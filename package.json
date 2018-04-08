@@ -11,6 +11,7 @@
     "e2e:open": "vue-cli-service e2e:open"
   },
   "dependencies": {
+    "auth0-js": "^9.4.2",
     "bootstrap": "^4.0.0",
     "vue": "^2.5.13",
     "vue-router": "^3.0.1",
