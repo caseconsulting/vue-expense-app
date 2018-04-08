@@ -15,7 +15,6 @@
     "axios": "^0.18.0",
     "bootstrap": "^4.0.0",
     "bootstrap-vue": "^2.0.0-rc.6",
-    "eventemitter3": "^3.0.1",
     "vue": "^2.5.13",
     "vue-awesome": "^3.0.0",
     "vue-router": "^3.0.1",

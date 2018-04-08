@@ -1,5 +1,13 @@
 {
   "root": true,
+  "parserOptions": {
+    "ecmaVersion": 6
+  },
+  "env": {
+    "browser": true,
+    "es6": true,
+    "node": true
+  },
   "extends": [
     "plugin:vue/essential",
     "@vue/prettier"
