@@ -1,15 +1,14 @@
 <template>
-  <div id="app" class="container-fluid">
-    <div class="row">
-      <div class="col-1">
+  <b-container fluid id="app">
+    <b-row>
+      <b-col sm="12" md="1">
         <main-nav></main-nav>
-      </div>
-  
-      <div class="col-11">
+      </b-col>
+      <b-col sm="12" md="11">
         <router-view/>
-      </div>
-    </div>
-  </div>
+      </b-col>
+    </b-row>
+  </b-container>
 </template>
 
 <script>

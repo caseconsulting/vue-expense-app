@@ -1,9 +1,9 @@
 <template>
-  <div class="row">
-    <div class=" col-1 navbar navbar-fixed-left text-center">
+  <b-row>
+    <div class="col-1 navbar navbar-fixed-left text-center">
       <a id="logo" class="navbar-brand">
         <router-link to="/">
-          <img src="src/assets/img/logo-big.png" height="52" width="52" />
+          <img src="@/assets/img/logo-big.png" height="52" width="52" />
         </router-link>
       </a>
       <ul class="nav navbar-nav">
@@ -25,7 +25,7 @@
         </li>
       </ul>
     </div>
-  </div>
+  </b-row>
 </template>
 
 <script>
