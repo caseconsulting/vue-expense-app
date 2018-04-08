@@ -1,22 +1,26 @@
 <template>
   <div class="row">
     <div class=" col-1 navbar navbar-fixed-left text-center">
-      <a id="logo" class="navbar-brand"><router-link to="/"><img src="src/assets/img/logo-big.png" height="52" width="52" /></router-link></a>
+      <a id="logo" class="navbar-brand">
+        <router-link to="/">
+          <img src="src/assets/img/logo-big.png" height="52" width="52" />
+        </router-link>
+      </a>
       <ul class="nav navbar-nav">
         <li>
-          <i class="fa fa-book fa-3x"/>
+          <icon name="book" scale="3"></icon>
           <router-link to="/expenseTypes">Expense Types</router-link>
         </li>
         <li>
-          <i class="fa fa-users fa-3x"/>
+          <icon name="users" scale="3"/>
           <router-link to="/employees">Employees</router-link>
         </li>
         <li>
-          <i class="fa fa-usd fa-3x"/>
+          <icon name="dollar-sign" scale="3"/>
           <router-link to="/expenses">Expenses</router-link>
         </li>
         <li>
-          <i class="fa fa-question fa-3x"/>
+          <icon name="question" scale="3"/>
           <router-link to="/help">Help</router-link>
         </li>
       </ul>
