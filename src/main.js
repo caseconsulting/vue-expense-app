@@ -5,14 +5,21 @@ import store from "./store";
 
 Vue.config.productionTip = false;
 
+// BEGIN VUE AWESOME
 import 'vue-awesome/icons/book'
 import 'vue-awesome/icons/users'
 import 'vue-awesome/icons/dollar-sign'
 import 'vue-awesome/icons/question'
+import 'vue-awesome/icons/code'
 
 import Icon from 'vue-awesome/components/Icon'
 
 Vue.component('icon', Icon)
+// END VUE AWESOME
+
+import BootstrapVue from 'bootstrap-vue'
+
+Vue.use(BootstrapVue);
 
 new Vue({
   router,

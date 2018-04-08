@@ -1,7 +1,14 @@
 <template>
-  <div id="app">
-    <main-nav></main-nav>
-    <router-view/>
+  <div id="app" class="container-fluid">
+    <div class="row">
+      <div class="col-1">
+        <main-nav></main-nav>
+      </div>
+  
+      <div class="col-11">
+        <router-view/>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -17,7 +24,7 @@ export default {
 </script>
 
 <style lang="scss">
-  @import '../node_modules/bootstrap/scss/bootstrap.scss';
+@import 'src/assets/styles/styles.scss';
 
 #app {
   font-family: "Avenir", Helvetica, Arial, sans-serif;
