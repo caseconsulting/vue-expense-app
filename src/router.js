@@ -1,7 +1,10 @@
 import Vue from "vue";
 import Router from "vue-router";
 import Home from "./views/Home.vue";
-import About from "./views/About.vue";
+import ExpenseTypes from "./views/ExpenseTypes.vue";
+import Employees from "./views/Employees.vue";
+import Expenses from "./views/Expenses.vue";
+import Help from "./views/Help.vue";
 
 Vue.use(Router);
 
@@ -13,9 +16,24 @@ export default new Router({
       component: Home
     },
     {
-      path: "/about",
-      name: "about",
-      component: About
+      path: "/expenseTypes",
+      name: "expenseTypes",
+      component: ExpenseTypes
+    },
+    {
+      path: "/employees",
+      name: "employees",
+      component: Employees
+    },
+    {
+      path: "/expenses",
+      name: "expenses",
+      component: Expenses
+    },
+    {
+      path: "/help",
+      name: "help",
+      component: Help
     }
   ]
 });
