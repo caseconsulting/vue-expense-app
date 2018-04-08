@@ -39,5 +39,31 @@ export default {
 </script>
 
 <style scoped lang="scss">
-  
+.navbar-fixed-left {
+  position: fixed;
+  border-radius: 0;
+  height: 100vh;
+  background-color: #BDBDBD;
+}
+
+i {
+  color: #FDFDFD;
+}
+
+li {
+  outline: none;
+  padding-top: 25px;
+  padding-bottom: 25px;
+  transition: background-color 0.5s ease;
+}
+
+.navbar-nav > li:hover {
+  background-color: #68CAA6;
+}
+
+#logo {
+  padding-bottom: 50px;
+  padding-top: 10px;
+  color: #FDFDFD;
+}
 </style>
