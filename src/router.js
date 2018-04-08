@@ -5,12 +5,12 @@ import ExpenseTypes from "./views/ExpenseTypes.vue";
 import Employees from "./views/Employees.vue";
 import Expenses from "./views/Expenses.vue";
 import Help from "./views/Help.vue";
+import Callback from '@/components/Callback';
 
 Vue.use(Router);
 
 export default new Router({
-  routes: [
-    {
+  routes: [{
       path: "/",
       name: "home",
       component: Home
@@ -34,6 +34,11 @@ export default new Router({
       path: "/help",
       name: "help",
       component: Help
+    },
+    {
+      path: '/callback',
+      name: 'Callback',
+      component: Callback
     }
   ]
 });
