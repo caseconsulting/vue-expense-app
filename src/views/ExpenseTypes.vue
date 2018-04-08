@@ -17,7 +17,7 @@
 </template>
 
 <script>
-import axios from 'axios';
+import apiRequest from '@/shared/apiRequest.js';
 
 export default {
   data() {
@@ -29,14 +29,9 @@ export default {
 
   // Fetches posts when the component is created.
   created() {
-    axios.get(`http://localhost:3000/expense-types`)
-    .then(response => {
-      // JSON responses are automatically parsed.
-      this.expenseTypes = response.data
-    })
-    .catch(e => {
-      this.errors.push(e)
-    })
+    apiRequest.get('expense-types').then(data => {
+      this.expenseTypes = data;
+    });
 
     // async / await version (created() becomes async created())
     //
