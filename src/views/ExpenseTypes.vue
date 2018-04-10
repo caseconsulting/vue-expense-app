@@ -16,15 +16,15 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="expTypes in expenseTypes" :key="expTypes.id">
-              <td>{{ expTypes.id }}</td>
-              <td>{{ expTypes.budgetName }}</td>
-              <td>{{ expTypes.description }}</td>
-              <td>{{ expTypes.budget }}</td>
-              <td>{{ expTypes.odFlag }}</td>
+            <tr v-for="expenseType in expenseTypes" :key="expenseType.id">
+              <td>{{ expenseType.id }}</td>
+              <td>{{ expenseType.budgetName }}</td>
+              <td>{{ expenseType.description }}</td>
+              <td>{{ expenseType.budget }}</td>
+              <td>{{ expenseType.odFlag }}</td>
               <td class="text-right">
-                <a href="#" @click.prevent="populateExpenseTypeToEdit(expType)">Edit</a> - 
-                <a href="#" @click.prevent="deleteExpenseType(expType.id)">Delete</a>
+                <a href="#" @click.prevent="populateExpenseTypeToEdit(expenseType)">Edit</a> - 
+                <a href="#" @click.prevent="deleteExpenseType(expenseType.id)">Delete</a>
               </td>
             </tr>
           </tbody>
@@ -77,7 +77,7 @@ export default {
       this.loading = true;
       try {
         const response = await apiRequest.get('expense-types');
-        this.expenseTypes = response.data;
+        this.expenseTypes = response;
       } catch (e) {
         this.errors.push(e);
       }
