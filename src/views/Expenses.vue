@@ -17,7 +17,7 @@
 </template>
 
 <script>
-import apiRequest from '@/shared/apiRequest.js';
+// import apiRequest from '@/shared/apiRequest.js';
 
 export default {
   data() {
@@ -29,9 +29,9 @@ export default {
 
   // Fetches posts when the component is created.
   created() {
-    apiRequest.get('expenses').then(data => {
-      this.expenses = data;
-    });
+    // apiRequest.get('expenses').then(data => {
+    //   this.expenses = data;
+    // });
   }
 }
 </script>

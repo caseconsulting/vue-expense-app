@@ -91,7 +91,7 @@ export default {
       await this.refreshExpenseTypes();
     },
     async deleteExpenseType (id) {
-      if (confirm('Are you sure you want to delete this Expense Type?')) {
+      if (confirm('Are you sure you want to delete this expense type?')) {
         // if we are editing an expense type we deleted, remove it from the form
         if (this.model.id === id) {
           this.model = {};
