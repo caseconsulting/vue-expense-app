@@ -56,7 +56,7 @@
 </template>
 
 <script>
-import apiRequest from '@/shared/apiRequest.js';
+import api from '@/shared/api.js';
 
 export default {
   data() {
@@ -74,23 +74,18 @@ export default {
   },
   methods: {
     async refreshExpenseTypes () {
-      this.loading = true;
-      try {
-        const response = await apiRequest.get('expense-types');
-        this.expenseTypes = response;
-      } catch (e) {
-        this.errors.push(e);
-      }
-      this.loading = false;
+      this.loading = true
+      this.expenseTypes = await api.getItems(api.EXPENSE_TYPES)
+      this.loading = false
     },
     async populateExpenseTypeToEdit (expenseType) {
       this.model = Object.assign({}, expenseType);
     },
     async saveExpenseType () {
       if (this.model.id) {
-        // await api.updateExpenseType(this.model.id, this.model);
+        await api.updateItem(api.EXPENSE_TYPES, this.model.id, this.model);
       } else {
-        // await api.createExpenseType(this.model);
+        await api.createItem(api.EXPENSE_TYPES, this.model);
       }
       this.model = {}; // reset form
       await this.refreshExpenseTypes();
@@ -101,7 +96,7 @@ export default {
         if (this.model.id === id) {
           this.model = {};
         }
-        // await api.deleteExpenseType(id)
+        await api.deleteItem(api.EXPENSE_TYPES, id)
         await this.refreshExpenseTypes();
       }
     }
