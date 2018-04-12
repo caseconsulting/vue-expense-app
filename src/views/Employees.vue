@@ -27,8 +27,8 @@
         </table>
       </b-col>
       <b-col lg="4">
-        <b-card :title="(model.id ? 'Edit Employee ID#' + model.id : 'New Employee')">
-          <form @submit.prevent="saveEmployee">
+        <form @submit.prevent="saveEmployee">
+          <b-card :header="(model.id ? 'Edit Employee' : 'New Employee')">
             <b-form-group label="Employee ID">
               <b-form-input type="text" v-model="model.empId"></b-form-input>
             </b-form-group>
@@ -44,11 +44,12 @@
             <b-form-group label="Hire Date">
               <datepicker v-model="model.hireDate" format="MM/dd/yyyy" initial-view="year" :bootstrap-styling="true"></datepicker>
             </b-form-group>
-            <div>
+            <div slot="footer">
+              <b-btn type="reset" variant="default" class="mr-1">Cancel</b-btn>
               <b-btn type="submit" variant="success">Save Employee</b-btn>
             </div>
-          </form>
-        </b-card>
+          </b-card>
+        </form>
       </b-col>
     </b-row>
   </div>

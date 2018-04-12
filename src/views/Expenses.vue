@@ -35,8 +35,8 @@
         </table>
       </b-col>
       <b-col lg="4">
-        <b-card :title="(model.id ? 'Edit Expense ID#' + model.id : 'New Expense')">
-          <form @submit.prevent="saveExpense">
+        <form @submit.prevent="saveExpense">
+          <b-card :header="(model.id ? 'Edit Expense' : 'New Expense')">
             <b-form-group label="Description">
               <b-form-input type="text" v-model="model.description"></b-form-input>
             </b-form-group>
@@ -52,7 +52,7 @@
               <b-form-input type="text" v-model="model.userId"></b-form-input>
             </b-form-group>
             <b-form-group label="Note">
-              <b-form-textarea rows="4" type="text" v-model="model.note"></b-form-textarea>
+              <b-form-textarea rows="2" type="text" v-model="model.note"></b-form-textarea>
             </b-form-group>
             <b-form-group label="Purchase Date">
               <datepicker v-model="model.purchaseDate" format="MM/dd/yyyy" initial-view="year" :bootstrap-styling="true"></datepicker>
@@ -60,11 +60,12 @@
             <b-form-group label="Reimbursed Date">
               <datepicker v-model="model.reimbursedDate" format="MM/dd/yyyy" initial-view="year" :bootstrap-styling="true"></datepicker>
             </b-form-group>
-            <div>
+            <div slot="footer">
+              <b-btn type="reset" variant="default" class="mr-1">Cancel</b-btn>
               <b-btn type="submit" variant="success">Save Expense</b-btn>
             </div>
-          </form>
-        </b-card>
+          </b-card>
+        </form>
       </b-col>
     </b-row>
   </div>

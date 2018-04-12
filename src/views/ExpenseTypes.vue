@@ -29,27 +29,28 @@
         </table>
       </b-col>
       <b-col lg="4">
-        <b-card :title="(model.id ? 'Edit Expense Type ID#' + model.id : 'New Expense Type')">
-          <form @submit.prevent="saveExpenseType">
-            <b-form-group label="Budget Name">
-              <b-form-input type="text" v-model="model.budgetName"></b-form-input>
-            </b-form-group>
-            <b-form-group label="Description">
-              <b-form-textarea rows="4" v-model="model.description"></b-form-textarea>
-            </b-form-group>
-            <b-form-group label="Budget">
-              <b-input-group prepend="$" append=".00">
-                <b-form-input type="text" v-model="model.budget"></b-form-input>
-              </b-input-group>
-            </b-form-group>
-            <b-form-checkbox v-model="model.odFlag" value="true" unchecked-value="false">
-              Overdraft Allowed?
-            </b-form-checkbox>
-            <div>
+        <form @submit.prevent="saveExpenseType">
+          <b-card :header="(model.id ? 'Edit Expense Type' : 'New Expense Type')">
+              <b-form-group label="Budget Name">
+                <b-form-input type="text" v-model="model.budgetName"></b-form-input>
+              </b-form-group>
+              <b-form-group label="Description">
+                <b-form-textarea rows="2" v-model="model.description"></b-form-textarea>
+              </b-form-group>
+              <b-form-group label="Budget">
+                <b-input-group prepend="$" append=".00">
+                  <b-form-input type="text" v-model="model.budget"></b-form-input>
+                </b-input-group>
+              </b-form-group>
+              <b-form-checkbox v-model="model.odFlag" value="true" unchecked-value="false">
+                Overdraft Allowed?
+              </b-form-checkbox>
+            <div slot="footer">
+              <b-btn type="reset" variant="default" class="mr-1">Cancel</b-btn>
               <b-btn type="submit" variant="success">Save Expense Type</b-btn>
             </div>
-          </form>
-        </b-card>
+          </b-card>
+        </form>
       </b-col>
     </b-row>
   </div>
