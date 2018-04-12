@@ -42,11 +42,9 @@
                   <b-form-input type="text" v-model="model.budget"></b-form-input>
                 </b-input-group>
               </b-form-group>
-              <b-form-checkbox v-model="model.odFlag" value="true" unchecked-value="false">
-                Overdraft Allowed?
-              </b-form-checkbox>
+              <b-form-checkbox v-model="model.odFlag">Overdraft Allowed?</b-form-checkbox>
             <div slot="footer">
-              <b-btn type="reset" variant="default" class="mr-1">Cancel</b-btn>
+              <b-btn @click.prevent="clearExpenseTypeToEdit()" variant="default" class="mr-1">Cancel</b-btn>
               <b-btn type="submit" variant="success">Save Expense Type</b-btn>
             </div>
           </b-card>
@@ -80,6 +78,9 @@ export default {
     },
     async populateExpenseTypeToEdit (expenseType) {
       this.model = Object.assign({}, expenseType);
+    },
+    async clearExpenseTypeToEdit () {
+      this.model = {};
     },
     async saveExpenseType () {
       if (this.model.id) {

@@ -45,7 +45,7 @@
               <datepicker v-model="model.hireDate" format="MM/dd/yyyy" initial-view="year" :bootstrap-styling="true"></datepicker>
             </b-form-group>
             <div slot="footer">
-              <b-btn type="reset" variant="default" class="mr-1">Cancel</b-btn>
+              <b-btn @click.prevent="clearEmployeeToEdit()" variant="default" class="mr-1">Cancel</b-btn>
               <b-btn type="submit" variant="success">Save Employee</b-btn>
             </div>
           </b-card>
@@ -83,6 +83,9 @@ export default {
     },
     async populateEmployeeToEdit (employee) {
       this.model = Object.assign({}, employee);
+    },
+    async clearEmployeeToEdit () {
+      this.model = {};
     },
     async saveEmployee () {
       if (this.model.id) {

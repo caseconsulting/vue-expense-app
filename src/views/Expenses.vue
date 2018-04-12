@@ -61,7 +61,7 @@
               <datepicker v-model="model.reimbursedDate" format="MM/dd/yyyy" initial-view="year" :bootstrap-styling="true"></datepicker>
             </b-form-group>
             <div slot="footer">
-              <b-btn type="reset" variant="default" class="mr-1">Cancel</b-btn>
+              <b-btn @click.prevent="clearExpenseToEdit()" variant="default" class="mr-1">Cancel</b-btn>
               <b-btn type="submit" variant="success">Save Expense</b-btn>
             </div>
           </b-card>
@@ -99,6 +99,9 @@ export default {
     },
     async populateExpenseToEdit (expense) {
       this.model = Object.assign({}, expense);
+    },
+    async clearExpenseToEdit () {
+      this.model = {};
     },
     async saveExpense () {
       if (this.model.id) {
