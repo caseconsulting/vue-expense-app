@@ -7,7 +7,6 @@
         <table class="table table-striped">
           <thead>
             <tr>
-              <th>ID</th>
               <th>Budget Name</th>
               <th>Description</th>
               <th>Budget</th>
@@ -17,7 +16,6 @@
           </thead>
           <tbody>
             <tr v-for="expenseType in expenseTypes" :key="expenseType.id">
-              <td>{{ expenseType.id }}</td>
               <td>{{ expenseType.budgetName }}</td>
               <td>{{ expenseType.description }}</td>
               <td>{{ expenseType.budget }}</td>
@@ -40,9 +38,11 @@
               <b-form-textarea rows="4" v-model="model.description"></b-form-textarea>
             </b-form-group>
             <b-form-group label="Budget">
-              <b-form-input type="text" v-model="model.budget"></b-form-input>
+              <b-input-group prepend="$" append=".00">
+                <b-form-input type="text" v-model="model.budget"></b-form-input>
+              </b-input-group>
             </b-form-group>
-            <b-form-checkbox v-model="model.odFlag" value="false" unchecked-value="true">
+            <b-form-checkbox v-model="model.odFlag" value="true" unchecked-value="false">
               Overdraft Allowed?
             </b-form-checkbox>
             <div>
@@ -67,9 +67,8 @@ export default {
       model: {}
     }
   },
-
-  // Fetches posts when the component is created.
   async created() {
+    // Fetches posts when the component is created.
     this.refreshExpenseTypes()
   },
   methods: {

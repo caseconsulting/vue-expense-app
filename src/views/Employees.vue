@@ -7,7 +7,6 @@
         <table class="table table-striped">
           <thead>
             <tr>
-              <th>ID</th>
               <th>Employee ID</th>
               <th>Name</th>
               <th>Hire Date</th>
@@ -16,7 +15,6 @@
           </thead>
           <tbody>
             <tr v-for="employee in employees" :key="employee.id">
-              <td>{{ employee.id }}</td>
               <td>{{ employee.empId }}</td>
               <td>{{ employee.firstName }} {{ employee.middleName }} {{ employee.lastName }}</td>
               <td>{{ employee.hireDate }}</td>
@@ -44,7 +42,7 @@
               <b-form-input type="text" v-model="model.lastName"></b-form-input>
             </b-form-group>
             <b-form-group label="Hire Date">
-              <b-form-input rows="4" v-model="model.hireDate"></b-form-input>
+              <datepicker v-model="model.hireDate" format="MM/dd/yyyy" initial-view="year" :bootstrap-styling="true"></datepicker>
             </b-form-group>
             <div>
               <b-btn type="submit" variant="success">Save Employee</b-btn>
@@ -58,6 +56,7 @@
 
 <script>
 import api from '@/shared/api.js';
+import Datepicker from 'vuejs-datepicker';
 
 export default {
   data() {
@@ -68,9 +67,11 @@ export default {
       model: {}
     }
   },
-
-  // Fetches posts when the component is created.
+  components: {
+    Datepicker
+  },
   async created() {
+    // Fetches posts when the component is created.
     this.refreshEmployees()
   },
   methods: {

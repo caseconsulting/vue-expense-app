@@ -1,13 +1,7 @@
 <template>
   <b-container fluid id="app">
-    <b-row>
-      <b-col sm="12" md="1">
-        <main-nav></main-nav>
-      </b-col>
-      <b-col sm="12" md="11">
-        <router-view/>
-      </b-col>
-    </b-row>
+    <main-nav></main-nav>
+    <router-view class="mt-3"/>
   </b-container>
 </template>
 
@@ -29,18 +23,6 @@
     font-family: "Avenir", Helvetica, Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    text-align: center;
     color: #2c3e50;
-  }
-
-  #nav {
-    padding: 30px;
-    a {
-      font-weight: bold;
-      color: #2c3e50;
-      &.router-link-exact-active {
-        color: #42b983;
-      }
-    }
   }
 </style>

@@ -7,7 +7,6 @@
         <table class="table table-striped">
           <thead>
             <tr>
-              <th>ID</th>
               <th>Description</th>
               <th>Cost</th>
               <th>Expense Type</th>
@@ -20,7 +19,6 @@
           </thead>
           <tbody>
             <tr v-for="expense in expenses" :key="expense.id">
-              <td>{{ expense.id }}</td>
               <td>{{ expense.description }}</td>
               <td>{{ expense.cost }}</td>
               <td>{{ expense.expenseTypeId }}</td>
@@ -43,7 +41,9 @@
               <b-form-input type="text" v-model="model.description"></b-form-input>
             </b-form-group>
             <b-form-group label="Cost">
-              <b-form-input rows="4" v-model="model.cost"></b-form-input>
+              <b-input-group prepend="$">
+                <b-form-input v-model="model.cost"></b-form-input>
+              </b-input-group>
             </b-form-group>
             <b-form-group label="Expense Type">
               <b-form-input type="text" v-model="model.expenseTypeId"></b-form-input>
@@ -52,13 +52,13 @@
               <b-form-input type="text" v-model="model.userId"></b-form-input>
             </b-form-group>
             <b-form-group label="Note">
-              <b-form-input type="text" v-model="model.note"></b-form-input>
+              <b-form-textarea rows="4" type="text" v-model="model.note"></b-form-textarea>
             </b-form-group>
             <b-form-group label="Purchase Date">
-              <b-form-input type="text" v-model="model.purchaseDate"></b-form-input>
+              <datepicker v-model="model.purchaseDate" format="MM/dd/yyyy" initial-view="year" :bootstrap-styling="true"></datepicker>
             </b-form-group>
             <b-form-group label="Reimbursed Date">
-              <b-form-input type="text" v-model="model.reimbursedDate"></b-form-input>
+              <datepicker v-model="model.reimbursedDate" format="MM/dd/yyyy" initial-view="year" :bootstrap-styling="true"></datepicker>
             </b-form-group>
             <div>
               <b-btn type="submit" variant="success">Save Expense</b-btn>
@@ -72,6 +72,7 @@
 
 <script>
 import api from '@/shared/api.js';
+import Datepicker from 'vuejs-datepicker';
 
 export default {
   data() {
@@ -82,9 +83,11 @@ export default {
       model: {}
     }
   },
-
-  // Fetches posts when the component is created.
+  components: {
+    Datepicker
+  },
   async created() {
+    // Fetches posts when the component is created.
     this.refreshExpenses()
   },
   methods: {
