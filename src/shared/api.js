@@ -1,4 +1,3 @@
-import Vue from 'vue';
 import axios from 'axios';
 
 const EXPENSE_TYPES = 'expense-types';
@@ -10,39 +9,39 @@ const client = axios.create({
   json: true
 });
 
-async function execute (method, resource, data) {
+async function execute(method, resource, data) {
   // inject the accessToken for each request
   //let accessToken = await Vue.prototype.$auth.getAccessToken()
   return client({
     method,
     url: resource,
-    data,
+    data
     // headers: {
     //   Authorization: `Bearer ${accessToken}`
     // }
   }).then(response => {
-    return response.data
+    return response.data;
   });
 }
 
-function getItems (type) {
-  return execute('get', `/${type}`)
+function getItems(type) {
+  return execute('get', `/${type}`);
 }
 
-function getItem (type, id) {
-  return execute('get', `/${type}/${id}`)
+function getItem(type, id) {
+  return execute('get', `/${type}/${id}`);
 }
 
-function createItem (type, data) {
-  return execute('post', `/${type}`, data)
+function createItem(type, data) {
+  return execute('post', `/${type}`, data);
 }
 
-function updateItem (type, id, data) {
-  return execute('put', `/${type}/${id}`, data)
+function updateItem(type, id, data) {
+  return execute('put', `/${type}/${id}`, data);
 }
 
-function deleteItem (type, id) {
-  return execute('delete', `/${type}/${id}`)
+function deleteItem(type, id) {
+  return execute('delete', `/${type}/${id}`);
 }
 
-export default { getItems, getItem, createItem, updateItem, deleteItem, EXPENSE_TYPES, EXPENSES, EMPLOYEES }
+export default { getItems, getItem, createItem, updateItem, deleteItem, EXPENSE_TYPES, EXPENSES, EMPLOYEES };
