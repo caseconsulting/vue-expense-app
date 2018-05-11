@@ -12,7 +12,7 @@
   },
   "dependencies": {
     "accounting-js": "^1.1.1",
-    "auth0-js": "^9.4.2",
+    "auth0-js": "^9.5.1",
     "axios": "^0.18.0",
     "bootstrap": "^4.0.0",
     "bootstrap-vue": "^2.0.0-rc.6",
