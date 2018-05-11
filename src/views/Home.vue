@@ -2,7 +2,7 @@
   <div>
     <h1>Home</h1>
     <b-alert :show="loading" variant="info">Loading...</b-alert>
-    
+
     <b-row class="mt-3">
       <b-card-group deck>
         <b-card v-for="expense in expenses" :header="expense.description">
@@ -48,21 +48,21 @@ export default {
       expenses: [],
       errors: [],
       model: {}
-    }
+    };
   },
   components: {
     Datepicker
   },
   async created() {
     // Fetches posts when the component is created.
-    this.refreshExpenses()
+    this.refreshExpenses();
   },
   methods: {
-    async refreshExpenses () {
-      this.loading = true
-      this.expenses = await api.getItems(api.EXPENSES)
-      this.loading = false
+    async refreshExpenses() {
+      this.loading = true;
+      this.expenses = await api.getItems(api.EXPENSES);
+      this.loading = false;
     }
   }
-}
+};
 </script>

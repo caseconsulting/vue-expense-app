@@ -1,3 +1,4 @@
+/* globals process */
 export const AUTH_CONFIG = {
   clientId: process.env.VUE_APP_AUTH0_CLIENT_ID || '{CLIENT_ID}',
   domain: process.env.VUE_APP_AUTH0_DOMAIN || '{DOMAIN}',

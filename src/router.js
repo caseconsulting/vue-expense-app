@@ -1,11 +1,13 @@
 import Vue from 'vue';
 import Router from 'vue-router';
 import Home from '@/views/Home.vue';
+import Login from '@/views/Login.vue';
 import ExpenseTypes from '@/views/ExpenseTypes.vue';
 import Employees from '@/views/Employees.vue';
 import Expenses from '@/views/Expenses.vue';
 import Help from '@/views/Help.vue';
 import Callback from '@/views/Callback';
+import { requireAuth } from '@/utils/auth';
 
 Vue.use(Router);
 
@@ -14,28 +16,38 @@ const router = new Router({
   routes: [
     {
       path: '/',
+      name: 'login',
+      component: Login
+    },
+    {
+      path: '/home',
       name: 'home',
-      component: Home
+      component: Home,
+      beforeEnter: requireAuth
     },
     {
       path: '/expenseTypes',
       name: 'expenseTypes',
-      component: ExpenseTypes
+      component: ExpenseTypes,
+      beforeEnter: requireAuth
     },
     {
       path: '/employees',
       name: 'employees',
-      component: Employees
+      component: Employees,
+      beforeEnter: requireAuth
     },
     {
       path: '/expenses',
       name: 'expenses',
-      component: Expenses
+      component: Expenses,
+      beforeEnter: requireAuth
     },
     {
       path: '/help',
       name: 'help',
-      component: Help
+      component: Help,
+      beforeEnter: requireAuth
     },
     {
       path: '/callback',
@@ -44,19 +56,5 @@ const router = new Router({
     }
   ]
 });
-
-// // very basic "setup" of a global guard
-// router.beforeEach((to, from, next) => {
-//   if (to.name === 'callback') {
-//     // check if "to"-route is "callback" and allow access
-//     next();
-//   } else if (router.app.$auth.isAuthenticated()) {
-//     // if authenticated allow access
-//     next();
-//   } else {
-//     // trigger auth0 login
-//     router.app.$auth.login();
-//   }
-// });
 
 export default router;

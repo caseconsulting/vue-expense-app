@@ -7,10 +7,12 @@ Vue.config.productionTip = false;
 
 // BEGIN VUE AWESOME
 import 'vue-awesome/icons/book';
-import 'vue-awesome/icons/users';
+import 'vue-awesome/icons/code';
 import 'vue-awesome/icons/dollar-sign';
 import 'vue-awesome/icons/question';
-import 'vue-awesome/icons/code';
+import 'vue-awesome/icons/sign-in-alt';
+import 'vue-awesome/icons/sign-out-alt';
+import 'vue-awesome/icons/users';
 
 import Icon from 'vue-awesome/components/Icon';
 
@@ -19,9 +21,6 @@ Vue.component('icon', Icon);
 
 import BootstrapVue from 'bootstrap-vue';
 Vue.use(BootstrapVue);
-
-import auth from '@/auth/AuthService';
-Vue.use(auth);
 
 new Vue({
   router,
