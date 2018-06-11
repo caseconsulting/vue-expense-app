@@ -23,7 +23,7 @@
     "vue": "^2.5.13",
     "vue-awesome": "^3.0.2",
     "vue-router": "^3.0.1",
-    "vuejs-datepicker": "^0.9.29",
+    "vuejs-datepicker": "^1.3.2",
     "vuex": "^3.0.1"
   },
   "devDependencies": {
