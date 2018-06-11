@@ -21,7 +21,7 @@
               <td>{{ expenseType.budget }}</td>
               <td>{{ expenseType.odFlag }}</td>
               <td class="text-right">
-                <a href="#" @click.prevent="populateExpenseTypeToEdit(expenseType)">Edit</a> - 
+                <a href="#" @click.prevent="populateExpenseTypeToEdit(expenseType)">Edit</a> -
                 <a href="#" @click.prevent="deleteExpenseType(expenseType.id)">Delete</a>
               </td>
             </tr>
@@ -43,7 +43,7 @@
                 </b-input-group>
               </b-form-group>
               <b-form-checkbox v-model="model.odFlag">Overdraft Allowed?</b-form-checkbox>
-            <div slot="footer">
+            <div slot="footer" class="footer-buttons">
               <b-btn @click.prevent="clearExpenseTypeToEdit()" variant="default" class="mr-1">Cancel</b-btn>
               <b-btn type="submit" variant="success">Save Expense Type</b-btn>
             </div>

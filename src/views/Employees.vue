@@ -19,7 +19,7 @@
               <td>{{ employee.firstName }} {{ employee.middleName }} {{ employee.lastName }}</td>
               <td>{{ employee.hireDate }}</td>
               <td class="text-right">
-                <a href="#" @click.prevent="populateEmployeeToEdit(employee)">Edit</a> - 
+                <a href="#" @click.prevent="populateEmployeeToEdit(employee)">Edit</a> -
                 <a href="#" @click.prevent="deleteEmployee(employee.id)">Delete</a>
               </td>
             </tr>
@@ -44,7 +44,7 @@
             <b-form-group label="Hire Date">
               <datepicker v-model="model.hireDate" format="MM/dd/yyyy" initial-view="year" :bootstrap-styling="true"></datepicker>
             </b-form-group>
-            <div slot="footer">
+            <div slot="footer" class="footer-buttons">
               <b-btn @click.prevent="clearEmployeeToEdit()" variant="default" class="mr-1">Cancel</b-btn>
               <b-btn type="submit" variant="success">Save Employee</b-btn>
             </div>

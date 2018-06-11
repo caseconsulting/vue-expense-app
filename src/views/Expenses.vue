@@ -27,7 +27,7 @@
               <td>{{ expense.purchaseDate }}</td>
               <td>{{ expense.reimbursedDate }}</td>
               <td class="text-right">
-                <a href="#" @click.prevent="populateExpenseToEdit(expense)">Edit</a> - 
+                <a href="#" @click.prevent="populateExpenseToEdit(expense)">Edit</a> -
                 <a href="#" @click.prevent="deleteExpense(expense.id)">Delete</a>
               </td>
             </tr>
@@ -60,7 +60,7 @@
             <b-form-group label="Reimbursed Date">
               <datepicker v-model="model.reimbursedDate" format="MM/dd/yyyy" initial-view="year" :bootstrap-styling="true"></datepicker>
             </b-form-group>
-            <div slot="footer">
+            <div slot="footer" class="footer-buttons">
               <b-btn @click.prevent="clearExpenseToEdit()" variant="default" class="mr-1">Cancel</b-btn>
               <b-btn type="submit" variant="success">Save Expense</b-btn>
             </div>
