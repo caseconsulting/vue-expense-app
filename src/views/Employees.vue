@@ -42,7 +42,7 @@
               <b-form-input type="text" v-model="model.lastName"></b-form-input>
             </b-form-group>
             <b-form-group label="Hire Date">
-              <datepicker v-model="model.hireDate" format="MM/dd/yyyy" initial-view="year" :bootstrap-styling="true"></datepicker>
+              <datepicker v-model="model.hireDate" format="MM/dd/yyyy" initial-view="year" :bootstrap-styling="true" :typeable=true :placeholder=" 'MM/DD/YYYY' "></datepicker>
             </b-form-group>
             <div slot="footer" class="footer-buttons">
               <b-btn @click.prevent="clearEmployeeToEdit()" variant="default" class="mr-1">Cancel</b-btn>

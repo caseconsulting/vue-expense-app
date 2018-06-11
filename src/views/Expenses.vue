@@ -55,10 +55,10 @@
               <b-form-textarea rows="2" type="text" v-model="model.note"></b-form-textarea>
             </b-form-group>
             <b-form-group label="Purchase Date">
-              <datepicker v-model="model.purchaseDate" format="MM/dd/yyyy" initial-view="year" :bootstrap-styling="true"></datepicker>
+              <datepicker v-model="model.purchaseDate" format="MM/dd/yyyy" initial-view="year" :bootstrap-styling="true" :typeable=true :placeholder=" 'MM/DD/YYYY' "></datepicker>
             </b-form-group>
             <b-form-group label="Reimbursed Date">
-              <datepicker v-model="model.reimbursedDate" format="MM/dd/yyyy" initial-view="year" :bootstrap-styling="true"></datepicker>
+              <datepicker v-model="model.reimbursedDate" format="MM/dd/yyyy" initial-view="year" :bootstrap-styling="true" :typeable=true :placeholder=" 'MM/DD/YYYY' "></datepicker>
             </b-form-group>
             <div slot="footer" class="footer-buttons">
               <b-btn @click.prevent="clearExpenseToEdit()" variant="default" class="mr-1">Cancel</b-btn>
