@@ -19,7 +19,7 @@
         </thead>
         <tbody>
 
-        <expense-row v-for="expense in expenses" :expense="expense"></expense-row>
+        <expense-row v-for="expense in expenses" :expense="expense" v-on:edit-expense="populateExpenseToEdit" v-on:delete-expense="deleteExpense"></expense-row>
         </tbody>
       </table>
       </b-col>
@@ -102,13 +102,13 @@ export default {
       this.model = {}; // reset form
       await this.refreshExpenses();
     },
-    async deleteExpense(id) {
+    async deleteExpense(expense) {
       if (confirm('Are you sure you want to delete this expense?')) {
         // if we are editing an expense type we deleted, remove it from the form
-        if (this.model.id === id) {
+        if (this.model.id === expense.id) {
           this.model = {};
         }
-        await api.deleteItem(api.EXPENSES, id);
+        await api.deleteItem(api.EXPENSES, expense.id);
         await this.refreshExpenses();
       }
     }

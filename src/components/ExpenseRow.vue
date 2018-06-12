@@ -8,8 +8,8 @@
       <td>{{ expense.purchaseDate }}</td>
       <td>{{ expense.reimbursedDate }}</td>
       <td class="text-right">
-        <!-- <a href="#" @click.prevent="populateExpenseToEdit(expense)">Edit</a> - -->
-        <!-- <a href="#" @click.prevent="deleteExpense(expense.id)">Delete</a> -->
+        <a href="#" @click="$emit('edit-expense', expense)">Edit</a> -
+        <a href="#" @click="$emit('delete-expense', expense)">Delete</a>
       </td>
     </tr>
 </template>
@@ -25,11 +25,17 @@ export default {
       employeeName: 'Loading...'
     };
   },
+  methods: {
+    sendToStore() {
+      this.$store.commit('setExpense', this.expense);
+    }
+  },
   async created() {
     let promise = await api.getItem(
       api.EXPENSE_TYPES,
       this.expense.expenseTypeId
     );
+
     this.budgetName = await promise.budgetName;
 
     promise = await api.getItem(api.EMPLOYEES, this.expense.userId);
