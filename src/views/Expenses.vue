@@ -3,8 +3,10 @@
     <h1>Expenses</h1>
     <b-alert :show="loading" variant="info">Loading...</b-alert>
     <b-row>
-      <b-col>
-        <table class="table table-striped">
+      <b-col lg="8" md="12" sm="12">
+        <div class="table-responsive">
+
+        <table class="table table-hover table-striped">
         <thead>
           <tr>
             <th>Description</th>
@@ -18,43 +20,13 @@
           </tr>
         </thead>
         <tbody>
-
         <expense-row v-for="expense in expenses" :expense="expense" v-on:edit-expense="populateExpenseToEdit" v-on:delete-expense="deleteExpense"></expense-row>
         </tbody>
       </table>
+      </div>
       </b-col>
-      <b-col lg="4">
-        <form @submit.prevent="saveExpense">
-          <b-card :header="(model.id ? 'Edit Expense' : 'New Expense')">
-            <b-form-group label="Description">
-              <b-form-input type="text" v-model="model.description"></b-form-input>
-            </b-form-group>
-            <b-form-group label="Cost">
-              <b-input-group prepend="$">
-                <b-form-input v-model="model.cost"></b-form-input>
-              </b-input-group>
-            </b-form-group>
-            <b-form-group label="Expense Type">
-              <b-form-input type="text" v-model="model.expenseTypeId"></b-form-input>
-            </b-form-group>
-            <b-form-group label="Employee">
-              <b-form-input type="text" v-model="model.userId"></b-form-input>
-            </b-form-group>
-            <b-form-group label="Note">
-              <b-form-textarea rows="2" type="text" v-model="model.note"></b-form-textarea>
-            </b-form-group>
-            <b-form-group label="Purchase Date">
-              <datepicker v-model="model.purchaseDate" format="MM/dd/yyyy" initial-view="year" :bootstrap-styling="true" :typeable=true :placeholder=" 'MM/DD/YYYY' "></datepicker>
-            </b-form-group>
-            <b-form-group label="Reimbursed Date">
-              <datepicker v-model="model.reimbursedDate" format="MM/dd/yyyy" initial-view="year" :bootstrap-styling="true" :typeable=true :placeholder=" 'MM/DD/YYYY' "></datepicker>
-            </b-form-group>
-            <div slot="footer" class="footer-buttons">
-              <b-btn @click.prevent="clearExpenseToEdit()" variant="default" class="mr-1">Cancel</b-btn>
-              <b-btn type="submit" variant="success">Save Expense</b-btn>
-            </div>
-          </b-card>
-        </form>
+      <b-col lg="4" md="12" sm="12">
+        <expense-form :model="model" v-on:clear-form="clearExpenseToEdit" v-on:submit-form="saveExpense"></expense-form>
       </b-col>
     </b-row>
   </div>
@@ -62,8 +34,9 @@
 
 <script>
 import api from '@/shared/api.js';
-import Datepicker from 'vuejs-datepicker';
 import ExpenseRow from '../components/ExpenseRow.vue';
+import ExpenseForm from '../components/ExpenseForm.vue';
+
 export default {
   data() {
     return {
@@ -74,8 +47,8 @@ export default {
     };
   },
   components: {
-    Datepicker,
-    ExpenseRow
+    ExpenseRow,
+    ExpenseForm
   },
   async created() {
     // Fetches posts when the component is created.

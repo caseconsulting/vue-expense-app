@@ -3,6 +3,11 @@ import App from './App.vue';
 import router from './router';
 import store from './store';
 
+//Vuesax
+import Vuesax from 'vuesax';
+import 'vuesax/dist/vuesax.css'; //vuesax styles
+Vue.use(Vuesax);
+
 Vue.config.productionTip = false;
 
 // BEGIN VUE AWESOME
