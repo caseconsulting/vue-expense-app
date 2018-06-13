@@ -31,21 +31,16 @@ export default {
     }
   },
   async created() {
-    let promise = await api.getItem(
+    let expenseType = await api.getItem(
       api.EXPENSE_TYPES,
       this.expense.expenseTypeId
     );
+    this.budgetName = expenseType.budgetName;
 
-    this.budgetName = await promise.budgetName;
-
-    promise = await api.getItem(api.EMPLOYEES, this.expense.userId);
-
-    this.employeeName =
-      (await promise.firstName) +
-      ' ' +
-      (await promise.middleName) +
-      ' ' +
-      (await promise.lastName);
+    let employee = await api.getItem(api.EMPLOYEES, this.expense.userId);
+    this.employeeName = `${employee.firstName} ${employee.middleName} ${
+      employee.lastName
+    }`;
   }
 };
 </script>

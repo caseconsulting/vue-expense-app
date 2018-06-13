@@ -10,22 +10,22 @@
       </b-input-group>
     </b-form-group>
     <b-form-group label="Expense Type">
-      <!-- <vs-select
+      <vs-select
     vs-autocomplete
     class="selectExample"
-      label="Colores"
-      v-model="select2"
-      :options="options2"
-      ></vs-select> -->
+      label="Expense Type"
+      v-model="selectedExpenseType"
+      :options="expenseTypes"
+      ></vs-select>
     </b-form-group>
     <b-form-group label="Employee">
-      <!-- <vs-select
+      <vs-select
     vs-autocomplete
     class="selectExample"
-      label="Colores"
-      v-model="select2"
-      :options="options2"
-      ></vs-select> -->
+      label="Employees"
+      v-model="selectedEmployee"
+      :options="employees"
+      ></vs-select>
     </b-form-group>
     <b-form-group label="Note">
       <b-form-textarea rows="2" type="text" v-model="model.note"></b-form-textarea>
@@ -45,11 +45,37 @@
 </template>
 
 <script>
+import api from '@/shared/api.js';
 import Datepicker from 'vuejs-datepicker';
 export default {
   components: {
     Datepicker
   },
-  props: ['model']
+  data() {
+    return {
+      selectedExpenseType: {},
+      expenseTypes: [],
+      selectedEmployee: {},
+      employees: []
+    };
+  },
+  props: ['model'],
+  async created() {
+    let expenseTypes = await api.getItems(api.EXPENSE_TYPES);
+    this.expenseTypes = expenseTypes.map(expenseType => {
+      return { text: expenseType.budgetName, value: expenseType.id };
+    });
+
+    let employees = await api.getItems(api.EMPLOYEES);
+    console.log(await employees);
+    this.employees = employees.map(employee => {
+      return {
+        text: `${employee.firstName} ${employee.middleName} ${
+          employee.lastName
+        }`,
+        value: employee.id
+      };
+    });
+  }
 };
 </script>
