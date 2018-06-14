@@ -1,5 +1,5 @@
 <template>
-  <form @submit.prevent="saveExpense">
+  <form @submit.prevent="">
   <b-card :header="(model.id ? 'Edit Expense' : 'New Expense')">
     <b-form-group label="Description">
       <b-form-input type="text" v-model="model.description"></b-form-input>
@@ -14,7 +14,7 @@
     vs-autocomplete
     class="selectExample"
       label="Expense Type"
-      v-model="selectedExpenseType"
+      v-model="model.expenseTypeId"
       :options="expenseTypes"
       ></vs-select>
     </b-form-group>
@@ -23,7 +23,7 @@
     vs-autocomplete
     class="selectExample"
       label="Employees"
-      v-model="selectedEmployee"
+      v-model="model.userId"
       :options="employees"
       ></vs-select>
     </b-form-group>
@@ -36,10 +36,13 @@
     <b-form-group label="Reimbursed Date">
       <datepicker v-model="model.reimbursedDate" format="MM/dd/yyyy" initial-view="year" :bootstrap-styling="true" :typeable=true :placeholder=" 'MM/DD/YYYY' "></datepicker>
     </b-form-group>
-    <div slot="footer" class="footer-buttons">
-      <b-btn @click="$emit('clear-form')" variant="default" class="mr-1">Cancel</b-btn>
-      <b-btn @click="$emit('submit-form', model)" type="submit" variant="success">Save Expense</b-btn>
+    <div slot="footer" class="all-footer-buttons">
+      <vs-button vs-type="danger-gradient" vs-icon="delete" @click="$emit('delete-form')" variant="default" class="mr-1">Delete</vs-button>
+    <div class="footer-buttons">
+      <vs-button vs-type="dark-line-down" vs-icon="cancel" @click="$emit('clear-form')" variant="default" class="mr-1">Cancel</vs-button>
+      <vs-button vs-type="success-gradient" vs-icon="save" @click="$emit('submit-form')" type="submit" variant="success">Save Expense</vs-button>
     </div>
+  </div>
   </b-card>
 </form>
 </template>

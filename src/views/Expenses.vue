@@ -67,13 +67,18 @@ export default {
       this.model = {};
     },
     async saveExpense() {
+      console.log(this.model);
       if (this.model.id) {
         await api.updateItem(api.EXPENSES, this.model.id, this.model);
       } else {
+        console.log('Creating new item');
         await api.createItem(api.EXPENSES, this.model);
       }
       this.model = {}; // reset form
       await this.refreshExpenses();
+    },
+    async logHello() {
+      console.log('Hello');
     },
     async deleteExpense(expense) {
       if (confirm('Are you sure you want to delete this expense?')) {
