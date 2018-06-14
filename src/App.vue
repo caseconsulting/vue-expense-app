@@ -1,8 +1,10 @@
 <template>
-  <b-container fluid id="app">
+  <div id="app">
     <main-nav></main-nav>
-    <router-view class="mt-3"/>
-  </b-container>
+    <b-container fluid>
+      <router-view class="mt-3"/>
+    </b-container>
+  </div>
 </template>
 
 <script>
