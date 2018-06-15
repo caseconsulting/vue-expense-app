@@ -1,6 +1,6 @@
 <template>
 <div>
-  <b-table :sort-by.sync="sortBy" :sort-desc.sync="sortDesc" :items="items" :fields="fields">
+  <b-table :sort-by.sync="sortBy" :sort-desc.sync="sortDesc" :items="expenses" :fields="fields">
   </b-table>
   <p>
     Sorting By: <b>{{ sortBy }}</b>, Sort Direction: <b>{{ sortDesc ? 'Descending' : 'Ascending' }}</b>
@@ -9,54 +9,46 @@
 </template>
 
 <script>
+import api from '@/shared/api.js';
+
+
 export default {
   data() {
     return {
       sortBy: 'age',
       sortDesc: false,
       fields: [{
-          key: 'last_name',
-          sortable: true
-        },
-        {
-          key: 'first_name',
-          sortable: true
-        },
-        {
-          key: 'age',
-          sortable: true
-        },
-        {
-          key: 'isActive',
+          key: 'reimbursedDate',
           sortable: false
+        },
+        {
+          key: 'userId',
+          sortable: true
+        },
+        {
+          key: 'expenseTypeId',
+          sortable: true
+        },
+        {
+          key: 'cost',
+          sortable: true
+        },
+        {
+          key: 'purchaseDate',
+          sortable: true
+        },
+        {
+          key: 'description',
+          sortable: true
         }
       ],
-      items: [{
-          isActive: true,
-          age: 40,
-          first_name: 'Dickerson',
-          last_name: 'Macdonald'
-        },
-        {
-          isActive: false,
-          age: 21,
-          first_name: 'Larsen',
-          last_name: 'Shaw'
-        },
-        {
-          isActive: false,
-          age: 89,
-          first_name: 'Geneva',
-          last_name: 'Wilson'
-        },
-        {
-          isActive: true,
-          age: 38,
-          first_name: 'Jami',
-          last_name: 'Carney'
-        }
-      ]
+      expenses: []
     }
+  },
+  async created() {
+    this.expenses = await api.getItems(api.EXPENSES);
+    console.log(this.expenses);
   }
 }
 </script>
+<style></style>
