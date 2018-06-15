@@ -1,11 +1,12 @@
 <template>
 <div id="nav-slider" class="con-example-sidebar">
 <vs-button id="nav-button" @click="active=!active" vs-type="dark-flat" vs-icon="menu"></vs-button>
-<h1>hello</h1>
 
 <vs-sidebar vs-parent="#nav-slider" :vs-active.sync="active">
+  <img src="@/assets/img/logo-big.png" height="52" width="52" class="mr-1" />Case Expense App
+
   <vs-sidebar-item @click="navigate(1)" :vs-active="actives==1" >
-    Dashboard
+    <icon name="desktop" class="mr-1" /> Dashboard
   </vs-sidebar-item>
   <vs-sidebar-item @click="navigate(2)" :vs-active="actives==2">
     <icon name="book" class="mr-1" /> Expense Types
@@ -27,38 +28,6 @@
   </vs-sidebar-item>
 </vs-sidebar>
 </div>
-
-<!-- <b-navbar toggleable="md" type="dark" variant="dark">
-  <b-navbar-toggle target="nav_collapse"></b-navbar-toggle>
-
-
-  <b-navbar-brand to="/">
-    <img src="@/assets/img/logo-big.png" height="52" width="52" class="mr-1" />Case Consulting Expense App
-  </b-navbar-brand>
-
-  <b-collapse is-nav id="nav_collapse">
-    <b-navbar-nav class="ml-auto">
-      <b-nav-item v-show="isLoggedIn()" to="/expenseTypes">
-        <icon name="book" class="mr-1" />Expense Types
-      </b-nav-item>
-      <b-nav-item v-show="isLoggedIn()" to="/employees">
-        <icon name="users" class="mr-1" />Employees
-      </b-nav-item>
-      <b-nav-item v-show="isLoggedIn()" to="/expenses">
-        <icon name="dollar-sign" class="mr-1" />Expenses
-      </b-nav-item>
-      <b-nav-item v-show="isLoggedIn()" to="/help">
-        <icon name="question" class="mr-1" />Help
-      </b-nav-item>
-      <b-nav-item >
-        <icon name="sign-out-alt" class="mr-1" />Logout
-      </b-nav-item>
-      <b-nav-item  >
-        <icon name="sign-in-alt" class="mr-1" />Login
-      </b-nav-item>
-    </b-navbar-nav>
-  </b-collapse>
-</b-navbar> -->
 </template>
 
 <script>

@@ -18,6 +18,7 @@ import 'vue-awesome/icons/question';
 import 'vue-awesome/icons/sign-in-alt';
 import 'vue-awesome/icons/sign-out-alt';
 import 'vue-awesome/icons/users';
+import 'vue-awesome/icons/desktop';
 
 import Icon from 'vue-awesome/components/Icon';
 
