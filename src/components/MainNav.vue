@@ -1,10 +1,13 @@
 <template>
-<div id="nav-slider" class="con-example-sidebar">
+<div id="nav-slider" class="text-center">
+
 <vs-button id="nav-button" @click="active=!active" vs-type="dark-flat" vs-icon="menu"></vs-button>
+<h1 id="main-header" class="text-center"><span class="e">€</span>xpense App</h1>
+
 
 <vs-sidebar vs-parent="#nav-slider" :vs-active.sync="active">
   <div id="slider-logo">
-    <img src="@/assets/img/logo-big.png" height="52" width="52" class="mr-1" />Case Expense App
+    <img src="@/assets/img/logo-big.png" height="52" width="52" class="mr-1" />
   </div>
 
   <vs-sidebar-item @click="navigate(1)" :vs-active="actives==1" >
@@ -34,47 +37,39 @@
 
 <script>
 // @ is an alias to /src
-import {
-  isLoggedIn,
-  login,
-  logout
-} from '@/utils/auth';
+import { isLoggedIn, login, logout } from '@/utils/auth';
 
 export default {
-  data(){
-    return{
+  data() {
+    return {
       active: false,
       actives: 1
     };
- },
- components: {
-
- },
+  },
+  components: {},
   methods: {
     navigate(selected) {
       this.actives = selected;
       switch (selected) {
         case 1:
-            this.$router.push({name: 'home'});
+          this.$router.push({ name: 'home' });
           break;
         case 2:
-          this.$router.push({name: 'expenseTypes'});
-            break;
+          this.$router.push({ name: 'expenseTypes' });
+          break;
         case 3:
-          this.$router.push({name: 'employees'});
+          this.$router.push({ name: 'employees' });
           break;
         case 4:
-          this.$router.push({name: 'expenses'});
+          this.$router.push({ name: 'expenses' });
           break;
         case 5:
-          this.$router.push({name: 'help'});
+          this.$router.push({ name: 'help' });
           break;
         default:
-          this.$router.push({name: 'login'});
-
+          this.$router.push({ name: 'login' });
       }
       this.active = false;
-
     },
     handleLogin() {
       login();
@@ -93,6 +88,21 @@ export default {
 #nav-slider span .material-icons {
   font-size: 32px;
 
+}
+
+#main-header {
+  font-family: 'Quicksand', sans-serif;
+  font-weight: bold;
+  font-size: 48px;
+  color: #38424D;
+  padding-top: 1%;
+  padding-bottom: 2%;
+}
+.e {
+  color: #68CAA6;
+}
+#nav-button {
+  float: left;
 }
 #nav-button :focus {
   outline:none;

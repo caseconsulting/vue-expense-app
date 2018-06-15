@@ -1,9 +1,8 @@
 <template>
 <div>
-  <h1>Expense App</h1>
   <b-alert :show="loading" variant="info">Loading...</b-alert>
   <b-row>
-    <b-col lg="10" md="12" sm="12">
+    <b-col offset-lg="1" offset-md="2" lg="9" md="12" sm="12">
       <unreimbursed-table></unreimbursed-table>
       <reimbursed-table></reimbursed-table>
     </b-col>
@@ -38,7 +37,6 @@ export default {
     ReimbursedTable,
     ExpenseInfo,
     ExpenseTypeTotals
-
   },
   async created() {
     // Fetches posts when the component is created.

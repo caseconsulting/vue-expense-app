@@ -1,7 +1,9 @@
 <template>
   <div id="app">
-    <main-nav></main-nav>
     <b-container fluid>
+      <main-nav></main-nav>
+    </b-container>
+    <b-container fluid class="no-right-gutter">
       <router-view class="mt-3"/>
     </b-container>
   </div>
@@ -27,4 +29,10 @@ export default {
   -moz-osx-font-smoothing: grayscale;
   color: #2c3e50;
 }
+
+.no-right-gutter {
+  padding-right: 0
+}
+
+
 </style>
