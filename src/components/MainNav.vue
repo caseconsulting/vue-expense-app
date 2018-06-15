@@ -3,7 +3,9 @@
 <vs-button id="nav-button" @click="active=!active" vs-type="dark-flat" vs-icon="menu"></vs-button>
 
 <vs-sidebar vs-parent="#nav-slider" :vs-active.sync="active">
-  <img src="@/assets/img/logo-big.png" height="52" width="52" class="mr-1" />Case Expense App
+  <div id="slider-logo">
+    <img src="@/assets/img/logo-big.png" height="52" width="52" class="mr-1" />Case Expense App
+  </div>
 
   <vs-sidebar-item @click="navigate(1)" :vs-active="actives==1" >
     <icon name="desktop" class="mr-1" /> Dashboard
@@ -94,5 +96,8 @@ export default {
 }
 #nav-button :focus {
   outline:none;
+}
+#slider-logo{
+  margin-bottom: 5px;
 }
 </style>
