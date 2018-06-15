@@ -1,5 +1,6 @@
 <template>
 <div>
+  <h4>Unreimbursed Expenses:</h4>
   <b-table :sort-by.sync="sortBy" :sort-desc.sync="sortDesc" :items="expenses" :fields="fields">
   </b-table>
   <p>

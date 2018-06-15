@@ -2,8 +2,16 @@
 <div>
   <h1>Expense App</h1>
   <b-alert :show="loading" variant="info">Loading...</b-alert>
-  <unreimbursed-table></unreimbursed-table>
-  <reimbursed-table></reimbursed-table>
+  <b-row>
+    <b-col lg="10" md="12" sm="12">
+      <unreimbursed-table></unreimbursed-table>
+      <reimbursed-table></reimbursed-table>
+    </b-col>
+    <b-col lg="2" md="12" sm="12">
+      <expense-info></expense-info>
+      <expense-type-totals></expense-type-totals>
+    </b-col>
+  </b-row>
 </div>
 </template>
 
@@ -12,6 +20,8 @@ import api from '@/shared/api.js';
 import Datepicker from 'vuejs-datepicker';
 import ReimbursedTable from '../components/ReimbursedTable.vue';
 import UnreimbursedTable from '../components/UnreimbursedTable.vue';
+import ExpenseInfo from '../components/ExpenseInfo.vue';
+import ExpenseTypeTotals from '../components/ExpenseTypeTotals.vue';
 
 export default {
   data() {
@@ -25,7 +35,9 @@ export default {
   components: {
     Datepicker,
     UnreimbursedTable,
-    ReimbursedTable
+    ReimbursedTable,
+    ExpenseInfo,
+    ExpenseTypeTotals
 
   },
   async created() {
