@@ -1,7 +1,7 @@
 <template>
 <div id="nav-slider" class="con-example-sidebar">
 <vs-button id="nav-button" @click="active=!active" vs-type="dark-flat" vs-icon="menu"></vs-button>
-
+<h1>hello</h1>
 
 <vs-sidebar vs-parent="#nav-slider" :vs-active.sync="active">
   <vs-sidebar-item @click="navigate(1)" :vs-active="actives==1" >
@@ -18,6 +18,12 @@
   </vs-sidebar-item>
   <vs-sidebar-item @click="navigate(5)" :vs-active="actives==5">
     <icon name="question" class="mr-1" />Help
+  </vs-sidebar-item>
+  <vs-sidebar-item v-show="isLoggedIn()" @click="handleLogout()">
+    <icon name="sign-out-alt" class="mr-1" />Logout
+  </vs-sidebar-item>
+  <vs-sidebar-item v-show="!isLoggedIn()" @click="handleLogin()">
+    <icon name="sign-in-alt" class="mr-1" />Login
   </vs-sidebar-item>
 </vs-sidebar>
 </div>
@@ -44,10 +50,10 @@
       <b-nav-item v-show="isLoggedIn()" to="/help">
         <icon name="question" class="mr-1" />Help
       </b-nav-item>
-      <b-nav-item v-show="isLoggedIn()" @click="handleLogout()">
+      <b-nav-item >
         <icon name="sign-out-alt" class="mr-1" />Logout
       </b-nav-item>
-      <b-nav-item v-show="!isLoggedIn()" @click="handleLogin()">
+      <b-nav-item  >
         <icon name="sign-in-alt" class="mr-1" />Login
       </b-nav-item>
     </b-navbar-nav>
