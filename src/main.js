@@ -3,18 +3,16 @@ import App from './App.vue';
 import router from './router';
 import store from './store';
 
-//vuetify
+//Vue Bootstrap
+import BootstrapVue from 'bootstrap-vue';
+
+//Vuetify
 import Vuetify from 'vuetify';
-Vue.use(Vuetify);
 import 'vuetify/dist/vuetify.min.css';
 
 //Vuesax
-// import Vuesax from 'vuesax';
-// import 'vuesax/dist/vuesax.css'; //vuesax styles
-import 'vuetify/dist/vuetify.min.css'; // Ensure you are using css-loader
-
-// Vue.use(Vuesax);
-Vue.use(Vuetify);
+import Vuesax from 'vuesax';
+import 'vuesax/dist/vuesax.css'; //vuesax styles
 
 Vue.config.productionTip = false;
 
@@ -37,8 +35,9 @@ import Icon from 'vue-awesome/components/Icon';
 Vue.component('icon', Icon);
 // END VUE AWESOME
 
-import BootstrapVue from 'bootstrap-vue';
 Vue.use(BootstrapVue);
+Vue.use(Vuesax);
+Vue.use(Vuetify);
 
 new Vue({
   router,
