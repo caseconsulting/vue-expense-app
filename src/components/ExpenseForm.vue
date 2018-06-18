@@ -10,7 +10,8 @@
       </b-input-group>
     </b-form-group>
     <b-form-group label="Expense Type">
-      <vs-select vs-autocomplete class="selectExample" label="Expense Type" v-model="model.expenseTypeId" :options="expenseTypes"></vs-select>
+      <v-select @input="onInput()" :items="expenseTypes" :filter="customFilterEmployee" v-model="model.expenseTypeId" item-text="text" label="Select" autocomplete></v-select>
+      <!-- <vs-select vs-autocomplete class="selectExample" label="Expense Type" v-model="model.expenseTypeId" :options="expenseTypes"></vs-select> -->
     </b-form-group>
     <b-form-group label="Employee">
       <!-- <vs-select
@@ -20,7 +21,7 @@
       v-model="model.userId"
       :options="employees"
       ></vs-select> -->
-      <v-select @input="onInput()" :items="employees" :filter="customFilter" v-model="model.userId" item-text="text" label="Select" autocomplete></v-select>
+      <v-select @input="onInput()" :items="employees" :filter="customFilterEmployee" v-model="model.userId" item-text="text" label="Select" autocomplete></v-select>
     </b-form-group>
     <b-form-group label="Note">
       <b-form-textarea rows="2" type="text" v-model="model.note"></b-form-textarea>
@@ -55,7 +56,15 @@ export default {
       expenseTypes: [],
       selectedEmployee: {},
       employees: [],
-      customFilter(item, queryText, itemText) {
+      customFilterEmployee(item, queryText, itemText) {
+        const hasValue = val => val != null ? val : ''
+        const text = hasValue(item.lastName)
+        const query = hasValue(queryText)
+        return text.toString()
+          .toLowerCase()
+          .indexOf(query.toString().toLowerCase()) > -1
+      },
+      customFilterExpenseType(item, queryText, itemText) {
         const hasValue = val => val != null ? val : ''
         const text = hasValue(item.lastName)
         const query = hasValue(queryText)
