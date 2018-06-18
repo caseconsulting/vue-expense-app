@@ -3,6 +3,11 @@ import App from './App.vue';
 import router from './router';
 import store from './store';
 
+//vuetify
+import Vuetify from 'vuetify'
+Vue.use(Vuetify)
+
+
 //Vuesax
 import Vuesax from 'vuesax';
 import 'vuesax/dist/vuesax.css'; //vuesax styles
