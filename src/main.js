@@ -6,11 +6,12 @@ import store from './store';
 //vuetify
 import Vuetify from 'vuetify'
 Vue.use(Vuetify)
+import 'vuetify/dist/vuetify.min.css'
 
 
 //Vuesax
 import Vuesax from 'vuesax';
-import 'vuesax/dist/vuesax.css'; //vuesax styles
+// import 'vuesax/dist/vuesax.css'; //vuesax styles
 Vue.use(Vuesax);
 
 Vue.config.productionTip = false;
