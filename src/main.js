@@ -25,6 +25,9 @@ import 'vue-awesome/icons/sign-in-alt';
 import 'vue-awesome/icons/sign-out-alt';
 import 'vue-awesome/icons/users';
 import 'vue-awesome/icons/desktop';
+import 'vue-awesome/icons/save';
+import 'vue-awesome/icons/trash';
+import 'vue-awesome/icons/ban';
 
 import Icon from 'vue-awesome/components/Icon';
 

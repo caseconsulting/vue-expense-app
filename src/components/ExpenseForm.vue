@@ -34,13 +34,21 @@
     </b-form-group>
     <div slot="footer" class="all-footer-buttons">
       <!-- <vs-button vs-type="danger-gradient" vs-icon="delete" @click="$emit('delete-form')" variant="default" class="mr-1">Delete</vs-button> -->
+      <v-btn outline color="error" @click="$emit('delete-form')">
+        <icon class="mr-1" name="trash"></icon>
+        Delete
+      </v-btn>
       <div class="footer-buttons">
         <!-- <vs-button vs-type="dark-line-down" vs-icon="cancel" @click="$emit('clear-form')" variant="default" class="mr-1">Cancel</vs-button> -->
-        <v-btn outline color="success">
-          <icon class="mr-1" name="desktop"></icon>
-          Upload
+        <v-btn color="white" @click="$emit('clear-form')">
+          <icon class="mr-1" name="ban"></icon>
+          Cancel
         </v-btn>
         <!-- <vs-button vs-type="success-gradient" vs-icon="save" @click="$emit('submit-form')" type="submit" variant="success">Save Expense</vs-button> -->
+        <v-btn outline color="success" @click="$emit('submit-form')" type="submit">
+          <icon class="mr-1" name="save"></icon>
+          Upload
+        </v-btn>
       </div>
     </div>
   </b-card>
