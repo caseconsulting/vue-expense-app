@@ -39,11 +39,11 @@
             hide-details
           ></v-checkbox>
         </td>
-        <td class="text-xs-right">{{ props.item.employeeName }}</td>
-        <td class="text-xs-right">{{ props.item.budgetName }}</td>
-        <td class="text-xs-right">{{ props.item.cost }}</td>
-        <td class="text-xs-right">{{ props.item.purchaseDate }}</td>
-        <td class="text-xs-right">{{ props.item.description }}</td>
+        <td class="text-xs-left">{{ props.item.employeeName }}</td>
+        <td class="text-xs-left">{{ props.item.budgetName }}</td>
+        <td class="text-xs-left">{{ props.item.cost }}</td>
+        <td class="text-xs-left">{{ props.item.purchaseDate }}</td>
+        <td class="text-xs-left">{{ props.item.description }}</td>
       </tr>
     </template>
   </v-data-table>
