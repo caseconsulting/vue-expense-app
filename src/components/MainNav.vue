@@ -1,18 +1,16 @@
 <template>
 <div>
-
-
   <v-container fluid>
-    <div class="top-header text-center">
-
-
-      <v-layout justify-left>
+      <v-layout d-inline-flex>
+        <v-flex d-block md2 lg1>
         <v-btn icon light @click.stop="drawer = !drawer">
           <icon name="bars"></icon>
         </v-btn>
+        </v-flex>
+        <v-flex d-block md10 lg11>
+        <h1 id="main-header" class="text-md-center"><span class="e">€</span>xpense App</h1>
+      </v-flex>
       </v-layout>
-      <h1 id="main-header" class="text-center"><span class="e">€</span>xpense App</h1>
-    </div>
   </v-container>
   <v-navigation-drawer
     v-model="drawer"
