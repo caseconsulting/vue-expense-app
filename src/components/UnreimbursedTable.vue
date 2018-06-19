@@ -2,7 +2,7 @@
   <v-data-table
     v-model="selected"
     :headers="headers"
-    :items="expenses"
+    :items="processedExpenses"
     :pagination.sync="pagination"
     select-all
     item-key="name"
@@ -39,10 +39,8 @@
             hide-details
           ></v-checkbox>
         </td>
-        <data-cell :id=props.item.userId APIType="employees"></data-cell>
-        <!-- <td class="text-xs-right" v-if="getEmployeeName(props.item)">{{ props.item.userName }}</td> -->
-        <!-- <td class="text-xs-right">{{ props.item.expenseTypeId }}</td> -->
-        <data-cell :id=props.item.expenseTypeId APIType="expense-types"></data-cell>
+        <td class="text-xs-right">{{ props.item.employeeName }}</td>
+        <td class="text-xs-right">{{ props.item.budgetName }}</td>
         <td class="text-xs-right">{{ props.item.cost }}</td>
         <td class="text-xs-right">{{ props.item.purchaseDate }}</td>
         <td class="text-xs-right">{{ props.item.description }}</td>
@@ -53,20 +51,22 @@
 
 <script>
 import api from '@/shared/api.js';
-import DataCell from './DataCell.vue';
+import _ from 'lodash';
+
 export default {
   data: () => ({
     expenses: [],
+    processedExpenses: [],
     pagination: {
-      sortBy: 'userId'
+      sortBy: 'employeeName'
     },
     selected: [],
     headers: [
       {
-        text: 'User',
-        value: 'userId'
+        text: 'Employee',
+        value: 'employeeName'
       },
-      { text: 'Expense Type', value: 'expenseTypeId' }, //change value to call a function
+      { text: 'Expense Type', value: 'budgetName' }, //change value to call a function
       { text: 'Cost', value: 'cost' },
       { text: 'Purchase Date', value: 'purchaseDate' },
       { text: 'Description', value: 'description' }
@@ -74,18 +74,15 @@ export default {
   }),
   async created() {
     this.expenses = await api.getItems(api.EXPENSES);
-    console.log(this.expenses);
-  },
-  watch: {
-    expenses: {
-      handler: () => {
-        console.log('A thing changed');
-      },
-      deep: true
-    }
-  },
-  components: {
-    DataCell
+    this.processedExpenses = _.map(this.expenses, expense => {
+      return this.getEmployeeName(expense);
+    });
+    this.processedExpenses = _.map(this.expenses, expense => {
+      return this.getExpenseTypeName(expense);
+    });
+    Promise.all(this.processedExpenses).then(values => {
+      this.processedExpenses = values;
+    });
   },
   methods: {
     toggleAll() {
@@ -100,11 +97,20 @@ export default {
         this.pagination.descending = false;
       }
     },
-    async getEmployeeName(employee) {
-      let employeeName = await api.getItem(api.EMPLOYEES, employee.userId);
-      employee.userName = await `${employeeName.firstName} ${
-        employeeName.middleName
-      } ${employeeName.lastName}`;
+    async getEmployeeName(expense) {
+      let employee = await api.getItem(api.EMPLOYEES, expense.userId);
+      expense.employeeName = `${employee.firstName} ${employee.middleName} ${
+        employee.lastName
+      }`;
+      return expense;
+    },
+    async getExpenseTypeName(expense) {
+      let expenseType = await api.getItem(
+        api.EXPENSE_TYPES,
+        expense.expenseTypeId
+      );
+      expense.budgetName = expenseType.budgetName;
+      return expense;
     }
   }
 };
