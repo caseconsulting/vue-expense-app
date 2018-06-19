@@ -1,15 +1,15 @@
 <template>
 <div id="app">
-  <b-container fluid>
-    <main-nav></main-nav>
-  </b-container>
-  <b-container fluid class="no-right-gutter">
-    <v-app>
+  <v-app>
+    <v-container fluid>
+      <main-nav></main-nav>
+    </v-container>
+    <v-container fluid class="no-right-gutter">
       <v-layout>
         <router-view class="mt-3" />
       </v-layout>
-    </v-app>
-  </b-container>
+    </v-container>
+  </v-app>
 </div>
 </template>
 

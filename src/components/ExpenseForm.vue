@@ -1,6 +1,6 @@
 <template>
 <form @submit.prevent="">
-  <b-card :header="(model.id ? 'Edit Expense' : 'New Expense')">
+  <v-card :header="(model.id ? 'Edit Expense' : 'New Expense')">
     <b-form-group label="Description">
       <b-form-input type="text" v-model="model.description"></b-form-input>
     </b-form-group>
@@ -32,6 +32,7 @@
     <b-form-group label="Reimbursed Date">
       <datepicker v-model="model.reimbursedDate" format="MM/dd/yyyy" initial-view="year" :bootstrap-styling="true" :typeable=true :placeholder=" 'MM/DD/YYYY' "></datepicker>
     </b-form-group>
+
     <div slot="footer" class="all-footer-buttons">
       <!-- <vs-button vs-type="danger-gradient" vs-icon="delete" @click="$emit('delete-form')" variant="default" class="mr-1">Delete</vs-button> -->
       <v-btn outline color="error" @click="$emit('delete-form')">
@@ -47,11 +48,11 @@
         <!-- <vs-button vs-type="success-gradient" vs-icon="save" @click="$emit('submit-form')" type="submit" variant="success">Save Expense</vs-button> -->
         <v-btn outline color="success" @click="$emit('submit-form')" type="submit">
           <icon class="mr-1" name="save"></icon>
-          Upload
+          Submit
         </v-btn>
       </div>
     </div>
-  </b-card>
+  </v-card>
 </form>
 </template>
 
