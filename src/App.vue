@@ -7,7 +7,6 @@
     <v-app>
       <v-layout>
         <router-view class="mt-3" />
-
       </v-layout>
     </v-app>
   </b-container>

@@ -33,10 +33,14 @@
       <datepicker v-model="model.reimbursedDate" format="MM/dd/yyyy" initial-view="year" :bootstrap-styling="true" :typeable=true :placeholder=" 'MM/DD/YYYY' "></datepicker>
     </b-form-group>
     <div slot="footer" class="all-footer-buttons">
-      <vs-button vs-type="danger-gradient" vs-icon="delete" @click="$emit('delete-form')" variant="default" class="mr-1">Delete</vs-button>
+      <!-- <vs-button vs-type="danger-gradient" vs-icon="delete" @click="$emit('delete-form')" variant="default" class="mr-1">Delete</vs-button> -->
       <div class="footer-buttons">
-        <vs-button vs-type="dark-line-down" vs-icon="cancel" @click="$emit('clear-form')" variant="default" class="mr-1">Cancel</vs-button>
-        <vs-button vs-type="success-gradient" vs-icon="save" @click="$emit('submit-form')" type="submit" variant="success">Save Expense</vs-button>
+        <!-- <vs-button vs-type="dark-line-down" vs-icon="cancel" @click="$emit('clear-form')" variant="default" class="mr-1">Cancel</vs-button> -->
+        <v-btn outline color="success">
+          <icon class="mr-1" name="desktop"></icon>
+          Upload
+        </v-btn>
+        <!-- <vs-button vs-type="success-gradient" vs-icon="save" @click="$emit('submit-form')" type="submit" variant="success">Save Expense</vs-button> -->
       </div>
     </div>
   </b-card>
@@ -85,3 +89,4 @@ export default {
   }
 };
 </script>
+<style></style>
