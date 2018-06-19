@@ -4,7 +4,7 @@
   <b-row>
     <b-col offset-lg="1" offset-md="2" lg="9" md="12" sm="12">
       <unreimbursed-table></unreimbursed-table>
-      <reimbursed-table></reimbursed-table>
+      <!-- <reimbursed-table></reimbursed-table> -->
     </b-col>
     <b-col lg="2" md="12" sm="12">
       <expense-info></expense-info>

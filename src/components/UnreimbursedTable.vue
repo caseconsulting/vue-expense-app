@@ -34,7 +34,7 @@
       <tr :active="props.selected" @click="props.selected = !props.selected">
         <td>
           <v-checkbox
-            :input-value="props.selected"
+            :input-value="props.item.reimbursedDate"
             primary
             hide-details
           ></v-checkbox>
