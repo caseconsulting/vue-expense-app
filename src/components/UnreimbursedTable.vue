@@ -4,20 +4,26 @@
   <v-card-title>
     <h3>Unreimbursed Expenses</h3>
     <v-spacer></v-spacer>
-    <v-text-field
-      v-model="search"
-      append-icon="search"
-      label="Search"
-      single-line
-      hide-details
-    ></v-text-field>
+    <v-select
+      :items="employees"
+      :filter="customFilter"
+      v-model="employee"
+      item-text="text"
+      label="Filter by Employee"
+    autocomplete></v-select>
+    <v-select
+      :items="expenseTypes"
+      :filter="customFilter"
+      v-model="expenseType"
+      item-text="text"
+      label="Filter by Expense Type"
+    autocomplete></v-select>
   </v-card-title>
   <v-data-table
     v-model="selected"
     :headers="headers"
-    :items="processedExpenses"
+    :items="filteredItems"
     :pagination.sync="pagination"
-    :search="search"
     select-all
     item-key="name"
     class="elevation-1"
@@ -61,7 +67,7 @@
       </tr>
     </template>
     <v-alert slot="no-results" :value="true" color="error" icon="warning">
-          Your search for "{{ search }}" found no results.
+          Your search for "{{ employee }}" found no results.
         </v-alert>
   </v-data-table>
   </v-card>
@@ -75,11 +81,14 @@ import _ from 'lodash';
 export default {
   data: () => ({
     expenses: [],
+    employees: [],
+    expenseTypes: [],
+    employee: null,
+    expenseType: null,
     processedExpenses: [],
     pagination: {
       sortBy: 'employeeName'
     },
-    search: '',
     selected: [],
     headers: [
       {
@@ -93,7 +102,27 @@ export default {
     ]
   }),
   async created() {
+    // TODO: Since we get all the employees and expense types, we no longer need to
+    // talk to the api to retrieve the employee name and expense type name for each expense
+    //Get employees
+    let employees = await api.getItems(api.EMPLOYEES);
+    this.employees = await employees.map(employee => {
+      return {
+        text: `${employee.firstName} ${employee.middleName} ${
+          employee.lastName
+        }`,
+        value: employee.id
+      };
+    });
+    //Get expense Types
+    let expenseTypes = await api.getItems(api.EXPENSE_TYPES);
+    this.expenseTypes = expenseTypes.map(expenseType => {
+      return { text: expenseType.budgetName, value: expenseType.id };
+    });
+
+    //Get expenses
     this.expenses = await api.getItems(api.EXPENSES);
+
     this.processedExpenses = _.map(this.expenses, expense => {
       return this.getEmployeeName(expense);
     });
@@ -103,6 +132,24 @@ export default {
     Promise.all(this.processedExpenses).then(values => {
       this.processedExpenses = values;
     });
+  },
+  computed: {
+    filteredItems() {
+      return _.filter(this.processedExpenses, expense => {
+        if (!this.employee && !this.expenseType) {
+          return true;
+        } else if (!this.employee && this.expenseType) {
+          return expense.expenseTypeId === this.expenseType;
+        } else if (!this.expenseType && this.employee) {
+          return expense.userId === this.employee;
+        } else {
+          return (
+            expense.userId === this.employee &&
+            expense.expenseTypeId === this.expenseType
+          );
+        }
+      });
+    }
   },
   methods: {
     toggleAll() {
@@ -131,6 +178,17 @@ export default {
       );
       expense.budgetName = expenseType.budgetName;
       return expense;
+    },
+    customFilter(item, queryText, itemText) {
+      const hasValue = val => (val != null ? val : '');
+      const text = hasValue(item.text);
+      const query = hasValue(queryText);
+      return (
+        text
+          .toString()
+          .toLowerCase()
+          .indexOf(query.toString().toLowerCase()) > -1
+      );
     }
   }
 };
