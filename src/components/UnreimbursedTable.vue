@@ -10,6 +10,7 @@
       v-model="employee"
       item-text="text"
       label="Filter by Employee"
+      clearable
     autocomplete></v-select>
     <v-select
       :items="expenseTypes"
@@ -17,6 +18,7 @@
       v-model="expenseType"
       item-text="text"
       label="Filter by Expense Type"
+      clearable
     autocomplete></v-select>
   </v-card-title>
   <v-data-table
