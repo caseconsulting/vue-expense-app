@@ -1,9 +1,7 @@
 <template>
 <div id="app">
   <v-app>
-    <v-container fluid>
       <main-nav></main-nav>
-    </v-container>
     <v-container fluid class="no-right-gutter">
       <v-layout>
         <router-view class="mt-3" />

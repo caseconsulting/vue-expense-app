@@ -1,12 +1,12 @@
 <template>
 <div>
-  <b-alert :show="loading" variant="info">Loading...</b-alert>
+  <!-- <b-alert :show="loading" variant="info">Loading...</b-alert> -->
   <b-row>
-    <b-col offset-lg="1" offset-md="2" lg="9" md="12" sm="12">
+    <b-col offset-lg="1" offset-md="2" lg="9" md="10" sm="12">
       <unreimbursed-table></unreimbursed-table>
       <!-- <reimbursed-table></reimbursed-table> -->
     </b-col>
-    <b-col lg="2" md="12" sm="12">
+    <b-col lg="2" md="2" sm="12">
       <expense-info></expense-info>
       <expense-type-totals></expense-type-totals>
     </b-col>
