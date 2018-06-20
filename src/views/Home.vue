@@ -1,16 +1,16 @@
 <template>
 <div>
   <!-- <b-alert :show="loading" variant="info">Loading...</b-alert> -->
-  <b-row>
-    <b-col offset-lg="1" offset-md="2" lg="9" md="10" sm="12">
+  <v-layout row wrap>
+    <v-flex offset-lg1 offset-md2 lg9 md10 sm12>
       <unreimbursed-table></unreimbursed-table>
       <!-- <reimbursed-table></reimbursed-table> -->
-    </b-col>
-    <b-col lg="2" md="2" sm="12">
+    </v-flex>
+    <v-flex lg2 md2 sm12>
       <expense-info></expense-info>
       <expense-type-totals></expense-type-totals>
-    </b-col>
-  </b-row>
+    </v-flex>
+  </v-layout>
 </div>
 </template>
 

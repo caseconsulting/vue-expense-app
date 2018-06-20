@@ -3,9 +3,7 @@
   <v-app>
       <main-nav></main-nav>
     <v-container fluid class="no-right-gutter">
-      <v-layout>
         <router-view class="mt-3" />
-      </v-layout>
     </v-container>
   </v-app>
 </div>
