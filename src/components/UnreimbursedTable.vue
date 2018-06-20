@@ -17,6 +17,7 @@
     :headers="headers"
     :items="processedExpenses"
     :pagination.sync="pagination"
+    :search="search"
     select-all
     item-key="name"
     class="elevation-1"
