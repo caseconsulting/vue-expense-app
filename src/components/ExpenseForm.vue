@@ -11,12 +11,12 @@
   <v-text-field
   v-model="model.cost"
   :counter="1"
-  label="Description"
-  data-vv-name="Description"
+  label="Cost"
+  data-vv-name="Cost"
   required
 ></v-text-field>
-      <v-select :items="expenseTypes" :filter="customFilter" v-model="model.expenseTypeId" item-text="text" label="Select" autocomplete></v-select>
-      <v-select :items="employees" :filter="customFilter" v-model="model.userId" item-text="text" label="Select" autocomplete></v-select>
+      <v-select :items="expenseTypes" :filter="customFilter" v-model="model.expenseTypeId" item-text="text" label="Expense Type" autocomplete></v-select>
+      <v-select :items="employees" :filter="customFilter" v-model="model.userId" item-text="text" label="Employee" autocomplete></v-select>
       <v-text-field
       v-model="model.note"
       label="Notes"
@@ -24,28 +24,28 @@
       multi-line
     ></v-text-field>
     <v-menu
-        ref="menu1"
-        :close-on-content-click="false"
-        v-model="menu1"
-        :nudge-right="40"
-        lazy
-        transition="scale-transition"
-        offset-y
-        full-width
-        max-width="290px"
-        min-width="290px"
-      >
-        <v-text-field
-          slot="activator"
-          v-model="model.purchaseDate"
-          label="Date"
-          hint="MM/DD/YYYY format"
-          persistent-hint
-          prepend-icon="event"
-          @blur="date = parseDate(dateFormatted)"
-        ></v-text-field>
-        <v-date-picker v-model="date" no-title @input="menu1 = false"></v-date-picker>
-      </v-menu>
+  ref="menu1"
+  :close-on-content-click="false"
+  v-model="menu1"
+  :nudge-right="40"
+  lazy
+  transition="scale-transition"
+  offset-y
+  full-width
+  max-width="290px"
+  min-width="290px"
+>
+  <v-text-field
+    slot="activator"
+    v-model="dateFormatted"
+    label="Date"
+    hint="MM/DD/YYYY format"
+    persistent-hint
+    prepend-icon="event"
+    @blur="model.purchaseDate = parseDate(dateFormatted)"
+  ></v-text-field>
+  <v-date-picker v-model="model.purchaseDate" no-title @input="menu1 = false"></v-date-picker>
+</v-menu>
       <datepicker v-model="model.reimbursedDate" format="MM/dd/yyyy" initial-view="year" :bootstrap-styling="true" :typeable=true :placeholder=" 'MM/DD/YYYY' "></datepicker>
     <!-- <div slot="footer" class="all-footer-buttons"> -->
       <v-btn outline color="error" @click="$emit('delete-form')">
@@ -96,10 +96,15 @@ export default {
       }
     };
   },
+  watch: {
+    'model.purchaseDate': function(val) {
+      this.dateFormatted = this.formatDate(this.model.purchaseDate);
+    }
+  },
   props: ['model'],
   computed: {
     computedDateFormatted() {
-      return this.formatDate(this.date);
+      return this.formatDate(this.model.purchaseDate);
     }
   },
   methods: {

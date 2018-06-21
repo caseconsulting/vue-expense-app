@@ -1,9 +1,9 @@
 <template>
   <div>
     <h1>Expenses</h1>
-    <b-alert :show="loading" variant="info">Loading...</b-alert>
-    <b-row>
-      <b-col lg="8" md="12" sm="12">
+    <!-- <b-alert :show="loading" variant="info">Loading...</b-alert> -->
+    <v-layout row wrap>
+      <v-flex lg8 md12 sm12>
         <div class="table-responsive">
 
         <table class="table table-hover table-striped">
@@ -24,11 +24,11 @@
         </tbody>
       </table>
       </div>
-      </b-col>
-      <b-col lg="4" md="12" sm="12">
+      </v-flex>
+      <v-flex lg4 md12 sm12>
         <expense-form :model="model" v-on:clear-form="clearExpenseToEdit" v-on:submit-form="saveExpense"></expense-form>
-      </b-col>
-    </b-row>
+      </v-flex>
+    </v-layout>
   </div>
 </template>
 
@@ -43,7 +43,10 @@ export default {
       loading: false,
       expenses: [],
       errors: [],
-      model: {}
+      model: {
+        purchaseDate: null,
+        reimbursedDate: null
+      }
     };
   },
   components: {
