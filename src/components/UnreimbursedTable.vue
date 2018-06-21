@@ -1,14 +1,16 @@
 <template>
 <div>
   <v-card>
-    <v-card-title>
-      <h3>Unreimbursed Expenses</h3>
-      <v-spacer></v-spacer>
-      <v-select :items="employees" :filter="customFilter" v-model="employee" item-text="text" label="Filter by Employee" clearable autocomplete></v-select>
-      <v-select :items="expenseTypes" :filter="customFilter" v-model="expenseType" item-text="text" label="Filter by Expense Type" clearable autocomplete></v-select>
-    </v-card-title>
-    <v-data-table v-model="selected" :headers="headers" :items="filteredItems" :pagination.sync="pagination" select-all item-key="id" class="elevation-1">
-      <template slot="headers" slot-scope="props">
+    <v-container fluid>
+      <v-card-title>
+        <h3>Unreimbursed Expenses</h3>
+        <v-spacer></v-spacer>
+        <v-select :items="employees" :filter="customFilter" v-model="employee" item-text="text" label="Filter by Employee" clearable autocomplete></v-select>
+        <v-select :items="expenseTypes" :filter="customFilter" v-model="expenseType" item-text="text" label="Filter by Expense Type" clearable autocomplete></v-select>
+      </v-card-title>
+
+      <v-data-table v-model="selected" :headers="headers" :items="filteredItems" :pagination.sync="pagination" select-all item-key="id" class="elevation-1">
+        <template slot="headers" slot-scope="props">
       <tr>
         <th>
           <v-checkbox
@@ -30,7 +32,7 @@
         </th>
       </tr>
     </template>
-      <template slot="items" slot-scope="props">
+        <template slot="items" slot-scope="props">
       <tr v-if="!props.item.reimbursedDate" :active="props.selected" @click="props.selected = !props.selected">
         <td>
           <v-checkbox
@@ -46,18 +48,19 @@
         <td class="text-xs-left">{{ props.item.description }}</td>
       </tr>
     </template>
-    </v-data-table>
-    <v-flex offset-md11>
+      </v-data-table>
+      <v-flex offset-md11>
 
-      <v-fab-transition slot="activator">
-        <v-btn id="custom-button-color" v-show="selected.length>0" fab dark small absolute bottom left>
-          <icon name="dollar-sign"></icon>
-        </v-btn>
-      </v-fab-transition>
+        <v-fab-transition slot="activator">
+          <v-btn id="custom-button-color" v-show="selected.length>0" fab dark small absolute bottom left>
+            <icon name="dollar-sign"></icon>
+          </v-btn>
+        </v-fab-transition>
 
 
 
-    </v-flex>
+      </v-flex>
+    </v-container>
   </v-card>
 </div>
 </template>
