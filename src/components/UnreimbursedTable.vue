@@ -46,10 +46,18 @@
         <td class="text-xs-left">{{ props.item.description }}</td>
       </tr>
     </template>
-      <v-alert slot="no-results" :value="true" color="error" icon="warning">
-        Your search for "{{ employee }}" found no results.
-      </v-alert>
     </v-data-table>
+    <v-flex offset-md11>
+
+      <v-fab-transition slot="activator">
+        <v-btn id="custom-button-color" v-show="selected.length>0" fab dark small absolute bottom left>
+          <icon name="dollar-sign"></icon>
+        </v-btn>
+      </v-fab-transition>
+
+
+
+    </v-flex>
   </v-card>
 </div>
 </template>
@@ -60,6 +68,7 @@ import _ from 'lodash';
 
 export default {
   data: () => ({
+    hidden: true,
     expenses: [],
     employees: [],
     expenseTypes: [],
