@@ -1,6 +1,12 @@
 <template>
 <!-- <form @submit.prevent=""> -->
 <v-card :header="(model.id ? 'Edit Expense' : 'New Expense')">
+  <v-card-title>
+    <h3>
+      Expense Form
+    </h3>
+  </v-card-title>
+  <v-container fluid>
   <v-text-field v-model="model.description" :counter="1" label="Description" data-vv-name="Description" required></v-text-field>
   <v-text-field v-model="model.cost" :counter="1" label="Cost" data-vv-name="Cost" required></v-text-field>
   <v-select :items="expenseTypes" :filter="customFilter" v-model="model.expenseTypeId" item-text="text" label="Expense Type" autocomplete></v-select>
@@ -30,6 +36,7 @@
   </v-btn>
   <!-- </div> -->
   <!-- </div> -->
+  </v-container>
 </v-card>
 <!-- </form> -->
 </template>
