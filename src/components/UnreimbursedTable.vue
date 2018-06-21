@@ -1,36 +1,14 @@
 <template>
-  <div>
-<v-card>
-  <v-card-title>
-    <h3>Unreimbursed Expenses</h3>
-    <v-spacer></v-spacer>
-    <v-select
-      :items="employees"
-      :filter="customFilter"
-      v-model="employee"
-      item-text="text"
-      label="Filter by Employee"
-      clearable
-    autocomplete></v-select>
-    <v-select
-      :items="expenseTypes"
-      :filter="customFilter"
-      v-model="expenseType"
-      item-text="text"
-      label="Filter by Expense Type"
-      clearable
-    autocomplete></v-select>
-  </v-card-title>
-  <v-data-table
-    v-model="selected"
-    :headers="headers"
-    :items="filteredItems"
-    :pagination.sync="pagination"
-    select-all
-    item-key="name"
-    class="elevation-1"
-  >
-    <template slot="headers" slot-scope="props">
+<div>
+  <v-card>
+    <v-card-title>
+      <h3>Unreimbursed Expenses</h3>
+      <v-spacer></v-spacer>
+      <v-select :items="employees" :filter="customFilter" v-model="employee" item-text="text" label="Filter by Employee" clearable autocomplete></v-select>
+      <v-select :items="expenseTypes" :filter="customFilter" v-model="expenseType" item-text="text" label="Filter by Expense Type" clearable autocomplete></v-select>
+    </v-card-title>
+    <v-data-table v-model="selected" :headers="headers" :items="filteredItems" :pagination.sync="pagination" select-all item-key="id" class="elevation-1">
+      <template slot="headers" slot-scope="props">
       <tr>
         <th>
           <v-checkbox
@@ -52,11 +30,11 @@
         </th>
       </tr>
     </template>
-    <template slot="items" slot-scope="props">
-      <tr :active="props.selected" @click="props.selected = !props.selected">
+      <template slot="items" slot-scope="props">
+      <tr v-if="!props.item.reimbursedDate" :active="props.selected" @click="props.selected = !props.selected">
         <td>
           <v-checkbox
-            :input-value="!props.item.reimbursedDate"
+            :input-value="props.selected"
             primary
             hide-details
           ></v-checkbox>
@@ -68,12 +46,12 @@
         <td class="text-xs-left">{{ props.item.description }}</td>
       </tr>
     </template>
-    <v-alert slot="no-results" :value="true" color="error" icon="warning">
-          Your search for "{{ employee }}" found no results.
-        </v-alert>
-  </v-data-table>
+      <v-alert slot="no-results" :value="true" color="error" icon="warning">
+        Your search for "{{ employee }}" found no results.
+      </v-alert>
+    </v-data-table>
   </v-card>
-  </div>
+</div>
 </template>
 
 <script>
@@ -92,8 +70,7 @@ export default {
       sortBy: 'employeeName'
     },
     selected: [],
-    headers: [
-      {
+    headers: [{
         text: 'Employee',
         value: 'employeeName'
       },
@@ -157,7 +134,7 @@ export default {
   methods: {
     toggleAll() {
       if (this.selected.length) this.selected = [];
-      else this.selected = this.expenses.slice();
+      else this.selected = this.filteredItems;
     },
     changeSort(column) {
       if (this.pagination.sortBy === column) {
@@ -188,9 +165,9 @@ export default {
       const query = hasValue(queryText);
       return (
         text
-          .toString()
-          .toLowerCase()
-          .indexOf(query.toString().toLowerCase()) > -1
+        .toString()
+        .toLowerCase()
+        .indexOf(query.toString().toLowerCase()) > -1
       );
     }
   }
