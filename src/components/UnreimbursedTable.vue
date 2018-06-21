@@ -56,7 +56,7 @@
       <tr :active="props.selected" @click="props.selected = !props.selected">
         <td>
           <v-checkbox
-            :input-value="props.item.reimbursedDate"
+            :input-value="!props.item.reimbursedDate"
             primary
             hide-details
           ></v-checkbox>
@@ -124,10 +124,11 @@ export default {
 
     //Get expenses
     this.expenses = await api.getItems(api.EXPENSES);
-
+    console.log('this.expenses', this.expenses);
     this.processedExpenses = _.map(this.expenses, expense => {
       return this.getEmployeeName(expense);
     });
+    console.log(this.expenses);
     this.processedExpenses = _.map(this.expenses, expense => {
       return this.getExpenseTypeName(expense);
     });

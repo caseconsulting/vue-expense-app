@@ -1,37 +1,58 @@
 <template>
-<form @submit.prevent="">
+<!-- <form @submit.prevent=""> -->
   <v-card :header="(model.id ? 'Edit Expense' : 'New Expense')">
-    <b-form-group label="Description">
-      <b-form-input type="text" v-model="model.description"></b-form-input>
-    </b-form-group>
-    <b-form-group label="Cost">
-      <b-input-group prepend="$">
-        <b-form-input v-model="model.cost"></b-form-input>
-      </b-input-group>
-    </b-form-group>
-    <b-form-group label="Expense Type">
+    <v-text-field
+    v-model="model.description"
+    :counter="1"
+    label="Description"
+    data-vv-name="Description"
+    required
+  ></v-text-field>
+  <v-text-field
+  v-model="model.cost"
+  :counter="1"
+  label="Description"
+  data-vv-name="Description"
+  required
+></v-text-field>
       <v-select :items="expenseTypes" :filter="customFilter" v-model="model.expenseTypeId" item-text="text" label="Select" autocomplete></v-select>
-
-    </b-form-group>
-    <b-form-group label="Employee">
       <v-select :items="employees" :filter="customFilter" v-model="model.userId" item-text="text" label="Select" autocomplete></v-select>
-    </b-form-group>
-    <b-form-group label="Note">
-      <b-form-textarea rows="2" type="text" v-model="model.note"></b-form-textarea>
-    </b-form-group>
-    <b-form-group label="Purchase Date">
-      <datepicker v-model="model.purchaseDate" format="MM/dd/yyyy" initial-view="year" :bootstrap-styling="true" :typeable=true :placeholder=" 'MM/DD/YYYY' "></datepicker>
-    </b-form-group>
-    <b-form-group label="Reimbursed Date">
+      <v-text-field
+      v-model="model.note"
+      label="Notes"
+      data-vv-name="Description"
+      multi-line
+    ></v-text-field>
+    <v-menu
+        ref="menu1"
+        :close-on-content-click="false"
+        v-model="menu1"
+        :nudge-right="40"
+        lazy
+        transition="scale-transition"
+        offset-y
+        full-width
+        max-width="290px"
+        min-width="290px"
+      >
+        <v-text-field
+          slot="activator"
+          v-model="model.purchaseDate"
+          label="Date"
+          hint="MM/DD/YYYY format"
+          persistent-hint
+          prepend-icon="event"
+          @blur="date = parseDate(dateFormatted)"
+        ></v-text-field>
+        <v-date-picker v-model="date" no-title @input="menu1 = false"></v-date-picker>
+      </v-menu>
       <datepicker v-model="model.reimbursedDate" format="MM/dd/yyyy" initial-view="year" :bootstrap-styling="true" :typeable=true :placeholder=" 'MM/DD/YYYY' "></datepicker>
-    </b-form-group>
-
-    <div slot="footer" class="all-footer-buttons">
+    <!-- <div slot="footer" class="all-footer-buttons"> -->
       <v-btn outline color="error" @click="$emit('delete-form')">
         <icon class="mr-1" name="trash"></icon>
         Delete
       </v-btn>
-      <div class="footer-buttons">
+      <!-- <div class="footer-buttons"> -->
         <v-btn color="white" @click="$emit('clear-form')">
           <icon class="mr-1" name="ban"></icon>
           Cancel
@@ -40,10 +61,10 @@
           <icon class="mr-1" name="save"></icon>
           Submit
         </v-btn>
-      </div>
-    </div>
+      <!-- </div> -->
+    <!-- </div> -->
   </v-card>
-</form>
+<!-- </form> -->
 </template>
 
 <script>
@@ -55,21 +76,46 @@ export default {
   },
   data() {
     return {
+      date: null,
+      dateFormatted: null,
       selectedExpenseType: {},
       expenseTypes: [],
       selectedEmployee: {},
       employees: [],
+      menu1: false,
       customFilter(item, queryText, itemText) {
-        const hasValue = val => val != null ? val : ''
-        const text = hasValue(item.text)
-        const query = hasValue(queryText)
-        return text.toString()
-          .toLowerCase()
-          .indexOf(query.toString().toLowerCase()) > -1
+        const hasValue = val => (val != null ? val : '');
+        const text = hasValue(item.text);
+        const query = hasValue(queryText);
+        return (
+          text
+            .toString()
+            .toLowerCase()
+            .indexOf(query.toString().toLowerCase()) > -1
+        );
       }
     };
   },
   props: ['model'],
+  computed: {
+    computedDateFormatted() {
+      return this.formatDate(this.date);
+    }
+  },
+  methods: {
+    formatDate(date) {
+      if (!date) return null;
+
+      const [year, month, day] = date.split('-');
+      return `${month}/${day}/${year}`;
+    },
+    parseDate(date) {
+      if (!date) return null;
+
+      const [month, day, year] = date.split('/');
+      return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+    }
+  },
   async created() {
     let expenseTypes = await api.getItems(api.EXPENSE_TYPES);
     this.expenseTypes = expenseTypes.map(expenseType => {
@@ -88,4 +134,5 @@ export default {
   }
 };
 </script>
-<style></style>
+<style>
+</style>
