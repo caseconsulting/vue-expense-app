@@ -45,6 +45,7 @@
             </td>
             <td class="text-xs-center">{{ props.item.employeeName }}</td>
             <td class="text-xs-center">{{ props.item.budgetName }}</td>
+            <td class="text-xs-center" id="money-team">{{ getExpenseTotal(props.item.expenses) }}</td>
           </tr>
         </template>
 
@@ -93,7 +94,8 @@ export default {
         text: 'Employee',
         value: 'employeeName'
       },
-      { text: 'Expense Type', value: 'budgetName' }
+      { text: 'Expense Type', value: 'budgetName' },
+      { text: 'Total' }
     ]
   }),
   async created() {
@@ -101,7 +103,7 @@ export default {
     // talk to the api to retrieve the employee name and expense type name for each expense
     //Get employees
     let employees = await api.getItems(api.EMPLOYEES);
-    console.log('emps', employees);
+
     this.employees = await employees.map(employee => {
       return {
         text: `${employee.firstName} ${employee.middleName} ${
@@ -130,27 +132,31 @@ export default {
       this.empBudgets = values;
 
       this.empBudgets = _.map(this.empBudgets, (expense) => {
-        return {
-          employeeName: expense.employeeName,
-          userId: expense.userId,
-          budgetName: expense.budgetName,
-          expenseTypeId: expense.expenseTypeId,
-          expenses: [],
-          key: `${expense.userId}${expense.expenseTypeId}`
+        if (!expense.reimbursedDate) {
+          return {
+            employeeName: expense.employeeName,
+            userId: expense.userId,
+            budgetName: expense.budgetName,
+            expenseTypeId: expense.expenseTypeId,
+            expenses: [],
+            key: `${expense.userId}${expense.expenseTypeId}`
+          }
         }
       });
+
+      this.empBudgets = _.filter(this.empBudgets, (item) => item !== undefined);
 
       this.empBudgets = _.uniqWith(this.empBudgets, _.isEqual);
       this.empBudgets = _.forEach(this.empBudgets, (item) => {
         return item.expenses = _.filter(this.expenses, (expense) => {
-          if ((expense.userId === item.userId) && (expense.expenseTypeId === item.expenseTypeId)) {
+
+          if ((expense.userId === item.userId) && (expense.expenseTypeId === item.expenseTypeId) && (!expense.reimbursedDate)) {
             return true;
           } else {
             return false;
           }
         });
       });
-      console.log('empBug', this.empBudgets);
       this.processedExpenses = this.empBudgets;
     });
 
@@ -174,9 +180,11 @@ export default {
     }
   },
   methods: {
-    logging(props) {
-      console.log('props', props);
-      console.log('expenses', this.expenses);
+    getExpenseTotal(expenses) {
+      let total = 0;
+      _.forEach(expenses, (expense) => total += parseInt(expense.cost, 10));
+      return total;
+
     },
     toggleAll() {
       if (this.selected.length) this.selected = [];
@@ -219,8 +227,12 @@ export default {
   }
 };
 </script>
-<style scoped>
+<style>
 .card {
   display: flex;
+}
+
+#money-team {
+  color: green;
 }
 </style>

@@ -58,7 +58,7 @@ export default {
     ]
   }),
   created() {
-    console.log('unrolled', this.expenses);
+
   },
 
   methods: {
