@@ -1,10 +1,10 @@
 <template>
 <div>
-  <!-- <b-alert :show="loading" variant="info">Loading...</b-alert> -->
   <v-layout row wrap>
     <v-flex offset-lg1 offset-md2 lg9 md10 sm12>
+      <rollup-expense-type-table></rollup-expense-type-table>
+      <br />
       <unreimbursed-table></unreimbursed-table>
-      <!-- <reimbursed-table></reimbursed-table> -->
     </v-flex>
     <v-flex lg2 md2 sm12>
       <expense-info></expense-info>
@@ -21,6 +21,7 @@ import ReimbursedTable from '../components/ReimbursedTable.vue';
 import UnreimbursedTable from '../components/UnreimbursedTable.vue';
 import ExpenseInfo from '../components/ExpenseInfo.vue';
 import ExpenseTypeTotals from '../components/ExpenseTypeTotals.vue';
+import RollupExpenseTypeTable from '../components/RollupExpenseTypeTable.vue';
 
 export default {
   data() {
@@ -36,7 +37,8 @@ export default {
     UnreimbursedTable,
     ReimbursedTable,
     ExpenseInfo,
-    ExpenseTypeTotals
+    ExpenseTypeTotals,
+    RollupExpenseTypeTable
   },
   async created() {
     // Fetches posts when the component is created.

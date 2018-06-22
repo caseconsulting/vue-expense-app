@@ -3,63 +3,65 @@
   <v-card>
     <v-container fluid>
       <v-card-title>
-        <h3>Unreimbursed Expenses</h3>
+        <h3>Expense Type Table</h3>
         <v-spacer></v-spacer>
         <v-select :items="employees" :filter="customFilter" v-model="employee" item-text="text" label="Filter by Employee" clearable autocomplete></v-select>
         <v-select :items="expenseTypes" :filter="customFilter" v-model="expenseType" item-text="text" label="Filter by Expense Type" clearable autocomplete></v-select>
       </v-card-title>
 
-      <v-data-table v-model="selected" :headers="headers" :items="filteredItems" :pagination.sync="pagination" select-all item-key="id" class="elevation-1">
+      <v-data-table v-model="selected" :headers="headers" :items="filteredItems" :pagination.sync="pagination" select-all item-key="key" class="elevation-1">
         <template slot="headers" slot-scope="props">
-      <tr>
-        <th>
-          <v-checkbox
-            :input-value="props.all"
-            :indeterminate="props.indeterminate"
-            primary
-            hide-details
-            @click.native="toggleAll"
-          ></v-checkbox>
-        </th>
-        <th
-          v-for="header in props.headers"
-          :key="header.text"
-          :class="['column sortable', pagination.descending ? 'desc' : 'asc', header.value === pagination.sortBy ? 'active' : '']"
-          @click="changeSort(header.value)"
-        >
-          <v-icon small>arrow_upward</v-icon>
-          {{ header.text }}
-        </th>
-      </tr>
-    </template>
+          <tr>
+            <th>
+              <v-checkbox
+                :input-value="props.all"
+                :indeterminate="props.indeterminate"
+                primary
+                hide-details
+                @click.native="toggleAll"
+              ></v-checkbox>
+            </th>
+            <th
+              v-for="header in props.headers"
+              :key="header.text"
+              :class="['column sortable', pagination.descending ? 'desc' : 'asc', header.value === pagination.sortBy ? 'active' : '']"
+              @click="changeSort(header.value)"
+            >
+              <v-icon small>arrow_upward</v-icon>
+              {{ header.text }}
+            </th>
+          </tr>
+        </template>
+
         <template slot="items" slot-scope="props">
-      <tr v-if="!props.item.reimbursedDate" :active="props.selected" @click="props.selected = !props.selected">
-        <td>
-          <v-checkbox
-            :input-value="props.selected"
-            primary
-            hide-details
-          ></v-checkbox>
-        </td>
-        <td class="text-xs-left">{{ props.item.employeeName }}</td>
-        <td class="text-xs-left">{{ props.item.budgetName }}</td>
-        <td class="text-xs-left">{{ props.item.cost }}</td>
-        <td class="text-xs-left">{{ props.item.purchaseDate }}</td>
-        <td class="text-xs-left">{{ props.item.description }}</td>
-      </tr>
-    </template>
+          <tr v-if="!props.item.reimbursedDate" :active="props.selected" @click="props.expanded=!props.expanded">
+          <td>
+            <v-checkbox
+              @click="props.selected = !props.selected"
+              :input-value="props.selected"
+              primary
+              hide-details
+            ></v-checkbox>
+            </td>
+            <td class="text-xs-center">{{ props.item.employeeName }}</td>
+            <td class="text-xs-center">{{ props.item.budgetName }}</td>
+          </tr>
+        </template>
+
+        <v-flex offset-md11>
+
+          <v-fab-transition>
+            <v-btn id="custom-button-color" v-show="selected.length>0" fab dark small absolute bottom left>
+              <icon name="dollar-sign"></icon>
+            </v-btn>
+          </v-fab-transition>
+        </v-flex>
+
+        <template slot="expand" slot-scope="props">
+          <unrolled-table-info  :expenses="props.item.expenses"></unrolled-table-info>
+        </template>
+
       </v-data-table>
-      <v-flex offset-md11>
-
-        <v-fab-transition>
-          <v-btn id="custom-button-color" v-show="selected.length>0" fab dark small absolute bottom left>
-            <icon name="dollar-sign"></icon>
-          </v-btn>
-        </v-fab-transition>
-
-
-
-      </v-flex>
     </v-container>
   </v-card>
 </div>
@@ -67,11 +69,16 @@
 
 <script>
 import api from '@/shared/api.js';
+import UnrolledTableInfo from './UnrolledTableInfo.vue';
+
 import _ from 'lodash';
 
 export default {
+  components: {
+    UnrolledTableInfo
+  },
   data: () => ({
-    hidden: true,
+    empBudgets: [],
     expenses: [],
     employees: [],
     expenseTypes: [],
@@ -86,10 +93,7 @@ export default {
         text: 'Employee',
         value: 'employeeName'
       },
-      { text: 'Expense Type', value: 'budgetName' }, //change value to call a function
-      { text: 'Cost', value: 'cost' },
-      { text: 'Purchase Date', value: 'purchaseDate' },
-      { text: 'Description', value: 'description' }
+      { text: 'Expense Type', value: 'budgetName' }
     ]
   }),
   async created() {
@@ -97,6 +101,7 @@ export default {
     // talk to the api to retrieve the employee name and expense type name for each expense
     //Get employees
     let employees = await api.getItems(api.EMPLOYEES);
+    console.log('emps', employees);
     this.employees = await employees.map(employee => {
       return {
         text: `${employee.firstName} ${employee.middleName} ${
@@ -122,8 +127,33 @@ export default {
       return this.getExpenseTypeName(expense);
     });
     Promise.all(this.processedExpenses).then(values => {
-      this.processedExpenses = values;
+      this.empBudgets = values;
+
+      this.empBudgets = _.map(this.empBudgets, (expense) => {
+        return {
+          employeeName: expense.employeeName,
+          userId: expense.userId,
+          budgetName: expense.budgetName,
+          expenseTypeId: expense.expenseTypeId,
+          expenses: [],
+          key: `${expense.userId}${expense.expenseTypeId}`
+        }
+      });
+
+      this.empBudgets = _.uniqWith(this.empBudgets, _.isEqual);
+      this.empBudgets = _.forEach(this.empBudgets, (item) => {
+        return item.expenses = _.filter(this.expenses, (expense) => {
+          if ((expense.userId === item.userId) && (expense.expenseTypeId === item.expenseTypeId)) {
+            return true;
+          } else {
+            return false;
+          }
+        });
+      });
+      console.log('empBug', this.empBudgets);
+      this.processedExpenses = this.empBudgets;
     });
+
   },
   computed: {
     filteredItems() {
@@ -144,6 +174,10 @@ export default {
     }
   },
   methods: {
+    logging(props) {
+      console.log('props', props);
+      console.log('expenses', this.expenses);
+    },
     toggleAll() {
       if (this.selected.length) this.selected = [];
       else this.selected = this.filteredItems;
