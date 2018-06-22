@@ -1,29 +1,28 @@
 <template>
   <div>
-    <h1>Expenses</h1>
     <v-layout row wrap>
       <v-flex lg8 md12 sm12>
         <v-card>
-        <v-data-table
+          <v-card-title>
+            <h2>Expenses</h2>
+            <v-spacer></v-spacer>
+            <v-text-field
+            v-model="search"
+            append-icon="search"
+            label="Search"
+            single-line
+            hide-details
+            ></v-text-field>
+          </v-card-title>
+          <v-data-table
             :headers="headers"
             :items="processedExpenses"
+            :search="search"
             item-key="name"
             class="elevation-1"
-          >
-            <template slot="headers" slot-scope="props">
-              <tr>
-                <th
-                  v-for="header in props.headers"
-                  :key="header.text"
-                  @click="changeSort(header.value)"
-                >
-                  <v-icon small>arrow_upward</v-icon>
-                  {{ header.text }}
-                </th>
-              </tr>
-            </template>
+            >
             <template slot="items" slot-scope="props">
-              <tr>
+              <tr @click="onSelect(props.item)">
                 <td class="text-xs-right">{{ props.item.employeeName }}</td>
                 <td class="text-xs-right">{{ props.item.budgetName }}</td>
                 <td class="text-xs-right">{{ props.item.cost }}</td>
@@ -32,11 +31,14 @@
                 <td class="text-xs-right">{{ props.item.description }}</td>
               </tr>
             </template>
+            <v-alert slot="no-results" :value="true" color="error" icon="warning">
+              Your search for "{{ search }}" found no results.
+            </v-alert>
           </v-data-table>
           </v-card>
       </v-flex>
       <v-flex lg4 md12 sm12>
-        <expense-form :model="model" v-on:clear-form="clearExpenseToEdit" v-on:submit-form="saveExpense"></expense-form>
+        <expense-form :model="model" v-on:submit-form="refreshExpenses"></expense-form>
       </v-flex>
     </v-layout>
   </div>
@@ -48,6 +50,7 @@ import ExpenseForm from '../components/ExpenseForm.vue';
 export default {
   data() {
     return {
+      search: '',
       loading: false,
       expenses: [],
       processedExpenses: [],
@@ -73,16 +76,7 @@ export default {
     ExpenseForm
   },
   async created() {
-    this.expenses = await api.getItems(api.EXPENSES);
-    this.processedExpenses = _.map(this.expenses, expense => {
-      return this.getEmployeeName(expense);
-    });
-    this.processedExpenses = _.map(this.expenses, expense => {
-      return this.getExpenseTypeName(expense);
-    });
-    Promise.all(this.processedExpenses).then(values => {
-      this.processedExpenses = values;
-    });
+    this.refreshExpenses();
   },
   methods: {
     async getEmployeeName(expense) {
@@ -103,19 +97,16 @@ export default {
     async refreshExpenses() {
       this.loading = true;
       this.expenses = await api.getItems(api.EXPENSES);
+      this.processedExpenses = _.map(this.expenses, expense => {
+        return this.getEmployeeName(expense);
+      });
+      this.processedExpenses = _.map(this.expenses, expense => {
+        return this.getExpenseTypeName(expense);
+      });
+      Promise.all(this.processedExpenses).then(values => {
+        this.processedExpenses = values;
+      });
       this.loading = false;
-    },
-    async populateExpenseToEdit(expense) {
-      this.model = Object.assign({}, expense);
-    },
-    async clearExpenseToEdit() {
-      this.model = {
-        purchaseDate: null,
-        reimbursedDate: null
-      };
-    },
-    async saveExpense() {
-      await this.refreshExpenses();
     },
     async deleteExpense(expense) {
       if (confirm('Are you sure you want to delete this expense?')) {
@@ -126,6 +117,15 @@ export default {
         await api.deleteItem(api.EXPENSES, expense.id);
         await this.refreshExpenses();
       }
+    },
+    onSelect(item) {
+      this.model.description = item.description;
+      this.model.cost = item.cost;
+      this.model.note = item.note;
+      this.model.userId = item.userId;
+      this.model.expenseTypeId = item.expenseTypeId;
+      this.model.purchaseDate = item.purchaseDate;
+      this.model.reimbursedDate = item.reimbursedDate;
     }
   }
 };
