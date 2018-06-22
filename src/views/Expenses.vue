@@ -67,17 +67,12 @@ export default {
       this.model = Object.assign({}, expense);
     },
     async clearExpenseToEdit() {
-      this.model = {};
+      this.model = {
+        purchaseDate: null,
+        reimbursedDate: null
+      };
     },
     async saveExpense() {
-      console.log(this.model);
-      if (this.model.id) {
-        await api.updateItem(api.EXPENSES, this.model.id, this.model);
-      } else {
-        console.log('Creating new item');
-        await api.createItem(api.EXPENSES, this.model);
-      }
-      this.model = {}; // reset form
       await this.refreshExpenses();
     },
     async logHello() {
