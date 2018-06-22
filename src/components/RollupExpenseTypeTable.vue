@@ -95,7 +95,7 @@ export default {
         value: 'employeeName'
       },
       { text: 'Expense Type', value: 'budgetName' },
-      { text: 'Total' }
+      { text: 'Total', value: 'expenses' }
     ]
   }),
   async created() {
@@ -191,6 +191,8 @@ export default {
       else this.selected = this.filteredItems;
     },
     changeSort(column) {
+      console.log('column', column);
+      console.log('pag', this.pagination);
       if (this.pagination.sortBy === column) {
         this.pagination.descending = !this.pagination.descending;
       } else {
