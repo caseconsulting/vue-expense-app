@@ -2,19 +2,12 @@ import Vue from 'vue';
 import App from './App.vue';
 import router from './router';
 import store from './store';
-
-//Vue Bootstrap
-import BootstrapVue from 'bootstrap-vue';
+Vue.config.productionTip = false;
 
 //Vuetify
 import Vuetify from 'vuetify';
 import 'vuetify/dist/vuetify.min.css';
-
-//Vuesax
-import Vuesax from 'vuesax';
-import 'vuesax/dist/vuesax.css'; //vuesax styles
-
-Vue.config.productionTip = false;
+Vue.use(Vuetify);
 
 // BEGIN VUE AWESOME
 import 'vue-awesome/icons/book';
@@ -29,15 +22,10 @@ import 'vue-awesome/icons/save';
 import 'vue-awesome/icons/trash';
 import 'vue-awesome/icons/ban';
 import 'vue-awesome/icons/bars';
-
 import Icon from 'vue-awesome/components/Icon';
 
 Vue.component('icon', Icon);
 // END VUE AWESOME
-
-Vue.use(BootstrapVue);
-Vue.use(Vuesax);
-Vue.use(Vuetify);
 
 new Vue({
   router,
