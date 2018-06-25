@@ -1,47 +1,35 @@
 <template>
-  <div>
-    <v-layout row wrap>
-      <v-flex lg8 md12 sm12>
-        <v-card>
-          <v-card-title>
-            <h2>Expenses</h2>
-            <v-spacer></v-spacer>
-            <v-text-field
-            v-model="search"
-            append-icon="search"
-            label="Search"
-            single-line
-            hide-details
-            ></v-text-field>
-          </v-card-title>
-          <v-data-table
-            :headers="headers"
-            :items="processedExpenses"
-            :search="search"
-            item-key="name"
-            class="elevation-1"
-            >
-            <template slot="items" slot-scope="props">
+<div>
+  <v-layout row wrap>
+    <v-flex lg8 md12 sm12>
+      <v-card>
+        <v-card-title>
+          <h2>Expenses</h2>
+          <v-spacer></v-spacer>
+          <v-text-field v-model="search" append-icon="search" label="Search" single-line hide-details></v-text-field>
+        </v-card-title>
+        <v-data-table :headers="headers" :items="processedExpenses" :search="search" item-key="name" class="elevation-1">
+          <template slot="items" slot-scope="props">
               <tr @click="onSelect(props.item)">
-                <td class="text-xs-right">{{ props.item.employeeName }}</td>
-                <td class="text-xs-right">{{ props.item.budgetName }}</td>
-                <td class="text-xs-right">{{ props.item.cost }}</td>
-                <td class="text-xs-right">{{ props.item.purchaseDate }}</td>
-                <td class="text-xs-right">{{ props.item.reimbursedDate }}</td>
-                <td class="text-xs-right">{{ props.item.description }}</td>
+                <td class="text-xs-left">{{ props.item.employeeName }}</td>
+                <td class="text-xs-left">{{ props.item.budgetName }}</td>
+                <td class="text-xs-left">{{ props.item.cost }}</td>
+                <td class="text-xs-left">{{ props.item.purchaseDate }}</td>
+                <td class="text-xs-left">{{ props.item.reimbursedDate }}</td>
+                <td class="text-xs-left">{{ props.item.description }}</td>
               </tr>
             </template>
-            <v-alert slot="no-results" :value="true" color="error" icon="warning">
-              Your search for "{{ search }}" found no results.
-            </v-alert>
-          </v-data-table>
-          </v-card>
-      </v-flex>
-      <v-flex lg4 md12 sm12>
-        <expense-form :model="model" v-on:submit-form="refreshExpenses"></expense-form>
-      </v-flex>
-    </v-layout>
-  </div>
+          <v-alert slot="no-results" :value="true" color="error" icon="warning">
+            Your search for "{{ search }}" found no results.
+          </v-alert>
+        </v-data-table>
+      </v-card>
+    </v-flex>
+    <v-flex lg4 md12 sm12>
+      <expense-form :model="model" v-on:submit-form="refreshExpenses"></expense-form>
+    </v-flex>
+  </v-layout>
+</div>
 </template>
 
 <script>
@@ -55,8 +43,7 @@ export default {
       expenses: [],
       processedExpenses: [],
       errors: [],
-      headers: [
-        {
+      headers: [{
           text: 'Employee',
           value: 'employeeName'
         },
