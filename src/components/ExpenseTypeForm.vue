@@ -42,9 +42,9 @@ export default {
       }
       if (this.$refs.form.validate()) {
         if (this.model.id) {
-          await api.updateItem(api.EXPENSES, this.model.id, this.model);
+          await api.updateItem(api.EXPENSE_TYPES, this.model.id, this.model);
         } else {
-          await api.createItem(api.EXPENSES, this.model);
+          await api.createItem(api.EXPENSE_TYPES, this.model);
         }
         this.clear();
         this.$emit('submit-form');
@@ -53,9 +53,6 @@ export default {
     clear() {
       this.$refs.form.reset();
     }
-  },
-  async created() {
-    console.log('this.model on creation', this.model);
   }
 };
 </script>
