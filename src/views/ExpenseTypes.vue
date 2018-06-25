@@ -36,7 +36,7 @@
           </v-card>
       </v-flex>
       <v-flex xl3 lg4 md12 sm12 >
-        <expense-form :model="model" v-on:submit-form="refreshExpenseTypes"></expense-form>
+        <expense-type-form :model="model" v-on:submit-form="refreshExpenseTypes"></expense-type-form>
       </v-flex>
     </v-layout>
   </div>
@@ -44,7 +44,7 @@
 
 <script>
 import api from '@/shared/api.js';
-import ExpenseForm from '../components/ExpenseForm.vue';
+import ExpenseTypeForm from '../components/ExpenseTypeForm.vue';
 export default {
   data() {
     return {
@@ -65,7 +65,7 @@ export default {
     };
   },
   components: {
-    ExpenseForm
+    ExpenseTypeForm
   },
   async created() {
     this.refreshExpenseTypes();
