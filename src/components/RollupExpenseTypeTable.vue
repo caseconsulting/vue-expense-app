@@ -49,20 +49,19 @@
           </tr>
         </template>
 
-        <v-flex offset-md11>
-
-          <v-fab-transition>
-            <v-btn id="custom-button-color" v-show="selected.length>0" fab dark small absolute bottom left>
-              <icon name="dollar-sign"></icon>
-            </v-btn>
-          </v-fab-transition>
-        </v-flex>
-
         <template slot="expand" slot-scope="props">
           <unrolled-table-info  :expenses="props.item.expenses"></unrolled-table-info>
         </template>
 
       </v-data-table>
+      <v-flex offset-md10>
+
+        <v-fab-transition>
+          <v-btn id="custom-button-color" v-show="selected.length>0" fab dark large bottom left fixed>
+            <icon name="dollar-sign"></icon>
+          </v-btn>
+        </v-fab-transition>
+      </v-flex>
     </v-container>
   </v-card>
 </div>
