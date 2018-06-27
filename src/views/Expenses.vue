@@ -26,7 +26,7 @@
       </v-card>
     </v-flex>
     <v-flex lg4 md12 sm12>
-      <expense-form :model="model" v-on:submit-form="refreshExpenses"></expense-form>
+      <expense-form :model="model" v-on:form-cleared="clearModel" v-on:submit-form="refreshExpenses"></expense-form>
     </v-flex>
   </v-layout>
 </div>
@@ -55,9 +55,10 @@ export default {
         { text: 'Description', value: 'description' }
       ],
       model: {
+        id: '',
         description: '',
         cost: '',
-        notes: '',
+        note: '',
         userId: '',
         expenseTypeId: '',
         purchaseDate: null,
@@ -112,13 +113,28 @@ export default {
       }
     },
     onSelect(item) {
-      this.model.description = item.description;
-      this.model.cost = item.cost;
-      this.model.note = item.note;
-      this.model.userId = item.userId;
-      this.model.expenseTypeId = item.expenseTypeId;
-      this.model.purchaseDate = item.purchaseDate;
-      this.model.reimbursedDate = item.reimbursedDate;
+      this.model = {
+        id: item.id,
+        description: item.description,
+        cost: item.cost,
+        note: item.note,
+        userId: item.userId,
+        expenseTypeId: item.expenseTypeId,
+        purchaseDate: item.purchaseDate,
+        reimbursedDate: item.reimbursedDate
+      };
+    },
+    clearModel() {
+      this.model = {
+        id: '',
+        description: '',
+        cost: '',
+        note: '',
+        userId: '',
+        expenseTypeId: '',
+        purchaseDate: null,
+        reimbursedDate: null
+      };
     }
   }
 };

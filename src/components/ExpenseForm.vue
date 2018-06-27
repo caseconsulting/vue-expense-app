@@ -1,7 +1,8 @@
 <template>
-<v-card hover :header="(model.id ? 'Edit Expense' : 'New Expense')">
+<v-card hover >
   <v-card-title>
-    <h3>Expense Form</h3>
+    <h3 v-if="model.id"> Edit Expense </h3>
+    <h3 v-else> Create New Expense </h3>
   </v-card-title>
   <v-container fluid>
 <v-form ref="form" v-model="valid" lazy-validation >
@@ -23,7 +24,7 @@
   <v-text-field v-model="model.note" label="Notes" data-vv-name="Description" multi-line></v-text-field>
   <v-btn outline color="error" @click="$emit('delete-form')">
     <icon class="mr-1" name="trash"></icon>Delete</v-btn>
-  <v-btn color="white" @click="clear"><icon class="mr-1" name="ban"></icon>Cancel</v-btn>
+  <v-btn color="white" @click="clearForm"><icon class="mr-1" name="ban"></icon>Cancel</v-btn>
   <v-btn outline color="success" @click="submit" :disabled="!valid"><icon class="mr-1" name="save"></icon>Submit</v-btn>
   </v-form>
   </v-container>
@@ -98,12 +99,13 @@ export default {
           console.log('Creating new item');
           await api.createItem(api.EXPENSES, this.model);
         }
-        this.clear();
+        this.clearForm();
         this.$emit('submit-form');
       }
     },
-    clear() {
+    clearForm() {
       this.$refs.form.reset();
+      this.$emit('form-cleared');
     }
   },
   async created() {
