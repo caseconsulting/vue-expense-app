@@ -22,7 +22,7 @@
   </v-menu>
 
   <!-- Buttons -->
-  <v-btn outline color="error" @click="deleteExpense">
+  <v-btn outline color="error" @click="deleteEmployee">
     <icon class="mr-1" name="trash"></icon>Delete</v-btn>
   <v-btn color="white" @click="clear"><icon class="mr-1" name="ban"></icon>Cancel</v-btn>
   <v-btn outline color="success" @click="submit" :disabled="!valid"><icon class="mr-1" name="save"></icon>Submit</v-btn>
@@ -33,7 +33,6 @@
 
 <script>
 import api from '@/shared/api.js';
-import Datepicker from 'vuejs-datepicker';
 export default {
   data() {
     return {
@@ -92,9 +91,9 @@ export default {
         this.$emit('update-table');
       }
     },
-    async deleteExpense(employee) {
+    async deleteEmployee() {
       if (confirm('Are you sure you want to delete this employee?')) {
-        await api.deleteItem(api.EMPLOYEES, employee.id);
+        await api.deleteItem(api.EMPLOYEES, this.model.id);
         this.clear();
         this.$emit('update-table');
       }

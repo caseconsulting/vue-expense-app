@@ -11,18 +11,21 @@
   <v-select :items="expenseTypes" :rules="componentRules" :filter="customFilter" v-model="model.expenseTypeId" item-text="text" label="Expense Type" autocomplete></v-select>
   <v-select :items="employees" :rules="componentRules" :filter="customFilter" v-model="model.userId" item-text="text" label="Employee" autocomplete></v-select>
 
+<!-- Date Picker 1-->
   <v-menu ref="menu1" :close-on-content-click="false" v-model="menu1" :nudge-right="40" lazy transition="scale-transition" offset-y full-width max-width="290px" min-width="290px">
     <v-text-field slot="activator" v-model="purchaseDateFormatted" :rules="componentRules" label="Purchase Date" hint="MM/DD/YYYY format" persistent-hint prepend-icon="event" @blur="model.purchaseDate = parseDate(purchaseDateFormatted)"></v-text-field>
     <v-date-picker v-model="model.purchaseDate" no-title @input="menu1 = false"></v-date-picker>
   </v-menu>
-
+<!-- Date Picker 2-->
   <v-menu ref="menu2" :close-on-content-click="false" v-model="menu2" :nudge-right="40" lazy transition="scale-transition" offset-y full-width max-width="290px" min-width="290px">
     <v-text-field slot="activator" v-model="reimbursedDateFormatted" label="Reimburse Date" hint="MM/DD/YYYY format" persistent-hint prepend-icon="event" @blur="model.reimbursedDate = parseDate(reimbursedDateFormatted)"></v-text-field>
     <v-date-picker v-model="model.reimbursedDate" no-title @input="menu2 = false"></v-date-picker>
   </v-menu>
 
   <v-text-field v-model="model.note" label="Notes" data-vv-name="Description" multi-line></v-text-field>
-  <v-btn outline color="error" @click="$emit('delete-form')">
+
+  <!-- Buttons -->
+  <v-btn outline color="error" @click="deleteExpense">
     <icon class="mr-1" name="trash"></icon>Delete</v-btn>
   <v-btn color="white" @click="clearForm"><icon class="mr-1" name="ban"></icon>Cancel</v-btn>
   <v-btn outline color="success" @click="submit" :disabled="!valid"><icon class="mr-1" name="save"></icon>Submit</v-btn>
@@ -33,11 +36,7 @@
 
 <script>
 import api from '@/shared/api.js';
-import Datepicker from 'vuejs-datepicker';
 export default {
-  components: {
-    Datepicker
-  },
   data() {
     return {
       date: null,
@@ -91,6 +90,13 @@ export default {
       const [month, day, year] = date.split('/');
       return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
     },
+    async deleteExpense() {
+      if (confirm('Are you sure you want to delete this expense?')) {
+        await api.deleteItem(api.EXPENSES, this.model.id);
+        this.clearForm();
+        this.$emit('update-table');
+      }
+    },
     async submit() {
       if (this.$refs.form.validate()) {
         if (this.model.id) {
@@ -100,7 +106,7 @@ export default {
           await api.createItem(api.EXPENSES, this.model);
         }
         this.clearForm();
-        this.$emit('submit-form');
+        this.$emit('update-table');
       }
     },
     clearForm() {

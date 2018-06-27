@@ -26,7 +26,7 @@
       </v-card>
     </v-flex>
     <v-flex lg4 md12 sm12>
-      <expense-form :model="model" v-on:form-cleared="clearModel" v-on:submit-form="refreshExpenses"></expense-form>
+      <expense-form :model="model" v-on:form-cleared="clearModel" v-on:update-table="refreshExpenses"></expense-form>
     </v-flex>
   </v-layout>
 </div>
@@ -101,16 +101,6 @@ export default {
         this.processedExpenses = values;
       });
       this.loading = false;
-    },
-    async deleteExpense(expense) {
-      if (confirm('Are you sure you want to delete this expense?')) {
-        // if we are editing an expense type we deleted, remove it from the form
-        if (this.model.id === expense.id) {
-          this.model = {};
-        }
-        await api.deleteItem(api.EXPENSES, expense.id);
-        await this.refreshExpenses();
-      }
     },
     onSelect(item) {
       this.model = {
