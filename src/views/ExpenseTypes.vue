@@ -36,7 +36,7 @@
           </v-card>
       </v-flex>
       <v-flex xl3 lg4 md12 sm12 >
-        <expense-type-form :model="model" v-on:submit-form="refreshExpenseTypes"></expense-type-form>
+        <expense-type-form :model="model" v-on:form-cleared="clearModel" v-on:update-table="refreshExpenseTypes"></expense-type-form>
       </v-flex>
     </v-layout>
   </div>
@@ -61,7 +61,13 @@ export default {
         { text: 'Description', value: 'description' },
         { text: 'Overdraft Allowed', value: 'odFlag' }
       ],
-      model: {}
+      model: {
+        id: '',
+        budget: '',
+        budgetName: '',
+        description: '',
+        odFlag: false
+      }
     };
   },
   components: {
@@ -76,20 +82,24 @@ export default {
       this.expenseTypes = await api.getItems(api.EXPENSE_TYPES);
       this.loading = false;
     },
-    async deleteExpenseType(expense) {
-      if (confirm('Are you sure you want to delete this expense?')) {
-        if (this.model.id === expense.id) {
-          this.model = {};
-        }
-        await api.deleteItem(api.EXPENSE_TYPES, expense.id);
-        await this.refreshExpenseTypes();
-      }
-    },
+
     onSelect(item) {
-      this.model.description = item.description;
-      this.model.budgetName = item.budgetName;
-      this.model.odFlag = item.odFlag;
-      this.model.budget = item.budget;
+      this.model = {
+        id: item.id,
+        budget: item.budget,
+        budgetName: item.budgetName,
+        description: item.description,
+        odFlag: item.odFlag
+      };
+    },
+    clearModel() {
+      this.model = {
+        id: '',
+        budget: '',
+        budgetName: '',
+        description: '',
+        odFlag: false
+      };
     }
   }
 };

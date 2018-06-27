@@ -1,7 +1,8 @@
 <template>
-<v-card hover :header="(model.id ? 'Edit Expense Type' : 'New Expense Type')">
+<v-card hover>
   <v-card-title>
-    <h3>Expense Type Form</h3>
+    <h3 v-if="model.id"> Edit Expense Type </h3>
+    <h3 v-else> Create New Expense Type </h3>
   </v-card-title>
   <v-container fluid>
 <v-form ref="form" v-model="valid" lazy-validation >
@@ -12,9 +13,11 @@
       label="Overdraft Flag"
       v-model="model.odFlag"
     ></v-checkbox>
-  <v-btn outline color="error" @click="$emit('delete-form')">
+
+    <!-- Buttons -->
+  <v-btn outline color="error" @click="deleteExpenseType">
     <icon class="mr-1" name="trash"></icon>Delete</v-btn>
-  <v-btn color="white" @click="clear"><icon class="mr-1" name="ban"></icon>Cancel</v-btn>
+  <v-btn color="white" @click="clearForm"><icon class="mr-1" name="ban"></icon>Cancel</v-btn>
   <v-btn outline color="success" @click="submit" :disabled="!valid"><icon class="mr-1" name="save"></icon>Submit</v-btn>
   </v-form>
   </v-container>
@@ -46,12 +49,20 @@ export default {
         } else {
           await api.createItem(api.EXPENSE_TYPES, this.model);
         }
-        this.clear();
-        this.$emit('submit-form');
+        this.clearForm();
+        this.$emit('update-table');
       }
     },
-    clear() {
+    async deleteExpenseType() {
+      if (confirm('Are you sure you want to delete this expense?')) {
+        await api.deleteItem(api.EXPENSE_TYPES, this.model.id);
+        this.$emit('update-table');
+        this.clearForm();
+      }
+    },
+    clearForm() {
       this.$refs.form.reset();
+      this.$emit('form-cleared');
     }
   }
 };
