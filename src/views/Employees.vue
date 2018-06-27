@@ -25,7 +25,7 @@
       </v-card>
     </v-flex>
     <v-flex lg4 md12 sm12>
-      <employee-form :model="model" v-on:update-table="refreshEmployees"></employee-form>
+      <employee-form :model="model" v-on:form-cleared="clearModel" v-on:update-table="refreshEmployees"></employee-form>
     </v-flex>
   </v-layout>
 </div>
@@ -52,6 +52,7 @@ export default {
         { text: 'Employee ID', value: 'empId' }
       ],
       model: {
+        id: '',
         firstName: '',
         middleName: '',
         lastName: '',
@@ -74,11 +75,24 @@ export default {
       this.loading = false;
     },
     onSelect(item) {
-      this.model.firstName = item.firstName;
-      this.model.middleName = item.middleName;
-      this.model.lastName = item.lastName;
-      this.model.empId = item.empId;
-      this.model.hireDate = item.hireDate;
+      this.model = {
+        id: item.id,
+        firstName: item.firstName,
+        middleName: item.middleName,
+        lastName: item.lastName,
+        empId: item.empId,
+        hireDate: item.hireDate
+      };
+    },
+    clearModel() {
+      this.model = {
+        id: '',
+        firstName: '',
+        middleName: '',
+        lastName: '',
+        empId: null,
+        hireDate: null
+      };
     }
   }
 };

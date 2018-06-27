@@ -2,7 +2,8 @@
 <v-card hover >
   <!-- :header="(model.id ? 'Edit Expense' : 'New Expense')" -->
   <v-card-title>
-    <h3>Employee Form</h3>
+    <h3 v-if="model.id"> Edit Employee </h3>
+    <h3 v-else> Create New Employee </h3>
   </v-card-title>
   <v-container fluid>
 <v-form ref="form" v-model="valid" lazy-validation >
@@ -24,7 +25,7 @@
   <!-- Buttons -->
   <v-btn outline color="error" @click="deleteEmployee">
     <icon class="mr-1" name="trash"></icon>Delete</v-btn>
-  <v-btn color="white" @click="clear"><icon class="mr-1" name="ban"></icon>Cancel</v-btn>
+  <v-btn color="white" @click="clearForm"><icon class="mr-1" name="ban"></icon>Cancel</v-btn>
   <v-btn outline color="success" @click="submit" :disabled="!valid"><icon class="mr-1" name="save"></icon>Submit</v-btn>
   </v-form>
   </v-container>
@@ -87,19 +88,20 @@ export default {
         } else {
           await api.createItem(api.EMPLOYEES, this.model);
         }
-        this.clear();
+        this.clearForm();
         this.$emit('update-table');
       }
     },
     async deleteEmployee() {
       if (confirm('Are you sure you want to delete this employee?')) {
         await api.deleteItem(api.EMPLOYEES, this.model.id);
-        this.clear();
         this.$emit('update-table');
+        this.clearForm();
       }
     },
-    clear() {
+    clearForm() {
       this.$refs.form.reset();
+      this.$emit('form-cleared');
     }
   }
 };
