@@ -14,11 +14,10 @@
           <tr>
             <th>
               <v-checkbox
-                :input-value="props.all"
-                :indeterminate="props.indeterminate"
+                :input-value="everythingSelected"
                 primary
                 hide-details
-                @click.native="toggleAll"
+                @click="toggleAll"
               ></v-checkbox>
             </th>
             <th
@@ -34,11 +33,11 @@
         </template>
 
         <template slot="items" slot-scope="props">
-          <tr v-if="!props.item.reimbursedDate" :active="props.selected" @click="props.expanded=!props.expanded">
+          <tr :active="props.selected" @click="props.expanded=!props.expanded">
           <td>
             <v-checkbox
-              @click="props.selected = !props.selected"
-              :input-value="props.selected"
+              v-model="props.item.allSelected"
+              @click="props.item = toggleExpenses(props.item)"
               primary
               hide-details
             ></v-checkbox>
@@ -50,7 +49,12 @@
         </template>
 
         <template slot="expand" slot-scope="props">
-          <unrolled-table-info  :expenses="props.item.expenses"></unrolled-table-info>
+          <unrolled-table-info
+            @expensePicked="addExpenseToSelected"
+            @changedAllSelected="props.item.allSelected = $event"
+            :allSelected="props.item.allSelected"
+            :expenses="props.item.expenses"
+            ></unrolled-table-info>
         </template>
 
       </v-data-table>
@@ -78,6 +82,9 @@ export default {
     UnrolledTableInfo
   },
   data: () => ({
+    everythingSelected: false,
+    indeterminate: false,
+    unreimbursedExpenses: [],
     empBudgets: [],
     expenses: [],
     employees: [],
@@ -127,6 +134,7 @@ export default {
     this.processedExpenses = _.map(this.expenses, expense => {
       return this.getExpenseTypeName(expense);
     });
+
     Promise.all(this.processedExpenses).then(values => {
       this.empBudgets = values;
 
@@ -138,7 +146,8 @@ export default {
             budgetName: expense.budgetName,
             expenseTypeId: expense.expenseTypeId,
             expenses: [],
-            key: `${expense.userId}${expense.expenseTypeId}`
+            key: `${expense.userId}${expense.expenseTypeId}`,
+            allSelected: false
           }
         }
       });
@@ -157,6 +166,9 @@ export default {
         });
       });
       this.processedExpenses = this.empBudgets;
+      this.unreimbursedExpenses = _.filter(this.expenses, (expense) => {
+        return !expense.reimbursedDate;
+      })
     });
 
   },
@@ -179,6 +191,49 @@ export default {
     }
   },
   methods: {
+    addExpenseToSelected(expense) {
+      console.log('recived', expense);
+      if (_.indexOf(this.selected, expense) === -1) {
+        this.selected.push(expense);
+        if (this.unreimbursedExpenses.length === this.selected.length) {
+          this.everythingSelected = true;
+        }
+      } else {
+        _.remove(this.selected, (item) => {
+          return item.id === expense.id;
+        });
+        this.indeterminate = true;
+        this.everythingSelected = false;
+      }
+    },
+    toggleExpenses(item) {
+      if (!item.allSelected) {
+        _.forEach(item.expenses, (expense) => {
+          expense.selected = true;
+          this.selected.push(expense);
+        });
+        this.indeterminate = true;
+        this.everythingSelected = false;
+        if (this.unreimbursedExpenses.length === this.selected.length) {
+          this.everythingSelected = true;
+        }
+      } else {
+        _.forEach(item.expenses, (expense) => {
+          expense.selected = false;
+        });
+        if (this.selected.length === 1) {
+          this.selected = [];
+          this.indeterminate = false;
+        } else {
+          _.forEach(item.expenses, (expense) => {
+            _.remove(this.selected, (e) => { return e.id === expense.id; });
+          });
+          this.everythingSelected = false;
+          this.indeterminate = true;
+        }
+      }
+      return item;
+    },
     getExpenseTotal(expenses) {
       let total = 0;
       _.forEach(expenses, (expense) => total += parseInt(expense.cost, 10));
@@ -186,12 +241,22 @@ export default {
 
     },
     toggleAll() {
-      if (this.selected.length) this.selected = [];
-      else this.selected = this.filteredItems;
+      if (this.selected.length) {
+        _.forEach(this.filteredItems, (item) => {
+          this.toggleExpenses(item);
+          item.allSelected = false;
+        });
+        this.everythingSelected = false;
+        this.selected = [];
+      } else {
+        _.forEach(this.filteredItems, (item) => {
+          this.toggleExpenses(item);
+          item.allSelected = true;
+        });
+        this.everythingSelected = true;
+      }
     },
     changeSort(column) {
-      console.log('column', column);
-      console.log('pag', this.pagination);
       if (this.pagination.sortBy === column) {
         this.pagination.descending = !this.pagination.descending;
       } else {
@@ -204,6 +269,7 @@ export default {
       expense.employeeName = `${employee.firstName} ${employee.middleName} ${
         employee.lastName
       }`;
+      expense.selected = false;
       return expense;
     },
     async getExpenseTypeName(expense) {

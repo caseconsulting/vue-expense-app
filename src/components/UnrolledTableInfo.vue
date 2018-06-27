@@ -20,10 +20,11 @@
     </tr>
   </template>
     <template slot="items" slot-scope="props">
-    <tr v-if="!props.item.reimbursedDate" :active="props.selected" @click="props.selected = !props.selected">
+    <tr v-if="!props.item.reimbursedDate" :active="props.item.selected" @click="props.selected = !props.selected">
       <td>
         <v-checkbox
-          :input-value="props.selected"
+          @click="$emit('expensePicked',props.item)"
+          v-model="props.item.selected"
           primary
           hide-details
         ></v-checkbox>
@@ -40,9 +41,10 @@
 
 <script>
 import UnrolledTableInfo from './UnrolledTableInfo.vue';
+import _ from 'lodash';
 
 export default {
-  props: ['expenses'],
+  props: ['expenses', 'allSelected'],
   components: {
     UnrolledTableInfo
   },
@@ -50,21 +52,41 @@ export default {
     pagination: {
       sortBy: 'cost'
     },
-    selected: [],
     headers: [
       { text: 'Cost', value: 'cost' },
       { text: 'Purchase Date', value: 'purchaseDate' },
       { text: 'Description', value: 'description' }
-    ]
+    ],
+    selected: [],
+
   }),
-  created() {
-
+  beforeUpdate() {
+    this.checkAllSelected();
   },
-
+  created() {
+    if (this.allSelected) {
+      this.selected = this.expenses;
+    }
+  },
   methods: {
-    toggleAll() {
-      if (this.selected.length) this.selected = [];
-      else this.selected = this.filteredItems;
+    theyPickedMe(item) {
+      this.$emit('expensePicked', item);
+    },
+    checkAllSelected() {
+      let calc = 0
+      let nonSelected = _.filter(this.expenses, (expense) => {
+        if (expense.selected === false) {
+          return true;
+        } else {
+          return false;
+        }
+      });
+      if (nonSelected.length > 0) {
+        this.$emit('changedAllSelected', false);
+      } else {
+        this.$emit('changedAllSelected', true);
+      }
+
     },
     changeSort(column) {
       if (this.pagination.sortBy === column) {
@@ -74,6 +96,7 @@ export default {
         this.pagination.descending = false;
       }
     }
-  }
+  },
+
 };
 </script>
