@@ -43,7 +43,8 @@ export default {
       expenses: [],
       processedExpenses: [],
       errors: [],
-      headers: [{
+      headers: [
+        {
           text: 'Employee',
           value: 'employeeName'
         },
@@ -54,6 +55,11 @@ export default {
         { text: 'Description', value: 'description' }
       ],
       model: {
+        description: '',
+        cost: '',
+        notes: '',
+        userId: '',
+        expenseTypeId: '',
         purchaseDate: null,
         reimbursedDate: null
       }

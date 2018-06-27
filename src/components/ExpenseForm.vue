@@ -9,14 +9,17 @@
   <v-text-field v-model="model.cost" :rules="costRules" label="Cost" data-vv-name="Cost" required></v-text-field>
   <v-select :items="expenseTypes" :rules="componentRules" :filter="customFilter" v-model="model.expenseTypeId" item-text="text" label="Expense Type" autocomplete></v-select>
   <v-select :items="employees" :rules="componentRules" :filter="customFilter" v-model="model.userId" item-text="text" label="Employee" autocomplete></v-select>
+
   <v-menu ref="menu1" :close-on-content-click="false" v-model="menu1" :nudge-right="40" lazy transition="scale-transition" offset-y full-width max-width="290px" min-width="290px">
     <v-text-field slot="activator" v-model="purchaseDateFormatted" :rules="componentRules" label="Purchase Date" hint="MM/DD/YYYY format" persistent-hint prepend-icon="event" @blur="model.purchaseDate = parseDate(purchaseDateFormatted)"></v-text-field>
     <v-date-picker v-model="model.purchaseDate" no-title @input="menu1 = false"></v-date-picker>
   </v-menu>
+
   <v-menu ref="menu2" :close-on-content-click="false" v-model="menu2" :nudge-right="40" lazy transition="scale-transition" offset-y full-width max-width="290px" min-width="290px">
     <v-text-field slot="activator" v-model="reimbursedDateFormatted" label="Reimburse Date" hint="MM/DD/YYYY format" persistent-hint prepend-icon="event" @blur="model.reimbursedDate = parseDate(reimbursedDateFormatted)"></v-text-field>
     <v-date-picker v-model="model.reimbursedDate" no-title @input="menu2 = false"></v-date-picker>
   </v-menu>
+
   <v-text-field v-model="model.note" label="Notes" data-vv-name="Description" multi-line></v-text-field>
   <v-btn outline color="error" @click="$emit('delete-form')">
     <icon class="mr-1" name="trash"></icon>Delete</v-btn>
@@ -51,20 +54,7 @@ export default {
         v => /^\d+$/.test(v) || 'Cost must be a number'
       ],
       componentRules: [v => !!v || 'Something must be selected'],
-      valid: false,
-
-      // TODO: Move this filter to methods
-      customFilter(item, queryText, itemText) {
-        const hasValue = val => (val != null ? val : '');
-        const text = hasValue(item.text);
-        const query = hasValue(queryText);
-        return (
-          text
-            .toString()
-            .toLowerCase()
-            .indexOf(query.toString().toLowerCase()) > -1
-        );
-      }
+      valid: false
     };
   },
   watch: {
@@ -76,16 +66,18 @@ export default {
     }
   },
   props: ['model'],
-  // watch: {
-  //   model: function(val) {
-  //     console.log('val', val);
-  //     if (val === { purchaseDate: null, reimbursedDate: null }) {
-  //       console.log('matching value');
-  //       this.$refs.form.reset();
-  //     }
-  //   }
-  // },
   methods: {
+    customFilter(item, queryText, itemText) {
+      const hasValue = val => (val != null ? val : '');
+      const text = hasValue(item.text);
+      const query = hasValue(queryText);
+      return (
+        text
+          .toString()
+          .toLowerCase()
+          .indexOf(query.toString().toLowerCase()) > -1
+      );
+    },
     formatDate(date) {
       if (!date) return null;
 

@@ -4,7 +4,7 @@
     <v-flex lg8 md12 sm12>
       <v-card>
         <v-card-title>
-          <h2>Expenses</h2>
+          <h2>Employees</h2>
           <v-spacer></v-spacer>
           <v-text-field v-model="search" append-icon="search" label="Search" single-line hide-details></v-text-field>
         </v-card-title>
@@ -25,7 +25,7 @@
       </v-card>
     </v-flex>
     <v-flex lg4 md12 sm12>
-      <employee-form :model="model" v-on:submit-form="refreshEmployees"></employee-form>
+      <employee-form :model="model" v-on:update-table="refreshEmployees"></employee-form>
     </v-flex>
   </v-layout>
 </div>
@@ -52,6 +52,10 @@ export default {
         { text: 'Employee ID', value: 'empId' }
       ],
       model: {
+        firstName: '',
+        middleName: '',
+        lastName: '',
+        empId: null,
         hireDate: null
       }
     };
@@ -59,6 +63,7 @@ export default {
   components: {
     EmployeeForm
   },
+
   async created() {
     this.refreshEmployees();
   },
@@ -67,15 +72,6 @@ export default {
       this.loading = true;
       this.employees = await api.getItems(api.EMPLOYEES);
       this.loading = false;
-    },
-    async deleteExpense(employee) {
-      if (confirm('Are you sure you want to delete this employee?')) {
-        if (this.model.id === employee.id) {
-          this.model = {};
-        }
-        await api.deleteItem(api.EMPLOYEES, employee.id);
-        await this.refreshEmployees();
-      }
     },
     onSelect(item) {
       this.model.firstName = item.firstName;
