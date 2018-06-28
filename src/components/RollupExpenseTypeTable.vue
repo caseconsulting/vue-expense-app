@@ -33,7 +33,7 @@
         </template>
 
         <template slot="items" slot-scope="props">
-          <tr :active="props.selected" @click="props.expanded=!props.expanded">
+          <tr :active="props.selected" @click="props.expanded = !props.expanded">
           <td>
             <v-checkbox
               v-model="props.item.allSelected"
@@ -93,7 +93,8 @@ export default {
     expenseType: null,
     processedExpenses: [],
     pagination: {
-      sortBy: 'employeeName'
+      sortBy: 'employeeName',
+      rowsPerPage: 10
     },
     selected: [],
     headers: [{
@@ -213,7 +214,6 @@ export default {
       this.selected = [];
     },
     removeExpenseFromList() {
-      // console.log(this.selected);
       _.forEach(this.processedExpenses, (item) => {
         _.forEach(item.expenses, (expense) => {
           if (_.findIndex(this.selected, (s) => s.id === expense.id) > -1) {
