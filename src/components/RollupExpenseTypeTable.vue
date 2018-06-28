@@ -61,7 +61,7 @@
       <v-flex offset-md10>
 
         <v-fab-transition>
-          <v-btn id="custom-button-color" v-show="selected.length>0" fab dark large bottom left fixed>
+          <v-btn @click="reminbureExpenses" id="custom-button-color" v-show="selected.length>0" fab dark large bottom left fixed>
             <icon name="dollar-sign"></icon>
           </v-btn>
         </v-fab-transition>
@@ -191,6 +191,40 @@ export default {
     }
   },
   methods: {
+    reminbureExpenses() {
+      console.log('submitting:', this.selected);
+      let expensesToSubmit = _.map(this.selected, (item) => {
+        return {
+          cost: item.cost,
+          description: item.description,
+          expenseTypeId: item.expenseTypeId,
+          id: item.id,
+          purchaseDate: item.purchaseDate,
+          reimbursedDate: this.moment().format('YYYY-MM-DD'),
+          note: !item.note ? null : item.note,
+          userId: item.userId,
+          receipt: null
+        }
+      });
+
+      _.forEach(expensesToSubmit, (expense) => {
+        api.updateItem(api.EXPENSES, expense.id, expense).then(this.removeExpenseFromList);
+      });
+      this.selected = [];
+    },
+    removeExpenseFromList() {
+      // console.log(this.selected);
+      _.forEach(this.processedExpenses, (item) => {
+        _.forEach(item.expenses, (expense) => {
+          if (_.findIndex(this.selected, (s) => s.id === expense.id) > -1) {
+            item.expense = _.remove(item.expenses, (e) => e.id === expense.id);
+          }
+        });
+      });
+
+      this.processedExpenses = _.filter(this.processedExpenses, (item) => item.expenses.length);
+
+    },
     addExpenseToSelected(expense) {
       console.log('recived', expense);
       if (_.indexOf(this.selected, expense) === -1) {

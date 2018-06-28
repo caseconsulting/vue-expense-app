@@ -8,6 +8,11 @@ Vue.config.productionTip = false;
 import Vuetify from 'vuetify';
 import 'vuetify/dist/vuetify.min.css';
 Vue.use(Vuetify);
+//Moment
+import moment from 'moment';
+
+
+Vue.prototype.moment = moment;
 
 // BEGIN VUE AWESOME
 import 'vue-awesome/icons/book';
@@ -30,5 +35,6 @@ Vue.component('icon', Icon);
 new Vue({
   router,
   store,
+  moment,
   render: h => h(App)
 }).$mount('#app');
