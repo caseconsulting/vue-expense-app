@@ -58,11 +58,12 @@ export default {
         id: '',
         description: '',
         cost: '',
-        note: '',
+        note: null,
         userId: '',
         expenseTypeId: '',
         purchaseDate: null,
-        reimbursedDate: null
+        reimbursedDate: null,
+        reciept: null
       }
     };
   },
@@ -119,7 +120,7 @@ export default {
         id: '',
         description: '',
         cost: '',
-        note: '',
+        note: null,
         userId: '',
         expenseTypeId: '',
         purchaseDate: null,
