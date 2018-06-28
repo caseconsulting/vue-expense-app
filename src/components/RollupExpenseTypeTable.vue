@@ -74,7 +74,6 @@
 <script>
 import api from '@/shared/api.js';
 import UnrolledTableInfo from './UnrolledTableInfo.vue';
-
 import _ from 'lodash';
 
 export default {
@@ -212,7 +211,6 @@ export default {
   },
   methods: {
     reminbureExpenses() {
-      console.log('submitting:', this.selected);
       let expensesToSubmit = _.map(this.selected, (item) => {
         return {
           cost: item.cost,
@@ -245,7 +243,7 @@ export default {
 
     },
     addExpenseToSelected(expense) {
-      console.log('recived', expense);
+
       if (_.indexOf(this.selected, expense) === -1) {
         this.selected.push(expense);
         if (this.unreimbursedExpenses.length === this.selected.length) {
@@ -287,6 +285,7 @@ export default {
           this.indeterminate = true;
         }
       }
+      this.$emit('selection', this.selected);
       return item;
     },
     getExpenseTotal(expenses) {
