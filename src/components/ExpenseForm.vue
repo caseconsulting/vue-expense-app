@@ -99,6 +99,9 @@ export default {
     },
     async submit() {
       if (this.$refs.form.validate()) {
+        if (!this.model.receipt) {
+          this.model.receipt = null;
+        }
         if (this.model.id) {
           await api.updateItem(api.EXPENSES, this.model.id, this.model);
         } else {
