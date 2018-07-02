@@ -26,7 +26,8 @@
       </v-card>
     </v-flex>
     <v-flex lg4 md12 sm12>
-      <expense-form :model="model" v-on:form-cleared="clearModel" v-on:update-table="refreshExpenses"></expense-form>
+      <!-- v-on:form-cleared="clearModel" -->
+      <expense-form :expense="expense" v-on:update="updateModelInTable"  v-on:update-table="refreshExpenses"></expense-form>
     </v-flex>
   </v-layout>
 </div>
@@ -38,8 +39,8 @@ import ExpenseForm from '../components/ExpenseForm.vue';
 export default {
   data() {
     return {
+      expense: {},
       search: '',
-      loading: false,
       expenses: [],
       processedExpenses: [],
       errors: [],
@@ -63,7 +64,9 @@ export default {
         expenseTypeId: '',
         purchaseDate: null,
         reimbursedDate: null,
-        reciept: null
+        reciept: null,
+        employeeName: '',
+        budgetName: ''
       }
     };
   },
@@ -90,21 +93,20 @@ export default {
       return expense;
     },
     async refreshExpenses() {
-      this.loading = true;
       this.expenses = await api.getItems(api.EXPENSES);
-      this.processedExpenses = _.map(this.expenses, expense => {
-        return this.getEmployeeName(expense);
+      this.processedExpenses = _.map(this.expenses, async expense => {
+        return await this.getEmployeeName(expense);
       });
-      this.processedExpenses = _.map(this.expenses, expense => {
-        return this.getExpenseTypeName(expense);
+      this.processedExpenses = _.map(this.expenses, async expense => {
+        return await this.getExpenseTypeName(expense);
       });
       Promise.all(this.processedExpenses).then(values => {
         this.processedExpenses = values;
+        console.log(this.processedExpenses);
       });
-      this.loading = false;
     },
     onSelect(item) {
-      this.model = {
+      this.expense = {
         id: item.id,
         description: item.description,
         cost: item.cost,
@@ -112,20 +114,47 @@ export default {
         userId: item.userId,
         expenseTypeId: item.expenseTypeId,
         purchaseDate: item.purchaseDate,
-        reimbursedDate: item.reimbursedDate
+        reimbursedDate: item.reimbursedDate,
+        employeeName: item.employeeName,
+        budgetName: item.budgetName,
+        reciept: null
       };
     },
-    clearModel() {
-      this.model = {
-        id: '',
-        description: '',
-        cost: '',
-        note: null,
-        userId: '',
-        expenseTypeId: '',
-        purchaseDate: null,
-        reimbursedDate: null
-      };
+    // clearModel() {
+    //   this.model = {
+    //     id: '',
+    //     description: '',
+    //     cost: '',
+    //     note: null,
+    //     userId: '',
+    //     expenseTypeId: '',
+    //     purchaseDate: null,
+    //     reimbursedDate: null,
+    //     employeeName: '',
+    //     budgetName: '',
+    //     reciept: null
+    //   };
+    // },
+    updateModelInTable(returnedExpense) {
+      console.log('expense in updateModelInTable', returnedExpense);
+      api.getItem(api.EMPLOYEES, this.expense.userId).then(employee => {
+        this.expense.employeeName = `${employee.firstName} ${
+          employee.middleName
+        } ${employee.lastName}`;
+      });
+
+      api
+        .getItem(api.EXPENSE_TYPES, this.expense.expenseTypeId)
+        .then(expenseType => {
+          this.expense.budgetName = expenseType.budgetName;
+        });
+
+      let modelIndex = _.findIndex(
+        this.processedExpenses,
+        expense => expense.id === this.expense.id
+      );
+      this.processedExpenses.splice(modelIndex, 1, this.expense);
+      console.log('after update', this.processedExpenses[modelIndex]);
     }
   }
 };
