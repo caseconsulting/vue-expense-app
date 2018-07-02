@@ -258,6 +258,7 @@ export default {
       }
     },
     toggleExpenses(item) {
+
       if (!item.allSelected) {
         _.forEach(item.expenses, (expense) => {
           expense.selected = true;
@@ -276,6 +277,7 @@ export default {
           this.selected = [];
           this.indeterminate = false;
         } else {
+
           _.forEach(item.expenses, (expense) => {
             _.remove(this.selected, (e) => {
               return e.id === expense.id;
@@ -283,9 +285,11 @@ export default {
           });
           this.everythingSelected = false;
           this.indeterminate = true;
+
         }
       }
-      this.$emit('selection', this.selected);
+      let emitVal = { data: this.selected };
+      this.$emit('selection', emitVal);
       return item;
     },
     getExpenseTotal(expenses) {

@@ -1,11 +1,8 @@
 <template>
 <div>
   <h3>Totals</h3>
-  <p>
-
-  </p>
   <ul>
-    <li v-for="total in totals">
+    <li v-for="total in totals" :key="total.id">
       <h4>{{total.name}}: {{total.costTotal}}</h4>
     </li>
   </ul>
@@ -20,7 +17,7 @@ import _ from 'lodash';
 export default {
   props: ['selected'],
   computed: {
-    totals() {
+    totals: function() {
       let totals = [];
       totals = _.map(this.selected, (item) => {
         return {
@@ -36,9 +33,8 @@ export default {
             total.costTotal += parseInt(expense.cost, 10);
           }
         })
-
-
       })
+
       return totals;
     }
   }

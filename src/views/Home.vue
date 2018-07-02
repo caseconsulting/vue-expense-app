@@ -2,11 +2,11 @@
 <div>
   <v-layout row wrap>
     <v-flex offset-lg1 offset-md2 lg9 md10 sm12>
-      <rollup-expense-type-table @selection="tableSelected=$event"></rollup-expense-type-table>
+      <rollup-expense-type-table @selection="selection"></rollup-expense-type-table>
     </v-flex>
     <v-flex lg2 md2 sm12>
       <expense-info></expense-info>
-      <expense-type-totals :selected="tableSelected"></expense-type-totals>
+      <expense-type-totals :selectedObj="tableSelected.data"></expense-type-totals>
     </v-flex>
   </v-layout>
 </div>
@@ -22,9 +22,25 @@ import RollupExpenseTypeTable from '../components/RollupExpenseTypeTable.vue';
 export default {
   data() {
     return {
-      tableSelected: [],
+      tableSelected: {},
     };
   },
+  watch: {
+    tableSelected: {
+      handler: function(val, oldVal) {
+        console.log('val', val);
+        console.log('oldVal', oldVal);
+        this.tableSelected = val;
+      },
+      deep: true
+    }
+  },
+  methods: {
+    selection(item) {
+      this.tableSelected = item;
+    }
+  },
+
   components: {
     UnreimbursedTable,
     ReimbursedTable,
