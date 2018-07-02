@@ -27,7 +27,7 @@
     </v-flex>
     <v-flex lg4 md12 sm12>
       <!-- v-on:form-cleared="clearModel" -->
-      <expense-form :expense="expense" v-on:update="updateModelInTable"  v-on:update-table="refreshExpenses"></expense-form>
+      <expense-form :expense="expense" v-on:add="addModelToTable" v-on:update="updateModelInTable"  v-on:delete="refreshExpenses"></expense-form>
     </v-flex>
   </v-layout>
 </div>
@@ -39,7 +39,19 @@ import ExpenseForm from '../components/ExpenseForm.vue';
 export default {
   data() {
     return {
-      expense: {},
+      expense: {
+        id: '',
+        description: '',
+        cost: '',
+        note: '',
+        userId: '',
+        expenseTypeId: '',
+        purchaseDate: null,
+        reimbursedDate: null,
+        reciept: null,
+        employeeName: '',
+        budgetName: ''
+      },
       search: '',
       expenses: [],
       processedExpenses: [],
@@ -54,20 +66,7 @@ export default {
         { text: 'Purchase Date', value: 'purchaseDate' },
         { text: 'Reimburse Date', value: 'reimbursedDate' },
         { text: 'Description', value: 'description' }
-      ],
-      model: {
-        id: '',
-        description: '',
-        cost: '',
-        note: null,
-        userId: '',
-        expenseTypeId: '',
-        purchaseDate: null,
-        reimbursedDate: null,
-        reciept: null,
-        employeeName: '',
-        budgetName: ''
-      }
+      ]
     };
   },
   components: {
@@ -120,23 +119,7 @@ export default {
         reciept: null
       };
     },
-    // clearModel() {
-    //   this.model = {
-    //     id: '',
-    //     description: '',
-    //     cost: '',
-    //     note: null,
-    //     userId: '',
-    //     expenseTypeId: '',
-    //     purchaseDate: null,
-    //     reimbursedDate: null,
-    //     employeeName: '',
-    //     budgetName: '',
-    //     reciept: null
-    //   };
-    // },
-    updateModelInTable(returnedExpense) {
-      console.log('expense in updateModelInTable', returnedExpense);
+    updateModelInTable() {
       api.getItem(api.EMPLOYEES, this.expense.userId).then(employee => {
         this.expense.employeeName = `${employee.firstName} ${
           employee.middleName
@@ -155,6 +138,21 @@ export default {
       );
       this.processedExpenses.splice(modelIndex, 1, this.expense);
       console.log('after update', this.processedExpenses[modelIndex]);
+    },
+    addModelToTable() {
+      api.getItem(api.EMPLOYEES, this.expense.userId).then(employee => {
+        this.expense.employeeName = `${employee.firstName} ${
+          employee.middleName
+        } ${employee.lastName}`;
+      });
+
+      api
+        .getItem(api.EXPENSE_TYPES, this.expense.expenseTypeId)
+        .then(expenseType => {
+          this.expense.budgetName = expenseType.budgetName;
+        });
+
+      this.processedExpenses.push(this.expense);
     }
   }
 };

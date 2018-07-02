@@ -6,16 +6,16 @@
   </v-card-title>
   <v-container fluid>
 <v-form ref="form" v-model="valid" lazy-validation >
+  <v-select :items="employees" :rules="componentRules" :filter="customFilter" v-model="expense.userId" item-text="text" label="Employee" autocomplete></v-select>
+  <v-select :items="expenseTypes" :rules="componentRules" :filter="customFilter" v-model="expense.expenseTypeId" item-text="text" label="Expense Type" autocomplete></v-select>
   <v-text-field v-model="expense.description" :rules="descriptionRules" label="Description" data-vv-name="Description" required></v-text-field>
   <v-text-field v-model="expense.cost" :rules="costRules" label="Cost" data-vv-name="Cost" required></v-text-field>
-  <v-select :items="expenseTypes" :rules="componentRules" :filter="customFilter" v-model="expense.expenseTypeId" item-text="text" label="Expense Type" autocomplete></v-select>
-  <v-select :items="employees" :rules="componentRules" :filter="customFilter" v-model="expense.userId" item-text="text" label="Employee" autocomplete></v-select>
 
 <!-- Date Picker 1-->
-  <v-menu ref="menu1" :close-on-content-click="false" v-model="menu1" :nudge-right="40" lazy transition="scale-transition" offset-y full-width max-width="290px" min-width="290px">
-    <v-text-field slot="activator" v-model="purchaseDateFormatted" :rules="componentRules" label="Purchase Date" hint="MM/DD/YYYY format" persistent-hint prepend-icon="event" @blur="expense.purchaseDate = parseDate(purchaseDateFormatted)"></v-text-field>
-    <v-date-picker v-model="expense.purchaseDate" no-title @input="menu1 = false"></v-date-picker>
-  </v-menu>
+<v-menu ref="menu1" :close-on-content-click="true" v-model="menu1" :nudge-right="40" lazy transition="scale-transition" offset-y full-width max-width="290px" min-width="290px">
+  <v-text-field slot="activator" v-model="purchaseDateFormatted" :rules="componentRules" label="Purchase Date" hint="MM/DD/YYYY format" persistent-hint prepend-icon="event" @blur="expense.purchaseDate = parseDate(purchaseDateFormatted)"></v-text-field>
+  <v-date-picker v-model="expense.purchaseDate" no-title @input="menu1 = false"></v-date-picker>
+</v-menu>
 <!-- Date Picker 2-->
   <v-menu ref="menu2" :close-on-content-click="false" v-model="menu2" :nudge-right="40" lazy transition="scale-transition" offset-y full-width max-width="290px" min-width="290px">
     <v-text-field slot="activator" v-model="reimbursedDateFormatted" label="Reimburse Date" hint="MM/DD/YYYY format" persistent-hint prepend-icon="event" @blur="expense.reimbursedDate = parseDate(reimbursedDateFormatted)"></v-text-field>
@@ -96,7 +96,7 @@ export default {
       if (confirm('Are you sure you want to delete this expense?')) {
         await api.deleteItem(api.EXPENSES, this.expense.id);
         this.clearForm();
-        this.$emit('update-table');
+        this.$emit('delete');
       }
     },
     async submit() {
@@ -106,7 +106,7 @@ export default {
         }
         if (this.expense.id) {
           await api.updateItem(api.EXPENSES, this.expense.id, this.expense);
-          this.$emit('update', this.expense);
+          this.$emit('update');
         } else {
           console.log('Creating new item');
           await api.createItem(api.EXPENSES, this.expense);
