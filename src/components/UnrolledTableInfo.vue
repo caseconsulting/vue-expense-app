@@ -30,7 +30,7 @@
         ></v-checkbox>
       </td>
 
-      <td class="text-xs-center">{{ props.item.cost }}</td>
+      <td class="text-xs-center">{{ props.item.cost | moneyValue}}</td>
       <td class="text-xs-center">{{ props.item.purchaseDate }}</td>
       <td class="text-xs-center">{{ props.item.description }}</td>
     </tr>
@@ -44,6 +44,16 @@ import UnrolledTableInfo from './UnrolledTableInfo.vue';
 import _ from 'lodash';
 
 export default {
+  filters: {
+    moneyValue: (value) => {
+      return `${new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD',
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      }).format(value)}`
+    }
+  },
   props: ['expenses', 'allSelected'],
   components: {
     UnrolledTableInfo
@@ -52,10 +62,18 @@ export default {
     pagination: {
       sortBy: 'cost'
     },
-    headers: [
-      { text: 'Cost', value: 'cost' },
-      { text: 'Purchase Date', value: 'purchaseDate' },
-      { text: 'Description', value: 'description' }
+    headers: [{
+        text: 'Cost',
+        value: 'cost'
+      },
+      {
+        text: 'Purchase Date',
+        value: 'purchaseDate'
+      },
+      {
+        text: 'Description',
+        value: 'description'
+      }
     ],
     selected: [],
 

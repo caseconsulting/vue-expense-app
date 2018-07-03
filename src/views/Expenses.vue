@@ -13,7 +13,7 @@
               <tr @click="onSelect(props.item)">
                 <td class="text-xs-left">{{ props.item.employeeName }}</td>
                 <td class="text-xs-left">{{ props.item.budgetName }}</td>
-                <td class="text-xs-left">{{ props.item.cost }}</td>
+                <td class="text-xs-left">{{ props.item.cost ? props.item.cost : 0 | moneyValue}}</td>
                 <td class="text-xs-left">{{ props.item.purchaseDate }}</td>
                 <td class="text-xs-left">{{ props.item.reimbursedDate }}</td>
                 <td class="text-xs-left">{{ props.item.description }}</td>
@@ -37,6 +37,16 @@
 import api from '@/shared/api.js';
 import ExpenseForm from '../components/ExpenseForm.vue';
 export default {
+  filters: {
+    moneyValue: (value) => {
+      return `${new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD',
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      }).format(value)}`
+    }
+  },
   data() {
     return {
       expense: {
@@ -56,16 +66,30 @@ export default {
       expenses: [],
       processedExpenses: [],
       errors: [],
-      headers: [
-        {
+      headers: [{
           text: 'Employee',
           value: 'employeeName'
         },
-        { text: 'Expense Type', value: 'budgetName' }, //change value to call a function
-        { text: 'Cost', value: 'cost' },
-        { text: 'Purchase Date', value: 'purchaseDate' },
-        { text: 'Reimburse Date', value: 'reimbursedDate' },
-        { text: 'Description', value: 'description' }
+        {
+          text: 'Expense Type',
+          value: 'budgetName'
+        }, //change value to call a function
+        {
+          text: 'Cost',
+          value: 'cost'
+        },
+        {
+          text: 'Purchase Date',
+          value: 'purchaseDate'
+        },
+        {
+          text: 'Reimburse Date',
+          value: 'reimbursedDate'
+        },
+        {
+          text: 'Description',
+          value: 'description'
+        }
       ],
       pagination: {
         sortBy: 'employeeName',

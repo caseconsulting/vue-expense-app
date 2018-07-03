@@ -44,7 +44,7 @@
             </td>
             <td class="text-xs-center">{{ props.item.employeeName }}</td>
             <td class="text-xs-center">{{ props.item.budgetName }}</td>
-            <td class="text-xs-center" id="money-team">{{ getExpenseTotal(props.item.expenses) }}</td>
+            <td class="text-xs-center" id="money-team">{{ getExpenseTotal(props.item.expenses) | moneyValue }}</td>
           </tr>
         </template>
 
@@ -78,6 +78,16 @@ import UnrolledTableInfo from './UnrolledTableInfo.vue';
 import _ from 'lodash';
 
 export default {
+  filters: {
+    moneyValue: (value) => {
+      return `${new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD',
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      }).format(value)}`
+    }
+  },
   components: {
     UnrolledTableInfo
   },
@@ -101,8 +111,14 @@ export default {
         text: 'Employee',
         value: 'employeeName'
       },
-      { text: 'Expense Type', value: 'budgetName' },
-      { text: 'Total', value: 'expenses' }
+      {
+        text: 'Expense Type',
+        value: 'budgetName'
+      },
+      {
+        text: 'Total',
+        value: 'expenses'
+      }
     ]
   }),
   async created() {
@@ -122,7 +138,10 @@ export default {
     //Get expense Types
     let expenseTypes = await api.getItems(api.EXPENSE_TYPES);
     this.expenseTypes = expenseTypes.map(expenseType => {
-      return { text: expenseType.budgetName, value: expenseType.id };
+      return {
+        text: expenseType.budgetName,
+        value: expenseType.id
+      };
     });
 
     //Get expenses
@@ -260,7 +279,9 @@ export default {
           this.indeterminate = false;
         } else {
           _.forEach(item.expenses, (expense) => {
-            _.remove(this.selected, (e) => { return e.id === expense.id; });
+            _.remove(this.selected, (e) => {
+              return e.id === expense.id;
+            });
           });
           this.everythingSelected = false;
           this.indeterminate = true;
