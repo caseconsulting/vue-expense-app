@@ -109,14 +109,21 @@ export default {
           this.$emit('update');
         } else {
           console.log('Creating new item');
-          await api.createItem(api.EXPENSES, this.expense);
-          this.$emit('add');
+          let newExpense = await api.createItem(api.EXPENSES, this.expense);
+          console.log(newExpense);
+          this.expense.id = newExpense.id;
+          this.$emit('add', newExpense);
         }
         // this.clearForm();
       }
     },
     clearForm() {
       this.$refs.form.reset();
+      this.expense.budgetName = '';
+      this.expense.employeeName = '';
+      this.expense.id = '';
+      this.expense.purchaseDate = null;
+      this.expense.reimbursedDate = null;
     }
   },
   async created() {

@@ -43,7 +43,7 @@ export default {
         id: '',
         description: '',
         cost: '',
-        note: '',
+        note: null,
         userId: '',
         expenseTypeId: '',
         purchaseDate: null,
@@ -66,7 +66,11 @@ export default {
         { text: 'Purchase Date', value: 'purchaseDate' },
         { text: 'Reimburse Date', value: 'reimbursedDate' },
         { text: 'Description', value: 'description' }
-      ]
+      ],
+      pagination: {
+        sortBy: 'employeeName',
+        rowsPerPage: 25
+      }
     };
   },
   components: {
@@ -101,7 +105,6 @@ export default {
       });
       Promise.all(this.processedExpenses).then(values => {
         this.processedExpenses = values;
-        console.log(this.processedExpenses);
       });
     },
     onSelect(item) {
@@ -139,20 +142,28 @@ export default {
       this.processedExpenses.splice(modelIndex, 1, this.expense);
       console.log('after update', this.processedExpenses[modelIndex]);
     },
-    addModelToTable() {
-      api.getItem(api.EMPLOYEES, this.expense.userId).then(employee => {
-        this.expense.employeeName = `${employee.firstName} ${
-          employee.middleName
-        } ${employee.lastName}`;
-      });
+    addModelToTable(newExpense) {
+      let matchingExpenses = _.filter(
+        this.processedExpenses,
+        expense => expense.id === newExpense.id
+      );
+      console.log(matchingExpenses);
 
-      api
-        .getItem(api.EXPENSE_TYPES, this.expense.expenseTypeId)
-        .then(expenseType => {
-          this.expense.budgetName = expenseType.budgetName;
+      if (!matchingExpenses.length) {
+        api.getItem(api.EMPLOYEES, this.expense.userId).then(employee => {
+          this.expense.employeeName = `${employee.firstName} ${
+            employee.middleName
+          } ${employee.lastName}`;
         });
 
-      this.processedExpenses.push(this.expense);
+        api
+          .getItem(api.EXPENSE_TYPES, this.expense.expenseTypeId)
+          .then(expenseType => {
+            this.expense.budgetName = expenseType.budgetName;
+          });
+
+        this.processedExpenses.push(this.expense);
+      }
     }
   }
 };
