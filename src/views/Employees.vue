@@ -14,7 +14,7 @@
                 <td class="text-xs-left">{{ props.item.firstName }}</td>
                 <td class="text-xs-left">{{ props.item.middleName }}</td>
                 <td class="text-xs-left">{{ props.item.lastName }}</td>
-                <td class="text-xs-left">{{ props.item.hireDate }}</td>
+                <td class="text-xs-left">{{ props.item.hireDate | dateFormat }}</td>
                 <td class="text-xs-left">{{ props.item.empId }}</td>
               </tr>
             </template>
@@ -35,21 +35,47 @@
 import api from '@/shared/api.js';
 import EmployeeForm from '../components/EmployeeForm.vue';
 export default {
+  filters: {
+    dateFormat: (value) => {
+      if (value) {
+        let date = new Date(value);
+        let options = {
+          month: 'short',
+          day: 'numeric',
+          year: 'numeric'
+        }
+        return date.toLocaleDateString("en-US", options);
+      } else {
+        return ""
+      }
+    }
+  },
   data() {
     return {
       search: '',
       loading: false,
       employees: [],
       errors: [],
-      headers: [
-        {
+      headers: [{
           text: 'First Name',
           value: 'firstName'
         },
-        { text: 'Middle Name', value: 'middleName' }, //change value to call a function
-        { text: 'Last Name', value: 'lastName' },
-        { text: 'Hire Date', value: 'hireDate' },
-        { text: 'Employee ID', value: 'empId' }
+        {
+          text: 'Middle Name',
+          value: 'middleName'
+        }, //change value to call a function
+        {
+          text: 'Last Name',
+          value: 'lastName'
+        },
+        {
+          text: 'Hire Date',
+          value: 'hireDate'
+        },
+        {
+          text: 'Employee ID',
+          value: 'empId'
+        }
       ],
       model: {
         id: '',

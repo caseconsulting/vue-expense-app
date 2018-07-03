@@ -31,7 +31,7 @@
       </td>
 
       <td class="text-xs-center">{{ props.item.cost | moneyValue}}</td>
-      <td class="text-xs-center">{{ props.item.purchaseDate }}</td>
+      <td class="text-xs-center">{{ props.item.purchaseDate | dateFormat }}</td>
       <td class="text-xs-center">{{ props.item.description }}</td>
     </tr>
   </template>
@@ -52,6 +52,19 @@ export default {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2
       }).format(value)}`
+    },
+    dateFormat: (value) => {
+      if (value) {
+        let date = new Date(value);
+        let options = {
+          month: 'short',
+          day: 'numeric',
+          year: 'numeric'
+        }
+        return date.toLocaleDateString("en-US", options);
+      } else {
+        return ""
+      }
     }
   },
   props: ['expenses', 'allSelected'],

@@ -14,8 +14,8 @@
                 <td class="text-xs-left">{{ props.item.employeeName }}</td>
                 <td class="text-xs-left">{{ props.item.budgetName }}</td>
                 <td class="text-xs-left">{{ props.item.cost ? props.item.cost : 0 | moneyValue}}</td>
-                <td class="text-xs-left">{{ props.item.purchaseDate }}</td>
-                <td class="text-xs-left">{{ props.item.reimbursedDate }}</td>
+                <td class="text-xs-left">{{ props.item.purchaseDate | dateFormat }}</td>
+                <td class="text-xs-left">{{ props.item.reimbursedDate |dateFormat }}</td>
                 <td class="text-xs-left">{{ props.item.description }}</td>
               </tr>
             </template>
@@ -27,7 +27,7 @@
     </v-flex>
     <v-flex lg4 md12 sm12>
       <!-- v-on:form-cleared="clearModel" -->
-      <expense-form :expense="expense" v-on:add="addModelToTable" v-on:update="updateModelInTable"  v-on:delete="deleteModelFromTable"></expense-form>
+      <expense-form :expense="expense" v-on:add="addModelToTable" v-on:update="updateModelInTable" v-on:delete="deleteModelFromTable"></expense-form>
     </v-flex>
   </v-layout>
 </div>
@@ -44,7 +44,20 @@ export default {
         currency: 'USD',
         minimumFractionDigits: 2,
         maximumFractionDigits: 2
-      }).format(value)}`;
+      }).format(value)}`
+    },
+    dateFormat: (value) => {
+      if (value) {
+        let date = new Date(value);
+        let options = {
+          month: 'short',
+          day: 'numeric',
+          year: 'numeric'
+        }
+        return date.toLocaleDateString("en-US", options);
+      } else {
+        return ""
+      }
     }
   },
   data() {
@@ -66,8 +79,7 @@ export default {
       expenses: [],
       processedExpenses: [],
       errors: [],
-      headers: [
-        {
+      headers: [{
           text: 'Employee',
           value: 'employeeName'
         },
