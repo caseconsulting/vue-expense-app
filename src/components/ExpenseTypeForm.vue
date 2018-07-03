@@ -45,24 +45,37 @@ export default {
       }
       if (this.$refs.form.validate()) {
         if (this.model.id) {
-          await api.updateItem(api.EXPENSE_TYPES, this.model.id, this.model);
+          let newExpenseType = await api.updateItem(
+            api.EXPENSE_TYPES,
+            this.model.id,
+            this.model
+          );
+          console.log(newExpenseType);
+          this.$emit('update', newExpenseType);
         } else {
-          await api.createItem(api.EXPENSE_TYPES, this.model);
+          let newExpenseType = await api.createItem(
+            api.EXPENSE_TYPES,
+            this.model
+          );
+          this.model.id = newExpenseType.id;
+          this.$emit('add', newExpenseType);
         }
-        this.clearForm();
-        this.$emit('update-table');
       }
     },
     async deleteExpenseType() {
       if (confirm('Are you sure you want to delete this expense?')) {
         await api.deleteItem(api.EXPENSE_TYPES, this.model.id);
-        this.$emit('update-table');
+        this.$emit('delete');
         this.clearForm();
       }
     },
     clearForm() {
       this.$refs.form.reset();
-      this.$emit('form-cleared');
+      this.model.budget = '';
+      this.model.budgetName = '';
+      this.model.description = '';
+      this.model.id = '';
+      this.model.odFlag = false;
     }
   }
 };

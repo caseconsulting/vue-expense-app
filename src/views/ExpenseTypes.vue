@@ -8,7 +8,7 @@
           <v-spacer></v-spacer>
           <v-text-field v-model="search" append-icon="search" label="Search" single-line hide-details></v-text-field>
         </v-card-title>
-        <v-data-table :headers="headers" :items="expenseTypes" :search="search" item-key="name" class="elevation-1">
+        <v-data-table :headers="headers" :items="expenseTypes" :search="search" item-key="budgetName" class="elevation-1">
           <template slot="items" slot-scope="props">
               <tr @click="onSelect(props.item)">
                 <td class="text-xs-left">{{ props.item.budgetName }}</td>
@@ -24,7 +24,7 @@
       </v-card>
     </v-flex>
     <v-flex xl3 lg4 md12 sm12>
-      <expense-type-form :model="model" v-on:form-cleared="clearModel" v-on:update-table="refreshExpenseTypes"></expense-type-form>
+      <expense-type-form :model="model" v-on:add="addModelToTable" v-on:update="updateModelInTable"  v-on:delete="deleteModelFromTable"></expense-type-form>
     </v-flex>
   </v-layout>
 </div>
@@ -35,13 +35,13 @@ import api from '@/shared/api.js';
 import ExpenseTypeForm from '../components/ExpenseTypeForm.vue';
 export default {
   filters: {
-    moneyValue: (value) => {
+    moneyValue: value => {
       return `${new Intl.NumberFormat('en-US', {
         style: 'currency',
         currency: 'USD',
         minimumFractionDigits: 2,
         maximumFractionDigits: 2
-      }).format(value)}`
+      }).format(value)}`;
     }
   },
   data() {
@@ -50,7 +50,8 @@ export default {
       loading: false,
       expenseTypes: [],
       errors: [],
-      headers: [{
+      headers: [
+        {
           text: 'Expense Type',
           value: 'budgetName'
         },
@@ -106,6 +107,32 @@ export default {
         description: '',
         odFlag: false
       };
+    },
+    updateModelInTable(updatedExpenseType) {
+      let matchingExpensesIndex = _.findIndex(
+        this.expenseTypes,
+        expenseType => expenseType.id === updatedExpenseType.id
+      );
+      console.log(updatedExpenseType);
+      console.log(matchingExpensesIndex);
+      this.expenseTypes.splice(matchingExpensesIndex, 1, updatedExpenseType);
+    },
+    addModelToTable(newExpenseType) {
+      let matchingExpenses = _.filter(
+        this.expenseTypes,
+        expenseType => expenseType.id === newExpenseType.id
+      );
+
+      if (!matchingExpenses.length) {
+        this.expenseTypes.push(this.model);
+      }
+    },
+    deleteModelFromTable() {
+      let modelIndex = _.findIndex(
+        this.expenseTypes,
+        expense => expense.id === this.model.id
+      );
+      this.expenseTypes.splice(modelIndex, 1);
     }
   }
 };

@@ -8,7 +8,7 @@
           <v-spacer></v-spacer>
           <v-text-field v-model="search" append-icon="search" label="Search" single-line hide-details></v-text-field>
         </v-card-title>
-        <v-data-table :headers="headers" :items="processedExpenses" :search="search" item-key="name" class="elevation-1">
+        <v-data-table :headers="headers" :items="processedExpenses" :search="search" :pagination.sync="pagination" item-key="name" class="elevation-1">
           <template slot="items" slot-scope="props">
               <tr @click="onSelect(props.item)">
                 <td class="text-xs-left">{{ props.item.employeeName }}</td>
@@ -38,13 +38,13 @@ import api from '@/shared/api.js';
 import ExpenseForm from '../components/ExpenseForm.vue';
 export default {
   filters: {
-    moneyValue: (value) => {
+    moneyValue: value => {
       return `${new Intl.NumberFormat('en-US', {
         style: 'currency',
         currency: 'USD',
         minimumFractionDigits: 2,
         maximumFractionDigits: 2
-      }).format(value)}`
+      }).format(value)}`;
     }
   },
   data() {
@@ -66,7 +66,8 @@ export default {
       expenses: [],
       processedExpenses: [],
       errors: [],
-      headers: [{
+      headers: [
+        {
           text: 'Employee',
           value: 'employeeName'
         },
@@ -93,7 +94,7 @@ export default {
       ],
       pagination: {
         sortBy: 'employeeName',
-        rowsPerPage: 25
+        rowsPerPage: 15
       }
     };
   },
@@ -164,14 +165,12 @@ export default {
         expense => expense.id === this.expense.id
       );
       this.processedExpenses.splice(modelIndex, 1, this.expense);
-      console.log('after update', this.processedExpenses[modelIndex]);
     },
     addModelToTable(newExpense) {
       let matchingExpenses = _.filter(
         this.processedExpenses,
         expense => expense.id === newExpense.id
       );
-      console.log(matchingExpenses);
 
       if (!matchingExpenses.length) {
         api.getItem(api.EMPLOYEES, this.expense.userId).then(employee => {
