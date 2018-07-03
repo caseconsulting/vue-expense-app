@@ -95,8 +95,8 @@ export default {
     async deleteExpense() {
       if (confirm('Are you sure you want to delete this expense?')) {
         await api.deleteItem(api.EXPENSES, this.expense.id);
-        this.clearForm();
         this.$emit('delete');
+        this.clearForm();
       }
     },
     async submit() {
@@ -114,7 +114,6 @@ export default {
           this.expense.id = newExpense.id;
           this.$emit('add', newExpense);
         }
-        // this.clearForm();
       }
     },
     clearForm() {
