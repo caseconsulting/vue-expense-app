@@ -113,8 +113,6 @@ export default {
         this.expenseTypes,
         expenseType => expenseType.id === updatedExpenseType.id
       );
-      console.log(updatedExpenseType);
-      console.log(matchingExpensesIndex);
       this.expenseTypes.splice(matchingExpensesIndex, 1, updatedExpenseType);
     },
     addModelToTable(newExpenseType) {

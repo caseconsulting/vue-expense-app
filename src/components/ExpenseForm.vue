@@ -105,12 +105,14 @@ export default {
           this.expense.receipt = null;
         }
         if (this.expense.id) {
-          await api.updateItem(api.EXPENSES, this.expense.id, this.expense);
-          this.$emit('update');
+          let updatedExpense = await api.updateItem(
+            api.EXPENSES,
+            this.expense.id,
+            this.expense
+          );
+          this.$emit('update', updatedExpense);
         } else {
-          console.log('Creating new item');
           let newExpense = await api.createItem(api.EXPENSES, this.expense);
-          console.log(newExpense);
           this.expense.id = newExpense.id;
           this.$emit('add', newExpense);
         }

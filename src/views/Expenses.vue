@@ -147,24 +147,25 @@ export default {
         reciept: null
       };
     },
-    updateModelInTable() {
-      api.getItem(api.EMPLOYEES, this.expense.userId).then(employee => {
-        this.expense.employeeName = `${employee.firstName} ${
-          employee.middleName
-        } ${employee.lastName}`;
+    updateModelInTable(updatedExpense) {
+      let matchingExpensesIndex = _.findIndex(
+        this.processedExpenses,
+        expense => expense.id === updatedExpense.id
+      );
+
+      api.getItem(api.EMPLOYEES, updatedExpense.userId).then(employee => {
+        let employeeName = `${employee.firstName} ${employee.middleName} ${
+          employee.lastName
+        }`;
+        this.$set(updatedExpense, 'employeeName', employeeName);
       });
 
       api
-        .getItem(api.EXPENSE_TYPES, this.expense.expenseTypeId)
+        .getItem(api.EXPENSE_TYPES, updatedExpense.expenseTypeId)
         .then(expenseType => {
-          this.expense.budgetName = expenseType.budgetName;
+          this.$set(updatedExpense, 'budgetName', expenseType.budgetName);
         });
-
-      let modelIndex = _.findIndex(
-        this.processedExpenses,
-        expense => expense.id === this.expense.id
-      );
-      this.processedExpenses.splice(modelIndex, 1, this.expense);
+      this.processedExpenses.splice(matchingExpensesIndex, 1, updatedExpense);
     },
     addModelToTable(newExpense) {
       let matchingExpenses = _.filter(
