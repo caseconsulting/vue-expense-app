@@ -5,6 +5,9 @@
     <h1 class="my-4">€xpense Portal</h1>
   </div>
   <v-btn @click="login()" id="custom-button-color" large>Login</v-btn>
+  <div>
+    <h2 class="mt-5 red--text">Invalid Login<br />Please Use @consultwithcase email address</h2>
+  </div>
 </v-container>
 </template>
 
@@ -24,6 +27,9 @@ export default {
     isLoggedIn() {
       return isLoggedIn();
     }
+  },
+  props: {
+    failure: Boolean
   }
 };
 </script>

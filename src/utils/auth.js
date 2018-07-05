@@ -40,7 +40,7 @@ export function requireAuth(to, from, next) {
   if (!isLoggedIn()) {
     next({
       path: '/',
-      query: { redirect: to.fullPath }
+      query: { redirect: to.fullPath },
     });
   } else {
     next();
@@ -82,8 +82,13 @@ export function setIdToken() {
 }
 
 export function isLoggedIn() {
-  const idToken = getIdToken();
-  return !!idToken && !isTokenExpired(idToken);
+  try{
+    const idToken = getIdToken();
+    return !!idToken && !isTokenExpired(idToken);
+  }
+  catch(error){
+    return false;
+  }
 }
 
 function getTokenExpirationDate(encodedToken) {

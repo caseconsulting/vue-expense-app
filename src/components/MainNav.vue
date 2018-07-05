@@ -1,6 +1,6 @@
 <template>
 <div>
-  <v-container fluid>
+  <v-container fluid v-show="isLoggedIn()">
       <v-layout d-inline-flex>
         <v-flex d-block md2 lg1>
         <v-btn icon light @click.stop="drawer = !drawer">
@@ -23,8 +23,7 @@
           <img src="@/assets/img/logo-big.png" height="52" width="52" class="mr-1" />
         </v-list-tile-avatar>
       </v-list-tile>
-      <v-list-tile v-show="isLoggedIn()" @click="handleLogout()">Logout &nbsp; <icon name="sign-out-alt" class="mr-1"></icon></v-list-tile>
-      <v-list-tile v-show="!isLoggedIn()" @click="handleLogin()"><icon name="sign-in-alt" class="mr-1"></icon>Login</v-list-tile>
+      <v-list-tile @click="handleLogout()">Logout &nbsp; <icon name="sign-out-alt" class="mr-1"></icon></v-list-tile>
     </v-list>
     <v-list class="pt-0" dense>
       <v-divider></v-divider>

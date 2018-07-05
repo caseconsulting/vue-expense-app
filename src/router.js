@@ -2,6 +2,7 @@ import Vue from 'vue';
 import Router from 'vue-router';
 import Home from '@/views/Home.vue';
 import Login from '@/views/Login.vue';
+import LoginFailed from '@/views/LoginFailed.vue';
 import ExpenseTypes from '@/views/ExpenseTypes.vue';
 import Employees from '@/views/Employees.vue';
 import Expenses from '@/views/Expenses.vue';
@@ -17,7 +18,12 @@ const router = new Router({
     {
       path: '/',
       name: 'login',
-      component: Login
+      component: Login,
+    },
+    {
+      path: '/loginFailed',
+      name: 'loginFailed',
+      component: LoginFailed,
     },
     {
       path: '/home',
