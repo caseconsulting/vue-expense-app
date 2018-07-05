@@ -25,7 +25,7 @@
       </v-card>
     </v-flex>
     <v-flex lg4 md12 sm12>
-      <employee-form :model="model" v-on:form-cleared="clearModel" v-on:update-table="refreshEmployees"></employee-form>
+      <employee-form :model="model" v-on:add="addModelToTable" v-on:update="updateModelInTable"  v-on:delete="deleteModelFromTable"></employee-form>
     </v-flex>
   </v-layout>
 </div>
@@ -119,6 +119,30 @@ export default {
         empId: null,
         hireDate: null
       };
+    },
+    updateModelInTable(updatedEmployee) {
+      let matchingEmployeeIndex = _.findIndex(
+        this.employees,
+        employee => employee.id === updatedEmployee.id
+      );
+      this.employees.splice(matchingEmployeeIndex, 1, updatedEmployee);
+    },
+    addModelToTable(newEmployee) {
+      let matchingEmployee = _.filter(
+        this.employees,
+        employee => employee.id === newEmployee.id
+      );
+
+      if (!matchingEmployee.length) {
+        this.employees.push(newEmployee);
+      }
+    },
+    deleteModelFromTable() {
+      let modelIndex = _.findIndex(
+        this.employees,
+        employee => employee.id === this.model.id
+      );
+      this.employees.splice(modelIndex, 1);
     }
   }
 };

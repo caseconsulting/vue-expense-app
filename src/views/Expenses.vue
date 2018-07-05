@@ -186,19 +186,20 @@ export default {
       );
 
       if (!matchingExpenses.length) {
-        api.getItem(api.EMPLOYEES, this.expense.userId).then(employee => {
-          this.expense.employeeName = `${employee.firstName} ${
-            employee.middleName
-          } ${employee.lastName}`;
+        api.getItem(api.EMPLOYEES, newExpense.userId).then(employee => {
+          let employeeName = `${employee.firstName} ${employee.middleName} ${
+            employee.lastName
+          }`;
+          this.$set(newExpense, 'employeeName', employeeName);
         });
 
         api
-          .getItem(api.EXPENSE_TYPES, this.expense.expenseTypeId)
+          .getItem(api.EXPENSE_TYPES, newExpense.expenseTypeId)
           .then(expenseType => {
-            this.expense.budgetName = expenseType.budgetName;
+            this.$set(newExpense, 'budgetName', expenseType.budgetName);
           });
 
-        this.processedExpenses.push(this.expense);
+        this.processedExpenses.push(newExpense);
       }
     },
     deleteModelFromTable() {

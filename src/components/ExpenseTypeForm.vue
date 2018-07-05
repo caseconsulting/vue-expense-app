@@ -39,7 +39,7 @@ export default {
   },
   props: ['model'],
   methods: {
-    async submit() {
+    async submit(newExpenseType) {
       if (!this.model.odFlag) {
         this.model.odFlag = false;
       }

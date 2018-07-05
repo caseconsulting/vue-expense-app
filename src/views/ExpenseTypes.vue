@@ -122,7 +122,7 @@ export default {
       );
 
       if (!matchingExpenses.length) {
-        this.expenseTypes.push(this.model);
+        this.expenseTypes.push(newExpenseType);
       }
     },
     deleteModelFromTable() {

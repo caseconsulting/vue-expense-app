@@ -82,25 +82,39 @@ export default {
     },
     async submit() {
       if (this.$refs.form.validate()) {
+        let newEmployee;
         if (this.model.id) {
-          await api.updateItem(api.EMPLOYEES, this.model.id, this.model);
+          newEmployee = await api.updateItem(
+            api.EMPLOYEES,
+            this.model.id,
+            this.model
+          );
+          console.log('*****', newEmployee);
+          this.$emit('update', newEmployee);
         } else {
-          await api.createItem(api.EMPLOYEES, this.model);
+          newEmployee = await api.createItem(api.EMPLOYEES, this.model);
         }
-        this.clearForm();
-        this.$emit('update-table');
+        console.log('*****', newEmployee);
+        this.model.id = newEmployee.id;
+        this.$emit('add', newEmployee);
       }
     },
     async deleteEmployee() {
       if (confirm('Are you sure you want to delete this employee?')) {
         await api.deleteItem(api.EMPLOYEES, this.model.id);
-        this.$emit('update-table');
+        this.$emit('delete');
         this.clearForm();
       }
     },
     clearForm() {
       this.$refs.form.reset();
-      this.$emit('form-cleared');
+      this.model.firstName = '';
+      this.model.middleName = '';
+      this.model.lastName = '';
+      this.model.empId = '';
+      this.model.expenseTypes = [];
+      this.model.hireDate = '';
+      this.model.id = '';
     }
   }
 };
