@@ -11,7 +11,6 @@ Vue.use(Vuetify);
 //Moment
 import moment from 'moment';
 
-
 Vue.prototype.moment = moment;
 
 // BEGIN VUE AWESOME
@@ -33,6 +32,7 @@ import Icon from 'vue-awesome/components/Icon';
 
 Vue.component('icon', Icon);
 // END VUE AWESOME
+window.EventBus = new Vue();
 
 new Vue({
   router,

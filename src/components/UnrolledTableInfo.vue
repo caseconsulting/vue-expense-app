@@ -20,7 +20,7 @@
     </tr>
   </template>
     <template slot="items" slot-scope="props">
-    <tr v-if="!props.item.reimbursedDate" :active="props.item.selected" @click="props.selected = !props.selected">
+    <tr v-if="!props.item.reimbursedDate" :active="props.item.selected" @click="expenseClicked(props.item)">
       <td>
         <v-checkbox
           @click="$emit('expensePicked',props.item)"
@@ -41,29 +41,30 @@
 
 <script>
 import UnrolledTableInfo from './UnrolledTableInfo.vue';
+
 import _ from 'lodash';
 
 export default {
   filters: {
-    moneyValue: (value) => {
+    moneyValue: value => {
       return `${new Intl.NumberFormat('en-US', {
         style: 'currency',
         currency: 'USD',
         minimumFractionDigits: 2,
         maximumFractionDigits: 2
-      }).format(value)}`
+      }).format(value)}`;
     },
-    dateFormat: (value) => {
+    dateFormat: value => {
       if (value) {
         let date = new Date(value);
         let options = {
           month: 'short',
           day: 'numeric',
           year: 'numeric'
-        }
-        return date.toLocaleDateString("en-US", options);
+        };
+        return date.toLocaleDateString('en-US', options);
       } else {
-        return ""
+        return '';
       }
     }
   },
@@ -75,7 +76,8 @@ export default {
     pagination: {
       sortBy: 'cost'
     },
-    headers: [{
+    headers: [
+      {
         text: 'Cost',
         value: 'cost'
       },
@@ -88,8 +90,7 @@ export default {
         value: 'description'
       }
     ],
-    selected: [],
-
+    selected: []
   }),
   beforeUpdate() {
     this.checkAllSelected();
@@ -100,12 +101,15 @@ export default {
     }
   },
   methods: {
+    expenseClicked(clickedExpense) {
+      EventBus.$emit('clickedExpense', clickedExpense);
+    },
     theyPickedMe(item) {
       this.$emit('expensePicked', item);
     },
     checkAllSelected() {
-      let calc = 0
-      let nonSelected = _.filter(this.expenses, (expense) => {
+      let calc = 0;
+      let nonSelected = _.filter(this.expenses, expense => {
         if (expense.selected === false) {
           return true;
         } else {
@@ -117,7 +121,6 @@ export default {
       } else {
         this.$emit('changedAllSelected', true);
       }
-
     },
     changeSort(column) {
       if (this.pagination.sortBy === column) {
@@ -127,7 +130,6 @@ export default {
         this.pagination.descending = false;
       }
     }
-  },
-
+  }
 };
 </script>

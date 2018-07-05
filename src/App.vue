@@ -2,8 +2,8 @@
 <div id="app">
   <v-app>
       <main-nav></main-nav>
-    <v-container fluid class="no-right-gutter">
-        <router-view class="mt-3" />
+    <v-container fluid grid-list-lg>
+        <router-view class="mt-3"/>
     </v-container>
   </v-app>
 </div>
@@ -26,9 +26,5 @@ export default {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   color: #2c3e50;
-}
-
-.no-right-gutter {
-  padding-right: 0;
 }
 </style>
