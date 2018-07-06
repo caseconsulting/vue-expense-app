@@ -288,8 +288,8 @@ export default {
 
         }
       }
-      let emitVal = { data: this.selected };
-      this.$emit('selection', emitVal);
+      EventBus.$emit('expensePicked', this.selected);
+
       return item;
     },
     getExpenseTotal(expenses) {

@@ -20,10 +20,10 @@
     </tr>
   </template>
     <template slot="items" slot-scope="props">
-    <tr v-if="!props.item.reimbursedDate" :active="props.item.selected" @click="expenseClicked(props.item)">
+    <tr v-if="!props.item.reimbursedDate" :active="props.item.selected" @click="props.selected = !props.selected; expenseClicked(props.item);">
       <td>
         <v-checkbox
-          @click="$emit('expensePicked',props.item)"
+          @click="theyPickedMe(props.item)"
           v-model="props.item.selected"
           primary
           hide-details
@@ -76,8 +76,7 @@ export default {
     pagination: {
       sortBy: 'cost'
     },
-    headers: [
-      {
+    headers: [{
         text: 'Cost',
         value: 'cost'
       },
@@ -105,7 +104,7 @@ export default {
       EventBus.$emit('clickedExpense', clickedExpense);
     },
     theyPickedMe(item) {
-      this.$emit('expensePicked', item);
+      EventBus.$emit('expensePicked', item);
     },
     checkAllSelected() {
       let calc = 0;

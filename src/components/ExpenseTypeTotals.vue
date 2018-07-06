@@ -15,7 +15,40 @@ import api from '@/shared/api.js';
 import _ from 'lodash';
 
 export default {
-  props: ['selected'],
+  data() {
+    return {
+      selected: [],
+      oldPassedItem: null
+    };
+  },
+  created() {
+    EventBus.$on('expensePicked', this.updateSelected);
+  },
+  methods: {
+    updateSelected(item) {
+      if (_.isArray(item)) {
+        if (!this.oldPassedItem) {
+          this.oldPassedItem = item;
+        }
+        if (item.length < this.oldPassedItem.length) { //removed item
+          this.selected = _.indexOf(this.selected, _.xor(item, oldPassedItem));
+        } else { //first time
+          this.selected.push(item);
+          this.selected = _.flatten(this.selected);
+        }
+        let intersection = _.intersection(this.selected, item);
+
+      } else if (item) {
+        let indexOfItem = _.indexOf(this.selected, item);
+        console.log('index', indexOfItem);
+        if (indexOfItem > -1) {
+          this.selected.splice(indexOfItem, 1);
+        } else {
+          this.selected.push(item);
+        }
+      }
+    }
+  },
   computed: {
     totals: function() {
       let totals = [];
