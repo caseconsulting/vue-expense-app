@@ -68,9 +68,34 @@ export default {
   -moz-osx-font-smoothing: grayscale;
   color: #2c3e50;
 }
-.e {
-  color: #ffeb3b;
+
+.e{
+    -webkit-animation: color-change 1s infinite alternate both;
+    -moz-animation: color-change 10s infinite alternate both;
+    -o-animation: color-change 10s infinite alternate both;
+    -ms-animation: color-change 10s infinite alternate both;
+    animation: color-change 5s infinite alternate both;
 }
 
+@-webkit-keyframes color-change {
+    0% { color: black; }
+    100% { color: gold; }
+}
+@-moz-keyframes color-change {
+    0% { color: black; }
+    100% { color: gold; }
+}
+@-ms-keyframes color-change {
+    0% { color: black; }
+    100% { color: gold; }
+}
+@-o-keyframes color-change {
+    0% { color: black; }
+    100% { color: gold; }
+}
+@keyframes color-change {
+    0% { color: black; }
+    100% { color: gold; }
+}
 
 </style>
