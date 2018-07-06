@@ -7,7 +7,11 @@ Vue.config.productionTip = false;
 //Vuetify
 import Vuetify from 'vuetify';
 import 'vuetify/dist/vuetify.min.css';
-Vue.use(Vuetify);
+Vue.use(Vuetify,{
+    theme: {
+      primary: "#68caa6"
+    }
+});
 //Moment
 import moment from 'moment';
 

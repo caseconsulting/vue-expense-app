@@ -1,30 +1,18 @@
 <template>
-<div>
-  <v-container fluid v-show="isLoggedIn()">
-      <v-layout d-inline-flex>
-        <v-flex d-block md2 lg1>
-        <v-btn icon light @click.stop="drawer = !drawer">
-          <icon name="bars"></icon>
-        </v-btn>
-        </v-flex>
-        <v-flex d-block md10 lg11>
-        <h1 id="main-header" class="text-md-center"><span class="e">€</span>xpense App</h1>
+  <div>
+
+      <v-flex>
+        <img src="@/assets/img/logo-banner.gif" class="logo" />
       </v-flex>
-      </v-layout>
-  </v-container>
-  <v-navigation-drawer
-    v-model="drawer"
-    temporary
-    absolute
-  >
-    <v-list class="pa-1">
-      <v-list-tile avatar>
+
+
+
+      <!-- <v-list-tile avatar>
         <v-list-tile-avatar>
-          <img src="@/assets/img/logo-big.png" height="52" width="52" class="mr-1" />
+          <img src="@/assets/img/logo-banner.gif" height="52" width="52" class="mr-1" />
         </v-list-tile-avatar>
-      </v-list-tile>
-      <v-list-tile @click="handleLogout()">Logout &nbsp; <icon name="sign-out-alt" class="mr-1"></icon></v-list-tile>
-    </v-list>
+      </v-list-tile> -->
+
     <v-list class="pt-0" dense>
       <v-divider></v-divider>
       <v-list-tile v-for="item in items" :key="item.title" @click="" :to='{name: item.route}'>
@@ -36,9 +24,7 @@
         </v-list-tile-content>
       </v-list-tile>
     </v-list>
-  </v-navigation-drawer>
-  </div>
-
+    </div>
 </template>
 
 
@@ -101,6 +87,12 @@ export default {
 .e {
   color: #68caa6;
 }
+
+.logo {
+  height: 50%;
+  width: 50%;
+}
+
 #nav-button {
   float: left;
 }
