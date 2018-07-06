@@ -27,20 +27,19 @@ export default {
   methods: {
     updateSelected(item) {
       if (_.isArray(item)) {
-        if (!this.oldPassedItem) {
-          this.oldPassedItem = item;
-        }
-        if (item.length < this.oldPassedItem.length) { //removed item
-          this.selected = _.indexOf(this.selected, _.xor(item, oldPassedItem));
+
+
+        if (item.length < this.selected.length) { //removed item
+          this.selected = _.xor(this.selected, _.xor(item, this.selected));
         } else { //first time
           this.selected.push(item);
           this.selected = _.flatten(this.selected);
+          this.selected = _.uniqWith(this.selected, _.isEqual);
         }
-        let intersection = _.intersection(this.selected, item);
+        this.oldPassedItem = item;
 
       } else if (item) {
         let indexOfItem = _.indexOf(this.selected, item);
-        console.log('index', indexOfItem);
         if (indexOfItem > -1) {
           this.selected.splice(indexOfItem, 1);
         } else {
