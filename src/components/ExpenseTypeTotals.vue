@@ -1,6 +1,6 @@
 <template>
 <div>
-  <v-card>
+  <v-card v-if="totals.length" class="slide-in-blurred-right">
     <v-card-title>
       <v-flex lg12 class="headline">Totals</v-flex>
 
@@ -82,4 +82,28 @@ export default {
   }
 }
 </script>
-<style></style>
+<style>
+.slide-in-blurred-right {
+  animation: slide-in-blurred-right 0.5s ease-in forwards;
+}
+/**
+ * ----------------------------------------
+ * animation slide-in-blurred-right
+ * ----------------------------------------
+ */
+@keyframes slide-in-blurred-right {
+  0% {
+    transform: translateX(1000px) scaleX(2.5) scaleY(0.2);
+    transform-origin: 0% 50%;
+    filter: blur(40px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(0) scaleY(1) scaleX(1);
+    transform-origin: 50% 50%;
+    filter: blur(0);
+    opacity: 1;
+  }
+}
+
+</style>
