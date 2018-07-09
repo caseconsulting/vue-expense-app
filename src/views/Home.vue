@@ -3,8 +3,8 @@
     <v-flex offset-lg1 offset-md2 lg9 md10 sm12>
       <rollup-expense-type-table @selection="selection"></rollup-expense-type-table>
     </v-flex>
-    <v-flex lg2 md2 sm12>  
-        <expense-info></expense-info>
+    <v-flex lg2 md2 sm12>
+        <expense-info class="jerryrig"></expense-info>
         <expense-type-totals :selectedObj="tableSelected.data"></expense-type-totals>
     </v-flex>
   </v-layout>
@@ -49,3 +49,9 @@ export default {
   }
 };
 </script>
+<style>
+.jerryrig{
+  margin-bottom: 15px;
+}
+
+</style>
