@@ -1,12 +1,22 @@
 <template>
 <div>
-  <h3>Totals</h3>
-  <ul>
-    <li v-for="total in totals" :key="total.id">
-      <h4>{{total.name}}: {{total.costTotal}}</h4>
-    </li>
-  </ul>
+  <v-card>
+    <v-card-title>
+      <v-flex lg12 class="headline">Totals</v-flex>
 
+      <v-flex lg12>
+        <p v-for="total in totals" :key="total.id">
+          <span>{{total.name}}:</span> {{total.costTotal}}
+        </p>
+      </v-flex>
+      <!-- <ul>
+        <p v-for="total in totals" :key="total.id">
+          <h4>{{total.name}}: {{total.costTotal}}</h4>
+        </p>
+      </ul> -->
+    </v-card-title>
+
+  </v-card>
 </div>
 </template>
 
