@@ -40,8 +40,6 @@
 </template>
 
 <script>
-import UnrolledTableInfo from './UnrolledTableInfo.vue';
-
 import _ from 'lodash';
 
 export default {
@@ -69,9 +67,6 @@ export default {
     }
   },
   props: ['expenses', 'allSelected'],
-  components: {
-    UnrolledTableInfo
-  },
   data: () => ({
     pagination: {
       sortBy: 'cost'
