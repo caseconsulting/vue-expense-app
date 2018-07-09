@@ -6,9 +6,9 @@
         <p><span>Description:</span> {{ expense.description }}</p>
         <p><span>Employee:</span> {{ expense.employeeName }}</p>
         <p><span>Budget:</span> {{ expense.budgetName }}</p>
-        <p><span>Cost:</span> {{ expense.cost }}</p>
-        <p><span>Purchased On:</span> {{ expense.purchaseDate }}</p>
-        <p><span>Reimbursed On:</span> {{ expense.reimbursedDate}}</p>
+        <p><span>Cost:</span> {{ expense.cost | moneyValue}}</p>
+        <p><span>Purchased On:</span> {{ expense.purchaseDate | dateFormat }}</p>
+        <p><span>Reimbursed On:</span> {{ expense.reimbursedDate | dateFormat }}</p>
       </div>
     </v-card-title>
   </v-card>
@@ -27,6 +27,29 @@ export default {
   methods: {
     displayExepense(clickedExpense) {
       this.expense = clickedExpense;
+    }
+  },
+  filters: {
+    moneyValue: value => {
+      return `${new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD',
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      }).format(value)}`;
+    }
+  },
+  dateFormat: value => {
+    if (value) {
+      let date = new Date(value);
+      let options = {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric'
+      };
+      return date.toLocaleDateString('en-US', options);
+    } else {
+      return '';
     }
   }
 };
