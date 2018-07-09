@@ -1,11 +1,12 @@
 import axios from 'axios';
-
+import { API_CONFIG } from './api-variables';
 const EXPENSE_TYPES = 'expense-types';
 const EXPENSES = 'expenses';
 const EMPLOYEES = 'employees';
-
+const APP_HOSTNAME = API_CONFIG.appHostname;
+const EXPRESS_PORT = API_CONFIG.expressPort;
 const client = axios.create({
-  baseURL: 'http://localhost:3000/',
+  baseURL: `${APP_HOSTNAME}${EXPRESS_PORT}/`,
   json: true
 });
 
@@ -44,4 +45,13 @@ function deleteItem(type, id) {
   return execute('delete', `/${type}/${id}`);
 }
 
-export default { getItems, getItem, createItem, updateItem, deleteItem, EXPENSE_TYPES, EXPENSES, EMPLOYEES };
+export default {
+  getItems,
+  getItem,
+  createItem,
+  updateItem,
+  deleteItem,
+  EXPENSE_TYPES,
+  EXPENSES,
+  EMPLOYEES
+};
