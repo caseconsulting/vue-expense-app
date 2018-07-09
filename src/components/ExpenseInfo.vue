@@ -38,7 +38,7 @@ export default {
         maximumFractionDigits: 2
       }).format(value)}`;
     }
-  },
+  ,
   dateFormat: value => {
     if (value) {
       let date = new Date(value);
@@ -52,6 +52,7 @@ export default {
       return '';
     }
   }
+}
 };
 </script>
 <style>

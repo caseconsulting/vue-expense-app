@@ -6,14 +6,9 @@
 
       <v-flex lg12>
         <p v-for="total in totals" :key="total.id">
-          <span>{{total.name}}:</span> {{total.costTotal}}
+          <span>{{total.name}}:</span> {{total.costTotal | moneyValue}}
         </p>
       </v-flex>
-      <!-- <ul>
-        <p v-for="total in totals" :key="total.id">
-          <h4>{{total.name}}: {{total.costTotal}}</h4>
-        </p>
-      </ul> -->
     </v-card-title>
 
   </v-card>
@@ -33,6 +28,16 @@ export default {
   },
   created() {
     EventBus.$on('expensePicked', this.updateSelected);
+  },
+  filters: {
+    moneyValue: value => {
+      return `${new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD',
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      }).format(value)}`;
+    }
   },
   methods: {
     updateSelected(item) {
