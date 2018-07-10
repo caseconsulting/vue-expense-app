@@ -8879,9 +8879,9 @@ vuesax@^3.1.30:
   dependencies:
     vue "^2.5.2"
 
-vuetify@^1.1.1:
-  version "1.1.1"
-  resolved "https://registry.yarnpkg.com/vuetify/-/vuetify-1.1.1.tgz#8d8f64306a45aaf862487addae8decf082dac0a3"
+vuetify@1.0.19:
+  version "1.0.19"
+  resolved "https://registry.yarnpkg.com/vuetify/-/vuetify-1.0.19.tgz#fb6d123dd1c217795fc2333e912c0ecbed2ed69e"
 
 vuex@^3.0.1:
   version "3.0.1"
