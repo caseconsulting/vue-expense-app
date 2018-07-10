@@ -9,7 +9,16 @@
         <v-autocomplete :items="expenseTypes" :filter="customFilter" v-model="expenseType" item-text="text" label="Filter by Expense Type" clearable ></v-autocomplete>
       </v-card-title>
 
-      <v-data-table v-model="selected" :headers="headers" :items="filteredItems" :pagination.sync="pagination" select-all item-key="key" class="elevation-1">
+      <v-data-table
+          v-model="selected"
+          :headers="headers"
+          :items="filteredItems"
+          :pagination.sync="pagination"
+          select-all
+          item-key="key"
+          class="elevation-1"
+          :loading="loading">
+          <v-progress-linear slot="progress" color="radioactive" indeterminate></v-progress-linear>
         <template slot="headers" slot-scope="props">
           <tr>
             <th>
@@ -33,7 +42,7 @@
         </template>
 
         <template slot="items" slot-scope="props">
-          <tr :active="props.selected" @click="props.expanded = !props.expanded">
+          <tr v-if="!loading" :active="props.selected" @click="props.expanded = !props.expanded">
           <td>
             <v-checkbox
               v-model="props.item.allSelected"
@@ -44,7 +53,7 @@
             </td>
             <td class="text-xs-center">{{ props.item.employeeName }}</td>
             <td class="text-xs-center">{{ props.item.budgetName }}</td>
-            <td class="text-xs-center" id="money-team">{{ getExpenseTotal(props.item.expenses) | moneyValue }}</td>
+            <td  class="text-xs-center" id="money-team">{{ getExpenseTotal(props.item.expenses) | moneyValue }}</td>
           </tr>
         </template>
 
@@ -91,6 +100,7 @@ export default {
     UnrolledTableInfo
   },
   data: () => ({
+    loading: true,
     everythingSelected: false,
     indeterminate: false,
     unreimbursedExpenses: [],
@@ -192,6 +202,7 @@ export default {
       this.unreimbursedExpenses = _.filter(this.expenses, expense => {
         return !expense.reimbursedDate;
       });
+      this.loading = false;
     });
   },
   computed: {
@@ -211,6 +222,9 @@ export default {
         }
       });
     }
+    // loading() {
+    //   return this.filteredItems.length === 0;
+    // }
   },
   methods: {
     reminbureExpenses() {

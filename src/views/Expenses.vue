@@ -8,9 +8,10 @@
           <v-spacer></v-spacer>
           <v-text-field v-model="search" append-icon="search" label="Search" single-line hide-details></v-text-field>
         </v-card-title>
-        <v-data-table :headers="headers" :items="processedExpenses" :search="search" :pagination.sync="pagination" item-key="name" class="elevation-1">
+        <v-data-table :loading="loading" :headers="headers" :items="processedExpenses" :search="search" :pagination.sync="pagination" item-key="name" class="elevation-1">
+          <v-progress-linear slot="progress" color="radioactive" indeterminate></v-progress-linear>
           <template slot="items" slot-scope="props">
-              <tr @click="onSelect(props.item)">
+              <tr v-if="!loading" @click="onSelect(props.item)">
                 <td class="text-xs-left">{{ props.item.employeeName }}</td>
                 <td class="text-xs-left">{{ props.item.budgetName }}</td>
                 <td class="text-xs-left">{{ props.item.cost ? props.item.cost : 0 | moneyValue}}</td>
@@ -44,24 +45,25 @@ export default {
         currency: 'USD',
         minimumFractionDigits: 2,
         maximumFractionDigits: 2
-      }).format(value)}`
+      }).format(value)}`;
     },
-    dateFormat: (value) => {
+    dateFormat: value => {
       if (value) {
         let date = new Date(value);
         let options = {
           month: 'short',
           day: 'numeric',
           year: 'numeric'
-        }
-        return date.toLocaleDateString("en-US", options);
+        };
+        return date.toLocaleDateString('en-US', options);
       } else {
-        return ""
+        return '';
       }
     }
   },
   data() {
     return {
+      loading: true,
       expense: {
         id: '',
         description: '',
@@ -79,7 +81,8 @@ export default {
       expenses: [],
       processedExpenses: [],
       errors: [],
-      headers: [{
+      headers: [
+        {
           text: 'Employee',
           value: 'employeeName'
         },
@@ -142,6 +145,7 @@ export default {
       });
       Promise.all(this.processedExpenses).then(values => {
         this.processedExpenses = values;
+        this.loading = false;
       });
     },
     onSelect(item) {
