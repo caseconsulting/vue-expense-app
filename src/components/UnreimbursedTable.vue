@@ -5,8 +5,8 @@
       <v-card-title>
         <h3>Unreimbursed Expenses</h3>
         <v-spacer></v-spacer>
-        <v-autocomplete :items="employees" :filter="customFilter" v-model="employee" item-text="text" label="Filter by Employee" clearable></v-autocomplete>
-        <v-autocomplete :items="expenseTypes" :filter="customFilter" v-model="expenseType" item-text="text" label="Filter by Expense Type" clearable></v-autocomplete>
+        <v-select :items="employees" :filter="customFilter" v-model="employee" item-text="text" label="Filter by Employee" clearable autocomplete></v-select>
+        <v-select :items="expenseTypes" :filter="customFilter" v-model="expenseType" item-text="text" label="Filter by Expense Type" clearable autocomplete></v-select>
       </v-card-title>
 
       <v-data-table v-model="selected" :headers="headers" :items="filteredItems" :pagination.sync="pagination" select-all item-key="id" class="elevation-1">
@@ -82,15 +82,26 @@ export default {
       sortBy: 'employeeName'
     },
     selected: [],
-    headers: [
-      {
+    headers: [{
         text: 'Employee',
         value: 'employeeName'
       },
-      { text: 'Expense Type', value: 'budgetName' }, //change value to call a function
-      { text: 'Cost', value: 'cost' },
-      { text: 'Purchase Date', value: 'purchaseDate' },
-      { text: 'Description', value: 'description' }
+      {
+        text: 'Expense Type',
+        value: 'budgetName'
+      }, //change value to call a function
+      {
+        text: 'Cost',
+        value: 'cost'
+      },
+      {
+        text: 'Purchase Date',
+        value: 'purchaseDate'
+      },
+      {
+        text: 'Description',
+        value: 'description'
+      }
     ]
   }),
   async created() {
@@ -109,7 +120,10 @@ export default {
     //Get expense Types
     let expenseTypes = await api.getItems(api.EXPENSE_TYPES);
     this.expenseTypes = expenseTypes.map(expenseType => {
-      return { text: expenseType.budgetName, value: expenseType.id };
+      return {
+        text: expenseType.budgetName,
+        value: expenseType.id
+      };
     });
 
     //Get expenses
@@ -178,9 +192,9 @@ export default {
       const query = hasValue(queryText);
       return (
         text
-          .toString()
-          .toLowerCase()
-          .indexOf(query.toString().toLowerCase()) > -1
+        .toString()
+        .toLowerCase()
+        .indexOf(query.toString().toLowerCase()) > -1
       );
     }
   }

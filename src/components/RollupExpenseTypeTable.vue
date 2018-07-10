@@ -5,20 +5,12 @@
       <v-card-title>
         <h3>Expense Type Table</h3>
         <v-spacer></v-spacer>
-        <v-autocomplete :items="employees" :filter="customFilter" v-model="employee" item-text="text" label="Filter by Employee" clearable ></v-autocomplete>
-        <v-autocomplete :items="expenseTypes" :filter="customFilter" v-model="expenseType" item-text="text" label="Filter by Expense Type" clearable ></v-autocomplete>
+        <v-select :items="employees" :filter="customFilter" v-model="employee" item-text="text" label="Filter by Employee" clearable autocomplete></v-select>
+        <v-select :items="expenseTypes" :filter="customFilter" v-model="expenseType" item-text="text" label="Filter by Expense Type" clearable autocomplete></v-select>
       </v-card-title>
 
-      <v-data-table
-          v-model="selected"
-          :headers="headers"
-          :items="filteredItems"
-          :pagination.sync="pagination"
-          select-all
-          item-key="key"
-          class="elevation-1"
-          :loading="loading">
-          <v-progress-linear slot="progress" color="radioactive" indeterminate></v-progress-linear>
+      <v-data-table v-model="selected" :headers="headers" :items="filteredItems" :pagination.sync="pagination" select-all item-key="key" class="elevation-1" :loading="loading">
+        <v-progress-linear slot="progress" color="radioactive" indeterminate></v-progress-linear>
         <template slot="headers" slot-scope="props">
           <tr>
             <th>
