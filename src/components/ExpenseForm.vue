@@ -1,35 +1,37 @@
 <template>
-<v-card hover >
+<v-card hover>
   <v-card-title>
     <h3 v-if="expense.id"> Edit Expense </h3>
     <h3 v-else> Create New Expense </h3>
   </v-card-title>
   <v-container fluid>
-<v-form ref="form" v-model="valid" lazy-validation >
-  <v-autocomplete :items="employees" :rules="componentRules" :filter="customFilter" v-model="expense.userId" item-text="text" label="Employee"></v-autocomplete>
-  <v-autocomplete :items="expenseTypes" :rules="componentRules" :filter="customFilter" v-model="expense.expenseTypeId" item-text="text" label="Expense Type"></v-autocomplete>
-  <v-text-field v-model="expense.description" :rules="descriptionRules" label="Description" data-vv-name="Description"></v-text-field>
-  <v-text-field v-model="expense.cost" :rules="costRules" label="Cost" data-vv-name="Cost"></v-text-field>
+    <v-form ref="form" v-model="valid" lazy-validation>
+      <v-select :items="employees" :rules="componentRules" :filter="customFilter" v-model="expense.userId" item-text="text" label="Employee" autocomplete></v-select>
+      <v-select :items="expenseTypes" :rules="componentRules" :filter="customFilter" v-model="expense.expenseTypeId" item-text="text" label="Expense Type" autocomplete></v-select>
+      <v-text-field v-model="expense.description" :rules="descriptionRules" label="Description" data-vv-name="Description"></v-text-field>
+      <v-text-field v-model="expense.cost" :rules="costRules" label="Cost" data-vv-name="Cost"></v-text-field>
 
-<!-- Date Picker 1-->
-<v-menu ref="menu1" :close-on-content-click="true" v-model="menu1" :nudge-right="40" lazy transition="scale-transition" offset-y full-width max-width="290px" min-width="290px">
-  <v-text-field slot="activator" v-model="purchaseDateFormatted" :rules="componentRules" label="Purchase Date" hint="MM/DD/YYYY format" persistent-hint prepend-icon="event" @blur="expense.purchaseDate = parseDate(purchaseDateFormatted)"></v-text-field>
-  <v-date-picker v-model="expense.purchaseDate" no-title @input="menu1 = false"></v-date-picker>
-</v-menu>
-<!-- Date Picker 2-->
-  <v-menu ref="menu2" :close-on-content-click="false" v-model="menu2" :nudge-right="40" lazy transition="scale-transition" offset-y full-width max-width="290px" min-width="290px">
-    <v-text-field slot="activator" v-model="reimbursedDateFormatted" label="Reimburse Date (optional)" hint="MM/DD/YYYY format " persistent-hint prepend-icon="event" @blur="expense.reimbursedDate = parseDate(reimbursedDateFormatted)"></v-text-field>
-    <v-date-picker v-model="expense.reimbursedDate" no-title @input="menu2 = false"></v-date-picker>
-  </v-menu>
+      <!-- Date Picker 1-->
+      <v-menu ref="menu1" :close-on-content-click="true" v-model="menu1" :nudge-right="40" lazy transition="scale-transition" offset-y full-width max-width="290px" min-width="290px">
+        <v-text-field slot="activator" v-model="purchaseDateFormatted" :rules="componentRules" label="Purchase Date" hint="MM/DD/YYYY format" persistent-hint prepend-icon="event" @blur="expense.purchaseDate = parseDate(purchaseDateFormatted)"></v-text-field>
+        <v-date-picker v-model="expense.purchaseDate" no-title @input="menu1 = false"></v-date-picker>
+      </v-menu>
+      <!-- Date Picker 2-->
+      <v-menu ref="menu2" :close-on-content-click="false" v-model="menu2" :nudge-right="40" lazy transition="scale-transition" offset-y full-width max-width="290px" min-width="290px">
+        <v-text-field slot="activator" v-model="reimbursedDateFormatted" label="Reimburse Date (optional)" hint="MM/DD/YYYY format " persistent-hint prepend-icon="event" @blur="expense.reimbursedDate = parseDate(reimbursedDateFormatted)"></v-text-field>
+        <v-date-picker v-model="expense.reimbursedDate" no-title @input="menu2 = false"></v-date-picker>
+      </v-menu>
 
-  <v-text-field v-model="expense.note" label="Notes (optional)" data-vv-name="Description" multi-line></v-text-field>
+      <v-text-field v-model="expense.note" label="Notes (optional)" data-vv-name="Description" multi-line></v-text-field>
 
-  <!-- Buttons -->
-  <v-btn outline color="error" @click="deleteExpense">
-    <icon class="mr-1" name="trash"></icon>Delete</v-btn>
-  <v-btn color="white" @click="clearForm"><icon class="mr-1" name="ban"></icon>Cancel</v-btn>
-  <v-btn outline color="success" @click="submit" :disabled="!valid"><icon class="mr-1" name="save"></icon>Submit</v-btn>
-  </v-form>
+      <!-- Buttons -->
+      <v-btn outline color="error" @click="deleteExpense">
+        <icon class="mr-1" name="trash"></icon>Delete</v-btn>
+      <v-btn color="white" @click="clearForm">
+        <icon class="mr-1" name="ban"></icon>Cancel</v-btn>
+      <v-btn outline color="success" @click="submit" :disabled="!valid">
+        <icon class="mr-1" name="save"></icon>Submit</v-btn>
+    </v-form>
   </v-container>
 </v-card>
 </template>
@@ -75,9 +77,9 @@ export default {
       const query = hasValue(queryText);
       return (
         text
-          .toString()
-          .toLowerCase()
-          .indexOf(query.toString().toLowerCase()) > -1
+        .toString()
+        .toLowerCase()
+        .indexOf(query.toString().toLowerCase()) > -1
       );
     },
     formatDate(date) {
