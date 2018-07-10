@@ -5,8 +5,8 @@
       <v-card-title>
         <h3>Unreimbursed Expenses</h3>
         <v-spacer></v-spacer>
-        <v-select :items="employees" :filter="customFilter" v-model="employee" item-text="text" label="Filter by Employee" clearable autocomplete></v-select>
-        <v-select :items="expenseTypes" :filter="customFilter" v-model="expenseType" item-text="text" label="Filter by Expense Type" clearable autocomplete></v-select>
+        <v-autocomplete :items="employees" :filter="customFilter" v-model="employee" item-text="text" label="Filter by Employee" clearable></v-autocomplete>
+        <v-autocomplete :items="expenseTypes" :filter="customFilter" v-model="expenseType" item-text="text" label="Filter by Expense Type" clearable></v-autocomplete>
       </v-card-title>
 
       <v-data-table v-model="selected" :headers="headers" :items="filteredItems" :pagination.sync="pagination" select-all item-key="id" class="elevation-1">

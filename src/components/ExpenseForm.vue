@@ -6,8 +6,8 @@
   </v-card-title>
   <v-container fluid>
 <v-form ref="form" v-model="valid" lazy-validation >
-  <v-select :items="employees" :rules="componentRules" :filter="customFilter" v-model="expense.userId" item-text="text" label="Employee" autocomplete></v-select>
-  <v-select :items="expenseTypes" :rules="componentRules" :filter="customFilter" v-model="expense.expenseTypeId" item-text="text" label="Expense Type" autocomplete></v-select>
+  <v-autocomplete :items="employees" :rules="componentRules" :filter="customFilter" v-model="expense.userId" item-text="text" label="Employee"></v-autocomplete>
+  <v-autocomplete :items="expenseTypes" :rules="componentRules" :filter="customFilter" v-model="expense.expenseTypeId" item-text="text" label="Expense Type"></v-autocomplete>
   <v-text-field v-model="expense.description" :rules="descriptionRules" label="Description" data-vv-name="Description"></v-text-field>
   <v-text-field v-model="expense.cost" :rules="costRules" label="Cost" data-vv-name="Cost"></v-text-field>
 
@@ -149,9 +149,7 @@ export default {
 };
 </script>
 <style>
-.optional
-{
+.optional {
   font-size: 0.5em;
 }
-
 </style>

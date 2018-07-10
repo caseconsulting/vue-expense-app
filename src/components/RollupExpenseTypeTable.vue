@@ -5,8 +5,8 @@
       <v-card-title>
         <h3>Expense Type Table</h3>
         <v-spacer></v-spacer>
-        <v-select :items="employees" :filter="customFilter" v-model="employee" item-text="text" label="Filter by Employee" clearable autocomplete></v-select>
-        <v-select :items="expenseTypes" :filter="customFilter" v-model="expenseType" item-text="text" label="Filter by Expense Type" clearable autocomplete></v-select>
+        <v-autocomplete :items="employees" :filter="customFilter" v-model="employee" item-text="text" label="Filter by Employee" clearable ></v-autocomplete>
+        <v-autocomplete :items="expenseTypes" :filter="customFilter" v-model="expenseType" item-text="text" label="Filter by Expense Type" clearable ></v-autocomplete>
       </v-card-title>
 
       <v-data-table v-model="selected" :headers="headers" :items="filteredItems" :pagination.sync="pagination" select-all item-key="key" class="elevation-1">
@@ -78,13 +78,13 @@ import _ from 'lodash';
 
 export default {
   filters: {
-    moneyValue: (value) => {
+    moneyValue: value => {
       return `${new Intl.NumberFormat('en-US', {
         style: 'currency',
         currency: 'USD',
         minimumFractionDigits: 2,
         maximumFractionDigits: 2
-      }).format(value)}`
+      }).format(value)}`;
     }
   },
   components: {
@@ -106,7 +106,8 @@ export default {
       rowsPerPage: 10
     },
     selected: [],
-    headers: [{
+    headers: [
+      {
         text: 'Employee',
         value: 'employeeName'
       },
@@ -157,7 +158,7 @@ export default {
     Promise.all(this.processedExpenses).then(values => {
       this.empBudgets = values;
 
-      this.empBudgets = _.map(this.empBudgets, (expense) => {
+      this.empBudgets = _.map(this.empBudgets, expense => {
         if (!expense.reimbursedDate) {
           return {
             employeeName: expense.employeeName,
@@ -167,29 +168,31 @@ export default {
             expenses: [],
             key: `${expense.userId}${expense.expenseTypeId}`,
             allSelected: false
-          }
+          };
         }
       });
 
-      this.empBudgets = _.filter(this.empBudgets, (item) => item !== undefined);
+      this.empBudgets = _.filter(this.empBudgets, item => item !== undefined);
 
       this.empBudgets = _.uniqWith(this.empBudgets, _.isEqual);
-      this.empBudgets = _.forEach(this.empBudgets, (item) => {
-        return item.expenses = _.filter(this.expenses, (expense) => {
-
-          if ((expense.userId === item.userId) && (expense.expenseTypeId === item.expenseTypeId) && (!expense.reimbursedDate)) {
+      this.empBudgets = _.forEach(this.empBudgets, item => {
+        return (item.expenses = _.filter(this.expenses, expense => {
+          if (
+            expense.userId === item.userId &&
+            expense.expenseTypeId === item.expenseTypeId &&
+            !expense.reimbursedDate
+          ) {
             return true;
           } else {
             return false;
           }
-        });
+        }));
       });
       this.processedExpenses = this.empBudgets;
-      this.unreimbursedExpenses = _.filter(this.expenses, (expense) => {
+      this.unreimbursedExpenses = _.filter(this.expenses, expense => {
         return !expense.reimbursedDate;
-      })
+      });
     });
-
   },
   computed: {
     filteredItems() {
@@ -211,7 +214,7 @@ export default {
   },
   methods: {
     reminbureExpenses() {
-      let expensesToSubmit = _.map(this.selected, (item) => {
+      let expensesToSubmit = _.map(this.selected, item => {
         return {
           cost: item.cost,
           description: item.description,
@@ -222,35 +225,38 @@ export default {
           note: !item.note ? null : item.note,
           userId: item.userId,
           receipt: null
-        }
+        };
       });
 
-      _.forEach(expensesToSubmit, (expense) => {
-        api.updateItem(api.EXPENSES, expense.id, expense).then(this.removeExpenseFromList);
+      _.forEach(expensesToSubmit, expense => {
+        api
+          .updateItem(api.EXPENSES, expense.id, expense)
+          .then(this.removeExpenseFromList);
       });
       this.selected = [];
     },
     removeExpenseFromList() {
-      _.forEach(this.processedExpenses, (item) => {
-        _.forEach(item.expenses, (expense) => {
-          if (_.findIndex(this.selected, (s) => s.id === expense.id) > -1) {
-            item.expense = _.remove(item.expenses, (e) => e.id === expense.id);
+      _.forEach(this.processedExpenses, item => {
+        _.forEach(item.expenses, expense => {
+          if (_.findIndex(this.selected, s => s.id === expense.id) > -1) {
+            item.expense = _.remove(item.expenses, e => e.id === expense.id);
           }
         });
       });
 
-      this.processedExpenses = _.filter(this.processedExpenses, (item) => item.expenses.length);
-
+      this.processedExpenses = _.filter(
+        this.processedExpenses,
+        item => item.expenses.length
+      );
     },
     addExpenseToSelected(expense) {
-
       if (_.indexOf(this.selected, expense) === -1) {
         this.selected.push(expense);
         if (this.unreimbursedExpenses.length === this.selected.length) {
           this.everythingSelected = true;
         }
       } else {
-        _.remove(this.selected, (item) => {
+        _.remove(this.selected, item => {
           return item.id === expense.id;
         });
         this.indeterminate = true;
@@ -258,9 +264,8 @@ export default {
       }
     },
     toggleExpenses(item) {
-
       if (!item.allSelected) {
-        _.forEach(item.expenses, (expense) => {
+        _.forEach(item.expenses, expense => {
           expense.selected = true;
           this.selected.push(expense);
         });
@@ -270,22 +275,20 @@ export default {
           this.everythingSelected = true;
         }
       } else {
-        _.forEach(item.expenses, (expense) => {
+        _.forEach(item.expenses, expense => {
           expense.selected = false;
         });
         if (this.selected.length === 1) {
           this.selected = [];
           this.indeterminate = false;
         } else {
-
-          _.forEach(item.expenses, (expense) => {
-            _.remove(this.selected, (e) => {
+          _.forEach(item.expenses, expense => {
+            _.remove(this.selected, e => {
               return e.id === expense.id;
             });
           });
           this.everythingSelected = false;
           this.indeterminate = true;
-
         }
       }
       EventBus.$emit('expensePicked', this.selected);
@@ -294,20 +297,19 @@ export default {
     },
     getExpenseTotal(expenses) {
       let total = 0;
-      _.forEach(expenses, (expense) => total += parseInt(expense.cost, 10));
+      _.forEach(expenses, expense => (total += parseInt(expense.cost, 10)));
       return total;
-
     },
     toggleAll() {
       if (this.selected.length) {
-        _.forEach(this.filteredItems, (item) => {
+        _.forEach(this.filteredItems, item => {
           this.toggleExpenses(item);
           item.allSelected = false;
         });
         this.everythingSelected = false;
         this.selected = [];
       } else {
-        _.forEach(this.filteredItems, (item) => {
+        _.forEach(this.filteredItems, item => {
           this.toggleExpenses(item);
           item.allSelected = true;
         });
@@ -344,9 +346,9 @@ export default {
       const query = hasValue(queryText);
       return (
         text
-        .toString()
-        .toLowerCase()
-        .indexOf(query.toString().toLowerCase()) > -1
+          .toString()
+          .toLowerCase()
+          .indexOf(query.toString().toLowerCase()) > -1
       );
     }
   }
