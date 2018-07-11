@@ -121,7 +121,7 @@ export default {
         }
       ],
       pagination: {
-        sortBy: 'employeeName',
+        sortBy: 'purchaseDate',
         rowsPerPage: 15
       }
     };

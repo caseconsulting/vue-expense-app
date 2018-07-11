@@ -104,11 +104,12 @@ export default {
     expenseType: null,
     processedExpenses: [],
     pagination: {
-      sortBy: 'employeeName',
+      sortBy: 'lastName',
       rowsPerPage: 10
     },
     selected: [],
-    headers: [{
+    headers: [
+      {
         text: 'Employee',
         value: 'employeeName'
       },
@@ -164,6 +165,8 @@ export default {
         if (!expense.reimbursedDate) {
           return {
             employeeName: expense.employeeName,
+            lastName: expense.lastName,
+            firstName: expense.firstName,
             userId: expense.userId,
             budgetName: expense.budgetName,
             expenseTypeId: expense.expenseTypeId,
@@ -343,6 +346,8 @@ export default {
       expense.employeeName = `${employee.firstName} ${employee.middleName} ${
         employee.lastName
       }`;
+      expense.lastName = employee.lastName;
+      expense.firstName = employee.firstName;
       expense.selected = false;
       return expense;
     },
@@ -360,9 +365,9 @@ export default {
       const query = hasValue(queryText);
       return (
         text
-        .toString()
-        .toLowerCase()
-        .indexOf(query.toString().toLowerCase()) > -1
+          .toString()
+          .toLowerCase()
+          .indexOf(query.toString().toLowerCase()) > -1
       );
     }
   }
