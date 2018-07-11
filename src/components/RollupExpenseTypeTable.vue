@@ -243,15 +243,19 @@ export default {
       _.forEach(expensesToSubmit, expense => {
         api
           .updateItem(api.EXPENSES, expense.id, expense)
-          .then(this.removeExpenseFromList);
+          .then(this.removeExpenseFromList(this.selected));
       });
       this.selected = [];
     },
-    removeExpenseFromList() {
+    removeExpenseFromList(selected) {
       _.forEach(this.processedExpenses, item => {
+
         _.forEach(item.expenses, expense => {
-          if (_.findIndex(this.selected, s => s.id === expense.id) > -1) {
-            item.expense = _.remove(item.expenses, e => e.id === expense.id);
+
+          let itemIndex = _.indexOf(selected, expense);
+
+          if (itemIndex > -1) {
+            item.expenses.splice(_.indexOf(item.expenses, expense), 1);
           }
         });
       });
@@ -260,6 +264,7 @@ export default {
         this.processedExpenses,
         item => item.expenses.length
       );
+      EventBus.$emit('expenseChange', []);
     },
     addExpenseToSelected(expense) {
       if (_.indexOf(this.selected, expense) === -1) {
