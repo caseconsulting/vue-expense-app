@@ -40,9 +40,7 @@ export default {
   props: ['model'],
   methods: {
     async submit(newExpenseType) {
-      console.log(typeof this.model.budget);
-      let budget = parseInt(this.model.budget);
-      this.model.budget = budget;
+      this.model.budget= parseInt(this.model.budget);
       if (!this.model.odFlag) {
         this.model.odFlag = false;
       }
@@ -54,7 +52,6 @@ export default {
             this.model
           );
           console.log(newExpenseType);
-          console.log(typeof this.model.budget); //test line. Delete after testing
           this.$emit('update', newExpenseType);
         } else {
           let newExpenseType = await api.createItem(
