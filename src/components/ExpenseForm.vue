@@ -7,7 +7,7 @@
   <v-container fluid>
     <v-form ref="form" v-model="valid" lazy-validation>
       <v-select :items="employees" :rules="componentRules" :filter="customFilter" v-model="expense.userId" item-text="text" label="Employee" autocomplete></v-select>
-      <v-select :items="expenseTypes" :rules="componentRules" :filter="customFilter" v-model="expense.expenseTypeId"  label="Expense Type" autocomplete></v-select>
+      <v-select :items="expenseTypes" :rules="componentRules" :filter="customFilter" v-model="expense.expenseTypeId" label="Expense Type" autocomplete></v-select>
       <v-text-field v-model="expense.description" :rules="descriptionRules" label="Description" data-vv-name="Description"></v-text-field>
       <v-text-field type='number' v-model="expense.cost" :rules="costRules" label="Cost" data-vv-name="Cost"></v-text-field>
 
@@ -117,11 +117,14 @@ export default {
           this.$emit('update', updatedExpense);
         } else {
           let newExpense = await api.createItem(api.EXPENSES, this.expense);
-          console.log(newExpense);
-          this.expense.id = newExpense.id;
-          this.$emit('add', newExpense);
+          if (newExpense.id) {
+            this.expense.id = newExpense.id;
+            this.$emit('add', newExpense);
+          } else {
+            this.$emit('error', newExpense);
+          }
         }
-        
+
       }
     },
     clearForm() {

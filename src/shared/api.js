@@ -7,7 +7,7 @@ const API_HOSTNAME = API_CONFIG.apiHostname;
 const API_PORT = API_CONFIG.apiPort;
 
 const client = axios.create({
-  baseURL: `${API_HOSTNAME}${API_PORT}/`,
+  baseURL: `http://localhost:3005/`,
   json: true
 });
 
@@ -21,9 +21,14 @@ async function execute(method, resource, data) {
     // headers: {
     //   Authorization: `Bearer ${accessToken}`
     // }
-  }).then(response => {
-    return response.data;
-  });
+  })
+    .then(response => {
+      return response.data;
+    })
+    .catch(err => {
+      console.log(err);
+      return err;
+    });
 }
 
 function getItems(type) {

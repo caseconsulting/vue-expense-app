@@ -1,6 +1,11 @@
 <template>
 <div>
   <v-layout row wrap>
+    <v-flex lg12 md12 sm12>
+      <v-alert v-if="error" dismissible :value="error" color="error" icon="warning" outline>
+        {{error.response.data.message}}
+      </v-alert>
+    </v-flex>
     <v-flex lg8 md12 sm12>
       <v-card>
         <v-card-title>
@@ -41,7 +46,7 @@
     </v-flex>
     <v-flex lg4 md12 sm12>
       <!-- v-on:form-cleared="clearModel" -->
-      <expense-form :expense="expense" v-on:add="addModelToTable" v-on:update="updateModelInTable" v-on:delete="deleteModelFromTable"></expense-form>
+      <expense-form :expense="expense" v-on:add="addModelToTable" v-on:update="updateModelInTable" v-on:delete="deleteModelFromTable" v-on:error="displayError"></expense-form>
     </v-flex>
   </v-layout>
 </div>
@@ -77,6 +82,7 @@ export default {
   data() {
     return {
       loading: true,
+      error: null,
       expense: {
         id: '',
         description: '',
@@ -134,6 +140,9 @@ export default {
     this.refreshExpenses();
   },
   methods: {
+    async displayError(err) {
+      this.error = err;
+    },
     async getEmployeeName(expense) {
       let employee = await api.getItem(api.EMPLOYEES, expense.userId);
       expense.employeeName = `${employee.firstName} ${employee.middleName} ${
