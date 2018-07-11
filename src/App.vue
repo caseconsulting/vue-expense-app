@@ -36,7 +36,6 @@
 
 <script>
 import { isLoggedIn, login, logout } from '@/utils/auth';
-
 import MainNav from '@/components/MainNav.vue';
 export default {
   data: () => ({

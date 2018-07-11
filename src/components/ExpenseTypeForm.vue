@@ -40,6 +40,7 @@ export default {
   props: ['model'],
   methods: {
     async submit(newExpenseType) {
+      console.log(typeof this.model.budget); //test line. Delete after testing
       if (!this.model.odFlag) {
         this.model.odFlag = false;
       }
@@ -71,7 +72,7 @@ export default {
     },
     clearForm() {
       this.$refs.form.reset();
-      this.model.budget = '';
+      this.model.budget = 0;
       this.model.budgetName = '';
       this.model.description = '';
       this.model.id = '';

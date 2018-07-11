@@ -67,7 +67,7 @@ export default {
       expense: {
         id: '',
         description: '',
-        cost: '',
+        cost: 0,
         note: null,
         userId: '',
         expenseTypeId: '',

@@ -70,7 +70,7 @@ export default {
       ],
       model: {
         id: '',
-        budget: '',
+        budget: 0,
         budgetName: '',
         description: '',
         odFlag: false
@@ -102,7 +102,7 @@ export default {
     clearModel() {
       this.model = {
         id: '',
-        budget: '',
+        budget: 0,
         budgetName: '',
         description: '',
         odFlag: false
