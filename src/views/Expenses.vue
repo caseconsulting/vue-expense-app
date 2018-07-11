@@ -10,6 +10,19 @@
         </v-card-title>
         <v-data-table :loading="loading" :headers="headers" :items="processedExpenses" :search="search" :pagination.sync="pagination" item-key="name" class="elevation-1">
           <v-progress-linear slot="progress" color="radioactive" indeterminate></v-progress-linear>
+          <template slot="headers" slot-scope="props">
+            <tr>
+              <th class="text-xs-left"
+                v-for="header in props.headers"
+                :key="header.text"
+                :class="['column sortable', pagination.descending ? 'desc' : 'asc', header.value === pagination.sortBy ? 'active' : '']"
+                @click="changeSort(header.value)"
+              >
+                {{ header.text }}
+                <v-icon small>arrow_upward</v-icon>
+              </th>
+            </tr>
+          </template>
           <template slot="items" slot-scope="props">
               <tr v-if="!loading" @click="onSelect(props.item)">
                 <td class="text-xs-left">{{ props.item.employeeName }}</td>
@@ -212,6 +225,14 @@ export default {
         expense => expense.id === this.expense.id
       );
       this.processedExpenses.splice(modelIndex, 1);
+    },
+    changeSort(column) {
+      if (this.pagination.sortBy === column) {
+        this.pagination.descending = !this.pagination.descending;
+      } else {
+        this.pagination.sortBy = column;
+        this.pagination.descending = false;
+      }
     }
   }
 };
