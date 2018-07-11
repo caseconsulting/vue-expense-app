@@ -108,10 +108,9 @@ export default {
       rowsPerPage: 10
     },
     selected: [],
-    headers: [
-      {
+    headers: [{
         text: 'Employee',
-        value: 'employeeName'
+        value: 'lastName'
       },
       {
         text: 'Expense Type',
@@ -365,9 +364,9 @@ export default {
       const query = hasValue(queryText);
       return (
         text
-          .toString()
-          .toLowerCase()
-          .indexOf(query.toString().toLowerCase()) > -1
+        .toString()
+        .toLowerCase()
+        .indexOf(query.toString().toLowerCase()) > -1
       );
     }
   }
