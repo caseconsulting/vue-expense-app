@@ -106,13 +106,15 @@ export default {
         if (!this.expense.receipt) {
           this.expense.receipt = null;
         }
+        this.expense.cost = parseInt(this.expense.cost);
+        console.log(typeof this.expense.cost);
         if (this.expense.id) {
           let updatedExpense = await api.updateItem(
             api.EXPENSES,
             this.expense.id,
             this.expense
           );
-          console.log(updatedExpense);
+
           this.$emit('update', updatedExpense);
         } else {
           let newExpense = await api.createItem(api.EXPENSES, this.expense);

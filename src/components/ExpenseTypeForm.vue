@@ -40,6 +40,7 @@ export default {
   props: ['model'],
   methods: {
     async submit(newExpenseType) {
+      console.log(typeof this.model.budget);
       let budget = parseInt(this.model.budget);
       this.model.budget = budget;
       if (!this.model.odFlag) {
