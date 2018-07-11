@@ -28,6 +28,7 @@ export default {
   },
   created() {
     EventBus.$on('expensePicked', this.updateSelected);
+    EventBus.$on('expenseChange', this.updateSelected);
   },
   filters: {
     moneyValue: value => {
@@ -91,11 +92,13 @@ export default {
 .slide-in-blurred-right {
   animation: slide-in-blurred-right 0.5s ease-in forwards;
 }
+
 /**
  * ----------------------------------------
  * animation slide-in-blurred-right
  * ----------------------------------------
  */
+
 @keyframes slide-in-blurred-right {
   0% {
     transform: translateX(1000px) scaleX(2.5) scaleY(0.2);
@@ -110,5 +113,4 @@ export default {
     opacity: 1;
   }
 }
-
 </style>

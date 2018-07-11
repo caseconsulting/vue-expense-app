@@ -62,7 +62,7 @@
       <v-flex offset-md10>
 
         <v-fab-transition>
-          <v-btn @click="reminbureExpenses" id="custom-button-color" v-show="selected.length>0" fab dark large bottom left fixed>
+          <v-btn @click="reminbureExpenses" id="custom-button-color" v-show="showSubmitButton" fab dark large bottom left fixed>
             <icon name="dollar-sign"></icon>
           </v-btn>
         </v-fab-transition>
@@ -108,8 +108,7 @@ export default {
       rowsPerPage: 10
     },
     selected: [],
-    headers: [
-      {
+    headers: [{
         text: 'Employee',
         value: 'employeeName'
       },
@@ -124,6 +123,7 @@ export default {
     ]
   }),
   async created() {
+    EventBus.$on('expensePicked', this.addExpenseToSelected);
     // TODO: Since we get all the employees and expense types, we no longer need to
     // talk to the api to retrieve the employee name and expense type name for each expense
     //Get employees
@@ -213,10 +213,14 @@ export default {
           );
         }
       });
+    },
+    showSubmitButton() {
+      if (this.selected.length === 0) {
+        return false;
+      } else {
+        return true;
+      }
     }
-    // loading() {
-    //   return this.filteredItems.length === 0;
-    // }
   },
   methods: {
     reminbureExpenses() {
@@ -262,8 +266,10 @@ export default {
           this.everythingSelected = true;
         }
       } else {
-        _.remove(this.selected, item => {
-          return item.id === expense.id;
+        _.forEach(this.selected, exp => {
+          if (exp && exp.id === expense.id) {
+            this.selected.splice(_.indexOf(this.selected, exp), 1);
+          }
         });
         this.indeterminate = true;
         this.everythingSelected = false;
@@ -289,15 +295,17 @@ export default {
           this.indeterminate = false;
         } else {
           _.forEach(item.expenses, expense => {
-            _.remove(this.selected, e => {
-              return e.id === expense.id;
+            _.forEach(this.selected, exp => {
+              if (exp && exp.id === expense.id) {
+                this.selected.splice(_.indexOf(this.selected, exp), 1);
+              }
             });
           });
           this.everythingSelected = false;
           this.indeterminate = true;
         }
       }
-      EventBus.$emit('expensePicked', this.selected);
+      EventBus.$emit('expenseChange', this.selected);
 
       return item;
     },
@@ -352,9 +360,9 @@ export default {
       const query = hasValue(queryText);
       return (
         text
-          .toString()
-          .toLowerCase()
-          .indexOf(query.toString().toLowerCase()) > -1
+        .toString()
+        .toLowerCase()
+        .indexOf(query.toString().toLowerCase()) > -1
       );
     }
   }
