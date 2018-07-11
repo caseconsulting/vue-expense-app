@@ -1,5 +1,5 @@
 /* globals process */
 export const API_CONFIG = {
-  appHostname: process.env.APP_HOSTNAME || 'http://localhost:',
-  expressPort: process.env.EXPRESS_PORT || '3005'
+  apiHostname: process.env.VUE_APP_API_HOSTNAME || 'http://localhost:',
+  apiPort: process.env.VUE_APP_API_PORT || 3000
 };

@@ -3,10 +3,11 @@ import { API_CONFIG } from './api-variables';
 const EXPENSE_TYPES = 'expense-types';
 const EXPENSES = 'expenses';
 const EMPLOYEES = 'employees';
-const APP_HOSTNAME = API_CONFIG.appHostname;
-const EXPRESS_PORT = API_CONFIG.expressPort;
+const API_HOSTNAME = API_CONFIG.apiHostname;
+const API_PORT = API_CONFIG.apiPort;
+
 const client = axios.create({
-  baseURL: `${APP_HOSTNAME}${EXPRESS_PORT}/`,
+  baseURL: `${API_HOSTNAME}${API_PORT}/`,
   json: true
 });
 

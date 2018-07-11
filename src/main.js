@@ -2,7 +2,8 @@ import Vue from 'vue';
 import App from './App.vue';
 import router from './router';
 import store from './store';
-Vue.config.productionTip = false;
+// import dotenv from 'dotenv';
+// dotenv.config({ path: '../' });
 
 //Vuetify
 import Vuetify from 'vuetify';
