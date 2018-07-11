@@ -3,14 +3,12 @@
   <v-card v-if="totals.length" class="slide-in-blurred-right">
     <v-card-title>
       <v-flex lg12 class="headline">Totals</v-flex>
-
       <v-flex lg12>
         <p v-for="total in totals" :key="total.id">
           <span>{{total.name}}:</span> {{total.costTotal | moneyValue}}
         </p>
       </v-flex>
     </v-card-title>
-
   </v-card>
 </div>
 </template>
@@ -43,17 +41,16 @@ export default {
   methods: {
     updateSelected(item) {
       if (_.isArray(item)) {
-
-
-        if (item.length < this.selected.length) { //removed item
+        if (item.length < this.selected.length) {
+          //removed item
           this.selected = _.xor(this.selected, _.xor(item, this.selected));
-        } else { //first time
+        } else {
+          //first time
           this.selected.push(item);
           this.selected = _.flatten(this.selected);
           this.selected = _.uniqWith(this.selected, _.isEqual);
         }
         this.oldPassedItem = item;
-
       } else if (item) {
         let indexOfItem = _.indexOf(this.selected, item);
         if (indexOfItem > -1) {
@@ -67,26 +64,26 @@ export default {
   computed: {
     totals: function() {
       let totals = [];
-      totals = _.map(this.selected, (item) => {
+      totals = _.map(this.selected, item => {
         return {
           name: item.budgetName,
           id: item.expenseTypeId,
           costTotal: 0
-        }
+        };
       });
       totals = _.uniqWith(totals, _.isEqual);
-      _.forEach(this.selected, (expense) => {
-        _.forEach(totals, (total) => {
+      _.forEach(this.selected, expense => {
+        _.forEach(totals, total => {
           if (total.id === expense.expenseTypeId) {
             total.costTotal += parseInt(expense.cost, 10);
           }
-        })
-      })
+        });
+      });
 
       return totals;
     }
   }
-}
+};
 </script>
 <style>
 .slide-in-blurred-right {

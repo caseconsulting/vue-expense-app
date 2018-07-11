@@ -8,7 +8,20 @@
           <v-spacer></v-spacer>
           <v-text-field v-model="search" append-icon="search" label="Search" single-line hide-details></v-text-field>
         </v-card-title>
-        <v-data-table :headers="headers" :items="employees" :search="search" item-key="name" class="elevation-1">
+        <v-data-table v-model="selected" :headers="headers" :items="employees" :search="search" :pagination.sync="pagination" item-key="name" class="elevation-1">
+          <template slot="headers" slot-scope="props">
+            <tr>
+              <th class="text-xs-left"
+                v-for="header in props.headers"
+                :key="header.text"
+                :class="['column sortable', pagination.descending ? 'desc' : 'asc', header.value === pagination.sortBy ? 'active' : '']"
+                @click="changeSort(header.value)"
+              >  
+                {{ header.text }}
+                <v-icon small>arrow_upward</v-icon>
+              </th>
+            </tr>
+          </template>
           <template slot="items" slot-scope="props">
               <tr @click="onSelect(props.item)">
                 <td class="text-xs-left">{{ props.item.firstName }}</td>
@@ -25,7 +38,7 @@
       </v-card>
     </v-flex>
     <v-flex lg4 md12 sm12>
-      <employee-form :model="model" v-on:add="addModelToTable" v-on:update="updateModelInTable"  v-on:delete="deleteModelFromTable"></employee-form>
+      <employee-form :model="model" v-on:add="addModelToTable" v-on:update="updateModelInTable" v-on:delete="deleteModelFromTable"></employee-form>
     </v-flex>
   </v-layout>
 </div>
@@ -36,17 +49,17 @@ import api from '@/shared/api.js';
 import EmployeeForm from '../components/EmployeeForm.vue';
 export default {
   filters: {
-    dateFormat: (value) => {
+    dateFormat: value => {
       if (value) {
         let date = new Date(value);
         let options = {
           month: 'short',
           day: 'numeric',
           year: 'numeric'
-        }
-        return date.toLocaleDateString("en-US", options);
+        };
+        return date.toLocaleDateString('en-US', options);
       } else {
-        return ""
+        return '';
       }
     }
   },
@@ -77,6 +90,10 @@ export default {
           value: 'empId'
         }
       ],
+      pagination: {
+        sortBy: 'lastName',
+        rowsPerPage: 10
+      },
       model: {
         id: '',
         firstName: '',
@@ -143,6 +160,14 @@ export default {
         employee => employee.id === this.model.id
       );
       this.employees.splice(modelIndex, 1);
+    },
+    changeSort(column) {
+      if (this.pagination.sortBy === column) {
+        this.pagination.descending = !this.pagination.descending;
+      } else {
+        this.pagination.sortBy = column;
+        this.pagination.descending = false;
+      }
     }
   }
 };

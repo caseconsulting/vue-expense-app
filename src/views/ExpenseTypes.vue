@@ -8,7 +8,20 @@
           <v-spacer></v-spacer>
           <v-text-field v-model="search" append-icon="search" label="Search" single-line hide-details></v-text-field>
         </v-card-title>
-        <v-data-table :headers="headers" :items="expenseTypes" :search="search" item-key="budgetName" class="elevation-1">
+        <v-data-table :headers="headers" :items="expenseTypes" :search="search" :pagination.sync="pagination" item-key="budgetName" class="elevation-1">
+          <template slot="headers" slot-scope="props">
+            <tr>
+              <th class="text-xs-left"
+                v-for="header in props.headers"
+                :key="header.text"
+                :class="['column sortable', pagination.descending ? 'desc' : 'asc', header.value === pagination.sortBy ? 'active' : '']"
+                @click="changeSort(header.value)"
+              >
+                {{ header.text }}
+                <v-icon small>arrow_upward</v-icon>
+              </th>
+            </tr>
+          </template>
           <template slot="items" slot-scope="props">
               <tr @click="onSelect(props.item)">
                 <td class="text-xs-left">{{ props.item.budgetName }}</td>
@@ -24,7 +37,7 @@
       </v-card>
     </v-flex>
     <v-flex xl3 lg4 md12 sm12>
-      <expense-type-form :model="model" v-on:add="addModelToTable" v-on:update="updateModelInTable"  v-on:delete="deleteModelFromTable"></expense-type-form>
+      <expense-type-form :model="model" v-on:add="addModelToTable" v-on:update="updateModelInTable" v-on:delete="deleteModelFromTable"></expense-type-form>
     </v-flex>
   </v-layout>
 </div>
@@ -50,8 +63,7 @@ export default {
       loading: false,
       expenseTypes: [],
       errors: [],
-      headers: [
-        {
+      headers: [{
           text: 'Expense Type',
           value: 'budgetName'
         },
@@ -68,6 +80,10 @@ export default {
           value: 'odFlag'
         }
       ],
+      pagination: {
+        sortBy: 'budgetName',
+        rowsPerPage: 10
+      },
       model: {
         id: '',
         budget: 0,
@@ -131,6 +147,14 @@ export default {
         expense => expense.id === this.model.id
       );
       this.expenseTypes.splice(modelIndex, 1);
+    },
+    changeSort(column) {
+      if (this.pagination.sortBy === column) {
+        this.pagination.descending = !this.pagination.descending;
+      } else {
+        this.pagination.sortBy = column;
+        this.pagination.descending = false;
+      }
     }
   }
 };
