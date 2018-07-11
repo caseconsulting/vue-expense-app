@@ -7,7 +7,7 @@
   <v-container fluid>
 <v-form ref="form" v-model="valid" lazy-validation >
   <v-text-field v-model="model.budgetName" :rules="genericRules" label="Budget Name" data-vv-name="Budget Name" required></v-text-field>
-  <v-text-field v-model="model.budget" :rules="budgetRules" label="Budget" data-vv-name="Budget" required></v-text-field>
+  <v-text-field type='number' v-model="model.budget" :rules="budgetRules" label="Budget" data-vv-name="Budget" required></v-text-field>
   <v-text-field v-model="model.description" :rules="genericRules" label="Notes" data-vv-name="Description" multi-line required></v-text-field>
   <v-checkbox
       label="Overdraft Flag"
@@ -40,7 +40,8 @@ export default {
   props: ['model'],
   methods: {
     async submit(newExpenseType) {
-      console.log(typeof this.model.budget); //test line. Delete after testing
+      let budget = parseInt(this.model.budget);
+      this.model.budget = budget;
       if (!this.model.odFlag) {
         this.model.odFlag = false;
       }
@@ -52,6 +53,7 @@ export default {
             this.model
           );
           console.log(newExpenseType);
+          console.log(typeof this.model.budget); //test line. Delete after testing
           this.$emit('update', newExpenseType);
         } else {
           let newExpenseType = await api.createItem(
