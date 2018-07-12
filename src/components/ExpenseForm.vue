@@ -38,6 +38,7 @@
 
 <script>
 import api from '@/shared/api.js';
+import moment from 'moment';
 export default {
   data() {
     return {
@@ -83,10 +84,16 @@ export default {
       );
     },
     formatDate(date) {
-      if (!date) return null;
-
-      const [year, month, day] = date.split('-');
-      return `${month}/${day}/${year}`;
+      if (!date) {
+        return null;
+      } else {
+        const [year, month, day] = date.split('-');
+        if (moment(`${month}/${day}/${year}`, 'MM/DD/YYYY', true).isValid()) {
+          return `${month}/${day}/${year}`;
+        } else {
+          return null;
+        }
+      }
     },
     parseDate(date) {
       if (!date) return null;
