@@ -11,10 +11,10 @@
         <v-data-table :headers="headers" :items="expenseTypes" :search="search" :pagination.sync="pagination" item-key="budgetName" class="elevation-1">
           <template slot="headers" slot-scope="props">
             <tr>
-              <th class="text-xs-left"
+              <th
                 v-for="header in props.headers"
                 :key="header.text"
-                :class="['column sortable', pagination.descending ? 'desc' : 'asc', header.value === pagination.sortBy ? 'active' : '']"
+                :class="['column sortable', pagination.descending ? 'desc' : 'asc', header.value === pagination.sortBy ? 'active' : '',header.value === 'odFlag' ? 'text-xs-center' : 'text-xs-left']"
                 @click="changeSort(header.value)"
               >
                 {{ header.text }}
@@ -27,7 +27,10 @@
                 <td class="text-xs-left">{{ props.item.budgetName }}</td>
                 <td class="text-xs-left">{{ props.item.budget | moneyValue}}</td>
                 <td class="text-xs-left">{{ props.item.description }}</td>
-                <td class="text-xs-left">{{ props.item.odFlag }}</td>
+                <td class="text-xs-center">
+                  <icon v-if="props.item.odFlag" id="marks" class="mr-1" name="regular/check-circle"></icon>
+                  <icon v-else class="mr-1" id="marks" name="regular/times-circle"></icon>
+                </td>
               </tr>
             </template>
           <v-alert slot="no-results" :value="true" color="error" icon="warning">
@@ -65,7 +68,8 @@ export default {
       errors: [],
       headers: [{
           text: 'Expense Type',
-          value: 'budgetName'
+          value: 'budgetName',
+          sortable: false
         },
         {
           text: 'Budget',
@@ -77,7 +81,8 @@ export default {
         },
         {
           text: 'Overdraft Allowed',
-          value: 'odFlag'
+          value: 'odFlag',
+          sortable: false
         }
       ],
       pagination: {
@@ -159,3 +164,9 @@ export default {
   }
 };
 </script>
+<style>
+#marks {
+  width: auto;
+  height: 1.5em;
+}
+</style>
