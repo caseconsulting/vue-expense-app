@@ -122,6 +122,7 @@ export default {
       ],
       pagination: {
         sortBy: 'purchaseDate',
+        descending: true,
         rowsPerPage: 15
       }
     };
