@@ -77,9 +77,9 @@ export default {
       const query = hasValue(queryText);
       return (
         text
-        .toString()
-        .toLowerCase()
-        .indexOf(query.toString().toLowerCase()) > -1
+          .toString()
+          .toLowerCase()
+          .indexOf(query.toString().toLowerCase()) > -1
       );
     },
     formatDate(date) {
@@ -102,6 +102,7 @@ export default {
       }
     },
     async submit() {
+      this.expense.cost = parseInt(this.expense.cost);
       if (this.$refs.form.validate()) {
         if (!this.expense.receipt) {
           this.expense.receipt = null;
@@ -124,7 +125,6 @@ export default {
             this.$emit('error', newExpense);
           }
         }
-
       }
     },
     clearForm() {
@@ -140,7 +140,9 @@ export default {
     let expenseTypes = await api.getItems(api.EXPENSE_TYPES);
     this.expenseTypes = expenseTypes.map(expenseType => {
       return {
-        text: expenseType.budgetName,
+        /* beautify preserve:start */
+        text: `${expenseType.budgetName} - ＄${expenseType.budget}`,
+        /* beautify preserve:end */
         value: expenseType.id
       };
     });

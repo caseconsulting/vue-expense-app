@@ -8,7 +8,7 @@
           <v-spacer></v-spacer>
           <v-text-field v-model="search" append-icon="search" label="Search" single-line hide-details></v-text-field>
         </v-card-title>
-        <v-data-table v-model="selected" :headers="headers" :items="employees" :search="search" :pagination.sync="pagination" item-key="name" class="elevation-1">
+        <v-data-table :headers="headers" :items="employees" :search="search" :pagination.sync="pagination" item-key="name" class="elevation-1">
           <template slot="headers" slot-scope="props">
             <tr>
               <th class="text-xs-left"
@@ -16,7 +16,7 @@
                 :key="header.text"
                 :class="['column sortable', pagination.descending ? 'desc' : 'asc', header.value === pagination.sortBy ? 'active' : '']"
                 @click="changeSort(header.value)"
-              >  
+              >
                 {{ header.text }}
                 <v-icon small>arrow_upward</v-icon>
               </th>
@@ -47,17 +47,12 @@
 <script>
 import api from '@/shared/api.js';
 import EmployeeForm from '../components/EmployeeForm.vue';
+import moment from 'moment';
 export default {
   filters: {
     dateFormat: value => {
       if (value) {
-        let date = new Date(value);
-        let options = {
-          month: 'short',
-          day: 'numeric',
-          year: 'numeric'
-        };
-        return date.toLocaleDateString('en-US', options);
+        return moment(value).format('MMM Do, YYYY');
       } else {
         return '';
       }
@@ -69,7 +64,8 @@ export default {
       loading: false,
       employees: [],
       errors: [],
-      headers: [{
+      headers: [
+        {
           text: 'First Name',
           value: 'firstName'
         },

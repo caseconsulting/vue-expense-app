@@ -41,7 +41,7 @@
 
 <script>
 import _ from 'lodash';
-
+import moment from 'moment';
 export default {
   filters: {
     moneyValue: value => {
@@ -54,13 +54,7 @@ export default {
     },
     dateFormat: value => {
       if (value) {
-        let date = new Date(value);
-        let options = {
-          month: 'short',
-          day: 'numeric',
-          year: 'numeric'
-        };
-        return date.toLocaleDateString('en-US', options);
+        return moment(value).format('MMM Do, YYYY');
       } else {
         return '';
       }
@@ -71,7 +65,8 @@ export default {
     pagination: {
       sortBy: 'cost'
     },
-    headers: [{
+    headers: [
+      {
         text: 'Cost',
         value: 'cost'
       },

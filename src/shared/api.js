@@ -26,7 +26,6 @@ async function execute(method, resource, data) {
       return response.data;
     })
     .catch(err => {
-      console.log(err);
       return err;
     });
 }

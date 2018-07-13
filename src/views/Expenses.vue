@@ -55,6 +55,7 @@
 <script>
 import api from '@/shared/api.js';
 import ExpenseForm from '../components/ExpenseForm.vue';
+import moment from 'moment';
 export default {
   filters: {
     moneyValue: value => {
@@ -67,13 +68,7 @@ export default {
     },
     dateFormat: value => {
       if (value) {
-        let date = new Date(value);
-        let options = {
-          month: 'short',
-          day: 'numeric',
-          year: 'numeric'
-        };
-        return date.toLocaleDateString('en-US', options);
+        return moment(value).format('MMM Do, YYYY');
       } else {
         return '';
       }
@@ -128,8 +123,7 @@ export default {
       ],
       pagination: {
         sortBy: 'purchaseDate',
-        descending: true,
-        rowsPerPage: 15
+        rowsPerPage: 25
       }
     };
   },

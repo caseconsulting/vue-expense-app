@@ -1,20 +1,22 @@
 <template>
-  <v-card v-if="expense"raised id="expense-info" class="white--text slide-in-blurred-right ">
-    <v-card-title primary-title class="color-change-2x">
-      <v-flex lg12 class="headline">Expense Info</v-flex>
-      <v-flex lg12>
-        <p><span>Description:</span> {{ expense.description }}</p>
-        <p><span>Employee:</span> {{ expense.employeeName }}</p>
-        <p><span>Budget:</span> {{ expense.budgetName }}</p>
-        <p><span>Cost:</span> {{ expense.cost | moneyValue}}</p>
-        <p><span>Purchased On:</span> {{ expense.purchaseDate | dateFormat }}</p>
-        <p><span>Reimbursed On:</span> {{ expense.reimbursedDate | dateFormat }}</p>
-      </v-flex>
-    </v-card-title>
-  </v-card>
+<v-card v-if="expense" raised id="expense-info" class="white--text slide-in-blurred-right ">
+  <v-card-title primary-title class="color-change-2x">
+    <v-flex lg12 class="headline">Expense Info</v-flex>
+    <v-flex lg12>
+      <p><span>Description:</span> {{ expense.description }}</p>
+      <p><span>Employee:</span> {{ expense.employeeName }}</p>
+      <p><span>Budget:</span> {{ expense.budgetName }}</p>
+      <p><span>Cost:</span> {{ expense.cost | moneyValue}}</p>
+      <p><span>Purchased On:</span> {{ expense.purchaseDate | dateFormat }}</p>
+      <p><span>Reimbursed On:</span> {{ expense.reimbursedDate | dateFormat }}</p>
+      <p><span>Notes:</span> {{ expense.note }}</p>
+    </v-flex>
+  </v-card-title>
+</v-card>
 </template>
 
 <script>
+import moment from 'moment';
 export default {
   data() {
     return {
@@ -37,22 +39,15 @@ export default {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2
       }).format(value)}`;
-    }
-  ,
-  dateFormat: value => {
-    if (value) {
-      let date = new Date(value);
-      let options = {
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric'
-      };
-      return date.toLocaleDateString('en-US', options);
-    } else {
-      return '';
+    },
+    dateFormat: value => {
+      if (value) {
+        return moment(value).format('MMM Do, YYYY');
+      } else {
+        return '';
+      }
     }
   }
-}
 };
 </script>
 <style>
@@ -78,6 +73,7 @@ span {
  * animation color-change-2x
  * ----------------------------------------
  */
+
 /* @-webkit-keyframes color-change-2x {
   0% {
     background: #19dcea;
@@ -100,6 +96,7 @@ span {
  * animation color-change-2x
  * ----------------------------------------
  */
+
 @-webkit-keyframes color-change-2x {
   0% {
     background: #02b4cb;
@@ -108,6 +105,7 @@ span {
     background: #64d48f;
   }
 }
+
 @keyframes color-change-2x {
   0% {
     background: #02b4cb;
@@ -120,11 +118,13 @@ span {
 .slide-in-blurred-right {
   animation: slide-in-blurred-right 0.5s ease-in forwards;
 }
+
 /**
  * ----------------------------------------
  * animation slide-in-blurred-right
  * ----------------------------------------
  */
+
 @keyframes slide-in-blurred-right {
   0% {
     transform: translateX(1000px) scaleX(2.5) scaleY(0.2);
@@ -139,6 +139,4 @@ span {
     opacity: 1;
   }
 }
-
-
 </style>
