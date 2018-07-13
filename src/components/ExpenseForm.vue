@@ -57,7 +57,7 @@ export default {
         v => /^\d+$/.test(v) || 'Cost must be a number'
       ],
       componentRules: [v => !!v || 'Something must be selected'],
-      dateRules: [v => !!v || 'Date must be a valid date'],
+      dateRules: [v => !!v || 'Date must be valid. MM/DD/YYYY format'],
       valid: false
     };
   },
@@ -85,15 +85,10 @@ export default {
       );
     },
     formatDate(date) {
-      console.log(date);
       if (!date) return null;
-      if (!moment(date, 'MM/DD/YYYY', true).isValid()) return null;
       else {
         const [year, month, day] = date.split('-');
         if (moment(`${month}/${day}/${year}`, 'MM/DD/YYYY', true).isValid()) {
-          console.log(
-            moment(`${month}/${day}/${year}`, 'MM/DD/YYYY', true).isValid()
-          );
           return `${month}/${day}/${year}`;
         } else {
           return null;
@@ -102,19 +97,22 @@ export default {
     },
     parseDate(date) {
       if (!date) return null;
-      else if (!moment(date, 'MM/DD/YYYY', true).isValid()) return null;
       else {
         const [month, day, year] = date.split('/');
-        if (year <= 50) {
-          return `${year.padStart(4, '20')}-${month.padStart(
-            2,
-            '0'
-          )}-${day.padStart(2, '0')}`;
+        if (month != undefined && day != undefined && year != undefined) {
+          if (year <= 40) {
+            return `${year.padStart(4, '20')}-${month.padStart(
+              2,
+              '0'
+            )}-${day.padStart(2, '0')}`;
+          } else {
+            return `${year.padStart(4, '19')}-${month.padStart(
+              2,
+              '0'
+            )}-${day.padStart(2, '0')}`;
+          }
         } else {
-          return `${year.padStart(4, '19')}-${month.padStart(
-            2,
-            '0'
-          )}-${day.padStart(2, '0')}`;
+          return date;
         }
       }
     },
