@@ -13,7 +13,7 @@
 
       <!-- Date Picker 1-->
       <v-menu ref="menu1" :close-on-content-click="true" v-model="menu1" :nudge-right="40" lazy transition="scale-transition" offset-y full-width max-width="290px" min-width="290px">
-        <v-text-field slot="activator" v-model="purchaseDateFormatted" :rules="componentRules" label="Purchase Date" hint="MM/DD/YYYY format" persistent-hint prepend-icon="event" @blur="expense.purchaseDate = parseDate(purchaseDateFormatted)"></v-text-field>
+        <v-text-field slot="activator" v-model="purchaseDateFormatted" :rules="dateRules" label="Purchase Date" hint="MM/DD/YYYY format" persistent-hint prepend-icon="event" @blur="expense.purchaseDate = parseDate(purchaseDateFormatted)"></v-text-field>
         <v-date-picker v-model="expense.purchaseDate" no-title @input="menu1 = false"></v-date-picker>
       </v-menu>
       <!-- Date Picker 2-->
@@ -57,6 +57,7 @@ export default {
         v => /^\d+$/.test(v) || 'Cost must be a number'
       ],
       componentRules: [v => !!v || 'Something must be selected'],
+      dateRules: [v => !!v || 'Date must be a valid date'],
       valid: false
     };
   },
@@ -78,17 +79,21 @@ export default {
       const query = hasValue(queryText);
       return (
         text
-        .toString()
-        .toLowerCase()
-        .indexOf(query.toString().toLowerCase()) > -1
+          .toString()
+          .toLowerCase()
+          .indexOf(query.toString().toLowerCase()) > -1
       );
     },
     formatDate(date) {
-      if (!date) {
-        return null;
-      } else {
+      console.log(date);
+      if (!date) return null;
+      if (!moment(date, 'MM/DD/YYYY', true).isValid()) return null;
+      else {
         const [year, month, day] = date.split('-');
         if (moment(`${month}/${day}/${year}`, 'MM/DD/YYYY', true).isValid()) {
+          console.log(
+            moment(`${month}/${day}/${year}`, 'MM/DD/YYYY', true).isValid()
+          );
           return `${month}/${day}/${year}`;
         } else {
           return null;
@@ -97,9 +102,21 @@ export default {
     },
     parseDate(date) {
       if (!date) return null;
-
-      const [month, day, year] = date.split('/');
-      return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+      else if (!moment(date, 'MM/DD/YYYY', true).isValid()) return null;
+      else {
+        const [month, day, year] = date.split('/');
+        if (year <= 50) {
+          return `${year.padStart(4, '20')}-${month.padStart(
+            2,
+            '0'
+          )}-${day.padStart(2, '0')}`;
+        } else {
+          return `${year.padStart(4, '19')}-${month.padStart(
+            2,
+            '0'
+          )}-${day.padStart(2, '0')}`;
+        }
+      }
     },
     async deleteExpense() {
       if (confirm('Are you sure you want to delete this expense?')) {
