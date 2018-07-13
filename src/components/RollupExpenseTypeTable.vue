@@ -3,7 +3,7 @@
   <v-card>
     <v-container fluid>
       <v-card-title>
-        <h3>Expense Type Table</h3>
+        <h2>Unreimbursed Expenses</h2>
         <v-spacer></v-spacer>
         <v-select :items="employees" :filter="customFilter" v-model="employee" item-text="text" label="Filter by Employee" clearable autocomplete></v-select>
         <v-select :items="expenseTypes" :filter="customFilter" v-model="expenseType" item-text="text" label="Filter by Expense Type" clearable autocomplete></v-select>
@@ -171,7 +171,12 @@ export default {
             expenseTypeId: expense.expenseTypeId,
             expenses: [],
             key: `${expense.userId}${expense.expenseTypeId}`,
-            allSelected: false
+            allSelected: false,
+            comparedField: expense.lastName.trim().concat(" ")
+                            .concat(expense.firstName).trim().concat(" ")
+                            .concat(expense.expenseTypeId).trim()
+                            .toLowerCase()
+
           };
         }
       });
@@ -373,6 +378,18 @@ export default {
         .toLowerCase()
         .indexOf(query.toString().toLowerCase()) > -1
       );
+    },
+    defaultSort() {
+      let arrayLength = this.empBudgets.length;
+
+      empBudgets.map( item => {
+        for(var i = 0; i < arrayLength; i++) {
+          if(item.lastName === this.empBudgets[i].lastName) {
+
+          }
+        }
+      });
+
     }
   }
 };

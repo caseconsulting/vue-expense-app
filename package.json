@@ -18,6 +18,8 @@
     "axios": "^0.18.0",
     "bootstrap": "^4.1.1",
     "bootstrap-vue": "^2.0.0-rc.11",
+    "graph2app-core": "0.0.4",
+    "graph2app-drawio-graph-builder": "0.0.3",
     "jwt-decode": "^2.2.0",
     "lodash": "^4.17.10",
     "moment": "^2.22.2",
@@ -27,7 +29,8 @@
     "vuejs-datepicker": "^1.5.2",
     "vuesax": "^3.1.30",
     "vuetify": "1.0.19",
-    "vuex": "^3.0.1"
+    "vuex": "^3.0.1",
+    "xml2js": "^0.4.19"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "^3.0.0-rc.3",
