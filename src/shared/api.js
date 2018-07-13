@@ -7,7 +7,7 @@ const API_HOSTNAME = API_CONFIG.apiHostname;
 const API_PORT = API_CONFIG.apiPort;
 
 const client = axios.create({
-  baseURL: `http://localhost:3005/`,
+  baseURL: `http://${API_HOSTNAME}:${API_PORT}`,
   json: true
 });
 
