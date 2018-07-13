@@ -5,21 +5,20 @@
     <h3 v-else> Create New Expense Type </h3>
   </v-card-title>
   <v-container fluid>
-<v-form ref="form" v-model="valid" lazy-validation >
-  <v-text-field v-model="model.budgetName" :rules="genericRules" label="Budget Name" data-vv-name="Budget Name" required></v-text-field>
-  <v-text-field type='number' v-model="model.budget" :rules="budgetRules" label="Budget" data-vv-name="Budget" required></v-text-field>
-  <v-text-field v-model="model.description" :rules="genericRules" label="Notes" data-vv-name="Description" multi-line required></v-text-field>
-  <v-checkbox
-      label="Overdraft Flag"
-      v-model="model.odFlag"
-    ></v-checkbox>
+    <v-form ref="form" v-model="valid" lazy-validation>
+      <v-text-field v-model="model.budgetName" :rules="genericRules" label="Budget Name" data-vv-name="Budget Name"></v-text-field>
+      <v-text-field prefix="$" v-model="model.budget" :rules="budgetRules" label="Budget" data-vv-name="Budget"></v-text-field>
+      <v-text-field v-model="model.description" :rules="genericRules" label="Notes" data-vv-name="Description" multi-line></v-text-field>
+      <v-checkbox label="Overdraft Flag (optional)" v-model="model.odFlag"></v-checkbox>
 
-    <!-- Buttons -->
-  <v-btn outline color="error" @click="deleteExpenseType">
-    <icon class="mr-1" name="trash"></icon>Delete</v-btn>
-  <v-btn color="white" @click="clearForm"><icon class="mr-1" name="ban"></icon>Cancel</v-btn>
-  <v-btn outline color="success" @click="submit" :disabled="!valid"><icon class="mr-1" name="save"></icon>Submit</v-btn>
-  </v-form>
+      <!-- Buttons -->
+      <v-btn outline color="error" @click="deleteExpenseType">
+        <icon class="mr-1" name="trash"></icon>Delete</v-btn>
+      <v-btn color="white" @click="clearForm">
+        <icon class="mr-1" name="ban"></icon>Cancel</v-btn>
+      <v-btn outline color="success" @click="submit" :disabled="!valid">
+        <icon class="mr-1" name="save"></icon>Submit</v-btn>
+    </v-form>
   </v-container>
 </v-card>
 </template>
@@ -40,7 +39,7 @@ export default {
   props: ['model'],
   methods: {
     async submit(newExpenseType) {
-      this.model.budget= parseInt(this.model.budget);
+      this.model.budget = parseInt(this.model.budget);
       if (!this.model.odFlag) {
         this.model.odFlag = false;
       }

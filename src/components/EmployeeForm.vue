@@ -1,32 +1,34 @@
 <template>
-<v-card hover >
+<v-card hover>
   <v-card-title>
     <h3 v-if="model.id"> Edit Employee </h3>
     <h3 v-else> Create New Employee </h3>
   </v-card-title>
   <v-container fluid>
-<v-form ref="form" v-model="valid" lazy-validation >
+    <v-form ref="form" v-model="valid" lazy-validation>
 
-  <!-- Name -->
-  <v-text-field v-model="model.firstName" :rules="genericRules" label="First Name" data-vv-name="First Name" required></v-text-field>
-  <v-text-field v-model="model.middleName" label="Middle Name" data-vv-name="Middle Name"></v-text-field>
-  <v-text-field v-model="model.lastName" :rules="genericRules" label="Last Name" data-vv-name="Last Name" required></v-text-field>
+      <!-- Name -->
+      <v-text-field v-model="model.firstName" :rules="genericRules" label="First Name" data-vv-name="First Name"></v-text-field>
+      <v-text-field v-model="model.middleName" label="Middle Name (optional)" data-vv-name="Middle Name"></v-text-field>
+      <v-text-field v-model="model.lastName" :rules="genericRules" label="Last Name" data-vv-name="Last Name"></v-text-field>
 
-  <!-- Employee ID -->
-  <v-text-field v-model="model.empId" :rules="numberRules" label="Employee ID" data-vv-name="Employee ID" required></v-text-field>
+      <!-- Employee ID -->
+      <v-text-field v-model="model.empId" :rules="numberRules" label="Employee ID" data-vv-name="Employee ID"></v-text-field>
 
-  <!-- Hire Date -->
-  <v-menu ref="menu1" :close-on-content-click="true" v-model="menu1" :nudge-right="40" lazy transition="scale-transition" offset-y full-width max-width="290px" min-width="290px">
-    <v-text-field slot="activator" v-model="hireDateFormatted" :rules="dateRules" label="Hire Date" hint="MM/DD/YYYY format" persistent-hint prepend-icon="event" @blur="model.hireDate = parseDate(hireDateFormatted)"></v-text-field>
-    <v-date-picker v-model="model.hireDate" no-title @input="menu1 = false"></v-date-picker>
-  </v-menu>
+      <!-- Hire Date -->
+      <v-menu ref="menu1" :close-on-content-click="true" v-model="menu1" :nudge-right="40" lazy transition="scale-transition" offset-y full-width max-width="290px" min-width="290px">
+        <v-text-field slot="activator" v-model="hireDateFormatted" :rules="dateRules" label="Hire Date" hint="MM/DD/YYYY format" persistent-hint prepend-icon="event" @blur="model.hireDate = parseDate(hireDateFormatted)"></v-text-field>
+        <v-date-picker v-model="model.hireDate" no-title @input="menu1 = false"></v-date-picker>
+      </v-menu>
 
-  <!-- Buttons -->
-  <v-btn outline color="error" @click="deleteEmployee">
-    <icon class="mr-1" name="trash"></icon>Delete</v-btn>
-  <v-btn color="white" @click="clearForm"><icon class="mr-1" name="ban"></icon>Cancel</v-btn>
-  <v-btn outline color="success" @click="submit" :disabled="!valid"><icon class="mr-1" name="save"></icon>Submit</v-btn>
-  </v-form>
+      <!-- Buttons -->
+      <v-btn outline color="error" @click="deleteEmployee">
+        <icon class="mr-1" name="trash"></icon>Delete</v-btn>
+      <v-btn color="white" @click="clearForm">
+        <icon class="mr-1" name="ban"></icon>Cancel</v-btn>
+      <v-btn outline color="success" @click="submit" :disabled="!valid">
+        <icon class="mr-1" name="save"></icon>Submit</v-btn>
+    </v-form>
   </v-container>
 </v-card>
 </template>
@@ -54,9 +56,9 @@ export default {
         const query = hasValue(queryText);
         return (
           text
-            .toString()
-            .toLowerCase()
-            .indexOf(query.toString().toLowerCase()) > -1
+          .toString()
+          .toLowerCase()
+          .indexOf(query.toString().toLowerCase()) > -1
         );
       }
     };
