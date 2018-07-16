@@ -29,19 +29,22 @@
         <icon class="mr-1" name="trash"></icon>Delete</v-btn>
       <v-btn color="white" @click="clearForm">
         <icon class="mr-1" name="ban"></icon>Cancel</v-btn>
-      <v-btn outline color="success" @click="submit" :disabled="!valid">
+      <v-btn outline color="success" @click="submitting=!submitting" :disabled="!valid">
         <icon class="mr-1" name="save"></icon>Submit</v-btn>
     </v-form>
   </v-container>
+  <confirmation-box :activate="submitting" :expense=expense></confirmation-box>
 </v-card>
 </template>
 
 <script>
 import api from '@/shared/api.js';
 import moment from 'moment';
+import ConfirmationBox from './ConfirmationBox.vue';
 export default {
   data() {
     return {
+      submitting: false,
       date: null,
       purchaseDateFormatted: null,
       reimbursedDateFormatted: null,
@@ -60,6 +63,9 @@ export default {
       dateRules: [v => !!v || 'Date must be valid. MM/DD/YYYY format'],
       valid: false
     };
+  },
+  components: {
+    ConfirmationBox
   },
   watch: {
     'expense.purchaseDate': function(val) {
@@ -124,6 +130,7 @@ export default {
       }
     },
     async submit() {
+      this.submitting = false;
       this.expense.cost = parseInt(this.expense.cost);
       if (this.$refs.form.validate()) {
         if (!this.expense.receipt) {
@@ -156,9 +163,16 @@ export default {
       this.expense.id = '';
       this.expense.purchaseDate = null;
       this.expense.reimbursedDate = null;
+    },
+    updateSubmitting() {
+
+      this.submitting = false;
     }
   },
   async created() {
+    EventBus.$on('canceled', this.updateSubmitting);
+    EventBus.$on('confirm', this.submit);
+
     let expenseTypes = await api.getItems(api.EXPENSE_TYPES);
     this.expenseTypes = expenseTypes.map(expenseType => {
       return {
