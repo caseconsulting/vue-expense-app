@@ -79,9 +79,9 @@ export default {
       const query = hasValue(queryText);
       return (
         text
-          .toString()
-          .toLowerCase()
-          .indexOf(query.toString().toLowerCase()) > -1
+        .toString()
+        .toLowerCase()
+        .indexOf(query.toString().toLowerCase()) > -1
       );
     },
     formatDate(date) {
@@ -144,7 +144,7 @@ export default {
             this.expense.id = newExpense.id;
             this.$emit('add', newExpense);
           } else {
-            this.$emit('error', newExpense);
+            this.$emit('error', newExpense.response.data.message);
           }
         }
       }

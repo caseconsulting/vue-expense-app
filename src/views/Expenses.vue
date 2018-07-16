@@ -1,10 +1,18 @@
 <template>
 <div>
   <v-layout row wrap>
+    <v-snackbar v-model="status.statusType" :color="status.color" :multi-line="true" :right="true" :timeout="5000" :top="true" :vertical="true">
+      <v-card-title headline color="white">
+        <span class="headline">{{status.statusMessage}}</span>
+      </v-card-title>
+      <v-btn color="white" flat @click="clearStatus">
+        Close
+      </v-btn>
+    </v-snackbar>
     <v-flex lg12 md12 sm12>
-      <v-alert v-if="error" dismissible :value="error" color="error" icon="warning" outline>
+      <!-- <v-alert v-if="error" dismissible :value="error" color="error" icon="warning" outline>
         {{error.response.data.message}}
-      </v-alert>
+      </v-alert> -->
     </v-flex>
     <v-flex lg8 md12 sm12>
       <v-card>
@@ -77,7 +85,11 @@ export default {
   data() {
     return {
       loading: true,
-      error: null,
+      status: {
+        statusType: undefined,
+        statusMessage: '',
+        color: ''
+      },
       expense: {
         id: '',
         description: '',
@@ -95,8 +107,7 @@ export default {
       expenses: [],
       processedExpenses: [],
       errors: [],
-      headers: [
-        {
+      headers: [{
           text: 'Employee',
           value: 'employeeName'
         },
@@ -134,8 +145,15 @@ export default {
     this.refreshExpenses();
   },
   methods: {
+    clearStatus() {
+      this.$set(this.status, 'statusType', undefined);
+      this.$set(this.status, 'statusMessage', '');
+      this.$set(this.status, 'color', '');
+    },
     async displayError(err) {
-      this.error = err;
+      this.$set(this.status, 'statusType', 'ERROR');
+      this.$set(this.status, 'statusMessage', err);
+      this.$set(this.status, 'color', 'red');
     },
     async getEmployeeName(expense) {
       let employee = await api.getItem(api.EMPLOYEES, expense.userId);
@@ -199,6 +217,9 @@ export default {
           this.$set(updatedExpense, 'budgetName', expenseType.budgetName);
         });
       this.processedExpenses.splice(matchingExpensesIndex, 1, updatedExpense);
+      this.$set(this.status, 'statusType', 'SUCCESS');
+      this.$set(this.status, 'statusMessage', 'Item was successfully updated!');
+      this.$set(this.status, 'color', 'green');
     },
     addModelToTable(newExpense) {
       let matchingExpenses = _.filter(
@@ -221,6 +242,13 @@ export default {
           });
 
         this.processedExpenses.push(newExpense);
+        this.$set(this.status, 'statusType', 'SUCCESS');
+        this.$set(
+          this.status,
+          'statusMessage',
+          'Item was successfully submitted!'
+        );
+        this.$set(this.status, 'color', 'green');
       }
     },
     deleteModelFromTable() {
@@ -229,6 +257,9 @@ export default {
         expense => expense.id === this.expense.id
       );
       this.processedExpenses.splice(modelIndex, 1);
+      this.$set(this.status, 'statusType', 'SUCCESS');
+      this.$set(this.status, 'statusMessage', 'Item was successfully deleted!');
+      this.$set(this.status, 'color', 'green');
     },
     changeSort(column) {
       if (this.pagination.sortBy === column) {
