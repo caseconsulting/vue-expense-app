@@ -5,7 +5,7 @@
       <v-card-title class="headline">You've reached the budget limit for this expense type</v-card-title>
       <v-card-text>
         <p>
-          The expense you are about to submit is only covered up to {{ expense.budget }} you will be reimbursed {{expense.budget - expense.cost}} of {{expense.cost}} Do you want to continue?
+          The expense you are about to submit is only covered up to {{ expense.budget|moneyValue }} you will be reimbursed {{expense.remaining|moneyValue}} of {{expense.cost|moneyValue}} Do you want to continue?
         </p>
       </v-card-text>
       <v-card-actions>
@@ -30,6 +30,16 @@ export default {
       }
     }
   },
+  filters: {
+    moneyValue: value => {
+      return `${new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD',
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      }).format(value)}`;
+    }
+  }
 
 }
 </script>

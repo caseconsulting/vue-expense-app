@@ -86,15 +86,17 @@ export default {
         let employee = _.find(this.employees, (emp) => this.expense.userId === emp.value);
         let employeeExpenseTypeBalence = _.find(employee.expenseTypes, exp => expenseType.value === exp.id);
         let cost = parseInt(this.expense.cost);
-        console.log(employeeExpenseTypeBalence);
+
         if (employeeExpenseTypeBalence) {
           employeeExpenseTypeBalence = employeeExpenseTypeBalence.balance;
+
           if (expenseType.odFlag) {
             if ((2 * expenseType.budget) !== employeeExpenseTypeBalence) { //under budget
               if ((employeeExpenseTypeBalence + cost) <= (2 * expenseType.budget)) { //full amount reimbursed
                 this.submit();
               } else { // not maxed out but also not fully covered
                 this.expense.budget = expenseType.budget;
+                this.expense.remaining = expenseType.budget - employeeExpenseTypeBalence;
                 this.submitting = true;
               }
             } else { //already overbudget handled by backend after submit
@@ -106,6 +108,7 @@ export default {
                 this.submit();
               } else { // not maxed out but also not fully covered
                 this.expense.budget = expenseType.budget;
+                this.expense.remaining = expenseType.budget - employeeExpenseTypeBalence;
                 this.submitting = true;
               }
             } else { //already overbudget handled by backend after submit
