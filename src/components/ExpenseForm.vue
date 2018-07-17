@@ -29,7 +29,7 @@
         <icon class="mr-1" name="trash"></icon>Delete</v-btn>
       <v-btn color="white" @click="clearForm">
         <icon class="mr-1" name="ban"></icon>Cancel</v-btn>
-      <v-btn outline color="success" @click="submitting=!submitting" :disabled="!valid">
+      <v-btn outline color="success" @click="checkCoverage" :disabled="!valid">
         <icon class="mr-1" name="save"></icon>Submit</v-btn>
     </v-form>
   </v-container>
@@ -41,6 +41,7 @@
 import api from '@/shared/api.js';
 import moment from 'moment';
 import ConfirmationBox from './ConfirmationBox.vue';
+import _ from 'lodash';
 export default {
   data() {
     return {
@@ -79,6 +80,44 @@ export default {
   },
   props: ['expense'],
   methods: {
+    checkCoverage() {
+      if (this.expense) {
+        let expenseType = _.find(this.expenseTypes, (type) => this.expense.expenseTypeId === type.value);
+        let employee = _.find(this.employees, (emp) => this.expense.userId === emp.value);
+        let employeeExpenseTypeBalence = _.find(employee.expenseTypes, exp => expenseType.value === exp.id);
+        let cost = parseInt(this.expense.cost);
+        console.log(employeeExpenseTypeBalence);
+        if (employeeExpenseTypeBalence) {
+          employeeExpenseTypeBalence = employeeExpenseTypeBalence.balance;
+          if (expenseType.odFlag) {
+            if ((2 * expenseType.budget) !== employeeExpenseTypeBalence) { //under budget
+              if ((employeeExpenseTypeBalence + cost) <= (2 * expenseType.budget)) { //full amount reimbursed
+                this.submit();
+              } else { // not maxed out but also not fully covered
+                this.expense.budget = expenseType.budget;
+                this.submitting = true;
+              }
+            } else { //already overbudget handled by backend after submit
+              this.submit();
+            }
+          } else {
+            if (expenseType.budget !== employeeExpenseTypeBalence) { //under budget
+              if ((employeeExpenseTypeBalence + cost) <= expenseType.budget) { //full amount reimbursed
+                this.submit();
+              } else { // not maxed out but also not fully covered
+                this.expense.budget = expenseType.budget;
+                this.submitting = true;
+              }
+            } else { //already overbudget handled by backend after submit
+              this.submit();
+            }
+          }
+
+        } else { //new expense for an expensetype
+          this.submit();
+        }
+      }
+    },
     customFilter(item, queryText, itemText) {
       const hasValue = val => (val != null ? val : '');
       const text = hasValue(item.text);
@@ -175,21 +214,26 @@ export default {
 
     let expenseTypes = await api.getItems(api.EXPENSE_TYPES);
     this.expenseTypes = expenseTypes.map(expenseType => {
+
       return {
         /* beautify preserve:start */
         text: `${expenseType.budgetName} - ＄${expenseType.budget}`,
         /* beautify preserve:end */
-        value: expenseType.id
+        value: expenseType.id,
+        budget: expenseType.budget,
+        odFlag: expenseType.odFlag
       };
     });
 
     let employees = await api.getItems(api.EMPLOYEES);
     this.employees = employees.map(employee => {
+
       return {
         text: `${employee.firstName} ${employee.middleName} ${
           employee.lastName
         }`,
-        value: employee.id
+        value: employee.id,
+        expenseTypes: employee.expenseTypes
       };
     });
   }
