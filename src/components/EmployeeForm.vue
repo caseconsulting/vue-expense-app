@@ -35,6 +35,7 @@
 
 <script>
 import api from '@/shared/api.js';
+import moment from 'moment';
 export default {
   data() {
     return {
@@ -46,7 +47,7 @@ export default {
         v => !!v || 'Cost is required',
         v => /^\d+$/.test(v) || 'Cost must be a number'
       ],
-      dateRules: [v => !!v || 'Date must be selected'],
+      dateRules: [v => !!v || 'Date must be valid. MM/DD/YYYY format'],
       valid: false,
 
       // TODO: Move this filter to methods
@@ -72,16 +73,48 @@ export default {
   methods: {
     formatDate(date) {
       if (!date) return null;
-
-      const [year, month, day] = date.split('-');
-      return `${month}/${day}/${year}`;
+      else {
+        const [year, month, day] = date.split('-');
+        if (moment(`${month}/${day}/${year}`, 'MM/DD/YYYY', true).isValid()) {
+          return `${month}/${day}/${year}`;
+        } else {
+          return null;
+        }
+      }
     },
     parseDate(date) {
       if (!date) return null;
-
-      const [month, day, year] = date.split('/');
-      return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+      else {
+        const [month, day, year] = date.split('/');
+        if (month != undefined && day != undefined && year != undefined) {
+          if (year <= 40) {
+            return `${year.padStart(4, '20')}-${month.padStart(
+              2,
+              '0'
+            )}-${day.padStart(2, '0')}`;
+          } else {
+            return `${year.padStart(4, '19')}-${month.padStart(
+              2,
+              '0'
+            )}-${day.padStart(2, '0')}`;
+          }
+        } else {
+          return date;
+        }
+      }
     },
+    // formatDate(date) {
+    //   if (!date) return null;
+    //
+    //   const [year, month, day] = date.split('-');
+    //   return `${month}/${day}/${year}`;
+    // },
+    // parseDate(date) {
+    //   if (!date) return null;
+    //
+    //   const [month, day, year] = date.split('/');
+    //   return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+    // },
     async submit() {
       if (this.$refs.form.validate()) {
         let newEmployee;
