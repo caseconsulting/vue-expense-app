@@ -1,51 +1,67 @@
 <template>
-  <div>
+<div>
 
-      <v-flex>
-        <img src="@/assets/img/logo-banner.gif" class="logo" />
-      </v-flex>
+  <v-flex>
+    <img src="@/assets/img/logo-banner.gif" class="logo" />
+  </v-flex>
 
-
-
-      <!-- <v-list-tile avatar>
-        <v-list-tile-avatar>
-          <img src="@/assets/img/logo-banner.gif" height="52" width="52" class="mr-1" />
-        </v-list-tile-avatar>
-      </v-list-tile> -->
-
-    <v-list class="pt-0" dense>
-      <v-divider></v-divider>
-      <v-list-tile v-for="item in items" :key="item.title" @click="" :to='{name: item.route}'>
-        <v-list-tile-action>
-          <icon :name="item.icon" class="navbar-icons"></icon>
-        </v-list-tile-action>
-        <v-list-tile-content>
-          <v-list-tile-title>{{ item.title }}</v-list-tile-title>
-        </v-list-tile-content>
-      </v-list-tile>
-    </v-list>
-    </div>
+  <v-list class="pt-0" dense>
+    <v-divider></v-divider>
+    <v-list-tile v-for="item in items" :key="item.title" @click="" :to='{name: item.route}'>
+      <v-list-tile-action>
+        <icon :name="item.icon" class="navbar-icons"></icon>
+      </v-list-tile-action>
+      <v-list-tile-content>
+        <v-list-tile-title>{{ item.title }}</v-list-tile-title>
+      </v-list-tile-content>
+    </v-list-tile>
+  </v-list>
+</div>
 </template>
 
 
 <script>
 // @ is an alias to /src
-import { isLoggedIn, login, logout } from '@/utils/auth';
+import {
+  isLoggedIn,
+  login,
+  logout
+} from '@/utils/auth';
 
 export default {
   data() {
     return {
       drawer: null,
-      items: [
-        { title: 'Home', icon: 'desktop', route: 'home' },
-        { title: 'Expenses', icon: 'dollar-sign', route: 'expenses' },
+      items: [{
+          title: 'Home',
+          icon: 'desktop',
+          route: 'home'
+        },
+        {
+          title: 'Expenses',
+          icon: 'dollar-sign',
+          route: 'expenses'
+        },
         {
           title: 'Expense Types',
           icon: 'book',
           route: 'expenseTypes'
         },
-        { title: 'Employees', icon: 'users', route: 'employees' },
-        { title: 'Help', icon: 'life-ring', route: 'help' }
+        {
+          title: 'Employees',
+          icon: 'users',
+          route: 'employees'
+        },
+        {
+          title: 'Help',
+          icon: 'life-ring',
+          route: 'help'
+        },
+        {
+          title: 'EmployeeHome',
+          icon: 'hand-holding-usd',
+          route: 'employeeHome'
+        }
       ]
     };
   },
@@ -66,40 +82,39 @@ export default {
 
 <style lang="scss">
 .navbar-icons {
-  color: #68caa6;
-  width: auto;
-  height: 2em;
-  max-width: 100%;
-  max-height: 100%;
+    color: #68caa6;
+    width: auto;
+    height: 2em;
+    max-width: 100%;
+    max-height: 100%;
 }
 
-.fa-icon {
-}
+.fa-icon {}
 
 #main-header {
-  font-family: 'Quicksand', sans-serif;
-  font-weight: bold;
-  font-size: 48px;
-  color: #38424d;
-  padding-top: 1%;
-  padding-bottom: 2%;
+    font-family: 'Quicksand', sans-serif;
+    font-weight: bold;
+    font-size: 48px;
+    color: #38424d;
+    padding-top: 1%;
+    padding-bottom: 2%;
 }
 .e {
-  color: #68caa6;
+    color: #68caa6;
 }
 
 .logo {
-  height: 50%;
-  width: 50%;
+    height: 50%;
+    width: 50%;
 }
 
 #nav-button {
-  float: left;
+    float: left;
 }
 #nav-button :focus {
-  outline: none;
+    outline: none;
 }
 #slider-logo {
-  margin-bottom: 5px;
+    margin-bottom: 5px;
 }
 </style>

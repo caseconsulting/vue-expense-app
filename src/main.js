@@ -36,6 +36,7 @@ import 'vue-awesome/icons/ban';
 import 'vue-awesome/icons/bars';
 import 'vue-awesome/icons/space-shuttle';
 import 'vue-awesome/icons/user-astronaut';
+import 'vue-awesome/icons/hand-holding-usd';
 import Icon from 'vue-awesome/components/Icon';
 
 Vue.component('icon', Icon);

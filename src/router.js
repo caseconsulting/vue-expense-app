@@ -8,6 +8,7 @@ import Employees from '@/views/Employees.vue';
 import Expenses from '@/views/Expenses.vue';
 import Help from '@/views/Help.vue';
 import Callback from '@/views/Callback';
+import EmployeeHome from '@/views/EmployeeHome';
 import { requireAuth } from '@/utils/auth';
 
 Vue.use(Router);
@@ -18,12 +19,12 @@ const router = new Router({
     {
       path: '/',
       name: 'login',
-      component: Login,
+      component: Login
     },
     {
       path: '/loginFailed',
       name: 'loginFailed',
-      component: LoginFailed,
+      component: LoginFailed
     },
     {
       path: '/home',
@@ -53,6 +54,12 @@ const router = new Router({
       path: '/help',
       name: 'help',
       component: Help,
+      beforeEnter: requireAuth
+    },
+    {
+      path: '/employeeHome',
+      name: 'employeeHome',
+      component: EmployeeHome,
       beforeEnter: requireAuth
     },
     {
