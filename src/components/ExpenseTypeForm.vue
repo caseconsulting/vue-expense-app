@@ -12,7 +12,7 @@
       <v-checkbox label="Overdraft Flag (optional)" v-model="model.odFlag"></v-checkbox>
 
       <!-- Buttons -->
-      <v-btn outline color="error" @click="deleteExpenseType">
+      <v-btn outline color="error" @click="deleting=true">
         <icon class="mr-1" name="trash"></icon>Delete</v-btn>
       <v-btn color="white" @click="clearForm">
         <icon class="mr-1" name="ban"></icon>Cancel</v-btn>
@@ -20,14 +20,17 @@
         <icon class="mr-1" name="save"></icon>Submit</v-btn>
     </v-form>
   </v-container>
+  <delete-modal :activate="deleting" :type="'expense type'"></delete-modal>
 </v-card>
 </template>
 
 <script>
 import api from '@/shared/api.js';
+import DeleteModal from './DeleteModal.vue';
 export default {
   data() {
     return {
+      deleting: false,
       genericRules: [v => !!v || 'This field is required'],
       budgetRules: [
         v => !!v || 'Budget amount is required',
@@ -37,6 +40,13 @@ export default {
     };
   },
   props: ['model'],
+  components: {
+    DeleteModal
+  },
+  created() {
+    EventBus.$on('canceledDelete', () => this.deleting = false);
+    EventBus.$on('confirmDelete', this.deleteExpenseType);
+  },
   methods: {
     async submit(newExpenseType) {
       this.model.budget = parseInt(this.model.budget);
@@ -63,11 +73,11 @@ export default {
       }
     },
     async deleteExpenseType() {
-      if (confirm('Are you sure you want to delete this expense?')) {
-        await api.deleteItem(api.EXPENSE_TYPES, this.model.id);
-        this.$emit('delete');
-        this.clearForm();
-      }
+      this.deleting = false;
+      await api.deleteItem(api.EXPENSE_TYPES, this.model.id);
+      this.$emit('delete');
+      this.clearForm();
+
     },
     clearForm() {
       this.$refs.form.reset();

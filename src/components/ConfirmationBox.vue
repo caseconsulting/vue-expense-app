@@ -10,8 +10,8 @@
       </v-card-text>
       <v-card-actions>
         <v-spacer></v-spacer>
-        <v-btn color="red" flat @click.native="emit('canceled',false)">No, take me back</v-btn>
-        <v-btn color="green darken-1" flat @click.native="emit('confirm')">Yes, submit</v-btn>
+        <v-btn color="red" flat @click.native="emit('canceledSubmit')">No, take me back</v-btn>
+        <v-btn color="green darken-1" flat @click.native="emit('confirmSubmit')">Yes, submit</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>

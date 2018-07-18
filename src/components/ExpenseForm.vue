@@ -25,7 +25,7 @@
       <v-text-field v-model="expense.note" label="Notes (optional)" data-vv-name="Description" multi-line></v-text-field>
 
       <!-- Buttons -->
-      <v-btn outline color="error" @click="deleteExpense">
+      <v-btn outline color="error" @click="deleting=true">
         <icon class="mr-1" name="trash"></icon>Delete</v-btn>
       <v-btn color="white" @click="clearForm">
         <icon class="mr-1" name="ban"></icon>Cancel</v-btn>
@@ -34,6 +34,7 @@
     </v-form>
   </v-container>
   <confirmation-box :activate="submitting" :expense=expense></confirmation-box>
+  <delete-modal :activate="deleting" :type="'expense'"></delete-modal>
 </v-card>
 </template>
 
@@ -41,10 +42,12 @@
 import api from '@/shared/api.js';
 import moment from 'moment';
 import ConfirmationBox from './ConfirmationBox.vue';
+import DeleteModal from './DeleteModal.vue';
 import _ from 'lodash';
 export default {
   data() {
     return {
+      deleting: false,
       submitting: false,
       date: null,
       purchaseDateFormatted: null,
@@ -66,7 +69,8 @@ export default {
     };
   },
   components: {
-    ConfirmationBox
+    ConfirmationBox,
+    DeleteModal
   },
   watch: {
     'expense.purchaseDate': function(val) {
@@ -165,11 +169,10 @@ export default {
       }
     },
     async deleteExpense() {
-      if (confirm('Are you sure you want to delete this expense?')) {
-        await api.deleteItem(api.EXPENSES, this.expense.id);
-        this.$emit('delete');
-        this.clearForm();
-      }
+      this.deleting = false;
+      await api.deleteItem(api.EXPENSES, this.expense.id);
+      this.$emit('delete');
+      this.clearForm();
     },
     async submit() {
       this.submitting = false;
@@ -207,13 +210,15 @@ export default {
       this.expense.reimbursedDate = null;
     },
     updateSubmitting() {
-
       this.submitting = false;
     }
   },
   async created() {
-    EventBus.$on('canceled', this.updateSubmitting);
-    EventBus.$on('confirm', this.submit);
+    EventBus.$on('canceledSubmit', () => this.submitting = false);
+    EventBus.$on('confirmSubmit', this.submit);
+
+    EventBus.$on('canceledDelete', () => this.deleting = false);
+    EventBus.$on('confirmDelete', this.deleteExpense);
 
     let expenseTypes = await api.getItems(api.EXPENSE_TYPES);
     this.expenseTypes = expenseTypes.map(expenseType => {

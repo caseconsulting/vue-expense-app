@@ -22,7 +22,7 @@
       </v-menu>
 
       <!-- Buttons -->
-      <v-btn outline color="error" @click="deleteEmployee">
+      <v-btn outline color="error" @click="deleting=true">
         <icon class="mr-1" name="trash"></icon>Delete</v-btn>
       <v-btn color="white" @click="clearForm">
         <icon class="mr-1" name="ban"></icon>Cancel</v-btn>
@@ -30,15 +30,18 @@
         <icon class="mr-1" name="save"></icon>Submit</v-btn>
     </v-form>
   </v-container>
+  <delete-modal :activate="deleting" :type="'employee'"></delete-modal>
 </v-card>
 </template>
 
 <script>
 import api from '@/shared/api.js';
 import moment from 'moment';
+import DeleteModal from './DeleteModal.vue';
 export default {
   data() {
     return {
+      deleting: false,
       date: null,
       hireDateFormatted: null,
       menu1: false,
@@ -64,12 +67,19 @@ export default {
       }
     };
   },
+  created() {
+    EventBus.$on('canceledDelete', () => this.deleting = false);
+    EventBus.$on('confirmDelete', this.deleteEmployee);
+  },
   watch: {
     'model.hireDate': function(val) {
       this.hireDateFormatted = this.formatDate(this.model.hireDate);
     }
   },
   props: ['model'],
+  components: {
+    DeleteModal
+  },
   methods: {
     formatDate(date) {
       if (!date) return null;
@@ -135,11 +145,11 @@ export default {
       }
     },
     async deleteEmployee() {
-      if (confirm('Are you sure you want to delete this employee?')) {
-        await api.deleteItem(api.EMPLOYEES, this.model.id);
-        this.$emit('delete');
-        this.clearForm();
-      }
+      this.deleting = false;
+      await api.deleteItem(api.EMPLOYEES, this.model.id);
+      this.$emit('delete');
+      this.clearForm();
+
     },
     clearForm() {
       this.$refs.form.reset();
