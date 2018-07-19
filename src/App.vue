@@ -1,18 +1,15 @@
 <template>
 <div id="app">
   <v-app>
-    <v-navigation-drawer
-      v-model="drawer"
-      fixed
-      app
-    >
+    <v-navigation-drawer v-model="drawer" fixed app>
       <main-nav></main-nav>
     </v-navigation-drawer>
     <v-toolbar color="primary" dark fixed app>
       <v-toolbar-side-icon v-show="isLoggedIn()" @click.stop="drawer = !drawer"></v-toolbar-side-icon>
-      <v-toolbar-title ><h2 style="text-align:center"><span class="e">€</span>xpense App</h2></v-toolbar-title>
+      <v-toolbar-title>
+        <h2 style="text-align:center"><span class="e">€</span>xpense App</h2></v-toolbar-title>
       <v-spacer></v-spacer>
-      <v-toolbar-items class="hidden-sm-and-down">
+      <v-toolbar-items>
         <v-btn flat v-show="isLoggedIn()" @click="handleLogout()">Logout</v-btn flat>
       </v-toolbar-items>
     </v-toolbar>
@@ -35,7 +32,11 @@
 </template>
 
 <script>
-import { isLoggedIn, login, logout } from '@/utils/auth';
+import {
+  isLoggedIn,
+  login,
+  logout
+} from '@/utils/auth';
 import MainNav from '@/components/MainNav.vue';
 export default {
   data: () => ({
@@ -62,13 +63,13 @@ export default {
 @import 'src/assets/styles/styles.scss';
 
 #app {
-  font-family: 'Avenir', Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  color: #2c3e50;
+    font-family: 'Avenir', Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    color: #2c3e50;
 }
 
-.e{
+.e {
     -webkit-animation: color-change 1s infinite alternate both;
     -moz-animation: color-change 10s infinite alternate both;
     -o-animation: color-change 10s infinite alternate both;
@@ -77,24 +78,43 @@ export default {
 }
 
 @-webkit-keyframes color-change {
-    0% { color: black; }
-    100% { color: gold; }
+    0% {
+        color: black;
+    }
+    100% {
+        color: gold;
+    }
 }
 @-moz-keyframes color-change {
-    0% { color: black; }
-    100% { color: gold; }
+    0% {
+        color: black;
+    }
+    100% {
+        color: gold;
+    }
 }
 @-ms-keyframes color-change {
-    0% { color: black; }
-    100% { color: gold; }
+    0% {
+        color: black;
+    }
+    100% {
+        color: gold;
+    }
 }
 @-o-keyframes color-change {
-    0% { color: black; }
-    100% { color: gold; }
+    0% {
+        color: black;
+    }
+    100% {
+        color: gold;
+    }
 }
 @keyframes color-change {
-    0% { color: black; }
-    100% { color: gold; }
+    0% {
+        color: black;
+    }
+    100% {
+        color: gold;
+    }
 }
-
 </style>
