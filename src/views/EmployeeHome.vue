@@ -1,9 +1,8 @@
 <template>
-<<<<<<< HEAD
 <v-container fill-height>
   <v-layout row wrap align-center justify-center>
     <v-flex text-xs-center lg10 md6 sm6>
-      <h2>Remaining Balances Go Here</h2>
+      <budget-table></budget-table>
     </v-flex>
     <v-flex text-xs-center lg7 md6 sm6>
       <budget-chart></budget-chart>
@@ -14,12 +13,14 @@
 
 <script>
 import BudgetChart from '../components/BudgetChart.vue';
+import BudgetTable from '../components/BudgetTable.vue';
 export default {
   data() {
     return {};
   },
   components: {
-    BudgetChart
+    BudgetChart,
+    BudgetTable
   }
 };
 </script>

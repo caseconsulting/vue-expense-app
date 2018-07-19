@@ -104,13 +104,13 @@ export default {
     expenseType: null,
     processedExpenses: [],
     pagination: {
-      sortBy: 'lastName',
+      sortBy: 'comparable',
       rowsPerPage: 10
     },
     selected: [],
     headers: [{
         text: 'Employee',
-        value: 'lastName'
+        value: 'nameComparable'
       },
       {
         text: 'Expense Type',
@@ -172,11 +172,10 @@ export default {
             expenses: [],
             key: `${expense.userId}${expense.expenseTypeId}`,
             allSelected: false,
-            comparedField: expense.lastName.trim().concat(" ")
-                            .concat(expense.firstName).trim().concat(" ")
-                            .concat(expense.expenseTypeId).trim()
+            nameComparable: expense.lastName.trim()
+                            .concat(expense.firstName).trim()
+                            .concat(expense.budgetName).trim()
                             .toLowerCase()
-
           };
         }
       });
@@ -343,12 +342,22 @@ export default {
       }
     },
     changeSort(column) {
-      if (this.pagination.sortBy === column) {
-        this.pagination.descending = !this.pagination.descending;
+      if(column !== undefined) {
+        if (this.pagination.sortBy === column) {
+          this.pagination.descending = !this.pagination.descending;
+        } else {
+          this.pagination.sortBy = column;
+          this.pagination.descending = false;
+        }
       } else {
-        this.pagination.sortBy = column;
-        this.pagination.descending = false;
+        this.pagination.sortBy
       }
+    },
+    defaultSort() {
+      let arrayLength = this.empBudgets.length;
+
+
+
     },
     async getEmployeeName(expense) {
       let employee = await api.getItem(api.EMPLOYEES, expense.userId);
@@ -378,19 +387,8 @@ export default {
         .toLowerCase()
         .indexOf(query.toString().toLowerCase()) > -1
       );
-    },
-    defaultSort() {
-      let arrayLength = this.empBudgets.length;
-
-      empBudgets.map( item => {
-        for(var i = 0; i < arrayLength; i++) {
-          if(item.lastName === this.empBudgets[i].lastName) {
-
-          }
-        }
-      });
-
     }
+
   }
 };
 </script>

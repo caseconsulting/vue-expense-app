@@ -41,7 +41,7 @@
 
       </v-data-iterator>
       <v-select
-       :items="items"
+       :items="expenseTypes"
        label="Temporary Employee Select"
 
      ></v-select>
