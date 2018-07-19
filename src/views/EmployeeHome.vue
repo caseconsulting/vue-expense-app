@@ -1,4 +1,5 @@
 <template>
+<<<<<<< HEAD
 <v-container fill-height>
   <v-layout row wrap align-center justify-center>
     <v-flex text-xs-center lg10 md6 sm6>
