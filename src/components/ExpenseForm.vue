@@ -84,15 +84,16 @@ export default {
   },
   props: ['expense'],
   methods: {
-    checkCoverage() {
+    async checkCoverage() {
       if (this.expense) {
         let expenseType = _.find(this.expenseTypes, (type) => this.expense.expenseTypeId === type.value);
-        let employee = _.find(this.employees, (emp) => this.expense.userId === emp.value);
+        let employee = await api.getItem(api.EMPLOYEES, this.expense.userId);
+        // _.find(this.employees, (emp) => this.expense.userId === emp.value);
         let employeeExpenseTypeBalence = _.find(employee.expenseTypes, exp => expenseType.value === exp.id);
         let cost = parseInt(this.expense.cost);
-
         if (employeeExpenseTypeBalence) {
           employeeExpenseTypeBalence = employeeExpenseTypeBalence.balance;
+
 
           if (expenseType.odFlag) {
             if ((2 * expenseType.budget) !== employeeExpenseTypeBalence) { //under budget
@@ -121,7 +122,13 @@ export default {
           }
 
         } else { //new expense for an expensetype
-          this.submit();
+          if (expenseType.budget < cost) {
+            this.expense.budget = expenseType.budget;
+            this.expense.remaining = expenseType.budget - employeeExpenseTypeBalence;
+            this.submitting = true;
+          } else {
+            this.submit();
+          }
         }
       }
     },
