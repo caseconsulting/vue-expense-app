@@ -1,4 +1,5 @@
 <template>
+  <div id="budget-table">
     <v-container fluid grid-list-md>
 
 
@@ -46,6 +47,7 @@
 
      ></v-select>
     </v-container>
+    </div>
 </template>
 <script>
 
