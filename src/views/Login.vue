@@ -29,6 +29,6 @@ export default {
 </script>
 <style>
 #custom-button-color {
-  background-color: #68CAA6;
+  background-color: #68caa6;
 }
 </style>

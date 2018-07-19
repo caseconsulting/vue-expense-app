@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { API_CONFIG } from './api-variables';
+import { getAccessToken, getIdToken } from '@/utils/auth';
 const EXPENSE_TYPES = 'expense-types';
 const EXPENSES = 'expenses';
 const EMPLOYEES = 'employees';
@@ -13,14 +14,14 @@ const client = axios.create({
 
 async function execute(method, resource, data) {
   // inject the accessToken for each request
-  //let accessToken = await Vue.prototype.$auth.getAccessToken()
+  let accessToken = getAccessToken();
   return client({
     method,
     url: resource,
-    data
-    // headers: {
-    //   Authorization: `Bearer ${accessToken}`
-    // }
+    data,
+    headers: {
+      Authorization: `Bearer ${accessToken}`
+    }
   })
     .then(response => {
       return response.data;

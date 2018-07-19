@@ -10,20 +10,19 @@ const CLIENT_ID = AUTH_CONFIG.clientId;
 const CLIENT_DOMAIN = AUTH_CONFIG.domain;
 const REDIRECT = AUTH_CONFIG.callbackUrl;
 const SCOPE = 'openid';
-const AUDIENCE = `https://${AUTH_CONFIG.domain}/userinfo`;
+// const AUDIENCE = `https://${AUTH_CONFIG.domain}/userinfo`;
 
 var auth = new auth0.WebAuth({
-  clientID: CLIENT_ID,
-  domain: CLIENT_DOMAIN
+  clientID: 'w9Ih4cZX8Plry47ZuoAcbnwGEG4hFeZx',
+  domain: 'consultwithcase.auth0.com',
+  responseType: 'token id_token',
+  audience: 'https://consultwithcase.auth0.com/api/v2/',
+  redirectUri: 'http://localhost:8080/callback',
+  scope: 'openid'
 });
 
 export function login() {
-  auth.authorize({
-    responseType: 'token id_token',
-    redirectUri: REDIRECT,
-    audience: AUDIENCE,
-    scope: SCOPE
-  });
+  auth.authorize();
 }
 
 var router = new Router({
@@ -65,6 +64,7 @@ function clearAccessToken() {
 
 // Helper function that will allow us to extract the access_token and id_token
 function getParameterByName(name) {
+  console.log('HASH', window.location.hash);
   let match = RegExp('[#&]' + name + '=([^&]*)').exec(window.location.hash);
   return match && decodeURIComponent(match[1].replace(/\+/g, ' '));
 }
@@ -72,6 +72,7 @@ function getParameterByName(name) {
 // Get and store access_token in local storage
 export function setAccessToken() {
   let accessToken = getParameterByName('access_token');
+  console.log('ACCESS TOKEN', accessToken);
   localStorage.setItem(ACCESS_TOKEN_KEY, accessToken);
 }
 
