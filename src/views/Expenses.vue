@@ -93,7 +93,7 @@ export default {
       expense: {
         id: '',
         description: '',
-        cost: 0,
+        cost: "0",
         note: null,
         userId: '',
         expenseTypeId: '',

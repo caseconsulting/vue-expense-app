@@ -61,6 +61,7 @@ export default {
       descriptionRules: [v => !!v || 'Description is required'],
       costRules: [
         v => !!v || 'Cost is required',
+        v => parseInt(v, 10) > 0 || 'Cost must be greater than 0',
         v => /^\d+$/.test(v) || 'Cost must be a number'
       ],
       componentRules: [v => !!v || 'Something must be selected'],
@@ -73,10 +74,10 @@ export default {
     DeleteModal
   },
   watch: {
-    'expense.purchaseDate': function(val) {
+    'expense.purchaseDate': function (val) {
       this.purchaseDateFormatted = this.formatDate(this.expense.purchaseDate);
     },
-    'expense.reimbursedDate': function(val) {
+    'expense.reimbursedDate': function (val) {
       this.reimbursedDateFormatted = this.formatDate(
         this.expense.reimbursedDate
       );
