@@ -29,8 +29,12 @@
                 <v-list-tile-content class="align-end">{{ props.item.budget }}</v-list-tile-content>
               </v-list-tile>
               <v-list-tile>
-                <v-list-tile-content>Description:</v-list-tile-content>
+                <div>
+                  <v-list-tile-content>Description: </v-list-tile-content>
+                </div>
+                <div>
                 <v-list-tile-content class="align-end">{{ props.item.description }}</v-list-tile-content>
+                </div>
               </v-list-tile>
               <v-list-tile>
                 <v-list-tile-content>Overdraft:</v-list-tile-content>
@@ -41,17 +45,13 @@
         </v-flex>
 
       </v-data-iterator>
-      <v-select
-       :items="expenseTypes"
-       label="Temporary Employee Select"
-
-     ></v-select>
     </v-container>
     </div>
 </template>
 <script>
 
   export default {
+    props: ['employee', 'expenseTypes', 'expenses'],
    data: () => ({
      rowsPerPageItems: [1, 4, 8, 12],
      pagination: {
@@ -65,56 +65,56 @@
        lastName: "BIG",
        empId: null,
        hireDate: null
-     },
-     expenseTypes: [
-       {
-         value: 'total',
-         budget: 60000,
-         budgetName: 'Overall',
-         description: "Overall budget of all of the employee's expenses.",
-         odFlag: true
-       },
-       {
-         value: 'training',
-         budget: 500,
-         budgetName: 'Training',
-         description: "Training in new technologies",
-         odFlag: true
-
-       },
-       {
-         value: 'total',
-         budget: 60000,
-         budgetName: 'Overall',
-         description: "Overall budget of all of the employee's expenses.",
-         odFlag: true
-
-       },
-       {
-         value: 'total',
-         budget: 60000,
-         budgetName: 'Overall',
-         description: "Overall budget of all of the employee's expenses.",
-         odFlag: true
-
-       },
-       {
-         value: 'total',
-         budget: 60000,
-         budgetName: 'Overall',
-         description: "Overall budget of all of the employee's expenses.",
-         odFlag: true
-
-       },
-       {
-         value: 'total',
-         budget: 60000,
-         budgetName: 'Overall',
-         description: "Overall budget of all of the employee's expenses.",
-         odFlag: true
-
-       }
-     ]
+     }
+     // expenseTypes: [
+     //   {
+     //     value: 'total',
+     //     budget: 60000,
+     //     budgetName: 'Overall',
+     //     description: "Overall budget of all of the employee's expenses.",
+     //     odFlag: true
+     //   },
+     //   {
+     //     value: 'training',
+     //     budget: 500,
+     //     budgetName: 'Training',
+     //     description: "Training in new technologies",
+     //     odFlag: true
+     //
+     //   },
+     //   {
+     //     value: 'total',
+     //     budget: 60000,
+     //     budgetName: 'Overall',
+     //     description: "Overall budget of all of the employee's expenses.",
+     //     odFlag: true
+     //
+     //   },
+     //   {
+     //     value: 'total',
+     //     budget: 60000,
+     //     budgetName: 'Overall',
+     //     description: "Overall budget of all of the employee's expenses.",
+     //     odFlag: true
+     //
+     //   },
+     //   {
+     //     value: 'total',
+     //     budget: 60000,
+     //     budgetName: 'Overall',
+     //     description: "Overall budget of all of the employee's expenses.",
+     //     odFlag: true
+     //
+     //   },
+     //   {
+     //     value: 'total',
+     //     budget: 60000,
+     //     budgetName: 'Overall',
+     //     description: "Overall budget of all of the employee's expenses.",
+     //     odFlag: true
+     //
+     //   }
+     // ]
    }),
    methods: {
 
