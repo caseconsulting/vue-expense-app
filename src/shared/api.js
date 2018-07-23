@@ -4,6 +4,7 @@ import { getAccessToken, getIdToken } from '@/utils/auth';
 const EXPENSE_TYPES = 'expense-types';
 const EXPENSES = 'expenses';
 const EMPLOYEES = 'employees';
+const SPECIAL = 'special';
 const API_HOSTNAME = API_CONFIG.apiHostname;
 const API_PORT = API_CONFIG.apiPort;
 
@@ -59,5 +60,6 @@ export default {
   deleteItem,
   EXPENSE_TYPES,
   EXPENSES,
-  EMPLOYEES
+  EMPLOYEES,
+  SPECIAL
 };

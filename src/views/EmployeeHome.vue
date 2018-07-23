@@ -31,93 +31,20 @@
 <script>
 import BudgetChart from '../components/BudgetChart.vue';
 import BudgetTable from '../components/BudgetTable.vue';
+import api from '@/shared/api.js';
 export default {
   data() {
     return {
+      loading: false,
       employee: {
-        id: '4178d87c-0044-47e4-a85c-03785a60846a',
-        firstName: 'Morse',
-        middleName: '-... ..- -- -... .-',
-        lastName: 'Code',
-        empId: '12345',
-        hireDate: '2018-04-03',
-        isActive: true,
-        expenseTypes: [
-          {
-            balance: 5,
-            id: '303ed9cb-a0e6-4090-949b-fd7f526debb2',
-            owedAmount: 0
-          },
-          {
-            balance: 200,
-            id: '20d1aa5b-687e-42c5-96c2-a824baa54cef',
-            owedAmount: 0
-          },
-          {
-            balance: 2,
-            id: 'ce671ddc-474c-42fa-9755-1a3e167b33cd',
-            owedAmount: 0
-          }
-        ]
-      },
-      expenseTypes: [
-        {
-          budget: 5,
-          budgetName: 'Sleeping',
-          description: 'Too tired',
-          id: '303ed9cb-a0e6-4090-949b-fd7f526debb2',
-          odFlag: false
-        },
-        {
-          budget: 3400,
-          budgetName: 'Training',
-          description: 'Do better',
-          id: '20d1aa5b-687e-42c5-96c2-a824baa54cef',
-          odFlag: false
-        },
-        {
-          budget: 7,
-          budgetName: 'Dragon Balls',
-          description: 'Free Wishes',
-          id: 'ce671ddc-474c-42fa-9755-1a3e167b33cd',
-          odFlag: false
-        }
-      ],
-      expenses: [
-        {
-          purchaseDate: "2018-07-05",
-          note: null,
-          cost: 2,
-          receipt: null,
-          reimbursedDate: null,
-          userId: "4178d87c-0044-47e4-a85c-03785a60846a",
-          expenseTypeId: "ce671ddc-474c-42fa-9755-1a3e167b33cd",
-          description: "twesgfd",
-          id: "1e8a8abc-4fa9-4b9c-bc5d-aab2632e74fe"
-        },
-        {
-          purchaseDate: "2018-07-09",
-          note: null,
-          cost: 3,
-          receipt: null,
-          reimbursedDate: null,
-          userId: "364f1788-43ac-4df8-ad34-9d6d5d74b50a",
-          expenseTypeId: "ce671ddc-474c-42fa-9755-1a3e167b33cd",
-          description: "251`",
-          id: "32074f0d-a91e-4214-af50-8b6f87fbb05e"
-        },
-        {
-          purchaseDate: "2018-07-19",
-          note: null,
-          cost: 1,
-          receipt: null,
-          reimbursedDate: null,
-          userId: "998440f3-a89d-4654-993d-08deafb47d53",
-          expenseTypeId: "ce671ddc-474c-42fa-9755-1a3e167b33cd",
-          description: "dbz",
-          id: "d4a0ecba-5158-47eb-aa66-650e0bad3902"
-        }
-      ]
+        budgetName: '',
+        odFlag: false,
+        description: '',
+        id: '',
+        budget: 0,
+        expenses: []
+      }
+
     };
   },
   async created() {
@@ -125,10 +52,54 @@ export default {
   },
   methods: {
     async refreshBudget() {
-
+      this.loading = true;
+      let employeeVar = await api.getItem(api.SPECIAL, "998440f3-a89d-4654-993d-08deafb47d53");
+      console.log(employeeVar);
+      this.employee = employeeVar;
+    //  console.log(this.employee.expenses);
+      this.loading = false;
     },
+    // async getExpenseType(expense) {
+    //   let expenseType = await api.getItem(
+    //     api.EXPENSE_TYPES,
+    //     expense.expenseTypeId
+    //   );
+    //   let found = false;
+    //   for(var i = 0; (i < this.expenseTypes.length) && (!found); i++) {
+    //     if(this.expenseTypes[i].id === expenseType.id) {
+    //       found = true;
+    //     }
+    //   }
+    //   if(!found) {
+    //     this.expenseTypes.push(expenseType);
+    //   }
+    //   return expense;
+    // },
+    // async getExpense(expense) {
+    //   let employee = await api.getItem(
+    //     api.EMPLOYEES,
+    //     expense.expenseTypeId
+    //   );
+    //   let found = false;
+    //   for(var i = 0; (i < this.employees.length) && (!found); i++) {
+    //     if(this.employees[i].id === employee.id) {
+    //       found = true;
+    //     }
+    //   }
+    //   if(!found) {
+    //     this.employees.push(employee);
+    //   }
+    //   return expense;
+    // },
     onSelect() {
-      TODO
+      this.model = {
+        id: item.id,
+        firstName: item.firstName,
+        middleName: item.middleName,
+        lastName: item.lastName,
+        empId: item.empId,
+        hireDate: item.hireDate
+      };
     },
     addModelToTable() {
 
@@ -143,25 +114,33 @@ export default {
   computed: {
     budgetNames() {
       let budgets = [];
-      for(var i = 0; i < this.expenseTypes.length; i++) {
-        budgets.push(this.expenseTypes[i].budgetName);
+      let expenseTypes = this.employee.expenses;
+
+      for(var i = 0; i < expenseTypes.length; i++) {
+        budgets.push(expenseTypes[i].budgetName);
       }
       return budgets;
     },
     budgets() {
       let budgetCosts = [];
-      for(var i = 0; i < this.expenseTypes.length; i++) {
-        budgetCosts.push(this.expenseTypes[i].budget);
+      let expenseTypes = this.employee.expenses;
+      for(var i = 0; i < expenseTypes.length; i++) {
+        budgetCosts.push(expenseTypes[i].budget);
       }
       return budgetCosts;
-    },
-    remainingBudgets() {
-      let remainders = [];
-      for(var i = 0; i < this.expenseTypes.length; i++) {
-        remainders.push(this.expenseTypes[i].budget);
-      }
-      return remainders;
     }
+    // remainingBudgets() {
+    //   let remainders = [];
+    //   let unlinkedExpenses = this.expenses;
+    //
+    //   for(var i = 0; i < this.expenseTypes.length; i++) {
+    //     for(var k = 0; k < this.expenseType)
+    //     if(remainder.id === unlinkedExpenses.expenseTypeId) {
+    //
+    //     }
+    //   }
+    //   return remainders;
+    // }
   },
   components: {
     BudgetChart,

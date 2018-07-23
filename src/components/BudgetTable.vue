@@ -57,15 +57,8 @@
      pagination: {
        rowsPerPage: 4
      },
-     expenses: [],
-     employee: {
-       id: "40c3b110-a489-4c02-99e7-d1b8f55c4893",
-       firstName: '',
-       middleName: '',
-       lastName: "BIG",
-       empId: null,
-       hireDate: null
-     }
+    
+
      // expenseTypes: [
      //   {
      //     value: 'total',
