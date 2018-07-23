@@ -18,7 +18,7 @@ var auth = new auth0.WebAuth({
   responseType: 'token id_token',
   audience: 'https://consultwithcase.auth0.com/api/v2/',
   redirectUri: 'http://localhost:8080/callback',
-  scope: 'openid'
+  scope: 'openid email'
 });
 
 export function login() {
