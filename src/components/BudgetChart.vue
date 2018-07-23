@@ -4,22 +4,24 @@ import {
 } from 'vue-chartjs';
 
 export default {
+  props: ['employee', 'expenseTypes', 'expenses', 'budgetNames'],
   extends: Bar,
   mounted() {
     // Overwriting base render method with actual data.
     this.renderChart({
-      labels: [
-        'AWS',
-        'Company Phones',
-        'Cowboy Training',
-        'Dragon Balls',
-        'Equipment',
-        'Ninja Training',
-        'Overall',
-        'Parking',
-        'Pirate Training',
-        'Pokemon Training'
-      ],
+      labels: this.budgetNames,
+       //[
+      //   'AWS',
+      //   'Company Phones',
+      //   'Cowboy Training',
+      //   'Dragon Balls',
+      //   'Equipment',
+      //   'Ninja Training',
+      //   'Overall',
+      //   'Parking',
+      //   'Pirate Training',
+      //   'Pokemon Training'
+      // ],
       datasets: [{
           type: 'bar',
           label: 'Reimbursed',
