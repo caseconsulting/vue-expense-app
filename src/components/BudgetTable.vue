@@ -4,7 +4,7 @@
 
 
       <v-data-iterator
-        :items="expenseTypes"
+        :items="employee.expenses"
         :rows-per-page-items="rowsPerPageItems"
         :pagination.sync="pagination"
         content-tag="v-layout"
@@ -51,13 +51,13 @@
 <script>
 
   export default {
-    props: ['employee', 'expenseTypes', 'expenses'],
+    props: ['employee'],
    data: () => ({
      rowsPerPageItems: [1, 4, 8, 12],
      pagination: {
        rowsPerPage: 4
      },
-    
+
 
      // expenseTypes: [
      //   {

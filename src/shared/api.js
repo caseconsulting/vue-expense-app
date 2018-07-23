@@ -52,12 +52,17 @@ function deleteItem(type, id) {
   return execute('delete', `/${type}/${id}`);
 }
 
+function getSpecial() {
+  return execute('get', `/special/00deaf13-102c-4b2e-95cc-25a0ffc2a03f`);
+}
+
 export default {
   getItems,
   getItem,
   createItem,
   updateItem,
   deleteItem,
+  getSpecial,
   EXPENSE_TYPES,
   EXPENSES,
   EMPLOYEES,

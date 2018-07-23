@@ -4,7 +4,7 @@ import {
 } from 'vue-chartjs';
 
 export default {
-  props: ['employee', 'expenseTypes', 'expenses', 'budgetNames'],
+  props: ['employee', 'budgetNames'],
   extends: Bar,
   mounted() {
     // Overwriting base render method with actual data.
