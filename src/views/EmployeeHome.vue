@@ -18,7 +18,7 @@
     <v-flex text-xs-center lg7 md6 sm6>
       <budget-chart
       :employee="employee"
-      :budgetNames="budgetNames"></budget-chart>
+      :budgets="budgets"></budget-chart>
     </v-flex>
   </v-layout>
 </v-container>
@@ -49,6 +49,14 @@ export default {
       // console.log(employeeVar);
       // console.log(employeeVar.expenses[0]);
       this.employee = employeeVar;
+      this.employee.expenses.map(expenseType => {
+        let totalCost = 0;
+        for(var i = 0; i < expenseType.expenses.length; i++) {
+          totalCost = totalCost + expenseType.expenses[i].cost;
+        }
+        expenseType.totalCost = totalCost;
+        return expenseType;
+      });
     //  console.log(this.employee.expenses);
       this.loading = false;
     },
@@ -73,23 +81,17 @@ export default {
     }
   },
   computed: {
-    budgetNames() {
-      let budgets = [];
-       let expenseTypes = this.employee.expenses;
-       console.log(expenseTypes.length);
-       for(var i = 0; i < expenseTypes.length; i++) {
-         budgets.push(expenseTypes[i].budgetName);
-       }
-      return budgets;
-    },
     budgets() {
+      let budgetNames = [];
       let budgetCosts = [];
        let expenseTypes = this.employee.expenses;
        for(var i = 0; i < expenseTypes.length; i++) {
          budgetCosts.push(expenseTypes[i].budget);
+         budgetNames.push(expenseTypes[i].budgetName);
        }
-      return budgetCosts;
+      return { budgets: budgetCosts, budgetNames: budgetNames};
     }
+
     // remainingBudgets() {
     //   let remainders = [];
     //   let unlinkedExpenses = this.expenses;

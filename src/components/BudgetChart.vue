@@ -4,12 +4,12 @@ import {
 } from 'vue-chartjs';
 
 export default {
-  props: ['employee', 'budgetNames'],
+  props: ['employee', 'budgets'],
   extends: Bar,
   mounted() {
     // Overwriting base render method with actual data.
     this.renderChart({
-      labels: this.budgetNames,
+      labels: this.budgets.budgetNames,
        //[
       //   'AWS',
       //   'Company Phones',
@@ -39,7 +39,7 @@ export default {
           label: 'Budget',
           backgroundColor: '#e1e7f2',
           fill: false,
-          data: [100, 100, 100, 100, 100, 100, 100, 100, 100, 100]
+          data: this.budgets.budgets
         }
       ]
     }, {
