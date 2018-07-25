@@ -81,15 +81,63 @@ export default {
     }
   },
   computed: {
+    // budgets() {
+    //   let budgetNames = [];
+    //   let budgetCosts = [];
+    //    let expenseTypes = this.employee.expenses;
+    //    for(var i = 0; i < expenseTypes.length; i++) {
+    //      budgetCosts.push(expenseTypes[i].budget);
+    //      budgetNames.push(expenseTypes[i].budgetName);
+    //    }
+    //   return { budgets: budgetCosts, budgetNames: budgetNames};
+    // },
     budgets() {
       let budgetNames = [];
       let budgetCosts = [];
-       let expenseTypes = this.employee.expenses;
-       for(var i = 0; i < expenseTypes.length; i++) {
-         budgetCosts.push(expenseTypes[i].budget);
-         budgetNames.push(expenseTypes[i].budgetName);
-       }
-      return { budgets: budgetCosts, budgetNames: budgetNames};
+      let budgetDifference = [];
+      let reimbursed = [];
+      let unreimbursed = [];
+      let expenseTypes = this.employee.expenses;
+      for(var i = 0; i < expenseTypes.length; i++) {
+        budgetNames.push(expenseTypes[i].budgetName);
+
+        if(expenseTypes[i].expenses.length === 0){
+          budgetDifference.push(expenseTypes[i].budget);
+          reimbursed.push(0);
+          unreimbursed.push(0);
+        }
+        else{
+          let totalReimbursed = 0;
+          let totalUnreimbursed = 0;
+          for(var j = 0; j < expenseTypes[i].expenses.length; j++){
+            if(expenseTypes[i].expenses[j].reimbursedDate !== null)
+            {
+              let cost = expenseTypes[i].expenses[j].cost;
+              totalReimbursed += cost;
+            }
+            else {
+              let cost = expenseTypes[i].expenses[j].cost;
+              totalUnreimbursed += cost;
+            }
+          }
+          let totalDifference = totalReimbursed + totalUnreimbursed;
+          console.log(totalDifference);
+          console.log('budget:' + expenseTypes[i].budget);
+          let budgetCost = expenseTypes[i].budget - totalDifference;
+          budgetDifference.push(budgetCost);
+          reimbursed.push(totalReimbursed);
+          unreimbursed.push(totalUnreimbursed);
+      }
+    }
+      return {
+        names: budgetNames,
+
+        difference: budgetDifference,
+        reimbursed: reimbursed,
+        unreimbursed: unreimbursed
+      };
+
+
     }
 
     // remainingBudgets() {

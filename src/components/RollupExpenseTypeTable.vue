@@ -127,6 +127,7 @@ export default {
     // TODO: Since we get all the employees and expense types, we no longer need to
     // talk to the api to retrieve the employee name and expense type name for each expense
     //Get employees
+    console.log(api.getItems(api.EMPLOYEES));
     let employees = await api.getItems(api.EMPLOYEES);
 
     this.employees = await employees.map(employee => {
@@ -138,6 +139,7 @@ export default {
       };
     });
     //Get expense Types
+
     let expenseTypes = await api.getItems(api.EXPENSE_TYPES);
     this.expenseTypes = expenseTypes.map(expenseType => {
       return {
@@ -147,7 +149,8 @@ export default {
     });
 
     //Get expenses
-    this.expenses = await api.getItems(api.EXPENSES);
+
+    this.expenses = await api.getItem(api.EXPENSES);
 
     this.processedExpenses = _.map(this.expenses, expense => {
       return this.getEmployeeName(expense);
