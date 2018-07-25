@@ -1,15 +1,10 @@
 import decode from 'jwt-decode';
 import auth0 from 'auth0-js';
-import { AUTH_CONFIG } from './auth0-variables';
 import Router from 'vue-router';
 
 const ID_TOKEN_KEY = 'id_token';
 const ACCESS_TOKEN_KEY = 'access_token';
-
-const CLIENT_ID = AUTH_CONFIG.clientId;
-const CLIENT_DOMAIN = AUTH_CONFIG.domain;
-const REDIRECT = AUTH_CONFIG.callbackUrl;
-const SCOPE = 'openid';
+const SCOPE = 'openid email';
 // const AUDIENCE = `https://${AUTH_CONFIG.domain}/userinfo`;
 
 var auth = new auth0.WebAuth({
@@ -18,7 +13,7 @@ var auth = new auth0.WebAuth({
   responseType: 'token id_token',
   audience: 'https://consultwithcase.auth0.com/api/v2/',
   redirectUri: 'http://localhost:8080/callback',
-  scope: 'openid email'
+  scope: SCOPE
 });
 
 export function login() {
@@ -64,7 +59,6 @@ function clearAccessToken() {
 
 // Helper function that will allow us to extract the access_token and id_token
 function getParameterByName(name) {
-  console.log('HASH', window.location.hash);
   let match = RegExp('[#&]' + name + '=([^&]*)').exec(window.location.hash);
   return match && decodeURIComponent(match[1].replace(/\+/g, ' '));
 }
@@ -72,7 +66,6 @@ function getParameterByName(name) {
 // Get and store access_token in local storage
 export function setAccessToken() {
   let accessToken = getParameterByName('access_token');
-  console.log('ACCESS TOKEN', accessToken);
   localStorage.setItem(ACCESS_TOKEN_KEY, accessToken);
 }
 
