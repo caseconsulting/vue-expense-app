@@ -171,12 +171,11 @@ export default {
             expenseTypeId: expense.expenseTypeId,
             expenses: [],
             key: `${expense.userId}${expense.expenseTypeId}`,
-            allSelected: false,
-            /*comparedField: expense.lastName.trim().concat(" ")
-              .concat(expense.firstName).trim().concat(" ")
-              .concat(expense.expenseTypeId).trim()
-              .toLowerCase()*/
-
+            allSelected: false
+            // comparedField: expense.lastName.trim().concat(" ")
+            //   .concat(expense.firstName).trim().concat(" ")
+            //   .concat(expense.expenseTypeId).trim()
+            //   .toLowerCase()
           };
         }
       });
@@ -254,9 +253,7 @@ export default {
     },
     removeExpenseFromList(selected) {
       _.forEach(this.processedExpenses, item => {
-
         _.forEach(item.expenses, expense => {
-
           let itemIndex = _.indexOf(selected, expense);
 
           if (itemIndex > -1) {
@@ -384,12 +381,9 @@ export default {
 
       empBudgets.map(item => {
         for (var i = 0; i < arrayLength; i++) {
-          if (item.lastName === this.empBudgets[i].lastName) {
-
-          }
+          if (item.lastName === this.empBudgets[i].lastName) {}
         }
       });
-
     }
   }
 };
