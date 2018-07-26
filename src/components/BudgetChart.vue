@@ -6,6 +6,7 @@ export default {
   extends: Bar,
   mounted() {
     // Overwriting base render method with actual data.
+
     this.renderChart(
       {
         labels: this.budgets.names,
@@ -28,6 +29,7 @@ export default {
             backgroundColor: '#e1e7f2',
             fill: false,
             data: this.budgets.difference
+
           }
         ]
       },

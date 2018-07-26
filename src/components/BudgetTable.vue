@@ -30,10 +30,18 @@
               </v-list-tile>
               <v-list-tile>
                 <div>
-                  <v-list-tile-content>Description: </v-list-tile-content>
+                  <v-list-tile-content>Reimbursed:</v-list-tile-content>
                 </div>
                 <div>
-                <v-list-tile-content class="align-end">{{ props.item.description }}</v-list-tile-content>
+                <v-list-tile-content class="align-end">{{ props.item.reimbursed }}</v-list-tile-content>
+                </div>
+              </v-list-tile>
+              <v-list-tile>
+                <div>
+                  <v-list-tile-content>Unreimbursed:</v-list-tile-content>
+                </div>
+                <div>
+                <v-list-tile-content class="align-end">{{ props.item.unreimbursed }}</v-list-tile-content>
                 </div>
               </v-list-tile>
               <v-list-tile>
