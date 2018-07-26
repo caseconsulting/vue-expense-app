@@ -6,8 +6,8 @@
 
 
   <v-flex text-xs-center lg8 md12 sm12>
-    <budget-table :employee="employee"></budget-table>
-    <budget-chart :employee="employee" :budgets="budgets"></budget-chart>
+    <budget-table v-if="!loading" :employee="employee"></budget-table>
+    <budget-chart v-if="!loading" :employee="employee" :budgets="budgets"></budget-chart>
   </v-flex>
 
   <v-flex text-xs-center lg4 md12 sm12>
@@ -47,6 +47,7 @@ export default {
 
       employees: [],
       employee: {},
+      expenseTypeData: [],
       expense: {
         id: '',
         description: '',
@@ -78,6 +79,7 @@ export default {
       // console.log(employeeVar);
       // console.log(employeeVar.expenses[0]);
       this.employee = employeeVar;
+      this.expenseTypeData = this.employee.expenseTypeData;
       // this.employee.expenseTypeData.map(expenseType => {
       //   let totalCost = 0;
       //   for(var i = 0; i < expenseType.expenses.length; i++) {
@@ -182,8 +184,9 @@ export default {
       let reimbursed = [];
       let unreimbursed = [];
       if (this.employee !== undefined) {
-        let expenseTypes = this.employee.expenseTypeData;
-        for (var i = 0; i < expenseTypes.length; i++) {
+        //Race Condition here
+        let expenseTypes = this.expenseTypeData;
+        for (var i = 0; i < this.expenseTypeData.length; i++) {
           budgetNames.push(expenseTypes[i].budgetName);
 
           if (expenseTypes[i].expenses === undefined) {
