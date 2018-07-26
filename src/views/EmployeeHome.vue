@@ -73,11 +73,12 @@ export default {
     },
     async refreshBudget() {
       this.loading = true;
-      let employeeVar = await api.getSpecial();
+      const id = '00deaf13-102c-4b2e-95cc-25a0ffc2a03f';
+      let employeeVar = await api.getItem(api.SPECIAL, id);
       // console.log(employeeVar);
       // console.log(employeeVar.expenses[0]);
       this.employee = employeeVar;
-      // this.employee.expenses.map(expenseType => {
+      // this.employee.expenseTypeData.map(expenseType => {
       //   let totalCost = 0;
       //   for(var i = 0; i < expenseType.expenses.length; i++) {
       //     totalCost = totalCost + expenseType.expenses[i].cost;
@@ -85,8 +86,8 @@ export default {
       //   expenseType.totalCost = totalCost;
       //   return expenseType;
       // });
-      //  console.log(this.employee.expenses);
-      this.employee.expenses.map(expenseType => {
+      //  console.log(this.employee.expenseTypeData);
+      this.employee.expenseTypeData.map(expenseType => {
         let totalCost = 0;
         for (var i = 0; i < expenseType.expenses.length; i++) {
           totalCost = totalCost + expenseType.expenses[i].cost;
@@ -94,7 +95,7 @@ export default {
         expenseType.totalCost = totalCost;
         return expenseType;
       });
-      //  console.log(this.employee.expenses);
+      //  console.log(this.employee.expenseTypeData);
 
       this.loading = false;
     },
@@ -181,7 +182,7 @@ export default {
       let reimbursed = [];
       let unreimbursed = [];
       if (this.employee !== undefined) {
-        let expenseTypes = this.employee.expenses;
+        let expenseTypes = this.employee.expenseTypeData;
         for (var i = 0; i < expenseTypes.length; i++) {
           budgetNames.push(expenseTypes[i].budgetName);
 
@@ -189,8 +190,8 @@ export default {
             budgetDifference.push(expenseTypes[i].budget);
             reimbursed.push(0);
             unreimbursed.push(0);
-            this.employee.expenses[i].reimbursed = 0;
-            this.employee.expenses[i].unreimbursed = 0;
+            this.employee.expenseTypeData[i].reimbursed = 0;
+            this.employee.expenseTypeData[i].unreimbursed = 0;
           } else {
             let totalReimbursed = 0;
             let totalUnreimbursed = 0;
@@ -208,8 +209,8 @@ export default {
             budgetDifference.push(budgetCost);
             reimbursed.push(totalReimbursed);
             unreimbursed.push(totalUnreimbursed);
-            this.employee.expenses[i].reimbursed = totalReimbursed;
-            this.employee.expenses[i].unreimbursed = totalUnreimbursed;
+            this.employee.expenseTypeData[i].reimbursed = totalReimbursed;
+            this.employee.expenseTypeData[i].unreimbursed = totalUnreimbursed;
           }
         }
       }
