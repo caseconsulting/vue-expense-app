@@ -3,7 +3,7 @@
   <v-container fluid grid-list-md>
 
 
-    <v-data-iterator :items="employee.expenses" content-tag="v-layout" hide-actions row wrap>
+    <v-data-iterator :items="employee.expenseTypeData" content-tag="v-layout" hide-actions row wrap>
 
       <v-flex slot="item" slot-scope="props" xs12 sm6 md4 lg3>
         <v-card>
