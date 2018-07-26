@@ -80,6 +80,6 @@
        return item.budget - item.reimbursed - item.unreimbursed;
      }
    }
-  }
+  
 }
 </script>
