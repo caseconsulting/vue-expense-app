@@ -14,7 +14,7 @@
           md4
           lg3
         >
-          <v-card color="blue">
+          <v-card color="blue" >
             <v-card-title><h4>{{ props.item.budgetName }}</h4></v-card-title>
             <v-divider></v-divider>
             <v-list dense>
