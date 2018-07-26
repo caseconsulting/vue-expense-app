@@ -2,8 +2,6 @@
 <v-layout row wrap justify-center>
   <v-flex lg5 md12 sm12 pb-3>
     <h1 pb-2>Budget Statistics for {{employee.firstName}} {{employee.lastName}}</h1>
-    <v-select :items="employees" :v-model="employee" label="Temporary Employee Select">
-    </v-select>
   </v-flex>
 
 
