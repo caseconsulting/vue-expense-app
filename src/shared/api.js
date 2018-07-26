@@ -52,8 +52,8 @@ function deleteItem(type, id) {
   return execute('delete', `/${type}/${id}`);
 }
 
-function getSpecial() {
-  return execute('get', `/special/00deaf13-102c-4b2e-95cc-25a0ffc2a03f`);
+function getAggregate() {
+  return execute('get', `/special/getAllExpenses`);
 }
 
 export default {
@@ -62,7 +62,7 @@ export default {
   createItem,
   updateItem,
   deleteItem,
-  getSpecial,
+  getAggregate,
   EXPENSE_TYPES,
   EXPENSES,
   EMPLOYEES,

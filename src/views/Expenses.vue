@@ -171,17 +171,10 @@ export default {
       return expense;
     },
     async refreshExpenses() {
-      this.expenses = await api.getItems(api.EXPENSES);
-      this.processedExpenses = _.map(this.expenses, async expense => {
-        return await this.getEmployeeName(expense);
-      });
-      this.processedExpenses = _.map(this.expenses, async expense => {
-        return await this.getExpenseTypeName(expense);
-      });
-      Promise.all(this.processedExpenses).then(values => {
-        this.processedExpenses = values;
-        this.loading = false;
-      });
+      let aggregatedData = await api.getAggregate();
+      console.log(aggregatedData);
+      this.processedExpenses = aggregatedData;
+      this.loading = false;
     },
     onSelect(item) {
       this.expense = {
