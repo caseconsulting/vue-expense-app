@@ -95,12 +95,11 @@ export default {
     loading: true,
     everythingSelected: false,
     indeterminate: false,
-    unreimbursedExpenses: [],
     empBudgets: [],
     employees: [], //For autocomplete
     expenseTypes: [], //For autocomplete
-    employee: null,
-    expenseType: null,
+    employee: null, //For autocomplete
+    expenseType: null, //For autocomplete
     pagination: {
       sortBy: 'lastName',
       rowsPerPage: 10
@@ -124,11 +123,8 @@ export default {
     EventBus.$on('expensePicked', this.addExpenseToSelected);
     let aggregatedData = await api.getAggregate();
     let expenses = this.createExpensesForUnrolled(aggregatedData);
-    this.constructAutoComplete();
+    this.constructAutoComplete(aggregatedData);
     aggregatedData = this.modifyAggregateDate(aggregatedData, expenses);
-    this.unreimbursedExpenses = _.filter(expenses, expense => {
-      return !expense.reimbursedDate;
-    });
     this.loading = false;
     this.empBudgets = aggregatedData;
   },
@@ -171,15 +167,13 @@ export default {
       });
     },
     modifyAggregateDate(aggregatedData, expenses) {
+      //Remove undefined stuff
+      aggregatedData = _.filter(aggregatedData, item => item !== undefined && !item.reimbursedDate);
       //Maps each expense and only returns if not reimbursed
       aggregatedData = _.forEach(aggregatedData, expense => {
-        if (!expense.reimbursedDate) {
-          expense.key = `${expense.userId}${expense.expenseTypeId}`;
-          expense.allSelected = false;
-        }
+        expense.key = `${expense.userId}${expense.expenseTypeId}`;
+        expense.allSelected = false;
       })
-      //Remove undefined stuff
-      aggregatedData = _.filter(aggregatedData, item => item !== undefined);
       //Remove duplicates
       aggregatedData = _.uniqWith(aggregatedData, _.isEqual);
       //Create a list of arrays if the userId matches, expenseTypeId matches and hasn't been reimbursed
@@ -195,22 +189,18 @@ export default {
         expense.expenseTypeId === item.expenseTypeId &&
         !expense.reimbursedDate);
     },
-    async constructAutoComplete() {
-      let employees = await api.getItems(api.EMPLOYEES);
-      this.employees = await employees.map(employee => {
+    constructAutoComplete(aggregatedData) {
+      this.employees = _.map(aggregatedData, data => {
         return {
-          text: `${employee.firstName} ${employee.middleName} ${
-            employee.lastName
-          }`,
-          value: employee.id
+          text: data.employeeName,
+          value: data.userId
         };
       });
       //Get expense Types
-      let expenseTypes = await api.getItems(api.EXPENSE_TYPES);
-      this.expenseTypes = expenseTypes.map(expenseType => {
+      this.expenseTypes = _.map(aggregatedData, data => {
         return {
-          text: expenseType.budgetName,
-          value: expenseType.id
+          text: data.budgetName,
+          value: data.expenseTypeId
         };
       });
     },
