@@ -172,10 +172,10 @@ export default {
             expenses: [],
             key: `${expense.userId}${expense.expenseTypeId}`,
             allSelected: false,
-            comparedField: expense.lastName.trim().concat(" ")
+            /*comparedField: expense.lastName.trim().concat(" ")
               .concat(expense.firstName).trim().concat(" ")
               .concat(expense.expenseTypeId).trim()
-              .toLowerCase()
+              .toLowerCase()*/
 
           };
         }

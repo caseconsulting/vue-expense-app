@@ -5,9 +5,8 @@
 
       <v-data-iterator
         :items="employee.expenses"
-        :rows-per-page-items="rowsPerPageItems"
-        :pagination.sync="pagination"
         content-tag="v-layout"
+        hide-actions
         row
         wrap
       >
