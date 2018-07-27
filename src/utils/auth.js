@@ -40,7 +40,7 @@ export function requireAuth(to, from, next) {
       query: { redirect: to.fullPath }
     });
   } else {
-    setRole();
+    // setRole();
     next();
   }
 }
@@ -108,7 +108,10 @@ function isTokenExpired(token) {
   return expirationDate < new Date();
 }
 
-async function setRole() {
+// export function setRole(role) {
+//   localStorage.setItem(ROLE, role);
+// }
+export async function setRole() {
   let role = await api.getRole();
   localStorage.setItem(ROLE, role);
 }
