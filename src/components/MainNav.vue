@@ -36,15 +36,16 @@ export default {
       permissions: '',
       drawer: null,
       items: [{
-          title: 'Home',
-          icon: 'desktop',
+          title: 'Employee Home',
+          icon: 'hand-holding-usd',
           route: 'home',
-          permission: ['super-admin', 'admin']
+          permission: ['user', 'admin', 'super-admin']
         },
         {
           title: 'Admin Dashboard',
           icon: 'desktop',
-          route: 'admin'
+          route: 'admin',
+          permission: ['super-admin', 'admin']
         },
         {
           title: 'Expenses',
@@ -69,12 +70,6 @@ export default {
           icon: 'life-ring',
           route: 'help',
           permission: ['super-admin', 'admin', 'user']
-        },
-        {
-          title: 'EmployeeHome',
-          icon: 'hand-holding-usd',
-          route: 'employeeHome',
-          permission: ['user', 'admin', 'super-admin']
         }
       ]
     };
@@ -83,7 +78,7 @@ export default {
   computed: {
     visibleTiles() {
       return _.filter(this.items, item => {
-        return _.includes(item.permission, this.permissions)
+        return _.includes(item.permission, this.permissions);
       });
     }
   },
