@@ -101,21 +101,21 @@ export default {
     employee: null, //For autocomplete
     expenseType: null, //For autocomplete
     pagination: {
-      sortBy: 'compareField',
+      sortBy: 'compareName',
       rowsPerPage: 10
     },
     selected: [],
     headers: [{
         text: 'Employee',
-        value: 'compareField'
+        value: 'compareName'
       },
       {
         text: 'Expense Type',
-        value: 'budgetName'
+        value: 'compareBudget'
       },
       {
         text: 'Total',
-        value: 'expenses'
+        value: 'compareCost'
       }
     ]
   }),
@@ -132,8 +132,11 @@ export default {
     filteredItems() {
       return _.filter(this.empBudgets, expense => {
 
-        let splitName = expense.employeeName.split(' ');
-        expense.compareField = `${splitName[2]}${splitName[0]}${splitName[1]}${expense.budgetName}`
+        let cost = this.getExpenseTotal(expense.expenses);
+        expense.compareName = `${expense.lastName}${expense.firstName}${expense.middleName}${expense.budgetName}`
+        expense.compareBudget = `${expense.budgetName}${expense.lastName}${expense.middleName}${expense.firstName}`
+        expense.compareCost = `${cost}`
+
 
         if (!this.employee && !this.expenseType) {
           return true;
@@ -166,7 +169,10 @@ export default {
           description: expense.description,
           purchaseDate: expense.purchaseDate,
           userId: expense.userId,
-          expenseTypeId: expense.expenseTypeId
+          expenseTypeId: expense.expenseTypeId,
+          firstName: expense.firstName,
+          middleName: expense.middleName,
+          lastName: expense.lastName
         };
       });
     },
