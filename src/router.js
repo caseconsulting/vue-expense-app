@@ -1,6 +1,6 @@
 import Vue from 'vue';
 import Router from 'vue-router';
-import Home from '@/views/Home.vue';
+import AdminDashboard from '@/views/AdminDashboard.vue';
 import Login from '@/views/Login.vue';
 import LoginFailed from '@/views/LoginFailed.vue';
 import ExpenseTypes from '@/views/ExpenseTypes.vue';
@@ -28,9 +28,9 @@ const router = new Router({
       component: LoginFailed
     },
     {
-      path: '/home',
-      name: 'home',
-      component: Home,
+      path: '/admin-dashboard',
+      name: 'admin',
+      component: AdminDashboard,
       beforeEnter: multiguard([requireAuth, isAdmin])
     },
     {
@@ -58,8 +58,8 @@ const router = new Router({
       beforeEnter: requireAuth
     },
     {
-      path: '/employeeHome',
-      name: 'employeeHome',
+      path: '/home',
+      name: 'home',
       component: EmployeeHome,
       beforeEnter: requireAuth
     },
