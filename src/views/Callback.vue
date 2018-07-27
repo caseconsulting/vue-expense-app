@@ -2,7 +2,7 @@
 </template>
 
 <script>
-import { setIdToken, setAccessToken, getAccessToken } from '@/utils/auth';
+import { setIdToken, setAccessToken, setRole } from '@/utils/auth';
 
 export default {
   name: 'callback',
@@ -10,6 +10,7 @@ export default {
     this.$nextTick(() => {
       setAccessToken();
       setIdToken();
+      setRole();
       window.location.href = '/loginFailed';
     });
   }

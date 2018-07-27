@@ -1,9 +1,11 @@
 import decode from 'jwt-decode';
 import auth0 from 'auth0-js';
 import Router from 'vue-router';
+import api from '../shared/api';
 
 const ID_TOKEN_KEY = 'id_token';
 const ACCESS_TOKEN_KEY = 'access_token';
+const ROLE = 'role';
 const SCOPE = 'openid email';
 // const AUDIENCE = `https://${AUTH_CONFIG.domain}/userinfo`;
 
@@ -99,4 +101,13 @@ function getTokenExpirationDate(encodedToken) {
 function isTokenExpired(token) {
   const expirationDate = getTokenExpirationDate(token);
   return expirationDate < new Date();
+}
+
+export async function setRole() {
+  let role = await api.getRole();
+  localStorage.setItem(ROLE, role);
+}
+
+export function getRole() {
+  return localStorage.getItem(ROLE);
 }
