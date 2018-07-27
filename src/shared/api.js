@@ -56,6 +56,10 @@ function getAggregate() {
   return execute('get', `/special/getAllExpenses`);
 }
 
+function getRole() {
+  return execute('get', '/role');
+}
+
 export default {
   getItems,
   getItem,
