@@ -31,7 +31,7 @@
                 <v-list-tile-content class="align-end">{{ props.item.unreimbursed | moneyValue }}</v-list-tile-content>
               </v-list-tile>
               <v-list-tile>
-                  <v-list-tile-content>Remaining Amount:</v-list-tile-content>
+                  <v-list-tile-content>Remaining Budget:</v-list-tile-content>
                 <v-list-tile-content class="align-end">{{ remaining(props.item)| moneyValue }}</v-list-tile-content>
               </v-list-tile>
               <v-list-tile>
@@ -80,6 +80,6 @@
        return item.budget - item.reimbursed - item.unreimbursed;
      }
    }
-  
+
 }
 </script>
