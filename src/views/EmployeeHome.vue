@@ -194,6 +194,46 @@ export default {
       this.$set(this.status, 'statusType', 'SUCCESS');
       this.$set(this.status, 'statusMessage', 'Item was successfully deleted!');
       this.$set(this.status, 'color', 'green');
+    },
+    getTotals(expenseType) {
+      let totalReimbursed = 0;
+      let totalUnreimbursed = 0;
+      let totalOdReimbursed = 0;
+      let totalOdUnreimbursed = 0;
+      let totalDifference = expenseType.budget;
+      if (expenseType.expenses !== undefined) {
+        for (let j = 0; j < expenseType.expenses.length; j++) {
+          let expense = expenseType.expenses[j];
+          let cost = expense.cost;
+          let isReimbursed = expense.reimbursedDate !== null;
+          let isOverdraft = totalDifference > 0;
+          console.log(expenseType.budgetName + ': ' + isOverdraft + '#' + j);
+          console.log(totalDifference);
+          if (isOverdraft) {
+            if(isReimbursed) {
+              //console.log("isReimbursed");
+              totalReimbursed += cost;
+            } else {
+              totalUnreimbursed += cost;
+            }
+            totalDifference = totalDifference - cost;
+          } else {
+            if(isReimbursed) {
+              totalOdReimbursed += cost;
+            } else {
+              totalOdUnreimbursed += cost;
+            }
+            totalDifference = 0;
+          }
+        }
+      }
+      return {
+        reimbursed: totalReimbursed,
+        unreimbursed: totalUnreimbursed,
+        odReimbursed: totalOdReimbursed,
+        odUnreimbursed: totalOdUnreimbursed,
+        difference: totalDifference
+      };
     }
   },
 
@@ -204,47 +244,34 @@ export default {
       let budgetDifference = [];
       let reimbursed = [];
       let unreimbursed = [];
+      let odReimbursed = [];
+      let odUnreimbursed = [];
       if (this.employee !== undefined) {
         //Race Condition here
         let expenseTypes = this.expenseTypeData;
         for (var i = 0; i < this.expenseTypeData.length; i++) {
           budgetNames.push(expenseTypes[i].budgetName);
-
-          if (expenseTypes[i].expenses === undefined) {
-            budgetDifference.push(expenseTypes[i].budget);
-            reimbursed.push(0);
-            unreimbursed.push(0);
-            this.employee.expenseTypeData[i].reimbursed = 0;
-            this.employee.expenseTypeData[i].unreimbursed = 0;
-          } else {
-            let totalReimbursed = 0;
-            let totalUnreimbursed = 0;
-            for (var j = 0; j < expenseTypes[i].expenses.length; j++) {
-              if (expenseTypes[i].expenses[j].reimbursedDate !== null) {
-                let cost = expenseTypes[i].expenses[j].cost;
-                totalReimbursed += cost;
-              } else {
-                let cost = expenseTypes[i].expenses[j].cost;
-                totalUnreimbursed += cost;
-              }
-            }
-            let totalDifference = totalReimbursed + totalUnreimbursed;
-            let budgetCost = expenseTypes[i].budget - totalDifference;
-            budgetDifference.push(budgetCost);
-            reimbursed.push(totalReimbursed);
-            unreimbursed.push(totalUnreimbursed);
-            this.employee.expenseTypeData[i].reimbursed = totalReimbursed;
-            this.employee.expenseTypeData[i].unreimbursed = totalUnreimbursed;
-          }
+          let total = this.getTotals(expenseTypes[i]);
+          budgetDifference.push(total.difference);
+          reimbursed.push(total.reimbursed);
+          unreimbursed.push(total.unreimbursed);
+          odReimbursed.push(total.odReimbursed);
+          odUnreimbursed.push(total.odUnreimbursed);
+          this.employee.expenseTypeData[i].reimbursed = total.reimbursed + total.odReimbursed; //For BudgetTable
+          this.employee.expenseTypeData[i].unreimbursed = total.unreimbursed + total.odUnreimbursed; //For BudgetTable
         }
       }
+
       return {
         names: budgetNames,
         difference: budgetDifference,
         reimbursed: reimbursed,
-        unreimbursed: unreimbursed
+        unreimbursed: unreimbursed,
+        odReimbursed: odReimbursed,
+        odUnreimbursed: odUnreimbursed
       };
     }
+
   },
   components: {
     BudgetChart,
