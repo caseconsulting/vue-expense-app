@@ -21,7 +21,7 @@
           <v-spacer></v-spacer>
           <v-text-field v-model="search" append-icon="search" label="Search" single-line hide-details></v-text-field>
         </v-card-title>
-        <v-data-table :loading="loading" :headers="headers" :items="processedExpenses" :search="search" :pagination.sync="pagination" item-key="name" class="elevation-1">
+        <v-data-table :loading="loading" :headers="headers" :items="sorting" :search="search" :pagination.sync="pagination" item-key="name" class="elevation-1">
           <v-progress-linear slot="progress" color="radioactive" indeterminate></v-progress-linear>
           <template slot="headers" slot-scope="props">
             <tr>
@@ -137,6 +137,11 @@ export default {
         rowsPerPage: 25
       }
     };
+  },
+  computed: {
+    sorting() {
+      return this.processedExpenses;
+    }
   },
   components: {
     ExpenseForm
