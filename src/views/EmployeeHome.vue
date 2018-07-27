@@ -95,9 +95,8 @@ export default {
     },
     async refreshBudget() {
       this.loading = true;
-
-      const id = '00deaf13-102c-4b2e-95cc-25a0ffc2a03f';
-      let employeeVar = await api.getItem(api.SPECIAL, id);
+      let employee = await api.getUser();
+      let employeeVar = await api.getItem(api.SPECIAL, employee.id);
       // console.log(employeeVar);
       // console.log(employeeVar.expenses[0]);
       this.employee = employeeVar;

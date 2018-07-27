@@ -7,7 +7,7 @@
 
   <v-list class="pt-0" dense>
     <v-divider></v-divider>
-    <v-list-tile v-for="item in items" :key="item.title" @click="" :to='{name: item.route}'>
+    <v-list-tile v-for="item in visibleTiles" :key="item.title" @click="" :to='{name: item.route}'>
       <v-list-tile-action>
         <icon :name="item.icon" class="navbar-icons"></icon>
       </v-list-tile-action>
@@ -21,18 +21,25 @@
 
 
 <script>
+import api from '@/shared/api.js';
+
 // @ is an alias to /src
-import { isLoggedIn, login, logout } from '@/utils/auth';
+import {
+  isLoggedIn,
+  login,
+  logout
+} from '@/utils/auth';
 
 export default {
   data() {
     return {
+      permissions: '',
       drawer: null,
-      items: [
-        {
-          title: 'Employee Home',
-          icon: 'hand-holding-usd',
-          route: 'home'
+      items: [{
+          title: 'Home',
+          icon: 'desktop',
+          route: 'home',
+          permission: ['super-admin', 'admin']
         },
         {
           title: 'Admin Dashboard',
@@ -42,27 +49,46 @@ export default {
         {
           title: 'Expenses',
           icon: 'dollar-sign',
-          route: 'expenses'
+          route: 'expenses',
+          permission: ['super-admin', 'admin']
         },
         {
           title: 'Expense Types',
           icon: 'book',
-          route: 'expenseTypes'
+          route: 'expenseTypes',
+          permission: ['super-admin', 'admin']
         },
         {
           title: 'Employees',
           icon: 'users',
-          route: 'employees'
+          route: 'employees',
+          permission: ['super-admin'.
+            'admin'
+          ]
         },
         {
           title: 'Help',
           icon: 'life-ring',
-          route: 'help'
+          route: 'help',
+          permission: ['super-admin', 'admin', 'user']
+        },
+        {
+          title: 'EmployeeHome',
+          icon: 'hand-holding-usd',
+          route: 'employeeHome',
+          permission: ['user', 'admin', 'super-admin']
         }
       ]
     };
   },
   components: {},
+  computed: {
+    visibleTiles() {
+      return _.filter(this.items, item => {
+        return _.includes(item.permission, this.permissions)
+      });
+    }
+  },
   methods: {
     handleLogin() {
       login();
@@ -73,46 +99,49 @@ export default {
     isLoggedIn() {
       return isLoggedIn();
     }
+  },
+  async created() {
+    let user = await api.getUser();
+    this.permissions = user.role;
   }
 };
 </script>
 
 <style lang="scss">
 .navbar-icons {
-  color: #68caa6;
-  width: auto;
-  height: 2em;
-  max-width: 100%;
-  max-height: 100%;
+    color: #68caa6;
+    width: auto;
+    height: 2em;
+    max-width: 100%;
+    max-height: 100%;
 }
 
-.fa-icon {
-}
+.fa-icon {}
 
 #main-header {
-  font-family: 'Quicksand', sans-serif;
-  font-weight: bold;
-  font-size: 48px;
-  color: #38424d;
-  padding-top: 1%;
-  padding-bottom: 2%;
+    font-family: 'Quicksand', sans-serif;
+    font-weight: bold;
+    font-size: 48px;
+    color: #38424d;
+    padding-top: 1%;
+    padding-bottom: 2%;
 }
 .e {
-  color: #68caa6;
+    color: #68caa6;
 }
 
 .logo {
-  height: 50%;
-  width: 50%;
+    height: 50%;
+    width: 50%;
 }
 
 #nav-button {
-  float: left;
+    float: left;
 }
 #nav-button :focus {
-  outline: none;
+    outline: none;
 }
 #slider-logo {
-  margin-bottom: 5px;
+    margin-bottom: 5px;
 }
 </style>
