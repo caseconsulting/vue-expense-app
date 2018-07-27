@@ -1,5 +1,13 @@
 <template>
 <v-layout row wrap justify-center>
+  <v-snackbar v-model="status.statusType" :color="status.color" :multi-line="true" :right="true" :timeout="5000" :top="true" :vertical="true">
+    <v-card-title headline color="white">
+      <span class="headline">{{status.statusMessage}}</span>
+    </v-card-title>
+    <v-btn color="white" flat @click="clearStatus">
+      Close
+    </v-btn>
+  </v-snackbar>
   <v-flex lg5 md12 sm12 pb-3>
     <h1 pb-2>Budget Statistics for {{employee.firstName}} {{employee.lastName}}</h1>
   </v-flex>
@@ -11,7 +19,7 @@
   </v-flex>
 
   <v-flex text-xs-center lg4 md12 sm12>
-    <expense-form :expense="expense" v-on:add="addModelToTable" v-on:update="updateModelInTable" v-on:delete="deleteModelFromTable" v-on:error="displayError" padForm></expense-form>
+    <expense-form :expense="expense" v-on:add="addModelToTable" v-on:update="updateModelInTable" v-on:delete="deleteModelFromTable" v-on:error="displayError"></expense-form>
   </v-flex>
 </v-layout>
 </template>
@@ -48,6 +56,14 @@ export default {
       employees: [],
       employee: {},
       expenseTypeData: [],
+      expenses: [],
+      processedExpenses: [],
+      errors: [],
+      status: {
+        statusType: undefined,
+        statusMessage: '',
+        color: ''
+      },
       expense: {
         id: '',
         description: '',
@@ -67,6 +83,11 @@ export default {
     this.refreshBudget();
   },
   methods: {
+    clearStatus() {
+      this.$set(this.status, 'statusType', undefined);
+      this.$set(this.status, 'statusMessage', '');
+      this.$set(this.status, 'color', '');
+    },
     async displayError(err) {
       this.$set(this.status, 'statusType', 'ERROR');
       this.$set(this.status, 'statusMessage', err);
@@ -233,7 +254,4 @@ export default {
 };
 </script>
 <style>
-.padForm {
-  padding-top: 16px;
-}
 </style>
