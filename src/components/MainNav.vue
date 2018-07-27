@@ -62,9 +62,7 @@ export default {
           title: 'Employees',
           icon: 'users',
           route: 'employees',
-          permission: ['super-admin'.
-            'admin'
-          ]
+          permission: ['super-admin', 'admin']
         },
         {
           title: 'Help',
