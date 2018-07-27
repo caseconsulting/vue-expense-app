@@ -101,13 +101,13 @@ export default {
     employee: null, //For autocomplete
     expenseType: null, //For autocomplete
     pagination: {
-      sortBy: 'lastName',
+      sortBy: 'employeeName',
       rowsPerPage: 10
     },
     selected: [],
     headers: [{
         text: 'Employee',
-        value: 'lastName'
+        value: 'employeeName'
       },
       {
         text: 'Expense Type',
