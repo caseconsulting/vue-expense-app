@@ -101,13 +101,13 @@ export default {
     employee: null, //For autocomplete
     expenseType: null, //For autocomplete
     pagination: {
-      sortBy: 'employeeName',
+      sortBy: 'compareField',
       rowsPerPage: 10
     },
     selected: [],
     headers: [{
         text: 'Employee',
-        value: 'employeeName'
+        value: 'compareField'
       },
       {
         text: 'Expense Type',
@@ -131,6 +131,10 @@ export default {
   computed: {
     filteredItems() {
       return _.filter(this.empBudgets, expense => {
+
+        let splitName = expense.employeeName.split(' ');
+        expense.compareField = `${splitName[2]}${splitName[0]}${splitName[1]}${expense.budgetName}`
+
         if (!this.employee && !this.expenseType) {
           return true;
         } else if (!this.employee && this.expenseType) {
