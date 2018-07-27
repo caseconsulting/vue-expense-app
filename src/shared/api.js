@@ -67,6 +67,7 @@ export default {
   updateItem,
   deleteItem,
   getAggregate,
+  getRole,
   EXPENSE_TYPES,
   EXPENSES,
   EMPLOYEES,

@@ -29,6 +29,7 @@ var router = new Router({
 export function logout() {
   clearIdToken();
   clearAccessToken();
+  clearRole();
   router.go('/');
 }
 
@@ -39,6 +40,7 @@ export function requireAuth(to, from, next) {
       query: { redirect: to.fullPath }
     });
   } else {
+    setRole();
     next();
   }
 }
@@ -57,6 +59,10 @@ function clearIdToken() {
 
 function clearAccessToken() {
   localStorage.removeItem(ACCESS_TOKEN_KEY);
+}
+
+function clearRole() {
+  localStorage.removeItem(ROLE);
 }
 
 // Helper function that will allow us to extract the access_token and id_token
@@ -94,7 +100,6 @@ function getTokenExpirationDate(encodedToken) {
 
   const date = new Date(0);
   date.setUTCSeconds(token.exp);
-
   return date;
 }
 
@@ -103,7 +108,7 @@ function isTokenExpired(token) {
   return expirationDate < new Date();
 }
 
-export async function setRole() {
+async function setRole() {
   let role = await api.getRole();
   localStorage.setItem(ROLE, role);
 }

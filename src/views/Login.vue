@@ -9,7 +9,10 @@
 </template>
 
 <script>
-import { isLoggedIn, login } from '@/utils/auth';
+import {
+  isLoggedIn,
+  login
+} from '@/utils/auth';
 
 export default {
   created() {

@@ -10,7 +10,6 @@ export default {
     this.$nextTick(() => {
       setAccessToken();
       setIdToken();
-      setRole();
       window.location.href = '/loginFailed';
     });
   }
