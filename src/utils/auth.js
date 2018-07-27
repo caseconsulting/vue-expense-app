@@ -52,7 +52,7 @@ export function isAdmin(to, from, next) {
     next();
   } else {
     next({
-      path: '/help',
+      path: '/home',
       query: { redirect: to.fullPath }
     });
   }
