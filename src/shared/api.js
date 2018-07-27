@@ -57,7 +57,10 @@ function getAggregate() {
 }
 
 function getRole() {
-  return execute('get', '/role');
+  return execute('get', 'info/role');
+}
+function getUser() {
+  return execute('get', 'info/me');
 }
 
 export default {
@@ -68,6 +71,7 @@ export default {
   deleteItem,
   getAggregate,
   getRole,
+  getUser,
   EXPENSE_TYPES,
   EXPENSES,
   EMPLOYEES,
