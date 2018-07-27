@@ -163,31 +163,40 @@ export default {
           purchaseDate: expense.purchaseDate,
           userId: expense.userId,
           expenseTypeId: expense.expenseTypeId
-        }
+        };
       });
     },
     modifyAggregateDate(aggregatedData, expenses) {
       //Remove undefined stuff
-      aggregatedData = _.filter(aggregatedData, item => item !== undefined && !item.reimbursedDate);
+      aggregatedData = _.filter(
+        aggregatedData,
+        item => item !== undefined && !item.reimbursedDate
+      );
       //Maps each expense and only returns if not reimbursed
       aggregatedData = _.forEach(aggregatedData, expense => {
         expense.key = `${expense.userId}${expense.expenseTypeId}`;
         expense.allSelected = false;
-      })
+      });
       //Remove duplicates
-      aggregatedData = _.uniqWith(aggregatedData, _.isEqual);
+
       //Create a list of arrays if the userId matches, expenseTypeId matches and hasn't been reimbursed
       aggregatedData = _.forEach(aggregatedData, item => {
         return (item.expenses = _.filter(expenses, expense => {
           return this.matchingEmployeeAndExpenseType(expense, item);
         }));
       });
+      aggregatedData = _.uniqWith(
+        aggregatedData,
+        (el1, el2) => el1.key === el2.key
+      );
       return aggregatedData;
     },
     matchingEmployeeAndExpenseType(expense, item) {
-      return (expense.userId === item.userId &&
+      return (
+        expense.userId === item.userId &&
         expense.expenseTypeId === item.expenseTypeId &&
-        !expense.reimbursedDate);
+        !expense.reimbursedDate
+      );
     },
     constructAutoComplete(aggregatedData) {
       this.employees = _.map(aggregatedData, data => {
@@ -228,7 +237,6 @@ export default {
     },
     removeExpenseFromList(selected) {
       _.forEach(this.empBudgets, item => {
-
         _.forEach(item.expenses, expense => {
           let itemIndex = _.indexOf(selected, expense);
 
@@ -238,10 +246,7 @@ export default {
         });
       });
 
-      this.empBudgets = _.filter(
-        this.empBudgets,
-        item => item.expenses.length
-      );
+      this.empBudgets = _.filter(this.empBudgets, item => item.expenses.length);
       EventBus.$emit('expenseChange', []);
     },
     addExpenseToSelected(expense) {
