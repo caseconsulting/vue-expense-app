@@ -29,6 +29,7 @@
     "vue-awesome": "^3.0.3",
     "vue-chartjs": "^3.3.2",
     "vue-router": "^3.0.1",
+    "vue-router-multiguard": "^1.0.3",
     "vuejs-datepicker": "^1.5.2",
     "vuesax": "^3.1.30",
     "vuetify": "1.0.19",

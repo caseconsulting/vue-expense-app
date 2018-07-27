@@ -9,7 +9,8 @@ import Expenses from '@/views/Expenses.vue';
 import Help from '@/views/Help.vue';
 import Callback from '@/views/Callback';
 import EmployeeHome from '@/views/EmployeeHome';
-import { requireAuth } from '@/utils/auth';
+import { requireAuth, isAdmin } from '@/utils/auth';
+import multiguard from 'vue-router-multiguard';
 
 Vue.use(Router);
 
@@ -30,25 +31,25 @@ const router = new Router({
       path: '/home',
       name: 'home',
       component: Home,
-      beforeEnter: requireAuth
+      beforeEnter: multiguard([requireAuth, isAdmin])
     },
     {
       path: '/expenseTypes',
       name: 'expenseTypes',
       component: ExpenseTypes,
-      beforeEnter: requireAuth
+      beforeEnter: multiguard([requireAuth, isAdmin])
     },
     {
       path: '/employees',
       name: 'employees',
       component: Employees,
-      beforeEnter: requireAuth
+      beforeEnter: multiguard([requireAuth, isAdmin])
     },
     {
       path: '/expenses',
       name: 'expenses',
       component: Expenses,
-      beforeEnter: requireAuth
+      beforeEnter: multiguard([requireAuth, isAdmin])
     },
     {
       path: '/help',
