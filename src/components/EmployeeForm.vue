@@ -1,5 +1,5 @@
 <template>
-<v-card hover>
+<v-card hover v-if="userIsAdmin()">
   <v-card-title>
     <h3 v-if="model.id"> Edit Employee </h3>
     <h3 v-else> Create New Employee </h3>
@@ -14,6 +14,8 @@
 
       <!-- Employee ID -->
       <v-text-field v-model="model.empId" :rules="numberRules" label="Employee ID" data-vv-name="Employee ID"></v-text-field>
+      <!-- Employee Role -->
+      <v-select :disabled="!userIsAdmin()" :items="permissions" :rules="componentRules" v-model="model.role" label="Employee Role" autocomplete></v-select>
 
       <!-- Hire Date -->
       <v-menu ref="menu1" :close-on-content-click="true" v-model="menu1" :nudge-right="40" lazy transition="scale-transition" offset-y full-width max-width="290px" min-width="290px">
@@ -38,16 +40,19 @@
 import api from '@/shared/api.js';
 import moment from 'moment';
 import DeleteModal from './DeleteModal.vue';
+import { getRole } from '@/utils/auth';
 export default {
   data() {
     return {
+      componentRules: [v => !!v || 'Something must be selected'],
+      permissions: ['Super Admin', 'Admin', 'User'],
       deleting: false,
       date: null,
       hireDateFormatted: null,
       menu1: false,
       genericRules: [v => !!v || 'This field is required'],
       numberRules: [
-        v => !!v || 'Cost is required',
+        v => !!v || 'Employee ID is required',
         v => /^\d+$/.test(v) || 'Cost must be a number'
       ],
       dateRules: [v => !!v || 'Date must be valid. MM/DD/YYYY format'],
@@ -60,15 +65,15 @@ export default {
         const query = hasValue(queryText);
         return (
           text
-          .toString()
-          .toLowerCase()
-          .indexOf(query.toString().toLowerCase()) > -1
+            .toString()
+            .toLowerCase()
+            .indexOf(query.toString().toLowerCase()) > -1
         );
       }
     };
   },
   created() {
-    EventBus.$on('canceledDelete', () => this.deleting = false);
+    EventBus.$on('canceledDelete', () => (this.deleting = false));
     EventBus.$on('confirmDelete', this.deleteEmployee);
   },
   watch: {
@@ -113,18 +118,9 @@ export default {
         }
       }
     },
-    // formatDate(date) {
-    //   if (!date) return null;
-    //
-    //   const [year, month, day] = date.split('-');
-    //   return `${month}/${day}/${year}`;
-    // },
-    // parseDate(date) {
-    //   if (!date) return null;
-    //
-    //   const [month, day, year] = date.split('/');
-    //   return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
-    // },
+    userIsAdmin() {
+      return getRole() === 'super-admin';
+    },
     async submit() {
       if (this.$refs.form.validate()) {
         let newEmployee;
@@ -134,12 +130,12 @@ export default {
             this.model.id,
             this.model
           );
-          console.log('*****', newEmployee);
+
           this.$emit('update', newEmployee);
         } else {
           newEmployee = await api.createItem(api.EMPLOYEES, this.model);
         }
-        console.log('*****', newEmployee);
+
         this.model.id = newEmployee.id;
         this.$emit('add', newEmployee);
       }
@@ -149,10 +145,10 @@ export default {
       await api.deleteItem(api.EMPLOYEES, this.model.id);
       this.$emit('delete');
       this.clearForm();
-
     },
     clearForm() {
       this.$refs.form.reset();
+      this.model.role = 'User';
       this.model.firstName = '';
       this.model.middleName = '';
       this.model.lastName = '';
