@@ -6,7 +6,10 @@
   </v-card-title>
   <v-container fluid>
     <v-form ref="form" v-model="valid" lazy-validation>
+
       <v-select :items="employees" :rules="componentRules" :filter="customFilter" v-model="expense.userId" item-text="text" label="Employee" autocomplete></v-select>
+
+
       <v-select :items="expenseTypes" :rules="componentRules" :filter="customFilter" v-model="expense.expenseTypeId" label="Expense Type" autocomplete></v-select>
       <v-text-field v-model="expense.description" :rules="descriptionRules" label="Description" data-vv-name="Description"></v-text-field>
       <v-text-field prefix="$" v-model="expense.cost" :rules="costRules" label="Cost" data-vv-name="Cost"></v-text-field>
@@ -40,6 +43,9 @@
 
 <script>
 import api from '@/shared/api.js';
+import {
+  getRole
+} from '@/utils/auth'
 import moment from 'moment';
 import ConfirmationBox from './ConfirmationBox.vue';
 import DeleteModal from './DeleteModal.vue';
@@ -47,6 +53,7 @@ import _ from 'lodash';
 export default {
   data() {
     return {
+      role: '',
       deleting: false,
       submitting: false,
       date: null,
@@ -222,6 +229,9 @@ export default {
     }
   },
   async created() {
+    this.role = getRole();
+
+
     EventBus.$on('canceledSubmit', () => this.submitting = false);
     EventBus.$on('confirmSubmit', this.submit);
 

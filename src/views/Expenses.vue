@@ -177,7 +177,6 @@ export default {
     },
     async refreshExpenses() {
       let aggregatedData = await api.getAggregate();
-
       this.processedExpenses = aggregatedData;
       this.loading = false;
     },
@@ -226,12 +225,12 @@ export default {
       );
 
       if (!matchingExpenses.length) {
-        api.getItem(api.EMPLOYEES, newExpense.userId).then(employee => {
-          let employeeName = `${employee.firstName} ${employee.middleName} ${
-            employee.lastName
-          }`;
-          this.$set(newExpense, 'employeeName', employeeName);
-        });
+        api.getItem(api.EMPLOYEES, newExpense.userId)
+          .then(employee => {
+            let employeeName = `${employee.firstName} ${employee.middleName} ${employee.lastName}`;
+            this.$set(newExpense, 'employeeName', employeeName);
+          })
+          .catch(err => console.log(err));
 
         api
           .getItem(api.EXPENSE_TYPES, newExpense.expenseTypeId)
