@@ -95,6 +95,7 @@ export default {
     loading: true,
     everythingSelected: false,
     indeterminate: false,
+    unreimbursedExpenses: [],
     empBudgets: [],
     employees: [], //For autocomplete
     expenseTypes: [], //For autocomplete
@@ -125,6 +126,9 @@ export default {
     let expenses = this.createExpensesForUnrolled(aggregatedData);
     this.constructAutoComplete(aggregatedData);
     aggregatedData = this.modifyAggregateDate(aggregatedData, expenses);
+    this.unreimbursedExpenses = _.filter(expenses, expense => {
+      return !expense.reimbursedDate;
+    });
     this.loading = false;
     this.empBudgets = aggregatedData;
   },
@@ -164,15 +168,21 @@ export default {
     createExpensesForUnrolled(aggregatedData) {
       return _.map(aggregatedData, expense => {
         return {
-          selected: false,
+          budgetName: expense.budgetName,
           cost: expense.cost,
           description: expense.description,
-          purchaseDate: expense.purchaseDate,
-          userId: expense.userId,
+          employeeName: expense.employeeName,
           expenseTypeId: expense.expenseTypeId,
           firstName: expense.firstName,
+          id: expense.id,
+          lastName: expense.lastName,
           middleName: expense.middleName,
-          lastName: expense.lastName
+          note: expense.note,
+          purchaseDate: expense.purchaseDate,
+          reciept: expense.reciept,
+          reimbursedDate: expense.reimbursedDate,
+          userId: expense.userId,
+          selected: false,
         };
       });
     },
