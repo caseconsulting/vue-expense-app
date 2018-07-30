@@ -97,19 +97,8 @@ export default {
       this.loading = true;
       let employee = await api.getUser();
       let employeeVar = await api.getItem(api.SPECIAL, employee.id);
-      // console.log(employeeVar);
-      // console.log(employeeVar.expenses[0]);
       this.employee = employeeVar;
       this.expenseTypeData = this.employee.expenseTypeData;
-      // this.employee.expenseTypeData.map(expenseType => {
-      //   let totalCost = 0;
-      //   for(var i = 0; i < expenseType.expenses.length; i++) {
-      //     totalCost = totalCost + expenseType.expenses[i].cost;
-      //   }
-      //   expenseType.totalCost = totalCost;
-      //   return expenseType;
-      // });
-      //  console.log(this.employee.expenseTypeData);
       this.employee.expenseTypeData.map(expenseType => {
         let totalCost = 0;
         for (var i = 0; i < expenseType.expenses.length; i++) {
@@ -118,8 +107,6 @@ export default {
         expenseType.totalCost = totalCost;
         return expenseType;
       });
-      //  console.log(this.employee.expenseTypeData);
-
       this.loading = false;
     },
     onSelect() {
@@ -207,21 +194,13 @@ export default {
         let cost = expense.cost;
         let isReimbursed = expense.reimbursedDate;
         totalDifference = totalDifference - cost;
-        // console.log(expenseType.budgetName + ': ' + isOverdraft + '#' + j);
-        // console.log(totalDifference);
-        // console.log(isOverdraft);
         if (!isOverdraft && totalDifference >= 0) {
           if(isReimbursed) {
-            //console.log("isReimbursed");
             totalReimbursed += cost;
           } else {
             totalUnreimbursed += cost;
           }
         } else {
-          console.log(expenseType.budgetName);
-          console.log(expense.description);
-          console.log(expense.reimbursedDate);
-          console.log(isReimbursed);
           if(isReimbursed) {
             totalOdReimbursed += cost;
           } else {
