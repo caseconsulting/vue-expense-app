@@ -16,13 +16,14 @@
       <v-text-field v-model="model.empId" :rules="numberRules" label="Employee ID" data-vv-name="Employee ID"></v-text-field>
       <!-- Employee Role -->
       <v-select :disabled="!userIsAdmin()" :items="permissions" :rules="componentRules" v-model="model.role" label="Employee Role" autocomplete></v-select>
-
       <!-- Hire Date -->
       <v-menu ref="menu1" :close-on-content-click="true" v-model="menu1" :nudge-right="40" lazy transition="scale-transition" offset-y full-width max-width="290px" min-width="290px">
         <v-text-field slot="activator" v-model="hireDateFormatted" :rules="dateRules" label="Hire Date" hint="MM/DD/YYYY format" persistent-hint prepend-icon="event" @blur="model.hireDate = parseDate(hireDateFormatted)"></v-text-field>
         <v-date-picker v-model="model.hireDate" no-title @input="menu1 = false"></v-date-picker>
       </v-menu>
 
+      <!-- isactive? only on edit -->
+      <v-checkbox v-if="model.id" label="Mark as Inactive" v-model="model.isActive"></v-checkbox>
       <!-- Buttons -->
       <v-btn outline color="error" @click="deleting=true">
         <icon class="mr-1" name="trash"></icon>Delete</v-btn>
@@ -40,7 +41,9 @@
 import api from '@/shared/api.js';
 import moment from 'moment';
 import DeleteModal from './DeleteModal.vue';
-import { getRole } from '@/utils/auth';
+import {
+  getRole
+} from '@/utils/auth';
 export default {
   data() {
     return {
@@ -65,9 +68,9 @@ export default {
         const query = hasValue(queryText);
         return (
           text
-            .toString()
-            .toLowerCase()
-            .indexOf(query.toString().toLowerCase()) > -1
+          .toString()
+          .toLowerCase()
+          .indexOf(query.toString().toLowerCase()) > -1
         );
       }
     };
