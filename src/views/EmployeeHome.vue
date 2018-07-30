@@ -201,32 +201,33 @@ export default {
       let totalOdReimbursed = 0;
       let totalOdUnreimbursed = 0;
       let totalDifference = expenseType.budget;
-      if (expenseType.expenses !== undefined) {
-        for (let j = 0; j < expenseType.expenses.length; j++) {
-          let expense = expenseType.expenses[j];
-          let cost = expense.cost;
-          let isReimbursed = expense.reimbursedDate !== null;
-          let isOverdraft = totalDifference > 0;
-          console.log(expenseType.budgetName + ': ' + isOverdraft + '#' + j);
-          console.log(totalDifference);
-          if (isOverdraft) {
-            if(isReimbursed) {
-              //console.log("isReimbursed");
-              totalReimbursed += cost;
-            } else {
-              totalUnreimbursed += cost;
-            }
-            totalDifference = totalDifference - cost;
+      let isOverdraft = false;
+      for (let j = 0; j < expenseType.expenses.length; j++) {
+        let expense = expenseType.expenses[j];
+        let cost = expense.cost;
+        let isReimbursed = expense.reimbursedDate !== null;
+        totalDifference = totalDifference - cost;
+        console.log(expenseType.budgetName + ': ' + isOverdraft + '#' + j);
+        console.log(totalDifference);
+        console.log(isOverdraft);
+        if (!isOverdraft && totalDifference >= 0) {
+          if(isReimbursed) {
+            //console.log("isReimbursed");
+            totalReimbursed += cost;
           } else {
-            if(isReimbursed) {
-              totalOdReimbursed += cost;
-            } else {
-              totalOdUnreimbursed += cost;
-            }
-            totalDifference = 0;
+            totalUnreimbursed += cost;
           }
+        } else {
+          if(isReimbursed) {
+            totalOdReimbursed += cost;
+          } else {
+            totalOdUnreimbursed += cost;
+          }
+          totalDifference = 0;
+          isOverdraft = true;
         }
       }
+
       return {
         reimbursed: totalReimbursed,
         unreimbursed: totalUnreimbursed,
