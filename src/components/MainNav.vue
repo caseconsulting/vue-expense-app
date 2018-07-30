@@ -27,7 +27,8 @@ import api from '@/shared/api.js';
 import {
   isLoggedIn,
   login,
-  logout
+  logout,
+  getRole,
 } from '@/utils/auth';
 
 export default {
@@ -93,9 +94,8 @@ export default {
       return isLoggedIn();
     }
   },
-  async created() {
-    let user = await api.getUser();
-    this.permissions = user.role;
+  created() {
+    this.permissions = getRole();
   }
 };
 </script>

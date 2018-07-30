@@ -34,7 +34,6 @@ export function logout() {
 }
 
 export function requireAuth(to, from, next) {
-  console.log('verifying login');
   if (!isLoggedIn()) {
     next({
       path: '/',
@@ -47,7 +46,6 @@ export function requireAuth(to, from, next) {
 }
 
 export function isAdmin(to, from, next) {
-  console.log(getRole());
   if (getRole() === 'admin' || getRole() === 'super-admin') {
     next();
   } else {
@@ -130,6 +128,5 @@ export async function setRole() {
 }
 
 export function getRole() {
-  console.log('getting item');
   return localStorage.getItem(ROLE);
 }
