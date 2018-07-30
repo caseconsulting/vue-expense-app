@@ -177,7 +177,7 @@ export default {
     },
     async refreshExpenses() {
       let aggregatedData = await api.getAggregate();
-      console.log(aggregatedData);
+
       this.processedExpenses = aggregatedData;
       this.loading = false;
     },

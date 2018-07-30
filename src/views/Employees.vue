@@ -45,7 +45,11 @@
 </template>
 
 <script>
-import { setIdToken, setAccessToken, getAccessToken } from '@/utils/auth';
+import {
+  setIdToken,
+  setAccessToken,
+  getAccessToken
+} from '@/utils/auth';
 import api from '@/shared/api.js';
 import EmployeeForm from '../components/EmployeeForm.vue';
 import moment from 'moment';
@@ -65,8 +69,7 @@ export default {
       loading: false,
       employees: [],
       errors: [],
-      headers: [
-        {
+      headers: [{
           text: 'First Name',
           value: 'firstName'
         },
@@ -107,7 +110,6 @@ export default {
 
   async created() {
     this.refreshEmployees();
-    console.log(getAccessToken());
   },
   methods: {
     async refreshEmployees() {
