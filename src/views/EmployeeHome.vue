@@ -205,11 +205,11 @@ export default {
       for (let j = 0; j < expenseType.expenses.length; j++) {
         let expense = expenseType.expenses[j];
         let cost = expense.cost;
-        let isReimbursed = expense.reimbursedDate !== null;
+        let isReimbursed = expense.reimbursedDate;
         totalDifference = totalDifference - cost;
-        console.log(expenseType.budgetName + ': ' + isOverdraft + '#' + j);
-        console.log(totalDifference);
-        console.log(isOverdraft);
+        // console.log(expenseType.budgetName + ': ' + isOverdraft + '#' + j);
+        // console.log(totalDifference);
+        // console.log(isOverdraft);
         if (!isOverdraft && totalDifference >= 0) {
           if(isReimbursed) {
             //console.log("isReimbursed");
@@ -218,6 +218,10 @@ export default {
             totalUnreimbursed += cost;
           }
         } else {
+          console.log(expenseType.budgetName);
+          console.log(expense.description);
+          console.log(expense.reimbursedDate);
+          console.log(isReimbursed);
           if(isReimbursed) {
             totalOdReimbursed += cost;
           } else {
