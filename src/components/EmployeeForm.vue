@@ -1,5 +1,5 @@
 <template>
-<v-card hover v-if="userIsAdmin()">
+<v-card hover>
   <v-card-title>
     <h3 v-if="model.id"> Edit Employee </h3>
     <h3 v-else> Create New Employee </h3>
@@ -15,7 +15,7 @@
       <!-- Employee ID -->
       <v-text-field v-model="model.empId" :rules="numberRules" label="Employee ID" data-vv-name="Employee ID"></v-text-field>
       <!-- Employee Role -->
-      <v-select :disabled="!userIsAdmin()" :items="permissions" :rules="componentRules" v-model="model.role" label="Employee Role" autocomplete></v-select>
+      <v-select :disabled="!userIsAdmin()" :items="permissions" :rules="componentRules" v-model="roleFormatted" label="Employee Role" autocomplete @blur="model.role = formatRole(roleFormatted)"></v-select>
       <!-- Hire Date -->
       <v-menu ref="menu1" :close-on-content-click="true" v-model="menu1" :nudge-right="40" lazy transition="scale-transition" offset-y full-width max-width="290px" min-width="290px">
         <v-text-field slot="activator" v-model="hireDateFormatted" :rules="dateRules" label="Hire Date" hint="MM/DD/YYYY format" persistent-hint prepend-icon="event" @blur="model.hireDate = parseDate(hireDateFormatted)"></v-text-field>
@@ -41,6 +41,7 @@
 import api from '@/shared/api.js';
 import moment from 'moment';
 import DeleteModal from './DeleteModal.vue';
+import _ from 'lodash';
 import {
   getRole
 } from '@/utils/auth';
@@ -52,6 +53,7 @@ export default {
       deleting: false,
       date: null,
       hireDateFormatted: null,
+      roleFormatted: 'User',
       menu1: false,
       genericRules: [v => !!v || 'This field is required'],
       numberRules: [
@@ -59,20 +61,7 @@ export default {
         v => /^\d+$/.test(v) || 'Cost must be a number'
       ],
       dateRules: [v => !!v || 'Date must be valid. MM/DD/YYYY format'],
-      valid: false,
-
-      // TODO: Move this filter to methods
-      customFilter(item, queryText, itemText) {
-        const hasValue = val => (val != null ? val : '');
-        const text = hasValue(item.text);
-        const query = hasValue(queryText);
-        return (
-          text
-          .toString()
-          .toLowerCase()
-          .indexOf(query.toString().toLowerCase()) > -1
-        );
-      }
+      valid: false
     };
   },
   created() {
@@ -82,6 +71,9 @@ export default {
   watch: {
     'model.hireDate': function(val) {
       this.hireDateFormatted = this.formatDate(this.model.hireDate);
+    },
+    'model.role': function(val) {
+      this.roleFormatted = _.startCase(this.model.role);
     }
   },
   props: ['model'],
@@ -89,6 +81,9 @@ export default {
     DeleteModal
   },
   methods: {
+    formatRole(role) {
+      return _.kebabCase(role);
+    },
     formatDate(date) {
       if (!date) return null;
       else {

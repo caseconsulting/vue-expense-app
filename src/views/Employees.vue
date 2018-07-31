@@ -1,7 +1,7 @@
 <template>
 <div>
   <v-layout row wrap>
-    <v-flex lg8 md12 sm12>
+    <v-flex :lg8="userIsAdmin()" :lg12="!userIsAdmin()" md12 sm12>
       <v-card>
         <v-card-title>
           <h2>Employees</h2>
@@ -25,10 +25,10 @@
           <template slot="items" slot-scope="props">
               <tr @click="onSelect(props.item)">
                 <td class="text-xs-left">{{ props.item.firstName }}</td>
-                <td class="text-xs-left">{{ props.item.middleName }}</td>
                 <td class="text-xs-left">{{ props.item.lastName }}</td>
                 <td class="text-xs-left">{{ props.item.hireDate | dateFormat }}</td>
                 <td class="text-xs-left">{{ props.item.empId }}</td>
+                <td class="text-xs-left">{{ props.item.email }}</td>
               </tr>
             </template>
           <v-alert slot="no-results" :value="true" color="error" icon="warning">
@@ -37,7 +37,7 @@
         </v-data-table>
       </v-card>
     </v-flex>
-    <v-flex lg4 md12 sm12>
+    <v-flex v-if="userIsAdmin()" lg4 md12 sm12>
       <employee-form :model="model" v-on:add="addModelToTable" v-on:update="updateModelInTable" v-on:delete="deleteModelFromTable"></employee-form>
     </v-flex>
   </v-layout>
@@ -45,7 +45,12 @@
 </template>
 
 <script>
-import { setIdToken, setAccessToken, getAccessToken } from '@/utils/auth';
+import {
+  setIdToken,
+  setAccessToken,
+  getAccessToken,
+  getRole
+} from '@/utils/auth';
 import api from '@/shared/api.js';
 import EmployeeForm from '../components/EmployeeForm.vue';
 import moment from 'moment';
@@ -71,10 +76,6 @@ export default {
           value: 'firstName'
         },
         {
-          text: 'Middle Name',
-          value: 'middleName'
-        }, //change value to call a function
-        {
           text: 'Last Name',
           value: 'lastName'
         },
@@ -85,6 +86,10 @@ export default {
         {
           text: 'Employee ID',
           value: 'empId'
+        },
+        {
+          text: 'Email',
+          value: 'email'
         }
       ],
       pagination: {
@@ -105,11 +110,14 @@ export default {
   components: {
     EmployeeForm
   },
-
   async created() {
     this.refreshEmployees();
   },
+
   methods: {
+    userIsAdmin() {
+      return getRole() === 'super-admin';
+    },
     async refreshEmployees() {
       this.loading = true;
       this.employees = await api.getItems(api.EMPLOYEES);
@@ -121,6 +129,7 @@ export default {
         firstName: item.firstName,
         middleName: item.middleName,
         lastName: item.lastName,
+        role: item.role,
         empId: item.empId,
         hireDate: item.hireDate
       };
