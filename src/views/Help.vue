@@ -5,7 +5,7 @@
     </div>
     <br />
     <br />
-  <div>
+  <div v-if="role !== 'user'">
     <h2>Expenses</h2>
   <div class="mb-5">
     <div class="text-xs-center mb-3"></div>
@@ -124,6 +124,76 @@
     </v-expansion-panel>
   </div>
   </div>
+  <div >
+    <h2>Employee Home</h2>
+  <div class="mb-5">
+    <div class="text-xs-center mb-3"></div>
+    <v-expansion-panel
+      expand
+    >
+      <v-expansion-panel-content v-for="section in user">
+        <div slot="header">{{ section.title }}</div>
+        <v-card>
+          <v-card-text class="grey lighten-3"><li v-for="infoItem in section.infoList"><icon name="space-shuttle"/>{{ infoItem }}</li></v-card-text>
+        </v-card>
+      </v-expansion-panel-content>
+
+    </v-expansion-panel>
+  </div>
+  </div>
 </v-container>
 
 </template>
+<script>
+import { getRole } from '@/utils/auth';
+export default {
+  data() {
+    return {
+      role: '',
+      user: {
+        about: {
+          title: "About",
+          icon: "space-shuttle",
+          infoList: [
+            'Employees are logged by employees and reviewed by administrators',
+            'To get to the expenses, click on the $ in the navigation menu'
+          ]
+        },
+        create: {
+          title: "Creating an Expense",
+          icon: "space-shuttle",
+          infoList: [
+            'Click on the "new" button. A form appears with required fields. Be sure to fill out the information to the best of your ability',
+            'A form appears with required fields. Be sure to fill out the information to the best of your ability'
+          ]
+        },
+        table: {
+          title: "About the Tables",
+          icon: "user-astronaut",
+          infoList: [
+            `Each rectangle in the top part of Employee Home page represents data for a budget`,
+            `The 'Budget' is the starting amount of money that can spent for the current year`,
+            `The 'Reimbursed' is the total amount of money that has been reimbursed to the employee who is currently logged in`,
+            `The 'Unreimbursed' is the total amount of money that the employee has spent on the budget that has not yet been reimbursed`,
+            `The 'Remaining Budget' is how much money is left to be spent on the budget after deducting the reimbursed and unreimbursed expenses`,
+            `The 'Overdraft' indicates whether expenses can be assigned to the budget for next year`
+          ]
+        },
+        chart: {
+          title: "About the Charts",
+          icon: "space-shuttle",
+          infoList: [
+            `Each column is representative of a particular budget with the budget's name at the bottom`,
+            `Each different colored bar in a column represents the total cost of either unreimbursed, reimbursed, overdrafted unreimbursed, or overdrafted reimbursed expenses`,
+            'The scale for the costs are displayed on the left vertical axis',
+            `Hover your mouse over a certain colored bar to display the total expense cost of the expenses represented by that bar.`
+          ]
+        }
+      }
+    };
+  },
+  created() {
+    this.role = getRole();
+  }
+}
+</script>
