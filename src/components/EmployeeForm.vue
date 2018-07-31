@@ -14,6 +14,9 @@
 
       <!-- Employee ID -->
       <v-text-field v-model="model.empId" :rules="numberRules" label="Employee ID" data-vv-name="Employee ID"></v-text-field>
+      <!-- Email -->
+      <v-text-field v-model="model.email" :rules="emailRules" label="Email" data-vv-name="Email"></v-text-field>
+
       <!-- Employee Role -->
       <v-select :disabled="!userIsAdmin()" :items="permissions" :rules="componentRules" v-model="roleFormatted" label="Employee Role" autocomplete @blur="model.role = formatRole(roleFormatted)"></v-select>
       <!-- Hire Date -->
@@ -42,9 +45,7 @@ import api from '@/shared/api.js';
 import moment from 'moment';
 import DeleteModal from './DeleteModal.vue';
 import _ from 'lodash';
-import {
-  getRole
-} from '@/utils/auth';
+import { getRole } from '@/utils/auth';
 export default {
   data() {
     return {
@@ -56,6 +57,13 @@ export default {
       roleFormatted: 'User',
       menu1: false,
       genericRules: [v => !!v || 'This field is required'],
+      emailRules: [
+        v => !!v || 'Email is required',
+        v =>
+          /^(([^<>()\[\]\\.,;:\s@#"]+(\.[^<>()\[\]\\.,;:\s@#"]+)*)|(".+"))@consultwithcase.com/.test(
+            v
+          ) || 'Not a valid @consultwithcase email address'
+      ],
       numberRules: [
         v => !!v || 'Employee ID is required',
         v => /^\d+$/.test(v) || 'Cost must be a number'
@@ -146,7 +154,8 @@ export default {
     },
     clearForm() {
       this.$refs.form.reset();
-      this.model.role = 'User';
+      this.model.email = '@consultwithcase.com';
+      this.roleFormatted = 'User';
       this.model.firstName = '';
       this.model.middleName = '';
       this.model.lastName = '';
