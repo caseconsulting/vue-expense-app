@@ -82,10 +82,10 @@ export default {
     DeleteModal
   },
   watch: {
-    'expense.purchaseDate': function(val) {
+    'expense.purchaseDate': function (val) {
       this.purchaseDateFormatted = this.formatDate(this.expense.purchaseDate);
     },
-    'expense.reimbursedDate': function(val) {
+    'expense.reimbursedDate': function (val) {
       this.reimbursedDateFormatted = this.formatDate(
         this.expense.reimbursedDate
       );
@@ -212,6 +212,7 @@ export default {
             this.expense.id = newExpense.id;
             this.$emit('add', newExpense);
             EventBus.$emit('refreshChart', newExpense);
+            this.clearForm();
           } else {
             this.$emit('error', newExpense.response.data.message);
           }

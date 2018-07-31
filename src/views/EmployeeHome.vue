@@ -88,12 +88,9 @@ export default {
       this.expenseTypeData = _.map(this.expenseTypeData, (data) => {
         if (newData.expenseTypeId === data.id) {
           data.expenses.push(newData)
-          console.log("same")
         }
         return data;
       })
-      console.log(newData);
-      console.log(this.expenseTypeData);
     },
     clearStatus() {
       this.$set(this.status, 'statusType', undefined);
@@ -236,7 +233,6 @@ export default {
 
   computed: {
     budgets() {
-      console.log("computed");
       let budgetNames = [];
       let budgetCosts = [];
       let budgetDifference = [];
@@ -314,7 +310,7 @@ export default {
             stacked: true,
             ticks: {
               beginAtZero: true,
-              callback: function(value, index, values) {
+              callback: function (value, index, values) {
                 return value.toLocaleString('en-US', {
                   style: 'currency',
                   currency: 'USD'
@@ -333,12 +329,12 @@ export default {
         },
         tooltips: {
           callbacks: {
-            label: function(tooltipItem, data) {
+            label: function (tooltipItem, data) {
               return (
                 "$" +
                 Number(tooltipItem.yLabel)
                 .toFixed(0)
-                .replace(/./g, function(c, i, a) {
+                .replace(/./g, function (c, i, a) {
                   return i > 0 && c !== '.' && (a.length - i) % 3 === 0 ?
                     ',' + c :
                     c;
