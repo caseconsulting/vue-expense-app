@@ -1,5 +1,6 @@
 <script>
 import { Bar } from 'vue-chartjs';
+import styles from '../assets/styles/styles.scss';
 
 export default {
   props: ['employee', 'budgets'],
@@ -33,7 +34,7 @@ export default {
           },
           {
             type: 'bar',
-            label: 'Overdraft reimbursed',
+            label: 'Overdraft Reimbursed',
             backgroundColor: 'purple',
             data: this.budgets.odReimbursed
           },
