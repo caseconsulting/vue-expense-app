@@ -15,7 +15,7 @@
 
   <v-flex text-xs-center lg8 md12 sm12>
     <budget-table v-if="!loading" :employee="employee"></budget-table>
-    <budget-chart v-if="!loading" :employee="employee" :budgets="budgets"></budget-chart>
+    <budget-chart v-if="!loading" :options="drawGraph.optionSet" :chart-data="drawGraph.dataSet" @add="addModelToTable"></budget-chart>
   </v-flex>
 
   <v-flex text-xs-center lg4 md12 sm12>
@@ -80,9 +80,21 @@ export default {
     };
   },
   async created() {
+    EventBus.$on("refreshChart", this.updateData);
     this.refreshBudget();
   },
   methods: {
+    updateData(newData) {
+      this.expenseTypeData = _.map(this.expenseTypeData, (data) => {
+        if (newData.expenseTypeId === data.id) {
+          data.expenses.push(newData)
+          console.log("same")
+        }
+        return data;
+      })
+      console.log(newData);
+      console.log(this.expenseTypeData);
+    },
     clearStatus() {
       this.$set(this.status, 'statusType', undefined);
       this.$set(this.status, 'statusMessage', '');
@@ -194,14 +206,15 @@ export default {
         let cost = expense.cost;
         let isReimbursed = expense.reimbursedDate;
         totalDifference = totalDifference - cost;
+
         if (!isOverdraft && totalDifference >= 0) {
-          if(isReimbursed) {
+          if (isReimbursed) {
             totalReimbursed += cost;
           } else {
             totalUnreimbursed += cost;
           }
         } else {
-          if(isReimbursed) {
+          if (isReimbursed) {
             totalOdReimbursed += cost;
           } else {
             totalOdUnreimbursed += cost;
@@ -223,6 +236,7 @@ export default {
 
   computed: {
     budgets() {
+      console.log("computed");
       let budgetNames = [];
       let budgetCosts = [];
       let budgetDifference = [];
@@ -253,6 +267,96 @@ export default {
         unreimbursed: unreimbursed,
         odReimbursed: odReimbursed,
         odUnreimbursed: odUnreimbursed
+      };
+    },
+    drawGraph() {
+      // Overwriting base render method with actual data.
+      let data = {
+        labels: this.budgets.names,
+        datasets: [{
+            type: 'bar',
+            label: 'Reimbursed',
+            backgroundColor: '#12c44c',
+            data: this.budgets.reimbursed
+          },
+          {
+            type: 'bar',
+            label: 'Unreimbursed',
+            backgroundColor: 'red',
+            data: this.budgets.unreimbursed
+          },
+          {
+            type: 'bar',
+            label: 'Remaining Budget',
+            backgroundColor: '#e1e7f2',
+            fill: false,
+            data: this.budgets.difference
+
+          },
+          {
+            type: 'bar',
+            label: 'Overdraft reimbursed',
+            backgroundColor: 'purple',
+            data: this.budgets.odReimbursed
+          },
+          {
+            type: 'bar',
+            label: 'Overdraft Unreimbursed',
+            backgroundColor: 'pink',
+            data: this.budgets.odUnreimbursed
+          }
+        ]
+      }
+
+      let options = {
+        scales: {
+          yAxes: [{
+            stacked: true,
+            ticks: {
+              beginAtZero: true,
+              callback: function(value, index, values) {
+                return value.toLocaleString('en-US', {
+                  style: 'currency',
+                  currency: 'USD'
+                });
+              }
+            }
+          }],
+          xAxes: [{
+            stacked: true,
+            categoryPercentage: 0.5,
+            barPercentage: 1,
+            ticks: {
+              autoSkip: false
+            }
+          }]
+        },
+        tooltips: {
+          callbacks: {
+            label: function(tooltipItem, data) {
+              return (
+                "$" +
+                Number(tooltipItem.yLabel)
+                .toFixed(0)
+                .replace(/./g, function(c, i, a) {
+                  return i > 0 && c !== '.' && (a.length - i) % 3 === 0 ?
+                    ',' + c :
+                    c;
+                })
+              );
+            }
+          }
+        },
+        legend: {
+          display: true
+        },
+        responsive: true,
+        maintainAspectRatio: false
+      }
+
+      return {
+        dataSet: data,
+        optionSet: options
       };
     }
 

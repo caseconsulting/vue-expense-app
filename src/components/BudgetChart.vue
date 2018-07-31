@@ -1,11 +1,20 @@
 <script>
+<<<<<<< HEAD
 import { Bar } from 'vue-chartjs';
 import styles from '../assets/styles/styles.scss';
+=======
+import {
+  Bar,
+  mixins
+} from 'vue-chartjs';
+>>>>>>> 208-live-update-employeeHome: charts update when adding data
 
 export default {
-  props: ['employee', 'budgets'],
   extends: Bar,
+  mixins: [mixins.reactiveProp],
+  props: ['chartData', 'options'],
   mounted() {
+<<<<<<< HEAD
     // Overwriting base render method with actual data.
 
     this.renderChart(
@@ -96,6 +105,9 @@ export default {
         maintainAspectRatio: false
       }
     );
+=======
+    this.renderChart(this.chartData, this.options)
+>>>>>>> 208-live-update-employeeHome: charts update when adding data
   }
 };
 </script>
