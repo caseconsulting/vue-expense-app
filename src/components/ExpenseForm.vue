@@ -7,10 +7,10 @@
   <v-container fluid>
     <v-form ref="form" v-model="valid" lazy-validation>
 
-      <v-select :items="employees" :rules="componentRules" :filter="customFilter" v-model="expense.userId" item-text="text" label="Employee" autocomplete></v-select>
-
+      <v-select v-if="role === 'super-admin'" :items="employees" :rules="componentRules" :filter="customFilter" v-model="expense.userId" item-text="text" label="Employee" autocomplete></v-select>
 
       <v-select :items="expenseTypes" :rules="componentRules" :filter="customFilter" v-model="expense.expenseTypeId" label="Expense Type" autocomplete></v-select>
+
       <v-text-field v-model="expense.description" :rules="descriptionRules" label="Description" data-vv-name="Description"></v-text-field>
       <v-text-field prefix="$" v-model="expense.cost" :rules="costRules" label="Cost" data-vv-name="Cost"></v-text-field>
 
@@ -65,6 +65,7 @@ export default {
       employees: [],
       menu1: false,
       menu2: false,
+      userInfo: {},
       descriptionRules: [v => !!v || 'Description is required'],
       costRules: [
         v => !!v || 'Cost is required',
@@ -94,15 +95,13 @@ export default {
   methods: {
     async checkCoverage() {
       if (this.expense) {
+
         let expenseType = _.find(this.expenseTypes, (type) => this.expense.expenseTypeId === type.value);
-        let employee = await api.getItem(api.EMPLOYEES, this.expense.userId);
-        // _.find(this.employees, (emp) => this.expense.userId === emp.value);
+        let employee = this.userInfo;
         let employeeExpenseTypeBalence = _.find(employee.expenseTypes, exp => expenseType.value === exp.id);
         let cost = parseInt(this.expense.cost);
         if (employeeExpenseTypeBalence) {
           employeeExpenseTypeBalence = employeeExpenseTypeBalence.balance;
-
-
           if (expenseType.odFlag) {
             if ((2 * expenseType.budget) !== employeeExpenseTypeBalence) { //under budget
               if ((employeeExpenseTypeBalence + cost) <= (2 * expenseType.budget)) { //full amount reimbursed
@@ -197,6 +196,8 @@ export default {
           this.expense.receipt = null;
         }
 
+
+
         if (this.expense.id) {
           let updatedExpense = await api.updateItem(
             api.EXPENSES,
@@ -216,21 +217,28 @@ export default {
         }
       }
     },
+    isUser() {
+      return this.role === 'user'
+    },
     clearForm() {
       this.$refs.form.reset();
       this.expense.budgetName = '';
-      this.expense.employeeName = '';
       this.expense.id = '';
       this.expense.purchaseDate = null;
       this.expense.reimbursedDate = null;
+      if (this.isUser()) {
+        this.expense.employeeName = this.userInfo.id;
+      } else {
+        this.expense.employeeName = '';
+      }
     },
     updateSubmitting() {
       this.submitting = false;
     }
   },
   async created() {
-    this.role = getRole();
-
+    let role = getRole();
+    this.userInfo = await api.getUser();
 
     EventBus.$on('canceledSubmit', () => this.submitting = false);
     EventBus.$on('confirmSubmit', this.submit);
@@ -238,9 +246,10 @@ export default {
     EventBus.$on('canceledDelete', () => this.deleting = false);
     EventBus.$on('confirmDelete', this.deleteExpense);
 
+
+
     let expenseTypes = await api.getItems(api.EXPENSE_TYPES);
     this.expenseTypes = expenseTypes.map(expenseType => {
-
       return {
         /* beautify preserve:start */
         text: `${expenseType.budgetName} - ＄${expenseType.budget}`,
@@ -251,17 +260,23 @@ export default {
       };
     });
 
-    let employees = await api.getItems(api.EMPLOYEES);
-    this.employees = employees.map(employee => {
+    if (role === 'super-admin') {
+      let employees = await api.getItems(api.EMPLOYEES);
+      this.employees = employees.map(employee => {
 
-      return {
-        text: `${employee.firstName} ${employee.middleName} ${
+        return {
+          text: `${employee.firstName} ${employee.middleName} ${
           employee.lastName
         }`,
-        value: employee.id,
-        expenseTypes: employee.expenseTypes
-      };
-    });
+          value: employee.id,
+          expenseTypes: employee.expenseTypes
+        };
+      });
+    } else {
+      this.expense.employeeName = this.userInfo.id;
+      this.expense.userId = this.userInfo.id;
+    }
+    this.role = role;
   }
 };
 </script>
