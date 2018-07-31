@@ -5,7 +5,7 @@ import api from '../shared/api';
 
 const ID_TOKEN_KEY = 'id_token';
 const ACCESS_TOKEN_KEY = 'access_token';
-const ROLE = 'role';
+const ROLE = 'employeeRole';
 const SCOPE = 'openid email';
 // const AUDIENCE = `https://${AUTH_CONFIG.domain}/userinfo`;
 
@@ -119,12 +119,12 @@ function isTokenExpired(token) {
   return expirationDate < new Date();
 }
 
-// export function setRole(role) {
-//   localStorage.setItem(ROLE, role);
+// export function setRole(employeeRole) {
+//   localStorage.setItem(ROLE, employeeRole);
 // }
 export async function setRole() {
-  let role = await api.getRole();
-  localStorage.setItem(ROLE, role);
+  let employeeRole = await api.getRole();
+  localStorage.setItem(ROLE, employeeRole);
 }
 
 export function getRole() {

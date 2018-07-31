@@ -70,7 +70,8 @@ export default {
       loading: false,
       employees: [],
       errors: [],
-      headers: [{
+      headers: [
+        {
           text: 'First Name',
           value: 'firstName'
         },
@@ -101,7 +102,7 @@ export default {
         middleName: '',
         lastName: '',
         email: '@consultwithcase.com',
-        role: 'User',
+        employeeRole: 'User',
         empId: null,
         hireDate: null
       }
@@ -130,7 +131,7 @@ export default {
         middleName: item.middleName,
         lastName: item.lastName,
         email: item.email,
-        role: item.role,
+        employeeRole: item.employeeRole,
         empId: item.empId,
         hireDate: item.hireDate
       };
@@ -142,7 +143,7 @@ export default {
         middleName: '',
         lastName: '',
         email: '@consultwithcase.com',
-        role: 'User',
+        employeeRole: 'User',
         empId: null,
         hireDate: null
       };

@@ -18,7 +18,7 @@
       <v-text-field v-model="model.email" :rules="emailRules" label="Email" data-vv-name="Email"></v-text-field>
 
       <!-- Employee Role -->
-      <v-select :disabled="!userIsAdmin()" :items="permissions" :rules="componentRules" v-model="roleFormatted" label="Employee Role" autocomplete @blur="model.role = formatRole(roleFormatted)"></v-select>
+      <v-select :disabled="!userIsAdmin()" :items="permissions" :rules="componentRules" v-model="employeeRoleFormatted" label="Employee Role" autocomplete @blur="model.employeeRole = formatRole(employeeRoleFormatted)"></v-select>
       <!-- Hire Date -->
       <v-menu ref="menu1" :close-on-content-click="true" v-model="menu1" :nudge-right="40" lazy transition="scale-transition" offset-y full-width max-width="290px" min-width="290px">
         <v-text-field slot="activator" v-model="hireDateFormatted" :rules="dateRules" label="Hire Date" hint="MM/DD/YYYY format" persistent-hint prepend-icon="event" @blur="model.hireDate = parseDate(hireDateFormatted)"></v-text-field>
@@ -45,7 +45,9 @@ import api from '@/shared/api.js';
 import moment from 'moment';
 import DeleteModal from './DeleteModal.vue';
 import _ from 'lodash';
-import { getRole } from '@/utils/auth';
+import {
+  getRole
+} from '@/utils/auth';
 export default {
   data() {
     return {
@@ -54,15 +56,15 @@ export default {
       deleting: false,
       date: null,
       hireDateFormatted: null,
-      roleFormatted: 'User',
+      employeeRoleFormatted: 'User',
       menu1: false,
       genericRules: [v => !!v || 'This field is required'],
       emailRules: [
         v => !!v || 'Email is required',
         v =>
-          /^(([^<>()\[\]\\.,;:\s@#"]+(\.[^<>()\[\]\\.,;:\s@#"]+)*)|(".+"))@consultwithcase.com/.test(
-            v
-          ) || 'Not a valid @consultwithcase email address'
+        /^(([^<>()\[\]\\.,;:\s@#"]+(\.[^<>()\[\]\\.,;:\s@#"]+)*)|(".+"))@consultwithcase.com/.test(
+          v
+        ) || 'Not a valid @consultwithcase email address'
       ],
       numberRules: [
         v => !!v || 'Employee ID is required',
@@ -80,8 +82,8 @@ export default {
     'model.hireDate': function(val) {
       this.hireDateFormatted = this.formatDate(this.model.hireDate);
     },
-    'model.role': function(val) {
-      this.roleFormatted = _.startCase(this.model.role);
+    'model.employeeRole': function(val) {
+      this.employeeRoleFormatted = _.startCase(this.model.employeeRole);
     }
   },
   props: ['model'],
@@ -89,8 +91,8 @@ export default {
     DeleteModal
   },
   methods: {
-    formatRole(role) {
-      return _.kebabCase(role);
+    formatRole(employeeRole) {
+      return _.kebabCase(employeeRole);
     },
     formatDate(date) {
       if (!date) return null;
@@ -155,7 +157,7 @@ export default {
     clearForm() {
       this.$refs.form.reset();
       this.model.email = '@consultwithcase.com';
-      this.roleFormatted = 'User';
+      this.employeeRoleFormatted = 'User';
       this.model.firstName = '';
       this.model.middleName = '';
       this.model.lastName = '';

@@ -7,7 +7,7 @@
   <v-container fluid>
     <v-form ref="form" v-model="valid" lazy-validation>
 
-      <v-select v-if="role === 'super-admin'" :items="employees" :rules="componentRules" :filter="customFilter" v-model="expense.userId" item-text="text" label="Employee" autocomplete></v-select>
+      <v-select v-if="employeeRole === 'super-admin'" :items="employees" :rules="componentRules" :filter="customFilter" v-model="expense.userId" item-text="text" label="Employee" autocomplete></v-select>
 
       <v-select :items="expenseTypes" :rules="componentRules" :filter="customFilter" v-model="expense.expenseTypeId" label="Expense Type" autocomplete></v-select>
 
@@ -53,7 +53,7 @@ import _ from 'lodash';
 export default {
   data() {
     return {
-      role: '',
+      employeeRole: '',
       deleting: false,
       submitting: false,
       date: null,
@@ -219,7 +219,7 @@ export default {
       }
     },
     isUser() {
-      return this.role === 'user'
+      return this.employeeRole === 'user'
     },
     clearForm() {
       this.$refs.form.reset();
@@ -238,7 +238,7 @@ export default {
     }
   },
   async created() {
-    let role = getRole();
+    let employeeRole = getRole();
     this.userInfo = await api.getUser();
 
     EventBus.$on('canceledSubmit', () => this.submitting = false);
@@ -261,7 +261,7 @@ export default {
       };
     });
 
-    if (role === 'super-admin') {
+    if (employeeRole === 'super-admin') {
       let employees = await api.getItems(api.EMPLOYEES);
       this.employees = employees.map(employee => {
 
@@ -277,7 +277,7 @@ export default {
       this.expense.employeeName = this.userInfo.id;
       this.expense.userId = this.userInfo.id;
     }
-    this.role = role;
+    this.employeeRole = employeeRole;
   }
 };
 </script>

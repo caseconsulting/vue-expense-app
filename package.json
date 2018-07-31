@@ -10,7 +10,10 @@
     "inspect": "vue-cli-service inspect",
     "lint": "vue-cli-service lint",
     "serve": "vue-cli-service serve",
-    "test": "vue-cli-service test"
+    "test": "vue-cli-service test",
+
+
+    "build:prod": "node build && grunt prod"
   },
   "dependencies": {
     "accounting-js": "^1.1.1",
@@ -47,6 +50,8 @@
     "babel-core": "^7.0.0-0",
     "babel-jest": "^23.2.0",
     "eslint-plugin-html": "^4.0.5",
+    "grunt": "^1.0.3",
+    "grunt-aws-s3": "^2.0.0",
     "node-sass": "^4.9.1",
     "sass-loader": "^7.0.3",
     "vue-template-compiler": "^2.5.13"
