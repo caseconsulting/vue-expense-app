@@ -14,7 +14,7 @@
 
 
   <v-flex text-xs-center lg8 md12 sm12>
-    <budget-table v-if="!loading" :employee="employee"></budget-table>
+    <budget-table v-if="!loading" :employee="getBudgets"></budget-table>
     <budget-chart v-if="!loading" :options="drawGraph.optionSet" :chart-data="drawGraph.dataSet" @add="addModelToTable"></budget-chart>
   </v-flex>
 
@@ -358,6 +358,9 @@ export default {
         dataSet: data,
         optionSet: options
       };
+    },
+    getBudgets() {
+      return this.expenseTypeData;
     }
 
   },
