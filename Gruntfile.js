@@ -1,13 +1,9 @@
 module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-aws-s3');
   var aws = grunt.file.readJSON('aws-keys.json');
-  console.log(grunt);
   grunt.initConfig({
-    // copies app to S3 bucket
-
     aws_s3: {
       options: {
-        access: 'Private',
         accessKeyId: aws.AWSAccessKeyId,
         secretAccessKey: aws.AWSSecretKey,
         differential: true,

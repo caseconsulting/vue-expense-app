@@ -7,14 +7,14 @@ const ID_TOKEN_KEY = 'id_token';
 const ACCESS_TOKEN_KEY = 'access_token';
 const ROLE = 'employeeRole';
 const SCOPE = 'openid email';
-// const AUDIENCE = `https://${AUTH_CONFIG.domain}/userinfo`;
+const CALLBACK = process.env.VUE_APP_HOSTNAME + '/callback';
 
 var auth = new auth0.WebAuth({
   clientID: 'w9Ih4cZX8Plry47ZuoAcbnwGEG4hFeZx',
   domain: 'consultwithcase.auth0.com',
   responseType: 'token id_token',
   audience: 'https://consultwithcase.auth0.com/api/v2/',
-  redirectUri: 'http://localhost:8080/callback',
+  redirectUri: CALLBACK,
   scope: SCOPE
 });
 
