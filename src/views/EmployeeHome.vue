@@ -291,8 +291,8 @@ export default {
           },
           {
             type: 'bar',
-            label: 'Overdraft reimbursed',
-            backgroundColor: 'purple',
+            label: 'Overdraft Reimbursed',
+            backgroundColor: '#bef7d6',
             data: this.budgets.odReimbursed
           },
           {
@@ -310,7 +310,7 @@ export default {
             stacked: true,
             ticks: {
               beginAtZero: true,
-              callback: function (value, index, values) {
+              callback: function(value, index, values) {
                 return value.toLocaleString('en-US', {
                   style: 'currency',
                   currency: 'USD'
@@ -329,12 +329,12 @@ export default {
         },
         tooltips: {
           callbacks: {
-            label: function (tooltipItem, data) {
+            label: function(tooltipItem, data) {
               return (
                 "$" +
                 Number(tooltipItem.yLabel)
                 .toFixed(0)
-                .replace(/./g, function (c, i, a) {
+                .replace(/./g, function(c, i, a) {
                   return i > 0 && c !== '.' && (a.length - i) % 3 === 0 ?
                     ',' + c :
                     c;

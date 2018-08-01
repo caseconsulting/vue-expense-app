@@ -70,10 +70,7 @@ export default {
     remaining(item) {
       return item.budget - item.reimbursed - item.unreimbursed;
     }
-  },
-  created() {
-    console.log(this.employee)
-  },
+  }
 
 }
 </script>
