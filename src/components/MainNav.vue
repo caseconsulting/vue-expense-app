@@ -52,7 +52,7 @@ export default {
           title: 'Expenses',
           icon: 'dollar-sign',
           route: 'expenses',
-          permission: ['super-admin', 'admin']
+          permission: ['super-admin', 'admin', 'user']
         },
         {
           title: 'Expense Types',
