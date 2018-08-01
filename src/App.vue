@@ -8,9 +8,22 @@
       <v-toolbar-side-icon v-show="isLoggedIn()" @click.stop="drawer = !drawer"></v-toolbar-side-icon>
       <v-toolbar-title>
         <h2 style="text-align:center"><span class="e">€</span>xpense App</h2></v-toolbar-title>
+
       <v-spacer></v-spacer>
-      <v-toolbar-items>
-        <v-btn flat v-show="isLoggedIn()" @click="handleLogout()">Logout</v-btn flat>
+
+
+      <v-toolbar-items v-show="isLoggedIn()">
+        <v-flex xs12 sm6 md8 align-center justify-left layout text-xs-center>
+          <v-menu bottom offset-y open-on-click>
+            <v-avatar slot="activator" size=50 color="grey lighten-4">
+              <img :src="profilePic" alt="avatar">
+            </v-avatar>
+            <v-list>
+              <v-btn flat @click="handleLogout()">Logout</v-btn>
+            </v-list>
+          </v-menu>
+        </v-flex>
+
       </v-toolbar-items>
     </v-toolbar>
     <v-content>
@@ -20,14 +33,6 @@
     </v-content>
     <v-footer app></v-footer>
   </v-app>
-
-
-  <!-- <v-app>
-      <main-nav></main-nav>
-    <v-container fluid grid-list-lg>
-        <router-view class="mt-3"/>
-    </v-container>
-  </v-app> -->
 </div>
 </template>
 
@@ -35,12 +40,14 @@
 import {
   isLoggedIn,
   login,
-  logout
+  logout,
+  getProfile
 } from '@/utils/auth';
 import MainNav from '@/components/MainNav.vue';
 export default {
   data: () => ({
-    drawer: false
+    drawer: false,
+    profilePic: 'src/assets/img/logo-big.png'
   }),
   props: {
     source: String
@@ -54,6 +61,12 @@ export default {
     },
     isLoggedIn() {
       return isLoggedIn();
+    }
+  },
+  created() {
+    let pic = getProfile();
+    if (pic) {
+      this.profilePic = pic;
     }
   }
 };

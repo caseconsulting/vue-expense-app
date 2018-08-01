@@ -6,8 +6,11 @@ import api from '../shared/api';
 const ID_TOKEN_KEY = 'id_token';
 const ACCESS_TOKEN_KEY = 'access_token';
 const ROLE = 'employeeRole';
-const SCOPE = 'openid email';
 const CALLBACK = process.env.VUE_APP_HOSTNAME + '/callback';
+const IMG = 'profilePic'
+const SCOPE = 'openid email profile';
+
+
 
 var auth = new auth0.WebAuth({
   clientID: 'w9Ih4cZX8Plry47ZuoAcbnwGEG4hFeZx',
@@ -30,6 +33,7 @@ export function logout() {
   clearIdToken();
   clearAccessToken();
   clearRole();
+  clearProfile();
   router.go('/');
 }
 
@@ -75,7 +79,9 @@ function clearAccessToken() {
 function clearRole() {
   localStorage.removeItem(ROLE);
 }
-
+function clearProfile() {
+  localStorage.removeItem(IMG);
+}
 // Helper function that will allow us to extract the access_token and id_token
 function getParameterByName(name) {
   let match = RegExp('[#&]' + name + '=([^&]*)').exec(window.location.hash);
@@ -92,6 +98,15 @@ export function setAccessToken() {
 export function setIdToken() {
   let idToken = getParameterByName('id_token');
   localStorage.setItem(ID_TOKEN_KEY, idToken);
+}
+
+export function setProfile() {
+  let profile = decode(getIdToken());
+  localStorage.setItem(IMG, profile.picture);
+}
+
+export function getProfile() {
+  return localStorage.getItem(IMG);
 }
 
 export function isLoggedIn() {
