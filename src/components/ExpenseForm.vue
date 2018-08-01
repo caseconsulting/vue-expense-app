@@ -82,10 +82,10 @@ export default {
     DeleteModal
   },
   watch: {
-    'expense.purchaseDate': function (val) {
+    'expense.purchaseDate': function(val) {
       this.purchaseDateFormatted = this.formatDate(this.expense.purchaseDate);
     },
-    'expense.reimbursedDate': function (val) {
+    'expense.reimbursedDate': function(val) {
       this.reimbursedDateFormatted = this.formatDate(
         this.expense.reimbursedDate
       );
@@ -184,9 +184,13 @@ export default {
     },
     async deleteExpense() {
       this.deleting = false;
-      await api.deleteItem(api.EXPENSES, this.expense.id);
-      this.$emit('delete');
-      this.clearForm();
+      console.log(this.expense.id);
+      if (this.expense.id) {
+        await api.deleteItem(api.EXPENSES, this.expense.id);
+        this.$emit('delete');
+        //this.clearForm();
+      }
+
     },
     async submit() {
       this.submitting = false;
@@ -212,7 +216,7 @@ export default {
             this.expense.id = newExpense.id;
             this.$emit('add', newExpense);
             EventBus.$emit('refreshChart', newExpense);
-            this.clearForm();
+            //this.clearForm();
           } else {
             this.$emit('error', newExpense.response.data.message);
           }
@@ -224,14 +228,14 @@ export default {
     },
     clearForm() {
       this.$refs.form.reset();
-      this.expense.budgetName = '';
-      this.expense.id = '';
-      this.expense.purchaseDate = null;
-      this.expense.reimbursedDate = null;
+      this.$set(this.expense, 'budgetName', '');
+      this.$set(this.expense, 'id', '');
+      this.$set(this.expense, 'purchaseDate', null);
+      this.$set(this.expense, 'reimbursedDate', null);
       if (this.isUser()) {
-        this.expense.employeeName = this.userInfo.id;
+        this.$set(this.expense, 'employeeName', this.userInfo.id);
       } else {
-        this.expense.employeeName = '';
+        this.$set(this.expense, 'employeeName', '');
       }
     },
     updateSubmitting() {

@@ -181,19 +181,18 @@ export default {
       this.loading = false;
     },
     onSelect(item) {
-      this.expense = {
-        id: item.id,
-        description: item.description,
-        cost: item.cost,
-        note: item.note,
-        userId: item.userId,
-        expenseTypeId: item.expenseTypeId,
-        purchaseDate: item.purchaseDate,
-        reimbursedDate: item.reimbursedDate,
-        employeeName: item.employeeName,
-        budgetName: item.budgetName,
-        reciept: null
-      };
+      this.$set(this.expense, 'budgetName', item.budgetName);
+      this.$set(this.expense, 'id', item.id);
+      this.$set(this.expense, 'purchaseDate', item.purchaseDate);
+      this.$set(this.expense, 'reimbursedDate', item.reimbursedDate);
+      this.$set(this.expense, 'employeeName', item.employeeName);
+      this.$set(this.expense, 'description', item.description);
+      this.$set(this.expense, 'cost', item.cost);
+      this.$set(this.expense, 'userId', item.userId);
+      this.$set(this.expense, 'expenseTypeId', item.expenseTypeId);
+      this.$set(this.expense, 'note', item.note);
+
+      console.log(this.expense);
     },
     updateModelInTable(updatedExpense) {
       let matchingExpensesIndex = _.findIndex(
@@ -214,6 +213,7 @@ export default {
           this.$set(updatedExpense, 'budgetName', expenseType.budgetName);
         });
       this.processedExpenses.splice(matchingExpensesIndex, 1, updatedExpense);
+      console.log(updatedExpense);
       this.$set(this.status, 'statusType', 'SUCCESS');
       this.$set(this.status, 'statusMessage', 'Item was successfully updated!');
       this.$set(this.status, 'color', 'green');
