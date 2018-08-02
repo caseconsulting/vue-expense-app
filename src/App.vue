@@ -1,7 +1,7 @@
 <template>
 <div id="app">
   <v-app>
-    <v-navigation-drawer v-model="drawer" fixed app>
+    <v-navigation-drawer v-model="drawer" fixed app disableResizeWatcher>
       <main-nav></main-nav>
     </v-navigation-drawer>
     <v-toolbar color="primary" dark fixed app>
@@ -61,6 +61,11 @@ export default {
     },
     isLoggedIn() {
       return isLoggedIn();
+    }
+  },
+  watch: {
+    drawer: function() {
+      console.log("drawer");
     }
   },
   created() {
