@@ -93,7 +93,7 @@ export default {
       expense: {
         id: '',
         description: '',
-        cost: "0",
+        cost: '0',
         note: null,
         userId: '',
         expenseTypeId: '',
@@ -191,8 +191,6 @@ export default {
       this.$set(this.expense, 'userId', item.userId);
       this.$set(this.expense, 'expenseTypeId', item.expenseTypeId);
       this.$set(this.expense, 'note', item.note);
-
-      console.log(this.expense);
     },
     updateModelInTable(updatedExpense) {
       let matchingExpensesIndex = _.findIndex(
@@ -213,7 +211,6 @@ export default {
           this.$set(updatedExpense, 'budgetName', expenseType.budgetName);
         });
       this.processedExpenses.splice(matchingExpensesIndex, 1, updatedExpense);
-      console.log(updatedExpense);
       this.$set(this.status, 'statusType', 'SUCCESS');
       this.$set(this.status, 'statusMessage', 'Item was successfully updated!');
       this.$set(this.status, 'color', 'green');
@@ -225,9 +222,12 @@ export default {
       );
 
       if (!matchingExpenses.length) {
-        api.getItem(api.EMPLOYEES, newExpense.userId)
+        api
+          .getItem(api.EMPLOYEES, newExpense.userId)
           .then(employee => {
-            let employeeName = `${employee.firstName} ${employee.middleName} ${employee.lastName}`;
+            let employeeName = `${employee.firstName} ${employee.middleName} ${
+              employee.lastName
+            }`;
             this.$set(newExpense, 'employeeName', employeeName);
           })
           .catch(err => console.log(err));

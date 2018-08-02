@@ -66,7 +66,8 @@ export default {
       loading: false,
       expenseTypes: [],
       errors: [],
-      headers: [{
+      headers: [
+        {
           text: 'Expense Type',
           value: 'budgetName',
           sortable: false
@@ -112,22 +113,18 @@ export default {
     },
 
     onSelect(item) {
-      this.model = {
-        id: item.id,
-        budget: item.budget,
-        budgetName: item.budgetName,
-        description: item.description,
-        odFlag: item.odFlag
-      };
+      this.$set(this.model, 'id', item.id);
+      this.$set(this.model, 'budget', item.budget);
+      this.$set(this.model, 'budgetName', item.budgetName);
+      this.$set(this.model, 'description', item.description);
+      this.$set(this.model, 'odFlag', item.odFlag);
     },
     clearModel() {
-      this.model = {
-        id: '',
-        budget: 0,
-        budgetName: '',
-        description: '',
-        odFlag: false
-      };
+      this.$set(this.model, 'id', '');
+      this.$set(this.model, 'budget', 0);
+      this.$set(this.model, 'budgetName', '');
+      this.$set(this.model, 'description', '');
+      this.$set(this.model, 'odFlag', false);
     },
     updateModelInTable(updatedExpenseType) {
       let matchingExpensesIndex = _.findIndex(

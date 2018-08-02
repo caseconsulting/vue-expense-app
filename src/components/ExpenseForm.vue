@@ -45,7 +45,7 @@
 import api from '@/shared/api.js';
 import {
   getRole
-} from '@/utils/auth'
+} from '@/utils/auth';
 import moment from 'moment';
 import ConfirmationBox from './ConfirmationBox.vue';
 import DeleteModal from './DeleteModal.vue';
@@ -95,43 +95,59 @@ export default {
   methods: {
     async checkCoverage() {
       if (this.expense) {
-
-        let expenseType = _.find(this.expenseTypes, (type) => this.expense.expenseTypeId === type.value);
+        let expenseType = _.find(
+          this.expenseTypes,
+          type => this.expense.expenseTypeId === type.value
+        );
         let employee = this.userInfo;
-        let employeeExpenseTypeBalence = _.find(employee.expenseTypes, exp => expenseType.value === exp.id);
+        let employeeExpenseTypeBalence = _.find(
+          employee.expenseTypes,
+          exp => expenseType.value === exp.id
+        );
         let cost = parseInt(this.expense.cost);
         if (employeeExpenseTypeBalence) {
           employeeExpenseTypeBalence = employeeExpenseTypeBalence.balance;
           if (expenseType.odFlag) {
-            if ((2 * expenseType.budget) !== employeeExpenseTypeBalence) { //under budget
-              if ((employeeExpenseTypeBalence + cost) <= (2 * expenseType.budget)) { //full amount reimbursed
+            if (2 * expenseType.budget !== employeeExpenseTypeBalence) {
+              //under budget
+              if (employeeExpenseTypeBalence + cost <= 2 * expenseType.budget) {
+                //full amount reimbursed
                 this.submit();
-              } else { // not maxed out but also not fully covered
+              } else {
+                // not maxed out but also not fully covered
                 this.expense.budget = expenseType.budget;
-                this.expense.remaining = expenseType.budget - employeeExpenseTypeBalence;
+                this.expense.remaining =
+                  expenseType.budget - employeeExpenseTypeBalence;
                 this.submitting = true;
               }
-            } else { //already overbudget handled by backend after submit
+            } else {
+              //already overbudget handled by backend after submit
               this.submit();
             }
           } else {
-            if (expenseType.budget !== employeeExpenseTypeBalence) { //under budget
-              if ((employeeExpenseTypeBalence + cost) <= expenseType.budget) { //full amount reimbursed
+            if (expenseType.budget !== employeeExpenseTypeBalence) {
+              //under budget
+              if (employeeExpenseTypeBalence + cost <= expenseType.budget) {
+                //full amount reimbursed
                 this.submit();
-              } else { // not maxed out but also not fully covered
+              } else {
+                // not maxed out but also not fully covered
                 this.expense.budget = expenseType.budget;
-                this.expense.remaining = expenseType.budget - employeeExpenseTypeBalence;
+                this.expense.remaining =
+                  expenseType.budget - employeeExpenseTypeBalence;
                 this.submitting = true;
               }
-            } else { //already overbudget handled by backend after submit
+            } else {
+              //already overbudget handled by backend after submit
               this.submit();
             }
           }
-
-        } else { //new expense for an expensetype
+        } else {
+          //new expense for an expensetype
           if (expenseType.budget < cost) {
             this.expense.budget = expenseType.budget;
-            this.expense.remaining = expenseType.budget - employeeExpenseTypeBalence;
+            this.expense.remaining =
+              expenseType.budget - employeeExpenseTypeBalence;
             this.submitting = true;
           } else {
             this.submit();
@@ -190,7 +206,6 @@ export default {
         this.$emit('delete');
         //this.clearForm();
       }
-
     },
     async submit() {
       this.submitting = false;
@@ -199,16 +214,12 @@ export default {
         if (!this.expense.receipt) {
           this.expense.receipt = null;
         }
-
-
-
         if (this.expense.id) {
           let updatedExpense = await api.updateItem(
             api.EXPENSES,
             this.expense.id,
             this.expense
           );
-
           this.$emit('update', updatedExpense);
         } else {
           let newExpense = await api.createItem(api.EXPENSES, this.expense);
@@ -224,7 +235,7 @@ export default {
       }
     },
     isUser() {
-      return this.employeeRole === 'user'
+      return this.employeeRole === 'user';
     },
     clearForm() {
       this.$refs.form.reset();
@@ -237,22 +248,17 @@ export default {
       } else {
         this.$set(this.expense, 'employeeName', '');
       }
-    },
-    updateSubmitting() {
-      this.submitting = false;
     }
   },
   async created() {
     let employeeRole = getRole();
     this.userInfo = await api.getUser();
 
-    EventBus.$on('canceledSubmit', () => this.submitting = false);
+    EventBus.$on('canceledSubmit', () => (this.submitting = false));
     EventBus.$on('confirmSubmit', this.submit);
 
-    EventBus.$on('canceledDelete', () => this.deleting = false);
-    EventBus.$on('confirmDelete', this.deleteExpense);
-
-
+    EventBus.$on('canceled-delete-expense', () => (this.deleting = false));
+    EventBus.$on('confirm-delete-expense', this.deleteExpense);
 
     let expenseTypes = await api.getItems(api.EXPENSE_TYPES);
     this.expenseTypes = expenseTypes.map(expenseType => {
@@ -269,11 +275,10 @@ export default {
     if (employeeRole === 'super-admin') {
       let employees = await api.getItems(api.EMPLOYEES);
       this.employees = employees.map(employee => {
-
         return {
           text: `${employee.firstName} ${employee.middleName} ${
-          employee.lastName
-        }`,
+            employee.lastName
+          }`,
           value: employee.id,
           expenseTypes: employee.expenseTypes
         };

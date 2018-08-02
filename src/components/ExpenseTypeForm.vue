@@ -20,7 +20,7 @@
         <icon class="mr-1" name="save"></icon>Submit</v-btn>
     </v-form>
   </v-container>
-  <delete-modal :activate="deleting" :type="'expense type'"></delete-modal>
+  <delete-modal :activate="deleting" :type="'expense-type'"></delete-modal>
 </v-card>
 </template>
 
@@ -44,8 +44,8 @@ export default {
     DeleteModal
   },
   created() {
-    EventBus.$on('canceledDelete', () => this.deleting = false);
-    EventBus.$on('confirmDelete', this.deleteExpenseType);
+    EventBus.$on('canceled-delete-expense-type', () => (this.deleting = false));
+    EventBus.$on('confirm-delete-expense-type', this.deleteExpenseType);
   },
   methods: {
     async submit(newExpenseType) {
@@ -67,25 +67,25 @@ export default {
             api.EXPENSE_TYPES,
             this.model
           );
-          this.model.id = newExpenseType.id;
+          this.$set(this.model, 'id', newExpenseType.id);
           this.$emit('add', newExpenseType);
         }
       }
     },
     async deleteExpenseType() {
       this.deleting = false;
+      console.log(this.model.id);
       await api.deleteItem(api.EXPENSE_TYPES, this.model.id);
       this.$emit('delete');
       this.clearForm();
-
     },
     clearForm() {
       this.$refs.form.reset();
-      this.model.budget = 0;
-      this.model.budgetName = '';
-      this.model.description = '';
-      this.model.id = '';
-      this.model.odFlag = false;
+      this.$set(this.model, 'id', '');
+      this.$set(this.model, 'budget', 0);
+      this.$set(this.model, 'budgetName', '');
+      this.$set(this.model, 'description', '');
+      this.$set(this.model, 'odFlag', false);
     }
   }
 };
