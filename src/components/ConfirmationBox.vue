@@ -33,7 +33,7 @@ export default {
       }
     },
     confirm(msg) {
-      this.expense.note = `The expense you are about to submit is only covered up to ${this.expense.budget} you will be reimbursed ${this.expense.remaining} of ${this.expense.cost}`
+      this.expense.note = `The expense you are about to submit is only covered up to ＄${this.expense.budget} you will be reimbursed ＄${this.expense.remaining} of ＄${this.expense.cost}`
       this.expense.cost = this.expense.remaining;
       EventBus.$emit(msg);
     }

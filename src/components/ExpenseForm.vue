@@ -20,7 +20,7 @@
         <v-date-picker v-model="expense.purchaseDate" no-title @input="menu1 = false"></v-date-picker>
       </v-menu>
       <!-- Date Picker 2-->
-      <v-menu ref="menu2" :close-on-content-click="false" v-model="menu2" :nudge-right="40" lazy transition="scale-transition" offset-y full-width max-width="290px" min-width="290px">
+      <v-menu v-if="employeeRole === 'super-admin'" ref="menu2" :close-on-content-click="false" v-model="menu2" :nudge-right="40" lazy transition="scale-transition" offset-y full-width max-width="290px" min-width="290px">
         <v-text-field slot="activator" v-model="reimbursedDateFormatted" label="Reimburse Date (optional)" hint="MM/DD/YYYY format " persistent-hint prepend-icon="event" @blur="expense.reimbursedDate = parseDate(reimbursedDateFormatted)"></v-text-field>
         <v-date-picker v-model="expense.reimbursedDate" no-title @input="menu2 = false"></v-date-picker>
       </v-menu>
@@ -82,10 +82,10 @@ export default {
     DeleteModal
   },
   watch: {
-    'expense.purchaseDate': function (val) {
+    'expense.purchaseDate': function(val) {
       this.purchaseDateFormatted = this.formatDate(this.expense.purchaseDate);
     },
-    'expense.reimbursedDate': function (val) {
+    'expense.reimbursedDate': function(val) {
       this.reimbursedDateFormatted = this.formatDate(
         this.expense.reimbursedDate
       );
