@@ -63,11 +63,6 @@ export default {
       return isLoggedIn();
     }
   },
-  watch: {
-    drawer: function() {
-      console.log("drawer");
-    }
-  },
   created() {
     let pic = getProfile();
     if (pic) {
