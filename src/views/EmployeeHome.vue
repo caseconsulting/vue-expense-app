@@ -31,6 +31,7 @@ import ExpenseForm from '../components/ExpenseForm.vue';
 import moment from 'moment';
 import api from '@/shared/api.js';
 import _ from 'lodash';
+import pattern from 'patternomaly';
 export default {
   filters: {
     moneyValue: value => {
@@ -278,13 +279,13 @@ export default {
         datasets: [{
             type: 'bar',
             label: 'Reimbursed',
-            backgroundColor: '#12c44c',
+            backgroundColor: '#2195f3',
             data: this.budgets.reimbursed
           },
           {
             type: 'bar',
             label: 'Unreimbursed',
-            backgroundColor: 'red',
+            backgroundColor: '#ff6666',
             data: this.budgets.unreimbursed
           },
           {
@@ -298,13 +299,13 @@ export default {
           {
             type: 'bar',
             label: 'Overdraft Reimbursed',
-            backgroundColor: '#bef7d6',
+            backgroundColor: pattern.draw('diagonal', '#88beef'),
             data: this.budgets.odReimbursed
           },
           {
             type: 'bar',
             label: 'Overdraft Unreimbursed',
-            backgroundColor: 'pink',
+            backgroundColor: pattern.draw('diagonal', 'pink'),
             data: this.budgets.odUnreimbursed
           }
         ]
