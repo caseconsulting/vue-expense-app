@@ -197,14 +197,15 @@ export default {
       let totalOdReimbursed = 0;
       let totalOdUnreimbursed = 0;
       let totalDifference = expenseType.budget;
-      let isOverdraft = false;
-      for (let j = 0; j < expenseType.expenses.length; j++) {
+      let isOverdraft = expenseType.odFlag;
+      let i = expenseType.expenses.length;
+      let owed = 0;
+      for (let j = 0; j < i; j++) {
         let expense = expenseType.expenses[j];
         let cost = expense.cost;
         let isReimbursed = expense.reimbursedDate;
         totalDifference = totalDifference - cost;
-
-        if (!isOverdraft && totalDifference >= 0) {
+        if (totalDifference >= 0) {
           if (isReimbursed) {
             totalReimbursed += cost;
           } else {
@@ -212,13 +213,18 @@ export default {
           }
         } else {
           if (isReimbursed) {
-            totalOdReimbursed += cost;
+            owed = -totalDifference;
+            totalOdReimbursed += owed;
+            totalReimbursed += cost - owed;
+            totalDifference = 0;
           } else {
-            totalOdUnreimbursed += cost;
+            owed = -totalDifference;
+            totalOdUnreimbursed += owed;
+            totalUnreimbursed += cost - owed;
+            totalDifference = 0;
           }
-          totalDifference = 0;
-          isOverdraft = true;
         }
+
       }
 
       return {
