@@ -1,4 +1,4 @@
-<template>
+ <template>
 <v-card hover>
   <v-card-title>
     <h3 v-if="model.id"> Edit Employee </h3>
@@ -45,9 +45,7 @@ import api from '@/shared/api.js';
 import moment from 'moment';
 import DeleteModal from './DeleteModal.vue';
 import _ from 'lodash';
-import {
-  getRole
-} from '@/utils/auth';
+import { getRole } from '@/utils/auth';
 export default {
   data() {
     return {
@@ -62,9 +60,9 @@ export default {
       emailRules: [
         v => !!v || 'Email is required',
         v =>
-        /^(([^<>()\[\]\\.,;:\s@#"]+(\.[^<>()\[\]\\.,;:\s@#"]+)*)|(".+"))@consultwithcase.com/.test(
-          v
-        ) || 'Not a valid @consultwithcase email address'
+          /^(([^<>()\[\]\\.,;:\s@#"]+(\.[^<>()\[\]\\.,;:\s@#"]+)*)|(".+"))@consultwithcase.com/.test(
+            v
+          ) || 'Not a valid @consultwithcase email address'
       ],
       numberRules: [
         v => !!v || 'Employee ID is required',
@@ -75,8 +73,8 @@ export default {
     };
   },
   created() {
-    EventBus.$on('canceledDelete', () => (this.deleting = false));
-    EventBus.$on('confirmDelete', this.deleteEmployee);
+    EventBus.$on('canceled-delete-employee', () => (this.deleting = false));
+    EventBus.$on('confirm-delete-employee', this.deleteEmployee);
   },
   watch: {
     'model.hireDate': function(val) {
@@ -143,8 +141,7 @@ export default {
         } else {
           newEmployee = await api.createItem(api.EMPLOYEES, this.model);
         }
-
-        this.model.id = newEmployee.id;
+        this.$set(this.model, 'id', newEmployee.id);
         this.$emit('add', newEmployee);
       }
     },
@@ -156,15 +153,15 @@ export default {
     },
     clearForm() {
       this.$refs.form.reset();
-      this.model.email = '@consultwithcase.com';
       this.employeeRoleFormatted = 'User';
-      this.model.firstName = '';
-      this.model.middleName = '';
-      this.model.lastName = '';
-      this.model.empId = '';
-      this.model.expenseTypes = [];
-      this.model.hireDate = '';
-      this.model.id = '';
+      this.$set(this.model, email, '@consultwithcase.com');
+      this.$set(this.model, firstName, '');
+      this.$set(this.model, middleName, '');
+      this.$set(this.model, lastName, '');
+      this.$set(this.model, empId, '');
+      this.$set(this.model, expenseTypes, []);
+      this.$set(this.model, hireDate, '');
+      this.$set(this.model, id, '');
     }
   }
 };

@@ -70,8 +70,7 @@ export default {
       loading: false,
       employees: [],
       errors: [],
-      headers: [
-        {
+      headers: [{
           text: 'First Name',
           value: 'firstName'
         },
@@ -125,28 +124,24 @@ export default {
       this.loading = false;
     },
     onSelect(item) {
-      this.model = {
-        id: item.id,
-        firstName: item.firstName,
-        middleName: item.middleName,
-        lastName: item.lastName,
-        email: item.email,
-        employeeRole: item.employeeRole,
-        empId: item.empId,
-        hireDate: item.hireDate
-      };
+      this.$set(this.model, 'id', item.id);
+      this.$set(this.model, 'firstName', item.firstName);
+      this.$set(this.model, 'middleName', item.middleName);
+      this.$set(this.model, 'lastName', item.lastName);
+      this.$set(this.model, 'email', item.email);
+      this.$set(this.model, 'employeeRole', item.employeeRole);
+      this.$set(this.model, 'empId', item.empId);
+      this.$set(this.model, 'hireDate', item.hireDate);
     },
     clearModel() {
-      this.model = {
-        id: '',
-        firstName: '',
-        middleName: '',
-        lastName: '',
-        email: '@consultwithcase.com',
-        employeeRole: 'User',
-        empId: null,
-        hireDate: null
-      };
+      this.$set(this.model, 'id', '');
+      this.$set(this.model, 'firstName', '');
+      this.$set(this.model, 'middleName', '');
+      this.$set(this.model, 'lastName', '');
+      this.$set(this.model, 'email', '@consultwithcase.com');
+      this.$set(this.model, 'employeeRole', 'User');
+      this.$set(this.model, 'empId', null);
+      this.$set(this.model, 'hireDate', null);
     },
     updateModelInTable(updatedEmployee) {
       let matchingEmployeeIndex = _.findIndex(

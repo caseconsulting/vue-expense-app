@@ -100,24 +100,27 @@ export default {
           type => this.expense.expenseTypeId === type.value
         );
         let employee = this.userInfo;
-        let employeeExpenseTypeBalence = _.find(
+        let employeeExpenseTypeBalance = _.find(
           employee.expenseTypes,
           exp => expenseType.value === exp.id
         );
         let cost = parseInt(this.expense.cost);
-        if (employeeExpenseTypeBalence) {
-          employeeExpenseTypeBalence = employeeExpenseTypeBalence.balance;
+        if (employeeExpenseTypeBalance) {
+          employeeExpenseTypeBalance = employeeExpenseTypeBalance.balance;
           if (expenseType.odFlag) {
-            if (2 * expenseType.budget !== employeeExpenseTypeBalence) {
+            if (2 * expenseType.budget !== employeeExpenseTypeBalance) {
               //under budget
-              if (employeeExpenseTypeBalence + cost <= 2 * expenseType.budget) {
+              if (employeeExpenseTypeBalance + cost <= 2 * expenseType.budget) {
                 //full amount reimbursed
                 this.submit();
               } else {
                 // not maxed out but also not fully covered
-                this.expense.budget = expenseType.budget;
-                this.expense.remaining =
-                  expenseType.budget - employeeExpenseTypeBalence;
+                this.$set(this.expense, 'budget', expenseType.budget);
+                this.$set(
+                  this.expense,
+                  'remaining',
+                  expenseType.budget - employeeExpenseTypeBalance
+                );
                 this.submitting = true;
               }
             } else {
@@ -125,16 +128,19 @@ export default {
               this.submit();
             }
           } else {
-            if (expenseType.budget !== employeeExpenseTypeBalence) {
+            if (expenseType.budget !== employeeExpenseTypeBalance) {
               //under budget
-              if (employeeExpenseTypeBalence + cost <= expenseType.budget) {
+              if (employeeExpenseTypeBalance + cost <= expenseType.budget) {
                 //full amount reimbursed
                 this.submit();
               } else {
                 // not maxed out but also not fully covered
-                this.expense.budget = expenseType.budget;
-                this.expense.remaining =
-                  expenseType.budget - employeeExpenseTypeBalence;
+                this.$set(this.expense, 'budget', expenseType.budget);
+                this.$set(
+                  this.expense,
+                  'remaining',
+                  expenseType.budget - employeeExpenseTypeBalance
+                );
                 this.submitting = true;
               }
             } else {
@@ -145,9 +151,12 @@ export default {
         } else {
           //new expense for an expensetype
           if (expenseType.budget < cost) {
-            this.expense.budget = expenseType.budget;
-            this.expense.remaining =
-              expenseType.budget - employeeExpenseTypeBalence;
+            this.$set(this.expense, 'budget', expenseType.budget);
+            this.$set(
+              this.expense,
+              'remaining',
+              expenseType.budget - employeeExpenseTypeBalance
+            );
             this.submitting = true;
           } else {
             this.submit();
@@ -200,16 +209,15 @@ export default {
     },
     async deleteExpense() {
       this.deleting = false;
-      console.log(this.expense.id);
       if (this.expense.id) {
         await api.deleteItem(api.EXPENSES, this.expense.id);
         this.$emit('delete');
-        //this.clearForm();
+        this.clearForm();
       }
     },
     async submit() {
       this.submitting = false;
-      this.expense.cost = parseInt(this.expense.cost);
+      this.$set(this.expense, 'cost', parseInt(this.expense.cost));
       if (this.$refs.form.validate()) {
         if (!this.expense.receipt) {
           this.expense.receipt = null;
@@ -224,10 +232,10 @@ export default {
         } else {
           let newExpense = await api.createItem(api.EXPENSES, this.expense);
           if (newExpense.id) {
-            this.expense.id = newExpense.id;
+            this.$set(this.expense, 'id', newExpense.id);
             this.$emit('add', newExpense);
             EventBus.$emit('refreshChart', newExpense);
-            //this.clearForm();
+            this.clearForm();
           } else {
             this.$emit('error', newExpense.response.data.message);
           }
@@ -284,8 +292,8 @@ export default {
         };
       });
     } else {
-      this.expense.employeeName = this.userInfo.id;
-      this.expense.userId = this.userInfo.id;
+      this.$set(this.expense, 'employeeName', this.userInfo.id);
+      this.$set(this.expense, 'userId', this.userInfo.id);
     }
     this.employeeRole = employeeRole;
   }
