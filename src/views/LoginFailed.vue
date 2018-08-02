@@ -9,18 +9,26 @@
     <h2 class="mt-5 red--text">Invalid Login<br />Please Use @consultwithcase email address</h2>
   </div>
   <div>
-    <img src="https://media.giphy.com/media/3ohzdQ1IynzclJldUQ/giphy.gif"/>
+    <img src="https://media.giphy.com/media/3ohzdQ1IynzclJldUQ/giphy.gif" />
   </div>
 </v-container>
 </template>
 
 <script>
-import { isLoggedIn, login } from '@/utils/auth';
+import {
+  isLoggedIn,
+  login,
+  getRole
+} from '@/utils/auth';
 
 export default {
   created() {
     if (this.isLoggedIn()) {
-      this.$router.push('home');
+      if (getRole() === 'admin' || getRole() === 'super-admin') {
+        this.$router.push('admin-dashboard');
+      } else {
+        this.$router.push('home');
+      }
     }
   },
   methods: {
