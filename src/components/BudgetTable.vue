@@ -13,8 +13,8 @@
           <v-divider></v-divider>
           <v-list dense>
             <v-list-tile>
-              <v-list-tile-content>Budget:</v-list-tile-content>
-              <v-list-tile-content class="align-end">{{ props.item.budget | moneyValue }}</v-list-tile-content>
+              <v-list-tile-content class="bold">Remaining Budget:</v-list-tile-content>
+              <v-list-tile-content class="align-end bold">{{ remaining(props.item)| moneyValue }}</v-list-tile-content>
             </v-list-tile>
             <v-list-tile>
               <v-list-tile-content>Reimbursed:</v-list-tile-content>
@@ -25,8 +25,8 @@
               <v-list-tile-content class="align-end">{{ props.item.unreimbursed | moneyValue }}</v-list-tile-content>
             </v-list-tile>
             <v-list-tile>
-              <v-list-tile-content>Remaining Budget:</v-list-tile-content>
-              <v-list-tile-content class="align-end">{{ remaining(props.item)| moneyValue }}</v-list-tile-content>
+              <v-list-tile-content>Budget:</v-list-tile-content>
+              <v-list-tile-content class="align-end">{{ props.item.budget | moneyValue }}</v-list-tile-content>
             </v-list-tile>
             <v-list-tile>
               <v-list-tile-content>Overdraft:</v-list-tile-content>
@@ -74,3 +74,8 @@ export default {
 
 }
 </script>
+<style>
+.bold {
+  font-weight: 900;
+}
+</style>
