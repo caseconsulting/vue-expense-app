@@ -36,7 +36,7 @@
         <icon class="mr-1" name="save"></icon>Submit</v-btn>
     </v-form>
   </v-container>
-  <confirmation-box :activate="submitting" :expense=expense></confirmation-box>
+  <confirmation-box :activate="submitting" :expense="expense"></confirmation-box>
   <delete-modal :activate="deleting" :type="'expense'"></delete-modal>
 </v-card>
 </template>
@@ -155,7 +155,7 @@ export default {
             this.$set(
               this.expense,
               'remaining',
-              expenseType.budget - employeeExpenseTypeBalance
+              expenseType.budget
             );
             this.submitting = true;
           } else {
