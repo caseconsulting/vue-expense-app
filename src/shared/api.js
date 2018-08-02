@@ -56,6 +56,10 @@ function getAggregate() {
   return execute('get', `/special/getAllExpenses`);
 }
 
+function getUserExpenses(id) {
+  return execute('get', `/special/getAllExpenses/${id}`)
+}
+
 function getRole() {
   return execute('get', 'info/role');
 }
@@ -70,6 +74,7 @@ export default {
   updateItem,
   deleteItem,
   getAggregate,
+  getUserExpenses,
   getRole,
   getUser,
   EXPENSE_TYPES,

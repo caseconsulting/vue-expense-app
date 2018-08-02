@@ -64,6 +64,8 @@
 import api from '@/shared/api.js';
 import ExpenseForm from '../components/ExpenseForm.vue';
 import moment from 'moment';
+import _ from 'lodash';
+import { getRole } from '@/utils/auth';
 export default {
   filters: {
     moneyValue: value => {
@@ -84,12 +86,14 @@ export default {
   },
   data() {
     return {
+      role: '',
       loading: true,
       status: {
         statusType: undefined,
         statusMessage: '',
         color: ''
       },
+      employee: {},
       expense: {
         id: '',
         description: '',
@@ -142,12 +146,19 @@ export default {
   computed: {
     sorting() {
       return this.processedExpenses;
+    },
+    isAdmin() {
+      return (this.role === 'admin') || (this.role === 'super-admin');
+    },
+    isUser() {
+      return this.role === 'user';
     }
   },
   components: {
     ExpenseForm
   },
   async created() {
+    this.role = getRole();
     this.refreshExpenses();
   },
   methods: {
@@ -177,8 +188,18 @@ export default {
       return expense;
     },
     async refreshExpenses() {
-      let aggregatedData = await api.getAggregate();
-      this.processedExpenses = aggregatedData;
+      if (this.isAdmin) {
+        let aggregatedData = await api.getAggregate();
+        this.processedExpenses = aggregatedData;
+      }
+      if (this.isUser) {
+        let employee = await api.getUser();
+        let aggregatedData = await api.getUserExpenses(employee.id);
+        this.processedExpenses = aggregatedData;
+        console.log(employee);
+
+      }
+
       this.loading = false;
     },
     onSelect(item) {
