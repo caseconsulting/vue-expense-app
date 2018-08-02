@@ -99,7 +99,7 @@ export default {
           this.expenseTypes,
           type => this.expense.expenseTypeId === type.value
         );
-        let employee = this.userInfo;
+        let employee = await api.getUser();
         let employeeExpenseTypeBalance = _.find(
           employee.expenseTypes,
           exp => expenseType.value === exp.id
