@@ -280,20 +280,25 @@ export default {
       };
     });
 
-    if (employeeRole === 'super-admin') {
-      let employees = await api.getItems(api.EMPLOYEES);
-      this.employees = employees.map(employee => {
-        return {
-          text: `${employee.firstName} ${employee.middleName} ${
-            employee.lastName
-          }`,
-          value: employee.id,
-          expenseTypes: employee.expenseTypes
-        };
-      });
-    } else {
+    if (this.$route.path === '/home') {
       this.$set(this.expense, 'employeeName', this.userInfo.id);
       this.$set(this.expense, 'userId', this.userInfo.id);
+    } else {
+      if (employeeRole === 'super-admin') {
+        let employees = await api.getItems(api.EMPLOYEES);
+        this.employees = employees.map(employee => {
+          return {
+            text: `${employee.firstName} ${employee.middleName} ${
+              employee.lastName
+            }`,
+            value: employee.id,
+            expenseTypes: employee.expenseTypes
+          };
+        });
+      } else {
+        this.$set(this.expense, 'employeeName', this.userInfo.id);
+        this.$set(this.expense, 'userId', this.userInfo.id);
+      }
     }
     this.employeeRole = employeeRole;
   }
