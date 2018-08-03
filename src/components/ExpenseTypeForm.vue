@@ -8,19 +8,33 @@
     <v-form ref="form" v-model="valid" lazy-validation>
       <v-text-field v-model="model.budgetName" :rules="genericRules" label="Budget Name" data-vv-name="Budget Name"></v-text-field>
       <v-text-field prefix="$" v-model="model.budget" :rules="budgetRules" label="Budget" data-vv-name="Budget"></v-text-field>
-      <v-text-field v-model="model.description" :rules="genericRules" label="Notes" data-vv-name="Description" multi-line></v-text-field>
-      <v-checkbox label="Overdraft Flag (optional)" v-model="model.odFlag"></v-checkbox>
+
+      <v-menu :disabled="reocurringFlag" :close-on-content-click="true" :nudge-right="40" lazy transition="scale-transition" offset-y full-width max-width="290px" min-width="290px">
+        <v-text-field slot="activator" :disabled="reocurringFlag" label="Start Date" hint="MM/DD/YYYY format" persistent-hint prepend-icon="event"></v-text-field>
+        <v-date-picker v-model="startDate" :disabled="reocurringFlag" no-title></v-date-picker>
+      </v-menu>
+
+      <v-menu :disabled="reocurringFlag" :close-on-content-click="true" :nudge-right="40" lazy transition="scale-transition" offset-y full-width max-width="290px" min-width="290px">
+        <v-text-field :disabled="reocurringFlag" slot="activator" label="End Date" hint="MM/DD/YYYY format" persistent-hint prepend-icon="event"></v-text-field>
+        <v-date-picker :disabled="reocurringFlag" v-model="endDate" no-title "></v-date-picker>
+      </v-menu>
+
+      <v-checkbox label='Reoccuring Expense' v-model='reocurringFlag'></v-checkbox>
+
+      <v-checkbox label="Overdraft Flag (optional) "></v-checkbox>
+
+      <v-text-field v-model='model.description' :rules="genericRules " label="Notes " data-vv-name="Description " multi-line></v-text-field>
 
       <!-- Buttons -->
-      <v-btn outline color="error" @click="deleting=true">
-        <icon class="mr-1" name="trash"></icon>Delete</v-btn>
-      <v-btn color="white" @click="clearForm">
-        <icon class="mr-1" name="ban"></icon>Cancel</v-btn>
-      <v-btn outline color="success" @click="submit" :disabled="!valid">
-        <icon class="mr-1" name="save"></icon>Submit</v-btn>
+      <v-btn outline color="error " @click="deleting=true ">
+        <icon class="mr-1 " name = 'trash'></icon>Delete</v-btn>
+      <v-btn color="white " @click="clearForm ">
+        <icon class="mr-1 " name='ban'></icon>Cancel</v-btn>
+      <v-btn outline color="success " @click="submit " :disabled="!valid ">
+        <icon class="mr-1 " name='save'></icon>Submit</v-btn>
     </v-form>
   </v-container>
-  <delete-modal :activate="deleting" :type="'expense-type'"></delete-modal>
+  <delete-modal :activate="deleting " :type=" 'expense-type' "></delete-modal>
 </v-card>
 </template>
 
@@ -36,7 +50,9 @@ export default {
         v => !!v || 'Budget amount is required',
         v => /^\d+$/.test(v) || 'Cost must be a number'
       ],
-      valid: false
+      valid: false,
+      startDate: "",
+      reocurringFlag: false,
     };
   },
   props: ['model'],
