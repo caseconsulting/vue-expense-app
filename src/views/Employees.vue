@@ -8,7 +8,7 @@
           <v-spacer></v-spacer>
           <v-text-field v-model="search" append-icon="search" label="Search" single-line hide-details></v-text-field>
         </v-card-title>
-        <v-data-table :headers="headers" :items="employees" :search="search" :pagination.sync="pagination" item-key="name" class="elevation-1">
+        <v-data-table :headers="headers" :items="employeeList" :search="search" :pagination.sync="pagination" item-key="name" class="elevation-1">
           <template slot="headers" slot-scope="props">
             <tr>
               <th class="text-xs-left"
@@ -29,13 +29,19 @@
                 <td class="text-xs-left">{{ props.item.hireDate | dateFormat }}</td>
                 <td class="text-xs-left">{{ props.item.empId }}</td>
                 <td class="text-xs-left">{{ props.item.email }}</td>
+                <td class="text-xs-left">{{ isInActive(props.item)}}</td>
               </tr>
             </template>
+
           <v-alert slot="no-results" :value="true" color="error" icon="warning">
             Your search for "{{ search }}" found no results.
           </v-alert>
         </v-data-table>
+        <v-card-actions>
+          <v-checkbox :label="'Show InActive Employees'" v-model="showAll"></v-checkbox>
+        </v-card-actions>
       </v-card>
+
     </v-flex>
     <v-flex v-if="userIsAdmin()" lg4 md12 sm12>
       <employee-form :model="model" v-on:add="addModelToTable" v-on:update="updateModelInTable" v-on:delete="deleteModelFromTable"></employee-form>
@@ -54,6 +60,7 @@ import {
 import api from '@/shared/api.js';
 import EmployeeForm from '../components/EmployeeForm.vue';
 import moment from 'moment';
+import _ from 'lodash';
 export default {
   filters: {
     dateFormat: value => {
@@ -63,12 +70,15 @@ export default {
         return '';
       }
     }
+
   },
   data() {
     return {
       search: '',
       loading: false,
+      showAll: false,
       employees: [],
+      filteredEmployees: [],
       errors: [],
       headers: [{
           text: 'First Name',
@@ -89,6 +99,9 @@ export default {
         {
           text: 'Email',
           value: 'email'
+        },
+        {
+          text: ''
         }
       ],
       pagination: {
@@ -115,12 +128,18 @@ export default {
   },
 
   methods: {
+    isInActive(employee) {
+      return employee.isActive ? "" : "Not Active";
+    },
     userIsAdmin() {
       return getRole() === 'super-admin';
     },
     async refreshEmployees() {
       this.loading = true;
       this.employees = await api.getItems(api.EMPLOYEES);
+      this.filteredEmployees = _.filter(this.employees, employee => {
+        return employee.isActive;
+      });
       this.loading = false;
     },
     onSelect(item) {
@@ -175,6 +194,13 @@ export default {
         this.pagination.descending = false;
       }
     }
+  },
+  computed: {
+    employeeList() {
+      return this.showAll ? this.employees : this.filteredEmployees;
+    },
+
+
   }
 };
 </script>
