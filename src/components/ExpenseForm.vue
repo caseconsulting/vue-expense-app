@@ -82,10 +82,10 @@ export default {
     DeleteModal
   },
   watch: {
-    'expense.purchaseDate': function(val) {
+    'expense.purchaseDate': function (val) {
       this.purchaseDateFormatted = this.formatDate(this.expense.purchaseDate);
     },
-    'expense.reimbursedDate': function(val) {
+    'expense.reimbursedDate': function (val) {
       this.reimbursedDateFormatted = this.formatDate(
         this.expense.reimbursedDate
       );
@@ -99,7 +99,12 @@ export default {
           this.expenseTypes,
           type => this.expense.expenseTypeId === type.value
         );
-        let employee = await api.getUser();
+        let employee = {}
+        if (getRole() === 'user') {
+          employee = await api.getUser();
+        } else {
+          employee = await api.getItem(api.EMPLOYEES, this.expense.userId);
+        }
         let employeeExpenseTypeBalance = _.find(
           employee.expenseTypes,
           exp => expenseType.value === exp.id
@@ -230,6 +235,7 @@ export default {
           );
           this.$emit('update', updatedExpense);
         } else {
+          this.$set(this.expense, 'createdAt', moment().format('MM-DD-YYYY'));
           let newExpense = await api.createItem(api.EXPENSES, this.expense);
           if (newExpense.id) {
             this.$set(this.expense, 'id', newExpense.id);
