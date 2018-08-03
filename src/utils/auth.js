@@ -139,6 +139,7 @@ function isTokenExpired(token) {
 // }
 export async function setRole() {
   let employeeRole = await api.getRole();
+  console.log(employeeRole);
   localStorage.setItem(ROLE, employeeRole);
 }
 

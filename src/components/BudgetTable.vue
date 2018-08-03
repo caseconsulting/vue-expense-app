@@ -14,7 +14,8 @@
           <v-list dense>
             <v-list-tile>
               <v-list-tile-content class="bold">Remaining Budget:</v-list-tile-content>
-              <v-list-tile-content class="align-end bold">{{ remaining(props.item)| moneyValue }}</v-list-tile-content>
+              <v-list-tile-content v-if="getRedColor(props.item)" class="align-end bold red--text">{{ remaining(props.item)| moneyValue }}</v-list-tile-content>
+              <v-list-tile-content v-else class="align-end bold green--text">{{ remaining(props.item)| moneyValue }}</v-list-tile-content>
             </v-list-tile>
             <v-list-tile>
               <v-list-tile-content>Reimbursed:</v-list-tile-content>
@@ -62,10 +63,11 @@ export default {
   methods: {
 
     odFlagMessage(expenseType) {
-      return (expenseType.odFlag ? "Allowed" : "Not Allowed");
+      let isOverdraftAllowed = expenseType.odFlag;
+      return (isOverdraftAllowed ? "Allowed" : "Not Allowed");
     },
-    setColor(expenseType) {
-      return (expenseType.value ? "Allowed" : "Not Allowed");
+    getRedColor(expenseType) {
+      return (this.remaining(expenseType) <= 0) && !expenseType.odFlag;
     },
     remaining(item) {
       return item.budget - item.reimbursed - item.unreimbursed;

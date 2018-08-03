@@ -108,7 +108,10 @@ export default {
       let employee = await api.getUser();
       let employeeVar = await api.getItem(api.SPECIAL, employee.id);
       this.employee = employeeVar;
-      this.expenseTypeData = this.employee.expenseTypeData;
+      this.expenseTypeData = _.map(this.employee.expenseTypeData, expenseType => {
+        expenseType.textColor = 'black';
+        return expenseType;
+      });
       this.employee.expenseTypeData.map(expenseType => {
         let totalCost = 0;
         for (var i = 0; i < expenseType.expenses.length; i++) {
