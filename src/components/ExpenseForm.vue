@@ -257,6 +257,7 @@ export default {
       this.$set(this.expense, 'id', '');
       this.$set(this.expense, 'purchaseDate', null);
       this.$set(this.expense, 'reimbursedDate', null);
+      this.$set(this.expense, 'createdAt', null);
       if (this.isUser()) {
         this.$set(this.expense, 'employeeName', this.userInfo.id);
       } else {

@@ -60,7 +60,7 @@ export default {
             this.model.id,
             this.model
           );
-          console.log(newExpenseType);
+
           this.$emit('update', newExpenseType);
         } else {
           let newExpenseType = await api.createItem(
