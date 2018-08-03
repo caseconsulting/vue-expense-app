@@ -2,20 +2,29 @@
 </template>
 
 <script>
-import { setIdToken, setAccessToken, setRole, setProfile } from '@/utils/auth';
+import {
+  setIdToken,
+  setAccessToken,
+  setRole,
+  setProfile
+} from '@/utils/auth';
 // import api from '@/shared/api';
 
 export default {
   name: 'callback',
   mounted() {
     this.$nextTick(async function() {
-      setAccessToken();
-      setIdToken();
-      setProfile();
-      await setRole();
+      try {
+        setAccessToken();
+        setIdToken();
+        setProfile();
+        await setRole();
+        window.location.href = '/loginFailed';
+      } catch (error) {
+        window.location.href = '/loginFailed';
+      }
       // let role = await api.getRole();
       // setRole(role);
-      window.location.href = '/loginFailed';
     });
   }
 };
