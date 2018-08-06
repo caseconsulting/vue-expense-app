@@ -183,6 +183,7 @@ export default {
           reimbursedDate: expense.reimbursedDate,
           userId: expense.userId,
           selected: false,
+          createdAt: expense.createdAt
         };
       });
     },
@@ -244,11 +245,13 @@ export default {
           reimbursedDate: this.moment().format('YYYY-MM-DD'),
           note: !item.note ? null : item.note,
           userId: item.userId,
-          receipt: null
+          receipt: null,
+          createdAt: item.createdAt
         };
       });
 
       _.forEach(expensesToSubmit, expense => {
+
         api
           .updateItem(api.EXPENSES, expense.id, expense)
           .then(this.removeExpenseFromList(this.selected));
