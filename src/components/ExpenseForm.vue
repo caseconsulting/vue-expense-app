@@ -6,13 +6,15 @@
   </v-card-title>
   <v-container fluid>
     <v-form ref="form" v-model="valid" lazy-validation>
-
+      <!--Employee picker if admin level -->
       <v-select v-if="employeeRole === 'super-admin' && this.$route.path !== '/home'" :items="employees" :rules="componentRules" :filter="customFilter" v-model="expense.userId" item-text="text" label="Employee" autocomplete></v-select>
-
+      <!--Expense type picker -->
       <v-select :items="expenseTypes" :rules="componentRules" :filter="customFilter" v-model="expense.expenseTypeId" label="Expense Type" autocomplete></v-select>
-
-      <v-text-field v-model="expense.description" :rules="descriptionRules" label="Description" data-vv-name="Description"></v-text-field>
+      <!--Cost input field -->
       <v-text-field prefix="$" v-model="expense.cost" :rules="costRules" label="Cost" data-vv-name="Cost"></v-text-field>
+      <!--Description input field -->
+      <v-text-field v-model="expense.description" :rules="descriptionRules" label="Description" data-vv-name="Description"></v-text-field>
+
 
       <!-- Date Picker 1-->
       <v-menu ref="menu1" :close-on-content-click="true" v-model="menu1" :nudge-right="40" lazy transition="scale-transition" offset-y full-width max-width="290px" min-width="290px">
@@ -82,10 +84,10 @@ export default {
     DeleteModal
   },
   watch: {
-    'expense.purchaseDate': function (val) {
+    'expense.purchaseDate': function(val) {
       this.purchaseDateFormatted = this.formatDate(this.expense.purchaseDate);
     },
-    'expense.reimbursedDate': function (val) {
+    'expense.reimbursedDate': function(val) {
       this.reimbursedDateFormatted = this.formatDate(
         this.expense.reimbursedDate
       );
