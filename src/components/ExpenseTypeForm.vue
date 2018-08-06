@@ -51,10 +51,6 @@ export default {
         v => /^\d+$/.test(v) || 'Cost must be a number'
       ],
       valid: false,
-      startDate: "",
-      endDate: "",
-      reocurringFlag: true,
-      overDraftFlag: false,
     };
   },
   props: ['model'],
