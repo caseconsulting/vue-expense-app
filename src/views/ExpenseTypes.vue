@@ -66,8 +66,7 @@ export default {
       loading: false,
       expenseTypes: [],
       errors: [],
-      headers: [
-        {
+      headers: [{
           text: 'Expense Type',
           value: 'budgetName',
           sortable: false
@@ -98,7 +97,7 @@ export default {
         odFlag: false,
         startDate: null,
         endDate: null,
-        recurringFlag: false
+        recurringFlag: true
       }
     };
   },
@@ -121,6 +120,9 @@ export default {
       this.$set(this.model, 'budgetName', item.budgetName);
       this.$set(this.model, 'description', item.description);
       this.$set(this.model, 'odFlag', item.odFlag);
+      this.$set(this.model, 'startDate', item.startDate);
+      this.$set(this.model, 'endDate', item.endDate);
+      this.$set(this.model, 'recurringFlag', item.recurringFlag);
     },
     clearModel() {
       this.$set(this.model, 'id', '');
@@ -128,6 +130,9 @@ export default {
       this.$set(this.model, 'budgetName', '');
       this.$set(this.model, 'description', '');
       this.$set(this.model, 'odFlag', false);
+      this.$set(this.model, 'startDate', '');
+      this.$set(this.model, 'endDate', '');
+      this.$set(this.model, 'recurringFlag', true);
     },
     updateModelInTable(updatedExpenseType) {
       let matchingExpensesIndex = _.findIndex(

@@ -8,19 +8,33 @@
     <v-form ref="form" v-model="valid" lazy-validation>
       <v-text-field v-model="model.budgetName" :rules="genericRules" label="Budget Name" data-vv-name="Budget Name"></v-text-field>
       <v-text-field prefix="$" v-model="model.budget" :rules="budgetRules" label="Budget" data-vv-name="Budget"></v-text-field>
-      <v-text-field v-model="model.description" :rules="genericRules" label="Notes" data-vv-name="Description" multi-line></v-text-field>
-      <v-checkbox label="Overdraft Flag (optional)" v-model="model.odFlag"></v-checkbox>
+
+      <v-checkbox label='Reocurring Expense' v-model='model.recurringFlag'></v-checkbox>
+
+      <v-menu v-if="!model.recurringFlag" :rules="genericRules" :close-on-content-click="true" :nudge-right="40" lazy transition="scale-transition" offset-y full-width max-width="290px" min-width="290px">
+        <v-text-field slot="activator" label="Start Date" hint="MM/DD/YYYY format" persistent-hint prepend-icon="event" v-model="model.startDate" :rules="genericRules"></v-text-field>
+        <v-date-picker v-model="model.startDate" :disabled="reocurringFlag" no-title></v-date-picker>
+      </v-menu>
+
+      <v-menu v-if="!model.recurringFlag" :close-on-content-click="true" :nudge-right="40" lazy transition="scale-transition" offset-y full-width max-width="290px" min-width="290px">
+        <v-text-field slot="activator" label="End Date" hint="MM/DD/YYYY format" persistent-hint prepend-icon="event" v-model="model.endDate" :rules="genericRules"></v-text-field>
+        <v-date-picker v-model="model.endDate" :disabled="reocurringFlag" no-title></v-date-picker>
+      </v-menu>
+
+      <v-checkbox label='Overdraft Flag (optional)' v-model='model.odFlag'></v-checkbox>
+
+      <v-text-field v-model='model.description' :rules="genericRules " label="Notes " data-vv-name="Description " multi-line></v-text-field>
 
       <!-- Buttons -->
-      <v-btn outline color="error" @click="deleting=true">
-        <icon class="mr-1" name="trash"></icon>Delete</v-btn>
-      <v-btn color="white" @click="clearForm">
-        <icon class="mr-1" name="ban"></icon>Cancel</v-btn>
-      <v-btn outline color="success" @click="submit" :disabled="!valid">
-        <icon class="mr-1" name="save"></icon>Submit</v-btn>
+      <v-btn outline color="error " @click="deleting=true ">
+        <icon class="mr-1 " name='trash'></icon>Delete</v-btn>
+      <v-btn color="white " @click="clearForm ">
+        <icon class="mr-1 " name='ban'></icon>Cancel</v-btn>
+      <v-btn outline color="success " @click="submit " :disabled="!valid ">
+        <icon class="mr-1 " name='save'></icon>Submit</v-btn>
     </v-form>
   </v-container>
-  <delete-modal :activate="deleting" :type="'expense-type'"></delete-modal>
+  <delete-modal :activate="deleting " :type=" 'expense-type' "></delete-modal>
 </v-card>
 </template>
 
@@ -36,7 +50,11 @@ export default {
         v => !!v || 'Budget amount is required',
         v => /^\d+$/.test(v) || 'Cost must be a number'
       ],
-      valid: false
+      valid: false,
+      startDate: "",
+      endDate: "",
+      reocurringFlag: true,
+      overDraftFlag: false,
     };
   },
   props: ['model'],
@@ -54,6 +72,10 @@ export default {
         this.model.odFlag = false;
       }
       if (this.$refs.form.validate()) {
+        if (this.model.recurringFlag) {
+          this.$set(this.model, 'startDate', null);
+          this.$set(this.model, 'endDate', null);
+        }
         if (this.model.id) {
           let newExpenseType = await api.updateItem(
             api.EXPENSE_TYPES,
@@ -70,11 +92,11 @@ export default {
           this.$set(this.model, 'id', newExpenseType.id);
           this.$emit('add', newExpenseType);
         }
+        this.clearForm();
       }
     },
     async deleteExpenseType() {
       this.deleting = false;
-      console.log(this.model.id);
       await api.deleteItem(api.EXPENSE_TYPES, this.model.id);
       this.$emit('delete');
       this.clearForm();
@@ -85,9 +107,11 @@ export default {
       this.$set(this.model, 'budget', 0);
       this.$set(this.model, 'budgetName', '');
       this.$set(this.model, 'description', '');
-      this.$set(this.model, 'odFlag', false);
+      this.$set(this.model, 'recurringFlag', true);
+      this.$set(this.model, 'startDate', '');
+      this.$set(this.model, 'endDate', '');
     }
-  }
+  },
 };
 </script>
 <style>
