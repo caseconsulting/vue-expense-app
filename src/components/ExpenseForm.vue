@@ -1,7 +1,8 @@
 <template>
 <v-card hover>
   <v-card-title>
-    <h3 v-if="expense.id"> Edit Expense </h3>
+    <h3 v-if="expense.id && (isSuperAdmin || !isReimbursed)"> Edit Expense </h3>
+    <h3 v-else-if="expense.id && !isSuperAdmin && isReimbursed"> View Expense </h3>
     <h3 v-else> Create New Expense </h3>
   </v-card-title>
   <v-container fluid>
@@ -30,11 +31,11 @@
       <v-text-field v-model="expense.note" label="Notes (optional)" data-vv-name="Description" multi-line></v-text-field>
 
       <!-- Buttons -->
-      <v-btn  outline color="error" @click="deleting=true" :disabled="!isAdmin && isReimbursed">
+      <v-btn  outline color="error" @click="deleting=true" :disabled="!isSuperAdmin && isReimbursed">
         <icon class="mr-1" name="trash"></icon>Delete</v-btn>
       <v-btn color="white" @click="clearForm">
         <icon class="mr-1" name="ban"></icon>Cancel</v-btn>
-      <v-btn v-if="" outline color="success" @click="checkCoverage" :disabled="!valid || (!isAdmin && isReimbursed)">
+      <v-btn v-if="" outline color="success" @click="checkCoverage" :disabled="!valid || (!isSuperAdmin && isReimbursed)">
         <icon class="mr-1" name="save"></icon>Submit</v-btn>
     </v-form>
   </v-container>
