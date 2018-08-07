@@ -62,12 +62,13 @@
       <v-flex offset-md10>
 
         <v-fab-transition>
-          <v-btn @click="reminbureExpenses" id="custom-button-color" v-show="showSubmitButton" fab dark large bottom left fixed>
+          <v-btn @click="button_clicked=true" id="custom-button-color" v-show="showSubmitButton" fab dark large bottom left fixed>
             <icon name="dollar-sign"></icon>
           </v-btn>
         </v-fab-transition>
       </v-flex>
     </v-container>
+    <reimburse-modal :activate="button_clicked"></reimburse-modal>
   </v-card>
 </div>
 </template>
@@ -75,6 +76,7 @@
 <script>
 import api from '@/shared/api.js';
 import UnrolledTableInfo from './UnrolledTableInfo.vue';
+import ReimburseModal from './ReimburseModal.vue';
 import _ from 'lodash';
 
 export default {
@@ -89,10 +91,12 @@ export default {
     }
   },
   components: {
-    UnrolledTableInfo
+    UnrolledTableInfo,
+    ReimburseModal
   },
   data: () => ({
     loading: true,
+    button_clicked: false,
     everythingSelected: false,
     indeterminate: false,
     unreimbursedExpenses: [],
@@ -122,6 +126,8 @@ export default {
   }),
   async created() {
     EventBus.$on('expensePicked', this.addExpenseToSelected);
+    EventBus.$on('confirm-reminburse', this.reminbureExpenses);
+    EventBus.$on('canceled-reminburse', () => (this.button_clicked = false));
     let aggregatedData = await api.getAggregate();
     let expenses = this.createExpensesForUnrolled(aggregatedData);
     this.constructAutoComplete(aggregatedData);
@@ -235,6 +241,7 @@ export default {
       });
     },
     reminbureExpenses() {
+      this.button_clicked = false;
       let expensesToSubmit = _.map(this.selected, item => {
         return {
           cost: item.cost,
