@@ -414,13 +414,9 @@ export default {
       if (now.isAfter(anniversary)) {
         anniversary.add(1, 'years');
         let days = anniversary.diff(now, 'days');
-        // console.log(days);
-        // console.log((typeof days));
         return anniversary.diff(now, 'days') + 1;
       } else {
         let days = anniversary.diff(now, 'days');
-        // console.log(days);
-        // console.log((typeof days));
         return anniversary.diff(now, 'days') + 1;
       }
     }
