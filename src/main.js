@@ -21,8 +21,8 @@ Vue.prototype.moment = moment;
 
 // BEGIN VUE AWESOME
 import 'vue-awesome/icons/regular/times-circle';
-
 import 'vue-awesome/icons/regular/check-circle';
+import 'vue-awesome/icons/question-circle';
 import 'vue-awesome/icons/book';
 import 'vue-awesome/icons/code';
 import 'vue-awesome/icons/dollar-sign';
