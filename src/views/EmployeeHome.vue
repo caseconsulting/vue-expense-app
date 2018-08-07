@@ -8,19 +8,40 @@
       Close
     </v-btn>
   </v-snackbar>
-  <v-flex lg5 md12 sm12 pb-3>
+  <v-flex text-xs-center lg8 md12 sm12 pb-3>
     <h1 pb-2>Budget Statistics for {{employee.firstName}} {{employee.lastName}}</h1>
   </v-flex>
+  <v-flex lg4>
+    <v-flex>
+      <v-card>
+        <v-card-title>
+          <div @mouseover="display = !display" @mouseleave="display = !display">
+            <h3 pt-2>Anniversary Date: {{getAnniversary}}</h3>
+            <div v-if="display">
+              Days Until: {{getDaysUntil}}
+            </div>
+            <div v-else>
+              Seconds Until: {{getSecondsUntil}}
+            </div>
+          </div>
+        </v-card-title>
+      </v-card>
+    </v-flex>
+  </v-flex>
+  <v-flex lg8>
 
+    <v-flex text-xs-center>
+      <budget-table v-if="!loading" :employee="getBudgets"></budget-table>
+      <budget-chart v-if="!loading" :options="drawGraph.optionSet" :chart-data="drawGraph.dataSet" @add="addModelToTable"></budget-chart>
+    </v-flex>
 
-  <v-flex text-xs-center lg8 md12 sm12>
-    <budget-table v-if="!loading" :employee="getBudgets"></budget-table>
-    <budget-chart v-if="!loading" :options="drawGraph.optionSet" :chart-data="drawGraph.dataSet" @add="addModelToTable"></budget-chart>
+  </v-flex>
+  <v-flex lg4 pt-3>
+    <v-flex text-xs-center lg12 md12 sm12>
+      <expense-form :expense="expense" v-on:add="addModelToTable" v-on:update="updateModelInTable" v-on:delete="deleteModelFromTable" v-on:error="displayError"></expense-form>
+    </v-flex>
   </v-flex>
 
-  <v-flex text-xs-center lg4 md12 sm12>
-    <expense-form :expense="expense" v-on:add="addModelToTable" v-on:update="updateModelInTable" v-on:delete="deleteModelFromTable" v-on:error="displayError"></expense-form>
-  </v-flex>
 </v-layout>
 </template>
 
@@ -53,7 +74,7 @@ export default {
   data() {
     return {
       loading: false,
-
+      hireDate: '',
       employees: [],
       employee: {},
       expenseTypeData: [],
@@ -77,14 +98,43 @@ export default {
         reciept: null,
         employeeName: '',
         budgetName: ''
-      }
+      },
+      display: true,
+      actualTime: moment().format('X'),
+      seconds: 0
     };
   },
   async created() {
     EventBus.$on("refreshChart", this.updateData);
     this.refreshBudget();
+    this.compute()
+    this.addOneSecondToActualTimeEverySecond()
+  },
+  watch: {
+    actualTime(val, oldVal) {
+      this.compute()
+    }
   },
   methods: {
+    addOneSecondToActualTimeEverySecond() {
+      var component = this
+      component.actualTime = moment().format('X')
+      setTimeout(function() {
+        component.addOneSecondToActualTimeEverySecond()
+      }, 1000);
+    },
+    getDiffInSeconds() {
+      return moment("2016-10-21 22:00:00").format('X') - this.actualTime
+    },
+    compute() {
+      var duration = moment.duration(this.getDiffInSeconds(), "seconds")
+      this.years = duration.years() > 0 ? duration.years() : 0
+      this.months = duration.months() > 0 ? duration.months() : 0
+      this.days = duration.days() > 0 ? duration.days() : 0
+      this.hours = duration.hours() > 0 ? duration.hours() : 0
+      this.minutes = duration.minutes() > 0 ? duration.minutes() : 0
+      this.seconds = duration.seconds() > 0 ? duration.seconds() : 0
+    },
     updateData(newData) {
       this.expenseTypeData = _.map(this.expenseTypeData, (data) => {
         if (newData.expenseTypeId === data.id) {
@@ -106,6 +156,8 @@ export default {
     async refreshBudget() {
       this.loading = true;
       let employee = await api.getUser();
+      let hireDate = employee.hireDate;
+      this.hireDate = hireDate;
       let employeeVar = await api.getItem(api.SPECIAL, employee.id);
       this.employee = employeeVar;
       this.expenseTypeData = _.map(this.employee.expenseTypeData, expenseType => {
@@ -367,8 +419,54 @@ export default {
     },
     getBudgets() {
       return this.expenseTypeData;
+    },
+    getHireDate() {
+      return this.hireDate;
+    },
+    getAnniversary() {
+      const [year, month, day] = this.hireDate.split('-');
+      if (moment(`${month}/${day}/${year}`, 'MM/DD/YYYY', true).isValid()) {
+        let now = moment();
+        let year = now.year();
+        let anniversary = moment(this.hireDate, "YYYY-MM-DD");
+        anniversary = anniversary.year(year);
+        if (now.isAfter(anniversary)) {
+          anniversary.add(1, 'years');
+          return anniversary.format("ddd. MMM D, YYYY");
+        } else {
+          return anniversary.format("ddd. MMM D, YYYY");
+        }
+      }
+    },
+    getDaysUntil() {
+      let now = moment();
+      let year = now.year();
+      let anniversary = moment(this.hireDate, "YYYY-MM-DD");
+      anniversary = anniversary.year(year);
+      if (now.isAfter(anniversary)) {
+        anniversary.add(1, 'years');
+        let days = anniversary.diff(now, 'days');
+        return anniversary.diff(now, 'days') + 1;
+      } else {
+        let days = anniversary.diff(now, 'days');
+        return anniversary.diff(now, 'days') + 1;
+      }
+    },
+    getSecondsUntil() {
+      let update = this.actualTime;
+      let now = moment();
+      let year = now.year();
+      let anniversary = moment(this.hireDate, "YYYY-MM-DD");
+      anniversary = anniversary.year(year);
+      if (now.isAfter(anniversary)) {
+        anniversary.add(1, 'years');
+        let days = anniversary.diff(now, 'seconds');
+        return anniversary.diff(now, 'seconds');
+      } else {
+        let days = anniversary.diff(now, 'seconds');
+        return anniversary.diff(now, 'seconds');
+      }
     }
-
   },
   components: {
     BudgetChart,
