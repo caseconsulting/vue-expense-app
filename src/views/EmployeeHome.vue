@@ -15,10 +15,13 @@
     <v-flex>
       <v-card>
         <v-card-title>
-          <div>
+          <div @mouseover="display = !display" @mouseleave="display = !display">
             <h3 pt-2>Anniversary Date: {{getAnniversary}}</h3>
-            <div>
+            <div v-if="display">
               Days Until: {{getDaysUntil}}
+            </div>
+            <div v-else>
+              Seconds Until: {{getSecondsUntil}}
             </div>
           </div>
         </v-card-title>
@@ -95,14 +98,43 @@ export default {
         reciept: null,
         employeeName: '',
         budgetName: ''
-      }
+      },
+      display: true,
+      actualTime: moment().format('X'),
+      seconds: 0
     };
   },
   async created() {
     EventBus.$on("refreshChart", this.updateData);
     this.refreshBudget();
+    this.compute()
+    this.addOneSecondToActualTimeEverySecond()
+  },
+  watch: {
+    actualTime(val, oldVal) {
+      this.compute()
+    }
   },
   methods: {
+    addOneSecondToActualTimeEverySecond() {
+      var component = this
+      component.actualTime = moment().format('X')
+      setTimeout(function() {
+        component.addOneSecondToActualTimeEverySecond()
+      }, 1000);
+    },
+    getDiffInSeconds() {
+      return moment("2016-10-21 22:00:00").format('X') - this.actualTime
+    },
+    compute() {
+      var duration = moment.duration(this.getDiffInSeconds(), "seconds")
+      this.years = duration.years() > 0 ? duration.years() : 0
+      this.months = duration.months() > 0 ? duration.months() : 0
+      this.days = duration.days() > 0 ? duration.days() : 0
+      this.hours = duration.hours() > 0 ? duration.hours() : 0
+      this.minutes = duration.minutes() > 0 ? duration.minutes() : 0
+      this.seconds = duration.seconds() > 0 ? duration.seconds() : 0
+    },
     updateData(newData) {
       this.expenseTypeData = _.map(this.expenseTypeData, (data) => {
         if (newData.expenseTypeId === data.id) {
@@ -418,6 +450,21 @@ export default {
       } else {
         let days = anniversary.diff(now, 'days');
         return anniversary.diff(now, 'days') + 1;
+      }
+    },
+    getSecondsUntil() {
+      let update = this.actualTime;
+      let now = moment();
+      let year = now.year();
+      let anniversary = moment(this.hireDate, "YYYY-MM-DD");
+      anniversary = anniversary.year(year);
+      if (now.isAfter(anniversary)) {
+        anniversary.add(1, 'years');
+        let days = anniversary.diff(now, 'seconds');
+        return anniversary.diff(now, 'seconds');
+      } else {
+        let days = anniversary.diff(now, 'seconds');
+        return anniversary.diff(now, 'seconds');
       }
     }
   },
