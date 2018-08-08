@@ -15,14 +15,17 @@
     <v-flex>
       <v-card>
         <v-card-title>
-          <div @mouseover="display = !display" @mouseleave="display = !display">
+          <div>
             <h3 pt-2>Anniversary Date: {{getAnniversary}}</h3>
-            <div v-if="display">
-              Days Until: {{getDaysUntil}}
+            <div @mouseover="display = !display" @mouseleave="display = !display">
+              <div v-if="display">
+                Days Until: {{getDaysUntil}}
+              </div>
+              <div v-else>
+                Seconds Until: {{getSecondsUntil}}
+              </div>
             </div>
-            <div v-else>
-              Seconds Until: {{getSecondsUntil}}
-            </div>
+
           </div>
         </v-card-title>
       </v-card>
