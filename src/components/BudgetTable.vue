@@ -4,12 +4,10 @@
 
 
     <v-data-iterator :items="employee" content-tag="v-layout" hide-actions row wrap>
-
-
       <v-flex slot="item" slot-scope="props" xs12 sm6 md4 lg3>
         <v-card color="blue">
           <v-card-title>
-            <h4 class="white--text subheading">{{ props.item.budgetName }}</h4></v-card-title>
+            <h4 class="white--text subheading">{{ props.item.expenseTypeName }}</h4></v-card-title>
           <v-divider></v-divider>
           <v-list dense>
             <v-list-tile>
@@ -19,11 +17,11 @@
             </v-list-tile>
             <v-list-tile>
               <v-list-tile-content>Reimbursed:</v-list-tile-content>
-              <v-list-tile-content class="align-end">{{ props.item.reimbursed | moneyValue }}</v-list-tile-content>
+              <v-list-tile-content class="align-end">{{ getReimbursed(props.item) | moneyValue }}</v-list-tile-content>
             </v-list-tile>
             <v-list-tile>
               <v-list-tile-content>Unreimbursed:</v-list-tile-content>
-              <v-list-tile-content class="align-end">{{ props.item.unreimbursed | moneyValue }}</v-list-tile-content>
+              <v-list-tile-content class="align-end">{{ getUnreimbursed(props.item) | moneyValue }}</v-list-tile-content>
             </v-list-tile>
             <v-list-tile>
               <v-list-tile-content>Budget:</v-list-tile-content>
@@ -70,8 +68,26 @@ export default {
       return (this.remaining(expenseType) <= 0) && !expenseType.odFlag;
     },
     remaining(item) {
-      return item.budget - item.reimbursed - item.unreimbursed;
+      if (item.budgetObject) {
+        return item.budget - item.budgetObject.pendingAmount - item.budgetObject.reimbursedAmount;
+      }
+      return item.budget;
+    },
+    getReimbursed(item) {
+      if (item.budgetObject) {
+        return item.budgetObject.reimbursedAmount
+      }
+      return 0
+    },
+    getUnreimbursed(item) {
+      if (item.budgetObject) {
+        return item.budgetObject.pendingAmount
+      }
+      return 0
     }
+  },
+  computed: {
+
   }
 
 }

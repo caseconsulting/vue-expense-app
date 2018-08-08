@@ -122,7 +122,7 @@ export default {
     addOneSecondToActualTimeEverySecond() {
       var component = this
       component.actualTime = moment().format('X')
-      setTimeout(function() {
+      setTimeout(function () {
         component.addOneSecondToActualTimeEverySecond()
       }, 1000);
     },
@@ -161,20 +161,13 @@ export default {
       let employee = await api.getUser();
       let hireDate = employee.hireDate;
       this.hireDate = hireDate;
-      let employeeVar = await api.getItem(api.SPECIAL, employee.id);
-      this.employee = employeeVar;
-      this.expenseTypeData = _.map(this.employee.expenseTypeData, expenseType => {
-        expenseType.textColor = 'black';
-        return expenseType;
+      let budgetsVar = await api.getItem(api.SPECIAL, employee.id);
+
+      this.expenseTypeData = _.map(budgetsVar, budget => {
+        budget.textColor = 'black';
+        return budget;
       });
-      this.employee.expenseTypeData.map(expenseType => {
-        let totalCost = 0;
-        for (var i = 0; i < expenseType.expenses.length; i++) {
-          totalCost = totalCost + expenseType.expenses[i].cost;
-        }
-        expenseType.totalCost = totalCost;
-        return expenseType;
-      });
+
       this.loading = false;
     },
     onSelect() {
@@ -305,21 +298,36 @@ export default {
       let unreimbursed = [];
       let odReimbursed = [];
       let odUnreimbursed = [];
-      if (this.employee !== undefined) {
-        //Race Condition here
+      if (this.expenseTypeData !== undefined) {
         let expenseTypes = this.expenseTypeData;
-        for (var i = 0; i < this.expenseTypeData.length; i++) {
-          budgetNames.push(expenseTypes[i].budgetName);
-          let total = this.getTotals(expenseTypes[i]);
-          budgetDifference.push(total.difference);
-          reimbursed.push(total.reimbursed);
-          unreimbursed.push(total.unreimbursed);
-          odReimbursed.push(total.odReimbursed);
-          odUnreimbursed.push(total.odUnreimbursed);
-          this.employee.expenseTypeData[i].reimbursed = total.reimbursed + total.odReimbursed; //For BudgetTable
-          this.employee.expenseTypeData[i].unreimbursed = total.unreimbursed + total.odUnreimbursed; //For BudgetTable
-        }
+        _.forEach(expenseTypes, expenseType => {
+          budgetNames.push(expenseType.expenseTypeName);
+          if (expenseType.budgetObject) {
+            console.log(expenseType)
+            //TODO HANDEL Over
+            reimbursed.push(expenseType.budgetObject.reimbursedAmount);
+            unreimbursed.push(expenseType.budgetObject.pendingAmount);
+            let difference = expenseType.budget - expenseType.budgetObject.reimbursedAmount - expenseType.budgetObject.pendingAmount
+            budgetDifference.push(difference);
+            odReimbursed.push(0);
+            odUnreimbursed.push(0);
+          } else {
+            console.log(expenseType.budget)
+            budgetDifference.push(expenseType.budget);
+            reimbursed.push(0);
+            unreimbursed.push(0);
+            odReimbursed.push(0);
+            odUnreimbursed.push(0);
+          }
+        })
+
+        // for (var i = 0; i < this.expenseTypeData.length; i++) {
+        //   let total = this.getTotals(expenseTypes[i]);
+        //
+        //   this.employee.expenseTypeData[i].reimbursed = total.reimbursed + total.odReimbursed; //For BudgetTable
+        //   this.employee.expenseTypeData[i].unreimbursed = total.unreimbursed + total.odUnreimbursed; //For BudgetTable
       }
+
 
       return {
         names: budgetNames,
@@ -375,7 +383,7 @@ export default {
             stacked: true,
             ticks: {
               beginAtZero: true,
-              callback: function(value, index, values) {
+              callback: function (value, index, values) {
                 return value.toLocaleString('en-US', {
                   style: 'currency',
                   currency: 'USD'
@@ -394,12 +402,12 @@ export default {
         },
         tooltips: {
           callbacks: {
-            label: function(tooltipItem, data) {
+            label: function (tooltipItem, data) {
               return (
                 "$" +
                 Number(tooltipItem.yLabel)
                 .toFixed(0)
-                .replace(/./g, function(c, i, a) {
+                .replace(/./g, function (c, i, a) {
                   return i > 0 && c !== '.' && (a.length - i) % 3 === 0 ?
                     ',' + c :
                     c;
