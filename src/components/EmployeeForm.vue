@@ -45,7 +45,9 @@ import api from '@/shared/api.js';
 import moment from 'moment';
 import DeleteModal from './DeleteModal.vue';
 import _ from 'lodash';
-import { getRole } from '@/utils/auth';
+import {
+  getRole
+} from '@/utils/auth';
 export default {
   data() {
     return {
@@ -60,9 +62,9 @@ export default {
       emailRules: [
         v => !!v || 'Email is required',
         v =>
-          /^(([^<>()\[\]\\.,;:\s@#"]+(\.[^<>()\[\]\\.,;:\s@#"]+)*)|(".+"))@consultwithcase.com/.test(
-            v
-          ) || 'Not a valid @consultwithcase email address'
+        /^(([^<>()\[\]\\.,;:\s@#"]+(\.[^<>()\[\]\\.,;:\s@#"]+)*)|(".+"))@consultwithcase.com/.test(
+          v
+        ) || 'Not a valid @consultwithcase email address'
       ],
       numberRules: [
         v => !!v || 'Employee ID is required',
@@ -155,6 +157,7 @@ export default {
       this.$refs.form.reset();
       this.employeeRoleFormatted = 'User';
       this.$set(this.model, email, '@consultwithcase.com');
+      this.$set(this.model, employeeRole, 'user');
       this.$set(this.model, firstName, '');
       this.$set(this.model, middleName, '');
       this.$set(this.model, lastName, '');

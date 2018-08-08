@@ -70,7 +70,6 @@ export default {
         return '';
       }
     }
-
   },
   data() {
     return {
@@ -114,7 +113,7 @@ export default {
         middleName: '',
         lastName: '',
         email: '@consultwithcase.com',
-        employeeRole: 'User',
+        employeeRole: 'user',
         empId: null,
         hireDate: null
       }
@@ -129,7 +128,7 @@ export default {
 
   methods: {
     isInActive(employee) {
-      return employee.isActive ? "" : "Not Active";
+      return employee.isActive ? '' : 'Not Active';
     },
     userIsAdmin() {
       return getRole() === 'super-admin';
@@ -158,7 +157,7 @@ export default {
       this.$set(this.model, 'middleName', '');
       this.$set(this.model, 'lastName', '');
       this.$set(this.model, 'email', '@consultwithcase.com');
-      this.$set(this.model, 'employeeRole', 'User');
+      this.$set(this.model, 'employeeRole', 'user');
       this.$set(this.model, 'empId', null);
       this.$set(this.model, 'hireDate', null);
     },
@@ -198,9 +197,7 @@ export default {
   computed: {
     employeeList() {
       return this.showAll ? this.employees : this.filteredEmployees;
-    },
-
-
+    }
   }
 };
 </script>
