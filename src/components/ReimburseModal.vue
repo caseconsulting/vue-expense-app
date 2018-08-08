@@ -2,12 +2,12 @@
 <v-layout row justify-center>
   <v-dialog v-model="activate" persistent max-width="350">
     <v-card>
-      <v-card-title class="headline">Are you sure you want to reminburse these expenses?</v-card-title>
+      <v-card-title class="headline">Are you sure you want to reimburse these expenses?</v-card-title>
       <v-card-actions>
         <v-spacer></v-spacer>
-        <v-btn color="info" flat @click.native="emit(`canceled-reminburse`)">No</v-btn>
+        <v-btn color="info" flat @click.native="emit(`canceled-reimburse`)">No</v-btn>
         <v-spacer></v-spacer>
-        <v-btn color="green" flat @click.native="emit(`confirm-reminburse`)">Reminburse</v-btn>
+        <v-btn color="green" flat @click.native="emit(`confirm-reimburse`)">Reimburse</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>

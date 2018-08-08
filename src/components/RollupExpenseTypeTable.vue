@@ -110,7 +110,8 @@ export default {
       rowsPerPage: 10
     },
     selected: [],
-    headers: [{
+    headers: [
+      {
         text: 'Employee',
         value: 'compareName'
       },
@@ -126,8 +127,8 @@ export default {
   }),
   async created() {
     EventBus.$on('expensePicked', this.addExpenseToSelected);
-    EventBus.$on('confirm-reminburse', this.reminbureExpenses);
-    EventBus.$on('canceled-reminburse', () => (this.button_clicked = false));
+    EventBus.$on('confirm-reimburse', this.reminbureExpenses);
+    EventBus.$on('canceled-reimburse', () => (this.button_clicked = false));
     let aggregatedData = await api.getAggregate();
     let expenses = this.createExpensesForUnrolled(aggregatedData);
     this.constructAutoComplete(aggregatedData);
@@ -141,12 +142,14 @@ export default {
   computed: {
     filteredItems() {
       return _.filter(this.empBudgets, expense => {
-
         let cost = this.getExpenseTotal(expense.expenses);
-        expense.compareName = `${expense.lastName}${expense.firstName}${expense.middleName}${expense.budgetName}`
-        expense.compareBudget = `${expense.budgetName}${expense.lastName}${expense.middleName}${expense.firstName}`
-        expense.compareCost = `${cost}`
-
+        expense.compareName = `${expense.lastName}${expense.firstName}${
+          expense.middleName
+        }${expense.budgetName}`;
+        expense.compareBudget = `${expense.budgetName}${expense.lastName}${
+          expense.middleName
+        }${expense.firstName}`;
+        expense.compareCost = `${cost}`;
 
         if (!this.employee && !this.expenseType) {
           return true;
@@ -258,7 +261,6 @@ export default {
       });
 
       _.forEach(expensesToSubmit, expense => {
-
         api
           .updateItem(api.EXPENSES, expense.id, expense)
           .then(this.removeExpenseFromList(this.selected));
@@ -382,9 +384,9 @@ export default {
       const query = hasValue(queryText);
       return (
         text
-        .toString()
-        .toLowerCase()
-        .indexOf(query.toString().toLowerCase()) > -1
+          .toString()
+          .toLowerCase()
+          .indexOf(query.toString().toLowerCase()) > -1
       );
     },
     defaultSort() {
@@ -392,7 +394,8 @@ export default {
 
       empBudgets.map(item => {
         for (var i = 0; i < arrayLength; i++) {
-          if (item.lastName === this.empBudgets[i].lastName) {}
+          if (item.lastName === this.empBudgets[i].lastName) {
+          }
         }
       });
     }
