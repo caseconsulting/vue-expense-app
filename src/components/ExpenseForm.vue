@@ -290,11 +290,12 @@ export default {
     EventBus.$on('confirm-delete-expense', this.deleteExpense);
 
     let expenseTypes = await api.getItems(api.EXPENSE_TYPES);
-    this.expenseTypes = expenseTypes.map(expenseType => {
+    this.expenseTypes = _.map(this.expenseTypes, expenseType => {
       return {
         /* beautify preserve:start */
         text: `${expenseType.budgetName} - ＄${expenseType.budget}`,
         /* beautify preserve:end */
+        budgetName: expenseType.budgetName,
         value: expenseType.id,
         budget: expenseType.budget,
         odFlag: expenseType.odFlag

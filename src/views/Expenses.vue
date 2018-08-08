@@ -152,6 +152,9 @@ export default {
     },
     isUser() {
       return this.role === 'user';
+    },
+    isSuperAdmin() {
+      return this.role === 'super-admin';
     }
   },
   components: {
@@ -188,18 +191,16 @@ export default {
       return expense;
     },
     async refreshExpenses() {
+      let aggregatedData = [];
       if (this.isAdmin) {
         let aggregatedData = await api.getAggregate();
         this.processedExpenses = aggregatedData;
       }
       if (this.isUser) {
         let employee = await api.getUser();
-        let aggregatedData = await api.getUserExpenses(employee.id);
-        this.processedExpenses = aggregatedData;
-        console.log(employee);
-
+        aggregatedData = await api.getUserExpenses(employee.id);
       }
-
+      this.processedExpenses = aggregatedData;
       this.loading = false;
     },
     onSelect(item) {
@@ -222,20 +223,25 @@ export default {
         this.processedExpenses,
         expense => expense.id === updatedExpense.id
       );
-
-      api.getItem(api.EMPLOYEES, updatedExpense.userId).then(employee => {
-        let employeeName = `${employee.firstName} ${employee.middleName} ${
-          employee.lastName
-        }`;
-        this.$set(updatedExpense, 'employeeName', employeeName);
-      });
-
-      api
-        .getItem(api.EXPENSE_TYPES, updatedExpense.expenseTypeId)
-        .then(expenseType => {
-          this.$set(updatedExpense, 'budgetName', expenseType.budgetName);
+      if(this.isAdmin) {
+        api.getItem(api.EMPLOYEES, updatedExpense.userId).then(employee => {
+          let employeeName = `${employee.firstName} ${employee.middleName} ${
+            employee.lastName
+          }`;
+          this.$set(updatedExpense, 'employeeName', employeeName);
         });
-      this.processedExpenses.splice(matchingExpensesIndex, 1, updatedExpense);
+
+        api
+          .getItem(api.EXPENSE_TYPES, updatedExpense.expenseTypeId)
+          .then(expenseType => {
+            this.$set(updatedExpense, 'budgetName', expenseType.budgetName);
+          });
+        this.processedExpenses.splice(matchingExpensesIndex, 1, updatedExpense);
+      } else {
+        let employeeName = updatedExpense.employeeName;
+        this.processedExpenses.splice(matchingExpensesIndex, 1, updatedExpense);
+        this.processedExpenses[matchingExpensesIndex].employeeName = employeeName;
+      }
       this.$set(this.status, 'statusType', 'SUCCESS');
       this.$set(this.status, 'statusMessage', 'Item was successfully updated!');
       this.$set(this.status, 'color', 'green');
