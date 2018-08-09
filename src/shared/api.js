@@ -7,9 +7,10 @@ const EMPLOYEES = 'employees';
 const SPECIAL = 'special';
 const API_HOSTNAME = API_CONFIG.apiHostname;
 const API_PORT = API_CONFIG.apiPort;
+const PORT = API_PORT === 443 ? '' : `:${API_PORT}`;
 
 const client = axios.create({
-  baseURL: `http://${API_HOSTNAME}:${API_PORT}`,
+  baseURL: `https://${API_HOSTNAME}${PORT}`,
   json: true
 });
 
