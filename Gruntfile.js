@@ -4,14 +4,18 @@ module.exports = function(grunt) {
   grunt.initConfig({
     aws_s3: {
       options: {
+        access: 'private',
+        params: {
+          CacheControl: 'max-age=600, s-maxage=300'
+        },
         accessKeyId: aws.AWSAccessKeyId,
         secretAccessKey: aws.AWSSecretKey,
         differential: true,
         region: 'us-east-1'
       },
-      application: {
+      dev: {
         options: {
-          bucket: 'case-consulting-vue-expense-app'
+          bucket: 'case-consulting-expense-app-dev'
         },
         files: [
           {
@@ -24,5 +28,5 @@ module.exports = function(grunt) {
       }
     }
   });
-  grunt.registerTask('prod', 'aws_s3:application');
+  grunt.registerTask('dev', 'aws_s3:dev');
 };
