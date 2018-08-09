@@ -38,7 +38,7 @@
             </tr>
           </template>
           <template slot="items" slot-scope="props">
-              <tr v-if="!loading" @click="onSelect(props.item)">
+              <tr v-if="!loading && showRow(props.item)" @click="onSelect(props.item)">
                 <td v-if="isAdmin" class="text-xs-left">{{ props.item.employeeName }}</td>
                 <td class="text-xs-left">{{ props.item.budgetName }}</td>
                 <td class="text-xs-left">{{ props.item.cost ? props.item.cost : 0 | moneyValue}}</td>
@@ -51,6 +51,9 @@
             Your search for "{{ search }}" found no results.
           </v-alert>
         </v-data-table>
+        <v-card-actions>
+          <v-checkbox :label="'Show Reimbursed Expenses'" v-model="hideReimbursed"></v-checkbox>
+        </v-card-actions>
       </v-card>
     </v-flex>
     <v-flex lg4 md12 sm12>
@@ -112,6 +115,7 @@ export default {
       search: '',
       expenses: [],
       processedExpenses: [],
+      hideReimbursed: false,
       errors: [],
       headers: [{
           text: 'Employee',
@@ -205,6 +209,9 @@ export default {
       }
       this.processedExpenses = aggregatedData;
       this.loading = false;
+    },
+    showRow(expense) {
+      return !this.hideReimbursed || expense.reimbursedDate;
     },
     onSelect(item) {
       this.$set(this.expense, 'budgetName', item.budgetName);
