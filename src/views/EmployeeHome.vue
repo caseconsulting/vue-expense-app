@@ -34,7 +34,7 @@
   <v-flex lg8>
 
     <v-flex text-xs-center>
-      <budget-table v-if="!loading" :employee="getBudgets"></budget-table>
+      <budget-table v-if="!loading" :employee="expenseTypeData"></budget-table>
       <budget-chart v-if="!loading" :options="drawGraph.optionSet" :chart-data="drawGraph.dataSet" @add="addModelToTable"></budget-chart>
     </v-flex>
 
@@ -162,12 +162,10 @@ export default {
       let hireDate = employee.hireDate;
       this.hireDate = hireDate;
       let budgetsVar = await api.getItem(api.SPECIAL, employee.id);
-
       this.expenseTypeData = _.map(budgetsVar, budget => {
         budget.textColor = 'black';
         return budget;
       });
-
       this.loading = false;
     },
     onSelect() {
@@ -303,7 +301,6 @@ export default {
         _.forEach(expenseTypes, expenseType => {
           budgetNames.push(expenseType.expenseTypeName);
           if (expenseType.budgetObject) {
-            console.log(expenseType)
             //TODO HANDEL Overdraft
             reimbursed.push(expenseType.budgetObject.reimbursedAmount);
             unreimbursed.push(expenseType.budgetObject.pendingAmount);
@@ -312,7 +309,6 @@ export default {
             odReimbursed.push(0);
             odUnreimbursed.push(0);
           } else {
-            console.log(expenseType.budget)
             budgetDifference.push(expenseType.budget);
             reimbursed.push(0);
             unreimbursed.push(0);
