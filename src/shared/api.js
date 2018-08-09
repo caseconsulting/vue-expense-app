@@ -10,7 +10,7 @@ const API_PORT = API_CONFIG.apiPort;
 const PORT = API_PORT === 443 ? '' : `:${API_PORT}`;
 
 const client = axios.create({
-  baseURL: `https://${API_HOSTNAME}${PORT}`,
+  baseURL: `http://${API_HOSTNAME}${PORT}`,
   json: true
 });
 
