@@ -226,25 +226,24 @@ export default {
         this.processedExpenses,
         expense => expense.id === updatedExpense.id
       );
+      let employeeName = '';
       if(this.isAdmin) {
         api.getItem(api.EMPLOYEES, updatedExpense.userId).then(employee => {
-          let employeeName = `${employee.firstName} ${employee.middleName} ${
+          employeeName = `${employee.firstName} ${employee.middleName} ${
             employee.lastName
           }`;
-          this.$set(updatedExpense, 'employeeName', employeeName);
         });
 
-        api
-          .getItem(api.EXPENSE_TYPES, updatedExpense.expenseTypeId)
-          .then(expenseType => {
-            this.$set(updatedExpense, 'budgetName', expenseType.budgetName);
-          });
-        this.processedExpenses.splice(matchingExpensesIndex, 1, updatedExpense);
       } else {
-        let employeeName = this.processedExpenses[matchingExpensesIndex].employeeName;
-        this.processedExpenses.splice(matchingExpensesIndex, 1, updatedExpense);
-        this.processedExpenses[matchingExpensesIndex].employeeName = employeeName;
+        employeeName = this.processedExpenses[matchingExpensesIndex].employeeName;
+        this.$set(updatedExpense, 'employeeName', employeeName);
       }
+      api
+        .getItem(api.EXPENSE_TYPES, updatedExpense.expenseTypeId)
+        .then(expenseType => {
+          this.$set(updatedExpense, 'budgetName', expenseType.budgetName);
+        });
+      this.processedExpenses.splice(matchingExpensesIndex, 1, updatedExpense);
       this.$set(this.status, 'statusType', 'SUCCESS');
       this.$set(this.status, 'statusMessage', 'Item was successfully updated!');
       this.$set(this.status, 'color', 'green');
