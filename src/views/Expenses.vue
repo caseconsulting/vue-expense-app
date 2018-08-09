@@ -192,13 +192,8 @@ export default {
     },
     async refreshExpenses() {
       let aggregatedData = [];
-      if (this.isAdmin) {
-        let aggregatedData = await api.getAggregate();
-        this.processedExpenses = aggregatedData;
-      }
-      if (this.isUser) {
-        let employee = await api.getUser();
-        aggregatedData = await api.getUserExpenses(employee.id);
+      if (this.isAdmin || this.isUser) {
+        aggregatedData = await api.getAggregate();
       }
       this.processedExpenses = aggregatedData;
       this.loading = false;
@@ -238,7 +233,7 @@ export default {
           });
         this.processedExpenses.splice(matchingExpensesIndex, 1, updatedExpense);
       } else {
-        let employeeName = updatedExpense.employeeName;
+        let employeeName = this.processedExpenses[matchingExpensesIndex].employeeName;
         this.processedExpenses.splice(matchingExpensesIndex, 1, updatedExpense);
         this.processedExpenses[matchingExpensesIndex].employeeName = employeeName;
       }

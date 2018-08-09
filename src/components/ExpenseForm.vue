@@ -108,6 +108,7 @@ export default {
     isReimbursed() {
       return this.reimbursedDateFormatted !== null;
     }
+
   },
   methods: {
     async checkCoverage() {
@@ -245,6 +246,7 @@ export default {
           this.expense.receipt = null;
         }
         if (this.expense.id) {
+          this.exp
           let updatedExpense = await api.updateItem(
             api.EXPENSES,
             this.expense.id,
@@ -290,7 +292,8 @@ export default {
     EventBus.$on('confirm-delete-expense', this.deleteExpense);
 
     let expenseTypes = await api.getItems(api.EXPENSE_TYPES);
-    this.expenseTypes = _.map(this.expenseTypes, expenseType => {
+    this.expenseTypes = _.map(expenseTypes, expenseType => {
+
       return {
         /* beautify preserve:start */
         text: `${expenseType.budgetName} - ＄${expenseType.budget}`,
