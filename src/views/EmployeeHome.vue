@@ -304,7 +304,7 @@ export default {
           budgetNames.push(expenseType.expenseTypeName);
           if (expenseType.budgetObject) {
             console.log(expenseType)
-            //TODO HANDEL Over
+            //TODO HANDEL Overdraft
             reimbursed.push(expenseType.budgetObject.reimbursedAmount);
             unreimbursed.push(expenseType.budgetObject.pendingAmount);
             let difference = expenseType.budget - expenseType.budgetObject.reimbursedAmount - expenseType.budgetObject.pendingAmount

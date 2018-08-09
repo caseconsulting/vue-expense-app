@@ -59,7 +59,6 @@ export default {
     }
   },
   methods: {
-
     odFlagMessage(expenseType) {
       let isOverdraftAllowed = expenseType.odFlag;
       return (isOverdraftAllowed ? "Allowed" : "Not Allowed");
