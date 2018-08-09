@@ -64,6 +64,8 @@
 import api from '@/shared/api.js';
 import ExpenseForm from '../components/ExpenseForm.vue';
 import moment from 'moment';
+import _ from 'lodash';
+import { getRole } from '@/utils/auth';
 export default {
   filters: {
     moneyValue: value => {
@@ -84,12 +86,14 @@ export default {
   },
   data() {
     return {
+      role: '',
       loading: true,
       status: {
         statusType: undefined,
         statusMessage: '',
         color: ''
       },
+      employee: {},
       expense: {
         id: '',
         description: '',
@@ -142,12 +146,22 @@ export default {
   computed: {
     sorting() {
       return this.processedExpenses;
+    },
+    isAdmin() {
+      return (this.role === 'admin') || (this.role === 'super-admin');
+    },
+    isUser() {
+      return this.role === 'user';
+    },
+    isSuperAdmin() {
+      return this.role === 'super-admin';
     }
   },
   components: {
     ExpenseForm
   },
   async created() {
+    this.role = getRole();
     this.refreshExpenses();
   },
   methods: {
@@ -177,7 +191,10 @@ export default {
       return expense;
     },
     async refreshExpenses() {
-      let aggregatedData = await api.getAggregate();
+      let aggregatedData = [];
+      if (this.isAdmin || this.isUser) {
+        aggregatedData = await api.getAggregate();
+      }
       this.processedExpenses = aggregatedData;
       this.loading = false;
     },
@@ -201,20 +218,25 @@ export default {
         this.processedExpenses,
         expense => expense.id === updatedExpense.id
       );
-
-      api.getItem(api.EMPLOYEES, updatedExpense.userId).then(employee => {
-        let employeeName = `${employee.firstName} ${employee.middleName} ${
-          employee.lastName
-        }`;
-        this.$set(updatedExpense, 'employeeName', employeeName);
-      });
-
-      api
-        .getItem(api.EXPENSE_TYPES, updatedExpense.expenseTypeId)
-        .then(expenseType => {
-          this.$set(updatedExpense, 'budgetName', expenseType.budgetName);
+      if(this.isAdmin) {
+        api.getItem(api.EMPLOYEES, updatedExpense.userId).then(employee => {
+          let employeeName = `${employee.firstName} ${employee.middleName} ${
+            employee.lastName
+          }`;
+          this.$set(updatedExpense, 'employeeName', employeeName);
         });
-      this.processedExpenses.splice(matchingExpensesIndex, 1, updatedExpense);
+
+        api
+          .getItem(api.EXPENSE_TYPES, updatedExpense.expenseTypeId)
+          .then(expenseType => {
+            this.$set(updatedExpense, 'budgetName', expenseType.budgetName);
+          });
+        this.processedExpenses.splice(matchingExpensesIndex, 1, updatedExpense);
+      } else {
+        let employeeName = this.processedExpenses[matchingExpensesIndex].employeeName;
+        this.processedExpenses.splice(matchingExpensesIndex, 1, updatedExpense);
+        this.processedExpenses[matchingExpensesIndex].employeeName = employeeName;
+      }
       this.$set(this.status, 'statusType', 'SUCCESS');
       this.$set(this.status, 'statusMessage', 'Item was successfully updated!');
       this.$set(this.status, 'color', 'green');

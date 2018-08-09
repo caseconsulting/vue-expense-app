@@ -1,7 +1,8 @@
 <template>
 <v-card hover>
   <v-card-title>
-    <h3 v-if="expense.id"> Edit Expense </h3>
+    <h3 v-if="expense.id && (isSuperAdmin || !isReimbursed)"> Edit Expense </h3>
+    <h3 v-else-if="expense.id && !isSuperAdmin && isReimbursed"> View Expense </h3>
     <h3 v-else> Create New Expense </h3>
   </v-card-title>
   <v-container fluid>
@@ -22,7 +23,7 @@
         <v-date-picker v-model="expense.purchaseDate" no-title @input="menu1 = false"></v-date-picker>
       </v-menu>
       <!-- Date Picker 2-->
-      <v-menu v-if="employeeRole === 'super-admin'" ref="menu2" :close-on-content-click="false" v-model="menu2" :nudge-right="40" lazy transition="scale-transition" offset-y full-width max-width="290px" min-width="290px">
+      <v-menu v-if="isSuperAdmin" ref="menu2" :close-on-content-click="false" v-model="menu2" :nudge-right="40" lazy transition="scale-transition" offset-y full-width max-width="290px" min-width="290px">
         <v-text-field slot="activator" v-model="reimbursedDateFormatted" label="Reimburse Date (optional)" hint="MM/DD/YYYY format " persistent-hint prepend-icon="event" @blur="expense.reimbursedDate = parseDate(reimbursedDateFormatted)"></v-text-field>
         <v-date-picker v-model="expense.reimbursedDate" no-title @input="menu2 = false"></v-date-picker>
       </v-menu>
@@ -30,11 +31,11 @@
       <v-text-field v-model="expense.note" label="Notes (optional)" data-vv-name="Description" multi-line></v-text-field>
 
       <!-- Buttons -->
-      <v-btn outline color="error" @click="deleting=true">
+      <v-btn  outline color="error" @click="deleting=true" :disabled="!isSuperAdmin && isReimbursed">
         <icon class="mr-1" name="trash"></icon>Delete</v-btn>
       <v-btn color="white" @click="clearForm">
         <icon class="mr-1" name="ban"></icon>Cancel</v-btn>
-      <v-btn outline color="success" @click="checkCoverage" :disabled="!valid">
+      <v-btn v-if="" outline color="success" @click="checkCoverage" :disabled="!valid || (!isSuperAdmin && isReimbursed)">
         <icon class="mr-1" name="save"></icon>Submit</v-btn>
     </v-form>
   </v-container>
@@ -94,6 +95,21 @@ export default {
     }
   },
   props: ['expense'],
+  computed: {
+    isUser() {
+      return this.employeeRole === 'user';
+    },
+    isAdmin() {
+      return (this.employeeRole === 'admin' || this.employeeRole === 'super-admin');
+    },
+    isSuperAdmin() {
+      return this.employeeRole === 'super-admin';
+    },
+    isReimbursed() {
+      return this.reimbursedDateFormatted !== null;
+    }
+
+  },
   methods: {
     async checkCoverage() {
       if (this.expense) {
@@ -230,6 +246,7 @@ export default {
           this.expense.receipt = null;
         }
         if (this.expense.id) {
+          this.exp
           let updatedExpense = await api.updateItem(
             api.EXPENSES,
             this.expense.id,
@@ -250,9 +267,6 @@ export default {
         }
       }
     },
-    isUser() {
-      return this.employeeRole === 'user';
-    },
     clearForm() {
       this.$refs.form.reset();
       this.$set(this.expense, 'budgetName', '');
@@ -260,7 +274,7 @@ export default {
       this.$set(this.expense, 'purchaseDate', null);
       this.$set(this.expense, 'reimbursedDate', null);
       this.$set(this.expense, 'createdAt', null);
-      if (this.isUser()) {
+      if (this.isUser) {
         this.$set(this.expense, 'employeeName', this.userInfo.id);
       } else {
         this.$set(this.expense, 'employeeName', '');
@@ -278,11 +292,13 @@ export default {
     EventBus.$on('confirm-delete-expense', this.deleteExpense);
 
     let expenseTypes = await api.getItems(api.EXPENSE_TYPES);
-    this.expenseTypes = expenseTypes.map(expenseType => {
+    this.expenseTypes = _.map(expenseTypes, expenseType => {
+
       return {
         /* beautify preserve:start */
         text: `${expenseType.budgetName} - ＄${expenseType.budget}`,
         /* beautify preserve:end */
+        budgetName: expenseType.budgetName,
         value: expenseType.id,
         budget: expenseType.budget,
         odFlag: expenseType.odFlag
