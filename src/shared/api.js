@@ -5,6 +5,7 @@ const EXPENSE_TYPES = 'expense-types';
 const EXPENSES = 'expenses';
 const EMPLOYEES = 'employees';
 const SPECIAL = 'special';
+const BUDGETS = 'budgets';
 const API_HOSTNAME = API_CONFIG.apiHostname;
 const API_PORT = API_CONFIG.apiPort;
 const PORT = API_PORT === 443 ? '' : `:${API_PORT}`;
@@ -76,5 +77,6 @@ export default {
   EXPENSE_TYPES,
   EXPENSES,
   EMPLOYEES,
-  SPECIAL
+  SPECIAL,
+  BUDGETS
 };

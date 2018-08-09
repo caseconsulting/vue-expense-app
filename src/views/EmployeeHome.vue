@@ -138,18 +138,8 @@ export default {
       this.minutes = duration.minutes() > 0 ? duration.minutes() : 0
       this.seconds = duration.seconds() > 0 ? duration.seconds() : 0
     },
-    updateData(newData) {
-      console.log(newData)
-      this.expenseTypeData = _.map(this.expenseTypeData, (data) => {
-        if (newData.expenseTypeId === data.expenseTypeId) {
-          if (newData.reimbursedDate === null) {
-            data.budgetObject.pendingAmount += newData.cost;
-          } else {
-            data.budgetObject.reimbursedAmount += newData.cost;
-          }
-        }
-        return data;
-      })
+    async updateData(newData) {
+      this.expenseTypeData = await api.getItem(api.SPECIAL, this.employee.id);
     },
 
     clearStatus() {
@@ -189,12 +179,35 @@ export default {
           budgetNames.push(expenseType.expenseTypeName);
           if (expenseType.budgetObject) {
             //TODO HANDEL Overdraft
-            reimbursed.push(expenseType.budgetObject.reimbursedAmount);
-            unreimbursed.push(expenseType.budgetObject.pendingAmount);
-            let difference = expenseType.budget - expenseType.budgetObject.reimbursedAmount - expenseType.budgetObject.pendingAmount
-            budgetDifference.push(difference);
-            odReimbursed.push(0);
-            odUnreimbursed.push(0);
+            if (!expenseType.odFlag) {
+              reimbursed.push(expenseType.budgetObject.reimbursedAmount);
+              unreimbursed.push(expenseType.budgetObject.pendingAmount);
+              let difference = expenseType.budget - expenseType.budgetObject.reimbursedAmount - expenseType.budgetObject.pendingAmount
+              budgetDifference.push(difference);
+              odReimbursed.push(0);
+              odUnreimbursed.push(0);
+            } else {
+              if (expenseType.budget - expenseType.budgetObject.reimbursedAmount < 0) {
+                let difference = 0;
+                reimbursed.push(expenseType.budget);
+                unreimbursed.push(0);
+                odReimbursed.push(expenseType.budgetObject.reimbursedAmount - expenseType.budget);
+                odUnreimbursed.push(expenseType.budgetObject.pendingAmount)
+              } else if (expenseType.budget - expenseType.budgetObject.reimbursedAmount - expenseType.budgetObject.pendingAmount < 0) {
+                reimbursed.push(expenseType.budgetObject.reimbursedAmount);
+                odReimbursed.push(0);
+                let temp = expenseType.budget - expenseType.budgetObject.reimbursedAmount;
+                unreimbursed.push(temp);
+                odUnreimbursed.push(expenseType.budgetObject.pendingAmount - temp);
+              } else {
+                reimbursed.push(expenseType.budgetObject.reimbursedAmount);
+                unreimbursed.push(expenseType.budgetObject.pendingAmount);
+                let difference = expenseType.budget - expenseType.budgetObject.reimbursedAmount - expenseType.budgetObject.pendingAmount
+                budgetDifference.push(difference);
+                odReimbursed.push(0);
+                odUnreimbursed.push(0);
+              }
+            }
           } else {
             budgetDifference.push(expenseType.budget);
             reimbursed.push(0);

@@ -31,7 +31,7 @@
       <v-text-field v-model="expense.note" label="Notes (optional)" data-vv-name="Description" multi-line></v-text-field>
 
       <!-- Buttons -->
-      <v-btn  outline color="error" @click="deleting=true" :disabled="!isSuperAdmin && isReimbursed">
+      <v-btn outline color="error" @click="deleting=true" :disabled="!isSuperAdmin && isReimbursed">
         <icon class="mr-1" name="trash"></icon>Delete</v-btn>
       <v-btn color="white" @click="clearForm">
         <icon class="mr-1" name="ban"></icon>Cancel</v-btn>
@@ -85,10 +85,10 @@ export default {
     DeleteModal
   },
   watch: {
-    'expense.purchaseDate': function(val) {
+    'expense.purchaseDate': function (val) {
       this.purchaseDateFormatted = this.formatDate(this.expense.purchaseDate);
     },
-    'expense.reimbursedDate': function(val) {
+    'expense.reimbursedDate': function (val) {
       this.reimbursedDateFormatted = this.formatDate(
         this.expense.reimbursedDate
       );
@@ -123,13 +123,15 @@ export default {
         } else {
           employee = await api.getItem(api.EMPLOYEES, this.expense.userId);
         }
+        let budgets = await api.getItems(api.BUDGETS);
         let employeeExpenseTypeBalance = _.find(
-          employee.expenseTypes,
-          exp => expenseType.value === exp.id
-        );
+          budgets, budget => {
+            return budget.expenseTypeId === expenseType.value;
+          }
+        )
         let cost = parseInt(this.expense.cost);
         if (employeeExpenseTypeBalance) {
-          employeeExpenseTypeBalance = employeeExpenseTypeBalance.balance;
+          employeeExpenseTypeBalance = employeeExpenseTypeBalance.pendingAmount + employeeExpenseTypeBalance.reimbursedAmount;
           if (expenseType.odFlag) {
             if (2 * expenseType.budget !== employeeExpenseTypeBalance) {
               //under budget
@@ -173,14 +175,18 @@ export default {
           }
         } else {
           //new expense for an expensetype
-          if (expenseType.budget < cost) {
-            this.$set(this.expense, 'budget', expenseType.budget);
-            this.$set(
-              this.expense,
-              'remaining',
-              expenseType.budget
-            );
-            this.submitting = true;
+          if (!expenseType.odFlag) {
+            if (expenseType.budget < cost) {
+              this.$set(this.expense, 'budget', expenseType.budget);
+              this.$set(
+                this.expense,
+                'remaining',
+                expenseType.budget
+              );
+              this.submitting = true;
+            } else {
+              this.submit();
+            }
           } else {
             this.submit();
           }
@@ -317,7 +323,6 @@ export default {
               employee.lastName
             }`,
             value: employee.id,
-            expenseTypes: employee.expenseTypes
           };
         });
       } else {
