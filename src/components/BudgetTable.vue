@@ -7,7 +7,8 @@
       <v-flex slot="item" slot-scope="props" xs12 sm6 md4 lg3>
         <v-card color="blue">
           <v-card-title>
-            <h4 class="white--text subheading">{{ props.item.expenseTypeName }}</h4></v-card-title>
+            <h4 class="white--text subheading">{{ props.item.expenseTypeName }}</h4>
+          </v-card-title>
           <v-divider></v-divider>
           <v-list dense>
             <v-list-tile>

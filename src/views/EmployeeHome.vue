@@ -35,13 +35,13 @@
 
     <v-flex text-xs-center>
       <budget-table v-if="!loading" :employee="expenseTypeData"></budget-table>
-      <budget-chart v-if="!loading" :options="drawGraph.optionSet" :chart-data="drawGraph.dataSet" @add="addModelToTable"></budget-chart>
+      <budget-chart v-if="!loading" :options="drawGraph.optionSet" :chart-data="drawGraph.dataSet"></budget-chart>
     </v-flex>
 
   </v-flex>
   <v-flex lg4 pt-3>
     <v-flex text-xs-center lg12 md12 sm12>
-      <expense-form :expense="expense" v-on:add="addModelToTable" v-on:update="updateModelInTable" v-on:delete="deleteModelFromTable" v-on:error="displayError"></expense-form>
+      <expense-form :expense="expense" v-on:error="displayError"></expense-form>
     </v-flex>
   </v-flex>
 
@@ -139,154 +139,41 @@ export default {
       this.seconds = duration.seconds() > 0 ? duration.seconds() : 0
     },
     updateData(newData) {
+      console.log(newData)
       this.expenseTypeData = _.map(this.expenseTypeData, (data) => {
-        if (newData.expenseTypeId === data.id) {
-          data.expenses.push(newData)
+        if (newData.expenseTypeId === data.expenseTypeId) {
+          if (newData.reimbursedDate === null) {
+            data.budgetObject.pendingAmount += newData.cost;
+          } else {
+            data.budgetObject.reimbursedAmount += newData.cost;
+          }
         }
         return data;
       })
     },
+
     clearStatus() {
       this.$set(this.status, 'statusType', undefined);
       this.$set(this.status, 'statusMessage', '');
       this.$set(this.status, 'color', '');
     },
+
     async displayError(err) {
       this.$set(this.status, 'statusType', 'ERROR');
       this.$set(this.status, 'statusMessage', err);
       this.$set(this.status, 'color', 'red');
     },
+
     async refreshBudget() {
       this.loading = true;
       let employee = await api.getUser();
-      let hireDate = employee.hireDate;
-      this.hireDate = hireDate;
+      this.hireDate = employee.hireDate;
       let budgetsVar = await api.getItem(api.SPECIAL, employee.id);
-      this.expenseTypeData = _.map(budgetsVar, budget => {
-        budget.textColor = 'black';
-        return budget;
-      });
+      this.expenseTypeData = budgetsVar;
+      this.employee = employee;
       this.loading = false;
-    },
-    onSelect() {
-      this.model = {
-        id: item.id,
-        firstName: item.firstName,
-        middleName: item.middleName,
-        lastName: item.lastName,
-        empId: item.empId,
-        hireDate: item.hireDate
-      };
-    },
-    updateModelInTable(updatedExpense) {
-      let matchingExpensesIndex = _.findIndex(
-        this.processedExpenses,
-        expense => expense.id === updatedExpense.id
-      );
-
-      api.getItem(api.EMPLOYEES, updatedExpense.userId).then(employee => {
-        let employeeName = `${employee.firstName} ${employee.middleName} ${
-          employee.lastName
-        }`;
-        this.$set(updatedExpense, 'employeeName', employeeName);
-      });
-
-      api
-        .getItem(api.EXPENSE_TYPES, updatedExpense.expenseTypeId)
-        .then(expenseType => {
-          this.$set(updatedExpense, 'budgetName', expenseType.budgetName);
-        });
-      this.processedExpenses.splice(matchingExpensesIndex, 1, updatedExpense);
-      this.$set(this.status, 'statusType', 'SUCCESS');
-      this.$set(this.status, 'statusMessage', 'Item was successfully updated!');
-      this.$set(this.status, 'color', 'green');
-    },
-    addModelToTable(newExpense) {
-      let matchingExpenses = _.filter(
-        this.processedExpenses,
-        expense => expense.id === newExpense.id
-      );
-
-      if (!matchingExpenses.length) {
-        api.getItem(api.EMPLOYEES, newExpense.userId).then(employee => {
-          let employeeName = `${employee.firstName} ${employee.middleName} ${
-            employee.lastName
-          }`;
-          this.$set(newExpense, 'employeeName', employeeName);
-        });
-
-        api
-          .getItem(api.EXPENSE_TYPES, newExpense.expenseTypeId)
-          .then(expenseType => {
-            this.$set(newExpense, 'budgetName', expenseType.budgetName);
-          });
-
-        this.processedExpenses.push(newExpense);
-        this.$set(this.status, 'statusType', 'SUCCESS');
-        this.$set(
-          this.status,
-          'statusMessage',
-          'Item was successfully submitted!'
-        );
-        this.$set(this.status, 'color', 'green');
-      }
-    },
-    deleteModelFromTable() {
-      let modelIndex = _.findIndex(
-        this.processedExpenses,
-        expense => expense.id === this.expense.id
-      );
-      this.processedExpenses.splice(modelIndex, 1);
-      this.$set(this.status, 'statusType', 'SUCCESS');
-      this.$set(this.status, 'statusMessage', 'Item was successfully deleted!');
-      this.$set(this.status, 'color', 'green');
-    },
-    getTotals(expenseType) {
-      let totalReimbursed = 0;
-      let totalUnreimbursed = 0;
-      let totalOdReimbursed = 0;
-      let totalOdUnreimbursed = 0;
-      let totalDifference = expenseType.budget;
-      let isOverdraft = expenseType.odFlag;
-      let i = expenseType.expenses.length;
-      let owed = 0;
-      for (let j = 0; j < i; j++) {
-        let expense = expenseType.expenses[j];
-        let cost = expense.cost;
-        let isReimbursed = expense.reimbursedDate;
-        totalDifference = totalDifference - cost;
-        if (totalDifference >= 0) {
-          if (isReimbursed) {
-            totalReimbursed += cost;
-          } else {
-            totalUnreimbursed += cost;
-          }
-        } else {
-          if (isReimbursed) {
-            owed = -totalDifference;
-            totalOdReimbursed += owed;
-            totalReimbursed += cost - owed;
-            totalDifference = 0;
-          } else {
-            owed = -totalDifference;
-            totalOdUnreimbursed += owed;
-            totalUnreimbursed += cost - owed;
-            totalDifference = 0;
-          }
-        }
-
-      }
-
-      return {
-        reimbursed: totalReimbursed,
-        unreimbursed: totalUnreimbursed,
-        odReimbursed: totalOdReimbursed,
-        odUnreimbursed: totalOdUnreimbursed,
-        difference: totalDifference
-      };
     }
   },
-
   computed: {
     budgets() {
       let budgetNames = [];
@@ -316,12 +203,6 @@ export default {
             odUnreimbursed.push(0);
           }
         })
-
-        // for (var i = 0; i < this.expenseTypeData.length; i++) {
-        //   let total = this.getTotals(expenseTypes[i]);
-        //
-        //   this.employee.expenseTypeData[i].reimbursed = total.reimbursed + total.odReimbursed; //For BudgetTable
-        //   this.employee.expenseTypeData[i].unreimbursed = total.unreimbursed + total.odUnreimbursed; //For BudgetTable
       }
 
 
@@ -334,6 +215,7 @@ export default {
         odUnreimbursed: odUnreimbursed
       };
     },
+
     drawGraph() {
       // Overwriting base render method with actual data.
       let data = {
@@ -423,12 +305,6 @@ export default {
         dataSet: data,
         optionSet: options
       };
-    },
-    getBudgets() {
-      return this.expenseTypeData;
-    },
-    getHireDate() {
-      return this.hireDate;
     },
     getAnniversary() {
       const [year, month, day] = this.hireDate.split('-');
