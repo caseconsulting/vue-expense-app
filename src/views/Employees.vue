@@ -44,7 +44,7 @@
 
     </v-flex>
     <v-flex v-if="userIsAdmin()" lg4 md12 sm12>
-      <employee-form :model="model" v-on:add="addModelToTable" v-on:update="updateModelInTable" v-on:delete="deleteModelFromTable"></employee-form>
+      <employee-form :model="model" v-on:add="refreshEmployees" v-on:update="updateModelInTable" v-on:delete="deleteModelFromTable"></employee-form>
     </v-flex>
   </v-layout>
 </div>

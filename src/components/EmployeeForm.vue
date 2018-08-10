@@ -142,10 +142,11 @@ export default {
           this.clearForm();
         } else {
           let newEmployee = await api.createItem(api.EMPLOYEES, this.model);
+          this.$set(this.model, 'id', newEmployee.id);
+          this.$emit('add', newEmployee);
+          this.clearForm();
         }
-        this.$set(this.model, 'id', newEmployee.id);
-        this.$emit('add', newEmployee);
-        this.clearForm();
+
       }
     },
     async deleteEmployee() {
