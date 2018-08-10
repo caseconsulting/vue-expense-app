@@ -44,7 +44,7 @@
 
     </v-flex>
     <v-flex v-if="userIsAdmin()" lg4 md12 sm12>
-      <employee-form :model="model" v-on:add="refreshEmployees" v-on:update="updateModelInTable" v-on:delete="deleteModelFromTable"></employee-form>
+      <employee-form :model="model" v-on:add="addModelToTable" v-on:update="updateModelInTable" v-on:delete="deleteModelFromTable"></employee-form>
     </v-flex>
   </v-layout>
 </div>
@@ -172,6 +172,14 @@ export default {
         employee => employee.id === updatedEmployee.id
       );
       this.employees.splice(matchingEmployeeIndex, 1, updatedEmployee);
+
+      if (updatedEmployee.isActive) {
+        matchingEmployeeIndex = _.findIndex(
+          this.filteredEmployees,
+          employee => employee.id === updatedEmployee.id
+        );
+        this.filteredEmployees.splice(matchingEmployeeIndex, 1, updatedEmployee);
+      }
     },
     addModelToTable(newEmployee) {
       let matchingEmployee = _.filter(
@@ -180,7 +188,12 @@ export default {
       );
 
       if (!matchingEmployee.length) {
-        this.employees.push(newEmployee);
+        if (newEmployee.isActive) {
+          this.filteredEmployees.push(newEmployee);
+          this.employees.push(newEmployee);
+        } else {
+          this.employees.push(newEmployee);
+        }
       }
     },
     deleteModelFromTable() {
@@ -189,6 +202,12 @@ export default {
         employee => employee.id === this.model.id
       );
       this.employees.splice(modelIndex, 1);
+      modelIndex = _.findIndex(
+        this.filteredEmployees,
+        employee => employee.id === this.model.id
+      );
+      this.filteredEmployees.splice(modelIndex, 1);
+
     },
     changeSort(column) {
       if (this.pagination.sortBy === column) {
