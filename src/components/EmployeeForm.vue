@@ -131,17 +131,17 @@ export default {
     },
     async submit() {
       if (this.$refs.form.validate()) {
-        let newEmployee;
         if (this.model.id) {
-          newEmployee = await api.updateItem(
+          this.model.isActive = !this.model.isActive
+          let updatedEmployee = await api.updateItem(
             api.EMPLOYEES,
             this.model.id,
             this.model
           );
-
-          this.$emit('update', newEmployee);
+          this.$emit('update', updatedEmployee);
+          this.clearForm();
         } else {
-          newEmployee = await api.createItem(api.EMPLOYEES, this.model);
+          let newEmployee = await api.createItem(api.EMPLOYEES, this.model);
         }
         this.$set(this.model, 'id', newEmployee.id);
         this.$emit('add', newEmployee);

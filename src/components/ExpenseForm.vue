@@ -85,10 +85,10 @@ export default {
     DeleteModal
   },
   watch: {
-    'expense.purchaseDate': function (val) {
+    'expense.purchaseDate': function(val) {
       this.purchaseDateFormatted = this.formatDate(this.expense.purchaseDate);
     },
-    'expense.reimbursedDate': function (val) {
+    'expense.reimbursedDate': function(val) {
       this.reimbursedDateFormatted = this.formatDate(
         this.expense.reimbursedDate
       );
@@ -255,7 +255,6 @@ export default {
           this.expense.receipt = null;
         }
         if (this.expense.id) {
-          this.exp
           let updatedExpense = await api.updateItem(
             api.EXPENSES,
             this.expense.id,

@@ -115,7 +115,8 @@ export default {
         email: '@consultwithcase.com',
         employeeRole: 'user',
         empId: null,
-        hireDate: null
+        hireDate: null,
+        isActive: false
       }
     };
   },
@@ -150,6 +151,8 @@ export default {
       this.$set(this.model, 'employeeRole', item.employeeRole);
       this.$set(this.model, 'empId', item.empId);
       this.$set(this.model, 'hireDate', item.hireDate);
+      this.$set(this.model, 'isActive', !item.isActive);
+
     },
     clearModel() {
       this.$set(this.model, 'id', '');
@@ -160,6 +163,8 @@ export default {
       this.$set(this.model, 'employeeRole', 'user');
       this.$set(this.model, 'empId', null);
       this.$set(this.model, 'hireDate', null);
+      this.$set(this.model, 'isActive', false);
+
     },
     updateModelInTable(updatedEmployee) {
       let matchingEmployeeIndex = _.findIndex(
