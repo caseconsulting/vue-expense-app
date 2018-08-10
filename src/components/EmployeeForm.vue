@@ -1,4 +1,4 @@
- <template>
+<template>
 <v-card hover>
   <v-card-title>
     <h3 v-if="model.id"> Edit Employee </h3>
@@ -145,6 +145,7 @@ export default {
         }
         this.$set(this.model, 'id', newEmployee.id);
         this.$emit('add', newEmployee);
+        this.clearForm();
       }
     },
     async deleteEmployee() {
