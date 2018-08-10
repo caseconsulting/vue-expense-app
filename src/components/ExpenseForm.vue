@@ -259,6 +259,7 @@ export default {
             this.expense
           );
           this.$emit('update', updatedExpense);
+          this.clearForm();          
         } else {
           this.$set(this.expense, 'createdAt', moment().format('MM-DD-YYYY'));
           let newExpense = await api.createItem(api.EXPENSES, this.expense);
