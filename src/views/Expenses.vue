@@ -235,10 +235,12 @@ export default {
       );
       let employeeName = '';
       if(this.isAdmin) {
+        console.log('admin');
         api.getItem(api.EMPLOYEES, updatedExpense.userId).then(employee => {
           employeeName = `${employee.firstName} ${employee.middleName} ${
             employee.lastName
           }`;
+          this.$set(updatedExpense, 'employeeName', employeeName);
         });
 
       } else {
@@ -251,6 +253,7 @@ export default {
           this.$set(updatedExpense, 'budgetName', expenseType.budgetName);
         });
       this.processedExpenses.splice(matchingExpensesIndex, 1, updatedExpense);
+      this.processedExpenses[matchingExpensesIndex].employeeName = employeeName;
       this.$set(this.status, 'statusType', 'SUCCESS');
       this.$set(this.status, 'statusMessage', 'Item was successfully updated!');
       this.$set(this.status, 'color', 'green');
