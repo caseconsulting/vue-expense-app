@@ -158,15 +158,15 @@ export default {
     clearForm() {
       this.$refs.form.reset();
       this.employeeRoleFormatted = 'User';
-      this.$set(this.model, email, '@consultwithcase.com');
-      this.$set(this.model, employeeRole, 'user');
-      this.$set(this.model, firstName, '');
-      this.$set(this.model, middleName, '');
-      this.$set(this.model, lastName, '');
-      this.$set(this.model, empId, '');
-      this.$set(this.model, expenseTypes, []);
-      this.$set(this.model, hireDate, '');
-      this.$set(this.model, id, '');
+      this.$set(this.model, 'email', '@consultwithcase.com');
+      this.$set(this.model, 'employeeRole', 'user');
+      this.$set(this.model, 'firstName', '');
+      this.$set(this.model, 'middleName', '');
+      this.$set(this.model, 'lastName', '');
+      this.$set(this.model, 'empId', '');
+      this.$set(this.model, 'expenseTypes', []);
+      this.$set(this.model, 'hireDate', '');
+      this.$set(this.model, 'id', '');
     }
   }
 };

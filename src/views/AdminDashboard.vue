@@ -26,8 +26,6 @@ export default {
   watch: {
     tableSelected: {
       handler: function(val, oldVal) {
-        console.log('val', val);
-        console.log('oldVal', oldVal);
         this.tableSelected = val;
       },
       deep: true
