@@ -58,7 +58,7 @@
     </v-flex>
     <v-flex lg4 md12 sm12>
       <!-- v-on:form-cleared="clearModel" -->
-      <expense-form :expense="expense" v-on:add="addModelToTable" v-on:update="updateModelInTable" v-on:delete="deleteModelFromTable" v-on:error="displayError"></expense-form>
+      <expense-form :expense="expense" v-on:add="addModelToTable" v-on:update="updateModelInTable" v-on:delete="deleting=true" v-on:error="displayError"></expense-form>
     </v-flex>
   </v-layout>
 </div>
@@ -289,12 +289,12 @@ export default {
         this.$set(this.status, 'color', 'green');
       }
     },
-    deleteModelFromTable() {
+    deleteModelFromTable(deletedExpense) {
       let modelIndex = _.findIndex(
         this.processedExpenses,
-        expense => expense.id === this.expense.id
+        expense => {return expense.id === deletedExpense.id; }
       );
-      this.processedExpenses.splice(modelIndex, 1);
+      this.processedExpenses = this.processedExpenses.splice(modelIndex, 1);
       this.$set(this.status, 'statusType', 'SUCCESS');
       this.$set(this.status, 'statusMessage', 'Item was successfully deleted!');
       this.$set(this.status, 'color', 'green');
