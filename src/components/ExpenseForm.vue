@@ -239,10 +239,13 @@ export default {
     async deleteExpense() {
       this.deleting = false;
       if (this.expense.id) {
+        let deletedExpense = this.expense;
         await api.deleteItem(api.EXPENSES, this.expense.id);
-        this.$emit('delete');
+        this.$emit('delete', deletedExpense);
+        console.log('delete emitted');
         this.clearForm();
       }
+      console.log('not deleted');
     },
     async submit() {
       this.submitting = false;
