@@ -127,7 +127,7 @@ export default {
   }),
   async created() {
     EventBus.$on('expensePicked', this.addExpenseToSelected);
-    EventBus.$on('confirm-reimburse', this.reminbureExpenses);
+    EventBus.$on('confirm-reimburse', this.reimburseExpenses);
     EventBus.$on('canceled-reimburse', () => (this.button_clicked = false));
     let aggregatedData = await api.getAggregate();
     let expenses = this.createExpensesForUnrolled(aggregatedData);
@@ -243,7 +243,7 @@ export default {
         };
       });
     },
-    reminbureExpenses() {
+    async reimburseExpenses() {
       this.button_clicked = false;
       let expensesToSubmit = _.map(this.selected, item => {
         return {
@@ -260,13 +260,24 @@ export default {
         };
       });
 
-      _.forEach(expensesToSubmit, expense => {
-        api
-          .updateItem(api.EXPENSES, expense.id, expense)
-          .then(this.removeExpenseFromList(this.selected));
+      // await expensesToSubmit.map(async expense => {
+      //   await api.updateItem(api.EXPENSES, expense.id, expense);
+      //   this.removeExpenseFromList(this.selected);
+      // });
+
+      await this.asyncForEach(expensesToSubmit, async expense => {
+        await api.updateItem(api.EXPENSES, expense.id, expense);
+        this.removeExpenseFromList(this.selected);
       });
+
       this.selected = [];
     },
+    async asyncForEach(array, callback) {
+      for (let index = 0; index < array.length; index++) {
+        await callback(array[index], index, array);
+      }
+    },
+
     removeExpenseFromList(selected) {
       _.forEach(this.empBudgets, item => {
         _.forEach(item.expenses, expense => {
