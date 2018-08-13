@@ -1,10 +1,10 @@
 <template>
 <v-card hover>
-  <v-card-title>
-    <h3 v-if="model.id"> Edit Expense Type </h3>
-    <h3 v-else> Create New Expense Type </h3>
-  </v-card-title>
   <v-container fluid>
+    <v-card-title>
+      <h3 v-if="model.id"> Edit Expense Type </h3>
+      <h3 v-else> Create New Expense Type </h3>
+    </v-card-title>
     <v-form ref="form" v-model="valid" lazy-validation>
       <v-text-field v-model="model.budgetName" :rules="genericRules" label="Budget Name" data-vv-name="Budget Name"></v-text-field>
       <v-text-field prefix="$" v-model="model.budget" :rules="budgetRules" label="Budget" data-vv-name="Budget"></v-text-field>
@@ -33,8 +33,8 @@
       <v-btn outline color="success " @click="submit " :disabled="!valid ">
         <icon class="mr-1 " name='save'></icon>Submit</v-btn>
     </v-form>
+    <delete-modal :activate="deleting " :type=" 'expense-type' "></delete-modal>
   </v-container>
-  <delete-modal :activate="deleting " :type=" 'expense-type' "></delete-modal>
 </v-card>
 </template>
 
@@ -50,7 +50,7 @@ export default {
         v => !!v || 'Budget amount is required',
         v => /^\d+$/.test(v) || 'Cost must be a number'
       ],
-      valid: false,
+      valid: false
     };
   },
   props: ['model'],
@@ -107,7 +107,7 @@ export default {
       this.$set(this.model, 'startDate', '');
       this.$set(this.model, 'endDate', '');
     }
-  },
+  }
 };
 </script>
 <style>

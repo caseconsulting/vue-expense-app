@@ -1,10 +1,11 @@
 <template>
 <v-card hover>
-  <v-card-title>
-    <h3 v-if="model.id"> Edit Employee </h3>
-    <h3 v-else> Create New Employee </h3>
-  </v-card-title>
   <v-container fluid>
+    <v-card-title>
+      <h3 v-if="model.id"> Edit Employee </h3>
+      <h3 v-else> Create New Employee </h3>
+    </v-card-title>
+
     <v-form ref="form" v-model="valid" lazy-validation>
 
       <!-- Name -->
@@ -35,8 +36,8 @@
       <v-btn outline color="success" @click="submit" :disabled="!valid">
         <icon class="mr-1" name="save"></icon>Submit</v-btn>
     </v-form>
+    <delete-modal :activate="deleting" :type="'employee'"></delete-modal>
   </v-container>
-  <delete-modal :activate="deleting" :type="'employee'"></delete-modal>
 </v-card>
 </template>
 
@@ -132,7 +133,7 @@ export default {
     async submit() {
       if (this.$refs.form.validate()) {
         if (this.model.id) {
-          this.model.isActive = !this.model.isActive
+          this.model.isActive = !this.model.isActive;
           let updatedEmployee = await api.updateItem(
             api.EMPLOYEES,
             this.model.id,
@@ -146,7 +147,6 @@ export default {
           this.$emit('add', newEmployee);
           this.clearForm();
         }
-
       }
     },
     async deleteEmployee() {

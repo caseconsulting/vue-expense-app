@@ -1,13 +1,14 @@
 <template>
-<div>
-  <v-layout row wrap>
-    <v-flex :lg8="userIsAdmin()" :lg12="!userIsAdmin()" md12 sm12>
-      <v-card>
+<v-layout row wrap>
+  <v-flex :lg8="userIsAdmin()" :lg12="!userIsAdmin()" md12 sm12>
+    <v-card>
+      <v-container fluid>
         <v-card-title>
           <h2>Employees</h2>
           <v-spacer></v-spacer>
           <v-text-field v-model="search" append-icon="search" label="Search" single-line hide-details></v-text-field>
         </v-card-title>
+
         <v-data-table :headers="headers" :items="employeeList" :search="search" :pagination.sync="pagination" item-key="name" class="elevation-1">
           <template slot="headers" slot-scope="props">
             <tr>
@@ -37,17 +38,18 @@
             Your search for "{{ search }}" found no results.
           </v-alert>
         </v-data-table>
+
         <v-card-actions>
           <v-checkbox :label="'Show Inactive Employees'" v-model="showAll"></v-checkbox>
         </v-card-actions>
-      </v-card>
+      </v-container>
+    </v-card>
 
-    </v-flex>
-    <v-flex v-if="userIsAdmin()" lg4 md12 sm12>
-      <employee-form :model="model" v-on:add="addModelToTable" v-on:update="updateModelInTable" v-on:delete="deleteModelFromTable"></employee-form>
-    </v-flex>
-  </v-layout>
-</div>
+  </v-flex>
+  <v-flex v-if="userIsAdmin()" lg4 md12 sm12>
+    <employee-form :model="model" v-on:add="addModelToTable" v-on:update="updateModelInTable" v-on:delete="deleteModelFromTable"></employee-form>
+  </v-flex>
+</v-layout>
 </template>
 
 <script>
@@ -79,7 +81,8 @@ export default {
       employees: [],
       filteredEmployees: [],
       errors: [],
-      headers: [{
+      headers: [
+        {
           text: 'First Name',
           value: 'firstName'
         },
@@ -152,7 +155,6 @@ export default {
       this.$set(this.model, 'empId', item.empId);
       this.$set(this.model, 'hireDate', item.hireDate);
       this.$set(this.model, 'isActive', !item.isActive);
-
     },
     clearModel() {
       this.$set(this.model, 'id', '');
@@ -164,7 +166,6 @@ export default {
       this.$set(this.model, 'empId', null);
       this.$set(this.model, 'hireDate', null);
       this.$set(this.model, 'isActive', false);
-
     },
     updateModelInTable(updatedEmployee) {
       let matchingEmployeeIndex = _.findIndex(
@@ -178,7 +179,11 @@ export default {
           this.filteredEmployees,
           employee => employee.id === updatedEmployee.id
         );
-        this.filteredEmployees.splice(matchingEmployeeIndex, 1, updatedEmployee);
+        this.filteredEmployees.splice(
+          matchingEmployeeIndex,
+          1,
+          updatedEmployee
+        );
       }
     },
     addModelToTable(newEmployee) {
@@ -207,7 +212,6 @@ export default {
         employee => employee.id === this.model.id
       );
       this.filteredEmployees.splice(modelIndex, 1);
-
     },
     changeSort(column) {
       if (this.pagination.sortBy === column) {

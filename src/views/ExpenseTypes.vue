@@ -1,8 +1,8 @@
 <template>
-<div>
-  <v-layout row wrap>
-    <v-flex xl7 lg8 md12 sm12 offset-xl1>
-      <v-card>
+<v-layout row wrap>
+  <v-flex xl7 lg8 md12 sm12 offset-xl1>
+    <v-card>
+      <v-container fluid>
         <v-card-title>
           <h2>Expense Types</h2>
           <v-spacer></v-spacer>
@@ -37,13 +37,13 @@
             Your search for "{{ search }}" found no results.
           </v-alert>
         </v-data-table>
-      </v-card>
-    </v-flex>
-    <v-flex xl3 lg4 md12 sm12>
-      <expense-type-form :model="model" v-on:add="addModelToTable" v-on:update="updateModelInTable" v-on:delete="deleteModelFromTable"></expense-type-form>
-    </v-flex>
-  </v-layout>
-</div>
+      </v-container>
+    </v-card>
+  </v-flex>
+  <v-flex xl4 lg4 md12 sm12>
+    <expense-type-form :model="model" v-on:add="addModelToTable" v-on:update="updateModelInTable" v-on:delete="deleteModelFromTable"></expense-type-form>
+  </v-flex>
+</v-layout>
 </template>
 
 <script>
@@ -66,7 +66,8 @@ export default {
       loading: false,
       expenseTypes: [],
       errors: [],
-      headers: [{
+      headers: [
+        {
           text: 'Expense Type',
           value: 'budgetName',
           sortable: false

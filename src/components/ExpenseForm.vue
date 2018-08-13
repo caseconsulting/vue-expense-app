@@ -1,11 +1,11 @@
 <template>
 <v-card hover>
-  <v-card-title>
-    <h3 v-if="expense.id && (isSuperAdmin || !isReimbursed)"> Edit Expense </h3>
-    <h3 v-else-if="expense.id && !isSuperAdmin && isReimbursed"> View Expense </h3>
-    <h3 v-else> Create New Expense </h3>
-  </v-card-title>
   <v-container fluid>
+    <v-card-title>
+      <h3 v-if="expense.id && (isSuperAdmin || !isReimbursed)"> Edit Expense </h3>
+      <h3 v-else-if="expense.id && !isSuperAdmin && isReimbursed"> View Expense </h3>
+      <h3 v-else> Create New Expense </h3>
+    </v-card-title>
     <v-form ref="form" v-model="valid" lazy-validation>
       <!--Employee picker if admin level -->
       <v-select v-if="employeeRole === 'super-admin' && this.$route.path !== '/home'" :items="employees" :rules="componentRules" :filter="customFilter" v-model="expense.userId" item-text="text" label="Employee" autocomplete></v-select>
@@ -38,9 +38,9 @@
       <v-btn v-if="" outline color="success" @click="checkCoverage" :disabled="!valid || (!isSuperAdmin && isReimbursed)">
         <icon class="mr-1" name="save"></icon>Submit</v-btn>
     </v-form>
+    <confirmation-box :activate="submitting" :expense="expense"></confirmation-box>
+    <delete-modal :activate="deleting" :type="'expense'"></delete-modal>
   </v-container>
-  <confirmation-box :activate="submitting" :expense="expense"></confirmation-box>
-  <delete-modal :activate="deleting" :type="'expense'"></delete-modal>
 </v-card>
 </template>
 

@@ -14,20 +14,22 @@
   <v-flex lg4>
     <v-flex>
       <v-card>
-        <v-card-title>
-          <div>
-            <h3 pt-2>Anniversary Date: {{getAnniversary}}</h3>
-            <div @mouseover="display = !display" @mouseleave="display = !display">
-              <div v-if="display">
-                Days Until: {{getDaysUntil}}
+        <v-container fluid>
+          <v-card-title>
+            <div>
+              <h3 pt-2>Anniversary Date: {{getAnniversary}}</h3>
+              <div @mouseover="display = !display" @mouseleave="display = !display">
+                <div v-if="display">
+                  Days Until: {{getDaysUntil}}
+                </div>
+                <div v-else>
+                  Seconds Until: {{getSecondsUntil}}
+                </div>
               </div>
-              <div v-else>
-                Seconds Until: {{getSecondsUntil}}
-              </div>
-            </div>
 
-          </div>
-        </v-card-title>
+            </div>
+          </v-card-title>
+        </v-container>
       </v-card>
     </v-flex>
   </v-flex>
@@ -108,35 +110,35 @@ export default {
     };
   },
   async created() {
-    EventBus.$on("refreshChart", this.updateData);
+    EventBus.$on('refreshChart', this.updateData);
     this.refreshBudget();
-    this.compute()
-    this.addOneSecondToActualTimeEverySecond()
+    this.compute();
+    this.addOneSecondToActualTimeEverySecond();
   },
   watch: {
     actualTime(val, oldVal) {
-      this.compute()
+      this.compute();
     }
   },
   methods: {
     addOneSecondToActualTimeEverySecond() {
-      var component = this
-      component.actualTime = moment().format('X')
-      setTimeout(function () {
-        component.addOneSecondToActualTimeEverySecond()
+      var component = this;
+      component.actualTime = moment().format('X');
+      setTimeout(function() {
+        component.addOneSecondToActualTimeEverySecond();
       }, 1000);
     },
     getDiffInSeconds() {
-      return moment("2016-10-21 22:00:00").format('X') - this.actualTime
+      return moment('2016-10-21 22:00:00').format('X') - this.actualTime;
     },
     compute() {
-      var duration = moment.duration(this.getDiffInSeconds(), "seconds")
-      this.years = duration.years() > 0 ? duration.years() : 0
-      this.months = duration.months() > 0 ? duration.months() : 0
-      this.days = duration.days() > 0 ? duration.days() : 0
-      this.hours = duration.hours() > 0 ? duration.hours() : 0
-      this.minutes = duration.minutes() > 0 ? duration.minutes() : 0
-      this.seconds = duration.seconds() > 0 ? duration.seconds() : 0
+      var duration = moment.duration(this.getDiffInSeconds(), 'seconds');
+      this.years = duration.years() > 0 ? duration.years() : 0;
+      this.months = duration.months() > 0 ? duration.months() : 0;
+      this.days = duration.days() > 0 ? duration.days() : 0;
+      this.hours = duration.hours() > 0 ? duration.hours() : 0;
+      this.minutes = duration.minutes() > 0 ? duration.minutes() : 0;
+      this.seconds = duration.seconds() > 0 ? duration.seconds() : 0;
     },
     async updateData(newData) {
       this.expenseTypeData = await api.getItem(api.SPECIAL, this.employee.id);
@@ -181,12 +183,18 @@ export default {
             if (!expenseType.odFlag) {
               reimbursed.push(expenseType.budgetObject.reimbursedAmount);
               unreimbursed.push(expenseType.budgetObject.pendingAmount);
-              let difference = expenseType.budget - expenseType.budgetObject.reimbursedAmount - expenseType.budgetObject.pendingAmount
+              let difference =
+                expenseType.budget -
+                expenseType.budgetObject.reimbursedAmount -
+                expenseType.budgetObject.pendingAmount;
               budgetDifference.push(difference);
               odReimbursed.push(0);
               odUnreimbursed.push(0);
             } else {
-              if (expenseType.budget - expenseType.budgetObject.reimbursedAmount < 0) {
+              if (
+                expenseType.budget - expenseType.budgetObject.reimbursedAmount <
+                0
+              ) {
                 let difference = 0;
                 reimbursed.push(expenseType.budget);
                 budgetDifference.push(difference);
@@ -198,13 +206,20 @@ export default {
                 budgetDifference.push(difference);
                 reimbursed.push(expenseType.budgetObject.reimbursedAmount);
                 odReimbursed.push(0);
-                let temp = expenseType.budget - expenseType.budgetObject.reimbursedAmount;
+                let temp =
+                  expenseType.budget -
+                  expenseType.budgetObject.reimbursedAmount;
                 unreimbursed.push(temp);
-                odUnreimbursed.push(expenseType.budgetObject.pendingAmount - temp);
+                odUnreimbursed.push(
+                  expenseType.budgetObject.pendingAmount - temp
+                );
               } else {
                 reimbursed.push(expenseType.budgetObject.reimbursedAmount);
                 unreimbursed.push(expenseType.budgetObject.pendingAmount);
-                let difference = expenseType.budget - expenseType.budgetObject.reimbursedAmount - expenseType.budgetObject.pendingAmount
+                let difference =
+                  expenseType.budget -
+                  expenseType.budgetObject.reimbursedAmount -
+                  expenseType.budgetObject.pendingAmount;
                 budgetDifference.push(difference);
                 odReimbursed.push(0);
                 odUnreimbursed.push(0);
@@ -217,9 +232,8 @@ export default {
             odReimbursed.push(0);
             odUnreimbursed.push(0);
           }
-        })
+        });
       }
-
 
       return {
         names: budgetNames,
@@ -253,7 +267,6 @@ export default {
             backgroundColor: '#e1e7f2',
             fill: false,
             data: this.budgets.difference
-
           },
           {
             type: 'bar',
@@ -268,7 +281,7 @@ export default {
             data: this.budgets.odUnreimbursed
           }
         ]
-      }
+      };
 
       let options = {
         scales: {
@@ -276,7 +289,7 @@ export default {
             stacked: true,
             ticks: {
               beginAtZero: true,
-              callback: function (value, index, values) {
+              callback: function(value, index, values) {
                 return value.toLocaleString('en-US', {
                   style: 'currency',
                   currency: 'USD'
@@ -295,12 +308,12 @@ export default {
         },
         tooltips: {
           callbacks: {
-            label: function (tooltipItem, data) {
+            label: function(tooltipItem, data) {
               return (
-                "$" +
+                '</script> +
                 Number(tooltipItem.yLabel)
                 .toFixed(0)
-                .replace(/./g, function (c, i, a) {
+                .replace(/./g, function(c, i, a) {
                   return i > 0 && c !== '.' && (a.length - i) % 3 === 0 ?
                     ',' + c :
                     c;
@@ -314,7 +327,7 @@ export default {
         },
         responsive: true,
         maintainAspectRatio: false
-      }
+      };
 
       return {
         dataSet: data,
@@ -326,20 +339,20 @@ export default {
       if (moment(`${month}/${day}/${year}`, 'MM/DD/YYYY', true).isValid()) {
         let now = moment();
         let year = now.year();
-        let anniversary = moment(this.hireDate, "YYYY-MM-DD");
+        let anniversary = moment(this.hireDate, 'YYYY-MM-DD');
         anniversary = anniversary.year(year);
         if (now.isAfter(anniversary)) {
           anniversary.add(1, 'years');
-          return anniversary.format("ddd. MMM D, YYYY");
+          return anniversary.format('ddd. MMM D, YYYY');
         } else {
-          return anniversary.format("ddd. MMM D, YYYY");
+          return anniversary.format('ddd. MMM D, YYYY');
         }
       }
     },
     getDaysUntil() {
       let now = moment();
       let year = now.year();
-      let anniversary = moment(this.hireDate, "YYYY-MM-DD");
+      let anniversary = moment(this.hireDate, 'YYYY-MM-DD');
       anniversary = anniversary.year(year);
       if (now.isAfter(anniversary)) {
         anniversary.add(1, 'years');
@@ -354,7 +367,7 @@ export default {
       let update = this.actualTime;
       let now = moment();
       let year = now.year();
-      let anniversary = moment(this.hireDate, "YYYY-MM-DD");
+      let anniversary = moment(this.hireDate, 'YYYY-MM-DD');
       anniversary = anniversary.year(year);
       if (now.isAfter(anniversary)) {
         anniversary.add(1, 'years');

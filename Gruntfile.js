@@ -25,8 +25,36 @@ module.exports = function(grunt) {
             dest: '/'
           }
         ]
+      },
+      test: {
+        options: {
+          bucket: 'case-consulting-expense-app-test'
+        },
+        files: [
+          {
+            expand: true,
+            cwd: 'dist/',
+            src: ['**'],
+            dest: '/'
+          }
+        ]
+      },
+      prod: {
+        options: {
+          bucket: 'case-consulting-expense-app-prod'
+        },
+        files: [
+          {
+            expand: true,
+            cwd: 'dist/',
+            src: ['**'],
+            dest: '/'
+          }
+        ]
       }
     }
   });
   grunt.registerTask('dev', 'aws_s3:dev');
+  grunt.registerTask('test', 'aws_s3:test');
+  grunt.registerTask('prod', 'aws_s3:prod');
 };

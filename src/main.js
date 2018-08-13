@@ -1,24 +1,13 @@
 import Vue from 'vue';
-import App from './App.vue';
 import router from './router';
 import store from './store';
-// import dotenv from 'dotenv';
-// dotenv.config({ path: '../' });
 
-//Vuetify
-import Vuetify from 'vuetify';
-import 'vuetify/dist/vuetify.min.css';
-Vue.use(Vuetify, {
-  theme: {
-    primary: '#68caa6',
-    radioactive: '#0ACF23'
-  }
-});
 //Moment
 import moment from 'moment';
-
-Vue.prototype.moment = moment;
-
+//Vuetify
+import Vuetify from 'vuetify';
+// import 'vuetify/dist/vuetify.min.css';
+import(/* webpackMode: "eager" */ 'vuetify/dist/vuetify.min.css');
 // BEGIN VUE AWESOME
 import 'vue-awesome/icons/regular/times-circle';
 import 'vue-awesome/icons/regular/check-circle';
@@ -39,11 +28,17 @@ import 'vue-awesome/icons/space-shuttle';
 import 'vue-awesome/icons/user-astronaut';
 import 'vue-awesome/icons/hand-holding-usd';
 import Icon from 'vue-awesome/components/Icon';
+import App from './App.vue';
+Vue.use(Vuetify, {
+  theme: {
+    primary: '#68caa6',
+    radioactive: '#0ACF23'
+  }
+});
 
+Vue.prototype.moment = moment;
 Vue.component('icon', Icon);
-// END VUE AWESOME
 window.EventBus = new Vue();
-
 new Vue({
   router,
   store,

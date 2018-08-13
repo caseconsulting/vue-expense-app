@@ -1,21 +1,21 @@
 <template>
-<div>
-  <v-layout row wrap>
-    <v-snackbar v-model="status.statusType" :color="status.color" :multi-line="true" :right="true" :timeout="5000" :top="true" :vertical="true">
-      <v-card-title headline color="white">
-        <span class="headline">{{status.statusMessage}}</span>
-      </v-card-title>
-      <v-btn color="white" flat @click="clearStatus">
-        Close
-      </v-btn>
-    </v-snackbar>
-    <v-flex lg12 md12 sm12>
-      <!-- <v-alert v-if="error" dismissible :value="error" color="error" icon="warning" outline>
+<v-layout row wrap>
+  <v-snackbar v-model="status.statusType" :color="status.color" :multi-line="true" :right="true" :timeout="5000" :top="true" :vertical="true">
+    <v-card-title headline color="white">
+      <span class="headline">{{status.statusMessage}}</span>
+    </v-card-title>
+    <v-btn color="white" flat @click="clearStatus">
+      Close
+    </v-btn>
+  </v-snackbar>
+  <v-flex lg12 md12 sm12>
+    <!-- <v-alert v-if="error" dismissible :value="error" color="error" icon="warning" outline>
         {{error.response.data.message}}
       </v-alert> -->
-    </v-flex>
-    <v-flex lg8 md12 sm12>
-      <v-card>
+  </v-flex>
+  <v-flex lg8 md12 sm12>
+    <v-card>
+      <v-container fluid>
         <v-card-title>
           <h2 v-if="isUser">{{ getUserName }}'s Expenses</h2>
           <h2 v-else>Expenses</h2>
@@ -54,16 +54,14 @@
         <v-card-actions>
           <v-checkbox v-if="isUser" :label="'Show Reimbursed Expenses'" v-model="showReimbursed"></v-checkbox>
         </v-card-actions>
-      </v-card>
-    </v-flex>
-    <v-flex lg4 md12 sm12>
-      <!-- v-on:form-cleared="clearModel" -->
-      <expense-form :expense="expense" v-on:add="addModelToTable" v-on:update="updateModelInTable" v-on:delete="deleteModelFromTable" v-on:error="displayError"></expense-form>
-    </v-flex>
-  </v-layout>
-</div>
+      </v-container>
+    </v-card>
+  </v-flex>
+  <v-flex lg4 md12 sm12>
+    <expense-form :expense="expense" v-on:add="addModelToTable" v-on:update="updateModelInTable" v-on:delete="deleteModelFromTable" v-on:error="displayError"></expense-form>
+  </v-flex>
+</v-layout>
 </template>
-
 <script>
 import api from '@/shared/api.js';
 import ExpenseForm from '../components/ExpenseForm.vue';
@@ -117,7 +115,8 @@ export default {
       processedExpenses: [],
       showReimbursed: false,
       errors: [],
-      headers: [{
+      headers: [
+        {
           text: 'Employee',
           value: 'employeeName'
         },
@@ -153,7 +152,7 @@ export default {
       return this.processedExpenses;
     },
     isAdmin() {
-      return (this.role === 'admin') || (this.role === 'super-admin');
+      return this.role === 'admin' || this.role === 'super-admin';
     },
     isUser() {
       return this.role === 'user';
@@ -165,9 +164,10 @@ export default {
       return this.isAdmin ? this.headers : this.headers.slice(1);
     },
     getUserName() {
-      return (this.processedExpenses.length === 0) ? '' : this.processedExpenses[0].employeeName;
+      return this.processedExpenses.length === 0
+        ? ''
+        : this.processedExpenses[0].employeeName;
     }
-
   },
   components: {
     ExpenseForm
@@ -225,8 +225,6 @@ export default {
       this.$set(this.expense, 'expenseTypeId', item.expenseTypeId);
       this.$set(this.expense, 'note', item.note);
       this.$set(this.expense, 'createdAt', item.createdAt);
-
-
     },
     updateModelInTable(updatedExpense) {
       let matchingExpensesIndex = _.findIndex(
@@ -234,7 +232,7 @@ export default {
         expense => expense.id === updatedExpense.id
       );
       let employeeName = '';
-      if(this.isAdmin) {
+      if (this.isAdmin) {
         console.log('admin');
         api.getItem(api.EMPLOYEES, updatedExpense.userId).then(employee => {
           employeeName = `${employee.firstName} ${employee.middleName} ${
@@ -242,9 +240,9 @@ export default {
           }`;
           this.$set(updatedExpense, 'employeeName', employeeName);
         });
-
       } else {
-        employeeName = this.processedExpenses[matchingExpensesIndex].employeeName;
+        employeeName = this.processedExpenses[matchingExpensesIndex]
+          .employeeName;
         this.$set(updatedExpense, 'employeeName', employeeName);
       }
       api
@@ -268,9 +266,9 @@ export default {
           api
             .getItem(api.EMPLOYEES, newExpense.userId)
             .then(employee => {
-              let employeeName = `${employee.firstName} ${employee.middleName} ${
-                employee.lastName
-              }`;
+              let employeeName = `${employee.firstName} ${
+                employee.middleName
+              } ${employee.lastName}`;
               this.$set(newExpense, 'employeeName', employeeName);
             })
             .catch(err => console.log(err));
@@ -292,10 +290,9 @@ export default {
       }
     },
     deleteModelFromTable(deletedExpense) {
-      let modelIndex = _.findIndex(
-        this.processedExpenses,
-        expense => {return expense.id === deletedExpense.id; }
-      );
+      let modelIndex = _.findIndex(this.processedExpenses, expense => {
+        return expense.id === deletedExpense.id;
+      });
       this.processedExpenses.splice(modelIndex, 1);
       this.$set(this.status, 'statusType', 'SUCCESS');
       this.$set(this.status, 'statusMessage', 'Item was successfully deleted!');
