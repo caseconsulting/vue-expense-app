@@ -85,10 +85,10 @@ export default {
     DeleteModal
   },
   watch: {
-    'expense.purchaseDate': function(val) {
+    'expense.purchaseDate': function (val) {
       this.purchaseDateFormatted = this.formatDate(this.expense.purchaseDate);
     },
-    'expense.reimbursedDate': function(val) {
+    'expense.reimbursedDate': function (val) {
       this.reimbursedDateFormatted = this.formatDate(
         this.expense.reimbursedDate
       );
@@ -139,12 +139,18 @@ export default {
                 //full amount reimbursed
                 this.submit();
               } else {
+                //TODO HERE
                 // not maxed out but also not fully covered
                 this.$set(this.expense, 'budget', expenseType.budget);
                 this.$set(
                   this.expense,
                   'remaining',
-                  expenseType.budget - employeeExpenseTypeBalance
+                  expenseType.budget * 2 - employeeExpenseTypeBalance
+                );
+                this.$set(
+                  this.expense,
+                  'od',
+                  true
                 );
                 this.submitting = true;
               }
@@ -153,6 +159,11 @@ export default {
               this.submit();
             }
           } else {
+            this.$set(
+              this.expense,
+              'od',
+              false
+            );
             if (expenseType.budget !== employeeExpenseTypeBalance) {
               //under budget
               if (employeeExpenseTypeBalance + cost <= expenseType.budget) {
@@ -259,7 +270,7 @@ export default {
             this.expense
           );
           this.$emit('update', updatedExpense);
-          this.clearForm();          
+          this.clearForm();
         } else {
           this.$set(this.expense, 'createdAt', moment().format('MM-DD-YYYY'));
           let newExpense = await api.createItem(api.EXPENSES, this.expense);

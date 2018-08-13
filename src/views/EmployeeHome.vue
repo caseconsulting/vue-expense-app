@@ -178,7 +178,6 @@ export default {
         _.forEach(expenseTypes, expenseType => {
           budgetNames.push(expenseType.expenseTypeName);
           if (expenseType.budgetObject) {
-            //TODO HANDEL Overdraft
             if (!expenseType.odFlag) {
               reimbursed.push(expenseType.budgetObject.reimbursedAmount);
               unreimbursed.push(expenseType.budgetObject.pendingAmount);
