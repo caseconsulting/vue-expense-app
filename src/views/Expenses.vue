@@ -38,7 +38,7 @@
             </tr>
           </template>
           <template slot="items" slot-scope="props">
-              <tr v-if="!loading && showRow(props.item)" @click="onSelect(props.item)">
+              <tr v-if="!loading && (showRow(props.item) || isAdmin)" @click="onSelect(props.item)">
                 <td v-if="isAdmin" class="text-xs-left">{{ props.item.employeeName }}</td>
                 <td class="text-xs-left">{{ props.item.budgetName }}</td>
                 <td class="text-xs-left">{{ props.item.cost ? props.item.cost : 0 | moneyValue}}</td>
@@ -52,7 +52,7 @@
           </v-alert>
         </v-data-table>
         <v-card-actions>
-          <v-checkbox :label="'Show Reimbursed Expenses'" v-model="showReimbursed"></v-checkbox>
+          <v-checkbox v-if="isUser" :label="'Show Reimbursed Expenses'" v-model="showReimbursed"></v-checkbox>
         </v-card-actions>
       </v-card>
     </v-flex>
