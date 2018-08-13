@@ -62,7 +62,7 @@
       <v-flex offset-md10>
 
         <v-fab-transition>
-          <v-btn @click="button_clicked=true" id="custom-button-color" v-show="showSubmitButton" fab dark large bottom left fixed>
+          <v-btn @click="button_clicked=true" id="custom-button-color" :loading="reimbursing" v-show="showSubmitButton" fab dark large bottom left fixed>
             <icon name="dollar-sign"></icon>
           </v-btn>
         </v-fab-transition>
@@ -96,6 +96,7 @@ export default {
   },
   data: () => ({
     loading: true,
+    reimbursing: false,
     button_clicked: false,
     everythingSelected: false,
     indeterminate: false,
@@ -259,17 +260,22 @@ export default {
           createdAt: item.createdAt
         };
       });
-
-      // await expensesToSubmit.map(async expense => {
-      //   await api.updateItem(api.EXPENSES, expense.id, expense);
-      //   this.removeExpenseFromList(this.selected);
-      // });
+      this.reimbursing = true;
+      let itemsToRemoveFromTable = [];
 
       await this.asyncForEach(expensesToSubmit, async expense => {
-        await api.updateItem(api.EXPENSES, expense.id, expense);
-        this.removeExpenseFromList(this.selected);
+        let updatedItem = await api.updateItem(
+          api.EXPENSES,
+          expense.id,
+          expense
+        );
+        itemsToRemoveFromTable.push(expense);
       });
 
+      _.forEach(itemsToRemoveFromTable, item => {
+        this.removeExpenseFromList(item);
+      });
+      this.reimbursing = false;
       this.selected = [];
     },
     async asyncForEach(array, callback) {
@@ -277,21 +283,21 @@ export default {
         await callback(array[index], index, array);
       }
     },
-
     removeExpenseFromList(selected) {
-      _.forEach(this.empBudgets, item => {
-        _.forEach(item.expenses, expense => {
-          let itemIndex = _.indexOf(selected, expense);
+      let employeeIndex = _.findIndex(
+        this.empBudgets,
+        employee => employee.userId === selected.userId
+      );
+      let expenseIndex = _.findIndex(
+        this.empBudgets[employeeIndex].expenses,
+        selected.id
+      );
+      this.empBudgets[employeeIndex].expenses.splice(expenseIndex, 1);
 
-          if (itemIndex > -1) {
-            item.expenses.splice(_.indexOf(item.expenses, expense), 1);
-          }
-        });
-      });
-
-      this.empBudgets = _.filter(this.empBudgets, item => item.expenses.length);
+      this.empBudgets = _.filter(this.empBudgets, item => item.expenses.length); //remove empty arrays
       EventBus.$emit('expenseChange', []);
     },
+
     addExpenseToSelected(expense) {
       if (_.indexOf(this.selected, expense) === -1) {
         this.selected.push(expense);
