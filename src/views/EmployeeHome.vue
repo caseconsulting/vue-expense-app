@@ -190,10 +190,13 @@ export default {
               if (expenseType.budget - expenseType.budgetObject.reimbursedAmount < 0) {
                 let difference = 0;
                 reimbursed.push(expenseType.budget);
+                budgetDifference.push(difference);
                 unreimbursed.push(0);
                 odReimbursed.push(expenseType.budgetObject.reimbursedAmount - expenseType.budget);
                 odUnreimbursed.push(expenseType.budgetObject.pendingAmount)
               } else if (expenseType.budget - expenseType.budgetObject.reimbursedAmount - expenseType.budgetObject.pendingAmount < 0) {
+                let difference = 0;
+                budgetDifference.push(difference);
                 reimbursed.push(expenseType.budgetObject.reimbursedAmount);
                 odReimbursed.push(0);
                 let temp = expenseType.budget - expenseType.budgetObject.reimbursedAmount;
