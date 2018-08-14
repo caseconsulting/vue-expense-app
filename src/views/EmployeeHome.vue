@@ -140,6 +140,17 @@ export default {
     },
     async updateData(newData) {
       this.expenseTypeData = await api.getItem(api.SPECIAL, this.employee.id);
+      this.showSnackbar();
+    },
+
+    async showSnackbar(newData) {
+      this.$set(this.status, 'statusType', 'SUCCESS');
+      this.$set(
+        this.status,
+        'statusMessage',
+        'Item was successfully submitted!'
+      );
+      this.$set(this.status, 'color', 'green');
     },
 
     clearStatus() {
@@ -162,7 +173,9 @@ export default {
       this.expenseTypeData = budgetsVar;
       this.employee = employee;
       this.loading = false;
-    }
+    },
+
+
   },
   computed: {
     budgets() {

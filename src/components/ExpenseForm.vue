@@ -291,6 +291,7 @@ export default {
             this.expense
           );
           this.$emit('update', updatedExpense);
+          EventBus.$emit('showSnackbar', newExpense);
           this.clearForm();
         } else {
           this.$set(this.expense, 'createdAt', moment().format('MM-DD-YYYY'));
@@ -298,6 +299,7 @@ export default {
           if (newExpense.id) {
             this.$set(this.expense, 'id', newExpense.id);
             this.$emit('add', newExpense);
+            EventBus.$emit('showSnackbar', newExpense);
             EventBus.$emit('refreshChart', newExpense);
             this.clearForm();
           } else {
