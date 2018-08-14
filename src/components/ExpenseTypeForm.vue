@@ -18,7 +18,6 @@
 
       <v-menu v-if="!model.recurringFlag" :close-on-content-click="true" :nudge-right="40" lazy transition="scale-transition" offset-y full-width max-width="290px" min-width="290px">
         <v-text-field slot="activator" label="End Date" hint="MM/DD/YYYY format" persistent-hint prepend-icon="event" v-model="model.endDate" :rules="genericRules"></v-text-field>
-        <v-date-picker v-model="model.endDate" :disabled="reocurringFlag" no-title></v-date-picker>
       </v-menu>
 
       <v-checkbox label='Overdraft Flag (optional)' v-model='model.odFlag'></v-checkbox>
@@ -103,7 +102,7 @@ export default {
       this.$set(this.model, 'budget', 0);
       this.$set(this.model, 'budgetName', '');
       this.$set(this.model, 'description', '');
-      this.$set(this.model, 'recurringFlag', true);
+      this.$set(this.model, 'recurringFlag', false);
       this.$set(this.model, 'startDate', '');
       this.$set(this.model, 'endDate', '');
     }
