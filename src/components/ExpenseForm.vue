@@ -132,12 +132,33 @@ export default {
         let cost = parseInt(this.expense.cost);
         if (employeeExpenseTypeBalance) {
           employeeExpenseTypeBalance = employeeExpenseTypeBalance.pendingAmount + employeeExpenseTypeBalance.reimbursedAmount;
+          let editCheck = await api.getAggregate();
+          let match = _.find(editCheck, entry => {
+            return entry.id === this.expense.id
+          })
           if (expenseType.odFlag) {
             if (2 * expenseType.budget !== employeeExpenseTypeBalance) {
               //under budget
               if (employeeExpenseTypeBalance + cost <= 2 * expenseType.budget) {
                 //full amount reimbursed
                 this.submit();
+              } else if (match) {
+                if (employeeExpenseTypeBalance + cost <= 2 * expenseType.budget + match.cost) {
+                  this.submit();
+                } else {
+                  this.$set(this.expense, 'budget', expenseType.budget);
+                  this.$set(
+                    this.expense,
+                    'remaining',
+                    expenseType.budget * 2 - employeeExpenseTypeBalance + match.cost
+                  )
+                  this.$set(
+                    this.expense,
+                    'od',
+                    true
+                  );
+                  this.submitting = true;
+                }
               } else {
                 //TODO HERE
                 // not maxed out but also not fully covered
