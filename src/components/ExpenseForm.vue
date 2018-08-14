@@ -296,7 +296,7 @@ export default {
           this.$emit('update', updatedExpense);
           }
           else {
-            this.$emit('error', updatedExpense.response.message);
+            this.$emit('error', updatedExpense.response.data.message);
           }
           this.clearForm();
         } else {
