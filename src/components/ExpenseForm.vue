@@ -285,13 +285,19 @@ export default {
           this.expense.receipt = null;
         }
         if (this.expense.id) {
+
           let updatedExpense = await api.updateItem(
             api.EXPENSES,
             this.expense.id,
             this.expense
           );
+          if(updatedExpense.id) {
+          console.log(updatedExpense);
           this.$emit('update', updatedExpense);
-          EventBus.$emit('showSnackbar', newExpense);
+          }
+          else {
+            this.$emit('error', updatedExpense.response.message);
+          }
           this.clearForm();
         } else {
           this.$set(this.expense, 'createdAt', moment().format('MM-DD-YYYY'));
