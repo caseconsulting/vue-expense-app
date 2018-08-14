@@ -111,7 +111,8 @@ export default {
       rowsPerPage: 10
     },
     selected: [],
-    headers: [{
+    headers: [
+      {
         text: 'Employee',
         value: 'compareName'
       },
@@ -289,7 +290,7 @@ export default {
       );
       let expenseIndex = _.findIndex(
         this.empBudgets[employeeIndex].expenses,
-        selected.id
+        expense => selected.id === expense.id
       );
       this.empBudgets[employeeIndex].expenses.splice(expenseIndex, 1);
 
@@ -401,9 +402,9 @@ export default {
       const query = hasValue(queryText);
       return (
         text
-        .toString()
-        .toLowerCase()
-        .indexOf(query.toString().toLowerCase()) > -1
+          .toString()
+          .toLowerCase()
+          .indexOf(query.toString().toLowerCase()) > -1
       );
     },
     defaultSort() {
@@ -411,7 +412,8 @@ export default {
 
       empBudgets.map(item => {
         for (var i = 0; i < arrayLength; i++) {
-          if (item.lastName === this.empBudgets[i].lastName) {}
+          if (item.lastName === this.empBudgets[i].lastName) {
+          }
         }
       });
     }

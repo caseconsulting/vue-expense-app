@@ -11,12 +11,12 @@
 
       <v-menu v-if="!model.recurringFlag" :rules="genericRules" :close-on-content-click="true" :nudge-right="40" lazy transition="scale-transition" offset-y full-width max-width="290px" min-width="290px">
         <v-text-field slot="activator" label="Start Date" hint="MM/DD/YYYY format" persistent-hint prepend-icon="event" v-model="model.startDate" :rules="genericRules"></v-text-field>
-        <v-date-picker v-model="model.startDate" :disabled="reocurringFlag" no-title></v-date-picker>
+        <v-date-picker v-model="model.startDate" no-title></v-date-picker>
       </v-menu>
 
       <v-menu v-if="!model.recurringFlag" :close-on-content-click="true" :nudge-right="40" lazy transition="scale-transition" offset-y full-width max-width="290px" min-width="290px">
         <v-text-field slot="activator" label="End Date" hint="MM/DD/YYYY format" persistent-hint prepend-icon="event" v-model="model.endDate" :rules="genericRules"></v-text-field>
-        <v-date-picker v-model="model.endDate" :disabled="reocurringFlag" no-title></v-date-picker>
+        <v-date-picker v-model="model.endDate" no-title></v-date-picker>
       </v-menu>
 
       <v-checkbox label='Overdraft Flag (optional)' v-model='model.odFlag'></v-checkbox>
