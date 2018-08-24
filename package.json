@@ -5,15 +5,15 @@
   "scripts": {
     "build": "vue-cli-service build",
     "cli": "vue-cli-service",
+    "deploy:dev": "vue-cli-service build && grunt dev",
+    "deploy:test": "vue-cli-service build && grunt test",
+    "deploy:prod": "vue-cli-service build && grunt prod",
     "e2e": "vue-cli-service e2e",
     "e2e:open": "vue-cli-service e2e:open",
     "inspect": "vue-cli-service inspect",
     "lint": "vue-cli-service lint",
     "serve": "vue-cli-service serve",
-    "test": "vue-cli-service test",
-    "build:dev": "vue-cli-service build && grunt dev",
-    "build:test": "vue-cli-service build && grunt test",
-    "build:prod": "vue-cli-service build && grunt prod"
+    "test": "vue-cli-service test"
   },
   "dependencies": {
     "accounting-js": "^1.1.1",

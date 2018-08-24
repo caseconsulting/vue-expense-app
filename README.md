@@ -82,3 +82,32 @@ To upgrade to the latest version of a specific Node.js module:
 ```
 yarn add <module-name> --save
 ```
+
+## Deployment
+
+To deploy to the dev environment:
+
+```
+aws s3 cp s3://case-consulting-expense-app-resources-dev/.env .env
+npm run deploy:dev
+```
+
+To deploy to the test environment:
+
+```
+aws s3 cp s3://case-consulting-expense-app-resources-test/.env .env
+npm run deploy:test
+```
+
+To deploy to the prod environment:
+
+```
+aws s3 cp s3://case-consulting-expense-app-resources-prod/.env .env
+npm run deploy:prod
+```
+
+To reset for local development, after a deployment:
+
+```
+aws s3 cp s3://case-expense-app/.env .env
+```

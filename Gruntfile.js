@@ -1,3 +1,4 @@
+/* globals module */
 module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-aws-s3');
   var aws = grunt.file.readJSON('aws-keys.json');
