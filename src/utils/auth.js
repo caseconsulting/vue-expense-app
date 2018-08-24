@@ -1,22 +1,25 @@
-/* globals process */
-
 import decode from 'jwt-decode';
 import auth0 from 'auth0-js';
+import { AUTH_CONFIG } from './auth0-variables';
 import Router from 'vue-router';
 import api from '../shared/api';
 
-const ID_TOKEN_KEY = 'id_token';
+const AUDIENCE = AUTH_CONFIG.audience;
+const CALLBACK = AUTH_CONFIG.callbackUrl;
+const CLIENT_ID = AUTH_CONFIG.clientId;
+const DOMAIN = AUTH_CONFIG.domain;
+
 const ACCESS_TOKEN_KEY = 'access_token';
-const ROLE = 'employeeRole';
-const CALLBACK = `${process.env.AUTH0_CALLBACK}/callback`;
+const ID_TOKEN_KEY = 'id_token';
 const IMG = 'profilePic'
+const ROLE = 'employeeRole';
 const SCOPE = 'openid email profile';
 
 var auth = new auth0.WebAuth({
-  clientID: 'w9Ih4cZX8Plry47ZuoAcbnwGEG4hFeZx',
-  domain: 'consultwithcase.auth0.com',
+  clientID: CLIENT_ID,
+  domain: DOMAIN,
   responseType: 'token id_token',
-  audience: 'https://consultwithcase.auth0.com/api/v2/',
+  audience: AUDIENCE,
   redirectUri: CALLBACK,
   scope: SCOPE
 });
