@@ -1,7 +1,6 @@
 /* globals module */
 module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-aws-s3');
-  var aws = grunt.file.readJSON('aws-keys.json');
   grunt.initConfig({
     aws_s3: {
       options: {
@@ -9,8 +8,6 @@ module.exports = function(grunt) {
         params: {
           CacheControl: 'max-age=600, s-maxage=300'
         },
-        accessKeyId: aws.AWSAccessKeyId,
-        secretAccessKey: aws.AWSSecretKey,
         differential: true,
         region: 'us-east-1'
       },
