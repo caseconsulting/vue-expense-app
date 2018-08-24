@@ -23,6 +23,7 @@ The following environment variables are required to support multiple environment
 
 * **API_HOSTNAME**
 * **API_PORT**
+* **NODE_ENV**
 
 **vue-cli** automatically picks up environment variables in `.env` files. Therefore, you can store these variables in a
 `.env` file in the project root directory. The `.env` file in the **case-expense-app** S3 bucket in the company AWS
