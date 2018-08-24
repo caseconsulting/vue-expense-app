@@ -52,7 +52,7 @@ module.exports = function(grunt) {
       }
     }
   });
-  grunt.registerTask('dev', 'aws_s3:dev');
-  grunt.registerTask('test', 'aws_s3:test');
-  grunt.registerTask('prod', 'aws_s3:prod');
+  grunt.registerTask('deploy:dev', 'aws_s3:dev');
+  grunt.registerTask('deploy:test', 'aws_s3:test');
+  grunt.registerTask('deploy:prod', 'aws_s3:prod');
 };

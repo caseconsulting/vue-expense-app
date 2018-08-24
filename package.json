@@ -5,9 +5,9 @@
   "scripts": {
     "build": "vue-cli-service build",
     "cli": "vue-cli-service",
-    "deploy:dev": "vue-cli-service build && grunt dev",
-    "deploy:test": "vue-cli-service build && grunt test",
-    "deploy:prod": "vue-cli-service build && grunt prod",
+    "deploy:dev": "vue-cli-service build && grunt deploy:dev",
+    "deploy:test": "vue-cli-service build && grunt deploy:test",
+    "deploy:prod": "vue-cli-service build && grunt deploy:prod",
     "e2e": "vue-cli-service e2e",
     "e2e:open": "vue-cli-service e2e:open",
     "inspect": "vue-cli-service inspect",
