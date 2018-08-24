@@ -8,7 +8,7 @@ import api from '../shared/api';
 const ID_TOKEN_KEY = 'id_token';
 const ACCESS_TOKEN_KEY = 'access_token';
 const ROLE = 'employeeRole';
-const CALLBACK = `${process.env.VUE_APP_HOSTNAME}/callback`;
+const CALLBACK = `${process.env.AUTH0_CALLBACK}/callback`;
 const IMG = 'profilePic'
 const SCOPE = 'openid email profile';
 

@@ -14,22 +14,22 @@ yarn install
 
 In order to use **Auth0** authentication, you will need to define some environment variables:
 
-* **VUE_APP_AUTH0_API_ID**
-* **VUE_APP_AUTH0_CLIENT_ID**
-* **VUE_APP_AUTH0_DOMAIN**
-* **VUE_APP_HOSTNAME**
+* **AUTH0_API_ID**
+* **AUTH0_CALLBACK**
+* **AUTH0_CLIENT_ID**
+* **AUTH0_DOMAIN**
 
 The following environment variables are required to support multiple environments:
 
-* **VUE_APP_API_HOSTNAME**
-* **VUE_APP_API_PORT**
+* **API_HOSTNAME**
+* **API_PORT**
 
 **vue-cli** automatically picks up environment variables in `.env` files. Therefore, you can store these variables in a
-`.env` file in the project root directory. The `.env.local` file in the **case-expense-app** S3 bucket in the company
-AWS account has up-to-date values to run locally. Download this file to the project root directory:
+`.env` file in the project root directory. The `.env` file in the **case-expense-app** S3 bucket in the company AWS
+account has up-to-date values to run locally. Download this file to the project root directory:
 
 ```
-aws s3 cp s3://case-expense-app/vue/.env.local .env
+aws s3 cp s3://case-expense-app/.env .env
 ```
 
 ## Application tasks
