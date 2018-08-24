@@ -14,9 +14,9 @@ yarn install
 
 In order to use **Auth0** authentication, you will need to define four environment variables:
 
+* **VUE_APP_AUTH0_API_ID**
 * **VUE_APP_AUTH0_CLIENT_ID**
 * **VUE_APP_AUTH0_DOMAIN**
-* **VUE_APP_AUTH0_API_ID**
 * **VUE_APP_HOSTNAME**
 
 **vue-cli** automatically picks up environment variables in `.env` files. Therefore, you can store these variables in a
