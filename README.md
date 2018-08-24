@@ -28,7 +28,7 @@ The following environment variables are required to support multiple environment
 **vue-cli** automatically picks up environment variables in `.env` files. Any variables that begin with **VUE_APP_**
 will be included in the client bundle created by webpack. They will be accessible from your code using **process.env**.
 At build time, webpack will replace these references with their corresponding values. For more information, go to:
-  https://cli.vuejs.org/guide/mode-and-env.html#using-env-variables-in-client-side-code
+https://cli.vuejs.org/guide/mode-and-env.html#using-env-variables-in-client-side-code.
 The `.env` file in the **case-expense-app** S3 bucket in the company AWS account has up-to-date values to run locally.
 Download this file to the project root directory:
 
