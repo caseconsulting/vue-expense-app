@@ -1,3 +1,5 @@
+/* globals process */
+
 import decode from 'jwt-decode';
 import auth0 from 'auth0-js';
 import Router from 'vue-router';
@@ -9,8 +11,6 @@ const ROLE = 'employeeRole';
 const CALLBACK = `${process.env.VUE_APP_HOSTNAME}/callback`;
 const IMG = 'profilePic'
 const SCOPE = 'openid email profile';
-
-
 
 var auth = new auth0.WebAuth({
   clientID: 'w9Ih4cZX8Plry47ZuoAcbnwGEG4hFeZx',
@@ -79,9 +79,11 @@ function clearAccessToken() {
 function clearRole() {
   localStorage.removeItem(ROLE);
 }
+
 function clearProfile() {
   localStorage.removeItem(IMG);
 }
+
 // Helper function that will allow us to extract the access_token and id_token
 function getParameterByName(name) {
   let match = RegExp('[#&]' + name + '=([^&]*)').exec(window.location.hash);
@@ -134,12 +136,8 @@ function isTokenExpired(token) {
   return expirationDate < new Date();
 }
 
-// export function setRole(employeeRole) {
-//   localStorage.setItem(ROLE, employeeRole);
-// }
 export async function setRole() {
   let employeeRole = await api.getRole();
-  console.log(employeeRole);
   localStorage.setItem(ROLE, employeeRole);
 }
 
