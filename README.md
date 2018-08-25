@@ -21,8 +21,8 @@ In order to use **Auth0** authentication, you will need to define some environme
 
 The following environment variables are required to support multiple environments:
 
-* **API_HOSTNAME**
-* **API_PORT**
+* **VUE_APP_API_HOSTNAME**
+* **VUE_APP_API_PORT**
 * **NODE_ENV**
 
 **vue-cli** automatically picks up environment variables in `.env` files. Any variables that begin with **VUE_APP_**
