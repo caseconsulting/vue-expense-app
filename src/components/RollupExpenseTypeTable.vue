@@ -45,7 +45,7 @@
             </td>
             <td class="text-xs-center">{{ props.item.employeeName }}</td>
             <td class="text-xs-center">{{ props.item.budgetName }}</td>
-            <td  class="text-xs-center" id="money-team">{{ getExpenseTotal(props.item.expenses) | moneyValue }}</td>
+            <td class="text-xs-center" id="money-team">{{ getExpenseTotal(props.item.expenses) | moneyValue }}</td>
           </tr>
         </template>
 
@@ -144,12 +144,8 @@ export default {
     filteredItems() {
       return _.filter(this.empBudgets, expense => {
         let cost = this.getExpenseTotal(expense.expenses);
-        expense.compareName = `${expense.lastName}${expense.firstName}${
-          expense.middleName
-        }${expense.budgetName}`;
-        expense.compareBudget = `${expense.budgetName}${expense.lastName}${
-          expense.middleName
-        }${expense.firstName}`;
+        expense.compareName = `${expense.lastName}${expense.firstName}${expense.middleName}${expense.budgetName}`;
+        expense.compareBudget = `${expense.budgetName}${expense.lastName}${expense.middleName}${expense.firstName}`;
         expense.compareCost = `${cost}`;
 
         if (!this.employee && !this.expenseType) {
@@ -159,10 +155,7 @@ export default {
         } else if (!this.expenseType && this.employee) {
           return expense.userId === this.employee;
         } else {
-          return (
-            expense.userId === this.employee &&
-            expense.expenseTypeId === this.expenseType
-          );
+          return expense.userId === this.employee && expense.expenseTypeId === this.expenseType;
         }
       });
     },
@@ -199,10 +192,7 @@ export default {
     },
     modifyAggregateDate(aggregatedData, expenses) {
       //Remove undefined stuff
-      aggregatedData = _.filter(
-        aggregatedData,
-        item => item !== undefined && !item.reimbursedDate
-      );
+      aggregatedData = _.filter(aggregatedData, item => item !== undefined && !item.reimbursedDate);
       //Maps each expense and only returns if not reimbursed
       aggregatedData = _.forEach(aggregatedData, expense => {
         expense.key = `${expense.userId}${expense.expenseTypeId}`;
@@ -216,18 +206,11 @@ export default {
           return this.matchingEmployeeAndExpenseType(expense, item);
         }));
       });
-      aggregatedData = _.uniqWith(
-        aggregatedData,
-        (el1, el2) => el1.key === el2.key
-      );
+      aggregatedData = _.uniqWith(aggregatedData, (el1, el2) => el1.key === el2.key);
       return aggregatedData;
     },
     matchingEmployeeAndExpenseType(expense, item) {
-      return (
-        expense.userId === item.userId &&
-        expense.expenseTypeId === item.expenseTypeId &&
-        !expense.reimbursedDate
-      );
+      return expense.userId === item.userId && expense.expenseTypeId === item.expenseTypeId && !expense.reimbursedDate;
     },
     constructAutoComplete(aggregatedData) {
       this.employees = _.map(aggregatedData, data => {
@@ -264,11 +247,7 @@ export default {
       let itemsToRemoveFromTable = [];
 
       await this.asyncForEach(expensesToSubmit, async expense => {
-        let updatedItem = await api.updateItem(
-          api.EXPENSES,
-          expense.id,
-          expense
-        );
+        let updatedItem = await api.updateItem(api.EXPENSES, expense.id, expense);
         itemsToRemoveFromTable.push(expense);
       });
 
@@ -284,14 +263,8 @@ export default {
       }
     },
     removeExpenseFromList(selected) {
-      let employeeIndex = _.findIndex(
-        this.empBudgets,
-        employee => employee.userId === selected.userId
-      );
-      let expenseIndex = _.findIndex(
-        this.empBudgets[employeeIndex].expenses,
-        expense => selected.id === expense.id
-      );
+      let employeeIndex = _.findIndex(this.empBudgets, employee => employee.userId === selected.userId);
+      let expenseIndex = _.findIndex(this.empBudgets[employeeIndex].expenses, expense => selected.id === expense.id);
       this.empBudgets[employeeIndex].expenses.splice(expenseIndex, 1);
 
       this.empBudgets = _.filter(this.empBudgets, item => item.expenses.length); //remove empty arrays
@@ -380,19 +353,14 @@ export default {
     },
     async getEmployeeName(expense) {
       let employee = await api.getItem(api.EMPLOYEES, expense.userId);
-      expense.employeeName = `${employee.firstName} ${employee.middleName} ${
-        employee.lastName
-      }`;
+      expense.employeeName = `${employee.firstName} ${employee.middleName} ${employee.lastName}`;
       expense.lastName = employee.lastName;
       expense.firstName = employee.firstName;
       expense.selected = false;
       return expense;
     },
     async getExpenseTypeName(expense) {
-      let expenseType = await api.getItem(
-        api.EXPENSE_TYPES,
-        expense.expenseTypeId
-      );
+      let expenseType = await api.getItem(api.EXPENSE_TYPES, expense.expenseTypeId);
       expense.budgetName = expenseType.budgetName;
       return expense;
     },
