@@ -389,10 +389,6 @@ export default {
 };
 </script>
 <style>
-.card {
-  display: flex;
-}
-
 #money-team {
   color: green;
 }
