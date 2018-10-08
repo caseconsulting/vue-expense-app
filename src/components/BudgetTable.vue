@@ -13,7 +13,7 @@
             <v-divider></v-divider>
             <v-list dense>
               <v-list-tile>
-                <v-list-tile-content class="bold">Remaining Budget:</v-list-tile-content>
+                <v-list-tile-content class="bold">Remaining:</v-list-tile-content>
                 <v-list-tile-content v-if="getRedColor(props.item)" class="align-end bold red--text">{{ remaining(props.item)| moneyValue }}</v-list-tile-content>
                 <v-list-tile-content v-else class="align-end bold black--text">{{ remaining(props.item)| moneyValue }}</v-list-tile-content>
               </v-list-tile>

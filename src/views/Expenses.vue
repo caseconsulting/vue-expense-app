@@ -220,7 +220,7 @@ export default {
       this.$set(this.expense, 'reimbursedDate', item.reimbursedDate);
       this.$set(this.expense, 'employeeName', item.employeeName);
       this.$set(this.expense, 'description', item.description);
-      this.$set(this.expense, 'cost', item.cost);
+      this.$set(this.expense, 'cost', sprintf("%.2f", item.cost));
       this.$set(this.expense, 'userId', item.userId);
       this.$set(this.expense, 'expenseTypeId', item.expenseTypeId);
       this.$set(this.expense, 'note', item.note);

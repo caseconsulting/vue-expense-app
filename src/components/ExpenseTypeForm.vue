@@ -70,7 +70,7 @@ function parseDate(date) {
 }
 
 async function submit(newExpenseType) {
-  this.model.budget = parseInt(this.model.budget);
+  this.model.budget = parseFloat(this.model.budget);
   if (!this.model.odFlag) {
     this.model.odFlag = false;
   }
@@ -97,7 +97,10 @@ export default {
     return {
       deleting: false,
       genericRules: [v => !!v || 'This field is required'],
-      budgetRules: [v => !!v || 'Budget amount is required', v => /^\d+$/.test(v) || 'Cost must be a number'],
+      budgetRules: [
+        v => !!v || 'Budget amount is required',
+        v => /^[+-]?[0-9]{1,3}(?:,?[0-9]{3})*(?:\.[0-9]{2})?$/.test(v) || 'Budget amount must be a number with two decimal digits.'
+      ],
       dateRules: [v => !!v || 'Date must be valid. MM/DD/YYYY format'],
       valid: false,
       startDateFormatted: null,

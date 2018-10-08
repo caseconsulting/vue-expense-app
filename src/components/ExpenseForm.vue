@@ -46,6 +46,7 @@
 </template>
 
 <script>
+var sprintf = require("sprintf-js").sprintf
 import api from '@/shared/api.js';
 import { getRole } from '@/utils/auth';
 import moment from 'moment';
@@ -294,8 +295,8 @@ export default {
       descriptionRules: [v => !!v || 'Description is required'],
       costRules: [
         v => !!v || 'Cost is required',
-        v => parseInt(v, 10) > 0 || 'Cost must be greater than 0',
-        v => /^\d+$/.test(v) || 'Cost must be a number'
+        v => parseFloat(v, 10) > 0 || 'Cost must be greater than 0',
+        v => /^[+-]?[0-9]{1,3}(?:,?[0-9]{3})*(?:\.[0-9]{2})?$/.test(v) || 'Cost must be a number with two decimal digits.'
       ],
       componentRules: [v => !!v || 'Something must be selected'],
       dateRules: [v => !!v || 'Date must be valid. MM/DD/YYYY format'],

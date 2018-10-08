@@ -262,7 +262,7 @@ export default {
           },
           {
             type: 'bar',
-            label: 'Remaining Budget',
+            label: 'Remaining',
             backgroundColor: '#e1e7f2',
             fill: false,
             data: this.budgets.difference
@@ -312,7 +312,8 @@ export default {
               return (
                 "$" +
                 Number(tooltipItem.yLabel)
-                .toFixed(0)
+                // toFixed sets the number of decimal points to show
+                .toFixed(2)
                 .replace(/./g, function(c, i, a) {
                   return i > 0 && c !== '.' && (a.length - i) % 3 === 0 ?
                     ',' + c :
