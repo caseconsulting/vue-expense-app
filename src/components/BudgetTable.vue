@@ -13,9 +13,8 @@
             <v-divider></v-divider>
             <v-list dense>
               <v-list-tile>
-                <v-list-tile-content class="bold">Remaining:</v-list-tile-content>
-                <v-list-tile-content v-if="getRedColor(props.item)" class="align-end bold red--text">{{ remaining(props.item)| moneyValue }}</v-list-tile-content>
-                <v-list-tile-content v-else class="align-end bold black--text">{{ remaining(props.item)| moneyValue }}</v-list-tile-content>
+                <v-list-tile-content>Budget:</v-list-tile-content>
+                <v-list-tile-content class="align-end">{{ props.item.budget | moneyValue }}</v-list-tile-content>
               </v-list-tile>
               <v-list-tile>
                 <v-list-tile-content>Reimbursed:</v-list-tile-content>
@@ -26,8 +25,9 @@
                 <v-list-tile-content class="align-end">{{ getUnreimbursed(props.item) | moneyValue }}</v-list-tile-content>
               </v-list-tile>
               <v-list-tile>
-                <v-list-tile-content>Budget:</v-list-tile-content>
-                <v-list-tile-content class="align-end">{{ props.item.budget | moneyValue }}</v-list-tile-content>
+                <v-list-tile-content class="bold">Remaining:</v-list-tile-content>
+                <v-list-tile-content v-if="getRedColor(props.item)" class="align-end bold red--text">{{ remaining(props.item)| moneyValue }}</v-list-tile-content>
+                <v-list-tile-content v-else class="align-end bold black--text">{{ remaining(props.item)| moneyValue }}</v-list-tile-content>
               </v-list-tile>
               <v-list-tile>
                 <v-list-tile-content>Overdraft:</v-list-tile-content>
@@ -54,20 +54,20 @@ export default {
   filters: {
     moneyValue: value => {
       return `${new Intl.NumberFormat('en-US', {
-         style: 'currency',
-         currency: 'USD',
-         minimumFractionDigits: 2,
-         maximumFractionDigits: 2
-       }).format(value)}`;
+        style: 'currency',
+        currency: 'USD',
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      }).format(value)}`;
     }
   },
   methods: {
     odFlagMessage(expenseType) {
       let isOverdraftAllowed = expenseType.odFlag;
-      return (isOverdraftAllowed ? "Allowed" : "Not Allowed");
+      return isOverdraftAllowed ? 'Allowed' : 'Not Allowed';
     },
     getRedColor(expenseType) {
-      return (this.remaining(expenseType) <= 0) && !expenseType.odFlag;
+      return this.remaining(expenseType) <= 0 && !expenseType.odFlag;
     },
     remaining(item) {
       if (item.budgetObject) {
@@ -77,22 +77,19 @@ export default {
     },
     getReimbursed(item) {
       if (item.budgetObject) {
-        return item.budgetObject.reimbursedAmount
+        return item.budgetObject.reimbursedAmount;
       }
-      return 0
+      return 0;
     },
     getUnreimbursed(item) {
       if (item.budgetObject) {
-        return item.budgetObject.pendingAmount
+        return item.budgetObject.pendingAmount;
       }
-      return 0
+      return 0;
     }
   },
-  computed: {
-
-  }
-
-}
+  computed: {}
+};
 </script>
 <style>
 .bold {
