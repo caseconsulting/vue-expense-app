@@ -8,6 +8,10 @@
     <v-form ref="form" v-model="valid" lazy-validation>
       <v-text-field v-model="model.budgetName" :rules="genericRules" label="Budget Name" data-vv-name="Budget Name"></v-text-field>
       <v-text-field prefix="$" v-model="model.budget" :rules="budgetRules" label="Budget" data-vv-name="Budget"></v-text-field>
+      
+      <v-checkbox label='Overdraft Flag (optional)' v-model='model.odFlag'></v-checkbox>
+
+      <v-checkbox label='Recurring (optional)' v-model='model.recurringFlag'></v-checkbox>
 
       <v-menu v-if="!model.recurringFlag" :rules="genericRules" :close-on-content-click="true" :nudge-right="40" lazy transition="scale-transition" offset-y full-width max-width="290px" min-width="290px">
         <v-text-field slot="activator" v-model="startDateFormatted" :rules="dateRules" label="Start Date" hint="MM/DD/YYYY format" persistent-hint prepend-icon="event" @blur="model.startDate = parseDate(startDateFormatted)"></v-text-field>
@@ -18,8 +22,6 @@
         <v-text-field slot="activator" v-model="endDateFormatted" :rules="dateRules" label="End Date" hint="MM/DD/YYYY format" persistent-hint prepend-icon="event" @blur="model.endDate = parseDate(endDateFormatted)"></v-text-field>
         <v-date-picker v-model="model.endDate" no-title></v-date-picker>
       </v-menu>
-
-      <v-checkbox label='Overdraft Flag (optional)' v-model='model.odFlag'></v-checkbox>
 
       <v-text-field v-model='model.description' :rules="genericRules " label="Notes " data-vv-name="Description " multi-line></v-text-field>
 
@@ -52,6 +54,7 @@ function clearForm() {
   this.$set(this.model, 'recurringFlag', false);
   this.$set(this.model, 'startDate', '');
   this.$set(this.model, 'endDate', '');
+  this.$set(this.model, 'odFlag', false);
 }
 
 async function deleteExpenseType() {
@@ -99,7 +102,9 @@ export default {
       genericRules: [v => !!v || 'This field is required'],
       budgetRules: [
         v => !!v || 'Budget amount is required',
-        v => /^[+-]?[0-9]{1,3}(?:,?[0-9]{3})*(?:\.[0-9]{2})?$/.test(v) || 'Budget amount must be a number with two decimal digits.'
+        v =>
+          /^[+-]?[0-9]{1,3}(?:,?[0-9]{3})*(?:\.[0-9]{2})?$/.test(v) ||
+          'Budget amount must be a number with two decimal digits.'
       ],
       dateRules: [v => !!v || 'Date must be valid. MM/DD/YYYY format'],
       valid: false,

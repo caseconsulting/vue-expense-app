@@ -27,8 +27,14 @@
                 <td class="text-xs-left">{{ props.item.budgetName }}</td>
                 <td class="text-xs-left">{{ props.item.budget | moneyValue}}</td>
                 <td class="text-xs-left">{{ props.item.description }}</td>
+                <td class="text-xs-left">{{ props.item.startDate }}</td>
+                <td class="text-xs-left">{{ props.item.endDate }}</td>
                 <td class="text-xs-center">
                   <icon v-if="props.item.odFlag" id="marks" class="mr-1" name="regular/check-circle"></icon>
+                  <icon v-else class="mr-1" id="marks" name="regular/times-circle"></icon>
+                </td>
+                <td class="text-xs-center">
+                  <icon v-if="props.item.recurringFlag" id="marks" class="mr-1" name="regular/check-circle"></icon>
                   <icon v-else class="mr-1" id="marks" name="regular/times-circle"></icon>
                 </td>
               </tr>
@@ -66,7 +72,8 @@ export default {
       loading: false,
       expenseTypes: [],
       errors: [],
-      headers: [{
+      headers: [
+        {
           text: 'Expense Type',
           value: 'budgetName',
           sortable: false
@@ -80,8 +87,21 @@ export default {
           value: 'description'
         },
         {
+          text: 'Start Date',
+          value: 'startDate'
+        },
+        {
+          text: 'End Date',
+          value: 'endDate'
+        },
+        {
           text: 'Overdraft Allowed',
           value: 'odFlag',
+          sortable: false
+        },
+        {
+          text: 'Recurring',
+          value: 'recurringFlag',
           sortable: false
         }
       ],
@@ -116,7 +136,7 @@ export default {
 
     onSelect(item) {
       this.$set(this.model, 'id', item.id);
-      this.$set(this.model, 'budget', sprintf("%.2f", item.budget));
+      this.$set(this.model, 'budget', sprintf('%.2f', item.budget));
       this.$set(this.model, 'budgetName', item.budgetName);
       this.$set(this.model, 'description', item.description);
       this.$set(this.model, 'odFlag', item.odFlag);
@@ -142,20 +162,14 @@ export default {
       this.expenseTypes.splice(matchingExpensesIndex, 1, updatedExpenseType);
     },
     addModelToTable(newExpenseType) {
-      let matchingExpenses = _.filter(
-        this.expenseTypes,
-        expenseType => expenseType.id === newExpenseType.id
-      );
+      let matchingExpenses = _.filter(this.expenseTypes, expenseType => expenseType.id === newExpenseType.id);
 
       if (!matchingExpenses.length) {
         this.expenseTypes.push(newExpenseType);
       }
     },
     deleteModelFromTable() {
-      let modelIndex = _.findIndex(
-        this.expenseTypes,
-        expense => expense.id === this.model.id
-      );
+      let modelIndex = _.findIndex(this.expenseTypes, expense => expense.id === this.model.id);
       this.expenseTypes.splice(modelIndex, 1);
     },
     changeSort(column) {

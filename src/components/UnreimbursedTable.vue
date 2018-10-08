@@ -1,68 +1,66 @@
 <template>
-<div>
-  <v-card>
-    <v-container fluid>
-      <v-card-title>
-        <h3>Unreimbursed Expenses</h3>
-        <v-spacer></v-spacer>
-        <v-select :items="employees" :filter="customFilter" v-model="employee" item-text="text" label="Filter by Employee" clearable autocomplete></v-select>
-        <v-select :items="expenseTypes" :filter="customFilter" v-model="expenseType" item-text="text" label="Filter by Expense Type" clearable autocomplete></v-select>
-      </v-card-title>
+  <div>
+    <v-card>
+      <v-container fluid>
+        <v-card-title>
+          <h3>Unreimbursed Expenses</h3>
+          <v-spacer></v-spacer>
+          <v-select :items="employees" :filter="customFilter" v-model="employee" item-text="text" label="Filter by Employee" clearable autocomplete></v-select>
+          <v-select :items="expenseTypes" :filter="customFilter" v-model="expenseType" item-text="text" label="Filter by Expense Type" clearable autocomplete></v-select>
+        </v-card-title>
 
-      <v-data-table v-model="selected" :headers="headers" :items="filteredItems" :pagination.sync="pagination" select-all item-key="id" class="elevation-1">
-        <template slot="headers" slot-scope="props">
-      <tr>
-        <th>
-          <v-checkbox
-            :input-value="props.all"
-            :indeterminate="props.indeterminate"
-            primary
-            hide-details
-            @click.native="toggleAll"
-          ></v-checkbox>
-        </th>
-        <th
-          v-for="header in props.headers"
-          :key="header.text"
-          :class="['column sortable', pagination.descending ? 'desc' : 'asc', header.value === pagination.sortBy ? 'active' : '']"
-          @click="changeSort(header.value)"
-        >
-          <v-icon small>arrow_upward</v-icon>
-          {{ header.text }}
-        </th>
-      </tr>
-    </template>
-        <template slot="items" slot-scope="props">
-      <tr v-if="!props.item.reimbursedDate" :active="props.selected" @click="props.selected = !props.selected">
-        <td>
-          <v-checkbox
-            :input-value="props.selected"
-            primary
-            hide-details
-          ></v-checkbox>
-        </td>
-        <td class="text-xs-left">{{ props.item.employeeName }}</td>
-        <td class="text-xs-left">{{ props.item.budgetName }}</td>
-        <td class="text-xs-left">{{ props.item.cost }}</td>
-        <td class="text-xs-left">{{ props.item.purchaseDate }}</td>
-        <td class="text-xs-left">{{ props.item.description }}</td>
-      </tr>
-    </template>
-      </v-data-table>
-      <v-flex offset-md11>
+        <v-data-table v-model="selected" :headers="headers" :items="filteredItems" :pagination.sync="pagination" select-all item-key="id" class="elevation-1">
+          <template slot="headers" slot-scope="props">
+            <tr>
+              <th>
+                <v-checkbox
+                  :input-value="props.all"
+                  :indeterminate="props.indeterminate"
+                  primary
+                  hide-details
+                  @click.native="toggleAll"
+                ></v-checkbox>
+              </th>
+              <th
+                v-for="header in props.headers"
+                :key="header.text"
+                :class="['column sortable', pagination.descending ? 'desc' : 'asc', header.value === pagination.sortBy ? 'active' : '']"
+                @click="changeSort(header.value)"
+              >
+                <v-icon small>arrow_upward</v-icon>
+                {{ header.text }}
+              </th>
+            </tr>
+          </template>
 
-        <v-fab-transition>
-          <v-btn id="custom-button-color" v-show="selected.length>0" fab dark small absolute bottom left>
-            <icon name="dollar-sign"></icon>
-          </v-btn>
-        </v-fab-transition>
+          <template slot="items" slot-scope="props">
+            <tr v-if="!props.item.reimbursedDate" :active="props.selected" @click="props.selected = !props.selected">
+              <td>
+                <v-checkbox
+                  :input-value="props.selected"
+                  primary
+                  hide-details
+                ></v-checkbox>
+              </td>
+              <td class="text-xs-left">{{ props.item.employeeName }}</td>
+              <td class="text-xs-left">{{ props.item.budgetName }}</td>
+              <td class="text-xs-left">{{ props.item.cost }}</td>
+              <td class="text-xs-left">{{ props.item.purchaseDate }}</td>
+              <td class="text-xs-left">{{ props.item.description }}</td>
+            </tr>
+          </template>
+        </v-data-table>
 
-
-
-      </v-flex>
-    </v-container>
-  </v-card>
-</div>
+        <v-flex offset-md11>
+          <v-fab-transition>
+            <v-btn id="custom-button-color" v-show="selected.length>0" fab dark small absolute bottom left>
+              <icon name="dollar-sign"></icon>
+            </v-btn>
+          </v-fab-transition>
+        </v-flex>
+      </v-container>
+    </v-card>
+  </div>
 </template>
 
 <script>
@@ -82,7 +80,8 @@ export default {
       sortBy: 'employeeName'
     },
     selected: [],
-    headers: [{
+    headers: [
+      {
         text: 'Employee',
         value: 'employeeName'
       },
@@ -111,9 +110,7 @@ export default {
     let employees = await api.getItems(api.EMPLOYEES);
     this.employees = await employees.map(employee => {
       return {
-        text: `${employee.firstName} ${employee.middleName} ${
-          employee.lastName
-        }`,
+        text: `${employee.firstName} ${employee.middleName} ${employee.lastName}`,
         value: employee.id
       };
     });
@@ -150,10 +147,7 @@ export default {
         } else if (!this.expenseType && this.employee) {
           return expense.userId === this.employee;
         } else {
-          return (
-            expense.userId === this.employee &&
-            expense.expenseTypeId === this.expenseType
-          );
+          return expense.userId === this.employee && expense.expenseTypeId === this.expenseType;
         }
       });
     }
@@ -173,16 +167,11 @@ export default {
     },
     async getEmployeeName(expense) {
       let employee = await api.getItem(api.EMPLOYEES, expense.userId);
-      expense.employeeName = `${employee.firstName} ${employee.middleName} ${
-        employee.lastName
-      }`;
+      expense.employeeName = `${employee.firstName} ${employee.middleName} ${employee.lastName}`;
       return expense;
     },
     async getExpenseTypeName(expense) {
-      let expenseType = await api.getItem(
-        api.EXPENSE_TYPES,
-        expense.expenseTypeId
-      );
+      let expenseType = await api.getItem(api.EXPENSE_TYPES, expense.expenseTypeId);
       expense.budgetName = expenseType.budgetName;
       return expense;
     },
@@ -192,9 +181,9 @@ export default {
       const query = hasValue(queryText);
       return (
         text
-        .toString()
-        .toLowerCase()
-        .indexOf(query.toString().toLowerCase()) > -1
+          .toString()
+          .toLowerCase()
+          .indexOf(query.toString().toLowerCase()) > -1
       );
     }
   }
