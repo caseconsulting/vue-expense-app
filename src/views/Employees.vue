@@ -1,55 +1,56 @@
 <template>
-<v-layout row wrap>
-  <v-flex :lg8="userIsAdmin()" :lg12="!userIsAdmin()" md12 sm12>
-    <v-card>
-      <v-container fluid>
-        <v-card-title>
-          <h2>Employees</h2>
-          <v-spacer></v-spacer>
-          <v-text-field v-model="search" append-icon="search" label="Search" single-line hide-details></v-text-field>
-        </v-card-title>
+  <v-layout row wrap>
+    <v-flex :lg8="userIsAdmin()" :lg12="!userIsAdmin()" md12 sm12>
+      <v-card>
+        <v-container fluid>
+          <v-card-title>
+            <h2>Employees</h2>
+            <v-spacer></v-spacer>
+            <v-text-field v-model="search" append-icon="search" label="Search" single-line hide-details></v-text-field>
+          </v-card-title>
 
-        <v-data-table :headers="headers" :items="employeeList" :search="search" :pagination.sync="pagination" item-key="name" class="elevation-1">
-          <template slot="headers" slot-scope="props">
-            <tr>
-              <th class="text-xs-left"
-                v-for="header in props.headers"
-                :key="header.text"
-                :class="['column sortable', pagination.descending ? 'desc' : 'asc', header.value === pagination.sortBy ? 'active' : '']"
-                @click="changeSort(header.value)"
-              >
-                {{ header.text }}
-                <v-icon small>arrow_upward</v-icon>
-              </th>
-            </tr>
-          </template>
-          <template slot="items" slot-scope="props">
+          <v-data-table :headers="headers" :items="employeeList" :search="search" :pagination.sync="pagination" item-key="name" class="elevation-1">
+            <template slot="headers" slot-scope="props">
+              <tr>
+                <th class="text-xs-left"
+                  v-for="header in props.headers"
+                  :key="header.text"
+                  :class="['column sortable', pagination.descending ? 'desc' : 'asc', header.value === pagination.sortBy ? 'active' : '']"
+                  @click="changeSort(header.value)"
+                >
+                  {{ header.text }}
+                  <v-icon small>arrow_upward</v-icon>
+                </th>
+              </tr>
+            </template>
+
+            <template slot="items" slot-scope="props">
               <tr @click="onSelect(props.item)">
+                <td class="text-xs-left">{{ props.item.empId }}</td>
                 <td class="text-xs-left">{{ props.item.firstName }}</td>
                 <td class="text-xs-left">{{ props.item.lastName }}</td>
                 <td class="text-xs-left">{{ props.item.hireDate | dateFormat }}</td>
-                <td class="text-xs-left">{{ props.item.empId }}</td>
                 <td class="text-xs-left">{{ props.item.email }}</td>
                 <td class="text-xs-left">{{ isInActive(props.item)}}</td>
               </tr>
             </template>
 
-          <v-alert slot="no-results" :value="true" color="error" icon="warning">
-            Your search for "{{ search }}" found no results.
-          </v-alert>
-        </v-data-table>
+            <v-alert slot="no-results" :value="true" color="error" icon="warning">
+              Your search for "{{ search }}" found no results.
+            </v-alert>
+          </v-data-table>
 
-        <v-card-actions>
-          <v-checkbox :label="'Show Inactive Employees'" v-model="showAll"></v-checkbox>
-        </v-card-actions>
-      </v-container>
-    </v-card>
+          <v-card-actions>
+            <v-checkbox :label="'Show Inactive Employees'" v-model="showAll"></v-checkbox>
+          </v-card-actions>
+        </v-container>
+      </v-card>
+    </v-flex>
 
-  </v-flex>
-  <v-flex v-if="userIsAdmin()" lg4 md12 sm12>
-    <employee-form :model="model" v-on:add="addModelToTable" v-on:update="updateModelInTable" v-on:delete="deleteModelFromTable"></employee-form>
-  </v-flex>
-</v-layout>
+    <v-flex v-if="userIsAdmin()" lg4 md12 sm12>
+      <employee-form :model="model" v-on:add="addModelToTable" v-on:update="updateModelInTable" v-on:delete="deleteModelFromTable"></employee-form>
+    </v-flex>
+  </v-layout>
 </template>
 
 <script>
@@ -58,24 +59,24 @@ import {
   setAccessToken,
   getAccessToken,
   getRole
-} from '@/utils/auth';
-import api from '@/shared/api.js';
-import EmployeeForm from '../components/EmployeeForm.vue';
-import moment from 'moment';
-import _ from 'lodash';
+} from "@/utils/auth";
+import api from "@/shared/api.js";
+import EmployeeForm from "../components/EmployeeForm.vue";
+import moment from "moment";
+import _ from "lodash";
 export default {
   filters: {
     dateFormat: value => {
       if (value) {
-        return moment(value).format('MMM Do, YYYY');
+        return moment(value).format("MMM Do, YYYY");
       } else {
-        return '';
+        return "";
       }
     }
   },
   data() {
     return {
-      search: '',
+      search: "",
       loading: false,
       showAll: false,
       employees: [],
@@ -83,40 +84,40 @@ export default {
       errors: [],
       headers: [
         {
-          text: 'First Name',
-          value: 'firstName'
+          text: "Employee ID",
+          value: "empId"
         },
         {
-          text: 'Last Name',
-          value: 'lastName'
+          text: "First Name",
+          value: "firstName"
         },
         {
-          text: 'Hire Date',
-          value: 'hireDate'
+          text: "Last Name",
+          value: "lastName"
         },
         {
-          text: 'Employee ID',
-          value: 'empId'
+          text: "Hire Date",
+          value: "hireDate"
         },
         {
-          text: 'Email',
-          value: 'email'
+          text: "Email",
+          value: "email"
         },
         {
-          text: ''
+          text: ""
         }
       ],
       pagination: {
-        sortBy: 'lastName',
+        sortBy: "empId",
         rowsPerPage: 10
       },
       model: {
-        id: '',
-        firstName: '',
-        middleName: '',
-        lastName: '',
-        email: '@consultwithcase.com',
-        employeeRole: 'user',
+        id: "",
+        firstName: "",
+        middleName: "",
+        lastName: "",
+        email: "@consultwithcase.com",
+        employeeRole: "user",
         empId: null,
         hireDate: null,
         isActive: false
@@ -132,10 +133,10 @@ export default {
 
   methods: {
     isInActive(employee) {
-      return employee.isActive ? '' : 'Not Active';
+      return employee.isActive ? "" : "Not Active";
     },
     userIsAdmin() {
-      return getRole() === 'super-admin';
+      return getRole() === "super-admin";
     },
     async refreshEmployees() {
       this.loading = true;
@@ -146,26 +147,26 @@ export default {
       this.loading = false;
     },
     onSelect(item) {
-      this.$set(this.model, 'id', item.id);
-      this.$set(this.model, 'firstName', item.firstName);
-      this.$set(this.model, 'middleName', item.middleName);
-      this.$set(this.model, 'lastName', item.lastName);
-      this.$set(this.model, 'email', item.email);
-      this.$set(this.model, 'employeeRole', item.employeeRole);
-      this.$set(this.model, 'empId', item.empId);
-      this.$set(this.model, 'hireDate', item.hireDate);
-      this.$set(this.model, 'isActive', !item.isActive);
+      this.$set(this.model, "id", item.id);
+      this.$set(this.model, "firstName", item.firstName);
+      this.$set(this.model, "middleName", item.middleName);
+      this.$set(this.model, "lastName", item.lastName);
+      this.$set(this.model, "email", item.email);
+      this.$set(this.model, "employeeRole", item.employeeRole);
+      this.$set(this.model, "empId", item.empId);
+      this.$set(this.model, "hireDate", item.hireDate);
+      this.$set(this.model, "isActive", !item.isActive);
     },
     clearModel() {
-      this.$set(this.model, 'id', '');
-      this.$set(this.model, 'firstName', '');
-      this.$set(this.model, 'middleName', '');
-      this.$set(this.model, 'lastName', '');
-      this.$set(this.model, 'email', '@consultwithcase.com');
-      this.$set(this.model, 'employeeRole', 'user');
-      this.$set(this.model, 'empId', null);
-      this.$set(this.model, 'hireDate', null);
-      this.$set(this.model, 'isActive', false);
+      this.$set(this.model, "id", "");
+      this.$set(this.model, "firstName", "");
+      this.$set(this.model, "middleName", "");
+      this.$set(this.model, "lastName", "");
+      this.$set(this.model, "email", "@consultwithcase.com");
+      this.$set(this.model, "employeeRole", "user");
+      this.$set(this.model, "empId", null);
+      this.$set(this.model, "hireDate", null);
+      this.$set(this.model, "isActive", false);
     },
     updateModelInTable(updatedEmployee) {
       let matchingEmployeeIndex = _.findIndex(
