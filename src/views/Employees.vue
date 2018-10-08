@@ -48,35 +48,30 @@
     </v-flex>
 
     <v-flex v-if="userIsAdmin()" lg4 md12 sm12>
-      <employee-form :model="model" v-on:add="addModelToTable" v-on:update="updateModelInTable" v-on:delete="deleteModelFromTable"></employee-form>
+      <employee-form :model="model" v-on:add="addModelToTable" v-on:update="updateModelInTable" v-on:delete="deleteModelFromTable" style="position: sticky; top: 79px;"></employee-form>
     </v-flex>
   </v-layout>
 </template>
 
 <script>
-import {
-  setIdToken,
-  setAccessToken,
-  getAccessToken,
-  getRole
-} from "@/utils/auth";
-import api from "@/shared/api.js";
-import EmployeeForm from "../components/EmployeeForm.vue";
-import moment from "moment";
-import _ from "lodash";
+import { setIdToken, setAccessToken, getAccessToken, getRole } from '@/utils/auth';
+import api from '@/shared/api.js';
+import EmployeeForm from '../components/EmployeeForm.vue';
+import moment from 'moment';
+import _ from 'lodash';
 export default {
   filters: {
     dateFormat: value => {
       if (value) {
-        return moment(value).format("MMM Do, YYYY");
+        return moment(value).format('MMM Do, YYYY');
       } else {
-        return "";
+        return '';
       }
     }
   },
   data() {
     return {
-      search: "",
+      search: '',
       loading: false,
       showAll: false,
       employees: [],
@@ -84,40 +79,40 @@ export default {
       errors: [],
       headers: [
         {
-          text: "Employee ID",
-          value: "empId"
+          text: 'Employee ID',
+          value: 'empId'
         },
         {
-          text: "First Name",
-          value: "firstName"
+          text: 'First Name',
+          value: 'firstName'
         },
         {
-          text: "Last Name",
-          value: "lastName"
+          text: 'Last Name',
+          value: 'lastName'
         },
         {
-          text: "Hire Date",
-          value: "hireDate"
+          text: 'Hire Date',
+          value: 'hireDate'
         },
         {
-          text: "Email",
-          value: "email"
+          text: 'Email',
+          value: 'email'
         },
         {
-          text: ""
+          text: ''
         }
       ],
       pagination: {
-        sortBy: "empId",
-        rowsPerPage: 10
+        sortBy: 'empId',
+        rowsPerPage: -1
       },
       model: {
-        id: "",
-        firstName: "",
-        middleName: "",
-        lastName: "",
-        email: "@consultwithcase.com",
-        employeeRole: "user",
+        id: '',
+        firstName: '',
+        middleName: '',
+        lastName: '',
+        email: '@consultwithcase.com',
+        employeeRole: 'user',
         empId: null,
         hireDate: null,
         isActive: false
@@ -133,10 +128,10 @@ export default {
 
   methods: {
     isInActive(employee) {
-      return employee.isActive ? "" : "Not Active";
+      return employee.isActive ? '' : 'Not Active';
     },
     userIsAdmin() {
-      return getRole() === "super-admin";
+      return getRole() === 'super-admin';
     },
     async refreshEmployees() {
       this.loading = true;
@@ -147,51 +142,38 @@ export default {
       this.loading = false;
     },
     onSelect(item) {
-      this.$set(this.model, "id", item.id);
-      this.$set(this.model, "firstName", item.firstName);
-      this.$set(this.model, "middleName", item.middleName);
-      this.$set(this.model, "lastName", item.lastName);
-      this.$set(this.model, "email", item.email);
-      this.$set(this.model, "employeeRole", item.employeeRole);
-      this.$set(this.model, "empId", item.empId);
-      this.$set(this.model, "hireDate", item.hireDate);
-      this.$set(this.model, "isActive", !item.isActive);
+      this.$set(this.model, 'id', item.id);
+      this.$set(this.model, 'firstName', item.firstName);
+      this.$set(this.model, 'middleName', item.middleName);
+      this.$set(this.model, 'lastName', item.lastName);
+      this.$set(this.model, 'email', item.email);
+      this.$set(this.model, 'employeeRole', item.employeeRole);
+      this.$set(this.model, 'empId', item.empId);
+      this.$set(this.model, 'hireDate', item.hireDate);
+      this.$set(this.model, 'isActive', !item.isActive);
     },
     clearModel() {
-      this.$set(this.model, "id", "");
-      this.$set(this.model, "firstName", "");
-      this.$set(this.model, "middleName", "");
-      this.$set(this.model, "lastName", "");
-      this.$set(this.model, "email", "@consultwithcase.com");
-      this.$set(this.model, "employeeRole", "user");
-      this.$set(this.model, "empId", null);
-      this.$set(this.model, "hireDate", null);
-      this.$set(this.model, "isActive", false);
+      this.$set(this.model, 'id', '');
+      this.$set(this.model, 'firstName', '');
+      this.$set(this.model, 'middleName', '');
+      this.$set(this.model, 'lastName', '');
+      this.$set(this.model, 'email', '@consultwithcase.com');
+      this.$set(this.model, 'employeeRole', 'user');
+      this.$set(this.model, 'empId', null);
+      this.$set(this.model, 'hireDate', null);
+      this.$set(this.model, 'isActive', false);
     },
     updateModelInTable(updatedEmployee) {
-      let matchingEmployeeIndex = _.findIndex(
-        this.employees,
-        employee => employee.id === updatedEmployee.id
-      );
+      let matchingEmployeeIndex = _.findIndex(this.employees, employee => employee.id === updatedEmployee.id);
       this.employees.splice(matchingEmployeeIndex, 1, updatedEmployee);
 
       if (updatedEmployee.isActive) {
-        matchingEmployeeIndex = _.findIndex(
-          this.filteredEmployees,
-          employee => employee.id === updatedEmployee.id
-        );
-        this.filteredEmployees.splice(
-          matchingEmployeeIndex,
-          1,
-          updatedEmployee
-        );
+        matchingEmployeeIndex = _.findIndex(this.filteredEmployees, employee => employee.id === updatedEmployee.id);
+        this.filteredEmployees.splice(matchingEmployeeIndex, 1, updatedEmployee);
       }
     },
     addModelToTable(newEmployee) {
-      let matchingEmployee = _.filter(
-        this.employees,
-        employee => employee.id === newEmployee.id
-      );
+      let matchingEmployee = _.filter(this.employees, employee => employee.id === newEmployee.id);
 
       if (!matchingEmployee.length) {
         if (newEmployee.isActive) {
@@ -203,15 +185,9 @@ export default {
       }
     },
     deleteModelFromTable() {
-      let modelIndex = _.findIndex(
-        this.employees,
-        employee => employee.id === this.model.id
-      );
+      let modelIndex = _.findIndex(this.employees, employee => employee.id === this.model.id);
       this.employees.splice(modelIndex, 1);
-      modelIndex = _.findIndex(
-        this.filteredEmployees,
-        employee => employee.id === this.model.id
-      );
+      modelIndex = _.findIndex(this.filteredEmployees, employee => employee.id === this.model.id);
       this.filteredEmployees.splice(modelIndex, 1);
     },
     changeSort(column) {
