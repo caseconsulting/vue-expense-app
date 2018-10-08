@@ -46,9 +46,62 @@ import api from '@/shared/api.js';
 import moment from 'moment';
 import DeleteModal from './DeleteModal.vue';
 import _ from 'lodash';
-import {
-  getRole
-} from '@/utils/auth';
+import { getRole } from '@/utils/auth';
+import dateUtils from '@/shared/dateUtils';
+
+function clearForm() {
+  this.$refs.form.reset();
+  this.employeeRoleFormatted = 'User';
+  this.$set(this.model, 'email', '@consultwithcase.com');
+  this.$set(this.model, 'employeeRole', 'user');
+  this.$set(this.model, 'firstName', '');
+  this.$set(this.model, 'middleName', '');
+  this.$set(this.model, 'lastName', '');
+  this.$set(this.model, 'empId', '');
+  this.$set(this.model, 'expenseTypes', []);
+  this.$set(this.model, 'hireDate', '');
+  this.$set(this.model, 'id', '');
+}
+
+async function deleteEmployee() {
+  this.deleting = false;
+  await api.deleteItem(api.EMPLOYEES, this.model.id);
+  this.$emit('delete');
+  this.clearForm();
+}
+
+function formatDate(date) {
+  return dateUtils.formatDate(date);
+}
+
+function formatRole(employeeRole) {
+  return _.kebabCase(employeeRole);
+}
+
+function parseDate(date) {
+  return dateUtils.parseDate(date);
+}
+
+async function submit() {
+  if (this.$refs.form.validate()) {
+    if (this.model.id) {
+      this.model.isActive = !this.model.isActive;
+      let updatedEmployee = await api.updateItem(api.EMPLOYEES, this.model.id, this.model);
+      this.$emit('update', updatedEmployee);
+      this.clearForm();
+    } else {
+      let newEmployee = await api.createItem(api.EMPLOYEES, this.model);
+      this.$set(this.model, 'id', newEmployee.id);
+      this.$emit('add', newEmployee);
+      this.clearForm();
+    }
+  }
+}
+
+function userIsAdmin() {
+  return getRole() === 'super-admin';
+}
+
 export default {
   data() {
     return {
@@ -63,14 +116,10 @@ export default {
       emailRules: [
         v => !!v || 'Email is required',
         v =>
-        /^(([^<>()\[\]\\.,;:\s@#"]+(\.[^<>()\[\]\\.,;:\s@#"]+)*)|(".+"))@consultwithcase.com/.test(
-          v
-        ) || 'Not a valid @consultwithcase email address'
+          /^(([^<>()\[\]\\.,;:\s@#"]+(\.[^<>()\[\]\\.,;:\s@#"]+)*)|(".+"))@consultwithcase.com/.test(v) ||
+          'Not a valid @consultwithcase email address'
       ],
-      numberRules: [
-        v => !!v || 'Employee ID is required',
-        v => /^\d+$/.test(v) || 'Cost must be a number'
-      ],
+      numberRules: [v => !!v || 'Employee ID is required', v => /^\d+$/.test(v) || 'Cost must be a number'],
       dateRules: [v => !!v || 'Date must be valid. MM/DD/YYYY format'],
       valid: false
     };
@@ -92,82 +141,13 @@ export default {
     DeleteModal
   },
   methods: {
-    formatRole(employeeRole) {
-      return _.kebabCase(employeeRole);
-    },
-    formatDate(date) {
-      if (!date) return null;
-      else {
-        const [year, month, day] = date.split('-');
-        if (moment(`${month}/${day}/${year}`, 'MM/DD/YYYY', true).isValid()) {
-          return `${month}/${day}/${year}`;
-        } else {
-          return null;
-        }
-      }
-    },
-    parseDate(date) {
-      if (!date) return null;
-      else {
-        const [month, day, year] = date.split('/');
-        if (month != undefined && day != undefined && year != undefined) {
-          if (year <= 40) {
-            return `${year.padStart(4, '20')}-${month.padStart(
-              2,
-              '0'
-            )}-${day.padStart(2, '0')}`;
-          } else {
-            return `${year.padStart(4, '19')}-${month.padStart(
-              2,
-              '0'
-            )}-${day.padStart(2, '0')}`;
-          }
-        } else {
-          return date;
-        }
-      }
-    },
-    userIsAdmin() {
-      return getRole() === 'super-admin';
-    },
-    async submit() {
-      if (this.$refs.form.validate()) {
-        if (this.model.id) {
-          this.model.isActive = !this.model.isActive;
-          let updatedEmployee = await api.updateItem(
-            api.EMPLOYEES,
-            this.model.id,
-            this.model
-          );
-          this.$emit('update', updatedEmployee);
-          this.clearForm();
-        } else {
-          let newEmployee = await api.createItem(api.EMPLOYEES, this.model);
-          this.$set(this.model, 'id', newEmployee.id);
-          this.$emit('add', newEmployee);
-          this.clearForm();
-        }
-      }
-    },
-    async deleteEmployee() {
-      this.deleting = false;
-      await api.deleteItem(api.EMPLOYEES, this.model.id);
-      this.$emit('delete');
-      this.clearForm();
-    },
-    clearForm() {
-      this.$refs.form.reset();
-      this.employeeRoleFormatted = 'User';
-      this.$set(this.model, 'email', '@consultwithcase.com');
-      this.$set(this.model, 'employeeRole', 'user');
-      this.$set(this.model, 'firstName', '');
-      this.$set(this.model, 'middleName', '');
-      this.$set(this.model, 'lastName', '');
-      this.$set(this.model, 'empId', '');
-      this.$set(this.model, 'expenseTypes', []);
-      this.$set(this.model, 'hireDate', '');
-      this.$set(this.model, 'id', '');
-    }
+    clearForm,
+    deleteEmployee,
+    formatDate,
+    formatRole,
+    parseDate,
+    submit,
+    userIsAdmin
   }
 };
 </script>

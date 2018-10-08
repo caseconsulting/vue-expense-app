@@ -10,12 +10,12 @@
       <v-text-field prefix="$" v-model="model.budget" :rules="budgetRules" label="Budget" data-vv-name="Budget"></v-text-field>
 
       <v-menu v-if="!model.recurringFlag" :rules="genericRules" :close-on-content-click="true" :nudge-right="40" lazy transition="scale-transition" offset-y full-width max-width="290px" min-width="290px">
-        <v-text-field slot="activator" label="Start Date" hint="MM/DD/YYYY format" persistent-hint prepend-icon="event" v-model="model.startDate" :rules="genericRules"></v-text-field>
+        <v-text-field slot="activator" v-model="startDateFormatted" :rules="dateRules" label="Start Date" hint="MM/DD/YYYY format" persistent-hint prepend-icon="event" @blur="model.startDate = parseDate(startDateFormatted)"></v-text-field>
         <v-date-picker v-model="model.startDate" no-title></v-date-picker>
       </v-menu>
 
       <v-menu v-if="!model.recurringFlag" :close-on-content-click="true" :nudge-right="40" lazy transition="scale-transition" offset-y full-width max-width="290px" min-width="290px">
-        <v-text-field slot="activator" label="End Date" hint="MM/DD/YYYY format" persistent-hint prepend-icon="event" v-model="model.endDate" :rules="genericRules"></v-text-field>
+        <v-text-field slot="activator" v-model="endDateFormatted" :rules="dateRules" label="End Date" hint="MM/DD/YYYY format" persistent-hint prepend-icon="event" @blur="model.endDate = parseDate(endDateFormatted)"></v-text-field>
         <v-date-picker v-model="model.endDate" no-title></v-date-picker>
       </v-menu>
 
@@ -39,16 +39,69 @@
 <script>
 import api from '@/shared/api.js';
 import DeleteModal from './DeleteModal.vue';
+import moment from 'moment';
+import dateUtils from '@/shared/dateUtils';
+
+// METHODS
+function clearForm() {
+  this.$refs.form.reset();
+  this.$set(this.model, 'id', '');
+  this.$set(this.model, 'budget', 0);
+  this.$set(this.model, 'budgetName', '');
+  this.$set(this.model, 'description', '');
+  this.$set(this.model, 'recurringFlag', false);
+  this.$set(this.model, 'startDate', '');
+  this.$set(this.model, 'endDate', '');
+}
+
+async function deleteExpenseType() {
+  this.deleting = false;
+  await api.deleteItem(api.EXPENSE_TYPES, this.model.id);
+  this.$emit('delete');
+  this.clearForm();
+}
+
+function formatDate(date) {
+  return dateUtils.formatDate(date);
+}
+
+function parseDate(date) {
+  return dateUtils.parseDate(date);
+}
+
+async function submit(newExpenseType) {
+  this.model.budget = parseInt(this.model.budget);
+  if (!this.model.odFlag) {
+    this.model.odFlag = false;
+  }
+  if (this.$refs.form.validate()) {
+    if (this.model.recurringFlag) {
+      this.$set(this.model, 'startDate', null);
+      this.$set(this.model, 'endDate', null);
+    }
+    if (this.model.id) {
+      let newExpenseType = await api.updateItem(api.EXPENSE_TYPES, this.model.id, this.model);
+
+      this.$emit('update', newExpenseType);
+    } else {
+      let newExpenseType = await api.createItem(api.EXPENSE_TYPES, this.model);
+      this.$set(this.model, 'id', newExpenseType.id);
+      this.$emit('add', newExpenseType);
+    }
+    this.clearForm();
+  }
+}
+
 export default {
   data() {
     return {
       deleting: false,
       genericRules: [v => !!v || 'This field is required'],
-      budgetRules: [
-        v => !!v || 'Budget amount is required',
-        v => /^\d+$/.test(v) || 'Cost must be a number'
-      ],
-      valid: false
+      budgetRules: [v => !!v || 'Budget amount is required', v => /^\d+$/.test(v) || 'Cost must be a number'],
+      dateRules: [v => !!v || 'Date must be valid. MM/DD/YYYY format'],
+      valid: false,
+      startDateFormatted: null,
+      endDateFormatted: null
     };
   },
   props: ['model'],
@@ -60,50 +113,18 @@ export default {
     EventBus.$on('confirm-delete-expense-type', this.deleteExpenseType);
   },
   methods: {
-    async submit(newExpenseType) {
-      this.model.budget = parseInt(this.model.budget);
-      if (!this.model.odFlag) {
-        this.model.odFlag = false;
-      }
-      if (this.$refs.form.validate()) {
-        if (this.model.recurringFlag) {
-          this.$set(this.model, 'startDate', null);
-          this.$set(this.model, 'endDate', null);
-        }
-        if (this.model.id) {
-          let newExpenseType = await api.updateItem(
-            api.EXPENSE_TYPES,
-            this.model.id,
-            this.model
-          );
-
-          this.$emit('update', newExpenseType);
-        } else {
-          let newExpenseType = await api.createItem(
-            api.EXPENSE_TYPES,
-            this.model
-          );
-          this.$set(this.model, 'id', newExpenseType.id);
-          this.$emit('add', newExpenseType);
-        }
-        this.clearForm();
-      }
+    clearForm,
+    deleteExpenseType,
+    parseDate,
+    formatDate,
+    submit
+  },
+  watch: {
+    'model.startDate': function(val) {
+      this.startDateFormatted = this.formatDate(this.model.startDate);
     },
-    async deleteExpenseType() {
-      this.deleting = false;
-      await api.deleteItem(api.EXPENSE_TYPES, this.model.id);
-      this.$emit('delete');
-      this.clearForm();
-    },
-    clearForm() {
-      this.$refs.form.reset();
-      this.$set(this.model, 'id', '');
-      this.$set(this.model, 'budget', 0);
-      this.$set(this.model, 'budgetName', '');
-      this.$set(this.model, 'description', '');
-      this.$set(this.model, 'recurringFlag', false);
-      this.$set(this.model, 'startDate', '');
-      this.$set(this.model, 'endDate', '');
+    'model.endDate': function(val) {
+      this.endDateFormatted = this.formatDate(this.model.endDate);
     }
   }
 };
