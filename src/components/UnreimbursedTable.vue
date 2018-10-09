@@ -65,6 +65,7 @@
 
 <script>
 import api from '@/shared/api.js';
+import employeeUtils from '@/shared/employeeUtils';
 import _ from 'lodash';
 
 export default {
@@ -110,7 +111,7 @@ export default {
     let employees = await api.getItems(api.EMPLOYEES);
     this.employees = await employees.map(employee => {
       return {
-        text: `${employee.firstName} ${employee.middleName} ${employee.lastName}`,
+        text: employeeUtils.fullName(employee),
         value: employee.id
       };
     });
@@ -167,7 +168,7 @@ export default {
     },
     async getEmployeeName(expense) {
       let employee = await api.getItem(api.EMPLOYEES, expense.userId);
-      expense.employeeName = `${employee.firstName} ${employee.middleName} ${employee.lastName}`;
+      expense.employeeName = employeeUtils.fullName(employee);
       return expense;
     },
     async getExpenseTypeName(expense) {

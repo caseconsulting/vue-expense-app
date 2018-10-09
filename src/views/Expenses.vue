@@ -64,6 +64,7 @@
 </template>
 <script>
 import api from '@/shared/api.js';
+import employeeUtils from '@/shared/employeeUtils';
 import ExpenseForm from '../components/ExpenseForm.vue';
 import moment from 'moment';
 import _ from 'lodash';
@@ -187,7 +188,7 @@ export default {
     },
     async getEmployeeName(expense) {
       let employee = await api.getItem(api.EMPLOYEES, expense.userId);
-      expense.employeeName = `${employee.firstName} ${employee.middleName} ${employee.lastName}`;
+      expense.employeeName = employeeUtils.fullName(employee);
       return expense;
     },
     async getExpenseTypeName(expense) {
@@ -225,7 +226,7 @@ export default {
       if (this.isAdmin) {
         console.log('admin');
         api.getItem(api.EMPLOYEES, updatedExpense.userId).then(employee => {
-          employeeName = `${employee.firstName} ${employee.middleName} ${employee.lastName}`;
+          employeeName = employeeUtils.fullName(employee);
           this.$set(updatedExpense, 'employeeName', employeeName);
         });
       } else {
@@ -248,7 +249,7 @@ export default {
           api
             .getItem(api.EMPLOYEES, newExpense.userId)
             .then(employee => {
-              let employeeName = `${employee.firstName} ${employee.middleName} ${employee.lastName}`;
+              let employeeName = employeeUtils.fullName(employee);
               this.$set(newExpense, 'employeeName', employeeName);
             })
             .catch(err => console.log(err));

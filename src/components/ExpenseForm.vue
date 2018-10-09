@@ -66,6 +66,7 @@ import ConfirmationBox from './ConfirmationBox.vue';
 import DeleteModal from './DeleteModal.vue';
 import _ from 'lodash';
 import dateUtils from '@/shared/dateUtils';
+import employeeUtils from '@/shared/employeeUtils';
 
 // METHODS
 async function checkCoverage() {
@@ -276,7 +277,7 @@ async function created() {
       let employees = await api.getItems(api.EMPLOYEES);
       this.employees = employees.map(employee => {
         return {
-          text: `${employee.firstName} ${employee.middleName} ${employee.lastName}`,
+          text: employeeUtils.fullName(employee),
           value: employee.id
         };
       });

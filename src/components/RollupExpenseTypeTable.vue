@@ -75,6 +75,7 @@
 
 <script>
 import api from '@/shared/api.js';
+import employeeUtils from '@/shared/employeeUtils';
 import UnrolledTableInfo from './UnrolledTableInfo.vue';
 import ReimburseModal from './ReimburseModal.vue';
 import _ from 'lodash';
@@ -353,7 +354,7 @@ export default {
     },
     async getEmployeeName(expense) {
       let employee = await api.getItem(api.EMPLOYEES, expense.userId);
-      expense.employeeName = `${employee.firstName} ${employee.middleName} ${employee.lastName}`;
+      expense.employeeName = employeeUtils.fullName(employee);
       expense.lastName = employee.lastName;
       expense.firstName = employee.firstName;
       expense.selected = false;
