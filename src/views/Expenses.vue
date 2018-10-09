@@ -164,9 +164,7 @@ export default {
       return this.isAdmin ? this.headers : this.headers.slice(1);
     },
     getUserName() {
-      return this.processedExpenses.length === 0
-        ? ''
-        : this.processedExpenses[0].employeeName;
+      return this.processedExpenses.length === 0 ? '' : this.processedExpenses[0].employeeName;
     }
   },
   components: {
@@ -189,16 +187,11 @@ export default {
     },
     async getEmployeeName(expense) {
       let employee = await api.getItem(api.EMPLOYEES, expense.userId);
-      expense.employeeName = `${employee.firstName} ${employee.middleName} ${
-        employee.lastName
-      }`;
+      expense.employeeName = `${employee.firstName} ${employee.middleName} ${employee.lastName}`;
       return expense;
     },
     async getExpenseTypeName(expense) {
-      let expenseType = await api.getItem(
-        api.EXPENSE_TYPES,
-        expense.expenseTypeId
-      );
+      let expenseType = await api.getItem(api.EXPENSE_TYPES, expense.expenseTypeId);
       expense.budgetName = expenseType.budgetName;
       return expense;
     },
@@ -220,72 +213,53 @@ export default {
       this.$set(this.expense, 'reimbursedDate', item.reimbursedDate);
       this.$set(this.expense, 'employeeName', item.employeeName);
       this.$set(this.expense, 'description', item.description);
-      this.$set(this.expense, 'cost', sprintf("%.2f", item.cost));
+      this.$set(this.expense, 'cost', sprintf('%.2f', item.cost));
       this.$set(this.expense, 'userId', item.userId);
       this.$set(this.expense, 'expenseTypeId', item.expenseTypeId);
       this.$set(this.expense, 'note', item.note);
       this.$set(this.expense, 'createdAt', item.createdAt);
     },
     updateModelInTable(updatedExpense) {
-      let matchingExpensesIndex = _.findIndex(
-        this.processedExpenses,
-        expense => expense.id === updatedExpense.id
-      );
+      let matchingExpensesIndex = _.findIndex(this.processedExpenses, expense => expense.id === updatedExpense.id);
       let employeeName = '';
       if (this.isAdmin) {
         console.log('admin');
         api.getItem(api.EMPLOYEES, updatedExpense.userId).then(employee => {
-          employeeName = `${employee.firstName} ${employee.middleName} ${
-            employee.lastName
-          }`;
+          employeeName = `${employee.firstName} ${employee.middleName} ${employee.lastName}`;
           this.$set(updatedExpense, 'employeeName', employeeName);
         });
       } else {
-        employeeName = this.processedExpenses[matchingExpensesIndex]
-          .employeeName;
+        employeeName = this.processedExpenses[matchingExpensesIndex].employeeName;
         this.$set(updatedExpense, 'employeeName', employeeName);
       }
-      api
-        .getItem(api.EXPENSE_TYPES, updatedExpense.expenseTypeId)
-        .then(expenseType => {
-          this.$set(updatedExpense, 'budgetName', expenseType.budgetName);
-        });
+      api.getItem(api.EXPENSE_TYPES, updatedExpense.expenseTypeId).then(expenseType => {
+        this.$set(updatedExpense, 'budgetName', expenseType.budgetName);
+      });
       this.processedExpenses.splice(matchingExpensesIndex, 1, updatedExpense);
       this.$set(this.status, 'statusType', 'SUCCESS');
       this.$set(this.status, 'statusMessage', 'Item was successfully updated!');
       this.$set(this.status, 'color', 'green');
     },
     addModelToTable(newExpense) {
-      let matchingExpenses = _.filter(
-        this.processedExpenses,
-        expense => expense.id === newExpense.id
-      );
+      let matchingExpenses = _.filter(this.processedExpenses, expense => expense.id === newExpense.id);
 
       if (!matchingExpenses.length) {
         if (this.isAdmin) {
           api
             .getItem(api.EMPLOYEES, newExpense.userId)
             .then(employee => {
-              let employeeName = `${employee.firstName} ${
-                employee.middleName
-              } ${employee.lastName}`;
+              let employeeName = `${employee.firstName} ${employee.middleName} ${employee.lastName}`;
               this.$set(newExpense, 'employeeName', employeeName);
             })
             .catch(err => console.log(err));
         }
-        api
-          .getItem(api.EXPENSE_TYPES, newExpense.expenseTypeId)
-          .then(expenseType => {
-            this.$set(newExpense, 'budgetName', expenseType.budgetName);
-          });
+        api.getItem(api.EXPENSE_TYPES, newExpense.expenseTypeId).then(expenseType => {
+          this.$set(newExpense, 'budgetName', expenseType.budgetName);
+        });
 
         this.processedExpenses.push(newExpense);
         this.$set(this.status, 'statusType', 'SUCCESS');
-        this.$set(
-          this.status,
-          'statusMessage',
-          'Item was successfully submitted!'
-        );
+        this.$set(this.status, 'statusMessage', 'Item was successfully submitted!');
         this.$set(this.status, 'color', 'green');
       }
     },
