@@ -1,10 +1,9 @@
 <template>
 <div id="budget-table">
+  <!-- <v-card> -->
   <v-container fluid grid-list-md>
-
-
     <v-data-iterator :items="employee" content-tag="v-layout" hide-actions row wrap>
-      <v-flex slot="item" slot-scope="props" xs12 sm6 md4 lg3>
+      <v-flex slot="item" slot-scope="props" xs12 sm6 lg4>
         <v-container fluid>
           <v-card color="blue">
             <v-card-title>
@@ -21,7 +20,7 @@
                 <v-list-tile-content class="align-end">{{ getReimbursed(props.item) | moneyValue }}</v-list-tile-content>
               </v-list-tile>
               <v-list-tile>
-                <v-list-tile-content>Unreimbursed:</v-list-tile-content>
+                <v-list-tile-content>Pending:</v-list-tile-content>
                 <v-list-tile-content class="align-end">{{ getUnreimbursed(props.item) | moneyValue }}</v-list-tile-content>
               </v-list-tile>
               <v-list-tile>
@@ -37,9 +36,9 @@
           </v-card>
         </v-container>
       </v-flex>
-
     </v-data-iterator>
   </v-container>
+<!-- </v-card> -->
 </div>
 </template>
 <script>

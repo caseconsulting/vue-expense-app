@@ -31,15 +31,13 @@
       </v-card>
     </v-flex>
   </v-flex>
-  <v-flex lg8>
-
+  <v-flex xs12 sm12 md12 lg8>
     <v-flex text-xs-center>
       <budget-table v-if="!loading" :employee="expenseTypeData"></budget-table>
       <budget-chart v-if="!loading" :options="drawGraph.optionSet" :chart-data="drawGraph.dataSet"></budget-chart>
     </v-flex>
-
   </v-flex>
-  <v-flex lg4 pt-3>
+  <v-flex xs12 sm12 md12 lg4 pt-3>
     <v-flex text-xs-center lg12 md12 sm12>
       <expense-form :expense="expense" v-on:error="displayError"></expense-form>
     </v-flex>
@@ -262,7 +260,7 @@ export default {
           },
           {
             type: 'bar',
-            label: 'Remaining',
+            label: 'Remaining Budget',
             backgroundColor: '#e1e7f2',
             fill: false,
             data: this.budgets.difference
