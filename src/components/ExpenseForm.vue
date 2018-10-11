@@ -260,7 +260,7 @@ async function created() {
   this.expenseTypes = _.map(expenseTypes, expenseType => {
     return {
       /* beautify preserve:start */
-      text: `${expenseType.budgetName} - ＄${expenseType.budget}`,
+      text: `${expenseType.budgetName} - \$${expenseType.budget}`,
       /* beautify preserve:end */
       budgetName: expenseType.budgetName,
       value: expenseType.id,
