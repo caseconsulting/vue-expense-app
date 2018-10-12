@@ -41,7 +41,7 @@
               <tr v-if="!loading && (showRow(props.item) || isAdmin)" @click="onSelect(props.item)">
                 <td v-if="isAdmin" class="text-xs-left">{{ props.item.employeeName }}</td>
                 <td class="text-xs-left">{{ props.item.budgetName }}</td>
-                <td class="text-xs-left">{{ props.item.cost ? props.item.cost : 0 | moneyValue}}</td>
+                <td class="text-xs-left">{{ (props.item.cost ? props.item.cost : 0) | moneyValue}}</td>
                 <td class="text-xs-left">{{ props.item.purchaseDate | dateFormat }}</td>
                 <td class="text-xs-left">{{ props.item.reimbursedDate |dateFormat }}</td>
                 <td class="text-xs-left">{{ props.item.description }}</td>
@@ -214,7 +214,7 @@ export default {
       this.$set(this.expense, 'reimbursedDate', item.reimbursedDate);
       this.$set(this.expense, 'employeeName', item.employeeName);
       this.$set(this.expense, 'description', item.description);
-      this.$set(this.expense, 'cost', sprintf('%.2f', item.cost));
+      this.$set(this.expense, 'cost', item.cost);
       this.$set(this.expense, 'userId', item.userId);
       this.$set(this.expense, 'expenseTypeId', item.expenseTypeId);
       this.$set(this.expense, 'note', item.note);

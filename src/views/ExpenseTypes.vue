@@ -136,7 +136,7 @@ export default {
 
     onSelect(item) {
       this.$set(this.model, 'id', item.id);
-      this.$set(this.model, 'budget', sprintf('%.2f', item.budget));
+      this.$set(this.model, 'budget', item.budget);
       this.$set(this.model, 'budgetName', item.budgetName);
       this.$set(this.model, 'description', item.description);
       this.$set(this.model, 'odFlag', item.odFlag);

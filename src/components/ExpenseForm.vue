@@ -82,7 +82,7 @@ async function checkCoverage() {
     let employeeExpenseTypeBalance = _.find(budgets, budget => {
       return budget.expenseTypeId === expenseType.value;
     });
-    let cost = parseInt(this.expense.cost);
+    let cost = parseFloat(this.expense.cost);
     if (employeeExpenseTypeBalance) {
       employeeExpenseTypeBalance =
         employeeExpenseTypeBalance.pendingAmount + employeeExpenseTypeBalance.reimbursedAmount;
@@ -198,7 +198,7 @@ function parseDate(date) {
 
 async function submit() {
   this.submitting = false;
-  this.$set(this.expense, 'cost', parseInt(this.expense.cost));
+  this.$set(this.expense, 'cost', parseFloat(this.expense.cost));
   if (this.$refs.form.validate()) {
     if (!this.expense.receipt) {
       this.expense.receipt = null;

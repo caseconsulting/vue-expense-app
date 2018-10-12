@@ -5,10 +5,10 @@ this.expense<template>
       <v-card-title class="headline">You've reached the budget limit for this expense type</v-card-title>
       <v-card-text>
         <p v-if="expense.od">
-          The expense you are about to submit is only covered up to {{ (expense.budget * 2)|moneyValue }} you will be reimbursed {{expense.remaining|moneyValue}} of {{expense.cost|moneyValue}}
+          The expense you are about to submit is only covered up to {{ (expense.budget * 2) | moneyValue }} you will be reimbursed {{expense.remaining|moneyValue}} of {{expense.cost|moneyValue}}
         </p>
         <p v-else>
-          The expense you are about to submit is only covered up to {{ expense.budget|moneyValue }} you will be reimbursed {{expense.remaining|moneyValue}} of {{expense.cost|moneyValue}}
+          The expense you are about to submit is only covered up to {{ expense.budget | moneyValue }} you will be reimbursed {{expense.remaining|moneyValue}} of {{expense.cost|moneyValue}}
         </p>
         <p>Do you want to continue?</p>
       </v-card-text>

@@ -8,7 +8,7 @@
     <v-form ref="form" v-model="valid" lazy-validation>
       <v-text-field v-model="model.budgetName" :rules="genericRules" label="Budget Name" data-vv-name="Budget Name"></v-text-field>
       <v-text-field prefix="$" v-model="model.budget" :rules="budgetRules" label="Budget" data-vv-name="Budget"></v-text-field>
-      
+
       <v-checkbox label='Overdraft Flag (optional)' v-model='model.odFlag'></v-checkbox>
 
       <v-checkbox label='Recurring (optional)' v-model='model.recurringFlag'></v-checkbox>

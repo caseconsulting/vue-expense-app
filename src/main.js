@@ -29,13 +29,14 @@ import 'vue-awesome/icons/user-astronaut';
 import 'vue-awesome/icons/hand-holding-usd';
 import Icon from 'vue-awesome/components/Icon';
 import App from './App.vue';
+import Vue2Filters from 'vue2-filters';
 Vue.use(Vuetify, {
   theme: {
     primary: '#68caa6',
     radioactive: '#0ACF23'
   }
 });
-
+Vue.use(Vue2Filters);
 Vue.prototype.moment = moment;
 Vue.component('icon', Icon);
 window.EventBus = new Vue();
