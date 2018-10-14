@@ -58,7 +58,6 @@
 </template>
 
 <script>
-var sprintf = require('sprintf-js').sprintf;
 import api from '@/shared/api.js';
 import { getRole } from '@/utils/auth';
 import moment from 'moment';
