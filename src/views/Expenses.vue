@@ -63,21 +63,27 @@
 </v-layout>
 </template>
 <script>
+var sprintf = require("sprintf-js").sprintf;
 import api from '@/shared/api.js';
 import employeeUtils from '@/shared/employeeUtils';
 import ExpenseForm from '../components/ExpenseForm.vue';
 import moment from 'moment';
 import _ from 'lodash';
 import { getRole, getUser } from '@/utils/auth';
+
+function moneyFilter(value) {
+  return `${new Intl.NumberFormat('en-US', {
+    style: 'decimal',
+    useGrouping: false,
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  }).format(value)}`;
+}
+
 export default {
   filters: {
     moneyValue: value => {
-      return `${new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: 'USD',
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
-      }).format(value)}`;
+      return `$` + moneyFilter(value);
     },
     dateFormat: value => {
       if (value) {
@@ -214,7 +220,7 @@ export default {
       this.$set(this.expense, 'reimbursedDate', item.reimbursedDate);
       this.$set(this.expense, 'employeeName', item.employeeName);
       this.$set(this.expense, 'description', item.description);
-      this.$set(this.expense, 'cost', item.cost);
+      this.$set(this.expense, 'cost', moneyFilter(item.cost));
       this.$set(this.expense, 'userId', item.userId);
       this.$set(this.expense, 'expenseTypeId', item.expenseTypeId);
       this.$set(this.expense, 'note', item.note);

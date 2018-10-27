@@ -55,15 +55,20 @@
 <script>
 import api from '@/shared/api.js';
 import ExpenseTypeForm from '../components/ExpenseTypeForm.vue';
+
+function moneyFilter(value) {
+  return `${new Intl.NumberFormat('en-US', {
+    style: 'decimal',
+    useGrouping: false,
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  }).format(value)}`;
+}
+
 export default {
   filters: {
     moneyValue: value => {
-      return `${new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: 'USD',
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
-      }).format(value)}`;
+      return `$` + moneyFilter(value);
     }
   },
   data() {
@@ -136,7 +141,7 @@ export default {
 
     onSelect(item) {
       this.$set(this.model, 'id', item.id);
-      this.$set(this.model, 'budget', item.budget);
+      this.$set(this.model, 'budget', moneyFilter(item.budget));
       this.$set(this.model, 'budgetName', item.budgetName);
       this.$set(this.model, 'description', item.description);
       this.$set(this.model, 'odFlag', item.odFlag);
