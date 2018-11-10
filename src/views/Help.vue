@@ -93,7 +93,7 @@
     <v-expansion-panel-content>
       <div slot="header">About</div>
       <v-card>
-        <v-card-text class="grey lighten-3"><li><icon name="space-shuttle"/> Employees are logged by employees and reviewed by administrators </li>
+        <v-card-text class="grey lighten-3"><li><icon name="space-shuttle"/> Expenses are logged by employees and reviewed by administrators </li>
         <li><icon name="space-shuttle"/> To get to the expenses, click on the $ in the navigation menu</li></v-card-text>
       </v-card>
     </v-expansion-panel-content>
@@ -155,7 +155,7 @@ export default {
           title: "About",
           icon: "space-shuttle",
           infoList: [
-            'Employees are logged by employees and reviewed by administrators',
+            'Expenses are logged by employees and reviewed by administrators',
             'To get to the expenses, click on the $ in the navigation menu'
           ]
         },
@@ -172,11 +172,11 @@ export default {
           icon: "user-astronaut",
           infoList: [
             `Each rectangle in the top part of Employee Home page represents data for a budget`,
-            `The 'Budget' is the starting amount of money that can spent for the current year`,
-            `The 'Reimbursed' is the total amount of money that has been reimbursed to the employee who is currently logged in`,
-            `The 'Unreimbursed' is the total amount of money that the employee has spent on the budget that has not yet been reimbursed`,
-            `The 'Remaining Budget' is how much money is left to be spent on the budget after deducting the reimbursed and unreimbursed expenses`,
-            `The 'Overdraft' indicates whether expenses can be assigned to the budget for next year`
+            `'Budget' is the starting amount of money that can spent for the current year`,
+            `'Reimbursed' is the total amount of money that has been reimbursed to the employee who is currently logged in`,
+            `'Unreimbursed' is the total amount of money that the employee has spent on the budget that has not yet been reimbursed`,
+            `'Remaining Budget' is how much money is left to be spent on the budget after deducting the reimbursed and unreimbursed expenses`,
+            `'Overdraft' indicates whether expenses can be assigned to the budget for next year`
           ]
         },
         chart: {
