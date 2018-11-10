@@ -197,7 +197,6 @@ function parseDate(date) {
 
 async function submit() {
   this.submitting = false;
-  this.$set(this.expense, 'cost', parseFloat(this.expense.cost));
   if (this.$refs.form.validate()) {
     if (!this.expense.receipt) {
       this.expense.receipt = null;
@@ -205,7 +204,6 @@ async function submit() {
     if (this.expense.id) {
       let updatedExpense = await api.updateItem(api.EXPENSES, this.expense.id, this.expense);
       if (updatedExpense.id) {
-        console.log(updatedExpense);
         this.$emit('update', updatedExpense);
       } else {
         this.$emit('error', updatedExpense.response.data.message);
