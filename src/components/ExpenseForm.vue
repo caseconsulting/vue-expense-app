@@ -87,11 +87,11 @@ async function checkCoverage() {
       let match = _.find(allExpenses, entry => {
         return entry.id === this.expense.id;
       });
-      let cost = parseFloat(this.expense.cost);
+      let cost = parseFloat(this.expense.cost.replace(/,/g, ''));
+      this.$set(this.expense, 'cost', cost);
       // For subsequent calculations, remove matched entry cost from committed amount
       let newCommittedAmount = match ? committedAmount - match.cost : committedAmount;
       if (expenseType.odFlag) {
-        console.log('@@@ Inside odFlag section');
         if (2 * expenseType.budget !== newCommittedAmount) {
           //under budget
           if (newCommittedAmount + cost <= 2 * expenseType.budget) {
