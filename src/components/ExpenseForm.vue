@@ -193,6 +193,9 @@ async function submit() {
     if (!this.expense.receipt) {
       this.expense.receipt = null;
     }
+    if (!this.expense.note) {
+      this.expense.note = null;
+    }
     if (this.expense.id) {
       let updatedExpense = await api.updateItem(api.EXPENSES, this.expense.id, this.expense);
       if (updatedExpense.id) {
