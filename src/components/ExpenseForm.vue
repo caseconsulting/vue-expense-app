@@ -78,37 +78,29 @@ async function checkCoverage() {
       employee = await api.getItem(api.EMPLOYEES, this.expense.userId);
     }
     let budgets = await api.getItems(api.BUDGETS);
-    let employeeExpenseTypeBalance = _.find(budgets, budget => {
+    let employeeExpenseTypeBudget = _.find(budgets, budget => {
       return budget.expenseTypeId === expenseType.value;
     });
-    let cost = parseFloat(this.expense.cost);
-    if (employeeExpenseTypeBalance) {
-      employeeExpenseTypeBalance =
-        employeeExpenseTypeBalance.pendingAmount + employeeExpenseTypeBalance.reimbursedAmount;
-      let editCheck = await api.getAggregate();
-      let match = _.find(editCheck, entry => {
+    if (employeeExpenseTypeBudget) {
+      let committedAmount = employeeExpenseTypeBudget.pendingAmount + employeeExpenseTypeBudget.reimbursedAmount;
+      let allExpenses = await api.getAggregate();
+      let match = _.find(allExpenses, entry => {
         return entry.id === this.expense.id;
       });
+      let cost = parseFloat(this.expense.cost);
+      // For subsequent calculations, remove matched entry cost from committed amount
+      let newCommittedAmount = match ? committedAmount - match.cost : committedAmount;
       if (expenseType.odFlag) {
-        if (2 * expenseType.budget !== employeeExpenseTypeBalance) {
+        console.log('@@@ Inside odFlag section');
+        if (2 * expenseType.budget !== newCommittedAmount) {
           //under budget
-          if (employeeExpenseTypeBalance + cost <= 2 * expenseType.budget) {
+          if (newCommittedAmount + cost <= 2 * expenseType.budget) {
             //full amount reimbursed
             this.submit();
-          } else if (match) {
-            if (employeeExpenseTypeBalance + cost <= 2 * expenseType.budget + match.cost) {
-              this.submit();
-            } else {
-              this.$set(this.expense, 'budget', expenseType.budget);
-              this.$set(this.expense, 'remaining', expenseType.budget * 2 - employeeExpenseTypeBalance + match.cost);
-              this.$set(this.expense, 'od', true);
-              this.submitting = true;
-            }
           } else {
-            //TODO HERE
             // not maxed out but also not fully covered
             this.$set(this.expense, 'budget', expenseType.budget);
-            this.$set(this.expense, 'remaining', expenseType.budget * 2 - employeeExpenseTypeBalance);
+            this.$set(this.expense, 'remaining', 2 * expenseType.budget - newCommittedAmount);
             this.$set(this.expense, 'od', true);
             this.submitting = true;
           }
@@ -118,15 +110,15 @@ async function checkCoverage() {
         }
       } else {
         this.$set(this.expense, 'od', false);
-        if (expenseType.budget !== employeeExpenseTypeBalance) {
+        if (expenseType.budget !== newCommittedAmount) {
           //under budget
-          if (employeeExpenseTypeBalance + cost <= expenseType.budget) {
+          if (newCommittedAmount + cost <= expenseType.budget) {
             //full amount reimbursed
             this.submit();
           } else {
             // not maxed out but also not fully covered
             this.$set(this.expense, 'budget', expenseType.budget);
-            this.$set(this.expense, 'remaining', expenseType.budget - employeeExpenseTypeBalance);
+            this.$set(this.expense, 'remaining', expenseType.budget - newCommittedAmount);
             this.submitting = true;
           }
         } else {
