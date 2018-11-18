@@ -81,14 +81,14 @@ async function checkCoverage() {
     let employeeExpenseTypeBudget = _.find(budgets, budget => {
       return budget.expenseTypeId === expenseType.value;
     });
+    let cost = parseFloat(this.expense.cost.replace(/,/g, ''));
+    this.$set(this.expense, 'cost', cost);
     if (employeeExpenseTypeBudget) {
       let committedAmount = employeeExpenseTypeBudget.pendingAmount + employeeExpenseTypeBudget.reimbursedAmount;
       let allExpenses = await api.getAggregate();
       let match = _.find(allExpenses, entry => {
         return entry.id === this.expense.id;
       });
-      let cost = parseFloat(this.expense.cost.replace(/,/g, ''));
-      this.$set(this.expense, 'cost', cost);
       // For subsequent calculations, remove matched entry cost from committed amount
       let newCommittedAmount = match ? committedAmount - match.cost : committedAmount;
       if (expenseType.odFlag) {
