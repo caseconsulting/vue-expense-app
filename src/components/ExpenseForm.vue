@@ -81,8 +81,15 @@ async function checkCoverage() {
     let employeeExpenseTypeBudget = _.find(budgets, budget => {
       return budget.expenseTypeId === expenseType.value;
     });
-    let cost = parseFloat(this.expense.cost.replace(/,/g, ''));
-    this.$set(this.expense, 'cost', cost);
+
+    // Keep the cost data as a string. This allows us to keep it formatted as ##.##
+    // -- If you parse the Expense object's cost field itself into a float, it drops the second
+    //    decimal place, then fails validation
+    // -- Remove commas from the input
+    let costInput = this.expense.cost.replace(/,/g, '');
+    let cost = parseFloat(costInput);
+    this.$set(this.expense, 'cost', costInput);
+
     if (employeeExpenseTypeBudget) {
       let committedAmount = employeeExpenseTypeBudget.pendingAmount + employeeExpenseTypeBudget.reimbursedAmount;
       let allExpenses = await api.getAggregate();
@@ -91,7 +98,7 @@ async function checkCoverage() {
       });
       // For subsequent calculations, remove matched entry cost from committed amount
       let newCommittedAmount = match ? committedAmount - match.cost : committedAmount;
-      if (expenseType.odFlag) {
+      if (expenseType.odFlag) { // Overdraft on the given Expense Type
         if (2 * expenseType.budget !== newCommittedAmount) {
           //under budget
           if (newCommittedAmount + cost <= 2 * expenseType.budget) {
