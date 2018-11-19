@@ -98,7 +98,8 @@ async function checkCoverage() {
       });
       // For subsequent calculations, remove matched entry cost from committed amount
       let newCommittedAmount = match ? committedAmount - match.cost : committedAmount;
-      if (expenseType.odFlag) { // Overdraft on the given Expense Type
+      if (expenseType.odFlag) {
+        // Selected Expense Type allows overdraft
         if (2 * expenseType.budget !== newCommittedAmount) {
           //under budget
           if (newCommittedAmount + cost <= 2 * expenseType.budget) {
@@ -134,16 +135,15 @@ async function checkCoverage() {
         }
       }
     } else {
-      //new expense for an expensetype
-      if (!expenseType.odFlag) {
-        if (expenseType.budget < cost) {
-          this.$set(this.expense, 'budget', expenseType.budget);
-          this.$set(this.expense, 'remaining', expenseType.budget);
-          this.submitting = true;
-        } else {
-          this.submit();
-        }
-      } else {
+      // Submitting a new Expense
+      if (!expenseType.odFlag && expenseType.budget < cost) {
+        // This Expense Type does not allow overdraft, and the budget is less than the
+        // cost of the current expense
+        this.$set(this.expense, 'budget', expenseType.budget);
+        this.$set(this.expense, 'remaining', expenseType.budget);
+        this.submitting = true;
+      }
+      else { // Good to go. Send it!
         this.submit();
       }
     }
@@ -304,15 +304,18 @@ export default {
       menu1: false,
       menu2: false,
       userInfo: {},
-      descriptionRules: [v => !!v || 'Description is required'],
-      costRules: [
-        v => !!v || 'Cost is required',
-        v => parseFloat(v, 10) > 0 || 'Cost must be greater than 0',
-        v =>
-          /^[+-]?[0-9]{1,3}(?:,?[0-9]{3})*(?:\.[0-9]{2})?$/.test(v) || 'Cost must be a number with two decimal digits.'
+      descriptionRules: [
+        v => !!v || 'Description is a required field.',
+        v => v.replace(/\s/g, '').length || 'Description is a required field.',
       ],
-      componentRules: [v => !!v || 'Something must be selected'],
-      dateRules: [v => !!v || 'Date must be valid. MM/DD/YYYY format'],
+      costRules: [
+        v => !!v || 'Cost is a required field.',
+        v => parseFloat(v, 10) > 0 || 'Cost must be greater than 0.',
+        v =>
+          /^[+-]?[0-9]{1,3}(?:,?[0-9]{3})*(?:\.[0-9]{1,2})?$/.test(v) || 'Cost must be a properly formatted number.'
+      ],
+      componentRules: [v => !!v || 'An appropriate expense type must be selected.'],
+      dateRules: [v => !!v || 'Date must be valid. Format: MM/DD/YYYY'],
       valid: false
     };
   },
