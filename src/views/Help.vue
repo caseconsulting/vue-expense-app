@@ -134,11 +134,11 @@
     <div class="mb-5">
       <div class="text-xs-center mb-3"></div>
       <v-expansion-panel expand>
-        <v-expansion-panel-content v-for="(section, sectionIndex) in user" :id="`section${sectionIndex}`">
+        <v-expansion-panel-content v-for="(section, sectionIndex) in user" :key="`section${sectionIndex}`">
           <div slot="header">{{ section.title }}</div>
           <v-card>
             <v-card-text class="grey lighten-3">
-              <li v-for="(infoItem, itemIndex) in section.infoList" :id="`item${itemIndex}`">
+              <li v-for="(infoItem, itemIndex) in section.infoList" :key="`item${itemIndex}`">
                 <icon name="space-shuttle"/>{{ infoItem }}
               </li>
             </v-card-text>
