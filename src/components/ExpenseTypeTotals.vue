@@ -75,7 +75,7 @@ export default {
       _.forEach(this.selected, expense => {
         _.forEach(totals, total => {
           if (total.id === expense.expenseTypeId) {
-            total.costTotal += parseInt(expense.cost, 10);
+            total.costTotal += parseFloat(expense.cost);
           }
         });
       });
@@ -85,6 +85,7 @@ export default {
   }
 };
 </script>
+
 <style>
 .slide-in-blurred-right {
   animation: slide-in-blurred-right 0.5s ease-in forwards;
@@ -95,7 +96,6 @@ export default {
  * animation slide-in-blurred-right
  * ----------------------------------------
  */
-
 @keyframes slide-in-blurred-right {
   0% {
     transform: translateX(1000px) scaleX(2.5) scaleY(0.2);
