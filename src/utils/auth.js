@@ -11,7 +11,7 @@ const DOMAIN = AUTH_CONFIG.domain;
 
 const ACCESS_TOKEN_KEY = 'access_token';
 const ID_TOKEN_KEY = 'id_token';
-const IMG = 'profilePic'
+const IMG = 'profilePic';
 const ROLE = 'employeeRole';
 const SCOPE = 'openid email profile';
 
@@ -64,27 +64,27 @@ export function isAdmin(to, from, next) {
 }
 
 export function getIdToken() {
-  return localStorage.getItem(ID_TOKEN_KEY);
+  return sessionStorage.getItem(ID_TOKEN_KEY);
 }
 
 export function getAccessToken() {
-  return localStorage.getItem(ACCESS_TOKEN_KEY);
+  return sessionStorage.getItem(ACCESS_TOKEN_KEY);
 }
 
 function clearIdToken() {
-  localStorage.removeItem(ID_TOKEN_KEY);
+  sessionStorage.removeItem(ID_TOKEN_KEY);
 }
 
 function clearAccessToken() {
-  localStorage.removeItem(ACCESS_TOKEN_KEY);
+  sessionStorage.removeItem(ACCESS_TOKEN_KEY);
 }
 
 function clearRole() {
-  localStorage.removeItem(ROLE);
+  sessionStorage.removeItem(ROLE);
 }
 
 function clearProfile() {
-  localStorage.removeItem(IMG);
+  sessionStorage.removeItem(IMG);
 }
 
 // Helper function that will allow us to extract the access_token and id_token
@@ -96,22 +96,22 @@ function getParameterByName(name) {
 // Get and store access_token in local storage
 export function setAccessToken() {
   let accessToken = getParameterByName('access_token');
-  localStorage.setItem(ACCESS_TOKEN_KEY, accessToken);
+  sessionStorage.setItem(ACCESS_TOKEN_KEY, accessToken);
 }
 
 // Get and store id_token in local storage
 export function setIdToken() {
   let idToken = getParameterByName('id_token');
-  localStorage.setItem(ID_TOKEN_KEY, idToken);
+  sessionStorage.setItem(ID_TOKEN_KEY, idToken);
 }
 
 export function setProfile() {
   let profile = decode(getIdToken());
-  localStorage.setItem(IMG, profile.picture);
+  sessionStorage.setItem(IMG, profile.picture);
 }
 
 export function getProfile() {
-  return localStorage.getItem(IMG);
+  return sessionStorage.getItem(IMG);
 }
 
 export function isLoggedIn() {
@@ -141,9 +141,9 @@ function isTokenExpired(token) {
 
 export async function setRole() {
   let employeeRole = await api.getRole();
-  localStorage.setItem(ROLE, employeeRole);
+  sessionStorage.setItem(ROLE, employeeRole);
 }
 
 export function getRole() {
-  return localStorage.getItem(ROLE);
+  return sessionStorage.getItem(ROLE);
 }
