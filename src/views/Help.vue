@@ -177,7 +177,7 @@ export default {
           icon: 'user-astronaut',
           infoList: [
             `Each rectangle in the top part of Employee Home page represents data for a budget`,
-            `'Budget' is the starting amount of money that can spent for the current year`,
+            `'Budget' is the starting amount of money that can be spent for the current year`,
             `'Reimbursed' is the total amount of money that has been reimbursed to the employee who is currently logged in`,
             `'Unreimbursed' is the total amount of money that the employee has spent on the budget that has not yet been reimbursed`,
             `'Remaining Budget' is how much money is left to be spent on the budget after deducting the reimbursed and unreimbursed expenses`,
