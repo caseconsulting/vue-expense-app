@@ -38,7 +38,10 @@
                       @blur="expense.reimbursedDate = parseDate(reimbursedDateFormatted)"></v-text-field>
         <v-date-picker v-model="expense.reimbursedDate" no-title @input="menu2 = false"></v-date-picker>
       </v-menu>
+      <!-- Receipt uploading -->
+      <file-upload @fileSelected="setFile"></file-upload>
 
+      <!-- Notes section -->
       <v-text-field v-model="expense.note" label="Notes (optional)" data-vv-name="Description"
                     multi-line></v-text-field>
 
@@ -66,8 +69,16 @@ import DeleteModal from './DeleteModal.vue';
 import _ from 'lodash';
 import dateUtils from '@/shared/dateUtils';
 import employeeUtils from '@/shared/employeeUtils';
-
+import FileUpload from './FileUpload.vue';
 // METHODS
+function setFile(file) {
+  if (file) {
+    this.file = file;
+    console.log('file set to', file);
+  } else {
+    this.file = undefined;
+  }
+}
 async function checkCoverage() {
   if (this.expense) {
     let expenseType = _.find(this.expenseTypes, type => this.expense.expenseTypeId === type.value);
@@ -142,8 +153,8 @@ async function checkCoverage() {
         this.$set(this.expense, 'budget', expenseType.budget);
         this.$set(this.expense, 'remaining', expenseType.budget);
         this.submitting = true;
-      }
-      else { // Good to go. Send it!
+      } else {
+        // Good to go. Send it!
         this.submit();
       }
     }
@@ -306,22 +317,23 @@ export default {
       userInfo: {},
       descriptionRules: [
         v => !!v || 'Description is a required field.',
-        v => v.replace(/\s/g, '').length || 'Description is a required field.',
+        v => v.replace(/\s/g, '').length || 'Description is a required field.'
       ],
       costRules: [
         v => !!v || 'Cost is a required field.',
         v => parseFloat(v, 10) > 0 || 'Cost must be greater than 0.',
-        v =>
-          /^[+-]?[0-9]{1,3}(?:,?[0-9]{3})*(?:\.[0-9]{1,2})?$/.test(v) || 'Cost must be a properly formatted number.'
+        v => /^[+-]?[0-9]{1,3}(?:,?[0-9]{3})*(?:\.[0-9]{1,2})?$/.test(v) || 'Cost must be a properly formatted number.'
       ],
       componentRules: [v => !!v || 'An appropriate expense type must be selected.'],
       dateRules: [v => !!v || 'Date must be valid. Format: MM/DD/YYYY'],
-      valid: false
+      valid: false,
+      file: undefined
     };
   },
   components: {
     ConfirmationBox,
-    DeleteModal
+    DeleteModal,
+    FileUpload
   },
   watch: {
     'expense.purchaseDate': function(val) {
@@ -345,7 +357,8 @@ export default {
     deleteExpense,
     formatDate,
     parseDate,
-    submit
+    submit,
+    setFile
   },
   created
 };
