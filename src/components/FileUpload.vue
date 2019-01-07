@@ -49,8 +49,8 @@ export default {
       if (files[0] !== undefined) {
         this.fileName = files[0].name;
         this.fileSize = files[0].size;
+        //this stops a memory error with really large files
         if (this.fileName.lastIndexOf('.') <= 0 || this.fileTooBig) {
-          //this stops a memory error with really large files
           return;
         }
         const fr = new FileReader();
