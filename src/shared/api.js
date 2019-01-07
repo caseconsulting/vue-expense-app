@@ -65,9 +65,36 @@ function getUser() {
   return execute('get', 'info/me');
 }
 
+async function createAttachment(expense, file) {
+  console.log('expense', expense);
+  console.log('file', file);
+  let formData = new FormData();
+  formData.append('userId', expense.userId);
+  formData.append('expenseId', expense.id);
+  formData.append('receipt', file);
+
+  // inject the accessToken for each request
+  let accessToken = getAccessToken();
+  return client({
+    method: 'post',
+    url: '/attachment',
+    data: formData,
+    headers: {
+      Authorization: `Bearer ${accessToken}`
+    }
+  })
+    .then(response => {
+      return response.data;
+    })
+    .catch(err => {
+      return err;
+    });
+}
+
 export default {
   getItems,
   getItem,
+  createAttachment,
   createItem,
   updateItem,
   deleteItem,

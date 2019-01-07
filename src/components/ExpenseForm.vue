@@ -208,15 +208,16 @@ function parseDate(date) {
 async function submit() {
   this.submitting = false;
   if (this.$refs.form.validate()) {
-    if (!this.expense.receipt) {
-      this.expense.receipt = null;
-    }
+    this.expense.receipt = undefined;
     if (!this.expense.note) {
-      this.expense.note = null;
+      this.expense.note = undefined;
     }
     if (this.expense.id) {
       let updatedExpense = await api.updateItem(api.EXPENSES, this.expense.id, this.expense);
       if (updatedExpense.id) {
+        // submit attachment
+        let attachment = await api.createAttachment(newExpense, this.file);
+        console.log('attachment', attachment);
         this.$emit('update', updatedExpense);
       } else {
         this.$emit('error', updatedExpense.response.data.message);
@@ -226,6 +227,9 @@ async function submit() {
       this.$set(this.expense, 'createdAt', moment().format('MM-DD-YYYY'));
       let newExpense = await api.createItem(api.EXPENSES, this.expense);
       if (newExpense.id) {
+        // submit attachment
+        let attachment = await api.createAttachment(newExpense, this.file);
+        console.log('attachment', attachment);
         this.$set(this.expense, 'id', newExpense.id);
         this.$emit('add', newExpense);
         EventBus.$emit('showSnackbar', newExpense);

@@ -46,7 +46,6 @@ export default {
         fr.addEventListener('load', () => {
           this.previewURL = fr.result;
           this.fileBlob = files[0]; // file that can be sent to s3
-          console.log(this.fileBlob);
           this.$emit('fileSelected', this.fileBlob);
         });
       } else {
