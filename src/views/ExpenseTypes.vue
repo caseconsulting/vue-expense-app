@@ -47,7 +47,7 @@
     </v-card>
   </v-flex>
   <v-flex xl4 lg4 md12 sm12>
-    <expense-type-form :model="model" v-on:add="addModelToTable" v-on:update="updateModelInTable" v-on:delete="deleteModelFromTable"></expense-type-form>
+    <expense-type-form :model="model" v-on:add="addModelToTable" v-on:update="updateModelInTable" v-on:delete="deleteModelFromTable" style="position: sticky; top: 79px;"></expense-type-form>
   </v-flex>
 </v-layout>
 </template>
