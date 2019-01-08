@@ -24,19 +24,15 @@
 import api from '@/shared/api.js';
 
 // @ is an alias to /src
-import {
-  isLoggedIn,
-  login,
-  logout,
-  getRole,
-} from '@/utils/auth';
+import { isLoggedIn, login, logout, getRole } from '@/utils/auth';
 
 export default {
   data() {
     return {
       permissions: '',
       drawer: null,
-      items: [{
+      items: [
+        {
           title: 'Employee Home',
           icon: 'hand-holding-usd',
           route: 'home',
@@ -64,7 +60,7 @@ export default {
           title: 'Employees',
           icon: 'users',
           route: 'employees',
-          permission: ['super-admin', 'admin']
+          permission: ['super-admin', 'admin', 'user']
         },
         {
           title: 'Help',
@@ -102,39 +98,40 @@ export default {
 
 <style lang="scss">
 .navbar-icons {
-    color: #68caa6;
-    width: auto;
-    height: 2em;
-    max-width: 100%;
-    max-height: 100%;
+  color: #68caa6;
+  width: auto;
+  height: 2em;
+  max-width: 100%;
+  max-height: 100%;
 }
 
-.fa-icon {}
+.fa-icon {
+}
 
 #main-header {
-    font-family: 'Quicksand', sans-serif;
-    font-weight: bold;
-    font-size: 48px;
-    color: #38424d;
-    padding-top: 1%;
-    padding-bottom: 2%;
+  font-family: 'Quicksand', sans-serif;
+  font-weight: bold;
+  font-size: 48px;
+  color: #38424d;
+  padding-top: 1%;
+  padding-bottom: 2%;
 }
 .e {
-    color: #68caa6;
+  color: #68caa6;
 }
 
 .logo {
-    height: 50%;
-    width: 50%;
+  height: 50%;
+  width: 50%;
 }
 
 #nav-button {
-    float: left;
+  float: left;
 }
 #nav-button :focus {
-    outline: none;
+  outline: none;
 }
 #slider-logo {
-    margin-bottom: 5px;
+  margin-bottom: 5px;
 }
 </style>

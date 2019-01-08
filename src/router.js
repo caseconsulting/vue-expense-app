@@ -43,7 +43,7 @@ const router = new Router({
       path: '/employees',
       name: 'employees',
       component: Employees,
-      beforeEnter: multiguard([requireAuth, isAdmin])
+      beforeEnter: requireAuth
     },
     {
       path: '/expenses',
