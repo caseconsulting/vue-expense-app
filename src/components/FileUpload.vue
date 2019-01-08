@@ -8,7 +8,7 @@
       <!-- previewing images works but not pdfs etc.  -->
       <!-- <img :src="previewURL" height="150" v-if="previewURL"/> -->
       <v-text-field label="Select Receipt" @click='pickFile' v-model='fileName' prepend-icon='attach_file'></v-text-field>
-      <input type="file" style="display: none" ref="receipt" accept=fileExts @change="onFilePicked">
+      <input type="file" style="display: none" ref="receipt" :accept="acceptedFileTypes" @change="onFilePicked">
     </v-flex>
   </v-container>
 </div>
@@ -24,6 +24,20 @@ function megabytes() {
   return this.fileSize / 1000000;
 }
 
+function acceptedFileTypes() {
+  return [
+    '.pdf',
+    '.doc',
+    '.docx',
+    'image/*',
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    'application/vnd.ms-excel',
+    '.xml',
+    'application/msword',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+  ].join(',');
+}
+
 export default {
   data: () => ({
     title: 'receipt upload',
@@ -32,11 +46,12 @@ export default {
     fileName: '',
     previewURL: '',
     fileBlob: '',
-    fileExts: ['.pdf', '.doc', '.docx', '.xls', '.xlsx', 'image/*'].join(',')
+    fileType: ''
   }),
   computed: {
     fileTooBig,
-    megabytes
+    megabytes,
+    acceptedFileTypes
   },
 
   methods: {
@@ -49,6 +64,7 @@ export default {
       if (files[0] !== undefined) {
         this.fileName = files[0].name;
         this.fileSize = files[0].size;
+        this.fileType = files[0].type;
         //this stops a memory error with really large files
         if (this.fileName.lastIndexOf('.') <= 0 || this.fileTooBig) {
           return;

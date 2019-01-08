@@ -66,8 +66,6 @@ function getUser() {
 }
 
 async function createAttachment(expense, file) {
-  console.log('expense', expense);
-  console.log('file', file);
   let formData = new FormData();
   formData.append('userId', expense.userId);
   formData.append('expenseId', expense.id);
