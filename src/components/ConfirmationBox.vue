@@ -42,7 +42,7 @@ export default {
         this.expense.budget
       }. You will be reimbursed $${this.expense.remaining} of $${this.expense.cost}`;
       this.expense.cost = this.expense.remaining;
-      EventBus.$emit('canceledSubmit');
+      EventBus.$emit('confirmSubmit');
     }
   },
   filters: {
