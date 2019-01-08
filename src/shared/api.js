@@ -67,15 +67,13 @@ function getUser() {
 
 async function createAttachment(expense, file) {
   let formData = new FormData();
-  formData.append('userId', expense.userId);
-  formData.append('expenseId', expense.id);
   formData.append('receipt', file);
 
   // inject the accessToken for each request
   let accessToken = getAccessToken();
   return client({
     method: 'post',
-    url: '/attachment',
+    url: `/attachment/${expense.userId}/${expense.id}`,
     data: formData,
     headers: {
       Authorization: `Bearer ${accessToken}`
