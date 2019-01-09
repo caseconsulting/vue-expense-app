@@ -40,7 +40,7 @@
             </v-alert>
           </v-data-table>
 
-          <v-card-actions>
+          <v-card-actions v-show="userIsAdmin()">
             <v-checkbox :label="'Show Inactive Employees'" v-model="showAll"></v-checkbox>
           </v-card-actions>
         </v-container>
