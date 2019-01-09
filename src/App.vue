@@ -8,7 +8,6 @@
       <v-toolbar-side-icon v-show="isLoggedIn()" @click.stop="drawer = !drawer"></v-toolbar-side-icon>
       <v-toolbar-title>
         <h2 style="text-align:center"><span class="e">€</span>xpense App</h2></v-toolbar-title>
-
       <v-spacer></v-spacer>
 
 
@@ -39,10 +38,12 @@
 <script>
 import { isLoggedIn, login, logout, getProfile } from '@/utils/auth';
 import MainNav from '@/components/MainNav.vue';
+import router from './router.js';
 export default {
   data: () => ({
     drawer: false,
-    profilePic: 'src/assets/img/logo-big.png'
+    profilePic: 'src/assets/img/logo-big.png',
+    hasBeenLoggedInBefore: false
   }),
   props: {
     source: String
@@ -56,6 +57,16 @@ export default {
     },
     isLoggedIn() {
       return isLoggedIn();
+    },
+    async initSession() {
+      const timeout = seconds => new Promise(resolve => setTimeout(resolve, seconds * 1000));
+      await timeout(60); //wait 60 seconds
+
+      if (!this.isLoggedIn() && this.hasBeenLoggedInBefore) {
+        this.hasBeenLoggedInBefore = false; //prevents looping for no reason
+        router.push({ path: '/home' });
+      }
+      this.initSession();
     }
   },
   created() {
@@ -63,6 +74,8 @@ export default {
     if (pic) {
       this.profilePic = pic;
     }
+    if (this.isLoggedIn()) this.hasBeenLoggedInBefore = true;
+    this.initSession(); //starts session checking
   }
 };
 </script>
