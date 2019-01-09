@@ -77,6 +77,9 @@ async function submit(newExpenseType) {
   if (!this.model.odFlag) {
     this.model.odFlag = false;
   }
+  if (this.model.budget > 0 && moment(this.model.startDate).is) {
+
+  }
   if (this.$refs.form.validate()) {
     if (this.model.recurringFlag) {
       this.$set(this.model, 'startDate', null);
@@ -102,6 +105,7 @@ export default {
       genericRules: [v => !!v || 'This field is required'],
       budgetRules: [
         v => !!v || 'Budget amount is required',
+        v => parseFloat(v, 10) > 0 || 'Budget must be greater than 0.',
         v =>
           /^[+-]?[0-9]{1,3}(?:,?[0-9]{3})*(?:\.[0-9]{2})?$/.test(v) ||
           'Budget amount must be a number with two decimal digits.'
