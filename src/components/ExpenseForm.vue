@@ -213,6 +213,7 @@ async function submit() {
       this.expense.note = undefined;
     }
     if (this.expense.id) {
+      this.$set(this.expense, 'receipt', this.file.name); //stores file name for lookup later
       let updatedExpense = await api.updateItem(api.EXPENSES, this.expense.id, this.expense);
       if (updatedExpense.id) {
         // submit attachment
@@ -225,7 +226,9 @@ async function submit() {
       this.clearForm();
     } else {
       this.$set(this.expense, 'createdAt', moment().format('MM-DD-YYYY'));
+      this.$set(this.expense, 'receipt', this.file.name); //stores file name for lookup later
       let newExpense = await api.createItem(api.EXPENSES, this.expense);
+      console.log(newExpense.id);
       if (newExpense.id) {
         // submit attachment
         let attachment = await api.createAttachment(newExpense, this.file);
