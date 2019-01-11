@@ -152,7 +152,7 @@ export default {
           value: 'description'
         },
         {
-          text: 'Receipt',
+          text: '',
           sortable: false
         }
       ],

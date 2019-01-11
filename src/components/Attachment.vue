@@ -1,8 +1,5 @@
 <template>
   <v-layout>
-    <v-flex xs8 v-if="this.expense.receipt"> <p>{{this.expense.receipt|longFileNames}}</p> </v-flex>
-    <v-flex xs8 v-else> <p>No receipt</p> </v-flex>
-
     <v-flex xs4>
       <v-btn v-if="this.expense.receipt" flat icon color="primary" @click="openDownloadTab" >
         <icon name="cloud-download-alt" scale="2"></icon>
@@ -36,16 +33,6 @@ export default {
   props: ['expense'],
   computed: {
     link
-  },
-  filters: {
-    longFileNames: val => {
-      if (val.length > 15) {
-        let splitStr = val.split('.');
-        let front = val.substring(0, 5);
-        let end = splitStr[splitStr.length - 1];
-        return `${front}...${end}`;
-      } else return val;
-    }
   }
 };
 </script>
