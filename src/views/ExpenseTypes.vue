@@ -1,5 +1,13 @@
 <template>
 <v-layout row wrap>
+  <v-snackbar v-model="status.statusType" :color="status.color" :multi-line="true" :right="true" :timeout="5000" :top="true" :vertical="true">
+    <v-card-title headline color="white">
+      <span class="headline">{{status.statusMessage}}</span>
+    </v-card-title>
+    <v-btn color="white" flat @click="clearStatus">
+      Close
+    </v-btn>
+  </v-snackbar>
   <v-flex xl7 lg8 md12 sm12 offset-xl1>
     <v-card>
       <v-container fluid>
@@ -47,7 +55,7 @@
     </v-card>
   </v-flex>
   <v-flex xl4 lg4 md12 sm12>
-    <expense-type-form :model="model" v-on:add="addModelToTable" v-on:update="updateModelInTable" v-on:delete="deleteModelFromTable" style="position: sticky; top: 79px;"></expense-type-form>
+    <expense-type-form :model="model" v-on:add="addModelToTable" v-on:update="updateModelInTable" v-on:delete="deleteModelFromTable" v-on:error="displayError" style="position: sticky; top: 79px;"></expense-type-form>
   </v-flex>
 </v-layout>
 </template>
@@ -75,6 +83,11 @@ export default {
     return {
       search: '',
       loading: false,
+      status: {
+        statusType: undefined,
+        statusMessage: '',
+        color: ''
+      },
       expenseTypes: [],
       errors: [],
       headers: [
@@ -133,12 +146,21 @@ export default {
     this.refreshExpenseTypes();
   },
   methods: {
+    clearStatus() {
+      this.$set(this.status, 'statusType', undefined);
+      this.$set(this.status, 'statusMessage', '');
+      this.$set(this.status, 'color', '');
+    },
+    async displayError(err) {
+      this.$set(this.status, 'statusType', 'ERROR');
+      this.$set(this.status, 'statusMessage', err);
+      this.$set(this.status, 'color', 'red');
+    },
     async refreshExpenseTypes() {
       this.loading = true;
       this.expenseTypes = await api.getItems(api.EXPENSE_TYPES);
       this.loading = false;
     },
-
     onSelect(item) {
       this.$set(this.model, 'id', item.id);
       this.$set(this.model, 'budget', moneyFilter(item.budget));
@@ -165,17 +187,26 @@ export default {
         expenseType => expenseType.id === updatedExpenseType.id
       );
       this.expenseTypes.splice(matchingExpensesIndex, 1, updatedExpenseType);
+      this.$set(this.status, 'statusType', 'SUCCESS');
+      this.$set(this.status, 'statusMessage', 'Item was successfully updated!');
+      this.$set(this.status, 'color', 'green');
     },
     addModelToTable(newExpenseType) {
       let matchingExpenses = _.filter(this.expenseTypes, expenseType => expenseType.id === newExpenseType.id);
 
       if (!matchingExpenses.length) {
         this.expenseTypes.push(newExpenseType);
+        this.$set(this.status, 'statusType', 'SUCCESS');
+        this.$set(this.status, 'statusMessage', 'Item was successfully submitted!');
+        this.$set(this.status, 'color', 'green');
       }
     },
     deleteModelFromTable() {
       let modelIndex = _.findIndex(this.expenseTypes, expense => expense.id === this.model.id);
       this.expenseTypes.splice(modelIndex, 1);
+      this.$set(this.status, 'statusType', 'SUCCESS');
+      this.$set(this.status, 'statusMessage', 'Item was successfully deleted!');
+      this.$set(this.status, 'color', 'green');
     },
     changeSort(column) {
       if (this.pagination.sortBy === column) {

@@ -77,24 +77,37 @@ async function submit(newExpenseType) {
   if (!this.model.odFlag) {
     this.model.odFlag = false;
   }
-  if (this.model.budget > 0 && moment(this.model.startDate).is) {
-
+  if (!this.model.recurringFlag) {
+    this.model.recurringFlag = false;
   }
+
   if (this.$refs.form.validate()) {
     if (this.model.recurringFlag) {
       this.$set(this.model, 'startDate', null);
       this.$set(this.model, 'endDate', null);
     }
+
+
     if (this.model.id) {
       let newExpenseType = await api.updateItem(api.EXPENSE_TYPES, this.model.id, this.model);
-
-      this.$emit('update', newExpenseType);
+      if(newExpenseType.id) {
+        this.$emit('update', newExpenseType);
+      }
+      else {
+        this.$emit('error', newExpenseType.response.data.message);
+      }
+      this.clearForm();
     } else {
       let newExpenseType = await api.createItem(api.EXPENSE_TYPES, this.model);
-      this.$set(this.model, 'id', newExpenseType.id);
-      this.$emit('add', newExpenseType);
+      if(newExpenseType.id) {
+        this.$set(this.model, 'id', newExpenseType.id);
+        this.$emit('add', newExpenseType);
+        this.clearForm();
+      }
+      else {
+        this.$emit('error', newExpenseType.response.data.message);
+      }
     }
-    this.clearForm();
   }
 }
 
