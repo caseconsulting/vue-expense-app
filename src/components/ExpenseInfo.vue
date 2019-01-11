@@ -10,6 +10,7 @@
       <p><span>Purchased On:</span> {{ expense.purchaseDate | dateFormat }}</p>
       <p><span>Reimbursed On:</span> {{ expense.reimbursedDate | dateFormat }}</p>
       <p><span>Notes:</span> {{ expense.note }}</p>
+      <attachment :expense="expense"></attachment>
     </v-flex>
   </v-card-title>
 </v-card>
@@ -17,7 +18,11 @@
 
 <script>
 import moment from 'moment';
+import Attachment from './Attachment.vue';
 export default {
+  components: {
+    Attachment
+  },
   data() {
     return {
       expense: undefined

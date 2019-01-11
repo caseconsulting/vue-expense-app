@@ -38,6 +38,7 @@
                       @blur="expense.reimbursedDate = parseDate(reimbursedDateFormatted)"></v-text-field>
         <v-date-picker v-model="expense.reimbursedDate" no-title @input="menu2 = false"></v-date-picker>
       </v-menu>
+
       <!-- Receipt uploading -->
       <file-upload @fileSelected="setFile"></file-upload>
 
@@ -70,6 +71,7 @@ import _ from 'lodash';
 import dateUtils from '@/shared/dateUtils';
 import employeeUtils from '@/shared/employeeUtils';
 import FileUpload from './FileUpload.vue';
+import { saveAs } from 'file-saver';
 // METHODS
 function setFile(file) {
   if (file) {

@@ -183,7 +183,7 @@ export default {
           middleName: expense.middleName,
           note: expense.note,
           purchaseDate: expense.purchaseDate,
-          reciept: expense.reciept,
+          receipt: expense.receipt,
           reimbursedDate: expense.reimbursedDate,
           userId: expense.userId,
           selected: false,

@@ -65,6 +65,10 @@ function getUser() {
   return execute('get', 'info/me');
 }
 
+function getAttachment(userId, expenseId) {
+  return execute('get', `attachment/${userId}/${expenseId}`);
+}
+
 async function createAttachment(expense, file) {
   let formData = new FormData();
   formData.append('receipt', file);
@@ -90,6 +94,7 @@ async function createAttachment(expense, file) {
 export default {
   getItems,
   getItem,
+  getAttachment,
   createAttachment,
   createItem,
   updateItem,
