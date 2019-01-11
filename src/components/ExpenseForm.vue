@@ -38,13 +38,9 @@
                       @blur="expense.reimbursedDate = parseDate(reimbursedDateFormatted)"></v-text-field>
         <v-date-picker v-model="expense.reimbursedDate" no-title @input="menu2 = false"></v-date-picker>
       </v-menu>
-      <div v-if="expense.id" class="input-group input-group--dirty input-group--text-field primary--text">
 
-        <label> Attachment(s)</label>
-        <v-btn  block outline color="blue" dark>View Receipt</v-btn>
-      </div>
-      <file-upload v-else @fileSelected="setFile"></file-upload>
       <!-- Receipt uploading -->
+      <file-upload @fileSelected="setFile"></file-upload>
 
       <!-- Notes section -->
       <v-text-field v-model="expense.note" label="Notes (optional)" data-vv-name="Description"
@@ -75,6 +71,7 @@ import _ from 'lodash';
 import dateUtils from '@/shared/dateUtils';
 import employeeUtils from '@/shared/employeeUtils';
 import FileUpload from './FileUpload.vue';
+import { saveAs } from 'file-saver';
 // METHODS
 function setFile(file) {
   if (file) {
