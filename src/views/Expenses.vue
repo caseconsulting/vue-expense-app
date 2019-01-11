@@ -45,6 +45,9 @@
                 <td class="text-xs-left">{{ props.item.purchaseDate | dateFormat }}</td>
                 <td class="text-xs-left">{{ props.item.reimbursedDate |dateFormat }}</td>
                 <td class="text-xs-left">{{ props.item.description }}</td>
+                <td class="text-xs-left">
+                  <attachment :expense="props.item"></attachment>
+                </td>
               </tr>
             </template>
           <v-alert slot="no-results" :value="true" color="error" icon="warning">
@@ -67,6 +70,7 @@ var sprintf = require('sprintf-js').sprintf;
 import api from '@/shared/api.js';
 import employeeUtils from '@/shared/employeeUtils';
 import ExpenseForm from '../components/ExpenseForm.vue';
+import Attachment from '../components/Attachment.vue';
 import moment from 'moment';
 import _ from 'lodash';
 import { getRole, getUser } from '@/utils/auth';
@@ -146,6 +150,10 @@ export default {
         {
           text: 'Description',
           value: 'description'
+        },
+        {
+          text: 'Receipt',
+          sortable: false
         }
       ],
       pagination: {
@@ -175,7 +183,8 @@ export default {
     }
   },
   components: {
-    ExpenseForm
+    ExpenseForm,
+    Attachment
   },
   async created() {
     this.role = getRole();
