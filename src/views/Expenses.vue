@@ -116,7 +116,7 @@ export default {
         expenseTypeId: '',
         purchaseDate: null,
         reimbursedDate: null,
-        reciept: null,
+        receipt: null,
         employeeName: '',
         budgetName: '',
         createdAt: null
@@ -233,6 +233,7 @@ export default {
       this.$set(this.expense, 'userId', item.userId);
       this.$set(this.expense, 'expenseTypeId', item.expenseTypeId);
       this.$set(this.expense, 'note', item.note);
+      this.$set(this.expense, 'receipt', item.receipt);
       this.$set(this.expense, 'createdAt', item.createdAt);
     },
     updateModelInTable(updatedExpense) {

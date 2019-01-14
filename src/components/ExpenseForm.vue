@@ -99,9 +99,9 @@ async function checkCoverage() {
     // -- If you parse the Expense object's cost field itself into a float, it drops the second
     //    decimal place, then fails validation
     // -- Remove commas from the input
-    let costInput = this.expense.cost.replace(/,/g, '');
-    let cost = parseFloat(costInput);
-    this.$set(this.expense, 'cost', costInput);
+    //let costInput = this.expense.cost.replace(/,/g, '');
+    let cost = parseFloat(this.expense.cost);
+    this.$set(this.expense, 'cost', this.expense.cost);
 
     if (employeeExpenseTypeBudget) {
       let committedAmount = employeeExpenseTypeBudget.pendingAmount + employeeExpenseTypeBudget.reimbursedAmount;
@@ -228,7 +228,9 @@ async function submit() {
       this.clearForm();
     } else {
       this.$set(this.expense, 'createdAt', moment().format('MM-DD-YYYY'));
-      this.$set(this.expense, 'receipt', this.file.name); //stores file name for lookup later
+      if(this.file) {
+        this.$set(this.expense, 'receipt', this.file.name); //stores file name for lookup later
+      }
       let newExpense = await api.createItem(api.EXPENSES, this.expense);
       console.log(newExpense.id);
       if (newExpense.id) {
@@ -330,8 +332,8 @@ export default {
       ],
       costRules: [
         v => !!v || 'Cost is a required field.',
-        v => parseFloat(v, 10) > 0 || 'Cost must be greater than 0.',
-        v => /^[+-]?[0-9]{1,3}(?:,?[0-9]{3})*(?:\.[0-9]{1,2})?$/.test(v) || 'Cost must be a properly formatted number.'
+        v => v > 0 || 'Cost must be greater than 0.',
+        v => v == (Math.round(v * 100)/100) || 'Cost must rounded to 2 places after the decimal.'
       ],
       componentRules: [v => !!v || 'An appropriate expense type must be selected.'],
       dateRules: [v => !!v || 'Date must be valid. Format: MM/DD/YYYY'],
