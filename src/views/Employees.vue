@@ -171,6 +171,9 @@ export default {
         matchingEmployeeIndex = _.findIndex(this.filteredEmployees, employee => employee.id === updatedEmployee.id);
         this.filteredEmployees.splice(matchingEmployeeIndex, 1, updatedEmployee);
       }
+      else {
+        this.filteredEmployees = _.remove(this.filteredEmployees, employee => employee.id !== updatedEmployee.id);
+      }
     },
     addModelToTable(newEmployee) {
       let matchingEmployee = _.filter(this.employees, employee => employee.id === newEmployee.id);
