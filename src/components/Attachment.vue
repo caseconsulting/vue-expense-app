@@ -12,6 +12,8 @@
 </template>
 <script>
 import { API_CONFIG } from '../shared/api-variables';
+import api from '../shared/api';
+var xhr = new XMLHttpRequest();
 // COMPUTED
 function link() {
   const API_HOSTNAME = API_CONFIG.apiHostname;
@@ -23,8 +25,10 @@ function link() {
 }
 
 // METHODS
-function openDownloadTab() {
-  window.open(this.link, '_blank');
+async function openDownloadTab() {
+  let signedURL = await api.getAttachment(this.expense.userId, this.expense.id);
+  console.log(signedURL);
+  window.open(signedURL, '_blank');
 }
 export default {
   methods: {
