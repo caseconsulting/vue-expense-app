@@ -327,12 +327,12 @@ export default {
       userInfo: {},
       descriptionRules: [
         v => !!v || 'Description is a required field.',
-        v => v.replace(/\s/g, '').length || 'Description is a required field.'
+        v => v.replace(/\s/g, '').length > 0 || 'Description is a required field.'
       ],
       costRules: [
         v => !!v || 'Cost is a required field.',
-        v => v > 0 || 'Cost must be greater than 0.',
-        v => v == Math.round(v * 100) / 100 || 'Cost must rounded to 2 places after the decimal.'
+        v => v > 0 || 'Cost must be greater than 0.'
+        // ,v => v == Math.round(v * 100) / 100 || 'Cost must rounded to 2 places after the decimal.' // rules need to return booleans
       ],
       componentRules: [v => !!v || 'An appropriate expense type must be selected.'],
       dateRules: [v => !!v || 'Date must be valid. Format: MM/DD/YYYY'],
