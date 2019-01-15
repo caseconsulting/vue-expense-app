@@ -44,7 +44,7 @@
                 <td class="text-xs-left">{{ (props.item.cost ? props.item.cost : 0) | moneyValue}}</td>
                 <td class="text-xs-left">{{ props.item.purchaseDate | dateFormat }}</td>
                 <td class="text-xs-left">{{ props.item.reimbursedDate |dateFormat }}</td>
-                <td class="text-xs-left">{{ props.item.description }}</td>
+                <td class="text-xs-left">{{ props.item.description |descriptionFilter }}</td>
                 <td class="text-xs-left">
                   <attachment :expense="props.item"></attachment>
                 </td>
@@ -75,6 +75,7 @@ import moment from 'moment';
 import _ from 'lodash';
 import { getRole, getUser } from '@/utils/auth';
 
+// FILTERS
 function moneyFilter(value) {
   return `${new Intl.NumberFormat('en-US', {
     style: 'decimal',
@@ -84,6 +85,11 @@ function moneyFilter(value) {
   }).format(value)}`;
 }
 
+function descriptionFilter(val) {
+  if (val.length > 15) {
+    return `${val.substring(0, 15)}...`;
+  } else return val;
+}
 export default {
   filters: {
     moneyValue: value => {
@@ -95,7 +101,8 @@ export default {
       } else {
         return '';
       }
-    }
+    },
+    descriptionFilter
   },
   data() {
     return {
