@@ -5,9 +5,7 @@
       <v-alert :value="fileTooBig" type="error">
         The file you selected is {{ megabytes }} MBs which exceeds the maximum file size of 6MB.
       </v-alert>
-      <!-- previewing images works but not pdfs etc.  -->
-      <!-- <img :src="previewURL" height="150" v-if="previewURL"/> -->
-      <v-text-field label="Select Receipt" @click='pickFile' v-model='fileName' prepend-icon='attach_file'></v-text-field>
+      <v-text-field :rules="passedRules" label="Select Receipt" @click='pickFile' v-model='fileName' prepend-icon='attach_file'></v-text-field>
       <input type="file" style="display: none" ref="receipt" :accept="acceptedFileTypes" @change="onFilePicked">
     </v-flex>
 </v-layout>
@@ -53,6 +51,7 @@ export default {
     megabytes,
     acceptedFileTypes
   },
+  props: ['passedRules'],
 
   methods: {
     pickFile() {
@@ -74,7 +73,6 @@ export default {
         fr.addEventListener('load', () => {
           this.previewURL = fr.result;
           this.fileBlob = files[0]; // file that can be sent to s3
-          console.log(this.fileBlob);
           this.$emit('fileSelected', this.fileBlob);
         });
       } else {

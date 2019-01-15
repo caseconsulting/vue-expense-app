@@ -40,7 +40,7 @@
       </v-menu>
 
       <!-- Receipt uploading -->
-      <file-upload @fileSelected="setFile"></file-upload>
+      <file-upload @fileSelected="setFile" :passedRules="receiptRules"></file-upload>
 
       <!-- Notes section -->
       <v-text-field v-model="expense.note" label="Notes (optional)" data-vv-name="Description"
@@ -76,7 +76,6 @@ import { saveAs } from 'file-saver';
 function setFile(file) {
   if (file) {
     this.file = file;
-    console.log('file set to', file);
   } else {
     this.file = undefined;
   }
@@ -228,7 +227,7 @@ async function submit() {
       this.clearForm();
     } else {
       this.$set(this.expense, 'createdAt', moment().format('MM-DD-YYYY'));
-      if(this.file) {
+      if (this.file) {
         this.$set(this.expense, 'receipt', this.file.name); //stores file name for lookup later
       }
       let newExpense = await api.createItem(api.EXPENSES, this.expense);
@@ -333,10 +332,11 @@ export default {
       costRules: [
         v => !!v || 'Cost is a required field.',
         v => v > 0 || 'Cost must be greater than 0.',
-        v => v == (Math.round(v * 100)/100) || 'Cost must rounded to 2 places after the decimal.'
+        v => v == Math.round(v * 100) / 100 || 'Cost must rounded to 2 places after the decimal.'
       ],
       componentRules: [v => !!v || 'An appropriate expense type must be selected.'],
       dateRules: [v => !!v || 'Date must be valid. Format: MM/DD/YYYY'],
+      receiptRules: [v => !!v || 'Receipts are required.'],
       valid: false,
       file: undefined
     };
