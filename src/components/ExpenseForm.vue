@@ -71,7 +71,7 @@ import _ from 'lodash';
 import dateUtils from '@/shared/dateUtils';
 import employeeUtils from '@/shared/employeeUtils';
 import FileUpload from './FileUpload.vue';
-import { saveAs } from 'file-saver';
+
 // METHODS
 function setFile(file) {
   if (file) {
