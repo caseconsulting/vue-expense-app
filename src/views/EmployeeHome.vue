@@ -390,7 +390,7 @@ export default {
     },
     isMobile() {
       let md = new MobileDetect(window.navigator.userAgent);
-      return md.is('iPhone') || md.is('Android');
+      return md.os() === 'AndroidOS' || md.is() === 'iOS';
     }
   },
   components: {
