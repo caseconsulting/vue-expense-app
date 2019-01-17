@@ -46,6 +46,9 @@
       <v-text-field v-model="expense.note" label="Notes (optional)" data-vv-name="Description"
                     multi-line></v-text-field>
 
+      <!-- Reference URL -->
+      <v-text-field v-model="expense.url" label="URL (Optional)"></v-text-field>
+
       <!-- Buttons -->
       <v-btn outline color="error" @click="deleting=true" :disabled="!isSuperAdmin && isReimbursed">
         <icon class="mr-1" name="trash"></icon>Delete</v-btn>
@@ -169,6 +172,8 @@ function clearForm() {
   this.$set(this.expense, 'purchaseDate', null);
   this.$set(this.expense, 'reimbursedDate', null);
   this.$set(this.expense, 'createdAt', null);
+  this.$set(this.expense, 'url', null);
+  this.$set(this.expense, 'receipt', undefined);
   if (this.isUser) {
     this.$set(this.expense, 'employeeName', this.userInfo.id);
   } else {

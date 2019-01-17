@@ -242,6 +242,7 @@ export default {
       this.$set(this.expense, 'note', item.note);
       this.$set(this.expense, 'receipt', item.receipt);
       this.$set(this.expense, 'createdAt', item.createdAt);
+      this.$set(this.expense, 'url', item.url);
     },
     updateModelInTable(updatedExpense) {
       let matchingExpensesIndex = _.findIndex(this.processedExpenses, expense => expense.id === updatedExpense.id);
