@@ -174,6 +174,7 @@ function clearForm() {
   this.$set(this.expense, 'createdAt', null);
   this.$set(this.expense, 'url', null);
   this.$set(this.expense, 'receipt', undefined);
+
   if (this.isUser) {
     this.$set(this.expense, 'employeeName', this.userInfo.id);
   } else {
@@ -216,14 +217,15 @@ async function submit() {
   if (this.$refs.form.validate()) {
     this.expense.receipt = undefined;
     if (!this.expense.note) {
-      this.expense.note = undefined;
+      this.expense.note = null;
     }
+    console.log(this.expense);
     if (this.expense.id) {
       this.$set(this.expense, 'receipt', this.file.name); //stores file name for lookup later
       let updatedExpense = await api.updateItem(api.EXPENSES, this.expense.id, this.expense);
       if (updatedExpense.id) {
         // submit attachment
-        let attachment = await api.createAttachment(newExpense, this.file);
+        let attachment = await api.createAttachment(this.expense, this.file);
         console.log('attachment', attachment);
         this.$emit('update', updatedExpense);
       } else {
