@@ -146,6 +146,24 @@
         </v-expansion-panel-content>
       </v-expansion-panel>
     </div>
+
+    <h2>FAQ</h2>
+    <div class="mb-5">
+      <div class="text-xs-center mb-3"></div>
+      <v-expansion-panel expand>
+        <v-expansion-panel-content>
+          <div slot="header">Known Issues</div>
+          <v-card>
+            <v-card-text class="grey lighten-3">
+              <li>
+                <icon name="space-shuttle"/>
+                Google Chrome has an issue displaying (some) attachments that are PDFs. Work-around is to tell Chrome to download PDFs. Or, use a different a browser.
+              </li>
+            </v-card-text>
+          </v-card>
+        </v-expansion-panel-content>
+      </v-expansion-panel>
+    </div>
   </v-container>
 </template>
 <script>
