@@ -1,13 +1,12 @@
 ## Setup
 
-The **Expense Application** is written in **Vue.js** and relies on **Node.js** v8.x+ and the **yarn** package management system.
+The **Expense Application** is written in **Vue.js** and relies on **Node.js** v8.x+ and the **npm** package management system.
 
-* Download and install Node.js from: https://nodejs.org/
-* Download and install yarn from: https://yarnpkg.com/en/docs/install
+* Download and install Node.js v8.x from: https://nodejs.org/dist/latest-v8.x/
 * Install required Node.js modules:
 
 ```
-yarn install
+npm install --no-optional
 ```
 
 ## Environment variables
@@ -83,7 +82,12 @@ npm run inspect
 To upgrade to the latest version of a specific Node.js module:
 
 ```
-yarn add <module-name> --save
+npm install --save <module-name>
+```
+To upgrade to the latest version of a specific Node.js module, which is a development dependency only:
+
+```
+npm install --save-dev <module-name>
 ```
 
 ## Deployment

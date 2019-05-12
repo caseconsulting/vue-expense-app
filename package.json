@@ -13,7 +13,8 @@
     "inspect": "vue-cli-service inspect",
     "lint": "vue-cli-service lint",
     "serve": "vue-cli-service serve",
-    "test": "vue-cli-service test:unit"
+    "test": "vue-cli-service test:unit",
+    "validate": "npm ci"
   },
   "dependencies": {
     "accounting-js": "^1.1.1",
