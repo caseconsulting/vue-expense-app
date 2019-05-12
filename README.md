@@ -7,6 +7,7 @@ The **Expense Application** is written in **Vue.js** and relies on **Node.js** v
 
 ```
 npm install --no-optional
+npm dedupe
 ```
 
 ## Environment variables
