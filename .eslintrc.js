@@ -1,6 +1,3 @@
-// https://eslint.org/docs/user-guide/configuration
-
-/* eslint-env node */
 module.exports = {
   root: true,
   parserOptions: {
@@ -10,17 +7,12 @@ module.exports = {
   },
   env: {
     browser: true,
-    es6: true
+    es6: true,
+    node: true
   },
-  // https://github.com/standard/standard/blob/master/docs/RULES-en.md
-  extends: ['eslint:recommended', 'plugin:vue/recommended'],
-  // required to lint *.vue files
-  plugins: ['html'],
-  // add your custom rules here
+  extends: ['eslint:recommended', 'plugin:vue/essential', '@vue/prettier'],
   rules: {
-    // allow async/await
-    'generator-star-spacing': 'off',
-    // allow debugger during development
+    'no-console': process.env.NODE_ENV === 'production' ? 'error' : 'off',
     'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'off'
   }
 };

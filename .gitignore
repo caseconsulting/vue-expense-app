@@ -14,6 +14,7 @@ aws-keys.json
 
 # Log files
 npm-debug.log*
+output.log
 yarn-debug.log*
 yarn-error.log*
 
