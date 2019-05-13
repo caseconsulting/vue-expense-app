@@ -1,6 +1,5 @@
-/* globals module */
 module.exports = {
-  lintOnSave: true,
+  lintOnSave: process.env.NODE_ENV !== 'production',
   devServer: {
     disableHostCheck: true
   }

@@ -8,11 +8,14 @@ module.exports = {
   env: {
     browser: true,
     es6: true,
+    jest: true,
     node: true
   },
   extends: ['eslint:recommended', 'plugin:vue/essential', '@vue/prettier'],
   rules: {
+    // allow console during development
     'no-console': process.env.NODE_ENV === 'production' ? 'error' : 'off',
+    // allow debugger during development
     'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'off'
   }
 };

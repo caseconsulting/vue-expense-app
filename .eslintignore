@@ -1,0 +1,6 @@
+/dist
+node_modules
+output.js
+tests/e2e/reports
+tests/unit/coverage
+tests/unit/reports
