@@ -1,8 +1,8 @@
 // https://docs.cypress.io/api/introduction/api.html
 
-describe("My First Test", () => {
-  it("Visits the Kitchen Sink", () => {
-    cy.visit("/");
-    cy.contains("h1", "Portal");
+describe('My First Test', () => {
+  it('Visits the Kitchen Sink', () => {
+    cy.visit('/');
+    cy.contains('h1', 'Portal');
   });
 });

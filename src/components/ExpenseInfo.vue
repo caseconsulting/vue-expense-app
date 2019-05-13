@@ -1,19 +1,19 @@
 <template>
-<v-card v-if="expense" raised id="expense-info" class="white--text slide-in-blurred-right ">
-  <v-card-title primary-title class="color-change-2x">
-    <v-flex lg12 class="headline">Expense Info</v-flex>
-    <v-flex lg12>
-      <p><span>Description:</span> {{ expense.description }}</p>
-      <p><span>Employee:</span> {{ expense.employeeName }}</p>
-      <p><span>Budget:</span> {{ expense.budgetName }}</p>
-      <p><span>Cost:</span> {{ expense.cost | moneyValue}}</p>
-      <p><span>Purchased On:</span> {{ expense.purchaseDate | dateFormat }}</p>
-      <p><span>Reimbursed On:</span> {{ expense.reimbursedDate | dateFormat }}</p>
-      <p><span>Notes:</span> {{ expense.note }}</p>
-      <attachment :expense="expense"></attachment>
-    </v-flex>
-  </v-card-title>
-</v-card>
+  <v-card v-if="expense" raised id="expense-info" class="white--text slide-in-blurred-right ">
+    <v-card-title primary-title class="color-change-2x">
+      <v-flex lg12 class="headline">Expense Info</v-flex>
+      <v-flex lg12>
+        <p><span>Description:</span> {{ expense.description }}</p>
+        <p><span>Employee:</span> {{ expense.employeeName }}</p>
+        <p><span>Budget:</span> {{ expense.budgetName }}</p>
+        <p><span>Cost:</span> {{ expense.cost | moneyValue }}</p>
+        <p><span>Purchased On:</span> {{ expense.purchaseDate | dateFormat }}</p>
+        <p><span>Reimbursed On:</span> {{ expense.reimbursedDate | dateFormat }}</p>
+        <p><span>Notes:</span> {{ expense.note }}</p>
+        <attachment :expense="expense"></attachment>
+      </v-flex>
+    </v-card-title>
+  </v-card>
 </template>
 
 <script>

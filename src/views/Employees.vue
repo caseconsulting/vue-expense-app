@@ -9,13 +9,25 @@
             <v-text-field v-model="search" append-icon="search" label="Search" single-line hide-details></v-text-field>
           </v-card-title>
 
-          <v-data-table :headers="headers" :items="employeeList" :search="search" :pagination.sync="pagination" item-key="name" class="elevation-1">
+          <v-data-table
+            :headers="headers"
+            :items="employeeList"
+            :search="search"
+            :pagination.sync="pagination"
+            item-key="name"
+            class="elevation-1"
+          >
             <template slot="headers" slot-scope="props">
               <tr>
-                <th class="text-xs-left"
+                <th
+                  class="text-xs-left"
                   v-for="header in props.headers"
                   :key="header.text"
-                  :class="['column sortable', pagination.descending ? 'desc' : 'asc', header.value === pagination.sortBy ? 'active' : '']"
+                  :class="[
+                    'column sortable',
+                    pagination.descending ? 'desc' : 'asc',
+                    header.value === pagination.sortBy ? 'active' : ''
+                  ]"
                   @click="changeSort(header.value)"
                 >
                   {{ header.text }}
@@ -31,7 +43,7 @@
                 <td class="text-xs-left">{{ props.item.lastName }}</td>
                 <td class="text-xs-left">{{ props.item.hireDate | dateFormat }}</td>
                 <td class="text-xs-left">{{ props.item.email }}</td>
-                <td class="text-xs-left">{{ isInActive(props.item)}}</td>
+                <td class="text-xs-left">{{ isInActive(props.item) }}</td>
               </tr>
             </template>
 
@@ -48,13 +60,19 @@
     </v-flex>
 
     <v-flex v-if="userIsAdmin()" lg4 md12 sm12>
-      <employee-form :model="model" v-on:add="addModelToTable" v-on:update="updateModelInTable" v-on:delete="deleteModelFromTable" style="position: sticky; top: 79px;"></employee-form>
+      <employee-form
+        :model="model"
+        v-on:add="addModelToTable"
+        v-on:update="updateModelInTable"
+        v-on:delete="deleteModelFromTable"
+        style="position: sticky; top: 79px;"
+      ></employee-form>
     </v-flex>
   </v-layout>
 </template>
 
 <script>
-import { setIdToken, setAccessToken, getAccessToken, getRole } from '@/utils/auth';
+import { getRole } from '@/utils/auth';
 import api from '@/shared/api.js';
 import EmployeeForm from '../components/EmployeeForm.vue';
 import moment from 'moment';
@@ -170,8 +188,7 @@ export default {
       if (updatedEmployee.isActive) {
         matchingEmployeeIndex = _.findIndex(this.filteredEmployees, employee => employee.id === updatedEmployee.id);
         this.filteredEmployees.splice(matchingEmployeeIndex, 1, updatedEmployee);
-      }
-      else {
+      } else {
         this.filteredEmployees = _.remove(this.filteredEmployees, employee => employee.id !== updatedEmployee.id);
       }
     },

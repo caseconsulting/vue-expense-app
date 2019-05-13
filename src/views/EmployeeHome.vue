@@ -1,54 +1,54 @@
 <template>
-<v-layout row wrap justify-center>
-  <v-snackbar v-model="status.statusType" :color="status.color" :multi-line="true" :right="true" :timeout="5000" :top="true" :vertical="true">
-    <v-card-title headline color="white">
-      <span class="headline">{{status.statusMessage}}</span>
-    </v-card-title>
-    <v-btn color="white" flat @click="clearStatus">
-      Close
-    </v-btn>
-  </v-snackbar>
-  <v-flex v-if="!isMobile" text-xs-center lg8 md12 sm12 pb-3>
-    <h1 pb-2>Budget Statistics for {{employee.firstName}} {{employee.lastName}}</h1>
-  </v-flex>
-  <v-flex lg4 v-if="!isMobile">
-    <v-flex>
-      <v-card>
-        <v-card-title>
-          <div>
-            <h3 pt-2>Anniversary Date: {{getAnniversary}}</h3>
-            <div @mouseover="display = !display" @mouseleave="display = !display">
-              <div v-if="display">
-                Days Until: {{getDaysUntil}}
-              </div>
-              <div v-else>
-                Seconds Until: {{getSecondsUntil}}
+  <v-layout row wrap justify-center>
+    <v-snackbar
+      v-model="status.statusType"
+      :color="status.color"
+      :multi-line="true"
+      :right="true"
+      :timeout="5000"
+      :top="true"
+      :vertical="true"
+    >
+      <v-card-title headline color="white">
+        <span class="headline">{{ status.statusMessage }}</span>
+      </v-card-title>
+      <v-btn color="white" flat @click="clearStatus">Close</v-btn>
+    </v-snackbar>
+    <v-flex v-if="!isMobile" text-xs-center lg8 md12 sm12 pb-3>
+      <h1 pb-2>Budget Statistics for {{ employee.firstName }} {{ employee.lastName }}</h1>
+    </v-flex>
+    <v-flex lg4 v-if="!isMobile">
+      <v-flex>
+        <v-card>
+          <v-card-title>
+            <div>
+              <h3 pt-2>Anniversary Date: {{ getAnniversary }}</h3>
+              <div @mouseover="display = !display" @mouseleave="display = !display">
+                <div v-if="display">Days Until: {{ getDaysUntil }}</div>
+                <div v-else>Seconds Until: {{ getSecondsUntil }}</div>
               </div>
             </div>
-
-          </div>
-        </v-card-title>
-      </v-card>
+          </v-card-title>
+        </v-card>
+      </v-flex>
     </v-flex>
-  </v-flex>
-  <v-flex v-if="!isMobile" xs12 sm12 md12 lg8>
-    <v-flex text-xs-center>
-      <budget-table v-if="!loading" :employee="expenseTypeData"></budget-table>
-      <budget-chart v-if="!loading" :options="drawGraph.optionSet" :chart-data="drawGraph.dataSet"></budget-chart>
+    <v-flex v-if="!isMobile" xs12 sm12 md12 lg8>
+      <v-flex text-xs-center>
+        <budget-table v-if="!loading" :employee="expenseTypeData"></budget-table>
+        <budget-chart v-if="!loading" :options="drawGraph.optionSet" :chart-data="drawGraph.dataSet"></budget-chart>
+      </v-flex>
     </v-flex>
-  </v-flex>
-  <v-flex v-else xs12 sm12 md12 lg8>
-    <v-flex text-xs-center>
-      <budget-table-mobile v-if="!loading" :employee="expenseTypeData"></budget-table-mobile>
+    <v-flex v-else xs12 sm12 md12 lg8>
+      <v-flex text-xs-center>
+        <budget-table-mobile v-if="!loading" :employee="expenseTypeData"></budget-table-mobile>
+      </v-flex>
     </v-flex>
-  </v-flex>
-  <v-flex xs12 sm12 md12 lg4 pt-3>
-    <v-flex text-xs-center lg12 md12 sm12>
-      <expense-form :expense="expense" v-on:error="displayError"></expense-form>
+    <v-flex xs12 sm12 md12 lg4 pt-3>
+      <v-flex text-xs-center lg12 md12 sm12>
+        <expense-form :expense="expense" v-on:error="displayError"></expense-form>
+      </v-flex>
     </v-flex>
-  </v-flex>
-
-</v-layout>
+  </v-layout>
 </template>
 
 <script>
@@ -143,12 +143,12 @@ export default {
       this.minutes = duration.minutes() > 0 ? duration.minutes() : 0;
       this.seconds = duration.seconds() > 0 ? duration.seconds() : 0;
     },
-    async updateData(newData) {
+    async updateData() {
       this.expenseTypeData = await api.getItem(api.SPECIAL, this.employee.id);
       this.showSnackbar();
     },
 
-    async showSnackbar(newData) {
+    async showSnackbar() {
       this.$set(this.status, 'statusType', 'SUCCESS');
       this.$set(this.status, 'statusMessage', 'Item was successfully submitted!');
       this.$set(this.status, 'color', 'green');
@@ -179,7 +179,6 @@ export default {
   computed: {
     budgets() {
       let budgetNames = [];
-      let budgetCosts = [];
       let budgetDifference = [];
       let reimbursed = [];
       let unreimbursed = [];
@@ -357,6 +356,8 @@ export default {
         } else {
           return anniversary.format('ddd. MMM D, YYYY');
         }
+      } else {
+        // TODO: Return something for invalid date
       }
     },
     getDaysUntil() {
@@ -366,25 +367,20 @@ export default {
       anniversary = anniversary.year(year);
       if (now.isAfter(anniversary)) {
         anniversary.add(1, 'years');
-        let days = anniversary.diff(now, 'days');
         return anniversary.diff(now, 'days') + 1;
       } else {
-        let days = anniversary.diff(now, 'days');
         return anniversary.diff(now, 'days') + 1;
       }
     },
     getSecondsUntil() {
-      let update = this.actualTime;
       let now = moment();
       let year = now.year();
       let anniversary = moment(this.hireDate, 'YYYY-MM-DD');
       anniversary = anniversary.year(year);
       if (now.isAfter(anniversary)) {
         anniversary.add(1, 'years');
-        let days = anniversary.diff(now, 'seconds');
         return anniversary.diff(now, 'seconds');
       } else {
-        let days = anniversary.diff(now, 'seconds');
         return anniversary.diff(now, 'seconds');
       }
     },
@@ -401,5 +397,4 @@ export default {
   }
 };
 </script>
-<style>
-</style>
+<style></style>

@@ -1,15 +1,21 @@
 <template>
-<div>
-<v-layout>
-    <v-flex xs12 class="text-xs-center text-sm-center text-md-center text-lg-center">
-      <v-alert :value="fileTooBig" type="error">
-        The file you selected is {{ megabytes }} MBs which exceeds the maximum file size of 6MB.
-      </v-alert>
-      <v-text-field :rules="passedRules" label="Select Receipt" @click='pickFile' v-model='fileName' prepend-icon='attach_file'></v-text-field>
-      <input type="file" style="display: none" ref="receipt" :accept="acceptedFileTypes" @change="onFilePicked">
-    </v-flex>
-</v-layout>
-</div>
+  <div>
+    <v-layout>
+      <v-flex xs12 class="text-xs-center text-sm-center text-md-center text-lg-center">
+        <v-alert :value="fileTooBig" type="error">
+          The file you selected is {{ megabytes }} MBs which exceeds the maximum file size of 6MB.
+        </v-alert>
+        <v-text-field
+          :rules="passedRules"
+          label="Select Receipt"
+          @click="pickFile"
+          v-model="fileName"
+          prepend-icon="attach_file"
+        ></v-text-field>
+        <input type="file" style="display: none" ref="receipt" :accept="acceptedFileTypes" @change="onFilePicked" />
+      </v-flex>
+    </v-layout>
+  </div>
 </template>
 
 <script>

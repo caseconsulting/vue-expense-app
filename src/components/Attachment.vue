@@ -1,19 +1,20 @@
 <template>
   <v-layout>
     <v-flex xs4>
-      <v-btn v-if="this.expense.receipt" flat icon color="primary" @click="openDownloadTab" >
+      <v-btn v-if="this.expense.receipt" flat icon color="primary" @click="openDownloadTab">
         <icon name="cloud-download-alt" scale="2"></icon>
       </v-btn>
-      <v-btn v-else disabled flat icon color="primary" @click="openDownloadTab" >
+      <v-btn v-else disabled flat icon color="primary" @click="openDownloadTab">
         <icon name="cloud-download-alt" scale="2"></icon>
       </v-btn>
     </v-flex>
   </v-layout>
 </template>
+
 <script>
 import { API_CONFIG } from '../shared/api-variables';
 import api from '../shared/api';
-var xhr = new XMLHttpRequest();
+
 // COMPUTED
 function link() {
   const API_HOSTNAME = API_CONFIG.apiHostname;

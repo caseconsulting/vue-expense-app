@@ -1,27 +1,25 @@
 <template>
-<div>
+  <div>
+    <v-flex>
+      <img src="@/assets/img/logo-banner.gif" class="logo" />
+    </v-flex>
 
-  <v-flex>
-    <img src="@/assets/img/logo-banner.gif" class="logo" />
-  </v-flex>
-
-  <v-list class="pt-0" dense>
-    <v-divider></v-divider>
-    <v-list-tile v-for="item in visibleTiles" :key="item.title" @click="" :to='{name: item.route}'>
-      <v-list-tile-action>
-        <icon :name="item.icon" class="navbar-icons"></icon>
-      </v-list-tile-action>
-      <v-list-tile-content>
-        <v-list-tile-title>{{ item.title }}</v-list-tile-title>
-      </v-list-tile-content>
-    </v-list-tile>
-  </v-list>
-</div>
+    <v-list class="pt-0" dense>
+      <v-divider></v-divider>
+      <v-list-tile v-for="item in visibleTiles" :key="item.title" @click="" :to="{ name: item.route }">
+        <v-list-tile-action>
+          <icon :name="item.icon" class="navbar-icons"></icon>
+        </v-list-tile-action>
+        <v-list-tile-content>
+          <v-list-tile-title>{{ item.title }}</v-list-tile-title>
+        </v-list-tile-content>
+      </v-list-tile>
+    </v-list>
+  </div>
 </template>
 
-
 <script>
-import api from '@/shared/api.js';
+import _ from 'lodash';
 
 // @ is an alias to /src
 import { isLoggedIn, login, logout, getRole } from '@/utils/auth';

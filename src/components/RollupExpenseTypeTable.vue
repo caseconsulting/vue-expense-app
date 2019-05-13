@@ -1,76 +1,109 @@
 <template>
-<div>
-  <v-card>
-    <v-container fluid>
-      <v-card-title>
-        <h2>Unreimbursed Expenses</h2>
-        <v-spacer></v-spacer>
-        <v-select :items="employees" :filter="customFilter" v-model="employee" item-text="text" label="Filter by Employee" clearable autocomplete></v-select>
-        <v-select :items="expenseTypes" :filter="customFilter" v-model="expenseType" item-text="text" label="Filter by Expense Type" clearable autocomplete></v-select>
-      </v-card-title>
+  <div>
+    <v-card>
+      <v-container fluid>
+        <v-card-title>
+          <h2>Unreimbursed Expenses</h2>
+          <v-spacer></v-spacer>
+          <v-select
+            :items="employees"
+            :filter="customFilter"
+            v-model="employee"
+            item-text="text"
+            label="Filter by Employee"
+            clearable
+            autocomplete
+          ></v-select>
+          <v-select
+            :items="expenseTypes"
+            :filter="customFilter"
+            v-model="expenseType"
+            item-text="text"
+            label="Filter by Expense Type"
+            clearable
+            autocomplete
+          ></v-select>
+        </v-card-title>
 
-      <v-data-table v-model="selected" :headers="headers" :items="filteredItems" :pagination.sync="pagination" select-all item-key="key" class="elevation-1" :loading="loading">
-        <v-progress-linear slot="progress" color="radioactive" indeterminate></v-progress-linear>
-        <template slot="headers" slot-scope="props">
-          <tr>
-            <th>
-              <v-checkbox
-                :input-value="everythingSelected"
-                primary
-                hide-details
-                @click="toggleAll"
-              ></v-checkbox>
-            </th>
-            <th
-              v-for="header in props.headers"
-              :key="header.text"
-              :class="['column sortable', pagination.descending ? 'desc' : 'asc', header.value === pagination.sortBy ? 'active' : '']"
-              @click="changeSort(header.value)"
-            >
-              <v-icon small>arrow_upward</v-icon>
-              {{ header.text }}
-            </th>
-          </tr>
-        </template>
+        <v-data-table
+          v-model="selected"
+          :headers="headers"
+          :items="filteredItems"
+          :pagination.sync="pagination"
+          select-all
+          item-key="key"
+          class="elevation-1"
+          :loading="loading"
+        >
+          <v-progress-linear slot="progress" color="radioactive" indeterminate></v-progress-linear>
+          <template slot="headers" slot-scope="props">
+            <tr>
+              <th>
+                <v-checkbox :input-value="everythingSelected" primary hide-details @click="toggleAll"></v-checkbox>
+              </th>
+              <th
+                v-for="header in props.headers"
+                :key="header.text"
+                :class="[
+                  'column sortable',
+                  pagination.descending ? 'desc' : 'asc',
+                  header.value === pagination.sortBy ? 'active' : ''
+                ]"
+                @click="changeSort(header.value)"
+              >
+                <v-icon small>arrow_upward</v-icon>
+                {{ header.text }}
+              </th>
+            </tr>
+          </template>
 
-        <template slot="items" slot-scope="props">
-          <tr v-if="!loading" :active="props.selected" @click="props.expanded = !props.expanded">
-          <td>
-            <v-checkbox
-              v-model="props.item.allSelected"
-              @click="props.item = toggleExpenses(props.item)"
-              primary
-              hide-details
-            ></v-checkbox>
-            </td>
-            <td class="text-xs-center">{{ props.item.employeeName }}</td>
-            <td class="text-xs-center">{{ props.item.budgetName }}</td>
-            <td class="text-xs-center" id="money-team">{{ getExpenseTotal(props.item.expenses) | moneyValue }}</td>
-          </tr>
-        </template>
+          <template slot="items" slot-scope="props">
+            <tr v-if="!loading" :active="props.selected" @click="props.expanded = !props.expanded">
+              <td>
+                <v-checkbox
+                  v-model="props.item.allSelected"
+                  @click="props.item = toggleExpenses(props.item)"
+                  primary
+                  hide-details
+                ></v-checkbox>
+              </td>
+              <td class="text-xs-center">{{ props.item.employeeName }}</td>
+              <td class="text-xs-center">{{ props.item.budgetName }}</td>
+              <td class="text-xs-center" id="money-team">{{ getExpenseTotal(props.item.expenses) | moneyValue }}</td>
+            </tr>
+          </template>
 
-        <template slot="expand" slot-scope="props">
-          <unrolled-table-info
-            @expensePicked="addExpenseToSelected"
-            @changedAllSelected="props.item.allSelected = $event"
-            :allSelected="props.item.allSelected"
-            :expenses="props.item.expenses"
+          <template slot="expand" slot-scope="props">
+            <unrolled-table-info
+              @expensePicked="addExpenseToSelected"
+              @changedAllSelected="props.item.allSelected = $event"
+              :allSelected="props.item.allSelected"
+              :expenses="props.item.expenses"
             ></unrolled-table-info>
-        </template>
-
-      </v-data-table>
-      <v-flex offset-md10>
-
-        <v-fab-transition>
-          <v-btn @click="button_clicked=true" id="custom-button-color" :loading="reimbursing" v-show="showSubmitButton" fab dark large bottom left fixed>
-            <icon name="dollar-sign"></icon>
-          </v-btn>
-        </v-fab-transition>
-      </v-flex>
-    </v-container>
-    <reimburse-modal :activate="button_clicked"></reimburse-modal>
-  </v-card>
-</div>
+          </template>
+        </v-data-table>
+        <v-flex offset-md10>
+          <v-fab-transition>
+            <v-btn
+              @click="button_clicked = true"
+              id="custom-button-color"
+              :loading="reimbursing"
+              v-show="showSubmitButton"
+              fab
+              dark
+              large
+              bottom
+              left
+              fixed
+            >
+              <icon name="dollar-sign"></icon>
+            </v-btn>
+          </v-fab-transition>
+        </v-flex>
+      </v-container>
+      <reimburse-modal :activate="button_clicked"></reimburse-modal>
+    </v-card>
+  </div>
 </template>
 
 <script>
@@ -248,7 +281,7 @@ export default {
       let itemsToRemoveFromTable = [];
 
       await this.asyncForEach(expensesToSubmit, async expense => {
-        let updatedItem = await api.updateItem(api.EXPENSES, expense.id, expense);
+        await api.updateItem(api.EXPENSES, expense.id, expense);
         itemsToRemoveFromTable.push(expense);
       });
 
@@ -379,9 +412,10 @@ export default {
     defaultSort() {
       let arrayLength = this.empBudgets.length;
 
-      empBudgets.map(item => {
+      this.empBudgets.map(item => {
         for (var i = 0; i < arrayLength; i++) {
           if (item.lastName === this.empBudgets[i].lastName) {
+            // TODO: What should happen here?
           }
         }
       });

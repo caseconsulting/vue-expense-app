@@ -15,8 +15,9 @@
           <v-card>
             <v-card-text class="grey lighten-3">
               <li>
-                <icon name="space-shuttle"/>
-                Google Chrome has an issue displaying (some) attachments that are PDFs. Work-around is to tell Chrome to download PDFs. Or, use a different a browser.
+                <icon name="space-shuttle" />
+                Google Chrome has an issue displaying (some) attachments that are PDFs. Work-around is to tell Chrome to
+                download PDFs. Or, use a different a browser.
               </li>
             </v-card-text>
           </v-card>
@@ -26,12 +27,14 @@
           <v-card>
             <v-card-text class="grey lighten-3">
               <li>
-                <icon name="space-shuttle"/>
-                How do I update an expense? - Select an expense from the list then click update to amend the desired information.
+                <icon name="space-shuttle" />
+                How do I update an expense? - Select an expense from the list then click update to amend the desired
+                information.
               </li>
               <li>
-                <icon name="space-shuttle"/>
-                How do I delete an expense? - Select an expense from the list then click the delete button. <strong>This action cannot be undone.</strong>
+                <icon name="space-shuttle" />
+                How do I delete an expense? - Select an expense from the list then click the delete button.
+                <strong>This action cannot be undone.</strong>
               </li>
             </v-card-text>
           </v-card>
@@ -42,12 +45,14 @@
           <v-card>
             <v-card-text class="grey lighten-3">
               <li>
-                <icon name="space-shuttle"/>
-                What is a recurring expense type? - This is an expense type has no start and end date and will be renewed on an employees anniversary date.
+                <icon name="space-shuttle" />
+                What is a recurring expense type? - This is an expense type has no start and end date and will be
+                renewed on an employees anniversary date.
               </li>
               <li>
-                <icon name="space-shuttle"/>
-                What is the overdraft flag? - This allows an expense type to be charged up to twice the defined amount. Subtracting the overage from next years budget.
+                <icon name="space-shuttle" />
+                What is the overdraft flag? - This allows an expense type to be charged up to twice the defined amount.
+                Subtracting the overage from next years budget.
               </li>
             </v-card-text>
           </v-card>
@@ -58,11 +63,11 @@
           <v-card>
             <v-card-text class="grey lighten-3">
               <li>
-                <icon name="space-shuttle"/>
+                <icon name="space-shuttle" />
                 What is an employee ID? - An employee's ID number will be a user's hire order.
               </li>
               <li>
-                <icon name="space-shuttle"/>
+                <icon name="space-shuttle" />
                 Marking an employee inactive - This will freeze the user's ability to submit new expenses.
               </li>
             </v-card-text>
@@ -74,7 +79,7 @@
           <v-card>
             <v-card-text class="grey lighten-3">
               <li v-for="(infoItem, itemIndex) in user.table.info" :key="`item${itemIndex}`">
-                <icon name="space-shuttle"/>{{ infoItem }}
+                <icon name="space-shuttle" />{{ infoItem }}
               </li>
             </v-card-text>
           </v-card>

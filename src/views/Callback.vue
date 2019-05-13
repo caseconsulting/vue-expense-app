@@ -1,13 +1,7 @@
-<template>
-</template>
+<template> </template>
 
 <script>
-import {
-  setIdToken,
-  setAccessToken,
-  setRole,
-  setProfile
-} from '@/utils/auth';
+import { setIdToken, setAccessToken, setRole, setProfile } from '@/utils/auth';
 // import api from '@/shared/api';
 
 export default {
@@ -30,5 +24,4 @@ export default {
 };
 </script>
 
-<style scoped lang="scss">
-</style>
+<style scoped lang="scss"></style>

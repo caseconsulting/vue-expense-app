@@ -1,47 +1,101 @@
 <template>
-<v-card hover>
-  <v-container fluid>
-    <v-card-title>
-      <h3 v-if="model.id"> Edit Expense Type </h3>
-      <h3 v-else> Create New Expense Type </h3>
-    </v-card-title>
-    <v-form ref="form" v-model="valid" lazy-validation>
-      <v-text-field v-model="model.budgetName" :rules="genericRules" label="Budget Name" data-vv-name="Budget Name"></v-text-field>
-      <v-text-field prefix="$" v-model="model.budget" :rules="budgetRules" label="Budget" data-vv-name="Budget"></v-text-field>
+  <v-card hover>
+    <v-container fluid>
+      <v-card-title>
+        <h3 v-if="model.id">Edit Expense Type</h3>
+        <h3 v-else>Create New Expense Type</h3>
+      </v-card-title>
+      <v-form ref="form" v-model="valid" lazy-validation>
+        <v-text-field
+          v-model="model.budgetName"
+          :rules="genericRules"
+          label="Budget Name"
+          data-vv-name="Budget Name"
+        ></v-text-field>
+        <v-text-field
+          prefix="$"
+          v-model="model.budget"
+          :rules="budgetRules"
+          label="Budget"
+          data-vv-name="Budget"
+        ></v-text-field>
 
-      <v-checkbox label='Overdraft Flag (optional)' v-model='model.odFlag'></v-checkbox>
+        <v-checkbox label="Overdraft Flag (optional)" v-model="model.odFlag"></v-checkbox>
 
-      <v-checkbox label='Recurring (optional)' v-model='model.recurringFlag'></v-checkbox>
+        <v-checkbox label="Recurring (optional)" v-model="model.recurringFlag"></v-checkbox>
 
-      <v-menu v-if="!model.recurringFlag" :rules="genericRules" :close-on-content-click="true" :nudge-right="40" lazy transition="scale-transition" offset-y full-width max-width="290px" min-width="290px">
-        <v-text-field slot="activator" v-model="startDateFormatted" :rules="dateRules" label="Start Date" hint="MM/DD/YYYY format" persistent-hint prepend-icon="event" @blur="model.startDate = parseDate(startDateFormatted)"></v-text-field>
-        <v-date-picker v-model="model.startDate" no-title></v-date-picker>
-      </v-menu>
+        <v-menu
+          v-if="!model.recurringFlag"
+          :rules="genericRules"
+          :close-on-content-click="true"
+          :nudge-right="40"
+          lazy
+          transition="scale-transition"
+          offset-y
+          full-width
+          max-width="290px"
+          min-width="290px"
+        >
+          <v-text-field
+            slot="activator"
+            v-model="startDateFormatted"
+            :rules="dateRules"
+            label="Start Date"
+            hint="MM/DD/YYYY format"
+            persistent-hint
+            prepend-icon="event"
+            @blur="model.startDate = parseDate(startDateFormatted)"
+          ></v-text-field>
+          <v-date-picker v-model="model.startDate" no-title></v-date-picker>
+        </v-menu>
 
-      <v-menu v-if="!model.recurringFlag" :close-on-content-click="true" :nudge-right="40" lazy transition="scale-transition" offset-y full-width max-width="290px" min-width="290px">
-        <v-text-field slot="activator" v-model="endDateFormatted" :rules="dateRules" label="End Date" hint="MM/DD/YYYY format" persistent-hint prepend-icon="event" @blur="model.endDate = parseDate(endDateFormatted)"></v-text-field>
-        <v-date-picker v-model="model.endDate" no-title></v-date-picker>
-      </v-menu>
+        <v-menu
+          v-if="!model.recurringFlag"
+          :close-on-content-click="true"
+          :nudge-right="40"
+          lazy
+          transition="scale-transition"
+          offset-y
+          full-width
+          max-width="290px"
+          min-width="290px"
+        >
+          <v-text-field
+            slot="activator"
+            v-model="endDateFormatted"
+            :rules="dateRules"
+            label="End Date"
+            hint="MM/DD/YYYY format"
+            persistent-hint
+            prepend-icon="event"
+            @blur="model.endDate = parseDate(endDateFormatted)"
+          ></v-text-field>
+          <v-date-picker v-model="model.endDate" no-title></v-date-picker>
+        </v-menu>
 
-      <v-text-field v-model='model.description' :rules="genericRules " label="Notes " data-vv-name="Description " multi-line></v-text-field>
+        <v-text-field
+          v-model="model.description"
+          :rules="genericRules"
+          label="Notes "
+          data-vv-name="Description "
+          multi-line
+        ></v-text-field>
 
-      <!-- Buttons -->
-      <v-btn outline color="error " @click="deleting=true ">
-        <icon class="mr-1 " name='trash'></icon>Delete</v-btn>
-      <v-btn color="white " @click="clearForm ">
-        <icon class="mr-1 " name='ban'></icon>Cancel</v-btn>
-      <v-btn outline color="success " @click="submit " :disabled="!valid ">
-        <icon class="mr-1 " name='save'></icon>Submit</v-btn>
-    </v-form>
-    <delete-modal :activate="deleting " :type=" 'expense-type' "></delete-modal>
-  </v-container>
-</v-card>
+        <!-- Buttons -->
+        <v-btn outline color="error " @click="deleting = true"> <icon class="mr-1 " name="trash"></icon>Delete</v-btn>
+        <v-btn color="white " @click="clearForm"> <icon class="mr-1 " name="ban"></icon>Cancel</v-btn>
+        <v-btn outline color="success " @click="submit" :disabled="!valid">
+          <icon class="mr-1 " name="save"></icon>Submit</v-btn
+        >
+      </v-form>
+      <delete-modal :activate="deleting" :type="'expense-type'"></delete-modal>
+    </v-container>
+  </v-card>
 </template>
 
 <script>
 import api from '@/shared/api.js';
 import DeleteModal from './DeleteModal.vue';
-import moment from 'moment';
 import dateUtils from '@/shared/dateUtils';
 
 // METHODS
@@ -87,24 +141,21 @@ async function submit(newExpenseType) {
       this.$set(this.model, 'endDate', null);
     }
 
-
     if (this.model.id) {
       let newExpenseType = await api.updateItem(api.EXPENSE_TYPES, this.model.id, this.model);
-      if(newExpenseType.id) {
+      if (newExpenseType.id) {
         this.$emit('update', newExpenseType);
-      }
-      else {
+      } else {
         this.$emit('error', newExpenseType.response.data.message);
       }
       this.clearForm();
     } else {
       let newExpenseType = await api.createItem(api.EXPENSE_TYPES, this.model);
-      if(newExpenseType.id) {
+      if (newExpenseType.id) {
         this.$set(this.model, 'id', newExpenseType.id);
         this.$emit('add', newExpenseType);
         this.clearForm();
-      }
-      else {
+      } else {
         this.$emit('error', newExpenseType.response.data.message);
       }
     }
@@ -154,5 +205,4 @@ export default {
   }
 };
 </script>
-<style>
-</style>
+<style></style>

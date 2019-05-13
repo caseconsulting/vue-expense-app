@@ -1,11 +1,11 @@
 <template>
-<div>
-  <b-table :sort-by.sync="sortBy" :sort-desc.sync="sortDesc" :items="items" :fields="fields">
-  </b-table>
-  <p>
-    Sorting By: <b>{{ sortBy }}</b>, Sort Direction: <b>{{ sortDesc ? 'Descending' : 'Ascending' }}</b>
-  </p>
-</div>
+  <div>
+    <b-table :sort-by.sync="sortBy" :sort-desc.sync="sortDesc" :items="items" :fields="fields"> </b-table>
+    <p>
+      Sorting By: <b>{{ sortBy }}</b
+      >, Sort Direction: <b>{{ sortDesc ? 'Descending' : 'Ascending' }}</b>
+    </p>
+  </div>
 </template>
 
 <script>
@@ -14,7 +14,8 @@ export default {
     return {
       sortBy: 'age',
       sortDesc: false,
-      fields: [{
+      fields: [
+        {
           key: 'last_name',
           sortable: true
         },
@@ -31,7 +32,8 @@ export default {
           sortable: false
         }
       ],
-      items: [{
+      items: [
+        {
           isActive: true,
           age: 40,
           first_name: 'Dickerson',
@@ -56,11 +58,9 @@ export default {
           last_name: 'Carney'
         }
       ]
-    }
+    };
   },
-  methods: {
-
-  },
-}
+  methods: {}
+};
 </script>
 <style></style>

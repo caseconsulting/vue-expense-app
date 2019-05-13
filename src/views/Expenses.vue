@@ -1,79 +1,106 @@
 <template>
-<v-layout row wrap>
-  <v-snackbar v-model="status.statusType" :color="status.color" :multi-line="true" :right="true" :timeout="5000" :top="true" :vertical="true">
-    <v-card-title headline color="white">
-      <span class="headline">{{status.statusMessage}}</span>
-    </v-card-title>
-    <v-btn color="white" flat @click="clearStatus">
-      Close
-    </v-btn>
-  </v-snackbar>
-  <v-flex lg12 md12 sm12>
-    <!-- <v-alert v-if="error" dismissible :value="error" color="error" icon="warning" outline>
+  <v-layout row wrap>
+    <v-snackbar
+      v-model="status.statusType"
+      :color="status.color"
+      :multi-line="true"
+      :right="true"
+      :timeout="5000"
+      :top="true"
+      :vertical="true"
+    >
+      <v-card-title headline color="white">
+        <span class="headline">{{ status.statusMessage }}</span>
+      </v-card-title>
+      <v-btn color="white" flat @click="clearStatus">
+        Close
+      </v-btn>
+    </v-snackbar>
+    <v-flex lg12 md12 sm12>
+      <!-- <v-alert v-if="error" dismissible :value="error" color="error" icon="warning" outline>
         {{error.response.data.message}}
       </v-alert> -->
-  </v-flex>
-  <v-flex lg8 md12 sm12>
-    <v-card>
-      <v-container fluid>
-        <v-card-title>
-          <h2 v-if="isUser">{{ getUserName }}'s Expenses</h2>
-          <h2 v-else>Expenses</h2>
-          <v-spacer></v-spacer>
-          <v-text-field v-model="search" append-icon="search" label="Search" single-line hide-details></v-text-field>
-        </v-card-title>
-        <v-data-table :loading="loading" :headers="roleHeaders" :items="sorting" :search="search" :pagination.sync="pagination" item-key="name" class="elevation-1">
-          <v-progress-linear slot="progress" color="radioactive" indeterminate></v-progress-linear>
-          <template slot="headers" slot-scope="props">
-            <tr>
-              <th class="text-xs-left"
-                v-for="header in props.headers"
-                :key="header.text"
-                :class="['column sortable', pagination.descending ? 'desc' : 'asc', header.value === pagination.sortBy ? 'active' : '']"
-                @click="changeSort(header.value)"
-              >
-                {{ header.text }}
-                <v-icon small>arrow_upward</v-icon>
-              </th>
-            </tr>
-          </template>
-          <template slot="items" slot-scope="props">
+    </v-flex>
+    <v-flex lg8 md12 sm12>
+      <v-card>
+        <v-container fluid>
+          <v-card-title>
+            <h2 v-if="isUser">{{ getUserName }}'s Expenses</h2>
+            <h2 v-else>Expenses</h2>
+            <v-spacer></v-spacer>
+            <v-text-field v-model="search" append-icon="search" label="Search" single-line hide-details></v-text-field>
+          </v-card-title>
+          <v-data-table
+            :loading="loading"
+            :headers="roleHeaders"
+            :items="sorting"
+            :search="search"
+            :pagination.sync="pagination"
+            item-key="name"
+            class="elevation-1"
+          >
+            <v-progress-linear slot="progress" color="radioactive" indeterminate></v-progress-linear>
+            <template slot="headers" slot-scope="props">
+              <tr>
+                <th
+                  class="text-xs-left"
+                  v-for="header in props.headers"
+                  :key="header.text"
+                  :class="[
+                    'column sortable',
+                    pagination.descending ? 'desc' : 'asc',
+                    header.value === pagination.sortBy ? 'active' : ''
+                  ]"
+                  @click="changeSort(header.value)"
+                >
+                  {{ header.text }}
+                  <v-icon small>arrow_upward</v-icon>
+                </th>
+              </tr>
+            </template>
+            <template slot="items" slot-scope="props">
               <tr v-if="!loading && (showRow(props.item) || isAdmin)" @click="onSelect(props.item)">
                 <td v-if="isAdmin" class="text-xs-left">{{ props.item.employeeName }}</td>
                 <td class="text-xs-left">{{ props.item.budgetName }}</td>
-                <td class="text-xs-left">{{ (props.item.cost ? props.item.cost : 0) | moneyValue}}</td>
+                <td class="text-xs-left">{{ (props.item.cost ? props.item.cost : 0) | moneyValue }}</td>
                 <td class="text-xs-left">{{ props.item.purchaseDate | dateFormat }}</td>
-                <td class="text-xs-left">{{ props.item.reimbursedDate |dateFormat }}</td>
-                <td class="text-xs-left">{{ props.item.description |descriptionFilter }}</td>
+                <td class="text-xs-left">{{ props.item.reimbursedDate | dateFormat }}</td>
+                <td class="text-xs-left">{{ props.item.description | descriptionFilter }}</td>
                 <td class="text-xs-left">
                   <attachment :expense="props.item"></attachment>
                 </td>
               </tr>
             </template>
-          <v-alert slot="no-results" :value="true" color="error" icon="warning">
-            Your search for "{{ search }}" found no results.
-          </v-alert>
-        </v-data-table>
-        <v-card-actions>
-          <v-checkbox v-if="isUser" :label="'Show Reimbursed Expenses'" v-model="showReimbursed"></v-checkbox>
-        </v-card-actions>
-      </v-container>
-    </v-card>
-  </v-flex>
-  <v-flex lg4 md12 sm12>
-    <expense-form :expense="expense" v-on:add="addModelToTable" v-on:update="updateModelInTable" v-on:delete="deleteModelFromTable" v-on:error="displayError" style="position: sticky; top: 79px;"></expense-form>
-  </v-flex>
-</v-layout>
+            <v-alert slot="no-results" :value="true" color="error" icon="warning">
+              Your search for "{{ search }}" found no results.
+            </v-alert>
+          </v-data-table>
+          <v-card-actions>
+            <v-checkbox v-if="isUser" :label="'Show Reimbursed Expenses'" v-model="showReimbursed"></v-checkbox>
+          </v-card-actions>
+        </v-container>
+      </v-card>
+    </v-flex>
+    <v-flex lg4 md12 sm12>
+      <expense-form
+        :expense="expense"
+        v-on:add="addModelToTable"
+        v-on:update="updateModelInTable"
+        v-on:delete="deleteModelFromTable"
+        v-on:error="displayError"
+        style="position: sticky; top: 79px;"
+      ></expense-form>
+    </v-flex>
+  </v-layout>
 </template>
 <script>
-var sprintf = require('sprintf-js').sprintf;
 import api from '@/shared/api.js';
 import employeeUtils from '@/shared/employeeUtils';
 import ExpenseForm from '../components/ExpenseForm.vue';
 import Attachment from '../components/Attachment.vue';
 import moment from 'moment';
 import _ from 'lodash';
-import { getRole, getUser } from '@/utils/auth';
+import { getRole } from '@/utils/auth';
 
 // FILTERS
 function moneyFilter(value) {

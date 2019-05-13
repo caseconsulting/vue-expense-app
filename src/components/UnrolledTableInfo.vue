@@ -1,42 +1,49 @@
 <template>
-<v-container fluid style="background:grey">
-  <v-data-table hide-actions v-model="selected" :headers="headers" :items="expenses" select-all item-key="id">
-    <template slot="headers" slot-scope="props">
-    <tr>
-      <th>
-        <v-flex md2 class="text-xs-center">
-          select
-        </v-flex>
-      </th>
-      <th
-        v-for="header in props.headers"
-        :key="header.text"
-        :class="['column sortable']"
-        @click="changeSort(header.value)"
-      >
-        <v-icon small>arrow_upward</v-icon>
-        {{ header.text }}
-      </th>
-    </tr>
-  </template>
-    <template slot="items" slot-scope="props">
-    <tr v-if="!props.item.reimbursedDate" :active="props.item.selected" @click="props.selected = !props.selected; expenseClicked(props.item);">
-      <td>
-        <v-checkbox
-          @click="theyPickedMe(props.item)"
-          v-model="props.item.selected"
-          primary
-          hide-details
-        ></v-checkbox>
-      </td>
+  <v-container fluid style="background:grey">
+    <v-data-table hide-actions v-model="selected" :headers="headers" :items="expenses" select-all item-key="id">
+      <template slot="headers" slot-scope="props">
+        <tr>
+          <th>
+            <v-flex md2 class="text-xs-center">
+              select
+            </v-flex>
+          </th>
+          <th
+            v-for="header in props.headers"
+            :key="header.text"
+            :class="['column sortable']"
+            @click="changeSort(header.value)"
+          >
+            <v-icon small>arrow_upward</v-icon>
+            {{ header.text }}
+          </th>
+        </tr>
+      </template>
+      <template slot="items" slot-scope="props">
+        <tr
+          v-if="!props.item.reimbursedDate"
+          :active="props.item.selected"
+          @click="
+            props.selected = !props.selected;
+            expenseClicked(props.item);
+          "
+        >
+          <td>
+            <v-checkbox
+              @click="theyPickedMe(props.item)"
+              v-model="props.item.selected"
+              primary
+              hide-details
+            ></v-checkbox>
+          </td>
 
-      <td class="text-xs-center">{{ props.item.cost | moneyValue}}</td>
-      <td class="text-xs-center">{{ props.item.purchaseDate | dateFormat }}</td>
-      <td class="text-xs-center">{{ props.item.description }}</td>
-    </tr>
-  </template>
-  </v-data-table>
-</v-container>
+          <td class="text-xs-center">{{ props.item.cost | moneyValue }}</td>
+          <td class="text-xs-center">{{ props.item.purchaseDate | dateFormat }}</td>
+          <td class="text-xs-center">{{ props.item.description }}</td>
+        </tr>
+      </template>
+    </v-data-table>
+  </v-container>
 </template>
 
 <script>
@@ -97,7 +104,6 @@ export default {
       EventBus.$emit('expensePicked', item);
     },
     checkAllSelected() {
-      let calc = 0;
       let nonSelected = _.filter(this.expenses, expense => {
         if (expense.selected === false) {
           return true;

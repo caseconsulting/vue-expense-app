@@ -1,20 +1,19 @@
 <template>
-<div>
-  <v-card v-if="totals.length" class="slide-in-blurred-right">
-    <v-card-title>
-      <v-flex lg12 class="headline">Totals</v-flex>
-      <v-flex lg12>
-        <p v-for="total in totals" :key="total.id">
-          <span>{{total.name}}:</span> {{total.costTotal | moneyValue}}
-        </p>
-      </v-flex>
-    </v-card-title>
-  </v-card>
-</div>
+  <div>
+    <v-card v-if="totals.length" class="slide-in-blurred-right">
+      <v-card-title>
+        <v-flex lg12 class="headline">Totals</v-flex>
+        <v-flex lg12>
+          <p v-for="total in totals" :key="total.id">
+            <span>{{ total.name }}:</span> {{ total.costTotal | moneyValue }}
+          </p>
+        </v-flex>
+      </v-card-title>
+    </v-card>
+  </div>
 </template>
 
 <script>
-import api from '@/shared/api.js';
 import _ from 'lodash';
 
 export default {

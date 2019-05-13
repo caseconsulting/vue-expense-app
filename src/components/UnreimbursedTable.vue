@@ -5,11 +5,35 @@
         <v-card-title>
           <h3>Unreimbursed Expenses</h3>
           <v-spacer></v-spacer>
-          <v-select :items="employees" :filter="customFilter" v-model="employee" item-text="text" label="Filter by Employee" clearable autocomplete></v-select>
-          <v-select :items="expenseTypes" :filter="customFilter" v-model="expenseType" item-text="text" label="Filter by Expense Type" clearable autocomplete></v-select>
+          <v-select
+            :items="employees"
+            :filter="customFilter"
+            v-model="employee"
+            item-text="text"
+            label="Filter by Employee"
+            clearable
+            autocomplete
+          ></v-select>
+          <v-select
+            :items="expenseTypes"
+            :filter="customFilter"
+            v-model="expenseType"
+            item-text="text"
+            label="Filter by Expense Type"
+            clearable
+            autocomplete
+          ></v-select>
         </v-card-title>
 
-        <v-data-table v-model="selected" :headers="headers" :items="filteredItems" :pagination.sync="pagination" select-all item-key="id" class="elevation-1">
+        <v-data-table
+          v-model="selected"
+          :headers="headers"
+          :items="filteredItems"
+          :pagination.sync="pagination"
+          select-all
+          item-key="id"
+          class="elevation-1"
+        >
           <template slot="headers" slot-scope="props">
             <tr>
               <th>
@@ -24,7 +48,11 @@
               <th
                 v-for="header in props.headers"
                 :key="header.text"
-                :class="['column sortable', pagination.descending ? 'desc' : 'asc', header.value === pagination.sortBy ? 'active' : '']"
+                :class="[
+                  'column sortable',
+                  pagination.descending ? 'desc' : 'asc',
+                  header.value === pagination.sortBy ? 'active' : ''
+                ]"
                 @click="changeSort(header.value)"
               >
                 <v-icon small>arrow_upward</v-icon>
@@ -36,11 +64,7 @@
           <template slot="items" slot-scope="props">
             <tr v-if="!props.item.reimbursedDate" :active="props.selected" @click="props.selected = !props.selected">
               <td>
-                <v-checkbox
-                  :input-value="props.selected"
-                  primary
-                  hide-details
-                ></v-checkbox>
+                <v-checkbox :input-value="props.selected" primary hide-details></v-checkbox>
               </td>
               <td class="text-xs-left">{{ props.item.employeeName }}</td>
               <td class="text-xs-left">{{ props.item.budgetName }}</td>
@@ -53,7 +77,7 @@
 
         <v-flex offset-md11>
           <v-fab-transition>
-            <v-btn id="custom-button-color" v-show="selected.length>0" fab dark small absolute bottom left>
+            <v-btn id="custom-button-color" v-show="selected.length > 0" fab dark small absolute bottom left>
               <icon name="dollar-sign"></icon>
             </v-btn>
           </v-fab-transition>

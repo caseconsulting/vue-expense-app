@@ -1,42 +1,41 @@
 <template>
-<div id="app">
-  <v-app>
-    <v-navigation-drawer v-model="drawer" fixed app disableResizeWatcher>
-      <main-nav></main-nav>
-    </v-navigation-drawer>
-    <v-toolbar color="primary" dark fixed app>
-      <v-toolbar-side-icon v-show="isLoggedIn()" @click.stop="drawer = !drawer"></v-toolbar-side-icon>
-      <v-toolbar-title>
-        <h2 style="text-align:center"><span class="e">€</span>xpense App</h2></v-toolbar-title>
-      <v-spacer></v-spacer>
+  <div id="app">
+    <v-app>
+      <v-navigation-drawer v-model="drawer" fixed app disableResizeWatcher>
+        <main-nav></main-nav>
+      </v-navigation-drawer>
+      <v-toolbar color="primary" dark fixed app>
+        <v-toolbar-side-icon v-show="isLoggedIn()" @click.stop="drawer = !drawer"></v-toolbar-side-icon>
+        <v-toolbar-title>
+          <h2 style="text-align:center"><span class="e">€</span>xpense App</h2></v-toolbar-title
+        >
+        <v-spacer></v-spacer>
 
-
-      <v-toolbar-items v-show="isLoggedIn()">
-        <v-flex xs12 sm6 md8 align-center justify-left layout text-xs-center>
-          <v-menu bottom offset-y open-on-click>
-            <v-avatar slot="activator" size=50 color="grey lighten-4">
-              <img :src="profilePic" alt="avatar">
-            </v-avatar>
-            <v-list>
-              <v-btn flat @click="handleLogout()">Logout</v-btn>
-            </v-list>
-          </v-menu>
-        </v-flex>
-
-      </v-toolbar-items>
-    </v-toolbar>
-    <v-content>
-      <v-container fluid grid-list-lg>
-        <router-view></router-view>
-      </v-container>
-    </v-content>
-    <v-footer app></v-footer>
-  </v-app>
-</div>
+        <v-toolbar-items v-show="isLoggedIn()">
+          <v-flex xs12 sm6 md8 align-center justify-left layout text-xs-center>
+            <v-menu bottom offset-y open-on-click>
+              <v-avatar slot="activator" size="50" color="grey lighten-4">
+                <img :src="profilePic" alt="avatar" />
+              </v-avatar>
+              <v-list>
+                <v-btn flat @click="handleLogout()">Logout</v-btn>
+              </v-list>
+            </v-menu>
+          </v-flex>
+        </v-toolbar-items>
+      </v-toolbar>
+      <v-content>
+        <v-container fluid grid-list-lg>
+          <router-view></router-view>
+        </v-container>
+      </v-content>
+      <v-footer app></v-footer>
+    </v-app>
+  </div>
 </template>
 
 <script>
-import { isLoggedIn, login, logout, getProfile } from '@/utils/auth';
+import { isLoggedIn, logout, getProfile } from '@/utils/auth';
 import MainNav from '@/components/MainNav.vue';
 import router from './router.js';
 export default {

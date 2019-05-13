@@ -1,67 +1,134 @@
 <template>
-<v-card hover>
-  <v-container fluid>
-    <v-card-title>
-      <h3 v-if="expense.id && (isSuperAdmin || !isReimbursed)"> Edit Expense </h3>
-      <h3 v-else-if="expense.id && !isSuperAdmin && isReimbursed"> View Expense </h3>
-      <h3 v-else> Create New Expense </h3>
-    </v-card-title>
-    <v-form ref="form" v-model="valid" lazy-validation>
-      <!--Employee picker if admin level -->
-      <v-select v-if="employeeRole === 'super-admin' && this.$route.path !== '/home'"
-                :items="employees" :rules="componentRules" :filter="customFilter" v-model="expense.userId"
-                item-text="text" label="Employee" autocomplete></v-select>
-      <!--Expense type picker -->
-      <v-select :items="expenseTypes" :rules="componentRules" :filter="customFilter" v-model="expense.expenseTypeId"
-                label="Expense Type" autocomplete :disabled="!!expense.id"></v-select>
-      <!--Cost input field -->
-      <v-text-field prefix="$" v-model="expense.cost" :rules="costRules" label="Cost"
-                    data-vv-name="Cost"></v-text-field>
-      <!--Description input field -->
-      <v-text-field v-model="expense.description" :rules="descriptionRules" label="Description"
-                    data-vv-name="Description"></v-text-field>
+  <v-card hover>
+    <v-container fluid>
+      <v-card-title>
+        <h3 v-if="expense.id && (isSuperAdmin || !isReimbursed)">Edit Expense</h3>
+        <h3 v-else-if="expense.id && !isSuperAdmin && isReimbursed">View Expense</h3>
+        <h3 v-else>Create New Expense</h3>
+      </v-card-title>
+      <v-form ref="form" v-model="valid" lazy-validation>
+        <!--Employee picker if admin level -->
+        <v-select
+          v-if="employeeRole === 'super-admin' && this.$route.path !== '/home'"
+          :items="employees"
+          :rules="componentRules"
+          :filter="customFilter"
+          v-model="expense.userId"
+          item-text="text"
+          label="Employee"
+          autocomplete
+        ></v-select>
+        <!--Expense type picker -->
+        <v-select
+          :items="expenseTypes"
+          :rules="componentRules"
+          :filter="customFilter"
+          v-model="expense.expenseTypeId"
+          label="Expense Type"
+          autocomplete
+          :disabled="!!expense.id"
+        ></v-select>
+        <!--Cost input field -->
+        <v-text-field
+          prefix="$"
+          v-model="expense.cost"
+          :rules="costRules"
+          label="Cost"
+          data-vv-name="Cost"
+        ></v-text-field>
+        <!--Description input field -->
+        <v-text-field
+          v-model="expense.description"
+          :rules="descriptionRules"
+          label="Description"
+          data-vv-name="Description"
+        ></v-text-field>
 
-      <!-- Date Picker 1-->
-      <v-menu ref="menu1" :close-on-content-click="true" v-model="menu1" :nudge-right="40"
-              lazy transition="scale-transition" offset-y full-width max-width="290px" min-width="290px">
-        <v-text-field slot="activator" v-model="purchaseDateFormatted" :rules="dateRules" label="Purchase Date"
-                      hint="MM/DD/YYYY format" persistent-hint prepend-icon="event"
-                      @blur="expense.purchaseDate = parseDate(purchaseDateFormatted)"></v-text-field>
-        <v-date-picker v-model="expense.purchaseDate" no-title @input="menu1 = false"></v-date-picker>
-      </v-menu>
+        <!-- Date Picker 1-->
+        <v-menu
+          ref="menu1"
+          :close-on-content-click="true"
+          v-model="menu1"
+          :nudge-right="40"
+          lazy
+          transition="scale-transition"
+          offset-y
+          full-width
+          max-width="290px"
+          min-width="290px"
+        >
+          <v-text-field
+            slot="activator"
+            v-model="purchaseDateFormatted"
+            :rules="dateRules"
+            label="Purchase Date"
+            hint="MM/DD/YYYY format"
+            persistent-hint
+            prepend-icon="event"
+            @blur="expense.purchaseDate = parseDate(purchaseDateFormatted)"
+          ></v-text-field>
+          <v-date-picker v-model="expense.purchaseDate" no-title @input="menu1 = false"></v-date-picker>
+        </v-menu>
 
-      <!-- Date Picker 2-->
-      <v-menu v-if="isSuperAdmin" ref="menu2" :close-on-content-click="false" v-model="menu2" :nudge-right="40"
-              lazy transition="scale-transition" offset-y full-width max-width="290px" min-width="290px">
-        <v-text-field slot="activator" v-model="reimbursedDateFormatted" label="Reimburse Date (optional)"
-                      hint="MM/DD/YYYY format " persistent-hint prepend-icon="event"
-                      @blur="expense.reimbursedDate = parseDate(reimbursedDateFormatted)"></v-text-field>
-        <v-date-picker v-model="expense.reimbursedDate" no-title @input="menu2 = false"></v-date-picker>
-      </v-menu>
+        <!-- Date Picker 2-->
+        <v-menu
+          v-if="isSuperAdmin"
+          ref="menu2"
+          :close-on-content-click="false"
+          v-model="menu2"
+          :nudge-right="40"
+          lazy
+          transition="scale-transition"
+          offset-y
+          full-width
+          max-width="290px"
+          min-width="290px"
+        >
+          <v-text-field
+            slot="activator"
+            v-model="reimbursedDateFormatted"
+            label="Reimburse Date (optional)"
+            hint="MM/DD/YYYY format "
+            persistent-hint
+            prepend-icon="event"
+            @blur="expense.reimbursedDate = parseDate(reimbursedDateFormatted)"
+          ></v-text-field>
+          <v-date-picker v-model="expense.reimbursedDate" no-title @input="menu2 = false"></v-date-picker>
+        </v-menu>
 
-      <!-- Receipt uploading -->
-      <file-upload @fileSelected="setFile" :passedRules="receiptRules"></file-upload>
+        <!-- Receipt uploading -->
+        <file-upload @fileSelected="setFile" :passedRules="receiptRules"></file-upload>
 
-      <!-- Notes section -->
-      <v-text-field v-model="expense.note" label="Notes (optional)" data-vv-name="Description"
-                    multi-line></v-text-field>
+        <!-- Notes section -->
+        <v-text-field
+          v-model="expense.note"
+          label="Notes (optional)"
+          data-vv-name="Description"
+          multi-line
+        ></v-text-field>
 
-      <!-- Reference URL -->
-      <v-text-field v-model="expense.url" label="URL (Optional)"></v-text-field>
+        <!-- Reference URL -->
+        <v-text-field v-model="expense.url" label="URL (Optional)"></v-text-field>
 
-      <!-- Buttons -->
-      <v-btn outline color="error" @click="deleting=true" :disabled="!isSuperAdmin && isReimbursed">
-        <icon class="mr-1" name="trash"></icon>Delete</v-btn>
-      <v-btn color="white" @click="clearForm">
-        <icon class="mr-1" name="ban"></icon>Cancel</v-btn>
-      <v-btn v-if="" outline color="success" @click="checkCoverage"
-             :disabled="!valid || (!isSuperAdmin && isReimbursed)">
-        <icon class="mr-1" name="save"></icon>Submit</v-btn>
-    </v-form>
-    <confirmation-box :activate="submitting" :expense="expense"></confirmation-box>
-    <delete-modal :activate="deleting" :type="'expense'"></delete-modal>
-  </v-container>
-</v-card>
+        <!-- Buttons -->
+        <v-btn outline color="error" @click="deleting = true" :disabled="!isSuperAdmin && isReimbursed">
+          <icon class="mr-1" name="trash"></icon>Delete</v-btn
+        >
+        <v-btn color="white" @click="clearForm"> <icon class="mr-1" name="ban"></icon>Cancel</v-btn>
+        <v-btn
+          v-if=""
+          outline
+          color="success"
+          @click="checkCoverage"
+          :disabled="!valid || (!isSuperAdmin && isReimbursed)"
+        >
+          <icon class="mr-1" name="save"></icon>Submit</v-btn
+        >
+      </v-form>
+      <confirmation-box :activate="submitting" :expense="expense"></confirmation-box>
+      <delete-modal :activate="deleting" :type="'expense'"></delete-modal>
+    </v-container>
+  </v-card>
 </template>
 
 <script>
