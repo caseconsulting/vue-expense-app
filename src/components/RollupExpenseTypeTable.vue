@@ -142,7 +142,7 @@ export default {
     expenseType: null, //For autocomplete
     pagination: {
       sortBy: 'compareName',
-      rowsPerPage: 10
+      rowsPerPage: -1,
     },
     selected: [],
     headers: [
