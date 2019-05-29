@@ -60,6 +60,7 @@
             </template>
             <template slot="items" slot-scope="props">
               <tr v-if="!loading && (showRow(props.item) || isAdmin)" @click="onSelect(props.item)">
+                <td class="text-xs-left">{{ props.item.createdAt | dateFormat }}</td>
                 <td v-if="isAdmin" class="text-xs-left">{{ props.item.employeeName }}</td>
                 <td class="text-xs-left">{{ props.item.budgetName }}</td>
                 <td class="text-xs-left">{{ (props.item.cost ? props.item.cost : 0) | moneyValue }}</td>
@@ -161,6 +162,10 @@ export default {
       showReimbursed: false,
       errors: [],
       headers: [
+        {
+          text: 'Creation Date',
+          value: 'createdAt'
+        },
         {
           text: 'Employee',
           value: 'employeeName'
