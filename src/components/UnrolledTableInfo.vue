@@ -39,7 +39,7 @@
 
           <td class="text-xs-center">{{ props.item.cost | moneyValue }}</td>
           <td class="text-xs-center">{{ props.item.purchaseDate | dateFormat }}</td>
-          <td class="text-xs-center">{{ props.item.description }}</td>
+          <td class="text-xs-center">{{ props.item.description | descripFormat }}</td>
         </tr>
       </template>
     </v-data-table>
@@ -65,6 +65,9 @@ export default {
       } else {
         return '';
       }
+    },
+    descripFormat: val => {
+      return val.length > 250 ? val.substring(0, 250) + '...' : val;
     }
   },
   props: ['expenses', 'allSelected'],
