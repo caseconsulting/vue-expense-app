@@ -22,7 +22,10 @@
 
         <v-checkbox label="Overdraft Flag (optional)" v-model="model.odFlag"></v-checkbox>
 
-        <v-checkbox label="Recurring (optional)" v-model="model.recurringFlag"></v-checkbox>
+        <v-checkbox label="Recurring Flag (optional)" v-model="model.recurringFlag"></v-checkbox>
+
+        <!-- Requires receipt attachment for expense type -->
+        <v-checkbox label="Receipt Required (optional)" v-model="model.requiredFlag"></v-checkbox>
 
         <v-menu
           v-if="!model.recurringFlag"
@@ -109,6 +112,7 @@ function clearForm() {
   this.$set(this.model, 'startDate', '');
   this.$set(this.model, 'endDate', '');
   this.$set(this.model, 'odFlag', false);
+  this.$set(this.model, 'requiredFlag', false);
 }
 
 async function deleteExpenseType() {
@@ -133,6 +137,9 @@ async function submit(newExpenseType) {
   }
   if (!this.model.recurringFlag) {
     this.model.recurringFlag = false;
+  }
+  if (!this.model.requiredFlag) {
+    this.model.requiredFlag = false;
   }
 
   if (this.$refs.form.validate()) {
