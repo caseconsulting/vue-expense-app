@@ -14,9 +14,13 @@
       </v-card-title>
       <v-btn color="white" flat @click="clearStatus">Close</v-btn>
     </v-snackbar>
+
+    <!-- title -->
     <v-flex v-if="!isMobile" text-xs-center lg8 md12 sm12 pb-3>
       <h1 pb-2>Budget Statistics for {{ employee.firstName }} {{ employee.lastName }}</h1>
     </v-flex>
+
+    <!-- anniversary date -->
     <v-flex lg4 v-if="!isMobile">
       <v-flex>
         <v-card>
@@ -32,6 +36,8 @@
         </v-card>
       </v-flex>
     </v-flex>
+
+    <!-- expense data -->
     <v-flex v-if="!isMobile" xs12 sm12 md12 lg8>
       <v-flex text-xs-center>
         <budget-table v-if="!loading" :employee="expenseTypeData"></budget-table>
@@ -43,7 +49,9 @@
         <budget-table-mobile v-if="!loading" :employee="expenseTypeData"></budget-table-mobile>
       </v-flex>
     </v-flex>
-    <v-flex xs12 sm12 md12 lg4 pt-3>
+
+    <!-- expense form-->
+    <v-flex v-if="employ == null" xs12 sm12 md12 lg4 pt-3>
       <v-flex text-xs-center lg12 md12 sm12>
         <expense-form :expense="expense" v-on:error="displayError"></expense-form>
       </v-flex>

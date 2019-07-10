@@ -53,7 +53,7 @@
               </tr>
             </template>
 
-            <template v-slot:expand="props">
+            <template v-if="userIsAdmin()" v-slot:expand="props">
               <v-card flat>
                 <v-card-text>
                   <employee-home :employ="props.item"> </employee-home>
