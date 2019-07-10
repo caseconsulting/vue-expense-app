@@ -76,7 +76,7 @@
         <v-text-field
           v-model="model.description"
           :rules="genericRules"
-          label="Notes "
+          label="Description "
           data-vv-name="Description "
           multi-line
         ></v-text-field>
