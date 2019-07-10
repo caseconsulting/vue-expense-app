@@ -112,6 +112,11 @@ export default {
       seconds: 0
     };
   },
+  props: {
+    employ: {
+      default: null
+    }
+  },
   async created() {
     EventBus.$on('refreshChart', this.updateData);
     this.refreshBudget();
@@ -144,6 +149,7 @@ export default {
       this.seconds = duration.seconds() > 0 ? duration.seconds() : 0;
     },
     async updateData() {
+      console.log('here');
       this.expenseTypeData = await api.getItem(api.SPECIAL, this.employee.id);
       this.showSnackbar();
     },
@@ -167,8 +173,17 @@ export default {
     },
 
     async refreshBudget() {
+      let employee;
       this.loading = true;
-      let employee = await api.getUser();
+      if (this.employ == null) {
+        console.log('here');
+        employee = await api.getUser();
+      } else {
+        console.log('here2');
+        console.log(this.employ);
+
+        employee = this.employ;
+      }
       this.hireDate = employee.hireDate;
       let budgetsVar = await api.getItem(api.SPECIAL, employee.id);
       this.expenseTypeData = budgetsVar;

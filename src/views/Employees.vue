@@ -14,7 +14,8 @@
             :items="employeeList"
             :search="search"
             :pagination.sync="pagination"
-            item-key="name"
+            :expand="expand"
+            item-key="empId"
             class="elevation-1"
           >
             <template slot="headers" slot-scope="props">
@@ -36,8 +37,13 @@
               </tr>
             </template>
 
-            <template slot="items" slot-scope="props">
-              <tr @click="onSelect(props.item)">
+            <template v-slot:items="props">
+              <tr
+                @click="
+                  onSelect(props.item);
+                  props.expanded = !props.expanded;
+                "
+              >
                 <td class="text-xs-left">{{ props.item.empId }}</td>
                 <td class="text-xs-left">{{ props.item.firstName }}</td>
                 <td class="text-xs-left">{{ props.item.lastName }}</td>
@@ -45,6 +51,14 @@
                 <td class="text-xs-left">{{ props.item.email }}</td>
                 <td class="text-xs-left">{{ isInActive(props.item) }}</td>
               </tr>
+            </template>
+
+            <template v-slot:expand="props">
+              <v-card flat>
+                <v-card-text>
+                  <employee-home :employ="props.item"> </employee-home>
+                </v-card-text>
+              </v-card>
             </template>
 
             <v-alert slot="no-results" :value="true" color="error" icon="warning">
@@ -77,6 +91,7 @@ import api from '@/shared/api.js';
 import EmployeeForm from '../components/EmployeeForm.vue';
 import moment from 'moment';
 import _ from 'lodash';
+import EmployeeHome from '@/views/EmployeeHome.vue';
 export default {
   filters: {
     dateFormat: value => {
@@ -134,11 +149,13 @@ export default {
         empId: null,
         hireDate: null,
         isActive: false
-      }
+      },
+      expand: false
     };
   },
   components: {
-    EmployeeForm
+    EmployeeForm,
+    EmployeeHome
   },
   async created() {
     this.refreshEmployees();
