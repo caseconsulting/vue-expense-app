@@ -65,6 +65,10 @@
                   <icon v-if="props.item.recurringFlag" id="marks" class="mr-1" name="regular/check-circle"></icon>
                   <icon v-else class="mr-1" id="marks" name="regular/times-circle"></icon>
                 </td>
+                <td class="text-xs-center">
+                  <icon v-if="!props.item.requiredFlag" id="marks" class="mr-1" name="regular/check-circle"></icon>
+                  <icon v-else class="mr-1" id="marks" name="regular/times-circle"></icon>
+                </td>
               </tr>
             </template>
             <v-alert slot="no-results" :value="true" color="error" icon="warning">
@@ -153,6 +157,11 @@ export default {
           text: 'Recurring',
           value: 'recurringFlag',
           sortable: false
+        },
+        {
+          text: 'Receipt Required',
+          value: 'requiredFlag',
+          sortable: false
         }
       ],
       pagination: {
@@ -167,7 +176,8 @@ export default {
         odFlag: false,
         startDate: null,
         endDate: null,
-        recurringFlag: false
+        recurringFlag: false,
+        requiredFlag: false
       }
     };
   },
@@ -202,6 +212,7 @@ export default {
       this.$set(this.model, 'startDate', item.startDate);
       this.$set(this.model, 'endDate', item.endDate);
       this.$set(this.model, 'recurringFlag', item.recurringFlag);
+      this.$set(this.model, 'requiredFlag', item.requiredFlag);
     },
     clearModel() {
       this.$set(this.model, 'id', '');
@@ -212,6 +223,7 @@ export default {
       this.$set(this.model, 'startDate', '');
       this.$set(this.model, 'endDate', '');
       this.$set(this.model, 'recurringFlag', false);
+      this.$set(this.model, 'requiredFlag', false);
     },
     updateModelInTable(updatedExpenseType) {
       let matchingExpensesIndex = _.findIndex(
