@@ -97,6 +97,7 @@
         </v-menu>
 
         <!-- Receipt uploading -->
+        <!-- v-if="expenseType.requiredFlag" -->
         <file-upload @fileSelected="setFile" :passedRules="receiptRules"></file-upload>
 
         <!-- Notes section -->
@@ -339,6 +340,11 @@ function isUser() {
   return this.employeeRole === 'user';
 }
 
+function isRequired() {
+  console.log(this.requiredFlag);
+  return this.requiredFlag;
+}
+
 // LIFECYCLE HOOKS
 async function created() {
   let employeeRole = getRole();
@@ -359,7 +365,8 @@ async function created() {
       budgetName: expenseType.budgetName,
       value: expenseType.id,
       budget: expenseType.budget,
-      odFlag: expenseType.odFlag
+      odFlag: expenseType.odFlag,
+      requiredFlag: expenseType.requiredFlag
     };
   });
 
@@ -434,7 +441,8 @@ export default {
     isAdmin,
     isReimbursed,
     isSuperAdmin,
-    isUser
+    isUser,
+    isRequired
   },
   methods: {
     checkCoverage,
