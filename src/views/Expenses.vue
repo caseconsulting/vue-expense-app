@@ -68,7 +68,7 @@
                 <td class="text-xs-left">{{ props.item.reimbursedDate | dateFormat }}</td>
                 <td class="text-xs-left">{{ props.item.description | descriptionFilter }}</td>
                 <td class="text-xs-left">
-                  <attachment :expense="props.item"></attachment>
+                  <attachment :expense="props.item" :mode="'expenses'"></attachment>
                 </td>
               </tr>
             </template>

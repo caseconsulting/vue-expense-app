@@ -2,10 +2,22 @@
   <v-layout>
     <v-flex xs4>
       <v-btn v-if="this.expense.receipt" flat icon color="primary" @click="openDownloadTab">
-        <icon name="cloud-download-alt" scale="2"></icon>
+        <icon
+          v-if="this.mode === 'adminExpenseInfo'"
+          name="cloud-download-alt"
+          style="color: #004C54;"
+          scale="2"
+        ></icon>
+        <icon v-else name="cloud-download-alt" scale="2"></icon>
       </v-btn>
       <v-btn v-else disabled flat icon color="primary" @click="openDownloadTab">
-        <icon name="cloud-download-alt" scale="2"></icon>
+        <icon
+          v-if="this.mode === 'adminExpenseInfo'"
+          name="cloud-download-alt"
+          style="color: #004C54;"
+          scale="2"
+        ></icon>
+        <icon v-else name="cloud-download-alt" scale="2"></icon>
       </v-btn>
     </v-flex>
   </v-layout>
@@ -35,7 +47,7 @@ export default {
   methods: {
     openDownloadTab
   },
-  props: ['expense'],
+  props: ['expense', 'mode'],
   computed: {
     link
   }
