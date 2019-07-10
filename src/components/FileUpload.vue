@@ -20,6 +20,7 @@
 
 <script>
 //COMPUTED
+
 function fileTooBig() {
   return this.megabytes > 6;
 }
