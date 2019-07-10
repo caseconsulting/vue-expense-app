@@ -157,7 +157,6 @@ export default {
       this.seconds = duration.seconds() > 0 ? duration.seconds() : 0;
     },
     async updateData() {
-      console.log('here');
       this.expenseTypeData = await api.getItem(api.SPECIAL, this.employee.id);
       this.showSnackbar();
     },
@@ -184,10 +183,8 @@ export default {
       let employee;
       this.loading = true;
       if (this.employ == null) {
-        console.log('here');
         employee = await api.getUser();
       } else {
-        console.log('here2');
         console.log(this.employ);
 
         employee = this.employ;
