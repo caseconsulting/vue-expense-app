@@ -52,9 +52,9 @@
             </template>
             <template slot="items" slot-scope="props">
               <tr @click="onSelect(props.item)">
-                <td class="text-xs-left">{{ props.item.budgetName }}</td>
+                <td class="text-xs-left">{{ limitedText(props.item.budgetName) }}</td>
                 <td class="text-xs-left">{{ props.item.budget | moneyValue }}</td>
-                <td class="text-xs-left">{{ limitedDescription(props.item) }}</td>
+                <td class="text-xs-left">{{ limitedText(props.item.description) }}</td>
                 <td class="text-xs-left">{{ props.item.startDate }}</td>
                 <td class="text-xs-left">{{ props.item.endDate }}</td>
                 <td class="text-xs-center">
@@ -244,8 +244,9 @@ export default {
         this.pagination.descending = false;
       }
     },
-    limitedDescription(val) {
-      return val.description.length > 250 ? val.description.substring(0, 50) + '...' : val.description;
+    limitedText(val) {
+      //limits text to 50 characters on table view
+      return val.length > 50 ? val.substring(0, 50) + '...' : val;
     }
   }
 };
