@@ -422,10 +422,10 @@ export default {
   },
   watch: {
     'expense.purchaseDate': function(val) {
-      this.purchaseDateFormatted = this.formatDate(this.expense.purchaseDate);
+      this.purchaseDateFormatted = this.formatDate(this.expense.purchaseDate) || this.purchaseDateFormatted;
     },
     'expense.reimbursedDate': function(val) {
-      this.reimbursedDateFormatted = this.formatDate(this.expense.reimbursedDate);
+      this.reimbursedDateFormatted = this.formatDate(this.expense.reimbursedDate) || this.reimbursedDateFormatted;
     }
   },
   props: ['expense'],
