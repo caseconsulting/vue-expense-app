@@ -18,7 +18,7 @@
             class="elevation-1"
           >
             <template slot="headers" slot-scope="props">
-              <tr>
+              <tr style="box-shadow: 0px 1.5px #888888;">
                 <th
                   class="text-xs-left"
                   v-for="header in props.headers"

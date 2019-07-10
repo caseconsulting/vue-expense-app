@@ -37,7 +37,7 @@
         >
           <v-progress-linear slot="progress" color="radioactive" indeterminate></v-progress-linear>
           <template slot="headers" slot-scope="props">
-            <tr>
+            <tr style="box-shadow: 0px 1.5px #888888;">
               <th>
                 <v-checkbox :input-value="everythingSelected" primary hide-details @click="toggleAll"></v-checkbox>
               </th>
@@ -142,7 +142,7 @@ export default {
     expenseType: null, //For autocomplete
     pagination: {
       sortBy: 'compareName',
-      rowsPerPage: -1,
+      rowsPerPage: -1
     },
     selected: [],
     headers: [
