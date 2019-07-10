@@ -247,10 +247,6 @@ export default {
         this.pagination.sortBy = column;
         this.pagination.descending = false;
       }
-    },
-    limitedText(val) {
-      //limits text to 50 characters on table view
-      return val.length > 50 ? val.substring(0, 50) + '...' : val;
     }
   }
 };
