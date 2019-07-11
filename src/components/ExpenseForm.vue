@@ -265,6 +265,7 @@ function clearForm() {
     this.$set(this.expense, 'employeeName', '');
   }
 
+  //merge conflict
   // this.loading = false; //ends loading button when form is cleared
 }
 
