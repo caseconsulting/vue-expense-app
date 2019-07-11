@@ -416,7 +416,7 @@ export default {
         v => v < 1000000000 || 'Nice try' //when a user tries to fill out expense that is over a million
         // ,v => v == Math.round(v * 100) / 100 || 'Cost must rounded to 2 places after the decimal.' // rules need to return booleans
       ],
-      componentRules: [v => !!v || 'An appropriate expense type must be selected.'],
+      componentRules: [v => !!v || 'Required field.'],
       dateRules: [v => !!v || 'Date must be valid. Format: MM/DD/YYYY'],
       receiptRules: [v => !!v || 'Receipts are required.'],
       valid: false,
