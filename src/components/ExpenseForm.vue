@@ -166,7 +166,6 @@ function setFile(file) {
 }
 async function checkCoverage() {
   if (this.expense) {
-    
     let expenseType = _.find(this.expenseTypes, type => this.expense.expenseTypeId === type.value);
     let employee = {};
     if (getRole() === 'user') {
@@ -265,7 +264,6 @@ function clearForm() {
     this.$set(this.expense, 'employeeName', '');
   }
 
-  //merge conflict
   // this.loading = false; //ends loading button when form is cleared
 }
 
