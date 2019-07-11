@@ -274,6 +274,7 @@ function customFilter(item, queryText, itemText) {
   );
 }
 
+// returns true if today is between a start and end date
 function betweenDates(startDate, endDate) {
   let today = new Date();
   let start = startDate.split('-');
@@ -288,6 +289,7 @@ function betweenDates(startDate, endDate) {
   return false;
 }
 
+// filter for expenses containing todays date
 function expenseTypeFilter(item, queryText, itemText) {
   return (
     customFilter(item, queryText, itemText) &&
