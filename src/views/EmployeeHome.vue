@@ -195,8 +195,6 @@ export default {
       if (this.employ == null) {
         employee = await api.getUser();
       } else {
-        console.log(this.employ);
-
         employee = this.employ;
       }
       this.hireDate = employee.hireDate;
