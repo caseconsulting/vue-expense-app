@@ -11,30 +11,60 @@
       <div class="text-xs-center mb-3"></div>
       <v-expansion-panel expand>
         <v-expansion-panel-content>
-          <div slot="header">Known Issues</div>
+          <div slot="header">Employee Home</div>
           <v-card>
             <v-card-text class="grey lighten-3">
-              <li>
-                <icon name="space-shuttle" />
-                Google Chrome has an issue displaying (some) attachments that are PDFs. Work-around is to tell Chrome to
-                download PDFs. Or, use a different a browser.
+              <li v-for="(infoItem, itemIndex) in user.table.info" :key="`item${itemIndex}`">
+                <icon name="space-shuttle" />{{ infoItem }}
               </li>
             </v-card-text>
           </v-card>
         </v-expansion-panel-content>
         <v-expansion-panel-content v-if="role !== 'user'">
+          <div slot="header">Admin Dashboard</div>
+          <v-card>
+            <v-card-text class="grey lighten-3">
+              <li>
+                <icon name="space-shuttle" />
+                How do I reimburse an expense? - select the expenses that you would like to reimburse by clicking the
+                select box either on a row (to select all expenses for that employee under that expense type) or on each
+                of their individual expenses. Next select the $ icon at the bottom left of the page and then confirm the
+                reimbursement.
+              </li>
+            </v-card-text>
+          </v-card>
+        </v-expansion-panel-content>
+        <v-expansion-panel-content>
           <div slot="header">Expenses</div>
           <v-card>
             <v-card-text class="grey lighten-3">
               <li>
                 <icon name="space-shuttle" />
-                How do I update an expense? - Select an expense from the list then click update to amend the desired
-                information.
+                How do I submit an expense? - In the Create New Expense tab fill in the required fields:
+                <strong>Employee, Expense Type, Cost, Description, and Purchase Date.</strong> Depending on the Expense
+                Type a <strong>Receipt</strong> upload might also be needed. Make sure your information is correct and
+                then click Submit!
               </li>
               <li>
                 <icon name="space-shuttle" />
-                How do I delete an expense? - Select an expense from the list then click the delete button.
+                How do I update an expense? - Select an item from the Expenses list, the current information of the
+                expense will then be shown on the right. You may now edit those fields!
+              </li>
+              <li>
+                <icon name="space-shuttle" />
+                How do I delete an expense? - Select an item from the Expenses list then click the delete button.
                 <strong>This action cannot be undone.</strong>
+              </li>
+              <li>
+                <icon name="space-shuttle" />
+                How do I convert training dollars to training hours? - Calculate your hourly pay rate by dividing your
+                salary by 2080. Enter the total dollar amount (hourly salary x number of hours) as training expense in
+                the expense app. Include a description of the training you plan to take.
+              </li>
+              <li>
+                <icon name="space-shuttle" />
+                How do I submit a High Five Award? - In the Create New Expense tab select the expense type “High Five”,
+                put $50 in Cost, and in the description be sure to specify who you are awarding and why.
               </li>
             </v-card-text>
           </v-card>
@@ -73,13 +103,14 @@
             </v-card-text>
           </v-card>
         </v-expansion-panel-content>
-
         <v-expansion-panel-content>
-          <div slot="header">Employee Home</div>
+          <div slot="header">Known Issues</div>
           <v-card>
             <v-card-text class="grey lighten-3">
-              <li v-for="(infoItem, itemIndex) in user.table.info" :key="`item${itemIndex}`">
-                <icon name="space-shuttle" />{{ infoItem }}
+              <li>
+                <icon name="space-shuttle" />
+                Google Chrome has an issue displaying (some) attachments that are PDFs. Work-around is to tell Chrome to
+                download PDFs. Or, use a different a browser.
               </li>
             </v-card-text>
           </v-card>
