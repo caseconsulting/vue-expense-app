@@ -36,7 +36,8 @@
             :items="sorting"
             :search="search"
             :pagination.sync="pagination"
-            item-key="name"
+            :expand="expand"
+            item-key="id"
             class="elevation-1"
           >
             <v-progress-linear slot="progress" color="radioactive" indeterminate></v-progress-linear>
@@ -58,8 +59,10 @@
                 </th>
               </tr>
             </template>
+
+            <!-- data row -->
             <template slot="items" slot-scope="props">
-              <tr v-if="!loading && (showRow(props.item) || isAdmin)" @click="onSelect(props.item)">
+              <tr v-if="!loading && (showRow(props.item) || isAdmin)" @click="props.expanded = !props.expanded">
                 <td class="text-xs-left">{{ props.item.createdAt | dateFormat }}</td>
                 <td v-if="isAdmin" class="text-xs-left">{{ props.item.employeeName }}</td>
                 <td class="text-xs-left">{{ props.item.budgetName }}</td>
@@ -72,6 +75,33 @@
                 </td>
               </tr>
             </template>
+            <!-- end data row -->
+
+            <!-- data row dropdown/expandable -->
+            <template v-slot:expand="props">
+              <v-card flat>
+                <v-card-text>
+                  <div>
+                    <!-- edit button -->
+                    <v-btn @click="onSelect(props.item)" color="white">
+                      <icon class="mr-1" name="edit"></icon>Edit</v-btn
+                    >
+                    <!-- unreimburse button -->
+                    <v-btn
+                      v-if="props.item.reimbursedDate"
+                      @click="unreimbursing = true"
+                      :disabled="isEditing()"
+                      color="white"
+                    >
+                      <icon class="mr-1" name="times-circle"></icon>Unremimburse</v-btn
+                    >
+                  </div>
+                </v-card-text>
+              </v-card>
+            </template>
+            <!-- end data row dropdown/expandable -->
+
+            <!-- no results display -->
             <v-alert slot="no-results" :value="true" color="error" icon="warning">
               Your search for "{{ search }}" found no results.
             </v-alert>
@@ -79,6 +109,10 @@
           <v-card-actions>
             <v-checkbox v-if="isUser" :label="'Show Reimbursed Expenses'" v-model="showReimbursed"></v-checkbox>
           </v-card-actions>
+          <!-- end no results display -->
+
+          <!-- unreimbursing button confirmation alert box -->
+          <unreimburse-modal :activate="unreimbursing" :type="'expense'"></unreimburse-modal>
         </v-container>
       </v-card>
     </v-flex>
@@ -98,6 +132,7 @@
 import api from '@/shared/api.js';
 import employeeUtils from '@/shared/employeeUtils';
 import ExpenseForm from '../components/ExpenseForm.vue';
+import UnreimburseModal from '../components/UnreimburseModal.vue';
 import Attachment from '../components/Attachment.vue';
 import moment from 'moment';
 import _ from 'lodash';
@@ -118,6 +153,26 @@ function descriptionFilter(val) {
     return `${val.substring(0, 15)}...`;
   } else return val;
 }
+
+async function unreimburseExpense() {
+  this.unreimbursing = false;
+  if (this.expense.id) {
+    let unreimbursedExpense = this.expense;
+    // await api.deleteItem(api.EXPENSES, this.expense.id);
+    this.$emit('unreimburse', unreimbursedExpense);
+    // this.clearForm();
+  }
+  console.log('add code to process unreimbursement in this method');
+}
+
+async function created() {
+  this.role = getRole();
+  this.refreshExpenses();
+
+  EventBus.$on('canceled-unreimburse-expense', () => (this.unreimbursing = false));
+  EventBus.$on('confirm-unreimburse-expense', this.unreimburseExpense);
+}
+
 export default {
   filters: {
     moneyValue: value => {
@@ -160,6 +215,7 @@ export default {
       expenses: [],
       processedExpenses: [],
       showReimbursed: false,
+      unreimbursing: false,
       errors: [],
       headers: [
         {
@@ -198,7 +254,8 @@ export default {
       pagination: {
         sortBy: 'purchaseDate',
         rowsPerPage: 25
-      }
+      },
+      expand: false
     };
   },
   computed: {
@@ -229,12 +286,10 @@ export default {
   },
   components: {
     ExpenseForm,
-    Attachment
+    Attachment,
+    UnreimburseModal
   },
-  async created() {
-    this.role = getRole();
-    this.refreshExpenses();
-  },
+  created,
   methods: {
     clearStatus() {
       this.$set(this.status, 'statusType', undefined);
@@ -342,7 +397,11 @@ export default {
         this.pagination.sortBy = column;
         this.pagination.descending = false;
       }
-    }
+    },
+    isEditing() {
+      return !!this.expense.id;
+    },
+    unreimburseExpense
   }
 };
 </script>

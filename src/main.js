@@ -28,6 +28,8 @@ import 'vue-awesome/icons/space-shuttle';
 import 'vue-awesome/icons/user-astronaut';
 import 'vue-awesome/icons/hand-holding-usd';
 import 'vue-awesome/icons/cloud-download-alt';
+import 'vue-awesome/icons/times-circle';
+import 'vue-awesome/icons/edit';
 
 import Icon from 'vue-awesome/components/Icon';
 import App from './App.vue';

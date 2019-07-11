@@ -124,20 +124,25 @@
         <v-text-field v-model="expense.url" label="URL (Optional)"></v-text-field>
 
         <!-- Buttons -->
+        <!-- delete button -->
         <v-btn outline color="error" @click="deleting = true" :disabled="!isSuperAdmin && isReimbursed">
           <icon class="mr-1" name="trash"></icon>Delete</v-btn
         >
+
+        <!-- cancel button -->
         <v-btn color="white" @click="clearForm"> <icon class="mr-1" name="ban"></icon>Cancel</v-btn>
+
+        <!-- submit button -->
         <v-btn
           v-if=""
           outline
           color="success"
           @click="checkCoverage"
-          :loading="loading"
           :disabled="!valid || (!isSuperAdmin && isReimbursed)"
         >
           <icon class="mr-1" name="save"></icon>Submit</v-btn
         >
+        <!-- End Buttons -->
       </v-form>
       <confirmation-box :activate="submitting" :expense="expense"></confirmation-box>
       <delete-modal :activate="deleting" :type="'expense'"></delete-modal>
