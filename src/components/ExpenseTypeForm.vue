@@ -204,10 +204,10 @@ export default {
   },
   watch: {
     'model.startDate': function(val) {
-      this.startDateFormatted = this.formatDate(this.model.startDate);
+      this.startDateFormatted = this.formatDate(this.model.startDate) || this.startDateFormatted;
     },
     'model.endDate': function(val) {
-      this.endDateFormatted = this.formatDate(this.model.endDate);
+      this.endDateFormatted = this.formatDate(this.model.endDate) || this.endDateFormatted;
     }
   }
 };

@@ -174,7 +174,7 @@ export default {
   },
   watch: {
     'model.hireDate': function(val) {
-      this.hireDateFormatted = this.formatDate(this.model.hireDate);
+      this.hireDateFormatted = this.formatDate(this.model.hireDate) || this.hireDateFormatted;
     },
     'model.employeeRole': function(val) {
       this.employeeRoleFormatted = _.startCase(this.model.employeeRole);
