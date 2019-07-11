@@ -408,7 +408,7 @@ export default {
       userInfo: {},
       descriptionRules: [
         v => !!v || 'Description is a required field.',
-        v => v.replace(/\s/g, '').length > 0 || 'Description is a required field.'
+        v => (v && v.replace(/\s/g, '').length > 0) || 'Description is a required field.'
       ],
       costRules: [
         v => !!v || 'Cost is a required field.',
