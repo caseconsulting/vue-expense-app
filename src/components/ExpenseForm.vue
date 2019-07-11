@@ -133,6 +133,7 @@
           outline
           color="success"
           @click="checkCoverage"
+          :loading="loading"
           :disabled="!valid || (!isSuperAdmin && isReimbursed)"
         >
           <icon class="mr-1" name="save"></icon>Submit</v-btn
@@ -165,17 +166,23 @@ function setFile(file) {
 }
 async function checkCoverage() {
   if (this.expense) {
+    this.loading = true;
     let expenseType = _.find(this.expenseTypes, type => this.expense.expenseTypeId === type.value);
     let employee = {};
     if (getRole() === 'user') {
+      console.log('here1');
       employee = await api.getUser();
     } else {
+      console.log('here');
       employee = await api.getItem(api.EMPLOYEES, this.expense.userId);
     }
+    console.log('here3');
     let budgets = await api.getItems(api.BUDGETS);
     let employeeExpenseTypeBudget = _.find(budgets, budget => {
+      console.log('here2');
       return budget.expenseTypeId === expenseType.value;
     });
+    console.log('here4');
 
     // Keep the cost data as a string. This allows us to keep it formatted as ##.##
     // -- If you parse the Expense object's cost field itself into a float, it drops the second
@@ -185,20 +192,25 @@ async function checkCoverage() {
     let cost = parseFloat(this.expense.cost);
     this.$set(this.expense, 'cost', this.expense.cost);
 
+    console.log('here24');
     if (employeeExpenseTypeBudget) {
+      console.log('here25');
       let committedAmount = employeeExpenseTypeBudget.pendingAmount + employeeExpenseTypeBudget.reimbursedAmount;
       let allExpenses = await api.getAggregate();
       let match = _.find(allExpenses, entry => {
+        console.log('here21');
         return entry.id === this.expense.id;
       });
       // For subsequent calculations, remove matched entry cost from committed amount
       let newCommittedAmount = match ? committedAmount - match.cost : committedAmount;
       if (expenseType.odFlag) {
+        console.log('here26');
         // Selected Expense Type allows overdraft
         if (2 * expenseType.budget !== newCommittedAmount) {
           //under budget
           if (newCommittedAmount + cost <= 2 * expenseType.budget) {
             //full amount reimbursed
+            console.log('here20');
             this.submit();
           } else {
             // not maxed out but also not fully covered
@@ -206,12 +218,16 @@ async function checkCoverage() {
             this.$set(this.expense, 'remaining', 2 * expenseType.budget - newCommittedAmount);
             this.$set(this.expense, 'od', true);
             this.submitting = true;
+            // this.loading = false;
           }
+          console.log('here6');
         } else {
           //already overbudget handled by backend after submit
+          console.log('here5');
           this.submit();
         }
       } else {
+        console.log('here27');
         this.$set(this.expense, 'od', false);
         if (expenseType.budget !== newCommittedAmount) {
           //under budget
@@ -237,6 +253,7 @@ async function checkCoverage() {
         this.$set(this.expense, 'budget', expenseType.budget);
         this.$set(this.expense, 'remaining', expenseType.budget);
         this.submitting = true;
+        // this.loading = false;
       } else {
         // Good to go. Send it!
         this.submit();
@@ -260,6 +277,8 @@ function clearForm() {
   } else {
     this.$set(this.expense, 'employeeName', '');
   }
+
+  // this.loading = false; //ends loading button when form is cleared
 }
 
 function customFilter(item, queryText, itemText) {
@@ -317,6 +336,7 @@ function parseDate(date) {
 }
 
 async function submit() {
+  this.loading = true;
   this.submitting = false;
   if (this.$refs.form.validate()) {
     this.expense.receipt = undefined;
@@ -331,6 +351,7 @@ async function submit() {
         // submit attachment
         let attachment = await api.createAttachment(this.expense, this.file);
         console.log('attachment', attachment);
+        console.log('loading' + this.loading);
         this.$emit('update', updatedExpense);
       } else {
         this.$emit('error', updatedExpense.response.data.message);
@@ -357,6 +378,7 @@ async function submit() {
       }
     }
   }
+  this.loading = false;
 }
 
 // COMPUTED
@@ -434,6 +456,7 @@ async function created() {
 export default {
   data() {
     return {
+      loading: false,
       employeeRole: '',
       deleting: false,
       submitting: false,
