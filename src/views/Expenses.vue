@@ -215,7 +215,13 @@ export default {
       return this.role === 'super-admin';
     },
     roleHeaders() {
-      return this.isAdmin ? this.headers : this.headers.slice(1);
+      return this.isAdmin
+        ? this.headers
+        : (function getUserHeaders(headers) {
+            let x = headers;
+            x.splice(1, 1);
+            return x;
+          })(this.headers);
     },
     getUserName() {
       return this.processedExpenses.length === 0 ? '' : this.processedExpenses[0].employeeName;
