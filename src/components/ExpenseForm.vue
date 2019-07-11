@@ -18,11 +18,23 @@
           label="Employee"
           autocomplete
         ></v-select>
-        <!--Expense type picker -->
+        <!--Expense type picker if admin -->
         <v-select
+          v-if="employeeRole === 'super-admin' && this.$route.path !== '/home'"
           :items="expenseTypes"
           :rules="componentRules"
           :filter="customFilter"
+          v-model="expense.expenseTypeId"
+          label="Expense Type"
+          autocomplete
+          :disabled="!!expense.id"
+        ></v-select>
+        <!--Expense type picker if user -->
+        <v-select
+          v-else
+          :items="expenseTypes"
+          :rules="componentRules"
+          :filter="expenseTypeFilter"
           v-model="expense.expenseTypeId"
           label="Expense Type"
           autocomplete
@@ -262,6 +274,28 @@ function customFilter(item, queryText, itemText) {
   );
 }
 
+function betweenDates(startDate, endDate) {
+  let today = new Date();
+  let start = startDate.split('-');
+  let end = endDate.split('-');
+  if (today.getUTCFullYear() <= parseInt(end[0]) && today.getUTCFullYear() >= parseInt(start[0])) {
+    if (today.getUTCMonth() + 1 <= parseInt(end[1]) && today.getUTCMonth() + 1 >= parseInt(start[1])) {
+      if (today.getUTCDate() <= parseInt(end[2]) && today.getUTCDate() >= parseInt(start[2])) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+function expenseTypeFilter(item, queryText, itemText) {
+  return (
+    customFilter(item, queryText, itemText) &&
+    item.endDate != null &&
+    (item.endDate === 'true' || betweenDates(item.startDate, item.endDate))
+  );
+}
+
 async function deleteExpense() {
   this.deleting = false;
   if (this.expense.id) {
@@ -340,6 +374,15 @@ function isUser() {
   return this.employeeRole === 'user';
 }
 
+//  extend the Number object
+Number.prototype.pad = function(size) {
+  var s = String(this);
+  while (s.length < (size || 2)) {
+    s = '0' + s;
+  }
+  return s;
+};
+
 // LIFECYCLE HOOKS
 async function created() {
   let employeeRole = getRole();
@@ -356,6 +399,8 @@ async function created() {
     return {
       /* beautify preserve:start */
       text: `${expenseType.budgetName} - \$${expenseType.budget}`,
+      startDate: expenseType.startDate,
+      endDate: expenseType.endDate,
       /* beautify preserve:end */
       budgetName: expenseType.budgetName,
       value: expenseType.id,
@@ -456,6 +501,8 @@ export default {
     checkCoverage,
     clearForm,
     customFilter,
+    expenseTypeFilter,
+    betweenDates,
     deleteExpense,
     formatDate,
     parseDate,
