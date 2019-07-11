@@ -449,8 +449,8 @@ export default {
     isAdmin,
     isReimbursed,
     isSuperAdmin,
-    isUser,
-    isRequired
+    isUser
+    // isRequired
   },
   methods: {
     checkCoverage,

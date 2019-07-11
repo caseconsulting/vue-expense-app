@@ -38,7 +38,13 @@
     </v-flex>
 
     <!-- expense data -->
-    <v-flex v-if="!isMobile" xs12 sm12 md12 lg8>
+    <v-flex xs12 sm12 md12 lg8>
+      <v-flex text-xs-center>
+        <budget-table v-if="!loading" :employee="expenseTypeData"></budget-table>
+        <budget-chart v-if="!loading" :options="drawGraph.optionSet" :chart-data="drawGraph.dataSet"></budget-chart>
+      </v-flex>
+    </v-flex>
+    <!-- <v-flex v-if="!isMobile" xs12 sm12 md12 lg8>
       <v-flex text-xs-center>
         <budget-table v-if="!loading" :employee="expenseTypeData"></budget-table>
         <budget-chart v-if="!loading" :options="drawGraph.optionSet" :chart-data="drawGraph.dataSet"></budget-chart>
@@ -48,7 +54,7 @@
       <v-flex text-xs-center>
         <budget-table-mobile v-if="!loading" :employee="expenseTypeData"></budget-table-mobile>
       </v-flex>
-    </v-flex>
+    </v-flex> -->
 
     <!-- expense form-->
     <v-flex v-if="employ == null" xs12 sm12 md12 lg4 pt-3>
