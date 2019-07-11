@@ -89,7 +89,10 @@
                     <!-- unreimburse button -->
                     <v-btn
                       v-if="props.item.reimbursedDate"
-                      @click="unreimbursing = true"
+                      @click="
+                        unreimbursing = true;
+                        undoReExpense = props.item;
+                      "
                       :disabled="isEditing()"
                       color="white"
                     >
@@ -308,7 +311,7 @@ function isEditing() {
   return !!this.expense.id;
 }
 
-async function unreimburseExpense() {
+async function unreimburseExpense2() {
   this.unreimbursing = false;
   if (this.expense.id) {
     let unreimbursedExpense = this.expense;
@@ -317,6 +320,58 @@ async function unreimburseExpense() {
     // this.clearForm();
   }
   console.log('add code to process unreimbursement in this method');
+}
+
+async function unreimburseExpense() {
+  this.loading = true;
+  this.unreimbursing = false;
+  console.log('id');
+  console.log(this.undoReExpense.id);
+
+  if (this.undoReExpense.id) {
+    console.log('made it into the if thix.expense.id');
+    console.log('before exp change');
+    console.log(this.undoReExpense.reimbursedDate);
+    this.undoReExpense.reimbursedDate = null;
+    // this.$set(this.expense, 'receipt', this.file.name); //stores file name for lookup later
+    let updatedExpense = await api.updateItem(api.EXPENSES, this.undoReExpense.id, this.undoReExpense);
+    console.log('after exp change');
+
+    console.log(this.undoReExpense);
+    if (updatedExpense.id) {
+      // submit attachment
+      // let attachment = await api.createAttachment(this.expense, this.file);
+      // console.log('attachment', attachment);
+      // console.log('loading' + this.loading);
+      console.log('success updated expense id');
+      this.$emit('unreimburse', unreimbursedExpense);
+    } else {
+      console.log('error');
+      this.$emit('error', updatedExpense.response.data.message);
+    }
+  }
+  //  else {
+  //   this.$set(this.expense, 'createdAt', moment().format('MM-DD-YYYY'));
+  //   if (this.file) {
+  //     this.$set(this.expense, 'receipt', this.file.name); //stores file name for lookup later
+  //   }
+  //   let newExpense = await api.createItem(api.EXPENSES, this.expense);
+  //   console.log(newExpense.id);
+  //   if (newExpense.id) {
+  //     // submit attachment
+  //     let attachment = await api.createAttachment(newExpense, this.file);
+  //     console.log('attachment', attachment);
+  //     this.$set(this.expense, 'id', newExpense.id);
+  //     this.$emit('add', newExpense);
+  //     EventBus.$emit('showSnackbar', newExpense);
+  //     EventBus.$emit('refreshChart', newExpense);
+  //     this.clearForm();
+  //   } else {
+  //     this.$emit('error', newExpense.response.data.message);
+  //   }
+  // }
+  console.log('made it to the end of the method');
+  this.loading = false;
 }
 
 // LIFECYCLE HOOKS
@@ -353,6 +408,20 @@ export default {
       },
       userFirstName: '',
       expense: {
+        id: '',
+        description: '',
+        cost: '',
+        note: null,
+        userId: '',
+        expenseTypeId: '',
+        purchaseDate: null,
+        reimbursedDate: null,
+        receipt: null,
+        employeeName: '',
+        budgetName: '',
+        createdAt: null
+      },
+      undoReExpense: {
         id: '',
         description: '',
         cost: '',
