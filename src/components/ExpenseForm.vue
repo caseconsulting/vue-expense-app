@@ -87,6 +87,7 @@
           <v-text-field
             slot="activator"
             v-model="reimbursedDateFormatted"
+            :rules="optionalDateRules"
             label="Reimburse Date (optional)"
             hint="MM/DD/YYYY format "
             persistent-hint
@@ -97,7 +98,6 @@
         </v-menu>
 
         <!-- Receipt uploading -->
-        <!-- v-if="expenseType.requiredFlag" -->
         <file-upload @fileSelected="setFile" :passedRules="receiptRules"></file-upload>
 
         <!-- Notes section -->
@@ -340,11 +340,6 @@ function isUser() {
   return this.employeeRole === 'user';
 }
 
-function isRequired() {
-  console.log(this.requiredFlag);
-  return this.requiredFlag;
-}
-
 // LIFECYCLE HOOKS
 async function created() {
   let employeeRole = getRole();
@@ -365,8 +360,7 @@ async function created() {
       budgetName: expenseType.budgetName,
       value: expenseType.id,
       budget: expenseType.budget,
-      odFlag: expenseType.odFlag,
-      requiredFlag: expenseType.requiredFlag
+      odFlag: expenseType.odFlag
     };
   });
 
@@ -408,7 +402,7 @@ export default {
       userInfo: {},
       descriptionRules: [
         v => !!v || 'Description is a required field.',
-        v => (v && v.replace(/\s/g, '').length > 0) || 'Description is a required field.'
+        v => v.replace(/\s/g, '').length > 0 || 'Description is a required field.'
       ],
       costRules: [
         v => !!v || 'Cost is a required field.',
@@ -416,8 +410,12 @@ export default {
         v => v < 1000000000 || 'Nice try' //when a user tries to fill out expense that is over a million
         // ,v => v == Math.round(v * 100) / 100 || 'Cost must rounded to 2 places after the decimal.' // rules need to return booleans
       ],
-      componentRules: [v => !!v || 'Required field.'],
-      dateRules: [v => !!v || 'Date must be valid. Format: MM/DD/YYYY'],
+      componentRules: [v => !!v || 'An appropriate expense type must be selected.'],
+      dateRules: [
+        v => !!v || 'Date must be valid. Format: MM/DD/YYYY',
+        v => (!!v && /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v)) || 'Date must be valid. Format: MM/DD/YYYY'
+      ],
+      optionalDateRules: [v => !v || /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v) || 'Date must be valid. Format: MM/DD/YYYY'],
       receiptRules: [v => !!v || 'Receipts are required.'],
       valid: false,
       file: undefined
@@ -431,9 +429,19 @@ export default {
   watch: {
     'expense.purchaseDate': function(val) {
       this.purchaseDateFormatted = this.formatDate(this.expense.purchaseDate) || this.purchaseDateFormatted;
+
+      //fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
+      if (!this.formatDate(this.expense.purchaseDate)) {
+        this.expense.purchaseDate = null;
+      }
     },
     'expense.reimbursedDate': function(val) {
       this.reimbursedDateFormatted = this.formatDate(this.expense.reimbursedDate) || this.reimbursedDateFormatted;
+
+      //fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
+      if (!this.formatDate(this.expense.reimbursedDate)) {
+        this.expense.reimbursedDate = null;
+      }
     }
   },
   props: ['expense'],
