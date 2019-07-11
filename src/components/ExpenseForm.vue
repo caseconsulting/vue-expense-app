@@ -166,7 +166,6 @@ function setFile(file) {
 }
 async function checkCoverage() {
   if (this.expense) {
-    this.loading = true;
     let expenseType = _.find(this.expenseTypes, type => this.expense.expenseTypeId === type.value);
     let employee = {};
     if (getRole() === 'user') {
