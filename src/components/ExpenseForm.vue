@@ -28,6 +28,7 @@
           label="Expense Type"
           autocomplete
           :disabled="!!expense.id"
+          @input="expenseTypeSelected"
         ></v-select>
         <!--Expense type picker if user -->
         <v-select
@@ -110,7 +111,7 @@
         </v-menu>
 
         <!-- Receipt uploading -->
-        <file-upload @fileSelected="setFile" :passedRules="receiptRules"></file-upload>
+        <file-upload v-if="isRequired" @fileSelected="setFile" :passedRules="receiptRules"></file-upload>
 
         <!-- Notes section -->
         <v-text-field
@@ -134,7 +135,6 @@
 
         <!-- submit button -->
         <v-btn
-          v-if=""
           outline
           color="success"
           @click="checkCoverage"
@@ -340,8 +340,10 @@ async function submit() {
       let updatedExpense = await api.updateItem(api.EXPENSES, this.expense.id, this.expense);
       if (updatedExpense.id) {
         // submit attachment
-        let attachment = await api.createAttachment(this.expense, this.file);
-        console.log('attachment', attachment);
+        if (this.isRequired) {
+          let attachment = await api.createAttachment(this.expense, this.file);
+        }
+        // console.log('attachment', attachment);
         console.log('loading' + this.loading);
         this.$emit('update', updatedExpense);
       } else {
@@ -357,8 +359,10 @@ async function submit() {
       console.log(newExpense.id);
       if (newExpense.id) {
         // submit attachment
-        let attachment = await api.createAttachment(newExpense, this.file);
-        console.log('attachment', attachment);
+        if (this.isRequired) {
+          let attachment = await api.createAttachment(newExpense, this.file);
+        }
+        // console.log('attachment', attachment);
         this.$set(this.expense, 'id', newExpense.id);
         this.$emit('add', newExpense);
         EventBus.$emit('showSnackbar', newExpense);
@@ -370,6 +374,14 @@ async function submit() {
     }
   }
   this.loading = false;
+}
+
+function expenseTypeSelected(value) {
+  this.selectedExpenseType = _.find(this.expenseTypes, expenseType => {
+    if (expenseType.value === value) {
+      return expenseType;
+    }
+  });
 }
 
 // COMPUTED
@@ -397,6 +409,13 @@ Number.prototype.pad = function(size) {
   }
   return s;
 };
+
+function isRequired() {
+  if (this.selectedExpenseType) {
+    return this.selectedExpenseType.requiredFlag;
+  }
+  return true;
+}
 
 // LIFECYCLE HOOKS
 async function created() {
@@ -523,7 +542,8 @@ export default {
     formatDate,
     parseDate,
     submit,
-    setFile
+    setFile,
+    expenseTypeSelected
   },
   created
 };
