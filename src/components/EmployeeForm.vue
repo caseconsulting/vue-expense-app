@@ -164,7 +164,10 @@ export default {
           'Not a valid @consultwithcase email address'
       ],
       numberRules: [v => !!v || 'Employee ID is required', v => /^\d+$/.test(v) || 'Cost must be a number'],
-      dateRules: [v => !!v || 'Date must be valid. MM/DD/YYYY format'],
+      dateRules: [
+        v => !!v || 'Date must be valid. Format: MM/DD/YYYY',
+        v => (!!v && /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v)) || 'Date must be valid. Format: MM/DD/YYYY'
+      ],
       valid: false
     };
   },
@@ -175,6 +178,10 @@ export default {
   watch: {
     'model.hireDate': function(val) {
       this.hireDateFormatted = this.formatDate(this.model.hireDate) || this.hireDateFormatted;
+      //fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
+      if (this.model.hireDate !== null && !this.formatDate(this.model.hireDate)) {
+        this.model.hireDate = null;
+      }
     },
     'model.employeeRole': function(val) {
       this.employeeRoleFormatted = _.startCase(this.model.employeeRole);

@@ -181,7 +181,10 @@ export default {
           /^[+-]?[0-9]{1,3}(?:,?[0-9]{3})*(?:\.[0-9]{2})?$/.test(v) ||
           'Budget amount must be a number with two decimal digits.'
       ],
-      dateRules: [v => !!v || 'Date must be valid. MM/DD/YYYY format'],
+      dateRules: [
+        v => !!v || 'Date must be valid. Format: MM/DD/YYYY',
+        v => (!!v && /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v)) || 'Date must be valid. Format: MM/DD/YYYY'
+      ],
       valid: false,
       startDateFormatted: null,
       endDateFormatted: null
@@ -205,9 +208,19 @@ export default {
   watch: {
     'model.startDate': function(val) {
       this.startDateFormatted = this.formatDate(this.model.startDate) || this.startDateFormatted;
+
+      //fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
+      if (this.model.startDate !== null && !this.formatDate(this.model.startDate)) {
+        this.model.startDate = null;
+      }
     },
     'model.endDate': function(val) {
       this.endDateFormatted = this.formatDate(this.model.endDate) || this.endDateFormatted;
+
+      //fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
+      if (this.model.endDate !== null && !this.formatDate(this.model.endDate)) {
+        this.model.endDate = null;
+      }
     }
   }
 };

@@ -431,7 +431,7 @@ export default {
       this.purchaseDateFormatted = this.formatDate(this.expense.purchaseDate) || this.purchaseDateFormatted;
 
       //fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
-      if (!this.formatDate(this.expense.purchaseDate)) {
+      if (this.expense.purchaseDate !== null && !this.formatDate(this.expense.purchaseDate)) {
         this.expense.purchaseDate = null;
       }
     },
@@ -439,7 +439,7 @@ export default {
       this.reimbursedDateFormatted = this.formatDate(this.expense.reimbursedDate) || this.reimbursedDateFormatted;
 
       //fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
-      if (!this.formatDate(this.expense.reimbursedDate)) {
+      if (this.expense.reimbursedDate !== null && !this.formatDate(this.expense.reimbursedDate)) {
         this.expense.reimbursedDate = null;
       }
     }
