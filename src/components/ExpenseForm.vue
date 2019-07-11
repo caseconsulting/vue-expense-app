@@ -18,7 +18,6 @@
           label="Employee"
           autocomplete
         ></v-select>
-
         <!--Expense type picker if super-admin -->
         <v-select
           v-if="employeeRole === 'super-admin' && this.$route.path !== '/home'"
