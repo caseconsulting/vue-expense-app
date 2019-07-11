@@ -170,14 +170,19 @@ async function checkCoverage() {
     let expenseType = _.find(this.expenseTypes, type => this.expense.expenseTypeId === type.value);
     let employee = {};
     if (getRole() === 'user') {
+      console.log('here1');
       employee = await api.getUser();
     } else {
+      console.log('here');
       employee = await api.getItem(api.EMPLOYEES, this.expense.userId);
     }
+    console.log('here3');
     let budgets = await api.getItems(api.BUDGETS);
     let employeeExpenseTypeBudget = _.find(budgets, budget => {
+      console.log('here2');
       return budget.expenseTypeId === expenseType.value;
     });
+    console.log('here4');
 
     // Keep the cost data as a string. This allows us to keep it formatted as ##.##
     // -- If you parse the Expense object's cost field itself into a float, it drops the second
@@ -187,20 +192,25 @@ async function checkCoverage() {
     let cost = parseFloat(this.expense.cost);
     this.$set(this.expense, 'cost', this.expense.cost);
 
+    console.log('here24');
     if (employeeExpenseTypeBudget) {
+      console.log('here25');
       let committedAmount = employeeExpenseTypeBudget.pendingAmount + employeeExpenseTypeBudget.reimbursedAmount;
       let allExpenses = await api.getAggregate();
       let match = _.find(allExpenses, entry => {
+        console.log('here21');
         return entry.id === this.expense.id;
       });
       // For subsequent calculations, remove matched entry cost from committed amount
       let newCommittedAmount = match ? committedAmount - match.cost : committedAmount;
       if (expenseType.odFlag) {
+        console.log('here26');
         // Selected Expense Type allows overdraft
         if (2 * expenseType.budget !== newCommittedAmount) {
           //under budget
           if (newCommittedAmount + cost <= 2 * expenseType.budget) {
             //full amount reimbursed
+            console.log('here20');
             this.submit();
           } else {
             // not maxed out but also not fully covered
@@ -210,11 +220,14 @@ async function checkCoverage() {
             this.submitting = true;
             // this.loading = false;
           }
+          console.log('here6');
         } else {
           //already overbudget handled by backend after submit
+          console.log('here5');
           this.submit();
         }
       } else {
+        console.log('here27');
         this.$set(this.expense, 'od', false);
         if (expenseType.budget !== newCommittedAmount) {
           //under budget
