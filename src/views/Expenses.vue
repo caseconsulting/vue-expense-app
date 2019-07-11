@@ -154,6 +154,160 @@ function descriptionFilter(val) {
   } else return val;
 }
 
+// COMPUTED
+function sorting() {
+  return this.processedExpenses;
+}
+
+function isAdmin() {
+  return this.role === 'admin' || this.role === 'super-admin';
+}
+
+function isUser() {
+  return this.role === 'user';
+}
+
+function isSuperAdmin() {
+  return this.role === 'super-admin';
+}
+
+function roleHeaders() {
+  return this.isAdmin
+    ? this.headers
+    : (function getUserHeaders(headers) {
+        let x = headers;
+        x.splice(1, 1);
+        return x;
+      })(this.headers);
+}
+
+function getUserName() {
+  return this.processedExpenses.length === 0 ? '' : this.processedExpenses[0].employeeName;
+}
+
+// METHODS
+function clearStatus() {
+  this.$set(this.status, 'statusType', undefined);
+  this.$set(this.status, 'statusMessage', '');
+  this.$set(this.status, 'color', '');
+}
+
+async function displayError(err) {
+  this.$set(this.status, 'statusType', 'ERROR');
+  this.$set(this.status, 'statusMessage', err);
+  this.$set(this.status, 'color', 'red');
+}
+
+async function getEmployeeName(expense) {
+  let employee = await api.getItem(api.EMPLOYEES, expense.userId);
+  expense.employeeName = employeeUtils.fullName(employee);
+  return expense;
+}
+
+async function getExpenseTypeName(expense) {
+  let expenseType = await api.getItem(api.EXPENSE_TYPES, expense.expenseTypeId);
+  expense.budgetName = expenseType.budgetName;
+  return expense;
+}
+
+async function refreshExpenses() {
+  let aggregatedData = [];
+  if (this.isAdmin || this.isUser) {
+    aggregatedData = await api.getAggregate();
+  }
+  this.processedExpenses = aggregatedData;
+  this.loading = false;
+}
+
+function showRow(expense) {
+  return this.showReimbursed || !expense.reimbursedDate;
+}
+
+function onSelect(item) {
+  this.$set(this.expense, 'budgetName', item.budgetName);
+  this.$set(this.expense, 'id', item.id);
+  this.$set(this.expense, 'purchaseDate', item.purchaseDate);
+  this.$set(this.expense, 'reimbursedDate', item.reimbursedDate);
+  this.$set(this.expense, 'employeeName', item.employeeName);
+  this.$set(this.expense, 'description', item.description);
+  this.$set(this.expense, 'cost', moneyFilter(item.cost));
+  this.$set(this.expense, 'userId', item.userId);
+  this.$set(this.expense, 'expenseTypeId', item.expenseTypeId);
+  this.$set(this.expense, 'note', item.note);
+  this.$set(this.expense, 'receipt', item.receipt);
+  this.$set(this.expense, 'createdAt', item.createdAt);
+  this.$set(this.expense, 'url', item.url);
+}
+
+function updateModelInTable(updatedExpense) {
+  let matchingExpensesIndex = _.findIndex(this.processedExpenses, expense => expense.id === updatedExpense.id);
+  let employeeName = '';
+  if (this.isAdmin) {
+    console.log('admin');
+    api.getItem(api.EMPLOYEES, updatedExpense.userId).then(employee => {
+      employeeName = employeeUtils.fullName(employee);
+      this.$set(updatedExpense, 'employeeName', employeeName);
+    });
+  } else {
+    employeeName = this.processedExpenses[matchingExpensesIndex].employeeName;
+    this.$set(updatedExpense, 'employeeName', employeeName);
+  }
+  api.getItem(api.EXPENSE_TYPES, updatedExpense.expenseTypeId).then(expenseType => {
+    this.$set(updatedExpense, 'budgetName', expenseType.budgetName);
+  });
+  this.processedExpenses.splice(matchingExpensesIndex, 1, updatedExpense);
+  this.$set(this.status, 'statusType', 'SUCCESS');
+  this.$set(this.status, 'statusMessage', 'Item was successfully updated!');
+  this.$set(this.status, 'color', 'green');
+}
+
+function addModelToTable(newExpense) {
+  let matchingExpenses = _.filter(this.processedExpenses, expense => expense.id === newExpense.id);
+
+  if (!matchingExpenses.length) {
+    if (this.isAdmin) {
+      api
+        .getItem(api.EMPLOYEES, newExpense.userId)
+        .then(employee => {
+          let employeeName = employeeUtils.fullName(employee);
+          this.$set(newExpense, 'employeeName', employeeName);
+        })
+        .catch(err => console.log(err));
+    }
+    api.getItem(api.EXPENSE_TYPES, newExpense.expenseTypeId).then(expenseType => {
+      this.$set(newExpense, 'budgetName', expenseType.budgetName);
+    });
+
+    this.processedExpenses.push(newExpense);
+    this.$set(this.status, 'statusType', 'SUCCESS');
+    this.$set(this.status, 'statusMessage', 'Item was successfully submitted!');
+    this.$set(this.status, 'color', 'green');
+  }
+}
+
+function deleteModelFromTable(deletedExpense) {
+  let modelIndex = _.findIndex(this.processedExpenses, expense => {
+    return expense.id === deletedExpense.id;
+  });
+  this.processedExpenses.splice(modelIndex, 1);
+  this.$set(this.status, 'statusType', 'SUCCESS');
+  this.$set(this.status, 'statusMessage', 'Item was successfully deleted!');
+  this.$set(this.status, 'color', 'green');
+}
+
+function changeSort(column) {
+  if (this.pagination.sortBy === column) {
+    this.pagination.descending = !this.pagination.descending;
+  } else {
+    this.pagination.sortBy = column;
+    this.pagination.descending = false;
+  }
+}
+
+function isEditing() {
+  return !!this.expense.id;
+}
+
 async function unreimburseExpense() {
   this.unreimbursing = false;
   if (this.expense.id) {
@@ -165,6 +319,7 @@ async function unreimburseExpense() {
   console.log('add code to process unreimbursement in this method');
 }
 
+// LIFECYCLE HOOKS
 async function created() {
   this.role = getRole();
   this.refreshExpenses();
@@ -259,149 +414,33 @@ export default {
     };
   },
   computed: {
-    sorting() {
-      return this.processedExpenses;
-    },
-    isAdmin() {
-      return this.role === 'admin' || this.role === 'super-admin';
-    },
-    isUser() {
-      return this.role === 'user';
-    },
-    isSuperAdmin() {
-      return this.role === 'super-admin';
-    },
-    roleHeaders() {
-      return this.isAdmin
-        ? this.headers
-        : (function getUserHeaders(headers) {
-            let x = headers;
-            x.splice(1, 1);
-            return x;
-          })(this.headers);
-    },
-    getUserName() {
-      return this.processedExpenses.length === 0 ? '' : this.processedExpenses[0].employeeName;
-    }
+    sorting,
+    isAdmin,
+    isUser,
+    isSuperAdmin,
+    roleHeaders,
+    getUserName
   },
   components: {
     ExpenseForm,
     Attachment,
     UnreimburseModal
   },
-  created,
   methods: {
-    clearStatus() {
-      this.$set(this.status, 'statusType', undefined);
-      this.$set(this.status, 'statusMessage', '');
-      this.$set(this.status, 'color', '');
-    },
-    async displayError(err) {
-      this.$set(this.status, 'statusType', 'ERROR');
-      this.$set(this.status, 'statusMessage', err);
-      this.$set(this.status, 'color', 'red');
-    },
-    async getEmployeeName(expense) {
-      let employee = await api.getItem(api.EMPLOYEES, expense.userId);
-      expense.employeeName = employeeUtils.fullName(employee);
-      return expense;
-    },
-    async getExpenseTypeName(expense) {
-      let expenseType = await api.getItem(api.EXPENSE_TYPES, expense.expenseTypeId);
-      expense.budgetName = expenseType.budgetName;
-      return expense;
-    },
-    async refreshExpenses() {
-      let aggregatedData = [];
-      if (this.isAdmin || this.isUser) {
-        aggregatedData = await api.getAggregate();
-      }
-      this.processedExpenses = aggregatedData;
-      this.loading = false;
-    },
-    showRow(expense) {
-      return this.showReimbursed || !expense.reimbursedDate;
-    },
-    onSelect(item) {
-      this.$set(this.expense, 'budgetName', item.budgetName);
-      this.$set(this.expense, 'id', item.id);
-      this.$set(this.expense, 'purchaseDate', item.purchaseDate);
-      this.$set(this.expense, 'reimbursedDate', item.reimbursedDate);
-      this.$set(this.expense, 'employeeName', item.employeeName);
-      this.$set(this.expense, 'description', item.description);
-      this.$set(this.expense, 'cost', moneyFilter(item.cost));
-      this.$set(this.expense, 'userId', item.userId);
-      this.$set(this.expense, 'expenseTypeId', item.expenseTypeId);
-      this.$set(this.expense, 'note', item.note);
-      this.$set(this.expense, 'receipt', item.receipt);
-      this.$set(this.expense, 'createdAt', item.createdAt);
-      this.$set(this.expense, 'url', item.url);
-    },
-    updateModelInTable(updatedExpense) {
-      let matchingExpensesIndex = _.findIndex(this.processedExpenses, expense => expense.id === updatedExpense.id);
-      let employeeName = '';
-      if (this.isAdmin) {
-        console.log('admin');
-        api.getItem(api.EMPLOYEES, updatedExpense.userId).then(employee => {
-          employeeName = employeeUtils.fullName(employee);
-          this.$set(updatedExpense, 'employeeName', employeeName);
-        });
-      } else {
-        employeeName = this.processedExpenses[matchingExpensesIndex].employeeName;
-        this.$set(updatedExpense, 'employeeName', employeeName);
-      }
-      api.getItem(api.EXPENSE_TYPES, updatedExpense.expenseTypeId).then(expenseType => {
-        this.$set(updatedExpense, 'budgetName', expenseType.budgetName);
-      });
-      this.processedExpenses.splice(matchingExpensesIndex, 1, updatedExpense);
-      this.$set(this.status, 'statusType', 'SUCCESS');
-      this.$set(this.status, 'statusMessage', 'Item was successfully updated!');
-      this.$set(this.status, 'color', 'green');
-    },
-    addModelToTable(newExpense) {
-      let matchingExpenses = _.filter(this.processedExpenses, expense => expense.id === newExpense.id);
-
-      if (!matchingExpenses.length) {
-        if (this.isAdmin) {
-          api
-            .getItem(api.EMPLOYEES, newExpense.userId)
-            .then(employee => {
-              let employeeName = employeeUtils.fullName(employee);
-              this.$set(newExpense, 'employeeName', employeeName);
-            })
-            .catch(err => console.log(err));
-        }
-        api.getItem(api.EXPENSE_TYPES, newExpense.expenseTypeId).then(expenseType => {
-          this.$set(newExpense, 'budgetName', expenseType.budgetName);
-        });
-
-        this.processedExpenses.push(newExpense);
-        this.$set(this.status, 'statusType', 'SUCCESS');
-        this.$set(this.status, 'statusMessage', 'Item was successfully submitted!');
-        this.$set(this.status, 'color', 'green');
-      }
-    },
-    deleteModelFromTable(deletedExpense) {
-      let modelIndex = _.findIndex(this.processedExpenses, expense => {
-        return expense.id === deletedExpense.id;
-      });
-      this.processedExpenses.splice(modelIndex, 1);
-      this.$set(this.status, 'statusType', 'SUCCESS');
-      this.$set(this.status, 'statusMessage', 'Item was successfully deleted!');
-      this.$set(this.status, 'color', 'green');
-    },
-    changeSort(column) {
-      if (this.pagination.sortBy === column) {
-        this.pagination.descending = !this.pagination.descending;
-      } else {
-        this.pagination.sortBy = column;
-        this.pagination.descending = false;
-      }
-    },
-    isEditing() {
-      return !!this.expense.id;
-    },
+    clearStatus,
+    displayError,
+    getEmployeeName,
+    getExpenseTypeName,
+    refreshExpenses,
+    showRow,
+    onSelect,
+    updateModelInTable,
+    addModelToTable,
+    deleteModelFromTable,
+    changeSort,
+    isEditing,
     unreimburseExpense
-  }
+  },
+  created
 };
 </script>
