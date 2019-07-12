@@ -261,7 +261,6 @@ function updateModelInTable(updatedExpense) {
   let matchingExpensesIndex = _.findIndex(this.processedExpenses, expense => expense.id === updatedExpense.id);
   let employeeName = '';
   if (this.isAdmin) {
-    console.log('admin');
     api.getItem(api.EMPLOYEES, updatedExpense.userId).then(employee => {
       employeeName = employeeUtils.fullName(employee);
       this.$set(updatedExpense, 'employeeName', employeeName);
@@ -307,7 +306,6 @@ function deleteModelFromTable(deletedExpense) {
   let modelIndex = _.findIndex(this.processedExpenses, expense => {
     return expense.id === deletedExpense.id;
   });
-  console.log('hello');
   this.processedExpenses.splice(modelIndex, 1);
   this.$set(this.status, 'statusType', 'SUCCESS');
   this.$set(this.status, 'statusMessage', 'Item was successfully deleted!');
@@ -327,22 +325,9 @@ function isEditing() {
   return !!this.expense.id;
 }
 
-async function unreimburseExpense2() {
-  this.unreimbursing = false;
-  if (this.expense.id) {
-    let unreimbursedExpense = this.expense;
-    // await api.deleteItem(api.EXPENSES, this.expense.id);
-    this.$emit('unreimburse', unreimbursedExpense);
-    // this.clearForm();
-  }
-  console.log('add code to process unreimbursement in this method');
-}
-
 async function unreimburseExpense() {
   this.loading = true;
   this.unreimbursing = false;
-  console.log('id');
-  console.log(this.propExpense.id);
 
   if (this.propExpense.id) {
     console.log('made it into the if thix.expense.id');
