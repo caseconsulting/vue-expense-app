@@ -12,7 +12,7 @@ module.exports = {
   testMatch: ['**/tests/unit/**/*.spec.(js|jsx|ts|tsx)|**/__tests__/*.(js|jsx|ts|tsx)'],
   testURL: 'http://localhost/',
   watchPlugins: ['jest-watch-typeahead/filename', 'jest-watch-typeahead/testname'],
-  testPathIgnorePatterns: ['<rootDir>/node_modules/', '<rootDir>/tests/e2e'],
+  testPathIgnorePatterns: ['<rootDir>/node_modules/', '<rootDir>/tests/e2e']
   // collectCoverage: true,
   // collectCoverageFrom: ['**/*.{js,vue}', '!src/main.js', '!**/node_modules/**', '!output.js'],
   // coverageReporters: ['html', 'text-summary'],
