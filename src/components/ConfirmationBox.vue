@@ -27,22 +27,24 @@ this.expense<template>
 </template>
 
 <script>
+// import { eventBus } from '../main.js';
+
 export default {
   props: ['expense', 'activate'],
   methods: {
     emit(msg, data) {
       if (data) {
-        EventBus.$emit(msg, data);
+        window.EventBus.$emit(msg, data);
       } else {
-        EventBus.$emit(msg);
+        window.EventBus.$emit(msg);
       }
     },
     confirm(msg) {
-      this.expense.note = `The expense you are about to submit is only covered up to $${
-        this.expense.budget
-      }. You will be reimbursed $${this.expense.remaining} of $${this.expense.cost}`;
+      this.expense.note = `The expense you are about to submit is only covered up to $
+        ${this.expense.budget}. You will be reimbursed $${this.expense.remaining} of $
+        ${this.expense.cost}`;
       this.expense.cost = this.expense.remaining;
-      EventBus.$emit('confirmSubmit');
+      window.EventBus.$emit(msg);
     }
   },
   filters: {
