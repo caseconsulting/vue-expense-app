@@ -172,18 +172,18 @@ export default {
     };
   },
   created() {
-    EventBus.$on('canceled-delete-employee', () => (this.deleting = false));
-    EventBus.$on('confirm-delete-employee', this.deleteEmployee);
+    window.EventBus.$on('canceled-delete-employee', () => (this.deleting = false));
+    window.EventBus.$on('confirm-delete-employee', this.deleteEmployee);
   },
   watch: {
-    'model.hireDate': function(val) {
+    'model.hireDate': function() {
       this.hireDateFormatted = this.formatDate(this.model.hireDate) || this.hireDateFormatted;
       //fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
       if (this.model.hireDate !== null && !this.formatDate(this.model.hireDate)) {
         this.model.hireDate = null;
       }
     },
-    'model.employeeRole': function(val) {
+    'model.employeeRole': function() {
       this.employeeRoleFormatted = _.startCase(this.model.employeeRole);
     }
   },
