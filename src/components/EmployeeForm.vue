@@ -93,6 +93,8 @@ import _ from 'lodash';
 import { getRole } from '@/utils/auth';
 import dateUtils from '@/shared/dateUtils';
 
+const regex = /^(([^<>()[\]\\.,;:\s@#"]+(\.[^<>()[\]\\.,;:\s@#"]+)*)|(".+"))@consultwithcase.com/;
+
 function clearForm() {
   this.$refs.form.reset();
   this.employeeRoleFormatted = 'User';
@@ -157,12 +159,7 @@ export default {
       employeeRoleFormatted: 'User',
       menu1: false,
       genericRules: [v => !!v || 'This field is required'],
-      emailRules: [
-        v => !!v || 'Email is required',
-        v =>
-          /^(([^<>()\[\]\\.,;:\s@#"]+(\.[^<>()\[\]\\.,;:\s@#"]+)*)|(".+"))@consultwithcase.com/.test(v) ||
-          'Not a valid @consultwithcase email address'
-      ],
+      emailRules: [v => !!v || 'Email is required', v => regex.test(v) || 'Not a valid @consultwithcase email address'],
       numberRules: [v => !!v || 'Employee ID is required', v => /^\d+$/.test(v) || 'Cost must be a number'],
       dateRules: [
         v => !!v || 'Date must be valid. Format: MM/DD/YYYY',

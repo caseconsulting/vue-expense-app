@@ -134,7 +134,17 @@
         <v-btn color="white" @click="clearForm"> <icon class="mr-1" name="ban"></icon>Cancel</v-btn>
 
         <!-- submit button -->
+<<<<<<< HEAD
         <v-btn outline color="success" @click="checkCoverage" :disabled="!valid || (!isSuperAdmin && isReimbursed)">
+=======
+        <v-btn
+          outline
+          color="success"
+          @click="checkCoverage"
+          :disabled="!valid || (!isSuperAdmin && isReimbursed)"
+          :loading="loading"
+        >
+>>>>>>> 642-fix-lint-errors: linted EmployeeForm and added loading button back to expenseform
           <icon class="mr-1" name="save"></icon>Submit</v-btn
         >
         <!-- End Buttons -->
