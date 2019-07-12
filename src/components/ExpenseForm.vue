@@ -40,6 +40,7 @@
           label="Expense Type"
           autocomplete
           :disabled="!!expense.id"
+          @input="expenseTypeSelected"
         ></v-select>
         <!--Cost input field -->
         <v-text-field
@@ -213,7 +214,6 @@ async function checkCoverage() {
             this.$set(this.expense, 'remaining', 2 * expenseType.budget - newCommittedAmount);
             this.$set(this.expense, 'od', true);
             this.submitting = true;
-            // this.loading = false;
           }
         } else {
           //already overbudget handled by backend after submit
@@ -245,7 +245,6 @@ async function checkCoverage() {
         this.$set(this.expense, 'budget', expenseType.budget);
         this.$set(this.expense, 'remaining', expenseType.budget);
         this.submitting = true;
-        // this.loading = false;
       } else {
         // Good to go. Send it!
         this.submit();
@@ -269,8 +268,6 @@ function clearForm() {
   } else {
     this.$set(this.expense, 'employeeName', '');
   }
-
-  // this.loading = false; //ends loading button when form is cleared
 }
 
 function customFilter(item, queryText, itemText) {
@@ -345,7 +342,6 @@ async function submit() {
           let attachment = await api.createAttachment(this.expense, this.file);
         }
         // console.log('attachment', attachment);
-        console.log('loading' + this.loading);
         this.$emit('update', updatedExpense);
       } else {
         this.$emit('error', updatedExpense.response.data.message);
@@ -440,7 +436,8 @@ async function created() {
       budgetName: expenseType.budgetName,
       value: expenseType.id,
       budget: expenseType.budget,
-      odFlag: expenseType.odFlag
+      odFlag: expenseType.odFlag,
+      requiredFlag: expenseType.requiredFlag
     };
   });
 
@@ -483,7 +480,7 @@ export default {
       userInfo: {},
       descriptionRules: [
         v => !!v || 'Description is a required field.',
-        v => v.replace(/\s/g, '').length > 0 || 'Description is a required field.'
+        v => (v && v.replace(/\s/g, '').length > 0) || 'Description is a required field.'
       ],
       costRules: [
         v => !!v || 'Cost is a required field.',
@@ -491,7 +488,7 @@ export default {
         v => v < 1000000000 || 'Nice try' //when a user tries to fill out expense that is over a million
         // ,v => v == Math.round(v * 100) / 100 || 'Cost must rounded to 2 places after the decimal.' // rules need to return booleans
       ],
-      componentRules: [v => !!v || 'An appropriate expense type must be selected.'],
+      componentRules: [v => !!v || 'Required field.'],
       dateRules: [
         v => !!v || 'Date must be valid. Format: MM/DD/YYYY',
         v => (!!v && /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v)) || 'Date must be valid. Format: MM/DD/YYYY'
