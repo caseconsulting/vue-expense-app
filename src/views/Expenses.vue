@@ -82,13 +82,48 @@
               <v-card flat>
                 <v-card-text>
                   <div>
-                    <!-- edit button -->
-                    <v-btn @click="onSelect(props.item)" outline color="black" :disabled="isEditing()">
+                    <!-- notes/url button -->
+                    <v-btn outline color="info"> <icon class="mr-1" name="sticky-note"></icon>View Notes</v-btn>
+
+                    <!-- edit button for super-admin-->
+                    <v-btn
+                      v-if="isSuperAdmin"
+                      @click="onSelect(props.item)"
+                      outline
+                      color="black"
+                      :disabled="isEditing()"
+                    >
                       <icon class="mr-1" name="edit"></icon>Edit</v-btn
                     >
 
-                    <!-- delete button -->
+                    <!-- edit button for user/admin-->
                     <v-btn
+                      v-if="!isSuperAdmin && !props.item.reimbursedDate"
+                      @click="onSelect(props.item)"
+                      outline
+                      color="black"
+                      :disabled="isEditing()"
+                    >
+                      <icon class="mr-1" name="edit"></icon>Edit</v-btn
+                    >
+
+                    <!-- delete button for super-admin -->
+                    <v-btn
+                      v-if="isSuperAdmin"
+                      outline
+                      color="error"
+                      @click="
+                        deleting = true;
+                        propExpense = props.item;
+                      "
+                      :disabled="isEditing()"
+                    >
+                      <icon class="mr-1" name="trash"></icon>Delete</v-btn
+                    >
+
+                    <!-- delete button for user/admin -->
+                    <v-btn
+                      v-if="!isSuperAdmin && !props.item.reimbursedDate"
                       outline
                       color="error"
                       @click="
@@ -102,13 +137,14 @@
 
                     <!-- unreimburse button -->
                     <v-btn
+                      v-if="isSuperAdmin && props.item.reimbursedDate"
                       outline
-                      color="info"
+                      color="indigo"
                       @click="
                         unreimbursing = true;
                         propExpense = props.item;
                       "
-                      :disabled="isEditing() || !props.item.reimbursedDate"
+                      :disabled="isEditing()"
                     >
                       <icon class="mr-1" name="times-circle"></icon>Unremimburse</v-btn
                     >

@@ -30,6 +30,7 @@ import 'vue-awesome/icons/hand-holding-usd';
 import 'vue-awesome/icons/cloud-download-alt';
 import 'vue-awesome/icons/times-circle';
 import 'vue-awesome/icons/edit';
+import 'vue-awesome/icons/sticky-note';
 
 import Icon from 'vue-awesome/components/Icon';
 import App from './App.vue';
