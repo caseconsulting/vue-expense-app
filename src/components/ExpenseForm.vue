@@ -134,12 +134,7 @@
         <v-btn color="white" @click="clearForm"> <icon class="mr-1" name="ban"></icon>Cancel</v-btn>
 
         <!-- submit button -->
-        <v-btn
-          outline
-          color="success"
-          @click="checkCoverage"
-          :disabled="!valid || (!isSuperAdmin && isReimbursed)"
-        >
+        <v-btn outline color="success" @click="checkCoverage" :disabled="!valid || (!isSuperAdmin && isReimbursed)">
           <icon class="mr-1" name="save"></icon>Submit</v-btn
         >
         <!-- End Buttons -->
@@ -529,8 +524,8 @@ export default {
     isAdmin,
     isReimbursed,
     isSuperAdmin,
-    isUser
-    // isRequired
+    isUser,
+    isRequired
   },
   methods: {
     checkCoverage,
