@@ -29,7 +29,7 @@ export default {
     };
   },
   created() {
-    EventBus.$on('clickedExpense', this.displayExepense);
+    window.EventBus.$on('clickedExpense', this.displayExepense);
   },
   methods: {
     displayExepense(clickedExpense) {

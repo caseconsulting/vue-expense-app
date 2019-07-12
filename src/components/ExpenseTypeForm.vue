@@ -103,6 +103,7 @@ import dateUtils from '@/shared/dateUtils';
 
 // METHODS
 function clearForm() {
+  //test
   this.$refs.form.reset();
   this.$set(this.model, 'id', '');
   this.$set(this.model, 'budget', 0);
@@ -130,7 +131,7 @@ function parseDate(date) {
   return dateUtils.parseDate(date);
 }
 
-async function submit(newExpenseType) {
+async function submit() {
   this.model.budget = parseFloat(this.model.budget);
   if (!this.model.odFlag) {
     this.model.odFlag = false;
@@ -195,8 +196,8 @@ export default {
     DeleteModal
   },
   created() {
-    EventBus.$on('canceled-delete-expense-type', () => (this.deleting = false));
-    EventBus.$on('confirm-delete-expense-type', this.deleteExpenseType);
+    window.EventBus.$on('canceled-delete-expense-type', () => (this.deleting = false));
+    window.EventBus.$on('confirm-delete-expense-type', this.deleteExpenseType);
   },
   methods: {
     clearForm,
@@ -206,7 +207,7 @@ export default {
     submit
   },
   watch: {
-    'model.startDate': function(val) {
+    'model.startDate': function() {
       this.startDateFormatted = this.formatDate(this.model.startDate) || this.startDateFormatted;
 
       //fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
@@ -214,7 +215,7 @@ export default {
         this.model.startDate = null;
       }
     },
-    'model.endDate': function(val) {
+    'model.endDate': function() {
       this.endDateFormatted = this.formatDate(this.model.endDate) || this.endDateFormatted;
 
       //fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
