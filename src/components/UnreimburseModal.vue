@@ -11,6 +11,7 @@
           >
           <v-spacer></v-spacer>
           <v-btn color="red" flat @click.native="emit(`confirm-unreimburse-${type}`)">Unreimburse</v-btn>
+          <v-spacer></v-spacer>
         </v-card-actions>
       </v-card>
     </v-dialog>

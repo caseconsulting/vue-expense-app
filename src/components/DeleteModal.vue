@@ -9,6 +9,7 @@
           <v-btn color="gray darken-1" flat @click.native="emit(`canceled-delete-${type}`)">No, keep {{ type }}</v-btn>
           <v-spacer></v-spacer>
           <v-btn color="red" flat @click.native="emit(`confirm-delete-${type}`)">Delete</v-btn>
+          <v-spacer></v-spacer>
         </v-card-actions>
       </v-card>
     </v-dialog>
