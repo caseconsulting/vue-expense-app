@@ -83,18 +83,32 @@
                 <v-card-text>
                   <div>
                     <!-- edit button -->
-                    <v-btn @click="onSelect(props.item)" color="white">
+                    <v-btn @click="onSelect(props.item)" outline color="black" :disabled="isEditing()">
                       <icon class="mr-1" name="edit"></icon>Edit</v-btn
                     >
-                    <!-- unreimburse button -->
+
+                    <!-- delete button -->
                     <v-btn
-                      v-if="props.item.reimbursedDate"
+                      outline
+                      color="error"
                       @click="
-                        unreimbursing = true;
-                        undoReExpense = props.item;
+                        deleting = true;
+                        propExpense = props.item;
                       "
                       :disabled="isEditing()"
-                      color="white"
+                    >
+                      <icon class="mr-1" name="trash"></icon>Delete</v-btn
+                    >
+
+                    <!-- unreimburse button -->
+                    <v-btn
+                      outline
+                      color="info"
+                      @click="
+                        unreimbursing = true;
+                        propExpense = props.item;
+                      "
+                      :disabled="isEditing() || !props.item.reimbursedDate"
                     >
                       <icon class="mr-1" name="times-circle"></icon>Unremimburse</v-btn
                     >
@@ -116,6 +130,7 @@
 
           <!-- unreimbursing button confirmation alert box -->
           <unreimburse-modal :activate="unreimbursing" :type="'expense'"></unreimburse-modal>
+          <delete-modal :activate="deleting" :type="'expense'"></delete-modal>
         </v-container>
       </v-card>
     </v-flex>
@@ -124,7 +139,6 @@
         :expense="expense"
         v-on:add="addModelToTable"
         v-on:update="updateModelInTable"
-        v-on:delete="deleteModelFromTable"
         v-on:error="displayError"
         style="position: sticky; top: 79px;"
       ></expense-form>
@@ -135,6 +149,7 @@
 import api from '@/shared/api.js';
 import employeeUtils from '@/shared/employeeUtils';
 import ExpenseForm from '../components/ExpenseForm.vue';
+import DeleteModal from '../components/DeleteModal.vue';
 import UnreimburseModal from '../components/UnreimburseModal.vue';
 import Attachment from '../components/Attachment.vue';
 import moment from 'moment';
@@ -292,6 +307,7 @@ function deleteModelFromTable(deletedExpense) {
   let modelIndex = _.findIndex(this.processedExpenses, expense => {
     return expense.id === deletedExpense.id;
   });
+  console.log('hello');
   this.processedExpenses.splice(modelIndex, 1);
   this.$set(this.status, 'statusType', 'SUCCESS');
   this.$set(this.status, 'statusMessage', 'Item was successfully deleted!');
@@ -326,18 +342,18 @@ async function unreimburseExpense() {
   this.loading = true;
   this.unreimbursing = false;
   console.log('id');
-  console.log(this.undoReExpense.id);
+  console.log(this.propExpense.id);
 
-  if (this.undoReExpense.id) {
+  if (this.propExpense.id) {
     console.log('made it into the if thix.expense.id');
     console.log('before exp change');
-    console.log(this.undoReExpense.reimbursedDate);
-    this.undoReExpense.reimbursedDate = null;
+    console.log(this.propExpense.reimbursedDate);
+    this.propExpense.reimbursedDate = null;
     // this.$set(this.expense, 'receipt', this.file.name); //stores file name for lookup later
-    let updatedExpense = await api.updateItem(api.EXPENSES, this.undoReExpense.id, this.undoReExpense);
+    let updatedExpense = await api.updateItem(api.EXPENSES, this.propExpense.id, this.propExpense);
     console.log('after exp change');
 
-    console.log(this.undoReExpense);
+    console.log(this.propExpense);
     if (updatedExpense.id) {
       // submit attachment
       // let attachment = await api.createAttachment(this.expense, this.file);
@@ -374,6 +390,15 @@ async function unreimburseExpense() {
   this.loading = false;
 }
 
+async function deleteExpense() {
+  this.deleting = false;
+  if (this.propExpense.id) {
+    let deletedExpense = this.propExpense;
+    await api.deleteItem(api.EXPENSES, this.propExpense.id);
+    this.deleteModelFromTable(deletedExpense);
+  }
+}
+
 // LIFECYCLE HOOKS
 async function created() {
   this.role = getRole();
@@ -381,6 +406,9 @@ async function created() {
 
   EventBus.$on('canceled-unreimburse-expense', () => (this.unreimbursing = false));
   EventBus.$on('confirm-unreimburse-expense', this.unreimburseExpense);
+
+  EventBus.$on('canceled-delete-expense', () => (this.deleting = false));
+  EventBus.$on('confirm-delete-expense', this.deleteExpense);
 }
 
 export default {
@@ -421,7 +449,7 @@ export default {
         budgetName: '',
         createdAt: null
       },
-      undoReExpense: {
+      propExpense: {
         id: '',
         description: '',
         cost: '',
@@ -439,6 +467,7 @@ export default {
       expenses: [],
       processedExpenses: [],
       showReimbursed: false,
+      deleting: false,
       unreimbursing: false,
       errors: [],
       headers: [
@@ -493,6 +522,7 @@ export default {
   components: {
     ExpenseForm,
     Attachment,
+    DeleteModal,
     UnreimburseModal
   },
   methods: {
@@ -508,6 +538,7 @@ export default {
     deleteModelFromTable,
     changeSort,
     isEditing,
+    deleteExpense,
     unreimburseExpense
   },
   created

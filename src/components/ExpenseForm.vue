@@ -126,10 +126,6 @@
         <v-text-field v-model="expense.url" label="URL (Optional)"></v-text-field>
 
         <!-- Buttons -->
-        <!-- delete button -->
-        <v-btn outline color="error" @click="deleting = true" :disabled="!isSuperAdmin && isReimbursed">
-          <icon class="mr-1" name="trash"></icon>Delete</v-btn
-        >
 
         <!-- cancel button -->
         <v-btn color="white" @click="clearForm"> <icon class="mr-1" name="ban"></icon>Cancel</v-btn>
@@ -147,7 +143,6 @@
         <!-- End Buttons -->
       </v-form>
       <confirmation-box :activate="submitting" :expense="expense"></confirmation-box>
-      <delete-modal :activate="deleting" :type="'expense'"></delete-modal>
     </v-container>
   </v-card>
 </template>
@@ -157,7 +152,6 @@ import api from '@/shared/api.js';
 import { getRole } from '@/utils/auth';
 import moment from 'moment';
 import ConfirmationBox from './ConfirmationBox.vue';
-import DeleteModal from './DeleteModal.vue';
 import _ from 'lodash';
 import dateUtils from '@/shared/dateUtils';
 import employeeUtils from '@/shared/employeeUtils';
@@ -306,16 +300,6 @@ function expenseTypeFilter(item, queryText, itemText) {
   );
 }
 
-async function deleteExpense() {
-  this.deleting = false;
-  if (this.expense.id) {
-    let deletedExpense = this.expense;
-    await api.deleteItem(api.EXPENSES, this.expense.id);
-    this.$emit('delete', deletedExpense);
-    this.clearForm();
-  }
-}
-
 function formatDate(date) {
   return dateUtils.formatDate(date);
 }
@@ -422,9 +406,6 @@ async function created() {
   EventBus.$on('canceledSubmit', () => (this.submitting = false));
   EventBus.$on('confirmSubmit', this.submit);
 
-  EventBus.$on('canceled-delete-expense', () => (this.deleting = false));
-  EventBus.$on('confirm-delete-expense', this.deleteExpense);
-
   let expenseTypes = await api.getItems(api.EXPENSE_TYPES);
   this.expenseTypes = _.map(expenseTypes, expenseType => {
     return {
@@ -466,7 +447,6 @@ export default {
     return {
       loading: false,
       employeeRole: '',
-      deleting: false,
       submitting: false,
       date: null,
       purchaseDateFormatted: null,
@@ -501,7 +481,6 @@ export default {
   },
   components: {
     ConfirmationBox,
-    DeleteModal,
     FileUpload
   },
   watch: {
@@ -536,7 +515,6 @@ export default {
     customFilter,
     expenseTypeFilter,
     betweenDates,
-    deleteExpense,
     formatDate,
     parseDate,
     submit,
