@@ -7,7 +7,7 @@
         </v-card-title>
         <v-divider></v-divider>
         <v-list dense>
-          <v-list-tile v-for="item in employee">
+          <v-list-tile v-for="item in employee" :key="item">
             <v-list-tile-content>{{ item.expenseTypeName }}:</v-list-tile-content>
             <v-list-tile-content class="align-end">{{ remaining(item) | moneyValue }}</v-list-tile-content>
           </v-list-tile>
@@ -20,6 +20,7 @@
 export default {
   props: ['employee'],
   filters: {
+    //lint?
     moneyValue: value => {
       return `${new Intl.NumberFormat('en-US', {
         style: 'currency',
