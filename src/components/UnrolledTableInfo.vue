@@ -51,6 +51,7 @@ import _ from 'lodash';
 import moment from 'moment';
 export default {
   filters: {
+    //test
     moneyValue: value => {
       return `${new Intl.NumberFormat('en-US', {
         style: 'currency',
@@ -101,10 +102,10 @@ export default {
   },
   methods: {
     expenseClicked(clickedExpense) {
-      EventBus.$emit('clickedExpense', clickedExpense);
+      window.EventBus.$emit('clickedExpense', clickedExpense);
     },
     theyPickedMe(item) {
-      EventBus.$emit('expensePicked', item);
+      window.EventBus.$emit('expensePicked', item);
     },
     checkAllSelected() {
       let nonSelected = _.filter(this.expenses, expense => {

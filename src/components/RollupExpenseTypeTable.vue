@@ -161,9 +161,9 @@ export default {
     ]
   }),
   async created() {
-    EventBus.$on('expensePicked', this.addExpenseToSelected);
-    EventBus.$on('confirm-reimburse', this.reimburseExpenses);
-    EventBus.$on('canceled-reimburse', () => (this.button_clicked = false));
+    window.EventBus.$on('expensePicked', this.addExpenseToSelected);
+    window.EventBus.$on('confirm-reimburse', this.reimburseExpenses);
+    window.EventBus.$on('canceled-reimburse', () => (this.button_clicked = false));
     let aggregatedData = await api.getAggregate();
     let expenses = this.createExpensesForUnrolled(aggregatedData);
     this.constructAutoComplete(aggregatedData);
@@ -202,6 +202,7 @@ export default {
     }
   },
   methods: {
+    //test
     createExpensesForUnrolled(aggregatedData) {
       return _.map(aggregatedData, expense => {
         return {
@@ -302,8 +303,8 @@ export default {
       this.empBudgets[employeeIndex].expenses.splice(expenseIndex, 1);
 
       this.empBudgets = _.filter(this.empBudgets, item => item.expenses.length); //remove empty arrays
-      EventBus.$emit('expenseChange', []);
-      EventBus.$emit('clickedExpense');
+      window.EventBus.$emit('expenseChange', []);
+      window.EventBus.$emit('clickedExpense');
     },
 
     addExpenseToSelected(expense) {
@@ -352,7 +353,7 @@ export default {
           this.indeterminate = true;
         }
       }
-      EventBus.$emit('expenseChange', this.selected);
+      window.EventBus.$emit('expenseChange', this.selected);
 
       return item;
     },
@@ -398,7 +399,7 @@ export default {
       expense.budgetName = expenseType.budgetName;
       return expense;
     },
-    customFilter(item, queryText, itemText) {
+    customFilter(item, queryText) {
       const hasValue = val => (val != null ? val : '');
       const text = hasValue(item.text);
       const query = hasValue(queryText);

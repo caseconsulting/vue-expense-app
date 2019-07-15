@@ -6,7 +6,7 @@
 
     <v-list class="pt-0" dense>
       <v-divider></v-divider>
-      <v-list-tile v-for="item in visibleTiles" :key="item.title" @click="" :to="{ name: item.route }">
+      <v-list-tile v-for="item in visibleTiles" :key="item.title" :to="{ name: item.route }">
         <v-list-tile-action>
           <icon :name="item.icon" class="navbar-icons"></icon>
         </v-list-tile-action>
@@ -72,7 +72,6 @@ export default {
   components: {},
   computed: {
     visibleTiles() {
-      //test
       return _.filter(this.items, item => {
         return _.includes(item.permission, this.permissions);
       });
