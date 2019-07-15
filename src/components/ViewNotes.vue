@@ -26,9 +26,9 @@ export default {
   methods: {
     emit(msg, data) {
       if (data) {
-        EventBus.$emit(msg, data);
+        window.EventBus.$emit(msg, data);
       } else {
-        EventBus.$emit(msg);
+        window.EventBus.$emit(msg);
       }
     }
   }

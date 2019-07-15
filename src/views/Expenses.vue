@@ -387,7 +387,7 @@ async function unreimburseExpense() {
       // console.log('attachment', attachment);
       // console.log('loading' + this.loading);
       console.log('success updated expense id');
-      this.$emit('unreimburse', unreimbursedExpense);
+      // this.$emit('unreimburse', unreimbursedExpense);
     } else {
       console.log('error');
       this.$emit('error', updatedExpense.response.data.message);
@@ -431,13 +431,13 @@ async function created() {
   this.role = getRole();
   this.refreshExpenses();
 
-  EventBus.$on('canceled-unreimburse-expense', () => (this.unreimbursing = false));
-  EventBus.$on('confirm-unreimburse-expense', this.unreimburseExpense);
+  window.EventBus.$on('canceled-unreimburse-expense', () => (this.unreimbursing = false));
+  window.EventBus.$on('confirm-unreimburse-expense', this.unreimburseExpense);
 
-  EventBus.$on('canceled-delete-expense', () => (this.deleting = false));
-  EventBus.$on('confirm-delete-expense', this.deleteExpense);
+  window.EventBus.$on('canceled-delete-expense', () => (this.deleting = false));
+  window.EventBus.$on('confirm-delete-expense', this.deleteExpense);
 
-  EventBus.$on('close-notes', () => (this.viewingNotes = false));
+  window.EventBus.$on('close-notes', () => (this.viewingNotes = false));
 }
 
 export default {

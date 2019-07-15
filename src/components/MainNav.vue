@@ -72,6 +72,7 @@ export default {
   components: {},
   computed: {
     visibleTiles() {
+      //test
       return _.filter(this.items, item => {
         return _.includes(item.permission, this.permissions);
       });

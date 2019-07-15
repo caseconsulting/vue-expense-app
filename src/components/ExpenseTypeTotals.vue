@@ -25,8 +25,8 @@ export default {
     };
   },
   created() {
-    EventBus.$on('expensePicked', this.updateSelected);
-    EventBus.$on('expenseChange', this.updateSelected);
+    window.EventBus.$on('expensePicked', this.updateSelected);
+    window.EventBus.$on('expenseChange', this.updateSelected);
   },
   filters: {
     moneyValue: value => {
