@@ -200,7 +200,7 @@ export default {
       expense.budgetName = expenseType.budgetName;
       return expense;
     },
-    customFilter(item, queryText, itemText) {
+    customFilter(item, queryText) {
       const hasValue = val => (val != null ? val : '');
       const text = hasValue(item.text);
       const query = hasValue(queryText);
