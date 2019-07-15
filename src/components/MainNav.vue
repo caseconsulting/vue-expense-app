@@ -103,9 +103,6 @@ export default {
   max-height: 100%;
 }
 
-.fa-icon {
-}
-
 #main-header {
   font-family: 'Quicksand', sans-serif;
   font-weight: bold;
@@ -114,6 +111,7 @@ export default {
   padding-top: 1%;
   padding-bottom: 2%;
 }
+
 .e {
   color: #68caa6;
 }
@@ -126,9 +124,11 @@ export default {
 #nav-button {
   float: left;
 }
+
 #nav-button :focus {
   outline: none;
 }
+
 #slider-logo {
   margin-bottom: 5px;
 }

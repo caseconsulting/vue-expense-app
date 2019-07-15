@@ -7,8 +7,8 @@
       <v-toolbar color="primary" dark fixed app>
         <v-toolbar-side-icon v-show="isLoggedIn()" @click.stop="drawer = !drawer"></v-toolbar-side-icon>
         <v-toolbar-title>
-          <h2 style="text-align:center"><span class="e">€</span>xpense App</h2></v-toolbar-title
-        >
+          <h2 style="text-align:center"><span class="e">€</span>xpense App</h2>
+        </v-toolbar-title>
         <v-spacer></v-spacer>
 
         <v-toolbar-items v-show="isLoggedIn()">
@@ -24,6 +24,7 @@
           </v-flex>
         </v-toolbar-items>
       </v-toolbar>
+
       <v-content>
         <v-container fluid grid-list-lg>
           <router-view></router-view>
@@ -38,6 +39,7 @@
 import { isLoggedIn, logout, getProfile } from '@/utils/auth';
 import MainNav from '@/components/MainNav.vue';
 import router from './router.js';
+
 export default {
   data: () => ({
     drawer: false,
@@ -65,15 +67,19 @@ export default {
         this.hasBeenLoggedInBefore = false; //prevents looping for no reason
         router.push({ path: '/home' });
       }
+
       this.initSession();
     }
   },
   created() {
     let pic = getProfile();
+
     if (pic) {
       this.profilePic = pic;
     }
+
     if (this.isLoggedIn()) this.hasBeenLoggedInBefore = true;
+
     this.initSession(); //starts session checking
   }
 };
@@ -102,38 +108,47 @@ export default {
   0% {
     color: black;
   }
+
   100% {
     color: gold;
   }
 }
+
 @-moz-keyframes color-change {
   0% {
     color: black;
   }
+
   100% {
     color: gold;
   }
 }
+
 @-ms-keyframes color-change {
   0% {
     color: black;
   }
+
   100% {
     color: gold;
   }
 }
+
 @-o-keyframes color-change {
   0% {
     color: black;
   }
+
   100% {
     color: gold;
   }
 }
+
 @keyframes color-change {
   0% {
     color: black;
   }
+
   100% {
     color: gold;
   }

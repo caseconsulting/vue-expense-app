@@ -13,11 +13,14 @@
     "eslint": "npm run lint",
     "inspect": "vue-cli-service inspect > output.log",
     "lint": "vue-cli-service lint",
+    "precommit": "npm run validate && npm run lint && npm run stylelint && npm run unit",
     "serve": "vue-cli-service serve",
     "start": "npm run serve",
+    "stylelint": "stylelint 'src/**/*.{css,scss,vue}'",
     "test": "npm run test:unit",
     "test:e2e": "vue-cli-service test:e2e",
     "test:unit": "vue-cli-service test:unit",
+    "unit": "npm run test:unit",
     "validate": "npm ci"
   },
   "dependencies": {
@@ -61,12 +64,30 @@
     "grunt": "^1.0.4",
     "grunt-aws-s3": "^2.0.0",
     "node-sass": "^4.12.0",
+    "precommit-hook": "^3.0.0",
     "sass-loader": "^7.1.0",
+    "stylelint": "^10.1.0",
+    "stylelint-checkstyle-formatter": "^0.1.2",
+    "stylelint-config-standard": "^18.3.0",
+    "stylelint-processor-html": "^1.0.0",
+    "stylelint-scss": "^3.9.1",
     "vue-template-compiler": "^2.6.10"
   },
   "browserslist": [
     "> 1%",
     "last 2 versions",
     "not ie <= 8"
-  ]
+  ],
+  "pre-commit": [
+    "validate",
+    "lint",
+    "stylelint",
+    "unit"
+  ],
+  "lint-staged": {
+    "src/**/*.{js,jsx,json,css,md}": [
+      "eslint --fix src",
+      "git add"
+    ]
+  }
 }
