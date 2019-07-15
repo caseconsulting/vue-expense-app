@@ -103,7 +103,7 @@ export default {
     filter: blur(40px);
     opacity: 0;
   }
-  
+
   100% {
     transform: translateX(0) scaleY(1) scaleX(1);
     transform-origin: 50% 50%;
