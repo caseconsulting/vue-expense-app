@@ -175,6 +175,7 @@
     </v-flex>
     <v-flex lg4 md12 sm12>
       <expense-form
+        :isEdit="isEdit"
         :expense="expense"
         v-on:add="addModelToTable"
         v-on:update="updateModelInTable"
@@ -282,6 +283,7 @@ function showRow(expense) {
 }
 
 function onSelect(item) {
+  this.isEdit = true;
   this.$set(this.expense, 'budgetName', item.budgetName);
   this.$set(this.expense, 'id', item.id);
   this.$set(this.expense, 'purchaseDate', item.purchaseDate);
@@ -454,6 +456,7 @@ export default {
   },
   data() {
     return {
+      isEdit: false,
       role: '',
       loading: true,
       status: {

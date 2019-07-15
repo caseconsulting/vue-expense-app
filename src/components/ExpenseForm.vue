@@ -112,7 +112,7 @@
         </v-menu>
 
         <!-- Receipt uploading -->
-        <file-upload v-if="isRequired" @fileSelected="setFile" :passedRules="receiptRules"></file-upload>
+        <file-upload v-if="isRequired || isEdit" @fileSelected="setFile" :passedRules="receiptRules"></file-upload>
 
         <!-- Notes section -->
         <v-text-field
@@ -502,7 +502,7 @@ export default {
       }
     }
   },
-  props: ['expense'],
+  props: ['expense', 'isEdit'],
   computed: {
     isAdmin,
     isReimbursed,
