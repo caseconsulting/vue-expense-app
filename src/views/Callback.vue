@@ -1,5 +1,3 @@
-<template> </template>
-
 <script>
 import { setIdToken, setAccessToken, setRole, setProfile } from '@/utils/auth';
 // import api from '@/shared/api';
@@ -19,6 +17,7 @@ export default {
       }
       // let role = await api.getRole();
       // setRole(role);
+      //test
     });
   }
 };

@@ -23,7 +23,7 @@ export default {
   },
   watch: {
     tableSelected: {
-      handler: function(val, oldVal) {
+      handler: function(val) {
         this.tableSelected = val;
       },
       deep: true

@@ -72,7 +72,6 @@
 <script>
 import BudgetChart from '../components/BudgetChart.vue';
 import BudgetTable from '../components/BudgetTable.vue';
-import BudgetTableMobile from '../components/BudgetTableMobile.vue';
 import ExpenseForm from '../components/ExpenseForm.vue';
 import moment from 'moment';
 import api from '@/shared/api.js';
@@ -136,13 +135,13 @@ export default {
     }
   },
   async created() {
-    EventBus.$on('refreshChart', this.updateData);
+    window.EventBus.$on('refreshChart', this.updateData);
     this.refreshBudget();
     this.compute();
     this.addOneSecondToActualTimeEverySecond();
   },
   watch: {
-    actualTime(val, oldVal) {
+    actualTime() {
       this.compute();
     }
   },
@@ -324,7 +323,7 @@ export default {
               stacked: true,
               ticks: {
                 beginAtZero: true,
-                callback: function(value, index, values) {
+                callback: function(value) {
                   return value.toLocaleString('en-US', {
                     style: 'currency',
                     currency: 'USD'
@@ -346,7 +345,7 @@ export default {
         },
         tooltips: {
           callbacks: {
-            label: function(tooltipItem, data) {
+            label: function(tooltipItem) {
               return (
                 '$' +
                 Number(tooltipItem.yLabel)
@@ -386,6 +385,7 @@ export default {
         }
       } else {
         // TODO: Return something for invalid date
+        return 'Ooops no anniversery, when did you start working here again? ';
       }
     },
     getDaysUntil() {
@@ -420,8 +420,7 @@ export default {
   components: {
     BudgetChart,
     BudgetTable,
-    ExpenseForm,
-    BudgetTableMobile
+    ExpenseForm
   }
 };
 </script>
