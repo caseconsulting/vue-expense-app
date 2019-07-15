@@ -174,6 +174,7 @@ async function checkCoverage() {
     } else {
       employee = await api.getItem(api.EMPLOYEES, this.expense.userId);
     }
+    console.log('employee', employee);
     let budgets = await api.getItems(api.BUDGETS);
     let employeeExpenseTypeBudget = _.find(budgets, budget => {
       return budget.expenseTypeId === expenseType.value;
@@ -264,7 +265,7 @@ function clearForm() {
   }
 }
 
-function customFilter(item, queryText, itemText) {
+function customFilter(item, queryText) {
   const hasValue = val => (val != null ? val : '');
   const text = hasValue(item.text);
   const query = hasValue(queryText);
@@ -324,8 +325,8 @@ async function submit() {
         // submit attachment
         if (this.isRequired) {
           let attachment = await api.createAttachment(this.expense, this.file);
+          console.log('attachment', attachment);
         }
-        // console.log('attachment', attachment);
         this.$emit('update', updatedExpense);
       } else {
         this.$emit('error', updatedExpense.response.data.message);
@@ -342,12 +343,12 @@ async function submit() {
         // submit attachment
         if (this.isRequired) {
           let attachment = await api.createAttachment(newExpense, this.file);
+          console.log('attachment', attachment);
         }
-        // console.log('attachment', attachment);
         this.$set(this.expense, 'id', newExpense.id);
         this.$emit('add', newExpense);
-        EventBus.$emit('showSnackbar', newExpense);
-        EventBus.$emit('refreshChart', newExpense);
+        window.EventBus.$emit('showSnackbar', newExpense);
+        window.EventBus.$emit('refreshChart', newExpense);
         this.clearForm();
       } else {
         this.$emit('error', newExpense.response.data.message);
@@ -403,14 +404,14 @@ async function created() {
   let employeeRole = getRole();
   this.userInfo = await api.getUser();
 
-  EventBus.$on('canceledSubmit', () => (this.submitting = false));
-  EventBus.$on('confirmSubmit', this.submit);
+  window.EventBus.$on('canceledSubmit', () => (this.submitting = false));
+  window.EventBus.$on('confirmSubmit', this.submit);
 
   let expenseTypes = await api.getItems(api.EXPENSE_TYPES);
   this.expenseTypes = _.map(expenseTypes, expenseType => {
     return {
       /* beautify preserve:start */
-      text: `${expenseType.budgetName} - \$${expenseType.budget}`,
+      text: `${expenseType.budgetName} - $${expenseType.budget}`,
       startDate: expenseType.startDate,
       endDate: expenseType.endDate,
       /* beautify preserve:end */
@@ -484,7 +485,7 @@ export default {
     FileUpload
   },
   watch: {
-    'expense.purchaseDate': function(val) {
+    'expense.purchaseDate': function() {
       this.purchaseDateFormatted = this.formatDate(this.expense.purchaseDate) || this.purchaseDateFormatted;
 
       //fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
@@ -492,7 +493,7 @@ export default {
         this.expense.purchaseDate = null;
       }
     },
-    'expense.reimbursedDate': function(val) {
+    'expense.reimbursedDate': function() {
       this.reimbursedDateFormatted = this.formatDate(this.expense.reimbursedDate) || this.reimbursedDateFormatted;
 
       //fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
