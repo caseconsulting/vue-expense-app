@@ -138,6 +138,7 @@
                     </v-tooltip>
                   </div>
                 </td>
+                <!-- end option buttons -->
               </tr>
             </template>
             <!-- end data row -->
