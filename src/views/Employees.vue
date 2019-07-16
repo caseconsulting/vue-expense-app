@@ -112,7 +112,7 @@ export default {
       errors: [],
       headers: [
         {
-          text: 'Employee ID',
+          text: 'Employee #',
           value: 'empId'
         },
         {

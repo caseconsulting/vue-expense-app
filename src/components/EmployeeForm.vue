@@ -26,12 +26,12 @@
           data-vv-name="Last Name"
         ></v-text-field>
 
-        <!-- Employee ID -->
+        <!-- Employee # -->
         <v-text-field
           v-model="model.empId"
           :rules="numberRules"
-          label="Employee ID"
-          data-vv-name="Employee ID"
+          label="Employee #"
+          data-vv-name="Employee #"
         ></v-text-field>
         <!-- Email -->
         <v-text-field v-model="model.email" :rules="emailRules" label="Email" data-vv-name="Email"></v-text-field>
@@ -160,7 +160,7 @@ export default {
       menu1: false,
       genericRules: [v => !!v || 'This field is required'],
       emailRules: [v => !!v || 'Email is required', v => regex.test(v) || 'Not a valid @consultwithcase email address'],
-      numberRules: [v => !!v || 'Employee ID is required', v => /^\d+$/.test(v) || 'Cost must be a number'],
+      numberRules: [v => !!v || 'Employee # is required', v => /^\d+$/.test(v) || 'Cost must be a number'],
       dateRules: [
         v => !!v || 'Date must be valid. Format: MM/DD/YYYY',
         v => (!!v && /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v)) || 'Date must be valid. Format: MM/DD/YYYY'

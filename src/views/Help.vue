@@ -94,7 +94,7 @@
             <v-card-text class="grey lighten-3">
               <li>
                 <icon name="space-shuttle" />
-                What is an employee ID? - An employee's ID number will be a user's hire order.
+                What is an Employee #? - An employee's ID number will be a user's hire order.
               </li>
               <li>
                 <icon name="space-shuttle" />
