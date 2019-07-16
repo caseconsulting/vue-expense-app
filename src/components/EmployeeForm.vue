@@ -28,7 +28,7 @@
 
         <!-- Employee # -->
         <v-text-field
-          v-model="model.empId"
+          v-model="model.employeeNumber"
           :rules="numberRules"
           label="Employee #"
           data-vv-name="Employee #"
@@ -103,7 +103,7 @@ function clearForm() {
   this.$set(this.model, 'firstName', '');
   this.$set(this.model, 'middleName', '');
   this.$set(this.model, 'lastName', '');
-  this.$set(this.model, 'empId', '');
+  this.$set(this.model, 'employeeNumber', '');
   this.$set(this.model, 'expenseTypes', []);
   this.$set(this.model, 'hireDate', '');
   this.$set(this.model, 'id', '');

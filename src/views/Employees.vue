@@ -15,7 +15,7 @@
             :search="search"
             :pagination.sync="pagination"
             :expand="expand"
-            item-key="empId"
+            item-key="employeeNumber"
             class="elevation-1"
           >
             <template slot="headers" slot-scope="props">
@@ -44,7 +44,7 @@
                   props.expanded = !props.expanded;
                 "
               >
-                <td class="text-xs-left">{{ props.item.empId }}</td>
+                <td class="text-xs-left">{{ props.item.employeeNumber }}</td>
                 <td class="text-xs-left">{{ props.item.firstName }}</td>
                 <td class="text-xs-left">{{ props.item.lastName }}</td>
                 <td class="text-xs-left">{{ props.item.hireDate | dateFormat }}</td>
@@ -113,7 +113,7 @@ export default {
       headers: [
         {
           text: 'Employee #',
-          value: 'empId'
+          value: 'employeeNumber'
         },
         {
           text: 'First Name',
@@ -136,7 +136,7 @@ export default {
         }
       ],
       pagination: {
-        sortBy: 'empId',
+        sortBy: 'employeeNumber',
         rowsPerPage: -1
       },
       model: {
@@ -146,7 +146,7 @@ export default {
         lastName: '',
         email: '@consultwithcase.com',
         employeeRole: 'user',
-        empId: null,
+        employeeNumber: null,
         hireDate: null,
         isActive: false
       },
@@ -183,7 +183,7 @@ export default {
       this.$set(this.model, 'lastName', item.lastName);
       this.$set(this.model, 'email', item.email);
       this.$set(this.model, 'employeeRole', item.employeeRole);
-      this.$set(this.model, 'empId', item.empId);
+      this.$set(this.model, 'employeeNumber', item.employeeNumber);
       this.$set(this.model, 'hireDate', item.hireDate);
       this.$set(this.model, 'isActive', !item.isActive);
     },
@@ -194,7 +194,7 @@ export default {
       this.$set(this.model, 'lastName', '');
       this.$set(this.model, 'email', '@consultwithcase.com');
       this.$set(this.model, 'employeeRole', 'user');
-      this.$set(this.model, 'empId', null);
+      this.$set(this.model, 'employeeNumber', null);
       this.$set(this.model, 'hireDate', null);
       this.$set(this.model, 'isActive', false);
     },
