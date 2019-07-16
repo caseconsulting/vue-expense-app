@@ -366,52 +366,6 @@ async function unreimburseExpense() {
   this.loading = true;
   this.unreimbursing = false;
 
-<<<<<<< HEAD
-  if (this.propExpense.id) {
-    console.log('made it into the if thix.expense.id');
-    console.log('before exp change');
-    console.log(this.propExpense.reimbursedDate);
-    this.propExpense.reimbursedDate = null;
-    // this.$set(this.expense, 'receipt', this.file.name); //stores file name for lookup later
-    let updatedExpense = await api.updateItem(api.EXPENSES, this.propExpense.id, this.propExpense);
-    console.log('after exp change');
-
-    console.log(this.propExpense);
-    if (updatedExpense.id) {
-      // submit attachment
-      // let attachment = await api.createAttachment(this.expense, this.file);
-      // console.log('attachment', attachment);
-      // console.log('loading' + this.loading);
-      console.log('success updated expense id');
-      // this.$emit('unreimburse', unreimbursedExpense);
-    } else {
-      console.log('error');
-      this.$emit('error', updatedExpense.response.data.message);
-    }
-  }
-  //  else {
-  //   this.$set(this.expense, 'createdAt', moment().format('MM-DD-YYYY'));
-  //   if (this.file) {
-  //     this.$set(this.expense, 'receipt', this.file.name); //stores file name for lookup later
-  //   }
-  //   let newExpense = await api.createItem(api.EXPENSES, this.expense);
-  //   console.log(newExpense.id);
-  //   if (newExpense.id) {
-  //     // submit attachment
-  //     let attachment = await api.createAttachment(newExpense, this.file);
-  //     console.log('attachment', attachment);
-  //     this.$set(this.expense, 'id', newExpense.id);
-  //     this.$emit('add', newExpense);
-  //     EventBus.$emit('showSnackbar', newExpense);
-  //     EventBus.$emit('refreshChart', newExpense);
-  //     this.clearForm();
-  //   } else {
-  //     this.$emit('error', newExpense.response.data.message);
-  //   }
-  // }
-  console.log('made it to the end of the method');
-=======
->>>>>>> 649-As-a-user/admin,-I-want-CRUD-options-as-a-column-in-expenses: added options button to expense view
   this.loading = false;
 }
 
