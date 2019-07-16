@@ -77,50 +77,65 @@
                 <!-- option buttons -->
                 <td class="datatable_btn layout">
                   <!-- download attachment button -->
-                  <attachment :expense="props.item" :mode="'expenses'"></attachment>
+                  <v-tooltip top>
+                    <attachment :expense="props.item" :mode="'expenses'" slot="activator"></attachment>
+                    <span>download attachment</span>
+                  </v-tooltip>
 
                   <!-- edit button -->
-                  <v-btn
-                    :disabled="props.item.reimbursedDate != null || isEditing()"
-                    flat
-                    icon
-                    @click="onSelect(props.item)"
-                  >
-                    <v-icon style="color: #606060">
-                      edit
-                    </v-icon>
-                  </v-btn>
+                  <v-tooltip top>
+                    <v-btn
+                      :disabled="props.item.reimbursedDate != null || isEditing()"
+                      flat
+                      icon
+                      @click="onSelect(props.item)"
+                      slot="activator"
+                    >
+                      <v-icon style="color: #606060">
+                        edit
+                      </v-icon>
+                    </v-btn>
+                    <span>edit</span>
+                  </v-tooltip>
 
                   <!-- delete button -->
-                  <v-btn
-                    :disabled="props.item.reimbursedDate != null || isEditing()"
-                    flat
-                    icon
-                    @click="
-                      deleting = true;
-                      propExpense = props.item;
-                    "
-                  >
-                    <v-icon style="color: #606060">
-                      delete
-                    </v-icon>
-                  </v-btn>
-
-                  <!-- unreimburse button -->
-                  <div v-if="isSuperAdmin">
+                  <v-tooltip top>
                     <v-btn
-                      :disabled="props.item.reimbursedDate == null || isEditing()"
+                      :disabled="props.item.reimbursedDate != null || isEditing()"
                       flat
                       icon
                       @click="
-                        unreimbursing = true;
+                        deleting = true;
                         propExpense = props.item;
                       "
+                      slot="activator"
                     >
                       <v-icon style="color: #606060">
-                        money_off
+                        delete
                       </v-icon>
                     </v-btn>
+                    <span>delete</span>
+                  </v-tooltip>
+
+                  <!-- unreimburse button -->
+                  <div v-if="isSuperAdmin">
+                    <v-tooltip top>
+                      <v-btn
+                        :disabled="props.item.reimbursedDate == null || isEditing()"
+                        flat
+                        icon
+                        @click="
+                          unreimbursing = true;
+                          propExpense = props.item;
+                        "
+                        slot="activator"
+                      >
+                        <v-icon style="color: #606060">
+                          money_off
+                        </v-icon>
+                      </v-btn>
+                      <span>unreimburse</span>
+                    </v-tooltip>
                   </div>
                 </td>
               </tr>
