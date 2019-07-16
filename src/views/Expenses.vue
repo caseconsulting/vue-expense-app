@@ -69,9 +69,59 @@
                 <td class="text-xs-left">{{ (props.item.cost ? props.item.cost : 0) | moneyValue }}</td>
                 <td class="text-xs-left">{{ props.item.purchaseDate | dateFormat }}</td>
                 <td class="text-xs-left">{{ props.item.reimbursedDate | dateFormat }}</td>
-                <td class="text-xs-left">{{ props.item.description | descriptionFilter }}</td>
-                <td class="text-xs-left">
+                <!-- <td class="text-xs-left">{{ props.item.description | descriptionFilter }}</td> -->
+                <!-- <td class="text-xs-left">
                   <attachment :expense="props.item" :mode="'expenses'"></attachment>
+                </td> -->
+
+                <!-- option buttons -->
+                <td class="datatable_btn layout">
+                  <!-- download attachment button -->
+                  <attachment :expense="props.item" :mode="'expenses'"></attachment>
+
+                  <!-- edit button -->
+                  <v-btn
+                    :disabled="props.item.reimbursedDate != null || isEditing()"
+                    flat
+                    icon
+                    @click="onSelect(props.item)"
+                  >
+                    <v-icon style="color: #606060">
+                      edit
+                    </v-icon>
+                  </v-btn>
+
+                  <!-- delete button -->
+                  <v-btn
+                    :disabled="props.item.reimbursedDate != null || isEditing()"
+                    flat
+                    icon
+                    @click="
+                      deleting = true;
+                      propExpense = props.item;
+                    "
+                  >
+                    <v-icon style="color: #606060">
+                      delete
+                    </v-icon>
+                  </v-btn>
+
+                  <!-- unreimburse button -->
+                  <div v-if="isSuperAdmin">
+                    <v-btn
+                      :disabled="props.item.reimbursedDate == null || isEditing()"
+                      flat
+                      icon
+                      @click="
+                        unreimbursing = true;
+                        propExpense = props.item;
+                      "
+                    >
+                      <v-icon style="color: #606060">
+                        money_off
+                      </v-icon>
+                    </v-btn>
+                  </div>
                 </td>
               </tr>
             </template>
@@ -81,75 +131,17 @@
             <template v-slot:expand="props">
               <v-card flat>
                 <v-card-text>
-                  <div>
+                  <div class="expandedInfo">
                     <!-- notes/url button -->
-                    <v-btn outline color="info" @click="viewingNotes = true">
+                    <!-- <v-btn outline color="info" @click="viewingNotes = true">
                       <icon class="mr-1" name="sticky-note"></icon>View Notes</v-btn
-                    >
-
-                    <!-- edit button for super-admin-->
-                    <v-btn
-                      v-if="isSuperAdmin"
-                      @click="onSelect(props.item)"
-                      outline
-                      color="black"
-                      :disabled="isEditing()"
-                    >
-                      <icon class="mr-1" name="edit"></icon>Edit</v-btn
-                    >
-
-                    <!-- edit button for user/admin-->
-                    <v-btn
-                      v-if="!isSuperAdmin && !props.item.reimbursedDate"
-                      @click="onSelect(props.item)"
-                      outline
-                      color="black"
-                      :disabled="isEditing()"
-                    >
-                      <icon class="mr-1" name="edit"></icon>Edit</v-btn
-                    >
-
-                    <!-- delete button for super-admin -->
-                    <v-btn
-                      v-if="isSuperAdmin"
-                      outline
-                      color="error"
-                      @click="
-                        deleting = true;
-                        propExpense = props.item;
-                      "
-                      :disabled="isEditing()"
-                    >
-                      <icon class="mr-1" name="trash"></icon>Delete</v-btn
-                    >
-
-                    <!-- delete button for user/admin -->
-                    <v-btn
-                      v-if="!isSuperAdmin && !props.item.reimbursedDate"
-                      outline
-                      color="error"
-                      @click="
-                        deleting = true;
-                        propExpense = props.item;
-                      "
-                      :disabled="isEditing()"
-                    >
-                      <icon class="mr-1" name="trash"></icon>Delete</v-btn
-                    >
-
-                    <!-- unreimburse button -->
-                    <v-btn
-                      v-if="isSuperAdmin && props.item.reimbursedDate"
-                      outline
-                      color="indigo"
-                      @click="
-                        unreimbursing = true;
-                        propExpense = props.item;
-                      "
-                      :disabled="isEditing()"
-                    >
-                      <icon class="mr-1" name="times-circle"></icon>Unremimburse</v-btn
-                    >
+                    > -->
+                    <p v-if="props.item.description"><b>Description: </b>{{ props.item.description }}</p>
+                    <p v-if="props.item.note"><b>Notes: </b>{{ props.item.note }}</p>
+                    <p v-if="props.item.receipt"><b>Receipt: </b>{{ props.item.receipt }}</p>
+                    <p v-if="props.item.url">
+                      <b>Url: </b> <a v-if="props.item.url" :href="props.item.url">{{ props.item.url }}</a>
+                    </p>
                   </div>
                 </v-card-text>
               </v-card>
@@ -168,7 +160,7 @@
           <!-- end no results display -->
 
           <!-- unreimbursing button confirmation alert box -->
-          <unreimburse-modal :activate="unreimbursing" :type="'expense'"></unreimburse-modal>
+          <unreimburse-modal :activate="unreimbursing" :expense="propExpense"></unreimburse-modal>
           <delete-modal :activate="deleting" :type="'expense'"></delete-modal>
         </v-container>
       </v-card>
@@ -367,10 +359,14 @@ function isEditing() {
   return !!this.expense.id;
 }
 
+/**
+ * Creates a new negative expense for the reimbursed expense selected
+ */
 async function unreimburseExpense() {
   this.loading = true;
   this.unreimbursing = false;
 
+<<<<<<< HEAD
   if (this.propExpense.id) {
     console.log('made it into the if thix.expense.id');
     console.log('before exp change');
@@ -414,6 +410,8 @@ async function unreimburseExpense() {
   //   }
   // }
   console.log('made it to the end of the method');
+=======
+>>>>>>> 649-As-a-user/admin,-I-want-CRUD-options-as-a-column-in-expenses: added options button to expense view
   this.loading = false;
 }
 
@@ -525,14 +523,6 @@ export default {
         {
           text: 'Reimburse Date',
           value: 'reimbursedDate'
-        },
-        {
-          text: 'Description',
-          value: 'description'
-        },
-        {
-          text: '',
-          sortable: false
         }
       ],
       pagination: {
@@ -576,3 +566,25 @@ export default {
   created
 };
 </script>
+
+<style>
+.datatable_btn .btn {
+  margin: 6px -2px;
+}
+
+.expandedInfo {
+  border: 1px solid black;
+  font-size: 14px;
+  padding: 20px;
+}
+
+.expandedInfo a {
+  font-size: 14px;
+  color: blue;
+  /* text-decoration: none; */
+}
+
+.expandedInfo a:hover {
+  color: #00ccff;
+}
+</style>
