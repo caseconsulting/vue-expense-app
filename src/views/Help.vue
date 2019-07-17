@@ -150,10 +150,6 @@ export default {
           body: 'Select an item from the Expenses list then click the delete button.'
         },
         {
-          title: 'How do I delete an expense?',
-          body: 'This is the total amount of money that has yet to be reimbursed to the user'
-        },
-        {
           title: 'How do I convert training dollars to training hours?',
           body:
             'Calculate your hourly pay rate by dividing your salary by 2080. Enter the total dollar amount (hourly salary x number of hours) as training expense in the expense app. Include a description of the training you plan to take.'
