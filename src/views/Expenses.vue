@@ -81,7 +81,7 @@
                   <!-- download attachment button -->
                   <v-tooltip top>
                     <attachment :expense="props.item" :mode="'expenses'" slot="activator"></attachment>
-                    <span>download attachment</span>
+                    <span>Download Attachment</span>
                   </v-tooltip>
 
                   <!-- edit button -->
@@ -97,7 +97,7 @@
                         edit
                       </v-icon>
                     </v-btn>
-                    <span>edit</span>
+                    <span>Edit</span>
                   </v-tooltip>
 
                   <!-- delete button -->
@@ -116,7 +116,7 @@
                         delete
                       </v-icon>
                     </v-btn>
-                    <span>delete</span>
+                    <span>Delete</span>
                   </v-tooltip>
 
                   <!-- unreimburse button -->
@@ -136,7 +136,7 @@
                           money_off
                         </v-icon>
                       </v-btn>
-                      <span>unreimburse</span>
+                      <span>Unreimburse</span>
                     </v-tooltip>
                   </div>
                 </td>
