@@ -126,7 +126,7 @@
         ></file-upload>
 
         <!-- Receipt name -->
-        <p v-if="this.expense.receipt"><b>Current Receipt: </b>{{ this.expense.receipt }}</p>
+        <p v-if="this.expense.receipt && isEdit"><b>Current Receipt: </b>{{ this.expense.receipt }}</p>
 
         <!-- Notes section -->
         <v-text-field
