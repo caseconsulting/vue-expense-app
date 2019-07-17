@@ -31,11 +31,11 @@
           @input="expenseTypeSelected"
         ></v-select>
         <!--Expense type picker if user -->
+        <!-- :filter="customFilter" -->
         <v-select
           v-else
-          :items="expenseTypes"
+          :items="filteredExpenseTypes()"
           :rules="componentRules"
-          :filter="expenseTypeFilter"
           v-model="expense.expenseTypeId"
           label="Expense Type"
           autocomplete
@@ -124,8 +124,6 @@
           @fileSelected="setFile"
           :passedRules="receiptRules"
         ></file-upload>
-
-        <p v-if="this.expense.receipt"><b>Current Receipt: </b>{{ this.expense.receipt }}</p>
 
         <!-- Notes section -->
         <v-text-field
@@ -307,13 +305,16 @@ function betweenDates(startDate, endDate) {
   return false;
 }
 
-// filter for expenses containing todays date
-function expenseTypeFilter(item, queryText, itemText) {
-  return (
-    customFilter(item, queryText, itemText) &&
-    item.endDate != null &&
-    (item.endDate === 'true' || betweenDates(item.startDate, item.endDate))
-  );
+// filter for expenses recurring or containing todays date
+function filteredExpenseTypes() {
+  let filteredExpType = [];
+
+  this.expenseTypes.forEach(function(element) {
+    if (element.recurringFlag || (element.endDate != null && betweenDates(element.startDate, element.endDate))) {
+      filteredExpType.push(element);
+    }
+  });
+  return filteredExpType;
 }
 
 function formatDate(date) {
@@ -448,7 +449,8 @@ async function created() {
       value: expenseType.id,
       budget: expenseType.budget,
       odFlag: expenseType.odFlag,
-      requiredFlag: expenseType.requiredFlag
+      requiredFlag: expenseType.requiredFlag,
+      recurringFlag: expenseType.recurringFlag
     };
   });
 
@@ -548,13 +550,13 @@ export default {
     checkCoverage,
     clearForm,
     customFilter,
-    expenseTypeFilter,
     betweenDates,
     formatDate,
     parseDate,
     submit,
     setFile,
-    expenseTypeSelected
+    expenseTypeSelected,
+    filteredExpenseTypes
   },
   created
 };
