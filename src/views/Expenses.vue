@@ -1,5 +1,5 @@
 <template>
-  <v-layout row wrap>
+	  <v-layout row wrap>
     <v-snackbar
       v-model="status.statusType"
       :color="status.color"
