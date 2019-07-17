@@ -1,5 +1,5 @@
 <template>
-		  <v-layout row wrap>
+  <v-layout row wrap>
     <v-snackbar
       v-model="status.statusType"
       :color="status.color"
@@ -69,7 +69,9 @@
                 <td class="text-xs-left">{{ (props.item.cost ? props.item.cost : 0) | moneyValue }}</td>
                 <td class="text-xs-left">{{ props.item.purchaseDate | dateFormat }}</td>
                 <td class="text-xs-left">{{ props.item.reimbursedDate | dateFormat }}</td>
+
                 <!-- <td class="text-xs-left">{{ props.item.description | descriptionFilter }}</td> -->
+
                 <!-- <td class="text-xs-left">
                   <attachment :expense="props.item" :mode="'expenses'"></attachment>
                 </td> -->
@@ -138,9 +140,11 @@
                     </v-tooltip>
                   </div>
                 </td>
+
                 <!-- end option buttons -->
               </tr>
             </template>
+
             <!-- end data row -->
 
             <!-- data row dropdown/expandable -->
@@ -163,6 +167,7 @@
               </v-card>
               <view-notes :activate="viewingNotes" :notes="props.item.note" :url="props.item.url"></view-notes>
             </template>
+
             <!-- end data row dropdown/expandable -->
 
             <!-- no results display -->
@@ -173,6 +178,7 @@
           <v-card-actions>
             <v-checkbox v-if="isUser" :label="'Show Reimbursed Expenses'" v-model="showReimbursed"></v-checkbox>
           </v-card-actions>
+
           <!-- end no results display -->
 
           <!-- unreimbursing button confirmation alert box -->
@@ -551,10 +557,9 @@ export default {
 .expandedInfo a {
   font-size: 14px;
   color: blue;
-  /* text-decoration: none; */
 }
 
 .expandedInfo a:hover {
-  color: #00ccff;
+  color: #0cf;
 }
 </style>
