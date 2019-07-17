@@ -183,7 +183,7 @@
     </v-flex>
     <v-flex lg4 md12 sm12>
       <expense-form
-        :isEdit="isEdit"
+        :isEdit="isEditing()"
         :expense="expense"
         v-on:add="addModelToTable"
         v-on:update="updateModelInTable"

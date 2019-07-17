@@ -112,7 +112,18 @@
         </v-menu>
 
         <!-- Receipt uploading -->
-        <file-upload v-if="isRequired || isEdit" @fileSelected="setFile" :passedRules="receiptRules"></file-upload>
+        <v-checkbox
+          style="padding-top: 10px; padding-bottom: 0px;"
+          v-model="allowReceipt"
+          label="Update the Receipt?"
+          v-if="updateIsRequired && isEdit"
+        ></v-checkbox>
+        <file-upload
+          v-if="updateIsRequired && ((allowReceipt && isEdit) || !isEdit)"
+          style="padding-top: 0px;"
+          @fileSelected="setFile"
+          :passedRules="receiptRules"
+        ></file-upload>
 
         <!-- Notes section -->
         <v-text-field
@@ -249,7 +260,9 @@ async function checkCoverage() {
 }
 
 function clearForm() {
+  this.allowReceipt = false;
   this.$refs.form.reset();
+
   this.$set(this.expense, 'budgetName', '');
   this.$set(this.expense, 'id', '');
   this.$set(this.expense, 'purchaseDate', null);
@@ -319,11 +332,13 @@ async function submit() {
     }
     console.log(this.expense);
     if (this.expense.id) {
-      this.$set(this.expense, 'receipt', this.file.name); //stores file name for lookup later
+      if (this.file) {
+        this.$set(this.expense, 'receipt', this.file.name); //stores file name for lookup later
+      }
       let updatedExpense = await api.updateItem(api.EXPENSES, this.expense.id, this.expense);
       if (updatedExpense.id) {
         // submit attachment
-        if (this.isRequired) {
+        if (this.isRequired && this.allowReceipt) {
           let attachment = await api.createAttachment(this.expense, this.file);
           console.log('attachment', attachment);
         }
@@ -359,14 +374,26 @@ async function submit() {
 }
 
 function expenseTypeSelected(value) {
-  this.selectedExpenseType = _.find(this.expenseTypes, expenseType => {
+  return (this.selectedExpenseType = _.find(this.expenseTypes, expenseType => {
     if (expenseType.value === value) {
       return expenseType;
     }
-  });
+  }));
 }
 
 // COMPUTED
+function updateIsRequired() {
+  this.selectedExpenseType = _.find(this.expenseTypes, expenseType => {
+    if (expenseType.value === this.expense.expenseTypeId) {
+      return expenseType;
+    }
+  });
+  if (this.selectedExpenseType) {
+    return this.selectedExpenseType.requiredFlag;
+  }
+  return true;
+}
+
 function isAdmin() {
   return this.employeeRole === 'admin' || this.employeeRole === 'super-admin';
 }
@@ -446,6 +473,7 @@ async function created() {
 export default {
   data() {
     return {
+      allowReceipt: false,
       loading: false,
       employeeRole: '',
       submitting: false,
@@ -511,7 +539,8 @@ export default {
     isReimbursed,
     isSuperAdmin,
     isUser,
-    isRequired
+    isRequired,
+    updateIsRequired
   },
   methods: {
     checkCoverage,
