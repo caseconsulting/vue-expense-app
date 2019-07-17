@@ -8,6 +8,7 @@
           <v-btn color="info" flat @click.native="emit(`canceled-reimburse`)">No</v-btn>
           <v-spacer></v-spacer>
           <v-btn color="green" flat @click.native="emit(`confirm-reimburse`)">Reimburse</v-btn>
+          <v-spacer></v-spacer>
         </v-card-actions>
       </v-card>
     </v-dialog>
