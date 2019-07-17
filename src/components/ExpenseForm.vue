@@ -125,6 +125,8 @@
           :passedRules="receiptRules"
         ></file-upload>
 
+        <p v-if="this.expense.receipt"><b>Current Receipt: </b>{{ this.expense.receipt }}</p>
+
         <!-- Notes section -->
         <v-text-field
           v-model="expense.note"
