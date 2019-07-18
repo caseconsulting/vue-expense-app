@@ -14,7 +14,7 @@
           <div slot="header">Employee Home</div>
           <v-card>
             <v-card-text class="grey lighten-3">
-              <li v-for="ques in expenses" :key="ques" style="padding-bottom: 10px">
+              <li v-for="ques in expenses" :key="ques.title" style="padding-bottom: 10px">
                 <body style="font-style: italic;">
                   <icon name="space-shuttle" /> {{ ques.title }}
                 </body>
@@ -27,7 +27,7 @@
           <div slot="header">Admin Dashboard</div>
           <v-card>
             <v-card-text class="grey lighten-3">
-              <li v-for="ques in adminDashboard" :key="ques" style="padding-bottom: 10px">
+              <li v-for="ques in adminDashboard" :key="ques.title" style="padding-bottom: 10px">
                 <body style="font-style: italic;">
                   <icon name="space-shuttle" /> {{ ques.title }}
                 </body>
@@ -49,7 +49,7 @@
                 Type a <strong>Receipt</strong> upload might also be needed. Make sure your information is correct and
                 then click Submit!
               </li>
-              <li v-for="ques in expenses" :key="ques" style="padding-bottom: 10px">
+              <li v-for="ques in expenses" :key="ques.title" style="padding-bottom: 10px">
                 <body style="font-style: italic;">
                   <icon name="space-shuttle" /> {{ ques.title }}
                 </body>
@@ -63,7 +63,7 @@
           <div slot="header">Expense Types</div>
           <v-card>
             <v-card-text class="grey lighten-3">
-              <li v-for="ques in expenseTypes" :key="ques" style="padding-bottom: 10px">
+              <li v-for="ques in expenseTypes" :key="ques.title" style="padding-bottom: 10px">
                 <body style="font-style: italic;">
                   <icon name="space-shuttle" /> {{ ques.title }}
                 </body>
@@ -77,7 +77,7 @@
           <div slot="header">Employees</div>
           <v-card>
             <v-card-text class="grey lighten-3">
-              <li v-for="ques in employees" :key="ques" style="padding-bottom: 10px">
+              <li v-for="ques in employees" :key="ques.title" style="padding-bottom: 10px">
                 <body style="font-style: italic;">
                   <icon name="space-shuttle" /> {{ ques.title }}
                 </body>
@@ -90,7 +90,7 @@
           <div slot="header">Known Issues</div>
           <v-card>
             <v-card-text class="grey lighten-3">
-              <li v-for="ques in knownIssues" :key="ques" style="padding-bottom: 10px">
+              <li v-for="ques in knownIssues" :key="ques.title" style="padding-bottom: 10px">
                 <body style="font-style: italic;">
                   <icon name="space-shuttle" /> {{ ques.title }}
                 </body>

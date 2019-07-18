@@ -170,6 +170,7 @@ import _ from 'lodash';
 import dateUtils from '@/shared/dateUtils';
 import employeeUtils from '@/shared/employeeUtils';
 import FileUpload from './FileUpload.vue';
+import { isError } from 'util';
 
 // METHODS
 function setFile(file) {
@@ -189,10 +190,11 @@ async function checkCoverage() {
       employee = await api.getItem(api.EMPLOYEES, this.expense.userId);
     }
     console.log('employee', employee);
-    let budgets = await api.getItems(api.BUDGETS);
+    let budgets = await api.getBudgetItem(this.expense.userId);
     let employeeExpenseTypeBudget = _.find(budgets, budget => {
       return budget.expenseTypeId === expenseType.value;
     });
+    console.log('employeeExpenseTypeBudget', employeeExpenseTypeBudget);
 
     // Keep the cost data as a string. This allows us to keep it formatted as ##.##
     // -- If you parse the Expense object's cost field itself into a float, it drops the second

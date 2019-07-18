@@ -34,6 +34,10 @@ async function execute(method, resource, data) {
     });
 }
 
+function getBudgetItem(id) {
+  return execute('get', `/budgets/user/${id}`);
+}
+
 function getItems(type) {
   return execute('get', `/${type}`);
 }
@@ -101,6 +105,7 @@ async function createAttachment(expense, file) {
 
 export default {
   // getCanDelete,
+  getBudgetItem,
   getAllEmployeeExpenses,
   getItems,
   getItem,
