@@ -1,10 +1,13 @@
 <template>
   <v-card hover>
     <v-container fluid>
+      <!-- form header -->
       <v-card-title>
         <h3 v-if="model.id">Edit Expense Type</h3>
         <h3 v-else>Create New Expense Type</h3>
       </v-card-title>
+
+      <!-- budget name field -->
       <v-form ref="form" v-model="valid" lazy-validation>
         <v-text-field
           v-model="model.budgetName"
@@ -12,6 +15,29 @@
           label="Budget Name"
           data-vv-name="Budget Name"
         ></v-text-field>
+
+        <!-- categories field -->
+        <v-select
+          v-model="categories"
+          label="Categories (optional)"
+          chips
+          tags
+          solo
+          append-icon=""
+          flat
+          clearable
+          style="border: 1px solid gray"
+        >
+          <template slot="selection" slot-scope="data">
+            <v-chip :selected="data.selected" close outline label color="gray" @input="removeCategory(data.item)">
+              <strong>{{ data.item }}</strong
+              >&nbsp;
+            </v-chip>
+          </template>
+        </v-select>
+        <br />
+
+        <!-- budget field -->
         <v-text-field
           prefix="$"
           v-model="model.budget"
@@ -20,6 +46,7 @@
           data-vv-name="Budget"
         ></v-text-field>
 
+        <!-- flags -->
         <v-checkbox label="Overdraft Flag (optional)" v-model="model.odFlag"></v-checkbox>
 
         <v-checkbox label="Recurring Flag (optional)" v-model="model.recurringFlag"></v-checkbox>
@@ -30,6 +57,7 @@
         <!-- Flag set if expense is inactive -->
         <v-checkbox label="Mark as Inactive (optional)" v-model="model.isInactive"></v-checkbox>
 
+        <!-- start date picker -->
         <v-menu
           v-if="!model.recurringFlag"
           :rules="genericRules"
@@ -55,6 +83,7 @@
           <v-date-picker v-model="model.startDate" no-title></v-date-picker>
         </v-menu>
 
+        <!-- end date picker -->
         <v-menu
           v-if="!model.recurringFlag"
           :close-on-content-click="true"
@@ -79,6 +108,7 @@
           <v-date-picker v-model="model.endDate" no-title></v-date-picker>
         </v-menu>
 
+        <!-- description field -->
         <v-text-field
           v-model="model.description"
           :rules="genericRules"
@@ -177,6 +207,11 @@ async function submit() {
   }
 }
 
+function removeCategory(category) {
+  this.categories.splice(this.categories.indexOf(category), 1);
+  this.categories = [...this.categories];
+}
+
 export default {
   data() {
     return {
@@ -195,7 +230,8 @@ export default {
       ],
       valid: false,
       startDateFormatted: null,
-      endDateFormatted: null
+      endDateFormatted: null,
+      categories: []
     };
   },
   props: ['model'],
@@ -211,7 +247,8 @@ export default {
     deleteExpenseType,
     parseDate,
     formatDate,
-    submit
+    submit,
+    removeCategory
   },
   watch: {
     'model.startDate': function() {
