@@ -127,7 +127,7 @@
 
         <!-- Receipt name -->
         <v-card-text
-          style="padding: 0px 0px 3px 0px; font: inherit; font-size: 16px; color: #838383"
+          style="padding: 0px 0px 3px 0px; font: inherit; font-size: 16px; color: #0000008a"
           v-if="this.expense.receipt && isEdit"
           >Current Receipt: {{ this.expense.receipt }}</v-card-text
         >
