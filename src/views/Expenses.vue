@@ -8,6 +8,7 @@
       :timeout="5000"
       :top="true"
       :vertical="true"
+      :auto-height="true"
     >
       <v-card-title headline color="white">
         <span class="headline">{{ status.statusMessage }}</span>
