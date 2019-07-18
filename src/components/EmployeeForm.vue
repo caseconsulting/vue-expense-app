@@ -75,14 +75,21 @@
         <!-- isactive? only on edit -->
         <v-checkbox v-if="model.id" label="Mark as Inactive" v-model="model.isActive"></v-checkbox>
         <!-- Buttons -->
-        <v-btn
-          :disabled="this.model.id && this.model.personalExpenses.length > 0"
-          outline
-          color="error"
-          @click="deleting = true"
-        >
-          <icon class="mr-1" name="trash"></icon>Delete</v-btn
-        >
+
+        <v-tooltip bottom>
+          <v-btn
+            :disabled="this.model.id && this.model.personalExpenses.length > 0"
+            outline
+            color="error"
+            @click="deleting = true"
+            slot="activator"
+          >
+            <icon class="mr-1" name="trash"></icon>Delete</v-btn
+          >
+          <span v-if="this.model.id && this.model.personalExpenses.length > 0"
+            >Employees can only be deleted if they have no expenses</span
+          >
+        </v-tooltip>
 
         <v-btn color="white" @click="clearForm"> <icon class="mr-1" name="ban"></icon>Cancel</v-btn>
         <v-btn outline color="success" @click="submit" :disabled="!valid">
