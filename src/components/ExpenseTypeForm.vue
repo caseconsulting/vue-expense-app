@@ -148,6 +148,7 @@ function clearForm() {
   this.$set(this.model, 'odFlag', false);
   this.$set(this.model, 'requiredFlag', false);
   this.$set(this.model, 'isInactive', false);
+  this.$set(this.model, 'categories', []);
 }
 
 async function deleteExpenseType() {
