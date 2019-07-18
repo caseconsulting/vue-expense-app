@@ -17,8 +17,8 @@
         ></v-text-field>
 
         <!-- categories field -->
-        <v-combobox
-          v-model="categories"
+        <v-select
+          v-model="model.categories"
           label="Categories (optional)"
           chips
           multiple
@@ -34,7 +34,7 @@
               >&nbsp;
             </v-chip>
           </template>
-        </v-combobox>
+        </v-select>
         <br />
 
         <!-- budget field -->
@@ -208,8 +208,8 @@ async function submit() {
 }
 
 function removeCategory(category) {
-  this.categories.splice(this.categories.indexOf(category), 1);
-  this.categories = [...this.categories];
+  this.model.categories.splice(this.model.categories.indexOf(category), 1);
+  this.model.categories = [...this.model.categories];
 }
 
 export default {
@@ -230,8 +230,7 @@ export default {
       ],
       valid: false,
       startDateFormatted: null,
-      endDateFormatted: null,
-      categories: []
+      endDateFormatted: null
     };
   },
   props: ['model'],

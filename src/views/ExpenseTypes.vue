@@ -8,6 +8,7 @@
       :timeout="5000"
       :top="true"
       :vertical="true"
+      :auto-height="true"
     >
       <v-card-title headline color="white">
         <span class="headline">{{ status.statusMessage }}</span>
@@ -233,6 +234,7 @@ export default {
       this.$set(this.model, 'recurringFlag', item.recurringFlag);
       this.$set(this.model, 'requiredFlag', item.requiredFlag);
       this.$set(this.model, 'isInactive', item.isInactive);
+      this.$set(this.model, 'categories', item.categories);
     },
     clearModel() {
       this.$set(this.model, 'id', '');
@@ -245,6 +247,7 @@ export default {
       this.$set(this.model, 'recurringFlag', false);
       this.$set(this.model, 'requiredFlag', false);
       this.$set(this.model, 'isInactive', false);
+      this.$set(this.model, 'categories', []);
     },
     updateModelInTable(updatedExpenseType) {
       let matchingExpensesIndex = _.findIndex(
