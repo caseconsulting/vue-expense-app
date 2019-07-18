@@ -113,20 +113,24 @@
 
         <!-- Receipt uploading -->
         <v-checkbox
-          style="padding-top: 10px; padding-bottom: 0px;"
+          style="padding-top: 20px; padding-bottom: 0px;"
           v-model="allowReceipt"
           label="Update the Receipt?"
           v-if="updateIsRequired && isEdit"
         ></v-checkbox>
         <file-upload
           v-if="updateIsRequired && ((allowReceipt && isEdit) || !isEdit)"
-          style="padding-top: 0px;"
+          style="padding-top: 0px; padding-bottom: 0px;"
           @fileSelected="setFile"
           :passedRules="receiptRules"
         ></file-upload>
 
         <!-- Receipt name -->
-        <p v-if="this.expense.receipt && isEdit"><b>Current Receipt: </b>{{ this.expense.receipt }}</p>
+        <v-card-text
+          style="padding: 0px 0px 3px 0px; font: inherit; font-size: 16px; color: #838383"
+          v-if="this.expense.receipt && isEdit"
+          >Current Receipt: {{ this.expense.receipt }}</v-card-text
+        >
 
         <!-- Notes section -->
         <v-text-field
