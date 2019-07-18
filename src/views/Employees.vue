@@ -148,7 +148,8 @@ export default {
         employeeRole: 'user',
         employeeNumber: null,
         hireDate: null,
-        isActive: false
+        isActive: false,
+        personalExpenses: ''
       },
       expand: false
     };
@@ -176,7 +177,26 @@ export default {
       });
       this.loading = false;
     },
+    getAllExpenses(id) {
+      console.log('expenses');
+      api
+        .getAllEmployeeExpenses(id)
+        .then(result => {
+          console.log(result);
+          this.$set(this.model, 'personalExpenses', result);
+          console.log(this.model.result);
+        })
+        .catch(err => {
+          console.log(err);
+        });
+
+      // this.$set(this.model, 'personalExpenses', expenses);
+    },
+    setExpenses(expenses) {
+      this.$set(this.model, 'personalExpenses', expenses);
+    },
     onSelect(item) {
+      console.log('select');
       this.$set(this.model, 'id', item.id);
       this.$set(this.model, 'firstName', item.firstName);
       this.$set(this.model, 'middleName', item.middleName);
@@ -186,6 +206,7 @@ export default {
       this.$set(this.model, 'employeeNumber', item.employeeNumber);
       this.$set(this.model, 'hireDate', item.hireDate);
       this.$set(this.model, 'isActive', !item.isActive);
+      this.getAllExpenses(item.id);
     },
     clearModel() {
       this.$set(this.model, 'id', '');

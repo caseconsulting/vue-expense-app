@@ -75,7 +75,15 @@
         <!-- isactive? only on edit -->
         <v-checkbox v-if="model.id" label="Mark as Inactive" v-model="model.isActive"></v-checkbox>
         <!-- Buttons -->
-        <v-btn outline color="error" @click="deleting = true"> <icon class="mr-1" name="trash"></icon>Delete</v-btn>
+        <v-btn
+          :disabled="this.model.id && this.model.personalExpenses.length > 0"
+          outline
+          color="error"
+          @click="deleting = true"
+        >
+          <icon class="mr-1" name="trash"></icon>Delete</v-btn
+        >
+
         <v-btn color="white" @click="clearForm"> <icon class="mr-1" name="ban"></icon>Cancel</v-btn>
         <v-btn outline color="success" @click="submit" :disabled="!valid">
           <icon class="mr-1" name="save"></icon>Submit</v-btn
@@ -196,6 +204,7 @@ export default {
     parseDate,
     submit,
     userIsAdmin
+    // tryDelete
   }
 };
 </script>

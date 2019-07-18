@@ -42,6 +42,10 @@ function getItem(type, id) {
   return execute('get', `/${type}/${id}`);
 }
 
+function getAllEmployeeExpenses(id) {
+  return execute('get', `/special/getAllEmployeeExpenses/${id}`);
+}
+
 function createItem(type, data) {
   return execute('post', `/${type}`, data);
 }
@@ -69,6 +73,10 @@ function getAttachment(userId, expenseId) {
   return execute('get', `attachment/${userId}/${expenseId}`);
 }
 
+// function getCanDelete(userId) {
+//   return execute('get', `/employee/${userId}`);
+// }
+
 async function createAttachment(expense, file) {
   let formData = new FormData();
   formData.append('receipt', file);
@@ -92,6 +100,8 @@ async function createAttachment(expense, file) {
 }
 
 export default {
+  // getCanDelete,
+  getAllEmployeeExpenses,
   getItems,
   getItem,
   getAttachment,
