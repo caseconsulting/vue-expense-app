@@ -56,10 +56,6 @@ export default {
 };
 </script>
 <style>
-/* #expense-info {
-  background-color: #68caa6;
-} */
-
 p {
   color: #38424d;
 }
@@ -72,29 +68,6 @@ span {
   -webkit-animation: color-change-2x 10s linear infinite alternate both;
   animation: color-change-2x 10s linear infinite alternate both;
 }
-
-/**
- * ----------------------------------------
- * animation color-change-2x
- * ----------------------------------------
- */
-
-/* @-webkit-keyframes color-change-2x {
-  0% {
-    background: #19dcea;
-  }
-  100% {
-    background: #b22cff;
-  }
-}
-@keyframes color-change-2x {
-  0% {
-    background: #19dcea;
-  }
-  100% {
-    background: #b22cff;
-  }
-} */
 
 /**
  * ----------------------------------------
