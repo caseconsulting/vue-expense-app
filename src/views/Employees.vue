@@ -178,13 +178,10 @@ export default {
       this.loading = false;
     },
     getAllExpenses(id) {
-      console.log('expenses');
       api
         .getAllEmployeeExpenses(id)
         .then(result => {
-          console.log(result);
           this.$set(this.model, 'personalExpenses', result);
-          console.log(this.model.result);
         })
         .catch(err => {
           console.log(err);

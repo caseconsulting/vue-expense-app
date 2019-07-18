@@ -89,6 +89,8 @@
           <span v-if="this.model.id && this.model.personalExpenses.length > 0"
             >Employees can only be deleted if they have no expenses</span
           >
+          <span v-else-if="this.model.id">Delete Available for Employee</span>
+          <span v-else>Please select an employee prior to deletion</span>
         </v-tooltip>
 
         <v-btn color="white" @click="clearForm"> <icon class="mr-1" name="ban"></icon>Cancel</v-btn>
