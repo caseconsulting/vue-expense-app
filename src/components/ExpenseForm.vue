@@ -459,7 +459,8 @@ async function created() {
       budget: expenseType.budget,
       odFlag: expenseType.odFlag,
       requiredFlag: expenseType.requiredFlag,
-      recurringFlag: expenseType.recurringFlag
+      recurringFlag: expenseType.recurringFlag,
+      isInactive: expenseType.isInactive
     };
   });
 

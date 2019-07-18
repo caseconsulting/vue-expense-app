@@ -26,7 +26,7 @@
           </v-card-title>
           <v-data-table
             :headers="headers"
-            :items="expenseTypes"
+            :items="expenseTypeList"
             :search="search"
             :pagination.sync="pagination"
             item-key="budgetName"
@@ -51,7 +51,7 @@
               </tr>
             </template>
             <template slot="items" slot-scope="props">
-              <tr @click="onSelect(props.item)">
+              <tr :class="{ inactiveStyle: props.item.isInactive }" @click="onSelect(props.item)">
                 <td class="text-xs-left">{{ props.item.budgetName | limitedText }}</td>
                 <td class="text-xs-left">{{ props.item.budget | moneyValue }}</td>
                 <td class="text-xs-left">{{ props.item.description | limitedText }}</td>
@@ -69,12 +69,16 @@
                   <icon v-if="!props.item.requiredFlag" id="marks" class="mr-1" name="regular/check-circle"></icon>
                   <icon v-else class="mr-1" id="marks" name="regular/times-circle"></icon>
                 </td>
+                <td class="text-xs-left">{{ isInactive(props.item) }}</td>
               </tr>
             </template>
             <v-alert slot="no-results" :value="true" color="error" icon="warning">
               Your search for "{{ search }}" found no results.
             </v-alert>
           </v-data-table>
+          <v-card-actions>
+            <v-checkbox :label="'Show Inactive Expense Types'" v-model="showAll"></v-checkbox>
+          </v-card-actions>
         </v-container>
       </v-card>
     </v-flex>
@@ -117,6 +121,7 @@ export default {
   },
   data() {
     return {
+      showAll: false, //used to show all expenseTypes (even inactive)
       search: '',
       loading: false,
       status: {
@@ -125,6 +130,7 @@ export default {
         color: ''
       },
       expenseTypes: [],
+      filteredExpenseTypes: [],
       errors: [],
       headers: [
         {
@@ -177,7 +183,8 @@ export default {
         startDate: null,
         endDate: null,
         recurringFlag: false,
-        requiredFlag: false
+        requiredFlag: false,
+        isInactive: false
       }
     };
   },
@@ -187,7 +194,15 @@ export default {
   async created() {
     this.refreshExpenseTypes();
   },
+  computed: {
+    expenseTypeList() {
+      return this.showAll ? this.expenseTypes : this.filteredExpenseTypes;
+    }
+  },
   methods: {
+    isInactive(expenseType) {
+      return !expenseType.isInactive ? '' : 'Not Active';
+    },
     clearStatus() {
       this.$set(this.status, 'statusType', undefined);
       this.$set(this.status, 'statusMessage', '');
@@ -201,6 +216,10 @@ export default {
     async refreshExpenseTypes() {
       this.loading = true;
       this.expenseTypes = await api.getItems(api.EXPENSE_TYPES);
+
+      this.filteredExpenseTypes = _.filter(this.expenseTypes, expenseType => {
+        return !expenseType.isInactive;
+      });
       this.loading = false;
     },
     onSelect(item) {
@@ -213,6 +232,7 @@ export default {
       this.$set(this.model, 'endDate', item.endDate);
       this.$set(this.model, 'recurringFlag', item.recurringFlag);
       this.$set(this.model, 'requiredFlag', item.requiredFlag);
+      this.$set(this.model, 'isInactive', item.isInactive);
     },
     clearModel() {
       this.$set(this.model, 'id', '');
@@ -224,6 +244,7 @@ export default {
       this.$set(this.model, 'endDate', '');
       this.$set(this.model, 'recurringFlag', false);
       this.$set(this.model, 'requiredFlag', false);
+      this.$set(this.model, 'isInactive', false);
     },
     updateModelInTable(updatedExpenseType) {
       let matchingExpensesIndex = _.findIndex(
@@ -231,6 +252,20 @@ export default {
         expenseType => expenseType.id === updatedExpenseType.id
       );
       this.expenseTypes.splice(matchingExpensesIndex, 1, updatedExpenseType);
+
+      if (updatedExpenseType.isInactive) {
+        matchingExpensesIndex = _.findIndex(
+          this.filteredExpenseTypes,
+          expenseType => expenseType.id === updatedExpenseType.id
+        );
+        this.filteredExpenseTypes.splice(matchingExpensesIndex, 1, updatedExpenseType);
+      } else {
+        this.filteredExpenseTypes = _.remove(
+          this.filteredExpenseTypes,
+          expenseType => expenseType.id !== updatedExpenseType.id
+        );
+      }
+
       this.$set(this.status, 'statusType', 'SUCCESS');
       this.$set(this.status, 'statusMessage', 'Item was successfully updated!');
       this.$set(this.status, 'color', 'green');
@@ -239,7 +274,13 @@ export default {
       let matchingExpenses = _.filter(this.expenseTypes, expenseType => expenseType.id === newExpenseType.id);
 
       if (!matchingExpenses.length) {
-        this.expenseTypes.push(newExpenseType);
+        if (newExpenseType.isInactive) {
+          this.expenseTypes.push(newExpenseType);
+        } else {
+          this.filteredExpenseTypes.push(newExpenseType);
+          this.expenseTypes.push(newExpenseType);
+        }
+        // this.expenseTypes.push(newExpenseType);
         this.$set(this.status, 'statusType', 'SUCCESS');
         this.$set(this.status, 'statusMessage', 'Item was successfully submitted!');
         this.$set(this.status, 'color', 'green');
@@ -248,6 +289,8 @@ export default {
     deleteModelFromTable() {
       let modelIndex = _.findIndex(this.expenseTypes, expense => expense.id === this.model.id);
       this.expenseTypes.splice(modelIndex, 1);
+      modelIndex = _.findIndex(this.filteredExpenseTypes, expense => expense.id === this.model.id);
+      this.filteredExpenseTypes.splice(modelIndex, 1);
       this.$set(this.status, 'statusType', 'SUCCESS');
       this.$set(this.status, 'statusMessage', 'Item was successfully deleted!');
       this.$set(this.status, 'color', 'green');
@@ -267,5 +310,9 @@ export default {
 #marks {
   width: auto;
   height: 1.5em;
+}
+
+.inactiveStyle {
+  background-color: #bdbbbb;
 }
 </style>

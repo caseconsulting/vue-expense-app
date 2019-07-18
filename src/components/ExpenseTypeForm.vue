@@ -27,6 +27,9 @@
         <!-- Requires receipt attachment for expense type -->
         <v-checkbox label="Receipt Required (optional)" v-model="model.requiredFlag"></v-checkbox>
 
+        <!-- Flag set if expense is inactive -->
+        <v-checkbox label="Mark as Inactive (optional)" v-model="model.isInactive"></v-checkbox>
+
         <v-menu
           v-if="!model.recurringFlag"
           :rules="genericRules"
@@ -114,6 +117,7 @@ function clearForm() {
   this.$set(this.model, 'endDate', '');
   this.$set(this.model, 'odFlag', false);
   this.$set(this.model, 'requiredFlag', false);
+  this.$set(this.model, 'isInactive', false);
 }
 
 async function deleteExpenseType() {
@@ -141,6 +145,9 @@ async function submit() {
   }
   if (!this.model.requiredFlag) {
     this.model.requiredFlag = false;
+  }
+  if (!this.model.isInactive) {
+    this.model.isInactive = false;
   }
 
   if (this.$refs.form.validate()) {
