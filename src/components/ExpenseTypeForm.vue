@@ -17,16 +17,15 @@
         ></v-text-field>
 
         <!-- categories field -->
-        <v-select
+
+        <v-combobox
           v-model="model.categories"
+          hint="Maximum of 5 categories"
           label="Categories (optional)"
-          chips
-          tags
-          solo
+          multiple
+          small-chips
           append-icon=""
-          flat
           clearable
-          style="border: 1px solid gray"
         >
           <template slot="selection" slot-scope="data">
             <v-chip :selected="data.selected" close outline label color="gray" @input="removeCategory(data.item)">
@@ -34,7 +33,16 @@
               >&nbsp;
             </v-chip>
           </template>
-        </v-select>
+        </v-combobox>
+
+        <!-- <v-select v-model="model.categories" label="Categories (optional)" chips tags append-icon="" flat clearable>
+          <template slot="selection" slot-scope="data">
+            <v-chip :selected="data.selected" close outline label color="gray" @input="removeCategory(data.item)">
+              <strong>{{ data.item }}</strong
+              >&nbsp;
+            </v-chip>
+          </template>
+        </v-select> -->
         <br />
 
         <!-- budget field -->
@@ -264,6 +272,11 @@ export default {
       //fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
       if (this.model.endDate !== null && !this.formatDate(this.model.endDate)) {
         this.model.endDate = null;
+      }
+    },
+    'model.categories': function(val) {
+      if (val.length > 5) {
+        this.$nextTick(() => this.model.categories.pop());
       }
     }
   }
