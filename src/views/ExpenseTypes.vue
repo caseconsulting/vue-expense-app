@@ -107,7 +107,7 @@
                     </div>
                     <div class="flag">
                       <p>Receipt Required:</p>
-                      <icon v-if="!props.item.requiredFlag" id="marks" class="mr-1" name="regular/check-circle"></icon>
+                      <icon v-if="props.item.requiredFlag" id="marks" class="mr-1" name="regular/check-circle"></icon>
                       <icon v-else class="mr-1" id="marks" name="regular/times-circle"></icon>
                     </div>
                   </div>
