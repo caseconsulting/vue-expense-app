@@ -37,15 +37,14 @@
         <v-text-field v-model="model.email" :rules="emailRules" label="Email" data-vv-name="Email"></v-text-field>
 
         <!-- Employee Role -->
-        <v-select
+        <v-autocomplete
           :disabled="!userIsAdmin()"
           :items="permissions"
           :rules="componentRules"
           v-model="employeeRoleFormatted"
           label="Employee Role"
-          autocomplete
           @blur="model.employeeRole = formatRole(employeeRoleFormatted)"
-        ></v-select>
+        ></v-autocomplete>
         <!-- Hire Date -->
         <v-menu
           ref="menu1"

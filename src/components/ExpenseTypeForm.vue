@@ -17,11 +17,11 @@
         ></v-text-field>
 
         <!-- categories field -->
-        <v-select
+        <v-combobox
           v-model="categories"
           label="Categories (optional)"
           chips
-          tags
+          multiple
           solo
           append-icon=""
           flat
@@ -34,7 +34,7 @@
               >&nbsp;
             </v-chip>
           </template>
-        </v-select>
+        </v-combobox>
         <br />
 
         <!-- budget field -->
@@ -109,13 +109,12 @@
         </v-menu>
 
         <!-- description field -->
-        <v-text-field
+        <v-textarea
           v-model="model.description"
           :rules="genericRules"
           label="Description "
           data-vv-name="Description "
-          multi-line
-        ></v-text-field>
+        ></v-textarea>
 
         <!-- Buttons -->
         <v-btn outline color="error " @click="deleting = true"> <icon class="mr-1 " name="trash"></icon>Delete</v-btn>

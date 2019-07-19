@@ -30,7 +30,7 @@
         >
           <td>
             <v-checkbox
-              @click="theyPickedMe(props.item)"
+              @change="theyPickedMe(props.item)"
               v-model="props.item.selected"
               primary
               hide-details

@@ -5,24 +5,22 @@
         <v-card-title>
           <h2>Unreimbursed Expenses</h2>
           <v-spacer></v-spacer>
-          <v-select
+          <v-autocomplete
             :items="employees"
             :filter="customFilter"
             v-model="employee"
             item-text="text"
             label="Filter by Employee"
             clearable
-            autocomplete
-          ></v-select>
-          <v-select
+          ></v-autocomplete>
+          <v-autocomplete
             :items="expenseTypes"
             :filter="customFilter"
             v-model="expenseType"
             item-text="text"
             label="Filter by Expense Type"
             clearable
-            autocomplete
-          ></v-select>
+          ></v-autocomplete>
         </v-card-title>
 
         <v-data-table
@@ -39,7 +37,7 @@
           <template slot="headers" slot-scope="props">
             <tr style="box-shadow: 0px 1.5px #888888;">
               <th>
-                <v-checkbox :input-value="everythingSelected" primary hide-details @click="toggleAll"></v-checkbox>
+                <v-checkbox :input-value="everythingSelected" primary hide-details @change="toggleAll"></v-checkbox>
               </th>
               <th
                 v-for="header in props.headers"
@@ -62,7 +60,7 @@
               <td>
                 <v-checkbox
                   v-model="props.item.allSelected"
-                  @click="props.item = toggleExpenses(props.item)"
+                  @change="props.item = toggleExpenses(props.item)"
                   primary
                   hide-details
                 ></v-checkbox>
@@ -324,7 +322,7 @@ export default {
       }
     },
     toggleExpenses(item) {
-      if (!item.allSelected) {
+      if (item.allSelected) {
         _.forEach(item.expenses, expense => {
           expense.selected = true;
           this.selected.push(expense);

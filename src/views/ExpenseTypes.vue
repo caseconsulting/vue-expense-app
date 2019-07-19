@@ -252,8 +252,7 @@ export default {
         expenseType => expenseType.id === updatedExpenseType.id
       );
       this.expenseTypes.splice(matchingExpensesIndex, 1, updatedExpenseType);
-
-      if (updatedExpenseType.isInactive) {
+      if (!updatedExpenseType.isInactive) {
         matchingExpensesIndex = _.findIndex(
           this.filteredExpenseTypes,
           expenseType => expenseType.id === updatedExpenseType.id
@@ -265,6 +264,13 @@ export default {
           expenseType => expenseType.id !== updatedExpenseType.id
         );
       }
+
+      //       if (!updatedEmployee.isInactive) {
+      //   matchingEmployeeIndex = _.findIndex(this.filteredEmployees, employee => employee.id === updatedEmployee.id);
+      //   this.filteredEmployees.splice(matchingEmployeeIndex, 1, updatedEmployee);
+      // } else {
+      //   this.filteredEmployees = _.remove(this.filteredEmployees, employee => employee.id !== updatedEmployee.id);
+      // }
 
       this.$set(this.status, 'statusType', 'SUCCESS');
       this.$set(this.status, 'statusMessage', 'Item was successfully updated!');

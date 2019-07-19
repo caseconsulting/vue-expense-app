@@ -8,7 +8,7 @@
       </v-card-title>
       <v-form ref="form" v-model="valid" lazy-validation>
         <!--Employee picker if admin level -->
-        <v-select
+        <v-autocomplete
           v-if="employeeRole === 'super-admin' && this.$route.path !== '/home'"
           :items="employees"
           :rules="componentRules"
@@ -16,32 +16,29 @@
           v-model="expense.userId"
           item-text="text"
           label="Employee"
-          autocomplete
-        ></v-select>
+        ></v-autocomplete>
         <!--Expense type picker if super-admin -->
-        <v-select
+        <v-autocomplete
           v-if="employeeRole === 'super-admin' && this.$route.path !== '/home'"
           :items="expenseTypes"
           :rules="componentRules"
           :filter="customFilter"
           v-model="expense.expenseTypeId"
           label="Expense Type"
-          autocomplete
           :disabled="!!expense.id"
           @input="expenseTypeSelected"
-        ></v-select>
+        ></v-autocomplete>
         <!--Expense type picker if user -->
         <!-- :filter="customFilter" -->
-        <v-select
+        <v-autocomplete
           v-else
           :items="filteredExpenseTypes()"
           :rules="componentRules"
           v-model="expense.expenseTypeId"
           label="Expense Type"
-          autocomplete
           :disabled="!!expense.id"
           @input="expenseTypeSelected"
-        ></v-select>
+        ></v-autocomplete>
         <!--Cost input field -->
         <v-text-field
           prefix="$"
@@ -133,12 +130,7 @@
         >
 
         <!-- Notes section -->
-        <v-text-field
-          v-model="expense.note"
-          label="Notes (optional)"
-          data-vv-name="Description"
-          multi-line
-        ></v-text-field>
+        <v-textarea v-model="expense.note" label="Notes (optional)" data-vv-name="Description"></v-textarea>
 
         <!-- Reference URL -->
         <v-text-field v-model="expense.url" label="URL (Optional)"></v-text-field>
