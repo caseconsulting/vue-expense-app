@@ -21,7 +21,7 @@
           v-model="model.categories"
           label="Categories (optional)"
           chips
-          multiple
+          tags
           solo
           append-icon=""
           flat
@@ -178,10 +178,6 @@ async function submit() {
   }
   if (!this.model.isInactive) {
     this.model.isInactive = false;
-  }
-
-  if (!this.model.categories) {
-    this.model.categories = [];
   }
 
   if (this.$refs.form.validate()) {
