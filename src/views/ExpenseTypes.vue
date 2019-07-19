@@ -185,7 +185,8 @@ export default {
         endDate: null,
         recurringFlag: false,
         requiredFlag: false,
-        isInactive: false
+        isInactive: false,
+        categories: []
       }
     };
   },

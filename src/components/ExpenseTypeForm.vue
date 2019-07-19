@@ -180,6 +180,10 @@ async function submit() {
     this.model.isInactive = false;
   }
 
+  if (!this.model.categories) {
+    this.model.categories = [];
+  }
+
   if (this.$refs.form.validate()) {
     if (this.model.recurringFlag) {
       this.$set(this.model, 'startDate', null);
