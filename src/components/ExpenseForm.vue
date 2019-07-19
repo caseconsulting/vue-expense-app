@@ -296,14 +296,19 @@ function betweenDates(startDate, endDate) {
   let today = new Date();
   let start = startDate.split('-');
   let end = endDate.split('-');
-  if (today.getUTCFullYear() <= parseInt(end[0]) && today.getUTCFullYear() >= parseInt(start[0])) {
-    if (today.getUTCMonth() + 1 <= parseInt(end[1]) && today.getUTCMonth() + 1 >= parseInt(start[1])) {
-      if (today.getUTCDate() <= parseInt(end[2]) && today.getUTCDate() >= parseInt(start[2])) {
-        return true;
-      }
-    }
-  }
-  return false;
+
+  return (
+    (today.getUTCFullYear() < parseInt(end[0]) ||
+      (today.getUTCFullYear() == parseInt(end[0]) && today.getUTCMonth() + 1 < parseInt(end[1])) ||
+      (today.getUTCFullYear() == parseInt(end[0]) &&
+        today.getUTCMonth() + 1 == parseInt(end[1]) &&
+        today.getUTCDate() <= parseInt(end[2]))) &&
+    (today.getUTCFullYear() > parseInt(start[0]) ||
+      (today.getUTCFullYear() == parseInt(start[0]) && today.getUTCMonth() + 1 > parseInt(start[1])) ||
+      (today.getUTCFullYear() == parseInt(start[0]) &&
+        today.getUTCMonth() + 1 == parseInt(start[1]) &&
+        today.getUTCDate() >= parseInt(start[2])))
+  );
 }
 
 // filter for expenses recurring or containing todays date
