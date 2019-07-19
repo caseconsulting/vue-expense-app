@@ -372,9 +372,6 @@ export default {
   background-color: #bdbbbb;
 }
 
-.flag {
-}
-
 .flag p {
   font-weight: bold;
   width: 150px;
