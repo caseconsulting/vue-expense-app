@@ -76,7 +76,7 @@
                   <icon v-else class="mr-1" id="marks" name="regular/times-circle"></icon>
                 </td>
                 <td class="text-xs-center">
-                  <icon v-if="!props.item.requiredFlag" id="marks" class="mr-1" name="regular/check-circle"></icon>
+                  <icon v-if="props.item.requiredFlag" id="marks" class="mr-1" name="regular/check-circle"></icon>
                   <icon v-else class="mr-1" id="marks" name="regular/times-circle"></icon>
                 </td>
                 <td class="text-xs-left">{{ isInactive(props.item) }}</td>
