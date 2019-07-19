@@ -30,6 +30,7 @@
             :items="expenseTypeList"
             :search="search"
             :pagination.sync="pagination"
+            :expand="expand"
             item-key="budgetName"
             class="elevation-1"
           >
@@ -51,8 +52,16 @@
                 </th>
               </tr>
             </template>
+
+            <!-- data row -->
             <template slot="items" slot-scope="props">
-              <tr :class="{ inactiveStyle: props.item.isInactive }" @click="onSelect(props.item)">
+              <tr
+                :class="{ inactiveStyle: props.item.isInactive }"
+                @click="
+                  onSelect(props.item);
+                  props.expanded = !props.expanded;
+                "
+              >
                 <td class="text-xs-left">{{ props.item.budgetName | limitedText }}</td>
                 <td class="text-xs-left">{{ props.item.budget | moneyValue }}</td>
                 <td class="text-xs-left">{{ props.item.description | limitedText }}</td>
@@ -73,6 +82,41 @@
                 <td class="text-xs-left">{{ isInactive(props.item) }}</td>
               </tr>
             </template>
+            <!-- end data row -->
+
+            <!-- data row dropdown/expandable -->
+            <template v-slot:expand="props">
+              <v-card flat>
+                <v-card-text>
+                  <div class="expandedInfo">
+                    <p v-if="props.item.description"><b>Description: </b>{{ props.item.description }}</p>
+
+                    <p v-if="props.item.categories.length > 0">
+                      <b>Categories: </b>{{ props.item.categories.join(', ') }}
+                    </p>
+
+                    <div class="flag">
+                      <p>Overdraft Allowed:</p>
+                      <icon v-if="props.item.odFlag" id="marks" class="mr-1" name="regular/check-circle"></icon>
+                      <icon v-else class="mr-1" id="marks" name="regular/times-circle"></icon>
+                    </div>
+                    <div class="flag">
+                      <p>Recurring:</p>
+                      <icon v-if="props.item.recurringFlag" id="marks" class="mr-1" name="regular/check-circle"></icon>
+                      <icon v-else class="mr-1" id="marks" name="regular/times-circle"></icon>
+                    </div>
+                    <div class="flag">
+                      <p>Receipt Required:</p>
+                      <icon v-if="!props.item.requiredFlag" id="marks" class="mr-1" name="regular/check-circle"></icon>
+                      <icon v-else class="mr-1" id="marks" name="regular/times-circle"></icon>
+                    </div>
+                  </div>
+                </v-card-text>
+              </v-card>
+            </template>
+            <!-- end data row dropdown/expandable -->
+
+            <!-- no results display -->
             <v-alert slot="no-results" :value="true" color="error" icon="warning">
               Your search for "{{ search }}" found no results.
             </v-alert>
@@ -187,7 +231,8 @@ export default {
         requiredFlag: false,
         isInactive: false,
         categories: []
-      }
+      },
+      expand: false
     };
   },
   components: {
@@ -256,6 +301,7 @@ export default {
         expenseType => expenseType.id === updatedExpenseType.id
       );
       this.expenseTypes.splice(matchingExpensesIndex, 1, updatedExpenseType);
+
       if (!updatedExpenseType.isInactive) {
         matchingExpensesIndex = _.findIndex(
           this.filteredExpenseTypes,
@@ -324,5 +370,18 @@ export default {
 
 .inactiveStyle {
   background-color: #bdbbbb;
+}
+
+.flag {
+}
+
+.flag p {
+  font-weight: bold;
+  width: 150px;
+  display: inline-block;
+}
+
+.flag svg {
+  margin-top: 5px;
 }
 </style>

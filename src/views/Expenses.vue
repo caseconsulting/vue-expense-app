@@ -145,7 +145,6 @@
                 <!-- end option buttons -->
               </tr>
             </template>
-
             <!-- end data row -->
 
             <!-- data row dropdown/expandable -->
