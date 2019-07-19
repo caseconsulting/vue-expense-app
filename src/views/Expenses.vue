@@ -544,7 +544,7 @@ export default {
 </script>
 
 <style>
-.datatable_btn .btn {
+.datatable_btn .v-btn {
   margin: 6px -2px;
 }
 
