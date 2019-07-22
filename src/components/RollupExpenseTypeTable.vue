@@ -300,7 +300,7 @@ export default {
       let expenseIndex = _.findIndex(this.empBudgets[employeeIndex].expenses, expense => selected.id === expense.id);
       this.empBudgets[employeeIndex].expenses.splice(expenseIndex, 1);
 
-      this.empBudgets = _.filter(this.empBudgets, item => item.expenses.length); //remove empty arrays
+      // this.empBudgets = _.filter(this.empBudgets, item => item.expenses.length); //remove empty arrays
       window.EventBus.$emit('expenseChange', []);
       window.EventBus.$emit('clickedExpense');
     },
