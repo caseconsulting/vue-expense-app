@@ -230,7 +230,8 @@ export default {
         recurringFlag: false,
         requiredFlag: false,
         isInactive: false,
-        categories: []
+        categories: [],
+        typeExpenses: ''
       },
       expand: false
     };
@@ -281,6 +282,7 @@ export default {
       this.$set(this.model, 'requiredFlag', item.requiredFlag);
       this.$set(this.model, 'isInactive', item.isInactive);
       this.$set(this.model, 'categories', item.categories);
+      this.getAllExpenses(item.id);
     },
     clearModel() {
       this.$set(this.model, 'id', '');
@@ -358,6 +360,19 @@ export default {
         this.pagination.sortBy = column;
         this.pagination.descending = false;
       }
+    },
+    getAllExpenses(id) {
+      api
+        .getAllExpenseTypeExpenses(id)
+        .then(result => {
+          this.$set(this.model, 'typeExpenses', result);
+        })
+        .catch(err => {
+          console.log(err);
+        });
+    },
+    setExpenses(expenses) {
+      this.$set(this.model, 'typeExpenses', expenses);
     }
   }
 };

@@ -50,6 +50,10 @@ function getAllEmployeeExpenses(id) {
   return execute('get', `/special/getAllEmployeeExpenses/${id}`);
 }
 
+function getAllExpenseTypeExpenses(id) {
+  return execute('get', `/special/getAllExpenseTypeExpenses/${id}`);
+}
+
 function createItem(type, data) {
   return execute('post', `/${type}`, data);
 }
@@ -107,6 +111,7 @@ export default {
   // getCanDelete,
   getBudgetItem,
   getAllEmployeeExpenses,
+  getAllExpenseTypeExpenses,
   getItems,
   getItem,
   getAttachment,
