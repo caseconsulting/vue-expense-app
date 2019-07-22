@@ -300,7 +300,7 @@ export default {
       let expenseIndex = _.findIndex(this.empBudgets[employeeIndex].expenses, expense => selected.id === expense.id);
       this.empBudgets[employeeIndex].expenses.splice(expenseIndex, 1);
 
-      // this.empBudgets = _.filter(this.empBudgets, item => item.expenses.length); //remove empty arrays
+      this.empBudgets = _.filter(this.empBudgets, item => item.expenses.length); //remove empty arrays
       window.EventBus.$emit('expenseChange', []);
       window.EventBus.$emit('clickedExpense');
     },
@@ -363,15 +363,15 @@ export default {
     toggleAll() {
       if (this.selected.length) {
         _.forEach(this.filteredItems, item => {
-          this.toggleExpenses(item);
           item.allSelected = false;
+          this.toggleExpenses(item);
         });
         this.everythingSelected = false;
         this.selected = [];
       } else {
         _.forEach(this.filteredItems, item => {
-          this.toggleExpenses(item);
           item.allSelected = true;
+          this.toggleExpenses(item);
         });
         this.everythingSelected = true;
       }
