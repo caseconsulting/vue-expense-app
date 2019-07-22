@@ -121,7 +121,7 @@
                   </v-tooltip>
 
                   <!-- unreimburse button -->
-                  <div v-if="isSuperAdmin">
+                  <!-- <div v-if="isSuperAdmin">
                     <v-tooltip top>
                       <v-btn
                         :disabled="props.item.reimbursedDate == null || isEditing()"
@@ -139,7 +139,7 @@
                       </v-btn>
                       <span>Unreimburse</span>
                     </v-tooltip>
-                  </div>
+                  </div> -->
                 </td>
 
                 <!-- end option buttons -->
