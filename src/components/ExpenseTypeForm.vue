@@ -125,7 +125,26 @@
         ></v-textarea>
 
         <!-- Buttons -->
-        <v-btn outline color="error " @click="deleting = true"> <icon class="mr-1 " name="trash"></icon>Delete</v-btn>
+
+        <!-- <v-btn outline color="error " @click="deleting = true"> <icon class="mr-1 " name="trash"></icon>Delete</v-btn> -->
+        <v-tooltip bottom>
+          <v-btn
+            :disabled="this.model.id && this.model.typeExpenses.length > 0"
+            outline
+            color="error"
+            @click="deleting = true"
+            slot="activator"
+          >
+            <icon class="mr-1" name="trash"></icon>Delete</v-btn
+          >
+          <span v-if="this.model.id && this.model.typeExpenses.length > 0"
+            >Expense Types can only be deleted if they have no expenses associated.
+          </span>
+
+          <span v-else-if="this.model.id">Delete Available for Expense Type</span>
+          <span v-else>Please select an Expense Type prior to deletion</span>
+        </v-tooltip>
+
         <v-btn color="white " @click="clearForm"> <icon class="mr-1 " name="ban"></icon>Cancel</v-btn>
         <v-btn outline color="success " @click="submit" :disabled="!valid">
           <icon class="mr-1 " name="save"></icon>Submit</v-btn
@@ -160,9 +179,13 @@ function clearForm() {
 
 async function deleteExpenseType() {
   this.deleting = false;
-  await api.deleteItem(api.EXPENSE_TYPES, this.model.id);
-  this.$emit('delete');
-  this.clearForm();
+  let et = await api.deleteItem(api.EXPENSE_TYPES, this.model.id);
+  if (et.id) {
+    this.$emit('delete');
+    this.clearForm();
+  } else {
+    this.$emit('error', et.response.data.message);
+  }
 }
 
 function formatDate(date) {
