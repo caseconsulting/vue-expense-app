@@ -25,6 +25,71 @@
             <v-spacer></v-spacer>
             <v-text-field v-model="search" append-icon="search" label="Search" single-line hide-details></v-text-field>
           </v-card-title>
+
+          <!-- start filter -->
+          <fieldset>
+            <legend>Filters</legend>
+            <div class="flagFilter">
+              <h4>Active:</h4>
+              <v-btn-toggle v-model="filter.active" flat mandatory>
+                <v-btn value="active" flat>
+                  <icon class="mr-1" name="regular/check-circle"></icon>
+                </v-btn>
+                <v-btn value="notActive" flat>
+                  <icon name="regular/times-circle"></icon>
+                </v-btn>
+                <v-btn value="both" flat>
+                  BOTH
+                </v-btn>
+              </v-btn-toggle>
+            </div>
+            <div class="flagFilter">
+              <h4>Overdraft:</h4>
+              <v-btn-toggle v-model="filter.overdraft" flat mandatory>
+                <v-btn value="overdraft" flat>
+                  <icon class="mr-1" name="regular/check-circle"></icon>
+                </v-btn>
+                <v-btn value="noOverdraft" flat>
+                  <icon name="regular/times-circle"></icon>
+                </v-btn>
+                <v-btn value="both" flat>
+                  BOTH
+                </v-btn>
+              </v-btn-toggle>
+            </div>
+            <div class="flagFilter">
+              <h4>Recurring:</h4>
+              <v-btn-toggle v-model="filter.recurring" flat mandatory>
+                <v-btn value="recurring" flat>
+                  <icon class="mr-1" name="regular/check-circle"></icon>
+                </v-btn>
+                <v-btn value="notRecurring" flat>
+                  <icon name="regular/times-circle"></icon>
+                </v-btn>
+                <v-btn value="both" flat>
+                  BOTH
+                </v-btn>
+              </v-btn-toggle>
+            </div>
+            <div class="flagFilter">
+              <h4>Receipt Required:</h4>
+              <v-btn-toggle v-model="filter.receipt" flat mandatory>
+                <v-btn value="receipt" flat>
+                  <icon class="mr-1" name="regular/check-circle"></icon>
+                </v-btn>
+                <v-btn value="noReceipt" flat>
+                  <icon name="regular/times-circle"></icon>
+                </v-btn>
+                <v-btn value="both" flat>
+                  BOTH
+                </v-btn>
+              </v-btn-toggle>
+            </div>
+          </fieldset>
+          <br />
+
+          <!-- end filter -->
+
           <v-data-table
             :headers="headers"
             :items="expenseTypeList"
@@ -121,9 +186,10 @@
               Your search for "{{ search }}" found no results.
             </v-alert>
           </v-data-table>
-          <v-card-actions>
-            <v-checkbox :label="'Show Inactive Expense Types'" v-model="showAll"></v-checkbox>
-          </v-card-actions>
+
+          <!-- <v-card-actions>
+            <v-checkbox :label="'Show Inactive Expense Types'" v-model="showInactive"></v-checkbox>
+          </v-card-actions> -->
         </v-container>
       </v-card>
     </v-flex>
@@ -145,6 +211,8 @@ import _ from 'lodash';
 import api from '@/shared/api.js';
 import ExpenseTypeForm from '../components/ExpenseTypeForm.vue';
 
+/* filters */
+
 function moneyFilter(value) {
   return `${new Intl.NumberFormat('en-US', {
     style: 'decimal',
@@ -152,6 +220,164 @@ function moneyFilter(value) {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2
   }).format(value)}`;
+}
+
+/* methods */
+
+function isInactive(expenseType) {
+  return !expenseType.isInactive ? '' : 'Not Active';
+}
+
+function clearStatus() {
+  this.$set(this.status, 'statusType', undefined);
+  this.$set(this.status, 'statusMessage', '');
+  this.$set(this.status, 'color', '');
+}
+
+async function displayError(err) {
+  this.$set(this.status, 'statusType', 'ERROR');
+  this.$set(this.status, 'statusMessage', err);
+  this.$set(this.status, 'color', 'red');
+}
+
+async function refreshExpenseTypes() {
+  this.loading = true;
+  this.expenseTypes = await api.getItems(api.EXPENSE_TYPES);
+
+  this.filteredExpenseTypes = _.filter(this.expenseTypes, expenseType => {
+    return !expenseType.isInactive;
+  });
+  this.loading = false;
+}
+
+function onSelect(item) {
+  this.$set(this.model, 'id', item.id);
+  this.$set(this.model, 'budget', moneyFilter(item.budget));
+  this.$set(this.model, 'budgetName', item.budgetName);
+  this.$set(this.model, 'description', item.description);
+  this.$set(this.model, 'odFlag', item.odFlag);
+  this.$set(this.model, 'startDate', item.startDate);
+  this.$set(this.model, 'endDate', item.endDate);
+  this.$set(this.model, 'recurringFlag', item.recurringFlag);
+  this.$set(this.model, 'requiredFlag', item.requiredFlag);
+  this.$set(this.model, 'isInactive', item.isInactive);
+  this.$set(this.model, 'categories', item.categories);
+}
+
+function clearModel() {
+  this.$set(this.model, 'id', '');
+  this.$set(this.model, 'budget', 0);
+  this.$set(this.model, 'budgetName', '');
+  this.$set(this.model, 'description', '');
+  this.$set(this.model, 'odFlag', false);
+  this.$set(this.model, 'startDate', '');
+  this.$set(this.model, 'endDate', '');
+  this.$set(this.model, 'recurringFlag', false);
+  this.$set(this.model, 'requiredFlag', false);
+  this.$set(this.model, 'isInactive', false);
+  this.$set(this.model, 'categories', []);
+}
+
+function updateModelInTable(updatedExpenseType) {
+  let matchingExpensesIndex = _.findIndex(this.expenseTypes, expenseType => expenseType.id === updatedExpenseType.id);
+  this.expenseTypes.splice(matchingExpensesIndex, 1, updatedExpenseType);
+
+  if (!updatedExpenseType.isInactive) {
+    matchingExpensesIndex = _.findIndex(
+      this.filteredExpenseTypes,
+      expenseType => expenseType.id === updatedExpenseType.id
+    );
+    this.filteredExpenseTypes.splice(matchingExpensesIndex, 1, updatedExpenseType);
+  } else {
+    this.filteredExpenseTypes = _.remove(
+      this.filteredExpenseTypes,
+      expenseType => expenseType.id !== updatedExpenseType.id
+    );
+  }
+
+  //       if (!updatedEmployee.isInactive) {
+  //   matchingEmployeeIndex = _.findIndex(this.filteredEmployees, employee => employee.id === updatedEmployee.id);
+  //   this.filteredEmployees.splice(matchingEmployeeIndex, 1, updatedEmployee);
+  // } else {
+  //   this.filteredEmployees = _.remove(this.filteredEmployees, employee => employee.id !== updatedEmployee.id);
+  // }
+
+  this.$set(this.status, 'statusType', 'SUCCESS');
+  this.$set(this.status, 'statusMessage', 'Item was successfully updated!');
+  this.$set(this.status, 'color', 'green');
+}
+
+function addModelToTable(newExpenseType) {
+  let matchingExpenses = _.filter(this.expenseTypes, expenseType => expenseType.id === newExpenseType.id);
+
+  if (!matchingExpenses.length) {
+    if (newExpenseType.isInactive) {
+      this.expenseTypes.push(newExpenseType);
+    } else {
+      this.filteredExpenseTypes.push(newExpenseType);
+      this.expenseTypes.push(newExpenseType);
+    }
+    // this.expenseTypes.push(newExpenseType);
+    this.$set(this.status, 'statusType', 'SUCCESS');
+    this.$set(this.status, 'statusMessage', 'Item was successfully submitted!');
+    this.$set(this.status, 'color', 'green');
+  }
+}
+
+function deleteModelFromTable() {
+  let modelIndex = _.findIndex(this.expenseTypes, expense => expense.id === this.model.id);
+  this.expenseTypes.splice(modelIndex, 1);
+  modelIndex = _.findIndex(this.filteredExpenseTypes, expense => expense.id === this.model.id);
+  this.filteredExpenseTypes.splice(modelIndex, 1);
+  this.$set(this.status, 'statusType', 'SUCCESS');
+  this.$set(this.status, 'statusMessage', 'Item was successfully deleted!');
+  this.$set(this.status, 'color', 'green');
+}
+
+function changeSort(column) {
+  if (this.pagination.sortBy === column) {
+    this.pagination.descending = !this.pagination.descending;
+  } else {
+    this.pagination.sortBy = column;
+    this.pagination.descending = false;
+  }
+}
+
+function filterExpense() {
+  this.filteredExpenseTypes = this.expenseTypes;
+  this.filteredExpenseTypes = _.filter(this.filteredExpenseTypes, expenseType => {
+    return this.filter.active == 'active'
+      ? !expenseType.isInactive
+      : this.filter.active == 'notActive'
+      ? expenseType.isInactive
+      : this.filteredExpenseTypes;
+  });
+  this.filteredExpenseTypes = _.filter(this.filteredExpenseTypes, expenseType => {
+    return this.filter.overdraft == 'overdraft'
+      ? expenseType.odFlag
+      : this.filter.overdraft == 'noOverdraft'
+      ? !expenseType.odFlag
+      : this.filteredExpenseTypes;
+  });
+  this.filteredExpenseTypes = _.filter(this.filteredExpenseTypes, expenseType => {
+    return this.filter.recurring == 'recurring'
+      ? expenseType.recurringFlag
+      : this.filter.recurring == 'notRecurring'
+      ? !expenseType.recurringFlag
+      : this.filteredExpenseTypes;
+  });
+  this.filteredExpenseTypes = _.filter(this.filteredExpenseTypes, expenseType => {
+    return this.filter.receipt == 'receipt'
+      ? expenseType.requiredFlag
+      : this.filter.receipt == 'noReceipt'
+      ? !expenseType.requiredFlag
+      : this.filteredExpenseTypes;
+  });
+}
+
+/* computed */
+function expenseTypeList() {
+  return this.filteredExpenseTypes;
 }
 
 export default {
@@ -166,7 +392,7 @@ export default {
   },
   data() {
     return {
-      showAll: false, //used to show all expenseTypes (even inactive)
+      //showInactive: false, //used to show all expenseTypes (even inactive)
       search: '',
       loading: false,
       status: {
@@ -233,6 +459,12 @@ export default {
         categories: [],
         typeExpenses: ''
       },
+      filter: {
+        active: 'active',
+        overdraft: 'both',
+        recurring: 'both',
+        receipt: 'both'
+      },
       expand: false
     };
   },
@@ -243,149 +475,47 @@ export default {
     this.refreshExpenseTypes();
   },
   computed: {
-    expenseTypeList() {
-      return this.showAll ? this.expenseTypes : this.filteredExpenseTypes;
+    expenseTypeList
+  },
+  watch: {
+    'filter.active': function() {
+      this.filterExpense();
+    },
+    'filter.overdraft': function() {
+      this.filterExpense();
+    },
+    'filter.recurring': function() {
+      this.filterExpense();
+    },
+    'filter.receipt': function() {
+      this.filterExpense();
     }
   },
   methods: {
-    isInactive(expenseType) {
-      return !expenseType.isInactive ? '' : 'Not Active';
-    },
-    clearStatus() {
-      this.$set(this.status, 'statusType', undefined);
-      this.$set(this.status, 'statusMessage', '');
-      this.$set(this.status, 'color', '');
-    },
-    async displayError(err) {
-      this.$set(this.status, 'statusType', 'ERROR');
-      this.$set(this.status, 'statusMessage', err);
-      this.$set(this.status, 'color', 'red');
-    },
-    async refreshExpenseTypes() {
-      this.loading = true;
-      this.expenseTypes = await api.getItems(api.EXPENSE_TYPES);
-
-      this.filteredExpenseTypes = _.filter(this.expenseTypes, expenseType => {
-        return !expenseType.isInactive;
-      });
-      this.loading = false;
-    },
-    onSelect(item) {
-      this.$set(this.model, 'id', item.id);
-      this.$set(this.model, 'budget', moneyFilter(item.budget));
-      this.$set(this.model, 'budgetName', item.budgetName);
-      this.$set(this.model, 'description', item.description);
-      this.$set(this.model, 'odFlag', item.odFlag);
-      this.$set(this.model, 'startDate', item.startDate);
-      this.$set(this.model, 'endDate', item.endDate);
-      this.$set(this.model, 'recurringFlag', item.recurringFlag);
-      this.$set(this.model, 'requiredFlag', item.requiredFlag);
-      this.$set(this.model, 'isInactive', item.isInactive);
-      this.$set(this.model, 'categories', item.categories);
-      this.getAllExpenses(item.id);
-    },
-    clearModel() {
-      this.$set(this.model, 'id', '');
-      this.$set(this.model, 'budget', 0);
-      this.$set(this.model, 'budgetName', '');
-      this.$set(this.model, 'description', '');
-      this.$set(this.model, 'odFlag', false);
-      this.$set(this.model, 'startDate', '');
-      this.$set(this.model, 'endDate', '');
-      this.$set(this.model, 'recurringFlag', false);
-      this.$set(this.model, 'requiredFlag', false);
-      this.$set(this.model, 'isInactive', false);
-      this.$set(this.model, 'categories', []);
-    },
-    updateModelInTable(updatedExpenseType) {
-      let matchingExpensesIndex = _.findIndex(
-        this.expenseTypes,
-        expenseType => expenseType.id === updatedExpenseType.id
-      );
-      this.expenseTypes.splice(matchingExpensesIndex, 1, updatedExpenseType);
-
-      if (!updatedExpenseType.isInactive) {
-        matchingExpensesIndex = _.findIndex(
-          this.filteredExpenseTypes,
-          expenseType => expenseType.id === updatedExpenseType.id
-        );
-        this.filteredExpenseTypes.splice(matchingExpensesIndex, 1, updatedExpenseType);
-      } else {
-        this.filteredExpenseTypes = _.remove(
-          this.filteredExpenseTypes,
-          expenseType => expenseType.id !== updatedExpenseType.id
-        );
-      }
-
-      //       if (!updatedEmployee.isInactive) {
-      //   matchingEmployeeIndex = _.findIndex(this.filteredEmployees, employee => employee.id === updatedEmployee.id);
-      //   this.filteredEmployees.splice(matchingEmployeeIndex, 1, updatedEmployee);
-      // } else {
-      //   this.filteredEmployees = _.remove(this.filteredEmployees, employee => employee.id !== updatedEmployee.id);
-      // }
-
-      this.$set(this.status, 'statusType', 'SUCCESS');
-      this.$set(this.status, 'statusMessage', 'Item was successfully updated!');
-      this.$set(this.status, 'color', 'green');
-    },
-    addModelToTable(newExpenseType) {
-      let matchingExpenses = _.filter(this.expenseTypes, expenseType => expenseType.id === newExpenseType.id);
-
-      if (!matchingExpenses.length) {
-        if (newExpenseType.isInactive) {
-          this.expenseTypes.push(newExpenseType);
-        } else {
-          this.filteredExpenseTypes.push(newExpenseType);
-          this.expenseTypes.push(newExpenseType);
-        }
-        // this.expenseTypes.push(newExpenseType);
-        this.$set(this.status, 'statusType', 'SUCCESS');
-        this.$set(this.status, 'statusMessage', 'Item was successfully submitted!');
-        this.$set(this.status, 'color', 'green');
-      }
-    },
-    deleteModelFromTable() {
-      let modelIndex = _.findIndex(this.expenseTypes, expense => expense.id === this.model.id);
-      this.expenseTypes.splice(modelIndex, 1);
-      modelIndex = _.findIndex(this.filteredExpenseTypes, expense => expense.id === this.model.id);
-      this.filteredExpenseTypes.splice(modelIndex, 1);
-      this.$set(this.status, 'statusType', 'SUCCESS');
-      this.$set(this.status, 'statusMessage', 'Item was successfully deleted!');
-      this.$set(this.status, 'color', 'green');
-    },
-    changeSort(column) {
-      if (this.pagination.sortBy === column) {
-        this.pagination.descending = !this.pagination.descending;
-      } else {
-        this.pagination.sortBy = column;
-        this.pagination.descending = false;
-      }
-    },
-    getAllExpenses(id) {
-      api
-        .getAllExpenseTypeExpenses(id)
-        .then(result => {
-          this.$set(this.model, 'typeExpenses', result);
-        })
-        .catch(err => {
-          console.log(err);
-        });
-    },
-    setExpenses(expenses) {
-      this.$set(this.model, 'typeExpenses', expenses);
-    }
+    isInactive,
+    clearStatus,
+    displayError,
+    refreshExpenseTypes,
+    onSelect,
+    clearModel,
+    updateModelInTable,
+    addModelToTable,
+    deleteModelFromTable,
+    changeSort,
+    filterExpense
   }
 };
 </script>
+
 <style>
 #marks {
   width: auto;
   height: 1.5em;
 }
 
-.inactiveStyle {
+/* .inactiveStyle {
   background-color: #bdbbbb;
-}
+} */
 
 .flag p {
   font-weight: bold;
@@ -395,5 +525,21 @@ export default {
 
 .flag svg {
   margin-top: 5px;
+}
+
+.flagFilter {
+  display: inline-block;
+  margin: 20px;
+}
+
+fieldset {
+  border: 1.5px solid #cccc;
+}
+
+fieldset legend {
+  font-size: 16px;
+  font-weight: bold;
+  margin-left: 20px;
+  padding: 10px;
 }
 </style>
