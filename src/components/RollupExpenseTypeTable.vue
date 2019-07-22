@@ -372,15 +372,15 @@ export default {
     toggleAll() {
       if (this.selected.length) {
         _.forEach(this.filteredItems, item => {
-          this.toggleExpenses(item);
           item.allSelected = false;
+          this.toggleExpenses(item);
         });
         this.everythingSelected = false;
         this.selected = [];
       } else {
         _.forEach(this.filteredItems, item => {
-          this.toggleExpenses(item);
           item.allSelected = true;
+          this.toggleExpenses(item);
         });
         this.everythingSelected = true;
       }
