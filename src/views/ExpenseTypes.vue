@@ -32,57 +32,93 @@
             <div class="flagFilter">
               <h4>Active:</h4>
               <v-btn-toggle v-model="filter.active" flat mandatory>
-                <v-btn value="active" flat>
-                  <icon class="mr-1" name="regular/check-circle"></icon>
-                </v-btn>
-                <v-btn value="notActive" flat>
-                  <icon name="regular/times-circle"></icon>
-                </v-btn>
-                <v-btn value="both" flat>
-                  BOTH
-                </v-btn>
+                <v-tooltip top>
+                  <v-btn value="active" slot="activator" flat>
+                    <icon class="mr-1" name="regular/check-circle"></icon>
+                  </v-btn>
+                  <span>Show Active</span>
+                </v-tooltip>
+                <v-tooltip top>
+                  <v-btn value="notActive" slot="activator" flat>
+                    <icon name="regular/times-circle"></icon>
+                  </v-btn>
+                  <span>Hide Active</span>
+                </v-tooltip>
+                <v-tooltip top>
+                  <v-btn value="both" slot="activator" flat>
+                    BOTH
+                  </v-btn>
+                  <span>Show All</span>
+                </v-tooltip>
               </v-btn-toggle>
             </div>
             <div class="flagFilter">
               <h4>Overdraft:</h4>
               <v-btn-toggle v-model="filter.overdraft" flat mandatory>
-                <v-btn value="overdraft" flat>
-                  <icon class="mr-1" name="regular/check-circle"></icon>
-                </v-btn>
-                <v-btn value="noOverdraft" flat>
-                  <icon name="regular/times-circle"></icon>
-                </v-btn>
-                <v-btn value="both" flat>
-                  BOTH
-                </v-btn>
+                <v-tooltip top>
+                  <v-btn value="overdraft" slot="activator" flat>
+                    <icon class="mr-1" name="regular/check-circle"></icon>
+                  </v-btn>
+                  <span>Show Overdraft</span>
+                </v-tooltip>
+                <v-tooltip top>
+                  <v-btn value="noOverdraft" slot="activator" flat>
+                    <icon name="regular/times-circle"></icon>
+                  </v-btn>
+                  <span>Hide Overdraft</span>
+                </v-tooltip>
+                <v-tooltip top>
+                  <v-btn value="both" slot="activator" flat>
+                    BOTH
+                  </v-btn>
+                  <span>Show All</span>
+                </v-tooltip>
               </v-btn-toggle>
             </div>
             <div class="flagFilter">
               <h4>Recurring:</h4>
               <v-btn-toggle v-model="filter.recurring" flat mandatory>
-                <v-btn value="recurring" flat>
-                  <icon class="mr-1" name="regular/check-circle"></icon>
-                </v-btn>
-                <v-btn value="notRecurring" flat>
-                  <icon name="regular/times-circle"></icon>
-                </v-btn>
-                <v-btn value="both" flat>
-                  BOTH
-                </v-btn>
+                <v-tooltip top>
+                  <v-btn value="recurring" slot="activator" flat>
+                    <icon class="mr-1" name="regular/check-circle"></icon>
+                  </v-btn>
+                  <span>Show Recurring</span>
+                </v-tooltip>
+                <v-tooltip top>
+                  <v-btn value="notRecurring" slot="activator" flat>
+                    <icon name="regular/times-circle"></icon>
+                  </v-btn>
+                  <span>Hide Recurring</span>
+                </v-tooltip>
+                <v-tooltip top>
+                  <v-btn value="both" slot="activator" flat>
+                    BOTH
+                  </v-btn>
+                  <span>Show All</span>
+                </v-tooltip>
               </v-btn-toggle>
             </div>
             <div class="flagFilter">
               <h4>Receipt Required:</h4>
               <v-btn-toggle v-model="filter.receipt" flat mandatory>
-                <v-btn value="receipt" flat>
-                  <icon class="mr-1" name="regular/check-circle"></icon>
-                </v-btn>
-                <v-btn value="noReceipt" flat>
-                  <icon name="regular/times-circle"></icon>
-                </v-btn>
-                <v-btn value="both" flat>
-                  BOTH
-                </v-btn>
+                <v-tooltip top>
+                  <v-btn value="receipt" slot="activator" flat>
+                    <icon class="mr-1" name="regular/check-circle"></icon>
+                  </v-btn>
+                  <span>Show Required Receipt</span>
+                </v-tooltip>
+                <v-tooltip top>
+                  <v-btn value="noReceipt" slot="activator" flat>
+                    <icon name="regular/times-circle"></icon>
+                  </v-btn>
+                  <span>Hide Required Receipt</span>
+                </v-tooltip>
+                <v-tooltip top>
+                  <v-btn value="both" slot="activator" flat>
+                    BOTH
+                  </v-btn>
+                  <span>Show All</span>
+                </v-tooltip>
               </v-btn-toggle>
             </div>
           </fieldset>
