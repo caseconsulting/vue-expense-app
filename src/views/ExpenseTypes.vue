@@ -91,7 +91,7 @@
                   <div class="expandedInfo">
                     <p v-if="props.item.description"><b>Description: </b>{{ props.item.description }}</p>
 
-                    <p v-if="props.item.categories.length > 0">
+                    <p v-if="props.item.categories && props.item.categories.length > 0">
                       <b>Categories: </b>{{ props.item.categories.join(', ') }}
                     </p>
 

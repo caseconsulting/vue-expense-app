@@ -162,6 +162,9 @@
                     <p v-if="props.item.url">
                       <b>Url: </b> <a v-if="props.item.url" :href="props.item.url">{{ props.item.url }}</a>
                     </p>
+                    <p v-if="props.item.categories && props.item.categories.length > 0">
+                      <b>Categories: </b>{{ props.item.categories.join(', ') }}
+                    </p>
                   </div>
                 </v-card-text>
               </v-card>
@@ -311,6 +314,7 @@ function onSelect(item) {
   this.$set(this.expense, 'receipt', item.receipt);
   this.$set(this.expense, 'createdAt', item.createdAt);
   this.$set(this.expense, 'url', item.url);
+  this.$set(this.expense, 'categories', item.categories);
 }
 
 function updateModelInTable(updatedExpense) {
@@ -451,7 +455,8 @@ export default {
         receipt: null,
         employeeName: '',
         budgetName: '',
-        createdAt: null
+        createdAt: null,
+        categories: []
       },
       propExpense: {
         id: '',
@@ -465,7 +470,8 @@ export default {
         receipt: null,
         employeeName: '',
         budgetName: '',
-        createdAt: null
+        createdAt: null,
+        categories: []
       },
       search: '',
       expenses: [],
