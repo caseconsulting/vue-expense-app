@@ -13,6 +13,7 @@
             label="Filter by Employee"
             clearable
           ></v-autocomplete>
+          <p>&nbsp;</p>
           <v-autocomplete
             :items="expenseTypes"
             :filter="customFilter"
@@ -247,17 +248,25 @@ export default {
     },
     constructAutoComplete(aggregatedData) {
       this.employees = _.map(aggregatedData, data => {
-        return {
-          text: data.employeeName,
-          value: data.userId
-        };
+        if (data && data.employeeName && data.userId) {
+          return {
+            text: data.employeeName,
+            value: data.userId
+          };
+        }
+      }).filter(data => {
+        return data != null;
       });
       //Get expense Types
       this.expenseTypes = _.map(aggregatedData, data => {
-        return {
-          text: data.budgetName,
-          value: data.expenseTypeId
-        };
+        if (data && data.budgetName && data.expenseTypeId) {
+          return {
+            text: data.budgetName,
+            value: data.expenseTypeId
+          };
+        }
+      }).filter(data => {
+        return data != null;
       });
     },
     async reimburseExpenses() {
@@ -363,15 +372,15 @@ export default {
     toggleAll() {
       if (this.selected.length) {
         _.forEach(this.filteredItems, item => {
-          item.allSelected = false;
           this.toggleExpenses(item);
+          item.allSelected = false;
         });
         this.everythingSelected = false;
         this.selected = [];
       } else {
         _.forEach(this.filteredItems, item => {
-          item.allSelected = true;
           this.toggleExpenses(item);
+          item.allSelected = true;
         });
         this.everythingSelected = true;
       }

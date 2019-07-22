@@ -29,6 +29,16 @@
             <h2 v-if="isUser">{{ getUserName }}'s Expenses</h2>
             <h2 v-else>Expenses</h2>
             <v-spacer></v-spacer>
+            <v-autocomplete
+              hide-details
+              :items="employees"
+              :filter="customFilter"
+              v-model="employee"
+              item-text="text"
+              label="Filter by Employee"
+              clearable
+            ></v-autocomplete>
+            <p>&nbsp;</p>
             <v-text-field v-model="search" append-icon="search" label="Search" single-line hide-details></v-text-field>
           </v-card-title>
           <v-data-table
@@ -121,7 +131,7 @@
                   </v-tooltip>
 
                   <!-- unreimburse button -->
-                  <!-- <div v-if="isSuperAdmin">
+                  <div v-if="isSuperAdmin">
                     <v-tooltip top>
                       <v-btn
                         :disabled="props.item.reimbursedDate == null || isEditing()"
@@ -139,7 +149,7 @@
                       </v-btn>
                       <span>Unreimburse</span>
                     </v-tooltip>
-                  </div> -->
+                  </div>
                 </td>
 
                 <!-- end option buttons -->
@@ -232,7 +242,15 @@ function descriptionFilter(val) {
 
 // COMPUTED
 function sorting() {
-  return this.processedExpenses;
+  return _.filter(this.processedExpenses, expense => {
+    if (!this.employee) {
+      return true;
+    } else {
+      return expense.userId === this.employee;
+    }
+  });
+
+  // return this.processedExpenses;
 }
 
 function isAdmin() {
@@ -262,6 +280,31 @@ function getUserName() {
 }
 
 // METHODS
+function constructAutoComplete(aggregatedData) {
+  this.employees = _.map(aggregatedData, data => {
+    if (data && data.employeeName && data.userId) {
+      return {
+        text: data.employeeName,
+        value: data.userId
+      };
+    }
+  }).filter(data => {
+    return data != null;
+  });
+}
+
+function customFilter(item, queryText) {
+  const hasValue = val => (val != null ? val : '');
+  const text = hasValue(item.text);
+  const query = hasValue(queryText);
+  return (
+    text
+      .toString()
+      .toLowerCase()
+      .indexOf(query.toString().toLowerCase()) > -1
+  );
+}
+
 function clearStatus() {
   this.$set(this.status, 'statusType', undefined);
   this.$set(this.status, 'statusMessage', '');
@@ -406,6 +449,9 @@ async function deleteExpense() {
 
 // LIFECYCLE HOOKS
 async function created() {
+  let aggregatedData = await api.getAggregate(); //autocomplete
+  this.constructAutoComplete(aggregatedData); //autocomplete
+
   this.role = getRole();
   this.refreshExpenses();
 
@@ -434,6 +480,8 @@ export default {
   },
   data() {
     return {
+      employees: [], //autocomplete
+      employee: null, //autocomplete
       isEdit: false,
       role: '',
       loading: true,
@@ -530,6 +578,8 @@ export default {
     UnreimburseModal
   },
   methods: {
+    constructAutoComplete,
+    customFilter,
     clearStatus,
     displayError,
     getEmployeeName,
