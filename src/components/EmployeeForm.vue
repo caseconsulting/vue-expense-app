@@ -45,6 +45,7 @@
           label="Employee Role"
           @blur="model.employeeRole = formatRole(employeeRoleFormatted)"
         ></v-autocomplete>
+
         <!-- Hire Date -->
         <v-menu
           ref="menu1"
@@ -115,7 +116,7 @@ function clearForm() {
   this.$refs.form.reset();
   this.employeeRoleFormatted = 'User';
   this.$set(this.model, 'email', '@consultwithcase.com');
-  this.$set(this.model, 'employeeRole', 'user');
+  this.$set(this.model, 'employeeRole', '');
   this.$set(this.model, 'firstName', '');
   this.$set(this.model, 'middleName', '');
   this.$set(this.model, 'lastName', '');
@@ -197,7 +198,11 @@ export default {
       }
     },
     'model.employeeRole': function() {
-      this.employeeRoleFormatted = _.startCase(this.model.employeeRole);
+      if (this.model.employeeRole) {
+        this.employeeRoleFormatted = _.startCase(this.model.employeeRole);
+      } else {
+        this.employeeRoleFormatted = 'User';
+      }
     }
   },
   props: ['model'],
