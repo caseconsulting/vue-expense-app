@@ -330,7 +330,10 @@ function filteredExpenseTypes() {
   let filteredExpType = [];
 
   this.expenseTypes.forEach(function(element) {
-    if (element.recurringFlag || (element.endDate != null && betweenDates(element.startDate, element.endDate))) {
+    if (
+      !element.isInactive &&
+      (element.recurringFlag || (element.endDate != null && betweenDates(element.startDate, element.endDate)))
+    ) {
       filteredExpType.push(element);
     }
   });
