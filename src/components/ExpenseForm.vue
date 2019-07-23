@@ -189,25 +189,22 @@ function setFile(file) {
     this.file = undefined;
   }
 }
+
 async function checkCoverage() {
   this.loading = true;
   if (this.expense) {
     let expenseType = _.find(this.expenseTypes, type => this.expense.expenseTypeId === type.value);
-    let employee = {};
     let budgets = [];
     if (getRole() === 'user') {
-      employee = await api.getUser();
+      await api.getUser();
       budgets = await api.getItems(api.BUDGETS);
     } else {
-      employee = await api.getItem(api.EMPLOYEES, this.expense.userId);
+      await api.getItem(api.EMPLOYEES, this.expense.userId);
       budgets = await api.getBudgetItem(this.expense.userId);
     }
-    console.log('employee', employee);
-    // console.log(budgets);
     let employeeExpenseTypeBudget = _.find(budgets, budget => {
       return budget.expenseTypeId === expenseType.value;
     });
-    // console.log('employeeExpenseTypeBudget', employeeExpenseTypeBudget);
 
     // Keep the cost data as a string. This allows us to keep it formatted as ##.##
     // -- If you parse the Expense object's cost field itself into a float, it drops the second
@@ -273,7 +270,7 @@ async function checkCoverage() {
         this.submitting = true;
         this.loading = false;
       } else {
-        // Good to go. Send it!
+        // Good to go. Send it
         this.submit();
       }
     }
@@ -363,57 +360,57 @@ function parseDate(date) {
   return dateUtils.parseDate(date);
 }
 
+/*
+ * Submit sometimes called multiple times. Normally occurs when submitting an expense after changing code.
+ */
 async function submit() {
-  this.loading = true;
   this.submitting = false;
-  // console.log('cattttts');
-  // console.log(this.expense.categories);
-  if (this.$refs.form.validate()) {
-    this.expense.receipt = undefined;
-    if (!this.expense.note) {
-      this.expense.note = null;
-    }
-    console.log(this.expense);
-    if (this.expense.id) {
-      if (this.file) {
-        this.$set(this.expense, 'receipt', this.file.name); //stores file name for lookup later
+  if (this.$refs.form != undefined || this.$refs.form != null) {
+    this.loading = true;
+    if (this.$refs.form.validate()) {
+      this.expense.receipt = undefined;
+      if (!this.expense.note) {
+        this.expense.note = null;
       }
-      let updatedExpense = await api.updateItem(api.EXPENSES, this.expense.id, this.expense);
-      if (updatedExpense.id) {
-        // submit attachment
-        if (this.isRequired && this.allowReceipt) {
-          let attachment = await api.createAttachment(this.expense, this.file);
-          console.log('attachment', attachment);
+
+      if (this.expense.id) {
+        if (this.file) {
+          this.$set(this.expense, 'receipt', this.file.name); //stores file name for lookup later
         }
-        this.$emit('update', updatedExpense);
-      } else {
-        this.$emit('error', updatedExpense.response.data.message);
-      }
-      this.clearForm();
-    } else {
-      this.$set(this.expense, 'createdAt', moment().format('MM-DD-YYYY'));
-      if (this.file) {
-        this.$set(this.expense, 'receipt', this.file.name); //stores file name for lookup later
-      }
-      let newExpense = await api.createItem(api.EXPENSES, this.expense);
-      console.log(newExpense.id);
-      if (newExpense.id) {
-        // submit attachment
-        if (this.isRequired) {
-          let attachment = await api.createAttachment(newExpense, this.file);
-          console.log('attachment', attachment);
+        let updatedExpense = await api.updateItem(api.EXPENSES, this.expense.id, this.expense);
+        if (updatedExpense.id) {
+          // submit attachment
+          if (this.isRequired && this.allowReceipt) {
+            await api.createAttachment(this.expense, this.file);
+          }
+          this.$emit('update', updatedExpense);
+        } else {
+          this.$emit('error', updatedExpense.response.data.message);
         }
-        this.$set(this.expense, 'id', newExpense.id);
-        this.$emit('add', newExpense);
-        window.EventBus.$emit('showSnackbar', newExpense);
-        window.EventBus.$emit('refreshChart', newExpense);
         this.clearForm();
       } else {
-        this.$emit('error', newExpense.response.data.message);
+        this.$set(this.expense, 'createdAt', moment().format('MM-DD-YYYY'));
+        if (this.file) {
+          this.$set(this.expense, 'receipt', this.file.name); //stores file name for lookup later
+        }
+        let newExpense = await api.createItem(api.EXPENSES, this.expense);
+        if (newExpense.id) {
+          // submit attachment
+          if (this.isRequired) {
+            await api.createAttachment(newExpense, this.file);
+          }
+          this.$set(this.expense, 'id', newExpense.id);
+          this.$emit('add', newExpense);
+          window.EventBus.$emit('showSnackbar', newExpense);
+          window.EventBus.$emit('refreshChart', newExpense);
+          this.clearForm();
+        } else {
+          this.$emit('error', newExpense.response.data.message);
+        }
       }
     }
+    this.loading = false;
   }
-  this.loading = false;
 }
 
 function expenseTypeSelected(value) {
