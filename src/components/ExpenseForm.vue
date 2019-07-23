@@ -189,21 +189,24 @@ function setFile(file) {
   }
 }
 async function checkCoverage() {
+  this.loading = true;
   if (this.expense) {
     let expenseType = _.find(this.expenseTypes, type => this.expense.expenseTypeId === type.value);
     let employee = {};
+    let budgets = [];
     if (getRole() === 'user') {
       employee = await api.getUser();
+      budgets = await api.getItems(api.BUDGETS);
     } else {
       employee = await api.getItem(api.EMPLOYEES, this.expense.userId);
+      budgets = await api.getBudgetItem(this.expense.userId);
     }
     console.log('employee', employee);
-    let budgets = await api.getBudgetItem(this.expense.userId);
-    console.log(budgets);
+    // console.log(budgets);
     let employeeExpenseTypeBudget = _.find(budgets, budget => {
       return budget.expenseTypeId === expenseType.value;
     });
-    console.log('employeeExpenseTypeBudget', employeeExpenseTypeBudget);
+    // console.log('employeeExpenseTypeBudget', employeeExpenseTypeBudget);
 
     // Keep the cost data as a string. This allows us to keep it formatted as ##.##
     // -- If you parse the Expense object's cost field itself into a float, it drops the second
@@ -234,6 +237,7 @@ async function checkCoverage() {
             this.$set(this.expense, 'remaining', 2 * expenseType.budget - newCommittedAmount);
             this.$set(this.expense, 'od', true);
             this.submitting = true;
+            this.loading = false;
           }
         } else {
           //already overbudget handled by backend after submit
@@ -251,6 +255,7 @@ async function checkCoverage() {
             this.$set(this.expense, 'budget', expenseType.budget);
             this.$set(this.expense, 'remaining', expenseType.budget - newCommittedAmount);
             this.submitting = true;
+            this.loading = false;
           }
         } else {
           //already overbudget handled by backend after submit
@@ -265,6 +270,7 @@ async function checkCoverage() {
         this.$set(this.expense, 'budget', expenseType.budget);
         this.$set(this.expense, 'remaining', expenseType.budget);
         this.submitting = true;
+        this.loading = false;
       } else {
         // Good to go. Send it!
         this.submit();
@@ -359,8 +365,8 @@ function parseDate(date) {
 async function submit() {
   this.loading = true;
   this.submitting = false;
-  console.log('cattttts');
-  console.log(this.expense.categories);
+  // console.log('cattttts');
+  // console.log(this.expense.categories);
   if (this.$refs.form.validate()) {
     this.expense.receipt = undefined;
     if (!this.expense.note) {
