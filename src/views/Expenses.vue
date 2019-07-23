@@ -242,15 +242,14 @@ function descriptionFilter(val) {
 
 // COMPUTED
 function sorting() {
-  return _.filter(this.processedExpenses, expense => {
+  let tempList = this.processedExpenses;
+  return _.filter(tempList, expense => {
     if (!this.employee) {
       return true;
     } else {
       return expense.userId === this.employee;
     }
   });
-
-  // return this.processedExpenses;
 }
 
 function isAdmin() {
@@ -449,11 +448,11 @@ async function deleteExpense() {
 
 // LIFECYCLE HOOKS
 async function created() {
-  let aggregatedData = await api.getAggregate(); //autocomplete
-  this.constructAutoComplete(aggregatedData); //autocomplete
-
   this.role = getRole();
   this.refreshExpenses();
+
+  let aggregatedData = await api.getAggregate(); //autocomplete
+  this.constructAutoComplete(aggregatedData); //autocomplete
 
   window.EventBus.$on('canceled-unreimburse-expense', () => (this.unreimbursing = false));
   window.EventBus.$on('confirm-unreimburse-expense', this.unreimburseExpense);
