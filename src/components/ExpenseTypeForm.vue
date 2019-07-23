@@ -20,7 +20,7 @@
 
         <v-combobox
           v-model="model.categories"
-          hint="Maximum of 5 categories"
+          hint="Maximum of 10 categories"
           label="Categories (optional)"
           multiple
           small-chips
@@ -298,7 +298,7 @@ export default {
       }
     },
     'model.categories': function(val) {
-      if (val.length > 5) {
+      if (val.length > 10) {
         this.$nextTick(() => this.model.categories.pop());
       }
     }

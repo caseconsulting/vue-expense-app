@@ -26,9 +26,11 @@
             <v-text-field v-model="search" append-icon="search" label="Search" single-line hide-details></v-text-field>
           </v-card-title>
 
-          <!-- start filter -->
+          <!-- start filters -->
           <fieldset>
             <legend>Filters</legend>
+
+            <!-- active fitler -->
             <div class="flagFilter">
               <h4>Active:</h4>
               <v-btn-toggle v-model="filter.active" flat mandatory>
@@ -52,6 +54,8 @@
                 </v-tooltip>
               </v-btn-toggle>
             </div>
+
+            <!-- overdraft fitler -->
             <div class="flagFilter">
               <h4>Overdraft:</h4>
               <v-btn-toggle v-model="filter.overdraft" flat mandatory>
@@ -75,6 +79,8 @@
                 </v-tooltip>
               </v-btn-toggle>
             </div>
+
+            <!-- recurring filter -->
             <div class="flagFilter">
               <h4>Recurring:</h4>
               <v-btn-toggle v-model="filter.recurring" flat mandatory>
@@ -98,6 +104,8 @@
                 </v-tooltip>
               </v-btn-toggle>
             </div>
+
+            <!-- receipt fitler -->
             <div class="flagFilter">
               <h4>Receipt Required:</h4>
               <v-btn-toggle v-model="filter.receipt" flat mandatory>
@@ -124,8 +132,9 @@
           </fieldset>
           <br />
 
-          <!-- end filter -->
+          <!-- end filters -->
 
+          <!-- start datatable -->
           <v-data-table
             :headers="headers"
             :items="expenseTypeList"
@@ -418,6 +427,11 @@ function expenseTypeList() {
   return this.filteredExpenseTypes;
 }
 
+/* created */
+async function created() {
+  this.refreshExpenseTypes();
+}
+
 export default {
   filters: {
     moneyValue: value => {
@@ -510,9 +524,6 @@ export default {
   components: {
     ExpenseTypeForm
   },
-  async created() {
-    this.refreshExpenseTypes();
-  },
   computed: {
     expenseTypeList
   },
@@ -542,7 +553,8 @@ export default {
     deleteModelFromTable,
     changeSort,
     filterExpense
-  }
+  },
+  created
 };
 </script>
 
