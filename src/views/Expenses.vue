@@ -75,7 +75,7 @@
             <!-- data row -->
             <template slot="items" slot-scope="props">
               <tr v-if="!loading && (showRow(props.item) || isAdmin)" @click="props.expanded = !props.expanded">
-                <td class="text-xs-left">{{ props.item.createdAt | dateFormat }}</td>
+                <td class="text-xs-left">{{ props.item.createdAt | dateFormatCreated }}</td>
                 <td v-if="isAdmin" class="text-xs-left">{{ props.item.employeeName }}</td>
                 <td class="text-xs-left">{{ props.item.budgetName }}</td>
                 <td class="text-xs-left">{{ (props.item.cost ? props.item.cost : 0) | moneyValue }}</td>
@@ -471,7 +471,16 @@ export default {
     },
     dateFormat: value => {
       if (value) {
-        return moment(new Date(value)).format('MMM Do, YYYY');
+        //Mon Jul 22 2019 20:00:00 GMT-0400
+        // return moment(value, 'h:mm:ss ddd MMM DD YYYY GMT-0400').format('MMM Do, YYYY');
+        return moment(value, 'YYYY-MM-DD').format('MMM Do, YYYY');
+      } else {
+        return '';
+      }
+    },
+    dateFormatCreated: value => {
+      if (value) {
+        return moment(value, 'MM-DD-YYYY').format('MMM Do, YYYY');
       } else {
         return '';
       }
