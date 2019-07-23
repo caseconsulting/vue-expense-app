@@ -9,16 +9,18 @@
     <h2>FAQ</h2>
     <div class="mb-5">
       <div class="text-xs-center mb-3"></div>
-      <v-expansion-panel expand>
-        <v-expansion-panel-content v-for="section in sections" :key="section[0]" v-if="(section[1] == role) || role == 'super-admin' || section[1] == 'user'">
+      <v-expansion-panel expand v-for="section in sections" :key="section[0]">
+        <v-expansion-panel-content v-if="section[1] == role || role == 'super-admin' || section[1] == 'user'">
           <div slot="header">{{ section[0] }}</div>
           <v-card>
             <v-card-text class="grey lighten-3">
-              <li v-for="ques in section" :key="ques.title" style="padding-bottom: 10px" v-if="ques.title">
-                <body style="font-style: italic;">
-                  <icon name="space-shuttle" /> {{ ques.title }}
-                </body>
-                {{ ques.body }}
+              <li v-for="ques in section" :key="ques.title">
+                <div v-if="ques.title" style="padding-bottom: 10px">
+                  <body style="font-style: italic;">
+                    <icon name="space-shuttle" /> {{ ques.title }}
+                  </body>
+                  {{ ques.body }}
+                </div>
               </li>
             </v-card-text>
           </v-card>
@@ -73,8 +75,8 @@ export default {
           'user',
           {
             title: 'How do I submit an expense?',
-            body: 'In the Create New Expense tab fill in the required fields: Employee, Expense Type, Cost, Description, and Purchase Date. Depending on the Expense Type a Receipt upload might also be needed. Make sure your information is correct and then click Submit!'
-
+            body:
+              'In the Create New Expense tab fill in the required fields: Employee, Expense Type, Cost, Description, and Purchase Date. Depending on the Expense Type a Receipt upload might also be needed. Make sure your information is correct and then click Submit!'
           },
           {
             title: 'How do I update an expense?',
