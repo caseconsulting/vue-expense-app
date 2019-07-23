@@ -309,6 +309,7 @@ function onSelect(item) {
   this.$set(this.model, 'requiredFlag', item.requiredFlag);
   this.$set(this.model, 'isInactive', item.isInactive);
   this.$set(this.model, 'categories', item.categories);
+  this.getAllExpenses(item.id);
 }
 
 function clearModel() {
@@ -422,6 +423,17 @@ function filterExpense() {
   });
 }
 
+function getAllExpenses(id) {
+  api
+    .getAllExpenseTypeExpenses(id)
+    .then(result => {
+      this.$set(this.model, 'typeExpenses', result);
+    })
+    .catch(err => {
+      console.log(err);
+    });
+}
+
 /* computed */
 function expenseTypeList() {
   return this.filteredExpenseTypes;
@@ -453,6 +465,7 @@ export default {
         color: ''
       },
       expenseTypes: [],
+      typeExpenses: '',
       filteredExpenseTypes: [],
       errors: [],
       headers: [
@@ -552,7 +565,8 @@ export default {
     addModelToTable,
     deleteModelFromTable,
     changeSort,
-    filterExpense
+    filterExpense,
+    getAllExpenses
   },
   created
 };
