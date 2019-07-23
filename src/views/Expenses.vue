@@ -30,6 +30,7 @@
             <h2 v-else>Expenses</h2>
             <v-spacer></v-spacer>
             <v-autocomplete
+              v-if="isAdmin"
               hide-details
               :items="employees"
               :filter="customFilter"
@@ -38,7 +39,7 @@
               label="Filter by Employee"
               clearable
             ></v-autocomplete>
-            <p>&nbsp;</p>
+            <p v-if="isAdmin">&nbsp;</p>
             <v-text-field v-model="search" append-icon="search" label="Search" single-line hide-details></v-text-field>
           </v-card-title>
           <v-data-table
