@@ -544,15 +544,15 @@ export default {
       menu2: false,
       userInfo: {},
       descriptionRules: [
-        v => !!v || 'Description is a required field.',
-        v => (v && v.replace(/\s/g, '').length > 0) || 'Description is a required field.'
+        v => !!v || 'Description is a required field',
+        v => (v && v.replace(/\s/g, '').length > 0) || 'Description is a required field'
       ],
       costRules: [
-        v => !!v || 'Cost is a required field.',
-        v => v > 0 || 'Cost must be greater than 0.',
+        v => !!v || 'Cost is a required field',
+        v => v > 0 || 'Cost must be a positive number',
         v =>
           /^[+-]?[0-9]{1,3}(?:,?[0-9]{3})*(?:\.[0-9]{2})?$/.test(v) ||
-          'Expense amount must be a number with two decimal digits.',
+          'Expense amount must be a number with two decimal digits',
         v => v < 1000000000 || 'Nice try' //when a user tries to fill out expense that is over a million
         // ,v => v == Math.round(v * 100) / 100 || 'Cost must rounded to 2 places after the decimal.' // rules need to return booleans
       ],
@@ -562,7 +562,7 @@ export default {
         v => (!!v && /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v)) || 'Date must be valid. Format: MM/DD/YYYY'
       ],
       optionalDateRules: [v => !v || /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v) || 'Date must be valid. Format: MM/DD/YYYY'],
-      receiptRules: [v => !!v || 'Receipts are required.'],
+      receiptRules: [v => !!v || 'Receipts are required'],
       valid: false,
       file: undefined
     };
