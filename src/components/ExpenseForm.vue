@@ -9,7 +9,7 @@
       <v-form ref="form" v-model="valid" lazy-validation>
         <!--Employee picker if admin level -->
         <v-autocomplete
-          v-if="employeeRole === 'super-admin' && this.$route.path !== '/home'"
+          v-if="isSuperAdmin && this.$route.path !== '/home'"
           :items="employees"
           :rules="componentRules"
           :filter="customFilter"
@@ -21,7 +21,7 @@
         <!--Expense type picker if super-admin -->
         <!-- :filter="customFilter" -->
         <v-autocomplete
-          v-if="employeeRole === 'super-admin' && this.$route.path !== '/home'"
+          v-if="isSuperAdmin && this.$route.path !== '/home'"
           :items="filteredExpenseTypes()"
           :rules="componentRules"
           v-model="expense.expenseTypeId"
@@ -96,7 +96,7 @@
 
         <!-- Date Picker 2-->
         <v-menu
-          v-if="isSuperAdmin"
+          v-if="isSuperAdmin && this.$route.path !== '/home'"
           ref="menu2"
           :close-on-content-click="false"
           v-model="menu2"
