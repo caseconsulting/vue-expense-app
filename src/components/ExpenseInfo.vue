@@ -47,7 +47,7 @@ export default {
     },
     dateFormat: value => {
       if (value) {
-        return moment(new Date(value)).format('MMM Do, YYYY');
+        return moment(value).format('MMM Do, YYYY');
       } else {
         return '';
       }
