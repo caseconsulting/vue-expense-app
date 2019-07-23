@@ -114,7 +114,6 @@ const regex = /^(([^<>()[\]\\.,;:\s@#"]+(\.[^<>()[\]\\.,;:\s@#"]+)*)|(".+"))@con
 
 function clearForm() {
   this.$refs.form.reset();
-  this.employeeRoleFormatted = 'User';
   this.$set(this.model, 'email', '@consultwithcase.com');
   this.$set(this.model, 'employeeRole', '');
   this.$set(this.model, 'firstName', '');
@@ -173,7 +172,7 @@ export default {
       deleting: false,
       date: null,
       hireDateFormatted: null,
-      employeeRoleFormatted: 'User',
+      employeeRoleFormatted: '',
       menu1: false,
       genericRules: [v => !!v || 'This field is required'],
       emailRules: [v => !!v || 'Email is required', v => regex.test(v) || 'Not a valid @consultwithcase email address'],
@@ -198,10 +197,8 @@ export default {
       }
     },
     'model.employeeRole': function() {
-      if (this.model.employeeRole) {
+      if (this.model.employeeRole != 'User') {
         this.employeeRoleFormatted = _.startCase(this.model.employeeRole);
-      } else {
-        this.employeeRoleFormatted = 'User';
       }
     }
   },

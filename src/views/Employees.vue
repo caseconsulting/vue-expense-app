@@ -145,7 +145,7 @@ export default {
         middleName: '',
         lastName: '',
         email: '@consultwithcase.com',
-        employeeRole: 'user',
+        employeeRole: '',
         employeeNumber: null,
         hireDate: null,
         isActive: false,
@@ -211,7 +211,7 @@ export default {
       this.$set(this.model, 'middleName', '');
       this.$set(this.model, 'lastName', '');
       this.$set(this.model, 'email', '@consultwithcase.com');
-      this.$set(this.model, 'employeeRole', 'user');
+      this.$set(this.model, 'employeeRole', '');
       this.$set(this.model, 'employeeNumber', null);
       this.$set(this.model, 'hireDate', null);
       this.$set(this.model, 'isActive', false);
