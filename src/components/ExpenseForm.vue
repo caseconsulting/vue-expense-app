@@ -18,11 +18,11 @@
           label="Employee"
         ></v-autocomplete>
         <!--Expense type picker if super-admin -->
+        <!-- :filter="customFilter" -->
         <v-autocomplete
           v-if="employeeRole === 'super-admin' && this.$route.path !== '/home'"
           :items="filteredExpenseTypes()"
           :rules="componentRules"
-          :filter="customFilter"
           v-model="expense.expenseTypeId"
           label="Expense Type"
           :disabled="!!expense.id"
@@ -39,6 +39,17 @@
           :disabled="!!expense.id"
           @input="expenseTypeSelected"
         ></v-autocomplete>
+
+        <!-- category selector -->
+        <v-select
+          v-if="getCategories() != null && getCategories().length >= 1"
+          v-model="expense.categories"
+          :items="getCategories()"
+          label="Select Categories (optional)"
+          multiple
+          chips
+        ></v-select>
+
         <!--Cost input field -->
         <v-text-field
           prefix="$"
@@ -47,6 +58,7 @@
           label="Cost"
           data-vv-name="Cost"
         ></v-text-field>
+
         <!--Description input field -->
         <v-text-field
           v-model="expense.description"
@@ -187,6 +199,7 @@ async function checkCoverage() {
     }
     console.log('employee', employee);
     let budgets = await api.getBudgetItem(this.expense.userId);
+    console.log(budgets);
     let employeeExpenseTypeBudget = _.find(budgets, budget => {
       return budget.expenseTypeId === expenseType.value;
     });
@@ -271,6 +284,7 @@ function clearForm() {
   this.$set(this.expense, 'createdAt', null);
   this.$set(this.expense, 'url', null);
   this.$set(this.expense, 'receipt', undefined);
+  this.$set(this.expense, 'categories, []');
 
   if (this.isUser) {
     this.$set(this.expense, 'employeeName', this.userInfo.id);
@@ -345,6 +359,8 @@ function parseDate(date) {
 async function submit() {
   this.loading = true;
   this.submitting = false;
+  console.log('cattttts');
+  console.log(this.expense.categories);
   if (this.$refs.form.validate()) {
     this.expense.receipt = undefined;
     if (!this.expense.note) {
@@ -394,6 +410,7 @@ async function submit() {
 }
 
 function expenseTypeSelected(value) {
+  this.expense.categories = [];
   return (this.selectedExpenseType = _.find(this.expenseTypes, expenseType => {
     if (expenseType.value === value) {
       return expenseType;
@@ -412,6 +429,18 @@ function updateIsRequired() {
     return this.selectedExpenseType.requiredFlag;
   }
   return true;
+}
+
+function getCategories() {
+  this.selectedExpenseType = _.find(this.expenseTypes, expenseType => {
+    if (expenseType.value === this.expense.expenseTypeId) {
+      return expenseType;
+    }
+  });
+  if (this.selectedExpenseType) {
+    return this.selectedExpenseType.categories;
+  }
+  return false;
 }
 
 function isAdmin() {
@@ -468,7 +497,8 @@ async function created() {
       odFlag: expenseType.odFlag,
       requiredFlag: expenseType.requiredFlag,
       recurringFlag: expenseType.recurringFlag,
-      isInactive: expenseType.isInactive
+      isInactive: expenseType.isInactive,
+      categories: expenseType.categories
     };
   });
 
@@ -574,7 +604,8 @@ export default {
     submit,
     setFile,
     expenseTypeSelected,
-    filteredExpenseTypes
+    filteredExpenseTypes,
+    getCategories
   },
   created
 };
