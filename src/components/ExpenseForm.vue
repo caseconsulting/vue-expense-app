@@ -48,6 +48,7 @@
           v-model="expense.categories"
           :items="getCategories()"
           label="Select Category (optional)"
+          clearable
           chips
         ></v-select>
 
