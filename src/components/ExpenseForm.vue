@@ -96,7 +96,7 @@
 
         <!-- Date Picker 2-->
         <v-menu
-          v-if="isSuperAdmin && this.$route.path !== '/home'"
+          v-if="isSuperAdmin"
           ref="menu2"
           :close-on-content-click="false"
           v-model="menu2"
