@@ -17,6 +17,7 @@
           item-text="text"
           label="Employee"
         ></v-autocomplete>
+
         <!--Expense type picker if super-admin -->
         <!-- :filter="customFilter" -->
         <v-autocomplete
@@ -28,6 +29,7 @@
           :disabled="!!expense.id"
           @input="expenseTypeSelected"
         ></v-autocomplete>
+
         <!--Expense type picker if user -->
         <!-- :filter="customFilter" -->
         <v-autocomplete
@@ -45,8 +47,7 @@
           v-if="getCategories() != null && getCategories().length >= 1"
           v-model="expense.categories"
           :items="getCategories()"
-          label="Select Categories (optional)"
-          multiple
+          label="Select Category (optional)"
           chips
         ></v-select>
 
