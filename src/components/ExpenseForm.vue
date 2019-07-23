@@ -191,87 +191,88 @@ function setFile(file) {
 }
 
 async function checkCoverage() {
-  this.loading = true;
-  if (this.expense) {
-    let expenseType = _.find(this.expenseTypes, type => this.expense.expenseTypeId === type.value);
-    let budgets = [];
-    if (getRole() === 'user') {
-      await api.getUser();
-      budgets = await api.getItems(api.BUDGETS);
-    } else {
-      await api.getItem(api.EMPLOYEES, this.expense.userId);
-      budgets = await api.getBudgetItem(this.expense.userId);
-    }
-    let employeeExpenseTypeBudget = _.find(budgets, budget => {
-      return budget.expenseTypeId === expenseType.value;
-    });
-
-    // Keep the cost data as a string. This allows us to keep it formatted as ##.##
-    // -- If you parse the Expense object's cost field itself into a float, it drops the second
-    //    decimal place, then fails validation
-    // -- Remove commas from the input
-    //let costInput = this.expense.cost.replace(/,/g, '');
-    let cost = parseFloat(this.expense.cost);
-    this.$set(this.expense, 'cost', this.expense.cost);
-
-    if (employeeExpenseTypeBudget) {
-      let committedAmount = employeeExpenseTypeBudget.pendingAmount + employeeExpenseTypeBudget.reimbursedAmount;
-      let allExpenses = await api.getAggregate();
-      let match = _.find(allExpenses, entry => {
-        return entry.id === this.expense.id;
-      });
-      // For subsequent calculations, remove matched entry cost from committed amount
-      let newCommittedAmount = match ? committedAmount - match.cost : committedAmount;
-      if (expenseType.odFlag) {
-        // Selected Expense Type allows overdraft
-        if (2 * expenseType.budget !== newCommittedAmount) {
-          //under budget
-          if (newCommittedAmount + cost <= 2 * expenseType.budget) {
-            //full amount reimbursed
-            this.submit();
-          } else {
-            // not maxed out but also not fully covered
-            this.$set(this.expense, 'budget', expenseType.budget);
-            this.$set(this.expense, 'remaining', 2 * expenseType.budget - newCommittedAmount);
-            this.$set(this.expense, 'od', true);
-            this.submitting = true;
-            this.loading = false;
-          }
-        } else {
-          //already overbudget handled by backend after submit
-          this.submit();
-        }
+  if (this.$refs.form.validate()) {
+    this.loading = true;
+    if (this.expense) {
+      let expenseType = _.find(this.expenseTypes, type => this.expense.expenseTypeId === type.value);
+      let budgets = [];
+      if (getRole() === 'user') {
+        await api.getUser();
+        budgets = await api.getItems(api.BUDGETS);
       } else {
-        this.$set(this.expense, 'od', false);
-        if (expenseType.budget !== newCommittedAmount) {
-          //under budget
-          if (newCommittedAmount + cost <= expenseType.budget) {
-            //full amount reimbursed
-            this.submit();
-          } else {
-            // not maxed out but also not fully covered
-            this.$set(this.expense, 'budget', expenseType.budget);
-            this.$set(this.expense, 'remaining', expenseType.budget - newCommittedAmount);
-            this.submitting = true;
-            this.loading = false;
-          }
-        } else {
-          //already overbudget handled by backend after submit
-          this.submit();
-        }
+        await api.getItem(api.EMPLOYEES, this.expense.userId);
+        budgets = await api.getBudgetItem(this.expense.userId);
       }
-    } else {
-      // Submitting a new Expense
-      if (!expenseType.odFlag && expenseType.budget < cost) {
-        // This Expense Type does not allow overdraft, and the budget is less than the
-        // cost of the current expense
-        this.$set(this.expense, 'budget', expenseType.budget);
-        this.$set(this.expense, 'remaining', expenseType.budget);
-        this.submitting = true;
-        this.loading = false;
+      let employeeExpenseTypeBudget = _.find(budgets, budget => {
+        return budget.expenseTypeId === expenseType.value;
+      });
+
+      // Keep the cost data as a string. This allows us to keep it formatted as ##.##
+      // -- If you parse the Expense object's cost field itself into a float, it drops the second
+      //    decimal place, then fails validation
+      // -- Remove commas from the input
+      //let costInput = this.expense.cost.replace(/,/g, '');
+      let cost = parseFloat(this.expense.cost);
+      this.$set(this.expense, 'cost', this.expense.cost);
+      if (employeeExpenseTypeBudget) {
+        let committedAmount = employeeExpenseTypeBudget.pendingAmount + employeeExpenseTypeBudget.reimbursedAmount;
+        let allExpenses = await api.getAggregate();
+        let match = _.find(allExpenses, entry => {
+          return entry.id === this.expense.id;
+        });
+        // For subsequent calculations, remove matched entry cost from committed amount
+        let newCommittedAmount = match ? committedAmount - match.cost : committedAmount;
+        if (expenseType.odFlag) {
+          // Selected Expense Type allows overdraft
+          if (2 * expenseType.budget !== newCommittedAmount) {
+            //under budget
+            if (newCommittedAmount + cost <= 2 * expenseType.budget) {
+              //full amount reimbursed
+              this.submit();
+            } else {
+              // not maxed out but also not fully covered
+              this.$set(this.expense, 'budget', expenseType.budget);
+              this.$set(this.expense, 'remaining', 2 * expenseType.budget - newCommittedAmount);
+              this.$set(this.expense, 'od', true);
+              this.submitting = true;
+              this.loading = false;
+            }
+          } else {
+            //already overbudget handled by backend after submit
+            this.submit();
+          }
+        } else {
+          this.$set(this.expense, 'od', false);
+          if (expenseType.budget !== newCommittedAmount) {
+            //under budget
+            if (newCommittedAmount + cost <= expenseType.budget) {
+              //full amount reimbursed
+              this.submit();
+            } else {
+              // not maxed out but also not fully covered
+              this.$set(this.expense, 'budget', expenseType.budget);
+              this.$set(this.expense, 'remaining', expenseType.budget - newCommittedAmount);
+              this.submitting = true;
+              this.loading = false;
+            }
+          } else {
+            //already overbudget handled by backend after submit
+            this.submit();
+          }
+        }
       } else {
-        // Good to go. Send it
-        this.submit();
+        // Submitting a new Expense
+        if (!expenseType.odFlag && expenseType.budget < cost) {
+          // This Expense Type does not allow overdraft, and the budget is less than the
+          // cost of the current expense
+          this.$set(this.expense, 'budget', expenseType.budget);
+          this.$set(this.expense, 'remaining', expenseType.budget);
+          this.submitting = true;
+          this.loading = false;
+        } else {
+          // Good to go. Send it
+          this.submit();
+        }
       }
     }
   }
@@ -368,6 +369,8 @@ async function submit() {
   if (this.$refs.form != undefined || this.$refs.form != null) {
     this.loading = true;
     if (this.$refs.form.validate()) {
+      // second validate may be unnecessary. included in checkCoverage()
+
       this.expense.receipt = undefined;
       if (!this.expense.note) {
         this.expense.note = null;
@@ -556,7 +559,7 @@ export default {
         v => v < 1000000000 || 'Nice try' //when a user tries to fill out expense that is over a million
         // ,v => v == Math.round(v * 100) / 100 || 'Cost must rounded to 2 places after the decimal.' // rules need to return booleans
       ],
-      componentRules: [v => !!v || 'Required field.'],
+      componentRules: [v => !!v || 'Required field'],
       dateRules: [
         v => !!v || 'Date must be valid. Format: MM/DD/YYYY',
         v => (!!v && /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v)) || 'Date must be valid. Format: MM/DD/YYYY'
