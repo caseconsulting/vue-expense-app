@@ -176,7 +176,10 @@ export default {
       menu1: false,
       genericRules: [v => !!v || 'This field is required'],
       emailRules: [v => !!v || 'Email is required', v => regex.test(v) || 'Not a valid @consultwithcase email address'],
-      numberRules: [v => !!v || 'Employee # is required', v => /^\d+$/.test(v) || 'Employee number must be a number'],
+      numberRules: [
+        v => !!v || 'Employee # is required',
+        v => /^\d+$/.test(v) || 'Employee # must be a positive number'
+      ],
       dateRules: [
         v => !!v || 'Date must be valid. Format: MM/DD/YYYY',
         v => (!!v && /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v)) || 'Date must be valid. Format: MM/DD/YYYY'
