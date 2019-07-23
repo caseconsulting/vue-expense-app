@@ -165,10 +165,10 @@
               >
                 <td class="text-xs-left">{{ props.item.budgetName | limitedText }}</td>
                 <td class="text-xs-left">{{ props.item.budget | moneyValue }}</td>
-                <td class="text-xs-left">{{ props.item.description | limitedText }}</td>
+                <!-- <td class="text-xs-left">{{ props.item.description | limitedText }}</td> -->
                 <td class="text-xs-left">{{ props.item.startDate }}</td>
                 <td class="text-xs-left">{{ props.item.endDate }}</td>
-                <td class="text-xs-center">
+                <!-- <td class="text-xs-center">
                   <icon v-if="props.item.odFlag" id="marks" class="mr-1" name="regular/check-circle"></icon>
                   <icon v-else class="mr-1" id="marks" name="regular/times-circle"></icon>
                 </td>
@@ -181,8 +181,10 @@
                   <icon v-else class="mr-1" id="marks" name="regular/times-circle"></icon>
                 </td>
                 <td class="text-xs-left">{{ isInactive(props.item) }}</td>
-              </tr>
-            </template>
+              </tr> -->
+              </tr></template
+            >
+
             <!-- end data row -->
 
             <!-- data row dropdown/expandable -->
@@ -449,10 +451,10 @@ export default {
           text: 'Budget',
           value: 'budget'
         }, //change value to call a function
-        {
-          text: 'Description',
-          value: 'description'
-        },
+        // {
+        //   text: 'Description',
+        //   value: 'description'
+        // },
         {
           text: 'Start Date',
           value: 'startDate'
@@ -460,22 +462,23 @@ export default {
         {
           text: 'End Date',
           value: 'endDate'
-        },
-        {
-          text: 'Overdraft Allowed',
-          value: 'odFlag',
-          sortable: false
-        },
-        {
-          text: 'Recurring',
-          value: 'recurringFlag',
-          sortable: false
-        },
-        {
-          text: 'Receipt Required',
-          value: 'requiredFlag',
-          sortable: false
         }
+        //,
+        // {
+        //   text: 'Overdraft Allowed',
+        //   value: 'odFlag',
+        //   sortable: false
+        // },
+        // {
+        //   text: 'Recurring',
+        //   value: 'recurringFlag',
+        //   sortable: false
+        // },
+        // {
+        //   text: 'Receipt Required',
+        //   value: 'requiredFlag',
+        //   sortable: false
+        // }
       ],
       pagination: {
         sortBy: 'budgetName',
