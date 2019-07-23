@@ -173,7 +173,9 @@
                     <p v-if="props.item.url">
                       <b>Url: </b> <a v-if="props.item.url" :href="props.item.url">{{ props.item.url }}</a>
                     </p>
-                    <p v-if="props.item.categories"><b>Category: </b>{{ props.item.categories }}</p>
+                    <p v-if="props.item.categories && typeof props.item.categories == 'string'">
+                      <b>Category: </b>{{ props.item.categories }}
+                    </p>
                   </div>
                 </v-card-text>
               </v-card>
