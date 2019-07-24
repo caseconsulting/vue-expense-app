@@ -81,10 +81,6 @@ function getAttachment(userId, expenseId) {
   return execute('get', `attachment/${userId}/${expenseId}`);
 }
 
-// function getCanDelete(userId) {
-//   return execute('get', `/employee/${userId}`);
-// }
-
 async function createAttachment(expense, file) {
   let formData = new FormData();
   formData.append('receipt', file);
