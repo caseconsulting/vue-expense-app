@@ -51,7 +51,6 @@ import _ from 'lodash';
 import moment from 'moment';
 export default {
   filters: {
-    //test
     moneyValue: value => {
       return `${new Intl.NumberFormat('en-US', {
         style: 'currency',

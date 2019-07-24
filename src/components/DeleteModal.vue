@@ -21,7 +21,6 @@ export default {
   props: ['type', 'activate'],
   methods: {
     emit(msg, data) {
-      //comment
       if (data) {
         window.EventBus.$emit(msg, data);
       } else {
