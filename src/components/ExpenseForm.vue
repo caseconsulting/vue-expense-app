@@ -180,7 +180,6 @@ import _ from 'lodash';
 import dateUtils from '@/shared/dateUtils';
 import employeeUtils from '@/shared/employeeUtils';
 import FileUpload from './FileUpload.vue';
-// import { isError } from 'util';
 
 // METHODS
 function setFile(file) {
@@ -212,7 +211,6 @@ async function checkCoverage() {
       // -- If you parse the Expense object's cost field itself into a float, it drops the second
       //    decimal place, then fails validation
       // -- Remove commas from the input
-      //let costInput = this.expense.cost.replace(/,/g, '');
       let cost = parseFloat(this.expense.cost);
       this.$set(this.expense, 'cost', this.expense.cost);
       if (employeeExpenseTypeBudget) {
