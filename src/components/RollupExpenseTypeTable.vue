@@ -2,9 +2,12 @@
   <div>
     <v-card>
       <v-container fluid>
+        <!-- table header -->
         <v-card-title>
           <h2>Unreimbursed Expenses</h2>
           <v-spacer></v-spacer>
+
+          <!-- search filters -->
           <v-autocomplete
             :items="employees"
             :filter="customFilter"
@@ -22,8 +25,11 @@
             label="Filter by Expense Type"
             clearable
           ></v-autocomplete>
+          <!-- end search filters -->
         </v-card-title>
+        <!-- end table header -->
 
+        <!-- unreimbursed datatable -->
         <v-data-table
           v-model="selected"
           :headers="headers"
@@ -34,9 +40,11 @@
           class="elevation-1"
           :loading="loading"
         >
+          <!-- header for datatable -->
           <v-progress-linear slot="progress" color="radioactive" indeterminate></v-progress-linear>
           <template slot="headers" slot-scope="props">
             <tr style="box-shadow: 0px 1.5px #888888;">
+              <!-- checkbox for select all table expenses -->
               <th>
                 <v-checkbox :input-value="everythingSelected" primary hide-details @change="toggleAll"></v-checkbox>
               </th>
@@ -55,9 +63,12 @@
               </th>
             </tr>
           </template>
+          <!-- end header for datatable -->
 
+          <!-- top level rows in datatable -->
           <template slot="items" slot-scope="props">
             <tr v-if="!loading" :active="props.selected" @click="props.expanded = !props.expanded">
+              <!-- checkbox for select all row expenses -->
               <td>
                 <v-checkbox
                   v-model="props.item.allSelected"
@@ -71,7 +82,9 @@
               <td class="text-xs-center" id="money-team">{{ getExpenseTotal(props.item.expenses) | moneyValue }}</td>
             </tr>
           </template>
+          <!-- end top level rows in datatable -->
 
+          <!-- expandable of rows in datatable -->
           <template slot="expand" slot-scope="props">
             <unrolled-table-info
               @expensePicked="addExpenseToSelected"
@@ -80,7 +93,11 @@
               :expenses="props.item.expenses"
             ></unrolled-table-info>
           </template>
+          <!-- end expandable of rows in datatable -->
         </v-data-table>
+        <!-- end unreimbursed datatable -->
+
+        <!-- unreimburse button -->
         <v-flex offset-md10>
           <v-fab-transition>
             <v-btn
@@ -99,7 +116,10 @@
             </v-btn>
           </v-fab-transition>
         </v-flex>
+        <!-- end unreimburse button -->
       </v-container>
+
+      <!-- activate reimburse button -->
       <reimburse-modal :activate="button_clicked"></reimburse-modal>
     </v-card>
   </div>
@@ -336,7 +356,9 @@ export default {
       if (item.allSelected) {
         _.forEach(item.expenses, expense => {
           expense.selected = true;
-          if (this.selected.includes(expense) === false) this.selected.push(expense);
+          if (this.selected.includes(expense) === false) {
+            this.selected.push(expense);
+          }
         });
         this.indeterminate = true;
         this.everythingSelected = false;
