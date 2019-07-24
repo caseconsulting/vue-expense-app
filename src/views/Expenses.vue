@@ -17,11 +17,7 @@
         Close
       </v-btn>
     </v-snackbar>
-    <v-flex lg12 md12 sm12>
-      <!-- <v-alert v-if="error" dismissible :value="error" color="error" icon="warning" outline>
-        {{error.response.data.message}}
-      </v-alert> -->
-    </v-flex>
+    <v-flex lg12 md12 sm12> </v-flex>
     <v-flex lg8 md12 sm12>
       <v-card>
         <v-container fluid>
@@ -81,12 +77,6 @@
                 <td class="text-xs-left">{{ (props.item.cost ? props.item.cost : 0) | moneyValue }}</td>
                 <td class="text-xs-left">{{ props.item.purchaseDate | dateFormat }}</td>
                 <td class="text-xs-left">{{ props.item.reimbursedDate | dateFormat }}</td>
-
-                <!-- <td class="text-xs-left">{{ props.item.description | descriptionFilter }}</td> -->
-
-                <!-- <td class="text-xs-left">
-                  <attachment :expense="props.item" :mode="'expenses'"></attachment>
-                </td> -->
 
                 <!-- option buttons -->
                 <td class="datatable_btn layout">
@@ -164,9 +154,6 @@
                 <v-card-text>
                   <div class="expandedInfo">
                     <!-- notes/url button -->
-                    <!-- <v-btn outline color="info" @click="viewingNotes = true">
-                      <icon class="mr-1" name="sticky-note"></icon>View Notes</v-btn
-                    > -->
                     <p v-if="props.item.description"><b>Description: </b>{{ props.item.description }}</p>
                     <p v-if="props.item.note"><b>Notes: </b>{{ props.item.note }}</p>
                     <p v-if="props.item.receipt"><b>Receipt: </b>{{ props.item.receipt }}</p>
@@ -233,12 +220,6 @@ function moneyFilter(value) {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2
   }).format(value)}`;
-}
-
-function descriptionFilter(val) {
-  if (val.length > 15) {
-    return `${val.substring(0, 15)}...`;
-  } else return val;
 }
 
 // COMPUTED
@@ -471,7 +452,6 @@ export default {
     },
     dateFormat: value => {
       if (value) {
-        //Mon Jul 22 2019 20:00:00 GMT-0400
         // return moment(value, 'h:mm:ss ddd MMM DD YYYY GMT-0400').format('MMM Do, YYYY');
         return moment(value, 'YYYY-MM-DD').format('MMM Do, YYYY');
       } else {
@@ -484,8 +464,7 @@ export default {
       } else {
         return '';
       }
-    },
-    descriptionFilter
+    }
   },
   data() {
     return {
