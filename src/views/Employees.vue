@@ -186,8 +186,6 @@ export default {
         .catch(err => {
           console.log(err);
         });
-
-      // this.$set(this.model, 'personalExpenses', expenses);
     },
     setExpenses(expenses) {
       this.$set(this.model, 'personalExpenses', expenses);
