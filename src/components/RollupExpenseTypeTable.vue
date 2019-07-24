@@ -294,8 +294,10 @@ export default {
       });
 
       _.forEach(itemsToRemoveFromTable, item => {
+        item.allSelected = false;
         this.removeExpenseFromList(item);
       });
+      this.everythingSelected = false;
       this.reimbursing = false;
       this.selected = [];
     },
@@ -334,7 +336,7 @@ export default {
       if (item.allSelected) {
         _.forEach(item.expenses, expense => {
           expense.selected = true;
-          this.selected.push(expense);
+          if (this.selected.includes(expense) === false) this.selected.push(expense);
         });
         this.indeterminate = true;
         this.everythingSelected = false;
@@ -370,7 +372,7 @@ export default {
       return total;
     },
     toggleAll() {
-      if (this.selected.length) {
+      if (this.unreimbursedExpenses.length == this.selected.length) {
         _.forEach(this.filteredItems, item => {
           item.allSelected = false;
           this.toggleExpenses(item);
