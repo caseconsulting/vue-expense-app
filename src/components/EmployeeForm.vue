@@ -33,6 +33,7 @@
           label="Employee #"
           data-vv-name="Employee #"
         ></v-text-field>
+
         <!-- Email -->
         <v-text-field v-model="model.email" :rules="emailRules" label="Email" data-vv-name="Email"></v-text-field>
 
@@ -217,7 +218,6 @@ export default {
     parseDate,
     submit,
     userIsAdmin
-    // tryDelete
   }
 };
 </script>
