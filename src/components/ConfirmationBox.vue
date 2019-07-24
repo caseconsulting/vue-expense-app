@@ -27,8 +27,6 @@ this.expense<template>
 </template>
 
 <script>
-// import { eventBus } from '../main.js';
-
 export default {
   props: ['expense', 'activate'],
   methods: {

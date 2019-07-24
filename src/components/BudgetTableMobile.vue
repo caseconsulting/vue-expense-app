@@ -20,7 +20,6 @@
 export default {
   props: ['employee'],
   filters: {
-    //lint?
     moneyValue: value => {
       return `${new Intl.NumberFormat('en-US', {
         style: 'currency',
