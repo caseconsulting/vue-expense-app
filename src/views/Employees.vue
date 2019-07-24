@@ -73,8 +73,24 @@
               </tr>
             </template>
 
-            <template v-if="userIsAdmin()" v-slot:expand="props">
+            <template v-slot:expand="props">
               <v-card flat>
+                <v-card-text>
+                  <div class="expandedInfo">
+                    <p><b>Birthday: </b>{{ props.item.birthday }}</p>
+                    <p><b>Role: </b>{{ props.item.jobRole }}</p>
+                    <p><b>Prime: </b>{{ props.item.prime }}</p>
+                    <p><b>Contract: </b>{{ props.item.contract }}</p>
+                    <p>
+                      <b>Github: </b><a :href="props.item.employeeNumber" target="_blank">{{ props.item.github }}</a>
+                    </p>
+                    <p>
+                      <b>Twitter: </b><a :href="props.item.employeeNumber" target="_blank">{{ props.item.twitter }}</a>
+                    </p>
+                  </div>
+                </v-card-text>
+              </v-card>
+              <v-card flat v-if="userIsAdmin()">
                 <v-card-text>
                   <employee-home :employ="props.item"> </employee-home>
                 </v-card-text>
@@ -337,3 +353,20 @@ export default {
   }
 };
 </script>
+
+<style>
+.expandedInfo {
+  border: 1px solid black;
+  font-size: 14px;
+  padding: 20px;
+}
+
+.expandedInfo a {
+  font-size: 14px;
+  color: blue;
+}
+
+.expandedInfo a:hover {
+  color: #0cf;
+}
+</style>
