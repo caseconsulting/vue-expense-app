@@ -1,5 +1,25 @@
 <template>
   <v-layout row wrap>
+    <!-- form submission status message -->
+    <v-snackbar
+      v-model="status.statusType"
+      :color="status.color"
+      :multi-line="true"
+      :right="true"
+      :timeout="5000"
+      :top="true"
+      :vertical="true"
+      :auto-height="true"
+    >
+      <v-card-title headline color="white">
+        <span class="headline">{{ status.statusMessage }}</span>
+      </v-card-title>
+      <v-btn color="white" flat @click="clearStatus">
+        Close
+      </v-btn>
+    </v-snackbar>
+    <!-- end form submission status message -->
+
     <v-flex :lg8="userIsAdmin()" :lg12="!userIsAdmin()" md12 sm12>
       <v-card>
         <v-container fluid>
@@ -79,6 +99,7 @@
         v-on:add="addModelToTable"
         v-on:update="updateModelInTable"
         v-on:delete="deleteModelFromTable"
+        v-on:error="displayError"
         style="position: sticky; top: 79px;"
       ></employee-form>
     </v-flex>
@@ -92,6 +113,19 @@ import EmployeeForm from '../components/EmployeeForm.vue';
 import moment from 'moment';
 import _ from 'lodash';
 import EmployeeHome from '@/views/EmployeeHome.vue';
+
+function clearStatus() {
+  this.$set(this.status, 'statusType', undefined);
+  this.$set(this.status, 'statusMessage', '');
+  this.$set(this.status, 'color', '');
+}
+
+async function displayError(err) {
+  this.$set(this.status, 'statusType', 'ERROR');
+  this.$set(this.status, 'statusMessage', err);
+  this.$set(this.status, 'color', 'red');
+}
+
 export default {
   filters: {
     dateFormat: value => {
@@ -110,6 +144,11 @@ export default {
       employees: [],
       filteredEmployees: [],
       errors: [],
+      status: {
+        statusType: undefined,
+        statusMessage: '',
+        color: ''
+      },
       headers: [
         {
           text: 'Employee #',
@@ -224,6 +263,9 @@ export default {
       } else {
         this.filteredEmployees = _.remove(this.filteredEmployees, employee => employee.id !== updatedEmployee.id);
       }
+      this.$set(this.status, 'statusType', 'SUCCESS');
+      this.$set(this.status, 'statusMessage', 'Employee was successfully updated!');
+      this.$set(this.status, 'color', 'green');
     },
     addModelToTable(newEmployee) {
       let matchingEmployee = _.filter(this.employees, employee => employee.id === newEmployee.id);
@@ -236,12 +278,18 @@ export default {
           this.employees.push(newEmployee);
         }
       }
+      this.$set(this.status, 'statusType', 'SUCCESS');
+      this.$set(this.status, 'statusMessage', 'Employee was successfully created!');
+      this.$set(this.status, 'color', 'green');
     },
     deleteModelFromTable() {
       let modelIndex = _.findIndex(this.employees, employee => employee.id === this.model.id);
       this.employees.splice(modelIndex, 1);
       modelIndex = _.findIndex(this.filteredEmployees, employee => employee.id === this.model.id);
       this.filteredEmployees.splice(modelIndex, 1);
+      this.$set(this.status, 'statusType', 'SUCCESS');
+      this.$set(this.status, 'statusMessage', 'Employee was successfully deleted!');
+      this.$set(this.status, 'color', 'green');
     },
     changeSort(column) {
       if (this.pagination.sortBy === column) {
@@ -250,7 +298,9 @@ export default {
         this.pagination.sortBy = column;
         this.pagination.descending = false;
       }
-    }
+    },
+    clearStatus,
+    displayError
   },
   computed: {
     employeeList() {

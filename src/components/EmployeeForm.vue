@@ -154,9 +154,13 @@ async function submit() {
       this.clearForm();
     } else {
       let newEmployee = await api.createItem(api.EMPLOYEES, this.model);
-      this.$set(this.model, 'id', newEmployee.id);
-      this.$emit('add', newEmployee);
-      this.clearForm();
+      if (newEmployee.id) {
+        this.$set(this.model, 'id', newEmployee.id);
+        this.$emit('add', newEmployee);
+        this.clearForm();
+      } else {
+        this.$emit('error', newEmployee.response.data.message);
+      }
     }
   }
 }
