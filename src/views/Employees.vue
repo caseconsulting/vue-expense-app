@@ -114,6 +114,115 @@ import moment from 'moment';
 import _ from 'lodash';
 import EmployeeHome from '@/views/EmployeeHome.vue';
 
+/* methods */
+function isInActive(employee) {
+  return employee.isActive ? '' : 'Not Active';
+}
+
+function userIsAdmin() {
+  return getRole() === 'super-admin';
+}
+
+async function refreshEmployees() {
+  this.loading = true;
+  this.employees = await api.getItems(api.EMPLOYEES);
+  this.filteredEmployees = _.filter(this.employees, employee => {
+    return employee.isActive;
+  });
+  this.loading = false;
+}
+
+function getAllExpenses(id) {
+  api
+    .getAllEmployeeExpenses(id)
+    .then(result => {
+      this.$set(this.model, 'personalExpenses', result);
+    })
+    .catch(err => {
+      console.log(err);
+    });
+}
+
+function setExpenses(expenses) {
+  this.$set(this.model, 'personalExpenses', expenses);
+}
+
+function onSelect(item) {
+  console.log('select');
+  this.$set(this.model, 'id', item.id);
+  this.$set(this.model, 'firstName', item.firstName);
+  this.$set(this.model, 'middleName', item.middleName);
+  this.$set(this.model, 'lastName', item.lastName);
+  this.$set(this.model, 'email', item.email);
+  this.$set(this.model, 'employeeRole', item.employeeRole);
+  this.$set(this.model, 'employeeNumber', item.employeeNumber);
+  this.$set(this.model, 'hireDate', item.hireDate);
+  this.$set(this.model, 'isActive', !item.isActive);
+  this.getAllExpenses(item.id);
+}
+
+function clearModel() {
+  this.$set(this.model, 'id', '');
+  this.$set(this.model, 'firstName', '');
+  this.$set(this.model, 'middleName', '');
+  this.$set(this.model, 'lastName', '');
+  this.$set(this.model, 'email', '@consultwithcase.com');
+  this.$set(this.model, 'employeeRole', '');
+  this.$set(this.model, 'employeeNumber', null);
+  this.$set(this.model, 'hireDate', null);
+  this.$set(this.model, 'isActive', false);
+}
+
+function updateModelInTable(updatedEmployee) {
+  let matchingEmployeeIndex = _.findIndex(this.employees, employee => employee.id === updatedEmployee.id);
+  this.employees.splice(matchingEmployeeIndex, 1, updatedEmployee);
+
+  if (updatedEmployee.isActive) {
+    matchingEmployeeIndex = _.findIndex(this.filteredEmployees, employee => employee.id === updatedEmployee.id);
+    this.filteredEmployees.splice(matchingEmployeeIndex, 1, updatedEmployee);
+  } else {
+    this.filteredEmployees = _.remove(this.filteredEmployees, employee => employee.id !== updatedEmployee.id);
+  }
+  this.$set(this.status, 'statusType', 'SUCCESS');
+  this.$set(this.status, 'statusMessage', 'Employee was successfully updated!');
+  this.$set(this.status, 'color', 'green');
+}
+
+function addModelToTable(newEmployee) {
+  let matchingEmployee = _.filter(this.employees, employee => employee.id === newEmployee.id);
+
+  if (!matchingEmployee.length) {
+    if (newEmployee.isActive) {
+      this.filteredEmployees.push(newEmployee);
+      this.employees.push(newEmployee);
+    } else {
+      this.employees.push(newEmployee);
+    }
+  }
+  this.$set(this.status, 'statusType', 'SUCCESS');
+  this.$set(this.status, 'statusMessage', 'Employee was successfully created!');
+  this.$set(this.status, 'color', 'green');
+}
+
+function deleteModelFromTable() {
+  let modelIndex = _.findIndex(this.employees, employee => employee.id === this.model.id);
+  this.employees.splice(modelIndex, 1);
+  modelIndex = _.findIndex(this.filteredEmployees, employee => employee.id === this.model.id);
+  this.filteredEmployees.splice(modelIndex, 1);
+  this.$set(this.status, 'statusType', 'SUCCESS');
+  this.$set(this.status, 'statusMessage', 'Employee was successfully deleted!');
+  this.$set(this.status, 'color', 'green');
+}
+
+function changeSort(column) {
+  if (this.pagination.sortBy === column) {
+    this.pagination.descending = !this.pagination.descending;
+  } else {
+    this.pagination.sortBy = column;
+    this.pagination.descending = false;
+  }
+}
+
 function clearStatus() {
   this.$set(this.status, 'statusType', undefined);
   this.$set(this.status, 'statusMessage', '');
@@ -124,6 +233,16 @@ async function displayError(err) {
   this.$set(this.status, 'statusType', 'ERROR');
   this.$set(this.status, 'statusMessage', err);
   this.$set(this.status, 'color', 'red');
+}
+
+/* computed */
+function employeeList() {
+  return this.showAll ? this.employees : this.filteredEmployees;
+}
+
+// LIFECYCLE HOOKS
+async function created() {
+  this.refreshEmployees();
 }
 
 export default {
@@ -149,6 +268,23 @@ export default {
         statusMessage: '',
         color: ''
       },
+      pagination: {
+        sortBy: 'employeeNumber',
+        rowsPerPage: -1
+      },
+      model: {
+        id: '',
+        firstName: '',
+        middleName: '',
+        lastName: '',
+        email: '@consultwithcase.com',
+        employeeRole: '',
+        employeeNumber: null,
+        hireDate: null,
+        isActive: false,
+        personalExpenses: ''
+      },
+      expand: false,
       headers: [
         {
           text: 'Employee #',
@@ -173,139 +309,31 @@ export default {
         {
           text: ''
         }
-      ],
-      pagination: {
-        sortBy: 'employeeNumber',
-        rowsPerPage: -1
-      },
-      model: {
-        id: '',
-        firstName: '',
-        middleName: '',
-        lastName: '',
-        email: '@consultwithcase.com',
-        employeeRole: '',
-        employeeNumber: null,
-        hireDate: null,
-        isActive: false,
-        personalExpenses: ''
-      },
-      expand: false
+      ]
     };
   },
   components: {
     EmployeeForm,
     EmployeeHome
   },
-  async created() {
-    this.refreshEmployees();
-  },
-
+  created,
   methods: {
-    isInActive(employee) {
-      return employee.isActive ? '' : 'Not Active';
-    },
-    userIsAdmin() {
-      return getRole() === 'super-admin';
-    },
-    async refreshEmployees() {
-      this.loading = true;
-      this.employees = await api.getItems(api.EMPLOYEES);
-      this.filteredEmployees = _.filter(this.employees, employee => {
-        return employee.isActive;
-      });
-      this.loading = false;
-    },
-    getAllExpenses(id) {
-      api
-        .getAllEmployeeExpenses(id)
-        .then(result => {
-          this.$set(this.model, 'personalExpenses', result);
-        })
-        .catch(err => {
-          console.log(err);
-        });
-    },
-    setExpenses(expenses) {
-      this.$set(this.model, 'personalExpenses', expenses);
-    },
-    onSelect(item) {
-      console.log('select');
-      this.$set(this.model, 'id', item.id);
-      this.$set(this.model, 'firstName', item.firstName);
-      this.$set(this.model, 'middleName', item.middleName);
-      this.$set(this.model, 'lastName', item.lastName);
-      this.$set(this.model, 'email', item.email);
-      this.$set(this.model, 'employeeRole', item.employeeRole);
-      this.$set(this.model, 'employeeNumber', item.employeeNumber);
-      this.$set(this.model, 'hireDate', item.hireDate);
-      this.$set(this.model, 'isActive', !item.isActive);
-      this.getAllExpenses(item.id);
-    },
-    clearModel() {
-      this.$set(this.model, 'id', '');
-      this.$set(this.model, 'firstName', '');
-      this.$set(this.model, 'middleName', '');
-      this.$set(this.model, 'lastName', '');
-      this.$set(this.model, 'email', '@consultwithcase.com');
-      this.$set(this.model, 'employeeRole', '');
-      this.$set(this.model, 'employeeNumber', null);
-      this.$set(this.model, 'hireDate', null);
-      this.$set(this.model, 'isActive', false);
-    },
-    updateModelInTable(updatedEmployee) {
-      let matchingEmployeeIndex = _.findIndex(this.employees, employee => employee.id === updatedEmployee.id);
-      this.employees.splice(matchingEmployeeIndex, 1, updatedEmployee);
-
-      if (updatedEmployee.isActive) {
-        matchingEmployeeIndex = _.findIndex(this.filteredEmployees, employee => employee.id === updatedEmployee.id);
-        this.filteredEmployees.splice(matchingEmployeeIndex, 1, updatedEmployee);
-      } else {
-        this.filteredEmployees = _.remove(this.filteredEmployees, employee => employee.id !== updatedEmployee.id);
-      }
-      this.$set(this.status, 'statusType', 'SUCCESS');
-      this.$set(this.status, 'statusMessage', 'Employee was successfully updated!');
-      this.$set(this.status, 'color', 'green');
-    },
-    addModelToTable(newEmployee) {
-      let matchingEmployee = _.filter(this.employees, employee => employee.id === newEmployee.id);
-
-      if (!matchingEmployee.length) {
-        if (newEmployee.isActive) {
-          this.filteredEmployees.push(newEmployee);
-          this.employees.push(newEmployee);
-        } else {
-          this.employees.push(newEmployee);
-        }
-      }
-      this.$set(this.status, 'statusType', 'SUCCESS');
-      this.$set(this.status, 'statusMessage', 'Employee was successfully created!');
-      this.$set(this.status, 'color', 'green');
-    },
-    deleteModelFromTable() {
-      let modelIndex = _.findIndex(this.employees, employee => employee.id === this.model.id);
-      this.employees.splice(modelIndex, 1);
-      modelIndex = _.findIndex(this.filteredEmployees, employee => employee.id === this.model.id);
-      this.filteredEmployees.splice(modelIndex, 1);
-      this.$set(this.status, 'statusType', 'SUCCESS');
-      this.$set(this.status, 'statusMessage', 'Employee was successfully deleted!');
-      this.$set(this.status, 'color', 'green');
-    },
-    changeSort(column) {
-      if (this.pagination.sortBy === column) {
-        this.pagination.descending = !this.pagination.descending;
-      } else {
-        this.pagination.sortBy = column;
-        this.pagination.descending = false;
-      }
-    },
+    isInActive,
+    userIsAdmin,
+    refreshEmployees,
+    getAllExpenses,
+    setExpenses,
+    onSelect,
+    clearModel,
+    updateModelInTable,
+    addModelToTable,
+    deleteModelFromTable,
+    changeSort,
     clearStatus,
     displayError
   },
   computed: {
-    employeeList() {
-      return this.showAll ? this.employees : this.filteredEmployees;
-    }
+    employeeList
   }
 };
 </script>
