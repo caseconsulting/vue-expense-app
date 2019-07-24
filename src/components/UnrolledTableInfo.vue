@@ -1,6 +1,8 @@
 <template>
   <v-container fluid style="background:grey">
+    <!-- unreimburse sub-datable -->
     <v-data-table hide-actions v-model="selected" :headers="headers" :items="expenses" select-all item-key="id">
+      <!-- header for sub-datatable -->
       <template slot="headers" slot-scope="props">
         <tr>
           <th>
@@ -19,6 +21,9 @@
           </th>
         </tr>
       </template>
+      <!-- end header for sub-datatable -->
+
+      <!-- rows in sub-datatable -->
       <template slot="items" slot-scope="props">
         <tr
           v-if="!props.item.reimbursedDate"
@@ -28,6 +33,7 @@
             expenseClicked(props.item);
           "
         >
+          <!-- checkbox for individual expense -->
           <td>
             <v-checkbox
               @change="theyPickedMe(props.item)"
@@ -42,7 +48,9 @@
           <td class="text-xs-center">{{ props.item.description | descripFormat }}</td>
         </tr>
       </template>
+      <!-- end rows in sub-datatable -->
     </v-data-table>
+    <!-- end unreimburse sub-datable -->
   </v-container>
 </template>
 
