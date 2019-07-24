@@ -15,9 +15,6 @@ export default {
       } catch (error) {
         window.location.href = '/loginFailed';
       }
-      // let role = await api.getRole();
-      // setRole(role);
-      //test
     });
   }
 };

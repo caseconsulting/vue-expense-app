@@ -6,7 +6,6 @@ import store from './store';
 import moment from 'moment';
 //Vuetify
 import Vuetify from 'vuetify';
-// import 'vuetify/dist/vuetify.min.css';
 import(/* webpackMode: "eager" */ 'vuetify/dist/vuetify.min.css');
 // BEGIN VUE AWESOME
 import 'vue-awesome/icons/regular/times-circle';

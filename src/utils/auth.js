@@ -47,7 +47,6 @@ export function requireAuth(to, from, next) {
       query: { redirect: to.fullPath }
     });
   } else {
-    // setRole();
     next();
   }
 }
