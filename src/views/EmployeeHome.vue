@@ -386,7 +386,7 @@ export default {
         }
       } else {
         // TODO: Return something for invalid date
-        return 'Ooops no anniversery, when did you start working here again? ';
+        return 'Ooops no anniversary, when did you start working here again? ';
       }
     },
     getDaysUntil() {
