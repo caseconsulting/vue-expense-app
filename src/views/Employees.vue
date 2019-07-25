@@ -298,7 +298,15 @@ export default {
         employeeNumber: null,
         hireDate: null,
         isActive: false,
-        personalExpenses: ''
+        personalExpenses: '',
+
+        // New Fields
+        birthday: '',
+        jobRole: '',
+        prime: '',
+        contract: '',
+        github: '',
+        twitter: ''
       },
       expand: false,
       headers: [
