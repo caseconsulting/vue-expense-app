@@ -124,6 +124,14 @@ function clearForm() {
   this.$set(this.model, 'expenseTypes', []);
   this.$set(this.model, 'hireDate', '');
   this.$set(this.model, 'id', '');
+
+  // New Fields
+  this.$set(this.model, 'birthday', 'item.birthday');
+  this.$set(this.model, 'jobRole', 'item.jobRole');
+  this.$set(this.model, 'prime', 'item.prime');
+  this.$set(this.model, 'contract', 'item.contract');
+  this.$set(this.model, 'github', 'item.github');
+  this.$set(this.model, 'twitter', 'item.twitter');
 }
 
 async function deleteEmployee() {
@@ -149,6 +157,8 @@ async function submit() {
   if (this.$refs.form.validate()) {
     if (this.model.id) {
       this.model.isActive = !this.model.isActive;
+      this.model.firstName = 'asdasd';
+      console.log('update');
       let updatedEmployee = await api.updateItem(api.EMPLOYEES, this.model.id, this.model);
       this.$emit('update', updatedEmployee);
       this.clearForm();
