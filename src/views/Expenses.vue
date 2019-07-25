@@ -38,10 +38,66 @@
             <p v-if="isAdmin">&nbsp;</p>
             <v-text-field v-model="search" append-icon="search" label="Search" single-line hide-details></v-text-field>
           </v-card-title>
+
+          <!-- start filters -->
+          <fieldset>
+            <legend style="padding-bottom: 0px;">Filters</legend>
+
+            <!-- active fitler -->
+            <div v-if="isAdmin" class="flagFilter">
+              <h4>Active Expense Type:</h4>
+              <v-btn-toggle v-model="filter.active" flat mandatory>
+                <v-tooltip top>
+                  <v-btn value="active" slot="activator" flat>
+                    <icon class="mr-1" name="regular/check-circle"></icon>
+                  </v-btn>
+                  <span>Show Active</span>
+                </v-tooltip>
+                <v-tooltip top>
+                  <v-btn value="notActive" slot="activator" flat>
+                    <icon name="regular/times-circle"></icon>
+                  </v-btn>
+                  <span>Hide Active</span>
+                </v-tooltip>
+                <v-tooltip top>
+                  <v-btn value="both" slot="activator" flat>
+                    BOTH
+                  </v-btn>
+                  <span>Show All</span>
+                </v-tooltip>
+              </v-btn-toggle>
+            </div>
+
+            <!-- reimbursed fitler -->
+            <div class="flagFilter">
+              <h4>Reimbursed:</h4>
+              <v-btn-toggle v-model="filter.reimbursed" flat mandatory>
+                <v-tooltip top>
+                  <v-btn value="reimbursed" slot="activator" flat>
+                    <icon class="mr-1" name="regular/check-circle"></icon>
+                  </v-btn>
+                  <span>Show Reimbursed</span>
+                </v-tooltip>
+                <v-tooltip top>
+                  <v-btn value="notReimbursed" slot="activator" flat>
+                    <icon name="regular/times-circle"></icon>
+                  </v-btn>
+                  <span>Hide Reimbursed</span>
+                </v-tooltip>
+                <v-tooltip top>
+                  <v-btn value="both" slot="activator" flat>
+                    BOTH
+                  </v-btn>
+                  <span>Show All</span>
+                </v-tooltip>
+              </v-btn-toggle>
+            </div>
+          </fieldset>
+          <br />
           <v-data-table
             :loading="loading"
             :headers="roleHeaders"
-            :items="sorting"
+            :items="expenseList"
             :search="search"
             :pagination.sync="pagination"
             :expand="expand"
@@ -70,7 +126,8 @@
 
             <!-- data row -->
             <template slot="items" slot-scope="props">
-              <tr v-if="!loading && (showRow(props.item) || isAdmin)" @click="props.expanded = !props.expanded">
+              <!-- v-if="!loading && (showRow(props.item) || isAdmin)" @click="props.expanded = !props.expanded" -->
+              <tr v-if="!loading" @click="props.expanded = !props.expanded">
                 <td class="text-xs-left">{{ props.item.createdAt | dateFormatCreated }}</td>
                 <td v-if="isAdmin" class="text-xs-left">{{ props.item.employeeName }}</td>
                 <td class="text-xs-left">{{ props.item.budgetName }}</td>
@@ -176,9 +233,9 @@
               Your search for "{{ search }}" found no results.
             </v-alert>
           </v-data-table>
-          <v-card-actions>
+          <!-- <v-card-actions>
             <v-checkbox v-if="isUser" :label="'Show Reimbursed Expenses'" v-model="showReimbursed"></v-checkbox>
-          </v-card-actions>
+          </v-card-actions> -->
 
           <!-- end no results display -->
 
@@ -316,12 +373,23 @@ async function refreshExpenses() {
     aggregatedData = await api.getAggregate();
   }
   this.processedExpenses = aggregatedData;
+  this.filteredExpenses = this.processedExpenses;
+  this.filterExpense();
+
+  // this.filteredExpenses = _.filter(this.processedExpenses, expense => {
+  //   //gets the expense type for expense to look up inactive
+  //   let expenseType = _.find(this.expenseTypes, type => expense.expenseTypeId === type.value);
+  //   return expenseType && !expenseType.isInactive;
+  // });
+
+  // console.log('refresh');
+  // console.log(this.filteredExpenses);
   this.loading = false;
 }
 
-function showRow(expense) {
-  return this.showReimbursed || !expense.reimbursedDate;
-}
+// function showRow(expense) {
+//   return this.showReimbursed || !expense.reimbursedDate;
+// }
 
 function onSelect(item) {
   this.isEdit = true;
@@ -357,6 +425,10 @@ function updateModelInTable(updatedExpense) {
     this.$set(updatedExpense, 'budgetName', expenseType.budgetName);
   });
   this.processedExpenses.splice(matchingExpensesIndex, 1, updatedExpense);
+
+  //filters expenses after update
+  this.filterExpense();
+
   this.$set(this.status, 'statusType', 'SUCCESS');
   this.$set(this.status, 'statusMessage', 'Item was successfully updated!');
   this.$set(this.status, 'color', 'green');
@@ -380,6 +452,10 @@ function addModelToTable(newExpense) {
     });
 
     this.processedExpenses.push(newExpense);
+
+    //filters expenses after adding new expense
+    this.filterExpense();
+
     this.$set(this.status, 'statusType', 'SUCCESS');
     this.$set(this.status, 'statusMessage', 'Item was successfully submitted!');
     this.$set(this.status, 'color', 'green');
@@ -391,6 +467,10 @@ function deleteModelFromTable(deletedExpense) {
     return expense.id === deletedExpense.id;
   });
   this.processedExpenses.splice(modelIndex, 1);
+
+  //filters expenses after delete
+  this.filterExpense();
+
   this.$set(this.status, 'statusType', 'SUCCESS');
   this.$set(this.status, 'statusMessage', 'Item was successfully deleted!');
   this.$set(this.status, 'color', 'green');
@@ -431,6 +511,26 @@ async function deleteExpense() {
 // LIFECYCLE HOOKS
 async function created() {
   this.role = getRole();
+
+  let expenseTypes = await api.getItems(api.EXPENSE_TYPES);
+  this.expenseTypes = _.map(expenseTypes, expenseType => {
+    return {
+      /* beautify preserve:start */
+      text: `${expenseType.budgetName} - $${expenseType.budget}`,
+      startDate: expenseType.startDate,
+      endDate: expenseType.endDate,
+      /* beautify preserve:end */
+      budgetName: expenseType.budgetName,
+      value: expenseType.id,
+      budget: expenseType.budget,
+      odFlag: expenseType.odFlag,
+      requiredFlag: expenseType.requiredFlag,
+      recurringFlag: expenseType.recurringFlag,
+      isInactive: expenseType.isInactive,
+      categories: expenseType.categories
+    };
+  });
+
   this.refreshExpenses();
 
   let aggregatedData = await api.getAggregate(); //autocomplete
@@ -443,6 +543,48 @@ async function created() {
   window.EventBus.$on('confirm-delete-expense', this.deleteExpense);
 
   window.EventBus.$on('close-notes', () => (this.viewingNotes = false));
+
+  console.log('created');
+  console.log(this.expenseTypes);
+}
+
+function filterExpense() {
+  this.filteredExpenses = this.processedExpenses;
+
+  if (this.employee) {
+    this.filteredExpenses = _.filter(this.filteredExpenses, expense => {
+      return expense.userId === this.employee;
+    });
+  }
+
+  // this.sorting();
+  //filter for reimbursed
+  if (this.filter.reimbursed !== 'both') {
+    this.filteredExpenses = _.filter(this.filteredExpenses, expense => {
+      if (this.filter.reimbursed == 'notReimbursed') {
+        return !expense.reimbursedDate;
+      } else {
+        return expense.reimbursedDate;
+      }
+    });
+  }
+
+  //filter for Active Expense Types (available to admin only)
+  if (this.filter.active !== 'both') {
+    this.filteredExpenses = _.filter(this.filteredExpenses, expense => {
+      //gets the expense type for expense to look up inactive
+      let expenseType = _.find(this.expenseTypes, type => expense.expenseTypeId === type.value);
+      if (this.filter.active == 'active') {
+        return expenseType && !expenseType.isInactive;
+      } else {
+        return expenseType && expenseType.isInactive;
+      }
+    });
+  }
+}
+
+function expenseList() {
+  return this.filteredExpenses;
 }
 
 export default {
@@ -511,8 +653,10 @@ export default {
       },
       search: '',
       expenses: [],
+      filteredExpenses: [], //mine
+      expenseTypes: [], //mine
       processedExpenses: [],
-      showReimbursed: false,
+      // showReimbursed: false,
       deleting: false,
       unreimbursing: false,
       viewingNotes: false,
@@ -543,6 +687,10 @@ export default {
           value: 'reimbursedDate'
         }
       ],
+      filter: {
+        active: 'both',
+        reimbursed: 'notReimbursed' //default only shows expenses that are not reimbursed
+      },
       pagination: {
         sortBy: 'purchaseDate',
         rowsPerPage: 25
@@ -556,7 +704,8 @@ export default {
     isUser,
     isSuperAdmin,
     roleHeaders,
-    getUserName
+    getUserName,
+    expenseList
   },
   components: {
     ExpenseForm,
@@ -564,6 +713,17 @@ export default {
     DeleteModal,
     ViewNotes,
     UnreimburseModal
+  },
+  watch: {
+    'filter.active': function() {
+      this.filterExpense();
+    },
+    'filter.reimbursed': function() {
+      this.filterExpense();
+    },
+    employee: function() {
+      this.filterExpense();
+    }
   },
   methods: {
     constructAutoComplete,
@@ -573,7 +733,7 @@ export default {
     getEmployeeName,
     getExpenseTypeName,
     refreshExpenses,
-    showRow,
+    // showRow,
     onSelect,
     updateModelInTable,
     addModelToTable,
@@ -581,7 +741,8 @@ export default {
     changeSort,
     isEditing,
     deleteExpense,
-    unreimburseExpense
+    unreimburseExpense,
+    filterExpense
   },
   created
 };
