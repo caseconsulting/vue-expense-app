@@ -49,6 +49,8 @@
 
         <!-- Hire Date -->
         <v-menu
+          :full-width="true"
+          style="padding-right: 20px; padding-bottom: 20px;"
           ref="menu1"
           :close-on-content-click="true"
           v-model="menu1"
@@ -56,7 +58,6 @@
           lazy
           transition="scale-transition"
           offset-y
-          full-width
           max-width="290px"
           min-width="290px"
         >
@@ -72,9 +73,89 @@
           ></v-text-field>
           <v-date-picker v-model="model.hireDate" no-title @input="menu1 = false"></v-date-picker>
         </v-menu>
+        <!-- <v-btn :depressed="true" color="secondary">Advanced</v-btn> -->
+
+        <v-expansion-panel>
+          <v-expansion-panel-content style="background-color: whitesmoke;">
+            <template v-slot:header>
+              <div>
+                ADVANCED (optional)
+              </div>
+            </template>
+            <!-- Contract text field -->
+            <v-text-field
+              style="padding-left: 10px; padding-right: 20px;"
+              v-model="model.contract"
+              label="Contract"
+              data-vv-name="Contract"
+            ></v-text-field>
+
+            <!-- Prime text field -->
+            <v-text-field
+              style="padding-left: 10px; padding-right: 20px;"
+              v-model="model.prime"
+              label="Prime"
+              data-vv-name="Prime"
+            ></v-text-field>
+
+            <!-- Github text field -->
+            <v-text-field
+              style="padding-left: 10px; padding-right: 20px;"
+              v-model="model.github"
+              label="Github"
+              data-vv-name="Github"
+            ></v-text-field>
+
+            <!-- Twitter text field -->
+            <v-text-field
+              style="padding-left: 10px; padding-right: 20px;"
+              v-model="model.twitter"
+              label="Twitter"
+              data-vv-name="Twitter"
+            ></v-text-field>
+
+            <!-- Job Role autocomplete -->
+            <v-autocomplete
+              style="padding-left: 10px; padding-right: 20px;"
+              :items="jobRoles"
+              v-model="model.jobRole"
+              item-text="text"
+              label="Job Role"
+            ></v-autocomplete>
+
+            <!-- Birthday Picker -->
+            <v-menu
+              ref="menu"
+              :close-on-content-click="false"
+              :nudge-right="40"
+              lazy
+              transition="scale-transition"
+              offset-y
+              full-width
+              min-width="290px"
+            >
+              <template v-slot:activator="{ on }">
+                <v-text-field
+                  style="padding-left: 10px; padding-right: 20px;"
+                  v-model="birthdayFormat"
+                  label="Birthday"
+                  prepend-icon="event"
+                  readonly
+                  v-on="on"
+                ></v-text-field>
+              </template>
+              <v-date-picker
+                v-model="model.birthday"
+                ref="picker"
+                :max="new Date().toISOString().substr(0, 10)"
+                min="1900-01-01"
+              ></v-date-picker>
+            </v-menu>
+          </v-expansion-panel-content>
+        </v-expansion-panel>
 
         <!-- isactive? only on edit -->
-        <v-checkbox v-if="model.id" label="Mark as Inactive" v-model="model.isActive"></v-checkbox>
+        <v-checkbox label="Mark as Inactive" v-model="model.isActive"></v-checkbox>
         <!-- Buttons -->
 
         <v-tooltip bottom>
@@ -157,7 +238,6 @@ async function submit() {
   if (this.$refs.form.validate()) {
     if (this.model.id) {
       this.model.isActive = !this.model.isActive;
-      console.log('update');
       let updatedEmployee = await api.updateItem(api.EMPLOYEES, this.model.id, this.model);
       this.$emit('update', updatedEmployee);
       this.clearForm();
@@ -181,6 +261,8 @@ function userIsAdmin() {
 export default {
   data() {
     return {
+      birthdayFormat: '',
+      jobRoles: ['Software Developer'],
       componentRules: [v => !!v || 'Something must be selected'],
       permissions: ['Super Admin', 'Admin', 'User'],
       deleting: false,
@@ -216,6 +298,14 @@ export default {
     'model.employeeRole': function() {
       if (this.model.employeeRole != 'User') {
         this.employeeRoleFormatted = _.startCase(this.model.employeeRole);
+      }
+    },
+    'model.birthday': function() {
+      this.birthdayFormat = this.formatDate(this.model.birthday) || this.model.birthday;
+
+      //fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
+      if (this.model.birthday !== null && !this.formatDate(this.model.birthday)) {
+        this.model.birthday = null;
       }
     }
   },

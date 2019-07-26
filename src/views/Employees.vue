@@ -77,16 +77,17 @@
               <v-card flat>
                 <v-card-text>
                   <div class="expandedInfo">
-                    <p><b>Birthday: </b>{{ props.item.birthday }}</p>
-                    <p><b>Role: </b>{{ props.item.jobRole }}</p>
-                    <p><b>Prime: </b>{{ props.item.prime }}</p>
                     <p><b>Contract: </b>{{ props.item.contract }}</p>
+                    <p><b>Prime: </b>{{ props.item.prime }}</p>
+                    <p><b>Job Role: </b>{{ props.item.jobRole }}</p>
                     <p>
                       <b>Github: </b><a :href="props.item.employeeNumber" target="_blank">{{ props.item.github }}</a>
                     </p>
                     <p>
                       <b>Twitter: </b><a :href="props.item.employeeNumber" target="_blank">{{ props.item.twitter }}</a>
                     </p>
+                    <p v-if="userIsAdmin"><b>Birthday: </b>{{ props.item.birthday | dateFormat }}</p>
+                    <p v-else><b>Birthday: </b>{{ props.item.birthday | dateFormat }}</p>
                   </div>
                 </v-card-text>
               </v-card>
@@ -164,7 +165,6 @@ function setExpenses(expenses) {
 }
 
 function onSelect(item) {
-  console.log('select');
   this.$set(this.model, 'id', item.id);
   this.$set(this.model, 'firstName', item.firstName);
   this.$set(this.model, 'middleName', item.middleName);
@@ -174,6 +174,15 @@ function onSelect(item) {
   this.$set(this.model, 'employeeNumber', item.employeeNumber);
   this.$set(this.model, 'hireDate', item.hireDate);
   this.$set(this.model, 'isActive', !item.isActive);
+
+  //New Fields
+  this.$set(this.model, 'birthday', item.birthday);
+  this.$set(this.model, 'jobRole', item.jobRole);
+  this.$set(this.model, 'prime', item.prime);
+  this.$set(this.model, 'contract', item.contract);
+  this.$set(this.model, 'github', item.github);
+  this.$set(this.model, 'twitter', item.twitter);
+
   this.getAllExpenses(item.id);
 }
 
@@ -187,9 +196,18 @@ function clearModel() {
   this.$set(this.model, 'employeeNumber', null);
   this.$set(this.model, 'hireDate', null);
   this.$set(this.model, 'isActive', false);
+
+  //New Fields
+  this.$set(this.model, 'birthday', '');
+  this.$set(this.model, 'jobRole', '');
+  this.$set(this.model, 'prime', '');
+  this.$set(this.model, 'contract', '');
+  this.$set(this.model, 'github', '');
+  this.$set(this.model, 'twitter', '');
 }
 
 function updateModelInTable(updatedEmployee) {
+  console.log(updatedEmployee);
   let matchingEmployeeIndex = _.findIndex(this.employees, employee => employee.id === updatedEmployee.id);
   this.employees.splice(matchingEmployeeIndex, 1, updatedEmployee);
 
@@ -264,8 +282,15 @@ async function created() {
 export default {
   filters: {
     dateFormat: value => {
-      if (value) {
+      if (value && value != ' ') {
         return moment(value).format('MMM Do, YYYY');
+      } else {
+        return '';
+      }
+    },
+    dateFormatNoYear: value => {
+      if (value) {
+        return moment(value).format('MMM Do');
       } else {
         return '';
       }
