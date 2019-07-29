@@ -126,7 +126,6 @@
 
         <!-- Buttons -->
 
-        <!-- <v-btn outline color="error " @click="deleting = true"> <icon class="mr-1 " name="trash"></icon>Delete</v-btn> -->
         <v-tooltip bottom>
           <v-btn
             :disabled="this.model.id && this.model.typeExpenses.length > 0"
@@ -162,7 +161,6 @@ import dateUtils from '@/shared/dateUtils';
 
 // METHODS
 function clearForm() {
-  //test
   this.$refs.form.reset();
   this.$set(this.model, 'id', '');
   this.$set(this.model, 'budget', 0);
