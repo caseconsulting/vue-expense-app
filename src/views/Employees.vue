@@ -86,8 +86,7 @@
                     <p>
                       <b>Twitter: </b><a :href="props.item.employeeNumber" target="_blank">{{ props.item.twitter }}</a>
                     </p>
-                    <p v-if="userIsAdmin"><b>Birthday: </b>{{ props.item.birthday | dateFormat }}</p>
-                    <p v-else><b>Birthday: </b>{{ props.item.birthday | dateFormat }}</p>
+                    <p v-if="userIsAdmin()"><b>Birthday: </b>{{ props.item.birthday | dateFormat }}</p>
                   </div>
                 </v-card-text>
               </v-card>
