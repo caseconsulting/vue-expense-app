@@ -29,10 +29,10 @@ export default {
     };
   },
   created() {
-    window.EventBus.$on('clickedExpense', this.displayExepense);
+    window.EventBus.$on('clickedExpense', this.displayExpense);
   },
   methods: {
-    displayExepense(clickedExpense) {
+    displayExpense(clickedExpense) {
       this.expense = clickedExpense;
     }
   },
