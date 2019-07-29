@@ -45,6 +45,7 @@
         <!-- category selector -->
         <v-select
           v-if="getCategories() != null && getCategories().length >= 1"
+          :rules="componentRules"
           v-model="expense.categories"
           :items="getCategories()"
           label="Select Category (optional)"
