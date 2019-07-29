@@ -280,16 +280,6 @@ function moneyFilter(value) {
 }
 
 // COMPUTED
-function sorting() {
-  let tempList = this.processedExpenses;
-  return _.filter(tempList, expense => {
-    if (!this.employee) {
-      return true;
-    } else {
-      return expense.userId === this.employee;
-    }
-  });
-}
 
 function isAdmin() {
   return this.role === 'admin' || this.role === 'super-admin';
@@ -699,7 +689,6 @@ export default {
     };
   },
   computed: {
-    sorting,
     isAdmin,
     isUser,
     isSuperAdmin,
