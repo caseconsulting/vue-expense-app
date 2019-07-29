@@ -547,7 +547,6 @@ function filterExpense() {
     });
   }
 
-  // this.sorting();
   //filter for reimbursed
   if (this.filter.reimbursed !== 'both') {
     this.filteredExpenses = _.filter(this.filteredExpenses, expense => {
