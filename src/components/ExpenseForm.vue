@@ -19,7 +19,6 @@
         ></v-autocomplete>
 
         <!--Expense type picker if super-admin -->
-        <!-- :filter="customFilter" -->
         <v-autocomplete
           v-if="isSuperAdmin && this.$route.path !== '/home'"
           :items="filteredExpenseTypes()"
@@ -31,7 +30,6 @@
         ></v-autocomplete>
 
         <!--Expense type picker if user -->
-        <!-- :filter="customFilter" -->
         <v-autocomplete
           v-else
           :items="filteredExpenseTypes()"
