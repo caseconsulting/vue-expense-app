@@ -126,7 +126,6 @@
 
             <!-- data row -->
             <template slot="items" slot-scope="props">
-              <!-- v-if="!loading && (showRow(props.item) || isAdmin)" @click="props.expanded = !props.expanded" -->
               <tr v-if="!loading" @click="props.expanded = !props.expanded">
                 <td class="text-xs-left">{{ props.item.createdAt | dateFormatCreated }}</td>
                 <td v-if="isAdmin" class="text-xs-left">{{ props.item.employeeName }}</td>
@@ -376,10 +375,6 @@ async function refreshExpenses() {
   // console.log(this.filteredExpenses);
   this.loading = false;
 }
-
-// function showRow(expense) {
-//   return this.showReimbursed || !expense.reimbursedDate;
-// }
 
 function onSelect(item) {
   this.isEdit = true;
@@ -721,7 +716,6 @@ export default {
     getEmployeeName,
     getExpenseTypeName,
     refreshExpenses,
-    // showRow,
     onSelect,
     updateModelInTable,
     addModelToTable,
