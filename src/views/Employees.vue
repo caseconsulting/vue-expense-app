@@ -136,7 +136,7 @@ function isInActive(employee) {
 }
 
 function userIsAdmin() {
-  return getRole() === 'super-admin';
+  return getRole() === 'super-admin' || getRole() === 'admin';
 }
 
 async function refreshEmployees() {
