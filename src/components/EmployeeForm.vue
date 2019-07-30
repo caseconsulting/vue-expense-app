@@ -82,25 +82,26 @@
                 ADVANCED (optional)
               </div>
             </template>
-            <!-- Contract text field -->
-            <v-text-field
-              style="padding-left: 10px; padding-right: 20px;"
-              v-model="model.contract"
-              label="Contract"
-              data-vv-name="Contract"
-            ></v-text-field>
 
             <!-- Prime text field -->
             <v-text-field
-              style="padding-left: 10px; padding-right: 20px;"
+              style="padding-right: 20px; padding-left: 10px;"
               v-model="model.prime"
               label="Prime"
               data-vv-name="Prime"
             ></v-text-field>
 
+            <!-- Contract text field -->
+            <v-text-field
+              style="padding-right: 20px; padding-left: 10px;"
+              v-model="model.contract"
+              label="Contract"
+              data-vv-name="Contract"
+            ></v-text-field>
+
             <!-- Github text field -->
             <v-text-field
-              style="padding-left: 10px; padding-right: 20px;"
+              style="padding-right: 20px; padding-left: 10px;"
               v-model="model.github"
               label="Github"
               data-vv-name="Github"
@@ -108,7 +109,7 @@
 
             <!-- Twitter text field -->
             <v-text-field
-              style="padding-left: 10px; padding-right: 20px;"
+              style="padding-right: 20px; padding-left: 10px;"
               v-model="model.twitter"
               label="Twitter"
               data-vv-name="Twitter"
@@ -116,7 +117,7 @@
 
             <!-- Job Role autocomplete -->
             <v-autocomplete
-              style="padding-left: 10px; padding-right: 20px;"
+              style="padding-right: 20px; padding-left: 10px;"
               :items="jobRoles"
               v-model="model.jobRole"
               item-text="text"
