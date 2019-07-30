@@ -289,7 +289,7 @@ function clearForm() {
   this.$set(this.expense, 'createdAt', null);
   this.$set(this.expense, 'url', null);
   this.$set(this.expense, 'receipt', undefined);
-  this.$set(this.expense, 'categories, []');
+  this.$set(this.expense, 'categories', null);
 
   if (this.isUser) {
     this.$set(this.expense, 'employeeName', this.userInfo.id);
@@ -417,7 +417,7 @@ async function submit() {
 }
 
 function expenseTypeSelected(value) {
-  this.expense.categories = [];
+  this.expense.categories = null;
   return (this.selectedExpenseType = _.find(this.expenseTypes, expenseType => {
     if (expenseType.value === value) {
       return expenseType;
