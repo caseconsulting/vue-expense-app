@@ -74,11 +74,13 @@
 import BudgetChart from '../components/BudgetChart.vue';
 import BudgetTable from '../components/BudgetTable.vue';
 import ExpenseForm from '../components/ExpenseForm.vue';
+
 import moment from 'moment';
 import api from '@/shared/api.js';
 import _ from 'lodash';
 import pattern from 'patternomaly';
 import MobileDetect from 'mobile-detect';
+
 export default {
   filters: {
     moneyValue: value => {
@@ -421,7 +423,8 @@ export default {
   components: {
     BudgetChart,
     BudgetTable,
-    ExpenseForm
+    ExpenseForm,
+    CovertToEsv
   }
 };
 </script>
