@@ -84,13 +84,36 @@
                     props.selected = !props.selected;
                     props.item.checkBox.all = !props.item.checkBox.all;
                     props.item.checkBox.indeterminate = false;
-                    toggleExpenses(props);
+                    toggleExpenses(props.item);
                   "
                 ></v-checkbox>
               </td>
-              <td class="text-xs-center" @click="props.expanded = !props.expanded">{{ props.item.employeeName }}</td>
-              <td class="text-xs-center" @click="props.expanded = !props.expanded">{{ props.item.budgetName }}</td>
-              <td class="text-xs-center" id="money-team" @click="props.expanded = !props.expanded">
+              <td
+                class="text-xs-center"
+                @click="
+                  handleExpanded(props);
+                  props.expanded = props.item.expanded;
+                "
+              >
+                {{ props.item.employeeName }}
+              </td>
+              <td
+                class="text-xs-center"
+                @click="
+                  handleExpanded(props);
+                  props.expanded = props.item.expanded;
+                "
+              >
+                {{ props.item.budgetName }}
+              </td>
+              <td
+                class="text-xs-center"
+                id="money-team"
+                @click="
+                  handleExpanded(props);
+                  props.expanded = props.item.expanded;
+                "
+              >
                 {{ getExpenseTotal(props.item.expenses) | moneyValue }}
               </td>
             </tr>
@@ -281,6 +304,7 @@ export default {
           all: false,
           indeterminate: false
         };
+        expense.expanded = false;
       });
       //Remove duplicates
 
@@ -384,8 +408,8 @@ export default {
     addExpenseToSelected(expense) {
       if (_.indexOf(this.selected, expense) === -1) {
         this.selected.push(expense);
-        _.findIndex(this.filteredItems, function(o) {
-          return o.id == expense.budgetId;
+        _.findIndex(this.filteredItems, function(item) {
+          return item.id == expense.budgetId;
         });
       } else {
         _.forEach(this.selected, exp => {
@@ -395,17 +419,28 @@ export default {
         });
       }
     },
+    handleExpanded(props) {
+      if (!props.item.expanded) {
+        _.forEach(this.filteredItems, item => {
+          item.expanded = props.item === item;
+        });
+      } else {
+        _.forEach(this.filteredItems, item => {
+          item.expanded = false;
+        });
+      }
+    },
     toggleExpenses(item) {
       if (!item.expanded) {
-        if (item.item.checkBox.all) {
-          _.forEach(item.item.expenses, exp => {
+        if (item.checkBox.all) {
+          _.forEach(item.expenses, exp => {
             if (_.indexOf(this.selected, exp) === -1) {
               this.selected.push(exp);
             }
           });
         } else {
           this.selected = _.filter(this.selected, expense => {
-            return !this.matchingEmployeeAndExpenseType(expense, item.item);
+            return !this.matchingEmployeeAndExpenseType(expense, item);
           });
         }
         window.EventBus.$emit('expenseChange', this.selected);
@@ -413,17 +448,21 @@ export default {
     },
     toggleAll() {
       if (this.selected.length != this.unreimbursedExpenses.length) {
+        // check all boxes
         this.filteredItems.forEach(e => {
           e.checkBox.all = true;
           e.checkBox.indeterminate = false;
+
+          this.toggleExpenses(e);
         });
-        this.selected = this.unreimbursedExpenses;
       } else {
+        // clear all checkboxes
         this.filteredItems.forEach(e => {
           e.checkBox.all = false;
           e.checkBox.indeterminate = false;
+
+          this.toggleExpenses(e);
         });
-        this.selected = [];
       }
       window.EventBus.$emit('expenseChange', this.selected);
     },

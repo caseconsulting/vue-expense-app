@@ -42,7 +42,13 @@
 
         <!-- rows in sub-datatable -->
         <template v-slot:items="props">
-          <tr :active="props.selected" @click="props.selected = !props.selected">
+          <tr
+            :active="props.selected"
+            @click="
+              props.selected = !props.selected;
+              expenseClicked(props.item);
+            "
+          >
             <!-- checkbox for individual expense -->
             <td>
               <v-checkbox :input-value="props.selected" primary hide-details></v-checkbox>
@@ -134,6 +140,9 @@ export default {
         this.pagination.sortBy = column;
         this.pagination.descending = false;
       }
+    },
+    expenseClicked(clickedExpense) {
+      window.EventBus.$emit('clickedExpense', clickedExpense);
     }
   },
   watch: {

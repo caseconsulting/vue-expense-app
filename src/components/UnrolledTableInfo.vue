@@ -1,62 +1,74 @@
 <template>
   <v-container fluid style="background:grey">
-    <!-- unreimburse sub-datable -->
-    <v-data-table hide-actions v-model="selected" :headers="headers" :items="expenses" select-all item-key="id">
-      <!-- header for sub-datatable -->
-      <template slot="headers" slot-scope="props">
-        <tr>
-          <th>
-            <v-flex md2 class="text-xs-center">
-              select
-            </v-flex>
-          </th>
-          <th
-            v-for="header in props.headers"
-            :key="header.text"
-            :class="['column sortable']"
-            @click="changeSort(header.value)"
+    <div>
+      <!-- unreimburse sub-datable -->
+      <v-data-table
+        hide-actions
+        v-model="selected"
+        :headers="headers"
+        :items="expenses"
+        :pagination.sync="pagination"
+        select-all
+        item-key="id"
+      >
+        <!-- header for sub-datatable -->
+
+        <template v-slot:headers="props">
+          <tr>
+            <th>
+              <!-- <v-checkbox
+                :input-value="props.all"
+                :indeterminate="props.indeterminate"
+                primary
+                hide-details
+              ></v-checkbox> -->
+            </th>
+            <th
+              v-for="header in props.headers"
+              :key="header.text"
+              :class="[
+                'column sortable',
+                pagination.descending ? 'desc' : 'asc',
+                header.value === pagination.sortBy ? 'active' : ''
+              ]"
+              @click="changeSort(header.value)"
+            >
+              <v-icon small>arrow_upward</v-icon>
+              {{ header.text }}
+            </th>
+          </tr>
+        </template>
+        <!-- end header for sub-datatable -->
+
+        <!-- rows in sub-datatable -->
+        <template v-slot:items="props">
+          <tr
+            :active="props.selected"
+            @click="
+              props.selected = !props.selected;
+              expenseClicked(props.item);
+            "
           >
-            <v-icon small>arrow_upward</v-icon>
-            {{ header.text }}
-          </th>
-        </tr>
-      </template>
-      <!-- end header for sub-datatable -->
-
-      <!-- rows in sub-datatable -->
-      <template slot="items" slot-scope="props">
-        <tr
-          v-if="!props.item.reimbursedDate"
-          :active="props.item.selected"
-          @click="
-            props.selected = !props.selected;
-            expenseClicked(props.item);
-          "
-        >
-          <!-- checkbox for individual expense -->
-          <td>
-            <v-checkbox
-              @change="theyPickedMe(props.item)"
-              v-model="props.item.selected"
-              primary
-              hide-details
-            ></v-checkbox>
-          </td>
-
-          <td class="text-xs-center">{{ props.item.cost | moneyValue }}</td>
-          <td class="text-xs-center">{{ props.item.purchaseDate | dateFormat }}</td>
-          <td class="text-xs-center">{{ props.item.description | descripFormat }}</td>
-        </tr>
-      </template>
-      <!-- end rows in sub-datatable -->
-    </v-data-table>
-    <!-- end unreimburse sub-datable -->
+            <!-- checkbox for individual expense -->
+            <td>
+              <v-checkbox :input-value="props.selected" primary hide-details></v-checkbox>
+            </td>
+            <td class="text-xs-center">{{ props.item.cost | moneyValue }}</td>
+            <td class="text-xs-center">{{ props.item.purchaseDate | dateFormat }}</td>
+            <td class="text-xs-center">{{ props.item.description | descripFormat }}</td>
+          </tr>
+        </template>
+        <!-- end rows in sub-datatable -->
+      </v-data-table>
+      <!-- end unreimburse sub-datable -->
+    </div>
   </v-container>
 </template>
 
 <script>
 import _ from 'lodash';
 import moment from 'moment';
+
 export default {
   filters: {
     moneyValue: value => {
@@ -78,54 +90,47 @@ export default {
       return val.length > 250 ? val.substring(0, 250) + '...' : val;
     }
   },
-  props: ['expenses', 'allSelected'],
-  data: () => ({
-    pagination: {
-      sortBy: 'cost'
-    },
-    headers: [
-      {
-        text: 'Cost',
-        value: 'cost'
+  data() {
+    return {
+      pagination: {
+        sortBy: 'cost'
       },
-      {
-        text: 'Purchase Date',
-        value: 'purchaseDate'
-      },
-      {
-        text: 'Description',
-        value: 'description'
-      }
-    ],
-    selected: []
-  }),
-  beforeUpdate() {
-    this.checkAllSelected();
-  },
-  created() {
-    if (this.allSelected) {
-      this.selected = this.expenses;
-    }
-  },
-  methods: {
-    expenseClicked(clickedExpense) {
-      window.EventBus.$emit('clickedExpense', clickedExpense);
-    },
-    theyPickedMe(item) {
-      window.EventBus.$emit('expensePicked', item);
-    },
-    checkAllSelected() {
-      let nonSelected = _.filter(this.expenses, expense => {
-        if (expense.selected === false) {
-          return true;
-        } else {
-          return false;
+      loadedChecks: false,
+      numExpenses: 0,
+      selected: [],
+      checkBox: { indeterminate: false, all: false },
+      headers: [
+        {
+          text: 'Cost',
+          value: 'cost'
+        },
+        {
+          text: 'Purchase Date',
+          value: 'purchaseDate'
+        },
+        {
+          text: 'Description',
+          value: 'description'
         }
-      });
-      if (nonSelected.length > 0) {
-        this.$emit('changedAllSelected', false);
-      } else {
-        this.$emit('changedAllSelected', true);
+      ]
+    };
+  },
+  props: ['expenses', 'budgetId', 'headBox', 'savedChecked'],
+  methods: {
+    toggleAll() {
+      if (!this.headBox.all && !this.headBox.indeterminate) {
+        this.selected = [];
+
+        // this.selected.forEach(e => {
+        //   window.EventBus.$emit('expensePicked', e);
+        // });
+        // this.selected = [];
+      } else if (this.headBox.all) {
+        this.selected = this.expenses.slice();
+        // let notIn = _.differenceWith(this.expenses, this.selected);
+        // notIn.forEach(e => {
+        //   window.EventBus.$emit('expensePicked', e);
+        // });
       }
     },
     changeSort(column) {
@@ -135,7 +140,45 @@ export default {
         this.pagination.sortBy = column;
         this.pagination.descending = false;
       }
+    },
+    expenseClicked(clickedExpense) {
+      window.EventBus.$emit('clickedExpense', clickedExpense);
     }
+  },
+  watch: {
+    'headBox.all': function() {
+      this.toggleAll();
+    },
+    selected: function(newSelect, oldSelect) {
+      if (this.loadedChecks) {
+        if (this.numExpenses === this.expenses.length) {
+          this.checkBox.all = this.selected.length === this.expenses.length;
+          this.checkBox.indeterminate = !this.checkBox.all && this.selected.length > 0;
+          window.EventBus.$emit('allCheckBoxChange', this.checkBox);
+
+          if (newSelect.length > oldSelect.length) {
+            let notIn = _.differenceWith(newSelect, oldSelect);
+            notIn.forEach(e => {
+              window.EventBus.$emit('expensePicked', e);
+            });
+          } else {
+            let notIn = _.differenceWith(oldSelect, newSelect);
+            notIn.forEach(e => {
+              window.EventBus.$emit('expensePicked', e);
+            });
+          }
+        }
+      } else {
+        this.loadedChecks = true;
+      }
+      this.numExpenses = this.expenses.length;
+    }
+  },
+  created() {
+    this.checkBox.b_id = this.budgetId;
+    let shared = _.intersection(this.savedChecked, this.expenses);
+    this.selected = shared;
+    this.numExpenses = this.expenses.length;
   }
 };
 </script>

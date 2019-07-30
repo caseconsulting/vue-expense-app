@@ -31,7 +31,6 @@
 
         <!-- unreimbursed datatable -->
         <v-data-table
-          v-model="selected"
           :headers="headers"
           :items="filteredItems"
           :pagination.sync="pagination"
@@ -40,13 +39,19 @@
           class="elevation-1"
           :loading="loading"
         >
-          <!-- header for datatable -->
+          <!-- header for sub-datatable -->
           <v-progress-linear slot="progress" color="radioactive" indeterminate></v-progress-linear>
-          <template slot="headers" slot-scope="props">
+
+          <template v-slot:headers="props">
             <tr style="box-shadow: 0px 1.5px #888888;">
-              <!-- checkbox for select all table expenses -->
               <th>
-                <v-checkbox :input-value="everythingSelected" primary hide-details @change="toggleAll"></v-checkbox>
+                <v-checkbox
+                  :input-value="headBox.all"
+                  :indeterminate="headBox.indeterminate"
+                  primary
+                  hide-details
+                  @click.stop="toggleAll"
+                ></v-checkbox>
               </th>
               <th
                 v-for="header in props.headers"
@@ -63,38 +68,71 @@
               </th>
             </tr>
           </template>
-          <!-- end header for datatable -->
+          <!-- end header for sub-datatable -->
 
-          <!-- top level rows in datatable -->
-          <template slot="items" slot-scope="props">
-            <tr v-if="!loading" :active="props.selected" @click="props.expanded = !props.expanded">
-              <!-- checkbox for select all row expenses -->
-              <td>
+          <!-- rows in sub-datatable -->
+          <template v-slot:items="props">
+            <tr v-if="!loading" :active="props.selected">
+              <!-- checkbox for individual expense -->
+              <td style="width: 1px">
                 <v-checkbox
-                  v-model="props.item.allSelected"
-                  @change="props.item = toggleExpenses(props.item)"
+                  :input-value="props.item.checkBox.all"
+                  :indeterminate="props.item.checkBox.indeterminate"
                   primary
                   hide-details
+                  @change="
+                    props.selected = !props.selected;
+                    props.item.checkBox.all = !props.item.checkBox.all;
+                    props.item.checkBox.indeterminate = false;
+                    toggleExpenses(props.item);
+                  "
                 ></v-checkbox>
               </td>
-              <td class="text-xs-center">{{ props.item.employeeName }}</td>
-              <td class="text-xs-center">{{ props.item.budgetName }}</td>
-              <td class="text-xs-center" id="money-team">{{ getExpenseTotal(props.item.expenses) | moneyValue }}</td>
+              <td
+                class="text-xs-center"
+                @click="
+                  handleExpanded(props);
+                  props.expanded = props.item.expanded;
+                "
+              >
+                {{ props.item.employeeName }}
+              </td>
+              <td
+                class="text-xs-center"
+                @click="
+                  handleExpanded(props);
+                  props.expanded = props.item.expanded;
+                "
+              >
+                {{ props.item.budgetName }}
+              </td>
+              <td
+                class="text-xs-center"
+                id="money-team"
+                @click="
+                  handleExpanded(props);
+                  props.expanded = props.item.expanded;
+                "
+              >
+                {{ getExpenseTotal(props.item.expenses) | moneyValue }}
+              </td>
             </tr>
           </template>
-          <!-- end top level rows in datatable -->
+          <!-- end rows in sub-datatable -->
 
           <!-- expandable of rows in datatable -->
-          <template slot="expand" slot-scope="props">
+          <template v-slot:expand="props">
             <unrolled-table-info
               @expensePicked="addExpenseToSelected"
-              @changedAllSelected="props.item.allSelected = $event"
-              :allSelected="props.item.allSelected"
+              :headBox="props.item.checkBox"
               :expenses="props.item.expenses"
+              :budgetId="props.item.id"
+              :savedChecked="selected"
             ></unrolled-table-info>
           </template>
           <!-- end expandable of rows in datatable -->
         </v-data-table>
+
         <!-- end unreimbursed datatable -->
 
         <!-- unreimburse button -->
@@ -144,6 +182,7 @@ export default {
     }
   },
   components: {
+    //UnrolledTableInfo,
     UnrolledTableInfo,
     ReimburseModal
   },
@@ -164,6 +203,7 @@ export default {
       rowsPerPage: -1
     },
     selected: [],
+    headBox: { indeterminate: false, all: false },
     headers: [
       {
         text: 'Employee',
@@ -181,6 +221,7 @@ export default {
   }),
   async created() {
     window.EventBus.$on('expensePicked', this.addExpenseToSelected);
+    window.EventBus.$on('allCheckBoxChange', this.updateCheckBoxes);
     window.EventBus.$on('confirm-reimburse', this.reimburseExpenses);
     window.EventBus.$on('canceled-reimburse', () => (this.button_clicked = false));
     let aggregatedData = await api.getAggregate();
@@ -244,13 +285,25 @@ export default {
         };
       });
     },
+    updateCheckBoxes(checkBox) {
+      this.filteredItems.forEach(e => {
+        if (e.id === checkBox.b_id) {
+          e.checkBox.all = checkBox.all;
+          e.checkBox.indeterminate = checkBox.indeterminate;
+        }
+      });
+    },
     modifyAggregateDate(aggregatedData, expenses) {
       //Remove undefined stuff
       aggregatedData = _.filter(aggregatedData, item => item !== undefined && !item.reimbursedDate);
       //Maps each expense and only returns if not reimbursed
       aggregatedData = _.forEach(aggregatedData, expense => {
         expense.key = `${expense.userId}${expense.expenseTypeId}`;
-        expense.allSelected = false;
+        expense.checkBox = {
+          all: false,
+          indeterminate: false
+        };
+        expense.expanded = false;
       });
       //Remove duplicates
 
@@ -290,36 +343,49 @@ export default {
       });
     },
     async reimburseExpenses() {
-      this.button_clicked = false;
-      let expensesToSubmit = _.map(this.selected, item => {
-        return {
-          cost: item.cost,
-          description: item.description,
-          expenseTypeId: item.expenseTypeId,
-          id: item.id,
-          purchaseDate: item.purchaseDate,
-          reimbursedDate: this.moment().format('YYYY-MM-DD'),
-          note: !item.note ? null : item.note,
-          userId: item.userId,
-          receipt: null,
-          createdAt: item.createdAt
-        };
-      });
-      this.reimbursing = true;
-      let itemsToRemoveFromTable = [];
+      if (this.button_clicked) {
+        this.button_clicked = false;
+        let expensesToSubmit = _.map(this.selected, item => {
+          return {
+            cost: item.cost,
+            description: item.description,
+            expenseTypeId: item.expenseTypeId,
+            id: item.id,
+            purchaseDate: item.purchaseDate,
+            reimbursedDate: this.moment().format('YYYY-MM-DD'),
+            note: !item.note ? null : item.note,
+            userId: item.userId,
+            receipt: null,
+            createdAt: item.createdAt
+          };
+        });
+        this.reimbursing = true;
+        let itemsToRemoveFromTable = [];
 
-      await this.asyncForEach(expensesToSubmit, async expense => {
-        await api.updateItem(api.EXPENSES, expense.id, expense);
-        itemsToRemoveFromTable.push(expense);
-      });
+        // reimburse expense on back end
+        await this.asyncForEach(expensesToSubmit, async expense => {
+          await api.updateItem(api.EXPENSES, expense.id, expense);
+          itemsToRemoveFromTable.push(expense);
+        });
 
-      _.forEach(itemsToRemoveFromTable, item => {
-        item.allSelected = false;
-        this.removeExpenseFromList(item);
-      });
-      this.everythingSelected = false;
-      this.reimbursing = false;
-      this.selected = [];
+        // remove expense from empBudgets
+        _.forEach(itemsToRemoveFromTable, item => {
+          this.removeExpenseFromList(item);
+        });
+
+        // reset each invidiual row checkbox to empty
+        _.forEach(this.filteredItems, item => {
+          item.checkBox.all = false;
+          item.checkBox.indeterminate = false;
+        });
+
+        // remove reimbursed expenses from list of unreimbursed expenses
+        this.unreimbursedExpenses = _.differenceWith(this.unreimbursedExpenses, this.selected);
+
+        this.selected = [];
+        this.reimbursing = false;
+        // location.reload();
+      }
     },
     async asyncForEach(array, callback) {
       for (let index = 0; index < array.length; index++) {
@@ -327,87 +393,82 @@ export default {
       }
     },
     removeExpenseFromList(selected) {
-      let employeeIndex = _.findIndex(this.empBudgets, employee => employee.userId === selected.userId);
+      let employeeIndex = _.findIndex(
+        this.empBudgets,
+        employee => employee.userId === selected.userId && employee.expenseTypeId === selected.expenseTypeId
+      );
       let expenseIndex = _.findIndex(this.empBudgets[employeeIndex].expenses, expense => selected.id === expense.id);
+
       this.empBudgets[employeeIndex].expenses.splice(expenseIndex, 1);
 
       this.empBudgets = _.filter(this.empBudgets, item => item.expenses.length); //remove empty arrays
-      window.EventBus.$emit('expenseChange', []);
-      window.EventBus.$emit('clickedExpense');
     },
 
     addExpenseToSelected(expense) {
       if (_.indexOf(this.selected, expense) === -1) {
         this.selected.push(expense);
-        if (this.unreimbursedExpenses.length === this.selected.length) {
-          this.everythingSelected = true;
-        }
+        _.findIndex(this.filteredItems, function(item) {
+          return item.id == expense.budgetId;
+        });
       } else {
         _.forEach(this.selected, exp => {
           if (exp && exp.id === expense.id) {
             this.selected.splice(_.indexOf(this.selected, exp), 1);
           }
         });
-        this.indeterminate = true;
-        this.everythingSelected = false;
+      }
+    },
+    handleExpanded(props) {
+      if (!props.item.expanded) {
+        _.forEach(this.filteredItems, item => {
+          item.expanded = props.item === item;
+        });
+      } else {
+        _.forEach(this.filteredItems, item => {
+          item.expanded = false;
+        });
       }
     },
     toggleExpenses(item) {
-      if (item.allSelected) {
-        _.forEach(item.expenses, expense => {
-          expense.selected = true;
-          if (this.selected.includes(expense) === false) {
-            this.selected.push(expense);
-          }
-        });
-        this.indeterminate = true;
-        this.everythingSelected = false;
-        if (this.unreimbursedExpenses.length === this.selected.length) {
-          this.everythingSelected = true;
-        }
-      } else {
-        _.forEach(item.expenses, expense => {
-          expense.selected = false;
-        });
-        if (this.selected.length === 1) {
-          this.selected = [];
-          this.indeterminate = false;
-        } else {
-          _.forEach(item.expenses, expense => {
-            _.forEach(this.selected, exp => {
-              if (exp && exp.id === expense.id) {
-                this.selected.splice(_.indexOf(this.selected, exp), 1);
-              }
-            });
+      if (!item.expanded) {
+        if (item.checkBox.all) {
+          _.forEach(item.expenses, exp => {
+            if (_.indexOf(this.selected, exp) === -1) {
+              this.selected.push(exp);
+            }
           });
-          this.everythingSelected = false;
-          this.indeterminate = true;
+        } else {
+          this.selected = _.filter(this.selected, expense => {
+            return !this.matchingEmployeeAndExpenseType(expense, item);
+          });
         }
+        window.EventBus.$emit('expenseChange', this.selected);
+      }
+    },
+    toggleAll() {
+      if (this.selected.length != this.unreimbursedExpenses.length) {
+        // check all boxes
+        this.filteredItems.forEach(e => {
+          e.checkBox.all = true;
+          e.checkBox.indeterminate = false;
+
+          this.toggleExpenses(e);
+        });
+      } else {
+        // clear all checkboxes
+        this.filteredItems.forEach(e => {
+          e.checkBox.all = false;
+          e.checkBox.indeterminate = false;
+
+          this.toggleExpenses(e);
+        });
       }
       window.EventBus.$emit('expenseChange', this.selected);
-
-      return item;
     },
     getExpenseTotal(expenses) {
       let total = 0;
       _.forEach(expenses, expense => (total += expense.cost));
       return total;
-    },
-    toggleAll() {
-      if (this.unreimbursedExpenses.length == this.selected.length) {
-        _.forEach(this.filteredItems, item => {
-          item.allSelected = false;
-          this.toggleExpenses(item);
-        });
-        this.everythingSelected = false;
-        this.selected = [];
-      } else {
-        _.forEach(this.filteredItems, item => {
-          item.allSelected = true;
-          this.toggleExpenses(item);
-        });
-        this.everythingSelected = true;
-      }
     },
     changeSort(column) {
       if (this.pagination.sortBy === column) {
@@ -451,6 +512,12 @@ export default {
           }
         }
       });
+    }
+  },
+  watch: {
+    selected: function() {
+      this.headBox.all = this.selected.length === this.unreimbursedExpenses.length;
+      this.headBox.indeterminate = !this.headBox.all && this.selected.length > 0;
     }
   }
 };
