@@ -71,17 +71,6 @@
           </v-layout>
         </v-container>
 
-        <!-- flags
-        <v-checkbox label="Overdraft Flag" v-model="model.odFlag"></v-checkbox>
-
-        <v-checkbox label="Recurring Flag" v-model="model.recurringFlag"></v-checkbox>
-
-     // Requires receipt attachment for expense type 
-        <v-checkbox label="Receipt Required" v-model="model.requiredFlag"></v-checkbox>
-
-     //    Flag set if expense is inactive 
-        <v-checkbox label="Mark as Inactive" v-model="model.isInactive"></v-checkbox> -->
-
         <!-- start date picker -->
         <v-menu
           v-if="!model.recurringFlag"
