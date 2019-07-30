@@ -1,7 +1,7 @@
 <template>
   <v-card hover>
     <v-container fluid>
-      <v-card-title>
+      <v-card-title class="header_style">
         <h3 v-if="expense.id && (isSuperAdmin || !isReimbursed)">Edit Expense</h3>
         <h3 v-else-if="expense.id && !isSuperAdmin && isReimbursed">View Expense</h3>
         <h3 v-else>Create New Expense</h3>

@@ -33,7 +33,7 @@
             <!-- active fitler -->
             <div class="flagFilter">
               <h4>Active:</h4>
-              <v-btn-toggle v-model="filter.active" flat mandatory>
+              <v-btn-toggle class="filter_color" v-model="filter.active" flat mandatory>
                 <v-tooltip top>
                   <v-btn value="active" slot="activator" flat>
                     <icon class="mr-1" name="regular/check-circle"></icon>
@@ -58,7 +58,7 @@
             <!-- overdraft fitler -->
             <div class="flagFilter">
               <h4>Overdraft:</h4>
-              <v-btn-toggle v-model="filter.overdraft" flat mandatory>
+              <v-btn-toggle class="filter_color" v-model="filter.overdraft" flat mandatory>
                 <v-tooltip top>
                   <v-btn value="overdraft" slot="activator" flat>
                     <icon class="mr-1" name="regular/check-circle"></icon>
@@ -83,7 +83,7 @@
             <!-- recurring filter -->
             <div class="flagFilter">
               <h4>Recurring:</h4>
-              <v-btn-toggle v-model="filter.recurring" flat mandatory>
+              <v-btn-toggle class="filter_color" v-model="filter.recurring" flat mandatory>
                 <v-tooltip top>
                   <v-btn value="recurring" slot="activator" flat>
                     <icon class="mr-1" name="regular/check-circle"></icon>
@@ -108,7 +108,7 @@
             <!-- receipt fitler -->
             <div class="flagFilter">
               <h4>Receipt Required:</h4>
-              <v-btn-toggle v-model="filter.receipt" flat mandatory>
+              <v-btn-toggle class="filter_color" v-model="filter.receipt" flat mandatory>
                 <v-tooltip top>
                   <v-btn value="receipt" slot="activator" flat>
                     <icon class="mr-1" name="regular/check-circle"></icon>

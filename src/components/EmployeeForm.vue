@@ -1,7 +1,7 @@
 <template>
   <v-card hover>
     <v-container fluid>
-      <v-card-title>
+      <v-card-title class="header_style">
         <h3 v-if="model.id">Edit Employee</h3>
         <h3 v-else>Create New Employee</h3>
       </v-card-title>

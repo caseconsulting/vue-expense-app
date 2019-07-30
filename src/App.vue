@@ -1,10 +1,10 @@
 <template>
   <div id="app">
-    <v-app>
-      <v-navigation-drawer v-model="drawer" fixed app disableResizeWatcher>
+    <v-app style="background: #F5F5F5">
+      <v-navigation-drawer light v-model="drawer" fixed app disableResizeWatcher>
         <main-nav></main-nav>
       </v-navigation-drawer>
-      <v-toolbar color="primary" dark fixed app>
+      <v-toolbar class="nav-color" dark fixed app>
         <v-toolbar-side-icon v-show="isLoggedIn()" @click.stop="drawer = !drawer"></v-toolbar-side-icon>
         <v-toolbar-title>
           <h2 style="text-align:center"><span class="e">€</span>xpense App</h2>
@@ -93,7 +93,7 @@ export default {
   font-family: 'Avenir', Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  color: #2c3e50;
+  color: #3f3f3c;
 }
 
 .e {
@@ -106,7 +106,7 @@ export default {
 
 @-webkit-keyframes color-change {
   0% {
-    color: black;
+    color: white;
   }
 
   100% {
@@ -116,7 +116,7 @@ export default {
 
 @-moz-keyframes color-change {
   0% {
-    color: black;
+    color: white;
   }
 
   100% {
@@ -126,7 +126,7 @@ export default {
 
 @-ms-keyframes color-change {
   0% {
-    color: black;
+    color: white;
   }
 
   100% {
@@ -136,7 +136,7 @@ export default {
 
 @-o-keyframes color-change {
   0% {
-    color: black;
+    color: white;
   }
 
   100% {
@@ -146,7 +146,7 @@ export default {
 
 @keyframes color-change {
   0% {
-    color: black;
+    color: white;
   }
 
   100% {

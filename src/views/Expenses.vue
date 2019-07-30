@@ -40,13 +40,13 @@
           </v-card-title>
 
           <!-- start filters -->
-          <fieldset>
-            <legend style="padding-bottom: 0px;">Filters</legend>
+          <fieldset class="filter_border">
+            <legend class="legend_style">Filters</legend>
 
             <!-- active fitler -->
             <div v-if="isAdmin" class="flagFilter">
               <h4>Active Expense Type:</h4>
-              <v-btn-toggle v-model="filter.active" flat mandatory>
+              <v-btn-toggle class="filter_color" v-model="filter.active" flat mandatory>
                 <v-tooltip top>
                   <v-btn value="active" slot="activator" flat>
                     <icon class="mr-1" name="regular/check-circle"></icon>
@@ -71,7 +71,7 @@
             <!-- reimbursed fitler -->
             <div class="flagFilter">
               <h4>Reimbursed:</h4>
-              <v-btn-toggle v-model="filter.reimbursed" flat mandatory>
+              <v-btn-toggle class="filter_color" v-model="filter.reimbursed" flat mandatory>
                 <v-tooltip top>
                   <v-btn value="reimbursed" slot="activator" flat>
                     <icon class="mr-1" name="regular/check-circle"></icon>
@@ -102,13 +102,13 @@
             :pagination.sync="pagination"
             :expand="expand"
             item-key="id"
-            class="elevation-1"
+            class="elevation-4"
           >
             <v-progress-linear slot="progress" color="radioactive" indeterminate></v-progress-linear>
             <template slot="headers" slot-scope="props">
               <tr style="box-shadow: 0px 1.5px #888888;">
                 <th
-                  class="text-xs-left"
+                  class="text-xs-left "
                   v-for="header in props.headers"
                   :key="header.text"
                   :class="[

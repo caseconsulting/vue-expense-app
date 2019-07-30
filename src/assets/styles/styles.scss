@@ -1,7 +1,151 @@
+//theme 1
+
 .footer-buttons {
   float: right;
 }
 
+.header_style {
+  background-color: #850000;
+  color: white;
+  // border-radius: 5px;
+}
+
+// .legend_style {
+//   padding-bottom: 0px;
+// }
+
+.budget_header {
+  background-color: #850000;
+}
+
+.expense_info_title {
+  color: white;
+}
+
+.expense_info {
+  color: black;
+}
+
+.reimburse_button {
+  background-color: #bc3825 !important;
+  color: white !important;
+}
+
+.table_color {
+  background-color: #f5694f;
+  opacity: 0.2;
+}
+
+.filter_color {
+  background-color: #e9eef0 !important;
+}
+
+.nav-color {
+  background-color: #29434e !important;
+}
+
+//theme 2
+
+// .footer-buttons {
+//   float: right;
+// }
+
+// .header_style {
+//   background-color: #29434e;
+//   color: white;
+// }
+
+// .legend_style {
+//   padding-bottom: 0px;
+// }
+
+// .budget_header {
+//   background-color: #29434e;
+// }
+
+// .expense_info_title {
+//   color: white;
+// }
+
+// .expense_info {
+//   color: black;
+// }
+
+// .reimburse_button {
+//   background-color: #29434e !important;
+//   color: white !important;
+// }
+
+// .table_color {
+//   background-color: #f5694f;
+//   opacity: 0.2;
+// }
+
+// .filter_color {
+//   background-color: #e9eef0 !important;
+// }
+
+// .nav-color {
+//   background-color: #850000 !important;
+// }
+
+.login_e {
+  -webkit-animation: login-change 1s infinite alternate both;
+  -moz-animation: login-change 10s infinite alternate both;
+  -o-animation: login-change 10s infinite alternate both;
+  -ms-animation: login-change 10s infinite alternate both;
+  animation: login-change 5s infinite alternate both;
+}
+
+@-webkit-keyframes login-change {
+  0% {
+    color: #3f3f3c;
+  }
+
+  100% {
+    color: gold;
+  }
+}
+
+@-moz-keyframes login-change {
+  0% {
+    color: #3f3f3c;
+  }
+
+  100% {
+    color: gold;
+  }
+}
+
+@-ms-keyframes login-change {
+  0% {
+    color: #3f3f3c;
+  }
+
+  100% {
+    color: gold;
+  }
+}
+
+@-o-keyframes login-change {
+  0% {
+    color: #3f3f3c;
+  }
+
+  100% {
+    color: gold;
+  }
+}
+
+@keyframes login-change {
+  0% {
+    color: #3f3f3c;
+  }
+
+  100% {
+    color: gold;
+  }
+}
 // .application--wrap > .container.fluid {
 //   padding-right: 0;
 // }

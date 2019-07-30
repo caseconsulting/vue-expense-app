@@ -5,9 +5,9 @@
       <v-data-iterator :items="employee" content-tag="v-layout" hide-actions row wrap>
         <v-flex slot="item" slot-scope="props" xs12 sm6 lg6>
           <v-container fluid>
-            <v-card color="blue">
-              <v-card-title>
-                <h4 class="white--text subheading">{{ props.item.expenseTypeName }}</h4>
+            <v-card>
+              <v-card-title class="budget_header">
+                <h4 class="white--text subheading font-weight-bold">{{ props.item.expenseTypeName }}</h4>
               </v-card-title>
               <v-divider></v-divider>
               <v-list dense>

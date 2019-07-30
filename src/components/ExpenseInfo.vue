@@ -1,16 +1,16 @@
 <template>
-  <v-card v-if="expense" raised id="expense-info" class="white--text slide-in-blurred-right ">
+  <v-card v-if="expense" raised id="expense-info" class="white--text slide-in-blurred-right">
     <v-card-title primary-title class="color-change-2x">
-      <v-flex lg12 class="headline">Expense Info</v-flex>
-      <v-flex lg12>
-        <p><span>Description:</span> {{ expense.description }}</p>
-        <p><span>Employee:</span> {{ expense.employeeName }}</p>
-        <p><span>Budget:</span> {{ expense.budgetName }}</p>
-        <p><span>Cost:</span> {{ expense.cost | moneyValue }}</p>
-        <p><span>Purchased On:</span> {{ expense.purchaseDate | dateFormat }}</p>
-        <p><span>Reimbursed On:</span> {{ expense.reimbursedDate | dateFormat }}</p>
-        <p><span>Notes:</span> {{ expense.note }}</p>
-        <attachment :expense="expense" :mode="'adminExpenseInfo'"></attachment>
+      <v-flex lg12 class="headline expense_info_title">Expense Info</v-flex>
+      <v-flex lg12 class="expense_info">
+        <p class="expense_info"><span>Description:</span> {{ expense.description }}</p>
+        <p class="expense_info"><span>Employee:</span> {{ expense.employeeName }}</p>
+        <p class="expense_info"><span>Budget:</span> {{ expense.budgetName }}</p>
+        <p class="expense_info"><span>Cost:</span> {{ expense.cost | moneyValue }}</p>
+        <p class="expense_info"><span>Purchased On:</span> {{ expense.purchaseDate | dateFormat }}</p>
+        <p class="expense_info"><span>Reimbursed On:</span> {{ expense.reimbursedDate | dateFormat }}</p>
+        <p class="expense_info"><span>Notes:</span> {{ expense.note }}</p>
+        <attachment :expense="expense" :mode="'adminExpenseInfo'" class="expense_info"></attachment>
       </v-flex>
     </v-card-title>
   </v-card>
@@ -77,21 +77,25 @@ span {
 
 @-webkit-keyframes color-change-2x {
   0% {
-    background: #02b4cb;
+    /* background: #ef9a9a; */
+    background: #819ca9;
   }
 
   100% {
-    background: #64d48f;
+    /* background: #bdbdbd; */
+    background: #f5694f;
   }
 }
 
 @keyframes color-change-2x {
   0% {
-    background: #02b4cb;
+    /* background: #ef9a9a; */
+    background: #819ca9;
   }
 
   100% {
-    background: #64d48f;
+    /* background: #bdbdbd; */
+    background: #f5694f;
   }
 }
 

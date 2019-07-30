@@ -6,7 +6,12 @@
 
     <v-list class="pt-0" dense>
       <v-divider></v-divider>
-      <v-list-tile v-for="item in visibleTiles" :key="item.title" :to="{ name: item.route }">
+      <v-list-tile
+        v-for="item in visibleTiles"
+        :key="item.title"
+        active-class="red--text v-list__tile--active"
+        :to="{ name: item.route }"
+      >
         <v-list-tile-action>
           <icon :name="item.icon" class="navbar-icons"></icon>
         </v-list-tile-action>
@@ -96,7 +101,7 @@ export default {
 
 <style lang="scss">
 .navbar-icons {
-  color: #68caa6;
+  color: #646460;
   width: auto;
   height: 2em;
   max-width: 100%;

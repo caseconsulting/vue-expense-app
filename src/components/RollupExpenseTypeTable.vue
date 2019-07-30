@@ -137,7 +137,7 @@
 
         <!-- unreimburse button -->
         <v-flex offset-md10>
-          <v-fab-transition>
+          <v-fab-transition class="reimburse_button">
             <v-btn
               @click="button_clicked = true"
               id="custom-button-color"
@@ -149,6 +149,7 @@
               bottom
               left
               fixed
+              class="reimburse_button"
             >
               <icon name="dollar-sign"></icon>
             </v-btn>
