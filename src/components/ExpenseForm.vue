@@ -46,7 +46,7 @@
           :rules="componentRules"
           v-model="expense.categories"
           :items="getCategories()"
-          label="Select Category (optional)"
+          label="Select Category"
           clearable
           chips
         ></v-select>
