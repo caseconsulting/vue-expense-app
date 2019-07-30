@@ -423,8 +423,7 @@ export default {
   components: {
     BudgetChart,
     BudgetTable,
-    ExpenseForm,
-    CovertToEsv
+    ExpenseForm
   }
 };
 </script>

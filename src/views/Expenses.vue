@@ -92,6 +92,7 @@
                 </v-tooltip>
               </v-btn-toggle>
             </div>
+            <div class="flagFilter"></div>
           </fieldset>
           <br />
           <v-data-table
@@ -234,7 +235,10 @@
           <!-- <v-card-actions>
             <v-checkbox v-if="isUser" :label="'Show Reimbursed Expenses'" v-model="showReimbursed"></v-checkbox>
           </v-card-actions> -->
-
+          <br />
+          <v-card-actions>
+            <convert-expenses-to-esv :expenses="getExpenses()"></convert-expenses-to-esv>
+          </v-card-actions>
           <!-- end no results display -->
 
           <!-- unreimbursing button confirmation alert box -->
@@ -262,6 +266,7 @@ import ExpenseForm from '../components/ExpenseForm.vue';
 import DeleteModal from '../components/DeleteModal.vue';
 import UnreimburseModal from '../components/UnreimburseModal.vue';
 import Attachment from '../components/Attachment.vue';
+import ConvertExpensesToEsv from '../components/ConvertExpensesToEsv.vue';
 import moment from 'moment';
 import _ from 'lodash';
 import { getRole } from '@/utils/auth';
@@ -305,6 +310,10 @@ function getUserName() {
 }
 
 // METHODS
+function getExpenses() {
+  return api.getItems(api.EXPENSES);
+}
+
 function constructAutoComplete(aggregatedData) {
   this.employees = _.map(aggregatedData, data => {
     if (data && data.employeeName && data.userId) {
@@ -689,7 +698,8 @@ export default {
     ExpenseForm,
     Attachment,
     DeleteModal,
-    UnreimburseModal
+    UnreimburseModal,
+    ConvertExpensesToEsv
   },
   watch: {
     'filter.active': function() {
@@ -718,7 +728,8 @@ export default {
     isEditing,
     deleteExpense,
     unreimburseExpense,
-    filterExpense
+    filterExpense,
+    getExpenses
   },
   created
 };
