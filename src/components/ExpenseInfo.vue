@@ -77,8 +77,8 @@ span {
 
 @-webkit-keyframes color-change-2x {
   0% {
-    /* background: #ef9a9a; */
-    background: #819ca9;
+    /* background: #819ca9; */
+    background: #83837d;
   }
 
   100% {
@@ -89,8 +89,8 @@ span {
 
 @keyframes color-change-2x {
   0% {
-    /* background: #ef9a9a; */
-    background: #819ca9;
+    /* background: #819ca9; */
+    background: #83837d;
   }
 
   100% {
