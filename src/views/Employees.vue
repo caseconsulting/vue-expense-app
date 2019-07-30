@@ -77,8 +77,8 @@
               <v-card flat>
                 <v-card-text>
                   <div class="expandedInfo">
+                    <p><b>Prime: </b> {{ props.item.prime }}</p>
                     <p><b>Contract: </b>{{ props.item.contract }}</p>
-                    <p><b>Prime: </b>{{ props.item.prime }}</p>
                     <p><b>Job Role: </b>{{ props.item.jobRole }}</p>
                     <p>
                       <b>Github: </b><a :href="props.item.employeeNumber" target="_blank">{{ props.item.github }}</a>
