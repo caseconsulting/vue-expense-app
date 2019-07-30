@@ -16,7 +16,7 @@
           v-model="expense.userId"
           item-text="text"
           label="Employee"
-          style="padding-top: 20px"
+          class="form_padding"
         ></v-autocomplete>
 
         <!--Expense type picker if super-admin -->
@@ -39,7 +39,7 @@
           label="Expense Type"
           :disabled="!!expense.id"
           @input="expenseTypeSelected"
-          style="padding-top: 20px"
+          class="form_padding"
         ></v-autocomplete>
 
         <!-- category selector -->

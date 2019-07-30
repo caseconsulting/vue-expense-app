@@ -14,6 +14,7 @@
           :rules="genericRules"
           label="Budget Name"
           data-vv-name="Budget Name"
+          class="type_form_padding"
         ></v-text-field>
 
         <!-- categories field -->
