@@ -55,15 +55,32 @@
         ></v-text-field>
 
         <!-- flags -->
-        <v-checkbox label="Overdraft Flag (optional)" v-model="model.odFlag"></v-checkbox>
+        <v-container grid-list-md text-xs-center>
+          <v-layout row wrap>
+            <v-flex xs6>
+              <v-checkbox label="Overdraft Flag" v-model="model.odFlag"></v-checkbox>
 
-        <v-checkbox label="Recurring Flag (optional)" v-model="model.recurringFlag"></v-checkbox>
+              <v-checkbox label="Recurring Flag" v-model="model.recurringFlag"></v-checkbox>
+            </v-flex>
+            <v-flex xs6>
+              <v-checkbox label="Receipt Required" v-model="model.requiredFlag"></v-checkbox>
 
-        <!-- Requires receipt attachment for expense type -->
-        <v-checkbox label="Receipt Required (optional)" v-model="model.requiredFlag"></v-checkbox>
+              <!-- Flag set if expense is inactive -->
+              <v-checkbox label="Mark as Inactive" v-model="model.isInactive"></v-checkbox>
+            </v-flex>
+          </v-layout>
+        </v-container>
 
-        <!-- Flag set if expense is inactive -->
-        <v-checkbox label="Mark as Inactive (optional)" v-model="model.isInactive"></v-checkbox>
+        <!-- flags
+        <v-checkbox label="Overdraft Flag" v-model="model.odFlag"></v-checkbox>
+
+        <v-checkbox label="Recurring Flag" v-model="model.recurringFlag"></v-checkbox>
+
+     // Requires receipt attachment for expense type 
+        <v-checkbox label="Receipt Required" v-model="model.requiredFlag"></v-checkbox>
+
+     //    Flag set if expense is inactive 
+        <v-checkbox label="Mark as Inactive" v-model="model.isInactive"></v-checkbox> -->
 
         <!-- start date picker -->
         <v-menu
@@ -170,7 +187,7 @@ function clearForm() {
   this.$set(this.model, 'startDate', '');
   this.$set(this.model, 'endDate', '');
   this.$set(this.model, 'odFlag', false);
-  this.$set(this.model, 'requiredFlag', false);
+  this.$set(this.model, 'requiredFlag', true);
   this.$set(this.model, 'isInactive', false);
   this.$set(this.model, 'categories', []);
 }
@@ -203,7 +220,7 @@ async function submit() {
     this.model.recurringFlag = false;
   }
   if (!this.model.requiredFlag) {
-    this.model.requiredFlag = false;
+    this.model.requiredFlag = true;
   }
   if (!this.model.isInactive) {
     this.model.isInactive = false;
