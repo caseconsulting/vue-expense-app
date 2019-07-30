@@ -12,17 +12,9 @@
         item-key="id"
       >
         <!-- header for sub-datatable -->
-
         <template v-slot:headers="props">
           <tr>
-            <th>
-              <!-- <v-checkbox
-                :input-value="props.all"
-                :indeterminate="props.indeterminate"
-                primary
-                hide-details
-              ></v-checkbox> -->
-            </th>
+            <th></th>
             <th
               v-for="header in props.headers"
               :key="header.text"
@@ -68,6 +60,44 @@
 <script>
 import _ from 'lodash';
 import moment from 'moment';
+
+/* methods */
+
+/*
+ * Toggle all expenses if the category box is checked
+ */
+function toggleAll() {
+  if (!this.headBox.all && !this.headBox.indeterminate) {
+    this.selected = [];
+  } else if (this.headBox.all) {
+    this.selected = this.expenses.slice();
+  }
+}
+
+function changeSort(column) {
+  if (this.pagination.sortBy === column) {
+    this.pagination.descending = !this.pagination.descending;
+  } else {
+    this.pagination.sortBy = column;
+    this.pagination.descending = false;
+  }
+}
+
+/*
+ * Emit an event to parent that an expense was selected
+ */
+function expenseClicked(clickedExpense) {
+  window.EventBus.$emit('clickedExpense', clickedExpense);
+}
+
+/* LIFECYCLE HOOKS */
+
+async function created() {
+  this.checkBox.b_id = this.budgetId;
+  let shared = _.intersection(this.savedChecked, this.expenses);
+  this.selected = shared;
+  this.numExpenses = this.expenses.length;
+}
 
 export default {
   filters: {
@@ -116,35 +146,6 @@ export default {
     };
   },
   props: ['expenses', 'budgetId', 'headBox', 'savedChecked'],
-  methods: {
-    toggleAll() {
-      if (!this.headBox.all && !this.headBox.indeterminate) {
-        this.selected = [];
-
-        // this.selected.forEach(e => {
-        //   window.EventBus.$emit('expensePicked', e);
-        // });
-        // this.selected = [];
-      } else if (this.headBox.all) {
-        this.selected = this.expenses.slice();
-        // let notIn = _.differenceWith(this.expenses, this.selected);
-        // notIn.forEach(e => {
-        //   window.EventBus.$emit('expensePicked', e);
-        // });
-      }
-    },
-    changeSort(column) {
-      if (this.pagination.sortBy === column) {
-        this.pagination.descending = !this.pagination.descending;
-      } else {
-        this.pagination.sortBy = column;
-        this.pagination.descending = false;
-      }
-    },
-    expenseClicked(clickedExpense) {
-      window.EventBus.$emit('clickedExpense', clickedExpense);
-    }
-  },
   watch: {
     'headBox.all': function() {
       this.toggleAll();
@@ -174,11 +175,11 @@ export default {
       this.numExpenses = this.expenses.length;
     }
   },
-  created() {
-    this.checkBox.b_id = this.budgetId;
-    let shared = _.intersection(this.savedChecked, this.expenses);
-    this.selected = shared;
-    this.numExpenses = this.expenses.length;
-  }
+  methods: {
+    toggleAll,
+    changeSort,
+    expenseClicked
+  },
+  created
 };
 </script>

@@ -16,18 +16,38 @@
 <script>
 import _ from 'lodash';
 
+/* methods */
+
+function updateSelected(item) {
+  if (_.isArray(item)) {
+    if (item.length < this.selected.length) {
+      //removed item
+      this.selected = _.xor(this.selected, _.xor(item, this.selected));
+    } else {
+      //first time
+      this.selected.push(item);
+      this.selected = _.flatten(this.selected);
+      this.selected = _.uniqWith(this.selected, _.isEqual);
+    }
+    this.oldPassedItem = item;
+  } else if (item) {
+    let indexOfItem = _.indexOf(this.selected, item);
+    if (indexOfItem > -1) {
+      this.selected.splice(indexOfItem, 1);
+    } else {
+      this.selected.push(item);
+    }
+  }
+}
+
+/* LIFECYCLE HOOKS */
+
+async function created() {
+  window.EventBus.$on('expensePicked', this.updateSelected);
+  window.EventBus.$on('expenseChange', this.updateSelected);
+}
+
 export default {
-  data() {
-    return {
-      //test
-      selected: [],
-      oldPassedItem: null
-    };
-  },
-  created() {
-    window.EventBus.$on('expensePicked', this.updateSelected);
-    window.EventBus.$on('expenseChange', this.updateSelected);
-  },
   filters: {
     moneyValue: value => {
       return `${new Intl.NumberFormat('en-US', {
@@ -38,28 +58,16 @@ export default {
       }).format(value)}`;
     }
   },
+  data() {
+    return {
+      //test
+      selected: [],
+      oldPassedItem: null
+    };
+  },
+  created,
   methods: {
-    updateSelected(item) {
-      if (_.isArray(item)) {
-        if (item.length < this.selected.length) {
-          //removed item
-          this.selected = _.xor(this.selected, _.xor(item, this.selected));
-        } else {
-          //first time
-          this.selected.push(item);
-          this.selected = _.flatten(this.selected);
-          this.selected = _.uniqWith(this.selected, _.isEqual);
-        }
-        this.oldPassedItem = item;
-      } else if (item) {
-        let indexOfItem = _.indexOf(this.selected, item);
-        if (indexOfItem > -1) {
-          this.selected.splice(indexOfItem, 1);
-        } else {
-          this.selected.push(item);
-        }
-      }
-    }
+    updateSelected
   },
   computed: {
     totals: function() {

@@ -171,6 +171,348 @@ import UnrolledTableInfo from './UnrolledTableInfo.vue';
 import ReimburseModal from './ReimburseModal.vue';
 import _ from 'lodash';
 
+/* methods */
+function createExpensesForUnrolled(aggregatedData) {
+  return _.map(aggregatedData, expense => {
+    return {
+      budgetName: expense.budgetName,
+      cost: expense.cost,
+      description: expense.description,
+      employeeName: expense.employeeName,
+      expenseTypeId: expense.expenseTypeId,
+      firstName: expense.firstName,
+      id: expense.id,
+      lastName: expense.lastName,
+      middleName: expense.middleName,
+      note: expense.note,
+      purchaseDate: expense.purchaseDate,
+      receipt: expense.receipt,
+      reimbursedDate: expense.reimbursedDate,
+      userId: expense.userId,
+      selected: false,
+      createdAt: expense.createdAt
+    };
+  });
+}
+
+/*
+ * toggle the checkboxes if all, none, or some expenses selected
+ */
+function updateCheckBoxes(checkBox) {
+  this.filteredItems.forEach(e => {
+    if (e.id === checkBox.b_id) {
+      e.checkBox.all = checkBox.all;
+      e.checkBox.indeterminate = checkBox.indeterminate;
+    }
+  });
+}
+
+function modifyAggregateDate(aggregatedData, expenses) {
+  //Remove undefined stuff
+  aggregatedData = _.filter(aggregatedData, item => item !== undefined && !item.reimbursedDate);
+  //Maps each expense and only returns if not reimbursed
+  aggregatedData = _.forEach(aggregatedData, expense => {
+    expense.key = `${expense.userId}${expense.expenseTypeId}`;
+    expense.checkBox = {
+      all: false,
+      indeterminate: false
+    };
+    expense.expanded = false;
+  });
+  //Remove duplicates
+
+  //Create a list of arrays if the userId matches, expenseTypeId matches and hasn't been reimbursed
+  aggregatedData = _.forEach(aggregatedData, item => {
+    return (item.expenses = _.filter(expenses, expense => {
+      return this.matchingEmployeeAndExpenseType(expense, item);
+    }));
+  });
+  aggregatedData = _.uniqWith(aggregatedData, (el1, el2) => el1.key === el2.key);
+  return aggregatedData;
+}
+
+function matchingEmployeeAndExpenseType(expense, item) {
+  return expense.userId === item.userId && expense.expenseTypeId === item.expenseTypeId && !expense.reimbursedDate;
+}
+
+function constructAutoComplete(aggregatedData) {
+  this.employees = _.map(aggregatedData, data => {
+    if (data && data.employeeName && data.userId) {
+      return {
+        text: data.employeeName,
+        value: data.userId
+      };
+    }
+  }).filter(data => {
+    return data != null;
+  });
+  //Get expense Types
+  this.expenseTypes = _.map(aggregatedData, data => {
+    if (data && data.budgetName && data.expenseTypeId) {
+      return {
+        text: data.budgetName,
+        value: data.expenseTypeId
+      };
+    }
+  }).filter(data => {
+    return data != null;
+  });
+}
+
+/*
+ * Reimburse the selected list of expenses
+ */
+async function reimburseExpenses() {
+  if (this.button_clicked) {
+    this.button_clicked = false;
+    let expensesToSubmit = _.map(this.selected, item => {
+      return {
+        cost: item.cost,
+        description: item.description,
+        expenseTypeId: item.expenseTypeId,
+        id: item.id,
+        purchaseDate: item.purchaseDate,
+        reimbursedDate: this.moment().format('YYYY-MM-DD'),
+        note: !item.note ? null : item.note,
+        userId: item.userId,
+        receipt: null,
+        createdAt: item.createdAt
+      };
+    });
+    this.reimbursing = true;
+    let itemsToRemoveFromTable = [];
+
+    // reimburse expense on back end
+    await this.asyncForEach(expensesToSubmit, async expense => {
+      await api.updateItem(api.EXPENSES, expense.id, expense);
+      itemsToRemoveFromTable.push(expense);
+    });
+
+    // remove expense from empBudgets
+    _.forEach(itemsToRemoveFromTable, item => {
+      this.removeExpenseFromList(item);
+    });
+
+    // reset each invidiual row checkbox to empty
+    _.forEach(this.filteredItems, item => {
+      item.checkBox.all = false;
+      item.checkBox.indeterminate = false;
+    });
+
+    // remove reimbursed expenses from list of unreimbursed expenses
+    this.unreimbursedExpenses = _.differenceWith(this.unreimbursedExpenses, this.selected);
+
+    this.selected = [];
+    this.reimbursing = false;
+    // location.reload();
+  }
+}
+
+async function asyncForEach(array, callback) {
+  for (let index = 0; index < array.length; index++) {
+    await callback(array[index], index, array);
+  }
+}
+
+/*
+ * Remove an expense from the list of unreimbursed budgets
+ */
+function removeExpenseFromList(selected) {
+  let employeeIndex = _.findIndex(
+    this.empBudgets,
+    employee => employee.userId === selected.userId && employee.expenseTypeId === selected.expenseTypeId
+  );
+  let expenseIndex = _.findIndex(this.empBudgets[employeeIndex].expenses, expense => selected.id === expense.id);
+
+  this.empBudgets[employeeIndex].expenses.splice(expenseIndex, 1);
+
+  this.empBudgets = _.filter(this.empBudgets, item => item.expenses.length); //remove empty arrays
+}
+
+/*
+ * Adds a given expense to the selected list to reimburse
+ */
+function addExpenseToSelected(expense) {
+  if (_.indexOf(this.selected, expense) === -1) {
+    this.selected.push(expense);
+    _.findIndex(this.filteredItems, function(item) {
+      return item.id == expense.budgetId;
+    });
+  } else {
+    _.forEach(this.selected, exp => {
+      if (exp && exp.id === expense.id) {
+        this.selected.splice(_.indexOf(this.selected, exp), 1);
+      }
+    });
+  }
+}
+
+/*
+ * Sets the expanded property for the rows of the datatable
+ */
+function handleExpanded(props) {
+  if (!props.item.expanded) {
+    _.forEach(this.filteredItems, item => {
+      item.expanded = props.item === item;
+    });
+  } else {
+    _.forEach(this.filteredItems, item => {
+      item.expanded = false;
+    });
+  }
+}
+
+/*
+ * Selects all expenses within a single employee expense type to reimburse
+ */
+function toggleExpenses(item) {
+  if (!item.expanded) {
+    if (item.checkBox.all) {
+      _.forEach(item.expenses, exp => {
+        if (_.indexOf(this.selected, exp) === -1) {
+          this.selected.push(exp);
+        }
+      });
+    } else {
+      this.selected = _.filter(this.selected, expense => {
+        return !this.matchingEmployeeAndExpenseType(expense, item);
+      });
+    }
+    window.EventBus.$emit('expenseChange', this.selected);
+  }
+}
+
+/*
+ * Selects all expenses to reimburse
+ */
+function toggleAll() {
+  if (this.selected.length != this.unreimbursedExpenses.length) {
+    // check all boxes
+    this.filteredItems.forEach(e => {
+      e.checkBox.all = true;
+      e.checkBox.indeterminate = false;
+
+      this.toggleExpenses(e);
+    });
+  } else {
+    // clear all checkboxes
+    this.filteredItems.forEach(e => {
+      e.checkBox.all = false;
+      e.checkBox.indeterminate = false;
+
+      this.toggleExpenses(e);
+    });
+  }
+  window.EventBus.$emit('expenseChange', this.selected);
+}
+
+function getExpenseTotal(expenses) {
+  let total = 0;
+  _.forEach(expenses, expense => (total += expense.cost));
+  return total;
+}
+
+function changeSort(column) {
+  if (this.pagination.sortBy === column) {
+    this.pagination.descending = !this.pagination.descending;
+  } else {
+    this.pagination.sortBy = column;
+    this.pagination.descending = false;
+  }
+}
+
+async function getEmployeeName(expense) {
+  let employee = await api.getItem(api.EMPLOYEES, expense.userId);
+  expense.employeeName = employeeUtils.fullName(employee);
+  expense.lastName = employee.lastName;
+  expense.firstName = employee.firstName;
+  expense.selected = false;
+  return expense;
+}
+
+async function getExpenseTypeName(expense) {
+  let expenseType = await api.getItem(api.EXPENSE_TYPES, expense.expenseTypeId);
+  expense.budgetName = expenseType.budgetName;
+  return expense;
+}
+
+function customFilter(item, queryText) {
+  const hasValue = val => (val != null ? val : '');
+  const text = hasValue(item.text);
+  const query = hasValue(queryText);
+  return (
+    text
+      .toString()
+      .toLowerCase()
+      .indexOf(query.toString().toLowerCase()) > -1
+  );
+}
+
+function defaultSort() {
+  let arrayLength = this.empBudgets.length;
+
+  this.empBudgets.map(item => {
+    for (var i = 0; i < arrayLength; i++) {
+      if (item.lastName === this.empBudgets[i].lastName) {
+        // TODO: What should happen here?
+      }
+    }
+  });
+}
+
+/* computed */
+
+/*
+ * returns a list of expenses that are unreimbursed
+ */
+function filteredItems() {
+  return _.filter(this.empBudgets, expense => {
+    let cost = this.getExpenseTotal(expense.expenses);
+    expense.compareName = `${expense.lastName}${expense.firstName}${expense.middleName}${expense.budgetName}`;
+    expense.compareBudget = `${expense.budgetName}${expense.lastName}${expense.middleName}${expense.firstName}`;
+    expense.compareCost = `${cost}`;
+
+    if (!this.employee && !this.expenseType) {
+      return true;
+    } else if (!this.employee && this.expenseType) {
+      return expense.expenseTypeId === this.expenseType;
+    } else if (!this.expenseType && this.employee) {
+      return expense.userId === this.employee;
+    } else {
+      return expense.userId === this.employee && expense.expenseTypeId === this.expenseType;
+    }
+  });
+}
+
+/*
+ * Return true to display submit button if an expense is selected
+ */
+function showSubmitButton() {
+  if (this.selected.length === 0) {
+    return false;
+  } else {
+    return true;
+  }
+}
+
+/* LIFECYCLE HOOKS */
+
+async function created() {
+  window.EventBus.$on('expensePicked', this.addExpenseToSelected);
+  window.EventBus.$on('allCheckBoxChange', this.updateCheckBoxes);
+  window.EventBus.$on('confirm-reimburse', this.reimburseExpenses);
+  window.EventBus.$on('canceled-reimburse', () => (this.button_clicked = false));
+  let aggregatedData = await api.getAggregate();
+  let expenses = this.createExpensesForUnrolled(aggregatedData);
+  this.constructAutoComplete(aggregatedData);
+  aggregatedData = this.modifyAggregateDate(aggregatedData, expenses);
+  this.unreimbursedExpenses = _.filter(expenses, expense => {
+    return !expense.reimbursedDate;
+  });
+  this.loading = false;
+  this.empBudgets = aggregatedData;
+}
+
 export default {
   filters: {
     moneyValue: value => {
@@ -181,11 +523,6 @@ export default {
         maximumFractionDigits: 2
       }).format(value)}`;
     }
-  },
-  components: {
-    //UnrolledTableInfo,
-    UnrolledTableInfo,
-    ReimburseModal
   },
   data: () => ({
     loading: true,
@@ -220,311 +557,41 @@ export default {
       }
     ]
   }),
-  async created() {
-    window.EventBus.$on('expensePicked', this.addExpenseToSelected);
-    window.EventBus.$on('allCheckBoxChange', this.updateCheckBoxes);
-    window.EventBus.$on('confirm-reimburse', this.reimburseExpenses);
-    window.EventBus.$on('canceled-reimburse', () => (this.button_clicked = false));
-    let aggregatedData = await api.getAggregate();
-    let expenses = this.createExpensesForUnrolled(aggregatedData);
-    this.constructAutoComplete(aggregatedData);
-    aggregatedData = this.modifyAggregateDate(aggregatedData, expenses);
-    this.unreimbursedExpenses = _.filter(expenses, expense => {
-      return !expense.reimbursedDate;
-    });
-    this.loading = false;
-    this.empBudgets = aggregatedData;
-  },
-  computed: {
-    filteredItems() {
-      return _.filter(this.empBudgets, expense => {
-        let cost = this.getExpenseTotal(expense.expenses);
-        expense.compareName = `${expense.lastName}${expense.firstName}${expense.middleName}${expense.budgetName}`;
-        expense.compareBudget = `${expense.budgetName}${expense.lastName}${expense.middleName}${expense.firstName}`;
-        expense.compareCost = `${cost}`;
-
-        if (!this.employee && !this.expenseType) {
-          return true;
-        } else if (!this.employee && this.expenseType) {
-          return expense.expenseTypeId === this.expenseType;
-        } else if (!this.expenseType && this.employee) {
-          return expense.userId === this.employee;
-        } else {
-          return expense.userId === this.employee && expense.expenseTypeId === this.expenseType;
-        }
-      });
-    },
-    showSubmitButton() {
-      if (this.selected.length === 0) {
-        return false;
-      } else {
-        return true;
-      }
-    }
-  },
-  methods: {
-    //test
-    createExpensesForUnrolled(aggregatedData) {
-      return _.map(aggregatedData, expense => {
-        return {
-          budgetName: expense.budgetName,
-          cost: expense.cost,
-          description: expense.description,
-          employeeName: expense.employeeName,
-          expenseTypeId: expense.expenseTypeId,
-          firstName: expense.firstName,
-          id: expense.id,
-          lastName: expense.lastName,
-          middleName: expense.middleName,
-          note: expense.note,
-          purchaseDate: expense.purchaseDate,
-          receipt: expense.receipt,
-          reimbursedDate: expense.reimbursedDate,
-          userId: expense.userId,
-          selected: false,
-          createdAt: expense.createdAt
-        };
-      });
-    },
-    updateCheckBoxes(checkBox) {
-      this.filteredItems.forEach(e => {
-        if (e.id === checkBox.b_id) {
-          e.checkBox.all = checkBox.all;
-          e.checkBox.indeterminate = checkBox.indeterminate;
-        }
-      });
-    },
-    modifyAggregateDate(aggregatedData, expenses) {
-      //Remove undefined stuff
-      aggregatedData = _.filter(aggregatedData, item => item !== undefined && !item.reimbursedDate);
-      //Maps each expense and only returns if not reimbursed
-      aggregatedData = _.forEach(aggregatedData, expense => {
-        expense.key = `${expense.userId}${expense.expenseTypeId}`;
-        expense.checkBox = {
-          all: false,
-          indeterminate: false
-        };
-        expense.expanded = false;
-      });
-      //Remove duplicates
-
-      //Create a list of arrays if the userId matches, expenseTypeId matches and hasn't been reimbursed
-      aggregatedData = _.forEach(aggregatedData, item => {
-        return (item.expenses = _.filter(expenses, expense => {
-          return this.matchingEmployeeAndExpenseType(expense, item);
-        }));
-      });
-      aggregatedData = _.uniqWith(aggregatedData, (el1, el2) => el1.key === el2.key);
-      return aggregatedData;
-    },
-    matchingEmployeeAndExpenseType(expense, item) {
-      return expense.userId === item.userId && expense.expenseTypeId === item.expenseTypeId && !expense.reimbursedDate;
-    },
-    constructAutoComplete(aggregatedData) {
-      this.employees = _.map(aggregatedData, data => {
-        if (data && data.employeeName && data.userId) {
-          return {
-            text: data.employeeName,
-            value: data.userId
-          };
-        }
-      }).filter(data => {
-        return data != null;
-      });
-      //Get expense Types
-      this.expenseTypes = _.map(aggregatedData, data => {
-        if (data && data.budgetName && data.expenseTypeId) {
-          return {
-            text: data.budgetName,
-            value: data.expenseTypeId
-          };
-        }
-      }).filter(data => {
-        return data != null;
-      });
-    },
-    async reimburseExpenses() {
-      if (this.button_clicked) {
-        this.button_clicked = false;
-        let expensesToSubmit = _.map(this.selected, item => {
-          return {
-            cost: item.cost,
-            description: item.description,
-            expenseTypeId: item.expenseTypeId,
-            id: item.id,
-            purchaseDate: item.purchaseDate,
-            reimbursedDate: this.moment().format('YYYY-MM-DD'),
-            note: !item.note ? null : item.note,
-            userId: item.userId,
-            receipt: null,
-            createdAt: item.createdAt
-          };
-        });
-        this.reimbursing = true;
-        let itemsToRemoveFromTable = [];
-
-        // reimburse expense on back end
-        await this.asyncForEach(expensesToSubmit, async expense => {
-          await api.updateItem(api.EXPENSES, expense.id, expense);
-          itemsToRemoveFromTable.push(expense);
-        });
-
-        // remove expense from empBudgets
-        _.forEach(itemsToRemoveFromTable, item => {
-          this.removeExpenseFromList(item);
-        });
-
-        // reset each invidiual row checkbox to empty
-        _.forEach(this.filteredItems, item => {
-          item.checkBox.all = false;
-          item.checkBox.indeterminate = false;
-        });
-
-        // remove reimbursed expenses from list of unreimbursed expenses
-        this.unreimbursedExpenses = _.differenceWith(this.unreimbursedExpenses, this.selected);
-
-        this.selected = [];
-        this.reimbursing = false;
-        // location.reload();
-      }
-    },
-    async asyncForEach(array, callback) {
-      for (let index = 0; index < array.length; index++) {
-        await callback(array[index], index, array);
-      }
-    },
-    removeExpenseFromList(selected) {
-      let employeeIndex = _.findIndex(
-        this.empBudgets,
-        employee => employee.userId === selected.userId && employee.expenseTypeId === selected.expenseTypeId
-      );
-      let expenseIndex = _.findIndex(this.empBudgets[employeeIndex].expenses, expense => selected.id === expense.id);
-
-      this.empBudgets[employeeIndex].expenses.splice(expenseIndex, 1);
-
-      this.empBudgets = _.filter(this.empBudgets, item => item.expenses.length); //remove empty arrays
-    },
-
-    addExpenseToSelected(expense) {
-      if (_.indexOf(this.selected, expense) === -1) {
-        this.selected.push(expense);
-        _.findIndex(this.filteredItems, function(item) {
-          return item.id == expense.budgetId;
-        });
-      } else {
-        _.forEach(this.selected, exp => {
-          if (exp && exp.id === expense.id) {
-            this.selected.splice(_.indexOf(this.selected, exp), 1);
-          }
-        });
-      }
-    },
-    handleExpanded(props) {
-      if (!props.item.expanded) {
-        _.forEach(this.filteredItems, item => {
-          item.expanded = props.item === item;
-        });
-      } else {
-        _.forEach(this.filteredItems, item => {
-          item.expanded = false;
-        });
-      }
-    },
-    toggleExpenses(item) {
-      if (!item.expanded) {
-        if (item.checkBox.all) {
-          _.forEach(item.expenses, exp => {
-            if (_.indexOf(this.selected, exp) === -1) {
-              this.selected.push(exp);
-            }
-          });
-        } else {
-          this.selected = _.filter(this.selected, expense => {
-            return !this.matchingEmployeeAndExpenseType(expense, item);
-          });
-        }
-        window.EventBus.$emit('expenseChange', this.selected);
-      }
-    },
-    toggleAll() {
-      if (this.selected.length != this.unreimbursedExpenses.length) {
-        // check all boxes
-        this.filteredItems.forEach(e => {
-          e.checkBox.all = true;
-          e.checkBox.indeterminate = false;
-
-          this.toggleExpenses(e);
-        });
-      } else {
-        // clear all checkboxes
-        this.filteredItems.forEach(e => {
-          e.checkBox.all = false;
-          e.checkBox.indeterminate = false;
-
-          this.toggleExpenses(e);
-        });
-      }
-      window.EventBus.$emit('expenseChange', this.selected);
-    },
-    getExpenseTotal(expenses) {
-      let total = 0;
-      _.forEach(expenses, expense => (total += expense.cost));
-      return total;
-    },
-    changeSort(column) {
-      if (this.pagination.sortBy === column) {
-        this.pagination.descending = !this.pagination.descending;
-      } else {
-        this.pagination.sortBy = column;
-        this.pagination.descending = false;
-      }
-    },
-    async getEmployeeName(expense) {
-      let employee = await api.getItem(api.EMPLOYEES, expense.userId);
-      expense.employeeName = employeeUtils.fullName(employee);
-      expense.lastName = employee.lastName;
-      expense.firstName = employee.firstName;
-      expense.selected = false;
-      return expense;
-    },
-    async getExpenseTypeName(expense) {
-      let expenseType = await api.getItem(api.EXPENSE_TYPES, expense.expenseTypeId);
-      expense.budgetName = expenseType.budgetName;
-      return expense;
-    },
-    customFilter(item, queryText) {
-      const hasValue = val => (val != null ? val : '');
-      const text = hasValue(item.text);
-      const query = hasValue(queryText);
-      return (
-        text
-          .toString()
-          .toLowerCase()
-          .indexOf(query.toString().toLowerCase()) > -1
-      );
-    },
-    defaultSort() {
-      let arrayLength = this.empBudgets.length;
-
-      this.empBudgets.map(item => {
-        for (var i = 0; i < arrayLength; i++) {
-          if (item.lastName === this.empBudgets[i].lastName) {
-            // TODO: What should happen here?
-          }
-        }
-      });
-    }
-  },
   watch: {
     selected: function() {
       this.headBox.all = this.selected.length === this.unreimbursedExpenses.length;
       this.headBox.indeterminate = !this.headBox.all && this.selected.length > 0;
     }
-  }
+  },
+  methods: {
+    createExpensesForUnrolled,
+    updateCheckBoxes,
+    modifyAggregateDate,
+    matchingEmployeeAndExpenseType,
+    constructAutoComplete,
+    reimburseExpenses,
+    asyncForEach,
+    removeExpenseFromList,
+    addExpenseToSelected,
+    handleExpanded,
+    toggleExpenses,
+    toggleAll,
+    getExpenseTotal,
+    changeSort,
+    getEmployeeName,
+    getExpenseTypeName,
+    customFilter,
+    defaultSort
+  },
+  computed: {
+    filteredItems,
+    showSubmitButton
+  },
+  components: {
+    //UnrolledTableInfo,
+    UnrolledTableInfo,
+    ReimburseModal
+  },
+  created
 };
 </script>
-<style>
-#money-team {
-  color: green;
-}
-</style>
