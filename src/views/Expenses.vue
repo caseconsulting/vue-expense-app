@@ -222,7 +222,6 @@
                   </div>
                 </v-card-text>
               </v-card>
-              <view-notes :activate="viewingNotes" :notes="props.item.note" :url="props.item.url"></view-notes>
             </template>
 
             <!-- end data row dropdown/expandable -->
@@ -261,7 +260,6 @@ import api from '@/shared/api.js';
 import employeeUtils from '@/shared/employeeUtils';
 import ExpenseForm from '../components/ExpenseForm.vue';
 import DeleteModal from '../components/DeleteModal.vue';
-import ViewNotes from '../components/ViewNotes.vue';
 import UnreimburseModal from '../components/UnreimburseModal.vue';
 import Attachment from '../components/Attachment.vue';
 import moment from 'moment';
@@ -527,8 +525,6 @@ async function created() {
   window.EventBus.$on('canceled-delete-expense', () => (this.deleting = false));
   window.EventBus.$on('confirm-delete-expense', this.deleteExpense);
 
-  window.EventBus.$on('close-notes', () => (this.viewingNotes = false));
-
   console.log('created');
   console.log(this.expenseTypes);
 }
@@ -643,7 +639,6 @@ export default {
       // showReimbursed: false,
       deleting: false,
       unreimbursing: false,
-      viewingNotes: false,
       errors: [],
       headers: [
         {
@@ -694,7 +689,6 @@ export default {
     ExpenseForm,
     Attachment,
     DeleteModal,
-    ViewNotes,
     UnreimburseModal
   },
   watch: {
