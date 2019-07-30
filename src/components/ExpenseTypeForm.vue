@@ -60,13 +60,10 @@
           <v-layout row wrap>
             <v-flex xs6>
               <v-checkbox label="Overdraft Flag" v-model="model.odFlag"></v-checkbox>
-
               <v-checkbox label="Recurring Flag" v-model="model.recurringFlag"></v-checkbox>
             </v-flex>
             <v-flex xs6>
               <v-checkbox label="Receipt Required" v-model="model.requiredFlag"></v-checkbox>
-
-              <!-- Flag set if expense is inactive -->
               <v-checkbox label="Mark as Inactive" v-model="model.isInactive"></v-checkbox>
             </v-flex>
           </v-layout>
