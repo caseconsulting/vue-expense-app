@@ -124,6 +124,15 @@ export default {
             body: "This will freeze the user's ability to submit new expenses."
           }
         ],
+        foradmins: [
+          'For Admins',
+          'admin',
+          {
+            title: 'What is the difference between a an Admin and a Super Admin?',
+            body:
+              "Admins may view the admin dashboard, reimburse expenses, and create expense types. Super Admins have every capability that admins do, in addition to being able to view each employee's home view, create new employees, and create expenses for other employees"
+          }
+        ],
         knownIssues: [
           'Known Issues',
           'user',
