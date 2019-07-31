@@ -237,7 +237,7 @@
           </v-card-actions> -->
           <br />
           <v-card-actions>
-            <convert-expenses-to-esv :expenses="getExpenses()"></convert-expenses-to-esv>
+            <convert-expenses-to-esv v-if="isAdmin" :expenses="getExpenses()"></convert-expenses-to-esv>
           </v-card-actions>
           <!-- end no results display -->
 
