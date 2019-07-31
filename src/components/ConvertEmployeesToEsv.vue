@@ -3,8 +3,6 @@
 </template>
 
 <script>
-import api from '@/shared/api.js';
-
 // METHODS
 function convertToCSV(objArray) {
   var array = typeof objArray != 'object' ? JSON.parse(objArray) : objArray;
