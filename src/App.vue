@@ -11,6 +11,11 @@
         </v-toolbar-title>
         <v-spacer></v-spacer>
 
+        <!-- session timer -->
+        <div v-if="isLoggedIn()">
+          <countdown style="padding-right: 20px;"></countdown>
+        </div>
+
         <v-toolbar-items v-show="isLoggedIn()">
           <v-flex xs12 sm6 md8 align-center justify-left layout text-xs-center>
             <v-menu bottom offset-y open-on-click>
@@ -31,6 +36,8 @@
         </v-container>
       </v-content>
       <v-footer app></v-footer>
+      <time-out-model :activate="timedOut"></time-out-model>
+      <time-out-warning-model :activate="session"></time-out-warning-model>
     </v-app>
   </div>
 </template>
@@ -39,49 +46,76 @@
 import { isLoggedIn, logout, getProfile } from '@/utils/auth';
 import MainNav from '@/components/MainNav.vue';
 import router from './router.js';
+import Countdown from '@/components/Countdown.vue';
+import TimeOutModel from '@/components/TimeOutModel.vue';
+import TimeOutWarningModel from '@/components/TimeOutWarningModel.vue';
+
+/* METHODS */
+
+/*
+ * Logout of expense app
+ */
+function handleLogout() {
+  this.session = false;
+  this.timedOut = false;
+  logout();
+}
+
+async function initSession() {
+  const timeout = seconds => new Promise(resolve => setTimeout(resolve, seconds * 1000));
+  await timeout(60); //wait 60 seconds
+
+  if (!this.isLoggedIn() && this.hasBeenLoggedInBefore) {
+    this.hasBeenLoggedInBefore = false; //prevents looping for no reason
+    router.push({ path: '/home' });
+  }
+
+  this.initSession();
+}
+
+/* LIFECYCLE HOOKS */
+
+async function created() {
+  window.EventBus.$on('sessionWarning', () => (this.session = true)); // Timer 5 minutes remaining
+  window.EventBus.$on('sessionTimedOut', () => (this.timedOut = true)); // Timer end
+
+  window.EventBus.$on('sessionContinue', () => (this.session = false)); // Confirm 5 minute warning
+  window.EventBus.$on('relog', this.handleLogout); // Session end - log out
+
+  let pic = getProfile();
+
+  if (pic) {
+    this.profilePic = pic;
+  }
+
+  if (this.isLoggedIn()) this.hasBeenLoggedInBefore = true;
+
+  this.initSession(); //starts session checking
+}
 
 export default {
   data: () => ({
     drawer: false,
     profilePic: 'src/assets/img/logo-big.png',
-    hasBeenLoggedInBefore: false
+    hasBeenLoggedInBefore: false,
+    timedOut: false,
+    session: false
   }),
   props: {
     source: String
   },
   components: {
-    MainNav
+    MainNav,
+    Countdown,
+    TimeOutModel,
+    TimeOutWarningModel
   },
   methods: {
-    handleLogout() {
-      logout();
-    },
-    isLoggedIn() {
-      return isLoggedIn();
-    },
-    async initSession() {
-      const timeout = seconds => new Promise(resolve => setTimeout(resolve, seconds * 1000));
-      await timeout(60); //wait 60 seconds
-
-      if (!this.isLoggedIn() && this.hasBeenLoggedInBefore) {
-        this.hasBeenLoggedInBefore = false; //prevents looping for no reason
-        router.push({ path: '/home' });
-      }
-
-      this.initSession();
-    }
+    handleLogout,
+    isLoggedIn,
+    initSession
   },
-  created() {
-    let pic = getProfile();
-
-    if (pic) {
-      this.profilePic = pic;
-    }
-
-    if (this.isLoggedIn()) this.hasBeenLoggedInBefore = true;
-
-    this.initSession(); //starts session checking
-  }
+  created
 };
 </script>
 

@@ -122,7 +122,7 @@ export function isLoggedIn() {
   }
 }
 
-function getTokenExpirationDate(encodedToken) {
+export function getTokenExpirationDate(encodedToken) {
   const token = decode(encodedToken);
   if (!token.exp) {
     return null;
@@ -133,7 +133,7 @@ function getTokenExpirationDate(encodedToken) {
   return date;
 }
 
-function isTokenExpired(token) {
+export function isTokenExpired(token) {
   const expirationDate = getTokenExpirationDate(token);
   return expirationDate < new Date();
 }
