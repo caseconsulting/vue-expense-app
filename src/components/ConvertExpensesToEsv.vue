@@ -23,73 +23,86 @@ function convertToCSV(objArray) {
 
   return str;
 }
+async function getData() {
+  await api.getItems(api.EMPLOYEES).then(emp => {
+    this.employees = emp;
+  });
+  await api.getItems(api.EXPENSE_TYPES).then(expT => {
+    this.expenseTypes = expT;
+  });
+}
 
-async function exportCSVFile(items, fileTitle) {
-  console.log(items);
-  for (var i = 0; i < items.length; i++) {
-    let person = items[i];
-    await api.getItem(api.EMPLOYEES, person.userId).then(employee => {
-      person.employeeNumber = employee.employeeNumber;
-      person.lastName = employee.lastName;
-      person.firstName = employee.firstName;
-      if (i + 1 == items.length) {
-        this.loading = false;
+function exportCSVFile(items, fileTitle) {
+  this.getData().then(() => {
+    for (var i = 0; i < items.length; i++) {
+      let person = items[i];
+
+      for (let employee of this.employees) {
+        if (employee.id === person.userId) {
+          person.employeeNumber = employee.employeeNumber;
+          person.lastName = employee.lastName;
+          person.firstName = employee.firstName;
+          continue;
+        }
       }
-    });
 
-    await api.getItem(api.EXPENSE_TYPES, person.expenseTypeId).then(expenseType => {
-      person.expenseType = expenseType.budgetName;
-    });
+      for (let expT of this.expenseTypes) {
+        if (expT.id === person.expenseTypeId) {
+          person.expenseType = expT.budgetName;
+          continue;
+        }
+      }
 
-    items[i] = [
-      person.firstName,
-      person.lastName,
-      person.employeeNumber,
-      person.expenseType,
-      person.cost,
-      person.purchaseDate,
-      person.reimbursedDate || ' ',
-      person.categories || ' '
-    ];
-  }
-
-  this.headers = [
-    'First Name',
-    'Last Name',
-    'Employee #',
-    'Expense Type',
-    'Cost',
-    'Purchase Date',
-    'Reimbursed Date',
-    'Categories'
-  ];
-  items.unshift(this.headers);
-
-  // Convert Object to JSON
-  var jsonObject = JSON.stringify(items);
-
-  var csv = this.convertToCSV(jsonObject);
-
-  var exportedFilenmae = fileTitle + '.csv' || 'export.csv';
-
-  var blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-  if (navigator.msSaveBlob) {
-    // IE 10+
-    navigator.msSaveBlob(blob, exportedFilenmae);
-  } else {
-    var link = document.createElement('a');
-    if (link.download !== undefined) {
-      // feature detection
-      // Browsers that support HTML5 download attribute
-      var url = URL.createObjectURL(blob);
-      link.setAttribute('href', url);
-      link.setAttribute('download', exportedFilenmae);
-      link.style.visibility = 'hidden';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      items[i] = [
+        person.firstName,
+        person.lastName,
+        person.employeeNumber,
+        person.expenseType,
+        person.cost,
+        person.purchaseDate,
+        person.reimbursedDate || ' ',
+        person.categories || ' '
+      ];
     }
-  }
+
+    this.headers = [
+      'First Name',
+      'Last Name',
+      'Employee #',
+      'Expense Type',
+      'Cost',
+      'Purchase Date',
+      'Reimbursed Date',
+      'Categories'
+    ];
+    items.unshift(this.headers);
+
+    // Convert Object to JSON
+    var jsonObject = JSON.stringify(items);
+
+    var csv = this.convertToCSV(jsonObject);
+
+    var exportedFilenmae = fileTitle + '.csv' || 'export.csv';
+
+    var blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    if (navigator.msSaveBlob) {
+      // IE 10+
+      navigator.msSaveBlob(blob, exportedFilenmae);
+    } else {
+      var link = document.createElement('a');
+      if (link.download !== undefined) {
+        // feature detection
+        // Browsers that support HTML5 download attribute
+        var url = URL.createObjectURL(blob);
+        link.setAttribute('href', url);
+        link.setAttribute('download', exportedFilenmae);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
+    }
+  });
 }
 
 function download() {
@@ -104,11 +117,14 @@ export default {
   data() {
     return {
       headers: [],
-      loading: false
+      loading: false,
+      employees: [],
+      expenseTypes: []
     };
   },
   methods: {
     convertToCSV,
+    getData,
     exportCSVFile,
     download
   }
