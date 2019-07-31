@@ -70,7 +70,7 @@
     "stylelint-checkstyle-formatter": "^0.1.2",
     "stylelint-config-standard": "^18.3.0",
     "stylelint-processor-html": "^1.0.0",
-    "stylelint-scss": "^3.9.1",
+    "stylelint-scss": "^3.9.2",
     "vue-template-compiler": "^2.6.10"
   },
   "browserslist": [
