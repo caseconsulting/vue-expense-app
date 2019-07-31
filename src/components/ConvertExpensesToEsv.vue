@@ -1,5 +1,5 @@
 <template>
-  <v-btn @click="download()" :loading="loading"> <i class="material-icons">file_download</i> Download All</v-btn>
+  <v-btn @click="download()"> <i class="material-icons">file_download</i> Download All</v-btn>
 </template>
 
 <script>
@@ -106,7 +106,6 @@ function exportCSVFile(items, fileTitle) {
 }
 
 function download() {
-  this.loading = true;
   var fileTitle = 'expenses'; // or 'my-unique-title'
   this.expenses.then(expenses => {
     this.exportCSVFile(expenses, fileTitle); // call the exportCSVFile() function to process the JSON and trigger the download
@@ -117,7 +116,6 @@ export default {
   data() {
     return {
       headers: [],
-      loading: false,
       employees: [],
       expenseTypes: []
     };

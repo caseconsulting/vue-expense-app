@@ -105,6 +105,7 @@
           <v-card-actions v-show="userIsAdmin()">
             <v-checkbox :label="'Show Inactive Employees'" v-model="showAll"></v-checkbox>
           </v-card-actions>
+          <convert-employees-to-esv :employees="this.employees"></convert-employees-to-esv>
         </v-container>
       </v-card>
     </v-flex>
@@ -129,6 +130,7 @@ import EmployeeForm from '../components/EmployeeForm.vue';
 import moment from 'moment';
 import _ from 'lodash';
 import EmployeeHome from '@/views/EmployeeHome.vue';
+import ConvertEmployeesToEsv from '../components/ConvertEmployeesToEsv.vue';
 
 /* methods */
 function isInActive(employee) {
@@ -362,7 +364,8 @@ export default {
   },
   components: {
     EmployeeForm,
-    EmployeeHome
+    EmployeeHome,
+    ConvertEmployeesToEsv
   },
   created,
   methods: {
