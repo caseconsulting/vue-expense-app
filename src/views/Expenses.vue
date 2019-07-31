@@ -237,7 +237,7 @@
           </v-card-actions> -->
           <br />
           <v-card-actions>
-            <convert-expenses-to-esv v-if="isAdmin" :expenses="getExpenses()"></convert-expenses-to-esv>
+            <convert-expenses-to-csv v-if="isAdmin" :expenses="getExpenses()"></convert-expenses-to-csv>
           </v-card-actions>
           <!-- end no results display -->
 
@@ -266,7 +266,7 @@ import ExpenseForm from '../components/ExpenseForm.vue';
 import DeleteModal from '../components/DeleteModal.vue';
 import UnreimburseModal from '../components/UnreimburseModal.vue';
 import Attachment from '../components/Attachment.vue';
-import ConvertExpensesToEsv from '../components/ConvertExpensesToEsv.vue';
+import ConvertExpensestoCsv from '../components/ConvertExpensestoCsv.vue';
 import moment from 'moment';
 import _ from 'lodash';
 import { getRole } from '@/utils/auth';
@@ -699,7 +699,7 @@ export default {
     Attachment,
     DeleteModal,
     UnreimburseModal,
-    ConvertExpensesToEsv
+    ConvertExpensestoCsv
   },
   watch: {
     'filter.active': function() {
