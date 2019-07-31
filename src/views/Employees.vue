@@ -130,7 +130,7 @@ import EmployeeForm from '../components/EmployeeForm.vue';
 import moment from 'moment';
 import _ from 'lodash';
 import EmployeeHome from '@/views/EmployeeHome.vue';
-import ConvertEmployeestoCsv from '../components/ConvertEmployeestoCsv.vue';
+import ConvertEmployeesToCsv from '../components/ConvertEmployeesToCsv.vue';
 
 /* methods */
 function isInActive(employee) {
@@ -365,7 +365,7 @@ export default {
   components: {
     EmployeeForm,
     EmployeeHome,
-    ConvertEmployeestoCsv
+    ConvertEmployeesToCsv
   },
   created,
   methods: {

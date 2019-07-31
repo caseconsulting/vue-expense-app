@@ -266,7 +266,7 @@ import ExpenseForm from '../components/ExpenseForm.vue';
 import DeleteModal from '../components/DeleteModal.vue';
 import UnreimburseModal from '../components/UnreimburseModal.vue';
 import Attachment from '../components/Attachment.vue';
-import ConvertExpensestoCsv from '../components/ConvertExpensestoCsv.vue';
+import ConvertExpensesToCsv from '../components/ConvertExpensesToCsv.vue';
 import moment from 'moment';
 import _ from 'lodash';
 import { getRole } from '@/utils/auth';
@@ -699,7 +699,7 @@ export default {
     Attachment,
     DeleteModal,
     UnreimburseModal,
-    ConvertExpensestoCsv
+    ConvertExpensesToCsv
   },
   watch: {
     'filter.active': function() {
