@@ -105,7 +105,7 @@
           <v-card-actions v-show="userIsAdmin()">
             <v-checkbox :label="'Show Inactive Employees'" v-model="showAll"></v-checkbox>
           </v-card-actions>
-          <convert-employees-to-esv v-if="userIsAdmin" :employees="this.employees"></convert-employees-to-esv>
+          <convert-employees-to-esv v-if="userIsAdmin()" :employees="this.employees"></convert-employees-to-esv>
         </v-container>
       </v-card>
     </v-flex>
