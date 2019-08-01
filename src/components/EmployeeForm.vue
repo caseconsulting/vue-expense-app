@@ -152,6 +152,40 @@
                 min="1900-01-01"
               ></v-date-picker>
             </v-menu>
+            <!-- <fieldset class="filter_border">
+              <legend class="legend_style" style="font-size: 17px; padding-left: 10px;">Place of Birth</legend>
+            </fieldset> -->
+
+            <p style="font-size: 17px; padding-left: 10px; padding-top: 10px;">Place of Birth</p>
+
+            <div style="padding-right: 20px; padding-left: 30px; padding-bottom: 10px;">
+              <div style="border-left-style: groove; padding-right: 20px; padding-left: 10px; ">
+                <!-- Place of Birth: City text field -->
+                <v-text-field
+                  v-model="model.city"
+                  label="City"
+                  data-vv-name="City"
+                  style="padding-top: 0px;"
+                ></v-text-field>
+
+                <!-- Place of Birth: State autocomplete -->
+                <v-autocomplete
+                  :items="states"
+                  v-model="model.state"
+                  item-text="text"
+                  label="State"
+                  style="padding-top: 0px; padding-bottom: 0px;"
+                ></v-autocomplete>
+
+                <!-- Place of Birth: Country text field -->
+                <v-text-field
+                  v-model="model.country"
+                  label="Country"
+                  data-vv-name="Country"
+                  style="padding-top: 0px;"
+                ></v-text-field>
+              </div>
+            </div>
           </v-expansion-panel-content>
         </v-expansion-panel>
 
@@ -208,12 +242,15 @@ function clearForm() {
   this.$set(this.model, 'id', '');
 
   // New Fields
-  this.$set(this.model, 'birthday', '');
-  this.$set(this.model, 'jobRole', '');
   this.$set(this.model, 'prime', '');
   this.$set(this.model, 'contract', '');
   this.$set(this.model, 'github', '');
   this.$set(this.model, 'twitter', '');
+  this.$set(this.model, 'jobRole', '');
+  this.$set(this.model, 'birthday', '');
+  this.$set(this.model, 'city', '');
+  this.$set(this.model, 'state', '');
+  this.$set(this.model, 'country', '');
 }
 
 async function deleteEmployee() {
@@ -263,7 +300,71 @@ export default {
   data() {
     return {
       birthdayFormat: '',
-      jobRoles: ['Software Developer'],
+      jobRoles: [
+        'Software Developer',
+        'Project Manager',
+        'System Engineer',
+        'Cloud Engineer',
+        'Data Scientist',
+        'QA/Tester',
+        'Intern',
+        'Accountant',
+        'President',
+        'Other'
+      ],
+      states: [
+        'Alabama',
+        'Alaska',
+        'Arizona',
+        'Arkansas',
+        'California',
+        'Colorado',
+        'Connecticut',
+        'Delaware',
+        'District of Columbia',
+        'Florida',
+        'Georgia',
+        'Hawaii',
+        'Idaho',
+        'Illinois',
+        'Indiana',
+        'Iowa',
+        'Kansas',
+        'Kentucky',
+        'Louisiana',
+        'Maine',
+        'Maryland',
+        'Massachusetts',
+        'Michigan',
+        'Minnesota',
+        'Mississippi',
+        'Missouri',
+        'Montana',
+        'Nebraska',
+        'Nevada',
+        'New Hampshire',
+        'New Jersey',
+        'New Mexico',
+        'New York',
+        'North Carolina',
+        'North Dakota',
+        'Ohio',
+        'Oklahoma',
+        'Oregon',
+        'Pennsylvania',
+        'Rhode Island',
+        'South Carolina',
+        'South Dakota',
+        'Tennessee',
+        'Texas',
+        'Utah',
+        'Vermont',
+        'Virginia',
+        'Washington',
+        'West Virginia',
+        'Wisconsin',
+        'Wyoming'
+      ],
       componentRules: [v => !!v || 'Something must be selected'],
       permissions: ['Admin', 'User'],
       deleting: false,
