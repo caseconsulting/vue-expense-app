@@ -121,7 +121,7 @@
               </v-card>
               <v-card flat v-if="userIsAdmin()">
                 <v-card-text>
-                  <employee-home :employ="props.item"> </employee-home>
+                  <employee-home :adminCall="true" :employ="props.item"> </employee-home>
                 </v-card-text>
               </v-card>
             </template>

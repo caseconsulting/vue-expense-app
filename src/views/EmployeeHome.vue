@@ -43,7 +43,7 @@
       <v-flex text-xs-center>
         <budget-table v-if="!loading" :employee="expenseTypeData"></budget-table>
         <budget-chart
-          v-if="!loading && !isMobile"
+          v-if="!loading && !isMobile && !adminCall"
           :options="drawGraph.optionSet"
           :chart-data="drawGraph.dataSet"
         ></budget-chart>
@@ -133,6 +133,9 @@ export default {
     };
   },
   props: {
+    adminCall: {
+      default: null
+    },
     employ: {
       default: null
     }
