@@ -177,22 +177,42 @@
                 <!-- <td class="text-xs-left">{{ props.item.description | limitedText }}</td> -->
                 <td class="text-xs-left">{{ props.item.startDate }}</td>
                 <td class="text-xs-left">{{ props.item.endDate }}</td>
-                <!-- <td class="text-xs-center">
-                  <icon v-if="props.item.odFlag" id="marks" class="mr-1" name="regular/check-circle"></icon>
-                  <icon v-else class="mr-1" id="marks" name="regular/times-circle"></icon>
+
+                <!-- action icons -->
+                <td class="datatable_btn layout">
+                  <!-- edit button -->
+                  <v-tooltip top>
+                    <!-- <v-btn :disabled="isEditing()" flat icon @click="onSelect(props.item)" slot="activator"> -->
+                    <v-btn :disabled="isEditing()" flat icon slot="activator">
+                      <v-icon style="color: #606060">
+                        edit
+                      </v-icon>
+                    </v-btn>
+                    <span>Edit</span>
+                  </v-tooltip>
+
+                  <!-- delete button -->
+                  <v-tooltip top>
+                    <v-btn
+                      :disabled="isEditing()"
+                      flat
+                      icon
+                      @click="
+                        deleting = true;
+                        propExpense = props.item;
+                      "
+                      slot="activator"
+                    >
+                      <v-icon style="color: #606060">
+                        delete
+                      </v-icon>
+                    </v-btn>
+                    <span>Delete</span>
+                  </v-tooltip>
                 </td>
-                <td class="text-xs-center">
-                  <icon v-if="props.item.recurringFlag" id="marks" class="mr-1" name="regular/check-circle"></icon>
-                  <icon v-else class="mr-1" id="marks" name="regular/times-circle"></icon>
-                </td>
-                <td class="text-xs-center">
-                  <icon v-if="props.item.requiredFlag" id="marks" class="mr-1" name="regular/check-circle"></icon>
-                  <icon v-else class="mr-1" id="marks" name="regular/times-circle"></icon>
-                </td>
-                <td class="text-xs-left">{{ isInactive(props.item) }}</td>
-              </tr> -->
-              </tr></template
-            >
+                <!-- end action icons -->
+              </tr>
+            </template>
 
             <!-- end data row -->
 
@@ -434,6 +454,10 @@ function getAllExpenses(id) {
     });
 }
 
+function isEditing() {
+  return !!this.model.id;
+}
+
 /* computed */
 function expenseTypeList() {
   return this.filteredExpenseTypes;
@@ -477,11 +501,7 @@ export default {
         {
           text: 'Budget',
           value: 'budget'
-        }, //change value to call a function
-        // {
-        //   text: 'Description',
-        //   value: 'description'
-        // },
+        },
         {
           text: 'Start Date',
           value: 'startDate'
@@ -490,22 +510,6 @@ export default {
           text: 'End Date',
           value: 'endDate'
         }
-        //,
-        // {
-        //   text: 'Overdraft Allowed',
-        //   value: 'odFlag',
-        //   sortable: false
-        // },
-        // {
-        //   text: 'Recurring',
-        //   value: 'recurringFlag',
-        //   sortable: false
-        // },
-        // {
-        //   text: 'Receipt Required',
-        //   value: 'requiredFlag',
-        //   sortable: false
-        // }
       ],
       pagination: {
         sortBy: 'budgetName',
@@ -566,7 +570,8 @@ export default {
     deleteModelFromTable,
     changeSort,
     filterExpense,
-    getAllExpenses
+    getAllExpenses,
+    isEditing
   },
   created
 };

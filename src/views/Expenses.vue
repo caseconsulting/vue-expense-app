@@ -135,7 +135,7 @@
                 <td class="text-xs-left">{{ props.item.purchaseDate | dateFormat }}</td>
                 <td class="text-xs-left">{{ props.item.reimbursedDate | dateFormat }}</td>
 
-                <!-- option buttons -->
+                <!-- action icons -->
                 <td class="datatable_btn layout">
                   <!-- download attachment button -->
                   <v-tooltip top>
