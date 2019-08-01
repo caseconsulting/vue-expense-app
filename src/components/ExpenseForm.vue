@@ -2,14 +2,14 @@
   <v-card hover>
     <v-container fluid>
       <v-card-title class="header_style">
-        <h3 v-if="expense.id && (isSuperAdmin || !isReimbursed)">Edit Expense</h3>
-        <h3 v-else-if="expense.id && !isSuperAdmin && isReimbursed">View Expense</h3>
+        <h3 v-if="expense.id && (isAdmin || !isReimbursed)">Edit Expense</h3>
+        <h3 v-else-if="expense.id && !isAdmin && isReimbursed">View Expense</h3>
         <h3 v-else>Create New Expense</h3>
       </v-card-title>
       <v-form ref="form" v-model="valid" lazy-validation>
         <!--Employee picker if admin level -->
         <v-autocomplete
-          v-if="isSuperAdmin && this.$route.path !== '/home'"
+          v-if="isAdmin && this.$route.path !== '/home'"
           :items="employees"
           :rules="componentRules"
           :filter="customFilter"
@@ -19,9 +19,9 @@
           class="form_padding"
         ></v-autocomplete>
 
-        <!--Expense type picker if super-admin -->
+        <!--Expense type picker if admin -->
         <v-autocomplete
-          v-if="isSuperAdmin && this.$route.path !== '/home'"
+          v-if="isAdmin && this.$route.path !== '/home'"
           :items="filteredExpenseTypes()"
           :rules="componentRules"
           v-model="expense.expenseTypeId"
@@ -98,7 +98,7 @@
 
         <!-- Date Picker 2-->
         <v-menu
-          v-if="isSuperAdmin"
+          v-if="isAdmin"
           ref="menu2"
           :close-on-content-click="false"
           v-model="menu2"
@@ -160,7 +160,7 @@
           outline
           color="success"
           @click="checkCoverage"
-          :disabled="!valid || (!isSuperAdmin && isReimbursed)"
+          :disabled="!valid || (!isAdmin && isReimbursed)"
           :loading="loading"
         >
           <icon class="mr-1" name="save"></icon>Submit</v-btn
@@ -334,7 +334,7 @@ function betweenDates(startDate, endDate) {
 function filteredExpenseTypes() {
   let filteredExpType = [];
 
-  if (this.employeeRole === 'super-admin' && this.$route.path === '/expenses') {
+  if (this.employeeRole === 'admin' && this.$route.path === '/expenses') {
     this.expenseTypes.forEach(function(element) {
       if (!element.isInactive) {
         filteredExpType.push(element);
@@ -451,15 +451,11 @@ function getCategories() {
 }
 
 function isAdmin() {
-  return this.employeeRole === 'admin' || this.employeeRole === 'super-admin';
+  return this.employeeRole === 'admin';
 }
 
 function isReimbursed() {
   return this.reimbursedDateFormatted !== null;
-}
-
-function isSuperAdmin() {
-  return this.employeeRole === 'super-admin';
 }
 
 function isUser() {
@@ -513,7 +509,7 @@ async function created() {
     this.$set(this.expense, 'employeeName', this.userInfo.id);
     this.$set(this.expense, 'userId', this.userInfo.id);
   } else {
-    if (employeeRole === 'super-admin') {
+    if (employeeRole === 'admin') {
       let employees = await api.getItems(api.EMPLOYEES);
       this.employees = employees.map(employee => {
         return {
@@ -596,7 +592,6 @@ export default {
   computed: {
     isAdmin,
     isReimbursed,
-    isSuperAdmin,
     isUser,
     isRequired,
     updateIsRequired
