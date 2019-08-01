@@ -11,11 +11,6 @@
         </v-toolbar-title>
         <v-spacer></v-spacer>
 
-        <!-- session timer -->
-        <div v-if="isLoggedIn()">
-          <countdown style="padding-right: 20px;"></countdown>
-        </div>
-
         <v-toolbar-items v-show="isLoggedIn()">
           <v-flex xs12 sm6 md8 align-center justify-left layout text-xs-center>
             <v-menu bottom offset-y open-on-click>
@@ -43,10 +38,10 @@
 </template>
 
 <script>
-import { isLoggedIn, logout, getProfile } from '@/utils/auth';
+import { isLoggedIn, logout, getProfile, getTokenExpirationDate, getAccessToken } from '@/utils/auth';
 import MainNav from '@/components/MainNav.vue';
 import router from './router.js';
-import Countdown from '@/components/Countdown.vue';
+// import Countdown from '@/components/Countdown.vue';
 import TimeOutModel from '@/components/TimeOutModel.vue';
 import TimeOutWarningModel from '@/components/TimeOutWarningModel.vue';
 
@@ -76,11 +71,28 @@ async function initSession() {
 /* LIFECYCLE HOOKS */
 
 async function created() {
-  window.EventBus.$on('sessionWarning', () => (this.session = true)); // Timer 5 minutes remaining
-  window.EventBus.$on('sessionTimedOut', () => (this.timedOut = true)); // Timer end
-
   window.EventBus.$on('sessionContinue', () => (this.session = false)); // Confirm 5 minute warning
   window.EventBus.$on('relog', this.handleLogout); // Session end - log out
+
+  // set expiration date if access token received
+  let accessToken = getAccessToken();
+
+  if (accessToken) {
+    this.date = Math.trunc(getTokenExpirationDate(accessToken).getTime());
+    this.now = Math.trunc(new Date().getTime());
+    let timeRemaining = this.date - this.now;
+    console.log(timeRemaining / 60000 + ' minutes');
+
+    window.setTimeout(() => {
+      this.timedOut = true;
+    }, timeRemaining);
+
+    if (timeRemaining > 300000) {
+      window.setTimeout(() => {
+        this.session = true;
+      }, timeRemaining - 300000);
+    }
+  }
 
   let pic = getProfile();
 
@@ -99,14 +111,15 @@ export default {
     profilePic: 'src/assets/img/logo-big.png',
     hasBeenLoggedInBefore: false,
     timedOut: false,
-    session: false
+    session: false,
+    now: Math.trunc(new Date().getTime() / 1000),
+    date: null
   }),
   props: {
     source: String
   },
   components: {
     MainNav,
-    Countdown,
     TimeOutModel,
     TimeOutWarningModel
   },
