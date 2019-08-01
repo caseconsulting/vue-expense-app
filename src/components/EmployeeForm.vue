@@ -256,7 +256,7 @@ async function submit() {
 }
 
 function userIsAdmin() {
-  return getRole() === 'super-admin';
+  return getRole() === 'admin';
 }
 
 export default {
@@ -265,7 +265,7 @@ export default {
       birthdayFormat: '',
       jobRoles: ['Software Developer'],
       componentRules: [v => !!v || 'Something must be selected'],
-      permissions: ['Super Admin', 'Admin', 'User'],
+      permissions: ['Admin', 'User'],
       deleting: false,
       date: null,
       hireDateFormatted: null,
