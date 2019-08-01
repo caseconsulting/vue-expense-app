@@ -52,7 +52,7 @@ export function requireAuth(to, from, next) {
 }
 
 export function isAdmin(to, from, next) {
-  if (getRole() === 'admin' || getRole() === 'super-admin') {
+  if (getRole() === 'admin') {
     next();
   } else {
     next({
