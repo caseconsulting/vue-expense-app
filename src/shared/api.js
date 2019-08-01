@@ -6,6 +6,7 @@ const EXPENSES = 'expenses';
 const EMPLOYEES = 'employees';
 const SPECIAL = 'special';
 const BUDGETS = 'budgets';
+const URLS = 'training-urls';
 const API_HOSTNAME = API_CONFIG.apiHostname;
 const API_PORT = API_CONFIG.apiPort;
 const PORT = API_PORT === '443' ? '' : `:${API_PORT}`;
@@ -52,6 +53,11 @@ function getAllEmployeeExpenses(id) {
 
 function getAllExpenseTypeExpenses(id) {
   return execute('get', `/special/getAllExpenseTypeExpenses/${id}`);
+}
+
+function getURLInfo(id) {
+  console.log('here we are');
+  return execute('get', `/special/getURLInfo/${id}`);
 }
 
 function createItem(type, data) {
@@ -112,6 +118,7 @@ export default {
   getItem,
   getAttachment,
   createAttachment,
+  getURLInfo,
   createItem,
   updateItem,
   deleteItem,
@@ -122,5 +129,6 @@ export default {
   EXPENSES,
   EMPLOYEES,
   SPECIAL,
-  BUDGETS
+  BUDGETS,
+  URLS
 };

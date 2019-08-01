@@ -291,6 +291,10 @@ function clearForm() {
   this.$set(this.expense, 'receipt', undefined);
   this.$set(this.expense, 'categories', null);
 
+  this.$set(this.urlInfo, 'url', '');
+  this.$set(this.urlInfo, 'category', []);
+  this.$set(this.urlInfo, 'hits', 0);
+
   if (this.isUser) {
     this.$set(this.expense, 'employeeName', this.userInfo.id);
   } else {
@@ -398,6 +402,10 @@ async function submit() {
         }
         let newExpense = await api.createItem(api.EXPENSES, this.expense);
         if (newExpense.id) {
+          //add url to training-urls table
+          if (newExpense.url) {
+            await this.addURLInfo(newExpense);
+          }
           // submit attachment
           if (this.isRequired) {
             await api.createAttachment(newExpense, this.file);
@@ -414,6 +422,72 @@ async function submit() {
     }
     this.loading = false;
   }
+}
+
+async function addURLInfo(newExpense) {
+  // let item = await api.getItem(api.URLS, newExpense.url);
+  // let url = newExpense.url;
+  let encodedURL = btoa(newExpense.url);
+  let item = await api.getURLInfo(encodedURL);
+
+  if (item) {
+    console.log('item', item);
+    await this.incrementURLHits(item, newExpense.categories);
+  } else {
+    console.log('front end made');
+    this.$set(this.urlInfo, 'id', newExpense.url);
+
+    //adds categories to the list if applicable
+    if (newExpense.categories) {
+      let categories = [];
+      console.log(newExpense.categories);
+      categories.push(newExpense.categories);
+      this.$set(this.urlInfo, 'category', categories);
+    }
+    this.$set(this.urlInfo, 'hits', 1);
+    await api.createItem(api.URLS, this.urlInfo);
+  }
+}
+
+async function incrementURLHits(urlInfo, categoryToAdd) {
+  let encodedURL = btoa(urlInfo.id);
+  console.log('urlInfo', urlInfo);
+  let hits = urlInfo.hits + 1;
+  this.$set(this.urlInfo, 'hits', hits);
+
+  //adds categories to the list if applicable
+  console.log('category to add', categoryToAdd);
+  if (categoryToAdd) {
+    console.log('length', urlInfo.category.length);
+    if (urlInfo.category.length > 0) {
+      console.log('has categories');
+      console.log(urlInfo.category);
+      let duplicate = _.find(urlInfo.category, category => {
+        console.log('in');
+        console.log(category);
+        if (category === categoryToAdd) {
+          return category;
+        }
+      });
+
+      console.log(duplicate);
+      if (!duplicate) {
+        let categories = urlInfo.category;
+        categories.push(categoryToAdd);
+        this.$set(this.urlInfo, 'category', categories);
+      } else {
+        this.$set(this.urlInfo, 'category', urlInfo.category);
+      }
+    } else {
+      let category = [];
+      category.push(categoryToAdd);
+      this.$set(this.urlInfo, 'category', category);
+    }
+  } else {
+    this.$set(this.urlInfo, 'category', urlInfo.category);
+  }
+
+  return await api.updateItem(api.URLS, encodedURL, this.urlInfo);
 }
 
 function expenseTypeSelected(value) {
@@ -542,6 +616,11 @@ export default {
       menu1: false,
       menu2: false,
       userInfo: {},
+      urlInfo: {
+        id: ' ',
+        category: [],
+        hits: 0
+      },
       descriptionRules: [
         v => !!v || 'Description is a required field',
         v => (v && v.replace(/\s/g, '').length > 0) || 'Description is a required field'
@@ -607,7 +686,9 @@ export default {
     setFile,
     expenseTypeSelected,
     filteredExpenseTypes,
-    getCategories
+    getCategories,
+    addURLInfo,
+    incrementURLHits
   },
   created
 };
