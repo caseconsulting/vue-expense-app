@@ -39,37 +39,37 @@ export default {
           title: 'Employee Home',
           icon: 'hand-holding-usd',
           route: 'home',
-          permission: ['user', 'admin', 'super-admin']
+          permission: ['user', 'admin']
         },
         {
           title: 'Admin Dashboard',
           icon: 'desktop',
           route: 'admin',
-          permission: ['super-admin', 'admin']
+          permission: ['admin']
         },
         {
           title: 'Expenses',
           icon: 'dollar-sign',
           route: 'expenses',
-          permission: ['super-admin', 'admin', 'user']
+          permission: ['admin', 'user']
         },
         {
           title: 'Expense Types',
           icon: 'book',
           route: 'expenseTypes',
-          permission: ['super-admin', 'admin']
+          permission: ['admin']
         },
         {
           title: 'Employees',
           icon: 'users',
           route: 'employees',
-          permission: ['super-admin', 'admin', 'user']
+          permission: ['admin', 'user']
         },
         {
           title: 'Help',
           icon: 'life-ring',
           route: 'help',
-          permission: ['super-admin', 'admin', 'user']
+          permission: ['admin', 'user']
         }
       ]
     };
