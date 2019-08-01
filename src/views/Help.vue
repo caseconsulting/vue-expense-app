@@ -10,7 +10,7 @@
     <div class="mb-5">
       <div class="text-xs-center mb-3"></div>
       <v-expansion-panel expand v-for="section in sections" :key="section[0]">
-        <v-expansion-panel-content v-if="section[1] == role || role == 'super-admin' || section[1] == 'user'">
+        <v-expansion-panel-content v-if="section[1] == role || role == 'admin' || section[1] == 'user'">
           <div slot="header">{{ section[0] }}</div>
           <v-card>
             <v-card-text class="grey lighten-3">
@@ -128,9 +128,9 @@ export default {
           'For Admins',
           'admin',
           {
-            title: 'What is the difference between an Admin and a Super Admin?',
+            title: 'What capabilities do Admins have?',
             body:
-              "Admins may view the admin dashboard, reimburse expenses, and create expense types. Super Admins have every capability that admins do, in addition to being able to view each employee's home view, create new employees, and create expenses for other employees"
+              "Admins may view the admin dashboard, reimburse expenses, and create expense types, view each employee's budget home view, create new employees, and create expenses for other employees"
           }
         ],
         knownIssues: [
