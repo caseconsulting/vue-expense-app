@@ -179,7 +179,7 @@
                   </v-tooltip>
 
                   <!-- unreimburse button -->
-                  <!-- <div v-if="isSuperAdmin">
+                  <!-- <div v-if="isAdmin">
                     <v-tooltip top>
                       <v-btn
                         :disabled="props.item.reimbursedDate == null || isEditing()"
@@ -284,15 +284,11 @@ function moneyFilter(value) {
 // COMPUTED
 
 function isAdmin() {
-  return this.role === 'admin' || this.role === 'super-admin';
+  return this.role === 'admin';
 }
 
 function isUser() {
   return this.role === 'user';
-}
-
-function isSuperAdmin() {
-  return this.role === 'super-admin';
 }
 
 function roleHeaders() {
@@ -691,7 +687,6 @@ export default {
   computed: {
     isAdmin,
     isUser,
-    isSuperAdmin,
     roleHeaders,
     getUserName,
     expenseList

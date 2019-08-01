@@ -20,7 +20,7 @@ import { isLoggedIn, login, getRole } from '@/utils/auth';
 export default {
   created() {
     if (this.isLoggedIn()) {
-      if (getRole() === 'admin' || getRole() === 'super-admin') {
+      if (getRole() === 'admin') {
         this.$router.push('admin-dashboard');
       } else {
         this.$router.push('home');
