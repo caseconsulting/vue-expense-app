@@ -105,17 +105,33 @@
             <template v-slot:expand="props">
               <v-card flat>
                 <v-card-text>
-                  <div class="expandedInfo">
-                    <p><b>Prime: </b> {{ props.item.prime }}</p>
-                    <p><b>Contract: </b>{{ props.item.contract }}</p>
-                    <p><b>Job Role: </b>{{ props.item.jobRole }}</p>
-                    <p>
-                      <b>Github: </b><a :href="props.item.employeeNumber" target="_blank">{{ props.item.github }}</a>
+                  <div
+                    class="expandedInfo"
+                    v-if="
+                      (props.item.prime && props.item.prime != ' ') ||
+                        (props.item.contract && props.item.contract != ' ') ||
+                        (props.item.jobRole && props.item.jobRole != ' ') ||
+                        (props.item.github && props.item.github != ' ') ||
+                        (props.item.twitter && props.item.twitter != ' ') ||
+                        (userIsAdmin() && props.item.birthday && props.item.birthday != ' ')
+                    "
+                  >
+                    <p v-if="props.item.prime && props.item.prime != ' '"><b>Prime: </b> {{ props.item.prime }}</p>
+                    <p v-if="props.item.contract && props.item.contract != ' '">
+                      <b>Contract: </b>{{ props.item.contract }}
                     </p>
-                    <p>
-                      <b>Twitter: </b><a :href="props.item.employeeNumber" target="_blank">{{ props.item.twitter }}</a>
+                    <p v-if="props.item.jobRole && props.item.jobRole != ' '">
+                      <b>Job Role: </b>{{ props.item.jobRole }}
                     </p>
-                    <p v-if="userIsAdmin()"><b>Birthday: </b>{{ props.item.birthday | dateFormat }}</p>
+                    <p v-if="props.item.github && props.item.github != ' '">
+                      <b>Github: </b><a :href="props.item.github" target="_blank">{{ props.item.github }}</a>
+                    </p>
+                    <p v-if="props.item.twitter && props.item.twitter != ' '">
+                      <b>Twitter: </b><a :href="props.item.twitter" target="_blank">{{ props.item.twitter }}</a>
+                    </p>
+                    <p v-if="userIsAdmin() && props.item.birthday && props.item.birthday != ' '">
+                      <b>Birthday: </b>{{ props.item.birthday | dateFormat }}
+                    </p>
                   </div>
                 </v-card-text>
               </v-card>
