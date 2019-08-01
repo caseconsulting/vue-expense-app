@@ -173,7 +173,7 @@ function clearForm() {
   this.$set(this.model, 'startDate', '');
   this.$set(this.model, 'endDate', '');
   this.$set(this.model, 'odFlag', false);
-  this.$set(this.model, 'requiredFlag', true);
+  this.$set(this.model, 'requiredFlag', false);
   this.$set(this.model, 'isInactive', false);
   this.$set(this.model, 'categories', []);
 }
@@ -272,6 +272,7 @@ export default {
   created() {
     window.EventBus.$on('canceled-delete-expense-type', () => (this.deleting = false));
     window.EventBus.$on('confirm-delete-expense-type', this.deleteExpenseType);
+    this.clearForm();
   },
   methods: {
     clearForm,

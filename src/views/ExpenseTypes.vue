@@ -341,7 +341,7 @@ function clearModel() {
   this.$set(this.model, 'startDate', '');
   this.$set(this.model, 'endDate', '');
   this.$set(this.model, 'recurringFlag', false);
-  this.$set(this.model, 'requiredFlag', true);
+  this.$set(this.model, 'requiredFlag', false);
   this.$set(this.model, 'isInactive', false);
   this.$set(this.model, 'categories', []);
 }
