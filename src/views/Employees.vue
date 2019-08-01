@@ -132,6 +132,17 @@
                     <p v-if="userIsAdmin() && props.item.birthday && props.item.birthday != ' '">
                       <b>Birthday: </b>{{ props.item.birthday | dateFormat }}
                     </p>
+                    <p v-if="userIsAdmin()"><b>Birthday: </b>{{ props.item.birthday | dateFormat }}</p>
+
+                    <p v-if="userIsAdmin() && props.item.city && props.item.state && props.item.country">
+                      <b>Place of Birth: </b>{{ props.item.city }}, {{ props.item.state }}, {{ props.item.country }}
+                    </p>
+                    <p v-else-if="userIsAdmin() && props.item.city && props.item.state">
+                      <b>Place of Birth: </b>{{ props.item.city }}, {{ props.item.state }}
+                    </p>
+                    <p v-else-if="userIsAdmin() && props.item.country">
+                      <b>Place of Birth: </b>{{ props.item.country }}
+                    </p>
                   </div>
                 </v-card-text>
               </v-card>
@@ -231,6 +242,9 @@ function onSelect(item) {
   this.$set(this.model, 'contract', item.contract);
   this.$set(this.model, 'github', item.github);
   this.$set(this.model, 'twitter', item.twitter);
+  this.$set(this.model, 'city', item.city);
+  this.$set(this.model, 'state', item.state);
+  this.$set(this.model, 'country', item.country);
 
   this.getAllExpenses(item.id);
 }
@@ -253,6 +267,9 @@ function clearModel() {
   this.$set(this.model, 'contract', '');
   this.$set(this.model, 'github', '');
   this.$set(this.model, 'twitter', '');
+  this.$set(this.model, 'city', '');
+  this.$set(this.model, 'state', '');
+  this.$set(this.model, 'country', '');
 }
 
 function updateModelInTable(updatedEmployee) {
@@ -389,7 +406,10 @@ export default {
         prime: '',
         contract: '',
         github: '',
-        twitter: ''
+        twitter: '',
+        city: '',
+        state: '',
+        country: ''
       },
       expand: false,
       headers: [
