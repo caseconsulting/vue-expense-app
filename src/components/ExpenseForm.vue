@@ -1,11 +1,11 @@
 <template>
   <v-card hover>
+    <v-card-title class="header_style">
+      <h3 v-if="expense.id && (isAdmin || !isReimbursed)">Edit Expense</h3>
+      <h3 v-else-if="expense.id && !isAdmin && isReimbursed">View Expense</h3>
+      <h3 v-else>Create New Expense</h3>
+    </v-card-title>
     <v-container fluid>
-      <v-card-title class="header_style">
-        <h3 v-if="expense.id && (isAdmin || !isReimbursed)">Edit Expense</h3>
-        <h3 v-else-if="expense.id && !isAdmin && isReimbursed">View Expense</h3>
-        <h3 v-else>Create New Expense</h3>
-      </v-card-title>
       <v-form ref="form" v-model="valid" lazy-validation>
         <!--Employee picker if admin level -->
         <v-autocomplete

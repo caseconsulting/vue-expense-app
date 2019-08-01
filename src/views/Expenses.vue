@@ -17,7 +17,6 @@
         Close
       </v-btn>
     </v-snackbar>
-    <v-flex lg12 md12 sm12> </v-flex>
     <v-flex lg8 md12 sm12>
       <v-card>
         <v-container fluid>

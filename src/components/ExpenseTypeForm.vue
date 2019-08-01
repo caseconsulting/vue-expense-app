@@ -1,12 +1,11 @@
 <template>
   <v-card hover>
+    <!-- form header -->
+    <v-card-title class="header_style">
+      <h3 v-if="model.id">Edit Expense Type</h3>
+      <h3 v-else>Create New Expense Type</h3>
+    </v-card-title>
     <v-container fluid>
-      <!-- form header -->
-      <v-card-title class="header_style">
-        <h3 v-if="model.id">Edit Expense Type</h3>
-        <h3 v-else>Create New Expense Type</h3>
-      </v-card-title>
-
       <!-- budget name field -->
       <v-form ref="form" v-model="valid" lazy-validation>
         <v-text-field
@@ -207,7 +206,7 @@ async function submit() {
     this.model.recurringFlag = false;
   }
   if (!this.model.requiredFlag) {
-    this.model.requiredFlag = true;
+    this.model.requiredFlag = false;
   }
   if (!this.model.isInactive) {
     this.model.isInactive = false;
