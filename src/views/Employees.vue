@@ -105,35 +105,19 @@
             <template v-slot:expand="props">
               <v-card flat>
                 <v-card-text>
-                  <div
-                    class="expandedInfo"
-                    v-if="
-                      (props.item.prime && props.item.prime != ' ') ||
-                        (props.item.contract && props.item.contract != ' ') ||
-                        (props.item.jobRole && props.item.jobRole != ' ') ||
-                        (props.item.github && props.item.github != ' ') ||
-                        (props.item.twitter && props.item.twitter != ' ') ||
-                        (userIsAdmin() && props.item.birthday && props.item.birthday != ' ')
-                    "
-                  >
-                    <p v-if="props.item.prime && props.item.prime != ' '"><b>Prime: </b> {{ props.item.prime }}</p>
-                    <p v-if="props.item.contract && props.item.contract != ' '">
-                      <b>Contract: </b>{{ props.item.contract }}
-                    </p>
-                    <p v-if="props.item.jobRole && props.item.jobRole != ' '">
-                      <b>Job Role: </b>{{ props.item.jobRole }}
-                    </p>
-                    <p v-if="props.item.github && props.item.github != ' '">
+                  <div class="expandedInfo">
+                    <p v-if="props.item.prime"><b>Prime: </b> {{ props.item.prime }}</p>
+                    <p v-if="props.item.contract"><b>Contract: </b>{{ props.item.contract }}</p>
+                    <p v-if="props.item.jobRole"><b>Job Role: </b>{{ props.item.jobRole }}</p>
+                    <p v-if="props.item.github">
                       <b>Github: </b><a :href="props.item.github" target="_blank">{{ props.item.github }}</a>
                     </p>
-                    <p v-if="props.item.twitter && props.item.twitter != ' '">
+                    <p v-if="props.item.twitter">
                       <b>Twitter: </b><a :href="props.item.twitter" target="_blank">{{ props.item.twitter }}</a>
                     </p>
-                    <p v-if="userIsAdmin() && props.item.birthday && props.item.birthday != ' '">
+                    <p v-if="userIsAdmin() && props.item.birthday">
                       <b>Birthday: </b>{{ props.item.birthday | dateFormat }}
                     </p>
-                    <p v-if="userIsAdmin()"><b>Birthday: </b>{{ props.item.birthday | dateFormat }}</p>
-
                     <p v-if="userIsAdmin() && props.item.city && props.item.state && props.item.country">
                       <b>Place of Birth: </b>{{ props.item.city }}, {{ props.item.state }}, {{ props.item.country }}
                     </p>
@@ -158,9 +142,6 @@
             </v-alert>
           </v-data-table>
 
-          <!-- <v-card-actions v-show="userIsAdmin()">
-            <v-checkbox :label="'Show Inactive Employees'" v-model="showAll"></v-checkbox>
-          </v-card-actions> -->
           <convert-employees-to-csv v-if="userIsAdmin()" :employees="this.employees"></convert-employees-to-csv>
         </v-container>
       </v-card>
