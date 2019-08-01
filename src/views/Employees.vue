@@ -29,6 +29,35 @@
             <v-text-field v-model="search" append-icon="search" label="Search" single-line hide-details></v-text-field>
           </v-card-title>
 
+          <fieldset class="filter_border">
+            <legend class="legend_style">Filters</legend>
+
+            <!-- active fitler -->
+            <div v-if="userIsAdmin()" class="flagFilter">
+              <h4>Active Expense Type:</h4>
+              <v-btn-toggle class="filter_color" v-model="filterActive" flat mandatory>
+                <v-tooltip top>
+                  <v-btn value="yes" slot="activator" flat>
+                    <icon class="mr-1" name="regular/check-circle"></icon>
+                  </v-btn>
+                  <span>Show Active</span>
+                </v-tooltip>
+                <v-tooltip top>
+                  <v-btn value="no" slot="activator" flat>
+                    <icon name="regular/times-circle"></icon>
+                  </v-btn>
+                  <span>Hide Active</span>
+                </v-tooltip>
+                <v-tooltip top>
+                  <v-btn value="both" slot="activator" flat>
+                    BOTH
+                  </v-btn>
+                  <span>Show All</span>
+                </v-tooltip>
+              </v-btn-toggle>
+            </div>
+          </fieldset>
+          <br />
           <v-data-table
             :headers="headers"
             :items="employeeList"
@@ -102,9 +131,9 @@
             </v-alert>
           </v-data-table>
 
-          <v-card-actions v-show="userIsAdmin()">
+          <!-- <v-card-actions v-show="userIsAdmin()">
             <v-checkbox :label="'Show Inactive Employees'" v-model="showAll"></v-checkbox>
-          </v-card-actions>
+          </v-card-actions> -->
           <convert-employees-to-csv v-if="userIsAdmin()" :employees="this.employees"></convert-employees-to-csv>
         </v-container>
       </v-card>
@@ -138,7 +167,7 @@ function isInActive(employee) {
 }
 
 function userIsAdmin() {
-  return getRole() === 'admin';
+  return getRole() === 'super-admin' || getRole() === 'admin';
 }
 
 async function refreshEmployees() {
@@ -146,6 +175,9 @@ async function refreshEmployees() {
   this.employees = await api.getItems(api.EMPLOYEES);
   this.filteredEmployees = _.filter(this.employees, employee => {
     return employee.isActive;
+  });
+  this.notActiveEmployees = _.filter(this.employees, employee => {
+    return !employee.isActive;
   });
   this.loading = false;
 }
@@ -272,7 +304,14 @@ async function displayError(err) {
 
 /* computed */
 function employeeList() {
-  return this.showAll ? this.employees : this.filteredEmployees;
+  if (this.filterActive === 'yes') {
+    return this.filteredEmployees;
+  } else if (this.filterActive === 'no') {
+    return this.notActiveEmployees;
+  } else {
+    return this.employees;
+  }
+  // return this.showAll ? this.employees : this.filteredEmployees;
 }
 
 // LIFECYCLE HOOKS
@@ -301,9 +340,11 @@ export default {
     return {
       search: '',
       loading: false,
-      showAll: false,
+      // showAll: false,
+      filterActive: 'yes',
       employees: [],
       filteredEmployees: [],
+      notActiveEmployees: [],
       errors: [],
       status: {
         statusType: undefined,
