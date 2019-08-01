@@ -28,11 +28,11 @@
 
           <!-- start filters -->
           <fieldset>
-            <legend>Filters</legend>
+            <legend class="legend_style">Filters</legend>
 
             <!-- active fitler -->
             <div class="flagFilter">
-              <h4>Active:</h4>
+              <h4>Active Expense Type:</h4>
               <v-btn-toggle class="filter_color" v-model="filter.active" flat mandatory>
                 <v-tooltip top>
                   <v-btn value="active" slot="activator" flat>
