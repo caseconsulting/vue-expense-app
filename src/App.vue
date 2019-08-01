@@ -80,8 +80,10 @@ async function created() {
   if (accessToken) {
     this.date = Math.trunc(getTokenExpirationDate(accessToken).getTime());
     this.now = Math.trunc(new Date().getTime());
-    let timeRemaining = this.date - this.now;
-    console.log(timeRemaining / 60000 + ' minutes');
+
+    let timeRemaining = this.date - this.now; // default access key (2 hours)
+    //let timeRemaining = this.date - this.now - 6890000; // test 10 sec access key before 5 min warning
+    //let timeRemaining = this.date - this.now - 7190000; // test 10 sec access key before time out
 
     window.setTimeout(() => {
       this.timedOut = true;
