@@ -495,8 +495,10 @@ async function deleteExpense() {
   this.deleting = false;
   if (this.propExpense.id) {
     let deletedExpense = this.propExpense;
-    await api.deleteItem(api.EXPENSES, this.propExpense.id);
-    this.deleteModelFromTable(deletedExpense);
+    let deleted = await api.deleteItem(api.EXPENSES, this.propExpense.id);
+    if (deleted) {
+      this.deleteModelFromTable(deletedExpense);
+    }
   }
 }
 
