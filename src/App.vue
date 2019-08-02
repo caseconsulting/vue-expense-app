@@ -11,8 +11,11 @@
         </v-toolbar-title>
         <v-spacer></v-spacer>
 
+        <!-- remove code below before prod -->
+        <!-- test time out alert -->
         <p style="padding: 5px; color: #596059" @click="session = true">testWarning</p>
         <p style="padding: 5px; color: #596059" @click="timedOut = true">testLogout</p>
+        <!-- remove code above before prod -->
 
         <v-toolbar-items v-show="isLoggedIn()">
           <v-flex xs12 sm6 md8 align-center justify-left layout text-xs-center>
