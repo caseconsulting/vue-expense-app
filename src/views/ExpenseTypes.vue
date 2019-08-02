@@ -165,13 +165,7 @@
 
             <!-- data row -->
             <template slot="items" slot-scope="props">
-              <tr
-                :class="{ inactiveStyle: props.item.isInactive }"
-                @click="
-                  onSelect(props.item);
-                  props.expanded = !props.expanded;
-                "
-              >
+              <tr :class="{ inactiveStyle: props.item.isInactive }" @click="props.expanded = !props.expanded">
                 <td class="text-xs-left">{{ props.item.budgetName | limitedText }}</td>
                 <td class="text-xs-left">{{ props.item.budget | moneyValue }}</td>
                 <!-- <td class="text-xs-left">{{ props.item.description | limitedText }}</td> -->
@@ -182,8 +176,7 @@
                 <td class="datatable_btn layout">
                   <!-- edit button -->
                   <v-tooltip top>
-                    <!-- <v-btn :disabled="isEditing()" flat icon @click="onSelect(props.item)" slot="activator"> -->
-                    <v-btn :disabled="isEditing()" flat icon slot="activator">
+                    <v-btn :disabled="isEditing()" flat icon @click="onSelect(props.item)" slot="activator">
                       <v-icon style="color: #606060">
                         edit
                       </v-icon>
@@ -193,16 +186,7 @@
 
                   <!-- delete button -->
                   <v-tooltip top>
-                    <v-btn
-                      :disabled="isEditing()"
-                      flat
-                      icon
-                      @click="
-                        deleting = true;
-                        propExpense = props.item;
-                      "
-                      slot="activator"
-                    >
+                    <v-btn :disabled="isEditing()" flat icon @click="validateDelete(props.item)" slot="activator">
                       <v-icon style="color: #606060">
                         delete
                       </v-icon>
@@ -257,6 +241,9 @@
           <!-- <v-card-actions>
             <v-checkbox :label="'Show Inactive Expense Types'" v-model="showInactive"></v-checkbox>
           </v-card-actions> -->
+
+          <delete-modal :activate="deleting" :type="'expense-type'"></delete-modal>
+          <expense-type-delete-model :activate="invalidDelete"></expense-type-delete-model>
         </v-container>
       </v-card>
     </v-flex>
@@ -265,7 +252,6 @@
         :model="model"
         v-on:add="addModelToTable"
         v-on:update="updateModelInTable"
-        v-on:delete="deleteModelFromTable"
         v-on:error="displayError"
         style="position: sticky; top: 79px;"
       ></expense-type-form>
@@ -277,6 +263,8 @@
 import _ from 'lodash';
 import api from '@/shared/api.js';
 import ExpenseTypeForm from '../components/ExpenseTypeForm.vue';
+import DeleteModal from '../components/DeleteModal.vue';
+import ExpenseTypeDeleteModel from '../components/ExpenseTypeDeleteModel.vue';
 
 /* filters */
 
@@ -329,7 +317,6 @@ function onSelect(item) {
   this.$set(this.model, 'requiredFlag', item.requiredFlag);
   this.$set(this.model, 'isInactive', item.isInactive);
   this.$set(this.model, 'categories', item.categories);
-  this.getAllExpenses(item.id);
 }
 
 function clearModel() {
@@ -393,9 +380,9 @@ function addModelToTable(newExpenseType) {
 }
 
 function deleteModelFromTable() {
-  let modelIndex = _.findIndex(this.expenseTypes, expense => expense.id === this.model.id);
+  let modelIndex = _.findIndex(this.expenseTypes, expense => expense.id === this.deleteModel.id);
   this.expenseTypes.splice(modelIndex, 1);
-  modelIndex = _.findIndex(this.filteredExpenseTypes, expense => expense.id === this.model.id);
+  modelIndex = _.findIndex(this.filteredExpenseTypes, expense => expense.id === this.deleteModel.id);
   this.filteredExpenseTypes.splice(modelIndex, 1);
   this.$set(this.status, 'statusType', 'SUCCESS');
   this.$set(this.status, 'statusMessage', 'Item was successfully deleted!');
@@ -443,19 +430,35 @@ function filterExpense() {
   });
 }
 
-function getAllExpenses(id) {
-  api
-    .getAllExpenseTypeExpenses(id)
+async function validateDelete(item) {
+  let x = await api
+    .getAllExpenseTypeExpenses(item.id)
     .then(result => {
-      this.$set(this.model, 'typeExpenses', result);
+      return result.length <= 0;
     })
     .catch(err => {
       console.log(err);
     });
+  if (x) {
+    this.$set(this.deleteModel, 'id', item.id);
+    this.deleting = true;
+  } else {
+    this.invalidDelete = true;
+  }
 }
 
 function isEditing() {
   return !!this.model.id;
+}
+
+async function deleteExpenseType() {
+  this.deleting = false;
+  let et = await api.deleteItem(api.EXPENSE_TYPES, this.deleteModel.id);
+  if (et.id) {
+    this.deleteModelFromTable();
+  } else {
+    this.displayError(et.response.data.message);
+  }
 }
 
 /* computed */
@@ -466,6 +469,11 @@ function expenseTypeList() {
 /* created */
 async function created() {
   this.refreshExpenseTypes();
+
+  window.EventBus.$on('canceled-delete-expense-type', () => (this.deleting = false));
+  window.EventBus.$on('confirm-delete-expense-type', this.deleteExpenseType);
+
+  window.EventBus.$on('invalid-expense-type-delete', () => (this.invalidDelete = false));
 }
 
 export default {
@@ -483,6 +491,8 @@ export default {
       //showInactive: false, //used to show all expenseTypes (even inactive)
       search: '',
       loading: false,
+      deleting: false,
+      invalidDelete: false,
       status: {
         statusType: undefined,
         statusMessage: '',
@@ -529,6 +539,9 @@ export default {
         categories: [],
         typeExpenses: ''
       },
+      deleteModel: {
+        id: ''
+      },
       filter: {
         active: 'active',
         overdraft: 'both',
@@ -539,7 +552,9 @@ export default {
     };
   },
   components: {
-    ExpenseTypeForm
+    ExpenseTypeForm,
+    DeleteModal,
+    ExpenseTypeDeleteModel
   },
   computed: {
     expenseTypeList
@@ -570,8 +585,9 @@ export default {
     deleteModelFromTable,
     changeSort,
     filterExpense,
-    getAllExpenses,
-    isEditing
+    validateDelete,
+    isEditing,
+    deleteExpenseType
   },
   created
 };

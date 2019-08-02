@@ -129,7 +129,7 @@
 
         <!-- Buttons -->
 
-        <v-tooltip bottom>
+        <!-- <v-tooltip bottom>
           <v-btn
             :disabled="this.model.id && this.model.typeExpenses.length > 0"
             outline
@@ -145,21 +145,21 @@
 
           <span v-else-if="this.model.id">Delete Available for Expense Type</span>
           <span v-else>Please select an Expense Type prior to deletion</span>
-        </v-tooltip>
+        </v-tooltip> -->
 
         <v-btn color="white " @click="clearForm"> <icon class="mr-1 " name="ban"></icon>Cancel</v-btn>
         <v-btn outline color="success " @click="submit" :disabled="!valid">
           <icon class="mr-1 " name="save"></icon>Submit</v-btn
         >
       </v-form>
-      <delete-modal :activate="deleting" :type="'expense-type'"></delete-modal>
+      <!-- <delete-modal :activate="deleting" :type="'expense-type'"></delete-modal> -->
     </v-container>
   </v-card>
 </template>
 
 <script>
 import api from '@/shared/api.js';
-import DeleteModal from './DeleteModal.vue';
+// import DeleteModal from './DeleteModal.vue';
 import dateUtils from '@/shared/dateUtils';
 
 // METHODS
@@ -178,16 +178,16 @@ function clearForm() {
   this.$set(this.model, 'categories', []);
 }
 
-async function deleteExpenseType() {
-  this.deleting = false;
-  let et = await api.deleteItem(api.EXPENSE_TYPES, this.model.id);
-  if (et.id) {
-    this.$emit('delete');
-    this.clearForm();
-  } else {
-    this.$emit('error', et.response.data.message);
-  }
-}
+// async function deleteExpenseType() {
+//   this.deleting = false;
+//   let et = await api.deleteItem(api.EXPENSE_TYPES, this.model.id);
+//   if (et.id) {
+//     this.$emit('delete');
+//     this.clearForm();
+//   } else {
+//     this.$emit('error', et.response.data.message);
+//   }
+// }
 
 function formatDate(date) {
   return dateUtils.formatDate(date);
@@ -266,17 +266,17 @@ export default {
     };
   },
   props: ['model'],
-  components: {
-    DeleteModal
-  },
+  // components: {
+  //   DeleteModal
+  // },
   created() {
-    window.EventBus.$on('canceled-delete-expense-type', () => (this.deleting = false));
-    window.EventBus.$on('confirm-delete-expense-type', this.deleteExpenseType);
+    // window.EventBus.$on('canceled-delete-expense-type', () => (this.deleting = false));
+    // window.EventBus.$on('confirm-delete-expense-type', this.deleteExpenseType);
     this.clearForm();
   },
   methods: {
     clearForm,
-    deleteExpenseType,
+    // deleteExpenseType,
     parseDate,
     formatDate,
     submit,
