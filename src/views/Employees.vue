@@ -29,12 +29,12 @@
             <v-text-field v-model="search" append-icon="search" label="Search" single-line hide-details></v-text-field>
           </v-card-title>
 
-          <fieldset class="filter_border">
+          <fieldset v-if="userIsAdmin()" class="filter_border">
             <legend class="legend_style">Filters</legend>
 
             <!-- active fitler -->
-            <div v-if="userIsAdmin()" class="flagFilter">
-              <h4>Active Expense Type:</h4>
+            <div class="flagFilter">
+              <h4>Active Employees:</h4>
               <v-btn-toggle class="filter_color" v-model="filterActive" flat mandatory>
                 <v-tooltip top>
                   <v-btn value="yes" slot="activator" flat>
