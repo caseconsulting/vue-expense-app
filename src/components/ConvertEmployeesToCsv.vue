@@ -28,13 +28,14 @@ function exportCSVFile(items, fileTitle) {
   for (var i = 0; i < items.length; i++) {
     let person = items[i];
 
+    let placeOfBirth = (person.city || ' ') + ' ' + (person.state || ' ') + ' ' + (person.country || ' ');
     tempEmployees[i] = [
       person.employeeNumber,
       person.firstName,
       person.middleName,
       person.lastName,
       person.birthday || ' ',
-      person.placeOfBirth || ' ',
+      placeOfBirth || ' ',
       person.hireDate,
       person.jobRole || ' ',
       person.prime || ' ',
