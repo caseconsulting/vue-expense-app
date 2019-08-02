@@ -272,7 +272,7 @@ export default {
   created() {
     // window.EventBus.$on('canceled-delete-expense-type', () => (this.deleting = false));
     // window.EventBus.$on('confirm-delete-expense-type', this.deleteExpenseType);
-    this.clearForm();
+    // this.clearForm();
   },
   methods: {
     clearForm,
