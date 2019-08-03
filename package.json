@@ -32,6 +32,7 @@
     "chartjs": "^0.3.24",
     "core-js": "^2.6.9",
     "file-saver": "^2.0.2",
+    "jquery": "^3.4.1",
     "jwt-decode": "^2.2.0",
     "lodash": "^4.17.15",
     "mobile-detect": "^1.4.3",
