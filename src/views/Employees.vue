@@ -297,9 +297,9 @@ function addModelToTable(newEmployee) {
 }
 
 function deleteModelFromTable() {
-  let modelIndex = _.findIndex(this.employees, employee => employee.id === this.model.id);
+  let modelIndex = _.findIndex(this.employees, employee => employee.id === this.deleteModel.id);
   this.employees.splice(modelIndex, 1);
-  modelIndex = _.findIndex(this.filteredEmployees, employee => employee.id === this.model.id);
+  modelIndex = _.findIndex(this.filteredEmployees, employee => employee.id === this.deleteModel.id);
   this.filteredEmployees.splice(modelIndex, 1);
   this.$set(this.status, 'statusType', 'SUCCESS');
   this.$set(this.status, 'statusMessage', 'Employee was successfully deleted!');
