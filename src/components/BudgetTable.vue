@@ -1,6 +1,5 @@
 <template>
   <div id="budget-table">
-    <!-- <v-card> -->
     <v-container fluid grid-list-md>
       <v-data-iterator :items="employee" content-tag="v-layout" hide-actions row wrap>
         <v-flex slot="item" slot-scope="props" xs12 sm6 lg6>
@@ -46,7 +45,6 @@
         </v-flex>
       </v-data-iterator>
     </v-container>
-    <!-- </v-card> -->
   </div>
 </template>
 <script>
