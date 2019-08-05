@@ -141,6 +141,9 @@
                       )
                     "
                   >
+                    <p>No additional data</p>
+                  </div>
+                  <div class="expandedInfo" v-else>
                     <p v-if="props.item.prime"><b>Prime: </b> {{ props.item.prime }}</p>
                     <p v-if="props.item.contract"><b>Contract: </b>{{ props.item.contract }}</p>
                     <p v-if="props.item.jobRole"><b>Job Role: </b>{{ props.item.jobRole }}</p>
@@ -162,9 +165,6 @@
                     <p v-else-if="userIsAdmin() && props.item.country">
                       <b>Place of Birth: </b>{{ props.item.country }}
                     </p>
-                  </div>
-                  <div class="expandedInfo" v-else>
-                    <p>No additional data</p>
                   </div>
                 </v-card-text>
               </v-card>
