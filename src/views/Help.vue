@@ -75,7 +75,7 @@ export default {
               'Go to the Admin Dashboard and select the expenses that you would like to reimburse by clicking the select box either on a row (to select all expenses for that employee under that expense type) or on each of their individual expenses. Next select the $ icon at the bottom left of the page and then confirm the reimbursement.'
           },
           {
-            title: 'What are categories',
+            title: 'What are categories?',
             body:
               'Admins may create up to 10 different categories for employees to choose from when submitting and expense. Categories are unique to each expense type and users will be required to select one category if the expense type has them. '
           }
