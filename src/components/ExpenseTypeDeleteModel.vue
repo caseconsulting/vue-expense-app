@@ -3,7 +3,7 @@
     <v-dialog v-model="activate" persistent max-width="350">
       <v-card>
         <v-card-title class="headline">Error: cannot delete expense</v-card-title>
-        <v-card-text>Cannot delete expense type. Exenses for this type exist.</v-card-text>
+        <v-card-text>Cannot delete expense type. Expenses for this type exist.</v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
           <v-btn color="gray darken-1" flat @click.native="emit('invalid-expense-type-delete')">Ok</v-btn>
