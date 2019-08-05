@@ -402,10 +402,11 @@ async function submit() {
         }
         let newExpense = await api.createItem(api.EXPENSES, this.expense);
         if (newExpense.id) {
-          //add url to training-urls table
-          if (newExpense.url) {
-            await this.addURLInfo(newExpense);
-          }
+          //add url to training-urls table (uncommenting will add URL info to training-urls table when URL is present)
+          //if (newExpense.url) {
+          // await this.addURLInfo(newExpense);
+          //}
+
           // submit attachment
           if (this.isRequired) {
             await api.createAttachment(newExpense, this.file);
