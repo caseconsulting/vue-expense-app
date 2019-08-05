@@ -299,9 +299,10 @@ async function refreshExpenseTypes() {
   this.loading = true;
   this.expenseTypes = await api.getItems(api.EXPENSE_TYPES);
 
-  this.filteredExpenseTypes = _.filter(this.expenseTypes, expenseType => {
-    return !expenseType.isInactive;
-  });
+  this.filterExpense();
+  // this.filteredExpenseTypes = _.filter(this.expenseTypes, expenseType => {
+  //   return !expenseType.isInactive;
+  // });
   this.loading = false;
 }
 
@@ -333,22 +334,23 @@ function clearModel() {
   this.$set(this.model, 'categories', []);
 }
 
-function updateModelInTable(updatedExpenseType) {
-  let matchingExpensesIndex = _.findIndex(this.expenseTypes, expenseType => expenseType.id === updatedExpenseType.id);
-  this.expenseTypes.splice(matchingExpensesIndex, 1, updatedExpenseType);
-
-  if (!updatedExpenseType.isInactive) {
-    matchingExpensesIndex = _.findIndex(
-      this.filteredExpenseTypes,
-      expenseType => expenseType.id === updatedExpenseType.id
-    );
-    this.filteredExpenseTypes.splice(matchingExpensesIndex, 1, updatedExpenseType);
-  } else {
-    this.filteredExpenseTypes = _.remove(
-      this.filteredExpenseTypes,
-      expenseType => expenseType.id !== updatedExpenseType.id
-    );
-  }
+function updateModelInTable() {
+  this.refreshExpenseTypes();
+  // let matchingExpensesIndex = _.findIndex(this.expenseTypes, expenseType => expenseType.id === updatedExpenseType.id);
+  // this.expenseTypes.splice(matchingExpensesIndex, 1, updatedExpenseType);
+  //
+  // if (!updatedExpenseType.isInactive) {
+  //   matchingExpensesIndex = _.findIndex(
+  //     this.filteredExpenseTypes,
+  //     expenseType => expenseType.id === updatedExpenseType.id
+  //   );
+  //   this.filteredExpenseTypes.splice(matchingExpensesIndex, 1, updatedExpenseType);
+  // } else {
+  //   this.filteredExpenseTypes = _.remove(
+  //     this.filteredExpenseTypes,
+  //     expenseType => expenseType.id !== updatedExpenseType.id
+  //   );
+  // }
 
   //       if (!updatedEmployee.isInactive) {
   //   matchingEmployeeIndex = _.findIndex(this.filteredEmployees, employee => employee.id === updatedEmployee.id);

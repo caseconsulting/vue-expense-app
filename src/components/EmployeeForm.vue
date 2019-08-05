@@ -269,7 +269,7 @@ async function submit() {
     if (this.model.id) {
       // this.model.isActive = !this.model.isActive;
       let updatedEmployee = await api.updateItem(api.EMPLOYEES, this.model.id, this.model);
-      if (updatedEmployee) {
+      if (updatedEmployee.id) {
         this.$emit('update');
         this.clearForm();
       } else {

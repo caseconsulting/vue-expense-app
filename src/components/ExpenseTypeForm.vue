@@ -221,7 +221,7 @@ async function submit() {
     if (this.model.id) {
       let newExpenseType = await api.updateItem(api.EXPENSE_TYPES, this.model.id, this.model);
       if (newExpenseType.id) {
-        this.$emit('update', newExpenseType);
+        this.$emit('update');
       } else {
         this.$emit('error', newExpenseType.response.data.message);
       }
