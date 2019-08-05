@@ -128,17 +128,15 @@
                   <div
                     class="expandedInfo"
                     v-if="
-                      !(
-                        props.item.prime &&
-                        props.item.contract &&
-                        props.item.jobRole &&
-                        props.item.github &&
-                        props.item.twitter &&
-                        props.item.birthday &&
-                        props.item.city &&
-                        props.item.state &&
-                        props.item.country
-                      )
+                      !props.item.prime &&
+                        !props.item.contract &&
+                        !props.item.jobRole &&
+                        !props.item.github &&
+                        !props.item.twitter &&
+                        !props.item.birthday &&
+                        !props.item.city &&
+                        !props.item.state &&
+                        !props.item.country
                     "
                   >
                     <p>No additional data</p>
