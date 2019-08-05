@@ -309,7 +309,6 @@ export default {
         'QA/Tester',
         'Intern',
         'Accountant',
-        'President',
         'Other'
       ],
       states: [
