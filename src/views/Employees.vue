@@ -32,7 +32,7 @@
           <fieldset v-if="userIsAdmin()" class="filter_border">
             <legend class="legend_style">Filters</legend>
 
-            <!-- active fitler -->
+            <!-- active filter -->
             <div class="flagFilter">
               <h4>Active Employees:</h4>
               <v-btn-toggle class="filter_color" v-model="filterActive" flat mandatory>
@@ -125,7 +125,22 @@
             <template v-slot:expand="props">
               <v-card flat>
                 <v-card-text>
-                  <div class="expandedInfo">
+                  <div
+                    class="expandedInfo"
+                    v-if="
+                      !(
+                        props.item.prime &&
+                        props.item.contract &&
+                        props.item.jobRole &&
+                        props.item.github &&
+                        props.item.twitter &&
+                        props.item.birthday &&
+                        props.item.city &&
+                        props.item.state &&
+                        props.item.country
+                      )
+                    "
+                  >
                     <p v-if="props.item.prime"><b>Prime: </b> {{ props.item.prime }}</p>
                     <p v-if="props.item.contract"><b>Contract: </b>{{ props.item.contract }}</p>
                     <p v-if="props.item.jobRole"><b>Job Role: </b>{{ props.item.jobRole }}</p>
@@ -147,6 +162,9 @@
                     <p v-else-if="userIsAdmin() && props.item.country">
                       <b>Place of Birth: </b>{{ props.item.country }}
                     </p>
+                  </div>
+                  <div class="expandedInfo" v-else>
+                    <p>No additional data</p>
                   </div>
                 </v-card-text>
               </v-card>
