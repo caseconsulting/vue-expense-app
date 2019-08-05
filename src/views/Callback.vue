@@ -1,6 +1,5 @@
 <script>
 import { setIdToken, setAccessToken, setRole, setProfile } from '@/utils/auth';
-// import api from '@/shared/api';
 
 export default {
   name: 'callback',
