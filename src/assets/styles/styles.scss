@@ -17,95 +17,6 @@
   padding-top: 0;
 }
 
-//theme 1
-
-// .footer-buttons {
-//   float: right;
-// }
-
-// .header_style {
-//   background-color: #850000;
-//   color: white;
-//   // border-radius: 5px;
-// }
-
-// .budget_header {
-//   background-color: #850000;
-// }
-
-// .expense_info_title {
-//   color: white;
-// }
-
-// .expense_info {
-//   color: black;
-// }
-
-// .reimburse_button {
-//   background-color: #bc3825 !important;
-//   color: white !important;
-// }
-
-// .table_color {
-//   background-color: #f5694f;
-//   opacity: 0.2;
-// }
-
-// .filter_color {
-//   background-color: #e9eef0 !important;
-// }
-
-// .nav-color {
-//   background-color: #29434e !important;
-// }
-
-//theme 2
-
-// .footer-buttons {
-//   float: right;
-// }
-
-// .header_style {
-//   background-color: #29434e;
-//   color: white;
-// }
-
-// .legend_style {
-//   padding-bottom: 0px;
-// }
-
-// .budget_header {
-//   background-color: #29434e;
-// }
-
-// .expense_info_title {
-//   color: white;
-// }
-
-// .expense_info {
-//   color: black;
-// }
-
-// .reimburse_button {
-//   background-color: #29434e !important;
-//   color: white !important;
-// }
-
-// .table_color {
-//   background-color: #f5694f;
-//   opacity: 0.2;
-// }
-
-// .filter_color {
-//   background-color: #e9eef0 !important;
-// }
-
-// .nav-color {
-//   background-color: #850000 !important;
-// }
-
-//theme 3
-
 .footer-buttons {
   float: right;
 }
@@ -134,7 +45,7 @@
 }
 
 .table_color {
-  background-color: #f5694f;
+  background-color: #bc3825;
   opacity: 0.2;
 }
 
@@ -146,46 +57,10 @@
   background-color: #565651 !important;
 }
 
-//theme 4
-// .footer-buttons {
-//   float: right;
-// }
-
-// .header_style {
-//   background-color: #565651;
-//   color: white;
-//   // border-radius: 5px;
-// }
-
-// .budget_header {
-//   background-color: #565651;
-// }
-
-// .expense_info_title {
-//   color: white;
-// }
-
-// .expense_info {
-//   color: black;
-// }
-
-// .reimburse_button {
-//   background-color: #83837d !important;
-//   color: white !important;
-// }
-
-// .table_color {
-//   background-color: #f5694f;
-//   opacity: 0.2;
-// }
-
-// .filter_color {
-//   background-color: #e9eef0 !important;
-// }
-
-// .nav-color {
-//   background-color: #bc3825 !important;
-// }
+.inactiveStyle {
+  //text-decoration: line-through red;
+  color: #e60026;
+}
 
 //end of themes
 .form_padding {

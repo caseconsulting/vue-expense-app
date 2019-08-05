@@ -88,6 +88,7 @@
 
             <template v-slot:items="props">
               <tr
+                :class="{ inactiveStyle: !props.item.isActive }"
                 @click="
                   onSelect(props.item);
                   props.expanded = !props.expanded;
@@ -98,7 +99,8 @@
                 <td class="text-xs-left">{{ props.item.lastName }}</td>
                 <td class="text-xs-left">{{ props.item.hireDate | dateFormat }}</td>
                 <td class="text-xs-left">{{ props.item.email }}</td>
-                <td class="text-xs-left">{{ isInActive(props.item) }}</td>
+
+                <!-- <td class="text-xs-left">{{ isInActive(props.item) }}</td> -->
               </tr>
             </template>
 
@@ -413,9 +415,6 @@ export default {
         {
           text: 'Email',
           value: 'email'
-        },
-        {
-          text: ''
         }
       ]
     };
