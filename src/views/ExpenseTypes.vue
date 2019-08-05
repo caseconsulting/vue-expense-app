@@ -243,7 +243,7 @@
           </v-card-actions> -->
 
           <delete-modal :activate="deleting" :type="'expense-type'"></delete-modal>
-          <expense-type-delete-model :activate="invalidDelete"></expense-type-delete-model>
+          <delete-error-modal :activate="invalidDelete" type="expense type"></delete-error-modal>
         </v-container>
       </v-card>
     </v-flex>
@@ -264,7 +264,7 @@ import _ from 'lodash';
 import api from '@/shared/api.js';
 import ExpenseTypeForm from '../components/ExpenseTypeForm.vue';
 import DeleteModal from '../components/DeleteModal.vue';
-import ExpenseTypeDeleteModel from '../components/ExpenseTypeDeleteModel.vue';
+import DeleteErrorModal from '../components/DeleteErrorModal.vue';
 
 /* filters */
 
@@ -473,7 +473,7 @@ async function created() {
   window.EventBus.$on('canceled-delete-expense-type', () => (this.deleting = false));
   window.EventBus.$on('confirm-delete-expense-type', this.deleteExpenseType);
 
-  window.EventBus.$on('invalid-expense-type-delete', () => (this.invalidDelete = false));
+  window.EventBus.$on('invalid-expense type-delete', () => (this.invalidDelete = false));
 }
 
 export default {
@@ -554,7 +554,7 @@ export default {
   components: {
     ExpenseTypeForm,
     DeleteModal,
-    ExpenseTypeDeleteModel
+    DeleteErrorModal
   },
   computed: {
     expenseTypeList

@@ -193,7 +193,7 @@
         <v-checkbox label="Mark as Inactive" v-model="model.isActive"></v-checkbox>
         <!-- Buttons -->
 
-        <v-tooltip bottom>
+        <!-- <v-tooltip bottom>
           <v-btn
             :disabled="this.model.id && this.model.personalExpenses.length > 0"
             outline
@@ -208,21 +208,20 @@
           >
           <span v-else-if="this.model.id">Delete Available for Employee</span>
           <span v-else>Please select an employee prior to deletion</span>
-        </v-tooltip>
+        </v-tooltip> -->
 
         <v-btn color="white" @click="clearForm"> <icon class="mr-1" name="ban"></icon>Cancel</v-btn>
         <v-btn outline color="success" @click="submit" :disabled="!valid">
           <icon class="mr-1" name="save"></icon>Submit</v-btn
         >
       </v-form>
-      <delete-modal :activate="deleting" :type="'employee'"></delete-modal>
+      <!-- <delete-modal :activate="deleting" :type="'employee'"></delete-modal> -->
     </v-container>
   </v-card>
 </template>
 
 <script>
 import api from '@/shared/api.js';
-import DeleteModal from './DeleteModal.vue';
 import _ from 'lodash';
 import { getRole } from '@/utils/auth';
 import dateUtils from '@/shared/dateUtils';
@@ -251,13 +250,6 @@ function clearForm() {
   this.$set(this.model, 'city', '');
   this.$set(this.model, 'state', '');
   this.$set(this.model, 'country', '');
-}
-
-async function deleteEmployee() {
-  this.deleting = false;
-  await api.deleteItem(api.EMPLOYEES, this.model.id);
-  this.$emit('delete');
-  this.clearForm();
 }
 
 function formatDate(date) {
@@ -391,10 +383,6 @@ export default {
       valid: false
     };
   },
-  created() {
-    window.EventBus.$on('canceled-delete-employee', () => (this.deleting = false));
-    window.EventBus.$on('confirm-delete-employee', this.deleteEmployee);
-  },
   watch: {
     'model.hireDate': function() {
       this.hireDateFormatted = this.formatDate(this.model.hireDate) || this.hireDateFormatted;
@@ -418,12 +406,8 @@ export default {
     }
   },
   props: ['model'],
-  components: {
-    DeleteModal
-  },
   methods: {
     clearForm,
-    deleteEmployee,
     formatDate,
     formatRole,
     parseDate,
@@ -432,5 +416,3 @@ export default {
   }
 };
 </script>
-
-<style></style>

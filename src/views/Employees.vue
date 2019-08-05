@@ -87,19 +87,37 @@
             </template>
 
             <template v-slot:items="props">
-              <tr
-                :class="{ inactiveStyle: !props.item.isActive }"
-                @click="
-                  onSelect(props.item);
-                  props.expanded = !props.expanded;
-                "
-              >
+              <tr :class="{ inactiveStyle: !props.item.isActive }" @click="props.expanded = !props.expanded">
                 <td class="text-xs-left">{{ props.item.employeeNumber }}</td>
                 <td class="text-xs-left">{{ props.item.firstName }}</td>
                 <td class="text-xs-left">{{ props.item.lastName }}</td>
                 <td class="text-xs-left">{{ props.item.hireDate | dateFormat }}</td>
                 <td class="text-xs-left">{{ props.item.email }}</td>
 
+                <!-- action icons -->
+                <td class="datatable_btn layout">
+                  <!-- edit button -->
+                  <v-tooltip top>
+                    <v-btn :disabled="isEditing()" flat icon @click="onSelect(props.item)" slot="activator">
+                      <v-icon style="color: #606060">
+                        edit
+                      </v-icon>
+                    </v-btn>
+                    <span>Edit</span>
+                  </v-tooltip>
+
+                  <!-- delete button -->
+                  <v-tooltip top>
+                    <v-btn :disabled="isEditing()" flat icon @click="validateDelete(props.item)" slot="activator">
+                      <v-icon style="color: #606060">
+                        delete
+                      </v-icon>
+                    </v-btn>
+                    <span>Delete</span>
+                  </v-tooltip>
+                </td>
+
+                <!-- end action icons -->
                 <!-- <td class="text-xs-left">{{ isInActive(props.item) }}</td> -->
               </tr>
             </template>
@@ -145,6 +163,9 @@
           </v-data-table>
 
           <convert-employees-to-csv v-if="userIsAdmin()" :employees="this.employees"></convert-employees-to-csv>
+
+          <delete-modal :activate="deleting" :type="'employee'"></delete-modal>
+          <delete-error-modal :activate="invalidDelete" type="employee"></delete-error-modal>
         </v-container>
       </v-card>
     </v-flex>
@@ -154,7 +175,6 @@
         :model="model"
         v-on:add="addModelToTable"
         v-on:update="updateModelInTable"
-        v-on:delete="deleteModelFromTable"
         v-on:error="displayError"
         style="position: sticky; top: 79px;"
       ></employee-form>
@@ -170,6 +190,8 @@ import moment from 'moment';
 import _ from 'lodash';
 import EmployeeHome from '@/views/EmployeeHome.vue';
 import ConvertEmployeesToCsv from '../components/ConvertEmployeesToCsv.vue';
+import DeleteModal from '../components/DeleteModal.vue';
+import DeleteErrorModal from '../components/DeleteErrorModal.vue';
 
 /* methods */
 function isInActive(employee) {
@@ -190,17 +212,6 @@ async function refreshEmployees() {
     return !employee.isActive;
   });
   this.loading = false;
-}
-
-function getAllExpenses(id) {
-  api
-    .getAllEmployeeExpenses(id)
-    .then(result => {
-      this.$set(this.model, 'personalExpenses', result);
-    })
-    .catch(err => {
-      console.log(err);
-    });
 }
 
 function setExpenses(expenses) {
@@ -228,8 +239,6 @@ function onSelect(item) {
   this.$set(this.model, 'city', item.city);
   this.$set(this.model, 'state', item.state);
   this.$set(this.model, 'country', item.country);
-
-  this.getAllExpenses(item.id);
 }
 
 function clearModel() {
@@ -318,6 +327,37 @@ async function displayError(err) {
   this.$set(this.status, 'color', 'red');
 }
 
+async function validateDelete(item) {
+  let x = await api
+    .getAllEmployeeExpenses(item.id)
+    .then(result => {
+      return result.length <= 0;
+    })
+    .catch(err => {
+      console.log(err);
+    });
+  if (x) {
+    this.$set(this.deleteModel, 'id', item.id);
+    this.deleting = true;
+  } else {
+    this.invalidDelete = true;
+  }
+}
+
+function isEditing() {
+  return !!this.model.id;
+}
+
+async function deleteEmployee() {
+  this.deleting = false;
+  let e = await api.deleteItem(api.EMPLOYEES, this.deleteModel.id);
+  if (e.id) {
+    this.deleteModelFromTable();
+  } else {
+    this.displayError(e.response.data.message);
+  }
+}
+
 /* computed */
 function employeeList() {
   if (this.filterActive === 'yes') {
@@ -333,6 +373,11 @@ function employeeList() {
 // LIFECYCLE HOOKS
 async function created() {
   this.refreshEmployees();
+
+  window.EventBus.$on('canceled-delete-employee', () => (this.deleting = false));
+  window.EventBus.$on('confirm-delete-employee', this.deleteEmployee);
+
+  window.EventBus.$on('invalid-employee-delete', () => (this.invalidDelete = false));
 }
 
 export default {
@@ -356,6 +401,8 @@ export default {
     return {
       search: '',
       loading: false,
+      deleting: false,
+      invalidDelete: false,
       // showAll: false,
       filterActive: 'yes',
       employees: [],
@@ -394,6 +441,9 @@ export default {
         state: '',
         country: ''
       },
+      deleteModel: {
+        id: ''
+      },
       expand: false,
       headers: [
         {
@@ -422,14 +472,15 @@ export default {
   components: {
     EmployeeForm,
     EmployeeHome,
-    ConvertEmployeesToCsv
+    ConvertEmployeesToCsv,
+    DeleteModal,
+    DeleteErrorModal
   },
   created,
   methods: {
     isInActive,
     userIsAdmin,
     refreshEmployees,
-    getAllExpenses,
     setExpenses,
     onSelect,
     clearModel,
@@ -438,7 +489,10 @@ export default {
     deleteModelFromTable,
     changeSort,
     clearStatus,
-    displayError
+    displayError,
+    validateDelete,
+    deleteEmployee,
+    isEditing
   },
   computed: {
     employeeList
