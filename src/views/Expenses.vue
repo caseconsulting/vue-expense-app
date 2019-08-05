@@ -211,9 +211,9 @@
                   <div class="expandedInfo">
                     <!-- notes/url button -->
                     <p v-if="props.item.description"><b>Description: </b>{{ props.item.description }}</p>
-                    <p v-if="props.item.note"><b>Notes: </b>{{ props.item.note }}</p>
-                    <p v-if="props.item.receipt"><b>Receipt: </b>{{ props.item.receipt }}</p>
-                    <p v-if="props.item.url">
+                    <p v-if="!isEmpty(props.item.note)"><b>Notes: </b>{{ props.item.note }}</p>
+                    <p v-if="!isEmpty(props.item.receipt)"><b>Receipt: </b>{{ props.item.receipt }}</p>
+                    <p v-if="!isEmpty(props.item.url)">
                       <b>Url: </b> <a v-if="props.item.url" :href="props.item.url">{{ props.item.url }}</a>
                     </p>
                     <p v-if="props.item.categories && typeof props.item.categories == 'string'">
@@ -568,6 +568,10 @@ function expenseList() {
   return this.filteredExpenses;
 }
 
+function isEmpty(item) {
+  return !item || item.trim().length <= 0;
+}
+
 export default {
   filters: {
     moneyValue: value => {
@@ -720,7 +724,8 @@ export default {
     deleteExpense,
     unreimburseExpense,
     filterExpense,
-    getExpenses
+    getExpenses,
+    isEmpty
   },
   created
 };
