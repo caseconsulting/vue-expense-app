@@ -373,8 +373,6 @@ async function refreshExpenses() {
   //   return expenseType && !expenseType.isInactive;
   // });
 
-  // console.log('refresh');
-  // console.log(this.filteredExpenses);
   this.loading = false;
 }
 
@@ -530,9 +528,6 @@ async function created() {
 
   window.EventBus.$on('canceled-delete-expense', () => (this.deleting = false));
   window.EventBus.$on('confirm-delete-expense', this.deleteExpense);
-
-  console.log('created');
-  console.log(this.expenseTypes);
 }
 
 function filterExpense() {
