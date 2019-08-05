@@ -190,7 +190,7 @@
         </v-expansion-panel>
 
         <!-- isactive? only on edit -->
-        <v-checkbox label="Mark as Inactive" v-model="model.isActive"></v-checkbox>
+        <v-checkbox label="Mark as Inactive" v-model="model.isInactive"></v-checkbox>
         <!-- Buttons -->
 
         <!-- <v-tooltip bottom>
@@ -267,10 +267,14 @@ function parseDate(date) {
 async function submit() {
   if (this.$refs.form.validate()) {
     if (this.model.id) {
-      this.model.isActive = !this.model.isActive;
+      // this.model.isActive = !this.model.isActive;
       let updatedEmployee = await api.updateItem(api.EMPLOYEES, this.model.id, this.model);
-      this.$emit('update', updatedEmployee);
-      this.clearForm();
+      if (updatedEmployee) {
+        this.$emit('update');
+        this.clearForm();
+      } else {
+        this.$emit('error', updatedEmployee.response.data.message);
+      }
     } else {
       let newEmployee = await api.createItem(api.EMPLOYEES, this.model);
       if (newEmployee.id) {

@@ -87,7 +87,7 @@
             </template>
 
             <template v-slot:items="props">
-              <tr :class="{ inactiveStyle: !props.item.isActive }" @click="props.expanded = !props.expanded">
+              <tr :class="{ inactiveStyle: props.item.isInactive }" @click="props.expanded = !props.expanded">
                 <td class="text-xs-left">{{ props.item.employeeNumber }}</td>
                 <td class="text-xs-left">{{ props.item.firstName }}</td>
                 <td class="text-xs-left">{{ props.item.lastName }}</td>
@@ -211,7 +211,7 @@ import DeleteErrorModal from '../components/DeleteErrorModal.vue';
 
 /* methods */
 function isInActive(employee) {
-  return employee.isActive ? '' : 'Not Active';
+  return employee.isInactive ? 'Not Active' : '';
 }
 
 function userIsAdmin() {
@@ -222,10 +222,10 @@ async function refreshEmployees() {
   this.loading = true;
   this.employees = await api.getItems(api.EMPLOYEES);
   this.filteredEmployees = _.filter(this.employees, employee => {
-    return employee.isActive;
+    return !employee.isInactive;
   });
   this.notActiveEmployees = _.filter(this.employees, employee => {
-    return !employee.isActive;
+    return employee.isInactive;
   });
   this.loading = false;
 }
@@ -243,7 +243,7 @@ function onSelect(item) {
   this.$set(this.model, 'employeeRole', item.employeeRole);
   this.$set(this.model, 'employeeNumber', item.employeeNumber);
   this.$set(this.model, 'hireDate', item.hireDate);
-  this.$set(this.model, 'isActive', !item.isActive);
+  this.$set(this.model, 'isInactive', item.isInactive);
 
   //New Fields
   this.$set(this.model, 'birthday', item.birthday);
@@ -266,7 +266,7 @@ function clearModel() {
   this.$set(this.model, 'employeeRole', '');
   this.$set(this.model, 'employeeNumber', null);
   this.$set(this.model, 'hireDate', null);
-  this.$set(this.model, 'isActive', false);
+  this.$set(this.model, 'isInactive', false);
 
   //New Fields
   this.$set(this.model, 'birthday', '');
@@ -280,17 +280,20 @@ function clearModel() {
   this.$set(this.model, 'country', '');
 }
 
-function updateModelInTable(updatedEmployee) {
-  console.log(updatedEmployee);
-  let matchingEmployeeIndex = _.findIndex(this.employees, employee => employee.id === updatedEmployee.id);
-  this.employees.splice(matchingEmployeeIndex, 1, updatedEmployee);
+function updateModelInTable() {
+  this.refreshEmployees();
 
-  if (updatedEmployee.isActive) {
-    matchingEmployeeIndex = _.findIndex(this.filteredEmployees, employee => employee.id === updatedEmployee.id);
-    this.filteredEmployees.splice(matchingEmployeeIndex, 1, updatedEmployee);
-  } else {
-    this.filteredEmployees = _.remove(this.filteredEmployees, employee => employee.id !== updatedEmployee.id);
-  }
+  // console.log(updatedEmployee);
+  // let matchingEmployeeIndex = _.findIndex(this.employees, employee => employee.id === updatedEmployee.id);
+  // this.employees.splice(matchingEmployeeIndex, 1, updatedEmployee);
+  //
+  // if (!updatedEmployee.isInactive) {
+  //   matchingEmployeeIndex = _.findIndex(this.filteredEmployees, employee => employee.id === updatedEmployee.id);
+  //   this.filteredEmployees.splice(matchingEmployeeIndex, 1, updatedEmployee);
+  // } else {
+  //   this.filteredEmployees = _.remove(this.filteredEmployees, employee => employee.id !== updatedEmployee.id);
+  // }
+
   this.$set(this.status, 'statusType', 'SUCCESS');
   this.$set(this.status, 'statusMessage', 'Employee was successfully updated!');
   this.$set(this.status, 'color', 'green');
@@ -300,7 +303,7 @@ function addModelToTable(newEmployee) {
   let matchingEmployee = _.filter(this.employees, employee => employee.id === newEmployee.id);
 
   if (!matchingEmployee.length) {
-    if (newEmployee.isActive) {
+    if (!newEmployee.isInactive) {
       this.filteredEmployees.push(newEmployee);
       this.employees.push(newEmployee);
     } else {
@@ -443,7 +446,7 @@ export default {
         employeeRole: '',
         employeeNumber: null,
         hireDate: null,
-        isActive: false,
+        isInactive: false,
         personalExpenses: '',
 
         // New Fields
