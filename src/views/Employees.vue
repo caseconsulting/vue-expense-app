@@ -161,7 +161,7 @@
               Your search for "{{ search }}" found no results.
             </v-alert>
           </v-data-table>
-
+          <br />
           <convert-employees-to-csv v-if="userIsAdmin()" :employees="this.employees"></convert-employees-to-csv>
 
           <delete-modal :activate="deleting" :type="'employee'"></delete-modal>
