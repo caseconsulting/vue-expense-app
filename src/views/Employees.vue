@@ -128,39 +128,46 @@
                   <div
                     class="expandedInfo"
                     v-if="
-                      !props.item.prime &&
-                        !props.item.contract &&
-                        !props.item.jobRole &&
-                        !props.item.github &&
-                        !props.item.twitter &&
-                        !props.item.birthday &&
-                        !props.item.city &&
-                        !props.item.state &&
-                        !props.item.country
+                      isEmpty(props.item.prime) &&
+                        isEmpty(props.item.contract) &&
+                        isEmpty(props.item.jobRole) &&
+                        isEmpty(props.item.github) &&
+                        isEmpty(props.item.twitter) &&
+                        isEmpty(props.item.birthday) &&
+                        isEmpty(props.item.city) &&
+                        isEmpty(props.item.state) &&
+                        isEmpty(props.item.country)
                     "
                   >
                     <p>No additional data</p>
                   </div>
                   <div class="expandedInfo" v-else>
-                    <p v-if="props.item.prime"><b>Prime: </b> {{ props.item.prime }}</p>
-                    <p v-if="props.item.contract"><b>Contract: </b>{{ props.item.contract }}</p>
-                    <p v-if="props.item.jobRole"><b>Job Role: </b>{{ props.item.jobRole }}</p>
-                    <p v-if="props.item.github">
+                    <p v-if="!isEmpty(props.item.prime)"><b>Prime: </b> {{ props.item.prime }}</p>
+                    <p v-if="!isEmpty(props.item.contract)"><b>Contract: </b>{{ props.item.contract }}</p>
+                    <p v-if="!isEmpty(props.item.jobRole)"><b>Job Role: </b>{{ props.item.jobRole }}</p>
+                    <p v-if="!isEmpty(props.item.github)">
                       <b>Github: </b><a :href="props.item.github" target="_blank">{{ props.item.github }}</a>
                     </p>
-                    <p v-if="props.item.twitter">
+                    <p v-if="!isEmpty(props.item.twitter)">
                       <b>Twitter: </b><a :href="props.item.twitter" target="_blank">{{ props.item.twitter }}</a>
                     </p>
-                    <p v-if="userIsAdmin() && props.item.birthday">
+                    <p v-if="userIsAdmin() && !isEmpty(props.item.birthday)">
                       <b>Birthday: </b>{{ props.item.birthday | dateFormat }}
                     </p>
-                    <p v-if="userIsAdmin() && props.item.city && props.item.state && props.item.country">
+                    <p
+                      v-if="
+                        userIsAdmin() &&
+                          !isEmpty(props.item.city) &&
+                          !isEmpty(props.item.state) &&
+                          !isEmpty(props.item.country)
+                      "
+                    >
                       <b>Place of Birth: </b>{{ props.item.city }}, {{ props.item.state }}, {{ props.item.country }}
                     </p>
-                    <p v-else-if="userIsAdmin() && props.item.city && props.item.state">
+                    <p v-else-if="userIsAdmin() && !isEmpty(props.item.city) && !isEmpty(props.item.state)">
                       <b>Place of Birth: </b>{{ props.item.city }}, {{ props.item.state }}
                     </p>
-                    <p v-else-if="userIsAdmin() && props.item.country">
+                    <p v-else-if="userIsAdmin() && !isEmpty(props.item.country)">
                       <b>Place of Birth: </b>{{ props.item.country }}
                     </p>
                   </div>
@@ -377,6 +384,10 @@ async function deleteEmployee() {
   }
 }
 
+function isEmpty(item) {
+  return !item || item.trim().length <= 0;
+}
+
 /* computed */
 function employeeList() {
   if (this.filterActive === 'yes') {
@@ -511,7 +522,8 @@ export default {
     displayError,
     validateDelete,
     deleteEmployee,
-    isEditing
+    isEditing,
+    isEmpty
   },
   computed: {
     employeeList
