@@ -305,6 +305,7 @@ export default {
         'Project Manager',
         'System Engineer',
         'Cloud Architect',
+        'Cloud Engineer',
         'Data Scientist',
         'QA/Tester',
         'Intern',
