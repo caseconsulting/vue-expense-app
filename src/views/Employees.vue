@@ -95,7 +95,7 @@
                 <td class="text-xs-left">{{ props.item.email }}</td>
 
                 <!-- action icons -->
-                <td class="datatable_btn layout" v-if="userIsAdmin">
+                <td class="datatable_btn layout" v-if="userIsAdmin()">
                   <!-- edit button -->
                   <v-tooltip top>
                     <v-btn :disabled="isEditing()" flat icon @click="onSelect(props.item)" slot="activator">
