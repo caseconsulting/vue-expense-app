@@ -236,7 +236,6 @@ function clearForm() {
   this.$set(this.model, 'middleName', '');
   this.$set(this.model, 'lastName', '');
   this.$set(this.model, 'employeeNumber', '');
-  this.$set(this.model, 'expenseTypes', []);
   this.$set(this.model, 'hireDate', '');
   this.$set(this.model, 'id', '');
 
