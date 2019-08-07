@@ -116,9 +116,6 @@
                     <span>Delete</span>
                   </v-tooltip>
                 </td>
-
-                <!-- end action icons -->
-                <!-- <td class="text-xs-left">{{ isInActive(props.item) }}</td> -->
               </tr>
             </template>
 
@@ -312,18 +309,6 @@ function clearModel() {
 
 function updateModelInTable() {
   this.refreshEmployees();
-
-  // console.log(updatedEmployee);
-  // let matchingEmployeeIndex = _.findIndex(this.employees, employee => employee.id === updatedEmployee.id);
-  // this.employees.splice(matchingEmployeeIndex, 1, updatedEmployee);
-  //
-  // if (!updatedEmployee.isInactive) {
-  //   matchingEmployeeIndex = _.findIndex(this.filteredEmployees, employee => employee.id === updatedEmployee.id);
-  //   this.filteredEmployees.splice(matchingEmployeeIndex, 1, updatedEmployee);
-  // } else {
-  //   this.filteredEmployees = _.remove(this.filteredEmployees, employee => employee.id !== updatedEmployee.id);
-  // }
-
   this.$set(this.status, 'statusType', 'SUCCESS');
   this.$set(this.status, 'statusMessage', 'Employee was successfully updated!');
   this.$set(this.status, 'color', 'green');
@@ -420,7 +405,6 @@ function employeeList() {
   } else {
     return this.employees;
   }
-  // return this.showAll ? this.employees : this.filteredEmployees;
 }
 
 // LIFECYCLE HOOKS
@@ -456,7 +440,6 @@ export default {
       loading: false,
       deleting: false,
       invalidDelete: false,
-      // showAll: false,
       filterActive: 'yes',
       employees: [],
       filteredEmployees: [],
