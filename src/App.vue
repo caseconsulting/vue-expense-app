@@ -11,11 +11,6 @@
         </v-toolbar-title>
         <v-spacer></v-spacer>
 
-        <!-- test time out alert (top right nav bar buttons)-->
-        <!-- <p style="padding: 5px; color: #596059" @click="session = true">testWarning</p>
-        <p style="padding: 5px; color: #596059" @click="timedOut = true">testLogout</p> -->
-        <!-- remove code above before prod -->
-
         <v-toolbar-items v-show="isLoggedIn()">
           <v-flex xs12 sm6 md8 align-center justify-left layout text-xs-center>
             <v-menu bottom offset-y open-on-click>
@@ -46,7 +41,6 @@
 import { isLoggedIn, logout, getProfile, getTokenExpirationDate, getAccessToken } from '@/utils/auth';
 import MainNav from '@/components/MainNav.vue';
 import router from './router.js';
-// import Countdown from '@/components/Countdown.vue';
 import TimeOutModel from '@/components/TimeOutModel.vue';
 import TimeOutWarningModel from '@/components/TimeOutWarningModel.vue';
 
@@ -85,10 +79,7 @@ async function created() {
   if (accessToken) {
     this.date = Math.trunc(getTokenExpirationDate(accessToken).getTime());
     this.now = Math.trunc(new Date().getTime());
-
     let timeRemaining = this.date - this.now; // default access key (2 hours)
-    //let timeRemaining = this.date - this.now - 6890000; // test 10 sec access key before 5 min warning
-    //let timeRemaining = this.date - this.now - 7190000; // test 10 sec access key before time out
 
     window.setTimeout(() => {
       this.timedOut = true;
