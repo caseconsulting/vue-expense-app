@@ -336,29 +336,6 @@ function clearModel() {
 
 function updateModelInTable() {
   this.refreshExpenseTypes();
-  // let matchingExpensesIndex = _.findIndex(this.expenseTypes, expenseType => expenseType.id === updatedExpenseType.id);
-  // this.expenseTypes.splice(matchingExpensesIndex, 1, updatedExpenseType);
-  //
-  // if (!updatedExpenseType.isInactive) {
-  //   matchingExpensesIndex = _.findIndex(
-  //     this.filteredExpenseTypes,
-  //     expenseType => expenseType.id === updatedExpenseType.id
-  //   );
-  //   this.filteredExpenseTypes.splice(matchingExpensesIndex, 1, updatedExpenseType);
-  // } else {
-  //   this.filteredExpenseTypes = _.remove(
-  //     this.filteredExpenseTypes,
-  //     expenseType => expenseType.id !== updatedExpenseType.id
-  //   );
-  // }
-
-  //       if (!updatedEmployee.isInactive) {
-  //   matchingEmployeeIndex = _.findIndex(this.filteredEmployees, employee => employee.id === updatedEmployee.id);
-  //   this.filteredEmployees.splice(matchingEmployeeIndex, 1, updatedEmployee);
-  // } else {
-  //   this.filteredEmployees = _.remove(this.filteredEmployees, employee => employee.id !== updatedEmployee.id);
-  // }
-
   this.$set(this.status, 'statusType', 'SUCCESS');
   this.$set(this.status, 'statusMessage', 'Item was successfully updated!');
   this.$set(this.status, 'color', 'green');

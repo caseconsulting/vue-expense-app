@@ -231,9 +231,6 @@
               Your search for "{{ search }}" found no results.
             </v-alert>
           </v-data-table>
-          <!-- <v-card-actions>
-            <v-checkbox v-if="isUser" :label="'Show Reimbursed Expenses'" v-model="showReimbursed"></v-checkbox>
-          </v-card-actions> -->
           <br />
           <v-card-actions>
             <convert-expenses-to-csv v-if="isAdmin" :expenses="getExpenses()"></convert-expenses-to-csv>
