@@ -116,6 +116,10 @@ export default {
             title: 'How do I submit a High Five Award?',
             body:
               'In the Create New Expense tab select the expense type “High Five”, put $50 in Cost, and in the description be sure to specify who you are awarding and why.'
+          },
+          {
+            title: "Why can't I delete an expense?",
+            body: 'An expense cannot be deleted if it has been reimbursed or you are editing an expense.'
           }
         ],
         expenseTypes: [
@@ -130,6 +134,11 @@ export default {
             title: 'What is the overdraft flag?',
             body:
               'This allows an expense type to be charged up to twice the defined amount. Subtracting the overage from next years budget.'
+          },
+          {
+            title: "Why can't I delete an expense type?",
+            body:
+              'An expense type cannot be deleted if there are expenses for that expense type or you are editing an expense type.'
           }
         ],
         employees: [
@@ -142,6 +151,10 @@ export default {
           {
             title: 'What does it mean to mark an employee inactive?',
             body: "This will freeze the user's ability to submit new expenses."
+          },
+          {
+            title: "Why can't I delete an employee?",
+            body: 'An employee cannot be deleted if the employee has expenses or you are editing an employee.'
           }
         ],
         knownIssues: [
