@@ -616,7 +616,7 @@ export default {
         employeeName: '',
         budgetName: '',
         createdAt: null,
-        categories: []
+        categories: ''
       },
       propExpense: {
         id: '',
@@ -631,7 +631,7 @@ export default {
         employeeName: '',
         budgetName: '',
         createdAt: null,
-        categories: []
+        categories: ''
       },
       search: '',
       expenses: [],

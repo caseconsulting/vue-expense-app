@@ -148,7 +148,7 @@
         <v-textarea v-model="expense.note" label="Notes (optional)" data-vv-name="Description"></v-textarea>
 
         <!-- Reference URL -->
-        <v-text-field v-model="expense.url" label="URL (Optional)"></v-text-field>
+        <v-text-field v-model="expense.url" :rules="urlRules" label="URL (Optional)"></v-text-field>
 
         <!-- Buttons -->
 
@@ -289,10 +289,10 @@ function clearForm() {
   this.$set(this.expense, 'createdAt', null);
   this.$set(this.expense, 'url', null);
   this.$set(this.expense, 'receipt', undefined);
-  this.$set(this.expense, 'categories', null);
+  this.$set(this.expense, 'categories', '');
 
   this.$set(this.urlInfo, 'url', '');
-  this.$set(this.urlInfo, 'category', []);
+  this.$set(this.urlInfo, 'category', '');
   this.$set(this.urlInfo, 'hits', 0);
 
   if (this.isUser) {
@@ -403,9 +403,10 @@ async function submit() {
         let newExpense = await api.createItem(api.EXPENSES, this.expense);
         if (newExpense.id) {
           //add url to training-urls table (uncommenting will add URL info to training-urls table when URL is present)
-          // if (newExpense.url && newExpense.url != ' ' && newExpense.categories && newExpense.categories != ' ') {
-          //   await this.addURLInfo(newExpense);
-          // }
+          //console.log('new exp category', newExpense.categories);
+          if (newExpense.url && newExpense.url != ' ' && newExpense.categories && newExpense.categories != ' ') {
+            await this.addURLInfo(newExpense);
+          }
 
           // submit attachment
           if (this.isRequired) {
@@ -458,7 +459,7 @@ async function incrementURLHits(urlInfo) {
 }
 
 function expenseTypeSelected(value) {
-  this.expense.categories = null;
+  this.expense.categories = '';
   return (this.selectedExpenseType = _.find(this.expenseTypes, expenseType => {
     if (expenseType.value === value) {
       return expenseType;
@@ -585,7 +586,7 @@ export default {
       userInfo: {},
       urlInfo: {
         id: ' ',
-        category: [],
+        category: '',
         hits: 0
       },
       descriptionRules: [
@@ -606,6 +607,15 @@ export default {
         v => (!!v && /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v)) || 'Date must be valid. Format: MM/DD/YYYY'
       ],
       optionalDateRules: [v => !v || /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v) || 'Date must be valid. Format: MM/DD/YYYY'],
+      urlRules: [
+        v =>
+          !v ||
+          v == ' ' ||
+          /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)/.test(
+            v
+          ) ||
+          'URL must be valid. Only http(s) are accepted.'
+      ],
       receiptRules: [v => !!v || 'Receipts are required'],
       valid: false,
       file: undefined
