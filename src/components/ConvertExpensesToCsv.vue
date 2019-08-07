@@ -9,7 +9,6 @@ import api from '@/shared/api.js';
 function convertToCSV(objArray) {
   var array = typeof objArray != 'object' ? JSON.parse(objArray) : objArray;
   var str = '';
-
   for (var i = 0; i < array.length; i++) {
     var line = '';
     for (var index = 0; index < array[i].length; index++) {
@@ -17,10 +16,8 @@ function convertToCSV(objArray) {
 
       line += array[i][index];
     }
-
     str += line + '\r\n';
   }
-
   return str;
 }
 async function getData() {

@@ -7,7 +7,6 @@
 function convertToCSV(objArray) {
   var array = typeof objArray != 'object' ? JSON.parse(objArray) : objArray;
   var str = '';
-
   for (var i = 0; i < array.length; i++) {
     var line = '';
     for (var index = 0; index < array[i].length; index++) {
@@ -15,10 +14,8 @@ function convertToCSV(objArray) {
 
       line += array[i][index];
     }
-
     str += line + '\r\n';
   }
-
   return str;
 }
 
@@ -107,6 +104,7 @@ function download() {
   var fileTitle = 'employees'; // or 'my-unique-title'
   this.exportCSVFile(this.employees, fileTitle); // call the exportCSVFile() function to process the JSON and trigger the download
 }
+
 export default {
   props: ['employees'],
   data() {
