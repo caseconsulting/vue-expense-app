@@ -599,7 +599,6 @@ export default {
           /^[+-]?[0-9]{1,3}(?:,?[0-9]{3})*(?:\.[0-9]{2})?$/.test(v) ||
           'Expense amount must be a number with two decimal digits',
         v => v < 1000000000 || 'Nice try' //when a user tries to fill out expense that is over a million
-        // ,v => v == Math.round(v * 100) / 100 || 'Cost must rounded to 2 places after the decimal.' // rules need to return booleans
       ],
       componentRules: [v => !!v || 'Required field'],
       dateRules: [
@@ -619,7 +618,6 @@ export default {
   watch: {
     'expense.purchaseDate': function() {
       this.purchaseDateFormatted = this.formatDate(this.expense.purchaseDate) || this.purchaseDateFormatted;
-
       //fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
       if (this.expense.purchaseDate !== null && !this.formatDate(this.expense.purchaseDate)) {
         this.expense.purchaseDate = null;
@@ -627,7 +625,6 @@ export default {
     },
     'expense.reimbursedDate': function() {
       this.reimbursedDateFormatted = this.formatDate(this.expense.reimbursedDate) || this.reimbursedDateFormatted;
-
       //fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
       if (this.expense.reimbursedDate !== null && !this.formatDate(this.expense.reimbursedDate)) {
         this.expense.reimbursedDate = null;

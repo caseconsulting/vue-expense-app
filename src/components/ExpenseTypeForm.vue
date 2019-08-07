@@ -35,14 +35,6 @@
           </template>
         </v-combobox>
 
-        <!-- <v-select v-model="model.categories" label="Categories (optional)" chips tags append-icon="" flat clearable>
-          <template slot="selection" slot-scope="data">
-            <v-chip :selected="data.selected" close outline label color="gray" @input="removeCategory(data.item)">
-              <strong>{{ data.item }}</strong
-              >&nbsp;
-            </v-chip>
-          </template>
-        </v-select> -->
         <br />
 
         <!-- budget field -->
@@ -129,37 +121,17 @@
 
         <!-- Buttons -->
 
-        <!-- <v-tooltip bottom>
-          <v-btn
-            :disabled="this.model.id && this.model.typeExpenses.length > 0"
-            outline
-            color="error"
-            @click="deleting = true"
-            slot="activator"
-          >
-            <icon class="mr-1" name="trash"></icon>Delete</v-btn
-          >
-          <span v-if="this.model.id && this.model.typeExpenses.length > 0"
-            >Expense Types can only be deleted if they have no expenses associated.
-          </span>
-
-          <span v-else-if="this.model.id">Delete Available for Expense Type</span>
-          <span v-else>Please select an Expense Type prior to deletion</span>
-        </v-tooltip> -->
-
         <v-btn color="white " @click="clearForm"> <icon class="mr-1 " name="ban"></icon>Cancel</v-btn>
         <v-btn outline color="success " @click="submit" :disabled="!valid">
           <icon class="mr-1 " name="save"></icon>Submit</v-btn
         >
       </v-form>
-      <!-- <delete-modal :activate="deleting" :type="'expense-type'"></delete-modal> -->
     </v-container>
   </v-card>
 </template>
 
 <script>
 import api from '@/shared/api.js';
-// import DeleteModal from './DeleteModal.vue';
 import dateUtils from '@/shared/dateUtils';
 
 // METHODS
@@ -177,17 +149,6 @@ function clearForm() {
   this.$set(this.model, 'isInactive', false);
   this.$set(this.model, 'categories', []);
 }
-
-// async function deleteExpenseType() {
-//   this.deleting = false;
-//   let et = await api.deleteItem(api.EXPENSE_TYPES, this.model.id);
-//   if (et.id) {
-//     this.$emit('delete');
-//     this.clearForm();
-//   } else {
-//     this.$emit('error', et.response.data.message);
-//   }
-// }
 
 function formatDate(date) {
   return dateUtils.formatDate(date);
@@ -266,14 +227,6 @@ export default {
     };
   },
   props: ['model'],
-  // components: {
-  //   DeleteModal
-  // },
-  created() {
-    // window.EventBus.$on('canceled-delete-expense-type', () => (this.deleting = false));
-    // window.EventBus.$on('confirm-delete-expense-type', this.deleteExpenseType);
-    // this.clearForm();
-  },
   methods: {
     clearForm,
     // deleteExpenseType,
@@ -285,7 +238,6 @@ export default {
   watch: {
     'model.startDate': function() {
       this.startDateFormatted = this.formatDate(this.model.startDate) || this.startDateFormatted;
-
       //fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
       if (this.model.startDate !== null && !this.formatDate(this.model.startDate)) {
         this.model.startDate = null;
@@ -293,7 +245,6 @@ export default {
     },
     'model.endDate': function() {
       this.endDateFormatted = this.formatDate(this.model.endDate) || this.endDateFormatted;
-
       //fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
       if (this.model.endDate !== null && !this.formatDate(this.model.endDate)) {
         this.model.endDate = null;

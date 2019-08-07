@@ -2,11 +2,11 @@ import Vue from 'vue';
 import router from './router';
 import store from './store';
 
-//Moment
 import moment from 'moment';
-//Vuetify
 import Vuetify from 'vuetify';
+
 import(/* webpackMode: "eager" */ 'vuetify/dist/vuetify.min.css');
+
 // BEGIN VUE AWESOME
 import 'vue-awesome/icons/regular/times-circle';
 import 'vue-awesome/icons/regular/check-circle';
