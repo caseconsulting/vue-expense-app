@@ -73,7 +73,8 @@
           ></v-text-field>
           <v-date-picker v-model="model.hireDate" no-title @input="menu1 = false"></v-date-picker>
         </v-menu>
-        <!-- <v-btn :depressed="true" color="secondary">Advanced</v-btn> -->
+
+        <!-- Advanced section -->
 
         <v-expansion-panel>
           <v-expansion-panel-content style="background-color: whitesmoke;">
@@ -152,12 +153,9 @@
                 min="1900-01-01"
               ></v-date-picker>
             </v-menu>
-            <!-- <fieldset class="filter_border">
-              <legend class="legend_style" style="font-size: 17px; padding-left: 10px;">Place of Birth</legend>
-            </fieldset> -->
 
+            <!-- Place of Birth -->
             <p style="font-size: 17px; padding-left: 10px; padding-top: 10px;">Place of Birth</p>
-
             <div style="padding-right: 20px; padding-left: 30px; padding-bottom: 10px;">
               <div style="border-left-style: groove; padding-right: 20px; padding-left: 10px; ">
                 <!-- Place of Birth: City text field -->
@@ -221,31 +219,11 @@
         </v-menu>
 
         <!-- Buttons -->
-
-        <!-- <v-tooltip bottom>
-          <v-btn
-            :disabled="this.model.id && this.model.personalExpenses.length > 0"
-            outline
-            color="error"
-            @click="deleting = true"
-            slot="activator"
-          >
-            <icon class="mr-1" name="trash"></icon>Delete</v-btn
-          >
-          <span v-if="this.model.id && this.model.personalExpenses.length > 0"
-            >Employees can only be deleted if they have no expenses</span
-          >
-          <span v-else-if="this.model.id">Delete Available for Employee</span>
-          <span v-else>Please select an employee prior to deletion</span>
-        </v-tooltip> -->
-
         <v-btn color="white" @click="clearForm"> <icon class="mr-1" name="ban"></icon>Cancel</v-btn>
         <v-btn outline color="success" @click="submit" :disabled="!valid">
           <icon class="mr-1" name="save"></icon>Submit</v-btn
         >
       </v-form>
-
-      <!-- <delete-modal :activate="deleting" :type="'employee'"></delete-modal> -->
     </v-container>
   </v-card>
 </template>
