@@ -55,9 +55,9 @@ function getAllExpenseTypeExpenses(id) {
   return execute('get', `/special/getAllExpenseTypeExpenses/${id}`);
 }
 
-function getURLInfo(id) {
+function getURLInfo(id, category) {
   console.log('here we are');
-  return execute('get', `/special/getURLInfo/${id}`);
+  return execute('get', `/special/getURLInfo/${id}/${category}`);
 }
 
 function createItem(type, data) {
@@ -66,6 +66,10 @@ function createItem(type, data) {
 
 function updateItem(type, id, data) {
   return execute('put', `/${type}/${id}`, data);
+}
+
+function updateURL(type, id, category, data) {
+  return execute('put', `/${type}/${id}/${category}`, data);
 }
 
 function deleteItem(type, id) {
@@ -121,6 +125,7 @@ export default {
   getURLInfo,
   createItem,
   updateItem,
+  updateURL,
   deleteItem,
   getAggregate,
   getRole,

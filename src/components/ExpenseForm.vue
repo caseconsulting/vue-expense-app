@@ -403,9 +403,9 @@ async function submit() {
         let newExpense = await api.createItem(api.EXPENSES, this.expense);
         if (newExpense.id) {
           //add url to training-urls table (uncommenting will add URL info to training-urls table when URL is present)
-          //if (newExpense.url) {
-          // await this.addURLInfo(newExpense);
-          //}
+          if (newExpense.url && newExpense.url != ' ' && newExpense.categories && newExpense.categories != ' ') {
+            await this.addURLInfo(newExpense);
+          }
 
           // submit attachment
           if (this.isRequired) {
@@ -426,69 +426,35 @@ async function submit() {
 }
 
 async function addURLInfo(newExpense) {
-  // let item = await api.getItem(api.URLS, newExpense.url);
-  // let url = newExpense.url;
+  console.log('here2');
   let encodedURL = btoa(newExpense.url);
-  let item = await api.getURLInfo(encodedURL);
+  let item = await api.getURLInfo(encodedURL, newExpense.categories);
 
   if (item) {
-    console.log('item', item);
-    await this.incrementURLHits(item, newExpense.categories);
+    await this.incrementURLHits(item);
   } else {
-    console.log('front end made');
     this.$set(this.urlInfo, 'id', newExpense.url);
 
     //adds categories to the list if applicable
     if (newExpense.categories) {
-      let categories = [];
-      console.log(newExpense.categories);
-      categories.push(newExpense.categories);
-      this.$set(this.urlInfo, 'category', categories);
+      this.$set(this.urlInfo, 'category', newExpense.categories);
+    } else {
+      this.$set(this.urlInfo, 'category', ' ');
     }
     this.$set(this.urlInfo, 'hits', 1);
     await api.createItem(api.URLS, this.urlInfo);
   }
 }
 
-async function incrementURLHits(urlInfo, categoryToAdd) {
-  let encodedURL = btoa(urlInfo.id);
-  console.log('urlInfo', urlInfo);
-  let hits = urlInfo.hits + 1;
-  this.$set(this.urlInfo, 'hits', hits);
+async function incrementURLHits(urlInfo) {
+  let encodedURL = btoa(urlInfo[0].id);
+  let hits = urlInfo[0].hits + 1;
 
-  //adds categories to the list if applicable
-  console.log('category to add', categoryToAdd);
-  if (categoryToAdd) {
-    console.log('length', urlInfo.category.length);
-    if (urlInfo.category.length > 0) {
-      console.log('has categories');
-      console.log(urlInfo.category);
-      let duplicate = _.find(urlInfo.category, category => {
-        console.log('in');
-        console.log(category);
-        if (category === categoryToAdd) {
-          return category;
-        }
-      });
+  this.urlInfo.id = encodedURL;
+  this.urlInfo.hits = hits;
+  this.urlInfo.category = urlInfo[0].category;
 
-      console.log(duplicate);
-      if (!duplicate) {
-        let categories = urlInfo.category;
-        categories.push(categoryToAdd);
-        this.$set(this.urlInfo, 'category', categories);
-      } else {
-        this.$set(this.urlInfo, 'category', urlInfo.category);
-      }
-    } else {
-      let category = [];
-      category.push(categoryToAdd);
-      this.$set(this.urlInfo, 'category', category);
-    }
-  } else {
-    this.$set(this.urlInfo, 'category', urlInfo.category);
-  }
-
-  return await api.updateItem(api.URLS, encodedURL, this.urlInfo);
+  return await api.updateURL(api.URLS, encodedURL, this.urlInfo.category, this.urlInfo);
 }
 
 function expenseTypeSelected(value) {
