@@ -128,15 +128,30 @@
                   <div
                     class="expandedInfo"
                     v-if="
-                      isEmpty(props.item.prime) &&
+                      userIsAdmin() &&
+                        isEmpty(props.item.prime) &&
                         isEmpty(props.item.contract) &&
                         isEmpty(props.item.jobRole) &&
                         isEmpty(props.item.github) &&
                         isEmpty(props.item.twitter) &&
                         isEmpty(props.item.birthday) &&
                         isEmpty(props.item.city) &&
-                        isEmpty(props.item.state) &&
-                        isEmpty(props.item.country)
+                        isEmpty(props.item.st) &&
+                        isEmpty(props.item.country) &&
+                        isEmpty(props.item.deptDate)
+                    "
+                  >
+                    <p>No additional data</p>
+                  </div>
+                  <div
+                    class="expandedInfo"
+                    v-else-if="
+                      !userIsAdmin() &&
+                        isEmpty(props.item.prime) &&
+                        isEmpty(props.item.contract) &&
+                        isEmpty(props.item.jobRole) &&
+                        isEmpty(props.item.github) &&
+                        isEmpty(props.item.twitter)
                     "
                   >
                     <p>No additional data</p>
@@ -158,17 +173,23 @@
                       v-if="
                         userIsAdmin() &&
                           !isEmpty(props.item.city) &&
-                          !isEmpty(props.item.state) &&
+                          !isEmpty(props.item.st) &&
                           !isEmpty(props.item.country)
                       "
                     >
-                      <b>Place of Birth: </b>{{ props.item.city }}, {{ props.item.state }}, {{ props.item.country }}
+                      <b>Place of Birth: </b>{{ props.item.city }}, {{ props.item.st }}, {{ props.item.country }}
                     </p>
-                    <p v-else-if="userIsAdmin() && !isEmpty(props.item.city) && !isEmpty(props.item.state)">
-                      <b>Place of Birth: </b>{{ props.item.city }}, {{ props.item.state }}
+                    <p v-else-if="userIsAdmin() && !isEmpty(props.item.city) && !isEmpty(props.item.st)">
+                      <b>Place of Birth: </b>{{ props.item.city }}, {{ props.item.st }}
+                    </p>
+                    <p v-else-if="userIsAdmin() && !isEmpty(props.item.city) && !isEmpty(props.item.country)">
+                      <b>Place of Birth: </b>{{ props.item.city }}, {{ props.item.country }}
                     </p>
                     <p v-else-if="userIsAdmin() && !isEmpty(props.item.country)">
                       <b>Place of Birth: </b>{{ props.item.country }}
+                    </p>
+                    <p v-if="userIsAdmin() && !isEmpty(props.item.deptDate)">
+                      <b>Departure Date: </b>{{ props.item.deptDate | dateFormat }}
                     </p>
                   </div>
                 </v-card-text>
@@ -252,7 +273,7 @@ function onSelect(item) {
   this.$set(this.model, 'hireDate', item.hireDate);
   this.$set(this.model, 'isInactive', item.isInactive);
 
-  //New Fields
+  // New Fields
   this.$set(this.model, 'birthday', item.birthday);
   this.$set(this.model, 'jobRole', item.jobRole);
   this.$set(this.model, 'prime', item.prime);
@@ -260,8 +281,9 @@ function onSelect(item) {
   this.$set(this.model, 'github', item.github);
   this.$set(this.model, 'twitter', item.twitter);
   this.$set(this.model, 'city', item.city);
-  this.$set(this.model, 'state', item.state);
+  this.$set(this.model, 'st', item.st);
   this.$set(this.model, 'country', item.country);
+  this.$set(this.model, 'deptDate', item.deptDate);
 }
 
 function clearModel() {
@@ -283,8 +305,9 @@ function clearModel() {
   this.$set(this.model, 'github', '');
   this.$set(this.model, 'twitter', '');
   this.$set(this.model, 'city', '');
-  this.$set(this.model, 'state', '');
+  this.$set(this.model, 'st', '');
   this.$set(this.model, 'country', '');
+  this.$set(this.model, 'deptDate', '');
 }
 
 function updateModelInTable() {
@@ -460,7 +483,7 @@ export default {
         isInactive: false,
         personalExpenses: '',
 
-        // New Fields
+        //New Fields
         birthday: '',
         jobRole: '',
         prime: '',
@@ -468,8 +491,9 @@ export default {
         github: '',
         twitter: '',
         city: '',
-        state: '',
-        country: ''
+        st: '',
+        country: '',
+        deptDate: ''
       },
       deleteModel: {
         id: ''
