@@ -318,13 +318,21 @@ function getAnniversary() {
   const [year, month, day] = this.hireDate.split('-');
   if (moment(`${month}/${day}/${year}`, 'MM/DD/YYYY', true).isValid()) {
     let now = moment();
-    let year = now.year();
     let anniversary = moment(this.hireDate, 'YYYY-MM-DD');
-    anniversary = anniversary.year(year);
+
     if (now.isAfter(anniversary)) {
-      anniversary.add(1, 'years');
-      return anniversary.format('ddd. MMM D, YYYY');
+      // if the employee start date is before today
+      if (now.isSameOrAfter(moment([now.year(), anniversary.month(), anniversary.date()]))) {
+        // if the employee's anniversary date has already occured this year
+        anniversary.add(1, 'years');
+        return anniversary.format('ddd. MMM D, YYYY');
+      } else {
+        // if the employee's anniversary date still has to happen between now and the end of year
+        anniversary = moment([now.year(), anniversary.month(), anniversary.date()]);
+        return anniversary.format('ddd. MMM D, YYYY');
+      }
     } else {
+      // if the employee's start day is in the future
       return anniversary.format('ddd. MMM D, YYYY');
     }
   } else {
