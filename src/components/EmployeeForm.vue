@@ -171,7 +171,7 @@
                 <!-- Place of Birth: State autocomplete -->
                 <v-autocomplete
                   :items="states"
-                  v-model="model.state"
+                  v-model="model.st"
                   item-text="text"
                   label="State"
                   style="padding-top: 0px; padding-bottom: 0px;"
@@ -191,6 +191,35 @@
 
         <!-- isactive? only on edit -->
         <v-checkbox label="Mark as Inactive" v-model="model.isInactive"></v-checkbox>
+
+        <!-- if inactive, set Departure Date -->
+        <v-menu
+          :full-width="true"
+          style="padding-right: 20px; padding-bottom: 20px;"
+          ref="menu2"
+          :close-on-content-click="true"
+          v-model="menu2"
+          :nudge-right="40"
+          lazy
+          transition="scale-transition"
+          offset-y
+          max-width="290px"
+          min-width="290px"
+          v-if="model.isInactive"
+        >
+          <v-text-field
+            slot="activator"
+            v-model="deptDateFormatted"
+            :rules="dateRules"
+            label="Departure Date"
+            hint="MM/DD/YYYY format"
+            persistent-hint
+            prepend-icon="event"
+            @blur="model.deptDate = parseDate(deptDateFormatted)"
+          ></v-text-field>
+          <v-date-picker v-model="model.deptDate" no-title @input="menu2 = false"></v-date-picker>
+        </v-menu>
+
         <!-- Buttons -->
 
         <!-- <v-tooltip bottom>
@@ -215,6 +244,7 @@
           <icon class="mr-1" name="save"></icon>Submit</v-btn
         >
       </v-form>
+
       <!-- <delete-modal :activate="deleting" :type="'employee'"></delete-modal> -->
     </v-container>
   </v-card>
@@ -237,6 +267,7 @@ function clearForm() {
   this.$set(this.model, 'lastName', '');
   this.$set(this.model, 'employeeNumber', '');
   this.$set(this.model, 'hireDate', '');
+  this.$set(this.model, 'deptDate', '');
   this.$set(this.model, 'id', '');
 
   // New Fields
@@ -247,7 +278,7 @@ function clearForm() {
   this.$set(this.model, 'jobRole', '');
   this.$set(this.model, 'birthday', '');
   this.$set(this.model, 'city', '');
-  this.$set(this.model, 'state', '');
+  this.$set(this.model, 'st', '');
   this.$set(this.model, 'country', '');
 }
 
@@ -375,8 +406,10 @@ export default {
       deleting: false,
       date: null,
       hireDateFormatted: null,
+      deptDateFormatted: null,
       employeeRoleFormatted: '',
       menu1: false,
+      menu2: false,
       genericRules: [v => !!v || 'This field is required'],
       emailRules: [v => !!v || 'Email is required', v => regex.test(v) || 'Not a valid @consultwithcase email address'],
       numberRules: [
@@ -398,14 +431,20 @@ export default {
         this.model.hireDate = null;
       }
     },
+    'model.deptDate': function() {
+      this.deptDateFormatted = this.formatDate(this.model.deptDate) || this.deptDateFormatted;
+      //fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
+      if (this.model.deptDate !== null && !this.formatDate(this.model.deptDate)) {
+        this.model.deptDate = null;
+      }
+    },
     'model.employeeRole': function() {
       if (this.model.employeeRole != 'User') {
         this.employeeRoleFormatted = _.startCase(this.model.employeeRole);
       }
     },
     'model.birthday': function() {
-      this.birthdayFormat = this.formatDate(this.model.birthday) || this.model.birthday;
-
+      this.birthdayFormat = this.formatDate(this.model.birthday) || this.birthdayFormat;
       //fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
       if (this.model.birthday !== null && !this.formatDate(this.model.birthday)) {
         this.model.birthday = null;
