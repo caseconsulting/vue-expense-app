@@ -318,22 +318,22 @@ function getAnniversary() {
   const [year, month, day] = this.hireDate.split('-');
   if (moment(`${month}/${day}/${year}`, 'MM/DD/YYYY', true).isValid()) {
     let now = moment();
-    let anniversary = moment(this.hireDate, 'YYYY-MM-DD');
+    let hireDate = moment(this.hireDate, 'YYYY-MM-DD');
 
-    if (now.isAfter(anniversary)) {
+    if (now.isAfter(hireDate)) {
+      let anniversary = moment([now.year(), hireDate.month(), hireDate.date()]);
       // if the employee start date is before today
-      if (now.isSameOrAfter(moment([now.year(), anniversary.month(), anniversary.date()]))) {
+      if (now.isSameOrAfter(anniversary)) {
         // if the employee's anniversary date has already occured this year
         anniversary.add(1, 'years');
         return anniversary.format('ddd. MMM D, YYYY');
       } else {
         // if the employee's anniversary date still has to happen between now and the end of year
-        anniversary = moment([now.year(), anniversary.month(), anniversary.date()]);
         return anniversary.format('ddd. MMM D, YYYY');
       }
     } else {
       // if the employee's start day is in the future
-      return anniversary.format('ddd. MMM D, YYYY');
+      return hireDate.add(1, 'years').format('ddd. MMM D, YYYY');
     }
   } else {
     // TODO: Return something for invalid date
