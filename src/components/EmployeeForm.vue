@@ -267,7 +267,6 @@ function clearForm() {
   this.$set(this.model, 'lastName', '');
   this.$set(this.model, 'employeeNumber', '');
   this.$set(this.model, 'hireDate', '');
-  this.$set(this.model, 'deptDate', '');
   this.$set(this.model, 'id', '');
 
   // New Fields
@@ -280,6 +279,7 @@ function clearForm() {
   this.$set(this.model, 'city', '');
   this.$set(this.model, 'st', '');
   this.$set(this.model, 'country', '');
+  this.$set(this.model, 'deptDate', '');
 }
 
 function formatDate(date) {
@@ -296,8 +296,11 @@ function parseDate(date) {
 
 async function submit() {
   if (this.$refs.form.validate()) {
+    if (!this.model.isInactive) {
+      this.$set(this.model, 'deptDate', '');
+    }
+
     if (this.model.id) {
-      // this.model.isActive = !this.model.isActive;
       let updatedEmployee = await api.updateItem(api.EMPLOYEES, this.model.id, this.model);
       if (updatedEmployee.id) {
         this.$emit('update');
