@@ -2,10 +2,6 @@
   <div class="timer">
     <v-tooltip bottom>
       <div value="active" slot="activator">
-        <!-- <p v-if="timeRemaining >= 0 && timeRemaining <= 300">
-            {{ hours | two_digits }}:{{ minutes | two_digits }}:{{ seconds | two_digits }}
-          </p> -->
-
         <!-- display timer after 5 minute warning -->
         <p v-if="timeRemaining > 0 && timeRemaining <= 300">{{ minutes }}:{{ seconds | two_digits }}</p>
 
@@ -52,15 +48,6 @@ function minutes() {
   return Math.trunc(this.timeRemaining / 60) % 60;
 }
 
-/*
- * Computes the hours displayed for the timer
- */
-/*
-function hours() {
-  return Math.trunc(this.timeRemaining / 60 / 60) % 24;
-}
-*/
-
 /* LIFECYCLE HOOKS */
 
 async function created() {
@@ -88,8 +75,6 @@ export default {
     timeRemaining,
     seconds,
     minutes
-    // ,
-    // hours
   },
   created
 };
