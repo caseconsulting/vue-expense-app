@@ -343,28 +343,42 @@ function getAnniversary() {
 
 function getDaysUntil() {
   let now = moment();
-  let year = now.year();
-  let anniversary = moment(this.hireDate, 'YYYY-MM-DD');
-  anniversary = anniversary.year(year);
-  if (now.isAfter(anniversary)) {
-    anniversary.add(1, 'years');
-    return anniversary.diff(now, 'days') + 1;
+
+  let hireDate = moment(this.hireDate, 'YYYY-MM-DD');
+  let anniversary = moment([now.year(), hireDate.month(), hireDate.date()]);
+
+  if (now.isAfter(hireDate)) {
+    // if the employee start date is before today
+    if (now.isSameOrAfter(anniversary)) {
+      // if the employee's anniversary date has already occured this year
+      anniversary.add(1, 'years');
+    }
   } else {
-    return anniversary.diff(now, 'days') + 1;
+    // if the employee's start day is in the future
+    anniversary = hireDate.add(1, 'years');
   }
+
+  return anniversary.diff(now, 'days') + 1;
 }
 
 function getSecondsUntil() {
   let now = moment();
-  let year = now.year();
-  let anniversary = moment(this.hireDate, 'YYYY-MM-DD');
-  anniversary = anniversary.year(year);
-  if (now.isAfter(anniversary)) {
-    anniversary.add(1, 'years');
-    return anniversary.diff(now, 'seconds');
+
+  let hireDate = moment(this.hireDate, 'YYYY-MM-DD');
+  let anniversary = moment([now.year(), hireDate.month(), hireDate.date()]);
+
+  if (now.isAfter(hireDate)) {
+    // if the employee start date is before today
+    if (now.isSameOrAfter(anniversary)) {
+      // if the employee's anniversary date has already occured this year
+      anniversary.add(1, 'years');
+    }
   } else {
-    return anniversary.diff(now, 'seconds');
+    // if the employee's start day is in the future
+    anniversary = hireDate.add(1, 'years');
   }
+
+  return anniversary.diff(now, 'seconds');
 }
 
 function isMobile() {
