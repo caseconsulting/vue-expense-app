@@ -428,6 +428,8 @@ async function submit() {
 
 async function addURLInfo(newExpense) {
   console.log('here2');
+  newExpense.url = newExpense.url.replace(/\/$/, '');
+  console.log(newExpense.url);
   let encodedURL = btoa(newExpense.url);
   let item = await api.getURLInfo(encodedURL, newExpense.categories);
 
