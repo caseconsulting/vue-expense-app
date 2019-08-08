@@ -135,7 +135,7 @@
 
         <!-- end unreimbursed datatable -->
 
-        <!-- unreimburse button -->
+        <!-- reimburse button -->
         <v-flex offset-md10>
           <v-fab-transition class="reimburse_button">
             <v-btn
