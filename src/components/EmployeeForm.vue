@@ -127,6 +127,33 @@
 
             <!-- Birthday Picker -->
             <v-menu
+              :full-width="true"
+              style="padding-right: 20px; padding-bottom: 20px;"
+              ref="menu3"
+              :close-on-content-click="true"
+              v-model="menu3"
+              :nudge-right="40"
+              lazy
+              transition="scale-transition"
+              offset-y
+              max-width="290px"
+              min-width="290px"
+            >
+              <v-text-field
+                slot="activator"
+                v-model="birthdayFormat"
+                :rules="dateRules"
+                label="Birthday"
+                hint="MM/DD/YYYY format"
+                persistent-hint
+                prepend-icon="event"
+                @blur="model.birthday = parseDate(birthdayFormat)"
+              ></v-text-field>
+              <v-date-picker v-model="model.birthday" no-title @input="menu3 = false"></v-date-picker>
+            </v-menu>
+
+            <!-- Birthday Picker -->
+            <!-- <v-menu
               ref="menu"
               :close-on-content-click="false"
               :nudge-right="40"
@@ -152,7 +179,7 @@
                 :max="new Date().toISOString().substr(0, 10)"
                 min="1900-01-01"
               ></v-date-picker>
-            </v-menu>
+            </v-menu> -->
 
             <!-- Place of Birth -->
             <p style="font-size: 17px; padding-left: 10px; padding-top: 10px;">Place of Birth</p>
@@ -391,6 +418,7 @@ export default {
       employeeRoleFormatted: '',
       menu1: false,
       menu2: false,
+      menu3: false,
       genericRules: [v => !!v || 'This field is required'],
       emailRules: [v => !!v || 'Email is required', v => regex.test(v) || 'Not a valid @consultwithcase email address'],
       numberRules: [
