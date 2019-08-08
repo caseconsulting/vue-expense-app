@@ -142,7 +142,7 @@
               <v-text-field
                 slot="activator"
                 v-model="birthdayFormat"
-                :rules="dateRules"
+                :rules="dateOptionalRules"
                 label="Birthday"
                 hint="MM/DD/YYYY format"
                 persistent-hint
@@ -428,6 +428,15 @@ export default {
       dateRules: [
         v => !!v || 'Date must be valid. Format: MM/DD/YYYY',
         v => (!!v && /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v)) || 'Date must be valid. Format: MM/DD/YYYY'
+      ],
+      dateOptionalRules: [
+        v => {
+          if (v) {
+            return /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v) || 'Date must be valid. Format: MM/DD/YYYY';
+          } else {
+            return true;
+          }
+        }
       ],
       valid: false
     };
