@@ -351,23 +351,24 @@ function getDaysUntil() {
 }
 
 function getSecondsUntil() {
-  let now = moment();
+  if (this.actualTime) {
+    let now = moment();
+    let year = now.year();
+    let hireDate = moment(this.hireDate, 'YYYY-MM-DD');
+    let anniversary = moment([year, hireDate.month(), hireDate.date()]);
 
-  let hireDate = moment(this.hireDate, 'YYYY-MM-DD');
-  let anniversary = moment([now.year(), hireDate.month(), hireDate.date()]);
-
-  if (now.isAfter(hireDate)) {
-    // if the employee start date is before today
-    if (now.isSameOrAfter(anniversary)) {
-      // if the employee's anniversary date has already occured this year
-      anniversary.add(1, 'years');
+    if (now.isAfter(hireDate)) {
+      // if the employee start date is before today
+      if (now.isSameOrAfter(anniversary)) {
+        // if the employee's anniversary date has already occured this year
+        anniversary.add(1, 'years');
+      }
+    } else {
+      // if the employee's start day is in the future
+      anniversary = hireDate.add(1, 'years');
     }
-  } else {
-    // if the employee's start day is in the future
-    anniversary = hireDate.add(1, 'years');
+    return anniversary.diff(now, 'seconds');
   }
-
-  return anniversary.diff(now, 'seconds');
 }
 
 function isMobile() {
