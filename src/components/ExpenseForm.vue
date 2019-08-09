@@ -176,11 +176,16 @@
 import api from '@/shared/api.js';
 import { getRole } from '@/utils/auth';
 import moment from 'moment';
+import { extendMoment } from 'moment-range';
+
 import ConfirmationBox from './ConfirmationBox.vue';
 import _ from 'lodash';
 import dateUtils from '@/shared/dateUtils';
 import employeeUtils from '@/shared/employeeUtils';
 import FileUpload from './FileUpload.vue';
+
+const IsoFormat = 'YYYY-MM-DD';
+const momentRange = extendMoment(moment);
 
 // METHODS
 function setFile(file) {
@@ -204,8 +209,9 @@ async function checkCoverage() {
         await api.getItem(api.EMPLOYEES, this.expense.userId);
         budgets = await api.getBudgetItem(this.expense.userId);
       }
+
       let employeeExpenseTypeBudget = _.find(budgets, budget => {
-        return budget.expenseTypeId === expenseType.value;
+        return budget.expenseTypeId === expenseType.value && checkExpenseDate(this.expense.purchaseDate, budget);
       });
 
       // Keep the cost data as a string. This allows us to keep it formatted as ##.##
@@ -469,6 +475,18 @@ function expenseTypeSelected(value) {
   }));
 }
 
+/**
+ * Check if purchase date is within the fiscal range of the budget
+ */
+function checkExpenseDate(purchaseDate, budget) {
+  let startDate, endDate, date, range;
+  startDate = moment(budget.fiscalStartDate, IsoFormat);
+  endDate = moment(budget.fiscalEndDate, IsoFormat);
+  date = moment(purchaseDate);
+  range = momentRange().range(startDate, endDate);
+  return range.contains(date);
+}
+
 // COMPUTED
 function updateIsRequired() {
   this.selectedExpenseType = _.find(this.expenseTypes, expenseType => {
@@ -664,7 +682,8 @@ export default {
     filteredExpenseTypes,
     getCategories,
     addURLInfo,
-    incrementURLHits
+    incrementURLHits,
+    checkExpenseDate
   },
   created
 };
