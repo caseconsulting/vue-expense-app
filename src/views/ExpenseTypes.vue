@@ -30,7 +30,7 @@
           <fieldset>
             <legend class="legend_style">Filters</legend>
 
-            <!-- active fitler -->
+            <!-- active filter -->
             <div class="flagFilter">
               <h4>Active Expense Type:</h4>
               <v-btn-toggle class="filter_color" v-model="filter.active" flat mandatory>
@@ -578,10 +578,6 @@ export default {
   width: auto;
   height: 1.5em;
 }
-
-/* .inactiveStyle {
-  background-color: #bdbbbb;
-} */
 
 .flag p {
   font-weight: bold;
