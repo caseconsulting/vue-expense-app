@@ -50,6 +50,7 @@
         <!-- Hire Date -->
         <v-menu
           :full-width="true"
+          :disabled="!!model.id"
           style="padding-right: 20px; padding-bottom: 20px;"
           ref="menu1"
           :close-on-content-click="true"
