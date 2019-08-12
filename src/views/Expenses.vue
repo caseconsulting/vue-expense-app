@@ -223,7 +223,7 @@
                     <p v-if="!isEmpty(props.item.categories) && typeof props.item.categories == 'string'">
                       <b>Category: </b>{{ props.item.categories }}
                     </p>
-                    <div class="flagExp">
+                    <div v-if="isAdmin" class="flagExp">
                       <p>Inactive:</p>
                       <icon
                         v-if="useInactiveStyle(props.item)"
