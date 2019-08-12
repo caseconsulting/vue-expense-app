@@ -433,9 +433,15 @@ async function submit() {
 }
 
 async function addURLInfo(newExpense) {
-  console.log('here2');
-  newExpense.url = newExpense.url.replace(/\/$/, '');
-  console.log(newExpense.url);
+  newExpense.url = newExpense.url.replace(/\/$/, ''); //removes trailing slash from url before adding to dynamo
+
+  if (
+    newExpense.url.length >= 12 &&
+    (newExpense.url.substring(0, 12) === 'https://www.' || newExpense.url.substring(0, 11) === 'http://www.')
+  ) {
+    newExpense.url = newExpense.url.replace(/www\./, ''); //removes www from url before adding to dynamo
+  }
+
   let encodedURL = btoa(newExpense.url);
   let item = await api.getURLInfo(encodedURL, newExpense.categories);
 
