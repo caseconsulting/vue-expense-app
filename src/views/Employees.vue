@@ -135,7 +135,8 @@
                         isEmpty(props.item.city) &&
                         isEmpty(props.item.st) &&
                         isEmpty(props.item.country) &&
-                        isEmpty(props.item.deptDate)
+                        isEmpty(props.item.deptDate) &&
+                        !props.item.isInactive
                     "
                   >
                     <p>No additional data</p>
@@ -188,6 +189,17 @@
                     <p v-if="userIsAdmin() && !isEmpty(props.item.deptDate)">
                       <b>Departure Date: </b>{{ props.item.deptDate | dateFormat }}
                     </p>
+                    <div v-if="userIsAdmin() && props.item.isInactive" class="flagEmp">
+                      <p>Inactive:</p>
+                      <icon
+                        style="padding: 0px;"
+                        v-if="props.item.isInactive"
+                        id="marks"
+                        class="mr-1"
+                        name="regular/check-circle"
+                      ></icon>
+                      <icon v-else class="mr-1" id="marks" name="regular/times-circle"></icon>
+                    </div>
                   </div>
                 </v-card-text>
               </v-card>
@@ -539,6 +551,12 @@ export default {
 </script>
 
 <style>
+.flagEmp p {
+  font-weight: bold;
+  width: 75px;
+  display: inline-block;
+}
+
 .expandedInfo {
   border: 1px solid black;
   font-size: 14px;

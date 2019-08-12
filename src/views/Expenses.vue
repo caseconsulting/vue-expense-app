@@ -126,7 +126,11 @@
 
             <!-- data row -->
             <template slot="items" slot-scope="props">
-              <tr v-if="!loading" @click="props.expanded = !props.expanded">
+              <tr
+                :class="{ inactiveStyle: useInactiveStyle(props.item) }"
+                v-if="!loading"
+                @click="props.expanded = !props.expanded"
+              >
                 <td class="text-xs-left">{{ props.item.createdAt | dateFormatCreated }}</td>
                 <td v-if="isAdmin" class="text-xs-left">{{ props.item.employeeName }}</td>
                 <td class="text-xs-left">{{ props.item.budgetName }}</td>
@@ -219,6 +223,16 @@
                     <p v-if="!isEmpty(props.item.categories) && typeof props.item.categories == 'string'">
                       <b>Category: </b>{{ props.item.categories }}
                     </p>
+                    <div class="flagExp">
+                      <p>Inactive:</p>
+                      <icon
+                        v-if="useInactiveStyle(props.item)"
+                        id="marks"
+                        class="mr-1"
+                        name="regular/check-circle"
+                      ></icon>
+                      <icon v-else class="mr-1" id="marks" name="regular/times-circle"></icon>
+                    </div>
                   </div>
                 </v-card-text>
               </v-card>
@@ -561,6 +575,17 @@ function filterExpense() {
   }
 }
 
+function useInactiveStyle(expense) {
+  //filter for Active Expense Types (available to admin only)
+  //gets the expense type for expense to look up inactive
+  if (this.isAdmin) {
+    let expenseType = _.find(this.expenseTypes, type => expense.expenseTypeId === type.value);
+    return expenseType && expenseType.isInactive;
+  }
+
+  return false;
+}
+
 function expenseList() {
   return this.filteredExpenses;
 }
@@ -721,6 +746,7 @@ export default {
     deleteExpense,
     unreimburseExpense,
     filterExpense,
+    useInactiveStyle,
     getExpenses,
     isEmpty
   },
@@ -729,6 +755,16 @@ export default {
 </script>
 
 <style>
+.flagExp p {
+  font-weight: bold;
+  width: 75px;
+  display: inline-block;
+}
+
+.flag svg {
+  margin-top: 5px;
+}
+
 .datatable_btn .v-btn {
   margin: 6px -2px;
 }
