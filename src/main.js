@@ -15,6 +15,7 @@ import 'vue-awesome/icons/book';
 import 'vue-awesome/icons/code';
 import 'vue-awesome/icons/dollar-sign';
 import 'vue-awesome/icons/life-ring';
+import 'vue-awesome/icons/fire';
 import 'vue-awesome/icons/sign-in-alt';
 import 'vue-awesome/icons/sign-out-alt';
 import 'vue-awesome/icons/users';
