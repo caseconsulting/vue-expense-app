@@ -66,6 +66,12 @@ export default {
           permission: ['admin', 'user']
         },
         {
+          title: 'Training',
+          icon: 'fire',
+          route: 'training',
+          permission: ['admin', 'user']
+        },
+        {
           title: 'Help',
           icon: 'life-ring',
           route: 'help',
