@@ -347,14 +347,20 @@ function filteredExpenseTypes() {
   if (this.employeeRole === 'admin' && this.$route.path === '/expenses') {
     this.expenseTypes.forEach(function(element) {
       if (!element.isInactive) {
-        filteredExpType.push(element);
+        if (element.recurringFlag) {
+          filteredExpType.push(element.text + ' (Recurring)');
+        } else {
+          filteredExpType.push(element.text + ` (${formatDate(element.startDate)} - ${formatDate(element.endDate)})`);
+        }
       }
     });
   } else {
     this.expenseTypes.forEach(function(element) {
       if (!element.isInactive) {
-        if (element.recurringFlag || (element.endDate != null && betweenDates(element.startDate, element.endDate))) {
-          filteredExpType.push(element);
+        if (element.recurringFlag) {
+          filteredExpType.push(element.text + ' (Recurring)');
+        } else if (element.endDate != null && betweenDates(element.startDate, element.endDate)) {
+          filteredExpType.push(element.text + ` (${formatDate(element.startDate)} - ${formatDate(element.endDate)})`);
         }
       }
     });
