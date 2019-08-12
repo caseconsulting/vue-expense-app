@@ -26,6 +26,8 @@
           :rules="componentRules"
           v-model="expense.expenseTypeId"
           label="Expense Type"
+          :hint="hint"
+          persistent-hint
           :disabled="!!expense.id"
           @input="expenseTypeSelected"
         ></v-autocomplete>
@@ -37,6 +39,8 @@
           :rules="componentRules"
           v-model="expense.expenseTypeId"
           label="Expense Type"
+          :hint="hint"
+          persistent-hint
           :disabled="!!expense.id"
           @input="expenseTypeSelected"
           class="form_padding"
@@ -347,20 +351,14 @@ function filteredExpenseTypes() {
   if (this.employeeRole === 'admin' && this.$route.path === '/expenses') {
     this.expenseTypes.forEach(function(element) {
       if (!element.isInactive) {
-        if (element.recurringFlag) {
-          filteredExpType.push(element.text + ' (Recurring)');
-        } else {
-          filteredExpType.push(element.text + ` (${formatDate(element.startDate)} - ${formatDate(element.endDate)})`);
-        }
+        filteredExpType.push(element);
       }
     });
   } else {
     this.expenseTypes.forEach(function(element) {
       if (!element.isInactive) {
-        if (element.recurringFlag) {
-          filteredExpType.push(element.text + ' (Recurring)');
-        } else if (element.endDate != null && betweenDates(element.startDate, element.endDate)) {
-          filteredExpType.push(element.text + ` (${formatDate(element.startDate)} - ${formatDate(element.endDate)})`);
+        if (element.recurringFlag || (element.endDate != null && betweenDates(element.startDate, element.endDate))) {
+          filteredExpType.push(element);
         }
       }
     });
@@ -602,6 +600,7 @@ async function created() {
 export default {
   data() {
     return {
+      hint: '',
       allowReceipt: false,
       loading: false,
       employeeRole: '',
@@ -670,6 +669,19 @@ export default {
       //fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
       if (this.expense.reimbursedDate !== null && !this.formatDate(this.expense.reimbursedDate)) {
         this.expense.reimbursedDate = null;
+      }
+    },
+    'expense.expenseTypeId': function() {
+      let selected = _.find(this.expenseTypes, expenseType => {
+        return expenseType.value === this.expense.expenseTypeId;
+      });
+
+      if (selected && selected.recurringFlag) {
+        this.hint = 'Recurring Expense Type';
+      } else if (selected) {
+        this.hint = `Available from ${formatDate(selected.startDate)} - ${formatDate(selected.endDate)}`;
+      } else {
+        this.hint = '';
       }
     }
   },
