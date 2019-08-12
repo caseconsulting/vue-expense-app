@@ -216,7 +216,7 @@
                     <p v-if="!isEmpty(props.item.url)">
                       <b>Url: </b> <a v-if="props.item.url" :href="props.item.url">{{ props.item.url }}</a>
                     </p>
-                    <p v-if="props.item.categories && typeof props.item.categories == 'string'">
+                    <p v-if="!isEmpty(props.item.categories) && typeof props.item.categories == 'string'">
                       <b>Category: </b>{{ props.item.categories }}
                     </p>
                   </div>
