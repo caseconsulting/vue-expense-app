@@ -66,12 +66,12 @@ export default {
           permission: ['admin', 'user']
         },
         //commenting in-progress training page out before deploying
-        {
-          title: 'Training',
-          icon: 'fire',
-          route: 'training',
-          permission: ['admin', 'user']
-        },
+        // {
+        //   title: 'Training',
+        //   icon: 'fire',
+        //   route: 'training',
+        //   permission: ['admin', 'user']
+        // },
         {
           title: 'Help',
           icon: 'life-ring',
