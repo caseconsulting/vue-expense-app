@@ -9,7 +9,7 @@ import Expenses from '@/views/Expenses.vue';
 import Help from '@/views/Help.vue';
 import Callback from '@/views/Callback';
 import EmployeeHome from '@/views/EmployeeHome';
-// import TrainingAnalytics from '@/views/TrainingAnalytics';
+import TrainingAnalytics from '@/views/TrainingAnalytics';
 import { requireAuth, isAdmin } from '@/utils/auth';
 import multiguard from 'vue-router-multiguard';
 
@@ -68,13 +68,13 @@ const router = new Router({
       path: '/callback',
       name: 'callback',
       component: Callback
+    },
+    // commenting in-progress training page out before deploying
+    {
+      path: '/training',
+      name: 'training',
+      component: TrainingAnalytics
     }
-    //commenting in-progress training page out before deploying
-    // {
-    //   path: '/training',
-    //   name: 'training',
-    //   component: TrainingAnalytics
-    // }
   ]
 });
 
