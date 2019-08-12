@@ -226,6 +226,11 @@
                       <icon v-if="props.item.requiredFlag" id="marks" class="mr-1" name="regular/check-circle"></icon>
                       <icon v-else class="mr-1" id="marks" name="regular/times-circle"></icon>
                     </div>
+                    <div class="flag">
+                      <p>Inactive:</p>
+                      <icon v-if="props.item.isInactive" id="marks" class="mr-1" name="regular/check-circle"></icon>
+                      <icon v-else class="mr-1" id="marks" name="regular/times-circle"></icon>
+                    </div>
                   </div>
                 </v-card-text>
               </v-card>
@@ -237,10 +242,6 @@
               Your search for "{{ search }}" found no results.
             </v-alert>
           </v-data-table>
-
-          <!-- <v-card-actions>
-            <v-checkbox :label="'Show Inactive Expense Types'" v-model="showInactive"></v-checkbox>
-          </v-card-actions> -->
 
           <delete-modal :activate="deleting" :type="'expense-type'"></delete-modal>
           <delete-error-modal :activate="invalidDelete" type="expense type"></delete-error-modal>
