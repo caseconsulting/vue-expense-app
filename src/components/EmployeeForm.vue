@@ -65,6 +65,7 @@
             slot="activator"
             v-model="hireDateFormatted"
             :rules="dateRules"
+            :disabled="!!model.id"
             label="Hire Date"
             hint="MM/DD/YYYY format"
             persistent-hint
