@@ -159,10 +159,14 @@
                     <p v-if="!isEmpty(props.item.contract)"><b>Contract: </b>{{ props.item.contract }}</p>
                     <p v-if="!isEmpty(props.item.jobRole)"><b>Job Role: </b>{{ props.item.jobRole }}</p>
                     <p v-if="!isEmpty(props.item.github)">
-                      <b>Github: </b><a :href="props.item.github" target="_blank">{{ props.item.github }}</a>
+                      <b>Github: </b
+                      ><a :href="'https://github.com/' + props.item.github" target="_blank">{{ props.item.github }}</a>
                     </p>
                     <p v-if="!isEmpty(props.item.twitter)">
-                      <b>Twitter: </b><a :href="props.item.twitter" target="_blank">{{ props.item.twitter }}</a>
+                      <b>Twitter: </b
+                      ><a :href="'https://twitter.com/' + props.item.twitter" target="_blank">{{
+                        props.item.twitter
+                      }}</a>
                     </p>
                     <p v-if="userIsAdmin() && !isEmpty(props.item.birthday)">
                       <b>Birthday: </b>{{ props.item.birthday | dateFormat }}
@@ -285,13 +289,13 @@ function onSelect(item) {
   // New Fields
   this.$set(this.model, 'birthday', item.birthday);
   this.$set(this.model, 'jobRole', item.jobRole);
-  this.$set(this.model, 'prime', item.prime);
-  this.$set(this.model, 'contract', item.contract);
-  this.$set(this.model, 'github', item.github);
-  this.$set(this.model, 'twitter', item.twitter);
-  this.$set(this.model, 'city', item.city);
-  this.$set(this.model, 'st', item.st);
-  this.$set(this.model, 'country', item.country);
+  this.$set(this.model, 'prime', item.prime.trim());
+  this.$set(this.model, 'contract', item.contract.trim());
+  this.$set(this.model, 'github', item.github.trim());
+  this.$set(this.model, 'twitter', item.twitter.trim());
+  this.$set(this.model, 'city', item.city.trim());
+  this.$set(this.model, 'st', item.st.trim());
+  this.$set(this.model, 'country', item.country.trim());
   this.$set(this.model, 'deptDate', item.deptDate);
 }
 

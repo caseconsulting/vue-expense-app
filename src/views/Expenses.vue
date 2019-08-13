@@ -398,10 +398,10 @@ function onSelect(item) {
   this.$set(this.expense, 'cost', moneyFilter(item.cost));
   this.$set(this.expense, 'userId', item.userId);
   this.$set(this.expense, 'expenseTypeId', item.expenseTypeId);
-  this.$set(this.expense, 'note', item.note);
+  this.$set(this.expense, 'note', item.note.trim());
   this.$set(this.expense, 'receipt', item.receipt);
   this.$set(this.expense, 'createdAt', item.createdAt);
-  this.$set(this.expense, 'url', item.url);
+  this.$set(this.expense, 'url', item.url.trim());
   this.$set(this.expense, 'categories', item.categories);
 }
 
