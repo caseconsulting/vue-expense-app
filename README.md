@@ -108,7 +108,7 @@ aws s3 cp s3://case-consulting-expense-app-resources-test/.env .env
 npm run deploy:test
 ```
 
-To deploy to the prod environment:
+<span style="color:red">To deploy to the prod environment:</span>
 
 ```
 aws s3 cp s3://case-consulting-expense-app-resources-prod/.env .env
