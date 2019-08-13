@@ -131,7 +131,7 @@
                 v-if="!loading"
                 @click="props.expanded = !props.expanded"
               >
-                <td class="text-xs-left">{{ props.item.createdAt | dateFormatCreated }}</td>
+                <td class="text-xs-left">{{ props.item.createdAt | dateFormat }}</td>
                 <td v-if="isAdmin" class="text-xs-left">{{ props.item.employeeName }}</td>
                 <td class="text-xs-left">{{ props.item.budgetName }}</td>
                 <td class="text-xs-left">{{ (props.item.cost ? props.item.cost : 0) | moneyValue }}</td>
@@ -603,13 +603,6 @@ export default {
       if (value) {
         // return moment(value, 'h:mm:ss ddd MMM DD YYYY GMT-0400').format('MMM Do, YYYY');
         return moment(value, 'YYYY-MM-DD').format('MMM Do, YYYY');
-      } else {
-        return '';
-      }
-    },
-    dateFormatCreated: value => {
-      if (value) {
-        return moment(value, 'MM-DD-YYYY').format('MMM Do, YYYY');
       } else {
         return '';
       }

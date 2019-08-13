@@ -406,7 +406,7 @@ async function submit() {
         }
         this.clearForm();
       } else {
-        this.$set(this.expense, 'createdAt', moment().format('MM-DD-YYYY'));
+        this.$set(this.expense, 'createdAt', moment().format('YYYY-MM-DD'));
         if (this.file) {
           this.$set(this.expense, 'receipt', this.file.name); //stores file name for lookup later
         }
