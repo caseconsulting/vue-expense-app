@@ -108,6 +108,8 @@ aws s3 cp s3://case-consulting-expense-app-resources-test/.env .env
 npm run deploy:test
 ```
 
+### DANGER DANGER
+
 **To deploy to the prod environment:**
 
 ```
