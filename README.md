@@ -108,12 +108,12 @@ aws s3 cp s3://case-consulting-expense-app-resources-test/.env .env
 npm run deploy:test
 ```
 
-To deploy to the **prod** environment:
+**To deploy to the prod environment:**
 
-```
+**```
 aws s3 cp s3://case-consulting-expense-app-resources-prod/.env .env
 npm run deploy:prod
-```
+```**
 
 To reset for local development, after a deployment:
 
