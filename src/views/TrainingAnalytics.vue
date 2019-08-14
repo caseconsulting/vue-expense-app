@@ -156,7 +156,6 @@ export default {
 .url-image {
   max-width: 250px;
   max-height: 250px;
-  /* border: 2px solid black; */
 }
 
 .url-info {
