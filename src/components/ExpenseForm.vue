@@ -391,7 +391,7 @@ async function submit() {
       }
 
       if (this.expense.id) {
-        if (this.file) {
+        if (this.isReceiptRequired() && this.file) {
           this.$set(this.expense, 'receipt', this.file.name); //stores file name for lookup later
         }
         let updatedExpense = await api.updateItem(api.EXPENSES, this.expense.id, this.expense);
@@ -407,9 +407,10 @@ async function submit() {
         this.clearForm();
       } else {
         this.$set(this.expense, 'createdAt', moment().format('YYYY-MM-DD'));
-        if (this.file) {
+        if (this.isReceiptRequired() && this.file) {
           this.$set(this.expense, 'receipt', this.file.name); //stores file name for lookup later
         }
+
         let newExpense = await api.createItem(api.EXPENSES, this.expense);
         if (newExpense.id) {
           //add url to training-urls table (uncommenting will add URL info to training-urls table when URL is present)
@@ -495,6 +496,18 @@ function checkExpenseDate(purchaseDate, budget) {
   date = moment(purchaseDate);
   range = momentRange().range(startDate, endDate);
   return range.contains(date);
+}
+
+function isReceiptRequired() {
+  this.selectedExpenseType = _.find(this.expenseTypes, expenseType => {
+    if (expenseType.value === this.expense.expenseTypeId) {
+      return expenseType;
+    }
+  });
+  if (this.selectedExpenseType) {
+    return this.selectedExpenseType.requiredFlag;
+  }
+  return true;
 }
 
 // COMPUTED
@@ -707,7 +720,8 @@ export default {
     getCategories,
     addURLInfo,
     incrementURLHits,
-    checkExpenseDate
+    checkExpenseDate,
+    isReceiptRequired
   },
   created
 };

@@ -13,7 +13,7 @@
 
   <!-- Expenses -->
   <div v-else>
-    <v-btn :disabled="!this.expense.receipt" flat icon @click="openDownloadTab">
+    <v-btn :disabled="!this.expense.receipt || this.expense.receipt.trim() <= 0" flat icon @click="openDownloadTab">
       <v-icon style="color: #606060">
         cloud_download
       </v-icon>
