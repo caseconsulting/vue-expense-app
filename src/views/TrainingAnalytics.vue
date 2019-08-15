@@ -1,11 +1,9 @@
 <template>
   <v-container>
     <div>
-      <h1 style="text-align:center">Trending</h1>
+      <h1 style="text-align:center; padding:0px;">Trending</h1>
     </div>
 
-    <br />
-    <br />
     <br />
     <div class="text-center">
       <center>
@@ -35,34 +33,23 @@
       </center>
 
       <br />
-      <br />
 
       <hr />
       <br />
-      <!-- <v-card :outlined="true">
-        <div class="container">
-          <div class="row">
-            <div class="col-sm">
-              <img class="url-image" src="../assets/img/logo-big.png" aspect-ratio="2.75" />
-            </div>
-            <div class="col-sm">
-              <p>alksjdaljd</p>
-            </div>
-          </div>
-        </div>
-      </v-card> -->
-      <p v-for="url in this.urls" :key="url.id">
-        <v-flex xs12 sm8 offset-sm2>
+      <p v-for="url in this.urlsNoDuplicates" :key="url.id">
+        <v-flex xs12 sm6 offset-sm3>
           <v-card>
             <v-layout>
-              <v-flex xs4>
+              <v-flex xs3>
                 <img class="url-image" src="../assets/img/logo-big.png" />
+                <!-- generic image (change later, could be based on category?) -->
               </v-flex>
               <v-flex>
-                <v-card-title primary-title>
+                <v-card-title primary-title style="padding-top: 25px;">
                   <div>
+                    <h1>{{ url.title }}</h1>
                     <a style="font-size: 20px;" :href="url.id" target="_blank">{{ url.id }}</a>
-                    <div>Hits: {{ url.hits }}</div>
+                    <div>Number of Hits: {{ url.hits }}</div>
                   </div>
                 </v-card-title>
               </v-flex>
@@ -70,62 +57,73 @@
           </v-card>
         </v-flex>
       </p>
-
-      <!-- <p v-for="url in this.urls">
-        <v-flex xs12 sm6 offset-sm3>
-          <v-card :outlined="true">
-            <v-img src="https://cdn.vuetifyjs.com/images/cards/desert.jpg" aspect-ratio="2.75"></v-img>
-            <v-card-title primary-title>
-              <h3>{{ url.id }}</h3>
-              <h3>Hits: {{ url.hits }}</h3>
-            </v-card-title>
-          </v-card>
-        </v-flex>
-      </p> -->
     </div>
   </v-container>
 </template>
 <script>
 import api from '@/shared/api.js';
-// import { getItems } from '@/utils/auth';
-// import _ from 'lodash';
+import _ from 'lodash';
 
 async function getUrls() {
   this.urls = await api.getItems(api.URLS);
+  _.forEach(this.urls, urlObject => {
+    // urlObject.title =
+    let split = urlObject.id.split('https://');
+    let title = split[0] || split[1];
+    split = title.split('http://');
+    title = split[0] || split[1];
+    urlObject.title = title.split('.')[0];
+    console.log(urlObject.title);
+  });
+  return this.urls;
 }
 
-function getUrl() {
-  // getUrls();
-  // getUrls().then(urls => {
-  //   console.log('len', urls);
-  //   let x = 0;
-  //   // for (u in urls) {
-  //   //   x++;
-  //   //   console.log('hi', x);
-  //   //   console.log(u);
-  //   // }
-  //   console.log('hi', x);
-  //   return console.log('done');
-  // });
+//removes duplicates, combines hits numbers, and sorts by hits then alphabetically
+//for main training page (no filters)
+function getUrlNoDuplicates() {
+  let noDuplicates = [];
+  _.forEach(this.urls, urlObject => {
+    let url = urlObject.id;
+    let duplicate = _.find(noDuplicates, duplicate => {
+      return url === duplicate.id;
+    });
+    if (duplicate) {
+      duplicate.hits += urlObject.hits;
+    } else {
+      noDuplicates.push({ id: url, hits: urlObject.hits, title: urlObject.title });
+    }
+  }); //creates new list with no url duplicates and adds all hits for same url
+  return _.orderBy(
+    noDuplicates,
+    [
+      'hits', //sort by hits
+      urlObject => {
+        //sort by url, disregarding https, http
+        let split = urlObject.id.split('https://');
+        let newUrl = split[0] || split[1];
+        split = newUrl.split('http://');
+        return split[0] || split[1];
+      }
+    ],
+    ['desc', 'asc']
+  );
 }
 
 export default {
   data() {
     return {
       urls: [],
-      urlInfo: {
-        id: ' ',
-        category: '',
-        hits: 0
-      }
+      urlsNoDuplicates: []
     };
   },
   methods: {
     getUrls,
-    getUrl
+    getUrlNoDuplicates
   },
   mounted() {
-    this.getUrls();
+    this.getUrls().then(() => {
+      this.urlsNoDuplicates = this.getUrlNoDuplicates();
+    });
   }
 };
 </script>
@@ -138,13 +136,13 @@ export default {
 
 .trend-bubble {
   padding-top: 20px !important;
-  padding-bottom: 100px !important;
-  padding-left: 60px !important;
-  padding-right: 60px !important;
+  padding-bottom: 80px !important;
+  padding-left: 50px !important;
+  padding-right: 50px !important;
 }
 
 .trend-icon {
-  font-size: 80px !important;
+  font-size: 60px !important;
 }
 
 /* Cards for the URL Posts */
@@ -154,8 +152,8 @@ export default {
 }
 
 .url-image {
-  max-width: 250px;
-  max-height: 250px;
+  max-width: 150px;
+  max-height: 150px;
 }
 
 .url-info {
