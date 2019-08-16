@@ -209,7 +209,7 @@ function updateCheckBoxes(checkBox) {
 
 function modifyAggregateDate(aggregatedData, expenses) {
   //Remove undefined stuff
-  aggregatedData = _.filter(aggregatedData, item => item !== undefined && !item.reimbursedDate);
+  aggregatedData = _.filter(aggregatedData, item => item !== undefined && !isReimbursed(item.reimbursedDate));
   //Maps each expense and only returns if not reimbursed
   aggregatedData = _.forEach(aggregatedData, expense => {
     expense.key = `${expense.userId}${expense.expenseTypeId}`;
@@ -232,7 +232,11 @@ function modifyAggregateDate(aggregatedData, expenses) {
 }
 
 function matchingEmployeeAndExpenseType(expense, item) {
-  return expense.userId === item.userId && expense.expenseTypeId === item.expenseTypeId && !expense.reimbursedDate;
+  return (
+    expense.userId === item.userId &&
+    expense.expenseTypeId === item.expenseTypeId &&
+    !isReimbursed(expense.reimbursedDate)
+  );
 }
 
 function constructAutoComplete(aggregatedData) {
@@ -460,6 +464,10 @@ function defaultSort() {
   });
 }
 
+function isReimbursed(reimburseDate) {
+  return reimburseDate && reimburseDate.trim().length > 0;
+}
+
 /* computed */
 
 /*
@@ -507,7 +515,7 @@ async function created() {
   this.constructAutoComplete(aggregatedData);
   aggregatedData = this.modifyAggregateDate(aggregatedData, expenses);
   this.unreimbursedExpenses = _.filter(expenses, expense => {
-    return !expense.reimbursedDate;
+    return !isReimbursed(expense.reimbursedDate);
   });
   this.loading = false;
   this.empBudgets = aggregatedData;
@@ -581,7 +589,8 @@ export default {
     getEmployeeName,
     getExpenseTypeName,
     customFilter,
-    defaultSort
+    defaultSort,
+    isReimbursed
   },
   computed: {
     filteredItems,

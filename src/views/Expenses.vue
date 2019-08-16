@@ -136,7 +136,10 @@
                 <td class="text-xs-left">{{ props.item.budgetName }}</td>
                 <td class="text-xs-left">{{ (props.item.cost ? props.item.cost : 0) | moneyValue }}</td>
                 <td class="text-xs-left">{{ props.item.purchaseDate | dateFormat }}</td>
-                <td class="text-xs-left">{{ props.item.reimbursedDate | dateFormat }}</td>
+                <td class="text-xs-left" v-if="isReimbursed(props.item.reimbursedDate)">
+                  {{ props.item.reimbursedDate | dateFormat }}
+                </td>
+                <td class="text-xs-left" v-else></td>
 
                 <!-- action icons -->
                 <td class="datatable_btn layout">
@@ -149,7 +152,7 @@
                   <!-- edit button -->
                   <v-tooltip top>
                     <v-btn
-                      :disabled="props.item.reimbursedDate != null || isEditing()"
+                      :disabled="isReimbursed(props.item.reimbursedDate) || isEditing()"
                       flat
                       icon
                       @click="onSelect(props.item)"
@@ -165,7 +168,7 @@
                   <!-- delete button -->
                   <v-tooltip top>
                     <v-btn
-                      :disabled="props.item.reimbursedDate != null || isEditing()"
+                      :disabled="isReimbursed(props.item.reimbursedDate) || isEditing()"
                       flat
                       icon
                       @click="
@@ -185,7 +188,7 @@
                   <div v-if="isAdmin">
                     <v-tooltip top>
                       <v-btn
-                        :disabled="props.item.reimbursedDate == null || isEditing()"
+                        :disabled="!isReimbursed(props.item.reimbursedDate) || isEditing()"
                         flat
                         icon
                         @click="
@@ -564,9 +567,9 @@ function filterExpense() {
   if (this.filter.reimbursed !== 'both') {
     this.filteredExpenses = _.filter(this.filteredExpenses, expense => {
       if (this.filter.reimbursed == 'notReimbursed') {
-        return !expense.reimbursedDate;
+        return !isReimbursed(expense.reimbursedDate);
       } else {
-        return expense.reimbursedDate;
+        return isReimbursed(expense.reimbursedDate);
       }
     });
   }
@@ -602,6 +605,10 @@ function expenseList() {
 
 function isEmpty(item) {
   return !item || item.trim().length <= 0;
+}
+
+function isReimbursed(reimburseDate) {
+  return reimburseDate && reimburseDate.trim().length > 0;
 }
 
 export default {
@@ -751,7 +758,8 @@ export default {
     filterExpense,
     useInactiveStyle,
     getExpenses,
-    isEmpty
+    isEmpty,
+    isReimbursed
   },
   created
 };
