@@ -1,17 +1,17 @@
 <template>
-  <v-container>
+  <v-container style="padding-top: 0px;">
     <div>
-      <h1 style="text-align:center; padding:0px;">Trending</h1>
+      <h1 style="text-align: center;">Trending</h1>
     </div>
 
     <br />
     <div class="text-center">
       <center>
-        <v-btn class="mx-3 trend-bubble" fab dark large color="primary">
+        <v-btn @click="filterByCategory()" class="mx-3 trend-bubble" fab dark large color="primary">
           <v-icon dark class="trend-icon">remove</v-icon></v-btn
         >
 
-        <v-btn class="mx-3 trend-bubble" fab dark large color="pink">
+        <v-btn @click="filterByCategory('alpha')" class="mx-3 trend-bubble" fab dark large color="pink">
           <v-icon dark class="trend-icon">favorite</v-icon>
         </v-btn>
 
@@ -36,7 +36,8 @@
 
       <hr />
       <br />
-      <p v-for="url in this.urlsNoDuplicates" :key="url.id">
+      <div v-if="categoryFilter">Category: {{ categoryFilter }}</div>
+      <p v-for="url in this.urls" :key="url.id">
         <v-flex xs12 sm6 offset-sm3>
           <v-card>
             <v-layout>
@@ -64,25 +65,25 @@
 import api from '@/shared/api.js';
 import _ from 'lodash';
 
+//METHODS
+
 async function getUrls() {
-  this.urls = await api.getItems(api.URLS);
-  _.forEach(this.urls, urlObject => {
-    // urlObject.title =
+  this.urlsOriginal = await api.getItems(api.URLS);
+  _.forEach(this.urlsOriginal, urlObject => {
     let split = urlObject.id.split('https://');
     let title = split[0] || split[1];
     split = title.split('http://');
     title = split[0] || split[1];
     urlObject.title = title.split('.')[0];
-    console.log(urlObject.title);
   });
-  return this.urls;
+  return this.urlsOriginal;
 }
 
 //removes duplicates, combines hits numbers, and sorts by hits then alphabetically
 //for main training page (no filters)
 function getUrlNoDuplicates() {
   let noDuplicates = [];
-  _.forEach(this.urls, urlObject => {
+  _.forEach(this.urlsOriginal, urlObject => {
     let url = urlObject.id;
     let duplicate = _.find(noDuplicates, duplicate => {
       return url === duplicate.id;
@@ -109,20 +110,43 @@ function getUrlNoDuplicates() {
   );
 }
 
+function filterByCategory(category) {
+  this.categoryFilter = category;
+}
+
+//COMPUTED
+
+function urls() {
+  if (this.categoryFilter) {
+    return _.filter(this.urlsOriginal, url => {
+      return url.category === this.categoryFilter;
+    });
+  } else {
+    return this.urlsShow;
+  }
+}
+
 export default {
   data() {
     return {
-      urls: [],
+      urlsShow: [],
+      categoryFilter: '',
+      urlsOriginal: [],
       urlsNoDuplicates: []
     };
   },
   methods: {
     getUrls,
-    getUrlNoDuplicates
+    getUrlNoDuplicates,
+    filterByCategory
+  },
+  computed: {
+    urls
   },
   mounted() {
     this.getUrls().then(() => {
       this.urlsNoDuplicates = this.getUrlNoDuplicates();
+      this.urlsShow = this.urlsNoDuplicates; //start out with no duplicates
     });
   }
 };
