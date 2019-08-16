@@ -7,36 +7,34 @@
     <br />
     <div class="text-center">
       <center>
-        <v-btn @click="filterByCategory()" class="mx-3 trend-bubble" fab dark large color="primary">
-          <v-icon dark class="trend-icon">remove</v-icon></v-btn
+        <!-- Add labels to the buttons -->
+        <v-btn @click="filterByCategory()" class="mx-3" fab dark color="red"> <v-icon dark>close</v-icon></v-btn>
+        <v-btn @click="filterByCategory('Training')" class="mx-3 trend-bubble" fab dark large color="primary">
+          <v-icon dark class="trend-icon">fitness_center</v-icon></v-btn
         >
-
-        <v-btn @click="filterByCategory('alpha')" class="mx-3 trend-bubble" fab dark large color="pink">
-          <v-icon dark class="trend-icon">favorite</v-icon>
+        <v-btn @click="filterByCategory('Conference')" class="mx-3 trend-bubble" fab dark large color="pink">
+          <v-icon dark class="trend-icon">group</v-icon>
         </v-btn>
-
-        <v-btn class="mx-3 trend-bubble" fab dark large color="indigo">
-          <v-icon dark class="trend-icon">add</v-icon>
+        <v-btn @click="filterByCategory('Certifications')" class="mx-3 trend-bubble" fab dark large color="orange">
+          <v-icon dark class="trend-icon">stars</v-icon>
         </v-btn>
-
-        <v-btn class="mx-3 trend-bubble" fab dark large color="teal">
-          <v-icon dark class="trend-icon">list</v-icon>
+        <v-btn @click="filterByCategory('Lodging')" class="mx-3 trend-bubble" fab dark large color="indigo">
+          <v-icon dark class="trend-icon">hotel</v-icon>
         </v-btn>
-
-        <v-btn class="mx-3 trend-bubble" fab dark large color="cyan">
-          <v-icon dark class="trend-icon">edit</v-icon>
+        <v-btn @click="filterByCategory('Travel')" class="mx-3 trend-bubble" fab dark large color="cyan">
+          <v-icon dark class="trend-icon">airplanemode_active</v-icon>
         </v-btn>
-
-        <v-btn class="mx-3 trend-bubble" fab dark large color="purple">
-          <v-icon dark class="trend-icon">android</v-icon>
+        <v-btn @click="filterByCategory('Meals')" class="mx-3 trend-bubble" fab dark large color="purple">
+          <v-icon dark class="trend-icon">restaurant</v-icon>
         </v-btn>
+        <a style="padding-right: 89px;"> </a>
       </center>
 
       <br />
 
       <hr />
       <br />
-      <div v-if="categoryFilter">Category: {{ categoryFilter }}</div>
+      <div>Category: {{ categoryFilter }}</div>
       <p v-for="url in this.urls" :key="url.id">
         <v-flex xs12 sm6 offset-sm3>
           <v-card>
