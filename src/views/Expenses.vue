@@ -182,7 +182,7 @@
                   </v-tooltip>
 
                   <!-- unreimburse button -->
-                  <!-- <div v-if="isAdmin">
+                  <div v-if="isAdmin">
                     <v-tooltip top>
                       <v-btn
                         :disabled="props.item.reimbursedDate == null || isEditing()"
@@ -200,7 +200,7 @@
                       </v-btn>
                       <span>Unreimburse</span>
                     </v-tooltip>
-                  </div> -->
+                  </div>
                 </td>
 
                 <!-- end option buttons -->
@@ -486,11 +486,21 @@ function isEditing() {
 }
 
 /**
- * Creates a new negative expense for the reimbursed expense selected
+ * Unreimburse an expense
  */
 async function unreimburseExpense() {
   this.loading = true;
   this.unreimbursing = false;
+
+  this.propExpense.reimbursedDate = null;
+  let updatedExpense = await api.updateItem(api.EXPENSES, this.propExpense.id, this.propExpense);
+  if (updatedExpense.id) {
+    this.$set(this.status, 'statusType', 'SUCCESS');
+    this.$set(this.status, 'statusMessage', 'Item was successfully unreimbursed!');
+    this.$set(this.status, 'color', 'green');
+  } else {
+    displayError(updatedExpense.error);
+  }
 
   this.loading = false;
 }
