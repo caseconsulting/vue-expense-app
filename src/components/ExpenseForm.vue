@@ -385,15 +385,16 @@ async function submit() {
     if (this.$refs.form.validate()) {
       // second validate may be unnecessary. included in checkCoverage()
 
-      this.expense.receipt = undefined;
       if (!this.expense.note) {
         this.expense.note = null;
       }
 
       if (this.expense.id) {
         if (this.isReceiptRequired() && this.file) {
+          console.log('filename', this.file.name);
           this.$set(this.expense, 'receipt', this.file.name); //stores file name for lookup later
         }
+        console.log('this.expense here', this.expense);
         let updatedExpense = await api.updateItem(api.EXPENSES, this.expense.id, this.expense);
         if (updatedExpense.id) {
           // submit attachment

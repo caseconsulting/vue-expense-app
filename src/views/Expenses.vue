@@ -505,6 +505,8 @@ async function unreimburseExpense() {
     displayError(updatedExpense.error);
   }
 
+  this.refreshExpenses();
+
   this.loading = false;
 }
 
