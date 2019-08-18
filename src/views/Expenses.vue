@@ -502,7 +502,7 @@ async function unreimburseExpense() {
     this.$set(this.status, 'statusMessage', 'Item was successfully unreimbursed!');
     this.$set(this.status, 'color', 'green');
   } else {
-    displayError(updatedExpense.error);
+    this.displayError('Error Unreimburseing Expense');
   }
 
   this.refreshExpenses();
@@ -515,8 +515,11 @@ async function deleteExpense() {
   if (this.propExpense.id) {
     let deletedExpense = this.propExpense;
     let deleted = await api.deleteItem(api.EXPENSES, this.propExpense.id);
-    if (deleted) {
+
+    if (deleted.id) {
       this.deleteModelFromTable(deletedExpense);
+    } else {
+      this.displayError('Error Deleting Expense');
     }
   }
 }
