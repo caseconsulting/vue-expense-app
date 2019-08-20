@@ -3,6 +3,7 @@ import auth0 from 'auth0-js';
 import { AUTH_CONFIG } from './auth0-variables';
 import Router from 'vue-router';
 import api from '../shared/api';
+var CryptoJS = require('crypto-js');
 
 const AUDIENCE = AUTH_CONFIG.audience;
 const CALLBACK = AUTH_CONFIG.callbackUrl;
@@ -139,10 +140,17 @@ export function isTokenExpired(token) {
 }
 
 export async function setRole() {
-  let employeeRole = await api.getRole();
-  sessionStorage.setItem(ROLE, employeeRole);
+  const employeeRole = await api.getRole();
+  if (employeeRole) {
+    const encryptedRole = CryptoJS.AES.encrypt(employeeRole, process.env.VUE_APP_AES_KEY);
+    sessionStorage.setItem(ROLE, encryptedRole);
+  }
 }
 
 export function getRole() {
-  return sessionStorage.getItem(ROLE);
+  const encryptedRole = sessionStorage.getItem(ROLE);
+  if (encryptedRole) {
+    const decryptedRole = CryptoJS.AES.decrypt(encryptedRole, process.env.VUE_APP_AES_KEY);
+    return decryptedRole.toString(CryptoJS.enc.Utf8);
+  }
 }
