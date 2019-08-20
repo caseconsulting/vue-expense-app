@@ -145,8 +145,7 @@
         <v-card-text
           style="padding: 0px 0px 3px 0px; font: inherit; font-size: 16px; color: #0000008a"
           v-if="this.expense.receipt && isEdit"
-          >Current Receipt: {{ this.expense.receipt }}</v-card-text
-        >
+        >Current Receipt: {{ this.expense.receipt }}</v-card-text>
 
         <!-- Notes section -->
         <v-textarea v-model="expense.note" label="Notes (optional)" data-vv-name="Description"></v-textarea>
@@ -157,7 +156,9 @@
         <!-- Buttons -->
 
         <!-- cancel button -->
-        <v-btn color="white" @click="clearForm"> <icon class="mr-1" name="ban"></icon>Cancel</v-btn>
+        <v-btn color="white" @click="clearForm">
+          <icon class="mr-1" name="ban"></icon>Cancel
+        </v-btn>
 
         <!-- submit button -->
         <v-btn
@@ -167,8 +168,8 @@
           :disabled="!valid || (!isAdmin && isReimbursed)"
           :loading="loading"
         >
-          <icon class="mr-1" name="save"></icon>Submit</v-btn
-        >
+          <icon class="mr-1" name="save"></icon>Submit
+        </v-btn>
         <!-- End Buttons -->
       </v-form>
       <confirmation-box :activate="submitting" :expense="expense"></confirmation-box>
@@ -531,7 +532,9 @@ function getCategories() {
     }
   });
   if (this.selectedExpenseType) {
-    return this.selectedExpenseType.categories;
+    return _.sortBy(this.selectedExpenseType.categories, category => {
+      return category;
+    });
   }
   return false;
 }
