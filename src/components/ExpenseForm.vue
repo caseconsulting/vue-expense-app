@@ -145,7 +145,8 @@
         <v-card-text
           style="padding: 0px 0px 3px 0px; font: inherit; font-size: 16px; color: #0000008a"
           v-if="this.expense.receipt && isEdit"
-        >Current Receipt: {{ this.expense.receipt }}</v-card-text>
+          >Current Receipt: {{ this.expense.receipt }}</v-card-text
+        >
 
         <!-- Notes section -->
         <v-textarea v-model="expense.note" label="Notes (optional)" data-vv-name="Description"></v-textarea>
@@ -156,9 +157,7 @@
         <!-- Buttons -->
 
         <!-- cancel button -->
-        <v-btn color="white" @click="clearForm">
-          <icon class="mr-1" name="ban"></icon>Cancel
-        </v-btn>
+        <v-btn color="white" @click="clearForm"> <icon class="mr-1" name="ban"></icon>Cancel </v-btn>
 
         <!-- submit button -->
         <v-btn
