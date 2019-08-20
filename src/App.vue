@@ -7,9 +7,7 @@
       <v-toolbar class="nav-color" dark fixed app>
         <v-toolbar-side-icon v-show="isLoggedIn()" @click.stop="drawer = !drawer"></v-toolbar-side-icon>
         <v-toolbar-title>
-          <h2 style="text-align:center">
-            <span class="e">€</span>xpense App
-          </h2>
+          <h2 style="text-align:center"><span class="e">€</span>xpense App</h2>
         </v-toolbar-title>
         <v-spacer></v-spacer>
 
