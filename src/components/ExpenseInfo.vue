@@ -19,6 +19,11 @@
 <script>
 import moment from 'moment';
 import Attachment from './Attachment.vue';
+
+function isReimbursed(reimburseDate) {
+  return reimburseDate && reimburseDate.trim().length > 0;
+}
+
 export default {
   components: {
     Attachment
@@ -34,7 +39,8 @@ export default {
   methods: {
     displayExpense(clickedExpense) {
       this.expense = clickedExpense;
-    }
+    },
+    isReimbursed
   },
   filters: {
     moneyValue: value => {
@@ -46,7 +52,7 @@ export default {
       }).format(value)}`;
     },
     dateFormat: value => {
-      if (value) {
+      if (isReimbursed(value)) {
         return moment(value).format('MMM Do, YYYY');
       } else {
         return '';
