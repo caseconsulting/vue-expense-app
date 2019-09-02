@@ -10,11 +10,10 @@ tests/stylelint
 tests/unit/coverage
 tests/unit/reports
 
-# local env files
+# Environment files
 .env
-.env.dev
-.env.local
-.env.test
+.env.*
+.env_*
 aws-keys.json
 
 # Log files
