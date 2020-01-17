@@ -279,7 +279,7 @@ async function reimburseExpenses() {
         reimbursedDate: this.moment().format('YYYY-MM-DD'),
         note: !item.note ? null : item.note,
         userId: item.userId,
-        receipt: null,
+        receipt: item.receipt,
         createdAt: item.createdAt
       };
     });
