@@ -12,7 +12,7 @@ function convertToCSV(objArray) {
     for (var index = 0; index < array[i].length; index++) {
       if (line != '') line += ',';
 
-      line += array[i][index];
+      line += `"${array[i][index]}"`;
     }
     str += line + '\r\n';
   }
