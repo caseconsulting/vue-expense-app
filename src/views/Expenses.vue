@@ -250,7 +250,7 @@
           </v-data-table>
           <br />
           <v-card-actions>
-            <convert-expenses-to-csv v-if="isAdmin" :expenses="getExpenses()"></convert-expenses-to-csv>
+            <convert-expenses-to-csv v-if="isAdmin" :expenses="getFilteredExpenses()"></convert-expenses-to-csv>
           </v-card-actions>
           <!-- end no results display -->
 
@@ -321,6 +321,13 @@ function getUserName() {
 // METHODS
 function getExpenses() {
   return api.getItems(api.EXPENSES);
+}
+
+/**
+ * Returns an array copy of the filtered expenses.
+ */
+function getFilteredExpenses() {
+  return this.filteredExpenses.slice();
 }
 
 function constructAutoComplete(aggregatedData) {
@@ -764,7 +771,8 @@ export default {
     useInactiveStyle,
     getExpenses,
     isEmpty,
-    isReimbursed
+    isReimbursed,
+    getFilteredExpenses
   },
   created
 };

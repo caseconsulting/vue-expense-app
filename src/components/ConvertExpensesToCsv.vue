@@ -104,9 +104,8 @@ function exportCSVFile(items, fileTitle) {
 
 function download() {
   var fileTitle = 'expenses'; // or 'my-unique-title'
-  this.expenses.then(expenses => {
-    this.exportCSVFile(expenses, fileTitle); // call the exportCSVFile() function to process the JSON and trigger the download
-  });
+
+  this.exportCSVFile(this.expenses, fileTitle); // call the exportCSVFile() function to process the JSON and trigger the download
 }
 export default {
   props: ['expenses'],
