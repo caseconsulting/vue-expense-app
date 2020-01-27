@@ -20,7 +20,6 @@ function convertToCSV(objArray) {
 }
 
 function exportCSVFile(items, fileTitle) {
-  console.log(items);
   let tempEmployees = [];
   for (var i = 0; i < items.length; i++) {
     let person = items[i];
@@ -41,7 +40,7 @@ function exportCSVFile(items, fileTitle) {
       person.twitter || ' ',
       person.github || ' ',
       person.employeeRole,
-      person.isActive,
+      person.isInactive ? 'no' : 'yes',
       person.id
     ];
   }

@@ -35,15 +35,15 @@
             <!-- active filter -->
             <div class="flagFilter">
               <h4>Active Employees:</h4>
-              <v-btn-toggle class="filter_color" v-model="filterActive" flat mandatory>
+              <v-btn-toggle class="filter_color" v-model="filter.active" flat mandatory>
                 <v-tooltip top>
-                  <v-btn value="yes" slot="activator" flat>
+                  <v-btn value="active" slot="activator" flat>
                     <icon class="mr-1" name="regular/check-circle"></icon>
                   </v-btn>
                   <span>Show Active</span>
                 </v-tooltip>
                 <v-tooltip top>
-                  <v-btn value="no" slot="activator" flat>
+                  <v-btn value="notActive" slot="activator" flat>
                     <icon name="regular/times-circle"></icon>
                   </v-btn>
                   <span>Hide Active</span>
@@ -219,7 +219,7 @@
             </v-alert>
           </v-data-table>
           <br />
-          <convert-employees-to-csv v-if="userIsAdmin()" :employees="this.employees"></convert-employees-to-csv>
+          <convert-employees-to-csv v-if="userIsAdmin()" :employees="getFilteredEmployees()"></convert-employees-to-csv>
 
           <delete-modal :activate="deleting" :type="'employee'"></delete-modal>
           <delete-error-modal :activate="invalidDelete" type="employee"></delete-error-modal>
@@ -262,13 +262,36 @@ function userIsAdmin() {
 async function refreshEmployees() {
   this.loading = true;
   this.employees = await api.getItems(api.EMPLOYEES);
-  this.filteredEmployees = _.filter(this.employees, employee => {
-    return !employee.isInactive;
-  });
-  this.notActiveEmployees = _.filter(this.employees, employee => {
-    return employee.isInactive;
-  });
+  this.filterEmployees();
   this.loading = false;
+}
+
+/**
+ * Filters the filteredEmployees array.
+ */
+function filterEmployees() {
+  //filter for Active Expense Types (available to admin only)
+  if (this.filter.active !== 'both') {
+    this.filteredEmployees = _.filter(this.employees, employee => {
+      if (this.filter.active == 'active') {
+        // display only active employees
+        return !employee.isInactive;
+      } else {
+        // display only inactive employees
+        return employee.isInactive;
+      }
+    });
+  } else {
+    // display all employees
+    this.filteredEmployees = this.employees;
+  }
+}
+
+/**
+ * Returns an array copy of filtered employees.
+ */
+function getFilteredEmployees() {
+  return this.filteredEmployees.slice();
 }
 
 function setExpenses(expenses) {
@@ -341,6 +364,9 @@ function addModelToTable(newEmployee) {
       this.employees.push(newEmployee);
     }
   }
+
+  this.refreshEmployees();
+
   this.$set(this.status, 'statusType', 'SUCCESS');
   this.$set(this.status, 'statusMessage', 'Employee was successfully created!');
   this.$set(this.status, 'color', 'green');
@@ -351,6 +377,9 @@ function deleteModelFromTable() {
   this.employees.splice(modelIndex, 1);
   modelIndex = _.findIndex(this.filteredEmployees, employee => employee.id === this.deleteModel.id);
   this.filteredEmployees.splice(modelIndex, 1);
+
+  this.refreshEmployees();
+
   this.$set(this.status, 'statusType', 'SUCCESS');
   this.$set(this.status, 'statusMessage', 'Employee was successfully deleted!');
   this.$set(this.status, 'color', 'green');
@@ -414,13 +443,7 @@ function isEmpty(item) {
 
 /* computed */
 function employeeList() {
-  if (this.filterActive === 'yes') {
-    return this.filteredEmployees;
-  } else if (this.filterActive === 'no') {
-    return this.notActiveEmployees;
-  } else {
-    return this.employees;
-  }
+  return this.filteredEmployees;
 }
 
 // LIFECYCLE HOOKS
@@ -456,10 +479,11 @@ export default {
       loading: false,
       deleting: false,
       invalidDelete: false,
-      filterActive: 'yes',
+      filter: {
+        active: 'active' //default only shows active employees
+      },
       employees: [],
       filteredEmployees: [],
-      notActiveEmployees: [],
       errors: [],
       status: {
         statusType: undefined,
@@ -530,6 +554,15 @@ export default {
     DeleteErrorModal
   },
   created,
+  watch: {
+    'filter.active': function() {
+      this.filterEmployees();
+    }
+    // ,
+    // employee: function() {
+    //   this.filterExpense();
+    // }
+  },
   methods: {
     isInActive,
     userIsAdmin,
@@ -546,7 +579,9 @@ export default {
     validateDelete,
     deleteEmployee,
     isEditing,
-    isEmpty
+    isEmpty,
+    getFilteredEmployees,
+    filterEmployees
   },
   computed: {
     employeeList
