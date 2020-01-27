@@ -15,7 +15,6 @@ function convertToCSV(objArray) {
       if (line != '') line += ',';
 
       line += `"${array[i][index]}"`;
-
     }
     str += line + '\r\n';
   }
