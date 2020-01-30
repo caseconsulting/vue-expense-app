@@ -127,7 +127,7 @@
             <!-- data row -->
             <template slot="items" slot-scope="props">
               <tr
-                :class="{ inactiveStyle: useInactiveStyle(props.item) }"
+                :class="{ inactiveStyle: useInactiveStyle(props.item), selectFocus: props.expanded }"
                 v-if="!loading"
                 @click="props.expanded = !props.expanded"
               >
@@ -795,6 +795,7 @@ export default {
 
 .expandedInfo {
   border: 1px solid black;
+  background-color: #f0f0f0;
   font-size: 14px;
   padding: 20px;
 }

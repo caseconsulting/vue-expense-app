@@ -87,7 +87,10 @@
             </template>
 
             <template v-slot:items="props">
-              <tr :class="{ inactiveStyle: props.item.isInactive }" @click="props.expanded = !props.expanded">
+              <tr
+                :class="{ inactiveStyle: props.item.isInactive, selectFocus: props.expanded }"
+                @click="props.expanded = !props.expanded"
+              >
                 <td class="text-xs-left">{{ props.item.employeeNumber }}</td>
                 <td class="text-xs-left">{{ props.item.firstName }}</td>
                 <td class="text-xs-left">{{ props.item.lastName }}</td>

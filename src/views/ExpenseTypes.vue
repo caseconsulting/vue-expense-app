@@ -165,7 +165,10 @@
 
             <!-- data row -->
             <template slot="items" slot-scope="props">
-              <tr :class="{ inactiveStyle: props.item.isInactive }" @click="props.expanded = !props.expanded">
+              <tr
+                :class="{ inactiveStyle: props.item.isInactive, selectFocus: props.expanded }"
+                @click="props.expanded = !props.expanded"
+              >
                 <td class="text-xs-left">{{ props.item.budgetName | limitedText }}</td>
                 <td class="text-xs-left">{{ props.item.budget | moneyValue }}</td>
                 <!-- <td class="text-xs-left">{{ props.item.description | limitedText }}</td> -->
