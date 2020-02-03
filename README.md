@@ -1,14 +1,12 @@
 ## Setup
 
-The **Expense Application** is written in **Vue.js** and relies on **Node.js** v8.x+ and the **npm** package management system.
+The **Expense Application** is written in **Vue.js** and relies on **Node.js** v12.x+ and the **npm** package management system.
 
-* Download and install Node.js v8.x from: https://nodejs.org/dist/latest-v8.x/
+* Download and install Node.js v12.x from: https://nodejs.org/en/ or https://nodejs.org/dist/latest-v12.x/
 * Install required Node.js modules:
 
 ```
-npm install --no-optional
-npm prune
-npm dedupe
+npm ci
 ```
 
 ## Environment variables
