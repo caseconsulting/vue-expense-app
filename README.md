@@ -82,12 +82,12 @@ npm run inspect
 To upgrade to the latest version of a specific Node.js module:
 
 ```
-npm update --save <module-name>
+npm update --save <module-name>@latest
 ```
 To upgrade to the latest version of a specific Node.js module, which is a development dependency only:
 
 ```
-npm update --save-dev <module-name>
+npm update --save-dev <module-name>@latest
 ```
 
 ## Deployment
