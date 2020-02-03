@@ -1,4 +1,3 @@
-/* globals process */
 const AUTH_CONFIG = {
   audience: process.env.VUE_APP_AUTH0_AUDIENCE || '{AUDIENCE}',
   clientId: process.env.VUE_APP_AUTH0_CLIENT_ID || '{CLIENT_ID}',

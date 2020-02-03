@@ -1,6 +1,5 @@
 // https://docs.cypress.io/guides/guides/plugins-guide.html
 
-/* globals module */
 module.exports = (on, config) => {
   return Object.assign({}, config, {
     fixturesFolder: 'tests/e2e/fixtures',
