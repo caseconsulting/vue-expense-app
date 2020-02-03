@@ -32,7 +32,7 @@ The `.env` file in the **case-expense-app** S3 bucket in the company AWS account
 Download this file to the project root directory:
 
 ```
-aws s3 cp s3://case-expense-app/.env .env
+npm run download:local:env
 ```
 
 ## Application tasks
@@ -92,31 +92,28 @@ npm update --save-dev <module-name>
 
 ## Deployment
 
-To deploy to the dev environment:
+To download dev .env and then deploy to the dev environment:
 
 ```
-aws s3 cp s3://case-consulting-expense-app-resources-dev/.env .env
 npm run deploy:dev
 ```
 
-To deploy to the test environment:
+To download test .env and then deploy to the test environment:
 
 ```
-aws s3 cp s3://case-consulting-expense-app-resources-test/.env .env
 npm run deploy:test
 ```
 
 ### DANGER DANGER
 
-**To deploy to the prod environment:**
+**To download prod .env and then deploy to the prod environment:**
 
 ```
-aws s3 cp s3://case-consulting-expense-app-resources-prod/.env .env
 npm run deploy:prod
 ```
 
 To reset for local development, after a deployment:
 
 ```
-aws s3 cp s3://case-expense-app/.env .env
+npm run download:local:env
 ```

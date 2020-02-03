@@ -5,8 +5,11 @@
   "scripts": {
     "build": "vue-cli-service build",
     "cli": "vue-cli-service",
+    "predeploy:dev": "npm run download:dev:env",
     "deploy:dev": "vue-cli-service build && grunt deploy:dev",
+    "predeploy:prod": "npm run download:prod:env",
     "deploy:prod": "vue-cli-service build && grunt deploy:prod",
+    "predeploy:test": "npm run download:test:env",
     "deploy:test": "vue-cli-service build && grunt deploy:test",
     "download:dev:env": "aws s3 cp s3://case-consulting-expense-app-resources-dev/.env .env",
     "download:local:env": "aws s3 cp s3://case-expense-app/.env .env",
