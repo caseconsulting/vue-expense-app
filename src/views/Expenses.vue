@@ -185,7 +185,8 @@
                   </v-tooltip>
 
                   <!-- unreimburse button -->
-                  <div v-if="isAdmin">
+                  <!-- remove "&& false" or switch to "true" to toggle button -->
+                  <div v-if="isAdmin && false">
                     <v-tooltip top>
                       <v-btn
                         :disabled="!isReimbursed(props.item.reimbursedDate) || isEditing()"
