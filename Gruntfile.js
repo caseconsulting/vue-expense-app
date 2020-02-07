@@ -38,7 +38,8 @@ module.exports = function(grunt) {
       },
       prod: {
         options: {
-          bucket: 'case-consulting-expense-app-prod'
+          bucket: 'case-consulting-expense-app-prod',
+          awsProfile: 'prod'
         },
         files: [
           {

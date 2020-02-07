@@ -13,7 +13,7 @@
     "deploy:test": "vue-cli-service build && grunt deploy:test",
     "download:dev:env": "aws s3 cp s3://case-consulting-expense-app-resources-dev/.env .env",
     "download:local:env": "aws s3 cp s3://case-expense-app/.env .env",
-    "download:prod:env": "aws s3 cp s3://case-consulting-expense-app-resources-prod/.env .env",
+    "download:prod:env": "aws s3 cp s3://case-consulting-expense-app-resources-prod/.env .env --profile prod",
     "download:test:env": "aws s3 cp s3://case-consulting-expense-app-resources-test/.env .env",
     "e2e": "npm run test:e2e",
     "e2e:open": "vue-cli-service e2e:open",
