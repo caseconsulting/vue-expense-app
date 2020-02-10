@@ -181,7 +181,11 @@ import api from '@/shared/api.js';
 import { getRole } from '@/utils/auth';
 import moment from 'moment';
 import { extendMoment } from 'moment-range';
+<<<<<<< HEAD
 import uuid from 'uuid/v4';
+=======
+//import uuid from 'uuid/v1';
+>>>>>>> 368-I-want-the-attachment-file-type-to-be-validated-in-the-API: Install uuid from npm
 
 import ConfirmationBox from './ConfirmationBox.vue';
 import _ from 'lodash';
