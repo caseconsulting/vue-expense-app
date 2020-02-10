@@ -4,7 +4,7 @@
     <v-layout>
       <v-flex xs4>
         <!-- admin dashboard has attachment -->
-        <v-btn v-if="this.expense.receipt" flat icon color="primary" @click="openDownloadTab">
+        <v-btn v-if="!isEmpty(this.expense.receipt)" flat icon color="primary" @click="openDownloadTab">
           <icon name="cloud-download-alt" style="color: #004C54;" scale="2"></icon>
         </v-btn>
       </v-flex>
@@ -41,9 +41,15 @@ async function openDownloadTab() {
   console.log(signedURL);
   window.open(signedURL, '_blank');
 }
+
+function isEmpty(item) {
+  return !item || item.trim().length <= 0;
+}
+
 export default {
   methods: {
-    openDownloadTab
+    openDownloadTab,
+    isEmpty
   },
   props: ['expense', 'mode'],
   computed: {
