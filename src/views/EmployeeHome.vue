@@ -210,7 +210,6 @@ function budgets() {
 }
 
 function drawGraph() {
-  // Overwriting base render method with actual data.
   let data = {
     labels: this.budgets.names,
     datasets: [
@@ -267,8 +266,8 @@ function drawGraph() {
       xAxes: [
         {
           stacked: true,
-          categoryPercentage: 0.5,
-          barPercentage: 1,
+          // categoryPercentage: 0.5, //Not supported by chartjs 3.x
+          // barPercentage: 1, //Not supported by chartjs 3.x
           ticks: {
             autoSkip: false
           }
