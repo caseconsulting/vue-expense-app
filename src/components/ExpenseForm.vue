@@ -181,11 +181,7 @@ import api from '@/shared/api.js';
 import { getRole } from '@/utils/auth';
 import moment from 'moment';
 import { extendMoment } from 'moment-range';
-<<<<<<< HEAD
 import uuid from 'uuid/v4';
-=======
-//import uuid from 'uuid/v1';
->>>>>>> 368-I-want-the-attachment-file-type-to-be-validated-in-the-API: Install uuid from npm
 
 import ConfirmationBox from './ConfirmationBox.vue';
 import _ from 'lodash';
@@ -384,11 +380,13 @@ function parseDate(date) {
  * Submit sometimes called multiple times. Normally occurs when submitting an expense after changing code.
  */
 async function submit() {
-  this.submitting = false;
   let newUUID = uuid();
+  this.submitting = false;
   if (this.$refs.form != undefined || this.$refs.form != null) {
     this.loading = true;
     if (this.$refs.form.validate()) {
+      let updatedAttachment;
+      let updatedExpense;
       // second validate may be unnecessary. included in checkCoverage()
 
       if (!this.expense.note) {
@@ -396,48 +394,92 @@ async function submit() {
       }
 
       if (this.expense.id) {
+        // if updating an expense
         if (this.isReceiptRequired() && this.file) {
-          console.log('filename', this.file.name);
-          this.$set(this.expense, 'receipt', this.file.name); //stores file name for lookup later
-        }
-        console.log('this.expense here', this.expense);
-        let updatedExpense = await api.updateItem(api.EXPENSES, this.expense.id, this.expense);
-        if (updatedExpense.id) {
-          // submit attachment
-          if (this.isRequired && this.allowReceipt) {
-            await api.createAttachment(this.expense, this.file);
+          // if receipt required and updating receipt
+          //stores file name for lookup later
+          this.$set(this.expense, 'receipt', this.file.name);
+          // upload attachment to S3
+          updatedAttachment = await api.createAttachment(this.expense, this.file);
+          if (updatedAttachment.code) {
+            // error uploading file
+            this.$emit('error', updatedAttachment.message);
+          } else {
+            // success uploading file
+            // update item in database
+            updatedExpense = await api.updateItem(api.EXPENSES, this.expense.id, this.expense);
+            if (updatedExpense.id) {
+              // success uploading form
+              this.$emit('update', updatedExpense);
+            } else {
+              // error uploading form
+              this.$emit('error', updatedExpense.response.data.message);
+            }
           }
-          this.$emit('update', updatedExpense);
         } else {
-          this.$emit('error', updatedExpense.response.data.message);
+          // if not updating receipt
+          // update item in database
+          updatedExpense = await api.updateItem(api.EXPENSES, this.expense.id, this.expense);
+          if (updatedExpense.id) {
+            // success uploading form
+            this.$emit('update', updatedExpense);
+          } else {
+            // error uploading form
+            this.$emit('error', updatedExpense.response.data.message);
+          }
         }
         this.clearForm();
       } else {
         this.$set(this.expense, 'id', newUUID);
         this.$set(this.expense, 'createdAt', moment().format('YYYY-MM-DD'));
         if (this.isReceiptRequired() && this.file) {
-          this.$set(this.expense, 'receipt', this.file.name); //stores file name for lookup later
-        }
+          // if receipt required and updating receipt
+          //stores file name for lookup later
+          this.$set(this.expense, 'receipt', this.file.name);
+          // upload attachment to S3
+          updatedAttachment = await api.createAttachment(this.expense, this.file);
+          if (updatedAttachment.code) {
+            // error uploading file
+            this.$emit('error', updatedAttachment.message);
+          } else {
+            // success uploading file
+            updatedExpense = await api.createItem(api.EXPENSES, this.expense);
 
-        let newExpense = await api.createItem(api.EXPENSES, this.expense);
-        if (newExpense.id) {
-          //add url to training-urls table (uncommenting will add URL info to training-urls table when URL is present)
-          //console.log('new exp category', newExpense.categories);
-          if (newExpense.url && newExpense.url != ' ' && newExpense.categories && newExpense.categories != ' ') {
-            await this.addURLInfo(newExpense);
-          }
+            if (updatedExpense.id) {
+              //add url to training-urls table (uncommenting will add URL info to training-urls table when URL is present)
+              //console.log('new exp category', newExpense.categories);
+              if (!isEmpty(updatedExpense.url) && !isEmpty(updatedExpense.categories)) {
+                await this.addURLInfo(updatedExpense);
+              }
 
-          // submit attachment
-          if (this.isRequired) {
-            await api.createAttachment(newExpense, this.file);
+              this.$set(this.expense, 'id', updatedExpense.id);
+              this.$emit('add', updatedExpense);
+              window.EventBus.$emit('showSnackbar', updatedExpense);
+              window.EventBus.$emit('refreshChart', updatedExpense);
+              this.clearForm();
+            } else {
+              this.$emit('error', updatedExpense.response.data.message);
+            }
           }
-          this.$set(this.expense, 'id', newExpense.id);
-          this.$emit('add', newExpense);
-          window.EventBus.$emit('showSnackbar', newExpense);
-          window.EventBus.$emit('refreshChart', newExpense);
-          this.clearForm();
         } else {
-          this.$emit('error', newExpense.response.data.message);
+          // success uploading file
+          updatedExpense = await api.createItem(api.EXPENSES, this.expense);
+
+          if (updatedExpense.id) {
+            //add url to training-urls table (uncommenting will add URL info to training-urls table when URL is present)
+            //console.log('new exp category', newExpense.categories);
+            if (!isEmpty(updatedExpense.url) && !isEmpty(updatedExpense.categories)) {
+              await this.addURLInfo(updatedExpense);
+            }
+
+            this.$set(this.expense, 'id', updatedExpense.id);
+            this.$emit('add', updatedExpense);
+            window.EventBus.$emit('showSnackbar', updatedExpense);
+            window.EventBus.$emit('refreshChart', updatedExpense);
+            this.clearForm();
+          } else {
+            this.$emit('error', updatedExpense.response.data.message);
+          }
         }
       }
     }
@@ -620,6 +662,10 @@ async function created() {
   this.employeeRole = employeeRole;
 }
 
+function isEmpty(item) {
+  return !item || item.trim().length <= 0;
+}
+
 export default {
   data() {
     return {
@@ -731,7 +777,8 @@ export default {
     addURLInfo,
     incrementURLHits,
     checkExpenseDate,
-    isReceiptRequired
+    isReceiptRequired,
+    isEmpty
   },
   created
 };
