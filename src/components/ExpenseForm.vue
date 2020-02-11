@@ -428,7 +428,6 @@ async function submit() {
             this.$emit('error', updatedExpense.response.data.message);
           }
         }
-        this.clearForm();
       } else {
         this.$set(this.expense, 'id', newUUID);
         this.$set(this.expense, 'createdAt', moment().format('YYYY-MM-DD'));
@@ -456,7 +455,6 @@ async function submit() {
               this.$emit('add', updatedExpense);
               window.EventBus.$emit('showSnackbar', updatedExpense);
               window.EventBus.$emit('refreshChart', updatedExpense);
-              this.clearForm();
             } else {
               this.$emit('error', updatedExpense.response.data.message);
             }
@@ -476,7 +474,6 @@ async function submit() {
             this.$emit('add', updatedExpense);
             window.EventBus.$emit('showSnackbar', updatedExpense);
             window.EventBus.$emit('refreshChart', updatedExpense);
-            this.clearForm();
           } else {
             this.$emit('error', updatedExpense.response.data.message);
           }
@@ -485,6 +482,7 @@ async function submit() {
     }
     this.loading = false;
   }
+  this.clearForm();
 }
 
 async function addURLInfo(newExpense) {
