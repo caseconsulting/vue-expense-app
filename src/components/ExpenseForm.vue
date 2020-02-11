@@ -393,7 +393,7 @@ async function submit() {
         this.expense.note = null;
       }
 
-      if (this.expense.id) {
+      if (this.expense.id && this.expense.id != newUUID) {
         // if updating an expense
         if (this.isReceiptRequired() && this.file) {
           // if receipt required and updating receipt
@@ -411,6 +411,7 @@ async function submit() {
             if (updatedExpense.id) {
               // success uploading form
               this.$emit('update', updatedExpense);
+              this.clearForm();
             } else {
               // error uploading form
               this.$emit('error', updatedExpense.response.data.message);
@@ -423,9 +424,11 @@ async function submit() {
           if (updatedExpense.id) {
             // success uploading form
             this.$emit('update', updatedExpense);
+            this.clearForm();
           } else {
             // error uploading form
             this.$emit('error', updatedExpense.response.data.message);
+            this.expense.id = null;
           }
         }
       } else {
@@ -440,6 +443,7 @@ async function submit() {
           if (updatedAttachment.code) {
             // error uploading file
             this.$emit('error', updatedAttachment.message);
+            this.expense.id = null;
           } else {
             // success uploading file
             updatedExpense = await api.createItem(api.EXPENSES, this.expense);
@@ -455,8 +459,10 @@ async function submit() {
               this.$emit('add', updatedExpense);
               window.EventBus.$emit('showSnackbar', updatedExpense);
               window.EventBus.$emit('refreshChart', updatedExpense);
+              this.clearForm();
             } else {
               this.$emit('error', updatedExpense.response.data.message);
+              this.expense.id = null;
             }
           }
         } else {
@@ -474,6 +480,7 @@ async function submit() {
             this.$emit('add', updatedExpense);
             window.EventBus.$emit('showSnackbar', updatedExpense);
             window.EventBus.$emit('refreshChart', updatedExpense);
+            this.clearForm();
           } else {
             this.$emit('error', updatedExpense.response.data.message);
           }
@@ -482,7 +489,6 @@ async function submit() {
     }
     this.loading = false;
   }
-  this.clearForm();
 }
 
 async function addURLInfo(newExpense) {
