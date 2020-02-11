@@ -103,9 +103,13 @@ export default {
               'Some expense types will have categories associated with them. The admin will set up categories and employees are required to select one category if they exist. '
           },
           {
-            title: "Why can't I upload a  receipt?",
+            title: "Why can't I upload a receipt?",
             body:
               'If the upload field is not visible when you are attempting to submit an expense, this means that this expense type does not require a receipt, and this will not allow you to upload one.'
+          },
+          {
+            title: 'What file types can I upload as a receipt?',
+            body: 'The following file formats are accepted: .pdf, .gif, .jpeg, .png, .xlsx, .xml, .doc, and .docx'
           },
           {
             title: 'How do I convert training dollars to training hours?',
