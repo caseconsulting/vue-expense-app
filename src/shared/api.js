@@ -56,7 +56,6 @@ function getAllExpenseTypeExpenses(id) {
 }
 
 function getURLInfo(id, category) {
-  console.log('here we are');
   return execute('get', `/special/getURLInfo/${id}/${category}`);
 }
 
