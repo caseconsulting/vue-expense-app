@@ -181,6 +181,7 @@ import api from '@/shared/api.js';
 import { getRole } from '@/utils/auth';
 import moment from 'moment';
 import { extendMoment } from 'moment-range';
+import uuid from 'uuid/v4';
 
 import ConfirmationBox from './ConfirmationBox.vue';
 import _ from 'lodash';
@@ -380,6 +381,7 @@ function parseDate(date) {
  */
 async function submit() {
   this.submitting = false;
+  let newUUID = uuid();
   if (this.$refs.form != undefined || this.$refs.form != null) {
     this.loading = true;
     if (this.$refs.form.validate()) {
@@ -407,6 +409,7 @@ async function submit() {
         }
         this.clearForm();
       } else {
+        this.$set(this.expense, 'id', newUUID);
         this.$set(this.expense, 'createdAt', moment().format('YYYY-MM-DD'));
         if (this.isReceiptRequired() && this.file) {
           this.$set(this.expense, 'receipt', this.file.name); //stores file name for lookup later
