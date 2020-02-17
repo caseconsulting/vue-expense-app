@@ -214,7 +214,6 @@ async function checkCoverage() {
         await api.getItem(api.EMPLOYEES, this.expense.userId);
         budgets = await api.getBudgetItem(this.expense.userId);
       }
-
       let employeeExpenseTypeBudget = _.find(budgets, budget => {
         return budget.expenseTypeId === expenseType.value && checkExpenseDate(this.expense.purchaseDate, budget);
       });
@@ -278,6 +277,13 @@ async function checkCoverage() {
           // cost of the current expense
           this.$set(this.expense, 'budget', expenseType.budget);
           this.$set(this.expense, 'remaining', expenseType.budget);
+          this.submitting = true;
+          this.loading = false;
+        } else if (expenseType.odFlag && cost > expenseType.budget * 2) {
+          // budget doesn't yet exist, overdraft allowed, and cost is greater than x2 of budget
+          this.$set(this.expense, 'budget', expenseType.budget);
+          this.$set(this.expense, 'remaining', 2 * expenseType.budget);
+          this.$set(this.expense, 'od', true);
           this.submitting = true;
           this.loading = false;
         } else {
