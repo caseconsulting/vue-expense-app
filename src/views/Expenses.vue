@@ -523,9 +523,13 @@ async function deleteExpense() {
   if (this.propExpense.id) {
     let deletedExpense = this.propExpense;
     let deleted = await api.deleteItem(api.EXPENSES, this.propExpense.id);
-
     if (deleted.id) {
       this.deleteModelFromTable(deletedExpense);
+      let deletedAttachment = await api.deleteAttachment(deleted);
+      if (deletedAttachment.code) {
+        // error deleting file
+        this.displayError(`Error Deleting Receipt: ${deletedAttachment.message}`);
+      }
     } else {
       this.displayError('Error Deleting Expense');
     }

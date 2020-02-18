@@ -112,6 +112,10 @@ async function createAttachment(expense, file) {
     });
 }
 
+function deleteAttachment(expense) {
+  return execute('delete', `attachment/${expense.userId}/${expense.id}/${expense.receipt}`);
+}
+
 export default {
   // getCanDelete,
   getBudgetItem,
@@ -125,6 +129,7 @@ export default {
   createItem,
   updateItem,
   updateURL,
+  deleteAttachment,
   deleteItem,
   getAggregate,
   getRole,
