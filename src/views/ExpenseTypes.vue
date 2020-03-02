@@ -17,7 +17,7 @@
         Close
       </v-btn>
     </v-snackbar>
-    <v-flex xl7 lg8 md12 sm12 offset-xl1>
+    <v-flex :lg8="userIsAdmin()" :lg12="!userIsAdmin()" xl7 md12 sm12 offset-xl1>
       <v-card>
         <v-container fluid>
           <v-card-title>
@@ -176,7 +176,7 @@
                 <td class="text-xs-left">{{ props.item.endDate }}</td>
 
                 <!-- action icons -->
-                <td class="datatable_btn layout">
+                <td v-if="userIsAdmin()" class="datatable_btn layout">
                   <!-- edit button -->
                   <v-tooltip top>
                     <v-btn :disabled="isEditing()" flat icon @click="onSelect(props.item)" slot="activator">
@@ -251,7 +251,8 @@
         </v-container>
       </v-card>
     </v-flex>
-    <v-flex xl4 lg4 md12 sm12>
+
+    <v-flex v-if="userIsAdmin()" xl4 lg4 md12 sm12>
       <expense-type-form
         :model="model"
         v-on:add="addModelToTable"
@@ -265,6 +266,7 @@
 
 <script>
 import _ from 'lodash';
+import { getRole } from '@/utils/auth';
 import api from '@/shared/api.js';
 import ExpenseTypeForm from '../components/ExpenseTypeForm.vue';
 import DeleteModal from '../components/DeleteModal.vue';
@@ -282,69 +284,6 @@ function moneyFilter(value) {
 }
 
 /* methods */
-
-function isInactive(expenseType) {
-  return !expenseType.isInactive ? '' : 'Not Active';
-}
-
-function clearStatus() {
-  this.$set(this.status, 'statusType', undefined);
-  this.$set(this.status, 'statusMessage', '');
-  this.$set(this.status, 'color', '');
-}
-
-async function displayError(err) {
-  this.$set(this.status, 'statusType', 'ERROR');
-  this.$set(this.status, 'statusMessage', err);
-  this.$set(this.status, 'color', 'red');
-}
-
-async function refreshExpenseTypes() {
-  this.loading = true;
-  this.expenseTypes = await api.getItems(api.EXPENSE_TYPES);
-
-  this.filterExpense();
-  // this.filteredExpenseTypes = _.filter(this.expenseTypes, expenseType => {
-  //   return !expenseType.isInactive;
-  // });
-  this.loading = false;
-}
-
-function onSelect(item) {
-  this.$set(this.model, 'id', item.id);
-  this.$set(this.model, 'budget', moneyFilter(item.budget));
-  this.$set(this.model, 'budgetName', item.budgetName);
-  this.$set(this.model, 'description', item.description);
-  this.$set(this.model, 'odFlag', item.odFlag);
-  this.$set(this.model, 'startDate', item.startDate);
-  this.$set(this.model, 'endDate', item.endDate);
-  this.$set(this.model, 'recurringFlag', item.recurringFlag);
-  this.$set(this.model, 'requiredFlag', item.requiredFlag);
-  this.$set(this.model, 'isInactive', item.isInactive);
-  this.$set(this.model, 'categories', item.categories);
-}
-
-function clearModel() {
-  this.$set(this.model, 'id', '');
-  this.$set(this.model, 'budget', 0);
-  this.$set(this.model, 'budgetName', '');
-  this.$set(this.model, 'description', '');
-  this.$set(this.model, 'odFlag', false);
-  this.$set(this.model, 'startDate', '');
-  this.$set(this.model, 'endDate', '');
-  this.$set(this.model, 'recurringFlag', false);
-  this.$set(this.model, 'requiredFlag', false);
-  this.$set(this.model, 'isInactive', false);
-  this.$set(this.model, 'categories', []);
-}
-
-function updateModelInTable() {
-  this.refreshExpenseTypes();
-  this.$set(this.status, 'statusType', 'SUCCESS');
-  this.$set(this.status, 'statusMessage', 'Item was successfully updated!');
-  this.$set(this.status, 'color', 'green');
-}
-
 function addModelToTable(newExpenseType) {
   let matchingExpenses = _.filter(this.expenseTypes, expenseType => expenseType.id === newExpenseType.id);
 
@@ -362,6 +301,45 @@ function addModelToTable(newExpenseType) {
   }
 }
 
+function changeSort(column) {
+  if (this.pagination.sortBy === column) {
+    this.pagination.descending = !this.pagination.descending;
+  } else {
+    this.pagination.sortBy = column;
+    this.pagination.descending = false;
+  }
+}
+
+function clearModel() {
+  this.$set(this.model, 'id', '');
+  this.$set(this.model, 'budget', 0);
+  this.$set(this.model, 'budgetName', '');
+  this.$set(this.model, 'description', '');
+  this.$set(this.model, 'odFlag', false);
+  this.$set(this.model, 'startDate', '');
+  this.$set(this.model, 'endDate', '');
+  this.$set(this.model, 'recurringFlag', false);
+  this.$set(this.model, 'requiredFlag', false);
+  this.$set(this.model, 'isInactive', false);
+  this.$set(this.model, 'categories', []);
+}
+
+function clearStatus() {
+  this.$set(this.status, 'statusType', undefined);
+  this.$set(this.status, 'statusMessage', '');
+  this.$set(this.status, 'color', '');
+}
+
+async function deleteExpenseType() {
+  this.deleting = false;
+  let et = await api.deleteItem(api.EXPENSE_TYPES, this.deleteModel.id);
+  if (et.id) {
+    this.deleteModelFromTable();
+  } else {
+    this.displayError(et.response.data.message);
+  }
+}
+
 function deleteModelFromTable() {
   let modelIndex = _.findIndex(this.expenseTypes, expense => expense.id === this.deleteModel.id);
   this.expenseTypes.splice(modelIndex, 1);
@@ -372,13 +350,10 @@ function deleteModelFromTable() {
   this.$set(this.status, 'color', 'green');
 }
 
-function changeSort(column) {
-  if (this.pagination.sortBy === column) {
-    this.pagination.descending = !this.pagination.descending;
-  } else {
-    this.pagination.sortBy = column;
-    this.pagination.descending = false;
-  }
+async function displayError(err) {
+  this.$set(this.status, 'statusType', 'ERROR');
+  this.$set(this.status, 'statusMessage', err);
+  this.$set(this.status, 'color', 'red');
 }
 
 function filterExpense() {
@@ -413,6 +388,50 @@ function filterExpense() {
   });
 }
 
+function isEditing() {
+  return !!this.model.id;
+}
+
+function isInactive(expenseType) {
+  return !expenseType.isInactive ? '' : 'Not Active';
+}
+
+function onSelect(item) {
+  this.$set(this.model, 'id', item.id);
+  this.$set(this.model, 'budget', moneyFilter(item.budget));
+  this.$set(this.model, 'budgetName', item.budgetName);
+  this.$set(this.model, 'description', item.description);
+  this.$set(this.model, 'odFlag', item.odFlag);
+  this.$set(this.model, 'startDate', item.startDate);
+  this.$set(this.model, 'endDate', item.endDate);
+  this.$set(this.model, 'recurringFlag', item.recurringFlag);
+  this.$set(this.model, 'requiredFlag', item.requiredFlag);
+  this.$set(this.model, 'isInactive', item.isInactive);
+  this.$set(this.model, 'categories', item.categories);
+}
+
+async function refreshExpenseTypes() {
+  this.loading = true;
+  this.expenseTypes = await api.getItems(api.EXPENSE_TYPES);
+
+  this.filterExpense();
+  // this.filteredExpenseTypes = _.filter(this.expenseTypes, expenseType => {
+  //   return !expenseType.isInactive;
+  // });
+  this.loading = false;
+}
+
+function updateModelInTable() {
+  this.refreshExpenseTypes();
+  this.$set(this.status, 'statusType', 'SUCCESS');
+  this.$set(this.status, 'statusMessage', 'Item was successfully updated!');
+  this.$set(this.status, 'color', 'green');
+}
+
+function userIsAdmin() {
+  return getRole() === 'admin';
+}
+
 async function validateDelete(item) {
   let x = await api
     .getAllExpenseTypeExpenses(item.id)
@@ -427,20 +446,6 @@ async function validateDelete(item) {
     this.deleting = true;
   } else {
     this.invalidDelete = true;
-  }
-}
-
-function isEditing() {
-  return !!this.model.id;
-}
-
-async function deleteExpenseType() {
-  this.deleting = false;
-  let et = await api.deleteItem(api.EXPENSE_TYPES, this.deleteModel.id);
-  if (et.id) {
-    this.deleteModelFromTable();
-  } else {
-    this.displayError(et.response.data.message);
   }
 }
 
@@ -557,20 +562,21 @@ export default {
     }
   },
   methods: {
-    isInactive,
-    clearStatus,
-    displayError,
-    refreshExpenseTypes,
-    onSelect,
-    clearModel,
-    updateModelInTable,
     addModelToTable,
-    deleteModelFromTable,
     changeSort,
+    clearModel,
+    clearStatus,
+    deleteExpenseType,
+    deleteModelFromTable,
+    displayError,
     filterExpense,
-    validateDelete,
     isEditing,
-    deleteExpenseType
+    isInactive,
+    onSelect,
+    refreshExpenseTypes,
+    updateModelInTable,
+    userIsAdmin,
+    validateDelete
   },
   created
 };

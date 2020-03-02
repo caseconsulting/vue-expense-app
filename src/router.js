@@ -37,8 +37,7 @@ const router = new Router({
     {
       path: '/expenseTypes',
       name: 'expenseTypes',
-      component: ExpenseTypes,
-      beforeEnter: multiguard([requireAuth, isAdmin])
+      component: ExpenseTypes
     },
     {
       path: '/employees',

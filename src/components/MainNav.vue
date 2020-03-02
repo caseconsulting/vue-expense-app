@@ -57,7 +57,7 @@ export default {
           title: 'Expense Types',
           icon: 'book',
           route: 'expenseTypes',
-          permission: ['admin']
+          permission: ['admin', 'user']
         },
         {
           title: 'Employees',
