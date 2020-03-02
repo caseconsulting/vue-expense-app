@@ -50,7 +50,6 @@
         <!-- Hire Date -->
         <v-menu
           :full-width="true"
-          :disabled="!!model.id"
           style="padding-right: 20px; padding-bottom: 20px;"
           ref="menu1"
           :close-on-content-click="true"
@@ -66,14 +65,14 @@
             slot="activator"
             v-model="hireDateFormatted"
             :rules="dateRules"
-            :disabled="!!model.id"
+            :disabled="hasExpenses"
             label="Hire Date"
             hint="MM/DD/YYYY format"
             persistent-hint
             prepend-icon="event"
-            @blur="model.hireDate = parseDate(hireDateFormatted)"
+            @blur="date = parseDate(hireDateFormatted)"
           ></v-text-field>
-          <v-date-picker v-model="model.hireDate" no-title @input="menu1 = false"></v-date-picker>
+          <v-date-picker v-model="date" no-title @input="menu1 = false"></v-date-picker>
         </v-menu>
 
         <!-- Advanced section -->
@@ -154,35 +153,6 @@
               <v-date-picker v-model="model.birthday" no-title @input="menu3 = false"></v-date-picker>
             </v-menu>
 
-            <!-- Birthday Picker -->
-            <!-- <v-menu
-              ref="menu"
-              :close-on-content-click="false"
-              :nudge-right="40"
-              lazy
-              transition="scale-transition"
-              offset-y
-              full-width
-              min-width="290px"
-            >
-              <template v-slot:activator="{ on }">
-                <v-text-field
-                  style="padding-left: 10px; padding-right: 20px;"
-                  v-model="birthdayFormat"
-                  label="Birthday"
-                  prepend-icon="event"
-                  readonly
-                  v-on="on"
-                ></v-text-field>
-              </template>
-              <v-date-picker
-                v-model="model.birthday"
-                ref="picker"
-                :max="new Date().toISOString().substr(0, 10)"
-                min="1900-01-01"
-              ></v-date-picker>
-            </v-menu> -->
-
             <!-- Place of Birth -->
             <p style="font-size: 17px; padding-left: 10px; padding-top: 10px;">Place of Birth</p>
             <div style="padding-right: 20px; padding-left: 30px; padding-bottom: 10px;">
@@ -253,6 +223,13 @@
           <icon class="mr-1" name="save"></icon>Submit</v-btn
         >
       </v-form>
+
+      <update-hire-date-modal
+        :activate="changingHireDate"
+        :employeeName="`${this.model.firstName} ${this.model.lastName}`"
+        :oldDate="this.model.hireDate"
+        :newDate="this.date"
+      ></update-hire-date-modal>
     </v-container>
   </v-card>
 </template>
@@ -262,11 +239,13 @@ import api from '@/shared/api.js';
 import _ from 'lodash';
 import { getRole } from '@/utils/auth';
 import dateUtils from '@/shared/dateUtils';
+import UpdateHireDateModal from './UpdateHireDateModal.vue';
 
 const regex = /^(([^<>()[\]\\.,;:\s@#"]+(\.[^<>()[\]\\.,;:\s@#"]+)*)|(".+"))@consultwithcase.com/;
 
 function clearForm() {
   this.$refs.form.reset();
+  this.$set(this, 'date', '');
   this.$set(this.model, 'email', '@consultwithcase.com');
   this.$set(this.model, 'employeeRole', '');
   this.$set(this.model, 'firstName', '');
@@ -297,6 +276,10 @@ function formatRole(employeeRole) {
   return _.kebabCase(employeeRole);
 }
 
+async function checkExpenses() {
+  this.hasExpenses = _.size(await api.getAllEmployeeExpenses(this.model.id)) > 0;
+}
+
 function parseDate(date) {
   return dateUtils.parseDate(date);
 }
@@ -307,7 +290,11 @@ async function submit() {
       this.$set(this.model, 'deptDate', '');
     }
 
+    // set the hire date
+    this.$set(this.model, 'hireDate', this.date);
+
     if (this.model.id) {
+      // update employee
       let updatedEmployee = await api.updateItem(api.EMPLOYEES, this.model.id, this.model);
       if (updatedEmployee.id) {
         this.$emit('update');
@@ -330,6 +317,17 @@ async function submit() {
 
 function userIsAdmin() {
   return getRole() === 'admin';
+}
+
+// LIFECYCLE HOOKS
+async function created() {
+  window.EventBus.$on('cancel-hireDate-change', () => {
+    this.changingHireDate = false;
+    this.date = this.model.hireDate;
+  });
+  window.EventBus.$on('confirm-hireDate-change', () => {
+    this.changingHireDate = false;
+  });
 }
 
 export default {
@@ -411,10 +409,12 @@ export default {
         'Wisconsin',
         'Wyoming'
       ],
+      changingHireDate: false,
       componentRules: [v => !!v || 'Something must be selected'],
       permissions: ['Admin', 'User'],
       deleting: false,
       date: null,
+      hasExpenses: false,
       hireDateFormatted: null,
       deptDateFormatted: null,
       employeeRoleFormatted: '',
@@ -443,13 +443,28 @@ export default {
       valid: false
     };
   },
+  components: {
+    UpdateHireDateModal
+  },
+  created,
   watch: {
-    'model.hireDate': function() {
-      this.hireDateFormatted = this.formatDate(this.model.hireDate) || this.hireDateFormatted;
-      //fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
-      if (this.model.hireDate !== null && !this.formatDate(this.model.hireDate)) {
-        this.model.hireDate = null;
+    date: function() {
+      this.hireDateFormatted = this.formatDate(this.date) || this.hireDateFormatted;
+      //fixes v-date-picker error so that if the format of date is incorrect the date is set to null
+      if (this.date !== null && !this.formatDate(this.date)) {
+        this.date = null;
       }
+
+      // prompt user to confirm hire date change
+      if (this.formatDate(this.date) && this.model.id && this.date != this.model.hireDate) {
+        this.changingHireDate = true;
+      } else {
+        this.changingHireDate = false;
+      }
+    },
+    'model.hireDate': function() {
+      this.checkExpenses();
+      this.date = this.model.hireDate;
     },
     'model.deptDate': function() {
       this.deptDateFormatted = this.formatDate(this.model.deptDate) || this.deptDateFormatted;
@@ -473,6 +488,7 @@ export default {
   },
   props: ['model'],
   methods: {
+    checkExpenses,
     clearForm,
     formatDate,
     formatRole,
