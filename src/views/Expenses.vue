@@ -725,7 +725,8 @@ export default {
         reimbursed: 'notReimbursed' //default only shows expenses that are not reimbursed
       },
       pagination: {
-        sortBy: 'purchaseDate',
+        sortBy: 'createdAt',
+        descending: true,
         rowsPerPage: 25
       },
       expand: false
