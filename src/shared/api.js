@@ -39,6 +39,10 @@ function getBudgetItem(id) {
   return execute('get', `/budgets/user/${id}`);
 }
 
+function getBudgetsByDate(id, date) {
+  return execute('get', `/special/${id}/${date}`);
+}
+
 function getItems(type) {
   return execute('get', `/${type}`);
 }
@@ -121,6 +125,7 @@ export default {
   getBudgetItem,
   getAllEmployeeExpenses,
   getAllExpenseTypeExpenses,
+  getBudgetsByDate,
   getItems,
   getItem,
   getAttachment,

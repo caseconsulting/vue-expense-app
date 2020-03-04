@@ -24,15 +24,27 @@
     <!-- anniversary date -->
     <v-flex lg4 v-if="!isMobile">
       <v-flex>
-        <v-card>
+        <v-card @click="changingBudgetView = true" hover>
           <v-card-title>
-            <div>
+            <!-- display the next anniversary date -->
+            <div v-if="viewingCurrentBudgetYear">
               <h3 pt-2>Anniversary Date: {{ getAnniversary }}</h3>
               <div @mouseover="display = !display" @mouseleave="display = !display">
                 <div v-if="display">Days Until: {{ getDaysUntil }}</div>
                 <div v-else>Seconds Until: {{ getSecondsUntil }}</div>
               </div>
             </div>
+            <!-- display the budget history year -->
+            <div v-else>
+              <h3 pt-2>Viewing budgets from {{ this.getFiscalYearView }} - {{ this.getFiscalYearView + 1 }}</h3>
+              <div>
+                <div>[Inactive Budget]</div>
+              </div>
+            </div>
+            <v-spacer></v-spacer>
+            <v-icon style="margin-right: 10px">
+              history
+            </v-icon>
           </v-card-title>
         </v-card>
       </v-flex>
@@ -56,6 +68,12 @@
         <expense-form :expense="expense" v-on:error="displayError"></expense-form>
       </v-flex>
     </v-flex>
+
+    <budget-select-modal
+      :activate="changingBudgetView"
+      :budgetYears="getBudgetYears"
+      :hireDate="this.hireDate"
+    ></budget-select-modal>
   </v-layout>
 </template>
 
@@ -63,8 +81,10 @@
 import BudgetChart from '../components/BudgetChart.vue';
 import BudgetTable from '../components/BudgetTable.vue';
 import ExpenseForm from '../components/ExpenseForm.vue';
+import BudgetSelectModal from '../components/BudgetSelectModal.vue';
 
 import moment from 'moment';
+const IsoFormat = 'YYYY-MM-DD';
 import api from '@/shared/api.js';
 import _ from 'lodash';
 import pattern from 'patternomaly';
@@ -73,9 +93,20 @@ import MobileDetect from 'mobile-detect';
 /* LIFECYCLE HOOKS */
 async function created() {
   window.EventBus.$on('refreshChart', this.updateData);
-  this.refreshBudget();
+  this.refreshEmployee();
   this.compute();
   this.addOneSecondToActualTimeEverySecond();
+
+  window.EventBus.$on('cancel-budget-year', () => {
+    this.changingBudgetView = false;
+  });
+  window.EventBus.$on('selected-budget-year', data => {
+    if (data.format() != this.fiscalDateView) {
+      this.fiscalDateView = data.format(IsoFormat);
+      this.refreshBudget();
+    }
+    this.changingBudgetView = false;
+  });
 }
 
 /* Methods */
@@ -102,7 +133,7 @@ function compute() {
 }
 
 async function updateData() {
-  this.expenseTypeData = await api.getItem(api.SPECIAL, this.employee.id);
+  this.expenseTypeData = await api.getBudgetsByDate(this.employee.id, this.fiscalDateView);
   this.showSnackbar();
 }
 
@@ -124,7 +155,7 @@ async function displayError(err) {
   this.$set(this.status, 'color', 'red');
 }
 
-async function refreshBudget() {
+async function refreshEmployee() {
   let employee;
   this.loading = true;
   if (this.employ == null) {
@@ -133,9 +164,17 @@ async function refreshBudget() {
     employee = this.employ;
   }
   this.hireDate = employee.hireDate;
-  let budgetsVar = await api.getItem(api.SPECIAL, employee.id);
-  this.expenseTypeData = budgetsVar;
+  this.fiscalDateView = this.getCurrentBudgetYear();
   this.employee = employee;
+  this.refreshBudget();
+  this.allUserBudgets = await api.getBudgetItem(this.employee.id);
+  this.loading = false;
+}
+
+async function refreshBudget() {
+  this.loading = true;
+  let budgetsVar = await api.getBudgetsByDate(this.employee.id, this.fiscalDateView);
+  this.expenseTypeData = budgetsVar;
   this.loading = false;
 }
 
@@ -329,6 +368,17 @@ function getAnniversary() {
   }
 }
 
+function getBudgetYears() {
+  let budgetYears = [];
+  let budgetDates = _.uniqBy(_.map(this.allUserBudgets, 'fiscalStartDate'));
+  budgetDates.forEach(date => {
+    const [year] = date.split('-');
+    budgetYears.push(parseInt(year));
+  });
+  budgetYears = _.uniqBy(budgetYears);
+  return _.reverse(_.sortBy(budgetYears));
+}
+
 function getDaysUntil() {
   let now = moment();
 
@@ -370,9 +420,29 @@ function getSecondsUntil() {
   }
 }
 
+function getFiscalYearView() {
+  let [year] = this.fiscalDateView.split('-');
+  return parseInt(year);
+}
+
 function isMobile() {
   let md = new MobileDetect(window.navigator.userAgent);
   return md.os() === 'AndroidOS' || md.os() === 'iOS';
+}
+
+function getCurrentBudgetYear() {
+  let currentBudgetYear = moment(this.hireDate, IsoFormat);
+  if (moment().isAfter(currentBudgetYear)) {
+    currentBudgetYear.year(moment().year());
+    if (moment().isBefore(currentBudgetYear)) {
+      currentBudgetYear = currentBudgetYear.subtract(1, 'years');
+    }
+  }
+  return currentBudgetYear.format(IsoFormat);
+}
+
+function viewingCurrentBudgetYear() {
+  return this.fiscalDateView == this.getCurrentBudgetYear();
 }
 
 export default {
@@ -395,6 +465,9 @@ export default {
   },
   data() {
     return {
+      allUserBudgets: null,
+      changingBudgetView: false,
+      fiscalDateView: '',
       loading: false,
       hireDate: '',
       employees: [],
@@ -443,23 +516,29 @@ export default {
   methods: {
     addOneSecondToActualTimeEverySecond,
     getDiffInSeconds,
+    getCurrentBudgetYear,
     compute,
     updateData,
     showSnackbar,
     clearStatus,
     displayError,
-    refreshBudget
+    refreshBudget,
+    refreshEmployee
   },
   computed: {
     budgets,
     drawGraph,
     getAnniversary,
+    getBudgetYears,
     getDaysUntil,
+    getFiscalYearView,
     getSecondsUntil,
-    isMobile
+    isMobile,
+    viewingCurrentBudgetYear
   },
   components: {
     BudgetChart,
+    BudgetSelectModal,
     BudgetTable,
     ExpenseForm
   }
