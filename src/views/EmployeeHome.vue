@@ -101,7 +101,7 @@ async function created() {
     this.changingBudgetView = false;
   });
   window.EventBus.$on('selected-budget-year', data => {
-    if (data.format() != this.fiscalDateView) {
+    if (data.format(IsoFormat) != this.fiscalDateView) {
       this.fiscalDateView = data.format(IsoFormat);
       this.refreshBudget();
     }
