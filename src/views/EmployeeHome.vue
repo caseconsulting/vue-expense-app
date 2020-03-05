@@ -72,6 +72,7 @@
     <budget-select-modal
       :activate="changingBudgetView"
       :budgetYears="getBudgetYears"
+      :current="this.fiscalDateView"
       :hireDate="this.hireDate"
     ></budget-select-modal>
   </v-layout>

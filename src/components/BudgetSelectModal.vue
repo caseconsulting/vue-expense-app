@@ -10,7 +10,9 @@
             <v-list-tile :key="budgetYear" ripple @click.native="select(budgetYear)" class="list-hover">
               <v-list-tile-content>
                 <v-list-tile-title>
-                  <h2 class="center-text">{{ budgetYear }} - {{ budgetYear + 1 }}</h2>
+                  <h2 v-bind:class="{ 'center-text': true, 'underline-text': isCurrent(budgetYear) }">
+                    {{ budgetYear }} - {{ budgetYear + 1 }}
+                  </h2>
                 </v-list-tile-title>
               </v-list-tile-content>
             </v-list-tile>
@@ -39,8 +41,13 @@ function select(budgetYear) {
   this.emit(`selected-budget-year`, fiscalYear);
 }
 
+function isCurrent(budgetYear) {
+  let [year] = this.current.split('-');
+  return budgetYear == year;
+}
+
 export default {
-  props: ['budgetYears', 'hireDate', 'activate'],
+  props: ['budgetYears', 'current', 'hireDate', 'activate'],
   methods: {
     emit(msg, data) {
       if (data) {
@@ -49,7 +56,8 @@ export default {
         window.EventBus.$emit(msg);
       }
     },
-    select
+    select,
+    isCurrent
   }
 };
 </script>
@@ -61,5 +69,9 @@ export default {
 
 .list-hover:hover {
   background-color: #f0f0f0;
+}
+
+.underline-text {
+  text-decoration: underline;
 }
 </style>
