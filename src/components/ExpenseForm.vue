@@ -13,6 +13,7 @@
           :items="employees"
           :rules="componentRules"
           :filter="customFilter"
+          :disabled="isReimbursed"
           v-model="expense.userId"
           item-text="text"
           label="Employee"
@@ -28,7 +29,6 @@
           label="Expense Type"
           :hint="hint"
           persistent-hint
-          :disabled="!!expense.id"
           @input="expenseTypeSelected"
         ></v-autocomplete>
 
@@ -41,7 +41,6 @@
           label="Expense Type"
           :hint="hint"
           persistent-hint
-          :disabled="!!expense.id"
           @input="expenseTypeSelected"
           class="form_padding"
         ></v-autocomplete>
@@ -62,6 +61,7 @@
           prefix="$"
           v-model="expense.cost"
           :rules="costRules"
+          :disabled="isReimbursed"
           label="Cost"
           data-vv-name="Cost"
         ></v-text-field>
@@ -80,6 +80,7 @@
           :close-on-content-click="true"
           v-model="menu1"
           :nudge-right="40"
+          :disabled="isReimbursed && !isDifferentExpenseType"
           lazy
           transition="scale-transition"
           offset-y
@@ -91,6 +92,7 @@
             slot="activator"
             v-model="purchaseDateFormatted"
             :rules="dateRules"
+            :disabled="isReimbursed && !isDifferentExpenseType"
             label="Purchase Date"
             hint="MM/DD/YYYY format"
             persistent-hint
@@ -107,6 +109,7 @@
           :close-on-content-click="false"
           v-model="menu2"
           :nudge-right="40"
+          :disabled="isReimbursed && !isDifferentExpenseType"
           lazy
           transition="scale-transition"
           offset-y
@@ -118,6 +121,7 @@
             slot="activator"
             v-model="reimbursedDateFormatted"
             :rules="optionalDateRules"
+            :disabled="isReimbursed && !isDifferentExpenseType"
             label="Reimburse Date (optional)"
             hint="MM/DD/YYYY format "
             persistent-hint
@@ -132,10 +136,10 @@
           style="padding-top: 20px; padding-bottom: 0px;"
           v-model="allowReceipt"
           label="Update the Receipt?"
-          v-if="updateIsRequired && isEdit"
+          v-if="updateIsRequired && isEdit && !isEmpty(expense.receipt)"
         ></v-checkbox>
         <file-upload
-          v-if="updateIsRequired && ((allowReceipt && isEdit) || !isEdit)"
+          v-if="updateIsRequired && ((allowReceipt && isEdit) || !isEdit || isEmpty(expense.receipt))"
           style="padding-top: 0px; padding-bottom: 0px;"
           @fileSelected="setFile"
           :passedRules="receiptRules"
@@ -144,7 +148,7 @@
         <!-- Receipt name -->
         <v-card-text
           style="padding: 0px 0px 3px 0px; font: inherit; font-size: 16px; color: #0000008a"
-          v-if="this.expense.receipt && isEdit"
+          v-if="!isEmpty(expense.receipt) && isEdit"
           >Current Receipt: {{ this.expense.receipt }}</v-card-text
         >
 
@@ -231,7 +235,11 @@ async function checkCoverage() {
           return entry.id === this.expense.id;
         });
         // For subsequent calculations, remove matched entry cost from committed amount
-        let newCommittedAmount = match ? committedAmount - match.cost : committedAmount;
+        let newCommittedAmount;
+        newCommittedAmount = match ? committedAmount - match.cost : committedAmount;
+        if (this.originalExpense && this.originalExpense.expenseTypeId != this.expense.expenseTypeId) {
+          newCommittedAmount = committedAmount;
+        }
         if (expenseType.odFlag) {
           // Selected Expense Type allows overdraft
           if (2 * expenseType.budget !== newCommittedAmount) {
@@ -307,6 +315,8 @@ function clearForm() {
   this.$set(this.expense, 'url', null);
   this.$set(this.expense, 'receipt', undefined);
   this.$set(this.expense, 'categories', '');
+  this.$set(this.expense, 'expenseTypeId', '');
+  this.originalExpense = null;
 
   this.$set(this.urlInfo, 'url', '');
   this.$set(this.urlInfo, 'category', '');
@@ -382,6 +392,117 @@ function parseDate(date) {
   return dateUtils.parseDate(date);
 }
 
+async function createNewEntry(newUUID) {
+  let updatedAttachment;
+  let updatedExpense;
+
+  this.$set(this.expense, 'id', newUUID);
+  this.$set(this.expense, 'createdAt', moment().format('YYYY-MM-DD'));
+  if (this.isReceiptRequired() && this.file) {
+    // if receipt required and updating receipt
+    //stores file name for lookup later
+    this.$set(this.expense, 'receipt', this.file.name);
+    // upload attachment to S3
+    updatedAttachment = await api.createAttachment(this.expense, this.file);
+    if (updatedAttachment.code) {
+      // error uploading file
+      this.$emit('error', updatedAttachment.message);
+      this.expense.id = null;
+    } else {
+      // success uploading file
+      updatedExpense = await api.createItem(api.EXPENSES, this.expense);
+
+      if (updatedExpense.id) {
+        //add url to training-urls table (uncommenting will add URL info to training-urls table when URL is present)
+        //console.log('new exp category', newExpense.categories);
+        if (!isEmpty(updatedExpense.url) && !isEmpty(updatedExpense.categories)) {
+          await this.addURLInfo(updatedExpense);
+        }
+
+        this.$set(this.expense, 'id', updatedExpense.id);
+        this.$emit('add', updatedExpense);
+        window.EventBus.$emit('showSnackbar', updatedExpense);
+        window.EventBus.$emit('refreshChart', updatedExpense);
+        this.clearForm();
+      } else {
+        this.$emit('error', updatedExpense.response.data.message);
+        this.expense.id = null;
+      }
+    }
+  } else {
+    // success uploading file
+    updatedExpense = await api.createItem(api.EXPENSES, this.expense);
+
+    if (updatedExpense.id) {
+      //add url to training-urls table (uncommenting will add URL info to training-urls table when URL is present)
+      //console.log('new exp category', newExpense.categories);
+      if (!isEmpty(updatedExpense.url) && !isEmpty(updatedExpense.categories)) {
+        await this.addURLInfo(updatedExpense);
+      }
+
+      this.$set(this.expense, 'id', updatedExpense.id);
+      this.$emit('add', updatedExpense);
+      window.EventBus.$emit('showSnackbar', updatedExpense);
+      window.EventBus.$emit('refreshChart', updatedExpense);
+      this.clearForm();
+    } else {
+      this.$emit('error', updatedExpense.response.data.message);
+    }
+  }
+}
+
+async function updateExistingEntry() {
+  let updatedAttachment;
+  let updatedExpense;
+
+  // if updating an expense
+  if (this.isReceiptRequired() && this.file) {
+    // if receipt required and updating receipt
+    //stores file name for lookup later
+    this.$set(this.expense, 'receipt', this.file.name);
+    // upload attachment to S3
+    updatedAttachment = await api.createAttachment(this.expense, this.file);
+    if (updatedAttachment.code) {
+      // error uploading file
+      this.$emit('error', updatedAttachment.message);
+    } else {
+      // success uploading file
+      // update item in database
+      updatedExpense = await api.updateItem(api.EXPENSES, this.expense.id, this.expense);
+      if (updatedExpense.id) {
+        // success uploading form
+        if (this.expense.expenseTypeId == this.originalExpense.expenseTypeId) {
+          this.$emit('update', updatedExpense);
+        } else {
+          this.$emit('delete', this.originalExpense);
+          this.$emit('add', updatedExpense);
+        }
+        this.clearForm();
+      } else {
+        // error uploading form
+        this.$emit('error', updatedExpense.response.data.message);
+      }
+    }
+  } else {
+    // if not updating receipt
+    // update item in database
+    updatedExpense = await api.updateItem(api.EXPENSES, this.expense.id, this.expense);
+    if (updatedExpense.id) {
+      // success uploading form
+      if (this.expense.expenseTypeId == this.originalExpense.expenseTypeId) {
+        this.$emit('update', updatedExpense);
+      } else {
+        this.$emit('delete', this.originalExpense);
+        this.$emit('add', updatedExpense);
+      }
+      this.clearForm();
+    } else {
+      // error uploading form
+      this.$emit('error', updatedExpense.response.data.message);
+    }
+  }
+}
+
 /*
  * Submit sometimes called multiple times. Normally occurs when submitting an expense after changing code.
  */
@@ -391,106 +512,18 @@ async function submit() {
   if (this.$refs.form != undefined || this.$refs.form != null) {
     this.loading = true;
     if (this.$refs.form.validate()) {
-      let updatedAttachment;
-      let updatedExpense;
       // second validate may be unnecessary. included in checkCoverage()
 
       if (!this.expense.note) {
         this.expense.note = null;
       }
 
-      if (this.expense.id && this.expense.id != newUUID) {
-        // if updating an expense
-        if (this.isReceiptRequired() && this.file) {
-          // if receipt required and updating receipt
-          //stores file name for lookup later
-          this.$set(this.expense, 'receipt', this.file.name);
-          // upload attachment to S3
-          updatedAttachment = await api.createAttachment(this.expense, this.file);
-          if (updatedAttachment.code) {
-            // error uploading file
-            this.$emit('error', updatedAttachment.message);
-          } else {
-            // success uploading file
-            // update item in database
-            updatedExpense = await api.updateItem(api.EXPENSES, this.expense.id, this.expense);
-            if (updatedExpense.id) {
-              // success uploading form
-              this.$emit('update', updatedExpense);
-              this.clearForm();
-            } else {
-              // error uploading form
-              this.$emit('error', updatedExpense.response.data.message);
-            }
-          }
-        } else {
-          // if not updating receipt
-          // update item in database
-          updatedExpense = await api.updateItem(api.EXPENSES, this.expense.id, this.expense);
-          if (updatedExpense.id) {
-            // success uploading form
-            this.$emit('update', updatedExpense);
-            this.clearForm();
-          } else {
-            // error uploading form
-            this.$emit('error', updatedExpense.response.data.message);
-            this.expense.id = null;
-          }
-        }
+      if (!this.expense.id || this.expense.id == newUUID) {
+        // creating a new expense
+        this.createNewEntry(newUUID);
       } else {
-        this.$set(this.expense, 'id', newUUID);
-        this.$set(this.expense, 'createdAt', moment().format('YYYY-MM-DD'));
-        if (this.isReceiptRequired() && this.file) {
-          // if receipt required and updating receipt
-          //stores file name for lookup later
-          this.$set(this.expense, 'receipt', this.file.name);
-          // upload attachment to S3
-          updatedAttachment = await api.createAttachment(this.expense, this.file);
-          if (updatedAttachment.code) {
-            // error uploading file
-            this.$emit('error', updatedAttachment.message);
-            this.expense.id = null;
-          } else {
-            // success uploading file
-            updatedExpense = await api.createItem(api.EXPENSES, this.expense);
-
-            if (updatedExpense.id) {
-              //add url to training-urls table (uncommenting will add URL info to training-urls table when URL is present)
-              //console.log('new exp category', newExpense.categories);
-              if (!isEmpty(updatedExpense.url) && !isEmpty(updatedExpense.categories)) {
-                await this.addURLInfo(updatedExpense);
-              }
-
-              this.$set(this.expense, 'id', updatedExpense.id);
-              this.$emit('add', updatedExpense);
-              window.EventBus.$emit('showSnackbar', updatedExpense);
-              window.EventBus.$emit('refreshChart', updatedExpense);
-              this.clearForm();
-            } else {
-              this.$emit('error', updatedExpense.response.data.message);
-              this.expense.id = null;
-            }
-          }
-        } else {
-          // success uploading file
-          updatedExpense = await api.createItem(api.EXPENSES, this.expense);
-
-          if (updatedExpense.id) {
-            //add url to training-urls table (uncommenting will add URL info to training-urls table when URL is present)
-            //console.log('new exp category', newExpense.categories);
-            if (!isEmpty(updatedExpense.url) && !isEmpty(updatedExpense.categories)) {
-              await this.addURLInfo(updatedExpense);
-            }
-
-            this.$set(this.expense, 'id', updatedExpense.id);
-            this.$emit('add', updatedExpense);
-            window.EventBus.$emit('showSnackbar', updatedExpense);
-            window.EventBus.$emit('refreshChart', updatedExpense);
-            this.clearForm();
-          } else {
-            this.$emit('error', updatedExpense.response.data.message);
-          }
-        }
+        // editing a current expense
+        this.updateExistingEntry();
       }
     }
     this.loading = false;
@@ -524,6 +557,13 @@ async function addURLInfo(newExpense) {
     this.$set(this.urlInfo, 'hits', 1);
     await api.createItem(api.URLS, this.urlInfo);
   }
+}
+
+function isDifferentExpenseType() {
+  if (this.expense && this.originalExpense) {
+    return this.expense.expenseTypeId != this.originalExpense.expenseTypeId;
+  }
+  return false;
 }
 
 async function incrementURLHits(urlInfo) {
@@ -602,7 +642,7 @@ function isAdmin() {
 }
 
 function isReimbursed() {
-  return this.reimbursedDateFormatted !== null;
+  return this.isEdit && this.originalExpense && !isEmpty(this.originalExpense.reimbursedDate);
 }
 
 function isUser() {
@@ -680,6 +720,7 @@ export default {
   data() {
     return {
       hint: '',
+      originalExpense: null,
       allowReceipt: false,
       loading: false,
       employeeRole: '',
@@ -736,6 +777,9 @@ export default {
     FileUpload
   },
   watch: {
+    'expense.id': function() {
+      this.originalExpense = _.cloneDeep(this.expense);
+    },
     'expense.purchaseDate': function() {
       this.purchaseDateFormatted = this.formatDate(this.expense.purchaseDate) || this.purchaseDateFormatted;
       //fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
@@ -767,6 +811,7 @@ export default {
   props: ['expense', 'isEdit'],
   computed: {
     isAdmin,
+    isDifferentExpenseType,
     isReimbursed,
     isUser,
     isRequired,
@@ -788,6 +833,8 @@ export default {
     incrementURLHits,
     checkExpenseDate,
     isReceiptRequired,
+    updateExistingEntry,
+    createNewEntry,
     isEmpty
   },
   created

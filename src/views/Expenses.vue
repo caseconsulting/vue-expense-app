@@ -152,7 +152,7 @@
                   <!-- edit button -->
                   <v-tooltip top>
                     <v-btn
-                      :disabled="isReimbursed(props.item.reimbursedDate) || isEditing()"
+                      :disabled="isEditing() || (isUser && isReimbursed(props.item.reimbursedDate))"
                       flat
                       icon
                       @click="onSelect(props.item)"
@@ -266,6 +266,7 @@
         :isEdit="isEditing()"
         :expense="expense"
         v-on:add="addModelToTable"
+        v-on:delete="deleteModelFromTable"
         v-on:update="updateModelInTable"
         v-on:error="displayError"
         style="position: sticky; top: 79px;"
