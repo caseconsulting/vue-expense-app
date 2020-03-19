@@ -1,48 +1,54 @@
 <template>
   <div id="budget-table">
-    <v-container fluid grid-list-md>
-      <v-data-iterator :items="employee" content-tag="v-layout" hide-actions row wrap>
-        <v-flex slot="item" slot-scope="props" xs12 sm6 lg6>
-          <v-container fluid>
-            <v-card>
-              <v-card-title class="budget_header">
-                <h4 class="white--text subheading font-weight-bold">{{ props.item.expenseTypeName }}</h4>
-              </v-card-title>
-              <v-divider></v-divider>
-              <v-list dense>
-                <v-list-tile>
-                  <v-list-tile-content>Budget:</v-list-tile-content>
-                  <v-list-tile-content class="align-end">{{ props.item.budget | moneyValue }}</v-list-tile-content>
-                </v-list-tile>
-                <v-list-tile>
-                  <v-list-tile-content>Reimbursed:</v-list-tile-content>
-                  <v-list-tile-content class="align-end">{{
-                    getReimbursed(props.item) | moneyValue
-                  }}</v-list-tile-content>
-                </v-list-tile>
-                <v-list-tile>
-                  <v-list-tile-content>Pending:</v-list-tile-content>
-                  <v-list-tile-content class="align-end">{{
-                    getUnreimbursed(props.item) | moneyValue
-                  }}</v-list-tile-content>
-                </v-list-tile>
-                <v-list-tile>
-                  <v-list-tile-content class="bold">Remaining:</v-list-tile-content>
-                  <v-list-tile-content v-if="getRedColor(props.item)" class="align-end bold red--text">{{
-                    remaining(props.item) | moneyValue
-                  }}</v-list-tile-content>
-                  <v-list-tile-content v-else class="align-end bold black--text">{{
-                    remaining(props.item) | moneyValue
-                  }}</v-list-tile-content>
-                </v-list-tile>
-                <v-list-tile>
-                  <v-list-tile-content>Overdraft:</v-list-tile-content>
-                  <v-list-tile-content class="align-end">{{ odFlagMessage(props.item) }}</v-list-tile-content>
-                </v-list-tile>
-              </v-list>
-            </v-card>
-          </v-container>
-        </v-flex>
+    <v-container fluid>
+      <v-data-iterator :items="employee" hide-default-footer>
+        <template v-slot:default="props">
+          <v-row>
+            <v-col v-for="item in props.items" :key="item.name" cols="12" sm="6" lg="6">
+              <v-card>
+                <v-card-title class="header_style">
+                  <h4 class="white--text">{{ item.expenseTypeName }}</h4>
+                </v-card-title>
+                <v-divider></v-divider>
+                <v-list class="pt-13" dense>
+                  <v-list-item>
+                    <v-list-item-content>Budget:</v-list-item-content>
+                    <v-list-item-content class="text-right">
+                      <div>{{ item.budget | moneyValue }}</div>
+                    </v-list-item-content>
+                  </v-list-item>
+                  <v-list-item>
+                    <v-list-item-content>Reimbursed:</v-list-item-content>
+                    <v-list-item-content class="text-right">
+                      <div>{{ getReimbursed(item) | moneyValue }}</div>
+                    </v-list-item-content>
+                  </v-list-item>
+                  <v-list-item>
+                    <v-list-item-content>Pending:</v-list-item-content>
+                    <v-list-item-content class="text-right">
+                      <div>{{ getUnreimbursed(item) | moneyValue }}</div>
+                    </v-list-item-content>
+                  </v-list-item>
+                  <v-list-item>
+                    <v-list-item-content class="bold">Remaining:</v-list-item-content>
+                    <v-list-item-content v-if="getRedColor(item)" class="text-right bold red--text">
+                      <div>{{ remaining(item) | moneyValue }}</div>
+                    </v-list-item-content>
+                    <v-list-item-content v-else class="text-right bold black--text">
+                      <div>{{ remaining(item) | moneyValue }}</div>
+                    </v-list-item-content>
+                  </v-list-item>
+                  <v-list-item>
+                    <v-list-item-content>Overdraft:</v-list-item-content>
+                    <v-list-item-content class="text-right">
+                      <div>{{ odFlagMessage(item) }}</div>
+                    </v-list-item-content>
+                  </v-list-item>
+                </v-list>
+              </v-card>
+            </v-col>
+          </v-row>
+        </template>
       </v-data-iterator>
     </v-container>
   </div>

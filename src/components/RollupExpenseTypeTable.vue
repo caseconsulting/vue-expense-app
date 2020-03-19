@@ -3,8 +3,8 @@
     <v-card>
       <v-container fluid>
         <!-- table header -->
-        <v-card-title class="subtitle-1">
-          <h2>Unreimbursed Expenses</h2>
+        <v-card-title>
+          <h3>Unreimbursed Expenses</h3>
           <v-spacer></v-spacer>
           <!-- search filters -->
           <v-autocomplete

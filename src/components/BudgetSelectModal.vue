@@ -7,23 +7,23 @@
         </v-toolbar>
         <v-list two-line>
           <template v-for="(budgetYear, index) in budgetYears">
-            <v-list-tile :key="budgetYear" ripple @click.native="select(budgetYear)" class="list-hover">
-              <v-list-tile-content>
-                <v-list-tile-title>
+            <v-list-item :key="budgetYear" ripple @click.native="select(budgetYear)" class="list-hover">
+              <v-list-item-content>
+                <v-list-item-title>
                   <h2 v-bind:class="{ 'center-text': true, 'underline-text': isCurrent(budgetYear) }">
                     {{ budgetYear }} - {{ budgetYear + 1 }}
                   </h2>
-                </v-list-tile-title>
-              </v-list-tile-content>
-            </v-list-tile>
+                </v-list-item-title>
+              </v-list-item-content>
+            </v-list-item>
             <v-divider :key="index"></v-divider>
           </template>
           <template>
-            <v-list-tile ripple @click.native="emit(`cancel-budget-year`)" class="list-hover">
-              <v-list-tile-content>
-                <v-list-tile-title><h2 class="center-text">Cancel</h2></v-list-tile-title>
-              </v-list-tile-content>
-            </v-list-tile>
+            <v-list-item ripple @click.native="emit(`cancel-budget-year`)" class="list-hover">
+              <v-list-item-content>
+                <v-list-item-title><h2 class="center-text">Cancel</h2></v-list-item-title>
+              </v-list-item-content>
+            </v-list-item>
           </template>
         </v-list>
       </v-card>

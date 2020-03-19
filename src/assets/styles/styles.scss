@@ -24,11 +24,8 @@
 .header_style {
   background-color: #bc3825;
   color: white;
+  font-size: 16px;
   // border-radius: 5px;
-}
-
-.budget_header {
-  background-color: #bc3825;
 }
 
 .expense_info_title {
@@ -136,4 +133,20 @@
 
 .v-card__title {
   word-break: normal;
+}
+
+.pt-20 {
+  font-size: 20px;
+}
+
+.pt-16 {
+  font-size: 16px;
+}
+
+.pt-14 {
+  font-size: 14px;
+}
+
+.pt-13 {
+  font-size: 13px;
 }

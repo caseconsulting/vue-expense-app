@@ -8,7 +8,6 @@
       :timeout="5000"
       :top="true"
       :vertical="true"
-      :auto-height="true"
     >
       <v-card-title headline color="white">
         <span class="headline">{{ status.statusMessage }}</span>
@@ -17,8 +16,8 @@
     </v-snackbar>
 
     <!-- title -->
-    <v-flex v-if="!isMobile" text-xs-center lg8 md12 sm12 pb-3>
-      <h1 pb-2>Budget Statistics for {{ employee.firstName }} {{ employee.lastName }}</h1>
+    <v-flex v-if="!isMobile" text-center lg8 md12 sm12 pb-3>
+      <h1>Budget Statistics for {{ employee.firstName }} {{ employee.lastName }}</h1>
     </v-flex>
 
     <!-- anniversary date -->
@@ -28,8 +27,8 @@
           <v-card-title>
             <!-- display the next anniversary date -->
             <div v-if="viewingCurrentBudgetYear">
-              <h3 pt-2>Anniversary Date: {{ getAnniversary }}</h3>
-              <div @mouseover="display = !display" @mouseleave="display = !display">
+              <h3 class="pt-16">Anniversary Date: {{ getAnniversary }}</h3>
+              <div @mouseover="display = !display" @mouseleave="display = !display" class="pt-14">
                 <div v-if="display">Days Until: {{ getDaysUntil }}</div>
                 <div v-else>Seconds Until: {{ getSecondsUntil }}</div>
               </div>
@@ -52,7 +51,7 @@
 
     <!-- expense data -->
     <v-flex xs12 sm12 md12 lg8>
-      <v-flex text-xs-center>
+      <v-flex text-center>
         <budget-table v-if="!loading" :employee="expenseTypeData"></budget-table>
         <budget-chart
           v-if="!loading && !isMobile && !adminCall"
@@ -64,7 +63,7 @@
 
     <!-- expense form-->
     <v-flex v-if="employ == null" xs12 sm12 md12 lg4 pt-3>
-      <v-flex text-xs-center lg12 md12 sm12>
+      <v-flex text-center lg12 md12 sm12>
         <expense-form :expense="expense" v-on:error="displayError"></expense-form>
       </v-flex>
     </v-flex>

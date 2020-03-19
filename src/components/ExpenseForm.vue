@@ -81,24 +81,24 @@
           v-model="menu1"
           :nudge-right="40"
           :disabled="isReimbursed && !isDifferentExpenseType"
-          lazy
           transition="scale-transition"
           offset-y
-          full-width
           max-width="290px"
           min-width="290px"
         >
-          <v-text-field
-            slot="activator"
-            v-model="purchaseDateFormatted"
-            :rules="dateRules"
-            :disabled="isReimbursed && !isDifferentExpenseType"
-            label="Purchase Date"
-            hint="MM/DD/YYYY format"
-            persistent-hint
-            prepend-icon="event"
-            @blur="expense.purchaseDate = parseDate(purchaseDateFormatted)"
-          ></v-text-field>
+          <template v-slot:activator="{ on }">
+            <v-text-field
+              v-model="purchaseDateFormatted"
+              :rules="dateRules"
+              :disabled="isReimbursed && !isDifferentExpenseType"
+              label="Purchase Date"
+              hint="MM/DD/YYYY format"
+              persistent-hint
+              prepend-icon="event"
+              @blur="expense.purchaseDate = parseDate(purchaseDateFormatted)"
+              v-on="on"
+            ></v-text-field>
+          </template>
           <v-date-picker v-model="expense.purchaseDate" no-title @input="menu1 = false"></v-date-picker>
         </v-menu>
 
@@ -110,24 +110,24 @@
           v-model="menu2"
           :nudge-right="40"
           :disabled="isReimbursed && !isDifferentExpenseType"
-          lazy
           transition="scale-transition"
           offset-y
-          full-width
           max-width="290px"
           min-width="290px"
         >
-          <v-text-field
-            slot="activator"
-            v-model="reimbursedDateFormatted"
-            :rules="optionalDateRules"
-            :disabled="isReimbursed && !isDifferentExpenseType"
-            label="Reimburse Date (optional)"
-            hint="MM/DD/YYYY format "
-            persistent-hint
-            prepend-icon="event"
-            @blur="expense.reimbursedDate = parseDate(reimbursedDateFormatted)"
-          ></v-text-field>
+          <template v-slot:activator="{ on }">
+            <v-text-field
+              v-model="reimbursedDateFormatted"
+              :rules="optionalDateRules"
+              :disabled="isReimbursed && !isDifferentExpenseType"
+              label="Reimburse Date (optional)"
+              hint="MM/DD/YYYY format "
+              persistent-hint
+              prepend-icon="event"
+              @blur="expense.reimbursedDate = parseDate(reimbursedDateFormatted)"
+              v-on="on"
+            ></v-text-field>
+          </template>
           <v-date-picker v-model="expense.reimbursedDate" no-title @input="menu2 = false"></v-date-picker>
         </v-menu>
 
@@ -161,15 +161,16 @@
         <!-- Buttons -->
 
         <!-- cancel button -->
-        <v-btn color="white" @click="clearForm"> <icon class="mr-1" name="ban"></icon>Cancel </v-btn>
+        <v-btn color="white" @click="clearForm" class="ma-2"> <icon class="mr-1" name="ban"></icon>Cancel </v-btn>
 
         <!-- submit button -->
         <v-btn
-          outline
+          outlined
           color="success"
           @click="checkCoverage"
           :disabled="!valid || (!isAdmin && isReimbursed)"
           :loading="loading"
+          class="ma-2"
         >
           <icon class="mr-1" name="save"></icon>Submit
         </v-btn>
