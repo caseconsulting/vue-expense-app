@@ -28,7 +28,10 @@
             <td style="width: 1px">
               <v-checkbox
                 :input-value="item.selected"
-                @click.stop="expenseSelected(item); expenseClicked(item)"
+                @click.stop="
+                  expenseSelected(item);
+                  expenseClicked(item);
+                "
                 primary
                 hide-details
                 class="ma-0"
