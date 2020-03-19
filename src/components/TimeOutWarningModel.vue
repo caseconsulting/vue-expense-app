@@ -6,7 +6,7 @@
         <v-card-text>Warning: Your session will time out in 5 minutes. Please complete any progress.</v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn color="gray darken-1" flat @click.native="emit('sessionContinue')">Ok</v-btn>
+          <v-btn color="gray darken-1" text @click.native="emit('sessionContinue')">Ok</v-btn>
           <v-spacer></v-spacer>
         </v-card-actions>
       </v-card>

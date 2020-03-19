@@ -1,7 +1,7 @@
 <template>
   <div>
     <v-card v-if="totals.length" class="slide-in-blurred-right">
-      <v-card-title>
+      <v-card-title class="subtitle-2">
         <v-flex lg12 class="headline">Totals</v-flex>
         <v-flex lg12>
           <p v-for="total in totals" :key="total.id">
@@ -43,7 +43,7 @@ function updateSelected(item) {
 /* LIFECYCLE HOOKS */
 
 async function created() {
-  window.EventBus.$on('expensePicked', this.updateSelected);
+  window.EventBus.$on('selectExpense', this.updateSelected);
   window.EventBus.$on('expenseChange', this.updateSelected);
 }
 

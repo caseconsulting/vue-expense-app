@@ -5,9 +5,9 @@
         <v-card-title class="headline">Are you sure you want to reimburse these expenses?</v-card-title>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn color="info" flat @click.native="emit(`canceled-reimburse`)">No</v-btn>
+          <v-btn color="info" text @click.native="emit(`canceled-reimburse`)">No</v-btn>
           <v-spacer></v-spacer>
-          <v-btn color="green" flat @click.native="emit(`confirm-reimburse`)">Reimburse</v-btn>
+          <v-btn color="green" text @click.native="emit(`confirm-reimburse`)">Reimburse</v-btn>
           <v-spacer></v-spacer>
         </v-card-actions>
       </v-card>
@@ -16,16 +16,18 @@
 </template>
 
 <script>
+function emit(msg, data) {
+  if (data) {
+    window.EventBus.$emit(msg, data);
+  } else {
+    window.EventBus.$emit(msg);
+  }
+}
+
 export default {
   props: ['activate'],
   methods: {
-    emit(msg, data) {
-      if (data) {
-        window.EventBus.$emit(msg, data);
-      } else {
-        window.EventBus.$emit(msg);
-      }
-    }
+    emit
   }
 };
 </script>

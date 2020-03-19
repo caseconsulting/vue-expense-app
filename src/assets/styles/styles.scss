@@ -128,6 +128,12 @@
     color: gold;
   }
 }
-// .application--wrap > .container.fluid {
-//   padding-right: 0;
-// }
+
+// override the word break styling from v-card
+.v-card__text {
+  word-break: normal;
+}
+
+.v-card__title {
+  word-break: normal;
+}

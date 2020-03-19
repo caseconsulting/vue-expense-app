@@ -1,6 +1,6 @@
 <template>
   <v-card v-if="expense" raised id="expense-info" class="white--text slide-in-blurred-right">
-    <v-card-title primary-title class="color-change-2x">
+    <v-card-title primary-title class="subtitle-2 color-change-2x">
       <v-flex lg12 class="headline expense_info_title">Expense Info</v-flex>
       <v-flex lg12 class="expense_info">
         <p class="expense_info"><span>Description:</span> {{ expense.description }}</p>
@@ -8,8 +8,11 @@
         <p class="expense_info"><span>Budget:</span> {{ expense.budgetName }}</p>
         <p class="expense_info"><span>Cost:</span> {{ expense.cost | moneyValue }}</p>
         <p class="expense_info"><span>Purchased On:</span> {{ expense.purchaseDate | dateFormat }}</p>
-        <p class="expense_info"><span>Reimbursed On:</span> {{ expense.reimbursedDate | dateFormat }}</p>
-        <p class="expense_info"><span>Notes:</span> {{ expense.note }}</p>
+        <p class="expense_info" v-if="!isEmpty(expense.reimbursedDate)">
+          <span>Reimbursed On:</span>
+          {{ expense.reimbursedDate | dateFormat }}
+        </p>
+        <p class="expense_info" v-if="!isEmpty(expense.note)"><span>Notes:</span> {{ expense.note }}</p>
         <attachment :expense="expense" :mode="'adminExpenseInfo'" class="expense_info"></attachment>
       </v-flex>
     </v-card-title>
@@ -24,6 +27,18 @@ function isReimbursed(reimburseDate) {
   return reimburseDate && reimburseDate.trim().length > 0;
 }
 
+function isEmpty(item) {
+  return !item || item.trim().length <= 0;
+}
+
+function displayExpense(clickedExpense) {
+  if (this.expense == clickedExpense) {
+    this.expense = undefined;
+  } else {
+    this.expense = clickedExpense;
+  }
+}
+
 export default {
   components: {
     Attachment
@@ -34,13 +49,12 @@ export default {
     };
   },
   created() {
-    window.EventBus.$on('clickedExpense', this.displayExpense);
+    window.EventBus.$on('expenseClicked', this.displayExpense);
   },
   methods: {
-    displayExpense(clickedExpense) {
-      this.expense = clickedExpense;
-    },
-    isReimbursed
+    displayExpense,
+    isReimbursed,
+    isEmpty
   },
   filters: {
     moneyValue: value => {

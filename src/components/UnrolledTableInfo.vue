@@ -3,54 +3,44 @@
     <div>
       <!-- unreimburse sub-datable -->
       <v-data-table
-        hide-actions
-        v-model="selected"
         :headers="headers"
         :items="expenses"
-        :pagination.sync="pagination"
-        select-all
+        :sort-by.sync="sortBy"
+        :sort-desc.sync="sortDesc"
+        :items-per-page="-1"
+        class="text-center"
         item-key="id"
+        show-select
+        hide-default-footer
       >
-        <!-- header for sub-datatable -->
-        <template v-slot:headers="props">
-          <tr>
-            <th></th>
-            <th
-              v-for="header in props.headers"
-              :key="header.text"
-              :class="[
-                'column sortable',
-                pagination.descending ? 'desc' : 'asc',
-                header.value === pagination.sortBy ? 'active' : ''
-              ]"
-              @click="changeSort(header.value)"
-            >
-              <v-icon small>arrow_upward</v-icon>
-              {{ header.text }}
-            </th>
-          </tr>
+        <!-- remove header check box -->
+        <template v-slot:header.data-table-select></template>
+        <!-- end remove header check box -->
+        <!-- checkbox for items -->
+        <template v-slot:item.data-table-select="{ item }">
+          <v-checkbox :input-value="item.selected" primary hide-details class="ma-0"></v-checkbox>
         </template>
-        <!-- end header for sub-datatable -->
-
-        <!-- rows in sub-datatable -->
-        <template v-slot:items="props">
-          <tr
-            :active="props.selected"
-            @click="
-              props.selected = !props.selected;
-              expenseClicked(props.item);
-            "
-          >
+        <!-- end checkbox for items -->
+        <!-- rows in datatable -->
+        <template v-slot:item="{ item }">
+          <tr @click="expenseClicked(item)">
             <!-- checkbox for individual expense -->
-            <td>
-              <v-checkbox :input-value="props.selected" primary hide-details></v-checkbox>
+            <td style="width: 1px">
+              <v-checkbox
+                :input-value="item.selected"
+                @click.stop="expenseSelected(item); expenseClicked(item)"
+                primary
+                hide-details
+                class="ma-0"
+              >
+              </v-checkbox>
             </td>
-            <td class="text-xs-center">{{ props.item.cost | moneyValue }}</td>
-            <td class="text-xs-center">{{ props.item.purchaseDate | dateFormat }}</td>
-            <td class="text-xs-center">{{ props.item.description | descripFormat }}</td>
+            <td id="money-team">{{ item.cost | moneyValue }}</td>
+            <td>{{ item.purchaseDate | dateFormat }}</td>
+            <td>{{ item.description | descripFormat }}</td>
           </tr>
         </template>
-        <!-- end rows in sub-datatable -->
+        <!-- end rows in datatable -->
       </v-data-table>
       <!-- end unreimburse sub-datable -->
     </div>
@@ -58,45 +48,22 @@
 </template>
 
 <script>
-import _ from 'lodash';
 import moment from 'moment';
 
 /* methods */
 
 /*
- * Toggle all expenses if the category box is checked
+ * Emit an event to parent that an expense was selected
  */
-function toggleAll() {
-  if (!this.headBox.all && !this.headBox.indeterminate) {
-    this.selected = [];
-  } else if (this.headBox.all) {
-    this.selected = this.expenses.slice();
-  }
-}
-
-function changeSort(column) {
-  if (this.pagination.sortBy === column) {
-    this.pagination.descending = !this.pagination.descending;
-  } else {
-    this.pagination.sortBy = column;
-    this.pagination.descending = false;
-  }
+function expenseSelected(selectedExpense) {
+  window.EventBus.$emit('selectExpense', selectedExpense);
 }
 
 /*
  * Emit an event to parent that an expense was selected
  */
 function expenseClicked(clickedExpense) {
-  window.EventBus.$emit('clickedExpense', clickedExpense);
-}
-
-/* LIFECYCLE HOOKS */
-
-async function created() {
-  this.checkBox.b_id = this.budgetId;
-  let shared = _.intersection(this.savedChecked, this.expenses);
-  this.selected = shared;
-  this.numExpenses = this.expenses.length;
+  window.EventBus.$emit('expenseClicked', clickedExpense);
 }
 
 export default {
@@ -122,64 +89,31 @@ export default {
   },
   data() {
     return {
-      pagination: {
-        sortBy: 'cost'
-      },
-      loadedChecks: false,
-      numExpenses: 0,
-      selected: [],
-      checkBox: { indeterminate: false, all: false },
+      sortBy: 'purchaseDate',
+      sortDesc: false,
       headers: [
         {
           text: 'Cost',
-          value: 'cost'
+          value: 'cost',
+          align: 'center'
         },
         {
           text: 'Purchase Date',
-          value: 'purchaseDate'
+          value: 'purchaseDate',
+          align: 'center'
         },
         {
           text: 'Description',
-          value: 'description'
+          value: 'description',
+          align: 'center'
         }
       ]
     };
   },
-  props: ['expenses', 'budgetId', 'headBox', 'savedChecked'],
-  watch: {
-    'headBox.all': function() {
-      this.toggleAll();
-    },
-    selected: function(newSelect, oldSelect) {
-      if (this.loadedChecks) {
-        if (this.numExpenses === this.expenses.length) {
-          this.checkBox.all = this.selected.length === this.expenses.length;
-          this.checkBox.indeterminate = !this.checkBox.all && this.selected.length > 0;
-          window.EventBus.$emit('allCheckBoxChange', this.checkBox);
-
-          if (newSelect.length > oldSelect.length) {
-            let notIn = _.differenceWith(newSelect, oldSelect);
-            notIn.forEach(e => {
-              window.EventBus.$emit('expensePicked', e);
-            });
-          } else {
-            let notIn = _.differenceWith(oldSelect, newSelect);
-            notIn.forEach(e => {
-              window.EventBus.$emit('expensePicked', e);
-            });
-          }
-        }
-      } else {
-        this.loadedChecks = true;
-      }
-      this.numExpenses = this.expenses.length;
-    }
-  },
+  props: ['expenses'],
   methods: {
-    toggleAll,
-    changeSort,
+    expenseSelected,
     expenseClicked
-  },
-  created
+  }
 };
 </script>

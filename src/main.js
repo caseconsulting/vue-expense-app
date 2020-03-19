@@ -3,7 +3,7 @@ import router from './router';
 import store from './store';
 
 import moment from 'moment';
-import Vuetify from 'vuetify';
+import vuetify from './vuetify';
 
 import(/* webpackMode: "eager" */ 'vuetify/dist/vuetify.min.css');
 
@@ -35,12 +35,12 @@ import 'vue-awesome/icons/sticky-note';
 import Icon from 'vue-awesome/components/Icon';
 import App from './App.vue';
 import Vue2Filters from 'vue2-filters';
-Vue.use(Vuetify, {
-  theme: {
-    primary: '#68caa6',
-    radioactive: '#0ACF23'
-  }
-});
+// Vue.use(Vuetify, {
+//   theme: {
+//     primary: '#68caa6',
+//     radioactive: '#0ACF23'
+//   }
+// });
 Vue.use(Vue2Filters);
 Vue.prototype.moment = moment;
 Vue.component('icon', Icon);
@@ -49,5 +49,6 @@ new Vue({
   router,
   store,
   moment,
+  vuetify,
   render: h => h(App)
 }).$mount('#app');

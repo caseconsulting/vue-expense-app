@@ -4,8 +4,8 @@
       <v-navigation-drawer light v-model="drawer" fixed app disableResizeWatcher>
         <main-nav></main-nav>
       </v-navigation-drawer>
-      <v-toolbar class="nav-color" dark fixed app>
-        <v-toolbar-side-icon v-show="isLoggedIn()" @click.stop="drawer = !drawer"></v-toolbar-side-icon>
+      <v-app-bar class="nav-color" dark fixed app>
+        <v-app-bar-nav-icon v-show="isLoggedIn()" @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
         <v-toolbar-title>
           <h2 style="text-align:center"><span class="e">€</span>xpense App</h2>
         </v-toolbar-title>
@@ -14,8 +14,8 @@
         <v-toolbar-items v-show="isLoggedIn()">
           <v-flex xs12 sm6 md8 align-center justify-left layout text-xs-center>
             <v-menu bottom offset-y open-on-click>
-              <v-avatar slot="activator" size="50" color="grey lighten-4">
-                <img :src="profilePic" alt="avatar" />
+              <v-avatar v-slot:activator="{ on }" size="50" color="grey lighten-4">
+                <img :src="profilePic" alt="avatar" v-on="on" />
               </v-avatar>
               <v-list>
                 <v-btn flat @click="handleLogout()">Logout</v-btn>
@@ -23,7 +23,7 @@
             </v-menu>
           </v-flex>
         </v-toolbar-items>
-      </v-toolbar>
+      </v-app-bar>
 
       <v-content>
         <v-container fluid grid-list-lg>

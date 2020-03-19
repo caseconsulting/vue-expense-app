@@ -6,19 +6,19 @@
 
     <v-list class="pt-0" dense>
       <v-divider></v-divider>
-      <v-list-tile
+      <v-list-item
         v-for="item in visibleTiles"
         :key="item.title"
         active-class="red--text v-list__tile--active"
         :to="{ name: item.route }"
       >
-        <v-list-tile-action>
+        <v-list-item-icon style="width: 30px">
           <icon :name="item.icon" class="navbar-icons"></icon>
-        </v-list-tile-action>
-        <v-list-tile-content>
-          <v-list-tile-title>{{ item.title }}</v-list-tile-title>
-        </v-list-tile-content>
-      </v-list-tile>
+        </v-list-item-icon>
+        <v-list-item-content>
+          <v-list-item-title>{{ item.title }}</v-list-item-title>
+        </v-list-item-content>
+      </v-list-item>
     </v-list>
   </div>
 </template>
