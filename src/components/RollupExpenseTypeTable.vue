@@ -120,10 +120,64 @@ const moment = require('moment');
 /* methods */
 
 /*
- * Returns true if the reimburse date is reimbursed
+ * Async function to loop an array
  */
-function isReimbursed(reimbursedDate) {
-  return reimbursedDate && reimbursedDate.trim().length > 0;
+async function asyncForEach(array, callback) {
+  for (let index = 0; index < array.length; index++) {
+    await callback(array[index], index, array);
+  }
+}
+
+/*
+ * Check all expenses and boxes
+ */
+function checkAllBoxes() {
+  this.empBudgets = _.forEach(this.empBudgets, budget => {
+    budget.checkBox.all = true;
+    budget.checkBox.indeterminate = false;
+    return _.forEach(budget.expenses, expense => {
+      emitSelectionChange(expense, true);
+      expense.selected = true;
+    });
+  });
+}
+
+/*
+ * Add expense to expanded row when clicked
+ */
+function clickedRow(value) {
+  if (_.isEmpty(this.expanded)) {
+    this.expanded.push(value);
+  } else {
+    this.expanded = [];
+  }
+}
+
+/*
+ * Constructs the auto complete lists for the filters
+ */
+function constructAutoComplete(aggregatedData) {
+  this.employees = _.map(aggregatedData, data => {
+    if (data && data.employeeName && data.userId) {
+      return {
+        text: data.employeeName,
+        value: data.userId
+      };
+    }
+  }).filter(data => {
+    return data != null;
+  });
+  //Get expense Types
+  this.expenseTypes = _.map(aggregatedData, data => {
+    if (data && data.budgetName && data.expenseTypeId) {
+      return {
+        text: data.budgetName,
+        value: data.expenseTypeId
+      };
+    }
+  }).filter(data => {
+    return data != null;
+  });
 }
 
 /*
@@ -157,79 +211,6 @@ function createExpenses(aggregatedData) {
 }
 
 /*
- * Remove reimbursed expenses
- */
-function filterOutReimbursed(expenses) {
-  return _.filter(expenses, expense => !isReimbursed(expense.reimbursedDate));
-}
-
-/*
- * Group expenses with the same employee name and expense type
- */
-function groupEmployeeExpenses(expenses) {
-  let data = _.forEach(expenses, expense => {
-    expense.key = `${expense.userId}${expense.expenseTypeId}`;
-  });
-
-  // Create a list of expenses under each group
-  data = _.forEach(data, item => {
-    return (item.expenses = _.filter(expenses, expense => {
-      return matchingEmployeeAndExpenseType(expense, item);
-    }));
-  });
-
-  data = _.uniqWith(data, (el1, el2) => el1.key === el2.key);
-
-  return data;
-}
-
-/*
- * Return true if two items have the same userId and expenseTypeId and not reimbursed
- */
-function matchingEmployeeAndExpenseType(expense, item) {
-  let reimbursed = isReimbursed(item.reimbursedDate);
-  return expense.userId === item.userId && expense.expenseTypeId === item.expenseTypeId && !reimbursed;
-}
-
-/*
- * Constructs the auto complete lists for the filters
- */
-function constructAutoComplete(aggregatedData) {
-  this.employees = _.map(aggregatedData, data => {
-    if (data && data.employeeName && data.userId) {
-      return {
-        text: data.employeeName,
-        value: data.userId
-      };
-    }
-  }).filter(data => {
-    return data != null;
-  });
-  //Get expense Types
-  this.expenseTypes = _.map(aggregatedData, data => {
-    if (data && data.budgetName && data.expenseTypeId) {
-      return {
-        text: data.budgetName,
-        value: data.expenseTypeId
-      };
-    }
-  }).filter(data => {
-    return data != null;
-  });
-}
-
-/*
- * Add expense to expanded row when clicked
- */
-function clickedRow(value) {
-  if (_.isEmpty(this.expanded)) {
-    this.expanded.push(value);
-  } else {
-    this.expanded = [];
-  }
-}
-
-/*
  * Determine the state of the group check box based on expenses
  */
 function determineCheckBox(budget) {
@@ -255,33 +236,8 @@ function determineCheckBox(budget) {
 }
 
 /*
- * Toggle expenses in a group selected
+ * Emit expense select change for expense type totals component
  */
-function toggleGroup(value) {
-  // updated group expenses selected
-  this.empBudgets = _.forEach(this.empBudgets, budget => {
-    if (value === budget) {
-      if (determineCheckBox(budget).all) {
-        return _.forEach(budget.expenses, expense => {
-          emitSelectionChange(expense, false);
-          expense.selected = false;
-        });
-      } else {
-        return _.forEach(budget.expenses, expense => {
-          emitSelectionChange(expense, true);
-          expense.selected = true;
-        });
-      }
-    }
-  });
-
-  this.empBudgets = _.forEach(this.empBudgets, budget => {
-    if (value === budget) {
-      budget.checkBox = determineCheckBox(budget);
-    }
-  });
-}
-
 function emitSelectionChange(expense, newSelect) {
   if (expense.selected != newSelect) {
     window.EventBus.$emit('expenseChange', expense);
@@ -289,44 +245,10 @@ function emitSelectionChange(expense, newSelect) {
 }
 
 /*
- * Toggle all expenses selected
+ * Remove reimbursed expenses
  */
-function toggleAll() {
-  if (!this.mainCheckBox.all) {
-    // check all boxes
-    this.checkAllBoxes();
-  } else {
-    // clear all checkboxes
-    this.unCheckAllBoxes();
-  }
-}
-
-/*
- * Check all expenses and boxes
- */
-function checkAllBoxes() {
-  this.empBudgets = _.forEach(this.empBudgets, budget => {
-    budget.checkBox.all = true;
-    budget.checkBox.indeterminate = false;
-    return _.forEach(budget.expenses, expense => {
-      emitSelectionChange(expense, true);
-      expense.selected = true;
-    });
-  });
-}
-
-/*
- * Uncheck all expenses and boxes
- */
-function unCheckAllBoxes() {
-  this.empBudgets = _.forEach(this.empBudgets, budget => {
-    budget.checkBox.all = false;
-    budget.checkBox.indeterminate = false;
-    return _.forEach(budget.expenses, expense => {
-      emitSelectionChange(expense, false);
-      expense.selected = false;
-    });
-  });
+function filterOutReimbursed(expenses) {
+  return _.filter(expenses, expense => !isReimbursed(expense.reimbursedDate));
 }
 
 /*
@@ -339,24 +261,38 @@ function getBudgetTotal(expenses) {
 }
 
 /*
- * Select an expense
+ * Group expenses with the same employee name and expense type
  */
-function selectExpense(expense) {
-  this.empBudgets = _.forEach(this.empBudgets, budget => {
-    if (expense.key === budget.key) {
-      return _.forEach(budget.expenses, budgetExpense => {
-        if (expense === budgetExpense) {
-          budgetExpense.selected = !budgetExpense.selected;
-        }
-      });
-    }
+function groupEmployeeExpenses(expenses) {
+  let data = _.forEach(expenses, expense => {
+    expense.key = `${expense.userId}${expense.expenseTypeId}`;
   });
 
-  this.empBudgets = _.forEach(this.empBudgets, budget => {
-    if (expense.key === budget.key) {
-      budget.checkBox = determineCheckBox(budget);
-    }
+  // Create a list of expenses under each group
+  data = _.forEach(data, item => {
+    return (item.expenses = _.filter(expenses, expense => {
+      return matchingEmployeeAndExpenseType(expense, item);
+    }));
   });
+
+  data = _.uniqWith(data, (el1, el2) => el1.key === el2.key);
+
+  return data;
+}
+
+/*
+ * Returns true if the reimburse date is reimbursed
+ */
+function isReimbursed(reimbursedDate) {
+  return reimbursedDate && reimbursedDate.trim().length > 0;
+}
+
+/*
+ * Return true if two items have the same userId and expenseTypeId and not reimbursed
+ */
+function matchingEmployeeAndExpenseType(expense, item) {
+  let reimbursed = isReimbursed(item.reimbursedDate);
+  return expense.userId === item.userId && expense.expenseTypeId === item.expenseTypeId && !reimbursed;
 }
 
 /*
@@ -405,6 +341,27 @@ async function reimburseExpenses() {
 }
 
 /*
+ * Select an expense
+ */
+function selectExpense(expense) {
+  this.empBudgets = _.forEach(this.empBudgets, budget => {
+    if (expense.key === budget.key) {
+      return _.forEach(budget.expenses, budgetExpense => {
+        if (expense === budgetExpense) {
+          budgetExpense.selected = !budgetExpense.selected;
+        }
+      });
+    }
+  });
+
+  this.empBudgets = _.forEach(this.empBudgets, budget => {
+    if (expense.key === budget.key) {
+      budget.checkBox = determineCheckBox(budget);
+    }
+  });
+}
+
+/*
  * Sets up an expense object to be submitted
  */
 function submitExpenseObject(expense) {
@@ -423,12 +380,58 @@ function submitExpenseObject(expense) {
 }
 
 /*
- * Async function to loop an array
+ * Toggle all expenses selected
  */
-async function asyncForEach(array, callback) {
-  for (let index = 0; index < array.length; index++) {
-    await callback(array[index], index, array);
+function toggleAll() {
+  if (!this.mainCheckBox.all) {
+    // check all boxes
+    this.checkAllBoxes();
+  } else {
+    // clear all checkboxes
+    this.unCheckAllBoxes();
   }
+}
+
+/*
+ * Toggle expenses in a group selected
+ */
+function toggleGroup(value) {
+  // updated group expenses selected
+  this.empBudgets = _.forEach(this.empBudgets, budget => {
+    if (value === budget) {
+      if (determineCheckBox(budget).all) {
+        return _.forEach(budget.expenses, expense => {
+          emitSelectionChange(expense, false);
+          expense.selected = false;
+        });
+      } else {
+        return _.forEach(budget.expenses, expense => {
+          emitSelectionChange(expense, true);
+          expense.selected = true;
+        });
+      }
+    }
+  });
+
+  this.empBudgets = _.forEach(this.empBudgets, budget => {
+    if (value === budget) {
+      budget.checkBox = determineCheckBox(budget);
+    }
+  });
+}
+
+/*
+ * Uncheck all expenses and boxes
+ */
+function unCheckAllBoxes() {
+  this.empBudgets = _.forEach(this.empBudgets, budget => {
+    budget.checkBox.all = false;
+    budget.checkBox.indeterminate = false;
+    return _.forEach(budget.expenses, expense => {
+      emitSelectionChange(expense, false);
+      expense.selected = false;
+    });
+  });
 }
 
 /* computed */
@@ -448,13 +451,6 @@ function filteredItems() {
       return budget.userId === this.employee && budget.expenseTypeId === this.expenseType;
     }
   });
-}
-
-/*
- * Show the reimburse button if an expense is selected
- */
-function showReimburseButton() {
-  return this.mainCheckBox.all || this.mainCheckBox.indeterminate;
 }
 
 /*
@@ -481,6 +477,13 @@ function mainCheckBox() {
   return checkBox;
 }
 
+/*
+ * Show the reimburse button if an expense is selected
+ */
+function showReimburseButton() {
+  return this.mainCheckBox.all || this.mainCheckBox.indeterminate;
+}
+
 /* LIFECYCLE HOOKS */
 
 async function created() {
@@ -498,30 +501,24 @@ async function created() {
 }
 
 export default {
-  filters: {
-    moneyValue: value => {
-      return `${new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: 'USD',
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
-      }).format(value)}`;
-    }
+  components: {
+    ReimburseModal,
+    UnrolledTableInfo
   },
+  computed: {
+    filteredItems,
+    mainCheckBox,
+    showReimburseButton
+  },
+  created,
   data: () => ({
-    loading: true,
-    reimbursing: false,
-    button_clicked: false,
-    empBudgets: [],
+    button_clicked: false, // reimburse button clicked
+    empBudgets: [], // grouped employee and expense types
     employees: [], //For autocomplete
     expenseTypes: [], //For autocomplete
     employee: null, //For autocomplete
     expenseType: null, //For autocomplete
-    expanded: [],
-    pendingExpenses: [],
-    singleExpand: true,
-    sortBy: 'employeeName',
-    sortDesc: false,
+    expanded: [], // database expanded
     headers: [
       {
         text: 'Employee',
@@ -538,36 +535,42 @@ export default {
         value: 'cost',
         align: 'center'
       }
-    ]
+    ], //datatable headers
+    loading: true, // is loading
+    pendingExpenses: [], // pending expenses
+    reimbursing: false, // is reimbursing
+    singleExpand: true, // datatable expand options
+    sortBy: 'employeeName', // sort datatable items
+    sortDesc: false // sort datatable items
   }),
+  filters: {
+    moneyValue: value => {
+      return `${new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD',
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      }).format(value)}`;
+    }
+  },
   methods: {
-    isReimbursed,
-    filterOutReimbursed,
-    groupEmployeeExpenses,
-    constructAutoComplete,
+    asyncForEach,
+    checkAllBoxes,
     clickedRow,
+    constructAutoComplete,
+    emitSelectionChange,
+    filterOutReimbursed,
+    getBudgetTotal,
+    groupEmployeeExpenses,
+    isReimbursed,
+    matchingEmployeeAndExpenseType,
+    refreshExpenses,
+    reimburseExpenses,
+    selectExpense,
+    submitExpenseObject,
     toggleAll,
     toggleGroup,
-    matchingEmployeeAndExpenseType,
-    checkAllBoxes,
-    unCheckAllBoxes,
-    getBudgetTotal,
-    selectExpense,
-    refreshExpenses,
-    emitSelectionChange,
-    submitExpenseObject,
-    reimburseExpenses,
-    asyncForEach
-  },
-  computed: {
-    filteredItems,
-    mainCheckBox,
-    showReimburseButton
-  },
-  components: {
-    ReimburseModal,
-    UnrolledTableInfo
-  },
-  created
+    unCheckAllBoxes
+  }
 };
 </script>
