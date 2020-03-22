@@ -35,10 +35,10 @@
             </div>
             <!-- display the budget history year -->
             <div v-else>
-              <h3 pt-2>Viewing budgets from {{ this.getFiscalYearView }} - {{ this.getFiscalYearView + 1 }}</h3>
-              <div>
-                <div>[Inactive Budget]</div>
-              </div>
+              <h3 class="pt-16">
+                Viewing budgets from {{ this.getFiscalYearView }} - {{ this.getFiscalYearView + 1 }}
+              </h3>
+              <div class="pt-14">[Inactive Budget]</div>
             </div>
             <v-spacer></v-spacer>
             <v-icon style="margin-right: 10px">
