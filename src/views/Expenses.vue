@@ -8,12 +8,11 @@
       :timeout="5000"
       :top="true"
       :vertical="true"
-      :auto-height="true"
     >
       <v-card-title headline color="white">
         <span class="headline">{{ status.statusMessage }}</span>
       </v-card-title>
-      <v-btn color="white" flat @click="clearStatus">
+      <v-btn color="white" text @click="clearStatus">
         Close
       </v-btn>
     </v-snackbar>
@@ -22,7 +21,7 @@
         <v-container fluid>
           <v-card-title>
             <h2 v-if="isUser">{{ getUserName }}'s Expenses</h2>
-            <h2 v-else>Expenses</h2>
+            <h3 v-else>Expenses</h3>
             <v-spacer></v-spacer>
             <v-autocomplete
               v-if="isAdmin"
@@ -45,23 +44,29 @@
             <!-- active fitler -->
             <div v-if="isAdmin" class="flagFilter">
               <h4>Active Expense Type:</h4>
-              <v-btn-toggle class="filter_color" v-model="filter.active" flat mandatory>
+              <v-btn-toggle class="filter_color" v-model="filter.active" text mandatory>
                 <v-tooltip top>
-                  <v-btn value="active" slot="activator" flat>
-                    <icon class="mr-1" name="regular/check-circle"></icon>
-                  </v-btn>
+                  <template v-slot:activator="{ on }">
+                    <v-btn value="active" v-on="on" text>
+                      <icon class="mr-1" name="regular/check-circle"></icon>
+                    </v-btn>
+                  </template>
                   <span>Show Active</span>
                 </v-tooltip>
                 <v-tooltip top>
-                  <v-btn value="notActive" slot="activator" flat>
-                    <icon name="regular/times-circle"></icon>
-                  </v-btn>
+                  <template v-slot:activator="{ on }">
+                    <v-btn value="notActive" v-on="on" text>
+                      <icon name="regular/times-circle"></icon>
+                    </v-btn>
+                  </template>
                   <span>Hide Active</span>
                 </v-tooltip>
                 <v-tooltip top>
-                  <v-btn value="both" slot="activator" flat>
-                    BOTH
-                  </v-btn>
+                  <template v-slot:activator="{ on }">
+                    <v-btn value="both" v-on="on" text>
+                      BOTH
+                    </v-btn>
+                  </template>
                   <span>Show All</span>
                 </v-tooltip>
               </v-btn-toggle>
@@ -70,23 +75,29 @@
             <!-- reimbursed fitler -->
             <div class="flagFilter">
               <h4>Reimbursed:</h4>
-              <v-btn-toggle class="filter_color" v-model="filter.reimbursed" flat mandatory>
+              <v-btn-toggle class="filter_color" v-model="filter.reimbursed" text mandatory>
                 <v-tooltip top>
-                  <v-btn value="reimbursed" slot="activator" flat>
-                    <icon class="mr-1" name="regular/check-circle"></icon>
-                  </v-btn>
+                  <template v-slot:activator="{ on }">
+                    <v-btn value="reimbursed" v-on="on" text>
+                      <icon class="mr-1" name="regular/check-circle"></icon>
+                    </v-btn>
+                  </template>
                   <span>Show Reimbursed</span>
                 </v-tooltip>
                 <v-tooltip top>
-                  <v-btn value="notReimbursed" slot="activator" flat>
-                    <icon name="regular/times-circle"></icon>
-                  </v-btn>
+                  <template v-slot:activator="{ on }">
+                    <v-btn value="notReimbursed" v-on="on" text>
+                      <icon name="regular/times-circle"></icon>
+                    </v-btn>
+                  </template>
                   <span>Hide Reimbursed</span>
                 </v-tooltip>
                 <v-tooltip top>
-                  <v-btn value="both" slot="activator" flat>
-                    BOTH
-                  </v-btn>
+                  <template v-slot:activator="{ on }">
+                    <v-btn value="both" v-on="on" text>
+                      BOTH
+                    </v-btn>
+                  </template>
                   <span>Show All</span>
                 </v-tooltip>
               </v-btn-toggle>
@@ -94,167 +105,139 @@
             <div class="flagFilter"></div>
           </fieldset>
           <br />
+          <!-- expense datatable-->
           <v-data-table
-            :loading="loading"
             :headers="roleHeaders"
             :items="expenseList"
+            :sort-by.sync="sortBy"
+            :sort-desc.sync="sortDesc"
+            :expanded.sync="expanded"
+            :loading="loading"
+            :items-per-page="-1"
             :search="search"
-            :pagination.sync="pagination"
-            :expand="expand"
             item-key="id"
             class="elevation-4"
           >
-            <v-progress-linear slot="progress" color="radioactive" indeterminate></v-progress-linear>
-            <template slot="headers" slot-scope="props">
-              <tr style="box-shadow: 0px 1.5px #888888;">
-                <th
-                  class="text-xs-left "
-                  v-for="header in props.headers"
-                  :key="header.text"
-                  :class="[
-                    'column sortable',
-                    pagination.descending ? 'desc' : 'asc',
-                    header.value === pagination.sortBy ? 'active' : ''
-                  ]"
-                  @click="changeSort(header.value)"
-                >
-                  {{ header.text }}
-                  <v-icon small>arrow_upward</v-icon>
-                </th>
-              </tr>
-            </template>
-
-            <!-- data row -->
-            <template slot="items" slot-scope="props">
-              <tr
-                :class="{ inactiveStyle: useInactiveStyle(props.item), selectFocus: props.expanded }"
-                v-if="!loading"
-                @click="props.expanded = !props.expanded"
-              >
-                <td class="text-xs-left">{{ props.item.createdAt | dateFormat }}</td>
-                <td v-if="isAdmin" class="text-xs-left">{{ props.item.employeeName }}</td>
-                <td class="text-xs-left">{{ props.item.budgetName }}</td>
-                <td class="text-xs-left">{{ (props.item.cost ? props.item.cost : 0) | moneyValue }}</td>
-                <td class="text-xs-left">{{ props.item.purchaseDate | dateFormat }}</td>
-                <td class="text-xs-left" v-if="isReimbursed(props.item.reimbursedDate)">
-                  {{ props.item.reimbursedDate | dateFormat }}
-                </td>
-                <td class="text-xs-left" v-else></td>
-
+            <!-- rows in datatable -->
+            <template v-slot:item="{ item }">
+              <tr @click="clickedRow(item)">
+                <td>{{ item.createdAt }}</td>
+                <td>{{ item.employeeName }}</td>
+                <td>{{ item.budgetName }}</td>
+                <td>{{ item.cost }}</td>
+                <td>{{ item.purchaseDate }}</td>
+                <td>{{ item.reimbursedDate }}</td>
                 <!-- action icons -->
                 <td class="datatable_btn layout">
                   <!-- download attachment button -->
-                  <v-tooltip top>
-                    <attachment :expense="props.item" :mode="'expenses'" slot="activator"></attachment>
-                    <span>Download Attachment</span>
-                  </v-tooltip>
-
+                  <attachment :expense="item" :mode="'expenses'"></attachment>
+                  <!-- end download attachment button -->
                   <!-- edit button -->
                   <v-tooltip top>
-                    <v-btn
-                      :disabled="isEditing() || (isUser && isReimbursed(props.item.reimbursedDate))"
-                      flat
-                      icon
-                      @click="onSelect(props.item)"
-                      slot="activator"
-                    >
-                      <v-icon style="color: #606060">
-                        edit
-                      </v-icon>
-                    </v-btn>
+                    <template v-slot:activator="{ on }">
+                      <v-btn
+                        :disabled="isEditing() || (isUser && isReimbursed(item.reimbursedDate))"
+                        text
+                        icon
+                        @click="onSelect(item)"
+                        v-on="on"
+                      >
+                        <v-icon style="color: #606060">
+                          edit
+                        </v-icon>
+                      </v-btn>
+                    </template>
                     <span>Edit</span>
                   </v-tooltip>
-
+                  <!-- end edit button -->
                   <!-- delete button -->
                   <v-tooltip top>
-                    <v-btn
-                      :disabled="isReimbursed(props.item.reimbursedDate) || isEditing()"
-                      flat
-                      icon
-                      @click="
-                        deleting = true;
-                        propExpense = props.item;
-                      "
-                      slot="activator"
-                    >
-                      <v-icon style="color: #606060">
-                        delete
-                      </v-icon>
-                    </v-btn>
+                    <template v-slot:activator="{ on }">
+                      <v-btn
+                        :disabled="isReimbursed(item.reimbursedDate) || isEditing()"
+                        text
+                        icon
+                        @click="
+                          deleting = true;
+                          propExpense = item;
+                        "
+                        v-on="on"
+                      >
+                        <v-icon style="color: #606060">
+                          delete
+                        </v-icon>
+                      </v-btn>
+                    </template>
                     <span>Delete</span>
                   </v-tooltip>
-
+                  <!-- end delete button -->
                   <!-- unreimburse button -->
                   <!-- remove "&& false" or switch to "true" to toggle button -->
                   <div v-if="isAdmin && true">
                     <v-tooltip top>
-                      <v-btn
-                        :disabled="!isReimbursed(props.item.reimbursedDate) || isEditing()"
-                        flat
-                        icon
-                        @click="
-                          unreimbursing = true;
-                          propExpense = props.item;
-                        "
-                        slot="activator"
-                      >
-                        <v-icon style="color: #606060">
-                          money_off
-                        </v-icon>
-                      </v-btn>
+                      <template v-slot:activator="{ on }">
+                        <v-btn
+                          :disabled="!isReimbursed(item.reimbursedDate) || isEditing()"
+                          text
+                          icon
+                          @click="
+                            unreimbursing = true;
+                            propExpense = item;
+                          "
+                          v-on="on"
+                        >
+                          <v-icon style="color: #606060">
+                            money_off
+                          </v-icon>
+                        </v-btn>
+                      </template>
                       <span>Unreimburse</span>
                     </v-tooltip>
                   </div>
+                  <!-- end unreimbures button -->
                 </td>
-
-                <!-- end option buttons -->
               </tr>
             </template>
-            <!-- end data row -->
-
-            <!-- data row dropdown/expandable -->
-            <template v-slot:expand="props">
-              <v-card flat>
-                <v-card-text>
-                  <div class="expandedInfo">
-                    <!-- notes/url button -->
-                    <p v-if="props.item.description"><b>Description: </b>{{ props.item.description }}</p>
-                    <p v-if="!isEmpty(props.item.note)"><b>Notes: </b>{{ props.item.note }}</p>
-                    <p v-if="!isEmpty(props.item.receipt)"><b>Receipt: </b>{{ props.item.receipt }}</p>
-                    <p v-if="!isEmpty(props.item.url)">
-                      <b>Url: </b> <a v-if="props.item.url" :href="props.item.url">{{ props.item.url }}</a>
-                    </p>
-                    <p v-if="!isEmpty(props.item.categories) && typeof props.item.categories == 'string'">
-                      <b>Category: </b>{{ props.item.categories }}
-                    </p>
-                    <div v-if="isAdmin" class="flagExp">
-                      <p>Inactive:</p>
-                      <icon
-                        v-if="useInactiveStyle(props.item)"
-                        id="marks"
-                        class="mr-1"
-                        name="regular/check-circle"
-                      ></icon>
-                      <icon v-else class="mr-1" id="marks" name="regular/times-circle"></icon>
+            <!-- end rows in datatable -->
+            <!-- expanded slot in datatable -->
+            <template v-slot:expanded-item="{ headers, item }">
+              <td :colspan="headers.length" class="pa-0">
+                <v-card text>
+                  <v-card-text>
+                    <div class="expandedInfo">
+                      <!-- notes/url button -->
+                      <p v-if="item.description"><b>Description: </b>{{ item.description }}</p>
+                      <p v-if="!isEmpty(item.note)"><b>Notes: </b>{{ item.note }}</p>
+                      <p v-if="!isEmpty(item.receipt)"><b>Receipt: </b>{{ item.receipt }}</p>
+                      <p v-if="!isEmpty(item.url)">
+                        <b>Url: </b> <a v-if="item.url" :href="item.url">{{ item.url }}</a>
+                      </p>
+                      <p v-if="!isEmpty(item.categories) && typeof item.categories == 'string'">
+                        <b>Category: </b>{{ item.categories }}
+                      </p>
+                      <div v-if="isAdmin" class="flagExp">
+                        <p>Inactive:</p>
+                        <icon v-if="useInactiveStyle(item)" id="marks" class="mr-1" name="regular/check-circle"></icon>
+                        <icon v-else class="mr-1" id="marks" name="regular/times-circle"></icon>
+                      </div>
                     </div>
-                  </div>
-                </v-card-text>
-              </v-card>
+                  </v-card-text>
+                </v-card>
+              </td>
             </template>
-
-            <!-- end data row dropdown/expandable -->
-
-            <!-- no results display -->
+            <!-- end expanded slot in datatable -->
+            <!-- alert for no search results -->
             <v-alert slot="no-results" :value="true" color="error" icon="warning">
               Your search for "{{ search }}" found no results.
             </v-alert>
+            <!-- end alert for no search results -->
           </v-data-table>
+          <!-- end expense datatable -->
           <br />
           <v-card-actions>
             <convert-expenses-to-csv v-if="isAdmin" :expenses="getFilteredExpenses()"></convert-expenses-to-csv>
           </v-card-actions>
           <!-- end no results display -->
-
           <!-- unreimbursing button confirmation alert box -->
           <unreimburse-modal :activate="unreimbursing" :expense="propExpense"></unreimburse-modal>
           <delete-modal :activate="deleting" :type="'expense'"></delete-modal>
@@ -355,6 +338,18 @@ function customFilter(item, queryText) {
       .toLowerCase()
       .indexOf(query.toString().toLowerCase()) > -1
   );
+}
+
+/*
+ * Add expense to expanded row when clicked
+ */
+function clickedRow(value) {
+  if (_.isEmpty(this.expanded) || this.expanded[0].key != value.key) {
+    this.expanded = [];
+    this.expanded.push(value);
+  } else {
+    this.expanded = [];
+  }
 }
 
 function clearStatus() {
@@ -688,6 +683,9 @@ export default {
       },
       search: '',
       expenses: [],
+      sortBy: 'createdAt', // sort datatable items
+      sortDesc: false, // sort datatable items
+      expanded: [], // database expanded
       filteredExpenses: [], //mine
       expenseTypes: [], //mine
       processedExpenses: [],
@@ -719,6 +717,10 @@ export default {
         {
           text: 'Reimburse Date',
           value: 'reimbursedDate'
+        },
+        {
+          value: 'actions',
+          sortable: false
         }
       ],
       filter: {
@@ -779,7 +781,8 @@ export default {
     getExpenses,
     isEmpty,
     isReimbursed,
-    getFilteredExpenses
+    getFilteredExpenses,
+    clickedRow
   },
   created
 };

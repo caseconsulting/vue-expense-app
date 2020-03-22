@@ -31,11 +31,9 @@
           :items="filteredItems"
           :sort-by.sync="sortBy"
           :sort-desc.sync="sortDesc"
-          :single-expanded="singleExpand"
           :expanded.sync="expanded"
           :loading="loading"
           :items-per-page="-1"
-          @click:row="clickedRow"
           show-select
           item-key="key"
           class="elevation-1 text-center"
@@ -146,7 +144,8 @@ function checkAllBoxes() {
  * Add expense to expanded row when clicked
  */
 function clickedRow(value) {
-  if (_.isEmpty(this.expanded)) {
+  if (_.isEmpty(this.expanded) || this.expanded[0].key != value.key) {
+    this.expanded = [];
     this.expanded.push(value);
   } else {
     this.expanded = [];
@@ -539,7 +538,6 @@ export default {
     loading: true, // is loading
     pendingExpenses: [], // pending expenses
     reimbursing: false, // is reimbursing
-    singleExpand: true, // datatable expand options
     sortBy: 'employeeName', // sort datatable items
     sortDesc: false // sort datatable items
   }),

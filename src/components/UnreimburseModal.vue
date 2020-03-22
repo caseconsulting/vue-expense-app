@@ -4,16 +4,15 @@
       <v-card>
         <v-card-title class="headline">Are you sure you want to unreimburse?</v-card-title>
         <v-card-text
-          >This will create a new {{ expense.budgetName }} expense with a negative balance of ${{ expense.cost }} for
-          employee, {{ expense.employeeName }}</v-card-text
+          >This will unreimburse the expense to pending and uncarry any overdrafts due to this expense</v-card-text
         >
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn color="gray darken-1" flat @click.native="emit(`canceled-unreimburse-expense`)"
+          <v-btn color="gray darken-1" text @click.native="emit(`canceled-unreimburse-expense`)"
             >No, keep reimbursed</v-btn
           >
           <v-spacer></v-spacer>
-          <v-btn color="red" flat @click.native="emit(`confirm-unreimburse-expense`)">Unreimburse</v-btn>
+          <v-btn color="red" text @click.native="emit(`confirm-unreimburse-expense`)">Unreimburse</v-btn>
           <v-spacer></v-spacer>
         </v-card-actions>
       </v-card>

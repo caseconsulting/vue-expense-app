@@ -6,9 +6,9 @@
         <v-card-text>Are you sure you want to delete this {{ type }}?</v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn color="gray darken-1" flat @click.native="emit(`canceled-delete-${type}`)">No, keep {{ type }}</v-btn>
+          <v-btn color="gray darken-1" text @click.native="emit(`canceled-delete-${type}`)">No, keep {{ type }}</v-btn>
           <v-spacer></v-spacer>
-          <v-btn color="red" flat @click.native="emit(`confirm-delete-${type}`)">Delete</v-btn>
+          <v-btn color="red" text @click.native="emit(`confirm-delete-${type}`)">Delete</v-btn>
           <v-spacer></v-spacer>
         </v-card-actions>
       </v-card>

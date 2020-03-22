@@ -13,11 +13,16 @@
 
   <!-- Expenses -->
   <div v-else>
-    <v-btn :disabled="!this.expense.receipt || this.expense.receipt.trim() <= 0" flat icon @click="openDownloadTab">
-      <v-icon style="color: #606060">
-        cloud_download
-      </v-icon>
-    </v-btn>
+    <v-tooltip top>
+      <template v-slot:activator="{ on }">
+        <v-btn :disabled="!expense.receipt || expense.receipt.trim() <= 0" text icon @click="openDownloadTab" v-on="on">
+          <v-icon style="color: #606060">
+            cloud_download
+          </v-icon>
+        </v-btn>
+      </template>
+      <span>Download Attachment</span>
+    </v-tooltip>
   </div>
 </template>
 
