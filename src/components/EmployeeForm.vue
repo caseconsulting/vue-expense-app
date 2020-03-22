@@ -216,8 +216,8 @@
         </v-menu>
 
         <!-- Buttons -->
-        <v-btn color="white" @click="clearForm"> <icon class="mr-1" name="ban"></icon>Cancel</v-btn>
-        <v-btn outlined color="success" @click="submit" :disabled="!valid">
+        <v-btn class="ma-2" color="white" @click="clearForm"> <icon class="mr-1" name="ban"></icon>Cancel</v-btn>
+        <v-btn outlined class="ma-2" color="success" @click="submit" :disabled="!valid">
           <icon class="mr-1" name="save"></icon>Submit</v-btn
         >
       </v-form>

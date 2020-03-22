@@ -76,6 +76,7 @@
 
         <!-- Date Picker 1-->
         <v-menu
+          v-if="isUser || isAdmin"
           ref="menu1"
           :close-on-content-click="true"
           v-model="menu1"

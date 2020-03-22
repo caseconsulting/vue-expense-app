@@ -27,9 +27,9 @@
           append-icon=""
           clearable
         >
-          <template slot="selection" slot-scope="data">
-            <v-chip :selected="data.selected" close outlined label color="gray" @input="removeCategory(data.item)">
-              <strong>{{ data.item }}</strong
+          <template v-slot:selection="{ attrs, item }">
+            <v-chip close outlined label color="gray" @click:close="removeCategory(item)">
+              <strong>{{ item }}</strong
               >&nbsp;
             </v-chip>
           </template>
@@ -119,8 +119,8 @@
           data-vv-name="Description "
         ></v-textarea>
         <!-- Buttons -->
-        <v-btn color="white " @click="clearForm"> <icon class="mr-1 " name="ban"></icon>Cancel</v-btn>
-        <v-btn outlined color="success " @click="submit" :disabled="!valid">
+        <v-btn color="white " @click="clearForm" class="ma-2"> <icon class="mr-1 " name="ban"></icon>Cancel</v-btn>
+        <v-btn outlined class="ma-2" color="success" @click="submit" :disabled="!valid">
           <icon class="mr-1 " name="save"></icon>
           Submit
         </v-btn>
