@@ -122,7 +122,7 @@
             <template v-slot:item="{ item }">
               <tr @click="clickedRow(item)">
                 <td>{{ item.createdAt }}</td>
-                <td>{{ item.employeeName }}</td>
+                <td v-if="isAdmin">{{ item.employeeName }}</td>
                 <td>{{ item.budgetName }}</td>
                 <td>{{ item.cost }}</td>
                 <td>{{ item.purchaseDate }}</td>
@@ -304,6 +304,7 @@ function roleHeaders() {
     : (function getUserHeaders(headers) {
         let x = headers;
         x.splice(1, 1);
+        console.log(x);
         return x;
       })(this.headers);
 }

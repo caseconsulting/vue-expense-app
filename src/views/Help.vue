@@ -9,23 +9,27 @@
     <h2>FAQ</h2>
     <div class="mb-5">
       <div class="text-xs-center mb-3"></div>
-      <v-expansion-panel expand v-for="section in sections" :key="section[0]">
-        <v-expansion-panel-content v-if="section[1] == role || role == 'admin' || section[1] == 'user'">
-          <div slot="header">{{ section[0] }}</div>
-          <v-card>
-            <v-card-text class="grey lighten-3">
-              <li v-for="ques in section" :key="ques.title">
-                <div v-if="ques.title" style="padding-bottom: 10px">
-                  <body style="font-style: italic;">
-                    <icon name="space-shuttle" /> {{ ques.title }}
-                  </body>
-                  {{ ques.body }}
-                </div>
-              </li>
-            </v-card-text>
-          </v-card>
-        </v-expansion-panel-content>
-      </v-expansion-panel>
+      <v-expansion-panels accordion>
+        <v-expansion-panel v-for="section in sections" :key="section[0]">
+          <v-expansion-panel-header v-if="section[1] == role || role == 'admin' || section[1] == 'user'">
+            {{ section[0] }}
+          </v-expansion-panel-header>
+          <v-expansion-panel-content v-if="section[1] == role || role == 'admin' || section[1] == 'user'">
+            <v-card>
+              <v-card-text class="grey lighten-3">
+                <li v-for="ques in section" :key="ques.title">
+                  <div v-if="ques.title" style="padding-bottom: 10px">
+                    <body style="font-style: italic;">
+                      <icon name="space-shuttle" /> {{ ques.title }}
+                    </body>
+                    {{ ques.body }}
+                  </div>
+                </li>
+              </v-card-text>
+            </v-card>
+          </v-expansion-panel-content>
+        </v-expansion-panel>
+      </v-expansion-panels>
     </div>
   </v-container>
 </template>

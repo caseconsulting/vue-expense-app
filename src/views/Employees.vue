@@ -521,6 +521,10 @@ export default {
         {
           text: 'Email',
           value: 'email'
+        },
+        {
+          value: 'actions',
+          sortable: false
         }
       ],
       invalidDelete: false,

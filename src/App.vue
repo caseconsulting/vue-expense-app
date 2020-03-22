@@ -14,9 +14,11 @@
         <v-toolbar-items v-show="isLoggedIn()">
           <v-flex xs12 sm6 md8 align-center justify-left layout text-xs-center>
             <v-menu bottom offset-y open-on-click>
-              <v-avatar v-slot:activator="{ on }" size="50" color="grey lighten-4">
-                <img :src="profilePic" alt="avatar" v-on="on" />
-              </v-avatar>
+              <template v-slot:activator="{ on }">
+                <v-avatar size="50" color="grey lighten-4">
+                  <img :src="profilePic" alt="avatar" v-on="on" />
+                </v-avatar>
+              </template>
               <v-list>
                 <v-btn text @click="handleLogout()">Logout</v-btn>
               </v-list>
