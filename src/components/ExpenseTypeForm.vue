@@ -28,7 +28,7 @@
           clearable
         >
           <template slot="selection" slot-scope="data">
-            <v-chip :selected="data.selected" close outline label color="gray" @input="removeCategory(data.item)">
+            <v-chip :selected="data.selected" close outlined label color="gray" @input="removeCategory(data.item)">
               <strong>{{ data.item }}</strong
               >&nbsp;
             </v-chip>
@@ -59,58 +59,58 @@
             </v-flex>
           </v-layout>
         </v-container>
-
-        <!-- start date picker -->
+        <!-- startDate picker -->
         <v-menu
           v-if="!model.recurringFlag"
           :rules="genericRules"
           :close-on-content-click="true"
           :nudge-right="40"
-          lazy
           transition="scale-transition"
           offset-y
-          full-width
           max-width="290px"
           min-width="290px"
         >
-          <v-text-field
-            slot="activator"
-            v-model="startDateFormatted"
-            :rules="dateRules"
-            label="Start Date"
-            hint="MM/DD/YYYY format"
-            persistent-hint
-            prepend-icon="event"
-            @blur="model.startDate = parseDate(startDateFormatted)"
-          ></v-text-field>
+          <template v-slot:activator="{ on }">
+            <v-text-field
+              v-model="startDateFormatted"
+              :rules="dateRules"
+              label="Start Date"
+              hint="MM/DD/YYYY format"
+              persistent-hint
+              prepend-icon="event"
+              @blur="model.startDate = parseDate(startDateFormatted)"
+              v-on="on"
+            ></v-text-field>
+          </template>
           <v-date-picker v-model="model.startDate" no-title></v-date-picker>
         </v-menu>
-
-        <!-- end date picker -->
+        <!-- end startDate picker -->
+        <!-- endDate picker -->
         <v-menu
           v-if="!model.recurringFlag"
+          :rules="genericRules"
           :close-on-content-click="true"
           :nudge-right="40"
-          lazy
           transition="scale-transition"
           offset-y
-          full-width
           max-width="290px"
           min-width="290px"
         >
-          <v-text-field
-            slot="activator"
-            v-model="endDateFormatted"
-            :rules="dateRules"
-            label="End Date"
-            hint="MM/DD/YYYY format"
-            persistent-hint
-            prepend-icon="event"
-            @blur="model.endDate = parseDate(endDateFormatted)"
-          ></v-text-field>
+          <template v-slot:activator="{ on }">
+            <v-text-field
+              v-model="endDateFormatted"
+              :rules="dateRules"
+              label="End Date"
+              hint="MM/DD/YYYY format"
+              persistent-hint
+              prepend-icon="event"
+              @blur="model.endDate = parseDate(endDateFormatted)"
+              v-on="on"
+            ></v-text-field>
+          </template>
           <v-date-picker v-model="model.endDate" no-title></v-date-picker>
         </v-menu>
-
+        <!-- end endDate picker -->
         <!-- description field -->
         <v-textarea
           v-model="model.description"
@@ -118,13 +118,12 @@
           label="Description "
           data-vv-name="Description "
         ></v-textarea>
-
         <!-- Buttons -->
-
         <v-btn color="white " @click="clearForm"> <icon class="mr-1 " name="ban"></icon>Cancel</v-btn>
-        <v-btn outline color="success " @click="submit" :disabled="!valid">
-          <icon class="mr-1 " name="save"></icon>Submit</v-btn
-        >
+        <v-btn outlined color="success " @click="submit" :disabled="!valid">
+          <icon class="mr-1 " name="save"></icon>
+          Submit
+        </v-btn>
       </v-form>
     </v-container>
   </v-card>

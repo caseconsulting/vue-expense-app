@@ -8,12 +8,11 @@
       :timeout="5000"
       :top="true"
       :vertical="true"
-      :auto-height="true"
     >
       <v-card-title headline color="white">
         <span class="headline">{{ status.statusMessage }}</span>
       </v-card-title>
-      <v-btn color="white" flat @click="clearStatus">
+      <v-btn color="white" text @click="clearStatus">
         Close
       </v-btn>
     </v-snackbar>
@@ -25,227 +24,232 @@
             <v-spacer></v-spacer>
             <v-text-field v-model="search" append-icon="search" label="Search" single-line hide-details></v-text-field>
           </v-card-title>
-
           <!-- start filters -->
           <fieldset>
             <legend class="legend_style">Filters</legend>
-
             <!-- active filter -->
             <div class="flagFilter">
               <h4>Active Expense Type:</h4>
-              <v-btn-toggle class="filter_color" v-model="filter.active" flat mandatory>
+              <v-btn-toggle class="filter_color" v-model="filter.active" text mandatory>
                 <v-tooltip top>
-                  <v-btn value="active" slot="activator" flat>
-                    <icon class="mr-1" name="regular/check-circle"></icon>
-                  </v-btn>
+                  <template v-slot:activator="{ on }">
+                    <v-btn value="active" v-on="on" text>
+                      <icon class="mr-1" name="regular/check-circle"></icon>
+                    </v-btn>
+                  </template>
                   <span>Show Active</span>
                 </v-tooltip>
                 <v-tooltip top>
-                  <v-btn value="notActive" slot="activator" flat>
-                    <icon name="regular/times-circle"></icon>
-                  </v-btn>
+                  <template v-slot:activator="{ on }">
+                    <v-btn value="notActive" v-on="on" text>
+                      <icon name="regular/times-circle"></icon>
+                    </v-btn>
+                  </template>
                   <span>Hide Active</span>
                 </v-tooltip>
                 <v-tooltip top>
-                  <v-btn value="both" slot="activator" flat>
-                    BOTH
-                  </v-btn>
+                  <template v-slot:activator="{ on }">
+                    <v-btn value="both" v-on="on" text>
+                      BOTH
+                    </v-btn>
+                  </template>
                   <span>Show All</span>
                 </v-tooltip>
               </v-btn-toggle>
             </div>
-
+            <!-- end active filter -->
             <!-- overdraft fitler -->
             <div class="flagFilter">
               <h4>Overdraft:</h4>
-              <v-btn-toggle class="filter_color" v-model="filter.overdraft" flat mandatory>
+              <v-btn-toggle class="filter_color" v-model="filter.overdraft" text mandatory>
                 <v-tooltip top>
-                  <v-btn value="overdraft" slot="activator" flat>
-                    <icon class="mr-1" name="regular/check-circle"></icon>
-                  </v-btn>
+                  <template v-slot:activator="{ on }">
+                    <v-btn value="overdraft" v-on="on" text>
+                      <icon class="mr-1" name="regular/check-circle"></icon>
+                    </v-btn>
+                  </template>
                   <span>Show Overdraft</span>
                 </v-tooltip>
                 <v-tooltip top>
-                  <v-btn value="noOverdraft" slot="activator" flat>
-                    <icon name="regular/times-circle"></icon>
-                  </v-btn>
+                  <template v-slot:activator="{ on }">
+                    <v-btn value="noOverdraft" v-on="on" text>
+                      <icon name="regular/times-circle"></icon>
+                    </v-btn>
+                  </template>
                   <span>Hide Overdraft</span>
                 </v-tooltip>
                 <v-tooltip top>
-                  <v-btn value="both" slot="activator" flat>
-                    BOTH
-                  </v-btn>
+                  <template v-slot:activator="{ on }">
+                    <v-btn value="both" v-on="on" text>
+                      BOTH
+                    </v-btn>
+                  </template>
                   <span>Show All</span>
                 </v-tooltip>
               </v-btn-toggle>
             </div>
-
+            <!-- end overdraft filter -->
             <!-- recurring filter -->
             <div class="flagFilter">
               <h4>Recurring:</h4>
-              <v-btn-toggle class="filter_color" v-model="filter.recurring" flat mandatory>
+              <v-btn-toggle class="filter_color" v-model="filter.recurring" text mandatory>
                 <v-tooltip top>
-                  <v-btn value="recurring" slot="activator" flat>
-                    <icon class="mr-1" name="regular/check-circle"></icon>
-                  </v-btn>
+                  <template v-slot:activator="{ on }">
+                    <v-btn value="recurring" v-on="on" text>
+                      <icon class="mr-1" name="regular/check-circle"></icon>
+                    </v-btn>
+                  </template>
                   <span>Show Recurring</span>
                 </v-tooltip>
                 <v-tooltip top>
-                  <v-btn value="notRecurring" slot="activator" flat>
-                    <icon name="regular/times-circle"></icon>
-                  </v-btn>
+                  <template v-slot:activator="{ on }">
+                    <v-btn value="notRecurring" v-on="on" text>
+                      <icon name="regular/times-circle"></icon>
+                    </v-btn>
+                  </template>
                   <span>Hide Recurring</span>
                 </v-tooltip>
                 <v-tooltip top>
-                  <v-btn value="both" slot="activator" flat>
-                    BOTH
-                  </v-btn>
+                  <template v-slot:activator="{ on }">
+                    <v-btn value="both" v-on="on" text>
+                      BOTH
+                    </v-btn>
+                  </template>
                   <span>Show All</span>
                 </v-tooltip>
               </v-btn-toggle>
             </div>
-
+            <!-- end recurring filter -->
             <!-- receipt fitler -->
             <div class="flagFilter">
               <h4>Receipt Required:</h4>
-              <v-btn-toggle class="filter_color" v-model="filter.receipt" flat mandatory>
+              <v-btn-toggle class="filter_color" v-model="filter.receipt" text mandatory>
                 <v-tooltip top>
-                  <v-btn value="receipt" slot="activator" flat>
-                    <icon class="mr-1" name="regular/check-circle"></icon>
-                  </v-btn>
+                  <template v-slot:activator="{ on }">
+                    <v-btn value="receipt" v-on="on" text>
+                      <icon class="mr-1" name="regular/check-circle"></icon>
+                    </v-btn>
+                  </template>
                   <span>Show Required Receipt</span>
                 </v-tooltip>
                 <v-tooltip top>
-                  <v-btn value="noReceipt" slot="activator" flat>
-                    <icon name="regular/times-circle"></icon>
-                  </v-btn>
+                  <template v-slot:activator="{ on }">
+                    <v-btn value="noReceipt" v-on="on" text>
+                      <icon name="regular/times-circle"></icon>
+                    </v-btn>
+                  </template>
                   <span>Hide Required Receipt</span>
                 </v-tooltip>
                 <v-tooltip top>
-                  <v-btn value="both" slot="activator" flat>
-                    BOTH
-                  </v-btn>
+                  <template v-slot:activator="{ on }">
+                    <v-btn value="both" v-on="on" text>
+                      BOTH
+                    </v-btn>
+                  </template>
                   <span>Show All</span>
                 </v-tooltip>
               </v-btn-toggle>
             </div>
+            <!-- end receipt filter-->
           </fieldset>
           <br />
-
           <!-- end filters -->
-
-          <!-- start datatable -->
+          <!-- expense type datatable-->
           <v-data-table
             :headers="headers"
             :items="expenseTypeList"
+            :sort-by.sync="sortBy"
+            :sort-desc.sync="sortDesc"
+            :expanded.sync="expanded"
+            :loading="loading"
+            :items-per-page="25"
             :search="search"
-            :pagination.sync="pagination"
-            :expand="expand"
-            item-key="budgetName"
-            class="elevation-1"
+            item-key="id"
+            class="elevation-4"
           >
-            <template slot="headers" slot-scope="props">
-              <tr style="box-shadow: 0px 1.5px #888888;">
-                <th
-                  v-for="header in props.headers"
-                  :key="header.text"
-                  :class="[
-                    'column sortable',
-                    pagination.descending ? 'desc' : 'asc',
-                    header.value === pagination.sortBy ? 'active' : '',
-                    header.value === 'odFlag' ? 'text-xs-center' : 'text-xs-left'
-                  ]"
-                  @click="changeSort(header.value)"
-                >
-                  {{ header.text }}
-                  <v-icon small>arrow_upward</v-icon>
-                </th>
-              </tr>
-            </template>
-
-            <!-- data row -->
-            <template slot="items" slot-scope="props">
-              <tr
-                :class="{ inactiveStyle: props.item.isInactive, selectFocus: props.expanded }"
-                @click="props.expanded = !props.expanded"
-              >
-                <td class="text-xs-left">{{ props.item.budgetName | limitedText }}</td>
-                <td class="text-xs-left">{{ props.item.budget | moneyValue }}</td>
-                <!-- <td class="text-xs-left">{{ props.item.description | limitedText }}</td> -->
-                <td class="text-xs-left">{{ props.item.startDate }}</td>
-                <td class="text-xs-left">{{ props.item.endDate }}</td>
-
+            <!-- rows in datatable -->
+            <template v-slot:item="{ item }">
+              <tr @click="clickedRow(item)">
+                <td>{{ item.budgetName | limitedText }}</td>
+                <td>{{ item.budget | moneyValue }}</td>
+                <td>{{ item.startDate }}</td>
+                <td>{{ item.endDate }}</td>
                 <!-- action icons -->
                 <td v-if="userIsAdmin()" class="datatable_btn layout">
                   <!-- edit button -->
                   <v-tooltip top>
-                    <v-btn :disabled="isEditing()" flat icon @click="onSelect(props.item)" slot="activator">
-                      <v-icon style="color: #606060">
-                        edit
-                      </v-icon>
-                    </v-btn>
+                    <template v-slot:activator="{ on }">
+                      <v-btn :disabled="isEditing()" text icon @click="onSelect(item)" v-on="on">
+                        <v-icon style="color: #606060">
+                          edit
+                        </v-icon>
+                      </v-btn>
+                    </template>
                     <span>Edit</span>
                   </v-tooltip>
-
+                  <!-- end edit button -->
                   <!-- delete button -->
                   <v-tooltip top>
-                    <v-btn :disabled="isEditing()" flat icon @click="validateDelete(props.item)" slot="activator">
-                      <v-icon style="color: #606060">
-                        delete
-                      </v-icon>
-                    </v-btn>
+                    <template v-slot:activator="{ on }">
+                      <v-btn :disabled="isEditing()" text icon @click="validateDelete(item)" v-on="on">
+                        <v-icon style="color: #606060">
+                          delete
+                        </v-icon>
+                      </v-btn>
+                    </template>
                     <span>Delete</span>
                   </v-tooltip>
+                  <!-- end delete button -->
                 </td>
                 <!-- end action icons -->
               </tr>
             </template>
+            <!-- end rows in datatable -->
+            <!-- expanded slot in datatable -->
+            <template v-slot:expanded-item="{ headers, item }">
+              <td :colspan="headers.length" class="pa-0">
+                <v-card text>
+                  <v-card-text>
+                    <div class="expandedInfo">
+                      <p v-if="item.description"><b>Description: </b>{{ item.description }}</p>
 
-            <!-- end data row -->
+                      <p v-if="item.categories && item.categories.length > 0">
+                        <b>Categories: </b>{{ item.categories.join(', ') }}
+                      </p>
 
-            <!-- data row dropdown/expandable -->
-            <template v-slot:expand="props">
-              <v-card flat>
-                <v-card-text>
-                  <div class="expandedInfo">
-                    <p v-if="props.item.description"><b>Description: </b>{{ props.item.description }}</p>
-
-                    <p v-if="props.item.categories && props.item.categories.length > 0">
-                      <b>Categories: </b>{{ props.item.categories.join(', ') }}
-                    </p>
-
-                    <div class="flag">
-                      <p>Overdraft Allowed:</p>
-                      <icon v-if="props.item.odFlag" id="marks" class="mr-1" name="regular/check-circle"></icon>
-                      <icon v-else class="mr-1" id="marks" name="regular/times-circle"></icon>
+                      <div class="flag">
+                        <p>Overdraft Allowed:</p>
+                        <icon v-if="item.odFlag" id="marks" class="mr-1" name="regular/check-circle"></icon>
+                        <icon v-else class="mr-1" id="marks" name="regular/times-circle"></icon>
+                      </div>
+                      <div class="flag">
+                        <p>Recurring:</p>
+                        <icon v-if="item.recurringFlag" id="marks" class="mr-1" name="regular/check-circle"></icon>
+                        <icon v-else class="mr-1" id="marks" name="regular/times-circle"></icon>
+                      </div>
+                      <div class="flag">
+                        <p>Receipt Required:</p>
+                        <icon v-if="item.requiredFlag" id="marks" class="mr-1" name="regular/check-circle"></icon>
+                        <icon v-else class="mr-1" id="marks" name="regular/times-circle"></icon>
+                      </div>
+                      <div class="flag">
+                        <p>Inactive:</p>
+                        <icon v-if="item.isInactive" id="marks" class="mr-1" name="regular/check-circle"></icon>
+                        <icon v-else class="mr-1" id="marks" name="regular/times-circle"></icon>
+                      </div>
                     </div>
-                    <div class="flag">
-                      <p>Recurring:</p>
-                      <icon v-if="props.item.recurringFlag" id="marks" class="mr-1" name="regular/check-circle"></icon>
-                      <icon v-else class="mr-1" id="marks" name="regular/times-circle"></icon>
-                    </div>
-                    <div class="flag">
-                      <p>Receipt Required:</p>
-                      <icon v-if="props.item.requiredFlag" id="marks" class="mr-1" name="regular/check-circle"></icon>
-                      <icon v-else class="mr-1" id="marks" name="regular/times-circle"></icon>
-                    </div>
-                    <div class="flag">
-                      <p>Inactive:</p>
-                      <icon v-if="props.item.isInactive" id="marks" class="mr-1" name="regular/check-circle"></icon>
-                      <icon v-else class="mr-1" id="marks" name="regular/times-circle"></icon>
-                    </div>
-                  </div>
-                </v-card-text>
-              </v-card>
+                  </v-card-text>
+                </v-card>
+              </td>
             </template>
-            <!-- end data row dropdown/expandable -->
-
-            <!-- no results display -->
+            <!-- end expanded slot in datatable -->
+            <!-- alert for no search results -->
             <v-alert slot="no-results" :value="true" color="error" icon="warning">
               Your search for "{{ search }}" found no results.
             </v-alert>
+            <!-- end alert for no search results -->
           </v-data-table>
-
+          <!-- end expense type datatable -->
           <delete-modal :activate="deleting" :type="'expense-type'"></delete-modal>
           <delete-error-modal :activate="invalidDelete" type="expense type"></delete-error-modal>
         </v-container>
@@ -301,12 +305,15 @@ function addModelToTable(newExpenseType) {
   }
 }
 
-function changeSort(column) {
-  if (this.pagination.sortBy === column) {
-    this.pagination.descending = !this.pagination.descending;
+/*
+ * Add expense type to expanded row when clicked
+ */
+function clickedRow(value) {
+  if (_.isEmpty(this.expanded) || this.expanded[0].id != value.id) {
+    this.expanded = [];
+    this.expanded.push(value);
   } else {
-    this.pagination.sortBy = column;
-    this.pagination.descending = false;
+    this.expanded = [];
   }
 }
 
@@ -476,25 +483,24 @@ export default {
   },
   data() {
     return {
-      //showInactive: false, //used to show all expenseTypes (even inactive)
-      search: '',
-      loading: false,
-      deleting: false,
-      invalidDelete: false,
-      status: {
-        statusType: undefined,
-        statusMessage: '',
-        color: ''
+      deleteModel: {
+        id: ''
       },
-      expenseTypes: [],
-      typeExpenses: '',
-      filteredExpenseTypes: [],
+      deleting: false, // activate delete model
       errors: [],
+      expanded: [], // database expanded
+      expenseTypes: [],
+      filter: {
+        active: 'active',
+        overdraft: 'both',
+        recurring: 'both',
+        receipt: 'both'
+      },
+      filteredExpenseTypes: [],
       headers: [
         {
           text: 'Expense Type',
-          value: 'budgetName',
-          sortable: false
+          value: 'budgetName'
         },
         {
           text: 'Budget',
@@ -507,12 +513,14 @@ export default {
         {
           text: 'End Date',
           value: 'endDate'
+        },
+        {
+          value: 'actions',
+          sortable: false
         }
       ],
-      pagination: {
-        sortBy: 'budgetName',
-        rowsPerPage: 10
-      },
+      invalidDelete: false,
+      loading: false,
       model: {
         id: '',
         budget: 0,
@@ -527,22 +535,21 @@ export default {
         categories: [],
         typeExpenses: ''
       },
-      deleteModel: {
-        id: ''
+      search: '', // query text for datatable search field
+      sortBy: 'budgetName', // sort datatable items
+      sortDesc: false, // sort datatable items
+      status: {
+        statusType: undefined,
+        statusMessage: '',
+        color: ''
       },
-      filter: {
-        active: 'active',
-        overdraft: 'both',
-        recurring: 'both',
-        receipt: 'both'
-      },
-      expand: false
+      typeExpenses: ''
     };
   },
   components: {
-    ExpenseTypeForm,
+    DeleteErrorModal,
     DeleteModal,
-    DeleteErrorModal
+    ExpenseTypeForm
   },
   computed: {
     expenseTypeList
@@ -551,21 +558,21 @@ export default {
     'filter.active': function() {
       this.filterExpense();
     },
-    'filter.overdraft': function() {
+    'filter.receipt': function() {
       this.filterExpense();
     },
     'filter.recurring': function() {
       this.filterExpense();
     },
-    'filter.receipt': function() {
+    'filter.overdraft': function() {
       this.filterExpense();
     }
   },
   methods: {
     addModelToTable,
-    changeSort,
     clearModel,
     clearStatus,
+    clickedRow,
     deleteExpenseType,
     deleteModelFromTable,
     displayError,
