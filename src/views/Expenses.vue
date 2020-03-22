@@ -696,7 +696,7 @@ export default {
       role: '',
       search: '', // query text for datatable search field
       sortBy: 'createdAt', // sort datatable items
-      sortDesc: false, // sort datatable items
+      sortDesc: true, // sort datatable items
       status: {
         statusType: undefined,
         statusMessage: '',

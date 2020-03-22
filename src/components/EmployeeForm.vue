@@ -49,177 +49,175 @@
 
         <!-- Hire Date -->
         <v-menu
-          :full-width="true"
-          style="padding-right: 20px; padding-bottom: 20px;"
           ref="menu1"
           :close-on-content-click="true"
           v-model="menu1"
           :nudge-right="40"
-          lazy
           transition="scale-transition"
           offset-y
           max-width="290px"
           min-width="290px"
+          style="padding-right: 20px; padding-bottom: 20px;"
         >
-          <v-text-field
-            slot="activator"
-            v-model="hireDateFormatted"
-            :rules="dateRules"
-            :disabled="hasExpenses"
-            label="Hire Date"
-            hint="MM/DD/YYYY format"
-            persistent-hint
-            prepend-icon="event"
-            @blur="date = parseDate(hireDateFormatted)"
-          ></v-text-field>
+          <template v-slot:activator="{ on }">
+            <v-text-field
+              v-model="hireDateFormatted"
+              :rules="dateRules"
+              :disabled="hasExpenses"
+              label="Hire Date"
+              hint="MM/DD/YYYY format"
+              persistent-hint
+              prepend-icon="event"
+              @blur="date = parseDate(hireDateFormatted)"
+              v-on="on"
+            ></v-text-field>
+          </template>
           <v-date-picker v-model="date" no-title @input="menu1 = false"></v-date-picker>
         </v-menu>
-
+        <br />
         <!-- Advanced section -->
-
-        <v-expansion-panel>
-          <v-expansion-panel-content style="background-color: whitesmoke;">
-            <template v-slot:header>
-              <div>
-                ADVANCED (optional)
-              </div>
-            </template>
-
-            <!-- Prime text field -->
-            <v-text-field
-              style="padding-right: 20px; padding-left: 10px;"
-              v-model="model.prime"
-              label="Prime"
-              data-vv-name="Prime"
-            ></v-text-field>
-
-            <!-- Contract text field -->
-            <v-text-field
-              style="padding-right: 20px; padding-left: 10px;"
-              v-model="model.contract"
-              label="Contract"
-              data-vv-name="Contract"
-            ></v-text-field>
-
-            <!-- Github text field -->
-            <v-text-field
-              style="padding-right: 20px; padding-left: 10px;"
-              v-model="model.github"
-              label="Github"
-              data-vv-name="Github"
-            ></v-text-field>
-
-            <!-- Twitter text field -->
-            <v-text-field
-              style="padding-right: 20px; padding-left: 10px;"
-              v-model="model.twitter"
-              label="Twitter"
-              data-vv-name="Twitter"
-            ></v-text-field>
-
-            <!-- Job Role autocomplete -->
-            <v-autocomplete
-              style="padding-right: 20px; padding-left: 10px;"
-              :items="jobRoles"
-              v-model="model.jobRole"
-              item-text="text"
-              label="Job Role"
-            ></v-autocomplete>
-
-            <!-- Birthday Picker -->
-            <v-menu
-              :full-width="true"
-              style="padding-right: 20px; padding-bottom: 20px;"
-              ref="menu3"
-              :close-on-content-click="true"
-              v-model="menu3"
-              :nudge-right="40"
-              lazy
-              transition="scale-transition"
-              offset-y
-              max-width="290px"
-              min-width="290px"
-            >
+        <v-expansion-panels accordion>
+          <v-expansion-panel>
+            <v-expansion-panel-header style="background-color: whitesmoke;">
+              ADVANCED (optional)
+            </v-expansion-panel-header>
+            <v-expansion-panel-content style="background-color: whitesmoke;">
+              <!-- Prime text field -->
               <v-text-field
-                slot="activator"
-                v-model="birthdayFormat"
-                :rules="dateOptionalRules"
-                label="Birthday"
-                hint="MM/DD/YYYY format"
-                persistent-hint
-                prepend-icon="event"
-                @blur="model.birthday = parseDate(birthdayFormat)"
+                style="padding-right: 20px; padding-left: 10px;"
+                v-model="model.prime"
+                label="Prime"
+                data-vv-name="Prime"
               ></v-text-field>
-              <v-date-picker v-model="model.birthday" no-title @input="menu3 = false"></v-date-picker>
-            </v-menu>
 
-            <!-- Place of Birth -->
-            <p style="font-size: 17px; padding-left: 10px; padding-top: 10px;">Place of Birth</p>
-            <div style="padding-right: 20px; padding-left: 30px; padding-bottom: 10px;">
-              <div style="border-left-style: groove; padding-right: 20px; padding-left: 10px; ">
-                <!-- Place of Birth: City text field -->
-                <v-text-field
-                  v-model="model.city"
-                  label="City"
-                  data-vv-name="City"
-                  style="padding-top: 0px;"
-                ></v-text-field>
+              <!-- Contract text field -->
+              <v-text-field
+                style="padding-right: 20px; padding-left: 10px;"
+                v-model="model.contract"
+                label="Contract"
+                data-vv-name="Contract"
+              ></v-text-field>
 
-                <!-- Place of Birth: State autocomplete -->
-                <v-autocomplete
-                  :items="states"
-                  v-model="model.st"
-                  item-text="text"
-                  label="State"
-                  style="padding-top: 0px; padding-bottom: 0px;"
-                ></v-autocomplete>
+              <!-- Github text field -->
+              <v-text-field
+                style="padding-right: 20px; padding-left: 10px;"
+                v-model="model.github"
+                label="Github"
+                data-vv-name="Github"
+              ></v-text-field>
 
-                <!-- Place of Birth: Country text field -->
-                <v-text-field
-                  v-model="model.country"
-                  label="Country"
-                  data-vv-name="Country"
-                  style="padding-top: 0px;"
-                ></v-text-field>
+              <!-- Twitter text field -->
+              <v-text-field
+                style="padding-right: 20px; padding-left: 10px;"
+                v-model="model.twitter"
+                label="Twitter"
+                data-vv-name="Twitter"
+              ></v-text-field>
+
+              <!-- Job Role autocomplete -->
+              <v-autocomplete
+                style="padding-right: 20px; padding-left: 10px;"
+                :items="jobRoles"
+                v-model="model.jobRole"
+                item-text="text"
+                label="Job Role"
+              ></v-autocomplete>
+
+              <!-- Birthday Picker -->
+              <v-menu
+                ref="menu3"
+                :close-on-content-click="true"
+                v-model="menu3"
+                :nudge-right="40"
+                transition="scale-transition"
+                offset-y
+                max-width="290px"
+                min-width="290px"
+                style="padding-right: 20px; padding-bottom: 20px;"
+              >
+                <template v-slot:activator="{ on }">
+                  <v-text-field
+                    v-model="birthdayFormat"
+                    :rules="dateOptionalRules"
+                    label="Birthday"
+                    hint="MM/DD/YYYY format"
+                    persistent-hint
+                    prepend-icon="event"
+                    @blur="model.birthday = parseDate(birthdayFormat)"
+                    v-on="on"
+                  ></v-text-field>
+                </template>
+                <v-date-picker v-model="model.birthday" no-title @input="menu3 = false"></v-date-picker>
+              </v-menu>
+
+              <!-- Place of Birth -->
+              <p style="font-size: 17px; padding-left: 10px; padding-top: 10px;">Place of Birth</p>
+              <div style="padding-right: 20px; padding-left: 30px; padding-bottom: 10px;">
+                <div style="border-left-style: groove; padding-right: 20px; padding-left: 10px; ">
+                  <!-- Place of Birth: City text field -->
+                  <v-text-field
+                    v-model="model.city"
+                    label="City"
+                    data-vv-name="City"
+                    style="padding-top: 0px;"
+                  ></v-text-field>
+
+                  <!-- Place of Birth: State autocomplete -->
+                  <v-autocomplete
+                    :items="states"
+                    v-model="model.st"
+                    item-text="text"
+                    label="State"
+                    style="padding-top: 0px; padding-bottom: 0px;"
+                  ></v-autocomplete>
+
+                  <!-- Place of Birth: Country text field -->
+                  <v-text-field
+                    v-model="model.country"
+                    label="Country"
+                    data-vv-name="Country"
+                    style="padding-top: 0px;"
+                  ></v-text-field>
+                </div>
               </div>
-            </div>
-          </v-expansion-panel-content>
-        </v-expansion-panel>
+            </v-expansion-panel-content>
+          </v-expansion-panel>
+        </v-expansion-panels>
 
         <!-- isactive? only on edit -->
         <v-checkbox label="Mark as Inactive" v-model="model.isInactive"></v-checkbox>
 
         <!-- if inactive, set Departure Date -->
         <v-menu
-          :full-width="true"
-          style="padding-right: 20px; padding-bottom: 20px;"
           ref="menu2"
           :close-on-content-click="true"
           v-model="menu2"
           :nudge-right="40"
-          lazy
           transition="scale-transition"
           offset-y
           max-width="290px"
           min-width="290px"
           v-if="model.isInactive"
+          style="padding-right: 20px; padding-bottom: 20px;"
         >
-          <v-text-field
-            slot="activator"
-            v-model="deptDateFormatted"
-            :rules="dateRules"
-            label="Departure Date"
-            hint="MM/DD/YYYY format"
-            persistent-hint
-            prepend-icon="event"
-            @blur="model.deptDate = parseDate(deptDateFormatted)"
-          ></v-text-field>
+          <template v-slot:activator="{ on }">
+            <v-text-field
+              v-model="deptDateFormatted"
+              :rules="dateRules"
+              label="Departure Date"
+              hint="MM/DD/YYYY format"
+              persistent-hint
+              prepend-icon="event"
+              @blur="model.deptDate = parseDate(deptDateFormatted)"
+              v-on="on"
+            ></v-text-field>
+          </template>
           <v-date-picker v-model="model.deptDate" no-title @input="menu2 = false"></v-date-picker>
         </v-menu>
 
         <!-- Buttons -->
         <v-btn color="white" @click="clearForm"> <icon class="mr-1" name="ban"></icon>Cancel</v-btn>
-        <v-btn outline color="success" @click="submit" :disabled="!valid">
+        <v-btn outlined color="success" @click="submit" :disabled="!valid">
           <icon class="mr-1" name="save"></icon>Submit</v-btn
         >
       </v-form>

@@ -18,7 +18,7 @@
                 <img :src="profilePic" alt="avatar" v-on="on" />
               </v-avatar>
               <v-list>
-                <v-btn flat @click="handleLogout()">Logout</v-btn>
+                <v-btn text @click="handleLogout()">Logout</v-btn>
               </v-list>
             </v-menu>
           </v-flex>

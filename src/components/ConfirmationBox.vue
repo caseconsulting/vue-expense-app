@@ -17,8 +17,8 @@ this.expense<template>
         <v-card-actions>
           <v-spacer></v-spacer>
           <div>
-            <v-btn color="red" flat @click.native="emit('canceledSubmit')">No, take me back</v-btn>
-            <v-btn color="green darken-1" flat @click.native="confirm('confirmSubmit')">Yes, submit</v-btn>
+            <v-btn color="red" text @click.native="emit('canceledSubmit')">No, take me back</v-btn>
+            <v-btn color="green darken-1" text @click.native="confirm('confirmSubmit')">Yes, submit</v-btn>
           </div>
         </v-card-actions>
       </v-card>

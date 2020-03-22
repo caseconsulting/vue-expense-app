@@ -7,7 +7,7 @@
 
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn color="gray darken-1" flat @click.native="emit(`invalid-${type}-delete`)">Ok</v-btn>
+          <v-btn color="gray darken-1" text @click.native="emit(`invalid-${type}-delete`)">Ok</v-btn>
           <v-spacer></v-spacer>
         </v-card-actions>
       </v-card>

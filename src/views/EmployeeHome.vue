@@ -12,7 +12,7 @@
       <v-card-title headline color="white">
         <span class="headline">{{ status.statusMessage }}</span>
       </v-card-title>
-      <v-btn color="white" flat @click="clearStatus">Close</v-btn>
+      <v-btn color="white" text @click="clearStatus">Close</v-btn>
     </v-snackbar>
 
     <!-- title -->

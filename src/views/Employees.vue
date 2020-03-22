@@ -9,12 +9,11 @@
       :timeout="5000"
       :top="true"
       :vertical="true"
-      :auto-height="true"
     >
       <v-card-title headline color="white">
         <span class="headline">{{ status.statusMessage }}</span>
       </v-card-title>
-      <v-btn color="white" flat @click="clearStatus">
+      <v-btn color="white" text @click="clearStatus">
         Close
       </v-btn>
     </v-snackbar>
@@ -35,201 +34,197 @@
             <!-- active filter -->
             <div class="flagFilter">
               <h4>Active Employees:</h4>
-              <v-btn-toggle class="filter_color" v-model="filter.active" flat mandatory>
+              <v-btn-toggle class="filter_color" v-model="filter.active" text mandatory>
                 <v-tooltip top>
-                  <v-btn value="active" slot="activator" flat>
-                    <icon class="mr-1" name="regular/check-circle"></icon>
-                  </v-btn>
+                  <template v-slot:activator="{ on }">
+                    <v-btn value="active" v-on="on" text>
+                      <icon class="mr-1" name="regular/check-circle"></icon>
+                    </v-btn>
+                  </template>
                   <span>Show Active</span>
                 </v-tooltip>
                 <v-tooltip top>
-                  <v-btn value="notActive" slot="activator" flat>
-                    <icon name="regular/times-circle"></icon>
-                  </v-btn>
+                  <template v-slot:activator="{ on }">
+                    <v-btn value="notActive" v-on="on" text>
+                      <icon name="regular/times-circle"></icon>
+                    </v-btn>
+                  </template>
                   <span>Hide Active</span>
                 </v-tooltip>
                 <v-tooltip top>
-                  <v-btn value="both" slot="activator" flat>
-                    BOTH
-                  </v-btn>
+                  <template v-slot:activator="{ on }">
+                    <v-btn value="both" v-on="on" text>
+                      BOTH
+                    </v-btn>
+                  </template>
                   <span>Show All</span>
                 </v-tooltip>
               </v-btn-toggle>
             </div>
+            <!-- end active filter -->
           </fieldset>
           <br />
+          <!-- employee datatable-->
           <v-data-table
             :headers="headers"
             :items="employeeList"
+            :sort-by.sync="sortBy"
+            :sort-desc.sync="sortDesc"
+            :expanded.sync="expanded"
+            :loading="loading"
+            :items-per-page="25"
             :search="search"
-            :pagination.sync="pagination"
-            :expand="expand"
             item-key="employeeNumber"
             class="elevation-1"
           >
-            <template slot="headers" slot-scope="props">
-              <tr style="box-shadow: 0px 1.5px #888888;">
-                <th
-                  class="text-xs-left"
-                  v-for="header in props.headers"
-                  :key="header.text"
-                  :class="[
-                    'column sortable',
-                    pagination.descending ? 'desc' : 'asc',
-                    header.value === pagination.sortBy ? 'active' : ''
-                  ]"
-                  @click="changeSort(header.value)"
-                >
-                  {{ header.text }}
-                  <v-icon small>arrow_upward</v-icon>
-                </th>
-              </tr>
-            </template>
-
-            <template v-slot:items="props">
-              <tr
-                :class="{ inactiveStyle: props.item.isInactive, selectFocus: props.expanded }"
-                @click="props.expanded = !props.expanded"
-              >
-                <td class="text-xs-left">{{ props.item.employeeNumber }}</td>
-                <td class="text-xs-left">{{ props.item.firstName }}</td>
-                <td class="text-xs-left">{{ props.item.lastName }}</td>
-                <td class="text-xs-left">{{ props.item.hireDate | dateFormat }}</td>
-                <td class="text-xs-left">{{ props.item.email }}</td>
-
+            <!-- rows in datatable -->
+            <template v-slot:item="{ item }">
+              <tr :class="{ inactiveStyle: item.isInactive, selectFocus: isFocus(item) }" @click="clickedRow(item)">
+                <td>{{ item.employeeNumber }}</td>
+                <td>{{ item.firstName }}</td>
+                <td>{{ item.lastName }}</td>
+                <td>{{ item.hireDate | dateFormat }}</td>
+                <td>{{ item.email }}</td>
                 <!-- action icons -->
                 <td class="datatable_btn layout" v-if="userIsAdmin()">
                   <!-- edit button -->
                   <v-tooltip top>
-                    <v-btn :disabled="isEditing()" flat icon @click="onSelect(props.item)" slot="activator">
-                      <v-icon style="color: #606060">
-                        edit
-                      </v-icon>
-                    </v-btn>
+                    <template v-slot:activator="{ on }">
+                      <v-btn :disabled="isEditing()" text icon @click="onSelect(item)" v-on="on">
+                        <v-icon style="color: #606060">
+                          edit
+                        </v-icon>
+                      </v-btn>
+                    </template>
                     <span>Edit</span>
                   </v-tooltip>
-
+                  <!-- end edit button -->
                   <!-- delete button -->
                   <v-tooltip top>
-                    <v-btn :disabled="isEditing()" flat icon @click="validateDelete(props.item)" slot="activator">
-                      <v-icon style="color: #606060">
-                        delete
-                      </v-icon>
-                    </v-btn>
+                    <template v-slot:activator="{ on }">
+                      <v-btn :disabled="isEditing()" text icon @click="validateDelete(item)" v-on="on">
+                        <v-icon style="color: #606060">
+                          delete
+                        </v-icon>
+                      </v-btn>
+                    </template>
                     <span>Delete</span>
                   </v-tooltip>
+                  <!-- end delete button -->
                 </td>
+                <!-- end action icons -->
               </tr>
             </template>
-
-            <template v-slot:expand="props">
-              <v-card flat>
-                <v-card-text>
-                  <div
-                    class="expandedInfo"
-                    v-if="
-                      userIsAdmin() &&
-                        isEmpty(props.item.prime) &&
-                        isEmpty(props.item.contract) &&
-                        isEmpty(props.item.jobRole) &&
-                        isEmpty(props.item.github) &&
-                        isEmpty(props.item.twitter) &&
-                        isEmpty(props.item.birthday) &&
-                        isEmpty(props.item.city) &&
-                        isEmpty(props.item.st) &&
-                        isEmpty(props.item.country) &&
-                        isEmpty(props.item.deptDate) &&
-                        !props.item.isInactive
-                    "
-                  >
-                    <p>No additional data</p>
-                  </div>
-                  <div
-                    class="expandedInfo"
-                    v-else-if="
-                      !userIsAdmin() &&
-                        isEmpty(props.item.prime) &&
-                        isEmpty(props.item.contract) &&
-                        isEmpty(props.item.jobRole) &&
-                        isEmpty(props.item.github) &&
-                        isEmpty(props.item.twitter)
-                    "
-                  >
-                    <p>No additional data</p>
-                  </div>
-                  <div class="expandedInfo" v-else>
-                    <p v-if="!isEmpty(props.item.prime)"><b>Prime: </b> {{ props.item.prime }}</p>
-                    <p v-if="!isEmpty(props.item.contract)"><b>Contract: </b>{{ props.item.contract }}</p>
-                    <p v-if="!isEmpty(props.item.jobRole)"><b>Job Role: </b>{{ props.item.jobRole }}</p>
-                    <p v-if="!isEmpty(props.item.github)">
-                      <b>Github: </b
-                      ><a :href="'https://github.com/' + props.item.github" target="_blank">{{ props.item.github }}</a>
-                    </p>
-                    <p v-if="!isEmpty(props.item.twitter)">
-                      <b>Twitter: </b
-                      ><a :href="'https://twitter.com/' + props.item.twitter" target="_blank">{{
-                        props.item.twitter
-                      }}</a>
-                    </p>
-                    <p v-if="userIsAdmin() && !isEmpty(props.item.birthday)">
-                      <b>Birthday: </b>{{ props.item.birthday | dateFormat }}
-                    </p>
-                    <p
+            <!-- end rows in datatable -->
+            <!-- expanded slot in datatable -->
+            <template v-slot:expanded-item="{ headers, item }">
+              <td :colspan="headers.length" class="pa-0">
+                <v-card text>
+                  <v-card-text>
+                    <div
+                      class="expandedInfo"
                       v-if="
                         userIsAdmin() &&
-                          !isEmpty(props.item.city) &&
-                          !isEmpty(props.item.st) &&
-                          !isEmpty(props.item.country)
+                          isEmpty(item.prime) &&
+                          isEmpty(item.contract) &&
+                          isEmpty(item.jobRole) &&
+                          isEmpty(item.github) &&
+                          isEmpty(item.twitter) &&
+                          isEmpty(item.birthday) &&
+                          isEmpty(item.city) &&
+                          isEmpty(item.st) &&
+                          isEmpty(item.country) &&
+                          isEmpty(item.deptDate) &&
+                          !item.isInactive
                       "
                     >
-                      <b>Place of Birth: </b>{{ props.item.city }}, {{ props.item.st }}, {{ props.item.country }}
-                    </p>
-                    <p v-else-if="userIsAdmin() && !isEmpty(props.item.city) && !isEmpty(props.item.st)">
-                      <b>Place of Birth: </b>{{ props.item.city }}, {{ props.item.st }}
-                    </p>
-                    <p v-else-if="userIsAdmin() && !isEmpty(props.item.city) && !isEmpty(props.item.country)">
-                      <b>Place of Birth: </b>{{ props.item.city }}, {{ props.item.country }}
-                    </p>
-                    <p v-else-if="userIsAdmin() && !isEmpty(props.item.country)">
-                      <b>Place of Birth: </b>{{ props.item.country }}
-                    </p>
-                    <p v-if="userIsAdmin() && !isEmpty(props.item.deptDate)">
-                      <b>Departure Date: </b>{{ props.item.deptDate | dateFormat }}
-                    </p>
-                    <div v-if="userIsAdmin() && props.item.isInactive" class="flagEmp">
-                      <p>Inactive:</p>
-                      <icon
-                        style="padding: 0px;"
-                        v-if="props.item.isInactive"
-                        id="marks"
-                        class="mr-1"
-                        name="regular/check-circle"
-                      ></icon>
-                      <icon v-else class="mr-1" id="marks" name="regular/times-circle"></icon>
+                      <p>No additional data</p>
                     </div>
-                  </div>
-                </v-card-text>
-              </v-card>
-              <v-card flat v-if="userIsAdmin()">
-                <v-card-text>
-                  <employee-home :adminCall="true" :employ="props.item"> </employee-home>
-                </v-card-text>
-              </v-card>
+                    <div
+                      class="expandedInfo"
+                      v-else-if="
+                        !userIsAdmin() &&
+                          isEmpty(item.prime) &&
+                          isEmpty(item.contract) &&
+                          isEmpty(item.jobRole) &&
+                          isEmpty(item.github) &&
+                          isEmpty(item.twitter)
+                      "
+                    >
+                      <p>No additional data</p>
+                    </div>
+                    <div class="expandedInfo" v-else>
+                      <p v-if="!isEmpty(item.prime)"><b>Prime: </b> {{ item.prime }}</p>
+                      <p v-if="!isEmpty(item.contract)"><b>Contract: </b>{{ item.contract }}</p>
+                      <p v-if="!isEmpty(item.jobRole)"><b>Job Role: </b>{{ item.jobRole }}</p>
+                      <p v-if="!isEmpty(item.github)">
+                        <b>Github: </b
+                        ><a :href="'https://github.com/' + item.github" target="_blank">{{ item.github }}</a>
+                      </p>
+                      <p v-if="!isEmpty(item.twitter)">
+                        <b>Twitter: </b>
+                        <a :href="'https://twitter.com/' + item.twitter" target="_blank">{{ item.twitter }}</a>
+                      </p>
+                      <p v-if="userIsAdmin() && !isEmpty(item.birthday)">
+                        <b>Birthday: </b>{{ item.birthday | dateFormat }}
+                      </p>
+                      <p v-if="userIsAdmin() && !isEmpty(item.city) && !isEmpty(item.st) && !isEmpty(item.country)">
+                        <b>Place of Birth: </b>{{ item.city }}, {{ item.st }}, {{ item.country }}
+                      </p>
+                      <p v-else-if="userIsAdmin() && !isEmpty(item.city) && !isEmpty(item.st)">
+                        <b>Place of Birth: </b>{{ item.city }}, {{ item.st }}
+                      </p>
+                      <p v-else-if="userIsAdmin() && !isEmpty(item.city) && !isEmpty(item.country)">
+                        <b>Place of Birth: </b>{{ item.city }}, {{ item.country }}
+                      </p>
+                      <p v-else-if="userIsAdmin() && !isEmpty(item.country)">
+                        <b>Place of Birth: </b>{{ item.country }}
+                      </p>
+                      <p v-if="userIsAdmin() && !isEmpty(item.deptDate)">
+                        <b>Departure Date: </b>{{ item.deptDate | dateFormat }}
+                      </p>
+                      <div v-if="userIsAdmin() && item.isInactive" class="flagEmp">
+                        <p>Inactive:</p>
+                        <icon
+                          style="padding: 0px;"
+                          v-if="item.isInactive"
+                          id="marks"
+                          class="mr-1"
+                          name="regular/check-circle"
+                        ></icon>
+                        <icon v-else class="mr-1" id="marks" name="regular/times-circle"></icon>
+                      </div>
+                    </div>
+                  </v-card-text>
+                </v-card>
+                <v-card text v-if="userIsAdmin()">
+                  <v-card-text>
+                    <employee-home :adminCall="true" :employ="item"> </employee-home>
+                  </v-card-text>
+                </v-card>
+              </td>
             </template>
-
+            <!-- end expanded slot in datatable -->
+            <!-- alert for no search results -->
             <v-alert slot="no-results" :value="true" color="error" icon="warning">
               Your search for "{{ search }}" found no results.
             </v-alert>
+            <!-- end alert for no search results -->
           </v-data-table>
+          <!-- end employee datatable -->
           <br />
+          <!-- download employee csv button -->
           <convert-employees-to-csv v-if="userIsAdmin()" :employees="getFilteredEmployees()"></convert-employees-to-csv>
-
+          <!-- end download employee csv button -->
+          <!-- confirmation modals -->
           <delete-modal :activate="deleting" :type="'employee'"></delete-modal>
           <delete-error-modal :activate="invalidDelete" type="employee"></delete-error-modal>
+          <!-- end confirmation modals -->
         </v-container>
       </v-card>
     </v-flex>
 
+    <!-- employee form -->
     <v-flex v-if="userIsAdmin()" lg4 md12 sm12>
       <employee-form
         :model="model"
@@ -239,6 +234,7 @@
         style="position: sticky; top: 79px;"
       ></employee-form>
     </v-flex>
+    <!-- end employee form -->
   </v-layout>
 </template>
 
@@ -349,6 +345,18 @@ function clearModel() {
   this.$set(this.model, 'deptDate', '');
 }
 
+/*
+ * Add employee to expanded row when clicked
+ */
+function clickedRow(value) {
+  if (_.isEmpty(this.expanded) || this.expanded[0].employeeNumber != value.employeeNumber) {
+    this.expanded = [];
+    this.expanded.push(value);
+  } else {
+    this.expanded = [];
+  }
+}
+
 function updateModelInTable() {
   this.refreshEmployees();
   this.$set(this.status, 'statusType', 'SUCCESS');
@@ -444,6 +452,10 @@ function isEmpty(item) {
   return !item || item.trim().length <= 0;
 }
 
+function isFocus(item) {
+  return !_.isEmpty(this.expanded) && item.employeeNumber == this.expanded[0].employeeNumber;
+}
+
 /* computed */
 function employeeList() {
   return this.filteredEmployees;
@@ -478,25 +490,41 @@ export default {
   },
   data() {
     return {
-      search: '',
-      loading: false,
+      deleteModel: {
+        id: ''
+      },
       deleting: false,
-      invalidDelete: false,
+      employees: [],
+      errors: [],
+      expanded: [], // database expanded
       filter: {
         active: 'active' //default only shows active employees
       },
-      employees: [],
       filteredEmployees: [],
-      errors: [],
-      status: {
-        statusType: undefined,
-        statusMessage: '',
-        color: ''
-      },
-      pagination: {
-        sortBy: 'employeeNumber',
-        rowsPerPage: -1
-      },
+      headers: [
+        {
+          text: 'Employee #',
+          value: 'employeeNumber'
+        },
+        {
+          text: 'First Name',
+          value: 'firstName'
+        },
+        {
+          text: 'Last Name',
+          value: 'lastName'
+        },
+        {
+          text: 'Hire Date',
+          value: 'hireDate'
+        },
+        {
+          text: 'Email',
+          value: 'email'
+        }
+      ],
+      invalidDelete: false,
+      loading: false,
       model: {
         id: '',
         firstName: '',
@@ -521,40 +549,22 @@ export default {
         country: '',
         deptDate: ''
       },
-      deleteModel: {
-        id: ''
-      },
-      expand: false,
-      headers: [
-        {
-          text: 'Employee #',
-          value: 'employeeNumber'
-        },
-        {
-          text: 'First Name',
-          value: 'firstName'
-        },
-        {
-          text: 'Last Name',
-          value: 'lastName'
-        },
-        {
-          text: 'Hire Date',
-          value: 'hireDate'
-        },
-        {
-          text: 'Email',
-          value: 'email'
-        }
-      ]
+      search: '', // query text for datatable search field
+      sortBy: 'employeeNumber', // sort datatable items
+      sortDesc: false, // sort datatable items
+      status: {
+        statusType: undefined,
+        statusMessage: '',
+        color: ''
+      }
     };
   },
   components: {
-    EmployeeForm,
-    EmployeeHome,
     ConvertEmployeesToCsv,
+    DeleteErrorModal,
     DeleteModal,
-    DeleteErrorModal
+    EmployeeForm,
+    EmployeeHome
   },
   created,
   watch: {
@@ -567,24 +577,26 @@ export default {
     // }
   },
   methods: {
-    isInActive,
-    userIsAdmin,
-    refreshEmployees,
-    setExpenses,
-    onSelect,
-    clearModel,
-    updateModelInTable,
     addModelToTable,
-    deleteModelFromTable,
     changeSort,
+    clearModel,
     clearStatus,
-    displayError,
-    validateDelete,
+    clickedRow,
     deleteEmployee,
+    deleteModelFromTable,
+    displayError,
+    filterEmployees,
+    getFilteredEmployees,
     isEditing,
     isEmpty,
-    getFilteredEmployees,
-    filterEmployees
+    isFocus,
+    isInActive,
+    onSelect,
+    refreshEmployees,
+    setExpenses,
+    updateModelInTable,
+    userIsAdmin,
+    validateDelete
   },
   computed: {
     employeeList
