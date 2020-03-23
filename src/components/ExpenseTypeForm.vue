@@ -26,6 +26,7 @@
           small-chips
           append-icon=""
           clearable
+          :search-input.sync="input"
         >
           <template v-slot:selection="{ attrs, item }">
             <v-chip close outlined label color="gray" @click:close="removeCategory(item)">
@@ -153,11 +154,19 @@ function formatDate(date) {
   return dateUtils.formatDate(date);
 }
 
+function isEmpty(item) {
+  return !item || item.trim().length <= 0;
+}
+
 function parseDate(date) {
   return dateUtils.parseDate(date);
 }
 
 async function submit() {
+  if (!this.isEmpty(this.input) && !this.model.categories.includes(this.input)) {
+    this.model.categories.push(this.input);
+  }
+
   this.model.budget = parseFloat(this.model.budget);
   if (!this.model.odFlag) {
     this.model.odFlag = false;
@@ -208,6 +217,7 @@ export default {
   data() {
     return {
       deleting: false,
+      input: null,
       genericRules: [v => !!v || 'This field is required'],
       budgetRules: [
         v => !!v || 'Budget amount is required',
@@ -229,10 +239,11 @@ export default {
   methods: {
     clearForm,
     // deleteExpenseType,
-    parseDate,
     formatDate,
-    submit,
-    removeCategory
+    isEmpty,
+    parseDate,
+    removeCategory,
+    submit
   },
   watch: {
     'model.startDate': function() {
