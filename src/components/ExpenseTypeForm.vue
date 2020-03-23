@@ -26,7 +26,7 @@
           small-chips
           append-icon=""
           clearable
-          :search-input.sync="input"
+          :search-input.sync="categoryInput"
         >
           <template v-slot:selection="{ attrs, item }">
             <v-chip close outlined label color="gray" @click:close="removeCategory(item)">
@@ -163,8 +163,9 @@ function parseDate(date) {
 }
 
 async function submit() {
-  if (!this.isEmpty(this.input) && !this.model.categories.includes(this.input)) {
-    this.model.categories.push(this.input);
+  // Add a typed-pending category if exists and not already included
+  if (!this.isEmpty(this.categoryInput) && !this.model.categories.includes(this.categoryInput)) {
+    this.model.categories.push(this.categoryInput);
   }
 
   this.model.budget = parseFloat(this.model.budget);
@@ -217,7 +218,7 @@ export default {
   data() {
     return {
       deleting: false,
-      input: null,
+      categoryInput: null, // category combobox input
       genericRules: [v => !!v || 'This field is required'],
       budgetRules: [
         v => !!v || 'Budget amount is required',
