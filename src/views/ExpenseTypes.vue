@@ -169,17 +169,26 @@
           >
             <!-- rows in datatable -->
             <template v-slot:item="{ item }">
-              <tr @click="clickedRow(item)">
+              <tr :class="{ selectFocus: isFocus(item) }" @click="clickedRow(item)">
                 <td>{{ item.budgetName | limitedText }}</td>
                 <td>{{ item.budget | moneyValue }}</td>
                 <td>{{ item.startDate }}</td>
                 <td>{{ item.endDate }}</td>
                 <!-- action icons -->
-                <td v-if="userIsAdmin()" class="datatable_btn layout">
+                <td v-if="userIsAdmin()" class="datatable_btn layout" @click="clickedRow(item)">
                   <!-- edit button -->
                   <v-tooltip top>
                     <template v-slot:activator="{ on }">
-                      <v-btn :disabled="isEditing()" text icon @click="onSelect(item)" v-on="on">
+                      <v-btn
+                        :disabled="isEditing()"
+                        text
+                        icon
+                        @click="
+                          toTop();
+                          onSelect(item);
+                        "
+                        v-on="on"
+                      >
                         <v-icon style="color: #606060">
                           edit
                         </v-icon>
@@ -262,7 +271,6 @@
         v-on:add="addModelToTable"
         v-on:update="updateModelInTable"
         v-on:error="displayError"
-        style="position: sticky; top: 79px;"
       ></expense-type-form>
     </v-flex>
   </v-layout>
@@ -399,6 +407,10 @@ function isEditing() {
   return !!this.model.id;
 }
 
+function isFocus(item) {
+  return (!_.isEmpty(this.expanded) && item.id == this.expanded[0].id) || this.model.id == item.id;
+}
+
 function isInactive(expenseType) {
   return !expenseType.isInactive ? '' : 'Not Active';
 }
@@ -426,6 +438,13 @@ async function refreshExpenseTypes() {
   //   return !expenseType.isInactive;
   // });
   this.loading = false;
+}
+
+/*
+ * scrolls window back to the top of the page
+ */
+function toTop() {
+  this.$vuetify.goTo(0);
 }
 
 function updateModelInTable() {
@@ -578,9 +597,11 @@ export default {
     displayError,
     filterExpense,
     isEditing,
+    isFocus,
     isInactive,
     onSelect,
     refreshExpenseTypes,
+    toTop,
     updateModelInTable,
     userIsAdmin,
     validateDelete

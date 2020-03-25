@@ -86,11 +86,20 @@
                 <td>{{ item.hireDate | dateFormat }}</td>
                 <td>{{ item.email }}</td>
                 <!-- action icons -->
-                <td class="datatable_btn layout" v-if="userIsAdmin()">
+                <td class="datatable_btn layout" v-if="userIsAdmin()" @click="clickedRow(item)">
                   <!-- edit button -->
                   <v-tooltip top>
                     <template v-slot:activator="{ on }">
-                      <v-btn :disabled="isEditing()" text icon @click="onSelect(item)" v-on="on">
+                      <v-btn
+                        :disabled="isEditing()"
+                        text
+                        icon
+                        @click="
+                          toTop();
+                          onSelect(item);
+                        "
+                        v-on="on"
+                      >
                         <v-icon style="color: #606060">
                           edit
                         </v-icon>
@@ -231,7 +240,6 @@
         v-on:add="addModelToTable"
         v-on:update="updateModelInTable"
         v-on:error="displayError"
-        style="position: sticky; top: 79px;"
       ></employee-form>
     </v-flex>
     <!-- end employee form -->
@@ -453,12 +461,20 @@ function isEmpty(item) {
 }
 
 function isFocus(item) {
-  return !_.isEmpty(this.expanded) && item.employeeNumber == this.expanded[0].employeeNumber;
+  let expanded = !_.isEmpty(this.expanded) && item.employeeNumber == this.expanded[0].employeeNumber;
+  return expanded || this.model.id == item.id;
 }
 
 /* computed */
 function employeeList() {
   return this.filteredEmployees;
+}
+
+/*
+ * scrolls window back to the top of the page
+ */
+function toTop() {
+  this.$vuetify.goTo(0);
 }
 
 // LIFECYCLE HOOKS
@@ -598,6 +614,7 @@ export default {
     onSelect,
     refreshEmployees,
     setExpenses,
+    toTop,
     updateModelInTable,
     userIsAdmin,
     validateDelete

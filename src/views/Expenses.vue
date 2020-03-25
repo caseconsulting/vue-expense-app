@@ -120,7 +120,7 @@
           >
             <!-- rows in datatable -->
             <template v-slot:item="{ item }">
-              <tr @click="clickedRow(item)">
+              <tr :class="{ selectFocus: isFocus(item) }" @click="clickedRow(item)">
                 <td>{{ item.createdAt }}</td>
                 <td v-if="isAdmin">{{ item.employeeName }}</td>
                 <td>{{ item.budgetName }}</td>
@@ -128,7 +128,7 @@
                 <td>{{ item.purchaseDate }}</td>
                 <td>{{ item.reimbursedDate }}</td>
                 <!-- action icons -->
-                <td class="datatable_btn layout">
+                <td class="datatable_btn layout" @click="clickedRow(item)">
                   <!-- download attachment button -->
                   <attachment :expense="item" :mode="'expenses'"></attachment>
                   <!-- end download attachment button -->
@@ -139,7 +139,10 @@
                         :disabled="isEditing() || (isUser && isReimbursed(item.reimbursedDate))"
                         text
                         icon
-                        @click="onSelect(item)"
+                        @click="
+                          toTop();
+                          onSelect(item);
+                        "
                         v-on="on"
                       >
                         <v-icon style="color: #606060">
@@ -253,7 +256,6 @@
         v-on:delete="deleteModelFromTable"
         v-on:update="updateModelInTable"
         v-on:error="displayError"
-        style="position: sticky; top: 79px;"
       ></expense-form>
     </v-flex>
   </v-layout>
@@ -304,7 +306,6 @@ function roleHeaders() {
     : (function getUserHeaders(headers) {
         let x = headers;
         x.splice(1, 1);
-        console.log(x);
         return x;
       })(this.headers);
 }
@@ -505,6 +506,10 @@ function isEmpty(item) {
   return !item || item.trim().length <= 0;
 }
 
+function isFocus(item) {
+  return (!_.isEmpty(this.expanded) && item.id == this.expanded[0].id) || this.expense.id == item.id;
+}
+
 function isReimbursed(reimburseDate) {
   return reimburseDate && reimburseDate.trim().length > 0;
 }
@@ -543,6 +548,13 @@ async function refreshExpenses() {
   // });
 
   this.loading = false;
+}
+
+/*
+ * scrolls window back to the top of the page
+ */
+function toTop() {
+  this.$vuetify.goTo(0);
 }
 
 /**
@@ -732,9 +744,11 @@ export default {
     getFilteredExpenses,
     isEditing,
     isEmpty,
+    isFocus,
     isReimbursed,
     onSelect,
     refreshExpenses,
+    toTop,
     unreimburseExpense,
     updateModelInTable,
     useInactiveStyle
