@@ -95,7 +95,7 @@
                         text
                         icon
                         @click="
-                          toTop();
+                          toForm();
                           onSelect(item);
                         "
                         v-on="on"
@@ -236,6 +236,7 @@
     <!-- employee form -->
     <v-flex v-if="userIsAdmin()" lg4 md12 sm12>
       <employee-form
+        ref="form"
         :model="model"
         v-on:add="addModelToTable"
         v-on:update="updateModelInTable"
@@ -471,10 +472,10 @@ function employeeList() {
 }
 
 /*
- * scrolls window back to the top of the page
+ * scrolls window back to the top of the form
  */
-function toTop() {
-  this.$vuetify.goTo(0);
+function toForm() {
+  this.$vuetify.goTo(this.$refs.form.$el.offsetTop + 50);
 }
 
 // LIFECYCLE HOOKS
@@ -614,7 +615,7 @@ export default {
     onSelect,
     refreshEmployees,
     setExpenses,
-    toTop,
+    toForm,
     updateModelInTable,
     userIsAdmin,
     validateDelete

@@ -11,6 +11,7 @@
         :key="item.title"
         active-class="red--text v-list__tile--active"
         :to="{ name: item.route }"
+        @click="scrollUp"
       >
         <v-list-item-icon style="width: 30px">
           <icon :name="item.icon" class="navbar-icons"></icon>
@@ -90,6 +91,9 @@ export default {
     }
   },
   methods: {
+    scrollUp() {
+      this.$vuetify.goTo(0);
+    },
     handleLogin() {
       login();
     },

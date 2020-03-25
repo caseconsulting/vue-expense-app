@@ -184,7 +184,7 @@
                         text
                         icon
                         @click="
-                          toTop();
+                          toForm();
                           onSelect(item);
                         "
                         v-on="on"
@@ -267,6 +267,7 @@
 
     <v-flex v-if="userIsAdmin()" xl4 lg4 md12 sm12>
       <expense-type-form
+        ref="form"
         :model="model"
         v-on:add="addModelToTable"
         v-on:update="updateModelInTable"
@@ -443,8 +444,8 @@ async function refreshExpenseTypes() {
 /*
  * scrolls window back to the top of the page
  */
-function toTop() {
-  this.$vuetify.goTo(0);
+function toForm() {
+  this.$vuetify.goTo(this.$refs.form.$el.offsetTop + 50);
 }
 
 function updateModelInTable() {
@@ -601,7 +602,7 @@ export default {
     isInactive,
     onSelect,
     refreshExpenseTypes,
-    toTop,
+    toForm,
     updateModelInTable,
     userIsAdmin,
     validateDelete

@@ -140,7 +140,7 @@
                         text
                         icon
                         @click="
-                          toTop();
+                          toForm();
                           onSelect(item);
                         "
                         v-on="on"
@@ -250,6 +250,7 @@
     </v-flex>
     <v-flex lg4 md12 sm12>
       <expense-form
+        ref="form"
         :isEdit="isEditing()"
         :expense="expense"
         v-on:add="addModelToTable"
@@ -551,10 +552,10 @@ async function refreshExpenses() {
 }
 
 /*
- * scrolls window back to the top of the page
+ * scrolls window back to the top of the form
  */
-function toTop() {
-  this.$vuetify.goTo(0);
+function toForm() {
+  this.$vuetify.goTo(this.$refs.form.$el.offsetTop + 50);
 }
 
 /**
@@ -748,7 +749,7 @@ export default {
     isReimbursed,
     onSelect,
     refreshExpenses,
-    toTop,
+    toForm,
     unreimburseExpense,
     updateModelInTable,
     useInactiveStyle
