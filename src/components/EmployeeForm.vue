@@ -319,20 +319,6 @@ function userIsAdmin() {
   return getRole() === 'admin';
 }
 
-async function getCountries() {
-  // get data for all countries
-  let countries = await api.getCountries();
-  _.forEach(countries, country => {
-    // get all country names
-    this.countries.push(country.name);
-
-    // map all alt names for countries
-    _.forEach(country.altSpellings, alt => {
-      this.countryMap[alt] = country.name;
-    });
-  });
-}
-
 // LIFECYCLE HOOKS
 async function created() {
   window.EventBus.$on('cancel-hireDate-change', () => {
@@ -342,7 +328,7 @@ async function created() {
   window.EventBus.$on('confirm-hireDate-change', () => {
     this.changingHireDate = false;
   });
-  await this.getCountries();
+  this.countries = _.map(await api.getCountries(), 'name');
   this.countries.unshift('United States of America');
 }
 
@@ -352,8 +338,7 @@ export default {
       birthdayFormat: '',
       changingHireDate: false,
       componentRules: [v => !!v || 'Something must be selected'],
-      countries: [],
-      countryMap: {},
+      countries: [], // list of countries
       date: null,
       dateOptionalRules: [
         v => {
@@ -510,7 +495,6 @@ export default {
     clearForm,
     formatDate,
     formatRole,
-    getCountries,
     parseDate,
     submit,
     userIsAdmin
