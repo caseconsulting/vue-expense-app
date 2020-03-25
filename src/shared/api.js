@@ -35,6 +35,19 @@ async function execute(method, resource, data) {
     });
 }
 
+function getCountries() {
+  return client({
+    method: 'get',
+    url: 'https://restcountries.eu/rest/v2/all'
+  })
+    .then(response => {
+      return response.data;
+    })
+    .catch(err => {
+      return err;
+    });
+}
+
 function getBudgetItem(id) {
   return execute('get', `/budgets/user/${id}`);
 }
@@ -137,6 +150,7 @@ export default {
   deleteAttachment,
   deleteItem,
   getAggregate,
+  getCountries,
   getRole,
   getUser,
   EXPENSE_TYPES,

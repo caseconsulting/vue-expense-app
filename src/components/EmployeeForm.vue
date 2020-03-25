@@ -162,22 +162,24 @@
                     style="padding-top: 0px;"
                   ></v-text-field>
 
+                  <!-- Place of Birth: Country autocomplete -->
+                  <v-autocomplete
+                    :items="countries"
+                    v-model="model.country"
+                    item-text="text"
+                    label="Country"
+                    style="padding-top: 0px; padding-bottom: 0px;"
+                  ></v-autocomplete>
+
                   <!-- Place of Birth: State autocomplete -->
                   <v-autocomplete
+                    v-if="this.model.country == 'United States of America'"
                     :items="states"
                     v-model="model.st"
                     item-text="text"
                     label="State"
-                    style="padding-top: 0px; padding-bottom: 0px;"
+                    style="padding-top: 0px; "
                   ></v-autocomplete>
-
-                  <!-- Place of Birth: Country text field -->
-                  <v-text-field
-                    v-model="model.country"
-                    label="Country"
-                    data-vv-name="Country"
-                    style="padding-top: 0px;"
-                  ></v-text-field>
                 </div>
               </div>
             </v-expansion-panel-content>
@@ -317,6 +319,20 @@ function userIsAdmin() {
   return getRole() === 'admin';
 }
 
+async function getCountries() {
+  // get data for all countries
+  let countries = await api.getCountries();
+  _.forEach(countries, country => {
+    // get all country names
+    this.countries.push(country.name);
+
+    // map all alt names for countries
+    _.forEach(country.altSpellings, alt => {
+      this.countryMap[alt] = country.name;
+    });
+  });
+}
+
 // LIFECYCLE HOOKS
 async function created() {
   window.EventBus.$on('cancel-hireDate-change', () => {
@@ -326,12 +342,39 @@ async function created() {
   window.EventBus.$on('confirm-hireDate-change', () => {
     this.changingHireDate = false;
   });
+  await this.getCountries();
+  this.countries.unshift('United States of America');
 }
 
 export default {
   data() {
     return {
       birthdayFormat: '',
+      changingHireDate: false,
+      componentRules: [v => !!v || 'Something must be selected'],
+      countries: [],
+      countryMap: {},
+      date: null,
+      dateOptionalRules: [
+        v => {
+          if (v) {
+            return /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v) || 'Date must be valid. Format: MM/DD/YYYY';
+          } else {
+            return true;
+          }
+        }
+      ],
+      dateRules: [
+        v => !!v || 'Date must be valid. Format: MM/DD/YYYY',
+        v => (!!v && /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v)) || 'Date must be valid. Format: MM/DD/YYYY'
+      ],
+      deleting: false,
+      deptDateFormatted: null,
+      emailRules: [v => !!v || 'Email is required', v => regex.test(v) || 'Not a valid @consultwithcase email address'],
+      employeeRoleFormatted: '',
+      genericRules: [v => !!v || 'This field is required'],
+      hasExpenses: false,
+      hireDateFormatted: null,
       jobRoles: [
         'Software Developer',
         'Project Manager',
@@ -344,6 +387,14 @@ export default {
         'Accountant',
         'Other'
       ],
+      menu1: false,
+      menu2: false,
+      menu3: false,
+      numberRules: [
+        v => !!v || 'Employee # is required',
+        v => /^\d+$/.test(v) || 'Employee # must be a positive number'
+      ],
+      permissions: ['Admin', 'User'],
       states: [
         'Alabama',
         'Alaska',
@@ -407,37 +458,6 @@ export default {
         'Wisconsin',
         'Wyoming'
       ],
-      changingHireDate: false,
-      componentRules: [v => !!v || 'Something must be selected'],
-      permissions: ['Admin', 'User'],
-      deleting: false,
-      date: null,
-      hasExpenses: false,
-      hireDateFormatted: null,
-      deptDateFormatted: null,
-      employeeRoleFormatted: '',
-      menu1: false,
-      menu2: false,
-      menu3: false,
-      genericRules: [v => !!v || 'This field is required'],
-      emailRules: [v => !!v || 'Email is required', v => regex.test(v) || 'Not a valid @consultwithcase email address'],
-      numberRules: [
-        v => !!v || 'Employee # is required',
-        v => /^\d+$/.test(v) || 'Employee # must be a positive number'
-      ],
-      dateRules: [
-        v => !!v || 'Date must be valid. Format: MM/DD/YYYY',
-        v => (!!v && /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v)) || 'Date must be valid. Format: MM/DD/YYYY'
-      ],
-      dateOptionalRules: [
-        v => {
-          if (v) {
-            return /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v) || 'Date must be valid. Format: MM/DD/YYYY';
-          } else {
-            return true;
-          }
-        }
-      ],
       valid: false
     };
   },
@@ -490,6 +510,7 @@ export default {
     clearForm,
     formatDate,
     formatRole,
+    getCountries,
     parseDate,
     submit,
     userIsAdmin
