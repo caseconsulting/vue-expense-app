@@ -533,7 +533,8 @@ async function submit() {
 }
 
 async function addURLInfo(newExpense) {
-  newExpense.url = newExpense.url.replace(/\/$/, ''); //removes trailing slash from url before adding to dynamo
+  //removes trailing slash from url and converts all letter to lowercase before adding to dynamo
+  newExpense.url = newExpense.url.replace(/\/$/, '').toLowerCase();
 
   if (
     newExpense.url.length >= 12 &&

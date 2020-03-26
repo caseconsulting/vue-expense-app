@@ -6,35 +6,93 @@
 
     <br />
     <div class="text-center">
+      <!-- category buttons -->
       <center>
-        <!-- Add labels to the buttons -->
-        <v-btn @click="filterByCategory()" class="mx-3" fab dark color="red"> <v-icon dark>close</v-icon></v-btn>
-        <v-btn @click="filterByCategory('Training')" class="mx-3 trend-bubble" fab dark large color="primary">
-          <v-icon dark class="trend-icon">fitness_center</v-icon></v-btn
-        >
-        <v-btn @click="filterByCategory('Conference')" class="mx-3 trend-bubble" fab dark large color="pink">
-          <v-icon dark class="trend-icon">group</v-icon>
-        </v-btn>
-        <v-btn @click="filterByCategory('Certifications')" class="mx-3 trend-bubble" fab dark large color="orange">
-          <v-icon dark class="trend-icon">stars</v-icon>
-        </v-btn>
-        <v-btn @click="filterByCategory('Lodging')" class="mx-3 trend-bubble" fab dark large color="indigo">
-          <v-icon dark class="trend-icon">hotel</v-icon>
-        </v-btn>
-        <v-btn @click="filterByCategory('Travel')" class="mx-3 trend-bubble" fab dark large color="cyan">
-          <v-icon dark class="trend-icon">airplanemode_active</v-icon>
-        </v-btn>
-        <v-btn @click="filterByCategory('Meals')" class="mx-3 trend-bubble" fab dark large color="purple">
-          <v-icon dark class="trend-icon">restaurant</v-icon>
-        </v-btn>
+        <!-- close button -->
+        <v-tooltip bottom>
+          <template v-slot:activator="{ on }">
+            <v-btn @click="filterByCategory('All')" class="mx-3" fab dark color="red" v-on="on">
+              <v-icon dark>close</v-icon>
+            </v-btn>
+          </template>
+          <span>Close</span>
+        </v-tooltip>
+        <!-- end close button -->
+        <!-- Training button -->
+        <v-tooltip bottom>
+          <template v-slot:activator="{ on }">
+            <v-btn @click="filterByCategory('Training')" class="mx-3 pa-12" fab dark large color="primary" v-on="on">
+              <v-icon dark class="pb-7" size="60px">fitness_center</v-icon>
+            </v-btn>
+          </template>
+          <span>Training</span>
+        </v-tooltip>
+        <!-- end Training button -->
+        <!-- Conference button -->
+        <v-tooltip bottom>
+          <template v-slot:activator="{ on }">
+            <v-btn @click="filterByCategory('Conference')" class="mx-3 pa-12" fab dark large color="pink" v-on="on">
+              <v-icon dark class="pb-7" size="60px">group</v-icon>
+            </v-btn>
+          </template>
+          <span>Conference</span>
+        </v-tooltip>
+        <!-- end Conference button -->
+        <!-- Certifications button -->
+        <v-tooltip bottom>
+          <template v-slot:activator="{ on }">
+            <v-btn
+              @click="filterByCategory('Certifications')"
+              class="mx-3 pa-12"
+              fab
+              dark
+              large
+              color="orange"
+              v-on="on"
+            >
+              <v-icon dark class="pb-7" size="60px">stars</v-icon>
+            </v-btn>
+          </template>
+          <span>Certifications</span>
+        </v-tooltip>
+        <!-- end Certifications button -->
+        <!-- Lodging button -->
+        <v-tooltip bottom>
+          <template v-slot:activator="{ on }">
+            <v-btn @click="filterByCategory('Lodging')" class="mx-3 pa-12" fab dark large color="indigo" v-on="on">
+              <v-icon dark class="pb-7" size="60px">hotel</v-icon>
+            </v-btn>
+          </template>
+          <span>Lodging</span>
+        </v-tooltip>
+        <!-- end Lodging button -->
+        <!-- Travel button -->
+        <v-tooltip bottom>
+          <template v-slot:activator="{ on }">
+            <v-btn @click="filterByCategory('Travel')" class="mx-3 pa-12" fab dark large color="cyan" v-on="on">
+              <v-icon dark class="pb-7" size="60px">airplanemode_active</v-icon>
+            </v-btn>
+          </template>
+          <span>Travel</span>
+        </v-tooltip>
+        <!-- end Travel button -->
+        <!-- Meals button -->
+        <v-tooltip bottom>
+          <template v-slot:activator="{ on }">
+            <v-btn @click="filterByCategory('Meals')" class="mx-3 pa-12" fab dark large color="purple" v-on="on">
+              <v-icon dark class="pb-7" size="60px">restaurant</v-icon>
+            </v-btn>
+          </template>
+          <span>Meals</span>
+        </v-tooltip>
+        <!-- end Meals button -->
         <a style="padding-right: 89px;"> </a>
       </center>
-
+      <!-- end category buttons -->
       <br />
-
       <hr />
-      <br />
       <div>Category: {{ categoryFilter }}</div>
+      <br />
       <p v-for="url in this.urls" :key="url.id">
         <v-flex xs12 sm6 offset-sm3>
           <v-card>
@@ -115,8 +173,9 @@ function filterByCategory(category) {
 //COMPUTED
 
 function urls() {
-  if (this.categoryFilter) {
+  if (this.categoryFilter != 'All') {
     return _.filter(this.urlsOriginal, url => {
+      console.log(url.category);
       return url.category === this.categoryFilter;
     });
   } else {
@@ -128,7 +187,7 @@ export default {
   data() {
     return {
       urlsShow: [],
-      categoryFilter: '',
+      categoryFilter: 'All',
       urlsOriginal: [],
       urlsNoDuplicates: []
     };
@@ -154,17 +213,6 @@ export default {
 
 .t {
   font-size: 80px;
-}
-
-.trend-bubble {
-  padding-top: 20px !important;
-  padding-bottom: 80px !important;
-  padding-left: 50px !important;
-  padding-right: 50px !important;
-}
-
-.trend-icon {
-  font-size: 60px !important;
 }
 
 /* Cards for the URL Posts */
