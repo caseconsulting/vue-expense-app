@@ -31,6 +31,7 @@ import 'vue-awesome/icons/cloud-download-alt';
 import 'vue-awesome/icons/times-circle';
 import 'vue-awesome/icons/edit';
 import 'vue-awesome/icons/sticky-note';
+import 'vue-awesome/icons/fire';
 
 import Icon from 'vue-awesome/components/Icon';
 import App from './App.vue';

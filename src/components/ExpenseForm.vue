@@ -535,7 +535,6 @@ async function submit() {
 async function addURLInfo(newExpense) {
   //removes trailing slash from url and converts all letter to lowercase before adding to dynamo
   newExpense.url = newExpense.url.replace(/\/$/, '').toLowerCase();
-
   if (
     newExpense.url.length >= 12 &&
     (newExpense.url.substring(0, 12) === 'https://www.' || newExpense.url.substring(0, 11) === 'http://www.')
@@ -544,8 +543,8 @@ async function addURLInfo(newExpense) {
   }
 
   let encodedURL = btoa(newExpense.url);
+  encodedURL = encodedURL.replace(/\//g, '%2F');
   let item = await api.getURLInfo(encodedURL, newExpense.categories);
-
   if (item) {
     await this.incrementURLHits(item);
   } else {
@@ -572,10 +571,8 @@ function isDifferentExpenseType() {
 async function incrementURLHits(urlInfo) {
   let encodedURL = btoa(urlInfo[0].id);
   let hits = urlInfo[0].hits + 1;
-
-  this.urlInfo.id = encodedURL;
+  this.urlInfo = urlInfo[0];
   this.urlInfo.hits = hits;
-  this.urlInfo.category = urlInfo[0].category;
 
   return await api.updateURL(api.URLS, encodedURL, this.urlInfo.category, this.urlInfo);
 }

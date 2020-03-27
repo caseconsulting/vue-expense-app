@@ -73,7 +73,7 @@ function getAllExpenseTypeExpenses(id) {
 }
 
 function getURLInfo(id, category) {
-  return execute('get', `/special/getURLInfo/${id}/${category}`);
+  return execute('get', `/special/getURLInfo/'${id}'/${category}`);
 }
 
 function createItem(type, data) {

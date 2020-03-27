@@ -93,119 +93,153 @@
       <hr />
       <div>Category: {{ categoryFilter }}</div>
       <br />
-      <p v-for="url in this.urls" :key="url.id">
-        <v-flex xs12 sm6 offset-sm3>
-          <v-card>
-            <v-layout>
-              <v-flex xs3>
-                <img class="url-image" src="../assets/img/logo-big.png" />
-                <!-- generic image (change later, could be based on category?) -->
-              </v-flex>
-              <v-flex>
-                <v-card-title primary-title style="padding-top: 25px;">
-                  <div>
-                    <h1>{{ url.title }}</h1>
-                    <a style="font-size: 20px;" :href="url.id" target="_blank">{{ url.id }}</a>
-                    <div>Number of Hits: {{ url.hits }}</div>
-                  </div>
-                </v-card-title>
-              </v-flex>
-            </v-layout>
-          </v-card>
-        </v-flex>
-      </p>
+
+      <!-- list all url info -->
+      <div v-for="url in this.urls" :key="url.id">
+        <v-container class="py-0">
+          <v-row dense>
+            <v-col cols="12">
+              <v-card color="#565651" dark :href="url.id" target="_blank">
+                <v-layout wrap class="ma-1">
+                  <v-flex xs12 sm3 md2>
+                    <v-avatar class="ma-1" size="100" tile>
+                      <img :src="url.display" :class="{ caseImage: url.isCaseLogo }" @error="changeDisplay(url)" />
+                    </v-avatar>
+                    <h3 v-if="!isEmpty(url.title)">{{ url.publisher }}</h3>
+                  </v-flex>
+
+                  <v-flex xs12 sm9 md10>
+                    <v-layout column justify-space-between fill-height>
+                      <!-- title and description -->
+                      <div v-if="!isEmpty(url.title)">
+                        <v-card-title class="headline" v-text="url.title"></v-card-title>
+                        <v-card-subtitle v-text="url.description"></v-card-subtitle>
+                      </div>
+
+                      <!-- no title or description -->
+                      <div v-else class="urlBox pt-4">{{ url.id }}</div>
+
+                      <!-- hit count -->
+                      <div class="mr-2">
+                        <span v-if="isEmpty(url.title)" style="float: left">{{ url.publisher }}</span>
+                        <span class="subheading hitText">{{ url.hits }}</span>
+                        <icon name="fire" class="hitIcon" scale="1"></icon>
+                      </div>
+                    </v-layout>
+                  </v-flex>
+                </v-layout>
+              </v-card>
+            </v-col>
+          </v-row>
+        </v-container>
+      </div>
     </div>
   </v-container>
 </template>
 <script>
 import api from '@/shared/api.js';
 import _ from 'lodash';
+let caseLogo = require('../assets/img/logo-big.png');
 
 //METHODS
 
 async function getUrls() {
   this.urlsOriginal = await api.getItems(api.URLS);
   _.forEach(this.urlsOriginal, urlObject => {
-    let split = urlObject.id.split('https://');
-    let title = split[0] || split[1];
-    split = title.split('http://');
-    title = split[0] || split[1];
-    urlObject.title = title.split('.')[0];
+    urlObject.title = titleFormat(urlObject.title);
+
+    urlObject.display = urlObject.logo;
   });
   return this.urlsOriginal;
 }
 
-//removes duplicates, combines hits numbers, and sorts by hits then alphabetically
-//for main training page (no filters)
-function getUrlNoDuplicates() {
-  let noDuplicates = [];
-  _.forEach(this.urlsOriginal, urlObject => {
-    let url = urlObject.id;
-    let duplicate = _.find(noDuplicates, duplicate => {
-      return url === duplicate.id;
-    });
-    if (duplicate) {
-      duplicate.hits += urlObject.hits;
-    } else {
-      noDuplicates.push({ id: url, hits: urlObject.hits, title: urlObject.title });
-    }
-  }); //creates new list with no url duplicates and adds all hits for same url
-  return _.orderBy(
-    noDuplicates,
-    [
-      'hits', //sort by hits
-      urlObject => {
-        //sort by url, disregarding https, http
-        let split = urlObject.id.split('https://');
-        let newUrl = split[0] || split[1];
-        split = newUrl.split('http://');
-        return split[0] || split[1];
-      }
-    ],
-    ['desc', 'asc']
-  );
+/*
+ * Changes the website image upon error displaying
+ */
+function changeDisplay(item) {
+  let index = _.findIndex(this.urlsOriginal, url => {
+    return url.id === item.id && url.category === item.category;
+  });
+
+  let newItem = this.urlsOriginal[index];
+
+  if (newItem.display === item.logo && item.image != item.logo) {
+    newItem.display = item.image;
+  } else {
+    newItem.display = caseLogo;
+    newItem.isCaseLogo = true;
+  }
+  this.urlsOriginal.splice(index, 1, newItem);
+}
+
+function titleFormat(value) {
+  // if the title from metadata is invalid (e.g. '{{...' ) return empty string
+  if (value.length >= 2 && value[0] === '{' && value[1] === '{') {
+    return undefined;
+  }
+  return value;
 }
 
 function filterByCategory(category) {
   this.categoryFilter = category;
 }
 
+function isEmpty(item) {
+  return !item || item.trim().length <= 0;
+}
+
 //COMPUTED
 
 function urls() {
+  let filteredUrls = [];
   if (this.categoryFilter != 'All') {
-    return _.filter(this.urlsOriginal, url => {
-      console.log(url.category);
+    filteredUrls = _.filter(this.urlsOriginal, url => {
       return url.category === this.categoryFilter;
     });
   } else {
-    return this.urlsShow;
+    let urls = _.cloneDeep(this.urlsOriginal);
+    _.forEach(urls, urlObject => {
+      let url = urlObject.id;
+      let dupIndex = _.findIndex(filteredUrls, duplicate => {
+        return url === duplicate.id;
+      });
+      if (dupIndex != -1) {
+        filteredUrls[dupIndex].hits += urlObject.hits;
+      } else {
+        filteredUrls.push(urlObject);
+      }
+    }); //creates new list with no url duplicates and adds all hits for same url
   }
+  return _.sortBy(filteredUrls, ['hits', 'id']).reverse();
+}
+
+async function created() {
+  let allURLS = await api.getItems(api.URLS);
+  this.urlsOriginal = _.forEach(allURLS, urlObject => {
+    urlObject.title = titleFormat(urlObject.title);
+    urlObject.display = urlObject.logo;
+  });
 }
 
 export default {
   data() {
     return {
+      caseLogo: caseLogo,
       urlsShow: [],
       categoryFilter: 'All',
-      urlsOriginal: [],
-      urlsNoDuplicates: []
+      urlsOriginal: []
     };
   },
   methods: {
     getUrls,
-    getUrlNoDuplicates,
-    filterByCategory
+    filterByCategory,
+    changeDisplay,
+    isEmpty
   },
   computed: {
     urls
   },
-  mounted() {
-    this.getUrls().then(() => {
-      this.urlsNoDuplicates = this.getUrlNoDuplicates();
-      this.urlsShow = this.urlsNoDuplicates; //start out with no duplicates
-    });
-  }
+  created
 };
 </script>
 <style>
@@ -215,21 +249,24 @@ export default {
   font-size: 80px;
 }
 
-/* Cards for the URL Posts */
-
-.url-card {
-  padding: 10px;
+.hitIcon {
+  color: #bc3825;
+  margin-top: 3px;
+  margin-right: 3px;
+  float: right;
 }
 
-.url-image {
-  max-width: 150px;
-  max-height: 150px;
+.hitText {
+  color: #bc3825;
+  float: right;
 }
 
-.url-info {
-  display: inline;
-  border: 2px solid black;
-  min-width: 100%;
-  min-height: 100%;
+.caseImage {
+  background-color: #e9eef0;
+}
+
+.urlBox {
+  overflow-wrap: break-word;
+  word-wrap: break-word;
 }
 </style>
