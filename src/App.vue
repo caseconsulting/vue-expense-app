@@ -73,7 +73,7 @@ async function initSession() {
 
 async function created() {
   window.EventBus.$on('sessionContinue', () => (this.session = false)); // Confirm 5 minute warning
-  window.EventBus.$on('relog', this.handleLogout); // Session end - log out
+  window.EventBus.$on('relog', handleLogout); // Session end - log out
 
   // set expiration date if access token received
   let accessToken = getAccessToken();
