@@ -1,104 +1,142 @@
 <template>
   <v-layout row justify-center>
-    <v-flex xs12>
-      <h1 class="text-center">Trending</h1>
-    </v-flex>
+    <v-container>
+      <v-row>
+        <v-flex xs4>
+          <h1 style="font-size: 35px">Trainings</h1>
+        </v-flex>
 
-    <br />
+        <v-flex xs8>
+          <v-toolbar color="white darken-3" class="mb-1" dense elevation="2">
+            <v-text-field
+              v-model="search"
+              clearable
+              flat
+              hide-details
+              prepend-inner-icon="search"
+              label="Search"
+              dense
+            ></v-text-field>
+          </v-toolbar>
+        </v-flex>
+      </v-row>
 
-    <!-- category buttons -->
-    <v-flex xs12 class="text-center">
-      <!-- close button -->
-      <v-tooltip bottom>
-        <template v-slot:activator="{ on }">
-          <v-btn @click="filterByCategory('All')" class="mx-3" fab dark color="red" v-on="on">
-            <v-icon dark>close</v-icon>
-          </v-btn>
-        </template>
-        <span>Close</span>
-      </v-tooltip>
-      <!-- end close button -->
-      <!-- Training button -->
-      <v-tooltip bottom>
-        <template v-slot:activator="{ on }">
-          <v-btn @click="filterByCategory('Training')" class="mx-3 pa-12" fab dark large color="primary" v-on="on">
-            <v-icon dark class="pb-7" size="60px">fitness_center</v-icon>
-          </v-btn>
-        </template>
-        <span>Training</span>
-      </v-tooltip>
-      <!-- end Training button -->
-      <!-- Conference button -->
-      <v-tooltip bottom>
-        <template v-slot:activator="{ on }">
-          <v-btn @click="filterByCategory('Conference')" class="mx-3 pa-12" fab dark large color="pink" v-on="on">
-            <v-icon dark class="pb-7" size="60px">group</v-icon>
-          </v-btn>
-        </template>
-        <span>Conference</span>
-      </v-tooltip>
-      <!-- end Conference button -->
-      <!-- Certifications button -->
-      <v-tooltip bottom>
-        <template v-slot:activator="{ on }">
-          <v-btn @click="filterByCategory('Certifications')" class="mx-3 pa-12" fab dark large color="orange" v-on="on">
-            <v-icon dark class="pb-7" size="60px">stars</v-icon>
-          </v-btn>
-        </template>
-        <span>Certifications</span>
-      </v-tooltip>
-      <!-- end Certifications button -->
-      <!-- Lodging button -->
-      <v-tooltip bottom>
-        <template v-slot:activator="{ on }">
-          <v-btn @click="filterByCategory('Lodging')" class="mx-3 pa-12" fab dark large color="indigo" v-on="on">
-            <v-icon dark class="pb-7" size="60px">hotel</v-icon>
-          </v-btn>
-        </template>
-        <span>Lodging</span>
-      </v-tooltip>
-      <!-- end Lodging button -->
-      <!-- Travel button -->
-      <v-tooltip bottom>
-        <template v-slot:activator="{ on }">
-          <v-btn @click="filterByCategory('Travel')" class="mx-3 pa-12" fab dark large color="cyan" v-on="on">
-            <v-icon dark class="pb-7" size="60px">airplanemode_active</v-icon>
-          </v-btn>
-        </template>
-        <span>Travel</span>
-      </v-tooltip>
-      <!-- end Travel button -->
-      <!-- Meals button -->
-      <v-tooltip bottom>
-        <template v-slot:activator="{ on }">
-          <v-btn @click="filterByCategory('Meals')" class="mx-3 pa-12" fab dark large color="purple" v-on="on">
-            <v-icon dark class="pb-7" size="60px">restaurant</v-icon>
-          </v-btn>
-        </template>
-        <span>Meals</span>
-      </v-tooltip>
-      <!-- end Meals button -->
-    </v-flex>
-    <!-- end category buttons -->
+      <!-- category buttons -->
+      <v-flex xs12 class="text-center">
+        <v-row>
+          <!-- Training button -->
+          <div>
+            <v-btn
+              @click="filterByCategory('Training')"
+              class="mx-3 pa-12"
+              fab
+              :rounded="isFocus('Training')"
+              dark
+              large
+              color="#bc3825"
+            >
+              <v-icon dark class="pb-7" size="60px">fitness_center</v-icon>
+            </v-btn>
+            <h4>Training</h4>
+          </div>
+          <!-- end Training button -->
+          <!-- Conference button -->
+          <div>
+            <v-btn
+              @click="filterByCategory('Conference')"
+              class="mx-3 pa-12"
+              fab
+              :rounded="isFocus('Conference')"
+              dark
+              large
+              color="#bc3825"
+            >
+              <v-icon dark class="pb-7" size="60px">group</v-icon>
+            </v-btn>
+            <h4>Conference</h4>
+          </div>
+          <!-- end Conference button -->
+          <!-- Certifications button -->
+          <div>
+            <v-btn
+              @click="filterByCategory('Certifications')"
+              class="mx-3 pa-12"
+              fab
+              :rounded="isFocus('Certifications')"
+              dark
+              large
+              color="#bc3825"
+            >
+              <v-icon dark class="pb-7" size="60px">stars</v-icon>
+            </v-btn>
+            <h4>Certifications</h4>
+          </div>
+          <!-- end Certifications button -->
+          <!-- Lodging button -->
+          <div>
+            <v-btn
+              @click="filterByCategory('Lodging')"
+              class="mx-3 pa-12"
+              fab
+              :rounded="isFocus('Lodging')"
+              dark
+              large
+              color="#bc3825"
+            >
+              <v-icon dark class="pb-7" size="60px">hotel</v-icon>
+            </v-btn>
+            <h4>Lodging</h4>
+          </div>
+          <!-- end Lodging button -->
+          <!-- Travel button -->
+          <div>
+            <v-btn
+              @click="filterByCategory('Travel')"
+              class="mx-3 pa-12"
+              fab
+              :rounded="isFocus('Travel')"
+              dark
+              large
+              color="#bc3825"
+            >
+              <v-icon dark class="pb-7" size="60px">airplanemode_active</v-icon>
+            </v-btn>
+            <h4>Travel</h4>
+          </div>
+          <!-- end Travel button -->
+          <!-- Meals button -->
+          <div>
+            <v-btn
+              @click="filterByCategory('Meals')"
+              class="mx-3 pa-12"
+              fab
+              :rounded="isFocus('Meals')"
+              dark
+              large
+              color="#bc3825"
+            >
+              <v-icon dark class="pb-7" size="60px">restaurant</v-icon>
+            </v-btn>
+            <h4>Meals</h4>
+          </div>
+          <!-- end Meals button -->
+        </v-row>
+      </v-flex>
+      <!-- end category buttons -->
 
-    <br />
-    <hr />
+      <!-- buttons/urls divider -->
+      <br />
+      <hr />
+      <br />
 
-    <v-flex xs12 class="text-center">
-      <div>Category: {{ categoryFilter }}</div>
-    </v-flex>
-
-    <br />
-
-    <v-flex xs12>
-      <!-- list all url info -->
-      <div v-for="url in this.urls" :key="url.id">
-        <v-container class="py-0 text-center">
+      <v-flex xs12>
+        <!-- list all url info -->
+        <div v-for="url in this.urls" :key="url.id">
           <v-row dense>
             <v-col cols="12">
               <v-card color="#565651" dark :href="url.id" target="_blank">
                 <v-layout wrap class="ma-1">
-                  <v-flex xs12 sm3 md2 xl1>
+                  <v-flex xs12 sm3 md2 xl1 class="text-center">
                     <v-avatar class="ma-1" size="100" tile>
                       <img :src="url.display" :class="{ caseImage: url.isCaseLogo }" @error="changeDisplay(url)" />
                     </v-avatar>
@@ -128,9 +166,9 @@
               </v-card>
             </v-col>
           </v-row>
-        </v-container>
-      </div>
-    </v-flex>
+        </div>
+      </v-flex>
+    </v-container>
   </v-layout>
 </template>
 
@@ -179,11 +217,19 @@ function titleFormat(value) {
 }
 
 function filterByCategory(category) {
-  this.categoryFilter = category;
+  if (this.categoryFilter == category) {
+    this.categoryFilter = 'All';
+  } else {
+    this.categoryFilter = category;
+  }
 }
 
 function isEmpty(item) {
   return !item || item.trim().length <= 0;
+}
+
+function isFocus(value) {
+  return value == this.categoryFilter;
 }
 
 //COMPUTED
@@ -208,6 +254,16 @@ function urls() {
       }
     }); //creates new list with no url duplicates and adds all hits for same url
   }
+  if (!this.isEmpty(this.search)) {
+    filteredUrls = _.filter(filteredUrls, url => {
+      let includes =
+        (url.title && url.title.toLowerCase().includes(this.search.toLowerCase())) ||
+        (url.description && url.description.toLowerCase().includes(this.search.toLowerCase())) ||
+        (url.id && url.id.toLowerCase().includes(this.search.toLowerCase())) ||
+        (url.hits && url.hits.toString().includes(this.search));
+      return includes;
+    });
+  }
   return _.sortBy(filteredUrls, ['hits', 'id']).reverse();
 }
 
@@ -223,6 +279,7 @@ export default {
   data() {
     return {
       caseLogo: caseLogo,
+      search: '',
       urlsShow: [],
       categoryFilter: 'All',
       urlsOriginal: []
@@ -232,7 +289,8 @@ export default {
     getUrls,
     filterByCategory,
     changeDisplay,
-    isEmpty
+    isEmpty,
+    isFocus
   },
   computed: {
     urls
@@ -260,7 +318,7 @@ export default {
 }
 
 .caseImage {
-  background-color: #e9eef0;
+  background-color: white;
 }
 
 .urlBox {
