@@ -4,7 +4,7 @@ import { getAccessToken } from '@/utils/auth';
 const EXPENSE_TYPES = 'expense-types';
 const EXPENSES = 'expenses';
 const EMPLOYEES = 'employees';
-const SPECIAL = 'special';
+const UTILITY = 'utility';
 const BUDGETS = 'budgets';
 const URLS = 'training-urls';
 const API_HOSTNAME = API_CONFIG.apiHostname;
@@ -53,7 +53,7 @@ function getBudgetItem(id) {
 }
 
 function getBudgetsByDate(id, date) {
-  return execute('get', `/special/${id}/${date}`);
+  return execute('get', `/utility/${id}/${date}`);
 }
 
 function getItems(type) {
@@ -65,15 +65,15 @@ function getItem(type, id) {
 }
 
 function getAllEmployeeExpenses(id) {
-  return execute('get', `/special/getAllEmployeeExpenses/${id}`);
+  return execute('get', `/utility/getAllEmployeeExpenses/${id}`);
 }
 
 function getAllExpenseTypeExpenses(id) {
-  return execute('get', `/special/getAllExpenseTypeExpenses/${id}`);
+  return execute('get', `/utility/getAllExpenseTypeExpenses/${id}`);
 }
 
 function getURLInfo(id, category) {
-  return execute('get', `/special/getURLInfo/'${id}'/${category}`);
+  return execute('get', `/utility/getURLInfo/'${id}'/${category}`);
 }
 
 function createItem(type, data) {
@@ -93,7 +93,7 @@ function deleteItem(type, id) {
 }
 
 function getAggregate() {
-  return execute('get', `/special/getAllExpenses`);
+  return execute('get', `/utility/getAllExpenses`);
 }
 
 function getRole() {
@@ -156,7 +156,7 @@ export default {
   EXPENSE_TYPES,
   EXPENSES,
   EMPLOYEES,
-  SPECIAL,
+  UTILITY,
   BUDGETS,
   URLS
 };
