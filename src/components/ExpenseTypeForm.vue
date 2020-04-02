@@ -119,9 +119,41 @@
           label="Description "
           data-vv-name="Description "
         ></v-textarea>
+        <!-- employee access list -->
+        <v-autocomplete
+          v-model="model.accessibleBy"
+          :items="allEmployees"
+          no-data-text="No Employees Available"
+          prepend-icon="group"
+          item-color="gray"
+          multiple
+          chips
+          clearable
+          small-chips
+          deletable-chips
+          single-line
+          @click:prepend="selectAll"
+        >
+          <template v-slot:label>
+            <span class="grey--text caption">
+              No Employee Access
+            </span>
+          </template>
+          <template v-slot:selection="{ index }">
+            <span v-if="index === 0 && model.accessibleBy.length == 1" class="grey--text caption">
+              Accessible by {{ model.accessibleBy.length }} employee
+            </span>
+            <span v-if="index === 0 && !isAllSelected() && model.accessibleBy.length > 1" class="grey--text caption">
+              Accessible by {{ model.accessibleBy.length }} employees
+            </span>
+            <span v-if="index === 0 && isAllSelected()" class="grey--text caption">
+              Accessible by all employees
+            </span>
+          </template>
+        </v-autocomplete>
         <!-- Buttons -->
         <v-btn color="white " @click="clearForm" class="ma-2"> <icon class="mr-1 " name="ban"></icon>Cancel</v-btn>
-        <v-btn outlined class="ma-2" color="success" @click="submit" :disabled="!valid">
+        <v-btn outlined class="ma-2" color="success" :loading="submitting" @click="submit" :disabled="!valid">
           <icon class="mr-1 " name="save"></icon>
           Submit
         </v-btn>
@@ -133,6 +165,7 @@
 <script>
 import api from '@/shared/api.js';
 import dateUtils from '@/shared/dateUtils';
+import _ from 'lodash';
 
 // METHODS
 function clearForm() {
@@ -148,10 +181,18 @@ function clearForm() {
   this.$set(this.model, 'requiredFlag', false);
   this.$set(this.model, 'isInactive', false);
   this.$set(this.model, 'categories', []);
+  this.selectAll();
 }
 
 function formatDate(date) {
   return dateUtils.formatDate(date);
+}
+
+/*
+ * Returns true if all employees in the accessibleBy list are checked
+ */
+function isAllSelected() {
+  return this.model.accessibleBy.length == this.allEmployees.length;
 }
 
 function isEmpty(item) {
@@ -162,10 +203,23 @@ function parseDate(date) {
   return dateUtils.parseDate(date);
 }
 
+/*
+ * Select all employees to have access to the expense type.
+ */
+function selectAll() {
+  this.model.accessibleBy = _.cloneDeep(this.allEmployees);
+}
+
 async function submit() {
+  this.submitting = true;
   // Add a typed-pending category if exists and not already included
   if (!this.isEmpty(this.categoryInput) && !this.model.categories.includes(this.categoryInput)) {
     this.model.categories.push(this.categoryInput);
+  }
+
+  // set accessibleBy to 'ALL' if all employees in list are selected
+  if (this.isAllSelected()) {
+    this.model.accessibleBy = 'ALL';
   }
 
   this.model.budget = parseFloat(this.model.budget);
@@ -207,6 +261,7 @@ async function submit() {
       }
     }
   }
+  this.submitting = false;
 }
 
 function removeCategory(category) {
@@ -214,9 +269,27 @@ function removeCategory(category) {
   this.model.categories = [...this.model.categories];
 }
 
+// LIFECYCLE HOOKS
+async function created() {
+  // get all employees for access list
+  let employees = await api.getItems(api.EMPLOYEES);
+  let allEmployees = [];
+  _.forEach(employees, employee => {
+    allEmployees.push({
+      value: employee.id,
+      text: `${employee.firstName} ${employee.lastName}`
+    });
+  });
+  allEmployees = _.sortBy(allEmployees, ['text']);
+  this.allEmployees = allEmployees;
+  this.clearForm();
+}
+
 export default {
+  created,
   data() {
     return {
+      allEmployees: null,
       deleting: false,
       categoryInput: null, // category combobox input
       genericRules: [v => !!v || 'This field is required'],
@@ -231,6 +304,7 @@ export default {
         v => !!v || 'Date must be valid. Format: MM/DD/YYYY',
         v => (!!v && /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v)) || 'Date must be valid. Format: MM/DD/YYYY'
       ],
+      submitting: false,
       valid: false,
       startDateFormatted: null,
       endDateFormatted: null
@@ -241,9 +315,11 @@ export default {
     clearForm,
     // deleteExpenseType,
     formatDate,
+    isAllSelected,
     isEmpty,
     parseDate,
     removeCategory,
+    selectAll,
     submit
   },
   watch: {
@@ -264,6 +340,14 @@ export default {
     'model.categories': function(val) {
       if (val.length > 10) {
         this.$nextTick(() => this.model.categories.pop());
+      }
+    },
+    'model.accessibleBy': function(val) {
+      // select all employees to have access if model is ALL and not currently submitting
+      if (!this.submitting) {
+        if (val == null || val == ' ' || val == 'ALL') {
+          this.selectAll();
+        }
       }
     }
   }

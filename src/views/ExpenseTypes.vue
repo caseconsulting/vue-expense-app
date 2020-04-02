@@ -220,32 +220,89 @@
                 <v-card text>
                   <v-card-text>
                     <div class="expandedInfo">
+                      <!-- description -->
                       <p v-if="item.description"><b>Description: </b>{{ item.description }}</p>
-
+                      <!-- end description -->
+                      <!-- categories -->
                       <p v-if="item.categories && item.categories.length > 0">
                         <b>Categories: </b>{{ item.categories.join(', ') }}
                       </p>
-
-                      <div class="flag">
-                        <p>Overdraft Allowed:</p>
-                        <icon v-if="item.odFlag" id="marks" class="mr-1" name="regular/check-circle"></icon>
-                        <icon v-else class="mr-1" id="marks" name="regular/times-circle"></icon>
-                      </div>
-                      <div class="flag">
-                        <p>Recurring:</p>
-                        <icon v-if="item.recurringFlag" id="marks" class="mr-1" name="regular/check-circle"></icon>
-                        <icon v-else class="mr-1" id="marks" name="regular/times-circle"></icon>
-                      </div>
-                      <div class="flag">
-                        <p>Receipt Required:</p>
-                        <icon v-if="item.requiredFlag" id="marks" class="mr-1" name="regular/check-circle"></icon>
-                        <icon v-else class="mr-1" id="marks" name="regular/times-circle"></icon>
-                      </div>
-                      <div class="flag">
-                        <p>Inactive:</p>
-                        <icon v-if="item.isInactive" id="marks" class="mr-1" name="regular/check-circle"></icon>
-                        <icon v-else class="mr-1" id="marks" name="regular/times-circle"></icon>
-                      </div>
+                      <!-- end categories -->
+                      <!-- flags -->
+                      <v-layout row>
+                        <v-flex sm6 class="flag py-0">
+                          <p>Overdraft Allowed:</p>
+                          <icon v-if="item.odFlag" id="marks" class="mr-1" name="regular/check-circle"></icon>
+                          <icon v-else class="mr-1" id="marks" name="regular/times-circle"></icon>
+                        </v-flex>
+                        <v-flex sm6 class="flag py-0">
+                          <p>Recurring:</p>
+                          <icon v-if="item.recurringFlag" id="marks" class="mr-1" name="regular/check-circle"></icon>
+                          <icon v-else class="mr-1" id="marks" name="regular/times-circle"></icon>
+                        </v-flex>
+                        <v-flex sm6 class="flag py-0">
+                          <p>Receipt Required:</p>
+                          <icon v-if="item.requiredFlag" id="marks" class="mr-1" name="regular/check-circle"></icon>
+                          <icon v-else class="mr-1" id="marks" name="regular/times-circle"></icon>
+                        </v-flex>
+                        <v-flex sm6 class="flag py-0">
+                          <p>Inactive:</p>
+                          <icon v-if="item.isInactive" id="marks" class="mr-1" name="regular/check-circle"></icon>
+                          <icon v-else class="mr-1" id="marks" name="regular/times-circle"></icon>
+                        </v-flex>
+                      </v-layout>
+                      <!-- end flags -->
+                      <!-- accessible by -->
+                      <v-row v-if="userIsAdmin()">
+                        <!-- display number of employees accessed by -->
+                        <div class="pt-2 px-3">
+                          <p v-if="item.accessibleBy == 'ALL'"><b>Access:</b> All Employees</p>
+                          <p v-else-if="item.accessibleBy.length == 1"><b>Access:</b> 1 Employee</p>
+                          <p v-else><b>Access:</b> {{ item.accessibleBy.length }} Employees</p>
+                        </div>
+                        <!-- button to view names of employees with acces -->
+                        <v-dialog v-model="showAccess" max-width="400px" scrollable>
+                          <template v-slot:activator="{ on }">
+                            <v-btn class="px-1 mt-2" x-small outlined v-on="on">view</v-btn>
+                          </template>
+                          <v-card color="#bc3825">
+                            <!-- dialog title -->
+                            <v-card-title>
+                              <span class="headline" style="color: white">Accessible By</span>
+                            </v-card-title>
+                            <v-divider color="black"></v-divider>
+                            <!-- list of employee names -->
+                            <v-card-text class="pb-0" style="max-height: 300px; background-color: #f0f0f0">
+                              <v-row>
+                                <v-list color="#f0f0f0" width="376">
+                                  <template v-for="(employee, index) in getEmployeeList(item.accessibleBy)">
+                                    <v-list-item :key="employee.id">
+                                      <!-- employee image -->
+                                      <v-list-item-avatar>
+                                        <img :src="employee.avatar" @error="changeAvatar(employee)" />
+                                      </v-list-item-avatar>
+                                      <!-- employee name -->
+                                      <v-list-item-content>
+                                        <v-list-item-title>
+                                          {{ getEmployeeName(employee.id) }}
+                                        </v-list-item-title>
+                                      </v-list-item-content>
+                                    </v-list-item>
+                                    <v-divider v-if="index != showAccessLength - 1" :key="index" inset></v-divider>
+                                  </template>
+                                </v-list>
+                              </v-row>
+                            </v-card-text>
+                            <v-divider color="black"></v-divider>
+                            <!-- close dialog button -->
+                            <v-card-actions>
+                              <v-spacer></v-spacer>
+                              <v-btn dark text @click="showAccess = false">Close</v-btn>
+                            </v-card-actions>
+                          </v-card>
+                        </v-dialog>
+                      </v-row>
+                      <!-- end accessible by -->
                     </div>
                   </v-card-text>
                 </v-card>
@@ -264,7 +321,7 @@
         </v-container>
       </v-card>
     </v-flex>
-
+    <!-- expense type form -->
     <v-flex v-if="userIsAdmin()" xl4 lg4 md12 sm12>
       <expense-type-form
         ref="form"
@@ -274,6 +331,7 @@
         v-on:error="displayError"
       ></expense-type-form>
     </v-flex>
+    <!-- end expense type form -->
   </v-layout>
 </template>
 
@@ -284,6 +342,7 @@ import api from '@/shared/api.js';
 import ExpenseTypeForm from '../components/ExpenseTypeForm.vue';
 import DeleteModal from '../components/DeleteModal.vue';
 import DeleteErrorModal from '../components/DeleteErrorModal.vue';
+let caseLogo = require('../assets/img/logo-big.png');
 
 /* filters */
 
@@ -315,6 +374,21 @@ function addModelToTable(newExpenseType) {
 }
 
 /*
+ * Changes the employee avatar upon error displaying
+ */
+function changeAvatar(item) {
+  let index = _.findIndex(this.employees, employee => {
+    return employee.id === item.id;
+  });
+
+  let newItem = this.employees[index];
+
+  newItem.avatar = this.caseLogo;
+
+  this.employees.splice(index, 1, newItem);
+}
+
+/*
  * Add expense type to expanded row when clicked
  */
 function clickedRow(value) {
@@ -338,6 +412,7 @@ function clearModel() {
   this.$set(this.model, 'requiredFlag', false);
   this.$set(this.model, 'isInactive', false);
   this.$set(this.model, 'categories', []);
+  this.$set(this.model, 'accessibleBy', []);
 }
 
 function clearStatus() {
@@ -404,6 +479,24 @@ function filterExpense() {
   });
 }
 
+function getEmployeeName(userId) {
+  let localEmployee = _.find(this.employees, ['id', userId]);
+  return `${localEmployee.firstName} ${localEmployee.lastName}`;
+}
+
+function getEmployeeList(accessibleBy) {
+  if (accessibleBy === 'ALL') {
+    this.showAccessLength = this.employees.length;
+    return this.employees;
+  } else {
+    let employeesList = _.filter(this.employees, employee => {
+      return accessibleBy.includes(employee.id);
+    });
+    this.showAccessLength = employeesList.length;
+    return employeesList;
+  }
+}
+
 function isEditing() {
   return !!this.model.id;
 }
@@ -428,6 +521,7 @@ function onSelect(item) {
   this.$set(this.model, 'requiredFlag', item.requiredFlag);
   this.$set(this.model, 'isInactive', item.isInactive);
   this.$set(this.model, 'categories', item.categories);
+  this.$set(this.model, 'accessibleBy', item.accessibleBy);
 }
 
 async function refreshExpenseTypes() {
@@ -478,7 +572,10 @@ async function validateDelete(item) {
 
 /* computed */
 function expenseTypeList() {
-  return this.filteredExpenseTypes;
+  // filter out expense types that the user does not have access to
+  return _.filter(this.filteredExpenseTypes, type => {
+    return this.userIsAdmin() || type.accessibleBy === 'ALL' || type.accessibleBy.includes(this.userInfo.id);
+  });
 }
 
 /* created */
@@ -489,6 +586,16 @@ async function created() {
   window.EventBus.$on('confirm-delete-expense-type', this.deleteExpenseType);
 
   window.EventBus.$on('invalid-expense type-delete', () => (this.invalidDelete = false));
+
+  this.userInfo = await api.getUser();
+  this.employees = await api.getItems(api.EMPLOYEES);
+
+  // temporary code until employee has avatar field
+  _.forEach(this.employees, employee => {
+    if (!employee.avatar) {
+      employee.avatar = 'email profile pic';
+    }
+  });
 }
 
 export default {
@@ -503,10 +610,14 @@ export default {
   },
   data() {
     return {
+      caseLogo: caseLogo,
       deleteModel: {
         id: ''
       },
       deleting: false, // activate delete model
+      showAccess: false,
+      showAccessLength: 0,
+      employees: [],
       errors: [],
       expanded: [], // database expanded
       expenseTypes: [],
@@ -553,7 +664,8 @@ export default {
         requiredFlag: true,
         isInactive: false,
         categories: [],
-        typeExpenses: ''
+        typeExpenses: '',
+        accessibleBy: []
       },
       search: '', // query text for datatable search field
       sortBy: 'budgetName', // sort datatable items
@@ -563,7 +675,8 @@ export default {
         statusMessage: '',
         color: ''
       },
-      typeExpenses: ''
+      typeExpenses: '',
+      userInfo: null
     };
   },
   components: {
@@ -590,6 +703,7 @@ export default {
   },
   methods: {
     addModelToTable,
+    changeAvatar,
     clearModel,
     clearStatus,
     clickedRow,
@@ -597,6 +711,8 @@ export default {
     deleteModelFromTable,
     displayError,
     filterExpense,
+    getEmployeeList,
+    getEmployeeName,
     isEditing,
     isFocus,
     isInactive,

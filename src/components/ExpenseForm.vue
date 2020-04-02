@@ -366,7 +366,6 @@ function betweenDates(startDate, endDate) {
 // filter for expenses recurring or containing todays date
 function filteredExpenseTypes() {
   let filteredExpType = [];
-
   if (this.employeeRole === 'admin' && this.$route.path === '/expenses') {
     this.expenseTypes.forEach(function(element) {
       if (!element.isInactive) {
@@ -374,10 +373,13 @@ function filteredExpenseTypes() {
       }
     });
   } else {
+    let employeeId = this.userInfo.id;
     this.expenseTypes.forEach(function(element) {
       if (!element.isInactive) {
-        if (element.recurringFlag || (element.endDate != null && betweenDates(element.startDate, element.endDate))) {
-          filteredExpType.push(element);
+        if (element.accessibleBy === 'ALL' || element.accessibleBy.includes(employeeId)) {
+          if (element.recurringFlag || (element.endDate != null && betweenDates(element.startDate, element.endDate))) {
+            filteredExpType.push(element);
+          }
         }
       }
     });
@@ -667,7 +669,7 @@ function isRequired() {
 
 // LIFECYCLE HOOKS
 async function created() {
-  let employeeRole = getRole();
+  this.employeeRole = getRole();
   this.userInfo = await api.getUser();
 
   window.EventBus.$on('canceledSubmit', () => (this.submitting = false));
@@ -688,7 +690,8 @@ async function created() {
       requiredFlag: expenseType.requiredFlag,
       recurringFlag: expenseType.recurringFlag,
       isInactive: expenseType.isInactive,
-      categories: expenseType.categories
+      categories: expenseType.categories,
+      accessibleBy: expenseType.accessibleBy
     };
   });
 
@@ -696,7 +699,7 @@ async function created() {
     this.$set(this.expense, 'employeeName', this.userInfo.id);
     this.$set(this.expense, 'userId', this.userInfo.id);
   } else {
-    if (employeeRole === 'admin') {
+    if (this.employeeRole === 'admin') {
       let employees = await api.getItems(api.EMPLOYEES);
       this.employees = employees.map(employee => {
         return {
@@ -709,7 +712,6 @@ async function created() {
       this.$set(this.expense, 'userId', this.userInfo.id);
     }
   }
-  this.employeeRole = employeeRole;
 }
 
 function isEmpty(item) {

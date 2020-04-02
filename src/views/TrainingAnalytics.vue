@@ -158,7 +158,7 @@
                       <div class="mr-2">
                         <span v-if="isEmpty(url.title)" style="float: left">{{ url.publisher }}</span>
                         <span class="subheading hitText">{{ url.hits }}</span>
-                        <icon name="fire" class="hitIcon" scale="1"></icon>
+                        <icon name="crosshairs" class="hitIcon" scale="1"></icon>
                       </div>
                     </v-layout>
                   </v-flex>
