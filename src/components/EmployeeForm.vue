@@ -185,12 +185,63 @@
             </v-expansion-panel-content>
           </v-expansion-panel>
         </v-expansion-panels>
-
-        <!-- isactive? only on edit -->
-        <v-checkbox label="Mark as Inactive" v-model="model.isInactive"></v-checkbox>
-
+        <!-- full/part/inactive status [MOBILE] -->
+        <v-radio-group v-if="isMobile()" v-model="statusRadio" row mandatory>
+          <v-layout fluid>
+            <v-row class="ml-0">
+              <v-flex xs6 sm3>
+                <v-radio label="Full Time" value="full"></v-radio>
+              </v-flex>
+              <v-flex xs6 sm3>
+                <v-radio label="Part Time" value="part" @change="viewStatus()"></v-radio>
+              </v-flex>
+              <v-flex xs6 sm3>
+                <v-radio label="Inactive" value="inactive"></v-radio>
+              </v-flex>
+              <!-- custom input field -->
+              <v-flex xs6 sm3>
+                <div :class="{ customInput: isPartTime() }">
+                  <div :class="['percentageBox', { disabled: !isPartTime(), inputError: isStatusEmpty() }]">
+                    <input
+                      v-model="status"
+                      type="text"
+                      oninput="this.value = this.value.replace(/[^0-9]/g, '');"
+                      maxlength="2"
+                      :disabled="!isPartTime()"
+                    />
+                    <div>%</div>
+                  </div>
+                </div>
+              </v-flex>
+              <!-- end custom input field -->
+            </v-row>
+          </v-layout>
+        </v-radio-group>
+        <!-- end [MOBILE] -->
+        <!-- full/part/inactive status [DESKTOP] -->
+        <v-radio-group v-else v-model="statusRadio" row mandatory>
+          <v-radio label="Full Time" value="full"></v-radio>
+          <v-radio label="Part Time" value="part" @change="viewStatus()"></v-radio>
+          <v-radio label="Inactive" value="inactive"></v-radio>
+          <!-- custom input field -->
+          <div :class="{ customInput: isPartTime() }">
+            <div :class="['percentageBox', { disabled: !isPartTime(), inputError: isStatusEmpty() }]">
+              <input
+                v-model="status"
+                type="text"
+                oninput="this.value = this.value.replace(/[^0-9]/g, '');"
+                maxlength="2"
+                :disabled="!isPartTime()"
+              />
+              <div>%</div>
+            </div>
+          </div>
+          <!-- end custom input field -->
+        </v-radio-group>
+        <!-- end [DESKTOP] -->
         <!-- if inactive, set Departure Date -->
         <v-menu
+          v-if="isInactive()"
           ref="menu2"
           :close-on-content-click="true"
           v-model="menu2"
@@ -199,7 +250,6 @@
           offset-y
           max-width="290px"
           min-width="290px"
-          v-if="model.isInactive"
           style="padding-right: 20px; padding-bottom: 20px;"
         >
           <template v-slot:activator="{ on }">
@@ -216,14 +266,14 @@
           </template>
           <v-date-picker v-model="model.deptDate" no-title @input="menu2 = false"></v-date-picker>
         </v-menu>
-
-        <!-- Buttons -->
+        <!-- end full/part/inactive status -->
+        <!-- form action buttons -->
         <v-btn class="ma-2" color="white" @click="clearForm"> <icon class="mr-1" name="ban"></icon>Cancel</v-btn>
-        <v-btn outlined class="ma-2" color="success" @click="submit" :disabled="!valid">
+        <v-btn outlined class="ma-2" color="success" @click="submit" :disabled="!valid || isStatusEmpty()">
           <icon class="mr-1" name="save"></icon>Submit</v-btn
         >
+        <!-- end form action buttons -->
       </v-form>
-
       <update-hire-date-modal
         :activate="changingHireDate"
         :employeeName="`${this.model.firstName} ${this.model.lastName}`"
@@ -240,6 +290,7 @@ import _ from 'lodash';
 import { getRole } from '@/utils/auth';
 import dateUtils from '@/shared/dateUtils';
 import UpdateHireDateModal from './UpdateHireDateModal.vue';
+import MobileDetect from 'mobile-detect';
 
 const regex = /^(([^<>()[\]\\.,;:\s@#"]+(\.[^<>()[\]\\.,;:\s@#"]+)*)|(".+"))@consultwithcase.com/;
 
@@ -254,6 +305,7 @@ function clearForm() {
   this.$set(this.model, 'employeeNumber', '');
   this.$set(this.model, 'hireDate', '');
   this.$set(this.model, 'id', '');
+  this.$set(this.model, 'workStatus', 100);
 
   // New Fields
   this.$set(this.model, 'prime', '');
@@ -266,6 +318,8 @@ function clearForm() {
   this.$set(this.model, 'st', '');
   this.$set(this.model, 'country', '');
   this.$set(this.model, 'deptDate', '');
+
+  this.deptDateFormatted = null;
 }
 
 function formatDate(date) {
@@ -280,18 +334,50 @@ async function checkExpenses() {
   this.hasExpenses = _.size(await api.getAllEmployeeExpenses(this.model.id)) > 0;
 }
 
+function viewStatus() {
+  if (this.model.workStatus && this.model.workStatus > 0 && this.model.workStatus < 100) {
+    this.status = this.model.workStatus;
+  } else {
+    this.status = '';
+  }
+}
+
+function isMobile() {
+  let md = new MobileDetect(window.navigator.userAgent);
+  return md.os() === 'AndroidOS' || md.os() === 'iOS';
+}
+
+function isFullTime() {
+  return this.statusRadio == 'inactive';
+}
+
+function isInactive() {
+  return this.statusRadio == 'inactive';
+}
+
+function isPartTime() {
+  return this.statusRadio == 'part';
+}
+
+function isStatusEmpty() {
+  return this.status.length == 0;
+}
+
 function parseDate(date) {
   return dateUtils.parseDate(date);
 }
 
 async function submit() {
   if (this.$refs.form.validate()) {
-    if (!this.model.isInactive) {
+    if (!this.isInactive()) {
       this.$set(this.model, 'deptDate', '');
     }
 
     // set the hire date
     this.$set(this.model, 'hireDate', this.date);
+
+    // set the status
+    this.$set(this.model, 'workStatus', parseInt(this.status));
 
     if (this.model.id) {
       // update employee
@@ -352,6 +438,12 @@ export default {
       dateRules: [
         v => !!v || 'Date must be valid. Format: MM/DD/YYYY',
         v => (!!v && /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v)) || 'Date must be valid. Format: MM/DD/YYYY'
+      ],
+      statusRules: [
+        v => !!v, // || 'Percentage must be a whole number between 0 - 99',
+        v => /^\d+$/.test(v), // || 'Percentage amount must be a whole number',
+        v => v < 100, //|| 'Percentage must be less than 100', // percentage must be less than 100
+        v => v >= 0 // || 'Percentage must be greater than 0' // percentage must be greater than 0
       ],
       deleting: false,
       deptDateFormatted: null,
@@ -443,6 +535,8 @@ export default {
         'Wisconsin',
         'Wyoming'
       ],
+      status: '100',
+      statusRadio: 'full',
       valid: false
     };
   },
@@ -487,17 +581,92 @@ export default {
       if (this.model.birthday !== null && !this.formatDate(this.model.birthday)) {
         this.model.birthday = null;
       }
+    },
+    'model.workStatus': function() {
+      console.log(this.model.workStatus);
+      // if work status exists
+      if (this.model.workStatus != null) {
+        // convert employee work status to string
+        this.status = this.model.workStatus.toString();
+
+        // set status radio
+        if (this.status == '100') {
+          this.statusRadio = 'full';
+        } else if (this.status == '0') {
+          this.statusRadio = 'inactive';
+        } else {
+          this.statusRadio = 'part';
+        }
+      } else {
+        // if status does not exist
+        this.status = '100';
+        this.statusRadio = 'full';
+      }
+    },
+    statusRadio: function() {
+      if (this.statusRadio == 'full') {
+        this.status = '100';
+      } else if (this.statusRadio == 'inactive') {
+        this.status = '0';
+      }
     }
   },
   props: ['model'],
   methods: {
     checkExpenses,
     clearForm,
+    viewStatus,
     formatDate,
     formatRole,
+    isFullTime,
+    isInactive,
+    isMobile,
+    isPartTime,
+    isStatusEmpty,
     parseDate,
     submit,
     userIsAdmin
   }
 };
 </script>
+
+<style>
+.disabled {
+  background-color: #ddd;
+}
+
+.customInput :hover {
+  border: solid 1px black;
+}
+
+.inputError {
+  border: solid 1px red !important;
+}
+
+.percentageBox {
+  border: solid 1px gray;
+  width: 46px;
+  height: 34px;
+  border-radius: 2px;
+  font-size: 14px;
+  display: flex;
+}
+
+.percentageBox input {
+  text-align: right;
+  width: 60%;
+}
+
+.percentageBox input:hover {
+  border: none;
+}
+
+.percentageBox div {
+  padding-top: 6px;
+  margin-left: 2px;
+}
+
+.percentageBox div:hover {
+  border: none;
+}
+</style>

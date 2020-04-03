@@ -85,6 +85,7 @@
                 <td>{{ item.lastName }}</td>
                 <td>{{ item.hireDate | dateFormat }}</td>
                 <td>{{ item.email }}</td>
+
                 <!-- action icons -->
                 <td class="datatable_btn layout" v-if="userIsAdmin()" @click="clickedRow(item)">
                   <!-- edit button -->
@@ -130,39 +131,14 @@
               <td :colspan="headers.length" class="pa-0">
                 <v-card text>
                   <v-card-text>
-                    <div
-                      class="expandedInfo"
-                      v-if="
-                        userIsAdmin() &&
-                          isEmpty(item.prime) &&
-                          isEmpty(item.contract) &&
-                          isEmpty(item.jobRole) &&
-                          isEmpty(item.github) &&
-                          isEmpty(item.twitter) &&
-                          isEmpty(item.birthday) &&
-                          isEmpty(item.city) &&
-                          isEmpty(item.st) &&
-                          isEmpty(item.country) &&
-                          isEmpty(item.deptDate) &&
-                          !item.isInactive
-                      "
-                    >
-                      <p>No additional data</p>
-                    </div>
-                    <div
-                      class="expandedInfo"
-                      v-else-if="
-                        !userIsAdmin() &&
-                          isEmpty(item.prime) &&
-                          isEmpty(item.contract) &&
-                          isEmpty(item.jobRole) &&
-                          isEmpty(item.github) &&
-                          isEmpty(item.twitter)
-                      "
-                    >
+                    <div class="expandedInfo" v-if="isDisplayData(item)">
                       <p>No additional data</p>
                     </div>
                     <div class="expandedInfo" v-else>
+                      <p v-if="userIsAdmin()">
+                        <b>Status: </b>
+                        {{ getWorkStatus(item.workStatus) }}
+                      </p>
                       <p v-if="!isEmpty(item.prime)"><b>Prime: </b> {{ item.prime }}</p>
                       <p v-if="!isEmpty(item.contract)"><b>Contract: </b>{{ item.contract }}</p>
                       <p v-if="!isEmpty(item.jobRole)"><b>Job Role: </b>{{ item.jobRole }}</p>
@@ -271,6 +247,7 @@ async function refreshEmployees() {
   this.loading = true;
   this.employees = await api.getItems(api.EMPLOYEES);
   this.filterEmployees();
+  this.expanded = [];
   this.loading = false;
 }
 
@@ -302,8 +279,19 @@ function getFilteredEmployees() {
   return this.filteredEmployees.slice();
 }
 
-function setExpenses(expenses) {
-  this.$set(this.model, 'personalExpenses', expenses);
+/**
+ * Returns Full Time, Part Time, or Inactive based on the work status
+ */
+function getWorkStatus(workStatus) {
+  if (workStatus == 100) {
+    return 'Full Time';
+  } else if (workStatus == 0) {
+    return 'Inactive';
+  } else if (workStatus > 0 && workStatus < 100) {
+    return 'Part Time';
+  } else {
+    return 'Invalid Status';
+  }
 }
 
 function onSelect(item) {
@@ -316,6 +304,7 @@ function onSelect(item) {
   this.$set(this.model, 'employeeNumber', item.employeeNumber);
   this.$set(this.model, 'hireDate', item.hireDate);
   this.$set(this.model, 'isInactive', item.isInactive);
+  this.$set(this.model, 'workStatus', item.workStatus);
 
   // New Fields
   this.$set(this.model, 'birthday', item.birthday);
@@ -340,6 +329,7 @@ function clearModel() {
   this.$set(this.model, 'employeeNumber', null);
   this.$set(this.model, 'hireDate', null);
   this.$set(this.model, 'isInactive', false);
+  this.$set(this.model, 'workStatus', 100);
 
   //New Fields
   this.$set(this.model, 'birthday', '');
@@ -426,6 +416,20 @@ async function displayError(err) {
   this.$set(this.status, 'color', 'red');
 }
 
+/**
+ * Returns true if there is data about the employee to display
+ */
+function isDisplayData(item) {
+  let valid =
+    !this.userIsAdmin() &&
+    this.isEmpty(item.prime) &&
+    this.isEmpty(item.contract) &&
+    this.isEmpty(item.jobRole) &&
+    this.isEmpty(item.github) &&
+    this.isEmpty(item.twitter);
+  return valid;
+}
+
 async function validateDelete(item) {
   let x = await api
     .getAllEmployeeExpenses(item.id)
@@ -484,7 +488,6 @@ async function created() {
 
   window.EventBus.$on('canceled-delete-employee', () => (this.deleting = false));
   window.EventBus.$on('confirm-delete-employee', this.deleteEmployee);
-
   window.EventBus.$on('invalid-employee-delete', () => (this.invalidDelete = false));
 }
 
@@ -556,7 +559,7 @@ export default {
         employeeNumber: null,
         hireDate: null,
         isInactive: false,
-        personalExpenses: '',
+        workStatus: 100,
 
         //New Fields
         birthday: '',
@@ -608,13 +611,14 @@ export default {
     displayError,
     filterEmployees,
     getFilteredEmployees,
+    getWorkStatus,
+    isDisplayData,
     isEditing,
     isEmpty,
     isFocus,
     isInActive,
     onSelect,
     refreshEmployees,
-    setExpenses,
     toForm,
     updateModelInTable,
     userIsAdmin,
