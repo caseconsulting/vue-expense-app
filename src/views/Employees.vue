@@ -33,34 +33,35 @@
 
             <!-- active filter -->
             <div class="flagFilter">
-              <h4>Active Employees:</h4>
-              <v-btn-toggle class="filter_color" v-model="filter.active" text mandatory>
+              <h4>Employee Status:</h4>
+              <v-btn-toggle class="filter_color" v-model="filter.active" text multiple>
                 <v-tooltip top>
                   <template v-slot:activator="{ on }">
-                    <v-btn value="active" v-on="on" text>
-                      <icon class="mr-1" name="regular/check-circle"></icon>
+                    <v-btn value="full" v-on="on" text>
+                      <icon class="mr-1" name="clock" color="black"></icon>
                     </v-btn>
                   </template>
-                  <span>Show Active</span>
+                  <span>Full Time</span>
                 </v-tooltip>
                 <v-tooltip top>
                   <template v-slot:activator="{ on }">
-                    <v-btn value="notActive" v-on="on" text>
-                      <icon name="regular/times-circle"></icon>
+                    <v-btn value="part" v-on="on" text>
+                      <icon name="regular/clock" color="black"></icon>
                     </v-btn>
                   </template>
-                  <span>Hide Active</span>
+                  <span>Part Time</span>
                 </v-tooltip>
                 <v-tooltip top>
                   <template v-slot:activator="{ on }">
-                    <v-btn value="both" v-on="on" text>
-                      BOTH
+                    <v-btn value="inactive" v-on="on" text>
+                      <icon name="regular/stop-circle" color="black"></icon>
                     </v-btn>
                   </template>
-                  <span>Show All</span>
+                  <span>Inactive</span>
                 </v-tooltip>
               </v-btn-toggle>
             </div>
+
             <!-- end active filter -->
           </fieldset>
           <br />
@@ -79,7 +80,7 @@
           >
             <!-- rows in datatable -->
             <template v-slot:item="{ item }">
-              <tr :class="{ inactiveStyle: item.isInactive, selectFocus: isFocus(item) }" @click="clickedRow(item)">
+              <tr :class="{ inactiveStyle: isInactive(item), selectFocus: isFocus(item) }" @click="clickedRow(item)">
                 <td>{{ item.employeeNumber }}</td>
                 <td>{{ item.firstName }}</td>
                 <td>{{ item.lastName }}</td>
@@ -168,17 +169,6 @@
                       <p v-if="userIsAdmin() && !isEmpty(item.deptDate)">
                         <b>Departure Date: </b>{{ item.deptDate | dateFormat }}
                       </p>
-                      <div v-if="userIsAdmin() && item.isInactive" class="flagEmp">
-                        <p>Inactive:</p>
-                        <icon
-                          style="padding: 0px;"
-                          v-if="item.isInactive"
-                          id="marks"
-                          class="mr-1"
-                          name="regular/check-circle"
-                        ></icon>
-                        <icon v-else class="mr-1" id="marks" name="regular/times-circle"></icon>
-                      </div>
                     </div>
                   </v-card-text>
                 </v-card>
@@ -235,8 +225,16 @@ import DeleteModal from '../components/DeleteModal.vue';
 import DeleteErrorModal from '../components/DeleteErrorModal.vue';
 
 /* methods */
-function isInActive(employee) {
-  return employee.isInactive ? 'Not Active' : '';
+function isFullTime(employee) {
+  return employee.workStatus == 100;
+}
+
+function isInactive(employee) {
+  return employee.workStatus == 0;
+}
+
+function isPartTime(employee) {
+  return employee.workStatus > 0 && employee.workStatus < 100;
 }
 
 function userIsAdmin() {
@@ -256,20 +254,12 @@ async function refreshEmployees() {
  */
 function filterEmployees() {
   //filter for Active Expense Types (available to admin only)
-  if (this.filter.active !== 'both') {
-    this.filteredEmployees = _.filter(this.employees, employee => {
-      if (this.filter.active == 'active') {
-        // display only active employees
-        return !employee.isInactive;
-      } else {
-        // display only inactive employees
-        return employee.isInactive;
-      }
-    });
-  } else {
-    // display all employees
-    this.filteredEmployees = this.employees;
-  }
+  this.filteredEmployees = _.filter(this.employees, employee => {
+    let fullCheck = this.filter.active.includes('full') && this.isFullTime(employee);
+    let partCheck = this.filter.active.includes('part') && this.isPartTime(employee);
+    let inactiveCheck = this.filter.active.includes('inactive') && this.isInactive(employee);
+    return fullCheck || partCheck || inactiveCheck;
+  });
 }
 
 /**
@@ -303,7 +293,6 @@ function onSelect(item) {
   this.$set(this.model, 'employeeRole', item.employeeRole);
   this.$set(this.model, 'employeeNumber', item.employeeNumber);
   this.$set(this.model, 'hireDate', item.hireDate);
-  this.$set(this.model, 'isInactive', item.isInactive);
   this.$set(this.model, 'workStatus', item.workStatus);
 
   // New Fields
@@ -328,7 +317,6 @@ function clearModel() {
   this.$set(this.model, 'employeeRole', '');
   this.$set(this.model, 'employeeNumber', null);
   this.$set(this.model, 'hireDate', null);
-  this.$set(this.model, 'isInactive', false);
   this.$set(this.model, 'workStatus', 100);
 
   //New Fields
@@ -367,7 +355,7 @@ function addModelToTable(newEmployee) {
   let matchingEmployee = _.filter(this.employees, employee => employee.id === newEmployee.id);
 
   if (!matchingEmployee.length) {
-    if (!newEmployee.isInactive) {
+    if (!this.isInactive(newEmployee)) {
       this.filteredEmployees.push(newEmployee);
       this.employees.push(newEmployee);
     } else {
@@ -518,7 +506,7 @@ export default {
       errors: [],
       expanded: [], // database expanded
       filter: {
-        active: 'active' //default only shows active employees
+        active: ['full', 'part'] //default only shows full and part time employees
       },
       filteredEmployees: [],
       headers: [
@@ -558,7 +546,6 @@ export default {
         employeeRole: '',
         employeeNumber: null,
         hireDate: null,
-        isInactive: false,
         workStatus: 100,
 
         //New Fields
@@ -616,7 +603,9 @@ export default {
     isEditing,
     isEmpty,
     isFocus,
-    isInActive,
+    isFullTime,
+    isInactive,
+    isPartTime,
     onSelect,
     refreshEmployees,
     toForm,

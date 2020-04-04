@@ -40,7 +40,7 @@ function exportCSVFile(items, fileTitle) {
       person.twitter || ' ',
       person.github || ' ',
       person.employeeRole,
-      person.isInactive ? 'no' : 'yes',
+      getWorkStatus(person.workStatus),
       person.id
     ];
   }
@@ -60,7 +60,7 @@ function exportCSVFile(items, fileTitle) {
     'Twitter',
     'Github',
     'Expense App Role',
-    'Is Active?',
+    'Status',
     'id'
   ];
 
@@ -104,6 +104,21 @@ function download() {
   this.exportCSVFile(this.employees, fileTitle); // call the exportCSVFile() function to process the JSON and trigger the download
 }
 
+/**
+ * Returns Full Time, Part Time, or Inactive based on the work status
+ */
+function getWorkStatus(workStatus) {
+  if (workStatus == 100) {
+    return `Full Time`;
+  } else if (workStatus == 0) {
+    return `Inactive`;
+  } else if (workStatus > 0 && workStatus < 100) {
+    return `Part Time (${workStatus}%)`;
+  } else {
+    return 'Invalid Status';
+  }
+}
+
 export default {
   props: ['employees'],
   data() {
@@ -113,8 +128,9 @@ export default {
   },
   methods: {
     convertToCSV,
+    download,
     exportCSVFile,
-    download
+    getWorkStatus
   }
 };
 </script>
