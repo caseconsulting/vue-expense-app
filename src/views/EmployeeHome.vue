@@ -62,7 +62,7 @@
     </v-flex>
 
     <!-- expense form-->
-    <v-flex v-if="employ == null" xs12 sm12 md12 lg4 pt-3>
+    <v-flex v-if="employ == null" xs12 sm12 md12 lg4>
       <v-flex text-center lg12 md12 sm12>
         <expense-form :expense="expense" v-on:error="displayError"></expense-form>
       </v-flex>

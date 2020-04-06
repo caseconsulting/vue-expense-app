@@ -3,13 +3,14 @@
     <v-card-title class="header_style">
       <h3 v-if="expense.id && (isAdmin || !isReimbursed)">Edit Expense</h3>
       <h3 v-else-if="expense.id && !isAdmin && isReimbursed">View Expense</h3>
-      <h3 v-else>Create New Expense</h3>
+      <h3 v-else-if="!isInactive">Create New Expense</h3>
+      <h3 v-else>Inactive Employee</h3>
     </v-card-title>
     <v-container fluid>
       <v-form ref="form" v-model="valid" lazy-validation>
         <!--Employee picker if admin level -->
         <v-autocomplete
-          v-if="isAdmin && this.$route.path !== '/home'"
+          v-if="isAdmin && !homeView"
           :items="employees"
           :rules="componentRules"
           :filter="customFilter"
@@ -22,9 +23,10 @@
 
         <!--Expense type picker if admin -->
         <v-autocomplete
-          v-if="isAdmin && this.$route.path !== '/home'"
+          v-if="isAdmin && !homeView"
           :items="filteredExpenseTypes()"
           :rules="componentRules"
+          :disabled="isInactive"
           v-model="expense.expenseTypeId"
           label="Expense Type"
           :hint="hint"
@@ -36,6 +38,7 @@
         <v-autocomplete
           v-else
           :items="filteredExpenseTypes()"
+          :disabled="isInactive"
           :rules="componentRules"
           v-model="expense.expenseTypeId"
           label="Expense Type"
@@ -49,6 +52,7 @@
         <v-select
           v-if="getCategories() != null && getCategories().length >= 1"
           :rules="componentRules"
+          :disabled="isInactive"
           v-model="expense.categories"
           :items="getCategories()"
           label="Select Category"
@@ -61,7 +65,7 @@
           prefix="$"
           v-model="expense.cost"
           :rules="costRules"
-          :disabled="isReimbursed"
+          :disabled="isReimbursed || isInactive"
           label="Cost"
           data-vv-name="Cost"
         ></v-text-field>
@@ -70,6 +74,7 @@
         <v-text-field
           v-model="expense.description"
           :rules="descriptionRules"
+          :disabled="isInactive"
           label="Description"
           data-vv-name="Description"
         ></v-text-field>
@@ -91,7 +96,7 @@
             <v-text-field
               v-model="purchaseDateFormatted"
               :rules="dateRules"
-              :disabled="isReimbursed && !isDifferentExpenseType"
+              :disabled="(isReimbursed && !isDifferentExpenseType) || isInactive"
               label="Purchase Date"
               hint="MM/DD/YYYY format"
               persistent-hint
@@ -120,7 +125,7 @@
             <v-text-field
               v-model="reimbursedDateFormatted"
               :rules="optionalDateRules"
-              :disabled="isReimbursed && !isDifferentExpenseType"
+              :disabled="(isReimbursed && !isDifferentExpenseType) || isInactive"
               label="Reimburse Date (optional)"
               hint="MM/DD/YYYY format "
               persistent-hint
@@ -134,13 +139,14 @@
 
         <!-- Receipt uploading -->
         <v-checkbox
+          v-if="updateIsRequired && isEdit && !isEmpty(expense.receipt)"
           style="padding-top: 20px; padding-bottom: 0px;"
           v-model="allowReceipt"
           label="Update the Receipt?"
-          v-if="updateIsRequired && isEdit && !isEmpty(expense.receipt)"
+          :disabled="isInactive"
         ></v-checkbox>
         <file-upload
-          v-if="updateIsRequired && ((allowReceipt && isEdit) || !isEdit || isEmpty(expense.receipt))"
+          v-if="!isInactive && updateIsRequired && ((allowReceipt && isEdit) || !isEdit || isEmpty(expense.receipt))"
           style="padding-top: 0px; padding-bottom: 0px;"
           @fileSelected="setFile"
           :passedRules="receiptRules"
@@ -154,22 +160,34 @@
         >
 
         <!-- Notes section -->
-        <v-textarea v-model="expense.note" label="Notes (optional)" data-vv-name="Description"></v-textarea>
+        <v-textarea
+          v-model="expense.note"
+          label="Notes (optional)"
+          data-vv-name="Description"
+          :disabled="isInactive"
+        ></v-textarea>
 
         <!-- Reference URL -->
-        <v-text-field v-model="expense.url" :rules="urlRules" label="URL (Optional)"></v-text-field>
+        <v-text-field
+          v-model="expense.url"
+          :rules="urlRules"
+          label="URL (Optional)"
+          :disabled="isInactive"
+        ></v-text-field>
 
         <!-- Buttons -->
 
         <!-- cancel button -->
-        <v-btn color="white" @click="clearForm" class="ma-2"> <icon class="mr-1" name="ban"></icon>Cancel </v-btn>
+        <v-btn color="white" @click="clearForm" class="ma-2" :disabled="isInactive">
+          <icon class="mr-1" name="ban"></icon>Cancel
+        </v-btn>
 
         <!-- submit button -->
         <v-btn
           outlined
           color="success"
           @click="checkCoverage"
-          :disabled="!valid || (!isAdmin && isReimbursed)"
+          :disabled="!valid || (!isAdmin && isReimbursed) || isInactive"
           :loading="loading"
           class="ma-2"
         >
@@ -367,18 +385,19 @@ function betweenDates(startDate, endDate) {
 function filteredExpenseTypes() {
   let filteredExpType = [];
   if (this.employeeRole === 'admin' && this.$route.path === '/expenses') {
-    this.expenseTypes.forEach(function(element) {
-      if (!element.isInactive) {
-        filteredExpType.push(element);
+    this.expenseTypes.forEach(function(type) {
+      if (!type.isInactive) {
+        filteredExpType.push(type);
       }
     });
   } else {
-    let employeeId = this.userInfo.id;
-    this.expenseTypes.forEach(function(element) {
-      if (!element.isInactive) {
-        if (element.accessibleBy === 'ALL' || element.accessibleBy.includes(employeeId)) {
-          if (element.recurringFlag || (element.endDate != null && betweenDates(element.startDate, element.endDate))) {
-            filteredExpType.push(element);
+    let employee = this.userInfo;
+    let homeView = this.homeView;
+    this.expenseTypes.forEach(function(type) {
+      if (!type.isInactive) {
+        if (hasAccess(employee, type, homeView)) {
+          if (type.recurringFlag || (type.endDate != null && betweenDates(type.startDate, type.endDate))) {
+            filteredExpType.push(type);
           }
         }
       }
@@ -390,6 +409,20 @@ function filteredExpenseTypes() {
 
 function formatDate(date) {
   return dateUtils.formatDate(date);
+}
+
+function hasAccess(employee, expenseType, homeView) {
+  if (employee.workStatus == 0) {
+    return false;
+  } else if ((employee.employeeRole == 'admin' && !homeView) || expenseType.accessibleBy == 'ALL') {
+    return true;
+  } else if (expenseType.accessibleBy == 'FULL TIME') {
+    return employee.workStatus == 100;
+  } else if (expenseType.accessibleBy == 'PART TIME') {
+    return employee.workStatus > 0 && employee.workStatus < 100;
+  } else {
+    return expenseType.accessibleBy.includes(employee.id);
+  }
 }
 
 function parseDate(date) {
@@ -695,7 +728,10 @@ async function created() {
     };
   });
 
-  if (this.$route.path === '/home') {
+  this.homeView = this.$route.path === '/home';
+  this.isInactive = this.homeView && this.userInfo.workStatus == 0;
+
+  if (this.homeView) {
     this.$set(this.expense, 'employeeName', this.userInfo.id);
     this.$set(this.expense, 'userId', this.userInfo.id);
   } else {
@@ -721,8 +757,10 @@ function isEmpty(item) {
 export default {
   data() {
     return {
+      homeView: false,
       hint: '',
       originalExpense: null,
+      isInactive: false,
       allowReceipt: false,
       loading: false,
       employeeRole: '',
@@ -825,6 +863,7 @@ export default {
     customFilter,
     betweenDates,
     formatDate,
+    hasAccess,
     parseDate,
     submit,
     setFile,

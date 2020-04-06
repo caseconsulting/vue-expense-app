@@ -583,7 +583,6 @@ export default {
       }
     },
     'model.workStatus': function() {
-      console.log(this.model.workStatus);
       // if work status exists
       if (this.model.workStatus != null) {
         // convert employee work status to string

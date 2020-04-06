@@ -1,3 +1,6 @@
+$case-red: #bc3825;
+$case-darkgray: #3f3f3c;
+
 /* RolledupExpenseTypeTable.vue */
 #money-team {
   color: green;
@@ -22,7 +25,7 @@
 }
 
 .header_style {
-  background-color: #bc3825;
+  background-color: $case-red;
   color: white;
   font-size: 16px;
   // border-radius: 5px;
@@ -37,12 +40,12 @@
 }
 
 .reimburse_button {
-  background-color: #bc3825 !important;
+  background-color: $case-red !important;
   color: white !important;
 }
 
 .table_color {
-  background-color: #bc3825;
+  background-color: $case-red;
   opacity: 0.2;
 }
 
@@ -78,7 +81,7 @@
 
 @-webkit-keyframes login-change {
   0% {
-    color: #3f3f3c;
+    color: $case-darkgray;
   }
 
   100% {
@@ -88,7 +91,7 @@
 
 @-moz-keyframes login-change {
   0% {
-    color: #3f3f3c;
+    color: $case-darkgray;
   }
 
   100% {
@@ -98,7 +101,7 @@
 
 @-ms-keyframes login-change {
   0% {
-    color: #3f3f3c;
+    color: $case-darkgray;
   }
 
   100% {
@@ -108,7 +111,7 @@
 
 @-o-keyframes login-change {
   0% {
-    color: #3f3f3c;
+    color: $case-darkgray;
   }
 
   100% {
@@ -118,7 +121,7 @@
 
 @keyframes login-change {
   0% {
-    color: #3f3f3c;
+    color: $case-darkgray;
   }
 
   100% {

@@ -256,7 +256,7 @@
                       <v-row v-if="userIsAdmin()">
                         <!-- display number of employees accessed by -->
                         <div class="pt-2 px-3">
-                          <p v-if="item.accessibleBy == 'ALL'"><b>Access:</b> All Employees</p>
+                          <p v-if="getAccess(item)"><b>Access:</b> {{ getAccess(item) }}</p>
                           <p v-else-if="item.accessibleBy.length == 1"><b>Access:</b> 1 Employee</p>
                           <p v-else><b>Access:</b> {{ item.accessibleBy.length }} Employees</p>
                         </div>
@@ -290,6 +290,9 @@
                                     </v-list-item>
                                     <v-divider v-if="index != showAccessLength - 1" :key="index" inset></v-divider>
                                   </template>
+                                  <div v-if="showAccessLength == 0" class="noEmployees">
+                                    No Employees
+                                  </div>
                                 </v-list>
                               </v-row>
                             </v-card-text>
@@ -412,7 +415,7 @@ function clearModel() {
   this.$set(this.model, 'requiredFlag', false);
   this.$set(this.model, 'isInactive', false);
   this.$set(this.model, 'categories', []);
-  this.$set(this.model, 'accessibleBy', []);
+  this.$set(this.model, 'accessibleBy', 'ALL');
 }
 
 function clearStatus() {
@@ -479,22 +482,46 @@ function filterExpense() {
   });
 }
 
+function getAccess(expenseType) {
+  if (expenseType.accessibleBy == 'ALL') {
+    return 'All Employees';
+  } else if (expenseType.accessibleBy == 'FULL TIME') {
+    return 'Full Time Employees';
+  } else if (expenseType.accessibleBy == 'PART TIME') {
+    return 'Part Time Employees';
+  } else {
+    return false;
+  }
+}
+
 function getEmployeeName(userId) {
   let localEmployee = _.find(this.employees, ['id', userId]);
   return `${localEmployee.firstName} ${localEmployee.lastName}`;
 }
 
 function getEmployeeList(accessibleBy) {
+  let employeesList;
+
   if (accessibleBy === 'ALL') {
-    this.showAccessLength = this.employees.length;
-    return this.employees;
+    employeesList = this.employees;
+  } else if (accessibleBy === 'FULL TIME') {
+    employeesList = _.filter(this.employees, employee => {
+      return employee.workStatus == 100;
+    });
+  } else if (accessibleBy === 'PART TIME') {
+    employeesList = _.filter(this.employees, employee => {
+      return employee.workStatus < 100 && employee.workStatus > 0;
+    });
   } else {
-    let employeesList = _.filter(this.employees, employee => {
+    employeesList = _.filter(this.employees, employee => {
       return accessibleBy.includes(employee.id);
     });
-    this.showAccessLength = employeesList.length;
-    return employeesList;
   }
+  this.showAccessLength = employeesList.length;
+  return _.sortBy(employeesList, [
+    employee => employee.firstName.toLowerCase(),
+    employee => employee.lastName.toLowerCase()
+  ]);
 }
 
 function isEditing() {
@@ -711,6 +738,7 @@ export default {
     deleteModelFromTable,
     displayError,
     filterExpense,
+    getAccess,
     getEmployeeList,
     getEmployeeName,
     isEditing,
@@ -757,5 +785,12 @@ fieldset legend {
   font-weight: bold;
   margin-left: 20px;
   padding: 10px;
+}
+
+.noEmployees {
+  text-align: center;
+  font-size: 20px;
+  margin-top: 20px;
+  margin-bottom: 20px;
 }
 </style>

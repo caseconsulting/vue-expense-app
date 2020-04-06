@@ -118,13 +118,25 @@
           :rules="genericRules"
           label="Description "
           data-vv-name="Description "
+          rows="3"
         ></v-textarea>
+        <!-- Accessibility -->
+        <div style="color: dimgray">
+          Employee Access
+        </div>
+        <v-radio-group v-model="model.accessibleBy" class="smallRadio ma-0" row mandatory>
+          <v-radio label="All" value="ALL"></v-radio>
+          <v-radio label="Full Time" value="FULL TIME"></v-radio>
+          <v-radio label="Part Time" value="PART TIME"></v-radio>
+          <v-radio label="Custom" value="CUSTOM"></v-radio>
+        </v-radio-group>
+        <!-- end [DESKTOP] -->
         <!-- employee access list -->
         <v-autocomplete
-          v-model="model.accessibleBy"
+          v-if="model.accessibleBy == 'CUSTOM'"
+          v-model="customAccess"
           :items="allEmployees"
           no-data-text="No Employees Available"
-          prepend-icon="group"
           item-color="gray"
           multiple
           chips
@@ -132,7 +144,7 @@
           small-chips
           deletable-chips
           single-line
-          @click:prepend="selectAll"
+          class="mt-0 pt-0"
         >
           <template v-slot:label>
             <span class="grey--text caption">
@@ -140,14 +152,11 @@
             </span>
           </template>
           <template v-slot:selection="{ index }">
-            <span v-if="index === 0 && model.accessibleBy.length == 1" class="grey--text caption">
-              Accessible by {{ model.accessibleBy.length }} employee
+            <span v-if="index === 0 && customAccess.length == 1" class="grey--text caption">
+              Accessible by {{ customAccess.length }} employee
             </span>
-            <span v-if="index === 0 && !isAllSelected() && model.accessibleBy.length > 1" class="grey--text caption">
-              Accessible by {{ model.accessibleBy.length }} employees
-            </span>
-            <span v-if="index === 0 && isAllSelected()" class="grey--text caption">
-              Accessible by all employees
+            <span v-else-if="index === 0" class="grey--text caption">
+              Accessible by {{ customAccess.length }} employees
             </span>
           </template>
         </v-autocomplete>
@@ -181,7 +190,8 @@ function clearForm() {
   this.$set(this.model, 'requiredFlag', false);
   this.$set(this.model, 'isInactive', false);
   this.$set(this.model, 'categories', []);
-  this.selectAll();
+  this.$set(this.model, 'accessibleBy', 'ALL');
+  this.customAccess = [];
 }
 
 function formatDate(date) {
@@ -189,10 +199,31 @@ function formatDate(date) {
 }
 
 /*
- * Returns true if all employees in the accessibleBy list are checked
+ * Returns true if all employees have access
  */
 function isAllSelected() {
-  return this.model.accessibleBy.length == this.allEmployees.length;
+  return this.model.accessibleBy == 'ALL';
+}
+
+/*
+ * Returns true if custom access for employees is selected
+ */
+function isCustomSelected() {
+  return this.model.accessibleBy == 'CUSTOM';
+}
+
+/*
+ * Returns true if all full time employees have access
+ */
+function isFullTimeSelected() {
+  return this.model.accessibleBy == 'FULL TIME';
+}
+
+/*
+ * Returns true if all part time employees have access
+ */
+function isPartTimeSelected() {
+  return this.model.accessibleBy == 'PART TIME';
 }
 
 function isEmpty(item) {
@@ -203,13 +234,6 @@ function parseDate(date) {
   return dateUtils.parseDate(date);
 }
 
-/*
- * Select all employees to have access to the expense type.
- */
-function selectAll() {
-  this.model.accessibleBy = _.cloneDeep(this.allEmployees);
-}
-
 async function submit() {
   this.submitting = true;
   // Add a typed-pending category if exists and not already included
@@ -217,9 +241,9 @@ async function submit() {
     this.model.categories.push(this.categoryInput);
   }
 
-  // set accessibleBy to 'ALL' if all employees in list are selected
-  if (this.isAllSelected()) {
-    this.model.accessibleBy = 'ALL';
+  // set accessibleBy based on access radio
+  if (this.isCustomSelected()) {
+    this.model.accessibleBy = this.customAccess;
   }
 
   this.model.budget = parseFloat(this.model.budget);
@@ -289,6 +313,7 @@ export default {
   created,
   data() {
     return {
+      customAccess: [],
       allEmployees: null,
       deleting: false,
       categoryInput: null, // category combobox input
@@ -313,13 +338,14 @@ export default {
   props: ['model'],
   methods: {
     clearForm,
-    // deleteExpenseType,
     formatDate,
     isAllSelected,
+    isCustomSelected,
+    isFullTimeSelected,
+    isPartTimeSelected,
     isEmpty,
     parseDate,
     removeCategory,
-    selectAll,
     submit
   },
   watch: {
@@ -343,14 +369,31 @@ export default {
       }
     },
     'model.accessibleBy': function(val) {
-      // select all employees to have access if model is ALL and not currently submitting
       if (!this.submitting) {
-        if (val == null || val == ' ' || val == 'ALL') {
-          this.selectAll();
+        if (!['ALL', 'FULL TIME', 'PART TIME', 'CUSTOM'].includes(val)) {
+          this.customAccess = _.filter(this.allEmployees, employee => {
+            return this.model.accessibleBy.includes(employee.value);
+          });
+          this.model.accessibleBy = 'CUSTOM';
         }
       }
     }
   }
 };
 </script>
-<style></style>
+
+<style>
+.smallRadio {
+  margin: 0 !important;
+}
+
+.smallRadio label {
+  margin-left: -6px;
+}
+
+.smallRadio [class*='__ripple'] {
+  height: 20px;
+  width: 20px;
+  margin: 14px;
+}
+</style>
