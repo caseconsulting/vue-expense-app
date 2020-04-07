@@ -25,7 +25,7 @@
         <template v-slot:item="{ item }">
           <tr @click="expenseClicked(item)">
             <!-- checkbox for individual expense -->
-            <td style="width: 1px">
+            <td style="width: 1px" :class="{ failed: item.failed }">
               <v-checkbox
                 :input-value="item.selected"
                 @click.stop="
@@ -38,9 +38,9 @@
               >
               </v-checkbox>
             </td>
-            <td id="money-team">{{ item.cost | moneyValue }}</td>
-            <td>{{ item.purchaseDate | dateFormat }}</td>
-            <td>{{ item.description | descripFormat }}</td>
+            <td id="money-team" :class="{ failed: item.failed }">{{ item.cost | moneyValue }}</td>
+            <td :class="{ failed: item.failed }">{{ item.purchaseDate | dateFormat }}</td>
+            <td :class="{ failed: item.failed }">{{ item.description | descripFormat }}</td>
           </tr>
         </template>
         <!-- end rows in datatable -->
@@ -120,3 +120,11 @@ export default {
   }
 };
 </script>
+
+<style lang="scss">
+@import 'src/assets/styles/styles.scss';
+
+.failed {
+  background-color: #ffbaba;
+}
+</style>

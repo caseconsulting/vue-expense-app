@@ -1,5 +1,8 @@
 <template>
   <div>
+    <v-alert v-for="(alert, index) in alerts" :key="index" :type="alert.status" :color="alert.color" dense class="mb-1">
+      {{ alert.message }}
+    </v-alert>
     <v-card>
       <v-container fluid>
         <!-- table header -->
@@ -141,6 +144,15 @@ function checkAllBoxes() {
 }
 
 /*
+ * clears the response status snackbar
+ */
+function clearStatus() {
+  this.$set(this.status, 'statusType', undefined);
+  this.$set(this.status, 'statusMessage', '');
+  this.$set(this.status, 'color', '');
+}
+
+/*
  * Add expense to expanded row when clicked
  */
 function clickedRow(value) {
@@ -204,7 +216,8 @@ function createExpenses(aggregatedData) {
         indeterminate: false
       },
       selected: false,
-      createdAt: expense.createdAt
+      createdAt: expense.createdAt,
+      failed: false
     };
   });
 }
@@ -232,6 +245,15 @@ function determineCheckBox(budget) {
     checkBox.indeterminate = false;
   }
   return checkBox;
+}
+
+/*
+ * displays an error in the response status snackbar
+ */
+async function displayError(err) {
+  this.$set(this.status, 'statusType', 'ERROR');
+  this.$set(this.status, 'statusMessage', err);
+  this.$set(this.status, 'color', 'red');
 }
 
 /*
@@ -331,7 +353,27 @@ async function reimburseExpenses() {
 
     // reimburse expense on back end
     await this.asyncForEach(expensesToReimburse, async expense => {
-      await api.updateItem(api.EXPENSES, expense.id, expense);
+      let reimbursedExpense = await api.updateItem(api.EXPENSES, expense.id, expense);
+      let msg;
+      if (!reimbursedExpense.id) {
+        msg = reimbursedExpense.response.data.message;
+        this.alerts.push({ status: 'error', message: msg, color: 'red' });
+        let self = this;
+        setTimeout(function() {
+          self.alerts.shift();
+        }, 10000);
+        let groupIndex = _.findIndex(this.empBudgets, { userId: expense.userId, expenseTypeId: expense.expenseTypeId });
+        let expenseIndex = _.findIndex(this.empBudgets[groupIndex].expenses, { id: expense.id });
+        this.empBudgets[groupIndex].expenses[expenseIndex].reimbursedDate = ' ';
+        this.empBudgets[groupIndex].expenses[expenseIndex].failed = true;
+      } else {
+        msg = 'Successfully reimbursed expense';
+        this.alerts.push({ status: 'success', message: msg, color: 'green' });
+        let self = this;
+        setTimeout(function() {
+          self.alerts.shift();
+        }, 10000);
+      }
     });
 
     this.refreshExpenses();
@@ -518,6 +560,8 @@ export default {
     employee: null, //For autocomplete
     expenseType: null, //For autocomplete
     expanded: [], // database expanded
+    alerts: [],
+    showAlert: true,
     headers: [
       {
         text: 'Employee',
@@ -539,7 +583,12 @@ export default {
     pendingExpenses: [], // pending expenses
     reimbursing: false, // is reimbursing
     sortBy: 'employeeName', // sort datatable items
-    sortDesc: false // sort datatable items
+    sortDesc: false, // sort datatable items
+    status: {
+      statusType: undefined,
+      statusMessage: '',
+      color: ''
+    }
   }),
   filters: {
     moneyValue: value => {
@@ -554,8 +603,10 @@ export default {
   methods: {
     asyncForEach,
     checkAllBoxes,
+    clearStatus,
     clickedRow,
     constructAutoComplete,
+    displayError,
     emitSelectionChange,
     filterOutReimbursed,
     getBudgetTotal,
