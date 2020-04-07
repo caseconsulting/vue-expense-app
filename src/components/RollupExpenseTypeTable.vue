@@ -480,7 +480,7 @@ function mainCheckBox() {
  * Show the reimburse button if an expense is selected
  */
 function showReimburseButton() {
-  return this.mainCheckBox.all || this.mainCheckBox.indeterminate;
+  return this.pendingExpenses.length > 0 && (this.mainCheckBox.all || this.mainCheckBox.indeterminate);
 }
 
 /* LIFECYCLE HOOKS */
