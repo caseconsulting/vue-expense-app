@@ -243,6 +243,7 @@ async function submit() {
 
   // set accessibleBy based on access radio
   if (this.isCustomSelected()) {
+    console.log(this.customAccess);
     this.model.accessibleBy = this.customAccess;
   }
 

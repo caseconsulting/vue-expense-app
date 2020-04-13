@@ -16,8 +16,10 @@
     </v-snackbar>
 
     <!-- title -->
-    <v-flex v-if="!isMobile" text-center lg8 md12 sm12 pb-3>
-      <h1>Budget Statistics for {{ employee.firstName }} {{ employee.lastName }}</h1>
+    <v-flex v-if="!isMobile" lg8 md12 sm12>
+      <v-row style="height: 100%" align="center" justify="center">
+        <h1>Budget Statistics for {{ employee.firstName }} {{ employee.lastName }}</h1>
+      </v-row>
     </v-flex>
 
     <!-- anniversary date -->
@@ -51,7 +53,11 @@
 
     <!-- expense data -->
     <v-flex xs12 sm12 md12 lg8>
-      <v-flex text-center>
+      <v-flex v-if="loading" text-center>
+        <v-progress-circular indeterminate size="64" color="#bc3825"></v-progress-circular>
+      </v-flex>
+
+      <v-flex v-else text-center class="pt-0">
         <budget-table v-if="!loading" :employee="expenseTypeData"></budget-table>
         <budget-chart
           v-if="!loading && !isMobile && !adminCall"
@@ -67,7 +73,6 @@
         <expense-form :expense="expense" v-on:error="displayError"></expense-form>
       </v-flex>
     </v-flex>
-
     <budget-select-modal
       :activate="changingBudgetView"
       :budgetYears="getBudgetYears"
@@ -100,6 +105,7 @@ async function created() {
   window.EventBus.$on('cancel-budget-year', () => {
     this.changingBudgetView = false;
   });
+
   window.EventBus.$on('selected-budget-year', data => {
     if (data.format(IsoFormat) != this.fiscalDateView) {
       this.fiscalDateView = data.format(IsoFormat);
@@ -133,7 +139,7 @@ function compute() {
 }
 
 async function updateData() {
-  this.expenseTypeData = await api.getBudgetsByDate(this.employee.id, this.fiscalDateView);
+  this.refreshBudget();
   this.showSnackbar();
 }
 
@@ -155,6 +161,10 @@ async function displayError(err) {
   this.$set(this.status, 'color', 'red');
 }
 
+function isFullTime(employee) {
+  return employee.workStatus == 100;
+}
+
 async function refreshEmployee() {
   let employee;
   this.loading = true;
@@ -173,8 +183,35 @@ async function refreshEmployee() {
 
 async function refreshBudget() {
   this.loading = true;
+  // get all budgets within the year displayed
   let budgetsVar = await api.getBudgetsByDate(this.employee.id, this.fiscalDateView);
-  this.expenseTypeData = budgetsVar;
+
+  // get all budgets non-recuring in the year displayed
+  let expenseTypes = _.filter(await api.getItems(api.EXPENSE_TYPES), expenseType => {
+    return !expenseType.recurringFlag;
+  });
+  _.forEach(expenseTypes, async expenseType => {
+    let date = moment(this.fiscalDateView)
+      .add(1, 'y')
+      .format(IsoFormat);
+    let pastBudget = await api.getBudgetsByDateAndType(this.employee.id, date, expenseType.id);
+    if (pastBudget) {
+      budgetsVar = _.merge(budgetsVar, pastBudget);
+    }
+  });
+
+  // if employee is not full time, prohibit overdraft
+  _.forEach(budgetsVar, async budget => {
+    if (!isFullTime(this.employee)) {
+      budget.odFlag = false;
+    }
+  });
+
+  // remove any budgets where budget amount is 0 and 0 total expenses
+  this.expenseTypeData = _.filter(budgetsVar, data => {
+    let budget = data.budgetObject;
+    return budget.amount != 0 || budget.reimbursedAmount != 0 || budget.pendingAmount != 0;
+  });
   this.loading = false;
 }
 
@@ -190,46 +227,47 @@ function budgets() {
     let expenseTypes = this.expenseTypeData;
     _.forEach(expenseTypes, expenseType => {
       budgetNames.push(expenseType.expenseTypeName);
-      if (expenseType.budgetObject) {
+      let budget = expenseType.budgetObject;
+      if (budget) {
+        // if a current budget exists for this expense type
         if (!expenseType.odFlag) {
-          reimbursed.push(expenseType.budgetObject.reimbursedAmount);
-          unreimbursed.push(expenseType.budgetObject.pendingAmount);
-          let difference =
-            expenseType.budget - expenseType.budgetObject.reimbursedAmount - expenseType.budgetObject.pendingAmount;
+          // if the expense type does not allow overdraft
+          reimbursed.push(budget.reimbursedAmount);
+          unreimbursed.push(budget.pendingAmount);
+          let difference = Math.max(budget.amount - budget.reimbursedAmount - budget.pendingAmount, 0);
           budgetDifference.push(difference);
           odReimbursed.push(0);
           odUnreimbursed.push(0);
         } else {
-          if (expenseType.budget - expenseType.budgetObject.reimbursedAmount < 0) {
+          if (budget.amount - budget.reimbursedAmount < 0) {
+            // if the reimbursed amount is more than the adjusted expense type budget
             let difference = 0;
-            reimbursed.push(expenseType.budget);
+            reimbursed.push(budget.amount);
             budgetDifference.push(difference);
             unreimbursed.push(0);
-            odReimbursed.push(expenseType.budgetObject.reimbursedAmount - expenseType.budget);
-            odUnreimbursed.push(expenseType.budgetObject.pendingAmount);
-          } else if (
-            expenseType.budget - expenseType.budgetObject.reimbursedAmount - expenseType.budgetObject.pendingAmount <
-            0
-          ) {
+            odReimbursed.push(budget.reimbursedAmount - budget.amount);
+            odUnreimbursed.push(budget.pendingAmount);
+          } else if (budget.amount - budget.reimbursedAmount - budget.pendingAmount < 0) {
+            // if the reimburse + pending amount is more than the adjusted expense type budget
             let difference = 0;
             budgetDifference.push(difference);
-            reimbursed.push(expenseType.budgetObject.reimbursedAmount);
+            reimbursed.push(budget.reimbursedAmount);
             odReimbursed.push(0);
-            let temp = expenseType.budget - expenseType.budgetObject.reimbursedAmount;
+            let temp = budget.amount - budget.reimbursedAmount;
             unreimbursed.push(temp);
-            odUnreimbursed.push(expenseType.budgetObject.pendingAmount - temp);
+            odUnreimbursed.push(budget.pendingAmount - temp);
           } else {
-            reimbursed.push(expenseType.budgetObject.reimbursedAmount);
-            unreimbursed.push(expenseType.budgetObject.pendingAmount);
-            let difference =
-              expenseType.budget - expenseType.budgetObject.reimbursedAmount - expenseType.budgetObject.pendingAmount;
+            reimbursed.push(budget.reimbursedAmount);
+            unreimbursed.push(budget.pendingAmount);
+            let difference = Math.max(budget.amount - budget.reimbursedAmount - budget.pendingAmount, 0);
             budgetDifference.push(difference);
             odReimbursed.push(0);
             odUnreimbursed.push(0);
           }
         }
       } else {
-        budgetDifference.push(expenseType.budget);
+        // if a current budget does not exist for this expense type
+        budgetDifference.push(budget.amount);
         reimbursed.push(0);
         unreimbursed.push(0);
         odReimbursed.push(0);
@@ -260,7 +298,7 @@ function drawGraph() {
       },
       {
         type: 'bar',
-        label: 'Unreimbursed',
+        label: 'Pending',
         backgroundColor: '#ff6666',
         data: this.budgets.unreimbursed
       },
@@ -279,7 +317,7 @@ function drawGraph() {
       },
       {
         type: 'bar',
-        label: 'Overdraft Unreimbursed',
+        label: 'Overdraft Pending',
         backgroundColor: pattern.draw('diagonal', 'pink'),
         data: this.budgets.odUnreimbursed
       }
@@ -375,7 +413,9 @@ function getBudgetYears() {
     const [year] = date.split('-');
     budgetYears.push(parseInt(year));
   });
-  budgetYears = _.uniqBy(budgetYears);
+  budgetYears = _.filter(_.uniqBy(budgetYears), year => {
+    return parseInt(year) <= parseInt(this.getCurrentBudgetYear());
+  });
   return _.reverse(_.sortBy(budgetYears));
 }
 
@@ -423,6 +463,20 @@ function getSecondsUntil() {
 function getFiscalYearView() {
   let [year] = this.fiscalDateView.split('-');
   return parseInt(year);
+}
+
+function hasAccess(employee, expenseType) {
+  if (employee.workStatus == 0) {
+    return false;
+  } else if (expenseType.accessibleBy == 'ALL') {
+    return true;
+  } else if (expenseType.accessibleBy == 'FULL TIME') {
+    return employee.workStatus == 100;
+  } else if (expenseType.accessibleBy == 'PART TIME') {
+    return employee.workStatus > 0 && employee.workStatus < 100;
+  } else {
+    return expenseType.accessibleBy.includes(employee.id);
+  }
 }
 
 function isMobile() {
@@ -515,15 +569,17 @@ export default {
   },
   methods: {
     addOneSecondToActualTimeEverySecond,
+    clearStatus,
+    compute,
+    displayError,
     getDiffInSeconds,
     getCurrentBudgetYear,
-    compute,
-    updateData,
-    showSnackbar,
-    clearStatus,
-    displayError,
+    hasAccess,
+    isFullTime,
     refreshBudget,
-    refreshEmployee
+    refreshEmployee,
+    showSnackbar,
+    updateData
   },
   computed: {
     budgets,

@@ -10,11 +10,11 @@
       <v-form ref="form" v-model="valid" lazy-validation>
         <!--Employee picker if admin level -->
         <v-autocomplete
-          v-if="isAdmin && !homeView"
+          v-if="!asUser"
           :items="employees"
           :rules="componentRules"
           :filter="customFilter"
-          :disabled="isReimbursed"
+          :disabled="isReimbursed || isEdit"
           v-model="expense.userId"
           item-text="text"
           label="Employee"
@@ -23,7 +23,7 @@
 
         <!--Expense type picker if admin -->
         <v-autocomplete
-          v-if="isAdmin && !homeView"
+          v-if="!asUser"
           :items="filteredExpenseTypes()"
           :rules="componentRules"
           :disabled="isInactive"
@@ -195,7 +195,7 @@
         </v-btn>
         <!-- End Buttons -->
       </v-form>
-      <confirmation-box :activate="submitting" :expense="expense"></confirmation-box>
+      <confirmation-box :activate="confirming" :expense="expense"></confirmation-box>
     </v-container>
   </v-card>
 </template>
@@ -204,7 +204,6 @@
 import api from '@/shared/api.js';
 import { getRole } from '@/utils/auth';
 import moment from 'moment';
-import { extendMoment } from 'moment-range';
 import uuid from 'uuid/v4';
 
 import ConfirmationBox from './ConfirmationBox.vue';
@@ -214,9 +213,16 @@ import employeeUtils from '@/shared/employeeUtils';
 import FileUpload from './FileUpload.vue';
 
 const IsoFormat = 'YYYY-MM-DD';
-const momentRange = extendMoment(moment);
 
 // METHODS
+function adjustedBudget(expenseType, employee) {
+  return (expenseType.budget * (employee.workStatus / 100.0)).toFixed(2);
+}
+
+function isFullTime(employee) {
+  return employee.workStatus == 100;
+}
+
 function setFile(file) {
   if (file) {
     this.file = file;
@@ -230,93 +236,111 @@ async function checkCoverage() {
     this.loading = true;
     if (this.expense) {
       let expenseType = _.find(this.expenseTypes, type => this.expense.expenseTypeId === type.value);
-      let budgets = [];
-      if (getRole() === 'user') {
-        await api.getUser();
-        budgets = await api.getItems(api.BUDGETS);
-      } else {
-        await api.getItem(api.EMPLOYEES, this.expense.userId);
-        budgets = await api.getBudgetItem(this.expense.userId);
-      }
-      let employeeExpenseTypeBudget = _.find(budgets, budget => {
-        return budget.expenseTypeId === expenseType.value && checkExpenseDate(this.expense.purchaseDate, budget);
-      });
+      //let budgets = [];
 
-      // Keep the cost data as a string. This allows us to keep it formatted as ##.##
-      // -- If you parse the Expense object's cost field itself into a float, it drops the second
-      //    decimal place, then fails validation
-      // -- Remove commas from the input
-      let cost = parseFloat(this.expense.cost);
-      this.$set(this.expense, 'cost', this.expense.cost);
-      if (employeeExpenseTypeBudget) {
-        let committedAmount = employeeExpenseTypeBudget.pendingAmount + employeeExpenseTypeBudget.reimbursedAmount;
-        let allExpenses = await api.getAggregate();
-        let match = _.find(allExpenses, entry => {
-          return entry.id === this.expense.id;
-        });
-        // For subsequent calculations, remove matched entry cost from committed amount
-        let newCommittedAmount;
-        newCommittedAmount = match ? committedAmount - match.cost : committedAmount;
-        if (this.originalExpense && this.originalExpense.expenseTypeId != this.expense.expenseTypeId) {
-          newCommittedAmount = committedAmount;
-        }
-        if (expenseType.odFlag) {
-          // Selected Expense Type allows overdraft
-          if (2 * expenseType.budget !== newCommittedAmount) {
-            //under budget
-            if (newCommittedAmount + cost <= 2 * expenseType.budget) {
-              //full amount reimbursed
-              this.submit();
-            } else {
-              // not maxed out but also not fully covered
-              this.$set(this.expense, 'budget', expenseType.budget);
-              this.$set(this.expense, 'remaining', 2 * expenseType.budget - newCommittedAmount);
-              this.$set(this.expense, 'od', true);
-              this.submitting = true;
-              this.loading = false;
-            }
-          } else {
-            //already overbudget handled by backend after submit
-            this.submit();
-          }
-        } else {
-          this.$set(this.expense, 'od', false);
-          if (expenseType.budget !== newCommittedAmount) {
-            //under budget
-            if (newCommittedAmount + cost <= expenseType.budget) {
-              //full amount reimbursed
-              this.submit();
-            } else {
-              // not maxed out but also not fully covered
-              this.$set(this.expense, 'budget', expenseType.budget);
-              this.$set(this.expense, 'remaining', expenseType.budget - newCommittedAmount);
-              this.submitting = true;
-              this.loading = false;
-            }
-          } else {
-            //already overbudget handled by backend after submit
-            this.submit();
-          }
-        }
+      // get employee information
+      if (this.asUser) {
+        this.employee = await api.getUser();
+        //budgets = await api.getItems(api.BUDGETS);
       } else {
-        // Submitting a new Expense
-        if (!expenseType.odFlag && expenseType.budget < cost) {
-          // This Expense Type does not allow overdraft, and the budget is less than the
-          // cost of the current expense
-          this.$set(this.expense, 'budget', expenseType.budget);
-          this.$set(this.expense, 'remaining', expenseType.budget);
-          this.submitting = true;
-          this.loading = false;
-        } else if (expenseType.odFlag && cost > expenseType.budget * 2) {
-          // budget doesn't yet exist, overdraft allowed, and cost is greater than x2 of budget
-          this.$set(this.expense, 'budget', expenseType.budget);
-          this.$set(this.expense, 'remaining', 2 * expenseType.budget);
-          this.$set(this.expense, 'od', true);
-          this.submitting = true;
-          this.loading = false;
+        this.employee = await api.getItem(api.EMPLOYEES, this.expense.userId); // is this used?
+        //budgets = await api.getBudgetItem(this.expense.userId);
+      }
+
+      let budget = await api.getBudgetsByDateAndType(this.employee.id, this.expense.purchaseDate, expenseType.value);
+
+      if (this.employee.workStatus == 0) {
+        // if user is inactive
+        this.$emit('error', 'Current user is inactive');
+        this.loading = false;
+      } else {
+        // Keep the cost data as a string. This allows us to keep it formatted as ##.##
+        // -- If you parse the Expense object's cost field itself into a float, it drops the second
+        //    decimal place, then fails validation
+        // -- Remove commas from the input
+        let cost = parseFloat(this.expense.cost);
+        this.$set(this.expense, 'cost', this.expense.cost);
+        if (budget) {
+          // if the matching budget exists
+          let committedAmount = budget.pendingAmount + budget.reimbursedAmount;
+          let allExpenses = await api.getAggregate();
+          let match = _.find(allExpenses, entry => {
+            return entry.id === this.expense.id;
+          });
+          // For subsequent calculations, remove matched entry cost from committed amount
+          let newCommittedAmount;
+          newCommittedAmount = match ? committedAmount - match.cost : committedAmount;
+          if (this.originalExpense && this.originalExpense.expenseTypeId != this.expense.expenseTypeId) {
+            newCommittedAmount = committedAmount;
+          }
+          if (expenseType.odFlag && this.isFullTime(this.employee)) {
+            // Selected Expense Type allows overdraft and employee is full time
+            if (2 * expenseType.budget > newCommittedAmount) {
+              //under budget
+              if (newCommittedAmount + cost <= 2 * expenseType.budget) {
+                //full amount reimbursed
+                this.submit();
+              } else {
+                // budget not maxed out but expense not fully covered show adusted confirmation dialog
+                this.$set(this.expense, 'budget', expenseType.budget);
+                this.$set(this.expense, 'remaining', 2 * expenseType.budget - newCommittedAmount);
+                this.$set(this.expense, 'od', true);
+                this.confirming = true;
+              }
+            } else {
+              // budget is already maxed out for overdraft
+              this.$emit('error', 'Budget is maxed out');
+              this.loading = false;
+            }
+          } else {
+            // Selected Expense Type does not allow overdraft or employee is not full time
+            this.$set(this.expense, 'od', false);
+            if (newCommittedAmount < budget.amount) {
+              // currently under budget
+              if (newCommittedAmount + cost < budget.amount) {
+                // reimburse the full expense
+                this.submit();
+              } else {
+                // budget not maxed out but the expense not fully covered
+                this.$set(this.expense, 'budget', budget.amount);
+                this.$set(this.expense, 'remaining', budget.amount - newCommittedAmount);
+                this.confirming = true;
+              }
+            } else {
+              // budget is maxed out
+              this.$emit('error', `${expenseType.budgetName} budget is maxed out`);
+              this.loading = false;
+            }
+          }
         } else {
-          // Good to go. Send it
-          this.submit();
+          // Budget for this expense does not exist
+          if (expenseType.odFlag && this.isFullTime(this.employee)) {
+            // Selected Expense Type allows overdraft and employee is full time
+            if (cost <= 2 * expenseType.budget) {
+              //full amount reimbursed
+              this.submit();
+            } else {
+              // budget not maxed out but the expense not fully covered
+              this.$set(this.expense, 'budget', expenseType.budget);
+              this.$set(this.expense, 'remaining', 2 * expenseType.budget);
+              this.$set(this.expense, 'od', true);
+              this.confirming = true;
+            }
+          } else {
+            // Selected Expense Type does not allow overdraft or employee is not full time
+            this.$set(this.expense, 'od', false);
+            // calculate adjustedBudget based on employee's current work status
+            let adjustedBudget = this.adjustedBudget(expenseType, this.employee);
+            if (cost <= adjustedBudget) {
+              // reimburse the full expense
+              this.submit();
+            } else {
+              // expense exceeds the budget but the expense not fully covered
+              this.$set(this.expense, 'budget', adjustedBudget);
+              this.$set(this.expense, 'remaining', adjustedBudget);
+              this.confirming = true;
+            }
+          }
         }
       }
     }
@@ -362,42 +386,37 @@ function customFilter(item, queryText) {
 }
 
 // returns true if today is between a start and end date
-function betweenDates(startDate, endDate) {
-  let today = new Date();
-  let start = startDate.split('-');
-  let end = endDate.split('-');
-
-  return (
-    (today.getUTCFullYear() < parseInt(end[0]) ||
-      (today.getUTCFullYear() == parseInt(end[0]) && today.getUTCMonth() + 1 < parseInt(end[1])) ||
-      (today.getUTCFullYear() == parseInt(end[0]) &&
-        today.getUTCMonth() + 1 == parseInt(end[1]) &&
-        today.getUTCDate() <= parseInt(end[2]))) &&
-    (today.getUTCFullYear() > parseInt(start[0]) ||
-      (today.getUTCFullYear() == parseInt(start[0]) && today.getUTCMonth() + 1 > parseInt(start[1])) ||
-      (today.getUTCFullYear() == parseInt(start[0]) &&
-        today.getUTCMonth() + 1 == parseInt(start[1]) &&
-        today.getUTCDate() >= parseInt(start[2])))
-  );
+function betweenDates(start, end) {
+  let startDate = moment(start, IsoFormat);
+  let endDate = moment(end, IsoFormat);
+  return moment().isBetween(startDate, endDate, 'day', '[]');
 }
 
 // filter for expenses recurring or containing todays date
 function filteredExpenseTypes() {
   let filteredExpType = [];
-  if (this.employeeRole === 'admin' && this.$route.path === '/expenses') {
-    this.expenseTypes.forEach(function(type) {
-      if (!type.isInactive) {
-        filteredExpType.push(type);
+  let selectedEmployee = _.find(this.employees, ['value', this.expense.userId]);
+  if (!this.asUser) {
+    _.forEach(this.expenseTypes, expenseType => {
+      if (!expenseType.isInactive) {
+        if (!selectedEmployee) {
+          filteredExpType.push(expenseType);
+        } else if (hasAccess({ id: selectedEmployee.value, workStatus: selectedEmployee.workStatus }, expenseType)) {
+          let amount = adjustedBudget(expenseType, selectedEmployee);
+          expenseType.text = `${expenseType.budgetName} - $${amount}`;
+          filteredExpType.push(expenseType);
+        }
       }
     });
   } else {
     let employee = this.userInfo;
-    let homeView = this.homeView;
-    this.expenseTypes.forEach(function(type) {
-      if (!type.isInactive) {
-        if (hasAccess(employee, type, homeView)) {
-          if (type.recurringFlag || (type.endDate != null && betweenDates(type.startDate, type.endDate))) {
-            filteredExpType.push(type);
+    _.forEach(this.expenseTypes, expenseType => {
+      if (!expenseType.isInactive) {
+        if (hasAccess(employee, expenseType)) {
+          if (expenseType.recurringFlag || betweenDates(expenseType.startDate, expenseType.endDate)) {
+            let amount = adjustedBudget(expenseType, employee);
+            expenseType.text = `${expenseType.budgetName} - $${amount}`;
+            filteredExpType.push(expenseType);
           }
         }
       }
@@ -411,10 +430,10 @@ function formatDate(date) {
   return dateUtils.formatDate(date);
 }
 
-function hasAccess(employee, expenseType, homeView) {
+function hasAccess(employee, expenseType) {
   if (employee.workStatus == 0) {
     return false;
-  } else if ((employee.employeeRole == 'admin' && !homeView) || expenseType.accessibleBy == 'ALL') {
+  } else if (expenseType.accessibleBy == 'ALL') {
     return true;
   } else if (expenseType.accessibleBy == 'FULL TIME') {
     return employee.workStatus == 100;
@@ -451,7 +470,6 @@ async function createNewEntry(newUUID) {
 
       if (updatedExpense.id) {
         //add url to training-urls table (uncommenting will add URL info to training-urls table when URL is present)
-        //console.log('new exp category', newExpense.categories);
         if (!isEmpty(updatedExpense.url) && !isEmpty(updatedExpense.categories)) {
           await this.addURLInfo(updatedExpense);
         }
@@ -472,7 +490,6 @@ async function createNewEntry(newUUID) {
 
     if (updatedExpense.id) {
       //add url to training-urls table (uncommenting will add URL info to training-urls table when URL is present)
-      //console.log('new exp category', newExpense.categories);
       if (!isEmpty(updatedExpense.url) && !isEmpty(updatedExpense.categories)) {
         await this.addURLInfo(updatedExpense);
       }
@@ -545,9 +562,7 @@ async function updateExistingEntry() {
  */
 async function submit() {
   let newUUID = uuid();
-  this.submitting = false;
   if (this.$refs.form != undefined || this.$refs.form != null) {
-    this.loading = true;
     if (this.$refs.form.validate()) {
       // second validate may be unnecessary. included in checkCoverage()
 
@@ -625,12 +640,11 @@ function expenseTypeSelected(value) {
  * Check if purchase date is within the fiscal range of the budget
  */
 function checkExpenseDate(purchaseDate, budget) {
-  let startDate, endDate, date, range;
+  let startDate, endDate, date;
   startDate = moment(budget.fiscalStartDate, IsoFormat);
   endDate = moment(budget.fiscalEndDate, IsoFormat);
   date = moment(purchaseDate);
-  range = momentRange().range(startDate, endDate);
-  return range.contains(date);
+  return date.isBetween(startDate, endDate, 'day', '[]');
 }
 
 function isReceiptRequired() {
@@ -705,8 +719,32 @@ async function created() {
   this.employeeRole = getRole();
   this.userInfo = await api.getUser();
 
-  window.EventBus.$on('canceledSubmit', () => (this.submitting = false));
-  window.EventBus.$on('confirmSubmit', this.submit);
+  window.EventBus.$on('canceledSubmit', () => {
+    this.confirming = false;
+    this.loading = false;
+  });
+  window.EventBus.$on('confirmSubmit', () => {
+    this.confirming = false;
+    this.submit();
+  });
+
+  this.homeView = this.$route.path === '/home';
+  this.isInactive = this.homeView && this.userInfo.workStatus == 0;
+  this.asUser = this.homeView || this.employeeRole == 'user';
+
+  if (this.asUser) {
+    this.$set(this.expense, 'employeeName', this.userInfo.id);
+    this.$set(this.expense, 'userId', this.userInfo.id);
+  } else {
+    let employees = await api.getItems(api.EMPLOYEES);
+    this.employees = employees.map(employee => {
+      return {
+        text: employeeUtils.fullName(employee),
+        value: employee.id,
+        workStatus: employee.workStatus
+      };
+    });
+  }
 
   let expenseTypes = await api.getItems(api.EXPENSE_TYPES);
   this.expenseTypes = _.map(expenseTypes, expenseType => {
@@ -727,27 +765,6 @@ async function created() {
       accessibleBy: expenseType.accessibleBy
     };
   });
-
-  this.homeView = this.$route.path === '/home';
-  this.isInactive = this.homeView && this.userInfo.workStatus == 0;
-
-  if (this.homeView) {
-    this.$set(this.expense, 'employeeName', this.userInfo.id);
-    this.$set(this.expense, 'userId', this.userInfo.id);
-  } else {
-    if (this.employeeRole === 'admin') {
-      let employees = await api.getItems(api.EMPLOYEES);
-      this.employees = employees.map(employee => {
-        return {
-          text: employeeUtils.fullName(employee),
-          value: employee.id
-        };
-      });
-    } else {
-      this.$set(this.expense, 'employeeName', this.userInfo.id);
-      this.$set(this.expense, 'userId', this.userInfo.id);
-    }
-  }
 }
 
 function isEmpty(item) {
@@ -757,33 +774,9 @@ function isEmpty(item) {
 export default {
   data() {
     return {
-      homeView: false,
-      hint: '',
-      originalExpense: null,
-      isInactive: false,
       allowReceipt: false,
-      loading: false,
-      employeeRole: '',
-      submitting: false,
-      date: null,
-      purchaseDateFormatted: null,
-      reimbursedDateFormatted: null,
-      selectedExpenseType: {},
-      expenseTypes: [],
-      selectedEmployee: {},
-      employees: [],
-      menu1: false,
-      menu2: false,
-      userInfo: {},
-      urlInfo: {
-        id: ' ',
-        category: '',
-        hits: 0
-      },
-      descriptionRules: [
-        v => !!v || 'Description is a required field',
-        v => (v && v.replace(/\s/g, '').length > 0) || 'Description is a required field'
-      ],
+      asUser: true,
+      componentRules: [v => !!v || 'Required field'],
       costRules: [
         v => !!v || 'Cost is a required field',
         v => v > 0 || 'Cost must be a positive number',
@@ -792,12 +785,39 @@ export default {
           'Expense amount must be a number with two decimal digits',
         v => v < 1000000000 || 'Nice try' //when a user tries to fill out expense that is over a million
       ],
-      componentRules: [v => !!v || 'Required field'],
+      date: null,
       dateRules: [
         v => !!v || 'Date must be valid. Format: MM/DD/YYYY',
         v => (!!v && /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v)) || 'Date must be valid. Format: MM/DD/YYYY'
       ],
+      descriptionRules: [
+        v => !!v || 'Description is a required field',
+        v => (v && v.replace(/\s/g, '').length > 0) || 'Description is a required field'
+      ],
+      employeeRole: '',
+      employee: null,
+      employees: [],
+      expenseTypes: [],
+      file: undefined,
+      homeView: false,
+      hint: '',
+      isInactive: false,
+      loading: false,
+      menu1: false,
+      menu2: false,
       optionalDateRules: [v => !v || /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v) || 'Date must be valid. Format: MM/DD/YYYY'],
+      originalExpense: null,
+      purchaseDateFormatted: null,
+      receiptRules: [v => !!v || 'Receipts are required'],
+      reimbursedDateFormatted: null,
+      selectedEmployee: {},
+      selectedExpenseType: {},
+      confirming: false,
+      urlInfo: {
+        id: ' ',
+        category: '',
+        hits: 0
+      },
       urlRules: [
         v =>
           !v ||
@@ -807,9 +827,8 @@ export default {
           ) ||
           'URL must be valid. Only http(s) are accepted.'
       ],
-      receiptRules: [v => !!v || 'Receipts are required'],
-      valid: false,
-      file: undefined
+      userInfo: {},
+      valid: false
     };
   },
   components: {
@@ -858,25 +877,27 @@ export default {
     updateIsRequired
   },
   methods: {
-    checkCoverage,
-    clearForm,
-    customFilter,
+    addURLInfo,
+    adjustedBudget,
     betweenDates,
+    checkCoverage,
+    checkExpenseDate,
+    clearForm,
+    createNewEntry,
+    customFilter,
+    expenseTypeSelected,
     formatDate,
+    filteredExpenseTypes,
+    getCategories,
     hasAccess,
+    incrementURLHits,
+    isEmpty,
+    isFullTime,
+    isReceiptRequired,
     parseDate,
     submit,
     setFile,
-    expenseTypeSelected,
-    filteredExpenseTypes,
-    getCategories,
-    addURLInfo,
-    incrementURLHits,
-    checkExpenseDate,
-    isReceiptRequired,
-    updateExistingEntry,
-    createNewEntry,
-    isEmpty
+    updateExistingEntry
   },
   created
 };

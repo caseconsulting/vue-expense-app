@@ -1,16 +1,16 @@
 this.expense<template>
   <v-layout row justify-center>
-    <v-dialog v-model="activate" persistent max-width="290">
+    <v-dialog v-model="activate" persistent max-width="330">
       <v-card>
         <v-card-title class="headline">You've reached the budget limit for this expense type</v-card-title>
         <v-card-text>
           <p v-if="expense.od">
-            The expense you are about to submit is only covered up to {{ (expense.budget * 2) | moneyValue }}. You will
-            be reimbursed {{ expense.remaining | moneyValue }} of {{ expense.cost | moneyValue }}.
+            The expense type you are about to submit is only covered up to {{ (expense.budget * 2) | moneyValue }}. You
+            will be reimbursed {{ expense.remaining | moneyValue }} of {{ expense.cost | moneyValue }}.
           </p>
           <p v-else>
-            The expense you are about to submit is only covered up to {{ expense.budget | moneyValue }}. You will be
-            reimbursed {{ expense.remaining | moneyValue }} of {{ expense.cost | moneyValue }}.
+            The expense type you are about to submit is only covered up to {{ expense.budget | moneyValue }}. You will
+            be reimbursed {{ expense.remaining | moneyValue }} of {{ expense.cost | moneyValue }}.
           </p>
           <p>Do you want to continue?</p>
         </v-card-text>
@@ -38,9 +38,12 @@ export default {
       }
     },
     confirm(msg) {
-      this.expense.note = `The expense you are about to submit is only covered up to $
-        ${this.expense.budget}. You will be reimbursed $${this.expense.remaining} of $
-        ${this.expense.cost}`;
+      let adjustNote = `Expense type is only covered up to $${this.expense.budget}. You will be reimbursed $${this.expense.remaining} of $${this.expense.cost}`;
+      if (this.expense.note) {
+        this.expense.note += `\n\n${adjustNote}`;
+      } else {
+        this.expense.note = adjustNote;
+      }
       this.expense.cost = this.expense.remaining;
       window.EventBus.$emit(msg);
     }

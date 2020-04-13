@@ -1,6 +1,6 @@
 <template>
   <div id="budget-table">
-    <v-container fluid>
+    <v-container fluid class="pt-0">
       <v-data-iterator :items="employee" hide-default-footer>
         <template v-slot:default="props">
           <v-row>
@@ -14,7 +14,7 @@
                   <v-list-item>
                     <v-list-item-content>Budget:</v-list-item-content>
                     <v-list-item-content class="text-right">
-                      <div>{{ item.budget | moneyValue }}</div>
+                      <div>{{ getAmount(item) | moneyValue }}</div>
                     </v-list-item-content>
                   </v-list-item>
                   <v-list-item>
@@ -77,12 +77,21 @@ export default {
       let isOverdraftAllowed = expenseType.odFlag;
       return isOverdraftAllowed ? 'Allowed' : 'Not Allowed';
     },
+    getAmount(item) {
+      if (item.budgetObject) {
+        return item.budgetObject.amount;
+      }
+      return 0;
+    },
     getRedColor(expenseType) {
       return this.remaining(expenseType) <= 0 && !expenseType.odFlag;
     },
     remaining(item) {
       if (item.budgetObject) {
-        return item.budget - item.budgetObject.pendingAmount - item.budgetObject.reimbursedAmount;
+        return Math.max(
+          item.budgetObject.amount - item.budgetObject.pendingAmount - item.budgetObject.reimbursedAmount,
+          0
+        );
       }
       return item.budget;
     },

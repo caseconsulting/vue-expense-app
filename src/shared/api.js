@@ -56,6 +56,10 @@ function getBudgetsByDate(id, date) {
   return execute('get', `/utility/${id}/${date}`);
 }
 
+function getBudgetsByDateAndType(id, date, expenseTypeId) {
+  return execute('get', `/utility/${id}/${date}/${expenseTypeId}`);
+}
+
 function getItems(type) {
   return execute('get', `/${type}`);
 }
@@ -139,6 +143,7 @@ export default {
   getAllEmployeeExpenses,
   getAllExpenseTypeExpenses,
   getBudgetsByDate,
+  getBudgetsByDateAndType,
   getItems,
   getItem,
   getAttachment,
