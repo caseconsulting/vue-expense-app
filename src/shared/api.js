@@ -107,8 +107,8 @@ function getUser() {
   return execute('get', 'info/me');
 }
 
-function getAttachment(userId, expenseId) {
-  return execute('get', `attachment/${userId}/${expenseId}`);
+function getAttachment(employeeId, expenseId) {
+  return execute('get', `attachment/${employeeId}/${expenseId}`);
 }
 
 async function createAttachment(expense, file) {
@@ -119,7 +119,7 @@ async function createAttachment(expense, file) {
   let accessToken = getAccessToken();
   return client({
     method: 'post',
-    url: `/attachment/${expense.userId}/${expense.id}`,
+    url: `/attachment/${expense.employeeId}/${expense.id}`,
     data: formData,
     headers: {
       Authorization: `Bearer ${accessToken}`
@@ -134,7 +134,7 @@ async function createAttachment(expense, file) {
 }
 
 function deleteAttachment(expense) {
-  return execute('delete', `attachment/${expense.userId}/${expense.id}/${expense.receipt}`);
+  return execute('delete', `attachment/${expense.employeeId}/${expense.id}/${expense.receipt}`);
 }
 
 export default {

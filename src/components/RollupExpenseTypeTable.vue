@@ -169,10 +169,10 @@ function clickedRow(value) {
  */
 function constructAutoComplete(aggregatedData) {
   this.employees = _.map(aggregatedData, data => {
-    if (data && data.employeeName && data.userId) {
+    if (data && data.employeeName && data.employeeId) {
       return {
         text: data.employeeName,
-        value: data.userId
+        value: data.employeeId
       };
     }
   }).filter(data => {
@@ -210,7 +210,7 @@ function createExpenses(aggregatedData) {
       purchaseDate: expense.purchaseDate,
       receipt: expense.receipt,
       reimbursedDate: expense.reimbursedDate,
-      userId: expense.userId,
+      employeeId: expense.employeeId,
       checkBox: {
         all: false,
         indeterminate: false
@@ -286,7 +286,7 @@ function getBudgetTotal(expenses) {
  */
 function groupEmployeeExpenses(expenses) {
   let data = _.forEach(expenses, expense => {
-    expense.key = `${expense.userId}${expense.expenseTypeId}`;
+    expense.key = `${expense.employeeId}${expense.expenseTypeId}`;
   });
 
   // Create a list of expenses under each group
@@ -309,11 +309,11 @@ function isReimbursed(reimbursedDate) {
 }
 
 /*
- * Return true if two items have the same userId and expenseTypeId and not reimbursed
+ * Return true if two items have the same employeeId and expenseTypeId and not reimbursed
  */
 function matchingEmployeeAndExpenseType(expense, item) {
   let reimbursed = isReimbursed(item.reimbursedDate);
-  return expense.userId === item.userId && expense.expenseTypeId === item.expenseTypeId && !reimbursed;
+  return expense.employeeId === item.employeeId && expense.expenseTypeId === item.expenseTypeId && !reimbursed;
 }
 
 /*
@@ -362,7 +362,10 @@ async function reimburseExpenses() {
         setTimeout(function() {
           self.alerts.shift();
         }, 10000);
-        let groupIndex = _.findIndex(this.empBudgets, { userId: expense.userId, expenseTypeId: expense.expenseTypeId });
+        let groupIndex = _.findIndex(this.empBudgets, {
+          employeeId: expense.employeeId,
+          expenseTypeId: expense.expenseTypeId
+        });
         let expenseIndex = _.findIndex(this.empBudgets[groupIndex].expenses, { id: expense.id });
         this.empBudgets[groupIndex].expenses[expenseIndex].reimbursedDate = ' ';
         this.empBudgets[groupIndex].expenses[expenseIndex].failed = true;
@@ -414,7 +417,7 @@ function submitExpenseObject(expense) {
     purchaseDate: expense.purchaseDate,
     reimbursedDate: expense.reimbursedDate,
     note: !expense.note ? null : expense.note,
-    userId: expense.userId,
+    employeeId: expense.employeeId,
     receipt: expense.receipt,
     createdAt: expense.createdAt
   };
@@ -487,9 +490,9 @@ function filteredItems() {
     } else if (!this.employee && this.expenseType) {
       return budget.expenseTypeId === this.expenseType;
     } else if (!this.expenseType && this.employee) {
-      return budget.userId === this.employee;
+      return budget.employeeId === this.employee;
     } else {
-      return budget.userId === this.employee && budget.expenseTypeId === this.expenseType;
+      return budget.employeeId === this.employee && budget.expenseTypeId === this.expenseType;
     }
   });
 }

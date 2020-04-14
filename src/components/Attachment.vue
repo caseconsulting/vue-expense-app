@@ -34,7 +34,7 @@ import api from '../shared/api';
 function link() {
   const API_HOSTNAME = API_CONFIG.apiHostname;
   const API_PORT = API_CONFIG.apiPort;
-  const endLink = `attachment/${this.expense.userId}/${this.expense.id}`;
+  const endLink = `attachment/${this.expense.employeeId}/${this.expense.id}`;
 
   if (API_HOSTNAME === 'localhost') return `http://${API_HOSTNAME}:${API_PORT}/${endLink}`;
   else return `https://${API_HOSTNAME}/${endLink}`;
@@ -42,7 +42,7 @@ function link() {
 
 // METHODS
 async function openDownloadTab() {
-  let signedURL = await api.getAttachment(this.expense.userId, this.expense.id);
+  let signedURL = await api.getAttachment(this.expense.employeeId, this.expense.id);
   console.log(signedURL);
   window.open(signedURL, '_blank');
 }

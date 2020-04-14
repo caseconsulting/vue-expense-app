@@ -353,7 +353,7 @@ function addModelToTable(newExpense) {
   if (!matchingExpenses.length) {
     if (this.isAdmin) {
       api
-        .getItem(api.EMPLOYEES, newExpense.userId)
+        .getItem(api.EMPLOYEES, newExpense.employeeId)
         .then(employee => {
           let employeeName = employeeUtils.fullName(employee);
           this.$set(newExpense, 'employeeName', employeeName);
@@ -395,10 +395,10 @@ function clickedRow(value) {
 
 function constructAutoComplete(aggregatedData) {
   this.employees = _.map(aggregatedData, data => {
-    if (data && data.employeeName && data.userId) {
+    if (data && data.employeeName && data.employeeId) {
       return {
         text: data.employeeName,
-        value: data.userId
+        value: data.employeeId
       };
     }
   }).filter(data => {
@@ -423,7 +423,7 @@ function filterExpense() {
 
   if (this.employee) {
     this.filteredExpenses = _.filter(this.filteredExpenses, expense => {
-      return expense.userId === this.employee;
+      return expense.employeeId === this.employee;
     });
   }
 
@@ -522,7 +522,7 @@ function onSelect(item) {
   this.$set(this.expense, 'employeeName', item.employeeName);
   this.$set(this.expense, 'description', item.description);
   this.$set(this.expense, 'cost', moneyFilter(item.cost));
-  this.$set(this.expense, 'userId', item.userId);
+  this.$set(this.expense, 'employeeId', item.employeeId);
   this.$set(this.expense, 'expenseTypeId', item.expenseTypeId);
   this.$set(this.expense, 'note', item.note.trim());
   this.$set(this.expense, 'receipt', item.receipt);
@@ -582,7 +582,7 @@ function updateModelInTable(updatedExpense) {
   let matchingExpensesIndex = _.findIndex(this.processedExpenses, expense => expense.id === updatedExpense.id);
   let employeeName = '';
   if (this.isAdmin) {
-    api.getItem(api.EMPLOYEES, updatedExpense.userId).then(employee => {
+    api.getItem(api.EMPLOYEES, updatedExpense.employeeId).then(employee => {
       employeeName = employeeUtils.fullName(employee);
       this.$set(updatedExpense, 'employeeName', employeeName);
     });
@@ -641,7 +641,7 @@ export default {
         description: '',
         cost: '',
         note: null,
-        userId: '',
+        employeeId: '',
         expenseTypeId: '',
         purchaseDate: null,
         reimbursedDate: null,
@@ -695,7 +695,7 @@ export default {
         description: '',
         cost: '',
         note: null,
-        userId: '',
+        employeeId: '',
         expenseTypeId: '',
         purchaseDate: null,
         reimbursedDate: null,

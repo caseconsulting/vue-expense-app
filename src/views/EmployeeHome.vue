@@ -540,7 +540,7 @@ export default {
         description: '',
         cost: '',
         note: null,
-        userId: '',
+        employeeId: '',
         expenseTypeId: '',
         purchaseDate: null,
         reimbursedDate: null,

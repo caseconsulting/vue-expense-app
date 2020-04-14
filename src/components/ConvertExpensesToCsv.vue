@@ -35,7 +35,7 @@ function exportCSVFile(items, fileTitle) {
       let person = items[i];
 
       for (let employee of this.employees) {
-        if (employee.id === person.userId) {
+        if (employee.id === person.employeeId) {
           person.employeeNumber = employee.employeeNumber;
           person.lastName = employee.lastName;
           person.firstName = employee.firstName;

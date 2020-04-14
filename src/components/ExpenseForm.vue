@@ -15,7 +15,7 @@
           :rules="componentRules"
           :filter="customFilter"
           :disabled="isReimbursed || isEdit"
-          v-model="expense.userId"
+          v-model="expense.employeeId"
           item-text="text"
           label="Employee"
           class="form_padding"
@@ -243,8 +243,8 @@ async function checkCoverage() {
         this.employee = await api.getUser();
         //budgets = await api.getItems(api.BUDGETS);
       } else {
-        this.employee = await api.getItem(api.EMPLOYEES, this.expense.userId); // is this used?
-        //budgets = await api.getBudgetItem(this.expense.userId);
+        this.employee = await api.getItem(api.EMPLOYEES, this.expense.employeeId); // is this used?
+        //budgets = await api.getBudgetItem(this.expense.employeeId);
       }
 
       let budget = await api.getBudgetsByDateAndType(this.employee.id, this.expense.purchaseDate, expenseType.value);
@@ -395,7 +395,7 @@ function betweenDates(start, end) {
 // filter for expenses recurring or containing todays date
 function filteredExpenseTypes() {
   let filteredExpType = [];
-  let selectedEmployee = _.find(this.employees, ['value', this.expense.userId]);
+  let selectedEmployee = _.find(this.employees, ['value', this.expense.employeeId]);
   if (!this.asUser) {
     _.forEach(this.expenseTypes, expenseType => {
       if (!expenseType.isInactive) {
@@ -734,7 +734,7 @@ async function created() {
 
   if (this.asUser) {
     this.$set(this.expense, 'employeeName', this.userInfo.id);
-    this.$set(this.expense, 'userId', this.userInfo.id);
+    this.$set(this.expense, 'employeeId', this.userInfo.id);
   } else {
     let employees = await api.getItems(api.EMPLOYEES);
     this.employees = employees.map(employee => {

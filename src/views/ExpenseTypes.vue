@@ -494,8 +494,8 @@ function getAccess(expenseType) {
   }
 }
 
-function getEmployeeName(userId) {
-  let localEmployee = _.find(this.employees, ['id', userId]);
+function getEmployeeName(employeeId) {
+  let localEmployee = _.find(this.employees, ['id', employeeId]);
   return `${localEmployee.firstName} ${localEmployee.lastName}`;
 }
 

@@ -170,9 +170,9 @@ export default {
         } else if (!this.employee && this.expenseType) {
           return expense.expenseTypeId === this.expenseType;
         } else if (!this.expenseType && this.employee) {
-          return expense.userId === this.employee;
+          return expense.employeeId === this.employee;
         } else {
-          return expense.userId === this.employee && expense.expenseTypeId === this.expenseType;
+          return expense.employeeId === this.employee && expense.expenseTypeId === this.expenseType;
         }
       });
     }
@@ -191,7 +191,7 @@ export default {
       }
     },
     async getEmployeeName(expense) {
-      let employee = await api.getItem(api.EMPLOYEES, expense.userId);
+      let employee = await api.getItem(api.EMPLOYEES, expense.employeeId);
       expense.employeeName = employeeUtils.fullName(employee);
       return expense;
     },
