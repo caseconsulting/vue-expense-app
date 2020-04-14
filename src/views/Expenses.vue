@@ -216,9 +216,7 @@
                       <p v-if="!isEmpty(item.url)">
                         <b>Url: </b> <a v-if="item.url" :href="item.url">{{ item.url }}</a>
                       </p>
-                      <p v-if="!isEmpty(item.categories) && typeof item.categories == 'string'">
-                        <b>Category: </b>{{ item.categories }}
-                      </p>
+                      <p v-if="!isEmpty(item.category)"><b>Category: </b>{{ item.category }}</p>
                       <div v-if="isAdmin" class="flagExp">
                         <p>Inactive:</p>
                         <icon v-if="useInactiveStyle(item)" id="marks" class="mr-1" name="regular/check-circle"></icon>
@@ -530,7 +528,7 @@ function onSelect(item) {
   this.$set(this.expense, 'receipt', item.receipt);
   this.$set(this.expense, 'createdAt', item.createdAt);
   this.$set(this.expense, 'url', item.url.trim());
-  this.$set(this.expense, 'categories', item.categories);
+  this.$set(this.expense, 'category', item.category);
 }
 
 async function refreshExpenses() {
@@ -651,7 +649,7 @@ export default {
         employeeName: '',
         budgetName: '',
         createdAt: null,
-        categories: ''
+        category: ''
       },
       expenseTypes: [], //mine
       filter: {
@@ -705,7 +703,7 @@ export default {
         employeeName: '',
         budgetName: '',
         createdAt: null,
-        categories: ''
+        category: ''
       },
       role: '',
       search: '', // query text for datatable search field

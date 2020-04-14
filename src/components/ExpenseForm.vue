@@ -53,7 +53,7 @@
           v-if="getCategories() != null && getCategories().length >= 1"
           :rules="componentRules"
           :disabled="isInactive"
-          v-model="expense.categories"
+          v-model="expense.category"
           :items="getCategories()"
           label="Select Category"
           clearable
@@ -358,7 +358,7 @@ function clearForm() {
   this.$set(this.expense, 'createdAt', null);
   this.$set(this.expense, 'url', null);
   this.$set(this.expense, 'receipt', undefined);
-  this.$set(this.expense, 'categories', '');
+  this.$set(this.expense, 'category', '');
   this.$set(this.expense, 'expenseTypeId', '');
   this.originalExpense = null;
 
@@ -470,7 +470,7 @@ async function createNewEntry(newUUID) {
 
       if (updatedExpense.id) {
         //add url to training-urls table (uncommenting will add URL info to training-urls table when URL is present)
-        if (!isEmpty(updatedExpense.url) && !isEmpty(updatedExpense.categories)) {
+        if (!isEmpty(updatedExpense.url) && !isEmpty(updatedExpense.category)) {
           await this.addURLInfo(updatedExpense);
         }
 
@@ -490,7 +490,7 @@ async function createNewEntry(newUUID) {
 
     if (updatedExpense.id) {
       //add url to training-urls table (uncommenting will add URL info to training-urls table when URL is present)
-      if (!isEmpty(updatedExpense.url) && !isEmpty(updatedExpense.categories)) {
+      if (!isEmpty(updatedExpense.url) && !isEmpty(updatedExpense.category)) {
         await this.addURLInfo(updatedExpense);
       }
 
@@ -594,15 +594,15 @@ async function addURLInfo(newExpense) {
 
   let encodedURL = btoa(newExpense.url);
   encodedURL = encodedURL.replace(/\//g, '%2F');
-  let item = await api.getURLInfo(encodedURL, newExpense.categories);
+  let item = await api.getURLInfo(encodedURL, newExpense.category);
   if (item) {
     await this.incrementURLHits(item);
   } else {
     this.$set(this.urlInfo, 'id', newExpense.url);
 
     //adds categories to the list if applicable
-    if (newExpense.categories) {
-      this.$set(this.urlInfo, 'category', newExpense.categories);
+    if (newExpense.category) {
+      this.$set(this.urlInfo, 'category', newExpense.category);
     } else {
       this.$set(this.urlInfo, 'category', ' ');
     }
@@ -628,7 +628,7 @@ async function incrementURLHits(urlInfo) {
 }
 
 function expenseTypeSelected(value) {
-  this.expense.categories = '';
+  this.expense.category = '';
   return (this.selectedExpenseType = _.find(this.expenseTypes, expenseType => {
     if (expenseType.value === value) {
       return expenseType;

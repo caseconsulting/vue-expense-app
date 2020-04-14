@@ -58,7 +58,7 @@ function exportCSVFile(items, fileTitle) {
         person.cost,
         person.purchaseDate,
         person.reimbursedDate || ' ',
-        person.categories || ' '
+        person.category || ' '
       ];
     }
 
@@ -70,7 +70,7 @@ function exportCSVFile(items, fileTitle) {
       'Cost',
       'Purchase Date',
       'Reimbursed Date',
-      'Categories'
+      'Category'
     ];
     items.unshift(this.headers);
 

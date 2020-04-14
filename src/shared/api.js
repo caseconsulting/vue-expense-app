@@ -53,11 +53,11 @@ function getBudgetItem(id) {
 }
 
 function getBudgetsByDate(id, date) {
-  return execute('get', `/utility/${id}/${date}`);
+  return execute('get', `/${UTILITY}/getEmployeeBudgets/${id}/${date}`);
 }
 
 function getBudgetsByDateAndType(id, date, expenseTypeId) {
-  return execute('get', `/utility/${id}/${date}/${expenseTypeId}`);
+  return execute('get', `/${UTILITY}/getEmployeeBudgets/${id}/${date}/${expenseTypeId}`);
 }
 
 function getItems(type) {
@@ -69,15 +69,15 @@ function getItem(type, id) {
 }
 
 function getAllEmployeeExpenses(id) {
-  return execute('get', `/utility/getAllEmployeeExpenses/${id}`);
+  return execute('get', `/${UTILITY}/getAllEmployeeExpenses/${id}`);
 }
 
 function getAllExpenseTypeExpenses(id) {
-  return execute('get', `/utility/getAllExpenseTypeExpenses/${id}`);
+  return execute('get', `/${UTILITY}/getAllExpenseTypeExpenses/${id}`);
 }
 
 function getURLInfo(id, category) {
-  return execute('get', `/utility/getURLInfo/'${id}'/${category}`);
+  return execute('get', `/${UTILITY}/getURLInfo/'${id}'/${category}`);
 }
 
 function createItem(type, data) {
@@ -97,7 +97,7 @@ function deleteItem(type, id) {
 }
 
 function getAggregate() {
-  return execute('get', `/utility/getAllExpenses`);
+  return execute('get', `/${UTILITY}/getAllExpenses`);
 }
 
 function getRole() {
