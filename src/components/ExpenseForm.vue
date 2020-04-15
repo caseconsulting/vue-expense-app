@@ -247,7 +247,8 @@ async function checkCoverage() {
         //budgets = await api.getBudgetItem(this.expense.employeeId);
       }
 
-      let budget = await api.getBudgetsByDateAndType(this.employee.id, this.expense.purchaseDate, expenseType.value);
+      let budget = await api.getBudgetsByDateAndType(this.employee.id, this.expense.purchaseDate, expenseType.value)
+        .budgetObject;
 
       if (this.employee.workStatus == 0) {
         // if user is inactive

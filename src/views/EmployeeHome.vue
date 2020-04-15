@@ -190,15 +190,23 @@ async function refreshBudget() {
   let expenseTypes = _.filter(await api.getItems(api.EXPENSE_TYPES), expenseType => {
     return !expenseType.recurringFlag;
   });
-  _.forEach(expenseTypes, async expenseType => {
-    let date = moment(this.fiscalDateView)
+
+  // for each non-recurring expense type
+  await this.asyncForEach(expenseTypes, async expenseType => {
+    let startDate = moment(this.fiscalDateView).format(IsoFormat);
+    let endDate = moment(this.fiscalDateView)
       .add(1, 'y')
       .format(IsoFormat);
-    let pastBudget = await api.getBudgetsByDateAndType(this.employee.id, date, expenseType.id);
-    if (pastBudget) {
-      budgetsVar = _.merge(budgetsVar, pastBudget);
+    let pastBudgetStart = await api.getBudgetsByDateAndType(this.employee.id, startDate, expenseType.id);
+    let pastBudgetEnd = await api.getBudgetsByDateAndType(this.employee.id, endDate, expenseType.id);
+    if (pastBudgetStart.length > 0) {
+      budgetsVar.push(pastBudgetStart[0]);
+    }
+    if (pastBudgetEnd.length > 0) {
+      budgetsVar.push(pastBudgetEnd[0]);
     }
   });
+  budgetsVar = _.uniqBy(budgetsVar, 'expenseTypeId');
 
   // if employee is not full time, prohibit overdraft
   _.forEach(budgetsVar, async budget => {
@@ -212,7 +220,17 @@ async function refreshBudget() {
     let budget = data.budgetObject;
     return budget.amount != 0 || budget.reimbursedAmount != 0 || budget.pendingAmount != 0;
   });
+
   this.loading = false;
+}
+
+/*
+ * Async function to loop an array
+ */
+async function asyncForEach(array, callback) {
+  for (let index = 0; index < array.length; index++) {
+    await callback(array[index], index, array);
+  }
 }
 
 /* Computed */
@@ -569,6 +587,7 @@ export default {
   },
   methods: {
     addOneSecondToActualTimeEverySecond,
+    asyncForEach,
     clearStatus,
     compute,
     displayError,
