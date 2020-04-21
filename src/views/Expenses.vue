@@ -358,7 +358,7 @@ function addModelToTable(newExpense) {
           let employeeName = employeeUtils.fullName(employee);
           this.$set(newExpense, 'employeeName', employeeName);
         })
-        .catch(err => console.log(err));
+        .catch(err => this.displayError(err));
     }
     api.getItem(api.EXPENSE_TYPES, newExpense.expenseTypeId).then(expenseType => {
       this.$set(newExpense, 'budgetName', expenseType.budgetName);
@@ -564,7 +564,7 @@ async function unreimburseExpense() {
   this.unreimbursing = false;
 
   this.propExpense.reimbursedDate = null;
-  let updatedExpense = await api.updateItem(api.EXPENSES, this.propExpense.id, this.propExpense);
+  let updatedExpense = await api.updateItem(api.EXPENSES, this.propExpense);
   if (updatedExpense.id) {
     this.$set(this.status, 'statusType', 'SUCCESS');
     this.$set(this.status, 'statusMessage', 'Item was successfully unreimbursed!');

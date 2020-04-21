@@ -426,6 +426,7 @@ function getAnniversary() {
 
 function getBudgetYears() {
   let budgetYears = [];
+  //console.log(this.allUserBudgets);
   let budgetDates = _.uniqBy(_.map(this.allUserBudgets, 'fiscalStartDate'));
   budgetDates.forEach(date => {
     const [year] = date.split('-');
@@ -434,6 +435,7 @@ function getBudgetYears() {
   budgetYears = _.filter(_.uniqBy(budgetYears), year => {
     return parseInt(year) <= parseInt(this.getCurrentBudgetYear());
   });
+  //console.log(_.reverse(_.sortBy(budgetYears)));
   return _.reverse(_.sortBy(budgetYears));
 }
 

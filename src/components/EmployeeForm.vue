@@ -291,6 +291,7 @@ import { getRole } from '@/utils/auth';
 import dateUtils from '@/shared/dateUtils';
 import UpdateHireDateModal from './UpdateHireDateModal.vue';
 import MobileDetect from 'mobile-detect';
+import uuid from 'uuid/v4';
 
 const regex = /^(([^<>()[\]\\.,;:\s@#"]+(\.[^<>()[\]\\.,;:\s@#"]+)*)|(".+"))@consultwithcase.com/;
 
@@ -328,10 +329,6 @@ function formatDate(date) {
 
 function formatRole(employeeRole) {
   return _.kebabCase(employeeRole);
-}
-
-async function checkExpenses() {
-  this.hasExpenses = _.size(await api.getAllEmployeeExpenses(this.model.id)) > 0;
 }
 
 function viewStatus() {
@@ -381,7 +378,7 @@ async function submit() {
 
     if (this.model.id) {
       // update employee
-      let updatedEmployee = await api.updateItem(api.EMPLOYEES, this.model.id, this.model);
+      let updatedEmployee = await api.updateItem(api.EMPLOYEES, this.model);
       if (updatedEmployee.id) {
         this.$emit('update');
         this.clearForm();
@@ -389,6 +386,7 @@ async function submit() {
         this.$emit('error', updatedEmployee.response.data.message);
       }
     } else {
+      this.model.id = uuid();
       let newEmployee = await api.createItem(api.EMPLOYEES, this.model);
       if (newEmployee.id) {
         this.$set(this.model, 'id', newEmployee.id);
@@ -396,6 +394,7 @@ async function submit() {
         this.clearForm();
       } else {
         this.$emit('error', newEmployee.response.data.message);
+        this.$set(this.model, 'id', '');
       }
     }
   }
@@ -559,8 +558,8 @@ export default {
         this.changingHireDate = false;
       }
     },
-    'model.hireDate': function() {
-      this.checkExpenses();
+    'model.hireDate': async function() {
+      this.hasExpenses = this.model.id ? _.size(await api.getAllEmployeeExpenses(this.model.id)) > 0 : false;
       this.date = this.model.hireDate;
     },
     'model.deptDate': function() {
@@ -612,7 +611,6 @@ export default {
   },
   props: ['model'],
   methods: {
-    checkExpenses,
     clearForm,
     viewStatus,
     formatDate,

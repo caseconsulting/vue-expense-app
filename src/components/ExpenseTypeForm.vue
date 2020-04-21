@@ -175,6 +175,7 @@
 import api from '@/shared/api.js';
 import dateUtils from '@/shared/dateUtils';
 import _ from 'lodash';
+import uuid from 'uuid/v4';
 
 // METHODS
 function clearForm() {
@@ -243,7 +244,6 @@ async function submit() {
 
   // set accessibleBy based on access radio
   if (this.isCustomSelected()) {
-    console.log(this.customAccess);
     this.model.accessibleBy = this.customAccess;
   }
 
@@ -268,7 +268,7 @@ async function submit() {
     }
 
     if (this.model.id) {
-      let newExpenseType = await api.updateItem(api.EXPENSE_TYPES, this.model.id, this.model);
+      let newExpenseType = await api.updateItem(api.EXPENSE_TYPES, this.model);
       if (newExpenseType.id) {
         this.$emit('update');
       } else {
@@ -276,6 +276,9 @@ async function submit() {
       }
       this.clearForm();
     } else {
+      let newUUID = uuid();
+      this.$set(this.model, 'id', newUUID);
+
       let newExpenseType = await api.createItem(api.EXPENSE_TYPES, this.model);
       if (newExpenseType.id) {
         this.$set(this.model, 'id', newExpenseType.id);
@@ -283,6 +286,7 @@ async function submit() {
         this.clearForm();
       } else {
         this.$emit('error', newExpenseType.response.data.message);
+        this.$set(this.model, 'id', '');
       }
     }
   }

@@ -425,7 +425,7 @@ async function validateDelete(item) {
       return result.length <= 0;
     })
     .catch(err => {
-      console.log(err);
+      this.displayError(err);
     });
   if (x) {
     this.$set(this.deleteModel, 'id', item.id);
@@ -477,6 +477,11 @@ async function created() {
   window.EventBus.$on('canceled-delete-employee', () => (this.deleting = false));
   window.EventBus.$on('confirm-delete-employee', this.deleteEmployee);
   window.EventBus.$on('invalid-employee-delete', () => (this.invalidDelete = false));
+
+  // if user, remove employee action button header
+  if (!this.userIsAdmin()) {
+    this.headers.pop();
+  }
 }
 
 export default {

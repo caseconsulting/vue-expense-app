@@ -43,7 +43,6 @@ function link() {
 // METHODS
 async function openDownloadTab() {
   let signedURL = await api.getAttachment(this.expense.employeeId, this.expense.id);
-  console.log(signedURL);
   window.open(signedURL, '_blank');
 }
 

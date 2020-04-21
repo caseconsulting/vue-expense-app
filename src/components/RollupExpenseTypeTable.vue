@@ -353,7 +353,7 @@ async function reimburseExpenses() {
 
     // reimburse expense on back end
     await this.asyncForEach(expensesToReimburse, async expense => {
-      let reimbursedExpense = await api.updateItem(api.EXPENSES, expense.id, expense);
+      let reimbursedExpense = await api.updateItem(api.EXPENSES, expense);
       let msg;
       if (!reimbursedExpense.id) {
         msg = reimbursedExpense.response.data.message;

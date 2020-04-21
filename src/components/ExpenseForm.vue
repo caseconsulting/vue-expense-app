@@ -247,8 +247,9 @@ async function checkCoverage() {
         //budgets = await api.getBudgetItem(this.expense.employeeId);
       }
 
-      let budget = await api.getBudgetsByDateAndType(this.employee.id, this.expense.purchaseDate, expenseType.value)
-        .budgetObject;
+      let budget = _.first(
+        await api.getBudgetsByDateAndType(this.employee.id, this.expense.purchaseDate, expenseType.value)
+      ).budgetObject;
 
       if (this.employee.workStatus == 0) {
         // if user is inactive
@@ -449,10 +450,11 @@ function parseDate(date) {
   return dateUtils.parseDate(date);
 }
 
-async function createNewEntry(newUUID) {
+async function createNewEntry() {
   let updatedAttachment;
   let updatedExpense;
 
+  let newUUID = uuid();
   this.$set(this.expense, 'id', newUUID);
   this.$set(this.expense, 'createdAt', moment().format('YYYY-MM-DD'));
   if (this.isReceiptRequired() && this.file) {
@@ -461,16 +463,12 @@ async function createNewEntry(newUUID) {
     this.$set(this.expense, 'receipt', this.file.name);
     // upload attachment to S3
     updatedAttachment = await api.createAttachment(this.expense, this.file);
-    if (updatedAttachment.code) {
-      // error uploading file
-      this.$emit('error', updatedAttachment.message);
-      this.expense.id = null;
-    } else {
+    if (updatedAttachment.key) {
       // success uploading file
       updatedExpense = await api.createItem(api.EXPENSES, this.expense);
 
       if (updatedExpense.id) {
-        //add url to training-urls table (uncommenting will add URL info to training-urls table when URL is present)
+        // TODO: Only add if training expense type. Allow empty category
         if (!isEmpty(updatedExpense.url) && !isEmpty(updatedExpense.category)) {
           await this.addURLInfo(updatedExpense);
         }
@@ -482,15 +480,19 @@ async function createNewEntry(newUUID) {
         this.clearForm();
       } else {
         this.$emit('error', updatedExpense.response.data.message);
-        this.expense.id = null;
+        this.$set(this.expense, 'id', '');
       }
+    } else {
+      // error uploading file
+      this.$emit('error', updatedAttachment.message);
+      this.$set(this.expense, 'id', '');
     }
   } else {
-    // success uploading file
+    // if receipt not required or not updating receipt
     updatedExpense = await api.createItem(api.EXPENSES, this.expense);
 
     if (updatedExpense.id) {
-      //add url to training-urls table (uncommenting will add URL info to training-urls table when URL is present)
+      // TODO: Only add if training expense type. Allow empty category
       if (!isEmpty(updatedExpense.url) && !isEmpty(updatedExpense.category)) {
         await this.addURLInfo(updatedExpense);
       }
@@ -502,6 +504,7 @@ async function createNewEntry(newUUID) {
       this.clearForm();
     } else {
       this.$emit('error', updatedExpense.response.data.message);
+      this.$set(this.expense, 'id', '');
     }
   }
 }
@@ -517,13 +520,10 @@ async function updateExistingEntry() {
     this.$set(this.expense, 'receipt', this.file.name);
     // upload attachment to S3
     updatedAttachment = await api.createAttachment(this.expense, this.file);
-    if (updatedAttachment.code) {
-      // error uploading file
-      this.$emit('error', updatedAttachment.message);
-    } else {
+    if (updatedAttachment.key) {
       // success uploading file
       // update item in database
-      updatedExpense = await api.updateItem(api.EXPENSES, this.expense.id, this.expense);
+      updatedExpense = await api.updateItem(api.EXPENSES, this.expense);
       if (updatedExpense.id) {
         // success uploading form
         if (this.expense.expenseTypeId == this.originalExpense.expenseTypeId) {
@@ -537,11 +537,14 @@ async function updateExistingEntry() {
         // error uploading form
         this.$emit('error', updatedExpense.response.data.message);
       }
+    } else {
+      // error uploading file
+      this.$emit('error', updatedAttachment.response.data.message);
     }
   } else {
     // if not updating receipt
     // update item in database
-    updatedExpense = await api.updateItem(api.EXPENSES, this.expense.id, this.expense);
+    updatedExpense = await api.updateItem(api.EXPENSES, this.expense);
     if (updatedExpense.id) {
       // success uploading form
       if (this.expense.expenseTypeId == this.originalExpense.expenseTypeId) {
@@ -562,7 +565,6 @@ async function updateExistingEntry() {
  * Submit sometimes called multiple times. Normally occurs when submitting an expense after changing code.
  */
 async function submit() {
-  let newUUID = uuid();
   if (this.$refs.form != undefined || this.$refs.form != null) {
     if (this.$refs.form.validate()) {
       // second validate may be unnecessary. included in checkCoverage()
@@ -571,9 +573,9 @@ async function submit() {
         this.expense.note = null;
       }
 
-      if (!this.expense.id || this.expense.id == newUUID) {
+      if (!this.expense.id) {
         // creating a new expense
-        this.createNewEntry(newUUID);
+        this.createNewEntry();
       } else {
         // editing a current expense
         this.updateExistingEntry();
@@ -596,8 +598,9 @@ async function addURLInfo(newExpense) {
   let encodedURL = btoa(newExpense.url);
   encodedURL = encodedURL.replace(/\//g, '%2F');
   let item = await api.getURLInfo(encodedURL, newExpense.category);
-  if (item) {
-    await this.incrementURLHits(item);
+  if (item.id) {
+    this.urlInfo = item;
+    await this.incrementURLHits();
   } else {
     this.$set(this.urlInfo, 'id', newExpense.url);
 
@@ -619,13 +622,10 @@ function isDifferentExpenseType() {
   return false;
 }
 
-async function incrementURLHits(urlInfo) {
-  let encodedURL = btoa(urlInfo[0].id);
-  let hits = urlInfo[0].hits + 1;
-  this.urlInfo = urlInfo[0];
-  this.urlInfo.hits = hits;
+async function incrementURLHits() {
+  this.urlInfo.hits = this.urlInfo.hits + 1;
 
-  return await api.updateURL(api.URLS, encodedURL, this.urlInfo.category, this.urlInfo);
+  return await api.updateItem(api.URLS, this.urlInfo);
 }
 
 function expenseTypeSelected(value) {

@@ -4,6 +4,7 @@ import { getAccessToken } from '@/utils/auth';
 const EXPENSE_TYPES = 'expense-types';
 const EXPENSES = 'expenses';
 const EMPLOYEES = 'employees';
+const TRAINING_URLS = 'training-urls';
 const UTILITY = 'utility';
 const BUDGETS = 'budgets';
 const URLS = 'training-urls';
@@ -77,19 +78,15 @@ function getAllExpenseTypeExpenses(id) {
 }
 
 function getURLInfo(id, category) {
-  return execute('get', `/${UTILITY}/getURLInfo/'${id}'/${category}`);
+  return execute('get', `/${TRAINING_URLS}/'${id}'/${category}`);
 }
 
 function createItem(type, data) {
   return execute('post', `/${type}`, data);
 }
 
-function updateItem(type, id, data) {
-  return execute('put', `/${type}/${id}`, data);
-}
-
-function updateURL(type, id, category, data) {
-  return execute('put', `/${type}/${id}/${category}`, data);
+function updateItem(type, data) {
+  return execute('put', `/${type}`, data);
 }
 
 function deleteItem(type, id) {
@@ -151,7 +148,6 @@ export default {
   getURLInfo,
   createItem,
   updateItem,
-  updateURL,
   deleteAttachment,
   deleteItem,
   getAggregate,

@@ -587,7 +587,7 @@ async function validateDelete(item) {
       return result.length <= 0;
     })
     .catch(err => {
-      console.log(err);
+      this.displayError(err);
     });
   if (x) {
     this.$set(this.deleteModel, 'id', item.id);
@@ -597,12 +597,28 @@ async function validateDelete(item) {
   }
 }
 
+function hasAccess(employee, expenseType) {
+  if (employee.workStatus == 0) {
+    return false;
+  } else if (expenseType.accessibleBy == 'ALL') {
+    return true;
+  } else if (expenseType.accessibleBy == 'FULL TIME') {
+    return employee.workStatus == 100;
+  } else if (expenseType.accessibleBy == 'PART TIME') {
+    return employee.workStatus > 0 && employee.workStatus < 100;
+  } else {
+    return expenseType.accessibleBy.includes(employee.id);
+  }
+}
+
 /* computed */
 function expenseTypeList() {
-  // filter out expense types that the user does not have access to
-  return _.filter(this.filteredExpenseTypes, type => {
-    return this.userIsAdmin() || type.accessibleBy === 'ALL' || type.accessibleBy.includes(this.userInfo.id);
-  });
+  // TODO: filter out expense types that the user does not have access to
+  // this commented out code does not (but should) include old expense types who the user no longer has access to
+  // return _.filter(this.filteredExpenseTypes, type => {
+  //   return this.userIsAdmin() || this.hasAccess(this.userInfo, type);
+  // });
+  return this.filteredExpenseTypes;
 }
 
 /* created */
@@ -741,6 +757,7 @@ export default {
     getAccess,
     getEmployeeList,
     getEmployeeName,
+    hasAccess,
     isEditing,
     isFocus,
     isInactive,
