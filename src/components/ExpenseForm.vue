@@ -204,7 +204,7 @@
 import api from '@/shared/api.js';
 import { getRole } from '@/utils/auth';
 import moment from 'moment';
-import uuid from 'uuid/v4';
+import { v4 as uuid } from 'uuid';
 
 import ConfirmationBox from './ConfirmationBox.vue';
 import _ from 'lodash';

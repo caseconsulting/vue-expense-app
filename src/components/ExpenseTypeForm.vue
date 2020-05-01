@@ -24,7 +24,7 @@
           label="Categories (optional)"
           multiple
           small-chips
-          append-icon=""
+          append-icon
           clearable
           :search-input.sync="categoryInput"
         >
@@ -121,9 +121,7 @@
           rows="3"
         ></v-textarea>
         <!-- Accessibility -->
-        <div style="color: dimgray">
-          Employee Access
-        </div>
+        <div style="color: dimgray">Employee Access</div>
         <v-radio-group v-model="model.accessibleBy" class="smallRadio ma-0" row mandatory>
           <v-radio label="All" value="ALL"></v-radio>
           <v-radio label="Full Time" value="FULL TIME"></v-radio>
@@ -147,24 +145,21 @@
           class="mt-0 pt-0"
         >
           <template v-slot:label>
-            <span class="grey--text caption">
-              No Employee Access
-            </span>
+            <span class="grey--text caption">No Employee Access</span>
           </template>
           <template v-slot:selection="{ index }">
-            <span v-if="index === 0 && customAccess.length == 1" class="grey--text caption">
-              Accessible by {{ customAccess.length }} employee
-            </span>
-            <span v-else-if="index === 0" class="grey--text caption">
-              Accessible by {{ customAccess.length }} employees
-            </span>
+            <span v-if="index === 0 && customAccess.length == 1" class="grey--text caption"
+              >Accessible by {{ customAccess.length }} employee</span
+            >
+            <span v-else-if="index === 0" class="grey--text caption"
+              >Accessible by {{ customAccess.length }} employees</span
+            >
           </template>
         </v-autocomplete>
         <!-- Buttons -->
-        <v-btn color="white " @click="clearForm" class="ma-2"> <icon class="mr-1 " name="ban"></icon>Cancel</v-btn>
+        <v-btn color="white " @click="clearForm" class="ma-2"> <icon class="mr-1" name="ban"></icon>Cancel </v-btn>
         <v-btn outlined class="ma-2" color="success" :loading="submitting" @click="submit" :disabled="!valid">
-          <icon class="mr-1 " name="save"></icon>
-          Submit
+          <icon class="mr-1" name="save"></icon>Submit
         </v-btn>
       </v-form>
     </v-container>
@@ -175,7 +170,7 @@
 import api from '@/shared/api.js';
 import dateUtils from '@/shared/dateUtils';
 import _ from 'lodash';
-import uuid from 'uuid/v4';
+import { v4 as uuid } from 'uuid';
 
 // METHODS
 function clearForm() {

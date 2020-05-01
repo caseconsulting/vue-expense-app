@@ -78,9 +78,9 @@
         <!-- Advanced section -->
         <v-expansion-panels accordion>
           <v-expansion-panel>
-            <v-expansion-panel-header style="background-color: whitesmoke;">
-              ADVANCED (optional)
-            </v-expansion-panel-header>
+            <v-expansion-panel-header style="background-color: whitesmoke;"
+              >ADVANCED (optional)</v-expansion-panel-header
+            >
             <v-expansion-panel-content style="background-color: whitesmoke;">
               <!-- Prime text field -->
               <v-text-field
@@ -268,10 +268,10 @@
         </v-menu>
         <!-- end full/part/inactive status -->
         <!-- form action buttons -->
-        <v-btn class="ma-2" color="white" @click="clearForm"> <icon class="mr-1" name="ban"></icon>Cancel</v-btn>
+        <v-btn class="ma-2" color="white" @click="clearForm"> <icon class="mr-1" name="ban"></icon>Cancel </v-btn>
         <v-btn outlined class="ma-2" color="success" @click="submit" :disabled="!valid || isStatusEmpty()">
-          <icon class="mr-1" name="save"></icon>Submit</v-btn
-        >
+          <icon class="mr-1" name="save"></icon>Submit
+        </v-btn>
         <!-- end form action buttons -->
       </v-form>
       <update-hire-date-modal
@@ -291,7 +291,7 @@ import { getRole } from '@/utils/auth';
 import dateUtils from '@/shared/dateUtils';
 import UpdateHireDateModal from './UpdateHireDateModal.vue';
 import MobileDetect from 'mobile-detect';
-import uuid from 'uuid/v4';
+import { v4 as uuid } from 'uuid';
 
 const regex = /^(([^<>()[\]\\.,;:\s@#"]+(\.[^<>()[\]\\.,;:\s@#"]+)*)|(".+"))@consultwithcase.com/;
 
