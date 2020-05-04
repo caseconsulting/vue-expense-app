@@ -49,17 +49,29 @@ function getCountries() {
     });
 }
 
-function getBudgetItem(id) {
-  return execute('get', `/budgets/user/${id}`);
+function getAllActiveEmployeeBudgets(id) {
+  return execute('get', `/${UTILITY}/getAllActiveEmployeeBudgets/${id}`);
 }
 
-function getBudgetsByDate(id, date) {
-  return execute('get', `/${UTILITY}/getEmployeeBudgets/${id}/${date}`);
+function getEmployeeBudget(id, expenseTypeId, date) {
+  return execute('get', `/${UTILITY}/getEmployeeBudget/${id}/${expenseTypeId}/${date}`);
 }
 
-function getBudgetsByDateAndType(id, date, expenseTypeId) {
-  return execute('get', `/${UTILITY}/getEmployeeBudgets/${id}/${date}/${expenseTypeId}`);
+function getEmployeeBudgetsByDate(id, startDate, endDate) {
+  return execute('get', `/${UTILITY}/getEmployeeBudgetsByDate/${id}/${startDate}/${endDate}`);
 }
+
+function getEmployeeBudgets(id) {
+  return execute('get', `/budgets/employee/${id}`);
+}
+
+// function getBudgetsByDate(id, date) {
+//   return execute('get', `/${UTILITY}/getEmployeeBudgets/${id}/${date}`);
+// }
+
+// function getBudgetsByDateAndType(id, date, expenseTypeId) {
+//   return execute('get', `/${UTILITY}/getEmployeeBudgets/${id}/${date}/${expenseTypeId}`);
+// }
 
 function getItems(type) {
   return execute('get', `/${type}`);
@@ -93,7 +105,7 @@ function deleteItem(type, id) {
   return execute('delete', `/${type}/${id}`);
 }
 
-function getAggregate() {
+function getAllAggregateExpenses() {
   return execute('get', `/${UTILITY}/getAllExpenses`);
 }
 
@@ -136,11 +148,14 @@ function deleteAttachment(expense) {
 
 export default {
   // getCanDelete,
-  getBudgetItem,
+  getEmployeeBudget,
+  getAllActiveEmployeeBudgets,
   getAllEmployeeExpenses,
   getAllExpenseTypeExpenses,
-  getBudgetsByDate,
-  getBudgetsByDateAndType,
+  getEmployeeBudgetsByDate,
+  getEmployeeBudgets,
+  //getBudgetsByDate,
+  //getBudgetsByDateAndType,
   getItems,
   getItem,
   getAttachment,
@@ -150,7 +165,7 @@ export default {
   updateItem,
   deleteAttachment,
   deleteItem,
-  getAggregate,
+  getAllAggregateExpenses,
   getCountries,
   getRole,
   getUser,

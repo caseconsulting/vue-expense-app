@@ -534,7 +534,7 @@ async function created() {
   window.EventBus.$on('selectExpense', this.selectExpense);
   window.EventBus.$on('confirm-reimburse', this.reimburseExpenses);
   window.EventBus.$on('canceled-reimburse', () => (this.button_clicked = false));
-  let aggregatedData = await api.getAggregate();
+  let aggregatedData = await api.getAllAggregateExpenses();
 
   let allExpenses = createExpenses(aggregatedData);
   this.pendingExpenses = filterOutReimbursed(allExpenses);

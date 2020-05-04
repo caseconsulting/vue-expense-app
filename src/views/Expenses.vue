@@ -335,7 +335,7 @@ async function created() {
 
   this.refreshExpenses();
 
-  let aggregatedData = await api.getAggregate(); //autocomplete
+  let aggregatedData = await api.getAllAggregateExpenses(); //autocomplete
   this.constructAutoComplete(aggregatedData); //autocomplete
 
   window.EventBus.$on('canceled-unreimburse-expense', () => (this.unreimbursing = false));
@@ -534,7 +534,7 @@ function onSelect(item) {
 async function refreshExpenses() {
   let aggregatedData = [];
   if (this.isAdmin || this.isUser) {
-    aggregatedData = await api.getAggregate();
+    aggregatedData = await api.getAllAggregateExpenses();
   }
   this.processedExpenses = aggregatedData;
   this.filteredExpenses = this.processedExpenses;

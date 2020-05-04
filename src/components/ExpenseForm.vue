@@ -241,15 +241,11 @@ async function checkCoverage() {
       // get employee information
       if (this.asUser) {
         this.employee = await api.getUser();
-        //budgets = await api.getItems(api.BUDGETS);
       } else {
-        this.employee = await api.getItem(api.EMPLOYEES, this.expense.employeeId); // is this used?
-        //budgets = await api.getBudgetItem(this.expense.employeeId);
+        this.employee = await api.getItem(api.EMPLOYEES, this.expense.employeeId);
       }
 
-      let budget = _.first(
-        await api.getBudgetsByDateAndType(this.employee.id, this.expense.purchaseDate, expenseType.value)
-      ).budgetObject;
+      let budget = await api.getEmployeeBudget(this.employee.id, expenseType.value, this.expense.purchaseDate);
 
       if (this.employee.workStatus == 0) {
         // if user is inactive
@@ -265,7 +261,7 @@ async function checkCoverage() {
         if (budget) {
           // if the matching budget exists
           let committedAmount = budget.pendingAmount + budget.reimbursedAmount;
-          let allExpenses = await api.getAggregate();
+          let allExpenses = await api.getAllAggregateExpenses();
           let match = _.find(allExpenses, entry => {
             return entry.id === this.expense.id;
           });

@@ -75,7 +75,7 @@
     </v-flex>
     <budget-select-modal
       :activate="changingBudgetView"
-      :budgetYears="getBudgetYears"
+      :budgetYears="this.budgetYears"
       :current="this.fiscalDateView"
       :hireDate="this.hireDate"
     ></budget-select-modal>
@@ -177,36 +177,25 @@ async function refreshEmployee() {
   this.fiscalDateView = this.getCurrentBudgetYear();
   this.employee = employee;
   this.refreshBudget();
-  this.allUserBudgets = await api.getBudgetItem(this.employee.id);
+  this.allUserBudgets = await api.getEmployeeBudgets(this.employee.id);
   this.loading = false;
 }
 
 async function refreshBudget() {
   this.loading = true;
   // get all budgets within the year displayed
-  let budgetsVar = await api.getBudgetsByDate(this.employee.id, this.fiscalDateView);
+  let endView = moment(this.fiscalDateView)
+    .add(1, 'y')
+    .subtract(1, 'd')
+    .format(IsoFormat);
 
-  // get all budgets non-recuring in the year displayed
-  let expenseTypes = _.filter(await api.getItems(api.EXPENSE_TYPES), expenseType => {
-    return !expenseType.recurringFlag;
-  });
+  let budgetsVar = await api.getEmployeeBudgetsByDate(this.employee.id, this.fiscalDateView, endView);
 
-  // for each non-recurring expense type
-  await this.asyncForEach(expenseTypes, async expenseType => {
-    let startDate = moment(this.fiscalDateView).format(IsoFormat);
-    let endDate = moment(this.fiscalDateView)
-      .add(1, 'y')
-      .format(IsoFormat);
-    let pastBudgetStart = await api.getBudgetsByDateAndType(this.employee.id, startDate, expenseType.id);
-    let pastBudgetEnd = await api.getBudgetsByDateAndType(this.employee.id, endDate, expenseType.id);
-    if (pastBudgetStart.length > 0) {
-      budgetsVar.push(pastBudgetStart[0]);
-    }
-    if (pastBudgetEnd.length > 0) {
-      budgetsVar.push(pastBudgetEnd[0]);
-    }
-  });
-  budgetsVar = _.uniqBy(budgetsVar, 'expenseTypeId');
+  if (this.fiscalDateView == this.getCurrentBudgetYear()) {
+    let activeBudgets = await api.getAllActiveEmployeeBudgets(this.employee.id);
+    budgetsVar = _.merge(budgetsVar, activeBudgets);
+    //budgetsVar = _.uniqBy(budgetsVar, 'expenseTypeId');
+  }
 
   // if employee is not full time, prohibit overdraft
   _.forEach(budgetsVar, async budget => {
@@ -221,6 +210,7 @@ async function refreshBudget() {
     return budget.amount != 0 || budget.reimbursedAmount != 0 || budget.pendingAmount != 0;
   });
 
+  this.refreshBudgetYears();
   this.loading = false;
 }
 
@@ -424,19 +414,19 @@ function getAnniversary() {
   }
 }
 
-function getBudgetYears() {
+function refreshBudgetYears() {
   let budgetYears = [];
-  //console.log(this.allUserBudgets);
+  let [currYear] = this.getCurrentBudgetYear().split('-');
   let budgetDates = _.uniqBy(_.map(this.allUserBudgets, 'fiscalStartDate'));
   budgetDates.forEach(date => {
     const [year] = date.split('-');
     budgetYears.push(parseInt(year));
   });
+  budgetYears.push(parseInt(currYear));
   budgetYears = _.filter(_.uniqBy(budgetYears), year => {
-    return parseInt(year) <= parseInt(this.getCurrentBudgetYear());
+    return parseInt(year) <= parseInt(currYear);
   });
-  //console.log(_.reverse(_.sortBy(budgetYears)));
-  return _.reverse(_.sortBy(budgetYears));
+  this.budgetYears = _.reverse(_.sortBy(budgetYears));
 }
 
 function getDaysUntil() {
@@ -540,6 +530,7 @@ export default {
   data() {
     return {
       allUserBudgets: null,
+      budgetYears: [],
       changingBudgetView: false,
       fiscalDateView: '',
       loading: false,
@@ -598,6 +589,7 @@ export default {
     hasAccess,
     isFullTime,
     refreshBudget,
+    refreshBudgetYears,
     refreshEmployee,
     showSnackbar,
     updateData
@@ -606,7 +598,6 @@ export default {
     budgets,
     drawGraph,
     getAnniversary,
-    getBudgetYears,
     getDaysUntil,
     getFiscalYearView,
     getSecondsUntil,
