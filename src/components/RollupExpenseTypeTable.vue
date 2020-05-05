@@ -57,7 +57,7 @@
           <template v-slot:item="{ item }">
             <tr @click="clickedRow(item)">
               <!-- checkbox for individual expense -->
-              <td style="width: 1px">
+              <td style="width: 1px;">
                 <v-checkbox
                   :input-value="item.checkBox.all"
                   :indeterminate="item.checkBox.indeterminate"
@@ -133,10 +133,10 @@ async function asyncForEach(array, callback) {
  * Check all expenses and boxes
  */
 function checkAllBoxes() {
-  this.empBudgets = _.forEach(this.empBudgets, budget => {
+  this.empBudgets = _.forEach(this.empBudgets, (budget) => {
     budget.checkBox.all = true;
     budget.checkBox.indeterminate = false;
-    return _.forEach(budget.expenses, expense => {
+    return _.forEach(budget.expenses, (expense) => {
       emitSelectionChange(expense, true);
       expense.selected = true;
     });
@@ -168,25 +168,25 @@ function clickedRow(value) {
  * Constructs the auto complete lists for the filters
  */
 function constructAutoComplete(aggregatedData) {
-  this.employees = _.map(aggregatedData, data => {
+  this.employees = _.map(aggregatedData, (data) => {
     if (data && data.employeeName && data.employeeId) {
       return {
         text: data.employeeName,
         value: data.employeeId
       };
     }
-  }).filter(data => {
+  }).filter((data) => {
     return data != null;
   });
   //Get expense Types
-  this.expenseTypes = _.map(aggregatedData, data => {
+  this.expenseTypes = _.map(aggregatedData, (data) => {
     if (data && data.budgetName && data.expenseTypeId) {
       return {
         text: data.budgetName,
         value: data.expenseTypeId
       };
     }
-  }).filter(data => {
+  }).filter((data) => {
     return data != null;
   });
 }
@@ -195,7 +195,7 @@ function constructAutoComplete(aggregatedData) {
  *  Maps dataset to objects
  */
 function createExpenses(aggregatedData) {
-  return _.map(aggregatedData, expense => {
+  return _.map(aggregatedData, (expense) => {
     return {
       budgetName: expense.budgetName,
       cost: expense.cost,
@@ -232,7 +232,7 @@ function determineCheckBox(budget) {
   };
 
   // determine if all grouped expeneses is selected or not
-  _.forEach(budget.expenses, expense => {
+  _.forEach(budget.expenses, (expense) => {
     if (!expense.selected) {
       checkBox.all = false;
     }
@@ -269,7 +269,7 @@ function emitSelectionChange(expense, newSelect) {
  * Remove reimbursed expenses
  */
 function filterOutReimbursed(expenses) {
-  return _.filter(expenses, expense => !isReimbursed(expense.reimbursedDate));
+  return _.filter(expenses, (expense) => !isReimbursed(expense.reimbursedDate));
 }
 
 /*
@@ -277,7 +277,7 @@ function filterOutReimbursed(expenses) {
  */
 function getBudgetTotal(expenses) {
   let total = 0;
-  _.forEach(expenses, expense => (total += expense.cost));
+  _.forEach(expenses, (expense) => (total += expense.cost));
   return total;
 }
 
@@ -285,13 +285,13 @@ function getBudgetTotal(expenses) {
  * Group expenses with the same employee name and expense type
  */
 function groupEmployeeExpenses(expenses) {
-  let data = _.forEach(expenses, expense => {
+  let data = _.forEach(expenses, (expense) => {
     expense.key = `${expense.employeeId}${expense.expenseTypeId}`;
   });
 
   // Create a list of expenses under each group
-  data = _.forEach(data, item => {
-    return (item.expenses = _.filter(expenses, expense => {
+  data = _.forEach(data, (item) => {
+    return (item.expenses = _.filter(expenses, (expense) => {
       return matchingEmployeeAndExpenseType(expense, item);
     }));
   });
@@ -321,8 +321,8 @@ function matchingEmployeeAndExpenseType(expense, item) {
  */
 function refreshExpenses() {
   this.pendingExpenses = [];
-  _.forEach(this.empBudgets, budget => {
-    _.forEach(budget.expenses, budgetExpense => {
+  _.forEach(this.empBudgets, (budget) => {
+    _.forEach(budget.expenses, (budgetExpense) => {
       if (!isReimbursed(budgetExpense.reimbursedDate)) {
         this.pendingExpenses.push(budgetExpense);
       }
@@ -342,8 +342,8 @@ async function reimburseExpenses() {
     this.reimbursing = true;
 
     // get selected expenses and set reimburse date
-    this.empBudgets = _.forEach(this.empBudgets, async budget => {
-      return await _.forEach(budget.expenses, async expense => {
+    this.empBudgets = _.forEach(this.empBudgets, async (budget) => {
+      return await _.forEach(budget.expenses, async (expense) => {
         if (expense.selected) {
           expense.reimbursedDate = moment().format('YYYY-MM-DD');
           expensesToReimburse.push(submitExpenseObject(expense));
@@ -352,14 +352,14 @@ async function reimburseExpenses() {
     });
 
     // reimburse expense on back end
-    await this.asyncForEach(expensesToReimburse, async expense => {
+    await this.asyncForEach(expensesToReimburse, async (expense) => {
       let reimbursedExpense = await api.updateItem(api.EXPENSES, expense);
       let msg;
       if (!reimbursedExpense.id) {
         msg = reimbursedExpense.response.data.message;
         this.alerts.push({ status: 'error', message: msg, color: 'red' });
         let self = this;
-        setTimeout(function() {
+        setTimeout(function () {
           self.alerts.shift();
         }, 10000);
         let groupIndex = _.findIndex(this.empBudgets, {
@@ -373,7 +373,7 @@ async function reimburseExpenses() {
         msg = 'Successfully reimbursed expense';
         this.alerts.push({ status: 'success', message: msg, color: 'green' });
         let self = this;
-        setTimeout(function() {
+        setTimeout(function () {
           self.alerts.shift();
         }, 10000);
       }
@@ -388,9 +388,9 @@ async function reimburseExpenses() {
  * Select an expense
  */
 function selectExpense(expense) {
-  this.empBudgets = _.forEach(this.empBudgets, budget => {
+  this.empBudgets = _.forEach(this.empBudgets, (budget) => {
     if (expense.key === budget.key) {
-      return _.forEach(budget.expenses, budgetExpense => {
+      return _.forEach(budget.expenses, (budgetExpense) => {
         if (expense === budgetExpense) {
           budgetExpense.selected = !budgetExpense.selected;
         }
@@ -398,7 +398,7 @@ function selectExpense(expense) {
     }
   });
 
-  this.empBudgets = _.forEach(this.empBudgets, budget => {
+  this.empBudgets = _.forEach(this.empBudgets, (budget) => {
     if (expense.key === budget.key) {
       budget.checkBox = determineCheckBox(budget);
     }
@@ -441,15 +441,15 @@ function toggleAll() {
  */
 function toggleGroup(value) {
   // updated group expenses selected
-  this.empBudgets = _.forEach(this.empBudgets, budget => {
+  this.empBudgets = _.forEach(this.empBudgets, (budget) => {
     if (value === budget) {
       if (determineCheckBox(budget).all) {
-        return _.forEach(budget.expenses, expense => {
+        return _.forEach(budget.expenses, (expense) => {
           emitSelectionChange(expense, false);
           expense.selected = false;
         });
       } else {
-        return _.forEach(budget.expenses, expense => {
+        return _.forEach(budget.expenses, (expense) => {
           emitSelectionChange(expense, true);
           expense.selected = true;
         });
@@ -457,7 +457,7 @@ function toggleGroup(value) {
     }
   });
 
-  this.empBudgets = _.forEach(this.empBudgets, budget => {
+  this.empBudgets = _.forEach(this.empBudgets, (budget) => {
     if (value === budget) {
       budget.checkBox = determineCheckBox(budget);
     }
@@ -468,10 +468,10 @@ function toggleGroup(value) {
  * Uncheck all expenses and boxes
  */
 function unCheckAllBoxes() {
-  this.empBudgets = _.forEach(this.empBudgets, budget => {
+  this.empBudgets = _.forEach(this.empBudgets, (budget) => {
     budget.checkBox.all = false;
     budget.checkBox.indeterminate = false;
-    return _.forEach(budget.expenses, expense => {
+    return _.forEach(budget.expenses, (expense) => {
       emitSelectionChange(expense, false);
       expense.selected = false;
     });
@@ -484,7 +484,7 @@ function unCheckAllBoxes() {
  * Filtered budgets based on employee and/or expense type
  */
 function filteredItems() {
-  return _.filter(this.empBudgets, budget => {
+  return _.filter(this.empBudgets, (budget) => {
     if (!this.employee && !this.expenseType) {
       return true;
     } else if (!this.employee && this.expenseType) {
@@ -506,7 +506,7 @@ function mainCheckBox() {
     indeterminate: false
   };
 
-  _.forEach(this.empBudgets, budget => {
+  _.forEach(this.empBudgets, (budget) => {
     if (_.some(budget.expenses, { selected: false })) {
       checkBox.all = false;
     }
@@ -594,7 +594,7 @@ export default {
     }
   }),
   filters: {
-    moneyValue: value => {
+    moneyValue: (value) => {
       return `${new Intl.NumberFormat('en-US', {
         style: 'currency',
         currency: 'USD',

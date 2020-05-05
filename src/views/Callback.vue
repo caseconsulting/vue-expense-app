@@ -4,7 +4,7 @@ import { setIdToken, setAccessToken, setRole, setProfile } from '@/utils/auth';
 export default {
   name: 'callback',
   mounted() {
-    this.$nextTick(async function() {
+    this.$nextTick(async function () {
       try {
         setAccessToken();
         setIdToken();

@@ -153,7 +153,7 @@
               <!-- Place of Birth -->
               <p style="font-size: 17px; padding-left: 10px; padding-top: 10px;">Place of Birth</p>
               <div style="padding-right: 20px; padding-left: 30px; padding-bottom: 10px;">
-                <div style="border-left-style: groove; padding-right: 20px; padding-left: 10px; ">
+                <div style="border-left-style: groove; padding-right: 20px; padding-left: 10px;">
                   <!-- Place of Birth: City text field -->
                   <v-text-field
                     v-model="model.city"
@@ -178,7 +178,7 @@
                     v-model="model.st"
                     item-text="text"
                     label="State"
-                    style="padding-top: 0px; "
+                    style="padding-top: 0px;"
                   ></v-autocomplete>
                 </div>
               </div>
@@ -422,11 +422,11 @@ export default {
     return {
       birthdayFormat: '',
       changingHireDate: false,
-      componentRules: [v => !!v || 'Something must be selected'],
+      componentRules: [(v) => !!v || 'Something must be selected'],
       countries: [], // list of countries
       date: null,
       dateOptionalRules: [
-        v => {
+        (v) => {
           if (v) {
             return /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v) || 'Date must be valid. Format: MM/DD/YYYY';
           } else {
@@ -435,20 +435,23 @@ export default {
         }
       ],
       dateRules: [
-        v => !!v || 'Date must be valid. Format: MM/DD/YYYY',
-        v => (!!v && /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v)) || 'Date must be valid. Format: MM/DD/YYYY'
+        (v) => !!v || 'Date must be valid. Format: MM/DD/YYYY',
+        (v) => (!!v && /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v)) || 'Date must be valid. Format: MM/DD/YYYY'
       ],
       statusRules: [
-        v => !!v, // || 'Percentage must be a whole number between 0 - 99',
-        v => /^\d+$/.test(v), // || 'Percentage amount must be a whole number',
-        v => v < 100, //|| 'Percentage must be less than 100', // percentage must be less than 100
-        v => v >= 0 // || 'Percentage must be greater than 0' // percentage must be greater than 0
+        (v) => !!v, // || 'Percentage must be a whole number between 0 - 99',
+        (v) => /^\d+$/.test(v), // || 'Percentage amount must be a whole number',
+        (v) => v < 100, //|| 'Percentage must be less than 100', // percentage must be less than 100
+        (v) => v >= 0 // || 'Percentage must be greater than 0' // percentage must be greater than 0
       ],
       deleting: false,
       deptDateFormatted: null,
-      emailRules: [v => !!v || 'Email is required', v => regex.test(v) || 'Not a valid @consultwithcase email address'],
+      emailRules: [
+        (v) => !!v || 'Email is required',
+        (v) => regex.test(v) || 'Not a valid @consultwithcase email address'
+      ],
       employeeRoleFormatted: '',
-      genericRules: [v => !!v || 'This field is required'],
+      genericRules: [(v) => !!v || 'This field is required'],
       hasExpenses: false,
       hireDateFormatted: null,
       jobRoles: [
@@ -467,8 +470,8 @@ export default {
       menu2: false,
       menu3: false,
       numberRules: [
-        v => !!v || 'Employee # is required',
-        v => /^\d+$/.test(v) || 'Employee # must be a positive number'
+        (v) => !!v || 'Employee # is required',
+        (v) => /^\d+$/.test(v) || 'Employee # must be a positive number'
       ],
       permissions: ['Admin', 'User'],
       states: [
@@ -544,7 +547,7 @@ export default {
   },
   created,
   watch: {
-    date: function() {
+    date: function () {
       this.hireDateFormatted = this.formatDate(this.date) || this.hireDateFormatted;
       //fixes v-date-picker error so that if the format of date is incorrect the date is set to null
       if (this.date !== null && !this.formatDate(this.date)) {
@@ -558,30 +561,30 @@ export default {
         this.changingHireDate = false;
       }
     },
-    'model.hireDate': async function() {
+    'model.hireDate': async function () {
       this.hasExpenses = this.model.id ? _.size(await api.getAllEmployeeExpenses(this.model.id)) > 0 : false;
       this.date = this.model.hireDate;
     },
-    'model.deptDate': function() {
+    'model.deptDate': function () {
       this.deptDateFormatted = this.formatDate(this.model.deptDate) || this.deptDateFormatted;
       //fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
       if (this.model.deptDate !== null && !this.formatDate(this.model.deptDate)) {
         this.model.deptDate = null;
       }
     },
-    'model.employeeRole': function() {
+    'model.employeeRole': function () {
       if (this.model.employeeRole != 'User') {
         this.employeeRoleFormatted = _.startCase(this.model.employeeRole);
       }
     },
-    'model.birthday': function() {
+    'model.birthday': function () {
       this.birthdayFormat = this.formatDate(this.model.birthday) || this.birthdayFormat;
       //fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
       if (this.model.birthday !== null && !this.formatDate(this.model.birthday)) {
         this.model.birthday = null;
       }
     },
-    'model.workStatus': function() {
+    'model.workStatus': function () {
       // if work status exists
       if (this.model.workStatus != null) {
         // convert employee work status to string
@@ -601,7 +604,7 @@ export default {
         this.statusRadio = 'full';
       }
     },
-    statusRadio: function() {
+    statusRadio: function () {
       if (this.statusRadio == 'full') {
         this.status = '100';
       } else if (this.statusRadio == 'inactive') {

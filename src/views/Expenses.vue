@@ -145,7 +145,7 @@
                         "
                         v-on="on"
                       >
-                        <v-icon style="color: #606060">
+                        <v-icon style="color: #606060;">
                           edit
                         </v-icon>
                       </v-btn>
@@ -166,7 +166,7 @@
                         "
                         v-on="on"
                       >
-                        <v-icon style="color: #606060">
+                        <v-icon style="color: #606060;">
                           delete
                         </v-icon>
                       </v-btn>
@@ -189,7 +189,7 @@
                           "
                           v-on="on"
                         >
-                          <v-icon style="color: #606060">
+                          <v-icon style="color: #606060;">
                             money_off
                           </v-icon>
                         </v-btn>
@@ -315,7 +315,7 @@ async function created() {
   this.role = getRole();
 
   let expenseTypes = await api.getItems(api.EXPENSE_TYPES);
-  this.expenseTypes = _.map(expenseTypes, expenseType => {
+  this.expenseTypes = _.map(expenseTypes, (expenseType) => {
     return {
       /* beautify preserve:start */
       text: `${expenseType.budgetName} - $${expenseType.budget}`,
@@ -348,19 +348,19 @@ async function created() {
 // METHODS
 
 function addModelToTable(newExpense) {
-  let matchingExpenses = _.filter(this.processedExpenses, expense => expense.id === newExpense.id);
+  let matchingExpenses = _.filter(this.processedExpenses, (expense) => expense.id === newExpense.id);
 
   if (!matchingExpenses.length) {
     if (this.isAdmin) {
       api
         .getItem(api.EMPLOYEES, newExpense.employeeId)
-        .then(employee => {
+        .then((employee) => {
           let employeeName = employeeUtils.fullName(employee);
           this.$set(newExpense, 'employeeName', employeeName);
         })
-        .catch(err => this.displayError(err));
+        .catch((err) => this.displayError(err));
     }
-    api.getItem(api.EXPENSE_TYPES, newExpense.expenseTypeId).then(expenseType => {
+    api.getItem(api.EXPENSE_TYPES, newExpense.expenseTypeId).then((expenseType) => {
       this.$set(newExpense, 'budgetName', expenseType.budgetName);
     });
 
@@ -394,42 +394,37 @@ function clickedRow(value) {
 }
 
 function constructAutoComplete(aggregatedData) {
-  this.employees = _.map(aggregatedData, data => {
+  this.employees = _.map(aggregatedData, (data) => {
     if (data && data.employeeName && data.employeeId) {
       return {
         text: data.employeeName,
         value: data.employeeId
       };
     }
-  }).filter(data => {
+  }).filter((data) => {
     return data != null;
   });
 }
 
 function customFilter(item, queryText) {
-  const hasValue = val => (val != null ? val : '');
+  const hasValue = (val) => (val != null ? val : '');
   const text = hasValue(item.text);
   const query = hasValue(queryText);
-  return (
-    text
-      .toString()
-      .toLowerCase()
-      .indexOf(query.toString().toLowerCase()) > -1
-  );
+  return text.toString().toLowerCase().indexOf(query.toString().toLowerCase()) > -1;
 }
 
 function filterExpense() {
   this.filteredExpenses = this.processedExpenses;
 
   if (this.employee) {
-    this.filteredExpenses = _.filter(this.filteredExpenses, expense => {
+    this.filteredExpenses = _.filter(this.filteredExpenses, (expense) => {
       return expense.employeeId === this.employee;
     });
   }
 
   //filter for reimbursed
   if (this.filter.reimbursed !== 'both') {
-    this.filteredExpenses = _.filter(this.filteredExpenses, expense => {
+    this.filteredExpenses = _.filter(this.filteredExpenses, (expense) => {
       if (this.filter.reimbursed == 'notReimbursed') {
         return !isReimbursed(expense.reimbursedDate);
       } else {
@@ -440,9 +435,9 @@ function filterExpense() {
 
   //filter for Active Expense Types (available to admin only)
   if (this.filter.active !== 'both') {
-    this.filteredExpenses = _.filter(this.filteredExpenses, expense => {
+    this.filteredExpenses = _.filter(this.filteredExpenses, (expense) => {
       //gets the expense type for expense to look up inactive
-      let expenseType = _.find(this.expenseTypes, type => expense.expenseTypeId === type.value);
+      let expenseType = _.find(this.expenseTypes, (type) => expense.expenseTypeId === type.value);
       if (this.filter.active == 'active') {
         return expenseType && !expenseType.isInactive;
       } else {
@@ -471,7 +466,7 @@ async function deleteExpense() {
 }
 
 function deleteModelFromTable(deletedExpense) {
-  let modelIndex = _.findIndex(this.processedExpenses, expense => {
+  let modelIndex = _.findIndex(this.processedExpenses, (expense) => {
     return expense.id === deletedExpense.id;
   });
   this.processedExpenses.splice(modelIndex, 1);
@@ -579,10 +574,10 @@ async function unreimburseExpense() {
 }
 
 function updateModelInTable(updatedExpense) {
-  let matchingExpensesIndex = _.findIndex(this.processedExpenses, expense => expense.id === updatedExpense.id);
+  let matchingExpensesIndex = _.findIndex(this.processedExpenses, (expense) => expense.id === updatedExpense.id);
   let employeeName = '';
   if (this.isAdmin) {
-    api.getItem(api.EMPLOYEES, updatedExpense.employeeId).then(employee => {
+    api.getItem(api.EMPLOYEES, updatedExpense.employeeId).then((employee) => {
       employeeName = employeeUtils.fullName(employee);
       this.$set(updatedExpense, 'employeeName', employeeName);
     });
@@ -590,7 +585,7 @@ function updateModelInTable(updatedExpense) {
     employeeName = this.processedExpenses[matchingExpensesIndex].employeeName;
     this.$set(updatedExpense, 'employeeName', employeeName);
   }
-  api.getItem(api.EXPENSE_TYPES, updatedExpense.expenseTypeId).then(expenseType => {
+  api.getItem(api.EXPENSE_TYPES, updatedExpense.expenseTypeId).then((expenseType) => {
     this.$set(updatedExpense, 'budgetName', expenseType.budgetName);
   });
   this.processedExpenses.splice(matchingExpensesIndex, 1, updatedExpense);
@@ -607,7 +602,7 @@ function useInactiveStyle(expense) {
   //filter for Active Expense Types (available to admin only)
   //gets the expense type for expense to look up inactive
   if (this.isAdmin) {
-    let expenseType = _.find(this.expenseTypes, type => expense.expenseTypeId === type.value);
+    let expenseType = _.find(this.expenseTypes, (type) => expense.expenseTypeId === type.value);
     return expenseType && expenseType.isInactive;
   }
 
@@ -718,10 +713,10 @@ export default {
     };
   },
   filters: {
-    moneyValue: value => {
+    moneyValue: (value) => {
       return `$` + moneyFilter(value);
     },
-    dateFormat: value => {
+    dateFormat: (value) => {
       if (value) {
         // return moment(value, 'h:mm:ss ddd MMM DD YYYY GMT-0400').format('MMM Do, YYYY');
         return moment(value, 'YYYY-MM-DD').format('MMM Do, YYYY');
@@ -753,13 +748,13 @@ export default {
     useInactiveStyle
   },
   watch: {
-    employee: function() {
+    employee: function () {
       this.filterExpense();
     },
-    'filter.active': function() {
+    'filter.active': function () {
       this.filterExpense();
     },
-    'filter.reimbursed': function() {
+    'filter.reimbursed': function () {
       this.filterExpense();
     }
   }

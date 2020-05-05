@@ -28,10 +28,10 @@ async function execute(method, resource, data) {
       Authorization: `Bearer ${accessToken}`
     }
   })
-    .then(response => {
+    .then((response) => {
       return response.data;
     })
-    .catch(err => {
+    .catch((err) => {
       return err;
     });
 }
@@ -41,10 +41,10 @@ function getCountries() {
     method: 'get',
     url: 'https://restcountries.eu/rest/v2/all'
   })
-    .then(response => {
+    .then((response) => {
       return response.data;
     })
-    .catch(err => {
+    .catch((err) => {
       return err;
     });
 }
@@ -134,10 +134,10 @@ async function createAttachment(expense, file) {
       Authorization: `Bearer ${accessToken}`
     }
   })
-    .then(response => {
+    .then((response) => {
       return response.data;
     })
-    .catch(err => {
+    .catch((err) => {
       return err;
     });
 }

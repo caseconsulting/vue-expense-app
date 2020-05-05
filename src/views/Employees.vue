@@ -102,7 +102,7 @@
                         "
                         v-on="on"
                       >
-                        <v-icon style="color: #606060">
+                        <v-icon style="color: #606060;">
                           edit
                         </v-icon>
                       </v-btn>
@@ -114,7 +114,7 @@
                   <v-tooltip top>
                     <template v-slot:activator="{ on }">
                       <v-btn :disabled="isEditing()" text icon @click="validateDelete(item)" v-on="on">
-                        <v-icon style="color: #606060">
+                        <v-icon style="color: #606060;">
                           delete
                         </v-icon>
                       </v-btn>
@@ -254,7 +254,7 @@ async function refreshEmployees() {
  */
 function filterEmployees() {
   //filter for Active Expense Types (available to admin only)
-  this.filteredEmployees = _.filter(this.employees, employee => {
+  this.filteredEmployees = _.filter(this.employees, (employee) => {
     let fullCheck = this.filter.active.includes('full') && this.isFullTime(employee);
     let partCheck = this.filter.active.includes('part') && this.isPartTime(employee);
     let inactiveCheck = this.filter.active.includes('inactive') && this.isInactive(employee);
@@ -352,7 +352,7 @@ function updateModelInTable() {
 }
 
 function addModelToTable(newEmployee) {
-  let matchingEmployee = _.filter(this.employees, employee => employee.id === newEmployee.id);
+  let matchingEmployee = _.filter(this.employees, (employee) => employee.id === newEmployee.id);
 
   if (!matchingEmployee.length) {
     if (!this.isInactive(newEmployee)) {
@@ -371,9 +371,9 @@ function addModelToTable(newEmployee) {
 }
 
 function deleteModelFromTable() {
-  let modelIndex = _.findIndex(this.employees, employee => employee.id === this.deleteModel.id);
+  let modelIndex = _.findIndex(this.employees, (employee) => employee.id === this.deleteModel.id);
   this.employees.splice(modelIndex, 1);
-  modelIndex = _.findIndex(this.filteredEmployees, employee => employee.id === this.deleteModel.id);
+  modelIndex = _.findIndex(this.filteredEmployees, (employee) => employee.id === this.deleteModel.id);
   this.filteredEmployees.splice(modelIndex, 1);
 
   this.refreshEmployees();
@@ -421,10 +421,10 @@ function isDisplayData(item) {
 async function validateDelete(item) {
   let x = await api
     .getAllEmployeeExpenses(item.id)
-    .then(result => {
+    .then((result) => {
       return result.length <= 0;
     })
-    .catch(err => {
+    .catch((err) => {
       this.displayError(err);
     });
   if (x) {
@@ -486,14 +486,14 @@ async function created() {
 
 export default {
   filters: {
-    dateFormat: value => {
+    dateFormat: (value) => {
       if (value && value != ' ') {
         return moment(value).format('MMM Do, YYYY');
       } else {
         return '';
       }
     },
-    dateFormatNoYear: value => {
+    dateFormatNoYear: (value) => {
       if (value) {
         return moment(value).format('MMM Do');
       } else {
@@ -584,7 +584,7 @@ export default {
   },
   created,
   watch: {
-    'filter.active': function() {
+    'filter.active': function () {
       this.filterEmployees();
     }
     // ,

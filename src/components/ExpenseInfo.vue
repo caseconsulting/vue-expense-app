@@ -57,7 +57,7 @@ export default {
     isEmpty
   },
   filters: {
-    moneyValue: value => {
+    moneyValue: (value) => {
       return `${new Intl.NumberFormat('en-US', {
         style: 'currency',
         currency: 'USD',
@@ -65,7 +65,7 @@ export default {
         maximumFractionDigits: 2
       }).format(value)}`;
     },
-    dateFormat: value => {
+    dateFormat: (value) => {
       if (isReimbursed(value)) {
         return moment(value).format('MMM Do, YYYY');
       } else {

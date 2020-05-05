@@ -189,7 +189,7 @@
                         "
                         v-on="on"
                       >
-                        <v-icon style="color: #606060">
+                        <v-icon style="color: #606060;">
                           edit
                         </v-icon>
                       </v-btn>
@@ -201,7 +201,7 @@
                   <v-tooltip top>
                     <template v-slot:activator="{ on }">
                       <v-btn :disabled="isEditing()" text icon @click="validateDelete(item)" v-on="on">
-                        <v-icon style="color: #606060">
+                        <v-icon style="color: #606060;">
                           delete
                         </v-icon>
                       </v-btn>
@@ -268,11 +268,11 @@
                           <v-card color="#bc3825">
                             <!-- dialog title -->
                             <v-card-title>
-                              <span class="headline" style="color: white">Accessible By</span>
+                              <span class="headline" style="color: white;">Accessible By</span>
                             </v-card-title>
                             <v-divider color="black"></v-divider>
                             <!-- list of employee names -->
-                            <v-card-text class="pb-0" style="max-height: 300px; background-color: #f0f0f0">
+                            <v-card-text class="pb-0" style="max-height: 300px; background-color: #f0f0f0;">
                               <v-row>
                                 <v-list color="#f0f0f0" width="376">
                                   <template v-for="(employee, index) in getEmployeeList(item.accessibleBy)">
@@ -360,7 +360,7 @@ function moneyFilter(value) {
 
 /* methods */
 function addModelToTable(newExpenseType) {
-  let matchingExpenses = _.filter(this.expenseTypes, expenseType => expenseType.id === newExpenseType.id);
+  let matchingExpenses = _.filter(this.expenseTypes, (expenseType) => expenseType.id === newExpenseType.id);
 
   if (!matchingExpenses.length) {
     if (newExpenseType.isInactive) {
@@ -380,7 +380,7 @@ function addModelToTable(newExpenseType) {
  * Changes the employee avatar upon error displaying
  */
 function changeAvatar(item) {
-  let index = _.findIndex(this.employees, employee => {
+  let index = _.findIndex(this.employees, (employee) => {
     return employee.id === item.id;
   });
 
@@ -435,9 +435,9 @@ async function deleteExpenseType() {
 }
 
 function deleteModelFromTable() {
-  let modelIndex = _.findIndex(this.expenseTypes, expense => expense.id === this.deleteModel.id);
+  let modelIndex = _.findIndex(this.expenseTypes, (expense) => expense.id === this.deleteModel.id);
   this.expenseTypes.splice(modelIndex, 1);
-  modelIndex = _.findIndex(this.filteredExpenseTypes, expense => expense.id === this.deleteModel.id);
+  modelIndex = _.findIndex(this.filteredExpenseTypes, (expense) => expense.id === this.deleteModel.id);
   this.filteredExpenseTypes.splice(modelIndex, 1);
   this.$set(this.status, 'statusType', 'SUCCESS');
   this.$set(this.status, 'statusMessage', 'Item was successfully deleted!');
@@ -452,28 +452,28 @@ async function displayError(err) {
 
 function filterExpense() {
   this.filteredExpenseTypes = this.expenseTypes;
-  this.filteredExpenseTypes = _.filter(this.filteredExpenseTypes, expenseType => {
+  this.filteredExpenseTypes = _.filter(this.filteredExpenseTypes, (expenseType) => {
     return this.filter.active == 'active'
       ? !expenseType.isInactive
       : this.filter.active == 'notActive'
       ? expenseType.isInactive
       : this.filteredExpenseTypes;
   });
-  this.filteredExpenseTypes = _.filter(this.filteredExpenseTypes, expenseType => {
+  this.filteredExpenseTypes = _.filter(this.filteredExpenseTypes, (expenseType) => {
     return this.filter.overdraft == 'overdraft'
       ? expenseType.odFlag
       : this.filter.overdraft == 'noOverdraft'
       ? !expenseType.odFlag
       : this.filteredExpenseTypes;
   });
-  this.filteredExpenseTypes = _.filter(this.filteredExpenseTypes, expenseType => {
+  this.filteredExpenseTypes = _.filter(this.filteredExpenseTypes, (expenseType) => {
     return this.filter.recurring == 'recurring'
       ? expenseType.recurringFlag
       : this.filter.recurring == 'notRecurring'
       ? !expenseType.recurringFlag
       : this.filteredExpenseTypes;
   });
-  this.filteredExpenseTypes = _.filter(this.filteredExpenseTypes, expenseType => {
+  this.filteredExpenseTypes = _.filter(this.filteredExpenseTypes, (expenseType) => {
     return this.filter.receipt == 'receipt'
       ? expenseType.requiredFlag
       : this.filter.receipt == 'noReceipt'
@@ -505,22 +505,22 @@ function getEmployeeList(accessibleBy) {
   if (accessibleBy === 'ALL') {
     employeesList = this.employees;
   } else if (accessibleBy === 'FULL TIME') {
-    employeesList = _.filter(this.employees, employee => {
+    employeesList = _.filter(this.employees, (employee) => {
       return employee.workStatus == 100;
     });
   } else if (accessibleBy === 'PART TIME') {
-    employeesList = _.filter(this.employees, employee => {
+    employeesList = _.filter(this.employees, (employee) => {
       return employee.workStatus < 100 && employee.workStatus > 0;
     });
   } else {
-    employeesList = _.filter(this.employees, employee => {
+    employeesList = _.filter(this.employees, (employee) => {
       return accessibleBy.includes(employee.id);
     });
   }
   this.showAccessLength = employeesList.length;
   return _.sortBy(employeesList, [
-    employee => employee.firstName.toLowerCase(),
-    employee => employee.lastName.toLowerCase()
+    (employee) => employee.firstName.toLowerCase(),
+    (employee) => employee.lastName.toLowerCase()
   ]);
 }
 
@@ -583,10 +583,10 @@ function userIsAdmin() {
 async function validateDelete(item) {
   let x = await api
     .getAllExpenseTypeExpenses(item.id)
-    .then(result => {
+    .then((result) => {
       return result.length <= 0;
     })
-    .catch(err => {
+    .catch((err) => {
       this.displayError(err);
     });
   if (x) {
@@ -634,7 +634,7 @@ async function created() {
   this.employees = await api.getItems(api.EMPLOYEES);
 
   // temporary code until employee has avatar field
-  _.forEach(this.employees, employee => {
+  _.forEach(this.employees, (employee) => {
     if (!employee.avatar) {
       employee.avatar = 'email profile pic';
     }
@@ -643,10 +643,10 @@ async function created() {
 
 export default {
   filters: {
-    moneyValue: value => {
+    moneyValue: (value) => {
       return `$` + moneyFilter(value);
     },
-    limitedText: val => {
+    limitedText: (val) => {
       //limits text to 50 characters on table view
       return val.length > 50 ? val.substring(0, 50) + '...' : val;
     }
@@ -731,16 +731,16 @@ export default {
     expenseTypeList
   },
   watch: {
-    'filter.active': function() {
+    'filter.active': function () {
       this.filterExpense();
     },
-    'filter.receipt': function() {
+    'filter.receipt': function () {
       this.filterExpense();
     },
-    'filter.recurring': function() {
+    'filter.recurring': function () {
       this.filterExpense();
     },
-    'filter.overdraft': function() {
+    'filter.overdraft': function () {
       this.filterExpense();
     }
   },

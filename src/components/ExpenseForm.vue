@@ -154,7 +154,7 @@
 
         <!-- Receipt name -->
         <v-card-text
-          style="padding: 0px 0px 3px 0px; font: inherit; font-size: 16px; color: #0000008a"
+          style="padding: 0px 0px 3px 0px; font: inherit; font-size: 16px; color: #0000008a;"
           v-if="!isEmpty(expense.receipt) && isEdit"
           >Current Receipt: {{ this.expense.receipt }}</v-card-text
         >
@@ -235,7 +235,7 @@ async function checkCoverage() {
   if (this.$refs.form.validate()) {
     this.loading = true;
     if (this.expense) {
-      let expenseType = _.find(this.expenseTypes, type => this.expense.expenseTypeId === type.value);
+      let expenseType = _.find(this.expenseTypes, (type) => this.expense.expenseTypeId === type.value);
       //let budgets = [];
 
       // get employee information
@@ -262,7 +262,7 @@ async function checkCoverage() {
           // if the matching budget exists
           let committedAmount = budget.pendingAmount + budget.reimbursedAmount;
           let allExpenses = await api.getAllAggregateExpenses();
-          let match = _.find(allExpenses, entry => {
+          let match = _.find(allExpenses, (entry) => {
             return entry.id === this.expense.id;
           });
           // For subsequent calculations, remove matched entry cost from committed amount
@@ -372,15 +372,10 @@ function clearForm() {
 }
 
 function customFilter(item, queryText) {
-  const hasValue = val => (val != null ? val : '');
+  const hasValue = (val) => (val != null ? val : '');
   const text = hasValue(item.text);
   const query = hasValue(queryText);
-  return (
-    text
-      .toString()
-      .toLowerCase()
-      .indexOf(query.toString().toLowerCase()) > -1
-  );
+  return text.toString().toLowerCase().indexOf(query.toString().toLowerCase()) > -1;
 }
 
 // returns true if today is between a start and end date
@@ -395,7 +390,7 @@ function filteredExpenseTypes() {
   let filteredExpType = [];
   let selectedEmployee = _.find(this.employees, ['value', this.expense.employeeId]);
   if (!this.asUser) {
-    _.forEach(this.expenseTypes, expenseType => {
+    _.forEach(this.expenseTypes, (expenseType) => {
       if (!expenseType.isInactive) {
         if (!selectedEmployee) {
           filteredExpType.push(expenseType);
@@ -408,7 +403,7 @@ function filteredExpenseTypes() {
     });
   } else {
     let employee = this.userInfo;
-    _.forEach(this.expenseTypes, expenseType => {
+    _.forEach(this.expenseTypes, (expenseType) => {
       if (!expenseType.isInactive) {
         if (hasAccess(employee, expenseType)) {
           if (expenseType.recurringFlag || betweenDates(expenseType.startDate, expenseType.endDate)) {
@@ -626,7 +621,7 @@ async function incrementURLHits() {
 
 function expenseTypeSelected(value) {
   this.expense.category = '';
-  return (this.selectedExpenseType = _.find(this.expenseTypes, expenseType => {
+  return (this.selectedExpenseType = _.find(this.expenseTypes, (expenseType) => {
     if (expenseType.value === value) {
       return expenseType;
     }
@@ -645,7 +640,7 @@ function checkExpenseDate(purchaseDate, budget) {
 }
 
 function isReceiptRequired() {
-  this.selectedExpenseType = _.find(this.expenseTypes, expenseType => {
+  this.selectedExpenseType = _.find(this.expenseTypes, (expenseType) => {
     if (expenseType.value === this.expense.expenseTypeId) {
       return expenseType;
     }
@@ -658,7 +653,7 @@ function isReceiptRequired() {
 
 // COMPUTED
 function updateIsRequired() {
-  this.selectedExpenseType = _.find(this.expenseTypes, expenseType => {
+  this.selectedExpenseType = _.find(this.expenseTypes, (expenseType) => {
     if (expenseType.value === this.expense.expenseTypeId) {
       return expenseType;
     }
@@ -670,13 +665,13 @@ function updateIsRequired() {
 }
 
 function getCategories() {
-  this.selectedExpenseType = _.find(this.expenseTypes, expenseType => {
+  this.selectedExpenseType = _.find(this.expenseTypes, (expenseType) => {
     if (expenseType.value === this.expense.expenseTypeId) {
       return expenseType;
     }
   });
   if (this.selectedExpenseType) {
-    return _.sortBy(this.selectedExpenseType.categories, category => {
+    return _.sortBy(this.selectedExpenseType.categories, (category) => {
       return category;
     });
   }
@@ -696,7 +691,7 @@ function isUser() {
 }
 
 //  extend the Number object
-Number.prototype.pad = function(size) {
+Number.prototype.pad = function (size) {
   var s = String(this);
   while (s.length < (size || 2)) {
     s = '0' + s;
@@ -734,7 +729,7 @@ async function created() {
     this.$set(this.expense, 'employeeId', this.userInfo.id);
   } else {
     let employees = await api.getItems(api.EMPLOYEES);
-    this.employees = employees.map(employee => {
+    this.employees = employees.map((employee) => {
       return {
         text: employeeUtils.fullName(employee),
         value: employee.id,
@@ -744,7 +739,7 @@ async function created() {
   }
 
   let expenseTypes = await api.getItems(api.EXPENSE_TYPES);
-  this.expenseTypes = _.map(expenseTypes, expenseType => {
+  this.expenseTypes = _.map(expenseTypes, (expenseType) => {
     return {
       /* beautify preserve:start */
       text: `${expenseType.budgetName} - $${expenseType.budget}`,
@@ -773,23 +768,23 @@ export default {
     return {
       allowReceipt: false,
       asUser: true,
-      componentRules: [v => !!v || 'Required field'],
+      componentRules: [(v) => !!v || 'Required field'],
       costRules: [
-        v => !!v || 'Cost is a required field',
-        v => v > 0 || 'Cost must be a positive number',
-        v =>
+        (v) => !!v || 'Cost is a required field',
+        (v) => v > 0 || 'Cost must be a positive number',
+        (v) =>
           /^[+-]?[0-9]{1,3}(?:,?[0-9]{3})*(?:\.[0-9]{2})?$/.test(v) ||
           'Expense amount must be a number with two decimal digits',
-        v => v < 1000000000 || 'Nice try' //when a user tries to fill out expense that is over a million
+        (v) => v < 1000000000 || 'Nice try' //when a user tries to fill out expense that is over a million
       ],
       date: null,
       dateRules: [
-        v => !!v || 'Date must be valid. Format: MM/DD/YYYY',
-        v => (!!v && /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v)) || 'Date must be valid. Format: MM/DD/YYYY'
+        (v) => !!v || 'Date must be valid. Format: MM/DD/YYYY',
+        (v) => (!!v && /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v)) || 'Date must be valid. Format: MM/DD/YYYY'
       ],
       descriptionRules: [
-        v => !!v || 'Description is a required field',
-        v => (v && v.replace(/\s/g, '').length > 0) || 'Description is a required field'
+        (v) => !!v || 'Description is a required field',
+        (v) => (v && v.replace(/\s/g, '').length > 0) || 'Description is a required field'
       ],
       employeeRole: '',
       employee: null,
@@ -802,10 +797,10 @@ export default {
       loading: false,
       menu1: false,
       menu2: false,
-      optionalDateRules: [v => !v || /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v) || 'Date must be valid. Format: MM/DD/YYYY'],
+      optionalDateRules: [(v) => !v || /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v) || 'Date must be valid. Format: MM/DD/YYYY'],
       originalExpense: null,
       purchaseDateFormatted: null,
-      receiptRules: [v => !!v || 'Receipts are required'],
+      receiptRules: [(v) => !!v || 'Receipts are required'],
       reimbursedDateFormatted: null,
       selectedEmployee: {},
       selectedExpenseType: {},
@@ -816,7 +811,7 @@ export default {
         hits: 0
       },
       urlRules: [
-        v =>
+        (v) =>
           !v ||
           v == ' ' ||
           /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)/.test(
@@ -833,25 +828,25 @@ export default {
     FileUpload
   },
   watch: {
-    'expense.id': function() {
+    'expense.id': function () {
       this.originalExpense = _.cloneDeep(this.expense);
     },
-    'expense.purchaseDate': function() {
+    'expense.purchaseDate': function () {
       this.purchaseDateFormatted = this.formatDate(this.expense.purchaseDate) || this.purchaseDateFormatted;
       //fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
       if (this.expense.purchaseDate !== null && !this.formatDate(this.expense.purchaseDate)) {
         this.expense.purchaseDate = null;
       }
     },
-    'expense.reimbursedDate': function() {
+    'expense.reimbursedDate': function () {
       this.reimbursedDateFormatted = this.formatDate(this.expense.reimbursedDate) || this.reimbursedDateFormatted;
       //fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
       if (this.expense.reimbursedDate !== null && !this.formatDate(this.expense.reimbursedDate)) {
         this.expense.reimbursedDate = null;
       }
     },
-    'expense.expenseTypeId': function() {
-      let selected = _.find(this.expenseTypes, expenseType => {
+    'expense.expenseTypeId': function () {
+      let selected = _.find(this.expenseTypes, (expenseType) => {
         return expenseType.value === this.expense.expenseTypeId;
       });
 

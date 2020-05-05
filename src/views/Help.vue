@@ -1,7 +1,7 @@
 <template>
   <v-container>
     <div>
-      <h1 style="text-align:center">H<span class="e">€</span>LP</h1>
+      <h1 style="text-align: center;">H<span class="e">€</span>LP</h1>
     </div>
     <br />
     <br />
@@ -18,7 +18,7 @@
             <v-card>
               <v-card-text class="grey lighten-3">
                 <li v-for="ques in section" :key="ques.title">
-                  <div v-if="ques.title" style="padding-bottom: 10px">
+                  <div v-if="ques.title" style="padding-bottom: 10px;">
                     <body style="font-style: italic;">
                       <icon name="space-shuttle" /> {{ ques.title }}
                     </body>

@@ -12,7 +12,7 @@
           v-model="fileName"
           prepend-icon="attach_file"
         ></v-text-field>
-        <input type="file" style="display: none" ref="receipt" :accept="acceptedFileTypes" @change="onFilePicked" />
+        <input type="file" style="display: none;" ref="receipt" :accept="acceptedFileTypes" @change="onFilePicked" />
       </v-flex>
     </v-layout>
   </div>

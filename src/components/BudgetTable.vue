@@ -63,7 +63,7 @@ export default {
     }
   }),
   filters: {
-    moneyValue: value => {
+    moneyValue: (value) => {
       return `${new Intl.NumberFormat('en-US', {
         style: 'currency',
         currency: 'USD',

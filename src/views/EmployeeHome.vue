@@ -17,7 +17,7 @@
 
     <!-- title -->
     <v-flex v-if="!isMobile" lg8 md12 sm12>
-      <v-row style="height: 100%" align="center" justify="center">
+      <v-row style="height: 100%;" align="center" justify="center">
         <h1>Budget Statistics for {{ employee.firstName }} {{ employee.lastName }}</h1>
       </v-row>
     </v-flex>
@@ -43,7 +43,7 @@
               <div class="pt-14">[Inactive Budget]</div>
             </div>
             <v-spacer></v-spacer>
-            <v-icon style="margin-right: 10px">
+            <v-icon style="margin-right: 10px;">
               history
             </v-icon>
           </v-card-title>
@@ -106,7 +106,7 @@ async function created() {
     this.changingBudgetView = false;
   });
 
-  window.EventBus.$on('selected-budget-year', data => {
+  window.EventBus.$on('selected-budget-year', (data) => {
     if (data.format(IsoFormat) != this.fiscalDateView) {
       this.fiscalDateView = data.format(IsoFormat);
       this.refreshBudget();
@@ -119,7 +119,7 @@ async function created() {
 function addOneSecondToActualTimeEverySecond() {
   var component = this;
   component.actualTime = moment().format('X');
-  setTimeout(function() {
+  setTimeout(function () {
     component.addOneSecondToActualTimeEverySecond();
   }, 1000);
 }
@@ -184,10 +184,7 @@ async function refreshEmployee() {
 async function refreshBudget() {
   this.loading = true;
   // get all budgets within the year displayed
-  let endView = moment(this.fiscalDateView)
-    .add(1, 'y')
-    .subtract(1, 'd')
-    .format(IsoFormat);
+  let endView = moment(this.fiscalDateView).add(1, 'y').subtract(1, 'd').format(IsoFormat);
 
   let budgetsVar = await api.getEmployeeBudgetsByDate(this.employee.id, this.fiscalDateView, endView);
 
@@ -198,14 +195,14 @@ async function refreshBudget() {
   }
 
   // if employee is not full time, prohibit overdraft
-  _.forEach(budgetsVar, async budget => {
+  _.forEach(budgetsVar, async (budget) => {
     if (!isFullTime(this.employee)) {
       budget.odFlag = false;
     }
   });
 
   // remove any budgets where budget amount is 0 and 0 total expenses
-  this.expenseTypeData = _.filter(budgetsVar, data => {
+  this.expenseTypeData = _.filter(budgetsVar, (data) => {
     let budget = data.budgetObject;
     return budget.amount != 0 || budget.reimbursedAmount != 0 || budget.pendingAmount != 0;
   });
@@ -233,7 +230,7 @@ function budgets() {
   let odUnreimbursed = [];
   if (this.expenseTypeData !== undefined) {
     let expenseTypes = this.expenseTypeData;
-    _.forEach(expenseTypes, expenseType => {
+    _.forEach(expenseTypes, (expenseType) => {
       budgetNames.push(expenseType.expenseTypeName);
       let budget = expenseType.budgetObject;
       if (budget) {
@@ -339,7 +336,7 @@ function drawGraph() {
           stacked: true,
           ticks: {
             beginAtZero: true,
-            callback: function(value) {
+            callback: function (value) {
               return value.toLocaleString('en-US', {
                 style: 'currency',
                 currency: 'USD'
@@ -361,13 +358,13 @@ function drawGraph() {
     },
     tooltips: {
       callbacks: {
-        label: function(tooltipItem) {
+        label: function (tooltipItem) {
           return (
             '$' +
             Number(tooltipItem.yLabel)
               // toFixed sets the number of decimal points to show
               .toFixed(2)
-              .replace(/./g, function(c, i, a) {
+              .replace(/./g, function (c, i, a) {
                 return i > 0 && c !== '.' && (a.length - i) % 3 === 0 ? ',' + c : c;
               })
           );
@@ -418,12 +415,12 @@ function refreshBudgetYears() {
   let budgetYears = [];
   let [currYear] = this.getCurrentBudgetYear().split('-');
   let budgetDates = _.uniqBy(_.map(this.allUserBudgets, 'fiscalStartDate'));
-  budgetDates.forEach(date => {
+  budgetDates.forEach((date) => {
     const [year] = date.split('-');
     budgetYears.push(parseInt(year));
   });
   budgetYears.push(parseInt(currYear));
-  budgetYears = _.filter(_.uniqBy(budgetYears), year => {
+  budgetYears = _.filter(_.uniqBy(budgetYears), (year) => {
     return parseInt(year) <= parseInt(currYear);
   });
   this.budgetYears = _.reverse(_.sortBy(budgetYears));
@@ -511,7 +508,7 @@ function viewingCurrentBudgetYear() {
 
 export default {
   filters: {
-    moneyValue: value => {
+    moneyValue: (value) => {
       return `${new Intl.NumberFormat('en-US', {
         style: 'currency',
         currency: 'USD',
@@ -519,7 +516,7 @@ export default {
         maximumFractionDigits: 2
       }).format(value)}`;
     },
-    dateFormat: value => {
+    dateFormat: (value) => {
       if (value) {
         return moment(value).format('MMM Do, YYYY');
       } else {

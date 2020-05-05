@@ -1,5 +1,5 @@
 <template>
-  <v-container fluid style="background:grey">
+  <v-container fluid style="background: grey;">
     <div>
       <!-- unreimburse sub-datable -->
       <v-data-table
@@ -25,7 +25,7 @@
         <template v-slot:item="{ item }">
           <tr @click="expenseClicked(item)">
             <!-- checkbox for individual expense -->
-            <td style="width: 1px" :class="{ failed: item.failed }">
+            <td style="width: 1px;" :class="{ failed: item.failed }">
               <v-checkbox
                 :input-value="item.selected"
                 @click.stop="
@@ -71,7 +71,7 @@ function expenseClicked(clickedExpense) {
 
 export default {
   filters: {
-    moneyValue: value => {
+    moneyValue: (value) => {
       return `${new Intl.NumberFormat('en-US', {
         style: 'currency',
         currency: 'USD',
@@ -79,14 +79,14 @@ export default {
         maximumFractionDigits: 2
       }).format(value)}`;
     },
-    dateFormat: value => {
+    dateFormat: (value) => {
       if (value) {
         return moment(value).format('MMM Do, YYYY');
       } else {
         return '';
       }
     },
-    descripFormat: val => {
+    descripFormat: (val) => {
       return val.length > 250 ? val.substring(0, 250) + '...' : val;
     }
   },

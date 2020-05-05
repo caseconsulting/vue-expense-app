@@ -121,7 +121,7 @@
           rows="3"
         ></v-textarea>
         <!-- Accessibility -->
-        <div style="color: dimgray">Employee Access</div>
+        <div style="color: dimgray;">Employee Access</div>
         <v-radio-group v-model="model.accessibleBy" class="smallRadio ma-0" row mandatory>
           <v-radio label="All" value="ALL"></v-radio>
           <v-radio label="Full Time" value="FULL TIME"></v-radio>
@@ -298,7 +298,7 @@ async function created() {
   // get all employees for access list
   let employees = await api.getItems(api.EMPLOYEES);
   let allEmployees = [];
-  _.forEach(employees, employee => {
+  _.forEach(employees, (employee) => {
     allEmployees.push({
       value: employee.id,
       text: `${employee.firstName} ${employee.lastName}`
@@ -317,17 +317,17 @@ export default {
       allEmployees: null,
       deleting: false,
       categoryInput: null, // category combobox input
-      genericRules: [v => !!v || 'This field is required'],
+      genericRules: [(v) => !!v || 'This field is required'],
       budgetRules: [
-        v => !!v || 'Budget amount is required',
-        v => parseFloat(v, 10) > 0 || 'Budget must be greater than 0.',
-        v =>
+        (v) => !!v || 'Budget amount is required',
+        (v) => parseFloat(v, 10) > 0 || 'Budget must be greater than 0.',
+        (v) =>
           /^[+-]?[0-9]{1,3}(?:,?[0-9]{3})*(?:\.[0-9]{2})?$/.test(v) ||
           'Budget amount must be a number with two decimal digits.'
       ],
       dateRules: [
-        v => !!v || 'Date must be valid. Format: MM/DD/YYYY',
-        v => (!!v && /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v)) || 'Date must be valid. Format: MM/DD/YYYY'
+        (v) => !!v || 'Date must be valid. Format: MM/DD/YYYY',
+        (v) => (!!v && /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v)) || 'Date must be valid. Format: MM/DD/YYYY'
       ],
       submitting: false,
       valid: false,
@@ -349,29 +349,29 @@ export default {
     submit
   },
   watch: {
-    'model.startDate': function() {
+    'model.startDate': function () {
       this.startDateFormatted = this.formatDate(this.model.startDate) || this.startDateFormatted;
       //fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
       if (this.model.startDate !== null && !this.formatDate(this.model.startDate)) {
         this.model.startDate = null;
       }
     },
-    'model.endDate': function() {
+    'model.endDate': function () {
       this.endDateFormatted = this.formatDate(this.model.endDate) || this.endDateFormatted;
       //fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
       if (this.model.endDate !== null && !this.formatDate(this.model.endDate)) {
         this.model.endDate = null;
       }
     },
-    'model.categories': function(val) {
+    'model.categories': function (val) {
       if (val.length > 10) {
         this.$nextTick(() => this.model.categories.pop());
       }
     },
-    'model.accessibleBy': function(val) {
+    'model.accessibleBy': function (val) {
       if (!this.submitting) {
         if (!['ALL', 'FULL TIME', 'PART TIME', 'CUSTOM'].includes(val)) {
-          this.customAccess = _.filter(this.allEmployees, employee => {
+          this.customAccess = _.filter(this.allEmployees, (employee) => {
             return this.model.accessibleBy.includes(employee.value);
           });
           this.model.accessibleBy = 'CUSTOM';

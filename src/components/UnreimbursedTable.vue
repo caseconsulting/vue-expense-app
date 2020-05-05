@@ -133,7 +133,7 @@ export default {
     // talk to the api to retrieve the employee name and expense type name for each expense
     //Get employees
     let employees = await api.getItems(api.EMPLOYEES);
-    this.employees = await employees.map(employee => {
+    this.employees = await employees.map((employee) => {
       return {
         text: employeeUtils.fullName(employee),
         value: employee.id
@@ -141,7 +141,7 @@ export default {
     });
     //Get expense Types
     let expenseTypes = await api.getItems(api.EXPENSE_TYPES);
-    this.expenseTypes = expenseTypes.map(expenseType => {
+    this.expenseTypes = expenseTypes.map((expenseType) => {
       return {
         text: expenseType.budgetName,
         value: expenseType.id
@@ -151,20 +151,20 @@ export default {
     //Get expenses
     this.expenses = await api.getItems(api.EXPENSES);
 
-    this.processedExpenses = _.map(this.expenses, expense => {
+    this.processedExpenses = _.map(this.expenses, (expense) => {
       return this.getEmployeeName(expense);
     });
 
-    this.processedExpenses = _.map(this.expenses, expense => {
+    this.processedExpenses = _.map(this.expenses, (expense) => {
       return this.getExpenseTypeName(expense);
     });
-    Promise.all(this.processedExpenses).then(values => {
+    Promise.all(this.processedExpenses).then((values) => {
       this.processedExpenses = values;
     });
   },
   computed: {
     filteredItems() {
-      return _.filter(this.processedExpenses, expense => {
+      return _.filter(this.processedExpenses, (expense) => {
         if (!this.employee && !this.expenseType) {
           return true;
         } else if (!this.employee && this.expenseType) {
@@ -201,15 +201,10 @@ export default {
       return expense;
     },
     customFilter(item, queryText) {
-      const hasValue = val => (val != null ? val : '');
+      const hasValue = (val) => (val != null ? val : '');
       const text = hasValue(item.text);
       const query = hasValue(queryText);
-      return (
-        text
-          .toString()
-          .toLowerCase()
-          .indexOf(query.toString().toLowerCase()) > -1
-      );
+      return text.toString().toLowerCase().indexOf(query.toString().toLowerCase()) > -1;
     }
   }
 };

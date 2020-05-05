@@ -1,4 +1,4 @@
-module.exports = function(grunt) {
+module.exports = function (grunt) {
   grunt.loadNpmTasks('grunt-aws-s3');
   grunt.initConfig({
     aws_s3: {

@@ -3,7 +3,7 @@
     <v-container>
       <v-row>
         <v-flex xs4>
-          <h1 style="font-size: 35px">Trainings</h1>
+          <h1 style="font-size: 35px;">Trainings</h1>
         </v-flex>
 
         <v-flex xs8>
@@ -156,7 +156,7 @@
 
                       <!-- hit count -->
                       <div class="mr-2">
-                        <span v-if="isEmpty(url.title)" style="float: left">{{ url.publisher }}</span>
+                        <span v-if="isEmpty(url.title)" style="float: left;">{{ url.publisher }}</span>
                         <span class="subheading hitText">{{ url.hits }}</span>
                         <icon name="crosshairs" class="hitIcon" scale="1"></icon>
                       </div>
@@ -181,7 +181,7 @@ let caseLogo = require('../assets/img/logo-big.png');
 
 async function getUrls() {
   this.urlsOriginal = await api.getItems(api.URLS);
-  _.forEach(this.urlsOriginal, urlObject => {
+  _.forEach(this.urlsOriginal, (urlObject) => {
     urlObject.title = titleFormat(urlObject.title);
 
     urlObject.display = urlObject.logo;
@@ -193,7 +193,7 @@ async function getUrls() {
  * Changes the website image upon error displaying
  */
 function changeDisplay(item) {
-  let index = _.findIndex(this.urlsOriginal, url => {
+  let index = _.findIndex(this.urlsOriginal, (url) => {
     return url.id === item.id && url.category === item.category;
   });
 
@@ -237,14 +237,14 @@ function isFocus(value) {
 function urls() {
   let filteredUrls = [];
   if (this.categoryFilter != 'All') {
-    filteredUrls = _.filter(this.urlsOriginal, url => {
+    filteredUrls = _.filter(this.urlsOriginal, (url) => {
       return url.category === this.categoryFilter;
     });
   } else {
     let urls = _.cloneDeep(this.urlsOriginal);
-    _.forEach(urls, urlObject => {
+    _.forEach(urls, (urlObject) => {
       let url = urlObject.id;
-      let dupIndex = _.findIndex(filteredUrls, duplicate => {
+      let dupIndex = _.findIndex(filteredUrls, (duplicate) => {
         return url === duplicate.id;
       });
       if (dupIndex != -1) {
@@ -255,7 +255,7 @@ function urls() {
     }); //creates new list with no url duplicates and adds all hits for same url
   }
   if (!this.isEmpty(this.search)) {
-    filteredUrls = _.filter(filteredUrls, url => {
+    filteredUrls = _.filter(filteredUrls, (url) => {
       let includes =
         (url.title && url.title.toLowerCase().includes(this.search.toLowerCase())) ||
         (url.description && url.description.toLowerCase().includes(this.search.toLowerCase())) ||
@@ -269,7 +269,7 @@ function urls() {
 
 async function created() {
   let allURLS = await api.getItems(api.URLS);
-  this.urlsOriginal = _.forEach(allURLS, urlObject => {
+  this.urlsOriginal = _.forEach(allURLS, (urlObject) => {
     urlObject.title = titleFormat(urlObject.title);
     urlObject.display = urlObject.logo;
   });

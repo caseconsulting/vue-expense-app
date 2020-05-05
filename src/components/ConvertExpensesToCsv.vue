@@ -21,10 +21,10 @@ function convertToCSV(objArray) {
   return str;
 }
 async function getData() {
-  await api.getItems(api.EMPLOYEES).then(emp => {
+  await api.getItems(api.EMPLOYEES).then((emp) => {
     this.employees = emp;
   });
-  await api.getItems(api.EXPENSE_TYPES).then(expT => {
+  await api.getItems(api.EXPENSE_TYPES).then((expT) => {
     this.expenseTypes = expT;
   });
 }

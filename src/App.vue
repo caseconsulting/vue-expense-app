@@ -1,13 +1,13 @@
 <template>
   <div id="app">
-    <v-app style="background: #F5F5F5">
+    <v-app style="background: #f5f5f5;">
       <v-navigation-drawer light v-model="drawer" fixed app disableResizeWatcher>
         <main-nav></main-nav>
       </v-navigation-drawer>
       <v-app-bar class="nav-color" dark fixed app>
         <v-app-bar-nav-icon v-show="isLoggedIn()" @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
         <v-toolbar-title>
-          <h2 style="text-align:center"><span class="e">€</span>xpense App</h2>
+          <h2 style="text-align: center;"><span class="e">€</span>xpense App</h2>
         </v-toolbar-title>
         <v-spacer></v-spacer>
 
@@ -58,7 +58,7 @@ function handleLogout() {
 }
 
 async function initSession() {
-  const timeout = seconds => new Promise(resolve => setTimeout(resolve, seconds * 1000));
+  const timeout = (seconds) => new Promise((resolve) => setTimeout(resolve, seconds * 1000));
   await timeout(60); //wait 60 seconds
 
   if (!this.isLoggedIn() && this.hasBeenLoggedInBefore) {

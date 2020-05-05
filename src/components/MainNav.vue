@@ -13,7 +13,7 @@
         :to="{ name: item.route }"
         @click="scrollUp"
       >
-        <v-list-item-icon style="width: 30px">
+        <v-list-item-icon style="width: 30px;">
           <icon :name="item.icon" class="navbar-icons"></icon>
         </v-list-item-icon>
         <v-list-item-content>
@@ -84,7 +84,7 @@ export default {
   components: {},
   computed: {
     visibleTiles() {
-      return _.filter(this.items, item => {
+      return _.filter(this.items, (item) => {
         return _.includes(item.permission, this.permissions);
       });
     }

@@ -49,7 +49,7 @@ async function created() {
 
 export default {
   filters: {
-    moneyValue: value => {
+    moneyValue: (value) => {
       return `${new Intl.NumberFormat('en-US', {
         style: 'currency',
         currency: 'USD',
@@ -70,9 +70,9 @@ export default {
     updateSelected
   },
   computed: {
-    totals: function() {
+    totals: function () {
       let totals = [];
-      totals = _.map(this.selected, item => {
+      totals = _.map(this.selected, (item) => {
         return {
           name: item.budgetName,
           id: item.expenseTypeId,
@@ -80,8 +80,8 @@ export default {
         };
       });
       totals = _.uniqWith(totals, _.isEqual);
-      _.forEach(this.selected, expense => {
-        _.forEach(totals, total => {
+      _.forEach(this.selected, (expense) => {
+        _.forEach(totals, (total) => {
           if (total.id === expense.expenseTypeId) {
             total.costTotal += parseFloat(expense.cost);
           }
