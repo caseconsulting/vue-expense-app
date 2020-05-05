@@ -1,10 +1,15 @@
 {
+  "esversion": 9,
+  "browser": true,
+  "boss": true,
+  "eqeqeq": true,
+  "eqnull": true,
+  "expr": true,
+  "latedef": "nofunc",
+  "noarg": true,
   "node": true,
-  "curly": true,
-  "latedef": true,
-  "quotmark": true,
+  "nonew": false,
   "undef": true,
   "unused": true,
-  "trailing": true,
-  "esversion": 9
+  "globals": {}
 }
