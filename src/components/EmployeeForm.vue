@@ -274,12 +274,6 @@
         </v-btn>
         <!-- end form action buttons -->
       </v-form>
-      <update-hire-date-modal
-        :activate="changingHireDate"
-        :employeeName="`${this.model.firstName} ${this.model.lastName}`"
-        :oldDate="this.model.hireDate"
-        :newDate="this.date"
-      ></update-hire-date-modal>
     </v-container>
   </v-card>
 </template>
@@ -289,7 +283,6 @@ import api from '@/shared/api.js';
 import _ from 'lodash';
 import { getRole } from '@/utils/auth';
 import dateUtils from '@/shared/dateUtils';
-import UpdateHireDateModal from './UpdateHireDateModal.vue';
 import MobileDetect from 'mobile-detect';
 import { v4 as uuid } from 'uuid';
 
@@ -406,13 +399,6 @@ function userIsAdmin() {
 
 // LIFECYCLE HOOKS
 async function created() {
-  window.EventBus.$on('cancel-hireDate-change', () => {
-    this.changingHireDate = false;
-    this.date = this.model.hireDate;
-  });
-  window.EventBus.$on('confirm-hireDate-change', () => {
-    this.changingHireDate = false;
-  });
   this.countries = _.map(await api.getCountries(), 'name');
   this.countries.unshift('United States of America');
 }
@@ -421,7 +407,6 @@ export default {
   data() {
     return {
       birthdayFormat: '',
-      changingHireDate: false,
       componentRules: [(v) => !!v || 'Something must be selected'],
       countries: [], // list of countries
       date: null,
@@ -542,9 +527,6 @@ export default {
       valid: false
     };
   },
-  components: {
-    UpdateHireDateModal
-  },
   created,
   watch: {
     date: function () {
@@ -552,13 +534,6 @@ export default {
       //fixes v-date-picker error so that if the format of date is incorrect the date is set to null
       if (this.date !== null && !this.formatDate(this.date)) {
         this.date = null;
-      }
-
-      // prompt user to confirm hire date change
-      if (this.formatDate(this.date) && this.model.id && this.date != this.model.hireDate) {
-        this.changingHireDate = true;
-      } else {
-        this.changingHireDate = false;
       }
     },
     'model.hireDate': async function () {
