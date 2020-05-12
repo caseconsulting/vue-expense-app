@@ -186,13 +186,25 @@ async function refreshBudget() {
   // get all budgets within the year displayed
   let endView = moment(this.fiscalDateView).add(1, 'y').subtract(1, 'd').format(IsoFormat);
 
-  let budgetsVar = await api.getEmployeeBudgetsByDate(this.employee.id, this.fiscalDateView, endView);
+  let budgetsVar;
 
   if (this.fiscalDateView == this.getCurrentBudgetYear()) {
-    let activeBudgets = await api.getAllActiveEmployeeBudgets(this.employee.id);
-    budgetsVar = _.merge(budgetsVar, activeBudgets);
-    //budgetsVar = _.uniqBy(budgetsVar, 'expenseTypeId');
+    budgetsVar = await api.getAllActiveEmployeeBudgets(this.employee.id);
   }
+
+  let existingBudgets = await api.getEmployeeBudgetsByDate(this.employee.id, this.fiscalDateView, endView);
+
+  // append inactive tag to end of budget expense type name
+  // the existing budget duplicates will later be removed (order in array comes after active budgets)
+  _.forEach(existingBudgets, (budget) => {
+    budget.expenseTypeName += ' (Inactive)';
+  });
+
+  budgetsVar = _.union(budgetsVar, existingBudgets); // combine existing and active budgets
+  budgetsVar = _.uniqBy(budgetsVar, 'expenseTypeId'); // remove duplicate expense types
+  budgetsVar = _.sortBy(budgetsVar, (budget) => {
+    return budget.expenseTypeName;
+  }); // sort by expense type name
 
   // if employee is not full time, prohibit overdraft
   _.forEach(budgetsVar, async (budget) => {
