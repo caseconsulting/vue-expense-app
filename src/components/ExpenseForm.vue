@@ -576,6 +576,14 @@ async function submit() {
   }
 }
 
+/**
+ * Encodes a url. Converts url from binary to ascii.
+ */
+async function encodeUrl(url) {
+  // return btoa(url).replace(/\//g, '%2F');
+  return btoa(url);
+} // encodeUrl
+
 async function addURLInfo(newExpense) {
   //removes trailing slash from url and converts all letter to lowercase before adding to dynamo
   newExpense.url = newExpense.url.replace(/\/$/, '').toLowerCase();
@@ -586,8 +594,7 @@ async function addURLInfo(newExpense) {
     newExpense.url = newExpense.url.replace(/www\./, ''); //removes www from url before adding to dynamo
   }
 
-  let encodedURL = btoa(newExpense.url);
-  encodedURL = encodedURL.replace(/\//g, '%2F');
+  let encodedURL = await this.encodeUrl(newExpense.url);
   let item = await api.getURLInfo(encodedURL, newExpense.category);
   if (item.id) {
     this.urlInfo = item;
@@ -877,6 +884,7 @@ export default {
     clearForm,
     createNewEntry,
     customFilter,
+    encodeUrl,
     expenseTypeSelected,
     formatDate,
     filteredExpenseTypes,
