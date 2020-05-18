@@ -239,6 +239,12 @@ async function submit() {
 
   // set accessibleBy based on access radio
   if (this.isCustomSelected()) {
+    console.log('this.customAccess');
+    console.log(this.customAccess);
+    console.log('\n');
+    console.log('this.model.accessibleBy');
+    console.log(this.model.accessibleBy);
+
     this.model.accessibleBy = this.customAccess;
   }
 
@@ -371,9 +377,16 @@ export default {
     'model.accessibleBy': function (val) {
       if (!this.submitting) {
         if (!['ALL', 'FULL TIME', 'PART TIME', 'CUSTOM'].includes(val)) {
+          // filter out employees that do not have access
           this.customAccess = _.filter(this.allEmployees, (employee) => {
             return this.model.accessibleBy.includes(employee.value);
           });
+
+          // map employee values
+          this.customAccess = _.map(this.customAccess, (employee) => {
+            return employee.value;
+          });
+
           this.model.accessibleBy = 'CUSTOM';
         }
       }
