@@ -266,10 +266,10 @@ async function submit() {
       let newExpenseType = await api.updateItem(api.EXPENSE_TYPES, this.model);
       if (newExpenseType.id) {
         this.$emit('update');
+        this.clearForm();
       } else {
         this.$emit('error', newExpenseType.response.data.message);
       }
-      this.clearForm();
     } else {
       let newUUID = uuid();
       this.$set(this.model, 'id', newUUID);
