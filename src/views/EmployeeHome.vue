@@ -484,20 +484,6 @@ function getFiscalYearView() {
   return parseInt(year);
 }
 
-function hasAccess(employee, expenseType) {
-  if (employee.workStatus == 0) {
-    return false;
-  } else if (expenseType.accessibleBy == 'ALL') {
-    return true;
-  } else if (expenseType.accessibleBy == 'FULL TIME') {
-    return employee.workStatus == 100;
-  } else if (expenseType.accessibleBy == 'PART TIME') {
-    return employee.workStatus > 0 && employee.workStatus < 100;
-  } else {
-    return expenseType.accessibleBy.includes(employee.id);
-  }
-}
-
 function isMobile() {
   let md = new MobileDetect(window.navigator.userAgent);
   return md.os() === 'AndroidOS' || md.os() === 'iOS';
@@ -595,7 +581,6 @@ export default {
     displayError,
     getDiffInSeconds,
     getCurrentBudgetYear,
-    hasAccess,
     isFullTime,
     refreshBudget,
     refreshBudgetYears,

@@ -124,8 +124,8 @@
         <div style="color: dimgray;">Employee Access</div>
         <v-radio-group v-model="model.accessibleBy" class="smallRadio ma-0" row mandatory>
           <v-radio label="All" value="ALL"></v-radio>
+          <v-radio label="Full" value="FULL"></v-radio>
           <v-radio label="Full Time" value="FULL TIME"></v-radio>
-          <v-radio label="Part Time" value="PART TIME"></v-radio>
           <v-radio label="Custom" value="CUSTOM"></v-radio>
         </v-radio-group>
         <!-- end [DESKTOP] -->
@@ -195,31 +195,31 @@ function formatDate(date) {
 }
 
 /*
- * Returns true if all employees have access
+ * Returns true if all employees have access and at a percentage rate
  */
 function isAllSelected() {
   return this.model.accessibleBy == 'ALL';
 }
 
 /*
- * Returns true if custom access for employees is selected
+ * Returns true if custom access for employees and at a percentage rate
  */
 function isCustomSelected() {
   return this.model.accessibleBy == 'CUSTOM';
 }
 
 /*
- * Returns true if all full time employees have access
+ * Returns true if only full time employees have access and at full rate
  */
 function isFullTimeSelected() {
   return this.model.accessibleBy == 'FULL TIME';
 }
 
 /*
- * Returns true if all part time employees have access
+ * Returns true if all employees have access and at a full rate
  */
-function isPartTimeSelected() {
-  return this.model.accessibleBy == 'PART TIME';
+function isFullSelected() {
+  return this.model.accessibleBy == 'FULL';
 }
 
 function isEmpty(item) {
@@ -239,12 +239,6 @@ async function submit() {
 
   // set accessibleBy based on access radio
   if (this.isCustomSelected()) {
-    console.log('this.customAccess');
-    console.log(this.customAccess);
-    console.log('\n');
-    console.log('this.model.accessibleBy');
-    console.log(this.model.accessibleBy);
-
     this.model.accessibleBy = this.customAccess;
   }
 
@@ -348,7 +342,7 @@ export default {
     isAllSelected,
     isCustomSelected,
     isFullTimeSelected,
-    isPartTimeSelected,
+    isFullSelected,
     isEmpty,
     parseDate,
     removeCategory,
@@ -376,7 +370,7 @@ export default {
     },
     'model.accessibleBy': function (val) {
       if (!this.submitting) {
-        if (!['ALL', 'FULL TIME', 'PART TIME', 'CUSTOM'].includes(val)) {
+        if (!['ALL', 'FULL TIME', 'FULL', 'CUSTOM'].includes(val)) {
           // filter out employees that do not have access
           this.customAccess = _.filter(this.allEmployees, (employee) => {
             return this.model.accessibleBy.includes(employee.value);

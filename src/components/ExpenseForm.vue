@@ -215,9 +215,17 @@ import FileUpload from './FileUpload.vue';
 const IsoFormat = 'YYYY-MM-DD';
 
 // METHODS
-function adjustedBudget(expenseType, employee) {
-  return (expenseType.budget * (employee.workStatus / 100.0)).toFixed(2);
-}
+function adjustedBudget(employee, expenseType) {
+  if (hasAccess(employee, expenseType)) {
+    if (expenseType.accessibleBy == 'FULL' || expenseType.accessibleBy == 'FULL TIME') {
+      return expenseType.budget;
+    } else {
+      return Number((expenseType.budget * (employee.workStatus / 100.0)).toFixed(2));
+    }
+  } else {
+    return 0;
+  }
+} // adjustedBudget
 
 function isFullTime(employee) {
   return employee.workStatus == 100;
@@ -328,7 +336,7 @@ async function checkCoverage() {
             // Selected Expense Type does not allow overdraft or employee is not full time
             this.$set(this.expense, 'od', false);
             // calculate adjustedBudget based on employee's current work status
-            let adjustedBudget = this.adjustedBudget(expenseType, this.employee);
+            let adjustedBudget = this.adjustedBudget(this.employee, expenseType);
             if (cost <= adjustedBudget) {
               // reimburse the full expense
               this.submit();
@@ -395,7 +403,7 @@ function filteredExpenseTypes() {
         if (!selectedEmployee) {
           filteredExpType.push(expenseType);
         } else if (hasAccess({ id: selectedEmployee.value, workStatus: selectedEmployee.workStatus }, expenseType)) {
-          let amount = adjustedBudget(expenseType, selectedEmployee);
+          let amount = adjustedBudget(selectedEmployee, expenseType);
           expenseType.text = `${expenseType.budgetName} - $${amount}`;
           filteredExpType.push(expenseType);
         }
@@ -407,7 +415,7 @@ function filteredExpenseTypes() {
       if (!expenseType.isInactive) {
         if (hasAccess(employee, expenseType)) {
           if (expenseType.recurringFlag || betweenDates(expenseType.startDate, expenseType.endDate)) {
-            let amount = adjustedBudget(expenseType, employee);
+            let amount = adjustedBudget(employee, expenseType);
             expenseType.text = `${expenseType.budgetName} - $${amount}`;
             filteredExpType.push(expenseType);
           }
@@ -424,18 +432,14 @@ function formatDate(date) {
 }
 
 function hasAccess(employee, expenseType) {
-  if (employee.workStatus == 0) {
-    return false;
-  } else if (expenseType.accessibleBy == 'ALL') {
+  if (expenseType.accessibleBy == 'ALL' || expenseType.accessibleBy == 'FULL') {
     return true;
   } else if (expenseType.accessibleBy == 'FULL TIME') {
     return employee.workStatus == 100;
-  } else if (expenseType.accessibleBy == 'PART TIME') {
-    return employee.workStatus > 0 && employee.workStatus < 100;
   } else {
     return expenseType.accessibleBy.includes(employee.id);
   }
-}
+} // hasAccess
 
 function parseDate(date) {
   return dateUtils.parseDate(date);

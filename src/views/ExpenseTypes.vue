@@ -485,10 +485,10 @@ function filterExpense() {
 function getAccess(expenseType) {
   if (expenseType.accessibleBy == 'ALL') {
     return 'All Employees';
+  } else if (expenseType.accessibleBy == 'FULL') {
+    return 'All Employees (100%)';
   } else if (expenseType.accessibleBy == 'FULL TIME') {
     return 'Full Time Employees';
-  } else if (expenseType.accessibleBy == 'PART TIME') {
-    return 'Part Time Employees';
   } else {
     return false;
   }
@@ -502,15 +502,11 @@ function getEmployeeName(employeeId) {
 function getEmployeeList(accessibleBy) {
   let employeesList;
 
-  if (accessibleBy === 'ALL') {
+  if (accessibleBy === 'ALL' || accessibleBy === 'FULL') {
     employeesList = this.employees;
   } else if (accessibleBy === 'FULL TIME') {
     employeesList = _.filter(this.employees, (employee) => {
       return employee.workStatus == 100;
-    });
-  } else if (accessibleBy === 'PART TIME') {
-    employeesList = _.filter(this.employees, (employee) => {
-      return employee.workStatus < 100 && employee.workStatus > 0;
     });
   } else {
     employeesList = _.filter(this.employees, (employee) => {
@@ -598,18 +594,14 @@ async function validateDelete(item) {
 }
 
 function hasAccess(employee, expenseType) {
-  if (employee.workStatus == 0) {
-    return false;
-  } else if (expenseType.accessibleBy == 'ALL') {
+  if (expenseType.accessibleBy == 'ALL' || expenseType.accessibleBy == 'FULL') {
     return true;
   } else if (expenseType.accessibleBy == 'FULL TIME') {
     return employee.workStatus == 100;
-  } else if (expenseType.accessibleBy == 'PART TIME') {
-    return employee.workStatus > 0 && employee.workStatus < 100;
   } else {
     return expenseType.accessibleBy.includes(employee.id);
   }
-}
+} // hasAccess
 
 /* computed */
 function expenseTypeList() {
