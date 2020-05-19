@@ -113,7 +113,7 @@
             :sort-desc.sync="sortDesc"
             :expanded.sync="expanded"
             :loading="loading"
-            :items-per-page="25"
+            :items-per-page="15"
             :search="search"
             item-key="id"
             class="elevation-4"

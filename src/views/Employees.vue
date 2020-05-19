@@ -73,7 +73,7 @@
             :sort-desc.sync="sortDesc"
             :expanded.sync="expanded"
             :loading="loading"
-            :items-per-page="25"
+            :items-per-page.sync="itemsPerPage"
             :search="search"
             item-key="employeeNumber"
             class="elevation-1"
@@ -541,6 +541,7 @@ export default {
         }
       ],
       invalidDelete: false,
+      itemsPerPage: -1,
       loading: false,
       model: {
         id: '',

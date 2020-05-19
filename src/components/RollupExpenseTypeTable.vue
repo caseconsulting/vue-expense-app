@@ -36,7 +36,7 @@
           :sort-desc.sync="sortDesc"
           :expanded.sync="expanded"
           :loading="loading"
-          :items-per-page="-1"
+          :items-per-page.sync="itemsPerPage"
           show-select
           item-key="key"
           class="elevation-1 text-center"
@@ -582,6 +582,7 @@ export default {
         align: 'center'
       }
     ], //datatable headers
+    itemsPerPage: -1, // data table elements per page
     loading: true, // is loading
     pendingExpenses: [], // pending expenses
     reimbursing: false, // is reimbursing
