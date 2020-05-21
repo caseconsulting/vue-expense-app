@@ -181,18 +181,16 @@ async function refreshEmployee() {
   this.loading = false;
 }
 
+// get all budgets within the year displayed
 async function refreshBudget() {
   this.loading = true;
-  // get all budgets within the year displayed
-  let endView = moment(this.fiscalDateView).add(1, 'y').subtract(1, 'd').format(IsoFormat);
-
   let budgetsVar;
 
   if (this.fiscalDateView == this.getCurrentBudgetYear()) {
     budgetsVar = await api.getAllActiveEmployeeBudgets(this.employee.id);
   }
 
-  let existingBudgets = await api.getEmployeeBudgetsByDate(this.employee.id, this.fiscalDateView, endView);
+  let existingBudgets = await api.getFiscalDateViewBudgets(this.employee.id, this.fiscalDateView);
 
   // append inactive tag to end of budget expense type name
   // the existing budget duplicates will later be removed (order in array comes after active budgets)

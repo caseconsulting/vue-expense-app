@@ -57,8 +57,8 @@ function getEmployeeBudget(id, expenseTypeId, date) {
   return execute('get', `/${UTILITY}/getEmployeeBudget/${id}/${expenseTypeId}/${date}`);
 }
 
-function getEmployeeBudgetsByDate(id, startDate, endDate) {
-  return execute('get', `/${UTILITY}/getEmployeeBudgetsByDate/${id}/${startDate}/${endDate}`);
+function getFiscalDateViewBudgets(id, fiscalDateView) {
+  return execute('get', `/${UTILITY}/getFiscalDateViewBudgets/${id}/${fiscalDateView}`);
 }
 
 function getEmployeeBudgets(id) {
@@ -152,7 +152,7 @@ export default {
   getAllActiveEmployeeBudgets,
   getAllEmployeeExpenses,
   getAllExpenseTypeExpenses,
-  getEmployeeBudgetsByDate,
+  getFiscalDateViewBudgets,
   getEmployeeBudgets,
   //getBudgetsByDate,
   //getBudgetsByDateAndType,
