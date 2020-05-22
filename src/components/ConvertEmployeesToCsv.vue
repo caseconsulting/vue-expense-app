@@ -36,7 +36,9 @@ function convertToCSV(objArray) {
  */
 function download() {
   var fileTitle = 'employees'; // or 'my-unique-title'
-  this.exportCSVFile(this.employees, fileTitle); // call the exportCSVFile() function to process the JSON and trigger the download
+
+  // call the exportCSVFile() function to process the JSON and trigger the download
+  this.exportCSVFile(this.employees, fileTitle);
 } // download
 
 /**
