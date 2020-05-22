@@ -1,7 +1,9 @@
 <template>
   <v-card hover>
     <v-card-title class="header_style">
+      <!-- Editing an employee -->
       <h3 v-if="model.id">Edit Employee</h3>
+      <!-- Creating a new employee -->
       <h3 v-else>Create New Employee</h3>
     </v-card-title>
 
@@ -10,7 +12,7 @@
         <!-- Name -->
         <v-text-field
           v-model="model.firstName"
-          :rules="genericRules"
+          :rules="requiredRules"
           label="First Name"
           data-vv-name="First Name"
         ></v-text-field>
@@ -21,7 +23,7 @@
         ></v-text-field>
         <v-text-field
           v-model="model.lastName"
-          :rules="genericRules"
+          :rules="requiredRules"
           label="Last Name"
           data-vv-name="Last Name"
         ></v-text-field>
@@ -44,14 +46,14 @@
           :rules="componentRules"
           v-model="employeeRoleFormatted"
           label="Employee Role"
-          @blur="model.employeeRole = formatRole(employeeRoleFormatted)"
+          @blur="model.employeeRole = formatKebabCase(employeeRoleFormatted)"
         ></v-autocomplete>
 
         <!-- Hire Date -->
         <v-menu
-          ref="menu1"
+          ref="hireMenu"
           :close-on-content-click="true"
-          v-model="menu1"
+          v-model="hireMenu"
           :nudge-right="40"
           transition="scale-transition"
           offset-y
@@ -72,9 +74,10 @@
               v-on="on"
             ></v-text-field>
           </template>
-          <v-date-picker v-model="date" no-title @input="menu1 = false"></v-date-picker>
+          <v-date-picker v-model="date" no-title @input="hireMenu = false"></v-date-picker>
         </v-menu>
         <br />
+
         <!-- Advanced section -->
         <v-expansion-panels accordion>
           <v-expansion-panel>
@@ -125,9 +128,9 @@
 
               <!-- Birthday Picker -->
               <v-menu
-                ref="menu3"
+                ref="BirthdayMenu"
                 :close-on-content-click="true"
-                v-model="menu3"
+                v-model="BirthdayMenu"
                 :nudge-right="40"
                 transition="scale-transition"
                 offset-y
@@ -147,7 +150,7 @@
                     v-on="on"
                   ></v-text-field>
                 </template>
-                <v-date-picker v-model="model.birthday" no-title @input="menu3 = false"></v-date-picker>
+                <v-date-picker v-model="model.birthday" no-title @input="BirthdayMenu = false"></v-date-picker>
               </v-menu>
 
               <!-- Place of Birth -->
@@ -185,7 +188,8 @@
             </v-expansion-panel-content>
           </v-expansion-panel>
         </v-expansion-panels>
-        <!-- full/part/inactive status [MOBILE] -->
+
+        <!-- Full/Part/Inactive Status [MOBILE] -->
         <v-radio-group v-if="isMobile()" v-model="statusRadio" row mandatory>
           <v-layout fluid>
             <v-row class="ml-0">
@@ -198,7 +202,7 @@
               <v-flex xs6 sm3>
                 <v-radio label="Inactive" value="inactive"></v-radio>
               </v-flex>
-              <!-- custom input field -->
+              <!-- Custom Input Field -->
               <v-flex xs6 sm3>
                 <div :class="{ customInput: isPartTime() }">
                   <div :class="['percentageBox', { disabled: !isPartTime(), inputError: isStatusEmpty() }]">
@@ -213,12 +217,13 @@
                   </div>
                 </div>
               </v-flex>
-              <!-- end custom input field -->
+              <!-- End Custom Input Field -->
             </v-row>
           </v-layout>
         </v-radio-group>
-        <!-- end [MOBILE] -->
-        <!-- full/part/inactive status [DESKTOP] -->
+        <!-- End [Full/Part/Inactive Status [MOBILE]] -->
+
+        <!-- Full/Part/Inactive Status [DESKTOP] -->
         <v-radio-group v-else v-model="statusRadio" row mandatory>
           <v-radio label="Full Time" value="full"></v-radio>
           <v-radio label="Part Time" value="part" @change="viewStatus()"></v-radio>
@@ -236,15 +241,16 @@
               <div>%</div>
             </div>
           </div>
-          <!-- end custom input field -->
+          <!-- End Full/Part/Inactive Status [DESKTOP] -->
         </v-radio-group>
         <!-- end [DESKTOP] -->
+
         <!-- if inactive, set Departure Date -->
         <v-menu
           v-if="isInactive()"
-          ref="menu2"
+          ref="departureMenu"
           :close-on-content-click="true"
-          v-model="menu2"
+          v-model="departureMenu"
           :nudge-right="40"
           transition="scale-transition"
           offset-y
@@ -264,9 +270,10 @@
               v-on="on"
             ></v-text-field>
           </template>
-          <v-date-picker v-model="model.deptDate" no-title @input="menu2 = false"></v-date-picker>
+          <v-date-picker v-model="model.deptDate" no-title @input="departureMenu = false"></v-date-picker>
         </v-menu>
         <!-- end full/part/inactive status -->
+
         <!-- form action buttons -->
         <v-btn class="ma-2" color="white" @click="clearForm"> <icon class="mr-1" name="ban"></icon>Cancel </v-btn>
         <v-btn outlined class="ma-2" color="success" @click="submit" :disabled="!valid || isStatusEmpty()">
@@ -280,14 +287,23 @@
 
 <script>
 import api from '@/shared/api.js';
-import _ from 'lodash';
-import { getRole } from '@/utils/auth';
 import dateUtils from '@/shared/dateUtils';
+import { getRole } from '@/utils/auth';
 import MobileDetect from 'mobile-detect';
 import { v4 as uuid } from 'uuid';
+import _ from 'lodash';
 
 const regex = /^(([^<>()[\]\\.,;:\s@#"]+(\.[^<>()[\]\\.,;:\s@#"]+)*)|(".+"))@consultwithcase.com/;
 
+// |--------------------------------------------------|
+// |                                                  |
+// |                     METHODS                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * Clears the form and sets all fields to a default state.
+ */
 function clearForm() {
   this.$refs.form.reset();
   this.$set(this, 'date', '');
@@ -314,102 +330,176 @@ function clearForm() {
   this.$set(this.model, 'deptDate', '');
 
   this.deptDateFormatted = null;
-}
+} // clearForm
 
+/**
+ * Formats a date.
+ *
+ * @param date - date to format
+ */
 function formatDate(date) {
   return dateUtils.formatDate(date);
-}
+} // formatDate
 
-function formatRole(employeeRole) {
-  return _.kebabCase(employeeRole);
-}
+/**
+ * Converts a string to kebab case.
+ *
+ * @param value - String value to convert
+ * @return String - String in kebab case
+ */
+function formatKebabCase(value) {
+  return _.kebabCase(value);
+} // formatKebabCase
 
+/**
+ * Sets the status to an employee if part time, otherwise sets it to an empty string.
+ */
 function viewStatus() {
   if (this.model.workStatus && this.model.workStatus > 0 && this.model.workStatus < 100) {
     this.status = this.model.workStatus;
   } else {
     this.status = '';
   }
-}
+} // viewStatus
 
+/**
+ * Checks if the current device used is mobile. Return true if it is mobile. Returns false if it is not mobile.
+ *
+ * @return boolean - if the device is mobile
+ */
 function isMobile() {
   let md = new MobileDetect(window.navigator.userAgent);
   return md.os() === 'AndroidOS' || md.os() === 'iOS';
-}
+} // isMobile
 
+/**
+ * Checks if full time work status button is selected.
+ *
+ * @return boolean - full time work status button selected
+ */
 function isFullTime() {
-  return this.statusRadio == 'inactive';
-}
+  return this.statusRadio == 'full';
+} // isFullTime
 
+/**
+ * Checks if inactive work status button is selected.
+ *
+ * @return boolean - inactive work status button selected
+ */
 function isInactive() {
   return this.statusRadio == 'inactive';
-}
+} // isInactive
 
+/**
+ * Checks if part time work status button is selected.
+ *
+ * @return boolean - part time work status button selected
+ */
 function isPartTime() {
   return this.statusRadio == 'part';
-}
+} // isPartTime
 
+/**
+ * Checks if the work status is empty.
+ *
+ * @return boolean - work status is empty
+ */
 function isStatusEmpty() {
   return this.status.length == 0;
-}
+} // isStatusEmpty
 
+/**
+ * Parse a date to isoformat (YYYY-MM-DD).
+ *
+ * @param Date = date to parse
+ * @return Date - date in isoformat
+ */
 function parseDate(date) {
   return dateUtils.parseDate(date);
-}
+} // parseDate
 
+/**
+ * Submits the employee form.
+ */
 async function submit() {
   if (this.$refs.form.validate()) {
+    // form validated
     if (!this.isInactive()) {
+      // set deptDate if employee is active
       this.$set(this.model, 'deptDate', '');
     }
 
-    // set the hire date
+    // set employee hire date
     this.$set(this.model, 'hireDate', this.date);
 
-    // set the status
+    // set employee work status
     this.$set(this.model, 'workStatus', parseInt(this.status));
 
     if (this.model.id) {
-      // update employee
+      // updating employee
       let updatedEmployee = await api.updateItem(api.EMPLOYEES, this.model);
       if (updatedEmployee.id) {
+        // successfully updated employee
         this.$emit('update');
         this.clearForm();
       } else {
+        // failed to update employee
         this.$emit('error', updatedEmployee.response.data.message);
       }
     } else {
+      // creating employee
       this.model.id = uuid();
       let newEmployee = await api.createItem(api.EMPLOYEES, this.model);
       if (newEmployee.id) {
-        this.$set(this.model, 'id', newEmployee.id);
+        // successfully created employee
         this.$emit('add', newEmployee);
         this.clearForm();
       } else {
+        // failed to create employee
         this.$emit('error', newEmployee.response.data.message);
-        this.$set(this.model, 'id', '');
+        this.$set(this.model, 'id', ''); // reset id
       }
     }
   }
-}
+} // submit
 
+/**
+ * Check if the user is an admin. Returns true if the user is an admin, otherwise returns false.
+ *
+ * @return boolean - user is an admin
+ */
 function userIsAdmin() {
   return getRole() === 'admin';
-}
+} // userIsAdmin
 
-// LIFECYCLE HOOKS
+// |--------------------------------------------------|
+// |                                                  |
+// |                 LIFECYCLE HOOKS                  |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * Set the list of countries.
+ */
 async function created() {
   this.countries = _.map(await api.getCountries(), 'name');
   this.countries.unshift('United States of America');
 }
 
+// |--------------------------------------------------|
+// |                                                  |
+// |                      EXPORT                      |
+// |                                                  |
+// |--------------------------------------------------|
+
 export default {
+  created,
   data() {
     return {
-      birthdayFormat: '',
-      componentRules: [(v) => !!v || 'Something must be selected'],
+      birthdayFormat: '', // formatted birthday
+      componentRules: [(v) => !!v || 'Something must be selected'], // rules for required componenet selection
       countries: [], // list of countries
-      date: null,
+      date: null, // hire date
       dateOptionalRules: [
         (v) => {
           if (v) {
@@ -418,27 +508,26 @@ export default {
             return true;
           }
         }
-      ],
+      ], // rules for optional date
       dateRules: [
         (v) => !!v || 'Date must be valid. Format: MM/DD/YYYY',
         (v) => (!!v && /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v)) || 'Date must be valid. Format: MM/DD/YYYY'
-      ],
+      ], // rules for date
       statusRules: [
         (v) => !!v, // || 'Percentage must be a whole number between 0 - 99',
         (v) => /^\d+$/.test(v), // || 'Percentage amount must be a whole number',
         (v) => v < 100, //|| 'Percentage must be less than 100', // percentage must be less than 100
         (v) => v >= 0 // || 'Percentage must be greater than 0' // percentage must be greater than 0
-      ],
-      deleting: false,
-      deptDateFormatted: null,
+      ], // rules for work status
+      deptDateFormatted: null, // formatted depature date
       emailRules: [
         (v) => !!v || 'Email is required',
         (v) => regex.test(v) || 'Not a valid @consultwithcase email address'
-      ],
-      employeeRoleFormatted: '',
-      genericRules: [(v) => !!v || 'This field is required'],
-      hasExpenses: false,
-      hireDateFormatted: null,
+      ], // rules for employee email
+      employeeRoleFormatted: '', // formatted employee role
+      requiredRules: [(v) => !!v || 'This field is required'], // rules for required fields
+      hasExpenses: false, // employee has expenses
+      hireDateFormatted: null, // formatted hire date
       jobRoles: [
         'Software Developer',
         'Project Manager',
@@ -450,15 +539,15 @@ export default {
         'Intern',
         'Accountant',
         'Other'
-      ],
-      menu1: false,
-      menu2: false,
-      menu3: false,
+      ], // job role options
+      hireMenu: false, // display hire menu
+      departureMenu: false, // display depature menu
+      BirthdayMenu: false, // display birthday menu
       numberRules: [
         (v) => !!v || 'Employee # is required',
         (v) => /^\d+$/.test(v) || 'Employee # must be a positive number'
-      ],
-      permissions: ['Admin', 'User'],
+      ], // rules for employee number
+      permissions: ['Admin', 'User'], // employee role options
       states: [
         'Alabama',
         'Alaska',
@@ -521,13 +610,27 @@ export default {
         'West Virginia',
         'Wisconsin',
         'Wyoming'
-      ],
-      status: '100',
-      statusRadio: 'full',
-      valid: false
+      ], // state options
+      status: '100', // work status value
+      statusRadio: 'full', // work status button
+      valid: false // form validity
     };
   },
-  created,
+  methods: {
+    clearForm,
+    viewStatus,
+    formatDate,
+    formatKebabCase,
+    isFullTime,
+    isInactive,
+    isMobile,
+    isPartTime,
+    isStatusEmpty,
+    parseDate,
+    submit,
+    userIsAdmin
+  },
+  props: ['model'], // employee to be created/updated
   watch: {
     date: function () {
       this.hireDateFormatted = this.formatDate(this.date) || this.hireDateFormatted;
@@ -536,9 +639,12 @@ export default {
         this.date = null;
       }
     },
-    'model.hireDate': async function () {
-      this.hasExpenses = this.model.id ? _.size(await api.getAllEmployeeExpenses(this.model.id)) > 0 : false;
-      this.date = this.model.hireDate;
+    'model.birthday': function () {
+      this.birthdayFormat = this.formatDate(this.model.birthday) || this.birthdayFormat;
+      //fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
+      if (this.model.birthday !== null && !this.formatDate(this.model.birthday)) {
+        this.model.birthday = null;
+      }
     },
     'model.deptDate': function () {
       this.deptDateFormatted = this.formatDate(this.model.deptDate) || this.deptDateFormatted;
@@ -552,18 +658,14 @@ export default {
         this.employeeRoleFormatted = _.startCase(this.model.employeeRole);
       }
     },
-    'model.birthday': function () {
-      this.birthdayFormat = this.formatDate(this.model.birthday) || this.birthdayFormat;
-      //fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
-      if (this.model.birthday !== null && !this.formatDate(this.model.birthday)) {
-        this.model.birthday = null;
-      }
+    'model.hireDate': async function () {
+      this.hasExpenses = this.model.id ? _.size(await api.getAllEmployeeExpenses(this.model.id)) > 0 : false;
+      this.date = this.model.hireDate;
     },
     'model.workStatus': function () {
-      // if work status exists
       if (this.model.workStatus != null) {
-        // convert employee work status to string
-        this.status = this.model.workStatus.toString();
+        // set work status buttons if the status exists
+        this.status = this.model.workStatus.toString(); // convert employee work status to string
 
         // set status radio
         if (this.status == '100') {
@@ -574,7 +676,7 @@ export default {
           this.statusRadio = 'part';
         }
       } else {
-        // if status does not exist
+        // set status to default full time if it does not exist
         this.status = '100';
         this.statusRadio = 'full';
       }
@@ -586,32 +688,17 @@ export default {
         this.status = '0';
       }
     }
-  },
-  props: ['model'],
-  methods: {
-    clearForm,
-    viewStatus,
-    formatDate,
-    formatRole,
-    isFullTime,
-    isInactive,
-    isMobile,
-    isPartTime,
-    isStatusEmpty,
-    parseDate,
-    submit,
-    userIsAdmin
   }
 };
 </script>
 
 <style>
-.disabled {
-  background-color: #ddd;
-}
-
 .customInput :hover {
   border: solid 1px black;
+}
+
+.disabled {
+  background-color: #ddd;
 }
 
 .inputError {
@@ -627,21 +714,21 @@ export default {
   display: flex;
 }
 
-.percentageBox input {
-  text-align: right;
-  width: 60%;
-}
-
-.percentageBox input:hover {
-  border: none;
-}
-
 .percentageBox div {
   padding-top: 6px;
   margin-left: 2px;
 }
 
 .percentageBox div:hover {
+  border: none;
+}
+
+.percentageBox input {
+  text-align: right;
+  width: 60%;
+}
+
+.percentageBox input:hover {
   border: none;
 }
 </style>
