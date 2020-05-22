@@ -17,16 +17,41 @@
 </template>
 
 <script>
-export default {
-  props: ['type', 'activate'],
-  methods: {
-    emit(msg, data) {
-      if (data) {
-        window.EventBus.$emit(msg, data);
-      } else {
-        window.EventBus.$emit(msg);
-      }
-    }
+// |--------------------------------------------------|
+// |                                                  |
+// |                     METHODS                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * Emits a message and data if it exists.
+ *
+ * @param msg - Message to emit
+ * @param data - Data to emit
+ */
+function emit(msg, data) {
+  if (data) {
+    // data exists
+    window.EventBus.$emit(msg, data);
+  } else {
+    // data does not exist
+    window.EventBus.$emit(msg);
   }
+} // emit
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      EXPORT                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+export default {
+  methods: {
+    emit
+  },
+  props: [
+    'activate', // dialog activator
+    'type' // type of object being deleted
+  ]
 };
 </script>
