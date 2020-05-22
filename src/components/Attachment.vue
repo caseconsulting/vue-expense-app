@@ -10,6 +10,7 @@
       </v-flex>
     </v-layout>
   </div>
+  <!-- End Admin Dashboard -->
 
   <!-- Expenses -->
   <div v-else>
@@ -24,6 +25,7 @@
       <span>Download Attachment</span>
     </v-tooltip>
   </div>
+  <!-- End Expenses -->
 </template>
 
 <script>
