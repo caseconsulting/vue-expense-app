@@ -51,7 +51,7 @@ function exportCSVFile(items, fileTitle) {
     let person = items[i];
 
     let placeOfBirth = (person.city || ' ') + ' ' + (person.st || ' ') + ' ' + (person.country || ' ');
-    
+
     tempEmployees[i] = [
       person.employeeNumber,
       person.firstName,
