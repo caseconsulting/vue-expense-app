@@ -38,8 +38,8 @@ import { API_CONFIG } from '../shared/api-variables';
 // |                                                  |
 // |--------------------------------------------------|
 
-/** UNUSED?
- *
+/**
+ *  NOTE: UNUSED?
  *
  * @return
  */

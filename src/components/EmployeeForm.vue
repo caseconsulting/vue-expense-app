@@ -336,6 +336,7 @@ function clearForm() {
  * Formats a date.
  *
  * @param date - date to format
+ * @return Date - formatted date
  */
 function formatDate(date) {
   return dateUtils.formatDate(date);
