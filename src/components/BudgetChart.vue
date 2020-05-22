@@ -1,6 +1,12 @@
 <script>
 import { Bar, mixins } from 'vue-chartjs';
 
+// |--------------------------------------------------|
+// |                                                  |
+// |                      EXPORT                      |
+// |                                                  |
+// |--------------------------------------------------|
+
 export default {
   extends: Bar,
   mixins: [mixins.reactiveProp],
