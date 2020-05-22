@@ -4,14 +4,13 @@
       <v-data-iterator :items="employee" hide-default-footer>
         <template v-slot:default="props">
           <v-row>
-            <!-- Loop All Budgets -->
+            <!-- Loop all budgets -->
             <v-col v-for="item in props.items" :key="item.name" cols="12" sm="6" lg="6">
               <v-card>
                 <!-- Budget Name -->
                 <v-card-title class="header_style">
                   <h4 class="white--text">{{ item.expenseTypeName }}</h4>
                 </v-card-title>
-                <!-- End Budget Name -->
                 <v-divider></v-divider>
                 <v-list class="pt-13" dense>
                   <!-- Display Budget Amount -->
@@ -21,7 +20,7 @@
                       <div>{{ getAmount(item) | moneyValue }}</div>
                     </v-list-item-content>
                   </v-list-item>
-                  <!-- End Display Budget Amount -->
+
                   <!-- Display Reimbursed Amount -->
                   <v-list-item>
                     <v-list-item-content>Reimbursed:</v-list-item-content>
@@ -29,7 +28,7 @@
                       <div>{{ getReimbursed(item) | moneyValue }}</div>
                     </v-list-item-content>
                   </v-list-item>
-                  <!-- End Display Reimbursed Amount -->
+
                   <!-- Display Pending Amount -->
                   <v-list-item>
                     <v-list-item-content>Pending:</v-list-item-content>
@@ -37,7 +36,7 @@
                       <div>{{ getPending(item) | moneyValue }}</div>
                     </v-list-item-content>
                   </v-list-item>
-                  <!-- End Display Pending Amount -->
+
                   <!-- Display Remaining Amount -->
                   <v-list-item>
                     <v-list-item-content class="bold">Remaining:</v-list-item-content>
@@ -48,7 +47,7 @@
                       <div>{{ calcRemaining(item) | moneyValue }}</div>
                     </v-list-item-content>
                   </v-list-item>
-                  <!-- End Display Remaining Amount -->
+
                   <!-- Display Overdraft Permissions -->
                   <v-list-item>
                     <v-list-item-content>Overdraft:</v-list-item-content>
@@ -56,11 +55,10 @@
                       <div>{{ odFlagMessage(item) }}</div>
                     </v-list-item-content>
                   </v-list-item>
-                  <!-- End Display Overdraft Permissions -->
                 </v-list>
               </v-card>
             </v-col>
-            <!-- End Loop All Budgets -->
+            <!-- End Loop all budgets -->
           </v-row>
         </template>
       </v-data-iterator>

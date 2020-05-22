@@ -243,9 +243,9 @@
           </div>
           <!-- End Full/Part/Inactive Status [DESKTOP] -->
         </v-radio-group>
-        <!-- end [DESKTOP] -->
+        <!-- End [DESKTOP] -->
 
-        <!-- if inactive, set Departure Date -->
+        <!-- If inactive, set Departure Date -->
         <v-menu
           v-if="isInactive()"
           ref="departureMenu"
@@ -272,14 +272,14 @@
           </template>
           <v-date-picker v-model="model.deptDate" no-title @input="departureMenu = false"></v-date-picker>
         </v-menu>
-        <!-- end full/part/inactive status -->
+        <!-- End Full/Part/Inactive Status [DESKTOP] -->
 
-        <!-- form action buttons -->
+        <!-- Form action buttons -->
         <v-btn class="ma-2" color="white" @click="clearForm"> <icon class="mr-1" name="ban"></icon>Cancel </v-btn>
         <v-btn outlined class="ma-2" color="success" @click="submit" :disabled="!valid || isStatusEmpty()">
           <icon class="mr-1" name="save"></icon>Submit
         </v-btn>
-        <!-- end form action buttons -->
+        <!-- End form action buttons -->
       </v-form>
     </v-container>
   </v-card>

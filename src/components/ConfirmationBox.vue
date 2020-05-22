@@ -5,12 +5,12 @@
       <v-card>
         <v-card-title class="headline">You've reached the budget limit for this expense type</v-card-title>
         <v-card-text>
-          <!-- overdraft allowed -->
+          <!-- Overdraft Allowed -->
           <p v-if="expense.od">
             The expense type you are about to submit is only covered up to {{ (expense.budget * 2) | moneyValue }}. You
             will be reimbursed {{ expense.remaining | moneyValue }} of {{ expense.cost | moneyValue }}.
           </p>
-          <!-- overdraft not allowed -->
+          <!-- Overdraft Not Allowed -->
           <p v-else>
             The expense type you are about to submit is only covered up to {{ expense.budget | moneyValue }}. You will
             be reimbursed {{ expense.remaining | moneyValue }} of {{ expense.cost | moneyValue }}.
