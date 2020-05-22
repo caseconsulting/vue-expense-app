@@ -29,8 +29,8 @@
 </template>
 
 <script>
-import { API_CONFIG } from '../shared/api-variables';
 import api from '../shared/api';
+import { API_CONFIG } from '../shared/api-variables';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -59,14 +59,6 @@ function link() {
 // |--------------------------------------------------|
 
 /**
- * Opens a new windows tab displaying the signed url of the expense selected.
- */
-async function openDownloadTab() {
-  let signedURL = await api.getAttachment(this.expense.employeeId, this.expense.id);
-  window.open(signedURL, '_blank');
-} // openDownloadTab
-
-/**
  * Checks if a value is empty. Returns true if the value is null or a single character space String.
  *
  * @param value - value to check
@@ -76,10 +68,18 @@ function isEmpty(value) {
   return value == null || value === ' ' || value === '';
 } // isEmpty
 
+/**
+ * Opens a new windows tab displaying the signed url of the expense selected.
+ */
+async function openDownloadTab() {
+  let signedURL = await api.getAttachment(this.expense.employeeId, this.expense.id);
+  window.open(signedURL, '_blank');
+} // openDownloadTab
+
 export default {
   methods: {
-    openDownloadTab,
-    isEmpty
+    isEmpty,
+    openDownloadTab
   },
   props: [
     'expense', // attachment expense
