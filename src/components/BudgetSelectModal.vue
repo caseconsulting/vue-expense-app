@@ -45,6 +45,12 @@
 const IsoFormat = 'YYYY-MM-DD';
 const Moment = require('moment');
 
+// |--------------------------------------------------|
+// |                                                  |
+// |                     METHODS                      |
+// |                                                  |
+// |--------------------------------------------------|
+
 /**
  * Emits a message and data if it exists.
  *
@@ -82,6 +88,12 @@ function select(budgetYear) {
   fiscalYear.year(budgetYear);
   this.emit(`selected-budget-year`, fiscalYear);
 } // select
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      EXPORT                      |
+// |                                                  |
+// |--------------------------------------------------|
 
 export default {
   props: ['activate', 'budgetYears', 'current', 'hireDate'],

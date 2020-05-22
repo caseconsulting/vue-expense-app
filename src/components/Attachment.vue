@@ -76,6 +76,12 @@ async function openDownloadTab() {
   window.open(signedURL, '_blank');
 } // openDownloadTab
 
+// |--------------------------------------------------|
+// |                                                  |
+// |                      EXPORT                      |
+// |                                                  |
+// |--------------------------------------------------|
+
 export default {
   methods: {
     isEmpty,
