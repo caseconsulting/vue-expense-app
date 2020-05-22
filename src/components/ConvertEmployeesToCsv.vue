@@ -1,9 +1,21 @@
 <template>
-  <v-btn @click="download()"> <i class="material-icons">file_download</i> Download All</v-btn>
+  <!-- Download CSV Button -->
+  <v-btn @click="download()"><i class="material-icons">file_download</i>Download All</v-btn>
 </template>
 
 <script>
-// METHODS
+// |--------------------------------------------------|
+// |                                                  |
+// |                     METHODS                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * Converts an object into a csv string.
+ *
+ * @param objArray - Object to convert
+ * @return String - csv of object
+ */
 function convertToCSV(objArray) {
   var array = typeof objArray != 'object' ? JSON.parse(objArray) : objArray;
   var str = '';
@@ -17,14 +29,29 @@ function convertToCSV(objArray) {
     str += line + '\r\n';
   }
   return str;
-}
+} // convertToCSV
 
+/**
+ * Exports employees to a csv file titled employees
+ */
+function download() {
+  var fileTitle = 'employees'; // or 'my-unique-title'
+  this.exportCSVFile(this.employees, fileTitle); // call the exportCSVFile() function to process the JSON and trigger the download
+} // download
+
+/**
+ * Exports employees to a csv file given a title.
+ *
+ * @param items - employees to export
+ * @param fileTitle - title of csv file
+ */
 function exportCSVFile(items, fileTitle) {
   let tempEmployees = [];
   for (var i = 0; i < items.length; i++) {
     let person = items[i];
 
     let placeOfBirth = (person.city || ' ') + ' ' + (person.st || ' ') + ' ' + (person.country || ' ');
+    
     tempEmployees[i] = [
       person.employeeNumber,
       person.firstName,
@@ -97,15 +124,13 @@ function exportCSVFile(items, fileTitle) {
       document.body.removeChild(link);
     }
   }
-}
-
-function download() {
-  var fileTitle = 'employees'; // or 'my-unique-title'
-  this.exportCSVFile(this.employees, fileTitle); // call the exportCSVFile() function to process the JSON and trigger the download
-}
+} // exportCSVFile
 
 /**
- * Returns Full Time, Part Time, or Inactive based on the work status
+ * Returns a work status 'Full Time', 'Part Time', 'Inactive', or 'Invalid Status'.
+ *
+ * @param workStatus - employee work status
+ * @return String - work status description
  */
 function getWorkStatus(workStatus) {
   if (workStatus == 100) {
@@ -117,10 +142,15 @@ function getWorkStatus(workStatus) {
   } else {
     return 'Invalid Status';
   }
-}
+} // getWorkStatus
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      EXPORT                      |
+// |                                                  |
+// |--------------------------------------------------|
 
 export default {
-  props: ['employees'],
   data() {
     return {
       headers: []
@@ -131,7 +161,8 @@ export default {
     download,
     exportCSVFile,
     getWorkStatus
-  }
+  },
+  props: ['employees'] // employees to export
 };
 </script>
 
