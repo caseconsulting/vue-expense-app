@@ -96,12 +96,17 @@ function select(budgetYear) {
 // |--------------------------------------------------|
 
 export default {
-  props: ['activate', 'budgetYears', 'current', 'hireDate'],
   methods: {
     emit,
     isCurrent,
     select
-  }
+  },
+  props: [
+    'activate', // dialog activator
+    'budgetYears', // all budget years
+    'current', // current fiscal date view
+    'hireDate' // employee hire date
+  ]
 };
 </script>
 

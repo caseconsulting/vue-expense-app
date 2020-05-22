@@ -83,6 +83,9 @@ async function openDownloadTab() {
 // |--------------------------------------------------|
 
 export default {
+  computed: {
+    link
+  },
   methods: {
     isEmpty,
     openDownloadTab
@@ -90,9 +93,6 @@ export default {
   props: [
     'expense', // attachment expense
     'mode' // attachment use
-  ],
-  computed: {
-    link
-  }
+  ]
 };
 </script>
