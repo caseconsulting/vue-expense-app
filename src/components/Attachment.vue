@@ -30,7 +30,17 @@
 import { API_CONFIG } from '../shared/api-variables';
 import api from '../shared/api';
 
-// COMPUTED
+// |--------------------------------------------------|
+// |                                                  |
+// |                     COMPUTED                     |
+// |                                                  |
+// |--------------------------------------------------|
+
+/** UNUSED?
+ *
+ *
+ * @return
+ */
 function link() {
   const API_HOSTNAME = API_CONFIG.apiHostname;
   const API_PORT = API_CONFIG.apiPort;
@@ -38,24 +48,41 @@ function link() {
 
   if (API_HOSTNAME === 'localhost') return `http://${API_HOSTNAME}:${API_PORT}/${endLink}`;
   else return `https://${API_HOSTNAME}/${endLink}`;
-}
+} // link
 
-// METHODS
+// |--------------------------------------------------|
+// |                                                  |
+// |                     METHODS                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * Opens a new windows tab displaying the signed url of the expense selected.
+ */
 async function openDownloadTab() {
   let signedURL = await api.getAttachment(this.expense.employeeId, this.expense.id);
   window.open(signedURL, '_blank');
-}
+} // openDownloadTab
 
-function isEmpty(item) {
-  return !item || item.trim().length <= 0;
-}
+/**
+ * Checks if a value is empty. Returns true if the value is null or a single character space String.
+ *
+ * @param value - value to check
+ * @return boolean - value is empty
+ */
+function isEmpty(value) {
+  return value == null || value === ' ' || value === '';
+} // isEmpty
 
 export default {
   methods: {
     openDownloadTab,
     isEmpty
   },
-  props: ['expense', 'mode'],
+  props: [
+    'expense', // attachment expense
+    'mode' // attachment use
+  ],
   computed: {
     link
   }
