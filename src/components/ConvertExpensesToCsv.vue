@@ -1,11 +1,23 @@
 <template>
+  <!-- Download CSV Button -->
   <v-btn @click="download()"> <i class="material-icons">file_download</i> Download All</v-btn>
 </template>
 
 <script>
 import api from '@/shared/api.js';
 
-// METHODS
+// |--------------------------------------------------|
+// |                                                  |
+// |                     METHODS                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * Converts an object into a csv string.
+ *
+ * @param objArray - Object to convert
+ * @return String - csv of object
+ */
 function convertToCSV(objArray) {
   var array = typeof objArray != 'object' ? JSON.parse(objArray) : objArray;
   var str = '';
@@ -19,16 +31,37 @@ function convertToCSV(objArray) {
     str += line + '\r\n';
   }
   return str;
-}
+} // convertToCSV
+
+/**
+ * Exports expenses to a csv file titled expenses
+ */
+function download() {
+  var fileTitle = 'expenses'; // or 'my-unique-title'
+
+  // call the exportCSVFile() function to process the JSON and trigger the download
+  this.exportCSVFile(this.expenses, fileTitle);
+} // download
+
+/**
+ * Set data for employees and expense types.
+ */
 async function getData() {
   await api.getItems(api.EMPLOYEES).then((emp) => {
     this.employees = emp;
   });
+
   await api.getItems(api.EXPENSE_TYPES).then((expT) => {
     this.expenseTypes = expT;
   });
-}
+} // getData
 
+/**
+ * Exports expenses to a csv file given a title.
+ *
+ * @param items - expenses to export
+ * @param fileTitle - title of csv file
+ */
 function exportCSVFile(items, fileTitle) {
   this.getData().then(() => {
     for (var i = 0; i < items.length; i++) {
@@ -100,27 +133,28 @@ function exportCSVFile(items, fileTitle) {
       }
     }
   });
-}
+} // exportCSVFile
 
-function download() {
-  var fileTitle = 'expenses'; // or 'my-unique-title'
+// |--------------------------------------------------|
+// |                                                  |
+// |                      EXPORT                      |
+// |                                                  |
+// |--------------------------------------------------|
 
-  this.exportCSVFile(this.expenses, fileTitle); // call the exportCSVFile() function to process the JSON and trigger the download
-}
 export default {
-  props: ['expenses'],
+  props: ['expenses'], // expenses to export
   data() {
     return {
-      headers: [],
       employees: [],
-      expenseTypes: []
+      expenseTypes: [],
+      headers: []
     };
   },
   methods: {
     convertToCSV,
+    download,
     getData,
-    exportCSVFile,
-    download
+    exportCSVFile
   }
 };
 </script>
