@@ -1,8 +1,13 @@
 <script>
 import { setIdToken, setAccessToken, setRole, setProfile } from '@/utils/auth';
 
+// |--------------------------------------------------|
+// |                                                  |
+// |                      EXPORT                      |
+// |                                                  |
+// |--------------------------------------------------|
+
 export default {
-  name: 'callback',
   mounted() {
     this.$nextTick(async function () {
       try {
@@ -15,8 +20,7 @@ export default {
         window.location.href = '/loginFailed';
       }
     });
-  }
+  },
+  name: 'callback'
 };
 </script>
-
-<style scoped lang="scss"></style>
