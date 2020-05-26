@@ -20,43 +20,79 @@
 </template>
 
 <script>
-import moment from 'moment';
 import Attachment from './Attachment.vue';
+import moment from 'moment';
 
-function isReimbursed(reimburseDate) {
-  return reimburseDate && reimburseDate.trim().length > 0;
-}
+// |--------------------------------------------------|
+// |                                                  |
+// |                     METHODS                      |
+// |                                                  |
+// |--------------------------------------------------|
 
-function isEmpty(item) {
-  return !item || item.trim().length <= 0;
-}
-
+/**
+ * Sets the expense to display the info for.
+ *
+ * @param clickedExpense - Expense to show info for
+ */
 function displayExpense(clickedExpense) {
   if (this.expense == clickedExpense) {
     this.expense = undefined;
   } else {
     this.expense = clickedExpense;
   }
-}
+} // displayExpense
+
+/**
+ * Checks if a value is empty. Returns true if the value is null or a single character space String.
+ *
+ * @param value - value to check
+ * @return boolean - value is empty
+ */
+function isEmpty(value) {
+  return value == null || value === ' ' || value === '';
+} // isEmpty
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                 LIFECYCLE HOOKS                  |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * Creates event listeners.
+ */
+async function created() {
+  window.EventBus.$on('expenseClicked', this.displayExpense);
+} // created
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      EXPORT                      |
+// |                                                  |
+// |--------------------------------------------------|
 
 export default {
   components: {
     Attachment
   },
+  created,
   data() {
     return {
       expense: undefined
     };
   },
-  created() {
-    window.EventBus.$on('expenseClicked', this.displayExpense);
-  },
   methods: {
     displayExpense,
-    isReimbursed,
     isEmpty
   },
   filters: {
+    dateFormat: (value) => {
+      if (!isEmpty(value)) {
+        return moment(value).format('MMM Do, YYYY');
+      } else {
+        return '';
+      }
+    },
     moneyValue: (value) => {
       return `${new Intl.NumberFormat('en-US', {
         style: 'currency',
@@ -64,29 +100,23 @@ export default {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2
       }).format(value)}`;
-    },
-    dateFormat: (value) => {
-      if (isReimbursed(value)) {
-        return moment(value).format('MMM Do, YYYY');
-      } else {
-        return '';
-      }
     }
   }
 };
 </script>
+
 <style>
+.color-change-2x {
+  -webkit-animation: color-change-2x 10s linear infinite alternate both;
+  animation: color-change-2x 10s linear infinite alternate both;
+}
+
 p {
   color: #38424d;
 }
 
 span {
   font-weight: bold;
-}
-
-.color-change-2x {
-  -webkit-animation: color-change-2x 10s linear infinite alternate both;
-  animation: color-change-2x 10s linear infinite alternate both;
 }
 
 /**
