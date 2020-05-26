@@ -16,38 +16,104 @@
 <script>
 import _ from 'lodash';
 
-/* methods */
+// |--------------------------------------------------|
+// |                                                  |
+// |                     COMPUTED                     |
+// |                                                  |
+// |--------------------------------------------------|
 
+/**
+ * Sets the total cost per each expense type.
+ *
+ * @return Array - expense type and each total
+ */
+function totals() {
+  let totals = [];
+  totals = _.map(this.selected, (item) => {
+    return {
+      name: item.budgetName,
+      id: item.expenseTypeId,
+      costTotal: 0
+    };
+  });
+  totals = _.uniqWith(totals, _.isEqual);
+  _.forEach(this.selected, (expense) => {
+    _.forEach(totals, (total) => {
+      if (total.id === expense.expenseTypeId) {
+        total.costTotal += parseFloat(expense.cost);
+      }
+    });
+  });
+
+  return totals;
+} // totals
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     METHODS                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * Update the expense types selected.
+ *
+ * @param item - expense types being added or removed
+ */
 function updateSelected(item) {
   if (_.isArray(item)) {
+    // item is an array
     if (item.length < this.selected.length) {
-      //removed item
+      // remove items
       this.selected = _.xor(this.selected, _.xor(item, this.selected));
     } else {
-      //first time
+      // add items
       this.selected.push(item);
       this.selected = _.flatten(this.selected);
       this.selected = _.uniqWith(this.selected, _.isEqual);
     }
-    this.oldPassedItem = item;
   } else if (item) {
+    // item is not an array
     let indexOfItem = _.indexOf(this.selected, item);
     if (indexOfItem > -1) {
+      // remove item
       this.selected.splice(indexOfItem, 1);
     } else {
+      // add item
       this.selected.push(item);
     }
   }
-}
+} // updateSelected
 
-/* LIFECYCLE HOOKS */
+// |--------------------------------------------------|
+// |                                                  |
+// |                 LIFECYCLE HOOKS                  |
+// |                                                  |
+// |--------------------------------------------------|
 
+/**
+ *  Creates event listeners.
+ */
 async function created() {
   window.EventBus.$on('selectExpense', this.updateSelected);
   window.EventBus.$on('expenseChange', this.updateSelected);
-}
+} // created
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      EXPORT                      |
+// |                                                  |
+// |--------------------------------------------------|
 
 export default {
+  computed: {
+    totals
+  },
+  created,
+  data() {
+    return {
+      selected: [],
+    };
+  },
   filters: {
     moneyValue: (value) => {
       return `${new Intl.NumberFormat('en-US', {
@@ -58,38 +124,8 @@ export default {
       }).format(value)}`;
     }
   },
-  data() {
-    return {
-      //test
-      selected: [],
-      oldPassedItem: null
-    };
-  },
-  created,
   methods: {
     updateSelected
-  },
-  computed: {
-    totals: function () {
-      let totals = [];
-      totals = _.map(this.selected, (item) => {
-        return {
-          name: item.budgetName,
-          id: item.expenseTypeId,
-          costTotal: 0
-        };
-      });
-      totals = _.uniqWith(totals, _.isEqual);
-      _.forEach(this.selected, (expense) => {
-        _.forEach(totals, (total) => {
-          if (total.id === expense.expenseTypeId) {
-            total.costTotal += parseFloat(expense.cost);
-          }
-        });
-      });
-
-      return totals;
-    }
   }
 };
 </script>
