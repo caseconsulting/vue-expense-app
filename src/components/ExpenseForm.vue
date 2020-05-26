@@ -956,6 +956,10 @@ Number.prototype.pad = function (size) {
 // |--------------------------------------------------|
 
 export default {
+  components: {
+    ConfirmationBox,
+    FileUpload
+  },
   computed: {
     isAdmin,
     isDifferentExpenseType,
@@ -964,10 +968,6 @@ export default {
     receiptRequired
   },
   created,
-  components: {
-    ConfirmationBox,
-    FileUpload
-  },
   data() {
     return {
       allowReceipt: false, // allow receipt to be uploaded
