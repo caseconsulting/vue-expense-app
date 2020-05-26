@@ -15,12 +15,25 @@
 </template>
 
 <script>
+// |--------------------------------------------------|
+// |                                                  |
+// |                     METHODS                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * Emits a message.
+ *
+ * @param msg - Message to emit
+ */
+function emit(msg) {
+  window.EventBus.$emit(msg);
+} // emit
+
 export default {
-  props: ['activate'],
   methods: {
-    emit(msg) {
-      window.EventBus.$emit(msg);
-    }
-  }
+    emit
+  },
+  props: ['activate'] // dialog activator
 };
 </script>
