@@ -111,7 +111,7 @@ export default {
   created,
   data() {
     return {
-      selected: [],
+      selected: []
     };
   },
   filters: {
