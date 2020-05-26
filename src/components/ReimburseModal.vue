@@ -16,16 +16,36 @@
 </template>
 
 <script>
+// |--------------------------------------------------|
+// |                                                  |
+// |                     METHODS                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * Emits a message and data if it exists.
+ *
+ * @param msg - Message to emit
+ * @param data - Data to emit
+ */
 function emit(msg, data) {
   if (data) {
+    // data exists
     window.EventBus.$emit(msg, data);
   } else {
+    // data does not exist
     window.EventBus.$emit(msg);
   }
-}
+} // emit
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      EXPORT                      |
+// |                                                  |
+// |--------------------------------------------------|
 
 export default {
-  props: ['activate'],
+  props: ['activate'], // dialog activator
   methods: {
     emit
   }
