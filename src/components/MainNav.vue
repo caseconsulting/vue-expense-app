@@ -1,9 +1,11 @@
 <template>
   <div>
+    <!-- Logo -->
     <v-flex>
       <img src="@/assets/img/logo-banner.gif" class="logo" />
     </v-flex>
 
+    <!-- Navigation Links -->
     <v-list class="pt-0" dense>
       <v-divider></v-divider>
       <v-list-item
@@ -13,28 +15,77 @@
         :to="{ name: item.route }"
         @click="scrollUp"
       >
+        <!-- Icon -->
         <v-list-item-icon style="width: 30px;">
           <icon :name="item.icon" class="navbar-icons"></icon>
         </v-list-item-icon>
+
+        <!-- Title -->
         <v-list-item-content>
           <v-list-item-title>{{ item.title }}</v-list-item-title>
         </v-list-item-content>
       </v-list-item>
     </v-list>
+    <!-- End Navigation Links -->
   </div>
 </template>
 
 <script>
+// @ is an alias to /src
+import { getRole } from '@/utils/auth';
 import _ from 'lodash';
 
-// @ is an alias to /src
-import { isLoggedIn, login, logout, getRole } from '@/utils/auth';
+// |--------------------------------------------------|
+// |                                                  |
+// |                     COMPUTED                     |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ *
+ */
+function visibleTiles() {
+  return _.filter(this.items, (item) => {
+    return _.includes(item.permission, this.permissions);
+  });
+} // visibleTiles
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     METHODS                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+function scrollUp() {
+  this.$vuetify.goTo(0);
+} // scrollUp
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                 LIFECYCLE HOOKS                  |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ *  Set permissions by user role.
+ */
+async function created() {
+  this.permissions = getRole();
+} // created
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      EXPORT                      |
+// |                                                  |
+// |--------------------------------------------------|
 
 export default {
+  computed: {
+    visibleTiles
+  },
+  created,
   data() {
     return {
-      permissions: '',
-      drawer: null,
       items: [
         {
           title: 'Employee Home',
@@ -78,44 +129,24 @@ export default {
           route: 'help',
           permission: ['admin', 'user']
         }
-      ]
+      ], // navigation options
+      permissions: '' // user role
     };
   },
-  components: {},
-  computed: {
-    visibleTiles() {
-      return _.filter(this.items, (item) => {
-        return _.includes(item.permission, this.permissions);
-      });
-    }
-  },
   methods: {
-    scrollUp() {
-      this.$vuetify.goTo(0);
-    },
-    handleLogin() {
-      login();
-    },
-    handleLogout() {
-      logout();
-    },
-    isLoggedIn() {
-      return isLoggedIn();
-    }
-  },
-  created() {
-    this.permissions = getRole();
+    scrollUp
   }
 };
 </script>
 
 <style lang="scss">
-.navbar-icons {
-  color: #646460;
-  width: auto;
-  height: 2em;
-  max-width: 100%;
-  max-height: 100%;
+.e {
+  color: #68caa6;
+}
+
+.logo {
+  height: 50%;
+  width: 50%;
 }
 
 #main-header {
@@ -127,13 +158,12 @@ export default {
   padding-bottom: 2%;
 }
 
-.e {
-  color: #68caa6;
-}
-
-.logo {
-  height: 50%;
-  width: 50%;
+.navbar-icons {
+  color: #646460;
+  width: auto;
+  height: 2em;
+  max-width: 100%;
+  max-height: 100%;
 }
 
 #nav-button {
