@@ -33,8 +33,8 @@
         </v-container>
       </v-content>
       <v-footer app></v-footer>
-      <time-out-model :activate="timedOut"></time-out-model>
-      <time-out-warning-model :activate="session"></time-out-warning-model>
+      <time-out-modal :activate="timedOut"></time-out-modal>
+      <time-out-warning-modal :activate="session"></time-out-warning-modal>
     </v-app>
   </div>
 </template>
@@ -43,8 +43,8 @@
 import { isLoggedIn, logout, getProfile, getTokenExpirationDate, getAccessToken } from '@/utils/auth';
 import MainNav from '@/components/MainNav.vue';
 import router from './router.js';
-import TimeOutModel from '@/components/TimeOutModel.vue';
-import TimeOutWarningModel from '@/components/TimeOutWarningModel.vue';
+import TimeOutModal from '@/components/TimeOutModal.vue';
+import TimeOutWarningModal from '@/components/TimeOutWarningModal.vue';
 
 /* METHODS */
 
@@ -120,8 +120,8 @@ export default {
   },
   components: {
     MainNav,
-    TimeOutModel,
-    TimeOutWarningModel
+    TimeOutModal,
+    TimeOutWarningModal
   },
   methods: {
     handleLogout,
