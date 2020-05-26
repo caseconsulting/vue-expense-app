@@ -30,6 +30,12 @@ function emit(msg) {
   window.EventBus.$emit(msg);
 } // emit
 
+// |--------------------------------------------------|
+// |                                                  |
+// |                      EXPORT                      |
+// |                                                  |
+// |--------------------------------------------------|
+
 export default {
   methods: {
     emit
