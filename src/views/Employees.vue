@@ -659,13 +659,6 @@ export default {
       } else {
         return '';
       }
-    },
-    dateFormatNoYear: (value) => {
-      if (value) {
-        return moment(value).format('MMM Do');
-      } else {
-        return '';
-      }
     }
   },
   methods: {
