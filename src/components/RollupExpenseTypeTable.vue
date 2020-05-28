@@ -656,14 +656,14 @@ export default {
   },
   created,
   data: () => ({
+    alerts: [], // status alerts
     buttonClicked: false, // reimburse button clicked
     empBudgets: [], // grouped employee and expense types
-    employees: [], // employee autocomplete options
-    expenseTypes: [], // expense type autocomplete options
     employee: null, // employee autocomplete filter
-    expenseType: null, // expense type autocomplete filter
+    employees: [], // employee autocomplete options
     expanded: [], // datatable expanded
-    alerts: [], // status alerts
+    expenseType: null, // expense type autocomplete filter
+    expenseTypes: [], // expense type autocomplete options
     headers: [
       {
         text: 'Employee',
