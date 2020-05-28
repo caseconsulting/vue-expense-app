@@ -469,7 +469,7 @@ async function checkCoverage() {
             // selected expense type does not allow overdraft or employee is not full time
             this.$set(this.expense, 'od', false);
             // calculate adjusted budget amount based on employee's current work status
-            let adjustedBudget = this.calcAdjustedAmount(this.employee, expenseType);
+            let adjustedBudget = this.calcAdjustedBudget(this.employee, expenseType);
             if (cost <= adjustedBudget) {
               // reimburse the full expense
               this.submit();
