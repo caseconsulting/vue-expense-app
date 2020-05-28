@@ -435,7 +435,6 @@ export default {
   props: ['model'], // expense type to be created/updated
   watch: {
     'model.accessibleBy': function (val) {
-      console.log(val);
       if (!this.submitting) {
         if (!['ALL', 'FULL TIME', 'FULL', 'CUSTOM'].includes(val)) {
           // set employee access form field when populating form with an existing expense type
