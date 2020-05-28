@@ -1,14 +1,14 @@
 <template>
   <v-layout row wrap>
     <v-flex offset-lg1 offset-md1 lg9 md9 sm12>
-      <!-- expense table -->
+      <!-- Expense Table -->
       <rollup-expense-type-table></rollup-expense-type-table>
     </v-flex>
     <v-flex lg2 md2 sm12>
-      <!-- expense info -->
+      <!-- Expense Info -->
       <expense-info class="jerryrig"></expense-info>
 
-      <!-- expenses total -->
+      <!-- Expenses Total -->
       <expense-type-totals></expense-type-totals>
     </v-flex>
   </v-layout>

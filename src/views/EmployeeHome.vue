@@ -1,5 +1,6 @@
 <template>
   <v-layout row wrap justify-center>
+    <!-- Status Alert -->
     <v-snackbar
       v-model="status.statusType"
       :color="status.color"
@@ -15,14 +16,14 @@
       <v-btn color="white" text @click="clearStatus">Close</v-btn>
     </v-snackbar>
 
-    <!-- title -->
+    <!-- Title -->
     <v-flex v-if="!isMobile" lg8 md12 sm12>
       <v-row style="height: 100%;" align="center" justify="center">
         <h1>Budget Statistics for {{ employee.firstName }} {{ employee.lastName }}</h1>
       </v-row>
     </v-flex>
 
-    <!-- anniversary date -->
+    <!-- Anniversary Date -->
     <v-flex lg4 v-if="!isMobile">
       <v-flex>
         <v-card @click="changingBudgetView = true" hover>
@@ -35,7 +36,7 @@
                 <div v-else>Seconds Until: {{ getSecondsUntil }}</div>
               </div>
             </div>
-            <!-- display the budget history year -->
+            <!-- Display the budget history year -->
             <div v-else>
               <h3 class="pt-16">
                 Viewing budgets from {{ this.getFiscalYearView }} - {{ this.getFiscalYearView + 1 }}
@@ -51,7 +52,7 @@
       </v-flex>
     </v-flex>
 
-    <!-- expense data -->
+    <!-- Expense Data -->
     <v-flex xs12 sm12 md12 lg8>
       <v-flex v-if="loading" text-center>
         <v-progress-circular indeterminate size="64" color="#bc3825"></v-progress-circular>
@@ -67,7 +68,7 @@
       </v-flex>
     </v-flex>
 
-    <!-- expense form-->
+    <!-- Expense Form-->
     <v-flex v-if="employ == null" xs12 sm12 md12 lg4>
       <v-flex text-center lg12 md12 sm12>
         <expense-form :expense="expense" v-on:error="displayError"></expense-form>
