@@ -799,8 +799,7 @@ async function submit() {
   if (this.$refs.form != undefined || this.$refs.form != null) {
     if (this.$refs.form.validate()) {
       // NOTE: this second validate may be unnecessary. included in checkCoverage()
-
-      if (this.expense.id == null) {
+      if (this.isEmpty(this.expense.id)) {
         // creating a new expense
         await this.createNewEntry();
       } else {
