@@ -199,7 +199,9 @@
           <br />
 
           <!-- Download employee csv button -->
-          <convert-employees-to-csv v-if="userIsAdmin()" :employees="filteredEmployees"></convert-employees-to-csv>
+          <v-card-actions>
+            <convert-employees-to-csv v-if="userIsAdmin()" :employees="filteredEmployees"></convert-employees-to-csv>
+          </v-card-actions>
 
           <!-- Confirmation Modals -->
           <delete-modal :activate="deleting" :type="'employee'"></delete-modal>
@@ -240,6 +242,184 @@ import _ from 'lodash';
 // |--------------------------------------------------|
 
 /**
+ * Refresh and updates employee list and displays a successful create status in the snackbar.
+ *
+ * @param newEmployee - employee created
+ */
+function addModelToTable() {
+  this.refreshEmployees();
+
+  this.$set(this.status, 'statusType', 'SUCCESS');
+  this.$set(this.status, 'statusMessage', 'Employee was successfully created!');
+  this.$set(this.status, 'color', 'green');
+} // addModelToTable
+
+/**
+ * Clear the selected employee.
+ */
+function clearModel() {
+  this.$set(this.model, 'id', '');
+  this.$set(this.model, 'firstName', '');
+  this.$set(this.model, 'middleName', '');
+  this.$set(this.model, 'lastName', '');
+  this.$set(this.model, 'email', '@consultwithcase.com');
+  this.$set(this.model, 'employeeRole', '');
+  this.$set(this.model, 'employeeNumber', null);
+  this.$set(this.model, 'hireDate', null);
+  this.$set(this.model, 'workStatus', 100);
+
+  //New Fields
+  this.$set(this.model, 'birthday', '');
+  this.$set(this.model, 'jobRole', '');
+  this.$set(this.model, 'prime', '');
+  this.$set(this.model, 'contract', '');
+  this.$set(this.model, 'github', '');
+  this.$set(this.model, 'twitter', '');
+  this.$set(this.model, 'city', '');
+  this.$set(this.model, 'st', '');
+  this.$set(this.model, 'country', '');
+  this.$set(this.model, 'deptDate', '');
+} // clearModel
+
+/**
+ * Clear the action status that is displayed in the snackbar.
+ */
+function clearStatus() {
+  this.$set(this.status, 'statusType', undefined);
+  this.$set(this.status, 'statusMessage', '');
+  this.$set(this.status, 'color', '');
+} // clearStatus
+
+/*
+ * Add employee to expanded row when clicked.
+ *
+ * @param value - employee to add
+ */
+function clickedRow(value) {
+  if (_.isEmpty(this.expanded) || this.expanded[0].employeeNumber != value.employeeNumber) {
+    // expand the selected employee if the selected employee not already expanded
+    this.expanded = [];
+    this.expanded.push(value);
+  } else {
+    // collapse the employee if the selected employee is already expanded
+    this.expanded = [];
+  }
+} // clickedRow
+
+/**
+ * Delete an employee and display status.
+ */
+async function deleteEmployee() {
+  this.deleting = false; // deactive modal to confirm delete
+  let e = await api.deleteItem(api.EMPLOYEES, this.deleteModel.id); // delete employee from api
+  if (e.id) {
+    // update data if successfully deletes employee
+    this.deleteModelFromTable();
+  } else {
+    // display error if failed to deleted employee
+    this.displayError(e.response.data.message);
+  }
+} // deleteEmployee
+
+/**
+ * Refresh and updates employee list and displays a successful delete status in the snackbar.
+ */
+function deleteModelFromTable() {
+  this.refreshEmployees();
+
+  this.$set(this.status, 'statusType', 'SUCCESS');
+  this.$set(this.status, 'statusMessage', 'Employee was successfully deleted!');
+  this.$set(this.status, 'color', 'green');
+} // deleteModelFromTable
+
+/**
+ * Set and display an error action status in the snackbar.
+ *
+ * @param err - String error message
+ */
+async function displayError(err) {
+  this.$set(this.status, 'statusType', 'ERROR');
+  this.$set(this.status, 'statusMessage', err);
+  this.$set(this.status, 'color', 'red');
+} // displayError
+
+/**
+ * Filters list of employees.
+ */
+function filterEmployees() {
+  //filter for Active Expense Types (available to admin only)
+  this.filteredEmployees = _.filter(this.employees, (employee) => {
+    let fullCheck = this.filter.active.includes('full') && this.isFullTime(employee);
+    let partCheck = this.filter.active.includes('part') && this.isPartTime(employee);
+    let inactiveCheck = this.filter.active.includes('inactive') && this.isInactive(employee);
+    return fullCheck || partCheck || inactiveCheck;
+  });
+} // filterEmployees
+
+/**
+ * Returns Full Time, Part Time, or Inactive based on the work status
+ */
+function getWorkStatus(workStatus) {
+  if (workStatus == 100) {
+    return 'Full Time';
+  } else if (workStatus == 0) {
+    return 'Inactive';
+  } else if (workStatus > 0 && workStatus < 100) {
+    return 'Part Time';
+  } else {
+    return 'Invalid Status';
+  }
+}
+
+/**
+ * Checks if there is data about an employee to display. Returns true if the user is an admin or if the there is data
+ * on the employee's prime, contract, job role, github, or twitter, otherwise returns false.
+ *
+ * @item item - employee to check
+ * @return boolean - employee has data to display
+ */
+function isDisplayData(item) {
+  let valid =
+    !this.userIsAdmin() &&
+    this.isEmpty(item.prime) &&
+    this.isEmpty(item.contract) &&
+    this.isEmpty(item.jobRole) &&
+    this.isEmpty(item.github) &&
+    this.isEmpty(item.twitter);
+  return valid;
+} // isDisplayData
+
+/**
+ * Checks if an employee is being edited.
+ *
+ * @return boolean - an employee is being edited
+ */
+function isEditing() {
+  return !!this.model.id;
+} // isEditing
+
+/**
+ * Checks if a value is empty. Returns true if the value is null or a single character space String.
+ *
+ * @param value - value to check
+ * @return boolean - value is empty
+ */
+function isEmpty(value) {
+  return value == null || value === ' ' || value === '';
+} // isEmpty
+
+/**
+ * Checks to see if an employee is expanded in the datatable.
+ *
+ * @param item - employee to check
+ * @return boolean - the employee is expanded
+ */
+function isFocus(item) {
+  let expanded = !_.isEmpty(this.expanded) && item.employeeNumber == this.expanded[0].employeeNumber;
+  return expanded || this.model.id == item.id;
+} // isFocus
+
+/**
  * Checks if an employee is full time. Returns true if the employee is full time with a work status of 100, otherwise
  * returns false.
  *
@@ -273,52 +453,6 @@ function isPartTime(employee) {
 } // isPartTime
 
 /**
- * Checks to see if the user is an admin. Returns true if the user's role is an admin, otherwise returns false.
- */
-function userIsAdmin() {
-  return getRole() === 'admin';
-}
-
-/**
- * Refresh employee data and filters employees.
- */
-async function refreshEmployees() {
-  this.loading = true; // set loading status to true
-  this.employees = await api.getItems(api.EMPLOYEES); // get all employees
-  this.filterEmployees(); // filter employees
-  this.expanded = []; // collapse any expanded rows in the database
-  this.loading = false; // set loading status to false
-} // refreshEmployees
-
-/**
- * Filters list of employees.
- */
-function filterEmployees() {
-  //filter for Active Expense Types (available to admin only)
-  this.filteredEmployees = _.filter(this.employees, (employee) => {
-    let fullCheck = this.filter.active.includes('full') && this.isFullTime(employee);
-    let partCheck = this.filter.active.includes('part') && this.isPartTime(employee);
-    let inactiveCheck = this.filter.active.includes('inactive') && this.isInactive(employee);
-    return fullCheck || partCheck || inactiveCheck;
-  });
-} // filterEmployees
-
-/**
- * Returns Full Time, Part Time, or Inactive based on the work status
- */
-function getWorkStatus(workStatus) {
-  if (workStatus == 100) {
-    return 'Full Time';
-  } else if (workStatus == 0) {
-    return 'Inactive';
-  } else if (workStatus > 0 && workStatus < 100) {
-    return 'Part Time';
-  } else {
-    return 'Invalid Status';
-  }
-}
-
-/**
  * Store the attributes of a selected employee.
  *
  * @param item - employee selected
@@ -348,47 +482,22 @@ function onSelect(item) {
 } // onSelect
 
 /**
- * Clear the selected employee.
+ * Refresh employee data and filters employees.
  */
-function clearModel() {
-  this.$set(this.model, 'id', '');
-  this.$set(this.model, 'firstName', '');
-  this.$set(this.model, 'middleName', '');
-  this.$set(this.model, 'lastName', '');
-  this.$set(this.model, 'email', '@consultwithcase.com');
-  this.$set(this.model, 'employeeRole', '');
-  this.$set(this.model, 'employeeNumber', null);
-  this.$set(this.model, 'hireDate', null);
-  this.$set(this.model, 'workStatus', 100);
-
-  //New Fields
-  this.$set(this.model, 'birthday', '');
-  this.$set(this.model, 'jobRole', '');
-  this.$set(this.model, 'prime', '');
-  this.$set(this.model, 'contract', '');
-  this.$set(this.model, 'github', '');
-  this.$set(this.model, 'twitter', '');
-  this.$set(this.model, 'city', '');
-  this.$set(this.model, 'st', '');
-  this.$set(this.model, 'country', '');
-  this.$set(this.model, 'deptDate', '');
-} // clearModel
+async function refreshEmployees() {
+  this.loading = true; // set loading status to true
+  this.employees = await api.getItems(api.EMPLOYEES); // get all employees
+  this.filterEmployees(); // filter employees
+  this.expanded = []; // collapse any expanded rows in the database
+  this.loading = false; // set loading status to false
+} // refreshEmployees
 
 /*
- * Add employee to expanded row when clicked.
- *
- * @param value - employee to add
+ * Scrolls window back to the top of the form
  */
-function clickedRow(value) {
-  if (_.isEmpty(this.expanded) || this.expanded[0].employeeNumber != value.employeeNumber) {
-    // expand the selected employee if the selected employee not already expanded
-    this.expanded = [];
-    this.expanded.push(value);
-  } else {
-    // collapse the employee if the selected employee is already expanded
-    this.expanded = [];
-  }
-} // clickedRow
+function toTopOfForm() {
+  this.$vuetify.goTo(this.$refs.form.$el.offsetTop + 50);
+} // toTopOfForm
 
 /**
  * Refresh and updates employee list and displays a successful update status in the snackbar.
@@ -401,66 +510,11 @@ function updateModelInTable() {
 } // updateModelInTable
 
 /**
- * Refresh and updates employee list and displays a successful create status in the snackbar.
- *
- * @param newEmployee - employee created
+ * Checks to see if the user is an admin. Returns true if the user's role is an admin, otherwise returns false.
  */
-function addModelToTable() {
-  this.refreshEmployees();
-
-  this.$set(this.status, 'statusType', 'SUCCESS');
-  this.$set(this.status, 'statusMessage', 'Employee was successfully created!');
-  this.$set(this.status, 'color', 'green');
-} // addModelToTable
-
-/**
- * Refresh and updates employee list and displays a successful delete status in the snackbar.
- */
-function deleteModelFromTable() {
-  this.refreshEmployees();
-
-  this.$set(this.status, 'statusType', 'SUCCESS');
-  this.$set(this.status, 'statusMessage', 'Employee was successfully deleted!');
-  this.$set(this.status, 'color', 'green');
-} // deleteModelFromTable
-
-/**
- * Clear the action status that is displayed in the snackbar.
- */
-function clearStatus() {
-  this.$set(this.status, 'statusType', undefined);
-  this.$set(this.status, 'statusMessage', '');
-  this.$set(this.status, 'color', '');
-} // clearStatus
-
-/**
- * Set and display an error action status in the snackbar.
- *
- * @param err - String error message
- */
-async function displayError(err) {
-  this.$set(this.status, 'statusType', 'ERROR');
-  this.$set(this.status, 'statusMessage', err);
-  this.$set(this.status, 'color', 'red');
-} // displayError
-
-/**
- * Checks if there is data about an employee to display. Returns true if the user is an admin or if the there is data
- * on the employee's prime, contract, job role, github, or twitter, otherwise returns false.
- *
- * @item item - employee to check
- * @return boolean - employee has data to display
- */
-function isDisplayData(item) {
-  let valid =
-    !this.userIsAdmin() &&
-    this.isEmpty(item.prime) &&
-    this.isEmpty(item.contract) &&
-    this.isEmpty(item.jobRole) &&
-    this.isEmpty(item.github) &&
-    this.isEmpty(item.twitter);
-  return valid;
-} // isDisplayData
+function userIsAdmin() {
+  return getRole() === 'admin';
+}
 
 /**
  * Validates if an employee can be deleted. Returns true if the employee has no expenses, otherwise returns false.
@@ -489,76 +543,27 @@ async function validateDelete(item) {
   }
 } // validateDelete
 
-/**
- * Checks if an employee is being edited.
- *
- * @return boolean - an employee is being edited
- */
-function isEditing() {
-  return !!this.model.id;
-} // isEditing
-
-/**
- * Delete an employee and display status.
- */
-async function deleteEmployee() {
-  this.deleting = false; // deactive modal to confirm delete
-  let e = await api.deleteItem(api.EMPLOYEES, this.deleteModel.id); // delete employee from api
-  if (e.id) {
-    // update data if successfully deletes employee
-    this.deleteModelFromTable();
-  } else {
-    // display error if failed to deleted employee
-    this.displayError(e.response.data.message);
-  }
-} // deleteEmployee
-
-/**
- * Checks if a value is empty. Returns true if the value is null or a single character space String.
- *
- * @param value - value to check
- * @return boolean - value is empty
- */
-function isEmpty(value) {
-  return value == null || value === ' ' || value === '';
-} // isEmpty
-
-/**
- * Checks to see if an employee is expanded in the datatable.
- *
- * @param item - employee to check
- * @return boolean - the employee is expanded
- */
-function isFocus(item) {
-  let expanded = !_.isEmpty(this.expanded) && item.employeeNumber == this.expanded[0].employeeNumber;
-  return expanded || this.model.id == item.id;
-} // isFocus
-
-/*
- * Scrolls window back to the top of the form
- */
-function toTopOfForm() {
-  this.$vuetify.goTo(this.$refs.form.$el.offsetTop + 50);
-} // toTopOfForm
-
 // |--------------------------------------------------|
 // |                                                  |
 // |                 LIFECYCLE HOOKS                  |
 // |                                                  |
 // |--------------------------------------------------|
 
+/**
+ *  Adjust datatable header for user view. Creates event listeners.
+ */
 async function created() {
-  this.refreshEmployees();
-
   window.EventBus.$on('canceled-delete-employee', () => (this.deleting = false));
   window.EventBus.$on('confirm-delete-employee', this.deleteEmployee);
   window.EventBus.$on('invalid-employee-delete', () => (this.invalidDelete = false));
 
-  // if user, remove employee action button header
+  this.refreshEmployees();
+
+  // remove employee action button header if user view
   if (!this.userIsAdmin()) {
     this.headers.pop();
   }
-}
+} // created
 
 // |--------------------------------------------------|
 // |                                                  |
