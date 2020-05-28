@@ -83,161 +83,37 @@
 </template>
 
 <script>
+import api from '@/shared/api.js';
 import BudgetChart from '../components/BudgetChart.vue';
+import BudgetSelectModal from '../components/BudgetSelectModal.vue';
 import BudgetTable from '../components/BudgetTable.vue';
 import ExpenseForm from '../components/ExpenseForm.vue';
-import BudgetSelectModal from '../components/BudgetSelectModal.vue';
-
-import moment from 'moment';
-const IsoFormat = 'YYYY-MM-DD';
-import api from '@/shared/api.js';
-import _ from 'lodash';
-import pattern from 'patternomaly';
 import MobileDetect from 'mobile-detect';
+import moment from 'moment';
+import pattern from 'patternomaly';
+import _ from 'lodash';
 
-/* LIFECYCLE HOOKS */
-async function created() {
-  window.EventBus.$on('refreshChart', this.updateData);
-  this.refreshEmployee();
-  this.compute();
-  this.addOneSecondToActualTimeEverySecond();
+const IsoFormat = 'YYYY-MM-DD';
 
-  window.EventBus.$on('cancel-budget-year', () => {
-    this.changingBudgetView = false;
-  });
+// |--------------------------------------------------|
+// |                                                  |
+// |                     COMPUTED                     |
+// |                                                  |
+// |--------------------------------------------------|
 
-  window.EventBus.$on('selected-budget-year', (data) => {
-    if (data.format(IsoFormat) != this.fiscalDateView) {
-      this.fiscalDateView = data.format(IsoFormat);
-      this.refreshBudget();
-    }
-    this.changingBudgetView = false;
-  });
-}
-
-/* Methods */
-function addOneSecondToActualTimeEverySecond() {
-  var component = this;
-  component.actualTime = moment().format('X');
-  setTimeout(function () {
-    component.addOneSecondToActualTimeEverySecond();
-  }, 1000);
-}
-
-function getDiffInSeconds() {
-  return moment('2016-10-21 22:00:00').format('X') - this.actualTime;
-}
-
-function compute() {
-  var duration = moment.duration(this.getDiffInSeconds(), 'seconds');
-  this.years = duration.years() > 0 ? duration.years() : 0;
-  this.months = duration.months() > 0 ? duration.months() : 0;
-  this.days = duration.days() > 0 ? duration.days() : 0;
-  this.hours = duration.hours() > 0 ? duration.hours() : 0;
-  this.minutes = duration.minutes() > 0 ? duration.minutes() : 0;
-  this.seconds = duration.seconds() > 0 ? duration.seconds() : 0;
-}
-
-async function updateData() {
-  this.refreshBudget();
-  this.showSnackbar();
-}
-
-async function showSnackbar() {
-  this.$set(this.status, 'statusType', 'SUCCESS');
-  this.$set(this.status, 'statusMessage', 'Item was successfully submitted!');
-  this.$set(this.status, 'color', 'green');
-}
-
-function clearStatus() {
-  this.$set(this.status, 'statusType', undefined);
-  this.$set(this.status, 'statusMessage', '');
-  this.$set(this.status, 'color', '');
-}
-
-async function displayError(err) {
-  this.$set(this.status, 'statusType', 'ERROR');
-  this.$set(this.status, 'statusMessage', err);
-  this.$set(this.status, 'color', 'red');
-}
-
-function isFullTime(employee) {
-  return employee.workStatus == 100;
-}
-
-async function refreshEmployee() {
-  let employee;
-  this.loading = true;
-  if (this.employ == null) {
-    employee = await api.getUser();
-  } else {
-    employee = this.employ;
-  }
-  this.hireDate = employee.hireDate;
-  this.fiscalDateView = this.getCurrentBudgetYear();
-  this.employee = employee;
-  this.refreshBudget();
-  this.allUserBudgets = await api.getEmployeeBudgets(this.employee.id);
-  this.loading = false;
-}
-
-// get all budgets within the year displayed
-async function refreshBudget() {
-  this.loading = true;
-  let budgetsVar;
-
-  if (this.fiscalDateView == this.getCurrentBudgetYear()) {
-    budgetsVar = await api.getAllActiveEmployeeBudgets(this.employee.id);
-  }
-
-  let existingBudgets = await api.getFiscalDateViewBudgets(this.employee.id, this.fiscalDateView);
-
-  // append inactive tag to end of budget expense type name
-  // the existing budget duplicates will later be removed (order in array comes after active budgets)
-  _.forEach(existingBudgets, (budget) => {
-    budget.expenseTypeName += ' (Inactive)';
-  });
-
-  budgetsVar = _.union(budgetsVar, existingBudgets); // combine existing and active budgets
-  budgetsVar = _.uniqBy(budgetsVar, 'expenseTypeId'); // remove duplicate expense types
-  budgetsVar = _.sortBy(budgetsVar, (budget) => {
-    return budget.expenseTypeName;
-  }); // sort by expense type name
-
-  // if employee is not full time, prohibit overdraft
-  _.forEach(budgetsVar, async (budget) => {
-    if (!isFullTime(this.employee)) {
-      budget.odFlag = false;
-    }
-  });
-
-  // remove any budgets where budget amount is 0 and 0 total expenses
-  this.expenseTypeData = _.filter(budgetsVar, (data) => {
-    let budget = data.budgetObject;
-    return budget.amount != 0 || budget.reimbursedAmount != 0 || budget.pendingAmount != 0;
-  });
-
-  this.refreshBudgetYears();
-  this.loading = false;
-}
-
-/*
- * Async function to loop an array
+/**
+ * Gets and calculates employee budget data. Returns multiple lists, consisting of the budgets names, remaining budget,
+ * reimbursed amount, pending amount, reimbursed overdraft amount, and pending overdraft amount.
+ *
+ * @return Object - budget data
  */
-async function asyncForEach(array, callback) {
-  for (let index = 0; index < array.length; index++) {
-    await callback(array[index], index, array);
-  }
-}
-
-/* Computed */
 function budgets() {
-  let budgetNames = [];
-  let budgetDifference = [];
-  let reimbursed = [];
-  let unreimbursed = [];
-  let odReimbursed = [];
-  let odUnreimbursed = [];
+  let budgetNames = []; // budget expense type names
+  let budgetDifference = []; // remaining budget amounts
+  let reimbursed = []; // reimbursed amounts
+  let unreimbursed = []; // pending amounts
+  let odReimbursed = []; // reimbursed overdraft amount
+  let odUnreimbursed = []; // pending overdraft amount
   if (this.expenseTypeData !== undefined) {
     let expenseTypes = this.expenseTypeData;
     _.forEach(expenseTypes, (expenseType) => {
@@ -299,42 +175,48 @@ function budgets() {
     odReimbursed: odReimbursed,
     odUnreimbursed: odUnreimbursed
   };
-}
+} // budgets
 
+/**
+ * Format and set data options for budget chart.
+ *
+ * @return Object - budget chart data
+ */
 function drawGraph() {
+  let budgets = this.budgets;
   let data = {
-    labels: this.budgets.names,
+    labels: budgets.names,
     datasets: [
       {
         type: 'bar',
         label: 'Reimbursed',
         backgroundColor: '#2195f3',
-        data: this.budgets.reimbursed
+        data: budgets.reimbursed
       },
       {
         type: 'bar',
         label: 'Pending',
         backgroundColor: '#ff6666',
-        data: this.budgets.unreimbursed
+        data: budgets.unreimbursed
       },
       {
         type: 'bar',
         label: 'Remaining Budget',
         backgroundColor: '#e1e7f2',
         fill: false,
-        data: this.budgets.difference
+        data: budgets.difference
       },
       {
         type: 'bar',
         label: 'Overdraft Reimbursed',
         backgroundColor: pattern.draw('diagonal', '#88beef'),
-        data: this.budgets.odReimbursed
+        data: budgets.odReimbursed
       },
       {
         type: 'bar',
         label: 'Overdraft Pending',
         backgroundColor: pattern.draw('diagonal', 'pink'),
-        data: this.budgets.odUnreimbursed
+        data: budgets.odUnreimbursed
       }
     ]
   };
@@ -392,50 +274,45 @@ function drawGraph() {
     dataSet: data,
     optionSet: options
   };
-}
+} // drawGraph
 
+/**
+ * Get the next anniversary date for the employee based on their hire date.
+ *
+ * @return String - next employee anniversary date (day of year, month, day, year)
+ */
 function getAnniversary() {
-  const [year, month, day] = this.hireDate.split('-');
+  const [year, month, day] = this.hireDate.split('-'); // split anniversary year, month, and day
   if (moment(`${month}/${day}/${year}`, 'MM/DD/YYYY', true).isValid()) {
+    // if valid date
     let now = moment();
     let hireDate = moment(this.hireDate, 'YYYY-MM-DD');
 
     if (now.isAfter(hireDate)) {
+      // employee's hire date is before today
       let anniversary = moment([now.year(), hireDate.month(), hireDate.date()]);
-      // if the employee start date is before today
+      // employee's hire date is before today
       if (now.isSameOrAfter(anniversary)) {
-        // if the employee's anniversary date has already occured this year
+        // employee's anniversary date has already occured this year
         anniversary.add(1, 'years');
         return anniversary.format('ddd. MMM D, YYYY');
       } else {
-        // if the employee's anniversary date still has to happen between now and the end of year
+        // employee's anniversary date still has to happen between now and the end of year
         return anniversary.format('ddd. MMM D, YYYY');
       }
     } else {
-      // if the employee's start day is in the future
+      // employee's hire date is in the future
       return hireDate.add(1, 'years').format('ddd. MMM D, YYYY');
     }
   } else {
     // TODO: Return something for invalid date
     return 'Ooops no anniversary, when did you start working here again? ';
   }
-}
+} // getAnniversary
 
-function refreshBudgetYears() {
-  let budgetYears = [];
-  let [currYear] = this.getCurrentBudgetYear().split('-');
-  let budgetDates = _.uniqBy(_.map(this.allUserBudgets, 'fiscalStartDate'));
-  budgetDates.forEach((date) => {
-    const [year] = date.split('-');
-    budgetYears.push(parseInt(year));
-  });
-  budgetYears.push(parseInt(currYear));
-  budgetYears = _.filter(_.uniqBy(budgetYears), (year) => {
-    return parseInt(year) <= parseInt(currYear);
-  });
-  this.budgetYears = _.reverse(_.sortBy(budgetYears));
-}
-
+/**
+ * Get the days until the employee's next anniversary date.
+ */
 function getDaysUntil() {
   let now = moment();
 
@@ -443,50 +320,127 @@ function getDaysUntil() {
   let anniversary = moment([now.year(), hireDate.month(), hireDate.date()]);
 
   if (now.isAfter(hireDate)) {
-    // if the employee start date is before today
+    // employee's hire date is before today
     if (now.isSameOrAfter(anniversary)) {
-      // if the employee's anniversary date has already occured this year
+      // employee's anniversary date has already occured this year
       anniversary.add(1, 'years');
     }
   } else {
-    // if the employee's start day is in the future
+    // employee's hire date is in the future
     anniversary = hireDate.add(1, 'years');
   }
 
   return anniversary.diff(now, 'days') + 1;
-}
+} // getDaysUntil
 
+/**
+ * Get the year for the employee budget year view.
+ *
+ * @return Int - year for budget year view
+ */
+function getFiscalYearView() {
+  let [year] = this.fiscalDateView.split('-');
+  return parseInt(year);
+} // getFiscalYearView
+
+/**
+ * Get the seconds until the employee's next anniversary date.
+ */
 function getSecondsUntil() {
   if (this.actualTime) {
+    // the actual time exists
     let now = moment();
     let year = now.year();
     let hireDate = moment(this.hireDate, 'YYYY-MM-DD');
     let anniversary = moment([year, hireDate.month(), hireDate.date()]);
 
     if (now.isAfter(hireDate)) {
-      // if the employee start date is before today
+      // employee's hire date is before today
       if (now.isSameOrAfter(anniversary)) {
-        // if the employee's anniversary date has already occured this year
+        // employee's anniversary date has already occured this year
         anniversary.add(1, 'years');
       }
     } else {
-      // if the employee's start day is in the future
+      // employee's hire date is in the future
       anniversary = hireDate.add(1, 'years');
     }
     return anniversary.diff(now, 'seconds');
   }
-}
+} // getSecondsUntil
 
-function getFiscalYearView() {
-  let [year] = this.fiscalDateView.split('-');
-  return parseInt(year);
-}
-
+/**
+ * Checks if the current device used is mobile. Return true if it is mobile. Returns false if it is not mobile.
+ *
+ * @return boolean - if the device is mobile
+ */
 function isMobile() {
   let md = new MobileDetect(window.navigator.userAgent);
   return md.os() === 'AndroidOS' || md.os() === 'iOS';
-}
+} // isMobile
 
+/**
+ * Viewing the current active budget year. Returns true if the budget year being viwed is todays budget.
+ *
+ * @return boolean - viewing the current active year budget
+ */
+function viewingCurrentBudgetYear() {
+  return this.fiscalDateView == this.getCurrentBudgetYear();
+} // viewingCurrentBudgetYear
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     METHODS                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * Increment the actual time by a second.
+ */
+function addOneSecondToActualTimeEverySecond() {
+  var component = this;
+  component.actualTime = moment().format('X');
+  setTimeout(function () {
+    component.addOneSecondToActualTimeEverySecond();
+  }, 1000);
+} // addOneSecondToActualTimeEverySecond
+
+/**
+ * Async function to loop an array.
+ *
+ * @param array - Array of elements to iterate over
+ * @param callback - callback function
+ */
+async function asyncForEach(array, callback) {
+  for (let index = 0; index < array.length; index++) {
+    await callback(array[index], index, array);
+  }
+} // asyncForEach
+
+/**
+ * Clear the action status that is displayed in the snackbar.
+ */
+function clearStatus() {
+  this.$set(this.status, 'statusType', undefined);
+  this.$set(this.status, 'statusMessage', '');
+  this.$set(this.status, 'color', '');
+} // clearStatus
+
+/**
+ * Set and display an error action status in the snackbar.
+ *
+ * @param err - String error message
+ */
+async function displayError(err) {
+  this.$set(this.status, 'statusType', 'ERROR');
+  this.$set(this.status, 'statusMessage', err);
+  this.$set(this.status, 'color', 'red');
+} // displayError
+
+/**
+ * Gets the current active anniversary budget year starting date in isoformat.
+ *
+ * @return String - current active anniversary budget date (YYYY-MM-DD)
+ */
 function getCurrentBudgetYear() {
   let currentBudgetYear = moment(this.hireDate, IsoFormat);
   if (moment().isAfter(currentBudgetYear)) {
@@ -496,13 +450,207 @@ function getCurrentBudgetYear() {
     }
   }
   return currentBudgetYear.format(IsoFormat);
-}
+} // getCurrentBudgetYear
 
-function viewingCurrentBudgetYear() {
-  return this.fiscalDateView == this.getCurrentBudgetYear();
-}
+/**
+ * Checks if an employee is full time. Returns true if the employee is full time with a work status of 100, otherwise
+ * returns false.
+ *
+ * @param employee - employee to check
+ * @return boolean - employee is full time
+ */
+function isFullTime(employee) {
+  return employee.workStatus == 100;
+} // isFullTime
+
+/**
+ * Refresh and sets the aggregated budgets for the employee budget year view.
+ */
+async function refreshBudget() {
+  this.loading = true; // set loading status to true
+  let budgetsVar;
+
+  if (this.fiscalDateView == this.getCurrentBudgetYear()) {
+    // viewing active budget year
+    budgetsVar = await api.getAllActiveEmployeeBudgets(this.employee.id);
+  }
+
+  // get existing budgets for the budget year being viewed
+  let existingBudgets = await api.getFiscalDateViewBudgets(this.employee.id, this.fiscalDateView);
+
+  // append inactive tag to end of budget expense type name
+  // the existing budget duplicates will later be removed (order in array comes after active budgets)
+  _.forEach(existingBudgets, (budget) => {
+    budget.expenseTypeName += ' (Inactive)';
+  });
+
+  budgetsVar = _.union(budgetsVar, existingBudgets); // combine existing and active budgets
+  budgetsVar = _.uniqBy(budgetsVar, 'expenseTypeId'); // remove duplicate expense types
+  budgetsVar = _.sortBy(budgetsVar, (budget) => {
+    return budget.expenseTypeName;
+  }); // sort by expense type name
+
+  // prohibit overdraft if employee is not full time
+  _.forEach(budgetsVar, async (budget) => {
+    if (!isFullTime(this.employee)) {
+      budget.odFlag = false;
+    }
+  });
+
+  // remove any budgets where budget amount is 0 and 0 total expenses
+  this.expenseTypeData = _.filter(budgetsVar, (data) => {
+    let budget = data.budgetObject;
+    return budget.amount != 0 || budget.reimbursedAmount != 0 || budget.pendingAmount != 0;
+  });
+
+  this.refreshBudgetYears(); // refresh the budget year view options
+  this.loading = false; // set loading status to false
+} // refreshBudget
+
+/**
+ * Refresh and sets the budget year view options for the employee.
+ */
+function refreshBudgetYears() {
+  let budgetYears = [];
+
+  // push all employee budget years
+  let budgetDates = _.uniqBy(_.map(this.allUserBudgets, 'fiscalStartDate'));
+  budgetDates.forEach((date) => {
+    const [year] = date.split('-');
+    budgetYears.push(parseInt(year));
+  });
+
+  // push active budget year
+  let [currYear] = this.getCurrentBudgetYear().split('-');
+  budgetYears.push(parseInt(currYear));
+
+  // remove duplicate years and filter to include only active and previous years
+  budgetYears = _.filter(_.uniqBy(budgetYears), (year) => {
+    return parseInt(year) <= parseInt(currYear);
+  });
+
+  this.budgetYears = _.reverse(_.sortBy(budgetYears)); // sort budgets from current to past
+} // refreshBudgetYears
+
+/**
+ * Refresh and sets employee information.
+ */
+async function refreshEmployee() {
+  this.loading = true; // set loading status to true
+  if (this.employ == null) {
+    // set the employee to the selected employee if viewing from an admin view
+    this.employee = await api.getUser();
+  } else {
+    // set the employee to the current user if viewing from a user view
+    this.employee = this.employ;
+  }
+  this.hireDate = this.employee.hireDate;
+  this.fiscalDateView = this.getCurrentBudgetYear();
+  this.refreshBudget(); // refresh employee budgets
+  this.allUserBudgets = await api.getEmployeeBudgets(this.employee.id); // set all employee budgets
+  this.loading = false; // set loading status to false
+} // refreshEmployee
+
+/**
+ * Set and display a successful submit status in the snackbar.
+ */
+async function showSuccessfulSubmit() {
+  this.$set(this.status, 'statusType', 'SUCCESS');
+  this.$set(this.status, 'statusMessage', 'Item was successfully submitted!');
+  this.$set(this.status, 'color', 'green');
+} // showSuccessfulSubmit
+
+/**
+ * Updates the budget data and display a successful submit.
+ */
+async function updateData() {
+  this.refreshBudget();
+  this.showSuccessfulSubmit();
+} // updateData
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                 LIFECYCLE HOOKS                  |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ *  Set budget charts and information for employee. Creates event listeners.
+ */
+async function created() {
+  window.EventBus.$on('refreshChart', this.updateData);
+  window.EventBus.$on('cancel-budget-year', () => {
+    this.changingBudgetView = false;
+  });
+  window.EventBus.$on('selected-budget-year', (data) => {
+    if (data.format(IsoFormat) != this.fiscalDateView) {
+      this.fiscalDateView = data.format(IsoFormat);
+      this.refreshBudget();
+    }
+    this.changingBudgetView = false;
+  });
+
+  this.refreshEmployee();
+  this.addOneSecondToActualTimeEverySecond();
+} // created
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      EXPORT                      |
+// |                                                  |
+// |--------------------------------------------------|
 
 export default {
+  components: {
+    BudgetChart,
+    BudgetSelectModal,
+    BudgetTable,
+    ExpenseForm
+  },
+  computed: {
+    budgets,
+    drawGraph,
+    getAnniversary,
+    getDaysUntil,
+    getFiscalYearView,
+    getSecondsUntil,
+    isMobile,
+    viewingCurrentBudgetYear
+  },
+  created,
+  data() {
+    return {
+      actualTime: moment().format('X'), // current time (unix ms timestamp)
+      allUserBudgets: null, // all user budgets
+      budgetYears: [], // list of options for chaning budget year view
+      changingBudgetView: false, // change budget year view activator
+      display: true, // show seconds till anniversary activator
+      employee: {}, // employee
+      expense: {
+        id: '',
+        description: '',
+        cost: '',
+        note: null,
+        employeeId: '',
+        expenseTypeId: '',
+        purchaseDate: null,
+        reimbursedDate: null,
+        reciept: null,
+        employeeName: '',
+        budgetName: ''
+      }, // expense for the expense form
+      expenseTypeData: [], // aggregated budgets for expense types
+      fiscalDateView: '', // current budget year view by anniversary day
+      hireDate: '', // employee hire date
+      loading: false, // loading status
+      seconds: 0, // seconds until next anniversary date
+      status: {
+        statusType: undefined,
+        statusMessage: '',
+        color: ''
+      } // snackbar action status
+    };
+  },
   filters: {
     moneyValue: (value) => {
       return `${new Intl.NumberFormat('en-US', {
@@ -520,88 +668,26 @@ export default {
       }
     }
   },
-  data() {
-    return {
-      allUserBudgets: null,
-      budgetYears: [],
-      changingBudgetView: false,
-      fiscalDateView: '',
-      loading: false,
-      hireDate: '',
-      employees: [],
-      employee: {},
-      expenseTypeData: [],
-      expenses: [],
-      processedExpenses: [],
-      errors: [],
-      status: {
-        statusType: undefined,
-        statusMessage: '',
-        color: ''
-      },
-      expense: {
-        id: '',
-        description: '',
-        cost: '',
-        note: null,
-        employeeId: '',
-        expenseTypeId: '',
-        purchaseDate: null,
-        reimbursedDate: null,
-        reciept: null,
-        employeeName: '',
-        budgetName: ''
-      },
-      display: true,
-      actualTime: moment().format('X'),
-      seconds: 0
-    };
-  },
-  props: {
-    adminCall: {
-      default: null
-    },
-    employ: {
-      default: null
-    }
-  },
-  created,
-  watch: {
-    actualTime() {
-      this.compute();
-    }
-  },
   methods: {
     addOneSecondToActualTimeEverySecond,
     asyncForEach,
     clearStatus,
-    compute,
     displayError,
-    getDiffInSeconds,
     getCurrentBudgetYear,
     isFullTime,
     refreshBudget,
     refreshBudgetYears,
     refreshEmployee,
-    showSnackbar,
+    showSuccessfulSubmit,
     updateData
   },
-  computed: {
-    budgets,
-    drawGraph,
-    getAnniversary,
-    getDaysUntil,
-    getFiscalYearView,
-    getSecondsUntil,
-    isMobile,
-    viewingCurrentBudgetYear
-  },
-  components: {
-    BudgetChart,
-    BudgetSelectModal,
-    BudgetTable,
-    ExpenseForm
+  props: {
+    adminCall: {
+      default: null
+    }, // admin employee view
+    employ: {
+      default: null
+    } // employee (admin employee view)
   }
 };
 </script>
-<style></style>
