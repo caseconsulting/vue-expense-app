@@ -367,7 +367,7 @@ function emitSelectionChange(expense, newSelect) {
  * @return Array - pending expenses
  */
 function filterOutReimbursed(expenses) {
-  return _.filter(expenses, (expense) => !isReimbursed(expense.reimbursedDate));
+  return _.filter(expenses, (expense) => !isReimbursed(expense));
 } // filterOutReimbursed
 
 /*
@@ -415,14 +415,14 @@ function isEmpty(value) {
   return value == null || value === ' ' || value === '';
 } // isEmpty
 
-/*
- * Returns true if the reimburse date is reimbursed.
+/**
+ * Checks if the expense is reimbursed. Returns true if the expense is reimbursed, otherwise returns false.
  *
- * @param reimbursedDate - reimbursed date
- * @return boolean - date is reimbursed
+ * @param expense - expense to check
+ * @return boolean - expense is reimbursed
  */
-function isReimbursed(reimbursedDate) {
-  return !isEmpty(reimbursedDate);
+function isReimbursed(expense) {
+  return expense && !isEmpty(expense.reimbursedDate);
 } // isReimbursed
 
 /*
@@ -433,7 +433,7 @@ function isReimbursed(reimbursedDate) {
  * @return boolean - item not reimbursed and employee and expense type match
  */
 function matchingEmployeeAndExpenseType(expense, item) {
-  let reimbursed = isReimbursed(item.reimbursedDate);
+  let reimbursed = isReimbursed(item);
   return expense.employeeId === item.employeeId && expense.expenseTypeId === item.expenseTypeId && !reimbursed;
 } // matchingEmployeeAndExpenseType
 
@@ -444,7 +444,7 @@ function refreshExpenses() {
   this.pendingExpenses = [];
   _.forEach(this.empBudgets, (budget) => {
     _.forEach(budget.expenses, (budgetExpense) => {
-      if (!isReimbursed(budgetExpense.reimbursedDate)) {
+      if (!isReimbursed(budgetExpense)) {
         this.pendingExpenses.push(budgetExpense);
       }
     });

@@ -243,8 +243,6 @@ import _ from 'lodash';
 
 /**
  * Refresh and updates employee list and displays a successful create status in the snackbar.
- *
- * @param newEmployee - employee created
  */
 function addModelToTable() {
   this.refreshEmployees();
@@ -290,7 +288,7 @@ function clearStatus() {
   this.$set(this.status, 'color', '');
 } // clearStatus
 
-/*
+/**
  * Add employee to expanded row when clicked.
  *
  * @param value - employee to add
@@ -493,7 +491,7 @@ async function refreshEmployees() {
 } // refreshEmployees
 
 /*
- * Scrolls window back to the top of the form
+ * Scrolls window back to the top of the form.
  */
 function toTopOfForm() {
   this.$vuetify.goTo(this.$refs.form.$el.offsetTop + 50);
@@ -653,8 +651,9 @@ export default {
     };
   },
   filters: {
+    // formats a date by month, day, year (e.g. Aug 18th, 2020)
     dateFormat: (value) => {
-      if (value && value != ' ') {
+      if (!isEmpty(value)) {
         return moment(value).format('MMM Do, YYYY');
       } else {
         return '';
