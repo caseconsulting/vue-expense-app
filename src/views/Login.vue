@@ -11,22 +11,36 @@
 <script>
 import { isLoggedIn, login } from '@/utils/auth';
 
+// |--------------------------------------------------|
+// |                                                  |
+// |                 LIFECYCLE HOOKS                  |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * Route to home page on log in.
+ */
+async function created() {
+  if (this.isLoggedIn()) {
+    this.$router.push('home');
+  }
+} // created
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      EXPORT                      |
+// |                                                  |
+// |--------------------------------------------------|
+
 export default {
-  created() {
-    if (this.isLoggedIn()) {
-      this.$router.push('home');
-    }
-  },
+  created,
   methods: {
-    login() {
-      login();
-    },
-    isLoggedIn() {
-      return isLoggedIn();
-    }
+    login,
+    isLoggedIn
   }
 };
 </script>
+
 <style>
 #custom-button-color {
   /* background-color: #68caa6; */
