@@ -611,7 +611,7 @@ async function refreshExpenses() {
   this.loading = false; // set loading status to false
 } // refreshExpenses
 
-/*
+/**
  * Scrolls window back to the top of the form.
  */
 function toTopOfForm() {

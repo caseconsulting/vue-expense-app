@@ -152,7 +152,7 @@ function filteredItems() {
   });
 } // filteredItems
 
-/*
+/**
  * State of datatable header check box based on selected expeneses.
  *
  * @return Object - main checkbox state
@@ -178,7 +178,7 @@ function mainCheckBox() {
   return checkBox;
 } // mainCheckBox
 
-/*
+/**
  * Returns the display status of the reimburse button. Returns true if an expense is selected, otherwise returns false.
  *
  * @return boolean - display reimbursed button
@@ -205,7 +205,7 @@ async function asyncForEach(array, callback) {
   }
 } // asyncForEach
 
-/*
+/**
  * Check all expenses and boxes.
  */
 function checkAllBoxes() {
@@ -219,7 +219,7 @@ function checkAllBoxes() {
   });
 } // checkAllBoxes
 
-/*
+/**
  * Clears the response status snackbar.
  */
 function clearStatus() {
@@ -228,7 +228,7 @@ function clearStatus() {
   this.$set(this.status, 'color', '');
 } // clearStatus
 
-/*
+/**
  * Expands an expense. Adds the expense to expanded row when clicked.
  *
  * @param value - expense to expand
@@ -242,7 +242,7 @@ function clickedRow(value) {
   }
 } // clickedRow
 
-/*
+/**
  * Constructs the auto complete lists for the employee and expense type filter.
  *
  * @param aggregatedData - expenses data
@@ -272,7 +272,7 @@ function constructAutoComplete(aggregatedData) {
   });
 } // constructAutoComplete
 
-/*
+/**
  *  Maps dataset to expenses.
  *
  * @param aggregatedData - data
@@ -306,7 +306,7 @@ function createExpenses(aggregatedData) {
   });
 } // createExpenses
 
-/*
+/**
  * Determine the state of the group check box based on expenses.
  *
  * @param budget - budget group selected
@@ -339,7 +339,7 @@ function determineCheckBox(budget) {
   return checkBox;
 } // determineCheckBox
 
-/*
+/**
  * Displays an error in the response status snackbar.
  */
 async function displayError(err) {
@@ -348,7 +348,7 @@ async function displayError(err) {
   this.$set(this.status, 'color', 'red');
 } // displayError
 
-/*
+/**
  * Emits expense select change for expense type totals component.
  *
  * @param expense - expense changed
@@ -360,7 +360,7 @@ function emitSelectionChange(expense, newSelect) {
   }
 } // emitSelectionChange
 
-/*
+/**
  * Remove reimbursed expenses and returns a list of pending expenses.
  *
  * @param expenses - list of expenses
@@ -370,7 +370,7 @@ function filterOutReimbursed(expenses) {
   return _.filter(expenses, (expense) => !isReimbursed(expense));
 } // filterOutReimbursed
 
-/*
+/**
  * Get the total cost of expenses in a group budget.
  *
  * @param expenses - list of expenses
@@ -382,7 +382,7 @@ function getBudgetTotal(expenses) {
   return total;
 } // getBudgetTotal
 
-/*
+/**
  * Group expenses with the same employee name and expense type.
  *
  * @param expenses - list of expenses
@@ -425,7 +425,7 @@ function isReimbursed(expense) {
   return expense && !isEmpty(expense.reimbursedDate);
 } // isReimbursed
 
-/*
+/**
  * Return true if two items have the same employeeId and expenseTypeId and not reimbursed.
  *
  * @param expense - first expense to compare
@@ -437,7 +437,7 @@ function matchingEmployeeAndExpenseType(expense, item) {
   return expense.employeeId === item.employeeId && expense.expenseTypeId === item.expenseTypeId && !reimbursed;
 } // matchingEmployeeAndExpenseType
 
-/*
+/**
  * Refresh expenses.
  */
 function refreshExpenses() {
@@ -453,7 +453,7 @@ function refreshExpenses() {
   this.unCheckAllBoxes();
 } // refreshExpenses
 
-/*
+/**
  * Reimburse the selected list of expenses.
  */
 async function reimburseExpenses() {
@@ -510,7 +510,7 @@ async function reimburseExpenses() {
   }
 } // reimburseExpenses
 
-/*
+/**
  * Select an expense and change check box status.
  *
  * @param expense - expense selected
@@ -533,7 +533,7 @@ function selectExpense(expense) {
   });
 } // selectExpense
 
-/*
+/**
  * Sets up an expense object to be submitted.
  *
  * @param expense - expense data to submit
@@ -554,7 +554,7 @@ function submitExpenseObject(expense) {
   };
 } // submitExpenseObject
 
-/*
+/**
  * Toggle all expenses selected.
  */
 function toggleAll() {
@@ -567,7 +567,7 @@ function toggleAll() {
   }
 } // toggleAll
 
-/*
+/**
  * Toggle expenses in a group selected.
  *
  * @param value - expense group selected
@@ -601,7 +601,7 @@ function toggleGroup(value) {
   });
 } // toggleGroup
 
-/*
+/**
  * Uncheck all expenses and boxes
  */
 function unCheckAllBoxes() {

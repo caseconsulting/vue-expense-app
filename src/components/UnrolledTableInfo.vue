@@ -65,7 +65,7 @@ import moment from 'moment';
 // |                                                  |
 // |--------------------------------------------------|
 
-/*
+/**
  * Emit an event to parent that an expense was clicked
  *
  * @param clickedExpense - expense clicked
@@ -74,7 +74,7 @@ function expenseClicked(clickedExpense) {
   window.EventBus.$emit('expenseClicked', clickedExpense);
 } // expenseClicked
 
-/*
+/**
  * Emit an event to parent that an expense was selected.
  *
  * @param selectExpense - selected expense

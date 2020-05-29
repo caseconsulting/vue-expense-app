@@ -42,7 +42,9 @@ import _ from 'lodash';
 // |--------------------------------------------------|
 
 /**
+ * Filter items by user permissions.
  *
+ * @return Array - Filtered items
  */
 function visibleTiles() {
   return _.filter(this.items, (item) => {

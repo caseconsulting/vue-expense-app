@@ -440,7 +440,7 @@ function addModelToTable() {
   this.$set(this.status, 'color', 'green');
 } // addModelToTable
 
-/*
+/**
  * Changes the employee avatar to default if it fails to display original.
  *
  * @param item - employee to check
@@ -724,7 +724,7 @@ async function refreshExpenseTypes() {
   this.loading = false; // set loading status to false
 } // refreshExpenseTypes
 
-/*
+/**
  * Scrolls window back to the top of the form.
  */
 function toTopOfForm() {

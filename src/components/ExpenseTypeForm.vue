@@ -371,7 +371,7 @@ async function submit() {
 // |--------------------------------------------------|
 
 /**
- *
+ * Gets and sets all employees.
  */
 async function created() {
   // get all employees for access list
