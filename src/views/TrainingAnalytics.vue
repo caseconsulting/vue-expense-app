@@ -21,10 +21,10 @@
         </v-flex>
       </v-row>
 
-      <!-- category buttons -->
+      <!-- Category Filter Buttons -->
       <v-flex xs12 class="text-center">
         <v-row>
-          <!-- Training button -->
+          <!-- Training Button -->
           <div>
             <v-btn
               @click="filterByCategory('Training')"
@@ -39,8 +39,8 @@
             </v-btn>
             <h4>Training</h4>
           </div>
-          <!-- end Training button -->
-          <!-- Conference button -->
+
+          <!-- Conference Button -->
           <div>
             <v-btn
               @click="filterByCategory('Conference')"
@@ -55,8 +55,8 @@
             </v-btn>
             <h4>Conference</h4>
           </div>
-          <!-- end Conference button -->
-          <!-- Certifications button -->
+
+          <!-- Certifications Button -->
           <div>
             <v-btn
               @click="filterByCategory('Certifications')"
@@ -71,8 +71,8 @@
             </v-btn>
             <h4>Certifications</h4>
           </div>
-          <!-- end Certifications button -->
-          <!-- Lodging button -->
+
+          <!-- Lodging Button -->
           <div>
             <v-btn
               @click="filterByCategory('Lodging')"
@@ -87,8 +87,8 @@
             </v-btn>
             <h4>Lodging</h4>
           </div>
-          <!-- end Lodging button -->
-          <!-- Travel button -->
+
+          <!-- Travel Button -->
           <div>
             <v-btn
               @click="filterByCategory('Travel')"
@@ -103,8 +103,8 @@
             </v-btn>
             <h4>Travel</h4>
           </div>
-          <!-- end Travel button -->
-          <!-- Meals button -->
+
+          <!-- Meals Button -->
           <div>
             <v-btn
               @click="filterByCategory('Meals')"
@@ -119,18 +119,17 @@
             </v-btn>
             <h4>Meals</h4>
           </div>
-          <!-- end Meals button -->
         </v-row>
       </v-flex>
-      <!-- end category buttons -->
+      <!-- End Category Filter Button -->
 
-      <!-- buttons/urls divider -->
+      <!-- Button/Urls Divider -->
       <br />
       <hr />
       <br />
 
       <v-flex xs12>
-        <!-- list all url info -->
+        <!-- List all url info -->
         <div v-for="url in this.urls" :key="url.id">
           <v-row dense>
             <v-col cols="12">
@@ -145,16 +144,16 @@
 
                   <v-flex xs12 sm9 md10 xl11>
                     <v-layout column justify-space-between fill-height>
-                      <!-- title and description -->
+                      <!-- Title and Description -->
                       <div v-if="!isEmpty(url.title)">
                         <v-card-title class="headline" v-text="url.title"></v-card-title>
                         <v-card-subtitle v-text="url.description"></v-card-subtitle>
                       </div>
 
-                      <!-- no title or description -->
+                      <!-- No title or Description -->
                       <div v-else class="urlBox pt-4">{{ url.id }}</div>
 
-                      <!-- hit count -->
+                      <!-- Hit Count -->
                       <div class="mr-2">
                         <span v-if="isEmpty(url.title)" style="float: left;">{{ url.publisher }}</span>
                         <span class="subheading hitText">{{ url.hits }}</span>
@@ -174,23 +173,72 @@
 
 <script>
 import api from '@/shared/api.js';
+import caseLogo from '../assets/img/logo-big.png';
 import _ from 'lodash';
-let caseLogo = require('../assets/img/logo-big.png');
 
-//METHODS
+// |--------------------------------------------------|
+// |                                                  |
+// |                     COMPUTED                     |
+// |                                                  |
+// |--------------------------------------------------|
 
-async function getUrls() {
-  this.urlsOriginal = await api.getItems(api.URLS);
-  _.forEach(this.urlsOriginal, (urlObject) => {
-    urlObject.title = titleFormat(urlObject.title);
+/**
+ * Filters and sorts the list of training urls.
+ *
+ * @return Array - filtered training urls
+ */
+function urls() {
+  let filteredUrls = [];
+  if (this.categoryFilter != 'All') {
+    // filter by category
+    filteredUrls = _.filter(this.urlsOriginal, (url) => {
+      return url.category === this.categoryFilter;
+    });
+  } else {
+    // creates new list with no url duplicates and adds all hits for same url
+    let urls = _.cloneDeep(this.urlsOriginal);
+    _.forEach(urls, (urlObject) => {
+      let url = urlObject.id;
+      let dupIndex = _.findIndex(filteredUrls, (duplicate) => {
+        return url === duplicate.id;
+      });
 
-    urlObject.display = urlObject.logo;
-  });
-  return this.urlsOriginal;
-}
+      if (dupIndex != -1) {
+        // url is a duplicate
+        filteredUrls[dupIndex].hits += urlObject.hits;
+      } else {
+        // url is not a duplicate
+        filteredUrls.push(urlObject);
+      }
+    });
+  }
 
-/*
- * Changes the website image upon error displaying
+  if (!this.isEmpty(this.search)) {
+    // filter by serach
+    filteredUrls = _.filter(filteredUrls, (url) => {
+      let includes =
+        (url.title && url.title.toLowerCase().includes(this.search.toLowerCase())) ||
+        (url.description && url.description.toLowerCase().includes(this.search.toLowerCase())) ||
+        (url.id && url.id.toLowerCase().includes(this.search.toLowerCase())) ||
+        (url.hits && url.hits.toString().includes(this.search));
+      return includes;
+    });
+  }
+
+  return _.sortBy(filteredUrls, ['hits', 'id']).reverse(); // sort by most hits
+} // urls
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     METHODS                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * Changes the webiste image to if it fails to display original. If the url fails to display a logo, the image will be
+ * display. If the image fails as well, the website will default to the case logo.
+ *
+ * @param item - training url
  */
 function changeDisplay(item) {
   let index = _.findIndex(this.urlsOriginal, (url) => {
@@ -206,67 +254,80 @@ function changeDisplay(item) {
     newItem.isCaseLogo = true;
   }
   this.urlsOriginal.splice(index, 1, newItem);
-}
+} // changeDisplay
 
-function titleFormat(value) {
-  // if the title from metadata is invalid (e.g. '{{...' ) return empty string
-  if (value.length >= 2 && value[0] === '{' && value[1] === '{') {
-    return undefined;
-  }
-  return value;
-}
-
+/**
+ * Set category filter for training urls.
+ *
+ * @param category - category to filter by
+ */
 function filterByCategory(category) {
   if (this.categoryFilter == category) {
     this.categoryFilter = 'All';
   } else {
     this.categoryFilter = category;
   }
-}
+} // filterByCategory
 
-function isEmpty(item) {
-  return !item || item.trim().length <= 0;
-}
+/**
+ * Get all aggregate trining urls.
+ *
+ * @return Array - training urls
+ */
+async function getUrls() {
+  this.urlsOriginal = await api.getItems(api.URLS);
+  _.forEach(this.urlsOriginal, (urlObject) => {
+    urlObject.title = titleFormat(urlObject.title);
 
+    urlObject.display = urlObject.logo;
+  });
+  return this.urlsOriginal;
+} // getUrls
+
+/**
+ * Checks if a value is empty. Returns true if the value is null or a single character space String.
+ *
+ * @param value - value to check
+ * @return boolean - value is empty
+ */
+function isEmpty(value) {
+  return value == null || value === ' ' || value === '';
+} // isEmpty
+
+/**
+ * Checks if a category is already the focus. Returns true if the category was already selected, otherwise returns
+ * false.
+ *
+ * @param value - category selected
+ * @return boolean - category was already selected
+ */
 function isFocus(value) {
   return value == this.categoryFilter;
-}
+} // isFocus
 
-//COMPUTED
-
-function urls() {
-  let filteredUrls = [];
-  if (this.categoryFilter != 'All') {
-    filteredUrls = _.filter(this.urlsOriginal, (url) => {
-      return url.category === this.categoryFilter;
-    });
-  } else {
-    let urls = _.cloneDeep(this.urlsOriginal);
-    _.forEach(urls, (urlObject) => {
-      let url = urlObject.id;
-      let dupIndex = _.findIndex(filteredUrls, (duplicate) => {
-        return url === duplicate.id;
-      });
-      if (dupIndex != -1) {
-        filteredUrls[dupIndex].hits += urlObject.hits;
-      } else {
-        filteredUrls.push(urlObject);
-      }
-    }); //creates new list with no url duplicates and adds all hits for same url
+/**
+ * Removes url titles with an invalid format.
+ *
+ * @param value - url title
+ * @return String - validated title
+ */
+function titleFormat(value) {
+  // if the title from metadata is invalid (e.g. '{{...' ) return empty string
+  if (value.length >= 2 && value[0] === '{' && value[1] === '{') {
+    return undefined;
   }
-  if (!this.isEmpty(this.search)) {
-    filteredUrls = _.filter(filteredUrls, (url) => {
-      let includes =
-        (url.title && url.title.toLowerCase().includes(this.search.toLowerCase())) ||
-        (url.description && url.description.toLowerCase().includes(this.search.toLowerCase())) ||
-        (url.id && url.id.toLowerCase().includes(this.search.toLowerCase())) ||
-        (url.hits && url.hits.toString().includes(this.search));
-      return includes;
-    });
-  }
-  return _.sortBy(filteredUrls, ['hits', 'id']).reverse();
-}
+  return value;
+} // titleFormat
 
+// |--------------------------------------------------|
+// |                                                  |
+// |                 LIFECYCLE HOOKS                  |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * Gets all training urls.
+ */
 async function created() {
   let allURLS = await api.getItems(api.URLS);
   this.urlsOriginal = _.forEach(allURLS, (urlObject) => {
@@ -275,34 +336,39 @@ async function created() {
   });
 }
 
+// |--------------------------------------------------|
+// |                                                  |
+// |                      EXPORT                      |
+// |                                                  |
+// |--------------------------------------------------|
+
 export default {
-  data() {
-    return {
-      caseLogo: caseLogo,
-      search: '',
-      urlsShow: [],
-      categoryFilter: 'All',
-      urlsOriginal: []
-    };
-  },
-  methods: {
-    getUrls,
-    filterByCategory,
-    changeDisplay,
-    isEmpty,
-    isFocus
-  },
   computed: {
     urls
   },
-  created
+  created,
+  data() {
+    return {
+      caseLogo: caseLogo, // default case logo
+      categoryFilter: 'All', // category filter
+      search: '', // search filter
+      urlsShow: [], // training urls to display
+      urlsOriginal: [] // all training urls
+    };
+  },
+  methods: {
+    changeDisplay,
+    filterByCategory,
+    getUrls,
+    isEmpty,
+    isFocus
+  }
 };
 </script>
-<style>
-/* Trending Filters */
 
-.t {
-  font-size: 80px;
+<style>
+.caseImage {
+  background-color: white;
 }
 
 .hitIcon {
@@ -317,8 +383,8 @@ export default {
   float: right;
 }
 
-.caseImage {
-  background-color: white;
+.t {
+  font-size: 80px;
 }
 
 .urlBox {

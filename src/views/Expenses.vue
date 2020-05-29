@@ -677,7 +677,7 @@ function useInactiveStyle(expense) {
 // |--------------------------------------------------|
 
 /**
- *  Get and set user info, expense types, and expenses. Creates event listeners.
+ *  Gets and sets user info, expense types, and expenses. Creates event listeners.
  */
 async function created() {
   window.EventBus.$on('canceled-unreimburse-expense', () => (this.unreimbursing = false));
