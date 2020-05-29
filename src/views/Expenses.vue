@@ -1,5 +1,6 @@
 <template>
   <v-layout row wrap>
+    <!-- Status alert -->
     <v-snackbar
       v-model="status.statusType"
       :color="status.color"
@@ -16,13 +17,17 @@
         Close
       </v-btn>
     </v-snackbar>
+
     <v-flex lg8 md12 sm12>
       <v-card>
         <v-container fluid>
+          <!-- Title -->
           <v-card-title>
             <h2 v-if="isUser">{{ getUserName }}'s Expenses</h2>
             <h3 v-else>Expenses</h3>
             <v-spacer></v-spacer>
+
+            <!-- Employee Filter -->
             <v-autocomplete
               v-if="isAdmin"
               hide-details
@@ -34,17 +39,20 @@
               clearable
             ></v-autocomplete>
             <p v-if="isAdmin">&nbsp;</p>
+
+            <!-- Search Bar -->
             <v-text-field v-model="search" append-icon="search" label="Search" single-line hide-details></v-text-field>
           </v-card-title>
 
-          <!-- start filters -->
+          <!-- Filters -->
           <fieldset class="filter_border">
             <legend class="legend_style">Filters</legend>
 
-            <!-- active fitler -->
+            <!-- Active Filter -->
             <div v-if="isAdmin" class="flagFilter">
               <h4>Active Expense Type:</h4>
               <v-btn-toggle class="filter_color" v-model="filter.active" text mandatory>
+                <!-- Show Active -->
                 <v-tooltip top>
                   <template v-slot:activator="{ on }">
                     <v-btn value="active" v-on="on" text>
@@ -53,14 +61,18 @@
                   </template>
                   <span>Show Active</span>
                 </v-tooltip>
+
+                <!-- Show Inactive -->
                 <v-tooltip top>
                   <template v-slot:activator="{ on }">
                     <v-btn value="notActive" v-on="on" text>
                       <icon name="regular/times-circle"></icon>
                     </v-btn>
                   </template>
-                  <span>Hide Active</span>
+                  <span>Show Inactive</span>
                 </v-tooltip>
+
+                <!-- Show Active and Inactive -->
                 <v-tooltip top>
                   <template v-slot:activator="{ on }">
                     <v-btn value="both" v-on="on" text>
@@ -71,11 +83,13 @@
                 </v-tooltip>
               </v-btn-toggle>
             </div>
+            <!-- End Active Filter -->
 
-            <!-- reimbursed fitler -->
+            <!-- Reimbursed Fitler -->
             <div class="flagFilter">
               <h4>Reimbursed:</h4>
               <v-btn-toggle class="filter_color" v-model="filter.reimbursed" text mandatory>
+                <!-- Show Reimbursed -->
                 <v-tooltip top>
                   <template v-slot:activator="{ on }">
                     <v-btn value="reimbursed" v-on="on" text>
@@ -84,14 +98,18 @@
                   </template>
                   <span>Show Reimbursed</span>
                 </v-tooltip>
+
+                <!-- Show Pending -->
                 <v-tooltip top>
                   <template v-slot:activator="{ on }">
                     <v-btn value="notReimbursed" v-on="on" text>
                       <icon name="regular/times-circle"></icon>
                     </v-btn>
                   </template>
-                  <span>Hide Reimbursed</span>
+                  <span>Show Pending</span>
                 </v-tooltip>
+
+                <!-- Show Reimbursed and Pending -->
                 <v-tooltip top>
                   <template v-slot:activator="{ on }">
                     <v-btn value="both" v-on="on" text>
@@ -102,13 +120,16 @@
                 </v-tooltip>
               </v-btn-toggle>
             </div>
+            <!-- End Reimbursed Filter -->
             <div class="flagFilter"></div>
           </fieldset>
           <br />
-          <!-- expense datatable-->
+          <!-- End Filters -->
+
+          <!-- Expense Datatable-->
           <v-data-table
             :headers="roleHeaders"
-            :items="expenseList"
+            :items="filteredExpenses"
             :sort-by.sync="sortBy"
             :sort-desc.sync="sortDesc"
             :expanded.sync="expanded"
@@ -118,29 +139,31 @@
             item-key="id"
             class="elevation-4"
           >
-            <!-- rows in datatable -->
+            <!-- Rows in datatable -->
             <template v-slot:item="{ item }">
               <tr :class="{ selectFocus: isFocus(item) }" @click="clickedRow(item)">
-                <td>{{ item.createdAt }}</td>
+                <!-- Expense Information -->
+                <td>{{ item.createdAt | dateFormat }}</td>
                 <td v-if="isAdmin">{{ item.employeeName }}</td>
                 <td>{{ item.budgetName }}</td>
-                <td>{{ item.cost }}</td>
-                <td>{{ item.purchaseDate }}</td>
-                <td>{{ item.reimbursedDate }}</td>
-                <!-- action icons -->
+                <td>{{ item.cost | moneyValue }}</td>
+                <td>{{ item.purchaseDate | dateFormat }}</td>
+                <td>{{ item.reimbursedDate | dateFormat }}</td>
+
+                <!-- Action Icons -->
                 <td class="datatable_btn layout" @click="clickedRow(item)">
-                  <!-- download attachment button -->
+                  <!-- Download Attachment Button -->
                   <attachment :expense="item" :mode="'expenses'"></attachment>
-                  <!-- end download attachment button -->
-                  <!-- edit button -->
+
+                  <!-- Edit Button -->
                   <v-tooltip top>
                     <template v-slot:activator="{ on }">
                       <v-btn
-                        :disabled="isEditing() || (isUser && isReimbursed(item.reimbursedDate))"
+                        :disabled="isEditing() || (isUser && isReimbursed(item))"
                         text
                         icon
                         @click="
-                          toForm();
+                          toTopOfForm();
                           onSelect(item);
                         "
                         v-on="on"
@@ -152,12 +175,12 @@
                     </template>
                     <span>Edit</span>
                   </v-tooltip>
-                  <!-- end edit button -->
-                  <!-- delete button -->
+
+                  <!-- Delete Button -->
                   <v-tooltip top>
                     <template v-slot:activator="{ on }">
                       <v-btn
-                        :disabled="isReimbursed(item.reimbursedDate) || isEditing()"
+                        :disabled="isReimbursed(item) || isEditing()"
                         text
                         icon
                         @click="
@@ -173,14 +196,13 @@
                     </template>
                     <span>Delete</span>
                   </v-tooltip>
-                  <!-- end delete button -->
-                  <!-- unreimburse button -->
-                  <!-- remove "&& false" or switch to "true" to toggle button -->
-                  <div v-if="isAdmin && true">
+
+                  <!-- Unreimburse Button -->
+                  <div v-if="isAdmin">
                     <v-tooltip top>
                       <template v-slot:activator="{ on }">
                         <v-btn
-                          :disabled="!isReimbursed(item.reimbursedDate) || isEditing()"
+                          :disabled="!isReimbursed(item) || isEditing()"
                           text
                           icon
                           @click="
@@ -197,19 +219,18 @@
                       <span>Unreimburse</span>
                     </v-tooltip>
                   </div>
-                  <!-- end unreimbures button -->
                 </td>
-                <!-- end action buttons -->
+                <!-- End Action Icons -->
               </tr>
             </template>
-            <!-- end rows in datatable -->
-            <!-- expanded slot in datatable -->
+            <!-- End rows in datatable -->
+
+            <!-- Expanded slot in datatable -->
             <template v-slot:expanded-item="{ headers, item }">
               <td :colspan="headers.length" class="pa-0">
                 <v-card text>
                   <v-card-text>
                     <div class="expandedInfo">
-                      <!-- notes/url button -->
                       <p v-if="item.description"><b>Description: </b>{{ item.description }}</p>
                       <p v-if="!isEmpty(item.note)"><b>Notes: </b>{{ item.note }}</p>
                       <p v-if="!isEmpty(item.receipt)"><b>Receipt: </b>{{ item.receipt }}</p>
@@ -227,25 +248,31 @@
                 </v-card>
               </td>
             </template>
-            <!-- end expanded slot in datatable -->
-            <!-- alert for no search results -->
+            <!-- End expanded slot in datatable -->
+
+            <!-- Alert for no search results -->
             <v-alert slot="no-results" :value="true" color="error" icon="warning">
               Your search for "{{ search }}" found no results.
             </v-alert>
-            <!-- end alert for no search results -->
+            <!-- End alert for no search results -->
           </v-data-table>
-          <!-- end expense datatable -->
+          <!-- End Expense datatable -->
           <br />
+
+          <!-- Download expense csv button -->
           <v-card-actions>
-            <convert-expenses-to-csv v-if="isAdmin" :expenses="getFilteredExpenses()"></convert-expenses-to-csv>
+            <convert-expenses-to-csv v-if="isAdmin" :expenses="filteredExpenses"></convert-expenses-to-csv>
           </v-card-actions>
 
-          <!-- unreimbursing button confirmation alert box -->
+          <!-- Confirmation Modals -->
           <unreimburse-modal :activate="unreimbursing" :expense="propExpense"></unreimburse-modal>
           <delete-modal :activate="deleting" :type="'expense'"></delete-modal>
+          <!-- End Confirmation Modals -->
         </v-container>
       </v-card>
     </v-flex>
+
+    <!-- Expense Form -->
     <v-flex lg4 md12 sm12>
       <expense-form
         ref="form"
@@ -259,19 +286,79 @@
     </v-flex>
   </v-layout>
 </template>
+
 <script>
 import api from '@/shared/api.js';
-import employeeUtils from '@/shared/employeeUtils';
-import ExpenseForm from '../components/ExpenseForm.vue';
-import DeleteModal from '../components/DeleteModal.vue';
-import UnreimburseModal from '../components/UnreimburseModal.vue';
 import Attachment from '../components/Attachment.vue';
 import ConvertExpensesToCsv from '../components/ConvertExpensesToCsv.vue';
+import DeleteModal from '../components/DeleteModal.vue';
+import employeeUtils from '@/shared/employeeUtils';
+import ExpenseForm from '../components/ExpenseForm.vue';
 import moment from 'moment';
+import UnreimburseModal from '../components/UnreimburseModal.vue';
 import _ from 'lodash';
-import { getRole } from '@/utils/auth';
 
-// FILTERS
+// |--------------------------------------------------|
+// |                                                  |
+// |                     COMPUTED                     |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * Gets the full name of the user.
+ *
+ * @return String - user's full name
+ */
+function getUserName() {
+  return this.expenses.length === 0 ? '' : employeeUtils.fullName(this.userInfo);
+} // getUserName
+
+/**
+ * Checks if the user's role is an admin. Returns true if the user's role is an admin, otherwise returns false.
+ *
+ * @return boolean - user's role is an admin
+ */
+function isAdmin() {
+  return this.userInfo ? this.userInfo.employeeRole === 'admin' : false;
+} // isAdmin
+
+/**
+ * Checks if the user's role is a user. Returns true if the user's role is a user, otherwise returns false.
+ *
+ * @return boolean - user's role is a user
+ */
+function isUser() {
+  return this.userInfo ? this.userInfo.employeeRole === 'user' : false;
+} // isUser
+
+/**
+ * Gets the datatable headers based on user's role. Returns all the headers if the user's role is an admin, otherwise
+ * returns all the headers except the 'Employee' header.
+ *
+ * @return Array - datatable headers
+ */
+function roleHeaders() {
+  return this.isAdmin
+    ? this.headers
+    : (function getUserHeaders(headers) {
+        let localHeaders = _.cloneDeep(headers); // create a local copy of all headers
+        localHeaders.splice(1, 1); // remove the employee header
+        return localHeaders; // return the remaining headers
+      })(this.headers);
+} // roleHeaders
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     FILTERS                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * Returns a number with two decimal point precision as a string.
+ *
+ * @param value - number to filter
+ * @return String - number with two decimal points
+ */
 function moneyFilter(value) {
   return `${new Intl.NumberFormat('en-US', {
     style: 'decimal',
@@ -279,41 +366,330 @@ function moneyFilter(value) {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2
   }).format(value)}`;
-}
+} // moneyFilter
 
-// COMPUTED
+// |--------------------------------------------------|
+// |                                                  |
+// |                     METHODS                      |
+// |                                                  |
+// |--------------------------------------------------|
 
-function getUserName() {
-  return this.processedExpenses.length === 0 ? '' : this.processedExpenses[0].employeeName;
-}
+/**
+ * Refresh and updates expense list and displays a successful create status in the snackbar.
+ */
+function addModelToTable() {
+  this.refreshExpenses();
 
-function expenseList() {
-  return this.filteredExpenses;
-}
+  this.$set(this.status, 'statusType', 'SUCCESS');
+  this.$set(this.status, 'statusMessage', 'Item was successfully submitted!');
+  this.$set(this.status, 'color', 'green');
+} // addModelToTable
 
-function isAdmin() {
-  return this.role === 'admin';
-}
+/**
+ * Clear the action status that is displayed in the snackbar.
+ */
+function clearStatus() {
+  this.$set(this.status, 'statusType', undefined);
+  this.$set(this.status, 'statusMessage', '');
+  this.$set(this.status, 'color', '');
+} // clearStatus
 
-function isUser() {
-  return this.role === 'user';
-}
+/**
+ * Add expense to expanded row when clicked.
+ *
+ * @param value - expense to add
+ */
+function clickedRow(value) {
+  if (_.isEmpty(this.expanded) || this.expanded[0].id != value.id) {
+    // expand the selected expense if the selected expense not already expanded
+    this.expanded = [];
+    this.expanded.push(value);
+  } else {
+    // collapse the expense if the selected expense is already expanded
+    this.expanded = [];
+  }
+} // clickedRow
 
-function roleHeaders() {
-  return this.isAdmin
-    ? this.headers
-    : (function getUserHeaders(headers) {
-        let x = headers;
-        x.splice(1, 1);
-        return x;
-      })(this.headers);
-}
+/**
+ * Sets a mapping of employee name to employee id of an expense for the autocomplete options.
+ *
+ * @param aggregatedData - aggregated expenses
+ */
+function constructAutoComplete(aggregatedData) {
+  this.employees = _.map(aggregatedData, (data) => {
+    if (data && data.employeeName && data.employeeId) {
+      return {
+        text: data.employeeName,
+        value: data.employeeId
+      };
+    }
+  }).filter((data) => {
+    return data != null;
+  });
+} // constructAutoComplete
 
-// LIFECYCLE HOOKS
+/**
+ * Filters autocomplete options for items that have a value.
+ *
+ * @param item - autocomplete object
+ * @param queryText - query text string
+ * @return boolean - value exists
+ */
+function customFilter(item, queryText) {
+  const hasValue = (val) => (val != null ? val : '');
+  const text = hasValue(item.text);
+  const query = hasValue(queryText);
+  return text.toString().toLowerCase().indexOf(query.toString().toLowerCase()) > -1;
+} // customFilter
 
+/**
+ * Filters expenses based on filter selections.
+ */
+function filterExpenses() {
+  this.filteredExpenses = this.expenses;
+
+  if (this.employee) {
+    // filter expenses by employee
+    this.filteredExpenses = _.filter(this.filteredExpenses, (expense) => {
+      return expense.employeeId === this.employee;
+    });
+  }
+
+  if (this.filter.reimbursed !== 'both') {
+    // filter expenses by reimburse date
+    this.filteredExpenses = _.filter(this.filteredExpenses, (expense) => {
+      if (this.filter.reimbursed == 'notReimbursed') {
+        // filter for pending expenses
+        return !isReimbursed(expense);
+      } else {
+        // filter for reimbursed expenses
+        return isReimbursed(expense);
+      }
+    });
+  }
+
+  if (this.filter.active !== 'both') {
+    // filter expenses by active or inactive expense types (available to admin only)
+    this.filteredExpenses = _.filter(this.filteredExpenses, (expense) => {
+      let expenseType = _.find(this.expenseTypes, (type) => expense.expenseTypeId === type.value);
+      if (this.filter.active == 'active') {
+        // filter for active expenses
+        return expenseType && !expenseType.isInactive;
+      } else {
+        // filter for inactive expenses
+        return expenseType && expenseType.isInactive;
+      }
+    });
+  }
+} // filterExpenses
+
+/**
+ * Delete a selected expense.
+ */
+async function deleteExpense() {
+  this.deleting = false; // collapse delete confirmation model
+  this.loading = true; // set loading status to true
+  if (this.propExpense.id) {
+    // expense is selected
+    let deletedExpense = this.propExpense;
+    let deleted = await api.deleteItem(api.EXPENSES, this.propExpense.id);
+    if (deleted.id) {
+      // successfully deletes expense
+      this.deleteModelFromTable(deletedExpense);
+      if (!this.isEmpty(deletedExpense.receipt)) {
+        // delete attachment from s3 if deleted expense has a receipt
+        let deletedAttachment = await api.deleteAttachment(deleted);
+        if (deletedAttachment.code) {
+          // emit alert if error deleting file
+          this.displayError(`Error Deleting Receipt: ${deletedAttachment.message}`);
+        }
+      }
+    } else {
+      // fails to delete expense
+      this.displayError('Error Deleting Expense');
+    }
+  }
+  this.loading = false; // set loading status to false
+} // deleteExpense
+
+/**
+ * Refresh and updates expense list and displays a successful delete status in the snackbar.
+ */
+function deleteModelFromTable() {
+  this.refreshExpenses();
+
+  this.$set(this.status, 'statusType', 'SUCCESS');
+  this.$set(this.status, 'statusMessage', 'Item was successfully deleted!');
+  this.$set(this.status, 'color', 'green');
+} // deleteModelFromTable
+
+/**
+ * Set and display an error action status in the snackbar.
+ *
+ * @param err - String error message
+ */
+async function displayError(err) {
+  this.$set(this.status, 'statusType', 'ERROR');
+  this.$set(this.status, 'statusMessage', err);
+  this.$set(this.status, 'color', 'red');
+} // displayError
+
+/**
+ * Checks if an expense is being edited.
+ *
+ * @return boolean - an expense is being edited
+ */
+function isEditing() {
+  return !!this.expense.id;
+} // isEditing
+
+/**
+ * Checks if a value is empty. Returns true if the value is null or a single character space String.
+ *
+ * @param value - value to check
+ * @return boolean - value is empty
+ */
+function isEmpty(value) {
+  return value == null || value === ' ' || value === '';
+} // isEmpty
+
+/**
+ * Checks to see if an expense is expanded in the datatable.
+ *
+ * @param item - expense to check
+ * @return boolean - the expense is expanded
+ */
+function isFocus(item) {
+  return (!_.isEmpty(this.expanded) && item.id == this.expanded[0].id) || this.expense.id == item.id;
+} // isFocus
+
+/**
+ * Checks if the expense is reimbursed. Returns true if the expense is reimbursed, otherwise returns false.
+ *
+ * @param expense - expense to check
+ * @return boolean - expense is reimbursed
+ */
+function isReimbursed(expense) {
+  return expense && !isEmpty(expense.reimbursedDate);
+} // isReimbursed
+
+/**
+ * Store the attributes of a selected expense.
+ *
+ * @param item - expense selected
+ */
+function onSelect(item) {
+  this.$set(this.expense, 'budgetName', item.budgetName);
+  this.$set(this.expense, 'id', item.id);
+  this.$set(this.expense, 'purchaseDate', item.purchaseDate);
+  this.$set(this.expense, 'reimbursedDate', item.reimbursedDate);
+  this.$set(this.expense, 'employeeName', item.employeeName);
+  this.$set(this.expense, 'description', item.description);
+  this.$set(this.expense, 'cost', moneyFilter(item.cost));
+  this.$set(this.expense, 'employeeId', item.employeeId);
+  this.$set(this.expense, 'expenseTypeId', item.expenseTypeId);
+  this.$set(this.expense, 'note', item.note.trim());
+  this.$set(this.expense, 'receipt', item.receipt);
+  this.$set(this.expense, 'createdAt', item.createdAt);
+  this.$set(this.expense, 'url', item.url.trim());
+  this.$set(this.expense, 'category', item.category);
+} // onSelect
+
+/**
+ * Refresh expense data and filters expenses.
+ */
+async function refreshExpenses() {
+  this.loading = true; // set loading status to true
+
+  if (this.isAdmin || this.isUser) {
+    // load expenses if employee role is user or admin
+    this.expenses = await api.getAllAggregateExpenses();
+  }
+
+  this.filterExpenses(); // filter expenses
+
+  this.loading = false; // set loading status to false
+} // refreshExpenses
+
+/*
+ * Scrolls window back to the top of the form.
+ */
+function toTopOfForm() {
+  this.$vuetify.goTo(this.$refs.form.$el.offsetTop + 50);
+} // toTopOfForm
+
+/**
+ * Unreimburse an expense.
+ */
+async function unreimburseExpense() {
+  this.loading = true; // set loading status to true
+  this.unreimbursing = false; // collapse unreimburse confirmation modal
+
+  this.propExpense.reimbursedDate = null; // clear reimburse date field
+  let updatedExpense = await api.updateItem(api.EXPENSES, this.propExpense);
+
+  if (updatedExpense.id) {
+    // successfully unreimburses expense
+    this.$set(this.status, 'statusType', 'SUCCESS');
+    this.$set(this.status, 'statusMessage', 'Item was successfully unreimbursed!');
+    this.$set(this.status, 'color', 'green');
+  } else {
+    // fails to unreimburse expense
+    this.displayError('Error Unreimburseing Expense');
+  }
+
+  this.refreshExpenses();
+  this.loading = false; // set loading status to false
+} // unreimburseExpense
+
+/**
+ * Refresh and updates expense list and displays a successful update status in the snackbar.
+ */
+function updateModelInTable() {
+  this.refreshExpenses();
+
+  this.$set(this.status, 'statusType', 'SUCCESS');
+  this.$set(this.status, 'statusMessage', 'Item was successfully updated!');
+  this.$set(this.status, 'color', 'green');
+} // updateModelInTable
+
+/**
+ * Checks if an inactive style shoud be applied for an expense. Returns true if the user is an admin and the expense
+ * is inactive, otherwise returns false.
+ *
+ * @param expense - expense to check
+ * @return boolean - user inactive styling
+ */
+function useInactiveStyle(expense) {
+  if (this.isAdmin) {
+    // admin view
+    let expenseType = _.find(this.expenseTypes, (type) => expense.expenseTypeId === type.value);
+    return expenseType && expenseType.isInactive;
+  }
+
+  return false;
+} // useInactiveStyle
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                 LIFECYCLE HOOKS                  |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ *  Get and set user info, expense types, and expenses. Creates event listeners.
+ */
 async function created() {
-  this.role = getRole();
+  window.EventBus.$on('canceled-unreimburse-expense', () => (this.unreimbursing = false));
+  window.EventBus.$on('confirm-unreimburse-expense', this.unreimburseExpense);
 
+  window.EventBus.$on('canceled-delete-expense', () => (this.deleting = false));
+  window.EventBus.$on('confirm-delete-expense', this.deleteExpense);
+
+  // get user info
+  this.userInfo = await api.getUser();
+
+  // get expense types
   let expenseTypes = await api.getItems(api.EXPENSE_TYPES);
   this.expenseTypes = _.map(expenseTypes, (expenseType) => {
     return {
@@ -333,281 +709,17 @@ async function created() {
     };
   });
 
-  this.refreshExpenses();
+  this.refreshExpenses(); // refresh and update expenses
 
-  let aggregatedData = await api.getAllAggregateExpenses(); //autocomplete
-  this.constructAutoComplete(aggregatedData); //autocomplete
-
-  window.EventBus.$on('canceled-unreimburse-expense', () => (this.unreimbursing = false));
-  window.EventBus.$on('confirm-unreimburse-expense', this.unreimburseExpense);
-
-  window.EventBus.$on('canceled-delete-expense', () => (this.deleting = false));
-  window.EventBus.$on('confirm-delete-expense', this.deleteExpense);
+  let aggregatedExpenses = await api.getAllAggregateExpenses(); // get aggregate expenses
+  this.constructAutoComplete(aggregatedExpenses); // set autocomplete options
 }
 
-// METHODS
-
-function addModelToTable(newExpense) {
-  let matchingExpenses = _.filter(this.processedExpenses, (expense) => expense.id === newExpense.id);
-
-  if (!matchingExpenses.length) {
-    if (this.isAdmin) {
-      api
-        .getItem(api.EMPLOYEES, newExpense.employeeId)
-        .then((employee) => {
-          let employeeName = employeeUtils.fullName(employee);
-          this.$set(newExpense, 'employeeName', employeeName);
-        })
-        .catch((err) => this.displayError(err));
-    }
-    api.getItem(api.EXPENSE_TYPES, newExpense.expenseTypeId).then((expenseType) => {
-      this.$set(newExpense, 'budgetName', expenseType.budgetName);
-    });
-
-    this.processedExpenses.push(newExpense);
-
-    //filters expenses after adding new expense
-    this.filterExpense();
-
-    this.$set(this.status, 'statusType', 'SUCCESS');
-    this.$set(this.status, 'statusMessage', 'Item was successfully submitted!');
-    this.$set(this.status, 'color', 'green');
-  }
-}
-
-function clearStatus() {
-  this.$set(this.status, 'statusType', undefined);
-  this.$set(this.status, 'statusMessage', '');
-  this.$set(this.status, 'color', '');
-}
-
-/*
- * Add expense to expanded row when clicked
- */
-function clickedRow(value) {
-  if (_.isEmpty(this.expanded) || this.expanded[0].id != value.id) {
-    this.expanded = [];
-    this.expanded.push(value);
-  } else {
-    this.expanded = [];
-  }
-}
-
-function constructAutoComplete(aggregatedData) {
-  this.employees = _.map(aggregatedData, (data) => {
-    if (data && data.employeeName && data.employeeId) {
-      return {
-        text: data.employeeName,
-        value: data.employeeId
-      };
-    }
-  }).filter((data) => {
-    return data != null;
-  });
-}
-
-function customFilter(item, queryText) {
-  const hasValue = (val) => (val != null ? val : '');
-  const text = hasValue(item.text);
-  const query = hasValue(queryText);
-  return text.toString().toLowerCase().indexOf(query.toString().toLowerCase()) > -1;
-}
-
-function filterExpense() {
-  this.filteredExpenses = this.processedExpenses;
-
-  if (this.employee) {
-    this.filteredExpenses = _.filter(this.filteredExpenses, (expense) => {
-      return expense.employeeId === this.employee;
-    });
-  }
-
-  //filter for reimbursed
-  if (this.filter.reimbursed !== 'both') {
-    this.filteredExpenses = _.filter(this.filteredExpenses, (expense) => {
-      if (this.filter.reimbursed == 'notReimbursed') {
-        return !isReimbursed(expense.reimbursedDate);
-      } else {
-        return isReimbursed(expense.reimbursedDate);
-      }
-    });
-  }
-
-  //filter for Active Expense Types (available to admin only)
-  if (this.filter.active !== 'both') {
-    this.filteredExpenses = _.filter(this.filteredExpenses, (expense) => {
-      //gets the expense type for expense to look up inactive
-      let expenseType = _.find(this.expenseTypes, (type) => expense.expenseTypeId === type.value);
-      if (this.filter.active == 'active') {
-        return expenseType && !expenseType.isInactive;
-      } else {
-        return expenseType && expenseType.isInactive;
-      }
-    });
-  }
-}
-
-async function deleteExpense() {
-  this.deleting = false;
-  if (this.propExpense.id) {
-    let deletedExpense = this.propExpense;
-    let deleted = await api.deleteItem(api.EXPENSES, this.propExpense.id);
-    if (deleted.id) {
-      this.deleteModelFromTable(deletedExpense);
-      let deletedAttachment = await api.deleteAttachment(deleted);
-      if (deletedAttachment.code) {
-        // error deleting file
-        this.displayError(`Error Deleting Receipt: ${deletedAttachment.message}`);
-      }
-    } else {
-      this.displayError('Error Deleting Expense');
-    }
-  }
-}
-
-function deleteModelFromTable(deletedExpense) {
-  let modelIndex = _.findIndex(this.processedExpenses, (expense) => {
-    return expense.id === deletedExpense.id;
-  });
-  this.processedExpenses.splice(modelIndex, 1);
-
-  //filters expenses after delete
-  this.filterExpense();
-
-  this.$set(this.status, 'statusType', 'SUCCESS');
-  this.$set(this.status, 'statusMessage', 'Item was successfully deleted!');
-  this.$set(this.status, 'color', 'green');
-}
-
-async function displayError(err) {
-  this.$set(this.status, 'statusType', 'ERROR');
-  this.$set(this.status, 'statusMessage', err);
-  this.$set(this.status, 'color', 'red');
-}
-
-/**
- * Returns an array copy of the filtered expenses.
- */
-function getFilteredExpenses() {
-  return this.filteredExpenses.slice();
-}
-
-function isEditing() {
-  return !!this.expense.id;
-}
-
-function isEmpty(item) {
-  return !item || item.trim().length <= 0;
-}
-
-function isFocus(item) {
-  return (!_.isEmpty(this.expanded) && item.id == this.expanded[0].id) || this.expense.id == item.id;
-}
-
-function isReimbursed(reimburseDate) {
-  return reimburseDate && reimburseDate.trim().length > 0;
-}
-
-function onSelect(item) {
-  this.isEdit = true;
-  this.$set(this.expense, 'budgetName', item.budgetName);
-  this.$set(this.expense, 'id', item.id);
-  this.$set(this.expense, 'purchaseDate', item.purchaseDate);
-  this.$set(this.expense, 'reimbursedDate', item.reimbursedDate);
-  this.$set(this.expense, 'employeeName', item.employeeName);
-  this.$set(this.expense, 'description', item.description);
-  this.$set(this.expense, 'cost', moneyFilter(item.cost));
-  this.$set(this.expense, 'employeeId', item.employeeId);
-  this.$set(this.expense, 'expenseTypeId', item.expenseTypeId);
-  this.$set(this.expense, 'note', item.note.trim());
-  this.$set(this.expense, 'receipt', item.receipt);
-  this.$set(this.expense, 'createdAt', item.createdAt);
-  this.$set(this.expense, 'url', item.url.trim());
-  this.$set(this.expense, 'category', item.category);
-}
-
-async function refreshExpenses() {
-  let aggregatedData = [];
-  if (this.isAdmin || this.isUser) {
-    aggregatedData = await api.getAllAggregateExpenses();
-  }
-  this.processedExpenses = aggregatedData;
-  this.filteredExpenses = this.processedExpenses;
-  this.filterExpense();
-
-  // this.filteredExpenses = _.filter(this.processedExpenses, expense => {
-  //   //gets the expense type for expense to look up inactive
-  //   let expenseType = _.find(this.expenseTypes, type => expense.expenseTypeId === type.value);
-  //   return expenseType && !expenseType.isInactive;
-  // });
-
-  this.loading = false;
-}
-
-/*
- * scrolls window back to the top of the form
- */
-function toForm() {
-  this.$vuetify.goTo(this.$refs.form.$el.offsetTop + 50);
-}
-
-/**
- * Unreimburse an expense
- */
-async function unreimburseExpense() {
-  this.loading = true;
-  this.unreimbursing = false;
-
-  this.propExpense.reimbursedDate = null;
-  let updatedExpense = await api.updateItem(api.EXPENSES, this.propExpense);
-  if (updatedExpense.id) {
-    this.$set(this.status, 'statusType', 'SUCCESS');
-    this.$set(this.status, 'statusMessage', 'Item was successfully unreimbursed!');
-    this.$set(this.status, 'color', 'green');
-  } else {
-    this.displayError('Error Unreimburseing Expense');
-  }
-
-  this.refreshExpenses();
-
-  this.loading = false;
-}
-
-function updateModelInTable(updatedExpense) {
-  let matchingExpensesIndex = _.findIndex(this.processedExpenses, (expense) => expense.id === updatedExpense.id);
-  let employeeName = '';
-  if (this.isAdmin) {
-    api.getItem(api.EMPLOYEES, updatedExpense.employeeId).then((employee) => {
-      employeeName = employeeUtils.fullName(employee);
-      this.$set(updatedExpense, 'employeeName', employeeName);
-    });
-  } else {
-    employeeName = this.processedExpenses[matchingExpensesIndex].employeeName;
-    this.$set(updatedExpense, 'employeeName', employeeName);
-  }
-  api.getItem(api.EXPENSE_TYPES, updatedExpense.expenseTypeId).then((expenseType) => {
-    this.$set(updatedExpense, 'budgetName', expenseType.budgetName);
-  });
-  this.processedExpenses.splice(matchingExpensesIndex, 1, updatedExpense);
-
-  //filters expenses after update
-  this.filterExpense();
-
-  this.$set(this.status, 'statusType', 'SUCCESS');
-  this.$set(this.status, 'statusMessage', 'Item was successfully updated!');
-  this.$set(this.status, 'color', 'green');
-}
-
-function useInactiveStyle(expense) {
-  //filter for Active Expense Types (available to admin only)
-  //gets the expense type for expense to look up inactive
-  if (this.isAdmin) {
-    let expenseType = _.find(this.expenseTypes, (type) => expense.expenseTypeId === type.value);
-    return expenseType && expenseType.isInactive;
-  }
-
-  return false;
-}
+// |--------------------------------------------------|
+// |                                                  |
+// |                      EXPORT                      |
+// |                                                  |
+// |--------------------------------------------------|
 
 export default {
   components: {
@@ -619,7 +731,6 @@ export default {
   },
   computed: {
     getUserName,
-    expenseList,
     isAdmin,
     isUser,
     roleHeaders
@@ -628,9 +739,10 @@ export default {
   data() {
     return {
       deleting: false, // activate delete model
-      expanded: [], // database expanded
-      employees: [], //autocomplete
-      employee: null, //autocomplete
+      expanded: [], // datatable expanded
+      expenses: [], // all expenses
+      employees: [], // employee autocomplete options
+      employee: null, // employee autocomplete filter
       expense: {
         id: '',
         description: '',
@@ -645,13 +757,13 @@ export default {
         budgetName: '',
         createdAt: null,
         category: ''
-      },
-      expenseTypes: [], //mine
+      }, // selected expense
+      expenseTypes: [], // expense types
       filter: {
         active: 'both',
         reimbursed: 'notReimbursed' //default only shows expenses that are not reimbursed
-      },
-      filteredExpenses: [], //mine
+      }, // datatable filters
+      filteredExpenses: [], // filtered expenses
       headers: [
         {
           text: 'Creation Date',
@@ -664,7 +776,7 @@ export default {
         {
           text: 'Expense Type',
           value: 'budgetName'
-        }, //change value to call a function
+        },
         {
           text: 'Cost',
           value: 'cost'
@@ -681,10 +793,8 @@ export default {
           value: 'actions',
           sortable: false
         }
-      ],
-      isEdit: false,
-      loading: true,
-      processedExpenses: [],
+      ], // datatable headers
+      loading: true, // loading status
       propExpense: {
         id: '',
         description: '',
@@ -699,8 +809,7 @@ export default {
         budgetName: '',
         createdAt: null,
         category: ''
-      },
-      role: '',
+      }, // expense to edit
       search: '', // query text for datatable search field
       sortBy: 'createdAt', // sort datatable items
       sortDesc: true, // sort datatable items
@@ -708,21 +817,23 @@ export default {
         statusType: undefined,
         statusMessage: '',
         color: ''
-      },
-      unreimbursing: false // activate unreimburse model
+      }, // snackbar action status
+      unreimbursing: false, // activate unreimburse model
+      userInfo: null // user information
     };
   },
   filters: {
-    moneyValue: (value) => {
-      return `$` + moneyFilter(value);
-    },
     dateFormat: (value) => {
-      if (value) {
-        // return moment(value, 'h:mm:ss ddd MMM DD YYYY GMT-0400').format('MMM Do, YYYY');
+      // formats a date by month, day, year (e.g. Aug 18th, 2020)
+      if (!isEmpty(value)) {
         return moment(value, 'YYYY-MM-DD').format('MMM Do, YYYY');
       } else {
         return '';
       }
+    },
+    moneyValue: (value) => {
+      // formats a value as US currency with cents (e.g. $100.00)
+      return `$${moneyFilter(value)}`;
     }
   },
   methods: {
@@ -734,44 +845,33 @@ export default {
     deleteExpense,
     deleteModelFromTable,
     displayError,
-    filterExpense,
-    getFilteredExpenses,
+    filterExpenses,
     isEditing,
     isEmpty,
     isFocus,
     isReimbursed,
     onSelect,
     refreshExpenses,
-    toForm,
+    toTopOfForm,
     unreimburseExpense,
     updateModelInTable,
     useInactiveStyle
   },
   watch: {
     employee: function () {
-      this.filterExpense();
+      this.filterExpenses();
     },
     'filter.active': function () {
-      this.filterExpense();
+      this.filterExpenses();
     },
     'filter.reimbursed': function () {
-      this.filterExpense();
+      this.filterExpenses();
     }
   }
 };
 </script>
 
 <style>
-.flagExp p {
-  font-weight: bold;
-  width: 75px;
-  display: inline-block;
-}
-
-.flag svg {
-  margin-top: 5px;
-}
-
 .datatable_btn .v-btn {
   margin: 6px -2px;
 }
@@ -790,5 +890,15 @@ export default {
 
 .expandedInfo a:hover {
   color: #0cf;
+}
+
+.flag svg {
+  margin-top: 5px;
+}
+
+.flagExp p {
+  font-weight: bold;
+  width: 75px;
+  display: inline-block;
 }
 </style>
