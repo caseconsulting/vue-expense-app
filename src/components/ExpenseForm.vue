@@ -877,7 +877,7 @@ async function updateExistingEntry() {
 // |--------------------------------------------------|
 
 /**
- *  Set employee role, user info, expense types, and current user view. Creates event listeners.
+ * Set employee role, user info, expense types, and current user view. Creates event listeners.
  */
 async function created() {
   this.employeeRole = getRole();

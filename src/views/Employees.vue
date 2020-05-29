@@ -1,6 +1,6 @@
 <template>
   <v-layout row wrap>
-    <!-- Status alert -->
+    <!-- Status Alert -->
     <v-snackbar
       v-model="status.statusType"
       :color="status.color"
@@ -253,6 +253,8 @@ function addModelToTable() {
 } // addModelToTable
 
 /**
+ * NOTE: Unused?
+ *
  * Clear the selected employee.
  */
 function clearModel() {
@@ -583,11 +585,11 @@ export default {
       deleteModel: {
         id: ''
       }, // employee to delete
-      deleting: false, // delete activator
+      deleting: false, // activate delete confirmation model
       employees: [], // employees
       expanded: [], // datatable expanded
       filter: {
-        active: ['full', 'part'] //default only shows full and part time employees
+        active: ['full', 'part'] // default only shows full and part time employees
       }, // datatable filter
       filteredEmployees: [], // filtered employees
       headers: [
@@ -662,7 +664,7 @@ export default {
   },
   methods: {
     addModelToTable,
-    clearModel,
+    clearModel, // NOTE: Unused?
     clearStatus,
     clickedRow,
     deleteEmployee,

@@ -1,6 +1,6 @@
 <template>
   <v-layout row wrap>
-    <!-- Status alert -->
+    <!-- Status Alert -->
     <v-snackbar
       v-model="status.statusType"
       :color="status.color"
@@ -256,7 +256,7 @@
             </v-alert>
             <!-- End alert for no search results -->
           </v-data-table>
-          <!-- End Expense datatable -->
+          <!-- End Expense Datatable -->
           <br />
 
           <!-- Download expense csv button -->
@@ -401,7 +401,7 @@ function clearStatus() {
  */
 function clickedRow(value) {
   if (_.isEmpty(this.expanded) || this.expanded[0].id != value.id) {
-    // expand the selected expense if the selected expense not already expanded
+    // expand the selected expense if the selected expense is not already expanded
     this.expanded = [];
     this.expanded.push(value);
   } else {
@@ -441,47 +441,6 @@ function customFilter(item, queryText) {
   const query = hasValue(queryText);
   return text.toString().toLowerCase().indexOf(query.toString().toLowerCase()) > -1;
 } // customFilter
-
-/**
- * Filters expenses based on filter selections.
- */
-function filterExpenses() {
-  this.filteredExpenses = this.expenses;
-
-  if (this.employee) {
-    // filter expenses by employee
-    this.filteredExpenses = _.filter(this.filteredExpenses, (expense) => {
-      return expense.employeeId === this.employee;
-    });
-  }
-
-  if (this.filter.reimbursed !== 'both') {
-    // filter expenses by reimburse date
-    this.filteredExpenses = _.filter(this.filteredExpenses, (expense) => {
-      if (this.filter.reimbursed == 'notReimbursed') {
-        // filter for pending expenses
-        return !isReimbursed(expense);
-      } else {
-        // filter for reimbursed expenses
-        return isReimbursed(expense);
-      }
-    });
-  }
-
-  if (this.filter.active !== 'both') {
-    // filter expenses by active or inactive expense types (available to admin only)
-    this.filteredExpenses = _.filter(this.filteredExpenses, (expense) => {
-      let expenseType = _.find(this.expenseTypes, (type) => expense.expenseTypeId === type.value);
-      if (this.filter.active == 'active') {
-        // filter for active expenses
-        return expenseType && !expenseType.isInactive;
-      } else {
-        // filter for inactive expenses
-        return expenseType && expenseType.isInactive;
-      }
-    });
-  }
-} // filterExpenses
 
 /**
  * Delete a selected expense.
@@ -528,11 +487,52 @@ function deleteModelFromTable() {
  *
  * @param err - String error message
  */
-async function displayError(err) {
+function displayError(err) {
   this.$set(this.status, 'statusType', 'ERROR');
   this.$set(this.status, 'statusMessage', err);
   this.$set(this.status, 'color', 'red');
 } // displayError
+
+/**
+ * Filters expenses based on filter selections.
+ */
+function filterExpenses() {
+  this.filteredExpenses = this.expenses;
+
+  if (this.employee) {
+    // filter expenses by employee
+    this.filteredExpenses = _.filter(this.filteredExpenses, (expense) => {
+      return expense.employeeId === this.employee;
+    });
+  }
+
+  if (this.filter.reimbursed !== 'both') {
+    // filter expenses by reimburse date
+    this.filteredExpenses = _.filter(this.filteredExpenses, (expense) => {
+      if (this.filter.reimbursed == 'notReimbursed') {
+        // filter for pending expenses
+        return !isReimbursed(expense);
+      } else {
+        // filter for reimbursed expenses
+        return isReimbursed(expense);
+      }
+    });
+  }
+
+  if (this.filter.active !== 'both') {
+    // filter expenses by active or inactive expense types (available to admin only)
+    this.filteredExpenses = _.filter(this.filteredExpenses, (expense) => {
+      let expenseType = _.find(this.expenseTypes, (type) => expense.expenseTypeId === type.value);
+      if (this.filter.active == 'active') {
+        // filter for active expenses
+        return expenseType && !expenseType.isInactive;
+      } else {
+        // filter for inactive expenses
+        return expenseType && expenseType.isInactive;
+      }
+    });
+  }
+} // filterExpenses
 
 /**
  * Checks if an expense is being edited.
