@@ -1,19 +1,24 @@
 <template>
   <v-container>
+    <!-- Help Title -->
     <div>
       <h1 style="text-align: center;">H<span class="e">€</span>LP</h1>
     </div>
     <br />
     <br />
 
+    <!-- FAQ Sub-Title -->
     <h2>FAQ</h2>
     <div class="mb-5">
       <div class="text-xs-center mb-3"></div>
       <v-expansion-panels accordion>
         <v-expansion-panel v-for="section in sections" :key="section[0]">
+          <!-- Header -->
           <v-expansion-panel-header v-if="section[1] == role || role == 'admin' || section[1] == 'user'">
             {{ section[0] }}
           </v-expansion-panel-header>
+
+          <!-- Content -->
           <v-expansion-panel-content v-if="section[1] == role || role == 'admin' || section[1] == 'user'">
             <v-card>
               <v-card-text class="grey lighten-3">
@@ -33,13 +38,34 @@
     </div>
   </v-container>
 </template>
+
 <script>
 import { getRole } from '@/utils/auth';
 
+// |--------------------------------------------------|
+// |                                                  |
+// |                 LIFECYCLE HOOKS                  |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * Gets the user's role.
+ */
+async function created() {
+  this.role = getRole();
+} // created
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      EXPORT                      |
+// |                                                  |
+// |--------------------------------------------------|
+
 export default {
+  created,
   data() {
     return {
-      role: '',
+      role: '', // employee role
       sections: {
         employeeHome: [
           'Employee Home',
@@ -178,11 +204,8 @@ export default {
               'Google Chrome has an issue displaying (some) attachments that are PDFs. Work-around is to tell Chrome to download PDFs. Or, use a different a browser.'
           }
         ]
-      }
+      } // faq sections
     };
-  },
-  created() {
-    this.role = getRole();
   }
 };
 </script>
