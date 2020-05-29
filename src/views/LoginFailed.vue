@@ -17,29 +17,43 @@
 <script>
 import { isLoggedIn, login, getRole } from '@/utils/auth';
 
+// |--------------------------------------------------|
+// |                                                  |
+// |                 LIFECYCLE HOOKS                  |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * Route to admin page if user role is admin, otherwise route to home page
+ */
+async function created() {
+  if (this.isLoggedIn()) {
+    // logged in
+    if (getRole() === 'admin') {
+      // user's role is admin
+      this.$router.push('admin-dashboard');
+    } else {
+      // user's role is not admin
+      this.$router.push('home');
+    }
+  }
+} // created
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      EXPORT                      |
+// |                                                  |
+// |--------------------------------------------------|
+
 export default {
-  created() {
-    if (this.isLoggedIn()) {
-      if (getRole() === 'admin') {
-        this.$router.push('admin-dashboard');
-      } else {
-        this.$router.push('home');
-      }
-    }
-  },
+  created,
   methods: {
-    login() {
-      login();
-    },
-    isLoggedIn() {
-      return isLoggedIn();
-    }
-  },
-  props: {
-    failure: Boolean
+    login,
+    isLoggedIn
   }
 };
 </script>
+
 <style>
 #custom-button-color {
   background-color: #68caa6;
