@@ -104,7 +104,7 @@
                         :disabled="isEditing()"
                         text
                         icon
-                        @click="
+                        @click.stop="
                           toTopOfForm();
                           onSelect(item);
                         "
@@ -121,7 +121,7 @@
                   <!-- Delete Button -->
                   <v-tooltip top>
                     <template v-slot:activator="{ on }">
-                      <v-btn :disabled="isEditing()" text icon @click="validateDelete(item)" v-on="on">
+                      <v-btn :disabled="isEditing()" text icon @click.stop="validateDelete(item)" v-on="on">
                         <v-icon style="color: #606060;">
                           delete
                         </v-icon>
@@ -180,7 +180,7 @@
                     </div>
                   </v-card-text>
                 </v-card>
-                <v-card text v-if="userIsAdmin()">
+                <v-card text v-if="userIsAdmin() && isFocus(item)">
                   <v-card-text>
                     <employee-home :adminCall="true" :employ="item"> </employee-home>
                   </v-card-text>
