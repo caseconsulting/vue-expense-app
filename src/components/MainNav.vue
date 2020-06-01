@@ -102,7 +102,7 @@ export default {
           permission: ['admin']
         },
         {
-          title: 'Expenses',
+          title: 'My Expenses',
           icon: 'dollar-sign',
           route: 'expenses',
           permission: ['admin', 'user']

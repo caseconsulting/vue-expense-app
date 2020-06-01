@@ -24,7 +24,7 @@
           <!-- Title -->
           <v-card-title>
             <h2 v-if="isUser">{{ getUserName }}'s Expenses</h2>
-            <h3 v-else>Expenses</h3>
+            <h3 v-else>My Expenses</h3>
             <v-spacer></v-spacer>
 
             <!-- Employee Filter -->
