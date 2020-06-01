@@ -181,6 +181,7 @@
                   </v-card-text>
                 </v-card>
                 <v-card text v-if="userIsAdmin() && isFocus(item)">
+                  <!-- Employee Budgets -->
                   <v-card-text>
                     <employee-home :adminCall="true" :employ="item"> </employee-home>
                   </v-card-text>

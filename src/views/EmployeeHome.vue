@@ -689,6 +689,11 @@ export default {
     employ: {
       default: null
     } // employee (admin employee view)
+  },
+  watch: {
+    employ: function () {
+      this.refreshEmployee();
+    }
   }
 };
 </script>
