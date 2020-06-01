@@ -90,7 +90,7 @@ export default {
     return {
       items: [
         {
-          title: 'Employee Home',
+          title: 'My Budgets',
           icon: 'hand-holding-usd',
           route: 'home',
           permission: ['user', 'admin']
