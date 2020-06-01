@@ -365,11 +365,11 @@ function getWorkStatus(workStatus) {
   } else if (workStatus == 0) {
     return 'Inactive';
   } else if (workStatus > 0 && workStatus < 100) {
-    return 'Part Time';
+    return `Part Time (${workStatus}%)`;
   } else {
     return 'Invalid Status';
   }
-}
+} // getWorkStatus
 
 /**
  * Checks if there is data about an employee to display. Returns true if the user is an admin or if the there is data
@@ -514,7 +514,7 @@ function updateModelInTable() {
  */
 function userIsAdmin() {
   return getRole() === 'admin';
-}
+} // userIsAdmin
 
 /**
  * Validates if an employee can be deleted. Returns true if the employee has no expenses, otherwise returns false.

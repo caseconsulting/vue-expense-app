@@ -2,11 +2,11 @@
   <v-layout row justify-center>
     <v-container>
       <v-row>
-        <v-flex xs4>
+        <v-flex xs12 sm4>
           <h1 style="font-size: 35px;">Trainings</h1>
         </v-flex>
 
-        <v-flex xs8>
+        <v-flex xs12 sm8>
           <v-toolbar color="white darken-3" class="mb-1" dense elevation="2">
             <v-text-field
               v-model="search"
@@ -35,7 +35,7 @@
               large
               color="#bc3825"
             >
-              <v-icon dark class="pb-7" size="60px">fitness_center</v-icon>
+              <v-icon dark size="60px">fitness_center</v-icon>
             </v-btn>
             <h4>Training</h4>
           </div>
@@ -51,7 +51,7 @@
               large
               color="#bc3825"
             >
-              <v-icon dark class="pb-7" size="60px">group</v-icon>
+              <v-icon dark size="60px">group</v-icon>
             </v-btn>
             <h4>Conference</h4>
           </div>
@@ -67,7 +67,7 @@
               large
               color="#bc3825"
             >
-              <v-icon dark class="pb-7" size="60px">stars</v-icon>
+              <v-icon dark size="60px">stars</v-icon>
             </v-btn>
             <h4>Certifications</h4>
           </div>
@@ -83,7 +83,7 @@
               large
               color="#bc3825"
             >
-              <v-icon dark class="pb-7" size="60px">hotel</v-icon>
+              <v-icon dark size="60px">hotel</v-icon>
             </v-btn>
             <h4>Lodging</h4>
           </div>
@@ -99,7 +99,7 @@
               large
               color="#bc3825"
             >
-              <v-icon dark class="pb-7" size="60px">airplanemode_active</v-icon>
+              <v-icon dark size="60px">airplanemode_active</v-icon>
             </v-btn>
             <h4>Travel</h4>
           </div>
@@ -115,7 +115,7 @@
               large
               color="#bc3825"
             >
-              <v-icon dark class="pb-7" size="60px">restaurant</v-icon>
+              <v-icon dark size="60px">restaurant</v-icon>
             </v-btn>
             <h4>Meals</h4>
           </div>

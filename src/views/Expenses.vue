@@ -416,16 +416,19 @@ function clickedRow(value) {
  * @param aggregatedData - aggregated expenses
  */
 function constructAutoComplete(aggregatedData) {
-  this.employees = _.map(aggregatedData, (data) => {
-    if (data && data.employeeName && data.employeeId) {
-      return {
-        text: data.employeeName,
-        value: data.employeeId
-      };
-    }
-  }).filter((data) => {
-    return data != null;
-  });
+  this.employees = _.sortBy(
+    _.map(aggregatedData, (data) => {
+      if (data && data.employeeName && data.employeeId) {
+        return {
+          text: data.employeeName,
+          value: data.employeeId
+        };
+      }
+    }).filter((data) => {
+      return data != null;
+    }),
+    (employee) => employee.text.toLowerCase()
+  );
 } // constructAutoComplete
 
 /**
