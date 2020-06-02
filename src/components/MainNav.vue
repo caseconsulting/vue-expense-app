@@ -102,7 +102,7 @@ export default {
           permission: ['user', 'admin']
         },
         {
-          title: 'Admin Dashboard',
+          title: 'Reimbursements',
           icon: 'desktop',
           route: 'admin',
           permission: ['admin']
