@@ -9,6 +9,7 @@ import Expenses from '@/views/MyExpenses.vue';
 import Help from '@/views/Help.vue';
 import Callback from '@/views/Callback';
 import EmployeeHome from '@/views/EmployeeHome';
+import Home from '@/views/Home.vue';
 import TrainingAnalytics from '@/views/TrainingAnalytics';
 import { requireAuth, isAdmin } from '@/utils/auth';
 import multiguard from 'vue-router-multiguard';
@@ -58,9 +59,15 @@ const router = new Router({
       beforeEnter: requireAuth
     },
     {
+      path: '/myBudgets',
+      name: 'myBudgets',
+      component: EmployeeHome,
+      beforeEnter: requireAuth
+    },
+    {
       path: '/home',
       name: 'home',
-      component: EmployeeHome,
+      component: Home,
       beforeEnter: requireAuth
     },
     {

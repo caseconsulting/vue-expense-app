@@ -90,9 +90,15 @@ export default {
     return {
       items: [
         {
+          title: 'Home',
+          icon: 'home',
+          route: 'home',
+          permission: ['user', 'admin']
+        },
+        {
           title: 'My Budgets',
           icon: 'hand-holding-usd',
-          route: 'home',
+          route: 'myBudgets',
           permission: ['user', 'admin']
         },
         {

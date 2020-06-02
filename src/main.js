@@ -35,6 +35,7 @@ import 'vue-awesome/icons/crosshairs';
 import 'vue-awesome/icons/clock';
 import 'vue-awesome/icons/regular/clock';
 import 'vue-awesome/icons/regular/stop-circle';
+import 'vue-awesome/icons/home';
 
 import Icon from 'vue-awesome/components/Icon';
 import App from './App.vue';
