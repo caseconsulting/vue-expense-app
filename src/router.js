@@ -5,7 +5,7 @@ import Login from '@/views/Login.vue';
 import LoginFailed from '@/views/LoginFailed.vue';
 import ExpenseTypes from '@/views/ExpenseTypes.vue';
 import Employees from '@/views/Employees.vue';
-import Expenses from '@/views/Expenses.vue';
+import Expenses from '@/views/MyExpenses.vue';
 import Help from '@/views/Help.vue';
 import Callback from '@/views/Callback';
 import EmployeeHome from '@/views/EmployeeHome';
@@ -46,7 +46,7 @@ const router = new Router({
       beforeEnter: requireAuth
     },
     {
-      path: '/expenses',
+      path: '/myExpenses',
       name: 'expenses',
       component: Expenses,
       beforeEnter: requireAuth
