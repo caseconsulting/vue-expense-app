@@ -2,7 +2,7 @@
   <v-container>
     <!-- Help Title -->
     <div>
-      <h1 style="text-align: center;">H<span class="e">€</span>LP</h1>
+      <h1 style="text-align: center;">HELP</h1>
     </div>
     <br />
     <br />
