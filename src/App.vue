@@ -1,11 +1,10 @@
 <template>
   <div id="app">
     <v-app style="background: #f5f5f5;">
-      <v-navigation-drawer light v-model="drawer" fixed app disableResizeWatcher>
+      <v-navigation-drawer light v-model="drawer" fixed app disableResizeWatcher expand-on-hover>
         <main-nav></main-nav>
       </v-navigation-drawer>
       <v-app-bar class="nav-color" dark fixed app>
-        <v-app-bar-nav-icon v-show="isLoggedIn()" @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
         <v-toolbar-title>
           <h2 style="text-align: center;">Case Portal</h2>
         </v-toolbar-title>
@@ -107,7 +106,7 @@ async function created() {
 
 export default {
   data: () => ({
-    drawer: false,
+    drawer: isLoggedIn(),
     profilePic: 'src/assets/img/logo-big.png',
     hasBeenLoggedInBefore: false,
     timedOut: false,
