@@ -111,7 +111,7 @@ export default {
           }
         ],
         expenses: [
-          'Expenses',
+          'My Expenses',
           'user',
           {
             title: 'How do I submit an expense?',
@@ -121,11 +121,11 @@ export default {
           {
             title: 'How do I update an expense?',
             body:
-              'Select an item from the Expenses list, the current information of the expense will then be shown on the right. You may now edit those fields!'
+              'Select an item from the My Expenses list, the current information of the expense will then be shown on the right. You may now edit those fields!'
           },
           {
             title: 'How do I delete an expense?',
-            body: 'Select an item from the Expenses list then click the delete button.'
+            body: 'Select an item from the My Expenses list then click the delete button.'
           },
           {
             title: 'What are categories?',
