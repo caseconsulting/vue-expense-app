@@ -8,7 +8,7 @@
     </v-flex>
 
     <!-- Available Budgets -->
-    <v-flex xs12 sm12 md12 lg8>
+    <v-flex xs12 sm6 md6 lg6 float-left>
       <v-flex v-if="loading" text-center>
         <v-progress-circular indeterminate size="64" color="#bc3825"></v-progress-circular>
       </v-flex>
@@ -256,16 +256,7 @@ async function refreshBudget() {
     budgetsVar = await api.getAllActiveEmployeeBudgets(this.employee.id);
   }
 
-  // get existing budgets for the budget year being viewed
-  let existingBudgets = await api.getFiscalDateViewBudgets(this.employee.id, this.fiscalDateView);
-
-  // append inactive tag to end of budget expense type name
-  // the existing budget duplicates will later be removed (order in array comes after active budgets)
-  _.forEach(existingBudgets, (budget) => {
-    budget.expenseTypeName += ' (Inactive)';
-  });
-
-  budgetsVar = _.union(budgetsVar, existingBudgets); // combine existing and active budgets
+  // budgetsVar = _.union(budgetsVar, existingBudgets); // combine existing and active budgets
   budgetsVar = _.uniqBy(budgetsVar, 'expenseTypeId'); // remove duplicate expense types
   budgetsVar = _.sortBy(budgetsVar, (budget) => {
     return budget.expenseTypeName;
@@ -396,7 +387,6 @@ export default {
   created,
   data() {
     return {
-      actualTime: moment().format('X'), // current time (unix ms timestamp)
       allUserBudgets: null, // all user budgets
       budgetYears: [], // list of options for chaning budget year view
       changingBudgetView: false, // change budget year view activator
@@ -436,19 +426,6 @@ export default {
     refreshEmployee,
     showSuccessfulSubmit,
     updateData
-  },
-  props: {
-    adminCall: {
-      default: null
-    }, // admin employee view
-    employ: {
-      default: null
-    } // employee (admin employee view)
-  },
-  watch: {
-    employ: function () {
-      this.refreshEmployee();
-    }
   }
 };
 </script>
