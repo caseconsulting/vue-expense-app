@@ -75,16 +75,6 @@ import moment from 'moment';
 // |--------------------------------------------------|
 
 /**
- * Checks if a value is empty. Returns true if the value is null or a single character space String.
- *
- * @param value - value to check
- * @return boolean - value is empty
- */
-function isEmpty(value) {
-  return value == null || value === ' ' || value === '';
-} // isEmpty
-
-/**
  * Calculates how much of a budget is remaining. Returns the remaining amount if it exists. Returns zero if the budget
  * itself does not exist.
  *
@@ -100,6 +90,22 @@ function calcRemaining(budget) {
   }
   return 0;
 } // calcRemaining
+
+/**
+ * Emits a message and data if it exists.
+ *
+ * @param msg - Message to emit
+ * @param data - Data to emit
+ */
+function emit(msg, data) {
+  if (data) {
+    // data exists
+    window.EventBus.$emit(msg, data);
+  } else {
+    // data does not exist
+    window.EventBus.$emit(msg);
+  }
+} // emit
 
 /**
  * Get the amount of an aggregate budget. Returns the amount if it exists. Returns zero if the budget itself does not
@@ -135,6 +141,16 @@ function getPending(budget) {
 } // getPending
 
 /**
+ * Checks if a value is empty. Returns true if the value is null or a single character space String.
+ *
+ * @param value - value to check
+ * @return boolean - value is empty
+ */
+function isEmpty(value) {
+  return value == null || value === ' ' || value === '';
+} // isEmpty
+
+/**
  * Returns 'Allowed' or 'Not Allowed' depending on whether an expense type allows overdraft.
  *
  * @param expenseType - expense type to check
@@ -142,22 +158,6 @@ function getPending(budget) {
 function odFlagMessage(expenseType) {
   return expenseType.odFlag ? 'Allowed' : 'Not Allowed';
 } // odFlagMessage
-
-/**
- * Emits a message and data if it exists.
- *
- * @param msg - Message to emit
- * @param data - Data to emit
- */
-function emit(msg, data) {
-  if (data) {
-    // data exists
-    window.EventBus.$emit(msg, data);
-  } else {
-    // data does not exist
-    window.EventBus.$emit(msg);
-  }
-} // emit
 
 /**
  * Determines if a budget has no remaining budget. Returns true if the budget is zero or negative. False otherwise.
@@ -182,12 +182,12 @@ export default {
     };
   },
   methods: {
-    isEmpty,
-    emit,
     calcRemaining,
+    emit,
     getAmount,
     getReimbursed,
     getPending,
+    isEmpty,
     odFlagMessage,
     noRemaining
   },

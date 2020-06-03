@@ -1,6 +1,5 @@
 <template>
   <div id="available-budgets">
-    {{ showDialog }}
     <v-card>
       <v-card-title class="header_style">
         <router-link to="/myBudgets" style="text-decoration: none;">
@@ -52,47 +51,11 @@ function calcRemaining(budget) {
   return 0;
 } // calcRemaining
 
-/**
- * Get the amount of an aggregate budget. Returns the amount if it exists. Returns zero if the budget itself does not
- * exist.
- *
- * @param budget - aggregate budget
- * @return int - budget amount
- */
-function getAmount(budget) {
-  return budget.budgetObject ? budget.budgetObject.amount : 0;
-} // getAmount
-
-/**
- * Get the reimbursed amount of an aggregate budget. Returns the reimbursed amount if exists. Returns zero if the
- * budget itself does not exist.
- *
- * @param budget - aggregate budget
- * @return int - reimbursed amount
- */
-function getReimbursed(budget) {
-  return budget.budgetObject ? budget.budgetObject.reimbursedAmount : 0;
-} // getReimbursed
-
-/**
- * Get the pending amount of an aggregate budget. Returns the pending amount if exists. Returns zero if the budget
- * itself does not exist.
- *
- * @param budget - aggregate budget
- * @return int - pending amount
- */
-function getPending(budget) {
-  return budget.budgetObject ? budget.budgetObject.pendingAmount : 0;
-} // getPending
-
-/**
- * Returns 'Allowed' or 'Not Allowed' depending on whether an expense type allows overdraft.
- *
- * @param expenseType - expense type to check
- */
-function odFlagMessage(expenseType) {
-  return expenseType.odFlag ? 'Allowed' : 'Not Allowed';
-} // odFlagMessage
+async function created() {
+  window.EventBus.$on('close-summary', () => {
+    this.showDialog = false;
+  });
+} // created
 
 /**
  * Determines if a budget has no remaining budget. Returns true if the budget is zero or negative. False otherwise.
@@ -105,7 +68,7 @@ function noRemaining(budget) {
 } // noRemaining
 
 /**
- * Sets budget for dialog box.
+ * Selects the budget for the dialog box.
  *
  * @param budget - budget
  */
@@ -113,12 +76,6 @@ function selectBudget(budget) {
   this.selectedBudget = budget;
   this.showDialog = true;
 } // selectBudget
-
-async function created() {
-  window.EventBus.$on('close-summary', () => {
-    this.showDialog = false;
-  });
-}
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -149,11 +106,7 @@ export default {
   },
   methods: {
     calcRemaining,
-    getAmount,
-    getReimbursed,
-    getPending,
     noRemaining,
-    odFlagMessage,
     selectBudget
   },
   props: ['budgets', 'employee'] // budgets
