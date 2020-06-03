@@ -68,7 +68,7 @@ export default {
       role: '', // employee role
       sections: {
         employeeHome: [
-          'Employee Home',
+          'My Budgets',
           'user',
           {
             title: 'What is budget?',

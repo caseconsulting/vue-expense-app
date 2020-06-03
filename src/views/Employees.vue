@@ -231,7 +231,7 @@ import ConvertEmployeesToCsv from '../components/ConvertEmployeesToCsv.vue';
 import DeleteErrorModal from '../components/DeleteErrorModal.vue';
 import DeleteModal from '../components/DeleteModal.vue';
 import EmployeeForm from '../components/EmployeeForm.vue';
-import EmployeeHome from '@/views/EmployeeHome.vue';
+import EmployeeHome from '@/views/MyBudgets.vue';
 import { getRole } from '@/utils/auth';
 import moment from 'moment';
 import _ from 'lodash';

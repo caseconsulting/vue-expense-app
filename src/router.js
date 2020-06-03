@@ -8,7 +8,7 @@ import Employees from '@/views/Employees.vue';
 import Expenses from '@/views/MyExpenses.vue';
 import Help from '@/views/Help.vue';
 import Callback from '@/views/Callback';
-import EmployeeHome from '@/views/EmployeeHome';
+import EmployeeHome from '@/views/MyBudgets.vue';
 import Home from '@/views/Home.vue';
 import TrainingAnalytics from '@/views/TrainingAnalytics';
 import { requireAuth, isAdmin } from '@/utils/auth';
