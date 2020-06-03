@@ -97,12 +97,12 @@ export default {
           {
             title: 'What capabilities do Admins have?',
             body:
-              "Admins may view the admin dashboard, reimburse expenses, and create expense types, view each employee's budget home view, create new employees, and create expenses for other employees"
+              "Admins may view reimbursements, reimburse expenses, and create expense types, view each employee's budget home view, create new employees, and create expenses for other employees"
           },
           {
             title: 'How do I reimburse an expense?',
             body:
-              'Go to the Admin Dashboard and select the expenses that you would like to reimburse by clicking the select box either on a row (to select all expenses for that employee under that expense type) or on each of their individual expenses. Next select the $ icon at the bottom left of the page and then confirm the reimbursement.'
+              'Go to Reimbursements and select the expenses that you would like to reimburse by clicking the select box either on a row (to select all expenses for that employee under that expense type) or on each of their individual expenses. Next select the $ icon at the bottom left of the page and then confirm the reimbursement.'
           },
           {
             title: 'What are categories?',

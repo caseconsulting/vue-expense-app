@@ -104,7 +104,7 @@ export default {
         {
           title: 'Reimbursements',
           icon: 'desktop',
-          route: 'admin',
+          route: 'reimbursements',
           permission: ['admin']
         },
         {
