@@ -1,7 +1,15 @@
 <template>
   <div id="app">
     <v-app style="background: #f5f5f5;">
-      <v-navigation-drawer light v-model="drawer" fixed app disableResizeWatcher expand-on-hover permanent>
+      <v-navigation-drawer
+        light
+        v-model="drawer"
+        fixed
+        app
+        disableResizeWatcher
+        expand-on-hover
+        :permanent="isLoggedIn()"
+      >
         <main-nav></main-nav>
       </v-navigation-drawer>
       <v-app-bar class="nav-color" dark fixed app>
