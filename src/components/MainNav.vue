@@ -151,9 +151,9 @@ export default {
               permission: ['admin', 'user']
             },
             {
-              title: 'Admin Dashboard',
+              title: 'Reimbursements',
               icon: 'desktop',
-              route: 'admin',
+              route: 'reimbursements',
               permission: ['admin']
             }
           ],
