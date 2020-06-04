@@ -809,6 +809,7 @@ async function submit() {
     }
     this.loading = false; // set loading status to false
   }
+  this.file = null;
 } // submit
 
 /**
