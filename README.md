@@ -1,28 +1,38 @@
 ## Setup
 
-The **Expense Application** is written in **Vue.js** and relies on **Node.js** v8.x+ and the **yarn** package management system.
+The **Expense Application** is written in **Vue.js** and relies on **Node.js** v12.x+ and the **npm** package management system.
 
-* Download and install Node.js from: https://nodejs.org/
-* Download and install yarn from: https://yarnpkg.com/en/docs/install
+* Download and install Node.js v12.x from: https://nodejs.org/en/ or https://nodejs.org/dist/latest-v12.x/
 * Install required Node.js modules:
 
 ```
-yarn install
+npm ci
 ```
 
 ## Environment variables
 
-In order to use **Auth0** authentication, you will need to define four environment variables:
+In order to use **Auth0** authentication, you will need to define some environment variables:
 
+* **VUE_APP_AUTH0_API_ID**
+* **VUE_APP_AUTH0_CALLBACK**
 * **VUE_APP_AUTH0_CLIENT_ID**
 * **VUE_APP_AUTH0_DOMAIN**
-* **VUE_APP_HOSTNAME**
-* **VUE_APP_AUTH0_API_ID**
 
-**vue-cli** automatically picks up environment variables in `.env` files. Therefore, you can store these variables in a `.env.local` file in the project root directory. `.env.local.sample` is an example of how this file should look. The `.env.local` file in the **case-expense-app** S3 bucket in the company AWS account has up-to-date values for the environment variables. Download this file to the project root directory:
+The following environment variables are required to support multiple environments:
+
+* **VUE_APP_API_HOSTNAME**
+* **VUE_APP_API_PORT**
+* **NODE_ENV**
+
+**vue-cli** automatically picks up environment variables in `.env` files. Any variables that begin with **VUE_APP_**
+will be included in the client bundle created by webpack. They will be accessible from your code using **process.env**.
+At build time, webpack will replace these references with their corresponding values. For more information, go to:
+https://cli.vuejs.org/guide/mode-and-env.html#using-env-variables-in-client-side-code.
+The `.env` file in the **case-expense-app** S3 bucket in the company AWS account has up-to-date values to run locally.
+Download this file to the project root directory:
 
 ```
-aws s3 cp s3://case-expense-app/.env.local .env.local
+npm run download:local:env
 ```
 
 ## Application tasks
@@ -72,5 +82,38 @@ npm run inspect
 To upgrade to the latest version of a specific Node.js module:
 
 ```
-yarn add <module-name> --save
+npm update --save <module-name>@latest
+```
+To upgrade to the latest version of a specific Node.js module, which is a development dependency only:
+
+```
+npm update --save-dev <module-name>@latest
+```
+
+## Deployment
+
+To download dev .env and then deploy to the dev environment:
+
+```
+npm run deploy:dev
+```
+
+To download test .env and then deploy to the test environment:
+
+```
+npm run deploy:test
+```
+
+### DANGER DANGER
+
+**To download prod .env and then deploy to the prod environment:**
+
+```
+npm run deploy:prod
+```
+
+To reset for local development, after a deployment:
+
+```
+npm run download:local:env
 ```

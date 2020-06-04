@@ -1,113 +1,182 @@
 <template>
-<div id="nav-slider" class="text-center">
+  <div>
+    <!-- Logo -->
+    <v-flex>
+      <img src="@/assets/img/logo-banner.gif" class="logo" />
+    </v-flex>
 
-<vs-button id="nav-button" @click="active=!active" vs-type="dark-flat" vs-icon="menu"></vs-button>
-<h1 id="main-header" class="text-center"><span class="e">€</span>xpense App</h1>
+    <!-- Navigation Links -->
+    <v-list class="pt-0" dense>
+      <v-divider></v-divider>
+      <v-list-item
+        v-for="item in visibleTiles"
+        :key="item.title"
+        active-class="red--text v-list__tile--active"
+        :to="{ name: item.route }"
+        @click="scrollUp"
+      >
+        <!-- Icon -->
+        <v-list-item-icon style="width: 30px;">
+          <icon :name="item.icon" class="navbar-icons"></icon>
+        </v-list-item-icon>
 
-
-<vs-sidebar vs-parent="#nav-slider" :vs-active.sync="active">
-  <div id="slider-logo">
-    <img src="@/assets/img/logo-big.png" height="52" width="52" class="mr-1" />
+        <!-- Title -->
+        <v-list-item-content>
+          <v-list-item-title>{{ item.title }}</v-list-item-title>
+        </v-list-item-content>
+      </v-list-item>
+    </v-list>
+    <!-- End Navigation Links -->
   </div>
-
-  <vs-sidebar-item @click="navigate(1)" :vs-active="actives==1" >
-    <icon name="desktop" class="mr-1" /> Dashboard
-  </vs-sidebar-item>
-  <vs-sidebar-item @click="navigate(2)" :vs-active="actives==2">
-    <icon name="book" class="mr-1" /> Expense Types
-  </vs-sidebar-item>
-  <vs-sidebar-item @click="navigate(3)" :vs-active="actives==3">
-    <icon name="users" class="mr-1" />Employees
-  </vs-sidebar-item>
-  <vs-sidebar-item @click="navigate(4)" :vs-active="actives==4">
-    <icon name="dollar-sign" class="mr-1" />Expenses
-  </vs-sidebar-item>
-  <vs-sidebar-item @click="navigate(5)" :vs-active="actives==5">
-    <icon name="question" class="mr-1" />Help
-  </vs-sidebar-item>
-  <vs-sidebar-item v-show="isLoggedIn()" @click="handleLogout()">
-    <icon name="sign-out-alt" class="mr-1" />Logout
-  </vs-sidebar-item>
-  <vs-sidebar-item v-show="!isLoggedIn()" @click="handleLogin()">
-    <icon name="sign-in-alt" class="mr-1" />Login
-  </vs-sidebar-item>
-</vs-sidebar>
-</div>
 </template>
 
 <script>
 // @ is an alias to /src
-import { isLoggedIn, login, logout } from '@/utils/auth';
+import { getRole } from '@/utils/auth';
+import _ from 'lodash';
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     COMPUTED                     |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * Filter items by user permissions.
+ *
+ * @return Array - Filtered items
+ */
+function visibleTiles() {
+  return _.filter(this.items, (item) => {
+    return _.includes(item.permission, this.permissions);
+  });
+} // visibleTiles
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     METHODS                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+function scrollUp() {
+  this.$vuetify.goTo(0);
+} // scrollUp
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                 LIFECYCLE HOOKS                  |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ *  Set permissions by user role.
+ */
+async function created() {
+  this.permissions = getRole();
+} // created
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      EXPORT                      |
+// |                                                  |
+// |--------------------------------------------------|
 
 export default {
+  computed: {
+    visibleTiles
+  },
+  created,
   data() {
     return {
-      active: false,
-      actives: 1
+      items: [
+        {
+          title: 'Employee Home',
+          icon: 'hand-holding-usd',
+          route: 'home',
+          permission: ['user', 'admin']
+        },
+        {
+          title: 'Admin Dashboard',
+          icon: 'desktop',
+          route: 'admin',
+          permission: ['admin']
+        },
+        {
+          title: 'Expenses',
+          icon: 'dollar-sign',
+          route: 'expenses',
+          permission: ['admin', 'user']
+        },
+        {
+          title: 'Expense Types',
+          icon: 'book',
+          route: 'expenseTypes',
+          permission: ['admin', 'user']
+        },
+        {
+          title: 'Employees',
+          icon: 'users',
+          route: 'employees',
+          permission: ['admin', 'user']
+        },
+        {
+          title: 'Training',
+          icon: 'fire',
+          route: 'training',
+          permission: ['admin', 'user']
+        },
+        {
+          title: 'Help',
+          icon: 'life-ring',
+          route: 'help',
+          permission: ['admin', 'user']
+        }
+      ], // navigation options
+      permissions: '' // user role
     };
   },
-  components: {},
   methods: {
-    navigate(selected) {
-      this.actives = selected;
-      switch (selected) {
-        case 1:
-          this.$router.push({ name: 'home' });
-          break;
-        case 2:
-          this.$router.push({ name: 'expenseTypes' });
-          break;
-        case 3:
-          this.$router.push({ name: 'employees' });
-          break;
-        case 4:
-          this.$router.push({ name: 'expenses' });
-          break;
-        case 5:
-          this.$router.push({ name: 'help' });
-          break;
-        default:
-          this.$router.push({ name: 'login' });
-      }
-      this.active = false;
-    },
-    handleLogin() {
-      login();
-    },
-    handleLogout() {
-      logout();
-    },
-    isLoggedIn() {
-      return isLoggedIn();
-    }
+    scrollUp
   }
 };
 </script>
 
 <style lang="scss">
-#nav-slider span .material-icons {
-  font-size: 32px;
+.e {
+  color: #68caa6;
+}
 
+.logo {
+  height: 50%;
+  width: 50%;
 }
 
 #main-header {
   font-family: 'Quicksand', sans-serif;
   font-weight: bold;
   font-size: 48px;
-  color: #38424D;
+  color: #38424d;
   padding-top: 1%;
   padding-bottom: 2%;
 }
-.e {
-  color: #68CAA6;
+
+.navbar-icons {
+  color: #646460;
+  width: auto;
+  height: 2em;
+  max-width: 100%;
+  max-height: 100%;
 }
+
 #nav-button {
   float: left;
 }
+
 #nav-button :focus {
-  outline:none;
+  outline: none;
 }
-#slider-logo{
+
+#slider-logo {
   margin-bottom: 5px;
 }
 </style>

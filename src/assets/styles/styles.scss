@@ -1,6 +1,155 @@
-@import '../node_modules/bootstrap/scss/bootstrap.scss';
-@import '../node_modules/bootstrap-vue/dist/bootstrap-vue.min.css';
+$case-red: #bc3825;
+$case-darkgray: #3f3f3c;
 
-.footer-buttons{
+/* RolledupExpenseTypeTable.vue */
+#money-team {
+  color: green;
+}
+
+/* Session Expired Timer */
+.timer {
+  margin-top: 10px;
+}
+
+.timer p {
+  color: white;
+}
+
+.legend_style {
+  padding-bottom: 0;
+  padding-top: 0;
+}
+
+.footer-buttons {
   float: right;
+}
+
+.header_style {
+  background-color: $case-red;
+  color: white;
+  font-size: 16px;
+  // border-radius: 5px;
+}
+
+.expense_info_title {
+  color: white;
+}
+
+.expense_info {
+  color: black;
+}
+
+.reimburse_button {
+  background-color: $case-red !important;
+  color: white !important;
+}
+
+.table_color {
+  background-color: $case-red;
+  opacity: 0.2;
+}
+
+.filter_color {
+  background-color: #e9eef0 !important;
+}
+
+.nav-color {
+  background-color: #565651 !important;
+}
+
+.inactiveStyle {
+  //text-decoration: line-through red;
+  color: #e60026;
+}
+
+.selectFocus {
+  background-color: #f0f0f0;
+}
+
+//end of themes
+.form_padding {
+  padding-top: 20px;
+}
+
+.login_e {
+  -webkit-animation: login-change 1s infinite alternate both;
+  -moz-animation: login-change 10s infinite alternate both;
+  -o-animation: login-change 10s infinite alternate both;
+  -ms-animation: login-change 10s infinite alternate both;
+  animation: login-change 5s infinite alternate both;
+}
+
+@-webkit-keyframes login-change {
+  0% {
+    color: $case-darkgray;
+  }
+
+  100% {
+    color: gold;
+  }
+}
+
+@-moz-keyframes login-change {
+  0% {
+    color: $case-darkgray;
+  }
+
+  100% {
+    color: gold;
+  }
+}
+
+@-ms-keyframes login-change {
+  0% {
+    color: $case-darkgray;
+  }
+
+  100% {
+    color: gold;
+  }
+}
+
+@-o-keyframes login-change {
+  0% {
+    color: $case-darkgray;
+  }
+
+  100% {
+    color: gold;
+  }
+}
+
+@keyframes login-change {
+  0% {
+    color: $case-darkgray;
+  }
+
+  100% {
+    color: gold;
+  }
+}
+
+// override the word break styling from v-card
+.v-card__text {
+  word-break: normal;
+}
+
+.v-card__title {
+  word-break: normal;
+}
+
+.pt-20 {
+  font-size: 20px;
+}
+
+.pt-16 {
+  font-size: 16px;
+}
+
+.pt-14 {
+  font-size: 14px;
+}
+
+.pt-13 {
+  font-size: 13px;
 }
