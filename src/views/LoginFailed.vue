@@ -31,7 +31,7 @@ async function created() {
     // logged in
     if (getRole() === 'admin') {
       // user's role is admin
-      this.$router.push('admin-dashboard');
+      this.$router.push('reimbursements');
     } else {
       // user's role is not admin
       this.$router.push('home');
