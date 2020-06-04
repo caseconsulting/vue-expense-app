@@ -8,23 +8,56 @@
     <!-- Navigation Links -->
     <v-list class="pt-0" dense>
       <v-divider></v-divider>
-      <v-list-item
-        v-for="item in visibleTiles"
-        :key="item.title"
-        active-class="red--text v-list__tile--active"
-        :to="{ name: item.route }"
-        @click="scrollUp"
-      >
-        <!-- Icon -->
-        <v-list-item-icon style="width: 30px;">
-          <icon :name="item.icon" class="navbar-icons"></icon>
-        </v-list-item-icon>
+      <template v-for="item in visibleTiles" class="navbar-icons">
+        <v-list-group v-if="item.subItems" :key="item.title" active-class="v-list__tile--active">
+          <template v-slot:activator>
+            <!-- Parent Item Icon -->
+            <v-list-item-icon style="width: 30px;">
+              <icon :name="item.icon" class="navbar-icons"></icon>
+            </v-list-item-icon>
 
-        <!-- Title -->
-        <v-list-item-content>
-          <v-list-item-title>{{ item.title }}</v-list-item-title>
-        </v-list-item-content>
-      </v-list-item>
+            <!-- Parent Item Title -->
+            <v-list-item-content>
+              <v-list-item-title>{{ item.title }}</v-list-item-title>
+            </v-list-item-content>
+          </template>
+
+          <v-list-item
+            v-for="subItem in item.subItems"
+            :key="subItem.title"
+            active-class="red--text v-list__tile--active"
+            :to="{ name: subItem.route }"
+            @click="scrollUp"
+          >
+            <!-- SubItems Title -->
+            <v-list-item-content>
+              <v-list-item-title>{{ subItem.title }}</v-list-item-title>
+            </v-list-item-content>
+
+            <!-- SubItems Icon -->
+            <v-list-item-icon style="width: 30px;">
+              <icon :name="subItem.icon" class="navbar-icons"></icon>
+            </v-list-item-icon>
+          </v-list-item>
+        </v-list-group>
+        <v-list-item
+          v-else
+          :key="item.title"
+          active-class="red--text v-list__tile--active"
+          :to="{ name: item.route }"
+          @click="scrollUp"
+        >
+          <!-- Item Icon -->
+          <v-list-item-icon style="width: 30px;">
+            <icon :name="item.icon" class="navbar-icons"></icon>
+          </v-list-item-icon>
+
+          <!-- Item mTitle -->
+          <v-list-item-content>
+            <v-list-item-title>{{ item.title }}</v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
+      </template>
     </v-list>
     <!-- End Navigation Links -->
   </div>
@@ -96,28 +129,35 @@ export default {
           permission: ['user', 'admin']
         },
         {
-          title: 'My Budgets',
-          icon: 'hand-holding-usd',
-          route: 'myBudgets',
-          permission: ['user', 'admin']
-        },
-        {
-          title: 'Reimbursements',
-          icon: 'desktop',
-          route: 'reimbursements',
-          permission: ['admin']
-        },
-        {
-          title: 'My Expenses',
+          title: 'Expenses',
           icon: 'dollar-sign',
-          route: 'expenses',
-          permission: ['admin', 'user']
-        },
-        {
-          title: 'Expense Types',
-          icon: 'book',
-          route: 'expenseTypes',
-          permission: ['admin', 'user']
+          subItems: [
+            {
+              title: 'My Budgets',
+              icon: 'hand-holding-usd',
+              route: 'myBudgets',
+              permission: ['user', 'admin']
+            },
+            {
+              title: 'My Expenses',
+              icon: 'dollar-sign',
+              route: 'expenses',
+              permission: ['admin', 'user']
+            },
+            {
+              title: 'Expense Types',
+              icon: 'book',
+              route: 'expenseTypes',
+              permission: ['admin', 'user']
+            },
+            {
+              title: 'Admin Dashboard',
+              icon: 'desktop',
+              route: 'admin',
+              permission: ['admin']
+            }
+          ],
+          permission: ['user', 'admin']
         },
         {
           title: 'Employees',
