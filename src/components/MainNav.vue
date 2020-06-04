@@ -30,7 +30,7 @@
             @click="scrollUp"
           >
             <!-- SubItems Title -->
-            <v-list-item-content>
+            <v-list-item-content style="margin-left: 75px;">
               <v-list-item-title>{{ subItem.title }}</v-list-item-title>
             </v-list-item-content>
 
