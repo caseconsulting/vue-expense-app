@@ -1,7 +1,7 @@
 <template>
   <div id="app">
     <v-app style="background: #f5f5f5;">
-      <v-navigation-drawer light v-model="drawer" fixed app disableResizeWatcher expand-on-hover>
+      <v-navigation-drawer light v-model="drawer" fixed app disableResizeWatcher expand-on-hover permanent>
         <main-nav></main-nav>
       </v-navigation-drawer>
       <v-app-bar class="nav-color" dark fixed app>
