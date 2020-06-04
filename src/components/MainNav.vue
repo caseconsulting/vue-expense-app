@@ -27,7 +27,10 @@
             :key="subItem.title"
             active-class="red--text v-list__tile--active"
             :to="{ name: subItem.route }"
-            @click="scrollUp"
+            @click="
+              scrollUp;
+              close;
+            "
           >
             <!-- SubItems Title -->
             <v-list-item-content style="margin-left: 75px;">
@@ -81,7 +84,20 @@ import _ from 'lodash';
  */
 function visibleTiles() {
   return _.filter(this.items, (item) => {
-    return _.includes(item.permission, this.permissions);
+    if (item.subItems) {
+      if (_.includes(item.permission, this.permissions)) {
+        item.subItems = _.filter(item.subItems, (subItem) => {
+          {
+            return _.includes(subItem.permission, this.permissions);
+          }
+        });
+        return true;
+      } else {
+        return false;
+      }
+    } else {
+      return _.includes(item.permission, this.permissions);
+    }
   });
 } // visibleTiles
 
@@ -182,7 +198,8 @@ export default {
     };
   },
   methods: {
-    scrollUp
+    scrollUp,
+    close
   }
 };
 </script>
