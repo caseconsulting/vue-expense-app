@@ -3,7 +3,7 @@
     <v-dialog v-model="activate" persistent max-width="350">
       <v-card>
         <v-card-title class="headline">Are you sure you want to delete?</v-card-title>
-        <v-card-text>Are you sure you want to delete this {{ type }}?</v-card-text>
+        <v-card-text> Are you sure you want to delete this {{ type }}? {{ deleteInfo }}</v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
           <v-btn color="gray darken-1" text @click.native="emit(`canceled-delete-${type}`)">No, keep {{ type }}</v-btn>
@@ -51,7 +51,8 @@ export default {
   },
   props: [
     'activate', // dialog activator
-    'type' // type of object being deleted
+    'type', // type of object being deleted
+    'deleteInfo' //delete info to be displayed
   ]
 };
 </script>

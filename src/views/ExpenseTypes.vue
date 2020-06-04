@@ -359,7 +359,7 @@
           <!-- End Expense Type Datatable -->
 
           <!-- Confirmation Modals -->
-          <delete-modal :activate="deleting" :type="'expense-type'"></delete-modal>
+          <delete-modal :activate="deleting" :deleteInfo="'(' + deleteType + ')'" :type="'expense-type'"></delete-modal>
           <delete-error-modal :activate="invalidDelete" type="expense type"></delete-error-modal>
           <!-- End Confirmation Modals -->
         </v-container>
@@ -756,6 +756,7 @@ function userIsAdmin() {
  * @param item - expense type to validate
  */
 async function validateDelete(item) {
+  this.deleteType = item.budgetName;
   let x = await api
     .getAllExpenseTypeExpenses(item.id)
     .then((result) => {
@@ -881,7 +882,8 @@ export default {
         statusMessage: '',
         color: ''
       }, // snakcbar action status
-      userInfo: null // user information
+      userInfo: null, // user information
+      deleteType: '' //item.budgetName for when item is deleted
     };
   },
   filters: {
@@ -930,6 +932,9 @@ export default {
     },
     'filter.overdraft': function () {
       this.filterExpenseTypes();
+    },
+    deleteInfo: function () {
+      console.log('?');
     }
   }
 };
