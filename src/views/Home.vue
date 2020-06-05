@@ -6,7 +6,40 @@
         <h1>Hello, {{ employee.firstName }}!</h1>
       </v-row>
     </v-flex>
-
+    <!-- Anniversary Date -->
+    <v-flex lg4 v-if="!isMobile">
+      <v-flex>
+        <v-card @click="changingBudgetView = true" hover>
+          <v-card-title>
+            <!-- display the next anniversary date -->
+            <div v-if="viewingCurrentBudgetYear">
+              <h3 class="pt-16">Anniversary Date: {{ getAnniversary }}</h3>
+              <div @mouseover="display = !display" @mouseleave="display = !display" class="pt-14">
+                <div v-if="display">Days Until: {{ getDaysUntil }}</div>
+                <div v-else>Seconds Until: {{ getSecondsUntil }}</div>
+              </div>
+            </div>
+            <!-- Display the budget history year -->
+            <div v-else>
+              <h3 class="pt-16">
+                Viewing budgets from {{ this.getFiscalYearView }} - {{ this.getFiscalYearView + 1 }}
+              </h3>
+              <div class="pt-14">[Inactive Budget]</div>
+            </div>
+            <v-spacer></v-spacer>
+            <v-icon style="margin-right: 10px;">
+              history
+            </v-icon>
+          </v-card-title>
+        </v-card>
+      </v-flex>
+    </v-flex>
+    <budget-select-modal
+      :activate="changingBudgetView"
+      :budgetYears="this.budgetYears"
+      :current="this.fiscalDateView"
+      :hireDate="this.hireDate"
+    ></budget-select-modal>
     <!-- Available Budgets -->
     <v-flex xs12 sm6 md6 lg6 float-left>
       <v-flex v-if="loading" text-center>
@@ -23,6 +56,7 @@
 <script>
 import api from '@/shared/api.js';
 import AvailableBudgets from '../components/AvailableBudgets.vue';
+import BudgetSelectModal from '../components/BudgetSelectModal.vue';
 import MobileDetect from 'mobile-detect';
 import moment from 'moment';
 import _ from 'lodash';
@@ -373,7 +407,8 @@ async function created() {
 
 export default {
   components: {
-    AvailableBudgets
+    AvailableBudgets,
+    BudgetSelectModal
   },
   computed: {
     budgets,
