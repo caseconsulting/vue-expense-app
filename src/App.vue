@@ -9,10 +9,11 @@
         disableResizeWatcher
         expand-on-hover
         :permanent="isLoggedIn()"
+        clipped
       >
         <main-nav></main-nav>
       </v-navigation-drawer>
-      <v-app-bar class="nav-color" dark fixed app>
+      <v-app-bar class="nav-color" dark fixed app clipped-left>
         <v-toolbar-title>
           <h2 style="text-align: center;">Case Portal</h2>
         </v-toolbar-title>
