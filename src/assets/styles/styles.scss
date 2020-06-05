@@ -42,6 +42,16 @@ $case-darkgray: #3f3f3c;
 .reimburse_button {
   background-color: $case-red !important;
   color: white !important;
+  padding: 4px 2px;
+}
+
+
+.home_buttons {
+  color: $case-red !important;
+  background-color: white !important;
+  padding: 4px 2px;
+  margin-bottom: 16px;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.12), 0 1px 4px rgba(0, 0, 0, 0.24);
 }
 
 .table_color {

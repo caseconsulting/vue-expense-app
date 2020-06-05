@@ -19,6 +19,9 @@
           </p>
         </v-row>
         <!-- End Loop all budgets -->
+        <router-link to="/myExpenses" style="text-decoration: none;">
+          <button class="home_buttons">Create an Expense</button>
+        </router-link>
       </v-card-text>
     </v-card>
     <available-budget-summary :activator="showDialog" :selectedBudget="selectedBudget"></available-budget-summary>
