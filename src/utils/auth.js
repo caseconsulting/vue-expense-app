@@ -2,28 +2,31 @@ import decode from 'jwt-decode';
 import auth0 from 'auth0-js';
 import { AUTH_CONFIG } from './auth0-variables';
 import Router from 'vue-router';
+import api from '../shared/api';
+var CryptoJS = require('crypto-js');
 
-const ID_TOKEN_KEY = 'id_token';
-const ACCESS_TOKEN_KEY = 'access_token';
-
+const AUDIENCE = AUTH_CONFIG.audience;
+const CALLBACK = AUTH_CONFIG.callbackUrl;
 const CLIENT_ID = AUTH_CONFIG.clientId;
-const CLIENT_DOMAIN = AUTH_CONFIG.domain;
-const REDIRECT = AUTH_CONFIG.callbackUrl;
-const SCOPE = 'openid';
-const AUDIENCE = `https://${AUTH_CONFIG.domain}/userinfo`;
+const DOMAIN = AUTH_CONFIG.domain;
+
+const ACCESS_TOKEN_KEY = 'access_token';
+const ID_TOKEN_KEY = 'id_token';
+const IMG = 'profilePic';
+const ROLE = 'employeeRole';
+const SCOPE = 'openid email profile';
 
 var auth = new auth0.WebAuth({
   clientID: CLIENT_ID,
-  domain: CLIENT_DOMAIN
+  domain: DOMAIN,
+  responseType: 'token id_token',
+  audience: AUDIENCE,
+  redirectUri: CALLBACK,
+  scope: SCOPE
 });
 
 export function login() {
-  auth.authorize({
-    responseType: 'token id_token',
-    redirectUri: REDIRECT,
-    audience: AUDIENCE,
-    scope: SCOPE
-  });
+  auth.authorize();
 }
 
 var router = new Router({
@@ -33,6 +36,8 @@ var router = new Router({
 export function logout() {
   clearIdToken();
   clearAccessToken();
+  clearRole();
+  clearProfile();
   router.go('/');
 }
 
@@ -47,20 +52,39 @@ export function requireAuth(to, from, next) {
   }
 }
 
+export function isAdmin(to, from, next) {
+  if (getRole() === 'admin') {
+    next();
+  } else {
+    next({
+      path: '/home',
+      query: { redirect: to.fullPath }
+    });
+  }
+}
+
 export function getIdToken() {
-  return localStorage.getItem(ID_TOKEN_KEY);
+  return sessionStorage.getItem(ID_TOKEN_KEY);
 }
 
 export function getAccessToken() {
-  return localStorage.getItem(ACCESS_TOKEN_KEY);
+  return sessionStorage.getItem(ACCESS_TOKEN_KEY);
 }
 
 function clearIdToken() {
-  localStorage.removeItem(ID_TOKEN_KEY);
+  sessionStorage.removeItem(ID_TOKEN_KEY);
 }
 
 function clearAccessToken() {
-  localStorage.removeItem(ACCESS_TOKEN_KEY);
+  sessionStorage.removeItem(ACCESS_TOKEN_KEY);
+}
+
+function clearRole() {
+  sessionStorage.removeItem(ROLE);
+}
+
+function clearProfile() {
+  sessionStorage.removeItem(IMG);
 }
 
 // Helper function that will allow us to extract the access_token and id_token
@@ -72,21 +96,34 @@ function getParameterByName(name) {
 // Get and store access_token in local storage
 export function setAccessToken() {
   let accessToken = getParameterByName('access_token');
-  localStorage.setItem(ACCESS_TOKEN_KEY, accessToken);
+  sessionStorage.setItem(ACCESS_TOKEN_KEY, accessToken);
 }
 
 // Get and store id_token in local storage
 export function setIdToken() {
   let idToken = getParameterByName('id_token');
-  localStorage.setItem(ID_TOKEN_KEY, idToken);
+  sessionStorage.setItem(ID_TOKEN_KEY, idToken);
+}
+
+export function setProfile() {
+  let profile = decode(getIdToken());
+  sessionStorage.setItem(IMG, profile.picture);
+}
+
+export function getProfile() {
+  return sessionStorage.getItem(IMG);
 }
 
 export function isLoggedIn() {
-  const idToken = getIdToken();
-  return !!idToken && !isTokenExpired(idToken);
+  try {
+    const idToken = getIdToken();
+    return !!idToken && !isTokenExpired(idToken);
+  } catch (error) {
+    return false;
+  }
 }
 
-function getTokenExpirationDate(encodedToken) {
+export function getTokenExpirationDate(encodedToken) {
   const token = decode(encodedToken);
   if (!token.exp) {
     return null;
@@ -94,11 +131,26 @@ function getTokenExpirationDate(encodedToken) {
 
   const date = new Date(0);
   date.setUTCSeconds(token.exp);
-
   return date;
 }
 
-function isTokenExpired(token) {
+export function isTokenExpired(token) {
   const expirationDate = getTokenExpirationDate(token);
   return expirationDate < new Date();
+}
+
+export async function setRole() {
+  const employeeRole = await api.getRole();
+  if (employeeRole) {
+    const encryptedRole = CryptoJS.AES.encrypt(employeeRole, process.env.VUE_APP_AES_KEY);
+    sessionStorage.setItem(ROLE, encryptedRole);
+  }
+}
+
+export function getRole() {
+  const encryptedRole = sessionStorage.getItem(ROLE);
+  if (encryptedRole) {
+    const decryptedRole = CryptoJS.AES.decrypt(encryptedRole, process.env.VUE_APP_AES_KEY);
+    return decryptedRole.toString(CryptoJS.enc.Utf8);
+  }
 }

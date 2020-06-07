@@ -1,25 +1,20 @@
-// https://eslint.org/docs/user-guide/configuration
-
-/* eslint-env node */
 module.exports = {
   root: true,
   parserOptions: {
     parser: 'babel-eslint',
-    ecmaVersion: 8,
+    ecmaVersion: 9,
     sourceType: 'module'
   },
   env: {
     browser: true,
-    es6: true
+    es6: true,
+    jest: true,
+    node: true
   },
-  // https://github.com/standard/standard/blob/master/docs/RULES-en.md
-  extends: ['eslint:recommended', 'plugin:vue/recommended'],
-  // required to lint *.vue files
-  plugins: ['html'],
-  // add your custom rules here
+  extends: ['eslint:recommended', 'plugin:vue/essential', '@vue/prettier', 'plugin:prettier/recommended'],
   rules: {
-    // allow async/await
-    'generator-star-spacing': 'off',
+    // allow console during development
+    'no-console': process.env.NODE_ENV === 'production' ? 'error' : 'off',
     // allow debugger during development
     'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'off'
   }

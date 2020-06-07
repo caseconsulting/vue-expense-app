@@ -2,12 +2,19 @@
 node_modules
 /dist
 
-/tests/e2e/videos/
-/tests/e2e/screenshots/
+tests/e2e/reports/
+tests/e2e/screenshots/
+tests/e2e/videos/
+tests/eslint
+tests/stylelint
+tests/unit/coverage
+tests/unit/reports
 
-# local env files
-.env.local
-.env.*.local
+# Environment files
+.env
+.env.*
+.env_*
+aws-keys.json
 
 # Environment files
 .env
@@ -16,8 +23,7 @@ node_modules
 
 # Log files
 npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
+output.log
 
 # Editor directories and files
 .idea
