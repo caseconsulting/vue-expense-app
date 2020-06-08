@@ -69,7 +69,7 @@
     </v-flex>
 
     <!-- Expense Form-->
-    <v-flex v-if="employ == null" xs12 sm12 md12 lg4>
+    <v-flex v-if="employ == null && !isInactive && viewingCurrentBudgetYear" xs12 sm12 md12 lg4>
       <v-flex text-center lg12 md12 sm12>
         <expense-form :expense="expense" v-on:error="displayError"></expense-form>
       </v-flex>
@@ -370,6 +370,17 @@ function getSecondsUntil() {
 } // getSecondsUntil
 
 /**
+ * Checks if an employee is inactive. Sets isInactive as true if the employee is inactive with a work status of 0, otherwise
+ * sets it to false.
+ *
+ * @param employee - employee to check
+ * @return boolean - employee is inactive
+ */
+function isInactive() {
+  return this.employee.workStatus == 0;
+} // isInactive
+
+/**
  * Checks if the current device used is mobile. Return true if it is mobile. Returns false if it is not mobile.
  *
  * @return boolean - if the device is mobile
@@ -615,6 +626,7 @@ export default {
     getDaysUntil,
     getFiscalYearView,
     getSecondsUntil,
+    isInactive,
     isMobile,
     viewingCurrentBudgetYear
   },

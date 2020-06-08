@@ -273,7 +273,7 @@
     </v-flex>
 
     <!-- Expense Form -->
-    <v-flex lg4 md12 sm12>
+    <v-flex v-if="isAdmin || !userIsInactive" lg4 md12 sm12>
       <expense-form
         ref="form"
         :isEdit="isEditing()"
@@ -346,6 +346,18 @@ function roleHeaders() {
         return localHeaders; // return the remaining headers
       })(this.headers);
 } // roleHeaders
+
+/**
+ * Checks if the user is inactive. Returns true if the user is inactive, otherwise returns false.
+ *
+ * @return boolean - whether or not the user is inactive
+ */
+function userIsInactive() {
+  if (this.userInfo == null) {
+    return false;
+  }
+  return this.userInfo.workStatus == 0;
+} // userIsInactive
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -716,6 +728,7 @@ async function created() {
 
   let aggregatedExpenses = await api.getAllAggregateExpenses(); // get aggregate expenses
   this.constructAutoComplete(aggregatedExpenses); // set autocomplete options
+  console.log(this.userInfo);
 }
 
 // |--------------------------------------------------|
@@ -736,7 +749,8 @@ export default {
     getUserName,
     isAdmin,
     isUser,
-    roleHeaders
+    roleHeaders,
+    userIsInactive
   },
   created,
   data() {
