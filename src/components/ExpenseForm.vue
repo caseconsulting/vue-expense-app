@@ -492,7 +492,7 @@ async function checkCoverage() {
  *
  * @param purchaseDate - expense purchase date
  * @param budget - budget for expense
- * @return boolean - expense purchase date is in budget date range.
+ * @return boolean - expense purchase date is in budget dsate range.
  */
 function checkExpenseDate(purchaseDate, budget) {
   let startDate, endDate, date;
