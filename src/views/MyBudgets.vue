@@ -23,6 +23,35 @@
       </v-row>
     </v-flex>
 
+    <!-- Anniversary Date -->
+    <v-flex lg4 v-if="!isMobile">
+      <v-flex>
+        <v-card @click="changingBudgetView = true" hover>
+          <v-card-title>
+            <!-- display the next anniversary date -->
+            <div v-if="viewingCurrentBudgetYear">
+              <h3 class="pt-16">Anniversary Date: {{ getAnniversary }}</h3>
+              <div @mouseover="display = !display" @mouseleave="display = !display" class="pt-14">
+                <div v-if="display">Days Until: {{ getDaysUntil }}</div>
+                <div v-else>Seconds Until: {{ getSecondsUntil }}</div>
+              </div>
+            </div>
+            <!-- Display the budget history year -->
+            <div v-else>
+              <h3 class="pt-16">
+                Viewing budgets from {{ this.getFiscalYearView }} - {{ this.getFiscalYearView + 1 }}
+              </h3>
+              <div class="pt-14">[Inactive Budget]</div>
+            </div>
+            <v-spacer></v-spacer>
+            <v-icon style="margin-right: 10px;">
+              history
+            </v-icon>
+          </v-card-title>
+        </v-card>
+      </v-flex>
+    </v-flex>
+
     <!-- Expense Data -->
     <v-flex xs12 sm12 md12 lg8>
       <v-flex v-if="loading" text-center>
@@ -57,7 +86,7 @@
 <script>
 import api from '@/shared/api.js';
 import BudgetChart from '../components/BudgetChart.vue';
-//import BudgetSelectModal from '../components/BudgetSelectModal.vue';
+import BudgetSelectModal from '../components/BudgetSelectModal.vue';
 import BudgetTable from '../components/BudgetTable.vue';
 import ExpenseForm from '../components/ExpenseForm.vue';
 import MobileDetect from 'mobile-detect';
@@ -247,6 +276,98 @@ function drawGraph() {
     optionSet: options
   };
 } // drawGraph
+
+/**
+ * Get the next anniversary date for the employee based on their hire date.
+ *
+ * @return String - next employee anniversary date (day of year, month, day, year)
+ */
+function getAnniversary() {
+  const [year, month, day] = this.hireDate.split('-'); // split anniversary year, month, and day
+  if (moment(`${month}/${day}/${year}`, 'MM/DD/YYYY', true).isValid()) {
+    // if valid date
+    let now = moment();
+    let hireDate = moment(this.hireDate, 'YYYY-MM-DD');
+
+    if (now.isAfter(hireDate)) {
+      // employee's hire date is before today
+      let anniversary = moment([now.year(), hireDate.month(), hireDate.date()]);
+      // employee's hire date is before today
+      if (now.isSameOrAfter(anniversary)) {
+        // employee's anniversary date has already occured this year
+        anniversary.add(1, 'years');
+        return anniversary.format('ddd. MMM D, YYYY');
+      } else {
+        // employee's anniversary date still has to happen between now and the end of year
+        return anniversary.format('ddd. MMM D, YYYY');
+      }
+    } else {
+      // employee's hire date is in the future
+      return hireDate.add(1, 'years').format('ddd. MMM D, YYYY');
+    }
+  } else {
+    // TODO: Return something for invalid date
+    return 'Ooops no anniversary, when did you start working here again? ';
+  }
+} // getAnniversary
+
+/**
+ * Get the days until the employee's next anniversary date.
+ */
+function getDaysUntil() {
+  let now = moment();
+
+  let hireDate = moment(this.hireDate, 'YYYY-MM-DD');
+  let anniversary = moment([now.year(), hireDate.month(), hireDate.date()]);
+
+  if (now.isAfter(hireDate)) {
+    // employee's hire date is before today
+    if (now.isSameOrAfter(anniversary)) {
+      // employee's anniversary date has already occured this year
+      anniversary.add(1, 'years');
+    }
+  } else {
+    // employee's hire date is in the future
+    anniversary = hireDate.add(1, 'years');
+  }
+
+  return anniversary.diff(now, 'days') + 1;
+} // getDaysUntil
+
+/**
+ * Get the year for the employee budget year view.
+ *
+ * @return Int - year for budget year view
+ */
+function getFiscalYearView() {
+  let [year] = this.fiscalDateView.split('-');
+  return parseInt(year);
+} // getFiscalYearView
+
+/**
+ * Get the seconds until the employee's next anniversary date.
+ */
+function getSecondsUntil() {
+  if (this.actualTime) {
+    // the actual time exists
+    let now = moment();
+    let year = now.year();
+    let hireDate = moment(this.hireDate, 'YYYY-MM-DD');
+    let anniversary = moment([year, hireDate.month(), hireDate.date()]);
+
+    if (now.isAfter(hireDate)) {
+      // employee's hire date is before today
+      if (now.isSameOrAfter(anniversary)) {
+        // employee's anniversary date has already occured this year
+        anniversary.add(1, 'years');
+      }
+    } else {
+      // employee's hire date is in the future
+      anniversary = hireDate.add(1, 'years');
+    }
+    return anniversary.diff(now, 'seconds');
+  }
+} // getSecondsUntil
 
 /**
  * Checks if the current device used is mobile. Return true if it is mobile. Returns false if it is not mobile.
@@ -483,13 +604,17 @@ async function created() {
 export default {
   components: {
     BudgetChart,
-
+    BudgetSelectModal,
     BudgetTable,
     ExpenseForm
   },
   computed: {
     budgets,
     drawGraph,
+    getAnniversary,
+    getDaysUntil,
+    getFiscalYearView,
+    getSecondsUntil,
     isMobile,
     viewingCurrentBudgetYear
   },
