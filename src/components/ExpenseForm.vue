@@ -519,6 +519,7 @@ function clearForm() {
   this.$set(this.expense, 'category', '');
   this.$set(this.expense, 'expenseTypeId', '');
   this.originalExpense = null;
+  this.file = null;
 
   this.$set(this.urlInfo, 'url', '');
   this.$set(this.urlInfo, 'category', '');
@@ -809,7 +810,6 @@ async function submit() {
     }
     this.loading = false; // set loading status to false
   }
-  this.file = null;
 } // submit
 
 /**
