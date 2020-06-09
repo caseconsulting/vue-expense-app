@@ -1,56 +1,83 @@
 <template>
-  <v-layout row wrap justify-center>
-    <!-- Title -->
-    <v-flex v-if="!isMobile" lg8 md12 sm12>
-      <v-row style="height: 100%;" align="center" justify="center">
-        <h1>Hello, {{ employee.firstName }}!</h1>
-      </v-row>
-    </v-flex>
-    <!-- Anniversary Date -->
-    <v-flex lg4 v-if="!isMobile">
-      <v-flex>
-        <v-card @click="changingBudgetView = true" hover>
-          <v-card-title>
-            <!-- display the next anniversary date -->
-            <div v-if="viewingCurrentBudgetYear">
-              <h3 class="pt-16">Anniversary Date: {{ getAnniversary }}</h3>
-              <div @mouseover="display = !display" @mouseleave="display = !display" class="pt-14">
-                <div v-if="display">Days Until: {{ getDaysUntil }}</div>
-                <div v-else>Seconds Until: {{ getSecondsUntil }}</div>
+  <v-container>
+    <v-layout row wrap justify-center>
+      <!-- Title -->
+      <v-flex v-if="!isMobile" lg6 md6 sm6>
+        <v-row style="height: 100%;" align="center" justify="center">
+          <h1>Hello, {{ employee.firstName }}!</h1>
+        </v-row>
+      </v-flex>
+      <!-- Anniversary Date -->
+      <v-flex lg6 v-if="!isMobile">
+        <v-flex>
+          <v-card @click="changingBudgetView = true" hover>
+            <v-card-title>
+              <!-- display the next anniversary date -->
+              <div v-if="viewingCurrentBudgetYear">
+                <h3 class="pt-16">Anniversary Date: {{ getAnniversary }}</h3>
+                <div @mouseover="display = !display" @mouseleave="display = !display" class="pt-14">
+                  <div v-if="display">Days Until: {{ getDaysUntil }}</div>
+                  <div v-else>Seconds Until: {{ getSecondsUntil }}</div>
+                </div>
               </div>
-            </div>
-            <!-- Display the budget history year -->
-            <div v-else>
-              <h3 class="pt-16">
-                Viewing budgets from {{ this.getFiscalYearView }} - {{ this.getFiscalYearView + 1 }}
-              </h3>
-              <div class="pt-14">[Inactive Budget]</div>
-            </div>
-            <v-spacer></v-spacer>
-            <v-icon style="margin-right: 10px;">
-              history
-            </v-icon>
-          </v-card-title>
+              <!-- Display the budget history year -->
+              <div v-else>
+                <h3 class="pt-16">
+                  Viewing budgets from {{ this.getFiscalYearView }} - {{ this.getFiscalYearView + 1 }}
+                </h3>
+                <div class="pt-14">[Inactive Budget]</div>
+              </div>
+              <v-spacer></v-spacer>
+              <v-icon style="margin-right: 10px;">
+                history
+              </v-icon>
+            </v-card-title>
+          </v-card>
+        </v-flex>
+      </v-flex>
+      <budget-select-modal
+        :activate="changingBudgetView"
+        :budgetYears="this.budgetYears"
+        :current="this.fiscalDateView"
+        :hireDate="this.hireDate"
+      ></budget-select-modal>
+      <!-- Available Budgets -->
+      <v-flex xs12 sm6 md6 lg6 float-left>
+        <v-flex v-if="loading" text-center>
+          <v-progress-circular indeterminate size="64" color="#bc3825"></v-progress-circular>
+        </v-flex>
+        <v-flex v-else text-center class="pt-0">
+          <available-budgets v-if="!loading" :budgets="expenseTypeData"></available-budgets>
+        </v-flex>
+      </v-flex>
+      <!-- extra links -->
+      <v-flex>
+        <v-card max-width="225" class="mx-auto">
+          <v-card flat tile color="#bc3825">
+            <v-card-text>
+              <v-btn
+                class="mx-auto white--text"
+                v-for="link in mediaLinks"
+                :key="link.name"
+                :href="link.link"
+                icon
+                target="_blank"
+              >
+                <icon :name="link.icon"></icon>
+              </v-btn>
+            </v-card-text>
+          </v-card>
+          <v-list v-for="link in links" :key="link.name">
+            <v-list-item :href="link.link" target="_blank">
+              <v-list-item-content>
+                {{ link.name }}
+              </v-list-item-content>
+            </v-list-item>
+          </v-list>
         </v-card>
       </v-flex>
-    </v-flex>
-    <budget-select-modal
-      :activate="changingBudgetView"
-      :budgetYears="this.budgetYears"
-      :current="this.fiscalDateView"
-      :hireDate="this.hireDate"
-    ></budget-select-modal>
-    <!-- Available Budgets -->
-    <v-flex xs12 sm6 md6 lg6 float-left>
-      <v-flex v-if="loading" text-center>
-        <v-progress-circular indeterminate size="64" color="#bc3825"></v-progress-circular>
-      </v-flex>
-
-      <v-flex v-else text-center class="pt-0">
-        <available-budgets v-if="!loading" :budgets="expenseTypeData"></available-budgets>
-      </v-flex>
-    </v-flex>
-  </v-layout>
+    </v-layout>
+  </v-container>
 </template>
 
 <script>
@@ -436,7 +463,21 @@ export default {
         statusType: undefined,
         statusMessage: '',
         color: ''
-      } // snackbar action status
+      }, // snackbar action status
+      links: [
+        { name: 'Basecamp', link: 'https://3.basecamp.com/3097063' },
+        { name: '401k', link: 'https://3.basecamp.com/3097063/buckets/179119/vaults/29920981' },
+        { name: 'Health Insurance', link: 'https://3.basecamp.com/3097063/buckets/179119/vaults/29920949' },
+        { name: 'TSheets', link: 'https://caseconsulting.tsheets.com/' },
+        { name: 'ADP', link: 'https://www.adp.com/' }
+      ],
+      mediaLinks: [
+        { name: 'github', link: 'https://github.com/caseconsulting', icon: 'brands/github' },
+        { name: 'linkedIn', link: 'https://linkedin.com/company/case-consulting-inc', icon: 'brands/linkedin' },
+        { name: 'youtube', link: 'https://www.youtube.com/channel/UC_oJY4OrOpLNrIBAN7Y-9fA', icon: 'brands/youtube' },
+        { name: 'twitter', link: 'https://twitter.com/consultwithcase?lang=en', icon: 'brands/twitter' },
+        { name: 'Facebook', link: 'https://www.facebook.com/ConsultwithCase/', icon: 'brands/facebook' }
+      ]
     };
   },
   filters: {

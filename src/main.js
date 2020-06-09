@@ -36,6 +36,11 @@ import 'vue-awesome/icons/clock';
 import 'vue-awesome/icons/regular/clock';
 import 'vue-awesome/icons/regular/stop-circle';
 import 'vue-awesome/icons/home';
+import 'vue-awesome/icons/brands/twitter';
+import 'vue-awesome/icons/brands/github';
+import 'vue-awesome/icons/brands/linkedin';
+import 'vue-awesome/icons/brands/youtube';
+import 'vue-awesome/icons/brands/facebook';
 
 import Icon from 'vue-awesome/components/Icon';
 import App from './App.vue';
