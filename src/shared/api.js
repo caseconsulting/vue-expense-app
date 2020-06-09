@@ -147,15 +147,12 @@ function deleteAttachment(expense) {
 }
 
 export default {
-  // getCanDelete,
   getEmployeeBudget,
   getAllActiveEmployeeBudgets,
   getAllEmployeeExpenses,
   getAllExpenseTypeExpenses,
   getFiscalDateViewBudgets,
   getEmployeeBudgets,
-  //getBudgetsByDate,
-  //getBudgetsByDateAndType,
   getItems,
   getItem,
   getAttachment,
