@@ -49,9 +49,13 @@ $case-darkgray: #3f3f3c;
 .home_buttons {
   color: $case-red !important;
   background-color: white !important;
-  padding: 4px 2px;
+  padding: 8px 8px;
   margin-bottom: 16px;
-  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.12), 0 1px 4px rgba(0, 0, 0, 0.24);
+  border: 0.5px solid $case-red;
+  border-radius: 5px;
+  text-transform: uppercase;
+  text-emphasis: bold;
+  font-weight: bold;
 }
 
 .table_color {
