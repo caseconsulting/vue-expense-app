@@ -176,7 +176,7 @@
 
                   <!-- Place of Birth: State autocomplete -->
                   <v-autocomplete
-                    v-if="this.model.country == 'United States of America'"
+                    v-if="isUSA"
                     :items="states"
                     v-model="model.st"
                     item-text="text"
@@ -295,6 +295,24 @@ import _ from 'lodash';
 
 const regex = /^(([^<>()[\]\\.,;:\s@#"]+(\.[^<>()[\]\\.,;:\s@#"]+)*)|(".+"))@consultwithcase.com/;
 
+// |--------------------------------------------------|
+// |                                                  |
+// |                    Computed                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * checks to see if the country is the United States. if it is: returns true
+ * otherwise clears state field and returns false
+ */
+function isUSA() {
+  if (this.model.country == 'United States of America') {
+    return true;
+  } else {
+    this.model.st = '';
+    return false;
+  }
+}
 // |--------------------------------------------------|
 // |                                                  |
 // |                     METHODS                      |
@@ -616,6 +634,9 @@ export default {
       statusRadio: 'full', // work status button
       valid: false // form validity
     };
+  },
+  computed: {
+    isUSA
   },
   methods: {
     clearForm,
