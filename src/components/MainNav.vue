@@ -1,10 +1,5 @@
 <template>
   <div>
-    <!-- Logo -->
-    <v-flex>
-      <img src="@/assets/img/logo-banner.gif" class="logo" />
-    </v-flex>
-
     <!-- Navigation Links -->
     <v-list class="pt-0" dense>
       <v-divider></v-divider>
@@ -207,10 +202,6 @@ export default {
 <style lang="scss">
 .e {
   color: #68caa6;
-}
-
-.logo {
-  width: 100%;
 }
 
 #main-header {

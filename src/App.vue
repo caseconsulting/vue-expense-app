@@ -14,8 +14,11 @@
         <main-nav></main-nav>
       </v-navigation-drawer>
       <v-app-bar class="nav-color" dark fixed app clipped-left>
+        <v-avatar size="40" color="grey lighten-4" class="mr-2">
+          <img src="@/assets/img/case-logo-circle.png" class="logo-bar" />
+        </v-avatar>
         <v-toolbar-title>
-          <h2 style="text-align: center;">Case Portal</h2>
+          <h1 class="d-inline" style="text-align: center;">Case Portal</h1>
         </v-toolbar-title>
         <v-spacer></v-spacer>
 
@@ -157,6 +160,10 @@ export default {
   -o-animation: color-change 10s infinite alternate both;
   -ms-animation: color-change 10s infinite alternate both;
   animation: color-change 5s infinite alternate both;
+}
+
+.logo-bar {
+  width: 25px;
 }
 
 @-webkit-keyframes color-change {
