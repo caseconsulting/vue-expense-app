@@ -8,6 +8,7 @@ const TRAINING_URLS = 'training-urls';
 const UTILITY = 'utility';
 const BUDGETS = 'budgets';
 const URLS = 'training-urls';
+const TSHEETS = 'tSheets';
 const API_HOSTNAME = API_CONFIG.apiHostname;
 const API_PORT = API_CONFIG.apiPort;
 const PORT = API_PORT === '443' ? '' : `:${API_PORT}`;
@@ -146,6 +147,15 @@ function deleteAttachment(expense) {
   return execute('delete', `attachment/${expense.employeeId}/${expense.id}/${expense.receipt}`);
 }
 
+//functions for tSheets
+function getPTOBalances(employeeNumber) {
+  return execute('get', `/${TSHEETS}/getPTOBalances/${employeeNumber}`);
+}
+
+function getTimeSheets(employeeNumber, startDate, endDate) {
+  return execute('get', `/${TSHEETS}//getTimeSheets/${employeeNumber}/${startDate}/${endDate}`);
+}
+
 export default {
   getEmployeeBudget,
   getAllActiveEmployeeBudgets,
@@ -166,10 +176,13 @@ export default {
   getCountries,
   getRole,
   getUser,
+  getPTOBalances,
+  getTimeSheets,
   EXPENSE_TYPES,
   EXPENSES,
   EMPLOYEES,
   UTILITY,
   BUDGETS,
-  URLS
+  URLS,
+  TSHEETS
 };
