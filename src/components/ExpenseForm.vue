@@ -299,6 +299,10 @@ function moneyFilter(value) {
   }).format(value)}`;
 } // moneyFilter
 
+function highFiveConst() {
+  const highFive = moneyFilter(50);
+  return highFive;
+}
 /**
  * Adds an expenses url and category to the training urls page.
  *
@@ -1040,6 +1044,7 @@ export default {
     };
   },
   methods: {
+    highFiveConst,
     moneyFilter,
     addURLInfo,
     betweenDates,
@@ -1073,20 +1078,20 @@ export default {
       let selected = _.find(this.expenseTypes, (expenseType) => {
         return expenseType.value === this.expense.expenseTypeId;
       });
-      if (selected && selected.recurringFlag) {
+      if (selected && selected.recurringFlag && selected.budgetName === 'High Five') {
         this.hint = 'Recurring Expense Type';
-        this.$set(this.expense, 'cost', moneyFilter(50));
+        this.$set(this.expense, 'cost', highFiveConst());
+      } else if (selected && selected.recurringFlag) {
+        this.hint = 'Recurring Expense Type';
+        this.$set(this.expense, 'cost', this.item.cost);
+      } else if (selected && selected.budgetName !== 'High Five') {
+        this.$set(this.expense, 'cost', '');
       } else if (selected) {
         this.hint = `Available from ${formatDate(selected.startDate)} - ${formatDate(selected.endDate)}`;
         this.$set(this.expense, 'cost', '');
       } else {
         this.hint = '';
       }
-      /*if (selected && selected.recurringFlag && this.expenseType.budgetName === 'High Five') {
-        this.$set(this.expense, 'cost', moneyFilter(50));
-      } else {
-        this.$set(this.expense, 'cost', '');
-      }*/
     },
     'expense.id': function () {
       this.originalExpense = _.cloneDeep(this.expense);
