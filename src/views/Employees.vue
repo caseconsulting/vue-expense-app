@@ -217,6 +217,7 @@
       <employee-form
         ref="form"
         :model="model"
+        :employeeInfo="employeeInfo"
         v-on:add="addModelToTable"
         v-on:update="updateModelInTable"
         v-on:error="displayError"
@@ -345,6 +346,16 @@ async function displayError(err) {
 } // displayError
 
 /**
+ * Filters out contracts from list of employees.
+ */
+function filterContracts() {
+  let tempContracts = _.map(this.employees, (a) => a.contract); //extract contracts
+  tempContracts = _.map(tempContracts, (a) => a.trim()); //trim whitespace
+  tempContracts = _.compact(tempContracts); //remove falsey values
+  this.employeeInfo.contracts = [...new Set(tempContracts)]; //remove duplicates
+} // filterContracts
+
+/**
  * Filters list of employees.
  */
 function filterEmployees() {
@@ -356,6 +367,16 @@ function filterEmployees() {
     return fullCheck || partCheck || inactiveCheck;
   });
 } // filterEmployees
+
+/**
+ * Filters out primes from list of employees.
+ */
+function filterPrimes() {
+  let tempPrimes = _.map(this.employees, (a) => a.prime); //extract primes
+  tempPrimes = _.map(tempPrimes, (a) => a.trim()); //trim whitespace
+  tempPrimes = _.compact(tempPrimes); //remove falsey values
+  this.employeeInfo.primes = [...new Set(tempPrimes)]; //remove duplicates and set
+} // filterPrimes
 
 /**
  * Returns Full Time, Part Time, or Inactive based on the work status
@@ -488,6 +509,8 @@ function onSelect(item) {
 async function refreshEmployees() {
   this.loading = true; // set loading status to true
   this.employees = await api.getItems(api.EMPLOYEES); // get all employees
+  this.filterPrimes();
+  this.filterContracts();
   this.filterEmployees(); // filter employees
   this.expanded = []; // collapse any expanded rows in the database
   this.loading = false; // set loading status to false
@@ -587,6 +610,10 @@ export default {
         id: ''
       }, // employee to delete
       deleting: false, // activate delete confirmation model
+      employeeInfo: {
+        primes: [],
+        contracts: []
+      },
       employees: [], // employees
       expanded: [], // datatable expanded
       filter: {
@@ -671,7 +698,9 @@ export default {
     deleteEmployee,
     deleteModelFromTable,
     displayError,
+    filterContracts,
     filterEmployees,
+    filterPrimes,
     getWorkStatus,
     isDisplayData,
     isEditing,

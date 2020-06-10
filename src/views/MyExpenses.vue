@@ -728,7 +728,6 @@ async function created() {
 
   let aggregatedExpenses = await api.getAllAggregateExpenses(); // get aggregate expenses
   this.constructAutoComplete(aggregatedExpenses); // set autocomplete options
-  console.log(this.userInfo);
 }
 
 // |--------------------------------------------------|

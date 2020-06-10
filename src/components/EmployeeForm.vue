@@ -85,21 +85,25 @@
               >ADVANCED (optional)</v-expansion-panel-header
             >
             <v-expansion-panel-content style="background-color: whitesmoke;">
-              <!-- Prime text field -->
-              <v-text-field
+              <!-- Prime combo box -->
+              <v-combobox
                 style="padding-right: 20px; padding-left: 10px;"
                 v-model="model.prime"
+                :items="employeeInfo.primes"
                 label="Prime"
                 data-vv-name="Prime"
-              ></v-text-field>
+                dense
+              ></v-combobox>
 
-              <!-- Contract text field -->
-              <v-text-field
+              <!-- Contract combo box -->
+              <v-combobox
                 style="padding-right: 20px; padding-left: 10px;"
                 v-model="model.contract"
+                :items="employeeInfo.contracts"
                 label="Contract"
                 data-vv-name="Contract"
-              ></v-text-field>
+                dense
+              ></v-combobox>
 
               <!-- Github text field -->
               <v-text-field
@@ -652,7 +656,7 @@ export default {
     submit,
     userIsAdmin
   },
-  props: ['model'], // employee to be created/updated
+  props: ['model', 'employeeInfo'], // employee to be created/updated
   watch: {
     date: function () {
       this.hireDateFormatted = this.formatDate(this.date) || this.hireDateFormatted;

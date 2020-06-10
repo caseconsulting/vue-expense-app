@@ -934,7 +934,7 @@ export default {
       this.filterExpenseTypes();
     },
     deleteInfo: function () {
-      console.log('?');
+      return;
     }
   }
 };
