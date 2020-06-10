@@ -50,10 +50,11 @@
           <available-budgets v-if="!loading" :budgets="expenseTypeData"></available-budgets>
         </v-flex>
       </v-flex>
-      <!-- extra links -->
+      <!-- Quick links -->
       <v-flex>
         <v-card max-width="225" class="mx-auto">
           <v-card flat tile color="#bc3825">
+            <v-card-title class="white--text">Quick Links</v-card-title>
             <v-card-text>
               <v-btn
                 class="mx-auto white--text"
@@ -67,7 +68,8 @@
               </v-btn>
             </v-card-text>
           </v-card>
-          <v-list v-for="link in links" :key="link.name">
+          <v-list v-for="(link, index) in links" :key="link.name">
+            <v-divider v-if="index != 0"></v-divider>
             <v-list-item :href="link.link" target="_blank">
               <v-list-item-content>
                 {{ link.name }}
