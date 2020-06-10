@@ -289,6 +289,16 @@ function isUser() {
 // |                                                  |
 // |--------------------------------------------------|
 
+//Returns a number with two decimal point precision as a string.
+function moneyFilter(value) {
+  return `${new Intl.NumberFormat('en-US', {
+    style: 'decimal',
+    useGrouping: false,
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  }).format(value)}`;
+} // moneyFilter
+
 /**
  * Adds an expenses url and category to the training urls page.
  *
@@ -1030,6 +1040,7 @@ export default {
     };
   },
   methods: {
+    moneyFilter,
     addURLInfo,
     betweenDates,
     calcAdjustedBudget,
@@ -1062,14 +1073,20 @@ export default {
       let selected = _.find(this.expenseTypes, (expenseType) => {
         return expenseType.value === this.expense.expenseTypeId;
       });
-
       if (selected && selected.recurringFlag) {
         this.hint = 'Recurring Expense Type';
+        this.$set(this.expense, 'cost', moneyFilter(50));
       } else if (selected) {
         this.hint = `Available from ${formatDate(selected.startDate)} - ${formatDate(selected.endDate)}`;
+        this.$set(this.expense, 'cost', '');
       } else {
         this.hint = '';
       }
+      /*if (selected && selected.recurringFlag && this.expenseType.budgetName === 'High Five') {
+        this.$set(this.expense, 'cost', moneyFilter(50));
+      } else {
+        this.$set(this.expense, 'cost', '');
+      }*/
     },
     'expense.id': function () {
       this.originalExpense = _.cloneDeep(this.expense);
