@@ -717,7 +717,31 @@ async function refreshExpenseTypes() {
   this.loading = true; // set loading status to true
   this.expenseTypes = await api.getItems(api.EXPENSE_TYPES);
 
-  // TODO: filter out expense types that the user does not have access to
+  // filter expense types for the user
+  if (!this.userIsAdmin()) {
+    // create an array for the user expense types
+    let expenseTypesFiltered = [];
+    // get the employees budgets that have expenses
+    let budgetsWithExpenses = await api.getEmployeeBudgets(this.userInfo.id);
+    // get the active budgets for the employee
+    let activeBudgets = await api.getAllActiveEmployeeBudgets(this.userInfo.id);
+    // map the active budgets
+    let activeExpTypes = _.map(activeBudgets, (budget) => {
+      return budget.expenseTypeId;
+    });
+    // map the budgets with expenses
+    let budExpTypes = _.map(budgetsWithExpenses, (budget) => {
+      return budget.expenseTypeId;
+    });
+    // combine the two types of expenses
+    expenseTypesFiltered = _.union(activeExpTypes, budExpTypes);
+    // get rid of duplicates
+    expenseTypesFiltered = _.uniq(expenseTypesFiltered);
+    // set this.expenseTypes to only have those the user should see (expenseTypesFiltered)
+    this.expenseTypes = _.filter(this.expenseTypes, expenseType => {
+      return expenseTypesFiltered.includes(expenseType.id);
+    });
+  }
 
   this.filterExpenseTypes();
 
