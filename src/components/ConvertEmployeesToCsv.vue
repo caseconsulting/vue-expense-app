@@ -4,6 +4,8 @@
 </template>
 
 <script>
+import _ from 'lodash';
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                     METHODS                      |
@@ -38,7 +40,7 @@ function download() {
   var fileTitle = 'employees'; // or 'my-unique-title'
 
   // call the exportCSVFile() function to process the JSON and trigger the download
-  this.exportCSVFile(this.employees, fileTitle);
+  this.exportCSVFile(_.cloneDeep(this.employees), fileTitle);
 } // download
 
 /**
