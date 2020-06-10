@@ -738,7 +738,7 @@ async function refreshExpenseTypes() {
     // get rid of duplicates
     expenseTypesFiltered = _.uniq(expenseTypesFiltered);
     // set this.expenseTypes to only have those the user should see (expenseTypesFiltered)
-    this.expenseTypes = _.filter(this.expenseTypes, expenseType => {
+    this.expenseTypes = _.filter(this.expenseTypes, (expenseType) => {
       return expenseTypesFiltered.includes(expenseType.id);
     });
   }
