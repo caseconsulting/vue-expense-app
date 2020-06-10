@@ -34,7 +34,7 @@
 
             <!-- SubItems Icon -->
             <v-list-item-icon style="width: 30px;">
-              <icon :name="subItem.icon" class="navbar-icons"></icon>
+              <!-- <icon :name="subItem.icon" class="navbar-icons"></icon> -->
             </v-list-item-icon>
           </v-list-item>
         </v-list-group>
