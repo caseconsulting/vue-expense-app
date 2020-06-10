@@ -153,7 +153,7 @@ function getPTOBalances(employeeNumber) {
 }
 
 function getTimeSheets(employeeNumber, startDate, endDate) {
-  return execute('get', `/${TSHEETS}//getTimeSheets/${employeeNumber}/${startDate}/${endDate}`);
+  return execute('get', `/${TSHEETS}/getTimeSheets/${employeeNumber}/${startDate}/${endDate}`);
 }
 
 export default {
