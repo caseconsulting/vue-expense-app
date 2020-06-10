@@ -5,6 +5,7 @@
 
 <script>
 import api from '@/shared/api.js';
+import _ from 'lodash';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -40,7 +41,7 @@ function download() {
   var fileTitle = 'expenses'; // or 'my-unique-title'
 
   // call the exportCSVFile() function to process the JSON and trigger the download
-  this.exportCSVFile(this.expenses, fileTitle);
+  this.exportCSVFile(_.cloneDeep(this.expenses), fileTitle);
 } // download
 
 /**
