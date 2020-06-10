@@ -157,6 +157,12 @@
                 <v-date-picker v-model="model.birthday" no-title @input="BirthdayMenu = false"></v-date-picker>
               </v-menu>
 
+              <!-- opt out of birthday feed -->
+              <v-switch
+                v-model="model.birthdayFeed"
+                :label="`Have birthday recognized on company feed ${model.birthdayFeed}`"
+              ></v-switch>
+
               <!-- Place of Birth -->
               <p style="font-size: 17px; padding-left: 10px; padding-top: 10px;">Place of Birth</p>
               <div style="padding-right: 20px; padding-left: 30px; padding-bottom: 10px;">
@@ -350,6 +356,7 @@ function clearForm() {
   this.$set(this.model, 'st', '');
   this.$set(this.model, 'country', '');
   this.$set(this.model, 'deptDate', '');
+  this.$set(this.model, 'birthdayFeed', false);
 
   this.deptDateFormatted = null;
 } // clearForm
