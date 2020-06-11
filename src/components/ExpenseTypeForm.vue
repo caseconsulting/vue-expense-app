@@ -378,10 +378,12 @@ async function created() {
   let employees = await api.getItems(api.EMPLOYEES);
   let allEmployees = [];
   _.forEach(employees, (employee) => {
-    allEmployees.push({
-      value: employee.id,
-      text: `${employee.firstName} ${employee.lastName}`
-    });
+    if (employee.workStatus > 0) {
+      allEmployees.push({
+        value: employee.id,
+        text: `${employee.firstName} ${employee.lastName}`
+      });
+    }
   });
   allEmployees = _.sortBy(allEmployees, ['text']);
   this.allEmployees = allEmployees;
