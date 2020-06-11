@@ -7,6 +7,10 @@
         </router-link>
       </v-card-title>
       <v-card-text class="px-7 pt-5 pb-1 black--text">
+        <!-- If no avaible budgets -->
+        <v-row v-if="budgets.length == 0" justify="center">
+          <p>No available budgets</p>
+        </v-row>
         <!-- Loop all budgets -->
         <v-row v-for="budget in budgets" :key="budget.expenseTypeId" @click="selectBudget(budget)">
           {{ budget.expenseTypeName }}:
