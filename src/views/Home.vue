@@ -8,9 +8,9 @@
         </v-row>
       </v-flex>
       <!-- Anniversary Date -->
-      <v-flex lg6 v-if="!isMobile">
+      <v-flex lg4 v-if="!isMobile">
         <v-flex>
-          <v-card @click="changingBudgetView = true" hover>
+          <v-card hover>
             <v-card-title>
               <!-- display the next anniversary date -->
               <div v-if="viewingCurrentBudgetYear">
@@ -22,25 +22,16 @@
               </div>
               <!-- Display the budget history year -->
               <div v-else>
-                <h3 class="pt-16">
+                <!--<h3 class="pt-16">
                   Viewing budgets from {{ this.getFiscalYearView }} - {{ this.getFiscalYearView + 1 }}
                 </h3>
-                <div class="pt-14">[Inactive Budget]</div>
+                <div class="pt-14">[Inactive Budget]</div> -->
               </div>
               <v-spacer></v-spacer>
-              <v-icon style="margin-right: 10px;">
-                history
-              </v-icon>
             </v-card-title>
           </v-card>
         </v-flex>
       </v-flex>
-      <budget-select-modal
-        :activate="changingBudgetView"
-        :budgetYears="this.budgetYears"
-        :current="this.fiscalDateView"
-        :hireDate="this.hireDate"
-      ></budget-select-modal>
     </v-layout>
     <v-layout row wrap>
       <!-- Available Budgets -->
@@ -91,7 +82,7 @@
 <script>
 import api from '@/shared/api.js';
 import AvailableBudgets from '../components/AvailableBudgets.vue';
-import BudgetSelectModal from '../components/BudgetSelectModal.vue';
+//import BudgetSelectModal from '../components/BudgetSelectModal.vue';
 import MobileDetect from 'mobile-detect';
 import moment from 'moment';
 import ActivityFeed from '../components/ActivityFeed';
@@ -444,8 +435,7 @@ async function created() {
 export default {
   components: {
     ActivityFeed,
-    AvailableBudgets,
-    BudgetSelectModal
+    AvailableBudgets
   },
   computed: {
     budgets,
