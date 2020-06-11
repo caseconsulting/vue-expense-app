@@ -1,6 +1,6 @@
 <template>
   <v-container>
-    <v-layout row wrap justify-center>
+    <v-layout row wrap>
       <!-- Title -->
       <v-flex v-if="!isMobile" lg6 md6 sm6>
         <v-row style="height: 100%;" align="center" justify="center">
@@ -41,6 +41,8 @@
         :current="this.fiscalDateView"
         :hireDate="this.hireDate"
       ></budget-select-modal>
+    </v-layout>
+    <v-layout row wrap>
       <!-- Available Budgets -->
       <v-flex xs12 sm6 md6 lg6 float-left>
         <v-flex v-if="loading" text-center>
@@ -50,12 +52,16 @@
           <available-budgets v-if="!loading" :budgets="expenseTypeData"></available-budgets>
         </v-flex>
       </v-flex>
+      <!-- Activity Feed -->
+      <v-flex mt-0 xs12 sm3 md3 lg3>
+        <activity-feed :events="events"></activity-feed>
+      </v-flex>
       <!-- Quick links -->
-      <v-flex>
-        <v-card max-width="225" class="mx-auto">
+      <v-flex xs12 sm3 md3 lg3>
+        <v-card align-content-space-around>
           <v-card flat tile color="#bc3825">
             <v-card-title class="white--text">Quick Links</v-card-title>
-            <v-card-text>
+            <div class="links">
               <v-btn
                 class="mx-auto white--text"
                 v-for="link in mediaLinks"
@@ -66,7 +72,7 @@
               >
                 <icon :name="link.icon"></icon>
               </v-btn>
-            </v-card-text>
+            </div>
           </v-card>
           <v-list v-for="(link, index) in links" :key="link.name">
             <v-divider v-if="index != 0"></v-divider>
@@ -88,6 +94,7 @@ import AvailableBudgets from '../components/AvailableBudgets.vue';
 import BudgetSelectModal from '../components/BudgetSelectModal.vue';
 import MobileDetect from 'mobile-detect';
 import moment from 'moment';
+import ActivityFeed from '../components/ActivityFeed';
 import _ from 'lodash';
 
 const IsoFormat = 'YYYY-MM-DD';
@@ -436,6 +443,7 @@ async function created() {
 
 export default {
   components: {
+    ActivityFeed,
     AvailableBudgets,
     BudgetSelectModal
   },
@@ -456,6 +464,63 @@ export default {
       changingBudgetView: false, // change budget year view activator
       display: true, // show seconds till anniversary activator
       employee: {}, // employee
+      events: [
+        // fake data to show activity feed functionality
+        {
+          icon: 'brands/twitter',
+          name: 'some name',
+          employeeAvatar: 'someAvatar.jpg',
+          text: 'this is the activity feed'
+        },
+        {
+          icon: 'brands/github',
+          name: 'some name2',
+          employeeAvatar: 'someAvatar.jpg',
+          text: 'we can easily add dates'
+        },
+        {
+          icon: 'brands/facebook',
+          name: 'some name3',
+          employeeAvatar: 'someAvatar.jpg',
+          text: 'and maybe check if it was today or yesterday and show that as a message instead'
+        },
+        {
+          icon: 'brands/twitter',
+          name: 'some name4',
+          employeeAvatar: 'someAvatar.jpg',
+          text: 'Icons on the left can be peoples avatars of basecamp maybe'
+        },
+        {
+          icon: 'brands/twitter',
+          name: 'some name5',
+          employeeAvatar: 'someAvatar.jpg',
+          text: 'what the text is about'
+        },
+        {
+          icon: 'brands/twitter',
+          name: 'some name6',
+          employeeAvatar: 'someAvatar.jpg',
+          text: 'what the text is about'
+        },
+        {
+          icon: 'brands/twitter',
+          name: 'some name7',
+          employeeAvatar: 'someAvatar.jpg',
+          text: 'what the text is about'
+        },
+        {
+          icon: 'brands/twitter',
+          name: 'some name8',
+          employeeAvatar: 'someAvatar.jpg',
+          text: 'what the text is about'
+        },
+        {
+          icon: 'brands/twitter',
+          name: 'some name9',
+          employeeAvatar: 'someAvatar.jpg',
+          text: 'what the text is about'
+        }
+      ],
       expenseTypeData: [], // aggregated budgets for expense types
       fiscalDateView: '', // current budget year view by anniversary day
       hireDate: '', // employee hire date
@@ -507,3 +572,9 @@ export default {
   }
 };
 </script>
+<style>
+.links {
+  padding-bottom: 16px;
+  text-align: center;
+}
+</style>
