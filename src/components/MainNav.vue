@@ -33,9 +33,6 @@
             </v-list-item-content>
 
             <!-- SubItems Icon -->
-            <v-list-item-icon style="width: 30px;">
-              <!-- <icon :name="subItem.icon" class="navbar-icons"></icon> -->
-            </v-list-item-icon>
           </v-list-item>
         </v-list-group>
         <v-list-item
@@ -45,6 +42,7 @@
           :to="{ name: item.route }"
           @click="scrollUp"
         >
+          <!--NavBar icons-->
           <!-- Item Icon -->
           <v-list-item-icon style="width: 30px;">
             <icon :name="item.icon" class="navbar-icons"></icon>
