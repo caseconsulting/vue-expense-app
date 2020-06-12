@@ -158,7 +158,11 @@
               </v-menu>
 
               <!-- opt out of birthday feed -->
-              <v-switch v-model="model.birthdayFeed" :label="`Have birthday recognized on company feed?`"></v-switch>
+              <v-switch
+                v-model="model.birthdayFeed"
+                :label="`Have birthday recognized on company feed?`"
+                :disabled="disableBirthdayFeed()"
+              ></v-switch>
 
               <!-- Place of Birth -->
               <p style="font-size: 17px; padding-left: 10px; padding-top: 10px;">Place of Birth</p>
@@ -499,6 +503,19 @@ function userIsAdmin() {
   return getRole() === 'admin';
 } // userIsAdmin
 
+/**
+ * Function for handling if the birthdayFeed switch is disabled
+ *
+ * @return boolean - birthday feed is disabled
+ */
+function disableBirthdayFeed() {
+  if (this.model.birthday == '' || this.model.birthday == null || typeof this.model.birthday == 'undefined') {
+    this.model.birthdayFeed = false;
+    return true;
+  }
+  return false;
+}
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                 LIFECYCLE HOOKS                  |
@@ -660,7 +677,8 @@ export default {
     isStatusEmpty,
     parseDate,
     submit,
-    userIsAdmin
+    userIsAdmin,
+    disableBirthdayFeed
   },
   props: ['model', 'employeeInfo'], // employee to be created/updated
   watch: {
