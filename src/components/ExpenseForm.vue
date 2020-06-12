@@ -784,9 +784,10 @@ function parseDate(date) {
  *
  * @param file - receipt
  */
-function setFile(file) {
+async function setFile(file) {
   if (file) {
     this.file = file;
+    this.receiptText = await api.extractText(file);
   } else {
     this.file = undefined;
   }
@@ -1005,6 +1006,7 @@ export default {
       originalExpense: null, // expense before changes
       purchaseDateFormatted: null, // formatted purchase date
       receiptRules: [(v) => !!v || 'Receipts are required'], // rules for receipt
+      receiptText: null,
       reimbursedDateFormatted: null, // formatted reimburse date
       selectedEmployee: {}, // selected employees
       selectedExpenseType: {}, // selected expense types

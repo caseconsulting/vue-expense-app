@@ -121,6 +121,29 @@ function getAttachment(employeeId, expenseId) {
   return execute('get', `attachment/${employeeId}/${expenseId}`);
 }
 
+async function extractText(file) {
+  let formData = new FormData();
+  formData.append('receipt', file);
+
+  // inject the accessToken for each request
+  let accessToken = getAccessToken();
+
+  return client({
+    method: 'put',
+    url: `/attachment/${file.name}`,
+    data: formData,
+    headers: {
+      Authorization: `Bearer ${accessToken}`
+    }
+  })
+    .then((response) => {
+      return response.data;
+    })
+    .catch((err) => {
+      return err;
+    });
+}
+
 async function createAttachment(expense, file) {
   let formData = new FormData();
   formData.append('receipt', file);
@@ -157,6 +180,7 @@ function getTimeSheets(employeeNumber, startDate, endDate) {
 }
 
 export default {
+  extractText,
   getEmployeeBudget,
   getAllActiveEmployeeBudgets,
   getAllEmployeeExpenses,
