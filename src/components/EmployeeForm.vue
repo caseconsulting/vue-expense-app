@@ -158,10 +158,7 @@
               </v-menu>
 
               <!-- opt out of birthday feed -->
-              <v-switch
-                v-model="model.birthdayFeed"
-                :label="`Have birthday recognized on company feed ${model.birthdayFeed}`"
-              ></v-switch>
+              <v-switch v-model="model.birthdayFeed" :label="`Have birthday recognized on company feed?`"></v-switch>
 
               <!-- Place of Birth -->
               <p style="font-size: 17px; padding-left: 10px; padding-top: 10px;">Place of Birth</p>
@@ -352,11 +349,11 @@ function clearForm() {
   this.$set(this.model, 'twitter', '');
   this.$set(this.model, 'jobRole', '');
   this.$set(this.model, 'birthday', '');
+  this.$set(this.model, 'birthdayFeed', false);
   this.$set(this.model, 'city', '');
   this.$set(this.model, 'st', '');
   this.$set(this.model, 'country', '');
   this.$set(this.model, 'deptDate', '');
-  this.$set(this.model, 'birthdayFeed', false);
 
   this.deptDateFormatted = null;
 } // clearForm
@@ -514,6 +511,7 @@ function userIsAdmin() {
 async function created() {
   this.countries = _.map(await api.getCountries(), 'name');
   this.countries.unshift('United States of America');
+  this.clearForm();
 }
 
 // |--------------------------------------------------|
@@ -643,7 +641,8 @@ export default {
       ], // state options
       status: '100', // work status value
       statusRadio: 'full', // work status button
-      valid: false // form validity
+      valid: false, // form validity
+      checker: 'not here'
     };
   },
   computed: {

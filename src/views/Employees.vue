@@ -162,6 +162,9 @@
                       <p v-if="userIsAdmin() && !isEmpty(item.birthday)">
                         <b>Birthday: </b>{{ item.birthday | dateFormat }}
                       </p>
+                      <p v-if="userIsAdmin() && !isEmpty(item.birthdayFeed)">
+                        <b>Birthday on feed: </b>{{ item.birthdayFeed | birthdayFeedResponse }}
+                      </p>
                       <p v-if="userIsAdmin() && !isEmpty(item.city) && !isEmpty(item.st) && !isEmpty(item.country)">
                         <b>Place of Birth: </b>{{ item.city }}, {{ item.st }}, {{ item.country }}
                       </p>
@@ -272,6 +275,7 @@ function clearModel() {
 
   //New Fields
   this.$set(this.model, 'birthday', '');
+  this.$set(this.model, 'birthdayFeed', false);
   this.$set(this.model, 'jobRole', '');
   this.$set(this.model, 'prime', '');
   this.$set(this.model, 'contract', '');
@@ -492,6 +496,7 @@ function onSelect(item) {
 
   // New Fields
   this.$set(this.model, 'birthday', item.birthday);
+  this.$set(this.model, 'birthdayFeed', item.birthdayFeed);
   this.$set(this.model, 'jobRole', item.jobRole);
   this.$set(this.model, 'prime', item.prime.trim());
   this.$set(this.model, 'contract', item.contract.trim());
@@ -660,6 +665,7 @@ export default {
         hireDate: null,
         workStatus: 100,
         birthday: '',
+        birthdayFeed: false,
         jobRole: '',
         prime: '',
         contract: '',
@@ -687,6 +693,13 @@ export default {
         return moment(value).format('MMM Do, YYYY');
       } else {
         return '';
+      }
+    },
+    birthdayFeedResponse: (value) => {
+      if (value == true) {
+        return 'yes';
+      } else {
+        return 'no';
       }
     }
   },
