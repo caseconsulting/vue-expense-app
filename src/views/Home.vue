@@ -10,7 +10,7 @@
       <!-- Anniversary Date -->
       <v-flex lg4 v-if="!isMobile">
         <v-flex>
-          <v-card hover>
+          <v-card>
             <v-card-title>
               <!-- display the next anniversary date -->
               <div v-if="viewingCurrentBudgetYear">
@@ -19,13 +19,6 @@
                   <div v-if="display">Days Until: {{ getDaysUntil }}</div>
                   <div v-else>Seconds Until: {{ getSecondsUntil }}</div>
                 </div>
-              </div>
-              <!-- Display the budget history year -->
-              <div v-else>
-                <!--<h3 class="pt-16">
-                  Viewing budgets from {{ this.getFiscalYearView }} - {{ this.getFiscalYearView + 1 }}
-                </h3>
-                <div class="pt-14">[Inactive Budget]</div> -->
               </div>
               <v-spacer></v-spacer>
             </v-card-title>
@@ -82,7 +75,6 @@
 <script>
 import api from '@/shared/api.js';
 import AvailableBudgets from '../components/AvailableBudgets.vue';
-//import BudgetSelectModal from '../components/BudgetSelectModal.vue';
 import MobileDetect from 'mobile-detect';
 import moment from 'moment';
 import ActivityFeed from '../components/ActivityFeed';
