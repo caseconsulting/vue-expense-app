@@ -67,7 +67,7 @@
           prefix="$"
           v-model="expense.cost"
           :rules="costRules"
-          :disabled="isReimbursed || isInactive"
+          :disabled="isReimbursed || isInactive || disabled"
           label="Cost"
           data-vv-name="Cost"
         ></v-text-field>
@@ -299,10 +299,6 @@ function moneyFilter(value) {
   }).format(value)}`;
 } // moneyFilter
 
-function highFiveConst() {
-  const highFive = moneyFilter(50);
-  return highFive;
-}
 /**
  * Adds an expenses url and category to the training urls page.
  *
@@ -1044,7 +1040,6 @@ export default {
     };
   },
   methods: {
-    highFiveConst,
     moneyFilter,
     addURLInfo,
     betweenDates,
@@ -1078,19 +1073,25 @@ export default {
       let selected = _.find(this.expenseTypes, (expenseType) => {
         return expenseType.value === this.expense.expenseTypeId;
       });
-      if (selected && selected.recurringFlag && selected.budgetName === 'High Five') {
+      if (selected && selected.budgetName === 'High Five') {
         this.hint = 'Recurring Expense Type';
-        this.$set(this.expense, 'cost', highFiveConst());
-      } else if (selected && selected.recurringFlag) {
+        this.$set(this.expense, 'cost', moneyFilter(50));
+        this.disabled = true;
+      } else if (selected && selected.recurringFlag && selected.budgetName !== 'High Five') {
         this.hint = 'Recurring Expense Type';
         this.$set(this.expense, 'cost', this.item.cost);
+        this.disabled = false;
       } else if (selected && selected.budgetName !== 'High Five') {
+        this.hint = `Available from ${formatDate(selected.startDate)} - ${formatDate(selected.endDate)}`;
         this.$set(this.expense, 'cost', '');
+        this.disabled = false;
       } else if (selected) {
         this.hint = `Available from ${formatDate(selected.startDate)} - ${formatDate(selected.endDate)}`;
         this.$set(this.expense, 'cost', '');
+        this.disabled = false;
       } else {
         this.hint = '';
+        this.disabled = false;
       }
     },
     'expense.id': function () {
