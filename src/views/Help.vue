@@ -149,7 +149,7 @@ export default {
           {
             title: 'How do I submit a High Five Award?',
             body:
-              'In the Create New Expense tab select the expense type “High Five”, put $50 in Cost, and in the description be sure to specify who you are awarding and why.'
+              'In the Create New Expense tab select the expense type “High Five”, the Cost section will be automatically set to $50, and in the description be sure to specify who you are awarding and why.'
           },
           {
             title: "Why can't I delete an expense?",
