@@ -893,9 +893,9 @@ async function created() {
     this.submit(); // submit expense
   });
 
-  this.homeView = this.$route.path === '/home';
-  this.isInactive = this.homeView && this.userInfo.workStatus == 0;
-  this.asUser = this.homeView || this.employeeRole == 'user';
+  this.myBudgetsView = this.$route.path === '/myBudgets';
+  this.isInactive = this.myBudgetsView && this.userInfo.workStatus == 0;
+  this.asUser = this.myBudgetsView || this.employeeRole == 'user';
 
   if (this.asUser) {
     // creating or updating an expense as a user
@@ -995,7 +995,7 @@ export default {
       employees: [], // employees
       expenseTypes: [], // expense types
       file: undefined, // receipt
-      homeView: false, // if home view
+      myBudgetsView: false, // if on myBudgetsView page
       hint: '', // form hints
       isInactive: false, // employee is inactive
       loading: false, // loading
