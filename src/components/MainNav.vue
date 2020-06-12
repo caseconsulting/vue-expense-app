@@ -44,6 +44,7 @@
         >
           <!--NavBar icons-->
           <!-- Item Icon -->
+
           <v-list-item-icon style="width: 30px;">
             <icon :name="item.icon" class="navbar-icons"></icon>
           </v-list-item-icon>
@@ -211,10 +212,16 @@ export default {
   padding-bottom: 2%;
 }
 
+.navbar-icons,
+.icon-text {
+  vertical-align: middle;
+}
+
 .navbar-icons {
   color: #646460;
-  width: auto;
-  height: 2em;
+  text-align: center;
+  width: 100%;
+  height: 100%;
   max-width: 100%;
   max-height: 100%;
 }
