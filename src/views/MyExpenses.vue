@@ -608,7 +608,6 @@ function onSelect(item) {
   this.$set(this.expense, 'createdAt', item.createdAt);
   this.$set(this.expense, 'url', item.url.trim());
   this.$set(this.expense, 'category', item.category);
-  console.log(item);
 } // onSelect
 
 /**
