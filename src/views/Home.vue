@@ -2,13 +2,13 @@
   <v-container>
     <v-layout row wrap>
       <!-- Title -->
-      <v-flex v-if="!isMobile" lg6 md6 sm6>
+      <v-flex lg6 md6 sm6>
         <v-row style="height: 100%;" align="center" justify="center">
           <h1>Hello, {{ employee.firstName }}!</h1>
         </v-row>
       </v-flex>
       <!-- Anniversary Date -->
-      <v-flex lg4 v-if="!isMobile">
+      <v-flex lg4>
         <v-flex>
           <v-card>
             <v-card-title>
@@ -75,7 +75,7 @@
 <script>
 import api from '@/shared/api.js';
 import AvailableBudgets from '../components/AvailableBudgets.vue';
-import MobileDetect from 'mobile-detect';
+// import MobileDetect from 'mobile-detect';
 import moment from 'moment';
 import ActivityFeed from '../components/ActivityFeed';
 import _ from 'lodash';
@@ -207,10 +207,10 @@ function getSecondsUntil() {
  *
  * @return boolean - if the device is mobile
  */
-function isMobile() {
-  let md = new MobileDetect(window.navigator.userAgent);
-  return md.os() === 'AndroidOS' || md.os() === 'iOS';
-} // isMobile
+// function isMobile() {
+//   let md = new MobileDetect(window.navigator.userAgent);
+//   return md.os() === 'AndroidOS' || md.os() === 'iOS';
+// isMobile
 
 /**
  * Viewing the current active budget year. Returns true if the budget year being viwed is todays budget.
@@ -435,7 +435,7 @@ export default {
     getDaysUntil,
     getFiscalYearView,
     getSecondsUntil,
-    isMobile,
+    //    isMobile,
     viewingCurrentBudgetYear
   },
   created,
