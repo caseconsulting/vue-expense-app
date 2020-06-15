@@ -67,7 +67,7 @@
           prefix="$"
           v-model="expense.cost"
           :rules="costRules"
-          :disabled="isReimbursed || isInactive || disabled"
+          :disabled="isReimbursed || isInactive || isDisabled"
           label="Cost"
           data-vv-name="Cost"
         ></v-text-field>
@@ -1076,22 +1076,22 @@ export default {
       if (selected && selected.budgetName === 'High Five') {
         this.hint = 'Recurring Expense Type';
         this.$set(this.expense, 'cost', moneyFilter(50));
-        this.disabled = true;
+        this.isDisabled = true;
       } else if (selected && selected.recurringFlag && selected.budgetName !== 'High Five') {
         this.hint = 'Recurring Expense Type';
         this.$set(this.expense, 'cost', this.item.cost);
-        this.disabled = false;
+        this.isDisabled = false;
       } else if (selected && selected.budgetName !== 'High Five') {
         this.hint = `Available from ${formatDate(selected.startDate)} - ${formatDate(selected.endDate)}`;
         this.$set(this.expense, 'cost', '');
-        this.disabled = false;
+        this.isDisabled = false;
       } else if (selected) {
         this.hint = `Available from ${formatDate(selected.startDate)} - ${formatDate(selected.endDate)}`;
         this.$set(this.expense, 'cost', '');
-        this.disabled = false;
+        this.isDisabled = false;
       } else {
         this.hint = '';
-        this.disabled = false;
+        this.isDisabled = false;
       }
     },
     'expense.id': function () {
