@@ -2,10 +2,9 @@
   <div id="monthly-charges">
     <v-card>
       <v-card-title class="header_style">
-        <h4 class="white--text">Monthly Charges</h4>
+        <h4 class="white--text">Hours for {{ month }} {{ year }}</h4>
       </v-card-title>
       <v-card-text class="px-7 pt-5 pb-1 black--text">
-        <!-- Loop all budgets -->
         <v-row></v-row>
       </v-card-text>
     </v-card>
@@ -18,19 +17,20 @@ import moment from 'moment';
 
 // |--------------------------------------------------|
 // |                                                  |
-// |                     METHODS                      |
+// |                 LIFECYCLE HOOKS                  |
 // |                                                  |
 // |--------------------------------------------------|
 
 /**
- * Get the next anniversary date for the employee based on their hire date.
- *
- * @return String - next employee anniversary date (day of year, month, day, year)
+ *  Set budget information for employee. Creates event listeners.
  */
-function getMonthlyTimeCharges() {
+async function created() {
   let now = moment();
-  console.log(now);
-} // getMonthlyTimeCharges
+  let currMonth = now._d.getMonth();
+  this.month = now._locale._months[currMonth];
+  this.year = now._d.getFullYear();
+  console.log(this.year);
+} // created
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -39,8 +39,12 @@ function getMonthlyTimeCharges() {
 // |--------------------------------------------------|
 
 export default {
-  methods: {
-    getMonthlyTimeCharges
+  created,
+  data() {
+    return {
+      month: '',
+      year: ''
+    };
   },
   props: ['employee'] // employee
 };
