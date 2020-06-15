@@ -530,7 +530,6 @@ function disableBirthdayFeed() {
 async function created() {
   this.countries = _.map(await api.getCountries(), 'name');
   this.countries.unshift('United States of America');
-  this.clearForm();
 }
 
 // |--------------------------------------------------|
