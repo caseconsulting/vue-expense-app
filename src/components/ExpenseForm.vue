@@ -981,6 +981,7 @@ export default {
   created,
   data() {
     return {
+      isDisabled: false,
       allowReceipt: false, // allow receipt to be uploaded
       asUser: true, // user view
       requiredRules: [(v) => !!v || 'Required field'], // rules for required fields
