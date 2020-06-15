@@ -160,7 +160,7 @@
               <!-- opt out of birthday feed -->
               <v-switch
                 v-model="model.birthdayFeed"
-                :label="`Have birthday recognized on company feed?`"
+                :label="`Have birthday recognized on company feed? ${model.birthdayFeed}`"
                 :disabled="disableBirthdayFeed()"
               ></v-switch>
 
@@ -510,9 +510,11 @@ function userIsAdmin() {
  */
 function disableBirthdayFeed() {
   if (this.model.birthday == '' || this.model.birthday == null || typeof this.model.birthday == 'undefined') {
+    this.undisabled = false;
     this.model.birthdayFeed = false;
     return true;
   }
+  this.undisabled = true;
   return false;
 }
 
@@ -659,7 +661,7 @@ export default {
       status: '100', // work status value
       statusRadio: 'full', // work status button
       valid: false, // form validity
-      checker: 'not here'
+      undisabled: false
     };
   },
   computed: {
@@ -736,6 +738,11 @@ export default {
         this.status = '100';
       } else if (this.statusRadio == 'inactive') {
         this.status = '0';
+      }
+    },
+    undisabled: function () {
+      if (this.undisabled == true) {
+        this.model.birthdayFeed = true;
       }
     }
   }
