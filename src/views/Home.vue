@@ -374,6 +374,7 @@ async function refreshEmployee() {
   this.refreshBudget(); // refresh employee budgets
   this.allUserBudgets = await api.getEmployeeBudgets(this.employee.id); // set all employee budgets
   this.loading = false; // set loading status to false
+  this.ptoBalances = await api.getPTOBalances(this.employee.employeeNumber).results.users[this.employee.employeeNumber];
 } // refreshEmployee
 
 /**
@@ -507,6 +508,7 @@ export default {
       fiscalDateView: '', // current budget year view by anniversary day
       hireDate: '', // employee hire date
       loading: false, // loading status
+      ptoBalances: [],
       seconds: 0, // seconds until next anniversary date
       status: {
         statusType: undefined,
