@@ -260,6 +260,57 @@ function clearStatus() {
 } // clearStatus
 
 /**
+ * Create the events to populate the activity feed
+ */
+async function createEvents() {
+  this.employees = await api.getItems(api.EMPLOYEES);
+  //generate anniversaries
+  let anniversaries = _.map(this.employees, (a) => {
+    let hireDate = moment(a.hireDate, 'YYYY-MM-DD');
+    let event = {};
+    if (a.workStatus != 0 && hireDate.isValid()) {
+      let now = moment();
+      //set what we want to see in the Date
+      if (now.isAfter(hireDate, 'day')) {
+        //hire date is before today
+        let anniversary = moment([now.year(), hireDate.month(), hireDate.date()]); //set anniversary to hiredate but this year
+        let diff = now.diff(anniversary, 'day'); //difference between today and anniversary
+        if (diff == 0) {
+          event.date = 'Today'; //set date message as today if no difference in date
+        } else if (diff == 1) {
+          event.date = 'Yesterday'; //if it was one day removed message is yesterday
+        } else if (diff <= 6 && diff > 1) {
+          event.date = diff + ' days ago'; //if it is otherwise less than 7 days ago create message
+        } else if (diff < 0 && diff >= -6) {
+          event.date = 'Coming up in ' + Math.abs(diff) + ' days'; //if its in the "future" and within 6 days say its coming up
+        } else {
+          if (diff < 0) {
+            anniversary.subtract(1, 'years'); //this will set the anniversary to have been last year
+          }
+          event.date = anniversary.format('ll');
+        }
+        if (anniversary.isSame(hireDate, 'day')) {
+          event.text = a.firstName + ' has joined the Case Consulting team!'; //new hire message
+          event.icon = 'user-plus';
+        } else {
+          event.text =
+            a.firstName + ' is celebrating ' + anniversary.diff(hireDate, 'year') + ' years at Case Consulting!';
+          event.icon = 'glass-cheers';
+        }
+        event.daysFromToday = now.diff(anniversary, 'days');
+        return event;
+      } else {
+        return null; //dont show anything for people hired in the future
+      }
+    } else {
+      return null;
+    }
+  });
+  //TODO: figure out why sortby wont let me sort in desc order
+  this.events = _.sortBy(_.compact(anniversaries), 'daysFromToday');
+}
+
+/**
  * Set and display an error action status in the snackbar.
  *
  * @param err - String error message
@@ -414,7 +465,7 @@ async function created() {
     }
     this.changingBudgetView = false;
   });
-
+  this.createEvents();
   this.refreshEmployee();
   this.addOneSecondToActualTimeEverySecond();
 } // created
@@ -447,63 +498,8 @@ export default {
       changingBudgetView: false, // change budget year view activator
       display: true, // show seconds till anniversary activator
       employee: {}, // employee
-      events: [
-        // fake data to show activity feed functionality
-        {
-          icon: 'brands/twitter',
-          name: 'some name',
-          employeeAvatar: 'someAvatar.jpg',
-          text: 'this is the activity feed'
-        },
-        {
-          icon: 'brands/github',
-          name: 'some name2',
-          employeeAvatar: 'someAvatar.jpg',
-          text: 'we can easily add dates'
-        },
-        {
-          icon: 'brands/facebook',
-          name: 'some name3',
-          employeeAvatar: 'someAvatar.jpg',
-          text: 'and maybe check if it was today or yesterday and show that as a message instead'
-        },
-        {
-          icon: 'brands/twitter',
-          name: 'some name4',
-          employeeAvatar: 'someAvatar.jpg',
-          text: 'Icons on the left can be peoples avatars of basecamp maybe'
-        },
-        {
-          icon: 'brands/twitter',
-          name: 'some name5',
-          employeeAvatar: 'someAvatar.jpg',
-          text: 'what the text is about'
-        },
-        {
-          icon: 'brands/twitter',
-          name: 'some name6',
-          employeeAvatar: 'someAvatar.jpg',
-          text: 'what the text is about'
-        },
-        {
-          icon: 'brands/twitter',
-          name: 'some name7',
-          employeeAvatar: 'someAvatar.jpg',
-          text: 'what the text is about'
-        },
-        {
-          icon: 'brands/twitter',
-          name: 'some name8',
-          employeeAvatar: 'someAvatar.jpg',
-          text: 'what the text is about'
-        },
-        {
-          icon: 'brands/twitter',
-          name: 'some name9',
-          employeeAvatar: 'someAvatar.jpg',
-          text: 'what the text is about'
-        }
-      ],
+      employees: [],
+      events: [],
       expenseTypeData: [], // aggregated budgets for expense types
       fiscalDateView: '', // current budget year view by anniversary day
       hireDate: '', // employee hire date
@@ -545,6 +541,7 @@ export default {
     addOneSecondToActualTimeEverySecond,
     asyncForEach,
     clearStatus,
+    createEvents,
     displayError,
     getCurrentBudgetYear,
     isFullTime,

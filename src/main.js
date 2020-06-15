@@ -41,6 +41,8 @@ import 'vue-awesome/icons/brands/github';
 import 'vue-awesome/icons/brands/linkedin';
 import 'vue-awesome/icons/brands/youtube';
 import 'vue-awesome/icons/brands/facebook';
+import 'vue-awesome/icons/user-plus';
+import 'vue-awesome/icons/glass-cheers';
 
 import Icon from 'vue-awesome/components/Icon';
 import App from './App.vue';

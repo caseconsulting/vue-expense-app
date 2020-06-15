@@ -10,9 +10,10 @@
           <!-- <template v-slot:opposite>
             <icon :name="event.icon"></icon>
           </template> -->
-          <template v-slot:icon v-if="event.employeeAvatar">
+          <template v-slot:icon v-if="event.icon">
             <icon class="white--text" :name="event.icon"></icon>
           </template>
+          <h3>{{ event.date }}</h3>
           <div>{{ event.text }}</div>
         </v-timeline-item>
       </v-timeline>
