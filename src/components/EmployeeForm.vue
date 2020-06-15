@@ -160,7 +160,7 @@
               <!-- opt out of birthday feed -->
               <v-switch
                 v-model="model.birthdayFeed"
-                :label="`Have birthday recognized on company feed? ${model.birthdayFeed}`"
+                label="Have birthday recognized on company feed?"
                 :disabled="disableBirthdayFeed()"
               ></v-switch>
 
