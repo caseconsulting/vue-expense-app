@@ -33,7 +33,16 @@
           <v-progress-circular indeterminate size="64" color="#bc3825"></v-progress-circular>
         </v-flex>
         <v-flex v-else text-center class="pt-0">
-          <available-budgets v-if="!loading" :budgets="expenseTypeData"></available-budgets>
+          <available-budgets :budgets="expenseTypeData"></available-budgets>
+        </v-flex>
+      </v-flex>
+      <!-- Monthly Changes (TSheets) -->
+      <v-flex xs12 sm6 md6 lg6>
+        <v-flex v-if="loading" text-center>
+          <v-progress-circular indeterminate size="64" color="#bc3825"></v-progress-circular>
+        </v-flex>
+        <v-flex v-else text-center class="pt-0">
+          <monthly-charges v-if="!loading"></monthly-charges>
         </v-flex>
       </v-flex>
       <!-- Activity Feed -->
@@ -75,6 +84,7 @@
 <script>
 import api from '@/shared/api.js';
 import AvailableBudgets from '../components/AvailableBudgets.vue';
+import MonthlyCharges from '../components/MonthlyCharges.vue';
 // import MobileDetect from 'mobile-detect';
 import moment from 'moment';
 import ActivityFeed from '../components/ActivityFeed';
@@ -425,7 +435,8 @@ async function refreshEmployee() {
   this.refreshBudget(); // refresh employee budgets
   this.allUserBudgets = await api.getEmployeeBudgets(this.employee.id); // set all employee budgets
   this.loading = false; // set loading status to false
-  this.ptoBalances = await api.getPTOBalances(this.employee.employeeNumber).results.users[this.employee.employeeNumber];
+  this.ptoBalances = await api.getPTOBalances(this.employee.employeeNumber); // call api
+  this.ptoBalances = this.ptoBalances.results.users[this.employee.employeeNumber]; // get to balances
 } // refreshEmployee
 
 /**
@@ -479,7 +490,8 @@ async function created() {
 export default {
   components: {
     ActivityFeed,
-    AvailableBudgets
+    AvailableBudgets,
+    MonthlyCharges
   },
   computed: {
     budgets,
