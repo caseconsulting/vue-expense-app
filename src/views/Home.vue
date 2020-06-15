@@ -42,7 +42,7 @@
           <v-progress-circular indeterminate size="64" color="#bc3825"></v-progress-circular>
         </v-flex>
         <v-flex v-else text-center class="pt-0">
-          <monthly-charges v-if="!loading"></monthly-charges>
+          <monthly-charges :employee="this.employee"></monthly-charges>
         </v-flex>
       </v-flex>
       <!-- Activity Feed -->

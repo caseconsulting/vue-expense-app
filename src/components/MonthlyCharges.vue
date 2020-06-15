@@ -13,7 +13,9 @@
 
 <script>
 import moment from 'moment';
-// import api from '@/shared/api.js';
+import api from '@/shared/api.js';
+
+const IsoFormat = 'YYYY-MM-DD';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -25,11 +27,16 @@ import moment from 'moment';
  *  Set budget information for employee. Creates event listeners.
  */
 async function created() {
-  let now = moment();
-  let currMonth = now._d.getMonth();
-  this.month = now._locale._months[currMonth];
-  this.year = now._d.getFullYear();
-  console.log(this.year);
+  // get the current day & time in the proper format
+  let now = moment().format(IsoFormat);
+  // set the current month
+  this.month = moment().format('MMMM');
+  // set the current year
+  this.year = moment().format('YYYY');
+  // get the first day of the month in the proper format
+  let firstDay = moment().set('date', 1).format(IsoFormat);
+  // get timesheets from api
+  this.timeSheets = await api.getTimeSheets(this.employee.employeeNumber, firstDay, now);
 } // created
 
 // |--------------------------------------------------|
@@ -43,6 +50,7 @@ export default {
   data() {
     return {
       month: '',
+      timeSheets: [],
       year: ''
     };
   },

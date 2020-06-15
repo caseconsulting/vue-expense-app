@@ -116,6 +116,6 @@ export default {
     noRemaining,
     selectBudget
   },
-  props: ['budgets', 'employee'] // budgets
+  props: ['budgets'] // budgets
 };
 </script>
