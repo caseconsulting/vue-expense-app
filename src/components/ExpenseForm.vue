@@ -67,7 +67,7 @@
           prefix="$"
           v-model="expense.cost"
           :rules="costRules"
-          :disabled="isReimbursed || isInactive || isDisabled"
+          :disabled="isReimbursed || isInactive || isHighFive"
           label="Cost"
           data-vv-name="Cost"
         ></v-text-field>
@@ -981,7 +981,7 @@ export default {
   created,
   data() {
     return {
-      isDisabled: false,
+      isHighFive: false,
       allowReceipt: false, // allow receipt to be uploaded
       asUser: true, // user view
       requiredRules: [(v) => !!v || 'Required field'], // rules for required fields
@@ -1041,7 +1041,6 @@ export default {
     };
   },
   methods: {
-    moneyFilter,
     addURLInfo,
     betweenDates,
     calcAdjustedBudget,
@@ -1060,6 +1059,7 @@ export default {
     isEmpty,
     isFullTime,
     isReceiptRequired,
+    moneyFilter,
     parseDate,
     submit,
     setFile,
@@ -1074,25 +1074,22 @@ export default {
       let selected = _.find(this.expenseTypes, (expenseType) => {
         return expenseType.value === this.expense.expenseTypeId;
       });
-      if (selected && selected.budgetName === 'High Five') {
-        this.hint = 'Recurring Expense Type';
-        this.$set(this.expense, 'cost', moneyFilter(50));
-        this.isDisabled = true;
-      } else if (selected && selected.recurringFlag && selected.budgetName !== 'High Five') {
-        this.hint = 'Recurring Expense Type';
-        this.$set(this.expense, 'cost', this.item.cost);
-        this.isDisabled = false;
-      } else if (selected && selected.budgetName !== 'High Five') {
-        this.hint = `Available from ${formatDate(selected.startDate)} - ${formatDate(selected.endDate)}`;
-        this.$set(this.expense, 'cost', '');
-        this.isDisabled = false;
-      } else if (selected) {
-        this.hint = `Available from ${formatDate(selected.startDate)} - ${formatDate(selected.endDate)}`;
-        this.$set(this.expense, 'cost', '');
-        this.isDisabled = false;
+
+      if (selected) {
+        // set hint
+        this.hint = selected.recurringFlag
+          ? 'Recurring Expense Type'
+          : `Available from ${formatDate(selected.startDate)} - ${formatDate(selected.endDate)}`;
+
+        // set high five cost
+        if (selected.budgetName === 'High Five') {
+          this.$set(this.expense, 'cost', moneyFilter(50));
+          this.isHighFive = true;
+        } else {
+          this.isHighFive = false;
+        }
       } else {
         this.hint = '';
-        this.isDisabled = false;
       }
     },
     'expense.id': function () {
