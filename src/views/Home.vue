@@ -89,7 +89,6 @@ import MonthlyCharges from '../components/MonthlyCharges.vue';
 import moment from 'moment';
 import ActivityFeed from '../components/ActivityFeed';
 import _ from 'lodash';
-
 const IsoFormat = 'YYYY-MM-DD';
 
 // |--------------------------------------------------|
@@ -443,7 +442,20 @@ async function refreshEmployee() {
   this.loading = false; // set loading status to false
   this.ptoBalances = await api.getPTOBalances(this.employee.employeeNumber); // call api
   this.ptoBalances = this.ptoBalances.results.users[this.employee.employeeNumber]; // get to balances
-} // refreshEmployee
+  this.balanceData = this.ptoBalances['pto_balances'];
+  console.log('test 1, ', this.ptoBalances);
+  console.log('test2:', this.ptoBalances['pto_balances']['Training']);
+  console.log('test3', this.balanceData['Training']);
+
+  //console.log(Object.keys(Trai));
+
+  // var obj = JSON.parse(JSON.stringify(this.ptoBalances));
+  // this.TrainingData = obj.Training;
+  // console.log(this.TrainingData);
+  // console.log(this.ptoBalances);
+}
+
+// refreshEmployee
 
 /**
  * Set and display a successful submit status in the snackbar.
@@ -485,6 +497,7 @@ async function created() {
   this.createEvents();
   this.refreshEmployee();
   this.addOneSecondToActualTimeEverySecond();
+  console.log(this.ptoBalances.Training);
 } // created
 
 // |--------------------------------------------------|
