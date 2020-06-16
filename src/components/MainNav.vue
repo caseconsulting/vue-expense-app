@@ -7,7 +7,7 @@
         <v-list-group v-if="item.subItems" :key="item.title" active-class="v-list__tile--active">
           <template v-slot:activator>
             <!-- Parent Item Icon -->
-            <v-list-item-icon style="width: 30px;">
+            <v-list-item-icon style="width: 24px;">
               <icon :name="item.icon" class="navbar-icons"></icon>
             </v-list-item-icon>
 
@@ -45,7 +45,7 @@
           <!--NavBar icons-->
           <!-- Item Icon -->
 
-          <v-list-item-icon style="width: 30px;">
+          <v-list-item-icon style="width: 24px;">
             <icon :name="item.icon" class="navbar-icons"></icon>
           </v-list-item-icon>
 
