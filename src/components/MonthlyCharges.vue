@@ -10,7 +10,7 @@
           <v-spacer></v-spacer>
           <p>{{ job.hours }}</p>
         </v-row>
-        <v-row>
+        <v-row class="bold">
           Total:
           <v-spacer></v-spacer>
           <p>{{ this.totalHours }} / {{ workHours }}</p>
