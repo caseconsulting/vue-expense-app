@@ -334,7 +334,7 @@ function isUSA() {
  * Clears the form and sets all fields to a default state.
  */
 function clearForm() {
-  this.$refs.form.reset();
+  this.$refs.form.resetValidation();
   this.$set(this, 'date', '');
   this.$set(this.model, 'email', '@consultwithcase.com');
   this.$set(this.model, 'employeeRole', '');
@@ -343,6 +343,7 @@ function clearForm() {
   this.$set(this.model, 'lastName', '');
   this.$set(this.model, 'employeeNumber', '');
   this.$set(this.model, 'hireDate', '');
+  this.$set(this, 'hireDateFormatted', '');
   this.$set(this.model, 'id', '');
   this.$set(this.model, 'workStatus', 100);
 
@@ -353,11 +354,13 @@ function clearForm() {
   this.$set(this.model, 'twitter', '');
   this.$set(this.model, 'jobRole', '');
   this.$set(this.model, 'birthday', '');
+  this.$set(this, 'birthdayFormat', '');
   this.$set(this.model, 'birthdayFeed', false);
   this.$set(this.model, 'city', '');
   this.$set(this.model, 'st', '');
   this.$set(this.model, 'country', '');
   this.$set(this.model, 'deptDate', '');
+  this.$set(this, 'deptDateFormatted', '');
 
   this.deptDateFormatted = null;
 } // clearForm
