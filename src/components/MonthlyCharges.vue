@@ -13,7 +13,7 @@
         <v-row>
           Total:
           <v-spacer></v-spacer>
-          <p>{{ this.totalHours }}</p>
+          <p>{{ this.totalHours }} / {{ workHours }}</p>
         </v-row>
       </v-card-text>
     </v-card>
@@ -55,12 +55,26 @@ function jobHours() {
     });
   });
   _.forEach(jobHours, (total) => {
-    var hrs = parseInt(Number(total.hours));
-    var min = Math.round((Number(total.hours) - hrs) * 60);
-    total.hours = hrs + 'h ' + min + 'm';
+    total.hours = decimalToTime(total.hours);
   });
   return jobHours;
 } // jobHours
+
+function workHours() {
+  let workHours = 0;
+  let day = moment().set('date', 1);
+  let currMonth = day.month();
+  while (day.month() === currMonth) {
+    // if day.isoWeekday() >= 1 && <=6 then add 8 hours to workHours
+    if (day.isoWeekday() >= 1 && day.isoWeekday() <= 5) {
+      workHours += 8;
+      console.log(day);
+    }
+    // increment to the next day
+    day = day.add(1, 'd');
+  }
+  return workHours + 'h';
+} // workHours
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -85,10 +99,25 @@ async function created() {
   _.forEach(this.timeSheets, (hours) => {
     this.totalHours += hours.duration;
   });
-  var hrs = parseInt(Number(this.totalHours));
-  var min = Math.round((Number(this.totalHours) - hrs) * 60);
-  this.totalHours = hrs + 'h ' + min + 'm';
+  this.totalHours = decimalToTime(this.totalHours);
 } // created
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     METHODS                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * Convert decimal number in to hours and minutes.
+ * @param hours the decimal number of hours
+ */
+function decimalToTime(hours) {
+  var hrs = parseInt(Number(hours));
+  var min = Math.round((Number(hours) - hrs) * 60);
+  hours = hrs + 'h ' + min + 'm';
+  return hours;
+} // decimalToTime
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -98,12 +127,14 @@ async function created() {
 
 export default {
   computed: {
-    jobHours
+    jobHours,
+    workHours
   },
   created,
   data() {
     return {
       month: '',
+      monthlyMin: 0,
       timeSheets: [],
       totalHours: 0,
       year: ''
