@@ -46,11 +46,11 @@
         </v-flex>
       </v-flex>
       <!-- Activity Feed -->
-      <v-flex mt-0 xs12 sm3 md3 lg3>
+      <v-flex mt-0 xs12 sm6 md6 lg6>
         <activity-feed :events="events"></activity-feed>
       </v-flex>
       <!-- Quick links -->
-      <v-flex xs12 sm3 md3 lg3>
+      <v-flex xs12 sm6 md3 lg3>
         <v-card align-content-space-around>
           <v-card flat tile color="#bc3825">
             <v-card-title class="white--text">Quick Links</v-card-title>
