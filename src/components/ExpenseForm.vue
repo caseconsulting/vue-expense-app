@@ -798,6 +798,7 @@ async function setFile(file) {
   if (file) {
     this.file = file;
     this.receiptText = await api.extractText(file);
+    console.log(this.receiptText);
   } else {
     this.file = undefined;
   }
