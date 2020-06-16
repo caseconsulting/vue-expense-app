@@ -68,7 +68,6 @@ function workHours() {
     // if day.isoWeekday() >= 1 && <=6 then add 8 hours to workHours
     if (day.isoWeekday() >= 1 && day.isoWeekday() <= 5) {
       workHours += 8;
-      console.log(day);
     }
     // increment to the next day
     day = day.add(1, 'd');
