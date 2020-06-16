@@ -291,6 +291,8 @@ async function createEvents() {
           event.date = 'Yesterday'; //if it was one day removed message is yesterday
         } else if (diff <= 6 && diff > 1) {
           event.date = diff + ' days ago'; //if it is otherwise less than 7 days ago create message
+        } else if (diff == -1) {
+          event.date = 'Tomorrow';
         } else if (diff < 0 && diff >= -6) {
           event.date = 'Coming up in ' + Math.abs(diff) + ' days'; //if its in the "future" and within 6 days say its coming up
         } else {
@@ -303,8 +305,12 @@ async function createEvents() {
           event.text = a.firstName + ' has joined the Case Consulting team!'; //new hire message
           event.icon = 'user-plus';
         } else {
-          event.text =
-            a.firstName + ' is celebrating ' + anniversary.diff(hireDate, 'year') + ' years at Case Consulting!';
+          if (anniversary.diff(hireDate, 'year') == 1) {
+            event.text = a.firstName + ' is celebrating 1 year at Case Consulting!';
+          } else {
+            event.text =
+              a.firstName + ' is celebrating ' + anniversary.diff(hireDate, 'year') + ' years at Case Consulting!';
+          }
           event.icon = 'glass-cheers';
         }
         event.daysFromToday = now.diff(anniversary, 'days');
