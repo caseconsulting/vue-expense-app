@@ -452,7 +452,6 @@ async function refreshEmployee() {
   this.loading = false; // set loading status to false
   this.ptoBalances = await api.getPTOBalances(this.employee.employeeNumber); // call api
   this.ptoBalances = this.ptoBalances.results.users[this.employee.employeeNumber]; // get to balances
-  
 }
 
 // refreshEmployee
