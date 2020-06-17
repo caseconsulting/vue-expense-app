@@ -26,6 +26,37 @@
         </v-row>
       </v-card-text>
     </v-card>
+    <v-dialog v-model="showDialog" max-width="400">
+      <v-toolbar color="#565651" dark>
+        <v-toolbar-title>Hours</v-toolbar-title>
+      </v-toolbar>
+      <v-divider></v-divider>
+      <v-list class="pt-13" dense>
+        <!-- Hours worked this month -->
+        <v-list-item>
+          <v-list-item-content>Hours Worked:</v-list-item-content>
+          <v-list-item-content class="text-right">
+            <div>{{ this.totalHours }}</div>
+          </v-list-item-content>
+        </v-list-item>
+        <!-- Hours left this month -->
+        <v-list-item>
+          <v-list-item-content>Hours Remaining:</v-list-item-content>
+          <v-list-item-content class="text-right">
+            <div>{{ this.remaingingHours }}</div>
+          </v-list-item-content>
+        </v-list-item>
+        <!-- Work days left -->
+        <v-list-item>
+          <v-list-item-content>Work Days Remaining:</v-list-item-content>
+          <v-list-item-content class="text-right">
+            <div>
+              <input type="text" class="text-right" v-bind:value="this.remaingingWorkDays" />
+            </div>
+          </v-list-item-content>
+        </v-list-item>
+      </v-list>
+    </v-dialog>
   </div>
 </template>
 
@@ -132,6 +163,7 @@ async function created() {
   this.estimatedDailyHours = this.remaingingHours / this.remaingingWorkDays;
   this.estimatedDailyHours = decimalToTime(this.estimatedDailyHours);
   this.totalHours = decimalToTime(this.totalHours);
+  this.remaingingHours = decimalToTime(this.remaingingHours);
 } // created
 
 // |--------------------------------------------------|
