@@ -496,7 +496,6 @@ async function created() {
   this.createEvents();
   this.refreshEmployee();
   this.addOneSecondToActualTimeEverySecond();
-  console.log(this.ptoBalances.Training);
 } // created
 
 // |--------------------------------------------------|

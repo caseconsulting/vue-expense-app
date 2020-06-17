@@ -180,7 +180,7 @@ function getTimeSheets(employeeNumber, startDate, endDate) {
   return execute('get', `/${TSHEETS}/getTimeSheets/${employeeNumber}/${startDate}/${endDate}`);
 }
 function getTwitterToken() {
-  return execute('get', `/TWITTER/getTwitterToken`);
+  return execute('get', `/${TWITTER}/getTwitterToken`);
 }
 
 export default {
