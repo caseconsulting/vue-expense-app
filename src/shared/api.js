@@ -9,6 +9,7 @@ const UTILITY = 'utility';
 const BUDGETS = 'budgets';
 const URLS = 'training-urls';
 const TSHEETS = 'tSheets';
+const TWITTER = 'twitter';
 const API_HOSTNAME = API_CONFIG.apiHostname;
 const API_PORT = API_CONFIG.apiPort;
 const PORT = API_PORT === '443' ? '' : `:${API_PORT}`;
@@ -178,6 +179,9 @@ function getPTOBalances(employeeNumber) {
 function getTimeSheets(employeeNumber, startDate, endDate) {
   return execute('get', `/${TSHEETS}/getTimeSheets/${employeeNumber}/${startDate}/${endDate}`);
 }
+function getTwitterToken() {
+  return execute('get', `/TWITTER/getTwitterToken`);
+}
 
 export default {
   extractText,
@@ -202,11 +206,13 @@ export default {
   getUser,
   getPTOBalances,
   getTimeSheets,
+  getTwitterToken,
   EXPENSE_TYPES,
   EXPENSES,
   EMPLOYEES,
   UTILITY,
   BUDGETS,
   URLS,
-  TSHEETS
+  TSHEETS,
+  TWITTER
 };
