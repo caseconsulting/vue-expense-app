@@ -7,17 +7,9 @@
           The file you selected is {{ megabytes }} MBs which exceeds the maximum file size of 6MB.
         </v-alert>
 
-        <!-- Receipt Text Field -->
-        <v-text-field
-          :rules="passedRules"
-          label="Select Receipt"
-          @click="pickFile"
-          v-model="fileName"
-          prepend-icon="attach_file"
-        ></v-text-field>
-
         <!-- Receipt Input -->
-        <input type="file" style="display: none;" ref="receipt" :accept="acceptedFileTypes" @change="onFilePicked" />
+        <v-file-input v-model="inputFile" :rules="passedRules" label="Select Receipt" :accept="acceptedFileTypes">
+        </v-file-input>
       </v-flex>
     </v-layout>
   </div>
@@ -47,7 +39,7 @@ function fileTooBig() {
  * @return Number - file size in megabytes
  */
 function megabytes() {
-  return this.fileSize / 1000000;
+  return this.inputFile ? this.inputFile.size / 1000000 : 0;
 } // megabytes
 
 function acceptedFileTypes() {
@@ -75,29 +67,23 @@ function acceptedFileTypes() {
  *
  * @param e - file picked
  */
-function onFilePicked(e) {
-  const files = e.target.files;
-  if (files[0] != null) {
+function receiptChange() {
+  if (this.inputFile) {
     // file exists
-    this.fileName = files[0].name;
-    this.fileSize = files[0].size;
-    this.fileType = files[0].type;
-    if (this.fileName.lastIndexOf('.') <= 0 || this.fileTooBig) {
+    if (this.inputFile.name.lastIndexOf('.') <= 0 || this.fileTooBig) {
       // end if file name is missing or file is too large
       return;
     }
     const fr = new FileReader();
-    fr.readAsDataURL(files[0]);
+    fr.readAsDataURL(this.inputFile);
     fr.addEventListener('load', () => {
       this.previewURL = fr.result;
-      this.fileBlob = files[0]; // file that can be sent to s3
-      this.$emit('fileSelected', this.fileBlob);
+      this.$emit('fileSelected', this.inputFile);
     });
   } else {
     // file does not exist
-    this.fileName = '';
-    this.fileBlob = '';
     this.previewURL = '';
+    this.$emit('fileSelected', null);
   }
 } // onFilePicked
 
@@ -122,17 +108,24 @@ export default {
   },
   data: () => ({
     dialog: false,
-    fileBlob: '',
-    fileName: '',
-    fileSize: 0,
-    fileType: '',
     previewURL: '',
-    title: 'receipt upload'
+    title: 'receipt upload',
+    inputFile: null
   }),
   methods: {
-    onFilePicked,
+    receiptChange,
     pickFile
   },
-  props: ['passedRules'] // file text field rules
+  watch: {
+    inputFile: function () {
+      this.receiptChange();
+    },
+    receipt: function () {
+      if (this.receipt == null) {
+        this.inputFile = null;
+      }
+    }
+  },
+  props: ['passedRules', 'receipt'] // file text field rules
 };
 </script>

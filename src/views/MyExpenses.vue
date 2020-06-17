@@ -594,20 +594,20 @@ function isReimbursed(expense) {
  * @param item - expense selected
  */
 function onSelect(item) {
-  this.$set(this.expense, 'budgetName', item.budgetName);
   this.$set(this.expense, 'id', item.id);
+  this.$set(this.expense, 'createdAt', item.createdAt);
+  this.$set(this.expense, 'employeeId', item.employeeId);
+  this.$set(this.expense, 'employeeName', item.employeeName);
+  this.$set(this.expense, 'expenseTypeId', item.expenseTypeId);
+  this.$set(this.expense, 'budgetName', item.budgetName);
+  this.$set(this.expense, 'category', item.category);
+  this.$set(this.expense, 'cost', moneyFilter(item.cost));
+  this.$set(this.expense, 'description', item.description);
   this.$set(this.expense, 'purchaseDate', item.purchaseDate);
   this.$set(this.expense, 'reimbursedDate', item.reimbursedDate);
-  this.$set(this.expense, 'employeeName', item.employeeName);
-  this.$set(this.expense, 'description', item.description);
-  this.$set(this.expense, 'cost', moneyFilter(item.cost));
-  this.$set(this.expense, 'employeeId', item.employeeId);
-  this.$set(this.expense, 'expenseTypeId', item.expenseTypeId);
   this.$set(this.expense, 'note', item.note.trim());
   this.$set(this.expense, 'receipt', item.receipt);
-  this.$set(this.expense, 'createdAt', item.createdAt);
   this.$set(this.expense, 'url', item.url.trim());
-  this.$set(this.expense, 'category', item.category);
 } // onSelect
 
 /**
@@ -760,19 +760,20 @@ export default {
       employees: [], // employee autocomplete options
       employee: null, // employee autocomplete filter
       expense: {
-        id: '',
-        description: '',
-        cost: '',
-        note: null,
-        employeeId: '',
-        expenseTypeId: '',
+        id: null,
+        createdAt: null,
+        employeeId: null,
+        employeeName: null,
+        expenseTypeId: null,
+        budgetName: null,
+        category: null,
+        cost: null,
+        description: null,
         purchaseDate: null,
         reimbursedDate: null,
+        note: null,
         receipt: null,
-        employeeName: '',
-        budgetName: '',
-        createdAt: null,
-        category: ''
+        url: null
       }, // selected expense
       expenseTypes: [], // expense types
       filter: {
@@ -812,19 +813,20 @@ export default {
       ], // datatable headers
       loading: true, // loading status
       propExpense: {
-        id: '',
-        description: '',
-        cost: '',
-        note: null,
-        employeeId: '',
-        expenseTypeId: '',
+        id: null,
+        createdAt: null,
+        employeeId: null,
+        employeeName: null,
+        expenseTypeId: null,
+        budgetName: null,
+        category: null,
+        cost: 0,
+        description: null,
         purchaseDate: null,
         reimbursedDate: null,
+        note: null,
         receipt: null,
-        employeeName: '',
-        budgetName: '',
-        createdAt: null,
-        category: ''
+        url: null
       }, // expense to edit
       search: '', // query text for datatable search field
       sortBy: 'createdAt', // sort datatable items

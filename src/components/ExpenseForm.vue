@@ -152,6 +152,7 @@
           style="padding-top: 0px; padding-bottom: 0px;"
           @fileSelected="setFile"
           :passedRules="receiptRules"
+          :receipt="expense.receipt"
         ></file-upload>
 
         <!-- Receipt Name -->
@@ -519,27 +520,34 @@ function clearForm() {
   this.allowReceipt = false;
   this.$refs.form.reset();
 
-  this.$set(this.expense, 'budgetName', '');
-  this.$set(this.expense, 'id', '');
+  this.$set(this.expense, 'id', null);
+  this.$set(this.expense, 'createdAt', null);
+  if (this.asUser) {
+    // creating or updating an expense as a user
+    this.$set(this.expense, 'employeeId', this.userInfo.id);
+    this.$set(this.expense, 'employeeName', this.userInfo.id);
+  } else {
+    this.$set(this.expense, 'employeeId', null);
+    this.$set(this.expense, 'employeeName', null);
+  }
+  this.$set(this.expense, 'expenseTypeId', null);
+  this.$set(this.expense, 'budgetName', null);
+  this.$set(this.expense, 'category', null);
+  this.$set(this.expense, 'cost', null);
+  this.$set(this.expense, 'description', null);
   this.$set(this.expense, 'purchaseDate', null);
   this.$set(this.expense, 'reimbursedDate', null);
-  this.$set(this.expense, 'createdAt', null);
+  this.$set(this.expense, 'note', null);
+  this.$set(this.expense, 'receipt', null);
   this.$set(this.expense, 'url', null);
-  this.$set(this.expense, 'receipt', undefined);
-  this.$set(this.expense, 'category', '');
-  this.$set(this.expense, 'expenseTypeId', '');
+
   this.originalExpense = null;
+  this.purchaseDateFormatted = null;
   this.file = null;
 
   this.$set(this.urlInfo, 'url', '');
   this.$set(this.urlInfo, 'category', '');
   this.$set(this.urlInfo, 'hits', 0);
-
-  if (this.isUser) {
-    this.$set(this.expense, 'employeeName', this.userInfo.id);
-  } else {
-    this.$set(this.expense, 'employeeName', '');
-  }
 } // clearForm
 
 /**
@@ -586,6 +594,10 @@ async function createNewEntry() {
     }
   } else {
     // if receipt not required or not updating receipt
+    if (!this.isReceiptRequired()) {
+      this.file = null;
+      this.$set(this.expense, 'receipt', null);
+    }
     updatedExpense = await api.createItem(api.EXPENSES, this.expense);
 
     if (updatedExpense.id) {
@@ -797,10 +809,11 @@ function parseDate(date) {
 async function setFile(file) {
   if (file) {
     this.file = file;
+    this.$set(this.expense, 'receipt', file.name);
     this.receiptText = await api.extractText(file);
-    console.log(this.receiptText);
   } else {
-    this.file = undefined;
+    this.file = null;
+    this.receipt = null;
   }
 } // setFile
 
@@ -863,6 +876,11 @@ async function updateExistingEntry() {
     }
   } else {
     // if not updating receipt
+    if (!this.isReceiptRequired()) {
+      this.file = null;
+      this.$set(this.expense, 'receipt', null);
+    }
+
     // update item in database
     updatedExpense = await api.updateItem(api.EXPENSES, this.expense);
     if (updatedExpense.id) {
