@@ -109,7 +109,6 @@ function scrollUp() {
  * Updates active field of item with subItems
  */
 function checkActive() {
-  console.log('works');
   var isAnyActive;
   for (var i in this.items) {
     if (this.items[i].subItems) {
