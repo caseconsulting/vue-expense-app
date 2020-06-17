@@ -57,6 +57,11 @@ function jobHours() {
   _.forEach(jobHours, (total) => {
     total.hours = decimalToTime(total.hours);
   });
+  jobHours = _.sortBy(jobHours, [
+    function (job) {
+      return job.name;
+    }
+  ]);
   return jobHours;
 } // jobHours
 
