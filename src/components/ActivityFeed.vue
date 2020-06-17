@@ -1,7 +1,9 @@
 <template>
   <v-flex pa-0>
     <v-card class="white--text" color="#bc3825">
-      <v-card-title class="header_style">Activity Feed</v-card-title>
+      <v-card-title class="header_style">
+        <h4>Activity Feed</h4>
+      </v-card-title>
     </v-card>
     <v-card class="overflow-y-auto" max-height="376px">
       <!-- timeline -->

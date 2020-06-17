@@ -53,7 +53,7 @@
       <v-flex xs12 sm6 md3 lg3>
         <v-card align-content-space-around>
           <v-card flat tile color="#bc3825">
-            <v-card-title class="white--text">Quick Links</v-card-title>
+            <v-card-title class="header_style"><h4 class="white--text">Quick Links</h4></v-card-title>
             <div class="links">
               <v-btn
                 class="mx-auto white--text"
