@@ -19,6 +19,11 @@
           <v-spacer></v-spacer>
           <p>{{ this.totalHours }} / {{ workHours }}</p>
         </v-row>
+        <v-row @click="showDialog = true">
+          Estimated Hours/Day:
+          <v-spacer></v-spacer>
+          <p>{{ estimatedDailyHours }}</p>
+        </v-row>
       </v-card-text>
     </v-card>
   </div>
@@ -69,6 +74,21 @@ function jobHours() {
   return jobHours;
 } // jobHours
 
+function remaingingWorkDays() {
+  let remaingingWorkDays = 0;
+  let day = moment();
+  let currMonth = day.month();
+  while (day.month() === currMonth) {
+    // if day.isoWeekday() >= 1 && <=6 then add 1 day to remaingingWorkDays
+    if (day.isoWeekday() >= 1 && day.isoWeekday() <= 5) {
+      remaingingWorkDays += 1;
+    }
+    // increment to the next day
+    day = day.add(1, 'd');
+  }
+  return remaingingWorkDays;
+} // remaingingWorkDays
+
 function workHours() {
   let workHours = 0;
   let day = moment().set('date', 1);
@@ -107,6 +127,10 @@ async function created() {
   _.forEach(this.timeSheets, (hours) => {
     this.totalHours += hours.duration;
   });
+  this.workHoursNumber = this.workHours.substring(0, this.workHours.length - 1);
+  this.remaingingHours = this.workHoursNumber - this.totalHours;
+  this.estimatedDailyHours = this.remaingingHours / this.remaingingWorkDays;
+  this.estimatedDailyHours = decimalToTime(this.estimatedDailyHours);
   this.totalHours = decimalToTime(this.totalHours);
 } // created
 
@@ -136,15 +160,20 @@ function decimalToTime(hours) {
 export default {
   computed: {
     jobHours,
+    remaingingWorkDays,
     workHours
   },
   created,
   data() {
     return {
+      estimatedDailyHours: '',
       month: '',
       monthlyMin: 0,
+      remaingingHours: 0,
+      showDialog: false,
       timeSheets: [],
       totalHours: 0,
+      workHoursNumber: 0,
       year: ''
     };
   },
