@@ -3,8 +3,8 @@
     <!-- Navigation Links -->
     <v-list class="pt-0" dense>
       <v-divider></v-divider>
-      <template v-for="item in visibleTiles" class="navbar-icons">
-        <v-list-group v-if="item.subItems" :key="item.title" active-class="v-list__tile--active">
+      <div v-for="(item, i) in visibleTiles" :key="i">
+        <v-list-group v-if="item.subItems" :key="item.title" no-action active-class="v-list__tile--active">
           <template v-slot:activator>
             <!-- Parent Item Icon -->
             <v-list-item-icon style="width: 24px;">
@@ -31,8 +31,6 @@
             <v-list-item-content style="margin-left: 75px;">
               <v-list-item-title>{{ subItem.title }}</v-list-item-title>
             </v-list-item-content>
-
-            <!-- SubItems Icon -->
           </v-list-item>
         </v-list-group>
         <v-list-item
@@ -54,7 +52,7 @@
             <v-list-item-title>{{ item.title }}</v-list-item-title>
           </v-list-item-content>
         </v-list-item>
-      </template>
+      </div>
     </v-list>
     <!-- End Navigation Links -->
   </div>
