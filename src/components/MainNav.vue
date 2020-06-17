@@ -4,11 +4,11 @@
     <v-list class="pt-0" dense>
       <v-divider></v-divider>
       <div v-for="(item, i) in visibleTiles" :key="i">
-        <v-list-group v-if="item.subItems" :key="item.title" no-action active-class="v-list__tile--active">
+        <v-list-group v-if="item.subItems" :key="item.title" no-action active-class="red--text v-list__tile--active">
           <template v-slot:activator>
             <!-- Parent Item Icon -->
             <v-list-item-icon style="width: 24px;">
-              <icon :name="item.icon" class="navbar-icons"></icon>
+              <icon :name="item.icon" v-bind:class="{ 'red-icon': item.active }" class="navbar-icons"></icon>
             </v-list-item-icon>
 
             <!-- Parent Item Title -->
@@ -28,7 +28,7 @@
             "
           >
             <!-- SubItems Title -->
-            <v-list-item-content style="margin-left: 75px;">
+            <v-list-item-content>
               <v-list-item-title>{{ subItem.title }}</v-list-item-title>
             </v-list-item-content>
           </v-list-item>
@@ -103,6 +103,22 @@ function scrollUp() {
   this.$vuetify.goTo(0);
 } // scrollUp
 
+function checkActive() {
+  console.log('works');
+  var isAnyActive;
+  for (var i in this.items) {
+    if (this.items[i].subItems) {
+      isAnyActive = false;
+      for (var j in this.items[i].subItems) {
+        if (this.items[i].subItems[j].route == this.route) {
+          isAnyActive = true;
+        }
+      }
+      this.items[i].active = isAnyActive;
+    }
+  }
+}
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                 LIFECYCLE HOOKS                  |
@@ -114,6 +130,7 @@ function scrollUp() {
  */
 async function created() {
   this.permissions = getRole();
+  this.route = this.$route.name;
 } // created
 
 // |--------------------------------------------------|
@@ -165,7 +182,8 @@ export default {
               permission: ['admin']
             }
           ],
-          permission: ['user', 'admin']
+          permission: ['user', 'admin'],
+          active: false
         },
         {
           title: 'Employees',
@@ -186,12 +204,23 @@ export default {
           permission: ['admin', 'user']
         }
       ], // navigation options
-      permissions: '' // user role
+      permissions: '', // user role
+      route: ''
     };
   },
   methods: {
     scrollUp,
-    close
+    close,
+    checkActive
+  },
+  watch: {
+    '$route.name': {
+      handler: function () {
+        this.route = this.$route.name;
+      },
+      deep: true
+    },
+    route: checkActive
   }
 };
 </script>
@@ -234,5 +263,9 @@ export default {
 
 #slider-logo {
   margin-bottom: 5px;
+}
+
+.red-icon {
+  color: #bc3825;
 }
 </style>
