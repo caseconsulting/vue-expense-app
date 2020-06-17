@@ -45,6 +45,15 @@
           <monthly-charges :employee="this.employee"></monthly-charges>
         </v-flex>
       </v-flex>
+      <!-- Total Balances -->
+      <v-flex xs12 sm3 md3 lg3>
+        <v-flex v-if="loading" text-center>
+          <v-progress-circular indeterminate size="64" color="#bc3825"></v-progress-circular>
+        </v-flex>
+        <v-flex v-else text-center class="pt-0">
+          <balances :employee="this.employee"></balances>
+        </v-flex>
+      </v-flex>
       <!-- Activity Feed -->
       <v-flex mt-0 xs12 sm6 md6 lg6>
         <activity-feed :events="events"></activity-feed>
@@ -85,6 +94,7 @@
 import api from '@/shared/api.js';
 import AvailableBudgets from '../components/AvailableBudgets.vue';
 import MonthlyCharges from '../components/MonthlyCharges.vue';
+import Balances from '../components/Balances.vue';
 // import MobileDetect from 'mobile-detect';
 import moment from 'moment';
 import ActivityFeed from '../components/ActivityFeed';
@@ -442,17 +452,7 @@ async function refreshEmployee() {
   this.loading = false; // set loading status to false
   this.ptoBalances = await api.getPTOBalances(this.employee.employeeNumber); // call api
   this.ptoBalances = this.ptoBalances.results.users[this.employee.employeeNumber]; // get to balances
-  this.balanceData = this.ptoBalances['pto_balances'];
-  console.log('test 1, ', this.ptoBalances);
-  console.log('test2:', this.ptoBalances['pto_balances']['Training']);
-  console.log('test3', this.balanceData['Training']);
-
-  //console.log(Object.keys(Trai));
-
-  // var obj = JSON.parse(JSON.stringify(this.ptoBalances));
-  // this.TrainingData = obj.Training;
-  // console.log(this.TrainingData);
-  // console.log(this.ptoBalances);
+  
 }
 
 // refreshEmployee
@@ -510,7 +510,8 @@ export default {
   components: {
     ActivityFeed,
     AvailableBudgets,
-    MonthlyCharges
+    MonthlyCharges,
+    Balances
   },
   computed: {
     budgets,
