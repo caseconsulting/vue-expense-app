@@ -285,17 +285,6 @@ async function createEvents() {
         //hire date is before today
         let anniversary = moment([now.year(), hireDate.month(), hireDate.date()]); //set anniversary to hiredate but this year
         let diff = now.startOf('day').diff(anniversary.startOf('day'), 'day'); //difference between today and anniversary
-        console.log(
-          a.firstName +
-            ' diff: ' +
-            diff +
-            ' hiredate: ' +
-            hireDate.format('ll') +
-            ' ----||---- now: ' +
-            now.format('ll') +
-            ' ----||---- anniversary: ' +
-            anniversary.format('ll')
-        );
         if (diff == 0) {
           event.date = 'Today'; //set date message as today if no difference in date
         } else if (diff == 1) {
