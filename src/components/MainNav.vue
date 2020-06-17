@@ -98,11 +98,16 @@ function visibleTiles() {
 // |                     METHODS                      |
 // |                                                  |
 // |--------------------------------------------------|
-
+/**
+ * Scrolls up the page
+ */
 function scrollUp() {
   this.$vuetify.goTo(0);
 } // scrollUp
 
+/**
+ * Updates active field of item with subItems
+ */
 function checkActive() {
   console.log('works');
   var isAnyActive;
@@ -117,7 +122,7 @@ function checkActive() {
       this.items[i].active = isAnyActive;
     }
   }
-}
+}// checkActive
 
 // |--------------------------------------------------|
 // |                                                  |
