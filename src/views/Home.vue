@@ -46,7 +46,7 @@
         </v-flex>
       </v-flex>
       <!-- Total Balances -->
-      <v-flex xs12 sm3 md3 lg3>
+      <v-flex xs12 sm6 md6 lg5>
         <v-flex v-if="loading" text-center>
           <v-progress-circular indeterminate size="64" color="#bc3825"></v-progress-circular>
         </v-flex>

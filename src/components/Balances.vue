@@ -54,7 +54,7 @@ import api from '@/shared/api.js';
 // |--------------------------------------------------|
 
 /**
- *  Set Balances information for employee. Creates event listeners.
+ *  Set Balances information for employee.
  */
 async function created() {
   this.ptoBalances = await api.getPTOBalances(this.employee.employeeNumber); // call api
