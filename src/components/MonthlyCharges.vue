@@ -6,24 +6,29 @@
       </v-card-title>
       <v-card-text class="px-7 pt-5 pb-1 black--text">
         <!-- If the user has no hours -->
-        <v-row v-if="jobHours.length == 0" justify="center">
-          <p>No hours for this month</p>
-        </v-row>
-        <v-row v-for="job in jobHours" :key="job.name">
-          {{ job.name }}:
-          <v-spacer></v-spacer>
-          <p>{{ job.hours }}</p>
-        </v-row>
-        <v-row class="bold">
-          Total:
-          <v-spacer></v-spacer>
-          <p>{{ this.totalHours }} / {{ workHours }}</p>
-        </v-row>
-        <v-row @click="showDialog = true">
-          Estimated Hours/Day:
-          <v-spacer></v-spacer>
-          <p>{{ estimatedDailyHours }}</p>
-        </v-row>
+        <div v-if="this.loading" class="pb-4">
+          <v-progress-linear :indeterminate="true"></v-progress-linear>
+        </div>
+        <div v-else>
+          <v-row v-if="jobHours.length == 0" justify="center">
+            <p>No hours for this month</p>
+          </v-row>
+          <v-row v-for="job in jobHours" :key="job.name">
+            {{ job.name }}:
+            <v-spacer></v-spacer>
+            <p>{{ job.hours }}</p>
+          </v-row>
+          <v-row class="bold">
+            Total:
+            <v-spacer></v-spacer>
+            <p>{{ this.totalHours }} / {{ workHours }}</p>
+          </v-row>
+          <v-row @click="showDialog = true">
+            Estimated Hours/Day:
+            <v-spacer></v-spacer>
+            <p>{{ estimatedDailyHours }}</p>
+          </v-row>
+        </div>
       </v-card-text>
     </v-card>
     <v-dialog v-model="showDialog" max-width="400">
@@ -145,6 +150,7 @@ function workHours() {
  *  Set budget information for employee. Creates event listeners.
  */
 async function created() {
+  this.loading = true;
   // get the current day & time in the proper format
   let now = moment().format(IsoFormat);
   // set the current month
@@ -164,6 +170,7 @@ async function created() {
   this.estimatedDailyHours = decimalToTime(this.estimatedDailyHours);
   this.totalHours = decimalToTime(this.totalHours);
   this.remaingingHours = decimalToTime(this.remaingingHours);
+  this.loading = false;
 } // created
 
 // |--------------------------------------------------|
@@ -199,6 +206,7 @@ export default {
   data() {
     return {
       estimatedDailyHours: '',
+      loading: false,
       month: '',
       monthlyMin: 0,
       remaingingHours: 0,
