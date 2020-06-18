@@ -306,7 +306,7 @@ function moneyFilter(value) {
  * @param newExpense - new expense with url and category
  */
 async function addURLInfo(newExpense) {
-  //remove trailing slash from url and convert all letter to lowercase
+  // remove trailing slash from url and convert all letter to lowercase
   newExpense.url = newExpense.url.replace(/\/$/, '').toLowerCase();
   if (
     newExpense.url.length >= 12 &&
@@ -398,7 +398,7 @@ async function checkCoverage() {
       let budget = await api.getEmployeeBudget(this.employee.id, expenseType.value, this.expense.purchaseDate);
 
       if (this.employee.workStatus == 0) {
-        // Emit error if user is inactive
+        // emit error if user is inactive
         this.$emit('error', 'Current user is inactive');
         this.loading = false; // set loading status to false
       } else {
@@ -446,12 +446,12 @@ async function checkCoverage() {
             // selected expense type does not allow overdraft or employee is not full time
             this.$set(this.expense, 'od', false);
             if (newCommittedAmount < budget.amount) {
-              // Currently under budget
+              // currently under budget
               if (newCommittedAmount + cost < budget.amount) {
-                // Reimburse the full expense
+                // reimburse the full expense
                 this.submit();
               } else {
-                // Budget not maxed out but the expense not fully covered
+                // budget not maxed out but the expense not fully covered
                 this.$set(this.expense, 'budget', budget.amount);
                 this.$set(this.expense, 'remaining', budget.amount - newCommittedAmount);
                 this.confirming = true;
