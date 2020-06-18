@@ -36,7 +36,7 @@
         <v-toolbar-title>Hours</v-toolbar-title>
       </v-toolbar>
       <v-divider></v-divider>
-      <v-list class="pt-13" dense>
+      <v-list style="font-size: 13px;" dense>
         <!-- Hours worked this month -->
         <v-list-item>
           <v-list-item-content>Hours Worked:</v-list-item-content>
@@ -48,7 +48,7 @@
         <v-list-item>
           <v-list-item-content>Hours Remaining:</v-list-item-content>
           <v-list-item-content class="text-right">
-            <div>{{ this.remaingingHours }}</div>
+            <div>{{ this.remainingHours }}</div>
           </v-list-item-content>
         </v-list-item>
         <!-- Work days left -->
@@ -56,7 +56,12 @@
           <v-list-item-content>Work Days Remaining:</v-list-item-content>
           <v-list-item-content class="text-right">
             <div>
-              <input type="text" class="text-right" v-bind:value="this.remaingingWorkDays" />
+              <input
+                type="text"
+                class="text-right"
+                :value="this.userWorkDays"
+                @input="updateEstimate"
+              />
             </div>
           </v-list-item-content>
         </v-list-item>
@@ -110,20 +115,20 @@ function jobHours() {
   return jobHours;
 } // jobHours
 
-function remaingingWorkDays() {
-  let remaingingWorkDays = 0;
+function remainingWorkDays() {
+  let remainingWorkDays = 0;
   let day = moment();
   let currMonth = day.month();
   while (day.month() === currMonth) {
-    // if day.isoWeekday() >= 1 && <=6 then add 1 day to remaingingWorkDays
+    // if day.isoWeekday() >= 1 && <=6 then add 1 day to remainingWorkDays
     if (day.isoWeekday() >= 1 && day.isoWeekday() <= 5) {
-      remaingingWorkDays += 1;
+      remainingWorkDays += 1;
     }
     // increment to the next day
     day = day.add(1, 'd');
   }
-  return remaingingWorkDays;
-} // remaingingWorkDays
+  return remainingWorkDays;
+} // remainingWorkDays
 
 function workHours() {
   let workHours = 0;
@@ -165,11 +170,12 @@ async function created() {
     this.totalHours += hours.duration;
   });
   this.workHoursNumber = this.workHours.substring(0, this.workHours.length - 1);
-  this.remaingingHours = this.workHoursNumber - this.totalHours;
-  this.estimatedDailyHours = this.remaingingHours / this.remaingingWorkDays;
+  this.remainingHours = this.workHoursNumber - this.totalHours;
+  this.userWorkDays = this.remainingWorkDays;
+  this.estimatedDailyHours = this.remainingHours / this.userWorkDays;
   this.estimatedDailyHours = decimalToTime(this.estimatedDailyHours);
   this.totalHours = decimalToTime(this.totalHours);
-  this.remaingingHours = decimalToTime(this.remaingingHours);
+  this.remainingHours = decimalToTime(this.remainingHours);
   this.loading = false;
 } // created
 
@@ -180,7 +186,7 @@ async function created() {
 // |--------------------------------------------------|
 
 /**
- * Convert decimal number in to hours and minutes.
+ * Convert decimal number into hours and minutes.
  * @param hours the decimal number of hours
  */
 function decimalToTime(hours) {
@@ -189,6 +195,18 @@ function decimalToTime(hours) {
   hours = hrs + 'h ' + min + 'm';
   return hours;
 } // decimalToTime
+
+/**
+ * Convert time in hours and minutes into a decimal number of hours.
+ * @param time the time in __h __m
+ */
+function timeToDecimal(time) {
+  let words = time.split(' ');
+  var hrs = parseInt(Number(words[0].substring(0, words[0].length - 1)));
+  var min = parseInt(Number(words[1].substring(0, words[1].length - 1)));
+  time = hrs + min / 60.0;
+  return time;
+} // timeToDecimal
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -199,7 +217,7 @@ function decimalToTime(hours) {
 export default {
   computed: {
     jobHours,
-    remaingingWorkDays,
+    remainingWorkDays,
     workHours
   },
   created,
@@ -209,13 +227,24 @@ export default {
       loading: false,
       month: '',
       monthlyMin: 0,
-      remaingingHours: 0,
+      remainingHours: 0,
       showDialog: false,
       timeSheets: [],
       totalHours: 0,
+      userWorkDays: 0,
       workHoursNumber: 0,
       year: ''
     };
+  },
+  methods: {
+    updateEstimate: function (event) {
+      if (event.target.value > 0) {
+        this.userWorkDays = event.target.value;
+        console.log(timeToDecimal(this.remainingHours));
+        this.estimatedDailyHours = timeToDecimal(this.remainingHours) / this.userWorkDays;
+        this.estimatedDailyHours = decimalToTime(this.estimatedDailyHours);
+      }
+    }
   },
   props: ['employee'] // employee
 };

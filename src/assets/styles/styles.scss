@@ -45,7 +45,6 @@ $case-darkgray: #3f3f3c;
   padding: 4px 2px;
 }
 
-
 .home_buttons {
   color: $case-red !important;
   background-color: white !important;
@@ -166,4 +165,5 @@ $case-darkgray: #3f3f3c;
 
 .pt-13 {
   font-size: 13px;
+  padding-top: inherit;
 }
