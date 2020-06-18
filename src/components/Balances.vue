@@ -40,6 +40,11 @@
           <v-spacer></v-spacer>
           <p>{{ this.covidPTO }}</p>
         </v-row>
+        <v-row>
+          Sabbatical:
+          <v-spacer></v-spacer>
+          <p>{{ this.sabbaticalBalance }}</p>
+        </v-row>
       </v-card-text>
     </v-card>
   </div>
@@ -66,6 +71,7 @@ async function created() {
   this.caseCareBalance = this.balanceData['Case Cares'];
   this.vacationBalance = this.balanceData['PTO'];
   this.covidPTO = this.balanceData['COVID-19 PTO'];
+  this.sabbaticalBalance = this.balancedData['Sabbatical'];
 } // created
 // |--------------------------------------------------|
 // |                                                  |
@@ -83,7 +89,8 @@ export default {
       caseConnectBalance: 0,
       caseCareBalance: 0,
       vacationBalance: 0,
-      covidPTO: 0
+      covidPTO: 0,
+      sabbaticalBalance: 0
     };
   },
   props: ['employee']
