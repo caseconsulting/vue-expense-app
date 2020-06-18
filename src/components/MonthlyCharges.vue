@@ -56,12 +56,7 @@
           <v-list-item-content>Work Days Remaining:</v-list-item-content>
           <v-list-item-content class="text-right">
             <div>
-              <input
-                type="text"
-                class="text-right"
-                :value="this.userWorkDays"
-                @input="updateEstimate"
-              />
+              <input type="text" class="text-right" :value="this.userWorkDays" @input="updateEstimate" />
             </div>
           </v-list-item-content>
         </v-list-item>
