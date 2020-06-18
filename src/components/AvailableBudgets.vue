@@ -7,25 +7,30 @@
         </router-link>
       </v-card-title>
       <v-card-text class="px-7 pt-5 pb-1 black--text">
-        <!-- If no avaible budgets -->
-        <v-row v-if="budgets.length == 0" justify="center">
-          <p>No available budgets</p>
-        </v-row>
-        <!-- Loop all budgets -->
-        <v-row v-for="budget in budgets" :key="budget.expenseTypeId" @click="selectBudget(budget)">
-          {{ budget.expenseTypeName }}:
-          <v-spacer></v-spacer>
-          <p v-if="noRemaining(budget)">
-            {{ calcRemaining(budget) | moneyValue }}
-          </p>
-          <p v-else>
-            {{ calcRemaining(budget) | moneyValue }}
-          </p>
-        </v-row>
-        <!-- End Loop all budgets -->
-        <router-link to="/myExpenses" style="text-decoration: none;">
-          <button class="home_buttons">Create an Expense</button>
-        </router-link>
+        <div v-if="this.loading" class="pb-4">
+          <v-progress-linear :indeterminate="true"></v-progress-linear>
+        </div>
+        <div v-else>
+          <!-- If no avaible budgets -->
+          <v-row v-if="budgets.length == 0" justify="center">
+            <p>No available budgets</p>
+          </v-row>
+          <!-- Loop all budgets -->
+          <v-row
+            v-for="budget in budgets"
+            :key="budget.expenseTypeId"
+            @click="selectBudget(budget)"
+          >
+            {{ budget.expenseTypeName }}:
+            <v-spacer></v-spacer>
+            <p v-if="noRemaining(budget)">{{ calcRemaining(budget) | moneyValue }}</p>
+            <p v-else>{{ calcRemaining(budget) | moneyValue }}</p>
+          </v-row>
+          <!-- End Loop all budgets -->
+          <router-link to="/myExpenses" style="text-decoration: none;">
+            <button class="home_buttons">Create an Expense</button>
+          </router-link>
+        </div>
       </v-card-text>
     </v-card>
     <available-budget-summary :activator="showDialog" :selectedBudget="selectedBudget"></available-budget-summary>
@@ -59,9 +64,11 @@ function calcRemaining(budget) {
 } // calcRemaining
 
 async function created() {
+  this.loading = true;
   window.EventBus.$on('close-summary', () => {
     this.showDialog = false;
   });
+  this.loading = false;
 } // created
 
 /**
@@ -116,6 +123,6 @@ export default {
     noRemaining,
     selectBudget
   },
-  props: ['budgets'] // budgets
+  props: ['budgets', 'loading'] // budgets, loading
 };
 </script>

@@ -5,11 +5,11 @@
         <h4 class="white--text">Hours for {{ month }} {{ year }}</h4>
       </v-card-title>
       <v-card-text class="px-7 pt-5 pb-1 black--text">
-        <!-- If the user has no hours -->
         <div v-if="this.loading" class="pb-4">
           <v-progress-linear :indeterminate="true"></v-progress-linear>
         </div>
         <div v-else>
+          <!-- If the user has no hours -->
           <v-row v-if="jobHours.length == 0" justify="center">
             <p>No hours for this month</p>
           </v-row>

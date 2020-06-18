@@ -33,7 +33,7 @@
           <v-progress-circular indeterminate size="64" color="#bc3825"></v-progress-circular>
         </v-flex>
         <v-flex v-else text-center class="pt-0">
-          <available-budgets :budgets="expenseTypeData"></available-budgets>
+          <available-budgets :budgets="expenseTypeData" :loading="loadingBudgets"></available-budgets>
         </v-flex>
       </v-flex>
       <!-- Monthly Changes (TSheets) -->
@@ -62,7 +62,9 @@
       <v-flex xs12 sm6 md3 lg3>
         <v-card align-content-space-around>
           <v-card flat tile color="#bc3825">
-            <v-card-title class="header_style"><h4 class="white--text">Quick Links</h4></v-card-title>
+            <v-card-title class="header_style">
+              <h4 class="white--text">Quick Links</h4>
+            </v-card-title>
             <div class="links">
               <v-btn
                 class="mx-auto white--text"
@@ -79,9 +81,7 @@
           <v-list v-for="(link, index) in links" :key="link.name">
             <v-divider v-if="index != 0"></v-divider>
             <v-list-item :href="link.link" target="_blank">
-              <v-list-item-content>
-                {{ link.name }}
-              </v-list-item-content>
+              <v-list-item-content>{{ link.name }}</v-list-item-content>
             </v-list-item>
           </v-list>
         </v-card>
@@ -378,6 +378,7 @@ function isFullTime(employee) {
  */
 async function refreshBudget() {
   this.loading = true; // set loading status to true
+  this.loadingBudgets = true;
   let budgetsVar;
 
   if (this.fiscalDateView == this.getCurrentBudgetYear()) {
@@ -406,6 +407,7 @@ async function refreshBudget() {
 
   this.refreshBudgetYears(); // refresh the budget year view options
   this.loading = false; // set loading status to false
+  this.loadingBudgets = false;
 } // refreshBudget
 
 /**
@@ -534,6 +536,7 @@ export default {
       fiscalDateView: '', // current budget year view by anniversary day
       hireDate: '', // employee hire date
       loading: false, // loading status
+      loadingBudgets: false, //prop for available budgets
       ptoBalances: [],
       seconds: 0, // seconds until next anniversary date
       status: {
