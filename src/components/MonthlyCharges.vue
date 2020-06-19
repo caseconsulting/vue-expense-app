@@ -39,8 +39,8 @@
             Avg Hours/Day to meet {{ month }} Hours:
             <v-spacer></v-spacer>
             <div @mouseover="decimal = !decimal" @mouseleave="decimal = !decimal">
-              <p v-if="decimal">{{ this.estimatedDailyHours }}h / {{ workHours }}</p>
-              <p v-else>{{ this.estimatedDailyHoursHover }} / {{ workHours }}</p>
+              <p v-if="decimal">{{ this.estimatedDailyHours }}h</p>
+              <p v-else>{{ this.estimatedDailyHoursHover }}</p>
             </div>
           </v-row>
         </div>
@@ -120,9 +120,9 @@ function jobHours() {
       }
     });
   });
-  // _.forEach(jobHours, (total) => {
-  //   total.hours = decimalToTime(total.hours);
-  // });
+  _.forEach(jobHours, (total) => {
+    total.hours = roundHours(total.hours);
+  });
   jobHours = _.sortBy(jobHours, [
     function (job) {
       return job.name.toLowerCase();
@@ -306,9 +306,9 @@ export default {
     updateEstimate: function (event) {
       if (event.target.value > 0) {
         this.userWorkDays = event.target.value;
-        console.log(timeToDecimal(this.remainingHours));
-        this.estimatedDailyHours = timeToDecimal(this.remainingHours) / this.userWorkDays;
-        // this.estimatedDailyHours = decimalToTime(this.estimatedDailyHours);
+        this.estimatedDailyHours = timeToDecimal(this.remainingHoursHover) / this.userWorkDays;
+        this.estimatedDailyHours = roundHours(this.estimatedDailyHours);
+        this.estimatedDailyHoursHover = decimalToTime(this.estimatedDailyHours);
       }
     }
   },
