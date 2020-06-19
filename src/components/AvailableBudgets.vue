@@ -16,11 +16,7 @@
             <p>No available budgets</p>
           </v-row>
           <!-- Loop all budgets -->
-          <v-row
-            v-for="budget in budgets"
-            :key="budget.expenseTypeId"
-            @click="selectBudget(budget)"
-          >
+          <v-row v-for="budget in budgets" :key="budget.expenseTypeId" @click="selectBudget(budget)">
             {{ budget.expenseTypeName }}:
             <v-spacer></v-spacer>
             <p v-if="noRemaining(budget)">{{ calcRemaining(budget) | moneyValue }}</p>
