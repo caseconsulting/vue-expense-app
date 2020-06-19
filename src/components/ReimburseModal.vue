@@ -37,6 +37,9 @@ function emit(msg, data) {
     this.willShow = false;
   } else {
     // data does not exist
+    if (msg == `canceled-reimburse`) {
+      window.EventBus.$emit(msg);
+    }
     window.EventBus.$emit(`${msg}-${this.willShow}`);
     this.willShow = false;
   }
