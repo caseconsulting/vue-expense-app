@@ -6,15 +6,17 @@
       </v-card-title>
       <v-card-text class="px-7 pt-5 pb-1 black--text">
         <!-- If no avaible balances dislay message -->
-        <v-row v-if="balanceData == 0" justify="center">
+        <v-row v-if="balanceData == 0 || isInactive" justify="center">
           <p>No available balances</p>
         </v-row>
-        <!-- Loop through and display all balances -->
-        <v-row v-for="balance in this.keysBalance" :key="balance">
-          <p>{{ balance }}:</p>
-          <v-spacer></v-spacer>
-          <p>${{ balanceData[balance] }}</p>
-        </v-row>
+        <v-span v-if="!isInactive">
+          <!-- Loop through and display all balances -->
+          <v-row v-for="balance in this.keysBalance" :key="balance">
+            <p>{{ balance }}:</p>
+            <v-spacer></v-spacer>
+            <p>${{ balanceData[balance] }}</p>
+          </v-row>
+        </v-span>
       </v-card-text>
     </v-card>
   </div>
@@ -37,6 +39,24 @@ async function created() {
   this.balanceData = this.ptoBalances['pto_balances'];
   this.keysBalance = Object.keys(this.balanceData);
 } // created
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                 COMPUTED                         |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * Checks if an employee is inactive. Sets isInactive as true if the employee is inactive with a work status of 0, otherwise
+ * sets it to false.
+ *
+ * @param employee - employee to check
+ * @return boolean - employee is inactive
+ */
+function isInactive() {
+  return this.employee.workStatus == 0;
+} // isInactive
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                      EXPORT                      |
@@ -44,6 +64,9 @@ async function created() {
 // |--------------------------------------------------|
 
 export default {
+  computed: {
+    isInactive
+  },
   created,
   data() {
     return {
