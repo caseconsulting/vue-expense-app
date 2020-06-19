@@ -347,7 +347,7 @@ async function createEvents() {
     return null;
   });
   let expenses = _.map(this.aggregatedExpenses, (a) => {
-    if (Object.prototype.hasOwnProperty.call(a, 'showOnFeed')) {
+    if (a.showOnFeed != ' ') {
       //expense has showOnFeed property
       if (a.showOnFeed) {
         //value of showOnFeed is true
