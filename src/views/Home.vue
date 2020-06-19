@@ -281,7 +281,7 @@ function clearStatus() {
  */
 async function createEvents() {
   this.employees = await api.getItems(api.EMPLOYEES);
-
+  this.aggregatedExpenses = await api.getAllAggregateExpenses();
   //generate anniversaries
   let anniversaries = _.map(this.employees, (a) => {
     let hireDate = moment(a.hireDate, 'YYYY-MM-DD');
@@ -293,20 +293,9 @@ async function createEvents() {
         //hire date is before today
         let anniversary = moment([now.year(), hireDate.month(), hireDate.date()]); //set anniversary to hiredate but this year
         let diff = now.startOf('day').diff(anniversary.startOf('day'), 'day'); //difference between today and anniversary
-        if (diff == 0) {
-          event.date = 'Today'; //set date message as today if no difference in date
-        } else if (diff == 1) {
-          event.date = 'Yesterday'; //if it was one day removed message is yesterday
-        } else if (diff <= 6 && diff > 1) {
-          event.date = diff + ' days ago'; //if it is otherwise less than 7 days ago create message
-        } else if (diff == -1) {
-          event.date = 'Tomorrow';
-        } else if (diff < 0 && diff >= -6) {
-          event.date = 'Coming up in ' + Math.abs(diff) + ' days'; //if its in the "future" and within 6 days say its coming up
-        } else {
-          if (diff < 0) {
-            anniversary.subtract(1, 'years'); //this will set the anniversary to have been last year;
-          }
+        event.date = getEventDateMessage(anniversary);
+        if (diff < 0 && diff < -6) {
+          anniversary.subtract(1, 'years');
           event.date = anniversary.format('ll');
         }
         if (anniversary.isSame(hireDate, 'day')) {
@@ -321,7 +310,7 @@ async function createEvents() {
           }
           event.icon = 'glass-cheers';
         }
-        event.daysFromToday = now.diff(anniversary, 'days');
+        event.daysFromToday = now.startOf('day').diff(anniversary.startOf('day'), 'days');
         return event;
       } else {
         return null; //dont show anything for people hired in the future
@@ -340,20 +329,9 @@ async function createEvents() {
       birthday = moment([now.year(), birthday.month(), birthday.date()]); // Gets birthday date this year
       let diff = now.startOf('day').diff(birthday.startOf('day'), 'day');
       // Get event date text
-      if (diff == 0) {
-        event.date = 'Today'; //set date message as today if no difference in date
-      } else if (diff == 1) {
-        event.date = 'Yesterday'; //if it was one day removed message is yesterday
-      } else if (diff <= 6 && diff > 1) {
-        event.date = diff + ' days ago'; //if it is otherwise less than 7 days ago create message
-      } else if (diff == -1) {
-        event.date = 'Tomorrow';
-      } else if (diff < 0 && diff >= -6) {
-        event.date = 'Coming up in ' + Math.abs(diff) + ' days'; //if its in the "future" and within 6 days say its coming up
-      } else {
-        if (diff < 0) {
-          birthday.subtract(1, 'years'); //this will set the birthday to have been last year
-        }
+      event.date = getEventDateMessage(birthday);
+      if (diff < 0 && diff < -6) {
+        birthday.subtract(1, 'years');
         event.date = birthday.format('ll');
       }
       // Sets event text
@@ -363,14 +341,61 @@ async function createEvents() {
         event.text = b.firstName + ' ' + b.lastName + "'s" + ' birthday!';
       }
       event.icon = 'birthday-cake';
-      event.daysFromToday = now.diff(birthday, 'days');
+      event.daysFromToday = now.startOf('day').diff(birthday.startOf('day'), 'days');
       return event;
     }
     return null;
   });
-  let mergedEventsList = [...anniversaries, ...birthdays]; // merges lists
-  //TODO: figure out why sortby wont let me sort in desc order
+  let expenses = _.map(this.aggregatedExpenses, (a) => {
+    if (Object.prototype.hasOwnProperty.call(a, 'showOnFeed')) {
+      //expense has showOnFeed property
+      if (a.showOnFeed) {
+        //value of showOnFeed is true
+        if (a.reimbursedDate === ' ') {
+          return null;
+        }
+        let now = moment();
+        let reimbursedDate = moment(a.reimbursedDate, 'YYYY-MM-DD');
+        let event = {};
+        event.date = getEventDateMessage(reimbursedDate);
+
+        event.text = `${a.firstName} used their ${a.budgetName} budget on ${a.description}`;
+        event.icon = 'dollar-sign';
+        event.daysFromToday = now.startOf('day').diff(reimbursedDate.startOf('day'), 'days');
+        return event;
+      } else {
+        return null;
+      }
+    } else {
+      //not a technology budget
+      return null;
+    }
+  });
+  let mergedEventsList = [...anniversaries, ...birthdays, ...expenses]; // merges lists
   this.events = _.sortBy(_.compact(mergedEventsList), 'daysFromToday');
+}
+
+/**
+ * get's the date message of the event
+ *
+ * @param date - the date of the event
+ */
+function getEventDateMessage(date) {
+  let now = moment();
+  let diff = now.startOf('day').diff(date.startOf('day'), 'day');
+  if (diff == 0) {
+    return 'Today'; //set date message as today if no difference in date
+  } else if (diff == 1) {
+    return 'Yesterday'; //if it was one day removed message is yesterday
+  } else if (diff <= 6 && diff > 1) {
+    return diff + ' days ago'; //if it is otherwise less than 7 days ago create message
+  } else if (diff == -1) {
+    return 'Tomorrow';
+  } else if (diff < 0 && diff >= -6) {
+    return 'Coming up in ' + Math.abs(diff) + ' days'; //if its in the "future" and within 6 days say its coming up
+  } else {
+    return date.format('ll');
+  }
 }
 
 /**
@@ -571,6 +596,7 @@ export default {
   created,
   data() {
     return {
+      aggregatedExpenses: [],
       allUserBudgets: null, // all user budgets
       budgetYears: [], // list of options for chaning budget year view
       changingBudgetView: false, // change budget year view activator

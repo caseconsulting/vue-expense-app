@@ -301,7 +301,8 @@ function createExpenses(aggregatedData) {
       },
       selected: false,
       createdAt: expense.createdAt,
-      failed: false
+      failed: false,
+      showOnFeed: false
     };
   });
 } // createExpenses
@@ -456,7 +457,7 @@ function refreshExpenses() {
 /**
  * Reimburse the selected list of expenses.
  */
-async function reimburseExpenses() {
+async function reimburseExpenses(show) {
   if (this.buttonClicked) {
     // reimburse button is clicked
     let expensesToReimburse = [];
@@ -467,6 +468,7 @@ async function reimburseExpenses() {
     this.empBudgets = _.forEach(this.empBudgets, async (budget) => {
       return await _.forEach(budget.expenses, async (expense) => {
         if (expense.selected) {
+          this.$set(expense, 'showOnFeed', show);
           expense.reimbursedDate = moment().format('YYYY-MM-DD');
           expensesToReimburse.push(submitExpenseObject(expense));
         }
@@ -550,7 +552,8 @@ function submitExpenseObject(expense) {
     note: expense.note,
     employeeId: expense.employeeId,
     receipt: expense.receipt,
-    createdAt: expense.createdAt
+    createdAt: expense.createdAt,
+    showOnFeed: expense.showOnFeed
   };
 } // submitExpenseObject
 
@@ -626,7 +629,13 @@ function unCheckAllBoxes() {
  */
 async function created() {
   window.EventBus.$on('selectExpense', this.selectExpense);
-  window.EventBus.$on('confirm-reimburse', this.reimburseExpenses);
+  window.EventBus.$on('confirm-reimburse-true', () => {
+    this.reimburseExpenses(true);
+  });
+  window.EventBus.$on('confirm-reimburse-false', () => {
+    this.reimburseExpenses(false);
+  });
+
   window.EventBus.$on('canceled-reimburse', () => (this.buttonClicked = false));
   let aggregatedData = await api.getAllAggregateExpenses();
 

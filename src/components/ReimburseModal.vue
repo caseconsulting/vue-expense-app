@@ -9,6 +9,8 @@
           <v-spacer></v-spacer>
           <v-btn color="green" text @click.native="emit(`confirm-reimburse`)">Reimburse</v-btn>
           <v-spacer></v-spacer>
+          <v-switch label="Include expense on feed?" v-model="willShow"></v-switch>
+          <v-spacer></v-spacer>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -31,10 +33,12 @@
 function emit(msg, data) {
   if (data) {
     // data exists
-    window.EventBus.$emit(msg, data);
+    window.EventBus.$emit(`${msg}-${this.willShow}`, data);
+    this.willShow = false;
   } else {
     // data does not exist
-    window.EventBus.$emit(msg);
+    window.EventBus.$emit(`${msg}-${this.willShow}`);
+    this.willShow = false;
   }
 } // emit
 
@@ -48,6 +52,11 @@ export default {
   props: ['activate'], // dialog activator
   methods: {
     emit
+  },
+  data() {
+    return {
+      willShow: false
+    };
   }
 };
 </script>
