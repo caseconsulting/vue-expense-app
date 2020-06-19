@@ -16,7 +16,11 @@
             <p>No available budgets</p>
           </v-row>
           <!-- Loop all budgets -->
-          <v-row v-for="budget in budgets" :key="budget.expenseTypeId" @click="selectBudget(budget)">
+          <v-row
+            v-for="budget in budgets"
+            :key="budget.expenseTypeId"
+            @click="selectBudget(budget)"
+          >
             {{ budget.expenseTypeName }}:
             <v-spacer></v-spacer>
             <p v-if="noRemaining(budget)">{{ calcRemaining(budget) | moneyValue }}</p>
@@ -60,11 +64,9 @@ function calcRemaining(budget) {
 } // calcRemaining
 
 async function created() {
-  this.loading = true;
   window.EventBus.$on('close-summary', () => {
     this.showDialog = false;
   });
-  this.loading = false;
 } // created
 
 /**
