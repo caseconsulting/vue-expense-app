@@ -13,20 +13,35 @@
           <v-row v-if="jobHours.length == 0" justify="center">
             <p>No hours for this month</p>
           </v-row>
-          <v-row v-for="job in jobHours" :key="job.name">
-            {{ job.name }}:
-            <v-spacer></v-spacer>
-            <p>{{ job.hours }}</p>
-          </v-row>
+          <div v-if="decimal">
+            <v-row v-for="job in jobHours" :key="job.name">
+              {{ job.name }}:
+              <v-spacer></v-spacer>
+              <p @mouseover="decimal = !decimal">{{ job.hours }}h</p>
+            </v-row>
+          </div>
+          <div v-else>
+            <v-row v-for="job in jobHoursHover" :key="job.name">
+              {{ job.name }}:
+              <v-spacer></v-spacer>
+              <p @mouseleave="decimal = !decimal">{{ job.hours }}</p>
+            </v-row>
+          </div>
           <v-row class="bold">
             Total:
             <v-spacer></v-spacer>
-            <p>{{ this.totalHours }} / {{ workHours }}</p>
+            <div @mouseover="decimal = !decimal" @mouseleave="decimal = !decimal">
+              <p v-if="decimal">{{ this.totalHours }}h / {{ workHours }}</p>
+              <p v-else>{{ this.totalHoursHover }} / {{ workHours }}</p>
+            </div>
           </v-row>
           <v-row @click="showDialog = true">
-            Estimated Hours/Day:
+            Avg Hours/Day to meet {{ month }} Hours:
             <v-spacer></v-spacer>
-            <p>{{ estimatedDailyHours }}</p>
+            <div @mouseover="decimal = !decimal" @mouseleave="decimal = !decimal">
+              <p v-if="decimal">{{ this.estimatedDailyHours }}h / {{ workHours }}</p>
+              <p v-else>{{ this.estimatedDailyHoursHover }} / {{ workHours }}</p>
+            </div>
           </v-row>
         </div>
       </v-card-text>
@@ -41,14 +56,26 @@
         <v-list-item>
           <v-list-item-content>Hours Worked:</v-list-item-content>
           <v-list-item-content class="text-right">
-            <div>{{ this.totalHours }}</div>
+            <div
+              @mouseover="decimalDialog = !decimalDialog"
+              @mouseleave="decimalDialog = !decimalDialog"
+            >
+              <p v-if="decimalDialog">{{ this.totalHours }}h</p>
+              <p v-else>{{ this.totalHoursHover }}</p>
+            </div>
           </v-list-item-content>
         </v-list-item>
         <!-- Hours left this month -->
         <v-list-item>
           <v-list-item-content>Hours Remaining:</v-list-item-content>
           <v-list-item-content class="text-right">
-            <div>{{ this.remainingHours }}</div>
+            <div
+              @mouseover="decimalDialog = !decimalDialog"
+              @mouseleave="decimalDialog = !decimalDialog"
+            >
+              <p v-if="decimalDialog">{{ this.remainingHours }}h</p>
+              <p v-else>{{ this.remainingHoursHover }}</p>
+            </div>
           </v-list-item-content>
         </v-list-item>
         <!-- Work days left -->
@@ -56,7 +83,12 @@
           <v-list-item-content>Work Days Remaining:</v-list-item-content>
           <v-list-item-content class="text-right">
             <div>
-              <input type="text" class="text-right" :value="this.userWorkDays" @input="updateEstimate" />
+              <input
+                type="text"
+                class="text-right"
+                :value="this.userWorkDays"
+                @input="updateEstimate"
+              />
             </div>
           </v-list-item-content>
         </v-list-item>
@@ -99,9 +131,9 @@ function jobHours() {
       }
     });
   });
-  _.forEach(jobHours, (total) => {
-    total.hours = decimalToTime(total.hours);
-  });
+  // _.forEach(jobHours, (total) => {
+  //   total.hours = decimalToTime(total.hours);
+  // });
   jobHours = _.sortBy(jobHours, [
     function (job) {
       return job.name.toLowerCase();
@@ -109,6 +141,38 @@ function jobHours() {
   ]);
   return jobHours;
 } // jobHours
+
+/**
+ * Sets the total cost per each expense type.
+ *
+ * @return Array - expense type and each total
+ */
+function jobHoursHover() {
+  let jobHoursHover = [];
+  jobHoursHover = _.map(this.timeSheets, (item) => {
+    return {
+      name: item.jobcode,
+      hours: 0
+    };
+  });
+  jobHoursHover = _.uniqWith(jobHoursHover, _.isEqual);
+  _.forEach(this.timeSheets, (hours) => {
+    _.forEach(jobHoursHover, (total) => {
+      if (total.name === hours.jobcode) {
+        total.hours += hours.duration;
+      }
+    });
+  });
+  _.forEach(jobHoursHover, (total) => {
+    total.hours = decimalToTime(total.hours);
+  });
+  jobHoursHover = _.sortBy(jobHoursHover, [
+    function (job) {
+      return job.name.toLowerCase();
+    }
+  ]);
+  return jobHoursHover;
+} // jobHoursHover
 
 function remainingWorkDays() {
   let remainingWorkDays = 0;
@@ -168,9 +232,12 @@ async function created() {
   this.remainingHours = this.workHoursNumber - this.totalHours;
   this.userWorkDays = this.remainingWorkDays;
   this.estimatedDailyHours = this.remainingHours / this.userWorkDays;
-  this.estimatedDailyHours = decimalToTime(this.estimatedDailyHours);
-  this.totalHours = decimalToTime(this.totalHours);
-  this.remainingHours = decimalToTime(this.remainingHours);
+  this.estimatedDailyHoursHover = decimalToTime(this.estimatedDailyHours);
+  this.totalHoursHover = decimalToTime(this.totalHours);
+  this.remainingHoursHover = decimalToTime(this.remainingHours);
+  this.estimatedDailyHours = roundHours(this.estimatedDailyHours);
+  this.totalHours = roundHours(this.totalHours);
+  this.remainingHours = roundHours(this.remainingHours);
   this.loading = false;
 } // created
 
@@ -188,6 +255,15 @@ function decimalToTime(hours) {
   var hrs = parseInt(Number(hours));
   var min = Math.round((Number(hours) - hrs) * 60);
   hours = hrs + 'h ' + min + 'm';
+  return hours;
+} // decimalToTime
+
+/**
+ * Rounds hours to 2 decimal places.
+ * @param hours the decimal number of hours
+ */
+function roundHours(hours) {
+  hours = hours.toFixed(2);
   return hours;
 } // decimalToTime
 
@@ -212,20 +288,26 @@ function timeToDecimal(time) {
 export default {
   computed: {
     jobHours,
+    jobHoursHover,
     remainingWorkDays,
     workHours
   },
   created,
   data() {
     return {
-      estimatedDailyHours: '',
+      decimal: true,
+      decimalDialog: true,
+      estimatedDailyHours: 0,
+      estimatedDailyHoursHover: '',
       loading: false,
       month: '',
       monthlyMin: 0,
       remainingHours: 0,
+      remainingHoursHover: '',
       showDialog: false,
       timeSheets: [],
       totalHours: 0,
+      totalHoursHover: '',
       userWorkDays: 0,
       workHoursNumber: 0,
       year: ''
@@ -237,7 +319,7 @@ export default {
         this.userWorkDays = event.target.value;
         console.log(timeToDecimal(this.remainingHours));
         this.estimatedDailyHours = timeToDecimal(this.remainingHours) / this.userWorkDays;
-        this.estimatedDailyHours = decimalToTime(this.estimatedDailyHours);
+        // this.estimatedDailyHours = decimalToTime(this.estimatedDailyHours);
       }
     }
   },
