@@ -5,7 +5,7 @@
         <h4 class="white--text">Balances</h4>
       </v-card-title>
       <v-card-text class="px-7 pt-5 pb-1 black--text">
-        <!-- If no avaible balances dislay message -->
+        <!-- If no avaible balances or inactive dislay message -->
         <v-row v-if="balanceData == 0 || isInactive" justify="center">
           <p>No available balances</p>
         </v-row>
