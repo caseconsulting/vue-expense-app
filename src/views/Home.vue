@@ -336,8 +336,8 @@ async function createEvents() {
     if (b.birthdayFeed) {
       let event = {};
       let now = moment();
-      let birthday = moment(b.birthday, 'YYYY-MM-DD').startOf('date');
-      birthday = moment([now.year(), birthday.month(), birthday.day()]); // Gets birthday date this year
+      let birthday = moment(b.birthday, 'YYYY-MM-DD');
+      birthday = moment([now.year(), birthday.month(), birthday.date()]); // Gets birthday date this year
       let diff = now.startOf('day').diff(birthday.startOf('day'), 'day');
       // Get event date text
       if (diff == 0) {
@@ -368,7 +368,7 @@ async function createEvents() {
     }
     return null;
   });
-  let mergedEventsList = [...anniversaries, ...birthdays]; // merges list
+  let mergedEventsList = [...anniversaries, ...birthdays]; // merges lists
   //TODO: figure out why sortby wont let me sort in desc order
   this.events = _.sortBy(_.compact(mergedEventsList), 'daysFromToday');
 }
@@ -513,6 +513,14 @@ async function updateData() {
   this.showSuccessfulSubmit();
 } // updateData
 
+function getAnniversaryEvents() {
+  // stub
+}
+
+function getBirthdayEvents() {
+  // stub
+}
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                 LIFECYCLE HOOKS                  |
@@ -614,6 +622,8 @@ export default {
     clearStatus,
     createEvents,
     displayError,
+    getAnniversaryEvents,
+    getBirthdayEvents,
     getCurrentBudgetYear,
     isFullTime,
     refreshBudget,
