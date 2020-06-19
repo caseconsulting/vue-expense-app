@@ -61,11 +61,9 @@
       <!-- Quick links -->
       <v-flex xs12 sm6 md3 lg3>
         <v-card align-content-space-around>
-          <v-card flat tile color="#bc3825">
-            <v-card-title class="header_style">
-              <h4 class="white--text">Quick Links</h4>
-            </v-card-title>
-            <div class="links">
+          <v-card-title class="header_style">
+            <h4 class="white--text">Quick Links</h4>
+            <div>
               <v-btn
                 class="mx-auto white--text"
                 v-for="link in mediaLinks"
@@ -77,7 +75,7 @@
                 <icon :name="link.icon"></icon>
               </v-btn>
             </div>
-          </v-card>
+          </v-card-title>
           <v-list v-for="(link, index) in links" :key="link.name">
             <v-divider v-if="index != 0"></v-divider>
             <v-list-item :href="link.link" target="_blank">
