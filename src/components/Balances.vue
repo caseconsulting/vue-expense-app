@@ -9,14 +9,14 @@
         <v-row v-if="balanceData == 0 || isInactive" justify="center">
           <p>No available balances</p>
         </v-row>
-        <span v-if="!isInactive">
+        <div v-if="!isInactive">
           <!-- Loop through and display all balances -->
           <v-row v-for="balance in this.keysBalance" :key="balance">
             <p>{{ balance }}:</p>
             <v-spacer></v-spacer>
             <p>{{ balanceData[balance] }} h</p>
           </v-row>
-        </span>
+        </div>
       </v-card-text>
     </v-card>
   </div>
