@@ -5,10 +5,15 @@
         <h4 class="white--text">Balances</h4>
       </v-card-title>
       <v-card-text class="px-7 pt-5 pb-1 black--text">
-        <!-- If no avaible balances or inactive dislay message -->
-        <v-row v-if="balanceData == 0 || isInactive" justify="center">
-          <p>No available balances</p>
-        </v-row>
+        <div v-if="this.loading" class="pb-4">
+          <v-progress-linear :indeterminate="true"></v-progress-linear>
+        </div>
+        <div v-else>
+          <!-- If no avaible balances or inactive dislay message -->
+          <v-row v-if="balanceData == 0 || isInactive" justify="center">
+            <p>No available balances</p>
+          </v-row>
+        </div>
         <div v-if="!isInactive">
           <!-- Loop through and display all balances -->
           <v-row v-for="balance in this.keysBalance" :key="balance">
@@ -34,10 +39,12 @@ import api from '@/shared/api.js';
  *  Set Balances information for employee.
  */
 async function created() {
+  this.loading = true;
   this.ptoBalances = await api.getPTOBalances(this.employee.employeeNumber); // call api
   this.ptoBalances = this.ptoBalances.results.users[this.employee.employeeNumber];
   this.balanceData = this.ptoBalances['pto_balances'];
   this.keysBalance = Object.keys(this.balanceData);
+  this.loading = false;
 } // created
 
 // |--------------------------------------------------|
@@ -72,7 +79,8 @@ export default {
     return {
       ptoBalances: [],
       balanceData: [],
-      keysBalance: []
+      keysBalance: [],
+      loading: false
     };
   },
   props: ['employee']
