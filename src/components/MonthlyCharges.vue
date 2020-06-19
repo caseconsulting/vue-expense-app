@@ -56,10 +56,7 @@
         <v-list-item>
           <v-list-item-content>Hours Worked:</v-list-item-content>
           <v-list-item-content class="text-right">
-            <div
-              @mouseover="decimalDialog = !decimalDialog"
-              @mouseleave="decimalDialog = !decimalDialog"
-            >
+            <div @mouseover="decimalDialog = !decimalDialog" @mouseleave="decimalDialog = !decimalDialog">
               <p v-if="decimalDialog">{{ this.totalHours }}h</p>
               <p v-else>{{ this.totalHoursHover }}</p>
             </div>
@@ -69,10 +66,7 @@
         <v-list-item>
           <v-list-item-content>Hours Remaining:</v-list-item-content>
           <v-list-item-content class="text-right">
-            <div
-              @mouseover="decimalDialog = !decimalDialog"
-              @mouseleave="decimalDialog = !decimalDialog"
-            >
+            <div @mouseover="decimalDialog = !decimalDialog" @mouseleave="decimalDialog = !decimalDialog">
               <p v-if="decimalDialog">{{ this.remainingHours }}h</p>
               <p v-else>{{ this.remainingHoursHover }}</p>
             </div>
@@ -83,12 +77,7 @@
           <v-list-item-content>Work Days Remaining:</v-list-item-content>
           <v-list-item-content class="text-right">
             <div>
-              <input
-                type="text"
-                class="text-right"
-                :value="this.userWorkDays"
-                @input="updateEstimate"
-              />
+              <input type="text" class="text-right" :value="this.userWorkDays" @input="updateEstimate" />
             </div>
           </v-list-item-content>
         </v-list-item>
