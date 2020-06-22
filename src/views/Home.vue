@@ -330,6 +330,7 @@ function clearStatus() {
 async function createEvents() {
   this.employees = await api.getItems(api.EMPLOYEES);
   this.aggregatedExpenses = await api.getAllAggregateExpenses();
+  console.log(this.aggregatedExpenses);
   //generate anniversaries
   let anniversaries = _.map(this.employees, (a) => {
     let hireDate = moment(a.hireDate, 'YYYY-MM-DD');
@@ -395,9 +396,9 @@ async function createEvents() {
     return null;
   });
   let expenses = _.map(this.aggregatedExpenses, (a) => {
-    if (a.showOnFeed != ' ') {
+    if (a.showOnFeed != ' ' || a.budgetName == 'High Five') {
       //expense has showOnFeed property
-      if (a.showOnFeed) {
+      if (a.showOnFeed || a.budgetName == 'High Five') {
         //value of showOnFeed is true
         if (a.reimbursedDate === ' ') {
           return null;
