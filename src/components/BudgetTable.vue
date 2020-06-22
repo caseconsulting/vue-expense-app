@@ -12,7 +12,7 @@
                   <h4 class="white--text">{{ item.expenseTypeName }}</h4>
                 </v-card-title>
                 <v-divider></v-divider>
-                <v-list class="pt-13" dense>
+                <v-list class="pt-1" dense>
                   <!-- Display Budget Amount -->
                   <v-list-item>
                     <v-list-item-content>Budget:</v-list-item-content>
