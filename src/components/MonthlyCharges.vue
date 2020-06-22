@@ -81,6 +81,16 @@
             </div>
           </v-list-item-content>
         </v-list-item>
+        <!-- Average Hours per Day -->
+        <v-list-item>
+          <v-list-item-content>Avg Hours/Day ({{ month }}):</v-list-item-content>
+          <v-list-item-content class="text-right">
+            <div @mouseover="decimalDialog = !decimalDialog" @mouseleave="decimalDialog = !decimalDialog">
+              <p v-if="decimalDialog">{{ this.estimatedDailyHours }}h</p>
+              <p v-else>{{ this.estimatedDailyHoursHover }}</p>
+            </div>
+          </v-list-item-content>
+        </v-list-item>
       </v-list>
     </v-dialog>
   </div>
