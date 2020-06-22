@@ -1,6 +1,6 @@
 <template>
   <v-container>
-    <v-layout row wrap>
+    <v-row wrap class="pb-4">
       <!-- Title -->
       <v-flex lg6 md6 sm6>
         <v-row style="height: 100%;" align="center" justify="center">
@@ -25,66 +25,76 @@
           </v-card>
         </v-flex>
       </v-flex>
-    </v-layout>
-    <v-layout row wrap>
-      <!-- Available Budgets -->
-      <v-flex xs12 sm6 md6 lg6 float-left>
-        <v-flex v-if="loading" text-center>
-          <v-progress-circular indeterminate size="64" color="#bc3825"></v-progress-circular>
-        </v-flex>
-        <v-flex v-else text-center class="pt-0">
-          <available-budgets :budgets="expenseTypeData" :loading="loadingBudgets"></available-budgets>
-        </v-flex>
-      </v-flex>
-      <!-- Monthly Changes (TSheets) -->
-      <v-flex xs12 sm6 md6 lg6>
-        <v-flex v-if="loading" text-center>
-          <v-progress-circular indeterminate size="64" color="#bc3825"></v-progress-circular>
-        </v-flex>
-        <v-flex v-else text-center class="pt-0">
-          <monthly-charges :employee="this.employee"></monthly-charges>
-        </v-flex>
-      </v-flex>
-      <!-- Total Balances -->
-      <v-flex xs12 sm6 md6 lg5>
-        <v-flex v-if="loading" text-center>
-          <v-progress-circular indeterminate size="64" color="#bc3825"></v-progress-circular>
-        </v-flex>
-        <v-flex v-else text-center class="pt-0">
-          <balances :employee="this.employee"></balances>
-        </v-flex>
-      </v-flex>
+    </v-row>
+    <v-row wrap class="px-4">
+      <v-col :cols="this.screenColOne">
+        <v-row wrap>
+          <!-- Monthly Changes (TSheets) -->
+          <v-flex xs12 sm6 md6 lg6 class="pa-4">
+            <v-flex v-if="loading" text-center>
+              <v-progress-circular indeterminate size="64" color="#bc3825"></v-progress-circular>
+            </v-flex>
+            <v-flex v-else text-center class="pt-0">
+              <monthly-charges :employee="this.employee"></monthly-charges>
+            </v-flex>
+          </v-flex>
+          <!-- Total Balances -->
+          <v-flex xs12 sm6 md6 lg6 class="pa-4">
+            <v-flex v-if="loading" text-center>
+              <v-progress-circular indeterminate size="64" color="#bc3825"></v-progress-circular>
+            </v-flex>
+            <v-flex v-else text-center class="pt-0">
+              <balances :employee="this.employee"></balances>
+            </v-flex>
+          </v-flex>
+        </v-row>
+        <v-row wrap>
+          <!-- Available Budgets -->
+          <v-flex xs12 sm6 md6 lg6 float-left class="pa-4">
+            <v-flex v-if="loading" text-center>
+              <v-progress-circular indeterminate size="64" color="#bc3825"></v-progress-circular>
+            </v-flex>
+            <v-flex v-else text-center class="pt-0">
+              <available-budgets :budgets="expenseTypeData" :loading="loadingBudgets"></available-budgets>
+            </v-flex>
+          </v-flex>
+          <!-- Quick links -->
+          <!-- <v-spacer></v-spacer> -->
+          <v-flex xs12 sm6 md6 lg6 class="pa-4">
+            <v-card align-content-space-around>
+              <v-card-title class="header_style">
+                <h4 class="white--text">Quick Links</h4>
+                <div>
+                  <v-btn
+                    class="mx-auto white--text"
+                    v-for="link in mediaLinks"
+                    :key="link.name"
+                    :href="link.link"
+                    icon
+                    target="_blank"
+                  >
+                    <icon :name="link.icon"></icon>
+                  </v-btn>
+                </div>
+              </v-card-title>
+              <v-list v-for="(link, index) in links" :key="link.name">
+                <v-divider v-if="index != 0"></v-divider>
+                <v-list-item :href="link.link" target="_blank">
+                  <v-list-item-content>{{ link.name }}</v-list-item-content>
+                </v-list-item>
+              </v-list>
+            </v-card>
+          </v-flex>
+          <!-- <v-spacer></v-spacer> -->
+        </v-row>
+      </v-col>
       <!-- Activity Feed -->
-      <v-flex mt-0 xs12 sm6 md6 lg6>
-        <activity-feed :events="events" :loading="loading"></activity-feed>
-      </v-flex>
-      <!-- Quick links -->
-      <v-flex xs12 sm6 md3 lg3>
-        <v-card align-content-space-around>
-          <v-card-title class="header_style">
-            <h4 class="white--text">Quick Links</h4>
-            <div>
-              <v-btn
-                class="mx-auto white--text"
-                v-for="link in mediaLinks"
-                :key="link.name"
-                :href="link.link"
-                icon
-                target="_blank"
-              >
-                <icon :name="link.icon"></icon>
-              </v-btn>
-            </div>
-          </v-card-title>
-          <v-list v-for="(link, index) in links" :key="link.name">
-            <v-divider v-if="index != 0"></v-divider>
-            <v-list-item :href="link.link" target="_blank">
-              <v-list-item-content>{{ link.name }}</v-list-item-content>
-            </v-list-item>
-          </v-list>
-        </v-card>
-      </v-flex>
-    </v-layout>
+      <v-col :cols="this.screenColTwo">
+        <v-flex mt-0 class="pt-4">
+          <activity-feed :events="events" :loading="loading"></activity-feed>
+        </v-flex>
+      </v-col>
+    </v-row>
   </v-container>
 </template>
 
@@ -229,6 +239,44 @@ function getSecondsUntil() {
 //   return md.os() === 'AndroidOS' || md.os() === 'iOS';
 // isMobile
 
+/**
+ * Checks current breakpoint to set position of the columns for the homepage
+ *
+ * @return desired col width class
+ */
+function screenColOne() {
+  switch (this.$vuetify.breakpoint.name) {
+    case 'xs':
+      return '12';
+    case 'sm':
+      return '12';
+    case 'md':
+      return '8';
+    case 'lg':
+      return '8';
+    case 'xl':
+      return '8';
+  }
+}
+/**
+ * Checks current breakpoint to set position of the columns for the activityFeed
+ *
+ * @return desired col width class
+ */
+function screenColTwo() {
+  switch (this.$vuetify.breakpoint.name) {
+    case 'xs':
+      return '12';
+    case 'sm':
+      return '12';
+    case 'md':
+      return '4';
+    case 'lg':
+      return '4';
+    case 'xl':
+      return '4';
+  }
+}
 /**
  * Viewing the current active budget year. Returns true if the budget year being viwed is todays budget.
  *
@@ -593,6 +641,8 @@ export default {
     getFiscalYearView,
     getSecondsUntil,
     //    isMobile,
+    screenColOne,
+    screenColTwo,
     viewingCurrentBudgetYear
   },
   created,
