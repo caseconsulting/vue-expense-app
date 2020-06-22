@@ -6,7 +6,7 @@
       </v-card-title>
     </v-card>
     <v-card class="overflow-y-auto" max-height="376px">
-      <div v-if="this.loadingBar" class="pb-4">
+      <div v-if="this.loading" class="py-4">
         <v-progress-linear :indeterminate="true"></v-progress-linear>
       </div>
       <!-- timeline -->
@@ -29,17 +29,7 @@
 </template>
 
 <script>
-async function mounted() {
-  this.loadingBar = true;
-  this.loadingBar = false;
-}
 export default {
-  mounted,
-  data() {
-    return {
-      loadingBar: false
-    };
-  },
-  props: ['events']
+  props: ['events', 'loading']
 };
 </script>

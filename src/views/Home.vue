@@ -56,7 +56,7 @@
       </v-flex>
       <!-- Activity Feed -->
       <v-flex mt-0 xs12 sm6 md6 lg6>
-        <activity-feed :events="events"></activity-feed>
+        <activity-feed :events="events" :loading="loading"></activity-feed>
       </v-flex>
       <!-- Quick links -->
       <v-flex xs12 sm6 md3 lg3>
@@ -566,7 +566,9 @@ async function created() {
     }
     this.changingBudgetView = false;
   });
+  this.loading = true;
   this.createEvents();
+  this.loading = false;
   this.refreshEmployee();
   this.addOneSecondToActualTimeEverySecond();
 } // created
