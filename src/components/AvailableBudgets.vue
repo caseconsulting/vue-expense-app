@@ -12,20 +12,24 @@
         </div>
         <div v-else>
           <!-- If no avaible budgets -->
-          <v-row v-if="budgets.length == 0" justify="center">
-            <p>No available budgets</p>
-          </v-row>
-          <!-- Loop all budgets -->
-          <v-row v-for="budget in budgets" :key="budget.expenseTypeId" @click="selectBudget(budget)">
-            {{ budget.expenseTypeName }}:
-            <v-spacer></v-spacer>
-            <p v-if="noRemaining(budget)">{{ calcRemaining(budget) | moneyValue }}</p>
-            <p v-else>{{ calcRemaining(budget) | moneyValue }}</p>
-          </v-row>
-          <!-- End Loop all budgets -->
-          <router-link to="/myExpenses" style="text-decoration: none;">
-            <button class="home_buttons">Create an Expense</button>
-          </router-link>
+          <div v-if="budgets.length == 0">
+            <v-row justify="center">
+              <p>No available budgets</p>
+            </v-row>
+          </div>
+          <div v-else>
+            <!-- Loop all budgets -->
+            <v-row v-for="budget in budgets" :key="budget.expenseTypeId" @click="selectBudget(budget)">
+              {{ budget.expenseTypeName }}:
+              <v-spacer></v-spacer>
+              <p v-if="noRemaining(budget)">{{ calcRemaining(budget) | moneyValue }}</p>
+              <p v-else>{{ calcRemaining(budget) | moneyValue }}</p>
+            </v-row>
+            <!-- End Loop all budgets -->
+            <router-link to="/myExpenses" style="text-decoration: none;">
+              <button class="home_buttons">Create an Expense</button>
+            </router-link>
+          </div>
         </div>
       </v-card-text>
     </v-card>
