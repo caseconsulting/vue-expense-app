@@ -30,16 +30,18 @@
           <v-card-title>
             <!-- display the next anniversary date -->
             <div v-if="viewingCurrentBudgetYear">
-              <h3 class="pt-4">Anniversary Date: {{ getAnniversary }}</h3>
-              <div @mouseover="display = !display" @mouseleave="display = !display" class="pt-4">
+              <h3 class="pt-4 font-16">Anniversary Date: {{ getAnniversary }}</h3>
+              <div @mouseover="display = !display" @mouseleave="display = !display" class="pt-4 font-14">
                 <div v-if="display">Days Until: {{ getDaysUntil }}</div>
                 <div v-else>Seconds Until: {{ getSecondsUntil }}</div>
               </div>
             </div>
             <!-- Display the budget history year -->
             <div v-else>
-              <h3 class="pt-4">Viewing budgets from {{ this.getFiscalYearView }} - {{ this.getFiscalYearView + 1 }}</h3>
-              <div class="pt-4">[Inactive Budget]</div>
+              <h3 class="pt-4 font-16">
+                Viewing budgets from {{ this.getFiscalYearView }} - {{ this.getFiscalYearView + 1 }}
+              </h3>
+              <div class="pt-4 font-14">[Inactive Budget]</div>
             </div>
             <v-spacer></v-spacer>
             <v-icon style="margin-right: 10px;">history</v-icon>
@@ -54,7 +56,7 @@
         <v-progress-circular indeterminate size="64" color="#bc3825"></v-progress-circular>
       </v-flex>
 
-      <v-flex v-else text-center class="pt-0">
+      <v-flex v-else text-center class="pt-0 font-13">
         <budget-table v-if="!loading" :employee="expenseTypeData"></budget-table>
         <budget-chart
           v-if="!loading && !isMobile && !adminCall"

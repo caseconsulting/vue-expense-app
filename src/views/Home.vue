@@ -14,8 +14,8 @@
             <v-card-title>
               <!-- display the next anniversary date -->
               <div v-if="viewingCurrentBudgetYear">
-                <h3 class="pt-4">Anniversary Date: {{ getAnniversary }}</h3>
-                <div @mouseover="display = !display" @mouseleave="display = !display" class="pt-4">
+                <h3 class="pt-4 font-16">Anniversary Date: {{ getAnniversary }}</h3>
+                <div @mouseover="display = !display" @mouseleave="display = !display" class="pt-4 font-14">
                   <div v-if="display">Days Until: {{ getDaysUntil }}</div>
                   <div v-else>Seconds Until: {{ getSecondsUntil }}</div>
                 </div>
