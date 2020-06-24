@@ -182,6 +182,9 @@ function getTimeSheets(employeeNumber, startDate, endDate) {
 function getTwitterToken() {
   return execute('get', `/${TWITTER}/getTwitterToken`);
 }
+function getCaseTimeline() {
+  return execute('get', `${TWITTER}/getCaseTimeline`);
+}
 
 export default {
   extractText,
@@ -207,6 +210,7 @@ export default {
   getPTOBalances,
   getTimeSheets,
   getTwitterToken,
+  getCaseTimeline,
   EXPENSE_TYPES,
   EXPENSES,
   EMPLOYEES,

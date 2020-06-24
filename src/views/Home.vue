@@ -89,9 +89,15 @@
         </v-row>
       </v-col>
       <!-- Activity Feed -->
-      <v-col :cols="this.screenColTwo">
+      <v-col xs12 sm6 md6 lg6>
         <v-flex mt-0 class="pt-4">
           <activity-feed :events="events" :loading="loading"></activity-feed>
+        </v-flex>
+      </v-col>
+      <!-- Twitter Feed -->
+      <v-col xs12 sm6 md6 lg6>
+        <v-flex mt-0 class="pt-4">
+          <twitter-feed :tweets="tweets" :loading="loading"></twitter-feed>
         </v-flex>
       </v-col>
     </v-row>
@@ -106,6 +112,7 @@ import Balances from '../components/Balances.vue';
 // import MobileDetect from 'mobile-detect';
 import moment from 'moment';
 import ActivityFeed from '../components/ActivityFeed';
+import TwitterFeed from '../components/TwitterFeed';
 import _ from 'lodash';
 const IsoFormat = 'YYYY-MM-DD';
 
@@ -330,7 +337,6 @@ function clearStatus() {
 async function createEvents() {
   this.employees = await api.getItems(api.EMPLOYEES);
   this.aggregatedExpenses = await api.getAllAggregateExpenses();
-  console.log(this.aggregatedExpenses);
   //generate anniversaries
   let anniversaries = _.map(this.employees, (a) => {
     let hireDate = moment(a.hireDate, 'YYYY-MM-DD');
@@ -445,6 +451,16 @@ function getEventDateMessage(date) {
   } else {
     return date.format('ll');
   }
+}
+
+/**
+ * Calls the API to get tweets from the Twitter account.
+ */
+async function getTweets() {
+  this.tweets = await api.getCaseTimeline();
+  // _.forEach(this.tweets, (tweet) => {
+  //   console.log(tweet);
+  // });
 }
 
 /**
@@ -620,6 +636,7 @@ async function created() {
   this.loading = false;
   this.refreshEmployee();
   this.addOneSecondToActualTimeEverySecond();
+  this.getTweets();
 } // created
 
 // |--------------------------------------------------|
@@ -633,7 +650,8 @@ export default {
     ActivityFeed,
     AvailableBudgets,
     MonthlyCharges,
-    Balances
+    Balances,
+    TwitterFeed
   },
   computed: {
     budgets,
@@ -664,6 +682,7 @@ export default {
       loadingBudgets: false, //prop for available budgets
       ptoBalances: [],
       seconds: 0, // seconds until next anniversary date
+      tweets: [],
       status: {
         statusType: undefined,
         statusMessage: '',
@@ -704,6 +723,7 @@ export default {
     getAnniversaryEvents,
     getBirthdayEvents,
     getCurrentBudgetYear,
+    getTweets,
     isFullTime,
     refreshBudget,
     refreshBudgetYears,
