@@ -19,7 +19,7 @@
               <icon class="white--text" :name="tweet.icon"></icon>
             </template>
             <h3>{{ tweet.date }}</h3>
-            <div class="px-4">{{ tweet.text }}</div>
+            <div class="px-4">{{ tweet.full_text }}</div>
           </v-timeline-item>
         </v-timeline>
       </div>
