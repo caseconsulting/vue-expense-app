@@ -403,9 +403,9 @@ async function createEvents() {
   });
   // generate expenses
   let expenses = _.map(this.aggregatedExpenses, (a) => {
-    if (a.showOnFeed != ' ' || a.budgetName == 'High Five') {
+    if (a.showOnFeed != ' ' || a.budgetName == 'High Five' || a.budgetName == 'Training') {
       //expense has showOnFeed property
-      if (a.showOnFeed || a.budgetName == 'High Five') {
+      if (a.showOnFeed || a.budgetName == 'High Five' || a.budgetName == 'Training') {
         //value of showOnFeed is true
         if (a.reimbursedDate === ' ') {
           return null;
@@ -427,6 +427,7 @@ async function createEvents() {
       return null;
     }
   });
+  console.log(this.aggregatedExpenses);
   //generate schedules
   let schedules = _.map(this.scheduleEntries, (a) => {
     let now = moment();
