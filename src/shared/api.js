@@ -10,6 +10,7 @@ const BUDGETS = 'budgets';
 const URLS = 'training-urls';
 const TSHEETS = 'tSheets';
 const TWITTER = 'twitter';
+const BASECAMP = 'basecamp';
 const API_HOSTNAME = API_CONFIG.apiHostname;
 const API_PORT = API_CONFIG.apiPort;
 const PORT = API_PORT === '443' ? '' : `:${API_PORT}`;
@@ -186,6 +187,9 @@ function getCaseTimeline() {
   return execute('get', `${TWITTER}/getCaseTimeline`);
 }
 
+function getFeedEvents() {
+  return execute('get', `/${BASECAMP}/getFeedEvents`);
+}
 export default {
   extractText,
   getEmployeeBudget,
@@ -194,6 +198,7 @@ export default {
   getAllExpenseTypeExpenses,
   getFiscalDateViewBudgets,
   getEmployeeBudgets,
+  getFeedEvents,
   getItems,
   getItem,
   getAttachment,
