@@ -38,11 +38,11 @@
         </v-toolbar-items>
       </v-app-bar>
 
-      <v-content>
+      <v-main>
         <v-container fluid grid-list-lg>
           <router-view></router-view>
         </v-container>
-      </v-content>
+      </v-main>
       <v-footer app></v-footer>
       <time-out-modal :activate="timedOut"></time-out-modal>
       <time-out-warning-modal :activate="session"></time-out-warning-modal>
