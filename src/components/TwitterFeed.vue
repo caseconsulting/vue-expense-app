@@ -15,10 +15,10 @@
       <div v-else>
         <v-timeline dense>
           <v-timeline-item color="#bc3825" v-for="tweet in tweets" :key="tweet.name">
-            <template v-slot:icon v-if="tweet.icon">
-              <icon class="white--text" :name="tweet.icon"></icon>
+            <template v-slot:icon>
+              <img src="../assets/img/case-logo-circle.png" class="twitter-icon" />
             </template>
-            <h3>{{ tweet.date }}</h3>
+            <h3>{{ tweet.created_at | formatDate }}</h3>
             <div class="px-4">{{ tweet.full_text }}</div>
           </v-timeline-item>
         </v-timeline>
@@ -28,7 +28,27 @@
 </template>
 
 <script>
+import moment from 'moment';
+
 export default {
+  filters: {
+    formatDate: function (date) {
+      let now = moment();
+      let tweetDate = moment(date, 'ddd MMM DD HH:mm:ss ZZ YYYY');
+      let diff = now.startOf('day').diff(tweetDate.startOf('day'), 'day');
+      if (diff == 0) {
+        return 'Today'; //set date message as today if no difference in date
+      } else if (diff == 1) {
+        return 'Yesterday'; //if it was one day removed message is yesterday
+      } else if (diff <= 6 && diff > 1) {
+        return diff + ' days ago'; //if it is otherwise less than 7 days ago create message
+      } else if (diff == -1) {
+        return 'Tomorrow';
+      } else {
+        return tweetDate.format('ll');
+      }
+    }
+  },
   props: ['tweets', 'loading']
 };
 </script>
