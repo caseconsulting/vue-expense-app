@@ -45,6 +45,8 @@ import 'vue-awesome/icons/user-plus';
 import 'vue-awesome/icons/glass-cheers';
 import 'vue-awesome/icons/birthday-cake';
 import 'vue-awesome/icons/dollar-sign';
+import 'vue-awesome/icons/calendar-alt';
+import 'vue-awesome/icons/external-link-alt';
 
 import Icon from 'vue-awesome/components/Icon';
 import App from './App.vue';

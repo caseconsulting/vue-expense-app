@@ -337,6 +337,7 @@ function clearStatus() {
 async function createEvents() {
   this.employees = await api.getItems(api.EMPLOYEES);
   this.aggregatedExpenses = await api.getAllAggregateExpenses();
+  this.scheduleEntries = _.flatten(await api.getFeedEvents());
   //generate anniversaries
   let anniversaries = _.map(this.employees, (a) => {
     let hireDate = moment(a.hireDate, 'YYYY-MM-DD');
@@ -374,7 +375,6 @@ async function createEvents() {
       return null;
     }
   });
-
   // generate birthdays
   let birthdays = _.map(this.employees, (b) => {
     if (b.birthdayFeed) {
@@ -401,6 +401,7 @@ async function createEvents() {
     }
     return null;
   });
+  // generate expenses
   let expenses = _.map(this.aggregatedExpenses, (a) => {
     if (a.showOnFeed != ' ' || a.budgetName == 'High Five') {
       //expense has showOnFeed property
@@ -426,7 +427,20 @@ async function createEvents() {
       return null;
     }
   });
-  let mergedEventsList = [...anniversaries, ...birthdays, ...expenses]; // merges lists
+  //generate schedules
+  let schedules = _.map(this.scheduleEntries, (a) => {
+    let now = moment();
+    let startDate = moment(a.starts_at, 'YYYY-MM-DD');
+    let event = {};
+    event.date = getEventDateMessage(startDate);
+
+    event.text = `${a.title} starts today!`; // --event name-- starts today!
+    event.icon = 'calendar-alt';
+    event.daysFromToday = now.startOf('day').diff(startDate.startOf('day'), 'days');
+    event.link = a.app_url;
+    return event;
+  });
+  let mergedEventsList = [...anniversaries, ...birthdays, ...expenses, ...schedules]; // merges lists
   this.events = _.sortBy(_.compact(mergedEventsList), 'daysFromToday');
 }
 
@@ -681,6 +695,7 @@ export default {
       loading: false, // loading status
       loadingBudgets: false, //prop for available budgets
       ptoBalances: [],
+      scheduleEntries: [],
       seconds: 0, // seconds until next anniversary date
       tweets: [],
       status: {
