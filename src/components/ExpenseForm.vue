@@ -963,13 +963,14 @@ async function created() {
 
   // creating or updating an expense as an admin
   let recipients = await api.getItems(api.EMPLOYEES);
-  this.highFiveRecipients = recipients.map((employee) => {
-    if (employee.id == this.userInfo.id) {
-      return;
-    }
-    return employeeUtils.fullName(employee);
-  });
-
+  this.highFiveRecipients = _.compact(
+    recipients.map((employee) => {
+      if (employee.id == this.userInfo.id || employee.workStatus == 0) {
+        return;
+      }
+      return employeeUtils.fullName(employee);
+    })
+  );
   // set aggregate expense types
   let expenseTypes = await api.getItems(api.EXPENSE_TYPES);
   this.expenseTypes = _.map(expenseTypes, (expenseType) => {
