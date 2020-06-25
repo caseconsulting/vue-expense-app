@@ -851,11 +851,8 @@ async function submit() {
       }
     }
     this.loading = false; // set loading status to false
-<<<<<<< HEAD
     this.$emit('endAction');
-=======
     this.isHighFive = false; // set high five back to false
->>>>>>> 992-display-a-list-employees-to-select-for-a-high-five: get data for recipient of high five and display altered message for high fives on activity feed
   }
 } // submit
 
