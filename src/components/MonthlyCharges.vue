@@ -57,8 +57,18 @@
           <v-list-item-content>Hours Worked:</v-list-item-content>
           <v-list-item-content class="text-right">
             <div @mouseover="decimalDialog = !decimalDialog" @mouseleave="decimalDialog = !decimalDialog">
-              <p v-if="decimalDialog">{{ this.totalHours }}h</p>
-              <p v-else>{{ this.totalHoursHover }}</p>
+              <p v-if="decimalDialog">{{ this.workedHours }}h</p>
+              <p v-else>{{ this.workedHoursHover }}</p>
+            </div>
+          </v-list-item-content>
+        </v-list-item>
+        <!-- Future hours for this month -->
+        <v-list-item>
+          <v-list-item-content>Future Hours:</v-list-item-content>
+          <v-list-item-content class="text-right">
+            <div @mouseover="decimalDialog = !decimalDialog" @mouseleave="decimalDialog = !decimalDialog">
+              <p v-if="decimalDialog">{{ this.futureHours }}h</p>
+              <p v-else>{{ this.futureHoursHover }}</p>
             </div>
           </v-list-item-content>
         </v-list-item>
@@ -116,14 +126,15 @@ const IsoFormat = 'YYYY-MM-DD';
  */
 function jobHours() {
   let jobHours = [];
-  jobHours = _.map(this.timeSheets, (item) => {
+  let allTimeSheets = _.union(this.timeSheets, this.futureTimeSheets);
+  jobHours = _.map(allTimeSheets, (item) => {
     return {
       name: item.jobcode,
       hours: 0
     };
   });
   jobHours = _.uniqWith(jobHours, _.isEqual);
-  _.forEach(this.timeSheets, (hours) => {
+  _.forEach(allTimeSheets, (hours) => {
     _.forEach(jobHours, (total) => {
       if (total.name === hours.jobcode) {
         total.hours += hours.duration;
@@ -148,14 +159,15 @@ function jobHours() {
  */
 function jobHoursHover() {
   let jobHoursHover = [];
-  jobHoursHover = _.map(this.timeSheets, (item) => {
+  let allTimeSheets = _.union(this.timeSheets, this.futureTimeSheets);
+  jobHoursHover = _.map(allTimeSheets, (item) => {
     return {
       name: item.jobcode,
       hours: 0
     };
   });
   jobHoursHover = _.uniqWith(jobHoursHover, _.isEqual);
-  _.forEach(this.timeSheets, (hours) => {
+  _.forEach(allTimeSheets, (hours) => {
     _.forEach(jobHoursHover, (total) => {
       if (total.name === hours.jobcode) {
         total.hours += hours.duration;
@@ -221,21 +233,30 @@ async function created() {
   // set the current year
   this.year = moment().format('YYYY');
   // get the first day of the month in the proper format
-  let firstDay = moment().set('date', 1).format(IsoFormat);
+  let firstDay = moment().startOf('month').format(IsoFormat);
+  // get last day of the month
+  let lastDay = moment().endOf('month').format(IsoFormat);
   // get timesheets from api
   this.timeSheets = await api.getTimeSheets(this.employee.employeeNumber, firstDay, now);
   _.forEach(this.timeSheets, (hours) => {
-    this.totalHours += hours.duration;
+    this.workedHours += hours.duration;
   });
+  this.futureTimeSheets = await api.getTimeSheets(this.employee.employeeNumber, now, lastDay);
+  _.forEach(this.futureTimeSheets, (hours) => {
+    this.futureHours += hours.duration;
+  });
+  this.totalHours = this.workedHours + this.futureHours;
+  this.totalHoursHover = decimalToTime(this.totalHours);
   this.workHoursNumber = this.workHours.substring(0, this.workHours.length - 1);
-  this.remainingHours = this.workHoursNumber - this.totalHours;
+  this.remainingHours = this.workHoursNumber - this.workedHours;
   this.userWorkDays = this.remainingWorkDays;
   this.estimatedDailyHours = this.remainingHours / this.userWorkDays;
   this.estimatedDailyHoursHover = decimalToTime(this.estimatedDailyHours);
-  this.totalHoursHover = decimalToTime(this.totalHours);
+  this.workedHoursHover = decimalToTime(this.workedHours);
   this.remainingHoursHover = decimalToTime(this.remainingHours);
+  this.futureHoursHover = decimalToTime(this.futureHours);
   this.estimatedDailyHours = roundHours(this.estimatedDailyHours);
-  this.totalHours = roundHours(this.totalHours);
+  this.workedHours = roundHours(this.workedHours);
   this.remainingHours = roundHours(this.remainingHours);
   this.loading = false;
 } // created
@@ -298,6 +319,9 @@ export default {
       decimalDialog: true,
       estimatedDailyHours: 0,
       estimatedDailyHoursHover: '',
+      futureHours: 0,
+      futureHoursHover: '',
+      futureTimeSheets: [],
       loading: false,
       month: '',
       monthlyMin: 0,
@@ -308,6 +332,8 @@ export default {
       totalHours: 0,
       totalHoursHover: '',
       userWorkDays: 0,
+      workedHours: 0,
+      workedHoursHover: '',
       workHoursNumber: 0,
       year: ''
     };

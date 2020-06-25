@@ -427,7 +427,6 @@ async function createEvents() {
       return null;
     }
   });
-  console.log(this.aggregatedExpenses);
   //generate schedules
   let schedules = _.map(this.scheduleEntries, (a) => {
     let now = moment();
