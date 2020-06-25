@@ -233,7 +233,11 @@
                 <v-card text>
                   <v-card-text>
                     <div class="expandedInfo">
-                      <p v-if="item.description"><b>Description: </b>{{ item.description }}</p>
+                      <p v-if="item.description">
+                        <b v-if="item.budgetName == 'High Five'">Recipient: </b>
+                        <b v-else>Description: </b>
+                        {{ item.description }}
+                      </p>
                       <p v-if="!isEmpty(item.note)"><b>Notes: </b>{{ item.note }}</p>
                       <p v-if="!isEmpty(item.receipt)"><b>Receipt: </b>{{ item.receipt }}</p>
                       <p v-if="!isEmpty(item.url)">

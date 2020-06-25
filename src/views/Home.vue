@@ -412,16 +412,14 @@ async function createEvents() {
         }
         let now = moment();
         let reimbursedDate = moment(a.reimbursedDate, 'YYYY-MM-DD');
-        let createdDate = moment(a.createdAt, 'YYYY-MM-DD');
-        let updateDate = moment('2020-06-25', 'YYYY-MM-DD');
         let event = {};
         event.date = getEventDateMessage(reimbursedDate);
 
         event.text = `${a.firstName} used their ${a.budgetName} budget on ${a.description}`;
         event.icon = 'dollar-sign';
         event.daysFromToday = now.startOf('day').diff(reimbursedDate.startOf('day'), 'days');
-        if (a.budgetName == 'High Five' && createdDate >= updateDate) {
-          event.text = `${a.firstName} gave ${a.description.text} a High Five`;
+        if (a.budgetName == 'High Five') {
+          event.text = `${a.firstName} gave ${a.description} a High Five`;
         }
         return event;
       } else {

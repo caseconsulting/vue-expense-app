@@ -75,13 +75,12 @@
         <!-- Employee Selection List -->
         <v-autocomplete
           v-if="this.isHighFive"
-          :items="employees"
+          :items="this.highFiveRecipients"
           :rules="requiredRules"
           :disabled="isReimbursed"
           v-model="expense.description"
           label="Recipient"
           class="form_padding"
-          return-object
         ></v-autocomplete>
 
         <!-- Description -->
@@ -962,6 +961,12 @@ async function created() {
     };
   });
 
+  // creating or updating an expense as an admin
+  let recipients = await api.getItems(api.EMPLOYEES);
+  this.highFiveRecipients = recipients.map((employee) => {
+    return employeeUtils.fullName(employee);
+  });
+
   // set aggregate expense types
   let expenseTypes = await api.getItems(api.EXPENSE_TYPES);
   this.expenseTypes = _.map(expenseTypes, (expenseType) => {
@@ -1047,6 +1052,7 @@ export default {
       file: undefined, // receipt
       myBudgetsView: false, // if on myBudgetsView page
       hint: '', // form hints
+      highFiveRecipients: [], // list of active employees to choose for high five
       isInactive: false, // employee is inactive
       loading: false, // loading
       purchaseMenu: false, // display purchase menu
