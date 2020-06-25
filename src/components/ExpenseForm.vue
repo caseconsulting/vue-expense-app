@@ -378,6 +378,7 @@ function calcAdjustedBudget(employee, expenseType) {
  */
 async function checkCoverage() {
   if (this.$refs.form.validate()) {
+    this.$emit('startAction');
     // form is validated
     this.loading = true; // set loading status to true
     if (this.expense) {
@@ -400,6 +401,7 @@ async function checkCoverage() {
       if (this.employee.workStatus == 0) {
         // emit error if user is inactive
         this.$emit('error', 'Current user is inactive');
+        this.$emit('endAction');
         this.loading = false; // set loading status to false
       } else {
         // user is active
@@ -441,6 +443,7 @@ async function checkCoverage() {
               // budget is already maxed out for overdraft
               this.$emit('error', 'Budget is maxed out');
               this.loading = false; // set loading status to false
+              this.$emit('endAction');
             }
           } else {
             // selected expense type does not allow overdraft or employee is not full time
@@ -460,6 +463,7 @@ async function checkCoverage() {
               // budget is maxed out
               this.$emit('error', `${expenseType.budgetName} budget is maxed out`);
               this.loading = false; // set loading status to false
+              this.$emit('endAction');
             }
           }
         } else {
@@ -834,6 +838,7 @@ async function submit() {
       }
     }
     this.loading = false; // set loading status to false
+    this.$emit('endAction');
   }
 } // submit
 
@@ -917,6 +922,7 @@ async function created() {
   window.EventBus.$on('canceledSubmit', () => {
     this.confirming = false;
     this.loading = false; // set loading status to false
+    this.$emit('endAction');
   });
   window.EventBus.$on('confirmSubmit', () => {
     this.confirming = false;

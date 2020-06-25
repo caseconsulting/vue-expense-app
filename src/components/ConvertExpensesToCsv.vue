@@ -1,6 +1,6 @@
 <template>
   <!-- Download CSV Button -->
-  <v-btn @click="download()"> <i class="material-icons">file_download</i> Download All</v-btn>
+  <v-btn :disabled="midAction" @click="download()"> <i class="material-icons">file_download</i> Download All</v-btn>
 </template>
 
 <script>
@@ -143,7 +143,7 @@ function exportCSVFile(items, fileTitle) {
 // |--------------------------------------------------|
 
 export default {
-  props: ['expenses'], // expenses to export
+  props: ['expenses', 'midAction'], // expenses to export
   data() {
     return {
       employees: [],

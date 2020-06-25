@@ -288,6 +288,7 @@ function removeCategory(category) {
  */
 async function submit() {
   this.submitting = true; // set loading status to true
+  this.$emit('startAction');
 
   // Add a typed-pending category if exists and not already included
   if (!this.isEmpty(this.categoryInput) && !this.model.categories.includes(this.categoryInput)) {
@@ -362,6 +363,7 @@ async function submit() {
     }
   }
   this.submitting = false; // set loading status to false
+  this.$emit('endAction');
 } // submit
 
 // |--------------------------------------------------|

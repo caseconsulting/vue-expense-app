@@ -213,7 +213,7 @@
                   <v-tooltip top>
                     <template v-slot:activator="{ on }">
                       <v-btn
-                        :disabled="isEditing()"
+                        :disabled="isEditing() || midAction"
                         text
                         icon
                         @click="
@@ -233,7 +233,7 @@
                   <!-- Delete Button -->
                   <v-tooltip top>
                     <template v-slot:activator="{ on }">
-                      <v-btn :disabled="isEditing()" text icon @click="validateDelete(item)" v-on="on">
+                      <v-btn :disabled="isEditing() || midAction" text icon @click="validateDelete(item)" v-on="on">
                         <v-icon style="color: #606060;">
                           delete
                         </v-icon>
@@ -372,6 +372,8 @@
         ref="form"
         :model="model"
         v-on:add="addModelToTable"
+        v-on:startAction="startAction"
+        v-on:endAction="endAction"
         v-on:update="updateModelInTable"
         v-on:error="displayError"
       ></expense-type-form>
@@ -515,6 +517,7 @@ async function deleteExpenseType() {
     // fails to delete expense type
     this.displayError(et.response.data.message);
   }
+  this.midAction = false;
 } // deleteExpenseType
 
 /**
@@ -538,6 +541,13 @@ function displayError(err) {
   this.$set(this.status, 'statusMessage', err);
   this.$set(this.status, 'color', 'red');
 } // displayError
+
+/**
+ * Sets inAction boolean to false.
+ */
+function endAction() {
+  this.inAction = false;
+}
 
 /**
  * Filters expense types based on filter selections.
@@ -749,6 +759,13 @@ async function refreshExpenseTypes() {
 } // refreshExpenseTypes
 
 /**
+ * set midAction to true
+ */
+function startAction() {
+  this.midAction = true;
+}
+
+/**
  * Scrolls window back to the top of the form.
  */
 function toTopOfForm() {
@@ -780,6 +797,7 @@ function userIsAdmin() {
  * @param item - expense type to validate
  */
 async function validateDelete(item) {
+  this.midAction = true;
   this.deleteType = item.budgetName;
   let x = await api
     .getAllExpenseTypeExpenses(item.id)
@@ -807,9 +825,15 @@ async function validateDelete(item) {
  * Set user info, employees, and expense types. Creates event listeners.
  */
 async function created() {
-  window.EventBus.$on('canceled-delete-expense-type', () => (this.deleting = false));
+  window.EventBus.$on('canceled-delete-expense-type', () => {
+    this.deleting = false;
+    this.midAction = false;
+  });
   window.EventBus.$on('confirm-delete-expense-type', this.deleteExpenseType);
-  window.EventBus.$on('invalid-expense type-delete', () => (this.invalidDelete = false));
+  window.EventBus.$on('invalid-expense type-delete', () => {
+    this.invalidDelete = false;
+    this.midAction = false;
+  });
 
   this.userInfo = await api.getUser();
   this.employees = await api.getItems(api.EMPLOYEES);
@@ -882,6 +906,7 @@ export default {
         }
       ], // datatable headers
       invalidDelete: false, // invalid delete status
+      midAction: false,
       itemsPerPage: -1, // items per datatable page
       loading: false, // loading status
       model: {
@@ -929,6 +954,7 @@ export default {
     deleteExpenseType,
     deleteModelFromTable,
     displayError,
+    endAction,
     filterExpenseTypes,
     getAccess,
     getEmployeeList,
@@ -939,6 +965,7 @@ export default {
     isInactive,
     onSelect,
     refreshExpenseTypes,
+    startAction,
     toTopOfForm,
     updateModelInTable,
     userIsAdmin,

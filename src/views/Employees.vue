@@ -101,7 +101,7 @@
                   <v-tooltip top>
                     <template v-slot:activator="{ on }">
                       <v-btn
-                        :disabled="isEditing()"
+                        :disabled="isEditing() || midAction"
                         text
                         icon
                         @click.stop="
@@ -121,7 +121,13 @@
                   <!-- Delete Button -->
                   <v-tooltip top>
                     <template v-slot:activator="{ on }">
-                      <v-btn :disabled="isEditing()" text icon @click.stop="validateDelete(item)" v-on="on">
+                      <v-btn
+                        :disabled="isEditing() || midAction"
+                        text
+                        icon
+                        @click.stop="validateDelete(item)"
+                        v-on="on"
+                      >
                         <v-icon style="color: #606060;">
                           delete
                         </v-icon>
@@ -204,7 +210,11 @@
 
           <!-- Download employee csv button -->
           <v-card-actions>
-            <convert-employees-to-csv v-if="userIsAdmin()" :employees="filteredEmployees"></convert-employees-to-csv>
+            <convert-employees-to-csv
+              v-if="userIsAdmin()"
+              :midAction="midAction"
+              :employees="filteredEmployees"
+            ></convert-employees-to-csv>
           </v-card-actions>
 
           <!-- Confirmation Modals -->
@@ -222,6 +232,8 @@
         :model="model"
         :employeeInfo="employeeInfo"
         v-on:add="addModelToTable"
+        v-on:startACtion="startAction"
+        v-on:endAction="endAction"
         v-on:update="updateModelInTable"
         v-on:error="displayError"
       ></employee-form>
@@ -325,6 +337,7 @@ async function deleteEmployee() {
     // display error if failed to deleted employee
     this.displayError(e.response.data.message);
   }
+  this.midAction = false;
 } // deleteEmployee
 
 /**
@@ -349,6 +362,12 @@ async function displayError(err) {
   this.$set(this.status, 'color', 'red');
 } // displayError
 
+/**
+ * sets midAction boolean to false
+ */
+function endAction() {
+  this.midAction = false;
+}
 /**
  * Filters out contracts from list of employees.
  */
@@ -522,6 +541,12 @@ async function refreshEmployees() {
 } // refreshEmployees
 
 /**
+ * Sets midAction boolean to true
+ */
+function startAction() {
+  this.midAction = true;
+}
+/**
  * Scrolls window back to the top of the form.
  */
 function toTopOfForm() {
@@ -551,6 +576,7 @@ function userIsAdmin() {
  * @param item - employee to validate
  */
 async function validateDelete(item) {
+  this.midAction = true;
   let valid = await api
     .getAllEmployeeExpenses(item.id) // get employee expenses
     .then((result) => {
@@ -582,9 +608,15 @@ async function validateDelete(item) {
  *  Adjust datatable header for user view. Creates event listeners.
  */
 async function created() {
-  window.EventBus.$on('canceled-delete-employee', () => (this.deleting = false));
+  window.EventBus.$on('canceled-delete-employee', () => {
+    this.deleting = false;
+    this.midAction = false;
+  });
   window.EventBus.$on('confirm-delete-employee', this.deleteEmployee);
-  window.EventBus.$on('invalid-employee-delete', () => (this.invalidDelete = false));
+  window.EventBus.$on('invalid-employee-delete', () => {
+    this.invalidDelete = false;
+    this.midAction = false;
+  });
 
   this.refreshEmployees();
 
@@ -651,6 +683,7 @@ export default {
           sortable: false
         }
       ], // datatable headers
+      midAction: false,
       invalidDelete: false, // invalid delete status
       itemsPerPage: -1, // items per datatable page
       loading: false, // loading status
@@ -711,6 +744,7 @@ export default {
     deleteEmployee,
     deleteModelFromTable,
     displayError,
+    endAction,
     filterContracts,
     filterEmployees,
     filterPrimes,
@@ -724,6 +758,7 @@ export default {
     isPartTime,
     onSelect,
     refreshEmployees,
+    startAction,
     toTopOfForm,
     updateModelInTable,
     userIsAdmin,

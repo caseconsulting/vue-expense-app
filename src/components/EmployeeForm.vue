@@ -457,6 +457,7 @@ function parseDate(date) {
  */
 async function submit() {
   if (this.$refs.form.validate()) {
+    this.$emit('startAction');
     // form validated
     if (!this.isInactive()) {
       // set deptDate if employee is active
@@ -476,9 +477,11 @@ async function submit() {
         // successfully updated employee
         this.$emit('update');
         this.clearForm();
+        this.$emit('endAction');
       } else {
         // failed to update employee
         this.$emit('error', updatedEmployee.response.data.message);
+        this.$emit('endAction');
       }
     } else {
       // creating employee
@@ -488,10 +491,12 @@ async function submit() {
         // successfully created employee
         this.$emit('add', newEmployee);
         this.clearForm();
+        this.$emit('endAction');
       } else {
         // failed to create employee
         this.$emit('error', newEmployee.response.data.message);
         this.$set(this.model, 'id', ''); // reset id
+        this.$emit('endAction');
       }
     }
   }

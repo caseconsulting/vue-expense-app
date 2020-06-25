@@ -153,13 +153,13 @@
                 <!-- Action Icons -->
                 <td class="datatable_btn layout" @click="clickedRow(item)">
                   <!-- Download Attachment Button -->
-                  <attachment :expense="item" :mode="'expenses'"></attachment>
+                  <attachment :midAction="midAction" :expense="item" :mode="'expenses'"></attachment>
 
                   <!-- Edit Button -->
                   <v-tooltip top>
                     <template v-slot:activator="{ on }">
                       <v-btn
-                        :disabled="isEditing() || (isUser && isReimbursed(item))"
+                        :disabled="isEditing() || (isUser && isReimbursed(item)) || midAction"
                         text
                         icon
                         @click="
@@ -180,11 +180,12 @@
                   <v-tooltip top>
                     <template v-slot:activator="{ on }">
                       <v-btn
-                        :disabled="isReimbursed(item) || isEditing()"
+                        :disabled="isReimbursed(item) || isEditing() || midAction"
                         text
                         icon
                         @click="
                           deleting = true;
+                          midAction = true;
                           propExpense = item;
                         "
                         v-on="on"
@@ -202,11 +203,12 @@
                     <v-tooltip top>
                       <template v-slot:activator="{ on }">
                         <v-btn
-                          :disabled="!isReimbursed(item) || isEditing()"
+                          :disabled="!isReimbursed(item) || isEditing() || midAction"
                           text
                           icon
                           @click="
                             unreimbursing = true;
+                            midAction = true;
                             propExpense = item;
                           "
                           v-on="on"
@@ -261,7 +263,11 @@
 
           <!-- Download expense csv button -->
           <v-card-actions>
-            <convert-expenses-to-csv v-if="isAdmin" :expenses="filteredExpenses"></convert-expenses-to-csv>
+            <convert-expenses-to-csv
+              v-if="isAdmin"
+              :midAction="midAction"
+              :expenses="filteredExpenses"
+            ></convert-expenses-to-csv>
           </v-card-actions>
 
           <!-- Confirmation Modals -->
@@ -280,6 +286,8 @@
         :expense="expense"
         v-on:add="addModelToTable"
         v-on:delete="deleteModelFromTable"
+        v-on:startAction="startAction"
+        v-on:endAction="endAction"
         v-on:update="updateModelInTable"
         v-on:error="displayError"
       ></expense-form>
@@ -482,6 +490,7 @@ async function deleteExpense() {
       // fails to delete expense
       this.displayError('Error Deleting Expense');
     }
+    this.midAction = false;
   }
   this.loading = false; // set loading status to false
 } // deleteExpense
@@ -508,6 +517,12 @@ function displayError(err) {
   this.$set(this.status, 'color', 'red');
 } // displayError
 
+/**
+ * set midAction to false
+ */
+function endAction() {
+  this.midAction = false;
+}
 /**
  * Filters expenses based on filter selections.
  */
@@ -627,6 +642,12 @@ async function refreshExpenses() {
 } // refreshExpenses
 
 /**
+ * set midAction to true
+ */
+function startAction() {
+  this.midAction = true;
+}
+/**
  * Scrolls window back to the top of the form.
  */
 function toTopOfForm() {
@@ -655,6 +676,7 @@ async function unreimburseExpense() {
 
   this.refreshExpenses();
   this.loading = false; // set loading status to false
+  this.midAction = false;
 } // unreimburseExpense
 
 /**
@@ -695,10 +717,16 @@ function useInactiveStyle(expense) {
  *  Gets and sets user info, expense types, and expenses. Creates event listeners.
  */
 async function created() {
-  window.EventBus.$on('canceled-unreimburse-expense', () => (this.unreimbursing = false));
+  window.EventBus.$on('canceled-unreimburse-expense', () => {
+    this.unreimbursing = false;
+    this.midAction = false;
+  });
   window.EventBus.$on('confirm-unreimburse-expense', this.unreimburseExpense);
 
-  window.EventBus.$on('canceled-delete-expense', () => (this.deleting = false));
+  window.EventBus.$on('canceled-delete-expense', () => {
+    this.deleting = false;
+    this.midAction = false;
+  });
   window.EventBus.$on('confirm-delete-expense', this.deleteExpense);
 
   // get user info
@@ -812,6 +840,7 @@ export default {
         }
       ], // datatable headers
       loading: true, // loading status
+      midAction: false,
       propExpense: {
         id: null,
         createdAt: null,
@@ -863,6 +892,7 @@ export default {
     deleteExpense,
     deleteModelFromTable,
     displayError,
+    endAction,
     filterExpenses,
     isEditing,
     isEmpty,
@@ -870,6 +900,7 @@ export default {
     isReimbursed,
     onSelect,
     refreshExpenses,
+    startAction,
     toTopOfForm,
     unreimburseExpense,
     updateModelInTable,
