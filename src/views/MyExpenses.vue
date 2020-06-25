@@ -855,6 +855,7 @@ export default {
         reimbursedDate: null,
         note: null,
         receipt: null,
+        recipient: null,
         url: null
       }, // expense to edit
       search: '', // query text for datatable search field

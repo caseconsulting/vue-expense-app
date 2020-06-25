@@ -647,6 +647,7 @@ export default {
         purchaseDate: null,
         reimbursedDate: null,
         reciept: null,
+        recipient: null,
         employeeName: '',
         budgetName: ''
       }, // expense for the expense form

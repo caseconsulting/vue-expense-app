@@ -418,6 +418,10 @@ async function createEvents() {
         event.text = `${a.firstName} used their ${a.budgetName} budget on ${a.description}`;
         event.icon = 'dollar-sign';
         event.daysFromToday = now.startOf('day').diff(reimbursedDate.startOf('day'), 'days');
+        if (a.budgetName == 'High Five') {
+          event.text = `${a.firstName} gave ${a.description.text} a High Five`;
+          console.log(a.description);
+        }
         return event;
       } else {
         return null;

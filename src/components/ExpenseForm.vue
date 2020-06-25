@@ -72,8 +72,21 @@
           data-vv-name="Cost"
         ></v-text-field>
 
+        <!-- Employee Selection List -->
+        <v-autocomplete
+          v-if="this.isHighFive"
+          :items="employees"
+          :rules="requiredRules"
+          :disabled="isReimbursed"
+          v-model="expense.description"
+          label="Recipient"
+          class="form_padding"
+          return-object
+        ></v-autocomplete>
+
         <!-- Description -->
         <v-text-field
+          v-if="!this.isHighFive"
           v-model="expense.description"
           :rules="descriptionRules"
           :disabled="isInactive"
@@ -838,7 +851,11 @@ async function submit() {
       }
     }
     this.loading = false; // set loading status to false
+<<<<<<< HEAD
     this.$emit('endAction');
+=======
+    this.isHighFive = false; // set high five back to false
+>>>>>>> 992-display-a-list-employees-to-select-for-a-high-five: get data for recipient of high five and display altered message for high fives on activity feed
   }
 } // submit
 
@@ -1046,6 +1063,7 @@ export default {
       reimbursedDateFormatted: null, // formatted reimburse date
       selectedEmployee: {}, // selected employees
       selectedExpenseType: {}, // selected expense types
+      selectedRecipient: {}, // the recipent selected for a high five
       confirming: false, // budget overage confirmation box activator
       urlInfo: {
         id: ' ',
