@@ -19,7 +19,7 @@
               <img src="../assets/img/case-logo-circle.png" class="twitter-icon" />
             </template>
             <h3>{{ tweet.created_at | formatDate }}</h3>
-            <div class="px-4">{{ tweet.full_text }}</div>
+            <div class="px-4">{{ tweet.full_text | removeLink }}</div>
           </v-timeline-item>
         </v-timeline>
       </div>
@@ -47,6 +47,14 @@ export default {
       } else {
         return tweetDate.format('ll');
       }
+    },
+    removeLink: function (tweet) {
+      let splits = [];
+      splits = tweet.split('https');
+      if (splits.length > 1) {
+        splits.pop();
+      }
+      return splits.join('https');
     }
   },
   props: ['tweets', 'loading']
