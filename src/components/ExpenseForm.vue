@@ -951,17 +951,16 @@ async function created() {
     // creating or updating an expense as a user
     this.$set(this.expense, 'employeeName', this.userInfo.id);
     this.$set(this.expense, 'employeeId', this.userInfo.id);
-  } else {
-    // creating or updating an expense as an admin
-    let employees = await api.getItems(api.EMPLOYEES);
-    this.employees = employees.map((employee) => {
-      return {
-        text: employeeUtils.fullName(employee),
-        value: employee.id,
-        workStatus: employee.workStatus
-      };
-    });
   }
+  // creating or updating an expense as an admin
+  let employees = await api.getItems(api.EMPLOYEES);
+  this.employees = employees.map((employee) => {
+    return {
+      text: employeeUtils.fullName(employee),
+      value: employee.id,
+      workStatus: employee.workStatus
+    };
+  });
 
   // set aggregate expense types
   let expenseTypes = await api.getItems(api.EXPENSE_TYPES);
