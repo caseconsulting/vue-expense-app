@@ -964,6 +964,9 @@ async function created() {
   // creating or updating an expense as an admin
   let recipients = await api.getItems(api.EMPLOYEES);
   this.highFiveRecipients = recipients.map((employee) => {
+    if (employee.id == this.userInfo.id) {
+      return;
+    }
     return employeeUtils.fullName(employee);
   });
 
