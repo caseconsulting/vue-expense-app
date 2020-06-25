@@ -248,7 +248,7 @@ async function created() {
   this.totalHours = this.workedHours + this.futureHours;
   this.totalHoursHover = decimalToTime(this.totalHours);
   this.workHoursNumber = this.workHours.substring(0, this.workHours.length - 1);
-  this.remainingHours = this.workHoursNumber - this.workedHours;
+  this.remainingHours = this.workHoursNumber - this.totalHours;
   this.userWorkDays = this.remainingWorkDays;
   this.estimatedDailyHours = this.remainingHours / this.userWorkDays;
   this.estimatedDailyHoursHover = decimalToTime(this.estimatedDailyHours);
