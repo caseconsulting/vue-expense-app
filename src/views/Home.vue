@@ -475,6 +475,7 @@ function getEventDateMessage(date) {
  */
 async function getTweets() {
   this.tweets = await api.getCaseTimeline();
+  console.log(this.tweets);
 }
 
 /**
