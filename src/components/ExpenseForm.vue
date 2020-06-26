@@ -962,10 +962,10 @@ async function created() {
   });
 
   // creating or updating an expense as an admin
-  let recipients = await api.getItems(api.EMPLOYEES);
+  //let recipients = await api.getItems(api.EMPLOYEES);
   this.highFiveRecipients = _.compact(
-    recipients.map((employee) => {
-      if (employee.id == this.userInfo.id || employee.workStatus == 0) {
+    employees.map((employee) => {
+      if (employee.id == this.userInfo.id || employee.workStatus == 0 || this.expense.employeeId == employee.id) {
         return;
       }
       return employeeUtils.fullName(employee);
@@ -1119,6 +1119,20 @@ export default {
     'isEdit' // if updating an expense
   ],
   watch: {
+    'expense.employeeId': function () {
+      this.highFiveRecipients = _.compact(
+        this.employees.map((employee) => {
+          if (
+            employee.value == this.userInfo.id ||
+            employee.workStatus == 0 ||
+            this.expense.employeeId == employee.value
+          ) {
+            return;
+          }
+          return employee.text;
+        })
+      );
+    },
     'expense.expenseTypeId': function () {
       let selected = _.find(this.expenseTypes, (expenseType) => {
         return expenseType.value === this.expense.expenseTypeId;
