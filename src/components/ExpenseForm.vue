@@ -962,10 +962,12 @@ async function created() {
   });
 
   // creating or updating an expense as an admin
-  //let recipients = await api.getItems(api.EMPLOYEES);
   this.highFiveRecipients = _.compact(
     employees.map((employee) => {
       if (employee.id == this.userInfo.id || employee.workStatus == 0 || this.expense.employeeId == employee.id) {
+        if (this.userInfo.id != this.expense.employeeId && !this.asUser) {
+          return employeeUtils.fullName(employee);
+        }
         return;
       }
       return employeeUtils.fullName(employee);
@@ -1127,6 +1129,9 @@ export default {
             employee.workStatus == 0 ||
             this.expense.employeeId == employee.value
           ) {
+            if (this.userInfo.id != this.expense.employeeId && !this.asUser) {
+              return employee.text;
+            }
             return;
           }
           return employee.text;
