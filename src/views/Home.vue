@@ -28,26 +28,8 @@
     </v-row>
     <v-row wrap class="px-4">
       <v-col :cols="this.screenColOne">
-        <v-row wrap>
-          <!-- Monthly Changes (TSheets) -->
-          <v-flex xs12 sm6 md6 lg6 class="pa-4">
-            <v-flex v-if="loading" text-center>
-              <v-progress-circular indeterminate size="64" color="#bc3825"></v-progress-circular>
-            </v-flex>
-            <v-flex v-else text-center class="pt-0">
-              <monthly-charges :employee="this.employee"></monthly-charges>
-            </v-flex>
-          </v-flex>
-          <!-- Total Balances -->
-          <v-flex xs12 sm6 md6 lg6 class="pa-4">
-            <v-flex v-if="loading" text-center>
-              <v-progress-circular indeterminate size="64" color="#bc3825"></v-progress-circular>
-            </v-flex>
-            <v-flex v-else text-center class="pt-0">
-              <balances :employee="this.employee"></balances>
-            </v-flex>
-          </v-flex>
-        </v-row>
+        <!-- TSheets -->
+        <t-sheets-data xs12 sm3 md3 lg3></t-sheets-data>
         <v-row wrap>
           <!-- Available Budgets -->
           <v-flex xs12 sm6 md6 lg6 float-left class="pa-4">
@@ -107,12 +89,11 @@
 <script>
 import api from '@/shared/api.js';
 import AvailableBudgets from '../components/AvailableBudgets.vue';
-import MonthlyCharges from '../components/MonthlyCharges.vue';
-import Balances from '../components/Balances.vue';
 // import MobileDetect from 'mobile-detect';
 import moment from 'moment';
 import ActivityFeed from '../components/ActivityFeed';
 import TwitterFeed from '../components/TwitterFeed';
+import TSheetsData from '../components/TSheetsData.vue';
 import _ from 'lodash';
 const IsoFormat = 'YYYY-MM-DD';
 
@@ -597,8 +578,6 @@ async function refreshEmployee() {
   this.refreshBudget(); // refresh employee budgets
   this.allUserBudgets = await api.getEmployeeBudgets(this.employee.id); // set all employee budgets
   this.loading = false; // set loading status to false
-  this.ptoBalances = await api.getPTOBalances(this.employee.employeeNumber); // call api
-  this.ptoBalances = this.ptoBalances.results.users[this.employee.employeeNumber]; // get to balances
 }
 
 // refreshEmployee
@@ -666,8 +645,7 @@ export default {
   components: {
     ActivityFeed,
     AvailableBudgets,
-    MonthlyCharges,
-    Balances,
+    TSheetsData,
     TwitterFeed
   },
   computed: {
@@ -697,7 +675,6 @@ export default {
       hireDate: '', // employee hire date
       loading: false, // loading status
       loadingBudgets: false, //prop for available budgets
-      ptoBalances: [],
       scheduleEntries: [],
       seconds: 0, // seconds until next anniversary date
       tweets: [],
