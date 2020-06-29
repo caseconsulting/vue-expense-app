@@ -241,7 +241,8 @@ async function created() {
   _.forEach(this.timeSheets, (hours) => {
     this.workedHours += hours.duration;
   });
-  this.futureTimeSheets = await api.getTimeSheets(this.employee.employeeNumber, now, lastDay);
+  let tomorrow = moment().add(1, 'days').format(IsoFormat);
+  this.futureTimeSheets = await api.getTimeSheets(this.employee.employeeNumber, tomorrow, lastDay);
   _.forEach(this.futureTimeSheets, (hours) => {
     this.futureHours += hours.duration;
   });
@@ -257,7 +258,9 @@ async function created() {
   this.futureHoursHover = decimalToTime(this.futureHours);
   this.estimatedDailyHours = roundHours(this.estimatedDailyHours);
   this.workedHours = roundHours(this.workedHours);
+  this.futureHours = roundHours(this.futureHours);
   this.remainingHours = roundHours(this.remainingHours);
+  this.totalHours = roundHours(this.totalHours);
   this.loading = false;
 } // created
 
