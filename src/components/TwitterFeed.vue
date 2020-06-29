@@ -19,14 +19,13 @@
               <img src="../assets/img/case-logo-circle.png" class="twitter-icon" />
             </template>
             <h3>{{ tweet.created_at | formatDate }}</h3>
-            <v-card
-              flat
+            <v-list-item
               :href="'https://twitter.com/ConsultwithCase/status/' + tweet.id_str"
               target="_blank"
               class="px-4"
             >
               {{ tweet.full_text | removeLink }}
-            </v-card>
+            </v-list-item>
           </v-timeline-item>
         </v-timeline>
       </div>
