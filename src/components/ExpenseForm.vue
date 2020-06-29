@@ -13,7 +13,7 @@
         <!-- Employee picker if admin -->
         <v-autocomplete
           v-if="!asUser"
-          :items="employees"
+          :items="activeEmployees"
           :rules="requiredRules"
           :filter="customFilter"
           :disabled="isReimbursed || isEdit"
@@ -960,6 +960,15 @@ async function created() {
       workStatus: employee.workStatus
     };
   });
+  //only active employees
+  this.activeEmployees = this.employees.map((employee) => {
+    if (employee.workStatus == 0) {
+      return;
+    } else {
+      return employee;
+    }
+  });
+  this.activeEmployees = _.compact(this.activeEmployees);
 
   // creating or updating an expense as an admin
   this.highFiveRecipients = _.compact(
@@ -1030,6 +1039,7 @@ export default {
   created,
   data() {
     return {
+      activeEmployees: [],
       isHighFive: false,
       allowReceipt: false, // allow receipt to be uploaded
       asUser: true, // user view
