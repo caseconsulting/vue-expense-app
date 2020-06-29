@@ -90,7 +90,7 @@
 import api from '@/shared/api.js';
 import AvailableBudgets from '../components/AvailableBudgets.vue';
 // import MobileDetect from 'mobile-detect';
-import moment from 'moment';
+import moment from 'moment-timezone';
 import ActivityFeed from '../components/ActivityFeed';
 import TwitterFeed from '../components/TwitterFeed';
 import TSheetsData from '../components/TSheetsData.vue';
@@ -416,11 +416,16 @@ async function createEvents() {
   //generate schedules
   let schedules = _.map(this.scheduleEntries, (a) => {
     let now = moment();
-    let startDate = moment(a.starts_at, 'YYYY-MM-DD');
+    let startDate = moment(a.starts_at);
+    let endDate = moment(a.ends_at);
     let event = {};
     event.date = getEventDateMessage(startDate);
 
-    event.text = `${a.title} starts today!`; // --event name-- starts today!
+    if (startDate.startOf('day').isSame(endDate.startOf('day'), 'days')) {
+      event.text = `${a.title} is today!`;
+    } else {
+      event.text = `${a.title} starts today until ${endDate.format('LL')}!`;
+    }
     event.icon = 'calendar-alt';
     event.daysFromToday = now.startOf('day').diff(startDate.startOf('day'), 'days');
     event.link = a.app_url;

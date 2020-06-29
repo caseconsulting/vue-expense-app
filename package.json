@@ -50,6 +50,7 @@
     "mobile-detect": "^1.4.4",
     "moment": "^2.27.0",
     "moment-range": "^4.0.2",
+    "moment-timezone": "^0.5.31",
     "patternomaly": "^1.3.2",
     "uuid": "^8.2.0",
     "vue": "^2.6.11",
