@@ -25,10 +25,10 @@ $case-darkgray: #3f3f3c;
 }
 
 .header_style {
+  /* border-radius: 5px; */
   background-color: $case-red;
   color: white;
   font-size: 16px;
-  // border-radius: 5px;
 }
 
 .expense_info_title {
@@ -71,7 +71,7 @@ $case-darkgray: #3f3f3c;
 }
 
 .inactiveStyle {
-  //text-decoration: line-through red;
+  /* text-decoration: line-through red; */
   color: #e60026;
 }
 
@@ -79,7 +79,7 @@ $case-darkgray: #3f3f3c;
   background-color: #f0f0f0;
 }
 
-//end of themes
+/* end of themes */
 .form_padding {
   padding-top: 20px;
 }
@@ -142,7 +142,7 @@ $case-darkgray: #3f3f3c;
   }
 }
 
-// override the word break styling from v-card
+/* override the word break styling from v-card */
 .v-card__text {
   word-break: normal;
 }
