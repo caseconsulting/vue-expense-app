@@ -367,6 +367,7 @@ async function createEvents() {
           event.icon = 'glass-cheers';
         }
         event.daysFromToday = now.startOf('day').diff(anniversary.startOf('day'), 'days');
+        event.color = '#bc3825';
         return event;
       } else {
         return null; //dont show anything for people hired in the future
@@ -396,6 +397,7 @@ async function createEvents() {
         event.text = b.firstName + ' ' + b.lastName + "'s" + ' birthday!';
       }
       event.icon = 'birthday-cake';
+      event.color = 'orange';
       event.daysFromToday = now.startOf('day').diff(birthday.startOf('day'), 'days');
       return event;
     }
@@ -414,7 +416,7 @@ async function createEvents() {
         let reimbursedDate = moment(a.reimbursedDate, 'YYYY-MM-DD');
         let event = {};
         event.date = getEventDateMessage(reimbursedDate);
-
+        event.color = 'green';
         event.text = `${a.firstName} used their ${a.budgetName} budget on ${a.description}`;
         event.icon = 'dollar-sign';
         event.daysFromToday = now.startOf('day').diff(reimbursedDate.startOf('day'), 'days');
@@ -441,6 +443,7 @@ async function createEvents() {
     event.icon = 'calendar-alt';
     event.daysFromToday = now.startOf('day').diff(startDate.startOf('day'), 'days');
     event.link = a.app_url;
+    event.color = '#1a73e8';
     return event;
   });
   let mergedEventsList = [...anniversaries, ...birthdays, ...expenses, ...schedules]; // merges lists

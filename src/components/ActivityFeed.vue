@@ -14,7 +14,7 @@
       <!-- timeline -->
       <div v-else>
         <v-timeline dense>
-          <v-timeline-item color="#bc3825" v-for="event in events" :key="event.name">
+          <v-timeline-item :color="event.color" v-for="event in events" :key="event.name">
             <template v-slot:icon v-if="event.icon">
               <icon class="white--text" :name="event.icon"></icon>
             </template>
