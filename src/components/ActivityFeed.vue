@@ -19,9 +19,9 @@
               <icon class="white--text" :name="event.icon"></icon>
             </template>
             <h3>{{ event.date }}</h3>
-            <v-card flat class="px-4" v-if="event.link" :href="event.link" target="_blank"
+            <a flat class="px-4" v-if="event.link" :href="event.link" target="_blank"
               >{{ event.text }}&nbsp;<span><icon height="12" width="12" name="external-link-alt"></icon></span
-            ></v-card>
+            ></a>
             <div class="px-4" v-else>{{ event.text }}</div>
           </v-timeline-item>
         </v-timeline>
