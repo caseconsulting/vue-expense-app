@@ -52,11 +52,21 @@
       <v-list style="font-size: 13px;" dense>
         <!-- Hours worked this month -->
         <v-list-item>
-          <v-list-item-content>Hours Worked:</v-list-item-content>
+          <v-list-item-content>Previous Hours Worked:</v-list-item-content>
           <v-list-item-content class="text-right">
             <div @mouseover="decimalDialog = !decimalDialog" @mouseleave="decimalDialog = !decimalDialog">
               <p v-if="decimalDialog">{{ this.workedHours }}h</p>
               <p v-else>{{ this.workedHoursHover }}</p>
+            </div>
+          </v-list-item-content>
+        </v-list-item>
+        <!-- Hours worked today -->
+        <v-list-item>
+          <v-list-item-content>Today's Hours:</v-list-item-content>
+          <v-list-item-content class="text-right">
+            <div @mouseover="decimalDialog = !decimalDialog" @mouseleave="decimalDialog = !decimalDialog">
+              <p v-if="decimalDialog">{{ this.todaysHours }}h</p>
+              <p v-else>{{ this.todaysHoursHover }}</p>
             </div>
           </v-list-item-content>
         </v-list-item>
@@ -121,7 +131,7 @@ const IsoFormat = 'YYYY-MM-DD';
  */
 function jobHours() {
   let jobHours = [];
-  let allTimeSheets = _.union(this.timeSheets, this.futureTimeSheets);
+  let allTimeSheets = _.union(this.previousTimeSheets, this.todaysTimeSheets, this.futureTimeSheets);
   jobHours = _.map(allTimeSheets, (item) => {
     return {
       name: item.jobcode,
@@ -217,8 +227,6 @@ function workHours() {
 async function created() {
   this.loading = true;
   this.employee = await api.getUser();
-  // get the current day & time in the proper format
-  let now = moment().format(IsoFormat);
   // set the current month
   this.month = moment().format('MMMM');
   // set the current year
@@ -227,19 +235,26 @@ async function created() {
   let firstDay = moment().startOf('month').format(IsoFormat);
   // get last day of the month
   let lastDay = moment().endOf('month').format(IsoFormat);
-  // get timesheets from api
-  this.timeSheets = await api.getTimeSheets(this.employee.employeeNumber, firstDay, now);
-  _.forEach(this.timeSheets, (hours) => {
-    this.workedHours += hours.duration;
+  let yesterday = moment().subtract(1, 'days').endOf('day').format(IsoFormat);
+  let today = moment().startOf('day').format(IsoFormat);
+  let tomorrow = moment().add(1, 'days').startOf('day').format(IsoFormat);
+  if (yesterday >= firstDay) {
+    this.previousTimeSheets = await api.getTimeSheets(this.employee.employeeNumber, firstDay, yesterday);
+    _.forEach(this.previousTimeSheets, (hours) => {
+      this.workedHours += hours.duration;
+    });
+  }
+  this.todaysTimeSheets = await api.getTimeSheets(this.employee.employeeNumber, today, tomorrow);
+  _.forEach(this.todaysTimeSheets, (hours) => {
+    this.todaysHours += hours.duration;
   });
-  let tomorrow = moment().add(1, 'days').format(IsoFormat);
   if (tomorrow <= lastDay) {
     this.futureTimeSheets = await api.getTimeSheets(this.employee.employeeNumber, tomorrow, lastDay);
     _.forEach(this.futureTimeSheets, (hours) => {
       this.futureHours += hours.duration;
     });
   }
-  this.totalHours = this.workedHours + this.futureHours;
+  this.totalHours = this.workedHours + this.todaysHours + this.futureHours;
   this.totalHoursHover = decimalToTime(this.totalHours);
   this.workHoursNumber = this.workHours.substring(0, this.workHours.length - 1);
   this.remainingHours = this.workHoursNumber - this.totalHours;
@@ -248,9 +263,11 @@ async function created() {
   this.estimatedDailyHoursHover = decimalToTime(this.estimatedDailyHours);
   this.workedHoursHover = decimalToTime(this.workedHours);
   this.remainingHoursHover = decimalToTime(this.remainingHours);
+  this.todaysHoursHover = decimalToTime(this.todaysHours);
   this.futureHoursHover = decimalToTime(this.futureHours);
   this.estimatedDailyHours = roundHours(this.estimatedDailyHours);
   this.workedHours = roundHours(this.workedHours);
+  this.todaysHours = roundHours(this.todaysHours);
   this.futureHours = roundHours(this.futureHours);
   this.remainingHours = roundHours(this.remainingHours);
   this.totalHours = roundHours(this.totalHours);
@@ -316,10 +333,13 @@ export default {
       loading: false,
       month: '',
       monthlyMin: 0,
+      previousTimeSheets: [],
       remainingHours: 0,
       remainingHoursHover: '',
       showDialog: false,
-      timeSheets: [],
+      todaysHours: 0,
+      todaysHoursHover: '',
+      todaysTimeSheets: [],
       totalHours: 0,
       totalHoursHover: '',
       userWorkDays: 0,
