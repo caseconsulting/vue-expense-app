@@ -1,7 +1,7 @@
 <template>
   <div id="monthly-charges">
     <h3>Hours for {{ month }} {{ year }}</h3>
-    <v-card-text class="px-7 pt-5 pb-1 black--text">
+    <v-card-text>
       <div v-if="this.loading" class="pb-4">
         <v-progress-linear :indeterminate="true"></v-progress-linear>
       </div>

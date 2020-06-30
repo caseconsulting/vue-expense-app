@@ -1,7 +1,7 @@
 <template>
   <div id="pto-balances">
     <h3 class="pt-5">PTO Balances</h3>
-    <v-card-text class="px-7 pt-5 pb-1 black--text">
+    <v-card-text>
       <div v-if="this.loadingBar" class="pb-4">
         <v-progress-linear :indeterminate="true"></v-progress-linear>
       </div>

@@ -26,58 +26,63 @@
         </v-flex>
       </v-flex>
     </v-row>
-    <v-row wrap class="px-4">
-      <v-col :cols="this.screenColOne">
+    <v-row>
+      <v-col xs12 sm12 md6 lg6>
         <!-- TSheets -->
-        <t-sheets-data xs12 sm3 md3 lg3></t-sheets-data>
-        <v-row wrap>
-          <!-- Available Budgets -->
-          <v-flex xs12 sm6 md6 lg6 float-left class="pa-4">
-            <v-flex v-if="loading" text-center>
-              <v-progress-circular indeterminate size="64" color="#bc3825"></v-progress-circular>
-            </v-flex>
-            <v-flex v-else text-center class="pt-0">
-              <available-budgets :budgets="expenseTypeData" :loading="loadingBudgets"></available-budgets>
-            </v-flex>
+        <v-flex class="pa-4">
+          <v-flex v-if="loading" text-center>
+            <v-progress-circular indeterminate size="64" color="#bc3825"></v-progress-circular>
           </v-flex>
-          <!-- Quick links -->
-          <!-- <v-spacer></v-spacer> -->
-          <v-flex xs12 sm6 md6 lg6 class="pa-4">
-            <v-card align-content-space-around>
-              <v-card-title class="header_style">
-                <h4 class="white--text">Quick Links</h4>
-                <div>
-                  <v-btn
-                    class="mx-auto white--text"
-                    v-for="link in mediaLinks"
-                    :key="link.name"
-                    :href="link.link"
-                    icon
-                    target="_blank"
-                  >
-                    <icon :name="link.icon"></icon>
-                  </v-btn>
-                </div>
-              </v-card-title>
-              <v-list v-for="(link, index) in links" :key="link.name">
-                <v-divider v-if="index != 0"></v-divider>
-                <v-list-item :href="link.link" target="_blank">
-                  <v-list-item-content>{{ link.name }}</v-list-item-content>
-                </v-list-item>
-              </v-list>
-            </v-card>
+          <v-flex v-else text-center class="pt-0">
+            <t-sheets-data xs12 sm3 md3 lg3></t-sheets-data>
           </v-flex>
-          <!-- <v-spacer></v-spacer> -->
-        </v-row>
+        </v-flex>
+        <!-- Available Budgets -->
+        <v-flex class="pa-4">
+          <v-flex v-if="loading" text-center>
+            <v-progress-circular indeterminate size="64" color="#bc3825"></v-progress-circular>
+          </v-flex>
+          <v-flex v-else text-center class="pt-0">
+            <available-budgets :budgets="expenseTypeData" :loading="loadingBudgets"></available-budgets>
+          </v-flex>
+        </v-flex>
+        <!-- Quick links -->
+        <!-- <v-flex xs12 sm6 md6 lg6 class="pa-4">
+          <v-card align-content-space-around>
+            <v-card-title class="header_style">
+              <h4 class="white--text">Quick Links</h4>
+              <div>
+                <v-btn
+                  class="mx-auto white--text"
+                  v-for="link in mediaLinks"
+                  :key="link.name"
+                  :href="link.link"
+                  icon
+                  target="_blank"
+                >
+                  <icon :name="link.icon"></icon>
+                </v-btn>
+              </div>
+            </v-card-title>
+            <v-list v-for="(link, index) in links" :key="link.name">
+              <v-divider v-if="index != 0"></v-divider>
+              <v-list-item :href="link.link" target="_blank">
+                <v-list-item-content>{{ link.name }}</v-list-item-content>
+              </v-list-item>
+            </v-list>
+          </v-card>
+        </v-flex> -->
       </v-col>
       <!-- Activity Feed -->
-      <v-col xs12 sm6 md6 lg6>
+      <v-col xs12 sm12 md6 lg6>
         <v-flex mt-0 class="pt-4">
           <activity-feed :events="events" :loading="loading"></activity-feed>
         </v-flex>
       </v-col>
+    </v-row>
+    <v-row>
       <!-- Twitter Feed -->
-      <v-col xs12 sm6 md6 lg6>
+      <v-col xs12 sm12 md6 lg6>
         <v-flex mt-0 class="pt-4">
           <twitter-feed :tweets="tweets" :loading="loading"></twitter-feed>
         </v-flex>

@@ -4,7 +4,7 @@
       <v-card-title class="header_style">
         <h4>TSheets Data</h4>
       </v-card-title>
-      <v-card-text class="px-7 pt-5 pb-1 black--text">
+      <v-card-text class="pt-5 pb-0 black--text">
         <monthly-charges></monthly-charges>
         <v-divider></v-divider>
         <balances></balances>
