@@ -47,7 +47,7 @@
 
         <v-toolbar-items v-show="isLoggedIn()">
           <v-flex xs12 sm6 md8 align-center justify-left layout text-xs-center>
-            <v-menu bottom offset-y open-on-click>
+            <v-menu bottom offset-y open-on-hover>
               <template v-slot:activator="{ on }">
                 <v-avatar size="50" color="grey lighten-4">
                   <img :src="profilePic" alt="avatar" v-on="on" />
