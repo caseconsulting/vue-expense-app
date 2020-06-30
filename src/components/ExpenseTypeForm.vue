@@ -157,6 +157,9 @@
           </template>
         </v-autocomplete>
 
+        <!-- Require Recipient -->
+        <v-switch v-model="model.hasRecipient" label="Does this expense type have a recipient?"></v-switch>
+
         <!-- Buttons -->
         <!-- Cancel Button -->
         <v-btn color="white " @click="clearForm" class="ma-2"> <icon class="mr-1" name="ban"></icon>Cancel </v-btn>
@@ -200,6 +203,7 @@ function clearForm() {
   this.$set(this.model, 'isInactive', false);
   this.$set(this.model, 'categories', []);
   this.$set(this.model, 'accessibleBy', 'ALL');
+  this.$set(this.model, 'hasRecipient', false);
   this.customAccess = [];
 } // clearForm
 

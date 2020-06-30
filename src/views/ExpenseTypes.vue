@@ -261,6 +261,10 @@
                         <b>Categories: </b>{{ item.categories.join(', ') }}
                       </p>
 
+                      <!-- Requires Recipient-->
+                      <p v-if="item.hasRecipient"><b>Requires Recipient: </b> yes</p>
+                      <p v-else><b>Requires Recipient: </b> no</p>
+
                       <!-- Flags -->
                       <v-layout row>
                         <v-flex sm6 class="flag py-0">
@@ -477,6 +481,7 @@ function clearModel() {
   this.$set(this.model, 'isInactive', false);
   this.$set(this.model, 'categories', []);
   this.$set(this.model, 'accessibleBy', 'ALL');
+  this.$set(this.model, 'hasRecipient', false);
 } // clearModel
 
 /**
@@ -718,6 +723,7 @@ function onSelect(item) {
   this.$set(this.model, 'isInactive', item.isInactive);
   this.$set(this.model, 'categories', item.categories);
   this.$set(this.model, 'accessibleBy', item.accessibleBy);
+  this.$set(this.model, 'hasRecipient', item.hasRecipient);
 } // onSelect
 
 /**
@@ -921,7 +927,8 @@ export default {
         requiredFlag: true,
         isInactive: false,
         categories: [],
-        accessibleBy: []
+        accessibleBy: [],
+        hasRecipient: false
       }, // selected expense type
       search: '', // query text for datatable search field
       sortBy: 'budgetName', // sort datatable items
