@@ -163,7 +163,7 @@ function jobHours() {
  */
 function jobHoursHover() {
   let jobHoursHover = [];
-  let allTimeSheets = _.union(this.timeSheets, this.futureTimeSheets);
+  let allTimeSheets = _.union(this.previousTimeSheets, this.todaysTimeSheets, this.futureTimeSheets);
   jobHoursHover = _.map(allTimeSheets, (item) => {
     return {
       name: item.jobcode,
