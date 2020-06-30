@@ -23,7 +23,7 @@
         <v-spacer></v-spacer>
         <v-menu open-on-hover bottom offset-y>
           <template v-slot:activator="{ on, attrs }">
-            <v-btn text small class="my-2" v-bind="attrs" v-on="on">Links</v-btn>
+            <v-btn text small class="my-2" v-bind="attrs" v-on="on">Links &#9662; </v-btn>
           </template>
 
           <v-list>

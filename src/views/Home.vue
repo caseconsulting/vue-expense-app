@@ -692,21 +692,7 @@ export default {
         statusType: undefined,
         statusMessage: '',
         color: ''
-      }, // snackbar action status
-      links: [
-        { name: 'Basecamp', link: 'https://3.basecamp.com/3097063' },
-        { name: '401k', link: 'https://3.basecamp.com/3097063/buckets/179119/vaults/29920981' },
-        { name: 'Health Insurance', link: 'https://3.basecamp.com/3097063/buckets/179119/vaults/29920949' },
-        { name: 'TSheets', link: 'https://caseconsulting.tsheets.com/' },
-        { name: 'ADP', link: 'https://www.adp.com/' }
-      ],
-      mediaLinks: [
-        { name: 'github', link: 'https://github.com/caseconsulting', icon: 'brands/github' },
-        { name: 'linkedIn', link: 'https://linkedin.com/company/case-consulting-inc', icon: 'brands/linkedin' },
-        { name: 'youtube', link: 'https://www.youtube.com/channel/UC_oJY4OrOpLNrIBAN7Y-9fA', icon: 'brands/youtube' },
-        { name: 'twitter', link: 'https://twitter.com/consultwithcase?lang=en', icon: 'brands/twitter' },
-        { name: 'Facebook', link: 'https://www.facebook.com/ConsultwithCase/', icon: 'brands/facebook' }
-      ]
+      }
     };
   },
   filters: {
