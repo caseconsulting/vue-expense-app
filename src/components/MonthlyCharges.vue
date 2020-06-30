@@ -1,18 +1,16 @@
 <template>
   <div id="monthly-charges">
-    <v-card>
-      <v-card-title class="header_style">
-        <h4 class="white--text">Hours for {{ month }} {{ year }}</h4>
-      </v-card-title>
-      <v-card-text class="px-7 pt-5 pb-1 black--text">
-        <div v-if="this.loading" class="pb-4">
-          <v-progress-linear :indeterminate="true"></v-progress-linear>
-        </div>
+    <h3>Hours for {{ month }} {{ year }}</h3>
+    <v-card-text class="px-7 pt-5 pb-1 black--text">
+      <div v-if="this.loading" class="pb-4">
+        <v-progress-linear :indeterminate="true"></v-progress-linear>
+      </div>
+      <div v-else>
+        <!-- If the user has no hours -->
+        <v-row v-if="jobHours.length == 0" justify="center">
+          <p>No hours for this month</p>
+        </v-row>
         <div v-else>
-          <!-- If the user has no hours -->
-          <v-row v-if="jobHours.length == 0" justify="center">
-            <p>No hours for this month</p>
-          </v-row>
           <div v-if="decimal">
             <v-row v-for="job in jobHours" :key="job.name">
               {{ job.name }}:
@@ -44,8 +42,8 @@
             </div>
           </v-row>
         </div>
-      </v-card-text>
-    </v-card>
+      </div>
+    </v-card-text>
     <v-dialog v-model="showDialog" max-width="400">
       <v-toolbar color="#565651" dark>
         <v-toolbar-title>Hours</v-toolbar-title>
@@ -110,15 +108,12 @@
 import moment from 'moment';
 import api from '@/shared/api.js';
 import _ from 'lodash';
-
 const IsoFormat = 'YYYY-MM-DD';
-
 // |--------------------------------------------------|
 // |                                                  |
 // |                     COMPUTED                     |
 // |                                                  |
 // |--------------------------------------------------|
-
 /**
  * Sets the total cost per each expense type.
  *
@@ -151,7 +146,6 @@ function jobHours() {
   ]);
   return jobHours;
 } // jobHours
-
 /**
  * Sets the total cost per each expense type.
  *
@@ -184,7 +178,6 @@ function jobHoursHover() {
   ]);
   return jobHoursHover;
 } // jobHoursHover
-
 function remainingWorkDays() {
   let remainingWorkDays = 0;
   let day = moment();
@@ -199,7 +192,6 @@ function remainingWorkDays() {
   }
   return remainingWorkDays;
 } // remainingWorkDays
-
 function workHours() {
   let workHours = 0;
   let day = moment().set('date', 1);
@@ -214,18 +206,17 @@ function workHours() {
   }
   return workHours + 'h';
 } // workHours
-
 // |--------------------------------------------------|
 // |                                                  |
 // |                 LIFECYCLE HOOKS                  |
 // |                                                  |
 // |--------------------------------------------------|
-
 /**
  *  Set budget information for employee. Creates event listeners.
  */
 async function created() {
   this.loading = true;
+  this.employee = await api.getUser();
   // get the current day & time in the proper format
   let now = moment().format(IsoFormat);
   // set the current month
@@ -242,10 +233,12 @@ async function created() {
     this.workedHours += hours.duration;
   });
   let tomorrow = moment().add(1, 'days').format(IsoFormat);
-  this.futureTimeSheets = await api.getTimeSheets(this.employee.employeeNumber, tomorrow, lastDay);
-  _.forEach(this.futureTimeSheets, (hours) => {
-    this.futureHours += hours.duration;
-  });
+  if (tomorrow <= lastDay) {
+    this.futureTimeSheets = await api.getTimeSheets(this.employee.employeeNumber, tomorrow, lastDay);
+    _.forEach(this.futureTimeSheets, (hours) => {
+      this.futureHours += hours.duration;
+    });
+  }
   this.totalHours = this.workedHours + this.futureHours;
   this.totalHoursHover = decimalToTime(this.totalHours);
   this.workHoursNumber = this.workHours.substring(0, this.workHours.length - 1);
@@ -263,13 +256,11 @@ async function created() {
   this.totalHours = roundHours(this.totalHours);
   this.loading = false;
 } // created
-
 // |--------------------------------------------------|
 // |                                                  |
 // |                     METHODS                      |
 // |                                                  |
 // |--------------------------------------------------|
-
 /**
  * Convert decimal number into hours and minutes.
  * @param hours the decimal number of hours
@@ -280,7 +271,6 @@ function decimalToTime(hours) {
   hours = hrs + 'h ' + min + 'm';
   return hours;
 } // decimalToTime
-
 /**
  * Rounds hours to 2 decimal places.
  * @param hours the decimal number of hours
@@ -289,7 +279,6 @@ function roundHours(hours) {
   hours = hours.toFixed(2);
   return hours;
 } // decimalToTime
-
 /**
  * Convert time in hours and minutes into a decimal number of hours.
  * @param time the time in __h __m
@@ -301,13 +290,11 @@ function timeToDecimal(time) {
   time = hrs + min / 60.0;
   return time;
 } // timeToDecimal
-
 // |--------------------------------------------------|
 // |                                                  |
 // |                      EXPORT                      |
 // |                                                  |
 // |--------------------------------------------------|
-
 export default {
   computed: {
     jobHours,
@@ -320,6 +307,7 @@ export default {
     return {
       decimal: true,
       decimalDialog: true,
+      employee: {},
       estimatedDailyHours: 0,
       estimatedDailyHoursHover: '',
       futureHours: 0,
@@ -350,7 +338,6 @@ export default {
         this.estimatedDailyHoursHover = decimalToTime(this.estimatedDailyHours);
       }
     }
-  },
-  props: ['employee'] // employee
+  }
 };
 </script>

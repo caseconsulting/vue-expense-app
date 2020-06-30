@@ -1,29 +1,25 @@
 <template>
-  <div id="balances">
-    <v-card>
-      <v-card-title class="header_style">
-        <h4 class="white--text">Balances</h4>
-      </v-card-title>
-      <v-card-text class="px-7 pt-5 pb-1 black--text">
-        <div v-if="this.loadingBar" class="pb-4">
-          <v-progress-linear :indeterminate="true"></v-progress-linear>
-        </div>
-        <div v-else>
-          <!-- If no avaible balances or inactive dislay message -->
-          <v-row v-if="balanceData == 0 || isInactive" justify="center">
-            <p>No available balances</p>
-          </v-row>
-        </div>
-        <div v-if="!isInactive">
-          <!-- Loop through and display all balances -->
-          <v-row v-for="balance in this.keysBalance" :key="balance">
-            <p>{{ balance }}:</p>
-            <v-spacer></v-spacer>
-            <p>{{ balanceData[balance] }} h</p>
-          </v-row>
-        </div>
-      </v-card-text>
-    </v-card>
+  <div id="pto-balances">
+    <h3 class="pt-5">PTO Balances</h3>
+    <v-card-text class="px-7 pt-5 pb-1 black--text">
+      <div v-if="this.loadingBar" class="pb-4">
+        <v-progress-linear :indeterminate="true"></v-progress-linear>
+      </div>
+      <div v-else>
+        <!-- If no avaible balances or inactive dislay message -->
+        <v-row v-if="balanceData == 0 || isInactive" justify="center">
+          <p>No available balances</p>
+        </v-row>
+      </div>
+      <div v-if="!isInactive">
+        <!-- Loop through and display all balances -->
+        <v-row v-for="balance in this.keysBalance" :key="balance">
+          <p>{{ balance }}:</p>
+          <v-spacer></v-spacer>
+          <p>{{ balanceData[balance] }} h</p>
+        </v-row>
+      </div>
+    </v-card-text>
   </div>
 </template>
 
@@ -40,6 +36,7 @@ import api from '@/shared/api.js';
  */
 async function created() {
   this.loadingBar = true;
+  this.employee = await api.getUser();
   this.ptoBalances = await api.getPTOBalances(this.employee.employeeNumber); // call api
   this.ptoBalances = this.ptoBalances.results.users[this.employee.employeeNumber];
   this.balanceData = this.ptoBalances['pto_balances'];
@@ -77,12 +74,12 @@ export default {
   created,
   data() {
     return {
+      employee: {},
       ptoBalances: [],
       balanceData: [],
       keysBalance: [],
       loadingBar: false
     };
-  },
-  props: ['employee']
+  }
 };
 </script>
