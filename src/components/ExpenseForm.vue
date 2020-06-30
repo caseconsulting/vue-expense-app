@@ -972,11 +972,12 @@ async function created() {
 
   // creating or updating an expense as an admin
   this.highFiveRecipients = _.compact(
-    employees.map((employee) => {
+    this.activeEmployees.map((employee) => {
       if (employee.id == this.userInfo.id || employee.workStatus == 0 || this.expense.employeeId == employee.id) {
         if (this.userInfo.id != this.expense.employeeId && !this.asUser) {
           return employeeUtils.fullName(employee);
         }
+
         return;
       }
       return employeeUtils.fullName(employee);
@@ -1132,14 +1133,22 @@ export default {
   ],
   watch: {
     'expense.employeeId': function () {
+      //watches admin accessible employee field to know who can be a recipient
       this.highFiveRecipients = _.compact(
-        this.employees.map((employee) => {
+        this.activeEmployees.map((employee) => {
+          console.log(this.expense.employeeId);
+          console.log(employee.value);
           if (
-            employee.value == this.userInfo.id ||
-            employee.workStatus == 0 ||
-            this.expense.employeeId == employee.value
+            employee.value == this.userInfo.id || //current value is the user
+            employee.workStatus == 0 || //value isn't an invalid employee
+            this.expense.employeeId == employee.value //selected employee
           ) {
-            if (this.userInfo.id != this.expense.employeeId && !this.asUser) {
+            //this is a bit of a mess but it makes sure admins can select themselves as recipients
+            if (
+              this.userInfo.id != this.expense.employeeId &&
+              !this.asUser &&
+              employee.value != this.expense.employeeId
+            ) {
               return employee.text;
             }
             return;
