@@ -21,27 +21,29 @@
           <h1 class="d-inline" style="text-align: center;">Case Portal</h1>
         </v-toolbar-title>
         <v-spacer></v-spacer>
-        <v-menu open-on-hover bottom offset-y>
-          <template v-slot:activator="{ on, attrs }">
-            <v-btn text small class="my-2" v-bind="attrs" v-on="on">Links &#9662; </v-btn>
-          </template>
+        <v-items v-show="isLoggedIn()">
+          <v-menu open-on-hover offset-y>
+            <template v-slot:activator="{ on, attrs }">
+              <v-btn top text small class="my-2" v-bind="attrs" v-on="on">Links &#9662; </v-btn>
+            </template>
 
-          <v-list>
-            <v-list-item v-for="(l, index) in links" :key="index" :href="l.link" target="_blank">
-              <v-list-item-title>{{ l.name }}</v-list-item-title>
-            </v-list-item>
-          </v-list>
-        </v-menu>
-        <v-btn
-          class="mx-auto white--text"
-          v-for="link in mediaLinks"
-          :key="link.name"
-          :href="link.link"
-          icon
-          target="_blank"
-        >
-          <icon :name="link.icon"></icon>
-        </v-btn>
+            <v-list>
+              <v-list-item v-for="(l, index) in links" :key="index" :href="l.link" target="_blank">
+                <v-list-item-title>{{ l.name }}</v-list-item-title>
+              </v-list-item>
+            </v-list>
+          </v-menu>
+          <v-btn
+            class="mx-auto white--text"
+            v-for="link in mediaLinks"
+            :key="link.name"
+            :href="link.link"
+            icon
+            target="_blank"
+          >
+            <icon :name="link.icon"></icon>
+          </v-btn>
+        </v-items>
 
         <v-toolbar-items v-show="isLoggedIn()">
           <v-flex xs12 sm6 md8 align-center justify-left layout text-xs-center>
