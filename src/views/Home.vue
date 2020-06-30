@@ -403,6 +403,9 @@ async function createEvents() {
         let event = {};
         event.date = getEventDateMessage(reimbursedDate);
         event.color = 'green';
+        if (a.url != ' ') {
+          event.link = a.url;
+        }
         event.text = `${a.firstName} used their ${a.budgetName} budget on ${a.description}`;
         event.icon = 'dollar-sign';
         event.daysFromToday = now.startOf('day').diff(reimbursedDate.startOf('day'), 'days');
@@ -439,7 +442,7 @@ async function createEvents() {
   });
   let mergedEventsList = [...anniversaries, ...birthdays, ...expenses, ...schedules]; // merges lists
   this.events = _.sortBy(_.compact(mergedEventsList), 'daysFromToday');
-}
+} //createEvents
 
 /**
  * get's the date message of the event

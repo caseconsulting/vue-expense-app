@@ -627,6 +627,7 @@ function onSelect(item) {
   this.$set(this.expense, 'note', item.note.trim());
   this.$set(this.expense, 'receipt', item.receipt);
   this.$set(this.expense, 'url', item.url.trim());
+  this.$set(this.expense, 'showOnFeed', item.showOnFeed);
 } // onSelect
 
 /**
@@ -805,7 +806,8 @@ export default {
         reimbursedDate: null,
         note: null,
         receipt: null,
-        url: null
+        url: null,
+        showOnFeed: null
       }, // selected expense
       expenseTypes: [], // expense types
       filter: {
@@ -860,7 +862,8 @@ export default {
         note: null,
         receipt: null,
         recipient: null,
-        url: null
+        url: null,
+        showOnFeed: null
       }, // expense to edit
       search: '', // query text for datatable search field
       sortBy: 'createdAt', // sort datatable items
