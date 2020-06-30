@@ -21,6 +21,27 @@
           <h1 class="d-inline" style="text-align: center;">Case Portal</h1>
         </v-toolbar-title>
         <v-spacer></v-spacer>
+        <v-menu open-on-hover bottom offset-y>
+          <template v-slot:activator="{ on, attrs }">
+            <v-btn text small class="my-2" v-bind="attrs" v-on="on">Links</v-btn>
+          </template>
+
+          <v-list>
+            <v-list-item v-for="(l, index) in links" :key="index" :href="l.link" target="_blank">
+              <v-list-item-title>{{ l.name }}</v-list-item-title>
+            </v-list-item>
+          </v-list>
+        </v-menu>
+        <v-btn
+          class="mx-auto white--text"
+          v-for="link in mediaLinks"
+          :key="link.name"
+          :href="link.link"
+          icon
+          target="_blank"
+        >
+          <icon :name="link.icon"></icon>
+        </v-btn>
 
         <v-toolbar-items v-show="isLoggedIn()">
           <v-flex xs12 sm6 md8 align-center justify-left layout text-xs-center>
@@ -124,7 +145,21 @@ export default {
     timedOut: false,
     session: false,
     now: Math.trunc(new Date().getTime() / 1000),
-    date: null
+    date: null,
+    links: [
+      { name: 'Basecamp', link: 'https://3.basecamp.com/3097063' },
+      { name: '401k', link: 'https://3.basecamp.com/3097063/buckets/179119/vaults/29920981' },
+      { name: 'Health Insurance', link: 'https://3.basecamp.com/3097063/buckets/179119/vaults/29920949' },
+      { name: 'TSheets', link: 'https://caseconsulting.tsheets.com/' },
+      { name: 'ADP', link: 'https://www.adp.com/' }
+    ],
+    mediaLinks: [
+      { name: 'github', link: 'https://github.com/caseconsulting', icon: 'brands/github' },
+      { name: 'linkedIn', link: 'https://linkedin.com/company/case-consulting-inc', icon: 'brands/linkedin' },
+      { name: 'youtube', link: 'https://www.youtube.com/channel/UC_oJY4OrOpLNrIBAN7Y-9fA', icon: 'brands/youtube' },
+      { name: 'twitter', link: 'https://twitter.com/consultwithcase?lang=en', icon: 'brands/twitter' },
+      { name: 'Facebook', link: 'https://www.facebook.com/ConsultwithCase/', icon: 'brands/facebook' }
+    ]
   }),
   props: {
     source: String
