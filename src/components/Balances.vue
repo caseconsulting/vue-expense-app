@@ -13,7 +13,7 @@
       </div>
       <div v-if="!isInactive">
         <!-- Loop through and display all balances -->
-        <v-row v-for="balance in this.keysBalance" :key="balance">
+        <v-row v-for="balance in this.balances" :key="balance">
           <p>{{ balance }}:</p>
           <v-spacer></v-spacer>
           <p>{{ balanceData[balance] }} h</p>
@@ -68,6 +68,16 @@ function isInactive() {
   return this.employee.workStatus == 0;
 } // isInactive
 
+function balances() {
+  let avaibleBalances = [];
+  this.keysBalance.forEach((balance) => {
+    if (this.balanceData[balance] > 0 || this.showMore) {
+      avaibleBalances.push(balance);
+    }
+  });
+  return avaibleBalances;
+}
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                      EXPORT                      |
@@ -76,7 +86,8 @@ function isInactive() {
 
 export default {
   computed: {
-    isInactive
+    isInactive,
+    balances
   },
   created,
   data() {

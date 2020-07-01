@@ -94,7 +94,13 @@
               <div>
                 <div>
                   <p>
-                    <input type="text" class="text-right" :value="this.userWorkDays" @input="updateEstimate" />
+                    <input
+                      type="text"
+                      class="text-right"
+                      style="max-width: 50px;"
+                      :value="this.userWorkDays"
+                      @input="updateEstimate"
+                    />
                   </p>
                 </div>
               </div>
