@@ -301,6 +301,7 @@ function createExpenses(aggregatedData) {
       },
       selected: false,
       url: expense.url,
+      category: expense.category,
       createdAt: expense.createdAt,
       failed: false,
       showOnFeed: false
@@ -553,6 +554,7 @@ function submitExpenseObject(expense) {
     note: expense.note,
     employeeId: expense.employeeId,
     receipt: expense.receipt,
+    category: expense.category,
     createdAt: expense.createdAt,
     showOnFeed: expense.showOnFeed,
     url: expense.url

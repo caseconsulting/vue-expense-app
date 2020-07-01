@@ -364,32 +364,28 @@ async function createEvents() {
     return null;
   });
   // generate expenses
-  let expenses = _.map(this.aggregatedExpenses, (a) => {
-    if (a.showOnFeed != ' ' || a.budgetName == 'High Five' || a.budgetName == 'Training') {
-      //expense has showOnFeed property
-      if (a.showOnFeed || a.budgetName == 'High Five' || a.budgetName == 'Training') {
-        //value of showOnFeed is true
-        if (a.reimbursedDate === ' ') {
-          return null;
-        }
-        let now = moment();
-        let reimbursedDate = moment(a.reimbursedDate, 'YYYY-MM-DD');
-        let event = {};
-        event.date = getEventDateMessage(reimbursedDate);
-        event.color = 'green';
-        if (a.url != ' ') {
-          event.link = a.url;
-        }
-        event.text = `${a.firstName} used their ${a.budgetName} budget on ${a.description}`;
-        event.icon = 'dollar-sign';
-        event.daysFromToday = now.startOf('day').diff(reimbursedDate.startOf('day'), 'days');
-        if (a.budgetName == 'High Five') {
-          event.text = `${a.firstName} gave ${a.description} a High Five`;
-        }
-        return event;
-      } else {
+  let filteredExpenses = this.filterOutExpensesByCategory(this.aggregatedExpenses);
+  let expenses = _.map(filteredExpenses, (a) => {
+    if (a.budgetName == 'High Five' || a.budgetName == 'Training') {
+      //value of showOnFeed is true
+      if (a.reimbursedDate === ' ') {
         return null;
       }
+      let now = moment();
+      let reimbursedDate = moment(a.reimbursedDate, 'YYYY-MM-DD');
+      let event = {};
+      event.date = getEventDateMessage(reimbursedDate);
+      event.color = 'green';
+      if (a.url != ' ') {
+        event.link = a.url;
+      }
+      event.text = `${a.firstName} used their ${a.budgetName} budget on ${a.description}`;
+      event.icon = 'dollar-sign';
+      event.daysFromToday = now.startOf('day').diff(reimbursedDate.startOf('day'), 'days');
+      if (a.budgetName == 'High Five') {
+        event.text = `${a.firstName} gave ${a.description} a High Five`;
+      }
+      return event;
     } else {
       //not a technology budget
       return null;
@@ -565,9 +561,9 @@ async function refreshEmployee() {
   this.refreshBudget(); // refresh employee budgets
   this.allUserBudgets = await api.getEmployeeBudgets(this.employee.id); // set all employee budgets
   this.loading = false; // set loading status to false
-}
-
-// refreshEmployee
+  this.ptoBalances = await api.getPTOBalances(this.employee.employeeNumber); // call api
+  this.ptoBalances = this.ptoBalances.results.users[this.employee.employeeNumber]; // get to balances
+} // refreshEmployee
 
 /**
  * Set and display a successful submit status in the snackbar.
@@ -586,12 +582,26 @@ async function updateData() {
   this.showSuccessfulSubmit();
 } // updateData
 
-function getAnniversaryEvents() {
-  // stub
-}
-
-function getBirthdayEvents() {
-  // stub
+/**
+ * Filters out events that have the following categories:
+ * Lodging, Meals, Travel, Transportation
+ *
+ * @param expenses aggregate expenses
+ * @return array of filtered out expenses by category
+ *
+ */
+function filterOutExpensesByCategory(expenses) {
+  return _.filter(expenses, (expense) => {
+    if (
+      expense.category != 'Lodging' &&
+      expense.category != 'Meals' &&
+      expense.category != 'Travel' &&
+      expense.category != 'Transportation'
+    ) {
+      return true;
+    }
+    return false;
+  });
 }
 
 // |--------------------------------------------------|
@@ -688,8 +698,7 @@ export default {
     clearStatus,
     createEvents,
     displayError,
-    getAnniversaryEvents,
-    getBirthdayEvents,
+    filterOutExpensesByCategory,
     getCurrentBudgetYear,
     getTweets,
     isFullTime,
