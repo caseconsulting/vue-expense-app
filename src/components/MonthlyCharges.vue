@@ -250,7 +250,6 @@ async function created() {
       this.workedHours += hours.duration;
     });
   }
-  console.log(this.previousTimeSheets);
   this.todaysTimeSheets = await api.getTimeSheets(this.employee.employeeNumber, today, today);
   _.forEach(this.todaysTimeSheets, (hours) => {
     this.todaysHours += hours.duration;
@@ -291,7 +290,11 @@ async function created() {
  */
 function decimalToTime(hours) {
   var hrs = parseInt(Number(hours));
-  var min = Math.round((Number(hours) - hrs) * 60);
+  var min = Math.ceil((Number(hours) - hrs) * 60);
+  if (min == 60) {
+    min = 0;
+    hrs++;
+  }
   hours = hrs + 'h ' + min + 'm';
   return hours;
 } // decimalToTime
