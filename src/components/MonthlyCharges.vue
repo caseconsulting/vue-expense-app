@@ -93,7 +93,9 @@
               <v-spacer></v-spacer>
               <div>
                 <div>
-                  <input type="text" class="text-right" :value="this.userWorkDays" @input="updateEstimate" />
+                  <p>
+                    <input type="text" class="text-right" :value="this.userWorkDays" @input="updateEstimate" />
+                  </p>
                 </div>
               </div>
             </v-row>
