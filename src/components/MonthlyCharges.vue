@@ -39,14 +39,14 @@
               </div>
             </div>
           </v-row>
-          <v-row @click="showDialog = true">
+          <a @click="showDialog = true" class="row text-decoration-underline mb-4">
             Avg Hours/Day to meet {{ month }} Hours:
             <v-spacer></v-spacer>
             <div @mouseover="decimal = !decimal" @mouseleave="decimal = !decimal">
-              <p v-if="decimal">{{ this.estimatedDailyHours }}h</p>
-              <p v-else>{{ this.estimatedDailyHoursHover }}</p>
+              <a v-if="decimal">{{ this.estimatedDailyHours }}h</a>
+              <a v-else>{{ this.estimatedDailyHoursHover }}</a>
             </div>
-          </v-row>
+          </a>
         </div>
       </div>
     </v-card-text>
