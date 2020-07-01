@@ -22,7 +22,7 @@
         </v-toolbar-title>
         <v-spacer></v-spacer>
         <!-- Display social media icons and links dropdown menu -->
-        <v-item-group v-show="isLoggedIn() && !isMobile">
+        <v-item-group class="hidden-sm-and-down" v-show="isLoggedIn() && !isMobile">
           <v-menu open-on-hover offset-y>
             <template v-slot:activator="{ on, attrs }">
               <v-btn top text small class="my-2" v-bind="attrs" v-on="on">Links &#9662; </v-btn>
@@ -46,31 +46,29 @@
           </v-btn>
         </v-item-group>
         <!--In MOBILE VIEW display all links under the links dropdown-->
-        <v-flex lg4 v-if="isMobile">
-          <v-item-group v-show="isLoggedIn()">
-            <v-menu open-on-hover offset-y>
-              <template v-slot:activator="{ on, attrs }">
-                <v-btn top text small class="my-2" v-bind="attrs" v-on="on">Links &#9662; </v-btn>
-              </template>
+        <v-item-group class="hidden-md-and-up" v-show="isLoggedIn() | isMobile">
+          <v-menu open-on-hover offset-y>
+            <template v-slot:activator="{ on, attrs }">
+              <v-btn top text small class="my-2" v-bind="attrs" v-on="on">Links &#9662; </v-btn>
+            </template>
 
-              <v-list>
-                <v-list-item v-for="(l, index) in links" :key="index" :href="l.link" target="_blank">
-                  <v-list-item-title>{{ l.name }}</v-list-item-title>
-                </v-list-item>
-                <v-list-item
-                  class="mx-auto white--text"
-                  v-for="link in mediaLinks"
-                  :key="link.name"
-                  :href="link.link"
-                  icon
-                  target="_blank"
-                >
-                  <icon :name="link.icon"></icon>
-                </v-list-item>
-              </v-list>
-            </v-menu>
-          </v-item-group>
-        </v-flex>
+            <v-list>
+              <v-list-item v-for="(l, index) in links" :key="index" :href="l.link" target="_blank">
+                <v-list-item-title>{{ l.name }}</v-list-item-title>
+              </v-list-item>
+              <v-list-item
+                class="mx-auto white--text"
+                v-for="link in mediaLinks"
+                :key="link.name"
+                :href="link.link"
+                icon
+                target="_blank"
+              >
+                <icon :name="link.icon"></icon>
+              </v-list-item>
+            </v-list>
+          </v-menu>
+        </v-item-group>
 
         <v-toolbar-items v-show="isLoggedIn()">
           <v-flex xs12 sm6 md8 align-center justify-left layout text-xs-center>
