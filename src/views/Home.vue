@@ -46,32 +46,6 @@
             <available-budgets :budgets="expenseTypeData" :loading="loadingBudgets"></available-budgets>
           </v-flex>
         </v-flex>
-        <!-- Quick links -->
-        <!-- <v-flex xs12 sm6 md6 lg6 class="pa-4">
-          <v-card align-content-space-around>
-            <v-card-title class="header_style">
-              <h4 class="white--text">Quick Links</h4>
-              <div>
-                <v-btn
-                  class="mx-auto white--text"
-                  v-for="link in mediaLinks"
-                  :key="link.name"
-                  :href="link.link"
-                  icon
-                  target="_blank"
-                >
-                  <icon :name="link.icon"></icon>
-                </v-btn>
-              </div>
-            </v-card-title>
-            <v-list v-for="(link, index) in links" :key="link.name">
-              <v-divider v-if="index != 0"></v-divider>
-              <v-list-item :href="link.link" target="_blank">
-                <v-list-item-content>{{ link.name }}</v-list-item-content>
-              </v-list-item>
-            </v-list>
-          </v-card>
-        </v-flex> -->
       </v-col>
       <!-- Activity Feed -->
       <v-col xs12 sm12 md6 lg6>
