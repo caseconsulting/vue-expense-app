@@ -250,7 +250,8 @@ async function created() {
       this.workedHours += hours.duration;
     });
   }
-  this.todaysTimeSheets = await api.getTimeSheets(this.employee.employeeNumber, today, tomorrow);
+  console.log(this.previousTimeSheets);
+  this.todaysTimeSheets = await api.getTimeSheets(this.employee.employeeNumber, today, today);
   _.forEach(this.todaysTimeSheets, (hours) => {
     this.todaysHours += hours.duration;
   });
