@@ -39,84 +39,82 @@
               </div>
             </div>
           </v-row>
-          <a @click="showDialog = true" class="row text-decoration-underline mb-4">
-            Avg Hours/Day to meet {{ month }} Hours:
-            <v-spacer></v-spacer>
-            <div @mouseover="decimal = !decimal" @mouseleave="decimal = !decimal">
-              <a v-if="decimal">{{ this.estimatedDailyHours }}h</a>
-              <a v-else>{{ this.estimatedDailyHoursHover }}</a>
-            </div>
-          </a>
+          <template v-if="!showMore" @click="showMore = true">
+            <v-btn @click="showMore = true" top text small class="my-2" v-bind="attrs">Show More &#9662; </v-btn>
+          </template>
+          <div v-if="showMore" max-width="400">
+            <!-- Hours worked this month -->
+            <v-row>
+              Previous Hours Worked:
+              <v-spacer></v-spacer>
+              <div>
+                <div @mouseover="decimal = !decimal" @mouseleave="decimal = !decimal">
+                  <p v-if="decimal">{{ this.workedHours }}h</p>
+                  <p v-else>{{ this.workedHoursHover }}</p>
+                </div>
+              </div>
+            </v-row>
+            <!-- Hours worked today -->
+            <v-row>
+              Today's Hours:
+              <v-spacer></v-spacer>
+              <div>
+                <div @mouseover="decimal = !decimal" @mouseleave="decimal = !decimal">
+                  <p v-if="decimal">{{ this.todaysHours }}h</p>
+                  <p v-else>{{ this.todaysHoursHover }}</p>
+                </div>
+              </div>
+            </v-row>
+            <!-- Future hours for this month -->
+            <v-row>
+              Future Hours:
+              <v-spacer></v-spacer>
+              <div>
+                <div @mouseover="decimal = !decimal" @mouseleave="decimal = !decimal">
+                  <p v-if="decimal">{{ this.futureHours }}h</p>
+                  <p v-else>{{ this.futureHoursHover }}</p>
+                </div>
+              </div>
+            </v-row>
+            <!-- Hours left this month -->
+            <v-row>
+              Hours Remaining:
+              <v-spacer></v-spacer>
+              <div>
+                <div @mouseover="decimal = !decimal" @mouseleave="decimal = !decimal">
+                  <p v-if="decimal">{{ this.remainingHours }}h</p>
+                  <p v-else>{{ this.remainingHoursHover }}</p>
+                </div>
+              </div>
+            </v-row>
+            <!-- Work days left -->
+            <v-row>
+              Work Days Remaining:
+              <v-spacer></v-spacer>
+              <div>
+                <div>
+                  <input type="text" class="text-right" :value="this.userWorkDays" @input="updateEstimate" />
+                </div>
+              </div>
+            </v-row>
+            <!-- Average Hours per Day -->
+            <v-row>
+              Avg Hours/Day ({{ month }}):
+              <v-spacer></v-spacer>
+              <div>
+                <div @mouseover="decimal = !decimal" @mouseleave="decimal = !decimal">
+                  <p v-if="decimal">{{ this.estimatedDailyHours }}h</p>
+                  <p v-else>{{ this.estimatedDailyHoursHover }}</p>
+                </div>
+              </div>
+            </v-row>
+          </div>
+          <template v-if="showMore">
+            <v-btn @click="showMore = false" top text small class="my-2" v-bind="attrs">Show Less &#9650; </v-btn>
+          </template>
         </div>
       </div>
     </v-card-text>
-    <v-dialog v-model="showDialog" max-width="400">
-      <v-toolbar color="#565651" dark>
-        <v-toolbar-title>Hours</v-toolbar-title>
-      </v-toolbar>
-      <v-divider></v-divider>
-      <v-list style="font-size: 13px;" dense>
-        <!-- Hours worked this month -->
-        <v-list-item>
-          <v-list-item-content>Previous Hours Worked:</v-list-item-content>
-          <v-list-item-content class="text-right">
-            <div @mouseover="decimalDialog = !decimalDialog" @mouseleave="decimalDialog = !decimalDialog">
-              <p v-if="decimalDialog">{{ this.workedHours }}h</p>
-              <p v-else>{{ this.workedHoursHover }}</p>
-            </div>
-          </v-list-item-content>
-        </v-list-item>
-        <!-- Hours worked today -->
-        <v-list-item>
-          <v-list-item-content>Today's Hours:</v-list-item-content>
-          <v-list-item-content class="text-right">
-            <div @mouseover="decimalDialog = !decimalDialog" @mouseleave="decimalDialog = !decimalDialog">
-              <p v-if="decimalDialog">{{ this.todaysHours }}h</p>
-              <p v-else>{{ this.todaysHoursHover }}</p>
-            </div>
-          </v-list-item-content>
-        </v-list-item>
-        <!-- Future hours for this month -->
-        <v-list-item>
-          <v-list-item-content>Future Hours:</v-list-item-content>
-          <v-list-item-content class="text-right">
-            <div @mouseover="decimalDialog = !decimalDialog" @mouseleave="decimalDialog = !decimalDialog">
-              <p v-if="decimalDialog">{{ this.futureHours }}h</p>
-              <p v-else>{{ this.futureHoursHover }}</p>
-            </div>
-          </v-list-item-content>
-        </v-list-item>
-        <!-- Hours left this month -->
-        <v-list-item>
-          <v-list-item-content>Hours Remaining:</v-list-item-content>
-          <v-list-item-content class="text-right">
-            <div @mouseover="decimalDialog = !decimalDialog" @mouseleave="decimalDialog = !decimalDialog">
-              <p v-if="decimalDialog">{{ this.remainingHours }}h</p>
-              <p v-else>{{ this.remainingHoursHover }}</p>
-            </div>
-          </v-list-item-content>
-        </v-list-item>
-        <!-- Work days left -->
-        <v-list-item>
-          <v-list-item-content>Work Days Remaining:</v-list-item-content>
-          <v-list-item-content class="text-right">
-            <div>
-              <input type="text" class="text-right" :value="this.userWorkDays" @input="updateEstimate" />
-            </div>
-          </v-list-item-content>
-        </v-list-item>
-        <!-- Average Hours per Day -->
-        <v-list-item>
-          <v-list-item-content>Avg Hours/Day ({{ month }}):</v-list-item-content>
-          <v-list-item-content class="text-right">
-            <div @mouseover="decimalDialog = !decimalDialog" @mouseleave="decimalDialog = !decimalDialog">
-              <p v-if="decimalDialog">{{ this.estimatedDailyHours }}h</p>
-              <p v-else>{{ this.estimatedDailyHoursHover }}</p>
-            </div>
-          </v-list-item-content>
-        </v-list-item>
-      </v-list>
-    </v-dialog>
   </div>
 </template>
 
@@ -333,7 +331,6 @@ export default {
   data() {
     return {
       decimal: true,
-      decimalDialog: true,
       employee: {},
       estimatedDailyHours: 0,
       estimatedDailyHoursHover: '',
@@ -346,7 +343,7 @@ export default {
       previousTimeSheets: [],
       remainingHours: 0,
       remainingHoursHover: '',
-      showDialog: false,
+      showMore: false,
       todaysHours: 0,
       todaysHoursHover: '',
       todaysTimeSheets: [],
