@@ -21,7 +21,8 @@
           <h1 class="d-inline" style="text-align: center;">Case Portal</h1>
         </v-toolbar-title>
         <v-spacer></v-spacer>
-        <v-items v-show="isLoggedIn()">
+        <!-- Display social media icons and links dropdown menu -->
+        <v-item-group v-show="isLoggedIn() && !isMobile">
           <v-menu open-on-hover offset-y>
             <template v-slot:activator="{ on, attrs }">
               <v-btn top text small class="my-2" v-bind="attrs" v-on="on">Links &#9662; </v-btn>
@@ -43,7 +44,33 @@
           >
             <icon :name="link.icon"></icon>
           </v-btn>
-        </v-items>
+        </v-item-group>
+        <!--In MOBILE VIEW display all links under the links dropdown-->
+        <v-flex lg4 v-if="isMobile">
+          <v-item-group v-show="isLoggedIn()">
+            <v-menu open-on-hover offset-y>
+              <template v-slot:activator="{ on, attrs }">
+                <v-btn top text small class="my-2" v-bind="attrs" v-on="on">Links &#9662; </v-btn>
+              </template>
+
+              <v-list>
+                <v-list-item v-for="(l, index) in links" :key="index" :href="l.link" target="_blank">
+                  <v-list-item-title>{{ l.name }}</v-list-item-title>
+                </v-list-item>
+                <v-list-item
+                  class="mx-auto white--text"
+                  v-for="link in mediaLinks"
+                  :key="link.name"
+                  :href="link.link"
+                  icon
+                  target="_blank"
+                >
+                  <icon :name="link.icon"></icon>
+                </v-list-item>
+              </v-list>
+            </v-menu>
+          </v-item-group>
+        </v-flex>
 
         <v-toolbar-items v-show="isLoggedIn()">
           <v-flex xs12 sm6 md8 align-center justify-left layout text-xs-center>
@@ -77,10 +104,30 @@
 import { isLoggedIn, logout, getProfile, getTokenExpirationDate, getAccessToken } from '@/utils/auth';
 import MainNav from '@/components/MainNav.vue';
 import router from './router.js';
+import MobileDetect from 'mobile-detect';
 import TimeOutModal from '@/components/TimeOutModal.vue';
 import TimeOutWarningModal from '@/components/TimeOutWarningModal.vue';
 
-/* METHODS */
+// |--------------------------------------------------|
+// |                                                  |
+// |                     COMPUTED                     |
+// |                                                  |
+// |--------------------------------------------------|
+/**
+ * Checks if the current device used is mobile. Return true if it is mobile. Returns false if it is not mobile.
+ *
+ * @return boolean - if the device is mobile
+ */
+function isMobile() {
+  let md = new MobileDetect(window.navigator.userAgent);
+  return md.os() === 'AndroidOS' || md.os() === 'iOS';
+}
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     METHODS                      |
+// |                                                  |
+// |--------------------------------------------------|
 
 /*
  * Logout of expense app
@@ -103,7 +150,11 @@ async function initSession() {
   this.initSession();
 }
 
-/* LIFECYCLE HOOKS */
+// |--------------------------------------------------|
+// |                                                  |
+// |                 LIFECYCLE HOOKS                  |
+// |                                                  |
+// |--------------------------------------------------|
 
 async function created() {
   window.EventBus.$on('sessionContinue', () => (this.session = false)); // Confirm 5 minute warning
@@ -139,6 +190,12 @@ async function created() {
   this.initSession(); //starts session checking
 }
 
+// |--------------------------------------------------|
+// |                                                  |
+// |                      EXPORT                      |
+// |                                                  |
+// |--------------------------------------------------|
+
 export default {
   data: () => ({
     drawer: isLoggedIn(),
@@ -165,6 +222,9 @@ export default {
   }),
   props: {
     source: String
+  },
+  computed: {
+    isMobile
   },
   components: {
     MainNav,
