@@ -857,7 +857,7 @@ async function setFile(file) {
     this.file = file;
     this.$set(this.expense, 'receipt', file.name);
     this.receiptText = await api.extractText(file);
-    console.log(this.receiptText);
+    // console.log(this.receiptText);
   } else {
     this.file = null;
     this.receipt = null;
@@ -1005,16 +1005,19 @@ async function created() {
   // creating or updating an expense as an admin
   this.highFiveRecipients = _.compact(
     this.activeEmployees.map((employee) => {
-      if (employee.id == this.userInfo.id || employee.workStatus == 0 || this.expense.employeeId == employee.id) {
+      if (employee.value == this.userInfo.id || employee.workStatus == 0 || this.expense.employeeId == employee.value) {
         if (this.userInfo.id != this.expense.employeeId && !this.asUser) {
-          return employeeUtils.fullName(employee);
+          // return employeeUtils.fullName(employee);
+          return employee.text;
         }
 
         return;
       }
-      return employeeUtils.fullName(employee);
+      // return employeeUtils.fullName(employee);
+      return employee.text;
     })
   );
+  console.log(this.highFiveRecipients);
   // set aggregate expense types
   let expenseTypes = await api.getItems(api.EXPENSE_TYPES);
   this.expenseTypes = _.map(expenseTypes, (expenseType) => {
@@ -1172,8 +1175,8 @@ export default {
       //watches admin accessible employee field to know who can be a recipient
       this.highFiveRecipients = _.compact(
         this.activeEmployees.map((employee) => {
-          console.log(this.expense.employeeId);
-          console.log(employee.value);
+          // console.log(this.expense.employeeId);
+          // console.log(employee.value);
           if (
             employee.value == this.userInfo.id || //current value is the user
             employee.workStatus == 0 || //value isn't an invalid employee
