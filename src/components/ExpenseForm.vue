@@ -74,7 +74,7 @@
 
         <!-- Employee Selection List -->
         <v-autocomplete
-          v-if="this.isHighFive"
+          v-if="this.reqRecipient"
           :items="this.highFiveRecipients"
           :rules="requiredRules"
           :disabled="isReimbursed"
@@ -85,7 +85,7 @@
 
         <!-- Description -->
         <v-text-field
-          v-if="!this.isHighFive"
+          v-if="!this.reqRecipient"
           v-model="expense.description"
           :rules="descriptionRules"
           :disabled="isInactive"
@@ -177,7 +177,8 @@
         <!-- Notes -->
         <v-textarea
           v-model="expense.note"
-          label="Notes (optional)"
+          :rules="notesRules"
+          :label="notesLabel"
           data-vv-name="Description"
           :disabled="isInactive"
         ></v-textarea>
@@ -295,6 +296,35 @@ function isReimbursed() {
 function isUser() {
   return this.employeeRole === 'user';
 } // isUser
+
+/**
+ * Creates the rules for the notes section based on whether or not
+ *  the current expense type requires a recipient
+ *
+ *  @return rule
+ */
+function notesRules() {
+  const notesRules = [];
+
+  if (this.reqRecipient) {
+    const notesRule = (v) => !!v || 'Notes is a required field';
+    notesRules.push(notesRule);
+  }
+
+  return notesRules;
+}
+/**
+ * Creates the label for the notes section base on if it is optional
+ *
+ * @return string - label
+ */
+function notesLabel() {
+  if (this.reqRecipient) {
+    return 'Notes';
+  } else {
+    return 'Notes (optional)';
+  }
+}
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -853,6 +883,7 @@ async function submit() {
     this.loading = false; // set loading status to false
     this.$emit('endAction');
     this.isHighFive = false; // set high five back to false
+    this.reqRecipient = false;
   }
 } // submit
 
@@ -1001,7 +1032,8 @@ async function created() {
       recurringFlag: expenseType.recurringFlag,
       isInactive: expenseType.isInactive,
       categories: expenseType.categories,
-      accessibleBy: expenseType.accessibleBy
+      accessibleBy: expenseType.accessibleBy,
+      hasRecipient: expenseType.hasRecipient
     };
   });
 } // created
@@ -1036,12 +1068,15 @@ export default {
     isDifferentExpenseType,
     isReimbursed,
     isUser,
-    receiptRequired
+    receiptRequired,
+    notesRules,
+    notesLabel
   },
   created,
   data() {
     return {
       activeEmployees: [],
+      reqRecipient: false,
       isHighFive: false,
       allowReceipt: false, // allow receipt to be uploaded
       asUser: true, // user view
@@ -1175,6 +1210,13 @@ export default {
           this.isHighFive = true;
         } else {
           this.isHighFive = false;
+        }
+
+        // set requires recipient
+        if (selected.hasRecipient == true) {
+          this.reqRecipient = true;
+        } else {
+          this.reqRecipient = false;
         }
       } else {
         this.hint = '';
