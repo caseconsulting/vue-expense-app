@@ -40,7 +40,7 @@
             </div>
           </v-row>
           <template v-if="!showMore" @click="showMore = true">
-            <v-btn @click="showMore = true" top text small class="my-2" v-bind="attrs">Show More &#9662; </v-btn>
+            <v-btn @click="showMore = true" top text small class="my-2">Show More &#9662; </v-btn>
           </template>
           <div v-if="showMore" max-width="400">
             <!-- Hours worked this month -->
@@ -112,7 +112,7 @@
             </v-row>
           </div>
           <template v-if="showMore">
-            <v-btn @click="showMore = false" top text small class="my-2" v-bind="attrs">Show Less &#9650; </v-btn>
+            <v-btn @click="showMore = false" top text small class="my-2">Show Less &#9650; </v-btn>
           </template>
         </div>
       </div>

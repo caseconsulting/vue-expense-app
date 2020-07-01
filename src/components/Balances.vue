@@ -19,6 +19,13 @@
           <p>{{ balanceData[balance] }} h</p>
         </v-row>
       </div>
+      <template v-if="!showMore">
+        <v-btn @click="showMore = true" top text small class="my-2">Show More &#9662; </v-btn>
+      </template>
+
+      <template v-if="showMore">
+        <v-btn @click="showMore = false" top text small class="my-2">Show Less &#9650; </v-btn>
+      </template>
     </v-card-text>
   </div>
 </template>
@@ -78,7 +85,8 @@ export default {
       ptoBalances: [],
       balanceData: [],
       keysBalance: [],
-      loadingBar: false
+      loadingBar: false,
+      showMore: false
     };
   }
 };
