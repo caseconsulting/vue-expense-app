@@ -55,8 +55,8 @@ async function created() {
       emptyBalances++;
     }
   });
-  if (emptyBalances == 0) {
-    this.showAll = true;
+  if (emptyBalances > 0) {
+    this.showAll = false;
   }
 } // created
 
@@ -106,7 +106,7 @@ export default {
       balanceData: [],
       keysBalance: [],
       loadingBar: false,
-      showAll: false,
+      showAll: true,
       showMore: false
     };
   }
