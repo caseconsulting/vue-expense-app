@@ -49,6 +49,15 @@ async function created() {
   this.balanceData = this.ptoBalances['pto_balances'];
   this.keysBalance = Object.keys(this.balanceData);
   this.loadingBar = false;
+  let emptyBalances = 0;
+  this.keysBalance.forEach((balance) => {
+    if (this.balanceData[balance] == 0) {
+      emptyBalances++;
+    }
+  });
+  if (emptyBalances == 0) {
+    this.showAll = true;
+  }
 } // created
 
 // |--------------------------------------------------|
@@ -70,17 +79,11 @@ function isInactive() {
 
 function balances() {
   let avaibleBalances = [];
-  let emptyBalances = 0;
   this.keysBalance.forEach((balance) => {
     if (this.balanceData[balance] > 0 || this.showMore) {
       avaibleBalances.push(balance);
-    } else {
-      emptyBalances++;
     }
   });
-  if (emptyBalances == 0) {
-    this.showAll = true;
-  }
   return avaibleBalances;
 }
 
