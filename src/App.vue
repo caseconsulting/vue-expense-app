@@ -28,7 +28,7 @@
               <v-btn top text small class="my-2" v-bind="attrs" v-on="on">Links &#9662; </v-btn>
             </template>
 
-            <v-list>
+            <v-list class="scroll">
               <v-list-item v-for="(l, index) in links" :key="index" :href="l.link" target="_blank">
                 <v-list-item-title>{{ l.name }}</v-list-item-title>
               </v-list-item>
@@ -45,14 +45,16 @@
             <icon :name="link.icon"></icon>
           </v-btn>
         </v-item-group>
-        <!--In MOBILE VIEW display all links under the links dropdown-->
+
+        <!--In MOBILE VIEW/Smaller Screen sizes display all links under the links dropdown-->
+
         <v-item-group class="hidden-md-and-up" v-show="isLoggedIn() | isMobile">
           <v-menu open-on-hover offset-y>
             <template v-slot:activator="{ on, attrs }">
               <v-btn top text small class="my-2" v-bind="attrs" v-on="on">Links &#9662; </v-btn>
             </template>
 
-            <v-list>
+            <v-list class="scroll">
               <v-list-item v-for="(l, index) in links" :key="index" :href="l.link" target="_blank">
                 <v-list-item-title>{{ l.name }}</v-list-item-title>
               </v-list-item>
@@ -309,5 +311,11 @@ export default {
   100% {
     color: gold;
   }
+}
+
+.scroll {
+  width: 130px;
+  max-height: 190px;
+  overflow-y: scroll;
 }
 </style>
