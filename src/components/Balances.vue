@@ -19,11 +19,11 @@
           <p>{{ balanceData[balance] }} h</p>
         </v-row>
       </div>
-      <template v-if="!showMore">
+      <template v-if="!showMore && !showAll">
         <v-btn @click="showMore = true" top text small class="my-2">Show More &#9662; </v-btn>
       </template>
 
-      <template v-if="showMore">
+      <template v-if="showMore && !showAll">
         <v-btn @click="showMore = false" top text small class="my-2">Show Less &#9650; </v-btn>
       </template>
     </v-card-text>
@@ -70,11 +70,17 @@ function isInactive() {
 
 function balances() {
   let avaibleBalances = [];
+  let emptyBalances = 0;
   this.keysBalance.forEach((balance) => {
     if (this.balanceData[balance] > 0 || this.showMore) {
       avaibleBalances.push(balance);
+    } else {
+      emptyBalances++;
     }
   });
+  if (emptyBalances == 0) {
+    this.showAll = true;
+  }
   return avaibleBalances;
 }
 
@@ -97,6 +103,7 @@ export default {
       balanceData: [],
       keysBalance: [],
       loadingBar: false,
+      showAll: false,
       showMore: false
     };
   }
