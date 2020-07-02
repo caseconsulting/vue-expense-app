@@ -319,7 +319,7 @@ export default {
   overflow-y: scroll;
 }
 
-::-webkit-scrollbar {
+.scroll::-webkit-scrollbar {
   width: 0 px; // remove space
   background: transparent; // make scroll bar invisible
 }
