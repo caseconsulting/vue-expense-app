@@ -318,4 +318,9 @@ export default {
   max-height: 190px;
   overflow-y: scroll;
 }
+
+::-webkit-scrollbar {
+  width: 0 px; // remove space
+  background: transparent; // make scroll bar invisible
+}
 </style>
