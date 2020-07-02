@@ -1,10 +1,17 @@
-<template>
+<template v-slot="{ active }">
   <div id="available-budgets">
     <v-card>
       <v-card-title class="header_style">
-        <router-link to="/myBudgets" style="text-decoration: none;">
-          <h4 class="white--text">Available Budgets</h4>
-        </router-link>
+        <v-hover v-slot:default="{ hover }">
+          <router-link to="/myBudgets" style="text-decoration: none;">
+            <h4
+              class="white--text px-2"
+              :class="[active || hover ? 'darken' : 'transparent', hover ? 'elevation-4' : '']"
+            >
+              Available Budgets
+            </h4>
+          </router-link>
+        </v-hover>
       </v-card-title>
       <v-card-text class="px-7 pt-5 pb-1 black--text">
         <div v-if="this.loading" class="pb-4">
@@ -19,12 +26,17 @@
           </div>
           <div v-else>
             <!-- Loop all budgets -->
-            <v-row v-for="budget in budgets" :key="budget.expenseTypeId" @click="selectBudget(budget)">
-              {{ budget.expenseTypeName }}:
+            <v-list-item
+              v-for="budget in budgets"
+              :key="budget.expenseTypeId"
+              @click="selectBudget(budget)"
+              class="ma-auto pa-auto"
+              :dense="true"
+              >{{ budget.expenseTypeName }}:
               <v-spacer></v-spacer>
               <p v-if="noRemaining(budget)">{{ calcRemaining(budget) | moneyValue }}</p>
               <p v-else>{{ calcRemaining(budget) | moneyValue }}</p>
-            </v-row>
+            </v-list-item>
             <!-- End Loop all budgets -->
             <router-link to="/myExpenses" style="text-decoration: none;">
               <button class="home_buttons">Create an Expense</button>
@@ -102,6 +114,8 @@ export default {
   created,
   data() {
     return {
+      active: false,
+      dense: false,
       selectedBudget: null,
       showDialog: false
     };

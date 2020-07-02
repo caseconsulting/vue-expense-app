@@ -24,7 +24,14 @@
               target="_blank"
               class="px-4"
             >
-              {{ tweet.full_text | removeLink }}
+              <v-card flat class="transparent"
+                >{{ tweet.full_text | removeLink }}&nbsp;<icon
+                  height="12"
+                  width="12"
+                  name="external-link-alt"
+                  color="blue"
+                ></icon>
+              </v-card>
             </v-list-item>
           </v-timeline-item>
         </v-timeline>

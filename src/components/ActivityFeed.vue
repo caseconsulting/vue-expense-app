@@ -19,9 +19,9 @@
               <icon class="white--text" :name="event.icon"></icon>
             </template>
             <h3>{{ event.date }}</h3>
-            <a flat class="px-4" v-if="event.link" :href="event.link" target="_blank"
-              >{{ event.text }}&nbsp;<span><icon height="12" width="12" name="external-link-alt"></icon></span
-            ></a>
+            <v-list-item class="ma-auto pa-auto" v-if="event.link" :href="event.link" target="_blank" :dense="true"
+              >{{ event.text }}&nbsp;<icon height="12" width="12" name="external-link-alt" color="blue"></icon>
+            </v-list-item>
             <div class="px-4" v-else>{{ event.text }}</div>
           </v-timeline-item>
         </v-timeline>
@@ -32,6 +32,11 @@
 
 <script>
 export default {
+  data() {
+    return {
+      dense: false
+    };
+  },
   props: ['events', 'loading']
 };
 </script>

@@ -39,6 +39,7 @@
               </div>
             </div>
           </v-row>
+<<<<<<< HEAD
           <template v-if="!showMore" @click="showMore = true">
             <v-btn @click="showMore = true" top text small class="my-2">Show More &#9662; </v-btn>
           </template>
@@ -144,6 +145,16 @@
           <template v-if="showMore">
             <v-btn @click="showMore = false" top text small class="my-2">Show Less &#9650; </v-btn>
           </template>
+=======
+          <v-row @click="showDialog = true" class="mb-4">
+            Avg Hours/Day to meet {{ month }} Hours:
+            <v-spacer></v-spacer>
+            <div @mouseover="decimal = !decimal" @mouseleave="decimal = !decimal">
+              <p v-if="decimal">{{ this.estimatedDailyHours }}h</p>
+              <p v-else>{{ this.estimatedDailyHoursHover }}</p>
+            </div>
+          </v-row>
+>>>>>>> 1079-show-items-on-home-page-as-clickable: edit styling
         </div>
       </div>
     </v-card-text>
