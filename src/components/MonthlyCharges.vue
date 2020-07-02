@@ -30,11 +30,11 @@
             <v-spacer></v-spacer>
             <div @mouseover="decimal = !decimal" @mouseleave="decimal = !decimal">
               <div v-if="decimal">
-                <p v-if="remainingHours > 0" style="color: red;">{{ this.totalHours }}h / {{ workHours }}</p>
+                <p v-if="remainingHours > 0">{{ this.totalHours }}h / {{ workHours }}</p>
                 <p v-else style="color: green;">{{ this.totalHours }}h / {{ workHours }}</p>
               </div>
               <div v-else>
-                <p v-if="remainingHours > 0" style="color: red;">{{ this.totalHoursHover }} / {{ workHours }}</p>
+                <p v-if="remainingHours > 0">{{ this.totalHoursHover }} / {{ workHours }}</p>
                 <p v-else style="color: green;">{{ this.totalHoursHover }} / {{ workHours }}</p>
               </div>
             </div>
@@ -45,7 +45,7 @@
           <div v-if="showMore" max-width="400">
             <!-- Hours worked this month -->
             <v-row>
-              Previous:
+              Completed:
               <v-spacer></v-spacer>
               <div>
                 <div @mouseover="decimal = !decimal" @mouseleave="decimal = !decimal">
