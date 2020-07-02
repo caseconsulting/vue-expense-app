@@ -45,40 +45,64 @@
           <div v-if="showMore" max-width="400">
             <!-- Hours worked this month -->
             <v-row>
-              Previous Hours Worked:
+              Previous:
               <v-spacer></v-spacer>
               <div>
                 <div @mouseover="decimal = !decimal" @mouseleave="decimal = !decimal">
-                  <p v-if="decimal">{{ this.workedHours }}h</p>
-                  <p v-else>{{ this.workedHoursHover }}</p>
+                  <div v-if="decimal">
+                    <p v-if="this.workedHours < this.workHours - 8 * this.remainingWorkDays">{{ this.workedHours }}h</p>
+                    <p v-else style="color: green;">{{ this.workedHours }}h</p>
+                  </div>
+                  <div v-else>
+                    <p v-if="this.workedHours < this.workHours - 8 * this.remainingWorkDays">
+                      {{ this.workedHoursHover }}
+                    </p>
+                    <p v-else style="color: green;">{{ this.workedHoursHover }}</p>
+                  </div>
                 </div>
               </div>
             </v-row>
             <!-- Hours worked today -->
             <v-row>
-              Today's Hours:
+              Today:
               <v-spacer></v-spacer>
               <div>
                 <div @mouseover="decimal = !decimal" @mouseleave="decimal = !decimal">
-                  <p v-if="decimal">{{ this.todaysHours }}h</p>
-                  <p v-else>{{ this.todaysHoursHover }}</p>
+                  <div v-if="decimal">
+                    <p v-if="this.todaysHours < 8">{{ this.todaysHours }}h</p>
+                    <p v-else style="color: green;">{{ this.todaysHours }}h</p>
+                  </div>
+                  <div v-else>
+                    <p v-if="this.todaysHours < 8">{{ this.todaysHoursHover }}</p>
+                    <p v-else style="color: green;">{{ this.todaysHoursHover }}</p>
+                  </div>
                 </div>
               </div>
             </v-row>
             <!-- Future hours for this month -->
             <v-row>
-              Future Hours:
+              Future:
               <v-spacer></v-spacer>
               <div>
                 <div @mouseover="decimal = !decimal" @mouseleave="decimal = !decimal">
-                  <p v-if="decimal">{{ this.futureHours }}h</p>
-                  <p v-else>{{ this.futureHoursHover }}</p>
+                  <div v-if="decimal">
+                    <p v-if="this.futureHours < 8 * (this.remainingWorkDays - 1)">{{ this.futureHours }}h</p>
+                    <p v-else style="color: green;">{{ this.futureHours }}h</p>
+                  </div>
+                  <div v-else>
+                    <div>
+                      <p v-if="this.futureHours < 8 * (this.remainingWorkDays - 1)">
+                        {{ this.futureHoursHover }}
+                      </p>
+                      <p v-else style="color: green;">{{ this.futureHoursHover }}</p>
+                    </div>
+                  </div>
                 </div>
               </div>
             </v-row>
             <!-- Hours left this month -->
             <v-row>
-              Hours Remaining:
+              Remaining:
               <v-spacer></v-spacer>
               <div>
                 <div @mouseover="decimal = !decimal" @mouseleave="decimal = !decimal">
@@ -89,7 +113,7 @@
             </v-row>
             <!-- Work days left -->
             <v-row>
-              Work Days Remaining:
+              Days Remaining:
               <v-spacer></v-spacer>
               <div>
                 <div>
@@ -97,7 +121,7 @@
                     <input
                       type="text"
                       class="text-right"
-                      style="max-width: 50px;"
+                      style="max-width: 40px;"
                       :value="this.userWorkDays"
                       @input="updateEstimate"
                     />
@@ -107,7 +131,7 @@
             </v-row>
             <!-- Average Hours per Day -->
             <v-row>
-              Avg Hours/Day ({{ month }}):
+              Avg Hours/Day:
               <v-spacer></v-spacer>
               <div>
                 <div @mouseover="decimal = !decimal" @mouseleave="decimal = !decimal">
