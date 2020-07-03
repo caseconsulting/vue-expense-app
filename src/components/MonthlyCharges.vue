@@ -39,6 +39,17 @@
               </div>
             </div>
           </v-row>
+          <!-- Average Hours per Day -->
+          <v-row>
+            Avg Hours/Day:
+            <v-spacer></v-spacer>
+            <div>
+              <div @mouseover="decimal = !decimal" @mouseleave="decimal = !decimal">
+                <p v-if="decimal">{{ this.estimatedDailyHours }}h</p>
+                <p v-else>{{ this.estimatedDailyHoursHover }}</p>
+              </div>
+            </div>
+          </v-row>
           <template v-if="!showMore" @click="showMore = true">
             <v-btn @click="showMore = true" top text small class="my-2">Show More &#9662; </v-btn>
           </template>
@@ -50,11 +61,13 @@
               <div>
                 <div @mouseover="decimal = !decimal" @mouseleave="decimal = !decimal">
                   <div v-if="decimal">
-                    <p v-if="this.workedHours < this.workHours - 8 * this.remainingWorkDays">{{ this.workedHours }}h</p>
+                    <p v-if="this.workedHours < this.workHoursNumber - 8 * this.remainingWorkDays">
+                      {{ this.workedHours }}h
+                    </p>
                     <p v-else style="color: green;">{{ this.workedHours }}h</p>
                   </div>
                   <div v-else>
-                    <p v-if="this.workedHours < this.workHours - 8 * this.remainingWorkDays">
+                    <p v-if="this.workedHours < this.workHoursNumber - 8 * this.remainingWorkDays">
                       {{ this.workedHoursHover }}
                     </p>
                     <p v-else style="color: green;">{{ this.workedHoursHover }}</p>
@@ -126,17 +139,6 @@
                       @input="updateEstimate"
                     />
                   </p>
-                </div>
-              </div>
-            </v-row>
-            <!-- Average Hours per Day -->
-            <v-row>
-              Avg Hours/Day:
-              <v-spacer></v-spacer>
-              <div>
-                <div @mouseover="decimal = !decimal" @mouseleave="decimal = !decimal">
-                  <p v-if="decimal">{{ this.estimatedDailyHours }}h</p>
-                  <p v-else>{{ this.estimatedDailyHoursHover }}</p>
                 </div>
               </div>
             </v-row>
