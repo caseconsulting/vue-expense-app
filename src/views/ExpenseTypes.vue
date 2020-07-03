@@ -551,7 +551,7 @@ function displayError(err) {
  * Sets inAction boolean to false.
  */
 function endAction() {
-  this.inAction = false;
+  this.midAction = false;
 }
 
 /**
