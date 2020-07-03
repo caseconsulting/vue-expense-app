@@ -4,28 +4,33 @@
       <v-card>
         <v-card-title class="headline">Are you sure you want to reimburse the following expense(s)?</v-card-title>
         <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn color="info" text @click.native="emit(`canceled-reimburse`)">No</v-btn>
-          <v-spacer></v-spacer>
-          <v-btn color="green" text @click.native="emit(`confirm-reimburse`, getShowOnFeedList())">Reimburse</v-btn>
-          <v-spacer></v-spacer>
-          <br />
-          <v-switch
-            v-if="filteredOutSelectedList.length == 1"
-            label="Include expense on feed?"
-            v-model="filteredOutSelectedList[0].showOnFeed"
-          ></v-switch>
-          <div v-else>
-            <v-switch
-              v-for="(expense, i) in filteredOutSelectedList"
-              v-bind:key="i"
-              label="Include expense on feed?"
-              v-model="expense.showOnFeed"
-            ></v-switch>
-            <v-spacer></v-spacer>
-            <br />
-          </div>
-          <v-spacer></v-spacer>
+          <v-container>
+            <v-layout row>
+              <v-spacer></v-spacer>
+              <v-btn color="info" text @click.native="emit(`canceled-reimburse`)">No</v-btn>
+              <v-spacer></v-spacer>
+              <v-btn color="green" text @click.native="emit(`confirm-reimburse`, getShowOnFeedList())">Reimburse</v-btn>
+              <v-spacer></v-spacer>
+              <v-flex px-4 pt-3>
+                <v-card flat>Do you want to add the following expense(s) to the activity fee?</v-card>
+              </v-flex>
+              <v-flex px-4>
+                <v-switch
+                  v-if="filteredOutSelectedList.length == 1"
+                  :label="filteredOutSelectedList[0].expenseObj.description"
+                  v-model="filteredOutSelectedList[0].showOnFeed"
+                ></v-switch>
+                <div v-else>
+                  <v-switch
+                    v-for="(expense, i) in filteredOutSelectedList"
+                    v-bind:key="i"
+                    :label="expense.expenseObj.description"
+                    v-model="expense.showOnFeed"
+                  ></v-switch>
+                </div>
+              </v-flex>
+            </v-layout>
+          </v-container>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -57,6 +62,10 @@ function emit(msg, data) {
   }
 } // emit
 
+/**
+ * Updates selected list and filtered list (doesn't include
+ * training and high fives)
+ */
 function updateSelectedLists(expenses) {
   let list = _.map(expenses, (expense) => {
     if (expense.budgetName == 'Training') {
@@ -90,6 +99,9 @@ function updateSelectedLists(expenses) {
   });
 }
 
+/**
+ * Gets list of selected expense IDs to show on the activity feed
+ */
 function getShowOnFeedList() {
   let showOnFeedList = [];
   for (let i = 0; i < this.selectedList.length; i++) {
@@ -98,7 +110,7 @@ function getShowOnFeedList() {
     }
   }
   return showOnFeedList;
-}
+} // getShowOnFeedList
 
 // |--------------------------------------------------|
 // |                                                  |
