@@ -364,9 +364,9 @@ async function createEvents() {
     return null;
   });
   // generate expenses
-  let filteredExpenses = this.filterOutExpensesByCategory(this.aggregatedExpenses);
-  let expenses = _.map(filteredExpenses, (a) => {
-    if (a.budgetName == 'High Five' || a.budgetName == 'Training') {
+  //let filteredExpenses = this.filterOutExpensesByCategory(this.aggregatedExpenses);
+  let expenses = _.map(this.aggregatedExpenses, (a) => {
+    if (a.showOnFeed != ' ' && a.showOnFeed) {
       //value of showOnFeed is true
       if (a.reimbursedDate === ' ') {
         return null;

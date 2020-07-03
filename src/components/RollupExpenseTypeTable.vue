@@ -115,7 +115,11 @@
       </v-container>
 
       <!-- Activate Reimburse Modal -->
-      <reimburse-modal :activate="buttonClicked"></reimburse-modal>
+      <reimburse-modal
+        :activate="buttonClicked"
+        :selectedReimbursements="getSelectedExpensesToReimburse"
+        v-on:confirm-reimburse="reimburseExpenses"
+      ></reimburse-modal>
     </v-card>
   </div>
 </template>
@@ -177,6 +181,17 @@ function mainCheckBox() {
   }
   return checkBox;
 } // mainCheckBox
+
+/**
+ * Gets all selected expenses
+ */
+function getSelectedExpensesToReimburse() {
+  return _.filter(this.pendingExpenses, (expense) => {
+    if (expense.selected) {
+      return true;
+    }
+  });
+} // getSelectedExpensesToReimburse
 
 /**
  * Returns the display status of the reimburse button. Returns true if an expense is selected, otherwise returns false.
@@ -459,7 +474,7 @@ function refreshExpenses() {
 /**
  * Reimburse the selected list of expenses.
  */
-async function reimburseExpenses(show) {
+async function reimburseExpenses(showOnFeedExpenses) {
   if (this.buttonClicked) {
     // reimburse button is clicked
     let expensesToReimburse = [];
@@ -470,7 +485,11 @@ async function reimburseExpenses(show) {
     this.empBudgets = _.forEach(this.empBudgets, async (budget) => {
       return await _.forEach(budget.expenses, async (expense) => {
         if (expense.selected) {
-          this.$set(expense, 'showOnFeed', show);
+          if (showOnFeedExpenses.indexOf(expense.id) > -1) {
+            this.$set(expense, 'showOnFeed', true);
+          } else {
+            this.$set(expense, 'showOnFeed', false);
+          }
           expense.reimbursedDate = moment().format('YYYY-MM-DD');
           expensesToReimburse.push(submitExpenseObject(expense));
         }
@@ -633,12 +652,6 @@ function unCheckAllBoxes() {
  */
 async function created() {
   window.EventBus.$on('selectExpense', this.selectExpense);
-  window.EventBus.$on('confirm-reimburse-true', () => {
-    this.reimburseExpenses(true);
-  });
-  window.EventBus.$on('confirm-reimburse-false', () => {
-    this.reimburseExpenses(false);
-  });
 
   window.EventBus.$on('canceled-reimburse', () => (this.buttonClicked = false));
   let aggregatedData = await api.getAllAggregateExpenses();
@@ -665,7 +678,8 @@ export default {
   computed: {
     filteredItems,
     mainCheckBox,
-    showReimburseButton
+    showReimburseButton,
+    getSelectedExpensesToReimburse
   },
   created,
   data: () => ({
@@ -736,7 +750,8 @@ export default {
     submitExpenseObject,
     toggleAll,
     toggleGroup,
-    unCheckAllBoxes
+    unCheckAllBoxes,
+    print
   }
 };
 </script>
