@@ -12,7 +12,7 @@
               <v-btn color="green" text @click.native="emit(`confirm-reimburse`, getShowOnFeedList())">Reimburse</v-btn>
               <v-spacer></v-spacer>
               <v-flex px-4 pt-3>
-                <v-card flat>Do you want to add the following expense(s) to the activity fee?</v-card>
+                <v-card flat>Do you want to add the following expense(s) to the activity feed?</v-card>
               </v-flex>
               <v-flex px-4>
                 <v-switch
