@@ -28,7 +28,7 @@
               <v-btn top text small class="my-2" v-bind="attrs" v-on="on">Links &#9662; </v-btn>
             </template>
 
-            <v-list class="scroll">
+            <v-list class="scrollLink">
               <v-list-item v-for="(l, index) in links" :key="index" :href="l.link" target="_blank">
                 <v-list-item-title>{{ l.name }}</v-list-item-title>
               </v-list-item>
@@ -54,7 +54,7 @@
               <v-btn top text small class="my-2" v-bind="attrs" v-on="on">Links &#9662; </v-btn>
             </template>
 
-            <v-list class="scroll">
+            <v-list class="scrollLink">
               <v-list-item v-for="(l, index) in links" :key="index" :href="l.link" target="_blank">
                 <v-list-item-title>{{ l.name }}</v-list-item-title>
               </v-list-item>
@@ -313,7 +313,7 @@ export default {
   }
 }
 
-.scroll {
+.scrollLink {
   width: 130px;
   max-height: 190px;
   overflow-y: scroll;
