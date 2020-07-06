@@ -214,6 +214,7 @@
               v-if="userIsAdmin()"
               :midAction="midAction"
               :employees="filteredEmployees"
+              :editing="isEditing()"
             ></convert-employees-to-csv>
           </v-card-actions>
 
