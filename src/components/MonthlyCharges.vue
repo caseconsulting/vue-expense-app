@@ -11,36 +11,38 @@
           <p>No hours for this month</p>
         </v-row>
         <div v-else>
-          <div v-if="decimal">
-            <v-row v-for="job in jobHours" :key="job.name">
-              {{ job.name }}:
-              <v-spacer></v-spacer>
-              <p @mouseover="decimal = !decimal">{{ job.hours }}h</p>
-            </v-row>
-          </div>
-          <div v-else>
-            <v-row v-for="job in jobHoursHover" :key="job.name">
-              {{ job.name }}:
-              <v-spacer></v-spacer>
-              <p @mouseleave="decimal = !decimal">{{ job.hours }}</p>
-            </v-row>
-          </div>
-          <v-row class="bold">
-            Total:
-            <v-spacer></v-spacer>
-            <div @mouseover="decimal = !decimal" @mouseleave="decimal = !decimal">
-              <div v-if="decimal">
-                <p v-if="remainingHours > 0">{{ this.totalHours }}h / {{ workHours }}</p>
-                <p v-else style="color: green;">{{ this.totalHours }}h / {{ workHours }}</p>
-              </div>
-              <div v-else>
-                <p v-if="remainingHours > 0">{{ this.totalHoursHover }} / {{ workHours }}</p>
-                <p v-else style="color: green;">{{ this.totalHoursHover }} / {{ workHours }}</p>
-              </div>
+          <div class="pt-3 px-5" style="border: 1px solid grey;">
+            <div v-if="decimal">
+              <v-row v-for="job in jobHours" :key="job.name">
+                {{ job.name }}:
+                <v-spacer></v-spacer>
+                <p @mouseover="decimal = !decimal">{{ job.hours }}h</p>
+              </v-row>
             </div>
-          </v-row>
+            <div v-else>
+              <v-row v-for="job in jobHoursHover" :key="job.name">
+                {{ job.name }}:
+                <v-spacer></v-spacer>
+                <p @mouseleave="decimal = !decimal">{{ job.hours }}</p>
+              </v-row>
+            </div>
+            <v-row class="bold">
+              Total:
+              <v-spacer></v-spacer>
+              <div @mouseover="decimal = !decimal" @mouseleave="decimal = !decimal">
+                <div v-if="decimal">
+                  <p v-if="remainingHours > 0">{{ this.totalHours }}h / {{ workHours }}</p>
+                  <p v-else style="color: green;">{{ this.totalHours }}h / {{ workHours }}</p>
+                </div>
+                <div v-else>
+                  <p v-if="remainingHours > 0">{{ this.totalHoursHover }} / {{ workHours }}</p>
+                  <p v-else style="color: green;">{{ this.totalHoursHover }} / {{ workHours }}</p>
+                </div>
+              </div>
+            </v-row>
+          </div>
           <!-- Average Hours per Day -->
-          <v-row>
+          <v-row class="pt-3">
             Avg Hours/Day:
             <v-spacer></v-spacer>
             <div>
