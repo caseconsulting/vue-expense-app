@@ -319,7 +319,7 @@ function createExpenses(aggregatedData) {
       category: expense.category,
       createdAt: expense.createdAt,
       failed: false,
-      showOnFeed: false
+      showOnFeed: expense.showOnFeed
     };
   });
 } // createExpenses

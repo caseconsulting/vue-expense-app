@@ -753,7 +753,9 @@ async function created() {
       requiredFlag: expenseType.requiredFlag,
       recurringFlag: expenseType.recurringFlag,
       isInactive: expenseType.isInactive,
-      categories: expenseType.categories
+      categories: expenseType.categories,
+      accessibleBy: expenseType.accessibleBy,
+      hasRecipient: expenseType.hasRecipient
     };
   });
 
@@ -793,21 +795,21 @@ export default {
       employees: [], // employee autocomplete options
       employee: null, // employee autocomplete filter
       expense: {
-        id: null,
-        createdAt: null,
-        employeeId: null,
-        employeeName: null,
-        expenseTypeId: null,
-        budgetName: null,
-        category: null,
-        cost: null,
-        description: null,
+        id: '',
         purchaseDate: null,
         reimbursedDate: null,
         note: null,
-        receipt: null,
         url: null,
-        showOnFeed: null
+        createdAt: null,
+        reciept: null,
+        cost: '',
+        description: '',
+        employeeId: '',
+        expenseTypeId: '',
+        catagory: null,
+        showOnFeed: false,
+        employeeName: null,
+        budgetName: null
       }, // selected expense
       expenseTypes: [], // expense types
       filter: {

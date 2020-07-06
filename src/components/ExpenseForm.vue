@@ -567,7 +567,14 @@ function clearForm() {
   this.$refs.form.reset();
 
   this.$set(this.expense, 'id', null);
+  this.$set(this.expense, 'purchaseDate', null);
+  this.$set(this.expense, 'reimbursedDate', null);
+  this.$set(this.expense, 'note', null);
+  this.$set(this.expense, 'url', null);
   this.$set(this.expense, 'createdAt', null);
+  this.$set(this.expense, 'receipt', null);
+  this.$set(this.expense, 'cost', null);
+  this.$set(this.expense, 'description', null);
   if (this.asUser) {
     // creating or updating an expense as a user
     this.$set(this.expense, 'employeeId', this.userInfo.id);
@@ -579,13 +586,7 @@ function clearForm() {
   this.$set(this.expense, 'expenseTypeId', null);
   this.$set(this.expense, 'budgetName', null);
   this.$set(this.expense, 'category', null);
-  this.$set(this.expense, 'cost', null);
-  this.$set(this.expense, 'description', null);
-  this.$set(this.expense, 'purchaseDate', null);
-  this.$set(this.expense, 'reimbursedDate', null);
-  this.$set(this.expense, 'note', null);
-  this.$set(this.expense, 'receipt', null);
-  this.$set(this.expense, 'url', null);
+  this.$set(this.expense, 'showOnFeed', null);
 
   this.originalExpense = null;
   this.purchaseDateFormatted = null;

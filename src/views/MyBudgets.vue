@@ -639,17 +639,20 @@ export default {
       employee: {}, // employee
       expense: {
         id: '',
-        description: '',
-        cost: '',
-        note: null,
-        employeeId: '',
-        expenseTypeId: '',
         purchaseDate: null,
         reimbursedDate: null,
+        note: null,
+        url: null,
+        createdAt: null,
         reciept: null,
-        recipient: null,
-        employeeName: '',
-        budgetName: ''
+        cost: '',
+        description: '',
+        employeeId: '',
+        expenseTypeId: '',
+        catagory: null,
+        showOnFeed: false,
+        employeeName: null,
+        budgetName: null
       }, // expense for the expense form
       expenseTypeData: [], // aggregated budgets for expense types
       fiscalDateView: '', // current budget year view by anniversary day
