@@ -54,6 +54,17 @@
             <v-btn @click="showMore = true" top text small class="my-2">Show More &#9662; </v-btn>
           </template>
           <div v-if="showMore" max-width="400">
+            <!-- Hours left this month -->
+            <v-row>
+              Remaining:
+              <v-spacer></v-spacer>
+              <div>
+                <div @mouseover="decimal = !decimal" @mouseleave="decimal = !decimal">
+                  <p v-if="decimal">{{ this.remainingHours }}h</p>
+                  <p v-else>{{ this.remainingHoursHover }}</p>
+                </div>
+              </div>
+            </v-row>
             <!-- Hours worked this month -->
             <v-row>
               Completed:
@@ -110,17 +121,6 @@
                       <p v-else style="color: green;">{{ this.futureHoursHover }}</p>
                     </div>
                   </div>
-                </div>
-              </div>
-            </v-row>
-            <!-- Hours left this month -->
-            <v-row>
-              Remaining:
-              <v-spacer></v-spacer>
-              <div>
-                <div @mouseover="decimal = !decimal" @mouseleave="decimal = !decimal">
-                  <p v-if="decimal">{{ this.remainingHours }}h</p>
-                  <p v-else>{{ this.remainingHoursHover }}</p>
                 </div>
               </div>
             </v-row>
