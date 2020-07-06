@@ -1,6 +1,7 @@
 <template>
   <div id="monthly-charges">
-    <h3>Hours for {{ month }} {{ year }}
+    <h3>
+      Hours for {{ month }} {{ year }}
       <v-icon class="pb-1" @click="showInfo = true">info</v-icon>
     </h3>
     <v-card-text>
