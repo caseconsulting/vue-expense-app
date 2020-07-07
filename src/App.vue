@@ -17,9 +17,14 @@
         <v-avatar size="40" color="grey lighten-4" class="mr-2">
           <img src="@/assets/img/case-logo-circle.png" class="logo-bar" />
         </v-avatar>
-        <v-toolbar-title>
+        <v-toolbar-title v-show="!isMobile">
           <h1 class="d-inline" style="text-align: center;">Case Portal</h1>
         </v-toolbar-title>
+        <!-- In Mobile View decrease title size-->
+        <h1 v-show="isMobile" class="font-25" style="text-align: center;">
+          Case Portal
+        </h1>
+
         <v-spacer></v-spacer>
         <!-- Display social media icons and links dropdown menu -->
         <v-item-group class="hidden-sm-and-down" v-show="isLoggedIn() && !isMobile">
@@ -28,7 +33,7 @@
               <v-btn top text small class="my-2" v-bind="attrs" v-on="on">Links &#9662; </v-btn>
             </template>
 
-            <v-list class="scrollLink">
+            <v-list>
               <v-list-item v-for="(l, index) in links" :key="index" :href="l.link" target="_blank">
                 <v-list-item-title>{{ l.name }}</v-list-item-title>
               </v-list-item>
@@ -51,22 +56,27 @@
         <v-item-group class="hidden-md-and-up" v-show="isLoggedIn() | isMobile">
           <v-menu open-on-hover offset-y>
             <template v-slot:activator="{ on, attrs }">
-              <v-btn top text small class="my-2" v-bind="attrs" v-on="on">Links &#9662; </v-btn>
+              <v-btn top text small class="my-2" v-bind="attrs" v-on="on">
+                <v-icon color="white">menu</v-icon>
+              </v-btn>
             </template>
 
             <v-list class="scrollLink">
               <v-list-item v-for="(l, index) in links" :key="index" :href="l.link" target="_blank">
                 <v-list-item-title>{{ l.name }}</v-list-item-title>
               </v-list-item>
-              <v-list-item
-                class="mx-auto white--text"
-                v-for="link in mediaLinks"
-                :key="link.name"
-                :href="link.link"
-                icon
-                target="_blank"
-              >
+              <hr
+                role="separator"
+                aria-orientation="horizontal"
+                class="v-divider theme--light"
+                :inset="inset"
+                vertical
+              />
+              <div class="v-subheader theme--light">Social</div>
+              <v-list-item v-for="link in mediaLinks" :key="link.name" :href="link.link" icon target="_blank">
                 <icon :name="link.icon"></icon>
+                <span class="mr-2"> </span>
+                <v-list-item-title> {{ ( link.name) }}</v-list-item-title>
               </v-list-item>
             </v-list>
           </v-menu>
@@ -199,6 +209,7 @@ async function created() {
 export default {
   data: () => ({
     drawer: isLoggedIn(),
+    inset: false,
     profilePic: 'src/assets/img/logo-big.png',
     hasBeenLoggedInBefore: false,
     timedOut: false,
@@ -213,10 +224,10 @@ export default {
       { name: 'ADP', link: 'https://www.adp.com/' }
     ],
     mediaLinks: [
-      { name: 'github', link: 'https://github.com/caseconsulting', icon: 'brands/github' },
-      { name: 'linkedIn', link: 'https://linkedin.com/company/case-consulting-inc', icon: 'brands/linkedin' },
-      { name: 'youtube', link: 'https://www.youtube.com/channel/UC_oJY4OrOpLNrIBAN7Y-9fA', icon: 'brands/youtube' },
-      { name: 'twitter', link: 'https://twitter.com/consultwithcase?lang=en', icon: 'brands/twitter' },
+      { name: 'Github', link: 'https://github.com/caseconsulting', icon: 'brands/github' },
+      { name: 'LinkedIn', link: 'https://linkedin.com/company/case-consulting-inc', icon: 'brands/linkedin' },
+      { name: 'Youtube', link: 'https://www.youtube.com/channel/UC_oJY4OrOpLNrIBAN7Y-9fA', icon: 'brands/youtube' },
+      { name: 'Twitter', link: 'https://twitter.com/consultwithcase?lang=en', icon: 'brands/twitter' },
       { name: 'Facebook', link: 'https://www.facebook.com/ConsultwithCase/', icon: 'brands/facebook' }
     ]
   }),
@@ -314,8 +325,8 @@ export default {
 }
 
 .scrollLink {
-  width: 130px;
-  max-height: 190px;
+  width: 150px;
+  max-height: 300px;
   overflow-y: scroll;
 }
 
