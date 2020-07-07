@@ -23,10 +23,10 @@
               </v-row>
             </div>
             <div v-else>
-              <v-row v-for="job in jobHoursHover" :key="job.name">
+              <v-row v-for="job in jobHours" :key="job.name">
                 {{ job.name }}:
                 <v-spacer></v-spacer>
-                <p @mouseleave="decimal = !decimal">{{ job.hours }}</p>
+                <p @mouseleave="decimal = !decimal">{{ job.hours | decimalToTime }}</p>
               </v-row>
             </div>
             <v-row class="bold">
@@ -38,8 +38,8 @@
                   <p v-else style="color: green;">{{ this.totalHours }}h / {{ workHours }}</p>
                 </div>
                 <div v-else>
-                  <p v-if="remainingHours > 0">{{ this.totalHoursHover }} / {{ workHours }}</p>
-                  <p v-else style="color: green;">{{ this.totalHoursHover }} / {{ workHours }}</p>
+                  <p v-if="remainingHours > 0">{{ this.totalHours | decimalToTime }} / {{ workHours }}</p>
+                  <p v-else style="color: green;">{{ this.totalHours | decimalToTime }} / {{ workHours }}</p>
                 </div>
               </div>
             </v-row>
@@ -51,7 +51,7 @@
             <div>
               <div @mouseover="decimal = !decimal" @mouseleave="decimal = !decimal">
                 <p v-if="decimal">{{ this.estimatedDailyHours }}h</p>
-                <p v-else>{{ this.estimatedDailyHoursHover }}</p>
+                <p v-else>{{ this.estimatedDailyHours | decimalToTime }}</p>
               </div>
             </div>
           </v-row>
@@ -66,7 +66,7 @@
               <div>
                 <div @mouseover="decimal = !decimal" @mouseleave="decimal = !decimal">
                   <p v-if="decimal">{{ this.remainingHours }}h</p>
-                  <p v-else>{{ this.remainingHoursHover }}</p>
+                  <p v-else>{{ this.remainingHours | decimalToTime }}</p>
                 </div>
               </div>
             </v-row>
@@ -84,9 +84,9 @@
                   </div>
                   <div v-else>
                     <p v-if="this.workedHours < this.workHoursNumber - 8 * this.remainingWorkDays">
-                      {{ this.workedHoursHover }}
+                      {{ this.workedHours | decimalToTime }}
                     </p>
-                    <p v-else style="color: green;">{{ this.workedHoursHover }}</p>
+                    <p v-else style="color: green;">{{ this.workedHours | decimalToTime }}</p>
                   </div>
                 </div>
               </div>
@@ -102,8 +102,8 @@
                     <p v-else style="color: green;">{{ this.todaysHours }}h</p>
                   </div>
                   <div v-else>
-                    <p v-if="this.todaysHours < 8">{{ this.todaysHoursHover }}</p>
-                    <p v-else style="color: green;">{{ this.todaysHoursHover }}</p>
+                    <p v-if="this.todaysHours < 8">{{ this.todaysHours | decimalToTime }}</p>
+                    <p v-else style="color: green;">{{ this.todaysHours | decimalToTime }}</p>
                   </div>
                 </div>
               </div>
@@ -121,9 +121,9 @@
                   <div v-else>
                     <div>
                       <p v-if="this.futureHours < 8 * (this.remainingWorkDays - 1)">
-                        {{ this.futureHoursHover }}
+                        {{ this.futureHours | decimalToTime }}
                       </p>
-                      <p v-else style="color: green;">{{ this.futureHoursHover }}</p>
+                      <p v-else style="color: green;">{{ this.futureHours | decimalToTime }}</p>
                     </div>
                   </div>
                 </div>
@@ -199,38 +199,6 @@ function jobHours() {
   ]);
   return jobHours;
 } // jobHours
-/**
- * Sets the total cost per each expense type.
- *
- * @return Array - expense type and each total
- */
-function jobHoursHover() {
-  let jobHoursHover = [];
-  let allTimeSheets = _.union(this.previousTimeSheets, this.todaysTimeSheets, this.futureTimeSheets);
-  jobHoursHover = _.map(allTimeSheets, (item) => {
-    return {
-      name: item.jobcode,
-      hours: 0
-    };
-  });
-  jobHoursHover = _.uniqWith(jobHoursHover, _.isEqual);
-  _.forEach(allTimeSheets, (hours) => {
-    _.forEach(jobHoursHover, (total) => {
-      if (total.name === hours.jobcode) {
-        total.hours += hours.duration;
-      }
-    });
-  });
-  _.forEach(jobHoursHover, (total) => {
-    total.hours = decimalToTime(total.hours);
-  });
-  jobHoursHover = _.sortBy(jobHoursHover, [
-    function (job) {
-      return job.name.toLowerCase();
-    }
-  ]);
-  return jobHoursHover;
-} // jobHoursHover
 function remainingWorkDays() {
   let remainingWorkDays = 0;
   let day = moment();
@@ -298,16 +266,10 @@ async function created() {
     });
   }
   this.totalHours = this.workedHours + this.todaysHours + this.futureHours;
-  this.totalHoursHover = decimalToTime(this.totalHours);
   this.workHoursNumber = this.workHours.substring(0, this.workHours.length - 1);
   this.remainingHours = this.workHoursNumber - this.totalHours;
   this.userWorkDays = this.remainingWorkDays;
   this.estimatedDailyHours = this.remainingHours / this.userWorkDays;
-  this.estimatedDailyHoursHover = decimalToTime(this.estimatedDailyHours);
-  this.workedHoursHover = decimalToTime(this.workedHours);
-  this.remainingHoursHover = decimalToTime(this.remainingHours);
-  this.todaysHoursHover = decimalToTime(this.todaysHours);
-  this.futureHoursHover = decimalToTime(this.futureHours);
   this.estimatedDailyHours = roundHours(this.estimatedDailyHours);
   this.workedHours = roundHours(this.workedHours);
   this.todaysHours = roundHours(this.todaysHours);
@@ -322,12 +284,25 @@ async function created() {
 // |                                                  |
 // |--------------------------------------------------|
 /**
+ * Rounds hours to 2 decimal places.
+ * @param hours the decimal number of hours
+ */
+function roundHours(hours) {
+  hours = hours.toFixed(2);
+  return hours;
+} // roundHours
+// |--------------------------------------------------|
+// |                                                  |
+// |                     FILTERS                      |
+// |                                                  |
+// |--------------------------------------------------|
+/**
  * Convert decimal number into hours and minutes.
  * @param hours the decimal number of hours
  */
 function decimalToTime(hours) {
   var hrs = parseInt(Number(hours));
-  var min = Math.ceil((Number(hours) - hrs) * 60);
+  var min = Math.round((Number(hours) - hrs) * 60);
   if (min == 60) {
     min = 0;
     hrs++;
@@ -335,25 +310,6 @@ function decimalToTime(hours) {
   hours = hrs + 'h ' + min + 'm';
   return hours;
 } // decimalToTime
-/**
- * Rounds hours to 2 decimal places.
- * @param hours the decimal number of hours
- */
-function roundHours(hours) {
-  hours = hours.toFixed(2);
-  return hours;
-} // decimalToTime
-/**
- * Convert time in hours and minutes into a decimal number of hours.
- * @param time the time in __h __m
- */
-function timeToDecimal(time) {
-  let words = time.split(' ');
-  var hrs = parseInt(Number(words[0].substring(0, words[0].length - 1)));
-  var min = parseInt(Number(words[1].substring(0, words[1].length - 1)));
-  time = hrs + min / 60.0;
-  return time;
-} // timeToDecimal
 // |--------------------------------------------------|
 // |                                                  |
 // |                      EXPORT                      |
@@ -362,7 +318,6 @@ function timeToDecimal(time) {
 export default {
   computed: {
     jobHours,
-    jobHoursHover,
     remainingWorkDays,
     workHours
   },
@@ -372,37 +327,32 @@ export default {
       decimal: true,
       employee: {},
       estimatedDailyHours: 0,
-      estimatedDailyHoursHover: '',
       futureHours: 0,
-      futureHoursHover: '',
       futureTimeSheets: [],
       loading: false,
       month: '',
       monthlyMin: 0,
       previousTimeSheets: [],
       remainingHours: 0,
-      remainingHoursHover: '',
       showInfo: false,
       showMore: false,
       todaysHours: 0,
-      todaysHoursHover: '',
       todaysTimeSheets: [],
       totalHours: 0,
-      totalHoursHover: '',
       userWorkDays: 0,
       workedHours: 0,
-      workedHoursHover: '',
       workHoursNumber: 0,
       year: ''
     };
+  },
+  filters: {
+    decimalToTime
   },
   methods: {
     updateEstimate: function (event) {
       if (event.target.value > 0) {
         this.userWorkDays = event.target.value;
-        this.estimatedDailyHours = timeToDecimal(this.remainingHoursHover) / this.userWorkDays;
         this.estimatedDailyHours = roundHours(this.estimatedDailyHours);
-        this.estimatedDailyHoursHover = decimalToTime(this.estimatedDailyHours);
       }
     }
   }
