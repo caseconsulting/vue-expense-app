@@ -82,10 +82,7 @@
  */
 function calcRemaining(budget) {
   if (budget.budgetObject) {
-    return Math.max(
-      budget.budgetObject.amount - budget.budgetObject.pendingAmount - budget.budgetObject.reimbursedAmount,
-      0
-    );
+    return budget.budgetObject.amount - budget.budgetObject.pendingAmount - budget.budgetObject.reimbursedAmount;
   }
   return 0;
 } // calcRemaining
@@ -139,7 +136,7 @@ function odFlagMessage(expenseType) {
  * @return boolean - budget has no remaining budget
  */
 function noRemaining(budget) {
-  return this.calcRemaining(budget) <= 0 && !budget.odFlag;
+  return this.calcRemaining(budget) <= 0;
 } // noRemaining
 
 // |--------------------------------------------------|
