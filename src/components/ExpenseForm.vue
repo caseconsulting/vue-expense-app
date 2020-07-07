@@ -191,6 +191,14 @@
           :disabled="isInactive"
         ></v-text-field>
 
+        <!-- Show On Feed -->
+        <v-switch
+          v-if="isAdmin"
+          v-model="expense.showOnFeed"
+          label="Have expense show on company feed?"
+          :disabled="disableShowOnFeed()"
+        ></v-switch>
+
         <!-- Buttons -->
         <!-- Cancel Button -->
         <v-btn color="white" @click="clearForm" class="ma-2" :disabled="isInactive">
@@ -887,7 +895,6 @@ function isDifferentExpenseType() {
 
 /**
  * Checks if a value is empty. Returns true if the value is null or a single character space String.
- *
  * @param value - value to check
  * @return boolean - value is empty
  */
@@ -1034,6 +1041,42 @@ async function updateExistingEntry() {
     }
   }
 } // updateExistingEntry
+
+/**
+ * Function for handling if the showOnFeed switch is disabled
+ *
+ * @return boolean - showOn feed is disabled
+ */
+function disableShowOnFeed() {
+  // if high five or training set to true and disable
+  let selected = _.find(this.expenseTypes, (expenseType) => {
+    return expenseType.value === this.expense.expenseTypeId;
+  });
+
+  if (selected) {
+    if (selected.budgetName === 'High Five' || selected.budgetName === 'Training') {
+      this.undisabledSOF = false;
+      this.expense.showOnFeed = true;
+      return true;
+    } else if (
+      this.expense.reimbursedDate == '' ||
+      this.expense.reimbursedDate == null ||
+      typeof this.expense.reimbursedDate == 'undefined'
+    ) {
+      this.undisabledSOF = false;
+      this.expense.showOnFeed = false;
+      return true;
+    }
+    // console.log(this.expense.showOnFeed);
+    this.undisabledSOF = true;
+    return false;
+  } else {
+    // console.log(this.expense.showOnFeed);
+    this.undisabledSOF = false;
+    this.expense.showOnFeed = false;
+    return true;
+  }
+}
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -1223,7 +1266,8 @@ export default {
           'URL must be valid. Only http(s) are accepted.'
       ], // rules for training url
       userInfo: {}, // user info
-      valid: false // form validity
+      valid: false, // form validity
+      undisabledSOF: false // control disable of showonfeed switch
     };
   },
   methods: {
@@ -1249,7 +1293,8 @@ export default {
     parseDate,
     submit,
     setFile,
-    updateExistingEntry
+    updateExistingEntry,
+    disableShowOnFeed
   },
   props: [
     'expense', // expense to be created/updated
@@ -1323,6 +1368,11 @@ export default {
       //fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
       if (this.expense.reimbursedDate !== null && !this.formatDate(this.expense.reimbursedDate)) {
         this.expense.reimbursedDate = null;
+      }
+    },
+    undisabledSOF: function () {
+      if (!this.expense.showOnFeed && this.undisabledSOF == true) {
+        this.expense.showOnFeed = false;
       }
     }
   }
