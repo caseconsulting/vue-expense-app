@@ -210,7 +210,12 @@
         </v-btn>
         <!-- End Buttons -->
       </v-form>
-      <confirmation-box :activate="confirming" :expense="expense"></confirmation-box>
+      <confirmation-box
+        :isCovered="isCovered"
+        :isOverCovered="isOverCovered"
+        :activate="confirming"
+        :expense="expense"
+      ></confirmation-box>
     </v-container>
   </v-card>
 </template>
@@ -453,9 +458,44 @@ async function checkCoverage() {
         //    decimal place, then fails validation
         // -- remove commas from the input
         let cost = parseFloat(this.expense.cost);
-        this.$set(this.expense, 'cost', this.expense.cost);
+
+        //I used this comment to help me understand this function and the chnages I needed to make. I'm leaving it for posterity
+
+        /**
+         * Threshold 1 initial buget e.g. Training 3600
+         * Threshold 2 Overdraft budget e.g. Training 7200
+         *
+         * Branch 1:
+         *  1.1: User has previous expenses for this budget
+         *    Branch 2:
+         *      2.1: User is Full time and budget has overdraft
+         *        Branch 3:
+         *          3.1: User begins under initial budget
+         *            Branch 4:
+         *              4.1: user stays under initial budget after applying new expense
+         *              4.2: user passes into overdraft budget after applying new expense -- SHOW confirmationBox
+         *              4.3: user passes over initial and overdraft budget -- SHOW confirmationBox
+         *          3.2: User begins over initial budget and is in overdraft budget
+         *            Branch 5:
+         *              5.1: user stays under overdraft budget --- SHOW confirmationBox
+         *              5.2: user goes over overdraft budget -- SHOW confirmationBox
+         *          3.3: This budget is already maxed out
+         *      2.2: User in not full time or budget does not have overdraft
+         *        Branch 6:
+         *          6.1: user starts under initial budget
+         *            Branch 7:
+         *              7.1: User stays within budget once new expense is added
+         *              7.2: User goes overbudget -- SHOW confirmationBox
+         *          6.2: budget is maxed out
+         *  1.2: User does not have previous expenses
+         *    BRANCH 8:
+         *      8.1: User is Full time and budget has overdraft
+         *        See Branch 3.1
+         *      8.2: User in not full time or budget does not have overdraft
+         *        See Branch 6.1
+         */
         if (budget) {
-          // if the matching budget exists
+          // BRANCH 1.1 if the matching budget exists
           let committedAmount = budget.pendingAmount + budget.reimbursedAmount;
           let allExpenses = await api.getAllAggregateExpenses();
           let match = _.find(allExpenses, (entry) => {
@@ -468,62 +508,104 @@ async function checkCoverage() {
             newCommittedAmount = committedAmount;
           }
           if (expenseType.odFlag && this.isFullTime(this.employee)) {
-            // selected expense type allows overdraft and employee is full time
-            if (2 * expenseType.budget > newCommittedAmount) {
-              // under budget
-              if (newCommittedAmount + cost <= 2 * expenseType.budget) {
-                // full amount reimbursed
+            // BRANCH 2.1 selected expense type allows overdraft and employee is full time
+            if (expenseType.budget > newCommittedAmount) {
+              //BRANCH 3.1 under initial budget (not including overdraft)
+              if (newCommittedAmount + cost <= expenseType.budget) {
+                // BRANCH 4.1 under initial budget and not going into overdraft after applying expense
                 this.submit();
+              } else if (newCommittedAmount + cost <= 2 * expenseType.budget) {
+                // BRANCH 4.2 goes over initial budget with new expense but stays below overdraft budget
+                this.$set(this.expense, 'budget', expenseType.budget);
+                this.$set(this.expense, 'remaining', expenseType.budget - newCommittedAmount);
+                this.$set(this.expense, 'od', true);
+                this.isCovered = true;
+                this.isOverCovered = false;
+                this.confirming = true;
               } else {
-                // budget not maxed out but expense not fully covered. Show adusted confirmation dialog
+                // BRANCH 4.3 goes over overdraft budget completely
                 this.$set(this.expense, 'budget', expenseType.budget);
                 this.$set(this.expense, 'remaining', 2 * expenseType.budget - newCommittedAmount);
                 this.$set(this.expense, 'od', true);
+                this.isCovered = false;
+                this.isOverCovered = false;
+                this.confirming = true;
+              }
+            } else if (2 * expenseType.budget > newCommittedAmount) {
+              // BRANCH 3.2 under overdraft budget -- expense is able to be made
+              if (newCommittedAmount + cost <= 2 * expenseType.budget) {
+                // BRANCH 5.1 above initial budget but below overdraft budget TODO: add condirmation box handling? new flag?
+                this.$set(this.expense, 'budget', expenseType.budget);
+                this.$set(this.expense, 'remaining', 2 * expenseType.budget - newCommittedAmount);
+                this.$set(this.expense, 'od', true);
+                this.isCovered = true;
+                this.isOverCovered = true;
+                this.confirming = true;
+              } else {
+                // BRANCH 5.2 budget not maxed out before this expense (going over overdraft) but expense not fully covered. Show adusted confirmation dialog
+                this.$set(this.expense, 'budget', expenseType.budget);
+                this.$set(this.expense, 'remaining', 2 * expenseType.budget - newCommittedAmount);
+                this.$set(this.expense, 'od', true);
+                this.isCovered = false;
+                this.isOverCovered = false;
                 this.confirming = true;
               }
             } else {
-              // budget is already maxed out for overdraft
+              // BRANCH 3.3 budget is already maxed out for overdraft expense can't be made
               this.$emit('error', 'Budget is maxed out');
               this.loading = false; // set loading status to false
               this.$emit('endAction');
             }
           } else {
-            // selected expense type does not allow overdraft or employee is not full time
+            // BRANCH 2.2 selected expense type does not allow overdraft or employee is not full time
             this.$set(this.expense, 'od', false);
             if (newCommittedAmount < budget.amount) {
-              // currently under budget
+              // BRANCH 6.1 starts under initial budget
               if (newCommittedAmount + cost < budget.amount) {
+                // BRANCH 7.1 doesnt go over budget
                 // reimburse the full expense
                 this.submit();
               } else {
-                // budget not maxed out but the expense not fully covered
+                // BRANCH 7.2 goes over budget
                 this.$set(this.expense, 'budget', budget.amount);
                 this.$set(this.expense, 'remaining', budget.amount - newCommittedAmount);
+                this.isCovered = false;
+                this.isOverCovered = false;
                 this.confirming = true;
               }
             } else {
-              // budget is maxed out
+              // BRANCH 6.2 budget is maxed out
               this.$emit('error', `${expenseType.budgetName} budget is maxed out`);
               this.loading = false; // set loading status to false
               this.$emit('endAction');
             }
           }
         } else {
-          // budget for this expense does not exist
+          // BRANCH 1.2 budget for this expense does not exist
           if (expenseType.odFlag && this.isFullTime(this.employee)) {
-            // selected expense type allows overdraft and employee is full time
-            if (cost <= 2 * expenseType.budget) {
+            // Branch 8.1 selected expense type allows overdraft and employee is full time
+            if (cost <= expenseType.budget) {
               // full amount reimbursed
               this.submit();
+            } else if (cost <= 2 * expenseType.budget) {
+              // the expense goes into overdraft but fully covered
+              this.$set(this.expense, 'budget', expenseType.budget);
+              this.$set(this.expense, 'remaining', expenseType.budget);
+              this.$set(this.expense, 'od', true);
+              this.isCovered = true;
+              this.isOverCovered = false;
+              this.confirming = true;
             } else {
-              // budget not maxed out but the expense not fully covered
+              // expense goes past overdraft budget completely and is partially covered
               this.$set(this.expense, 'budget', expenseType.budget);
               this.$set(this.expense, 'remaining', 2 * expenseType.budget);
               this.$set(this.expense, 'od', true);
+              this.isCovered = false;
+              this.isOverCovered = false;
               this.confirming = true;
             }
           } else {
-            // selected expense type does not allow overdraft or employee is not full time
+            // BRANCH 8.2 selected expense type does not allow overdraft or employee is not full time
             this.$set(this.expense, 'od', false);
             // calculate adjusted budget amount based on employee's current work status
             let adjustedBudget = this.calcAdjustedBudget(this.employee, expenseType);
@@ -534,6 +616,8 @@ async function checkCoverage() {
               // expense exceeds the budget but the expense not fully covered
               this.$set(this.expense, 'budget', adjustedBudget);
               this.$set(this.expense, 'remaining', adjustedBudget);
+              this.isCovered = false;
+              this.isOverCovered = false;
               this.confirming = true;
             }
           }
@@ -858,7 +942,6 @@ async function setFile(file) {
     this.file = file;
     this.$set(this.expense, 'receipt', file.name);
     this.receiptText = await api.extractText(file);
-    // console.log(this.receiptText);
   } else {
     this.file = null;
     this.receipt = null;
@@ -1018,7 +1101,6 @@ async function created() {
       return employee.text;
     })
   );
-  console.log(this.highFiveRecipients);
   // set aggregate expense types
   let expenseTypes = await api.getItems(api.EXPENSE_TYPES);
   this.expenseTypes = _.map(expenseTypes, (expenseType) => {
@@ -1111,6 +1193,8 @@ export default {
       hint: '', // form hints
       highFiveRecipients: [], // list of active employees to choose for high five
       isInactive: false, // employee is inactive
+      isCovered: false,
+      isOverCovered: false,
       loading: false, // loading
       purchaseMenu: false, // display purchase menu
       reimburseMenu: false, // display reimburse menu
@@ -1176,8 +1260,6 @@ export default {
       //watches admin accessible employee field to know who can be a recipient
       this.highFiveRecipients = _.compact(
         this.activeEmployees.map((employee) => {
-          // console.log(this.expense.employeeId);
-          // console.log(employee.value);
           if (
             employee.value == this.userInfo.id || //current value is the user
             employee.workStatus == 0 || //value isn't an invalid employee
