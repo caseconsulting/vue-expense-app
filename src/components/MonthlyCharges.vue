@@ -334,11 +334,7 @@ export default {
       monthlyMin: 0,
       previousTimeSheets: [],
       remainingHours: 0,
-<<<<<<< HEAD
-      showInfo: false,
-=======
       remainingHoursHover: '',
->>>>>>> 1099-more-info-about-hours: link icon to help page
       showMore: false,
       todaysHours: 0,
       todaysTimeSheets: [],
