@@ -67,6 +67,29 @@ export default {
     return {
       role: '', // employee role
       sections: {
+        tsheetsHours: [
+          'Hours',
+          'user',
+          {
+            title: 'What information is displayed in the box?',
+            body: 'Hours worked for each job ending with the total hours for the month at the bottom in bold.'
+          },
+          {
+            title: 'How is the Avg Hours/Day calculated?',
+            body:
+              'The average number of hours to work each day for the work days left in the month to reach the minimum. This can be changed by editing the Days Remaining.'
+          },
+          {
+            title: 'What hours fall under Completed, Today, and Futute?',
+            body:
+              "Completed hours are any hours logged in TSheets from the first day of the month through the end of the day yesterday. Today's hours are any hours logged in TSheet at any point today. Future hours are any hours logged in TSheets between the beginning of the day tomorrow and the last day of the month."
+          },
+          {
+            title: 'How can I edit Days Remaining?',
+            body:
+              'Once you click on the number of Days Remaining on the right hand side you will be able to edit this number using your keyboard.'
+          }
+        ],
         employeeHome: [
           'My Budgets',
           'user',
@@ -89,25 +112,6 @@ export default {
           {
             title: 'What is overdraft?',
             body: 'This indicates whether expenses can be assigned to the budget for next year'
-          }
-        ],
-        forAdmins: [
-          'For Admins',
-          'admin',
-          {
-            title: 'What capabilities do Admins have?',
-            body:
-              "Admins may view reimbursements, reimburse expenses, and create expense types, view each employee's budget home view, create new employees, and create expenses for other employees"
-          },
-          {
-            title: 'How do I reimburse an expense?',
-            body:
-              'Go to Reimbursements and select the expenses that you would like to reimburse by clicking the select box either on a row (to select all expenses for that employee under that expense type) or on each of their individual expenses. Next select the $ icon at the bottom left of the page and then confirm the reimbursement.'
-          },
-          {
-            title: 'What are categories?',
-            body:
-              'Admins may create up to 10 different categories for employees to choose from when submitting and expense. Categories are unique to each expense type and users will be required to select one category if the expense type has them. '
           }
         ],
         expenses: [
@@ -178,6 +182,25 @@ export default {
             title: 'What are the employee access options for expense types?',
             body:
               'Expense types accessible by All will provide all employees access to a prorated budget based on their work status. Expense types accessible by Full will provide both full time and part time employees will access to 100% of the budget. Expense types accessible by Full Time will provide only full time employees with access to the budget. Expense types accessible by Custom will provide the selected employees access to a prorated budget based on their work status.'
+          }
+        ],
+        forAdmins: [
+          'For Admins',
+          'admin',
+          {
+            title: 'What capabilities do Admins have?',
+            body:
+              "Admins may view reimbursements, reimburse expenses, and create expense types, view each employee's budget home view, create new employees, and create expenses for other employees"
+          },
+          {
+            title: 'How do I reimburse an expense?',
+            body:
+              'Go to Reimbursements and select the expenses that you would like to reimburse by clicking the select box either on a row (to select all expenses for that employee under that expense type) or on each of their individual expenses. Next select the $ icon at the bottom left of the page and then confirm the reimbursement.'
+          },
+          {
+            title: 'What are categories?',
+            body:
+              'Admins may create up to 10 different categories for employees to choose from when submitting and expense. Categories are unique to each expense type and users will be required to select one category if the expense type has them. '
           }
         ],
         employees: [

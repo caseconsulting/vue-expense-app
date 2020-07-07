@@ -2,7 +2,7 @@
   <div id="monthly-charges">
     <h3>
       Hours for {{ month }} {{ year }}
-      <v-icon class="pb-1" @click="showInfo = true">info</v-icon>
+      <router-link to="/help" tag="v-icon">info</router-link>
     </h3>
     <v-card-text>
       <div v-if="this.loading" class="pb-4">
@@ -154,59 +154,6 @@
         </div>
       </div>
     </v-card-text>
-    <v-dialog v-model="showInfo" max-width="400">
-      <v-toolbar color="#565651" dark>
-        <v-toolbar-title>More Info</v-toolbar-title>
-      </v-toolbar>
-      <v-divider></v-divider>
-      <v-expansion-panels style="font-size: 13px;" dense accordion>
-        <v-expansion-panel>
-          <v-expansion-panel-header>Box</v-expansion-panel-header>
-          <v-expansion-panel-content
-            >Hours works for each job ending with the total hours for the month at the
-            bottom.</v-expansion-panel-content
-          >
-        </v-expansion-panel>
-        <v-expansion-panel>
-          <v-expansion-panel-header>Avg Hours/Day</v-expansion-panel-header>
-          <v-expansion-panel-content
-            >The average number of hours to work each day for the work days left in the month to reach the minimum. This
-            can be changed by editing the Days Remaining.</v-expansion-panel-content
-          >
-        </v-expansion-panel>
-        <v-expansion-panel>
-          <v-expansion-panel-header>Remaining</v-expansion-panel-header>
-          <v-expansion-panel-content
-            >The number of hours left to reach the minimum for the month.</v-expansion-panel-content
-          >
-        </v-expansion-panel>
-        <v-expansion-panel>
-          <v-expansion-panel-header>Completed</v-expansion-panel-header>
-          <v-expansion-panel-content
-            >Any hours logged in TSheets from the first day of the month through the end of the day
-            yesterday.</v-expansion-panel-content
-          >
-        </v-expansion-panel>
-        <v-expansion-panel>
-          <v-expansion-panel-header>Today</v-expansion-panel-header>
-          <v-expansion-panel-content>Any hours logged in TSheet at any point today.</v-expansion-panel-content>
-        </v-expansion-panel>
-        <v-expansion-panel>
-          <v-expansion-panel-header>Future</v-expansion-panel-header>
-          <v-expansion-panel-content
-            >Any hours logged in TSheets between the beginning of the day tomorrow and the last day of the
-            month.</v-expansion-panel-content
-          >
-        </v-expansion-panel>
-        <v-expansion-panel>
-          <v-expansion-panel-header>Days Remaining</v-expansion-panel-header>
-          <v-expansion-panel-content
-            >The number of work days left in the month. This number is editable to be able to change the Avg Hours/Day
-            based on the Days Remaining.</v-expansion-panel-content
-          >
-        </v-expansion-panel>
-      </v-expansion-panels>
-    </v-dialog>
   </div>
 </template>
 
@@ -387,7 +334,11 @@ export default {
       monthlyMin: 0,
       previousTimeSheets: [],
       remainingHours: 0,
+<<<<<<< HEAD
       showInfo: false,
+=======
+      remainingHoursHover: '',
+>>>>>>> 1099-more-info-about-hours: link icon to help page
       showMore: false,
       todaysHours: 0,
       todaysTimeSheets: [],
