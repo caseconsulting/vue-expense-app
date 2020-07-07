@@ -8,7 +8,8 @@
         </v-row>
       </v-flex>
       <!-- Anniversary Date -->
-      <v-flex lg4>
+
+      <v-flex lg6 class="pa-4">
         <v-flex>
           <v-card>
             <v-card-title>
