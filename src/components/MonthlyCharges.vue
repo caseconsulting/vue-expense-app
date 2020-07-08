@@ -352,6 +352,7 @@ export default {
     updateEstimate: function (event) {
       if (event.target.value > 0) {
         this.userWorkDays = event.target.value;
+        this.estimatedDailyHours = this.remainingHours / this.userWorkDays;
         this.estimatedDailyHours = roundHours(this.estimatedDailyHours);
       }
     }
