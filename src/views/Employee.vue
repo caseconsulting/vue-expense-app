@@ -6,6 +6,10 @@
         <v-card>
           <v-card-text>
             <div class="expandedInfo">
+              <p v-if="userIsAdmin()">
+                <b>Status: </b>
+                {{ getWorkStatus(this.model.workStatus) }}
+              </p>
               <p v-if="!isEmpty(this.model.prime)"><b>Prime: </b> {{ this.model.prime }}</p>
               <p v-if="!isEmpty(this.model.contract)"><b>Contract: </b>{{ this.model.contract }}</p>
               <p v-if="!isEmpty(this.model.jobRole)"><b>Job Role: </b>{{ this.model.jobRole }}</p>
@@ -115,7 +119,22 @@ async function getEmployee() {
   // this.model = await api.getItem(api.EMPLOYEES, this.$route.params.id); // get employee
 
   this.loading = false; // set loading status to false
-} // refreshEmployees
+} // getEmployees
+
+/**
+ * Returns Full Time, Part Time, or Inactive based on the work status
+ */
+function getWorkStatus(workStatus) {
+  if (workStatus == 100) {
+    return 'Full Time';
+  } else if (workStatus == 0) {
+    return 'Inactive';
+  } else if (workStatus > 0 && workStatus < 100) {
+    return `Part Time (${workStatus}%)`;
+  } else {
+    return 'Invalid Status';
+  }
+} // getWorkStatus
 
 /**
  * Checks to see if the user is an admin. Returns true if the user's role is an admin, otherwise returns false.
@@ -211,6 +230,7 @@ export default {
     isDisplayData,
     isEmpty,
     getEmployee,
+    getWorkStatus,
     userIsAdmin
   }
 };
