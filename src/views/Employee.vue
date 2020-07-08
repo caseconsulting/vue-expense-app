@@ -4,49 +4,46 @@
       <!-- Expanded slot in datatable -->
       <template>
         <v-card>
-          <!-- <v-card-text>
-            <div class="expandedInfo" v-if="isDisplayData(item)">
-              <p>No additional data</p>
-            </div>
-            <div class="expandedInfo" v-else>
-              <p v-if="userIsAdmin()">
-                <b>Status: </b>
-                {{ getWorkStatus(item.workStatus) }}
-              </p>
-              <p v-if="!isEmpty(item.prime)"><b>Prime: </b> {{ item.prime }}</p>
-              <p v-if="!isEmpty(item.contract)"><b>Contract: </b>{{ item.contract }}</p>
-              <p v-if="!isEmpty(item.jobRole)"><b>Job Role: </b>{{ item.jobRole }}</p>
-              <p v-if="!isEmpty(item.github)">
+          <v-card-text>
+            <div class="expandedInfo">
+              <p v-if="!isEmpty(this.model.prime)"><b>Prime: </b> {{ this.model.prime }}</p>
+              <p v-if="!isEmpty(this.model.contract)"><b>Contract: </b>{{ this.model.contract }}</p>
+              <p v-if="!isEmpty(this.model.jobRole)"><b>Job Role: </b>{{ this.model.jobRole }}</p>
+              <p v-if="!isEmpty(this.model.github)">
                 <b>Github: </b
-                ><a :href="'https://github.com/' + item.github" target="_blank">{{ item.github }}</a>
+                ><a :href="'https://github.com/' + this.model.github" target="_blank">{{ this.model.github }}</a>
               </p>
-              <p v-if="!isEmpty(item.twitter)">
+              <p v-if="!isEmpty(this.model.twitter)">
                 <b>Twitter: </b>
-                <a :href="'https://twitter.com/' + item.twitter" target="_blank">{{ item.twitter }}</a>
+                <a :href="'https://twitter.com/' + this.model.twitter" target="_blank">{{ this.model.twitter }}</a>
               </p>
-              <p v-if="userIsAdmin() && !isEmpty(item.birthday)">
-                <b>Birthday: </b>{{ item.birthday | dateFormat }}
+              <p v-if="userIsAdmin() && !isEmpty(this.model.birthday)">
+                <b>Birthday: </b>{{ this.model.birthday | dateFormat }}
               </p>
-              <p v-if="userIsAdmin() && !isEmpty(item.birthdayFeed)">
-                <b>Birthday on feed: </b>{{ item.birthdayFeed | birthdayFeedResponse }}
+              <p v-if="userIsAdmin() && !isEmpty(this.model.birthdayFeed)">
+                <b>Birthday on feed: </b>{{ this.model.birthdayFeed | birthdayFeedResponse }}
               </p>
-              <p v-if="userIsAdmin() && !isEmpty(item.city) && !isEmpty(item.st) && !isEmpty(item.country)">
-                <b>Place of Birth: </b>{{ item.city }}, {{ item.st }}, {{ item.country }}
+              <p
+                v-if="
+                  userIsAdmin() && !isEmpty(this.model.city) && !isEmpty(this.model.st) && !isEmpty(this.model.country)
+                "
+              >
+                <b>Place of Birth: </b>{{ this.model.city }}, {{ this.model.st }}, {{ this.model.country }}
               </p>
-              <p v-else-if="userIsAdmin() && !isEmpty(item.city) && !isEmpty(item.st)">
-                <b>Place of Birth: </b>{{ item.city }}, {{ item.st }}
+              <p v-else-if="userIsAdmin() && !isEmpty(this.model.city) && !isEmpty(this.model.st)">
+                <b>Place of Birth: </b>{{ this.model.city }}, {{ this.model.st }}
               </p>
-              <p v-else-if="userIsAdmin() && !isEmpty(item.city) && !isEmpty(item.country)">
-                <b>Place of Birth: </b>{{ item.city }}, {{ item.country }}
+              <p v-else-if="userIsAdmin() && !isEmpty(this.model.city) && !isEmpty(this.model.country)">
+                <b>Place of Birth: </b>{{ this.model.city }}, {{ this.model.country }}
               </p>
-              <p v-else-if="userIsAdmin() && !isEmpty(item.country)">
-                <b>Place of Birth: </b>{{ item.country }}
+              <p v-else-if="userIsAdmin() && !isEmpty(this.model.country)">
+                <b>Place of Birth: </b>{{ this.model.country }}
               </p>
-              <p v-if="userIsAdmin() && !isEmpty(item.deptDate)">
-                <b>Departure Date: </b>{{ item.deptDate | dateFormat }}
+              <p v-if="userIsAdmin() && !isEmpty(this.model.deptDate)">
+                <b>Departure Date: </b>{{ this.model.deptDate | dateFormat }}
               </p>
             </div>
-          </v-card-text> -->
+          </v-card-text>
         </v-card>
         <available-budgets v-if="this.model.id" :employee="this.model"></available-budgets>
       </template>
