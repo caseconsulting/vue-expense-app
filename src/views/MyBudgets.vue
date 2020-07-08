@@ -482,6 +482,7 @@ async function refreshBudget() {
 
   if (this.fiscalDateView == this.getCurrentBudgetYear()) {
     // viewing active budget year
+    console.log(this.employee.id);
     budgetsVar = await api.getAllActiveEmployeeBudgets(this.employee.id);
   }
 
@@ -491,6 +492,7 @@ async function refreshBudget() {
   // append inactive tag to end of budget expense type name
   // the existing budget duplicates will later be removed (order in array comes after active budgets)
   _.forEach(existingBudgets, (budget) => {
+    console.log(budget.expenseTypeName);
     budget.expenseTypeName += ' (Inactive)';
   });
 
@@ -599,7 +601,6 @@ async function created() {
     }
     this.changingBudgetView = false;
   });
-
   this.refreshEmployee();
   this.addOneSecondToActualTimeEverySecond();
 } // created

@@ -44,7 +44,7 @@
             <v-progress-circular indeterminate size="64" color="#bc3825"></v-progress-circular>
           </v-flex>
           <v-flex v-else text-center class="pt-0">
-            <available-budgets :budgets="expenseTypeData" :loading="loadingBudgets"></available-budgets>
+            <available-budgets :employee="this.employee" :fiscalDateView="this.fiscalDateView"></available-budgets>
           </v-flex>
         </v-flex>
       </v-col>
@@ -488,7 +488,6 @@ function isFullTime(employee) {
  */
 async function refreshBudget() {
   this.loading = true; // set loading status to true
-  this.loadingBudgets = true;
   let budgetsVar;
 
   if (this.fiscalDateView == this.getCurrentBudgetYear()) {
@@ -517,7 +516,6 @@ async function refreshBudget() {
 
   this.refreshBudgetYears(); // refresh the budget year view options
   this.loading = false; // set loading status to false
-  this.loadingBudgets = false;
 } // refreshBudget
 
 /**
@@ -672,7 +670,6 @@ export default {
       fiscalDateView: '', // current budget year view by anniversary day
       hireDate: '', // employee hire date
       loading: false, // loading status
-      loadingBudgets: false, //prop for available budgets
       scheduleEntries: [],
       seconds: 0, // seconds until next anniversary date
       tweets: [],
