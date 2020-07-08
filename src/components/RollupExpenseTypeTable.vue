@@ -58,10 +58,17 @@
           <!-- Rows in datatable -->
           <template v-slot:item="{ item }">
             <tr @click="clickedRow(item)">
-              <!-- Checkbox for individual expense -->
+              <!--  Checkbox for individual expense  -->
               <td style="width: 1px;">
-                <v-badge :expanded.sync="expanded" :inline="true" :content="2" :value="messages" color="red">
+                <v-badge
+                  :expanded.sync="expanded"
+                  :inline="true"
+                  :content="item.expenses.length"
+                  :value="messages"
+                  color="grey"
+                >
                   <v-checkbox
+                    v-if="item.expenses"
                     :input-value="item.checkBox.all"
                     :indeterminate="item.checkBox.indeterminate"
                     primary
@@ -255,20 +262,10 @@ function clickedRow(value) {
   if (_.isEmpty(this.expanded) || this.expanded[0].key != value.key) {
     this.expanded = [];
     this.expanded.push(value);
-    console.log(value.expenses.length);
-    // console.log(this.item.expenses);
   } else {
     this.expanded = [];
   }
 } // clickedRow
-
-// function showExpanded() {
-//   if (this.expanded[0].expenses.length > 1) {
-//     console.log('success!');
-//     // let showLength = this.expanded[0].expenses.length;
-//     // return showLength;
-//   }
-// }
 
 /**
  * Constructs the auto complete lists for the employee and expense type filter.
@@ -723,7 +720,6 @@ export default {
     ], // datatable headers
     itemsPerPage: -1, // data table elements per page
     loading: true, // is loading
-    messages: 1,
     pendingExpenses: [], // pending expenses
     reimbursing: false, // is reimbursing
     sortBy: 'employeeName', // sort datatable items
@@ -761,7 +757,6 @@ export default {
     refreshExpenses,
     reimburseExpenses,
     selectExpense,
-    // showExpanded,
     submitExpenseObject,
     toggleAll,
     toggleGroup,
