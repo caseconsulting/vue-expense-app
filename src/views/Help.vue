@@ -77,7 +77,7 @@ export default {
           {
             title: 'How is the Avg Hours/Day calculated?',
             body:
-              'The average number of hours to work each day for the work days left in the month to reach the minimum. This can be changed by editing the Days Remaining.'
+              'The Remaining hours for the month divided by the Days Remaining. This can be changed by editing the Days Remaining.'
           },
           {
             title: 'What hours fall under Completed, Today, and Futute?',
