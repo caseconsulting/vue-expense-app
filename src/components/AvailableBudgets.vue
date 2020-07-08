@@ -81,12 +81,10 @@ function calcRemaining(budget) {
 } // calcRemaining
 
 async function created() {
-  this.loading = true;
-
   window.EventBus.$on('close-summary', () => {
     this.showDialog = false;
   });
-  this.refreshEmployee();
+  await this.refreshEmployee();
   this.loading = false;
 } // created
 
@@ -120,7 +118,6 @@ function noRemaining(budget) {
  * Refresh and sets the aggregated budgets for the employee budget year view.
  */
 async function refreshBudget() {
-  this.loading = true; // set loading status to true
   let budgetsVar;
 
   if (this.date == this.getCurrentBudgetYear()) {
@@ -150,7 +147,6 @@ async function refreshBudget() {
   });
 
   this.refreshBudgetYears(); // refresh the budget year view options
-  this.loading = false; // set loading status to false
 } // refreshBudget
 
 /**
@@ -187,7 +183,7 @@ async function refreshEmployee() {
   if (!this.date) {
     this.date = this.getCurrentBudgetYear();
   }
-  this.refreshBudget(); // refresh employee budgets
+  await this.refreshBudget(); // refresh employee budgets
   this.allUserBudgets = await api.getEmployeeBudgets(this.employee.id); // set all employee budgets
 } // refreshEmployee
 
@@ -221,7 +217,7 @@ export default {
       date: '',
       dense: false,
       hireDate: '',
-      loading: false,
+      loading: true,
       selectedBudget: null,
       showDialog: false
     };
