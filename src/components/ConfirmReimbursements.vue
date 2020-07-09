@@ -2,9 +2,9 @@
   <div>
     <v-card class="slide-in-blurred-right">
       <v-card-title class="subtitle-2">
-        <v-flex lg12 class="headline">Reimburse</v-flex>
+        <v-flex lg12 class="headline">Reimbursements</v-flex>
         <v-flex lg12>
-          <v-btn color="green" text @click.native="emit(`confirm-reimburse`)">Reimburse</v-btn>
+          <v-btn color="green" text @click="emit('reimburse-button-click')">Reimburse</v-btn>
         </v-flex>
       </v-card-title>
     </v-card>
@@ -22,10 +22,10 @@ import _ from 'lodash';
 function emit(msg, data) {
   if (data) {
     // data exists
-    window.EventBus.$emit(msg, data);
+    this.$emit(msg);
   } else {
     // data does not exist
-    window.EventBus.$emit(msg);
+    this.$emit(msg);
   }
 } // emit
 

@@ -484,11 +484,12 @@ function refreshExpenses() {
  * Reimburse the selected list of expenses.
  */
 async function reimburseExpenses() {
-  console.log('Clicked Reimburse');
-  if (this.buttonClicked) {
+  console.log(this.confirmReimburse);
+  if (this.confirmReimburse) {
     // reimburse button is clicked
     let expensesToReimburse = [];
     this.buttonClicked = false;
+    this.$emit('resetReimbursements');
     this.reimbursing = true; // set reimbursing status to true
 
     // get selected expenses and set reimburse date
@@ -682,6 +683,7 @@ async function created() {
 // |--------------------------------------------------|
 
 export default {
+  prop: ['confirmReimburse'],
   components: {
     ReimburseModal,
     UnrolledTableInfo
