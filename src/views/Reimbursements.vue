@@ -2,12 +2,14 @@
   <v-layout row wrap>
     <v-flex offset-lg1 offset-md1 lg9 md9 sm12>
       <!-- Expense Table -->
-      <rollup-expense-type-table></rollup-expense-type-table>
+      <rollup-expense-type-table :confirmReimburse="confirmReimbursements"></rollup-expense-type-table>
     </v-flex>
     <v-flex lg2 md2 sm12>
       <!-- Expense Info -->
       <expense-info class="jerryrig"></expense-info>
-
+      <!-- Reimburse Option -->
+      <confirm-reimbursements v-on:reimburse-button-click="confirmReimbursements = true"></confirm-reimbursements>
+      <v-spacer></v-spacer>
       <!-- Expenses Total -->
       <expense-type-totals></expense-type-totals>
     </v-flex>
@@ -18,6 +20,8 @@
 import ExpenseInfo from '../components/ExpenseInfo.vue';
 import ExpenseTypeTotals from '../components/ExpenseTypeTotals.vue';
 import RollupExpenseTypeTable from '../components/RollupExpenseTypeTable.vue';
+import ConfirmReimbursements from '../components/ConfirmReimbursements.vue';
+// import ReimburseModal from '../components/ReimburseModal.vue';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -29,7 +33,13 @@ export default {
   components: {
     ExpenseInfo,
     ExpenseTypeTotals,
-    RollupExpenseTypeTable
+    RollupExpenseTypeTable,
+    ConfirmReimbursements
+  },
+  data() {
+    return {
+      confirmReimbursements: false
+    };
   }
 };
 </script>

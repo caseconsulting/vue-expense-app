@@ -119,7 +119,7 @@ function getShowOnFeedList() {
 // |--------------------------------------------------|
 
 export default {
-  props: ['activate', 'selectedReimbursements'], // dialog activator
+  props: ['activate'], // dialog activator
   methods: {
     emit,
     updateSelectedLists,

@@ -483,7 +483,8 @@ function refreshExpenses() {
 /**
  * Reimburse the selected list of expenses.
  */
-async function reimburseExpenses(showOnFeedExpenses) {
+async function reimburseExpenses() {
+  console.log('Clicked Reimburse');
   if (this.buttonClicked) {
     // reimburse button is clicked
     let expensesToReimburse = [];
@@ -494,11 +495,11 @@ async function reimburseExpenses(showOnFeedExpenses) {
     this.empBudgets = _.forEach(this.empBudgets, async (budget) => {
       return await _.forEach(budget.expenses, async (expense) => {
         if (expense.selected) {
-          if (showOnFeedExpenses.indexOf(expense.id) > -1) {
+          /*if (showOnFeedExpenses.indexOf(expense.id) > -1) {
             this.$set(expense, 'showOnFeed', true);
           } else {
             this.$set(expense, 'showOnFeed', false);
-          }
+          }*/
           expense.reimbursedDate = moment().format('YYYY-MM-DD');
           expensesToReimburse.push(submitExpenseObject(expense));
         }
@@ -663,6 +664,7 @@ async function created() {
   window.EventBus.$on('selectExpense', this.selectExpense);
 
   window.EventBus.$on('canceled-reimburse', () => (this.buttonClicked = false));
+  window.EventBus.$on('confirm-reimburse', () => this.reimburseExpenses());
   let aggregatedData = await api.getAllAggregateExpenses();
 
   let allExpenses = createExpenses(aggregatedData);
