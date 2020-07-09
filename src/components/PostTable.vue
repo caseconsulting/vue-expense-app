@@ -68,7 +68,7 @@
                       <p>No additional data</p>
                     </div>
                     <div class="expandedInfo" v-else>
-                      <p>stuff to show</p>
+                      <p>{{ item.text }}</p>
                     </div>
                   </v-card-text>
                 </v-card>
@@ -105,7 +105,7 @@ function clickedRow(value) {
   if (_.isEmpty(this.expanded) || this.expanded[0].postId != value.postId) {
     // expand the selected employee if the selected employee not already expanded
     this.expanded = [];
-    this.expanded.push(value.text);
+    this.expanded.push(value);
   } else {
     // collapse the employee if the selected employee is already expanded
     this.expanded = [];
@@ -132,8 +132,7 @@ function constructAutoComplete(aggregatedData) {
 } // constructAutoComplete
 
 /**
- * Checks if there is data about an employee to display. Returns true if the user is an admin or if the there is data
- * on the employee's prime, contract, job role, github, or twitter, otherwise returns false.
+ * Checks if there is data about a post to display. Returns true if there is data to display
  *
  * @item item - post to check
  * @return boolean - post has data to display
@@ -149,7 +148,6 @@ function isDisplayData(item) {
   //     this.isEmpty(item.twitter);
   //   return valid;
   console.log(item);
-  console.log(this.expanded);
   return true;
 } // isDisplayData
 
@@ -209,13 +207,13 @@ export default {
       employees: [],
       headers: [
         {
-          text: 'Employee',
-          value: 'employeeName',
+          text: 'Title',
+          value: 'title',
           align: 'center'
         },
         {
-          text: 'Title',
-          value: 'title',
+          text: 'Employee',
+          value: 'employeeName',
           align: 'center'
         },
         {
