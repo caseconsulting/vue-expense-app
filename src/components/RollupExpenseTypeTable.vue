@@ -59,28 +59,27 @@
           <template v-slot:item="{ item }">
             <tr @click="clickedRow(item)">
               <!--  Checkbox for individual expense  -->
-              <td style="width: 1px;">
-                <v-badge
-                  :expanded.sync="expanded"
-                  :inline="true"
-                  :content="item.expenses.length"
-                  :value="messages"
-                  color="grey"
+              <td>
+                <v-checkbox
+                  :input-value="item.checkBox.all"
+                  :indeterminate="item.checkBox.indeterminate"
+                  primary
+                  hide-details
+                  @click.stop="toggleGroup(item)"
+                  class="ma-0"
                 >
-                  <v-checkbox
-                    v-if="item.expenses"
-                    :input-value="item.checkBox.all"
-                    :indeterminate="item.checkBox.indeterminate"
-                    primary
-                    hide-details
-                    @click.stop="toggleGroup(item)"
-                    class="ma-0"
-                  ></v-checkbox>
-                </v-badge>
+                </v-checkbox>
               </td>
-
               <!-- Employee Name -->
               <td>
+                <v-badge
+                  v-if="item.expenses.length > 1"
+                  :content="item.expenses.length"
+                  :value="true"
+                  :left="true"
+                  :offset-x="-10"
+                  color="grey"
+                ></v-badge>
                 {{ item.employeeName }}
               </td>
               <!-- Budget Name -->
