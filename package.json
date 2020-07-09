@@ -34,6 +34,8 @@
     "validate": "npm ci"
   },
   "dependencies": {
+    "@ckeditor/ckeditor5-build-classic": "^20.0.0",
+    "@ckeditor/ckeditor5-vue": "^1.0.1",
     "accounting-js": "^1.1.1",
     "auth0-js": "^9.13.4",
     "axios": "^0.19.2",
