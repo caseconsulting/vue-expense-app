@@ -56,9 +56,9 @@
     <v-flex>
       <v-card>
         <!-- Employee Details Form -->
-        <!-- <v-card-text>
-          <employee-details-form :adminCall="true" :employ="this.model"></employee-details-form>
-        </v-card-text> -->
+        <v-card-text>
+          <employee-details-form :employee="this.model"></employee-details-form>
+        </v-card-text>
       </v-card>
     </v-flex>
   </v-layout>
@@ -67,7 +67,7 @@
 <script>
 import api from '@/shared/api.js';
 import AvailableBudgets from '@/components/AvailableBudgets.vue';
-// import EmployeeDetailsForm from '@/components/EmployeeDetailsForm.vue';
+import EmployeeDetailsForm from '@/components/EmployeeDetailsForm.vue';
 import { getRole } from '@/utils/auth';
 import moment from 'moment';
 
@@ -164,8 +164,8 @@ async function created() {
 
 export default {
   components: {
-    AvailableBudgets
-    // EmployeeDetailsForm,
+    AvailableBudgets,
+    EmployeeDetailsForm
   },
   created,
   data() {

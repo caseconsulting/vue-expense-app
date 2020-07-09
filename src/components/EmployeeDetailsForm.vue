@@ -5,6 +5,107 @@
     </v-card-title>
     <v-container>
       <v-form>
+        <!-- LinkedIn account -->
+
+        <!-- Degrees -->
+        <p>Degrees:</p>
+        <v-autocomplete v-model="this.employee.degree" :items="this.employee.degrees"></v-autocomplete>
+        <p>in</p>
+        <v-autocomplete v-model="this.employee.major" :items="this.employee.majors"></v-autocomplete>
+        <!-- Plus button  -->
+        <!-- <v-btn> -->
+        <v-icon>add</v-icon>
+        <!-- </v-btn> -->
+
+        <!-- Experience -->
+        <p>Experience:</p>
+
+        <p>Case:</p>
+        <!-- Start date -->
+        <v-menu
+          ref="hireMenu"
+          :close-on-content-click="true"
+          v-model="hireMenu"
+          :nudge-right="40"
+          transition="scale-transition"
+          offset-y
+          max-width="290px"
+          min-width="290px"
+          style="padding-right: 20px; padding-bottom: 20px;"
+        >
+          <template v-slot:activator="{ on }">
+            <v-text-field
+              v-model="hireDateFormatted"
+              :rules="dateRules"
+              :disabled="hasExpenses"
+              label="Start Date"
+              hint="MM/DD/YYYY format"
+              persistent-hint
+              prepend-icon="event"
+              @blur="date = parseDate(hireDateFormatted)"
+              v-on="on"
+            ></v-text-field>
+          </template>
+          <v-date-picker v-model="date" no-title @input="hireMenu = false"></v-date-picker>
+        </v-menu>
+        <!-- End date -->
+        <v-menu
+          ref="hireMenu"
+          :close-on-content-click="true"
+          v-model="hireMenu"
+          :nudge-right="40"
+          transition="scale-transition"
+          offset-y
+          max-width="290px"
+          min-width="290px"
+          style="padding-right: 20px; padding-bottom: 20px;"
+        >
+          <template v-slot:activator="{ on }">
+            <v-text-field
+              v-model="hireDateFormatted"
+              :rules="dateRules"
+              :disabled="hasExpenses"
+              label="End Date"
+              hint="MM/DD/YYYY format"
+              persistent-hint
+              prepend-icon="event"
+              @blur="date = parseDate(hireDateFormatted)"
+              v-on="on"
+            ></v-text-field>
+          </template>
+          <v-date-picker v-model="date" no-title @input="hireMenu = false"></v-date-picker>
+        </v-menu>
+        <!-- Plus button  -->
+        <!-- If user adds another -->
+        <!-- general, IC radio button -->
+        <!-- title  -->
+        <!-- start date -->
+        <!-- end date -->
+
+        <!-- Certifications -->
+        <p>Certifications:</p>
+        <!-- Title -->
+        <!-- Date -->
+        <!-- Optional expiration date -->
+
+        <!-- Awards -->
+        <p>Awards:</p>
+        <!-- Title  -->
+        <!-- date -->
+
+        <!-- Technologies -->
+        <p>Technologies</p>
+        <!-- Title  -->
+        <!-- Start Date -->
+        <!-- End DAte optional -->
+
+        <!-- Customer Org Experience -->
+        <!-- Title -->
+        <v-autocomplete></v-autocomplete>
+        <!-- DST, ADO, Talent, ..., Other -->
+        <!-- start date -->
+        <!-- end date optional  -->
+
         <!-- Form action buttons -->
         <v-btn class="ma-2" color="white" @click="clearForm"> <icon class="mr-1" name="ban"></icon>Cancel </v-btn>
         <v-btn outlined class="ma-2" color="success" @click="submit" :disabled="!valid || isStatusEmpty()">
@@ -42,18 +143,18 @@ async function submit() {
     // form validated
     if (!this.isInactive()) {
       // set deptDate if employee is active
-      this.$set(this.model, 'deptDate', '');
+      this.$set(this.employee, 'deptDate', '');
     }
 
     // set employee hire date
-    this.$set(this.model, 'hireDate', this.date);
+    this.$set(this.employee, 'hireDate', this.date);
 
     // set employee work status
-    this.$set(this.model, 'workStatus', parseInt(this.status));
+    this.$set(this.employee, 'workStatus', parseInt(this.status));
 
-    if (this.model.id) {
+    if (this.employee.id) {
       // updating employee
-      let updatedEmployee = await api.updateItem(api.EMPLOYEES, this.model);
+      let updatedEmployee = await api.updateItem(api.EMPLOYEES, this.employee);
       if (updatedEmployee.id) {
         // successfully updated employee
         this.$emit('update');
@@ -66,8 +167,8 @@ async function submit() {
       }
     } else {
       // creating employee
-      this.model.id = uuid();
-      let newEmployee = await api.createItem(api.EMPLOYEES, this.model);
+      this.employee.id = uuid();
+      let newEmployee = await api.createItem(api.EMPLOYEES, this.employee);
       if (newEmployee.id) {
         // successfully created employee
         this.$emit('add', newEmployee);
@@ -76,7 +177,7 @@ async function submit() {
       } else {
         // failed to create employee
         this.$emit('error', newEmployee.response.data.message);
-        this.$set(this.model, 'id', ''); // reset id
+        this.$set(this.employee, 'id', ''); // reset id
         this.$emit('endAction');
       }
     }
@@ -103,12 +204,19 @@ async function created() {}
 export default {
   created,
   data() {
-    return {};
+    return {
+      employeeInfo: {
+        degrees: [],
+        majors: []
+      },
+      requiredRules: [(v) => !!v || 'This field is required'] // rules for required fields
+    };
   },
   methods: {
     clearForm,
     submit
-  }
+  },
+  props: ['employee']
 };
 </script>
 
