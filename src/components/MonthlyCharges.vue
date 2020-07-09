@@ -46,7 +46,7 @@
           </div>
           <!-- Average Hours per Day -->
           <v-row class="pt-3">
-            Avg Hours/Day:
+            Remaining Avg Hours/Day:
             <v-spacer></v-spacer>
             <div>
               <div @mouseover="decimal = !decimal" @mouseleave="decimal = !decimal">
