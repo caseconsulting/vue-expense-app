@@ -11,6 +11,7 @@ import Help from '@/views/Help.vue';
 import Callback from '@/views/Callback';
 import EmployeeHome from '@/views/MyBudgets.vue';
 import Home from '@/views/Home.vue';
+import Blog from '@/views/Blog.vue';
 import TrainingAnalytics from '@/views/TrainingAnalytics';
 import { requireAuth, isAdmin } from '@/utils/auth';
 import multiguard from 'vue-router-multiguard';
@@ -93,6 +94,11 @@ const router = new Router({
       name: 'employee',
       component: Employee,
       beforeEnter: requireAuth
+    },
+    {
+      path: '/blog',
+      name: 'blog',
+      component: Blog
     }
   ]
 });
