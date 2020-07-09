@@ -4,7 +4,7 @@
       <h3>Employee Details</h3>
     </v-card-title>
     <v-container>
-      <v-form>
+      <v-form ref="form" v-model="valid" lazy-validation>
         <!-- LinkedIn account -->
 
         <!-- Degrees -->
@@ -135,6 +135,15 @@ function clearForm() {
 } // clearForm
 
 /**
+ * Checks if the work status is empty.
+ *
+ * @return boolean - work status is empty
+ */
+function isStatusEmpty() {
+  return this.status.length == 0;
+} // isStatusEmpty
+
+/**
  * Submits the employee form.
  */
 async function submit() {
@@ -209,54 +218,20 @@ export default {
         degrees: [],
         majors: []
       },
-      requiredRules: [(v) => !!v || 'This field is required'] // rules for required fields
+      requiredRules: [(v) => !!v || 'This field is required'], // rules for required fields
+      status: {
+        statusType: undefined,
+        statusMessage: '',
+        color: ''
+      }, // snackbar action status
+      valid: false // form validity
     };
   },
   methods: {
     clearForm,
+    isStatusEmpty,
     submit
   },
   props: ['employee']
 };
 </script>
-
-<style>
-.customInput :hover {
-  border: solid 1px black;
-}
-
-.disabled {
-  background-color: #ddd;
-}
-
-.inputError {
-  border: solid 1px red !important;
-}
-
-.percentageBox {
-  border: solid 1px gray;
-  width: 46px;
-  height: 34px;
-  border-radius: 2px;
-  font-size: 14px;
-  display: flex;
-}
-
-.percentageBox div {
-  padding-top: 6px;
-  margin-left: 2px;
-}
-
-.percentageBox div:hover {
-  border: none;
-}
-
-.percentageBox input {
-  text-align: right;
-  width: 60%;
-}
-
-.percentageBox input:hover {
-  border: none;
-}
-</style>
