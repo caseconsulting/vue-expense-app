@@ -372,14 +372,14 @@ export default {
 }
 
 .hitIcon {
-  color: #bc3825;
+  color: white;
   margin-top: 3px;
   margin-right: 3px;
   float: right;
 }
 
 .hitText {
-  color: #bc3825;
+  color: white;
   float: right;
 }
 
