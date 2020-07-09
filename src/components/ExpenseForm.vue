@@ -567,9 +567,9 @@ async function checkCoverage() {
           } else {
             // BRANCH 2.2 selected expense type does not allow overdraft or employee is not full time
             this.$set(this.expense, 'od', false);
-            if (newCommittedAmount < budget.amount) {
+            if (newCommittedAmount <= budget.amount) {
               // BRANCH 6.1 starts under initial budget
-              if (newCommittedAmount + cost < budget.amount) {
+              if (newCommittedAmount + cost <= budget.amount) {
                 // BRANCH 7.1 doesnt go over budget
                 // reimburse the full expense
                 this.submit();
