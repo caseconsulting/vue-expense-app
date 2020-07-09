@@ -297,7 +297,7 @@ function clearStatus() {
  */
 async function createEvents() {
   this.employees = await api.getItems(api.EMPLOYEES);
-  this.aggregatedExpenses = await api.getAllAggregateExpenses();
+  this.aggregatedExpenses = await api.getAllExpenses();
   this.scheduleEntries = _.flatten(await api.getFeedEvents());
   //generate anniversaries
   let anniversaries = _.map(this.employees, (a) => {

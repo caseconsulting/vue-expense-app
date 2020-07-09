@@ -109,6 +109,10 @@ function deleteItem(type, id) {
 }
 
 function getAllAggregateExpenses() {
+  return execute('get', `/${UTILITY}/getAllAggregateExpenses`);
+}
+
+function getAllExpenses() {
   return execute('get', `/${UTILITY}/getAllExpenses`);
 }
 
@@ -209,6 +213,7 @@ export default {
   deleteAttachment,
   deleteItem,
   getAllAggregateExpenses,
+  getAllExpenses,
   getCountries,
   getRole,
   getUser,
