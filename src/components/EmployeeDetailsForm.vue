@@ -1,7 +1,11 @@
 <template>
   <v-card hover>
     <v-card-title class="header_style">
-      <h3>Employee Details</h3>
+      <v-row class="px-5" style="font-size: 14px;">
+        <h3>Employee Details</h3>
+        <v-spacer></v-spacer>
+        <v-icon class="pb-2" justify="right" @click="editing = true">edit</v-icon>
+      </v-row>
     </v-card-title>
     <v-container>
       <v-form ref="form" v-model="valid" lazy-validation>
@@ -132,6 +136,7 @@ import { v4 as uuid } from 'uuid';
  */
 function clearForm() {
   this.$refs.form.resetValidation();
+  this.editing = false;
 } // clearForm
 
 /**
@@ -191,6 +196,7 @@ async function submit() {
       }
     }
   }
+  this.editing = false;
 } // submit
 
 // |--------------------------------------------------|
@@ -214,6 +220,7 @@ export default {
   created,
   data() {
     return {
+      editing: false,
       employeeInfo: {
         degrees: [],
         majors: []
