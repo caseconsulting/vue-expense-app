@@ -384,7 +384,7 @@ async function createEvents() {
       event.icon = 'dollar-sign';
       event.daysFromToday = now.startOf('day').diff(reimbursedDate.startOf('day'), 'days');
       if (a.budgetName == 'High Five') {
-        event.text = `${a.firstName} gave ${a.description} a High Five`;
+        event.text = `${a.firstName} gave ${a.description} a High Five: ${a.note}`;
       }
       return event;
     } else {
