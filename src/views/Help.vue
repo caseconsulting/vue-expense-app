@@ -88,6 +88,11 @@ export default {
             title: 'How can I edit Days Remaining?',
             body:
               'Once you click on the number of Days Remaining on the right hand side you will be able to edit this number using your keyboard.'
+          },
+          {
+            title: 'Why do I not see some of my hours for today?',
+            body:
+              'If you are using the clock in function on TSheets those hours will not show up until after you clock out. All other hours for the month should be seen on the home page.'
           }
         ],
         employeeHome: [
@@ -184,6 +189,22 @@ export default {
               'Expense types accessible by All will provide all employees access to a prorated budget based on their work status. Expense types accessible by Full will provide both full time and part time employees will access to 100% of the budget. Expense types accessible by Full Time will provide only full time employees with access to the budget. Expense types accessible by Custom will provide the selected employees access to a prorated budget based on their work status.'
           }
         ],
+        employees: [
+          'Employees',
+          'admin',
+          {
+            title: 'What is an Employee #?',
+            body: "An employee's ID number will be a user's hire order."
+          },
+          {
+            title: 'What does it mean to mark an employee inactive?',
+            body: "This will freeze the user's ability to submit new expenses."
+          },
+          {
+            title: "Why can't I delete an employee?",
+            body: 'An employee cannot be deleted if the employee has expenses or you are editing an employee.'
+          }
+        ],
         forAdmins: [
           'For Admins',
           'admin',
@@ -201,22 +222,6 @@ export default {
             title: 'What are categories?',
             body:
               'Admins may create up to 10 different categories for employees to choose from when submitting and expense. Categories are unique to each expense type and users will be required to select one category if the expense type has them. '
-          }
-        ],
-        employees: [
-          'Employees',
-          'admin',
-          {
-            title: 'What is an Employee #?',
-            body: "An employee's ID number will be a user's hire order."
-          },
-          {
-            title: 'What does it mean to mark an employee inactive?',
-            body: "This will freeze the user's ability to submit new expenses."
-          },
-          {
-            title: "Why can't I delete an employee?",
-            body: 'An employee cannot be deleted if the employee has expenses or you are editing an employee.'
           }
         ],
         knownIssues: [
