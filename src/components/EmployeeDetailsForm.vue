@@ -1,8 +1,8 @@
 <template>
   <v-card hover>
     <v-card-title class="header_style">
-      <v-row class="px-5" style="font-size: 14px;">
-        <h3>Employee Details</h3>
+      <v-row class="px-5">
+        <h4>Employee Details</h4>
         <v-spacer></v-spacer>
         <v-icon class="pb-2" justify="right" @click="editing = true">edit</v-icon>
       </v-row>
