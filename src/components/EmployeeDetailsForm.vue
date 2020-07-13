@@ -4,22 +4,30 @@
       <v-row class="px-5">
         <h4>Employee Details</h4>
         <v-spacer></v-spacer>
-        <v-icon class="pb-2" justify="right" @click="editing = true">edit</v-icon>
+        <v-icon class="pb-2" justify="right" style="color: white;" @click="editing = true">edit</v-icon>
       </v-row>
     </v-card-title>
     <v-container>
-      <v-form ref="form" v-model="valid" lazy-validation>
+      <v-form class="px-2" ref="form" v-model="valid" lazy-validation>
         <!-- LinkedIn account -->
 
         <!-- Degrees -->
         <p>Degrees:</p>
-        <v-autocomplete v-model="this.employee.degree" :items="this.employee.degrees"></v-autocomplete>
-        <p>in</p>
-        <v-autocomplete v-model="this.employee.major" :items="this.employee.majors"></v-autocomplete>
+        <v-autocomplete
+          style="width: 35%; display: inline-block;"
+          v-model="this.employee.degree"
+          :items="this.employee.degrees"
+        ></v-autocomplete>
+        <p class="px-2" style="display: inline-block;">in</p>
+        <v-autocomplete
+          class="pr-3"
+          style="width: 55%; display: inline-block;"
+          v-model="this.employee.major"
+          :items="this.employee.majors"
+        ></v-autocomplete>
+        <!-- Completion year -->
         <!-- Plus button  -->
-        <!-- <v-btn> -->
         <v-icon>add</v-icon>
-        <!-- </v-btn> -->
 
         <!-- Experience -->
         <p>Experience:</p>
