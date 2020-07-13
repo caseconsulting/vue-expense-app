@@ -166,7 +166,7 @@ function changeDisplay(item) {
 
   let newItem = this.urlsOriginal[index];
 
-  if (newItem.display === item.logo && item.image != item.logo) {
+  if (newItem.display === item.logo && item.image != item.logo && item.image != null) {
     newItem.display = item.image;
   } else {
     newItem.display = caseLogo;
@@ -232,7 +232,7 @@ function isFocus(value) {
  */
 function titleFormat(value) {
   // if the title from metadata is invalid (e.g. '{{...' ) return empty string
-  if (value.length >= 2 && value[0] === '{' && value[1] === '{') {
+  if (value == null || (value.length >= 2 && value[0] === '{' && value[1] === '{')) {
     return undefined;
   }
   return value;
@@ -251,7 +251,14 @@ async function created() {
   let allURLS = await api.getItems(api.URLS);
   this.urlsOriginal = _.forEach(allURLS, (urlObject) => {
     urlObject.title = titleFormat(urlObject.title);
-    urlObject.display = urlObject.logo;
+    if (urlObject.logo != null) {
+      urlObject.display = urlObject.logo;
+    } else if (urlObject.image != null) {
+      urlObject.display = urlObject.image;
+    } else {
+      urlObject.display = caseLogo;
+      urlObject.isCaseLogo = true;
+    }
   });
 }
 
