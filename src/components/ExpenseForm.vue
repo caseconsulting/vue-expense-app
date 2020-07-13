@@ -711,7 +711,7 @@ async function createNewEntry() {
 
       if (updatedExpense.id) {
         // successfully updates expense
-        // TODO: Only add if training expense type. Allow empty category
+        // TODO: Only add if training expense type.
         if (!isEmpty(updatedExpense.url) && !isEmpty(updatedExpense.category)) {
           await this.addURLInfo(updatedExpense);
         }
