@@ -11,7 +11,10 @@
       <!-- Expense Info -->
       <expense-info class="jerryrig"></expense-info>
 
-      <confirm-reimbursements v-on:reimburse-button-click="confirmReimbursements = true"></confirm-reimbursements>
+      <confirm-reimbursements
+        class="mb-4"
+        v-on:reimburse-button-click="confirmReimbursements = true"
+      ></confirm-reimbursements>
       <v-spacer></v-spacer>
       <!-- Expenses Total -->
       <expense-type-totals></expense-type-totals>
