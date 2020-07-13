@@ -218,10 +218,13 @@ export default {
     date: null,
     links: [
       { name: 'Basecamp', link: 'https://3.basecamp.com/3097063' },
-      { name: '401k', link: 'https://3.basecamp.com/3097063/buckets/179119/vaults/29920981' },
-      { name: 'Health Insurance', link: 'https://3.basecamp.com/3097063/buckets/179119/vaults/29920949' },
+      { name: '401k', link: 'https://www.sharebuilder401k.com/' },
+      { name: 'Health Insurance', link: 'https://3.basecamp.com/3097063/buckets/179119/messages/2306027830' },
       { name: 'TSheets', link: 'https://caseconsulting.tsheets.com/' },
-      { name: 'ADP', link: 'https://www.adp.com/' }
+      { name: 'ADP', link: 'https://www.my.adp.com/' },
+      { name: 'Life Insurance', link: 'https://www.reliancestandard.com/home/' },
+      { name: 'Make Offices', link: 'https://redmine.consultwithcase.com/attachments/download/82/floorplan.jpg' },
+      { name: 'Redmine', link: 'https://redmine.consultwithcase.com/login' }
     ],
     mediaLinks: [
       { name: 'Github', link: 'https://github.com/caseconsulting', icon: 'brands/github' },
