@@ -1,9 +1,10 @@
 <template>
-  <ckeditor :editor="editor"></ckeditor>
+  <ckeditor :editor="editor" :config="editorConfig"></ckeditor>
 </template>
 <script>
 import CKEditor from '@ckeditor/ckeditor5-vue';
 import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
+
 export default {
   components: {
     // Use the <ckeditor> component in this view.
@@ -11,8 +12,10 @@ export default {
   },
   data() {
     return {
-      editor: ClassicEditor
-
+      editor: ClassicEditor,
+      editorConfig: {
+        height: '500px'
+      }
       // ...
     };
   }
