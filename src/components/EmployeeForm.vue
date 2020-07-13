@@ -748,7 +748,11 @@ export default {
       }
     },
     undisabled: function () {
-      if (this.undisabled == true) {
+      if (this.employee != null) {
+        this.model.birthdayFeed = this.employee.birthdayFeed;
+      }
+      //this.model.id &&
+      else if (this.undisabled == true) {
         this.model.birthdayFeed = true;
       }
     }
