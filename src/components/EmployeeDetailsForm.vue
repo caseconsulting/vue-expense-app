@@ -27,72 +27,105 @@
         ></v-autocomplete>
         <!-- Completion year -->
         <!-- Plus button  -->
-        <v-icon>add</v-icon>
-
+        <v-icon style="display: inline-block;">add</v-icon>
         <!-- Experience -->
         <p>Experience:</p>
-
-        <p>Case:</p>
-        <!-- Start date -->
-        <v-menu
-          ref="hireMenu"
-          :close-on-content-click="true"
-          v-model="hireMenu"
-          :nudge-right="40"
-          transition="scale-transition"
-          offset-y
-          max-width="290px"
-          min-width="290px"
-          style="padding-right: 20px; padding-bottom: 20px;"
-        >
-          <template v-slot:activator="{ on }">
-            <v-text-field
-              v-model="hireDateFormatted"
-              :rules="dateRules"
-              :disabled="hasExpenses"
-              label="Start Date"
-              hint="MM/DD/YYYY format"
-              persistent-hint
-              prepend-icon="event"
-              @blur="date = parseDate(hireDateFormatted)"
-              v-on="on"
-            ></v-text-field>
-          </template>
-          <v-date-picker v-model="date" no-title @input="hireMenu = false"></v-date-picker>
-        </v-menu>
-        <!-- End date -->
-        <v-menu
-          ref="hireMenu"
-          :close-on-content-click="true"
-          v-model="hireMenu"
-          :nudge-right="40"
-          transition="scale-transition"
-          offset-y
-          max-width="290px"
-          min-width="290px"
-          style="padding-right: 20px; padding-bottom: 20px;"
-        >
-          <template v-slot:activator="{ on }">
-            <v-text-field
-              v-model="hireDateFormatted"
-              :rules="dateRules"
-              :disabled="hasExpenses"
-              label="End Date"
-              hint="MM/DD/YYYY format"
-              persistent-hint
-              prepend-icon="event"
-              @blur="date = parseDate(hireDateFormatted)"
-              v-on="on"
-            ></v-text-field>
-          </template>
-          <v-date-picker v-model="date" no-title @input="hireMenu = false"></v-date-picker>
-        </v-menu>
+        <div class="py-2 px-5" style="border: 1px solid grey;">
+          <p>Case:</p>
+          <!-- Start date -->
+          <v-menu
+            ref="hireMenu"
+            :close-on-content-click="true"
+            v-model="hireMenu"
+            :nudge-right="40"
+            transition="scale-transition"
+            offset-y
+            max-width="290px"
+            min-width="290px"
+            style="padding-right: 20px; padding-bottom: 20px;"
+          >
+            <template v-slot:activator="{ on }">
+              <v-text-field
+                v-model="hireDateFormatted"
+                :rules="dateRules"
+                :disabled="hasExpenses"
+                label="Start Date"
+                hint="MM/DD/YYYY format"
+                persistent-hint
+                prepend-icon="event"
+                @blur="date = parseDate(hireDateFormatted)"
+                v-on="on"
+              ></v-text-field>
+            </template>
+            <v-date-picker v-model="date" no-title @input="hireMenu = false"></v-date-picker>
+          </v-menu>
+        </div>
         <!-- Plus button  -->
         <!-- If user adds another -->
-        <!-- general, IC radio button -->
-        <!-- title  -->
-        <!-- start date -->
-        <!-- end date -->
+        <div class="py-2 px-5" style="border: 1px solid grey;">
+          <!-- general, IC radio button -->
+          <input type="radio" id="general" name="job-type" value="general" />
+          <label for="general">General</label><br />
+          <input type="radio" id="ic" name="job-type" value="ic" />
+          <label for="ic">IC</label><br />
+          <!-- company  -->
+          <p class="pr-3" style="display: inline-block;">Company:</p>
+          <v-autocomplete style="display: inline-block; width: 80%;"></v-autocomplete>
+          <!-- start date -->
+          <v-menu
+            ref="hireMenu"
+            :close-on-content-click="true"
+            v-model="hireMenu"
+            :nudge-right="40"
+            transition="scale-transition"
+            offset-y
+            max-width="290px"
+            min-width="290px"
+            style="padding-right: 20px; padding-bottom: 20px;"
+          >
+            <template v-slot:activator="{ on }">
+              <v-text-field
+                v-model="hireDateFormatted"
+                :rules="dateRules"
+                :disabled="hasExpenses"
+                label="Start Date"
+                hint="MM/DD/YYYY format"
+                persistent-hint
+                prepend-icon="event"
+                @blur="date = parseDate(hireDateFormatted)"
+                v-on="on"
+              ></v-text-field>
+            </template>
+            <v-date-picker v-model="date" no-title @input="hireMenu = false"></v-date-picker>
+          </v-menu>
+          <!-- end date -->
+          <v-menu
+            ref="hireMenu"
+            :close-on-content-click="true"
+            v-model="hireMenu"
+            :nudge-right="40"
+            transition="scale-transition"
+            offset-y
+            max-width="290px"
+            min-width="290px"
+            style="padding-right: 20px; padding-bottom: 20px;"
+          >
+            <template v-slot:activator="{ on }">
+              <v-text-field
+                v-model="hireDateFormatted"
+                :rules="dateRules"
+                :disabled="hasExpenses"
+                label="End Date"
+                hint="MM/DD/YYYY format"
+                persistent-hint
+                prepend-icon="event"
+                @blur="date = parseDate(hireDateFormatted)"
+                v-on="on"
+              ></v-text-field>
+            </template>
+            <v-date-picker v-model="date" no-title @input="hireMenu = false"></v-date-picker>
+          </v-menu>
+        </div>
 
         <!-- Certifications -->
         <p>Certifications:</p>
