@@ -15,7 +15,6 @@
 </template>
 
 <script>
-import _ from 'lodash';
 /**
  * Emits a message and data if it exists.
  *
@@ -32,74 +31,9 @@ function emit(msg, data) {
   }
 } // emit
 
-function emitButtonClick() {
-  console.log('button click');
-  this.$emit('reimburse-button-click');
-}
-
-/**
- * Updates selected list and filtered list (doesn't include
- * training and high fives)
- */
-function updateSelectedLists(expenses) {
-  let list = _.map(expenses, (expense) => {
-    if (expense.budgetName == 'Training') {
-      if (
-        expense.category == 'Meals' ||
-        expense.category == 'Travel' ||
-        expense.category == 'Transportation' ||
-        expense.category == 'Lodging'
-      ) {
-        let obj = { id: expense.id, expenseObj: expense, showOnFeed: false };
-        return obj;
-      } else {
-        let obj = { id: expense.id, expenseObj: expense, showOnFeed: true };
-        return obj;
-      }
-    } else if (expense.budgetName == 'High Five') {
-      let obj = { id: expense.id, expenseObj: expense, showOnFeed: true };
-      return obj;
-    } else {
-      let obj = { id: expense.id, expenseObj: expense, showOnFeed: false };
-      return obj;
-    }
-  });
-  this.selectedList = list;
-  this.filteredOutSelectedList = _.filter(this.selectedList, (expense) => {
-    if (expense.expenseObj['budgetName'] == 'Training' || expense.expenseObj['budgetName'] == 'High Five') {
-      return false;
-    } else {
-      return true;
-    }
-  });
-}
-
-/**
- * Gets list of selected expense IDs to show on the activity feed
- */
-function getShowOnFeedList() {
-  let showOnFeedList = [];
-  for (let i = 0; i < this.selectedList.length; i++) {
-    if (this.selectedList[i].showOnFeed) {
-      showOnFeedList.push(this.selectedList[i].expenseObj.id);
-    }
-  }
-  return showOnFeedList;
-} // getShowOnFeedList
-
 export default {
-  prop: ['reimburseExpenses'],
   methods: {
-    emit,
-    emitButtonClick,
-    getShowOnFeedList,
-    updateSelectedLists
-  },
-  data() {
-    return {
-      filteredOutSelectedList: [],
-      selectedList: []
-    };
+    emit
   }
 };
 </script>
