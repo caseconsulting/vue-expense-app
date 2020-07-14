@@ -1,6 +1,6 @@
 <template>
   <v-layout row wrap>
-    <v-flex lg8 lg12 md12 sm12>
+    <v-flex lg6 lg12 md12 sm12>
       <!-- Expanded slot in datatable -->
       <template>
         <v-card>
@@ -53,7 +53,7 @@
       </template>
       <!-- End expanded slot in datatable -->
     </v-flex>
-    <v-flex>
+    <v-flex lg6>
       <v-card>
         <!-- Employee Details Form -->
         <v-card-text>

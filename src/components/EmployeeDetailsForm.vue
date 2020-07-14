@@ -10,146 +10,139 @@
     <v-container>
       <v-form class="px-2" ref="form" v-model="valid" lazy-validation>
         <!-- LinkedIn account -->
-
-        <!-- Degrees -->
-        <p>Degrees:</p>
-        <v-autocomplete
-          style="width: 35%; display: inline-block;"
-          v-model="this.employee.degree"
-          :items="this.employee.degrees"
-        ></v-autocomplete>
-        <p class="px-2" style="display: inline-block;">in</p>
-        <v-autocomplete
-          class="pr-3"
-          style="width: 55%; display: inline-block;"
-          v-model="this.employee.major"
-          :items="this.employee.majors"
-        ></v-autocomplete>
-        <!-- Completion year -->
-        <!-- Plus button  -->
-        <v-icon style="display: inline-block;">add</v-icon>
-        <!-- Experience -->
-        <p>Experience:</p>
-        <div class="py-2 px-5" style="border: 1px solid grey;">
-          <p>Case:</p>
-          <!-- Start date -->
-          <v-menu
-            ref="hireMenu"
-            :close-on-content-click="true"
-            v-model="hireMenu"
-            :nudge-right="40"
-            transition="scale-transition"
-            offset-y
-            max-width="290px"
-            min-width="290px"
-            style="padding-right: 20px; padding-bottom: 20px;"
-          >
-            <template v-slot:activator="{ on }">
-              <v-text-field
-                v-model="hireDateFormatted"
-                :rules="dateRules"
-                :disabled="hasExpenses"
-                label="Start Date"
-                hint="MM/DD/YYYY format"
-                persistent-hint
-                prepend-icon="event"
-                @blur="date = parseDate(hireDateFormatted)"
-                v-on="on"
-              ></v-text-field>
-            </template>
-            <v-date-picker v-model="date" no-title @input="hireMenu = false"></v-date-picker>
-          </v-menu>
-        </div>
-        <!-- Plus button  -->
-        <!-- If user adds another -->
-        <div class="py-2 px-5" style="border: 1px solid grey;">
-          <!-- general, IC radio button -->
-          <input type="radio" id="general" name="job-type" value="general" />
-          <label for="general">General</label><br />
-          <input type="radio" id="ic" name="job-type" value="ic" />
-          <label for="ic">IC</label><br />
-          <!-- company  -->
-          <p class="pr-3" style="display: inline-block;">Company:</p>
-          <v-autocomplete style="display: inline-block; width: 80%;"></v-autocomplete>
-          <!-- start date -->
-          <v-menu
-            ref="hireMenu"
-            :close-on-content-click="true"
-            v-model="hireMenu"
-            :nudge-right="40"
-            transition="scale-transition"
-            offset-y
-            max-width="290px"
-            min-width="290px"
-            style="padding-right: 20px; padding-bottom: 20px;"
-          >
-            <template v-slot:activator="{ on }">
-              <v-text-field
-                v-model="hireDateFormatted"
-                :rules="dateRules"
-                :disabled="hasExpenses"
-                label="Start Date"
-                hint="MM/DD/YYYY format"
-                persistent-hint
-                prepend-icon="event"
-                @blur="date = parseDate(hireDateFormatted)"
-                v-on="on"
-              ></v-text-field>
-            </template>
-            <v-date-picker v-model="date" no-title @input="hireMenu = false"></v-date-picker>
-          </v-menu>
-          <!-- end date -->
-          <v-menu
-            ref="hireMenu"
-            :close-on-content-click="true"
-            v-model="hireMenu"
-            :nudge-right="40"
-            transition="scale-transition"
-            offset-y
-            max-width="290px"
-            min-width="290px"
-            style="padding-right: 20px; padding-bottom: 20px;"
-          >
-            <template v-slot:activator="{ on }">
-              <v-text-field
-                v-model="hireDateFormatted"
-                :rules="dateRules"
-                :disabled="hasExpenses"
-                label="End Date"
-                hint="MM/DD/YYYY format"
-                persistent-hint
-                prepend-icon="event"
-                @blur="date = parseDate(hireDateFormatted)"
-                v-on="on"
-              ></v-text-field>
-            </template>
-            <v-date-picker v-model="date" no-title @input="hireMenu = false"></v-date-picker>
-          </v-menu>
-        </div>
-
-        <!-- Certifications -->
-        <p>Certifications:</p>
-        <!-- Title -->
-        <!-- Date -->
-        <!-- Optional expiration date -->
-
-        <!-- Awards -->
-        <p>Awards:</p>
-        <!-- Title  -->
-        <!-- date -->
-
-        <!-- Technologies -->
-        <p>Technologies</p>
-        <!-- Title  -->
-        <!-- Start Date -->
-        <!-- End DAte optional -->
-
-        <!-- Customer Org Experience -->
-        <!-- Title -->
-        <v-autocomplete></v-autocomplete>
-        <!-- DST, ADO, Talent, ..., Other -->
-        <!-- start date -->
-        <!-- end date optional  -->
+        <!-- Tabs -->
+        <v-tabs class="pb-4">
+          <v-tab href="#degrees">Degrees</v-tab>
+          <v-tab href="#jobExperience">Job Experience</v-tab>
+          <v-tab href="#certifications">Certifications</v-tab>
+          <v-tab href="#awards">Awards</v-tab>
+          <v-tab href="#technologies">Technologies</v-tab>
+          <v-tab href="#customerOrgExp">Customer Org</v-tab>
+          <!-- Degrees -->
+          <v-tab-item id="degrees">
+            <v-autocomplete
+              style="width: 35%; display: inline-block;"
+              v-model="this.employee.degree"
+              :items="this.employee.degrees"
+            ></v-autocomplete>
+            <p class="px-2" style="display: inline-block;">in</p>
+            <v-autocomplete
+              class="pr-3"
+              style="width: 55%; display: inline-block;"
+              v-model="this.employee.major"
+              :items="this.employee.majors"
+            ></v-autocomplete>
+            <!-- Completion year -->
+            <!-- Plus button  -->
+            <v-icon style="display: inline-block;">add</v-icon>
+          </v-tab-item>
+          <!-- Experience -->
+          <v-tab-item id="jobExperience">
+            <div class="py-2 px-5" style="border: 1px solid grey;">
+              <p>Case:</p>
+              <!-- Start date -->
+              <v-menu
+                :close-on-content-click="true"
+                :nudge-right="40"
+                transition="scale-transition"
+                offset-y
+                max-width="290px"
+                min-width="290px"
+                style="padding-right: 20px; padding-bottom: 20px;"
+              >
+                <template v-slot:activator="{ on }">
+                  <v-text-field
+                    label="Start Date"
+                    hint="MM/DD/YYYY format"
+                    persistent-hint
+                    prepend-icon="event"
+                    v-on="on"
+                  ></v-text-field>
+                </template>
+                <v-date-picker no-title></v-date-picker>
+              </v-menu>
+            </div>
+            <!-- Plus button  -->
+            <!-- If user adds another -->
+            <div class="py-2 px-5" style="border: 1px solid grey;">
+              <!-- general, IC radio button -->
+              <input type="radio" id="general" name="job-type" value="general" />
+              <label for="general">General</label><br />
+              <input type="radio" id="ic" name="job-type" value="ic" />
+              <label for="ic">IC</label><br />
+              <!-- company  -->
+              <p class="pr-3" style="display: inline-block;">Company:</p>
+              <v-autocomplete style="display: inline-block; width: 80%;"></v-autocomplete>
+              <!-- start date -->
+              <v-menu
+                :close-on-content-click="true"
+                :nudge-right="40"
+                transition="scale-transition"
+                offset-y
+                max-width="290px"
+                min-width="290px"
+                style="padding-right: 20px; padding-bottom: 20px;"
+              >
+                <template v-slot:activator="{ on }">
+                  <v-text-field
+                    label="Start Date"
+                    hint="MM/DD/YYYY format"
+                    persistent-hint
+                    prepend-icon="event"
+                    v-on="on"
+                  ></v-text-field>
+                </template>
+                <v-date-picker no-title></v-date-picker>
+              </v-menu>
+              <!-- end date -->
+              <v-menu
+                :close-on-content-click="true"
+                :nudge-right="40"
+                transition="scale-transition"
+                offset-y
+                max-width="290px"
+                min-width="290px"
+                style="padding-right: 20px; padding-bottom: 20px;"
+              >
+                <template v-slot:activator="{ on }">
+                  <v-text-field
+                    label="End Date"
+                    hint="MM/DD/YYYY format"
+                    persistent-hint
+                    prepend-icon="event"
+                    v-on="on"
+                  ></v-text-field>
+                </template>
+                <v-date-picker no-title></v-date-picker>
+              </v-menu>
+            </div>
+          </v-tab-item>
+          <!-- Certifications -->
+          <v-tab-item id="certifications">
+            <!-- Title -->
+            <!-- Date -->
+            <!-- Optional expiration date -->
+          </v-tab-item>
+          <!-- Awards -->
+          <v-tab-item id="awards">
+            <!-- Title  -->
+            <!-- date -->
+          </v-tab-item>
+          <!-- Technologies -->
+          <v-tab-item id="technologies">
+            <!-- Title  -->
+            <!-- Start Date -->
+            <!-- End DAte optional -->
+          </v-tab-item>
+          <!-- Customer Org Experience -->
+          <v-tab-item id="customerOrgExp">
+            <!-- Title -->
+            <v-autocomplete></v-autocomplete>
+            <!-- DST, ADO, Talent, ..., Other -->
+            <!-- start date -->
+            <!-- end date optional  -->
+          </v-tab-item>
+        </v-tabs>
 
         <!-- Form action buttons -->
         <v-btn class="ma-2" color="white" @click="clearForm"> <icon class="mr-1" name="ban"></icon>Cancel </v-btn>
