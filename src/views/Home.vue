@@ -296,9 +296,11 @@ function clearStatus() {
  * Create the events to populate the activity feed
  */
 async function createEvents() {
-  this.employees = await api.getItems(api.EMPLOYEES);
-  this.aggregatedExpenses = await api.getAllExpenses();
-  this.scheduleEntries = _.flatten(await api.getFeedEvents());
+  let eventData = await api.getAllEvents();
+  this.employees = eventData.employees;
+  this.aggregatedExpenses = eventData.expenses;
+  this.scheduleEntries = _.flatten(eventData.schedules);
+
   //generate anniversaries
   let anniversaries = _.map(this.employees, (a) => {
     let hireDate = moment(a.hireDate, 'YYYY-MM-DD');

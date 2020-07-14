@@ -68,6 +68,10 @@ function getEmployeeBudgets(id) {
   return execute('get', `/budgets/employee/${id}`);
 }
 
+function getAllEvents() {
+  return execute('get', `/${UTILITY}/getAllEvents`);
+}
+
 // function getBudgetsByDate(id, date) {
 //   return execute('get', `/${UTILITY}/getEmployeeBudgets/${id}/${date}`);
 // }
@@ -213,6 +217,7 @@ export default {
   deleteAttachment,
   deleteItem,
   getAllAggregateExpenses,
+  getAllEvents,
   getAllExpenses,
   getCountries,
   getRole,
