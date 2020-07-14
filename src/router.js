@@ -54,7 +54,13 @@ const router = new Router({
       beforeEnter: requireAuth
     },
     {
-      path: '/help/:hoursInfo',
+      path: '/help',
+      name: 'help',
+      component: Help,
+      beforeEnter: requireAuth
+    },
+    {
+      path: '/helpHoursInfo',
       name: 'help',
       component: Help,
       beforeEnter: requireAuth
