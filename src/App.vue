@@ -169,7 +169,6 @@ async function initSession() {
 async function created() {
   window.EventBus.$on('sessionContinue', () => (this.session = false)); // Confirm 5 minute warning
   window.EventBus.$on('relog', handleLogout); // Session end - log out
-
   // set expiration date if access token received
   let accessToken = getAccessToken();
 
@@ -198,6 +197,13 @@ async function created() {
   if (this.isLoggedIn()) this.hasBeenLoggedInBefore = true;
 
   this.initSession(); //starts session checking
+
+  if (
+    (router.app._route.fullPath === '/training' || router.app._route.fullPath === '/expenseTypes') &&
+    this.isLoggedIn() === false
+  ) {
+    router.push({ path: '/' });
+  }
 }
 
 // |--------------------------------------------------|
