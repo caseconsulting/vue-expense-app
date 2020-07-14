@@ -7,15 +7,7 @@
         <v-flex lg12>
           <v-btn color="info" text @click.native="emit(`canceled-reimburse`)">No</v-btn>
 
-          <v-btn
-            color="green"
-            text
-            @click="
-              emitButtonClick();
-              emit('confirm-reimburse');
-            "
-            >Reimburse</v-btn
-          >
+          <v-btn color="green" text @click="emit('confirm-reimburse')">Reimburse</v-btn>
         </v-flex>
       </v-card-title>
     </v-card>

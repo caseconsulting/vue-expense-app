@@ -2,19 +2,13 @@
   <v-layout row wrap>
     <v-flex offset-lg1 offset-md1 lg9 md9 sm12>
       <!-- Expense Table -->
-      <rollup-expense-type-table
-        v-on:resetReimbursements="confirmReimbursements = false"
-        :confirmReimburse="confirmReimbursements"
-      ></rollup-expense-type-table>
+      <rollup-expense-type-table></rollup-expense-type-table>
     </v-flex>
     <v-flex lg2 md2 sm12>
       <!-- Expense Info -->
       <expense-info class="jerryrig"></expense-info>
 
-      <confirm-reimbursements
-        class="mb-4"
-        v-on:reimburse-button-click="confirmReimbursements = true"
-      ></confirm-reimbursements>
+      <confirm-reimbursements class="mb-4"></confirm-reimbursements>
       <v-spacer></v-spacer>
       <!-- Expenses Total -->
       <expense-type-totals></expense-type-totals>
@@ -41,11 +35,6 @@ export default {
     ExpenseTypeTotals,
     RollupExpenseTypeTable,
     ConfirmReimbursements
-  },
-  data() {
-    return {
-      confirmReimbursements: false
-    };
   }
 };
 </script>

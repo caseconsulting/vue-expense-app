@@ -484,64 +484,59 @@ function refreshExpenses() {
  * Reimburse the selected list of expenses.
  */
 async function reimburseExpenses() {
-  console.log(this.confirmReimburse);
-  if (this.confirmReimburse) {
-    // reimburse button is clicked
-    let expensesToReimburse = [];
-    this.buttonClicked = false;
-    this.$emit('resetReimbursements');
-    this.reimbursing = true; // set reimbursing status to true
+  // reimburse button is clicked
+  let expensesToReimburse = [];
+  this.reimbursing = true; // set reimbursing status to true
 
-    // get selected expenses and set reimburse date
-    this.empBudgets = _.forEach(this.empBudgets, async (budget) => {
-      return await _.forEach(budget.expenses, async (expense) => {
-        if (expense.selected) {
-          /*if (showOnFeedExpenses.indexOf(expense.id) > -1) {
+  // get selected expenses and set reimburse date
+  this.empBudgets = _.forEach(this.empBudgets, async (budget) => {
+    return await _.forEach(budget.expenses, async (expense) => {
+      if (expense.selected) {
+        /*if (showOnFeedExpenses.indexOf(expense.id) > -1) {
             this.$set(expense, 'showOnFeed', true);
           } else {
             this.$set(expense, 'showOnFeed', false);
           }*/
-          expense.reimbursedDate = moment().format('YYYY-MM-DD');
-          expensesToReimburse.push(submitExpenseObject(expense));
-        }
-      });
-    });
-
-    // reimburse expense on back end
-    await this.asyncForEach(expensesToReimburse, async (expense) => {
-      let reimbursedExpense = await api.updateItem(api.EXPENSES, expense);
-      let msg;
-      if (!reimbursedExpense.id) {
-        // failed to reimburse expense
-        msg = reimbursedExpense.response.data.message;
-        this.alerts.push({ status: 'error', message: msg, color: 'red' });
-        let self = this;
-        setTimeout(function () {
-          self.alerts.shift();
-        }, 10000);
-
-        // revert reimburse date change
-        let groupIndex = _.findIndex(this.empBudgets, {
-          employeeId: expense.employeeId,
-          expenseTypeId: expense.expenseTypeId
-        });
-        let expenseIndex = _.findIndex(this.empBudgets[groupIndex].expenses, { id: expense.id });
-        this.empBudgets[groupIndex].expenses[expenseIndex].reimbursedDate = ' ';
-        this.empBudgets[groupIndex].expenses[expenseIndex].failed = true;
-      } else {
-        // successfully reimbursed expense
-        msg = 'Successfully reimbursed expense';
-        this.alerts.push({ status: 'success', message: msg, color: 'green' });
-        let self = this;
-        setTimeout(function () {
-          self.alerts.shift();
-        }, 10000);
+        expense.reimbursedDate = moment().format('YYYY-MM-DD');
+        expensesToReimburse.push(submitExpenseObject(expense));
       }
     });
+  });
 
-    this.refreshExpenses();
-    this.reimbursing = false; // set reimbursing status to false
-  }
+  // reimburse expense on back end
+  await this.asyncForEach(expensesToReimburse, async (expense) => {
+    let reimbursedExpense = await api.updateItem(api.EXPENSES, expense);
+    let msg;
+    if (!reimbursedExpense.id) {
+      // failed to reimburse expense
+      msg = reimbursedExpense.response.data.message;
+      this.alerts.push({ status: 'error', message: msg, color: 'red' });
+      let self = this;
+      setTimeout(function () {
+        self.alerts.shift();
+      }, 10000);
+
+      // revert reimburse date change
+      let groupIndex = _.findIndex(this.empBudgets, {
+        employeeId: expense.employeeId,
+        expenseTypeId: expense.expenseTypeId
+      });
+      let expenseIndex = _.findIndex(this.empBudgets[groupIndex].expenses, { id: expense.id });
+      this.empBudgets[groupIndex].expenses[expenseIndex].reimbursedDate = ' ';
+      this.empBudgets[groupIndex].expenses[expenseIndex].failed = true;
+    } else {
+      // successfully reimbursed expense
+      msg = 'Successfully reimbursed expense';
+      this.alerts.push({ status: 'success', message: msg, color: 'green' });
+      let self = this;
+      setTimeout(function () {
+        self.alerts.shift();
+      }, 10000);
+    }
+  });
+
+  this.refreshExpenses();
+  this.reimbursing = false; // set reimbursing status to false
 } // reimburseExpenses
 
 /**
@@ -663,7 +658,6 @@ function unCheckAllBoxes() {
  */
 async function created() {
   window.EventBus.$on('selectExpense', this.selectExpense);
-
   window.EventBus.$on('canceled-reimburse', () => (this.buttonClicked = false));
   window.EventBus.$on('confirm-reimburse', () => this.reimburseExpenses());
   let aggregatedData = await api.getAllAggregateExpenses();
