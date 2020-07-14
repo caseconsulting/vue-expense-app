@@ -8,7 +8,7 @@
       <!-- Expense Info -->
       <expense-info class="jerryrig"></expense-info>
 
-      <confirm-reimbursements class="mb-4"></confirm-reimbursements>
+      <!-- <confirm-reimbursements class="mb-4"></confirm-reimbursements> -->
       <v-spacer></v-spacer>
       <!-- Expenses Total -->
       <expense-type-totals></expense-type-totals>
@@ -20,7 +20,7 @@
 import ExpenseInfo from '../components/ExpenseInfo.vue';
 import ExpenseTypeTotals from '../components/ExpenseTypeTotals.vue';
 import RollupExpenseTypeTable from '../components/RollupExpenseTypeTable.vue';
-import ConfirmReimbursements from '../components/ConfirmReimbursements.vue';
+
 // import ReimburseModal from '../components/ReimburseModal.vue';
 
 // |--------------------------------------------------|
@@ -33,8 +33,7 @@ export default {
   components: {
     ExpenseInfo,
     ExpenseTypeTotals,
-    RollupExpenseTypeTable,
-    ConfirmReimbursements
+    RollupExpenseTypeTable
   }
 };
 </script>

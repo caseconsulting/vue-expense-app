@@ -102,7 +102,7 @@
         <!-- End unreimbursed datatable -->
 
         <!-- Reimburse Button -->
-        <v-flex offset-md10>
+        <!-- <v-flex offset-md10>
           <v-fab-transition class="reimburse_button">
             <v-btn
               @click="buttonClicked = true"
@@ -120,15 +120,8 @@
               <icon name="dollar-sign"></icon>
             </v-btn>
           </v-fab-transition>
-        </v-flex>
+        </v-flex>-->
       </v-container>
-
-      <!-- Activate Reimburse Modal -->
-      <reimburse-modal
-        :activate="buttonClicked"
-        :selectedReimbursements="getSelectedExpensesToReimburse"
-        v-on:confirm-reimburse="reimburseExpenses"
-      ></reimburse-modal>
     </v-card>
   </div>
 </template>
@@ -136,7 +129,6 @@
 <script>
 import api from '@/shared/api.js';
 import moment from 'moment';
-import ReimburseModal from './ReimburseModal.vue';
 import UnrolledTableInfo from './UnrolledTableInfo.vue';
 import _ from 'lodash';
 
@@ -658,7 +650,7 @@ function unCheckAllBoxes() {
  */
 async function created() {
   window.EventBus.$on('selectExpense', this.selectExpense);
-  window.EventBus.$on('canceled-reimburse', () => (this.buttonClicked = false));
+  window.EventBus.$on('canceled-reimburse', () => (this.resimburseExpenses = false));
   window.EventBus.$on('confirm-reimburse', () => this.reimburseExpenses());
   let aggregatedData = await api.getAllAggregateExpenses();
 
@@ -679,7 +671,6 @@ async function created() {
 export default {
   prop: ['confirmReimburse'],
   components: {
-    ReimburseModal,
     UnrolledTableInfo
   },
   computed: {
