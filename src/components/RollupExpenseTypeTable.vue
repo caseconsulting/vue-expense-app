@@ -172,7 +172,6 @@ function filteredItems() {
       return budget.employeeId === this.employee && budget.expenseTypeId === this.expenseType;
     }
   });
-  console.log(data);
   return data;
 } // filteredItems
 
@@ -586,6 +585,13 @@ function selectExpense(expense) {
       return _.forEach(budget.expenses, (budgetExpense) => {
         if (expense === budgetExpense) {
           budgetExpense.selected = !budgetExpense.selected;
+          if (!budgetExpense.selected) {
+            budgetExpense.showOnFeed = false;
+            budget.showSwitch = determineShowSwitch(budget);
+          } else {
+            budgetExpense.showOnFeed = determineShowOnFeed(expense);
+            budget.showSwitch = determineShowSwitch(budget);
+          }
         }
       });
     }
@@ -796,6 +802,16 @@ function isEditable(expense) {
   return true;
 }
 
+function resetShowOnFeedToggles() {
+  this.empBudgets = _.forEach(this.empBudgets, (budget) => {
+    budget.showSwitch.all = false;
+    budget.showSwitch.indeterminate = false;
+    return _.forEach(budget.expenses, (expense) => {
+      expense.showOnFeed = false;
+    });
+  });
+}
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                 LIFECYCLE HOOKS                  |
@@ -815,9 +831,11 @@ async function created() {
 
   let allExpenses = createExpenses(aggregatedData);
   this.pendingExpenses = filterOutReimbursed(allExpenses);
+
   this.constructAutoComplete(this.pendingExpenses);
   this.empBudgets = groupEmployeeExpenses(this.pendingExpenses);
   this.unCheckAllBoxes();
+  this.resetShowOnFeedToggles();
   this.loading = false;
 } // created
 
@@ -911,6 +929,7 @@ export default {
     matchingEmployeeAndExpenseType,
     refreshExpenses,
     reimburseExpenses,
+    resetShowOnFeedToggles,
     selectExpense,
     submitExpenseObject,
     toggleAll,
