@@ -50,7 +50,11 @@
 
             <!-- Show on Feed -->
             <td style="width: 4px;">
-              <v-switch :input-value="item.showOnFeed" :disabled="!item.selected || !isEditable(item)"></v-switch>
+              <v-switch
+                :input-value="item.showOnFeed"
+                @click.stop="expenseToggle(item)"
+                :disabled="!item.selected || !isEditable(item)"
+              ></v-switch>
             </td>
           </tr>
         </template>
@@ -93,6 +97,10 @@ function isEditable(expense) {
     return false;
   }
   return true;
+}
+
+function expenseToggle(toggledExpense) {
+  window.EventBus.$emit('toggleExpense', toggledExpense);
 }
 
 // |--------------------------------------------------|
@@ -157,6 +165,7 @@ export default {
   methods: {
     expenseClicked,
     expenseSelected,
+    expenseToggle,
     isEditable
   },
   props: ['expenses'] // list of expenses

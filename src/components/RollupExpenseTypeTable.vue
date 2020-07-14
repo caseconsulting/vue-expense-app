@@ -107,7 +107,11 @@
           <!-- Expanded slot in datatable -->
           <template v-slot:expanded-item="{ headers, item }">
             <td :colspan="headers.length" class="pa-0">
-              <unrolled-table-info :expenses="item.expenses" @selectExpense="selectExpense"></unrolled-table-info>
+              <unrolled-table-info
+                :expenses="item.expenses"
+                @toggleExpense="toggleShowOnFeed"
+                @selectExpense="selectExpense"
+              ></unrolled-table-info>
             </td>
           </template>
           <!-- End expanded slot in datatable -->
@@ -604,6 +608,12 @@ function toggleShowOnFeed(expense) {
       });
     }
   });
+
+  this.empBudgets = _.forEach(this.empBudgets, (budget) => {
+    if (expense.key === budget.key) {
+      budget.showSwitch = determineShowSwitch(budget);
+    }
+  });
 }
 
 /**
@@ -797,7 +807,9 @@ function isEditable(expense) {
  */
 async function created() {
   window.EventBus.$on('selectExpense', this.selectExpense);
-  window.EventBus.$on('canceled-reimburse', () => (this.resimburseExpenses = false));
+  window.EventBus.$on('toggleExpense', this.toggleShowOnFeed);
+
+  window.EventBus.$on('canceled-reimburse', () => (this.buttonClicked = false));
   window.EventBus.$on('confirm-reimburse', () => this.reimburseExpenses());
   let aggregatedData = await api.getAllAggregateExpenses();
 
