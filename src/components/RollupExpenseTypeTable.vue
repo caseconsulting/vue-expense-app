@@ -484,6 +484,7 @@ function refreshExpenses() {
  * Reimburse the selected list of expenses.
  */
 async function reimburseExpenses() {
+  console.log(this.confirmReimburse);
   if (this.confirmReimburse) {
     // reimburse button is clicked
     let expensesToReimburse = [];
