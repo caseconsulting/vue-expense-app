@@ -2,7 +2,7 @@
   <div id="monthly-charges">
     <h3>
       Hours for {{ month }} {{ year }}
-      <router-link to="/help" tag="v-icon">info</router-link>
+      <router-link to="/help/hoursInfo" tag="v-icon">info</router-link>
     </h3>
     <v-card-text>
       <div v-if="this.loading" class="pb-4">

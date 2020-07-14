@@ -11,7 +11,7 @@
     <h2>FAQ</h2>
     <div class="mb-5">
       <div class="text-xs-center mb-3"></div>
-      <v-expansion-panels accordion>
+      <v-expansion-panels accordion :v-model="panel">
         <v-expansion-panel v-for="section in sections" :key="section[0]">
           <!-- Header -->
           <v-expansion-panel-header v-if="section[1] == role || role == 'admin' || section[1] == 'user'">
@@ -53,6 +53,12 @@ import { getRole } from '@/utils/auth';
  */
 async function created() {
   this.role = getRole();
+  let params = this.$route.params.hoursInfo;
+  console.log('param: ');
+  console.log(params);
+  if (params != null && params == 'hoursInfo') {
+    this.panel = 0;
+  }
 } // created
 
 // |--------------------------------------------------|
@@ -65,6 +71,7 @@ export default {
   created,
   data() {
     return {
+      panel: null,
       role: '', // employee role
       sections: {
         tsheetsHours: [
