@@ -224,7 +224,10 @@ export default {
       { name: 'ADP', link: 'https://www.my.adp.com/' },
       { name: 'Life Insurance', link: 'https://www.reliancestandard.com/home/' },
       { name: 'Make Offices', link: 'https://redmine.consultwithcase.com/attachments/download/82/floorplan.jpg' },
-      { name: 'Redmine', link: 'https://redmine.consultwithcase.com/login' }
+      {
+        name: 'Redmine',
+        link: 'https://redmine.consultwithcase.com/users/35'
+      }
     ],
     mediaLinks: [
       { name: 'Github', link: 'https://github.com/caseconsulting', icon: 'brands/github' },
