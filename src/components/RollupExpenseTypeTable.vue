@@ -380,6 +380,13 @@ function determineCheckBox(budget) {
   return checkBox;
 } // determineCheckBox
 
+/**
+ * Determine the state of the group toggle based on expenses show on
+ * feed toggle
+ *
+ * @param budget - budget group toggled
+ * @return Object - toggle switch
+ */
 function determineShowSwitch(budget) {
   let showSwitch = {
     all: true,
@@ -404,7 +411,7 @@ function determineShowSwitch(budget) {
   }
 
   return showSwitch;
-}
+} // determineShowSwitch
 
 /**
  * Displays an error in the response status snackbar.
@@ -604,6 +611,11 @@ function selectExpense(expense) {
   });
 } // selectExpense
 
+/**
+ * Toggles show on feed switch for individual expenses
+ *
+ * @param expense - expense toggled
+ */
 function toggleShowOnFeed(expense) {
   this.empBudgets = _.forEach(this.empBudgets, (budget) => {
     if (expense.key === budget.key) {
@@ -620,7 +632,7 @@ function toggleShowOnFeed(expense) {
       budget.showSwitch = determineShowSwitch(budget);
     }
   });
-}
+} // toggleShowOnFeed
 
 /**
  * Sets up an expense object to be submitted.
@@ -693,6 +705,12 @@ function toggleGroup(value) {
   });
 } // toggleGroup
 
+/**
+ * Toggle show on feed on group of expenses
+ *
+ * @param value - expense group toggled
+ * @param toggle - checks if toggle v-switch called the function
+ */
 function toggleShowOnFeedGroup(value, toggle) {
   this.empBudgets = _.forEach(this.empBudgets, (budget) => {
     if (value === budget) {
@@ -760,7 +778,7 @@ function toggleShowOnFeedGroup(value, toggle) {
       budget.showSwitch = determineShowSwitch(budget);
     }
   });
-}
+} // toggleShowOnFeedGroup
 
 /**
  * Uncheck all expenses and boxes
@@ -776,6 +794,10 @@ function unCheckAllBoxes() {
   });
 } // unCheckAllBoxes
 
+/**
+ * Determines if expense should be automatically shown on feed
+ * @param expense - expense
+ */
 function determineShowOnFeed(expense) {
   if (expense.budgetName == 'Training') {
     if (
@@ -793,15 +815,24 @@ function determineShowOnFeed(expense) {
   } else {
     return false;
   }
-}
+} // determineShowOnFeed
 
+/**
+ * Checks if expense toggle show on feed should be edited based on
+ * automated determination
+ *
+ * @return true if should be edited, false otherwise
+ */
 function isEditable(expense) {
   if (expense.budgetName == 'Training' || expense.budgetName == 'High Five') {
     return false;
   }
   return true;
-}
+} // isEditable
 
+/**
+ * Resets show on feed toggles when page is created
+ */
 function resetShowOnFeedToggles() {
   this.empBudgets = _.forEach(this.empBudgets, (budget) => {
     budget.showSwitch.all = false;
@@ -810,7 +841,7 @@ function resetShowOnFeedToggles() {
       expense.showOnFeed = false;
     });
   });
-}
+} // resetShowOnFeedToggles
 
 // |--------------------------------------------------|
 // |                                                  |

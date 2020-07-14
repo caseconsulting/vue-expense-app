@@ -92,16 +92,26 @@ function expenseSelected(selectedExpense) {
   window.EventBus.$emit('selectExpense', selectedExpense);
 } // expenseSelected
 
+/**
+ * Checks if show on feed toggle is editable for individual expense
+ *
+ * @return true if it is editable, false otherwise
+ */
 function isEditable(expense) {
   if (expense.budgetName == 'Training' || expense.budgetName == 'High Five') {
     return false;
   }
   return true;
-}
+} // isEditable
 
+/**
+ * Emit an event to parent that an expense was toggled.
+ *
+ * @param toggledExpense - expense toggled
+ */
 function expenseToggle(toggledExpense) {
   window.EventBus.$emit('toggleExpense', toggledExpense);
-}
+} // expenseToggle
 
 // |--------------------------------------------------|
 // |                                                  |
