@@ -276,28 +276,28 @@ function addModelToTable() {
  * Clear the selected employee.
  */
 function clearModel() {
-  this.$set(this.model, 'id', '');
-  this.$set(this.model, 'firstName', '');
-  this.$set(this.model, 'middleName', '');
-  this.$set(this.model, 'lastName', '');
+  this.$set(this.model, 'id', null);
+  this.$set(this.model, 'firstName', null);
+  this.$set(this.model, 'middleName', null);
+  this.$set(this.model, 'lastName', null);
   this.$set(this.model, 'email', '@consultwithcase.com');
-  this.$set(this.model, 'employeeRole', '');
+  this.$set(this.model, 'employeeRole', null);
   this.$set(this.model, 'employeeNumber', null);
   this.$set(this.model, 'hireDate', null);
   this.$set(this.model, 'workStatus', 100);
 
   //New Fields
-  this.$set(this.model, 'birthday', '');
+  this.$set(this.model, 'birthday', null);
   this.$set(this.model, 'birthdayFeed', false);
-  this.$set(this.model, 'jobRole', '');
-  this.$set(this.model, 'prime', '');
-  this.$set(this.model, 'contract', '');
-  this.$set(this.model, 'github', '');
-  this.$set(this.model, 'twitter', '');
-  this.$set(this.model, 'city', '');
-  this.$set(this.model, 'st', '');
-  this.$set(this.model, 'country', '');
-  this.$set(this.model, 'deptDate', '');
+  this.$set(this.model, 'jobRole', null);
+  this.$set(this.model, 'prime', null);
+  this.$set(this.model, 'contract', null);
+  this.$set(this.model, 'github', null);
+  this.$set(this.model, 'twitter', null);
+  this.$set(this.model, 'city', null);
+  this.$set(this.model, 'st', null);
+  this.$set(this.model, 'country', null);
+  this.$set(this.model, 'deptDate', null);
 } // clearModel
 
 /**
@@ -305,8 +305,8 @@ function clearModel() {
  */
 function clearStatus() {
   this.$set(this.status, 'statusType', undefined);
-  this.$set(this.status, 'statusMessage', '');
-  this.$set(this.status, 'color', '');
+  this.$set(this.status, 'statusMessage', null);
+  this.$set(this.status, 'color', null);
 } // clearStatus
 
 /**
@@ -374,7 +374,6 @@ function endAction() {
  */
 function filterContracts() {
   let tempContracts = _.map(this.employees, (a) => a.contract); //extract contracts
-  tempContracts = _.map(tempContracts, (a) => a.trim()); //trim whitespace
   tempContracts = _.compact(tempContracts); //remove falsey values
   this.employeeInfo.contracts = [...new Set(tempContracts)]; //remove duplicates
 } // filterContracts
@@ -397,7 +396,6 @@ function filterEmployees() {
  */
 function filterPrimes() {
   let tempPrimes = _.map(this.employees, (a) => a.prime); //extract primes
-  tempPrimes = _.map(tempPrimes, (a) => a.trim()); //trim whitespace
   tempPrimes = _.compact(tempPrimes); //remove falsey values
   this.employeeInfo.primes = [...new Set(tempPrimes)]; //remove duplicates and set
 } // filterPrimes
@@ -506,7 +504,6 @@ function isPartTime(employee) {
 function onSelect(item) {
   this.$set(this.model, 'id', item.id);
   this.$set(this.model, 'firstName', item.firstName);
-  this.$set(this.model, 'middleName', item.middleName);
   this.$set(this.model, 'lastName', item.lastName);
   this.$set(this.model, 'email', item.email);
   this.$set(this.model, 'employeeRole', item.employeeRole);
@@ -514,17 +511,18 @@ function onSelect(item) {
   this.$set(this.model, 'hireDate', item.hireDate);
   this.$set(this.model, 'workStatus', item.workStatus);
 
-  // New Fields
+  // Additional Fields
+  this.$set(this.model, 'middleName', item.middleName);
   this.$set(this.model, 'birthday', item.birthday);
   this.$set(this.model, 'birthdayFeed', item.birthdayFeed);
   this.$set(this.model, 'jobRole', item.jobRole);
-  this.$set(this.model, 'prime', item.prime.trim());
-  this.$set(this.model, 'contract', item.contract.trim());
-  this.$set(this.model, 'github', item.github.trim());
-  this.$set(this.model, 'twitter', item.twitter.trim());
-  this.$set(this.model, 'city', item.city.trim());
-  this.$set(this.model, 'st', item.st.trim());
-  this.$set(this.model, 'country', item.country.trim());
+  this.$set(this.model, 'prime', item.prime);
+  this.$set(this.model, 'contract', item.contract);
+  this.$set(this.model, 'github', item.github);
+  this.$set(this.model, 'twitter', item.twitter);
+  this.$set(this.model, 'city', item.city);
+  this.$set(this.model, 'st', item.st);
+  this.$set(this.model, 'country', item.country);
   this.$set(this.model, 'deptDate', item.deptDate);
 } // onSelect
 
@@ -645,7 +643,7 @@ export default {
   data() {
     return {
       deleteModel: {
-        id: ''
+        id: null
       }, // employee to delete
       deleting: false, // activate delete confirmation model
       employeeInfo: {
@@ -689,34 +687,34 @@ export default {
       itemsPerPage: -1, // items per datatable page
       loading: false, // loading status
       model: {
-        id: '',
-        firstName: '',
-        middleName: '',
-        lastName: '',
+        id: null,
+        firstName: null,
+        middleName: null,
+        lastName: null,
         email: '@consultwithcase.com',
-        employeeRole: '',
+        employeeRole: null,
         employeeNumber: null,
         hireDate: null,
         workStatus: 100,
-        birthday: '',
+        birthday: null,
         birthdayFeed: false,
-        jobRole: '',
-        prime: '',
-        contract: '',
-        github: '',
-        twitter: '',
-        city: '',
-        st: '',
-        country: '',
-        deptDate: ''
+        jobRole: null,
+        prime: null,
+        contract: null,
+        github: null,
+        twitter: null,
+        city: null,
+        st: null,
+        country: null,
+        deptDate: null
       }, // selected employee
-      search: '', // query text for datatable search field
+      search: null, // query text for datatable search field
       sortBy: 'employeeNumber', // sort datatable items
       sortDesc: false, // sort datatable items
       status: {
         statusType: undefined,
-        statusMessage: '',
-        color: ''
+        statusMessage: null,
+        color: null
       } // snackbar action status
     };
   },

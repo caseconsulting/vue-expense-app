@@ -320,7 +320,7 @@ function isUSA() {
   if (this.model.country == 'United States of America') {
     return true;
   } else {
-    this.model.st = '';
+    this.model.st = null;
     return false;
   }
 }
@@ -335,32 +335,32 @@ function isUSA() {
  */
 function clearForm() {
   this.$refs.form.resetValidation();
-  this.$set(this, 'date', '');
+  this.$set(this, 'date', null);
   this.$set(this.model, 'email', '@consultwithcase.com');
-  this.$set(this.model, 'employeeRole', '');
-  this.$set(this.model, 'firstName', '');
-  this.$set(this.model, 'middleName', '');
-  this.$set(this.model, 'lastName', '');
-  this.$set(this.model, 'employeeNumber', '');
-  this.$set(this.model, 'hireDate', '');
-  this.$set(this, 'hireDateFormatted', '');
-  this.$set(this.model, 'id', '');
+  this.$set(this.model, 'employeeRole', null);
+  this.$set(this.model, 'firstName', null);
+  this.$set(this.model, 'middleName', null);
+  this.$set(this.model, 'lastName', null);
+  this.$set(this.model, 'employeeNumber', null);
+  this.$set(this.model, 'hireDate', null);
+  this.$set(this, 'hireDateFormatted', null);
+  this.$set(this.model, 'id', null);
   this.$set(this.model, 'workStatus', 100);
 
   // New Fields
-  this.$set(this.model, 'prime', '');
-  this.$set(this.model, 'contract', '');
-  this.$set(this.model, 'github', '');
-  this.$set(this.model, 'twitter', '');
-  this.$set(this.model, 'jobRole', '');
-  this.$set(this.model, 'birthday', '');
-  this.$set(this, 'birthdayFormat', '');
+  this.$set(this.model, 'prime', null);
+  this.$set(this.model, 'contract', null);
+  this.$set(this.model, 'github', null);
+  this.$set(this.model, 'twitter', null);
+  this.$set(this.model, 'jobRole', null);
+  this.$set(this.model, 'birthday', null);
+  this.$set(this, 'birthdayFormat', null);
   this.$set(this.model, 'birthdayFeed', false);
-  this.$set(this.model, 'city', '');
-  this.$set(this.model, 'st', '');
-  this.$set(this.model, 'country', '');
-  this.$set(this.model, 'deptDate', '');
-  this.$set(this, 'deptDateFormatted', '');
+  this.$set(this.model, 'city', null);
+  this.$set(this.model, 'st', null);
+  this.$set(this.model, 'country', null);
+  this.$set(this.model, 'deptDate', null);
+  this.$set(this, 'deptDateFormatted', null);
 
   this.deptDateFormatted = null;
 } // clearForm
@@ -392,7 +392,7 @@ function viewStatus() {
   if (this.model.workStatus && this.model.workStatus > 0 && this.model.workStatus < 100) {
     this.status = this.model.workStatus;
   } else {
-    this.status = '';
+    this.status = null;
   }
 } // viewStatus
 
@@ -461,7 +461,7 @@ async function submit() {
     // form validated
     if (!this.isInactive()) {
       // set deptDate if employee is active
-      this.$set(this.model, 'deptDate', '');
+      this.$set(this.model, 'deptDate', null);
     }
 
     // set employee hire date
@@ -495,7 +495,7 @@ async function submit() {
       } else {
         // failed to create employee
         this.$emit('error', newEmployee.response.data.message);
-        this.$set(this.model, 'id', ''); // reset id
+        this.$set(this.model, 'id', null); // reset id
         this.$emit('endAction');
       }
     }
@@ -517,7 +517,7 @@ function userIsAdmin() {
  * @return boolean - birthday feed is disabled
  */
 function disableBirthdayFeed() {
-  if (this.model.birthday == '' || this.model.birthday == null || typeof this.model.birthday == 'undefined') {
+  if (this.model.birthday == null) {
     this.undisabled = false;
     this.model.birthdayFeed = false;
     return true;
@@ -550,7 +550,7 @@ export default {
   created,
   data() {
     return {
-      birthdayFormat: '', // formatted birthday
+      birthdayFormat: null, // formatted birthday
       componentRules: [(v) => !!v || 'Something must be selected'], // rules for required componenet selection
       countries: [], // list of countries
       date: null, // hire date
@@ -578,7 +578,7 @@ export default {
         (v) => !!v || 'Email is required',
         (v) => regex.test(v) || 'Not a valid @consultwithcase email address'
       ], // rules for employee email
-      employeeRoleFormatted: '', // formatted employee role
+      employeeRoleFormatted: null, // formatted employee role
       requiredRules: [(v) => !!v || 'This field is required'], // rules for required fields
       hasExpenses: false, // employee has expenses
       hireDateFormatted: null, // formatted hire date
