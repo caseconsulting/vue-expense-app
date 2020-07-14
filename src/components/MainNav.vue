@@ -119,7 +119,7 @@ function checkActive() {
         }
       }
       this.items[i].active = isAnyActive;
-    } 
+    }
   }
 } // checkActive
 
