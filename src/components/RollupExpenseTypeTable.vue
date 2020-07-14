@@ -594,6 +594,18 @@ function selectExpense(expense) {
   });
 } // selectExpense
 
+function toggleShowOnFeed(expense) {
+  this.empBudgets = _.forEach(this.empBudgets, (budget) => {
+    if (expense.key === budget.key) {
+      return _.forEach(budget.expenses, (budgetExpense) => {
+        if (expense === budgetExpense) {
+          budgetExpense.showOnFeed = !budgetExpense.showOnFeed;
+        }
+      });
+    }
+  });
+}
+
 /**
  * Sets up an expense object to be submitted.
  *
@@ -666,10 +678,8 @@ function toggleGroup(value) {
 } // toggleGroup
 
 function toggleShowOnFeedGroup(value, toggle) {
-  console.log('showOnFeedGroupToggle');
   this.empBudgets = _.forEach(this.empBudgets, (budget) => {
     if (value === budget) {
-      console.log(value);
       if (budget.budgetName == 'Training') {
         let check = true;
         for (let i = 0; i < budget.expenses.length; i++) {
@@ -677,7 +687,6 @@ function toggleShowOnFeedGroup(value, toggle) {
             check = false;
           }
         }
-        console.log('There is at least one: ' + check);
         if (!check) {
           return _.forEach(budget.expenses, (expense) => {
             if (expense.showOnFeed) {
@@ -895,6 +904,7 @@ export default {
     toggleAll,
     toggleGroup,
     toggleShowOnFeedGroup,
+    toggleShowOnFeed,
     unCheckAllBoxes,
     print
   }
