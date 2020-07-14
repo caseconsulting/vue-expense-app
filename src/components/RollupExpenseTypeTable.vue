@@ -96,7 +96,6 @@
                 <v-switch
                   :input-value="item.showSwitch.all"
                   :indeterminate="item.showSwitch.indeterminate"
-                  @click.stop="toggleShowOnFeedGroup(item)"
                   :disabled="!item.selected || !isEditable(item)"
                 ></v-switch>
               </td>
@@ -666,15 +665,18 @@ function toggleGroup(value) {
 } // toggleGroup
 
 function toggleShowOnFeedGroup(value) {
+  console.log('showOnFeedGroupToggle');
   this.empBudgets = _.forEach(this.empBudgets, (budget) => {
     if (value === budget) {
-      if (budget == 'Training') {
+      console.log(value);
+      if (budget.budgetName == 'Training') {
         let check = true;
         for (let i = 0; i < budget.expenses.length; i++) {
           if (!determineShowOnFeed(budget.expenses[i])) {
             check = false;
           }
         }
+        console.log('There is at least one: ' + check);
         if (!check) {
           return _.forEach(budget.expenses, (expense) => {
             if (expense.showOnFeed) {
@@ -694,7 +696,7 @@ function toggleShowOnFeedGroup(value) {
             });
           }
         }
-      } else if (budget == 'High Five') {
+      } else if (budget.budgetName == 'High Five') {
         if (determineShowSwitch(budget).all) {
           return _.forEach(budget.expenses, (expense) => {
             expense.showOnFeed = false;
