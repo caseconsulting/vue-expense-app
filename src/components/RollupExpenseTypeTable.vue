@@ -65,7 +65,10 @@
                   :indeterminate="item.checkBox.indeterminate"
                   primary
                   hide-details
-                  @click.stop="toggleGroup(item)"
+                  @click.stop="
+                    toggleGroup(item);
+                    toggleShowOnFeedGroup(item);
+                  "
                   class="ma-0"
                 >
                 </v-checkbox>
@@ -87,6 +90,16 @@
 
               <!-- Total Expense Amount -->
               <td id="money-team">{{ getBudgetTotal(item.expenses) | moneyValue }}</td>
+
+              <!-- Show On Feed -->
+              <td style="width: 4px;">
+                <v-switch
+                  :input-value="item.showSwitch.all"
+                  :indeterminate="item.showSwitch.indeterminate"
+                  @click.stop="toggleShowOnFeedGroup(item)"
+                  :disabled="!item.selected || !isEditable(item)"
+                ></v-switch>
+              </td>
             </tr>
           </template>
           <!-- End rows in datatable -->
@@ -144,7 +157,7 @@ import _ from 'lodash';
  * @return Array - filtered budgets
  */
 function filteredItems() {
-  return _.filter(this.empBudgets, (budget) => {
+  let data = _.filter(this.empBudgets, (budget) => {
     if (!this.employee && !this.expenseType) {
       return true;
     } else if (!this.employee && this.expenseType) {
@@ -155,6 +168,8 @@ function filteredItems() {
       return budget.employeeId === this.employee && budget.expenseTypeId === this.expenseType;
     }
   });
+  console.log(data);
+  return data;
 } // filteredItems
 
 /**
@@ -316,6 +331,10 @@ function createExpenses(aggregatedData) {
         indeterminate: false
       },
       selected: false,
+      showSwitch: {
+        all: false,
+        indeterminante: false
+      },
       url: expense.url,
       category: expense.category,
       createdAt: expense.createdAt,
@@ -357,6 +376,32 @@ function determineCheckBox(budget) {
 
   return checkBox;
 } // determineCheckBox
+
+function determineShowSwitch(budget) {
+  let showSwitch = {
+    all: true,
+    indeterminate: false
+  };
+
+  _.forEach(budget.expenses, (expense) => {
+    if (!expense.showOnFeed) {
+      // at least one of the expenses is not selected to show on feed
+      showSwitch.all = false;
+    }
+
+    if (expense.selected) {
+      // at least one of the expenses is selected to show on feed
+      showSwitch.indeterminate = true;
+    }
+  });
+
+  if (showSwitch.all) {
+    // set indeterminate to false if all is selected to show on feed
+    showSwitch.indeterminate = false;
+  }
+
+  return showSwitch;
+}
 
 /**
  * Displays an error in the response status snackbar.
@@ -484,11 +529,6 @@ async function reimburseExpenses() {
   this.empBudgets = _.forEach(this.empBudgets, async (budget) => {
     return await _.forEach(budget.expenses, async (expense) => {
       if (expense.selected) {
-        /*if (showOnFeedExpenses.indexOf(expense.id) > -1) {
-            this.$set(expense, 'showOnFeed', true);
-          } else {
-            this.$set(expense, 'showOnFeed', false);
-          }*/
         expense.reimbursedDate = moment().format('YYYY-MM-DD');
         expensesToReimburse.push(submitExpenseObject(expense));
       }
@@ -625,6 +665,57 @@ function toggleGroup(value) {
   });
 } // toggleGroup
 
+function toggleShowOnFeedGroup(value) {
+  this.empBudgets = _.forEach(this.empBudgets, (budget) => {
+    if (value === budget) {
+      if (budget == 'Training') {
+        let check = true;
+        for (let i = 0; i < budget.expenses.length; i++) {
+          if (!determineShowOnFeed(budget.expenses[i])) {
+            check = false;
+          }
+        }
+        if (!check) {
+          return _.forEach(budget.expenses, (expense) => {
+            if (expense.showOnFeed) {
+              expense.showOnFeed = false;
+            } else {
+              expense.showOnFeed = determineShowOnFeed(expense);
+            }
+          });
+        } else {
+          if (determineShowSwitch(budget).all) {
+            return _.forEach(budget.expenses, (expense) => {
+              expense.showOnFeed = false;
+            });
+          } else {
+            return _.forEach(budget.expenses, (expense) => {
+              expense.showOnFeed = true;
+            });
+          }
+        }
+      } else if (budget == 'High Five') {
+        if (determineShowSwitch(budget).all) {
+          return _.forEach(budget.expenses, (expense) => {
+            expense.showOnFeed = false;
+          });
+        } else {
+          return _.forEach(budget.expenses, (expense) => {
+            expense.showOnFeed = true;
+          });
+        }
+      }
+    }
+  });
+
+  // set the group check box
+  this.empBudgets = _.forEach(this.empBudgets, (budget) => {
+    if (value === budget) {
+      budget.showSwitch = determineShowSwitch(budget);
+    }
+  });
+}
+
 /**
  * Uncheck all expenses and boxes
  */
@@ -638,6 +729,32 @@ function unCheckAllBoxes() {
     });
   });
 } // unCheckAllBoxes
+
+function determineShowOnFeed(expense) {
+  if (expense.budgetName == 'Training') {
+    if (
+      expense.category == 'Meals' ||
+      expense.category == 'Travel' ||
+      expense.category == 'Transportation' ||
+      expense.category == 'Lodging'
+    ) {
+      return false;
+    } else {
+      return true;
+    }
+  } else if (expense.budgetName == 'High Five') {
+    return true;
+  } else {
+    return false;
+  }
+}
+
+function isEditable(expense) {
+  if (expense.budgetName == 'Training' || expense.budgetName == 'High Five') {
+    return false;
+  }
+  return true;
+}
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -704,6 +821,12 @@ export default {
         text: 'Total',
         value: 'cost',
         align: 'center'
+      },
+      {
+        text: 'Show on Feed',
+        value: 'showOnFeed',
+        align: 'center',
+        sortable: false
       }
     ], // datatable headers
     itemsPerPage: -1, // data table elements per page
@@ -734,11 +857,13 @@ export default {
     clearStatus,
     clickedRow,
     constructAutoComplete,
+    determineShowOnFeed,
     displayError,
     emitSelectionChange,
     filterOutReimbursed,
     getBudgetTotal,
     groupEmployeeExpenses,
+    isEditable,
     isEmpty,
     isReimbursed,
     matchingEmployeeAndExpenseType,
@@ -748,6 +873,7 @@ export default {
     submitExpenseObject,
     toggleAll,
     toggleGroup,
+    toggleShowOnFeedGroup,
     unCheckAllBoxes,
     print
   }

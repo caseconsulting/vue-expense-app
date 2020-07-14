@@ -47,6 +47,11 @@
 
             <!-- Description -->
             <td :class="{ failed: item.failed }">{{ item.description | descripFormat }}</td>
+
+            <!-- Show on Feed -->
+            <td style="width: 4px;">
+              <v-switch :input-value="item.showOnFeed" :disabled="!item.selected || !isEditable(item)"></v-switch>
+            </td>
           </tr>
         </template>
         <!-- End rows in datatable -->
@@ -83,6 +88,13 @@ function expenseSelected(selectedExpense) {
   window.EventBus.$emit('selectExpense', selectedExpense);
 } // expenseSelected
 
+function isEditable(expense) {
+  if (expense.budgetName == 'Training' || expense.budgetName == 'High Five') {
+    return false;
+  }
+  return true;
+}
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                      EXPORT                      |
@@ -107,6 +119,12 @@ export default {
           text: 'Description',
           value: 'description',
           align: 'center'
+        },
+        {
+          text: 'Show on Feed',
+          value: 'showOnFeed',
+          align: 'center',
+          sortable: false
         }
       ],
       sortBy: 'purchaseDate',
@@ -138,7 +156,8 @@ export default {
   },
   methods: {
     expenseClicked,
-    expenseSelected
+    expenseSelected,
+    isEditable
   },
   props: ['expenses'] // list of expenses
 };
