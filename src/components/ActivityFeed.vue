@@ -12,20 +12,22 @@
         <v-progress-linear :indeterminate="true"></v-progress-linear>
       </div>
       <!-- timeline -->
-      <div v-else>
-        <v-timeline dense>
-          <v-timeline-item :color="event.color" v-for="event in events" :key="event.name">
-            <template v-slot:icon v-if="event.icon">
-              <icon class="white--text" :name="event.icon"></icon>
-            </template>
-            <h3>{{ event.date }}</h3>
-            <v-list-item class="ma-auto pa-auto" v-if="event.link" :href="event.link" target="_blank" :dense="true"
-              >{{ event.text }}&nbsp;<icon height="12" width="12" name="external-link-alt" color="blue"></icon>
-            </v-list-item>
-            <div class="px-4" v-else>{{ event.text }}</div>
-          </v-timeline-item>
-        </v-timeline>
-      </div>
+      <v-timeline v-else dense>
+        <v-virtual-scroll :items="events" :item-height="100" height="600">
+          <template v-slot="{ item }">
+            <v-timeline-item :color="item.color" :key="item.name">
+              <template v-slot:icon v-if="item.icon">
+                <icon class="white--text" :name="item.icon"></icon>
+              </template>
+              <h3>{{ item.date }}</h3>
+              <v-list-item class="ma-auto pa-auto" v-if="item.link" :href="item.link" target="_blank" :dense="true"
+                >{{ item.text }}&nbsp;<icon height="12" width="12" name="external-link-alt" color="blue"></icon>
+              </v-list-item>
+              <div class="px-4" v-else>{{ item.text }}</div>
+            </v-timeline-item>
+          </template>
+        </v-virtual-scroll>
+      </v-timeline>
     </v-card>
   </v-flex>
 </template>
