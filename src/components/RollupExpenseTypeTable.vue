@@ -96,6 +96,7 @@
                 <v-switch
                   :input-value="item.showSwitch.all"
                   :indeterminate="item.showSwitch.indeterminate"
+                  @click.stop="toggleShowOnFeedGroup(item, true)"
                   :disabled="!item.selected || !isEditable(item)"
                 ></v-switch>
               </td>
@@ -664,7 +665,7 @@ function toggleGroup(value) {
   });
 } // toggleGroup
 
-function toggleShowOnFeedGroup(value) {
+function toggleShowOnFeedGroup(value, toggle) {
   console.log('showOnFeedGroupToggle');
   this.empBudgets = _.forEach(this.empBudgets, (budget) => {
     if (value === budget) {
@@ -705,6 +706,24 @@ function toggleShowOnFeedGroup(value) {
           return _.forEach(budget.expenses, (expense) => {
             expense.showOnFeed = true;
           });
+        }
+      } else {
+        if (toggle) {
+          if (determineShowSwitch(budget).all) {
+            return _.forEach(budget.expenses, (expense) => {
+              expense.showOnFeed = false;
+            });
+          } else {
+            return _.forEach(budget.expenses, (expense) => {
+              expense.showOnFeed = true;
+            });
+          }
+        } else {
+          if (determineShowSwitch(budget).all) {
+            return _.forEach(budget.expenses, (expense) => {
+              expense.showOnFeed = false;
+            });
+          }
         }
       }
     }
