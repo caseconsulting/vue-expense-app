@@ -22,13 +22,7 @@
   <div v-else>
     <v-tooltip top>
       <template v-slot:activator="{ on }">
-        <v-btn
-          :disabled="!expense.receipt || expense.receipt.trim() <= 0 || midAction"
-          text
-          icon
-          @click="openDownloadTab"
-          v-on="on"
-        >
+        <v-btn :disabled="isEmpty(expense.receipt) || midAction" text icon @click="openDownloadTab" v-on="on">
           <v-icon style="color: #606060;">
             cloud_download
           </v-icon>
