@@ -30,7 +30,7 @@
               v-for="budget in budgets"
               :key="budget.expenseTypeId"
               @click="selectBudget(budget)"
-              class="ma-auto pa-auto"
+              class="px-1"
               :dense="true"
               >{{ budget.expenseTypeName }}:
               <v-spacer></v-spacer>
