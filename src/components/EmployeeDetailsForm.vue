@@ -11,7 +11,7 @@
       <v-form class="px-2" ref="form" v-model="valid" lazy-validation>
         <!-- LinkedIn account -->
         <!-- Tabs -->
-        <v-tabs class="pb-4">
+        <v-tabs show-arrows class="pb-4">
           <v-tab href="#degrees">Degrees</v-tab>
           <v-tab href="#jobExperience">Job Experience</v-tab>
           <v-tab href="#certifications">Certifications</v-tab>
@@ -38,7 +38,7 @@
           </v-tab-item>
           <!-- Experience -->
           <v-tab-item id="jobExperience">
-            <div class="py-2 px-5" style="border: 1px solid grey;">
+            <div class="pb-7">
               <p>Case:</p>
               <!-- Start date -->
               <v-menu
@@ -64,15 +64,16 @@
             </div>
             <!-- Plus button  -->
             <!-- If user adds another -->
-            <div class="py-2 px-5" style="border: 1px solid grey;">
+            <div class="py-2">
+              <!-- company  -->
+              <p class="pr-3" style="display: inline-block;">Company:</p>
+              <v-autocomplete style="display: inline-block; width: 80%;"></v-autocomplete>
+              <br />
               <!-- general, IC radio button -->
               <input type="radio" id="general" name="job-type" value="general" />
               <label for="general">General</label><br />
               <input type="radio" id="ic" name="job-type" value="ic" />
               <label for="ic">IC</label><br />
-              <!-- company  -->
-              <p class="pr-3" style="display: inline-block;">Company:</p>
-              <v-autocomplete style="display: inline-block; width: 80%;"></v-autocomplete>
               <!-- start date -->
               <v-menu
                 :close-on-content-click="true"
