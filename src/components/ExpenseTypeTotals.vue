@@ -1,27 +1,14 @@
 <template>
   <div>
     <v-card v-if="totals.length" class="slide-in-blurred-right">
-      <v-card-title class="header_style">
-        <h4>Reimbursements Info</h4>
-      </v-card-title>
-      <v-card-text class="pt-5 pb-0 black--text">
-        <v-card-title class="headline">Confirm Reimbursement(s): </v-card-title>
-        <v-spacer></v-spacer>
+      <v-card-title class="subtitle-2">
+        <v-flex lg12 class="headline">Totals</v-flex>
         <v-flex lg12>
-          <v-btn class="ma-2" outlined color="success" @click="emit('confirm-reimburse')">Reimburse</v-btn>
+          <p v-for="total in totals" :key="total.id">
+            <span>{{ total.name }}:</span> {{ total.costTotal | moneyValue }}
+          </p>
         </v-flex>
-
-        <v-divider></v-divider>
-
-        <v-card-title class="subtitle-2">
-          <v-flex lg12 class="headline">Totals:</v-flex>
-          <v-flex lg12>
-            <p v-for="total in totals" :key="total.id">
-              <span>{{ total.name }}:</span> {{ total.costTotal | moneyValue }}
-            </p>
-          </v-flex>
-        </v-card-title>
-      </v-card-text>
+      </v-card-title>
     </v-card>
   </div>
 </template>
@@ -66,21 +53,6 @@ function totals() {
 // |                     METHODS                      |
 // |                                                  |
 // |--------------------------------------------------|
-/**
- * Emits a message and data if it exists.
- *
- * @param msg - Message to emit
- * @param data - Data to emit
- */
-function emit(msg, data) {
-  if (data) {
-    // data exists
-    window.EventBus.$emit(msg);
-  } else {
-    // data does not exist
-    window.EventBus.$emit(msg);
-  }
-} // emit
 /**
  * Update the expense types selected.
  *
@@ -152,8 +124,7 @@ export default {
     }
   },
   methods: {
-    updateSelected,
-    emit
+    updateSelected
   }
 };
 </script>
