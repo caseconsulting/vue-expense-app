@@ -7,9 +7,6 @@
     <v-flex lg2 md2 sm12>
       <!-- Expense Info -->
       <expense-info class="jerryrig"></expense-info>
-
-      <!-- <confirm-reimbursements class="mb-4"></confirm-reimbursements> -->
-      <v-spacer></v-spacer>
       <!-- Expenses Total -->
       <expense-type-totals></expense-type-totals>
     </v-flex>
@@ -20,8 +17,6 @@
 import ExpenseInfo from '../components/ExpenseInfo.vue';
 import ExpenseTypeTotals from '../components/ExpenseTypeTotals.vue';
 import RollupExpenseTypeTable from '../components/RollupExpenseTypeTable.vue';
-
-// import ReimburseModal from '../components/ReimburseModal.vue';
 
 // |--------------------------------------------------|
 // |                                                  |
