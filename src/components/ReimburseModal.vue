@@ -2,7 +2,7 @@
   <v-layout row justify-center>
     <v-dialog v-model="activate" persistent max-width="350">
       <v-card>
-        <v-card-title class="headline">Are you sure you want to reimburse the following expense(s)?</v-card-title>
+        <v-card-title class="headline">Are you sure you want to reimburse these expenses?</v-card-title>
         <v-card-actions>
           <v-spacer></v-spacer>
           <v-btn color="info" text @click.native="emit(`canceled-reimburse`)">No</v-btn>
