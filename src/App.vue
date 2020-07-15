@@ -232,7 +232,7 @@ export default {
       { name: 'Make Offices', link: 'https://redmine.consultwithcase.com/attachments/download/82/floorplan.jpg' },
       {
         name: 'Redmine',
-        link: 'https://www.redmine.org/login'
+        link: 'https://redmine.consultwithcase.com/login'
       }
     ],
     mediaLinks: [
