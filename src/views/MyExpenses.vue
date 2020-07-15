@@ -624,9 +624,9 @@ function onSelect(item) {
   this.$set(this.expense, 'description', item.description);
   this.$set(this.expense, 'purchaseDate', item.purchaseDate);
   this.$set(this.expense, 'reimbursedDate', item.reimbursedDate);
-  this.$set(this.expense, 'note', item.note.trim());
+  this.$set(this.expense, 'note', item.note);
   this.$set(this.expense, 'receipt', item.receipt);
-  this.$set(this.expense, 'url', item.url.trim());
+  this.$set(this.expense, 'url', item.url);
   this.$set(this.expense, 'showOnFeed', item.showOnFeed);
 } // onSelect
 

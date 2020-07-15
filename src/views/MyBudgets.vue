@@ -645,7 +645,7 @@ export default {
         note: null,
         url: null,
         createdAt: null,
-        reciept: null,
+        receipt: null,
         cost: '',
         description: '',
         employeeId: '',
