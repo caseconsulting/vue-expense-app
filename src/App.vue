@@ -37,6 +37,7 @@
               <v-list-item v-for="(l, index) in links" :key="index" :href="l.link" target="_blank">
                 <v-list-item-title>{{ l.name }}</v-list-item-title>
               </v-list-item>
+              <v-list-item :href="floorPlan" target="_blank">Make Offices</v-list-item>
             </v-list>
           </v-menu>
           <v-btn
@@ -65,6 +66,7 @@
               <v-list-item v-for="(l, index) in links" :key="index" :href="l.link" target="_blank">
                 <v-list-item-title>{{ l.name }}</v-list-item-title>
               </v-list-item>
+              <v-list-item :href="floorPlan" target="_blank">Make Offices</v-list-item>
               <hr
                 role="separator"
                 aria-orientation="horizontal"
@@ -117,6 +119,7 @@ import router from './router.js';
 import MobileDetect from 'mobile-detect';
 import TimeOutModal from '@/components/TimeOutModal.vue';
 import TimeOutWarningModal from '@/components/TimeOutWarningModal.vue';
+import floorPlan from '@/assets/img/MakeOfficesfloorplan.jpg';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -214,6 +217,7 @@ async function created() {
 
 export default {
   data: () => ({
+    floorPlan: floorPlan,
     drawer: isLoggedIn(),
     inset: false,
     profilePic: 'src/assets/img/logo-big.png',
@@ -229,7 +233,6 @@ export default {
       { name: 'TSheets', link: 'https://caseconsulting.tsheets.com/' },
       { name: 'ADP', link: 'https://www.my.adp.com/' },
       { name: 'Life Insurance', link: 'https://www.reliancestandard.com/home/' },
-      { name: 'Make Offices', link: 'https://redmine.consultwithcase.com/attachments/download/82/floorplan.jpg' },
       {
         name: 'Redmine',
         link: 'https://www.redmine.org/login'
