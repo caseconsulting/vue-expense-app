@@ -331,6 +331,9 @@ async function createEvents() {
         }
         event.daysFromToday = now.startOf('day').diff(anniversary.startOf('day'), 'days');
         event.color = '#bc3825';
+        if (this.textMaxLength < event.text.length) {
+          event.truncatedText = _.truncate(event.text, { length: this.textMaxLength });
+        }
         return event;
       } else {
         return null; //dont show anything for people hired in the future
@@ -341,7 +344,7 @@ async function createEvents() {
   });
   // generate birthdays
   let birthdays = _.map(this.employees, (b) => {
-    if (b.birthdayFeed) {
+    if (b.birthdayFeed && b.birthday != ' ') {
       let event = {};
       let now = moment();
       let birthday = moment(b.birthday, 'YYYY-MM-DD');
@@ -362,6 +365,9 @@ async function createEvents() {
       event.icon = 'birthday-cake';
       event.color = 'orange';
       event.daysFromToday = now.startOf('day').diff(birthday.startOf('day'), 'days');
+      if (this.textMaxLength < event.text.length) {
+        event.truncatedText = _.truncate(event.text, { length: this.textMaxLength });
+      }
       return event;
     }
     return null;
@@ -388,6 +394,9 @@ async function createEvents() {
       if (a.budgetName == 'High Five') {
         event.text = `${a.firstName} gave ${a.description} a High Five: ${a.note}`;
       }
+      if (this.textMaxLength < event.text.length) {
+        event.truncatedText = _.truncate(event.text, { length: this.textMaxLength });
+      }
       return event;
     } else {
       //not a technology budget
@@ -411,6 +420,9 @@ async function createEvents() {
     event.daysFromToday = now.startOf('day').diff(startDate.startOf('day'), 'days');
     event.link = a.app_url;
     event.color = '#1a73e8';
+    if (this.textMaxLength < event.text.length) {
+      event.truncatedText = _.truncate(event.text, { length: this.textMaxLength });
+    }
     return event;
   });
   let mergedEventsList = [...anniversaries, ...birthdays, ...expenses, ...schedules]; // merges lists
@@ -674,6 +686,7 @@ export default {
       loading: false, // loading status
       scheduleEntries: [],
       seconds: 0, // seconds until next anniversary date
+      textMaxLength: 110,
       tweets: [],
       status: {
         statusType: undefined,
