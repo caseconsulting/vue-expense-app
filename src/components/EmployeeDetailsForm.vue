@@ -20,21 +20,38 @@
           <v-tab href="#customerOrgExp">Customer Org</v-tab>
           <!-- Degrees -->
           <v-tab-item id="degrees">
+            <p class="pr-5" style="display: inline-block;">Degree:</p>
             <v-autocomplete
-              style="width: 35%; display: inline-block;"
+              style="width: 70%; display: inline-block;"
               v-model="this.employee.degree"
               :items="this.employee.degrees"
             ></v-autocomplete>
-            <p class="px-2" style="display: inline-block;">in</p>
+            <br />
+            <p class="pr-5" style="display: inline-block;">Major:</p>
             <v-autocomplete
-              class="pr-3"
-              style="width: 55%; display: inline-block;"
+              style="width: 70%; display: inline-block;"
               v-model="this.employee.major"
               :items="this.employee.majors"
             ></v-autocomplete>
-            <!-- Completion year -->
             <!-- Plus button  -->
-            <v-icon style="display: inline-block;">add</v-icon>
+            <v-icon>add</v-icon><br />
+            <p class="pr-5" style="display: inline-block;">Minor:</p>
+            <v-autocomplete
+              style="width: 70%; display: inline-block;"
+              v-model="this.employee.minor"
+              :items="this.employee.minors"
+            ></v-autocomplete>
+            <!-- Plus button  -->
+            <v-icon>add</v-icon><br />
+            <p class="pr-5" style="display: inline-block;">Concentration:</p>
+            <v-autocomplete
+              style="width: 70%; display: inline-block;"
+              v-model="this.employee.major"
+              :items="this.employee.majors"
+            ></v-autocomplete>
+            <!-- Plus button  -->
+            <v-icon>add</v-icon><br />
+            <!-- Completion year -->
           </v-tab-item>
           <!-- Experience -->
           <v-tab-item id="jobExperience">
