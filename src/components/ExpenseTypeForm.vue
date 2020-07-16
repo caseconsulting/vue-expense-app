@@ -18,14 +18,14 @@
 
         <!-- Categories -->
         <v-combobox
-          v-model="model.categories"
+          v-model="categories"
           hint="Maximum of 10 categories"
           label="Categories (optional)"
           multiple
           small-chips
           append-icon
-          clearable
           :search-input.sync="categoryInput"
+          @input="createCategory(categoryInput)"
         >
           <template v-slot:selection="{ attrs, item }">
             <v-chip close outlined label color="gray" @click:close="removeCategory(item)">
@@ -34,6 +34,12 @@
             </v-chip>
           </template>
         </v-combobox>
+
+        <v-layout row wrap>
+          <v-flex v-for="(category, index) in model.categories" :key="index" xs6>
+            <v-checkbox light :label="category.name" v-model="category.showOnFeed"></v-checkbox>
+          </v-flex>
+        </v-layout>
         <br />
 
         <!-- Budget Amount -->
@@ -211,6 +217,16 @@ function clearForm() {
   this.customAccess = [];
 } // clearForm
 
+function createCategory(catName) {
+  var category = { name: catName, showOnFeed: false };
+  for (var i = 0; i < this.model.categories.length; i++) {
+    if (this.model.categories[i].name == catName) {
+      return;
+    }
+  }
+  this.model.categories.push(category);
+} //createCategory
+
 /**
  * Formats a date.
  *
@@ -289,6 +305,8 @@ function parseDate(date) {
 function removeCategory(category) {
   this.model.categories.splice(this.model.categories.indexOf(category), 1);
   this.model.categories = [...this.model.categories];
+  this.categories.splice(this.categories.indexOf(category), 1);
+  this.categories = [...this.categories];
 } // removeCategory
 
 /**
@@ -297,11 +315,6 @@ function removeCategory(category) {
 async function submit() {
   this.submitting = true; // set loading status to true
   this.$emit('startAction');
-
-  // Add a typed-pending category if exists and not already included
-  if (!this.isEmpty(this.categoryInput) && !this.model.categories.includes(this.categoryInput)) {
-    this.model.categories.push(this.categoryInput);
-  }
 
   // set accessibleBy based on access radio
   if (this.isCustomSelected()) {
@@ -329,6 +342,10 @@ async function submit() {
   if (this.model.isInactive == null) {
     // set is inactive flag to false if checkbox is null
     this.model.isInactive = false;
+  }
+
+  for (var i = 0; i < this.model.categories.length; i++) {
+    this.model.categories[i] = JSON.stringify(this.model.categories[i]);
   }
 
   if (this.$refs.form.validate()) {
@@ -418,6 +435,7 @@ export default {
           /^[+-]?[0-9]{1,3}(?:,?[0-9]{3})*(?:\.[0-9]{2})?$/.test(v) ||
           'Budget amount must be a number with two decimal digits.'
       ],
+      categories: [],
       categoryInput: null, // category combobox input
       customAccess: [],
       dateRules: [
@@ -434,6 +452,7 @@ export default {
   },
   methods: {
     clearForm,
+    createCategory,
     formatDate,
     isAllSelected,
     isCustomSelected,
