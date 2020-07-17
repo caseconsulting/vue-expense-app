@@ -37,7 +37,12 @@
 
         <v-layout row wrap>
           <v-flex v-for="(category, index) in model.categories" :key="index" xs6>
-            <v-checkbox v-if="category.showOnFeed" light :label="category.name" v-model="category.showOnFeed"></v-checkbox>
+            <v-checkbox
+              v-if="category.showOnFeed"
+              light
+              :label="category.name"
+              v-model="category.showOnFeed"
+            ></v-checkbox>
           </v-flex>
         </v-layout>
         <br />
