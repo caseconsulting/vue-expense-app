@@ -235,7 +235,7 @@ export default {
       { name: 'Life Insurance', link: 'https://www.reliancestandard.com/home/' },
       {
         name: 'Redmine',
-        link: 'https://www.redmine.org/login'
+        link: 'https://redmine.consultwithcase.com'
       }
     ],
     mediaLinks: [
