@@ -62,6 +62,8 @@
           chips
         ></v-select>
 
+        {{ expense.category }}
+
         <!-- Cost -->
         <v-text-field
           prefix="$"
@@ -259,8 +261,8 @@ function getCategories() {
     }
   });
   if (this.selectedExpenseType) {
-    return _.sortBy(this.selectedExpenseType.categories, (category) => {
-      return category;
+    return _.map(this.selectedExpenseType.categories, (category) => {
+      return category.name;
     });
   }
   return [];
@@ -1054,7 +1056,7 @@ function disableShowOnFeed() {
   });
 
   if (selected) {
-    if (selected.budgetName === 'High Five' || selected.budgetName === 'Training') {
+    if (selected.budgetName === 'High Five' || selected.budgetName === 'Training' || this.requiredCategoryFeed) {
       this.undisabledSOF = false;
       this.expense.showOnFeed = true;
       return true;
@@ -1247,6 +1249,7 @@ export default {
       receiptRules: [(v) => !!v || 'Receipts are required'], // rules for receipt
       receiptText: null,
       reimbursedDateFormatted: null, // formatted reimburse date
+      requiredCategoryFeed: false,
       selectedEmployee: {}, // selected employees
       selectedExpenseType: {}, // selected expense types
       selectedRecipient: {}, // the recipent selected for a high five
@@ -1301,6 +1304,23 @@ export default {
     'isEdit' // if updating an expense
   ],
   watch: {
+    // 'expense.category': function () {
+    //   console.log('here');
+    //   if (this.expense.category != null) {
+    //     let category = _.find(this.selectedExpenseType.categories, (category) => {
+    //       return category == this.expense.category;
+    //     });
+    //     if (category.showOnFeed) {
+    //       console.log('here');
+    //       expense.showOnFeed = true;
+    //       this.requiredCategoryFeed = true;
+    //     } else {
+    //       this.requiredCategoryFeed = false;
+    //     }
+    //   } else {
+    //     this.requiredCategoryFeed = false;
+    //   }
+    // },
     'expense.employeeId': function () {
       //watches admin accessible employee field to know who can be a recipient
       this.highFiveRecipients = _.compact(

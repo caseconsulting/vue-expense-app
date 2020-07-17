@@ -25,7 +25,6 @@
           small-chips
           append-icon
           :search-input.sync="categoryInput"
-          @input="createCategory(categoryInput)"
         >
           <template v-slot:selection="{ attrs, item }">
             <v-chip close outlined label color="gray" @click:close="removeCategory(item)">
@@ -216,16 +215,6 @@ function clearForm() {
   this.$set(this.model, 'alwaysOnFeed', false);
   this.customAccess = [];
 } // clearForm
-
-function createCategory(catName) {
-  var category = { name: catName, showOnFeed: false };
-  for (var i = 0; i < this.model.categories.length; i++) {
-    if (this.model.categories[i].name == catName) {
-      return;
-    }
-  }
-  this.model.categories.push(category);
-} //createCategory
 
 /**
  * Formats a date.
@@ -453,7 +442,6 @@ export default {
   },
   methods: {
     clearForm,
-    createCategory,
     formatDate,
     isAllSelected,
     isCustomSelected,
@@ -466,6 +454,13 @@ export default {
   },
   props: ['model'], // expense type to be created/updated
   watch: {
+    'model.id': function () {
+      if (this.model.id != null) {
+        this.categories = _.map(this.model.categories, (category) => {
+          return category.name;
+        });
+      }
+    },
     'model.accessibleBy': function (val) {
       if (!this.submitting) {
         if (!['ALL', 'FULL TIME', 'FULL', 'CUSTOM'].includes(val)) {
@@ -484,9 +479,23 @@ export default {
         }
       }
     },
-    'model.categories': function (val) {
+    categories: function (val) {
       if (val.length > 10) {
+        this.$nextTick(() => this.categories.pop());
         this.$nextTick(() => this.model.categories.pop());
+      }
+      if (val.length > this.model.categories.length) {
+        let c = _.map(this.model.categories, (category) => {
+          return category.name;
+        });
+        let index = _.findIndex(val, (x) => {
+          return !c.includes(x);
+        });
+        this.model.categories.push({ name: val[index], showOnFeed: false });
+      } else if (val.length < this.model.categories.length) {
+        this.model.categories = _.filter(this.model.categories, (category) => {
+          return val.includes(category.name);
+        });
       }
     },
     'model.endDate': function () {
