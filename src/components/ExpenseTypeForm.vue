@@ -37,7 +37,7 @@
 
         <v-layout row wrap>
           <v-flex v-for="(category, index) in model.categories" :key="index" xs6>
-            <v-checkbox light :label="category.name" v-model="category.showOnFeed"></v-checkbox>
+            <v-checkbox v-if="category.showOnFeed" light :label="category.name" v-model="category.showOnFeed"></v-checkbox>
           </v-flex>
         </v-layout>
         <br />
@@ -347,6 +347,7 @@ async function submit() {
   for (var i = 0; i < this.model.categories.length; i++) {
     this.model.categories[i] = JSON.stringify(this.model.categories[i]);
   }
+  console.log(this.model.categories);
 
   if (this.$refs.form.validate()) {
     // form is validated
