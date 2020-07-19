@@ -62,8 +62,6 @@
           chips
         ></v-select>
 
-        {{ this.expense.category }}
-
         <!-- Cost -->
         <v-text-field
           prefix="$"
@@ -198,7 +196,7 @@
           v-if="isAdmin"
           v-model="expense.showOnFeed"
           label="Have expense show on company feed?"
-          :disabled="disableShowOnFeed()"
+          :disabled="disableShowOnFeed"
         ></v-switch>
 
         <!-- Buttons -->
@@ -1056,31 +1054,8 @@ function disableShowOnFeed() {
   let selected = _.find(this.expenseTypes, (expenseType) => {
     return expenseType.value === this.expense.expenseTypeId;
   });
-
-  if (selected) {
-    if (selected.disableShowOnFeedToggle || this.requiredCategoryFeed) {
-      this.undisabledSOF = false;
-      this.expense.showOnFeed = true;
-      return true;
-    } else if (
-      this.expense.reimbursedDate == '' ||
-      this.expense.reimbursedDate == null ||
-      typeof this.expense.reimbursedDate == 'undefined'
-    ) {
-      this.undisabledSOF = false;
-      this.expense.showOnFeed = false;
-      return true;
-    }
-    // console.log(this.expense.showOnFeed);
-    this.undisabledSOF = true;
-    return false;
-  } else {
-    // console.log(this.expense.showOnFeed);
-    this.undisabledSOF = false;
-    this.expense.showOnFeed = false;
-    return true;
-  }
-}
+  return selected ? selected.disableShowOnFeedToggle : false;
+} // disableShowOnFeed
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -1198,6 +1173,7 @@ export default {
     FileUpload
   },
   computed: {
+    disableShowOnFeed,
     isAdmin,
     isDifferentExpenseType,
     isReimbursed,
@@ -1252,7 +1228,6 @@ export default {
       receiptRules: [(v) => !!v || 'Receipts are required'], // rules for receipt
       receiptText: null,
       reimbursedDateFormatted: null, // formatted reimburse date
-      requiredCategoryFeed: false,
       selectedEmployee: {}, // selected employees
       selectedExpenseType: {}, // selected expense types
       selectedRecipient: {}, // the recipent selected for a high five
@@ -1272,8 +1247,7 @@ export default {
           'URL must be valid. Only http(s) are accepted.'
       ], // rules for training url
       userInfo: {}, // user info
-      valid: false, // form validity
-      undisabledSOF: false // control disable of showonfeed switch
+      valid: false // form validity
     };
   },
   methods: {
@@ -1299,32 +1273,39 @@ export default {
     parseDate,
     submit,
     setFile,
-    updateExistingEntry,
-    disableShowOnFeed
+    updateExistingEntry
   },
   props: [
     'expense', // expense to be created/updated
     'isEdit' // if updating an expense
   ],
   watch: {
-    'expense.cost': function () {
-      console.log('cost changed');
-    },
     'expense.category': function () {
-      console.log('category changed');
-      if (this.expense.category != null && this.selectedExpenseType) {
-        let category = _.find(this.selectedExpenseType.categories, (category) => {
-          return category == this.expense.category;
-        });
-        if (category.showOnFeed) {
-          console.log('here');
-          this.expense.showOnFeed = true;
-          this.requiredCategoryFeed = true;
+      if (this.selectedExpenseType) {
+        if (this.selectedExpenseType.disableShowOnFeedToggle) {
+          // check for categories
+          if (_.isEmpty(this.selectedExpenseType.categories)) {
+            // expenseType without categories
+            this.expense.showOnFeed = true;
+          } else {
+            // expenseType with categories
+            let category = _.find(this.selectedExpenseType.categories, (category) => {
+              return category.name == this.expense.category;
+            });
+            this.expense.showOnFeed = category.showOnFeed;
+          }
         } else {
-          this.requiredCategoryFeed = false;
+          if (_.isEmpty(this.selectedExpenseType.categories)) {
+            // expenseType without categories
+            this.expense.showOnFeed = false;
+          } else {
+            // expenseType with categories
+            let category = _.find(this.selectedExpenseType.categories, (category) => {
+              return category.name == this.expense.category;
+            });
+            this.expense.showOnFeed = category.showOnFeed;
+          }
         }
-      } else {
-        this.requiredCategoryFeed = false;
       }
     },
     'expense.employeeId': function () {
@@ -1351,18 +1332,20 @@ export default {
       );
     },
     'expense.expenseTypeId': function () {
-      let selected = _.find(this.expenseTypes, (expenseType) => {
+      this.selectedExpenseType = _.find(this.expenseTypes, (expenseType) => {
         return expenseType.value === this.expense.expenseTypeId;
       });
 
-      if (selected) {
+      if (this.selectedExpenseType) {
         // set hint
-        this.hint = selected.recurringFlag
+        this.hint = this.selectedExpenseType.recurringFlag
           ? 'Recurring Expense Type'
-          : `Available from ${formatDate(selected.startDate)} - ${formatDate(selected.endDate)}`;
+          : `Available from ${formatDate(this.selectedExpenseType.startDate)} - ${formatDate(
+              this.selectedExpenseType.endDate
+            )}`;
 
         // set high five cost
-        if (selected.budgetName === 'High Five') {
+        if (this.selectedExpenseType.budgetName === 'High Five') {
           this.$set(this.expense, 'cost', moneyFilter(50));
           this.isHighFive = true;
         } else {
@@ -1370,10 +1353,37 @@ export default {
         }
 
         // set requires recipient
-        if (selected.hasRecipient == true) {
+        if (this.selectedExpenseType.hasRecipient == true) {
           this.reqRecipient = true;
         } else {
           this.reqRecipient = false;
+        }
+
+        if (this.selectedExpenseType.disableShowOnFeedToggle) {
+          // if SOF toggle is disabled
+          if (_.isEmpty(this.selectedExpenseType.categories)) {
+            // expenseType without categories
+            this.expense.showOnFeed = true;
+          } else {
+            // expenseType with categories
+            let category = _.find(this.selectedExpenseType.categories, (category) => {
+              return category.name == this.expense.category;
+            });
+            this.expense.showOnFeed = category.showOnFeed;
+          }
+        } else {
+          if (_.isEmpty(this.selectedExpenseType.categories)) {
+            // expenseType without categories
+            this.expense.showOnFeed = false;
+          } else {
+            // expenseType with categories
+            if (!this.expense.showOnFeed) {
+              let category = _.find(this.selectedExpenseType.categories, (category) => {
+                return category.name == this.expense.category;
+              });
+              this.expense.showOnFeed = category.showOnFeed;
+            }
+          }
         }
       } else {
         this.hint = '';
@@ -1399,11 +1409,6 @@ export default {
       //fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
       if (this.expense.reimbursedDate !== null && !this.formatDate(this.expense.reimbursedDate)) {
         this.expense.reimbursedDate = null;
-      }
-    },
-    undisabledSOF: function () {
-      if (!this.expense.showOnFeed && this.undisabledSOF == true) {
-        this.expense.showOnFeed = false;
       }
     }
   }

@@ -34,9 +34,17 @@
           </template>
         </v-combobox>
 
+        <p v-if="model.categories.length > 0" class="pt-4">Show this category on feed?</p>
+
         <v-layout row wrap>
-          <v-flex v-for="(category, index) in model.categories" :key="index" xs6>
-            <v-checkbox v-if="!submitting" light :label="category.name" v-model="category.showOnFeed"></v-checkbox>
+          <v-flex class="py-0" v-for="(category, index) in model.categories" :key="index" xs6>
+            <v-checkbox
+              class="my-0"
+              v-if="!submitting"
+              light
+              :label="category.name"
+              v-model="category.showOnFeed"
+            ></v-checkbox>
           </v-flex>
         </v-layout>
         <br />
@@ -166,10 +174,7 @@
         <v-switch v-model="model.hasRecipient" label="Does this expense type have a recipient?"></v-switch>
 
         <!-- always show on feed -->
-        <v-switch
-          v-model="model.disableShowOnFeedToggle"
-          label="Have this expense type always show on company feed?"
-        ></v-switch>
+        <v-switch v-model="model.disableShowOnFeedToggle" label="Disable show on feed toggle?"></v-switch>
 
         <!-- Buttons -->
         <!-- Cancel Button -->
