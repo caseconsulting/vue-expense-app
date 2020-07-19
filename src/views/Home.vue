@@ -307,15 +307,19 @@ async function createEvents() {
     let event = {};
     if (a.workStatus != 0 && hireDate.isValid()) {
       let now = moment();
+      let cutOff = moment().subtract(6, 'months').startOf('day'); //can't use now because itll change now
       //set what we want to see in the Date
       if (now.isAfter(hireDate, 'day')) {
         //hire date is before today
         let anniversary = moment([now.year(), hireDate.month(), hireDate.date()]); //set anniversary to hiredate but this year
         let diff = now.startOf('day').diff(anniversary.startOf('day'), 'day'); //difference between today and anniversary
         event.date = getEventDateMessage(anniversary);
-        if (diff < 0 && diff < -6) {
+        if (diff < -6) {
           anniversary.subtract(1, 'years');
           event.date = anniversary.format('ll');
+        }
+        if (cutOff.isAfter(anniversary.startOf('day'))) {
+          return null;
         }
         if (anniversary.isSame(hireDate, 'day')) {
           event.text = a.firstName + ' has joined the Case Consulting team!'; //new hire message
@@ -330,6 +334,7 @@ async function createEvents() {
           event.icon = 'glass-cheers';
         }
         event.daysFromToday = now.startOf('day').diff(anniversary.startOf('day'), 'days');
+
         event.color = '#bc3825';
         if (this.textMaxLength < event.text.length) {
           event.truncatedText = _.truncate(event.text, { length: this.textMaxLength });
@@ -347,14 +352,19 @@ async function createEvents() {
     if (b.birthdayFeed && b.birthday != ' ') {
       let event = {};
       let now = moment();
+      let cutOff = moment().subtract(6, 'months').startOf('day');
       let birthday = moment(b.birthday, 'YYYY-MM-DD');
       birthday = moment([now.year(), birthday.month(), birthday.date()]); // Gets birthday date this year
+
       let diff = now.startOf('day').diff(birthday.startOf('day'), 'day');
       // Get event date text
       event.date = getEventDateMessage(birthday);
-      if (diff < 0 && diff < -6) {
+      if (diff < -6) {
         birthday.subtract(1, 'years');
         event.date = birthday.format('ll');
+      }
+      if (cutOff.isAfter(birthday.startOf('day'))) {
+        return null;
       }
       // Sets event text
       if (diff == 0) {
@@ -406,11 +416,14 @@ async function createEvents() {
   //generate schedules
   let schedules = _.map(this.scheduleEntries, (a) => {
     let now = moment();
+    let cutOff = moment().subtract(6, 'months').startOf('day');
     let startDate = moment(a.starts_at);
     let endDate = moment(a.ends_at);
     let event = {};
     event.date = getEventDateMessage(startDate);
-
+    if (cutOff.isAfter(startDate.startOf('day'))) {
+      return null;
+    }
     if (startDate.startOf('day').isSame(endDate.startOf('day'), 'days')) {
       event.text = `${a.title} is today!`;
     } else {
