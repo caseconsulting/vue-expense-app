@@ -166,7 +166,10 @@
         <v-switch v-model="model.hasRecipient" label="Does this expense type have a recipient?"></v-switch>
 
         <!-- always show on feed -->
-        <v-switch v-model="model.alwaysOnFeed" label="Have this expense type always show on company feed?"></v-switch>
+        <v-switch
+          v-model="model.disableShowOnFeedToggle"
+          label="Have this expense type always show on company feed?"
+        ></v-switch>
 
         <!-- Buttons -->
         <!-- Cancel Button -->
@@ -212,7 +215,7 @@ function clearForm() {
   this.$set(this.model, 'categories', []);
   this.$set(this.model, 'accessibleBy', 'ALL');
   this.$set(this.model, 'hasRecipient', false);
-  this.$set(this.model, 'alwaysOnFeed', false);
+  this.$set(this.model, 'disableShowOnFeedToggle', false);
   this.customAccess = [];
 } // clearForm
 

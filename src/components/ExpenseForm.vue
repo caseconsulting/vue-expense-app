@@ -62,7 +62,7 @@
           chips
         ></v-select>
 
-        {{ expense.category }}
+        {{ this.expense.category }}
 
         <!-- Cost -->
         <v-text-field
@@ -849,7 +849,9 @@ function formatDate(date) {
  * @return Object - expense type selected
  */
 function getExpenseTypeSelected(expenseTypeId) {
-  this.expense.category = '';
+  if (this.expense.expenseTypeId != expenseTypeId) {
+    this.expense.category = '';
+  }
   return (this.selectedExpenseType = _.find(this.expenseTypes, (expenseType) => {
     if (expenseType.value === expenseTypeId) {
       return expenseType;
@@ -1056,7 +1058,7 @@ function disableShowOnFeed() {
   });
 
   if (selected) {
-    if (selected.budgetName === 'High Five' || selected.budgetName === 'Training' || this.requiredCategoryFeed) {
+    if (selected.disableShowOnFeedToggle || this.requiredCategoryFeed) {
       this.undisabledSOF = false;
       this.expense.showOnFeed = true;
       return true;
@@ -1164,7 +1166,8 @@ async function created() {
       isInactive: expenseType.isInactive,
       categories: expenseType.categories,
       accessibleBy: expenseType.accessibleBy,
-      hasRecipient: expenseType.hasRecipient
+      hasRecipient: expenseType.hasRecipient,
+      disableShowOnFeedToggle: expenseType.disableShowOnFeedToggle
     };
   });
 } // created
@@ -1304,23 +1307,26 @@ export default {
     'isEdit' // if updating an expense
   ],
   watch: {
-    // 'expense.category': function () {
-    //   console.log('here');
-    //   if (this.expense.category != null) {
-    //     let category = _.find(this.selectedExpenseType.categories, (category) => {
-    //       return category == this.expense.category;
-    //     });
-    //     if (category.showOnFeed) {
-    //       console.log('here');
-    //       expense.showOnFeed = true;
-    //       this.requiredCategoryFeed = true;
-    //     } else {
-    //       this.requiredCategoryFeed = false;
-    //     }
-    //   } else {
-    //     this.requiredCategoryFeed = false;
-    //   }
-    // },
+    'expense.cost': function () {
+      console.log('cost changed');
+    },
+    'expense.category': function () {
+      console.log('category changed');
+      if (this.expense.category != null && this.selectedExpenseType) {
+        let category = _.find(this.selectedExpenseType.categories, (category) => {
+          return category == this.expense.category;
+        });
+        if (category.showOnFeed) {
+          console.log('here');
+          this.expense.showOnFeed = true;
+          this.requiredCategoryFeed = true;
+        } else {
+          this.requiredCategoryFeed = false;
+        }
+      } else {
+        this.requiredCategoryFeed = false;
+      }
+    },
     'expense.employeeId': function () {
       //watches admin accessible employee field to know who can be a recipient
       this.highFiveRecipients = _.compact(
@@ -1375,6 +1381,11 @@ export default {
     },
     'expense.id': function () {
       this.originalExpense = _.cloneDeep(this.expense);
+      this.selectedExpenseType = _.find(this.expenseTypes, (expenseType) => {
+        if (expenseType.value === this.expense.expenseTypeId) {
+          return expenseType;
+        }
+      });
     },
     'expense.purchaseDate': function () {
       this.purchaseDateFormatted = this.formatDate(this.expense.purchaseDate) || this.purchaseDateFormatted;

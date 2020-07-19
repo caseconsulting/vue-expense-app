@@ -234,7 +234,7 @@
                   <v-card-text>
                     <div class="expandedInfo">
                       <p v-if="item.description">
-                        <b v-if="item.budgetName == 'High Five'">Recipient: </b>
+                        <b v-if="hasRecipient(item)">Recipient: </b>
                         <b v-else>Description: </b>
                         {{ item.description }}
                       </p>
@@ -569,6 +569,14 @@ function filterExpenses() {
 } // filterExpenses
 
 /**
+ * Checks if expense type has recipient.
+ */
+function hasRecipient(expense) {
+  let expenseType = _.find(this.expenseTypes, (type) => expense.expenseTypeId === type.value);
+  return !isEmpty(expenseType.hasRecipient) && expenseType.hasRecipient;
+}
+
+/**
  * Checks if an expense is being edited.
  *
  * @return boolean - an expense is being edited
@@ -755,7 +763,8 @@ async function created() {
       isInactive: expenseType.isInactive,
       categories: expenseType.categories,
       accessibleBy: expenseType.accessibleBy,
-      hasRecipient: expenseType.hasRecipient
+      hasRecipient: expenseType.hasRecipient,
+      disableShowOnFeedToggle: expenseType.disableShowOnFeedToggle
     };
   });
 
@@ -904,6 +913,7 @@ export default {
     displayError,
     endAction,
     filterExpenses,
+    hasRecipient,
     isEditing,
     isEmpty,
     isFocus,

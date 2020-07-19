@@ -266,7 +266,7 @@
                       <p v-else><b>Requires Recipient: </b> no</p>
 
                       <!-- Always show on feed -->
-                      <p v-if="item.alwaysOnFeed"><b>Always Show On Feed: </b> yes</p>
+                      <p v-if="item.disableShowOnFeedToggle"><b>Always Show On Feed: </b> yes</p>
                       <p v-else><b>Always Show On Feed: </b> no</p>
 
                       <!-- Flags -->
@@ -486,7 +486,7 @@ function clearModel() {
   this.$set(this.model, 'categories', []);
   this.$set(this.model, 'accessibleBy', 'ALL');
   this.$set(this.model, 'hasRecipient', false);
-  this.$set(this.model, 'alwaysOnFeed', false);
+  this.$set(this.model, 'disableShowOnFeedToggle', false);
 } // clearModel
 
 /**
@@ -729,7 +729,7 @@ function onSelect(item) {
   this.$set(this.model, 'categories', item.categories);
   this.$set(this.model, 'accessibleBy', item.accessibleBy);
   this.$set(this.model, 'hasRecipient', item.hasRecipient);
-  this.$set(this.model, 'alwaysOnFeed', item.alwaysOnFeed);
+  this.$set(this.model, 'disableShowOnFeedToggle', item.disableShowOnFeedToggle);
 } // onSelect
 
 /**
@@ -935,7 +935,7 @@ export default {
         categories: [],
         accessibleBy: [],
         hasRecipient: false,
-        alwaysOnFeed: false
+        disableShowOnFeedToggle: false
       }, // selected expense type
       search: '', // query text for datatable search field
       sortBy: 'budgetName', // sort datatable items
