@@ -258,7 +258,7 @@
 
                       <!-- Category -->
                       <p v-if="item.categories && item.categories.length > 0">
-                        <b>Categories: </b>{{ item.categories.join(', ') }}
+                        <b>Categories: </b>{{ categoriesToString(item.categories) }}
                       </p>
 
                       <!-- Requires Recipient -->
@@ -449,6 +449,20 @@ function addModelToTable() {
   this.$set(this.status, 'statusMessage', 'Item was successfully submitted!');
   this.$set(this.status, 'color', 'green');
 } // addModelToTable
+
+/**
+ * Returns a string of category names.
+ */
+function categoriesToString(categories) {
+  let string = '';
+  for (let i = 0; i < categories.length; i++) {
+    string += categories[i].name;
+    if (i < categories.length - 1) {
+      string += ', ';
+    }
+  }
+  return string;
+} // categoriesToString
 
 /**
  * Changes the employee avatar to default if it fails to display original.
@@ -961,6 +975,7 @@ export default {
   },
   methods: {
     addModelToTable,
+    categoriesToString,
     changeAvatar,
     clearModel, // NOTE: Unused?
     clearStatus,
