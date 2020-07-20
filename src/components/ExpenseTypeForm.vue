@@ -344,7 +344,6 @@ async function submit() {
   for (var i = 0; i < this.model.categories.length; i++) {
     this.model.categories[i] = JSON.stringify(this.model.categories[i]);
   }
-  console.log(this.model.categories);
 
   if (this.$refs.form.validate()) {
     // form is validated

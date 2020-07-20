@@ -1280,56 +1280,15 @@ export default {
     'isEdit' // if updating an expense
   ],
   watch: {
-    'expense.category': function () {
-      if (this.selectedExpenseType) {
-        if (this.selectedExpenseType.disableShowOnFeedToggle) {
-          // check for categories
-          if (_.isEmpty(this.selectedExpenseType.categories)) {
-            // expenseType without categories
-            this.expense.showOnFeed = true;
-          } else {
-            // expenseType with categories
-            let category = _.find(this.selectedExpenseType.categories, (category) => {
-              return category.name == this.expense.category;
-            });
-            this.expense.showOnFeed = category.showOnFeed;
-          }
-        } else {
-          if (_.isEmpty(this.selectedExpenseType.categories)) {
-            // expenseType without categories
-            this.expense.showOnFeed = false;
-          } else {
-            // expenseType with categories
-            let category = _.find(this.selectedExpenseType.categories, (category) => {
-              return category.name == this.expense.category;
-            });
-            this.expense.showOnFeed = category.showOnFeed;
-          }
+    'expense.id': function () {
+      this.originalExpense = _.cloneDeep(this.expense);
+      console.log('expense id changed: ');
+      console.log(this.originalExpense);
+      this.selectedExpenseType = _.find(this.expenseTypes, (expenseType) => {
+        if (expenseType.value === this.expense.expenseTypeId) {
+          return expenseType;
         }
-      }
-    },
-    'expense.employeeId': function () {
-      //watches admin accessible employee field to know who can be a recipient
-      this.highFiveRecipients = _.compact(
-        this.activeEmployees.map((employee) => {
-          if (
-            employee.value == this.userInfo.id || //current value is the user
-            employee.workStatus == 0 || //value isn't an invalid employee
-            this.expense.employeeId == employee.value //selected employee
-          ) {
-            //this is a bit of a mess but it makes sure admins can select themselves as recipients
-            if (
-              this.userInfo.id != this.expense.employeeId &&
-              !this.asUser &&
-              employee.value != this.expense.employeeId
-            ) {
-              return employee.text;
-            }
-            return;
-          }
-          return employee.text;
-        })
-      );
+      });
     },
     'expense.expenseTypeId': function () {
       this.selectedExpenseType = _.find(this.expenseTypes, (expenseType) => {
@@ -1358,30 +1317,34 @@ export default {
         } else {
           this.reqRecipient = false;
         }
-
-        if (this.selectedExpenseType.disableShowOnFeedToggle) {
-          // if SOF toggle is disabled
-          if (_.isEmpty(this.selectedExpenseType.categories)) {
-            // expenseType without categories
-            this.expense.showOnFeed = true;
-          } else {
-            // expenseType with categories
-            let category = _.find(this.selectedExpenseType.categories, (category) => {
-              return category.name == this.expense.category;
-            });
-            this.expense.showOnFeed = category.showOnFeed;
-          }
-        } else {
-          if (_.isEmpty(this.selectedExpenseType.categories)) {
-            // expenseType without categories
-            this.expense.showOnFeed = false;
-          } else {
-            // expenseType with categories
-            if (!this.expense.showOnFeed) {
+        console.log(this.originalExpense);
+        console.log(this.expense);
+        console.log('\n');
+        if (!_.isEqual(this.originalExpense, this.expense)) {
+          console.log('og is not equal to editted expense');
+          if (this.selectedExpenseType.disableShowOnFeedToggle) {
+            // if SOF toggle is disabled
+            if (_.isEmpty(this.selectedExpenseType.categories)) {
+              // expenseType without categories
+              this.expense.showOnFeed = true;
+            } else {
+              // expenseType with categories
               let category = _.find(this.selectedExpenseType.categories, (category) => {
                 return category.name == this.expense.category;
               });
               this.expense.showOnFeed = category.showOnFeed;
+            }
+          } else {
+            if (_.isEmpty(this.selectedExpenseType.categories)) {
+              // expenseType without categories
+              this.expense.showOnFeed = false;
+            } else {
+              // expenseType with categories
+              let category = _.find(this.selectedExpenseType.categories, (category) => {
+                return category.name == this.expense.category;
+              });
+              this.expense.showOnFeed = category.showOnFeed;
+              console.log('HERE: ' + this.expense.showOnFeed);
             }
           }
         }
@@ -1389,13 +1352,81 @@ export default {
         this.hint = '';
       }
     },
-    'expense.id': function () {
-      this.originalExpense = _.cloneDeep(this.expense);
-      this.selectedExpenseType = _.find(this.expenseTypes, (expenseType) => {
-        if (expenseType.value === this.expense.expenseTypeId) {
-          return expenseType;
+    'expense.category': function () {
+      console.log('category changed');
+      console.log('this.originalExpense: ');
+      console.log(this.originalExpense);
+      console.log('this.expense: ');
+      console.log(this.expense);
+      if (this.originalExpense && this.expense) {
+        console.log('this.originalExpense.category: ');
+        console.log(this.originalExpense.category);
+        console.log('this.expense.category: ');
+        console.log(this.expense.category);
+
+        if (
+          !_.isEqual(this.originalExpense.category, this.expense.category) ||
+          !_.isEqual(this.originalExpense.expenseTypeId, this.expense.expenseTypeId)
+        ) {
+          if (this.selectedExpenseType) {
+            if (this.selectedExpenseType.disableShowOnFeedToggle) {
+              // admin cannot switch show on feed
+              if (_.isEmpty(this.selectedExpenseType.categories)) {
+                // expenseType without categories
+                this.expense.showOnFeed = true;
+              } else {
+                // expenseType with categories2
+                let category = _.find(this.selectedExpenseType.categories, (category) => {
+                  return category.name == this.expense.category;
+                });
+                this.expense.showOnFeed = category.showOnFeed;
+              }
+            } else {
+              // admin can switch show on feed
+              if (_.isEmpty(this.selectedExpenseType.categories)) {
+                console.log('isEmpty8: ' + this.expense.showOnFeed);
+                // expenseType without categories
+                this.expense.showOnFeed = false;
+              } else {
+                console.log('admin can switch and expense type has categories');
+                // expenseType with categories
+                let category = _.find(this.selectedExpenseType.categories, (category) => {
+                  return category.name == this.expense.category;
+                });
+                this.expense.showOnFeed = category.showOnFeed;
+                console.log(this.expense.showOnFeed);
+              }
+            }
+          }
+        } else {
+          console.log('expense categories are the same');
+          this.expense.showOnFeed = this.originalExpense.showOnFeed;
         }
-      });
+      }
+      console.log('end 2: ' + this.expense.showOnFeed);
+    },
+    'expense.employeeId': function () {
+      //watches admin accessible employee field to know who can be a recipient
+      this.highFiveRecipients = _.compact(
+        this.activeEmployees.map((employee) => {
+          if (
+            employee.value == this.userInfo.id || //current value is the user
+            employee.workStatus == 0 || //value isn't an invalid employee
+            this.expense.employeeId == employee.value //selected employee
+          ) {
+            //this is a bit of a mess but it makes sure admins can select themselves as recipients
+            if (
+              this.userInfo.id != this.expense.employeeId &&
+              !this.asUser &&
+              employee.value != this.expense.employeeId
+            ) {
+              return employee.text;
+            }
+            return;
+          }
+          return employee.text;
+        })
+      );
     },
     'expense.purchaseDate': function () {
       this.purchaseDateFormatted = this.formatDate(this.expense.purchaseDate) || this.purchaseDateFormatted;
