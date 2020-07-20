@@ -680,7 +680,7 @@ function clearForm() {
   this.$set(this.expense, 'category', null);
   this.$set(this.expense, 'showOnFeed', null);
 
-  this.originalExpense = null;
+  this.originalExpense = this.expense;
   this.purchaseDateFormatted = null;
   this.file = null;
 
@@ -1145,6 +1145,7 @@ async function created() {
       disableShowOnFeedToggle: expenseType.disableShowOnFeedToggle
     };
   });
+  this.clearForm();
 } // created
 
 /**
@@ -1340,10 +1341,17 @@ export default {
               this.expense.showOnFeed = false;
             } else {
               // expenseType with categories
+              console.log('WHAT IS THE selected expense type categories?');
+              console.log(this.selectedExpenseType.categories);
+              console.log()
+              console.log('\n\n');
               let category = _.find(this.selectedExpenseType.categories, (category) => {
                 return category.name == this.expense.category;
               });
-              this.expense.showOnFeed = category.showOnFeed;
+              console.log('WHAT IS THE CATEGORY?');
+              console.log(category);
+              console.log('\n\n');
+              this.expense.showOnFeed = category ? category.showOnFeed : false;
               console.log('HERE: ' + this.expense.showOnFeed);
             }
           }
@@ -1368,6 +1376,8 @@ export default {
           !_.isEqual(this.originalExpense.category, this.expense.category) ||
           !_.isEqual(this.originalExpense.expenseTypeId, this.expense.expenseTypeId)
         ) {
+          // category is changed
+          console.log('CATEGORY IS CHANGED');
           if (this.selectedExpenseType) {
             if (this.selectedExpenseType.disableShowOnFeedToggle) {
               // admin cannot switch show on feed

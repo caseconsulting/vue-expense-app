@@ -91,12 +91,13 @@
               <!-- Total Expense Amount -->
               <td id="money-team">{{ getBudgetTotal(item.expenses) | moneyValue }}</td>
 
+              <!-- rachel -->
               <!-- Show On Feed -->
               <td style="width: 4px;">
                 <v-switch
                   :input-value="item.showSwitch.all"
                   :indeterminate="item.showSwitch.indeterminate"
-                  @click.stop="toggleShowOnFeedGroup(item, true)"
+                  @click.stop="toggleShowOnFeedGroup(item)"
                   :disabled="!item.selected || !isEditable(item)"
                 ></v-switch>
               </td>
@@ -321,7 +322,13 @@ function constructAutoComplete(aggregatedData) {
  * return Array - List of aggregated expenses
  */
 function createExpenses(aggregatedData) {
-  return _.map(aggregatedData, (expense) => {
+  console.log(aggregatedData);
+  let x = _.map(aggregatedData, (expense) => {
+    console.log('here1');
+
+    if (expense.budgetName == 'Editable Categories') {
+      console.log(expense.budgetName + " showOnFeed " + expense.showOnFeed);
+    }
     return {
       budgetName: expense.budgetName,
       cost: expense.cost,
@@ -350,9 +357,18 @@ function createExpenses(aggregatedData) {
       category: expense.category,
       createdAt: expense.createdAt,
       failed: false,
-      showOnFeed: expense.showOnFeed
+      showOnFeed: expense.showOnFeed,
+      disableShowOnFeedToggle: expense.disableShowOnFeedToggle
     };
   });
+  console.log('here2');
+  _.forEach(x, y => {
+    if (y.budgetName == 'Editable Categories') {
+      console.log(y.id + " " + y.budgetName + " showOnFeed " + y.showOnFeed);
+    }
+  });
+  console.log(_.cloneDeep(x));
+  return x;
 } // createExpenses
 
 /**
@@ -603,13 +619,13 @@ function selectExpense(expense) {
       return _.forEach(budget.expenses, (budgetExpense) => {
         if (expense === budgetExpense) {
           budgetExpense.selected = !budgetExpense.selected;
-          if (!budgetExpense.selected) {
-            budgetExpense.showOnFeed = false;
-            budget.showSwitch = determineShowSwitch(budget);
-          } else {
-            budgetExpense.showOnFeed = determineShowOnFeed(expense);
-            budget.showSwitch = determineShowSwitch(budget);
-          }
+          // if (!budgetExpense.selected) {
+          //   budgetExpense.showOnFeed = false;
+          //   budget.showSwitch = determineShowSwitch(budget);
+          // } else {
+          //   budgetExpense.showOnFeed = expense.showOnFeed; // determineShowOnFeed(expense);
+          //   budget.showSwitch = determineShowSwitch(budget);
+          // }
         }
       });
     }
@@ -720,66 +736,19 @@ function toggleGroup(value) {
  * Toggle show on feed on group of expenses
  *
  * @param value - expense group toggled
- * @param toggle - checks if toggle v-switch called the function
  */
-function toggleShowOnFeedGroup(value, toggle) {
+function toggleShowOnFeedGroup(value) {
   this.empBudgets = _.forEach(this.empBudgets, (budget) => {
     if (value === budget) {
-      if (budget.budgetName == 'Training') {
-        let check = true;
-        for (let i = 0; i < budget.expenses.length; i++) {
-          if (!determineShowOnFeed(budget.expenses[i])) {
-            check = false;
-          }
-        }
-        if (!check) {
-          return _.forEach(budget.expenses, (expense) => {
-            if (expense.showOnFeed) {
-              expense.showOnFeed = false;
-            } else {
-              expense.showOnFeed = determineShowOnFeed(expense);
-            }
-          });
-        } else {
-          if (determineShowSwitch(budget).all) {
-            return _.forEach(budget.expenses, (expense) => {
-              expense.showOnFeed = false;
-            });
-          } else {
-            return _.forEach(budget.expenses, (expense) => {
-              expense.showOnFeed = true;
-            });
-          }
-        }
-      } else if (budget.budgetName == 'High Five') {
-        if (determineShowSwitch(budget).all) {
-          return _.forEach(budget.expenses, (expense) => {
-            expense.showOnFeed = false;
-          });
-        } else {
-          return _.forEach(budget.expenses, (expense) => {
-            expense.showOnFeed = true;
-          });
-        }
-      } else {
-        if (toggle) {
-          if (determineShowSwitch(budget).all) {
-            return _.forEach(budget.expenses, (expense) => {
-              expense.showOnFeed = false;
-            });
-          } else {
-            return _.forEach(budget.expenses, (expense) => {
-              expense.showOnFeed = true;
-            });
-          }
-        } else {
-          if (determineShowSwitch(budget).all) {
-            return _.forEach(budget.expenses, (expense) => {
-              expense.showOnFeed = false;
-            });
-          }
+      let check = true;
+      for (let i = 0; i < budget.expenses.length; i++) {
+        if (!budget.expenses[i].showOnFeed) {
+          check = false;
         }
       }
+      _.forEach(budget.expenses, (expense) => {
+        expense.showOnFeed = !check;
+      });
     }
   });
 
@@ -805,28 +774,28 @@ function unCheckAllBoxes() {
   });
 } // unCheckAllBoxes
 
-/**
- * Determines if expense should be automatically shown on feed
- * @param expense - expense
- */
-function determineShowOnFeed(expense) {
-  if (expense.budgetName == 'Training') {
-    if (
-      expense.category == 'Meals' ||
-      expense.category == 'Travel' ||
-      expense.category == 'Transportation' ||
-      expense.category == 'Lodging'
-    ) {
-      return false;
-    } else {
-      return true;
-    }
-  } else if (expense.budgetName == 'High Five') {
-    return true;
-  } else {
-    return false;
-  }
-} // determineShowOnFeed
+// /**
+//  * Determines if expense should be automatically shown on feed
+//  * @param expense - expense
+//  */
+// function determineShowOnFeed(expense) {
+//   if (expense.budgetName == 'Training') {
+//     if (
+//       expense.category == 'Meals' ||
+//       expense.category == 'Travel' ||
+//       expense.category == 'Transportation' ||
+//       expense.category == 'Lodging'
+//     ) {
+//       return false;
+//     } else {
+//       return true;
+//     }
+//   } else if (expense.budgetName == 'High Five') {
+//     return true;
+//   } else {
+//     return false;
+//   }
+// } // determineShowOnFeed
 
 /**
  * Checks if expense toggle show on feed should be edited based on
@@ -835,10 +804,7 @@ function determineShowOnFeed(expense) {
  * @return true if should be edited, false otherwise
  */
 function isEditable(expense) {
-  if (expense.budgetName == 'Training' || expense.budgetName == 'High Five') {
-    return false;
-  }
-  return true;
+  return !expense.disableShowOnFeedToggle;
 } // isEditable
 
 /**
@@ -960,7 +926,7 @@ export default {
     clearStatus,
     clickedRow,
     constructAutoComplete,
-    determineShowOnFeed,
+    // determineShowOnFeed,
     displayError,
     emitSelectionChange,
     filterOutReimbursed,

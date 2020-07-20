@@ -55,6 +55,7 @@
                 @click.stop="expenseToggle(item)"
                 :disabled="!item.selected || !isEditable(item)"
               ></v-switch>
+              {{ item.showOnFeed}}
             </td>
           </tr>
         </template>
