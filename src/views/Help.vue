@@ -82,12 +82,17 @@ export default {
           {
             title: 'How is the Avg Hours/Day calculated?',
             body:
-              'The Remaining hours for the month divided by the Days Remaining. This can be changed by editing the Days Remaining.'
+              'The Remaining hours for the month divided by the Days Remaining. This can be changed by editing the Days Remaining. Days Remaining includes today.'
           },
           {
             title: 'What hours fall under Completed, Today, and Futute?',
             body:
               "Completed hours are any hours logged in TSheets from the first day of the month through the end of the day yesterday. Today's hours are any hours logged in TSheet at any point today. Future hours are any hours logged in TSheets between the beginning of the day tomorrow and the last day of the month."
+          },
+          {
+            title: 'Why does my Avg Hours/Day or Days Remaining seem wrong?',
+            body:
+              'Days Remaining includes today by default. If you have already worked your hours for today you can edit Days Remaining to have one less day. This will update the Avg Hours/Day as well.'
           },
           {
             title: 'How can I edit Days Remaining?',
