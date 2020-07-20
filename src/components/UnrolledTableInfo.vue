@@ -51,11 +51,10 @@
             <!-- Show on Feed -->
             <td style="width: 4px;">
               <v-switch
-                :input-value="item.showOnFeed"
-                @click.stop="expenseToggle(item)"
-                :disabled="!item.selected || !isEditable(item)"
+                :input-value="item.showOnFeed && item.selected"
+                @change="expenseToggle(item)"
+                :disabled="!item.selected"
               ></v-switch>
-              {{ item.showOnFeed}}
             </td>
           </tr>
         </template>
@@ -92,18 +91,6 @@ function expenseClicked(clickedExpense) {
 function expenseSelected(selectedExpense) {
   window.EventBus.$emit('selectExpense', selectedExpense);
 } // expenseSelected
-
-/**
- * Checks if show on feed toggle is editable for individual expense
- *
- * @return true if it is editable, false otherwise
- */
-function isEditable(expense) {
-  if (expense.budgetName == 'Training' || expense.budgetName == 'High Five') {
-    return false;
-  }
-  return true;
-} // isEditable
 
 /**
  * Emit an event to parent that an expense was toggled.
@@ -176,8 +163,7 @@ export default {
   methods: {
     expenseClicked,
     expenseSelected,
-    expenseToggle,
-    isEditable
+    expenseToggle
   },
   props: ['expenses'] // list of expenses
 };

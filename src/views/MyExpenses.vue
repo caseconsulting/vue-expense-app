@@ -246,8 +246,17 @@
                       <p v-if="!isEmpty(item.category)"><b>Category: </b>{{ item.category }}</p>
                       <div v-if="isAdmin" class="flagExp">
                         <p>Inactive:</p>
-                        <icon v-if="useInactiveStyle(item)" id="marks" class="mr-1" name="regular/check-circle"></icon>
-                        <icon v-else class="mr-1" id="marks" name="regular/times-circle"></icon>
+                        <icon
+                          v-if="useInactiveStyle(item)"
+                          id="marks"
+                          class="mr-1 mx-3"
+                          name="regular/check-circle"
+                        ></icon>
+                        <icon v-else class="mr-1 mx-3" id="marks" name="regular/times-circle"></icon>
+                        <br />
+                        <p>Show On Feed:</p>
+                        <icon v-if="item.showOnFeed" id="marks" class="mr-1 mx-3" name="regular/check-circle"></icon>
+                        <icon v-else class="mr-1 mx-3" id="marks" name="regular/times-circle"></icon>
                       </div>
                     </div>
                   </v-card-text>
@@ -764,7 +773,7 @@ async function created() {
       categories: expenseType.categories,
       accessibleBy: expenseType.accessibleBy,
       hasRecipient: expenseType.hasRecipient,
-      disableShowOnFeedToggle: expenseType.disableShowOnFeedToggle
+      alwaysOnFeed: expenseType.alwaysOnFeed
     };
   });
 
@@ -967,7 +976,6 @@ export default {
 
 .flagExp p {
   font-weight: bold;
-  width: 75px;
   display: inline-block;
 }
 </style>

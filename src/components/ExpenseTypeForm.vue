@@ -34,21 +34,6 @@
           </template>
         </v-combobox>
 
-        <p v-if="model.categories.length > 0" class="pt-4">Show this category on feed?</p>
-
-        <v-layout row wrap>
-          <v-flex class="py-0" v-for="(category, index) in model.categories" :key="index" xs6>
-            <v-checkbox
-              class="my-0"
-              v-if="!submitting"
-              light
-              :label="category.name"
-              v-model="category.showOnFeed"
-            ></v-checkbox>
-          </v-flex>
-        </v-layout>
-        <br />
-
         <!-- Budget Amount -->
         <v-text-field
           prefix="$"
@@ -174,7 +159,27 @@
         <v-switch v-model="model.hasRecipient" label="Does this expense type have a recipient?"></v-switch>
 
         <!-- always show on feed -->
-        <v-switch v-model="model.disableShowOnFeedToggle" label="Disable show on feed toggle?"></v-switch>
+        <v-switch
+          v-model="model.alwaysOnFeed"
+          @change="toggleShowAllCategories()"
+          label="Have this expense type show on the company feed?"
+        ></v-switch>
+
+        <p v-if="model.categories.length > 0" class="pt-4">Show only these categories on feed?</p>
+
+        <v-layout row wrap>
+          <v-flex class="py-0" v-for="(category, index) in model.categories" :key="index" xs6>
+            <v-checkbox
+              class="my-0"
+              v-if="!submitting"
+              light
+              :label="category.name"
+              v-model="category.showOnFeed"
+              @click.stop="checkSelection(category)"
+            ></v-checkbox>
+          </v-flex>
+        </v-layout>
+        <br />
 
         <!-- Buttons -->
         <!-- Cancel Button -->
@@ -202,6 +207,24 @@ import _ from 'lodash';
 // |                                                  |
 // |--------------------------------------------------|
 
+function checkSelection(category) {
+  let index = _.findIndex(this.model.categories, (cat) => {
+    return cat.name == category.name;
+  });
+
+  this.model.categories[index].showOnFeed = !this.model.categories[index].showOnFeed;
+
+  let somethingIsFalse = _.find(this.model.categories, (category) => {
+    return !category.showOnFeed;
+  });
+
+  if (somethingIsFalse) {
+    this.model.alwaysOnFeed = false;
+  } else {
+    this.model.alwaysOnFeed = true;
+  }
+} // checkSelection
+
 /**
  * Clears the form and sets all fields to a default state.
  */
@@ -220,7 +243,7 @@ function clearForm() {
   this.$set(this.model, 'categories', []);
   this.$set(this.model, 'accessibleBy', 'ALL');
   this.$set(this.model, 'hasRecipient', false);
-  this.$set(this.model, 'disableShowOnFeedToggle', false);
+  this.$set(this.model, 'alwaysOnFeed', false);
   this.customAccess = [];
 } // clearForm
 
@@ -388,6 +411,15 @@ async function submit() {
   this.$emit('endAction');
 } // submit
 
+function toggleShowAllCategories() {
+  if (!this.submitting) {
+    let alwaysOF = this.model.alwaysOnFeed;
+    _.forEach(this.model.categories, (category) => {
+      category.showOnFeed = alwaysOF;
+    });
+  }
+} // toggleShowAllCategories
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                 LIFECYCLE HOOKS                  |
@@ -448,6 +480,7 @@ export default {
     };
   },
   methods: {
+    checkSelection,
     clearForm,
     formatDate,
     isAllSelected,
@@ -457,7 +490,8 @@ export default {
     isFullTimeSelected,
     parseDate,
     removeCategory,
-    submit
+    submit,
+    toggleShowAllCategories
   },
   props: ['model'], // expense type to be created/updated
   watch: {

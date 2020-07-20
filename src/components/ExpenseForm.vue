@@ -192,12 +192,7 @@
         ></v-text-field>
 
         <!-- Show On Feed -->
-        <v-switch
-          v-if="isAdmin"
-          v-model="expense.showOnFeed"
-          label="Have expense show on company feed?"
-          :disabled="disableShowOnFeed"
-        ></v-switch>
+        <v-switch v-if="isAdmin" v-model="expense.showOnFeed" label="Have expense show on company feed?"></v-switch>
 
         <!-- Buttons -->
         <!-- Cancel Button -->
@@ -1044,19 +1039,6 @@ async function updateExistingEntry() {
   }
 } // updateExistingEntry
 
-/**
- * Function for handling if the showOnFeed switch is disabled
- *
- * @return boolean - showOn feed is disabled
- */
-function disableShowOnFeed() {
-  // if high five or training set to true and disable
-  let selected = _.find(this.expenseTypes, (expenseType) => {
-    return expenseType.value === this.expense.expenseTypeId;
-  });
-  return selected ? selected.disableShowOnFeedToggle : false;
-} // disableShowOnFeed
-
 // |--------------------------------------------------|
 // |                                                  |
 // |                 LIFECYCLE HOOKS                  |
@@ -1142,7 +1124,7 @@ async function created() {
       categories: expenseType.categories,
       accessibleBy: expenseType.accessibleBy,
       hasRecipient: expenseType.hasRecipient,
-      disableShowOnFeedToggle: expenseType.disableShowOnFeedToggle
+      alwaysOnFeed: expenseType.alwaysOnFeed
     };
   });
   this.clearForm();
@@ -1174,7 +1156,6 @@ export default {
     FileUpload
   },
   computed: {
-    disableShowOnFeed,
     isAdmin,
     isDifferentExpenseType,
     isReimbursed,
@@ -1283,8 +1264,7 @@ export default {
   watch: {
     'expense.id': function () {
       this.originalExpense = _.cloneDeep(this.expense);
-      console.log('expense id changed: ');
-      console.log(this.originalExpense);
+
       this.selectedExpenseType = _.find(this.expenseTypes, (expenseType) => {
         if (expenseType.value === this.expense.expenseTypeId) {
           return expenseType;
@@ -1305,6 +1285,7 @@ export default {
             )}`;
 
         // set high five cost
+        // HARD CODE
         if (this.selectedExpenseType.budgetName === 'High Five') {
           this.$set(this.expense, 'cost', moneyFilter(50));
           this.isHighFive = true;
@@ -1313,46 +1294,25 @@ export default {
         }
 
         // set requires recipient
-        if (this.selectedExpenseType.hasRecipient == true) {
-          this.reqRecipient = true;
-        } else {
-          this.reqRecipient = false;
-        }
-        console.log(this.originalExpense);
-        console.log(this.expense);
-        console.log('\n');
+        this.reqRecipient = this.selectedExpenseType.hasRecipient;
+
+        // set show on company feed
         if (!_.isEqual(this.originalExpense, this.expense)) {
-          console.log('og is not equal to editted expense');
-          if (this.selectedExpenseType.disableShowOnFeedToggle) {
-            // if SOF toggle is disabled
-            if (_.isEmpty(this.selectedExpenseType.categories)) {
-              // expenseType without categories
-              this.expense.showOnFeed = true;
-            } else {
-              // expenseType with categories
-              let category = _.find(this.selectedExpenseType.categories, (category) => {
-                return category.name == this.expense.category;
-              });
-              this.expense.showOnFeed = category.showOnFeed;
-            }
+          // changing the expense type
+          if (this.selectedExpenseType.alwaysOnFeed) {
+            // if expense type is always on feed
+            this.expense.showOnFeed = true;
           } else {
+            // if expense type is not always on feed
             if (_.isEmpty(this.selectedExpenseType.categories)) {
-              // expenseType without categories
+              // expense type does not have categories
               this.expense.showOnFeed = false;
             } else {
-              // expenseType with categories
-              console.log('WHAT IS THE selected expense type categories?');
-              console.log(this.selectedExpenseType.categories);
-              console.log()
-              console.log('\n\n');
+              // expense type has categories
               let category = _.find(this.selectedExpenseType.categories, (category) => {
-                return category.name == this.expense.category;
+                return category == this.expense.category;
               });
-              console.log('WHAT IS THE CATEGORY?');
-              console.log(category);
-              console.log('\n\n');
               this.expense.showOnFeed = category ? category.showOnFeed : false;
-              console.log('HERE: ' + this.expense.showOnFeed);
             }
           }
         }
@@ -1361,59 +1321,30 @@ export default {
       }
     },
     'expense.category': function () {
-      console.log('category changed');
-      console.log('this.originalExpense: ');
-      console.log(this.originalExpense);
-      console.log('this.expense: ');
-      console.log(this.expense);
-      if (this.originalExpense && this.expense) {
-        console.log('this.originalExpense.category: ');
-        console.log(this.originalExpense.category);
-        console.log('this.expense.category: ');
-        console.log(this.expense.category);
-
-        if (
-          !_.isEqual(this.originalExpense.category, this.expense.category) ||
-          !_.isEqual(this.originalExpense.expenseTypeId, this.expense.expenseTypeId)
-        ) {
-          // category is changed
-          console.log('CATEGORY IS CHANGED');
-          if (this.selectedExpenseType) {
-            if (this.selectedExpenseType.disableShowOnFeedToggle) {
-              // admin cannot switch show on feed
-              if (_.isEmpty(this.selectedExpenseType.categories)) {
-                // expenseType without categories
-                this.expense.showOnFeed = true;
-              } else {
-                // expenseType with categories2
-                let category = _.find(this.selectedExpenseType.categories, (category) => {
-                  return category.name == this.expense.category;
-                });
-                this.expense.showOnFeed = category.showOnFeed;
-              }
-            } else {
-              // admin can switch show on feed
-              if (_.isEmpty(this.selectedExpenseType.categories)) {
-                console.log('isEmpty8: ' + this.expense.showOnFeed);
-                // expenseType without categories
-                this.expense.showOnFeed = false;
-              } else {
-                console.log('admin can switch and expense type has categories');
-                // expenseType with categories
-                let category = _.find(this.selectedExpenseType.categories, (category) => {
-                  return category.name == this.expense.category;
-                });
-                this.expense.showOnFeed = category.showOnFeed;
-                console.log(this.expense.showOnFeed);
-              }
-            }
-          }
+      if (
+        !_.isEqual(this.originalExpense.category, this.expense.category) ||
+        !_.isEqual(this.originalExpense.expenseTypeId, this.expense.expenseTypeId)
+      ) {
+        // category or expense type is changed
+        if (this.selectedExpenseType.alwaysOnFeed) {
+          // if expense type is always on feed
+          this.expense.showOnFeed = true;
         } else {
-          console.log('expense categories are the same');
-          this.expense.showOnFeed = this.originalExpense.showOnFeed;
+          // if expense type is not always on feed
+          if (_.isEmpty(this.selectedExpenseType.categories)) {
+            // expense type does not have categories
+            this.expense.showOnFeed = false;
+          } else {
+            // expense type has categories
+            let category = _.find(this.selectedExpenseType.categories, (category) => {
+              return category.name == this.expense.category;
+            });
+            this.expense.showOnFeed = category ? category.showOnFeed : false;
+          }
         }
+      } else {
+        this.expense.showOnFeed = this.originalExpense.showOnFeed;
       }
-      console.log('end 2: ' + this.expense.showOnFeed);
     },
     'expense.employeeId': function () {
       //watches admin accessible employee field to know who can be a recipient
