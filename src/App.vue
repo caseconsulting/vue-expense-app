@@ -37,7 +37,7 @@
               <v-list-item v-for="(l, index) in links" :key="index" :href="l.link" target="_blank">
                 <v-list-item-title>{{ l.name }}</v-list-item-title>
               </v-list-item>
-              <v-list-item :href="floorPlan" target="_blank">Make Offices</v-list-item>
+              <v-list-item :href="floorPlan" target="_blank">MakeOffices Map</v-list-item>
             </v-list>
           </v-menu>
           <v-btn
@@ -66,7 +66,7 @@
               <v-list-item v-for="(l, index) in links" :key="index" :href="l.link" target="_blank">
                 <v-list-item-title>{{ l.name }}</v-list-item-title>
               </v-list-item>
-              <v-list-item :href="floorPlan" target="_blank">Make Offices</v-list-item>
+              <v-list-item :href="floorPlan" target="_blank">MakeOffices Map</v-list-item>
               <hr
                 role="separator"
                 aria-orientation="horizontal"
