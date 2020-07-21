@@ -65,7 +65,10 @@
                   :indeterminate="item.checkBox.indeterminate"
                   primary
                   hide-details
-                  @click.stop="toggleGroup(item)"
+                  @click.stop="
+                    toggleGroup(item);
+                    determineShowOnFeed(item);
+                  "
                   class="ma-0"
                 >
                 </v-checkbox>
@@ -628,6 +631,19 @@ function toggleShowOnFeed(expense) {
 } // toggleShowOnFeed
 
 /**
+ * Toggles show on feed switch for individual expenses
+ *
+ * @param expense - expense toggled
+ */
+function determineShowOnFeed(expense) {
+  this.empBudgets = _.forEach(this.empBudgets, (budget) => {
+    if (expense.key === budget.key) {
+      budget.showSwitch = determineShowSwitch(budget);
+    }
+  });
+} // determineShowOnFeed
+
+/**
  * Sets up an expense object to be submitted.
  *
  * @param expense - expense data to submit
@@ -855,6 +871,7 @@ export default {
     clearStatus,
     clickedRow,
     constructAutoComplete,
+    determineShowOnFeed,
     displayError,
     emitSelectionChange,
     filterOutReimbursed,
