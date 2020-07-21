@@ -25,6 +25,7 @@
           small-chips
           append-icon
           :search-input.sync="categoryInput"
+          @input="createCategory(categoryInput)"
         >
           <template v-slot:selection="{ attrs, item }">
             <v-chip close outlined label color="gray" @click:close="removeCategory(item)">
@@ -33,6 +34,21 @@
             </v-chip>
           </template>
         </v-combobox>
+
+        <p v-if="model.categories.length > 0" class="pt-4">Show this category on feed?</p>
+
+        <v-layout row wrap>
+          <v-flex class="py-0" v-for="(category, index) in model.categories" :key="index" xs6>
+            <v-checkbox
+              class="my-0"
+              v-if="!submitting"
+              light
+              :label="category.name"
+              v-model="category.showOnFeed"
+            ></v-checkbox>
+          </v-flex>
+        </v-layout>
+        <br />
 
         <!-- Budget Amount -->
         <v-text-field
@@ -159,27 +175,7 @@
         <v-switch v-model="model.hasRecipient" label="Does this expense type have a recipient?"></v-switch>
 
         <!-- always show on feed -->
-        <v-switch
-          v-model="model.alwaysOnFeed"
-          @change="toggleShowAllCategories()"
-          label="Have this expense type show on the company feed?"
-        ></v-switch>
-
-        <p v-if="model.categories.length > 0" class="pt-4">Show only these categories on feed?</p>
-
-        <v-layout row wrap>
-          <v-flex class="py-0" v-for="(category, index) in model.categories" :key="index" xs6>
-            <v-checkbox
-              class="my-0"
-              v-if="!submitting"
-              light
-              :label="category.name"
-              v-model="category.showOnFeed"
-              @click.stop="checkSelection(category)"
-            ></v-checkbox>
-          </v-flex>
-        </v-layout>
-        <br />
+        <v-switch v-model="model.disableShowOnFeedToggle" label="Disable show on feed toggle?"></v-switch>
 
         <!-- Buttons -->
         <!-- Cancel Button -->
@@ -207,24 +203,6 @@ import _ from 'lodash';
 // |                                                  |
 // |--------------------------------------------------|
 
-function checkSelection(category) {
-  let index = _.findIndex(this.model.categories, (cat) => {
-    return cat.name == category.name;
-  });
-
-  this.model.categories[index].showOnFeed = !this.model.categories[index].showOnFeed;
-
-  let somethingIsFalse = _.find(this.model.categories, (category) => {
-    return !category.showOnFeed;
-  });
-
-  if (somethingIsFalse) {
-    this.model.alwaysOnFeed = false;
-  } else {
-    this.model.alwaysOnFeed = true;
-  }
-} // checkSelection
-
 /**
  * Clears the form and sets all fields to a default state.
  */
@@ -243,11 +221,19 @@ function clearForm() {
   this.$set(this.model, 'categories', []);
   this.$set(this.model, 'accessibleBy', 'ALL');
   this.$set(this.model, 'hasRecipient', false);
-  this.$set(this.model, 'alwaysOnFeed', false);
-  this.startDateFormatted = null;
-  this.endDateFormatted = null;
+  this.$set(this.model, 'disableShowOnFeedToggle', false);
   this.customAccess = [];
 } // clearForm
+
+function createCategory(catName) {
+  var category = { name: catName, showOnFeed: false };
+  for (var i = 0; i < this.model.categories.length; i++) {
+    if (this.model.categories[i].name == catName) {
+      return;
+    }
+  }
+  this.model.categories.push(category);
+} //createCategory
 
 /**
  * Formats a date.
@@ -413,15 +399,6 @@ async function submit() {
   this.$emit('endAction');
 } // submit
 
-function toggleShowAllCategories() {
-  if (!this.submitting) {
-    let alwaysOF = this.model.alwaysOnFeed;
-    _.forEach(this.model.categories, (category) => {
-      category.showOnFeed = alwaysOF;
-    });
-  }
-} // toggleShowAllCategories
-
 // |--------------------------------------------------|
 // |                                                  |
 // |                 LIFECYCLE HOOKS                  |
@@ -482,8 +459,8 @@ export default {
     };
   },
   methods: {
-    checkSelection,
     clearForm,
+    createCategory,
     formatDate,
     isAllSelected,
     isCustomSelected,
@@ -492,8 +469,7 @@ export default {
     isFullTimeSelected,
     parseDate,
     removeCategory,
-    submit,
-    toggleShowAllCategories
+    submit
   },
   props: ['model'], // expense type to be created/updated
   watch: {
