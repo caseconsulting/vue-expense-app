@@ -210,11 +210,9 @@
         <!-- Buttons -->
 
         <!-- Cancel Button -->
-
         <v-btn color="white " @click="clearForm" class="ma-2"> <icon class="mr-1" name="ban"></icon>Cancel </v-btn>
 
         <!-- Submit Button -->
-
         <v-btn outlined class="ma-2" color="success" :loading="submitting" @click="submit" :disabled="!valid">
           <icon class="mr-1" name="save"></icon>Submit
         </v-btn>
@@ -227,11 +225,8 @@
 
 <script>
 import api from '@/shared/api.js';
-
 import dateUtils from '@/shared/dateUtils';
-
 import { v4 as uuid } from 'uuid';
-
 import _ from 'lodash';
 
 // |--------------------------------------------------|
@@ -270,39 +265,22 @@ function checkSelection(category) {
 
 function clearForm() {
   this.$refs.form.reset();
-
   this.$set(this.model, 'id', '');
-
   this.$set(this.model, 'budget', 0);
-
   this.$set(this.model, 'budgetName', '');
-
   this.$set(this.model, 'description', '');
-
   this.$set(this.model, 'recurringFlag', false);
-
   this.$set(this.model, 'startDate', '');
-
   this.$set(this.model, 'endDate', '');
-
   this.$set(this.model, 'odFlag', false);
-
   this.$set(this.model, 'requiredFlag', false);
-
   this.$set(this.model, 'isInactive', false);
-
   this.$set(this.model, 'categories', []);
-
   this.$set(this.model, 'accessibleBy', 'ALL');
-
   this.$set(this.model, 'hasRecipient', false);
-
   this.$set(this.model, 'alwaysOnFeed', false);
-
   this.startDateFormatted = null;
-
   this.endDateFormatted = null;
-
   this.customAccess = [];
 } // clearForm
 
@@ -608,11 +586,9 @@ async function created() {
 
 export default {
   created,
-
   data() {
     return {
       allEmployees: null,
-
       budgetRules: [
         (v) => !!v || 'Budget amount is required',
 
@@ -622,61 +598,37 @@ export default {
           /^[+-]?[0-9]{1,3}(?:,?[0-9]{3})*(?:\.[0-9]{2})?$/.test(v) ||
           'Budget amount must be a number with two decimal digits.'
       ],
-
       categories: [],
-
       categoryInput: null, // category combobox input
-
       customAccess: [],
-
       dateRules: [
         (v) => !!v || 'Date must be valid. Format: MM/DD/YYYY',
 
         (v) => (!!v && /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v)) || 'Date must be valid. Format: MM/DD/YYYY'
       ],
-
       deleting: false,
-
       endDateFormatted: null,
-
       genericRules: [(v) => !!v || 'This field is required'],
-
       startDateFormatted: null,
-
       submitting: false,
-
       valid: false
     };
   },
-
   methods: {
     checkSelection,
-
     clearForm,
-
     formatDate,
-
     isAllSelected,
-
     isCustomSelected,
-
     isEmpty,
-
     isFullSelected,
-
     isFullTimeSelected,
-
     parseDate,
-
     removeCategory,
-
     submit,
-
     toggleShowAllCategories
   },
-
   props: ['model'], // expense type to be created/updated
-
   watch: {
     'model.id': function () {
       if (this.model.id != null) {
@@ -685,7 +637,6 @@ export default {
         });
       }
     },
-
     'model.accessibleBy': function (val) {
       if (!this.submitting) {
         if (!['ALL', 'FULL TIME', 'FULL', 'CUSTOM'].includes(val)) {
@@ -707,7 +658,6 @@ export default {
         }
       }
     },
-
     categories: function (val) {
       if (val.length > 10) {
         this.$nextTick(() => this.categories.pop());
@@ -731,7 +681,6 @@ export default {
         });
       }
     },
-
     'model.endDate': function () {
       this.endDateFormatted = this.formatDate(this.model.endDate) || this.endDateFormatted;
 
@@ -741,7 +690,6 @@ export default {
         this.model.endDate = null;
       }
     },
-
     'model.startDate': function () {
       this.startDateFormatted = this.formatDate(this.model.startDate) || this.startDateFormatted;
 
