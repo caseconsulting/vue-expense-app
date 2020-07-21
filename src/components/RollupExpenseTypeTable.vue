@@ -93,11 +93,12 @@
 
               <!-- Show On Feed -->
               <td style="width: 4px;">
+                {{ item.showSwitch }}
                 <v-switch
                   :input-value="item.showSwitch && item.selected"
                   @click.native.stop
                   @change="toggleShowOnFeedGroup(item)"
-                  :disabled="!item.selected"
+                  :disabled="!item.checkBox.all"
                 ></v-switch>
               </td>
             </tr>
@@ -589,7 +590,6 @@ function selectExpense(expense) {
         if (expense === budgetExpense) {
           budgetExpense.selected = !budgetExpense.selected;
           if (!budgetExpense.selected) {
-            budgetExpense.showOnFeed = false;
             budget.showSwitch = determineShowSwitch(budget);
           } else {
             budgetExpense.showOnFeed = expense.showOnFeed;
