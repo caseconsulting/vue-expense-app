@@ -93,7 +93,6 @@
 
               <!-- Show On Feed -->
               <td style="width: 4px;">
-                {{ item.showSwitch }}
                 <v-switch
                   :input-value="item.showSwitch && item.selected"
                   @click.native.stop
