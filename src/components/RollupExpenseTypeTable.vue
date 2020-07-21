@@ -91,7 +91,7 @@
               <!-- Show On Feed -->
               <td style="width: 4px;">
                 <v-switch
-                  v-model="item.showSwitch"
+                  :input-value="item.showSwitch && item.selected"
                   @click.native.stop
                   @change="toggleShowOnFeedGroup(item)"
                   :disabled="!item.selected"
