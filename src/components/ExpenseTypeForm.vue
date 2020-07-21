@@ -244,6 +244,8 @@ function clearForm() {
   this.$set(this.model, 'accessibleBy', 'ALL');
   this.$set(this.model, 'hasRecipient', false);
   this.$set(this.model, 'alwaysOnFeed', false);
+  this.startDateFormatted = null;
+  this.endDateFormatted = null;
   this.customAccess = [];
 } // clearForm
 
