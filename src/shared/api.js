@@ -8,6 +8,9 @@ const TRAINING_URLS = 'training-urls';
 const UTILITY = 'utility';
 const BUDGETS = 'budgets';
 const URLS = 'training-urls';
+const TSHEETS = 'tSheets';
+const TWITTER = 'twitter';
+const BASECAMP = 'basecamp';
 const API_HOSTNAME = API_CONFIG.apiHostname;
 const API_PORT = API_CONFIG.apiPort;
 const PORT = API_PORT === '443' ? '' : `:${API_PORT}`;
@@ -65,6 +68,10 @@ function getEmployeeBudgets(id) {
   return execute('get', `/budgets/employee/${id}`);
 }
 
+function getAllEvents() {
+  return execute('get', `/${UTILITY}/getAllEvents`);
+}
+
 // function getBudgetsByDate(id, date) {
 //   return execute('get', `/${UTILITY}/getEmployeeBudgets/${id}/${date}`);
 // }
@@ -106,6 +113,10 @@ function deleteItem(type, id) {
 }
 
 function getAllAggregateExpenses() {
+  return execute('get', `/${UTILITY}/getAllAggregateExpenses`);
+}
+
+function getAllExpenses() {
   return execute('get', `/${UTILITY}/getAllExpenses`);
 }
 
@@ -118,6 +129,29 @@ function getUser() {
 
 function getAttachment(employeeId, expenseId) {
   return execute('get', `attachment/${employeeId}/${expenseId}`);
+}
+
+async function extractText(file) {
+  let formData = new FormData();
+  formData.append('receipt', file);
+
+  // inject the accessToken for each request
+  let accessToken = getAccessToken();
+
+  return client({
+    method: 'put',
+    url: `/attachment/${file.name}`,
+    data: formData,
+    headers: {
+      Authorization: `Bearer ${accessToken}`
+    }
+  })
+    .then((response) => {
+      return response.data;
+    })
+    .catch((err) => {
+      return err;
+    });
 }
 
 async function createAttachment(expense, file) {
@@ -146,16 +180,33 @@ function deleteAttachment(expense) {
   return execute('delete', `attachment/${expense.employeeId}/${expense.id}/${expense.receipt}`);
 }
 
+//functions for tSheets
+function getPTOBalances(employeeNumber) {
+  return execute('get', `/${TSHEETS}/getPTOBalances/${employeeNumber}`);
+}
+
+function getTimeSheets(employeeNumber, startDate, endDate) {
+  return execute('get', `/${TSHEETS}/getTimeSheets/${employeeNumber}/${startDate}/${endDate}`);
+}
+function getTwitterToken() {
+  return execute('get', `/${TWITTER}/getTwitterToken`);
+}
+function getCaseTimeline() {
+  return execute('get', `${TWITTER}/getCaseTimeline`);
+}
+
+function getFeedEvents() {
+  return execute('get', `/${BASECAMP}/getFeedEvents`);
+}
 export default {
-  // getCanDelete,
+  extractText,
   getEmployeeBudget,
   getAllActiveEmployeeBudgets,
   getAllEmployeeExpenses,
   getAllExpenseTypeExpenses,
   getFiscalDateViewBudgets,
   getEmployeeBudgets,
-  //getBudgetsByDate,
-  //getBudgetsByDateAndType,
+  getFeedEvents,
   getItems,
   getItem,
   getAttachment,
@@ -166,13 +217,21 @@ export default {
   deleteAttachment,
   deleteItem,
   getAllAggregateExpenses,
+  getAllEvents,
+  getAllExpenses,
   getCountries,
   getRole,
   getUser,
+  getPTOBalances,
+  getTimeSheets,
+  getTwitterToken,
+  getCaseTimeline,
   EXPENSE_TYPES,
   EXPENSES,
   EMPLOYEES,
   UTILITY,
   BUDGETS,
-  URLS
+  URLS,
+  TSHEETS,
+  TWITTER
 };

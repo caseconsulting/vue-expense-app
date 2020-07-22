@@ -24,7 +24,7 @@
           <!-- Title -->
           <v-card-title>
             <h2 v-if="isUser">{{ getUserName }}'s Expenses</h2>
-            <h3 v-else>Expenses</h3>
+            <h3 v-else>My Expenses</h3>
             <v-spacer></v-spacer>
 
             <!-- Employee Filter -->
@@ -153,13 +153,13 @@
                 <!-- Action Icons -->
                 <td class="datatable_btn layout" @click="clickedRow(item)">
                   <!-- Download Attachment Button -->
-                  <attachment :expense="item" :mode="'expenses'"></attachment>
+                  <attachment :midAction="midAction" :expense="item" :mode="'expenses'"></attachment>
 
                   <!-- Edit Button -->
                   <v-tooltip top>
                     <template v-slot:activator="{ on }">
                       <v-btn
-                        :disabled="isEditing() || (isUser && isReimbursed(item))"
+                        :disabled="isEditing() || (isUser && isReimbursed(item)) || midAction"
                         text
                         icon
                         @click="
@@ -180,11 +180,12 @@
                   <v-tooltip top>
                     <template v-slot:activator="{ on }">
                       <v-btn
-                        :disabled="isReimbursed(item) || isEditing()"
+                        :disabled="isReimbursed(item) || isEditing() || midAction"
                         text
                         icon
                         @click="
                           deleting = true;
+                          midAction = true;
                           propExpense = item;
                         "
                         v-on="on"
@@ -202,11 +203,12 @@
                     <v-tooltip top>
                       <template v-slot:activator="{ on }">
                         <v-btn
-                          :disabled="!isReimbursed(item) || isEditing()"
+                          :disabled="!isReimbursed(item) || isEditing() || midAction"
                           text
                           icon
                           @click="
                             unreimbursing = true;
+                            midAction = true;
                             propExpense = item;
                           "
                           v-on="on"
@@ -231,7 +233,11 @@
                 <v-card text>
                   <v-card-text>
                     <div class="expandedInfo">
-                      <p v-if="item.description"><b>Description: </b>{{ item.description }}</p>
+                      <p v-if="item.description">
+                        <b v-if="hasRecipient(item)">Recipient: </b>
+                        <b v-else>Description: </b>
+                        {{ item.description }}
+                      </p>
                       <p v-if="!isEmpty(item.note)"><b>Notes: </b>{{ item.note }}</p>
                       <p v-if="!isEmpty(item.receipt)"><b>Receipt: </b>{{ item.receipt }}</p>
                       <p v-if="!isEmpty(item.url)">
@@ -240,8 +246,17 @@
                       <p v-if="!isEmpty(item.category)"><b>Category: </b>{{ item.category }}</p>
                       <div v-if="isAdmin" class="flagExp">
                         <p>Inactive:</p>
-                        <icon v-if="useInactiveStyle(item)" id="marks" class="mr-1" name="regular/check-circle"></icon>
-                        <icon v-else class="mr-1" id="marks" name="regular/times-circle"></icon>
+                        <icon
+                          v-if="useInactiveStyle(item)"
+                          id="marks"
+                          class="mr-1 mx-3"
+                          name="regular/check-circle"
+                        ></icon>
+                        <icon v-else class="mr-1 mx-3" id="marks" name="regular/times-circle"></icon>
+                        <br />
+                        <p>Show On Feed:</p>
+                        <icon v-if="item.showOnFeed" id="marks" class="mr-1 mx-3" name="regular/check-circle"></icon>
+                        <icon v-else class="mr-1 mx-3" id="marks" name="regular/times-circle"></icon>
                       </div>
                     </div>
                   </v-card-text>
@@ -261,7 +276,11 @@
 
           <!-- Download expense csv button -->
           <v-card-actions>
-            <convert-expenses-to-csv v-if="isAdmin" :expenses="filteredExpenses"></convert-expenses-to-csv>
+            <convert-expenses-to-csv
+              v-if="isAdmin"
+              :midAction="midAction"
+              :expenses="filteredExpenses"
+            ></convert-expenses-to-csv>
           </v-card-actions>
 
           <!-- Confirmation Modals -->
@@ -273,13 +292,15 @@
     </v-flex>
 
     <!-- Expense Form -->
-    <v-flex lg4 md12 sm12>
+    <v-flex v-if="isAdmin || !userIsInactive" lg4 md12 sm12>
       <expense-form
         ref="form"
         :isEdit="isEditing()"
         :expense="expense"
         v-on:add="addModelToTable"
         v-on:delete="deleteModelFromTable"
+        v-on:startAction="startAction"
+        v-on:endAction="endAction"
         v-on:update="updateModelInTable"
         v-on:error="displayError"
       ></expense-form>
@@ -346,6 +367,18 @@ function roleHeaders() {
         return localHeaders; // return the remaining headers
       })(this.headers);
 } // roleHeaders
+
+/**
+ * Checks if the user is inactive. Returns true if the user is inactive, otherwise returns false.
+ *
+ * @return boolean - whether or not the user is inactive
+ */
+function userIsInactive() {
+  if (this.userInfo == null) {
+    return false;
+  }
+  return this.userInfo.workStatus == 0;
+} // userIsInactive
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -470,6 +503,7 @@ async function deleteExpense() {
       // fails to delete expense
       this.displayError('Error Deleting Expense');
     }
+    this.midAction = false;
   }
   this.loading = false; // set loading status to false
 } // deleteExpense
@@ -496,6 +530,12 @@ function displayError(err) {
   this.$set(this.status, 'color', 'red');
 } // displayError
 
+/**
+ * set midAction to false
+ */
+function endAction() {
+  this.midAction = false;
+}
 /**
  * Filters expenses based on filter selections.
  */
@@ -536,6 +576,14 @@ function filterExpenses() {
     });
   }
 } // filterExpenses
+
+/**
+ * Checks if expense type has recipient.
+ */
+function hasRecipient(expense) {
+  let expenseType = _.find(this.expenseTypes, (type) => expense.expenseTypeId === type.value);
+  return !isEmpty(expenseType.hasRecipient) && expenseType.hasRecipient;
+}
 
 /**
  * Checks if an expense is being edited.
@@ -582,20 +630,21 @@ function isReimbursed(expense) {
  * @param item - expense selected
  */
 function onSelect(item) {
-  this.$set(this.expense, 'budgetName', item.budgetName);
   this.$set(this.expense, 'id', item.id);
+  this.$set(this.expense, 'createdAt', item.createdAt);
+  this.$set(this.expense, 'employeeId', item.employeeId);
+  this.$set(this.expense, 'employeeName', item.employeeName);
+  this.$set(this.expense, 'expenseTypeId', item.expenseTypeId);
+  this.$set(this.expense, 'budgetName', item.budgetName);
+  this.$set(this.expense, 'category', item.category);
+  this.$set(this.expense, 'cost', moneyFilter(item.cost));
+  this.$set(this.expense, 'description', item.description);
   this.$set(this.expense, 'purchaseDate', item.purchaseDate);
   this.$set(this.expense, 'reimbursedDate', item.reimbursedDate);
-  this.$set(this.expense, 'employeeName', item.employeeName);
-  this.$set(this.expense, 'description', item.description);
-  this.$set(this.expense, 'cost', moneyFilter(item.cost));
-  this.$set(this.expense, 'employeeId', item.employeeId);
-  this.$set(this.expense, 'expenseTypeId', item.expenseTypeId);
-  this.$set(this.expense, 'note', item.note.trim());
+  this.$set(this.expense, 'note', item.note);
   this.$set(this.expense, 'receipt', item.receipt);
-  this.$set(this.expense, 'createdAt', item.createdAt);
-  this.$set(this.expense, 'url', item.url.trim());
-  this.$set(this.expense, 'category', item.category);
+  this.$set(this.expense, 'url', item.url);
+  this.$set(this.expense, 'showOnFeed', item.showOnFeed);
 } // onSelect
 
 /**
@@ -614,6 +663,12 @@ async function refreshExpenses() {
   this.loading = false; // set loading status to false
 } // refreshExpenses
 
+/**
+ * set midAction to true
+ */
+function startAction() {
+  this.midAction = true;
+}
 /**
  * Scrolls window back to the top of the form.
  */
@@ -643,6 +698,7 @@ async function unreimburseExpense() {
 
   this.refreshExpenses();
   this.loading = false; // set loading status to false
+  this.midAction = false;
 } // unreimburseExpense
 
 /**
@@ -683,10 +739,16 @@ function useInactiveStyle(expense) {
  *  Gets and sets user info, expense types, and expenses. Creates event listeners.
  */
 async function created() {
-  window.EventBus.$on('canceled-unreimburse-expense', () => (this.unreimbursing = false));
+  window.EventBus.$on('canceled-unreimburse-expense', () => {
+    this.unreimbursing = false;
+    this.midAction = false;
+  });
   window.EventBus.$on('confirm-unreimburse-expense', this.unreimburseExpense);
 
-  window.EventBus.$on('canceled-delete-expense', () => (this.deleting = false));
+  window.EventBus.$on('canceled-delete-expense', () => {
+    this.deleting = false;
+    this.midAction = false;
+  });
   window.EventBus.$on('confirm-delete-expense', this.deleteExpense);
 
   // get user info
@@ -708,7 +770,10 @@ async function created() {
       requiredFlag: expenseType.requiredFlag,
       recurringFlag: expenseType.recurringFlag,
       isInactive: expenseType.isInactive,
-      categories: expenseType.categories
+      categories: expenseType.categories,
+      accessibleBy: expenseType.accessibleBy,
+      hasRecipient: expenseType.hasRecipient,
+      alwaysOnFeed: expenseType.alwaysOnFeed
     };
   });
 
@@ -736,7 +801,8 @@ export default {
     getUserName,
     isAdmin,
     isUser,
-    roleHeaders
+    roleHeaders,
+    userIsInactive
   },
   created,
   data() {
@@ -748,18 +814,20 @@ export default {
       employee: null, // employee autocomplete filter
       expense: {
         id: '',
-        description: '',
-        cost: '',
-        note: null,
-        employeeId: '',
-        expenseTypeId: '',
         purchaseDate: null,
         reimbursedDate: null,
-        receipt: null,
-        employeeName: '',
-        budgetName: '',
+        note: null,
+        url: null,
         createdAt: null,
-        category: ''
+        reciept: null,
+        cost: '',
+        description: '',
+        employeeId: '',
+        expenseTypeId: '',
+        catagory: null,
+        showOnFeed: false,
+        employeeName: null,
+        budgetName: null
       }, // selected expense
       expenseTypes: [], // expense types
       filter: {
@@ -798,20 +866,24 @@ export default {
         }
       ], // datatable headers
       loading: true, // loading status
+      midAction: false,
       propExpense: {
-        id: '',
-        description: '',
-        cost: '',
-        note: null,
-        employeeId: '',
-        expenseTypeId: '',
+        id: null,
+        createdAt: null,
+        employeeId: null,
+        employeeName: null,
+        expenseTypeId: null,
+        budgetName: null,
+        category: null,
+        cost: 0,
+        description: null,
         purchaseDate: null,
         reimbursedDate: null,
+        note: null,
         receipt: null,
-        employeeName: '',
-        budgetName: '',
-        createdAt: null,
-        category: ''
+        recipient: null,
+        url: null,
+        showOnFeed: null
       }, // expense to edit
       search: '', // query text for datatable search field
       sortBy: 'createdAt', // sort datatable items
@@ -848,13 +920,16 @@ export default {
     deleteExpense,
     deleteModelFromTable,
     displayError,
+    endAction,
     filterExpenses,
+    hasRecipient,
     isEditing,
     isEmpty,
     isFocus,
     isReimbursed,
     onSelect,
     refreshExpenses,
+    startAction,
     toTopOfForm,
     unreimburseExpense,
     updateModelInTable,
@@ -901,7 +976,6 @@ export default {
 
 .flagExp p {
   font-weight: bold;
-  width: 75px;
   display: inline-block;
 }
 </style>

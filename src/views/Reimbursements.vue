@@ -7,7 +7,6 @@
     <v-flex lg2 md2 sm12>
       <!-- Expense Info -->
       <expense-info class="jerryrig"></expense-info>
-
       <!-- Expenses Total -->
       <expense-type-totals></expense-type-totals>
     </v-flex>

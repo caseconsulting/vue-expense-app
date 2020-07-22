@@ -101,7 +101,7 @@
                   <v-tooltip top>
                     <template v-slot:activator="{ on }">
                       <v-btn
-                        :disabled="isEditing()"
+                        :disabled="isEditing() || midAction"
                         text
                         icon
                         @click.stop="
@@ -121,7 +121,13 @@
                   <!-- Delete Button -->
                   <v-tooltip top>
                     <template v-slot:activator="{ on }">
-                      <v-btn :disabled="isEditing()" text icon @click.stop="validateDelete(item)" v-on="on">
+                      <v-btn
+                        :disabled="isEditing() || midAction"
+                        text
+                        icon
+                        @click.stop="validateDelete(item)"
+                        v-on="on"
+                      >
                         <v-icon style="color: #606060;">
                           delete
                         </v-icon>
@@ -162,6 +168,9 @@
                       <p v-if="userIsAdmin() && !isEmpty(item.birthday)">
                         <b>Birthday: </b>{{ item.birthday | dateFormat }}
                       </p>
+                      <p v-if="userIsAdmin() && !isEmpty(item.birthdayFeed)">
+                        <b>Birthday on feed: </b>{{ item.birthdayFeed | birthdayFeedResponse }}
+                      </p>
                       <p v-if="userIsAdmin() && !isEmpty(item.city) && !isEmpty(item.st) && !isEmpty(item.country)">
                         <b>Place of Birth: </b>{{ item.city }}, {{ item.st }}, {{ item.country }}
                       </p>
@@ -201,7 +210,12 @@
 
           <!-- Download employee csv button -->
           <v-card-actions>
-            <convert-employees-to-csv v-if="userIsAdmin()" :employees="filteredEmployees"></convert-employees-to-csv>
+            <convert-employees-to-csv
+              v-if="userIsAdmin()"
+              :midAction="midAction"
+              :employees="filteredEmployees"
+              :editing="isEditing()"
+            ></convert-employees-to-csv>
           </v-card-actions>
 
           <!-- Confirmation Modals -->
@@ -217,7 +231,10 @@
       <employee-form
         ref="form"
         :model="model"
+        :employeeInfo="employeeInfo"
         v-on:add="addModelToTable"
+        v-on:startACtion="startAction"
+        v-on:endAction="endAction"
         v-on:update="updateModelInTable"
         v-on:error="displayError"
       ></employee-form>
@@ -231,7 +248,7 @@ import ConvertEmployeesToCsv from '../components/ConvertEmployeesToCsv.vue';
 import DeleteErrorModal from '../components/DeleteErrorModal.vue';
 import DeleteModal from '../components/DeleteModal.vue';
 import EmployeeForm from '../components/EmployeeForm.vue';
-import EmployeeHome from '@/views/EmployeeHome.vue';
+import EmployeeHome from '@/views/MyBudgets.vue';
 import { getRole } from '@/utils/auth';
 import moment from 'moment';
 import _ from 'lodash';
@@ -271,6 +288,7 @@ function clearModel() {
 
   //New Fields
   this.$set(this.model, 'birthday', '');
+  this.$set(this.model, 'birthdayFeed', false);
   this.$set(this.model, 'jobRole', '');
   this.$set(this.model, 'prime', '');
   this.$set(this.model, 'contract', '');
@@ -320,6 +338,7 @@ async function deleteEmployee() {
     // display error if failed to deleted employee
     this.displayError(e.response.data.message);
   }
+  this.midAction = false;
 } // deleteEmployee
 
 /**
@@ -345,6 +364,22 @@ async function displayError(err) {
 } // displayError
 
 /**
+ * sets midAction boolean to false
+ */
+function endAction() {
+  this.midAction = false;
+}
+/**
+ * Filters out contracts from list of employees.
+ */
+function filterContracts() {
+  let tempContracts = _.map(this.employees, (a) => a.contract); //extract contracts
+  tempContracts = _.map(tempContracts, (a) => a.trim()); //trim whitespace
+  tempContracts = _.compact(tempContracts); //remove falsey values
+  this.employeeInfo.contracts = [...new Set(tempContracts)]; //remove duplicates
+} // filterContracts
+
+/**
  * Filters list of employees.
  */
 function filterEmployees() {
@@ -356,6 +391,16 @@ function filterEmployees() {
     return fullCheck || partCheck || inactiveCheck;
   });
 } // filterEmployees
+
+/**
+ * Filters out primes from list of employees.
+ */
+function filterPrimes() {
+  let tempPrimes = _.map(this.employees, (a) => a.prime); //extract primes
+  tempPrimes = _.map(tempPrimes, (a) => a.trim()); //trim whitespace
+  tempPrimes = _.compact(tempPrimes); //remove falsey values
+  this.employeeInfo.primes = [...new Set(tempPrimes)]; //remove duplicates and set
+} // filterPrimes
 
 /**
  * Returns Full Time, Part Time, or Inactive based on the work status
@@ -471,6 +516,7 @@ function onSelect(item) {
 
   // New Fields
   this.$set(this.model, 'birthday', item.birthday);
+  this.$set(this.model, 'birthdayFeed', item.birthdayFeed);
   this.$set(this.model, 'jobRole', item.jobRole);
   this.$set(this.model, 'prime', item.prime.trim());
   this.$set(this.model, 'contract', item.contract.trim());
@@ -488,11 +534,19 @@ function onSelect(item) {
 async function refreshEmployees() {
   this.loading = true; // set loading status to true
   this.employees = await api.getItems(api.EMPLOYEES); // get all employees
+  this.filterPrimes();
+  this.filterContracts();
   this.filterEmployees(); // filter employees
   this.expanded = []; // collapse any expanded rows in the database
   this.loading = false; // set loading status to false
 } // refreshEmployees
 
+/**
+ * Sets midAction boolean to true
+ */
+function startAction() {
+  this.midAction = true;
+}
 /**
  * Scrolls window back to the top of the form.
  */
@@ -523,6 +577,7 @@ function userIsAdmin() {
  * @param item - employee to validate
  */
 async function validateDelete(item) {
+  this.midAction = true;
   let valid = await api
     .getAllEmployeeExpenses(item.id) // get employee expenses
     .then((result) => {
@@ -554,9 +609,15 @@ async function validateDelete(item) {
  *  Adjust datatable header for user view. Creates event listeners.
  */
 async function created() {
-  window.EventBus.$on('canceled-delete-employee', () => (this.deleting = false));
+  window.EventBus.$on('canceled-delete-employee', () => {
+    this.deleting = false;
+    this.midAction = false;
+  });
   window.EventBus.$on('confirm-delete-employee', this.deleteEmployee);
-  window.EventBus.$on('invalid-employee-delete', () => (this.invalidDelete = false));
+  window.EventBus.$on('invalid-employee-delete', () => {
+    this.invalidDelete = false;
+    this.midAction = false;
+  });
 
   this.refreshEmployees();
 
@@ -587,6 +648,10 @@ export default {
         id: ''
       }, // employee to delete
       deleting: false, // activate delete confirmation model
+      employeeInfo: {
+        primes: [],
+        contracts: []
+      },
       employees: [], // employees
       expanded: [], // datatable expanded
       filter: {
@@ -619,6 +684,7 @@ export default {
           sortable: false
         }
       ], // datatable headers
+      midAction: false,
       invalidDelete: false, // invalid delete status
       itemsPerPage: -1, // items per datatable page
       loading: false, // loading status
@@ -633,6 +699,7 @@ export default {
         hireDate: null,
         workStatus: 100,
         birthday: '',
+        birthdayFeed: false,
         jobRole: '',
         prime: '',
         contract: '',
@@ -661,6 +728,13 @@ export default {
       } else {
         return '';
       }
+    },
+    birthdayFeedResponse: (value) => {
+      if (value == true) {
+        return 'yes';
+      } else {
+        return 'no';
+      }
     }
   },
   methods: {
@@ -671,7 +745,10 @@ export default {
     deleteEmployee,
     deleteModelFromTable,
     displayError,
+    endAction,
+    filterContracts,
     filterEmployees,
+    filterPrimes,
     getWorkStatus,
     isDisplayData,
     isEditing,
@@ -682,6 +759,7 @@ export default {
     isPartTime,
     onSelect,
     refreshEmployees,
+    startAction,
     toTopOfForm,
     updateModelInTable,
     userIsAdmin,

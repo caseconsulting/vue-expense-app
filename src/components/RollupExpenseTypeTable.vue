@@ -58,26 +58,48 @@
           <!-- Rows in datatable -->
           <template v-slot:item="{ item }">
             <tr @click="clickedRow(item)">
-              <!-- Checkbox for individual expense -->
-              <td style="width: 1px;">
+              <!--  Checkbox for individual expense  -->
+              <td>
                 <v-checkbox
                   :input-value="item.checkBox.all"
                   :indeterminate="item.checkBox.indeterminate"
                   primary
                   hide-details
-                  @click.stop="toggleGroup(item)"
+                  @click.stop="
+                    toggleGroup(item);
+                    determineShowOnFeed(item);
+                  "
                   class="ma-0"
-                ></v-checkbox>
+                >
+                </v-checkbox>
               </td>
-
               <!-- Employee Name -->
-              <td>{{ item.employeeName }}</td>
-
+              <td>
+                <v-badge
+                  v-if="item.expenses.length > 1"
+                  :content="item.expenses.length"
+                  :value="true"
+                  :left="true"
+                  :offset-x="-10"
+                  color="grey"
+                ></v-badge>
+                {{ item.employeeName }}
+              </td>
               <!-- Budget Name -->
               <td>{{ item.budgetName }}</td>
 
               <!-- Total Expense Amount -->
               <td id="money-team">{{ getBudgetTotal(item.expenses) | moneyValue }}</td>
+
+              <!-- Show On Feed -->
+              <td style="width: 4px;">
+                <v-switch
+                  :input-value="item.showSwitch && item.selected"
+                  @click.native.stop
+                  @change="toggleShowOnFeedGroup(item)"
+                  :disabled="!item.checkBox.all"
+                ></v-switch>
+              </td>
             </tr>
           </template>
           <!-- End rows in datatable -->
@@ -85,7 +107,11 @@
           <!-- Expanded slot in datatable -->
           <template v-slot:expanded-item="{ headers, item }">
             <td :colspan="headers.length" class="pa-0">
-              <unrolled-table-info :expenses="item.expenses" @selectExpense="selectExpense"></unrolled-table-info>
+              <unrolled-table-info
+                :expenses="item.expenses"
+                @toggleExpense="toggleShowOnFeed"
+                @selectExpense="selectExpense"
+              ></unrolled-table-info>
             </td>
           </template>
           <!-- End expanded slot in datatable -->
@@ -115,7 +141,11 @@
       </v-container>
 
       <!-- Activate Reimburse Modal -->
-      <reimburse-modal :activate="buttonClicked"></reimburse-modal>
+      <reimburse-modal
+        :activate="buttonClicked"
+        :selectedReimbursements="getSelectedExpensesToReimburse"
+        v-on:confirm-reimburse="reimburseExpenses"
+      ></reimburse-modal>
     </v-card>
   </div>
 </template>
@@ -139,7 +169,7 @@ import _ from 'lodash';
  * @return Array - filtered budgets
  */
 function filteredItems() {
-  return _.filter(this.empBudgets, (budget) => {
+  let data = _.filter(this.empBudgets, (budget) => {
     if (!this.employee && !this.expenseType) {
       return true;
     } else if (!this.employee && this.expenseType) {
@@ -150,6 +180,7 @@ function filteredItems() {
       return budget.employeeId === this.employee && budget.expenseTypeId === this.expenseType;
     }
   });
+  return data;
 } // filteredItems
 
 /**
@@ -177,6 +208,17 @@ function mainCheckBox() {
   }
   return checkBox;
 } // mainCheckBox
+
+/**
+ * Gets all selected expenses
+ */
+function getSelectedExpensesToReimburse() {
+  return _.filter(this.pendingExpenses, (expense) => {
+    if (expense.selected) {
+      return true;
+    }
+  });
+} // getSelectedExpensesToReimburse
 
 /**
  * Returns the display status of the reimburse button. Returns true if an expense is selected, otherwise returns false.
@@ -300,8 +342,13 @@ function createExpenses(aggregatedData) {
         indeterminate: false
       },
       selected: false,
+      showSwitch: false,
+      url: expense.url,
+      category: expense.category,
       createdAt: expense.createdAt,
-      failed: false
+      failed: false,
+      showOnFeed: expense.showOnFeed,
+      disableShowOnFeedToggle: expense.disableShowOnFeedToggle
     };
   });
 } // createExpenses
@@ -338,6 +385,26 @@ function determineCheckBox(budget) {
 
   return checkBox;
 } // determineCheckBox
+
+/**
+ * Determine the state of the group toggle based on expenses show on
+ * feed toggle
+ *
+ * @param budget - budget group toggled
+ * @return Object - toggle switch
+ */
+function determineShowSwitch(budget) {
+  let showSwitch = true;
+
+  _.forEach(budget.expenses, (expense) => {
+    if (!expense.showOnFeed) {
+      // at least one of the expenses is not selected to show on feed
+      showSwitch = false;
+    }
+  });
+
+  return showSwitch;
+} // determineShowSwitch
 
 /**
  * Displays an error in the response status snackbar.
@@ -521,6 +588,12 @@ function selectExpense(expense) {
       return _.forEach(budget.expenses, (budgetExpense) => {
         if (expense === budgetExpense) {
           budgetExpense.selected = !budgetExpense.selected;
+          if (!budgetExpense.selected) {
+            budget.showSwitch = determineShowSwitch(budget);
+          } else {
+            budgetExpense.showOnFeed = expense.showOnFeed;
+            budget.showSwitch = determineShowSwitch(budget);
+          }
         }
       });
     }
@@ -532,6 +605,42 @@ function selectExpense(expense) {
     }
   });
 } // selectExpense
+
+/**
+ * Toggles show on feed switch for individual expenses
+ *
+ * @param expense - expense toggled
+ */
+function toggleShowOnFeed(expense) {
+  this.empBudgets = _.forEach(this.empBudgets, (budget) => {
+    if (expense.key === budget.key) {
+      return _.forEach(budget.expenses, (budgetExpense) => {
+        if (expense === budgetExpense) {
+          budgetExpense.showOnFeed = !budgetExpense.showOnFeed;
+        }
+      });
+    }
+  });
+
+  this.empBudgets = _.forEach(this.empBudgets, (budget) => {
+    if (expense.key === budget.key) {
+      budget.showSwitch = determineShowSwitch(budget);
+    }
+  });
+} // toggleShowOnFeed
+
+/**
+ * Toggles show on feed switch for individual expenses
+ *
+ * @param expense - expense toggled
+ */
+function determineShowOnFeed(expense) {
+  this.empBudgets = _.forEach(this.empBudgets, (budget) => {
+    if (expense.key === budget.key) {
+      budget.showSwitch = determineShowSwitch(budget);
+    }
+  });
+} // determineShowOnFeed
 
 /**
  * Sets up an expense object to be submitted.
@@ -550,7 +659,10 @@ function submitExpenseObject(expense) {
     note: expense.note,
     employeeId: expense.employeeId,
     receipt: expense.receipt,
-    createdAt: expense.createdAt
+    category: expense.category,
+    createdAt: expense.createdAt,
+    showOnFeed: expense.showOnFeed,
+    url: expense.url
   };
 } // submitExpenseObject
 
@@ -602,6 +714,34 @@ function toggleGroup(value) {
 } // toggleGroup
 
 /**
+ * Toggle show on feed on group of expenses
+ *
+ * @param value - expense group toggled
+ */
+function toggleShowOnFeedGroup(value) {
+  this.empBudgets = _.forEach(this.empBudgets, (budget) => {
+    if (value === budget) {
+      let check = true;
+      for (let i = 0; i < budget.expenses.length; i++) {
+        if (!budget.expenses[i].showOnFeed) {
+          check = false;
+        }
+      }
+      _.forEach(budget.expenses, (expense) => {
+        expense.showOnFeed = !check;
+      });
+    }
+  });
+
+  // set the group check box
+  this.empBudgets = _.forEach(this.empBudgets, (budget) => {
+    if (value === budget) {
+      budget.showSwitch = determineShowSwitch(budget);
+    }
+  });
+} // toggleShowOnFeedGroup
+
+/**
  * Uncheck all expenses and boxes
  */
 function unCheckAllBoxes() {
@@ -615,6 +755,15 @@ function unCheckAllBoxes() {
   });
 } // unCheckAllBoxes
 
+/**
+ * Resets show on feed toggles when page is created
+ */
+function resetShowOnFeedToggles() {
+  this.empBudgets = _.forEach(this.empBudgets, (budget) => {
+    budget.showSwitch = false;
+  });
+} // resetShowOnFeedToggles
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                 LIFECYCLE HOOKS                  |
@@ -626,15 +775,19 @@ function unCheckAllBoxes() {
  */
 async function created() {
   window.EventBus.$on('selectExpense', this.selectExpense);
-  window.EventBus.$on('confirm-reimburse', this.reimburseExpenses);
+  window.EventBus.$on('toggleExpense', this.toggleShowOnFeed);
+
   window.EventBus.$on('canceled-reimburse', () => (this.buttonClicked = false));
+  window.EventBus.$on('confirm-reimburse', () => this.reimburseExpenses());
   let aggregatedData = await api.getAllAggregateExpenses();
 
   let allExpenses = createExpenses(aggregatedData);
   this.pendingExpenses = filterOutReimbursed(allExpenses);
+
   this.constructAutoComplete(this.pendingExpenses);
   this.empBudgets = groupEmployeeExpenses(this.pendingExpenses);
   this.unCheckAllBoxes();
+  this.resetShowOnFeedToggles();
   this.loading = false;
 } // created
 
@@ -645,6 +798,7 @@ async function created() {
 // |--------------------------------------------------|
 
 export default {
+  prop: ['confirmReimburse'],
   components: {
     ReimburseModal,
     UnrolledTableInfo
@@ -652,7 +806,8 @@ export default {
   computed: {
     filteredItems,
     mainCheckBox,
-    showReimburseButton
+    showReimburseButton,
+    getSelectedExpensesToReimburse
   },
   created,
   data: () => ({
@@ -679,6 +834,12 @@ export default {
         text: 'Total',
         value: 'cost',
         align: 'center'
+      },
+      {
+        text: 'Show on Feed',
+        value: 'showOnFeed',
+        align: 'center',
+        sortable: false
       }
     ], // datatable headers
     itemsPerPage: -1, // data table elements per page
@@ -709,6 +870,7 @@ export default {
     clearStatus,
     clickedRow,
     constructAutoComplete,
+    determineShowOnFeed,
     displayError,
     emitSelectionChange,
     filterOutReimbursed,
@@ -719,10 +881,13 @@ export default {
     matchingEmployeeAndExpenseType,
     refreshExpenses,
     reimburseExpenses,
+    resetShowOnFeedToggles,
     selectExpense,
     submitExpenseObject,
     toggleAll,
     toggleGroup,
+    toggleShowOnFeedGroup,
+    toggleShowOnFeed,
     unCheckAllBoxes
   }
 };

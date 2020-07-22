@@ -31,7 +31,7 @@
 function emit(msg, data) {
   if (data) {
     // data exists
-    window.EventBus.$emit(msg, data);
+    this.$emit(msg, data);
   } else {
     // data does not exist
     window.EventBus.$emit(msg);

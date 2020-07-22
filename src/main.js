@@ -35,6 +35,18 @@ import 'vue-awesome/icons/crosshairs';
 import 'vue-awesome/icons/clock';
 import 'vue-awesome/icons/regular/clock';
 import 'vue-awesome/icons/regular/stop-circle';
+import 'vue-awesome/icons/home';
+import 'vue-awesome/icons/brands/twitter';
+import 'vue-awesome/icons/brands/github';
+import 'vue-awesome/icons/brands/linkedin';
+import 'vue-awesome/icons/brands/youtube';
+import 'vue-awesome/icons/brands/facebook';
+import 'vue-awesome/icons/user-plus';
+import 'vue-awesome/icons/glass-cheers';
+import 'vue-awesome/icons/birthday-cake';
+import 'vue-awesome/icons/dollar-sign';
+import 'vue-awesome/icons/calendar-alt';
+import 'vue-awesome/icons/external-link-alt';
 
 import Icon from 'vue-awesome/components/Icon';
 import App from './App.vue';

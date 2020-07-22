@@ -47,6 +47,15 @@
 
             <!-- Description -->
             <td :class="{ failed: item.failed }">{{ item.description | descripFormat }}</td>
+
+            <!-- Show on Feed -->
+            <td style="width: 4px;">
+              <v-switch
+                :input-value="item.showOnFeed && item.selected"
+                @change="expenseToggle(item)"
+                :disabled="!item.selected"
+              ></v-switch>
+            </td>
           </tr>
         </template>
         <!-- End rows in datatable -->
@@ -83,6 +92,15 @@ function expenseSelected(selectedExpense) {
   window.EventBus.$emit('selectExpense', selectedExpense);
 } // expenseSelected
 
+/**
+ * Emit an event to parent that an expense was toggled.
+ *
+ * @param toggledExpense - expense toggled
+ */
+function expenseToggle(toggledExpense) {
+  window.EventBus.$emit('toggleExpense', toggledExpense);
+} // expenseToggle
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                      EXPORT                      |
@@ -107,6 +125,12 @@ export default {
           text: 'Description',
           value: 'description',
           align: 'center'
+        },
+        {
+          text: 'Show on Feed',
+          value: 'showOnFeed',
+          align: 'center',
+          sortable: false
         }
       ],
       sortBy: 'purchaseDate',
@@ -138,7 +162,8 @@ export default {
   },
   methods: {
     expenseClicked,
-    expenseSelected
+    expenseSelected,
+    expenseToggle
   },
   props: ['expenses'] // list of expenses
 };

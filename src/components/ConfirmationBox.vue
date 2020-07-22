@@ -3,17 +3,33 @@
   <v-layout row justify-center>
     <v-dialog v-model="activate" persistent max-width="330">
       <v-card>
-        <v-card-title class="headline">You've reached the budget limit for this expense type</v-card-title>
+        <v-card-title v-if="isCovered" class="headline"
+          >You've reached the budget limit for this expense type</v-card-title
+        >
+        <v-card-title v-else class="headline">You've reached the overdraft limit for this expense type</v-card-title>
         <v-card-text>
-          <!-- Overdraft Allowed -->
-          <p v-if="expense.od">
-            The expense type you are about to submit is only covered up to {{ (expense.budget * 2) | moneyValue }}. You
-            will be reimbursed {{ expense.remaining | moneyValue }} of {{ expense.cost | moneyValue }}.
+          <!-- Overdraft Allowed start above overdraft and not going over overdraft limit -->
+          <p v-if="isOverCovered">
+            You are already above the initial budget of {{ expense.budget | moneyValue }}. However you are still within
+            the overdraft limit of {{ (expense.budget * 2) | moneyValue }}. You will be reimbursed the full amount but
+            will be charged next year for an additional {{ expense.cost | moneyValue }}.
           </p>
-          <!-- Overdraft Not Allowed -->
+          <!-- Overdraft Allowed and Going over initial budget-->
+          <p v-else-if="expense.od && isCovered">
+            The expense type you are about to submit is covered up to {{ expense.budget | moneyValue }} but allows
+            overdraft. You will be reimbursed but will be charged the following year for
+            {{ (expense.cost - expense.remaining) | moneyValue }}.
+          </p>
+          <!-- Overdraft Allowed and going over overdraft budget -->
+          <p v-else-if="expense.od && !isCovered">
+            The expense type you are about to submit is only covered up to {{ (expense.budget * 2) | moneyValue }} with
+            overdraft. You will be reimbursed {{ expense.remaining | moneyValue }} of {{ expense.cost | moneyValue }}.
+          </p>
+          <!-- Overdraft not allowed and going over budget -->
           <p v-else>
-            The expense type you are about to submit is only covered up to {{ expense.budget | moneyValue }}. You will
-            be reimbursed {{ expense.remaining | moneyValue }} of {{ expense.cost | moneyValue }}.
+            The expense type you are about to submit is only covered up to {{ expense.budget | moneyValue }} and does
+            not allow overdraft. You will be reimbursed {{ expense.remaining | moneyValue }} of
+            {{ expense.cost | moneyValue }}.
           </p>
           <p>Do you want to continue?</p>
         </v-card-text>
@@ -46,15 +62,24 @@
 function emit(msg, data) {
   if (data) {
     // data exists
-    let adjustNote = `Expense type is only covered up to $${this.expense.budget}. You will be reimbursed $${this.expense.remaining} of $${this.expense.cost}`;
-    if (!isEmpty(this.expense.note)) {
-      // expense has a note
-      this.expense.note += `\n\n${adjustNote}`;
-    } else {
-      // expense does not have a note
-      this.expense.note = adjustNote;
+    if (!this.isCovered) {
+      let adjustNote = '';
+      if (!this.expense.od) {
+        adjustNote = `Expense type is only covered up to $${this.expense.budget}. You will be reimbursed $${this.expense.remaining} of $${this.expense.cost}`;
+      } else {
+        adjustNote = `Expense type is only covered up to $${2 * this.expense.budget}. You will be reimbursed $${
+          this.expense.remaining
+        } of $${this.expense.cost}`;
+      }
+      if (!isEmpty(this.expense.note)) {
+        // expense has a note
+        this.expense.note += `\n\n${adjustNote}`;
+      } else {
+        // expense does not have a note
+        this.expense.note = adjustNote;
+      }
+      this.expense.cost = this.expense.remaining;
     }
-    this.expense.cost = this.expense.remaining;
     window.EventBus.$emit(msg, data);
   } else {
     // data does not exist
@@ -96,7 +121,9 @@ export default {
   },
   props: [
     'expense', // expense to confirm
-    'activate' // dialog activator
+    'activate', // dialog activator
+    'isCovered',
+    'isOverCovered'
   ]
 };
 </script>

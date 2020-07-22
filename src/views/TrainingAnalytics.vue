@@ -25,108 +25,26 @@
       <v-flex xs12 class="text-center">
         <v-row>
           <!-- Training Button -->
-          <div>
+          <div v-for="category in categories" :key="category.value">
             <v-btn
-              @click="filterByCategory('Training')"
+              @click="filterByCategory(category.value)"
               class="mx-3 pa-12"
               fab
-              :rounded="isFocus('Training')"
+              :rounded="isFocus(category.value)"
               dark
               large
               color="#bc3825"
             >
-              <v-icon dark size="60px">fitness_center</v-icon>
+              <v-icon dark size="60px">{{ category.icon }}</v-icon>
             </v-btn>
-            <h4>Training</h4>
-          </div>
-
-          <!-- Conference Button -->
-          <div>
-            <v-btn
-              @click="filterByCategory('Conference')"
-              class="mx-3 pa-12"
-              fab
-              :rounded="isFocus('Conference')"
-              dark
-              large
-              color="#bc3825"
-            >
-              <v-icon dark size="60px">group</v-icon>
-            </v-btn>
-            <h4>Conference</h4>
-          </div>
-
-          <!-- Certifications Button -->
-          <div>
-            <v-btn
-              @click="filterByCategory('Certifications')"
-              class="mx-3 pa-12"
-              fab
-              :rounded="isFocus('Certifications')"
-              dark
-              large
-              color="#bc3825"
-            >
-              <v-icon dark size="60px">stars</v-icon>
-            </v-btn>
-            <h4>Certifications</h4>
-          </div>
-
-          <!-- Lodging Button -->
-          <div>
-            <v-btn
-              @click="filterByCategory('Lodging')"
-              class="mx-3 pa-12"
-              fab
-              :rounded="isFocus('Lodging')"
-              dark
-              large
-              color="#bc3825"
-            >
-              <v-icon dark size="60px">hotel</v-icon>
-            </v-btn>
-            <h4>Lodging</h4>
-          </div>
-
-          <!-- Travel Button -->
-          <div>
-            <v-btn
-              @click="filterByCategory('Travel')"
-              class="mx-3 pa-12"
-              fab
-              :rounded="isFocus('Travel')"
-              dark
-              large
-              color="#bc3825"
-            >
-              <v-icon dark size="60px">airplanemode_active</v-icon>
-            </v-btn>
-            <h4>Travel</h4>
-          </div>
-
-          <!-- Meals Button -->
-          <div>
-            <v-btn
-              @click="filterByCategory('Meals')"
-              class="mx-3 pa-12"
-              fab
-              :rounded="isFocus('Meals')"
-              dark
-              large
-              color="#bc3825"
-            >
-              <v-icon dark size="60px">restaurant</v-icon>
-            </v-btn>
-            <h4>Meals</h4>
+            <h4>{{ category.value }}</h4>
           </div>
         </v-row>
       </v-flex>
       <!-- End Category Filter Button -->
 
       <!-- Button/Urls Divider -->
-      <br />
-      <hr />
-      <br />
+      <hr class="my-6" />
 
       <v-flex xs12>
         <!-- List all url info -->
@@ -166,6 +84,7 @@
             </v-col>
           </v-row>
         </div>
+        <div v-if="this.urls.length === 0" class="text-center">No Training URL with Category: {{ categoryFilter }}</div>
       </v-flex>
     </v-container>
   </v-layout>
@@ -353,7 +272,33 @@ export default {
       categoryFilter: 'All', // category filter
       search: '', // search filter
       urlsShow: [], // training urls to display
-      urlsOriginal: [] // all training urls
+      urlsOriginal: [], // all training urls,
+      categories: [
+        {
+          value: 'Training',
+          icon: 'fitness_center'
+        },
+        {
+          value: 'Conference',
+          icon: 'group'
+        },
+        {
+          value: 'Certifications',
+          icon: 'stars'
+        },
+        {
+          value: 'Lodging',
+          icon: 'hotel'
+        },
+        {
+          value: 'Travel',
+          icon: 'airplanemode_active'
+        },
+        {
+          value: 'Meals',
+          icon: 'restaurant'
+        }
+      ] // categories for button filters
     };
   },
   methods: {
@@ -372,14 +317,14 @@ export default {
 }
 
 .hitIcon {
-  color: #bc3825;
+  color: white;
   margin-top: 3px;
   margin-right: 3px;
   float: right;
 }
 
 .hitText {
-  color: #bc3825;
+  color: white;
   float: right;
 }
 

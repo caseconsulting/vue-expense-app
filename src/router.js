@@ -1,14 +1,16 @@
 import Vue from 'vue';
 import Router from 'vue-router';
-import AdminDashboard from '@/views/AdminDashboard.vue';
+import Reimbursements from '@/views/Reimbursements.vue';
 import Login from '@/views/Login.vue';
 import LoginFailed from '@/views/LoginFailed.vue';
 import ExpenseTypes from '@/views/ExpenseTypes.vue';
 import Employees from '@/views/Employees.vue';
-import Expenses from '@/views/Expenses.vue';
+import Employee from '@/views/Employee.vue';
+import Expenses from '@/views/MyExpenses.vue';
 import Help from '@/views/Help.vue';
 import Callback from '@/views/Callback';
-import EmployeeHome from '@/views/EmployeeHome';
+import EmployeeHome from '@/views/MyBudgets.vue';
+import Home from '@/views/Home.vue';
 import TrainingAnalytics from '@/views/TrainingAnalytics';
 import { requireAuth, isAdmin } from '@/utils/auth';
 import multiguard from 'vue-router-multiguard';
@@ -29,9 +31,9 @@ const router = new Router({
       component: LoginFailed
     },
     {
-      path: '/admin-dashboard',
-      name: 'admin',
-      component: AdminDashboard,
+      path: '/reimbursements',
+      name: 'reimbursements',
+      component: Reimbursements,
       beforeEnter: multiguard([requireAuth, isAdmin])
     },
     {
@@ -46,7 +48,7 @@ const router = new Router({
       beforeEnter: requireAuth
     },
     {
-      path: '/expenses',
+      path: '/myExpenses',
       name: 'expenses',
       component: Expenses,
       beforeEnter: requireAuth
@@ -58,9 +60,21 @@ const router = new Router({
       beforeEnter: requireAuth
     },
     {
+      path: '/help/HoursInfo',
+      name: 'help2',
+      component: Help,
+      beforeEnter: requireAuth
+    },
+    {
+      path: '/myBudgets',
+      name: 'myBudgets',
+      component: EmployeeHome,
+      beforeEnter: requireAuth
+    },
+    {
       path: '/home',
       name: 'home',
-      component: EmployeeHome,
+      component: Home,
       beforeEnter: requireAuth
     },
     {
@@ -73,6 +87,12 @@ const router = new Router({
       path: '/training',
       name: 'training',
       component: TrainingAnalytics
+    },
+    {
+      path: '/employee/:id',
+      name: 'employee',
+      component: Employee,
+      beforeEnter: requireAuth
     }
   ]
 });

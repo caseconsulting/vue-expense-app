@@ -1,30 +1,58 @@
 <template>
   <div>
-    <!-- Logo -->
-    <v-flex>
-      <img src="@/assets/img/logo-banner.gif" class="logo" />
-    </v-flex>
-
     <!-- Navigation Links -->
     <v-list class="pt-0" dense>
       <v-divider></v-divider>
-      <v-list-item
-        v-for="item in visibleTiles"
-        :key="item.title"
-        active-class="red--text v-list__tile--active"
-        :to="{ name: item.route }"
-        @click="scrollUp"
-      >
-        <!-- Icon -->
-        <v-list-item-icon style="width: 30px;">
-          <icon :name="item.icon" class="navbar-icons"></icon>
-        </v-list-item-icon>
+      <div v-for="(item, i) in visibleTiles" :key="i">
+        <v-list-group v-if="item.subItems" :key="item.title" no-action active-class="red--text v-list__tile--active">
+          <template v-slot:activator>
+            <!-- Parent Item Icon -->
+            <v-list-item-icon style="width: 24px;">
+              <icon :name="item.icon" v-bind:class="{ 'red-icon': item.active }" class="navbar-icons"></icon>
+            </v-list-item-icon>
 
-        <!-- Title -->
-        <v-list-item-content>
-          <v-list-item-title>{{ item.title }}</v-list-item-title>
-        </v-list-item-content>
-      </v-list-item>
+            <!-- Parent Item Title -->
+            <v-list-item-content>
+              <v-list-item-title>{{ item.title }}</v-list-item-title>
+            </v-list-item-content>
+          </template>
+
+          <v-list-item
+            v-for="subItem in item.subItems"
+            :key="subItem.title"
+            active-class="red--text v-list__tile--active"
+            :to="{ name: subItem.route }"
+            @click="
+              scrollUp;
+              close;
+            "
+          >
+            <!-- SubItems Title -->
+            <v-list-item-content>
+              <v-list-item-title>{{ subItem.title }}</v-list-item-title>
+            </v-list-item-content>
+          </v-list-item>
+        </v-list-group>
+        <v-list-item
+          v-else
+          :key="item.title"
+          active-class="red--text v-list__tile--active"
+          :to="{ name: item.route }"
+          @click="scrollUp"
+        >
+          <!--NavBar icons-->
+          <!-- Item Icon -->
+
+          <v-list-item-icon style="width: 24px;">
+            <icon :name="item.icon" class="navbar-icons"></icon>
+          </v-list-item-icon>
+
+          <!-- Item mTitle -->
+          <v-list-item-content>
+            <v-list-item-title>{{ item.title }}</v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
+      </div>
     </v-list>
     <!-- End Navigation Links -->
   </div>
@@ -48,7 +76,20 @@ import _ from 'lodash';
  */
 function visibleTiles() {
   return _.filter(this.items, (item) => {
-    return _.includes(item.permission, this.permissions);
+    if (item.subItems) {
+      if (_.includes(item.permission, this.permissions)) {
+        item.subItems = _.filter(item.subItems, (subItem) => {
+          {
+            return _.includes(subItem.permission, this.permissions);
+          }
+        });
+        return true;
+      } else {
+        return false;
+      }
+    } else {
+      return _.includes(item.permission, this.permissions);
+    }
   });
 } // visibleTiles
 
@@ -57,10 +98,30 @@ function visibleTiles() {
 // |                     METHODS                      |
 // |                                                  |
 // |--------------------------------------------------|
-
+/**
+ * Scrolls up the page
+ */
 function scrollUp() {
   this.$vuetify.goTo(0);
 } // scrollUp
+
+/**
+ * Updates active field of item with subItems
+ */
+function checkActive() {
+  var isAnyActive;
+  for (var i in this.items) {
+    if (this.items[i].subItems) {
+      isAnyActive = false;
+      for (var j in this.items[i].subItems) {
+        if (this.items[i].subItems[j].route == this.route) {
+          isAnyActive = true;
+        }
+      }
+      this.items[i].active = isAnyActive;
+    }
+  }
+} // checkActive
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -73,6 +134,7 @@ function scrollUp() {
  */
 async function created() {
   this.permissions = getRole();
+  this.route = this.$route.name;
 } // created
 
 // |--------------------------------------------------|
@@ -90,28 +152,42 @@ export default {
     return {
       items: [
         {
-          title: 'Employee Home',
-          icon: 'hand-holding-usd',
+          title: 'Home',
+          icon: 'home',
           route: 'home',
           permission: ['user', 'admin']
         },
         {
-          title: 'Admin Dashboard',
-          icon: 'desktop',
-          route: 'admin',
-          permission: ['admin']
-        },
-        {
           title: 'Expenses',
           icon: 'dollar-sign',
-          route: 'expenses',
-          permission: ['admin', 'user']
-        },
-        {
-          title: 'Expense Types',
-          icon: 'book',
-          route: 'expenseTypes',
-          permission: ['admin', 'user']
+          subItems: [
+            {
+              title: 'My Budgets',
+              icon: 'hand-holding-usd',
+              route: 'myBudgets',
+              permission: ['user', 'admin']
+            },
+            {
+              title: 'My Expenses',
+              icon: 'dollar-sign',
+              route: 'expenses',
+              permission: ['admin', 'user']
+            },
+            {
+              title: 'Expense Types',
+              icon: 'book',
+              route: 'expenseTypes',
+              permission: ['admin', 'user']
+            },
+            {
+              title: 'Reimbursements',
+              icon: 'desktop',
+              route: 'reimbursements',
+              permission: ['admin']
+            }
+          ],
+          permission: ['user', 'admin'],
+          active: false
         },
         {
           title: 'Employees',
@@ -132,11 +208,23 @@ export default {
           permission: ['admin', 'user']
         }
       ], // navigation options
-      permissions: '' // user role
+      permissions: '', // user role
+      route: ''
     };
   },
   methods: {
-    scrollUp
+    scrollUp,
+    close,
+    checkActive
+  },
+  watch: {
+    '$route.name': {
+      handler: function () {
+        this.route = this.$route.name;
+      },
+      deep: true
+    },
+    route: checkActive
   }
 };
 </script>
@@ -144,11 +232,6 @@ export default {
 <style lang="scss">
 .e {
   color: #68caa6;
-}
-
-.logo {
-  height: 50%;
-  width: 50%;
 }
 
 #main-header {
@@ -160,10 +243,16 @@ export default {
   padding-bottom: 2%;
 }
 
+.navbar-icons,
+.icon-text {
+  vertical-align: middle;
+}
+
 .navbar-icons {
   color: #646460;
-  width: auto;
-  height: 2em;
+  text-align: center;
+  width: 100%;
+  height: 100%;
   max-width: 100%;
   max-height: 100%;
 }
@@ -178,5 +267,9 @@ export default {
 
 #slider-logo {
   margin-bottom: 5px;
+}
+
+.red-icon {
+  color: #bc3825;
 }
 </style>

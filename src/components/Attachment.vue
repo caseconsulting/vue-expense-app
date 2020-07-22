@@ -4,7 +4,13 @@
     <v-layout>
       <v-flex xs4>
         <!-- admin dashboard has attachment -->
-        <v-btn v-if="!isEmpty(this.expense.receipt)" text icon color="primary" @click="openDownloadTab">
+        <v-btn
+          v-if="!isEmpty(this.expense.receipt)"
+          :disabled="midAction"
+          icon
+          color="primary"
+          @click="openDownloadTab"
+        >
           <icon name="cloud-download-alt" style="color: #004c54;" scale="2"></icon>
         </v-btn>
       </v-flex>
@@ -16,7 +22,13 @@
   <div v-else>
     <v-tooltip top>
       <template v-slot:activator="{ on }">
-        <v-btn :disabled="!expense.receipt || expense.receipt.trim() <= 0" text icon @click="openDownloadTab" v-on="on">
+        <v-btn
+          :disabled="!expense.receipt || expense.receipt.trim() <= 0 || midAction"
+          text
+          icon
+          @click="openDownloadTab"
+          v-on="on"
+        >
           <v-icon style="color: #606060;">
             cloud_download
           </v-icon>
@@ -92,7 +104,8 @@ export default {
   },
   props: [
     'expense', // attachment expense
-    'mode' // attachment use
+    'mode', // attachment use
+    'midAction' //whether or not to disable button
   ]
 };
 </script>

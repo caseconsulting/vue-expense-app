@@ -2,7 +2,7 @@
   <v-container class="text-md-center">
     <div>
       <img src="../assets/img/logo-banner.gif" alt="" />
-      <h1 class="my-4"><span class="e">€</span>xpense Portal</h1>
+      <h1 class="my-4">Case Portal</h1>
     </div>
     <v-btn @click="login()" id="custom-button-color" large>Login</v-btn>
     <div>
@@ -31,7 +31,7 @@ async function created() {
     // logged in
     if (getRole() === 'admin') {
       // user's role is admin
-      this.$router.push('admin-dashboard');
+      this.$router.push('reimbursements');
     } else {
       // user's role is not admin
       this.$router.push('home');

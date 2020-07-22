@@ -1,13 +1,17 @@
 <template>
   <v-card hover>
     <!-- Form Header -->
+
     <v-card-title class="header_style">
       <h3 v-if="model.id">Edit Expense Type</h3>
+
       <h3 v-else>Create New Expense Type</h3>
     </v-card-title>
+
     <v-container fluid>
       <v-form ref="form" v-model="valid" lazy-validation>
         <!-- Budget Name -->
+
         <v-text-field
           v-model="model.budgetName"
           :rules="genericRules"
@@ -17,14 +21,14 @@
         ></v-text-field>
 
         <!-- Categories -->
+
         <v-combobox
-          v-model="model.categories"
+          v-model="categories"
           hint="Maximum of 10 categories"
           label="Categories (optional)"
           multiple
           small-chips
           append-icon
-          clearable
           :search-input.sync="categoryInput"
         >
           <template v-slot:selection="{ attrs, item }">
@@ -34,9 +38,9 @@
             </v-chip>
           </template>
         </v-combobox>
-        <br />
 
         <!-- Budget Amount -->
+
         <v-text-field
           prefix="$"
           v-model="model.budget"
@@ -46,20 +50,25 @@
         ></v-text-field>
 
         <!-- Flags -->
+
         <v-container grid-list-md text-xs-center>
           <v-layout row wrap>
             <v-flex xs6>
               <v-checkbox label="Overdraft Flag" v-model="model.odFlag"></v-checkbox>
+
               <v-checkbox label="Recurring Flag" v-model="model.recurringFlag"></v-checkbox>
             </v-flex>
+
             <v-flex xs6>
               <v-checkbox label="Receipt Required" v-model="model.requiredFlag"></v-checkbox>
+
               <v-checkbox label="Mark as Inactive" v-model="model.isInactive"></v-checkbox>
             </v-flex>
           </v-layout>
         </v-container>
 
         <!-- Start Date -->
+
         <v-menu
           v-if="!model.recurringFlag"
           :rules="genericRules"
@@ -82,10 +91,12 @@
               v-on="on"
             ></v-text-field>
           </template>
+
           <v-date-picker v-model="model.startDate" no-title></v-date-picker>
         </v-menu>
 
         <!-- End Date -->
+
         <v-menu
           v-if="!model.recurringFlag"
           :rules="genericRules"
@@ -108,10 +119,12 @@
               v-on="on"
             ></v-text-field>
           </template>
+
           <v-date-picker v-model="model.endDate" no-title></v-date-picker>
         </v-menu>
 
         <!-- Description -->
+
         <v-textarea
           v-model="model.description"
           :rules="genericRules"
@@ -121,15 +134,21 @@
         ></v-textarea>
 
         <!-- Accessibility -->
+
         <div style="color: dimgray;">Employee Access</div>
+
         <v-radio-group v-model="model.accessibleBy" class="smallRadio ma-0" row mandatory>
           <v-radio label="All" value="ALL"></v-radio>
+
           <v-radio label="Full" value="FULL"></v-radio>
+
           <v-radio label="Full Time" value="FULL TIME"></v-radio>
+
           <v-radio label="Custom" value="CUSTOM"></v-radio>
         </v-radio-group>
 
         <!-- Employee Access List -->
+
         <v-autocomplete
           v-if="model.accessibleBy == 'CUSTOM'"
           v-model="customAccess"
@@ -147,17 +166,49 @@
           <template v-slot:label>
             <span class="grey--text caption">No Employee Access</span>
           </template>
+
           <template v-slot:selection="{ index }">
             <span v-if="index === 0 && customAccess.length == 1" class="grey--text caption"
               >Accessible by {{ customAccess.length }} employee</span
             >
+
             <span v-else-if="index === 0" class="grey--text caption"
               >Accessible by {{ customAccess.length }} employees</span
             >
           </template>
         </v-autocomplete>
 
+        <!-- Require Recipient -->
+
+        <v-switch v-model="model.hasRecipient" label="Does this expense type have a recipient?"></v-switch>
+
+        <!-- always show on feed -->
+
+        <v-switch
+          v-model="model.alwaysOnFeed"
+          @change="toggleShowAllCategories()"
+          label="Have this expense type show on the company feed?"
+        ></v-switch>
+
+        <p v-if="model.categories.length > 0" class="pt-4">Show only these categories on feed?</p>
+
+        <v-layout row wrap>
+          <v-flex class="py-0" v-for="(category, index) in model.categories" :key="index" xs6>
+            <v-checkbox
+              class="my-0"
+              v-if="!submitting"
+              light
+              :label="category.name"
+              v-model="category.showOnFeed"
+              @click.stop="checkSelection(category)"
+            ></v-checkbox>
+          </v-flex>
+        </v-layout>
+
+        <br />
+
         <!-- Buttons -->
+
         <!-- Cancel Button -->
         <v-btn color="white " @click="clearForm" class="ma-2"> <icon class="mr-1" name="ban"></icon>Cancel </v-btn>
 
@@ -165,6 +216,7 @@
         <v-btn outlined class="ma-2" color="success" :loading="submitting" @click="submit" :disabled="!valid">
           <icon class="mr-1" name="save"></icon>Submit
         </v-btn>
+
         <!-- End Buttons -->
       </v-form>
     </v-container>
@@ -178,14 +230,39 @@ import { v4 as uuid } from 'uuid';
 import _ from 'lodash';
 
 // |--------------------------------------------------|
+
 // |                                                  |
+
 // |                     METHODS                      |
+
 // |                                                  |
+
 // |--------------------------------------------------|
 
+function checkSelection(category) {
+  let index = _.findIndex(this.model.categories, (cat) => {
+    return cat.name == category.name;
+  });
+
+  this.model.categories[index].showOnFeed = !this.model.categories[index].showOnFeed;
+
+  let somethingIsFalse = _.find(this.model.categories, (category) => {
+    return !category.showOnFeed;
+  });
+
+  if (somethingIsFalse) {
+    this.model.alwaysOnFeed = false;
+  } else {
+    this.model.alwaysOnFeed = true;
+  }
+} // checkSelection
+
 /**
+
  * Clears the form and sets all fields to a default state.
+
  */
+
 function clearForm() {
   this.$refs.form.reset();
   this.$set(this.model, 'id', '');
@@ -200,126 +277,192 @@ function clearForm() {
   this.$set(this.model, 'isInactive', false);
   this.$set(this.model, 'categories', []);
   this.$set(this.model, 'accessibleBy', 'ALL');
+  this.$set(this.model, 'hasRecipient', false);
+  this.$set(this.model, 'alwaysOnFeed', false);
+  this.startDateFormatted = null;
+  this.endDateFormatted = null;
   this.customAccess = [];
 } // clearForm
 
 /**
+
  * Formats a date.
+
  *
+
  * @param date - date to format
+
  * @return Date - formatted date
+
  */
+
 function formatDate(date) {
   return dateUtils.formatDate(date);
 } // formatDate
 
 /**
+
  * Checks if all employees have access to an expense type and at a percentage rate. Return true if 'ALL' is selected,
+
  * otherwise returns false.
+
  *
+
  * @return boolean - all employees have access at a percentage rate
+
  */
+
 function isAllSelected() {
   return this.model.accessibleBy == 'ALL';
 } // isAllSelected
 
 /**
+
  * Checks if custom access of employees have acess to an expense type at a percentage rate. Returns true if 'CUSTOM'
+
  * is selected, otherwise returns false.
+
  *
+
  * @return boolean - custom employees have access
+
  */
+
 function isCustomSelected() {
   return this.model.accessibleBy == 'CUSTOM';
 } // isCustomSelected
 
 /**
+
  * Checks if a value is empty. Returns true if the value is null or a single character space String.
+
  *
+
  * @param value - value to check
+
  * @return boolean - value is empty
+
  */
+
 function isEmpty(value) {
   return value == null || value === ' ' || value === '';
 } // isEmpty
 
 /**
+
  * Checks if all employees have access to an expense type and at a full rate. Return true if 'FULL' is selected,
+
  * otherwise returns false.
+
  *
+
  * @return boolean - all employees have access at a full rate
+
  */
+
 function isFullSelected() {
   return this.model.accessibleBy == 'FULL';
 } // isFullSelected
 
 /**
+
  * Checks if all full time employees have access to an expense type. Return true if 'FULL TIME' is selected, otherwise
+
  * returns false.
+
  *
+
  * @return boolean - all full time employees have access
+
  */
+
 function isFullTimeSelected() {
   return this.model.accessibleBy == 'FULL TIME';
 } // isFullTimeSelected
 
 /**
+
  * Parse a date to isoformat (YYYY-MM-DD).
+
  *
+
  * @param Date = date to parse
+
  * @return Date - date in isoformat
+
  */
+
 function parseDate(date) {
   return dateUtils.parseDate(date);
 } // parseDate
 
 /**
+
  * Removes a category from the list of expense type categories.
+
  *
+
  * @param category - category to remove
+
  */
+
 function removeCategory(category) {
   this.model.categories.splice(this.model.categories.indexOf(category), 1);
+
   this.model.categories = [...this.model.categories];
+
+  this.categories.splice(this.categories.indexOf(category), 1);
+
+  this.categories = [...this.categories];
 } // removeCategory
 
 /**
+
  * Submits an expense type.
+
  */
+
 async function submit() {
   this.submitting = true; // set loading status to true
 
-  // Add a typed-pending category if exists and not already included
-  if (!this.isEmpty(this.categoryInput) && !this.model.categories.includes(this.categoryInput)) {
-    this.model.categories.push(this.categoryInput);
-  }
+  this.$emit('startAction');
 
   // set accessibleBy based on access radio
+
   if (this.isCustomSelected()) {
     this.model.accessibleBy = this.customAccess;
   }
 
   // convert budget input into a floating point number
+
   this.model.budget = parseFloat(this.model.budget);
 
   if (this.model.odFlag == null) {
     // set overdraft flag to false if checkbox is null
+
     this.model.odFlag = false;
   }
 
   if (this.model.recurringFlag == null) {
     // set recurring flag to false if checkbox is null
+
     this.model.recurringFlag = false;
   }
 
   if (this.model.requiredFlag == null) {
     // set receipt required flag to false if checkbox is null
+
     this.model.requiredFlag = false;
   }
 
   if (this.model.isInactive == null) {
     // set is inactive flag to false if checkbox is null
+
     this.model.isInactive = false;
+  }
+
+  for (var i = 0; i < this.model.categories.length; i++) {
+    this.model.categories[i] = JSON.stringify(this.model.categories[i]);
   }
 
   if (this.$refs.form.validate()) {
@@ -327,71 +470,118 @@ async function submit() {
 
     if (this.model.recurringFlag) {
       // clear start and end date fields if expense type is recurring
+
       this.$set(this.model, 'startDate', null);
+
       this.$set(this.model, 'endDate', null);
     }
 
     if (this.model.id) {
       // editing an expense type
+
       let newExpenseType = await api.updateItem(api.EXPENSE_TYPES, this.model);
 
       if (newExpenseType.id) {
         // successfully updates expense type
+
         this.$emit('update');
+
         this.clearForm();
       } else {
         // emit error if fails to update expense type
+
         this.$emit('error', newExpenseType.response.data.message);
       }
     } else {
       // creating a new expense type
+
       let newUUID = uuid();
+
       this.$set(this.model, 'id', newUUID);
+
       let newExpenseType = await api.createItem(api.EXPENSE_TYPES, this.model);
 
       if (newExpenseType.id) {
         // successfully creates an expense type
+
         this.$set(this.model, 'id', newExpenseType.id);
+
         this.$emit('add', newExpenseType);
+
         this.clearForm();
       } else {
         // emit error if fails to create an expense type
+
         this.$emit('error', newExpenseType.response.data.message);
+
         this.$set(this.model, 'id', '');
       }
     }
   }
+
   this.submitting = false; // set loading status to false
+
+  this.$emit('endAction');
 } // submit
 
+function toggleShowAllCategories() {
+  if (!this.submitting) {
+    let alwaysOF = this.model.alwaysOnFeed;
+
+    _.forEach(this.model.categories, (category) => {
+      category.showOnFeed = alwaysOF;
+    });
+  }
+} // toggleShowAllCategories
+
 // |--------------------------------------------------|
+
 // |                                                  |
+
 // |                 LIFECYCLE HOOKS                  |
+
 // |                                                  |
+
 // |--------------------------------------------------|
 
 /**
+
  * Gets and sets all employees.
+
  */
+
 async function created() {
   // get all employees for access list
+
   let employees = await api.getItems(api.EMPLOYEES);
+
   let allEmployees = [];
+
   _.forEach(employees, (employee) => {
-    allEmployees.push({
-      value: employee.id,
-      text: `${employee.firstName} ${employee.lastName}`
-    });
+    if (employee.workStatus > 0) {
+      allEmployees.push({
+        value: employee.id,
+
+        text: `${employee.firstName} ${employee.lastName}`
+      });
+    }
   });
+
   allEmployees = _.sortBy(allEmployees, ['text']);
+
   this.allEmployees = allEmployees;
+
   this.clearForm();
 } // created
 
 // |--------------------------------------------------|
+
 // |                                                  |
+
 // |                      EXPORT                      |
+
 // |                                                  |
+
 // |--------------------------------------------------|
 
 export default {
@@ -401,15 +591,19 @@ export default {
       allEmployees: null,
       budgetRules: [
         (v) => !!v || 'Budget amount is required',
+
         (v) => parseFloat(v, 10) > 0 || 'Budget must be greater than 0.',
+
         (v) =>
           /^[+-]?[0-9]{1,3}(?:,?[0-9]{3})*(?:\.[0-9]{2})?$/.test(v) ||
           'Budget amount must be a number with two decimal digits.'
       ],
+      categories: [],
       categoryInput: null, // category combobox input
       customAccess: [],
       dateRules: [
         (v) => !!v || 'Date must be valid. Format: MM/DD/YYYY',
+
         (v) => (!!v && /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v)) || 'Date must be valid. Format: MM/DD/YYYY'
       ],
       deleting: false,
@@ -421,6 +615,7 @@ export default {
     };
   },
   methods: {
+    checkSelection,
     clearForm,
     formatDate,
     isAllSelected,
@@ -430,20 +625,31 @@ export default {
     isFullTimeSelected,
     parseDate,
     removeCategory,
-    submit
+    submit,
+    toggleShowAllCategories
   },
   props: ['model'], // expense type to be created/updated
   watch: {
+    'model.id': function () {
+      if (this.model.id != null) {
+        this.categories = _.map(this.model.categories, (category) => {
+          return category.name;
+        });
+      }
+    },
     'model.accessibleBy': function (val) {
       if (!this.submitting) {
         if (!['ALL', 'FULL TIME', 'FULL', 'CUSTOM'].includes(val)) {
           // set employee access form field when populating form with an existing expense type
+
           // filter out employees that do not have access
+
           this.customAccess = _.filter(this.allEmployees, (employee) => {
             return this.model.accessibleBy.includes(employee.value);
           });
 
           // map employee values
+
           this.customAccess = _.map(this.customAccess, (employee) => {
             return employee.value;
           });
@@ -452,21 +658,43 @@ export default {
         }
       }
     },
-    'model.categories': function (val) {
+    categories: function (val) {
       if (val.length > 10) {
+        this.$nextTick(() => this.categories.pop());
+
         this.$nextTick(() => this.model.categories.pop());
+      }
+
+      if (val.length > this.model.categories.length) {
+        let c = _.map(this.model.categories, (category) => {
+          return category.name;
+        });
+
+        let index = _.findIndex(val, (x) => {
+          return !c.includes(x);
+        });
+
+        this.model.categories.push({ name: val[index], showOnFeed: false });
+      } else if (val.length < this.model.categories.length) {
+        this.model.categories = _.filter(this.model.categories, (category) => {
+          return val.includes(category.name);
+        });
       }
     },
     'model.endDate': function () {
       this.endDateFormatted = this.formatDate(this.model.endDate) || this.endDateFormatted;
+
       //fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
+
       if (this.model.endDate !== null && !this.formatDate(this.model.endDate)) {
         this.model.endDate = null;
       }
     },
     'model.startDate': function () {
       this.startDateFormatted = this.formatDate(this.model.startDate) || this.startDateFormatted;
+
       //fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
+
       if (this.model.startDate !== null && !this.formatDate(this.model.startDate)) {
         this.model.startDate = null;
       }

@@ -85,21 +85,25 @@
               >ADVANCED (optional)</v-expansion-panel-header
             >
             <v-expansion-panel-content style="background-color: whitesmoke;">
-              <!-- Prime text field -->
-              <v-text-field
+              <!-- Prime combo box -->
+              <v-combobox
                 style="padding-right: 20px; padding-left: 10px;"
                 v-model="model.prime"
+                :items="employeeInfo.primes"
                 label="Prime"
                 data-vv-name="Prime"
-              ></v-text-field>
+                dense
+              ></v-combobox>
 
-              <!-- Contract text field -->
-              <v-text-field
+              <!-- Contract combo box -->
+              <v-combobox
                 style="padding-right: 20px; padding-left: 10px;"
                 v-model="model.contract"
+                :items="employeeInfo.contracts"
                 label="Contract"
                 data-vv-name="Contract"
-              ></v-text-field>
+                dense
+              ></v-combobox>
 
               <!-- Github text field -->
               <v-text-field
@@ -153,6 +157,13 @@
                 <v-date-picker v-model="model.birthday" no-title @input="BirthdayMenu = false"></v-date-picker>
               </v-menu>
 
+              <!-- opt out of birthday feed -->
+              <v-switch
+                v-model="model.birthdayFeed"
+                label="Have birthday recognized on company feed?"
+                :disabled="disableBirthdayFeed()"
+              ></v-switch>
+
               <!-- Place of Birth -->
               <p style="font-size: 17px; padding-left: 10px; padding-top: 10px;">Place of Birth</p>
               <div style="padding-right: 20px; padding-left: 30px; padding-bottom: 10px;">
@@ -176,7 +187,7 @@
 
                   <!-- Place of Birth: State autocomplete -->
                   <v-autocomplete
-                    v-if="this.model.country == 'United States of America'"
+                    v-if="isUSA"
                     :items="states"
                     v-model="model.st"
                     item-text="text"
@@ -297,6 +308,24 @@ const regex = /^(([^<>()[\]\\.,;:\s@#"]+(\.[^<>()[\]\\.,;:\s@#"]+)*)|(".+"))@con
 
 // |--------------------------------------------------|
 // |                                                  |
+// |                    Computed                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * checks to see if the country is the United States. if it is: returns true
+ * otherwise clears state field and returns false
+ */
+function isUSA() {
+  if (this.model.country == 'United States of America') {
+    return true;
+  } else {
+    this.model.st = '';
+    return false;
+  }
+}
+// |--------------------------------------------------|
+// |                                                  |
 // |                     METHODS                      |
 // |                                                  |
 // |--------------------------------------------------|
@@ -305,7 +334,7 @@ const regex = /^(([^<>()[\]\\.,;:\s@#"]+(\.[^<>()[\]\\.,;:\s@#"]+)*)|(".+"))@con
  * Clears the form and sets all fields to a default state.
  */
 function clearForm() {
-  this.$refs.form.reset();
+  this.$refs.form.resetValidation();
   this.$set(this, 'date', '');
   this.$set(this.model, 'email', '@consultwithcase.com');
   this.$set(this.model, 'employeeRole', '');
@@ -314,6 +343,7 @@ function clearForm() {
   this.$set(this.model, 'lastName', '');
   this.$set(this.model, 'employeeNumber', '');
   this.$set(this.model, 'hireDate', '');
+  this.$set(this, 'hireDateFormatted', '');
   this.$set(this.model, 'id', '');
   this.$set(this.model, 'workStatus', 100);
 
@@ -324,10 +354,13 @@ function clearForm() {
   this.$set(this.model, 'twitter', '');
   this.$set(this.model, 'jobRole', '');
   this.$set(this.model, 'birthday', '');
+  this.$set(this, 'birthdayFormat', '');
+  this.$set(this.model, 'birthdayFeed', false);
   this.$set(this.model, 'city', '');
   this.$set(this.model, 'st', '');
   this.$set(this.model, 'country', '');
   this.$set(this.model, 'deptDate', '');
+  this.$set(this, 'deptDateFormatted', '');
 
   this.deptDateFormatted = null;
 } // clearForm
@@ -424,6 +457,7 @@ function parseDate(date) {
  */
 async function submit() {
   if (this.$refs.form.validate()) {
+    this.$emit('startAction');
     // form validated
     if (!this.isInactive()) {
       // set deptDate if employee is active
@@ -443,9 +477,11 @@ async function submit() {
         // successfully updated employee
         this.$emit('update');
         this.clearForm();
+        this.$emit('endAction');
       } else {
         // failed to update employee
         this.$emit('error', updatedEmployee.response.data.message);
+        this.$emit('endAction');
       }
     } else {
       // creating employee
@@ -455,10 +491,12 @@ async function submit() {
         // successfully created employee
         this.$emit('add', newEmployee);
         this.clearForm();
+        this.$emit('endAction');
       } else {
         // failed to create employee
         this.$emit('error', newEmployee.response.data.message);
         this.$set(this.model, 'id', ''); // reset id
+        this.$emit('endAction');
       }
     }
   }
@@ -472,6 +510,21 @@ async function submit() {
 function userIsAdmin() {
   return getRole() === 'admin';
 } // userIsAdmin
+
+/**
+ * Function for handling if the birthdayFeed switch is disabled
+ *
+ * @return boolean - birthday feed is disabled
+ */
+function disableBirthdayFeed() {
+  if (this.model.birthday == '' || this.model.birthday == null || typeof this.model.birthday == 'undefined') {
+    this.undisabled = false;
+    this.model.birthdayFeed = false;
+    return true;
+  }
+  this.undisabled = true;
+  return false;
+}
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -614,8 +667,12 @@ export default {
       ], // state options
       status: '100', // work status value
       statusRadio: 'full', // work status button
-      valid: false // form validity
+      valid: false, // form validity
+      undisabled: false
     };
+  },
+  computed: {
+    isUSA
   },
   methods: {
     clearForm,
@@ -629,9 +686,10 @@ export default {
     isStatusEmpty,
     parseDate,
     submit,
-    userIsAdmin
+    userIsAdmin,
+    disableBirthdayFeed
   },
-  props: ['model'], // employee to be created/updated
+  props: ['model', 'employeeInfo'], // employee to be created/updated
   watch: {
     date: function () {
       this.hireDateFormatted = this.formatDate(this.date) || this.hireDateFormatted;
@@ -687,6 +745,11 @@ export default {
         this.status = '100';
       } else if (this.statusRadio == 'inactive') {
         this.status = '0';
+      }
+    },
+    undisabled: function () {
+      if (!this.model.id && this.undisabled == true) {
+        this.model.birthdayFeed = true;
       }
     }
   }

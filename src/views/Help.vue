@@ -2,7 +2,7 @@
   <v-container>
     <!-- Help Title -->
     <div>
-      <h1 style="text-align: center;">H<span class="e">€</span>LP</h1>
+      <h1 style="text-align: center;">HELP</h1>
     </div>
     <br />
     <br />
@@ -11,7 +11,7 @@
     <h2>FAQ</h2>
     <div class="mb-5">
       <div class="text-xs-center mb-3"></div>
-      <v-expansion-panels accordion>
+      <v-expansion-panels accordion v-model="panel">
         <v-expansion-panel v-for="section in sections" :key="section[0]">
           <!-- Header -->
           <v-expansion-panel-header v-if="section[1] == role || role == 'admin' || section[1] == 'user'">
@@ -53,6 +53,10 @@ import { getRole } from '@/utils/auth';
  */
 async function created() {
   this.role = getRole();
+  let route = this.$route.name;
+  if (route == 'help2') {
+    this.panel = 0;
+  }
 } // created
 
 // |--------------------------------------------------|
@@ -65,10 +69,44 @@ export default {
   created,
   data() {
     return {
+      panel: null,
       role: '', // employee role
       sections: {
+        tsheetsHours: [
+          'Hours',
+          'user',
+          {
+            title: 'What information is displayed in the box?',
+            body: 'Hours worked for each job ending with the total hours for the month at the bottom in bold.'
+          },
+          {
+            title: 'How is the Avg Hours/Day calculated?',
+            body:
+              'The Remaining hours for the month divided by the Days Remaining. This can be changed by editing the Days Remaining. Days Remaining includes today.'
+          },
+          {
+            title: 'What hours fall under Completed, Today, and Futute?',
+            body:
+              "Completed hours are any hours logged in TSheets from the first day of the month through the end of the day yesterday. Today's hours are any hours logged in TSheet at any point today. Future hours are any hours logged in TSheets between the beginning of the day tomorrow and the last day of the month."
+          },
+          {
+            title: 'Why does my Avg Hours/Day or Days Remaining seem wrong?',
+            body:
+              'Days Remaining includes today by default. If you have already worked your hours for today you can edit Days Remaining to have one less day. This will update the Avg Hours/Day as well.'
+          },
+          {
+            title: 'How can I edit Days Remaining?',
+            body:
+              'Once you click on the number of Days Remaining on the right hand side you will be able to edit this number using your keyboard.'
+          },
+          {
+            title: 'Why do I not see some of my hours for today?',
+            body:
+              'If you are using the clock in function on TSheets those hours will not show up until after you clock out. All other hours for the month should be seen on the home page.'
+          }
+        ],
         employeeHome: [
-          'Employee Home',
+          'My Budgets',
           'user',
           {
             title: 'What is budget?',
@@ -91,27 +129,8 @@ export default {
             body: 'This indicates whether expenses can be assigned to the budget for next year'
           }
         ],
-        forAdmins: [
-          'For Admins',
-          'admin',
-          {
-            title: 'What capabilities do Admins have?',
-            body:
-              "Admins may view the admin dashboard, reimburse expenses, and create expense types, view each employee's budget home view, create new employees, and create expenses for other employees"
-          },
-          {
-            title: 'How do I reimburse an expense?',
-            body:
-              'Go to the Admin Dashboard and select the expenses that you would like to reimburse by clicking the select box either on a row (to select all expenses for that employee under that expense type) or on each of their individual expenses. Next select the $ icon at the bottom left of the page and then confirm the reimbursement.'
-          },
-          {
-            title: 'What are categories?',
-            body:
-              'Admins may create up to 10 different categories for employees to choose from when submitting and expense. Categories are unique to each expense type and users will be required to select one category if the expense type has them. '
-          }
-        ],
         expenses: [
-          'Expenses',
+          'My Expenses',
           'user',
           {
             title: 'How do I submit an expense?',
@@ -121,11 +140,11 @@ export default {
           {
             title: 'How do I update an expense?',
             body:
-              'Select an item from the Expenses list, the current information of the expense will then be shown on the right. You may now edit those fields!'
+              'Select an item from the My Expenses list, the current information of the expense will then be shown on the right. You may now edit those fields!'
           },
           {
             title: 'How do I delete an expense?',
-            body: 'Select an item from the Expenses list then click the delete button.'
+            body: 'Select an item from the My Expenses list then click the delete button.'
           },
           {
             title: 'What are categories?',
@@ -149,7 +168,7 @@ export default {
           {
             title: 'How do I submit a High Five Award?',
             body:
-              'In the Create New Expense tab select the expense type “High Five”, put $50 in Cost, and in the description be sure to specify who you are awarding and why.'
+              'In the Create New Expense tab select the expense type “High Five”, the Cost section will be automatically set to $50, and in the description be sure to specify who you are awarding and why.'
           },
           {
             title: "Why can't I delete an expense?",
@@ -194,6 +213,25 @@ export default {
           {
             title: "Why can't I delete an employee?",
             body: 'An employee cannot be deleted if the employee has expenses or you are editing an employee.'
+          }
+        ],
+        forAdmins: [
+          'For Admins',
+          'admin',
+          {
+            title: 'What capabilities do Admins have?',
+            body:
+              "Admins may view reimbursements, reimburse expenses, and create expense types, view each employee's budget home view, create new employees, and create expenses for other employees"
+          },
+          {
+            title: 'How do I reimburse an expense?',
+            body:
+              'Go to Reimbursements and select the expenses that you would like to reimburse by clicking the select box either on a row (to select all expenses for that employee under that expense type) or on each of their individual expenses. Next select the $ icon at the bottom left of the page and then confirm the reimbursement.'
+          },
+          {
+            title: 'What are categories?',
+            body:
+              'Admins may create up to 10 different categories for employees to choose from when submitting and expense. Categories are unique to each expense type and users will be required to select one category if the expense type has them. '
           }
         ],
         knownIssues: [

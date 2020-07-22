@@ -12,7 +12,7 @@
                   <h4 class="white--text">{{ item.expenseTypeName }}</h4>
                 </v-card-title>
                 <v-divider></v-divider>
-                <v-list class="pt-13" dense>
+                <v-list class="pt-1" dense>
                   <!-- Display Budget Amount -->
                   <v-list-item>
                     <v-list-item-content>Budget:</v-list-item-content>
@@ -82,10 +82,7 @@
  */
 function calcRemaining(budget) {
   if (budget.budgetObject) {
-    return Math.max(
-      budget.budgetObject.amount - budget.budgetObject.pendingAmount - budget.budgetObject.reimbursedAmount,
-      0
-    );
+    return budget.budgetObject.amount - budget.budgetObject.pendingAmount - budget.budgetObject.reimbursedAmount;
   }
   return 0;
 } // calcRemaining
@@ -139,7 +136,7 @@ function odFlagMessage(expenseType) {
  * @return boolean - budget has no remaining budget
  */
 function noRemaining(budget) {
-  return this.calcRemaining(budget) <= 0 && !budget.odFlag;
+  return this.calcRemaining(budget) <= 0;
 } // noRemaining
 
 // |--------------------------------------------------|

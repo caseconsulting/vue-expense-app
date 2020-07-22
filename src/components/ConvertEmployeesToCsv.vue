@@ -1,6 +1,8 @@
 <template>
   <!-- Download CSV Button -->
-  <v-btn @click="download()"><i class="material-icons">file_download</i>Download All</v-btn>
+  <v-btn :disabled="editing || midAction" @click="download()"
+    ><i class="material-icons">file_download</i>Download All</v-btn
+  >
 </template>
 
 <script>
@@ -166,7 +168,7 @@ export default {
     exportCSVFile,
     getWorkStatus
   },
-  props: ['employees'] // employees to export
+  props: ['employees', 'midAction', 'editing'] // employees to export
 };
 </script>
 

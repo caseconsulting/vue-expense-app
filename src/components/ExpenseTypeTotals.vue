@@ -53,7 +53,6 @@ function totals() {
 // |                     METHODS                      |
 // |                                                  |
 // |--------------------------------------------------|
-
 /**
  * Update the expense types selected.
  *

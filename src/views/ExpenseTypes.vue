@@ -213,7 +213,7 @@
                   <v-tooltip top>
                     <template v-slot:activator="{ on }">
                       <v-btn
-                        :disabled="isEditing()"
+                        :disabled="isEditing() || midAction"
                         text
                         icon
                         @click="
@@ -233,7 +233,7 @@
                   <!-- Delete Button -->
                   <v-tooltip top>
                     <template v-slot:activator="{ on }">
-                      <v-btn :disabled="isEditing()" text icon @click="validateDelete(item)" v-on="on">
+                      <v-btn :disabled="isEditing() || midAction" text icon @click="validateDelete(item)" v-on="on">
                         <v-icon style="color: #606060;">
                           delete
                         </v-icon>
@@ -258,7 +258,20 @@
 
                       <!-- Category -->
                       <p v-if="item.categories && item.categories.length > 0">
-                        <b>Categories: </b>{{ item.categories.join(', ') }}
+                        <b>Categories: </b>{{ categoriesToString(item.categories) }}
+                      </p>
+
+                      <!-- Requires Recipient -->
+                      <p v-if="item.hasRecipient"><b>Requires Recipient: </b> yes</p>
+                      <p v-else><b>Requires Recipient: </b> no</p>
+
+                      <!-- Always show on feed -->
+                      <p v-if="item.alwaysOnFeed"><b>Always Show On Feed: </b> yes</p>
+                      <p v-else><b>Always Show On Feed: </b> no</p>
+
+                      <!-- Categories show on feed -->
+                      <p v-if="!item.alwaysOnFeed && item.categories && item.categories.length > 0">
+                        <b>Categories' Show On Feed: </b>{{ categoriesOnFeed(item.categories) }}
                       </p>
 
                       <!-- Flags -->
@@ -359,7 +372,7 @@
           <!-- End Expense Type Datatable -->
 
           <!-- Confirmation Modals -->
-          <delete-modal :activate="deleting" :type="'expense-type'"></delete-modal>
+          <delete-modal :activate="deleting" :deleteInfo="'(' + deleteType + ')'" :type="'expense-type'"></delete-modal>
           <delete-error-modal :activate="invalidDelete" type="expense type"></delete-error-modal>
           <!-- End Confirmation Modals -->
         </v-container>
@@ -372,6 +385,8 @@
         ref="form"
         :model="model"
         v-on:add="addModelToTable"
+        v-on:startAction="startAction"
+        v-on:endAction="endAction"
         v-on:update="updateModelInTable"
         v-on:error="displayError"
       ></expense-type-form>
@@ -441,6 +456,39 @@ function addModelToTable() {
 } // addModelToTable
 
 /**
+ * Returns a string of category names.
+ */
+function categoriesToString(categories) {
+  let string = '';
+  for (let i = 0; i < categories.length; i++) {
+    string += categories[i].name;
+    if (i < categories.length - 1) {
+      string += ', ';
+    }
+  }
+  return string;
+} // categoriesToString
+
+/**
+ * Returns a string of category names that are on the feed.
+ */
+function categoriesOnFeed(categories) {
+  let string = '';
+  for (let i = 0; i < categories.length; i++) {
+    if (categories[i].showOnFeed) {
+      if (string.length > 0) {
+        string += ', ';
+      }
+      string += categories[i].name;
+    }
+  }
+  if (string.length == 0) {
+    string = 'none';
+  }
+  return string;
+} // categoriesOnFeed
+
+/**
  * Changes the employee avatar to default if it fails to display original.
  *
  * @param item - employee to check
@@ -475,6 +523,8 @@ function clearModel() {
   this.$set(this.model, 'isInactive', false);
   this.$set(this.model, 'categories', []);
   this.$set(this.model, 'accessibleBy', 'ALL');
+  this.$set(this.model, 'hasRecipient', false);
+  this.$set(this.model, 'alwaysOnFeed', false);
 } // clearModel
 
 /**
@@ -515,6 +565,7 @@ async function deleteExpenseType() {
     // fails to delete expense type
     this.displayError(et.response.data.message);
   }
+  this.midAction = false;
 } // deleteExpenseType
 
 /**
@@ -538,6 +589,13 @@ function displayError(err) {
   this.$set(this.status, 'statusMessage', err);
   this.$set(this.status, 'color', 'red');
 } // displayError
+
+/**
+ * Sets inAction boolean to false.
+ */
+function endAction() {
+  this.midAction = false;
+}
 
 /**
  * Filters expense types based on filter selections.
@@ -708,6 +766,8 @@ function onSelect(item) {
   this.$set(this.model, 'isInactive', item.isInactive);
   this.$set(this.model, 'categories', item.categories);
   this.$set(this.model, 'accessibleBy', item.accessibleBy);
+  this.$set(this.model, 'hasRecipient', item.hasRecipient);
+  this.$set(this.model, 'alwaysOnFeed', item.alwaysOnFeed);
 } // onSelect
 
 /**
@@ -717,12 +777,43 @@ async function refreshExpenseTypes() {
   this.loading = true; // set loading status to true
   this.expenseTypes = await api.getItems(api.EXPENSE_TYPES);
 
-  // TODO: filter out expense types that the user does not have access to
+  // filter expense types for the user
+  if (!this.userIsAdmin()) {
+    // create an array for the user expense types
+    let expenseTypesFiltered = [];
+    // get the employees budgets that have expenses
+    let budgetsWithExpenses = await api.getEmployeeBudgets(this.userInfo.id);
+    // get the active budgets for the employee
+    let activeBudgets = await api.getAllActiveEmployeeBudgets(this.userInfo.id);
+    // map the active budgets
+    let activeExpTypes = _.map(activeBudgets, (budget) => {
+      return budget.expenseTypeId;
+    });
+    // map the budgets with expenses
+    let budExpTypes = _.map(budgetsWithExpenses, (budget) => {
+      return budget.expenseTypeId;
+    });
+    // combine the two types of expenses
+    expenseTypesFiltered = _.union(activeExpTypes, budExpTypes);
+    // get rid of duplicates
+    expenseTypesFiltered = _.uniq(expenseTypesFiltered);
+    // set this.expenseTypes to only have those the user should see (expenseTypesFiltered)
+    this.expenseTypes = _.filter(this.expenseTypes, (expenseType) => {
+      return expenseTypesFiltered.includes(expenseType.id);
+    });
+  }
 
   this.filterExpenseTypes();
 
   this.loading = false; // set loading status to false
 } // refreshExpenseTypes
+
+/**
+ * set midAction to true
+ */
+function startAction() {
+  this.midAction = true;
+}
 
 /**
  * Scrolls window back to the top of the form.
@@ -756,6 +847,8 @@ function userIsAdmin() {
  * @param item - expense type to validate
  */
 async function validateDelete(item) {
+  this.midAction = true;
+  this.deleteType = item.budgetName;
   let x = await api
     .getAllExpenseTypeExpenses(item.id)
     .then((result) => {
@@ -782,9 +875,15 @@ async function validateDelete(item) {
  * Set user info, employees, and expense types. Creates event listeners.
  */
 async function created() {
-  window.EventBus.$on('canceled-delete-expense-type', () => (this.deleting = false));
+  window.EventBus.$on('canceled-delete-expense-type', () => {
+    this.deleting = false;
+    this.midAction = false;
+  });
   window.EventBus.$on('confirm-delete-expense-type', this.deleteExpenseType);
-  window.EventBus.$on('invalid-expense type-delete', () => (this.invalidDelete = false));
+  window.EventBus.$on('invalid-expense type-delete', () => {
+    this.invalidDelete = false;
+    this.midAction = false;
+  });
 
   this.userInfo = await api.getUser();
   this.employees = await api.getItems(api.EMPLOYEES);
@@ -857,6 +956,7 @@ export default {
         }
       ], // datatable headers
       invalidDelete: false, // invalid delete status
+      midAction: false,
       itemsPerPage: -1, // items per datatable page
       loading: false, // loading status
       model: {
@@ -871,7 +971,9 @@ export default {
         requiredFlag: true,
         isInactive: false,
         categories: [],
-        accessibleBy: []
+        accessibleBy: [],
+        hasRecipient: false,
+        alwaysOnFeed: false
       }, // selected expense type
       search: '', // query text for datatable search field
       sortBy: 'budgetName', // sort datatable items
@@ -881,7 +983,8 @@ export default {
         statusMessage: '',
         color: ''
       }, // snakcbar action status
-      userInfo: null // user information
+      userInfo: null, // user information
+      deleteType: '' //item.budgetName for when item is deleted
     };
   },
   filters: {
@@ -896,6 +999,8 @@ export default {
   },
   methods: {
     addModelToTable,
+    categoriesToString,
+    categoriesOnFeed,
     changeAvatar,
     clearModel, // NOTE: Unused?
     clearStatus,
@@ -903,6 +1008,7 @@ export default {
     deleteExpenseType,
     deleteModelFromTable,
     displayError,
+    endAction,
     filterExpenseTypes,
     getAccess,
     getEmployeeList,
@@ -913,6 +1019,7 @@ export default {
     isInactive,
     onSelect,
     refreshExpenseTypes,
+    startAction,
     toTopOfForm,
     updateModelInTable,
     userIsAdmin,
@@ -930,6 +1037,9 @@ export default {
     },
     'filter.overdraft': function () {
       this.filterExpenseTypes();
+    },
+    deleteInfo: function () {
+      return;
     }
   }
 };
