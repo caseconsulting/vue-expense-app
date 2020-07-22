@@ -16,6 +16,11 @@ tests/unit/reports
 .env_*
 aws-keys.json
 
+# Environment files
+.env
+.env.*
+.env_*
+
 # Log files
 npm-debug.log*
 output.log
