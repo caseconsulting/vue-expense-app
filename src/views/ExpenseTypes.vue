@@ -269,6 +269,11 @@
                       <p v-if="item.alwaysOnFeed"><b>Always Show On Feed: </b> yes</p>
                       <p v-else><b>Always Show On Feed: </b> no</p>
 
+                      <!-- Categories show on feed -->
+                      <p v-if="!item.alwaysOnFeed && item.categories && item.categories.length > 0">
+                        <b>Categories' Show On Feed: </b>{{ categoriesOnFeed(item.categories) }}
+                      </p>
+
                       <!-- Flags -->
                       <v-layout row>
                         <v-flex sm6 class="flag py-0">
@@ -463,6 +468,25 @@ function categoriesToString(categories) {
   }
   return string;
 } // categoriesToString
+
+/**
+ * Returns a string of category names that are on the feed.
+ */
+function categoriesOnFeed(categories) {
+  let string = '';
+  for (let i = 0; i < categories.length; i++) {
+    if (categories[i].showOnFeed) {
+      if (string.length > 0) {
+        string += ', ';
+      }
+      string += categories[i].name;
+    }
+  }
+  if (string.length == 0) {
+    string = 'none';
+  }
+  return string;
+} // categoriesOnFeed
 
 /**
  * Changes the employee avatar to default if it fails to display original.
@@ -976,6 +1000,7 @@ export default {
   methods: {
     addModelToTable,
     categoriesToString,
+    categoriesOnFeed,
     changeAvatar,
     clearModel, // NOTE: Unused?
     clearStatus,
