@@ -947,6 +947,7 @@ async function setFile(file) {
     this.file = file;
     this.$set(this.expense, 'receipt', file.name);
     this.receiptText = await api.extractText(file);
+    console.log(this.receiptText);
   } else {
     this.file = null;
     this.receipt = null;
