@@ -28,10 +28,13 @@
         <post-editor> </post-editor>
       </v-col>
     </v-row>
+    <v-row>
+      <v-btn @click="rekognition()">Rekognition</v-btn>
+    </v-row>
   </v-container>
 </template>
 <script>
-//import api from '@/shared/api.js';
+import api from '@/shared/api.js';
 //import moment from 'moment';
 import PendingPostTable from '../components/PendingPostTable.vue';
 import PostTable from '../components/PostTable.vue';
@@ -89,6 +92,10 @@ async function created() {
   ];
   this.model.id = '4';
 }
+async function rekognition() {
+  let result = await api.getModerationLabel();
+  console.log(result);
+}
 //import _ from 'lodash';
 export default {
   components: {
@@ -103,6 +110,9 @@ export default {
       posts: [],
       model: {}
     };
+  },
+  methods: {
+    rekognition
   }
 };
 </script>

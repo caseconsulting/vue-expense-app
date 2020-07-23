@@ -194,10 +194,13 @@ function getTwitterToken() {
 function getCaseTimeline() {
   return execute('get', `${TWITTER}/getCaseTimeline`);
 }
-
 function getFeedEvents() {
   return execute('get', `/${BASECAMP}/getFeedEvents`);
 }
+function getModerationLabel() {
+  return execute('post', `blog/getModerationLabel/`);
+}
+
 export default {
   extractText,
   getEmployeeBudget,
@@ -207,6 +210,7 @@ export default {
   getFiscalDateViewBudgets,
   getEmployeeBudgets,
   getFeedEvents,
+  getModerationLabel,
   getItems,
   getItem,
   getAttachment,
