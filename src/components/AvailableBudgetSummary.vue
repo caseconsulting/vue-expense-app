@@ -68,6 +68,8 @@
 
 <script>
 import moment from 'moment';
+import _ from 'lodash';
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                     METHODS                      |
@@ -141,13 +143,13 @@ function getPending(budget) {
 } // getPending
 
 /**
- * Checks if a value is empty. Returns true if the value is null or a single character space String.
+ * Checks if a value is empty. Returns true if the value is null or an empty/blank string.
  *
  * @param value - value to check
  * @return boolean - value is empty
  */
 function isEmpty(value) {
-  return value == null || value === ' ' || value === '';
+  return _.isNil(value) || (_.isString(value) && value.trim().length === 0);
 } // isEmpty
 
 /**

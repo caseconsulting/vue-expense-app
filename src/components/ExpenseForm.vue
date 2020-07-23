@@ -382,7 +382,7 @@ async function addURLInfo(newExpense) {
     if (newExpense.category) {
       this.$set(this.urlInfo, 'category', newExpense.category);
     } else {
-      this.$set(this.urlInfo, 'category', ' ');
+      this.$set(this.urlInfo, 'category', null);
     }
     this.$set(this.urlInfo, 'hits', 1);
     await api.createItem(api.URLS, this.urlInfo);
@@ -891,12 +891,13 @@ function isDifferentExpenseType() {
 } // isDifferentExpenseType
 
 /**
- * Checks if a value is empty. Returns true if the value is null or a single character space String.
+ * Checks if a value is empty. Returns true if the value is null or an empty/blank string.
+ *
  * @param value - value to check
  * @return boolean - value is empty
  */
 function isEmpty(value) {
-  return value == null || value === ' ' || value === '';
+  return _.isNil(value) || (_.isString(value) && value.trim().length === 0);
 } // isEmpty
 
 /**
@@ -1215,14 +1216,14 @@ export default {
       selectedRecipient: {}, // the recipent selected for a high five
       confirming: false, // budget overage confirmation box activator
       urlInfo: {
-        id: ' ',
-        category: '',
+        id: null,
+        category: null,
         hits: 0
       }, // training url info
       urlRules: [
         (v) =>
           !v ||
-          v == ' ' ||
+          v == null ||
           /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)/.test(
             v
           ) ||

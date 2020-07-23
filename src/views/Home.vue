@@ -349,7 +349,7 @@ async function createEvents() {
   });
   // generate birthdays
   let birthdays = _.map(this.employees, (b) => {
-    if (b.birthdayFeed && b.birthday != ' ') {
+    if (b.birthdayFeed && !this.isEmpty(b.birthday)) {
       let event = {};
       let now = moment();
       let cutOff = moment().subtract(6, 'months').startOf('day');
@@ -385,17 +385,14 @@ async function createEvents() {
   // generate expenses
   //let filteredExpenses = this.filterOutExpensesByCategory(this.aggregatedExpenses);
   let expenses = _.map(this.aggregatedExpenses, (a) => {
-    if (a.showOnFeed != ' ' && a.showOnFeed) {
+    if (!this.isEmpty(a.showOnFeed) && a.showOnFeed) {
       //value of showOnFeed is true
-      if (a.reimbursedDate === ' ') {
-        return null;
-      }
       let now = moment();
       let reimbursedDate = moment(a.reimbursedDate, 'YYYY-MM-DD');
       let event = {};
       event.date = getEventDateMessage(reimbursedDate);
       event.color = 'green';
-      if (a.url != ' ') {
+      if (!this.isEmpty(a.url)) {
         event.link = a.url;
       }
       event.text = `${a.firstName} used their ${a.budgetName} budget on ${a.description}`;
@@ -498,6 +495,16 @@ function getCurrentBudgetYear() {
   }
   return currentBudgetYear.format(IsoFormat);
 } // getCurrentBudgetYear
+
+/**
+ * Checks if a value is empty. Returns true if the value is null or an empty/blank string.
+ *
+ * @param value - value to check
+ * @return boolean - value is empty
+ */
+function isEmpty(value) {
+  return _.isNil(value) || (_.isString(value) && value.trim().length === 0);
+} // isEmpty
 
 /**
  * Checks if an employee is full time. Returns true if the employee is full time with a work status of 100, otherwise
@@ -727,6 +734,7 @@ export default {
     filterOutExpensesByCategory,
     getCurrentBudgetYear,
     getTweets,
+    isEmpty,
     isFullTime,
     refreshBudget,
     refreshBudgetYears,

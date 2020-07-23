@@ -85,14 +85,14 @@ function exportCSVFile(items, fileTitle) {
       }
 
       items[i] = [
-        person.firstName,
-        person.lastName,
-        person.employeeNumber,
-        person.expenseType,
-        person.cost,
-        person.purchaseDate,
-        person.reimbursedDate || ' ',
-        person.category || ' '
+        person.firstName || '',
+        person.lastName || '',
+        person.employeeNumber || '',
+        person.expenseType || '',
+        person.cost || '',
+        person.purchaseDate || '',
+        person.reimbursedDate || '',
+        person.category || ''
       ];
     }
 
