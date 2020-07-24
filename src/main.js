@@ -43,6 +43,7 @@ import 'vue-awesome/icons/brands/linkedin';
 import 'vue-awesome/icons/brands/youtube';
 import 'vue-awesome/icons/brands/facebook';
 import 'vue-awesome/icons/user-plus';
+import 'vue-awesome/icons/user-circle';
 import 'vue-awesome/icons/glass-cheers';
 import 'vue-awesome/icons/birthday-cake';
 import 'vue-awesome/icons/dollar-sign';

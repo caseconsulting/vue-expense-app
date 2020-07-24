@@ -327,7 +327,13 @@
                                     <v-list-item :key="employee.id">
                                       <!-- Employee Image -->
                                       <v-list-item-avatar>
-                                        <img :src="employee.avatar" @error="changeAvatar(employee)" />
+                                        <img
+                                          v-if="employee.avatar"
+                                          :src="employee.avatar"
+                                          @error="changeAvatar(employee)"
+                                        />
+                                        <icon class="user-circle" name="user-circle" v-else></icon>
+                                        <!-- <icon class="user-circle" name="regular/user-circle" v-else></icon> -->
                                       </v-list-item-avatar>
 
                                       <!-- Employee Name -->
@@ -396,7 +402,6 @@
 
 <script>
 import api from '@/shared/api.js';
-import caseLogo from '../assets/img/logo-big.png';
 import DeleteErrorModal from '../components/DeleteErrorModal.vue';
 import DeleteModal from '../components/DeleteModal.vue';
 import ExpenseTypeForm from '../components/ExpenseTypeForm.vue';
@@ -500,7 +505,7 @@ function changeAvatar(item) {
 
   let newItem = this.employees[index];
 
-  newItem.avatar = this.caseLogo;
+  newItem.avatar = null;
 
   this.employees.splice(index, 1, newItem);
 } // changeAvatar
@@ -894,7 +899,7 @@ async function created() {
   let avatars = await api.getBasecampAvatars();
   _.map(this.employees, (employee) => {
     let avatar = _.find(avatars, ['email_address', employee.email]);
-    let avatarUrl = avatar ? avatar.avatar_url : this.caseLogo;
+    let avatarUrl = avatar ? avatar.avatar_url : null;
     employee.avatar = avatarUrl;
     return employee;
   });
@@ -918,7 +923,6 @@ export default {
   created,
   data() {
     return {
-      caseLogo: caseLogo, // case logo for employee avatars
       deleteModel: {
         id: ''
       }, // expense type to delete
