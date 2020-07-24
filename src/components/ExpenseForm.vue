@@ -953,11 +953,12 @@ async function setFile(file) {
     this.file = file;
     this.$set(this.expense, 'receipt', file.name);
     //go get text data from textract and comprehend
-    try {
-      this.receiptObject = await api.extractText(file);
-      console.log(typeof this.receiptObject);
-    } catch (err) {
+
+    this.receiptObject = await api.extractText(file);
+
+    if (this.receiptObject instanceof Error) {
       this.isInactive = false;
+      this.receiptObject = null;
       return;
     }
     // this.expense.cost = 12;
