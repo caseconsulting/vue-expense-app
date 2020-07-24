@@ -56,6 +56,15 @@ function getAllActiveEmployeeBudgets(id) {
   return execute('get', `/${UTILITY}/getAllActiveEmployeeBudgets/${id}`);
 }
 
+/**
+ * Get basecamp avatars for all employees in the Case Consulting Basecamp.
+ *
+ * @return object - Employee Basecamp avatar data
+ */
+function getBasecampAvatars() {
+  return execute('get', `/${BASECAMP}/getBasecampAvatars`);
+} // getBasecampAvatars
+
 function getEmployeeBudget(id, expenseTypeId, date) {
   return execute('get', `/${UTILITY}/getEmployeeBudget/${id}/${expenseTypeId}/${date}`);
 }
@@ -206,35 +215,36 @@ function getKeyPhrases() {
 }
 
 export default {
-  extractText,
-  getEmployeeBudget,
-  getAllActiveEmployeeBudgets,
-  getAllEmployeeExpenses,
-  getAllExpenseTypeExpenses,
-  getFiscalDateViewBudgets,
-  getEmployeeBudgets,
-  getFeedEvents,
-  getModerationLabel,
-  getKeyPhrases,
-  getItems,
-  getItem,
-  getAttachment,
   createAttachment,
-  getURLInfo,
   createItem,
-  updateItem,
   deleteAttachment,
   deleteItem,
+  extractText,
+  getAllActiveEmployeeBudgets,
   getAllAggregateExpenses,
+  getAllEmployeeExpenses,
   getAllEvents,
   getAllExpenses,
+  getAllExpenseTypeExpenses,
+  getAttachment,
+  getBasecampAvatars,
+  getCaseTimeline,
   getCountries,
-  getRole,
-  getUser,
+  getEmployeeBudget,
+  getEmployeeBudgets,
+  getFeedEvents,
+  getFiscalDateViewBudgets,
+  getItem,
+  getItems,
+  getKeyPhrases,
+  getModerationLabel,
   getPTOBalances,
+  getRole,
   getTimeSheets,
   getTwitterToken,
-  getCaseTimeline,
+  getURLInfo,
+  getUser,
+  updateItem,
   EXPENSE_TYPES,
   EXPENSES,
   EMPLOYEES,

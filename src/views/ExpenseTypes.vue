@@ -890,11 +890,13 @@ async function created() {
 
   this.refreshExpenseTypes();
 
-  // temporary code until employee has avatar field
-  _.forEach(this.employees, (employee) => {
-    if (!employee.avatar) {
-      employee.avatar = 'google profile pic';
-    }
+  // set employee avatar
+  let avatars = await api.getBasecampAvatars();
+  _.map(this.employees, (employee) => {
+    let avatar = _.find(avatars, ['email_address', employee.email]);
+    let avatarUrl = avatar ? avatar.avatar_url : this.caseLogo;
+    employee.avatar = avatarUrl;
+    return employee;
   });
 } // created
 
