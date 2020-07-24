@@ -16,7 +16,7 @@
           :items="activeEmployees"
           :rules="requiredRules"
           :filter="customFilter"
-          :disabled="isReimbursed || isEdit"
+          :disabled="isReimbursed || isEdit || isInactive"
           v-model="expense.employeeId"
           item-text="text"
           label="Employee"
@@ -160,7 +160,7 @@
           :disabled="isInactive"
         ></v-checkbox>
         <file-upload
-          v-if="!isInactive && receiptRequired && ((allowReceipt && isEdit) || !isEdit || isEmpty(expense.receipt))"
+          v-if="receiptRequired && ((allowReceipt && isEdit) || !isEdit || isEmpty(expense.receipt))"
           style="padding-top: 0px; padding-bottom: 0px;"
           @fileSelected="setFile"
           :passedRules="receiptRules"
@@ -192,7 +192,12 @@
         ></v-text-field>
 
         <!-- Show On Feed -->
-        <v-switch v-if="isAdmin" v-model="expense.showOnFeed" label="Have expense show on company feed?"></v-switch>
+        <v-switch
+          v-if="isAdmin"
+          :disabled="isInactive"
+          v-model="expense.showOnFeed"
+          label="Have expense show on company feed?"
+        ></v-switch>
 
         <!-- Buttons -->
         <!-- Cancel Button -->
@@ -944,15 +949,205 @@ function parseDate(date) {
  */
 async function setFile(file) {
   if (file) {
+    this.isInactive = true;
     this.file = file;
     this.$set(this.expense, 'receipt', file.name);
-    this.receiptText = await api.extractText(file);
-    console.log(this.receiptText);
+    //go get text data from textract and comprehend
+    try {
+      this.receiptObject = await api.extractText(file);
+      console.log(typeof this.receiptObject);
+    } catch (err) {
+      this.isInactive = false;
+      return;
+    }
+    // this.expense.cost = 12;
+    let totalPrice;
+    let failed = false;
+
+    _.forEach(this.receiptObject.KeyValueSets, (relationship) => {
+      //loop through keyvaluesets
+
+      let keys = Object.values(relationship.Keys); //grab the text and confidence objects
+      let keyText = '';
+      _.forEach(keys, (key) => {
+        // loop through each one
+        keyText += key.Text.toLowerCase() + ' ';
+      });
+
+      if (_.includes(keyText, 'total') && !_.includes(keyText, 'sub') && !_.includes(keyText, 'tax')) {
+        //check if there is a total in any relationship
+        //if there is loop throught the values in that relationship, and build the text.
+
+        let valText = '';
+        let valConfidence = 100;
+        //build value string
+        _.forEach(relationship.Values, (value) => {
+          valText += value.Text + '';
+          valConfidence = Math.min(valConfidence, value.Confidence); //key: Total: Values: USD confidence 99 141500 confidence 50
+        });
+        //set string to format that parsefloat will like and parse it
+        valText = preformatFloat(valText);
+        totalPrice = parseFloat(valText.replace(/[^\d.]/g, ''));
+
+        //check to see if the confidence is above acceptable values and that the parse worked
+        if (valConfidence < 90 || typeof totalPrice != 'number' || isNaN(totalPrice)) {
+          failed = true;
+        }
+      }
+    });
+    let isTotal = false;
+    let currentTotal = null;
+    if (totalPrice == null) {
+      //if there was no relationship that included total do it with words
+      _.forEach(this.receiptObject.Words, (word) => {
+        //loop through word object
+        if (isTotal) {
+          //if the previous word was total
+          if (word.Confidence >= 90) {
+            //if the confidence is higher than 90/100 parse the word to look for a number
+            let number = word.Text;
+            number = preformatFloat(number);
+            currentTotal = parseFloat(number.replace(/[^\d.]/g, ''));
+            if (typeof currentTotal != 'number' || isNaN(currentTotal)) {
+              //if it wasn't a number or parsefloat screwed up it failed
+              currentTotal = null;
+            }
+            if (currentTotal != null) {
+              totalPrice = currentTotal;
+            }
+          }
+          //switch isTotal back
+          isTotal = false;
+        }
+        let wordText = word.Text.toLowerCase();
+        if (_.includes(wordText, 'total') && !_.includes(wordText, 'sub') && !_.includes(wordText, 'tax')) {
+          //if the current word is total
+          isTotal = true;
+        }
+      });
+      if (totalPrice == null || typeof totalPrice != 'number' || isNaN(totalPrice)) {
+        failed = true;
+      }
+    }
+    //if there is no relationship with the total
+    //--find the word total in words and check if the next word is a number
+    //--if that number has high confidence use it as the total
+    //else if there is no total word at all
+
+    //check comprehend data for date objects
+    //see if what it found is able to be converted to moment
+    //format it so it is in the correct format
+    //set purchase date
+    let bestDate = { Date: null, Score: 0 };
+    // COMMERCIAL_ITEM
+    let commercialItem = '';
+    // EVENT
+    let event = '';
+    // LOCATION
+    let location = '';
+    // ORGANIZATION
+    let organization = '';
+    // TITLE
+    let title = '';
+    _.forEach(this.receiptObject.comprehend.Entities, (entity) => {
+      if (entity.Type == 'DATE') {
+        if (entity.Score > bestDate.Score) {
+          bestDate = { Date: entity.Text, Score: entity.Score };
+        }
+      } else if (entity.Type == 'COMMERCIAL_ITEM') {
+        if (entity.Score > 0.9) {
+          commercialItem += entity.Text + ' ';
+        }
+      } else if (entity.Type == 'EVENT') {
+        if (entity.Score > 0.9) {
+          event += entity.Text + ' ';
+        }
+      } else if (entity.Type == 'LOCATION') {
+        if (entity.Score > 0.9) {
+          location += entity.Text + ' ';
+        }
+      } else if (entity.Type == 'ORGANIZATION') {
+        if (entity.Score > 0.9) {
+          organization += entity.Text + ' ';
+        }
+      } else if (entity.Type == 'TITLE') {
+        if (entity.Score > 0.9) {
+          title += entity.Text + ' ';
+        }
+      }
+    });
+    let adjustNote = '';
+    if (title != '') {
+      adjustNote += 'Title: ' + title + '\n';
+    }
+    if (organization != '') {
+      adjustNote += 'Organization: ' + organization + '\n';
+    }
+    if (location != '') {
+      adjustNote += 'Location: ' + location + '\n';
+    }
+    if (event != '') {
+      adjustNote += 'Event: ' + event + '\n';
+    }
+    if (commercialItem != '') {
+      adjustNote += 'Commercial Item: ' + commercialItem;
+    }
+    if (adjustNote != '') {
+      adjustNote = '\n\nValues generated from receipt:\n' + adjustNote;
+      adjustNote = adjustNote
+        .split(' ')
+        .filter(function (item, i, allItems) {
+          return i == allItems.indexOf(item);
+        })
+        .join(' ');
+    }
+    this.isInactive = false;
+
+    if (bestDate.Score >= 0.9 && this.expense.purchaseDate == null) {
+      let date = moment(bestDate.Date);
+      date = parseDate(date.format('YYYY-MM-DD'));
+      this.expense.purchaseDate = date;
+    }
+    if (!failed && (this.expense.cost == 0 || this.expense.cost == null)) {
+      this.expense.cost = totalPrice;
+    }
+    if (!isEmpty(this.expense.note)) {
+      // expense has a note
+      this.expense.note += `\n\n${adjustNote}`;
+    } else {
+      // expense does not have a note
+      this.expense.note = adjustNote;
+    }
   } else {
     this.file = null;
     this.receipt = null;
   }
 } // setFile
+
+function preformatFloat(float) {
+  if (!float) {
+    return '';
+  }
+
+  //Index of first comma
+  const posC = float.indexOf(',');
+
+  if (posC === -1) {
+    //No commas found, treat as float
+    return float;
+  }
+
+  //Index of first full stop
+  const posFS = float.indexOf('.');
+
+  if (posFS === -1) {
+    //Uses commas and not full stops - swap them (e.g. 1,23 --> 1.23)
+    return float.replace(/,/g, '.');
+  }
+
+  //Uses both commas and full stops - ensure correct order and remove 1000s separators
+  return posC < posFS ? float.replace(/,/g, '') : float.replace(/\./g, '').replace(',', '.');
+}
 
 /**
  * Submits an expense.
@@ -1200,7 +1395,7 @@ export default {
       myBudgetsView: false, // if on myBudgetsView page
       hint: '', // form hints
       highFiveRecipients: [], // list of active employees to choose for high five
-      isInactive: false, // employee is inactive
+      isInactive: false, // employee is inactive -- also used for uploading reciepts dont delete
       isCovered: false,
       isOverCovered: false,
       loading: false, // loading
