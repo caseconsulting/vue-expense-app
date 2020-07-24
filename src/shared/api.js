@@ -201,6 +201,10 @@ function getModerationLabel() {
   return execute('post', `blog/getModerationLabel/`);
 }
 
+function getKeyPhrases() {
+  return execute('post', `blog/getKeyPhrases`);
+}
+
 export default {
   extractText,
   getEmployeeBudget,
@@ -211,6 +215,7 @@ export default {
   getEmployeeBudgets,
   getFeedEvents,
   getModerationLabel,
+  getKeyPhrases,
   getItems,
   getItem,
   getAttachment,

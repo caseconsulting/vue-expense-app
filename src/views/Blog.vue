@@ -16,20 +16,25 @@
       <v-btn color="white" text @click="clearStatus">
         Close
       </v-btn>
-    </v-snackbar> -->
+    </v-snackbar>-->
     <!-- title -->
-    <v-row><v-flex>Some title thing</v-flex></v-row>
+    <v-row>
+      <v-flex>Some title thing</v-flex>
+    </v-row>
     <v-row>
       <v-col>
         <pending-post-table :pendingPosts="pendingPosts" :model="model"></pending-post-table>
         <post-table :posts="posts"></post-table>
       </v-col>
       <v-col>
-        <post-editor> </post-editor>
+        <post-editor></post-editor>
       </v-col>
     </v-row>
     <v-row>
       <v-btn @click="rekognition()">Rekognition</v-btn>
+    </v-row>
+    <v-row>
+      <v-btn @click="comprehend()">comprehend</v-btn>
     </v-row>
   </v-container>
 </template>
@@ -96,6 +101,10 @@ async function rekognition() {
   let result = await api.getModerationLabel();
   console.log(result);
 }
+async function comprehend() {
+  let text = await api.getKeyPhrases();
+  console.log(text);
+}
 //import _ from 'lodash';
 export default {
   components: {
@@ -112,7 +121,8 @@ export default {
     };
   },
   methods: {
-    rekognition
+    rekognition,
+    comprehend
   }
 };
 </script>
