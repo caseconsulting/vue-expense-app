@@ -979,7 +979,8 @@ export default {
         categories: [],
         accessibleBy: [],
         hasRecipient: false,
-        alwaysOnFeed: false
+        alwaysOnFeed: false,
+        requireURL: false
       }, // selected expense type
       search: '', // query text for datatable search field
       sortBy: 'budgetName', // sort datatable items

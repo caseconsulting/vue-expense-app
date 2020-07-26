@@ -179,20 +179,46 @@
           label="Have this expense type show on the company feed?"
         ></v-switch>
 
+        <!-- require url for expense type -->
+        <v-switch
+          v-model="model.requireURL"
+          @change="toggleRequireURL()"
+          label="Require a url for this expense?"
+        ></v-switch>
+
         <p v-if="model.categories.length > 0" class="pt-4">Show only these categories on feed?</p>
 
-        <v-layout row wrap>
-          <v-flex class="py-0" v-for="(category, index) in model.categories" :key="index" xs6>
-            <v-checkbox
-              class="my-0"
-              v-if="!submitting"
-              light
-              :label="category.name"
-              v-model="category.showOnFeed"
-              @click.stop="checkSelection(category)"
-            ></v-checkbox>
-          </v-flex>
-        </v-layout>
+        <v-container>
+          <v-row v-if="model.categories.length > 0">
+            <v-col>Category</v-col>
+            <v-col>Show on Feed?</v-col>
+            <v-col>Require Url?</v-col>
+          </v-row>
+          <v-row v-for="(category, index) in model.categories" :key="index">
+            <v-col>{{ category.name }}</v-col>
+            <v-col>
+              <div>
+                <v-checkbox
+                  class="my-0"
+                  v-if="!submitting"
+                  light
+                  v-model="category.showOnFeed"
+                  @click.stop="checkSelection(category)"
+                ></v-checkbox>
+              </div>
+            </v-col>
+            <v-col>
+              <v-checkbox
+                class="my-0"
+                v-if="!submitting"
+                light
+                justify="center"
+                v-model="category.requireURL"
+                @click.stop="checkRequireURL(category)"
+              ></v-checkbox>
+            </v-col>
+          </v-row>
+        </v-container>
 
         <br />
 
@@ -240,6 +266,24 @@ function checkSelection(category) {
   }
 } // checkSelection
 
+function checkRequireURL(category) {
+  let index = _.findIndex(this.model.categories, (cat) => {
+    return cat.name == category.name;
+  });
+
+  this.model.categories[index].requireURL = !this.model.categories[index].requireURL;
+
+  let somethingIsFalse = _.find(this.model.categories, (category) => {
+    return !category.requireURL;
+  });
+
+  if (somethingIsFalse) {
+    this.model.requireURL = false;
+  } else {
+    this.model.requireURL = true;
+  }
+} // checkRequireURL
+
 /**
  * Clears the form and sets all fields to a default state.
  */
@@ -259,6 +303,7 @@ function clearForm() {
   this.$set(this.model, 'accessibleBy', 'ALL');
   this.$set(this.model, 'hasRecipient', false);
   this.$set(this.model, 'alwaysOnFeed', false);
+  this.$set(this.model, 'requireURL', false);
   this.startDateFormatted = null;
   this.endDateFormatted = null;
   this.customAccess = [];
@@ -438,6 +483,16 @@ function toggleShowAllCategories() {
   }
 } // toggleShowAllCategories
 
+function toggleRequireURL() {
+  if (!this.submitting) {
+    let requireURL = this.model.requireURL;
+
+    _.forEach(this.model.categories, (category) => {
+      category.requireURL = requireURL;
+    });
+  }
+} // toggleRequireURL
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                 LIFECYCLE HOOKS                  |
@@ -500,6 +555,7 @@ export default {
     };
   },
   methods: {
+    checkRequireURL,
     checkSelection,
     clearForm,
     formatDate,
@@ -511,6 +567,7 @@ export default {
     parseDate,
     removeCategory,
     submit,
+    toggleRequireURL,
     toggleShowAllCategories
   },
   props: ['model'], // expense type to be created/updated
@@ -555,7 +612,7 @@ export default {
           return !c.includes(x);
         });
 
-        this.model.categories.push({ name: val[index], showOnFeed: false });
+        this.model.categories.push({ name: val[index], showOnFeed: false, requireURL: false });
       } else if (val.length < this.model.categories.length) {
         this.model.categories = _.filter(this.model.categories, (category) => {
           return val.includes(category.name);
