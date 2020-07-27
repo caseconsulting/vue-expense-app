@@ -530,6 +530,7 @@ function clearModel() {
   this.$set(this.model, 'accessibleBy', 'ALL');
   this.$set(this.model, 'hasRecipient', false);
   this.$set(this.model, 'alwaysOnFeed', false);
+  this.$set(this.model, 'requireURL', false);
 } // clearModel
 
 /**
@@ -773,6 +774,7 @@ function onSelect(item) {
   this.$set(this.model, 'accessibleBy', item.accessibleBy);
   this.$set(this.model, 'hasRecipient', item.hasRecipient);
   this.$set(this.model, 'alwaysOnFeed', item.alwaysOnFeed);
+  this.$set(this.model, 'requireURL', item.requireURL);
 } // onSelect
 
 /**

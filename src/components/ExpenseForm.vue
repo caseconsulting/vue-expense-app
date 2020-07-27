@@ -184,12 +184,7 @@
         ></v-textarea>
 
         <!-- URL -->
-        <v-text-field
-          v-model="expense.url"
-          :rules="urlRules"
-          label="URL (Optional)"
-          :disabled="isInactive"
-        ></v-text-field>
+        <v-text-field v-model="expense.url" :rules="urlRules" :label="uRLLabel" :disabled="isInactive"></v-text-field>
 
         <!-- Show On Feed -->
         <v-switch
@@ -260,7 +255,7 @@ function getCategories() {
   });
   if (this.selectedExpenseType) {
     return _.map(this.selectedExpenseType.categories, (category) => {
-      return category.name;
+      return { text: category.name, value: category };
     });
   }
   return [];
@@ -336,6 +331,18 @@ function notesLabel() {
     return 'Notes';
   } else {
     return 'Notes (optional)';
+  }
+}
+/**
+ * Creates the label for the url section base on if it is optional
+ *
+ * @return string - label
+ */
+function uRLLabel() {
+  if (this.requireURLCategory || this.requireURLET) {
+    return 'URL';
+  } else {
+    return 'URL (optional)';
   }
 }
 
@@ -1322,7 +1329,8 @@ async function created() {
       categories: expenseType.categories,
       accessibleBy: expenseType.accessibleBy,
       hasRecipient: expenseType.hasRecipient,
-      alwaysOnFeed: expenseType.alwaysOnFeed
+      alwaysOnFeed: expenseType.alwaysOnFeed,
+      requireURL: expenseType.requireURL
     };
   });
   this.clearForm();
@@ -1360,7 +1368,8 @@ export default {
     isUser,
     receiptRequired,
     notesRules,
-    notesLabel
+    notesLabel,
+    uRLLabel
   },
   created,
   data() {
@@ -1408,6 +1417,8 @@ export default {
       receiptRules: [(v) => !!v || 'Receipts are required'], // rules for receipt
       receiptText: null,
       reimbursedDateFormatted: null, // formatted reimburse date
+      requireURLCategory: false,
+      requireURLET: false,
       selectedEmployee: {}, // selected employees
       selectedExpenseType: {}, // selected expense types
       selectedRecipient: {}, // the recipent selected for a high five
@@ -1418,6 +1429,7 @@ export default {
         hits: 0
       }, // training url info
       urlRules: [
+        (v) => (!this.requireURLCategory && !this.requireURLET) || !!v || 'URL is required. Only http(s) are accepted.',
         (v) =>
           !v ||
           v == null ||
@@ -1470,9 +1482,13 @@ export default {
       });
     },
     'expense.expenseTypeId': function () {
+      this.requireURLCategory = false;
       this.selectedExpenseType = _.find(this.expenseTypes, (expenseType) => {
         return expenseType.value === this.expense.expenseTypeId;
       });
+      console.log(this.selectedExpenseType);
+      this.requireURLET = this.selectedExpenseType && this.selectedExpenseType.requireURL;
+      console.log(this.requireURLET);
 
       if (this.selectedExpenseType) {
         // set hint
@@ -1519,6 +1535,7 @@ export default {
       }
     },
     'expense.category': function () {
+      this.requireURLCategory = this.expense.category && this.expense.category.requireURL;
       if (
         !_.isEqual(this.originalExpense.category, this.expense.category) ||
         !_.isEqual(this.originalExpense.expenseTypeId, this.expense.expenseTypeId)
