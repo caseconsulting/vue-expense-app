@@ -16,7 +16,7 @@
         <v-row v-for="balance in this.balances" :key="balance">
           <p>{{ balance }}:</p>
           <v-spacer></v-spacer>
-          <p>{{ balanceData[balance] }} h</p>
+          <p>{{ formatHours(balanceData[balance]) }}</p>
         </v-row>
       </div>
       <template v-if="!showMore && !showAll">
@@ -89,6 +89,26 @@ function balances() {
 
 // |--------------------------------------------------|
 // |                                                  |
+// |                     METHODS                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+function formatHours(hours) {
+  if (this.showMinutes) {
+    let hrs = parseInt(Number(hours));
+    let min = Math.round((Number(hours) - hrs) * 60);
+    if (min == 60) {
+      min = 0;
+      hrs++;
+    }
+    hours = hrs + 'h ' + min + 'm';
+    return hours;
+  }
+  return `${hours}h`;
+} // formatHours
+
+// |--------------------------------------------------|
+// |                                                  |
 // |                      EXPORT                      |
 // |                                                  |
 // |--------------------------------------------------|
@@ -109,6 +129,10 @@ export default {
       showAll: true,
       showMore: false
     };
-  }
+  },
+  methods: {
+    formatHours
+  },
+  props: ['showMinutes']
 };
 </script>

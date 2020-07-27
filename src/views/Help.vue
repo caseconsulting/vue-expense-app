@@ -102,7 +102,7 @@ export default {
           {
             title: 'Why do I not see some of my hours for today?',
             body:
-              'If you are using the clock in function on TSheets those hours will not show up until after you clock out. All other hours for the month should be seen on the home page.'
+              'If you are using the clock in function on TSheets, those hours may still be accumulating. Try refreshing the page.'
           }
         ],
         employeeHome: [

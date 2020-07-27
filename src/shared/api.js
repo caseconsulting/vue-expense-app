@@ -194,8 +194,8 @@ function getPTOBalances(employeeNumber) {
   return execute('get', `/${TSHEETS}/getPTOBalances/${employeeNumber}`);
 }
 
-function getTimeSheets(employeeNumber, startDate, endDate) {
-  return execute('get', `/${TSHEETS}/getTimeSheets/${employeeNumber}/${startDate}/${endDate}`);
+function getMonthlyHours(employeeNumber) {
+  return execute('get', `/${TSHEETS}/getMonthlyHours/${employeeNumber}`);
 }
 function getTwitterToken() {
   return execute('get', `/${TWITTER}/getTwitterToken`);
@@ -240,7 +240,7 @@ export default {
   getModerationLabel,
   getPTOBalances,
   getRole,
-  getTimeSheets,
+  getMonthlyHours,
   getTwitterToken,
   getURLInfo,
   getUser,
