@@ -186,7 +186,7 @@
           label="Require a url for this expense?"
         ></v-switch>
 
-        <p v-if="model.categories.length > 0" class="pt-4">Show only these categories on feed?</p>
+        <!-- <p v-if="model.categories.length > 0" class="pt-4">Show only these categories on feed?</p> -->
 
         <v-container>
           <v-row v-if="model.categories.length > 0">
