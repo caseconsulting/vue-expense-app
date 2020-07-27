@@ -346,6 +346,7 @@ function clearForm() {
   this.$set(this, 'hireDateFormatted', null);
   this.$set(this.model, 'id', null);
   this.$set(this.model, 'workStatus', 100);
+  this.$set(this, 'statusRadio', 'full');
 
   // New Fields
   this.$set(this.model, 'prime', null);
@@ -725,7 +726,7 @@ export default {
       if (this.model.workStatus != null) {
         // set work status buttons if the status exists
         this.status = this.model.workStatus.toString(); // convert employee work status to string
-
+        console.log(this.status);
         // set status radio
         if (this.status == '100') {
           this.statusRadio = 'full';
@@ -743,8 +744,16 @@ export default {
     statusRadio: function () {
       if (this.statusRadio == 'full') {
         this.status = '100';
+        this.model.workStatus = 100;
       } else if (this.statusRadio == 'inactive') {
         this.status = '0';
+        this.model.workStatus = 0;
+      } else {
+        if (this.model.workStatus && this.model.workStatus > 0 && this.model.workStatus < 100) {
+          this.status = this.model.workStatus;
+        } else {
+          this.status = null;
+        }
       }
     },
     undisabled: function () {
