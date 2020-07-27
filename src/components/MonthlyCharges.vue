@@ -144,17 +144,10 @@ async function created() {
   this.todaysHours = this.tsheetsData.todaysHours;
   this.futureHours = this.tsheetsData.futureHours;
   this.totalHours = this.workedHours + this.todaysHours + this.futureHours;
-  this.calcWorkHours();
-  this.remainingHours = this.workHours - this.totalHours;
+  await this.calcWorkHours();
+  this.remainingHours = roundHours(this.workHours - this.totalHours);
   this.userWorkDays = this.remainingWorkDays;
-  this.estimatedDailyHours = this.remainingHours / this.userWorkDays;
-  this.estimatedDailyHours = roundHours(this.estimatedDailyHours);
-  this.workedHours = roundHours(this.workedHours);
-  this.todaysHours = roundHours(this.todaysHours);
-  this.futureHours = roundHours(this.futureHours);
-  this.remainingHours = roundHours(this.remainingHours);
-  this.totalHours = roundHours(this.totalHours);
-
+  this.estimatedDailyHours = roundHours(this.remainingHours / this.userWorkDays);
   this.loading = false;
 } // created
 
@@ -164,7 +157,7 @@ async function created() {
 // |                                                  |
 // |--------------------------------------------------|
 
-function calcWorkHours() {
+async function calcWorkHours() {
   let workHours = 0;
   let day = moment().set('date', 1);
   let currMonth = day.month();
@@ -176,7 +169,7 @@ function calcWorkHours() {
     // increment to the next day
     day = day.add(1, 'd');
   }
-  this.workHours = Number(workHours);
+  this.workHours = workHours;
 } // calcWorkHours
 
 /**
@@ -184,7 +177,7 @@ function calcWorkHours() {
  * @param hours the decimal number of hours
  */
 function roundHours(hours) {
-  hours = hours.toFixed(2);
+  hours = Number(hours.toFixed(2));
   return hours;
 } // roundHours
 
