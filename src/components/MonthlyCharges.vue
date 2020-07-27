@@ -49,7 +49,7 @@
             <v-row>
               Completed:
               <v-spacer></v-spacer>
-              <p v-if="this.workedHours < this.workHours - 8 * this.remainingWorkDays">
+              <p v-if="this.workedHours < this.workHours - this.workDayHours * this.remainingWorkDays">
                 {{ formatHours(this.workedHours) }}
               </p>
               <p v-else style="color: green;">{{ formatHours(this.workedHours) }}</p>
@@ -58,7 +58,7 @@
             <v-row>
               Today:
               <v-spacer></v-spacer>
-              <p v-if="this.todaysHours < 8">
+              <p v-if="this.todaysHours < this.workDayHours">
                 {{ formatHours(this.todaysHours) }}
               </p>
               <p v-else style="color: green;">{{ formatHours(this.todaysHours) }}</p>
@@ -67,7 +67,7 @@
             <v-row>
               Future:
               <v-spacer></v-spacer>
-              <p v-if="this.futureHours < 8 * (this.remainingWorkDays - 1)">
+              <p v-if="this.futureHours < this.workDayHours * (this.remainingWorkDays - 1)">
                 {{ formatHours(this.futureHours) }}
               </p>
               <p v-else style="color: green;">{{ formatHours(this.futureHours) }}</p>
@@ -134,6 +134,8 @@ function remainingWorkDays() {
 async function created() {
   this.loading = true;
   this.employee = await api.getUser();
+  console.log(this.employee);
+  this.workDayHours *= this.employee.workStatus * 0.01;
   // set the current month
   this.month = moment().format('MMMM');
   // set the current year
@@ -145,9 +147,9 @@ async function created() {
   this.futureHours = this.tsheetsData.futureHours;
   this.totalHours = this.workedHours + this.todaysHours + this.futureHours;
   await this.calcWorkHours();
-  this.remainingHours = roundHours(this.workHours - this.totalHours);
+  this.remainingHours = this.workHours - this.totalHours;
   this.userWorkDays = this.remainingWorkDays;
-  this.estimatedDailyHours = roundHours(this.remainingHours / this.userWorkDays);
+  this.estimatedDailyHours = this.remainingHours / this.userWorkDays;
   this.loading = false;
 } // created
 
@@ -162,9 +164,9 @@ async function calcWorkHours() {
   let day = moment().set('date', 1);
   let currMonth = day.month();
   while (day.month() === currMonth) {
-    // if day.isoWeekday() >= 1 && <=6 then add 8 hours to workHours
+    // if day.isoWeekday() >= 1 && <=6 then add user hours to workHours
     if (day.isoWeekday() >= 1 && day.isoWeekday() <= 5) {
-      workHours += 8;
+      workHours += this.workDayHours;
     }
     // increment to the next day
     day = day.add(1, 'd');
@@ -192,6 +194,7 @@ function formatHours(hours) {
     hours = hrs + 'h ' + min + 'm';
     return hours;
   }
+  hours = roundHours(hours);
   return `${hours}h`;
 } // formatHours
 
@@ -220,6 +223,7 @@ export default {
       totalHours: 0,
       tsheetsData: {},
       userWorkDays: 0,
+      workDayHours: 8,
       workedHours: 0,
       year: ''
     };

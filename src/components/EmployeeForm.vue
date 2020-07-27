@@ -439,7 +439,7 @@ function isPartTime() {
  * @return boolean - work status is empty
  */
 function isStatusEmpty() {
-  return this.status.length == 0;
+  return _.isString(this.status) ? this.status.length == 0 : true;
 } // isStatusEmpty
 
 /**
