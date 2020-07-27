@@ -112,15 +112,13 @@ function isEmpty(value) {
 async function getEmployee() {
   this.loading = true; // set loading status to true
 
-  //THIS IS A TEMP PIECE OF CODE, just for testing/dev purposes
-  //this will be replaced w/ getting the specific employee's id once hooked up to employees list
-  this.model = await api.getUser();
-
-  //this next line is closer to what the actual code will look like:
-  // this.model = await api.getItem(api.EMPLOYEES, this.$route.params.id); // get employee
+  let employees = await api.getItems(api.EMPLOYEES);
+  this.model = _.find(employees, (employee) => {
+    return employee.employeeNumber == this.$route.params.id;
+  });
 
   this.loading = false; // set loading status to false
-} // getEmployees
+} // getEmployee
 
 /**
  * Returns Full Time, Part Time, or Inactive based on the work status

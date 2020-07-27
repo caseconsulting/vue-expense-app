@@ -87,14 +87,17 @@
           >
             <!-- Rows in datatable -->
             <template v-slot:item="{ item }">
-              <tr :class="{ inactiveStyle: isInactive(item), selectFocus: isFocus(item) }" @click="clickedRow(item)">
+              <router-link
+                :to="employeePath(item)"
+                tag="tr"
+                :class="{ inactiveStyle: isInactive(item), selectFocus: isFocus(item) }"
+              >
                 <!-- Employee Information -->
                 <td>{{ item.employeeNumber }}</td>
                 <td>{{ item.firstName }}</td>
                 <td>{{ item.lastName }}</td>
                 <td>{{ item.hireDate | dateFormat }}</td>
                 <td>{{ item.email }}</td>
-
                 <!-- Action Icons -->
                 <td class="datatable_btn layout" v-if="userIsAdmin()" @click="clickedRow(item)">
                   <!-- Edit Button -->
@@ -137,67 +140,9 @@
                   </v-tooltip>
                 </td>
                 <!-- End Action Icons -->
-              </tr>
+              </router-link>
             </template>
             <!-- End rows in datatable -->
-
-            <!-- Expanded slot in datatable -->
-            <template v-slot:expanded-item="{ headers, item }">
-              <td :colspan="headers.length" class="pa-0">
-                <v-card text>
-                  <v-card-text>
-                    <div class="expandedInfo" v-if="isDisplayData(item)">
-                      <p>No additional data</p>
-                    </div>
-                    <div class="expandedInfo" v-else>
-                      <p v-if="userIsAdmin()">
-                        <b>Status: </b>
-                        {{ getWorkStatus(item.workStatus) }}
-                      </p>
-                      <p v-if="!isEmpty(item.prime)"><b>Prime: </b> {{ item.prime }}</p>
-                      <p v-if="!isEmpty(item.contract)"><b>Contract: </b>{{ item.contract }}</p>
-                      <p v-if="!isEmpty(item.jobRole)"><b>Job Role: </b>{{ item.jobRole }}</p>
-                      <p v-if="!isEmpty(item.github)">
-                        <b>Github: </b
-                        ><a :href="'https://github.com/' + item.github" target="_blank">{{ item.github }}</a>
-                      </p>
-                      <p v-if="!isEmpty(item.twitter)">
-                        <b>Twitter: </b>
-                        <a :href="'https://twitter.com/' + item.twitter" target="_blank">{{ item.twitter }}</a>
-                      </p>
-                      <p v-if="userIsAdmin() && !isEmpty(item.birthday)">
-                        <b>Birthday: </b>{{ item.birthday | dateFormat }}
-                      </p>
-                      <p v-if="userIsAdmin() && !isEmpty(item.birthdayFeed)">
-                        <b>Birthday on feed: </b>{{ item.birthdayFeed | birthdayFeedResponse }}
-                      </p>
-                      <p v-if="userIsAdmin() && !isEmpty(item.city) && !isEmpty(item.st) && !isEmpty(item.country)">
-                        <b>Place of Birth: </b>{{ item.city }}, {{ item.st }}, {{ item.country }}
-                      </p>
-                      <p v-else-if="userIsAdmin() && !isEmpty(item.city) && !isEmpty(item.st)">
-                        <b>Place of Birth: </b>{{ item.city }}, {{ item.st }}
-                      </p>
-                      <p v-else-if="userIsAdmin() && !isEmpty(item.city) && !isEmpty(item.country)">
-                        <b>Place of Birth: </b>{{ item.city }}, {{ item.country }}
-                      </p>
-                      <p v-else-if="userIsAdmin() && !isEmpty(item.country)">
-                        <b>Place of Birth: </b>{{ item.country }}
-                      </p>
-                      <p v-if="userIsAdmin() && !isEmpty(item.deptDate)">
-                        <b>Departure Date: </b>{{ item.deptDate | dateFormat }}
-                      </p>
-                    </div>
-                  </v-card-text>
-                </v-card>
-                <v-card text v-if="userIsAdmin() && isFocus(item)">
-                  <!-- Employee Budgets -->
-                  <v-card-text>
-                    <employee-home :adminCall="true" :employ="item"> </employee-home>
-                  </v-card-text>
-                </v-card>
-              </td>
-            </template>
-            <!-- End expanded slot in datatable -->
 
             <!-- Alert for no search results -->
             <v-alert slot="no-results" :value="true" color="error" icon="warning">
@@ -248,7 +193,6 @@ import ConvertEmployeesToCsv from '../components/ConvertEmployeesToCsv.vue';
 import DeleteErrorModal from '../components/DeleteErrorModal.vue';
 import DeleteModal from '../components/DeleteModal.vue';
 import EmployeeForm from '../components/EmployeeForm.vue';
-import EmployeeHome from '@/views/MyBudgets.vue';
 import { getRole } from '@/utils/auth';
 import moment from 'moment';
 import _ from 'lodash';
@@ -310,22 +254,6 @@ function clearStatus() {
 } // clearStatus
 
 /**
- * Add employee to expanded row when clicked.
- *
- * @param value - employee to add
- */
-function clickedRow(value) {
-  if (_.isEmpty(this.expanded) || this.expanded[0].employeeNumber != value.employeeNumber) {
-    // expand the selected employee if the selected employee not already expanded
-    this.expanded = [];
-    this.expanded.push(value);
-  } else {
-    // collapse the employee if the selected employee is already expanded
-    this.expanded = [];
-  }
-} // clickedRow
-
-/**
  * Delete an employee and display status.
  */
 async function deleteEmployee() {
@@ -366,9 +294,17 @@ async function displayError(err) {
 /**
  * sets midAction boolean to false
  */
+function employeePath(item) {
+  return `/employee/${item.employeeNumber}`;
+} // employeePath
+
+/**
+ * sets midAction boolean to false
+ */
 function endAction() {
   this.midAction = false;
 }
+
 /**
  * Filters out contracts from list of employees.
  */
@@ -636,8 +572,7 @@ export default {
     ConvertEmployeesToCsv,
     DeleteErrorModal,
     DeleteModal,
-    EmployeeForm,
-    EmployeeHome
+    EmployeeForm
   },
   created,
   data() {
@@ -739,10 +674,10 @@ export default {
     addModelToTable,
     clearModel, // NOTE: Unused?
     clearStatus,
-    clickedRow,
     deleteEmployee,
     deleteModelFromTable,
     displayError,
+    employeePath,
     endAction,
     filterContracts,
     filterEmployees,
