@@ -134,7 +134,6 @@ function remainingWorkDays() {
 async function created() {
   this.loading = true;
   this.employee = await api.getUser();
-  console.log(this.employee);
   this.workDayHours *= this.employee.workStatus * 0.01;
   // set the current month
   this.month = moment().format('MMMM');
