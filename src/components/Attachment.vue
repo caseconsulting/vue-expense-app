@@ -1,20 +1,10 @@
 <template>
   <!-- Admin Dashboard -->
   <div v-if="this.mode === 'adminExpenseInfo'">
-    <v-layout>
-      <v-flex xs4>
-        <!-- admin dashboard has attachment -->
-        <v-btn
-          v-if="!isEmpty(this.expense.receipt)"
-          :disabled="midAction"
-          icon
-          color="primary"
-          @click="openDownloadTab"
-        >
-          <icon name="cloud-download-alt" style="color: #004c54;" scale="2"></icon>
-        </v-btn>
-      </v-flex>
-    </v-layout>
+    <!-- admin dashboard has attachment -->
+    <v-btn v-if="!isEmpty(this.expense.receipt)" :disabled="midAction" icon color="primary" @click="openDownloadTab">
+      <icon name="cloud-download-alt" style="color: #004c54;" scale="2"></icon>
+    </v-btn>
   </div>
   <!-- End Admin Dashboard -->
 
