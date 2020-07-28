@@ -1,5 +1,5 @@
 <template>
-  <v-layout row wrap>
+  <v-row>
     <!-- Status Alert -->
     <v-snackbar
       v-model="status.statusType"
@@ -18,7 +18,7 @@
       </v-btn>
     </v-snackbar>
 
-    <v-flex lg8 md12 sm12>
+    <v-col cols="12" lg="8">
       <v-card>
         <v-container fluid>
           <!-- Title -->
@@ -289,10 +289,10 @@
           <!-- End Confirmation Modals -->
         </v-container>
       </v-card>
-    </v-flex>
+    </v-col>
 
     <!-- Expense Form -->
-    <v-flex v-if="isAdmin || !userIsInactive" lg4 md12 sm12>
+    <v-col v-if="isAdmin || !userIsInactive" cols="12" lg="4">
       <expense-form
         ref="form"
         :isEdit="isEditing()"
@@ -304,8 +304,8 @@
         v-on:update="updateModelInTable"
         v-on:error="displayError"
       ></expense-form>
-    </v-flex>
-  </v-layout>
+    </v-col>
+  </v-row>
 </template>
 
 <script>
