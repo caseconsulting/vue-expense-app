@@ -1,5 +1,5 @@
 <template>
-  <v-layout row justify-center>
+  <div>
     <v-dialog v-model="activate" persistent max-width="400">
       <v-card>
         <!-- Anniversary Date -->
@@ -38,7 +38,7 @@
         <!-- End Buttons -->
       </v-card>
     </v-dialog>
-  </v-layout>
+  </div>
 </template>
 
 <script>
