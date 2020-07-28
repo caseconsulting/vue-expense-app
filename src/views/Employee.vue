@@ -57,7 +57,7 @@
       <v-card>
         <!-- Employee Details Form -->
         <v-card-text>
-          <employee-details-form :employee="this.model"></employee-details-form>
+          <employee-form :model="this.model" :employeeInfo="this.employeeInfo"></employee-form>
         </v-card-text>
       </v-card>
     </v-col>
@@ -67,7 +67,7 @@
 <script>
 import api from '@/shared/api.js';
 import AvailableBudgets from '@/components/AvailableBudgets.vue';
-import EmployeeDetailsForm from '@/components/EmployeeDetailsForm.vue';
+import EmployeeForm from '../components/EmployeeForm.vue';
 import { getRole } from '@/utils/auth';
 import moment from 'moment';
 import _ from 'lodash';
@@ -164,7 +164,7 @@ async function created() {
 export default {
   components: {
     AvailableBudgets,
-    EmployeeDetailsForm
+    EmployeeForm
   },
   created,
   data() {

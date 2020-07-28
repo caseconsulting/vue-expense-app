@@ -170,20 +170,6 @@
         </v-container>
       </v-card>
     </v-flex>
-
-    <!-- Employee Form -->
-    <v-flex v-if="userIsAdmin()" lg4 md12 sm12>
-      <employee-form
-        ref="form"
-        :model="model"
-        :employeeInfo="employeeInfo"
-        v-on:add="addModelToTable"
-        v-on:startACtion="startAction"
-        v-on:endAction="endAction"
-        v-on:update="updateModelInTable"
-        v-on:error="displayError"
-      ></employee-form>
-    </v-flex>
   </v-layout>
 </template>
 
@@ -192,7 +178,6 @@ import api from '@/shared/api.js';
 import ConvertEmployeesToCsv from '../components/ConvertEmployeesToCsv.vue';
 import DeleteErrorModal from '../components/DeleteErrorModal.vue';
 import DeleteModal from '../components/DeleteModal.vue';
-import EmployeeForm from '../components/EmployeeForm.vue';
 import { getRole } from '@/utils/auth';
 import moment from 'moment';
 import _ from 'lodash';
@@ -481,12 +466,6 @@ async function refreshEmployees() {
 function startAction() {
   this.midAction = true;
 }
-/**
- * Scrolls window back to the top of the form.
- */
-function toTopOfForm() {
-  this.$vuetify.goTo(this.$refs.form.$el.offsetTop + 50);
-} // toTopOfForm
 
 /**
  * Refresh and updates employee list and displays a successful update status in the snackbar.
@@ -571,8 +550,7 @@ export default {
   components: {
     ConvertEmployeesToCsv,
     DeleteErrorModal,
-    DeleteModal,
-    EmployeeForm
+    DeleteModal
   },
   created,
   data() {
@@ -693,7 +671,6 @@ export default {
     onSelect,
     refreshEmployees,
     startAction,
-    toTopOfForm,
     updateModelInTable,
     userIsAdmin,
     validateDelete
