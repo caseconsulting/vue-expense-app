@@ -1,5 +1,5 @@
 <template>
-  <v-flex pa-0>
+  <v-div>
     <!-- title -->
     <v-card class="white--text" color="#bc3825">
       <v-card-title class="header_style">
@@ -42,7 +42,7 @@
         </v-virtual-scroll>
       </v-timeline>
     </v-card>
-  </v-flex>
+  </v-div>
 </template>
 
 <script>
