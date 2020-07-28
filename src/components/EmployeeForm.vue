@@ -11,7 +11,7 @@
       <v-form ref="form" v-model="valid" lazy-validation>
         <!-- Tabs -->
         <v-tabs show-arrows class="pb-4">
-          <v-tab href="#employee">Employee Info</v-tab>
+          <v-tab href="#employee">General Info</v-tab>
           <v-tab href="#degrees">Degrees</v-tab>
           <v-tab href="#jobExperience">Job Experience</v-tab>
           <v-tab href="#certifications">Certifications</v-tab>
@@ -969,5 +969,9 @@ export default {
 
 .percentageBox input:hover {
   border: none;
+}
+
+.v-window {
+  padding: 20px;
 }
 </style>
