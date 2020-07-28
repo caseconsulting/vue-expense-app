@@ -1,5 +1,5 @@
 <template>
-  <v-layout row wrap>
+  <v-row>
     <!-- Status Alert -->
     <v-snackbar
       v-model="status.statusType"
@@ -18,7 +18,7 @@
       </v-btn>
     </v-snackbar>
 
-    <v-flex :lg8="userIsAdmin()" :lg12="!userIsAdmin()" xl7 md12 sm12 offset-xl1>
+    <v-col cols="12" :lg="userIsAdmin() ? 8 : 12">
       <v-card>
         <v-container fluid>
           <!-- Title -->
@@ -275,28 +275,28 @@
                       </p>
 
                       <!-- Flags -->
-                      <v-layout row>
-                        <v-flex sm6 class="flag py-0">
+                      <v-row>
+                        <v-col cols="12" sm="6" class="flag py-0">
                           <p>Overdraft Allowed:</p>
                           <icon v-if="item.odFlag" id="marks" class="mr-1" name="regular/check-circle"></icon>
                           <icon v-else class="mr-1" id="marks" name="regular/times-circle"></icon>
-                        </v-flex>
-                        <v-flex sm6 class="flag py-0">
+                        </v-col>
+                        <v-col cols="12" sm="6" class="flag py-0">
                           <p>Recurring:</p>
                           <icon v-if="item.recurringFlag" id="marks" class="mr-1" name="regular/check-circle"></icon>
                           <icon v-else class="mr-1" id="marks" name="regular/times-circle"></icon>
-                        </v-flex>
-                        <v-flex sm6 class="flag py-0">
+                        </v-col>
+                        <v-col cols="12" sm="6" class="flag py-0">
                           <p>Receipt Required:</p>
                           <icon v-if="item.requiredFlag" id="marks" class="mr-1" name="regular/check-circle"></icon>
                           <icon v-else class="mr-1" id="marks" name="regular/times-circle"></icon>
-                        </v-flex>
-                        <v-flex sm6 class="flag py-0">
+                        </v-col>
+                        <v-col cols="12" sm="6" class="flag py-0">
                           <p>Inactive:</p>
                           <icon v-if="item.isInactive" id="marks" class="mr-1" name="regular/check-circle"></icon>
                           <icon v-else class="mr-1" id="marks" name="regular/times-circle"></icon>
-                        </v-flex>
-                      </v-layout>
+                        </v-col>
+                      </v-row>
                       <!-- End Flags -->
 
                       <!-- Accessible By -->
@@ -383,10 +383,10 @@
           <!-- End Confirmation Modals -->
         </v-container>
       </v-card>
-    </v-flex>
+    </v-col>
 
     <!-- Expense Type Form -->
-    <v-flex v-if="userIsAdmin()" xl4 lg4 md12 sm12>
+    <v-col v-if="userIsAdmin()" cols="12" lg="4">
       <expense-type-form
         ref="form"
         :model="model"
@@ -396,8 +396,8 @@
         v-on:update="updateModelInTable"
         v-on:error="displayError"
       ></expense-type-form>
-    </v-flex>
-  </v-layout>
+    </v-col>
+  </v-row>
 </template>
 
 <script>
