@@ -84,20 +84,20 @@
           </v-menu>
         </v-item-group>
 
-        <v-toolbar-items v-show="isLoggedIn()">
-          <v-flex xs12 sm6 md8 align-center justify-left layout text-xs-center>
-            <v-menu bottom offset-y open-on-hover>
-              <template v-slot:activator="{ on }">
-                <v-avatar size="50" color="grey lighten-4">
-                  <img :src="profilePic" alt="avatar" v-on="on" />
-                </v-avatar>
-              </template>
-              <v-list>
-                <v-btn text @click="handleLogout()">Logout</v-btn>
-              </v-list>
-            </v-menu>
-          </v-flex>
-        </v-toolbar-items>
+        <!-- User image and logout -->
+        <v-menu bottom offset-y open-on-hover v-if="isLoggedIn()">
+          <template v-slot:activator="{ on }">
+            <v-avatar size="50" color="grey lighten-4">
+              <img :src="profilePic" alt="avatar" v-on="on" />
+            </v-avatar>
+          </template>
+          <v-list>
+            <v-list-item>
+              <v-btn text @click="handleLogout()">Logout</v-btn>
+            </v-list-item>
+          </v-list>
+        </v-menu>
+        <!-- End user image and logout -->
       </v-app-bar>
 
       <v-main>
