@@ -271,7 +271,7 @@
 
                       <!-- Categories show on feed -->
                       <p v-if="!item.alwaysOnFeed && item.categories && item.categories.length > 0">
-                        <b>Categories' Show On Feed: </b>{{ categoriesOnFeed(item.categories) }}
+                        <b>Categories Showing On Feed: </b>{{ categoriesOnFeed(item.categories) }}
                       </p>
 
                       <!-- Flags -->
