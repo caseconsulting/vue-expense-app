@@ -9,132 +9,344 @@
 
     <v-container fluid>
       <v-form ref="form" v-model="valid" lazy-validation>
-        <!-- Name -->
-        <v-text-field
-          v-model="model.firstName"
-          :rules="requiredRules"
-          label="First Name"
-          data-vv-name="First Name"
-        ></v-text-field>
-        <v-text-field
-          v-model="model.middleName"
-          label="Middle Name (optional)"
-          data-vv-name="Middle Name"
-        ></v-text-field>
-        <v-text-field
-          v-model="model.lastName"
-          :rules="requiredRules"
-          label="Last Name"
-          data-vv-name="Last Name"
-        ></v-text-field>
-
-        <!-- Employee # -->
-        <v-text-field
-          v-model="model.employeeNumber"
-          :rules="numberRules"
-          label="Employee #"
-          data-vv-name="Employee #"
-        ></v-text-field>
-
-        <!-- Email -->
-        <v-text-field v-model="model.email" :rules="emailRules" label="Email" data-vv-name="Email"></v-text-field>
-
-        <!-- Employee Role -->
-        <v-autocomplete
-          :disabled="!userIsAdmin()"
-          :items="permissions"
-          :rules="componentRules"
-          v-model="employeeRoleFormatted"
-          label="Employee Role"
-          @blur="model.employeeRole = formatKebabCase(employeeRoleFormatted)"
-        ></v-autocomplete>
-
-        <!-- Hire Date -->
-        <v-menu
-          ref="hireMenu"
-          :close-on-content-click="true"
-          v-model="hireMenu"
-          :nudge-right="40"
-          transition="scale-transition"
-          offset-y
-          max-width="290px"
-          min-width="290px"
-          style="padding-right: 20px; padding-bottom: 20px;"
-        >
-          <template v-slot:activator="{ on }">
+        <!-- Tabs -->
+        <v-tabs show-arrows class="pb-4">
+          <v-tab href="#employee">Employee Info</v-tab>
+          <v-tab href="#degrees">Degrees</v-tab>
+          <v-tab href="#jobExperience">Job Experience</v-tab>
+          <v-tab href="#certifications">Certifications</v-tab>
+          <v-tab href="#awards">Awards</v-tab>
+          <v-tab href="#technologies">Technologies</v-tab>
+          <v-tab href="#customerOrgExp">Customer Org</v-tab>
+          <v-tab-item id="employee">
+            <!-- Name -->
             <v-text-field
-              v-model="hireDateFormatted"
-              :rules="dateRules"
-              :disabled="hasExpenses"
-              label="Hire Date"
-              hint="MM/DD/YYYY format"
-              persistent-hint
-              prepend-icon="event"
-              @blur="date = parseDate(hireDateFormatted)"
-              v-on="on"
+              v-model="model.firstName"
+              :rules="requiredRules"
+              label="First Name"
+              data-vv-name="First Name"
             ></v-text-field>
-          </template>
-          <v-date-picker v-model="date" no-title @input="hireMenu = false"></v-date-picker>
-        </v-menu>
-        <br />
+            <v-text-field
+              v-model="model.middleName"
+              label="Middle Name (optional)"
+              data-vv-name="Middle Name"
+            ></v-text-field>
+            <v-text-field
+              v-model="model.lastName"
+              :rules="requiredRules"
+              label="Last Name"
+              data-vv-name="Last Name"
+            ></v-text-field>
 
-        <!-- Advanced section -->
-        <v-expansion-panels accordion>
-          <v-expansion-panel>
-            <v-expansion-panel-header style="background-color: whitesmoke;"
-              >ADVANCED (optional)</v-expansion-panel-header
+            <!-- Employee # -->
+            <v-text-field
+              v-model="model.employeeNumber"
+              :rules="numberRules"
+              label="Employee #"
+              data-vv-name="Employee #"
+            ></v-text-field>
+
+            <!-- Email -->
+            <v-text-field v-model="model.email" :rules="emailRules" label="Email" data-vv-name="Email"></v-text-field>
+
+            <!-- Employee Role -->
+            <v-autocomplete
+              :disabled="!userIsAdmin()"
+              :items="permissions"
+              :rules="componentRules"
+              v-model="employeeRoleFormatted"
+              label="Employee Role"
+              @blur="model.employeeRole = formatKebabCase(employeeRoleFormatted)"
+            ></v-autocomplete>
+
+            <!-- Hire Date -->
+            <v-menu
+              ref="hireMenu"
+              :close-on-content-click="true"
+              v-model="hireMenu"
+              :nudge-right="40"
+              transition="scale-transition"
+              offset-y
+              max-width="290px"
+              min-width="290px"
+              style="padding-right: 20px; padding-bottom: 20px;"
             >
-            <v-expansion-panel-content style="background-color: whitesmoke;">
-              <!-- Prime combo box -->
-              <v-combobox
-                style="padding-right: 20px; padding-left: 10px;"
-                v-model="model.prime"
-                :items="employeeInfo.primes"
-                label="Prime"
-                data-vv-name="Prime"
-                dense
-              ></v-combobox>
+              <template v-slot:activator="{ on }">
+                <v-text-field
+                  v-model="hireDateFormatted"
+                  :rules="dateRules"
+                  :disabled="hasExpenses"
+                  label="Hire Date"
+                  hint="MM/DD/YYYY format"
+                  persistent-hint
+                  prepend-icon="event"
+                  @blur="date = parseDate(hireDateFormatted)"
+                  v-on="on"
+                ></v-text-field>
+              </template>
+              <v-date-picker v-model="date" no-title @input="hireMenu = false"></v-date-picker>
+            </v-menu>
+            <br />
 
-              <!-- Contract combo box -->
-              <v-combobox
-                style="padding-right: 20px; padding-left: 10px;"
-                v-model="model.contract"
-                :items="employeeInfo.contracts"
-                label="Contract"
-                data-vv-name="Contract"
-                dense
-              ></v-combobox>
+            <!-- Advanced section -->
+            <v-expansion-panels accordion>
+              <v-expansion-panel>
+                <v-expansion-panel-header style="background-color: whitesmoke;"
+                  >ADVANCED (optional)</v-expansion-panel-header
+                >
+                <v-expansion-panel-content style="background-color: whitesmoke;">
+                  <!-- Prime combo box -->
+                  <v-combobox
+                    style="padding-right: 20px; padding-left: 10px;"
+                    v-model="model.prime"
+                    :items="employeeInfo.primes"
+                    label="Prime"
+                    data-vv-name="Prime"
+                    dense
+                  ></v-combobox>
 
-              <!-- Github text field -->
-              <v-text-field
-                style="padding-right: 20px; padding-left: 10px;"
-                v-model="model.github"
-                label="Github"
-                data-vv-name="Github"
-              ></v-text-field>
+                  <!-- Contract combo box -->
+                  <v-combobox
+                    style="padding-right: 20px; padding-left: 10px;"
+                    v-model="model.contract"
+                    :items="employeeInfo.contracts"
+                    label="Contract"
+                    data-vv-name="Contract"
+                    dense
+                  ></v-combobox>
 
-              <!-- Twitter text field -->
-              <v-text-field
-                style="padding-right: 20px; padding-left: 10px;"
-                v-model="model.twitter"
-                label="Twitter"
-                data-vv-name="Twitter"
-              ></v-text-field>
+                  <!-- Github text field -->
+                  <v-text-field
+                    style="padding-right: 20px; padding-left: 10px;"
+                    v-model="model.github"
+                    label="Github"
+                    data-vv-name="Github"
+                  ></v-text-field>
 
-              <!-- Job Role autocomplete -->
-              <v-autocomplete
-                style="padding-right: 20px; padding-left: 10px;"
-                :items="jobRoles"
-                v-model="model.jobRole"
-                item-text="text"
-                label="Job Role"
-              ></v-autocomplete>
+                  <!-- Twitter text field -->
+                  <v-text-field
+                    style="padding-right: 20px; padding-left: 10px;"
+                    v-model="model.twitter"
+                    label="Twitter"
+                    data-vv-name="Twitter"
+                  ></v-text-field>
 
-              <!-- Birthday Picker -->
+                  <!-- Job Role autocomplete -->
+                  <v-autocomplete
+                    style="padding-right: 20px; padding-left: 10px;"
+                    :items="jobRoles"
+                    v-model="model.jobRole"
+                    item-text="text"
+                    label="Job Role"
+                  ></v-autocomplete>
+
+                  <!-- Birthday Picker -->
+                  <v-menu
+                    ref="BirthdayMenu"
+                    :close-on-content-click="true"
+                    v-model="BirthdayMenu"
+                    :nudge-right="40"
+                    transition="scale-transition"
+                    offset-y
+                    max-width="290px"
+                    min-width="290px"
+                    style="padding-right: 20px; padding-bottom: 20px;"
+                  >
+                    <template v-slot:activator="{ on }">
+                      <v-text-field
+                        v-model="birthdayFormat"
+                        :rules="dateOptionalRules"
+                        label="Birthday"
+                        hint="MM/DD/YYYY format"
+                        persistent-hint
+                        prepend-icon="event"
+                        @blur="model.birthday = parseDate(birthdayFormat)"
+                        v-on="on"
+                      ></v-text-field>
+                    </template>
+                    <v-date-picker v-model="model.birthday" no-title @input="BirthdayMenu = false"></v-date-picker>
+                  </v-menu>
+
+                  <!-- opt out of birthday feed -->
+                  <v-switch
+                    v-model="model.birthdayFeed"
+                    label="Have birthday recognized on company feed?"
+                    :disabled="disableBirthdayFeed()"
+                  ></v-switch>
+
+                  <!-- Place of Birth -->
+                  <p style="font-size: 17px; padding-left: 10px; padding-top: 10px;">Place of Birth</p>
+                  <div style="padding-right: 20px; padding-left: 30px; padding-bottom: 10px;">
+                    <div style="border-left-style: groove; padding-right: 20px; padding-left: 10px;">
+                      <!-- Place of Birth: City text field -->
+                      <v-text-field
+                        v-model="model.city"
+                        label="City"
+                        data-vv-name="City"
+                        style="padding-top: 0px;"
+                      ></v-text-field>
+
+                      <!-- Place of Birth: Country autocomplete -->
+                      <v-autocomplete
+                        :items="countries"
+                        v-model="model.country"
+                        item-text="text"
+                        label="Country"
+                        style="padding-top: 0px; padding-bottom: 0px;"
+                      ></v-autocomplete>
+
+                      <!-- Place of Birth: State autocomplete -->
+                      <v-autocomplete
+                        v-if="isUSA"
+                        :items="states"
+                        v-model="model.st"
+                        item-text="text"
+                        label="State"
+                        style="padding-top: 0px;"
+                      ></v-autocomplete>
+                    </div>
+                  </div>
+                </v-expansion-panel-content>
+              </v-expansion-panel>
+            </v-expansion-panels>
+
+            <!-- Full/Part/Inactive Status [MOBILE] -->
+            <v-radio-group v-if="isMobile()" v-model="statusRadio" row mandatory>
+              <v-layout fluid>
+                <v-row class="ml-0">
+                  <v-flex xs6 sm3>
+                    <v-radio label="Full Time" value="full"></v-radio>
+                  </v-flex>
+                  <v-flex xs6 sm3>
+                    <v-radio label="Part Time" value="part" @change="viewStatus()"></v-radio>
+                  </v-flex>
+                  <v-flex xs6 sm3>
+                    <v-radio label="Inactive" value="inactive"></v-radio>
+                  </v-flex>
+                  <!-- Custom Input Field -->
+                  <v-flex xs6 sm3>
+                    <div :class="{ customInput: isPartTime() }">
+                      <div :class="['percentageBox', { disabled: !isPartTime(), inputError: isStatusEmpty() }]">
+                        <input
+                          v-model="status"
+                          type="text"
+                          oninput="this.value = this.value.replace(/[^0-9]/g, '');"
+                          maxlength="2"
+                          :disabled="!isPartTime()"
+                        />
+                        <div>%</div>
+                      </div>
+                    </div>
+                  </v-flex>
+                  <!-- End Custom Input Field -->
+                </v-row>
+              </v-layout>
+            </v-radio-group>
+            <!-- End [Full/Part/Inactive Status [MOBILE]] -->
+
+            <!-- Full/Part/Inactive Status [DESKTOP] -->
+            <v-radio-group v-else v-model="statusRadio" row mandatory>
+              <v-radio label="Full Time" value="full"></v-radio>
+              <v-radio label="Part Time" value="part" @change="viewStatus()"></v-radio>
+              <v-radio label="Inactive" value="inactive"></v-radio>
+              <!-- custom input field -->
+              <div :class="{ customInput: isPartTime() }">
+                <div :class="['percentageBox', { disabled: !isPartTime(), inputError: isStatusEmpty() }]">
+                  <input
+                    v-model="status"
+                    type="text"
+                    oninput="this.value = this.value.replace(/[^0-9]/g, '');"
+                    maxlength="2"
+                    :disabled="!isPartTime()"
+                  />
+                  <div>%</div>
+                </div>
+              </div>
+              <!-- End Full/Part/Inactive Status [DESKTOP] -->
+            </v-radio-group>
+            <!-- End [DESKTOP] -->
+
+            <!-- If inactive, set Departure Date -->
+            <v-menu
+              v-if="isInactive()"
+              ref="departureMenu"
+              :close-on-content-click="true"
+              v-model="departureMenu"
+              :nudge-right="40"
+              transition="scale-transition"
+              offset-y
+              max-width="290px"
+              min-width="290px"
+              style="padding-right: 20px; padding-bottom: 20px;"
+            >
+              <template v-slot:activator="{ on }">
+                <v-text-field
+                  v-model="deptDateFormatted"
+                  :rules="dateRules"
+                  label="Departure Date"
+                  hint="MM/DD/YYYY format"
+                  persistent-hint
+                  prepend-icon="event"
+                  @blur="model.deptDate = parseDate(deptDateFormatted)"
+                  v-on="on"
+                ></v-text-field>
+              </template>
+              <v-date-picker v-model="model.deptDate" no-title @input="departureMenu = false"></v-date-picker>
+            </v-menu>
+            <!-- End Full/Part/Inactive Status [DESKTOP] -->
+          </v-tab-item>
+          <!-- Degrees -->
+          <v-tab-item id="degrees">
+            <p class="pr-5" style="display: inline-block;">Degree:</p>
+            <v-autocomplete
+              style="width: 70%; display: inline-block;"
+              v-model="this.model.degree"
+              :items="this.model.degrees"
+            ></v-autocomplete>
+            <br />
+            <p class="pr-5" style="display: inline-block;">Major:</p>
+            <v-autocomplete
+              style="width: 70%; display: inline-block;"
+              v-model="this.model.major"
+              :items="this.model.majors"
+            ></v-autocomplete>
+            <!-- Plus button  -->
+            <v-icon>add</v-icon>
+            <br />
+            <p class="pr-5" style="display: inline-block;">Minor:</p>
+            <v-autocomplete
+              style="width: 70%; display: inline-block;"
+              v-model="this.model.minor"
+              :items="this.model.minors"
+            ></v-autocomplete>
+            <!-- Plus button  -->
+            <v-icon>add</v-icon>
+            <br />
+
+            <!-- Degrees - Concentration -->
+            <div>Concentration:</div>
+            <v-row class="px-3" align="center">
+              <!-- <p class="pr-5 mb-0" align-center text-center style="display: inline-block;">Concentration:</p> -->
+              <v-autocomplete v-model="this.model.major" :items="this.model.majors">
+                <!-- Plus button  -->
+                <template v-slot:append-outer>
+                  <v-slide-x-reverse-transition mode="out-in">
+                    <v-icon>delete</v-icon>
+                  </v-slide-x-reverse-transition>
+                </template>
+              </v-autocomplete>
+            </v-row>
+            <!-- End Degrees - Concentration -->
+
+            <!-- Completion year -->
+          </v-tab-item>
+          <!-- Experience -->
+          <v-tab-item id="jobExperience">
+            <div class="pb-7">
+              <p>Case:</p>
+              <!-- Start date -->
               <v-menu
-                ref="BirthdayMenu"
                 :close-on-content-click="true"
-                v-model="BirthdayMenu"
                 :nudge-right="40"
                 transition="scale-transition"
                 offset-y
@@ -144,149 +356,103 @@
               >
                 <template v-slot:activator="{ on }">
                   <v-text-field
-                    v-model="birthdayFormat"
-                    :rules="dateOptionalRules"
-                    label="Birthday"
+                    label="Start Date"
                     hint="MM/DD/YYYY format"
                     persistent-hint
                     prepend-icon="event"
-                    @blur="model.birthday = parseDate(birthdayFormat)"
                     v-on="on"
                   ></v-text-field>
                 </template>
-                <v-date-picker v-model="model.birthday" no-title @input="BirthdayMenu = false"></v-date-picker>
+                <v-date-picker no-title></v-date-picker>
               </v-menu>
-
-              <!-- opt out of birthday feed -->
-              <v-switch
-                v-model="model.birthdayFeed"
-                label="Have birthday recognized on company feed?"
-                :disabled="disableBirthdayFeed()"
-              ></v-switch>
-
-              <!-- Place of Birth -->
-              <p style="font-size: 17px; padding-left: 10px; padding-top: 10px;">Place of Birth</p>
-              <div style="padding-right: 20px; padding-left: 30px; padding-bottom: 10px;">
-                <div style="border-left-style: groove; padding-right: 20px; padding-left: 10px;">
-                  <!-- Place of Birth: City text field -->
-                  <v-text-field
-                    v-model="model.city"
-                    label="City"
-                    data-vv-name="City"
-                    style="padding-top: 0px;"
-                  ></v-text-field>
-
-                  <!-- Place of Birth: Country autocomplete -->
-                  <v-autocomplete
-                    :items="countries"
-                    v-model="model.country"
-                    item-text="text"
-                    label="Country"
-                    style="padding-top: 0px; padding-bottom: 0px;"
-                  ></v-autocomplete>
-
-                  <!-- Place of Birth: State autocomplete -->
-                  <v-autocomplete
-                    v-if="isUSA"
-                    :items="states"
-                    v-model="model.st"
-                    item-text="text"
-                    label="State"
-                    style="padding-top: 0px;"
-                  ></v-autocomplete>
-                </div>
-              </div>
-            </v-expansion-panel-content>
-          </v-expansion-panel>
-        </v-expansion-panels>
-
-        <!-- Full/Part/Inactive Status [MOBILE] -->
-        <v-radio-group v-if="isMobile()" v-model="statusRadio" row mandatory>
-          <v-layout fluid>
-            <v-row class="ml-0">
-              <v-flex xs6 sm3>
-                <v-radio label="Full Time" value="full"></v-radio>
-              </v-flex>
-              <v-flex xs6 sm3>
-                <v-radio label="Part Time" value="part" @change="viewStatus()"></v-radio>
-              </v-flex>
-              <v-flex xs6 sm3>
-                <v-radio label="Inactive" value="inactive"></v-radio>
-              </v-flex>
-              <!-- Custom Input Field -->
-              <v-flex xs6 sm3>
-                <div :class="{ customInput: isPartTime() }">
-                  <div :class="['percentageBox', { disabled: !isPartTime(), inputError: isStatusEmpty() }]">
-                    <input
-                      v-model="status"
-                      type="text"
-                      oninput="this.value = this.value.replace(/[^0-9]/g, '');"
-                      maxlength="2"
-                      :disabled="!isPartTime()"
-                    />
-                    <div>%</div>
-                  </div>
-                </div>
-              </v-flex>
-              <!-- End Custom Input Field -->
-            </v-row>
-          </v-layout>
-        </v-radio-group>
-        <!-- End [Full/Part/Inactive Status [MOBILE]] -->
-
-        <!-- Full/Part/Inactive Status [DESKTOP] -->
-        <v-radio-group v-else v-model="statusRadio" row mandatory>
-          <v-radio label="Full Time" value="full"></v-radio>
-          <v-radio label="Part Time" value="part" @change="viewStatus()"></v-radio>
-          <v-radio label="Inactive" value="inactive"></v-radio>
-          <!-- custom input field -->
-          <div :class="{ customInput: isPartTime() }">
-            <div :class="['percentageBox', { disabled: !isPartTime(), inputError: isStatusEmpty() }]">
-              <input
-                v-model="status"
-                type="text"
-                oninput="this.value = this.value.replace(/[^0-9]/g, '');"
-                maxlength="2"
-                :disabled="!isPartTime()"
-              />
-              <div>%</div>
             </div>
-          </div>
-          <!-- End Full/Part/Inactive Status [DESKTOP] -->
-        </v-radio-group>
-        <!-- End [DESKTOP] -->
-
-        <!-- If inactive, set Departure Date -->
-        <v-menu
-          v-if="isInactive()"
-          ref="departureMenu"
-          :close-on-content-click="true"
-          v-model="departureMenu"
-          :nudge-right="40"
-          transition="scale-transition"
-          offset-y
-          max-width="290px"
-          min-width="290px"
-          style="padding-right: 20px; padding-bottom: 20px;"
-        >
-          <template v-slot:activator="{ on }">
-            <v-text-field
-              v-model="deptDateFormatted"
-              :rules="dateRules"
-              label="Departure Date"
-              hint="MM/DD/YYYY format"
-              persistent-hint
-              prepend-icon="event"
-              @blur="model.deptDate = parseDate(deptDateFormatted)"
-              v-on="on"
-            ></v-text-field>
-          </template>
-          <v-date-picker v-model="model.deptDate" no-title @input="departureMenu = false"></v-date-picker>
-        </v-menu>
-        <!-- End Full/Part/Inactive Status [DESKTOP] -->
+            <!-- Plus button  -->
+            <!-- If user adds another -->
+            <div class="py-2">
+              <!-- company  -->
+              <p class="pr-3" style="display: inline-block;">Company:</p>
+              <v-autocomplete style="display: inline-block; width: 80%;"></v-autocomplete>
+              <br />
+              <!-- general, IC radio button -->
+              <input type="radio" id="general" name="job-type" value="general" />
+              <label for="general">General</label>
+              <br />
+              <input type="radio" id="ic" name="job-type" value="ic" />
+              <label for="ic">IC</label>
+              <br />
+              <!-- start date -->
+              <v-menu
+                :close-on-content-click="true"
+                :nudge-right="40"
+                transition="scale-transition"
+                offset-y
+                max-width="290px"
+                min-width="290px"
+                style="padding-right: 20px; padding-bottom: 20px;"
+              >
+                <template v-slot:activator="{ on }">
+                  <v-text-field
+                    label="Start Date"
+                    hint="MM/DD/YYYY format"
+                    persistent-hint
+                    prepend-icon="event"
+                    v-on="on"
+                  ></v-text-field>
+                </template>
+                <v-date-picker no-title></v-date-picker>
+              </v-menu>
+              <!-- end date -->
+              <v-menu
+                :close-on-content-click="true"
+                :nudge-right="40"
+                transition="scale-transition"
+                offset-y
+                max-width="290px"
+                min-width="290px"
+                style="padding-right: 20px; padding-bottom: 20px;"
+              >
+                <template v-slot:activator="{ on }">
+                  <v-text-field
+                    label="End Date"
+                    hint="MM/DD/YYYY format"
+                    persistent-hint
+                    prepend-icon="event"
+                    v-on="on"
+                  ></v-text-field>
+                </template>
+                <v-date-picker no-title></v-date-picker>
+              </v-menu>
+            </div>
+          </v-tab-item>
+          <!-- Certifications -->
+          <v-tab-item id="certifications">
+            <!-- Title -->
+            <!-- Date -->
+            <!-- Optional expiration date -->
+          </v-tab-item>
+          <!-- Awards -->
+          <v-tab-item id="awards">
+            <!-- Title  -->
+            <!-- date -->
+          </v-tab-item>
+          <!-- Technologies -->
+          <v-tab-item id="technologies">
+            <!-- Title  -->
+            <!-- Start Date -->
+            <!-- End DAte optional -->
+          </v-tab-item>
+          <!-- Customer Org Experience -->
+          <v-tab-item id="customerOrgExp">
+            <!-- Title -->
+            <v-autocomplete></v-autocomplete>
+            <!-- DST, ADO, Talent, ..., Other -->
+            <!-- start date -->
+            <!-- end date optional  -->
+          </v-tab-item>
+        </v-tabs>
 
         <!-- Form action buttons -->
-        <v-btn class="ma-2" color="white" @click="clearForm"> <icon class="mr-1" name="ban"></icon>Cancel </v-btn>
+        <v-btn class="ma-2" color="white" @click="clearForm"><icon class="mr-1" name="ban"></icon>Cancel</v-btn>
         <v-btn outlined class="ma-2" color="success" @click="submit" :disabled="!valid || isStatusEmpty()">
           <icon class="mr-1" name="save"></icon>Submit
         </v-btn>
