@@ -43,14 +43,45 @@
             ></v-autocomplete>
             <!-- Plus button  -->
             <v-icon>add</v-icon><br />
-            <p class="pr-5" style="display: inline-block;">Concentration:</p>
-            <v-autocomplete
-              style="width: 70%; display: inline-block;"
-              v-model="this.employee.major"
-              :items="this.employee.majors"
-            ></v-autocomplete>
-            <!-- Plus button  -->
-            <v-icon>add</v-icon><br />
+
+            <!-- Degrees - Concentration -->
+            <div>
+              Concentration:
+            </div>
+            <v-row class="px-3" align="center">
+              <!-- <p class="pr-5 mb-0" align-center text-center style="display: inline-block;">Concentration:</p> -->
+              <v-autocomplete v-model="this.employee.major" :items="this.employee.majors">
+                <!-- Plus button  -->
+                <template v-slot:append-outer>
+                  <v-slide-x-reverse-transition mode="out-in">
+                    <v-icon
+                      :key="`icon-${isEditing}`"
+                      :color="isEditing ? 'success' : 'gray'"
+                      @click="isEditing = !isEditing"
+                      v-text="isEditing ? 'add' : 'delete'"
+                    ></v-icon>
+                  </v-slide-x-reverse-transition>
+                </template>
+              </v-autocomplete>
+            </v-row>
+            <v-row class="px-3" align="center">
+              <!-- <p class="pr-5 mb-0" align-center text-center style="display: inline-block;">Concentration:</p> -->
+              <v-autocomplete v-model="this.employee.major" :items="this.employee.majors">
+                <!-- Plus button  -->
+                <template v-slot:append-outer>
+                  <v-slide-x-reverse-transition mode="out-in">
+                    <v-icon
+                      :key="`icon-${isEditing}`"
+                      :color="isEditing ? 'success' : 'gray'"
+                      @click="isEditing = !isEditing"
+                      v-text="isEditing ? 'add' : 'delete'"
+                    ></v-icon>
+                  </v-slide-x-reverse-transition>
+                </template>
+              </v-autocomplete>
+            </v-row>
+            <!-- End Degrees - Concentration -->
+
             <!-- Completion year -->
           </v-tab-item>
           <!-- Experience -->
@@ -272,6 +303,7 @@ export default {
   created,
   data() {
     return {
+      isEditing: false,
       editing: false,
       employeeInfo: {
         degrees: [],

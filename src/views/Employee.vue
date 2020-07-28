@@ -1,6 +1,6 @@
 <template>
-  <v-layout row wrap>
-    <v-flex lg6 lg12 md12 sm12>
+  <v-row>
+    <v-col cols="12" md="6" lg="5">
       <!-- Expanded slot in datatable -->
       <template>
         <v-card>
@@ -52,16 +52,16 @@
         <available-budgets v-if="this.model.id" :employee="this.model"></available-budgets>
       </template>
       <!-- End expanded slot in datatable -->
-    </v-flex>
-    <v-flex lg6>
+    </v-col>
+    <v-col cols="12" md="6" lg="7">
       <v-card>
         <!-- Employee Details Form -->
         <v-card-text>
           <employee-details-form :employee="this.model"></employee-details-form>
         </v-card-text>
       </v-card>
-    </v-flex>
-  </v-layout>
+    </v-col>
+  </v-row>
 </template>
 
 <script>
