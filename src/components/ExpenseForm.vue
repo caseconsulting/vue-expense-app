@@ -999,7 +999,6 @@ async function scanFile() {
     //go get text data from textract and comprehend
 
     this.receiptObject = await api.extractText(file);
-
     if (this.receiptObject instanceof Error) {
       this.isInactive = false;
       this.receiptObject = null;
@@ -1551,6 +1550,10 @@ export default {
       this.selectedExpenseType = _.find(this.expenseTypes, (expenseType) => {
         return expenseType.value === this.expense.expenseTypeId;
       });
+      // console.log(this.selectedExpenseType);
+      this.requireURLET = this.selectedExpenseType && this.selectedExpenseType.requireURL;
+      // console.log(this.requireURLET);
+
       if (this.selectedExpenseType) {
         // set hint
         this.hint = this.selectedExpenseType.recurringFlag

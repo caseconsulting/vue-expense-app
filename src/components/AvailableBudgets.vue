@@ -37,6 +37,14 @@
             <router-link v-if="this.fiscalDateView" to="/myExpenses" style="text-decoration: none;">
               <button class="home_buttons">Create an Expense</button>
             </router-link>
+            <v-file-input
+              style="padding-top: 0px; padding-bottom: 0px;"
+              label="Create an Expense from Receipt"
+              s
+              @change="reroute()"
+              :dense="true"
+              :single-line="true"
+            ></v-file-input>
           </div>
         </div>
       </v-card-text>
@@ -50,6 +58,7 @@ import api from '@/shared/api.js';
 import AvailableBudgetSummary from '@/components/AvailableBudgetSummary.vue';
 import _ from 'lodash';
 import moment from 'moment-timezone';
+import router from '../router.js';
 const IsoFormat = 'YYYY-MM-DD';
 
 // |--------------------------------------------------|
@@ -57,6 +66,10 @@ const IsoFormat = 'YYYY-MM-DD';
 // |                     METHODS                      |
 // |                                                  |
 // |--------------------------------------------------|
+
+function reroute() {
+  router.push({ path: '/myExpenses' });
+}
 
 /**
  * Calculates how much of a budget is remaining. Returns the remaining amount if it exists. Returns zero if the budget
@@ -233,6 +246,7 @@ export default {
     refreshBudget,
     refreshBudgetYears,
     refreshEmployee,
+    reroute,
     selectBudget
   },
   props: ['employee', 'fiscalDateView']
