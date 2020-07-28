@@ -206,12 +206,16 @@ function getCaseTimeline() {
 function getFeedEvents() {
   return execute('get', `/${BASECAMP}/getFeedEvents`);
 }
-function getModerationLabel() {
-  return execute('post', `blog/getModerationLabel/`);
+function getModerationLabel(img) {
+  return execute('post', `blog/getModerationLabel/${img}`);
 }
 
-function getKeyPhrases() {
-  return execute('post', `blog/getKeyPhrases`);
+function getKeyPhrases(text) {
+  return execute('post', `blog/getKeyPhrases/${text}`);
+}
+
+function uploadBlogAttachment(img) {
+  return execute('post', `blog/uploadBlogAttachmentToS3/${img}`);
 }
 
 export default {
@@ -245,6 +249,7 @@ export default {
   getURLInfo,
   getUser,
   updateItem,
+  uploadBlogAttachment,
   EXPENSE_TYPES,
   EXPENSES,
   EMPLOYEES,

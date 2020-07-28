@@ -31,6 +31,7 @@
       </v-col>
     </v-row>
     <v-row>
+      <v-file-upload v-model="inputFile" label="Select image to rekognize" :accept="acceptedFileTypes"></v-file-upload>
       <v-btn @click="rekognition()">Rekognition</v-btn>
     </v-row>
     <v-row>
@@ -44,6 +45,10 @@ import api from '@/shared/api.js';
 import PendingPostTable from '../components/PendingPostTable.vue';
 import PostTable from '../components/PostTable.vue';
 import PostEditor from '../components/PostEditor.vue';
+
+function acceptedFileTypes() {
+  return ['jpg', 'png'].join(',');
+} // acceptedFileTypes
 
 async function created() {
   this.posts = [
@@ -97,12 +102,12 @@ async function created() {
   ];
   this.model.id = '4';
 }
-async function rekognition() {
-  let result = await api.getModerationLabel();
+async function rekognition(img) {
+  let result = await api.getModerationLabel(img);
   console.log(result);
 }
-async function comprehend() {
-  let text = await api.getKeyPhrases();
+async function comprehend(txt) {
+  let text = await api.getKeyPhrases(txt);
   console.log(text);
 }
 //import _ from 'lodash';
@@ -117,12 +122,19 @@ export default {
     return {
       pendingPosts: [],
       posts: [],
-      model: {}
+      model: {},
+      inputFile: ''
     };
   },
   methods: {
     rekognition,
-    comprehend
+    comprehend,
+    acceptedFileTypes
+  },
+  watch: {
+    inputFile: function () {
+      console.log(this.inputFile);
+    }
   }
 };
 </script>
