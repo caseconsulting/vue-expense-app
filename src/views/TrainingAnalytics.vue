@@ -1,12 +1,12 @@
 <template>
-  <v-layout row justify-center>
+  <v-row>
     <v-container>
       <v-row>
-        <v-flex xs12 sm4>
+        <v-col cols="12" sm="4">
           <h1 style="font-size: 35px;">Trainings</h1>
-        </v-flex>
+        </v-col>
 
-        <v-flex xs12 sm8>
+        <v-col cols="12" sm="8">
           <v-toolbar color="white darken-3" class="mb-1" dense elevation="2">
             <v-text-field
               v-model="search"
@@ -18,11 +18,11 @@
               dense
             ></v-text-field>
           </v-toolbar>
-        </v-flex>
+        </v-col>
       </v-row>
 
       <!-- Category Filter Buttons -->
-      <v-flex xs12 class="text-center">
+      <v-col cols="12" class="text-center">
         <v-row>
           <!-- Training Button -->
           <div v-for="category in categories" :key="category.value">
@@ -40,28 +40,28 @@
             <h4>{{ category.value }}</h4>
           </div>
         </v-row>
-      </v-flex>
+      </v-col>
       <!-- End Category Filter Button -->
 
       <!-- Button/Urls Divider -->
       <hr class="my-6" />
 
-      <v-flex xs12>
+      <v-col cols="12">
         <!-- List all url info -->
         <div v-for="url in this.urls" :key="url.id">
           <v-row dense>
             <v-col cols="12">
               <v-card color="#565651" dark :href="url.id" target="_blank">
-                <v-layout wrap class="ma-1">
-                  <v-flex xs12 sm3 md2 xl1 class="text-center">
+                <v-row class="ma-1">
+                  <v-col cols="12" sm="3" md="2" xl="1" class="text-center">
                     <v-avatar class="ma-1" size="100" tile>
                       <img :src="url.display" :class="{ caseImage: url.isCaseLogo }" @error="changeDisplay(url)" />
                     </v-avatar>
                     <h3 v-if="!isEmpty(url.title)">{{ url.publisher }}</h3>
-                  </v-flex>
+                  </v-col>
 
-                  <v-flex xs12 sm9 md10 xl11>
-                    <v-layout column justify-space-between fill-height>
+                  <v-col cols="12" sm="9" md="10" xl="11" class="py-0">
+                    <v-row no-gutters class="fill-height">
                       <!-- Title and Description -->
                       <div v-if="!isEmpty(url.title)">
                         <v-card-title class="headline" v-text="url.title"></v-card-title>
@@ -72,22 +72,23 @@
                       <div v-else class="urlBox pt-4">{{ url.id }}</div>
 
                       <!-- Hit Count -->
+                      <v-spacer></v-spacer>
                       <div class="mr-2">
                         <span v-if="isEmpty(url.title)" style="float: left;">{{ url.publisher }}</span>
                         <span class="subheading hitText">{{ url.hits }}</span>
                         <icon name="crosshairs" class="hitIcon" scale="1"></icon>
                       </div>
-                    </v-layout>
-                  </v-flex>
-                </v-layout>
+                    </v-row>
+                  </v-col>
+                </v-row>
               </v-card>
             </v-col>
           </v-row>
         </div>
         <div v-if="this.urls.length === 0" class="text-center">No Training URL with Category: {{ categoryFilter }}</div>
-      </v-flex>
+      </v-col>
     </v-container>
-  </v-layout>
+  </v-row>
 </template>
 
 <script>
