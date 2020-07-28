@@ -1,165 +1,167 @@
 <template>
-  <!-- Status Alert -->
-  <v-snackbar
-    v-model="status.statusType"
-    :color="status.color"
-    :multi-line="true"
-    :right="true"
-    :timeout="5000"
-    :top="true"
-    :vertical="true"
-  >
-    <v-card-title headline color="white">
-      <span class="headline">{{ status.statusMessage }}</span>
-    </v-card-title>
-    <v-btn color="white" text @click="clearStatus">
-      Close
-    </v-btn>
-  </v-snackbar>
-  <v-card>
-    <v-container fluid>
-      <!-- Title -->
-      <v-card-title>
-        <h2>Employees</h2>
-        <v-spacer></v-spacer>
-        <v-text-field v-model="search" append-icon="search" label="Search" single-line hide-details></v-text-field>
+  <div>
+    <!-- Status Alert -->
+    <v-snackbar
+      v-model="status.statusType"
+      :color="status.color"
+      :multi-line="true"
+      :right="true"
+      :timeout="5000"
+      :top="true"
+      :vertical="true"
+    >
+      <v-card-title headline color="white">
+        <span class="headline">{{ status.statusMessage }}</span>
       </v-card-title>
+      <v-btn color="white" text @click="clearStatus">
+        Close
+      </v-btn>
+    </v-snackbar>
+    <v-card>
+      <v-container fluid>
+        <!-- Title -->
+        <v-card-title>
+          <h2>Employees</h2>
+          <v-spacer></v-spacer>
+          <v-text-field v-model="search" append-icon="search" label="Search" single-line hide-details></v-text-field>
+        </v-card-title>
 
-      <!-- Filters -->
-      <fieldset v-if="userIsAdmin()" class="filter_border">
-        <legend class="legend_style">Filters</legend>
+        <!-- Filters -->
+        <fieldset v-if="userIsAdmin()" class="filter_border">
+          <legend class="legend_style">Filters</legend>
 
-        <!-- Active Filter -->
-        <div class="flagFilter">
-          <h4>Employee Status:</h4>
-          <v-btn-toggle class="filter_color" v-model="filter.active" text multiple>
-            <!-- Full Time -->
-            <v-tooltip top>
-              <template v-slot:activator="{ on }">
-                <v-btn value="full" v-on="on" text>
-                  <icon class="mr-1" name="clock" color="black"></icon>
-                </v-btn>
-              </template>
-              <span>Full Time</span>
-            </v-tooltip>
-
-            <!-- Part Time -->
-            <v-tooltip top>
-              <template v-slot:activator="{ on }">
-                <v-btn value="part" v-on="on" text>
-                  <icon name="regular/clock" color="black"></icon>
-                </v-btn>
-              </template>
-              <span>Part Time</span>
-            </v-tooltip>
-
-            <!-- Inactive -->
-            <v-tooltip top>
-              <template v-slot:activator="{ on }">
-                <v-btn value="inactive" v-on="on" text>
-                  <icon name="regular/stop-circle" color="black"></icon>
-                </v-btn>
-              </template>
-              <span>Inactive</span>
-            </v-tooltip>
-          </v-btn-toggle>
-        </div>
-        <!-- End Active Filter -->
-      </fieldset>
-      <br />
-      <!-- End Filters -->
-
-      <!-- Employee Datatable-->
-      <v-data-table
-        :headers="headers"
-        :items="filteredEmployees"
-        :sort-by.sync="sortBy"
-        :sort-desc.sync="sortDesc"
-        :expanded.sync="expanded"
-        :loading="loading"
-        :items-per-page.sync="itemsPerPage"
-        :search="search"
-        item-key="employeeNumber"
-        class="elevation-1"
-      >
-        <!-- Rows in datatable -->
-        <template v-slot:item="{ item }">
-          <router-link
-            :to="employeePath(item)"
-            tag="tr"
-            :class="{ inactiveStyle: isInactive(item), selectFocus: isFocus(item) }"
-          >
-            <!-- Employee Information -->
-            <td>{{ item.employeeNumber }}</td>
-            <td>{{ item.firstName }}</td>
-            <td>{{ item.lastName }}</td>
-            <td>{{ item.hireDate | dateFormat }}</td>
-            <td>{{ item.email }}</td>
-            <!-- Action Icons -->
-            <td class="datatable_btn layout" v-if="userIsAdmin()" @click="clickedRow(item)">
-              <!-- Edit Button -->
+          <!-- Active Filter -->
+          <div class="flagFilter">
+            <h4>Employee Status:</h4>
+            <v-btn-toggle class="filter_color" v-model="filter.active" text multiple>
+              <!-- Full Time -->
               <v-tooltip top>
                 <template v-slot:activator="{ on }">
-                  <v-btn
-                    :disabled="isEditing() || midAction"
-                    text
-                    icon
-                    @click.stop="
-                      toTopOfForm();
-                      onSelect(item);
-                    "
-                    v-on="on"
-                  >
-                    <v-icon style="color: #606060;">
-                      edit
-                    </v-icon>
+                  <v-btn value="full" v-on="on" text>
+                    <icon class="mr-1" name="clock" color="black"></icon>
                   </v-btn>
                 </template>
-                <span>Edit</span>
+                <span>Full Time</span>
               </v-tooltip>
 
-              <!-- Delete Button -->
+              <!-- Part Time -->
               <v-tooltip top>
                 <template v-slot:activator="{ on }">
-                  <v-btn :disabled="isEditing() || midAction" text icon @click.stop="validateDelete(item)" v-on="on">
-                    <v-icon style="color: #606060;">
-                      delete
-                    </v-icon>
+                  <v-btn value="part" v-on="on" text>
+                    <icon name="regular/clock" color="black"></icon>
                   </v-btn>
                 </template>
-                <span>Delete</span>
+                <span>Part Time</span>
               </v-tooltip>
-            </td>
-            <!-- End Action Icons -->
-          </router-link>
-        </template>
-        <!-- End rows in datatable -->
 
-        <!-- Alert for no search results -->
-        <v-alert slot="no-results" :value="true" color="error" icon="warning">
-          Your search for "{{ search }}" found no results.
-        </v-alert>
-        <!-- End alert for no search results -->
-      </v-data-table>
-      <!-- End employee datatable -->
-      <br />
+              <!-- Inactive -->
+              <v-tooltip top>
+                <template v-slot:activator="{ on }">
+                  <v-btn value="inactive" v-on="on" text>
+                    <icon name="regular/stop-circle" color="black"></icon>
+                  </v-btn>
+                </template>
+                <span>Inactive</span>
+              </v-tooltip>
+            </v-btn-toggle>
+          </div>
+          <!-- End Active Filter -->
+        </fieldset>
+        <br />
+        <!-- End Filters -->
 
-      <!-- Download employee csv button -->
-      <v-card-actions>
-        <convert-employees-to-csv
-          v-if="userIsAdmin()"
-          :midAction="midAction"
-          :employees="filteredEmployees"
-          :editing="isEditing()"
-        ></convert-employees-to-csv>
-      </v-card-actions>
+        <!-- Employee Datatable-->
+        <v-data-table
+          :headers="headers"
+          :items="filteredEmployees"
+          :sort-by.sync="sortBy"
+          :sort-desc.sync="sortDesc"
+          :expanded.sync="expanded"
+          :loading="loading"
+          :items-per-page.sync="itemsPerPage"
+          :search="search"
+          item-key="employeeNumber"
+          class="elevation-1"
+        >
+          <!-- Rows in datatable -->
+          <template v-slot:item="{ item }">
+            <router-link
+              :to="employeePath(item)"
+              tag="tr"
+              :class="{ inactiveStyle: isInactive(item), selectFocus: isFocus(item) }"
+            >
+              <!-- Employee Information -->
+              <td>{{ item.employeeNumber }}</td>
+              <td>{{ item.firstName }}</td>
+              <td>{{ item.lastName }}</td>
+              <td>{{ item.hireDate | dateFormat }}</td>
+              <td>{{ item.email }}</td>
+              <!-- Action Icons -->
+              <td class="datatable_btn layout" v-if="userIsAdmin()" @click="clickedRow(item)">
+                <!-- Edit Button -->
+                <v-tooltip top>
+                  <template v-slot:activator="{ on }">
+                    <v-btn
+                      :disabled="isEditing() || midAction"
+                      text
+                      icon
+                      @click.stop="
+                        toTopOfForm();
+                        onSelect(item);
+                      "
+                      v-on="on"
+                    >
+                      <v-icon style="color: #606060;">
+                        edit
+                      </v-icon>
+                    </v-btn>
+                  </template>
+                  <span>Edit</span>
+                </v-tooltip>
 
-      <!-- Confirmation Modals -->
-      <delete-modal :activate="deleting" :type="'employee'"></delete-modal>
-      <delete-error-modal :activate="invalidDelete" type="employee"></delete-error-modal>
-      <!-- End Confirmation Modals -->
-    </v-container>
-  </v-card>
+                <!-- Delete Button -->
+                <v-tooltip top>
+                  <template v-slot:activator="{ on }">
+                    <v-btn :disabled="isEditing() || midAction" text icon @click.stop="validateDelete(item)" v-on="on">
+                      <v-icon style="color: #606060;">
+                        delete
+                      </v-icon>
+                    </v-btn>
+                  </template>
+                  <span>Delete</span>
+                </v-tooltip>
+              </td>
+              <!-- End Action Icons -->
+            </router-link>
+          </template>
+          <!-- End rows in datatable -->
+
+          <!-- Alert for no search results -->
+          <v-alert slot="no-results" :value="true" color="error" icon="warning">
+            Your search for "{{ search }}" found no results.
+          </v-alert>
+          <!-- End alert for no search results -->
+        </v-data-table>
+        <!-- End employee datatable -->
+        <br />
+
+        <!-- Download employee csv button -->
+        <v-card-actions>
+          <convert-employees-to-csv
+            v-if="userIsAdmin()"
+            :midAction="midAction"
+            :employees="filteredEmployees"
+            :editing="isEditing()"
+          ></convert-employees-to-csv>
+        </v-card-actions>
+
+        <!-- Confirmation Modals -->
+        <delete-modal :activate="deleting" :type="'employee'"></delete-modal>
+        <delete-error-modal :activate="invalidDelete" type="employee"></delete-error-modal>
+        <!-- End Confirmation Modals -->
+      </v-container>
+    </v-card>
+  </div>
 </template>
 
 <script>
