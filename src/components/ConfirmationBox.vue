@@ -1,6 +1,6 @@
 <!-- Confirmation box should only be displayed if the expense exceeds the available budget remaining -->
 <template>
-  <v-layout row justify-center>
+  <div>
     <v-dialog v-model="activate" persistent max-width="330">
       <v-card>
         <v-card-title v-if="isCovered" class="headline"
@@ -42,7 +42,7 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
-  </v-layout>
+  </div>
 </template>
 
 <script>

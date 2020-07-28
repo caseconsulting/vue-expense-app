@@ -1,8 +1,8 @@
 <template>
   <v-card v-if="expense" raised id="expense-info" class="white--text slide-in-blurred-right">
     <v-card-title primary-title class="subtitle-2 color-change-2x">
-      <v-flex lg12 class="headline expense_info_title">Expense Info</v-flex>
-      <v-flex lg12 class="expense_info">
+      <div class="headline expense_info_title">Expense Info</div>
+      <div class="expense_info">
         <p class="expense_info"><span>Description:</span> {{ expense.description }}</p>
         <p class="expense_info"><span>Employee:</span> {{ expense.employeeName }}</p>
         <p class="expense_info"><span>Budget:</span> {{ expense.budgetName }}</p>
@@ -14,7 +14,7 @@
         </p>
         <p class="expense_info" v-if="!isEmpty(expense.note)"><span>Notes:</span> {{ expense.note }}</p>
         <attachment :expense="expense" :mode="'adminExpenseInfo'" class="expense_info"></attachment>
-      </v-flex>
+      </div>
     </v-card-title>
   </v-card>
 </template>

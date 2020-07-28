@@ -1,7 +1,7 @@
 <template>
-  <v-layout row wrap>
+  <v-row>
     <!-- Status Alert -->
-    <v-flex :lg8="userIsBlogger()" :lg12="!userIsBlogger()" md12 sm12>
+    <v-col cols="12" :lg="userIsBlogger() ? 8 : 12">
       <v-card>
         <v-container fluid>
           <!-- Title -->
@@ -86,8 +86,8 @@
           <br />
         </v-container>
       </v-card>
-    </v-flex>
-  </v-layout>
+    </v-col>
+  </v-row>
 </template>
 <script>
 import _ from 'lodash';

@@ -212,35 +212,33 @@
 
             <!-- Full/Part/Inactive Status [MOBILE] -->
             <v-radio-group v-if="isMobile()" v-model="statusRadio" row mandatory>
-              <v-layout fluid>
-                <v-row class="ml-0">
-                  <v-flex xs6 sm3>
-                    <v-radio label="Full Time" value="full"></v-radio>
-                  </v-flex>
-                  <v-flex xs6 sm3>
-                    <v-radio label="Part Time" value="part" @change="viewStatus()"></v-radio>
-                  </v-flex>
-                  <v-flex xs6 sm3>
-                    <v-radio label="Inactive" value="inactive"></v-radio>
-                  </v-flex>
-                  <!-- Custom Input Field -->
-                  <v-flex xs6 sm3>
-                    <div :class="{ customInput: isPartTime() }">
-                      <div :class="['percentageBox', { disabled: !isPartTime(), inputError: isStatusEmpty() }]">
-                        <input
-                          v-model="status"
-                          type="text"
-                          oninput="this.value = this.value.replace(/[^0-9]/g, '');"
-                          maxlength="2"
-                          :disabled="!isPartTime()"
-                        />
-                        <div>%</div>
-                      </div>
+              <v-row class="ml-0">
+                <v-col cols="6" sm="3">
+                  <v-radio label="Full Time" value="full"></v-radio>
+                </v-col>
+                <v-col cols="6" sm="3">
+                  <v-radio label="Part Time" value="part" @change="viewStatus()"></v-radio>
+                </v-col>
+                <v-col cols="6" sm="3">
+                  <v-radio label="Inactive" value="inactive"></v-radio>
+                </v-col>
+                <!-- Custom Input Field -->
+                <v-col cols="6" sm="3">
+                  <div :class="{ customInput: isPartTime() }">
+                    <div :class="['percentageBox', { disabled: !isPartTime(), inputError: isStatusEmpty() }]">
+                      <input
+                        v-model="status"
+                        type="text"
+                        oninput="this.value = this.value.replace(/[^0-9]/g, '');"
+                        maxlength="2"
+                        :disabled="!isPartTime()"
+                      />
+                      <div>%</div>
                     </div>
-                  </v-flex>
-                  <!-- End Custom Input Field -->
-                </v-row>
-              </v-layout>
+                  </div>
+                </v-col>
+                <!-- End Custom Input Field -->
+              </v-row>
             </v-radio-group>
             <!-- End [Full/Part/Inactive Status [MOBILE]] -->
 

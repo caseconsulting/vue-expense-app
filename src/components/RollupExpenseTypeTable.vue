@@ -119,25 +119,23 @@
         <!-- End unreimbursed datatable -->
 
         <!-- Reimburse Button -->
-        <v-flex offset-md10>
-          <v-fab-transition class="reimburse_button">
-            <v-btn
-              @click="buttonClicked = true"
-              id="custom-button-color"
-              :loading="reimbursing"
-              v-show="showReimburseButton"
-              fab
-              dark
-              large
-              bottom
-              left
-              fixed
-              class="reimburse_button"
-            >
-              <icon name="dollar-sign"></icon>
-            </v-btn>
-          </v-fab-transition>
-        </v-flex>
+        <v-fab-transition class="reimburse_button">
+          <v-btn
+            @click="buttonClicked = true"
+            id="custom-button-color"
+            :loading="reimbursing"
+            v-show="showReimburseButton"
+            fab
+            dark
+            large
+            bottom
+            left
+            fixed
+            class="reimburse_button"
+          >
+            <icon name="dollar-sign"></icon>
+          </v-btn>
+        </v-fab-transition>
       </v-container>
 
       <!-- Activate Reimburse Modal -->

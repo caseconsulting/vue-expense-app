@@ -1,5 +1,5 @@
 <template>
-  <v-layout row justify-center>
+  <div>
     <v-dialog v-model="activate" persistent max-width="350">
       <v-card>
         <v-card-title class="headline">Session Timed Out</v-card-title>
@@ -11,7 +11,7 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
-  </v-layout>
+  </div>
 </template>
 
 <script>

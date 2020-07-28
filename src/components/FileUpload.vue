@@ -1,17 +1,13 @@
 <template>
-  <div>
-    <v-layout>
-      <v-flex xs12 class="text-xs-center text-sm-center text-md-center text-lg-center">
-        <!-- Receipt Size Error -->
-        <v-alert :value="fileTooBig" type="error">
-          The file you selected is {{ megabytes }} MBs which exceeds the maximum file size of 6MB.
-        </v-alert>
+  <div class="text-xs-center text-sm-center text-md-center text-lg-center">
+    <!-- Receipt Size Error -->
+    <v-alert :value="fileTooBig" type="error">
+      The file you selected is {{ megabytes }} MBs which exceeds the maximum file size of 6MB.
+    </v-alert>
 
-        <!-- Receipt Input -->
-        <v-file-input v-model="inputFile" :rules="passedRules" label="Select Receipt" :accept="acceptedFileTypes">
-        </v-file-input>
-      </v-flex>
-    </v-layout>
+    <!-- Receipt Input -->
+    <v-file-input v-model="inputFile" :rules="passedRules" label="Select Receipt" :accept="acceptedFileTypes">
+    </v-file-input>
   </div>
 </template>
 

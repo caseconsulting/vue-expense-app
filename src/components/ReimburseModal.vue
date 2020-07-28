@@ -1,5 +1,5 @@
 <template>
-  <v-layout row justify-center>
+  <div>
     <v-dialog v-model="activate" persistent max-width="350">
       <v-card>
         <v-card-title class="headline">Are you sure you want to reimburse these expenses?</v-card-title>
@@ -12,7 +12,7 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
-  </v-layout>
+  </div>
 </template>
 
 <script>

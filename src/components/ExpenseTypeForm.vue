@@ -47,19 +47,19 @@
 
         <!-- Flags -->
         <v-container grid-list-md text-xs-center>
-          <v-layout row wrap>
-            <v-flex xs6>
+          <v-row>
+            <v-col cols="6">
               <v-checkbox label="Overdraft Flag" v-model="model.odFlag"></v-checkbox>
 
               <v-checkbox label="Recurring Flag" v-model="model.recurringFlag"></v-checkbox>
-            </v-flex>
+            </v-col>
 
-            <v-flex xs6>
+            <v-col cols="6">
               <v-checkbox label="Receipt Required" v-model="model.requiredFlag"></v-checkbox>
 
               <v-checkbox label="Mark as Inactive" v-model="model.isInactive"></v-checkbox>
-            </v-flex>
-          </v-layout>
+            </v-col>
+          </v-row>
         </v-container>
 
         <!-- Start Date -->

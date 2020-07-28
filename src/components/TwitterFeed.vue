@@ -1,5 +1,5 @@
 <template class="twitter-feed">
-  <v-flex pa-0>
+  <div>
     <!-- title -->
     <v-card class="white--text" color="#bc3825">
       <v-card-title class="header_style">
@@ -37,7 +37,7 @@
         </v-timeline>
       </div>
     </v-card>
-  </v-flex>
+  </div>
 </template>
 
 <script>

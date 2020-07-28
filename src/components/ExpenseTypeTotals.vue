@@ -2,12 +2,12 @@
   <div>
     <v-card v-if="totals.length" class="slide-in-blurred-right">
       <v-card-title class="subtitle-2">
-        <v-flex lg12 class="headline">Totals</v-flex>
-        <v-flex lg12>
+        <div class="headline">Totals</div>
+        <div>
           <p v-for="total in totals" :key="total.id">
             <span>{{ total.name }}:</span> {{ total.costTotal | moneyValue }}
           </p>
-        </v-flex>
+        </div>
       </v-card-title>
     </v-card>
   </div>
