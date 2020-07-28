@@ -1,31 +1,29 @@
 <template>
   <v-container>
-    <v-row wrap class="pb-4">
+    <v-row class="pb-4">
       <!-- Title -->
-      <v-flex lg6 md6 sm6>
+      <v-col cols="12" md="6">
         <v-row style="height: 100%;" align="center" justify="center">
           <h1>Hello, {{ employee.firstName }}!</h1>
         </v-row>
-      </v-flex>
+      </v-col>
       <!-- Anniversary Date -->
 
-      <v-flex lg6 class="pa-4">
-        <v-flex>
-          <v-card>
-            <v-card-title>
-              <!-- display the next anniversary date -->
-              <div v-if="viewingCurrentBudgetYear">
-                <h3 class="pt-4 font-16">Anniversary Date: {{ getAnniversary }}</h3>
-                <div @mouseover="display = !display" @mouseleave="display = !display" class="pt-4 font-14">
-                  <div v-if="display">Days Until: {{ getDaysUntil }}</div>
-                  <div v-else>Seconds Until: {{ getSecondsUntil }}</div>
-                </div>
+      <v-col cols="12" md="6" class="pa-4">
+        <v-card>
+          <v-card-title>
+            <!-- display the next anniversary date -->
+            <div v-if="viewingCurrentBudgetYear">
+              <h3 class="pt-4 font-16">Anniversary Date: {{ getAnniversary }}</h3>
+              <div @mouseover="display = !display" @mouseleave="display = !display" class="pt-4 font-14">
+                <div v-if="display">Days Until: {{ getDaysUntil }}</div>
+                <div v-else>Seconds Until: {{ getSecondsUntil }}</div>
               </div>
-              <v-spacer></v-spacer>
-            </v-card-title>
-          </v-card>
-        </v-flex>
-      </v-flex>
+            </div>
+            <v-spacer></v-spacer>
+          </v-card-title>
+        </v-card>
+      </v-col>
     </v-row>
     <v-row>
       <v-col xs12 sm12 md6 lg6>
