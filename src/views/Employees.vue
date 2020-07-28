@@ -25,6 +25,17 @@
           <v-spacer></v-spacer>
           <v-text-field v-model="search" append-icon="search" label="Search" single-line hide-details></v-text-field>
         </v-card-title>
+        <!-- Delete Button -->
+        <v-tooltip top>
+          <template v-slot:activator="{ on }">
+            <v-btn :disabled="midAction" text icon @click.stop="validateDelete(item)" v-on="on">
+              <v-icon style="color: #606060;">
+                account_plus
+              </v-icon>
+            </v-btn>
+          </template>
+          <span>Create Employee</span>
+        </v-tooltip>
 
         <!-- Filters -->
         <fieldset v-if="userIsAdmin()" class="filter_border">
@@ -104,7 +115,7 @@
                 <!-- Delete Button -->
                 <v-tooltip top>
                   <template v-slot:activator="{ on }">
-                    <v-btn :disabled="isEditing() || midAction" text icon @click.stop="validateDelete(item)" v-on="on">
+                    <v-btn :disabled="midAction" text icon @click.stop="validateDelete(item)" v-on="on">
                       <v-icon style="color: #606060;">
                         delete
                       </v-icon>
@@ -133,7 +144,6 @@
             v-if="userIsAdmin()"
             :midAction="midAction"
             :employees="filteredEmployees"
-            :editing="isEditing()"
           ></convert-employees-to-csv>
         </v-card-actions>
 
@@ -326,15 +336,6 @@ function isDisplayData(item) {
     this.isEmpty(item.twitter);
   return valid;
 } // isDisplayData
-
-/**
- * Checks if an employee is being edited.
- *
- * @return boolean - an employee is being edited
- */
-function isEditing() {
-  return !!this.model.id;
-} // isEditing
 
 /**
  * Checks if a value is empty. Returns true if the value is null or an empty/blank string.
@@ -635,7 +636,6 @@ export default {
     filterPrimes,
     getWorkStatus,
     isDisplayData,
-    isEditing,
     isEmpty,
     isFocus,
     isFullTime,
