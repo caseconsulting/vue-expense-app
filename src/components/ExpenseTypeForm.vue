@@ -612,7 +612,11 @@ export default {
           return !c.includes(x);
         });
 
-        this.model.categories.push({ name: val[index], showOnFeed: false, requireURL: false });
+        this.model.categories.push({
+          name: val[index],
+          showOnFeed: this.model.alwaysOnFeed,
+          requireURL: this.model.requireURL
+        });
       } else if (val.length < this.model.categories.length) {
         this.model.categories = _.filter(this.model.categories, (category) => {
           return val.includes(category.name);
