@@ -1,67 +1,75 @@
 <template>
-  <v-row>
-    <v-col cols="12" md="6" lg="5">
-      <!-- Expanded slot in datatable -->
-      <template>
+  <v-container>
+    <v-row class="pl-3">
+      <v-btn to="/employees"><v-icon>arrow_back</v-icon>Back to Employees Page</v-btn>
+    </v-row>
+    <v-row>
+      <v-col cols="12" md="6" lg="5">
+        <!-- Expanded slot in datatable -->
+        <template>
+          <v-card>
+            <v-card-text>
+              <div class="expandedInfo">
+                <p v-if="userIsAdmin()">
+                  <b>Status: </b>
+                  {{ getWorkStatus(this.model.workStatus) }}
+                </p>
+                <p v-if="!isEmpty(this.model.prime)"><b>Prime: </b> {{ this.model.prime }}</p>
+                <p v-if="!isEmpty(this.model.contract)"><b>Contract: </b>{{ this.model.contract }}</p>
+                <p v-if="!isEmpty(this.model.jobRole)"><b>Job Role: </b>{{ this.model.jobRole }}</p>
+                <p v-if="!isEmpty(this.model.github)">
+                  <b>Github: </b
+                  ><a :href="'https://github.com/' + this.model.github" target="_blank">{{ this.model.github }}</a>
+                </p>
+                <p v-if="!isEmpty(this.model.twitter)">
+                  <b>Twitter: </b>
+                  <a :href="'https://twitter.com/' + this.model.twitter" target="_blank">{{ this.model.twitter }}</a>
+                </p>
+                <p v-if="userIsAdmin() && !isEmpty(this.model.birthday)">
+                  <b>Birthday: </b>{{ this.model.birthday | dateFormat }}
+                </p>
+                <p v-if="userIsAdmin() && !isEmpty(this.model.birthdayFeed)">
+                  <b>Birthday on feed: </b>{{ this.model.birthdayFeed | birthdayFeedResponse }}
+                </p>
+                <p
+                  v-if="
+                    userIsAdmin() &&
+                    !isEmpty(this.model.city) &&
+                    !isEmpty(this.model.st) &&
+                    !isEmpty(this.model.country)
+                  "
+                >
+                  <b>Place of Birth: </b>{{ this.model.city }}, {{ this.model.st }}, {{ this.model.country }}
+                </p>
+                <p v-else-if="userIsAdmin() && !isEmpty(this.model.city) && !isEmpty(this.model.st)">
+                  <b>Place of Birth: </b>{{ this.model.city }}, {{ this.model.st }}
+                </p>
+                <p v-else-if="userIsAdmin() && !isEmpty(this.model.city) && !isEmpty(this.model.country)">
+                  <b>Place of Birth: </b>{{ this.model.city }}, {{ this.model.country }}
+                </p>
+                <p v-else-if="userIsAdmin() && !isEmpty(this.model.country)">
+                  <b>Place of Birth: </b>{{ this.model.country }}
+                </p>
+                <p v-if="userIsAdmin() && !isEmpty(this.model.deptDate)">
+                  <b>Departure Date: </b>{{ this.model.deptDate | dateFormat }}
+                </p>
+              </div>
+            </v-card-text>
+          </v-card>
+          <available-budgets v-if="this.model.id" :employee="this.model"></available-budgets>
+        </template>
+        <!-- End expanded slot in datatable -->
+      </v-col>
+      <v-col cols="12" md="6" lg="7">
         <v-card>
+          <!-- Employee Details Form -->
           <v-card-text>
-            <div class="expandedInfo">
-              <p v-if="userIsAdmin()">
-                <b>Status: </b>
-                {{ getWorkStatus(this.model.workStatus) }}
-              </p>
-              <p v-if="!isEmpty(this.model.prime)"><b>Prime: </b> {{ this.model.prime }}</p>
-              <p v-if="!isEmpty(this.model.contract)"><b>Contract: </b>{{ this.model.contract }}</p>
-              <p v-if="!isEmpty(this.model.jobRole)"><b>Job Role: </b>{{ this.model.jobRole }}</p>
-              <p v-if="!isEmpty(this.model.github)">
-                <b>Github: </b
-                ><a :href="'https://github.com/' + this.model.github" target="_blank">{{ this.model.github }}</a>
-              </p>
-              <p v-if="!isEmpty(this.model.twitter)">
-                <b>Twitter: </b>
-                <a :href="'https://twitter.com/' + this.model.twitter" target="_blank">{{ this.model.twitter }}</a>
-              </p>
-              <p v-if="userIsAdmin() && !isEmpty(this.model.birthday)">
-                <b>Birthday: </b>{{ this.model.birthday | dateFormat }}
-              </p>
-              <p v-if="userIsAdmin() && !isEmpty(this.model.birthdayFeed)">
-                <b>Birthday on feed: </b>{{ this.model.birthdayFeed | birthdayFeedResponse }}
-              </p>
-              <p
-                v-if="
-                  userIsAdmin() && !isEmpty(this.model.city) && !isEmpty(this.model.st) && !isEmpty(this.model.country)
-                "
-              >
-                <b>Place of Birth: </b>{{ this.model.city }}, {{ this.model.st }}, {{ this.model.country }}
-              </p>
-              <p v-else-if="userIsAdmin() && !isEmpty(this.model.city) && !isEmpty(this.model.st)">
-                <b>Place of Birth: </b>{{ this.model.city }}, {{ this.model.st }}
-              </p>
-              <p v-else-if="userIsAdmin() && !isEmpty(this.model.city) && !isEmpty(this.model.country)">
-                <b>Place of Birth: </b>{{ this.model.city }}, {{ this.model.country }}
-              </p>
-              <p v-else-if="userIsAdmin() && !isEmpty(this.model.country)">
-                <b>Place of Birth: </b>{{ this.model.country }}
-              </p>
-              <p v-if="userIsAdmin() && !isEmpty(this.model.deptDate)">
-                <b>Departure Date: </b>{{ this.model.deptDate | dateFormat }}
-              </p>
-            </div>
+            <employee-form :model="this.model" :employeeInfo="this.employeeInfo"></employee-form>
           </v-card-text>
         </v-card>
-        <available-budgets v-if="this.model.id" :employee="this.model"></available-budgets>
-      </template>
-      <!-- End expanded slot in datatable -->
-    </v-col>
-    <v-col cols="12" md="6" lg="7">
-      <v-card>
-        <!-- Employee Details Form -->
-        <v-card-text>
-          <employee-form :model="this.model" :employeeInfo="this.employeeInfo"></employee-form>
-        </v-card-text>
-      </v-card>
-    </v-col>
-  </v-row>
+      </v-col>
+    </v-row>
+  </v-container>
 </template>
 
 <script>
