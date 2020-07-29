@@ -124,7 +124,7 @@ function checkActive() {
       }
       this.items[i].active = isAnyActive;
     } else {
-      this.items[i].active = this.items[i].route == this.route;
+      this.items[i].active = this.route.includes(this.items[i].route);
     }
   }
 } // checkActive
