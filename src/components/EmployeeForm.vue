@@ -78,11 +78,11 @@
                   hint="MM/DD/YYYY format"
                   persistent-hint
                   prepend-icon="event"
-                  @blur="date = parseDate(hireDateFormatted)"
+                  @blur="hireDate = parseDate(hireDateFormatted)"
                   v-on="on"
                 ></v-text-field>
               </template>
-              <v-date-picker v-model="date" no-title @input="hireMenu = false"></v-date-picker>
+              <v-date-picker v-model="hireDate" no-title @input="hireMenu = false"></v-date-picker>
             </v-menu>
             <br />
 
@@ -506,7 +506,7 @@ function cancel() {
  */
 function clearForm() {
   this.$refs.form.resetValidation();
-  this.$set(this, 'date', null);
+  this.$set(this, 'hireDate', null);
   this.$set(this.model, 'email', '@consultwithcase.com');
   this.$set(this.model, 'employeeRole', null);
   this.$set(this.model, 'firstName', null);
@@ -638,7 +638,7 @@ async function submit() {
     }
 
     // set employee hire date
-    this.$set(this.model, 'hireDate', this.date);
+    this.$set(this.model, 'hireDate', this.hireDate);
 
     // set employee work status
     this.$set(this.model, 'workStatus', parseInt(this.status));
@@ -732,13 +732,19 @@ async function created() {
   window.EventBus.$on('canceled', () => {
     this.submitting = false;
   });
-  this.model = this.employee ? _.cloneDeep(this.employee) : this.model;
+
+  // fills model in with populated fields in employee prop
+  this.model = _.mergeWith(this.model, this.employee, (modelValue, employeeValue) => {
+    return employeeValue ? employeeValue : modelValue;
+  });
+
+  // this.model = this.employee ? _.cloneDeep(this.employee) : this.model;
   this.countries = _.map(await api.getCountries(), 'name');
   this.countries.unshift('United States of America');
   this.employees = await api.getItems(api.EMPLOYEES); // get all employees
   this.filterPrimes();
   this.filterContracts();
-  this.date = this.model.hireDate;
+  this.hireDate = this.model.hireDate;
   this.birthdayFormat = this.formatDate(this.model.birthday) || this.birthdayFormat;
   //fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
   if (this.model.birthday !== null && !this.formatDate(this.model.birthday)) {
@@ -753,7 +759,6 @@ async function created() {
     this.employeeRoleFormatted = _.startCase(this.model.employeeRole);
   }
   this.hasExpenses = this.model.id ? _.size(await api.getAllEmployeeExpenses(this.model.id)) > 0 : false;
-  this.date = this.model.hireDate;
   if (this.model.workStatus != null) {
     // set work status buttons if the status exists
     this.status = this.model.workStatus.toString(); // convert employee work status to string
@@ -799,9 +804,10 @@ export default {
   data() {
     return {
       birthdayFormat: null, // formatted birthday
+      BirthdayMenu: false,
       componentRules: [(v) => !!v || 'Something must be selected'], // rules for required componenet selection
       countries: [], // list of countries
-      date: null, // hire date
+      hireDate: null, // hire date
       dateOptionalRules: [
         (v) => {
           if (v) {
@@ -850,9 +856,26 @@ export default {
       hireMenu: false, // display hire menu
       departureMenu: false, // display depature menu
       model: {
-        birthdayFeed: false,
+        id: null,
+        firstName: null,
+        middleName: null,
+        lastName: null,
         email: '@consultwithcase.com',
-        employeeRole: 'user'
+        employeeRole: 'user',
+        employeeNumber: null,
+        hireDate: null,
+        workStatus: 100,
+        birthday: null,
+        birthdayFeed: false,
+        jobRole: null,
+        prime: null,
+        contract: null,
+        github: null,
+        twitter: null,
+        city: null,
+        st: null,
+        country: null,
+        deptDate: null
       },
       numberRules: [
         (v) => !!v || 'Employee # is required',
@@ -952,14 +975,16 @@ export default {
   },
   props: ['employee'], // employee to be created/updated
   watch: {
-    date: function () {
-      this.hireDateFormatted = this.formatDate(this.date) || this.hireDateFormatted;
+    hireDate: function () {
+      this.hireDateFormatted = this.formatDate(this.hireDate) || this.hireDateFormatted;
       //fixes v-date-picker error so that if the format of date is incorrect the date is set to null
-      if (this.date !== null && !this.formatDate(this.date)) {
-        this.date = null;
+      if (this.hireDate !== null && !this.formatDate(this.hireDate)) {
+        this.hireDate = null;
       }
     },
     'model.birthday': function () {
+      console.log('bday watch');
+      console.log(_.cloneDeep(this.model.birthday));
       this.birthdayFormat = this.formatDate(this.model.birthday) || this.birthdayFormat;
       //fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
       if (this.model.birthday !== null && !this.formatDate(this.model.birthday)) {
@@ -980,7 +1005,7 @@ export default {
     },
     'model.hireDate': async function () {
       this.hasExpenses = this.model.id ? _.size(await api.getAllEmployeeExpenses(this.model.id)) > 0 : false;
-      this.date = this.model.hireDate;
+      this.hireDate = this.model.hireDate;
     },
     'model.workStatus': function () {
       if (this.model.workStatus != null) {
