@@ -102,9 +102,6 @@
               <td>{{ item.email }}</td>
               <!-- Action Icons -->
               <td class="datatable_btn layout" v-if="userIsAdmin()" @click="clickedRow(item)">
-                <!-- Edit Button -->
-                <v-icon style="color: #606060;">edit</v-icon>
-
                 <!-- Delete Button -->
                 <v-tooltip top>
                   <template v-slot:activator="{ on }">
