@@ -448,7 +448,7 @@
         </v-tabs>
 
         <!-- Form action buttons -->
-        <v-btn class="ma-2" color="white" @click="clearForm"><icon class="mr-1" name="ban"></icon>Cancel</v-btn>
+        <v-btn class="ma-2" color="white" @click="cancel"><icon class="mr-1" name="ban"></icon>Cancel</v-btn>
         <v-btn outlined class="ma-2" color="success" @click="submit" :disabled="!valid || isStatusEmpty()">
           <icon class="mr-1" name="save"></icon>Submit
         </v-btn>
@@ -491,6 +491,13 @@ function isUSA() {
 // |                     METHODS                      |
 // |                                                  |
 // |--------------------------------------------------|
+
+/**
+ * resets back to employee info.
+ */
+function cancel() {
+  window.EventBus.$emit('cancel-form');
+} // cancel
 
 /**
  * Clears the form and sets all fields to a default state.
@@ -718,6 +725,7 @@ function filterPrimes() {
  * Set the list of countries.
  */
 async function created() {
+  this.model = _.cloneDeep(this.employee);
   this.countries = _.map(await api.getCountries(), 'name');
   this.countries.unshift('United States of America');
   this.employees = await api.getItems(api.EMPLOYEES); // get all employees
@@ -832,6 +840,7 @@ export default {
       hireMenu: false, // display hire menu
       departureMenu: false, // display depature menu
       BirthdayMenu: false, // display birthday menu
+      model: null,
       numberRules: [
         (v) => !!v || 'Employee # is required',
         (v) => /^\d+$/.test(v) || 'Employee # must be a positive number'
@@ -910,6 +919,7 @@ export default {
     isUSA
   },
   methods: {
+    cancel,
     clearForm,
     viewStatus,
     filterContracts,
@@ -926,13 +936,55 @@ export default {
     userIsAdmin,
     disableBirthdayFeed
   },
-  props: ['model'], // employee to be created/updated
+  props: ['employee'], // employee to be created/updated
   watch: {
     date: function () {
       this.hireDateFormatted = this.formatDate(this.date) || this.hireDateFormatted;
       //fixes v-date-picker error so that if the format of date is incorrect the date is set to null
       if (this.date !== null && !this.formatDate(this.date)) {
         this.date = null;
+      }
+    },
+    'model.birthday': function () {
+      this.birthdayFormat = this.formatDate(this.model.birthday) || this.birthdayFormat;
+      //fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
+      if (this.model.birthday !== null && !this.formatDate(this.model.birthday)) {
+        this.model.birthday = null;
+      }
+    },
+    'model.deptDate': function () {
+      this.deptDateFormatted = this.formatDate(this.model.deptDate) || this.deptDateFormatted;
+      //fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
+      if (this.model.deptDate !== null && !this.formatDate(this.model.deptDate)) {
+        this.model.deptDate = null;
+      }
+    },
+    'model.employeeRole': function () {
+      if (this.model.employeeRole != 'User') {
+        this.employeeRoleFormatted = _.startCase(this.model.employeeRole);
+      }
+    },
+    'model.hireDate': async function () {
+      this.hasExpenses = this.model.id ? _.size(await api.getAllEmployeeExpenses(this.model.id)) > 0 : false;
+      this.date = this.model.hireDate;
+    },
+    'model.workStatus': function () {
+      if (this.model.workStatus != null) {
+        // set work status buttons if the status exists
+        this.status = this.model.workStatus.toString(); // convert employee work status to string
+        console.log(this.status);
+        // set status radio
+        if (this.status == '100') {
+          this.statusRadio = 'full';
+        } else if (this.status == '0') {
+          this.statusRadio = 'inactive';
+        } else {
+          this.statusRadio = 'part';
+        }
+      } else {
+        // set status to default full time if it does not exist
+        this.status = '100';
+        this.statusRadio = 'full';
       }
     },
     statusRadio: function () {

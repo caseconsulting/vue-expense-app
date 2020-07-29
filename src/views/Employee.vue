@@ -22,7 +22,7 @@
           <employee-info :model="this.model" v-if="!editing"></employee-info>
         </v-card>
         <!-- Edit Info (Form) -->
-        <employee-form :model="this.model" v-if="editing"></employee-form>
+        <employee-form :employee="this.model" v-if="editing"></employee-form>
       </v-col>
     </v-row>
   </v-container>
@@ -118,6 +118,9 @@ function userIsAdmin() {
  */
 async function created() {
   await this.getEmployee();
+  window.EventBus.$on('cancel-form', () => {
+    this.editing = false;
+  });
 } // created
 
 // |--------------------------------------------------|
