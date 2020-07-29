@@ -67,7 +67,6 @@
 <script>
 import api from '@/shared/api.js';
 import AvailableBudgets from '../components/AvailableBudgets.vue';
-// import MobileDetect from 'mobile-detect';
 import moment from 'moment-timezone';
 import ActivityFeed from '../components/ActivityFeed';
 import TwitterFeed from '../components/TwitterFeed';
@@ -516,66 +515,6 @@ function isFullTime(employee) {
 } // isFullTime
 
 /**
- * Refresh and sets the aggregated budgets for the employee budget year view.
- */
-async function refreshBudget() {
-  this.loading = true; // set loading status to true
-  let budgetsVar;
-
-  if (this.fiscalDateView == this.getCurrentBudgetYear()) {
-    // viewing active budget year
-    budgetsVar = await api.getAllActiveEmployeeBudgets(this.employee.id);
-  }
-
-  // budgetsVar = _.union(budgetsVar, existingBudgets); // combine existing and active budgets
-  budgetsVar = _.uniqBy(budgetsVar, 'expenseTypeId'); // remove duplicate expense types
-  budgetsVar = _.sortBy(budgetsVar, (budget) => {
-    return budget.expenseTypeName;
-  }); // sort by expense type name
-
-  // prohibit overdraft if employee is not full time
-  _.forEach(budgetsVar, async (budget) => {
-    if (!isFullTime(this.employee)) {
-      budget.odFlag = false;
-    }
-  });
-
-  // remove any budgets where budget amount is 0 and 0 total expenses
-  this.expenseTypeData = _.filter(budgetsVar, (data) => {
-    let budget = data.budgetObject;
-    return budget.amount != 0 || budget.pendingAmount != 0;
-  });
-
-  this.refreshBudgetYears(); // refresh the budget year view options
-  this.loading = false; // set loading status to false
-} // refreshBudget
-
-/**
- * Refresh and sets the budget year view options for the employee.
- */
-function refreshBudgetYears() {
-  let budgetYears = [];
-
-  // push all employee budget years
-  let budgetDates = _.uniqBy(_.map(this.allUserBudgets, 'fiscalStartDate'));
-  budgetDates.forEach((date) => {
-    const [year] = date.split('-');
-    budgetYears.push(parseInt(year));
-  });
-
-  // push active budget year
-  let [currYear] = this.getCurrentBudgetYear().split('-');
-  budgetYears.push(parseInt(currYear));
-
-  // remove duplicate years and filter to include only active and previous years
-  budgetYears = _.filter(_.uniqBy(budgetYears), (year) => {
-    return parseInt(year) <= parseInt(currYear);
-  });
-
-  this.budgetYears = _.reverse(_.sortBy(budgetYears)); // sort budgets from current to past
-} // refreshBudgetYears
-
-/**
  * Refresh and sets employee information.
  */
 async function refreshEmployee() {
@@ -589,7 +528,6 @@ async function refreshEmployee() {
   }
   this.hireDate = this.employee.hireDate;
   this.fiscalDateView = this.getCurrentBudgetYear();
-  this.refreshBudget(); // refresh employee budgets
   this.allUserBudgets = await api.getEmployeeBudgets(this.employee.id); // set all employee budgets
   this.loading = false; // set loading status to false
   this.ptoBalances = await api.getPTOBalances(this.employee.employeeNumber); // call api
@@ -609,7 +547,6 @@ async function showSuccessfulSubmit() {
  * Updates the budget data and display a successful submit.
  */
 async function updateData() {
-  this.refreshBudget();
   this.showSuccessfulSubmit();
 } // updateData
 
@@ -645,16 +582,6 @@ function filterOutExpensesByCategory(expenses) {
  *  Set budget information for employee. Creates event listeners.
  */
 async function created() {
-  window.EventBus.$on('cancel-budget-year', () => {
-    this.changingBudgetView = false;
-  });
-  window.EventBus.$on('selected-budget-year', (data) => {
-    if (data.format(IsoFormat) != this.fiscalDateView) {
-      this.fiscalDateView = data.format(IsoFormat);
-      this.refreshBudget();
-    }
-    this.changingBudgetView = false;
-  });
   this.loading = true;
   this.createEvents();
   this.loading = false;
@@ -693,7 +620,6 @@ export default {
       aggregatedExpenses: [],
       allUserBudgets: null, // all user budgets
       budgetYears: [], // list of options for chaning budget year view
-      changingBudgetView: false, // change budget year view activator
       display: true, // show seconds till anniversary activator
       employee: {}, // employee
       employees: [],
@@ -734,8 +660,6 @@ export default {
     getTweets,
     isEmpty,
     isFullTime,
-    refreshBudget,
-    refreshBudgetYears,
     refreshEmployee,
     showSuccessfulSubmit,
     updateData
