@@ -124,7 +124,13 @@ function checkActive() {
       }
       this.items[i].active = isAnyActive;
     } else {
-      this.items[i].active = this.route.includes(this.items[i].route);
+      this.items[i].active =
+        this.route.includes(this.items[i].route) ||
+        !_.isNil(
+          _.find(this.items[i].alias, (alias) => {
+            return this.route.includes(alias);
+          })
+        );
     }
   }
 } // checkActive
@@ -198,6 +204,7 @@ export default {
         },
         {
           title: 'Employees',
+          alias: ['employee'],
           icon: 'users',
           route: 'employees',
           permission: ['admin', 'user'],
