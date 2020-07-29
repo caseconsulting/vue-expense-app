@@ -4,11 +4,12 @@
     <v-list class="pt-0" dense>
       <v-divider></v-divider>
       <div v-for="(item, i) in visibleTiles" :key="i">
+        <!-- Grouped Navigation Links -->
         <v-list-group v-if="item.subItems" :key="item.title" no-action active-class="red--text v-list__tile--active">
           <template v-slot:activator>
             <!-- Parent Item Icon -->
             <v-list-item-icon style="width: 24px;">
-              <icon :name="item.icon" v-bind:class="{ 'red-icon': item.active }" class="navbar-icons"></icon>
+              <icon :name="item.icon" v-bind:class="{ iconSelected: item.active }" class="navbar-icons"></icon>
             </v-list-item-icon>
 
             <!-- Parent Item Title -->
@@ -33,6 +34,9 @@
             </v-list-item-content>
           </v-list-item>
         </v-list-group>
+        <!-- End Grouped Navigation Links -->
+
+        <!-- Individual Navavigation Links -->
         <v-list-item
           v-else
           :key="item.title"
@@ -44,7 +48,7 @@
           <!-- Item Icon -->
 
           <v-list-item-icon style="width: 24px;">
-            <icon :name="item.icon" class="navbar-icons"></icon>
+            <icon :name="item.icon" v-bind:class="{ iconSelected: item.active }" class="navbar-icons"></icon>
           </v-list-item-icon>
 
           <!-- Item mTitle -->
@@ -119,6 +123,8 @@ function checkActive() {
         }
       }
       this.items[i].active = isAnyActive;
+    } else {
+      this.items[i].active = this.items[i].route == this.route;
     }
   }
 } // checkActive
@@ -155,7 +161,8 @@ export default {
           title: 'Home',
           icon: 'home',
           route: 'home',
-          permission: ['user', 'admin']
+          permission: ['user', 'admin'],
+          active: false
         },
         {
           title: 'Expenses',
@@ -193,19 +200,22 @@ export default {
           title: 'Employees',
           icon: 'users',
           route: 'employees',
-          permission: ['admin', 'user']
+          permission: ['admin', 'user'],
+          active: false
         },
         {
           title: 'Training',
           icon: 'fire',
           route: 'training',
-          permission: ['admin', 'user']
+          permission: ['admin', 'user'],
+          active: false
         },
         {
           title: 'Help',
           icon: 'life-ring',
           route: 'help',
-          permission: ['admin', 'user']
+          permission: ['admin', 'user'],
+          active: false
         }
       ], // navigation options
       permissions: '', // user role
@@ -230,10 +240,6 @@ export default {
 </script>
 
 <style lang="scss">
-.e {
-  color: #68caa6;
-}
-
 #main-header {
   font-family: 'Quicksand', sans-serif;
   font-weight: bold;
@@ -267,9 +273,5 @@ export default {
 
 #slider-logo {
   margin-bottom: 5px;
-}
-
-.red-icon {
-  color: #bc3825;
 }
 </style>

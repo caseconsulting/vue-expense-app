@@ -146,6 +146,65 @@ $case-darkgray: #3f3f3c;
   }
 }
 
+/* navigation color changing icon */
+.iconSelected {
+  -webkit-animation: color-change 1s infinite alternate both;
+  -moz-animation: color-change 10s infinite alternate both;
+  -o-animation: color-change 10s infinite alternate both;
+  -ms-animation: color-change 10s infinite alternate both;
+  animation: color-change 5s infinite alternate both;
+}
+
+@-webkit-keyframes color-change {
+  0% {
+    color: gold;
+  }
+
+  100% {
+    color: $case-red;
+  }
+}
+
+@-moz-keyframes color-change {
+  0% {
+    color: gold;
+  }
+
+  100% {
+    color: $case-red;
+  }
+}
+
+@-ms-keyframes color-change {
+  0% {
+    color: gold;
+  }
+
+  100% {
+    color: $case-red;
+  }
+}
+
+@-o-keyframes color-change {
+  0% {
+    color: gold;
+  }
+
+  100% {
+    color: $case-red;
+  }
+}
+
+@keyframes color-change {
+  0% {
+    color: gold;
+  }
+
+  100% {
+    color: $case-red;
+  }
+}
+
 /* override the word break styling from v-card */
 .v-card__text {
   word-break: normal;
