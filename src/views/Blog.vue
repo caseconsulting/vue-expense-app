@@ -41,8 +41,8 @@
     <v-row>
       <v-btn @click="rekognition()">Rekognition</v-btn>
     </v-row>
-    <v-row>
-      <v-textarea> </v-textarea>
+    <v-row class="paddingTop">
+      <v-textarea filled label="Enter text to comprehend" v-model="inputText"></v-textarea>
     </v-row>
     <v-row>
       <v-btn @click="comprehend()">comprehend</v-btn>
@@ -114,9 +114,7 @@ async function created() {
 }
 
 async function uploadToS3() {
-  console.log(this.inputFile);
-  let response = await api.uploadBlogAttachment(this.inputFile);
-  console.log(response);
+  await api.uploadBlogAttachment(this.inputFile);
 }
 
 async function rekognition() {
@@ -125,9 +123,9 @@ async function rekognition() {
   console.log(result);
 }
 
-async function comprehend(txt) {
-  let text = await api.getKeyPhrases(txt);
-  console.log(text);
+async function comprehend() {
+  let result = await api.getKeyPhrases(this.inputText);
+  console.log(result);
 }
 //import _ from 'lodash';
 export default {
@@ -142,7 +140,8 @@ export default {
       pendingPosts: [],
       posts: [],
       model: {},
-      inputFile: null
+      inputFile: null,
+      inputText: null
     };
   },
   methods: {
@@ -150,11 +149,11 @@ export default {
     comprehend,
     acceptedFileTypes,
     uploadToS3
-  },
-  watch: {
-    inputFile: function () {
-      console.log(this.inputFile);
-    }
   }
 };
 </script>
+<style lang="scss">
+.paddingTop {
+  padding-top: 20px;
+}
+</style>
