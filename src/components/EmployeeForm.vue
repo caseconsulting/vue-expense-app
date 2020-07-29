@@ -642,16 +642,18 @@ async function submit() {
 
     if (this.model.id) {
       // updating employee
+      console.log(this.model);
       let updatedEmployee = await api.updateItem(api.EMPLOYEES, this.model);
       if (updatedEmployee.id) {
+        console.log(updatedEmployee);
         // successfully updated employee
-        this.$emit('update');
-        this.clearForm();
-        this.$emit('endAction');
+        window.EventBus.$emit('update', updatedEmployee);
+        cancel();
       } else {
         // failed to update employee
+        console.log('fail');
         this.$emit('error', updatedEmployee.response.data.message);
-        this.$emit('endAction');
+        // this.$emit('cancel-form');
       }
     } else {
       // creating employee
@@ -659,14 +661,12 @@ async function submit() {
       let newEmployee = await api.createItem(api.EMPLOYEES, this.model);
       if (newEmployee.id) {
         // successfully created employee
-        this.$emit('add', newEmployee);
-        this.clearForm();
-        this.$emit('endAction');
+        this.$router.push(`/employees/${newEmployee.employeeNumber}`);
       } else {
         // failed to create employee
         this.$emit('error', newEmployee.response.data.message);
         this.$set(this.model, 'id', null); // reset id
-        this.$emit('endAction');
+        // this.$emit('endAction');
       }
     }
   }
@@ -725,7 +725,7 @@ function filterPrimes() {
  * Set the list of countries.
  */
 async function created() {
-  this.model = _.cloneDeep(this.employee);
+  this.model = this.employee ? _.cloneDeep(this.employee) : {};
   this.countries = _.map(await api.getCountries(), 'name');
   this.countries.unshift('United States of America');
   this.employees = await api.getItems(api.EMPLOYEES); // get all employees
@@ -840,7 +840,7 @@ export default {
       hireMenu: false, // display hire menu
       departureMenu: false, // display depature menu
       BirthdayMenu: false, // display birthday menu
-      model: null,
+      model: {},
       numberRules: [
         (v) => !!v || 'Employee # is required',
         (v) => /^\d+$/.test(v) || 'Employee # must be a positive number'
@@ -972,7 +972,6 @@ export default {
       if (this.model.workStatus != null) {
         // set work status buttons if the status exists
         this.status = this.model.workStatus.toString(); // convert employee work status to string
-        console.log(this.status);
         // set status radio
         if (this.status == '100') {
           this.statusRadio = 'full';

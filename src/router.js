@@ -90,8 +90,8 @@ const router = new Router({
       component: TrainingAnalytics
     },
     {
-      path: '/employees/:id',
-      name: 'employees',
+      path: '/employee/:id',
+      name: 'employee',
       component: Employee,
       beforeEnter: requireAuth
     },

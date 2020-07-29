@@ -258,7 +258,7 @@ async function displayError(err) {
  * sets midAction boolean to false
  */
 function employeePath(item) {
-  return `/employees/${item.employeeNumber}`;
+  return `/employee/${item.employeeNumber}`;
 } // employeePath
 
 /**

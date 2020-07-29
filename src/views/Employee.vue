@@ -121,6 +121,9 @@ async function created() {
   window.EventBus.$on('cancel-form', () => {
     this.editing = false;
   });
+  window.EventBus.$on('update', (updatedEmployee) => {
+    this.model = updatedEmployee;
+  });
 } // created
 
 // |--------------------------------------------------|
