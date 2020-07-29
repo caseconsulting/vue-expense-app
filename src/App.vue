@@ -176,7 +176,7 @@ async function created() {
   // set expiration date if access token received
   let accessToken = getAccessToken();
 
-  if (accessToken) {
+  if (accessToken && this.isLoggedIn()) {
     this.date = Math.trunc(getTokenExpirationDate(accessToken).getTime());
     this.now = Math.trunc(new Date().getTime());
     let timeRemaining = this.date - this.now; // default access key (2 hours)
