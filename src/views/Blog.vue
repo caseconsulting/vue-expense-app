@@ -31,7 +31,14 @@
       </v-col>
     </v-row>
     <v-row>
-      <v-file-upload v-model="inputFile" label="Select image to rekognize" :accept="acceptedFileTypes"></v-file-upload>
+      <v-file-input
+        style="width: 50px;"
+        v-model="inputFile"
+        label="Select image to rekognize"
+        :accept="acceptedFileTypes"
+      ></v-file-input>
+    </v-row>
+    <v-row>
       <v-btn @click="rekognition()">Rekognition</v-btn>
     </v-row>
     <v-row>
@@ -102,10 +109,19 @@ async function created() {
   ];
   this.model.id = '4';
 }
-async function rekognition(img) {
-  let result = await api.getModerationLabel(img);
+
+async function uploadToS3() {
+  console.log(this.inputFile);
+  let response = await api.uploadBlogAttachment(this.inputFile);
+  console.log(response);
+}
+
+async function rekognition() {
+  await this.uploadToS3();
+  let result = await api.getModerationLabel(this.inputFile.name);
   console.log(result);
 }
+
 async function comprehend(txt) {
   let text = await api.getKeyPhrases(txt);
   console.log(text);
@@ -123,13 +139,14 @@ export default {
       pendingPosts: [],
       posts: [],
       model: {},
-      inputFile: ''
+      inputFile: null
     };
   },
   methods: {
     rekognition,
     comprehend,
-    acceptedFileTypes
+    acceptedFileTypes,
+    uploadToS3
   },
   watch: {
     inputFile: function () {

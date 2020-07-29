@@ -214,8 +214,26 @@ function getKeyPhrases(text) {
   return execute('post', `blog/getKeyPhrases/${text}`);
 }
 
-function uploadBlogAttachment(img) {
-  return execute('post', `blog/uploadBlogAttachmentToS3/${img}`);
+async function uploadBlogAttachment(file) {
+  let formData = new FormData();
+  formData.append('image', file);
+
+  // inject the accessToken for each request
+  let accessToken = getAccessToken();
+  return client({
+    method: 'post',
+    url: `blog/uploadBlogAttachmentToS3/${file.name}`,
+    data: formData,
+    headers: {
+      Authorization: `Bearer ${accessToken}`
+    }
+  })
+    .then((response) => {
+      return response.data;
+    })
+    .catch((err) => {
+      return err;
+    });
 }
 
 export default {
