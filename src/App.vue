@@ -7,13 +7,14 @@
         fixed
         app
         disableResizeWatcher
-        expand-on-hover
-        :permanent="isLoggedIn()"
+        :expand-on-hover="!isMobile"
+        :permanent="isLoggedIn() && !isMobile"
         clipped
       >
         <main-nav></main-nav>
       </v-navigation-drawer>
       <v-app-bar class="nav-color" dark fixed app clipped-left>
+        <v-app-bar-nav-icon v-show="isLoggedIn() && isMobile" @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
         <v-avatar size="40" color="grey lighten-4" class="mr-2">
           <img src="@/assets/img/case-logo-circle.png" class="logo-bar" />
         </v-avatar>
