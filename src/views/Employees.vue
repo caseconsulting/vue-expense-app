@@ -497,7 +497,10 @@ async function created() {
 
 export default {
   beforeDestroy() {
+    window.EventBus.$off('cancel-form');
+    window.EventBus.$off('canceled-delete-employee');
     window.EventBus.$off('confirm-delete-employee');
+    window.EventBus.$off('invalid-employee-delete');
   },
   components: {
     ConvertEmployeesToCsv,

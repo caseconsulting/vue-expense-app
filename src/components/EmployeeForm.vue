@@ -2,7 +2,8 @@
   <v-card hover>
     <v-card-title class="header_style">
       <!-- Editing an employee -->
-      <h3>Edit {{ this.model.firstName }} {{ this.model.lastName }}</h3>
+      <h3 v-if="model.id">Editing {{ this.employee.firstName }} {{ this.employee.lastName }}</h3>
+      <h3 v-else>New Employee</h3>
     </v-card-title>
 
     <v-container fluid>
@@ -738,7 +739,7 @@ async function created() {
   });
 
   window.EventBus.$on('canceled', () => {
-    this.submitting = false;
+    this.confirming = false;
   });
 
   // fills model in with populated fields in employee prop

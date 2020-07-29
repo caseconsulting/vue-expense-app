@@ -1357,6 +1357,10 @@ Number.prototype.pad = function (size) {
 // |--------------------------------------------------|
 
 export default {
+  beforeDestroy() {
+    window.EventBus.$off('canceledSubmit');
+    window.EventBus.$off('confirmSubmit');
+  },
   components: {
     ConfirmationBox,
     FileUpload
