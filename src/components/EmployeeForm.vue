@@ -449,11 +449,12 @@
 
         <!-- Form action buttons -->
         <v-btn class="ma-2" color="white" @click="cancel"><icon class="mr-1" name="ban"></icon>Cancel</v-btn>
-        <v-btn outlined class="ma-2" color="success" @click="submit" :disabled="!valid || isStatusEmpty()">
+        <v-btn outlined class="ma-2" color="success" @click="submitting = true" :disabled="!valid || isStatusEmpty()">
           <icon class="mr-1" name="save"></icon>Submit
         </v-btn>
         <!-- End form action buttons -->
       </v-form>
+      <form-submission-confirmation :activate="this.submitting"></form-submission-confirmation>
     </v-container>
   </v-card>
 </template>
@@ -461,6 +462,7 @@
 <script>
 import api from '@/shared/api.js';
 import dateUtils from '@/shared/dateUtils';
+import FormSubmissionConfirmation from '@/components/FormSubmissionConfirmation.vue';
 import { getRole } from '@/utils/auth';
 import MobileDetect from 'mobile-detect';
 import { v4 as uuid } from 'uuid';
@@ -626,6 +628,7 @@ function parseDate(date) {
  * Submits the employee form.
  */
 async function submit() {
+  this.submitting = true;
   if (this.$refs.form.validate()) {
     this.$emit('startAction');
     // form validated
@@ -642,16 +645,13 @@ async function submit() {
 
     if (this.model.id) {
       // updating employee
-      console.log(this.model);
       let updatedEmployee = await api.updateItem(api.EMPLOYEES, this.model);
       if (updatedEmployee.id) {
-        console.log(updatedEmployee);
         // successfully updated employee
         window.EventBus.$emit('update', updatedEmployee);
         cancel();
       } else {
         // failed to update employee
-        console.log('fail');
         this.$emit('error', updatedEmployee.response.data.message);
         // this.$emit('cancel-form');
       }
@@ -670,6 +670,7 @@ async function submit() {
       }
     }
   }
+  this.submitting = false;
 } // submit
 
 /**
@@ -725,7 +726,13 @@ function filterPrimes() {
  * Set the list of countries.
  */
 async function created() {
-  this.model = this.employee ? _.cloneDeep(this.employee) : {};
+  window.EventBus.$on('confirmed', () => {
+    this.submit();
+  });
+  window.EventBus.$on('canceled', () => {
+    this.submitting = false;
+  });
+  this.model = this.employee ? _.cloneDeep(this.employee) : this.model;
   this.countries = _.map(await api.getCountries(), 'name');
   this.countries.unshift('United States of America');
   this.employees = await api.getItems(api.EMPLOYEES); // get all employees
@@ -785,6 +792,9 @@ async function created() {
 // |--------------------------------------------------|
 
 export default {
+  components: {
+    FormSubmissionConfirmation
+  },
   created,
   data() {
     return {
@@ -839,8 +849,11 @@ export default {
       ], // job role options
       hireMenu: false, // display hire menu
       departureMenu: false, // display depature menu
-      BirthdayMenu: false, // display birthday menu
-      model: {},
+      model: {
+        birthdayFeed: false,
+        email: '@consultwithcase.com',
+        employeeRole: 'user'
+      },
       numberRules: [
         (v) => !!v || 'Employee # is required',
         (v) => /^\d+$/.test(v) || 'Employee # must be a positive number'
@@ -911,6 +924,7 @@ export default {
       ], // state options
       status: '100', // work status value
       statusRadio: 'full', // work status button
+      submitting: false,
       valid: false, // form validity
       undisabled: false
     };

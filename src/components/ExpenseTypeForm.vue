@@ -225,13 +225,20 @@
         <!-- Buttons -->
         <!-- Cancel Button -->
         <v-btn color="white " @click="clearForm" class="ma-2"> <icon class="mr-1" name="ban"></icon>Cancel </v-btn>
-
         <!-- Submit Button -->
-        <v-btn outlined class="ma-2" color="success" :loading="submitting" @click="submit" :disabled="!valid">
+        <v-btn
+          outlined
+          class="ma-2"
+          color="success"
+          :loading="submitting"
+          @click="submitting = true"
+          :disabled="!valid"
+        >
           <icon class="mr-1" name="save"></icon>Submit
         </v-btn>
         <!-- End Buttons -->
       </v-form>
+      <form-submission-confirmation :activate="this.submitting"></form-submission-confirmation>
     </v-container>
   </v-card>
 </template>
@@ -239,6 +246,7 @@
 <script>
 import api from '@/shared/api.js';
 import dateUtils from '@/shared/dateUtils';
+import FormSubmissionConfirmation from '@/components/FormSubmissionConfirmation.vue';
 import { v4 as uuid } from 'uuid';
 import _ from 'lodash';
 
@@ -503,6 +511,12 @@ function toggleRequireURL() {
  * Gets and sets all employees.
  */
 async function created() {
+  window.EventBus.$on('confirmed', () => {
+    this.submit();
+  });
+  window.EventBus.$on('canceled', () => {
+    this.submitting = false;
+  });
   // get all employees for access list
   let employees = await api.getItems(api.EMPLOYEES);
   let allEmployees = [];
@@ -528,6 +542,9 @@ async function created() {
 // |--------------------------------------------------|
 
 export default {
+  components: {
+    FormSubmissionConfirmation
+  },
   created,
   data() {
     return {

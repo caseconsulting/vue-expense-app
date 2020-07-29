@@ -471,6 +471,9 @@ async function validateDelete(item) {
  *  Adjust datatable header for user view. Creates event listeners.
  */
 async function created() {
+  window.EventBus.$on('cancel-form', () => {
+    this.createEmployee = false;
+  });
   window.EventBus.$on('canceled-delete-employee', () => {
     this.deleting = false;
     this.midAction = false;
