@@ -235,7 +235,8 @@ export default {
     // formats a date by month, day, year (e.g. Aug 18th, 2020)
     dateFormat: (value) => {
       if (!isEmpty(value)) {
-        return moment(value).format('MMM Do, YYYY');
+        let date = moment(new Date(value)).format('MMM Do, YYYY');
+        return date;
       } else {
         return '';
       }
