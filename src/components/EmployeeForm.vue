@@ -661,7 +661,7 @@ async function submit() {
       let newEmployee = await api.createItem(api.EMPLOYEES, this.model);
       if (newEmployee.id) {
         // successfully created employee
-        this.$router.push(`/employees/${newEmployee.employeeNumber}`);
+        this.$router.push(`/employee/${newEmployee.employeeNumber}`);
       } else {
         // failed to create employee
         this.$emit('error', newEmployee.response.data.message);
@@ -729,6 +729,7 @@ async function created() {
   window.EventBus.$on('confirmed', () => {
     this.submit();
   });
+
   window.EventBus.$on('canceled', () => {
     this.submitting = false;
   });
@@ -797,6 +798,10 @@ async function created() {
 // |--------------------------------------------------|
 
 export default {
+  beforeDestroy() {
+    window.EventBus.$off('confirmed');
+    window.EventBus.$off('canceled');
+  },
   components: {
     FormSubmissionConfirmation
   },
@@ -983,8 +988,6 @@ export default {
       }
     },
     'model.birthday': function () {
-      console.log('bday watch');
-      console.log(_.cloneDeep(this.model.birthday));
       this.birthdayFormat = this.formatDate(this.model.birthday) || this.birthdayFormat;
       //fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
       if (this.model.birthday !== null && !this.formatDate(this.model.birthday)) {
