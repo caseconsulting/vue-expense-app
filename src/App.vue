@@ -289,56 +289,6 @@ export default {
   width: 25px;
 }
 
-@-webkit-keyframes color-change {
-  0% {
-    color: white;
-  }
-
-  100% {
-    color: gold;
-  }
-}
-
-@-moz-keyframes color-change {
-  0% {
-    color: white;
-  }
-
-  100% {
-    color: gold;
-  }
-}
-
-@-ms-keyframes color-change {
-  0% {
-    color: white;
-  }
-
-  100% {
-    color: gold;
-  }
-}
-
-@-o-keyframes color-change {
-  0% {
-    color: white;
-  }
-
-  100% {
-    color: gold;
-  }
-}
-
-@keyframes color-change {
-  0% {
-    color: white;
-  }
-
-  100% {
-    color: gold;
-  }
-}
-
 .scrollLink {
   width: 150px;
   max-height: 300px;
