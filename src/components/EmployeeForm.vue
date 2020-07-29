@@ -449,12 +449,12 @@
 
         <!-- Form action buttons -->
         <v-btn class="ma-2" color="white" @click="cancel"><icon class="mr-1" name="ban"></icon>Cancel</v-btn>
-        <v-btn outlined class="ma-2" color="success" @click="submitting = true" :disabled="!valid || isStatusEmpty()">
+        <v-btn outlined class="ma-2" color="success" @click="confirm" :disabled="!valid || isStatusEmpty()">
           <icon class="mr-1" name="save"></icon>Submit
         </v-btn>
         <!-- End form action buttons -->
       </v-form>
-      <form-submission-confirmation :activate="this.submitting"></form-submission-confirmation>
+      <form-submission-confirmation :activate="this.confirming"></form-submission-confirmation>
     </v-container>
   </v-card>
 </template>
@@ -536,6 +536,12 @@ function clearForm() {
 
   this.deptDateFormatted = null;
 } // clearForm
+
+function confirm() {
+  if (this.$refs.form.validate()) {
+    this.confirming = true;
+  }
+} // confirm
 
 /**
  * Formats a date.
@@ -727,6 +733,7 @@ function filterPrimes() {
  */
 async function created() {
   window.EventBus.$on('confirmed', () => {
+    this.confirming = false;
     this.submit();
   });
 
@@ -812,6 +819,7 @@ export default {
       BirthdayMenu: false,
       componentRules: [(v) => !!v || 'Something must be selected'], // rules for required componenet selection
       countries: [], // list of countries
+      confirming: false,
       hireDate: null, // hire date
       dateOptionalRules: [
         (v) => {
@@ -963,6 +971,7 @@ export default {
   methods: {
     cancel,
     clearForm,
+    confirm,
     viewStatus,
     filterContracts,
     filterPrimes,
