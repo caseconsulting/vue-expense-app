@@ -14,12 +14,12 @@
         <!-- Saved info -->
 
         <v-card>
-          <v-card-title class="header_style">
+          <v-card-title class="header_style" v-if="!editing">
             <h3>{{ this.model.firstName }} {{ this.model.lastName }}</h3>
             <v-spacer></v-spacer>
-            <v-icon @click="this.editing = true" style="color: white;" align="right">edit</v-icon>
+            <v-icon @click="editing = true" style="color: white;" align="right">edit</v-icon>
           </v-card-title>
-          <employee-info :model="this.model" v-if="!editing" :editing="editing"></employee-info>
+          <employee-info :model="this.model" v-if="!editing"></employee-info>
         </v-card>
         <!-- Edit Info (Form) -->
         <employee-form :model="this.model" v-if="editing"></employee-form>

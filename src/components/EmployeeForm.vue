@@ -686,6 +686,7 @@ function disableBirthdayFeed() {
     return true;
   }
   this.undisabled = true;
+  this.model.birthdayFeed = true;
   return false;
 }
 
@@ -722,6 +723,51 @@ async function created() {
   this.employees = await api.getItems(api.EMPLOYEES); // get all employees
   this.filterPrimes();
   this.filterContracts();
+  this.date = this.model.hireDate;
+  this.birthdayFormat = this.formatDate(this.model.birthday) || this.birthdayFormat;
+  //fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
+  if (this.model.birthday !== null && !this.formatDate(this.model.birthday)) {
+    this.model.birthday = null;
+  }
+  this.deptDateFormatted = this.formatDate(this.model.deptDate) || this.deptDateFormatted;
+  //fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
+  if (this.model.deptDate !== null && !this.formatDate(this.model.deptDate)) {
+    this.model.deptDate = null;
+  }
+  if (this.model.employeeRole != 'User') {
+    this.employeeRoleFormatted = _.startCase(this.model.employeeRole);
+  }
+  this.hasExpenses = this.model.id ? _.size(await api.getAllEmployeeExpenses(this.model.id)) > 0 : false;
+  this.date = this.model.hireDate;
+  if (this.model.workStatus != null) {
+    // set work status buttons if the status exists
+    this.status = this.model.workStatus.toString(); // convert employee work status to string
+    // set status radio
+    if (this.status == '100') {
+      this.statusRadio = 'full';
+    } else if (this.status == '0') {
+      this.statusRadio = 'inactive';
+    } else {
+      this.statusRadio = 'part';
+    }
+  } else {
+    // set status to default full time if it does not exist
+    this.status = '100';
+    this.statusRadio = 'full';
+  }
+  if (this.statusRadio == 'full') {
+    this.status = '100';
+    this.model.workStatus = 100;
+  } else if (this.statusRadio == 'inactive') {
+    this.status = '0';
+    this.model.workStatus = 0;
+  } else {
+    if (this.model.workStatus && this.model.workStatus > 0 && this.model.workStatus < 100) {
+      this.status = this.model.workStatus;
+    } else {
+      this.status = null;
+    }
+  }
 }
 
 // |--------------------------------------------------|
@@ -889,48 +935,6 @@ export default {
         this.date = null;
       }
     },
-    'model.birthday': function () {
-      this.birthdayFormat = this.formatDate(this.model.birthday) || this.birthdayFormat;
-      //fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
-      if (this.model.birthday !== null && !this.formatDate(this.model.birthday)) {
-        this.model.birthday = null;
-      }
-    },
-    'model.deptDate': function () {
-      this.deptDateFormatted = this.formatDate(this.model.deptDate) || this.deptDateFormatted;
-      //fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
-      if (this.model.deptDate !== null && !this.formatDate(this.model.deptDate)) {
-        this.model.deptDate = null;
-      }
-    },
-    'model.employeeRole': function () {
-      if (this.model.employeeRole != 'User') {
-        this.employeeRoleFormatted = _.startCase(this.model.employeeRole);
-      }
-    },
-    'model.hireDate': async function () {
-      this.hasExpenses = this.model.id ? _.size(await api.getAllEmployeeExpenses(this.model.id)) > 0 : false;
-      this.date = this.model.hireDate;
-    },
-    'model.workStatus': function () {
-      if (this.model.workStatus != null) {
-        // set work status buttons if the status exists
-        this.status = this.model.workStatus.toString(); // convert employee work status to string
-        console.log(this.status);
-        // set status radio
-        if (this.status == '100') {
-          this.statusRadio = 'full';
-        } else if (this.status == '0') {
-          this.statusRadio = 'inactive';
-        } else {
-          this.statusRadio = 'part';
-        }
-      } else {
-        // set status to default full time if it does not exist
-        this.status = '100';
-        this.statusRadio = 'full';
-      }
-    },
     statusRadio: function () {
       if (this.statusRadio == 'full') {
         this.status = '100';
@@ -944,11 +948,6 @@ export default {
         } else {
           this.status = null;
         }
-      }
-    },
-    undisabled: function () {
-      if (!this.model.id && this.undisabled == true) {
-        this.model.birthdayFeed = true;
       }
     }
   }

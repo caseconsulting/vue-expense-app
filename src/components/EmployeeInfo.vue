@@ -100,7 +100,7 @@ export default {
     isEmpty,
     userIsAdmin
   },
-  props: ['model', 'editing']
+  props: ['model']
 };
 </script>
 
