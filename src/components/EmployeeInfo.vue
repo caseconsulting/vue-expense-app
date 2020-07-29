@@ -1,7 +1,7 @@
 <template>
   <v-card-text class="px-7 pt-5 pb-1 black--text">
     <div class="savedInfo">
-      <v-tabs show-arrows class="pb-4">
+      <v-tabs center-active show-arrows class="pb-4">
         <v-tab href="#employee">General Info</v-tab>
         <v-tab href="#degrees">Degrees</v-tab>
         <v-tab href="#jobExperience">Job Experience</v-tab>
