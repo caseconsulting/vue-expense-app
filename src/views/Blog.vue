@@ -42,6 +42,9 @@
       <v-btn @click="rekognition()">Rekognition</v-btn>
     </v-row>
     <v-row>
+      <v-textarea> </v-textarea>
+    </v-row>
+    <v-row>
       <v-btn @click="comprehend()">comprehend</v-btn>
     </v-row>
   </v-container>
