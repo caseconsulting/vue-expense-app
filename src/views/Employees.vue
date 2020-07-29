@@ -25,17 +25,6 @@
           <v-spacer></v-spacer>
           <v-text-field v-model="search" append-icon="search" label="Search" single-line hide-details></v-text-field>
         </v-card-title>
-        <!-- Delete Button -->
-        <v-tooltip top>
-          <template v-slot:activator="{ on }">
-            <v-btn :disabled="midAction" text icon @click.stop="validateDelete(item)" v-on="on">
-              <v-icon style="color: #606060;">
-                account_plus
-              </v-icon>
-            </v-btn>
-          </template>
-          <span>Create Employee</span>
-        </v-tooltip>
 
         <!-- Filters -->
         <fieldset v-if="userIsAdmin()" class="filter_border">
@@ -80,6 +69,10 @@
         </fieldset>
         <br />
         <!-- End Filters -->
+        <!-- Create an Employee -->
+        <v-btn class="mb-5" @click="createEmployee = true">
+          Create an Employee<v-icon class="pl-2">person_add</v-icon>
+        </v-btn>
 
         <!-- Employee Datatable-->
         <v-data-table
@@ -153,6 +146,7 @@
         <!-- End Confirmation Modals -->
       </v-container>
     </v-card>
+    <v-dialog v-model="createEmployee"><employee-form :model="this.model"></employee-form></v-dialog>
   </div>
 </template>
 
@@ -161,6 +155,7 @@ import api from '@/shared/api.js';
 import ConvertEmployeesToCsv from '../components/ConvertEmployeesToCsv.vue';
 import DeleteErrorModal from '../components/DeleteErrorModal.vue';
 import DeleteModal from '../components/DeleteModal.vue';
+import EmployeeForm from '../components/EmployeeForm.vue';
 import { getRole } from '@/utils/auth';
 import moment from 'moment';
 import _ from 'lodash';
@@ -274,15 +269,6 @@ function endAction() {
 }
 
 /**
- * Filters out contracts from list of employees.
- */
-function filterContracts() {
-  let tempContracts = _.map(this.employees, (a) => a.contract); //extract contracts
-  tempContracts = _.compact(tempContracts); //remove falsey values
-  this.employeeInfo.contracts = [...new Set(tempContracts)]; //remove duplicates
-} // filterContracts
-
-/**
  * Filters list of employees.
  */
 function filterEmployees() {
@@ -294,15 +280,6 @@ function filterEmployees() {
     return fullCheck || partCheck || inactiveCheck;
   });
 } // filterEmployees
-
-/**
- * Filters out primes from list of employees.
- */
-function filterPrimes() {
-  let tempPrimes = _.map(this.employees, (a) => a.prime); //extract primes
-  tempPrimes = _.compact(tempPrimes); //remove falsey values
-  this.employeeInfo.primes = [...new Set(tempPrimes)]; //remove duplicates and set
-} // filterPrimes
 
 /**
  * Returns Full Time, Part Time, or Inactive based on the work status
@@ -427,8 +404,6 @@ function onSelect(item) {
 async function refreshEmployees() {
   this.loading = true; // set loading status to true
   this.employees = await api.getItems(api.EMPLOYEES); // get all employees
-  this.filterPrimes();
-  this.filterContracts();
   this.filterEmployees(); // filter employees
   this.expanded = []; // collapse any expanded rows in the database
   this.loading = false; // set loading status to false
@@ -524,19 +499,17 @@ export default {
   components: {
     ConvertEmployeesToCsv,
     DeleteErrorModal,
-    DeleteModal
+    DeleteModal,
+    EmployeeForm
   },
   created,
   data() {
     return {
+      createEmployee: false,
       deleteModel: {
         id: null
       }, // employee to delete
       deleting: false, // activate delete confirmation model
-      employeeInfo: {
-        primes: [],
-        contracts: []
-      },
       employees: [], // employees
       expanded: [], // datatable expanded
       filter: {
@@ -631,9 +604,7 @@ export default {
     displayError,
     employeePath,
     endAction,
-    filterContracts,
     filterEmployees,
-    filterPrimes,
     getWorkStatus,
     isDisplayData,
     isEmpty,

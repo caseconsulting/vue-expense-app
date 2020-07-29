@@ -2,9 +2,7 @@
   <v-card hover>
     <v-card-title class="header_style">
       <!-- Editing an employee -->
-      <h3 v-if="model.id">Edit Employee</h3>
-      <!-- Creating a new employee -->
-      <h3 v-else>Create New Employee</h3>
+      <h3>Edit {{ this.model.firstName }} {{ this.model.lastName }}</h3>
     </v-card-title>
 
     <v-container fluid>
@@ -691,6 +689,24 @@ function disableBirthdayFeed() {
   return false;
 }
 
+/**
+ * Filters out contracts from list of employees.
+ */
+function filterContracts() {
+  let tempContracts = _.map(this.employees, (a) => a.contract); //extract contracts
+  tempContracts = _.compact(tempContracts); //remove falsey values
+  this.employeeInfo.contracts = [...new Set(tempContracts)]; //remove duplicates
+} // filterContracts
+
+/**
+ * Filters out primes from list of employees.
+ */
+function filterPrimes() {
+  let tempPrimes = _.map(this.employees, (a) => a.prime); //extract primes
+  tempPrimes = _.compact(tempPrimes); //remove falsey values
+  this.employeeInfo.primes = [...new Set(tempPrimes)]; //remove duplicates and set
+} // filterPrimes
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                 LIFECYCLE HOOKS                  |
@@ -703,6 +719,9 @@ function disableBirthdayFeed() {
 async function created() {
   this.countries = _.map(await api.getCountries(), 'name');
   this.countries.unshift('United States of America');
+  this.employees = await api.getItems(api.EMPLOYEES); // get all employees
+  this.filterPrimes();
+  this.filterContracts();
 }
 
 // |--------------------------------------------------|
@@ -743,7 +762,12 @@ export default {
         (v) => !!v || 'Email is required',
         (v) => regex.test(v) || 'Not a valid @consultwithcase email address'
       ], // rules for employee email
+      employeeInfo: {
+        primes: [],
+        contracts: []
+      },
       employeeRoleFormatted: null, // formatted employee role
+      employees: [],
       requiredRules: [(v) => !!v || 'This field is required'], // rules for required fields
       hasExpenses: false, // employee has expenses
       hireDateFormatted: null, // formatted hire date
@@ -842,6 +866,8 @@ export default {
   methods: {
     clearForm,
     viewStatus,
+    filterContracts,
+    filterPrimes,
     formatDate,
     formatKebabCase,
     isFullTime,
@@ -854,7 +880,7 @@ export default {
     userIsAdmin,
     disableBirthdayFeed
   },
-  props: ['model', 'employeeInfo'], // employee to be created/updated
+  props: ['model'], // employee to be created/updated
   watch: {
     date: function () {
       this.hireDateFormatted = this.formatDate(this.date) || this.hireDateFormatted;

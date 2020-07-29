@@ -1,72 +1,28 @@
 <template>
-  <v-container>
+  <v-container fluid>
     <v-row class="pl-3">
-      <v-btn to="/employees"><v-icon>arrow_back</v-icon>Back to Employees Page</v-btn>
+      <v-btn to="/employees"><v-icon class="pr-1">arrow_back</v-icon>Back to Employees Page</v-btn>
     </v-row>
     <v-row>
       <v-col cols="12" md="6" lg="5">
-        <!-- Expanded slot in datatable -->
         <template>
-          <v-card>
-            <v-card-text>
-              <div class="expandedInfo">
-                <p v-if="userIsAdmin()">
-                  <b>Status: </b>
-                  {{ getWorkStatus(this.model.workStatus) }}
-                </p>
-                <p v-if="!isEmpty(this.model.prime)"><b>Prime: </b> {{ this.model.prime }}</p>
-                <p v-if="!isEmpty(this.model.contract)"><b>Contract: </b>{{ this.model.contract }}</p>
-                <p v-if="!isEmpty(this.model.jobRole)"><b>Job Role: </b>{{ this.model.jobRole }}</p>
-                <p v-if="!isEmpty(this.model.github)">
-                  <b>Github: </b
-                  ><a :href="'https://github.com/' + this.model.github" target="_blank">{{ this.model.github }}</a>
-                </p>
-                <p v-if="!isEmpty(this.model.twitter)">
-                  <b>Twitter: </b>
-                  <a :href="'https://twitter.com/' + this.model.twitter" target="_blank">{{ this.model.twitter }}</a>
-                </p>
-                <p v-if="userIsAdmin() && !isEmpty(this.model.birthday)">
-                  <b>Birthday: </b>{{ this.model.birthday | dateFormat }}
-                </p>
-                <p v-if="userIsAdmin() && !isEmpty(this.model.birthdayFeed)">
-                  <b>Birthday on feed: </b>{{ this.model.birthdayFeed | birthdayFeedResponse }}
-                </p>
-                <p
-                  v-if="
-                    userIsAdmin() &&
-                    !isEmpty(this.model.city) &&
-                    !isEmpty(this.model.st) &&
-                    !isEmpty(this.model.country)
-                  "
-                >
-                  <b>Place of Birth: </b>{{ this.model.city }}, {{ this.model.st }}, {{ this.model.country }}
-                </p>
-                <p v-else-if="userIsAdmin() && !isEmpty(this.model.city) && !isEmpty(this.model.st)">
-                  <b>Place of Birth: </b>{{ this.model.city }}, {{ this.model.st }}
-                </p>
-                <p v-else-if="userIsAdmin() && !isEmpty(this.model.city) && !isEmpty(this.model.country)">
-                  <b>Place of Birth: </b>{{ this.model.city }}, {{ this.model.country }}
-                </p>
-                <p v-else-if="userIsAdmin() && !isEmpty(this.model.country)">
-                  <b>Place of Birth: </b>{{ this.model.country }}
-                </p>
-                <p v-if="userIsAdmin() && !isEmpty(this.model.deptDate)">
-                  <b>Departure Date: </b>{{ this.model.deptDate | dateFormat }}
-                </p>
-              </div>
-            </v-card-text>
-          </v-card>
           <available-budgets v-if="this.model.id" :employee="this.model"></available-budgets>
         </template>
-        <!-- End expanded slot in datatable -->
+        <!-- End saved info -->
       </v-col>
       <v-col cols="12" md="6" lg="7">
+        <!-- Saved info -->
+
         <v-card>
-          <!-- Employee Details Form -->
-          <v-card-text>
-            <employee-form :model="this.model" :employeeInfo="this.employeeInfo"></employee-form>
-          </v-card-text>
+          <v-card-title class="header_style">
+            <h3>{{ this.model.firstName }} {{ this.model.lastName }}</h3>
+            <v-spacer></v-spacer>
+            <v-icon @click="this.editing = true" style="color: white;" align="right">edit</v-icon>
+          </v-card-title>
+          <employee-info :model="this.model" v-if="!editing" :editing="editing"></employee-info>
         </v-card>
+        <!-- Edit Info (Form) -->
+        <employee-form :model="this.model" v-if="editing"></employee-form>
       </v-col>
     </v-row>
   </v-container>
@@ -76,6 +32,7 @@
 import api from '@/shared/api.js';
 import AvailableBudgets from '@/components/AvailableBudgets.vue';
 import EmployeeForm from '../components/EmployeeForm.vue';
+import EmployeeInfo from '../components/EmployeeInfo.vue';
 import { getRole } from '@/utils/auth';
 import moment from 'moment';
 import _ from 'lodash';
@@ -172,16 +129,13 @@ async function created() {
 export default {
   components: {
     AvailableBudgets,
-    EmployeeForm
+    EmployeeForm,
+    EmployeeInfo
   },
   created,
   data() {
     return {
-      employeeInfo: {
-        primes: [],
-        contracts: []
-      },
-      expanded: [], // datatable expanded
+      editing: false,
       filter: {
         active: ['full', 'part'] // default only shows full and part time employees
       }, // datatable filter
@@ -242,20 +196,3 @@ export default {
   }
 };
 </script>
-
-<style>
-.expandedInfo {
-  border: 1px solid black;
-  font-size: 14px;
-  padding: 20px;
-}
-
-.expandedInfo a {
-  font-size: 14px;
-  color: blue;
-}
-
-.expandedInfo a:hover {
-  color: #0cf;
-}
-</style>
