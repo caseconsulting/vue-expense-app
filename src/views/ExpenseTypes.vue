@@ -657,7 +657,7 @@ function getAccess(expenseType) {
   if (expenseType.accessibleBy == 'ALL') {
     return 'All Employees';
   } else if (expenseType.accessibleBy == 'FULL') {
-    return 'All Employees (100%)';
+    return 'Full - 100% of budget';
   } else if (expenseType.accessibleBy == 'FULL TIME') {
     return 'Full Time Employees';
   } else {
