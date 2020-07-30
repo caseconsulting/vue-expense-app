@@ -53,38 +53,6 @@
           </v-btn>
         </v-item-group>
 
-        <!--In MOBILE VIEW/Smaller Screen sizes display all links under the links dropdown-->
-
-        <v-item-group class="hidden-md-and-up" v-show="isLoggedIn() | isMobile">
-          <v-menu open-on-hover offset-y>
-            <template v-slot:activator="{ on, attrs }">
-              <v-btn top text small class="my-2" v-bind="attrs" v-on="on">
-                <v-icon color="white">menu</v-icon>
-              </v-btn>
-            </template>
-
-            <v-list class="scrollLink">
-              <v-list-item v-for="(l, index) in links" :key="index" :href="l.link" target="_blank">
-                <v-list-item-title>{{ l.name }}</v-list-item-title>
-              </v-list-item>
-              <v-list-item :href="floorPlan" target="_blank">MakeOffices Map</v-list-item>
-              <hr
-                role="separator"
-                aria-orientation="horizontal"
-                class="v-divider theme--light"
-                :inset="inset"
-                vertical
-              />
-              <div class="v-subheader theme--light">Social</div>
-              <v-list-item v-for="link in mediaLinks" :key="link.name" :href="link.link" icon target="_blank">
-                <icon :name="link.icon"></icon>
-                <span class="mr-2"> </span>
-                <v-list-item-title> {{ ( link.name) }}</v-list-item-title>
-              </v-list-item>
-            </v-list>
-          </v-menu>
-        </v-item-group>
-
         <!-- User image and logout -->
         <v-menu bottom offset-y open-on-hover v-if="isLoggedIn()">
           <template v-slot:activator="{ on }">
@@ -92,9 +60,28 @@
               <img :src="profilePic" alt="avatar" v-on="on" />
             </v-avatar>
           </template>
-          <v-list>
+          <v-list v-if="!(isLoggedIn() && (isMobile || isSmallScreen))">
             <v-list-item>
               <v-btn text @click="handleLogout()">Logout</v-btn>
+            </v-list-item>
+          </v-list>
+          <!--In MOBILE VIEW/Smaller Screen sizes display all links under the user image dropdown-->
+          <v-list class="scrollLink" v-else>
+            <v-list-item>
+              <v-btn text @click="handleLogout()">Logout</v-btn>
+            </v-list-item>
+            <hr role="separator" aria-orientation="horizontal" class="v-divider theme--light" :inset="inset" vertical />
+            <div class="v-subheader theme--light">Company Links</div>
+            <v-list-item v-for="(l, index) in links" :key="index" :href="l.link" target="_blank">
+              <v-list-item-title>{{ l.name }}</v-list-item-title>
+            </v-list-item>
+            <v-list-item :href="floorPlan" target="_blank">MakeOffices Map</v-list-item>
+            <hr role="separator" aria-orientation="horizontal" class="v-divider theme--light" :inset="inset" vertical />
+            <div class="v-subheader theme--light">Social</div>
+            <v-list-item v-for="link in mediaLinks" :key="link.name" :href="link.link" icon target="_blank">
+              <icon :name="link.icon"></icon>
+              <span class="mr-2"> </span>
+              <v-list-item-title> {{ ( link.name) }}</v-list-item-title>
             </v-list-item>
           </v-list>
         </v-menu>
@@ -164,6 +151,10 @@ async function initSession() {
   this.initSession();
 }
 
+function onResize() {
+  this.isSmallScreen = window.innerWidth < 960;
+}
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                 LIFECYCLE HOOKS                  |
@@ -210,6 +201,17 @@ async function created() {
   }
 }
 
+async function beforeDestroy() {
+  if (typeof window !== 'undefined') {
+    window.removeEventListener('resize', this.onResize, { passive: true });
+  }
+}
+
+async function mounted() {
+  this.onResize();
+  window.addEventListener('resize', this.onResize, { passive: true });
+}
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                      EXPORT                      |
@@ -245,7 +247,8 @@ export default {
       { name: 'Youtube', link: 'https://www.youtube.com/channel/UC_oJY4OrOpLNrIBAN7Y-9fA', icon: 'brands/youtube' },
       { name: 'Twitter', link: 'https://twitter.com/consultwithcase?lang=en', icon: 'brands/twitter' },
       { name: 'Facebook', link: 'https://www.facebook.com/ConsultwithCase/', icon: 'brands/facebook' }
-    ]
+    ],
+    isSmallScreen: false
   }),
   props: {
     source: String
@@ -261,8 +264,11 @@ export default {
   methods: {
     handleLogout,
     isLoggedIn,
-    initSession
+    initSession,
+    onResize
   },
+  beforeDestroy,
+  mounted,
   created
 };
 </script>
