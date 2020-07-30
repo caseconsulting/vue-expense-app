@@ -124,7 +124,7 @@ async function rekognition() {
 }
 
 async function comprehend() {
-  let result = await api.getKeyPhrases(this.inputText);
+  let result = await api.getKeyPhrases({ inputText: this.inputText });
   console.log(result);
 }
 //import _ from 'lodash';

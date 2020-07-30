@@ -210,8 +210,8 @@ function getModerationLabel(img) {
   return execute('post', `blog/getModerationLabel/${img}`);
 }
 
-function getKeyPhrases(text) {
-  return execute('post', `blog/getKeyPhrases/${text}`);
+function getKeyPhrases(data) {
+  return execute('post', `blog/getKeyPhrases`, data);
 }
 
 async function uploadBlogAttachment(file) {
