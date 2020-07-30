@@ -26,39 +26,39 @@
       </v-col>
     </v-row>
     <v-row>
-      <v-col xs12 sm12 md6 lg6>
+      <v-col wrap cols="12" lg="6">
         <!-- TSheets -->
-        <v-flex class="pa-4">
-          <v-flex v-if="loading" text-center>
+        <v-col class="pa-4">
+          <v-col v-if="loading" text-center>
             <v-progress-circular indeterminate size="64" color="#bc3825"></v-progress-circular>
+          </v-col>
+          <v-flex v-else text-md-center class="pt-0">
+            <t-sheets-data cols="12" lg="6"></t-sheets-data>
           </v-flex>
-          <v-flex v-else text-center class="pt-0">
-            <t-sheets-data xs12 sm3 md3 lg3></t-sheets-data>
-          </v-flex>
-        </v-flex>
+        </v-col>
         <!-- Available Budgets -->
-        <v-flex class="pa-4">
-          <v-flex v-if="loading" text-center>
+        <v-col class="pa-4">
+          <v-col v-if="loading" text-center>
             <v-progress-circular indeterminate size="64" color="#bc3825"></v-progress-circular>
-          </v-flex>
+          </v-col>
           <v-flex v-else text-center class="pt-0">
             <available-budgets :employee="this.employee" :fiscalDateView="this.fiscalDateView"></available-budgets>
           </v-flex>
-        </v-flex>
+        </v-col>
       </v-col>
       <!-- Activity Feed -->
-      <v-col xs12 sm12 md6 lg6>
-        <v-flex mt-0 class="pt-4">
+      <v-col cols="12" lg="6">
+        <v-col mt-0 class="pt-4">
           <activity-feed :events="events" :loading="loading"></activity-feed>
-        </v-flex>
+        </v-col>
       </v-col>
     </v-row>
     <v-row>
       <!-- Twitter Feed -->
-      <v-col xs12 sm12 md6 lg6>
-        <v-flex mt-0 class="pt-4">
+      <v-col>
+        <v-col mt-0 class="pt-4">
           <twitter-feed :tweets="tweets" :loading="loading"></twitter-feed>
-        </v-flex>
+        </v-col>
       </v-col>
     </v-row>
   </v-container>

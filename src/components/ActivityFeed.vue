@@ -7,13 +7,13 @@
       </v-card-title>
     </v-card>
     <!-- loading bar -->
-    <v-card class="overflow-y-auto" max-height="676px">
+    <v-card class="overflow-y-auto" max-height="850px">
       <div v-if="this.loading" class="py-4">
         <v-progress-linear :indeterminate="true"></v-progress-linear>
       </div>
       <!-- timeline -->
       <v-timeline v-else dense class="pt-0">
-        <v-virtual-scroll :items="events" :item-height="this.itemHeight" height="600" bench="2">
+        <v-virtual-scroll :items="events" :item-height="this.itemHeight" height="850" bench="2">
           <template v-slot="{ item }">
             <div class="pa-4"></div>
             <v-hover v-slot:default="{ hover }" open-delay="200">
@@ -23,13 +23,9 @@
                     <icon class="white--text" :name="item.icon"></icon>
                   </template>
                   <h3>{{ item.date }}</h3>
-                  <v-list-item class="ma-auto pa-auto" v-if="item.link" :href="item.link" target="_blank" :dense="true"
-                    >{{ item.truncatedText ? item.truncatedText : item.text }}&nbsp;<icon
-                      height="12"
-                      width="12"
-                      name="external-link-alt"
-                      color="blue"
-                    ></icon>
+                  <v-list-item class="ma-auto pa-auto" v-if="item.link" :href="item.link" target="_blank" :dense="true">
+                    {{ item.truncatedText ? item.truncatedText : item.text }}&nbsp;
+                    <icon height="12" width="12" name="external-link-alt" color="blue"></icon>
                   </v-list-item>
                   <div class="px-4" v-else>{{ item.truncatedText ? item.truncatedText : item.text }}</div>
                 </v-timeline-item>
