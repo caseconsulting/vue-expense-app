@@ -2,7 +2,7 @@
   <v-card hover>
     <v-card-title class="header_style">
       <!-- Editing an employee -->
-      <h3 v-if="model.id">Editing {{ this.employee.firstName }} {{ this.employee.lastName }}</h3>
+      <h3 v-if="model.id">Editing {{ fullName }}</h3>
       <h3 v-else>New Employee</h3>
     </v-card-title>
 
@@ -655,6 +655,7 @@ async function submit() {
       let updatedEmployee = await api.updateItem(api.EMPLOYEES, this.model);
       if (updatedEmployee.id) {
         // successfully updated employee
+        this.fullName = `${updatedEmployee.firstName} ${updatedEmployee.lastName}`;
         window.EventBus.$emit('update', updatedEmployee);
         cancel();
       } else {
@@ -797,6 +798,9 @@ async function created() {
       this.status = null;
     }
   }
+  if (this.employee) {
+    this.fullName = `${this.employee.firstName} ${this.employee.lastName}`;
+  }
 }
 
 // |--------------------------------------------------|
@@ -852,6 +856,7 @@ export default {
       },
       employeeRoleFormatted: null, // formatted employee role
       employees: [],
+      fullName: '', // employee's first and last name
       requiredRules: [(v) => !!v || 'This field is required'], // rules for required fields
       hasExpenses: false, // employee has expenses
       hireDateFormatted: null, // formatted hire date
