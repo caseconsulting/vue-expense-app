@@ -124,10 +124,27 @@ async function rekognition() {
 }
 
 async function comprehend() {
-  let result = await api.getKeyPhrases({ inputText: this.inputText });
-  console.log(result);
+  let arr = this.splitInputText();
+  for (let i = 0; i < arr.length; i++) {
+    let result = await api.getKeyPhrases({ inputText: arr[i] });
+    console.log(result);
+  }
 }
-//import _ from 'lodash';
+
+function splitInputText() {
+  let strArr = [];
+  if (this.inputText.length > 5000) {
+    let currOffset = 0;
+    while (currOffset < this.inputText.length) {
+      let start = currOffset;
+      currOffset += 5000 % this.inputText.length;
+      strArr.push(this.inputText.substring(start, currOffset));
+    }
+    return strArr;
+  } else {
+    return [this.inputText];
+  }
+}
 export default {
   components: {
     PendingPostTable,
@@ -145,9 +162,10 @@ export default {
     };
   },
   methods: {
-    rekognition,
-    comprehend,
     acceptedFileTypes,
+    comprehend,
+    rekognition,
+    splitInputText,
     uploadToS3
   }
 };
