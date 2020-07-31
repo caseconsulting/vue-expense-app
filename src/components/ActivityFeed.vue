@@ -86,6 +86,6 @@ export default {
 </script>
 <style lang="scss">
 .activityFeedText {
-  font-weight: 0;
+  font-weight: normal;
 }
 </style>
