@@ -11,7 +11,7 @@
       :vertical="true"
     >
       <v-card-title headline color="white">
-        <span class="headline">{{ status.statusMessage }}</span>
+        <span class="headline">{{ errorStatus.statusMessage }}</span>
       </v-card-title>
       <v-btn color="white" text @click="clearStatus">
         Close
@@ -561,9 +561,9 @@ function clearForm() {
  * Clear the action status that is displayed in the snackbar.
  */
 function clearStatus() {
-  this.$set(this.status, 'statusType', undefined);
-  this.$set(this.status, 'statusMessage', null);
-  this.$set(this.status, 'color', null);
+  this.$set(this.errorStatus, 'statusType', undefined);
+  this.$set(this.errorStatus, 'statusMessage', null);
+  this.$set(this.errorStatus, 'color', null);
 } // clearStatus
 
 function confirm() {
