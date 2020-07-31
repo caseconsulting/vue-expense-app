@@ -16,24 +16,39 @@
         <v-virtual-scroll :items="events" :item-height="this.itemHeight" height="850" bench="2">
           <template v-slot="{ item }">
             <div class="pa-4"></div>
-            <v-hover v-slot:default="{ hover }" open-delay="200">
-              <div>
-                <v-timeline-item :color="item.color" :key="item.name">
-                  <template v-slot:icon v-if="item.icon">
-                    <icon class="white--text" :name="item.icon"></icon>
-                  </template>
-                  <h3>{{ item.date }}</h3>
-                  <v-list-item class="ma-auto pa-auto" v-if="item.link" :href="item.link" target="_blank" :dense="true">
-                    {{ item.truncatedText ? item.truncatedText : item.text }}&nbsp;
-                    <icon height="12" width="12" name="external-link-alt" color="blue"></icon>
-                  </v-list-item>
-                  <div class="px-4" v-else>{{ item.truncatedText ? item.truncatedText : item.text }}</div>
-                </v-timeline-item>
-                <v-card v-if="hover && item.truncatedText" style="z-index: 10;">
-                  <v-card-text>{{ item.text }}</v-card-text>
-                </v-card>
-              </div>
-            </v-hover>
+            <v-tooltip
+              open-on-hover
+              top
+              max-width="400px"
+              min-width="200px"
+              :color="item.truncatedText ? 'grey darken-3' : 'rgba(0, 0, 0, 0)'"
+              open-delay="200"
+            >
+              <template v-slot:activator="{ on, attrs }">
+                <span v-bind="attrs" v-on="on">
+                  <v-timeline-item :color="item.color" :key="item.name">
+                    <template v-slot:icon v-if="item.icon">
+                      <icon class="white--text" :name="item.icon"></icon>
+                    </template>
+                    <h3>{{ item.date }}</h3>
+                    <v-list-item
+                      class="ma-auto pa-auto"
+                      v-if="item.link"
+                      :href="item.link"
+                      target="_blank"
+                      :dense="true"
+                    >
+                      {{ item.truncatedText ? item.truncatedText : item.text }}&nbsp;
+                      <icon height="12" width="12" name="external-link-alt" color="blue"></icon>
+                    </v-list-item>
+                    <div class="px-4 activityFeedText" v-else>
+                      {{ item.truncatedText ? item.truncatedText : item.text }}
+                    </div>
+                  </v-timeline-item>
+                </span>
+              </template>
+              <span v-if="item.truncatedText">{{ item.text }}</span>
+            </v-tooltip>
           </template>
         </v-virtual-scroll>
       </v-timeline>
@@ -69,3 +84,8 @@ export default {
   props: ['events', 'loading']
 };
 </script>
+<style lang="scss">
+.activityFeedText {
+  font-weight: 0;
+}
+</style>
