@@ -657,7 +657,7 @@ function isPartTime() {
  * @return boolean - work status is empty
  */
 function isStatusEmpty() {
-  return _.isString(this.status) ? this.status.length == 0 : true;
+  return _.isString(this.status) ? this.status.length == 0 || (this.isPartTime() && this.status <= 0) : true;
 } // isStatusEmpty
 
 /**
@@ -786,7 +786,7 @@ async function created() {
 
   // fills model in with populated fields in employee prop
   this.model = _.mergeWith(this.model, this.employee, (modelValue, employeeValue) => {
-    return employeeValue ? employeeValue : modelValue;
+    return _.isNil(employeeValue) ? modelValue : employeeValue;
   });
 
   // this.model = this.employee ? _.cloneDeep(this.employee) : this.model;
