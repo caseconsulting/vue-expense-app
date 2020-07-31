@@ -32,7 +32,7 @@
                     </template>
                     <h3>{{ item.date }}</h3>
                     <v-list-item
-                      class="ma-auto pa-auto"
+                      class="ma-auto pa-auto activityFeedText"
                       v-if="item.link"
                       :href="item.link"
                       target="_blank"
@@ -87,5 +87,9 @@ export default {
 <style lang="scss">
 .activityFeedText {
   font-weight: normal;
+}
+
+.v-tooltip__content.menuable__content__active {
+  opacity: 1 !important;
 }
 </style>
