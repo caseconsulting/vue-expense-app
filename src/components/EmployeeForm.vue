@@ -843,7 +843,7 @@ async function created() {
     this.fullName = `${this.employee.firstName} ${this.employee.lastName}`;
   }
   this.value = '' + this.model.workStatus;
-}
+} // created
 
 // |--------------------------------------------------|
 // |                                                  |

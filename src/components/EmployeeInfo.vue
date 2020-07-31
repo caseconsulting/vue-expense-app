@@ -10,7 +10,15 @@
         <v-tab href="#technologies">Technologies</v-tab>
         <v-tab href="#customerOrgExp">Customer Org</v-tab>
         <v-tab-item id="employee">
+          <p><b>Full Name: </b>{{ fullName }}</p>
+          <p><b>Employee Number: </b>{{ this.model.employeeNumber }}</p>
+          <p><b>Email: </b>{{ this.model.email }}</p>
+          <p v-if="(userIsAdmin() || userIsEmployee())"><b>Hire Date: </b>{{ this.model.hireDate | dateFormat }}</p>
           <p v-if="userIsAdmin()">
+            <b>Employee Role: </b>
+            {{ this.model.employeeRole | startCase }}
+          </p>
+          <p v-if="(userIsAdmin() || userIsEmployee())">
             <b>Status: </b>
             {{ getWorkStatus(this.model.workStatus) }}
           </p>
@@ -25,28 +33,38 @@
             <b>Twitter: </b>
             <a :href="'https://twitter.com/' + this.model.twitter" target="_blank">{{ this.model.twitter }}</a>
           </p>
-          <p v-if="userIsAdmin() && !isEmpty(this.model.birthday)">
+          <p v-if="!isEmpty(this.model.birthday) && (userIsAdmin() || userIsEmployee())">
             <b>Birthday: </b>{{ this.model.birthday | dateFormat }}
           </p>
-          <p v-if="userIsAdmin() && !isEmpty(this.model.birthdayFeed)">
+          <p v-else-if="!isEmpty(this.model.birthday) && this.model.birthdayFeed">
+            <b>Birthday: </b>{{ this.model.birthday | dateMMDD }}
+          </p>
+          <p v-if="!isEmpty(this.model.birthdayFeed) && (userIsAdmin() || userIsEmployee())">
             <b>Birthday on Feed: </b>{{ this.model.birthdayFeed | birthdayFeedResponse }}
           </p>
           <p
-            v-if="userIsAdmin() && !isEmpty(this.model.city) && !isEmpty(this.model.st) && !isEmpty(this.model.country)"
+            v-if="
+              !isEmpty(this.model.city) &&
+              !isEmpty(this.model.st) &&
+              !isEmpty(this.model.country) &&
+              (userIsAdmin() || userIsEmployee())
+            "
           >
             <b>Place of Birth: </b>{{ this.model.city }}, {{ this.model.st }}, {{ this.model.country }}
           </p>
-          <p v-else-if="userIsAdmin() && !isEmpty(this.model.city) && !isEmpty(this.model.st)">
+          <p v-else-if="!isEmpty(this.model.city) && !isEmpty(this.model.st) && (userIsAdmin() || userIsEmployee())">
             <b>Place of Birth: </b>{{ this.model.city }}, {{ this.model.st }}
           </p>
-          <p v-else-if="userIsAdmin() && !isEmpty(this.model.city) && !isEmpty(this.model.country)">
+          <p
+            v-else-if="!isEmpty(this.model.city) && !isEmpty(this.model.country) && (userIsAdmin() || userIsEmployee())"
+          >
             <b>Place of Birth: </b>{{ this.model.city }}, {{ this.model.country }}
           </p>
-          <p v-else-if="userIsAdmin() && !isEmpty(this.model.country)">
+          <p v-else-if="!isEmpty(this.model.country) && (userIsAdmin() || userIsEmployee())">
             <b>Place of Birth: </b>
             {{ this.model.country }}
           </p>
-          <p v-if="userIsAdmin() && !isEmpty(this.model.deptDate)">
+          <p v-if="!isEmpty(this.model.deptDate) && userIsAdmin()">
             <b>Departure Date: </b>{{ this.model.deptDate | dateFormat }}
           </p>
         </v-tab-item>
@@ -56,6 +74,16 @@
 </template>
 
 <script>
+import employeeUtils from '@/shared/employeeUtils';
+import api from '@/shared/api';
+import { getRole } from '@/utils/auth';
+import _ from 'lodash';
+import moment from 'moment';
+
+function fullName() {
+  return employeeUtils.fullName(this.model);
+} // fullName
+
 /**
  * Returns Full Time, Part Time, or Inactive based on the work status
  */
@@ -90,11 +118,38 @@ function userIsAdmin() {
   return getRole() === 'admin';
 } // userIsAdmin
 
-import { getRole } from '@/utils/auth';
-import _ from 'lodash';
-import moment from 'moment';
+/**
+ * Check if the user the employee displayed. Returns true if the user is the employee displayed, otherwise returns false.
+ *
+ * @return boolean - user is the employee displayed
+ */
+function userIsEmployee() {
+  return !_.isNil(this.model) && !_.isNil(this.user) ? this.user.employeeNumber === this.model.employeeNumber : false;
+} // userIsAdmin
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                 LIFECYCLE HOOKS                  |
+// |                                                  |
+// |--------------------------------------------------|
+
+/*
+ * Get the user.
+ */
+async function created() {
+  this.user = await api.getUser();
+} // created
 
 export default {
+  computed: {
+    fullName
+  },
+  created,
+  data() {
+    return {
+      user: null
+    };
+  },
   filters: {
     // formats a date by month, day, year (e.g. Aug 18th, 2020)
     dateFormat: (value) => {
@@ -104,18 +159,25 @@ export default {
         return '';
       }
     },
+    dateMMDD: (value) => {
+      return !isEmpty(value) ? moment(value).format('MMMM Do') : 'N/A';
+    },
     birthdayFeedResponse: (value) => {
       if (value == true) {
         return 'Yes';
       } else {
         return 'No';
       }
+    },
+    startCase: (value) => {
+      return _.startCase(value);
     }
   },
   methods: {
     getWorkStatus,
     isEmpty,
-    userIsAdmin
+    userIsAdmin,
+    userIsEmployee
   },
   props: ['model']
 };
