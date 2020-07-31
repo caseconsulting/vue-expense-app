@@ -32,18 +32,18 @@
           <v-col v-if="loading" text-center>
             <v-progress-circular indeterminate size="64" color="#bc3825"></v-progress-circular>
           </v-col>
-          <v-flex v-else text-md-center class="pt-0">
+          <v-col v-else text-center class="pt-0">
             <t-sheets-data cols="12" lg="6"></t-sheets-data>
-          </v-flex>
+          </v-col>
         </v-col>
         <!-- Available Budgets -->
         <v-col class="pa-4">
           <v-col v-if="loading" text-center>
             <v-progress-circular indeterminate size="64" color="#bc3825"></v-progress-circular>
           </v-col>
-          <v-flex v-else text-center class="pt-0">
+          <v-col v-else text-center class="pt-0">
             <available-budgets :employee="this.employee" :fiscalDateView="this.fiscalDateView"></available-budgets>
-          </v-flex>
+          </v-col>
         </v-col>
       </v-col>
       <!-- Activity Feed -->
