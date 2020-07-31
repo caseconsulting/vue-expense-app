@@ -50,25 +50,25 @@
 
     <!-- Expense Data -->
     <v-col cols="12" lg="8">
-      <v-div v-if="loading" text-center>
+      <div v-if="loading" text-center>
         <v-progress-circular indeterminate size="64" color="#bc3825"></v-progress-circular>
-      </v-div>
+      </div>
 
-      <v-div v-else text-center class="pt-0 font-13">
+      <div v-else text-center class="pt-0 font-13">
         <budget-table v-if="!loading" :employee="expenseTypeData"></budget-table>
         <budget-chart
           v-if="!loading && !isMobile && !adminCall"
           :options="drawGraph.optionSet"
           :chart-data="drawGraph.dataSet"
         ></budget-chart>
-      </v-div>
+      </div>
     </v-col>
 
     <!-- Expense Form-->
     <v-col v-if="employ == null && !isInactive && viewingCurrentBudgetYear" cols="12" lg="4">
-      <v-div text-center>
+      <div text-center>
         <expense-form :expense="expense" v-on:error="displayError"></expense-form>
-      </v-div>
+      </div>
     </v-col>
     <budget-select-modal
       :activate="changingBudgetView"
