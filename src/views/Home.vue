@@ -29,10 +29,10 @@
       <v-col wrap cols="12" lg="6">
         <!-- TSheets -->
         <v-col class="pa-4">
-          <v-col v-if="loading" text-center>
+          <v-col v-if="loading" class="text-center">
             <v-progress-circular indeterminate size="64" color="#bc3825"></v-progress-circular>
           </v-col>
-          <v-col v-else text-center class="pt-0">
+          <v-col v-else class="pt-0 text-center">
             <t-sheets-data cols="12" lg="6"></t-sheets-data>
           </v-col>
         </v-col>
@@ -41,7 +41,7 @@
           <v-col v-if="loading" text-center>
             <v-progress-circular indeterminate size="64" color="#bc3825"></v-progress-circular>
           </v-col>
-          <v-col v-else text-center class="pt-0">
+          <v-col v-else class="pt-0 text-center">
             <available-budgets :employee="this.employee" :fiscalDateView="this.fiscalDateView"></available-budgets>
           </v-col>
         </v-col>
