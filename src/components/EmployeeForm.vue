@@ -2,8 +2,8 @@
   <div>
     <!-- Status Alert -->
     <v-snackbar
-      v-model="status.statusType"
-      :color="status.color"
+      v-model="errorStatus.statusType"
+      :color="errorStatus.color"
       :multi-line="true"
       :right="true"
       :timeout="5000"
@@ -557,6 +557,15 @@ function clearForm() {
   this.deptDateFormatted = null;
 } // clearForm
 
+/**
+ * Clear the action status that is displayed in the snackbar.
+ */
+function clearStatus() {
+  this.$set(this.status, 'statusType', undefined);
+  this.$set(this.status, 'statusMessage', null);
+  this.$set(this.status, 'color', null);
+} // clearStatus
+
 function confirm() {
   if (this.$refs.form.validate()) {
     this.confirming = true;
@@ -569,9 +578,9 @@ function confirm() {
  * @param err - String error message
  */
 async function displayError(err) {
-  this.$set(this.status, 'statusType', 'ERROR');
-  this.$set(this.status, 'statusMessage', err);
-  this.$set(this.status, 'color', 'red');
+  this.$set(this.errorStatus, 'statusType', 'ERROR');
+  this.$set(this.errorStatus, 'statusMessage', err);
+  this.$set(this.errorStatus, 'color', 'red');
 } // displayError
 
 /**
@@ -825,7 +834,7 @@ async function created() {
     this.model.workStatus = 0;
   } else {
     if (this.model.workStatus && this.model.workStatus > 0 && this.model.workStatus < 100) {
-      this.status = this.model.workStatus;
+      this.status = this.model.workStatus.toString();
     } else {
       this.status = null;
     }
@@ -833,6 +842,7 @@ async function created() {
   if (this.employee) {
     this.fullName = `${this.employee.firstName} ${this.employee.lastName}`;
   }
+  this.value = '' + this.model.workStatus;
 }
 
 // |--------------------------------------------------|
@@ -888,6 +898,11 @@ export default {
       },
       employeeRoleFormatted: null, // formatted employee role
       employees: [],
+      errorStatus: {
+        statusType: undefined,
+        statusMessage: null,
+        color: null
+      }, // snack bar error
       fullName: '', // employee's first and last name
       requiredRules: [(v) => !!v || 'This field is required'], // rules for required fields
       hasExpenses: false, // employee has expenses
@@ -1000,6 +1015,7 @@ export default {
       statusRadio: 'full', // work status button
       submitting: false,
       valid: false, // form validity
+      value: '',
       undisabled: false
     };
   },
@@ -1009,6 +1025,7 @@ export default {
   methods: {
     cancel,
     clearForm,
+    clearStatus,
     confirm,
     displayError,
     viewStatus,
