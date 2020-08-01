@@ -13,7 +13,7 @@
         <v-card>
           <v-card-title>
             <!-- display the next anniversary date -->
-            <div v-if="viewingCurrentBudgetYear">
+            <div>
               <h3 class="pt-4 font-16">Anniversary Date: {{ getAnniversary }}</h3>
               <div @mouseover="display = !display" @mouseleave="display = !display" class="pt-4 font-14">
                 <div v-if="display">Days Until: {{ getDaysUntil }}</div>
@@ -81,28 +81,6 @@ const IsoFormat = 'YYYY-MM-DD';
 // |--------------------------------------------------|
 
 /**
- * Gets and calculates employee budget data. Returns multiple lists, consisting of the budgets names, remaining budget,
- * pending amount, and pending overdraft amount.
- *
- * @return Object - budget data
- */
-function budgets() {
-  let budgetNames = []; // budget expense type names
-  let budgetDifference = []; // remaining budget amounts
-  if (this.expenseTypeData !== undefined) {
-    let expenseTypes = this.expenseTypeData;
-    _.forEach(expenseTypes, (expenseType) => {
-      budgetNames.push(expenseType.expenseTypeName);
-    });
-  }
-
-  return {
-    names: budgetNames,
-    difference: budgetDifference
-  };
-} // budgets
-
-/**
  * Get the next anniversary date for the employee based on their hire date.
  *
  * @return String - next employee anniversary date (day of year, month, day, year)
@@ -160,16 +138,6 @@ function getDaysUntil() {
 } // getDaysUntil
 
 /**
- * Get the year for the employee budget year view.
- *
- * @return Int - year for budget year view
- */
-function getFiscalYearView() {
-  let [year] = this.fiscalDateView.split('-');
-  return parseInt(year);
-} // getFiscalYearView
-
-/**
  * Get the seconds until the employee's next anniversary date.
  */
 function getSecondsUntil() {
@@ -193,63 +161,6 @@ function getSecondsUntil() {
     return anniversary.diff(now, 'seconds');
   }
 } // getSecondsUntil
-
-/**
- * Checks if the current device used is mobile. Return true if it is mobile. Returns false if it is not mobile.
- *
- * @return boolean - if the device is mobile
- */
-// function isMobile() {
-//   let md = new MobileDetect(window.navigator.userAgent);
-//   return md.os() === 'AndroidOS' || md.os() === 'iOS';
-// isMobile
-
-/**
- * Checks current breakpoint to set position of the columns for the homepage
- *
- * @return desired col width class
- */
-function screenColOne() {
-  switch (this.$vuetify.breakpoint.name) {
-    case 'xs':
-      return '12';
-    case 'sm':
-      return '12';
-    case 'md':
-      return '8';
-    case 'lg':
-      return '8';
-    case 'xl':
-      return '8';
-  }
-}
-/**
- * Checks current breakpoint to set position of the columns for the activityFeed
- *
- * @return desired col width class
- */
-function screenColTwo() {
-  switch (this.$vuetify.breakpoint.name) {
-    case 'xs':
-      return '12';
-    case 'sm':
-      return '12';
-    case 'md':
-      return '4';
-    case 'lg':
-      return '4';
-    case 'xl':
-      return '4';
-  }
-}
-/**
- * Viewing the current active budget year. Returns true if the budget year being viwed is todays budget.
- *
- * @return boolean - viewing the current active year budget
- */
-function viewingCurrentBudgetYear() {
-  return this.fiscalDateView == this.getCurrentBudgetYear();
-} // viewingCurrentBudgetYear
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -604,19 +515,14 @@ export default {
     TwitterFeed
   },
   computed: {
-    budgets,
     getAnniversary,
     getDaysUntil,
-    getFiscalYearView,
-    getSecondsUntil,
-    //    isMobile,
-    screenColOne,
-    screenColTwo,
-    viewingCurrentBudgetYear
+    getSecondsUntil
   },
   created,
   data() {
     return {
+      actualTime: moment().format('X'),
       aggregatedExpenses: [],
       allUserBudgets: null, // all user budgets
       budgetYears: [], // list of options for chaning budget year view
