@@ -17,7 +17,9 @@
           <v-card-title class="header_style" v-if="!editing">
             <h3>{{ this.model.firstName }} {{ this.model.lastName }}</h3>
             <v-spacer></v-spacer>
-            <v-icon @click="editing = true" style="color: white;" align="right">edit</v-icon>
+            <v-icon v-if="userIsAdmin() || userIsEmployee()" @click="editing = true" style="color: white;" align="right"
+              >edit</v-icon
+            >
           </v-card-title>
           <employee-info :model="this.model" v-if="!editing"></employee-info>
         </v-card>
@@ -34,7 +36,6 @@ import AvailableBudgets from '@/components/AvailableBudgets.vue';
 import EmployeeForm from '../components/EmployeeForm.vue';
 import EmployeeInfo from '../components/EmployeeInfo.vue';
 import { getRole } from '@/utils/auth';
-import moment from 'moment';
 import _ from 'lodash';
 
 // |--------------------------------------------------|
@@ -107,6 +108,15 @@ function userIsAdmin() {
   return getRole() === 'admin';
 } // userIsAdmin
 
+/**
+ * Check if the user the employee displayed. Returns true if the user is the employee displayed, otherwise returns false.
+ *
+ * @return boolean - user is the employee displayed
+ */
+function userIsEmployee() {
+  return !_.isNil(this.model) && !_.isNil(this.user) ? this.user.employeeNumber === this.model.employeeNumber : false;
+} // userIsEmployee
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                 LIFECYCLE HOOKS                  |
@@ -117,13 +127,15 @@ function userIsAdmin() {
  *  Adjust datatable header for user view. Creates event listeners.
  */
 async function created() {
-  await this.getEmployee();
   window.EventBus.$on('cancel-form', () => {
     this.editing = false;
   });
   window.EventBus.$on('update', (updatedEmployee) => {
     this.model = updatedEmployee;
   });
+
+  await this.getEmployee();
+  this.user = await api.getUser();
 } // created
 
 // |--------------------------------------------------|
@@ -173,32 +185,17 @@ export default {
         statusType: undefined,
         statusMessage: '',
         color: ''
-      } // snackbar action status
+      }, // snackbar action status
+      user: null
     };
-  },
-  filters: {
-    // formats a date by month, day, year (e.g. Aug 18th, 2020)
-    dateFormat: (value) => {
-      if (!isEmpty(value)) {
-        return moment(value).format('MMM Do, YYYY');
-      } else {
-        return '';
-      }
-    },
-    birthdayFeedResponse: (value) => {
-      if (value == true) {
-        return 'yes';
-      } else {
-        return 'no';
-      }
-    }
   },
   methods: {
     isDisplayData,
     isEmpty,
     getEmployee,
     getWorkStatus,
-    userIsAdmin
+    userIsAdmin,
+    userIsEmployee
   }
 };
 </script>

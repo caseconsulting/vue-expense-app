@@ -27,8 +27,9 @@
       <v-container fluid>
         <v-form ref="form" v-model="valid" lazy-validation>
           <!-- Tabs -->
-          <v-tabs show-arrows class="pb-4">
-            <v-tab href="#employee">General Info</v-tab>
+          <v-tabs show-arrows class="pb-0">
+            <v-tab href="#employee">Employee Info</v-tab>
+            <v-tab href="#personal">Personal Info</v-tab>
             <v-tab href="#degrees">Degrees</v-tab>
             <v-tab href="#jobExperience">Job Experience</v-tab>
             <v-tab href="#certifications">Certifications</v-tab>
@@ -103,8 +104,94 @@
                 </template>
                 <v-date-picker v-model="hireDate" no-title @input="hireMenu = false"></v-date-picker>
               </v-menu>
-              <br />
 
+              <!-- Full/Part/Inactive Status [MOBILE] -->
+              <v-radio-group v-if="isMobile()" v-model="statusRadio" row mandatory>
+                <v-row class="ml-0">
+                  <v-col cols="6" sm="3">
+                    <v-radio label="Full Time" value="full"></v-radio>
+                  </v-col>
+                  <v-col cols="6" sm="3">
+                    <v-radio label="Part Time" value="part" @change="viewStatus()"></v-radio>
+                  </v-col>
+                  <v-col cols="6" sm="3">
+                    <v-radio label="Inactive" value="inactive"></v-radio>
+                  </v-col>
+                  <!-- Custom Input Field -->
+                  <v-col cols="6" sm="3">
+                    <div :class="{ customInput: isPartTime() }">
+                      <div :class="['percentageBox', { disabled: !isPartTime(), inputError: isStatusEmpty() }]">
+                        <input
+                          v-model="status"
+                          type="text"
+                          oninput="this.value = this.value.replace(/[^0-9]/g, '');"
+                          maxlength="2"
+                          :disabled="!isPartTime()"
+                        />
+                        <div>%</div>
+                      </div>
+                    </div>
+                  </v-col>
+                  <!-- End Custom Input Field -->
+                </v-row>
+              </v-radio-group>
+              <!-- End [Full/Part/Inactive Status [MOBILE]] -->
+
+              <!-- Full/Part/Inactive Status [DESKTOP] -->
+              <v-radio-group v-else v-model="statusRadio" row mandatory hide-details>
+                <v-radio label="Full Time" value="full"></v-radio>
+                <v-radio label="Part Time" value="part" @change="viewStatus()"></v-radio>
+                <v-radio label="Inactive" value="inactive"></v-radio>
+                <!-- custom input field -->
+                <div :class="{ customInput: isPartTime() }">
+                  <div :class="['percentageBox', { disabled: !isPartTime(), inputError: isStatusEmpty() }]">
+                    <input
+                      v-model="status"
+                      type="text"
+                      oninput="this.value = this.value.replace(/[^0-9]/g, '');"
+                      maxlength="2"
+                      :disabled="!isPartTime()"
+                    />
+                    <div>%</div>
+                  </div>
+                </div>
+                <!-- End Full/Part/Inactive Status [DESKTOP] -->
+              </v-radio-group>
+              <!-- End [DESKTOP] -->
+
+              <!-- If inactive, set Departure Date -->
+              <v-menu
+                v-if="isInactive()"
+                ref="departureMenu"
+                :close-on-content-click="true"
+                v-model="departureMenu"
+                :nudge-right="40"
+                transition="scale-transition"
+                offset-y
+                max-width="290px"
+                min-width="290px"
+                style="padding-right: 20px; padding-bottom: 20px;"
+              >
+                <template v-slot:activator="{ on }">
+                  <v-text-field
+                    v-model="deptDateFormatted"
+                    :rules="dateRules"
+                    label="Departure Date"
+                    hint="MM/DD/YYYY format"
+                    persistent-hint
+                    prepend-icon="event"
+                    @blur="model.deptDate = parseDate(deptDateFormatted)"
+                    v-on="on"
+                  ></v-text-field>
+                </template>
+                <v-date-picker v-model="model.deptDate" no-title @input="departureMenu = false"></v-date-picker>
+              </v-menu>
+              <!-- End Full/Part/Inactive Status [DESKTOP] -->
+            </v-tab-item>
+            <!-- End Employee Info -->
+
+            <!-- Personal Info -->
+            <v-tab-item id="personal">
               <!-- Advanced section -->
               <v-expansion-panels accordion>
                 <v-expansion-panel>
@@ -226,90 +313,9 @@
                   </v-expansion-panel-content>
                 </v-expansion-panel>
               </v-expansion-panels>
-
-              <!-- Full/Part/Inactive Status [MOBILE] -->
-              <v-radio-group v-if="isMobile()" v-model="statusRadio" row mandatory>
-                <v-row class="ml-0">
-                  <v-col cols="6" sm="3">
-                    <v-radio label="Full Time" value="full"></v-radio>
-                  </v-col>
-                  <v-col cols="6" sm="3">
-                    <v-radio label="Part Time" value="part" @change="viewStatus()"></v-radio>
-                  </v-col>
-                  <v-col cols="6" sm="3">
-                    <v-radio label="Inactive" value="inactive"></v-radio>
-                  </v-col>
-                  <!-- Custom Input Field -->
-                  <v-col cols="6" sm="3">
-                    <div :class="{ customInput: isPartTime() }">
-                      <div :class="['percentageBox', { disabled: !isPartTime(), inputError: isStatusEmpty() }]">
-                        <input
-                          v-model="status"
-                          type="text"
-                          oninput="this.value = this.value.replace(/[^0-9]/g, '');"
-                          maxlength="2"
-                          :disabled="!isPartTime()"
-                        />
-                        <div>%</div>
-                      </div>
-                    </div>
-                  </v-col>
-                  <!-- End Custom Input Field -->
-                </v-row>
-              </v-radio-group>
-              <!-- End [Full/Part/Inactive Status [MOBILE]] -->
-
-              <!-- Full/Part/Inactive Status [DESKTOP] -->
-              <v-radio-group v-else v-model="statusRadio" row mandatory>
-                <v-radio label="Full Time" value="full"></v-radio>
-                <v-radio label="Part Time" value="part" @change="viewStatus()"></v-radio>
-                <v-radio label="Inactive" value="inactive"></v-radio>
-                <!-- custom input field -->
-                <div :class="{ customInput: isPartTime() }">
-                  <div :class="['percentageBox', { disabled: !isPartTime(), inputError: isStatusEmpty() }]">
-                    <input
-                      v-model="status"
-                      type="text"
-                      oninput="this.value = this.value.replace(/[^0-9]/g, '');"
-                      maxlength="2"
-                      :disabled="!isPartTime()"
-                    />
-                    <div>%</div>
-                  </div>
-                </div>
-                <!-- End Full/Part/Inactive Status [DESKTOP] -->
-              </v-radio-group>
-              <!-- End [DESKTOP] -->
-
-              <!-- If inactive, set Departure Date -->
-              <v-menu
-                v-if="isInactive()"
-                ref="departureMenu"
-                :close-on-content-click="true"
-                v-model="departureMenu"
-                :nudge-right="40"
-                transition="scale-transition"
-                offset-y
-                max-width="290px"
-                min-width="290px"
-                style="padding-right: 20px; padding-bottom: 20px;"
-              >
-                <template v-slot:activator="{ on }">
-                  <v-text-field
-                    v-model="deptDateFormatted"
-                    :rules="dateRules"
-                    label="Departure Date"
-                    hint="MM/DD/YYYY format"
-                    persistent-hint
-                    prepend-icon="event"
-                    @blur="model.deptDate = parseDate(deptDateFormatted)"
-                    v-on="on"
-                  ></v-text-field>
-                </template>
-                <v-date-picker v-model="model.deptDate" no-title @input="departureMenu = false"></v-date-picker>
-              </v-menu>
-              <!-- End Full/Part/Inactive Status [DESKTOP] -->
             </v-tab-item>
+            <!-- End Personal Info -->
+
             <!-- Degrees -->
             <v-tab-item id="degrees">
               <p class="pr-5" style="display: inline-block;">Degree:</p>

@@ -2,7 +2,8 @@
   <v-card-text class="px-7 pt-5 pb-1 black--text">
     <div class="savedInfo">
       <v-tabs center-active show-arrows class="pb-4">
-        <v-tab href="#employee">General Info</v-tab>
+        <v-tab href="#employee">Employee Info</v-tab>
+        <v-tab href="#personal">Personal Info</v-tab>
         <v-tab href="#degrees">Degrees</v-tab>
         <v-tab href="#jobExperience">Job Experience</v-tab>
         <v-tab href="#certifications">Certifications</v-tab>
@@ -22,6 +23,11 @@
             <b>Status: </b>
             {{ getWorkStatus(this.model.workStatus) }}
           </p>
+          <p v-if="!isEmpty(this.model.deptDate) && userIsAdmin()">
+            <b>Departure Date: </b>{{ this.model.deptDate | dateFormat }}
+          </p>
+        </v-tab-item>
+        <v-tab-item id="personal">
           <p v-if="!isEmpty(this.model.prime)"><b>Prime: </b> {{ this.model.prime }}</p>
           <p v-if="!isEmpty(this.model.contract)"><b>Contract: </b>{{ this.model.contract }}</p>
           <p v-if="!isEmpty(this.model.jobRole)"><b>Job Role: </b>{{ this.model.jobRole }}</p>
@@ -63,9 +69,6 @@
           <p v-else-if="!isEmpty(this.model.country) && (userIsAdmin() || userIsEmployee())">
             <b>Place of Birth: </b>
             {{ this.model.country }}
-          </p>
-          <p v-if="!isEmpty(this.model.deptDate) && userIsAdmin()">
-            <b>Departure Date: </b>{{ this.model.deptDate | dateFormat }}
           </p>
         </v-tab-item>
       </v-tabs>
@@ -125,7 +128,7 @@ function userIsAdmin() {
  */
 function userIsEmployee() {
   return !_.isNil(this.model) && !_.isNil(this.user) ? this.user.employeeNumber === this.model.employeeNumber : false;
-} // userIsAdmin
+} // userIsEmployee
 
 // |--------------------------------------------------|
 // |                                                  |
