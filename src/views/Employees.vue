@@ -70,7 +70,7 @@
         <br />
         <!-- End Filters -->
         <!-- Create an Employee -->
-        <v-btn class="mb-5" @click="createEmployee = true">
+        <v-btn class="mb-5" @click="createEmployee = true" v-if="userIsAdmin()">
           Create an Employee<v-icon class="pl-2">person_add</v-icon>
         </v-btn>
 
