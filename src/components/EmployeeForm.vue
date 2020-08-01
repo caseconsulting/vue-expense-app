@@ -28,8 +28,8 @@
         <v-form ref="form" v-model="valid" lazy-validation>
           <!-- Tabs -->
           <v-tabs show-arrows class="pb-0">
-            <v-tab href="#employee">Employee Info</v-tab>
-            <v-tab href="#personal">Personal Info</v-tab>
+            <v-tab href="#employee">Employee</v-tab>
+            <v-tab href="#personal">Personal</v-tab>
             <v-tab href="#degrees">Degrees</v-tab>
             <v-tab href="#jobExperience">Job Experience</v-tab>
             <v-tab href="#certifications">Certifications</v-tab>
@@ -43,17 +43,20 @@
                 :rules="requiredRules"
                 label="First Name"
                 data-vv-name="First Name"
+                :disabled="!userIsAdmin()"
               ></v-text-field>
               <v-text-field
                 v-model="model.middleName"
                 label="Middle Name (optional)"
                 data-vv-name="Middle Name"
+                :disabled="!userIsAdmin()"
               ></v-text-field>
               <v-text-field
                 v-model="model.lastName"
                 :rules="requiredRules"
                 label="Last Name"
                 data-vv-name="Last Name"
+                :disabled="!userIsAdmin()"
               ></v-text-field>
 
               <!-- Employee # -->
@@ -62,10 +65,17 @@
                 :rules="numberRules"
                 label="Employee #"
                 data-vv-name="Employee #"
+                :disabled="!userIsAdmin()"
               ></v-text-field>
 
               <!-- Email -->
-              <v-text-field v-model="model.email" :rules="emailRules" label="Email" data-vv-name="Email"></v-text-field>
+              <v-text-field
+                v-model="model.email"
+                :rules="emailRules"
+                label="Email"
+                data-vv-name="Email"
+                :disabled="!userIsAdmin()"
+              ></v-text-field>
 
               <!-- Employee Role -->
               <v-autocomplete
@@ -88,12 +98,13 @@
                 max-width="290px"
                 min-width="290px"
                 style="padding-right: 20px; padding-bottom: 20px;"
+                :disabled="!userIsAdmin()"
               >
                 <template v-slot:activator="{ on }">
                   <v-text-field
                     v-model="hireDateFormatted"
                     :rules="dateRules"
-                    :disabled="hasExpenses"
+                    :disabled="hasExpenses || !userIsAdmin()"
                     label="Hire Date"
                     hint="MM/DD/YYYY format"
                     persistent-hint
@@ -102,11 +113,16 @@
                     v-on="on"
                   ></v-text-field>
                 </template>
-                <v-date-picker v-model="hireDate" no-title @input="hireMenu = false"></v-date-picker>
+                <v-date-picker
+                  v-model="hireDate"
+                  no-title
+                  @input="hireMenu = false"
+                  :disabled="!userIsAdmin()"
+                ></v-date-picker>
               </v-menu>
 
               <!-- Full/Part/Inactive Status [MOBILE] -->
-              <v-radio-group v-if="isMobile()" v-model="statusRadio" row mandatory>
+              <v-radio-group v-if="isMobile()" v-model="statusRadio" row mandatory :disabled="!userIsAdmin()">
                 <v-row class="ml-0">
                   <v-col cols="6" sm="3">
                     <v-radio label="Full Time" value="full"></v-radio>
@@ -138,7 +154,7 @@
               <!-- End [Full/Part/Inactive Status [MOBILE]] -->
 
               <!-- Full/Part/Inactive Status [DESKTOP] -->
-              <v-radio-group v-else v-model="statusRadio" row mandatory hide-details>
+              <v-radio-group v-else v-model="statusRadio" row mandatory hide-details :disabled="!userIsAdmin()">
                 <v-radio label="Full Time" value="full"></v-radio>
                 <v-radio label="Part Time" value="part" @change="viewStatus()"></v-radio>
                 <v-radio label="Inactive" value="inactive"></v-radio>
@@ -171,6 +187,7 @@
                 max-width="290px"
                 min-width="290px"
                 style="padding-right: 20px; padding-bottom: 20px;"
+                :disabled="!userIsAdmin()"
               >
                 <template v-slot:activator="{ on }">
                   <v-text-field
@@ -182,9 +199,15 @@
                     prepend-icon="event"
                     @blur="model.deptDate = parseDate(deptDateFormatted)"
                     v-on="on"
+                    :disabled="!userIsAdmin()"
                   ></v-text-field>
                 </template>
-                <v-date-picker v-model="model.deptDate" no-title @input="departureMenu = false"></v-date-picker>
+                <v-date-picker
+                  v-model="model.deptDate"
+                  no-title
+                  @input="departureMenu = false"
+                  :disabled="!userIsAdmin()"
+                ></v-date-picker>
               </v-menu>
               <!-- End Full/Part/Inactive Status [DESKTOP] -->
             </v-tab-item>

@@ -2,8 +2,8 @@
   <v-card-text class="px-7 pt-5 pb-1 black--text">
     <div class="savedInfo">
       <v-tabs center-active show-arrows class="pb-4">
-        <v-tab href="#employee">Employee Info</v-tab>
-        <v-tab href="#personal">Personal Info</v-tab>
+        <v-tab href="#employee">Employee</v-tab>
+        <v-tab href="#personal">Personal</v-tab>
         <v-tab href="#degrees">Degrees</v-tab>
         <v-tab href="#jobExperience">Job Experience</v-tab>
         <v-tab href="#certifications">Certifications</v-tab>
