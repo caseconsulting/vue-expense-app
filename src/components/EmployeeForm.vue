@@ -215,127 +215,116 @@
 
             <!-- Personal Info -->
             <v-tab-item id="personal">
-              <!-- Advanced section -->
-              <v-expansion-panels accordion>
-                <v-expansion-panel>
-                  <v-expansion-panel-header style="background-color: whitesmoke;"
-                    >ADVANCED (optional)</v-expansion-panel-header
-                  >
-                  <v-expansion-panel-content style="background-color: whitesmoke;">
-                    <!-- Prime combo box -->
-                    <v-combobox
-                      style="padding-right: 20px; padding-left: 10px;"
-                      v-model="model.prime"
-                      :items="employeeInfo.primes"
-                      label="Prime"
-                      data-vv-name="Prime"
-                      dense
-                    ></v-combobox>
+              <v-combobox
+                style="padding-right: 20px; padding-left: 10px;"
+                v-model="model.prime"
+                :items="employeeInfo.primes"
+                label="Prime"
+                data-vv-name="Prime"
+                dense
+              ></v-combobox>
 
-                    <!-- Contract combo box -->
-                    <v-combobox
-                      style="padding-right: 20px; padding-left: 10px;"
-                      v-model="model.contract"
-                      :items="employeeInfo.contracts"
-                      label="Contract"
-                      data-vv-name="Contract"
-                      dense
-                    ></v-combobox>
+              <!-- Contract combo box -->
+              <v-combobox
+                style="padding-right: 20px; padding-left: 10px;"
+                v-model="model.contract"
+                :items="employeeInfo.contracts"
+                label="Contract"
+                data-vv-name="Contract"
+                dense
+              ></v-combobox>
 
-                    <!-- Github text field -->
-                    <v-text-field
-                      style="padding-right: 20px; padding-left: 10px;"
-                      v-model="model.github"
-                      label="Github"
-                      data-vv-name="Github"
-                    ></v-text-field>
+              <!-- Github text field -->
+              <v-text-field
+                style="padding-right: 20px; padding-left: 10px;"
+                v-model="model.github"
+                label="Github"
+                data-vv-name="Github"
+              ></v-text-field>
 
-                    <!-- Twitter text field -->
-                    <v-text-field
-                      style="padding-right: 20px; padding-left: 10px;"
-                      v-model="model.twitter"
-                      label="Twitter"
-                      data-vv-name="Twitter"
-                    ></v-text-field>
+              <!-- Twitter text field -->
+              <v-text-field
+                style="padding-right: 20px; padding-left: 10px;"
+                v-model="model.twitter"
+                label="Twitter"
+                data-vv-name="Twitter"
+              ></v-text-field>
 
-                    <!-- Job Role autocomplete -->
-                    <v-autocomplete
-                      style="padding-right: 20px; padding-left: 10px;"
-                      :items="jobRoles"
-                      v-model="model.jobRole"
-                      item-text="text"
-                      label="Job Role"
-                    ></v-autocomplete>
+              <!-- Job Role autocomplete -->
+              <v-autocomplete
+                style="padding-right: 20px; padding-left: 10px;"
+                :items="jobRoles"
+                v-model="model.jobRole"
+                item-text="text"
+                label="Job Role"
+              ></v-autocomplete>
 
-                    <!-- Birthday Picker -->
-                    <v-menu
-                      ref="BirthdayMenu"
-                      :close-on-content-click="true"
-                      v-model="BirthdayMenu"
-                      :nudge-right="40"
-                      transition="scale-transition"
-                      offset-y
-                      max-width="290px"
-                      min-width="290px"
-                      style="padding-right: 20px; padding-bottom: 20px;"
-                    >
-                      <template v-slot:activator="{ on }">
-                        <v-text-field
-                          v-model="birthdayFormat"
-                          :rules="dateOptionalRules"
-                          label="Birthday"
-                          hint="MM/DD/YYYY format"
-                          persistent-hint
-                          prepend-icon="event"
-                          @blur="model.birthday = parseDate(birthdayFormat)"
-                          v-on="on"
-                        ></v-text-field>
-                      </template>
-                      <v-date-picker v-model="model.birthday" no-title @input="BirthdayMenu = false"></v-date-picker>
-                    </v-menu>
+              <!-- Birthday Picker -->
+              <v-menu
+                ref="BirthdayMenu"
+                :close-on-content-click="true"
+                v-model="BirthdayMenu"
+                :nudge-right="40"
+                transition="scale-transition"
+                offset-y
+                max-width="290px"
+                min-width="290px"
+                style="padding-right: 20px; padding-bottom: 20px;"
+              >
+                <template v-slot:activator="{ on }">
+                  <v-text-field
+                    v-model="birthdayFormat"
+                    :rules="dateOptionalRules"
+                    label="Birthday"
+                    hint="MM/DD/YYYY format"
+                    persistent-hint
+                    prepend-icon="event"
+                    @blur="model.birthday = parseDate(birthdayFormat)"
+                    v-on="on"
+                  ></v-text-field>
+                </template>
+                <v-date-picker v-model="model.birthday" no-title @input="BirthdayMenu = false"></v-date-picker>
+              </v-menu>
 
-                    <!-- opt out of birthday feed -->
-                    <v-switch
-                      v-model="model.birthdayFeed"
-                      label="Have birthday recognized on company feed?"
-                      :disabled="disableBirthdayFeed()"
-                    ></v-switch>
+              <!-- opt out of birthday feed -->
+              <v-switch
+                v-model="model.birthdayFeed"
+                label="Have birthday recognized on company feed?"
+                :disabled="disableBirthdayFeed()"
+              ></v-switch>
 
-                    <!-- Place of Birth -->
-                    <p style="font-size: 17px; padding-left: 10px; padding-top: 10px;">Place of Birth</p>
-                    <div style="padding-right: 20px; padding-left: 30px; padding-bottom: 10px;">
-                      <div style="border-left-style: groove; padding-right: 20px; padding-left: 10px;">
-                        <!-- Place of Birth: City text field -->
-                        <v-text-field
-                          v-model="model.city"
-                          label="City"
-                          data-vv-name="City"
-                          style="padding-top: 0px;"
-                        ></v-text-field>
+              <!-- Place of Birth -->
+              <p style="font-size: 17px; padding-left: 10px; padding-top: 10px;">Place of Birth</p>
+              <div style="padding-right: 20px; padding-left: 30px; padding-bottom: 10px;">
+                <div style="border-left-style: groove; padding-right: 20px; padding-left: 10px;">
+                  <!-- Place of Birth: City text field -->
+                  <v-text-field
+                    v-model="model.city"
+                    label="City"
+                    data-vv-name="City"
+                    style="padding-top: 0px;"
+                  ></v-text-field>
 
-                        <!-- Place of Birth: Country autocomplete -->
-                        <v-autocomplete
-                          :items="countries"
-                          v-model="model.country"
-                          item-text="text"
-                          label="Country"
-                          style="padding-top: 0px; padding-bottom: 0px;"
-                        ></v-autocomplete>
+                  <!-- Place of Birth: Country autocomplete -->
+                  <v-autocomplete
+                    :items="countries"
+                    v-model="model.country"
+                    item-text="text"
+                    label="Country"
+                    style="padding-top: 0px; padding-bottom: 0px;"
+                  ></v-autocomplete>
 
-                        <!-- Place of Birth: State autocomplete -->
-                        <v-autocomplete
-                          v-if="isUSA"
-                          :items="states"
-                          v-model="model.st"
-                          item-text="text"
-                          label="State"
-                          style="padding-top: 0px;"
-                        ></v-autocomplete>
-                      </div>
-                    </div>
-                  </v-expansion-panel-content>
-                </v-expansion-panel>
-              </v-expansion-panels>
+                  <!-- Place of Birth: State autocomplete -->
+                  <v-autocomplete
+                    v-if="isUSA"
+                    :items="states"
+                    v-model="model.st"
+                    item-text="text"
+                    label="State"
+                    style="padding-top: 0px;"
+                  ></v-autocomplete>
+                </div>
+              </div>
             </v-tab-item>
             <!-- End Personal Info -->
 

@@ -124,19 +124,25 @@ function userIsEmployee() {
 // |--------------------------------------------------|
 
 /**
- *  Adjust datatable header for user view. Creates event listeners.
+ *  Adjust datatable header for user view.
  */
 async function created() {
-  window.EventBus.$on('cancel-form', () => {
-    this.editing = false;
-  });
-  window.EventBus.$on('update', (updatedEmployee) => {
-    this.model = updatedEmployee;
-  });
-
   await this.getEmployee();
   this.user = await api.getUser();
 } // created
+
+/**
+ * Mount event listeners.
+ */
+async function mounted() {
+  window.EventBus.$on('cancel-form', () => {
+    this.editing = false;
+  });
+
+  window.EventBus.$on('update', (updatedEmployee) => {
+    this.model = updatedEmployee;
+  });
+} // mounted
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -196,6 +202,7 @@ export default {
     getWorkStatus,
     userIsAdmin,
     userIsEmployee
-  }
+  },
+  mounted
 };
 </script>
