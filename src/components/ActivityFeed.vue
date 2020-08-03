@@ -3,7 +3,7 @@
     <!-- title -->
     <v-card class="white--text" color="#bc3825">
       <v-card-title class="header_style">
-        <h4>Activity Feed</h4>
+        <h3>Activity Feed</h3>
       </v-card-title>
     </v-card>
     <!-- loading bar -->

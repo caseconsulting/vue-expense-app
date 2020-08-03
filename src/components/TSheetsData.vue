@@ -2,7 +2,7 @@
   <div id="t-sheets-data">
     <v-card>
       <v-card-title class="header_style">
-        <h4>TSheets Data</h4>
+        <h3>TSheets Data</h3>
         <v-spacer></v-spacer>
         <v-switch v-model="showMinutes" dense hide-details color="gray" class="my-0 py-0"></v-switch>
       </v-card-title>

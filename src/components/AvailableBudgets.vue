@@ -3,9 +3,9 @@
     <v-card>
       <v-card-title class="header_style">
         <router-link to="/myBudgets" style="text-decoration: none;">
-          <h4 id="link" class="white--text px-2">
+          <h3 id="link" class="white--text px-2">
             Available Budgets
-          </h4>
+          </h3>
         </router-link>
       </v-card-title>
       <v-card-text class="px-7 pt-5 pb-1 black--text">
@@ -240,6 +240,6 @@ export default {
 </script>
 <style>
 #link:hover {
-  font-size: 18px;
+  font-size: 20px;
 }
 </style>

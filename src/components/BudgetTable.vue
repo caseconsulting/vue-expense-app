@@ -9,7 +9,7 @@
               <v-card>
                 <!-- Budget Name -->
                 <v-card-title class="header_style">
-                  <h4 class="white--text">{{ item.expenseTypeName }}</h4>
+                  <h3 class="white--text">{{ item.expenseTypeName }}</h3>
                 </v-card-title>
                 <v-divider></v-divider>
                 <v-list class="pt-1" dense>
