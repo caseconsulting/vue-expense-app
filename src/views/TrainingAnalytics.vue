@@ -52,32 +52,34 @@
           <v-row dense>
             <v-col cols="12">
               <v-card color="#565651" dark :href="url.id" target="_blank">
-                <v-row class="ma-1">
+                <v-row class="ma-1" dense>
                   <v-col cols="12" sm="3" md="2" xl="1" class="text-center">
                     <v-avatar class="ma-1" size="100" tile>
                       <img :src="url.display" :class="{ caseImage: url.isCaseLogo }" @error="changeDisplay(url)" />
                     </v-avatar>
-                    <h3 v-if="!isEmpty(url.title)">{{ url.publisher }}</h3>
+                    <h3 v-if="url.publisher">{{ url.publisher }}</h3>
                   </v-col>
 
                   <v-col cols="12" sm="9" md="10" xl="11" class="py-0">
                     <v-row no-gutters class="fill-height">
-                      <!-- Title and Description -->
-                      <div v-if="!isEmpty(url.title)">
-                        <v-card-title class="headline" v-text="url.title"></v-card-title>
-                        <v-card-subtitle v-text="url.description"></v-card-subtitle>
-                      </div>
+                      <v-col cols="12">
+                        <!-- Title and Description -->
+                        <div v-if="!isEmpty(url.title)">
+                          <v-card-title class="headline" v-text="url.title"></v-card-title>
+                          <v-card-subtitle v-text="url.description"></v-card-subtitle>
+                        </div>
 
-                      <!-- No title or Description -->
-                      <div v-else class="urlBox pt-4">{{ url.id }}</div>
-
-                      <!-- Hit Count -->
-                      <v-spacer></v-spacer>
-                      <div class="mr-2">
-                        <span v-if="isEmpty(url.title)" style="float: left;">{{ url.publisher }}</span>
-                        <span class="subheading hitText">{{ url.hits }}</span>
-                        <icon name="crosshairs" class="hitIcon" scale="1"></icon>
-                      </div>
+                        <!-- No title or Description -->
+                        <div v-else class="urlBox pt-4">{{ url.id }}</div>
+                      </v-col>
+                      <v-col cols="12" align-self="end">
+                        <!-- Hit Count -->
+                        <v-spacer></v-spacer>
+                        <div class="mr-2">
+                          <span class="subheading hitText">{{ url.hits }}</span>
+                          <icon name="crosshairs" class="hitIcon" scale="1"></icon>
+                        </div>
+                      </v-col>
                     </v-row>
                   </v-col>
                 </v-row>
