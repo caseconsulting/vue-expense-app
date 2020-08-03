@@ -149,10 +149,10 @@
 
 <script>
 import api from '@/shared/api.js';
-import ConvertEmployeesToCsv from '../components/ConvertEmployeesToCsv.vue';
-import DeleteErrorModal from '../components/DeleteErrorModal.vue';
-import DeleteModal from '../components/DeleteModal.vue';
-import EmployeeForm from '../components/EmployeeForm.vue';
+import ConvertEmployeesToCsv from '@/components/ConvertEmployeesToCsv.vue';
+import DeleteErrorModal from '@/components/DeleteErrorModal.vue';
+import DeleteModal from '@/components/DeleteModal.vue';
+import EmployeeForm from '@/components/employees/EmployeeForm.vue';
 import { getRole } from '@/utils/auth';
 import moment from 'moment';
 import _ from 'lodash';

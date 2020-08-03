@@ -33,8 +33,8 @@
 <script>
 import api from '@/shared/api.js';
 import AvailableBudgets from '@/components/AvailableBudgets.vue';
-import EmployeeForm from '../components/EmployeeForm.vue';
-import EmployeeInfo from '../components/EmployeeInfo.vue';
+import EmployeeForm from '@/components/employees/EmployeeForm.vue';
+import EmployeeInfo from '@/components/employees/EmployeeInfo.vue';
 import { getRole } from '@/utils/auth';
 import _ from 'lodash';
 
