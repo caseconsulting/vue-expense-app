@@ -57,6 +57,9 @@ async function created() {
   if (route == 'help2') {
     this.panel = 0;
   }
+  if (route == 'help3') {
+    this.panel = 3;
+  }
 } // created
 
 // |--------------------------------------------------|

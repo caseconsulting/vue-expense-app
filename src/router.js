@@ -67,6 +67,12 @@ const router = new Router({
       beforeEnter: requireAuth
     },
     {
+      path: '/help/expenseTypes',
+      name: 'help3',
+      component: Help,
+      beforeEnter: requireAuth
+    },
+    {
       path: '/myBudgets',
       name: 'myBudgets',
       component: EmployeeHome,

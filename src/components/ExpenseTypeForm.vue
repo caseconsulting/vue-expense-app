@@ -127,7 +127,10 @@
         ></v-textarea>
 
         <!-- Accessibility -->
-        <div style="color: dimgray;">Employee Access</div>
+        <div style="color: dimgray;">
+          Employee Access
+          <router-link to="/help/expenseTypes" tag="v-icon">info</router-link>
+        </div>
 
         <v-radio-group v-model="model.accessibleBy" class="smallRadio ma-0" row mandatory>
           <v-radio label="All" value="ALL"></v-radio>
