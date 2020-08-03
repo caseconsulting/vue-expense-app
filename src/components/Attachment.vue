@@ -1,12 +1,12 @@
 <template>
-  <!-- Admin Dashboard -->
+  <!-- Reimbursements -->
   <div v-if="this.mode === 'adminExpenseInfo'">
     <!-- admin dashboard has attachment -->
     <v-btn v-if="!isEmpty(this.expense.receipt)" :disabled="midAction" icon color="primary" @click="openDownloadTab">
       <icon name="cloud-download-alt" style="color: #004c54;" scale="2"></icon>
     </v-btn>
   </div>
-  <!-- End Admin Dashboard -->
+  <!-- End Reimbursements -->
 
   <!-- Expenses -->
   <div v-else>
@@ -26,29 +26,7 @@
 
 <script>
 import api from '../shared/api';
-import { API_CONFIG } from '../shared/api-variables';
 import _ from 'lodash';
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                     COMPUTED                     |
-// |                                                  |
-// |--------------------------------------------------|
-
-/**
- *  NOTE: UNUSED?
- *
- * @return
- */
-function link() {
-  const API_HOSTNAME = API_CONFIG.apiHostname;
-  const API_PORT = API_CONFIG.apiPort;
-  const endLink = `attachment/${this.expense.employeeId}/${this.expense.id}`;
-
-  if (API_HOSTNAME === 'localhost') return `http://${API_HOSTNAME}:${API_PORT}/${endLink}`;
-  else return `https://${API_HOSTNAME}/${endLink}`;
-} // link
-
 // |--------------------------------------------------|
 // |                                                  |
 // |                     METHODS                      |
@@ -80,9 +58,6 @@ async function openDownloadTab() {
 // |--------------------------------------------------|
 
 export default {
-  computed: {
-    link
-  },
   methods: {
     isEmpty,
     openDownloadTab

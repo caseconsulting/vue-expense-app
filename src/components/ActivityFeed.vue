@@ -57,7 +57,9 @@
 </template>
 
 <script>
-//function item
+/**
+ * itemHeight - determines the height of each item in the activity feed.
+ */
 function itemHeight() {
   switch (this.$vuetify.breakpoint.name) {
     case 'xs':
@@ -71,7 +73,7 @@ function itemHeight() {
     case 'xl':
       return 100;
   }
-}
+} // itemHeight
 export default {
   data() {
     return {

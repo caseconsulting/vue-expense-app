@@ -2,16 +2,11 @@
   <div id="available-budgets">
     <v-card>
       <v-card-title class="header_style">
-        <v-hover v-slot:default="{ hover }">
-          <router-link to="/myBudgets" style="text-decoration: none;">
-            <h4
-              class="white--text px-2"
-              :class="[active || hover ? 'darken' : 'transparent', hover ? 'elevation-4' : '']"
-            >
-              Available Budgets
-            </h4>
-          </router-link>
-        </v-hover>
+        <router-link to="/myBudgets" style="text-decoration: none;">
+          <h4 id="link" class="white--text px-2">
+            Available Budgets
+          </h4>
+        </router-link>
       </v-card-title>
       <v-card-text class="px-7 pt-5 pb-1 black--text">
         <div v-if="this.loading" class="pb-4">
@@ -215,7 +210,6 @@ export default {
       budgets: [],
       budgetYears: [],
       date: '',
-      dense: false,
       hireDate: '',
       loading: true,
       selectedBudget: null,
@@ -244,3 +238,8 @@ export default {
   props: ['employee', 'fiscalDateView']
 };
 </script>
+<style>
+#link:hover {
+  font-size: 18px;
+}
+</style>

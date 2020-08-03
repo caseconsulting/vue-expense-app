@@ -13,7 +13,7 @@
       </div>
       <div v-if="!isInactive">
         <!-- Loop through and display all balances -->
-        <v-row v-for="balance in this.balances" :key="balance">
+        <v-row v-for="balance in this.availableBalances" :key="balance">
           <p>{{ balance }}:</p>
           <v-spacer></v-spacer>
           <p>{{ formatHours(balanceData[balance]) }}</p>
@@ -44,9 +44,9 @@ import api from '@/shared/api.js';
 async function created() {
   this.loadingBar = true;
   this.employee = await api.getUser();
-  this.ptoBalances = await api.getPTOBalances(this.employee.employeeNumber); // call api
-  this.ptoBalances = this.ptoBalances.results.users[this.employee.employeeNumber];
-  this.balanceData = this.ptoBalances['pto_balances'];
+  let ptoBalances = await api.getPTOBalances(this.employee.employeeNumber); // call api
+  ptoBalances = ptoBalances.results.users[this.employee.employeeNumber];
+  this.balanceData = ptoBalances['pto_balances'];
   this.keysBalance = Object.keys(this.balanceData);
   this.loadingBar = false;
   let emptyBalances = 0;
@@ -70,14 +70,17 @@ async function created() {
  * Checks if an employee is inactive. Sets isInactive as true if the employee is inactive with a work status of 0, otherwise
  * sets it to false.
  *
- * @param employee - employee to check
  * @return boolean - employee is inactive
  */
 function isInactive() {
   return this.employee.workStatus == 0;
 } // isInactive
 
-function balances() {
+/**
+ * Returns the balances that are currently shown on the screen.
+ * Balances > 0 will always show.
+ */
+function availableBalances() {
   let avaibleBalances = [];
   this.keysBalance.forEach((balance) => {
     if (this.balanceData[balance] > 0 || this.showMore) {
@@ -85,7 +88,7 @@ function balances() {
     }
   });
   return avaibleBalances;
-}
+} // availableBalances
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -93,6 +96,9 @@ function balances() {
 // |                                                  |
 // |--------------------------------------------------|
 
+/**
+ * changes hours from a decimal number to hours and minutes
+ */
 function formatHours(hours) {
   if (this.showMinutes) {
     let hrs = parseInt(Number(hours));
@@ -116,13 +122,12 @@ function formatHours(hours) {
 export default {
   computed: {
     isInactive,
-    balances
+    availableBalances
   },
   created,
   data() {
     return {
       employee: {},
-      ptoBalances: [],
       balanceData: [],
       keysBalance: [],
       loadingBar: false,

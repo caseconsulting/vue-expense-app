@@ -116,7 +116,6 @@ export default {
     }
   },
   methods: {
-    confirm,
     emit,
     isEmpty
   },

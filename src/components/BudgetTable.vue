@@ -146,12 +146,6 @@ function noRemaining(budget) {
 // |--------------------------------------------------|
 
 export default {
-  data: () => ({
-    pagination: {
-      rowsPerPage: 4
-    },
-    rowsPerPageItems: [1, 4, 8, 12]
-  }),
   filters: {
     moneyValue: (value) => {
       return `${new Intl.NumberFormat('en-US', {
