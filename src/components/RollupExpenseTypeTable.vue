@@ -260,15 +260,6 @@ function checkAllBoxes() {
 } // checkAllBoxes
 
 /**
- * Clears the response status snackbar.
- */
-function clearStatus() {
-  this.$set(this.status, 'statusType', undefined);
-  this.$set(this.status, 'statusMessage', '');
-  this.$set(this.status, 'color', '');
-} // clearStatus
-
-/**
  * Expands an expense. Adds the expense to expanded row when clicked.
  *
  * @param value - expense to expand
@@ -865,7 +856,6 @@ export default {
   methods: {
     asyncForEach,
     checkAllBoxes,
-    clearStatus,
     clickedRow,
     constructAutoComplete,
     determineShowOnFeed,
