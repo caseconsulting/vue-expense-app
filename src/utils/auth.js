@@ -116,7 +116,7 @@ export function isLoggedIn() {
 
 export function isTokenExpired(token) {
   const expirationDate = getTokenExpirationDate(token);
-  return expirationDate < new Date();
+  return expirationDate.getTime() - Date.now() <= 0;
 } // isTokenExpired
 
 export function login() {

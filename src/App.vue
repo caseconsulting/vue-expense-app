@@ -103,7 +103,6 @@
 <script>
 import { isLoggedIn, logout, getProfile, getTokenExpirationDate, getAccessToken } from '@/utils/auth';
 import MainNav from '@/components/MainNav.vue';
-import router from './router.js';
 import MobileDetect from 'mobile-detect';
 import TimeOutModal from '@/components/TimeOutModal.vue';
 import TimeOutWarningModal from '@/components/TimeOutWarningModal.vue';
@@ -139,18 +138,6 @@ function handleLogout() {
   logout();
 }
 
-async function initSession() {
-  const timeout = (seconds) => new Promise((resolve) => setTimeout(resolve, seconds * 1000));
-  await timeout(60); //wait 60 seconds
-
-  if (!this.isLoggedIn() && this.hasBeenLoggedInBefore) {
-    this.hasBeenLoggedInBefore = false; //prevents looping for no reason
-    router.push({ path: '/home' });
-  }
-
-  this.initSession();
-}
-
 function onResize() {
   this.isSmallScreen = window.innerWidth < 960;
 }
@@ -167,7 +154,7 @@ async function created() {
   // set expiration date if access token received
   let accessToken = getAccessToken();
 
-  if (accessToken && this.$route.name != 'login' && this.$route.name != 'loginFailed') {
+  if (accessToken && isLoggedIn()) {
     this.date = Math.trunc(getTokenExpirationDate(accessToken).getTime());
     this.now = Math.trunc(new Date().getTime());
     let timeRemaining = this.date - this.now; // default access key (2 hours)
@@ -187,17 +174,6 @@ async function created() {
 
   if (pic) {
     this.profilePic = pic;
-  }
-
-  if (this.isLoggedIn()) this.hasBeenLoggedInBefore = true;
-
-  this.initSession(); //starts session checking
-
-  if (
-    (router.app._route.fullPath === '/training' || router.app._route.fullPath === '/expenseTypes') &&
-    this.isLoggedIn() === false
-  ) {
-    router.push({ path: '/' });
   }
 }
 
@@ -224,7 +200,6 @@ export default {
     drawer: isLoggedIn(),
     inset: false,
     profilePic: 'src/assets/img/logo-big.png',
-    hasBeenLoggedInBefore: false,
     timedOut: false,
     session: false,
     now: Math.trunc(new Date().getTime() / 1000),
@@ -264,7 +239,6 @@ export default {
   methods: {
     handleLogout,
     isLoggedIn,
-    initSession,
     onResize
   },
   beforeDestroy,
