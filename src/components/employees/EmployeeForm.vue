@@ -30,7 +30,7 @@
           <v-tabs v-model="formTab" show-arrows class="pb-0">
             <v-tab href="#employee">Employee</v-tab>
             <v-tab href="#personal">Personal</v-tab>
-            <v-tab href="#degrees">Degrees</v-tab>
+            <v-tab href="#education">Education</v-tab>
             <v-tab href="#jobExperience">Job Experience</v-tab>
             <v-tab href="#certifications">Certifications</v-tab>
             <v-tab href="#awards">Awards</v-tab>
@@ -46,50 +46,9 @@
             </v-tab-item>
             <!-- End Personal Info -->
 
-            <!-- Degrees -->
-            <v-tab-item id="degrees">
-              <p class="pr-5" style="display: inline-block;">Degree:</p>
-              <v-autocomplete
-                style="width: 70%; display: inline-block;"
-                v-model="this.model.degree"
-                :items="this.model.degrees"
-              ></v-autocomplete>
-              <br />
-              <p class="pr-5" style="display: inline-block;">Major:</p>
-              <v-autocomplete
-                style="width: 70%; display: inline-block;"
-                v-model="this.model.major"
-                :items="this.model.majors"
-              ></v-autocomplete>
-              <!-- Plus button  -->
-              <v-icon>add</v-icon>
-              <br />
-              <p class="pr-5" style="display: inline-block;">Minor:</p>
-              <v-autocomplete
-                style="width: 70%; display: inline-block;"
-                v-model="this.model.minor"
-                :items="this.model.minors"
-              ></v-autocomplete>
-              <!-- Plus button  -->
-              <v-icon>add</v-icon>
-              <br />
-
-              <!-- Degrees - Concentration -->
-              <div>Concentration:</div>
-              <v-row class="px-3" align="center">
-                <!-- <p class="pr-5 mb-0" align-center text-center style="display: inline-block;">Concentration:</p> -->
-                <v-autocomplete v-model="this.model.major" :items="this.model.majors">
-                  <!-- Plus button  -->
-                  <template v-slot:append-outer>
-                    <v-slide-x-reverse-transition mode="out-in">
-                      <v-icon>delete</v-icon>
-                    </v-slide-x-reverse-transition>
-                  </template>
-                </v-autocomplete>
-              </v-row>
-              <!-- End Degrees - Concentration -->
-
-              <!-- Completion year -->
+            <!-- Education -->
+            <v-tab-item id="education">
+              <education-tab :model="model"></education-tab>
             </v-tab-item>
             <!-- Experience -->
             <v-tab-item id="jobExperience">
@@ -218,6 +177,7 @@
 <script>
 import api from '@/shared/api.js';
 import dateUtils from '@/shared/dateUtils';
+import EducationTab from '@/components/employees/formTabs/EducationTab';
 import EmployeeTab from '@/components/employees/formTabs/EmployeeTab';
 import FormSubmissionConfirmation from '@/components/modals/FormSubmissionConfirmation.vue';
 import PersonalTab from '@/components/employees/formTabs/PersonalTab';
@@ -345,11 +305,6 @@ async function created() {
   this.model = _.mergeWith(this.model, this.employee, (modelValue, employeeValue) => {
     return _.isNil(employeeValue) ? modelValue : employeeValue;
   });
-  this.birthdayFormat = this.formatDate(this.model.birthday) || this.birthdayFormat;
-  //fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
-  if (this.model.birthday !== null && !this.formatDate(this.model.birthday)) {
-    this.model.birthday = null;
-  }
   if (this.employee) {
     this.fullName = `${this.employee.firstName} ${this.employee.lastName}`;
   }
@@ -370,6 +325,7 @@ export default {
     window.EventBus.$off('canceled');
   },
   components: {
+    EducationTab,
     EmployeeTab,
     FormSubmissionConfirmation,
     PersonalTab
@@ -377,8 +333,6 @@ export default {
   created,
   data() {
     return {
-      birthdayFormat: null, // formatted birthday
-      BirthdayMenu: false,
       confirming: false,
       dateOptionalRules: [
         (v) => {
@@ -397,26 +351,27 @@ export default {
       formTab: null,
       fullName: '', // employee's first and last name
       model: {
-        id: null,
-        firstName: null,
-        middleName: null,
-        lastName: null,
-        email: '@consultwithcase.com',
-        employeeRole: 'user',
-        employeeNumber: null,
-        hireDate: null,
-        workStatus: 100,
         birthday: null,
         birthdayFeed: false,
-        jobRole: null,
-        prime: null,
-        contract: null,
-        github: null,
-        twitter: null,
         city: null,
-        st: null,
+        contract: null,
         country: null,
-        deptDate: null
+        degrees: [],
+        deptDate: null,
+        email: '@consultwithcase.com',
+        employeeNumber: null,
+        employeeRole: 'user',
+        firstName: null,
+        github: null,
+        hireDate: null,
+        id: null,
+        jobRole: null,
+        lastName: null,
+        middleName: null,
+        prime: null,
+        st: null,
+        twitter: null,
+        workStatus: 100
       },
       submitting: false,
       valid: false, // form validity
@@ -439,13 +394,6 @@ export default {
         if (!_.isEqual(val, this.currentTab)) {
           window.EventBus.$emit('tabChange', val);
         }
-      }
-    },
-    'model.birthday': function () {
-      this.birthdayFormat = this.formatDate(this.model.birthday) || this.birthdayFormat;
-      //fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
-      if (this.model.birthday !== null && !this.formatDate(this.model.birthday)) {
-        this.model.birthday = null;
       }
     }
   }
