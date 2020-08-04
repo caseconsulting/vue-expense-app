@@ -81,10 +81,10 @@
 
 <script>
 import api from '@/shared/api.js';
-import BudgetChart from '../components/BudgetChart.vue';
-import BudgetSelectModal from '../modals/components/BudgetSelectModal.vue';
-import BudgetTable from '../components/BudgetTable.vue';
-import ExpenseForm from '../components/ExpenseForm.vue';
+import BudgetChart from '@/components/BudgetChart.vue';
+import BudgetSelectModal from '@/components/modals/BudgetSelectModal.vue';
+import BudgetTable from '@/components/BudgetTable.vue';
+import ExpenseForm from '@/components/ExpenseForm.vue';
 import MobileDetect from 'mobile-detect';
 import moment from 'moment';
 import pattern from 'patternomaly';

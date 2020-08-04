@@ -95,7 +95,7 @@
 
 <script>
 import api from '@/shared/api.js';
-import caseLogo from '../assets/img/logo-big.png';
+import caseLogo from '@/assets/img/logo-big.png';
 import _ from 'lodash';
 
 // |--------------------------------------------------|

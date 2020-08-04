@@ -66,11 +66,11 @@
 
 <script>
 import api from '@/shared/api.js';
-import AvailableBudgets from '../components/AvailableBudgets.vue';
+import AvailableBudgets from '@/components/AvailableBudgets.vue';
 import moment from 'moment-timezone';
-import ActivityFeed from '../components/ActivityFeed';
-import TwitterFeed from '../components/TwitterFeed';
-import TSheetsData from '../components/TSheetsData.vue';
+import ActivityFeed from '@/components/ActivityFeed';
+import TwitterFeed from '@/components/TwitterFeed';
+import TSheetsData from '@/components/TSheetsData.vue';
 import _ from 'lodash';
 const IsoFormat = 'YYYY-MM-DD';
 

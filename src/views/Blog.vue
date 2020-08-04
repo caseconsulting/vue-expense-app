@@ -52,9 +52,9 @@
 <script>
 import api from '@/shared/api.js';
 //import moment from 'moment';
-import PendingPostTable from '../components/PendingPostTable.vue';
-import PostTable from '../components/PostTable.vue';
-import PostEditor from '../components/PostEditor.vue';
+import PendingPostTable from '@/components/PendingPostTable.vue';
+import PostTable from '@/components/PostTable.vue';
+import PostEditor from '@/components/PostEditor.vue';
 
 function acceptedFileTypes() {
   return ['jpg', 'png'].join(',');

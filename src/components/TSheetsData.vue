@@ -16,8 +16,8 @@
 </template>
 
 <script>
-import MonthlyCharges from '../components/MonthlyCharges.vue';
-import Balances from '../components/Balances.vue';
+import MonthlyCharges from '@/components/MonthlyCharges.vue';
+import Balances from '@/components/Balances.vue';
 
 export default {
   components: {

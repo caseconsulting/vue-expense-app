@@ -47,7 +47,7 @@
 
 <script>
 import api from '@/shared/api.js';
-import AvailableBudgetSummary from './AvailableBudgetSummary.vue';
+import AvailableBudgetSummary from '@/components/AvailableBudgetSummary.vue';
 import _ from 'lodash';
 import moment from 'moment-timezone';
 const IsoFormat = 'YYYY-MM-DD';

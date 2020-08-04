@@ -25,7 +25,7 @@
 </template>
 
 <script>
-import api from '../shared/api';
+import api from '@/shared/api';
 import _ from 'lodash';
 // |--------------------------------------------------|
 // |                                                  |

@@ -14,9 +14,9 @@
 </template>
 
 <script>
-import ExpenseInfo from '../components/ExpenseInfo.vue';
-import ExpenseTypeTotals from '../components/ExpenseTypeTotals.vue';
-import RollupExpenseTypeTable from '../components/RollupExpenseTypeTable.vue';
+import ExpenseInfo from '@/components/ExpenseInfo.vue';
+import ExpenseTypeTotals from '@/components/ExpenseTypeTotals.vue';
+import RollupExpenseTypeTable from '@/components/RollupExpenseTypeTable.vue';
 
 // |--------------------------------------------------|
 // |                                                  |

@@ -20,7 +20,7 @@
 </template>
 
 <script>
-import Attachment from './Attachment.vue';
+import Attachment from '@/components/Attachment.vue';
 import moment from 'moment';
 import _ from 'lodash';
 
