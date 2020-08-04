@@ -37,182 +37,9 @@
             <v-tab href="#technologies">Technologies</v-tab>
             <v-tab href="#customerOrgExp">Customer Org</v-tab>
             <v-tab-item id="employee">
-              <!-- Name -->
-              <v-text-field
-                v-model="model.firstName"
-                :rules="requiredRules"
-                label="First Name"
-                data-vv-name="First Name"
-                :disabled="!userIsAdmin()"
-              ></v-text-field>
-              <v-text-field
-                v-model="model.middleName"
-                label="Middle Name (optional)"
-                data-vv-name="Middle Name"
-                :disabled="!userIsAdmin()"
-              ></v-text-field>
-              <v-text-field
-                v-model="model.lastName"
-                :rules="requiredRules"
-                label="Last Name"
-                data-vv-name="Last Name"
-                :disabled="!userIsAdmin()"
-              ></v-text-field>
-
-              <!-- Employee # -->
-              <v-text-field
-                v-model="model.employeeNumber"
-                :rules="numberRules"
-                label="Employee #"
-                data-vv-name="Employee #"
-                :disabled="!userIsAdmin()"
-              ></v-text-field>
-
-              <!-- Email -->
-              <v-text-field
-                v-model="model.email"
-                :rules="emailRules"
-                label="Email"
-                data-vv-name="Email"
-                :disabled="!userIsAdmin()"
-              ></v-text-field>
-
-              <!-- Employee Role -->
-              <v-autocomplete
-                :disabled="!userIsAdmin()"
-                :items="permissions"
-                :rules="componentRules"
-                v-model="employeeRoleFormatted"
-                label="Employee Role"
-                @blur="model.employeeRole = formatKebabCase(employeeRoleFormatted)"
-              ></v-autocomplete>
-
-              <!-- Hire Date -->
-              <v-menu
-                ref="hireMenu"
-                :close-on-content-click="true"
-                v-model="hireMenu"
-                :nudge-right="40"
-                transition="scale-transition"
-                offset-y
-                max-width="290px"
-                min-width="290px"
-                style="padding-right: 20px; padding-bottom: 20px;"
-                :disabled="!userIsAdmin()"
-              >
-                <template v-slot:activator="{ on }">
-                  <v-text-field
-                    v-model="hireDateFormatted"
-                    :rules="dateRules"
-                    :disabled="hasExpenses || !userIsAdmin()"
-                    label="Hire Date"
-                    hint="MM/DD/YYYY format"
-                    persistent-hint
-                    prepend-icon="event"
-                    @blur="hireDate = parseDate(hireDateFormatted)"
-                    v-on="on"
-                  ></v-text-field>
-                </template>
-                <v-date-picker
-                  v-model="hireDate"
-                  no-title
-                  @input="hireMenu = false"
-                  :disabled="!userIsAdmin()"
-                ></v-date-picker>
-              </v-menu>
-
-              <!-- Full/Part/Inactive Status [MOBILE] -->
-              <v-radio-group v-if="isMobile()" v-model="statusRadio" row mandatory :disabled="!userIsAdmin()">
-                <v-row class="ml-0">
-                  <v-col cols="6" sm="3">
-                    <v-radio label="Full Time" value="full"></v-radio>
-                  </v-col>
-                  <v-col cols="6" sm="3">
-                    <v-radio label="Part Time" value="part" @change="viewStatus()"></v-radio>
-                  </v-col>
-                  <v-col cols="6" sm="3">
-                    <v-radio label="Inactive" value="inactive"></v-radio>
-                  </v-col>
-                  <!-- Custom Input Field -->
-                  <v-col cols="6" sm="3">
-                    <div :class="{ customInput: isPartTime() }">
-                      <div :class="['percentageBox', { disabled: !isPartTime(), inputError: isStatusEmpty() }]">
-                        <input
-                          v-model="status"
-                          type="text"
-                          oninput="this.value = this.value.replace(/[^0-9]/g, '');"
-                          maxlength="2"
-                          :disabled="!isPartTime()"
-                        />
-                        <div>%</div>
-                      </div>
-                    </div>
-                  </v-col>
-                  <!-- End Custom Input Field -->
-                </v-row>
-              </v-radio-group>
-              <!-- End [Full/Part/Inactive Status [MOBILE]] -->
-
-              <!-- Full/Part/Inactive Status [DESKTOP] -->
-              <v-radio-group v-else v-model="statusRadio" row mandatory hide-details :disabled="!userIsAdmin()">
-                <v-radio label="Full Time" value="full"></v-radio>
-                <v-radio label="Part Time" value="part" @change="viewStatus()"></v-radio>
-                <v-radio label="Inactive" value="inactive"></v-radio>
-                <!-- custom input field -->
-                <div :class="{ customInput: isPartTime() }">
-                  <div :class="['percentageBox', { disabled: !isPartTime(), inputError: isStatusEmpty() }]">
-                    <input
-                      v-model="status"
-                      type="text"
-                      oninput="this.value = this.value.replace(/[^0-9]/g, '');"
-                      maxlength="2"
-                      :disabled="!isPartTime()"
-                    />
-                    <div>%</div>
-                  </div>
-                </div>
-                <!-- End Full/Part/Inactive Status [DESKTOP] -->
-              </v-radio-group>
-              <!-- End [DESKTOP] -->
-
-              <!-- If inactive, set Departure Date -->
-              <v-menu
-                v-if="isInactive()"
-                ref="departureMenu"
-                :close-on-content-click="true"
-                v-model="departureMenu"
-                :nudge-right="40"
-                transition="scale-transition"
-                offset-y
-                max-width="290px"
-                min-width="290px"
-                style="padding-right: 20px; padding-bottom: 20px;"
-                :disabled="!userIsAdmin()"
-              >
-                <template v-slot:activator="{ on }">
-                  <v-text-field
-                    v-model="deptDateFormatted"
-                    :rules="dateRules"
-                    label="Departure Date"
-                    hint="MM/DD/YYYY format"
-                    persistent-hint
-                    prepend-icon="event"
-                    @blur="model.deptDate = parseDate(deptDateFormatted)"
-                    v-on="on"
-                    :disabled="!userIsAdmin()"
-                  ></v-text-field>
-                </template>
-                <v-date-picker
-                  v-model="model.deptDate"
-                  no-title
-                  @input="departureMenu = false"
-                  :disabled="!userIsAdmin()"
-                ></v-date-picker>
-              </v-menu>
-              <!-- End Full/Part/Inactive Status [DESKTOP] -->
+              <employee-tab :admin="userIsAdmin()" :model="model"></employee-tab>
             </v-tab-item>
-            <!-- End Employee Info -->
-
+            <!-- End Employee Tab -->
             <!-- Personal Info -->
             <v-tab-item id="personal">
               <v-combobox
@@ -486,7 +313,7 @@
 
           <!-- Form action buttons -->
           <v-btn class="ma-2" color="white" @click="cancel"><icon class="mr-1" name="ban"></icon>Cancel</v-btn>
-          <v-btn outlined class="ma-2" color="success" @click="confirm" :disabled="!valid || isStatusEmpty()">
+          <v-btn outlined class="ma-2" color="success" @click="confirm" :disabled="!valid || model.workStatus == null">
             <icon class="mr-1" name="save"></icon>Submit
           </v-btn>
           <!-- End form action buttons -->
@@ -500,13 +327,11 @@
 <script>
 import api from '@/shared/api.js';
 import dateUtils from '@/shared/dateUtils';
+import EmployeeTab from '@/components/employees/formTabs/EmployeeTab';
 import FormSubmissionConfirmation from '@/components/FormSubmissionConfirmation.vue';
 import { getRole } from '@/utils/auth';
-import MobileDetect from 'mobile-detect';
 import { v4 as uuid } from 'uuid';
 import _ from 'lodash';
-
-const regex = /^(([^<>()[\]\\.,;:\s@#"]+(\.[^<>()[\]\\.,;:\s@#"]+)*)|(".+"))@consultwithcase.com/;
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -538,42 +363,6 @@ function isUSA() {
 function cancel() {
   window.EventBus.$emit('cancel-form');
 } // cancel
-
-/**
- * Clears the form and sets all fields to a default state.
- */
-function clearForm() {
-  this.$refs.form.resetValidation();
-  this.$set(this, 'hireDate', null);
-  this.$set(this.model, 'email', '@consultwithcase.com');
-  this.$set(this.model, 'employeeRole', null);
-  this.$set(this.model, 'firstName', null);
-  this.$set(this.model, 'middleName', null);
-  this.$set(this.model, 'lastName', null);
-  this.$set(this.model, 'employeeNumber', null);
-  this.$set(this.model, 'hireDate', null);
-  this.$set(this, 'hireDateFormatted', null);
-  this.$set(this.model, 'id', null);
-  this.$set(this.model, 'workStatus', 100);
-  this.$set(this, 'statusRadio', 'full');
-
-  // New Fields
-  this.$set(this.model, 'prime', null);
-  this.$set(this.model, 'contract', null);
-  this.$set(this.model, 'github', null);
-  this.$set(this.model, 'twitter', null);
-  this.$set(this.model, 'jobRole', null);
-  this.$set(this.model, 'birthday', null);
-  this.$set(this, 'birthdayFormat', null);
-  this.$set(this.model, 'birthdayFeed', false);
-  this.$set(this.model, 'city', null);
-  this.$set(this.model, 'st', null);
-  this.$set(this.model, 'country', null);
-  this.$set(this.model, 'deptDate', null);
-  this.$set(this, 'deptDateFormatted', null);
-
-  this.deptDateFormatted = null;
-} // clearForm
 
 /**
  * Clear the action status that is displayed in the snackbar.
@@ -612,73 +401,6 @@ function formatDate(date) {
 } // formatDate
 
 /**
- * Converts a string to kebab case.
- *
- * @param value - String value to convert
- * @return String - String in kebab case
- */
-function formatKebabCase(value) {
-  return _.kebabCase(value);
-} // formatKebabCase
-
-/**
- * Sets the status to an employee if part time, otherwise sets it to an empty string.
- */
-function viewStatus() {
-  if (this.model.workStatus && this.model.workStatus > 0 && this.model.workStatus < 100) {
-    this.status = this.model.workStatus;
-  } else {
-    this.status = null;
-  }
-} // viewStatus
-
-/**
- * Checks if the current device used is mobile. Return true if it is mobile. Returns false if it is not mobile.
- *
- * @return boolean - if the device is mobile
- */
-function isMobile() {
-  let md = new MobileDetect(window.navigator.userAgent);
-  return md.os() === 'AndroidOS' || md.os() === 'iOS';
-} // isMobile
-
-/**
- * Checks if full time work status button is selected.
- *
- * @return boolean - full time work status button selected
- */
-function isFullTime() {
-  return this.statusRadio == 'full';
-} // isFullTime
-
-/**
- * Checks if inactive work status button is selected.
- *
- * @return boolean - inactive work status button selected
- */
-function isInactive() {
-  return this.statusRadio == 'inactive';
-} // isInactive
-
-/**
- * Checks if part time work status button is selected.
- *
- * @return boolean - part time work status button selected
- */
-function isPartTime() {
-  return this.statusRadio == 'part';
-} // isPartTime
-
-/**
- * Checks if the work status is empty.
- *
- * @return boolean - work status is empty
- */
-function isStatusEmpty() {
-  return _.isString(this.status) ? this.status.length == 0 || (this.isPartTime() && this.status <= 0) : true;
-} // isStatusEmpty
-
-/**
  * Parse a date to isoformat (YYYY-MM-DD).
  *
  * @param Date = date to parse
@@ -694,18 +416,8 @@ function parseDate(date) {
 async function submit() {
   this.submitting = true;
   if (this.$refs.form.validate()) {
-    this.$emit('startAction');
     // form validated
-    if (!this.isInactive()) {
-      // set deptDate if employee is active
-      this.$set(this.model, 'deptDate', null);
-    }
-
-    // set employee hire date
-    this.$set(this.model, 'hireDate', this.hireDate);
-
-    // set employee work status
-    this.$set(this.model, 'workStatus', parseInt(this.status));
+    this.$emit('startAction');
 
     if (this.model.id) {
       // updating employee
@@ -763,7 +475,7 @@ function disableBirthdayFeed() {
   this.undisabled = true;
   this.model.birthdayFeed = true;
   return false;
-}
+} // disableBirthdayFeed
 
 /**
  * Filters out contracts from list of employees.
@@ -813,54 +525,14 @@ async function created() {
   this.employees = await api.getItems(api.EMPLOYEES); // get all employees
   this.filterPrimes();
   this.filterContracts();
-  this.hireDate = this.model.hireDate;
   this.birthdayFormat = this.formatDate(this.model.birthday) || this.birthdayFormat;
   //fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
   if (this.model.birthday !== null && !this.formatDate(this.model.birthday)) {
     this.model.birthday = null;
   }
-  this.deptDateFormatted = this.formatDate(this.model.deptDate) || this.deptDateFormatted;
-  //fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
-  if (this.model.deptDate !== null && !this.formatDate(this.model.deptDate)) {
-    this.model.deptDate = null;
-  }
-  if (this.model.employeeRole != 'User') {
-    this.employeeRoleFormatted = _.startCase(this.model.employeeRole);
-  }
-  this.hasExpenses = this.model.id ? _.size(await api.getAllEmployeeExpenses(this.model.id)) > 0 : false;
-  if (this.model.workStatus != null) {
-    // set work status buttons if the status exists
-    this.status = this.model.workStatus.toString(); // convert employee work status to string
-    // set status radio
-    if (this.status == '100') {
-      this.statusRadio = 'full';
-    } else if (this.status == '0') {
-      this.statusRadio = 'inactive';
-    } else {
-      this.statusRadio = 'part';
-    }
-  } else {
-    // set status to default full time if it does not exist
-    this.status = '100';
-    this.statusRadio = 'full';
-  }
-  if (this.statusRadio == 'full') {
-    this.status = '100';
-    this.model.workStatus = 100;
-  } else if (this.statusRadio == 'inactive') {
-    this.status = '0';
-    this.model.workStatus = 0;
-  } else {
-    if (this.model.workStatus && this.model.workStatus > 0 && this.model.workStatus < 100) {
-      this.status = this.model.workStatus.toString();
-    } else {
-      this.status = null;
-    }
-  }
   if (this.employee) {
     this.fullName = `${this.employee.firstName} ${this.employee.lastName}`;
   }
-  this.value = '' + this.model.workStatus;
 } // created
 
 // |--------------------------------------------------|
@@ -875,6 +547,7 @@ export default {
     window.EventBus.$off('canceled');
   },
   components: {
+    EmployeeTab,
     FormSubmissionConfirmation
   },
   created,
@@ -882,10 +555,8 @@ export default {
     return {
       birthdayFormat: null, // formatted birthday
       BirthdayMenu: false,
-      componentRules: [(v) => !!v || 'Something must be selected'], // rules for required componenet selection
       countries: [], // list of countries
       confirming: false,
-      hireDate: null, // hire date
       dateOptionalRules: [
         (v) => {
           if (v) {
@@ -895,26 +566,10 @@ export default {
           }
         }
       ], // rules for optional date
-      dateRules: [
-        (v) => !!v || 'Date must be valid. Format: MM/DD/YYYY',
-        (v) => (!!v && /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v)) || 'Date must be valid. Format: MM/DD/YYYY'
-      ], // rules for date
-      statusRules: [
-        (v) => !!v, // || 'Percentage must be a whole number between 0 - 99',
-        (v) => /^\d+$/.test(v), // || 'Percentage amount must be a whole number',
-        (v) => v < 100, //|| 'Percentage must be less than 100', // percentage must be less than 100
-        (v) => v >= 0 // || 'Percentage must be greater than 0' // percentage must be greater than 0
-      ], // rules for work status
-      deptDateFormatted: null, // formatted depature date
-      emailRules: [
-        (v) => !!v || 'Email is required',
-        (v) => regex.test(v) || 'Not a valid @consultwithcase email address'
-      ], // rules for employee email
       employeeInfo: {
         primes: [],
         contracts: []
       },
-      employeeRoleFormatted: null, // formatted employee role
       employees: [],
       errorStatus: {
         statusType: undefined,
@@ -922,9 +577,6 @@ export default {
         color: null
       }, // snack bar error
       fullName: '', // employee's first and last name
-      requiredRules: [(v) => !!v || 'This field is required'], // rules for required fields
-      hasExpenses: false, // employee has expenses
-      hireDateFormatted: null, // formatted hire date
       jobRoles: [
         'Software Developer',
         'Project Manager',
@@ -937,8 +589,6 @@ export default {
         'Accountant',
         'Other'
       ], // job role options
-      hireMenu: false, // display hire menu
-      departureMenu: false, // display depature menu
       model: {
         id: null,
         firstName: null,
@@ -961,11 +611,6 @@ export default {
         country: null,
         deptDate: null
       },
-      numberRules: [
-        (v) => !!v || 'Employee # is required',
-        (v) => /^\d+$/.test(v) || 'Employee # must be a positive number'
-      ], // rules for employee number
-      permissions: ['Admin', 'User'], // employee role options
       states: [
         'Alabama',
         'Alaska',
@@ -1029,11 +674,8 @@ export default {
         'Wisconsin',
         'Wyoming'
       ], // state options
-      status: '100', // work status value
-      statusRadio: 'full', // work status button
       submitting: false,
       valid: false, // form validity
-      value: '',
       undisabled: false
     };
   },
@@ -1042,20 +684,12 @@ export default {
   },
   methods: {
     cancel,
-    clearForm,
     clearStatus,
     confirm,
     displayError,
-    viewStatus,
     filterContracts,
     filterPrimes,
     formatDate,
-    formatKebabCase,
-    isFullTime,
-    isInactive,
-    isMobile,
-    isPartTime,
-    isStatusEmpty,
     parseDate,
     submit,
     userIsAdmin,
@@ -1063,67 +697,11 @@ export default {
   },
   props: ['employee'], // employee to be created/updated
   watch: {
-    hireDate: function () {
-      this.hireDateFormatted = this.formatDate(this.hireDate) || this.hireDateFormatted;
-      //fixes v-date-picker error so that if the format of date is incorrect the date is set to null
-      if (this.hireDate !== null && !this.formatDate(this.hireDate)) {
-        this.hireDate = null;
-      }
-    },
     'model.birthday': function () {
       this.birthdayFormat = this.formatDate(this.model.birthday) || this.birthdayFormat;
       //fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
       if (this.model.birthday !== null && !this.formatDate(this.model.birthday)) {
         this.model.birthday = null;
-      }
-    },
-    'model.deptDate': function () {
-      this.deptDateFormatted = this.formatDate(this.model.deptDate) || this.deptDateFormatted;
-      //fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
-      if (this.model.deptDate !== null && !this.formatDate(this.model.deptDate)) {
-        this.model.deptDate = null;
-      }
-    },
-    'model.employeeRole': function () {
-      if (this.model.employeeRole != 'User') {
-        this.employeeRoleFormatted = _.startCase(this.model.employeeRole);
-      }
-    },
-    'model.hireDate': async function () {
-      this.hasExpenses = this.model.id ? _.size(await api.getAllEmployeeExpenses(this.model.id)) > 0 : false;
-      this.hireDate = this.model.hireDate;
-    },
-    'model.workStatus': function () {
-      if (this.model.workStatus != null) {
-        // set work status buttons if the status exists
-        this.status = this.model.workStatus.toString(); // convert employee work status to string
-        // set status radio
-        if (this.status == '100') {
-          this.statusRadio = 'full';
-        } else if (this.status == '0') {
-          this.statusRadio = 'inactive';
-        } else {
-          this.statusRadio = 'part';
-        }
-      } else {
-        // set status to default full time if it does not exist
-        this.status = '100';
-        this.statusRadio = 'full';
-      }
-    },
-    statusRadio: function () {
-      if (this.statusRadio == 'full') {
-        this.status = '100';
-        this.model.workStatus = 100;
-      } else if (this.statusRadio == 'inactive') {
-        this.status = '0';
-        this.model.workStatus = 0;
-      } else {
-        if (this.model.workStatus && this.model.workStatus > 0 && this.model.workStatus < 100) {
-          this.status = this.model.workStatus;
-        } else {
-          this.status = null;
-        }
       }
     }
   }
