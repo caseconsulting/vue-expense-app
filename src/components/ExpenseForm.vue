@@ -225,7 +225,7 @@
 
 <script>
 import api from '@/shared/api.js';
-import ConfirmationBox from './ConfirmationBox.vue';
+import ConfirmationBox from './modals/ConfirmationBox.vue';
 import dateUtils from '@/shared/dateUtils';
 import employeeUtils from '@/shared/employeeUtils';
 import FileUpload from './FileUpload.vue';

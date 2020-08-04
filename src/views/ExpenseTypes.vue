@@ -402,8 +402,8 @@
 
 <script>
 import api from '@/shared/api.js';
-import DeleteErrorModal from '../components/DeleteErrorModal.vue';
-import DeleteModal from '../components/DeleteModal.vue';
+import DeleteErrorModal from '../components/modals/DeleteErrorModal.vue';
+import DeleteModal from '../components/modals/DeleteModal.vue';
 import ExpenseTypeForm from '../components/ExpenseTypeForm.vue';
 import { getRole } from '@/utils/auth';
 import _ from 'lodash';

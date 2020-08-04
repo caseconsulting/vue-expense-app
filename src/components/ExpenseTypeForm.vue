@@ -249,7 +249,7 @@
 <script>
 import api from '@/shared/api.js';
 import dateUtils from '@/shared/dateUtils';
-import FormSubmissionConfirmation from '@/components/FormSubmissionConfirmation.vue';
+import FormSubmissionConfirmation from '@/components/modals/FormSubmissionConfirmation.vue';
 import { v4 as uuid } from 'uuid';
 import _ from 'lodash';
 

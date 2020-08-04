@@ -104,8 +104,8 @@
 import { isLoggedIn, logout, getProfile, getTokenExpirationDate, getAccessToken } from '@/utils/auth';
 import MainNav from '@/components/MainNav.vue';
 import MobileDetect from 'mobile-detect';
-import TimeOutModal from '@/components/TimeOutModal.vue';
-import TimeOutWarningModal from '@/components/TimeOutWarningModal.vue';
+import TimeOutModal from '@/components/modals/TimeOutModal.vue';
+import TimeOutWarningModal from '@/components/modals/TimeOutWarningModal.vue';
 import floorPlan from '@/assets/img/MakeOfficesfloorplan.jpg';
 
 // |--------------------------------------------------|

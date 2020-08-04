@@ -219,7 +219,7 @@
 import api from '@/shared/api.js';
 import dateUtils from '@/shared/dateUtils';
 import EmployeeTab from '@/components/employees/formTabs/EmployeeTab';
-import FormSubmissionConfirmation from '@/components/FormSubmissionConfirmation.vue';
+import FormSubmissionConfirmation from '@/components/modals/FormSubmissionConfirmation.vue';
 import PersonalTab from '@/components/employees/formTabs/PersonalTab';
 import { getRole } from '@/utils/auth';
 import { v4 as uuid } from 'uuid';

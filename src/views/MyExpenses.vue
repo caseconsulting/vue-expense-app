@@ -312,11 +312,11 @@
 import api from '@/shared/api.js';
 import Attachment from '../components/Attachment.vue';
 import ConvertExpensesToCsv from '../components/ConvertExpensesToCsv.vue';
-import DeleteModal from '../components/DeleteModal.vue';
+import DeleteModal from '../modals/components/DeleteModal.vue';
 import employeeUtils from '@/shared/employeeUtils';
 import ExpenseForm from '../components/ExpenseForm.vue';
 import moment from 'moment';
-import UnreimburseModal from '../components/UnreimburseModal.vue';
+import UnreimburseModal from '../modals/components/UnreimburseModal.vue';
 import _ from 'lodash';
 
 // |--------------------------------------------------|

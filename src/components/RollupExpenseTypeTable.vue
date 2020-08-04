@@ -151,7 +151,7 @@
 <script>
 import api from '@/shared/api.js';
 import moment from 'moment';
-import ReimburseModal from './ReimburseModal.vue';
+import ReimburseModal from './modals/ReimburseModal.vue';
 import UnrolledTableInfo from './UnrolledTableInfo.vue';
 import _ from 'lodash';
 
