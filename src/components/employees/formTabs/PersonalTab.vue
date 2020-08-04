@@ -319,6 +319,15 @@ export default {
     formatDate,
     parseDate
   },
-  props: ['model']
+  props: ['model'],
+  watch: {
+    'model.birthday': function () {
+      this.birthdayFormat = this.formatDate(this.model.birthday) || this.birthdayFormat;
+      //fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
+      if (this.model.birthday !== null && !this.formatDate(this.model.birthday)) {
+        this.model.birthday = null;
+      }
+    }
+  }
 };
 </script>
