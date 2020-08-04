@@ -39,7 +39,11 @@
                       :dense="true"
                     >
                       {{ item.truncatedText ? item.truncatedText : item.text }}&nbsp;
-                      <icon height="12" width="12" name="external-link-alt" color="blue"></icon>
+                      <v-row class="ma-1" dense justify-end>
+                        <v-col>
+                          <icon height="12" width="12" name="external-link-alt" color="blue"></icon>
+                        </v-col>
+                      </v-row>
                     </v-list-item>
                     <div class="px-4 activityFeedText" v-else>
                       {{ item.truncatedText ? item.truncatedText : item.text }}
