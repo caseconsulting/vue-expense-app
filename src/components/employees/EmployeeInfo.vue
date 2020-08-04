@@ -4,7 +4,7 @@
       <v-tabs v-model="infoTab" center-active show-arrows class="pb-4">
         <v-tab href="#employee">Employee</v-tab>
         <v-tab href="#personal">Personal</v-tab>
-        <v-tab href="#degrees">Degrees</v-tab>
+        <v-tab href="#education">Education</v-tab>
         <v-tab href="#jobExperience">Job Experience</v-tab>
         <v-tab href="#certifications">Certifications</v-tab>
         <v-tab href="#awards">Awards</v-tab>
