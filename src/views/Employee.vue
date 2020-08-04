@@ -12,7 +12,6 @@
       </v-col>
       <v-col cols="12" md="6" lg="7">
         <!-- Saved info -->
-
         <v-card>
           <v-card-title class="header_style" v-if="!editing">
             <h3>{{ this.model.firstName }} {{ this.model.lastName }}</h3>
@@ -21,10 +20,10 @@
               >edit</v-icon
             >
           </v-card-title>
-          <employee-info :model="this.model" v-if="!editing"></employee-info>
+          <employee-info :model="this.model" :currentTab="this.currentTab" v-if="!editing"></employee-info>
         </v-card>
         <!-- Edit Info (Form) -->
-        <employee-form :employee="this.model" v-if="editing"></employee-form>
+        <employee-form :employee="this.model" :currentTab="this.currentTab" v-if="editing"></employee-form>
       </v-col>
     </v-row>
   </v-container>
@@ -142,6 +141,10 @@ async function mounted() {
   window.EventBus.$on('update', (updatedEmployee) => {
     this.model = updatedEmployee;
   });
+
+  window.EventBus.$on('tabChange', (tab) => {
+    this.currentTab = tab;
+  });
 } // mounted
 
 // |--------------------------------------------------|
@@ -159,6 +162,7 @@ export default {
   created,
   data() {
     return {
+      currentTab: null,
       editing: false,
       filter: {
         active: ['full', 'part'] // default only shows full and part time employees

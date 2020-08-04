@@ -27,7 +27,7 @@
       <v-container fluid>
         <v-form ref="form" v-model="valid" lazy-validation>
           <!-- Tabs -->
-          <v-tabs show-arrows class="pb-0">
+          <v-tabs v-model="formTab" show-arrows class="pb-0">
             <v-tab href="#employee">Employee</v-tab>
             <v-tab href="#personal">Personal</v-tab>
             <v-tab href="#degrees">Degrees</v-tab>
@@ -353,6 +353,9 @@ async function created() {
   if (this.employee) {
     this.fullName = `${this.employee.firstName} ${this.employee.lastName}`;
   }
+
+  this.formTab = this.currentTab;
+  this.afterCreate = true;
 } // created
 
 // |--------------------------------------------------|
@@ -391,6 +394,7 @@ export default {
         statusMessage: null,
         color: null
       }, // snack bar error
+      formTab: null,
       fullName: '', // employee's first and last name
       model: {
         id: null,
@@ -428,8 +432,15 @@ export default {
     submit,
     userIsAdmin
   },
-  props: ['employee'], // employee to be created/updated
+  props: ['currentTab', 'employee'], // employee to be created/updated
   watch: {
+    formTab: function (val) {
+      if (this.afterCreate) {
+        if (!_.isEqual(val, this.currentTab)) {
+          window.EventBus.$emit('tabChange', val);
+        }
+      }
+    },
     'model.birthday': function () {
       this.birthdayFormat = this.formatDate(this.model.birthday) || this.birthdayFormat;
       //fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null

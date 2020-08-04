@@ -1,7 +1,7 @@
 <template>
   <v-card-text class="px-7 pt-5 pb-1 black--text">
     <div class="savedInfo">
-      <v-tabs center-active show-arrows class="pb-4">
+      <v-tabs v-model="infoTab" center-active show-arrows class="pb-4">
         <v-tab href="#employee">Employee</v-tab>
         <v-tab href="#personal">Personal</v-tab>
         <v-tab href="#degrees">Degrees</v-tab>
@@ -141,6 +141,8 @@ function userIsEmployee() {
  */
 async function created() {
   this.user = await api.getUser();
+  this.infoTab = this.currentTab;
+  this.afterCreate = true;
 } // created
 
 export default {
@@ -150,6 +152,8 @@ export default {
   created,
   data() {
     return {
+      afterCreate: false,
+      infoTab: null,
       user: null
     };
   },
@@ -182,7 +186,16 @@ export default {
     userIsAdmin,
     userIsEmployee
   },
-  props: ['model']
+  props: ['model', 'currentTab'],
+  watch: {
+    infoTab: function (val) {
+      if (this.afterCreate) {
+        if (!_.isEqual(val, this.currentTab)) {
+          window.EventBus.$emit('tabChange', val);
+        }
+      }
+    }
+  }
 };
 </script>
 
