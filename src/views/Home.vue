@@ -257,7 +257,7 @@ async function createEvents() {
   });
   // generate birthdays
   let birthdays = _.map(this.employees, (b) => {
-    if (b.birthdayFeed && !this.isEmpty(b.birthday)) {
+    if (b.birthdayFeed && !this.isEmpty(b.birthday) && b.workStatus != 0) {
       let event = {};
       let now = moment();
       let cutOff = moment().subtract(6, 'months').startOf('day');
