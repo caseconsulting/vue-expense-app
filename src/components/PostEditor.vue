@@ -44,23 +44,10 @@ export default {
       editor: ClassicEditor,
       editorData: '<p>Content of the editor.</p>',
       editorConfig: {
-        plugins: [
-          EssentialsPlugin,
-          BoldPlugin,
-          ItalicPlugin,
-          LinkPlugin,
-          ParagraphPlugin,
-          Base64UploadAdapter,
-        ],
+        plugins: [EssentialsPlugin, BoldPlugin, ItalicPlugin, LinkPlugin, ParagraphPlugin, Base64UploadAdapter],
 
         toolbar: {
-          items: [
-            'bold',
-            'italic',
-            'link',
-            'undo',
-            'redo'
-          ]
+          items: ['bold', 'italic', 'link', 'undo', 'redo']
         }
       }
     };
