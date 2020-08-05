@@ -1,10 +1,40 @@
 <template>
-  <ckeditor :editor="editor" v-model="editorData" :config="editorConfig"></ckeditor>
+  <div id="app">
+    <ckeditor :editor="editor" v-model="editorData" :config="editorConfig"></ckeditor>
+  </div>
 </template>
 <script>
+// import CKEditor from '@ckeditor/ckeditor5-vue';
+// import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
+
+// export default {
+//   components: {
+//     // Use the <ckeditor> component in this view.
+//     ckeditor: CKEditor.component
+//   },
+//   data() {
+//     return {
+//       editor: ClassicEditor,
+//       editorConfig: {
+//         height: '500px'
+//       }
+//       // ...
+//     };
+//   }
+// };
+
 import CKEditor from '@ckeditor/ckeditor5-vue';
-import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
+import ClassicEditor from '@ckeditor/ckeditor5-editor-classic/src/classiceditor';
+
+import Base64UploadAdapter from '@ckeditor/ckeditor5-upload/src/adapters/base64uploadadapter';
+import EssentialsPlugin from '@ckeditor/ckeditor5-essentials/src/essentials';
+import BoldPlugin from '@ckeditor/ckeditor5-basic-styles/src/bold';
+import ItalicPlugin from '@ckeditor/ckeditor5-basic-styles/src/italic';
+import LinkPlugin from '@ckeditor/ckeditor5-link/src/link';
+import ParagraphPlugin from '@ckeditor/ckeditor5-paragraph/src/paragraph';
+
 export default {
+  name: 'app',
   components: {
     // Use the <ckeditor> component in this view.
     ckeditor: CKEditor.component
@@ -12,20 +42,27 @@ export default {
   data() {
     return {
       editor: ClassicEditor,
-      editorData: '',
+      editorData: '<p>Content of the editor.</p>',
       editorConfig: {
-        heading: {
-          options: [
-            { model: 'paragraph', title: 'Paragraph', class: 'ck-heading_paragraph' },
-            { model: 'heading1', view: 'h1', title: 'Heading 1', class: 'ck-heading_heading1' },
-            { model: 'heading2', view: 'h2', title: 'Heading 2', class: 'ck-heading_heading2' },
-            { model: 'heading3', view: 'h3', title: 'Heading 3', class: 'ck-heading_heading3' },
-            { model: 'heading4', view: 'h4', title: 'Heading 4', class: 'ck-heading_heading4' }
+        plugins: [
+          EssentialsPlugin,
+          BoldPlugin,
+          ItalicPlugin,
+          LinkPlugin,
+          ParagraphPlugin,
+          Base64UploadAdapter,
+        ],
+
+        toolbar: {
+          items: [
+            'bold',
+            'italic',
+            'link',
+            'undo',
+            'redo'
           ]
-        },
-        placeholder: 'Create a New Blog Post'
+        }
       }
-      // ...
     };
   }
 };
