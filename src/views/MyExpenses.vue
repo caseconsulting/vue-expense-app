@@ -254,6 +254,7 @@
                         <icon v-else class="mr-1 mx-3" id="marks" name="regular/times-circle"></icon>
                         <br />
                         <p>Show On Feed:</p>
+                        {{ item.showOnFeed }}
                         <icon v-if="item.showOnFeed" id="marks" class="mr-1 mx-3" name="regular/check-circle"></icon>
                         <icon v-else class="mr-1 mx-3" id="marks" name="regular/times-circle"></icon>
                       </div>
@@ -416,6 +417,15 @@ function addModelToTable() {
   this.$set(this.status, 'statusMessage', 'Item was successfully submitted!');
   this.$set(this.status, 'color', 'green');
 } // addModelToTable
+
+/**
+ * Sets all expense attribute values to null.
+ */
+function clearExpense() {
+  this.expense = _.mapValues(this.expense, () => {
+    return null;
+  });
+} // clearExpense
 
 /**
  * Clear the action status that is displayed in the snackbar.
@@ -629,7 +639,11 @@ function isReimbursed(expense) {
  * @param item - expense selected
  */
 function onSelect(item) {
-  this.expense = _.cloneDeep(item);
+  this.clearExpense();
+  this.expense = _.mergeWith(this.expense, item, (expenseValue, itemValue) => {
+    return _.isNil(itemValue) ? expenseValue : itemValue;
+  });
+
   this.$set(this.expense, 'cost', moneyFilter(item.cost));
 } // onSelect
 
@@ -767,7 +781,7 @@ async function created() {
 
   let aggregatedExpenses = await api.getAllAggregateExpenses(); // get aggregate expenses
   this.constructAutoComplete(aggregatedExpenses); // set autocomplete options
-}
+} // created
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -799,19 +813,19 @@ export default {
       employees: [], // employee autocomplete options
       employee: null, // employee autocomplete filter
       expense: {
-        id: '',
+        id: null,
         purchaseDate: null,
         reimbursedDate: null,
         note: null,
         url: null,
         createdAt: null,
-        reciept: null,
-        cost: '',
-        description: '',
-        employeeId: '',
-        expenseTypeId: '',
-        catagory: null,
-        showOnFeed: false,
+        receipt: null,
+        cost: null,
+        description: null,
+        employeeId: null,
+        expenseTypeId: null,
+        category: null,
+        showOnFeed: null,
         employeeName: null,
         budgetName: null,
         recipient: null
@@ -900,6 +914,7 @@ export default {
   },
   methods: {
     addModelToTable,
+    clearExpense,
     clearStatus,
     clickedRow,
     constructAutoComplete,
