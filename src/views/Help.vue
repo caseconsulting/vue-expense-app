@@ -199,7 +199,7 @@ export default {
           {
             title: 'What are the employee access options for expense types?',
             body:
-              'Expense types accessible by All will provide all employees access to a prorated budget based on their work status. Expense types accessible by Full will provide both full time and part time employees will access to 100% of the budget. Expense types accessible by Full Time will provide only full time employees with access to the budget. Expense types accessible by Custom will provide the selected employees access to a prorated budget based on their work status.'
+              'Expense types accessible by All will provide all employees access to a prorated budget based on their work status. Expense types accessible by Full will provide both full time and part time employees with access to 100% of the budget. Expense types accessible by Full Time will provide only full time employees with access to the budget. Expense types accessible by Custom will provide the selected employees access to a prorated budget based on their work status.'
           }
         ],
         employees: [
