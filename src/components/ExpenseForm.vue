@@ -81,7 +81,7 @@
           v-model="expense.recipient"
           label="Recipient"
           class="form_padding"
-          :placeholder="invalidRecipient"
+          :placeholder="recipientPlaceholder"
         ></v-autocomplete>
 
         <!-- Description -->
@@ -689,6 +689,8 @@ function clearForm() {
   this.$set(this.expense, 'showOnFeed', null);
   this.$set(this.expense, 'recipient', null);
 
+  this.reqRecipient = false;
+  this.recipientPlaceholder = null;
   this.originalExpense = this.expense;
   this.purchaseDateFormatted = null;
   this.file = null;
@@ -1430,7 +1432,7 @@ export default {
       myBudgetsView: false, // if on myBudgetsView page
       hint: '', // form hints
       recipientOptions: [], // list of active employees to choose for high five
-      invalidRecipient: '',
+      recipientPlaceholder: '',
       isInactive: false, // employee is inactive -- also used for uploading reciepts dont delete
       isCovered: false,
       isOverCovered: false,
@@ -1535,7 +1537,7 @@ export default {
         this.reqRecipient = this.selectedExpenseType.hasRecipient;
 
         let localRecipient = _.find(this.employees, (employee) => employee.value == this.expense.recipient);
-        this.invalidRecipient = localRecipient ? localRecipient.text : '';
+        this.recipientPlaceholder = localRecipient ? localRecipient.text : '';
 
         // set show on company feed
         if (!_.isEqual(this.originalExpense, this.expense)) {
