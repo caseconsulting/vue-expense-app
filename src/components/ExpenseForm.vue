@@ -1155,6 +1155,11 @@ async function scanFile() {
   }
 } // scanFile
 
+/**
+ * preformats different US/Europe money formats for parsing
+ *
+ * @param float - number to be formatted
+ */
 function preformatFloat(float) {
   if (!float) {
     return '';
