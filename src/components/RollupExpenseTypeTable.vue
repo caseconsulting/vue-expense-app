@@ -311,34 +311,16 @@ function constructAutoComplete(aggregatedData) {
  */
 function createExpenses(aggregatedData) {
   return _.map(aggregatedData, (expense) => {
-    return {
-      budgetName: expense.budgetName,
-      cost: expense.cost,
-      description: expense.description,
-      employeeName: expense.employeeName,
-      expenseTypeId: expense.expenseTypeId,
-      firstName: expense.firstName,
-      id: expense.id,
-      lastName: expense.lastName,
-      middleName: expense.middleName,
-      note: expense.note,
-      purchaseDate: expense.purchaseDate,
-      receipt: expense.receipt,
-      reimbursedDate: expense.reimbursedDate,
-      employeeId: expense.employeeId,
+    let additionalAttributes = {
       checkBox: {
         all: false,
         indeterminate: false
       },
       selected: false,
       showSwitch: false,
-      url: expense.url,
-      category: expense.category,
-      createdAt: expense.createdAt,
-      failed: false,
-      showOnFeed: expense.showOnFeed,
-      disableShowOnFeedToggle: expense.disableShowOnFeedToggle
+      failed: false
     };
+    return _.merge(expense, additionalAttributes);
   });
 } // createExpenses
 
@@ -524,7 +506,7 @@ async function reimburseExpenses() {
       return await _.forEach(budget.expenses, async (expense) => {
         if (expense.selected) {
           expense.reimbursedDate = moment().format('YYYY-MM-DD');
-          expensesToReimburse.push(submitExpenseObject(expense));
+          expensesToReimburse.push(removeAggregateExpenseData(expense));
         }
       });
     });
@@ -632,28 +614,20 @@ function determineShowOnFeed(expense) {
 } // determineShowOnFeed
 
 /**
- * Sets up an expense object to be submitted.
+ * Remove additional attributes from the aggregate expense.
  *
- * @param expense - expense data to submit
- * @return Object - expense object
+ * @param expense - expense data to remove aggregate data from
+ * @return Object - simplified expense object
  */
-function submitExpenseObject(expense) {
-  return {
-    cost: expense.cost,
-    description: expense.description,
-    expenseTypeId: expense.expenseTypeId,
-    id: expense.id,
-    purchaseDate: expense.purchaseDate,
-    reimbursedDate: expense.reimbursedDate,
-    note: expense.note,
-    employeeId: expense.employeeId,
-    receipt: expense.receipt,
-    category: expense.category,
-    createdAt: expense.createdAt,
-    showOnFeed: expense.showOnFeed,
-    url: expense.url
-  };
-} // submitExpenseObject
+function removeAggregateExpenseData(expense) {
+  let localExpense = _.cloneDeep(expense);
+  delete localExpense.expenses;
+  delete localExpense.checkBox;
+  delete localExpense.failed;
+  delete localExpense.selected;
+  delete localExpense.showSwitch;
+  return localExpense;
+} // removeAggregateExpenseData
 
 /**
  * Toggle all expenses selected.
@@ -772,7 +746,6 @@ async function created() {
 
   let allExpenses = createExpenses(aggregatedData);
   this.pendingExpenses = filterOutReimbursed(allExpenses);
-
   this.constructAutoComplete(this.pendingExpenses);
   this.empBudgets = groupEmployeeExpenses(this.pendingExpenses);
   this.unCheckAllBoxes();
@@ -871,7 +844,7 @@ export default {
     reimburseExpenses,
     resetShowOnFeedToggles,
     selectExpense,
-    submitExpenseObject,
+    removeAggregateExpenseData,
     toggleAll,
     toggleGroup,
     toggleShowOnFeedGroup,

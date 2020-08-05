@@ -75,12 +75,13 @@
         <!-- Employee Selection List -->
         <v-autocomplete
           v-if="this.reqRecipient"
-          :items="this.highFiveRecipients"
+          :items="this.recipientOptions"
           :rules="requiredRules"
           :disabled="isReimbursed"
-          v-model="expense.description"
+          v-model="expense.recipient"
           label="Recipient"
           class="form_padding"
+          :placeholder="invalidRecipient"
         ></v-autocomplete>
 
         <!-- Description -->
@@ -686,6 +687,7 @@ function clearForm() {
   this.$set(this.expense, 'budgetName', null);
   this.$set(this.expense, 'category', null);
   this.$set(this.expense, 'showOnFeed', null);
+  this.$set(this.expense, 'recipient', null);
 
   this.originalExpense = this.expense;
   this.purchaseDateFormatted = null;
@@ -1155,7 +1157,27 @@ function preformatFloat(float) {
 
   //Uses both commas and full stops - ensure correct order and remove 1000s separators
   return posC < posFS ? float.replace(/,/g, '') : float.replace(/\./g, '').replace(',', '.');
-}
+} // preformatFloat
+
+/**
+ * Sets the recipients to choose from based on expense type.
+ */
+function setRecipientOptions() {
+  // creating or updating an expense as an admin
+  this.recipientOptions = _.compact(
+    this.activeEmployees.map((employee) => {
+      if (employee.value == this.userInfo.id || employee.workStatus == 0 || this.expense.employeeId == employee.value) {
+        if (this.userInfo.id != this.expense.employeeId && !this.asUser) {
+          // return employeeUtils.fullName(employee);
+          return employee;
+        }
+        return;
+      }
+      // return employeeUtils.fullName(employee);
+      return employee;
+    })
+  );
+} // setRecipientOptions
 
 /**
  * Submits an expense.
@@ -1165,6 +1187,18 @@ async function submit() {
   if (this.$refs.form != undefined || this.$refs.form != null) {
     if (this.$refs.form.validate()) {
       // NOTE: this second validate may be unnecessary. included in checkCoverage()
+
+      // set the description if a recipient is required
+      if (this.reqRecipient) {
+        let giver = _.find(this.employees, (employee) => employee.value == this.expense.employeeId);
+        let receiver = _.find(this.employees, (employee) => employee.value == this.expense.recipient);
+        let expenseType = _.find(this.expenseTypes, (type) => this.expense.expenseTypeId === type.value);
+
+        if (giver && receiver && expenseType) {
+          this.expense.description = `${giver.text} gave ${receiver.text} a ${expenseType.budgetName}`;
+        }
+      }
+
       if (this.isEmpty(this.expense.id)) {
         // creating a new expense
         await this.createNewEntry();
@@ -1295,21 +1329,8 @@ async function created() {
   });
   this.activeEmployees = _.compact(this.activeEmployees);
 
-  // creating or updating an expense as an admin
-  this.highFiveRecipients = _.compact(
-    this.activeEmployees.map((employee) => {
-      if (employee.value == this.userInfo.id || employee.workStatus == 0 || this.expense.employeeId == employee.value) {
-        if (this.userInfo.id != this.expense.employeeId && !this.asUser) {
-          // return employeeUtils.fullName(employee);
-          return employee.text;
-        }
+  this.setRecipientOptions();
 
-        return;
-      }
-      // return employeeUtils.fullName(employee);
-      return employee.text;
-    })
-  );
   // set aggregate expense types
   let expenseTypes = await api.getItems(api.EXPENSE_TYPES);
   this.expenseTypes = _.map(expenseTypes, (expenseType) => {
@@ -1408,7 +1429,8 @@ export default {
       file: undefined, // receipt
       myBudgetsView: false, // if on myBudgetsView page
       hint: '', // form hints
-      highFiveRecipients: [], // list of active employees to choose for high five
+      recipientOptions: [], // list of active employees to choose for high five
+      invalidRecipient: '',
       isInactive: false, // employee is inactive -- also used for uploading reciepts dont delete
       isCovered: false,
       isOverCovered: false,
@@ -1467,6 +1489,7 @@ export default {
     isReceiptRequired,
     moneyFilter,
     parseDate,
+    setRecipientOptions,
     submit,
     setFile,
     updateExistingEntry
@@ -1510,6 +1533,9 @@ export default {
 
         // set requires recipient
         this.reqRecipient = this.selectedExpenseType.hasRecipient;
+
+        let localRecipient = _.find(this.employees, (employee) => employee.value == this.expense.recipient);
+        this.invalidRecipient = localRecipient ? localRecipient.text : '';
 
         // set show on company feed
         if (!_.isEqual(this.originalExpense, this.expense)) {
@@ -1563,27 +1589,7 @@ export default {
       }
     },
     'expense.employeeId': function () {
-      //watches admin accessible employee field to know who can be a recipient
-      this.highFiveRecipients = _.compact(
-        this.activeEmployees.map((employee) => {
-          if (
-            employee.value == this.userInfo.id || //current value is the user
-            employee.workStatus == 0 || //value isn't an invalid employee
-            this.expense.employeeId == employee.value //selected employee
-          ) {
-            //this is a bit of a mess but it makes sure admins can select themselves as recipients
-            if (
-              this.userInfo.id != this.expense.employeeId &&
-              !this.asUser &&
-              employee.value != this.expense.employeeId
-            ) {
-              return employee.text;
-            }
-            return;
-          }
-          return employee.text;
-        })
-      );
+      this.setRecipientOptions();
     },
     'expense.purchaseDate': function () {
       this.purchaseDateFormatted = this.formatDate(this.expense.purchaseDate) || this.purchaseDateFormatted;

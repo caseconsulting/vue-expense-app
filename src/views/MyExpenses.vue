@@ -234,8 +234,7 @@
                   <v-card-text>
                     <div class="expandedInfo">
                       <p v-if="item.description">
-                        <b v-if="hasRecipient(item)">Recipient: </b>
-                        <b v-else>Description: </b>
+                        <b>Description: </b>
                         {{ item.description }}
                       </p>
                       <p v-if="!isEmpty(item.note)"><b>Notes: </b>{{ item.note }}</p>
@@ -630,21 +629,8 @@ function isReimbursed(expense) {
  * @param item - expense selected
  */
 function onSelect(item) {
-  this.$set(this.expense, 'id', item.id);
-  this.$set(this.expense, 'createdAt', item.createdAt);
-  this.$set(this.expense, 'employeeId', item.employeeId);
-  this.$set(this.expense, 'employeeName', item.employeeName);
-  this.$set(this.expense, 'expenseTypeId', item.expenseTypeId);
-  this.$set(this.expense, 'budgetName', item.budgetName);
-  this.$set(this.expense, 'category', item.category);
+  this.expense = _.cloneDeep(item);
   this.$set(this.expense, 'cost', moneyFilter(item.cost));
-  this.$set(this.expense, 'description', item.description);
-  this.$set(this.expense, 'purchaseDate', item.purchaseDate);
-  this.$set(this.expense, 'reimbursedDate', item.reimbursedDate);
-  this.$set(this.expense, 'note', item.note);
-  this.$set(this.expense, 'receipt', item.receipt);
-  this.$set(this.expense, 'url', item.url);
-  this.$set(this.expense, 'showOnFeed', item.showOnFeed);
 } // onSelect
 
 /**
@@ -827,7 +813,8 @@ export default {
         catagory: null,
         showOnFeed: false,
         employeeName: null,
-        budgetName: null
+        budgetName: null,
+        recipient: null
       }, // selected expense
       expenseTypes: [], // expense types
       filter: {
