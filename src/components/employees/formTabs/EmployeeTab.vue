@@ -374,3 +374,39 @@ export default {
   }
 };
 </script>
+<style>
+.customInput :hover {
+  border: solid 1px black;
+}
+
+.inputError {
+  border: solid 1px red !important;
+}
+
+.percentageBox {
+  border: solid 1px gray;
+  width: 46px;
+  height: 34px;
+  border-radius: 2px;
+  font-size: 14px;
+  display: flex;
+}
+
+.percentageBox div {
+  padding-top: 6px;
+  margin-left: 2px;
+}
+
+.percentageBox div:hover {
+  border: none;
+}
+
+.percentageBox input {
+  text-align: right;
+  width: 60%;
+}
+
+.percentageBox input:hover {
+  border: none;
+}
+</style>

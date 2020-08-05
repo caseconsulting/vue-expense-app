@@ -36,103 +36,21 @@
             <v-tab href="#awards">Awards</v-tab>
             <v-tab href="#technologies">Technologies</v-tab>
             <v-tab href="#customerOrgExp">Customer Org</v-tab>
+            <!-- Employee -->
             <v-tab-item id="employee">
               <employee-tab :admin="userIsAdmin()" :model="model"></employee-tab>
             </v-tab-item>
-            <!-- End Employee Tab -->
             <!-- Personal Info -->
             <v-tab-item id="personal">
               <personal-tab :model="model"></personal-tab>
             </v-tab-item>
-            <!-- End Personal Info -->
-
             <!-- Education -->
             <v-tab-item id="education">
               <education-tab :model="model"></education-tab>
             </v-tab-item>
             <!-- Experience -->
             <v-tab-item id="jobExperience">
-              <div class="pb-7">
-                <p>Case:</p>
-                <!-- Start date -->
-                <v-menu
-                  :close-on-content-click="true"
-                  :nudge-right="40"
-                  transition="scale-transition"
-                  offset-y
-                  max-width="290px"
-                  min-width="290px"
-                  style="padding-right: 20px; padding-bottom: 20px;"
-                >
-                  <template v-slot:activator="{ on }">
-                    <v-text-field
-                      label="Start Date"
-                      hint="MM/DD/YYYY format"
-                      persistent-hint
-                      prepend-icon="event"
-                      v-on="on"
-                    ></v-text-field>
-                  </template>
-                  <v-date-picker no-title></v-date-picker>
-                </v-menu>
-              </div>
-              <!-- Plus button  -->
-              <!-- If user adds another -->
-              <div class="py-2">
-                <!-- company  -->
-                <p class="pr-3" style="display: inline-block;">Company:</p>
-                <v-autocomplete style="display: inline-block; width: 80%;"></v-autocomplete>
-                <br />
-                <!-- general, IC radio button -->
-                <input type="radio" id="general" name="job-type" value="general" />
-                <label for="general">General</label>
-                <br />
-                <input type="radio" id="ic" name="job-type" value="ic" />
-                <label for="ic">IC</label>
-                <br />
-                <!-- start date -->
-                <v-menu
-                  :close-on-content-click="true"
-                  :nudge-right="40"
-                  transition="scale-transition"
-                  offset-y
-                  max-width="290px"
-                  min-width="290px"
-                  style="padding-right: 20px; padding-bottom: 20px;"
-                >
-                  <template v-slot:activator="{ on }">
-                    <v-text-field
-                      label="Start Date"
-                      hint="MM/DD/YYYY format"
-                      persistent-hint
-                      prepend-icon="event"
-                      v-on="on"
-                    ></v-text-field>
-                  </template>
-                  <v-date-picker no-title></v-date-picker>
-                </v-menu>
-                <!-- end date -->
-                <v-menu
-                  :close-on-content-click="true"
-                  :nudge-right="40"
-                  transition="scale-transition"
-                  offset-y
-                  max-width="290px"
-                  min-width="290px"
-                  style="padding-right: 20px; padding-bottom: 20px;"
-                >
-                  <template v-slot:activator="{ on }">
-                    <v-text-field
-                      label="End Date"
-                      hint="MM/DD/YYYY format"
-                      persistent-hint
-                      prepend-icon="event"
-                      v-on="on"
-                    ></v-text-field>
-                  </template>
-                  <v-date-picker no-title></v-date-picker>
-                </v-menu>
-              </div>
+              <job-experience-tab></job-experience-tab>
             </v-tab-item>
             <!-- Certifications -->
             <v-tab-item id="certifications">
@@ -176,10 +94,10 @@
 
 <script>
 import api from '@/shared/api.js';
-import dateUtils from '@/shared/dateUtils';
 import EducationTab from '@/components/employees/formTabs/EducationTab';
 import EmployeeTab from '@/components/employees/formTabs/EmployeeTab';
 import FormSubmissionConfirmation from '@/components/modals/FormSubmissionConfirmation.vue';
+import JobExperienceTab from '@/components/employees/formTabs/JobExperienceTab';
 import PersonalTab from '@/components/employees/formTabs/PersonalTab';
 import { getRole } from '@/utils/auth';
 import { v4 as uuid } from 'uuid';
@@ -223,16 +141,6 @@ async function displayError(err) {
   this.$set(this.errorStatus, 'statusMessage', err);
   this.$set(this.errorStatus, 'color', 'red');
 } // displayError
-
-/**
- * Formats a date.
- *
- * @param date - date to format
- * @return Date - formatted date
- */
-function formatDate(date) {
-  return dateUtils.formatDate(date);
-} // formatDate
 
 /**
  * Submits the employee form.
@@ -328,6 +236,7 @@ export default {
     EducationTab,
     EmployeeTab,
     FormSubmissionConfirmation,
+    JobExperienceTab,
     PersonalTab
   },
   created,
@@ -374,8 +283,7 @@ export default {
         workStatus: 100
       },
       submitting: false,
-      valid: false, // form validity
-      undisabled: false
+      valid: false // form validity
     };
   },
   methods: {
@@ -383,7 +291,6 @@ export default {
     clearStatus,
     confirm,
     displayError,
-    formatDate,
     submit,
     userIsAdmin
   },
@@ -401,45 +308,6 @@ export default {
 </script>
 
 <style>
-.customInput :hover {
-  border: solid 1px black;
-}
-
-.disabled {
-  background-color: #ddd;
-}
-
-.inputError {
-  border: solid 1px red !important;
-}
-
-.percentageBox {
-  border: solid 1px gray;
-  width: 46px;
-  height: 34px;
-  border-radius: 2px;
-  font-size: 14px;
-  display: flex;
-}
-
-.percentageBox div {
-  padding-top: 6px;
-  margin-left: 2px;
-}
-
-.percentageBox div:hover {
-  border: none;
-}
-
-.percentageBox input {
-  text-align: right;
-  width: 60%;
-}
-
-.percentageBox input:hover {
-  border: none;
-}
-
 .v-window {
   padding: 20px;
 }
