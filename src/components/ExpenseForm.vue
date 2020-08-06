@@ -1199,6 +1199,8 @@ async function submit() {
         if (giver && receiver && expenseType) {
           this.expense.description = `${giver.text} gave ${receiver.text} a ${expenseType.budgetName}`;
         }
+      } else {
+        this.expense.recipient = null;
       }
 
       if (this.isEmpty(this.expense.id)) {
@@ -1449,7 +1451,7 @@ export default {
       requireURLET: false,
       selectedEmployee: {}, // selected employees
       selectedExpenseType: {}, // selected expense types
-      selectedRecipient: {}, // the recipent selected for a high five
+      selectedRecipient: {}, // the recipient selected for a high five
       confirming: false, // budget overage confirmation box activator
       urlInfo: {
         id: null,
@@ -1540,7 +1542,7 @@ export default {
         this.recipientPlaceholder = localRecipient ? localRecipient.text : '';
 
         // set show on company feed
-        if (!_.isEqual(this.originalExpense, this.expense)) {
+        if (!_.isEqual(this.originalExpense, this.expense) || _.isNil(this.expense.id)) {
           // changing the expense type
           if (this.selectedExpenseType.alwaysOnFeed) {
             // if expense type is always on feed
