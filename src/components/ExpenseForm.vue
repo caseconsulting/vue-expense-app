@@ -175,6 +175,17 @@
           >Current Receipt: {{ this.expense.receipt }}</v-card-text
         >
 
+        <!-- Scan Receipt Button -->
+        <v-btn
+          v-if="receiptRequired && ((allowReceipt && isEdit) || !isEdit || isEmpty(expense.receipt))"
+          color="white"
+          @click="scanFile"
+          class="ma-2"
+          :disabled="isInactive"
+        >
+          Scan Receipt
+        </v-btn>
+
         <!-- Notes -->
         <v-textarea
           v-model="expense.note"
@@ -963,6 +974,20 @@ async function setFile(file) {
     this.isInactive = true;
     this.file = file;
     this.$set(this.expense, 'receipt', file.name);
+    this.isInactive = false;
+  } else {
+    this.file = null;
+    this.receipt = null;
+  }
+} // setFile
+
+/**
+ * Scans the receipt file.
+ */
+async function scanFile() {
+  let file = this.file;
+  if (file) {
+    this.isInactive = true;
     //go get text data from textract and comprehend
 
     this.receiptObject = await api.extractText(file);
@@ -972,7 +997,7 @@ async function setFile(file) {
       this.receiptObject = null;
       return;
     }
-    // this.expense.cost = 12;
+
     let totalPrice;
     let failed = false;
 
@@ -1130,11 +1155,8 @@ async function setFile(file) {
       // expense does not have a note
       this.expense.note = adjustNote;
     }
-  } else {
-    this.file = null;
-    this.receipt = null;
   }
-} // setFile
+} // scanFile
 
 function preformatFloat(float) {
   if (!float) {
@@ -1496,6 +1518,7 @@ export default {
     setRecipientOptions,
     submit,
     setFile,
+    scanFile,
     updateExistingEntry
   },
   props: [
