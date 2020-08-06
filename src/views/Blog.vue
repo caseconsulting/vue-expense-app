@@ -22,12 +22,12 @@
       <v-flex>Some title thing</v-flex>
     </v-row>
     <v-row>
-      <v-col>
+      <v-col cols="12" md="6" lg="6">
         <pending-post-table :pendingPosts="pendingPosts" :model="model"></pending-post-table>
-        <post-table :posts="posts"></post-table>
+        <post-table :posts="posts" v-on:edit="onSelect"></post-table>
       </v-col>
-      <v-col>
-        <post-editor></post-editor>
+      <v-col cols="12" md="6" lg="6">
+        <post-editor :blogPost="blogPost"></post-editor>
       </v-col>
     </v-row>
     <v-row>
@@ -55,6 +55,7 @@ import api from '@/shared/api.js';
 import PendingPostTable from '@/components/PendingPostTable.vue';
 import PostTable from '@/components/PostTable.vue';
 import PostEditor from '@/components/PostEditor.vue';
+import _ from 'lodash';
 
 function acceptedFileTypes() {
   return ['jpg', 'png'].join(',');
@@ -65,7 +66,7 @@ async function created() {
     {
       postId: '1',
       title: 'ahhhhhhhh',
-      text: 'stuff',
+      text: 'i dont know, whats another word for stuff',
       employeeName: 'Pablo',
       employeeId: '1',
       createDate: '12/02/2019'
@@ -73,7 +74,7 @@ async function created() {
     {
       postId: '2',
       title: 'nooooooo',
-      text: 'stuff',
+      text: 'other?',
       employeeName: 'Helen',
       employeeId: '2',
       createDate: '1/23/2019'
@@ -81,7 +82,7 @@ async function created() {
     {
       postId: '3',
       title: 'whyyyyy',
-      text: 'stuff',
+      text: 'items',
       employeeName: 'Diego',
       employeeId: '3',
       createDate: '4/02/2019'
@@ -97,7 +98,7 @@ async function created() {
     {
       postId: '5',
       title: 'wooooork',
-      text: 'stuff',
+      text: 'things',
       employeeName: 'Zertash',
       employeeId: '5',
       createDate: '10/02/2019'
@@ -105,6 +106,7 @@ async function created() {
     {
       postId: '6',
       title: ':(',
+      text: 'uhhhh',
       employeeName: 'Charles',
       employeeId: '6',
       createDate: '2/02/2019'
@@ -112,6 +114,15 @@ async function created() {
   ];
   this.model.id = '4';
 }
+
+/**
+ * Store the attributes of a selected blog post.
+ *
+ * @param item - expense selected
+ */
+function onSelect(item) {
+  this.blogPost = _.cloneDeep(item.text);
+} // onSelect
 
 async function uploadToS3() {
   await api.uploadBlogAttachment(this.inputFile);
@@ -157,6 +168,7 @@ export default {
       pendingPosts: [],
       posts: [],
       model: {},
+      blogPost: '',
       inputFile: null,
       inputText: null
     };
@@ -166,7 +178,8 @@ export default {
     comprehend,
     rekognition,
     splitInputText,
-    uploadToS3
+    uploadToS3,
+    onSelect
   }
 };
 </script>

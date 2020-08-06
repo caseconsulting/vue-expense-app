@@ -1,7 +1,7 @@
 <template>
   <v-row>
     <!-- Status Alert -->
-    <v-col cols="12" :lg="userIsBlogger() ? 8 : 12">
+    <v-col cols="12">
       <v-card>
         <v-container fluid>
           <!-- Title -->
@@ -36,16 +36,7 @@
                   <!-- Edit Button -->
                   <v-tooltip top>
                     <template v-slot:activator="{ on }">
-                      <v-btn
-                        :disabled="isEditing() || midAction"
-                        text
-                        icon
-                        @click.stop="
-                          toTopOfForm();
-                          onSelect(item);
-                        "
-                        v-on="on"
-                      >
+                      <v-btn :disabled="isEditing() || midAction" text icon @click="onSelect(item)" v-on="on">
                         <v-icon style="color: #606060;">
                           edit
                         </v-icon>
@@ -182,6 +173,9 @@ function isFocus(item) {
   return expanded || false;
 } // isFocus
 
+function onSelect(item) {
+  this.$emit('edit', item);
+}
 /**
  * Checks to see if the user is an admin. Returns true if the user's role is an admin, otherwise returns false.
  */
@@ -200,7 +194,8 @@ export default {
     isEditing,
     isEmpty,
     isFocus,
-    userIsBlogger
+    userIsBlogger,
+    onSelect
   },
   data() {
     return {
