@@ -254,7 +254,6 @@
                         <icon v-else class="mr-1 mx-3" id="marks" name="regular/times-circle"></icon>
                         <br />
                         <p>Show On Feed:</p>
-                        {{ item.showOnFeed }}
                         <icon v-if="item.showOnFeed" id="marks" class="mr-1 mx-3" name="regular/check-circle"></icon>
                         <icon v-else class="mr-1 mx-3" id="marks" name="regular/times-circle"></icon>
                       </div>

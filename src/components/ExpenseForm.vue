@@ -196,7 +196,7 @@
         ></v-textarea>
 
         <!-- URL -->
-        <v-text-field v-model="expense.url" :rules="urlRules" :label="uRLLabel" :disabled="isInactive"></v-text-field>
+        <v-text-field v-model="expense.url" :rules="urlRules" :label="urlLabel" :disabled="isInactive"></v-text-field>
 
         <!-- Show On Feed -->
         <v-switch
@@ -267,7 +267,7 @@ function getCategories() {
   });
   if (this.selectedExpenseType) {
     return _.map(this.selectedExpenseType.categories, (category) => {
-      return { text: category.name, value: category };
+      return category.name;
     });
   }
   return [];
@@ -350,12 +350,8 @@ function notesLabel() {
  *
  * @return string - label
  */
-function uRLLabel() {
-  if (this.requireURLCategory || this.requireURLET) {
-    return 'URL';
-  } else {
-    return 'URL (optional)';
-  }
+function urlLabel() {
+  return this.expense.requireURL ? 'URL' : 'URL (optional)';
 }
 
 // |--------------------------------------------------|
@@ -698,6 +694,7 @@ function clearForm() {
   this.$set(this.expense, 'budgetName', null);
   this.$set(this.expense, 'category', null);
   this.$set(this.expense, 'showOnFeed', null);
+  this.$set(this.expense, 'requireURL', null);
   this.$set(this.expense, 'recipient', null);
 
   this.reqRecipient = false;
@@ -1420,7 +1417,7 @@ export default {
     receiptRequired,
     notesRules,
     notesLabel,
-    uRLLabel
+    urlLabel
   },
   created,
   data() {
@@ -1469,8 +1466,6 @@ export default {
       receiptRules: [(v) => !!v || 'Receipts are required'], // rules for receipt
       receiptText: null,
       reimbursedDateFormatted: null, // formatted reimburse date
-      requireURLCategory: false,
-      requireURLET: false,
       selectedEmployee: {}, // selected employees
       selectedExpenseType: {}, // selected expense types
       selectedRecipient: {}, // the recipient selected for a high five
@@ -1481,7 +1476,7 @@ export default {
         hits: 0
       }, // training url info
       urlRules: [
-        (v) => (!this.requireURLCategory && !this.requireURLET) || !!v || 'URL is required. Only http(s) are accepted.',
+        (v) => !this.expense.requireURL || !!v || 'URL is required. Only http(s) are accepted.',
         (v) =>
           !v ||
           v == null ||
@@ -1536,11 +1531,9 @@ export default {
       });
     },
     'expense.expenseTypeId': function () {
-      this.requireURLCategory = false;
       this.selectedExpenseType = _.find(this.expenseTypes, (expenseType) => {
         return expenseType.value === this.expense.expenseTypeId;
       });
-      this.requireURLET = this.selectedExpenseType && this.selectedExpenseType.requireURL;
       if (this.selectedExpenseType) {
         // set hint
         this.hint = this.selectedExpenseType.recurringFlag
@@ -1564,7 +1557,7 @@ export default {
         let localRecipient = _.find(this.employees, (employee) => employee.value == this.expense.recipient);
         this.recipientPlaceholder = localRecipient ? localRecipient.text : '';
 
-        // set show on company feed
+        // set show on company feed and require url
         if (!_.isEqual(this.originalExpense, this.expense) || _.isNil(this.expense.id)) {
           // changing the expense type
           if (this.selectedExpenseType.alwaysOnFeed) {
@@ -1584,15 +1577,33 @@ export default {
             }
           }
         }
+
+        if (this.selectedExpenseType.requireURL) {
+          // if expense type always requires url
+          this.expense.requireURL = true;
+        } else {
+          // if expense type does not always require url
+          if (_.isEmpty(this.selectedExpenseType.categories)) {
+            // expense type does not have categories
+            this.expense.requireURL = false;
+          } else {
+            // expense type has categories
+            let category = _.find(this.selectedExpenseType.categories, (category) => {
+              return category == this.expense.category;
+            });
+            this.expense.requireURL = category ? category.requireURL : false;
+          }
+        }
       } else {
         this.hint = '';
       }
     },
     'expense.category': function () {
-      this.requireURLCategory = this.expense.category && this.expense.category.requireURL;
       if (
-        !_.isEqual(this.originalExpense.category, this.expense.category) ||
-        !_.isEqual(this.originalExpense.expenseTypeId, this.expense.expenseTypeId)
+        !_.isNil(this.selectedExpenseType) &&
+        (!_.isEqual(this.originalExpense.category, this.expense.category) ||
+          !_.isEqual(this.originalExpense.expenseTypeId, this.expense.expenseTypeId) ||
+          _.isNil(this.expense.id))
       ) {
         // category or expense type is changed
         if (this.selectedExpenseType.alwaysOnFeed) {
@@ -1612,7 +1623,27 @@ export default {
           }
         }
       } else {
+        // category and expense type are not changed
         this.expense.showOnFeed = this.originalExpense.showOnFeed;
+      }
+
+      if (!_.isNil(this.selectedExpenseType)) {
+        if (this.selectedExpenseType.requireURL) {
+          // if expense type requires url
+          this.expense.requireURL = true;
+        } else {
+          // if expense type does not always require url
+          if (_.isEmpty(this.selectedExpenseType.categories)) {
+            // expense type does not have categories
+            this.expense.requireURL = false;
+          } else {
+            // expense type has categories
+            let category = _.find(this.selectedExpenseType.categories, (category) => {
+              return category.name == this.expense.category;
+            });
+            this.expense.requireURL = category ? category.requireURL : false;
+          }
+        }
       }
     },
     'expense.employeeId': function () {
