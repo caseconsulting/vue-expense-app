@@ -29,7 +29,7 @@
           ></v-autocomplete>
         </v-card-title>
 
-        <!-- Unreimbursed Datatable -->
+        <!-- NEW DATA TABLE -->
         <v-data-table
           :headers="headers"
           :items="filteredItems"
@@ -41,8 +41,86 @@
           show-select
           item-key="key"
           class="elevation-1 text-center"
+          @click:row="clickedRow"
         >
-          <!-- Check box in datatable header -->
+          <!-- Select item slot in data table -->
+          <template v-slot:item.data-table-select="{ item }">
+            <v-checkbox
+              :input-value="item.checkBox.all"
+              :indeterminate="item.checkBox.indeterminate"
+              primary
+              hide-details
+              @click.stop="
+                toggleGroup(item);
+                determineShowOnFeed(item);
+              "
+              class="ma-0"
+            >
+            </v-checkbox>
+          </template>
+          <!-- Employee Name slot in data table-->
+          <template v-slot:item.employeeName="{ item }"
+            ><v-badge
+              v-if="item.expenses.length > 1"
+              :content="item.expenses.length"
+              :value="true"
+              :left="true"
+              :offset-x="-10"
+              color="grey"
+            ></v-badge>
+            {{ item.employeeName }}</template
+          >
+          <!-- Show on feed item slot in data table -->
+          <template v-slot:item.showOnFeed="{ item }">
+            <v-switch
+              :input-value="item.showSwitch && item.selected"
+              @click.native.stop
+              @change="toggleShowOnFeedGroup(item)"
+              :disabled="!item.checkBox.all"
+            ></v-switch>
+          </template>
+          <!-- Item cost in data table slot -->
+          <template v-slot:item.cost="{ item }">
+            <p id="money-team">{{ getBudgetTotal(item.expenses) | moneyValue }}</p>
+          </template>
+          <!-- Header select slot in data table -->
+          <template v-slot:header.data-table-select>
+            <v-checkbox
+              :input-value="mainCheckBox.all"
+              :indeterminate="mainCheckBox.indeterminate"
+              primary
+              hide-details
+              @click.stop="toggleAll"
+              class="ma-0"
+            >
+            </v-checkbox>
+          </template>
+          <!-- Expanded slot in datatable -->
+          <template v-slot:expanded-item="{ headers, item }">
+            <td :colspan="headers.length" class="pa-0">
+              <unrolled-table-info
+                :expenses="item.expenses"
+                @toggleExpense="toggleShowOnFeed"
+                @selectExpense="selectExpense"
+              ></unrolled-table-info>
+            </td>
+          </template>
+        </v-data-table>
+        <!-- NEW DATA TABLE -->
+        <!-- OLD DATA TABLE -->
+        <!-- Unreimbursed Datatable -->
+        <!--<v-data-table
+          :headers="headers"
+          :items="filteredItems"
+          :sort-by.sync="sortBy"
+          :sort-desc.sync="sortDesc"
+          :expanded.sync="expanded"
+          :loading="loading"
+          :items-per-page.sync="itemsPerPage"
+          show-select
+          item-key="key"
+          class="elevation-1 text-center"
+        >
           <template v-slot:header.data-table-select>
             <v-checkbox
               :input-value="mainCheckBox.all"
@@ -53,12 +131,9 @@
               class="ma-0"
             ></v-checkbox>
           </template>
-          <!-- End check box in datatable header -->
 
-          <!-- Rows in datatable -->
           <template v-slot:item="{ item }">
             <tr @click="clickedRow(item)">
-              <!--  Checkbox for individual expense  -->
               <td>
                 <v-checkbox
                   :input-value="item.checkBox.all"
@@ -73,7 +148,7 @@
                 >
                 </v-checkbox>
               </td>
-              <!-- Employee Name -->
+
               <td>
                 <v-badge
                   v-if="item.expenses.length > 1"
@@ -85,13 +160,11 @@
                 ></v-badge>
                 {{ item.employeeName }}
               </td>
-              <!-- Budget Name -->
+
               <td>{{ item.budgetName }}</td>
 
-              <!-- Total Expense Amount -->
               <td id="money-team">{{ getBudgetTotal(item.expenses) | moneyValue }}</td>
 
-              <!-- Show On Feed -->
               <td style="width: 4px;">
                 <v-switch
                   :input-value="item.showSwitch && item.selected"
@@ -102,9 +175,6 @@
               </td>
             </tr>
           </template>
-          <!-- End rows in datatable -->
-
-          <!-- Expanded slot in datatable -->
           <template v-slot:expanded-item="{ headers, item }">
             <td :colspan="headers.length" class="pa-0">
               <unrolled-table-info
@@ -114,10 +184,9 @@
               ></unrolled-table-info>
             </td>
           </template>
-          <!-- End expanded slot in datatable -->
-        </v-data-table>
+        </v-data-table> -->
         <!-- End unreimbursed datatable -->
-
+        <!-- OLD DATA TABLE -->
         <!-- Reimburse Button -->
         <v-fab-transition class="reimburse_button">
           <v-btn
