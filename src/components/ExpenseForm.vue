@@ -181,7 +181,7 @@
           color="white"
           @click="scanFile"
           class="ma-2"
-          :disabled="isInactive"
+          :disabled="isInactive || disableScan"
         >
           Scan Receipt
         </v-btn>
@@ -974,6 +974,7 @@ async function setFile(file) {
     this.isInactive = false;
   } else {
     this.file = null;
+    this.$set(this.expense, 'receipt', null);
     this.receipt = null;
   }
 } // setFile
@@ -1491,7 +1492,8 @@ export default {
           'URL must be valid. Only http(s) are accepted.'
       ], // rules for training url
       userInfo: {}, // user info
-      valid: false // form validity
+      valid: false, // form validity
+      disableScan: true
     };
   },
   methods: {
@@ -1666,6 +1668,18 @@ export default {
       //fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
       if (this.expense.reimbursedDate !== null && !this.formatDate(this.expense.reimbursedDate)) {
         this.expense.reimbursedDate = null;
+      }
+    },
+    file: function () {
+      //for disabling the scan button
+      if (this.file == null) {
+        //if no file
+        this.disableScan = true;
+      } else if (this.file.type != 'image/jpeg' && this.file.type != 'image/png') {
+        //if file isn't jpg or png
+        this.disableScan = true;
+      } else {
+        this.disableScan = false;
       }
     }
   }
