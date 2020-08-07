@@ -190,7 +190,7 @@
             class="elevation-4"
             @click:row="clickedRow"
           >
-            <!-- Budg -->
+            <!-- Budget Name slot -->
             <template v-slot:item.budgetName="{ item }">
               <td>{{ item.budgetName | limitedText }}</td>
             </template>
@@ -801,7 +801,7 @@ function startAction() {
  * Scrolls window back to the top of the form.
  */
 function toTopOfForm() {
-  this.$vuetify.goTo(this.$refs.form.$el.offsetTop + 50);
+  this.$vuetify.goTo(this.$refs.form.$el.offsetTop + 100);
 } // toTopOfForm
 
 /**

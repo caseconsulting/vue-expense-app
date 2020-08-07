@@ -126,6 +126,144 @@
           <br />
           <!-- End Filters -->
 
+          <!-- NEW DATA TABLE-->
+          <v-data-table
+            :headers="roleHeaders"
+            :items="filteredExpenses"
+            :sort-by.sync="sortBy"
+            :sort-desc.sync="sortDesc"
+            :expanded.sync="expanded"
+            :loading="loading"
+            :items-per-page="15"
+            :search="search"
+            item-key="id"
+            class="elevation-4"
+            @click:row="clickedRow"
+          >
+            <!-- Cost slot -->
+            <template v-slot:item.cost="{ item }">
+              <td>{{ item.cost | moneyValue }}</td>
+            </template>
+            <!-- Purchase date slot -->
+            <template v-slot:item.purchaseDate="{ item }">
+              <td>{{ item.purchaseDate | dateFormat }}</td>
+            </template>
+            <!-- Reimburse date Slot -->
+            <template v-slot:item.reimburseDate="{ item }">
+              <td>{{ item.reimbursedDate | dateFormat }}</td>
+            </template>
+            <!-- Creation date slot -->
+            <template v-slot:item.createdAt="{ item }">
+              <td>{{ item.createdAt | dateFormat }}</td>
+            </template>
+            <!-- Creation date slot -->
+            <template v-slot:item.createdAt="{ item }">
+              <td>{{ item.createdAt | dateFormat }}</td>
+            </template>
+            <!-- Employee name slot-->
+            <template v-slot: item.employeeName="{item}">
+              <td v-if="isAdmin">{{ item.employeeName }}</td>
+            </template>
+            <!-- Budget Name Slot -->
+            <template v-slot: item.budgetName="{item}">
+              <td v-if="isAdmin">{{ item.budgetName }}</td>
+            </template>
+            <!--Action Items-->
+
+            <template v-slot:item.actions="{ item }">
+              <!-- Download Button-->
+              <td class="datatable_btn layout" @click="clickedRow(item)">
+                <!-- Download Attachment Button -->
+                <attachment :midAction="midAction" :expense="item" :mode="'expenses'"></attachment>
+
+                <!-- Edit Button -->
+                <v-btn
+                  :disabled="isEditing() || (isUser && isReimbursed(item)) || midAction"
+                  text
+                  icon
+                  @click="
+                    toTopOfForm();
+                    onSelect(item);
+                  "
+                >
+                  <v-icon style="color: #606060;">edit</v-icon>
+                </v-btn>
+                <v-btn
+                  :disabled="isReimbursed(item) || isEditing() || midAction"
+                  text
+                  icon
+                  @click="
+                    deleting = true;
+                    midAction = true;
+                    propExpense = item;
+                  "
+                >
+                  <v-icon style="color: #606060;">
+                    delete
+                  </v-icon>
+                </v-btn>
+                <!-- Unreimburse Button -->
+                <v-btn
+                  :disabled="!isReimbursed(item) || isEditing() || midAction"
+                  text
+                  icon
+                  @click="
+                    unreimbursing = true;
+                    midAction = true;
+                    propExpense = item;
+                  "
+                >
+                  <v-icon style="color: #606060;">
+                    money_off
+                  </v-icon>
+                </v-btn>
+              </td></template
+            >
+
+            <!-- Expanded slot in datatable -->
+            <template v-slot:expanded-item="{ headers, item }">
+              <td :colspan="headers.length" class="pa-0">
+                <v-card text>
+                  <v-card-text>
+                    <div class="expandedInfo">
+                      <p v-if="item.description">
+                        <b>Description: </b>
+                        {{ item.description }}
+                      </p>
+                      <p v-if="!isEmpty(item.note)"><b>Notes: </b>{{ item.note }}</p>
+                      <p v-if="!isEmpty(item.receipt)"><b>Receipt: </b>{{ item.receipt }}</p>
+                      <p v-if="!isEmpty(item.url)">
+                        <b>Url: </b> <a v-if="item.url" :href="item.url">{{ item.url }}</a>
+                      </p>
+                      <p v-if="!isEmpty(item.category)"><b>Category: </b>{{ item.category }}</p>
+                      <div v-if="isAdmin" class="flagExp">
+                        <p>Inactive:</p>
+                        <icon
+                          v-if="useInactiveStyle(item)"
+                          id="marks"
+                          class="mr-1 mx-3"
+                          name="regular/check-circle"
+                        ></icon>
+                        <icon v-else class="mr-1 mx-3" id="marks" name="regular/times-circle"></icon>
+                        <br />
+                        <p>Show On Feed:</p>
+                        <icon v-if="item.showOnFeed" id="marks" class="mr-1 mx-3" name="regular/check-circle"></icon>
+                        <icon v-else class="mr-1 mx-3" id="marks" name="regular/times-circle"></icon>
+                      </div>
+                    </div>
+                  </v-card-text>
+                </v-card>
+              </td>
+            </template>
+            <!-- End expanded slot in datatable -->
+
+            <!-- Alert for no search results -->
+            <v-alert slot="no-results" :value="true" color="error" icon="warning">
+              Your search for "{{ search }}" found no results.
+            </v-alert>
+            <!-- End alert for no search results -->
+          </v-data-table>
+
           <!-- Expense Datatable-->
           <v-data-table
             :headers="roleHeaders"
@@ -263,11 +401,12 @@
               </td>
             </template>
             <!-- End expanded slot in datatable -->
-
-            <!-- Alert for no search results -->
-            <v-alert slot="no-results" :value="true" color="error" icon="warning">
-              Your search for "{{ search }}" found no results.
-            </v-alert>
+            <!-- Alert slot for no search results -->
+            <template v-slot:no-results>
+              <v-alert :value="true" color="error" icon="warning">
+                Your search for "{{ search }}" found no results
+              </v-alert>
+            </template>
             <!-- End alert for no search results -->
           </v-data-table>
           <!-- End Expense Datatable -->
