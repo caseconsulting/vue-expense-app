@@ -1,78 +1,110 @@
 <template>
   <div>
-    <div v-for="degree in degrees" :key="degree.name">
+    <div
+      class="pt-3 px-5"
+      style="border: 1px solid grey;"
+      v-for="(degree, index) in model.degrees"
+      :key="'degree: ' + degree.name + index"
+    >
       <p class="bold">Degree:</p>
-      <v-combobox v-model="degree.name"></v-combobox>
-      <br />
-      <p>Majors:</p>
-      <div v-for="(major, index) in degree.majors" :key="major">
-        <v-combobox v-model="degree.majors[index]"></v-combobox>
-      </div>
-      <!-- Plus button  -->
-      <v-icon>add</v-icon>
-      <br />
-      <p>Minors:</p>
-      <div v-for="(minor, index) in degree.minors" :key="minor">
-        <v-combobox v-model="degree.minors[index]"></v-combobox>
-      </div>
-      <!-- Plus button  -->
-      <v-icon>add</v-icon>
-      <br />
+      <v-combobox v-model="degree.name">
+        <!-- Delete button  -->
+        <template v-slot:append-outer>
+          <v-slide-x-reverse-transition mode="out-in">
+            <v-icon @click="deleteDegree(index)">delete</v-icon>
+          </v-slide-x-reverse-transition>
+        </template>
+      </v-combobox>
+      <v-row
+        ><v-icon class="pb-5" @click="addItem(degree.majors)">add</v-icon>
+        <p>Majors:</p>
+      </v-row>
+      <v-row v-for="(major, index) in degree.majors" :key="'major: ' + major + index">
+        <v-combobox v-model="degree.majors[index]">
+          <!-- Delete button  -->
+          <template v-slot:append-outer>
+            <v-slide-x-reverse-transition mode="out-in">
+              <v-icon @click="deleteItem(degree.majors, index)">delete</v-icon>
+            </v-slide-x-reverse-transition>
+          </template>
+        </v-combobox>
+      </v-row>
+      <v-row
+        ><v-icon class="pb-5" @click="addItem(degree.minors)">add</v-icon>
+        <p>Minors:</p>
+      </v-row>
+      <v-row v-for="(minor, index) in degree.minors" :key="'minor: ' + minor + index">
+        <v-combobox v-model="degree.minors[index]">
+          <!-- Delete button  -->
+          <template v-slot:append-outer>
+            <v-slide-x-reverse-transition mode="out-in">
+              <v-icon @click="deleteItem(degree.minors, index)">delete</v-icon>
+            </v-slide-x-reverse-transition>
+          </template>
+        </v-combobox>
+      </v-row>
 
       <!-- Concentration -->
-      <div v-for="(concentration, index) in degree.concentrations" :key="concentration">
-        <div>Concentrations:</div>
+      <v-row
+        ><v-icon class="pb-5" @click="addItem(degree.concentrations)">add</v-icon>
+        <p>Concentrations:</p></v-row
+      >
+      <v-row v-for="(concentration, index) in degree.concentrations" :key="'conc: ' + concentration + index">
         <v-row class="px-3" align="center">
           <!-- <p class="pr-5 mb-0" align-center text-center style="display: inline-block;">Concentration:</p> -->
           <v-combobox v-model="degree.concentrations[index]">
-            <!-- Plus button  -->
+            <!-- Delete button  -->
             <template v-slot:append-outer>
               <v-slide-x-reverse-transition mode="out-in">
-                <v-icon>delete</v-icon>
+                <v-icon @click="deleteItem(degree.concentrations, index)">delete</v-icon>
               </v-slide-x-reverse-transition>
             </template>
           </v-combobox>
         </v-row>
-      </div>
+      </v-row>
       <!-- End Concentration -->
 
       <!-- Completion year -->
     </div>
+    <v-row class="pt-4" align="center" justify="center">
+      <v-btn @click="addDegree()">Add a Degree<v-icon class="pl-2">add</v-icon></v-btn>
+    </v-row>
   </div>
 </template>
 <script>
-// /**
-//  * Gets the current degrees if there are any.
-//  */
-// function degrees() {
-//   return this.model.degrees != null ? this.model.degrees : [];
-// } // degrees
+// |--------------------------------------------------|
+// |                                                  |
+// |                     METHODS                      |
+// |                                                  |
+// |--------------------------------------------------|
 
-async function created() {
-  this.degrees = [
-    {
-      name: "Bachelor's of Science",
-      majors: ['Math', 'Computer Science'],
-      minors: ['Computer Information Systems'],
-      concentrations: ['Robotics']
-    },
-    {
-      name: "Bachelor's of Art",
-      majors: ['Theater'],
-      minors: [],
-      concentrations: []
-    }
-  ];
-} // created
+function addDegree() {
+  this.model.degrees.push({
+    name: '',
+    majors: [],
+    minors: [],
+    concentrations: []
+  });
+}
+
+function addItem(array) {
+  array.push('');
+}
+
+function deleteItem(array, index) {
+  array.splice(index, 1);
+}
+
+function deleteDegree(index) {
+  this.model.degrees.splice(index, 1);
+}
+
 export default {
-  created,
-  // computed: {
-  //   degrees
-  // },
-  data() {
-    return {
-      degrees: []
-    };
+  methods: {
+    addDegree,
+    addItem,
+    deleteDegree,
+    deleteItem
   },
   props: ['model']
 };

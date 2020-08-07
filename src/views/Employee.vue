@@ -169,26 +169,27 @@ export default {
       }, // datatable filter
       loading: false, // loading status
       model: {
-        id: null,
-        firstName: '',
-        middleName: '',
-        lastName: '',
-        email: '@consultwithcase.com',
-        employeeRole: '',
-        employeeNumber: null,
-        hireDate: null,
-        workStatus: 100,
         birthday: '',
         birthdayFeed: false,
-        jobRole: '',
-        prime: '',
-        contract: '',
-        github: '',
-        twitter: '',
         city: '',
-        st: '',
+        contract: '',
         country: '',
-        deptDate: ''
+        degrees: [],
+        deptDate: '',
+        email: '@consultwithcase.com',
+        employeeNumber: null,
+        employeeRole: '',
+        firstName: '',
+        github: '',
+        hireDate: null,
+        id: null,
+        jobRole: '',
+        lastName: '',
+        middleName: '',
+        prime: '',
+        st: '',
+        twitter: '',
+        workStatus: 100
       }, // selected employee
       search: '', // query text for datatable search field
       status: {

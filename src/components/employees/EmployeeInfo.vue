@@ -16,6 +16,9 @@
         <v-tab-item id="personal">
           <personal-tab :admin="userIsAdmin()" :employee="userIsEmployee()" :model="model"></personal-tab>
         </v-tab-item>
+        <v-tab-item id="education">
+          <education-tab :admin="userIsAdmin()" :employee="userIsEmployee()" :model="model"></education-tab>
+        </v-tab-item>
       </v-tabs>
     </div>
   </v-card-text>
@@ -25,6 +28,7 @@
 import api from '@/shared/api';
 import { getRole } from '@/utils/auth';
 import _ from 'lodash';
+import EducationTab from '@/components/employees/infoTabs/EducationTab';
 import EmployeeTab from '@/components/employees/infoTabs/EmployeeTab';
 import PersonalTab from '@/components/employees/infoTabs/PersonalTab';
 
@@ -63,6 +67,7 @@ async function created() {
 
 export default {
   components: {
+    EducationTab,
     EmployeeTab,
     PersonalTab
   },
