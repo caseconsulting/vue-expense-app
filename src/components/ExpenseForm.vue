@@ -1073,7 +1073,7 @@ async function scanFile() {
     //see if what it found is able to be converted to moment
     //format it so it is in the correct format
     //set purchase date
-    let bestDate = { Date: null, Score: 0 };
+    let firstDate = null;
     // COMMERCIAL_ITEM
     let commercialItem = '';
     // EVENT
@@ -1086,8 +1086,8 @@ async function scanFile() {
     let title = '';
     _.forEach(this.receiptObject.comprehend.Entities, (entity) => {
       if (entity.Type == 'DATE') {
-        if (entity.Score > bestDate.Score) {
-          bestDate = { Date: entity.Text, Score: entity.Score };
+        if (entity.Score > 0.9 && firstDate == null) {
+          firstDate = entity.Text;
         }
       } else if (entity.Type == 'COMMERCIAL_ITEM') {
         if (entity.Score > 0.9) {
@@ -1138,8 +1138,8 @@ async function scanFile() {
     }
     this.isInactive = false;
 
-    if (bestDate.Score >= 0.9 && this.expense.purchaseDate == null) {
-      let date = moment(bestDate.Date);
+    if (firstDate != null && this.expense.purchaseDate == null) {
+      let date = moment(firstDate);
       date = parseDate(date.format('YYYY-MM-DD'));
       this.expense.purchaseDate = date;
     }
