@@ -42,7 +42,7 @@
 
         <!-- Description -->
         <template v-slot:item.description="{ item }">
-          <p :class="{ failed: item.failed }">{{ item.description | item.descripFormat }}</p>
+          <p :class="{ failed: item.failed }">{{ item.description | descripFormat }}</p>
         </template>
 
         <!-- Show on Feed -->
