@@ -191,8 +191,8 @@
             @click:row="clickedRow"
           >
             <!-- Budg -->
-            <template v-slot:item.budgetName = "{item}">
-            <td>{{ item.budgetName | limitedText }}</td>
+            <template v-slot:item.budgetName="{ item }">
+              <td>{{ item.budgetName | limitedText }}</td>
             </template>
             <!-- Budget slot -->
             <template v-slot:item.budget="{ item }">
