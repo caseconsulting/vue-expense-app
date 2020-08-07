@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 <template>
   <v-row>
     <!-- Status Alert -->
@@ -13,9 +14,7 @@
       <v-card-title headline color="white">
         <span class="headline">{{ status.statusMessage }}</span>
       </v-card-title>
-      <v-btn color="white" text @click="clearStatus">
-        Close
-      </v-btn>
+      <v-btn color="white" text @click="clearStatus">Close</v-btn>
     </v-snackbar>
 
     <v-col cols="12" :lg="userIsAdmin() ? 8 : 12">
@@ -61,9 +60,7 @@
                 <!-- Show Active and Inactive -->
                 <v-tooltip top>
                   <template v-slot:activator="{ on }">
-                    <v-btn value="both" v-on="on" text>
-                      BOTH
-                    </v-btn>
+                    <v-btn value="both" v-on="on" text>BOTH</v-btn>
                   </template>
                   <span>Show All</span>
                 </v-tooltip>
@@ -98,9 +95,7 @@
                 <!-- Show Overdraft and No Overdraft -->
                 <v-tooltip top>
                   <template v-slot:activator="{ on }">
-                    <v-btn value="both" v-on="on" text>
-                      BOTH
-                    </v-btn>
+                    <v-btn value="both" v-on="on" text>BOTH</v-btn>
                   </template>
                   <span>Show All</span>
                 </v-tooltip>
@@ -135,9 +130,7 @@
                 <!-- Show Recurring and Non-Recurring -->
                 <v-tooltip top>
                   <template v-slot:activator="{ on }">
-                    <v-btn value="both" v-on="on" text>
-                      BOTH
-                    </v-btn>
+                    <v-btn value="both" v-on="on" text>BOTH</v-btn>
                   </template>
                   <span>Show All</span>
                 </v-tooltip>
@@ -172,9 +165,7 @@
                 <!-- Show Receipt Required and Not Required-->
                 <v-tooltip top>
                   <template v-slot:activator="{ on }">
-                    <v-btn value="both" v-on="on" text>
-                      BOTH
-                    </v-btn>
+                    <v-btn value="both" v-on="on" text>BOTH</v-btn>
                   </template>
                   <span>Show All</span>
                 </v-tooltip>
@@ -185,7 +176,7 @@
           <br />
           <!-- End Filters -->
 
-          <!-- Expense Type Datatable-->
+          <!--EXPENSE TYPE DATA TABLE -->
           <v-data-table
             :headers="headers"
             :items="expenseTypeList"
@@ -197,81 +188,64 @@
             :search="search"
             item-key="id"
             class="elevation-4"
+            @click:row="clickedRow"
           >
-            <!-- Rows in datatable -->
-            <template v-slot:item="{ item }">
-              <tr :class="{ selectFocus: isFocus(item) }" @click="clickedRow(item)">
-                <!-- Expense Type Information -->
-                <td>{{ item.budgetName | limitedText }}</td>
-                <td>{{ item.budget | moneyValue }}</td>
-                <td>{{ item.startDate }}</td>
-                <td>{{ item.endDate }}</td>
-
-                <!-- Action Icons -->
-                <td v-if="userIsAdmin()" class="datatable_btn layout" @click="clickedRow(item)">
-                  <!-- Edit Button -->
-                  <v-tooltip top>
-                    <template v-slot:activator="{ on }">
-                      <v-btn
-                        :disabled="isEditing() || midAction"
-                        text
-                        icon
-                        @click="
-                          toTopOfForm();
-                          onSelect(item);
-                        "
-                        v-on="on"
-                      >
-                        <v-icon style="color: #606060;">
-                          edit
-                        </v-icon>
-                      </v-btn>
-                    </template>
-                    <span>Edit</span>
-                  </v-tooltip>
-
-                  <!-- Delete Button -->
-                  <v-tooltip top>
-                    <template v-slot:activator="{ on }">
-                      <v-btn :disabled="isEditing() || midAction" text icon @click="validateDelete(item)" v-on="on">
-                        <v-icon style="color: #606060;">
-                          delete
-                        </v-icon>
-                      </v-btn>
-                    </template>
-                    <span>Delete</span>
-                  </v-tooltip>
-                </td>
-                <!-- End Action Icons -->
-              </tr>
+            <!-- Budg -->
+            <template v-slot:item.budgetName = "{item}">
+            <td>{{ item.budgetName | limitedText }}</td>
             </template>
-            <!-- End rows in datatable -->
+            <!-- Budget slot -->
+            <template v-slot:item.budget="{ item }">
+              <p>{{ item.budget | moneyValue }}</p>
+            </template>
+            <!-- Actions -->
+            <template v-slot:item.actions="{ item }">
+              <v-btn
+                :disabled="isEditing() || midAction"
+                text
+                icon
+                @click="
+                  toTopOfForm();
+                  onSelect(item);
+                "
+              >
+                <v-icon style="color: #606060;">edit</v-icon>
+              </v-btn>
+              <v-btn :disabled="isEditing() || midAction" text icon @click="validateDelete(item)">
+                <v-icon style="color: #606060;">delete</v-icon>
+              </v-btn>
+            </template>
 
-            <!-- Expanded slot in datatable -->
+            <!-- Expanded slot item -->
             <template v-slot:expanded-item="{ headers, item }">
               <td :colspan="headers.length" class="pa-0">
                 <v-card text>
                   <v-card-text>
                     <div class="expandedInfo">
                       <!-- Description -->
-                      <p v-if="item.description"><b>Description: </b>{{ item.description }}</p>
+                      <p v-if="item.description">
+                        <b>Description:</b>
+                        {{ item.description }}
+                      </p>
 
                       <!-- Category -->
                       <p v-if="item.categories && item.categories.length > 0">
-                        <b>Categories: </b>{{ categoriesToString(item.categories) }}
+                        <b>Categories:</b>
+                        {{ categoriesToString(item.categories) }}
                       </p>
 
                       <!-- Requires Recipient -->
-                      <p v-if="item.hasRecipient"><b>Requires Recipient: </b> yes</p>
-                      <p v-else><b>Requires Recipient: </b> no</p>
+                      <p v-if="item.hasRecipient"><b>Requires Recipient:</b> yes</p>
+                      <p v-else><b>Requires Recipient:</b> no</p>
 
                       <!-- Always show on feed -->
-                      <p v-if="item.alwaysOnFeed"><b>Always Show On Feed: </b> yes</p>
-                      <p v-else><b>Always Show On Feed: </b> no</p>
+                      <p v-if="item.alwaysOnFeed"><b>Always Show On Feed:</b> yes</p>
+                      <p v-else><b>Always Show On Feed:</b> no</p>
 
                       <!-- Categories show on feed -->
                       <p v-if="!item.alwaysOnFeed && item.categories && item.categories.length > 0">
-                        <b>Categories Showing On Feed: </b>{{ categoriesOnFeed(item.categories) }}
+                        <b>Categories Showing On Feed:</b>
+                        {{ categoriesOnFeed(item.categories) }}
                       </p>
 
                       <!-- Flags -->
@@ -303,9 +277,15 @@
                       <v-row v-if="userIsAdmin()">
                         <!-- Display number of employees accessed by -->
                         <div class="pt-2 px-3">
-                          <p v-if="getAccess(item)"><b>Access:</b> {{ getAccess(item) }}</p>
+                          <p v-if="getAccess(item)">
+                            <b>Access:</b>
+                            {{ getAccess(item) }}
+                          </p>
                           <p v-else-if="item.accessibleBy.length == 1"><b>Access:</b> 1 Employee</p>
-                          <p v-else><b>Access:</b> {{ item.accessibleBy.length }} Employees</p>
+                          <p v-else>
+                            <b>Access:</b>
+                            {{ item.accessibleBy.length }} Employees
+                          </p>
                         </div>
                         <!-- Button to view names of employees with access -->
                         <v-dialog v-model="showAccess" max-width="400px" scrollable>
@@ -318,12 +298,11 @@
                               <span class="headline" style="color: white;">Accessible By</span>
                             </v-card-title>
                             <v-divider color="black"></v-divider>
-
-                            <!-- List of employee names -->
+                            <!-- List of employee names/ISSUES -->
                             <v-card-text class="pb-0" style="max-height: 300px; background-color: #f0f0f0;">
                               <v-row>
                                 <v-list color="#f0f0f0" width="376">
-                                  <template v-for="(employee, index) in getEmployeeList(item.accessibleBy)">
+                                  <template v-for="employee in getEmployeeList(item.accessibleBy)">
                                     <v-list-item :key="employee.id">
                                       <!-- Employee Image -->
                                       <v-list-item-avatar>
@@ -333,26 +312,21 @@
                                           @error="changeAvatar(employee)"
                                         />
                                         <icon class="user-circle" name="user-circle" v-else></icon>
-                                        <!-- <icon class="user-circle" name="regular/user-circle" v-else></icon> -->
                                       </v-list-item-avatar>
 
                                       <!-- Employee Name -->
                                       <v-list-item-content>
-                                        <v-list-item-title>
-                                          {{ getEmployeeName(employee.id) }}
-                                        </v-list-item-title>
+                                        <v-list-item-title>{{ getEmployeeName(employee.id) }}</v-list-item-title>
                                       </v-list-item-content>
                                     </v-list-item>
-                                    <v-divider v-if="index != showAccessLength - 1" :key="index" inset></v-divider>
+                                    <!-- <v-divider v-if="index != showAccessLength - 1" :key="index" inset></v-divider> -->
                                   </template>
-                                  <div v-if="showAccessLength == 0" class="noEmployees">
-                                    No Employees
-                                  </div>
+                                  <!-- <div v-if="showAccessLength == 0" class="noEmployees">No Employees</div> -->
                                 </v-list>
                               </v-row>
                             </v-card-text>
-                            <v-divider color="black"></v-divider>
 
+                            <v-divider color="black"></v-divider>
                             <!-- Close dialog button -->
                             <v-card-actions>
                               <v-spacer></v-spacer>
@@ -367,15 +341,16 @@
                 </v-card>
               </td>
             </template>
-            <!-- End expanded slot in datatable -->
 
-            <!-- Alert for no search results -->
-            <v-alert slot="no-results" :value="true" color="error" icon="warning">
-              Your search for "{{ search }}" found no results.
-            </v-alert>
+            <!-- Alert slot for no search results -->
+            <template v-slot:no-results>
+              <v-alert :value="true" color="error" icon="warning">
+                Your search for "{{ search }}" found no results
+              </v-alert>
+            </template>
             <!-- End alert for no search results -->
           </v-data-table>
-          <!-- End Expense Type Datatable -->
+          <!-- END EXPENSE TYPE Datatable -->
 
           <!-- Confirmation Modals -->
           <delete-modal :activate="deleting" :deleteInfo="'(' + deleteType + ')'" :type="'expense-type'"></delete-modal>
