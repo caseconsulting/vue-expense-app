@@ -22,13 +22,13 @@
       <v-flex>Some title thing</v-flex>
     </v-row>
     <v-row>
-      <v-col cols="12" md="6" lg="6">
-        <pending-post-table :pendingPosts="pendingPosts" :model="model"></pending-post-table>
+      <v-col cols="12">
+        <v-btn class="mb-5" to="/postEditor/0"> Create a New Blog Post<v-icon class="pl-2">person_add</v-icon> </v-btn>
         <post-table :posts="posts" v-on:edit="onSelect"></post-table>
       </v-col>
-      <v-col cols="12" md="6" lg="6">
+      <!-- <v-col cols="12" md="6" lg="6">
         <post-editor :blogPost="blogPost"></post-editor>
-      </v-col>
+      </v-col> -->
     </v-row>
     <v-row>
       <v-file-input
@@ -52,9 +52,8 @@
 <script>
 import api from '@/shared/api.js';
 //import moment from 'moment';
-import PendingPostTable from '@/components/PendingPostTable.vue';
 import PostTable from '@/components/PostTable.vue';
-import PostEditor from '@/components/PostEditor.vue';
+// import PostEditor from '@/components/PostEditor.vue';
 import _ from 'lodash';
 
 function acceptedFileTypes() {
@@ -158,9 +157,8 @@ function splitInputText() {
 }
 export default {
   components: {
-    PendingPostTable,
-    PostTable,
-    PostEditor
+    PostTable
+    // PostEditor
   },
   created,
   data() {

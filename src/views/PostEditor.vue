@@ -1,10 +1,15 @@
 <template>
   <v-container>
+    <!-- Cancel Button -->
+    <v-btn to="/blog" color="white" class="ma-2"> <icon class="mr-1" name="ban"></icon>Cancel </v-btn>
+
+    <!-- Submit Button -->
+    <v-btn outlined color="success" class="ma-2"> <icon class="mr-1" name="save"></icon>Submit</v-btn>
     <div cols="12">
       <ckeditor :editor="editor" :value="editorData" :config="editorConfig"></ckeditor>
     </div>
     <!-- Cancel Button -->
-    <v-btn color="white" class="ma-2"> <icon class="mr-1" name="ban"></icon>Cancel </v-btn>
+    <v-btn to="/blog" color="white" class="ma-2"> <icon class="mr-1" name="ban"></icon>Cancel </v-btn>
 
     <!-- Submit Button -->
     <v-btn outlined color="success" class="ma-2"> <icon class="mr-1" name="save"></icon>Submit</v-btn>

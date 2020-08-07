@@ -12,6 +12,7 @@ import Callback from '@/views/Callback';
 import EmployeeHome from '@/views/MyBudgets.vue';
 import Home from '@/views/Home.vue';
 import Blog from '@/views/Blog.vue';
+import PostEditor from '@/views/PostEditor.vue';
 import TrainingAnalytics from '@/views/TrainingAnalytics';
 import { requireAuth, isAdmin } from '@/utils/auth';
 import multiguard from 'vue-router-multiguard';
@@ -106,7 +107,14 @@ const router = new Router({
     {
       path: '/blog',
       name: 'blog',
-      component: Blog
+      component: Blog,
+      beforeEnter: requireAuth
+    },
+    {
+      path: '/postEditor/:id',
+      name: 'postEditor',
+      component: PostEditor,
+      beforeEnter: requireAuth
     }
   ]
 });
