@@ -123,6 +123,7 @@ export default {
           text: 'Show on Feed',
           value: 'showOnFeed',
           align: 'center',
+          width: '4px',
           sortable: false
         }
       ],
