@@ -38,9 +38,9 @@
                       target="_blank"
                       :dense="true"
                     >
-                      {{ item.truncatedText ? item.truncatedText : item.text }}&nbsp;
-                      <v-row class="ma-1" dense justify-end>
-                        <v-col>
+                      <v-row class="ma-1" dense>
+                        <v-col cols="11">{{ item.truncatedText ? item.truncatedText : item.text }}&nbsp;</v-col>
+                        <v-col cols="1">
                           <icon height="12" width="12" name="external-link-alt" color="blue"></icon>
                         </v-col>
                       </v-row>
