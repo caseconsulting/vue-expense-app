@@ -2,12 +2,10 @@
   <div class="infoTab">
     <div v-if="model.degrees.length > 0">
       <div v-for="(degree, index) in model.degrees" :key="degree.name">
+        <p><b>Degree: </b>{{ degree.name }}</p>
+        <p><b>School: </b>{{ degree.school }}</p>
         <div>
-          <b>Degree:</b>
-          <div>{{ degree.name }}</div>
-        </div>
-        <div>
-          <b v-if="degree.majors.length > 0">Major(s): </b>
+          <b>Major(s): </b>
           <div v-for="major in degree.majors" :key="major">{{ major }}</div>
         </div>
         <div>

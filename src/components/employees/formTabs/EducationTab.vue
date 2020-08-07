@@ -20,6 +20,13 @@
           </v-slide-x-reverse-transition>
         </template>
       </v-combobox>
+      <v-combobox
+        v-model="degree.school"
+        :rules="requiredRules"
+        :items="schoolDropDown"
+        label="School"
+        data-vv-name="School"
+      ></v-combobox>
       <div v-for="(major, index) in degree.majors" :key="'major: ' + major + index">
         <v-combobox
           v-model="degree.majors[index]"
@@ -80,12 +87,11 @@
         <v-btn @click="addItem(degree.concentrations)">Add a Concentration<v-icon class="pl-2">add</v-icon></v-btn>
       </div>
       <!-- End Concentration -->
-
-      <!-- Completion year -->
     </div>
     <div class="pt-4" align="center">
       <v-btn @click="addDegree()">Add a Degree<v-icon class="pl-2">add</v-icon></v-btn>
     </div>
+    <!-- Completion year -->
   </div>
 </template>
 <script>
@@ -116,7 +122,8 @@ function addDegree() {
     name: '',
     majors: [''],
     minors: [],
-    concentrations: []
+    concentrations: [],
+    school: ''
   });
 } // addDegree
 
@@ -150,6 +157,7 @@ function getDropDownInfo() {
   _.forEach(employeesDegrees, (degrees) => {
     _.forEach(degrees, (degree) => {
       this.degreeDropDown.push(degree.name);
+      this.schoolDropDown.push(degree.school);
       _.forEach(degree.majors, (major) => {
         this.majorDropDown.push(major);
       });
@@ -173,7 +181,8 @@ export default {
       minorDropDown: [],
       requiredRules: [
         (v) => !!v || 'This field is required. You must enter information or delete the field if possible.'
-      ] // rules for required fields
+      ], // rules for required fields
+      schoolDropDown: []
     };
   },
   methods: {
