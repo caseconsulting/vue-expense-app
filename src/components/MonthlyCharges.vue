@@ -33,7 +33,8 @@
           <v-row class="pt-3">
             Remaining Avg Hours/Day:
             <v-spacer></v-spacer>
-            <p>{{ formatHours(this.estimatedDailyHours) }}</p>
+            <p v-if="this.estimatedDailyHours < 24">{{ formatHours(this.estimatedDailyHours) }}</p>
+            <p v-else style="color: red;">{{ formatHours(this.estimatedDailyHours) }}</p>
           </v-row>
           <template v-if="!showMore" @click="showMore = true">
             <v-btn @click="showMore = true" top text small class="my-2">Show More &#9662; </v-btn>
