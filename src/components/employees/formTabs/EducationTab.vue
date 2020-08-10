@@ -27,6 +27,30 @@
         label="School"
         data-vv-name="School"
       ></v-combobox>
+      <!-- Month and Year of Completion -->
+      <v-menu
+        ref="educationMenu"
+        :close-on-content-click="true"
+        v-model="educationMenu"
+        :nudge-right="40"
+        transition="scale-transition"
+        offset-y
+        max-width="290px"
+        min-width="290px"
+      >
+        <template v-slot:activator="{ on }">
+          <v-text-field
+            v-model="degree.date"
+            :rules="dateRules"
+            label="Completion Date"
+            hint="YYYY-MM format"
+            persistent-hint
+            prepend-icon="event"
+            v-on="on"
+          ></v-text-field>
+        </template>
+        <v-date-picker v-model="degree.date" no-title @input="educationMenu = false" type="month"></v-date-picker>
+      </v-menu>
       <div v-for="(major, index) in degree.majors" :key="'major: ' + major + index">
         <v-combobox
           v-model="degree.majors[index]"
@@ -121,10 +145,11 @@ async function created() {
  */
 function addDegree() {
   this.model.degrees.push({
-    name: '',
+    concentrations: [],
+    date: null,
     majors: [''],
     minors: [],
-    concentrations: [],
+    name: '',
     school: ''
   });
 } // addDegree
@@ -178,7 +203,12 @@ export default {
   data() {
     return {
       concentrationDropDown: [],
+      dateRules: [
+        (v) => !!v || 'Date must be valid. Format: YYYY-MM',
+        (v) => (!!v && /^\d{4}[-](0?[1-9]|1[0-2])$/.test(v)) || 'Date must be valid. Format: YYYY-MM'
+      ], // rules for dates
       degreeDropDown: [],
+      educationMenu: false, // boolean for showing month-picker
       majorDropDown: [],
       minorDropDown: [],
       requiredRules: [
