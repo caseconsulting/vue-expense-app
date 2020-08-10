@@ -296,7 +296,6 @@ async function createEvents() {
     return null;
   });
   // generate expenses
-  //let filteredExpenses = this.filterOutExpensesByCategory(this.aggregatedExpenses);
   let expenses = _.map(this.aggregatedExpenses, (a) => {
     if (!this.isEmpty(a.showOnFeed) && a.showOnFeed) {
       //value of showOnFeed is true
@@ -341,6 +340,9 @@ async function createEvents() {
     }
     event.icon = 'calendar-alt';
     event.daysFromToday = now.startOf('day').diff(startDate.startOf('day'), 'days');
+    if (event.daysFromToday < -6) {
+      return null;
+    }
     event.link = a.app_url;
     event.color = '#1a73e8';
     if (this.textMaxLength < event.text.length) {
@@ -349,7 +351,7 @@ async function createEvents() {
     return event;
   });
   let mergedEventsList = [...anniversaries, ...birthdays, ...expenses, ...schedules]; // merges lists
-  this.events = _.sortBy(_.compact(mergedEventsList), 'daysFromToday');
+  this.events = _.sortBy(_.compact(mergedEventsList), 'daysFromToday'); //sorts by days from today
 } //createEvents
 
 /**
