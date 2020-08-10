@@ -230,14 +230,19 @@ async function createEvents() {
           return null;
         }
         if (anniversary.isSame(hireDate, 'day')) {
-          event.text = a.firstName + ' has joined the Case Consulting team!'; //new hire message
+          event.text = a.firstName + ' ' + a.lastName + ' has joined the Case Consulting team!'; //new hire message
           event.icon = 'user-plus';
         } else {
           if (anniversary.diff(hireDate, 'year') == 1) {
-            event.text = a.firstName + ' is celebrating 1 year at Case Consulting!';
+            event.text = a.firstName + ' ' + a.lastName + ' is celebrating 1 year at Case Consulting!';
           } else {
             event.text =
-              a.firstName + ' is celebrating ' + anniversary.diff(hireDate, 'year') + ' years at Case Consulting!';
+              a.firstName +
+              ' ' +
+              a.lastName +
+              ' is celebrating ' +
+              anniversary.diff(hireDate, 'year') +
+              ' years at Case Consulting!';
           }
           event.icon = 'glass-cheers';
         }
@@ -303,10 +308,9 @@ async function createEvents() {
       if (!this.isEmpty(a.url)) {
         event.link = a.url;
       }
-      event.text = `${a.firstName} used their ${a.budgetName} budget on ${a.description}`;
+      event.text = `${a.firstName} ${a.lastName} used their ${a.budgetName} budget on ${a.description}`;
       event.icon = 'dollar-sign';
       event.daysFromToday = now.startOf('day').diff(reimbursedDate.startOf('day'), 'days');
-      console.log(a.recipient);
       if (a.budgetName == 'High Five') {
         event.text = `${a.description}: ${a.note}`;
       }
