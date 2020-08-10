@@ -210,9 +210,11 @@ async function created() {
   });
 
   // fills model in with populated fields in employee prop
-  this.model = _.mergeWith(this.model, this.employee, (modelValue, employeeValue) => {
-    return _.isNil(employeeValue) ? modelValue : employeeValue;
-  });
+  this.model = _.cloneDeep(
+    _.mergeWith(this.model, this.employee, (modelValue, employeeValue) => {
+      return _.isNil(employeeValue) ? modelValue : employeeValue;
+    })
+  );
   if (this.employee) {
     this.fullName = `${this.employee.firstName} ${this.employee.lastName}`;
   }
