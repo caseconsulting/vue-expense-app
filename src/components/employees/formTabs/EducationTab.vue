@@ -44,7 +44,7 @@
         </v-combobox>
       </div>
       <div align="center" class="pb-4">
-        <v-btn @click="addItem(degree.majors)">Add a Major<v-icon class="pl-2">add</v-icon></v-btn>
+        <v-btn @click="addItem(degree.majors)" depressed outlined small color="#3f3f3c">Add a Major</v-btn>
       </div>
       <div v-for="(minor, index) in degree.minors" :key="'minor: ' + minor + index">
         <v-combobox
@@ -63,7 +63,7 @@
         </v-combobox>
       </div>
       <div align="center" class="pb-4">
-        <v-btn @click="addItem(degree.minors)">Add a Minor<v-icon class="pl-2">add</v-icon></v-btn>
+        <v-btn @click="addItem(degree.minors)" depressed outlined small color="#3f3f3c">Add a Minor</v-btn>
       </div>
       <!-- Concentration -->
       <div v-for="(concentration, index) in degree.concentrations" :key="'conc: ' + concentration + index">
@@ -84,12 +84,14 @@
         </v-combobox>
       </div>
       <div align="center" class="pb-4">
-        <v-btn @click="addItem(degree.concentrations)">Add a Concentration<v-icon class="pl-2">add</v-icon></v-btn>
+        <v-btn @click="addItem(degree.concentrations)" depressed outlined small color="#3f3f3c"
+          >Add a Concentration</v-btn
+        >
       </div>
       <!-- End Concentration -->
     </div>
     <div class="pt-4" align="center">
-      <v-btn @click="addDegree()">Add a Degree<v-icon class="pl-2">add</v-icon></v-btn>
+      <v-btn @click="addDegree()"><v-icon class="pr-1">add</v-icon>Degree</v-btn>
     </div>
     <!-- Completion year -->
   </div>
