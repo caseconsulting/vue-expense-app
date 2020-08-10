@@ -20,35 +20,50 @@
             :loading="loading"
             :items-per-page.sync="itemsPerPage"
             :search="search"
+            @click:row="clickedRow"
             item-key="postId"
-            class="elevation-1"
+            class="elevation-1 text-center"
           >
-            <!-- Rows in datatable -->
-            <template v-slot:item="{ item }">
-              <tr :class="{ selectFocus: isFocus(item) }" @click="clickedRow(item)">
-                <!-- Employee Information -->
-                <td>{{ item.title }}</td>
-                <td>{{ item.employeeName }}</td>
-                <td>{{ item.createDate | dateFormat }}</td>
-
-                <!-- Action Icons -->
-                <td class="datatable_btn layout" v-if="userIsBlogger()" @click="clickedRow(item)">
-                  <!-- Edit Button -->
-                  <v-tooltip top>
-                    <template v-slot:activator="{ on }">
-                      <v-btn :disabled="isEditing() || midAction" text icon @click="onSelect(item)" v-on="on">
-                        <v-icon style="color: #606060;">
-                          edit
-                        </v-icon>
-                      </v-btn>
-                    </template>
-                    <span>Edit</span>
-                  </v-tooltip>
-                </td>
-                <!-- End Action Icons -->
-              </tr>
+            <!-- Title  slot -->
+            <template v-slot:item.title="{ item }">
+              <td>{{ item.title }}</td>
             </template>
-            <!-- End rows in datatable -->
+
+            <!-- Employee  slot -->
+            <template v-slot:item.employeeName="{ item }">
+              <td>{{ item.employeeName }}</td>
+            </template>
+
+            <!-- Date  slot -->
+            <template v-slot:item.createDate="{ item }">
+              <td>{{ item.createDate | dateFormat }}</td>
+            </template>
+
+            <!-- Action Icons -->
+            <!-- Actions -->
+            <template v-slot:item.actions="{ item }">
+              <td class="datatable_btn layout" v-if="userIsBlogger()" @click="clickedRow(item)">
+                <!-- Edit Button -->
+                <v-btn :disabled="isEditing() || midAction" text icon @click="onSelect(item)">
+                  <v-icon style="color: #606060;">edit</v-icon>
+                </v-btn>
+                <!-- Delete Button -->
+                <v-btn
+                  :disabled="isEditing() || midAction"
+                  text
+                  icon
+                  @click="
+                    deleting = true;
+                    midAction = true;
+                    propExpense = item;
+                  "
+                >
+                  <v-icon style="color: #606060;">
+                    delete
+                  </v-icon>
+                </v-btn>
+              </td>
+            </template>
 
             <!-- Expanded slot in datatable -->
             <template v-slot:expanded-item="{ headers, item }">
@@ -68,18 +83,20 @@
             <!-- End expanded slot in datatable -->
 
             <!-- Alert for no search results -->
-            <v-alert slot="no-results" :value="true" color="error" icon="warning">
-              Your search for "{{ search }}" found no results.
-            </v-alert>
+            <v-alert slot="no-results" :value="true" color="error" icon="warning"
+              >Your search for "{{ search }}" found no results.</v-alert
+            >
             <!-- End alert for no search results -->
           </v-data-table>
           <!-- End employee datatable -->
+
           <br />
         </v-container>
       </v-card>
     </v-col>
   </v-row>
 </template>
+
 <script>
 import _ from 'lodash';
 import moment from 'moment';
@@ -203,18 +220,19 @@ export default {
       headers: [
         {
           text: 'Title',
-          value: 'title',
-          align: 'center'
+          value: 'title'
         },
         {
           text: 'Employee',
-          value: 'employeeName',
-          align: 'center'
+          value: 'employeeName'
         },
         {
           text: 'Date',
-          value: 'createDate',
-          align: 'center'
+          value: 'createDate'
+        },
+        {
+          value: 'actions',
+          sortable: false
         }
       ], // datatable headers
       sortBy: 'employeeName', // sort datatable items
