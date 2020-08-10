@@ -306,8 +306,9 @@ async function createEvents() {
       event.text = `${a.firstName} used their ${a.budgetName} budget on ${a.description}`;
       event.icon = 'dollar-sign';
       event.daysFromToday = now.startOf('day').diff(reimbursedDate.startOf('day'), 'days');
+      console.log(a.recipient);
       if (a.budgetName == 'High Five') {
-        event.text = `${a.firstName} gave ${a.description} a High Five: ${a.note}`;
+        event.text = `${a.description}: ${a.note}`;
       }
       if (this.textMaxLength < event.text.length) {
         event.truncatedText = _.truncate(event.text, { length: this.textMaxLength });
