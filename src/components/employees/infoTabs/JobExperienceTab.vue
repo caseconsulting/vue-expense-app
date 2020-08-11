@@ -9,7 +9,7 @@
     <p v-if="model.jobRole"><b>Position: </b>{{ model.jobRole }}</p>
     <p><b>Start Date: </b>{{ model.hireDate | dateFormat }}</p>
     <p v-if="model.deptDate"><b>End Date: </b>{{ model.deptDate | dateFormat }}</p>
-    <v-divider v-if="model.jobs.length > 0" class="mb-3" />
+    <v-divider v-if="model.jobs && model.jobs.length > 0" class="mb-3" />
 
     <!-- Other Jobs -->
     <div v-if="!isEmpty(model.jobs)">
