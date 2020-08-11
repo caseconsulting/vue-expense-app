@@ -176,15 +176,23 @@
         >
 
         <!-- Scan Receipt Button -->
-        <v-btn
-          v-if="receiptRequired && ((allowReceipt && isEdit) || !isEdit || isEmpty(expense.receipt))"
-          color="white"
-          @click="scanFile"
-          class="ma-2"
-          :disabled="isInactive || disableScan"
-        >
-          Scan Receipt
-        </v-btn>
+        <v-tooltip bottom>
+          <template v-slot:activator="{ on, attrs }">
+            <span v-on="on">
+              <v-btn
+                v-if="receiptRequired && ((allowReceipt && isEdit) || !isEdit || isEmpty(expense.receipt))"
+                color="white"
+                @click="scanFile"
+                class="ma-2"
+                :disabled="isInactive || disableScan"
+                v-bind="attrs"
+              >
+                Scan Receipt
+              </v-btn>
+            </span>
+          </template>
+          <span>Scanning only works for pngs and jpegs.</span>
+        </v-tooltip>
 
         <!-- Notes -->
         <v-textarea
