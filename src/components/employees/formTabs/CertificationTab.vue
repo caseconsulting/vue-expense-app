@@ -4,7 +4,7 @@
     <div
       v-for="(certification, index) in model.certifications"
       style="border: 1px solid grey;"
-      class="py-3 px-5"
+      class="pt-3 pb-1 px-5"
       :key="'certification: ' + certification.name + index"
     >
       <v-combobox
@@ -13,18 +13,13 @@
         :items="certificationDropDown"
         label="Certification"
         data-vv-name="Certification"
-        hide-details
+        append-outer-icon="delete"
+        @click:append-outer="deleteCertification(index)"
       >
-        <!-- Delete button  -->
-        <template v-slot:append-outer>
-          <v-slide-x-reverse-transition mode="out-in">
-            <v-icon @click="deleteCertification(index)">delete</v-icon>
-          </v-slide-x-reverse-transition>
-        </template>
       </v-combobox>
 
       <v-row>
-        <v-col cols="12" sm="6" md="12" lg="6">
+        <v-col cols="12" sm="6" md="12" lg="6" class="pt-0">
           <!-- Received Date -->
           <v-menu
             v-model="certification.showReceivedMenu"
@@ -43,7 +38,6 @@
                 readonly
                 v-bind="attrs"
                 v-on="on"
-                hide-details
               ></v-text-field>
             </template>
             <v-date-picker
@@ -54,7 +48,7 @@
           </v-menu>
           <!-- End Received Date -->
         </v-col>
-        <v-col cols="12" sm="6" md="12" lg="6">
+        <v-col cols="12" sm="6" md="12" lg="6" class="pt-0">
           <!-- Expiration Date -->
           <v-menu
             v-model="certification.showExpirationMenu"
@@ -75,7 +69,6 @@
                 v-on="on"
                 clearable
                 @click:clear="certification.expirationDate = null"
-                hide-details
               ></v-text-field>
             </template>
             <v-date-picker
@@ -120,27 +113,13 @@ async function created() {
  */
 function addCertification() {
   this.model.certifications.push({
-    name: '',
-    dateReceived: '',
-    expirationDate: '',
+    name: null,
+    dateReceived: null,
+    expirationDate: null,
     showReceivedMenu: false,
     showExpirationMenu: false
   });
 } // addCertification
-
-/**
- * Add minor/major/concentration
- */
-function addItem(array) {
-  array.push('');
-} //addItem
-
-/**
- * delete minor/major/concentration
- */
-function deleteItem(array, index) {
-  array.splice(index, 1);
-} // deleteItem
 
 /**
  * delete a certification from the form
@@ -161,7 +140,7 @@ function formatDate(date) {
  * Gets information that other employees have filled out.
  */
 function getDropDownInfo() {
-  let employeesCertifications = _.map(this.employees, (employee) => employee.certifications); //extract sertifications
+  let employeesCertifications = _.map(this.employees, (employee) => employee.certifications); //extract certifications
   employeesCertifications = _.compact(employeesCertifications); //remove falsey values
   _.forEach(employeesCertifications, (certifications) => {
     _.forEach(certifications, (certification) => {
@@ -193,23 +172,19 @@ export default {
         (v) => {
           return v ? /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v) || 'Date must be valid. Format: MM/DD/YYYY' : true;
         }
-      ],
+      ], // rules for optional dates
       dateRules: [
-        (v) => !!v || 'Date must be valid. Format: YYYY-MM-DD',
+        (v) => !!v || 'Date required',
         (v) => (!!v && /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v)) || 'Date must be valid. Format: MM/DD/YYYY'
       ], // rules for date
-      displayReceivedMenu: false,
       requiredRules: [
-        (v) => !!v || 'This field is required. You must enter information or delete the field if possible.'
-      ], // rules for required fields
-      schoolDropDown: []
+        (v) => !!v || 'This field is required. You must enter information or delete the field if possible'
+      ] // rules for required fields
     };
   },
   methods: {
     addCertification,
-    addItem,
     deleteCertification,
-    deleteItem,
     formatDate,
     getDropDownInfo,
     parseDate

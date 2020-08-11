@@ -27,7 +27,7 @@
       <v-container fluid>
         <v-form ref="form" v-model="valid" lazy-validation>
           <!-- Tabs -->
-          <v-tabs v-model="formTab" show-arrows class="pb-0">
+          <v-tabs v-model="formTab" center-active show-arrows class="pb-0">
             <v-tab href="#employee">Employee</v-tab>
             <v-tab href="#personal">Personal</v-tab>
             <v-tab href="#education">Education</v-tab>
@@ -50,7 +50,7 @@
             </v-tab-item>
             <!-- Experience -->
             <v-tab-item id="jobExperience">
-              <job-experience-tab></job-experience-tab>
+              <job-experience-tab :model="model"></job-experience-tab>
             </v-tab-item>
             <!-- Certifications -->
             <v-tab-item id="certifications">
@@ -98,6 +98,7 @@ import CertificationTab from '@/components/employees/formTabs/CertificationTab';
 import FormSubmissionConfirmation from '@/components/modals/FormSubmissionConfirmation.vue';
 import JobExperienceTab from '@/components/employees/formTabs/JobExperienceTab';
 import PersonalTab from '@/components/employees/formTabs/PersonalTab';
+import moment from 'moment';
 import { getRole } from '@/utils/auth';
 import { v4 as uuid } from 'uuid';
 import _ from 'lodash';
@@ -166,7 +167,35 @@ async function submit() {
         }
       });
     } else {
-      this.model.certification = null;
+      this.model.certifications = null;
+    }
+
+    if (!_.isEmpty(this.model.jobs)) {
+      this.model.jobs = _.reverse(
+        _.sortBy(
+          _.map(this.model.jobs, (job) => {
+            if (job.endDate) {
+              return {
+                company: job.company,
+                position: job.position,
+                startDate: job.startDate,
+                endDate: job.endDate
+              };
+            } else {
+              return {
+                company: job.company,
+                position: job.position,
+                startDate: job.startDate
+              };
+            }
+          }),
+          (job) => {
+            return moment(job.startDate);
+          }
+        )
+      );
+    } else {
+      this.model.jobs = null;
     }
 
     if (this.model.id) {
@@ -298,6 +327,7 @@ export default {
         hireDate: null,
         id: null,
         jobRole: null,
+        jobs: [],
         lastName: null,
         middleName: null,
         prime: null,

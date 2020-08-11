@@ -22,6 +22,9 @@
         <v-tab-item id="certifications">
           <certifications-tab :admin="userIsAdmin()" :employee="userIsEmployee()" :model="model"></certifications-tab>
         </v-tab-item>
+        <v-tab-item id="jobExperience">
+          <job-experience-tab :admin="userIsAdmin()" :employee="userIsEmployee()" :model="model"></job-experience-tab>
+        </v-tab-item>
       </v-tabs>
     </div>
   </v-card-text>
@@ -34,6 +37,7 @@ import _ from 'lodash';
 import CertificationsTab from '@/components/employees/infoTabs/CertificationsTab';
 import EducationTab from '@/components/employees/infoTabs/EducationTab';
 import EmployeeTab from '@/components/employees/infoTabs/EmployeeTab';
+import JobExperienceTab from '@/components/employees/infoTabs/JobExperienceTab';
 import PersonalTab from '@/components/employees/infoTabs/PersonalTab';
 
 /**
@@ -74,6 +78,7 @@ export default {
     CertificationsTab,
     EducationTab,
     EmployeeTab,
+    JobExperienceTab,
     PersonalTab
   },
   created,
