@@ -196,7 +196,7 @@
             </template>
             <!-- Budget slot -->
             <template v-slot:item.budget="{ item }">
-              <p>{{ item.budget | moneyValue }}</p>
+              <p style="margin-bottom: 0px;">{{ item.budget | moneyValue }}</p>
             </template>
             <!-- Actions -->
             <template v-slot:item.actions="{ item }">
