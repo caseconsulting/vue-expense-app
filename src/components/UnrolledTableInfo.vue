@@ -32,7 +32,9 @@
 
         <!-- Item cost -->
         <template v-slot:item.cost="{ item }">
-          <p id="money-team" :class="{ failed: item.failed }" style="margin-bottom: 0px;">{{ item.cost | moneyValue }}</p>
+          <p id="money-team" :class="{ failed: item.failed }" style="margin-bottom: 0px;">
+            {{ item.cost | moneyValue }}
+          </p>
         </template>
 
         <!-- Purchase Date -->
