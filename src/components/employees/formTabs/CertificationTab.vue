@@ -38,7 +38,7 @@
               <v-text-field
                 :value="formatDate(certification.dateReceived)"
                 label="Date Received"
-                prepend-icon="event"
+                prepend-icon="event_available"
                 :rules="dateRules"
                 readonly
                 v-bind="attrs"
@@ -68,7 +68,7 @@
               <v-text-field
                 :value="formatDate(certification.expirationDate)"
                 label="Expiration Date (optional)"
-                prepend-icon="event"
+                prepend-icon="event_busy"
                 :rules="dateOptionalRules"
                 readonly
                 v-bind="attrs"
