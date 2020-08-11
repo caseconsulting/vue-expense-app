@@ -69,11 +69,7 @@
             </v-tab-item>
             <!-- Customer Org Experience -->
             <v-tab-item id="customerOrgExp">
-              <!-- Title -->
-              <v-autocomplete></v-autocomplete>
-              <!-- DST, ADO, Talent, ..., Other -->
-              <!-- start date -->
-              <!-- end date optional  -->
+              <customer-org-tab :model="model"></customer-org-tab>
             </v-tab-item>
           </v-tabs>
 
@@ -95,6 +91,7 @@ import api from '@/shared/api.js';
 import EducationTab from '@/components/employees/formTabs/EducationTab';
 import EmployeeTab from '@/components/employees/formTabs/EmployeeTab';
 import CertificationTab from '@/components/employees/formTabs/CertificationTab';
+import CustomerOrgTab from '@/components/employees/formTabs/CustomerOrgTab';
 import FormSubmissionConfirmation from '@/components/modals/FormSubmissionConfirmation.vue';
 import JobExperienceTab from '@/components/employees/formTabs/JobExperienceTab';
 import PersonalTab from '@/components/employees/formTabs/PersonalTab';
@@ -151,6 +148,21 @@ async function submit() {
     // form validated
     this.$emit('startAction');
 
+    if (!_.isEmpty(this.model.degrees)) {
+      this.model.degrees = _.map(this.model.degrees, (degree) => {
+        return {
+          concentrations: degree.concentrations,
+          date: degree.date,
+          majors: degree.majors,
+          minors: degree.minors,
+          name: degree.name,
+          school: degree.school
+        };
+      });
+    } else {
+      this.model.degrees = null;
+    }
+
     if (!_.isEmpty(this.model.certifications)) {
       this.model.certifications = _.map(this.model.certifications, (certification) => {
         if (certification.expirationDate) {
@@ -168,6 +180,25 @@ async function submit() {
       });
     } else {
       this.model.certifications = null;
+    }
+
+    if (!_.isEmpty(this.model.customerOrgExp)) {
+      this.model.customerOrgExp = _.map(this.model.customerOrgExp, (exp) => {
+        if (exp.expirationDate) {
+          return {
+            name: exp.name,
+            dateReceived: exp.dateReceived,
+            expirationDate: exp.expirationDate
+          };
+        } else {
+          return {
+            name: exp.name,
+            dateReceived: exp.dateReceived
+          };
+        }
+      });
+    } else {
+      this.model.customerOrgExp = null;
     }
 
     if (!_.isEmpty(this.model.jobs)) {
@@ -301,6 +332,7 @@ export default {
   },
   components: {
     CertificationTab,
+    CustomerOrgTab,
     EducationTab,
     EmployeeTab,
     FormSubmissionConfirmation,
@@ -334,6 +366,7 @@ export default {
         city: null,
         contract: null,
         country: null,
+        customerOrgExp: [],
         degrees: [],
         deptDate: null,
         email: '@consultwithcase.com',
