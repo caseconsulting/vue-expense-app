@@ -17,16 +17,16 @@
           <personal-tab :admin="userIsAdmin()" :employee="userIsEmployee()" :model="model"></personal-tab>
         </v-tab-item>
         <v-tab-item id="education">
-          <education-tab :admin="userIsAdmin()" :employee="userIsEmployee()" :model="model"></education-tab>
+          <education-tab :model="model"></education-tab>
         </v-tab-item>
         <v-tab-item id="certifications">
-          <certifications-tab :admin="userIsAdmin()" :employee="userIsEmployee()" :model="model"></certifications-tab>
+          <certifications-tab :model="model"></certifications-tab>
         </v-tab-item>
         <v-tab-item id="jobExperience">
-          <job-experience-tab :admin="userIsAdmin()" :employee="userIsEmployee()" :model="model"></job-experience-tab>
+          <job-experience-tab :model="model"></job-experience-tab>
         </v-tab-item>
         <v-tab-item id="customerOrgExp">
-          <customer-org-tab :admin="userIsAdmin()" :employee="userIsEmployee()" :model="model"></customer-org-tab>
+          <customer-org-tab :model="model"></customer-org-tab>
         </v-tab-item>
       </v-tabs>
     </div>

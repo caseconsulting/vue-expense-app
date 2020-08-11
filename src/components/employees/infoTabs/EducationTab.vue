@@ -50,7 +50,7 @@ export default {
   methods: {
     isEmpty
   },
-  props: ['admin', 'employee', 'model']
+  props: ['model']
 };
 </script>
 <style>
