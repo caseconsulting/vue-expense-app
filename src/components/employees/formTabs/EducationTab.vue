@@ -29,10 +29,8 @@
       ></v-combobox>
       <!-- Month and Year of Completion -->
       <v-menu
-        ref="degree.showEducationMenu"
-        :close-on-content-click="true"
         v-model="degree.showEducationMenu"
-        :nudge-right="40"
+        :close-on-content-click="false"
         transition="scale-transition"
         offset-y
         max-width="290px"
@@ -40,12 +38,13 @@
       >
         <template v-slot:activator="{ on }">
           <v-text-field
-            v-model="degree.date"
-            :rules="dateRules"
+            :value="degree.date"
             label="Completion Date"
+            prepend-icon="event"
+            :rules="dateRules"
+            readonly
             hint="YYYY-MM format"
             persistent-hint
-            prepend-icon="event"
             v-on="on"
           ></v-text-field>
         </template>
@@ -96,7 +95,6 @@
       </div>
       <!-- Concentration -->
       <div v-for="(concentration, index) in degree.concentrations" :key="'conc: ' + concentration + index">
-        <!-- <p class="pr-5 mb-0" align-center text-center style="display: inline-block;">Concentration:</p> -->
         <v-combobox
           v-model="degree.concentrations[index]"
           :rules="requiredRules"
