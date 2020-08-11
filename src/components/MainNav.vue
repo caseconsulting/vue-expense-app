@@ -23,10 +23,7 @@
             :key="subItem.title"
             active-class="red--text v-list__tile--active"
             :to="{ name: subItem.route }"
-            @click="
-              scrollUp;
-              close;
-            "
+            @click="scrollUp"
           >
             <!-- SubItems Title -->
             <v-list-item-content>
