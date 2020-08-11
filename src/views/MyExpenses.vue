@@ -177,48 +177,66 @@
                 <attachment :midAction="midAction" :expense="item" :mode="'expenses'"></attachment>
 
                 <!-- Edit Button -->
-                <v-btn
-                  :disabled="isEditing() || (isUser && isReimbursed(item)) || midAction"
-                  text
-                  icon
-                  @click="
-                    toTopOfForm();
-                    onSelect(item);
-                  "
-                >
-                  <v-icon style="color: #606060;">edit</v-icon>
-                </v-btn>
-                <v-btn
-                  :disabled="isReimbursed(item) || isEditing() || midAction"
-                  text
-                  icon
-                  @click="
-                    deleting = true;
-                    midAction = true;
-                    propExpense = item;
-                  "
-                >
-                  <v-icon style="color: #606060;">
-                    delete
-                  </v-icon>
-                </v-btn>
+                <v-tooltip top>
+                  <template v-slot:activator="{ on }">
+                    <v-btn
+                      :disabled="isEditing() || (isUser && isReimbursed(item)) || midAction"
+                      text
+                      icon
+                      @click="
+                        toTopOfForm();
+                        onSelect(item);
+                      "
+                      v-on="on"
+                    >
+                      <v-icon style="color: #606060;">edit</v-icon>
+                    </v-btn>
+                  </template>
+                  <span>Edit</span>
+                </v-tooltip>
+                <v-tooltip top>
+                  <template v-slot:activator="{ on }">
+                    <v-btn
+                      :disabled="isReimbursed(item) || isEditing() || midAction"
+                      text
+                      icon
+                      @click="
+                        deleting = true;
+                        midAction = true;
+                        propExpense = item;
+                      "
+                      v-on="on"
+                    >
+                      <v-icon style="color: #606060;">
+                        delete
+                      </v-icon>
+                    </v-btn>
+                  </template>
+                  <span>Delete</span>
+                </v-tooltip>
                 <!-- Unreimburse Button -->
-                <v-btn
-                  :disabled="!isReimbursed(item) || isEditing() || midAction"
-                  text
-                  icon
-                  @click="
-                    unreimbursing = true;
-                    midAction = true;
-                    propExpense = item;
-                  "
-                >
-                  <v-icon style="color: #606060;">
-                    money_off
-                  </v-icon>
-                </v-btn>
-              </td></template
-            >
+                <v-tooltip top>
+                  <template v-slot:activator="{ on }">
+                    <v-btn
+                      :disabled="!isReimbursed(item) || isEditing() || midAction"
+                      text
+                      icon
+                      @click="
+                        unreimbursing = true;
+                        midAction = true;
+                        propExpense = item;
+                      "
+                      v-on="on"
+                    >
+                      <v-icon style="color: #606060;">
+                        money_off
+                      </v-icon>
+                    </v-btn>
+                  </template>
+                  <span>Unreimburse</span>
+                </v-tooltip>
+              </td>
+            </template>
 
             <!-- Expanded slot in datatable -->
             <template v-slot:expanded-item="{ headers, item }">

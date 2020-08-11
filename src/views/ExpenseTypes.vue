@@ -200,20 +200,31 @@
             </template>
             <!-- Actions -->
             <template v-slot:item.actions="{ item }">
-              <v-btn
-                :disabled="isEditing() || midAction"
-                text
-                icon
-                @click="
-                  toTopOfForm();
-                  onSelect(item);
-                "
-              >
-                <v-icon style="color: #606060;">edit</v-icon>
-              </v-btn>
-              <v-btn :disabled="isEditing() || midAction" text icon @click="validateDelete(item)">
-                <v-icon style="color: #606060;">delete</v-icon>
-              </v-btn>
+              <v-tooltip top>
+                <template v-slot:activator="{ on }">
+                  <v-btn
+                    :disabled="isEditing() || midAction"
+                    text
+                    icon
+                    @click="
+                      toTopOfForm();
+                      onSelect(item);
+                    "
+                    v-on="on"
+                  >
+                    <v-icon style="color: #606060;">edit</v-icon>
+                  </v-btn>
+                </template>
+                <span>Edit</span>
+              </v-tooltip>
+              <v-tooltip top>
+                <template v-slot:activator="{ on }">
+                  <v-btn :disabled="isEditing() || midAction" text icon @click="validateDelete(item)" v-on="on">
+                    <v-icon style="color: #606060;">delete</v-icon>
+                  </v-btn>
+                </template>
+                <slot>Delete</slot>
+              </v-tooltip>
             </template>
 
             <!-- Expanded slot item -->
