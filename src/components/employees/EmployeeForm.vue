@@ -54,9 +54,7 @@
             </v-tab-item>
             <!-- Certifications -->
             <v-tab-item id="certifications">
-              <!-- Title -->
-              <!-- Date -->
-              <!-- Optional expiration date -->
+              <certification-tab :model="model"></certification-tab>
             </v-tab-item>
             <!-- Awards -->
             <v-tab-item id="awards">
@@ -96,6 +94,7 @@
 import api from '@/shared/api.js';
 import EducationTab from '@/components/employees/formTabs/EducationTab';
 import EmployeeTab from '@/components/employees/formTabs/EmployeeTab';
+import CertificationTab from '@/components/employees/formTabs/CertificationTab';
 import FormSubmissionConfirmation from '@/components/modals/FormSubmissionConfirmation.vue';
 import JobExperienceTab from '@/components/employees/formTabs/JobExperienceTab';
 import PersonalTab from '@/components/employees/formTabs/PersonalTab';
@@ -150,6 +149,25 @@ async function submit() {
   if (this.$refs.form.validate()) {
     // form validated
     this.$emit('startAction');
+
+    if (!_.isEmpty(this.model.certifications)) {
+      this.model.certifications = _.map(this.model.certifications, (certification) => {
+        if (certification.expirationDate) {
+          return {
+            name: certification.name,
+            dateReceived: certification.dateReceived,
+            expirationDate: certification.expirationDate
+          };
+        } else {
+          return {
+            name: certification.name,
+            dateReceived: certification.dateReceived
+          };
+        }
+      });
+    } else {
+      this.model.certification = null;
+    }
 
     if (this.model.id) {
       // updating employee
@@ -215,6 +233,7 @@ async function created() {
       return _.isNil(employeeValue) ? modelValue : employeeValue;
     })
   );
+
   if (this.employee) {
     this.fullName = `${this.employee.firstName} ${this.employee.lastName}`;
   }
@@ -235,6 +254,7 @@ export default {
     window.EventBus.$off('canceled');
   },
   components: {
+    CertificationTab,
     EducationTab,
     EmployeeTab,
     FormSubmissionConfirmation,
@@ -264,6 +284,7 @@ export default {
       model: {
         birthday: null,
         birthdayFeed: false,
+        certifications: [],
         city: null,
         contract: null,
         country: null,
