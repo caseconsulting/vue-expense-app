@@ -182,25 +182,6 @@ async function submit() {
       this.model.certifications = null;
     }
 
-    if (!_.isEmpty(this.model.customerOrgExp)) {
-      this.model.customerOrgExp = _.map(this.model.customerOrgExp, (exp) => {
-        if (exp.expirationDate) {
-          return {
-            name: exp.name,
-            dateReceived: exp.dateReceived,
-            expirationDate: exp.expirationDate
-          };
-        } else {
-          return {
-            name: exp.name,
-            dateReceived: exp.dateReceived
-          };
-        }
-      });
-    } else {
-      this.model.customerOrgExp = null;
-    }
-
     if (!_.isEmpty(this.model.jobs)) {
       this.model.jobs = _.reverse(
         _.sortBy(

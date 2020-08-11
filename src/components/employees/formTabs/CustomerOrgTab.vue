@@ -1,80 +1,31 @@
 <template>
   <div>
     <!-- Loop customer org exp -->
-    <div
-      v-for="(exp, index) in model.customerOrgExp"
-      style="border: 1px solid grey;"
-      class="pt-3 pb-1 px-5"
-      :key="'exp: ' + exp.name + index"
-    >
-      <v-combobox
-        v-model="exp.name"
-        :rules="requiredRules"
-        :items="experienceDropDown"
-        label="Customer Organization Experience"
-        data-vv-name="Customer Organization Experience"
-        append-outer-icon="delete"
-        @click:append-outer="deleteExperience(index)"
-      >
-      </v-combobox>
-
-      <v-row>
-        <v-col cols="12" sm="6" md="12" lg="6" class="pt-0">
-          <!-- Received Date -->
-          <v-menu
-            v-model="exp.showReceivedMenu"
-            :close-on-content-click="false"
-            transition="scale-transition"
-            offset-y
-            max-width="290px"
-            min-width="290px"
-          >
-            <template v-slot:activator="{ on, attrs }">
-              <v-text-field
-                :value="formatDate(exp.dateReceived)"
-                label="Date Received"
-                prepend-icon="event_available"
-                :rules="dateRules"
-                readonly
-                v-bind="attrs"
-                v-on="on"
-              ></v-text-field>
-            </template>
-            <v-date-picker v-model="exp.dateReceived" no-title @input="exp.showReceivedMenu = false"></v-date-picker>
-          </v-menu>
-          <!-- End Received Date -->
-        </v-col>
-        <v-col cols="12" sm="6" md="12" lg="6" class="pt-0">
-          <!-- Expiration Date -->
-          <v-menu
-            v-model="exp.showExpirationMenu"
-            :close-on-content-click="false"
-            transition="scale-transition"
-            offset-y
-            max-width="290px"
-            min-width="290px"
-          >
-            <template v-slot:activator="{ on, attrs }">
-              <v-text-field
-                :value="formatDate(exp.expirationDate)"
-                label="Expiration Date (optional)"
-                prepend-icon="event_busy"
-                :rules="dateOptionalRules"
-                readonly
-                v-bind="attrs"
-                v-on="on"
-                clearable
-                @click:clear="exp.expirationDate = null"
-              ></v-text-field>
-            </template>
-            <v-date-picker
-              v-model="exp.expirationDate"
-              no-title
-              @input="exp.showExpirationMenu = false"
-            ></v-date-picker>
-          </v-menu>
-          <!-- End Expiration Date -->
-        </v-col>
+    <div v-for="(exp, index) in model.customerOrgExp" class="pt-3 pb-1 px-5" :key="'exp: ' + exp.name + index">
+      <v-row v-if="index == 0">Current:</v-row>
+      <v-row style="vertical-align: middle;">
+        <v-combobox
+          v-model="exp.name"
+          :rules="requiredRules"
+          :items="experienceDropDown"
+          label="Customer Organization Experience"
+          data-vv-name="Customer Organization Experience"
+        >
+        </v-combobox>
+        <div class="yearsBox">
+          <input
+            v-model="exp.years"
+            type="text"
+            oninput="this.value = this.value.replace(/[^0-9]/g, '');"
+            maxlength="2"
+            :rules="requiredRules"
+          />
+          <div>years</div>
+        </div>
+        <!-- Delete button  -->
+        <v-slide-x-reverse-transition mode="out-in">
+          <v-btn text icon><v-icon @click="deleteExperience(index)">delete</v-icon></v-btn>
+        </v-slide-x-reverse-transition>
       </v-row>
     </div>
     <!-- Add Experience button -->
@@ -110,10 +61,8 @@ async function created() {
 function addExperience() {
   this.model.customerOrgExp.push({
     name: '',
-    dateReceived: null,
-    expirationDate: null,
-    showReceivedMenu: false,
-    showExpirationMenu: false
+    years: 0,
+    current: this.model.customerOrgExp.length == 0
   });
 } // addExperience
 
@@ -188,3 +137,26 @@ export default {
   props: ['model']
 };
 </script>
+
+<style>
+.yearsBox {
+  border: solid 1px gray;
+  width: 70px;
+  height: 34px;
+  border-radius: 2px;
+  font-size: 14px;
+  display: flex;
+}
+
+.yearsBox div {
+  padding-top: 6px;
+  margin-left: 4px;
+  margin-right: 3px;
+}
+
+.yearsBox input {
+  outline: none;
+  text-align: right;
+  width: 33%;
+}
+</style>
