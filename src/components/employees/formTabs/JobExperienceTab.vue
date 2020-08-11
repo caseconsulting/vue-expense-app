@@ -215,13 +215,17 @@ function formatRange(range) {
   }
   // const [year, month] = date.split('-');
   // return `${month}/${year}`;
-  let text = moment(range[0], 'YYYY-MM').format('MMMM YYYY');
+  let start = moment(range[0], 'YYYY-MM');
   if (range[1]) {
-    text += ' - ' + moment(range[1], 'YYYY-MM').format('MMMM YYYY');
+    let end = moment(range[1], 'YYYY-MM');
+    if (start.isAfter(end)) {
+      return `${end.format('MMMM YYYY')} - ${start.format('MMMM YYYY')}`;
+    } else {
+      return `${start.format('MMMM YYYY')} - ${end.format('MMMM YYYY')}`;
+    }
   } else {
-    text += ` - Present`;
+    return `${start.format('MMMM YYYY')} - Present`;
   }
-  return text;
 } // formatRange
 
 /**

@@ -233,8 +233,11 @@ async function submit() {
       this.model.icTimeFrames = _.reverse(
         _.sortBy(
           _.map(this.model.icTimeFrames, (timeFrame) => {
+            let chronologicalRange = _.sortBy(timeFrame.range, (monthYear) => {
+              return moment(monthYear, 'YYYY-MM');
+            });
             return {
-              range: timeFrame.range
+              range: chronologicalRange
             };
           }),
           (timeFrame) => {
