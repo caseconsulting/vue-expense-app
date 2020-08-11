@@ -29,9 +29,9 @@
       ></v-combobox>
       <!-- Month and Year of Completion -->
       <v-menu
-        ref="educationMenu"
+        ref="degree.showEducationMenu"
         :close-on-content-click="true"
-        v-model="educationMenu"
+        v-model="degree.showEducationMenu"
         :nudge-right="40"
         transition="scale-transition"
         offset-y
@@ -49,7 +49,12 @@
             v-on="on"
           ></v-text-field>
         </template>
-        <v-date-picker v-model="degree.date" no-title @input="educationMenu = false" type="month"></v-date-picker>
+        <v-date-picker
+          v-model="degree.date"
+          no-title
+          @input="degree.showEducationMenu = false"
+          type="month"
+        ></v-date-picker>
       </v-menu>
       <div v-for="(major, index) in degree.majors" :key="'major: ' + major + index">
         <v-combobox
@@ -150,7 +155,8 @@ function addDegree() {
     majors: [''],
     minors: [],
     name: '',
-    school: ''
+    school: '',
+    showEducationMenu: false
   });
 } // addDegree
 
@@ -208,7 +214,6 @@ export default {
         (v) => (!!v && /^\d{4}[-](0?[1-9]|1[0-2])$/.test(v)) || 'Date must be valid. Format: YYYY-MM'
       ], // rules for dates
       degreeDropDown: [],
-      educationMenu: false, // boolean for showing month-picker
       majorDropDown: [],
       minorDropDown: [],
       requiredRules: [
