@@ -42,6 +42,7 @@
             </template>
             <v-date-picker
               v-model="certification.dateReceived"
+              :max="certification.expirationDate"
               no-title
               @input="certification.showReceivedMenu = false"
             ></v-date-picker>
@@ -74,6 +75,7 @@
             </template>
             <v-date-picker
               v-model="certification.expirationDate"
+              :min="certification.dateReceived"
               no-title
               @input="certification.showExpirationMenu = false"
             ></v-date-picker>

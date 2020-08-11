@@ -96,7 +96,12 @@
                 v-on="on"
               ></v-text-field>
             </template>
-            <v-date-picker v-model="job.startDate" no-title @input="job.showStartMenu = false"></v-date-picker>
+            <v-date-picker
+              v-model="job.startDate"
+              :max="job.endDate"
+              no-title
+              @input="job.showStartMenu = false"
+            ></v-date-picker>
           </v-menu>
           <!-- End Start Date -->
         </v-col>
@@ -120,10 +125,16 @@
                 v-bind="attrs"
                 v-on="on"
                 clearable
+                @click="compareDate = job.startDate"
                 @click:clear="job.endDate = null"
               ></v-text-field>
             </template>
-            <v-date-picker v-model="job.endDate" no-title @input="job.showEndMenu = false"></v-date-picker>
+            <v-date-picker
+              v-model="job.endDate"
+              :min="job.startDate"
+              no-title
+              @input="job.showEndMenu = false"
+            ></v-date-picker>
           </v-menu>
           <!-- End End Date -->
         </v-col>
@@ -260,6 +271,7 @@ export default {
   data() {
     return {
       companyDropDown: [],
+      compareDate: null,
       dateOptionalRules: [
         (v) => {
           return v ? /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v) || 'Date must be valid. Format: MM/DD/YYYY' : true;
