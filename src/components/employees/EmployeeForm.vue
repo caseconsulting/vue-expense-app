@@ -215,8 +215,6 @@ async function submit() {
       this.model.icTimeFrames = null;
     }
 
-    console.log(_.cloneDeep(this.model.icTimeFrames));
-
     if (this.model.id) {
       // updating employee
       let updatedEmployee = await api.updateItem(api.EMPLOYEES, this.model);
