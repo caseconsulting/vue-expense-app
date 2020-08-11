@@ -198,6 +198,25 @@ async function submit() {
       this.model.jobs = null;
     }
 
+    if (!_.isEmpty(this.model.icTimeFrames)) {
+      this.model.icTimeFrames = _.reverse(
+        _.sortBy(
+          _.map(this.model.icTimeFrames, (timeFrame) => {
+            return {
+              range: timeFrame.range
+            };
+          }),
+          (timeFrame) => {
+            return moment(timeFrame.range[0], 'YYYY-MM');
+          }
+        )
+      );
+    } else {
+      this.model.icTimeFrames = null;
+    }
+
+    console.log(_.cloneDeep(this.model.icTimeFrames));
+
     if (this.model.id) {
       // updating employee
       let updatedEmployee = await api.updateItem(api.EMPLOYEES, this.model);
@@ -325,6 +344,7 @@ export default {
         firstName: null,
         github: null,
         hireDate: null,
+        icTimeFrames: [],
         id: null,
         jobRole: null,
         jobs: [],

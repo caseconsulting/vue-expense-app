@@ -68,6 +68,7 @@
                 v-bind="attrs"
                 v-on="on"
                 clearable
+                hide-details
                 @click:clear="certification.expirationDate = null"
               ></v-text-field>
             </template>

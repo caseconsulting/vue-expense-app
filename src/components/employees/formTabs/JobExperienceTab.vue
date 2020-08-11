@@ -1,5 +1,51 @@
 <template>
   <div>
+    <div style="border: 1px solid grey;" class="pt-3 pb-1 px-5">
+      <!-- Experience in IC -->
+      <div class="pb-2">
+        <b>Experience in IC:</b>
+        <v-tooltip bottom>
+          <template v-slot:activator="{ on }">
+            <v-icon v-on="on" class="pl-2 pb-2" small>info</v-icon>
+          </template>
+          <span>Date ranges are inclusive. Overlapping months will add extended time to IC experience</span>
+        </v-tooltip>
+      </div>
+
+      <!-- Loop Time Frames -->
+      <div v-for="(timeFrame, index) in model.icTimeFrames" :key="index">
+        <!-- Range -->
+        <v-menu
+          v-model="timeFrame.showRangeMenu"
+          :close-on-content-click="false"
+          transition="scale-transition"
+          offset-y
+          max-width="290px"
+          min-width="290px"
+        >
+          <template v-slot:activator="{ on, attrs }">
+            <v-text-field
+              :value="formatRange(timeFrame.range)"
+              :rules="dateRequired"
+              label="Date Range"
+              prepend-icon="event"
+              readonly
+              v-bind="attrs"
+              v-on="on"
+              append-outer-icon="delete"
+              @click:append-outer="deleteICTimeFrame(index)"
+            ></v-text-field>
+          </template>
+          <v-date-picker v-model="timeFrame.range" no-title type="month" range></v-date-picker>
+        </v-menu>
+        <!-- End Range -->
+      </div>
+      <!-- End Loop TimeFrames -->
+      <div align="center" class="pt-2 pb-4">
+        <v-btn @click="addICTimeFrame()" depressed outlined small color="#3f3f3c">Add a Time Frame</v-btn>
+      </div>
+    </div>
+
     <!-- Loop Jobs -->
     <div
       v-for="(job, index) in model.jobs"
@@ -92,6 +138,7 @@
 
 <script>
 import api from '@/shared/api.js';
+import moment from 'moment';
 import _ from 'lodash';
 // |--------------------------------------------------|
 // |                                                  |
@@ -111,11 +158,22 @@ async function created() {
 // |--------------------------------------------------|
 
 /**
+ * Add a ic time frame
+ */
+function addICTimeFrame() {
+  this.model.icTimeFrames.push({
+    range: [],
+    showRangeMenu: false
+  });
+} // addICTimeFrame
+
+/**
  * Add a job to the form.
  */
 function addJob() {
   this.model.jobs.push({
     company: null,
+    position: null,
     startDate: null,
     endDate: null,
     showStartMenu: false,
@@ -124,12 +182,22 @@ function addJob() {
 } // addJob
 
 /**
+ * delete a ic time frame
+ */
+function deleteICTimeFrame(index) {
+  this.model.icTimeFrames.splice(index, 1);
+} // deleteICTimeFrame
+
+/**
  * delete a job from the form
  */
 function deleteJob(index) {
   this.model.jobs.splice(index, 1);
 } // deleteJob
 
+/**
+ * format date as MM/DD/YYYY
+ */
 function formatDate(date) {
   if (!date) {
     return null;
@@ -137,6 +205,24 @@ function formatDate(date) {
   const [year, month, day] = date.split('-');
   return `${month}/${day}/${year}`;
 } // formatDate
+
+/**
+ * format date range as Month YYYY - Month YYYY
+ */
+function formatRange(range) {
+  if (_.isEmpty(range)) {
+    return null;
+  }
+  // const [year, month] = date.split('-');
+  // return `${month}/${year}`;
+  let text = moment(range[0], 'YYYY-MM').format('MMMM YYYY');
+  if (range[1]) {
+    text += ' - ' + moment(range[1], 'YYYY-MM').format('MMMM YYYY');
+  } else {
+    text += ` - Present`;
+  }
+  return text;
+} // formatRange
 
 /**
  * Gets information that other employees have filled out.
@@ -175,6 +261,7 @@ export default {
           return v ? /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v) || 'Date must be valid. Format: MM/DD/YYYY' : true;
         }
       ], // rules for optional dates
+      dateRequired: [(v) => !!v || 'Date required'], // date required
       dateRules: [
         (v) => !!v || 'Date required',
         (v) => (!!v && /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v)) || 'Date must be valid. Format: MM/DD/YYYY'
@@ -184,9 +271,12 @@ export default {
     };
   },
   methods: {
+    addICTimeFrame,
     addJob,
+    deleteICTimeFrame,
     deleteJob,
     formatDate,
+    formatRange,
     getDropDownInfo,
     parseDate
   },
