@@ -74,7 +74,7 @@
           Create an Employee<v-icon class="pl-2">person_add</v-icon>
         </v-btn>
 
-        <!-- Employee Datatable-->
+        <!-- NEW DATA TABLE -->
         <v-data-table
           :headers="headers"
           :items="filteredEmployees"
@@ -86,46 +86,65 @@
           :search="search"
           item-key="employeeNumber"
           class="elevation-1"
+          @click:row="handleClick"
         >
-          <!-- Rows in datatable -->
-          <template v-slot:item="{ item }">
-            <router-link
-              :to="employeePath(item)"
-              tag="tr"
-              :class="{ inactiveStyle: isInactive(item), selectFocus: isFocus(item) }"
-            >
-              <!-- Employee Information -->
-              <td>{{ item.employeeNumber }}</td>
-              <td>{{ item.firstName }}</td>
-              <td>{{ item.lastName }}</td>
-              <td>{{ item.hireDate | dateFormat }}</td>
-              <td>{{ item.email }}</td>
-              <!-- Action Icons -->
-              <td class="datatable_btn layout" v-if="userIsAdmin()" @click="clickedRow(item)">
-                <!-- Delete Button -->
-                <v-tooltip top>
-                  <template v-slot:activator="{ on }">
-                    <v-btn :disabled="midAction" text icon @click.stop="validateDelete(item)" v-on="on">
-                      <v-icon style="color: #606060;">
-                        delete
-                      </v-icon>
-                    </v-btn>
-                  </template>
-                  <span>Delete</span>
-                </v-tooltip>
-              </td>
-              <!-- End Action Icons -->
-            </router-link>
+          <!-- Delete Action Item Slot -->
+          <template v-slot:item.actions="{ item }">
+            <div class="datatable_btn layout" v-if="userIsAdmin()">
+              <v-tooltip top>
+                <template v-slot:activator="{ on }">
+                  <v-btn :disabled="midAction" text icon @click.stop="validateDelete(item)" v-on="on">
+                    <v-icon style="color: #606060;">
+                      delete
+                    </v-icon>
+                  </v-btn>
+                </template>
+                <span>Delete</span>
+              </v-tooltip>
+            </div>
           </template>
-          <!-- End rows in datatable -->
+          <!-- Employee Number Item Slot -->
+          <template v-slot:item.employeeNumber="{ item }">
+            <p :class="{ inactiveStyle: isInactive(item), selectFocus: isFocus(item) }" style="margin-bottom: 0px;">
+              {{ item.employeeNumber }}
+            </p>
+          </template>
+
+          <!-- First Name Item Slot -->
+          <template v-slot:item.firstName="{ item }">
+            <p :class="{ inactiveStyle: isInactive(item), selectFocus: isFocus(item) }" style="margin-bottom: 0px;">
+              {{ item.firstName }}
+            </p>
+          </template>
+
+          <!-- Last Name Item Slot -->
+          <template v-slot:item.lastName="{ item }">
+            <p :class="{ inactiveStyle: isInactive(item), selectFocus: isFocus(item) }" style="margin-bottom: 0px;">
+              {{ item.lastName }}
+            </p>
+          </template>
+
+          <!-- Date Item Slot -->
+          <template v-slot:item.hireDate="{ item }">
+            <p :class="{ inactiveStyle: isInactive(item), selectFocus: isFocus(item) }" style="margin-bottom: 0px;">
+              {{ item.hireDate | dateFormat }}
+            </p>
+          </template>
+
+          <!-- Email Item Slot -->
+          <template v-slot:item.email="{ item }">
+            <p :class="{ inactiveStyle: isInactive(item), selectFocus: isFocus(item) }" style="margin-bottom: 0px;">
+              {{ item.email }}
+            </p>
+          </template>
 
           <!-- Alert for no search results -->
           <v-alert slot="no-results" :value="true" color="error" icon="warning">
             Your search for "{{ search }}" found no results.
           </v-alert>
-          <!-- End alert for no search results -->
         </v-data-table>
-        <!-- End employee datatable -->
+        <!-- NEW DATA TABLE -->
+
         <br />
 
         <!-- Download employee csv button -->
@@ -257,6 +276,10 @@ async function displayError(err) {
 function employeePath(item) {
   return `/employee/${item.employeeNumber}`;
 } // employeePath
+
+function handleClick(item) {
+  this.$router.push(employeePath(item));
+}
 
 /**
  * sets midAction boolean to false
@@ -521,7 +544,7 @@ export default {
       filter: {
         active: ['full', 'part'] // default only shows full and part time employees
       }, // datatable filter
-      filteredEmployees: [], // filtered employees
+      filteredEmployees: [], // filtered employees,
       headers: [
         {
           text: 'Employee #',
@@ -612,6 +635,7 @@ export default {
     endAction,
     filterEmployees,
     getWorkStatus,
+    handleClick,
     isDisplayData,
     isEmpty,
     isFocus,
