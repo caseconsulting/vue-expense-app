@@ -40,11 +40,7 @@
                 v-on="on"
               ></v-text-field>
             </template>
-            <v-date-picker
-              v-model="exp.dateReceived"
-              no-title
-              @input="exp.showReceivedMenu = false"
-            ></v-date-picker>
+            <v-date-picker v-model="exp.dateReceived" no-title @input="exp.showReceivedMenu = false"></v-date-picker>
           </v-menu>
           <!-- End Received Date -->
         </v-col>
