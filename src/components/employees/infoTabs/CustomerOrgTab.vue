@@ -1,16 +1,14 @@
 <template>
   <div class="infoTab">
-    <div v-if="!isEmpty(model.certifications)">
-      <div v-for="(certification, index) in model.certifications" :key="certification.name">
-        <p><b>Certification: </b>{{ certification.name }}</p>
-        <p><b>Date Received: </b>{{ certification.dateReceived | dateFormat }}</p>
-        <p v-if="certification.expirationDate">
-          <b>Expiration Date: </b>{{ certification.expirationDate | dateFormat }}
-        </p>
-        <v-divider v-if="index < model.certifications.length - 1" class="pb-3" />
+    <div v-if="!isEmpty(model.customerOrgExp)">
+      <div v-for="(exp, index) in model.customerOrgExp" :key="exp.name">
+        <p><b>Customer Organization Experience: </b>{{ exp.name }}</p>
+        <p><b>Date Received: </b>{{ exp.dateReceived | dateFormat }}</p>
+        <p v-if="exp.expirationDate"><b>Expiration Date: </b>{{ exp.expirationDate | dateFormat }}</p>
+        <v-divider v-if="index < model.customerOrgExp.length - 1" class="pb-3" />
       </div>
     </div>
-    <p v-else>No Certification information</p>
+    <p v-else>No Customer Organization Experience Information</p>
   </div>
 </template>
 

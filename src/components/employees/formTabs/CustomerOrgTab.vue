@@ -5,12 +5,12 @@
       v-for="(exp, index) in model.customerOrgExp"
       style="border: 1px solid grey;"
       class="pt-3 pb-1 px-5"
-      :key="'exp: ' + customerOrgExp.name + index"
+      :key="'exp: ' + exp.name + index"
     >
       <v-combobox
-        v-model="customerOrgExp.name"
+        v-model="exp.name"
         :rules="requiredRules"
-        :items="customerOrgExpDropDown"
+        :items="experienceDropDown"
         label="Customer Organization Experience"
         data-vv-name="Customer Organization Experience"
         append-outer-icon="delete"
@@ -109,7 +109,7 @@ async function created() {
  */
 function addExperience() {
   this.model.customerOrgExp.push({
-    name: null,
+    name: '',
     dateReceived: null,
     expirationDate: null,
     showReceivedMenu: false,
@@ -163,7 +163,7 @@ export default {
   created,
   data() {
     return {
-      experienceDropDown: [],
+      experienceDropDown: ['DST', 'ADO', 'Talent', 'OMA', 'CCI'],
       dateOptionalRules: [
         (v) => {
           return v ? /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v) || 'Date must be valid. Format: MM/DD/YYYY' : true;

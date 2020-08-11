@@ -25,6 +25,9 @@
         <v-tab-item id="jobExperience">
           <job-experience-tab :admin="userIsAdmin()" :employee="userIsEmployee()" :model="model"></job-experience-tab>
         </v-tab-item>
+        <v-tab-item id="customerOrgExp">
+          <customer-org-tab :admin="userIsAdmin()" :employee="userIsEmployee()" :model="model"></customer-org-tab>
+        </v-tab-item>
       </v-tabs>
     </div>
   </v-card-text>
@@ -35,6 +38,7 @@ import api from '@/shared/api';
 import { getRole } from '@/utils/auth';
 import _ from 'lodash';
 import CertificationsTab from '@/components/employees/infoTabs/CertificationsTab';
+import CustomerOrgTab from '@/components/employees/infoTabs/CustomerOrgTab';
 import EducationTab from '@/components/employees/infoTabs/EducationTab';
 import EmployeeTab from '@/components/employees/infoTabs/EmployeeTab';
 import JobExperienceTab from '@/components/employees/infoTabs/JobExperienceTab';
@@ -76,6 +80,7 @@ async function created() {
 export default {
   components: {
     CertificationsTab,
+    CustomerOrgTab,
     EducationTab,
     EmployeeTab,
     JobExperienceTab,
