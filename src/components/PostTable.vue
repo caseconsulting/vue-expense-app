@@ -44,24 +44,35 @@
             <template v-slot:item.actions="{ item }">
               <td class="datatable_btn layout" v-if="userIsBlogger()" @click="clickedRow(item)">
                 <!-- Edit Button -->
-                <v-btn :disabled="isEditing() || midAction" text icon @click="onSelect(item)">
-                  <v-icon style="color: #606060;">edit</v-icon>
-                </v-btn>
+                <v-tooltip top>
+                  <template v-slot:activator="{ on }">
+                    <v-btn :disabled="isEditing() || midAction" text icon @click="onSelect(item)" v-on="on">
+                      <v-icon style="color: #606060;">edit</v-icon>
+                    </v-btn>
+                  </template>
+                  <span>Edit</span>
+                </v-tooltip>
                 <!-- Delete Button -->
-                <v-btn
-                  :disabled="isEditing() || midAction"
-                  text
-                  icon
-                  @click="
-                    deleting = true;
-                    midAction = true;
-                    propExpense = item;
-                  "
-                >
-                  <v-icon style="color: #606060;">
-                    delete
-                  </v-icon>
-                </v-btn>
+                <v-tooltip top>
+                  <template v-slot:activator="{ on }">
+                    <v-btn
+                      :disabled="isEditing() || midAction"
+                      text
+                      icon
+                      @click="
+                        deleting = true;
+                        midAction = true;
+                        propExpense = item;
+                      "
+                      v-on="on"
+                    >
+                      <v-icon style="color: #606060;">
+                        delete
+                      </v-icon>
+                    </v-btn>
+                  </template>
+                  <span>Delete</span>
+                </v-tooltip>
               </td>
             </template>
 
