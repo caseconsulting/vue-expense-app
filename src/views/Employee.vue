@@ -3,24 +3,23 @@
     <v-row class="pl-3">
       <v-btn to="/employees"><v-icon class="pr-1">arrow_back</v-icon>Back to Employees Page</v-btn>
     </v-row>
-    <v-row>
+    <v-row v-if="loading" class="my-10" justify="center">
+      <v-progress-circular :size="70" :width="7" color="#bc3825" indeterminate></v-progress-circular>
+    </v-row>
+    <v-row v-else>
       <!-- TSheets and Budgets-->
-      <v-col v-if="userIsAdmin() || userIsEmployee()" cols="12" md="6" lg="5">
+      <v-col v-if="displayTSheetsAndBalances" cols="12" md="6" lg="5">
         <t-sheets-data :employee="this.model" class="mb-6"></t-sheets-data>
         <available-budgets v-if="this.model.id" :employee="this.model"></available-budgets>
       </v-col>
 
       <!-- Employee Form -->
-      <v-col
-        cols="12"
-        :md="userIsAdmin() || userIsEmployee() ? 6 : 12"
-        :lg="userIsAdmin() || userIsEmployee() ? 7 : 12"
-      >
+      <v-col cols="12" :md="displayTSheetsAndBalances ? 6 : 12" :lg="displayTSheetsAndBalances ? 7 : 12">
         <v-card>
           <v-card-title class="header_style" v-if="!editing">
             <h3>{{ this.model.firstName }} {{ this.model.lastName }}</h3>
             <v-spacer></v-spacer>
-            <v-icon v-if="userIsAdmin() || userIsEmployee()" @click="editing = true" style="color: white;" align="right"
+            <v-icon v-if="displayTSheetsAndBalances" @click="editing = true" style="color: white;" align="right"
               >edit</v-icon
             >
           </v-card-title>
@@ -80,14 +79,10 @@ function isEmpty(value) {
  * Get employee data.
  */
 async function getEmployee() {
-  this.loading = true; // set loading status to true
-
   let employees = await api.getItems(api.EMPLOYEES);
   this.model = _.find(employees, (employee) => {
     return employee.employeeNumber == this.$route.params.id;
   });
-
-  this.loading = false; // set loading status to false
 } // getEmployee
 
 /**
@@ -109,7 +104,7 @@ function getWorkStatus(workStatus) {
  * Checks to see if the user is an admin. Returns true if the user's role is an admin, otherwise returns false.
  */
 function userIsAdmin() {
-  return getRole() === 'admin';
+  return this.role === 'admin';
 } // userIsAdmin
 
 /**
@@ -131,8 +126,12 @@ function userIsEmployee() {
  *  Adjust datatable header for user view.
  */
 async function created() {
+  this.loading = true;
   await this.getEmployee();
   this.user = await api.getUser();
+  this.role = getRole();
+  this.displayTSheetsAndBalances = this.userIsAdmin() || this.userIsEmployee();
+  this.loading = false;
 } // created
 
 /**
@@ -169,6 +168,7 @@ export default {
   data() {
     return {
       currentTab: null,
+      displayTSheetsAndBalances: true,
       editing: false,
       filter: {
         active: ['full', 'part'] // default only shows full and part time employees
@@ -197,6 +197,7 @@ export default {
         twitter: '',
         workStatus: 100
       }, // selected employee
+      role: null, // user role
       search: '', // query text for datatable search field
       status: {
         statusType: undefined,
