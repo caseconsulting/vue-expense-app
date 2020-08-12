@@ -125,14 +125,18 @@ function cleanUpData() {
   // Degrees
   if (!_.isEmpty(this.model.degrees)) {
     this.model.degrees = _.map(this.model.degrees, (degree) => {
-      return {
-        concentrations: degree.concentrations,
-        date: degree.date,
-        majors: degree.majors,
-        minors: degree.minors,
-        name: degree.name,
-        school: degree.school
-      };
+      // remove date picker menu booleans
+      delete degree.showEducationMenu;
+
+      // delete null attributes
+      _.forEach(degree, (value, key) => {
+        if (_.isNil(value)) {
+          delete degree[key];
+        }
+      });
+
+      // return updated degree
+      return degree;
     });
   } else {
     this.model.degrees = null;
@@ -141,18 +145,19 @@ function cleanUpData() {
   // Certifications
   if (!_.isEmpty(this.model.certifications)) {
     this.model.certifications = _.map(this.model.certifications, (certification) => {
-      if (certification.expirationDate) {
-        return {
-          name: certification.name,
-          dateReceived: certification.dateReceived,
-          expirationDate: certification.expirationDate
-        };
-      } else {
-        return {
-          name: certification.name,
-          dateReceived: certification.dateReceived
-        };
-      }
+      // remove date picker menu booleans
+      delete certification.showReceivedMenu;
+      delete certification.showExpirationMenu;
+
+      // delete null attributes
+      _.forEach(certification, (value, key) => {
+        if (_.isNil(value)) {
+          delete certification[key];
+        }
+      });
+
+      // return updated certification
+      return certification;
     });
   } else {
     this.model.certifications = null;
@@ -163,20 +168,19 @@ function cleanUpData() {
     this.model.jobs = _.reverse(
       _.sortBy(
         _.map(this.model.jobs, (job) => {
-          if (job.endDate) {
-            return {
-              company: job.company,
-              position: job.position,
-              startDate: job.startDate,
-              endDate: job.endDate
-            };
-          } else {
-            return {
-              company: job.company,
-              position: job.position,
-              startDate: job.startDate
-            };
-          }
+          // remove date picker menu booleans
+          delete job.showEndMenu;
+          delete job.showStartMenu;
+
+          // delete null attributes
+          _.forEach(job, (value, key) => {
+            if (_.isNil(value)) {
+              delete job[key];
+            }
+          });
+
+          // return updated job
+          return job;
         }),
         (job) => {
           return moment(job.startDate);
@@ -192,12 +196,18 @@ function cleanUpData() {
     this.model.icTimeFrames = _.reverse(
       _.sortBy(
         _.map(this.model.icTimeFrames, (timeFrame) => {
+          // remove date picker menu booleans
+          delete timeFrame.showRangeMenu;
+
+          // sort range dates
           let chronologicalRange = _.sortBy(timeFrame.range, (monthYear) => {
             return moment(monthYear, 'YYYY-MM');
           });
-          return {
-            range: chronologicalRange
-          };
+
+          timeFrame.range = chronologicalRange;
+
+          // return updated time frame
+          return timeFrame;
         }),
         (timeFrame) => {
           return moment(timeFrame.range[0], 'YYYY-MM');
