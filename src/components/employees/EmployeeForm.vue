@@ -158,26 +158,6 @@ function cleanUpData() {
     this.model.certifications = null;
   }
 
-  // Customer Organization Experience
-  if (!_.isEmpty(this.model.customerOrgExp)) {
-    this.model.customerOrgExp = _.map(this.model.customerOrgExp, (exp) => {
-      if (exp.expirationDate) {
-        return {
-          name: exp.name,
-          dateReceived: exp.dateReceived,
-          expirationDate: exp.expirationDate
-        };
-      } else {
-        return {
-          name: exp.name,
-          dateReceived: exp.dateReceived
-        };
-      }
-    });
-  } else {
-    this.model.customerOrgExp = null;
-  }
-
   // Jobs
   if (!_.isEmpty(this.model.jobs)) {
     this.model.jobs = _.reverse(
@@ -326,87 +306,7 @@ async function submit() {
     // form validated
     this.$emit('startAction');
 
-    if (!_.isEmpty(this.model.degrees)) {
-      this.model.degrees = _.map(this.model.degrees, (degree) => {
-        return {
-          concentrations: degree.concentrations,
-          date: degree.date,
-          majors: degree.majors,
-          minors: degree.minors,
-          name: degree.name,
-          school: degree.school
-        };
-      });
-    } else {
-      this.model.degrees = null;
-    }
-
-    if (!_.isEmpty(this.model.certifications)) {
-      this.model.certifications = _.map(this.model.certifications, (certification) => {
-        if (certification.expirationDate) {
-          return {
-            name: certification.name,
-            dateReceived: certification.dateReceived,
-            expirationDate: certification.expirationDate
-          };
-        } else {
-          return {
-            name: certification.name,
-            dateReceived: certification.dateReceived
-          };
-        }
-      });
-    } else {
-      this.model.certifications = null;
-    }
-
-    if (!_.isEmpty(this.model.jobs)) {
-      this.model.jobs = _.reverse(
-        _.sortBy(
-          _.map(this.model.jobs, (job) => {
-            if (job.endDate) {
-              return {
-                company: job.company,
-                position: job.position,
-                startDate: job.startDate,
-                endDate: job.endDate
-              };
-            } else {
-              return {
-                company: job.company,
-                position: job.position,
-                startDate: job.startDate
-              };
-            }
-          }),
-          (job) => {
-            return moment(job.startDate);
-          }
-        )
-      );
-    } else {
-      this.model.jobs = null;
-    }
-
-    if (!_.isEmpty(this.model.icTimeFrames)) {
-      this.model.icTimeFrames = _.reverse(
-        _.sortBy(
-          _.map(this.model.icTimeFrames, (timeFrame) => {
-            let chronologicalRange = _.sortBy(timeFrame.range, (monthYear) => {
-              return moment(monthYear, 'YYYY-MM');
-            });
-            return {
-              range: chronologicalRange
-            };
-          }),
-          (timeFrame) => {
-            return moment(timeFrame.range[0], 'YYYY-MM');
-          }
-        )
-      );
-    } else {
-      this.model.icTimeFrames = null;
-    }
+    this.cleanUpData();
 
     if (this.model.id) {
       // updating employee
