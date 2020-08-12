@@ -455,6 +455,7 @@ function calcAdjustedBudget(employee, expenseType) {
  * Checks how much of the expense is covered and submits the expense.
  */
 async function checkCoverage() {
+  this.isInactive = true;
   if (this.$refs.form.validate()) {
     this.$emit('startAction');
     // form is validated
@@ -656,6 +657,7 @@ async function checkCoverage() {
       }
     }
   }
+  this.isInactive = false;
 } // checkCoverage
 
 /**
