@@ -10,7 +10,7 @@
         <v-tab href="#awards">Awards</v-tab>
         <v-tab href="#technologies">Technologies</v-tab>
         <v-tab href="#customerOrgExp">Customer Org</v-tab>
-        <v-tab href="#clearance">Clearance</v-tab>
+        <v-tab href="#clearance" v-if="userIsAdmin() || userIsEmployee()">Clearance</v-tab>
         <v-tab-item id="employee">
           <employee-tab :admin="userIsAdmin()" :employee="userIsEmployee()" :model="model"></employee-tab>
         </v-tab-item>
@@ -32,7 +32,7 @@
         <v-tab-item id="customerOrgExp">
           <customer-org-tab :model="model"></customer-org-tab>
         </v-tab-item>
-        <v-tab-item id="clearance">
+        <v-tab-item id="clearance" v-if="userIsAdmin() || userIsEmployee()">
           <clearance-tab :model="model"></clearance-tab>
         </v-tab-item>
       </v-tabs>
