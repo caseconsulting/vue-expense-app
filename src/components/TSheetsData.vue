@@ -7,9 +7,9 @@
         <v-switch v-model="showMinutes" dense hide-details color="gray" class="my-0 py-0"></v-switch>
       </v-card-title>
       <v-card-text class="pt-5 pb-0 black--text">
-        <monthly-charges :showMinutes="showMinutes"></monthly-charges>
+        <monthly-charges :passedEmployee="employee" :showMinutes="showMinutes"></monthly-charges>
         <v-divider></v-divider>
-        <balances :showMinutes="showMinutes"></balances>
+        <balances :passedEmployee="employee" :showMinutes="showMinutes"></balances>
       </v-card-text>
     </v-card>
   </div>
@@ -28,6 +28,7 @@ export default {
     return {
       showMinutes: false
     };
-  }
+  },
+  props: ['employee']
 };
 </script>

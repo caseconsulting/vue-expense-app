@@ -129,7 +129,7 @@
         <!-- Accessibility -->
         <div style="color: dimgray;">
           Employee Access
-          <router-link to="/help/expenseTypes" tag="v-icon">info</router-link>
+          <v-btn to="/help/expenseTypes" class="mb-4" x-small icon><v-icon color="#3f51b5">info</v-icon></v-btn>
         </div>
 
         <v-radio-group v-model="model.accessibleBy" class="smallRadio ma-0" row mandatory>

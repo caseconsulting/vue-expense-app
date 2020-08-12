@@ -4,14 +4,18 @@
       <v-btn to="/employees"><v-icon class="pr-1">arrow_back</v-icon>Back to Employees Page</v-btn>
     </v-row>
     <v-row>
-      <v-col cols="12" md="6" lg="5">
-        <template>
-          <available-budgets v-if="this.model.id" :employee="this.model"></available-budgets>
-        </template>
-        <!-- End saved info -->
+      <!-- TSheets and Budgets-->
+      <v-col v-if="userIsAdmin() || userIsEmployee()" cols="12" md="6" lg="5">
+        <t-sheets-data :employee="this.model" class="mb-6"></t-sheets-data>
+        <available-budgets v-if="this.model.id" :employee="this.model"></available-budgets>
       </v-col>
-      <v-col cols="12" md="6" lg="7">
-        <!-- Saved info -->
+
+      <!-- Employee Form -->
+      <v-col
+        cols="12"
+        :md="userIsAdmin() || userIsEmployee() ? 6 : 12"
+        :lg="userIsAdmin() || userIsEmployee() ? 7 : 12"
+      >
         <v-card>
           <v-card-title class="header_style" v-if="!editing">
             <h3>{{ this.model.firstName }} {{ this.model.lastName }}</h3>
@@ -34,6 +38,7 @@ import api from '@/shared/api.js';
 import AvailableBudgets from '@/components/AvailableBudgets.vue';
 import EmployeeForm from '@/components/employees/EmployeeForm.vue';
 import EmployeeInfo from '@/components/employees/EmployeeInfo.vue';
+import TSheetsData from '@/components/TSheetsData.vue';
 import { getRole } from '@/utils/auth';
 import _ from 'lodash';
 
@@ -157,7 +162,8 @@ export default {
   components: {
     AvailableBudgets,
     EmployeeForm,
-    EmployeeInfo
+    EmployeeInfo,
+    TSheetsData
   },
   created,
   data() {

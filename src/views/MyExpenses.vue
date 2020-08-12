@@ -340,7 +340,7 @@ import _ from 'lodash';
  * @return String - user's full name
  */
 function getUserName() {
-  return this.expenses.length === 0 ? '' : employeeUtils.fullName(this.userInfo);
+  return employeeUtils.fullName(this.userInfo);
 } // getUserName
 
 /**

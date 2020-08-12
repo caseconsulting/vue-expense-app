@@ -2,108 +2,120 @@
   <div id="monthly-charges">
     <h3>
       Hours for {{ month }} {{ year }}
-      <router-link to="/help/hoursInfo" tag="v-icon">info</router-link>
+      <v-btn to="/help/hoursInfo" class="mb-4" x-small icon><v-icon color="#3f51b5">info</v-icon></v-btn>
     </h3>
-    <v-card-text>
-      <div v-if="this.loading" class="pb-4">
-        <v-progress-linear :indeterminate="true"></v-progress-linear>
-      </div>
-      <div v-else>
-        <!-- If the user has no hours -->
-        <v-row v-if="tsheetsData.jobcodeHours.length == 0" justify="center">
-          <p>No hours for this month</p>
-        </v-row>
-        <div v-else>
-          <div class="pt-3 px-5" style="border: 1px solid grey;">
-            <v-row v-for="job in tsheetsData.jobcodeHours" :key="job.name">
-              {{ job.name }}:
-              <v-spacer></v-spacer>
-              <p>{{ formatHours(job.hours) }}</p>
-            </v-row>
-            <v-row class="bold">
-              Total:
-              <v-spacer></v-spacer>
-              <div>
-                <p v-if="remainingHours > 0">{{ formatHours(totalHours) }} / {{ formatHours(workHours) }}</p>
-                <p v-else style="color: green;">{{ formatHours(totalHours) }} / {{ formatHours(workHours) }}</p>
-              </div>
-            </v-row>
-          </div>
-          <!-- Average Hours per Day -->
-          <v-row class="pt-3">
-            Remaining Avg Hours/Day:
-            <v-spacer></v-spacer>
-            <p v-if="this.estimatedDailyHours < 24">{{ formatHours(this.estimatedDailyHours) }}</p>
-            <p v-else style="color: red;">{{ formatHours(this.estimatedDailyHours) }}</p>
-          </v-row>
-          <template v-if="!showMore" @click="showMore = true">
-            <v-btn @click="showMore = true" top text small class="my-2">Show More &#9662; </v-btn>
-          </template>
-          <div v-if="showMore" max-width="400">
-            <!-- Hours left this month -->
-            <v-row>
-              Remaining:
-              <v-spacer></v-spacer>
-              <p>{{ formatHours(this.remainingHours) }}</p>
-            </v-row>
-            <!-- Hours worked this month -->
-            <v-row>
-              Completed:
-              <v-spacer></v-spacer>
-              <p v-if="this.workedHours < this.workHours - this.workDayHours * this.remainingWorkDays">
-                {{ formatHours(this.workedHours) }}
-              </p>
-              <p v-else style="color: green;">{{ formatHours(this.workedHours) }}</p>
-            </v-row>
-            <!-- Hours worked today -->
-            <v-row>
-              Today:
-              <v-spacer></v-spacer>
-              <p v-if="this.todaysHours < this.workDayHours">
-                {{ formatHours(this.todaysHours) }}
-              </p>
-              <p v-else style="color: green;">{{ formatHours(this.todaysHours) }}</p>
-            </v-row>
-            <!-- Future hours for this month -->
-            <v-row>
-              Future:
-              <v-spacer></v-spacer>
-              <p v-if="this.futureHours < this.workDayHours * (this.remainingWorkDays - 1)">
-                {{ formatHours(this.futureHours) }}
-              </p>
-              <p v-else style="color: green;">{{ formatHours(this.futureHours) }}</p>
-            </v-row>
-            <!-- Work days left -->
-            <v-row>
-              Days Remaining:
-              <v-spacer></v-spacer>
-              <div>
-                <div>
-                  <p>
-                    <input
-                      type="text"
-                      class="text-right"
-                      style="max-width: 40px;"
-                      :value="this.userWorkDays"
-                      @input="updateEstimate"
-                    />
-                  </p>
-                </div>
-              </div>
-            </v-row>
-          </div>
-          <template v-if="showMore">
-            <v-btn @click="showMore = false" top text small class="my-2">Show Less &#9650; </v-btn>
-          </template>
+    <div v-if="monthlyHourError" class="pt-2 pb-6" align="center">
+      <v-tooltip right>
+        <template v-slot:activator="{ on }">
+          <v-icon v-on="on">warning</v-icon>
+        </template>
+        <span>Error</span>
+      </v-tooltip>
+    </div>
+    <div v-else>
+      <v-card-text>
+        <div v-if="this.loading" class="pb-4">
+          <v-progress-linear :indeterminate="true"></v-progress-linear>
         </div>
-      </div>
-    </v-card-text>
+        <div v-else>
+          <!-- If the user has no hours -->
+          <v-row v-if="tsheetsData.jobcodeHours && tsheetsData.jobcodeHours.length == 0" justify="center">
+            <p>No hours for this month</p>
+          </v-row>
+          <div v-else>
+            <div class="pt-3 px-5" style="border: 1px solid grey;">
+              <v-row v-for="job in tsheetsData.jobcodeHours" :key="job.name">
+                {{ job.name }}:
+                <v-spacer></v-spacer>
+                <p>{{ formatHours(job.hours) }}</p>
+              </v-row>
+              <v-row class="bold">
+                Total:
+                <v-spacer></v-spacer>
+                <div>
+                  <p v-if="remainingHours > 0">{{ formatHours(totalHours) }} / {{ formatHours(workHours) }}</p>
+                  <p v-else style="color: green;">{{ formatHours(totalHours) }} / {{ formatHours(workHours) }}</p>
+                </div>
+              </v-row>
+            </div>
+            <!-- Average Hours per Day -->
+            <v-row class="pt-3">
+              Remaining Avg Hours/Day:
+              <v-spacer></v-spacer>
+              <p v-if="this.estimatedDailyHours < 24">{{ formatHours(this.estimatedDailyHours) }}</p>
+              <p v-else style="color: red;">{{ formatHours(this.estimatedDailyHours) }}</p>
+            </v-row>
+            <template v-if="!showMore" @click="showMore = true">
+              <v-btn @click="showMore = true" top text small class="my-2">Show More &#9662; </v-btn>
+            </template>
+            <div v-if="showMore" max-width="400">
+              <!-- Hours left this month -->
+              <v-row>
+                Remaining:
+                <v-spacer></v-spacer>
+                <p>{{ formatHours(this.remainingHours) }}</p>
+              </v-row>
+              <!-- Hours worked this month -->
+              <v-row>
+                Completed:
+                <v-spacer></v-spacer>
+                <p v-if="this.workedHours < this.workHours - this.workDayHours * this.remainingWorkDays">
+                  {{ formatHours(this.workedHours) }}
+                </p>
+                <p v-else style="color: green;">{{ formatHours(this.workedHours) }}</p>
+              </v-row>
+              <!-- Hours worked today -->
+              <v-row>
+                Today:
+                <v-spacer></v-spacer>
+                <p v-if="this.todaysHours < this.workDayHours">
+                  {{ formatHours(this.todaysHours) }}
+                </p>
+                <p v-else style="color: green;">{{ formatHours(this.todaysHours) }}</p>
+              </v-row>
+              <!-- Future hours for this month -->
+              <v-row>
+                Future:
+                <v-spacer></v-spacer>
+                <p v-if="this.futureHours < this.workDayHours * (this.remainingWorkDays - 1)">
+                  {{ formatHours(this.futureHours) }}
+                </p>
+                <p v-else style="color: green;">{{ formatHours(this.futureHours) }}</p>
+              </v-row>
+              <!-- Work days left -->
+              <v-row>
+                Days Remaining:
+                <v-spacer></v-spacer>
+                <div>
+                  <div>
+                    <p>
+                      <input
+                        type="text"
+                        class="text-right"
+                        style="max-width: 40px;"
+                        :value="this.userWorkDays"
+                        @input="updateEstimate"
+                      />
+                    </p>
+                  </div>
+                </div>
+              </v-row>
+            </div>
+            <template v-if="showMore">
+              <v-btn @click="showMore = false" top text small class="my-2">Show Less &#9650; </v-btn>
+            </template>
+          </div>
+        </div>
+      </v-card-text>
+    </div>
   </div>
 </template>
 
 <script>
 import moment from 'moment';
 import api from '@/shared/api.js';
+import _ from 'lodash';
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                     COMPUTED                     |
@@ -133,24 +145,15 @@ function remainingWorkDays() {
  *  Set budget information for employee. Creates event listeners.
  */
 async function created() {
+  this.isEmployeeView = this.$route.name === 'employee';
+
   this.loading = true;
-  this.employee = await api.getUser();
-  this.workDayHours *= this.employee.workStatus * 0.01;
   // set the current month
   this.month = moment().format('MMMM');
   // set the current year
   this.year = moment().format('YYYY');
-  // make call to api to get data
-  this.tsheetsData = await api.getMonthlyHours(this.employee.employeeNumber);
-  this.workedHours = this.tsheetsData.previousHours;
-  this.todaysHours = this.tsheetsData.todaysHours;
-  this.futureHours = this.tsheetsData.futureHours;
-  this.totalHours = this.workedHours + this.todaysHours + this.futureHours;
-  await this.calcWorkHours();
-  this.remainingHours = this.workHours - this.totalHours;
-  this.userWorkDays = this.remainingWorkDays;
-  this.estimatedDailyHours = this.remainingHours / this.userWorkDays;
-  this.loading = false;
+
+  await this.setMonthlyCharges();
 } // created
 
 // |--------------------------------------------------|
@@ -198,6 +201,46 @@ function formatHours(hours) {
   return `${hours}h`;
 } // formatHours
 
+/**
+ * Checks if a value is empty. Returns true if the value is null or an empty/blank string.
+ *
+ * @param value - value to check
+ * @return boolean - value is empty
+ */
+function isEmpty(value) {
+  return _.isNil(value) || (_.isString(value) && value.trim().length === 0);
+} // isEmpty
+
+/**
+ * Sets the monthly charges for the employee (or user if no employee is specified).
+ */
+async function setMonthlyCharges() {
+  this.employee = this.isEmployeeView ? this.passedEmployee : await api.getUser();
+  if (!isEmpty(this.employee.id)) {
+    this.workDayHours *= this.employee.workStatus * 0.01;
+    // make call to api to get data
+    this.tsheetsData = await api.getMonthlyHours(this.employee.employeeNumber);
+
+    if (
+      _.isNil(this.tsheetsData.previousHours) ||
+      _.isNil(this.tsheetsData.todaysHours) ||
+      _.isNil(this.tsheetsData.futureHours)
+    ) {
+      this.monthlyHourError = true;
+    } else {
+      this.workedHours = this.tsheetsData.previousHours;
+      this.todaysHours = this.tsheetsData.todaysHours;
+      this.futureHours = this.tsheetsData.futureHours;
+      this.totalHours = this.workedHours + this.todaysHours + this.futureHours;
+      await this.calcWorkHours();
+      this.remainingHours = this.workHours - this.totalHours;
+      this.userWorkDays = this.remainingWorkDays;
+      this.estimatedDailyHours = this.remainingHours / this.userWorkDays;
+    }
+    this.loading = false;
+  }
+} // setMonthlyCharges
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                      EXPORT                      |
@@ -213,8 +256,10 @@ export default {
       employee: {},
       estimatedDailyHours: 0,
       futureHours: 0,
+      isEmployeeView: false,
       loading: false,
       month: '',
+      monthlyHourError: false,
       monthlyMin: 0,
       remainingHours: 0,
       remainingHoursHover: '',
@@ -231,6 +276,8 @@ export default {
   methods: {
     calcWorkHours,
     formatHours,
+    isEmpty,
+    setMonthlyCharges,
     updateEstimate: function (event) {
       if (event.target.value > 0) {
         this.userWorkDays = event.target.value;
@@ -239,6 +286,13 @@ export default {
       }
     }
   },
-  props: ['showMinutes']
+  props: ['passedEmployee', 'showMinutes'],
+  watch: {
+    'passedEmployee.id': async function () {
+      if (this.isEmployeeView) {
+        await this.setMonthlyCharges();
+      }
+    }
+  }
 };
 </script>

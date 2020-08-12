@@ -1,37 +1,49 @@
 <template>
   <div id="pto-balances">
     <h3 class="pt-5">PTO Balances</h3>
-    <v-card-text>
-      <div v-if="this.loadingBar" class="pb-4">
-        <v-progress-linear :indeterminate="true"></v-progress-linear>
-      </div>
-      <div v-else>
-        <!-- If no avaible balances or inactive dislay message -->
-        <v-row v-if="balanceData == 0 || isInactive" justify="center">
-          <p>No available balances</p>
-        </v-row>
-      </div>
-      <div v-if="!isInactive">
-        <!-- Loop through and display all balances -->
-        <v-row v-for="balance in this.availableBalances" :key="balance">
-          <p>{{ balance }}:</p>
-          <v-spacer></v-spacer>
-          <p>{{ formatHours(balanceData[balance]) }}</p>
-        </v-row>
-      </div>
-      <template v-if="!showMore && !showAll">
-        <v-btn @click="showMore = true" top text small class="my-2">Show More &#9662; </v-btn>
-      </template>
+    <div v-if="balancesError" class="pt-2 pb-6" align="center">
+      <v-tooltip right>
+        <template v-slot:activator="{ on }">
+          <v-icon v-on="on">warning</v-icon>
+        </template>
+        <span>Error</span>
+      </v-tooltip>
+    </div>
+    <div v-else>
+      <v-card-text>
+        <div v-if="this.loadingBar" class="pb-4">
+          <v-progress-linear :indeterminate="true"></v-progress-linear>
+        </div>
+        <div v-else>
+          <!-- If no avaible balances or inactive dislay message -->
+          <v-row v-if="balanceData == 0 || isInactive" justify="center">
+            <p>No available balances</p>
+          </v-row>
+        </div>
+        <div v-if="!isInactive">
+          <!-- Loop through and display all balances -->
+          <v-row v-for="balance in this.availableBalances" :key="balance">
+            <p>{{ balance }}:</p>
+            <v-spacer></v-spacer>
+            <p>{{ formatHours(balanceData[balance]) }}</p>
+          </v-row>
+        </div>
+        <template v-if="!showMore && !showAll">
+          <v-btn @click="showMore = true" top text small class="my-2">Show More &#9662; </v-btn>
+        </template>
 
-      <template v-if="showMore && !showAll">
-        <v-btn @click="showMore = false" top text small class="my-2">Show Less &#9650; </v-btn>
-      </template>
-    </v-card-text>
+        <template v-if="showMore && !showAll">
+          <v-btn @click="showMore = false" top text small class="my-2">Show Less &#9650; </v-btn>
+        </template>
+      </v-card-text>
+    </div>
   </div>
 </template>
 
 <script>
 import api from '@/shared/api.js';
+import _ from 'lodash';
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                 LIFECYCLE HOOKS                  |
@@ -42,22 +54,9 @@ import api from '@/shared/api.js';
  *  Set Balances information for employee.
  */
 async function created() {
+  this.isEmployeeView = this.$route.name === 'employee';
   this.loadingBar = true;
-  this.employee = await api.getUser();
-  let ptoBalances = await api.getPTOBalances(this.employee.employeeNumber); // call api
-  ptoBalances = ptoBalances.results.users[this.employee.employeeNumber];
-  this.balanceData = ptoBalances['pto_balances'];
-  this.keysBalance = Object.keys(this.balanceData);
-  this.loadingBar = false;
-  let emptyBalances = 0;
-  this.keysBalance.forEach((balance) => {
-    if (this.balanceData[balance] == 0) {
-      emptyBalances++;
-    }
-  });
-  if (emptyBalances > 0) {
-    this.showAll = false;
-  }
+  await this.setPTOBalances();
 } // created
 
 // |--------------------------------------------------|
@@ -113,6 +112,44 @@ function formatHours(hours) {
   return `${hours}h`;
 } // formatHours
 
+/**
+ * Checks if a value is empty. Returns true if the value is null or an empty/blank string.
+ *
+ * @param value - value to check
+ * @return boolean - value is empty
+ */
+function isEmpty(value) {
+  return _.isNil(value) || (_.isString(value) && value.trim().length === 0);
+} // isEmpty
+
+/**
+ * Sets the PTO balances for the employee (or user if no employee is specified)
+ */
+async function setPTOBalances() {
+  this.employee = this.isEmployeeView ? this.passedEmployee : await api.getUser();
+  if (!isEmpty(this.employee.id)) {
+    let ptoBalances = await api.getPTOBalances(this.employee.employeeNumber); // call api
+    if (_.isNil(ptoBalances.results)) {
+      this.balancesError = true;
+    } else {
+      ptoBalances = ptoBalances.results.users[this.employee.employeeNumber];
+      this.balanceData = ptoBalances['pto_balances'];
+      this.keysBalance = Object.keys(this.balanceData);
+      this.loadingBar = false;
+      let emptyBalances = 0;
+      this.keysBalance.forEach((balance) => {
+        if (this.balanceData[balance] == 0) {
+          emptyBalances++;
+        }
+      });
+      if (emptyBalances > 0) {
+        this.showAll = false;
+      }
+    }
+    this.loading = false;
+  }
+} // setPTOBalances
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                      EXPORT                      |
@@ -127,8 +164,10 @@ export default {
   created,
   data() {
     return {
-      employee: {},
       balanceData: [],
+      balancesError: false,
+      employee: {},
+      isEmployeeView: false,
       keysBalance: [],
       loadingBar: false,
       showAll: true,
@@ -136,8 +175,17 @@ export default {
     };
   },
   methods: {
-    formatHours
+    formatHours,
+    isEmpty,
+    setPTOBalances
   },
-  props: ['showMinutes']
+  props: ['passedEmployee', 'showMinutes'],
+  watch: {
+    'passedEmployee.id': async function () {
+      if (this.isEmployeeView) {
+        await this.setPTOBalances();
+      }
+    }
+  }
 };
 </script>
