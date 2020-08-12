@@ -3,7 +3,7 @@
     <!-- Loop customer org exp -->
     <div v-for="(exp, index) in model.customerOrgExp" class="pt-3 pb-1 px-5" :key="'exp: ' + exp.name + index">
       <v-row v-if="index == 0">Current:</v-row>
-      <v-row style="vertical-align: middle;">
+      <v-row align="center">
         <v-combobox
           v-model="exp.name"
           :rules="requiredRules"
@@ -140,6 +140,7 @@ export default {
 
 <style>
 .yearsBox {
+  margin-left: 10px;
   border: solid 1px gray;
   width: 70px;
   height: 34px;

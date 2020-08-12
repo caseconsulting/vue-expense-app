@@ -3,8 +3,7 @@
     <div v-if="!isEmpty(model.customerOrgExp)">
       <div v-for="(exp, index) in model.customerOrgExp" :key="exp.name">
         <p><b>Customer Organization Experience: </b>{{ exp.name }}</p>
-        <p><b>Date Received: </b>{{ exp.dateReceived | dateFormat }}</p>
-        <p v-if="exp.expirationDate"><b>Expiration Date: </b>{{ exp.expirationDate | dateFormat }}</p>
+        <p><b>Years of Experience: </b>{{ exp.years }}</p>
         <v-divider v-if="index < model.customerOrgExp.length - 1" class="pb-3" />
       </div>
     </div>
@@ -13,7 +12,6 @@
 </template>
 
 <script>
-import moment from 'moment';
 import _ from 'lodash';
 /**
  * Checks if a value is empty. Returns true if the value is null or an empty/blank string.
@@ -26,16 +24,6 @@ function isEmpty(value) {
 } // isEmpty
 
 export default {
-  filters: {
-    // formats a date by month, day, year (e.g. Aug 18th, 2020)
-    dateFormat: (value) => {
-      if (!isEmpty(value)) {
-        return moment(value).format('MMM Do, YYYY');
-      } else {
-        return '';
-      }
-    }
-  },
   methods: {
     isEmpty
   },
