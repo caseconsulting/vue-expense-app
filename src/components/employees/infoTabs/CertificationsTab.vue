@@ -7,7 +7,7 @@
         <p v-if="certification.expirationDate">
           <b>Expiration Date: </b>{{ certification.expirationDate | dateFormat }}
         </p>
-        <v-divider v-if="index < model.certifications.length - 1" class="mb-3" />
+        <hr v-if="index < model.certifications.length - 1" class="mb-3" />
       </div>
     </div>
     <p v-else>No Certification information</p>

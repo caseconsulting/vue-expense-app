@@ -10,6 +10,7 @@
         <v-tab href="#awards">Awards</v-tab>
         <v-tab href="#technologies">Technologies</v-tab>
         <v-tab href="#customerOrgExp">Customer Org</v-tab>
+        <v-tab href="#clearance">Clearance</v-tab>
         <v-tab-item id="employee">
           <employee-tab :admin="userIsAdmin()" :employee="userIsEmployee()" :model="model"></employee-tab>
         </v-tab-item>
@@ -28,6 +29,9 @@
         <v-tab-item id="customerOrgExp">
           <customer-org-tab :model="model"></customer-org-tab>
         </v-tab-item>
+        <v-tab-item id="clearance">
+          <clearance-tab :model="model"></clearance-tab>
+        </v-tab-item>
       </v-tabs>
     </div>
   </v-card-text>
@@ -43,6 +47,7 @@ import EducationTab from '@/components/employees/infoTabs/EducationTab';
 import EmployeeTab from '@/components/employees/infoTabs/EmployeeTab';
 import JobExperienceTab from '@/components/employees/infoTabs/JobExperienceTab';
 import PersonalTab from '@/components/employees/infoTabs/PersonalTab';
+import ClearanceTab from '@/components/employees/infoTabs/ClearanceTab';
 
 /**
  * Check if the user is an admin. Returns true if the user is an admin, otherwise returns false.
@@ -80,6 +85,7 @@ async function created() {
 export default {
   components: {
     CertificationsTab,
+    ClearanceTab,
     CustomerOrgTab,
     EducationTab,
     EmployeeTab,

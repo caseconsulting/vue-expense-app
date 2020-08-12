@@ -36,6 +36,7 @@
             <v-tab href="#awards">Awards</v-tab>
             <v-tab href="#technologies">Technologies</v-tab>
             <v-tab href="#customerOrgExp">Customer Org</v-tab>
+            <v-tab href="#clearance">Clearance</v-tab>
             <!-- Employee -->
             <v-tab-item id="employee">
               <employee-tab :admin="userIsAdmin()" :model="model"></employee-tab>
@@ -71,6 +72,9 @@
             <v-tab-item id="customerOrgExp">
               <customer-org-tab :model="model"></customer-org-tab>
             </v-tab-item>
+            <v-tab-item id="clearance">
+              <clearance-tab :model="model"></clearance-tab>
+            </v-tab-item>
           </v-tabs>
 
           <!-- Form action buttons -->
@@ -95,6 +99,7 @@ import CustomerOrgTab from '@/components/employees/formTabs/CustomerOrgTab';
 import FormSubmissionConfirmation from '@/components/modals/FormSubmissionConfirmation.vue';
 import JobExperienceTab from '@/components/employees/formTabs/JobExperienceTab';
 import PersonalTab from '@/components/employees/formTabs/PersonalTab';
+import ClearanceTab from '@/components/employees/formTabs/ClearanceTab';
 import moment from 'moment';
 import { getRole } from '@/utils/auth';
 import { v4 as uuid } from 'uuid';
@@ -112,6 +117,179 @@ import _ from 'lodash';
 function cancel() {
   window.EventBus.$emit('cancel-form');
 } // cancel
+
+/**
+ * Removes unnecessary attributes from the employee data.
+ */
+function cleanUpData() {
+  // Degrees
+  if (!_.isEmpty(this.model.degrees)) {
+    this.model.degrees = _.map(this.model.degrees, (degree) => {
+      return {
+        concentrations: degree.concentrations,
+        date: degree.date,
+        majors: degree.majors,
+        minors: degree.minors,
+        name: degree.name,
+        school: degree.school
+      };
+    });
+  } else {
+    this.model.degrees = null;
+  }
+
+  // Certifications
+  if (!_.isEmpty(this.model.certifications)) {
+    this.model.certifications = _.map(this.model.certifications, (certification) => {
+      if (certification.expirationDate) {
+        return {
+          name: certification.name,
+          dateReceived: certification.dateReceived,
+          expirationDate: certification.expirationDate
+        };
+      } else {
+        return {
+          name: certification.name,
+          dateReceived: certification.dateReceived
+        };
+      }
+    });
+  } else {
+    this.model.certifications = null;
+  }
+
+  // Customer Organization Experience
+  if (!_.isEmpty(this.model.customerOrgExp)) {
+    this.model.customerOrgExp = _.map(this.model.customerOrgExp, (exp) => {
+      if (exp.expirationDate) {
+        return {
+          name: exp.name,
+          dateReceived: exp.dateReceived,
+          expirationDate: exp.expirationDate
+        };
+      } else {
+        return {
+          name: exp.name,
+          dateReceived: exp.dateReceived
+        };
+      }
+    });
+  } else {
+    this.model.customerOrgExp = null;
+  }
+
+  // Jobs
+  if (!_.isEmpty(this.model.jobs)) {
+    this.model.jobs = _.reverse(
+      _.sortBy(
+        _.map(this.model.jobs, (job) => {
+          if (job.endDate) {
+            return {
+              company: job.company,
+              position: job.position,
+              startDate: job.startDate,
+              endDate: job.endDate
+            };
+          } else {
+            return {
+              company: job.company,
+              position: job.position,
+              startDate: job.startDate
+            };
+          }
+        }),
+        (job) => {
+          return moment(job.startDate);
+        }
+      )
+    );
+  } else {
+    this.model.jobs = null;
+  }
+
+  // IC Time Frames
+  if (!_.isEmpty(this.model.icTimeFrames)) {
+    this.model.icTimeFrames = _.reverse(
+      _.sortBy(
+        _.map(this.model.icTimeFrames, (timeFrame) => {
+          let chronologicalRange = _.sortBy(timeFrame.range, (monthYear) => {
+            return moment(monthYear, 'YYYY-MM');
+          });
+          return {
+            range: chronologicalRange
+          };
+        }),
+        (timeFrame) => {
+          return moment(timeFrame.range[0], 'YYYY-MM');
+        }
+      )
+    );
+  } else {
+    this.model.icTimeFrames = null;
+  }
+
+  // Clearances
+  if (!_.isEmpty(this.model.clearances)) {
+    this.model.clearances = _.reverse(
+      _.sortBy(
+        _.map(this.model.clearances, (clearance) => {
+          // remove date picker menu booleans
+          delete clearance.showGrantedMenu;
+          delete clearance.showExpirationMenu;
+          delete clearance.showSubmissionMenu;
+          delete clearance.showPolyMenu;
+          delete clearance.showAdjudicationMenu;
+
+          // delete null attributes
+          _.forEach(clearance, (value, key) => {
+            if (_.isNil(value)) {
+              delete clearance[key];
+            }
+          });
+
+          // clean up and sort BI Dates
+          clearance.biDates = _.reverse(
+            _.sortBy(
+              _.map(clearance.biDates, (biDates) => {
+                let chronologicalRange = _.sortBy(biDates.range, (date) => {
+                  return moment(date, 'YYYY-MM-DD');
+                });
+                return {
+                  range: chronologicalRange
+                };
+              }),
+              (biDates) => {
+                return biDates.range[0];
+              }
+            )
+          );
+
+          // sort adjudication dates
+          clearance.adjudicationDates = _.reverse(
+            _.sortBy(clearance.adjudicationDates, (date) => {
+              return moment(date, 'YYYY-MM-DD');
+            })
+          );
+
+          // sort poly dates
+          clearance.polyDates = _.reverse(
+            _.sortBy(clearance.polyDates, (date) => {
+              return moment(date, 'YYYY-MM-DD');
+            })
+          );
+
+          // return updated clearance
+          return clearance;
+        }),
+        (clearance) => {
+          return moment(clearance.grantedDate);
+        }
+      )
+    );
+  } else {
+    this.model.clearances = null;
+  }
+} // cleanUpData
 
 /**
  * Clear the action status that is displayed in the snackbar.
@@ -316,6 +494,7 @@ export default {
   },
   components: {
     CertificationTab,
+    ClearanceTab,
     CustomerOrgTab,
     EducationTab,
     EmployeeTab,
@@ -348,6 +527,7 @@ export default {
         birthdayFeed: false,
         certifications: [],
         city: null,
+        clearances: [],
         contract: null,
         country: null,
         customerOrgExp: [],
@@ -376,6 +556,7 @@ export default {
   },
   methods: {
     cancel,
+    cleanUpData,
     clearStatus,
     confirm,
     displayError,

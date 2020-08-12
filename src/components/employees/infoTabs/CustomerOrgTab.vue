@@ -4,7 +4,7 @@
       <div v-for="(exp, index) in model.customerOrgExp" :key="exp.name">
         <p><b>Customer Organization Experience: </b>{{ exp.name }}</p>
         <p><b>Years of Experience: </b>{{ exp.years }}</p>
-        <v-divider v-if="index < model.customerOrgExp.length - 1" class="pb-3" />
+        <hr v-if="index < model.customerOrgExp.length - 1" class="pb-3" />
       </div>
     </div>
     <p v-else>No Customer Organization Experience Information</p>

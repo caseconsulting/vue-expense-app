@@ -28,7 +28,7 @@
               :value="formatRange(timeFrame.range)"
               :rules="dateRequired"
               label="Date Range"
-              prepend-icon="event"
+              prepend-icon="date_range"
               readonly
               v-bind="attrs"
               v-on="on"
@@ -125,7 +125,6 @@
                 v-bind="attrs"
                 v-on="on"
                 clearable
-                @click="compareDate = job.startDate"
                 @click:clear="job.endDate = null"
               ></v-text-field>
             </template>
@@ -224,8 +223,7 @@ function formatRange(range) {
   if (_.isEmpty(range)) {
     return null;
   }
-  // const [year, month] = date.split('-');
-  // return `${month}/${year}`;
+
   let start = moment(range[0], 'YYYY-MM');
   if (range[1]) {
     let end = moment(range[1], 'YYYY-MM');
@@ -271,7 +269,6 @@ export default {
   data() {
     return {
       companyDropDown: [],
-      compareDate: null,
       dateOptionalRules: [
         (v) => {
           return v ? /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v) || 'Date must be valid. Format: MM/DD/YYYY' : true;

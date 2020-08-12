@@ -2,14 +2,14 @@
   <div class="infoTab">
     <!-- IC Experience -->
     <p><b>Experience in IC: </b>{{ icExperience }}</p>
-    <v-divider class="my-3" />
+    <hr class="my-3" />
 
     <!-- Case Consulting -->
     <p><b>Company: </b>Case Consulting</p>
     <p v-if="model.jobRole"><b>Position: </b>{{ model.jobRole }}</p>
     <p><b>Start Date: </b>{{ model.hireDate | dateFormat }}</p>
     <p v-if="model.deptDate"><b>End Date: </b>{{ model.deptDate | dateFormat }}</p>
-    <v-divider v-if="model.jobs && model.jobs.length > 0" class="mb-3" />
+    <hr v-if="model.jobs && model.jobs.length > 0" class="mb-3" />
 
     <!-- Other Jobs -->
     <div v-if="!isEmpty(model.jobs)">
@@ -18,7 +18,7 @@
         <p><b>Position: </b>{{ job.position }}</p>
         <p><b>Start Date: </b>{{ job.startDate | dateFormat }}</p>
         <p v-if="job.endDate"><b>End Date: </b>{{ job.endDate | dateFormat }}</p>
-        <v-divider v-if="index < model.jobs.length - 1" class="mb-3" />
+        <hr v-if="index < model.jobs.length - 1" class="mb-3" />
       </div>
     </div>
   </div>
