@@ -59,8 +59,7 @@
             </v-tab-item>
             <!-- Awards -->
             <v-tab-item id="awards">
-              <!-- Title  -->
-              <!-- date -->
+              <award-tab :model="model"></award-tab>
             </v-tab-item>
             <!-- Technologies -->
             <v-tab-item id="technologies">
@@ -92,14 +91,15 @@
 
 <script>
 import api from '@/shared/api.js';
+import AwardTab from '@/components/employees/formTabs/AwardTab';
+import CertificationTab from '@/components/employees/formTabs/CertificationTab';
+import ClearanceTab from '@/components/employees/formTabs/ClearanceTab';
+import CustomerOrgTab from '@/components/employees/formTabs/CustomerOrgTab';
 import EducationTab from '@/components/employees/formTabs/EducationTab';
 import EmployeeTab from '@/components/employees/formTabs/EmployeeTab';
-import CertificationTab from '@/components/employees/formTabs/CertificationTab';
-import CustomerOrgTab from '@/components/employees/formTabs/CustomerOrgTab';
 import FormSubmissionConfirmation from '@/components/modals/FormSubmissionConfirmation.vue';
 import JobExperienceTab from '@/components/employees/formTabs/JobExperienceTab';
 import PersonalTab from '@/components/employees/formTabs/PersonalTab';
-import ClearanceTab from '@/components/employees/formTabs/ClearanceTab';
 import moment from 'moment';
 import { getRole } from '@/utils/auth';
 import { v4 as uuid } from 'uuid';
@@ -140,6 +140,26 @@ function cleanUpData() {
     });
   } else {
     this.model.degrees = null;
+  }
+
+  // Awards
+  if (!_.isEmpty(this.model.awards)) {
+    this.model.awards = _.map(this.model.awards, (award) => {
+      // remove date picker menu booleans
+      delete award.showReceivedMenu;
+
+      // delete null attributes
+      _.forEach(award, (value, key) => {
+        if (_.isNil(value)) {
+          delete award[key];
+        }
+      });
+
+      // return updated award
+      return award;
+    });
+  } else {
+    this.model.awards = null;
   }
 
   // Certifications
@@ -403,6 +423,7 @@ export default {
     window.EventBus.$off('canceled');
   },
   components: {
+    AwardTab,
     CertificationTab,
     ClearanceTab,
     CustomerOrgTab,
@@ -433,6 +454,7 @@ export default {
       formTab: null,
       fullName: '', // employee's first and last name
       model: {
+        awards: [],
         birthday: null,
         birthdayFeed: false,
         certifications: [],

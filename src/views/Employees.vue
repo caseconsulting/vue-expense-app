@@ -183,47 +183,6 @@ import _ from 'lodash';
 // |--------------------------------------------------|
 
 /**
- * Refresh and updates employee list and displays a successful create status in the snackbar.
- */
-function addModelToTable() {
-  this.refreshEmployees();
-
-  this.$set(this.status, 'statusType', 'SUCCESS');
-  this.$set(this.status, 'statusMessage', 'Employee was successfully created!');
-  this.$set(this.status, 'color', 'green');
-} // addModelToTable
-
-/**
- * NOTE: Unused?
- *
- * Clear the selected employee.
- */
-function clearModel() {
-  this.$set(this.model, 'id', null);
-  this.$set(this.model, 'firstName', null);
-  this.$set(this.model, 'middleName', null);
-  this.$set(this.model, 'lastName', null);
-  this.$set(this.model, 'email', '@consultwithcase.com');
-  this.$set(this.model, 'employeeRole', null);
-  this.$set(this.model, 'employeeNumber', null);
-  this.$set(this.model, 'hireDate', null);
-  this.$set(this.model, 'workStatus', 100);
-
-  //New Fields
-  this.$set(this.model, 'birthday', null);
-  this.$set(this.model, 'birthdayFeed', false);
-  this.$set(this.model, 'jobRole', null);
-  this.$set(this.model, 'prime', null);
-  this.$set(this.model, 'contract', null);
-  this.$set(this.model, 'github', null);
-  this.$set(this.model, 'twitter', null);
-  this.$set(this.model, 'city', null);
-  this.$set(this.model, 'st', null);
-  this.$set(this.model, 'country', null);
-  this.$set(this.model, 'deptDate', null);
-} // clearModel
-
-/**
  * Clear the action status that is displayed in the snackbar.
  */
 function clearStatus() {
@@ -279,14 +238,7 @@ function employeePath(item) {
 
 function handleClick(item) {
   this.$router.push(employeePath(item));
-}
-
-/**
- * sets midAction boolean to false
- */
-function endAction() {
-  this.midAction = false;
-}
+} //handleClick
 
 /**
  * Filters list of employees.
@@ -300,39 +252,6 @@ function filterEmployees() {
     return fullCheck || partCheck || inactiveCheck;
   });
 } // filterEmployees
-
-/**
- * Returns Full Time, Part Time, or Inactive based on the work status
- */
-function getWorkStatus(workStatus) {
-  if (workStatus == 100) {
-    return 'Full Time';
-  } else if (workStatus == 0) {
-    return 'Inactive';
-  } else if (workStatus > 0 && workStatus < 100) {
-    return `Part Time (${workStatus}%)`;
-  } else {
-    return 'Invalid Status';
-  }
-} // getWorkStatus
-
-/**
- * Checks if there is data about an employee to display. Returns true if the user is an admin or if the there is data
- * on the employee's prime, contract, job role, github, or twitter, otherwise returns false.
- *
- * @item item - employee to check
- * @return boolean - employee has data to display
- */
-function isDisplayData(item) {
-  let valid =
-    !this.userIsAdmin() &&
-    this.isEmpty(item.prime) &&
-    this.isEmpty(item.contract) &&
-    this.isEmpty(item.jobRole) &&
-    this.isEmpty(item.github) &&
-    this.isEmpty(item.twitter);
-  return valid;
-} // isDisplayData
 
 /**
  * Checks if a value is empty. Returns true if the value is null or an empty/blank string.
@@ -389,36 +308,6 @@ function isPartTime(employee) {
 } // isPartTime
 
 /**
- * Store the attributes of a selected employee.
- *
- * @param item - employee selected
- */
-function onSelect(item) {
-  this.$set(this.model, 'id', item.id);
-  this.$set(this.model, 'firstName', item.firstName);
-  this.$set(this.model, 'lastName', item.lastName);
-  this.$set(this.model, 'email', item.email);
-  this.$set(this.model, 'employeeRole', item.employeeRole);
-  this.$set(this.model, 'employeeNumber', item.employeeNumber);
-  this.$set(this.model, 'hireDate', item.hireDate);
-  this.$set(this.model, 'workStatus', item.workStatus);
-
-  // Additional Fields
-  this.$set(this.model, 'middleName', item.middleName);
-  this.$set(this.model, 'birthday', item.birthday);
-  this.$set(this.model, 'birthdayFeed', item.birthdayFeed);
-  this.$set(this.model, 'jobRole', item.jobRole);
-  this.$set(this.model, 'prime', item.prime);
-  this.$set(this.model, 'contract', item.contract);
-  this.$set(this.model, 'github', item.github);
-  this.$set(this.model, 'twitter', item.twitter);
-  this.$set(this.model, 'city', item.city);
-  this.$set(this.model, 'st', item.st);
-  this.$set(this.model, 'country', item.country);
-  this.$set(this.model, 'deptDate', item.deptDate);
-} // onSelect
-
-/**
  * Refresh employee data and filters employees.
  */
 async function refreshEmployees() {
@@ -428,23 +317,6 @@ async function refreshEmployees() {
   this.expanded = []; // collapse any expanded rows in the database
   this.loading = false; // set loading status to false
 } // refreshEmployees
-
-/**
- * Sets midAction boolean to true
- */
-function startAction() {
-  this.midAction = true;
-}
-
-/**
- * Refresh and updates employee list and displays a successful update status in the snackbar.
- */
-function updateModelInTable() {
-  this.refreshEmployees();
-  this.$set(this.status, 'statusType', 'SUCCESS');
-  this.$set(this.status, 'statusMessage', 'Employee was successfully updated!');
-  this.$set(this.status, 'color', 'green');
-} // updateModelInTable
 
 /**
  * Checks to see if the user is an admin. Returns true if the user's role is an admin, otherwise returns false.
@@ -615,37 +487,22 @@ export default {
       } else {
         return '';
       }
-    },
-    birthdayFeedResponse: (value) => {
-      if (value == true) {
-        return 'yes';
-      } else {
-        return 'no';
-      }
     }
   },
   methods: {
-    addModelToTable,
-    clearModel, // NOTE: Unused?
     clearStatus,
     deleteEmployee,
     deleteModelFromTable,
     displayError,
     employeePath,
-    endAction,
     filterEmployees,
-    getWorkStatus,
     handleClick,
-    isDisplayData,
     isEmpty,
     isFocus,
     isFullTime,
     isInactive,
     isPartTime,
-    onSelect,
     refreshEmployees,
-    startAction,
-    updateModelInTable,
     userIsAdmin,
     validateDelete
   },
@@ -657,26 +514,3 @@ export default {
   }
 };
 </script>
-
-<style>
-.expandedInfo {
-  border: 1px solid black;
-  font-size: 14px;
-  padding: 20px;
-}
-
-.expandedInfo a {
-  font-size: 14px;
-  color: blue;
-}
-
-.expandedInfo a:hover {
-  color: #0cf;
-}
-
-.flagEmp p {
-  font-weight: bold;
-  width: 75px;
-  display: inline-block;
-}
-</style>

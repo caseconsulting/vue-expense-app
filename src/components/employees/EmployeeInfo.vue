@@ -20,11 +20,14 @@
         <v-tab-item id="education">
           <education-tab :model="model"></education-tab>
         </v-tab-item>
+        <v-tab-item id="jobExperience">
+          <job-experience-tab :model="model"></job-experience-tab>
+        </v-tab-item>
         <v-tab-item id="certifications">
           <certifications-tab :model="model"></certifications-tab>
         </v-tab-item>
-        <v-tab-item id="jobExperience">
-          <job-experience-tab :model="model"></job-experience-tab>
+        <v-tab-item id="awards">
+          <awards-tab :model="model"></awards-tab>
         </v-tab-item>
         <v-tab-item id="customerOrgExp">
           <customer-org-tab :model="model"></customer-org-tab>
@@ -41,6 +44,7 @@
 import api from '@/shared/api';
 import { getRole } from '@/utils/auth';
 import _ from 'lodash';
+import AwardsTab from '@/components/employees/infoTabs/AwardsTab';
 import CertificationsTab from '@/components/employees/infoTabs/CertificationsTab';
 import CustomerOrgTab from '@/components/employees/infoTabs/CustomerOrgTab';
 import EducationTab from '@/components/employees/infoTabs/EducationTab';
@@ -84,6 +88,7 @@ async function created() {
 
 export default {
   components: {
+    AwardsTab,
     CertificationsTab,
     ClearanceTab,
     CustomerOrgTab,

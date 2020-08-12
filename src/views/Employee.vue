@@ -175,6 +175,7 @@ export default {
       }, // datatable filter
       loading: false, // loading status
       model: {
+        awards: [],
         birthday: '',
         birthdayFeed: false,
         city: '',
