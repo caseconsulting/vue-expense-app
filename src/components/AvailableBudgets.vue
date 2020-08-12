@@ -37,14 +37,14 @@
             <router-link v-if="this.fiscalDateView" to="/myExpenses" style="text-decoration: none;">
               <button class="home_buttons">Create an Expense</button>
             </router-link>
-            <v-file-input
+            <file-upload
               style="padding-top: 0px; padding-bottom: 0px;"
               label="Create an Expense from Receipt"
-              s
-              @change="reroute()"
+              @fileSelected="reroute()"
               :dense="true"
               :single-line="true"
-            ></v-file-input>
+              :receipt="newFile"
+            ></file-upload>
           </div>
         </div>
       </v-card-text>
@@ -57,8 +57,9 @@
 import api from '@/shared/api.js';
 import AvailableBudgetSummary from '@/components/AvailableBudgetSummary.vue';
 import _ from 'lodash';
+import FileUpload from './FileUpload.vue';
 import moment from 'moment-timezone';
-import router from '../router.js';
+// import router from '../router.js';
 const IsoFormat = 'YYYY-MM-DD';
 
 // |--------------------------------------------------|
@@ -68,9 +69,9 @@ const IsoFormat = 'YYYY-MM-DD';
 // |--------------------------------------------------|
 
 function reroute() {
-  router.push({ path: '/myExpenses' });
+  // router.push({ path: '/myExpenses' });
+  console.log(this.newFile);
 }
-
 /**
  * Calculates how much of a budget is remaining. Returns the remaining amount if it exists. Returns zero if the budget
  * itself does not exist.
@@ -213,7 +214,8 @@ function selectBudget(budget) {
 
 export default {
   components: {
-    AvailableBudgetSummary
+    AvailableBudgetSummary,
+    FileUpload
   },
   created,
   data() {
@@ -225,6 +227,7 @@ export default {
       date: '',
       hireDate: '',
       loading: true,
+      newFile: undefined,
       selectedBudget: null,
       showDialog: false
     };
