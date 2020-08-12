@@ -1,9 +1,13 @@
 <template>
   <div>
     <!-- Loop customer org exp -->
-    <div v-for="(exp, index) in model.customerOrgExp" class="pt-3 pb-1 px-5" :key="'exp: ' + exp.name + index">
-      <v-row v-if="index == 0">Current:</v-row>
-      <v-row align="center">
+    <div
+      v-for="(exp, index) in model.customerOrgExp"
+      class="pt-3 pb-1 px-5"
+      :key="'exp: ' + exp.name + index"
+      style="border: 1px solid grey;"
+    >
+      <v-row>
         <v-combobox
           v-model="exp.name"
           :rules="requiredRules"
@@ -12,16 +16,23 @@
           data-vv-name="Customer Organization Experience"
         >
         </v-combobox>
-        <div class="yearsBox">
-          <input
-            v-model="exp.years"
-            type="text"
-            oninput="this.value = this.value.replace(/[^0-9]/g, '');"
-            maxlength="2"
-            :rules="requiredRules"
-          />
-          <div>years</div>
-        </div>
+      </v-row>
+      <v-row align="center">
+        <v-col>
+          <div class="yearsBox">
+            <input
+              v-model="exp.years"
+              type="text"
+              oninput="this.value = this.value.replace(/[^0-9]/g, '');"
+              maxlength="2"
+              :rules="requiredRules"
+            />
+            <div>years</div>
+          </div>
+        </v-col>
+        <v-col>
+          <v-switch v-model="exp.current" label="Current"></v-switch>
+        </v-col>
         <!-- Delete button  -->
         <v-slide-x-reverse-transition mode="out-in">
           <v-btn text icon><v-icon @click="deleteExperience(index)">delete</v-icon></v-btn>
@@ -62,7 +73,7 @@ function addExperience() {
   this.model.customerOrgExp.push({
     name: '',
     years: 0,
-    current: this.model.customerOrgExp.length == 0
+    current: false
   });
 } // addExperience
 

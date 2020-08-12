@@ -4,6 +4,7 @@
       <div v-for="(exp, index) in model.customerOrgExp" :key="exp.name">
         <p><b>Customer Organization Experience: </b>{{ exp.name }}</p>
         <p><b>Years of Experience: </b>{{ exp.years }}</p>
+        <p><b>Current: </b>{{ exp.current | current }}</p>
         <hr v-if="index < model.customerOrgExp.length - 1" class="pb-3" />
       </div>
     </div>
@@ -24,6 +25,15 @@ function isEmpty(value) {
 } // isEmpty
 
 export default {
+  filters: {
+    current: (value) => {
+      if (value == true) {
+        return 'Yes';
+      } else {
+        return 'No';
+      }
+    }
+  },
   methods: {
     isEmpty
   },
