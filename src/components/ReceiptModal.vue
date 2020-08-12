@@ -6,9 +6,9 @@
         <v-card-text> Would you like to create a blank expense or start from a reciept?</v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn color="gray darken-1" text @click.native="emit(`canceled-delete-${type}`)">Create New Expense</v-btn>
+          <v-btn color="gray darken-1" text @click.native="emit()">Create New Expense</v-btn>
           <v-spacer></v-spacer>
-          <v-btn color="red" text @click.native="emit(`confirm-delete-${type}`)">Upload From Receipt</v-btn>
+          <v-btn color="red" text @click.native="emit()">Upload From Receipt</v-btn>
           <v-spacer></v-spacer>
         </v-card-actions>
       </v-card>
@@ -49,10 +49,6 @@ export default {
   methods: {
     emit
   },
-  props: [
-    'activate', // dialog activator
-    'type', // type of object being deleted
-    'deleteInfo' //delete info to be displayed
-  ]
+  props: ['activate', 'type', 'deleteInfo']
 };
 </script>

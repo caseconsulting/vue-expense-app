@@ -35,16 +35,11 @@
             <div style="height: 20px;"></div>
             <!-- End Loop all budgets -->
             <router-link v-if="this.fiscalDateView" to="/myExpenses" style="text-decoration: none;">
-              <button class="home_buttons">Create an Expense</button>
+              <button class="home_buttons" @click="selectReceipt = true">Create an Expense</button>
             </router-link>
-            <file-upload
-              style="padding-top: 0px; padding-bottom: 0px;"
-              label="Create an Expense from Receipt"
-              @fileSelected="reroute()"
-              :dense="true"
-              :single-line="true"
-              :receipt="newFile"
-            ></file-upload>
+            <!-- Pop-up modal to upload receipt from home page
+            <button class="home_buttons" @click="selectReceipt = true">Create an Expense</button>
+            <receipt-modal :activate="selectReceipt"></receipt-modal> -->
           </div>
         </div>
       </v-card-text>
@@ -57,9 +52,8 @@
 import api from '@/shared/api.js';
 import AvailableBudgetSummary from '@/components/AvailableBudgetSummary.vue';
 import _ from 'lodash';
-import FileUpload from './FileUpload.vue';
+// import ReceiptModal from '../components/ReceiptModal.vue';
 import moment from 'moment-timezone';
-// import router from '../router.js';
 const IsoFormat = 'YYYY-MM-DD';
 
 // |--------------------------------------------------|
@@ -68,10 +62,6 @@ const IsoFormat = 'YYYY-MM-DD';
 // |                                                  |
 // |--------------------------------------------------|
 
-function reroute() {
-  // router.push({ path: '/myExpenses' });
-  console.log(this.newFile);
-}
 /**
  * Calculates how much of a budget is remaining. Returns the remaining amount if it exists. Returns zero if the budget
  * itself does not exist.
@@ -214,8 +204,8 @@ function selectBudget(budget) {
 
 export default {
   components: {
-    AvailableBudgetSummary,
-    FileUpload
+    AvailableBudgetSummary
+    // ReceiptModal
   },
   created,
   data() {
@@ -229,6 +219,7 @@ export default {
       loading: true,
       newFile: undefined,
       selectedBudget: null,
+      selectReceipt: false,
       showDialog: false
     };
   },
@@ -249,7 +240,6 @@ export default {
     refreshBudget,
     refreshBudgetYears,
     refreshEmployee,
-    reroute,
     selectBudget
   },
   props: ['employee', 'fiscalDateView']
