@@ -29,6 +29,9 @@
         <v-tab-item id="awards">
           <awards-tab :model="model"></awards-tab>
         </v-tab-item>
+        <v-tab-item id="technologies">
+          <technologies-tab :model="model"></technologies-tab>
+        </v-tab-item>
         <v-tab-item id="customerOrgExp">
           <customer-org-tab :model="model"></customer-org-tab>
         </v-tab-item>
@@ -46,12 +49,13 @@ import { getRole } from '@/utils/auth';
 import _ from 'lodash';
 import AwardsTab from '@/components/employees/infoTabs/AwardsTab';
 import CertificationsTab from '@/components/employees/infoTabs/CertificationsTab';
+import ClearanceTab from '@/components/employees/infoTabs/ClearanceTab';
 import CustomerOrgTab from '@/components/employees/infoTabs/CustomerOrgTab';
 import EducationTab from '@/components/employees/infoTabs/EducationTab';
 import EmployeeTab from '@/components/employees/infoTabs/EmployeeTab';
 import JobExperienceTab from '@/components/employees/infoTabs/JobExperienceTab';
 import PersonalTab from '@/components/employees/infoTabs/PersonalTab';
-import ClearanceTab from '@/components/employees/infoTabs/ClearanceTab';
+import TechnologiesTab from '@/components/employees/infoTabs/TechnologiesTab';
 
 /**
  * Check if the user is an admin. Returns true if the user is an admin, otherwise returns false.
@@ -95,7 +99,8 @@ export default {
     EducationTab,
     EmployeeTab,
     JobExperienceTab,
-    PersonalTab
+    PersonalTab,
+    TechnologiesTab
   },
   created,
   data() {

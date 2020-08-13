@@ -178,6 +178,7 @@ export default {
         awards: [],
         birthday: '',
         birthdayFeed: false,
+        certifications: [],
         city: '',
         contract: '',
         country: '',
@@ -195,6 +196,7 @@ export default {
         middleName: '',
         prime: '',
         st: '',
+        technologies: [],
         twitter: '',
         workStatus: 100
       }, // selected employee

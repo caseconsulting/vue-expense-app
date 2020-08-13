@@ -63,9 +63,7 @@
             </v-tab-item>
             <!-- Technologies -->
             <v-tab-item id="technologies">
-              <!-- Title  -->
-              <!-- Start Date -->
-              <!-- End DAte optional -->
+              <technology-tab :model="model"></technology-tab>
             </v-tab-item>
             <!-- Customer Org Experience -->
             <v-tab-item id="customerOrgExp">
@@ -100,6 +98,7 @@ import EmployeeTab from '@/components/employees/formTabs/EmployeeTab';
 import FormSubmissionConfirmation from '@/components/modals/FormSubmissionConfirmation.vue';
 import JobExperienceTab from '@/components/employees/formTabs/JobExperienceTab';
 import PersonalTab from '@/components/employees/formTabs/PersonalTab';
+import TechnologyTab from '@/components/employees/formTabs/TechnologyTab';
 import moment from 'moment';
 import { getRole } from '@/utils/auth';
 import { v4 as uuid } from 'uuid';
@@ -431,7 +430,8 @@ export default {
     EmployeeTab,
     FormSubmissionConfirmation,
     JobExperienceTab,
-    PersonalTab
+    PersonalTab,
+    TechnologyTab
   },
   created,
   data() {
@@ -479,6 +479,7 @@ export default {
         middleName: null,
         prime: null,
         st: null,
+        technologies: [],
         twitter: null,
         workStatus: 100
       },
