@@ -141,6 +141,27 @@ function cleanUpData() {
     this.model.degrees = null;
   }
 
+  // Certifications
+  if (!_.isEmpty(this.model.certifications)) {
+    this.model.certifications = _.map(this.model.certifications, (certification) => {
+      // remove date picker menu booleans
+      delete certification.showReceivedMenu;
+      delete certification.showExpirationMenu;
+
+      // delete null attributes
+      _.forEach(certification, (value, key) => {
+        if (_.isNil(value)) {
+          delete certification[key];
+        }
+      });
+
+      // return updated certification
+      return certification;
+    });
+  } else {
+    this.model.certifications = null;
+  }
+
   // Awards
   if (!_.isEmpty(this.model.awards)) {
     this.model.awards = _.map(this.model.awards, (award) => {
@@ -161,25 +182,14 @@ function cleanUpData() {
     this.model.awards = null;
   }
 
-  // Certifications
-  if (!_.isEmpty(this.model.certifications)) {
-    this.model.certifications = _.map(this.model.certifications, (certification) => {
-      // remove date picker menu booleans
-      delete certification.showReceivedMenu;
-      delete certification.showExpirationMenu;
+  // Technologies
+  if (_.isEmpty(this.model.technologies)) {
+    this.model.technologies = null;
+  }
 
-      // delete null attributes
-      _.forEach(certification, (value, key) => {
-        if (_.isNil(value)) {
-          delete certification[key];
-        }
-      });
-
-      // return updated certification
-      return certification;
-    });
-  } else {
-    this.model.certifications = null;
+  // Customer Org
+  if (_.isEmpty(this.model.customerOrgExp)) {
+    this.model.customerOrgExp = null;
   }
 
   // Jobs
