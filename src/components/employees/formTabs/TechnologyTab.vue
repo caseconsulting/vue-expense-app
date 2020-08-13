@@ -18,7 +18,7 @@
         </v-combobox>
       </v-row>
       <v-row align="center">
-        <v-col>
+        <v-col cols="3" class="mr-3">
           <div class="yearsBox">
             <input
               v-model="technology.years"
@@ -31,12 +31,14 @@
           </div>
         </v-col>
         <v-col>
-          <v-switch v-model="technology.current" label="Current"></v-switch>
+          <v-switch v-model="technology.current" label="Currently working with this technology"></v-switch>
         </v-col>
         <!-- Delete button  -->
-        <v-slide-x-reverse-transition mode="out-in">
-          <v-btn text icon><v-icon @click="deleteTechnology(index)">delete</v-icon></v-btn>
-        </v-slide-x-reverse-transition>
+        <v-col cols="1" class="mr-3">
+          <v-slide-x-reverse-transition mode="out-in">
+            <v-btn text icon><v-icon @click="deleteTechnology(index)">delete</v-icon></v-btn>
+          </v-slide-x-reverse-transition>
+        </v-col>
       </v-row>
     </div>
     <!-- Add Technology button -->
