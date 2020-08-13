@@ -123,7 +123,7 @@ export default {
   created,
   data() {
     return {
-      technologyDropDown: ['DST', 'ADO', 'Talent', 'OMA', 'CCI'],
+      technologyDropDown: [],
       dateOptionalRules: [
         (v) => {
           return v ? /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v) || 'Date must be valid. Format: MM/DD/YYYY' : true;
