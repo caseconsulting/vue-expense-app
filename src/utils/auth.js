@@ -30,14 +30,9 @@ let router = new Router({
 });
 
 function clearCookies() {
-  let cookies = document.cookie.split(';');
-
-  for (let i = 0; i < cookies.length; i++) {
-    let cookie = cookies[i];
-    let eqPos = cookie.indexOf('=');
-    let name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
-    document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT`;
-  }
+  document.cookie.split(';').forEach(function (c) {
+    document.cookie = c.replace(/^ +/, '').replace(/=.*/, '=;expires=' + new Date().toUTCString() + ';path=/');
+  });
 } // clearCookies
 
 export function getAccessToken() {
