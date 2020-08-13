@@ -61,8 +61,6 @@
           label="Start Date"
           prepend-icon="event_available"
           readonly
-          v-bind="attrs"
-          v-on="on"
         ></v-text-field>
         <!-- End Start Date -->
       </v-row>
