@@ -20,13 +20,9 @@
       <b>Twitter: </b>
       <a :href="'https://twitter.com/' + this.model.twitter" target="_blank">{{ this.model.twitter }}</a>
     </p>
-    <p v-if="!isEmpty(this.model.birthday) && (admin || employee)">
+    <p v-if="!isEmpty(this.model.birthday)">
       <b>Birthday:</b>
       {{ this.model.birthday | dateFormat }}
-    </p>
-    <p v-else-if="!isEmpty(this.model.birthday) && this.model.birthdayFeed">
-      <b>Birthday:</b>
-      {{ this.model.birthday | dateMMDD }}
     </p>
     <p v-if="!isEmpty(this.model.birthdayFeed) && (admin || employee)">
       <b>Birthday on Feed:</b>
@@ -77,7 +73,11 @@ export default {
     // formats a date by month, day, year (e.g. Aug 18th, 2020)
     dateFormat: (value) => {
       if (!isEmpty(value)) {
-        return moment(value).format('MMM Do, YYYY');
+        if (this.admin || this.employee) {
+          return moment(value).format('MMM Do, YYYY');
+        } else {
+          return moment(value).format('MMM Do');
+        }
       } else {
         return '';
       }
