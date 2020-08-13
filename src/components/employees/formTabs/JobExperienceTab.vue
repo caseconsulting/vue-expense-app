@@ -46,6 +46,29 @@
       </div>
     </div>
 
+    <!-- Case Info -->
+    <div style="border: 1px solid grey;" class="pt-3 pb-1 px-5">
+      <!-- Company Name -->
+      <v-text-field label="Company" data-vv-name="Company" readonly value="Case Consulting"></v-text-field>
+
+      <!-- Job Position -->
+      <v-text-field v-model="model.jobRole" readonly label="Position" data-vv-name="Position"></v-text-field>
+
+      <v-row class="px-3">
+        <!-- Start Date -->
+        <v-text-field
+          :value="formatDate(model.hireDate)"
+          label="Start Date"
+          prepend-icon="event_available"
+          readonly
+          v-bind="attrs"
+          v-on="on"
+        ></v-text-field>
+        <!-- End Start Date -->
+      </v-row>
+    </div>
+    <!-- End Case Info -->
+
     <!-- Loop Jobs -->
     <div
       v-for="(job, index) in model.jobs"
