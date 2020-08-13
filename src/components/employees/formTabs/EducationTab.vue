@@ -7,6 +7,7 @@
       :key="'degree: ' + degree.name + index"
     >
       <v-combobox
+        ref="formFields"
         v-model="degree.name"
         :rules="requiredRules"
         :items="degreeDropDown"
@@ -21,6 +22,7 @@
         </template>
       </v-combobox>
       <v-combobox
+        ref="formFields"
         v-model="degree.school"
         :rules="requiredRules"
         :items="schoolDropDown"
@@ -38,6 +40,7 @@
       >
         <template v-slot:activator="{ on }">
           <v-text-field
+            ref="formFields"
             :value="degree.date"
             label="Completion Date"
             prepend-icon="event"
@@ -57,6 +60,7 @@
       </v-menu>
       <div v-for="(major, index) in degree.majors" :key="'major: ' + major + index">
         <v-combobox
+          ref="formFields"
           v-model="degree.majors[index]"
           :rules="requiredRules"
           :items="majorDropDown"
@@ -76,6 +80,7 @@
       </div>
       <div v-for="(minor, index) in degree.minors" :key="'minor: ' + minor + index">
         <v-combobox
+          ref="formFields"
           v-model="degree.minors[index]"
           :rules="requiredRules"
           :items="minorDropDown"
@@ -96,6 +101,7 @@
       <!-- Concentration -->
       <div v-for="(concentration, index) in degree.concentrations" :key="'conc: ' + concentration + index">
         <v-combobox
+          ref="formFields"
           v-model="degree.concentrations[index]"
           :rules="requiredRules"
           :items="concentrationDropDown"
@@ -126,6 +132,7 @@
 <script>
 import api from '@/shared/api.js';
 import _ from 'lodash';
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                 LIFECYCLE HOOKS                  |
@@ -133,6 +140,7 @@ import _ from 'lodash';
 // |--------------------------------------------------|
 
 async function created() {
+  window.EventBus.$emit('created', 'education');
   this.employees = await api.getItems(api.EMPLOYEES); // get all employees
   this.getDropDownInfo();
 } // created
@@ -202,6 +210,25 @@ function getDropDownInfo() {
   });
 } // getDropDownInfo
 
+/**
+ * Validate all input fields are valid. Emit to parent the error status.
+ */
+function validateFields() {
+  let hasErrors = false;
+
+  if (_.isArray(this.$refs.formFields)) {
+    let error = _.find(this.$refs.formFields, (field) => {
+      return !field.validate();
+    });
+    hasErrors = _.isNil(error) ? false : true;
+  } else if (this.$refs.formFields) {
+    hasErrors = this.$refs.formFields.validate;
+  }
+
+  window.EventBus.$emit('doneValidating', 'education');
+  window.EventBus.$emit('educationStatus', hasErrors);
+} // validateFields
+
 export default {
   created,
   data() {
@@ -212,6 +239,7 @@ export default {
         (v) => (!!v && /^\d{4}[-](0?[1-9]|1[0-2])$/.test(v)) || 'Date must be valid. Format: YYYY-MM'
       ], // rules for dates
       degreeDropDown: [],
+      formFields: [],
       majorDropDown: [],
       minorDropDown: [],
       requiredRules: [
@@ -225,8 +253,16 @@ export default {
     addItem,
     deleteDegree,
     deleteItem,
-    getDropDownInfo
+    getDropDownInfo,
+    validateFields
   },
-  props: ['model']
+  props: ['model', 'validating'],
+  watch: {
+    validating: function (val) {
+      if (val) {
+        this.validateFields();
+      }
+    }
+  }
 };
 </script>

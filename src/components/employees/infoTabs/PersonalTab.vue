@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="infoTab">
     <p v-if="!isEmpty(this.model.prime)">
       <b>Prime:</b>
       {{ this.model.prime }}
@@ -24,7 +24,7 @@
       <b>Birthday:</b>
       {{ this.model.birthday | dateFormat }}
     </p>
-    <p v-ielse>
+    <p v-else>
       <b>Birthday:</b>
       {{ this.model.birthday | hideYearFormat }}
     </p>
@@ -52,6 +52,7 @@
     </p>
   </div>
 </template>
+
 <script>
 import moment from 'moment';
 import _ from 'lodash';
@@ -97,3 +98,9 @@ export default {
   props: ['admin', 'employee', 'model']
 };
 </script>
+
+<style>
+.infoTab {
+  color: #38424d;
+}
+</style>

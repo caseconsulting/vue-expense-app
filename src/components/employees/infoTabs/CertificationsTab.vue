@@ -44,6 +44,7 @@ export default {
   props: ['model']
 };
 </script>
+
 <style>
 .infoTab {
   color: #38424d;

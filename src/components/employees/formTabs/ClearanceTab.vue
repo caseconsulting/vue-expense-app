@@ -9,6 +9,7 @@
     >
       <!-- Clearance Type -->
       <v-combobox
+        ref="formFields"
         v-model="clearance.type"
         :rules="requiredRules"
         :items="clearanceTypeDropDown"
@@ -32,6 +33,7 @@
           >
             <template v-slot:activator="{ on, attrs }">
               <v-text-field
+                ref="formFields"
                 :value="formatDate(clearance.grantedDate)"
                 label="Granted Date"
                 prepend-icon="event_available"
@@ -65,6 +67,7 @@
           >
             <template v-slot:activator="{ on, attrs }">
               <v-text-field
+                ref="formFields"
                 :value="formatDate(clearance.expirationDate)"
                 label="Expiration Date"
                 prepend-icon="event_busy"
@@ -97,6 +100,7 @@
           >
             <template v-slot:activator="{ on, attrs }">
               <v-text-field
+                ref="formFields"
                 :value="formatDate(clearance.submissionDate)"
                 label="Submission Date"
                 prepend-icon="event_note"
@@ -204,6 +208,7 @@
         >
           <template v-slot:activator="{ on, attrs }">
             <v-text-field
+              ref="formFields"
               :value="formatRange(bi.range)"
               :rules="dateRequired"
               label="BI Dates"
@@ -246,6 +251,7 @@ const ISOFORMAT = 'YYYY-MM-DD';
 // |--------------------------------------------------|
 
 async function created() {
+  window.EventBus.$emit('created', 'clearance');
   this.employees = await api.getItems(api.EMPLOYEES); // get all employees
   this.getDropDownInfo();
 } // created
@@ -422,7 +428,26 @@ function parseDate(date) {
   }
   const [month, day, year] = date.split('/');
   return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`; // parseDate
-}
+} // parseDate
+
+/**
+ * Validate all input fields are valid. Emit to parent the error status.
+ */
+function validateFields() {
+  let hasErrors = false;
+
+  if (_.isArray(this.$refs.formFields)) {
+    let error = _.find(this.$refs.formFields, (field) => {
+      return !field.validate();
+    });
+    hasErrors = _.isNil(error) ? false : true;
+  } else if (this.$refs.formFields) {
+    hasErrors = this.$refs.formFields.validate;
+  }
+
+  window.EventBus.$emit('doneValidating', 'clearance');
+  window.EventBus.$emit('clearanceStatus', hasErrors);
+} // validateFields
 
 export default {
   created,
@@ -454,8 +479,16 @@ export default {
     getDropDownInfo,
     maxSubmission,
     minExpiration,
-    parseDate
+    parseDate,
+    validateFields
   },
-  props: ['model']
+  props: ['model', 'validating'],
+  watch: {
+    validating: function (val) {
+      if (val) {
+        this.validateFields();
+      }
+    }
+  }
 };
 </script>

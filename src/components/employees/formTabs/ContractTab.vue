@@ -9,6 +9,7 @@
     >
       <v-row>
         <v-combobox
+          ref="formFields"
           v-model="contract.name"
           :rules="requiredRules"
           :items="contractsDropDown"
@@ -19,6 +20,7 @@
       </v-row>
       <v-row>
         <v-combobox
+          ref="formFields"
           v-model="contract.prime"
           :rules="requiredRules"
           :items="primesDropDown"
@@ -31,6 +33,7 @@
         <v-col cols="3" class="mr-3">
           <div class="yearsBox">
             <input
+              ref="formFields"
               v-model="contract.years"
               type="text"
               oninput="this.value = this.value.replace(/[^0-9]/g, '');"
@@ -68,6 +71,7 @@ import _ from 'lodash';
 // |--------------------------------------------------|
 
 async function created() {
+  window.EventBus.$emit('created', 'contracts');
   this.employees = await api.getItems(api.EMPLOYEES); // get all employees
   this.getDropDownInfo();
 } // created
@@ -137,7 +141,26 @@ function parseDate(date) {
   }
   const [month, day, year] = date.split('/');
   return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`; // parseDate
-}
+} // parseDate
+
+/**
+ * Validate all input fields are valid. Emit to parent the error status.
+ */
+function validateFields() {
+  let hasErrors = false;
+
+  if (_.isArray(this.$refs.formFields)) {
+    let error = _.find(this.$refs.formFields, (field) => {
+      return !field.validate();
+    });
+    hasErrors = _.isNil(error) ? false : true;
+  } else if (this.$refs.formFields) {
+    hasErrors = this.$refs.formFields.validate;
+  }
+
+  window.EventBus.$emit('doneValidating', 'contracts');
+  window.EventBus.$emit('contractsStatus', hasErrors);
+} // validateFields
 
 export default {
   created,
@@ -164,9 +187,17 @@ export default {
     deleteContract,
     formatDate,
     getDropDownInfo,
-    parseDate
+    parseDate,
+    validateFields
   },
-  props: ['model']
+  props: ['model', 'validating'],
+  watch: {
+    validating: function (val) {
+      if (val) {
+        this.validateFields();
+      }
+    }
+  }
 };
 </script>
 

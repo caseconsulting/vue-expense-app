@@ -58,6 +58,7 @@
     >
       <template v-slot:activator="{ on }">
         <v-text-field
+          ref="formFields"
           v-model="birthdayFormat"
           :rules="dateOptionalRules"
           label="Birthday"
@@ -107,6 +108,7 @@
     </div>
   </div>
 </template>
+
 <script>
 import api from '@/shared/api.js';
 import dateUtils from '@/shared/dateUtils';
@@ -191,6 +193,25 @@ function parseDate(date) {
   return dateUtils.parseDate(date);
 } // parseDate
 
+/**
+ * Validate all input fields are valid. Emit to parent the error status.
+ */
+function validateFields() {
+  let hasErrors = false;
+
+  if (_.isArray(this.$refs.formFields)) {
+    let error = _.find(this.$refs.formFields, (field) => {
+      return !field.validate();
+    });
+    hasErrors = _.isNil(error) ? false : true;
+  } else if (this.$refs.formFields) {
+    hasErrors = !this.$refs.formFields.validate;
+  }
+
+  window.EventBus.$emit('doneValidating', 'personal');
+  window.EventBus.$emit('personalStatus', hasErrors);
+} // validateFields
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                 LIFECYCLE HOOKS                  |
@@ -198,6 +219,7 @@ function parseDate(date) {
 // |--------------------------------------------------|
 
 async function created() {
+  window.EventBus.$emit('created', 'personal');
   this.countries = _.map(await api.getCountries(), 'name');
   this.countries.unshift('United States of America');
   this.employees = await api.getItems(api.EMPLOYEES); // get all employees
@@ -222,18 +244,15 @@ export default {
       countries: [], // list of countries
       dateOptionalRules: [
         (v) => {
-          if (v) {
-            return /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v) || 'Date must be valid. Format: MM/DD/YYYY';
-          } else {
-            return true;
-          }
+          return v ? /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v) || 'Date must be valid. Format: MM/DD/YYYY' : true;
         }
-      ], // rules for optional date
+      ], // rules for optional dates
       employeeInfo: {
         primes: [],
         contracts: []
       },
       employees: [],
+      formFields: [],
       jobRoles: [
         'Software Developer',
         'Project Manager',
@@ -317,15 +336,21 @@ export default {
     filterContracts,
     filterPrimes,
     formatDate,
-    parseDate
+    parseDate,
+    validateFields
   },
-  props: ['model'],
+  props: ['model', 'validating'],
   watch: {
     'model.birthday': function () {
       this.birthdayFormat = this.formatDate(this.model.birthday) || this.birthdayFormat;
       //fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
       if (this.model.birthday !== null && !this.formatDate(this.model.birthday)) {
         this.model.birthday = null;
+      }
+    },
+    validating: function (val) {
+      if (val) {
+        this.validateFields();
       }
     }
   }

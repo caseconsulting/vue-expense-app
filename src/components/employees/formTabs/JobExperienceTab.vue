@@ -25,6 +25,7 @@
         >
           <template v-slot:activator="{ on, attrs }">
             <v-text-field
+              ref="formFields"
               :value="formatRange(timeFrame.range)"
               :rules="dateRequired"
               label="Date Range"
@@ -76,6 +77,7 @@
     >
       <!-- Company Name -->
       <v-combobox
+        ref="formFields"
         v-model="job.company"
         :rules="requiredRules"
         :items="companyDropDown"
@@ -88,6 +90,7 @@
 
       <!-- Job Position -->
       <v-combobox
+        ref="formFields"
         v-model="job.position"
         :rules="requiredRules"
         :items="positionDropDown"
@@ -108,6 +111,7 @@
           >
             <template v-slot:activator="{ on, attrs }">
               <v-text-field
+                ref="formFields"
                 :value="formatDate(job.startDate)"
                 label="Start Date"
                 prepend-icon="event_available"
@@ -138,6 +142,7 @@
           >
             <template v-slot:activator="{ on, attrs }">
               <v-text-field
+                ref="formFields"
                 :value="formatDate(job.endDate)"
                 label="End Date (optional)"
                 prepend-icon="event_busy"
@@ -171,6 +176,7 @@
 import api from '@/shared/api.js';
 import moment from 'moment';
 import _ from 'lodash';
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                 LIFECYCLE HOOKS                  |
@@ -178,6 +184,7 @@ import _ from 'lodash';
 // |--------------------------------------------------|
 
 async function created() {
+  window.EventBus.$emit('created', 'jobExperience');
   this.employees = await api.getItems(api.EMPLOYEES); // get all employees
   this.getDropDownInfo();
 } // created
@@ -283,7 +290,26 @@ function parseDate(date) {
   }
   const [month, day, year] = date.split('/');
   return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`; // parseDate
-}
+} // parseDate
+
+/**
+ * Validate all input fields are valid. Emit to parent the error status.
+ */
+function validateFields() {
+  let hasErrors = false;
+
+  if (_.isArray(this.$refs.formFields)) {
+    let error = _.find(this.$refs.formFields, (field) => {
+      return !field.validate();
+    });
+    hasErrors = _.isNil(error) ? false : true;
+  } else if (this.$refs.formFields) {
+    hasErrors = this.$refs.formFields.validate;
+  }
+
+  window.EventBus.$emit('doneValidating', 'jobExperience');
+  window.EventBus.$emit('jobExperienceStatus', hasErrors);
+} // validateFields
 
 export default {
   created,
@@ -300,6 +326,7 @@ export default {
         (v) => !!v || 'Date required',
         (v) => (!!v && /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v)) || 'Date must be valid. Format: MM/DD/YYYY'
       ], // rules for date
+      formFields: [],
       positionDropDown: [],
       requiredRules: [(v) => !!v || 'This field is required'] // rules for required fields
     };
@@ -312,8 +339,16 @@ export default {
     formatDate,
     formatRange,
     getDropDownInfo,
-    parseDate
+    parseDate,
+    validateFields
   },
-  props: ['model']
+  props: ['model', 'validating'],
+  watch: {
+    validating: function (val) {
+      if (val) {
+        this.validateFields();
+      }
+    }
+  }
 };
 </script>

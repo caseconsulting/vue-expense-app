@@ -2,6 +2,7 @@
   <div>
     <!-- Name -->
     <v-text-field
+      ref="formFields"
       v-model="model.firstName"
       :rules="requiredRules"
       label="First Name"
@@ -15,6 +16,7 @@
       :disabled="!admin"
     ></v-text-field>
     <v-text-field
+      ref="formFields"
       v-model="model.lastName"
       :rules="requiredRules"
       label="Last Name"
@@ -24,6 +26,7 @@
 
     <!-- Employee # -->
     <v-text-field
+      ref="formFields"
       v-model="model.employeeNumber"
       :rules="numberRules"
       label="Employee #"
@@ -33,6 +36,7 @@
 
     <!-- Email -->
     <v-text-field
+      ref="formFields"
       v-model="model.email"
       :rules="emailRules"
       label="Email"
@@ -42,6 +46,7 @@
 
     <!-- Employee Role -->
     <v-autocomplete
+      ref="formFields"
       :disabled="!admin"
       :items="permissions"
       :rules="componentRules"
@@ -65,6 +70,7 @@
     >
       <template v-slot:activator="{ on }">
         <v-text-field
+          ref="formFields"
           v-model="hireDateFormatted"
           :rules="dateRules"
           :disabled="hasExpenses || !admin"
@@ -149,6 +155,7 @@
     >
       <template v-slot:activator="{ on }">
         <v-text-field
+          ref="formFields"
           v-model="deptDateFormatted"
           :rules="dateRules"
           label="Departure Date"
@@ -246,6 +253,25 @@ function parseDate(date) {
 } // parseDate
 
 /**
+ * Validate all input fields are valid. Emit to parent the error status.
+ */
+function validateFields() {
+  let hasErrors = false;
+
+  if (_.isArray(this.$refs.formFields)) {
+    let error = _.find(this.$refs.formFields, (field) => {
+      return !field.validate();
+    });
+    hasErrors = _.isNil(error) ? false : true;
+  } else if (this.$refs.formFields) {
+    hasErrors = this.$refs.formFields.validate;
+  }
+
+  window.EventBus.$emit('doneValidating', 'employee');
+  window.EventBus.$emit('employeeStatus', hasErrors);
+} // validateFields
+
+/**
  * Sets the status to an employee if part time, otherwise sets it to an empty string.
  */
 function viewStatus() {
@@ -266,6 +292,7 @@ function viewStatus() {
  * Set the list of countries.
  */
 async function created() {
+  window.EventBus.$emit('created', 'employee');
   this.hireDateFormatted = this.formatDate(this.model.hireDate) || this.hireDateFormatted;
   this.deptDateFormatted = this.formatDate(this.model.deptDate) || this.deptDateFormatted;
   //fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
@@ -309,6 +336,7 @@ export default {
       hasExpenses: false, // employee has expenses
       hireDateFormatted: null, // formatted hire date
       hireMenu: false, // display hire menu
+      formFields: [],
       numberRules: [
         (v) => !!v || 'Employee # is required',
         (v) => /^\d+$/.test(v) || 'Employee # must be a positive number'
@@ -328,9 +356,10 @@ export default {
     isPartTime,
     isStatusEmpty,
     parseDate,
+    validateFields,
     viewStatus
   },
-  props: ['admin', 'model'],
+  props: ['admin', 'model', 'validating'],
   watch: {
     'model.employeeRole': function () {
       if (this.model.employeeRole != 'User') {

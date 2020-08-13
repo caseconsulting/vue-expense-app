@@ -1550,9 +1550,7 @@ export default {
       this.selectedExpenseType = _.find(this.expenseTypes, (expenseType) => {
         return expenseType.value === this.expense.expenseTypeId;
       });
-      // console.log(this.selectedExpenseType);
       this.requireURLET = this.selectedExpenseType && this.selectedExpenseType.requireURL;
-      // console.log(this.requireURLET);
 
       if (this.selectedExpenseType) {
         // set hint

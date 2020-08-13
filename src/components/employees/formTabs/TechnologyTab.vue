@@ -9,6 +9,7 @@
     >
       <v-row>
         <v-combobox
+          ref="formFields"
           v-model="technology.name"
           :rules="requiredRules"
           :items="technologyDropDown"
@@ -21,6 +22,7 @@
         <v-col cols="3" class="mr-3">
           <div class="yearsBox">
             <input
+              ref="formFields"
               v-model="technology.years"
               type="text"
               oninput="this.value = this.value.replace(/[^0-9]/g, '');"
@@ -51,6 +53,7 @@
 <script>
 import api from '@/shared/api.js';
 import _ from 'lodash';
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                 LIFECYCLE HOOKS                  |
@@ -58,6 +61,7 @@ import _ from 'lodash';
 // |--------------------------------------------------|
 
 async function created() {
+  window.EventBus.$emit('created', 'technologies');
   this.employees = await api.getItems(api.EMPLOYEES); // get all employees
   this.getDropDownInfo();
 } // created
@@ -119,7 +123,26 @@ function parseDate(date) {
   }
   const [month, day, year] = date.split('/');
   return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`; // parseDate
-}
+} // parseDate
+
+/**
+ * Validate all input fields are valid. Emit to parent the error status.
+ */
+function validateFields() {
+  let hasErrors = false;
+
+  if (_.isArray(this.$refs.formFields)) {
+    let error = _.find(this.$refs.formFields, (field) => {
+      return !field.validate();
+    });
+    hasErrors = _.isNil(error) ? false : true;
+  } else if (this.$refs.formFields) {
+    hasErrors = this.$refs.formFields.validate;
+  }
+
+  window.EventBus.$emit('doneValidating', 'technologies');
+  window.EventBus.$emit('technologiesStatus', hasErrors);
+} // validateFields
 
 export default {
   created,
@@ -135,6 +158,7 @@ export default {
         (v) => !!v || 'Date required',
         (v) => (!!v && /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v)) || 'Date must be valid. Format: MM/DD/YYYY'
       ], // rules for date
+      formFields: [],
       requiredRules: [
         (v) => !!v || 'This field is required. You must enter information or delete the field if possible'
       ] // rules for required fields
@@ -145,9 +169,17 @@ export default {
     deleteTechnology,
     formatDate,
     getDropDownInfo,
-    parseDate
+    parseDate,
+    validateFields
   },
-  props: ['model']
+  props: ['model', 'validating'],
+  watch: {
+    validating: function (val) {
+      if (val) {
+        this.validateFields();
+      }
+    }
+  }
 };
 </script>
 

@@ -28,53 +28,55 @@
         <v-form ref="form" v-model="valid" lazy-validation>
           <!-- Tabs -->
           <v-tabs v-model="formTab" center-active show-arrows class="pb-0">
-            <v-tab href="#employee">Employee</v-tab>
-            <v-tab href="#personal">Personal</v-tab>
-            <v-tab href="#education">Education</v-tab>
-            <v-tab href="#jobExperience">Job Experience</v-tab>
-            <v-tab href="#certifications">Certifications</v-tab>
-            <v-tab href="#awards">Awards</v-tab>
-            <v-tab href="#technologies">Technologies</v-tab>
-            <v-tab href="#customerOrgExp">Customer Org</v-tab>
-            <v-tab href="#contracts">Contracts</v-tab>
-            <v-tab href="#clearance">Clearance</v-tab>
+            <v-tab href="#employee" v-bind:class="{ errorTab: tabErrors.employee }">Employee</v-tab>
+            <v-tab href="#personal" v-bind:class="{ errorTab: tabErrors.personal }">Personal</v-tab>
+            <v-tab href="#education" v-bind:class="{ errorTab: tabErrors.education }">Education</v-tab>
+            <v-tab href="#jobExperience" v-bind:class="{ errorTab: tabErrors.jobExperience }">Job Experience</v-tab>
+            <v-tab href="#certifications" v-bind:class="{ errorTab: tabErrors.certifications }">Certifications</v-tab>
+            <v-tab href="#awards" v-bind:class="{ errorTab: tabErrors.awards }">Awards</v-tab>
+            <v-tab href="#technologies" v-bind:class="{ errorTab: tabErrors.technologies }">Technologies</v-tab>
+            <v-tab href="#customerOrgExp" v-bind:class="{ errorTab: tabErrors.customerOrgExp }">Customer Org</v-tab>
+            <v-tab href="#contracts" v-bind:class="{ errorTab: tabErrors.contracts }">Contracts</v-tab>
+            <v-tab href="#clearance" v-bind:class="{ errorTab: tabErrors.clearance }">Clearance</v-tab>
             <!-- Employee -->
             <v-tab-item id="employee">
-              <employee-tab :admin="userIsAdmin()" :model="model"></employee-tab>
+              <employee-tab :admin="userIsAdmin()" :model="model" :validating="validating.employee"></employee-tab>
             </v-tab-item>
             <!-- Personal Info -->
             <v-tab-item id="personal">
-              <personal-tab :model="model"></personal-tab>
+              <personal-tab :model="model" :validating="validating.personal"></personal-tab>
             </v-tab-item>
             <!-- Education -->
             <v-tab-item id="education">
-              <education-tab :model="model"></education-tab>
+              <education-tab :model="model" :validating="validating.education"></education-tab>
             </v-tab-item>
             <!-- Experience -->
             <v-tab-item id="jobExperience">
-              <job-experience-tab :model="model"></job-experience-tab>
+              <job-experience-tab :model="model" :validating="validating.jobExperience"></job-experience-tab>
             </v-tab-item>
             <!-- Certifications -->
             <v-tab-item id="certifications">
-              <certification-tab :model="model"></certification-tab>
+              <certification-tab :model="model" :validating="validating.certifications"></certification-tab>
             </v-tab-item>
             <!-- Awards -->
             <v-tab-item id="awards">
-              <award-tab :model="model"></award-tab>
+              <award-tab :model="model" :validating="validating.awards"></award-tab>
             </v-tab-item>
             <!-- Technologies -->
             <v-tab-item id="technologies">
-              <technology-tab :model="model"></technology-tab>
+              <technology-tab :model="model" :validating="validating.technologies"></technology-tab>
             </v-tab-item>
             <!-- Customer Org Experience -->
             <v-tab-item id="customerOrgExp">
-              <customer-org-tab :model="model"></customer-org-tab>
+              <customer-org-tab :model="model" :validating="validating.customerOrgExp"></customer-org-tab>
             </v-tab-item>
+            <!-- Contracts -->
             <v-tab-item id="contracts">
-              <contract-tab :model="model"></contract-tab>
+              <contract-tab :model="model" :validating="validating.contracts"></contract-tab>
             </v-tab-item>
+            <!-- Clearance -->
             <v-tab-item id="clearance">
-              <clearance-tab :model="model"></clearance-tab>
+              <clearance-tab :model="model" :validating="validating.clearance"></clearance-tab>
             </v-tab-item>
           </v-tabs>
 
@@ -330,6 +332,12 @@ function clearStatus() {
 } // clearStatus
 
 function confirm() {
+  _.forEach(this.tabCreated, (value, key) => {
+    if (value) {
+      this.validating[key] = true;
+    }
+  });
+
   if (this.$refs.form.validate()) {
     this.confirming = true;
   }
@@ -413,6 +421,48 @@ async function created() {
 
   window.EventBus.$on('canceled', () => {
     this.confirming = false;
+  });
+
+  // set tab mounted
+  window.EventBus.$on('created', (tab) => {
+    this.tabCreated[tab] = true;
+  });
+
+  // reset validating status
+  window.EventBus.$on('doneValidating', (tab) => {
+    this.validating[tab] = false;
+  });
+
+  // set tab error status
+  window.EventBus.$on('awardStatus', (status) => {
+    this.tabErrors.awards = status;
+  });
+  window.EventBus.$on('certificationsStatus', (status) => {
+    this.tabErrors.certifications = status;
+  });
+  window.EventBus.$on('clearanceStatus', (status) => {
+    this.tabErrors.clearance = status;
+  });
+  window.EventBus.$on('contractsStatus', (status) => {
+    this.tabErrors.contracts = status;
+  });
+  window.EventBus.$on('customerOrgExpStatus', (status) => {
+    this.tabErrors.customerOrgExp = status;
+  });
+  window.EventBus.$on('educationStatus', (status) => {
+    this.tabErrors.education = status;
+  });
+  window.EventBus.$on('employeeStatus', (status) => {
+    this.tabErrors.employee = status;
+  });
+  window.EventBus.$on('jobExperienceStatus', (status) => {
+    this.tabErrors.jobExperience = status;
+  });
+  window.EventBus.$on('personalStatus', (status) => {
+    this.tabErrors.personal = status;
+  });
+  window.EventBus.$on('technologiesStatus', (status) => {
+    this.tabErrors.technologies = status;
   });
 
   // fills model in with populated fields in employee prop
@@ -506,7 +556,43 @@ export default {
         workStatus: 100
       },
       submitting: false,
-      valid: false // form validity
+      tabErrors: {
+        awards: false,
+        certifications: false,
+        clearance: false,
+        contracts: false,
+        customerOrgExp: false,
+        education: false,
+        employee: false,
+        jobExperience: false,
+        personal: false,
+        technologies: false
+      },
+      tabCreated: {
+        awards: false,
+        certifications: false,
+        clearance: false,
+        contracts: false,
+        customerOrgExp: false,
+        education: false,
+        employee: false,
+        jobExperience: false,
+        personal: false,
+        technologies: false
+      },
+      valid: false, // form validity
+      validating: {
+        awards: false,
+        certifications: false,
+        clearance: false,
+        contracts: false,
+        customerOrgExp: false,
+        education: false,
+        employee: false,
+        jobExperience: false,
+        personal: false,
+        technologies: false
+      }
     };
   },
   methods: {
@@ -532,6 +618,10 @@ export default {
 </script>
 
 <style>
+.errorTab {
+  color: red !important;
+}
+
 .v-window {
   padding: 20px;
 }

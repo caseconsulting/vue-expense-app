@@ -8,6 +8,7 @@
       :key="'certification: ' + certification.name + index"
     >
       <v-combobox
+        ref="formFields"
         v-model="certification.name"
         :rules="requiredRules"
         :items="certificationDropDown"
@@ -31,6 +32,7 @@
           >
             <template v-slot:activator="{ on, attrs }">
               <v-text-field
+                ref="formFields"
                 :value="formatDate(certification.dateReceived)"
                 label="Date Received"
                 prepend-icon="event_available"
@@ -61,6 +63,7 @@
           >
             <template v-slot:activator="{ on, attrs }">
               <v-text-field
+                ref="formFields"
                 :value="formatDate(certification.expirationDate)"
                 label="Expiration Date (optional)"
                 prepend-icon="event_busy"
@@ -94,6 +97,7 @@
 <script>
 import api from '@/shared/api.js';
 import _ from 'lodash';
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                 LIFECYCLE HOOKS                  |
@@ -101,6 +105,7 @@ import _ from 'lodash';
 // |--------------------------------------------------|
 
 async function created() {
+  window.EventBus.$emit('created', 'certifications');
   this.employees = await api.getItems(api.EMPLOYEES); // get all employees
   this.getDropDownInfo();
 } // created
@@ -164,7 +169,26 @@ function parseDate(date) {
   }
   const [month, day, year] = date.split('/');
   return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`; // parseDate
-}
+} // parseDate
+
+/**
+ * Validate all input fields are valid. Emit to parent the error status.
+ */
+function validateFields() {
+  let hasErrors = false;
+
+  if (_.isArray(this.$refs.formFields)) {
+    let error = _.find(this.$refs.formFields, (field) => {
+      return !field.validate();
+    });
+    hasErrors = _.isNil(error) ? false : true;
+  } else if (this.$refs.formFields) {
+    hasErrors = this.$refs.formFields.validate;
+  }
+
+  window.EventBus.$emit('doneValidating', 'certifications');
+  window.EventBus.$emit('certificationsStatus', hasErrors);
+} // validateFields
 
 export default {
   created,
@@ -180,6 +204,7 @@ export default {
         (v) => !!v || 'Date required',
         (v) => (!!v && /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v)) || 'Date must be valid. Format: MM/DD/YYYY'
       ], // rules for date
+      formFields: [],
       requiredRules: [
         (v) => !!v || 'This field is required. You must enter information or delete the field if possible'
       ] // rules for required fields
@@ -190,8 +215,16 @@ export default {
     deleteCertification,
     formatDate,
     getDropDownInfo,
-    parseDate
+    parseDate,
+    validateFields
   },
-  props: ['model']
+  props: ['model', 'validating'],
+  watch: {
+    validating: function (val) {
+      if (val) {
+        this.validateFields();
+      }
+    }
+  }
 };
 </script>
