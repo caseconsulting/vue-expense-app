@@ -10,6 +10,7 @@
         <v-tab href="#awards">Awards</v-tab>
         <v-tab href="#technologies">Technologies</v-tab>
         <v-tab href="#customerOrgExp">Customer Org</v-tab>
+        <v-tab href="#contracts">Contracts</v-tab>
         <v-tab href="#clearance" v-if="userIsAdmin() || userIsEmployee()">Clearance</v-tab>
         <v-tab-item id="employee">
           <employee-tab :admin="userIsAdmin()" :employee="userIsEmployee()" :model="model"></employee-tab>
@@ -35,6 +36,9 @@
         <v-tab-item id="customerOrgExp">
           <customer-org-tab :model="model"></customer-org-tab>
         </v-tab-item>
+        <v-tab-item id="contracts">
+          <contracts-tab :model="model"></contracts-tab>
+        </v-tab-item>
         <v-tab-item id="clearance" v-if="userIsAdmin() || userIsEmployee()">
           <clearance-tab :model="model"></clearance-tab>
         </v-tab-item>
@@ -50,6 +54,7 @@ import _ from 'lodash';
 import AwardsTab from '@/components/employees/infoTabs/AwardsTab';
 import CertificationsTab from '@/components/employees/infoTabs/CertificationsTab';
 import ClearanceTab from '@/components/employees/infoTabs/ClearanceTab';
+import ContractsTab from '@/components/employees/infoTabs/ContractsTab';
 import CustomerOrgTab from '@/components/employees/infoTabs/CustomerOrgTab';
 import EducationTab from '@/components/employees/infoTabs/EducationTab';
 import EmployeeTab from '@/components/employees/infoTabs/EmployeeTab';
@@ -95,6 +100,7 @@ export default {
     AwardsTab,
     CertificationsTab,
     ClearanceTab,
+    ContractsTab,
     CustomerOrgTab,
     EducationTab,
     EmployeeTab,

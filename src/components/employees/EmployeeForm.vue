@@ -36,6 +36,7 @@
             <v-tab href="#awards">Awards</v-tab>
             <v-tab href="#technologies">Technologies</v-tab>
             <v-tab href="#customerOrgExp">Customer Org</v-tab>
+            <v-tab href="#contracts">Contracts</v-tab>
             <v-tab href="#clearance">Clearance</v-tab>
             <!-- Employee -->
             <v-tab-item id="employee">
@@ -69,6 +70,9 @@
             <v-tab-item id="customerOrgExp">
               <customer-org-tab :model="model"></customer-org-tab>
             </v-tab-item>
+            <v-tab-item id="contracts">
+              <contract-tab :model="model"></contract-tab>
+            </v-tab-item>
             <v-tab-item id="clearance">
               <clearance-tab :model="model"></clearance-tab>
             </v-tab-item>
@@ -92,6 +96,7 @@ import api from '@/shared/api.js';
 import AwardTab from '@/components/employees/formTabs/AwardTab';
 import CertificationTab from '@/components/employees/formTabs/CertificationTab';
 import ClearanceTab from '@/components/employees/formTabs/ClearanceTab';
+import ContractTab from '@/components/employees/formTabs/ContractTab';
 import CustomerOrgTab from '@/components/employees/formTabs/CustomerOrgTab';
 import EducationTab from '@/components/employees/formTabs/EducationTab';
 import EmployeeTab from '@/components/employees/formTabs/EmployeeTab';
@@ -190,6 +195,11 @@ function cleanUpData() {
   // Customer Org
   if (_.isEmpty(this.model.customerOrgExp)) {
     this.model.customerOrgExp = null;
+  }
+
+  // Contracts
+  if (_.isEmpty(this.model.contracts)) {
+    this.model.contracts = null;
   }
 
   // Jobs
@@ -435,6 +445,7 @@ export default {
     AwardTab,
     CertificationTab,
     ClearanceTab,
+    ContractTab,
     CustomerOrgTab,
     EducationTab,
     EmployeeTab,
@@ -471,6 +482,7 @@ export default {
         city: null,
         clearances: [],
         contract: null,
+        contracts: [],
         country: null,
         customerOrgExp: [],
         degrees: [],
