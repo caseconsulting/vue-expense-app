@@ -1,6 +1,6 @@
 <template>
   <div id="pto-balances">
-    <h3 class="pt-5">PTO Balances</h3>
+    <h3 class="pt-5" align="center">PTO Balances</h3>
     <div v-if="balancesError" class="pt-2 pb-6" align="center">
       <v-tooltip right>
         <template v-slot:activator="{ on }">
@@ -28,13 +28,13 @@
             <p>{{ formatHours(balanceData[balance]) }}</p>
           </v-row>
         </div>
-        <template v-if="!showMore && !showAll">
+        <div v-if="!showMore && !showAll" align="center">
           <v-btn @click="showMore = true" top text small class="my-2">Show More &#9662; </v-btn>
-        </template>
+        </div>
 
-        <template v-if="showMore && !showAll">
+        <div v-if="showMore && !showAll" align="center">
           <v-btn @click="showMore = false" top text small class="my-2">Show Less &#9650; </v-btn>
-        </template>
+        </div>
       </v-card-text>
     </div>
   </div>

@@ -1,6 +1,6 @@
 <template>
   <div id="monthly-charges">
-    <h3>
+    <h3 align="center">
       Hours for {{ month }} {{ year }}
       <v-btn to="/help/hoursInfo" class="mb-4" x-small icon><v-icon color="#3f51b5">info</v-icon></v-btn>
     </h3>
@@ -45,9 +45,9 @@
               <p v-if="this.estimatedDailyHours < 24">{{ formatHours(this.estimatedDailyHours) }}</p>
               <p v-else style="color: red;">{{ formatHours(this.estimatedDailyHours) }}</p>
             </v-row>
-            <template v-if="!showMore" @click="showMore = true">
+            <div v-if="!showMore" @click="showMore = true" align="center">
               <v-btn @click="showMore = true" top text small class="my-2">Show More &#9662; </v-btn>
-            </template>
+            </div>
             <div v-if="showMore" max-width="400">
               <!-- Hours left this month -->
               <v-row>
@@ -101,9 +101,9 @@
                 </div>
               </v-row>
             </div>
-            <template v-if="showMore">
+            <div v-if="showMore" align="center">
               <v-btn @click="showMore = false" top text small class="my-2">Show Less &#9650; </v-btn>
-            </template>
+            </div>
           </div>
         </div>
       </v-card-text>
