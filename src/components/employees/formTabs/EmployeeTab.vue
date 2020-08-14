@@ -264,7 +264,7 @@ function validateFields() {
     });
     hasErrors = _.isNil(error) ? false : true;
   } else if (this.$refs.formFields) {
-    hasErrors = this.$refs.formFields.validate;
+    hasErrors = !this.$refs.formFields.validate();
   }
 
   window.EventBus.$emit('doneValidating', 'employee');
@@ -336,7 +336,6 @@ export default {
       hasExpenses: false, // employee has expenses
       hireDateFormatted: null, // formatted hire date
       hireMenu: false, // display hire menu
-      formFields: [],
       numberRules: [
         (v) => !!v || 'Employee # is required',
         (v) => /^\d+$/.test(v) || 'Employee # must be a positive number'
@@ -398,6 +397,11 @@ export default {
         this.model.workStatus = parseInt(this.status);
       } else {
         this.model.workStatus = null;
+      }
+    },
+    validating: function (val) {
+      if (val) {
+        this.validateFields();
       }
     }
   }

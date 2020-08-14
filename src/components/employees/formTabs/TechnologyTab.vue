@@ -154,7 +154,7 @@ function validateFields() {
     });
     hasErrors = _.isNil(error) ? false : true;
   } else if (this.$refs.formFields) {
-    hasErrors = this.$refs.formFields.validate;
+    hasErrors = !this.$refs.formFields.validate();
   }
 
   window.EventBus.$emit('doneValidating', 'technologies');
