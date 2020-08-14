@@ -46,9 +46,7 @@
         </v-col>
         <!-- Delete button  -->
         <v-col cols="2" class="mb-3" align="center">
-          <v-slide-x-reverse-transition mode="out-in">
-            <v-btn text icon><v-icon @click="deleteTechnology(index)">delete</v-icon></v-btn>
-          </v-slide-x-reverse-transition>
+          <v-btn text icon><v-icon @click="deleteTechnology(index)">delete</v-icon></v-btn>
         </v-col>
       </v-row>
     </div>
