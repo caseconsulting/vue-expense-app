@@ -18,25 +18,34 @@
         >
         </v-combobox>
       </v-row>
-      <v-row align="center">
-        <v-col cols="3" class="mr-3">
-          <div class="yearsBox">
-            <input
-              ref="formFields"
-              v-model="technology.years"
-              type="text"
-              oninput="this.value = this.value.replace(/[^0-9]/g, '');"
-              maxlength="2"
-              :rules="requiredRules"
-            />
-            <div>years</div>
-          </div>
-        </v-col>
-        <v-col>
+      <v-row align="center" justify="center">
+        <v-col cols="6" sm="7" md="6" lg="7">
           <v-switch v-model="technology.current" label="Currently working with this technology"></v-switch>
         </v-col>
+        <v-col
+          cols="4"
+          sm="3"
+          md="4"
+          lg="3"
+          class="px-0 pb-0"
+          :class="{ 'px-4': $vuetify.breakpoint.sm, 'px-4': $vuetify.breakpoint.lg }"
+        >
+          <v-text-field
+            ref="formFields"
+            :value="technology.years"
+            flat
+            :rules="countRequired"
+            single-line
+            max="99"
+            min="0"
+            suffix="years"
+            dense
+            type="number"
+            outlined
+          ></v-text-field>
+        </v-col>
         <!-- Delete button  -->
-        <v-col cols="1" class="mr-3">
+        <v-col cols="2" class="mb-3" align="center">
           <v-slide-x-reverse-transition mode="out-in">
             <v-btn text icon><v-icon @click="deleteTechnology(index)">delete</v-icon></v-btn>
           </v-slide-x-reverse-transition>
@@ -112,6 +121,16 @@ function getDropDownInfo() {
 } // getDropDownInfo
 
 /**
+ * Checks if a value is empty. Returns true if the value is null or an empty/blank string.
+ *
+ * @param value - value to check
+ * @return boolean - value is empty
+ */
+function isEmpty(value) {
+  return _.isNil(value) || (_.isString(value) && value.trim().length === 0);
+} // isEmpty
+
+/**
  * Parse a date to isoformat (YYYY-MM-DD).
  *
  * @param Date = date to parse
@@ -160,8 +179,13 @@ export default {
       ], // rules for date
       formFields: [],
       requiredRules: [
-        (v) => !!v || 'This field is required. You must enter information or delete the field if possible'
-      ] // rules for required fields
+        (v) => !isEmpty(v) || 'This field is required. You must enter information or delete the field if possible'
+      ], // rules for required fields
+      countRequired: [
+        (v) => !isEmpty(v) || 'This field is required',
+        (v) => v >= 0 || 'Value cannot be negative',
+        (v) => v < 100 || 'Value must be less than 100'
+      ] // rules for year count
     };
   },
   methods: {
@@ -170,6 +194,7 @@ export default {
     formatDate,
     getDropDownInfo,
     parseDate,
+    isEmpty,
     validateFields
   },
   props: ['model', 'validating'],
@@ -182,27 +207,3 @@ export default {
   }
 };
 </script>
-
-<style>
-.yearsBox {
-  margin-left: 10px;
-  border: solid 1px gray;
-  width: 70px;
-  height: 34px;
-  border-radius: 2px;
-  font-size: 14px;
-  display: flex;
-}
-
-.yearsBox div {
-  padding-top: 6px;
-  margin-left: 4px;
-  margin-right: 3px;
-}
-
-.yearsBox input {
-  outline: none;
-  text-align: right;
-  width: 33%;
-}
-</style>
