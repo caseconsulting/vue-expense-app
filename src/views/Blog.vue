@@ -64,7 +64,7 @@ async function created() {
   this.posts = [
     {
       postId: '1',
-      title: 'ahhhhhhhh',
+      title: 'The Epidemic of Fake Blog Titles',
       text: 'i dont know, whats another word for stuff',
       employeeName: 'Pablo',
       employeeId: '1',
@@ -72,7 +72,7 @@ async function created() {
     },
     {
       postId: '2',
-      title: 'nooooooo',
+      title: 'Completely Real Blog Title, I swear',
       text: 'other?',
       employeeName: 'Helen',
       employeeId: '2',
@@ -80,7 +80,7 @@ async function created() {
     },
     {
       postId: '3',
-      title: 'whyyyyy',
+      title: 'The Art of Making Real Blog Titles',
       text: 'items',
       employeeName: 'Diego',
       employeeId: '3',
@@ -88,7 +88,7 @@ async function created() {
     },
     {
       postId: '4',
-      title: 'pleeeeasee',
+      title: 'Community Leader Nicholas Cage Speaks out about Fake Blog Titles',
       text: 'stuff',
       employeeName: 'Rachel',
       employeeId: '4',
@@ -96,7 +96,7 @@ async function created() {
     },
     {
       postId: '5',
-      title: 'wooooork',
+      title: 'The Aftermath of the Blog Wars and How to Navigate the Radioactive Wasteland',
       text: 'things',
       employeeName: 'Zertash',
       employeeId: '5',
@@ -104,7 +104,7 @@ async function created() {
     },
     {
       postId: '6',
-      title: ':(',
+      title: 'Fake Blog Title',
       text: 'uhhhh',
       employeeName: 'Charles',
       employeeId: '6',
