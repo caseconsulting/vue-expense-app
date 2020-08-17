@@ -1,34 +1,18 @@
 <template>
-  <!-- Admin Dashboard -->
+  <!-- Reimbursements -->
   <div v-if="this.mode === 'adminExpenseInfo'">
-    <v-layout>
-      <v-flex xs4>
-        <!-- admin dashboard has attachment -->
-        <v-btn
-          v-if="!isEmpty(this.expense.receipt)"
-          :disabled="midAction"
-          icon
-          color="primary"
-          @click="openDownloadTab"
-        >
-          <icon name="cloud-download-alt" style="color: #004c54;" scale="2"></icon>
-        </v-btn>
-      </v-flex>
-    </v-layout>
+    <!-- admin dashboard has attachment -->
+    <v-btn v-if="!isEmpty(this.expense.receipt)" :disabled="midAction" icon color="primary" @click="openDownloadTab">
+      <icon name="cloud-download-alt" style="color: #004c54;" scale="2"></icon>
+    </v-btn>
   </div>
-  <!-- End Admin Dashboard -->
+  <!-- End Reimbursements -->
 
   <!-- Expenses -->
   <div v-else>
     <v-tooltip top>
       <template v-slot:activator="{ on }">
-        <v-btn
-          :disabled="!expense.receipt || expense.receipt.trim() <= 0 || midAction"
-          text
-          icon
-          @click="openDownloadTab"
-          v-on="on"
-        >
+        <v-btn :disabled="isEmpty(expense.receipt) || midAction" text icon @click="openDownloadTab" v-on="on">
           <v-icon style="color: #606060;">
             cloud_download
           </v-icon>
@@ -41,29 +25,8 @@
 </template>
 
 <script>
-import api from '../shared/api';
-import { API_CONFIG } from '../shared/api-variables';
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                     COMPUTED                     |
-// |                                                  |
-// |--------------------------------------------------|
-
-/**
- *  NOTE: UNUSED?
- *
- * @return
- */
-function link() {
-  const API_HOSTNAME = API_CONFIG.apiHostname;
-  const API_PORT = API_CONFIG.apiPort;
-  const endLink = `attachment/${this.expense.employeeId}/${this.expense.id}`;
-
-  if (API_HOSTNAME === 'localhost') return `http://${API_HOSTNAME}:${API_PORT}/${endLink}`;
-  else return `https://${API_HOSTNAME}/${endLink}`;
-} // link
-
+import api from '@/shared/api';
+import _ from 'lodash';
 // |--------------------------------------------------|
 // |                                                  |
 // |                     METHODS                      |
@@ -71,13 +34,13 @@ function link() {
 // |--------------------------------------------------|
 
 /**
- * Checks if a value is empty. Returns true if the value is null or a single character space String.
+ * Checks if a value is empty. Returns true if the value is null or an empty/blank string.
  *
  * @param value - value to check
  * @return boolean - value is empty
  */
 function isEmpty(value) {
-  return value == null || value === ' ' || value === '';
+  return _.isNil(value) || (_.isString(value) && value.trim().length === 0);
 } // isEmpty
 
 /**
@@ -95,9 +58,6 @@ async function openDownloadTab() {
 // |--------------------------------------------------|
 
 export default {
-  computed: {
-    link
-  },
   methods: {
     isEmpty,
     openDownloadTab

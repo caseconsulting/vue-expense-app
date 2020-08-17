@@ -1,7 +1,6 @@
 <template>
   <v-container fluid style="background: grey;">
     <div>
-      <!-- Unreimburse Sub-Datable -->
       <v-data-table
         :headers="headers"
         :items="expenses"
@@ -12,55 +11,51 @@
         item-key="id"
         show-select
         hide-default-footer
+        @click:row="expenseClicked"
       >
-        <!-- Remove check box in header-->
+        <!-- Remove Check Box in header -->
         <template v-slot:header.data-table-select></template>
 
         <!-- Group Checkbox -->
         <template v-slot:item.data-table-select="{ item }">
-          <v-checkbox :input-value="item.selected" primary hide-details class="ma-0"></v-checkbox>
+          <v-checkbox
+            :input-value="item.selected"
+            @click.stop="
+              expenseSelected(item);
+              expenseClicked(item);
+            "
+            primary
+            hide-details
+            class="ma-0"
+          ></v-checkbox>
         </template>
 
-        <!-- Rows in datatable -->
-        <template v-slot:item="{ item }">
-          <tr @click="expenseClicked(item)">
-            <!-- Expense Check Box -->
-            <td style="width: 1px;" :class="{ failed: item.failed }">
-              <v-checkbox
-                :input-value="item.selected"
-                @click.stop="
-                  expenseSelected(item);
-                  expenseClicked(item);
-                "
-                primary
-                hide-details
-                class="ma-0"
-              >
-              </v-checkbox>
-            </td>
-
-            <!-- Cost -->
-            <td id="money-team" :class="{ failed: item.failed }">{{ item.cost | moneyValue }}</td>
-
-            <!-- Purchase Date -->
-            <td :class="{ failed: item.failed }">{{ item.purchaseDate | dateFormat }}</td>
-
-            <!-- Description -->
-            <td :class="{ failed: item.failed }">{{ item.description | descripFormat }}</td>
-
-            <!-- Show on Feed -->
-            <td style="width: 4px;">
-              <v-switch
-                :input-value="item.showOnFeed && item.selected"
-                @change="expenseToggle(item)"
-                :disabled="!item.selected"
-              ></v-switch>
-            </td>
-          </tr>
+        <!-- Item cost -->
+        <template v-slot:item.cost="{ item }">
+          <p id="money-team" :class="{ failed: item.failed }" style="margin-bottom: 0px;">
+            {{ item.cost | moneyValue }}
+          </p>
         </template>
-        <!-- End rows in datatable -->
+
+        <!-- Purchase Date -->
+        <template v-slot:item.purchaseDate="{ item }">
+          <p :class="{ failed: item.failed }" style="margin-bottom: 0px;">{{ item.purchaseDate | dateFormat }}</p>
+        </template>
+
+        <!-- Description -->
+        <template v-slot:item.description="{ item }">
+          <p :class="{ failed: item.failed }" style="margin-bottom: 0px;">{{ item.description | descripFormat }}</p>
+        </template>
+
+        <!-- Show on Feed -->
+        <template v-slot:item.showOnFeed="{ item }">
+          <v-switch
+            :input-value="item.showOnFeed && item.selected"
+            @change="expenseToggle(item)"
+            :disabled="!item.selected"
+          ></v-switch>
+        </template>
       </v-data-table>
-      <!-- End Unreimburse Sub-Datable -->
     </div>
   </v-container>
 </template>
@@ -130,6 +125,7 @@ export default {
           text: 'Show on Feed',
           value: 'showOnFeed',
           align: 'center',
+          width: '4px',
           sortable: false
         }
       ],

@@ -1,66 +1,64 @@
 <template>
   <v-container>
-    <v-row wrap class="pb-4">
+    <v-row class="pb-4">
       <!-- Title -->
-      <v-flex lg6 md6 sm6>
+      <v-col cols="12" md="6">
         <v-row style="height: 100%;" align="center" justify="center">
           <h1>Hello, {{ employee.firstName }}!</h1>
         </v-row>
-      </v-flex>
+      </v-col>
       <!-- Anniversary Date -->
 
-      <v-flex lg6 class="pa-4">
-        <v-flex>
-          <v-card>
-            <v-card-title>
-              <!-- display the next anniversary date -->
-              <div v-if="viewingCurrentBudgetYear">
-                <h3 class="pt-4 font-16">Anniversary Date: {{ getAnniversary }}</h3>
-                <div @mouseover="display = !display" @mouseleave="display = !display" class="pt-4 font-14">
-                  <div v-if="display">Days Until: {{ getDaysUntil }}</div>
-                  <div v-else>Seconds Until: {{ getSecondsUntil }}</div>
-                </div>
+      <v-col cols="12" md="6" class="pa-4">
+        <v-card>
+          <v-card-title>
+            <!-- display the next anniversary date -->
+            <div>
+              <h3 class="pt-4 font-16">Anniversary Date: {{ getAnniversary }}</h3>
+              <div @mouseover="display = !display" @mouseleave="display = !display" class="pt-4 font-14">
+                <div v-if="display">Days Until: {{ getDaysUntil }}</div>
+                <div v-else>Seconds Until: {{ getSecondsUntil }}</div>
               </div>
-              <v-spacer></v-spacer>
-            </v-card-title>
-          </v-card>
-        </v-flex>
-      </v-flex>
+            </div>
+            <v-spacer></v-spacer>
+          </v-card-title>
+        </v-card>
+      </v-col>
     </v-row>
     <v-row>
-      <v-col xs12 sm12 md6 lg6>
+      <v-col wrap cols="12" lg="6">
         <!-- TSheets -->
-        <v-flex class="pa-4">
-          <v-flex v-if="loading" text-center>
+        <v-col class="pa-4">
+          <v-col v-if="loading" class="text-center">
             <v-progress-circular indeterminate size="64" color="#bc3825"></v-progress-circular>
-          </v-flex>
-          <v-flex v-else text-center class="pt-0">
-            <t-sheets-data xs12 sm3 md3 lg3></t-sheets-data>
-          </v-flex>
-        </v-flex>
+          </v-col>
+          <v-col v-else class="pt-0 text-center">
+            <t-sheets-data cols="12" lg="6"></t-sheets-data>
+          </v-col>
+        </v-col>
         <!-- Available Budgets -->
-        <v-flex class="pa-4">
-          <v-flex v-if="loading" text-center>
+        <v-col class="pa-4">
+          <v-col v-if="loading" text-center>
             <v-progress-circular indeterminate size="64" color="#bc3825"></v-progress-circular>
-          </v-flex>
-          <v-flex v-else text-center class="pt-0">
+          </v-col>
+          <v-col v-else class="pt-0 text-center">
             <available-budgets :employee="this.employee" :fiscalDateView="this.fiscalDateView"></available-budgets>
-          </v-flex>
-        </v-flex>
+          </v-col>
+        </v-col>
       </v-col>
       <!-- Activity Feed -->
-      <v-col xs12 sm12 md6 lg6>
-        <v-flex mt-0 class="pt-4">
+      <v-col cols="12" lg="6">
+        <v-col mt-0 class="pt-4">
           <activity-feed :events="events" :loading="loading"></activity-feed>
-        </v-flex>
+        </v-col>
       </v-col>
     </v-row>
     <v-row>
       <!-- Twitter Feed -->
-      <v-col xs12 sm12 md6 lg6>
-        <v-flex mt-0 class="pt-4">
+      <v-col>
+        <v-col mt-0 class="pt-4">
           <twitter-feed :tweets="tweets" :loading="loading"></twitter-feed>
-        </v-flex>
+        </v-col>
       </v-col>
     </v-row>
   </v-container>
@@ -68,12 +66,11 @@
 
 <script>
 import api from '@/shared/api.js';
-import AvailableBudgets from '../components/AvailableBudgets.vue';
-// import MobileDetect from 'mobile-detect';
+import AvailableBudgets from '@/components/AvailableBudgets.vue';
 import moment from 'moment-timezone';
-import ActivityFeed from '../components/ActivityFeed';
-import TwitterFeed from '../components/TwitterFeed';
-import TSheetsData from '../components/TSheetsData.vue';
+import ActivityFeed from '@/components/ActivityFeed';
+import TwitterFeed from '@/components/TwitterFeed';
+import TSheetsData from '@/components/TSheetsData.vue';
 import _ from 'lodash';
 const IsoFormat = 'YYYY-MM-DD';
 
@@ -82,28 +79,6 @@ const IsoFormat = 'YYYY-MM-DD';
 // |                     COMPUTED                     |
 // |                                                  |
 // |--------------------------------------------------|
-
-/**
- * Gets and calculates employee budget data. Returns multiple lists, consisting of the budgets names, remaining budget,
- * pending amount, and pending overdraft amount.
- *
- * @return Object - budget data
- */
-function budgets() {
-  let budgetNames = []; // budget expense type names
-  let budgetDifference = []; // remaining budget amounts
-  if (this.expenseTypeData !== undefined) {
-    let expenseTypes = this.expenseTypeData;
-    _.forEach(expenseTypes, (expenseType) => {
-      budgetNames.push(expenseType.expenseTypeName);
-    });
-  }
-
-  return {
-    names: budgetNames,
-    difference: budgetDifference
-  };
-} // budgets
 
 /**
  * Get the next anniversary date for the employee based on their hire date.
@@ -163,16 +138,6 @@ function getDaysUntil() {
 } // getDaysUntil
 
 /**
- * Get the year for the employee budget year view.
- *
- * @return Int - year for budget year view
- */
-function getFiscalYearView() {
-  let [year] = this.fiscalDateView.split('-');
-  return parseInt(year);
-} // getFiscalYearView
-
-/**
  * Get the seconds until the employee's next anniversary date.
  */
 function getSecondsUntil() {
@@ -196,63 +161,6 @@ function getSecondsUntil() {
     return anniversary.diff(now, 'seconds');
   }
 } // getSecondsUntil
-
-/**
- * Checks if the current device used is mobile. Return true if it is mobile. Returns false if it is not mobile.
- *
- * @return boolean - if the device is mobile
- */
-// function isMobile() {
-//   let md = new MobileDetect(window.navigator.userAgent);
-//   return md.os() === 'AndroidOS' || md.os() === 'iOS';
-// isMobile
-
-/**
- * Checks current breakpoint to set position of the columns for the homepage
- *
- * @return desired col width class
- */
-function screenColOne() {
-  switch (this.$vuetify.breakpoint.name) {
-    case 'xs':
-      return '12';
-    case 'sm':
-      return '12';
-    case 'md':
-      return '8';
-    case 'lg':
-      return '8';
-    case 'xl':
-      return '8';
-  }
-}
-/**
- * Checks current breakpoint to set position of the columns for the activityFeed
- *
- * @return desired col width class
- */
-function screenColTwo() {
-  switch (this.$vuetify.breakpoint.name) {
-    case 'xs':
-      return '12';
-    case 'sm':
-      return '12';
-    case 'md':
-      return '4';
-    case 'lg':
-      return '4';
-    case 'xl':
-      return '4';
-  }
-}
-/**
- * Viewing the current active budget year. Returns true if the budget year being viwed is todays budget.
- *
- * @return boolean - viewing the current active year budget
- */
-function viewingCurrentBudgetYear() {
-  return this.fiscalDateView == this.getCurrentBudgetYear();
-} // viewingCurrentBudgetYear
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -309,7 +217,7 @@ async function createEvents() {
       let now = moment();
       let cutOff = moment().subtract(6, 'months').startOf('day'); //can't use now because itll change now
       //set what we want to see in the Date
-      if (now.isAfter(hireDate, 'day')) {
+      if (now.isSameOrAfter(hireDate, 'day')) {
         //hire date is before today
         let anniversary = moment([now.year(), hireDate.month(), hireDate.date()]); //set anniversary to hiredate but this year
         let diff = now.startOf('day').diff(anniversary.startOf('day'), 'day'); //difference between today and anniversary
@@ -322,14 +230,19 @@ async function createEvents() {
           return null;
         }
         if (anniversary.isSame(hireDate, 'day')) {
-          event.text = a.firstName + ' has joined the Case Consulting team!'; //new hire message
+          event.text = a.firstName + ' ' + a.lastName + ' has joined the Case Consulting team!'; //new hire message
           event.icon = 'user-plus';
         } else {
           if (anniversary.diff(hireDate, 'year') == 1) {
-            event.text = a.firstName + ' is celebrating 1 year at Case Consulting!';
+            event.text = a.firstName + ' ' + a.lastName + ' is celebrating 1 year at Case Consulting!';
           } else {
             event.text =
-              a.firstName + ' is celebrating ' + anniversary.diff(hireDate, 'year') + ' years at Case Consulting!';
+              a.firstName +
+              ' ' +
+              a.lastName +
+              ' is celebrating ' +
+              anniversary.diff(hireDate, 'year') +
+              ' years at Case Consulting!';
           }
           event.icon = 'glass-cheers';
         }
@@ -349,7 +262,7 @@ async function createEvents() {
   });
   // generate birthdays
   let birthdays = _.map(this.employees, (b) => {
-    if (b.birthdayFeed && b.birthday != ' ') {
+    if (b.birthdayFeed && !this.isEmpty(b.birthday) && b.workStatus != 0) {
       let event = {};
       let now = moment();
       let cutOff = moment().subtract(6, 'months').startOf('day');
@@ -383,26 +296,22 @@ async function createEvents() {
     return null;
   });
   // generate expenses
-  //let filteredExpenses = this.filterOutExpensesByCategory(this.aggregatedExpenses);
   let expenses = _.map(this.aggregatedExpenses, (a) => {
-    if (a.showOnFeed != ' ' && a.showOnFeed) {
+    if (!this.isEmpty(a.showOnFeed) && a.showOnFeed) {
       //value of showOnFeed is true
-      if (a.reimbursedDate === ' ') {
-        return null;
-      }
       let now = moment();
       let reimbursedDate = moment(a.reimbursedDate, 'YYYY-MM-DD');
       let event = {};
       event.date = getEventDateMessage(reimbursedDate);
       event.color = 'green';
-      if (a.url != ' ') {
+      if (!this.isEmpty(a.url)) {
         event.link = a.url;
       }
-      event.text = `${a.firstName} used their ${a.budgetName} budget on ${a.description}`;
+      event.text = `${a.firstName} ${a.lastName} used their ${a.budgetName} budget on ${a.description}`;
       event.icon = 'dollar-sign';
       event.daysFromToday = now.startOf('day').diff(reimbursedDate.startOf('day'), 'days');
       if (a.budgetName == 'High Five') {
-        event.text = `${a.firstName} gave ${a.description} a High Five: ${a.note}`;
+        event.text = `${a.description}: ${a.note}`;
       }
       if (this.textMaxLength < event.text.length) {
         event.truncatedText = _.truncate(event.text, { length: this.textMaxLength });
@@ -431,6 +340,9 @@ async function createEvents() {
     }
     event.icon = 'calendar-alt';
     event.daysFromToday = now.startOf('day').diff(startDate.startOf('day'), 'days');
+    if (event.daysFromToday < -6) {
+      return null;
+    }
     event.link = a.app_url;
     event.color = '#1a73e8';
     if (this.textMaxLength < event.text.length) {
@@ -439,7 +351,7 @@ async function createEvents() {
     return event;
   });
   let mergedEventsList = [...anniversaries, ...birthdays, ...expenses, ...schedules]; // merges lists
-  this.events = _.sortBy(_.compact(mergedEventsList), 'daysFromToday');
+  this.events = _.sortBy(_.compact(mergedEventsList), 'daysFromToday'); //sorts by days from today
 } //createEvents
 
 /**
@@ -500,6 +412,16 @@ function getCurrentBudgetYear() {
 } // getCurrentBudgetYear
 
 /**
+ * Checks if a value is empty. Returns true if the value is null or an empty/blank string.
+ *
+ * @param value - value to check
+ * @return boolean - value is empty
+ */
+function isEmpty(value) {
+  return _.isNil(value) || (_.isString(value) && value.trim().length === 0);
+} // isEmpty
+
+/**
  * Checks if an employee is full time. Returns true if the employee is full time with a work status of 100, otherwise
  * returns false.
  *
@@ -509,66 +431,6 @@ function getCurrentBudgetYear() {
 function isFullTime(employee) {
   return employee.workStatus == 100;
 } // isFullTime
-
-/**
- * Refresh and sets the aggregated budgets for the employee budget year view.
- */
-async function refreshBudget() {
-  this.loading = true; // set loading status to true
-  let budgetsVar;
-
-  if (this.fiscalDateView == this.getCurrentBudgetYear()) {
-    // viewing active budget year
-    budgetsVar = await api.getAllActiveEmployeeBudgets(this.employee.id);
-  }
-
-  // budgetsVar = _.union(budgetsVar, existingBudgets); // combine existing and active budgets
-  budgetsVar = _.uniqBy(budgetsVar, 'expenseTypeId'); // remove duplicate expense types
-  budgetsVar = _.sortBy(budgetsVar, (budget) => {
-    return budget.expenseTypeName;
-  }); // sort by expense type name
-
-  // prohibit overdraft if employee is not full time
-  _.forEach(budgetsVar, async (budget) => {
-    if (!isFullTime(this.employee)) {
-      budget.odFlag = false;
-    }
-  });
-
-  // remove any budgets where budget amount is 0 and 0 total expenses
-  this.expenseTypeData = _.filter(budgetsVar, (data) => {
-    let budget = data.budgetObject;
-    return budget.amount != 0 || budget.pendingAmount != 0;
-  });
-
-  this.refreshBudgetYears(); // refresh the budget year view options
-  this.loading = false; // set loading status to false
-} // refreshBudget
-
-/**
- * Refresh and sets the budget year view options for the employee.
- */
-function refreshBudgetYears() {
-  let budgetYears = [];
-
-  // push all employee budget years
-  let budgetDates = _.uniqBy(_.map(this.allUserBudgets, 'fiscalStartDate'));
-  budgetDates.forEach((date) => {
-    const [year] = date.split('-');
-    budgetYears.push(parseInt(year));
-  });
-
-  // push active budget year
-  let [currYear] = this.getCurrentBudgetYear().split('-');
-  budgetYears.push(parseInt(currYear));
-
-  // remove duplicate years and filter to include only active and previous years
-  budgetYears = _.filter(_.uniqBy(budgetYears), (year) => {
-    return parseInt(year) <= parseInt(currYear);
-  });
-
-  this.budgetYears = _.reverse(_.sortBy(budgetYears)); // sort budgets from current to past
-} // refreshBudgetYears
 
 /**
  * Refresh and sets employee information.
@@ -584,7 +446,6 @@ async function refreshEmployee() {
   }
   this.hireDate = this.employee.hireDate;
   this.fiscalDateView = this.getCurrentBudgetYear();
-  this.refreshBudget(); // refresh employee budgets
   this.allUserBudgets = await api.getEmployeeBudgets(this.employee.id); // set all employee budgets
   this.loading = false; // set loading status to false
   this.ptoBalances = await api.getPTOBalances(this.employee.employeeNumber); // call api
@@ -604,7 +465,6 @@ async function showSuccessfulSubmit() {
  * Updates the budget data and display a successful submit.
  */
 async function updateData() {
-  this.refreshBudget();
   this.showSuccessfulSubmit();
 } // updateData
 
@@ -640,16 +500,6 @@ function filterOutExpensesByCategory(expenses) {
  *  Set budget information for employee. Creates event listeners.
  */
 async function created() {
-  window.EventBus.$on('cancel-budget-year', () => {
-    this.changingBudgetView = false;
-  });
-  window.EventBus.$on('selected-budget-year', (data) => {
-    if (data.format(IsoFormat) != this.fiscalDateView) {
-      this.fiscalDateView = data.format(IsoFormat);
-      this.refreshBudget();
-    }
-    this.changingBudgetView = false;
-  });
   this.loading = true;
   this.createEvents();
   this.loading = false;
@@ -672,23 +522,17 @@ export default {
     TwitterFeed
   },
   computed: {
-    budgets,
     getAnniversary,
     getDaysUntil,
-    getFiscalYearView,
-    getSecondsUntil,
-    //    isMobile,
-    screenColOne,
-    screenColTwo,
-    viewingCurrentBudgetYear
+    getSecondsUntil
   },
   created,
   data() {
     return {
+      actualTime: moment().format('X'),
       aggregatedExpenses: [],
       allUserBudgets: null, // all user budgets
       budgetYears: [], // list of options for chaning budget year view
-      changingBudgetView: false, // change budget year view activator
       display: true, // show seconds till anniversary activator
       employee: {}, // employee
       employees: [],
@@ -727,9 +571,8 @@ export default {
     filterOutExpensesByCategory,
     getCurrentBudgetYear,
     getTweets,
+    isEmpty,
     isFullTime,
-    refreshBudget,
-    refreshBudgetYears,
     refreshEmployee,
     showSuccessfulSubmit,
     updateData

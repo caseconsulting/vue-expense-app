@@ -2,16 +2,11 @@
   <div id="available-budgets">
     <v-card>
       <v-card-title class="header_style">
-        <v-hover v-slot:default="{ hover }">
-          <router-link to="/myBudgets" style="text-decoration: none;">
-            <h4
-              class="white--text px-2"
-              :class="[active || hover ? 'darken' : 'transparent', hover ? 'elevation-4' : '']"
-            >
-              Available Budgets
-            </h4>
-          </router-link>
-        </v-hover>
+        <router-link to="/myBudgets" style="text-decoration: none;">
+          <h3 id="link" class="white--text px-2">
+            Available Budgets
+          </h3>
+        </router-link>
       </v-card-title>
       <v-card-text class="px-7 pt-5 pb-1 black--text">
         <div v-if="this.loading" class="pb-4">
@@ -40,8 +35,11 @@
             <div style="height: 20px;"></div>
             <!-- End Loop all budgets -->
             <router-link v-if="this.fiscalDateView" to="/myExpenses" style="text-decoration: none;">
-              <button class="home_buttons">Create an Expense</button>
+              <button class="home_buttons" @click="selectReceipt = true">Create an Expense</button>
             </router-link>
+            <!-- Pop-up modal to upload receipt from home page
+            <button class="home_buttons" @click="selectReceipt = true">Create an Expense</button>
+            <receipt-modal :activate="selectReceipt"></receipt-modal> -->
           </div>
         </div>
       </v-card-text>
@@ -52,8 +50,9 @@
 
 <script>
 import api from '@/shared/api.js';
-import AvailableBudgetSummary from './AvailableBudgetSummary.vue';
+import AvailableBudgetSummary from '@/components/AvailableBudgetSummary.vue';
 import _ from 'lodash';
+// import ReceiptModal from '../components/ReceiptModal.vue';
 import moment from 'moment-timezone';
 const IsoFormat = 'YYYY-MM-DD';
 
@@ -206,6 +205,7 @@ function selectBudget(budget) {
 export default {
   components: {
     AvailableBudgetSummary
+    // ReceiptModal
   },
   created,
   data() {
@@ -215,10 +215,11 @@ export default {
       budgets: [],
       budgetYears: [],
       date: '',
-      dense: false,
       hireDate: '',
       loading: true,
+      newFile: undefined,
       selectedBudget: null,
+      selectReceipt: false,
       showDialog: false
     };
   },
@@ -244,3 +245,8 @@ export default {
   props: ['employee', 'fiscalDateView']
 };
 </script>
+<style>
+#link:hover {
+  font-size: 20px;
+}
+</style>

@@ -1,17 +1,18 @@
 <template>
-  <v-layout row justify-center>
+  <div>
     <v-dialog v-model="activate" persistent max-width="350">
       <v-card>
-        <v-card-title class="headline">Error: cannot delete {{ type }}</v-card-title>
-        <v-card-text>Cannot delete {{ type }}. Expenses for this {{ type }} exist.</v-card-text>
+        <v-card-title class="headline">Are you sure you want to reimburse these expenses?</v-card-title>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn color="gray darken-1" text @click.native="emit(`invalid-${type}-delete`)">Ok</v-btn>
+          <v-btn color="info" text @click.native="emit(`canceled-reimburse`)">No</v-btn>
+          <v-spacer></v-spacer>
+          <v-btn color="green" text @click.native="emit(`confirm-reimburse`)">Reimburse</v-btn>
           <v-spacer></v-spacer>
         </v-card-actions>
       </v-card>
     </v-dialog>
-  </v-layout>
+  </div>
 </template>
 
 <script>
@@ -22,12 +23,19 @@
 // |--------------------------------------------------|
 
 /**
- * Emits a message.
+ * Emits a message and data if it exists.
  *
  * @param msg - Message to emit
+ * @param data - Data to emit
  */
-function emit(msg) {
-  window.EventBus.$emit(msg);
+function emit(msg, data) {
+  if (data) {
+    // data exists
+    this.$emit(msg, data);
+  } else {
+    // data does not exist
+    window.EventBus.$emit(msg);
+  }
 } // emit
 
 // |--------------------------------------------------|
@@ -37,12 +45,9 @@ function emit(msg) {
 // |--------------------------------------------------|
 
 export default {
+  props: ['activate'], // dialog activator
   methods: {
     emit
-  },
-  props: [
-    'activate', // dialog activator
-    'type' // type of object being deleted
-  ]
+  }
 };
 </script>

@@ -1,23 +1,17 @@
 <template>
-  <v-layout row justify-center>
+  <div>
     <v-dialog v-model="activate" persistent max-width="350">
       <v-card>
-        <v-card-title class="headline">Are you sure you want to unreimburse?</v-card-title>
-        <v-card-text>
-          This will unreimburse the expense to pending and uncarry any overdrafts due to this expense
-        </v-card-text>
+        <v-card-title class="headline">Session Time Out Warning</v-card-title>
+        <v-card-text>Warning: Your session will time out in 5 minutes. Please complete any progress.</v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn color="gray darken-1" text @click.native="emit(`canceled-unreimburse-expense`)">
-            No, keep reimbursed
-          </v-btn>
-          <v-spacer></v-spacer>
-          <v-btn color="red" text @click.native="emit(`confirm-unreimburse-expense`)">Unreimburse</v-btn>
+          <v-btn color="gray darken-1" text @click.native="emit('sessionContinue')">Ok</v-btn>
           <v-spacer></v-spacer>
         </v-card-actions>
       </v-card>
     </v-dialog>
-  </v-layout>
+  </div>
 </template>
 
 <script>
@@ -28,19 +22,12 @@
 // |--------------------------------------------------|
 
 /**
- * Emits a message and data if it exists.
+ * Emits a message.
  *
  * @param msg - Message to emit
- * @param data - Data to emit
  */
-function emit(msg, data) {
-  if (data) {
-    // data exists
-    window.EventBus.$emit(msg, data);
-  } else {
-    // data does not exist
-    window.EventBus.$emit(msg);
-  }
+function emit(msg) {
+  window.EventBus.$emit(msg);
 } // emit
 
 // |--------------------------------------------------|
@@ -53,9 +40,6 @@ export default {
   methods: {
     emit
   },
-  props: [
-    'activate', // dialog activator
-    'expense' // expense to unreimburse
-  ]
+  props: ['activate'] // dialog activator
 };
 </script>

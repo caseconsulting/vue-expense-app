@@ -1,8 +1,6 @@
 <template>
   <!-- Download CSV Button -->
-  <v-btn :disabled="editing || midAction" @click="download()"
-    ><i class="material-icons">file_download</i>Download All</v-btn
-  >
+  <v-btn :disabled="midAction" @click="download()"><i class="material-icons">file_download</i>Download All</v-btn>
 </template>
 
 <script>
@@ -59,22 +57,22 @@ function exportCSVFile(items, fileTitle) {
     let placeOfBirth = (person.city || ' ') + ' ' + (person.st || ' ') + ' ' + (person.country || ' ');
 
     tempEmployees[i] = [
-      person.employeeNumber,
-      person.firstName,
-      person.middleName,
-      person.lastName,
-      person.birthday || ' ',
-      placeOfBirth || ' ',
-      person.hireDate,
-      person.jobRole || ' ',
-      person.prime || ' ',
-      person.contract || ' ',
-      person.email,
-      person.twitter || ' ',
-      person.github || ' ',
-      person.employeeRole,
-      getWorkStatus(person.workStatus),
-      person.id
+      person.employeeNumber || '',
+      person.firstName || '',
+      person.middleName || '',
+      person.lastName || '',
+      person.birthday || '',
+      placeOfBirth || '',
+      person.hireDate || '',
+      person.jobRole || '',
+      person.prime || '',
+      person.contract || '',
+      person.email || '',
+      person.twitter || '',
+      person.github || '',
+      person.employeeRole || '',
+      getWorkStatus(person.workStatus) || '',
+      person.id || ''
     ];
   }
 
@@ -168,7 +166,7 @@ export default {
     exportCSVFile,
     getWorkStatus
   },
-  props: ['employees', 'midAction', 'editing'] // employees to export
+  props: ['employees', 'midAction'] // employees to export
 };
 </script>
 

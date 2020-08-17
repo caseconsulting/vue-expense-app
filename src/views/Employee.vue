@@ -1,75 +1,45 @@
 <template>
-  <v-layout row wrap>
-    <v-flex lg6 lg12 md12 sm12>
-      <!-- Expanded slot in datatable -->
-      <template>
-        <v-card>
-          <v-card-text>
-            <div class="expandedInfo">
-              <p v-if="userIsAdmin()">
-                <b>Status: </b>
-                {{ getWorkStatus(this.model.workStatus) }}
-              </p>
-              <p v-if="!isEmpty(this.model.prime)"><b>Prime: </b> {{ this.model.prime }}</p>
-              <p v-if="!isEmpty(this.model.contract)"><b>Contract: </b>{{ this.model.contract }}</p>
-              <p v-if="!isEmpty(this.model.jobRole)"><b>Job Role: </b>{{ this.model.jobRole }}</p>
-              <p v-if="!isEmpty(this.model.github)">
-                <b>Github: </b
-                ><a :href="'https://github.com/' + this.model.github" target="_blank">{{ this.model.github }}</a>
-              </p>
-              <p v-if="!isEmpty(this.model.twitter)">
-                <b>Twitter: </b>
-                <a :href="'https://twitter.com/' + this.model.twitter" target="_blank">{{ this.model.twitter }}</a>
-              </p>
-              <p v-if="userIsAdmin() && !isEmpty(this.model.birthday)">
-                <b>Birthday: </b>{{ this.model.birthday | dateFormat }}
-              </p>
-              <p v-if="userIsAdmin() && !isEmpty(this.model.birthdayFeed)">
-                <b>Birthday on feed: </b>{{ this.model.birthdayFeed | birthdayFeedResponse }}
-              </p>
-              <p
-                v-if="
-                  userIsAdmin() && !isEmpty(this.model.city) && !isEmpty(this.model.st) && !isEmpty(this.model.country)
-                "
-              >
-                <b>Place of Birth: </b>{{ this.model.city }}, {{ this.model.st }}, {{ this.model.country }}
-              </p>
-              <p v-else-if="userIsAdmin() && !isEmpty(this.model.city) && !isEmpty(this.model.st)">
-                <b>Place of Birth: </b>{{ this.model.city }}, {{ this.model.st }}
-              </p>
-              <p v-else-if="userIsAdmin() && !isEmpty(this.model.city) && !isEmpty(this.model.country)">
-                <b>Place of Birth: </b>{{ this.model.city }}, {{ this.model.country }}
-              </p>
-              <p v-else-if="userIsAdmin() && !isEmpty(this.model.country)">
-                <b>Place of Birth: </b>{{ this.model.country }}
-              </p>
-              <p v-if="userIsAdmin() && !isEmpty(this.model.deptDate)">
-                <b>Departure Date: </b>{{ this.model.deptDate | dateFormat }}
-              </p>
-            </div>
-          </v-card-text>
-        </v-card>
+  <v-container fluid>
+    <v-row class="pl-3">
+      <v-btn to="/employees"><v-icon class="pr-1">arrow_back</v-icon>Back to Employees Page</v-btn>
+    </v-row>
+    <v-row v-if="loading" class="my-10" justify="center">
+      <v-progress-circular :size="70" :width="7" color="#bc3825" indeterminate></v-progress-circular>
+    </v-row>
+    <v-row v-else>
+      <!-- TSheets and Budgets-->
+      <v-col v-if="displayTSheetsAndBalances" cols="12" md="6" lg="5">
+        <t-sheets-data :employee="this.model" class="mb-6"></t-sheets-data>
         <available-budgets v-if="this.model.id" :employee="this.model"></available-budgets>
-      </template>
-      <!-- End expanded slot in datatable -->
-    </v-flex>
-    <v-flex lg6>
-      <v-card>
-        <!-- Employee Details Form -->
-        <v-card-text>
-          <employee-details-form :employee="this.model"></employee-details-form>
-        </v-card-text>
-      </v-card>
-    </v-flex>
-  </v-layout>
+      </v-col>
+
+      <!-- Employee Form -->
+      <v-col cols="12" :md="displayTSheetsAndBalances ? 6 : 12" :lg="displayTSheetsAndBalances ? 7 : 12">
+        <v-card>
+          <v-card-title class="header_style" v-if="!editing">
+            <h3>{{ this.model.firstName }} {{ this.model.lastName }}</h3>
+            <v-spacer></v-spacer>
+            <v-icon v-if="displayTSheetsAndBalances" @click="editing = true" style="color: white;" align="right"
+              >edit</v-icon
+            >
+          </v-card-title>
+          <employee-info :model="this.model" :currentTab="this.currentTab" v-if="!editing"></employee-info>
+        </v-card>
+        <!-- Edit Info (Form) -->
+        <employee-form :employee="this.model" :currentTab="this.currentTab" v-if="editing"></employee-form>
+      </v-col>
+    </v-row>
+  </v-container>
 </template>
 
 <script>
 import api from '@/shared/api.js';
 import AvailableBudgets from '@/components/AvailableBudgets.vue';
-import EmployeeDetailsForm from '@/components/EmployeeDetailsForm.vue';
+import EmployeeForm from '@/components/employees/EmployeeForm.vue';
+import EmployeeInfo from '@/components/employees/EmployeeInfo.vue';
+import TSheetsData from '@/components/TSheetsData.vue';
 import { getRole } from '@/utils/auth';
-import moment from 'moment';
+import _ from 'lodash';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -96,30 +66,24 @@ function isDisplayData(item) {
 } // isDisplayData
 
 /**
- * Checks if a value is empty. Returns true if the value is null or a single character space String.
+ * Checks if a value is empty. Returns true if the value is null or an empty/blank string.
  *
  * @param value - value to check
  * @return boolean - value is empty
  */
 function isEmpty(value) {
-  return value == null || value === ' ' || value === '';
+  return _.isNil(value) || (_.isString(value) && value.trim().length === 0);
 } // isEmpty
 
 /**
  * Get employee data.
  */
 async function getEmployee() {
-  this.loading = true; // set loading status to true
-
-  //THIS IS A TEMP PIECE OF CODE, just for testing/dev purposes
-  //this will be replaced w/ getting the specific employee's id once hooked up to employees list
-  this.model = await api.getUser();
-
-  //this next line is closer to what the actual code will look like:
-  // this.model = await api.getItem(api.EMPLOYEES, this.$route.params.id); // get employee
-
-  this.loading = false; // set loading status to false
-} // getEmployees
+  let employees = await api.getItems(api.EMPLOYEES);
+  this.model = _.find(employees, (employee) => {
+    return employee.employeeNumber == this.$route.params.id;
+  });
+} // getEmployee
 
 /**
  * Returns Full Time, Part Time, or Inactive based on the work status
@@ -140,8 +104,17 @@ function getWorkStatus(workStatus) {
  * Checks to see if the user is an admin. Returns true if the user's role is an admin, otherwise returns false.
  */
 function userIsAdmin() {
-  return getRole() === 'admin';
+  return this.role === 'admin';
 } // userIsAdmin
+
+/**
+ * Check if the user the employee displayed. Returns true if the user is the employee displayed, otherwise returns false.
+ *
+ * @return boolean - user is the employee displayed
+ */
+function userIsEmployee() {
+  return !_.isNil(this.model) && !_.isNil(this.user) ? this.user.employeeNumber === this.model.employeeNumber : false;
+} // userIsEmployee
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -150,11 +123,33 @@ function userIsAdmin() {
 // |--------------------------------------------------|
 
 /**
- *  Adjust datatable header for user view. Creates event listeners.
+ *  Adjust datatable header for user view.
  */
 async function created() {
+  this.loading = true;
   await this.getEmployee();
+  this.user = await api.getUser();
+  this.role = getRole();
+  this.displayTSheetsAndBalances = this.userIsAdmin() || this.userIsEmployee();
+  this.loading = false;
 } // created
+
+/**
+ * Mount event listeners.
+ */
+async function mounted() {
+  window.EventBus.$on('cancel-form', () => {
+    this.editing = false;
+  });
+
+  window.EventBus.$on('update', (updatedEmployee) => {
+    this.model = updatedEmployee;
+  });
+
+  window.EventBus.$on('tabChange', (tab) => {
+    this.currentTab = tab;
+  });
+} // mounted
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -165,90 +160,64 @@ async function created() {
 export default {
   components: {
     AvailableBudgets,
-    EmployeeDetailsForm
+    EmployeeForm,
+    EmployeeInfo,
+    TSheetsData
   },
   created,
   data() {
     return {
-      employeeInfo: {
-        primes: [],
-        contracts: []
-      },
-      expanded: [], // datatable expanded
+      currentTab: null,
+      displayTSheetsAndBalances: true,
+      editing: false,
       filter: {
         active: ['full', 'part'] // default only shows full and part time employees
       }, // datatable filter
       loading: false, // loading status
       model: {
-        id: null,
-        firstName: '',
-        middleName: '',
-        lastName: '',
-        email: '@consultwithcase.com',
-        employeeRole: '',
-        employeeNumber: null,
-        hireDate: null,
-        workStatus: 100,
+        awards: [],
         birthday: '',
         birthdayFeed: false,
-        jobRole: '',
-        prime: '',
-        contract: '',
-        github: '',
-        twitter: '',
+        certifications: [],
         city: '',
-        st: '',
+        contract: '',
         country: '',
-        deptDate: ''
+        degrees: [],
+        deptDate: '',
+        email: '@consultwithcase.com',
+        employeeNumber: null,
+        employeeRole: '',
+        firstName: '',
+        github: '',
+        hireDate: null,
+        id: null,
+        jobRole: '',
+        lastName: '',
+        middleName: '',
+        prime: '',
+        st: '',
+        technologies: [],
+        twitter: '',
+        workStatus: 100
       }, // selected employee
+      role: null, // user role
       search: '', // query text for datatable search field
       status: {
         statusType: undefined,
         statusMessage: '',
         color: ''
-      } // snackbar action status
+      }, // snackbar action status
+      user: null
     };
-  },
-  filters: {
-    // formats a date by month, day, year (e.g. Aug 18th, 2020)
-    dateFormat: (value) => {
-      if (!isEmpty(value)) {
-        return moment(value).format('MMM Do, YYYY');
-      } else {
-        return '';
-      }
-    },
-    birthdayFeedResponse: (value) => {
-      if (value == true) {
-        return 'yes';
-      } else {
-        return 'no';
-      }
-    }
   },
   methods: {
     isDisplayData,
     isEmpty,
     getEmployee,
     getWorkStatus,
-    userIsAdmin
-  }
+    userIsAdmin,
+    userIsEmployee
+  },
+  mounted
 };
 </script>
-
-<style>
-.expandedInfo {
-  border: 1px solid black;
-  font-size: 14px;
-  padding: 20px;
-}
-
-.expandedInfo a {
-  font-size: 14px;
-  color: blue;
-}
-
-.expandedInfo a:hover {
-  color: #0cf;
-}
-</style>

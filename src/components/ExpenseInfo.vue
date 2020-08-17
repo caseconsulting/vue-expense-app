@@ -1,8 +1,8 @@
 <template>
   <v-card v-if="expense" raised id="expense-info" class="white--text slide-in-blurred-right">
     <v-card-title primary-title class="subtitle-2 color-change-2x">
-      <v-flex lg12 class="headline expense_info_title">Expense Info</v-flex>
-      <v-flex lg12 class="expense_info">
+      <div class="headline expense_info_title">Expense Info</div>
+      <div class="expense_info">
         <p class="expense_info"><span>Description:</span> {{ expense.description }}</p>
         <p class="expense_info"><span>Employee:</span> {{ expense.employeeName }}</p>
         <p class="expense_info"><span>Budget:</span> {{ expense.budgetName }}</p>
@@ -14,14 +14,15 @@
         </p>
         <p class="expense_info" v-if="!isEmpty(expense.note)"><span>Notes:</span> {{ expense.note }}</p>
         <attachment :expense="expense" :mode="'adminExpenseInfo'" class="expense_info"></attachment>
-      </v-flex>
+      </div>
     </v-card-title>
   </v-card>
 </template>
 
 <script>
-import Attachment from './Attachment.vue';
+import Attachment from '@/components/Attachment.vue';
 import moment from 'moment';
+import _ from 'lodash';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -43,13 +44,13 @@ function displayExpense(clickedExpense) {
 } // displayExpense
 
 /**
- * Checks if a value is empty. Returns true if the value is null or a single character space String.
+ * Checks if a value is empty. Returns true if the value is null or an empty/blank string.
  *
  * @param value - value to check
  * @return boolean - value is empty
  */
 function isEmpty(value) {
-  return value == null || value === ' ' || value === '';
+  return _.isNil(value) || (_.isString(value) && value.trim().length === 0);
 } // isEmpty
 
 // |--------------------------------------------------|

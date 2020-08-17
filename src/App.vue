@@ -7,13 +7,14 @@
         fixed
         app
         disableResizeWatcher
-        expand-on-hover
-        :permanent="isLoggedIn()"
+        :expand-on-hover="!isMobile"
+        :permanent="isLoggedIn() && !isMobile"
         clipped
       >
         <main-nav></main-nav>
       </v-navigation-drawer>
       <v-app-bar class="nav-color" dark fixed app clipped-left>
+        <v-app-bar-nav-icon v-show="isLoggedIn() && isMobile" @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
         <v-avatar size="40" color="grey lighten-4" class="mr-2">
           <img src="@/assets/img/case-logo-circle.png" class="logo-bar" />
         </v-avatar>
@@ -52,52 +53,39 @@
           </v-btn>
         </v-item-group>
 
-        <!--In MOBILE VIEW/Smaller Screen sizes display all links under the links dropdown-->
-
-        <v-item-group class="hidden-md-and-up" v-show="isLoggedIn() | isMobile">
-          <v-menu open-on-hover offset-y>
-            <template v-slot:activator="{ on, attrs }">
-              <v-btn top text small class="my-2" v-bind="attrs" v-on="on">
-                <v-icon color="white">menu</v-icon>
-              </v-btn>
-            </template>
-
-            <v-list class="scrollLink">
-              <v-list-item v-for="(l, index) in links" :key="index" :href="l.link" target="_blank">
-                <v-list-item-title>{{ l.name }}</v-list-item-title>
-              </v-list-item>
-              <v-list-item :href="floorPlan" target="_blank">MakeOffices Map</v-list-item>
-              <hr
-                role="separator"
-                aria-orientation="horizontal"
-                class="v-divider theme--light"
-                :inset="inset"
-                vertical
-              />
-              <div class="v-subheader theme--light">Social</div>
-              <v-list-item v-for="link in mediaLinks" :key="link.name" :href="link.link" icon target="_blank">
-                <icon :name="link.icon"></icon>
-                <span class="mr-2"> </span>
-                <v-list-item-title> {{ ( link.name) }}</v-list-item-title>
-              </v-list-item>
-            </v-list>
-          </v-menu>
-        </v-item-group>
-
-        <v-toolbar-items v-show="isLoggedIn()">
-          <v-flex xs12 sm6 md8 align-center justify-left layout text-xs-center>
-            <v-menu bottom offset-y open-on-hover>
-              <template v-slot:activator="{ on }">
-                <v-avatar size="50" color="grey lighten-4">
-                  <img :src="profilePic" alt="avatar" v-on="on" />
-                </v-avatar>
-              </template>
-              <v-list>
-                <v-btn text @click="handleLogout()">Logout</v-btn>
-              </v-list>
-            </v-menu>
-          </v-flex>
-        </v-toolbar-items>
+        <!-- User image and logout -->
+        <v-menu bottom offset-y open-on-hover v-if="isLoggedIn()">
+          <template v-slot:activator="{ on }">
+            <v-avatar size="50" color="grey lighten-4">
+              <img :src="profilePic" alt="avatar" v-on="on" />
+            </v-avatar>
+          </template>
+          <v-list v-if="!(isLoggedIn() && (isMobile || isSmallScreen))">
+            <v-list-item>
+              <v-btn text @click="handleLogout()">Logout</v-btn>
+            </v-list-item>
+          </v-list>
+          <!--In MOBILE VIEW/Smaller Screen sizes display all links under the user image dropdown-->
+          <v-list class="scrollLink" v-else>
+            <v-list-item>
+              <v-btn text @click="handleLogout()">Logout</v-btn>
+            </v-list-item>
+            <hr role="separator" aria-orientation="horizontal" class="v-divider theme--light" :inset="inset" vertical />
+            <div class="v-subheader theme--light">Company Links</div>
+            <v-list-item v-for="(l, index) in links" :key="index" :href="l.link" target="_blank">
+              <v-list-item-title>{{ l.name }}</v-list-item-title>
+            </v-list-item>
+            <v-list-item :href="floorPlan" target="_blank">MakeOffices Map</v-list-item>
+            <hr role="separator" aria-orientation="horizontal" class="v-divider theme--light" :inset="inset" vertical />
+            <div class="v-subheader theme--light">Social</div>
+            <v-list-item v-for="link in mediaLinks" :key="link.name" :href="link.link" icon target="_blank">
+              <icon :name="link.icon"></icon>
+              <span class="mr-2"> </span>
+              <v-list-item-title> {{ ( link.name) }}</v-list-item-title>
+            </v-list-item>
+          </v-list>
+        </v-menu>
+        <!-- End user image and logout -->
       </v-app-bar>
 
       <v-main>
@@ -115,10 +103,9 @@
 <script>
 import { isLoggedIn, logout, getProfile, getTokenExpirationDate, getAccessToken } from '@/utils/auth';
 import MainNav from '@/components/MainNav.vue';
-import router from './router.js';
 import MobileDetect from 'mobile-detect';
-import TimeOutModal from '@/components/TimeOutModal.vue';
-import TimeOutWarningModal from '@/components/TimeOutWarningModal.vue';
+import TimeOutModal from '@/components/modals/TimeOutModal.vue';
+import TimeOutWarningModal from '@/components/modals/TimeOutWarningModal.vue';
 import floorPlan from '@/assets/img/MakeOfficesfloorplan.jpg';
 
 // |--------------------------------------------------|
@@ -151,16 +138,8 @@ function handleLogout() {
   logout();
 }
 
-async function initSession() {
-  const timeout = (seconds) => new Promise((resolve) => setTimeout(resolve, seconds * 1000));
-  await timeout(60); //wait 60 seconds
-
-  if (!this.isLoggedIn() && this.hasBeenLoggedInBefore) {
-    this.hasBeenLoggedInBefore = false; //prevents looping for no reason
-    router.push({ path: '/home' });
-  }
-
-  this.initSession();
+function onResize() {
+  this.isSmallScreen = window.innerWidth < 960;
 }
 
 // |--------------------------------------------------|
@@ -175,7 +154,7 @@ async function created() {
   // set expiration date if access token received
   let accessToken = getAccessToken();
 
-  if (accessToken) {
+  if (accessToken && isLoggedIn()) {
     this.date = Math.trunc(getTokenExpirationDate(accessToken).getTime());
     this.now = Math.trunc(new Date().getTime());
     let timeRemaining = this.date - this.now; // default access key (2 hours)
@@ -196,17 +175,17 @@ async function created() {
   if (pic) {
     this.profilePic = pic;
   }
+}
 
-  if (this.isLoggedIn()) this.hasBeenLoggedInBefore = true;
-
-  this.initSession(); //starts session checking
-
-  if (
-    (router.app._route.fullPath === '/training' || router.app._route.fullPath === '/expenseTypes') &&
-    this.isLoggedIn() === false
-  ) {
-    router.push({ path: '/' });
+async function beforeDestroy() {
+  if (typeof window !== 'undefined') {
+    window.removeEventListener('resize', this.onResize, { passive: true });
   }
+}
+
+async function mounted() {
+  this.onResize();
+  window.addEventListener('resize', this.onResize, { passive: true });
 }
 
 // |--------------------------------------------------|
@@ -221,7 +200,6 @@ export default {
     drawer: isLoggedIn(),
     inset: false,
     profilePic: 'src/assets/img/logo-big.png',
-    hasBeenLoggedInBefore: false,
     timedOut: false,
     session: false,
     now: Math.trunc(new Date().getTime() / 1000),
@@ -244,7 +222,8 @@ export default {
       { name: 'Youtube', link: 'https://www.youtube.com/channel/UC_oJY4OrOpLNrIBAN7Y-9fA', icon: 'brands/youtube' },
       { name: 'Twitter', link: 'https://twitter.com/consultwithcase?lang=en', icon: 'brands/twitter' },
       { name: 'Facebook', link: 'https://www.facebook.com/ConsultwithCase/', icon: 'brands/facebook' }
-    ]
+    ],
+    isSmallScreen: false
   }),
   props: {
     source: String
@@ -260,8 +239,10 @@ export default {
   methods: {
     handleLogout,
     isLoggedIn,
-    initSession
+    onResize
   },
+  beforeDestroy,
+  mounted,
   created
 };
 </script>
@@ -287,56 +268,6 @@ export default {
 
 .logo-bar {
   width: 25px;
-}
-
-@-webkit-keyframes color-change {
-  0% {
-    color: white;
-  }
-
-  100% {
-    color: gold;
-  }
-}
-
-@-moz-keyframes color-change {
-  0% {
-    color: white;
-  }
-
-  100% {
-    color: gold;
-  }
-}
-
-@-ms-keyframes color-change {
-  0% {
-    color: white;
-  }
-
-  100% {
-    color: gold;
-  }
-}
-
-@-o-keyframes color-change {
-  0% {
-    color: white;
-  }
-
-  100% {
-    color: gold;
-  }
-}
-
-@keyframes color-change {
-  0% {
-    color: white;
-  }
-
-  100% {
-    color: gold;
-  }
 }
 
 .scrollLink {

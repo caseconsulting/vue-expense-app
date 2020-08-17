@@ -1,5 +1,5 @@
 <template>
-  <v-layout row wrap>
+  <v-row>
     <!-- Status Alert -->
     <v-snackbar
       v-model="status.statusType"
@@ -18,7 +18,7 @@
       </v-btn>
     </v-snackbar>
 
-    <v-flex lg8 md12 sm12>
+    <v-col cols="12" lg="8">
       <v-card>
         <v-container fluid>
           <!-- Title -->
@@ -126,7 +126,7 @@
           <br />
           <!-- End Filters -->
 
-          <!-- Expense Datatable-->
+          <!-- My Expenses Data Table-->
           <v-data-table
             :headers="roleHeaders"
             :items="filteredExpenses"
@@ -138,94 +138,105 @@
             :search="search"
             item-key="id"
             class="elevation-4"
+            @click:row="clickedRow"
           >
-            <!-- Rows in datatable -->
-            <template v-slot:item="{ item }">
-              <tr :class="{ selectFocus: isFocus(item) }" @click="clickedRow(item)">
-                <!-- Expense Information -->
-                <td>{{ item.createdAt | dateFormat }}</td>
-                <td v-if="isAdmin">{{ item.employeeName }}</td>
-                <td>{{ item.budgetName }}</td>
-                <td>{{ item.cost | moneyValue }}</td>
-                <td>{{ item.purchaseDate | dateFormat }}</td>
-                <td>{{ item.reimbursedDate | dateFormat }}</td>
-
-                <!-- Action Icons -->
-                <td class="datatable_btn layout" @click="clickedRow(item)">
-                  <!-- Download Attachment Button -->
-                  <attachment :midAction="midAction" :expense="item" :mode="'expenses'"></attachment>
-
-                  <!-- Edit Button -->
-                  <v-tooltip top>
-                    <template v-slot:activator="{ on }">
-                      <v-btn
-                        :disabled="isEditing() || (isUser && isReimbursed(item)) || midAction"
-                        text
-                        icon
-                        @click="
-                          toTopOfForm();
-                          onSelect(item);
-                        "
-                        v-on="on"
-                      >
-                        <v-icon style="color: #606060;">
-                          edit
-                        </v-icon>
-                      </v-btn>
-                    </template>
-                    <span>Edit</span>
-                  </v-tooltip>
-
-                  <!-- Delete Button -->
-                  <v-tooltip top>
-                    <template v-slot:activator="{ on }">
-                      <v-btn
-                        :disabled="isReimbursed(item) || isEditing() || midAction"
-                        text
-                        icon
-                        @click="
-                          deleting = true;
-                          midAction = true;
-                          propExpense = item;
-                        "
-                        v-on="on"
-                      >
-                        <v-icon style="color: #606060;">
-                          delete
-                        </v-icon>
-                      </v-btn>
-                    </template>
-                    <span>Delete</span>
-                  </v-tooltip>
-
-                  <!-- Unreimburse Button -->
-                  <div v-if="isAdmin">
-                    <v-tooltip top>
-                      <template v-slot:activator="{ on }">
-                        <v-btn
-                          :disabled="!isReimbursed(item) || isEditing() || midAction"
-                          text
-                          icon
-                          @click="
-                            unreimbursing = true;
-                            midAction = true;
-                            propExpense = item;
-                          "
-                          v-on="on"
-                        >
-                          <v-icon style="color: #606060;">
-                            money_off
-                          </v-icon>
-                        </v-btn>
-                      </template>
-                      <span>Unreimburse</span>
-                    </v-tooltip>
-                  </div>
-                </td>
-                <!-- End Action Icons -->
-              </tr>
+            <!-- Cost slot -->
+            <template v-slot:item.cost="{ item }">
+              <td>{{ item.cost | moneyValue }}</td>
             </template>
-            <!-- End rows in datatable -->
+            <!-- Purchase date slot -->
+            <template v-slot:item.purchaseDate="{ item }">
+              <td>{{ item.purchaseDate | dateFormat }}</td>
+            </template>
+            <!-- Reimburse date Slot -->
+            <template v-slot:item.reimburseDate="{ item }">
+              <td>{{ item.reimbursedDate | dateFormat }}</td>
+            </template>
+            <!-- Creation date slot -->
+            <template v-slot:item.createdAt="{ item }">
+              <td>{{ item.createdAt | dateFormat }}</td>
+            </template>
+            <!-- Creation date slot -->
+            <template v-slot:item.createdAt="{ item }">
+              <td>{{ item.createdAt | dateFormat }}</td>
+            </template>
+            <!-- Employee name slot-->
+            <template v-slot: item.employeeName="{item}">
+              <td v-if="isAdmin">{{ item.employeeName }}</td>
+            </template>
+            <!-- Budget Name Slot -->
+            <template v-slot: item.budgetName="{item}">
+              <td v-if="isAdmin">{{ item.budgetName }}</td>
+            </template>
+            <!--Action Items-->
+
+            <template v-slot:item.actions="{ item }">
+              <!-- Download Button-->
+              <td class="datatable_btn layout" @click="clickedRow(item)">
+                <!-- Download Attachment Button -->
+                <attachment :midAction="midAction" :expense="item" :mode="'expenses'"></attachment>
+
+                <!-- Edit Button -->
+                <v-tooltip top>
+                  <template v-slot:activator="{ on }">
+                    <v-btn
+                      :disabled="isEditing() || (isUser && isReimbursed(item)) || midAction"
+                      text
+                      icon
+                      @click="
+                        toTopOfForm();
+                        onSelect(item);
+                      "
+                      v-on="on"
+                    >
+                      <v-icon style="color: #606060;">edit</v-icon>
+                    </v-btn>
+                  </template>
+                  <span>Edit</span>
+                </v-tooltip>
+                <v-tooltip top>
+                  <template v-slot:activator="{ on }">
+                    <v-btn
+                      :disabled="isReimbursed(item) || isEditing() || midAction"
+                      text
+                      icon
+                      @click="
+                        deleting = true;
+                        midAction = true;
+                        propExpense = item;
+                      "
+                      v-on="on"
+                    >
+                      <v-icon style="color: #606060;">
+                        delete
+                      </v-icon>
+                    </v-btn>
+                  </template>
+                  <span>Delete</span>
+                </v-tooltip>
+                <!-- Unreimburse Button -->
+                <v-tooltip top>
+                  <template v-slot:activator="{ on }">
+                    <v-btn
+                      :disabled="!isReimbursed(item) || isEditing() || midAction"
+                      text
+                      icon
+                      @click="
+                        unreimbursing = true;
+                        midAction = true;
+                        propExpense = item;
+                      "
+                      v-on="on"
+                    >
+                      <v-icon style="color: #606060;">
+                        money_off
+                      </v-icon>
+                    </v-btn>
+                  </template>
+                  <span>Unreimburse</span>
+                </v-tooltip>
+              </td>
+            </template>
 
             <!-- Expanded slot in datatable -->
             <template v-slot:expanded-item="{ headers, item }">
@@ -234,8 +245,7 @@
                   <v-card-text>
                     <div class="expandedInfo">
                       <p v-if="item.description">
-                        <b v-if="hasRecipient(item)">Recipient: </b>
-                        <b v-else>Description: </b>
+                        <b>Description: </b>
                         {{ item.description }}
                       </p>
                       <p v-if="!isEmpty(item.note)"><b>Notes: </b>{{ item.note }}</p>
@@ -271,7 +281,6 @@
             </v-alert>
             <!-- End alert for no search results -->
           </v-data-table>
-          <!-- End Expense Datatable -->
           <br />
 
           <!-- Download expense csv button -->
@@ -289,10 +298,10 @@
           <!-- End Confirmation Modals -->
         </v-container>
       </v-card>
-    </v-flex>
+    </v-col>
 
     <!-- Expense Form -->
-    <v-flex v-if="isAdmin || !userIsInactive" lg4 md12 sm12>
+    <v-col v-if="isAdmin || !userIsInactive" cols="12" lg="4">
       <expense-form
         ref="form"
         :isEdit="isEditing()"
@@ -304,19 +313,19 @@
         v-on:update="updateModelInTable"
         v-on:error="displayError"
       ></expense-form>
-    </v-flex>
-  </v-layout>
+    </v-col>
+  </v-row>
 </template>
 
 <script>
 import api from '@/shared/api.js';
-import Attachment from '../components/Attachment.vue';
-import ConvertExpensesToCsv from '../components/ConvertExpensesToCsv.vue';
-import DeleteModal from '../components/DeleteModal.vue';
+import Attachment from '@/components/Attachment.vue';
+import ConvertExpensesToCsv from '@/components/ConvertExpensesToCsv.vue';
+import DeleteModal from '@/components/modals/DeleteModal.vue';
 import employeeUtils from '@/shared/employeeUtils';
-import ExpenseForm from '../components/ExpenseForm.vue';
+import ExpenseForm from '@/components/ExpenseForm.vue';
 import moment from 'moment';
-import UnreimburseModal from '../components/UnreimburseModal.vue';
+import UnreimburseModal from '@/components/modals/UnreimburseModal.vue';
 import _ from 'lodash';
 
 // |--------------------------------------------------|
@@ -331,7 +340,7 @@ import _ from 'lodash';
  * @return String - user's full name
  */
 function getUserName() {
-  return this.expenses.length === 0 ? '' : employeeUtils.fullName(this.userInfo);
+  return employeeUtils.fullName(this.userInfo);
 } // getUserName
 
 /**
@@ -417,6 +426,15 @@ function addModelToTable() {
   this.$set(this.status, 'statusMessage', 'Item was successfully submitted!');
   this.$set(this.status, 'color', 'green');
 } // addModelToTable
+
+/**
+ * Sets all expense attribute values to null.
+ */
+function clearExpense() {
+  this.expense = _.mapValues(this.expense, () => {
+    return null;
+  });
+} // clearExpense
 
 /**
  * Clear the action status that is displayed in the snackbar.
@@ -595,13 +613,13 @@ function isEditing() {
 } // isEditing
 
 /**
- * Checks if a value is empty. Returns true if the value is null or a single character space String.
+ * Checks if a value is empty. Returns true if the value is null or an empty/blank string.
  *
  * @param value - value to check
  * @return boolean - value is empty
  */
 function isEmpty(value) {
-  return value == null || value === ' ' || value === '';
+  return _.isNil(value) || (_.isString(value) && value.trim().length === 0);
 } // isEmpty
 
 /**
@@ -630,21 +648,12 @@ function isReimbursed(expense) {
  * @param item - expense selected
  */
 function onSelect(item) {
-  this.$set(this.expense, 'id', item.id);
-  this.$set(this.expense, 'createdAt', item.createdAt);
-  this.$set(this.expense, 'employeeId', item.employeeId);
-  this.$set(this.expense, 'employeeName', item.employeeName);
-  this.$set(this.expense, 'expenseTypeId', item.expenseTypeId);
-  this.$set(this.expense, 'budgetName', item.budgetName);
-  this.$set(this.expense, 'category', item.category);
+  this.clearExpense();
+  this.expense = _.mergeWith(this.expense, item, (expenseValue, itemValue) => {
+    return _.isNil(itemValue) ? expenseValue : itemValue;
+  });
+
   this.$set(this.expense, 'cost', moneyFilter(item.cost));
-  this.$set(this.expense, 'description', item.description);
-  this.$set(this.expense, 'purchaseDate', item.purchaseDate);
-  this.$set(this.expense, 'reimbursedDate', item.reimbursedDate);
-  this.$set(this.expense, 'note', item.note);
-  this.$set(this.expense, 'receipt', item.receipt);
-  this.$set(this.expense, 'url', item.url);
-  this.$set(this.expense, 'showOnFeed', item.showOnFeed);
 } // onSelect
 
 /**
@@ -781,7 +790,7 @@ async function created() {
 
   let aggregatedExpenses = await api.getAllAggregateExpenses(); // get aggregate expenses
   this.constructAutoComplete(aggregatedExpenses); // set autocomplete options
-}
+} // created
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -813,21 +822,22 @@ export default {
       employees: [], // employee autocomplete options
       employee: null, // employee autocomplete filter
       expense: {
-        id: '',
+        id: null,
         purchaseDate: null,
         reimbursedDate: null,
         note: null,
         url: null,
         createdAt: null,
-        reciept: null,
-        cost: '',
-        description: '',
-        employeeId: '',
-        expenseTypeId: '',
-        catagory: null,
-        showOnFeed: false,
+        receipt: null,
+        cost: null,
+        description: null,
+        employeeId: null,
+        expenseTypeId: null,
+        category: null,
+        showOnFeed: null,
         employeeName: null,
-        budgetName: null
+        budgetName: null,
+        recipient: null
       }, // selected expense
       expenseTypes: [], // expense types
       filter: {
@@ -913,6 +923,7 @@ export default {
   },
   methods: {
     addModelToTable,
+    clearExpense,
     clearStatus,
     clickedRow,
     constructAutoComplete,

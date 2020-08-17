@@ -16,7 +16,7 @@
           :items="activeEmployees"
           :rules="requiredRules"
           :filter="customFilter"
-          :disabled="isReimbursed || isEdit"
+          :disabled="isReimbursed || isEdit || isInactive"
           v-model="expense.employeeId"
           item-text="text"
           label="Employee"
@@ -75,12 +75,13 @@
         <!-- Employee Selection List -->
         <v-autocomplete
           v-if="this.reqRecipient"
-          :items="this.highFiveRecipients"
+          :items="this.recipientOptions"
           :rules="requiredRules"
           :disabled="isReimbursed"
-          v-model="expense.description"
+          v-model="expense.recipient"
           label="Recipient"
           class="form_padding"
+          :placeholder="recipientPlaceholder"
         ></v-autocomplete>
 
         <!-- Description -->
@@ -160,7 +161,7 @@
           :disabled="isInactive"
         ></v-checkbox>
         <file-upload
-          v-if="!isInactive && receiptRequired && ((allowReceipt && isEdit) || !isEdit || isEmpty(expense.receipt))"
+          v-if="receiptRequired && ((allowReceipt && isEdit) || !isEdit || isEmpty(expense.receipt))"
           style="padding-top: 0px; padding-bottom: 0px;"
           @fileSelected="setFile"
           :passedRules="receiptRules"
@@ -174,6 +175,25 @@
           >Current Receipt: {{ this.expense.receipt }}</v-card-text
         >
 
+        <!-- Scan Receipt Button -->
+        <v-tooltip bottom>
+          <template v-slot:activator="{ on, attrs }">
+            <span v-on="on">
+              <v-btn
+                v-if="receiptRequired && ((allowReceipt && isEdit) || !isEdit || isEmpty(expense.receipt))"
+                color="white"
+                @click="scanFile"
+                class="ma-2"
+                :disabled="isInactive || disableScan"
+                v-bind="attrs"
+              >
+                Scan Receipt
+              </v-btn>
+            </span>
+          </template>
+          <span>Scanning only works for pngs and jpegs.</span>
+        </v-tooltip>
+
         <!-- Notes -->
         <v-textarea
           v-model="expense.note"
@@ -184,15 +204,15 @@
         ></v-textarea>
 
         <!-- URL -->
-        <v-text-field
-          v-model="expense.url"
-          :rules="urlRules"
-          label="URL (Optional)"
-          :disabled="isInactive"
-        ></v-text-field>
+        <v-text-field v-model="expense.url" :rules="urlRules" :label="urlLabel" :disabled="isInactive"></v-text-field>
 
         <!-- Show On Feed -->
-        <v-switch v-if="isAdmin" v-model="expense.showOnFeed" label="Have expense show on company feed?"></v-switch>
+        <v-switch
+          v-if="isAdmin"
+          :disabled="isInactive"
+          v-model="expense.showOnFeed"
+          label="Have expense show on company feed?"
+        ></v-switch>
 
         <!-- Buttons -->
         <!-- Cancel Button -->
@@ -225,10 +245,10 @@
 
 <script>
 import api from '@/shared/api.js';
-import ConfirmationBox from './ConfirmationBox.vue';
+import ConfirmationBox from '@/components/modals/ConfirmationBox.vue';
 import dateUtils from '@/shared/dateUtils';
 import employeeUtils from '@/shared/employeeUtils';
-import FileUpload from './FileUpload.vue';
+import FileUpload from '@/components/FileUpload.vue';
 import { getRole } from '@/utils/auth';
 import moment from 'moment';
 import { v4 as uuid } from 'uuid';
@@ -333,6 +353,14 @@ function notesLabel() {
     return 'Notes (optional)';
   }
 }
+/**
+ * Creates the label for the url section base on if it is optional
+ *
+ * @return string - label
+ */
+function urlLabel() {
+  return this.expense.requireURL ? 'URL' : 'URL (optional)';
+}
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -382,7 +410,7 @@ async function addURLInfo(newExpense) {
     if (newExpense.category) {
       this.$set(this.urlInfo, 'category', newExpense.category);
     } else {
-      this.$set(this.urlInfo, 'category', ' ');
+      this.$set(this.urlInfo, 'category', null);
     }
     this.$set(this.urlInfo, 'hits', 1);
     await api.createItem(api.URLS, this.urlInfo);
@@ -427,6 +455,7 @@ function calcAdjustedBudget(employee, expenseType) {
  * Checks how much of the expense is covered and submits the expense.
  */
 async function checkCoverage() {
+  this.isInactive = true;
   if (this.$refs.form.validate()) {
     this.$emit('startAction');
     // form is validated
@@ -628,6 +657,7 @@ async function checkCoverage() {
       }
     }
   }
+  this.isInactive = false;
 } // checkCoverage
 
 /**
@@ -674,7 +704,11 @@ function clearForm() {
   this.$set(this.expense, 'budgetName', null);
   this.$set(this.expense, 'category', null);
   this.$set(this.expense, 'showOnFeed', null);
+  this.$set(this.expense, 'requireURL', null);
+  this.$set(this.expense, 'recipient', null);
 
+  this.reqRecipient = false;
+  this.recipientPlaceholder = null;
   this.originalExpense = this.expense;
   this.purchaseDateFormatted = null;
   this.file = null;
@@ -891,12 +925,13 @@ function isDifferentExpenseType() {
 } // isDifferentExpenseType
 
 /**
- * Checks if a value is empty. Returns true if the value is null or a single character space String.
+ * Checks if a value is empty. Returns true if the value is null or an empty/blank string.
+ *
  * @param value - value to check
  * @return boolean - value is empty
  */
 function isEmpty(value) {
-  return value == null || value === ' ' || value === '';
+  return _.isNil(value) || (_.isString(value) && value.trim().length === 0);
 } // isEmpty
 
 /**
@@ -943,14 +978,242 @@ function parseDate(date) {
  */
 async function setFile(file) {
   if (file) {
+    this.isInactive = true;
     this.file = file;
     this.$set(this.expense, 'receipt', file.name);
-    this.receiptText = await api.extractText(file);
+    this.isInactive = false;
   } else {
     this.file = null;
+    this.$set(this.expense, 'receipt', null);
     this.receipt = null;
   }
 } // setFile
+
+/**
+ * Scans the receipt file.
+ */
+async function scanFile() {
+  let file = this.file;
+  if (file) {
+    this.isInactive = true;
+    //go get text data from textract and comprehend
+
+    this.receiptObject = await api.extractText(file);
+    if (this.receiptObject instanceof Error) {
+      this.isInactive = false;
+      this.receiptObject = null;
+      return;
+    }
+
+    let totalPrice;
+    let failed = false;
+
+    _.forEach(this.receiptObject.KeyValueSets, (relationship) => {
+      //loop through keyvaluesets
+
+      let keys = Object.values(relationship.Keys); //grab the text and confidence objects
+      let keyText = '';
+      _.forEach(keys, (key) => {
+        // loop through each one
+        keyText += key.Text.toLowerCase() + ' ';
+      });
+
+      if (_.includes(keyText, 'total') && !_.includes(keyText, 'sub') && !_.includes(keyText, 'tax')) {
+        //check if there is a total in any relationship
+        //if there is loop throught the values in that relationship, and build the text.
+
+        let valText = '';
+        let valConfidence = 100;
+        //build value string
+        _.forEach(relationship.Values, (value) => {
+          valText += value.Text + '';
+          valConfidence = Math.min(valConfidence, value.Confidence); //key: Total: Values: USD confidence 99 141500 confidence 50
+        });
+        //set string to format that parsefloat will like and parse it
+        valText = preformatFloat(valText);
+        totalPrice = parseFloat(valText.replace(/[^\d.]/g, ''));
+
+        //check to see if the confidence is above acceptable values and that the parse worked
+        if (valConfidence < 90 || typeof totalPrice != 'number' || isNaN(totalPrice)) {
+          failed = true;
+        }
+      }
+    });
+    let isTotal = false;
+    let currentTotal = null;
+    if (totalPrice == null) {
+      //if there was no relationship that included total do it with words
+      _.forEach(this.receiptObject.Words, (word) => {
+        //loop through word object
+        if (isTotal) {
+          //if the previous word was total
+          if (word.Confidence >= 90) {
+            //if the confidence is higher than 90/100 parse the word to look for a number
+            let number = word.Text;
+            number = preformatFloat(number);
+            currentTotal = parseFloat(number.replace(/[^\d.]/g, ''));
+            if (typeof currentTotal != 'number' || isNaN(currentTotal)) {
+              //if it wasn't a number or parsefloat screwed up it failed
+              currentTotal = null;
+            }
+            if (currentTotal != null) {
+              totalPrice = currentTotal;
+            }
+          }
+          //switch isTotal back
+          isTotal = false;
+        }
+        let wordText = word.Text.toLowerCase();
+        if (_.includes(wordText, 'total') && !_.includes(wordText, 'sub') && !_.includes(wordText, 'tax')) {
+          //if the current word is total
+          isTotal = true;
+        }
+      });
+      if (totalPrice == null || typeof totalPrice != 'number' || isNaN(totalPrice)) {
+        failed = true;
+      }
+    }
+    //if there is no relationship with the total
+    //--find the word total in words and check if the next word is a number
+    //--if that number has high confidence use it as the total
+    //else if there is no total word at all
+
+    //check comprehend data for date objects
+    //see if what it found is able to be converted to moment
+    //format it so it is in the correct format
+    //set purchase date
+    let firstDate = null;
+    // COMMERCIAL_ITEM
+    let commercialItem = '';
+    // EVENT
+    let event = '';
+    // LOCATION
+    let location = '';
+    // ORGANIZATION
+    let organization = '';
+    // TITLE
+    let title = '';
+    _.forEach(this.receiptObject.comprehend.Entities, (entity) => {
+      if (entity.Type == 'DATE') {
+        if (entity.Score > 0.9 && firstDate == null) {
+          firstDate = entity.Text;
+        }
+      } else if (entity.Type == 'COMMERCIAL_ITEM') {
+        if (entity.Score > 0.9) {
+          commercialItem += entity.Text + ' ';
+        }
+      } else if (entity.Type == 'EVENT') {
+        if (entity.Score > 0.9) {
+          event += entity.Text + ' ';
+        }
+      } else if (entity.Type == 'LOCATION') {
+        if (entity.Score > 0.9) {
+          location += entity.Text + ' ';
+        }
+      } else if (entity.Type == 'ORGANIZATION') {
+        if (entity.Score > 0.9) {
+          organization += entity.Text + ' ';
+        }
+      } else if (entity.Type == 'TITLE') {
+        if (entity.Score > 0.9) {
+          title += entity.Text + ' ';
+        }
+      }
+    });
+    let adjustNote = '';
+    if (title != '') {
+      adjustNote += 'Title: ' + title + '\n';
+    }
+    if (organization != '') {
+      adjustNote += 'Organization: ' + organization + '\n';
+    }
+    if (location != '') {
+      adjustNote += 'Location: ' + location + '\n';
+    }
+    if (event != '') {
+      adjustNote += 'Event: ' + event + '\n';
+    }
+    if (commercialItem != '') {
+      adjustNote += 'Commercial Item: ' + commercialItem;
+    }
+    if (adjustNote != '') {
+      adjustNote = '\n\nValues generated from receipt:\n' + adjustNote;
+      adjustNote = adjustNote
+        .split(' ')
+        .filter(function (item, i, allItems) {
+          return i == allItems.indexOf(item);
+        })
+        .join(' ');
+    }
+    this.isInactive = false;
+
+    if (firstDate != null && this.expense.purchaseDate == null) {
+      let date = moment(firstDate);
+      date = parseDate(date.format('YYYY-MM-DD'));
+      this.expense.purchaseDate = date;
+    }
+    if (!failed && (this.expense.cost == 0 || this.expense.cost == null)) {
+      this.expense.cost = totalPrice;
+    }
+    if (!isEmpty(this.expense.note)) {
+      // expense has a note
+      this.expense.note += `\n\n${adjustNote}`;
+    } else {
+      // expense does not have a note
+      this.expense.note = adjustNote;
+    }
+  }
+} // scanFile
+
+/**
+ * preformats different US/Europe money formats for parsing
+ *
+ * @param float - number to be formatted
+ */
+function preformatFloat(float) {
+  if (!float) {
+    return '';
+  }
+
+  //Index of first comma
+  const posC = float.indexOf(',');
+
+  if (posC === -1) {
+    //No commas found, treat as float
+    return float;
+  }
+
+  //Index of first full stop
+  const posFS = float.indexOf('.');
+
+  if (posFS === -1) {
+    //Uses commas and not full stops - swap them (e.g. 1,23 --> 1.23)
+    return float.replace(/,/g, '.');
+  }
+
+  //Uses both commas and full stops - ensure correct order and remove 1000s separators
+  return posC < posFS ? float.replace(/,/g, '') : float.replace(/\./g, '').replace(',', '.');
+} // preformatFloat
+
+/**
+ * Sets the recipients to choose from based on expense type.
+ */
+function setRecipientOptions() {
+  // creating or updating an expense as an admin
+  this.recipientOptions = _.compact(
+    this.activeEmployees.map((employee) => {
+      if (employee.value == this.userInfo.id || employee.workStatus == 0 || this.expense.employeeId == employee.value) {
+        if (this.userInfo.id != this.expense.employeeId && !this.asUser) {
+          // return employeeUtils.fullName(employee);
+          return employee;
+        }
+        return;
+      }
+      // return employeeUtils.fullName(employee);
+      return employee;
+    })
+  );
+} // setRecipientOptions
 
 /**
  * Submits an expense.
@@ -960,6 +1223,20 @@ async function submit() {
   if (this.$refs.form != undefined || this.$refs.form != null) {
     if (this.$refs.form.validate()) {
       // NOTE: this second validate may be unnecessary. included in checkCoverage()
+
+      // set the description if a recipient is required
+      if (this.reqRecipient) {
+        let giver = _.find(this.employees, (employee) => employee.value == this.expense.employeeId);
+        let receiver = _.find(this.employees, (employee) => employee.value == this.expense.recipient);
+        let expenseType = _.find(this.expenseTypes, (type) => this.expense.expenseTypeId === type.value);
+
+        if (giver && receiver && expenseType) {
+          this.expense.description = `${giver.text} gave ${receiver.text} a ${expenseType.budgetName}`;
+        }
+      } else {
+        this.expense.recipient = null;
+      }
+
       if (this.isEmpty(this.expense.id)) {
         // creating a new expense
         await this.createNewEntry();
@@ -1090,21 +1367,8 @@ async function created() {
   });
   this.activeEmployees = _.compact(this.activeEmployees);
 
-  // creating or updating an expense as an admin
-  this.highFiveRecipients = _.compact(
-    this.activeEmployees.map((employee) => {
-      if (employee.value == this.userInfo.id || employee.workStatus == 0 || this.expense.employeeId == employee.value) {
-        if (this.userInfo.id != this.expense.employeeId && !this.asUser) {
-          // return employeeUtils.fullName(employee);
-          return employee.text;
-        }
+  this.setRecipientOptions();
 
-        return;
-      }
-      // return employeeUtils.fullName(employee);
-      return employee.text;
-    })
-  );
   // set aggregate expense types
   let expenseTypes = await api.getItems(api.EXPENSE_TYPES);
   this.expenseTypes = _.map(expenseTypes, (expenseType) => {
@@ -1124,7 +1388,8 @@ async function created() {
       categories: expenseType.categories,
       accessibleBy: expenseType.accessibleBy,
       hasRecipient: expenseType.hasRecipient,
-      alwaysOnFeed: expenseType.alwaysOnFeed
+      alwaysOnFeed: expenseType.alwaysOnFeed,
+      requireURL: expenseType.requireURL
     };
   });
   this.clearForm();
@@ -1151,6 +1416,10 @@ Number.prototype.pad = function (size) {
 // |--------------------------------------------------|
 
 export default {
+  beforeDestroy() {
+    window.EventBus.$off('canceledSubmit');
+    window.EventBus.$off('confirmSubmit');
+  },
   components: {
     ConfirmationBox,
     FileUpload
@@ -1162,7 +1431,8 @@ export default {
     isUser,
     receiptRequired,
     notesRules,
-    notesLabel
+    notesLabel,
+    urlLabel
   },
   created,
   data() {
@@ -1197,8 +1467,9 @@ export default {
       file: undefined, // receipt
       myBudgetsView: false, // if on myBudgetsView page
       hint: '', // form hints
-      highFiveRecipients: [], // list of active employees to choose for high five
-      isInactive: false, // employee is inactive
+      recipientOptions: [], // list of active employees to choose for high five
+      recipientPlaceholder: '',
+      isInactive: false, // employee is inactive -- also used for uploading reciepts dont delete
       isCovered: false,
       isOverCovered: false,
       loading: false, // loading
@@ -1212,24 +1483,26 @@ export default {
       reimbursedDateFormatted: null, // formatted reimburse date
       selectedEmployee: {}, // selected employees
       selectedExpenseType: {}, // selected expense types
-      selectedRecipient: {}, // the recipent selected for a high five
+      selectedRecipient: {}, // the recipient selected for a high five
       confirming: false, // budget overage confirmation box activator
       urlInfo: {
-        id: ' ',
-        category: '',
+        id: null,
+        category: null,
         hits: 0
       }, // training url info
       urlRules: [
+        (v) => !this.expense.requireURL || !!v || 'URL is required. Only http(s) are accepted.',
         (v) =>
           !v ||
-          v == ' ' ||
+          v == null ||
           /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)/.test(
             v
           ) ||
           'URL must be valid. Only http(s) are accepted.'
       ], // rules for training url
       userInfo: {}, // user info
-      valid: false // form validity
+      valid: false, // form validity
+      disableScan: true
     };
   },
   methods: {
@@ -1253,8 +1526,10 @@ export default {
     isReceiptRequired,
     moneyFilter,
     parseDate,
+    setRecipientOptions,
     submit,
     setFile,
+    scanFile,
     updateExistingEntry
   },
   props: [
@@ -1275,6 +1550,7 @@ export default {
       this.selectedExpenseType = _.find(this.expenseTypes, (expenseType) => {
         return expenseType.value === this.expense.expenseTypeId;
       });
+      this.requireURLET = this.selectedExpenseType && this.selectedExpenseType.requireURL;
 
       if (this.selectedExpenseType) {
         // set hint
@@ -1296,8 +1572,11 @@ export default {
         // set requires recipient
         this.reqRecipient = this.selectedExpenseType.hasRecipient;
 
-        // set show on company feed
-        if (!_.isEqual(this.originalExpense, this.expense)) {
+        let localRecipient = _.find(this.employees, (employee) => employee.value == this.expense.recipient);
+        this.recipientPlaceholder = localRecipient ? localRecipient.text : '';
+
+        // set show on company feed and require url
+        if (!_.isEqual(this.originalExpense, this.expense) || _.isNil(this.expense.id)) {
           // changing the expense type
           if (this.selectedExpenseType.alwaysOnFeed) {
             // if expense type is always on feed
@@ -1316,14 +1595,33 @@ export default {
             }
           }
         }
+
+        if (this.selectedExpenseType.requireURL) {
+          // if expense type always requires url
+          this.expense.requireURL = true;
+        } else {
+          // if expense type does not always require url
+          if (_.isEmpty(this.selectedExpenseType.categories)) {
+            // expense type does not have categories
+            this.expense.requireURL = false;
+          } else {
+            // expense type has categories
+            let category = _.find(this.selectedExpenseType.categories, (category) => {
+              return category == this.expense.category;
+            });
+            this.expense.requireURL = category ? category.requireURL : false;
+          }
+        }
       } else {
         this.hint = '';
       }
     },
     'expense.category': function () {
       if (
-        !_.isEqual(this.originalExpense.category, this.expense.category) ||
-        !_.isEqual(this.originalExpense.expenseTypeId, this.expense.expenseTypeId)
+        !_.isNil(this.selectedExpenseType) &&
+        (!_.isEqual(this.originalExpense.category, this.expense.category) ||
+          !_.isEqual(this.originalExpense.expenseTypeId, this.expense.expenseTypeId) ||
+          _.isNil(this.expense.id))
       ) {
         // category or expense type is changed
         if (this.selectedExpenseType.alwaysOnFeed) {
@@ -1343,31 +1641,31 @@ export default {
           }
         }
       } else {
+        // category and expense type are not changed
         this.expense.showOnFeed = this.originalExpense.showOnFeed;
+      }
+
+      if (!_.isNil(this.selectedExpenseType)) {
+        if (this.selectedExpenseType.requireURL) {
+          // if expense type requires url
+          this.expense.requireURL = true;
+        } else {
+          // if expense type does not always require url
+          if (_.isEmpty(this.selectedExpenseType.categories)) {
+            // expense type does not have categories
+            this.expense.requireURL = false;
+          } else {
+            // expense type has categories
+            let category = _.find(this.selectedExpenseType.categories, (category) => {
+              return category.name == this.expense.category;
+            });
+            this.expense.requireURL = category ? category.requireURL : false;
+          }
+        }
       }
     },
     'expense.employeeId': function () {
-      //watches admin accessible employee field to know who can be a recipient
-      this.highFiveRecipients = _.compact(
-        this.activeEmployees.map((employee) => {
-          if (
-            employee.value == this.userInfo.id || //current value is the user
-            employee.workStatus == 0 || //value isn't an invalid employee
-            this.expense.employeeId == employee.value //selected employee
-          ) {
-            //this is a bit of a mess but it makes sure admins can select themselves as recipients
-            if (
-              this.userInfo.id != this.expense.employeeId &&
-              !this.asUser &&
-              employee.value != this.expense.employeeId
-            ) {
-              return employee.text;
-            }
-            return;
-          }
-          return employee.text;
-        })
-      );
+      this.setRecipientOptions();
     },
     'expense.purchaseDate': function () {
       this.purchaseDateFormatted = this.formatDate(this.expense.purchaseDate) || this.purchaseDateFormatted;
@@ -1381,6 +1679,18 @@ export default {
       //fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
       if (this.expense.reimbursedDate !== null && !this.formatDate(this.expense.reimbursedDate)) {
         this.expense.reimbursedDate = null;
+      }
+    },
+    file: function () {
+      //for disabling the scan button
+      if (this.file == null) {
+        //if no file
+        this.disableScan = true;
+      } else if (this.file.type != 'image/jpeg' && this.file.type != 'image/png') {
+        //if file isn't jpg or png
+        this.disableScan = true;
+      } else {
+        this.disableScan = false;
       }
     }
   }

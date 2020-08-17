@@ -56,6 +56,15 @@ function getAllActiveEmployeeBudgets(id) {
   return execute('get', `/${UTILITY}/getAllActiveEmployeeBudgets/${id}`);
 }
 
+/**
+ * Get basecamp avatars for all employees in the Case Consulting Basecamp.
+ *
+ * @return object - Employee Basecamp avatar data
+ */
+function getBasecampAvatars() {
+  return execute('get', `/${BASECAMP}/getBasecampAvatars`);
+} // getBasecampAvatars
+
 function getEmployeeBudget(id, expenseTypeId, date) {
   return execute('get', `/${UTILITY}/getEmployeeBudget/${id}/${expenseTypeId}/${date}`);
 }
@@ -185,8 +194,8 @@ function getPTOBalances(employeeNumber) {
   return execute('get', `/${TSHEETS}/getPTOBalances/${employeeNumber}`);
 }
 
-function getTimeSheets(employeeNumber, startDate, endDate) {
-  return execute('get', `/${TSHEETS}/getTimeSheets/${employeeNumber}/${startDate}/${endDate}`);
+function getMonthlyHours(employeeNumber) {
+  return execute('get', `/${TSHEETS}/getMonthlyHours/${employeeNumber}`);
 }
 function getTwitterToken() {
   return execute('get', `/${TWITTER}/getTwitterToken`);
@@ -194,38 +203,71 @@ function getTwitterToken() {
 function getCaseTimeline() {
   return execute('get', `${TWITTER}/getCaseTimeline`);
 }
-
 function getFeedEvents() {
   return execute('get', `/${BASECAMP}/getFeedEvents`);
 }
+function getModerationLabel(img) {
+  return execute('post', `blog/getModerationLabel/${img}`);
+}
+
+function getKeyPhrases(data) {
+  return execute('post', `blog/getKeyPhrases`, data);
+}
+
+async function uploadBlogAttachment(file) {
+  let formData = new FormData();
+  formData.append('image', file);
+
+  // inject the accessToken for each request
+  let accessToken = getAccessToken();
+  return client({
+    method: 'post',
+    url: `blog/uploadBlogAttachmentToS3/${file.name}`,
+    data: formData,
+    headers: {
+      Authorization: `Bearer ${accessToken}`
+    }
+  })
+    .then((response) => {
+      return response.data;
+    })
+    .catch((err) => {
+      return err;
+    });
+}
+
 export default {
-  extractText,
-  getEmployeeBudget,
-  getAllActiveEmployeeBudgets,
-  getAllEmployeeExpenses,
-  getAllExpenseTypeExpenses,
-  getFiscalDateViewBudgets,
-  getEmployeeBudgets,
-  getFeedEvents,
-  getItems,
-  getItem,
-  getAttachment,
   createAttachment,
-  getURLInfo,
   createItem,
-  updateItem,
   deleteAttachment,
   deleteItem,
+  extractText,
+  getAllActiveEmployeeBudgets,
   getAllAggregateExpenses,
+  getAllEmployeeExpenses,
   getAllEvents,
   getAllExpenses,
-  getCountries,
-  getRole,
-  getUser,
-  getPTOBalances,
-  getTimeSheets,
-  getTwitterToken,
+  getAllExpenseTypeExpenses,
+  getAttachment,
+  getBasecampAvatars,
   getCaseTimeline,
+  getCountries,
+  getEmployeeBudget,
+  getEmployeeBudgets,
+  getFeedEvents,
+  getFiscalDateViewBudgets,
+  getItem,
+  getItems,
+  getKeyPhrases,
+  getModerationLabel,
+  getPTOBalances,
+  getRole,
+  getMonthlyHours,
+  getTwitterToken,
+  getURLInfo,
+  getUser,
+  updateItem,
+  uploadBlogAttachment,
   EXPENSE_TYPES,
   EXPENSES,
   EMPLOYEES,

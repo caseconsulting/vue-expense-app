@@ -1,6 +1,6 @@
 <!-- Confirmation box should only be displayed if the expense exceeds the available budget remaining -->
 <template>
-  <v-layout row justify-center>
+  <div>
     <v-dialog v-model="activate" persistent max-width="330">
       <v-card>
         <v-card-title v-if="isCovered" class="headline"
@@ -42,10 +42,11 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
-  </v-layout>
+  </div>
 </template>
 
 <script>
+import _ from 'lodash';
 // |--------------------------------------------------|
 // |                                                  |
 // |                     METHODS                      |
@@ -88,13 +89,13 @@ function emit(msg, data) {
 } // emit
 
 /**
- * Checks if a value is empty. Returns true if the value is null or a single character space String.
+ * Checks if a value is empty. Returns true if the value is null or an empty/blank string.
  *
  * @param value - value to check
  * @return boolean - value is empty
  */
 function isEmpty(value) {
-  return value == null || value === ' ' || value === '';
+  return _.isNil(value) || (_.isString(value) && value.trim().length === 0);
 } // isEmpty
 
 // |--------------------------------------------------|
@@ -115,7 +116,6 @@ export default {
     }
   },
   methods: {
-    confirm,
     emit,
     isEmpty
   },

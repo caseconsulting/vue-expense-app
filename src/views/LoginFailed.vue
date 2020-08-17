@@ -6,7 +6,10 @@
     </div>
     <v-btn @click="login()" id="custom-button-color" large>Login</v-btn>
     <div>
-      <h2 class="mt-5 red--text">Invalid Login<br />Please Use @consultwithcase email address</h2>
+      <h2 class="mt-5 red--text">
+        Invalid Login - Email not registered with an employee<br />Use @consultwithcase email address or contact your
+        administrator
+      </h2>
     </div>
     <div>
       <img src="https://media.giphy.com/media/3ohzdQ1IynzclJldUQ/giphy.gif" />

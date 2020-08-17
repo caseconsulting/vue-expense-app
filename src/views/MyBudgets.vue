@@ -1,5 +1,5 @@
 <template>
-  <v-layout row wrap justify-center>
+  <v-row>
     <!-- Status Alert -->
     <v-snackbar
       v-model="status.statusType"
@@ -17,76 +17,74 @@
     </v-snackbar>
 
     <!-- Title -->
-    <v-flex v-if="!isMobile" lg8 md12 sm12>
+    <v-col v-if="!isMobile" cols="12" lg="8">
       <v-row style="height: 100%;" align="center" justify="center">
         <h1>Budget Statistics for {{ employee.firstName }} {{ employee.lastName }}</h1>
       </v-row>
-    </v-flex>
+    </v-col>
 
     <!-- Anniversary Date -->
-    <v-flex lg4 v-if="!isMobile">
-      <v-flex>
-        <v-card @click="changingBudgetView = true" hover>
-          <v-card-title>
-            <!-- display the next anniversary date -->
-            <div v-if="viewingCurrentBudgetYear">
-              <h3 class="pt-4 font-16">Anniversary Date: {{ getAnniversary }}</h3>
-              <div @mouseover="display = !display" @mouseleave="display = !display" class="pt-4 font-14">
-                <div v-if="display">Days Until: {{ getDaysUntil }}</div>
-                <div v-else>Seconds Until: {{ getSecondsUntil }}</div>
-              </div>
+    <v-col cols="12" lg="4" v-if="!isMobile">
+      <v-card @click="changingBudgetView = true" hover>
+        <v-card-title>
+          <!-- display the next anniversary date -->
+          <div v-if="viewingCurrentBudgetYear">
+            <h3 class="pt-4 font-16">Anniversary Date: {{ getAnniversary }}</h3>
+            <div @mouseover="display = !display" @mouseleave="display = !display" class="pt-4 font-14">
+              <div v-if="display">Days Until: {{ getDaysUntil }}</div>
+              <div v-else>Seconds Until: {{ getSecondsUntil }}</div>
             </div>
-            <!-- Display the budget history year -->
-            <div v-else>
-              <h3 class="pt-4 font-16">
-                Viewing budgets from {{ this.getFiscalYearView }} - {{ this.getFiscalYearView + 1 }}
-              </h3>
-              <div class="pt-4 font-14">[Inactive Budget]</div>
-            </div>
-            <v-spacer></v-spacer>
-            <v-icon style="margin-right: 10px;">history</v-icon>
-          </v-card-title>
-        </v-card>
-      </v-flex>
-    </v-flex>
+          </div>
+          <!-- Display the budget history year -->
+          <div v-else>
+            <h3 class="pt-4 font-16">
+              Viewing budgets from {{ this.getFiscalYearView }} - {{ this.getFiscalYearView + 1 }}
+            </h3>
+            <div class="pt-4 font-14">[Inactive Budget]</div>
+          </div>
+          <v-spacer></v-spacer>
+          <v-icon style="margin-right: 10px;">history</v-icon>
+        </v-card-title>
+      </v-card>
+    </v-col>
 
     <!-- Expense Data -->
-    <v-flex xs12 sm12 md12 lg8>
-      <v-flex v-if="loading" text-center>
+    <v-col cols="12" lg="8">
+      <div v-if="loading" text-center>
         <v-progress-circular indeterminate size="64" color="#bc3825"></v-progress-circular>
-      </v-flex>
+      </div>
 
-      <v-flex v-else text-center class="pt-0 font-13">
+      <div v-else text-center class="pt-0 font-13">
         <budget-table v-if="!loading" :employee="expenseTypeData"></budget-table>
         <budget-chart
           v-if="!loading && !isMobile && !adminCall"
           :options="drawGraph.optionSet"
           :chart-data="drawGraph.dataSet"
         ></budget-chart>
-      </v-flex>
-    </v-flex>
+      </div>
+    </v-col>
 
     <!-- Expense Form-->
-    <v-flex v-if="employ == null && !isInactive && viewingCurrentBudgetYear" xs12 sm12 md12 lg4>
-      <v-flex text-center lg12 md12 sm12>
+    <v-col v-if="employ == null && !isInactive && viewingCurrentBudgetYear" cols="12" lg="4">
+      <div text-center>
         <expense-form :expense="expense" v-on:error="displayError"></expense-form>
-      </v-flex>
-    </v-flex>
+      </div>
+    </v-col>
     <budget-select-modal
       :activate="changingBudgetView"
       :budgetYears="this.budgetYears"
       :current="this.fiscalDateView"
       :hireDate="this.hireDate"
     ></budget-select-modal>
-  </v-layout>
+  </v-row>
 </template>
 
 <script>
 import api from '@/shared/api.js';
-import BudgetChart from '../components/BudgetChart.vue';
-import BudgetSelectModal from '../components/BudgetSelectModal.vue';
-import BudgetTable from '../components/BudgetTable.vue';
-import ExpenseForm from '../components/ExpenseForm.vue';
+import BudgetChart from '@/components/BudgetChart.vue';
+import BudgetSelectModal from '@/components/modals/BudgetSelectModal.vue';
+import BudgetTable from '@/components/BudgetTable.vue';
+import ExpenseForm from '@/components/ExpenseForm.vue';
 import MobileDetect from 'mobile-detect';
 import moment from 'moment';
 import pattern from 'patternomaly';

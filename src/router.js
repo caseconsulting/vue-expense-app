@@ -11,6 +11,8 @@ import Help from '@/views/Help.vue';
 import Callback from '@/views/Callback';
 import EmployeeHome from '@/views/MyBudgets.vue';
 import Home from '@/views/Home.vue';
+import Blog from '@/views/Blog.vue';
+import PostEditor from '@/views/PostEditor.vue';
 import TrainingAnalytics from '@/views/TrainingAnalytics';
 import { requireAuth, isAdmin } from '@/utils/auth';
 import multiguard from 'vue-router-multiguard';
@@ -39,7 +41,8 @@ const router = new Router({
     {
       path: '/expenseTypes',
       name: 'expenseTypes',
-      component: ExpenseTypes
+      component: ExpenseTypes,
+      beforeEnter: requireAuth
     },
     {
       path: '/employees',
@@ -66,6 +69,12 @@ const router = new Router({
       beforeEnter: requireAuth
     },
     {
+      path: '/help/expenseTypes',
+      name: 'help3',
+      component: Help,
+      beforeEnter: requireAuth
+    },
+    {
       path: '/myBudgets',
       name: 'myBudgets',
       component: EmployeeHome,
@@ -86,12 +95,25 @@ const router = new Router({
     {
       path: '/training',
       name: 'training',
-      component: TrainingAnalytics
+      component: TrainingAnalytics,
+      beforeEnter: requireAuth
     },
     {
       path: '/employee/:id',
       name: 'employee',
       component: Employee,
+      beforeEnter: requireAuth
+    },
+    {
+      path: '/blog',
+      name: 'blog',
+      component: Blog,
+      beforeEnter: requireAuth
+    },
+    {
+      path: '/postEditor/:id',
+      name: 'postEditor',
+      component: PostEditor,
       beforeEnter: requireAuth
     }
   ]

@@ -29,7 +29,7 @@
           ></v-autocomplete>
         </v-card-title>
 
-        <!-- Unreimbursed Datatable -->
+        <!-- NEW DATA TABLE -->
         <v-data-table
           :headers="headers"
           :items="filteredItems"
@@ -41,8 +41,49 @@
           show-select
           item-key="key"
           class="elevation-1 text-center"
+          @click:row="clickedRow"
         >
-          <!-- Check box in datatable header -->
+          <!-- Select item slot in data table -->
+          <template v-slot:item.data-table-select="{ item }">
+            <v-checkbox
+              :input-value="item.checkBox.all"
+              :indeterminate="item.checkBox.indeterminate"
+              primary
+              hide-details
+              @click.stop="
+                toggleGroup(item);
+                determineShowOnFeed(item);
+              "
+              class="ma-0"
+            >
+            </v-checkbox>
+          </template>
+          <!-- Employee Name slot in data table-->
+          <template v-slot:item.employeeName="{ item }"
+            ><v-badge
+              v-if="item.expenses.length > 1"
+              :content="item.expenses.length"
+              :value="true"
+              :left="true"
+              :offset-x="-10"
+              color="grey"
+            ></v-badge>
+            {{ item.employeeName }}</template
+          >
+          <!-- Show on feed item slot in data table -->
+          <template v-slot:item.showOnFeed="{ item }">
+            <v-switch
+              :input-value="item.showSwitch && item.selected"
+              @click.native.stop
+              @change="toggleShowOnFeedGroup(item)"
+              :disabled="!item.checkBox.all"
+            ></v-switch>
+          </template>
+          <!-- Item cost in data table slot -->
+          <template v-slot:item.cost="{ item }">
+            <p id="money-team" style="margin-bottom: 0px;">{{ getBudgetTotal(item.expenses) | moneyValue }}</p>
+          </template>
+          <!-- Header select slot in data table -->
           <template v-slot:header.data-table-select>
             <v-checkbox
               :input-value="mainCheckBox.all"
@@ -51,59 +92,9 @@
               hide-details
               @click.stop="toggleAll"
               class="ma-0"
-            ></v-checkbox>
+            >
+            </v-checkbox>
           </template>
-          <!-- End check box in datatable header -->
-
-          <!-- Rows in datatable -->
-          <template v-slot:item="{ item }">
-            <tr @click="clickedRow(item)">
-              <!--  Checkbox for individual expense  -->
-              <td>
-                <v-checkbox
-                  :input-value="item.checkBox.all"
-                  :indeterminate="item.checkBox.indeterminate"
-                  primary
-                  hide-details
-                  @click.stop="
-                    toggleGroup(item);
-                    determineShowOnFeed(item);
-                  "
-                  class="ma-0"
-                >
-                </v-checkbox>
-              </td>
-              <!-- Employee Name -->
-              <td>
-                <v-badge
-                  v-if="item.expenses.length > 1"
-                  :content="item.expenses.length"
-                  :value="true"
-                  :left="true"
-                  :offset-x="-10"
-                  color="grey"
-                ></v-badge>
-                {{ item.employeeName }}
-              </td>
-              <!-- Budget Name -->
-              <td>{{ item.budgetName }}</td>
-
-              <!-- Total Expense Amount -->
-              <td id="money-team">{{ getBudgetTotal(item.expenses) | moneyValue }}</td>
-
-              <!-- Show On Feed -->
-              <td style="width: 4px;">
-                <v-switch
-                  :input-value="item.showSwitch && item.selected"
-                  @click.native.stop
-                  @change="toggleShowOnFeedGroup(item)"
-                  :disabled="!item.checkBox.all"
-                ></v-switch>
-              </td>
-            </tr>
-          </template>
-          <!-- End rows in datatable -->
-
           <!-- Expanded slot in datatable -->
           <template v-slot:expanded-item="{ headers, item }">
             <td :colspan="headers.length" class="pa-0">
@@ -114,30 +105,26 @@
               ></unrolled-table-info>
             </td>
           </template>
-          <!-- End expanded slot in datatable -->
         </v-data-table>
-        <!-- End unreimbursed datatable -->
-
+        <!-- NEW DATA TABLE -->
         <!-- Reimburse Button -->
-        <v-flex offset-md10>
-          <v-fab-transition class="reimburse_button">
-            <v-btn
-              @click="buttonClicked = true"
-              id="custom-button-color"
-              :loading="reimbursing"
-              v-show="showReimburseButton"
-              fab
-              dark
-              large
-              bottom
-              left
-              fixed
-              class="reimburse_button"
-            >
-              <icon name="dollar-sign"></icon>
-            </v-btn>
-          </v-fab-transition>
-        </v-flex>
+        <v-fab-transition class="reimburse_button">
+          <v-btn
+            @click="buttonClicked = true"
+            id="custom-button-color"
+            :loading="reimbursing"
+            v-show="showReimburseButton"
+            fab
+            dark
+            large
+            bottom
+            left
+            fixed
+            class="reimburse_button"
+          >
+            <icon name="dollar-sign"></icon>
+          </v-btn>
+        </v-fab-transition>
       </v-container>
 
       <!-- Activate Reimburse Modal -->
@@ -153,8 +140,8 @@
 <script>
 import api from '@/shared/api.js';
 import moment from 'moment';
-import ReimburseModal from './ReimburseModal.vue';
-import UnrolledTableInfo from './UnrolledTableInfo.vue';
+import ReimburseModal from '@/components/modals/ReimburseModal.vue';
+import UnrolledTableInfo from '@/components/UnrolledTableInfo.vue';
 import _ from 'lodash';
 
 // |--------------------------------------------------|
@@ -262,15 +249,6 @@ function checkAllBoxes() {
 } // checkAllBoxes
 
 /**
- * Clears the response status snackbar.
- */
-function clearStatus() {
-  this.$set(this.status, 'statusType', undefined);
-  this.$set(this.status, 'statusMessage', '');
-  this.$set(this.status, 'color', '');
-} // clearStatus
-
-/**
  * Expands an expense. Adds the expense to expanded row when clicked.
  *
  * @param value - expense to expand
@@ -322,34 +300,16 @@ function constructAutoComplete(aggregatedData) {
  */
 function createExpenses(aggregatedData) {
   return _.map(aggregatedData, (expense) => {
-    return {
-      budgetName: expense.budgetName,
-      cost: expense.cost,
-      description: expense.description,
-      employeeName: expense.employeeName,
-      expenseTypeId: expense.expenseTypeId,
-      firstName: expense.firstName,
-      id: expense.id,
-      lastName: expense.lastName,
-      middleName: expense.middleName,
-      note: expense.note,
-      purchaseDate: expense.purchaseDate,
-      receipt: expense.receipt,
-      reimbursedDate: expense.reimbursedDate,
-      employeeId: expense.employeeId,
+    let additionalAttributes = {
       checkBox: {
         all: false,
         indeterminate: false
       },
       selected: false,
       showSwitch: false,
-      url: expense.url,
-      category: expense.category,
-      createdAt: expense.createdAt,
-      failed: false,
-      showOnFeed: expense.showOnFeed,
-      disableShowOnFeedToggle: expense.disableShowOnFeedToggle
+      failed: false
     };
+    return _.merge(expense, additionalAttributes);
   });
 } // createExpenses
 
@@ -473,13 +433,13 @@ function groupEmployeeExpenses(expenses) {
 } // groupEmployeeExpenses
 
 /**
- * Checks if a value is empty. Returns true if the value is null or a single character space String.
+ * Checks if a value is empty. Returns true if the value is null or an empty/blank string.
  *
  * @param value - value to check
  * @return boolean - value is empty
  */
 function isEmpty(value) {
-  return value == null || value === ' ' || value === '';
+  return _.isNil(value) || (_.isString(value) && value.trim().length === 0);
 } // isEmpty
 
 /**
@@ -535,7 +495,7 @@ async function reimburseExpenses() {
       return await _.forEach(budget.expenses, async (expense) => {
         if (expense.selected) {
           expense.reimbursedDate = moment().format('YYYY-MM-DD');
-          expensesToReimburse.push(submitExpenseObject(expense));
+          expensesToReimburse.push(removeAggregateExpenseData(expense));
         }
       });
     });
@@ -559,7 +519,7 @@ async function reimburseExpenses() {
           expenseTypeId: expense.expenseTypeId
         });
         let expenseIndex = _.findIndex(this.empBudgets[groupIndex].expenses, { id: expense.id });
-        this.empBudgets[groupIndex].expenses[expenseIndex].reimbursedDate = ' ';
+        this.empBudgets[groupIndex].expenses[expenseIndex].reimbursedDate = null;
         this.empBudgets[groupIndex].expenses[expenseIndex].failed = true;
       } else {
         // successfully reimbursed expense
@@ -643,28 +603,20 @@ function determineShowOnFeed(expense) {
 } // determineShowOnFeed
 
 /**
- * Sets up an expense object to be submitted.
+ * Remove additional attributes from the aggregate expense.
  *
- * @param expense - expense data to submit
- * @return Object - expense object
+ * @param expense - expense data to remove aggregate data from
+ * @return Object - simplified expense object
  */
-function submitExpenseObject(expense) {
-  return {
-    cost: expense.cost,
-    description: expense.description,
-    expenseTypeId: expense.expenseTypeId,
-    id: expense.id,
-    purchaseDate: expense.purchaseDate,
-    reimbursedDate: expense.reimbursedDate,
-    note: expense.note,
-    employeeId: expense.employeeId,
-    receipt: expense.receipt,
-    category: expense.category,
-    createdAt: expense.createdAt,
-    showOnFeed: expense.showOnFeed,
-    url: expense.url
-  };
-} // submitExpenseObject
+function removeAggregateExpenseData(expense) {
+  let localExpense = _.cloneDeep(expense);
+  delete localExpense.expenses;
+  delete localExpense.checkBox;
+  delete localExpense.failed;
+  delete localExpense.selected;
+  delete localExpense.showSwitch;
+  return localExpense;
+} // removeAggregateExpenseData
 
 /**
  * Toggle all expenses selected.
@@ -783,7 +735,6 @@ async function created() {
 
   let allExpenses = createExpenses(aggregatedData);
   this.pendingExpenses = filterOutReimbursed(allExpenses);
-
   this.constructAutoComplete(this.pendingExpenses);
   this.empBudgets = groupEmployeeExpenses(this.pendingExpenses);
   this.unCheckAllBoxes();
@@ -839,6 +790,7 @@ export default {
         text: 'Show on Feed',
         value: 'showOnFeed',
         align: 'center',
+        width: '4px',
         sortable: false
       }
     ], // datatable headers
@@ -867,7 +819,6 @@ export default {
   methods: {
     asyncForEach,
     checkAllBoxes,
-    clearStatus,
     clickedRow,
     constructAutoComplete,
     determineShowOnFeed,
@@ -883,7 +834,7 @@ export default {
     reimburseExpenses,
     resetShowOnFeedToggles,
     selectExpense,
-    submitExpenseObject,
+    removeAggregateExpenseData,
     toggleAll,
     toggleGroup,
     toggleShowOnFeedGroup,

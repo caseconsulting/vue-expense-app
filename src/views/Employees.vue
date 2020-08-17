@@ -1,5 +1,5 @@
 <template>
-  <v-layout row wrap>
+  <div>
     <!-- Status Alert -->
     <v-snackbar
       v-model="status.statusType"
@@ -17,238 +17,161 @@
         Close
       </v-btn>
     </v-snackbar>
+    <v-card>
+      <v-container fluid>
+        <!-- Title -->
+        <v-card-title>
+          <h2>Employees</h2>
+          <v-spacer></v-spacer>
+          <v-text-field v-model="search" append-icon="search" label="Search" single-line hide-details></v-text-field>
+        </v-card-title>
 
-    <v-flex :lg8="userIsAdmin()" :lg12="!userIsAdmin()" md12 sm12>
-      <v-card>
-        <v-container fluid>
-          <!-- Title -->
-          <v-card-title>
-            <h2>Employees</h2>
-            <v-spacer></v-spacer>
-            <v-text-field v-model="search" append-icon="search" label="Search" single-line hide-details></v-text-field>
-          </v-card-title>
+        <!-- Filters -->
+        <fieldset v-if="userIsAdmin()" class="filter_border">
+          <legend class="legend_style">Filters</legend>
 
-          <!-- Filters -->
-          <fieldset v-if="userIsAdmin()" class="filter_border">
-            <legend class="legend_style">Filters</legend>
+          <!-- Active Filter -->
+          <div class="flagFilter">
+            <h4>Employee Status:</h4>
+            <v-btn-toggle class="filter_color" v-model="filter.active" text multiple>
+              <!-- Full Time -->
+              <v-tooltip top>
+                <template v-slot:activator="{ on }">
+                  <v-btn value="full" v-on="on" text>
+                    <icon class="mr-1" name="clock" color="black"></icon>
+                  </v-btn>
+                </template>
+                <span>Full Time</span>
+              </v-tooltip>
 
-            <!-- Active Filter -->
-            <div class="flagFilter">
-              <h4>Employee Status:</h4>
-              <v-btn-toggle class="filter_color" v-model="filter.active" text multiple>
-                <!-- Full Time -->
-                <v-tooltip top>
-                  <template v-slot:activator="{ on }">
-                    <v-btn value="full" v-on="on" text>
-                      <icon class="mr-1" name="clock" color="black"></icon>
-                    </v-btn>
-                  </template>
-                  <span>Full Time</span>
-                </v-tooltip>
+              <!-- Part Time -->
+              <v-tooltip top>
+                <template v-slot:activator="{ on }">
+                  <v-btn value="part" v-on="on" text>
+                    <icon name="regular/clock" color="black"></icon>
+                  </v-btn>
+                </template>
+                <span>Part Time</span>
+              </v-tooltip>
 
-                <!-- Part Time -->
-                <v-tooltip top>
-                  <template v-slot:activator="{ on }">
-                    <v-btn value="part" v-on="on" text>
-                      <icon name="regular/clock" color="black"></icon>
-                    </v-btn>
-                  </template>
-                  <span>Part Time</span>
-                </v-tooltip>
+              <!-- Inactive -->
+              <v-tooltip top>
+                <template v-slot:activator="{ on }">
+                  <v-btn value="inactive" v-on="on" text>
+                    <icon name="regular/stop-circle" color="black"></icon>
+                  </v-btn>
+                </template>
+                <span>Inactive</span>
+              </v-tooltip>
+            </v-btn-toggle>
+          </div>
+          <!-- End Active Filter -->
+        </fieldset>
+        <br />
+        <!-- End Filters -->
+        <!-- Create an Employee -->
+        <v-btn class="mb-5" @click="createEmployee = true" v-if="userIsAdmin()">
+          Create an Employee<v-icon class="pl-2">person_add</v-icon>
+        </v-btn>
 
-                <!-- Inactive -->
-                <v-tooltip top>
-                  <template v-slot:activator="{ on }">
-                    <v-btn value="inactive" v-on="on" text>
-                      <icon name="regular/stop-circle" color="black"></icon>
-                    </v-btn>
-                  </template>
-                  <span>Inactive</span>
-                </v-tooltip>
-              </v-btn-toggle>
+        <!-- NEW DATA TABLE -->
+        <v-data-table
+          :headers="headers"
+          :items="filteredEmployees"
+          :sort-by.sync="sortBy"
+          :sort-desc.sync="sortDesc"
+          :expanded.sync="expanded"
+          :loading="loading"
+          :items-per-page.sync="itemsPerPage"
+          :search="search"
+          item-key="employeeNumber"
+          class="elevation-1"
+          @click:row="handleClick"
+        >
+          <!-- Delete Action Item Slot -->
+          <template v-slot:item.actions="{ item }">
+            <div class="datatable_btn layout" v-if="userIsAdmin()">
+              <v-tooltip top>
+                <template v-slot:activator="{ on }">
+                  <v-btn :disabled="midAction" text icon @click.stop="validateDelete(item)" v-on="on">
+                    <v-icon style="color: #606060;">
+                      delete
+                    </v-icon>
+                  </v-btn>
+                </template>
+                <span>Delete</span>
+              </v-tooltip>
             </div>
-            <!-- End Active Filter -->
-          </fieldset>
-          <br />
-          <!-- End Filters -->
+          </template>
+          <!-- Employee Number Item Slot -->
+          <template v-slot:item.employeeNumber="{ item }">
+            <p :class="{ inactiveStyle: isInactive(item), selectFocus: isFocus(item) }" style="margin-bottom: 0px;">
+              {{ item.employeeNumber }}
+            </p>
+          </template>
 
-          <!-- Employee Datatable-->
-          <v-data-table
-            :headers="headers"
-            :items="filteredEmployees"
-            :sort-by.sync="sortBy"
-            :sort-desc.sync="sortDesc"
-            :expanded.sync="expanded"
-            :loading="loading"
-            :items-per-page.sync="itemsPerPage"
-            :search="search"
-            item-key="employeeNumber"
-            class="elevation-1"
-          >
-            <!-- Rows in datatable -->
-            <template v-slot:item="{ item }">
-              <tr :class="{ inactiveStyle: isInactive(item), selectFocus: isFocus(item) }" @click="clickedRow(item)">
-                <!-- Employee Information -->
-                <td>{{ item.employeeNumber }}</td>
-                <td>{{ item.firstName }}</td>
-                <td>{{ item.lastName }}</td>
-                <td>{{ item.hireDate | dateFormat }}</td>
-                <td>{{ item.email }}</td>
+          <!-- First Name Item Slot -->
+          <template v-slot:item.firstName="{ item }">
+            <p :class="{ inactiveStyle: isInactive(item), selectFocus: isFocus(item) }" style="margin-bottom: 0px;">
+              {{ item.firstName }}
+            </p>
+          </template>
 
-                <!-- Action Icons -->
-                <td class="datatable_btn layout" v-if="userIsAdmin()" @click="clickedRow(item)">
-                  <!-- Edit Button -->
-                  <v-tooltip top>
-                    <template v-slot:activator="{ on }">
-                      <v-btn
-                        :disabled="isEditing() || midAction"
-                        text
-                        icon
-                        @click.stop="
-                          toTopOfForm();
-                          onSelect(item);
-                        "
-                        v-on="on"
-                      >
-                        <v-icon style="color: #606060;">
-                          edit
-                        </v-icon>
-                      </v-btn>
-                    </template>
-                    <span>Edit</span>
-                  </v-tooltip>
+          <!-- Last Name Item Slot -->
+          <template v-slot:item.lastName="{ item }">
+            <p :class="{ inactiveStyle: isInactive(item), selectFocus: isFocus(item) }" style="margin-bottom: 0px;">
+              {{ item.lastName }}
+            </p>
+          </template>
 
-                  <!-- Delete Button -->
-                  <v-tooltip top>
-                    <template v-slot:activator="{ on }">
-                      <v-btn
-                        :disabled="isEditing() || midAction"
-                        text
-                        icon
-                        @click.stop="validateDelete(item)"
-                        v-on="on"
-                      >
-                        <v-icon style="color: #606060;">
-                          delete
-                        </v-icon>
-                      </v-btn>
-                    </template>
-                    <span>Delete</span>
-                  </v-tooltip>
-                </td>
-                <!-- End Action Icons -->
-              </tr>
-            </template>
-            <!-- End rows in datatable -->
+          <!-- Date Item Slot -->
+          <template v-slot:item.hireDate="{ item }">
+            <p :class="{ inactiveStyle: isInactive(item), selectFocus: isFocus(item) }" style="margin-bottom: 0px;">
+              {{ item.hireDate | dateFormat }}
+            </p>
+          </template>
 
-            <!-- Expanded slot in datatable -->
-            <template v-slot:expanded-item="{ headers, item }">
-              <td :colspan="headers.length" class="pa-0">
-                <v-card text>
-                  <v-card-text>
-                    <div class="expandedInfo" v-if="isDisplayData(item)">
-                      <p>No additional data</p>
-                    </div>
-                    <div class="expandedInfo" v-else>
-                      <p v-if="userIsAdmin()">
-                        <b>Status: </b>
-                        {{ getWorkStatus(item.workStatus) }}
-                      </p>
-                      <p v-if="!isEmpty(item.prime)"><b>Prime: </b> {{ item.prime }}</p>
-                      <p v-if="!isEmpty(item.contract)"><b>Contract: </b>{{ item.contract }}</p>
-                      <p v-if="!isEmpty(item.jobRole)"><b>Job Role: </b>{{ item.jobRole }}</p>
-                      <p v-if="!isEmpty(item.github)">
-                        <b>Github: </b
-                        ><a :href="'https://github.com/' + item.github" target="_blank">{{ item.github }}</a>
-                      </p>
-                      <p v-if="!isEmpty(item.twitter)">
-                        <b>Twitter: </b>
-                        <a :href="'https://twitter.com/' + item.twitter" target="_blank">{{ item.twitter }}</a>
-                      </p>
-                      <p v-if="userIsAdmin() && !isEmpty(item.birthday)">
-                        <b>Birthday: </b>{{ item.birthday | dateFormat }}
-                      </p>
-                      <p v-if="userIsAdmin() && !isEmpty(item.birthdayFeed)">
-                        <b>Birthday on feed: </b>{{ item.birthdayFeed | birthdayFeedResponse }}
-                      </p>
-                      <p v-if="userIsAdmin() && !isEmpty(item.city) && !isEmpty(item.st) && !isEmpty(item.country)">
-                        <b>Place of Birth: </b>{{ item.city }}, {{ item.st }}, {{ item.country }}
-                      </p>
-                      <p v-else-if="userIsAdmin() && !isEmpty(item.city) && !isEmpty(item.st)">
-                        <b>Place of Birth: </b>{{ item.city }}, {{ item.st }}
-                      </p>
-                      <p v-else-if="userIsAdmin() && !isEmpty(item.city) && !isEmpty(item.country)">
-                        <b>Place of Birth: </b>{{ item.city }}, {{ item.country }}
-                      </p>
-                      <p v-else-if="userIsAdmin() && !isEmpty(item.country)">
-                        <b>Place of Birth: </b>{{ item.country }}
-                      </p>
-                      <p v-if="userIsAdmin() && !isEmpty(item.deptDate)">
-                        <b>Departure Date: </b>{{ item.deptDate | dateFormat }}
-                      </p>
-                    </div>
-                  </v-card-text>
-                </v-card>
-                <v-card text v-if="userIsAdmin() && isFocus(item)">
-                  <!-- Employee Budgets -->
-                  <v-card-text>
-                    <employee-home :adminCall="true" :employ="item"> </employee-home>
-                  </v-card-text>
-                </v-card>
-              </td>
-            </template>
-            <!-- End expanded slot in datatable -->
+          <!-- Email Item Slot -->
+          <template v-slot:item.email="{ item }">
+            <p :class="{ inactiveStyle: isInactive(item), selectFocus: isFocus(item) }" style="margin-bottom: 0px;">
+              {{ item.email }}
+            </p>
+          </template>
 
-            <!-- Alert for no search results -->
-            <v-alert slot="no-results" :value="true" color="error" icon="warning">
-              Your search for "{{ search }}" found no results.
-            </v-alert>
-            <!-- End alert for no search results -->
-          </v-data-table>
-          <!-- End employee datatable -->
-          <br />
+          <!-- Alert for no search results -->
+          <v-alert slot="no-results" :value="true" color="error" icon="warning">
+            Your search for "{{ search }}" found no results.
+          </v-alert>
+        </v-data-table>
+        <!-- NEW DATA TABLE -->
 
-          <!-- Download employee csv button -->
-          <v-card-actions>
-            <convert-employees-to-csv
-              v-if="userIsAdmin()"
-              :midAction="midAction"
-              :employees="filteredEmployees"
-              :editing="isEditing()"
-            ></convert-employees-to-csv>
-          </v-card-actions>
+        <br />
 
-          <!-- Confirmation Modals -->
-          <delete-modal :activate="deleting" :type="'employee'"></delete-modal>
-          <delete-error-modal :activate="invalidDelete" type="employee"></delete-error-modal>
-          <!-- End Confirmation Modals -->
-        </v-container>
-      </v-card>
-    </v-flex>
+        <!-- Download employee csv button -->
+        <v-card-actions>
+          <convert-employees-to-csv
+            v-if="userIsAdmin()"
+            :midAction="midAction"
+            :employees="filteredEmployees"
+          ></convert-employees-to-csv>
+        </v-card-actions>
 
-    <!-- Employee Form -->
-    <v-flex v-if="userIsAdmin()" lg4 md12 sm12>
-      <employee-form
-        ref="form"
-        :model="model"
-        :employeeInfo="employeeInfo"
-        v-on:add="addModelToTable"
-        v-on:startACtion="startAction"
-        v-on:endAction="endAction"
-        v-on:update="updateModelInTable"
-        v-on:error="displayError"
-      ></employee-form>
-    </v-flex>
-  </v-layout>
+        <!-- Confirmation Modals -->
+        <delete-modal :activate="deleting" :type="'employee'"></delete-modal>
+        <delete-error-modal :activate="invalidDelete" type="employee"></delete-error-modal>
+        <!-- End Confirmation Modals -->
+      </v-container>
+    </v-card>
+    <v-dialog v-model="createEmployee"><employee-form :model="this.model"></employee-form></v-dialog>
+  </div>
 </template>
 
 <script>
 import api from '@/shared/api.js';
-import ConvertEmployeesToCsv from '../components/ConvertEmployeesToCsv.vue';
-import DeleteErrorModal from '../components/DeleteErrorModal.vue';
-import DeleteModal from '../components/DeleteModal.vue';
-import EmployeeForm from '../components/EmployeeForm.vue';
-import EmployeeHome from '@/views/MyBudgets.vue';
+import ConvertEmployeesToCsv from '@/components/ConvertEmployeesToCsv.vue';
+import DeleteErrorModal from '@/components/modals/DeleteErrorModal.vue';
+import DeleteModal from '@/components/modals/DeleteModal.vue';
+import EmployeeForm from '@/components/employees/EmployeeForm.vue';
 import { getRole } from '@/utils/auth';
 import moment from 'moment';
 import _ from 'lodash';
@@ -260,70 +183,13 @@ import _ from 'lodash';
 // |--------------------------------------------------|
 
 /**
- * Refresh and updates employee list and displays a successful create status in the snackbar.
- */
-function addModelToTable() {
-  this.refreshEmployees();
-
-  this.$set(this.status, 'statusType', 'SUCCESS');
-  this.$set(this.status, 'statusMessage', 'Employee was successfully created!');
-  this.$set(this.status, 'color', 'green');
-} // addModelToTable
-
-/**
- * NOTE: Unused?
- *
- * Clear the selected employee.
- */
-function clearModel() {
-  this.$set(this.model, 'id', '');
-  this.$set(this.model, 'firstName', '');
-  this.$set(this.model, 'middleName', '');
-  this.$set(this.model, 'lastName', '');
-  this.$set(this.model, 'email', '@consultwithcase.com');
-  this.$set(this.model, 'employeeRole', '');
-  this.$set(this.model, 'employeeNumber', null);
-  this.$set(this.model, 'hireDate', null);
-  this.$set(this.model, 'workStatus', 100);
-
-  //New Fields
-  this.$set(this.model, 'birthday', '');
-  this.$set(this.model, 'birthdayFeed', false);
-  this.$set(this.model, 'jobRole', '');
-  this.$set(this.model, 'prime', '');
-  this.$set(this.model, 'contract', '');
-  this.$set(this.model, 'github', '');
-  this.$set(this.model, 'twitter', '');
-  this.$set(this.model, 'city', '');
-  this.$set(this.model, 'st', '');
-  this.$set(this.model, 'country', '');
-  this.$set(this.model, 'deptDate', '');
-} // clearModel
-
-/**
  * Clear the action status that is displayed in the snackbar.
  */
 function clearStatus() {
   this.$set(this.status, 'statusType', undefined);
-  this.$set(this.status, 'statusMessage', '');
-  this.$set(this.status, 'color', '');
+  this.$set(this.status, 'statusMessage', null);
+  this.$set(this.status, 'color', null);
 } // clearStatus
-
-/**
- * Add employee to expanded row when clicked.
- *
- * @param value - employee to add
- */
-function clickedRow(value) {
-  if (_.isEmpty(this.expanded) || this.expanded[0].employeeNumber != value.employeeNumber) {
-    // expand the selected employee if the selected employee not already expanded
-    this.expanded = [];
-    this.expanded.push(value);
-  } else {
-    // collapse the employee if the selected employee is already expanded
-    this.expanded = [];
-  }
-} // clickedRow
 
 /**
  * Delete an employee and display status.
@@ -366,18 +232,13 @@ async function displayError(err) {
 /**
  * sets midAction boolean to false
  */
-function endAction() {
-  this.midAction = false;
-}
-/**
- * Filters out contracts from list of employees.
- */
-function filterContracts() {
-  let tempContracts = _.map(this.employees, (a) => a.contract); //extract contracts
-  tempContracts = _.map(tempContracts, (a) => a.trim()); //trim whitespace
-  tempContracts = _.compact(tempContracts); //remove falsey values
-  this.employeeInfo.contracts = [...new Set(tempContracts)]; //remove duplicates
-} // filterContracts
+function employeePath(item) {
+  return `/employee/${item.employeeNumber}`;
+} // employeePath
+
+function handleClick(item) {
+  this.$router.push(employeePath(item));
+} //handleClick
 
 /**
  * Filters list of employees.
@@ -393,65 +254,13 @@ function filterEmployees() {
 } // filterEmployees
 
 /**
- * Filters out primes from list of employees.
- */
-function filterPrimes() {
-  let tempPrimes = _.map(this.employees, (a) => a.prime); //extract primes
-  tempPrimes = _.map(tempPrimes, (a) => a.trim()); //trim whitespace
-  tempPrimes = _.compact(tempPrimes); //remove falsey values
-  this.employeeInfo.primes = [...new Set(tempPrimes)]; //remove duplicates and set
-} // filterPrimes
-
-/**
- * Returns Full Time, Part Time, or Inactive based on the work status
- */
-function getWorkStatus(workStatus) {
-  if (workStatus == 100) {
-    return 'Full Time';
-  } else if (workStatus == 0) {
-    return 'Inactive';
-  } else if (workStatus > 0 && workStatus < 100) {
-    return `Part Time (${workStatus}%)`;
-  } else {
-    return 'Invalid Status';
-  }
-} // getWorkStatus
-
-/**
- * Checks if there is data about an employee to display. Returns true if the user is an admin or if the there is data
- * on the employee's prime, contract, job role, github, or twitter, otherwise returns false.
- *
- * @item item - employee to check
- * @return boolean - employee has data to display
- */
-function isDisplayData(item) {
-  let valid =
-    !this.userIsAdmin() &&
-    this.isEmpty(item.prime) &&
-    this.isEmpty(item.contract) &&
-    this.isEmpty(item.jobRole) &&
-    this.isEmpty(item.github) &&
-    this.isEmpty(item.twitter);
-  return valid;
-} // isDisplayData
-
-/**
- * Checks if an employee is being edited.
- *
- * @return boolean - an employee is being edited
- */
-function isEditing() {
-  return !!this.model.id;
-} // isEditing
-
-/**
- * Checks if a value is empty. Returns true if the value is null or a single character space String.
+ * Checks if a value is empty. Returns true if the value is null or an empty/blank string.
  *
  * @param value - value to check
  * @return boolean - value is empty
  */
 function isEmpty(value) {
-  return value == null || value === ' ' || value === '';
+  return _.isNil(value) || (_.isString(value) && value.trim().length === 0);
 } // isEmpty
 
 /**
@@ -499,70 +308,15 @@ function isPartTime(employee) {
 } // isPartTime
 
 /**
- * Store the attributes of a selected employee.
- *
- * @param item - employee selected
- */
-function onSelect(item) {
-  this.$set(this.model, 'id', item.id);
-  this.$set(this.model, 'firstName', item.firstName);
-  this.$set(this.model, 'middleName', item.middleName);
-  this.$set(this.model, 'lastName', item.lastName);
-  this.$set(this.model, 'email', item.email);
-  this.$set(this.model, 'employeeRole', item.employeeRole);
-  this.$set(this.model, 'employeeNumber', item.employeeNumber);
-  this.$set(this.model, 'hireDate', item.hireDate);
-  this.$set(this.model, 'workStatus', item.workStatus);
-
-  // New Fields
-  this.$set(this.model, 'birthday', item.birthday);
-  this.$set(this.model, 'birthdayFeed', item.birthdayFeed);
-  this.$set(this.model, 'jobRole', item.jobRole);
-  this.$set(this.model, 'prime', item.prime.trim());
-  this.$set(this.model, 'contract', item.contract.trim());
-  this.$set(this.model, 'github', item.github.trim());
-  this.$set(this.model, 'twitter', item.twitter.trim());
-  this.$set(this.model, 'city', item.city.trim());
-  this.$set(this.model, 'st', item.st.trim());
-  this.$set(this.model, 'country', item.country.trim());
-  this.$set(this.model, 'deptDate', item.deptDate);
-} // onSelect
-
-/**
  * Refresh employee data and filters employees.
  */
 async function refreshEmployees() {
   this.loading = true; // set loading status to true
   this.employees = await api.getItems(api.EMPLOYEES); // get all employees
-  this.filterPrimes();
-  this.filterContracts();
   this.filterEmployees(); // filter employees
   this.expanded = []; // collapse any expanded rows in the database
   this.loading = false; // set loading status to false
 } // refreshEmployees
-
-/**
- * Sets midAction boolean to true
- */
-function startAction() {
-  this.midAction = true;
-}
-/**
- * Scrolls window back to the top of the form.
- */
-function toTopOfForm() {
-  this.$vuetify.goTo(this.$refs.form.$el.offsetTop + 50);
-} // toTopOfForm
-
-/**
- * Refresh and updates employee list and displays a successful update status in the snackbar.
- */
-function updateModelInTable() {
-  this.refreshEmployees();
-  this.$set(this.status, 'statusType', 'SUCCESS');
-  this.$set(this.status, 'statusMessage', 'Employee was successfully updated!');
-  this.$set(this.status, 'color', 'green');
-} // updateModelInTable
 
 /**
  * Checks to see if the user is an admin. Returns true if the user's role is an admin, otherwise returns false.
@@ -609,6 +363,9 @@ async function validateDelete(item) {
  *  Adjust datatable header for user view. Creates event listeners.
  */
 async function created() {
+  window.EventBus.$on('cancel-form', () => {
+    this.createEmployee = false;
+  });
   window.EventBus.$on('canceled-delete-employee', () => {
     this.deleting = false;
     this.midAction = false;
@@ -634,30 +391,32 @@ async function created() {
 // |--------------------------------------------------|
 
 export default {
+  beforeDestroy() {
+    window.EventBus.$off('cancel-form');
+    window.EventBus.$off('canceled-delete-employee');
+    window.EventBus.$off('confirm-delete-employee');
+    window.EventBus.$off('invalid-employee-delete');
+  },
   components: {
     ConvertEmployeesToCsv,
     DeleteErrorModal,
     DeleteModal,
-    EmployeeForm,
-    EmployeeHome
+    EmployeeForm
   },
   created,
   data() {
     return {
+      createEmployee: false,
       deleteModel: {
-        id: ''
+        id: null
       }, // employee to delete
       deleting: false, // activate delete confirmation model
-      employeeInfo: {
-        primes: [],
-        contracts: []
-      },
       employees: [], // employees
       expanded: [], // datatable expanded
       filter: {
         active: ['full', 'part'] // default only shows full and part time employees
       }, // datatable filter
-      filteredEmployees: [], // filtered employees
+      filteredEmployees: [], // filtered employees,
       headers: [
         {
           text: 'Employee #',
@@ -689,34 +448,34 @@ export default {
       itemsPerPage: -1, // items per datatable page
       loading: false, // loading status
       model: {
-        id: '',
-        firstName: '',
-        middleName: '',
-        lastName: '',
+        id: null,
+        firstName: null,
+        middleName: null,
+        lastName: null,
         email: '@consultwithcase.com',
-        employeeRole: '',
+        employeeRole: null,
         employeeNumber: null,
         hireDate: null,
         workStatus: 100,
-        birthday: '',
+        birthday: null,
         birthdayFeed: false,
-        jobRole: '',
-        prime: '',
-        contract: '',
-        github: '',
-        twitter: '',
-        city: '',
-        st: '',
-        country: '',
-        deptDate: ''
+        jobRole: null,
+        prime: null,
+        contract: null,
+        github: null,
+        twitter: null,
+        city: null,
+        st: null,
+        country: null,
+        deptDate: null
       }, // selected employee
-      search: '', // query text for datatable search field
+      search: null, // query text for datatable search field
       sortBy: 'employeeNumber', // sort datatable items
       sortDesc: false, // sort datatable items
       status: {
         statusType: undefined,
-        statusMessage: '',
-        color: ''
+        statusMessage: null,
+        color: null
       } // snackbar action status
     };
   },
@@ -728,40 +487,22 @@ export default {
       } else {
         return '';
       }
-    },
-    birthdayFeedResponse: (value) => {
-      if (value == true) {
-        return 'yes';
-      } else {
-        return 'no';
-      }
     }
   },
   methods: {
-    addModelToTable,
-    clearModel, // NOTE: Unused?
     clearStatus,
-    clickedRow,
     deleteEmployee,
     deleteModelFromTable,
     displayError,
-    endAction,
-    filterContracts,
+    employeePath,
     filterEmployees,
-    filterPrimes,
-    getWorkStatus,
-    isDisplayData,
-    isEditing,
+    handleClick,
     isEmpty,
     isFocus,
     isFullTime,
     isInactive,
     isPartTime,
-    onSelect,
     refreshEmployees,
-    startAction,
-    toTopOfForm,
-    updateModelInTable,
     userIsAdmin,
     validateDelete
   },
@@ -773,26 +514,3 @@ export default {
   }
 };
 </script>
-
-<style>
-.expandedInfo {
-  border: 1px solid black;
-  font-size: 14px;
-  padding: 20px;
-}
-
-.expandedInfo a {
-  font-size: 14px;
-  color: blue;
-}
-
-.expandedInfo a:hover {
-  color: #0cf;
-}
-
-.flagEmp p {
-  font-weight: bold;
-  width: 75px;
-  display: inline-block;
-}
-</style>

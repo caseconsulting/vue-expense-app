@@ -57,6 +57,9 @@ async function created() {
   if (route == 'help2') {
     this.panel = 0;
   }
+  if (route == 'help3') {
+    this.panel = 3;
+  }
 } // created
 
 // |--------------------------------------------------|
@@ -102,7 +105,7 @@ export default {
           {
             title: 'Why do I not see some of my hours for today?',
             body:
-              'If you are using the clock in function on TSheets those hours will not show up until after you clock out. All other hours for the month should be seen on the home page.'
+              'If you are using the clock in function on TSheets, those hours may still be accumulating. Try refreshing the page.'
           }
         ],
         employeeHome: [
@@ -196,7 +199,7 @@ export default {
           {
             title: 'What are the employee access options for expense types?',
             body:
-              'Expense types accessible by All will provide all employees access to a prorated budget based on their work status. Expense types accessible by Full will provide both full time and part time employees will access to 100% of the budget. Expense types accessible by Full Time will provide only full time employees with access to the budget. Expense types accessible by Custom will provide the selected employees access to a prorated budget based on their work status.'
+              'Expense types accessible by All will provide all employees access to a prorated budget based on their work status. Expense types accessible by Full will provide both full time and part time employees with access to 100% of the budget. Expense types accessible by Full Time will provide only full time employees with access to the budget. Expense types accessible by Custom will provide the selected employees access to a prorated budget based on their work status.'
           }
         ],
         employees: [

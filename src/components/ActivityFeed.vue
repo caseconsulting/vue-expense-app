@@ -1,52 +1,69 @@
 <template>
-  <v-flex pa-0>
+  <div>
     <!-- title -->
     <v-card class="white--text" color="#bc3825">
       <v-card-title class="header_style">
-        <h4>Activity Feed</h4>
+        <h3>Activity Feed</h3>
       </v-card-title>
     </v-card>
     <!-- loading bar -->
-    <v-card class="overflow-y-auto" max-height="676px">
+    <v-card class="overflow-y-auto" max-height="850px">
       <div v-if="this.loading" class="py-4">
         <v-progress-linear :indeterminate="true"></v-progress-linear>
       </div>
       <!-- timeline -->
       <v-timeline v-else dense class="pt-0">
-        <v-virtual-scroll :items="events" :item-height="this.itemHeight" height="600" bench="2">
+        <v-virtual-scroll :items="events" :item-height="this.itemHeight" height="850" bench="2">
           <template v-slot="{ item }">
             <div class="pa-4"></div>
-            <v-hover v-slot:default="{ hover }" open-delay="200">
-              <div>
-                <v-timeline-item :color="item.color" :key="item.name">
-                  <template v-slot:icon v-if="item.icon">
-                    <icon class="white--text" :name="item.icon"></icon>
-                  </template>
-                  <h3>{{ item.date }}</h3>
-                  <v-list-item class="ma-auto pa-auto" v-if="item.link" :href="item.link" target="_blank" :dense="true"
-                    >{{ item.truncatedText ? item.truncatedText : item.text }}&nbsp;<icon
-                      height="12"
-                      width="12"
-                      name="external-link-alt"
-                      color="blue"
-                    ></icon>
-                  </v-list-item>
-                  <div class="px-4" v-else>{{ item.truncatedText ? item.truncatedText : item.text }}</div>
-                </v-timeline-item>
-                <v-card v-if="hover && item.truncatedText" style="z-index: 10;">
-                  <v-card-text>{{ item.text }}</v-card-text>
-                </v-card>
-              </div>
-            </v-hover>
+            <v-tooltip
+              open-on-hover
+              top
+              max-width="400px"
+              min-width="200px"
+              :color="item.truncatedText ? 'grey darken-3' : 'rgba(0, 0, 0, 0)'"
+              open-delay="200"
+            >
+              <template v-slot:activator="{ on, attrs }">
+                <span v-bind="attrs" v-on="on">
+                  <v-timeline-item :color="item.color" :key="item.name">
+                    <template v-slot:icon v-if="item.icon">
+                      <icon class="white--text" :name="item.icon"></icon>
+                    </template>
+                    <h3>{{ item.date }}</h3>
+                    <v-list-item
+                      class="ma-auto pa-auto activityFeedText"
+                      v-if="item.link"
+                      :href="item.link"
+                      target="_blank"
+                      :dense="true"
+                    >
+                      <v-row dense>
+                        <v-col cols="11">{{ item.truncatedText ? item.truncatedText : item.text }}&nbsp;</v-col>
+                        <v-col cols="1">
+                          <icon height="12" width="12" name="external-link-alt" color="blue"></icon>
+                        </v-col>
+                      </v-row>
+                    </v-list-item>
+                    <div class="px-4 activityFeedText" v-else>
+                      {{ item.truncatedText ? item.truncatedText : item.text }}
+                    </div>
+                  </v-timeline-item>
+                </span>
+              </template>
+              <span v-if="item.truncatedText">{{ item.text }}</span>
+            </v-tooltip>
           </template>
         </v-virtual-scroll>
       </v-timeline>
     </v-card>
-  </v-flex>
+  </div>
 </template>
 
 <script>
-//function item
+/**
+ * itemHeight - determines the height of each item in the activity feed.
+ */
 function itemHeight() {
   switch (this.$vuetify.breakpoint.name) {
     case 'xs':
@@ -60,7 +77,7 @@ function itemHeight() {
     case 'xl':
       return 100;
   }
-}
+} // itemHeight
 export default {
   data() {
     return {
@@ -73,3 +90,12 @@ export default {
   props: ['events', 'loading']
 };
 </script>
+<style lang="scss">
+.activityFeedText {
+  font-weight: normal;
+}
+
+.v-tooltip__content.menuable__content__active {
+  opacity: 1 !important;
+}
+</style>

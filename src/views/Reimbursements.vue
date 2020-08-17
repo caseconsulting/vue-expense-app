@@ -1,22 +1,22 @@
 <template>
-  <v-layout row wrap>
-    <v-flex offset-lg1 offset-md1 lg9 md9 sm12>
+  <v-row>
+    <v-col cols="12" md="9" offset-lg="1" offset-md="1">
       <!-- Expense Table -->
       <rollup-expense-type-table></rollup-expense-type-table>
-    </v-flex>
-    <v-flex lg2 md2 sm12>
+    </v-col>
+    <v-col cols="12" md="2">
       <!-- Expense Info -->
       <expense-info class="jerryrig"></expense-info>
       <!-- Expenses Total -->
       <expense-type-totals></expense-type-totals>
-    </v-flex>
-  </v-layout>
+    </v-col>
+  </v-row>
 </template>
 
 <script>
-import ExpenseInfo from '../components/ExpenseInfo.vue';
-import ExpenseTypeTotals from '../components/ExpenseTypeTotals.vue';
-import RollupExpenseTypeTable from '../components/RollupExpenseTypeTable.vue';
+import ExpenseInfo from '@/components/ExpenseInfo.vue';
+import ExpenseTypeTotals from '@/components/ExpenseTypeTotals.vue';
+import RollupExpenseTypeTable from '@/components/RollupExpenseTypeTable.vue';
 
 // |--------------------------------------------------|
 // |                                                  |

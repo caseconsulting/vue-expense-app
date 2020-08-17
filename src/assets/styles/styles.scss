@@ -70,6 +70,10 @@ $case-darkgray: #3f3f3c;
   background-color: #565651 !important;
 }
 
+.user-circle {
+  color: #565651;
+}
+
 .inactiveStyle {
   /* text-decoration: line-through red; */
   color: #e60026;
@@ -139,6 +143,65 @@ $case-darkgray: #3f3f3c;
 
   100% {
     color: gold;
+  }
+}
+
+/* navigation color changing icon */
+.iconSelected {
+  -webkit-animation: color-change 1s infinite alternate both;
+  -moz-animation: color-change 10s infinite alternate both;
+  -o-animation: color-change 10s infinite alternate both;
+  -ms-animation: color-change 10s infinite alternate both;
+  animation: color-change 5s infinite alternate both;
+}
+
+@-webkit-keyframes color-change {
+  0% {
+    color: gold;
+  }
+
+  100% {
+    color: $case-red;
+  }
+}
+
+@-moz-keyframes color-change {
+  0% {
+    color: gold;
+  }
+
+  100% {
+    color: $case-red;
+  }
+}
+
+@-ms-keyframes color-change {
+  0% {
+    color: gold;
+  }
+
+  100% {
+    color: $case-red;
+  }
+}
+
+@-o-keyframes color-change {
+  0% {
+    color: gold;
+  }
+
+  100% {
+    color: $case-red;
+  }
+}
+
+@keyframes color-change {
+  0% {
+    color: gold;
+  }
+
+  100% {
+    color: $case-red;
   }
 }
 
