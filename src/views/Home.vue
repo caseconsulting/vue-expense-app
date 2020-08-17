@@ -206,7 +206,6 @@ function clearStatus() {
 async function createEvents() {
   let eventData = await api.getAllEvents();
   this.employees = eventData.employees;
-  console.log(this.employees);
   this.aggregatedExpenses = eventData.expenses;
   this.scheduleEntries = _.flatten(eventData.schedules);
 
