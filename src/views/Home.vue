@@ -206,6 +206,7 @@ function clearStatus() {
 async function createEvents() {
   let eventData = await api.getAllEvents();
   this.employees = eventData.employees;
+  console.log(this.employees);
   this.aggregatedExpenses = eventData.expenses;
   this.scheduleEntries = _.flatten(eventData.schedules);
 
@@ -217,7 +218,7 @@ async function createEvents() {
       let now = moment();
       let cutOff = moment().subtract(6, 'months').startOf('day'); //can't use now because itll change now
       //set what we want to see in the Date
-      if (now.isAfter(hireDate, 'day')) {
+      if (now.isSameOrAfter(hireDate, 'day')) {
         //hire date is before today
         let anniversary = moment([now.year(), hireDate.month(), hireDate.date()]); //set anniversary to hiredate but this year
         let diff = now.startOf('day').diff(anniversary.startOf('day'), 'day'); //difference between today and anniversary
