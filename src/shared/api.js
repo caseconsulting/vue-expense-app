@@ -11,6 +11,8 @@ const URLS = 'training-urls';
 const TSHEETS = 'tSheets';
 const TWITTER = 'twitter';
 const BASECAMP = 'basecamp';
+// const BLOG = 'blog';
+// const BLOG_FILE = 'blogFile';
 const API_HOSTNAME = API_CONFIG.apiHostname;
 const API_PORT = API_CONFIG.apiPort;
 const PORT = API_PORT === '443' ? '' : `:${API_PORT}`;
