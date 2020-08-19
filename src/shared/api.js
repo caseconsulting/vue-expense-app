@@ -65,6 +65,15 @@ function getBasecampAvatars() {
   return execute('get', `/${BASECAMP}/getBasecampAvatars`);
 } // getBasecampAvatars
 
+/**
+ * Get Basecamp Campfires the Case Consulting Info Basecamp Account.
+ *
+ * @return object - Basecamp Campfire data
+ */
+function getBasecampCampfires() {
+  return execute('get', `/${BASECAMP}/getBasecampCampfires`);
+} // getBasecampCampfires
+
 function getEmployeeBudget(id, expenseTypeId, date) {
   return execute('get', `/${UTILITY}/getEmployeeBudget/${id}/${expenseTypeId}/${date}`);
 }
@@ -250,6 +259,7 @@ export default {
   getAllExpenseTypeExpenses,
   getAttachment,
   getBasecampAvatars,
+  getBasecampCampfires,
   getCaseTimeline,
   getCountries,
   getEmployeeBudget,

@@ -246,12 +246,12 @@
                       </p>
 
                       <!-- Requires Recipient -->
-                      <p v-if="item.hasRecipient"><b>Requires Recipient:</b> yes</p>
-                      <p v-else><b>Requires Recipient:</b> no</p>
+                      <p v-if="item.hasRecipient"><b>Requires Recipient:</b> Yes</p>
+                      <p v-else><b>Requires Recipient:</b> No</p>
 
                       <!-- Always show on feed -->
-                      <p v-if="item.alwaysOnFeed"><b>Always Show On Feed:</b> yes</p>
-                      <p v-else><b>Always Show On Feed:</b> no</p>
+                      <p v-if="item.alwaysOnFeed"><b>Always Show On Feed:</b> Yes</p>
+                      <p v-else><b>Always Show On Feed:</b> No</p>
 
                       <!-- Categories show on feed -->
                       <p v-if="!item.alwaysOnFeed && item.categories && item.categories.length > 0">
@@ -347,6 +347,15 @@
                         </v-dialog>
                       </v-row>
                       <!-- End Accessible By -->
+
+                      <!-- Basecamp Campfire -->
+                      <p v-if="getCampfire(item.campfire)">
+                        <b>Basecamp Campfire:</b>
+                        <a :href="getCampfire(item.campfire).url" target="blank">
+                          {{ getCampfire(item.campfire).name }}
+                        </a>
+                      </p>
+                      <!-- End Basecamp Campfire -->
                     </div>
                   </v-card-text>
                 </v-card>
@@ -516,6 +525,7 @@ function clearModel() {
   this.$set(this.model, 'accessibleBy', 'ALL');
   this.$set(this.model, 'hasRecipient', false);
   this.$set(this.model, 'alwaysOnFeed', false);
+  this.$set(this.model, 'campfire', null);
   this.$set(this.model, 'requireURL', false);
 } // clearModel
 
@@ -652,6 +662,18 @@ function getAccess(expenseType) {
 } // getAccess
 
 /**
+ * Gets the campfire name and url for a given url.
+ *
+ * @param url - basecamp url String
+ * @return Object - basecamp name and url data
+ */
+function getCampfire(url) {
+  return _.find(this.campfires, (campfire) => {
+    return campfire.url == url;
+  });
+} // getCampfire
+
+/**
  * Get the list of employees who have access to a expense type accessible by value.
  *
  * @param accessibleBy - expense type accessible by value
@@ -760,6 +782,7 @@ function onSelect(item) {
   this.$set(this.model, 'accessibleBy', item.accessibleBy);
   this.$set(this.model, 'hasRecipient', item.hasRecipient);
   this.$set(this.model, 'alwaysOnFeed', item.alwaysOnFeed);
+  this.$set(this.model, 'campfire', item.campfire);
   this.$set(this.model, 'requireURL', item.requireURL);
 } // onSelect
 
@@ -891,6 +914,8 @@ async function created() {
     employee.avatar = avatarUrl;
     return employee;
   });
+
+  this.campfires = await api.getBasecampCampfires();
 } // created
 
 // |--------------------------------------------------|
@@ -911,6 +936,7 @@ export default {
   created,
   data() {
     return {
+      campfires: [], // basecamp campfires
       deleteModel: {
         id: ''
       }, // expense type to delete
@@ -954,21 +980,22 @@ export default {
       itemsPerPage: -1, // items per datatable page
       loading: false, // loading status
       model: {
-        id: '',
+        accessibleBy: [],
+        alwaysOnFeed: false,
         budget: 0,
         budgetName: '',
+        campfire: null,
+        categories: [],
         description: '',
-        odFlag: false,
-        startDate: null,
         endDate: null,
+        hasRecipient: false,
+        id: '',
+        isInactive: false,
+        odFlag: false,
         recurringFlag: false,
         requiredFlag: true,
-        isInactive: false,
-        categories: [],
-        accessibleBy: [],
-        hasRecipient: false,
-        alwaysOnFeed: false,
-        requireURL: false
+        requireURL: false,
+        startDate: null
       }, // selected expense type
       search: '', // query text for datatable search field
       sortBy: 'budgetName', // sort datatable items
@@ -1006,6 +1033,7 @@ export default {
     endAction,
     filterExpenseTypes,
     getAccess,
+    getCampfire,
     getEmployeeList,
     getEmployeeName,
     hasAccess,
@@ -1040,42 +1068,21 @@ export default {
 };
 </script>
 
-<style>
-fieldset {
-  border: 1.5px solid #cccc;
-}
-
-fieldset legend {
-  font-size: 16px;
-  font-weight: bold;
-  margin-left: 20px;
-  padding: 10px;
-}
-
-.flag p {
-  font-weight: bold;
-  width: 150px;
-  display: inline-block;
-}
-
-.flag svg {
-  margin-top: 5px;
-}
-
-.flagFilter {
-  display: inline-block;
-  margin: 20px;
-}
-
-#marks {
-  width: auto;
-  height: 1.5em;
-}
-
+<style scoped>
 .noEmployees {
   text-align: center;
   font-size: 20px;
   margin-top: 20px;
   margin-bottom: 20px;
+}
+
+a {
+  color: black !important;
+  text-decoration: none;
+}
+
+a:hover {
+  color: blue !important;
+  text-decoration: none;
 }
 </style>

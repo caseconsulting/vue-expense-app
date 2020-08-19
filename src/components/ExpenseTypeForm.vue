@@ -126,6 +126,16 @@
           rows="3"
         ></v-textarea>
 
+        <!-- Campfires autocomplete -->
+        <v-autocomplete
+          :items="campfires"
+          v-model="model.campfire"
+          item-text="name"
+          item-value="url"
+          label="Basecamp Campfire (optional)"
+          clearable
+        ></v-autocomplete>
+
         <!-- Accessibility -->
         <div style="color: dimgray;">
           Employee Access
@@ -189,9 +199,7 @@
           label="Require a url for this expense?"
         ></v-switch>
 
-        <!-- <p v-if="model.categories.length > 0" class="pt-4">Show only these categories on feed?</p> -->
-
-        <v-container>
+        <v-container class="pb-0 mb-0">
           <v-row v-if="model.categories.length > 0">
             <v-col>Category</v-col>
             <v-col>Show on Feed?</v-col>
@@ -222,9 +230,6 @@
             </v-col>
           </v-row>
         </v-container>
-
-        <br />
-
         <!-- Buttons -->
         <!-- Cancel Button -->
         <v-btn color="white " @click="clearForm" class="ma-2"> <icon class="mr-1" name="ban"></icon>Cancel </v-btn>
@@ -535,6 +540,7 @@ async function created() {
 
   allEmployees = _.sortBy(allEmployees, ['text']);
   this.allEmployees = allEmployees;
+  this.campfires = await api.getBasecampCampfires();
   this.clearForm();
 } // created
 
@@ -559,6 +565,7 @@ export default {
           /^[+-]?[0-9]{1,3}(?:,?[0-9]{3})*(?:\.[0-9]{2})?$/.test(v) ||
           'Budget amount must be a number with two decimal digits.'
       ],
+      campfires: [], // basecamp campfires
       categories: [],
       categoryInput: null, // category combobox input
       customAccess: [],

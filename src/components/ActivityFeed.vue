@@ -28,7 +28,29 @@
                 <span v-bind="attrs" v-on="on">
                   <v-timeline-item :color="item.color" :key="item.name">
                     <template v-slot:icon v-if="item.icon">
-                      <icon class="white--text" :name="item.icon"></icon>
+                      <v-tooltip
+                        bottom
+                        v-if="
+                          item.newCampfire ||
+                          item.congratulateCampfire ||
+                          item.birthdayCampfire ||
+                          item.campfire ||
+                          item.eventScheduled
+                        "
+                      >
+                        <template v-slot:activator="{ on }">
+                          <v-btn v-on="on" text icon :href="item.campfire" target="blank">
+                            <icon class="white--text" :name="item.icon"></icon>
+                          </v-btn>
+                        </template>
+                        <span v-if="item.newCampfire">welcome to team</span>
+                        <span v-else-if="item.congratulateCampfire">congratulate</span>
+                        <span v-else-if="item.birthdayCampfire">say happy birthday</span>
+                        <span v-else-if="item.campfire">comment in campfire</span>
+                        <span v-else-if="item.eventScheduled">see event</span>
+                      </v-tooltip>
+
+                      <icon class="white--text" :name="item.icon" v-else></icon>
                     </template>
                     <h3>{{ item.date }}</h3>
                     <v-list-item
