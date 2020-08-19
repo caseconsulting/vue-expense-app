@@ -46,7 +46,8 @@
 </template>
 
 <script>
-import _ from 'lodash';
+import { isEmpty } from '@/utils/utils';
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                     METHODS                      |
@@ -87,16 +88,6 @@ function emit(msg, data) {
     window.EventBus.$emit(msg);
   }
 } // emit
-
-/**
- * Checks if a value is empty. Returns true if the value is null or an empty/blank string.
- *
- * @param value - value to check
- * @return boolean - value is empty
- */
-function isEmpty(value) {
-  return _.isNil(value) || (_.isString(value) && value.trim().length === 0);
-} // isEmpty
 
 // |--------------------------------------------------|
 // |                                                  |
