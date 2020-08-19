@@ -11,8 +11,9 @@ const URLS = 'training-urls';
 const TSHEETS = 'tSheets';
 const TWITTER = 'twitter';
 const BASECAMP = 'basecamp';
-// const BLOG = 'blog';
-// const BLOG_FILE = 'blogFile';
+const BLOG = 'blog';
+const BLOG_FILE = 'blogFile';
+const BLOG_ATTACHMENT = 'blogAttachment';
 const API_HOSTNAME = API_CONFIG.apiHostname;
 const API_PORT = API_CONFIG.apiPort;
 const PORT = API_PORT === '443' ? '' : `:${API_PORT}`;
@@ -151,6 +152,10 @@ function getAttachment(employeeId, expenseId) {
   return execute('get', `attachment/${employeeId}/${expenseId}`);
 }
 
+function getBlogFile(authorId, blogId) {
+  return execute('get', `${BLOG_FILE}/${authorId}/${blogId}`);
+}
+
 async function extractText(file) {
   let formData = new FormData();
   formData.append('receipt', file);
@@ -196,8 +201,34 @@ async function createAttachment(expense, file) {
     });
 }
 
+async function createBlogFile(blogPost, file) {
+  let formData = new FormData();
+  formData.append('blogFile', file);
+
+  // inject the accessToken for each request
+  let accessToken = getAccessToken();
+  return client({
+    method: 'post',
+    url: `/${BLOG_FILE}/${blogPost.authorId}/${blogPost.id}`,
+    data: formData,
+    headers: {
+      Authorization: `Bearer ${accessToken}`
+    }
+  })
+    .then((response) => {
+      return response.data;
+    })
+    .catch((err) => {
+      return err;
+    });
+}
+
 function deleteAttachment(expense) {
   return execute('delete', `attachment/${expense.employeeId}/${expense.id}/${expense.receipt}`);
+}
+
+function deleteBlogFile(blogPost) {
+  return execute('delete', `${BLOG_FILE}/${blogPost.authorId}/${blogPost.id}/${blogPost.fileName}`);
 }
 
 //functions for tSheets
@@ -218,11 +249,11 @@ function getFeedEvents() {
   return execute('get', `/${BASECAMP}/getFeedEvents`);
 }
 function getModerationLabel(img) {
-  return execute('post', `blog/getModerationLabel/${img}`);
+  return execute('post', `${BLOG_ATTACHMENT}/getModerationLabel/${img}`);
 }
 
 function getKeyPhrases(data) {
-  return execute('post', `blog/getKeyPhrases`, data);
+  return execute('post', `${BLOG_ATTACHMENT}/getKeyPhrases`, data);
 }
 
 async function uploadBlogAttachment(file) {
@@ -233,7 +264,7 @@ async function uploadBlogAttachment(file) {
   let accessToken = getAccessToken();
   return client({
     method: 'post',
-    url: `blog/uploadBlogAttachmentToS3/${file.name}`,
+    url: `${BLOG_ATTACHMENT}/uploadBlogAttachmentToS3/${file.name}`,
     data: formData,
     headers: {
       Authorization: `Bearer ${accessToken}`
@@ -249,8 +280,10 @@ async function uploadBlogAttachment(file) {
 
 export default {
   createAttachment,
+  createBlogFile,
   createItem,
   deleteAttachment,
+  deleteBlogFile,
   deleteItem,
   extractText,
   getAllActiveEmployeeBudgets,
@@ -260,6 +293,7 @@ export default {
   getAllExpenses,
   getAllExpenseTypeExpenses,
   getAttachment,
+  getBlogFile,
   getBasecampAvatars,
   getBasecampCampfires,
   getCaseTimeline,
@@ -287,5 +321,8 @@ export default {
   BUDGETS,
   URLS,
   TSHEETS,
-  TWITTER
+  TWITTER,
+  BLOG,
+  BLOG_ATTACHMENT,
+  BLOG_FILE
 };

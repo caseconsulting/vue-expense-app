@@ -61,6 +61,9 @@ function acceptedFileTypes() {
 } // acceptedFileTypes
 
 async function created() {
+  this.posts = await api.getItems(api.BLOG);
+  console.log(this.posts);
+
   this.posts = [
     {
       postId: '1',

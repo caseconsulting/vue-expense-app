@@ -4,7 +4,9 @@
     <v-btn to="/blog" color="white" class="ma-2"> <icon class="mr-1" name="ban"></icon>Cancel </v-btn>
 
     <!-- Submit Button -->
-    <v-btn outlined color="success" class="ma-2"> <icon class="mr-1" name="save"></icon>Submit</v-btn>
+    <v-btn outlined @click="checkSubmit" color="success" class="ma-2">
+      <icon class="mr-1" name="save"></icon>Submit</v-btn
+    >
     <div cols="12">
       <ckeditor :editor="editor" :value="editorData" :config="editorConfig"></ckeditor>
     </div>
@@ -12,12 +14,18 @@
     <v-btn to="/blog" color="white" class="ma-2"> <icon class="mr-1" name="ban"></icon>Cancel </v-btn>
 
     <!-- Submit Button -->
-    <v-btn outlined color="success" class="ma-2"> <icon class="mr-1" name="save"></icon>Submit</v-btn>
+    <v-btn outlined @click="checkSubmit" color="success" class="ma-2">
+      <icon class="mr-1" name="save"></icon>Submit</v-btn
+    >
   </v-container>
 </template>
 <script>
 import CKEditor from '@ckeditor/ckeditor5-vue';
 import ClassicEditor from '@ckeditor/ckeditor5-editor-classic/src/classiceditor';
+import { v4 as uuid } from 'uuid';
+import api from '@/shared/api.js';
+import moment from 'moment-timezone';
+const IsoFormat = 'YYYY-MM-DD';
 
 //some of these plugins are currently unused
 import Base64UploadAdapter from '@ckeditor/ckeditor5-upload/src/adapters/base64uploadadapter';
@@ -42,8 +50,53 @@ import BlockQuote from '@ckeditor/ckeditor5-block-quote/src/blockquote';
 import MediaEmbed from '@ckeditor/ckeditor5-media-embed/src/mediaembed';
 import Font from '@ckeditor/ckeditor5-font/src/font';
 
+async function created() {
+  this.user = await api.getUser();
+  console.log(this.user);
+}
+
 function editorData() {
   return this.blogPost;
+}
+
+async function checkSubmit() {
+  //check to see if there is any data
+  if (this.blogPost != null || this.blogPost != '') {
+    //TODO: first send data through moderation.
+    //begin creating the object
+    console.log(this.blogPost);
+    let newUUID = uuid();
+    this.$set(this.model, 'id', newUUID);
+    this.$set(this.model, 'authorId', this.user.id);
+    let newDate = moment().format(IsoFormat);
+    this.$set(this.model, 'createDate', newDate);
+    this.$set(this.model, 'fileName', 'test.md');
+    this.$set(this.model, 'tags', []);
+
+    let blogPost = await api.createItem(api.BLOG, this.model);
+
+    if (blogPost.id) {
+      this.clearForm();
+      //some success message popup
+      console.log('submitted');
+    } else {
+      //failure message
+      console.log('issue');
+      this.model.id = null;
+      console.log(blogPost.response.data.message);
+    }
+  } else {
+    //nothing to submit
+    console.log('nothing in the box');
+  }
+}
+
+function clearForm() {
+  this.$set(this.model, 'id', '');
+  this.$set(this.model, 'authorId', '');
+  this.$set(this.model, 'createDate', '');
+  this.$set(this.model, 'fileName', '');
+  this.$set(this.model, 'tags', []);
 }
 export default {
   name: 'app',
@@ -52,6 +105,7 @@ export default {
     // Use the <ckeditor> component in this view.
     ckeditor: CKEditor.component
   },
+  created,
   data() {
     return {
       editor: ClassicEditor,
@@ -140,11 +194,23 @@ export default {
           ]
         },
         placeholder: 'Create a New Blog Post'
+      },
+      user: null,
+      model: {
+        id: '',
+        authorId: '',
+        createDate: '',
+        fileName: '',
+        tags: []
       }
     };
   },
   computed: {
     editorData
+  },
+  methods: {
+    checkSubmit,
+    clearForm
   }
 };
 </script>
