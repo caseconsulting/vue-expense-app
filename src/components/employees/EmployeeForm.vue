@@ -17,15 +17,17 @@
         Close
       </v-btn>
     </v-snackbar>
+    <!-- End Status Alert -->
+
     <v-card hover>
+      <!-- Form Header -->
       <v-card-title class="header_style">
-        <!-- Editing an employee -->
         <h3 v-if="model.id">Editing {{ fullName }}</h3>
         <h3 v-else>New Employee</h3>
       </v-card-title>
 
       <v-container fluid>
-        <v-form ref="form" v-model="valid" lazy-validation>
+        <v-form ref="form" v-model="valid" lazy-validation class="my-1 mx-5">
           <!-- Tabs -->
           <v-tabs v-model="formTab" center-active show-arrows class="pb-0">
             <v-tab href="#employee" v-bind:class="{ errorTab: tabErrors.employee }">Employee</v-tab>
@@ -39,43 +41,43 @@
             <v-tab href="#contracts" v-bind:class="{ errorTab: tabErrors.contracts }">Contracts</v-tab>
             <v-tab href="#clearance" v-bind:class="{ errorTab: tabErrors.clearance }">Clearance</v-tab>
             <!-- Employee -->
-            <v-tab-item id="employee">
+            <v-tab-item id="employee" class="mt-6 mb-4">
               <employee-tab :admin="userIsAdmin()" :model="model" :validating="validating.employee"></employee-tab>
             </v-tab-item>
             <!-- Personal Info -->
-            <v-tab-item id="personal">
+            <v-tab-item id="personal" class="mt-6 mb-4">
               <personal-tab :model="model" :validating="validating.personal"></personal-tab>
             </v-tab-item>
             <!-- Education -->
-            <v-tab-item id="education">
+            <v-tab-item id="education" class="mt-6 mb-4">
               <education-tab :model="model" :validating="validating.education"></education-tab>
             </v-tab-item>
             <!-- Experience -->
-            <v-tab-item id="jobExperience">
+            <v-tab-item id="jobExperience" class="mt-6 mb-4">
               <job-experience-tab :model="model" :validating="validating.jobExperience"></job-experience-tab>
             </v-tab-item>
             <!-- Certifications -->
-            <v-tab-item id="certifications">
+            <v-tab-item id="certifications" class="mt-6 mb-4">
               <certification-tab :model="model" :validating="validating.certifications"></certification-tab>
             </v-tab-item>
             <!-- Awards -->
-            <v-tab-item id="awards">
+            <v-tab-item id="awards" class="mt-6 mb-4">
               <award-tab :model="model" :validating="validating.awards"></award-tab>
             </v-tab-item>
             <!-- Technologies -->
-            <v-tab-item id="technologies">
+            <v-tab-item id="technologies" class="mt-6 mb-4">
               <technology-tab :model="model" :validating="validating.technologies"></technology-tab>
             </v-tab-item>
             <!-- Customer Org Experience -->
-            <v-tab-item id="customerOrgExp">
+            <v-tab-item id="customerOrgExp" class="mt-6 mb-4">
               <customer-org-tab :model="model" :validating="validating.customerOrgExp"></customer-org-tab>
             </v-tab-item>
             <!-- Contracts -->
-            <v-tab-item id="contracts">
+            <v-tab-item id="contracts" class="mt-6 mb-4">
               <contract-tab :model="model" :validating="validating.contracts"></contract-tab>
             </v-tab-item>
             <!-- Clearance -->
-            <v-tab-item id="clearance">
+            <v-tab-item id="clearance" class="mt-6 mb-4">
               <clearance-tab :model="model" :validating="validating.clearance"></clearance-tab>
             </v-tab-item>
           </v-tabs>
@@ -87,6 +89,7 @@
           </v-btn>
           <!-- End form action buttons -->
         </v-form>
+        <!-- Confirmation Model -->
         <form-submission-confirmation :activate="this.confirming"></form-submission-confirmation>
       </v-container>
     </v-card>
@@ -118,7 +121,7 @@ import _ from 'lodash';
 // |--------------------------------------------------|
 
 /**
- * resets back to employee info.
+ * Resets back to employee info.
  */
 function cancel() {
   window.EventBus.$emit('cancel-form');
@@ -128,7 +131,7 @@ function cancel() {
  * Removes unnecessary attributes from the employee data.
  */
 function cleanUpData() {
-  // Degrees
+  // degrees
   if (!_.isEmpty(this.model.degrees)) {
     this.model.degrees = _.map(this.model.degrees, (degree) => {
       // remove date picker menu booleans
@@ -148,7 +151,7 @@ function cleanUpData() {
     this.model.degrees = null;
   }
 
-  // Certifications
+  // certifications
   if (!_.isEmpty(this.model.certifications)) {
     this.model.certifications = _.map(this.model.certifications, (certification) => {
       // remove date picker menu booleans
@@ -169,7 +172,7 @@ function cleanUpData() {
     this.model.certifications = null;
   }
 
-  // Awards
+  // awards
   if (!_.isEmpty(this.model.awards)) {
     this.model.awards = _.map(this.model.awards, (award) => {
       // remove date picker menu booleans
@@ -189,22 +192,22 @@ function cleanUpData() {
     this.model.awards = null;
   }
 
-  // Technologies
+  // technologies
   if (_.isEmpty(this.model.technologies)) {
     this.model.technologies = null;
   }
 
-  // Customer Org
+  // customer Org
   if (_.isEmpty(this.model.customerOrgExp)) {
     this.model.customerOrgExp = null;
   }
 
-  // Contracts
+  // contracts
   if (_.isEmpty(this.model.contracts)) {
     this.model.contracts = null;
   }
 
-  // Jobs
+  // jobs
   if (!_.isEmpty(this.model.jobs)) {
     this.model.jobs = _.reverse(
       _.sortBy(
@@ -232,7 +235,7 @@ function cleanUpData() {
     this.model.jobs = null;
   }
 
-  // IC Time Frames
+  // IC time frames
   if (!_.isEmpty(this.model.icTimeFrames)) {
     this.model.icTimeFrames = _.reverse(
       _.sortBy(
@@ -259,7 +262,7 @@ function cleanUpData() {
     this.model.icTimeFrames = null;
   }
 
-  // Clearances
+  // clearances
   if (!_.isEmpty(this.model.clearances)) {
     this.model.clearances = _.reverse(
       _.sortBy(
@@ -331,7 +334,11 @@ function clearStatus() {
   this.$set(this.errorStatus, 'color', null);
 } // clearStatus
 
+/**
+ * Validate and confirm form submission.
+ */
 function confirm() {
+  // validate tabs
   _.forEach(this.tabCreated, (value, key) => {
     if (value) {
       this.validating[key] = true;
@@ -507,22 +514,14 @@ export default {
   created,
   data() {
     return {
-      confirming: false,
-      dateOptionalRules: [
-        (v) => {
-          if (v) {
-            return /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v) || 'Date must be valid. Format: MM/DD/YYYY';
-          } else {
-            return true;
-          }
-        }
-      ], // rules for optional date
+      afterCreate: false, // component has been created
+      confirming: false, // confirming form submission
       errorStatus: {
         statusType: undefined,
         statusMessage: null,
         color: null
       }, // snack bar error
-      formTab: null,
+      formTab: null, // currently active tab
       fullName: '', // employee's first and last name
       model: {
         awards: [],
@@ -554,8 +553,8 @@ export default {
         technologies: [],
         twitter: null,
         workStatus: 100
-      },
-      submitting: false,
+      }, // employee info
+      submitting: false, // submitting form
       tabErrors: {
         awards: false,
         certifications: false,
@@ -567,7 +566,7 @@ export default {
         jobExperience: false,
         personal: false,
         technologies: false
-      },
+      }, // tab error status
       tabCreated: {
         awards: false,
         certifications: false,
@@ -579,7 +578,7 @@ export default {
         jobExperience: false,
         personal: false,
         technologies: false
-      },
+      }, // tab component created
       valid: false, // form validity
       validating: {
         awards: false,
@@ -592,7 +591,7 @@ export default {
         jobExperience: false,
         personal: false,
         technologies: false
-      }
+      } // signal to child tabs to validate
     };
   },
   methods: {
@@ -607,9 +606,10 @@ export default {
   props: ['currentTab', 'employee'], // employee to be created/updated
   watch: {
     formTab: function (val) {
+      // track current tab when switching between form and info
       if (this.afterCreate) {
         if (!_.isEqual(val, this.currentTab)) {
-          window.EventBus.$emit('tabChange', val);
+          window.EventBus.$emit('tabChange', val); // emit to parent tab was changed
         }
       }
     }
@@ -620,9 +620,5 @@ export default {
 <style>
 .errorTab {
   color: red !important;
-}
-
-.v-window {
-  padding: 20px;
 }
 </style>
