@@ -1,38 +1,41 @@
 <template>
   <div>
-    <!-- Loop contracts -->
+    <!-- Loop Contracts -->
     <div
       v-for="(contract, index) in model.contracts"
       class="pt-3 pb-1 px-5"
       :key="'contract: ' + contract.name + index"
       style="border: 1px solid grey;"
     >
-      <v-row>
-        <v-combobox
-          ref="formFields"
-          v-model="contract.name"
-          :rules="requiredRules"
-          :items="contractsDropDown"
-          label="Contract"
-          data-vv-name="Contract"
-        >
-        </v-combobox>
-      </v-row>
-      <v-row>
-        <v-combobox
-          ref="formFields"
-          v-model="contract.prime"
-          :rules="requiredRules"
-          :items="primesDropDown"
-          label="Prime"
-          data-vv-name="Prime"
-        >
-        </v-combobox>
-      </v-row>
+      <!-- Name of Contract -->
+      <v-combobox
+        ref="formFields"
+        v-model="contract.name"
+        :rules="requiredRules"
+        :items="contractsDropDown"
+        label="Contract"
+        data-vv-name="Contract"
+      >
+      </v-combobox>
+
+      <!-- Name of Prime -->
+      <v-combobox
+        ref="formFields"
+        v-model="contract.prime"
+        :rules="requiredRules"
+        :items="primesDropDown"
+        label="Prime"
+        data-vv-name="Prime"
+      >
+      </v-combobox>
+
       <v-row align="center" justify="center">
+        <!-- Current Switch -->
         <v-col cols="6" sm="7" md="6" lg="7">
           <v-switch v-model="contract.current" label="Currently working with this customer organization"></v-switch>
         </v-col>
+
+        <!-- Years of Experience -->
         <v-col
           cols="4"
           sm="3"
@@ -45,7 +48,7 @@
             ref="formFields"
             :value="contract.years"
             flat
-            :rules="countRequired"
+            :rules="experienceRequired"
             single-line
             max="99"
             min="0"
@@ -55,13 +58,16 @@
             outlined
           ></v-text-field>
         </v-col>
-        <!-- Delete button  -->
+
+        <!-- Button to Delete Contract -->
         <v-col cols="2" class="mb-3" align="center">
           <v-btn text icon><v-icon @click="deleteContract(index)">delete</v-icon></v-btn>
         </v-col>
       </v-row>
     </div>
-    <!-- Add Contract button -->
+    <!-- End Loop Contracts -->
+
+    <!-- Button to Add Contracts -->
     <div class="pt-4" align="center">
       <v-btn @click="addContract()"><v-icon class="pr-1">add</v-icon>Contract</v-btn>
     </div>
@@ -71,16 +77,21 @@
 <script>
 import api from '@/shared/api.js';
 import _ from 'lodash';
+import { formatDateDashToSlash, formatDateSlashToDash, isEmpty } from '@/utils/utils';
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                 LIFECYCLE HOOKS                  |
 // |                                                  |
 // |--------------------------------------------------|
 
+/**
+ * Emits to parent the component was created and get data.
+ */
 async function created() {
-  window.EventBus.$emit('created', 'contracts');
+  window.EventBus.$emit('created', 'contracts'); // emit contracts tab was created
   this.employees = await api.getItems(api.EMPLOYEES); // get all employees
-  this.getDropDownInfo();
+  this.populateDropDowns(); // get autocomplete drop down data
 } // created
 
 // |--------------------------------------------------|
@@ -90,7 +101,7 @@ async function created() {
 // |--------------------------------------------------|
 
 /**
- * Add a Contract to the form.
+ * Adds a Contract.
  */
 function addContract() {
   this.model.contracts.push({
@@ -102,63 +113,29 @@ function addContract() {
 } // addContract
 
 /**
- * delete a Contract from the form
+ * Deletes a Contract.
+ *
+ * @param index - array index of contract to delete
  */
 function deleteContract(index) {
   this.model.contracts.splice(index, 1);
 } // deleteContract
 
-function formatDate(date) {
-  if (!date) {
-    return null;
-  }
-  const [year, month, day] = date.split('-');
-  return `${month}/${day}/${year}`;
-} // formatDate
-
 /**
- * Gets information that other employees have filled out.
+ * Populate drop downs with information that other employees have filled out.
  */
-function getDropDownInfo() {
-  let employeesContracts = _.map(this.employees, (employee) => employee.contracts); //extract Contracts
-  employeesContracts = _.compact(employeesContracts); //remove falsey values
+function populateDropDowns() {
+  let employeesContracts = _.map(this.employees, (employee) => employee.contracts); // extract contracts
+  employeesContracts = _.compact(employeesContracts); // remove falsey values
+  // loop employees
   _.forEach(employeesContracts, (contracts) => {
+    // loop contracts
     _.forEach(contracts, (contract) => {
-      this.contractsDropDown.push(contract.name);
+      this.contractsDropDown.push(contract.name); // add contract name
+      this.primesDropDown.push(contract.prime); // add contract prime
     });
   });
-  employeesContracts = _.map(this.employees, (employee) => employee.contracts); //extract Contracts
-  employeesContracts = _.compact(employeesContracts); //remove falsey values
-  _.forEach(employeesContracts, (contracts) => {
-    _.forEach(contracts, (contract) => {
-      this.primesDropDown.push(contract.prime);
-    });
-  });
-} // getDropDownInfo
-
-/**
- * Checks if a value is empty. Returns true if the value is null or an empty/blank string.
- *
- * @param value - value to check
- * @return boolean - value is empty
- */
-function isEmpty(value) {
-  return _.isNil(value) || (_.isString(value) && value.trim().length === 0);
-} // isEmpty
-
-/**
- * Parse a date to isoformat (YYYY-MM-DD).
- *
- * @param Date = date to parse
- * @return Date - date in isoformat
- */
-function parseDate(date) {
-  if (!date) {
-    return null;
-  }
-  const [month, day, year] = date.split('/');
-  return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`; // parseDate
-} // parseDate
+} // populateDropDowns
 
 /**
  * Validate all input fields are valid. Emit to parent the error status.
@@ -167,56 +144,59 @@ function validateFields() {
   let hasErrors = false;
 
   if (_.isArray(this.$refs.formFields)) {
+    // more than one TYPE of vuetify component used
     let error = _.find(this.$refs.formFields, (field) => {
       return !field.validate();
     });
     hasErrors = _.isNil(error) ? false : true;
   } else if (this.$refs.formFields) {
+    // single vuetify component
     hasErrors = !this.$refs.formFields.validate();
   }
 
-  window.EventBus.$emit('doneValidating', 'contracts');
-  window.EventBus.$emit('contractsStatus', hasErrors);
+  window.EventBus.$emit('doneValidating', 'contracts'); // emit done validating
+  window.EventBus.$emit('contractsStatus', hasErrors); // emit error status
 } // validateFields
 
 export default {
   created,
   data() {
     return {
-      contractsDropDown: [],
+      contractsDropDown: [], // autocomplete contract name options
       dateOptionalRules: [
         (v) => {
-          return v ? /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v) || 'Date must be valid. Format: MM/DD/YYYY' : true;
+          return !isEmpty(v) ? /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v) || 'Date must be valid. Format: MM/DD/YYYY' : true;
         }
-      ], // rules for optional dates
+      ], // rules for an optional date
       dateRules: [
-        (v) => !!v || 'Date required',
-        (v) => (!!v && /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v)) || 'Date must be valid. Format: MM/DD/YYYY'
-      ], // rules for date
-      primesDropDown: [],
-      requiredRules: [
-        (v) => !isEmpty(v) || 'This field is required. You must enter information or delete the field if possible'
-      ], // rules for required fields
-      countRequired: [
+        (v) => !isEmpty(v) || 'Date required',
+        (v) => (!isEmpty(v) && /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v)) || 'Date must be valid. Format: MM/DD/YYYY'
+      ], // rules for a required date
+      experienceRequired: [
         (v) => !isEmpty(v) || 'This field is required',
         (v) => v >= 0 || 'Value cannot be negative',
         (v) => v < 100 || 'Value must be less than 100'
-      ] // rules for year count
+      ], // rules for years of experience
+      primesDropDown: [], // autocomplete contract prime options
+      requiredRules: [
+        (v) => !isEmpty(v) || 'This field is required. You must enter information or delete the field if possible'
+      ] // rules for a required field
     };
   },
   methods: {
     addContract,
     deleteContract,
-    formatDate,
-    getDropDownInfo,
-    parseDate,
+    formatDateSlashToDash,
+    formatDateDashToSlash,
     isEmpty,
+    populateDropDowns,
     validateFields
   },
   props: ['model', 'validating'],
   watch: {
     validating: function (val) {
       if (val) {
+        // parent component triggers validation
         this.validateFields();
       }
     }

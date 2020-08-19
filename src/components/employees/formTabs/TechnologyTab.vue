@@ -1,27 +1,30 @@
 <template>
   <div>
-    <!-- Loop technologies -->
+    <!-- Loop Technologies -->
     <div
       v-for="(technology, index) in model.technologies"
       class="pt-3 pb-1 px-5"
       :key="'technology: ' + technology.name + index"
       style="border: 1px solid grey;"
     >
-      <v-row>
-        <v-combobox
-          ref="formFields"
-          v-model="technology.name"
-          :rules="requiredRules"
-          :items="technologyDropDown"
-          label="Technology"
-          data-vv-name="Technology"
-        >
-        </v-combobox>
-      </v-row>
+      <!-- Name of Technology -->
+      <v-combobox
+        ref="formFields"
+        v-model="technology.name"
+        :rules="requiredRules"
+        :items="technologyDropDown"
+        label="Technology"
+        data-vv-name="Technology"
+      >
+      </v-combobox>
+
       <v-row align="center" justify="center">
+        <!-- Current Switch -->
         <v-col cols="6" sm="7" md="6" lg="7">
           <v-switch v-model="technology.current" label="Currently working with this technology"></v-switch>
         </v-col>
+
+        <!-- Years of Experience -->
         <v-col
           cols="4"
           sm="3"
@@ -34,7 +37,7 @@
             ref="formFields"
             :value="technology.years"
             flat
-            :rules="countRequired"
+            :rules="experienceRequired"
             single-line
             max="99"
             min="0"
@@ -44,13 +47,16 @@
             outlined
           ></v-text-field>
         </v-col>
-        <!-- Delete button  -->
+
+        <!-- Button to Delete Technology -->
         <v-col cols="2" class="mb-3" align="center">
           <v-btn text icon><v-icon @click="deleteTechnology(index)">delete</v-icon></v-btn>
         </v-col>
       </v-row>
     </div>
-    <!-- Add Technology button -->
+    <!-- End Loop Technologies -->
+
+    <!-- Button to Add Technologies -->
     <div class="pt-4" align="center">
       <v-btn @click="addTechnology()"><v-icon class="pr-1">add</v-icon>Technology</v-btn>
     </div>
@@ -60,6 +66,7 @@
 <script>
 import api from '@/shared/api.js';
 import _ from 'lodash';
+import { formatDateDashToSlash, formatDateSlashToDash, isEmpty } from '@/utils/utils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -67,10 +74,13 @@ import _ from 'lodash';
 // |                                                  |
 // |--------------------------------------------------|
 
+/**
+ * Emits to parent the component was created and get data.
+ */
 async function created() {
-  window.EventBus.$emit('created', 'technologies');
+  window.EventBus.$emit('created', 'technologies'); // emit technologies tab was created
   this.employees = await api.getItems(api.EMPLOYEES); // get all employees
-  this.getDropDownInfo();
+  this.populateDropDowns();
 } // created
 
 // |--------------------------------------------------|
@@ -80,7 +90,7 @@ async function created() {
 // |--------------------------------------------------|
 
 /**
- * Add an technology to the form.
+ * Add a Technology.
  */
 function addTechnology() {
   this.model.technologies.push({
@@ -91,56 +101,28 @@ function addTechnology() {
 } // addTechnology
 
 /**
- * delete an technology from the form
+ * Deletes a Technology.
+ *
+ * @param index - array index of technology to delete
  */
 function deleteTechnology(index) {
   this.model.technologies.splice(index, 1);
 } // deleteTechnology
 
-function formatDate(date) {
-  if (!date) {
-    return null;
-  }
-  const [year, month, day] = date.split('-');
-  return `${month}/${day}/${year}`;
-} // formatDate
-
 /**
  * Gets information that other employees have filled out.
  */
-function getDropDownInfo() {
+function populateDropDowns() {
   let employeesTechnology = _.map(this.employees, (employee) => employee.technologies); //extract technology
   employeesTechnology = _.compact(employeesTechnology); //remove falsey values
+  // loop employees
   _.forEach(employeesTechnology, (technologies) => {
+    // loop technologies
     _.forEach(technologies, (technology) => {
-      this.technologyDropDown.push(technology.name);
+      this.technologyDropDown.push(technology.name); // add technology name
     });
   });
-} // getDropDownInfo
-
-/**
- * Checks if a value is empty. Returns true if the value is null or an empty/blank string.
- *
- * @param value - value to check
- * @return boolean - value is empty
- */
-function isEmpty(value) {
-  return _.isNil(value) || (_.isString(value) && value.trim().length === 0);
-} // isEmpty
-
-/**
- * Parse a date to isoformat (YYYY-MM-DD).
- *
- * @param Date = date to parse
- * @return Date - date in isoformat
- */
-function parseDate(date) {
-  if (!date) {
-    return null;
-  }
-  const [month, day, year] = date.split('/');
-  return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`; // parseDate
-} // parseDate
+} // populateDropDowns
 
 /**
  * Validate all input fields are valid. Emit to parent the error status.
@@ -149,56 +131,58 @@ function validateFields() {
   let hasErrors = false;
 
   if (_.isArray(this.$refs.formFields)) {
+    // more than one TYPE of vuetify component used
     let error = _.find(this.$refs.formFields, (field) => {
       return !field.validate();
     });
     hasErrors = _.isNil(error) ? false : true;
   } else if (this.$refs.formFields) {
+    // single vuetify component
     hasErrors = !this.$refs.formFields.validate();
   }
 
-  window.EventBus.$emit('doneValidating', 'technologies');
-  window.EventBus.$emit('technologiesStatus', hasErrors);
+  window.EventBus.$emit('doneValidating', 'technologies'); // emit done validating
+  window.EventBus.$emit('technologiesStatus', hasErrors); // emit error status
 } // validateFields
 
 export default {
   created,
   data() {
     return {
-      technologyDropDown: [],
+      technologyDropDown: [], // autocomplete technology name options
       dateOptionalRules: [
         (v) => {
-          return v ? /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v) || 'Date must be valid. Format: MM/DD/YYYY' : true;
+          return !isEmpty(v) ? /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v) || 'Date must be valid. Format: MM/DD/YYYY' : true;
         }
-      ], // rules for optional dates
+      ], // rules for an optional date
       dateRules: [
-        (v) => !!v || 'Date required',
-        (v) => (!!v && /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v)) || 'Date must be valid. Format: MM/DD/YYYY'
-      ], // rules for date
-      formFields: [],
-      requiredRules: [
-        (v) => !isEmpty(v) || 'This field is required. You must enter information or delete the field if possible'
-      ], // rules for required fields
-      countRequired: [
+        (v) => !isEmpty(v) || 'Date required',
+        (v) => (!isEmpty(v) && /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v)) || 'Date must be valid. Format: MM/DD/YYYY'
+      ], // rules for a required date
+      experienceRequired: [
         (v) => !isEmpty(v) || 'This field is required',
         (v) => v >= 0 || 'Value cannot be negative',
         (v) => v < 100 || 'Value must be less than 100'
-      ] // rules for year count
+      ], // rules for years of experience
+      requiredRules: [
+        (v) => !isEmpty(v) || 'This field is required. You must enter information or delete the field if possible'
+      ] // rules for a required field
     };
   },
   methods: {
     addTechnology,
     deleteTechnology,
-    formatDate,
-    getDropDownInfo,
-    parseDate,
+    formatDateDashToSlash,
+    formatDateSlashToDash,
     isEmpty,
+    populateDropDowns,
     validateFields
   },
   props: ['model', 'validating'],
   watch: {
     validating: function (val) {
       if (val) {
+        // parent component triggers validation
         this.validateFields();
       }
     }

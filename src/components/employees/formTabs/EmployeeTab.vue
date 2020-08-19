@@ -49,7 +49,7 @@
       ref="formFields"
       :disabled="!admin"
       :items="permissions"
-      :rules="componentRules"
+      :rules="requiredRules"
       v-model="employeeRoleFormatted"
       label="Employee Role"
       @blur="model.employeeRole = formatKebabCase(employeeRoleFormatted)"
@@ -179,21 +179,58 @@
 </template>
 <script>
 import api from '@/shared/api.js';
-import dateUtils from '@/shared/dateUtils';
 import MobileDetect from 'mobile-detect';
 import _ from 'lodash';
+import { formatDate, isEmpty, parseDate } from '@/utils/utils';
 
 const regex = /^(([^<>()[\]\\.,;:\s@#"]+(\.[^<>()[\]\\.,;:\s@#"]+)*)|(".+"))@consultwithcase.com/;
 
+// |--------------------------------------------------|
+// |                                                  |
+// |                 LIFECYCLE HOOKS                  |
+// |                                                  |
+// |--------------------------------------------------|
+
 /**
- * Formats a date.
- *
- * @param date - date to format
- * @return Date - formatted date
+ * Emits to parent the component was created and get data.
  */
-function formatDate(date) {
-  return dateUtils.formatDate(date);
-} // formatDate
+async function created() {
+  window.EventBus.$emit('created', 'employee'); // emit employee tab was created
+  // set formatted hire date
+  this.hireDateFormatted = formatDate(this.model.hireDate) || this.hireDateFormatted;
+  // set formatted depature date
+  this.deptDateFormatted = formatDate(this.model.deptDate) || this.deptDateFormatted;
+  // fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
+  if (this.model.deptDate !== null && !formatDate(this.model.deptDate)) {
+    // clear depature date if fails to format
+    this.model.deptDate = null;
+  }
+  // capitalize the employee role
+  this.employeeRoleFormatted = _.startCase(this.model.employeeRole);
+  // determine if employee has expenses
+  this.hasExpenses = this.model.id ? _.size(await api.getAllEmployeeExpenses(this.model.id)) > 0 : false;
+
+  if (this.model.workStatus != null) {
+    // set work status buttons if the status exists
+    this.status = this.model.workStatus.toString(); // convert employee work status to string
+    // set status radio
+    if (this.status == '100') {
+      this.statusRadio = 'full';
+    } else if (this.status == '0') {
+      this.statusRadio = 'inactive';
+    } else {
+      this.statusRadio = 'part';
+    }
+  }
+  // set works status value to a string
+  this.value = this.model.workStatus.toString();
+} // created
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     METHODS                      |
+// |                                                  |
+// |--------------------------------------------------|
 
 /**
  * Converts a string to kebab case.
@@ -243,32 +280,24 @@ function isStatusEmpty() {
 } // isStatusEmpty
 
 /**
- * Parse a date to isoformat (YYYY-MM-DD).
- *
- * @param Date = date to parse
- * @return Date - date in isoformat
- */
-function parseDate(date) {
-  return dateUtils.parseDate(date);
-} // parseDate
-
-/**
  * Validate all input fields are valid. Emit to parent the error status.
  */
 function validateFields() {
   let hasErrors = false;
 
   if (_.isArray(this.$refs.formFields)) {
+    // more than one TYPE of vuetify component used
     let error = _.find(this.$refs.formFields, (field) => {
       return !field.validate();
     });
     hasErrors = _.isNil(error) ? false : true;
   } else if (this.$refs.formFields) {
+    // single vuetify component
     hasErrors = !this.$refs.formFields.validate();
   }
 
-  window.EventBus.$emit('doneValidating', 'employee');
-  window.EventBus.$emit('employeeStatus', hasErrors);
+  window.EventBus.$emit('doneValidating', 'employee'); // emit done validating
+  window.EventBus.$emit('employeeStatus', hasErrors); // emit error status
 } // validateFields
 
 /**
@@ -282,66 +311,29 @@ function viewStatus() {
   }
 } // viewStatus
 
-// |--------------------------------------------------|
-// |                                                  |
-// |                 LIFECYCLE HOOKS                  |
-// |                                                  |
-// |--------------------------------------------------|
-
-/**
- * Set the list of countries.
- */
-async function created() {
-  window.EventBus.$emit('created', 'employee');
-  this.hireDateFormatted = this.formatDate(this.model.hireDate) || this.hireDateFormatted;
-  this.deptDateFormatted = this.formatDate(this.model.deptDate) || this.deptDateFormatted;
-  //fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
-  if (this.model.deptDate !== null && !this.formatDate(this.model.deptDate)) {
-    this.model.deptDate = null;
-  }
-  if (this.model.employeeRole != 'User') {
-    this.employeeRoleFormatted = _.startCase(this.model.employeeRole);
-  }
-  this.hasExpenses = this.model.id ? _.size(await api.getAllEmployeeExpenses(this.model.id)) > 0 : false;
-  if (this.model.workStatus != null) {
-    // set work status buttons if the status exists
-    this.status = this.model.workStatus.toString(); // convert employee work status to string
-    // set status radio
-    if (this.status == '100') {
-      this.statusRadio = 'full';
-    } else if (this.status == '0') {
-      this.statusRadio = 'inactive';
-    } else {
-      this.statusRadio = 'part';
-    }
-  }
-  this.value = this.model.workStatus.toString();
-} // created
-
 export default {
   created,
   data() {
     return {
       dateRules: [
-        (v) => !!v || 'Date must be valid. Format: MM/DD/YYYY',
-        (v) => (!!v && /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v)) || 'Date must be valid. Format: MM/DD/YYYY'
-      ], // rules for date
+        (v) => !isEmpty(v) || 'Date must be valid. Format: MM/DD/YYYY',
+        (v) => (!isEmpty(v) && /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v)) || 'Date must be valid. Format: MM/DD/YYYY'
+      ], // rules for a required date
       deptDateFormatted: null, // formatted departure date
       departureMenu: false, // display depature menu
-      componentRules: [(v) => !!v || 'Something must be selected'], // rules for required componenet selection
       emailRules: [
-        (v) => !!v || 'Email is required',
+        (v) => !isEmpty(v) || 'Email is required',
         (v) => regex.test(v) || 'Not a valid @consultwithcase email address'
-      ], // rules for employee email
+      ], // rules for an employee email
       hasExpenses: false, // employee has expenses
       hireDateFormatted: null, // formatted hire date
       hireMenu: false, // display hire menu
       numberRules: [
-        (v) => !!v || 'Employee # is required',
+        (v) => !isEmpty(v) || 'Employee # is required',
         (v) => /^\d+$/.test(v) || 'Employee # must be a positive number'
-      ], // rules for employee number
+      ], // rules for an employee number
       permissions: ['Admin', 'User'], // employee role options
-      requiredRules: [(v) => !!v || 'This field is required'], // rules for required fields
+      requiredRules: [(v) => !isEmpty(v) || 'This field is required'], // rules for a required field
       status: '100', // work status value
       statusRadio: 'full', // work status button
       value: '' // used for removing non-number characters from the workstatus
@@ -350,6 +342,7 @@ export default {
   methods: {
     formatDate,
     formatKebabCase,
+    isEmpty,
     isInactive,
     isMobile,
     isPartTime,
@@ -366,17 +359,17 @@ export default {
       }
     },
     'model.deptDate': function () {
-      this.deptDateFormatted = this.formatDate(this.model.deptDate) || this.deptDateFormatted;
+      this.deptDateFormatted = formatDate(this.model.deptDate) || this.deptDateFormatted;
       //fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
-      if (this.model.deptDate !== null && !this.formatDate(this.model.deptDate)) {
+      if (this.model.deptDate !== null && !formatDate(this.model.deptDate)) {
         this.model.deptDate = null;
       }
     },
     'model.hireDate': async function () {
       this.hasExpenses = this.model.id ? _.size(await api.getAllEmployeeExpenses(this.model.id)) > 0 : false;
-      this.hireDateFormatted = this.formatDate(this.model.hireDate) || this.hireDateFormatted;
+      this.hireDateFormatted = formatDate(this.model.hireDate) || this.hireDateFormatted;
       //fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
-      if (this.model.hireDate !== null && !this.formatDate(this.model.hireDate)) {
+      if (this.model.hireDate !== null && !formatDate(this.model.hireDate)) {
         this.model.hireDate = null;
       }
     },
@@ -401,13 +394,15 @@ export default {
     },
     validating: function (val) {
       if (val) {
+        // parent component triggers validation
         this.validateFields();
       }
     }
   }
 };
 </script>
-<style>
+
+<style scoped>
 .customInput :hover {
   border: solid 1px black;
 }

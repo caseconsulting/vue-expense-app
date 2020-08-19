@@ -1,12 +1,13 @@
 <template>
   <div>
-    <!-- Loop awards -->
+    <!-- Loop Awards -->
     <div
       v-for="(award, index) in model.awards"
       style="border: 1px solid grey;"
       class="pt-3 pb-1 px-5"
       :key="'award: ' + award.name + index"
     >
+      <!-- Name of Award -->
       <v-combobox
         ref="formFields"
         v-model="award.name"
@@ -32,7 +33,7 @@
             <template v-slot:activator="{ on, attrs }">
               <v-text-field
                 ref="formFields"
-                :value="formatDate(award.dateReceived)"
+                :value="formatDateDashToSlash(award.dateReceived)"
                 label="Date Received"
                 prepend-icon="event_available"
                 :rules="dateRules"
@@ -51,7 +52,9 @@
         </v-col>
       </v-row>
     </div>
-    <!-- Add award button -->
+    <!-- Loop Awards -->
+
+    <!-- Button to Add Awards -->
     <div class="pt-4" align="center">
       <v-btn @click="addAward()"><v-icon class="pr-1">add</v-icon>Award</v-btn>
     </div>
@@ -61,6 +64,7 @@
 <script>
 import api from '@/shared/api.js';
 import _ from 'lodash';
+import { formatDateDashToSlash, formatDateSlashToDash, isEmpty } from '@/utils/utils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -68,8 +72,11 @@ import _ from 'lodash';
 // |                                                  |
 // |--------------------------------------------------|
 
+/**
+ * Emits to parent the component was created and get data.
+ */
 async function created() {
-  window.EventBus.$emit('created', 'awards');
+  window.EventBus.$emit('created', 'awards'); // emit awards tab was created
   this.employees = await api.getItems(api.EMPLOYEES); // get all employees
 } // created
 
@@ -80,7 +87,7 @@ async function created() {
 // |--------------------------------------------------|
 
 /**
- * Add an award to the form.
+ * Add an award.
  */
 function addAward() {
   this.model.awards.push({
@@ -93,33 +100,11 @@ function addAward() {
 } // addAward
 
 /**
- * delete an award from the form
+ * Delete an award.
  */
 function deleteAward(index) {
   this.model.awards.splice(index, 1);
 } // deleteAward
-
-function formatDate(date) {
-  if (!date) {
-    return null;
-  }
-  const [year, month, day] = date.split('-');
-  return `${month}/${day}/${year}`;
-} // formatDate
-
-/**
- * Parse a date to isoformat (YYYY-MM-DD).
- *
- * @param Date = date to parse
- * @return Date - date in isoformat
- */
-function parseDate(date) {
-  if (!date) {
-    return null;
-  }
-  const [month, day, year] = date.split('/');
-  return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`; // parseDate
-} // parseDate
 
 /**
  * Validate all input fields are valid. Emit to parent the error status.
@@ -128,16 +113,18 @@ function validateFields() {
   let hasErrors = false;
 
   if (_.isArray(this.$refs.formFields)) {
+    // more than one TYPE of vuetify component used
     let error = _.find(this.$refs.formFields, (field) => {
       return !field.validate();
     });
     hasErrors = _.isNil(error) ? false : true;
   } else if (this.$refs.formFields) {
+    // single vuetify component
     hasErrors = !this.$refs.formFields.validate();
   }
 
-  window.EventBus.$emit('doneValidating', 'awards');
-  window.EventBus.$emit('awardStatus', hasErrors);
+  window.EventBus.$emit('doneValidating', 'awards'); // emit done validating
+  window.EventBus.$emit('awardStatus', hasErrors); // emit error status
 } // validateFields
 
 export default {
@@ -146,30 +133,31 @@ export default {
     return {
       dateOptionalRules: [
         (v) => {
-          return v ? /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v) || 'Date must be valid. Format: MM/DD/YYYY' : true;
+          return !isEmpty(v) ? /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v) || 'Date must be valid. Format: MM/DD/YYYY' : true;
         }
-      ], // rules for optional dates
+      ], // rules for an optional date
       dateRules: [
-        (v) => !!v || 'Date required',
-        (v) => (!!v && /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v)) || 'Date must be valid. Format: MM/DD/YYYY'
-      ], // rules for date
-      formFields: [],
+        (v) => !isEmpty(v) || 'Date required',
+        (v) => (!isEmpty(v) && /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v)) || 'Date must be valid. Format: MM/DD/YYYY'
+      ], // rules for a required date
       requiredRules: [
-        (v) => !!v || 'This field is required. You must enter information or delete the field if possible'
-      ] // rules for required fields
+        (v) => !isEmpty(v) || 'This field is required. You must enter information or delete the field if possible'
+      ] // rules for a required field
     };
   },
   methods: {
     addAward,
     deleteAward,
-    formatDate,
-    parseDate,
+    formatDateSlashToDash,
+    formatDateDashToSlash,
+    isEmpty,
     validateFields
   },
   props: ['model', 'validating'],
   watch: {
     validating: function (val) {
       if (val) {
+        // parent component triggers validation
         this.validateFields();
       }
     }

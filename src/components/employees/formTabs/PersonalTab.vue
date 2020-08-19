@@ -1,25 +1,24 @@
 <template>
   <div>
+    <!-- Prime -->
     <v-combobox
       style="padding-right: 20px; padding-left: 10px;"
       v-model="model.prime"
       :items="employeeInfo.primes"
       label="Prime"
       data-vv-name="Prime"
-      dense
     ></v-combobox>
 
-    <!-- Contract combo box -->
+    <!-- Contract -->
     <v-combobox
       style="padding-right: 20px; padding-left: 10px;"
       v-model="model.contract"
       :items="employeeInfo.contracts"
       label="Contract"
       data-vv-name="Contract"
-      dense
     ></v-combobox>
 
-    <!-- Github text field -->
+    <!-- Github -->
     <v-text-field
       style="padding-right: 20px; padding-left: 10px;"
       v-model="model.github"
@@ -27,7 +26,7 @@
       data-vv-name="Github"
     ></v-text-field>
 
-    <!-- Twitter text field -->
+    <!-- Twitter -->
     <v-text-field
       style="padding-right: 20px; padding-left: 10px;"
       v-model="model.twitter"
@@ -35,10 +34,10 @@
       data-vv-name="Twitter"
     ></v-text-field>
 
-    <!-- Job Role autocomplete -->
+    <!-- Job Role -->
     <v-autocomplete
       style="padding-right: 20px; padding-left: 10px;"
-      :items="jobRoles"
+      :items="jobTitles"
       v-model="model.jobRole"
       item-text="text"
       label="Job Role"
@@ -72,7 +71,7 @@
       <v-date-picker v-model="model.birthday" no-title @input="BirthdayMenu = false"></v-date-picker>
     </v-menu>
 
-    <!-- opt out of birthday feed -->
+    <!-- Show Birthday -->
     <v-switch
       v-model="model.birthdayFeed"
       label="Have birthday recognized on company feed?"
@@ -111,8 +110,36 @@
 
 <script>
 import api from '@/shared/api.js';
-import dateUtils from '@/shared/dateUtils';
 import _ from 'lodash';
+import { formatDate, isEmpty, parseDate } from '@/utils/utils';
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                 LIFECYCLE HOOKS                  |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * Emits to parent the component was created and get data.
+ */
+async function created() {
+  window.EventBus.$emit('created', 'personal'); // emit personal tab was created
+  // get countries
+  this.countries = _.map(await api.getCountries(), 'name');
+  this.countries.unshift('United States of America');
+  // get all employees
+  this.employees = await api.getItems(api.EMPLOYEES);
+  // set formatted birthday date
+  this.birthdayFormat = formatDate(this.model.birthday) || this.birthdayFormat;
+  // fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
+  if (this.model.birthday !== null && !formatDate(this.model.birthday)) {
+    // clear birthday date if fails to format
+    this.model.birthday = null;
+  }
+  // filter primes and contracts
+  this.filterPrimes();
+  this.filterContracts();
+} // created
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -121,8 +148,10 @@ import _ from 'lodash';
 // |--------------------------------------------------|
 
 /**
- * checks to see if the country is the United States. if it is: returns true
- * otherwise clears state field and returns false
+ * Checks to see if the country is the United States. if it is: returns true
+ * otherwise clears state field and returns false.
+ *
+ * @param boolan - USA is selected for countries
  */
 function isUSA() {
   if (this.model.country == 'United States of America') {
@@ -131,7 +160,7 @@ function isUSA() {
     this.model.st = null;
     return false;
   }
-}
+} // isUSA
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -140,17 +169,15 @@ function isUSA() {
 // |--------------------------------------------------|
 
 /**
- * Function for handling if the birthdayFeed switch is disabled
+ * Function for handling if the birthdayFeed switch is disabled.
  *
  * @return boolean - birthday feed is disabled
  */
 function disableBirthdayFeed() {
   if (this.model.birthday == null) {
-    this.undisabled = false;
     this.model.birthdayFeed = false;
     return true;
   }
-  this.undisabled = true;
   this.model.birthdayFeed = true;
   return false;
 } // disableBirthdayFeed
@@ -174,63 +201,25 @@ function filterPrimes() {
 } // filterPrimes
 
 /**
- * Formats a date.
- *
- * @param date - date to format
- * @return Date - formatted date
- */
-function formatDate(date) {
-  return dateUtils.formatDate(date);
-} // formatDate
-
-/**
- * Parse a date to isoformat (YYYY-MM-DD).
- *
- * @param Date = date to parse
- * @return Date - date in isoformat
- */
-function parseDate(date) {
-  return dateUtils.parseDate(date);
-} // parseDate
-
-/**
  * Validate all input fields are valid. Emit to parent the error status.
  */
 function validateFields() {
   let hasErrors = false;
 
   if (_.isArray(this.$refs.formFields)) {
+    // more than one TYPE of vuetify component used
     let error = _.find(this.$refs.formFields, (field) => {
       return !field.validate();
     });
     hasErrors = _.isNil(error) ? false : true;
   } else if (this.$refs.formFields) {
+    // single vuetify component
     hasErrors = !this.$refs.formFields.validate;
   }
 
-  window.EventBus.$emit('doneValidating', 'personal');
-  window.EventBus.$emit('personalStatus', hasErrors);
+  window.EventBus.$emit('doneValidating', 'personal'); // emit done validating
+  window.EventBus.$emit('personalStatus', hasErrors); // emit error status
 } // validateFields
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                 LIFECYCLE HOOKS                  |
-// |                                                  |
-// |--------------------------------------------------|
-
-async function created() {
-  window.EventBus.$emit('created', 'personal');
-  this.countries = _.map(await api.getCountries(), 'name');
-  this.countries.unshift('United States of America');
-  this.employees = await api.getItems(api.EMPLOYEES); // get all employees
-  this.filterPrimes();
-  this.filterContracts();
-  this.birthdayFormat = this.formatDate(this.model.birthday) || this.birthdayFormat;
-  //fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
-  if (this.model.birthday !== null && !this.formatDate(this.model.birthday)) {
-    this.model.birthday = null;
-  }
-} // created
 
 export default {
   created,
@@ -240,20 +229,19 @@ export default {
   data() {
     return {
       birthdayFormat: null, // formatted birthday
-      BirthdayMenu: false,
+      BirthdayMenu: false, // display birthday menu
       countries: [], // list of countries
       dateOptionalRules: [
         (v) => {
-          return v ? /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v) || 'Date must be valid. Format: MM/DD/YYYY' : true;
+          return !isEmpty(v) ? /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v) || 'Date must be valid. Format: MM/DD/YYYY' : true;
         }
-      ], // rules for optional dates
+      ], // rules for an optional date
       employeeInfo: {
         primes: [],
         contracts: []
-      },
-      employees: [],
-      formFields: [],
-      jobRoles: [
+      }, // employee prime and contract info
+      employees: [], // all employees
+      jobTitles: [
         'Software Developer',
         'Project Manager',
         'System Engineer',
@@ -264,7 +252,7 @@ export default {
         'Intern',
         'Accountant',
         'Other'
-      ], // job role options
+      ], // job title options
       states: [
         'Alabama',
         'Alaska',
@@ -327,8 +315,7 @@ export default {
         'West Virginia',
         'Wisconsin',
         'Wyoming'
-      ], // state options
-      undisabled: false
+      ] // state options
     };
   },
   methods: {
@@ -342,9 +329,9 @@ export default {
   props: ['model', 'validating'],
   watch: {
     'model.birthday': function () {
-      this.birthdayFormat = this.formatDate(this.model.birthday) || this.birthdayFormat;
+      this.birthdayFormat = formatDate(this.model.birthday) || this.birthdayFormat;
       //fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
-      if (this.model.birthday !== null && !this.formatDate(this.model.birthday)) {
+      if (this.model.birthday !== null && !formatDate(this.model.birthday)) {
         this.model.birthday = null;
       }
     },
