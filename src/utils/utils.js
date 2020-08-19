@@ -1,5 +1,26 @@
 import dateUtils from '@/shared/dateUtils';
+import moment from 'moment';
 import _ from 'lodash';
+
+/**
+ * Returns a date formated as 'MMM Do, YYYY' (Aug 18th, 2020).
+ *
+ * @param date - date to format
+ * @return String - date formated
+ */
+export function monthDayYearFormat(date) {
+  return !isEmpty(date) ? moment(date).format('MMM Do, YYYY') : '';
+} // monthDayYearFormat
+
+/**
+ * Returns a date formated as 'MMM Do' (Aug 18th).
+ *
+ * @param date - date to format
+ * @return String - date formated
+ */
+export function monthDayFormat(date) {
+  return !isEmpty(date) ? moment(date).format('MMM Do') : '';
+} // monthDayFormat
 
 /**
  * Formats a date.
@@ -46,7 +67,7 @@ export function formatDateSlashToDash(date) {
  * @return boolean - value is empty
  */
 export function isEmpty(value) {
-  return _.isNil(value) || (_.isString(value) && value.trim().length === 0);
+  return _.isNil(value) || (_.isString(value) && value.trim().length === 0) || (_.isArray(value) && _.isEmpty(value));
 } // isEmpty
 
 /**

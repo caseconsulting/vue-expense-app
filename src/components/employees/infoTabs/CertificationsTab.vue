@@ -1,42 +1,29 @@
 <template>
   <div class="infoTab">
+    <!-- Employee has Certifications -->
     <div v-if="!isEmpty(model.certifications)">
+      <!-- Loop Certifications -->
       <div v-for="(certification, index) in model.certifications" :key="certification.name">
         <p><b>Certification: </b>{{ certification.name }}</p>
-        <p><b>Date Received: </b>{{ certification.dateReceived | dateFormat }}</p>
+        <p><b>Date Received: </b>{{ certification.dateReceived | monthDayYearFormat }}</p>
         <p v-if="certification.expirationDate">
-          <b>Expiration Date: </b>{{ certification.expirationDate | dateFormat }}
+          <b>Expiration Date: </b>{{ certification.expirationDate | monthDayYearFormat }}
         </p>
         <hr v-if="index < model.certifications.length - 1" class="mb-3" />
       </div>
+      <!-- End Loop Certifications -->
     </div>
+    <!-- Employee does not have Certifications -->
     <p v-else>No Certification information</p>
   </div>
 </template>
 
 <script>
-import moment from 'moment';
-import _ from 'lodash';
-/**
- * Checks if a value is empty. Returns true if the value is null or an empty/blank string.
- *
- * @param value - value to check
- * @return boolean - value is empty
- */
-function isEmpty(value) {
-  return _.isNil(value) || (_.isString(value) && value.trim().length === 0) || (_.isArray(value) && _.isEmpty(value));
-} // isEmpty
+import { isEmpty, monthDayYearFormat } from '@/utils/utils';
 
 export default {
   filters: {
-    // formats a date by month, day, year (e.g. Aug 18th, 2020)
-    dateFormat: (value) => {
-      if (!isEmpty(value)) {
-        return moment(value).format('MMM Do, YYYY');
-      } else {
-        return '';
-      }
-    }
+    monthDayYearFormat
   },
   methods: {
     isEmpty
@@ -44,9 +31,3 @@ export default {
   props: ['model']
 };
 </script>
-
-<style>
-.infoTab {
-  color: #38424d;
-}
-</style>
