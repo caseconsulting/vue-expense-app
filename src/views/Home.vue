@@ -66,12 +66,14 @@
 
 <script>
 import api from '@/shared/api.js';
+import ActivityFeed from '@/components/ActivityFeed';
 import AvailableBudgets from '@/components/AvailableBudgets.vue';
 import moment from 'moment-timezone';
-import ActivityFeed from '@/components/ActivityFeed';
 import TwitterFeed from '@/components/TwitterFeed';
 import TSheetsData from '@/components/TSheetsData.vue';
 import _ from 'lodash';
+import { asyncForEach, isEmpty, isFullTime } from '@/utils/utils';
+
 const IsoFormat = 'YYYY-MM-DD';
 
 // |--------------------------------------------------|
@@ -178,18 +180,6 @@ function addOneSecondToActualTimeEverySecond() {
     component.addOneSecondToActualTimeEverySecond();
   }, 1000);
 } // addOneSecondToActualTimeEverySecond
-
-/**
- * Async function to loop an array.
- *
- * @param array - Array of elements to iterate over
- * @param callback - callback function
- */
-async function asyncForEach(array, callback) {
-  for (let index = 0; index < array.length; index++) {
-    await callback(array[index], index, array);
-  }
-} // asyncForEach
 
 /**
  * Clear the action status that is displayed in the snackbar.
@@ -388,14 +378,14 @@ function getEventDateMessage(date) {
   } else {
     return date.format('ll');
   }
-}
+} // getEventDateMessage
 
 /**
  * Calls the API to get tweets from the Twitter account.
  */
 async function getTweets() {
   this.tweets = await api.getCaseTimeline();
-}
+} // getTweets
 
 /**
  * Set and display an error action status in the snackbar.
@@ -407,6 +397,27 @@ async function displayError(err) {
   this.$set(this.status, 'statusMessage', err);
   this.$set(this.status, 'color', 'red');
 } // displayError
+
+/**
+ * Filters out events that have the following categories:
+ * Lodging, Meals, Travel, Transportation
+ *
+ * @param expenses aggregate expenses
+ * @return array of filtered out expenses by category
+ */
+function filterOutExpensesByCategory(expenses) {
+  return _.filter(expenses, (expense) => {
+    if (
+      expense.category != 'Lodging' &&
+      expense.category != 'Meals' &&
+      expense.category != 'Travel' &&
+      expense.category != 'Transportation'
+    ) {
+      return true;
+    }
+    return false;
+  });
+} // filterOutExpensesByCategory
 
 /**
  * Gets the current active anniversary budget year starting date in isoformat.
@@ -423,27 +434,6 @@ function getCurrentBudgetYear() {
   }
   return currentBudgetYear.format(IsoFormat);
 } // getCurrentBudgetYear
-
-/**
- * Checks if a value is empty. Returns true if the value is null or an empty/blank string.
- *
- * @param value - value to check
- * @return boolean - value is empty
- */
-function isEmpty(value) {
-  return _.isNil(value) || (_.isString(value) && value.trim().length === 0);
-} // isEmpty
-
-/**
- * Checks if an employee is full time. Returns true if the employee is full time with a work status of 100, otherwise
- * returns false.
- *
- * @param employee - employee to check
- * @return boolean - employee is full time
- */
-function isFullTime(employee) {
-  return employee.workStatus == 100;
-} // isFullTime
 
 /**
  * Refresh and sets employee information.
@@ -480,28 +470,6 @@ async function showSuccessfulSubmit() {
 async function updateData() {
   this.showSuccessfulSubmit();
 } // updateData
-
-/**
- * Filters out events that have the following categories:
- * Lodging, Meals, Travel, Transportation
- *
- * @param expenses aggregate expenses
- * @return array of filtered out expenses by category
- *
- */
-function filterOutExpensesByCategory(expenses) {
-  return _.filter(expenses, (expense) => {
-    if (
-      expense.category != 'Lodging' &&
-      expense.category != 'Meals' &&
-      expense.category != 'Travel' &&
-      expense.category != 'Transportation'
-    ) {
-      return true;
-    }
-    return false;
-  });
-}
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -592,7 +560,8 @@ export default {
   }
 };
 </script>
-<style>
+
+<style scoped>
 .links {
   padding-bottom: 16px;
   text-align: center;

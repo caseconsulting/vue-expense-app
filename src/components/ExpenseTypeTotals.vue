@@ -15,6 +15,7 @@
 
 <script>
 import _ from 'lodash';
+import { moneyValue } from '@/utils/utils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -114,14 +115,7 @@ export default {
     };
   },
   filters: {
-    moneyValue: (value) => {
-      return `${new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: 'USD',
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
-      }).format(value)}`;
-    }
+    moneyValue
   },
   methods: {
     updateSelected

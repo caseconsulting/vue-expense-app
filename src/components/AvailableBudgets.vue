@@ -54,6 +54,8 @@ import AvailableBudgetSummary from '@/components/AvailableBudgetSummary.vue';
 import _ from 'lodash';
 // import ReceiptModal from '../components/ReceiptModal.vue';
 import moment from 'moment-timezone';
+import { moneyValue } from '@/utils/utils';
+
 const IsoFormat = 'YYYY-MM-DD';
 
 // |--------------------------------------------------|
@@ -224,14 +226,7 @@ export default {
     };
   },
   filters: {
-    moneyValue: (value) => {
-      return `${new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: 'USD',
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
-      }).format(value)}`;
-    }
+    moneyValue
   },
   methods: {
     calcRemaining,
@@ -245,7 +240,8 @@ export default {
   props: ['employee', 'fiscalDateView']
 };
 </script>
-<style>
+
+<style scoped>
 #link:hover {
   font-size: 20px;
 }

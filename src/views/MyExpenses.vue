@@ -146,19 +146,19 @@
             </template>
             <!-- Purchase date slot -->
             <template v-slot:item.purchaseDate="{ item }">
-              <td>{{ item.purchaseDate | dateFormat }}</td>
+              <td>{{ item.purchaseDate | monthDayYearFormat }}</td>
             </template>
             <!-- Reimburse date Slot -->
             <template v-slot:item.reimburseDate="{ item }">
-              <td>{{ item.reimbursedDate | dateFormat }}</td>
+              <td>{{ item.reimbursedDate | monthDayYearFormat }}</td>
             </template>
             <!-- Creation date slot -->
             <template v-slot:item.createdAt="{ item }">
-              <td>{{ item.createdAt | dateFormat }}</td>
+              <td>{{ item.createdAt | monthDayYearFormat }}</td>
             </template>
             <!-- Creation date slot -->
             <template v-slot:item.createdAt="{ item }">
-              <td>{{ item.createdAt | dateFormat }}</td>
+              <td>{{ item.createdAt | monthDayYearFormat }}</td>
             </template>
             <!-- Employee name slot-->
             <template v-slot: item.employeeName="{item}">
@@ -324,9 +324,9 @@ import ConvertExpensesToCsv from '@/components/ConvertExpensesToCsv.vue';
 import DeleteModal from '@/components/modals/DeleteModal.vue';
 import employeeUtils from '@/shared/employeeUtils';
 import ExpenseForm from '@/components/ExpenseForm.vue';
-import moment from 'moment';
 import UnreimburseModal from '@/components/modals/UnreimburseModal.vue';
 import _ from 'lodash';
+import { isEmpty, monthDayYearFormat } from '@/utils/utils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -611,16 +611,6 @@ function hasRecipient(expense) {
 function isEditing() {
   return !!this.expense.id;
 } // isEditing
-
-/**
- * Checks if a value is empty. Returns true if the value is null or an empty/blank string.
- *
- * @param value - value to check
- * @return boolean - value is empty
- */
-function isEmpty(value) {
-  return _.isNil(value) || (_.isString(value) && value.trim().length === 0);
-} // isEmpty
 
 /**
  * Checks to see if an expense is expanded in the datatable.
@@ -908,14 +898,7 @@ export default {
     };
   },
   filters: {
-    dateFormat: (value) => {
-      // formats a date by month, day, year (e.g. Aug 18th, 2020)
-      if (!isEmpty(value)) {
-        return moment(value, 'YYYY-MM-DD').format('MMM Do, YYYY');
-      } else {
-        return '';
-      }
-    },
+    monthDayYearFormat,
     moneyValue: (value) => {
       // formats a value as US currency with cents (e.g. $100.00)
       return `$${moneyFilter(value)}`;

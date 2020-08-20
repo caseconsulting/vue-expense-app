@@ -252,6 +252,7 @@ import FileUpload from '@/components/FileUpload.vue';
 import { getRole } from '@/utils/auth';
 import moment from 'moment';
 import { v4 as uuid } from 'uuid';
+import { isEmpty, isFullTime } from '@/utils/utils';
 import _ from 'lodash';
 
 const IsoFormat = 'YYYY-MM-DD';
@@ -335,7 +336,7 @@ function notesRules() {
   const notesRules = [];
 
   if (this.reqRecipient) {
-    const notesRule = (v) => !!v || 'Notes is a required field';
+    const notesRule = (v) => !isEmpty(v) || 'Notes is a required field';
     notesRules.push(notesRule);
   }
 
@@ -367,16 +368,6 @@ function urlLabel() {
 // |                     METHODS                      |
 // |                                                  |
 // |--------------------------------------------------|
-
-//Returns a number with two decimal point precision as a string.
-function moneyFilter(value) {
-  return `${new Intl.NumberFormat('en-US', {
-    style: 'decimal',
-    useGrouping: false,
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2
-  }).format(value)}`;
-} // moneyFilter
 
 /**
  * Adds an expenses url and category to the training urls page.
@@ -925,26 +916,6 @@ function isDifferentExpenseType() {
 } // isDifferentExpenseType
 
 /**
- * Checks if a value is empty. Returns true if the value is null or an empty/blank string.
- *
- * @param value - value to check
- * @return boolean - value is empty
- */
-function isEmpty(value) {
-  return _.isNil(value) || (_.isString(value) && value.trim().length === 0);
-} // isEmpty
-
-/**
- * Checks if an employee is full time. Returns true if the employee is full time, otherwise returns false.
- *
- * @param employee - employee to check
- * @return boolean - employee is full time
- */
-function isFullTime(employee) {
-  return employee.workStatus == 100;
-} // isFullTime
-
-/**
  * Checks if the selected expense type requires a receipt. Returns true if a receipt is required, otherwise returns false.
  *
  * @return boolean - receipt is required for expense type.
@@ -961,6 +932,16 @@ function isReceiptRequired() {
   return true;
 } // isReceiptRequired
 
+//Returns a number with two decimal point precision as a string.
+function moneyFilter(value) {
+  return `${new Intl.NumberFormat('en-US', {
+    style: 'decimal',
+    useGrouping: false,
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  }).format(value)}`;
+} // moneyFilter
+
 /**
  * Parse a date to isoformat (YYYY-MM-DD).
  *
@@ -970,6 +951,36 @@ function isReceiptRequired() {
 function parseDate(date) {
   return dateUtils.parseDate(date);
 } // parseDate
+
+/**
+ * preformats different US/Europe money formats for parsing
+ *
+ * @param float - number to be formatted
+ */
+function preformatFloat(float) {
+  if (!float) {
+    return '';
+  }
+
+  //Index of first comma
+  const posC = float.indexOf(',');
+
+  if (posC === -1) {
+    //No commas found, treat as float
+    return float;
+  }
+
+  //Index of first full stop
+  const posFS = float.indexOf('.');
+
+  if (posFS === -1) {
+    //Uses commas and not full stops - swap them (e.g. 1,23 --> 1.23)
+    return float.replace(/,/g, '.');
+  }
+
+  //Uses both commas and full stops - ensure correct order and remove 1000s separators
+  return posC < posFS ? float.replace(/,/g, '') : float.replace(/\./g, '').replace(',', '.');
+} // preformatFloat
 
 /**
  * Sets the file.
@@ -1164,36 +1175,6 @@ async function scanFile() {
     }
   }
 } // scanFile
-
-/**
- * preformats different US/Europe money formats for parsing
- *
- * @param float - number to be formatted
- */
-function preformatFloat(float) {
-  if (!float) {
-    return '';
-  }
-
-  //Index of first comma
-  const posC = float.indexOf(',');
-
-  if (posC === -1) {
-    //No commas found, treat as float
-    return float;
-  }
-
-  //Index of first full stop
-  const posFS = float.indexOf('.');
-
-  if (posFS === -1) {
-    //Uses commas and not full stops - swap them (e.g. 1,23 --> 1.23)
-    return float.replace(/,/g, '.');
-  }
-
-  //Uses both commas and full stops - ensure correct order and remove 1000s separators
-  return posC < posFS ? float.replace(/,/g, '') : float.replace(/\./g, '').replace(',', '.');
-} // preformatFloat
 
 /**
  * Sets the recipients to choose from based on expense type.
@@ -1437,15 +1418,13 @@ export default {
   created,
   data() {
     return {
-      activeEmployees: [],
-      reqRecipient: false,
-      isHighFive: false,
+      activeEmployees: [], // active employees
       allowReceipt: false, // allow receipt to be uploaded
       asUser: true, // user view
-      requiredRules: [(v) => !!v || 'Required field'], // rules for required fields
+      confirming: false, // budget overage confirmation box activator
       costRules: [
-        (v) => !!v || 'Cost is a required field',
-        (v) => v > 0 || 'Cost must be a positive number',
+        (v) => !isEmpty(v) || 'Cost is a required field',
+        (v) => !isEmpty(v) > 0 || 'Cost must be a positive number',
         (v) =>
           /^[+-]?[0-9]{1,3}(?:,?[0-9]{3})*(?:\.[0-9]{2})?$/.test(v) ||
           'Expense amount must be a number with two decimal digits',
@@ -1453,56 +1432,58 @@ export default {
       ], // rules for cost
       date: null, // NOTE: Unused?
       dateRules: [
-        (v) => !!v || 'Date must be valid. Format: MM/DD/YYYY',
-        (v) => (!!v && /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v)) || 'Date must be valid. Format: MM/DD/YYYY'
+        (v) => !isEmpty(v) || 'Date must be valid. Format: MM/DD/YYYY',
+        (v) => (!isEmpty(v) && /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v)) || 'Date must be valid. Format: MM/DD/YYYY'
       ], // rules for dates
       descriptionRules: [
-        (v) => !!v || 'Description is a required field',
-        (v) => (v && v.replace(/\s/g, '').length > 0) || 'Description is a required field'
+        (v) => !isEmpty(v) || 'Description is a required field',
+        (v) => (!isEmpty(v) && v.replace(/\s/g, '').length > 0) || 'Description is a required field'
       ], // rules for description
-      employeeRole: '', // employee role
+      disableScan: true, // receipt scanned disabled
       employee: null, // employee selected
+      employeeRole: '', // employee role
       employees: [], // employees
       expenseTypes: [], // expense types
       file: undefined, // receipt
-      myBudgetsView: false, // if on myBudgetsView page
       hint: '', // form hints
-      recipientOptions: [], // list of active employees to choose for high five
-      recipientPlaceholder: '',
+      isCovered: false, // expense is fully covered
+      isHighFive: false, // expense is a high five
       isInactive: false, // employee is inactive -- also used for uploading reciepts dont delete
-      isCovered: false,
-      isOverCovered: false,
+      isOverCovered: false, // expense is only partially covered
       loading: false, // loading
-      purchaseMenu: false, // display purchase menu
-      reimburseMenu: false, // display reimburse menu
-      optionalDateRules: [(v) => !v || /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v) || 'Date must be valid. Format: MM/DD/YYYY'], // option date rules
+      myBudgetsView: false, // if on myBudgetsView page
+      optionalDateRules: [
+        (v) => isEmpty(v) || /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v) || 'Date must be valid. Format: MM/DD/YYYY'
+      ], // option date rules
       originalExpense: null, // expense before changes
       purchaseDateFormatted: null, // formatted purchase date
-      receiptRules: [(v) => !!v || 'Receipts are required'], // rules for receipt
-      receiptText: null,
+      purchaseMenu: false, // display purchase menu
+      receiptRules: [(v) => !isEmpty(v) || 'Receipts are required'], // rules for receipt
+      recipientOptions: [], // list of active employees to choose for high five
+      recipientPlaceholder: '',
       reimbursedDateFormatted: null, // formatted reimburse date
+      reimburseMenu: false, // display reimburse menu
+      reqRecipient: false, // expense requires recipient
+      requiredRules: [(v) => !isEmpty(v) || 'Required field'], // rules for required fields
       selectedEmployee: {}, // selected employees
       selectedExpenseType: {}, // selected expense types
       selectedRecipient: {}, // the recipient selected for a high five
-      confirming: false, // budget overage confirmation box activator
       urlInfo: {
         id: null,
         category: null,
         hits: 0
       }, // training url info
       urlRules: [
-        (v) => !this.expense.requireURL || !!v || 'URL is required. Only http(s) are accepted.',
+        (v) => !this.expense.requireURL || !isEmpty(v) || 'URL is required. Only http(s) are accepted.',
         (v) =>
-          !v ||
-          v == null ||
+          isEmpty(v) ||
           /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)/.test(
             v
           ) ||
           'URL must be valid. Only http(s) are accepted.'
       ], // rules for training url
       userInfo: {}, // user info
-      valid: false, // form validity
-      disableScan: true
+      valid: false // form validity
     };
   },
   methods: {
@@ -1515,10 +1496,10 @@ export default {
     createNewEntry,
     customFilter,
     encodeUrl,
-    getExpenseTypeSelected,
-    formatDate,
     filteredExpenseTypes,
+    formatDate,
     getCategories,
+    getExpenseTypeSelected,
     hasAccess,
     incrementURLHits,
     isEmpty,
@@ -1526,10 +1507,10 @@ export default {
     isReceiptRequired,
     moneyFilter,
     parseDate,
+    scanFile,
+    setFile,
     setRecipientOptions,
     submit,
-    setFile,
-    scanFile,
     updateExistingEntry
   },
   props: [
@@ -1697,7 +1678,7 @@ export default {
 };
 </script>
 
-<style>
+<style scoped>
 .optional {
   font-size: 0.5em;
 }

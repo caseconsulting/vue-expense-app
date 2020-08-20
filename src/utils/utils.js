@@ -3,24 +3,16 @@ import moment from 'moment';
 import _ from 'lodash';
 
 /**
- * Returns a date formated as 'MMM Do, YYYY' (Aug 18th, 2020).
+ * Async function to loop an array.
  *
- * @param date - date to format
- * @return String - date formated
+ * @param array - Array of elements to iterate over
+ * @param callback - callback function
  */
-export function monthDayYearFormat(date) {
-  return !isEmpty(date) ? moment(date).format('MMM Do, YYYY') : '';
-} // monthDayYearFormat
-
-/**
- * Returns a date formated as 'MMM Do' (Aug 18th).
- *
- * @param date - date to format
- * @return String - date formated
- */
-export function monthDayFormat(date) {
-  return !isEmpty(date) ? moment(date).format('MMM Do') : '';
-} // monthDayFormat
+export async function asyncForEach(array, callback) {
+  for (let index = 0; index < array.length; index++) {
+    await callback(array[index], index, array);
+  }
+} // asyncForEach
 
 /**
  * Formats a date.
@@ -69,6 +61,73 @@ export function formatDateSlashToDash(date) {
 export function isEmpty(value) {
   return _.isNil(value) || (_.isString(value) && value.trim().length === 0) || (_.isArray(value) && _.isEmpty(value));
 } // isEmpty
+
+/**
+ * Checks if an employee is full time. Returns true if the employee is full time, otherwise returns false.
+ *
+ * @param employee - employee to check
+ * @return boolean - employee is full time
+ */
+export function isFullTime(employee) {
+  return employee.workStatus == 100;
+} // isFullTime
+
+/**
+ * Checks if an employee is inactive. Returns true if the employee is inactive with a work status of 0, otherwise
+ * returns false.
+ *
+ * @param employee - employee to check
+ * @return boolean - employee is inactive
+ */
+export function isInactive(employee) {
+  return employee.workStatus == 0;
+} // isInactive
+
+/**
+ * Checks if an employee is part time. Returns true if the employee is part time with a work status between 0 and 100,
+ * otherwise returns false.
+ *
+ * @param employee - employee to check
+ * @return boolean - employee is part time
+ */
+export function isPartTime(employee) {
+  return employee.workStatus > 0 && employee.workStatus < 100;
+} // isPartTime
+
+/**
+ * Convert a value to a 2 deciaml currency with prepended $.
+ *
+ * @param value - value to convert
+ * @return String - money format
+ */
+export function moneyValue(value) {
+  return `${new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  }).format(value)}`;
+} // moneyValue
+
+/**
+ * Returns a date formated as 'MMM Do, YYYY' (Aug 18th, 2020).
+ *
+ * @param date - date to format
+ * @return String - date formated
+ */
+export function monthDayYearFormat(date) {
+  return !isEmpty(date) ? moment(date).format('MMM Do, YYYY') : '';
+} // monthDayYearFormat
+
+/**
+ * Returns a date formated as 'MMM Do' (Aug 18th).
+ *
+ * @param date - date to format
+ * @return String - date formated
+ */
+export function monthDayFormat(date) {
+  return !isEmpty(date) ? moment(date).format('MMM Do') : '';
+} // monthDayFormat
 
 /**
  * Parse a date to isoformat (YYYY-MM-DD).

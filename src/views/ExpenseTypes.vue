@@ -402,6 +402,7 @@ import DeleteModal from '@/components/modals/DeleteModal.vue';
 import ExpenseTypeForm from '@/components/ExpenseTypeForm.vue';
 import { getRole } from '@/utils/auth';
 import _ from 'lodash';
+import { moneyValue } from '@/utils/utils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -416,27 +417,6 @@ function expenseTypeList() {
   // });
   return this.filteredExpenseTypes;
 } // expenseTypeList
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                     FILTERS                      |
-// |                                                  |
-// |--------------------------------------------------|
-
-/**
- * Returns a number with two decimal point precision as a string.
- *
- * @param value - number to filter
- * @return String - number with two decimal points
- */
-function moneyFilter(value) {
-  return `${new Intl.NumberFormat('en-US', {
-    style: 'decimal',
-    useGrouping: false,
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2
-  }).format(value)}`;
-} // moneyFilter
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -763,13 +743,28 @@ function isInactive(expenseType) {
 } // isInactive
 
 /**
+ * Returns a number with two decimal point precision as a string.
+ *
+ * @param value - number to filter
+ * @return String - number with two decimal points
+ */
+function twoDecimals(value) {
+  return `${new Intl.NumberFormat('en-US', {
+    style: 'decimal',
+    useGrouping: false,
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  }).format(value)}`;
+} // twoDecimals
+
+/**
  * Store the attributes of a selected expense type.
  *
  * @param item - expense type selected
  */
 function onSelect(item) {
   this.$set(this.model, 'id', item.id);
-  this.$set(this.model, 'budget', moneyFilter(item.budget));
+  this.$set(this.model, 'budget', twoDecimals(item.budget));
   this.$set(this.model, 'budgetName', item.budgetName);
   this.$set(this.model, 'description', item.description);
   this.$set(this.model, 'odFlag', item.odFlag);
@@ -1010,14 +1005,11 @@ export default {
     };
   },
   filters: {
-    moneyValue: (value) => {
-      // formats a value as US currency with cents (e.g. $100.00)
-      return `$${moneyFilter(value)}`;
-    },
     limitedText: (val) => {
       // limits text displayed to 50 characters on table view
       return val.length > 50 ? `${val.substring(0, 50)}...` : val;
-    }
+    },
+    moneyValue
   },
   methods: {
     addModelToTable,
@@ -1044,6 +1036,7 @@ export default {
     refreshExpenseTypes,
     startAction,
     toTopOfForm,
+    twoDecimals,
     updateModelInTable,
     userIsAdmin,
     validateDelete

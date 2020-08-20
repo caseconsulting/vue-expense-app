@@ -12,7 +12,7 @@
         <!-- Budget Name -->
         <v-text-field
           v-model="model.budgetName"
-          :rules="genericRules"
+          :rules="requiredRules"
           label="Budget Name"
           data-vv-name="Budget Name"
           class="type_form_padding"
@@ -65,7 +65,7 @@
         <!-- Start Date -->
         <v-menu
           v-if="!model.recurringFlag"
-          :rules="genericRules"
+          :rules="requiredRules"
           :close-on-content-click="true"
           :nudge-right="40"
           transition="scale-transition"
@@ -93,7 +93,7 @@
 
         <v-menu
           v-if="!model.recurringFlag"
-          :rules="genericRules"
+          :rules="requiredRules"
           :close-on-content-click="true"
           :nudge-right="40"
           transition="scale-transition"
@@ -120,7 +120,7 @@
         <!-- Description -->
         <v-textarea
           v-model="model.description"
-          :rules="genericRules"
+          :rules="requiredRules"
           label="Description "
           data-vv-name="Description "
           rows="3"
@@ -156,7 +156,7 @@
         <v-autocomplete
           v-if="model.accessibleBy == 'CUSTOM'"
           v-model="customAccess"
-          :items="allEmployees"
+          :items="activeEmployees"
           no-data-text="No Employees Available"
           item-color="gray"
           multiple
@@ -253,10 +253,10 @@
 
 <script>
 import api from '@/shared/api.js';
-import dateUtils from '@/shared/dateUtils';
 import FormSubmissionConfirmation from '@/components/modals/FormSubmissionConfirmation.vue';
-import { v4 as uuid } from 'uuid';
 import _ from 'lodash';
+import { v4 as uuid } from 'uuid';
+import { formatDate, isEmpty, parseDate } from '@/utils/utils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -264,41 +264,55 @@ import _ from 'lodash';
 // |                                                  |
 // |--------------------------------------------------|
 
-function checkSelection(category) {
-  let index = _.findIndex(this.model.categories, (cat) => {
-    return cat.name == category.name;
-  });
-
-  this.model.categories[index].showOnFeed = !this.model.categories[index].showOnFeed;
-
-  let somethingIsFalse = _.find(this.model.categories, (category) => {
-    return !category.showOnFeed;
-  });
-
-  if (somethingIsFalse) {
-    this.model.alwaysOnFeed = false;
-  } else {
-    this.model.alwaysOnFeed = true;
-  }
-} // checkSelection
-
+/**
+ * Set required url for expense type if all category required url checkboxes are enabled.
+ */
 function checkRequireURL(category) {
+  // find index of category selected
   let index = _.findIndex(this.model.categories, (cat) => {
     return cat.name == category.name;
   });
 
+  // toggle the category require url
   this.model.categories[index].requireURL = !this.model.categories[index].requireURL;
 
+  // check if any categories do not require a url
   let somethingIsFalse = _.find(this.model.categories, (category) => {
     return !category.requireURL;
   });
 
+  // update require url for expense type
   if (somethingIsFalse) {
     this.model.requireURL = false;
   } else {
     this.model.requireURL = true;
   }
 } // checkRequireURL
+
+/**
+ * Set always on feed for expense type if all category show on feed checkboxes are enabled.
+ */
+function checkSelection(category) {
+  // find index of category selected
+  let index = _.findIndex(this.model.categories, (cat) => {
+    return cat.name == category.name;
+  });
+
+  // toggle the category show on feed
+  this.model.categories[index].showOnFeed = !this.model.categories[index].showOnFeed;
+
+  // check if any categories are hidden on feed
+  let somethingIsFalse = _.find(this.model.categories, (category) => {
+    return !category.showOnFeed;
+  });
+
+  // update always on feed for expense type
+  if (somethingIsFalse) {
+    this.model.alwaysOnFeed = false;
+  } else {
+    this.model.alwaysOnFeed = true;
+  }
+} // checkSelection
 
 /**
  * Clears the form and sets all fields to a default state.
@@ -326,16 +340,6 @@ function clearForm() {
 } // clearForm
 
 /**
- * Formats a date.
- *
- * @param date - date to format
- * @return Date - formatted date
- */
-function formatDate(date) {
-  return dateUtils.formatDate(date);
-} // formatDate
-
-/**
  * Checks if all employees have access to an expense type and at a percentage rate. Return true if 'ALL' is selected,
  * otherwise returns false.
  *
@@ -356,16 +360,6 @@ function isCustomSelected() {
 } // isCustomSelected
 
 /**
- * Checks if a value is empty. Returns true if the value is null or an empty/blank string.
- *
- * @param value - value to check
- * @return boolean - value is empty
- */
-function isEmpty(value) {
-  return _.isNil(value) || (_.isString(value) && value.trim().length === 0);
-} // isEmpty
-
-/**
  * Checks if all employees have access to an expense type and at a full rate. Return true if 'FULL' is selected,
  * otherwise returns false.
  *
@@ -384,16 +378,6 @@ function isFullSelected() {
 function isFullTimeSelected() {
   return this.model.accessibleBy == 'FULL TIME';
 } // isFullTimeSelected
-
-/**
- * Parse a date to isoformat (YYYY-MM-DD).
- *
- * @param Date = date to parse
- * @return Date - date in isoformat
- */
-function parseDate(date) {
-  return dateUtils.parseDate(date);
-} // parseDate
 
 /**
  * Removes a category from the list of expense type categories.
@@ -489,6 +473,10 @@ async function submit() {
   this.$emit('endAction');
 } // submit
 
+/**
+ * Sets all category show on feed to true if expense type always show on feed is enabled. Sets all category show on
+ * feed to false otherwise.
+ */
 function toggleShowAllCategories() {
   if (!this.submitting) {
     let alwaysOF = this.model.alwaysOnFeed;
@@ -499,6 +487,9 @@ function toggleShowAllCategories() {
   }
 } // toggleShowAllCategories
 
+/**
+ * Sets all category require url to true if expense type require url is enabled. Sets all to false otherwise.
+ */
 function toggleRequireURL() {
   if (!this.submitting) {
     let requireURL = this.model.requireURL;
@@ -525,21 +516,22 @@ async function created() {
   window.EventBus.$on('canceled', () => {
     this.submitting = false;
   });
-  // get all employees for access list
+  // get all employees
   let employees = await api.getItems(api.EMPLOYEES);
-  let allEmployees = [];
+  let activeEmployees = [];
 
+  // populate list of active employees
   _.forEach(employees, (employee) => {
     if (employee.workStatus > 0) {
-      allEmployees.push({
+      activeEmployees.push({
         value: employee.id,
         text: `${employee.firstName} ${employee.lastName}`
       });
     }
   });
 
-  allEmployees = _.sortBy(allEmployees, ['text']);
-  this.allEmployees = allEmployees;
+  activeEmployees = _.sortBy(activeEmployees, ['text']); // sort employees
+  this.activeEmployees = activeEmployees;
   this.campfires = await api.getBasecampCampfires();
   this.clearForm();
 } // created
@@ -557,28 +549,27 @@ export default {
   created,
   data() {
     return {
-      allEmployees: null,
+      activeEmployees: null, // list of active employees
       budgetRules: [
         (v) => !!v || 'Budget amount is required',
         (v) => parseFloat(v, 10) > 0 || 'Budget must be greater than 0.',
         (v) =>
           /^[+-]?[0-9]{1,3}(?:,?[0-9]{3})*(?:\.[0-9]{2})?$/.test(v) ||
           'Budget amount must be a number with two decimal digits.'
-      ],
+      ], // rules for an expense type budget
       campfires: [], // basecamp campfires
-      categories: [],
+      categories: [], // list of expense type categories
       categoryInput: null, // category combobox input
-      customAccess: [],
+      customAccess: [], // list of employees with custom access
       dateRules: [
-        (v) => !!v || 'Date must be valid. Format: MM/DD/YYYY',
-        (v) => (!!v && /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v)) || 'Date must be valid. Format: MM/DD/YYYY'
-      ],
-      deleting: false,
-      endDateFormatted: null,
-      genericRules: [(v) => !!v || 'This field is required'],
-      startDateFormatted: null,
-      submitting: false,
-      valid: false
+        (v) => !isEmpty(v) || 'Date must be valid. Format: MM/DD/YYYY',
+        (v) => (!isEmpty(v) && /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v)) || 'Date must be valid. Format: MM/DD/YYYY'
+      ], // rule for a required date
+      endDateFormatted: null, // formatted end date
+      requiredRules: [(v) => !isEmpty(v) || 'This field is required'],
+      startDateFormatted: null, // formatted start date
+      submitting: false, // submitting form
+      valid: false // form is valid
     };
   },
   methods: {
@@ -611,7 +602,7 @@ export default {
         if (!['ALL', 'FULL TIME', 'FULL', 'CUSTOM'].includes(val)) {
           // set employee access form field when populating form with an existing expense type
           // filter out employees that do not have access
-          this.customAccess = _.filter(this.allEmployees, (employee) => {
+          this.customAccess = _.filter(this.activeEmployees, (employee) => {
             return this.model.accessibleBy.includes(employee.value);
           });
 
@@ -625,12 +616,15 @@ export default {
       }
     },
     categories: function (val) {
+      // limit categories to less than 10
       if (val.length > 10) {
         this.$nextTick(() => this.categories.pop());
         this.$nextTick(() => this.model.categories.pop());
       }
 
+      // update categories checkboxes
       if (val.length > this.model.categories.length) {
+        // category was added
         let c = _.map(this.model.categories, (category) => {
           return category.name;
         });
@@ -645,6 +639,7 @@ export default {
           requireURL: this.model.requireURL
         });
       } else if (val.length < this.model.categories.length) {
+        // category was removed
         this.model.categories = _.filter(this.model.categories, (category) => {
           return val.includes(category.name);
         });
@@ -668,7 +663,7 @@ export default {
 };
 </script>
 
-<style>
+<style scoped>
 .smallRadio {
   margin: 0 !important;
 }

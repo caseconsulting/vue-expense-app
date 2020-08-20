@@ -97,6 +97,7 @@
 import api from '@/shared/api.js';
 import caseLogo from '@/assets/img/logo-big.png';
 import _ from 'lodash';
+import { isEmpty } from '@/utils/utils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -207,16 +208,6 @@ async function getUrls() {
 } // getUrls
 
 /**
- * Checks if a value is empty. Returns true if the value is null or an empty/blank string.
- *
- * @param value - value to check
- * @return boolean - value is empty
- */
-function isEmpty(value) {
-  return _.isNil(value) || (_.isString(value) && value.trim().length === 0);
-} // isEmpty
-
-/**
  * Checks if a category is already the focus. Returns true if the category was already selected, otherwise returns
  * false.
  *
@@ -321,7 +312,7 @@ export default {
 };
 </script>
 
-<style>
+<style scoped>
 .caseImage {
   background-color: white;
 }

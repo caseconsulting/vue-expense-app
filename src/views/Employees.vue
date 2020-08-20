@@ -127,7 +127,7 @@
           <!-- Date Item Slot -->
           <template v-slot:item.hireDate="{ item }">
             <p :class="{ inactiveStyle: isInactive(item), selectFocus: isFocus(item) }" style="margin-bottom: 0px;">
-              {{ item.hireDate | dateFormat }}
+              {{ item.hireDate | monthDayYearFormat }}
             </p>
           </template>
 
@@ -172,9 +172,9 @@ import ConvertEmployeesToCsv from '@/components/ConvertEmployeesToCsv.vue';
 import DeleteErrorModal from '@/components/modals/DeleteErrorModal.vue';
 import DeleteModal from '@/components/modals/DeleteModal.vue';
 import EmployeeForm from '@/components/employees/EmployeeForm.vue';
-import { getRole } from '@/utils/auth';
-import moment from 'moment';
 import _ from 'lodash';
+import { getRole } from '@/utils/auth';
+import { isEmpty, isFullTime, isInactive, isPartTime, monthDayYearFormat } from '@/utils/utils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -236,10 +236,6 @@ function employeePath(item) {
   return `/employee/${item.employeeNumber}`;
 } // employeePath
 
-function handleClick(item) {
-  this.$router.push(employeePath(item));
-} //handleClick
-
 /**
  * Filters list of employees.
  */
@@ -253,15 +249,9 @@ function filterEmployees() {
   });
 } // filterEmployees
 
-/**
- * Checks if a value is empty. Returns true if the value is null or an empty/blank string.
- *
- * @param value - value to check
- * @return boolean - value is empty
- */
-function isEmpty(value) {
-  return _.isNil(value) || (_.isString(value) && value.trim().length === 0);
-} // isEmpty
+function handleClick(item) {
+  this.$router.push(employeePath(item));
+} //handleClick
 
 /**
  * Checks to see if an employee is expanded in the datatable.
@@ -273,39 +263,6 @@ function isFocus(item) {
   let expanded = !_.isEmpty(this.expanded) && item.employeeNumber == this.expanded[0].employeeNumber;
   return expanded || this.model.id == item.id;
 } // isFocus
-
-/**
- * Checks if an employee is full time. Returns true if the employee is full time with a work status of 100, otherwise
- * returns false.
- *
- * @param employee - employee to check
- * @return boolean - employee is full time
- */
-function isFullTime(employee) {
-  return employee.workStatus == 100;
-} // isFullTime
-
-/**
- * Checks if an employee is inactive. Returns true if the employee is inactive with a work status of 0, otherwise
- * returns false.
- *
- * @param employee - employee to check
- * @return boolean - employee is inactive
- */
-function isInactive(employee) {
-  return employee.workStatus == 0;
-} // isInactive
-
-/**
- * Checks if an employee is part time. Returns true if the employee is part time with a work status between 0 and 100,
- * otherwise returns false.
- *
- * @param employee - employee to check
- * @return boolean - employee is part time
- */
-function isPartTime(employee) {
-  return employee.workStatus > 0 && employee.workStatus < 100;
-} // isPartTime
 
 /**
  * Refresh employee data and filters employees.
@@ -480,14 +437,7 @@ export default {
     };
   },
   filters: {
-    // formats a date by month, day, year (e.g. Aug 18th, 2020)
-    dateFormat: (value) => {
-      if (!isEmpty(value)) {
-        return moment(value).format('MMM Do, YYYY');
-      } else {
-        return '';
-      }
-    }
+    monthDayYearFormat
   },
   methods: {
     clearStatus,

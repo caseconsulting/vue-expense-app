@@ -99,12 +99,6 @@ function visibleTiles() {
 // |                     METHODS                      |
 // |                                                  |
 // |--------------------------------------------------|
-/**
- * Scrolls up the page
- */
-function scrollUp() {
-  this.$vuetify.goTo(0);
-} // scrollUp
 
 /**
  * Updates active field of item with subItems
@@ -131,6 +125,13 @@ function checkActive() {
     }
   }
 } // checkActive
+
+/**
+ * Scrolls up the page
+ */
+function scrollUp() {
+  this.$vuetify.goTo(0);
+} // scrollUp
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -227,9 +228,9 @@ export default {
     };
   },
   methods: {
-    scrollUp,
+    checkActive,
     close,
-    checkActive
+    scrollUp
   },
   watch: {
     '$route.name': {
@@ -243,7 +244,7 @@ export default {
 };
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 #main-header {
   font-family: 'Quicksand', sans-serif;
   font-weight: bold;

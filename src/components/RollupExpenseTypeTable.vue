@@ -143,6 +143,7 @@ import moment from 'moment';
 import ReimburseModal from '@/components/modals/ReimburseModal.vue';
 import UnrolledTableInfo from '@/components/UnrolledTableInfo.vue';
 import _ from 'lodash';
+import { asyncForEach, isEmpty, moneyValue } from '@/utils/utils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -221,18 +222,6 @@ function showReimburseButton() {
 // |                     METHODS                      |
 // |                                                  |
 // |--------------------------------------------------|
-
-/**
- * Async function to loop an array.
- *
- * @param array - Array of elements to iterate over
- * @param callback - callback function
- */
-async function asyncForEach(array, callback) {
-  for (let index = 0; index < array.length; index++) {
-    await callback(array[index], index, array);
-  }
-} // asyncForEach
 
 /**
  * Check all expenses and boxes.
@@ -431,16 +420,6 @@ function groupEmployeeExpenses(expenses) {
 
   return data;
 } // groupEmployeeExpenses
-
-/**
- * Checks if a value is empty. Returns true if the value is null or an empty/blank string.
- *
- * @param value - value to check
- * @return boolean - value is empty
- */
-function isEmpty(value) {
-  return _.isNil(value) || (_.isString(value) && value.trim().length === 0);
-} // isEmpty
 
 /**
  * Checks if the expense is reimbursed. Returns true if the expense is reimbursed, otherwise returns false.
@@ -807,14 +786,7 @@ export default {
     } // reimburse status
   }),
   filters: {
-    moneyValue: (value) => {
-      return `${new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: 'USD',
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
-      }).format(value)}`;
-    }
+    moneyValue
   },
   methods: {
     asyncForEach,

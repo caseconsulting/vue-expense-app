@@ -26,22 +26,13 @@
 
 <script>
 import api from '@/shared/api';
-import _ from 'lodash';
+import { isEmpty } from '@/utils/utils';
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                     METHODS                      |
 // |                                                  |
 // |--------------------------------------------------|
-
-/**
- * Checks if a value is empty. Returns true if the value is null or an empty/blank string.
- *
- * @param value - value to check
- * @return boolean - value is empty
- */
-function isEmpty(value) {
-  return _.isNil(value) || (_.isString(value) && value.trim().length === 0);
-} // isEmpty
 
 /**
  * Opens a new windows tab displaying the signed url of the expense selected.

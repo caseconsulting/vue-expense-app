@@ -36,7 +36,7 @@
 
             <!-- Date  slot -->
             <template v-slot:item.createDate="{ item }">
-              <td>{{ item.createDate | dateFormat }}</td>
+              <td>{{ item.createDate | monthDayYearFormat }}</td>
             </template>
 
             <!-- Action Icons -->
@@ -110,7 +110,8 @@
 
 <script>
 import _ from 'lodash';
-import moment from 'moment';
+import { isEmpty, monthDayYearFormat } from '@/utils/utils';
+
 async function created() {
   this.constructAutoComplete(this.pendingPosts);
 }
@@ -181,16 +182,6 @@ function isEditing() {
 } // isEditing
 
 /**
- * Checks if a value is empty. Returns true if the value is null or a single character space String.
- *
- * @param value - value to check
- * @return boolean - value is empty
- */
-function isEmpty(value) {
-  return value == null || value === ' ' || value === '';
-} // isEmpty
-
-/**
  * Checks to see if an employee is expanded in the datatable.
  *
  * @param item - employee to check
@@ -257,21 +248,14 @@ export default {
   },
   filters: {
     // formats a date by month, day, year (e.g. Aug 18th, 2020)
-    dateFormat: (value) => {
-      if (!isEmpty(value)) {
-        let date = moment(new Date(value)).format('MMM Do, YYYY');
-        return date;
-      } else {
-        return '';
-      }
-    },
     birthdayFeedResponse: (value) => {
       if (value == true) {
         return 'yes';
       } else {
         return 'no';
       }
-    }
+    },
+    monthDayYearFormat
   }
 };
 </script>

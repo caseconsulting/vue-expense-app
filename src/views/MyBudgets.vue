@@ -89,6 +89,7 @@ import MobileDetect from 'mobile-detect';
 import moment from 'moment';
 import pattern from 'patternomaly';
 import _ from 'lodash';
+import { asyncForEach, isInactive, isFullTime, moneyValue } from '@/utils/utils';
 
 const IsoFormat = 'YYYY-MM-DD';
 
@@ -366,17 +367,6 @@ function getSecondsUntil() {
 } // getSecondsUntil
 
 /**
- * Checks if an employee is inactive. Sets isInactive as true if the employee is inactive with a work status of 0, otherwise
- * sets it to false.
- *
- * @param employee - employee to check
- * @return boolean - employee is inactive
- */
-function isInactive() {
-  return this.employee.workStatus == 0;
-} // isInactive
-
-/**
  * Checks if the current device used is mobile. Return true if it is mobile. Returns false if it is not mobile.
  *
  * @return boolean - if the device is mobile
@@ -413,18 +403,6 @@ function addOneSecondToActualTimeEverySecond() {
 } // addOneSecondToActualTimeEverySecond
 
 /**
- * Async function to loop an array.
- *
- * @param array - Array of elements to iterate over
- * @param callback - callback function
- */
-async function asyncForEach(array, callback) {
-  for (let index = 0; index < array.length; index++) {
-    await callback(array[index], index, array);
-  }
-} // asyncForEach
-
-/**
  * Clear the action status that is displayed in the snackbar.
  */
 function clearStatus() {
@@ -459,17 +437,6 @@ function getCurrentBudgetYear() {
   }
   return currentBudgetYear.format(IsoFormat);
 } // getCurrentBudgetYear
-
-/**
- * Checks if an employee is full time. Returns true if the employee is full time with a work status of 100, otherwise
- * returns false.
- *
- * @param employee - employee to check
- * @return boolean - employee is full time
- */
-function isFullTime(employee) {
-  return employee.workStatus == 100;
-} // isFullTime
 
 /**
  * Refresh and sets the aggregated budgets for the employee budget year view.
@@ -664,21 +631,7 @@ export default {
     };
   },
   filters: {
-    moneyValue: (value) => {
-      return `${new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: 'USD',
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
-      }).format(value)}`;
-    },
-    dateFormat: (value) => {
-      if (value) {
-        return moment(value).format('MMM Do, YYYY');
-      } else {
-        return '';
-      }
-    }
+    moneyValue
   },
   methods: {
     addOneSecondToActualTimeEverySecond,
