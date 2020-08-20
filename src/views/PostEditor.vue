@@ -8,7 +8,7 @@
       <icon class="mr-1" name="save"></icon>Submit</v-btn
     >
     <div cols="12">
-      <ckeditor :editor="editor" :value="editorData" :config="editorConfig"></ckeditor>
+      <ckeditor :editor="editor" v-model="editorData" :config="editorConfig" @ready="onEditorReady"></ckeditor>
     </div>
     <!-- Cancel Button -->
     <v-btn to="/blog" color="white" class="ma-2"> <icon class="mr-1" name="ban"></icon>Cancel </v-btn>
@@ -26,6 +26,7 @@ import { v4 as uuid } from 'uuid';
 import api from '@/shared/api.js';
 import moment from 'moment-timezone';
 const IsoFormat = 'YYYY-MM-DD';
+import GFMDataProcessor from '@ckeditor/ckeditor5-markdown-gfm/src/gfmdataprocessor';
 
 //some of these plugins are currently unused
 import Base64UploadAdapter from '@ckeditor/ckeditor5-upload/src/adapters/base64uploadadapter';
@@ -53,18 +54,22 @@ import Font from '@ckeditor/ckeditor5-font/src/font';
 async function created() {
   this.user = await api.getUser();
   console.log(this.user);
+  // this.editor = CKEditor;
+  // console.log(this.editor);
+  // Markdown(this.editor);
 }
 
-function editorData() {
-  return this.blogPost;
-}
+// function Markdown(editor) {
+//   editor.data.processor = new GFMDataProcessor(editor.editing.view.document);
+// }
 
 async function checkSubmit() {
   //check to see if there is any data
-  if (this.blogPost != null || this.blogPost != '') {
+  if (this.editorData != null || this.editorData != '') {
+    console.log(this.editorData);
+    console.log(this.editor.getData());
     //TODO: first send data through moderation.
     //begin creating the object
-    console.log(this.blogPost);
     let newUUID = uuid();
     this.$set(this.model, 'id', newUUID);
     this.$set(this.model, 'authorId', this.user.id);
@@ -91,6 +96,13 @@ async function checkSubmit() {
   }
 }
 
+function onEditorReady(editor) {
+  console.log('Editor is ready.', { editor });
+  console.log(new GFMDataProcessor(editor.editing.view.document)._htmlDP);
+  editor.data.processor = new GFMDataProcessor(editor.editing.view.document);
+  console.log(editor);
+}
+
 function clearForm() {
   this.$set(this.model, 'id', '');
   this.$set(this.model, 'authorId', '');
@@ -100,7 +112,6 @@ function clearForm() {
 }
 export default {
   name: 'app',
-  props: ['blogPost'],
   components: {
     // Use the <ckeditor> component in this view.
     ckeditor: CKEditor.component
@@ -109,6 +120,7 @@ export default {
   data() {
     return {
       editor: ClassicEditor,
+      editorData: '',
       editorConfig: {
         plugins: [
           Image,
@@ -131,7 +143,8 @@ export default {
           BlockQuote,
           MediaEmbed,
           Underline,
-          Font
+          Font,
+          GFMDataProcessor
         ],
         toolbar: {
           items: [
@@ -193,7 +206,8 @@ export default {
             'imageTextAlternative'
           ]
         },
-        placeholder: 'Create a New Blog Post'
+        placeholder: 'Create a New Blog Post',
+        processor: GFMDataProcessor
       },
       user: null,
       model: {
@@ -205,12 +219,10 @@ export default {
       }
     };
   },
-  computed: {
-    editorData
-  },
   methods: {
     checkSubmit,
-    clearForm
+    clearForm,
+    onEditorReady
   }
 };
 </script>
