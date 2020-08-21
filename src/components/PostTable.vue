@@ -21,27 +21,27 @@
             :items-per-page.sync="itemsPerPage"
             :search="search"
             @click:row="clickedRow"
-            item-key="postId"
+            item-key="id"
             class="elevation-1 text-center"
           >
             <!-- Title  slot -->
-            <template v-slot:item.title="{ item }">
+            <template v-slot:[`item.title`]="{ item }">
               <td>{{ item.title }}</td>
             </template>
 
             <!-- Employee  slot -->
-            <template v-slot:item.employeeName="{ item }">
+            <template v-slot:[`item.employeeName`]="{ item }">
               <td>{{ item.employeeName }}</td>
             </template>
 
             <!-- Date  slot -->
-            <template v-slot:item.createDate="{ item }">
-              <td>{{ item.createDate | monthDayYearFormat }}</td>
+            <template v-slot:[`item.createDate`]="{ item }">
+              <td>{{ item.createDate | dateFormat }}</td>
             </template>
 
             <!-- Action Icons -->
             <!-- Actions -->
-            <template v-slot:item.actions="{ item }">
+            <template v-slot:[`item.actions`]="{ item }">
               <td class="datatable_btn layout" v-if="userIsBlogger()" @click="clickedRow(item)">
                 <!-- Edit Button -->
                 <v-tooltip top>
@@ -111,7 +111,7 @@
 <script>
 import _ from 'lodash';
 import { isEmpty, monthDayYearFormat } from '@/utils/utils';
-
+import moment from 'moment-timezone';
 async function created() {
   this.constructAutoComplete(this.pendingPosts);
 }
@@ -248,6 +248,14 @@ export default {
   },
   filters: {
     // formats a date by month, day, year (e.g. Aug 18th, 2020)
+    dateFormat: (value) => {
+      if (!isEmpty(value)) {
+        let date = moment(value).format('MMM Do, YYYY');
+        return date;
+      } else {
+        return '';
+      }
+    },
     birthdayFeedResponse: (value) => {
       if (value == true) {
         return 'yes';

@@ -203,7 +203,7 @@ async function createAttachment(expense, file) {
 
 async function createBlogFile(blogPost, file) {
   let formData = new FormData();
-  formData.append('blogFile', file);
+  formData.append('blogFile', file, blogPost.fileName);
 
   // inject the accessToken for each request
   let accessToken = getAccessToken();

@@ -26,7 +26,6 @@ import { v4 as uuid } from 'uuid';
 import api from '@/shared/api.js';
 import moment from 'moment-timezone';
 const IsoFormat = 'YYYY-MM-DD';
-import GFMDataProcessor from '@ckeditor/ckeditor5-markdown-gfm/src/gfmdataprocessor';
 
 //some of these plugins are currently unused
 import Base64UploadAdapter from '@ckeditor/ckeditor5-upload/src/adapters/base64uploadadapter';
@@ -54,20 +53,12 @@ import Font from '@ckeditor/ckeditor5-font/src/font';
 async function created() {
   this.user = await api.getUser();
   console.log(this.user);
-  // this.editor = CKEditor;
-  // console.log(this.editor);
-  // Markdown(this.editor);
 }
-
-// function Markdown(editor) {
-//   editor.data.processor = new GFMDataProcessor(editor.editing.view.document);
-// }
 
 async function checkSubmit() {
   //check to see if there is any data
   if (this.editorData != null || this.editorData != '') {
     console.log(this.editorData);
-    console.log(this.editor.getData());
     //TODO: first send data through moderation.
     //begin creating the object
     let newUUID = uuid();
@@ -84,6 +75,11 @@ async function checkSubmit() {
       this.clearForm();
       //some success message popup
       console.log('submitted');
+      //generate md file and upload it to s3
+      let file = new Blob([this.editorData], { type: 'text/markdown' });
+      console.log(file);
+      let fileSubmit = await api.createBlogFile(blogPost, file);
+      console.log(fileSubmit);
     } else {
       //failure message
       console.log('issue');
@@ -98,9 +94,6 @@ async function checkSubmit() {
 
 function onEditorReady(editor) {
   console.log('Editor is ready.', { editor });
-  console.log(new GFMDataProcessor(editor.editing.view.document)._htmlDP);
-  editor.data.processor = new GFMDataProcessor(editor.editing.view.document);
-  console.log(editor);
 }
 
 function clearForm() {
@@ -109,6 +102,7 @@ function clearForm() {
   this.$set(this.model, 'createDate', '');
   this.$set(this.model, 'fileName', '');
   this.$set(this.model, 'tags', []);
+  this.editorData = '';
 }
 export default {
   name: 'app',
@@ -143,8 +137,7 @@ export default {
           BlockQuote,
           MediaEmbed,
           Underline,
-          Font,
-          GFMDataProcessor
+          Font
         ],
         toolbar: {
           items: [
@@ -206,8 +199,7 @@ export default {
             'imageTextAlternative'
           ]
         },
-        placeholder: 'Create a New Blog Post',
-        processor: GFMDataProcessor
+        placeholder: 'Create a New Blog Post'
       },
       user: null,
       model: {
