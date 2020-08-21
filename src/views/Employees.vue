@@ -103,6 +103,21 @@
               </v-tooltip>
             </div>
           </template>
+
+          <!-- Avatar Item Slot -->
+          <template v-slot:item.avatars="{ item }">
+            <!-- Valid Avatar -->
+            <v-avatar v-if="item.avatar" size="35">
+              <img :src="item.avatar" @error="changeAvatar(employee)" />
+            </v-avatar>
+            <!-- Invalid Avatar -->
+            <v-avatar v-else size="35" color="grey darken-2">
+              <div style="color: white; font-family: arial;">
+                <b>{{ item.firstName.substring(0, 1) }}{{ item.lastName.substring(0, 1) }}</b>
+              </div>
+            </v-avatar>
+          </template>
+
           <!-- Employee Number Item Slot -->
           <template v-slot:item.employeeNumber="{ item }">
             <p :class="{ inactiveStyle: isInactive(item), selectFocus: isFocus(item) }" style="margin-bottom: 0px;">
@@ -181,6 +196,23 @@ import { isEmpty, isFullTime, isInactive, isPartTime, monthDayYearFormat } from 
 // |                     METHODS                      |
 // |                                                  |
 // |--------------------------------------------------|
+
+/**
+ * Changes the employee avatar to default if it fails to display original.
+ *
+ * @param item - employee to check
+ */
+function changeAvatar(item) {
+  let index = _.findIndex(this.employees, (employee) => {
+    return employee.id === item.id;
+  });
+
+  let newItem = this.employees[index];
+
+  newItem.avatar = null;
+
+  this.employees.splice(index, 1, newItem);
+} // changeAvatar
 
 /**
  * Clear the action status that is displayed in the snackbar.
@@ -272,6 +304,15 @@ async function refreshEmployees() {
   this.employees = await api.getItems(api.EMPLOYEES); // get all employees
   this.filterEmployees(); // filter employees
   this.expanded = []; // collapse any expanded rows in the database
+
+  // set employee avatar
+  let avatars = await api.getBasecampAvatars();
+  _.map(this.employees, (employee) => {
+    let avatar = _.find(avatars, ['email_address', employee.email]);
+    let avatarUrl = avatar ? avatar.avatar_url : null;
+    employee.avatar = avatarUrl;
+    return employee;
+  });
   this.loading = false; // set loading status to false
 } // refreshEmployees
 
@@ -376,6 +417,10 @@ export default {
       filteredEmployees: [], // filtered employees,
       headers: [
         {
+          value: 'avatars',
+          sortable: false
+        },
+        {
           text: 'Employee #',
           value: 'employeeNumber'
         },
@@ -440,6 +485,7 @@ export default {
     monthDayYearFormat
   },
   methods: {
+    changeAvatar,
     clearStatus,
     deleteEmployee,
     deleteModelFromTable,
