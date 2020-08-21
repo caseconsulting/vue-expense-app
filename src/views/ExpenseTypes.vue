@@ -245,19 +245,31 @@
                         {{ categoriesToString(item.categories) }}
                       </p>
 
+                      <!-- Show on Feed -->
+                      <div v-if="item.alwaysOnFeed">
+                        <p><b>Show On Feed:</b> All Expenses</p>
+                      </div>
+                      <div v-else>
+                        <p v-if="item.categories.length > 0">
+                          <b>Show On Feed:</b> {{ categoriesOnFeed(item.categories) }}
+                        </p>
+                        <p v-else><b>Show On Feed:</b> None</p>
+                      </div>
+
+                      <!-- Show Require URL -->
+                      <div v-if="item.requireURL">
+                        <p><b>Require URL:</b> All Expenses</p>
+                      </div>
+                      <div v-else>
+                        <p v-if="item.categories.length > 0">
+                          <b>Require URL:</b> {{ categoriesReqUrl(item.categories) }}
+                        </p>
+                        <p v-else><b>Require URL:</b> None</p>
+                      </div>
+
                       <!-- Requires Recipient -->
                       <p v-if="item.hasRecipient"><b>Requires Recipient:</b> Yes</p>
                       <p v-else><b>Requires Recipient:</b> No</p>
-
-                      <!-- Always show on feed -->
-                      <p v-if="item.alwaysOnFeed"><b>Always Show On Feed:</b> Yes</p>
-                      <p v-else><b>Always Show On Feed:</b> No</p>
-
-                      <!-- Categories show on feed -->
-                      <p v-if="!item.alwaysOnFeed && item.categories && item.categories.length > 0">
-                        <b>Categories Showing On Feed:</b>
-                        {{ categoriesOnFeed(item.categories) }}
-                      </p>
 
                       <!-- Flags -->
                       <v-row>
@@ -467,6 +479,25 @@ function categoriesOnFeed(categories) {
   }
   return string;
 } // categoriesOnFeed
+
+/**
+ * Returns a string of category names that require a url.
+ */
+function categoriesReqUrl(categories) {
+  let string = '';
+  for (let i = 0; i < categories.length; i++) {
+    if (categories[i].requireURL) {
+      if (string.length > 0) {
+        string += ', ';
+      }
+      string += categories[i].name;
+    }
+  }
+  if (string.length == 0) {
+    string = 'none';
+  }
+  return string;
+} // categoriesReqUrl
 
 /**
  * Changes the employee avatar to default if it fails to display original.
@@ -1015,6 +1046,7 @@ export default {
     addModelToTable,
     categoriesToString,
     categoriesOnFeed,
+    categoriesReqUrl,
     changeAvatar,
     clearModel, // NOTE: Unused?
     clearStatus,
