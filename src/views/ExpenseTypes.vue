@@ -250,10 +250,7 @@
                         <p><b>Show On Feed:</b> All Expenses</p>
                       </div>
                       <div v-else>
-                        <p v-if="item.categories.length > 0">
-                          <b>Show On Feed:</b> {{ categoriesOnFeed(item.categories) }}
-                        </p>
-                        <p v-else><b>Show On Feed:</b> None</p>
+                        <p><b>Show On Feed:</b> {{ categoriesOnFeed(item.categories) }}</p>
                       </div>
 
                       <!-- Show Require URL -->
@@ -261,10 +258,7 @@
                         <p><b>Require URL:</b> All Expenses</p>
                       </div>
                       <div v-else>
-                        <p v-if="item.categories.length > 0">
-                          <b>Require URL:</b> {{ categoriesReqUrl(item.categories) }}
-                        </p>
-                        <p v-else><b>Require URL:</b> None</p>
+                        <p><b>Require URL:</b> {{ categoriesReqUrl(item.categories) }}</p>
                       </div>
 
                       <!-- Requires Recipient -->
@@ -475,7 +469,7 @@ function categoriesOnFeed(categories) {
     }
   }
   if (string.length == 0) {
-    string = 'none';
+    string = 'None';
   }
   return string;
 } // categoriesOnFeed
@@ -494,7 +488,7 @@ function categoriesReqUrl(categories) {
     }
   }
   if (string.length == 0) {
-    string = 'none';
+    string = 'None';
   }
   return string;
 } // categoriesReqUrl
