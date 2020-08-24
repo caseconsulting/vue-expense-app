@@ -7,7 +7,9 @@
     <v-btn outlined @click="checkSubmit" color="success" class="ma-2">
       <icon class="mr-1" name="save"></icon>Submit</v-btn
     >
-    <v-text-field v-model="model.title" :rules="requiredRules" label="Blog Post Title"></v-text-field>
+    <v-form ref="form" v-model="valid" lazy-validation
+      ><v-text-field v-model="model.title" :rules="requiredRules" label="Blog Post Title"></v-text-field
+    ></v-form>
     <div cols="12">
       <ckeditor :editor="editor" v-model="editorData" :config="editorConfig" @ready="onEditorReady"></ckeditor>
     </div>
@@ -59,7 +61,7 @@ async function created() {
 
 async function checkSubmit() {
   //check to see if there is any data
-  if (this.editorData != null || this.editorData != '') {
+  if (!isEmpty(this.editorData) && this.$refs.form.validate()) {
     console.log(this.editorData);
     //TODO: first send data through moderation.
     //begin creating the object
@@ -74,14 +76,15 @@ async function checkSubmit() {
     let blogPost = await api.createItem(api.BLOG, this.model);
 
     if (blogPost.id) {
-      this.clearForm();
       //some success message popup
       console.log('submitted');
+      let metaData = await createMetaData(this.model);
       //generate md file and upload it to s3
-      let file = new Blob([this.editorData], { type: 'text/markdown' });
+      let file = new Blob([metaData, this.editorData], { type: 'text/markdown' });
       console.log(file);
       let fileSubmit = await api.createBlogFile(blogPost, file);
       console.log(fileSubmit);
+      this.clearForm();
     } else {
       //failure message
       console.log('issue');
@@ -94,13 +97,24 @@ async function checkSubmit() {
   }
 }
 
+async function createMetaData(model) {
+  let metaData = '---';
+  metaData += `\ntitle: ${model.title}`;
+  let employee = await api.getItem(api.EMPOLYEES, model.authorId);
+  metaData += `\nauthor: ${employee.firstName} ${employee.lastName}`;
+  metaData += `\ndate: ${model.createDate}`;
+  metaData += `\ntags: ${model.tags}`;
+  metaData += '\nlayout: BlogPost\n---\n';
+  //TODO: description? image?
+  return metaData;
+}
 function onEditorReady(editor) {
   console.log('Editor is ready.', { editor });
 }
 
 function clearForm() {
   this.$set(this.model, 'id', '');
-  this.$set(this.model, 'title', '');
+  this.$refs.form.reset();
   this.$set(this.model, 'authorId', '');
   this.$set(this.model, 'createDate', '');
   this.$set(this.model, 'fileName', '');
@@ -213,7 +227,8 @@ export default {
         createDate: '',
         fileName: '',
         tags: []
-      }
+      },
+      valid: false
     };
   },
   methods: {

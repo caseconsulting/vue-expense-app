@@ -92,7 +92,9 @@ async function created() {
         return post.authorId == employee.id;
       });
       post.employeeName = `${employee.firstName} ${employee.lastName}`;
-      post.title = 'testTitle';
+      if (post.title == null) {
+        post.title = 'testTitle';
+      }
       return post;
     });
   } else {
@@ -103,7 +105,9 @@ async function created() {
         return null;
       }
       post.employeeName = `${this.userInfo.firstName} ${this.userInfo.lastName}`;
-      post.title = 'testTitle';
+      if (post.title == null) {
+        post.title = 'testTitle';
+      }
       return post;
     });
     this.posts = _.compact(this.posts);
