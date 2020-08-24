@@ -59,6 +59,7 @@ async function created() {
   console.log(this.user);
 }
 
+//TODO: add editing functionality currently only handles creating new posts.
 async function checkSubmit() {
   //check to see if there is any data
   if (!isEmpty(this.editorData) && this.$refs.form.validate()) {
@@ -70,6 +71,7 @@ async function checkSubmit() {
     this.$set(this.model, 'authorId', this.user.id);
     let newDate = moment().format(IsoFormat);
     this.$set(this.model, 'createDate', newDate);
+    this.$set(this.model, 'lastModifiedDate', newDate);
     this.$set(this.model, 'fileName', 'test.md');
     this.$set(this.model, 'tags', []);
 
@@ -100,11 +102,11 @@ async function checkSubmit() {
 async function createMetaData(model) {
   let metaData = '---';
   metaData += `\ntitle: ${model.title}`;
-  let employee = await api.getItem(api.EMPOLYEES, model.authorId);
+  let employee = await api.getItem(api.EMPLOYEES, model.authorId);
   metaData += `\nauthor: ${employee.firstName} ${employee.lastName}`;
   metaData += `\ndate: ${model.createDate}`;
   metaData += `\ntags: ${model.tags}`;
-  metaData += '\nlayout: BlogPost\n---\n';
+  metaData += '\nlayout: BlogPost\n---\n\n';
   //TODO: description? image?
   return metaData;
 }
@@ -117,6 +119,7 @@ function clearForm() {
   this.$refs.form.reset();
   this.$set(this.model, 'authorId', '');
   this.$set(this.model, 'createDate', '');
+  this.$set(this.model, 'lastModifiedDate', '');
   this.$set(this.model, 'fileName', '');
   this.$set(this.model, 'tags', []);
   this.editorData = '';
@@ -225,6 +228,7 @@ export default {
         title: '',
         authorId: '',
         createDate: '',
+        lastModifiedDate: '',
         fileName: '',
         tags: []
       },
