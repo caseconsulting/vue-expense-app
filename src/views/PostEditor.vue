@@ -7,6 +7,7 @@
     <v-btn outlined @click="checkSubmit" color="success" class="ma-2">
       <icon class="mr-1" name="save"></icon>Submit</v-btn
     >
+    <v-text-field v-model="model.title" :rules="requiredRules" label="Blog Post Title"></v-text-field>
     <div cols="12">
       <ckeditor :editor="editor" v-model="editorData" :config="editorConfig" @ready="onEditorReady"></ckeditor>
     </div>
@@ -26,6 +27,7 @@ import { v4 as uuid } from 'uuid';
 import api from '@/shared/api.js';
 import moment from 'moment-timezone';
 const IsoFormat = 'YYYY-MM-DD';
+import { isEmpty } from '@/utils/utils';
 
 //some of these plugins are currently unused
 import Base64UploadAdapter from '@ckeditor/ckeditor5-upload/src/adapters/base64uploadadapter';
@@ -98,6 +100,7 @@ function onEditorReady(editor) {
 
 function clearForm() {
   this.$set(this.model, 'id', '');
+  this.$set(this.model, 'title', '');
   this.$set(this.model, 'authorId', '');
   this.$set(this.model, 'createDate', '');
   this.$set(this.model, 'fileName', '');
@@ -202,8 +205,10 @@ export default {
         placeholder: 'Create a New Blog Post'
       },
       user: null,
+      requiredRules: [(v) => !isEmpty(v) || 'Required field'], // rules for required fields
       model: {
         id: '',
+        title: '',
         authorId: '',
         createDate: '',
         fileName: '',
