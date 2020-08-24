@@ -7,9 +7,19 @@
     <v-btn outlined @click="checkSubmit" color="success" class="ma-2">
       <icon class="mr-1" name="save"></icon>Submit</v-btn
     >
-    <v-form ref="form" v-model="valid" lazy-validation
-      ><v-text-field v-model="model.title" :rules="requiredRules" label="Blog Post Title"></v-text-field
-    ></v-form>
+    <v-form ref="form" v-model="valid" lazy-validation>
+      <v-text-field v-model="model.title" :rules="requiredRules" label="Blog Post Title"></v-text-field>
+      <v-combobox
+        v-model="model.tags"
+        :rules="requiredRules"
+        :items="tags"
+        label="Tags"
+        multiple
+        small-chips
+        append-icon
+        data-vv-name="Tags"
+      ></v-combobox>
+    </v-form>
     <div cols="12">
       <ckeditor :editor="editor" v-model="editorData" :config="editorConfig" @ready="onEditorReady"></ckeditor>
     </div>
@@ -30,6 +40,7 @@ import api from '@/shared/api.js';
 import moment from 'moment-timezone';
 const IsoFormat = 'YYYY-MM-DD';
 import { isEmpty } from '@/utils/utils';
+import _ from 'lodash';
 
 //some of these plugins are currently unused
 import Base64UploadAdapter from '@ckeditor/ckeditor5-upload/src/adapters/base64uploadadapter';
@@ -57,6 +68,14 @@ import Font from '@ckeditor/ckeditor5-font/src/font';
 async function created() {
   this.user = await api.getUser();
   console.log(this.user);
+  this.posts = await api.getItems(api.BLOG);
+  console.log(this.posts);
+  this.tags = _.flatten(
+    _.map(this.posts, (post) => {
+      return post.tags;
+    })
+  );
+  console.log(this.tags);
 }
 
 //TODO: add editing functionality currently only handles creating new posts.
@@ -72,8 +91,7 @@ async function checkSubmit() {
     let newDate = moment().format(IsoFormat);
     this.$set(this.model, 'createDate', newDate);
     this.$set(this.model, 'lastModifiedDate', newDate);
-    this.$set(this.model, 'fileName', 'test.md');
-    this.$set(this.model, 'tags', []);
+    this.$set(this.model, 'fileName', 'test.md'); //TODO: figure out what the fileName should be
 
     let blogPost = await api.createItem(api.BLOG, this.model);
 
@@ -232,7 +250,9 @@ export default {
         fileName: '',
         tags: []
       },
-      valid: false
+      valid: false,
+      tags: [], //TODO: maybe prepopulate blog post tags from original posts
+      posts: null
     };
   },
   methods: {
