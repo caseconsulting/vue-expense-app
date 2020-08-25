@@ -20,7 +20,7 @@
             :loading="loading"
             :items-per-page.sync="itemsPerPage"
             :search="search"
-            @click:row="clickedRow"
+            @click:row="handleClick"
             item-key="id"
             class="elevation-1 text-center"
           >
@@ -42,7 +42,7 @@
             <!-- Action Icons -->
             <!-- Actions -->
             <template v-slot:[`item.actions`]="{ item }">
-              <td class="datatable_btn layout" v-if="userIsBlogger()" @click="clickedRow(item)">
+              <td class="datatable_btn layout" v-if="userIsBlogger()" @click="handleClick(item)">
                 <!-- Edit Button -->
                 <v-tooltip top>
                   <template v-slot:activator="{ on }">
@@ -195,6 +195,15 @@ function isFocus(item) {
 function onSelect(item) {
   this.$emit('edit', item);
 }
+
+function blogPath(item) {
+  return `/postEditor/${item.id}`;
+}
+
+function handleClick(item) {
+  this.$router.push(blogPath(item));
+} //handleClick
+
 /**
  * Checks to see if the user is an admin. Returns true if the user's role is an admin, otherwise returns false.
  */
@@ -214,7 +223,9 @@ export default {
     isEmpty,
     isFocus,
     userIsBlogger,
-    onSelect
+    onSelect,
+    blogPath,
+    handleClick
   },
   data() {
     return {

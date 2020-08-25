@@ -69,6 +69,17 @@ async function created() {
   this.user = await api.getUser();
   console.log(this.user);
   this.posts = await api.getItems(api.BLOG);
+  if (this.$route.params.id != 0) {
+    console.log('in here');
+    this.model = _.find(this.posts, (post) => {
+      return post.id == this.$route.params.id;
+    });
+    console.log('before getting blog');
+    let blogFile = await api.getBlogFile(this.model.authorId, this.model.id);
+    blogFile = removeMetaData(blogFile);
+    this.editorData = blogFile;
+    this.editing = true;
+  }
   console.log(this.posts);
   this.tags = _.flatten(
     _.map(this.posts, (post) => {
@@ -85,18 +96,24 @@ async function checkSubmit() {
     console.log(this.editorData);
     //TODO: first send data through moderation.
     //begin creating the object
-    let newUUID = uuid();
-    this.$set(this.model, 'id', newUUID);
-    this.$set(this.model, 'authorId', this.user.id);
+    let blogPost;
     let newDate = moment().format(IsoFormat);
-    this.$set(this.model, 'createDate', newDate);
-    this.$set(this.model, 'lastModifiedDate', newDate);
-    this.$set(this.model, 'fileName', 'test.md'); //TODO: figure out what the fileName should be
+    if (!this.editing) {
+      let newUUID = uuid();
+      this.$set(this.model, 'id', newUUID);
+      this.$set(this.model, 'authorId', this.user.id);
+      this.$set(this.model, 'createDate', newDate);
+      this.$set(this.model, 'lastModifiedDate', newDate);
+      this.$set(this.model, 'fileName', 'test.md'); //TODO: figure out what the fileName should be
 
-    let blogPost = await api.createItem(api.BLOG, this.model);
+      blogPost = await api.createItem(api.BLOG, this.model);
+    } else {
+      this.$set(this.model, 'lastModifiedDate', newDate);
 
+      blogPost = await api.updateItem(api.BLOG, this.model);
+    }
     if (blogPost.id) {
-      //some success message popup
+      //TODO: some success message popup
       console.log('submitted');
       let metaData = await createMetaData(this.model);
       //generate md file and upload it to s3
@@ -106,7 +123,7 @@ async function checkSubmit() {
       console.log(fileSubmit);
       this.clearForm();
     } else {
-      //failure message
+      //TODO: failure message
       console.log('issue');
       this.model.id = null;
       console.log(blogPost.response.data.message);
@@ -132,6 +149,17 @@ function onEditorReady(editor) {
   console.log('Editor is ready.', { editor });
 }
 
+function removeMetaData(post) {
+  let firstIndex = post.indexOf('---');
+  let secondIndex = post.indexOf('---', 2);
+  if (firstIndex == -1 || secondIndex == -1) {
+    return post;
+  } else {
+    console.log('removing tags');
+    return post.substring(secondIndex + 3);
+  }
+}
+
 function clearForm() {
   this.$set(this.model, 'id', '');
   this.$refs.form.reset();
@@ -141,6 +169,10 @@ function clearForm() {
   this.$set(this.model, 'fileName', '');
   this.$set(this.model, 'tags', []);
   this.editorData = '';
+  if (this.editing) {
+    this.editing = false;
+    this.$router.push('/postEditor/0');
+  }
 }
 export default {
   name: 'app',
@@ -252,13 +284,15 @@ export default {
       },
       valid: false,
       tags: [], //TODO: maybe prepopulate blog post tags from original posts
-      posts: null
+      posts: null,
+      editing: false
     };
   },
   methods: {
     checkSubmit,
     clearForm,
-    onEditorReady
+    onEditorReady,
+    removeMetaData
   }
 };
 </script>
