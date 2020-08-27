@@ -74,6 +74,12 @@ async function created() {
     this.model = _.find(this.posts, (post) => {
       return post.id == this.$route.params.id;
     });
+    //this is probably not needed later TODO: remove later
+    if (!this.model) {
+      this.model = _.find(this.posts, (post) => {
+        return post.blogNumber == this.$route.params.id;
+      });
+    }
     console.log('before getting blog');
     let blogFile = await api.getBlogFile(this.model.authorId, this.model.id);
     blogFile = removeMetaData(blogFile);
@@ -101,10 +107,11 @@ async function checkSubmit() {
     if (!this.editing) {
       let newUUID = uuid();
       this.$set(this.model, 'id', newUUID);
+      this.$set(this.model, 'blogNumber', this.createBlogNumber());
       this.$set(this.model, 'authorId', this.user.id);
       this.$set(this.model, 'createDate', newDate);
       this.$set(this.model, 'lastModifiedDate', newDate);
-      this.$set(this.model, 'fileName', 'test.md'); //TODO: figure out what the fileName should be
+      this.$set(this.model, 'fileName', `${this.model.blogNumber}.md`); //TODO: figure out what the fileName should be
 
       blogPost = await api.createItem(api.BLOG, this.model);
     } else {
@@ -163,6 +170,7 @@ function removeMetaData(post) {
 function clearForm() {
   this.$set(this.model, 'id', '');
   this.$refs.form.reset();
+  this.$set(this.model, 'blogNumber', '');
   this.$set(this.model, 'authorId', '');
   this.$set(this.model, 'createDate', '');
   this.$set(this.model, 'lastModifiedDate', '');
@@ -173,6 +181,18 @@ function clearForm() {
     this.editing = false;
     this.$router.push('/postEditor/0');
   }
+}
+function createBlogNumber() {
+  let highestNumber = 0;
+  _.forEach(this.posts, (post) => {
+    if (post.blogNumber) {
+      //if it has a number !!!! this is temporary TODO: remove
+      if (post.blogNumber > highestNumber) {
+        highestNumber = post.blogNumber;
+      }
+    }
+  });
+  return highestNumber + 1;
 }
 export default {
   name: 'app',
@@ -292,7 +312,8 @@ export default {
     checkSubmit,
     clearForm,
     onEditorReady,
-    removeMetaData
+    removeMetaData,
+    createBlogNumber
   }
 };
 </script>

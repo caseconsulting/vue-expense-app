@@ -83,7 +83,6 @@
             <!-- End alert for no search results -->
           </v-data-table>
           <!-- End employee datatable -->
-
           <br />
           <delete-modal :activate="deleting" :type="'expense'"></delete-modal>
         </v-container>
@@ -173,6 +172,9 @@ function onSelect(item) {
 }
 
 function blogPath(item) {
+  if (item.blogNumber) {
+    return `/postEditor/${item.blogNumber}`; //TODO: remove once blogNumber is set up
+  }
   return `/postEditor/${item.id}`;
 }
 
