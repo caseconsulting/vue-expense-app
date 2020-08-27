@@ -1,7 +1,7 @@
 <template>
   <v-container>
     <!-- Alert snackbar -->
-    <!-- <v-snackbar
+    <v-snackbar
       v-model="status.statusType"
       :color="status.color"
       :multi-line="true"
@@ -16,7 +16,7 @@
       <v-btn color="white" text @click="clearStatus">
         Close
       </v-btn>
-    </v-snackbar>-->
+    </v-snackbar>
     <!-- title -->
     <v-row>
       <v-flex>Some title thing</v-flex>
@@ -24,7 +24,12 @@
     <v-row>
       <v-col cols="12">
         <v-btn class="mb-5" to="/postEditor/0"> Create a New Blog Post<v-icon class="pl-2">person_add</v-icon> </v-btn>
-        <post-table :posts="posts" v-on:edit="onSelect"></post-table>
+        <post-table
+          :posts="posts"
+          v-on:edit="onSelect"
+          v-on:failedDelete="failedDelete"
+          v-on:successfulDelete="successfulDelete"
+        ></post-table>
       </v-col>
       <!-- <v-col cols="12" md="6" lg="6">
         <post-editor :blogPost="blogPost"></post-editor>
@@ -155,6 +160,38 @@ function splitInputText() {
     return [this.inputText];
   }
 }
+
+async function successfulDelete() {
+  this.posts = await api.getItems(api.BLOG);
+
+  this.$set(this.status, 'statusType', 'SUCCESS');
+  this.$set(this.status, 'statusMessage', 'Item was successfully deleted!');
+  this.$set(this.status, 'color', 'green');
+}
+
+/**
+ * Set and display an error action status in the snackbar.
+ *
+ * @param err - String error message
+ */
+function displayError(err) {
+  this.$set(this.status, 'statusType', 'ERROR');
+  this.$set(this.status, 'statusMessage', err);
+  this.$set(this.status, 'color', 'red');
+} // displayError
+
+/**
+ * Clear the action status that is displayed in the snackbar.
+ */
+function clearStatus() {
+  this.$set(this.status, 'statusType', undefined);
+  this.$set(this.status, 'statusMessage', '');
+  this.$set(this.status, 'color', '');
+} // clearStatus
+
+function failedDelete(message) {
+  this.displayError(message);
+}
 export default {
   components: {
     PostTable
@@ -163,14 +200,18 @@ export default {
   created,
   data() {
     return {
-      pendingPosts: [],
       posts: [],
       model: {},
       blogPost: '',
       inputFile: null,
       inputText: null,
       employees: null,
-      userInfo: null
+      userInfo: null,
+      status: {
+        statusType: undefined,
+        statusMessage: '',
+        color: ''
+      } // snackbar action status
     };
   },
   methods: {
@@ -181,7 +222,11 @@ export default {
     uploadToS3,
     onSelect,
     isUser,
-    isAdmin
+    isAdmin,
+    successfulDelete,
+    displayError,
+    clearStatus,
+    failedDelete
   }
 };
 </script>

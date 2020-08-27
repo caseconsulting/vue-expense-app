@@ -42,11 +42,11 @@
             <!-- Action Icons -->
             <!-- Actions -->
             <template v-slot:[`item.actions`]="{ item }">
-              <td class="datatable_btn layout" v-if="userIsBlogger()" @click="handleClick(item)">
+              <td class="datatable_btn layout" @click="handleClick(item)">
                 <!-- Edit Button -->
                 <v-tooltip top>
                   <template v-slot:activator="{ on }">
-                    <v-btn :disabled="isEditing() || midAction" text icon @click="onSelect(item)" v-on="on">
+                    <v-btn :disabled="isEditing() || midAction" text icon @click.stop="onSelect(item)" v-on="on">
                       <v-icon style="color: #606060;">edit</v-icon>
                     </v-btn>
                   </template>
@@ -59,10 +59,10 @@
                       :disabled="isEditing() || midAction"
                       text
                       icon
-                      @click="
+                      @click.stop="
                         deleting = true;
                         midAction = true;
-                        propExpense = item;
+                        propBlogPost = item;
                       "
                       v-on="on"
                     >
@@ -76,23 +76,6 @@
               </td>
             </template>
 
-            <!-- Expanded slot in datatable -->
-            <template v-slot:expanded-item="{ headers, item }">
-              <td :colspan="headers.length" class="pa-0">
-                <v-card text>
-                  <v-card-text>
-                    <div class="expandedInfo" v-if="!isDisplayData(item)">
-                      <p>No additional data</p>
-                    </div>
-                    <div class="expandedInfo" v-else>
-                      <p>{{ item.text }}</p>
-                    </div>
-                  </v-card-text>
-                </v-card>
-              </td>
-            </template>
-            <!-- End expanded slot in datatable -->
-
             <!-- Alert for no search results -->
             <v-alert slot="no-results" :value="true" color="error" icon="warning"
               >Your search for "{{ search }}" found no results.</v-alert
@@ -102,6 +85,7 @@
           <!-- End employee datatable -->
 
           <br />
+          <delete-modal :activate="deleting" :type="'expense'"></delete-modal>
         </v-container>
       </v-card>
     </v-col>
@@ -111,26 +95,18 @@
 <script>
 import _ from 'lodash';
 import { isEmpty, monthDayYearFormat } from '@/utils/utils';
+import DeleteModal from '@/components/modals/DeleteModal.vue';
 import moment from 'moment-timezone';
+import api from '@/shared/api.js';
+
 async function created() {
   this.constructAutoComplete(this.pendingPosts);
+  window.EventBus.$on('canceled-delete-expense', () => {
+    this.deleting = false;
+    this.midAction = false;
+  });
+  window.EventBus.$on('confirm-delete-expense', this.deleteBlogPost);
 }
-
-/**
- * add text to expanded row when clicked.
- *
- * @param value - employee to add
- */
-function clickedRow(value) {
-  if (_.isEmpty(this.expanded) || this.expanded[0].postId != value.postId) {
-    // expand the selected employee if the selected employee not already expanded
-    this.expanded = [];
-    this.expanded.push(value);
-  } else {
-    // collapse the employee if the selected employee is already expanded
-    this.expanded = [];
-  }
-} // clickedRow
 
 /**
  * Constructs the auto complete lists for the employee and expense type filter.
@@ -204,6 +180,29 @@ function handleClick(item) {
   this.$router.push(blogPath(item));
 } //handleClick
 
+async function deleteBlogPost() {
+  console.log('deleting');
+  if (this.propBlogPost.id) {
+    // blogPost is selected
+    let deleted = await api.deleteItem(api.BLOG, this.propBlogPost.id);
+    if (deleted.id) {
+      // successfully deletes blogPost
+      this.$emit('successfulDelete');
+      // delete attachment from s3 if deleted expense has a receipt
+      let deletedBlogFile = await api.deleteBlogFile(deleted);
+      if (deletedBlogFile.code) {
+        // emit alert if error deleting file
+        this.$emit('displayError', `Error Deleting Receipt: ${deletedBlogFile.message}`);
+      }
+    } else {
+      // fails to delete expense
+      this.$emit('displayError', 'Error Deleting Expense');
+    }
+    this.deleting = false;
+    this.midAction = false;
+  }
+}
+
 /**
  * Checks to see if the user is an admin. Returns true if the user's role is an admin, otherwise returns false.
  */
@@ -214,9 +213,12 @@ function userIsBlogger() {
 
 export default {
   props: ['posts', 'model'],
+  components: {
+    DeleteModal
+  },
   created,
   methods: {
-    clickedRow,
+    // clickedRow,
     constructAutoComplete,
     isDisplayData,
     isEditing,
@@ -225,7 +227,8 @@ export default {
     userIsBlogger,
     onSelect,
     blogPath,
-    handleClick
+    handleClick,
+    deleteBlogPost
   },
   data() {
     return {
@@ -254,7 +257,9 @@ export default {
       itemsPerPage: -1,
       search: '', // query text for datatable search field
       loading: false,
-      midAction: false
+      midAction: false,
+      deleting: false,
+      propBlogPost: null
     };
   },
   filters: {

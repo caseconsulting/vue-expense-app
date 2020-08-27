@@ -194,6 +194,7 @@
                   </template>
                   <span>Edit</span>
                 </v-tooltip>
+                <!-- Delete Button -->
                 <v-tooltip top>
                   <template v-slot:activator="{ on }">
                     <v-btn
