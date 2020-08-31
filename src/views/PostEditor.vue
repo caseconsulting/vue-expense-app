@@ -9,6 +9,12 @@
     >
     <v-form ref="form" v-model="valid" lazy-validation>
       <v-text-field v-model="model.title" :rules="requiredRules" label="Blog Post Title"></v-text-field>
+      <v-text-field
+        v-model="model.description"
+        :rules="descriptionRules"
+        label="Description"
+        data-vv-name="Description"
+      ></v-text-field>
       <v-combobox
         v-model="model.tags"
         :rules="requiredRules"
@@ -95,7 +101,6 @@ async function created() {
   console.log(this.tags);
 }
 
-//TODO: add editing functionality currently only handles creating new posts.
 async function checkSubmit() {
   //check to see if there is any data
   if (!isEmpty(this.editorData) && this.$refs.form.validate()) {
@@ -148,6 +153,7 @@ async function createMetaData(model) {
   metaData += `\nauthor: ${employee.firstName} ${employee.lastName}`;
   metaData += `\ndate: ${model.createDate}`;
   metaData += `\ntags: ${model.tags}`;
+  metaData += `\ndescription: ${model.description}`;
   metaData += '\nlayout: BlogPost\n---\n\n';
   //TODO: description? image?
   return metaData;
@@ -162,7 +168,7 @@ function removeMetaData(post) {
   if (firstIndex == -1 || secondIndex == -1) {
     return post;
   } else {
-    console.log('removing tags');
+    console.log('removing metaData');
     return post.substring(secondIndex + 3);
   }
 }
@@ -172,6 +178,7 @@ function clearForm() {
   this.$refs.form.reset();
   this.$set(this.model, 'blogNumber', 0);
   this.$set(this.model, 'authorId', '');
+  this.$set(this.model, 'description', '');
   this.$set(this.model, 'createDate', '');
   this.$set(this.model, 'lastModifiedDate', '');
   this.$set(this.model, 'fileName', '');
@@ -293,11 +300,16 @@ export default {
       },
       user: null,
       requiredRules: [(v) => !isEmpty(v) || 'Required field'], // rules for required fields
+      descriptionRules: [
+        (v) => !isEmpty(v) || 'Description is a required field',
+        (v) => (!isEmpty(v) && v.replace(/\s/g, '').length > 0) || 'Description is a required field'
+      ], // rules for description
       model: {
         id: '',
         blogNumber: 0,
         title: '',
         authorId: '',
+        description: '',
         createDate: '',
         lastModifiedDate: '',
         fileName: '',
