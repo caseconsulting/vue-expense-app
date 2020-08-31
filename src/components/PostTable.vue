@@ -20,7 +20,7 @@
             :loading="loading"
             :items-per-page.sync="itemsPerPage"
             :search="search"
-            @click:row="handleClick"
+            @click:row="handlePreview"
             item-key="id"
             class="elevation-1 text-center"
           >
@@ -42,11 +42,11 @@
             <!-- Action Icons -->
             <!-- Actions -->
             <template v-slot:[`item.actions`]="{ item }">
-              <td class="datatable_btn layout" @click="handleClick(item)">
+              <td class="datatable_btn layout" @click="handlePreview(item)">
                 <!-- Edit Button -->
                 <v-tooltip top>
                   <template v-slot:activator="{ on }">
-                    <v-btn :disabled="isEditing() || midAction" text icon @click.stop="onSelect(item)" v-on="on">
+                    <v-btn :disabled="isEditing() || midAction" text icon @click.stop="handleEdit(item)" v-on="on">
                       <v-icon style="color: #606060;">edit</v-icon>
                     </v-btn>
                   </template>
@@ -178,9 +178,17 @@ function blogPath(item) {
   return `/postEditor/${item.id}`;
 }
 
-function handleClick(item) {
+function previewPath(item) {
+  return `/blogPreview/${item.blogNumber}`;
+}
+
+function handleEdit(item) {
   this.$router.push(blogPath(item));
-} //handleClick
+} //handleEdit
+
+function handlePreview(item) {
+  this.$router.push(previewPath(item));
+}
 
 async function deleteBlogPost() {
   console.log('deleting');
@@ -229,7 +237,8 @@ export default {
     userIsBlogger,
     onSelect,
     blogPath,
-    handleClick,
+    handleEdit,
+    handlePreview,
     deleteBlogPost
   },
   data() {

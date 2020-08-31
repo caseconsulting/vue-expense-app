@@ -170,7 +170,7 @@ function removeMetaData(post) {
 function clearForm() {
   this.$set(this.model, 'id', '');
   this.$refs.form.reset();
-  this.$set(this.model, 'blogNumber', '');
+  this.$set(this.model, 'blogNumber', 0);
   this.$set(this.model, 'authorId', '');
   this.$set(this.model, 'createDate', '');
   this.$set(this.model, 'lastModifiedDate', '');
@@ -295,6 +295,7 @@ export default {
       requiredRules: [(v) => !isEmpty(v) || 'Required field'], // rules for required fields
       model: {
         id: '',
+        blogNumber: 0,
         title: '',
         authorId: '',
         createDate: '',
