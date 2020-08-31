@@ -25,6 +25,14 @@
         append-icon
         data-vv-name="Tags"
       ></v-combobox>
+      <v-autocomplete
+        :items="categories"
+        :rules="requiredRules"
+        v-model="model.category"
+        item-text="text"
+        label="Category"
+        class="form_padding"
+      ></v-autocomplete>
     </v-form>
     <div cols="12">
       <ckeditor :editor="editor" v-model="editorData" :config="editorConfig" @ready="onEditorReady"></ckeditor>
@@ -178,7 +186,6 @@ function clearForm() {
   this.$refs.form.reset();
   this.$set(this.model, 'blogNumber', 0);
   this.$set(this.model, 'authorId', '');
-  this.$set(this.model, 'description', '');
   this.$set(this.model, 'createDate', '');
   this.$set(this.model, 'lastModifiedDate', '');
   this.$set(this.model, 'fileName', '');
@@ -318,7 +325,8 @@ export default {
       valid: false,
       tags: [], //TODO: maybe prepopulate blog post tags from original posts
       posts: null,
-      editing: false
+      editing: false,
+      categories: ['Case News', 'Case Cares']
     };
   },
   methods: {
