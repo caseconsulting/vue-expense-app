@@ -1,10 +1,26 @@
 <template>
   <v-container>
+    <!-- Status Alert -->
+    <v-snackbar
+      v-model="status.statusType"
+      :color="status.color"
+      :multi-line="true"
+      :right="true"
+      :timeout="5000"
+      :top="true"
+      :vertical="true"
+    >
+      <v-card-title headline color="white">
+        <span class="headline">{{ status.statusMessage }}</span>
+      </v-card-title>
+      <v-btn color="white" text @click="clearStatus">
+        Close
+      </v-btn>
+    </v-snackbar>
     <!-- Cancel Button -->
     <v-btn to="/blog" color="white" class="ma-2"> <icon class="mr-1" name="ban"></icon>Cancel </v-btn>
-
     <!-- Submit Button -->
-    <v-btn outlined @click="checkSubmit" color="success" class="ma-2">
+    <v-btn outlined @click="confirming = true" color="success" class="ma-2">
       <icon class="mr-1" name="save"></icon>Submit</v-btn
     >
     <v-form ref="form" v-model="valid" lazy-validation>
@@ -56,6 +72,7 @@
     <v-btn outlined @click="checkSubmit" color="success" class="ma-2">
       <icon class="mr-1" name="save"></icon>Submit</v-btn
     >
+    <form-submission-confirmation :activate="this.confirming"></form-submission-confirmation>
   </v-container>
 </template>
 <script>
@@ -68,6 +85,7 @@ const IsoFormat = 'YYYY-MM-DD';
 import { isEmpty } from '@/utils/utils';
 import _ from 'lodash';
 import FileUpload from '../components/FileUpload.vue';
+import FormSubmissionConfirmation from '../components/modals/FormSubmissionConfirmation';
 
 //some of these plugins are currently unused
 import Base64UploadAdapter from '@ckeditor/ckeditor5-upload/src/adapters/base64uploadadapter';
@@ -93,6 +111,15 @@ import MediaEmbed from '@ckeditor/ckeditor5-media-embed/src/mediaembed';
 import Font from '@ckeditor/ckeditor5-font/src/font';
 
 async function created() {
+  window.EventBus.$on('confirmed', () => {
+    this.confirming = false;
+    this.checkSubmit();
+  });
+
+  window.EventBus.$on('canceled', () => {
+    this.confirming = false;
+  });
+
   this.user = await api.getUser();
   console.log(this.user);
   this.posts = await api.getItems(api.BLOG);
@@ -234,6 +261,26 @@ function createBlogNumber() {
 } // createBlogNumber
 
 /**
+ * Clear the action status that is displayed in the snackbar.
+ */
+function clearStatus() {
+  this.$set(this.status, 'statusType', undefined);
+  this.$set(this.status, 'statusMessage', '');
+  this.$set(this.status, 'color', '');
+} // clearStatus
+
+/**
+ * Set and display an error action status in the snackbar.
+ *
+ * @param err - String error message
+ */
+function displayError(err) {
+  this.$set(this.status, 'statusType', 'ERROR');
+  this.$set(this.status, 'statusMessage', err);
+  this.$set(this.status, 'color', 'red');
+} // displayError
+
+/**
  * Sets the file.
  *
  * @param file - mainPicture
@@ -254,7 +301,8 @@ export default {
   components: {
     // Use the <ckeditor> component in this view.
     ckeditor: CKEditor.component,
-    FileUpload
+    FileUpload,
+    FormSubmissionConfirmation
   },
   created,
   data() {
@@ -371,7 +419,13 @@ export default {
       posts: null,
       editing: false,
       categories: ['Case News', 'Case Cares'],
-      mainPictureFile: null
+      mainPictureFile: null,
+      status: {
+        statusType: undefined,
+        statusMessage: '',
+        color: ''
+      }, // snackbar action status
+      confirming: false
     };
   },
   methods: {
@@ -380,7 +434,9 @@ export default {
     onEditorReady,
     removeMetaData,
     createBlogNumber,
-    setFile
+    setFile,
+    clearStatus,
+    displayError
   }
 };
 </script>
