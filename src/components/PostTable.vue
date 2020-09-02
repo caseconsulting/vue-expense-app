@@ -99,32 +99,12 @@ import moment from 'moment-timezone';
 import api from '@/shared/api.js';
 
 async function created() {
-  this.constructAutoComplete(this.pendingPosts);
   window.EventBus.$on('canceled-delete-expense', () => {
     this.deleting = false;
     this.midAction = false;
   });
   window.EventBus.$on('confirm-delete-expense', this.deleteBlogPost);
 }
-
-/**
- * Constructs the auto complete lists for the employee and expense type filter.
- *
- * @param aggregatedData - expenses data
- */
-function constructAutoComplete(aggregatedData) {
-  // set employees
-  this.employees = _.map(aggregatedData, (data) => {
-    if (data && data.employeeName && data.employeeId) {
-      return {
-        text: data.employeeName,
-        value: data.employeeId
-      };
-    }
-  }).filter((data) => {
-    return data != null;
-  });
-} // constructAutoComplete
 
 /**
  * Checks if there is data about a post to display. Returns true if there is data to display
@@ -229,7 +209,6 @@ export default {
   created,
   methods: {
     // clickedRow,
-    constructAutoComplete,
     isDisplayData,
     isEditing,
     isEmpty,

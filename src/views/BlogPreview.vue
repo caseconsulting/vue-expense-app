@@ -3,19 +3,18 @@
     <v-btn class="mb-5" to="/blog"> Return to Blog Page</v-btn>
     <div class="w3-display-container">
       <h1 class="blogTitle">{{ this.metaData.title }}</h1>
-      <img class="mainImage" v-if="this.metaData.postImage" :src="$withBase(this.metaData.postImage)" />
+      <img class="mainImage" :src="model.mainPicture" />
     </div>
     <div class="content">
       <p class="meta" style="font-size: 15px; padding-top: 5px;">
         <br />
-        <span>{{ this.metaData.topic }}</span>
+        <span>{{ this.model.category }}</span>
         <br />By
         <span style="color: tomato;">{{ this.metaData.author }}</span>
         ◆
         {{ this.metaData.date }}
       </p>
       <p><span class="ck-content" v-html="this.textContent"></span></p>
-      <br />
       <br />
       <br />
       <div row class="tagsScroll">
@@ -39,12 +38,18 @@ async function created() {
   let blogPost = _.find(this.posts, (post) => {
     return post.blogNumber == this.$route.params.id;
   });
+  console.log('blogPost');
   console.log(blogPost);
   this.model = blogPost;
   console.log(this.model);
   let fileContent = await api.getBlogFile(this.model.authorId, this.model.id);
   console.log('fileContent:');
   console.log(fileContent);
+  let pictureObject = await api.getPictureFile(this.model.authorId, this.model.id, this.model.mainPicture);
+  console.log('pictureFile');
+  console.log(pictureObject);
+  this.model.mainPicture = `data:${pictureObject.type};base64,` + pictureObject.data;
+  console.log(this.model.mainPicture);
   let metaData = this.extractMetaData(fileContent);
   console.log('metaData:');
   console.log(metaData);
@@ -70,6 +75,9 @@ function extractMetaData(fileContent) {
     console.log('cannot retrieve metaData');
   } else {
     let metaData = fileContent.substring(firstIndex + 3, secondIndex);
+    let imageIndex = metaData.indexOf('\ntitle:');
+    this.imageData = metaData.substring(0, imageIndex);
+    metaData = metaData.substring(imageIndex);
     let splitData = metaData.split('\n');
     return splitData;
   }
@@ -92,7 +100,9 @@ export default {
         id: '',
         blogNumber: 0,
         title: '',
+        mainPicture: null,
         authorId: '',
+        category: '',
         createDate: '',
         lastModifiedDate: '',
         fileName: '',
@@ -100,7 +110,8 @@ export default {
       },
       metaData: {},
       posts: null,
-      textContent: ''
+      textContent: '',
+      imageData: ''
     };
   },
   methods: {
@@ -170,7 +181,7 @@ export default {
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
-.tagsScroll a:hover {
+.tagsScroll span:hover {
   color: gray;
   text-decoration: none;
 }

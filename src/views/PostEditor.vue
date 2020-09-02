@@ -8,13 +8,24 @@
       <icon class="mr-1" name="save"></icon>Submit</v-btn
     >
     <v-form ref="form" v-model="valid" lazy-validation>
+      <!-- Title -->
       <v-text-field v-model="model.title" :rules="requiredRules" label="Blog Post Title"></v-text-field>
+      <!-- Main Picture -->
+      <file-upload
+        style="padding-top: 0px; padding-bottom: 0px;"
+        @fileSelected="setFile"
+        :passedRules="mainPictureRules"
+        :mainPicture="model.mainPicture"
+        customLabel="Select Main Picture"
+      ></file-upload>
+      <!-- Description -->
       <v-text-field
         v-model="model.description"
         :rules="descriptionRules"
         label="Description"
         data-vv-name="Description"
       ></v-text-field>
+      <!-- Tags -->
       <v-combobox
         v-model="model.tags"
         :rules="requiredRules"
@@ -25,6 +36,7 @@
         append-icon
         data-vv-name="Tags"
       ></v-combobox>
+      <!-- Category -->
       <v-autocomplete
         :items="categories"
         :rules="requiredRules"
@@ -55,6 +67,7 @@ import moment from 'moment-timezone';
 const IsoFormat = 'YYYY-MM-DD';
 import { isEmpty } from '@/utils/utils';
 import _ from 'lodash';
+import FileUpload from '../components/FileUpload.vue';
 
 //some of these plugins are currently unused
 import Base64UploadAdapter from '@ckeditor/ckeditor5-upload/src/adapters/base64uploadadapter';
@@ -96,6 +109,7 @@ async function created() {
     }
     console.log('before getting blog');
     let blogFile = await api.getBlogFile(this.model.authorId, this.model.id);
+    this.mainPictureFile = await api.getBlogFile(this.model.authorId, this.model.id, this.model.mainPicture);
     blogFile = removeMetaData(blogFile);
     this.editorData = blogFile;
     this.editing = true;
@@ -124,7 +138,7 @@ async function checkSubmit() {
       this.$set(this.model, 'authorId', this.user.id);
       this.$set(this.model, 'createDate', newDate);
       this.$set(this.model, 'lastModifiedDate', newDate);
-      this.$set(this.model, 'fileName', `${this.model.blogNumber}.md`); //TODO: figure out what the fileName should be
+      this.$set(this.model, 'fileName', `${this.model.blogNumber}.md`);
 
       blogPost = await api.createItem(api.BLOG, this.model);
     } else {
@@ -139,8 +153,13 @@ async function checkSubmit() {
       //generate md file and upload it to s3
       let file = new Blob([metaData, this.editorData], { type: 'text/markdown' });
       console.log(file);
-      let fileSubmit = await api.createBlogFile(blogPost, file);
+      //upload file
+      let fileSubmit = await api.createBlogFile(blogPost, file, blogPost.fileName);
       console.log(fileSubmit);
+
+      //upload picture
+      let pictureSubmit = await api.createBlogFile(blogPost, this.mainPictureFile, blogPost.mainPicture);
+      console.log(pictureSubmit);
       this.clearForm();
     } else {
       //TODO: failure message
@@ -152,10 +171,13 @@ async function checkSubmit() {
     //nothing to submit
     console.log('nothing in the box');
   }
-}
+} // checkSubmit
 
 async function createMetaData(model) {
   let metaData = '---';
+  metaData += `\nmeta:\n- property: og:image\n content: https://blog.consultwithcase.com/${model.mainPicture}\n`;
+  metaData += `\nimage: /${model.mainPicture}`;
+  metaData += `\npostImage: /${model.mainPicture}`;
   metaData += `\ntitle: ${model.title}`;
   let employee = await api.getItem(api.EMPLOYEES, model.authorId);
   metaData += `\nauthor: ${employee.firstName} ${employee.lastName}`;
@@ -166,6 +188,7 @@ async function createMetaData(model) {
   //TODO: description? image?
   return metaData;
 }
+
 function onEditorReady(editor) {
   console.log('Editor is ready.', { editor });
 }
@@ -179,7 +202,7 @@ function removeMetaData(post) {
     console.log('removing metaData');
     return post.substring(secondIndex + 3);
   }
-}
+} // removeMetaData
 
 function clearForm() {
   this.$set(this.model, 'id', '');
@@ -195,7 +218,8 @@ function clearForm() {
     this.editing = false;
     this.$router.push('/postEditor/0');
   }
-}
+} // clearForm
+
 function createBlogNumber() {
   let highestNumber = 0;
   _.forEach(this.posts, (post) => {
@@ -207,12 +231,30 @@ function createBlogNumber() {
     }
   });
   return highestNumber + 1;
-}
+} // createBlogNumber
+
+/**
+ * Sets the file.
+ *
+ * @param file - mainPicture
+ */
+async function setFile(file) {
+  if (file) {
+    this.mainPictureFile = file;
+    this.$set(this.model, 'mainPicture', file.name);
+  } else {
+    this.mainPictureFile = null;
+    this.$set(this.model, 'mainPicture', null);
+    this.model = null;
+  }
+} // setFile
+
 export default {
   name: 'app',
   components: {
     // Use the <ckeditor> component in this view.
-    ckeditor: CKEditor.component
+    ckeditor: CKEditor.component,
+    FileUpload
   },
   created,
   data() {
@@ -311,10 +353,12 @@ export default {
         (v) => !isEmpty(v) || 'Description is a required field',
         (v) => (!isEmpty(v) && v.replace(/\s/g, '').length > 0) || 'Description is a required field'
       ], // rules for description
+      mainPictureRules: [(v) => !isEmpty(v) || 'mainPicture is required'], // rules for mainPicture
       model: {
         id: '',
         blogNumber: 0,
         title: '',
+        mainPicture: '',
         authorId: '',
         description: '',
         createDate: '',
@@ -326,7 +370,8 @@ export default {
       tags: [], //TODO: maybe prepopulate blog post tags from original posts
       posts: null,
       editing: false,
-      categories: ['Case News', 'Case Cares']
+      categories: ['Case News', 'Case Cares'],
+      mainPictureFile: null
     };
   },
   methods: {
@@ -334,7 +379,8 @@ export default {
     clearForm,
     onEditorReady,
     removeMetaData,
-    createBlogNumber
+    createBlogNumber,
+    setFile
   }
 };
 </script>

@@ -156,6 +156,10 @@ function getBlogFile(authorId, blogId) {
   return execute('get', `${BLOG_FILE}/${authorId}/${blogId}`);
 }
 
+function getPictureFile(authorId, blogId, mainPicture) {
+  return execute('get', `${BLOG_FILE}/${authorId}/${blogId}/${mainPicture}`);
+}
+
 async function extractText(file) {
   let formData = new FormData();
   formData.append('receipt', file);
@@ -201,9 +205,9 @@ async function createAttachment(expense, file) {
     });
 }
 
-async function createBlogFile(blogPost, file) {
+async function createBlogFile(blogPost, file, fileName) {
   let formData = new FormData();
-  formData.append('blogFile', file, blogPost.fileName);
+  formData.append('blogFile', file, fileName);
 
   // inject the accessToken for each request
   let accessToken = getAccessToken();
@@ -228,7 +232,10 @@ function deleteAttachment(expense) {
 }
 
 function deleteBlogFile(blogPost) {
-  return execute('delete', `${BLOG_FILE}/${blogPost.authorId}/${blogPost.id}/${blogPost.fileName}`);
+  return execute(
+    'delete',
+    `${BLOG_FILE}/${blogPost.authorId}/${blogPost.id}/${blogPost.fileName}/${blogPost.mainPicture}}`
+  );
 }
 
 //functions for tSheets
@@ -294,6 +301,7 @@ export default {
   getAllExpenseTypeExpenses,
   getAttachment,
   getBlogFile,
+  getPictureFile,
   getBasecampAvatars,
   getBasecampCampfires,
   getCaseTimeline,
