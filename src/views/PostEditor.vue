@@ -44,7 +44,6 @@
       <!-- Tags -->
       <v-combobox
         v-model="model.tags"
-        :rules="requiredRules"
         :items="tags"
         label="Tags"
         multiple
