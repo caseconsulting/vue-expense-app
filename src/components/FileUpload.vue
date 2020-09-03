@@ -43,17 +43,21 @@ function megabytes() {
 } // megabytes
 
 function acceptedFileTypes() {
-  return [
-    'application/msword',
-    'application/vnd.ms-excel',
-    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-    '.doc',
-    '.docx',
-    'image/*',
-    '.pdf',
-    '.xml'
-  ].join(',');
+  if (this.customFileTypes) {
+    return this.customFileTypes.join(',');
+  } else {
+    return [
+      'application/msword',
+      'application/vnd.ms-excel',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      '.doc',
+      '.docx',
+      'image/*',
+      '.pdf',
+      '.xml'
+    ].join(',');
+  }
 } // acceptedFileTypes
 
 // |--------------------------------------------------|
@@ -128,6 +132,6 @@ export default {
       }
     }
   },
-  props: ['passedRules', 'receipt', 'customLabel'] // file text field rules
+  props: ['passedRules', 'receipt', 'customLabel', 'customFileTypes'] // file text field rules
 };
 </script>

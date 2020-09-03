@@ -30,29 +30,15 @@ import api from '@/shared/api.js';
 
 async function created() {
   //get blog post and file
-  console.log('start');
   this.posts = await api.getItems(api.BLOG);
-  console.log('blogPosts');
-  console.log(this.posts);
-  console.log(this.$route.params.id);
   let blogPost = _.find(this.posts, (post) => {
     return post.blogNumber == this.$route.params.id;
   });
-  console.log('blogPost');
-  console.log(blogPost);
   this.model = blogPost;
-  console.log(this.model);
   let fileContent = await api.getBlogFile(this.model.authorId, this.model.id);
-  console.log('fileContent:');
-  console.log(fileContent);
   let pictureObject = await api.getPictureFile(this.model.authorId, this.model.id, this.model.mainPicture);
-  console.log('pictureFile');
-  console.log(pictureObject);
   this.model.mainPicture = `data:${pictureObject.type};base64,` + pictureObject.data;
-  console.log(this.model.mainPicture);
   let metaData = this.extractMetaData(fileContent);
-  console.log('metaData:');
-  console.log(metaData);
   _.forEach(metaData, (metaDatum) => {
     let data = metaDatum.split(': ');
     let key = data[0].toLowerCase();
@@ -62,25 +48,19 @@ async function created() {
   if (this.metaData.tags && this.metaData.tags != '') {
     this.metaData.tags = this.metaData.tags.split(',');
   }
-  console.log(this.metaData);
   this.textContent = this.extractTextContent(fileContent);
-  console.log('textContent:');
-  console.log(this.textContent);
 }
 
 function extractMetaData(fileContent) {
   let firstIndex = fileContent.indexOf('---');
   let secondIndex = fileContent.indexOf('---', 2);
-  if (firstIndex == -1 || secondIndex == -1) {
-    console.log('cannot retrieve metaData');
-  } else {
-    let metaData = fileContent.substring(firstIndex + 3, secondIndex);
-    let imageIndex = metaData.indexOf('\ntitle:');
-    this.imageData = metaData.substring(0, imageIndex);
-    metaData = metaData.substring(imageIndex);
-    let splitData = metaData.split('\n');
-    return splitData;
-  }
+
+  let metaData = fileContent.substring(firstIndex + 3, secondIndex);
+  let imageIndex = metaData.indexOf('\ntitle:');
+  this.imageData = metaData.substring(0, imageIndex);
+  metaData = metaData.substring(imageIndex);
+  let splitData = metaData.split('\n');
+  return splitData;
 }
 
 function extractTextContent(fileContent) {

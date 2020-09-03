@@ -46,7 +46,7 @@
                 <!-- Edit Button -->
                 <v-tooltip top>
                   <template v-slot:activator="{ on }">
-                    <v-btn :disabled="isEditing() || midAction" text icon @click.stop="handleEdit(item)" v-on="on">
+                    <v-btn :disabled="midAction" text icon @click.stop="handleEdit(item)" v-on="on">
                       <v-icon style="color: #606060;">edit</v-icon>
                     </v-btn>
                   </template>
@@ -56,7 +56,7 @@
                 <v-tooltip top>
                   <template v-slot:activator="{ on }">
                     <v-btn
-                      :disabled="isEditing() || midAction"
+                      :disabled="midAction"
                       text
                       icon
                       @click.stop="
@@ -107,36 +107,6 @@ async function created() {
 }
 
 /**
- * Checks if there is data about a post to display. Returns true if there is data to display
- *
- * @item item - post to check
- * @return boolean - post has data to display
- */
-function isDisplayData(item) {
-  //TODO: refactor for this component
-  //   let valid =
-  //     !this.userIsAdmin() &&
-  //     this.isEmpty(item.prime) &&
-  //     this.isEmpty(item.contract) &&
-  //     this.isEmpty(item.jobRole) &&
-  //     this.isEmpty(item.github) &&
-  //     this.isEmpty(item.twitter);
-  //   return valid;
-  console.log(item);
-  return true;
-} // isDisplayData
-
-/**
- * Checks if an employee is being edited.
- *
- * @return boolean - an employee is being edited
- */
-function isEditing() {
-  //TODO: refactor for this component
-  return false;
-} // isEditing
-
-/**
  * Checks to see if an employee is expanded in the datatable.
  *
  * @param item - employee to check
@@ -153,7 +123,7 @@ function onSelect(item) {
 
 function blogPath(item) {
   if (item.blogNumber) {
-    return `/postEditor/${item.blogNumber}`; //TODO: remove once blogNumber is set up
+    return `/postEditor/${item.blogNumber}`; //this is legacy set up
   }
   return `/postEditor/${item.id}`;
 }
@@ -171,7 +141,6 @@ function handlePreview(item) {
 }
 
 async function deleteBlogPost() {
-  console.log('deleting');
   if (this.propBlogPost.id) {
     // blogPost is selected
     let deleted = await api.deleteItem(api.BLOG, this.propBlogPost.id);
@@ -193,13 +162,12 @@ async function deleteBlogPost() {
   }
 }
 
-/**
- * Checks to see if the user is an admin. Returns true if the user's role is an admin, otherwise returns false.
- */
-function userIsBlogger() {
-  //TODO: make this thing
-  return true;
-} // userIsBlogger
+// /**
+//  * Checks to see if the user is an admin. Returns true if the user's role is an admin, otherwise returns false.
+//  */
+// function userIsBlogger() {
+//   return true;
+// } // userIsBlogger
 
 export default {
   props: ['posts', 'model'],
@@ -209,11 +177,9 @@ export default {
   created,
   methods: {
     // clickedRow,
-    isDisplayData,
-    isEditing,
     isEmpty,
     isFocus,
-    userIsBlogger,
+    // userIsBlogger,
     onSelect,
     blogPath,
     handleEdit,

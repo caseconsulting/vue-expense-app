@@ -86,11 +86,9 @@ function isAdmin() {
 
 async function created() {
   this.posts = await api.getItems(api.BLOG);
-  console.log(this.posts);
   this.employeeRole = getRole();
   if (isAdmin) {
     //get all employee's data and match posts to it.
-    //TODO: add title as field in blogPosts
     this.employees = await api.getItems(api.EMPLOYEES);
     this.posts = _.map(this.posts, (post) => {
       let employee = _.find(this.employees, (employee) => {

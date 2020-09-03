@@ -32,6 +32,7 @@
         @fileSelected="setFile"
         :passedRules="mainPictureRules"
         :mainPicture="model.mainPicture"
+        :customFileTypes="customFileTypes"
         customLabel="Select Main Picture"
       ></file-upload>
       <!-- Description -->
@@ -62,7 +63,7 @@
       ></v-autocomplete>
     </v-form>
     <div cols="12">
-      <ckeditor :editor="editor" v-model="editorData" :config="editorConfig" @ready="onEditorReady"></ckeditor>
+      <ckeditor :editor="editor" v-model="editorData" :config="editorConfig"></ckeditor>
     </div>
     <!-- Cancel Button -->
     <v-btn to="/blog" color="white" class="ma-2"> <icon class="mr-1" name="ban"></icon>Cancel </v-btn>
@@ -120,40 +121,33 @@ async function created() {
   });
 
   this.user = await api.getUser();
-  console.log(this.user);
+
   this.posts = await api.getItems(api.BLOG);
   if (this.$route.params.id != 0) {
-    console.log('in here');
     this.model = _.find(this.posts, (post) => {
       return post.id == this.$route.params.id;
     });
-    //this is probably not needed later TODO: remove later
     if (!this.model) {
       this.model = _.find(this.posts, (post) => {
         return post.blogNumber == this.$route.params.id;
       });
     }
-    console.log('before getting blog');
     let blogFile = await api.getBlogFile(this.model.authorId, this.model.id);
     this.mainPictureFile = await api.getBlogFile(this.model.authorId, this.model.id, this.model.mainPicture);
     blogFile = removeMetaData(blogFile);
     this.editorData = blogFile;
     this.editing = true;
   }
-  console.log(this.posts);
   this.tags = _.flatten(
     _.map(this.posts, (post) => {
       return post.tags;
     })
   );
-  console.log(this.tags);
 }
 
 async function checkSubmit() {
   //check to see if there is any data
   if (this.$refs.form.validate() && !isEmpty(this.editorData)) {
-    console.log(this.editorData);
-    //TODO: first send data through moderation.
     //begin creating the object
     let blogPost;
     let newDate = moment().format(IsoFormat);
@@ -173,30 +167,28 @@ async function checkSubmit() {
       blogPost = await api.updateItem(api.BLOG, this.model);
     }
     if (blogPost.id) {
-      //TODO: some success message popup
-      console.log('submitted');
       let metaData = await createMetaData(this.model);
       //generate md file and upload it to s3
       let file = new Blob([metaData, this.editorData], { type: 'text/markdown' });
-      console.log(file);
       //upload file
       let fileSubmit = await api.createBlogFile(blogPost, file, blogPost.fileName);
-      console.log(fileSubmit);
-
       //upload picture
       let pictureSubmit = await api.createBlogFile(blogPost, this.mainPictureFile, blogPost.mainPicture);
-      console.log(pictureSubmit);
-      this.clearForm();
+      if (fileSubmit.code) {
+        this.displayError('Error submitting blog file');
+      } else if (pictureSubmit.code) {
+        this.displayError('Error submitting Main Picture');
+      } else {
+        this.displaySuccess('Successfully submitted blogPost');
+        this.clearForm();
+      }
     } else {
-      //TODO: failure message
-      console.log('issue');
+      this.displayError('Error submitting blog to table');
       this.model.id = null;
-      console.log(blogPost.response.data.message);
     }
   } else {
     //nothing to submit
     this.displayError('Blog could not be submitted');
-    console.log('nothing in the box');
   }
 } // checkSubmit
 
@@ -212,12 +204,8 @@ async function createMetaData(model) {
   metaData += `\ntags: ${model.tags}`;
   metaData += `\ndescription: ${model.description}`;
   metaData += '\nlayout: BlogPost\n---\n\n';
-  //TODO: description? image?
-  return metaData;
-}
 
-function onEditorReady(editor) {
-  console.log('Editor is ready.', { editor });
+  return metaData;
 }
 
 function removeMetaData(post) {
@@ -226,7 +214,6 @@ function removeMetaData(post) {
   if (firstIndex == -1 || secondIndex == -1) {
     return post;
   } else {
-    console.log('removing metaData');
     return post.substring(secondIndex + 3);
   }
 } // removeMetaData
@@ -251,7 +238,6 @@ function createBlogNumber() {
   let highestNumber = 0;
   _.forEach(this.posts, (post) => {
     if (post.blogNumber) {
-      //if it has a number !!!! this is temporary TODO: remove
       if (post.blogNumber > highestNumber) {
         highestNumber = post.blogNumber;
       }
@@ -280,6 +266,11 @@ function displayError(err) {
   this.$set(this.status, 'color', 'red');
 } // displayError
 
+function displaySuccess(message) {
+  this.$set(this.status, 'statusType', 'SUCCESS');
+  this.$set(this.status, 'statusMessage', message);
+  this.$set(this.status, 'color', 'green');
+}
 /**
  * Sets the file.
  *
@@ -415,7 +406,7 @@ export default {
         tags: []
       },
       valid: false,
-      tags: [], //TODO: maybe prepopulate blog post tags from original posts
+      tags: [],
       posts: null,
       editing: false,
       categories: ['Case News', 'Case Cares'],
@@ -425,18 +416,23 @@ export default {
         statusMessage: '',
         color: ''
       }, // snackbar action status
-      confirming: false
+      confirming: false,
+      customFileTypes: [
+        'image/gif', //.gif
+        'image/jpeg', //.jpeg
+        'image/png' //.png
+      ]
     };
   },
   methods: {
     checkSubmit,
     clearForm,
-    onEditorReady,
     removeMetaData,
     createBlogNumber,
     setFile,
     clearStatus,
-    displayError
+    displayError,
+    displaySuccess
   }
 };
 </script>
