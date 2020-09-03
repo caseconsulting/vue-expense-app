@@ -62,6 +62,7 @@
         class="form_padding"
       ></v-autocomplete>
     </v-form>
+    <!-- CKEditor -->
     <div cols="12">
       <ckeditor :editor="editor" v-model="editorData" :config="editorConfig"></ckeditor>
     </div>
@@ -72,6 +73,7 @@
     <v-btn outlined @click="checkSubmit" color="success" class="ma-2">
       <icon class="mr-1" name="save"></icon>Submit</v-btn
     >
+    <!-- Submission check -->
     <form-submission-confirmation :activate="this.confirming"></form-submission-confirmation>
   </v-container>
 </template>
@@ -110,6 +112,9 @@ import BlockQuote from '@ckeditor/ckeditor5-block-quote/src/blockquote';
 import MediaEmbed from '@ckeditor/ckeditor5-media-embed/src/mediaembed';
 import Font from '@ckeditor/ckeditor5-font/src/font';
 
+/**
+ * Initial setup
+ */
 async function created() {
   window.EventBus.$on('confirmed', () => {
     this.confirming = false;
@@ -143,8 +148,11 @@ async function created() {
       return post.tags;
     })
   );
-}
+} //created
 
+/**
+ * Check validation and then attempt to submit blog
+ */
 async function checkSubmit() {
   //check to see if there is any data
   if (this.$refs.form.validate() && !isEmpty(this.editorData)) {
@@ -192,6 +200,11 @@ async function checkSubmit() {
   }
 } // checkSubmit
 
+/**
+ * Set and display an error action status in the snackbar.
+ *
+ * @param model - current blog info
+ */
 async function createMetaData(model) {
   let metaData = '---';
   metaData += `\nmeta:\n- property: og:image\n content: https://blog.consultwithcase.com/${model.mainPicture}\n`;
@@ -206,8 +219,13 @@ async function createMetaData(model) {
   metaData += '\nlayout: BlogPost\n---\n\n';
 
   return metaData;
-}
+} // createMetaData
 
+/**
+ * Remove metadata header and return blog contents
+ *
+ * @param post - full contents of the blogFile
+ */
 function removeMetaData(post) {
   let firstIndex = post.indexOf('---');
   let secondIndex = post.indexOf('---', 2);
@@ -218,6 +236,9 @@ function removeMetaData(post) {
   }
 } // removeMetaData
 
+/**
+ * Clear the current form
+ */
 function clearForm() {
   this.$set(this.model, 'id', '');
   this.$refs.form.reset();
@@ -234,6 +255,11 @@ function clearForm() {
   }
 } // clearForm
 
+/**
+ * Calculate the blog number that is right after the highest blog number
+ *
+ * @return number - next available blog number
+ */
 function createBlogNumber() {
   let highestNumber = 0;
   _.forEach(this.posts, (post) => {
@@ -266,13 +292,19 @@ function displayError(err) {
   this.$set(this.status, 'color', 'red');
 } // displayError
 
+/**
+ * Set and display a success action status in the snackbar.
+ *
+ * @param message - String success message
+ */
 function displaySuccess(message) {
   this.$set(this.status, 'statusType', 'SUCCESS');
   this.$set(this.status, 'statusMessage', message);
   this.$set(this.status, 'color', 'green');
-}
+} // displaySuccess
+
 /**
- * Sets the file.
+ * Sets the main picture file.
  *
  * @param file - mainPicture
  */
@@ -300,6 +332,9 @@ export default {
     return {
       editor: ClassicEditor,
       editorData: '',
+      /**
+       * Below is the config for the CKeditor
+       */
       editorConfig: {
         plugins: [
           Image,
@@ -323,7 +358,7 @@ export default {
           MediaEmbed,
           Underline,
           Font
-        ],
+        ], //plugins used in the editor
         toolbar: {
           items: [
             'heading',
@@ -345,8 +380,8 @@ export default {
             'link',
             'imageUpload',
             'mediaEmbed'
-          ]
-        },
+          ] 
+        }, //plugins used in toolbar
         heading: {
           options: [
             { model: 'paragraph', title: 'Paragraph', class: 'ck-heading_paragraph' },
@@ -354,7 +389,7 @@ export default {
             { model: 'heading2', view: 'h2', title: 'Heading 2', class: 'ck-heading_heading2' },
             { model: 'heading3', view: 'h3', title: 'Heading 3', class: 'ck-heading_heading3' }
           ]
-        },
+        }, //heading drop down in tollbar
         image: {
           styles: ['alignLeft', 'alignCenter', 'alignRight'],
           resizeOptions: [
@@ -383,10 +418,10 @@ export default {
             '|',
             'imageTextAlternative'
           ]
-        },
+        }, //image toolbar stuff (appears while editing image)
         placeholder: 'Create a New Blog Post'
       },
-      user: null,
+      user: null, //current user
       requiredRules: [(v) => !isEmpty(v) || 'Required field'], // rules for required fields
       descriptionRules: [
         (v) => !isEmpty(v) || 'Description is a required field',
@@ -394,29 +429,29 @@ export default {
       ], // rules for description
       mainPictureRules: [(v) => !isEmpty(v) || 'mainPicture is required'], // rules for mainPicture
       model: {
-        id: '',
-        blogNumber: 0,
+        id: '', //UUID for blog
+        blogNumber: 0, //id for blog so we dont have to use huge id for things
         title: '',
-        mainPicture: '',
-        authorId: '',
+        mainPicture: '', //picture that is shown at top of blogPost
+        authorId: '', //author's employee UUID
         description: '',
         createDate: '',
         lastModifiedDate: '',
-        fileName: '',
-        tags: []
+        fileName: '', //name of blog contents file
+        tags: [] //hashtags
       },
       valid: false,
-      tags: [],
-      posts: null,
-      editing: false,
+      tags: [], //tags from other posts for autocomplete
+      posts: null, //all blog posts
+      editing: false, //whether we are creating or editing a blog post
       categories: ['Case News', 'Case Cares'],
-      mainPictureFile: null,
-      status: {
+      mainPictureFile: null, //file for picture
+      status: { //
         statusType: undefined,
         statusMessage: '',
         color: ''
       }, // snackbar action status
-      confirming: false,
+      confirming: false, //activator for form submission dialog
       customFileTypes: [
         'image/gif', //.gif
         'image/jpeg', //.jpeg
@@ -439,6 +474,7 @@ export default {
 
 <style>
 .ck-editor__editable_inline {
+  /* Height of editor text box */
   min-height: 500px;
 }
 </style>

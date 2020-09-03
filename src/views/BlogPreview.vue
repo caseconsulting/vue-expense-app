@@ -1,22 +1,30 @@
 <template>
   <v-container>
+    <!-- Return button -->
     <v-btn class="mb-5" to="/blog"> Return to Blog Page</v-btn>
     <div class="w3-display-container">
+      <!-- title -->
       <h1 class="blogTitle">{{ this.metaData.title }}</h1>
+      <!-- main image -->
       <img class="mainImage" :src="model.mainPicture" />
     </div>
     <div class="content">
       <p class="meta" style="font-size: 15px; padding-top: 5px;">
         <br />
+        <!-- category -->
         <span>{{ this.model.category }}</span>
         <br />By
+        <!-- author -->
         <span style="color: tomato;">{{ this.metaData.author }}</span>
         ◆
+        <!-- date -->
         {{ this.metaData.date }}
       </p>
+      <!-- blog content -->
       <p><span class="ck-content" v-html="this.textContent"></span></p>
       <br />
       <br />
+      <!-- tags -->
       <div row class="tagsScroll">
         <span v-for="(tag, index) in model.tags" :key="index"># {{ tag }}</span>
       </div>
@@ -28,6 +36,9 @@
 import _ from 'lodash';
 import api from '@/shared/api.js';
 
+/**
+ * Inital setup
+ */
 async function created() {
   //get blog post and file
   this.posts = await api.getItems(api.BLOG);
@@ -49,8 +60,14 @@ async function created() {
     this.metaData.tags = this.metaData.tags.split(',');
   }
   this.textContent = this.extractTextContent(fileContent);
-}
+} // created
 
+/**
+ * Remove text content and return an array of metadata
+ *
+ * @param fileContent - all blog file content
+ * @return - returns metaDAta array
+ */
 function extractMetaData(fileContent) {
   let firstIndex = fileContent.indexOf('---');
   let secondIndex = fileContent.indexOf('---', 2);
@@ -61,8 +78,14 @@ function extractMetaData(fileContent) {
   metaData = metaData.substring(imageIndex);
   let splitData = metaData.split('\n');
   return splitData;
-}
+} // extractMetaData
 
+/**
+ * Remove metaData and return blog Content
+ *
+ * @param fileContent - all blog file content
+ * @return - returns blog content
+ */
 function extractTextContent(fileContent) {
   let firstIndex = fileContent.indexOf('---');
   let secondIndex = fileContent.indexOf('---', 2);
@@ -71,7 +94,7 @@ function extractTextContent(fileContent) {
   } else {
     return fileContent.substring(secondIndex + 3);
   }
-}
+} // extractTextContent
 
 export default {
   data() {

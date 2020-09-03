@@ -92,54 +92,67 @@
 </template>
 
 <script>
-import _ from 'lodash';
+// import _ from 'lodash';
 import { isEmpty, monthDayYearFormat } from '@/utils/utils';
 import DeleteModal from '@/components/modals/DeleteModal.vue';
 import moment from 'moment-timezone';
 import api from '@/shared/api.js';
 
+/**
+ * initial setup
+ */
 async function created() {
   window.EventBus.$on('canceled-delete-expense', () => {
     this.deleting = false;
     this.midAction = false;
   });
   window.EventBus.$on('confirm-delete-expense', this.deleteBlogPost);
-}
+} // created
 
 /**
- * Checks to see if an employee is expanded in the datatable.
+ * Get path to post editor for edit
  *
- * @param item - employee to check
- * @return boolean - the employee is expanded
+ * @param item - selected item from table
+ * @return - returns blog path to post editor to edit
  */
-function isFocus(item) {
-  let expanded = !_.isEmpty(this.expanded) && item.postId == this.expanded[0].postId;
-  return expanded || false;
-} // isFocus
-
-function onSelect(item) {
-  this.$emit('edit', item);
-}
-
 function blogPath(item) {
   if (item.blogNumber) {
     return `/postEditor/${item.blogNumber}`; //this is legacy set up
   }
   return `/postEditor/${item.id}`;
-}
+} // blogPath
 
+/**
+ * Get path to post previewer
+ *
+ * @param item - selected item from table
+ * @return - returns blog path to post preview
+ */
 function previewPath(item) {
   return `/blogPreview/${item.blogNumber}`;
 }
 
+/**
+ * redirect to post editor for edit
+ *
+ * @param item - selected item from table
+ */
 function handleEdit(item) {
   this.$router.push(blogPath(item));
 } //handleEdit
 
+/**
+ * redirect to post preview
+ *
+ * @param item - selected item from table
+ */
 function handlePreview(item) {
   this.$router.push(previewPath(item));
-}
+} // handle preview
 
+/**
+ * delete blog post and files
+ */
 async function deleteBlogPost() {
   if (this.propBlogPost.id) {
     // blogPost is selected
@@ -160,14 +173,7 @@ async function deleteBlogPost() {
     this.deleting = false;
     this.midAction = false;
   }
-}
-
-// /**
-//  * Checks to see if the user is an admin. Returns true if the user's role is an admin, otherwise returns false.
-//  */
-// function userIsBlogger() {
-//   return true;
-// } // userIsBlogger
+} // deletedBlogPost
 
 export default {
   props: ['posts', 'model'],
@@ -176,11 +182,7 @@ export default {
   },
   created,
   methods: {
-    // clickedRow,
     isEmpty,
-    isFocus,
-    // userIsBlogger,
-    onSelect,
     blogPath,
     handleEdit,
     handlePreview,

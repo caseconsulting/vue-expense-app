@@ -19,11 +19,10 @@
     </v-snackbar>
     <!-- title -->
     <v-row>
-      <v-flex>Some title thing</v-flex>
-    </v-row>
-    <v-row>
       <v-col cols="12">
-        <v-btn class="mb-5" to="/postEditor/0"> Create a New Blog Post<v-icon class="pl-2">person_add</v-icon> </v-btn>
+        <!-- new blog post button -->
+        <v-btn class="mb-5" to="/postEditor/0"> Create a New Blog Post</v-btn>
+        <!-- Post table -->
         <post-table
           :posts="posts"
           v-on:edit="onSelect"
@@ -31,10 +30,8 @@
           v-on:successfulDelete="successfulDelete"
         ></post-table>
       </v-col>
-      <!-- <v-col cols="12" md="6" lg="6">
-        <post-editor :blogPost="blogPost"></post-editor>
-      </v-col> -->
     </v-row>
+    <!-- Rekognition and comprehend -->
     <v-row>
       <v-file-input
         style="width: 50px;"
@@ -56,24 +53,13 @@
 </template>
 <script>
 import api from '@/shared/api.js';
-//import moment from 'moment';
 import PostTable from '@/components/PostTable.vue';
-// import PostEditor from '@/components/PostEditor.vue';
 import _ from 'lodash';
 import { getRole } from '@/utils/auth';
 
 function acceptedFileTypes() {
   return ['jpg', 'png'].join(',');
 } // acceptedFileTypes
-
-/**
- * Checks if the employee is a user. Returns true if the employee is a user, otherwise returns false.
- *
- * @return boolean - employee is a user
- */
-function isUser() {
-  return this.employeeRole === 'user';
-} // isUser
 
 /**
  * Checks if the employee is an admin. Returns true if the employee is an admin, otherwise returns false.
@@ -84,6 +70,9 @@ function isAdmin() {
   return this.employeeRole === 'admin';
 } // isAdmin
 
+/**
+ * Initial Setup
+ */
 async function created() {
   this.posts = await api.getItems(api.BLOG);
   this.employeeRole = getRole();
@@ -115,7 +104,7 @@ async function created() {
     });
     this.posts = _.compact(this.posts);
   }
-}
+} // created
 
 /**
  * Store the attributes of a selected blog post.
@@ -159,13 +148,16 @@ function splitInputText() {
   }
 }
 
+/**
+ * refresh blogTable and give successful status message
+ */
 async function successfulDelete() {
   this.posts = await api.getItems(api.BLOG);
 
   this.$set(this.status, 'statusType', 'SUCCESS');
   this.$set(this.status, 'statusMessage', 'Item was successfully deleted!');
   this.$set(this.status, 'color', 'green');
-}
+} // successfulDelete
 
 /**
  * Set and display an error action status in the snackbar.
@@ -187,6 +179,11 @@ function clearStatus() {
   this.$set(this.status, 'color', '');
 } // clearStatus
 
+/**
+ * display error message
+ *
+ * @param message - message to display in snackbar
+ */
 function failedDelete(message) {
   this.displayError(message);
 }
@@ -219,7 +216,6 @@ export default {
     splitInputText,
     uploadToS3,
     onSelect,
-    isUser,
     isAdmin,
     successfulDelete,
     displayError,
