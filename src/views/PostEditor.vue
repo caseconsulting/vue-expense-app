@@ -152,7 +152,7 @@ async function created() {
 
 async function checkSubmit() {
   //check to see if there is any data
-  if (!isEmpty(this.editorData) && this.$refs.form.validate()) {
+  if (this.$refs.form.validate() && !isEmpty(this.editorData)) {
     console.log(this.editorData);
     //TODO: first send data through moderation.
     //begin creating the object
@@ -196,6 +196,7 @@ async function checkSubmit() {
     }
   } else {
     //nothing to submit
+    this.displayError('Blog could not be submitted');
     console.log('nothing in the box');
   }
 } // checkSubmit
