@@ -380,7 +380,7 @@ export default {
             'link',
             'imageUpload',
             'mediaEmbed'
-          ] 
+          ]
         }, //plugins used in toolbar
         heading: {
           options: [
@@ -446,7 +446,7 @@ export default {
       editing: false, //whether we are creating or editing a blog post
       categories: ['Case News', 'Case Cares'],
       mainPictureFile: null, //file for picture
-      status: { //
+      status: {
         statusType: undefined,
         statusMessage: '',
         color: ''
