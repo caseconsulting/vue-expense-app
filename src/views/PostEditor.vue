@@ -31,10 +31,11 @@
         style="padding-top: 0px; padding-bottom: 0px;"
         @fileSelected="setFile"
         :passedRules="mainPictureRules"
-        :mainPicture="model.mainPicture"
         :customFileTypes="customFileTypes"
+        :receipt="model.mainPicture"
         customLabel="Select Main Picture"
       ></file-upload>
+      <p v-if="editing">Current Main Picture: {{ mainPictureFile.name }}</p>
       <!-- Description -->
       <v-text-field
         v-model="model.description"
@@ -128,18 +129,29 @@ async function created() {
   this.user = await api.getUser();
 
   this.posts = await api.getItems(api.BLOG);
+  console.log(this.posts);
+  // if editing
   if (this.$route.params.id != 0) {
     this.model = _.find(this.posts, (post) => {
       return post.id == this.$route.params.id;
     });
+    console.log(this.model);
     if (!this.model) {
       this.model = _.find(this.posts, (post) => {
         return post.blogNumber == this.$route.params.id;
       });
     }
+    console.log(this.model);
     let blogFile = await api.getBlogFile(this.model.authorId, this.model.id);
-    this.mainPictureFile = await api.getBlogFile(this.model.authorId, this.model.id, this.model.mainPicture);
+    let pictureObj = await api.getPictureFile(this.model.authorId, this.model.id, this.model.mainPicture);
+    this.mainPictureFile = pictureObj.file;
+    this.mainPictureFile.name = this.model.mainPicture;
+    console.log(this.mainPictureFile.name);
+    console.log(this.model);
     blogFile = removeMetaData(blogFile);
+    this.$set(this.model, 'mainPicture', pictureObj.file.name);
+    console.log(this.model.mainPicture);
+    console.log(pictureObj);
     this.editorData = blogFile;
     this.editing = true;
   }

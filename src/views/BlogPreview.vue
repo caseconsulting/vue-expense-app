@@ -48,7 +48,7 @@ async function created() {
   this.model = blogPost;
   let fileContent = await api.getBlogFile(this.model.authorId, this.model.id);
   let pictureObject = await api.getPictureFile(this.model.authorId, this.model.id, this.model.mainPicture);
-  this.model.mainPicture = `data:${pictureObject.type};base64,` + pictureObject.data;
+  this.model.mainPicture = `data:${pictureObject.file.ContentType};base64,` + pictureObject.data;
   let metaData = this.extractMetaData(fileContent);
   _.forEach(metaData, (metaDatum) => {
     let data = metaDatum.split(': ');
