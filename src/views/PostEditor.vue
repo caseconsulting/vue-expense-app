@@ -18,7 +18,7 @@
       </v-btn>
     </v-snackbar>
     <!-- Cancel Button -->
-    <v-btn to="/blog" color="white" class="ma-2"> <icon class="mr-1" name="ban"></icon>Cancel </v-btn>
+    <v-btn to="/blog" color="white" class="ma-2"> <icon class="mr-1" name="ban"></icon>Cancel</v-btn>
     <!-- Submit Button -->
     <v-btn outlined @click="confirming = true" color="success" class="ma-2">
       <icon class="mr-1" name="save"></icon>Submit</v-btn
@@ -64,6 +64,7 @@
       ></v-autocomplete>
     </v-form>
     <!-- CKEditor -->
+    <p v-if="error" class="editorError">Editor must contain data before submission</p>
     <div cols="12">
       <ckeditor :editor="editor" v-model="editorData" :config="editorConfig"></ckeditor>
     </div>
@@ -71,7 +72,7 @@
     <v-btn to="/blog" color="white" class="ma-2"> <icon class="mr-1" name="ban"></icon>Cancel </v-btn>
 
     <!-- Submit Button -->
-    <v-btn outlined @click="checkSubmit" color="success" class="ma-2">
+    <v-btn outlined @click="confirming = true" color="success" class="ma-2">
       <icon class="mr-1" name="save"></icon>Submit</v-btn
     >
     <!-- Submission check -->
@@ -119,6 +120,10 @@ import Font from '@ckeditor/ckeditor5-font/src/font';
 async function created() {
   window.EventBus.$on('confirmed', () => {
     this.confirming = false;
+    if (!this.hasTriedSubmitting && (this.editorData == null || this.editorData == '')) {
+      this.error = true;
+    }
+    this.hasTriedSubmitting = true;
     this.checkSubmit();
   });
 
@@ -129,29 +134,27 @@ async function created() {
   this.user = await api.getUser();
 
   this.posts = await api.getItems(api.BLOG);
-  console.log(this.posts);
   // if editing
   if (this.$route.params.id != 0) {
+    console.log('hmmmmm');
     this.model = _.find(this.posts, (post) => {
       return post.id == this.$route.params.id;
     });
-    console.log(this.model);
+
     if (!this.model) {
       this.model = _.find(this.posts, (post) => {
         return post.blogNumber == this.$route.params.id;
       });
     }
-    console.log(this.model);
+
     let blogFile = await api.getBlogFile(this.model.authorId, this.model.id);
     let pictureObj = await api.getPictureFile(this.model.authorId, this.model.id, this.model.mainPicture);
     this.mainPictureFile = pictureObj.file;
     this.mainPictureFile.name = this.model.mainPicture;
-    console.log(this.mainPictureFile.name);
-    console.log(this.model);
+
     blogFile = removeMetaData(blogFile);
     this.$set(this.model, 'mainPicture', pictureObj.file.name);
-    console.log(this.model.mainPicture);
-    console.log(pictureObj);
+
     this.editorData = blogFile;
     this.editing = true;
   }
@@ -167,7 +170,9 @@ async function created() {
  */
 async function checkSubmit() {
   //check to see if there is any data
+  console.log('in check submit');
   if (this.$refs.form.validate() && !isEmpty(this.editorData)) {
+    console.log('???????????????');
     //begin creating the object
     let blogPost;
     let newDate = moment().format(IsoFormat);
@@ -191,14 +196,19 @@ async function checkSubmit() {
       //generate md file and upload it to s3
       let file = new Blob([metaData, this.editorData], { type: 'text/markdown' });
       //upload file
+      console.log('submitted post');
       let fileSubmit = await api.createBlogFile(blogPost, file, blogPost.fileName);
       //upload picture
+      console.log('before picture');
       let pictureSubmit = await api.createBlogFile(blogPost, this.mainPictureFile, blogPost.mainPicture);
       if (fileSubmit.code) {
+        console.log('hmmmmmmmmmm');
         this.displayError('Error submitting blog file');
       } else if (pictureSubmit.code) {
+        console.log('hm2');
         this.displayError('Error submitting Main Picture');
       } else {
+        console.log('uhhh');
         this.displaySuccess('Successfully submitted blogPost');
         this.clearForm();
       }
@@ -253,7 +263,9 @@ function removeMetaData(post) {
  */
 function clearForm() {
   this.$set(this.model, 'id', '');
+  console.log('xxxxxxx');
   this.$refs.form.reset();
+  console.log('yyyyyyy');
   this.$set(this.model, 'blogNumber', 0);
   this.$set(this.model, 'authorId', '');
   this.$set(this.model, 'createDate', '');
@@ -261,10 +273,13 @@ function clearForm() {
   this.$set(this.model, 'fileName', '');
   this.$set(this.model, 'tags', []);
   this.editorData = '';
+  console.log(this.model);
   if (this.editing) {
     this.editing = false;
     this.$router.push('/postEditor/0');
   }
+  this.hasTriedSubmitting = false;
+  console.log(this.model);
 } // clearForm
 
 /**
@@ -327,7 +342,6 @@ async function setFile(file) {
   } else {
     this.mainPictureFile = null;
     this.$set(this.model, 'mainPicture', null);
-    this.model = null;
   }
 } // setFile
 
@@ -439,7 +453,7 @@ export default {
         (v) => !isEmpty(v) || 'Description is a required field',
         (v) => (!isEmpty(v) && v.replace(/\s/g, '').length > 0) || 'Description is a required field'
       ], // rules for description
-      mainPictureRules: [(v) => !isEmpty(v) || 'mainPicture is required'], // rules for mainPicture
+      mainPictureRules: [(v) => !isEmpty(v) || this.editing || 'mainPicture is required'], // rules for mainPicture
       model: {
         id: '', //UUID for blog
         blogNumber: 0, //id for blog so we dont have to use huge id for things
@@ -468,7 +482,9 @@ export default {
         'image/gif', //.gif
         'image/jpeg', //.jpeg
         'image/png' //.png
-      ]
+      ],
+      error: false,
+      hasTriedSubmitting: false
     };
   },
   methods: {
@@ -480,6 +496,21 @@ export default {
     clearStatus,
     displayError,
     displaySuccess
+  },
+  watch: {
+    editorData: function () {
+      if (this.hasTriedSubmitting) {
+        if (this.editorData == null || this.editorData == '') {
+          this.error = true;
+        } else {
+          this.error = false;
+        }
+      }
+    },
+    model: function () {
+      console.log('changed');
+      console.log(this.model);
+    }
   }
 };
 </script>
@@ -488,5 +519,10 @@ export default {
 .ck-editor__editable_inline {
   /* Height of editor text box */
   min-height: 500px;
+}
+
+.editorError {
+  color: #FF5252 !important;
+  margin-top: 10px;
 }
 </style>
