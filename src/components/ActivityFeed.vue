@@ -41,7 +41,7 @@
                         "
                       >
                         <template v-slot:activator="{ on }">
-                          <v-btn v-on="on" text icon :href="item.campfire" target="blank">
+                          <v-btn v-on="on" text icon :href="getURL(item)" target="blank">
                             <icon class="white--text" :name="item.icon"></icon>
                           </v-btn>
                         </template>
@@ -91,6 +91,8 @@
 </template>
 
 <script>
+import _ from 'lodash';
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                     COMPUTED                     |
@@ -117,6 +119,32 @@ function itemHeight() {
   }
 } // itemHeight
 
+// |--------------------------------------------------|
+// |                                                  |
+// |                     METHODS                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * Gets the URL to basecamp for an activity feed event.
+ *
+ * @param item - activity feed event
+ * @return String - basecamp url
+ */
+function getURL(item) {
+  if (!_.isNil(item.newCampfire)) {
+    return item.newCampfire;
+  } else if (!_.isNil(item.congratulateCampfire)) {
+    return item.congratulateCampfire;
+  } else if (!_.isNil(item.birthdayCampfire)) {
+    return item.birthdayCampfire;
+  } else if (!_.isNil(item.campfire)) {
+    return item.campfire;
+  } else if (!_.isNil(item.eventScheduled)) {
+    return item.eventScheduled;
+  }
+} // getURL
+
 export default {
   data() {
     return {
@@ -125,6 +153,9 @@ export default {
   },
   computed: {
     itemHeight
+  },
+  methods: {
+    getURL
   },
   props: ['events', 'loading']
 };
