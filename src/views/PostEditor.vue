@@ -35,7 +35,7 @@
         :receipt="model.mainPicture"
         customLabel="Select Main Picture"
       ></file-upload>
-      <p v-if="editing">Current Main Picture: {{ mainPictureFile.name }}</p>
+      <p v-if="editing">Current Main Picture: {{ model.mainPicture }}</p>
       <!-- Description -->
       <v-text-field
         v-model="model.description"
@@ -136,7 +136,6 @@ async function created() {
   this.posts = await api.getItems(api.BLOG);
   // if editing
   if (this.$route.params.id != 0) {
-    console.log('hmmmmm');
     this.model = _.find(this.posts, (post) => {
       return post.id == this.$route.params.id;
     });
@@ -148,12 +147,12 @@ async function created() {
     }
 
     let blogFile = await api.getBlogFile(this.model.authorId, this.model.id);
-    let pictureObj = await api.getPictureFile(this.model.authorId, this.model.id, this.model.mainPicture);
-    this.mainPictureFile = pictureObj.file;
-    this.mainPictureFile.name = this.model.mainPicture;
+    //let pictureObj = await api.getPictureFile(this.model.authorId, this.model.id, this.model.mainPicture);
+    //this.mainPictureFile = pictureObj.file;
+    //this.mainPictureFile.name = this.model.mainPicture;
 
     blogFile = removeMetaData(blogFile);
-    this.$set(this.model, 'mainPicture', pictureObj.file.name);
+    //this.$set(this.model, 'mainPicture', pictureObj.file.name);
 
     this.editorData = blogFile;
     this.editing = true;
@@ -170,9 +169,7 @@ async function created() {
  */
 async function checkSubmit() {
   //check to see if there is any data
-  console.log('in check submit');
   if (this.$refs.form.validate() && !isEmpty(this.editorData)) {
-    console.log('???????????????');
     //begin creating the object
     let blogPost;
     let newDate = moment().format(IsoFormat);
@@ -196,19 +193,17 @@ async function checkSubmit() {
       //generate md file and upload it to s3
       let file = new Blob([metaData, this.editorData], { type: 'text/markdown' });
       //upload file
-      console.log('submitted post');
       let fileSubmit = await api.createBlogFile(blogPost, file, blogPost.fileName);
       //upload picture
-      console.log('before picture');
-      let pictureSubmit = await api.createBlogFile(blogPost, this.mainPictureFile, blogPost.mainPicture);
+      if (this.mainPictureFile != null) {
+        let pictureSubmit = await api.createBlogFile(blogPost, this.mainPictureFile, blogPost.mainPicture);
+        if (pictureSubmit.code) {
+          this.displayError('Error submitting picture');
+        }
+      }
       if (fileSubmit.code) {
-        console.log('hmmmmmmmmmm');
         this.displayError('Error submitting blog file');
-      } else if (pictureSubmit.code) {
-        console.log('hm2');
-        this.displayError('Error submitting Main Picture');
       } else {
-        console.log('uhhh');
         this.displaySuccess('Successfully submitted blogPost');
         this.clearForm();
       }
@@ -263,9 +258,7 @@ function removeMetaData(post) {
  */
 function clearForm() {
   this.$set(this.model, 'id', '');
-  console.log('xxxxxxx');
   this.$refs.form.reset();
-  console.log('yyyyyyy');
   this.$set(this.model, 'blogNumber', 0);
   this.$set(this.model, 'authorId', '');
   this.$set(this.model, 'createDate', '');
@@ -273,13 +266,11 @@ function clearForm() {
   this.$set(this.model, 'fileName', '');
   this.$set(this.model, 'tags', []);
   this.editorData = '';
-  console.log(this.model);
   if (this.editing) {
     this.editing = false;
     this.$router.push('/postEditor/0');
   }
   this.hasTriedSubmitting = false;
-  console.log(this.model);
 } // clearForm
 
 /**
@@ -354,6 +345,10 @@ export default {
     FormSubmissionConfirmation
   },
   created,
+  beforeDestroy() {
+    window.EventBus.$off('confirmed');
+    window.EventBus.$off('canceled');
+  },
   data() {
     return {
       editor: ClassicEditor,
@@ -506,10 +501,6 @@ export default {
           this.error = false;
         }
       }
-    },
-    model: function () {
-      console.log('changed');
-      console.log(this.model);
     }
   }
 };
@@ -522,7 +513,7 @@ export default {
 }
 
 .editorError {
-  color: #FF5252 !important;
+  color: #ff5252 !important;
   margin-top: 10px;
 }
 </style>

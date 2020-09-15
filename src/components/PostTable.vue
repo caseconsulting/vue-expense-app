@@ -84,7 +84,7 @@
           </v-data-table>
           <!-- End employee datatable -->
           <br />
-          <delete-modal :activate="deleting" :type="'expense'"></delete-modal>
+          <delete-modal :activate="deleting" :type="'BlogPost'"></delete-modal>
         </v-container>
       </v-card>
     </v-col>
@@ -102,11 +102,11 @@ import api from '@/shared/api.js';
  * initial setup
  */
 async function created() {
-  window.EventBus.$on('canceled-delete-expense', () => {
+  window.EventBus.$on('canceled-delete-BlogPost', () => {
     this.deleting = false;
     this.midAction = false;
   });
-  window.EventBus.$on('confirm-delete-expense', this.deleteBlogPost);
+  window.EventBus.$on('confirm-delete-BlogPost', this.deleteBlogPost);
 } // created
 
 /**
@@ -162,6 +162,7 @@ async function deleteBlogPost() {
       this.$emit('successfulDelete');
       // delete attachment from s3 if deleted expense has a receipt
       let deletedBlogFile = await api.deleteBlogFile(deleted);
+
       if (deletedBlogFile.code) {
         // emit alert if error deleting file
         this.$emit('displayError', `Error Deleting Receipt: ${deletedBlogFile.message}`);
@@ -181,6 +182,10 @@ export default {
     DeleteModal
   },
   created,
+  beforeDestroy() {
+    window.EventBus.$off('canceled-delete-BlogPost');
+    window.EventBus.$off('confirm-delete-BlogPost');
+  },
   methods: {
     isEmpty,
     blogPath,

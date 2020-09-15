@@ -234,7 +234,7 @@ function deleteAttachment(expense) {
 function deleteBlogFile(blogPost) {
   return execute(
     'delete',
-    `${BLOG_FILE}/${blogPost.authorId}/${blogPost.id}/${blogPost.fileName}/${blogPost.mainPicture}}`
+    `${BLOG_FILE}/${blogPost.authorId}/${blogPost.id}/${blogPost.fileName}/${blogPost.mainPicture}`
   );
 }
 
