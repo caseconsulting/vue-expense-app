@@ -39,7 +39,9 @@
 
         <!-- Purchase Date -->
         <template v-slot:item.purchaseDate="{ item }">
-          <p :class="{ failed: item.failed }" style="margin-bottom: 0px;">{{ item.purchaseDate | dateFormat }}</p>
+          <p :class="{ failed: item.failed }" style="margin-bottom: 0px;">
+            {{ item.purchaseDate | monthDayYearFormat }}
+          </p>
         </template>
 
         <!-- Description -->
@@ -61,7 +63,7 @@
 </template>
 
 <script>
-import moment from 'moment';
+import { moneyValue, monthDayYearFormat } from '@/utils/utils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -128,33 +130,18 @@ export default {
           width: '4px',
           sortable: false
         }
-      ],
-      sortBy: 'purchaseDate',
-      sortDesc: false
+      ], // data table headers
+      sortBy: 'purchaseDate', // sort data table by
+      sortDesc: false // sort data table in descending order
     };
   },
   filters: {
-    dateFormat: (value) => {
-      if (value) {
-        // date exists
-        return moment(value).format('MMM Do, YYYY');
-      } else {
-        // date does not exist
-        return '';
-      }
-    },
     descripFormat: (val) => {
       // split strings that exceed 250 characters with eclipses
       return val.length > 250 ? val.substring(0, 250) + '...' : val;
     },
-    moneyValue: (value) => {
-      return `${new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: 'USD',
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
-      }).format(value)}`;
-    }
+    moneyValue,
+    monthDayYearFormat
   },
   methods: {
     expenseClicked,
@@ -165,7 +152,7 @@ export default {
 };
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 @import 'src/assets/styles/styles.scss';
 
 .failed {

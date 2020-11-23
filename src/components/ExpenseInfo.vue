@@ -7,10 +7,10 @@
         <p class="expense_info"><span>Employee:</span> {{ expense.employeeName }}</p>
         <p class="expense_info"><span>Budget:</span> {{ expense.budgetName }}</p>
         <p class="expense_info"><span>Cost:</span> {{ expense.cost | moneyValue }}</p>
-        <p class="expense_info"><span>Purchased On:</span> {{ expense.purchaseDate | dateFormat }}</p>
+        <p class="expense_info"><span>Purchased On:</span> {{ expense.purchaseDate | monthDayYearFormat }}</p>
         <p class="expense_info" v-if="!isEmpty(expense.reimbursedDate)">
           <span>Reimbursed On:</span>
-          {{ expense.reimbursedDate | dateFormat }}
+          {{ expense.reimbursedDate | monthDayYearFormat }}
         </p>
         <p class="expense_info" v-if="!isEmpty(expense.note)"><span>Notes:</span> {{ expense.note }}</p>
         <attachment :expense="expense" :mode="'adminExpenseInfo'" class="expense_info"></attachment>
@@ -21,8 +21,7 @@
 
 <script>
 import Attachment from '@/components/Attachment.vue';
-import moment from 'moment';
-import _ from 'lodash';
+import { isEmpty, moneyValue, monthDayYearFormat } from '@/utils/utils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -42,16 +41,6 @@ function displayExpense(clickedExpense) {
     this.expense = clickedExpense;
   }
 } // displayExpense
-
-/**
- * Checks if a value is empty. Returns true if the value is null or an empty/blank string.
- *
- * @param value - value to check
- * @return boolean - value is empty
- */
-function isEmpty(value) {
-  return _.isNil(value) || (_.isString(value) && value.trim().length === 0);
-} // isEmpty
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -79,7 +68,7 @@ export default {
   created,
   data() {
     return {
-      expense: undefined
+      expense: undefined // expense info
     };
   },
   methods: {
@@ -87,26 +76,13 @@ export default {
     isEmpty
   },
   filters: {
-    dateFormat: (value) => {
-      if (!isEmpty(value)) {
-        return moment(value).format('MMM Do, YYYY');
-      } else {
-        return '';
-      }
-    },
-    moneyValue: (value) => {
-      return `${new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: 'USD',
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
-      }).format(value)}`;
-    }
+    monthDayYearFormat,
+    moneyValue
   }
 };
 </script>
 
-<style>
+<style scoped>
 .color-change-2x {
   -webkit-animation: color-change-2x 10s linear infinite alternate both;
   animation: color-change-2x 10s linear infinite alternate both;

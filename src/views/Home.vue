@@ -66,12 +66,14 @@
 
 <script>
 import api from '@/shared/api.js';
+import ActivityFeed from '@/components/ActivityFeed';
 import AvailableBudgets from '@/components/AvailableBudgets.vue';
 import moment from 'moment-timezone';
-import ActivityFeed from '@/components/ActivityFeed';
 import TwitterFeed from '@/components/TwitterFeed';
 import TSheetsData from '@/components/TSheetsData.vue';
 import _ from 'lodash';
+import { asyncForEach, isEmpty, isFullTime } from '@/utils/utils';
+
 const IsoFormat = 'YYYY-MM-DD';
 
 // |--------------------------------------------------|
@@ -180,18 +182,6 @@ function addOneSecondToActualTimeEverySecond() {
 } // addOneSecondToActualTimeEverySecond
 
 /**
- * Async function to loop an array.
- *
- * @param array - Array of elements to iterate over
- * @param callback - callback function
- */
-async function asyncForEach(array, callback) {
-  for (let index = 0; index < array.length; index++) {
-    await callback(array[index], index, array);
-  }
-} // asyncForEach
-
-/**
  * Clear the action status that is displayed in the snackbar.
  */
 function clearStatus() {
@@ -232,6 +222,7 @@ async function createEvents() {
         if (anniversary.isSame(hireDate, 'day')) {
           event.text = a.firstName + ' ' + a.lastName + ' has joined the Case Consulting team!'; //new hire message
           event.icon = 'user-plus';
+          event.newCampfire = 'https://3.basecamp.com/3097063/buckets/171415/chats/29039726';
         } else {
           if (anniversary.diff(hireDate, 'year') == 1) {
             event.text = a.firstName + ' ' + a.lastName + ' is celebrating 1 year at Case Consulting!';
@@ -245,9 +236,9 @@ async function createEvents() {
               ' years at Case Consulting!';
           }
           event.icon = 'glass-cheers';
+          event.congratulateCampfire = 'https://3.basecamp.com/3097063/buckets/171415/chats/29039726';
         }
         event.daysFromToday = now.startOf('day').diff(anniversary.startOf('day'), 'days');
-
         event.color = '#bc3825';
         if (this.textMaxLength < event.text.length) {
           event.truncatedText = _.truncate(event.text, { length: this.textMaxLength });
@@ -260,6 +251,7 @@ async function createEvents() {
       return null;
     }
   });
+
   // generate birthdays
   let birthdays = _.map(this.employees, (b) => {
     if (b.birthdayFeed && !this.isEmpty(b.birthday) && b.workStatus != 0) {
@@ -288,6 +280,7 @@ async function createEvents() {
       event.icon = 'birthday-cake';
       event.color = 'orange';
       event.daysFromToday = now.startOf('day').diff(birthday.startOf('day'), 'days');
+      event.birthdayCampfire = 'https://3.basecamp.com/3097063/buckets/171415/chats/29039726';
       if (this.textMaxLength < event.text.length) {
         event.truncatedText = _.truncate(event.text, { length: this.textMaxLength });
       }
@@ -295,6 +288,7 @@ async function createEvents() {
     }
     return null;
   });
+
   // generate expenses
   let expenses = _.map(this.aggregatedExpenses, (a) => {
     if (!this.isEmpty(a.showOnFeed) && a.showOnFeed) {
@@ -303,14 +297,21 @@ async function createEvents() {
       let reimbursedDate = moment(a.reimbursedDate, 'YYYY-MM-DD');
       let event = {};
       event.date = getEventDateMessage(reimbursedDate);
-      event.color = 'green';
       if (!this.isEmpty(a.url)) {
         event.link = a.url;
       }
       event.text = `${a.firstName} ${a.lastName} used their ${a.budgetName} budget on ${a.description}`;
-      event.icon = 'dollar-sign';
       event.daysFromToday = now.startOf('day').diff(reimbursedDate.startOf('day'), 'days');
-      if (a.budgetName == 'High Five') {
+      if (a.recipient) {
+        event.congratulateCampfire = a.campfire;
+        event.icon = 'thumbs-up';
+        event.color = 'purple';
+      } else {
+        event.campfire = a.campfire;
+        event.icon = 'dollar-sign';
+        event.color = 'green';
+      }
+      if (!this.isEmpty(a.recipient)) {
         event.text = `${a.description}: ${a.note}`;
       }
       if (this.textMaxLength < event.text.length) {
@@ -322,6 +323,7 @@ async function createEvents() {
       return null;
     }
   });
+
   //generate schedules
   let schedules = _.map(this.scheduleEntries, (a) => {
     let now = moment();
@@ -344,6 +346,7 @@ async function createEvents() {
       return null;
     }
     event.link = a.app_url;
+    event.eventScheduled = a.app_url;
     event.color = '#1a73e8';
     if (this.textMaxLength < event.text.length) {
       event.truncatedText = _.truncate(event.text, { length: this.textMaxLength });
@@ -375,14 +378,14 @@ function getEventDateMessage(date) {
   } else {
     return date.format('ll');
   }
-}
+} // getEventDateMessage
 
 /**
  * Calls the API to get tweets from the Twitter account.
  */
 async function getTweets() {
   this.tweets = await api.getCaseTimeline();
-}
+} // getTweets
 
 /**
  * Set and display an error action status in the snackbar.
@@ -394,6 +397,27 @@ async function displayError(err) {
   this.$set(this.status, 'statusMessage', err);
   this.$set(this.status, 'color', 'red');
 } // displayError
+
+/**
+ * Filters out events that have the following categories:
+ * Lodging, Meals, Travel, Transportation
+ *
+ * @param expenses aggregate expenses
+ * @return array of filtered out expenses by category
+ */
+function filterOutExpensesByCategory(expenses) {
+  return _.filter(expenses, (expense) => {
+    if (
+      expense.category != 'Lodging' &&
+      expense.category != 'Meals' &&
+      expense.category != 'Travel' &&
+      expense.category != 'Transportation'
+    ) {
+      return true;
+    }
+    return false;
+  });
+} // filterOutExpensesByCategory
 
 /**
  * Gets the current active anniversary budget year starting date in isoformat.
@@ -410,27 +434,6 @@ function getCurrentBudgetYear() {
   }
   return currentBudgetYear.format(IsoFormat);
 } // getCurrentBudgetYear
-
-/**
- * Checks if a value is empty. Returns true if the value is null or an empty/blank string.
- *
- * @param value - value to check
- * @return boolean - value is empty
- */
-function isEmpty(value) {
-  return _.isNil(value) || (_.isString(value) && value.trim().length === 0);
-} // isEmpty
-
-/**
- * Checks if an employee is full time. Returns true if the employee is full time with a work status of 100, otherwise
- * returns false.
- *
- * @param employee - employee to check
- * @return boolean - employee is full time
- */
-function isFullTime(employee) {
-  return employee.workStatus == 100;
-} // isFullTime
 
 /**
  * Refresh and sets employee information.
@@ -467,28 +470,6 @@ async function showSuccessfulSubmit() {
 async function updateData() {
   this.showSuccessfulSubmit();
 } // updateData
-
-/**
- * Filters out events that have the following categories:
- * Lodging, Meals, Travel, Transportation
- *
- * @param expenses aggregate expenses
- * @return array of filtered out expenses by category
- *
- */
-function filterOutExpensesByCategory(expenses) {
-  return _.filter(expenses, (expense) => {
-    if (
-      expense.category != 'Lodging' &&
-      expense.category != 'Meals' &&
-      expense.category != 'Travel' &&
-      expense.category != 'Transportation'
-    ) {
-      return true;
-    }
-    return false;
-  });
-}
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -579,7 +560,8 @@ export default {
   }
 };
 </script>
-<style>
+
+<style scoped>
 .links {
   padding-bottom: 16px;
   text-align: center;

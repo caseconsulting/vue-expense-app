@@ -1,17 +1,18 @@
 <template>
   <div>
-    <!-- title -->
+    <!-- Title -->
     <v-card class="white--text" color="#bc3825">
       <v-card-title class="header_style">
         <h3>Activity Feed</h3>
       </v-card-title>
     </v-card>
-    <!-- loading bar -->
     <v-card class="overflow-y-auto" max-height="850px">
+      <!-- Loading Bar -->
       <div v-if="this.loading" class="py-4">
         <v-progress-linear :indeterminate="true"></v-progress-linear>
       </div>
-      <!-- timeline -->
+
+      <!-- Timeline -->
       <v-timeline v-else dense class="pt-0">
         <v-virtual-scroll :items="events" :item-height="this.itemHeight" height="850" bench="2">
           <template v-slot="{ item }">
@@ -27,10 +28,37 @@
               <template v-slot:activator="{ on, attrs }">
                 <span v-bind="attrs" v-on="on">
                   <v-timeline-item :color="item.color" :key="item.name">
+                    <!-- Icon -->
                     <template v-slot:icon v-if="item.icon">
-                      <icon class="white--text" :name="item.icon"></icon>
+                      <v-tooltip
+                        bottom
+                        v-if="
+                          item.newCampfire ||
+                          item.congratulateCampfire ||
+                          item.birthdayCampfire ||
+                          item.campfire ||
+                          item.eventScheduled
+                        "
+                      >
+                        <template v-slot:activator="{ on }">
+                          <v-btn v-on="on" text icon :href="getURL(item)" target="blank">
+                            <icon class="white--text" :name="item.icon"></icon>
+                          </v-btn>
+                        </template>
+                        <!-- Icon Hover Text -->
+                        <span v-if="item.newCampfire">welcome to team</span>
+                        <span v-else-if="item.congratulateCampfire">congratulate</span>
+                        <span v-else-if="item.birthdayCampfire">say happy birthday</span>
+                        <span v-else-if="item.campfire">comment in campfire</span>
+                        <span v-else-if="item.eventScheduled">see event</span>
+                      </v-tooltip>
+
+                      <icon class="white--text" :name="item.icon" v-else></icon>
                     </template>
+                    <!-- End Icon -->
+
                     <h3>{{ item.date }}</h3>
+                    <!-- Event has a link -->
                     <v-list-item
                       class="ma-auto pa-auto activityFeedText"
                       v-if="item.link"
@@ -45,12 +73,14 @@
                         </v-col>
                       </v-row>
                     </v-list-item>
+                    <!-- Event does not have a link -->
                     <div class="px-4 activityFeedText" v-else>
                       {{ item.truncatedText ? item.truncatedText : item.text }}
                     </div>
                   </v-timeline-item>
                 </span>
               </template>
+              <!-- Expanded Event Description -->
               <span v-if="item.truncatedText">{{ item.text }}</span>
             </v-tooltip>
           </template>
@@ -61,8 +91,18 @@
 </template>
 
 <script>
+import _ from 'lodash';
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     COMPUTED                     |
+// |                                                  |
+// |--------------------------------------------------|
+
 /**
  * itemHeight - determines the height of each item in the activity feed.
+ *
+ * @return int - height for activity feed item
  */
 function itemHeight() {
   switch (this.$vuetify.breakpoint.name) {
@@ -78,6 +118,33 @@ function itemHeight() {
       return 100;
   }
 } // itemHeight
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     METHODS                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * Gets the URL to basecamp for an activity feed event.
+ *
+ * @param item - activity feed event
+ * @return String - basecamp url
+ */
+function getURL(item) {
+  if (!_.isNil(item.newCampfire)) {
+    return item.newCampfire;
+  } else if (!_.isNil(item.congratulateCampfire)) {
+    return item.congratulateCampfire;
+  } else if (!_.isNil(item.birthdayCampfire)) {
+    return item.birthdayCampfire;
+  } else if (!_.isNil(item.campfire)) {
+    return item.campfire;
+  } else if (!_.isNil(item.eventScheduled)) {
+    return item.eventScheduled;
+  }
+} // getURL
+
 export default {
   data() {
     return {
@@ -87,10 +154,14 @@ export default {
   computed: {
     itemHeight
   },
+  methods: {
+    getURL
+  },
   props: ['events', 'loading']
 };
 </script>
-<style lang="scss">
+
+<style lang="scss" scoped>
 .activityFeedText {
   font-weight: normal;
 }

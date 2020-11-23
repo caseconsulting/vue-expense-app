@@ -67,6 +67,8 @@
 </template>
 
 <script>
+import { moneyValue } from '@/utils/utils';
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                     METHODS                      |
@@ -147,14 +149,7 @@ function noRemaining(budget) {
 
 export default {
   filters: {
-    moneyValue: (value) => {
-      return `${new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: 'USD',
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
-      }).format(value)}`;
-    }
+    moneyValue
   },
   methods: {
     calcRemaining,
@@ -168,7 +163,7 @@ export default {
 };
 </script>
 
-<style>
+<style scoped>
 .bold {
   font-weight: 900;
 }

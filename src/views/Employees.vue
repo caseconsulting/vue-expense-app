@@ -103,6 +103,21 @@
               </v-tooltip>
             </div>
           </template>
+
+          <!-- Avatar Item Slot -->
+          <template v-slot:item.avatars="{ item }">
+            <!-- Valid Avatar -->
+            <v-avatar v-if="item.avatar" size="35">
+              <img :src="item.avatar" @error="changeAvatar(employee)" />
+            </v-avatar>
+            <!-- Invalid Avatar -->
+            <v-avatar v-else size="35" color="grey darken-2">
+              <div style="color: white; font-family: arial;">
+                <b>{{ item.firstName.substring(0, 1) }}{{ item.lastName.substring(0, 1) }}</b>
+              </div>
+            </v-avatar>
+          </template>
+
           <!-- Employee Number Item Slot -->
           <template v-slot:item.employeeNumber="{ item }">
             <p :class="{ inactiveStyle: isInactive(item), selectFocus: isFocus(item) }" style="margin-bottom: 0px;">
@@ -127,7 +142,7 @@
           <!-- Date Item Slot -->
           <template v-slot:item.hireDate="{ item }">
             <p :class="{ inactiveStyle: isInactive(item), selectFocus: isFocus(item) }" style="margin-bottom: 0px;">
-              {{ item.hireDate | dateFormat }}
+              {{ item.hireDate | monthDayYearFormat }}
             </p>
           </template>
 
@@ -172,15 +187,32 @@ import ConvertEmployeesToCsv from '@/components/ConvertEmployeesToCsv.vue';
 import DeleteErrorModal from '@/components/modals/DeleteErrorModal.vue';
 import DeleteModal from '@/components/modals/DeleteModal.vue';
 import EmployeeForm from '@/components/employees/EmployeeForm.vue';
-import { getRole } from '@/utils/auth';
-import moment from 'moment';
 import _ from 'lodash';
+import { getRole } from '@/utils/auth';
+import { isEmpty, isFullTime, isInactive, isPartTime, monthDayYearFormat } from '@/utils/utils';
 
 // |--------------------------------------------------|
 // |                                                  |
 // |                     METHODS                      |
 // |                                                  |
 // |--------------------------------------------------|
+
+/**
+ * Changes the employee avatar to default if it fails to display original.
+ *
+ * @param item - employee to check
+ */
+function changeAvatar(item) {
+  let index = _.findIndex(this.employees, (employee) => {
+    return employee.id === item.id;
+  });
+
+  let newItem = this.employees[index];
+
+  newItem.avatar = null;
+
+  this.employees.splice(index, 1, newItem);
+} // changeAvatar
 
 /**
  * Clear the action status that is displayed in the snackbar.
@@ -236,10 +268,6 @@ function employeePath(item) {
   return `/employee/${item.employeeNumber}`;
 } // employeePath
 
-function handleClick(item) {
-  this.$router.push(employeePath(item));
-} //handleClick
-
 /**
  * Filters list of employees.
  */
@@ -253,15 +281,9 @@ function filterEmployees() {
   });
 } // filterEmployees
 
-/**
- * Checks if a value is empty. Returns true if the value is null or an empty/blank string.
- *
- * @param value - value to check
- * @return boolean - value is empty
- */
-function isEmpty(value) {
-  return _.isNil(value) || (_.isString(value) && value.trim().length === 0);
-} // isEmpty
+function handleClick(item) {
+  this.$router.push(employeePath(item));
+} //handleClick
 
 /**
  * Checks to see if an employee is expanded in the datatable.
@@ -275,39 +297,6 @@ function isFocus(item) {
 } // isFocus
 
 /**
- * Checks if an employee is full time. Returns true if the employee is full time with a work status of 100, otherwise
- * returns false.
- *
- * @param employee - employee to check
- * @return boolean - employee is full time
- */
-function isFullTime(employee) {
-  return employee.workStatus == 100;
-} // isFullTime
-
-/**
- * Checks if an employee is inactive. Returns true if the employee is inactive with a work status of 0, otherwise
- * returns false.
- *
- * @param employee - employee to check
- * @return boolean - employee is inactive
- */
-function isInactive(employee) {
-  return employee.workStatus == 0;
-} // isInactive
-
-/**
- * Checks if an employee is part time. Returns true if the employee is part time with a work status between 0 and 100,
- * otherwise returns false.
- *
- * @param employee - employee to check
- * @return boolean - employee is part time
- */
-function isPartTime(employee) {
-  return employee.workStatus > 0 && employee.workStatus < 100;
-} // isPartTime
-
-/**
  * Refresh employee data and filters employees.
  */
 async function refreshEmployees() {
@@ -315,6 +304,15 @@ async function refreshEmployees() {
   this.employees = await api.getItems(api.EMPLOYEES); // get all employees
   this.filterEmployees(); // filter employees
   this.expanded = []; // collapse any expanded rows in the database
+
+  // set employee avatar
+  let avatars = await api.getBasecampAvatars();
+  _.map(this.employees, (employee) => {
+    let avatar = _.find(avatars, ['email_address', employee.email]);
+    let avatarUrl = avatar ? avatar.avatar_url : null;
+    employee.avatar = avatarUrl;
+    return employee;
+  });
   this.loading = false; // set loading status to false
 } // refreshEmployees
 
@@ -419,6 +417,10 @@ export default {
       filteredEmployees: [], // filtered employees,
       headers: [
         {
+          value: 'avatars',
+          sortable: false
+        },
+        {
           text: 'Employee #',
           value: 'employeeNumber'
         },
@@ -480,16 +482,10 @@ export default {
     };
   },
   filters: {
-    // formats a date by month, day, year (e.g. Aug 18th, 2020)
-    dateFormat: (value) => {
-      if (!isEmpty(value)) {
-        return moment(value).format('MMM Do, YYYY');
-      } else {
-        return '';
-      }
-    }
+    monthDayYearFormat
   },
   methods: {
+    changeAvatar,
     clearStatus,
     deleteEmployee,
     deleteModelFromTable,

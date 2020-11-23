@@ -6,12 +6,16 @@
     </v-alert>
 
     <!-- Receipt Input -->
-    <v-file-input v-model="inputFile" :rules="passedRules" label="Select Receipt" :accept="acceptedFileTypes">
-    </v-file-input>
+    <v-file-input v-model="inputFile" :rules="passedRules" :label="label" :accept="acceptedFileTypes"></v-file-input>
   </div>
 </template>
 
 <script>
+function created() {
+  if (this.customLabel) {
+    this.label = this.customLabel;
+  }
+}
 // |--------------------------------------------------|
 // |                                                  |
 // |                     COMPUTED                     |
@@ -39,17 +43,21 @@ function megabytes() {
 } // megabytes
 
 function acceptedFileTypes() {
-  return [
-    'application/msword',
-    'application/vnd.ms-excel',
-    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-    '.doc',
-    '.docx',
-    'image/*',
-    '.pdf',
-    '.xml'
-  ].join(',');
+  if (this.customFileTypes) {
+    return this.customFileTypes.join(',');
+  } else {
+    return [
+      'application/msword',
+      'application/vnd.ms-excel',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      '.doc',
+      '.docx',
+      'image/*',
+      '.pdf',
+      '.xml'
+    ].join(',');
+  }
 } // acceptedFileTypes
 
 // |--------------------------------------------------|
@@ -106,8 +114,10 @@ export default {
     dialog: false,
     previewURL: '',
     title: 'receipt upload',
-    inputFile: null
+    inputFile: null,
+    label: 'Select Receipt'
   }),
+  created,
   methods: {
     receiptChange,
     pickFile
@@ -122,6 +132,6 @@ export default {
       }
     }
   },
-  props: ['passedRules', 'receipt'] // file text field rules
+  props: ['passedRules', 'receipt', 'customLabel', 'customFileTypes'] // file text field rules
 };
 </script>

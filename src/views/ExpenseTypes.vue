@@ -245,19 +245,25 @@
                         {{ categoriesToString(item.categories) }}
                       </p>
 
+                      <!-- Show on Feed -->
+                      <div v-if="item.alwaysOnFeed">
+                        <p><b>Show On Feed:</b> All Expenses</p>
+                      </div>
+                      <div v-else>
+                        <p><b>Show On Feed:</b> {{ categoriesOnFeed(item.categories) }}</p>
+                      </div>
+
+                      <!-- Show Require URL -->
+                      <div v-if="item.requireURL">
+                        <p><b>Require URL:</b> All Expenses</p>
+                      </div>
+                      <div v-else>
+                        <p><b>Require URL:</b> {{ categoriesReqUrl(item.categories) }}</p>
+                      </div>
+
                       <!-- Requires Recipient -->
-                      <p v-if="item.hasRecipient"><b>Requires Recipient:</b> yes</p>
-                      <p v-else><b>Requires Recipient:</b> no</p>
-
-                      <!-- Always show on feed -->
-                      <p v-if="item.alwaysOnFeed"><b>Always Show On Feed:</b> yes</p>
-                      <p v-else><b>Always Show On Feed:</b> no</p>
-
-                      <!-- Categories show on feed -->
-                      <p v-if="!item.alwaysOnFeed && item.categories && item.categories.length > 0">
-                        <b>Categories Showing On Feed:</b>
-                        {{ categoriesOnFeed(item.categories) }}
-                      </p>
+                      <p v-if="item.hasRecipient"><b>Requires Recipient:</b> Yes</p>
+                      <p v-else><b>Requires Recipient:</b> No</p>
 
                       <!-- Flags -->
                       <v-row>
@@ -347,6 +353,15 @@
                         </v-dialog>
                       </v-row>
                       <!-- End Accessible By -->
+
+                      <!-- Basecamp Campfire -->
+                      <p v-if="getCampfire(item.campfire)">
+                        <b>Basecamp Campfire:</b>
+                        <a :href="getCampfire(item.campfire).url" target="blank">
+                          {{ getCampfire(item.campfire).name }}
+                        </a>
+                      </p>
+                      <!-- End Basecamp Campfire -->
                     </div>
                   </v-card-text>
                 </v-card>
@@ -393,6 +408,7 @@ import DeleteModal from '@/components/modals/DeleteModal.vue';
 import ExpenseTypeForm from '@/components/ExpenseTypeForm.vue';
 import { getRole } from '@/utils/auth';
 import _ from 'lodash';
+import { moneyValue } from '@/utils/utils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -407,27 +423,6 @@ function expenseTypeList() {
   // });
   return this.filteredExpenseTypes;
 } // expenseTypeList
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                     FILTERS                      |
-// |                                                  |
-// |--------------------------------------------------|
-
-/**
- * Returns a number with two decimal point precision as a string.
- *
- * @param value - number to filter
- * @return String - number with two decimal points
- */
-function moneyFilter(value) {
-  return `${new Intl.NumberFormat('en-US', {
-    style: 'decimal',
-    useGrouping: false,
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2
-  }).format(value)}`;
-} // moneyFilter
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -474,10 +469,29 @@ function categoriesOnFeed(categories) {
     }
   }
   if (string.length == 0) {
-    string = 'none';
+    string = 'None';
   }
   return string;
 } // categoriesOnFeed
+
+/**
+ * Returns a string of category names that require a url.
+ */
+function categoriesReqUrl(categories) {
+  let string = '';
+  for (let i = 0; i < categories.length; i++) {
+    if (categories[i].requireURL) {
+      if (string.length > 0) {
+        string += ', ';
+      }
+      string += categories[i].name;
+    }
+  }
+  if (string.length == 0) {
+    string = 'None';
+  }
+  return string;
+} // categoriesReqUrl
 
 /**
  * Changes the employee avatar to default if it fails to display original.
@@ -516,6 +530,7 @@ function clearModel() {
   this.$set(this.model, 'accessibleBy', 'ALL');
   this.$set(this.model, 'hasRecipient', false);
   this.$set(this.model, 'alwaysOnFeed', false);
+  this.$set(this.model, 'campfire', null);
   this.$set(this.model, 'requireURL', false);
 } // clearModel
 
@@ -652,6 +667,18 @@ function getAccess(expenseType) {
 } // getAccess
 
 /**
+ * Gets the campfire name and url for a given url.
+ *
+ * @param url - basecamp url String
+ * @return Object - basecamp name and url data
+ */
+function getCampfire(url) {
+  return _.find(this.campfires, (campfire) => {
+    return campfire.url == url;
+  });
+} // getCampfire
+
+/**
  * Get the list of employees who have access to a expense type accessible by value.
  *
  * @param accessibleBy - expense type accessible by value
@@ -741,13 +768,28 @@ function isInactive(expenseType) {
 } // isInactive
 
 /**
+ * Returns a number with two decimal point precision as a string.
+ *
+ * @param value - number to filter
+ * @return String - number with two decimal points
+ */
+function twoDecimals(value) {
+  return `${new Intl.NumberFormat('en-US', {
+    style: 'decimal',
+    useGrouping: false,
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  }).format(value)}`;
+} // twoDecimals
+
+/**
  * Store the attributes of a selected expense type.
  *
  * @param item - expense type selected
  */
 function onSelect(item) {
   this.$set(this.model, 'id', item.id);
-  this.$set(this.model, 'budget', moneyFilter(item.budget));
+  this.$set(this.model, 'budget', twoDecimals(item.budget));
   this.$set(this.model, 'budgetName', item.budgetName);
   this.$set(this.model, 'description', item.description);
   this.$set(this.model, 'odFlag', item.odFlag);
@@ -760,6 +802,7 @@ function onSelect(item) {
   this.$set(this.model, 'accessibleBy', item.accessibleBy);
   this.$set(this.model, 'hasRecipient', item.hasRecipient);
   this.$set(this.model, 'alwaysOnFeed', item.alwaysOnFeed);
+  this.$set(this.model, 'campfire', item.campfire);
   this.$set(this.model, 'requireURL', item.requireURL);
 } // onSelect
 
@@ -891,6 +934,8 @@ async function created() {
     employee.avatar = avatarUrl;
     return employee;
   });
+
+  this.campfires = await api.getBasecampCampfires();
 } // created
 
 // |--------------------------------------------------|
@@ -911,6 +956,7 @@ export default {
   created,
   data() {
     return {
+      campfires: [], // basecamp campfires
       deleteModel: {
         id: ''
       }, // expense type to delete
@@ -954,21 +1000,22 @@ export default {
       itemsPerPage: -1, // items per datatable page
       loading: false, // loading status
       model: {
-        id: '',
+        accessibleBy: [],
+        alwaysOnFeed: false,
         budget: 0,
         budgetName: '',
+        campfire: null,
+        categories: [],
         description: '',
-        odFlag: false,
-        startDate: null,
         endDate: null,
+        hasRecipient: false,
+        id: '',
+        isInactive: false,
+        odFlag: false,
         recurringFlag: false,
         requiredFlag: true,
-        isInactive: false,
-        categories: [],
-        accessibleBy: [],
-        hasRecipient: false,
-        alwaysOnFeed: false,
-        requireURL: false
+        requireURL: false,
+        startDate: null
       }, // selected expense type
       search: '', // query text for datatable search field
       sortBy: 'budgetName', // sort datatable items
@@ -983,19 +1030,17 @@ export default {
     };
   },
   filters: {
-    moneyValue: (value) => {
-      // formats a value as US currency with cents (e.g. $100.00)
-      return `$${moneyFilter(value)}`;
-    },
     limitedText: (val) => {
       // limits text displayed to 50 characters on table view
       return val.length > 50 ? `${val.substring(0, 50)}...` : val;
-    }
+    },
+    moneyValue
   },
   methods: {
     addModelToTable,
     categoriesToString,
     categoriesOnFeed,
+    categoriesReqUrl,
     changeAvatar,
     clearModel, // NOTE: Unused?
     clearStatus,
@@ -1006,6 +1051,7 @@ export default {
     endAction,
     filterExpenseTypes,
     getAccess,
+    getCampfire,
     getEmployeeList,
     getEmployeeName,
     hasAccess,
@@ -1016,6 +1062,7 @@ export default {
     refreshExpenseTypes,
     startAction,
     toTopOfForm,
+    twoDecimals,
     updateModelInTable,
     userIsAdmin,
     validateDelete
@@ -1040,42 +1087,21 @@ export default {
 };
 </script>
 
-<style>
-fieldset {
-  border: 1.5px solid #cccc;
-}
-
-fieldset legend {
-  font-size: 16px;
-  font-weight: bold;
-  margin-left: 20px;
-  padding: 10px;
-}
-
-.flag p {
-  font-weight: bold;
-  width: 150px;
-  display: inline-block;
-}
-
-.flag svg {
-  margin-top: 5px;
-}
-
-.flagFilter {
-  display: inline-block;
-  margin: 20px;
-}
-
-#marks {
-  width: auto;
-  height: 1.5em;
-}
-
+<style scoped>
 .noEmployees {
   text-align: center;
   font-size: 20px;
   margin-top: 20px;
   margin-bottom: 20px;
+}
+
+a {
+  color: black !important;
+  text-decoration: none;
+}
+
+a:hover {
+  color: blue !important;
+  text-decoration: none;
 }
 </style>

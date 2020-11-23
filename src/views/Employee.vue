@@ -40,6 +40,7 @@ import EmployeeInfo from '@/components/employees/EmployeeInfo.vue';
 import TSheetsData from '@/components/TSheetsData.vue';
 import { getRole } from '@/utils/auth';
 import _ from 'lodash';
+import { isEmpty } from '@/utils/utils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -64,16 +65,6 @@ function isDisplayData(item) {
     this.isEmpty(item.twitter);
   return valid;
 } // isDisplayData
-
-/**
- * Checks if a value is empty. Returns true if the value is null or an empty/blank string.
- *
- * @param value - value to check
- * @return boolean - value is empty
- */
-function isEmpty(value) {
-  return _.isNil(value) || (_.isString(value) && value.trim().length === 0);
-} // isEmpty
 
 /**
  * Get employee data.

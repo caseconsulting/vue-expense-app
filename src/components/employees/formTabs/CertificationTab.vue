@@ -1,12 +1,13 @@
 <template>
   <div>
-    <!-- Loop certifications -->
+    <!-- Loop Certifications -->
     <div
       v-for="(certification, index) in model.certifications"
       style="border: 1px solid grey;"
       class="pt-3 pb-1 px-5"
       :key="'certification: ' + certification.name + index"
     >
+      <!-- Name of Certification -->
       <v-combobox
         ref="formFields"
         v-model="certification.name"
@@ -33,7 +34,7 @@
             <template v-slot:activator="{ on, attrs }">
               <v-text-field
                 ref="formFields"
-                :value="formatDate(certification.dateReceived)"
+                :value="formatDateDashToSlash(certification.dateReceived)"
                 label="Date Received"
                 prepend-icon="event_available"
                 :rules="dateRules"
@@ -64,7 +65,7 @@
             <template v-slot:activator="{ on, attrs }">
               <v-text-field
                 ref="formFields"
-                :value="formatDate(certification.expirationDate)"
+                :value="formatDateDashToSlash(certification.expirationDate)"
                 label="Expiration Date (optional)"
                 prepend-icon="event_busy"
                 :rules="dateOptionalRules"
@@ -87,7 +88,9 @@
         </v-col>
       </v-row>
     </div>
-    <!-- Add certification button -->
+    <!-- End Loop Certifications -->
+
+    <!-- Button to Add Certifications -->
     <div class="pt-4" align="center">
       <v-btn @click="addCertification()"><v-icon class="pr-1">add</v-icon>Certification</v-btn>
     </div>
@@ -97,6 +100,7 @@
 <script>
 import api from '@/shared/api.js';
 import _ from 'lodash';
+import { formatDateDashToSlash, formatDateSlashToDash, isEmpty } from '@/utils/utils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -104,10 +108,13 @@ import _ from 'lodash';
 // |                                                  |
 // |--------------------------------------------------|
 
+/**
+ * Emits to parent the component was created and get data.
+ */
 async function created() {
-  window.EventBus.$emit('created', 'certifications');
+  window.EventBus.$emit('created', 'certifications'); // emit certifications tab was created
   this.employees = await api.getItems(api.EMPLOYEES); // get all employees
-  this.getDropDownInfo();
+  this.populateDropDowns(); // get autocomplete drop down data
 } // created
 
 // |--------------------------------------------------|
@@ -117,7 +124,7 @@ async function created() {
 // |--------------------------------------------------|
 
 /**
- * Add a certification to the form.
+ * Adds a certification.
  */
 function addCertification() {
   this.model.certifications.push({
@@ -130,46 +137,28 @@ function addCertification() {
 } // addCertification
 
 /**
- * delete a certification from the form
+ * Deletes a certification.
+ *
+ * @param index - array index of certification to delete
  */
 function deleteCertification(index) {
   this.model.certifications.splice(index, 1);
 } // deleteCertification
 
-function formatDate(date) {
-  if (!date) {
-    return null;
-  }
-  const [year, month, day] = date.split('-');
-  return `${month}/${day}/${year}`;
-} // formatDate
-
 /**
- * Gets information that other employees have filled out.
+ * Populate drop downs with information that other employees have filled out.
  */
-function getDropDownInfo() {
-  let employeesCertifications = _.map(this.employees, (employee) => employee.certifications); //extract certifications
-  employeesCertifications = _.compact(employeesCertifications); //remove falsey values
+function populateDropDowns() {
+  let employeesCertifications = _.map(this.employees, (employee) => employee.certifications); // extract certifications
+  employeesCertifications = _.compact(employeesCertifications); // remove falsey values
+  // loop employees
   _.forEach(employeesCertifications, (certifications) => {
+    // loop certifications
     _.forEach(certifications, (certification) => {
-      this.certificationDropDown.push(certification.name);
+      this.certificationDropDown.push(certification.name); // add certification name
     });
   });
-} // getDropDownInfo
-
-/**
- * Parse a date to isoformat (YYYY-MM-DD).
- *
- * @param Date = date to parse
- * @return Date - date in isoformat
- */
-function parseDate(date) {
-  if (!date) {
-    return null;
-  }
-  const [month, day, year] = date.split('/');
-  return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`; // parseDate
-} // parseDate
+} // populateDropDowns
 
 /**
  * Validate all input fields are valid. Emit to parent the error status.
@@ -178,50 +167,53 @@ function validateFields() {
   let hasErrors = false;
 
   if (_.isArray(this.$refs.formFields)) {
+    // more than one TYPE of vuetify component used
     let error = _.find(this.$refs.formFields, (field) => {
       return !field.validate();
     });
     hasErrors = _.isNil(error) ? false : true;
   } else if (this.$refs.formFields) {
+    // single vuetify component
     hasErrors = !this.$refs.formFields.validate();
   }
 
-  window.EventBus.$emit('doneValidating', 'certifications');
-  window.EventBus.$emit('certificationsStatus', hasErrors);
+  window.EventBus.$emit('doneValidating', 'certifications'); // emit done validating
+  window.EventBus.$emit('certificationsStatus', hasErrors); // emit error status
 } // validateFields
 
 export default {
   created,
   data() {
     return {
-      certificationDropDown: [],
+      certificationDropDown: [], // autocomplete certification name options
       dateOptionalRules: [
         (v) => {
-          return v ? /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v) || 'Date must be valid. Format: MM/DD/YYYY' : true;
+          return !isEmpty(v) ? /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v) || 'Date must be valid. Format: MM/DD/YYYY' : true;
         }
-      ], // rules for optional dates
+      ], // rules for an optional date
       dateRules: [
-        (v) => !!v || 'Date required',
-        (v) => (!!v && /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v)) || 'Date must be valid. Format: MM/DD/YYYY'
-      ], // rules for date
-      formFields: [],
+        (v) => !isEmpty(v) || 'Date required',
+        (v) => (!isEmpty(v) && /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v)) || 'Date must be valid. Format: MM/DD/YYYY'
+      ], // rules for a required date
       requiredRules: [
-        (v) => !!v || 'This field is required. You must enter information or delete the field if possible'
-      ] // rules for required fields
+        (v) => !isEmpty(v) || 'This field is required. You must enter information or delete the field if possible'
+      ] // rules for a required field
     };
   },
   methods: {
     addCertification,
     deleteCertification,
-    formatDate,
-    getDropDownInfo,
-    parseDate,
+    formatDateSlashToDash,
+    formatDateDashToSlash,
+    isEmpty,
+    populateDropDowns,
     validateFields
   },
   props: ['model', 'validating'],
   watch: {
     validating: function (val) {
       if (val) {
+        // parent component triggers validation
         this.validateFields();
       }
     }

@@ -1,9 +1,11 @@
 <template>
   <div>
+    <!-- Experience in IC -->
     <div style="border: 1px solid grey;" class="pt-3 pb-1 px-5">
-      <!-- Experience in IC -->
+      <!-- Experience in IC Header -->
       <div class="pb-2">
         <b>Experience in IC:</b>
+        <!-- Info Tooltip Message -->
         <v-tooltip bottom>
           <template v-slot:activator="{ on }">
             <v-icon v-on="on" class="pl-2 pb-2" small>info</v-icon>
@@ -27,7 +29,7 @@
             <v-text-field
               ref="formFields"
               :value="formatRange(timeFrame.range)"
-              :rules="dateRequired"
+              :rules="requiredRules"
               label="Date Range"
               prepend-icon="date_range"
               readonly
@@ -42,10 +44,13 @@
         <!-- End Range -->
       </div>
       <!-- End Loop TimeFrames -->
+
+      <!-- Button to Add IC Time Frame -->
       <div align="center" class="pt-2 pb-4">
         <v-btn @click="addICTimeFrame()" depressed outlined small color="#3f3f3c">Add a Time Frame</v-btn>
       </div>
     </div>
+    <!-- End Experience in IC -->
 
     <!-- Case Info -->
     <div style="border: 1px solid grey;" class="pt-3 pb-1 px-5">
@@ -58,7 +63,7 @@
       <v-row class="px-3">
         <!-- Start Date -->
         <v-text-field
-          :value="formatDate(model.hireDate)"
+          :value="formatDateDashToSlash(model.hireDate)"
           label="Start Date"
           prepend-icon="event_available"
           readonly
@@ -93,7 +98,6 @@
         ref="formFields"
         v-model="job.position"
         :rules="requiredRules"
-        :items="positionDropDown"
         label="Position"
         data-vv-name="Position"
       ></v-combobox>
@@ -112,7 +116,7 @@
             <template v-slot:activator="{ on, attrs }">
               <v-text-field
                 ref="formFields"
-                :value="formatDate(job.startDate)"
+                :value="formatDateDashToSlash(job.startDate)"
                 label="Start Date"
                 prepend-icon="event_available"
                 :rules="dateRules"
@@ -143,7 +147,7 @@
             <template v-slot:activator="{ on, attrs }">
               <v-text-field
                 ref="formFields"
-                :value="formatDate(job.endDate)"
+                :value="formatDateDashToSlash(job.endDate)"
                 label="End Date (optional)"
                 prepend-icon="event_busy"
                 :rules="dateOptionalRules"
@@ -165,7 +169,9 @@
         </v-col>
       </v-row>
     </div>
-    <!-- Add job button -->
+    <!-- End Loop Jobs -->
+
+    <!-- Button to Add Jobs -->
     <div class="pt-4" align="center">
       <v-btn @click="addJob()"><v-icon class="pr-1">add</v-icon>Job</v-btn>
     </div>
@@ -176,6 +182,7 @@
 import api from '@/shared/api.js';
 import moment from 'moment';
 import _ from 'lodash';
+import { isEmpty } from '@/utils/utils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -183,10 +190,13 @@ import _ from 'lodash';
 // |                                                  |
 // |--------------------------------------------------|
 
+/**
+ * Emits to parent the component was created and get data.
+ */
 async function created() {
-  window.EventBus.$emit('created', 'jobExperience');
+  window.EventBus.$emit('created', 'jobExperience'); // emit education tab was created
   this.employees = await api.getItems(api.EMPLOYEES); // get all employees
-  this.getDropDownInfo();
+  this.populateDropDowns(); // get autocomplete drop down data
 } // created
 
 // |--------------------------------------------------|
@@ -196,7 +206,7 @@ async function created() {
 // |--------------------------------------------------|
 
 /**
- * Add a ic time frame
+ * Adds an IC Time Frame.
  */
 function addICTimeFrame() {
   this.model.icTimeFrames.push({
@@ -206,7 +216,7 @@ function addICTimeFrame() {
 } // addICTimeFrame
 
 /**
- * Add a job to the form.
+ * Adds a Job.
  */
 function addJob() {
   this.model.jobs.push({
@@ -220,32 +230,56 @@ function addJob() {
 } // addJob
 
 /**
- * delete a ic time frame
+ * Deletes an IC Time Frame.
+ *
+ * @param index - array index of IC time frame to delete
  */
 function deleteICTimeFrame(index) {
   this.model.icTimeFrames.splice(index, 1);
 } // deleteICTimeFrame
 
 /**
- * delete a job from the form
+ * Deletes a Job.
+ *
+ * @param index - array index of job to delete
  */
 function deleteJob(index) {
   this.model.jobs.splice(index, 1);
 } // deleteJob
 
 /**
- * format date as MM/DD/YYYY
+ * Returns a date formated from MM/DD/YYYY to YYYY-MM-DD.
+ *
+ * @param date - MM/DD/YYYY String date
+ * @return String - YYYY-MM-DD date
  */
-function formatDate(date) {
+function formatDateSlashToDash(date) {
+  if (!date) {
+    return null;
+  }
+  const [month, day, year] = date.split('/');
+  return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`; // formatDateSlashToDash
+} // formatDateSlashToDash
+
+/**
+ * Returns a date formated from YYYY-MM-DD to MM/DD/YYYY.
+ *
+ * @param date - YYYY-MM-DD String date
+ * @return String - MM/DD/YYYY date
+ */
+function formatDateDashToSlash(date) {
   if (!date) {
     return null;
   }
   const [year, month, day] = date.split('-');
   return `${month}/${day}/${year}`;
-} // formatDate
+} // formatDateDashToSlash
 
 /**
- * format date range as Month YYYY - Month YYYY
+ * Format date range as 'Month YYYY' - 'Month YYYY' in chronological order.
+ *
+ * @param range - Array of String dates in 'Month YYYY' format
+ * @return String - 'Month YYYY' - 'Month YYYY' date range
  */
 function formatRange(range) {
   if (_.isEmpty(range)) {
@@ -254,43 +288,35 @@ function formatRange(range) {
 
   let start = moment(range[0], 'YYYY-MM');
   if (range[1]) {
+    // end date selected
     let end = moment(range[1], 'YYYY-MM');
     if (start.isAfter(end)) {
+      // start date is listed after end date
       return `${end.format('MMMM YYYY')} - ${start.format('MMMM YYYY')}`;
     } else {
+      // start date is listed before end date
       return `${start.format('MMMM YYYY')} - ${end.format('MMMM YYYY')}`;
     }
   } else {
+    // no end date selected
     return `${start.format('MMMM YYYY')} - Present`;
   }
 } // formatRange
 
 /**
- * Gets information that other employees have filled out.
+ * Populate drop downs with information that other employees have filled out.
  */
-function getDropDownInfo() {
+function populateDropDowns() {
   let employeesJobs = _.map(this.employees, (employee) => employee.jobs); //extract jobs
   employeesJobs = _.compact(employeesJobs); //remove falsey values
+  // loop employees
   _.forEach(employeesJobs, (jobs) => {
+    // loop jobs
     _.forEach(jobs, (job) => {
-      this.companyDropDown.push(job.company);
+      this.companyDropDown.push(job.company); // add company name
     });
   });
-} // getDropDownInfo
-
-/**
- * Parse a date to isoformat (YYYY-MM-DD).
- *
- * @param Date = date to parse
- * @return Date - date in isoformat
- */
-function parseDate(date) {
-  if (!date) {
-    return null;
-  }
-  const [month, day, year] = date.split('/');
-  return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`; // parseDate
-} // parseDate
+} // populateDropDowns
 
 /**
  * Validate all input fields are valid. Emit to parent the error status.
@@ -299,36 +325,35 @@ function validateFields() {
   let hasErrors = false;
 
   if (_.isArray(this.$refs.formFields)) {
+    // more than one TYPE of vuetify component used
     let error = _.find(this.$refs.formFields, (field) => {
       return !field.validate();
     });
     hasErrors = _.isNil(error) ? false : true;
   } else if (this.$refs.formFields) {
+    // single vuetify component
     hasErrors = !this.$refs.formFields.validate();
   }
 
-  window.EventBus.$emit('doneValidating', 'jobExperience');
-  window.EventBus.$emit('jobExperienceStatus', hasErrors);
+  window.EventBus.$emit('doneValidating', 'jobExperience'); // emit done validating
+  window.EventBus.$emit('jobExperienceStatus', hasErrors); // emit error status
 } // validateFields
 
 export default {
   created,
   data() {
     return {
-      companyDropDown: [],
+      companyDropDown: [], // autocomplete company name options
       dateOptionalRules: [
         (v) => {
-          return v ? /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v) || 'Date must be valid. Format: MM/DD/YYYY' : true;
+          return !isEmpty(v) ? /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v) || 'Date must be valid. Format: MM/DD/YYYY' : true;
         }
-      ], // rules for optional dates
-      dateRequired: [(v) => !!v || 'Date required'], // date required
+      ], // rules for an optional date
       dateRules: [
-        (v) => !!v || 'Date required',
-        (v) => (!!v && /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v)) || 'Date must be valid. Format: MM/DD/YYYY'
-      ], // rules for date
-      formFields: [],
-      positionDropDown: [],
-      requiredRules: [(v) => !!v || 'This field is required'] // rules for required fields
+        (v) => !isEmpty(v) || 'Date required',
+        (v) => (!isEmpty(v) && /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v)) || 'Date must be valid. Format: MM/DD/YYYY'
+      ], // rules for a required date
+      requiredRules: [(v) => !isEmpty(v) || 'This field is required'] // rules for required fields
     };
   },
   methods: {
@@ -336,16 +361,18 @@ export default {
     addJob,
     deleteICTimeFrame,
     deleteJob,
-    formatDate,
+    formatDateSlashToDash,
+    formatDateDashToSlash,
     formatRange,
-    getDropDownInfo,
-    parseDate,
+    isEmpty,
+    populateDropDowns,
     validateFields
   },
   props: ['model', 'validating'],
   watch: {
     validating: function (val) {
       if (val) {
+        // parent component triggers validation
         this.validateFields();
       }
     }

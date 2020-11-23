@@ -1,51 +1,51 @@
 <template>
   <div class="infoTab">
-    <div v-if="model.degrees && model.degrees.length > 0">
+    <!-- Employee has Degrees -->
+    <div v-if="!isEmpty(model.degrees)">
+      <!-- Loop Degrees -->
       <div v-for="(degree, index) in model.degrees" :key="degree.name">
         <p><b>Degree: </b>{{ degree.name }}</p>
         <p><b>School: </b>{{ degree.school }}</p>
-        <p><b>Completion Date: </b>{{ degree.date | dateFormat }}</p>
-        <div>
-          <b>Major(s): </b>
-          <div v-for="major in degree.majors" :key="major">{{ major }}</div>
-        </div>
-        <div>
-          <b v-if="degree.minors.length > 0">Minor(s):</b>
-          <div v-for="minor in degree.minors" :key="minor">{{ minor }}</div>
-        </div>
-        <div>
-          <b v-if="degree.concentrations.length > 0">Concentration(s):</b>
-          <div v-for="concentration in degree.concentrations" :key="concentration">{{ concentration }}</div>
-        </div>
-        <hr v-if="index < model.degrees.length - 1" />
+        <p><b>Completion Date: </b>{{ degree.date | monthDayYearFormat }}</p>
+
+        <!-- Majors -->
+        <p class="mb-2"><b>Majors: </b></p>
+        <ul class="mb-4">
+          <li v-for="(major, majorIndex) in degree.majors" :key="majorIndex">
+            {{ major }}
+          </li>
+        </ul>
+
+        <!-- Minors -->
+        <p v-if="degree.minors.length > 0" class="mb-2"><b>Minors: </b></p>
+        <ul v-if="degree.minors.length > 0" class="mb-4">
+          <li v-for="(minor, minorIndex) in degree.minors" :key="minorIndex">
+            {{ minor }}
+          </li>
+        </ul>
+
+        <!-- Concentrations -->
+        <p v-if="degree.concentrations.length > 0" class="mb-2"><b>Concentrations: </b></p>
+        <ul v-if="degree.concentrations.length > 0" class="mb-4">
+          <li v-for="(concentration, concentrationsIndex) in degree.concentrations" :key="concentrationsIndex">
+            {{ concentration }}
+          </li>
+        </ul>
+        <hr v-if="index < model.degrees.length - 1" class="mb-3" />
       </div>
+      <!-- End Loop Degrees -->
     </div>
+    <!-- Employee does not have Degrees -->
     <p v-else>No Education information</p>
   </div>
 </template>
+
 <script>
-import moment from 'moment';
-import _ from 'lodash';
-/**
- * Checks if a value is empty. Returns true if the value is null or an empty/blank string.
- *
- * @param value - value to check
- * @return boolean - value is empty
- */
-function isEmpty(value) {
-  return _.isNil(value) || (_.isString(value) && value.trim().length === 0);
-} // isEmpty
+import { isEmpty, monthDayYearFormat } from '@/utils/utils';
 
 export default {
   filters: {
-    // formats a date by month, day, year (e.g. Aug 18th, 2020)
-    dateFormat: (value) => {
-      if (!isEmpty(value)) {
-        return moment(value).format('MMM YYYY');
-      } else {
-        return '';
-      }
-    }
+    monthDayYearFormat
   },
   methods: {
     isEmpty
@@ -53,8 +53,3 @@ export default {
   props: ['model']
 };
 </script>
-<style>
-.infoTab {
-  color: #38424d;
-}
-</style>

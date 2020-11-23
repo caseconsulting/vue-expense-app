@@ -7,7 +7,7 @@
       class="pt-3 pb-1 px-5"
       :key="cIndex"
     >
-      <!-- Clearance Type -->
+      <!-- Type of Clearance -->
       <v-combobox
         ref="formFields"
         v-model="clearance.type"
@@ -34,7 +34,7 @@
             <template v-slot:activator="{ on, attrs }">
               <v-text-field
                 ref="formFields"
-                :value="formatDate(clearance.grantedDate)"
+                :value="formatDateDashToSlash(clearance.grantedDate)"
                 label="Granted Date"
                 prepend-icon="event_available"
                 clearable
@@ -68,7 +68,7 @@
             <template v-slot:activator="{ on, attrs }">
               <v-text-field
                 ref="formFields"
-                :value="formatDate(clearance.expirationDate)"
+                :value="formatDateDashToSlash(clearance.expirationDate)"
                 label="Expiration Date"
                 prepend-icon="event_busy"
                 clearable
@@ -101,7 +101,7 @@
             <template v-slot:activator="{ on, attrs }">
               <v-text-field
                 ref="formFields"
-                :value="formatDate(clearance.submissionDate)"
+                :value="formatDateDashToSlash(clearance.submissionDate)"
                 label="Submission Date"
                 prepend-icon="event_note"
                 clearable
@@ -210,7 +210,7 @@
             <v-text-field
               ref="formFields"
               :value="formatRange(bi.range)"
-              :rules="dateRequired"
+              :rules="requiredRules"
               label="BI Dates"
               prepend-icon="date_range"
               readonly
@@ -230,7 +230,8 @@
       </div>
     </div>
     <!-- End Loop Clearances -->
-    <!-- Add Clearance button -->
+
+    <!-- Button to add Clearances -->
     <div class="pt-4" align="center">
       <v-btn @click="addClearance"><v-icon class="pr-1">add</v-icon>Clearance</v-btn>
     </div>
@@ -241,6 +242,7 @@
 import api from '@/shared/api.js';
 import moment from 'moment';
 import _ from 'lodash';
+import { formatDateDashToSlash, formatDateSlashToDash, isEmpty } from '@/utils/utils';
 
 const ISOFORMAT = 'YYYY-MM-DD';
 
@@ -250,10 +252,13 @@ const ISOFORMAT = 'YYYY-MM-DD';
 // |                                                  |
 // |--------------------------------------------------|
 
+/**
+ * Emits to parent the component was created and get data.
+ */
 async function created() {
-  window.EventBus.$emit('created', 'clearance');
+  window.EventBus.$emit('created', 'clearance'); // emit clearance tab was created
   this.employees = await api.getItems(api.EMPLOYEES); // get all employees
-  this.getDropDownInfo();
+  this.populateDropDowns(); // get autocomplete drop down data
 } // created
 
 // |--------------------------------------------------|
@@ -264,6 +269,8 @@ async function created() {
 
 /**
  * Add BI dates to a clearance
+ *
+ * @param cIndex - array index of clearance to add the BI date to.
  */
 function addBIDates(cIndex) {
   this.model.clearances[cIndex].biDates.push({
@@ -273,7 +280,7 @@ function addBIDates(cIndex) {
 } // addBIDates
 
 /**
- * Add a clearance to the form.
+ * Adds a clearance.
  */
 function addClearance() {
   this.model.clearances.push({
@@ -293,32 +300,29 @@ function addClearance() {
 } // addClearance
 
 /**
- * delete a BI Date from a clearance
+ * Deletes a BI Date from a clearance.
+ *
+ * @param cIndex - array index of clearance to remove the BI date from.
+ * @param biIndex - array index of BI date to remove.
  */
 function deleteBIDate(cIndex, biIndex) {
   this.model.clearances[cIndex].biDates.splice(biIndex, 1);
 } // deleteBIDate
 
 /**
- * delete a clearance from the form
+ * Deletes a clearance.
+ *
+ * @param cIndex - array index of clearance to remove.
  */
 function deleteClearance(cIndex) {
   this.model.clearances.splice(cIndex, 1);
 } // deleteClearance
 
 /**
- * format date as MM/DD/YYYY
- */
-function formatDate(date) {
-  if (!date) {
-    return null;
-  }
-  const [year, month, day] = date.split('-');
-  return `${month}/${day}/${year}`;
-} // formatDate
-
-/**
- * format date range as 'MM/DD/YYYY' - 'MM/DD/YYYY'
+ * Format date range as 'MM/DD/YYYY' - 'MM/DD/YYYY' in chronological order.
+ *
+ * @param range - Array of String dates in isoformat
+ * @return String - 'MM/DD/YYYY' - 'MM/DD/YYYY' date range
  */
 function formatRange(range) {
   if (_.isEmpty(range)) {
@@ -327,37 +331,28 @@ function formatRange(range) {
 
   let start = moment(range[0], ISOFORMAT);
   if (range[1]) {
+    // end date selected
     let end = moment(range[1], ISOFORMAT);
     if (start.isAfter(end)) {
+      // start date is listed after end date
       return `${end.format('MM/DD/YYYY')} - ${start.format('MM/DD/YYYY')}`;
     } else {
+      // start date is listed before end date
       return `${start.format('MM/DD/YYYY')} - ${end.format('MM/DD/YYYY')}`;
     }
   } else {
+    // no end date selected
     return `${start.format('MM/DD/YYYY')} - Present`;
   }
 } // formatRange
-
-/**
- * Gets information that other employees have filled out.
- */
-function getDropDownInfo() {
-  let employeesClearances = _.map(this.employees, (employee) => employee.clearances); //extract clearances
-  employeesClearances = _.compact(employeesClearances); //remove falsey values
-  _.forEach(employeesClearances, (clearances) => {
-    _.forEach(clearances, (clearance) => {
-      this.clearanceTypeDropDown.push(clearance.type);
-    });
-  });
-} // getDropDownInfo
 
 /**
  * Return the maximum available date to be selected for submission date. Returns the granted date if it exists.
  * Returns the expiration date if the expiration date exists and the granted date does not exists. Returns null if
  * neither the granted date or expiration date exist.
  *
- * @param cIndex - clearance index
- * @return string - maximum date
+ * @param cIndex - array index of clearance
+ * @return string - maximum (latest possible) date
  */
 function maxSubmission(cIndex) {
   let max;
@@ -369,31 +364,39 @@ function maxSubmission(cIndex) {
     max = moment(this.model.clearances[cIndex].expirationDate, ISOFORMAT);
   }
 
-  // submission date is before any poly dates
+  // check submission date is before any poly dates
   if (!_.isEmpty(this.model.clearances[cIndex].polyDates)) {
+    // poly dates exist
     let earliest = moment(
       _.first(
+        // get earliest poly date
         _.sortBy(this.model.clearances[cIndex].polyDates, (date) => {
+          // sort poly dates
           return moment(date, ISOFORMAT);
         })
       )
     );
     if (earliest.isBefore(max)) {
-      max = earliest;
+      // poly date is earliest date
+      max = earliest; // update max date
     }
   }
 
-  // submission date is before any adjudication dates
+  // check submission date is before any adjudication dates
   if (!_.isEmpty(this.model.clearances[cIndex].adjudicationDates)) {
+    // adjudication dates exist
     let earliest = moment(
       _.first(
+        // get earliest adjudication date
         _.sortBy(this.model.clearances[cIndex].adjudicationDates, (date) => {
+          // sort adjudication dates
           return moment(date, ISOFORMAT);
         })
       )
     );
     if (earliest.isBefore(max)) {
-      max = earliest;
+      // adjudication date is earliest date
+      max = earliest; // update max date
     }
   }
 
@@ -405,8 +408,8 @@ function maxSubmission(cIndex) {
  * Returns the submission date if the submission date exists and the granted date does not exists. Returns null if
  * neither the granted date or submission date exist.
  *
- * @param cIndex - clearance index
- * @return string - maximum date
+ * @param cIndex - array index of clearance
+ * @return string - minimum (earliest possible) date
  */
 function minExpiration(cIndex) {
   if (this.model.clearances[cIndex].grantedDate) {
@@ -417,18 +420,19 @@ function minExpiration(cIndex) {
 } // minExpiration
 
 /**
- * Parse a date to isoformat (YYYY-MM-DD).
- *
- * @param Date = date to parse
- * @return Date - date in isoformat
+ * Populate drop downs with information that other employees have filled out.
  */
-function parseDate(date) {
-  if (!date) {
-    return null;
-  }
-  const [month, day, year] = date.split('/');
-  return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`; // parseDate
-} // parseDate
+function populateDropDowns() {
+  let employeesClearances = _.map(this.employees, (employee) => employee.clearances); // extract clearances
+  employeesClearances = _.compact(employeesClearances); //remove falsey values
+  // loop employees
+  _.forEach(employeesClearances, (clearances) => {
+    // loop certifications
+    _.forEach(clearances, (clearance) => {
+      this.clearanceTypeDropDown.push(clearance.type); // add clearance type
+    });
+  });
+} // populateDropDowns
 
 /**
  * Validate all input fields are valid. Emit to parent the error status.
@@ -437,36 +441,35 @@ function validateFields() {
   let hasErrors = false;
 
   if (_.isArray(this.$refs.formFields)) {
+    // more than one TYPE of vuetify component used
     let error = _.find(this.$refs.formFields, (field) => {
       return !field.validate();
     });
     hasErrors = _.isNil(error) ? false : true;
   } else if (this.$refs.formFields) {
+    // single vuetify component
     hasErrors = !this.$refs.formFields.validate();
   }
 
-  window.EventBus.$emit('doneValidating', 'clearance');
-  window.EventBus.$emit('clearanceStatus', hasErrors);
+  window.EventBus.$emit('doneValidating', 'clearance'); // emit done validating
+  window.EventBus.$emit('clearanceStatus', hasErrors); // emit error status
 } // validateFields
 
 export default {
   created,
   data() {
     return {
-      clearanceTypeDropDown: [],
-      compareDate: null,
+      clearanceTypeDropDown: [], // autocomplete clearance type options
       dateOptionalRules: [
         (v) => {
-          return v ? /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v) || 'Date must be valid. Format: MM/DD/YYYY' : true;
+          return !isEmpty(v) ? /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v) || 'Date must be valid. Format: MM/DD/YYYY' : true;
         }
-      ], // rules for optional dates
-      dateRequired: [(v) => !!v || 'Date required'], // date required
+      ], // rules for an optional date
       dateRules: [
-        (v) => !!v || 'Date required',
-        (v) => (!!v && /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v)) || 'Date must be valid. Format: MM/DD/YYYY'
-      ], // rules for date
-      positionDropDown: [],
-      requiredRules: [(v) => !!v || 'This field is required'] // rules for required fields
+        (v) => !isEmpty(v) || 'Date required',
+        (v) => (!isEmpty(v) && /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v)) || 'Date must be valid. Format: MM/DD/YYYY'
+      ], // rules for a required date
+      requiredRules: [(v) => !isEmpty(v) || 'This field is required'] // rules for a required field
     };
   },
   methods: {
@@ -474,18 +477,20 @@ export default {
     addClearance,
     deleteBIDate,
     deleteClearance,
-    formatDate,
+    formatDateSlashToDash,
+    formatDateDashToSlash,
     formatRange,
-    getDropDownInfo,
+    isEmpty,
     maxSubmission,
     minExpiration,
-    parseDate,
+    populateDropDowns,
     validateFields
   },
   props: ['model', 'validating'],
   watch: {
     validating: function (val) {
       if (val) {
+        // parent component triggers validation
         this.validateFields();
       }
     }

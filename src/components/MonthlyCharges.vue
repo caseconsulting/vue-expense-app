@@ -4,6 +4,7 @@
       Hours for {{ month }} {{ year }}
       <v-btn to="/help/hoursInfo" class="mb-4" x-small icon><v-icon color="#3f51b5">info</v-icon></v-btn>
     </h3>
+    <!-- Error Getting Monthly Hours -->
     <div v-if="monthlyHourError" class="pt-2 pb-6" align="center">
       <v-tooltip right>
         <template v-slot:activator="{ on }">
@@ -12,6 +13,7 @@
         <span>Error</span>
       </v-tooltip>
     </div>
+    <!-- End Error -->
     <div v-else>
       <v-card-text>
         <div v-if="this.loading" class="pb-4">
@@ -22,7 +24,9 @@
           <v-row v-if="tsheetsData.jobcodeHours && tsheetsData.jobcodeHours.length == 0" justify="center">
             <p>No hours for this month</p>
           </v-row>
+          <!-- User has hours -->
           <div v-else>
+            <!-- Display Charge Code Hours -->
             <div class="pt-3 px-5" style="border: 1px solid grey;">
               <v-row v-for="job in tsheetsData.jobcodeHours" :key="job.name">
                 {{ job.name }}:
@@ -45,6 +49,7 @@
               <p v-if="this.estimatedDailyHours < 24">{{ formatHours(this.estimatedDailyHours) }}</p>
               <p v-else style="color: red;">{{ formatHours(this.estimatedDailyHours) }}</p>
             </v-row>
+            <!-- Button to Show More -->
             <div v-if="!showMore" @click="showMore = true" align="center">
               <v-btn @click="showMore = true" top text small class="my-2">Show More &#9662; </v-btn>
             </div>
@@ -101,6 +106,7 @@
                 </div>
               </v-row>
             </div>
+            <!-- Button to Show Less -->
             <div v-if="showMore" align="center">
               <v-btn @click="showMore = false" top text small class="my-2">Show Less &#9650; </v-btn>
             </div>
@@ -115,19 +121,24 @@
 import moment from 'moment';
 import api from '@/shared/api.js';
 import _ from 'lodash';
+import { isEmpty } from '@/utils/utils';
 
 // |--------------------------------------------------|
 // |                                                  |
 // |                     COMPUTED                     |
 // |                                                  |
 // |--------------------------------------------------|
+
+/**
+ * Calculates and returns the remaining work days of the month.
+ */
 function remainingWorkDays() {
   let remainingWorkDays = 0;
   let day = moment();
   let currMonth = day.month();
   while (day.month() === currMonth) {
-    // if day.isoWeekday() >= 1 && <=6 then add 1 day to remainingWorkDays
     if (day.isoWeekday() >= 1 && day.isoWeekday() <= 5) {
+      // monday - friday
       remainingWorkDays += 1;
     }
     // increment to the next day
@@ -141,6 +152,7 @@ function remainingWorkDays() {
 // |                 LIFECYCLE HOOKS                  |
 // |                                                  |
 // |--------------------------------------------------|
+
 /**
  *  Set budget information for employee. Creates event listeners.
  */
@@ -202,16 +214,6 @@ function formatHours(hours) {
 } // formatHours
 
 /**
- * Checks if a value is empty. Returns true if the value is null or an empty/blank string.
- *
- * @param value - value to check
- * @return boolean - value is empty
- */
-function isEmpty(value) {
-  return _.isNil(value) || (_.isString(value) && value.trim().length === 0);
-} // isEmpty
-
-/**
  * Sets the monthly charges for the employee (or user if no employee is specified).
  */
 async function setMonthlyCharges() {
@@ -253,24 +255,22 @@ export default {
   created,
   data() {
     return {
-      employee: {},
-      estimatedDailyHours: 0,
-      futureHours: 0,
-      isEmployeeView: false,
-      loading: false,
-      month: '',
-      monthlyHourError: false,
-      monthlyMin: 0,
-      remainingHours: 0,
-      remainingHoursHover: '',
-      showMore: false,
-      todaysHours: 0,
-      totalHours: 0,
-      tsheetsData: {},
-      userWorkDays: 0,
-      workDayHours: 8,
-      workedHours: 0,
-      year: ''
+      employee: null, // employee to view
+      estimatedDailyHours: 0, // estimated hours each day
+      futureHours: 0, // hours recorded for the future
+      isEmployeeView: false, // viewing component on the employee page
+      loading: false, // loading
+      month: '', // current month
+      monthlyHourError: false, // error getting monthly hours
+      remainingHours: 0, // remaining hours this month
+      showMore: false, // show more time details
+      todaysHours: 0, // hours completed today
+      totalHours: 0, // total hours completed this month
+      tsheetsData: {}, // time sheet data
+      userWorkDays: 0, // work days remaining this month
+      workDayHours: 8, // average work day hours
+      workedHours: 0, // total hours worked this month
+      year: '' // current year
     };
   },
   methods: {

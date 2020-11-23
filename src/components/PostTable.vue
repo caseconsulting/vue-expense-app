@@ -20,33 +20,33 @@
             :loading="loading"
             :items-per-page.sync="itemsPerPage"
             :search="search"
-            @click:row="clickedRow"
-            item-key="postId"
+            @click:row="handlePreview"
+            item-key="id"
             class="elevation-1 text-center"
           >
             <!-- Title  slot -->
-            <template v-slot:item.title="{ item }">
+            <template v-slot:[`item.title`]="{ item }">
               <td>{{ item.title }}</td>
             </template>
 
             <!-- Employee  slot -->
-            <template v-slot:item.employeeName="{ item }">
+            <template v-slot:[`item.employeeName`]="{ item }">
               <td>{{ item.employeeName }}</td>
             </template>
 
             <!-- Date  slot -->
-            <template v-slot:item.createDate="{ item }">
+            <template v-slot:[`item.createDate`]="{ item }">
               <td>{{ item.createDate | dateFormat }}</td>
             </template>
 
             <!-- Action Icons -->
             <!-- Actions -->
-            <template v-slot:item.actions="{ item }">
-              <td class="datatable_btn layout" v-if="userIsBlogger()" @click="clickedRow(item)">
+            <template v-slot:[`item.actions`]="{ item }">
+              <td class="datatable_btn layout" @click="handlePreview(item)">
                 <!-- Edit Button -->
                 <v-tooltip top>
                   <template v-slot:activator="{ on }">
-                    <v-btn :disabled="isEditing() || midAction" text icon @click="onSelect(item)" v-on="on">
+                    <v-btn :disabled="midAction" text icon @click.stop="handleEdit(item)" v-on="on">
                       <v-icon style="color: #606060;">edit</v-icon>
                     </v-btn>
                   </template>
@@ -56,13 +56,13 @@
                 <v-tooltip top>
                   <template v-slot:activator="{ on }">
                     <v-btn
-                      :disabled="isEditing() || midAction"
+                      :disabled="midAction"
                       text
                       icon
-                      @click="
+                      @click.stop="
                         deleting = true;
                         midAction = true;
-                        propExpense = item;
+                        propBlogPost = item;
                       "
                       v-on="on"
                     >
@@ -76,23 +76,6 @@
               </td>
             </template>
 
-            <!-- Expanded slot in datatable -->
-            <template v-slot:expanded-item="{ headers, item }">
-              <td :colspan="headers.length" class="pa-0">
-                <v-card text>
-                  <v-card-text>
-                    <div class="expandedInfo" v-if="!isDisplayData(item)">
-                      <p>No additional data</p>
-                    </div>
-                    <div class="expandedInfo" v-else>
-                      <p>{{ item.text }}</p>
-                    </div>
-                  </v-card-text>
-                </v-card>
-              </td>
-            </template>
-            <!-- End expanded slot in datatable -->
-
             <!-- Alert for no search results -->
             <v-alert slot="no-results" :value="true" color="error" icon="warning"
               >Your search for "{{ search }}" found no results.</v-alert
@@ -100,8 +83,8 @@
             <!-- End alert for no search results -->
           </v-data-table>
           <!-- End employee datatable -->
-
           <br />
+          <delete-modal :activate="deleting" :type="'BlogPost'"></delete-modal>
         </v-container>
       </v-card>
     </v-col>
@@ -109,121 +92,106 @@
 </template>
 
 <script>
-import _ from 'lodash';
-import moment from 'moment';
+// import _ from 'lodash';
+import { isEmpty, monthDayYearFormat } from '@/utils/utils';
+import DeleteModal from '@/components/modals/DeleteModal.vue';
+import moment from 'moment-timezone';
+import api from '@/shared/api.js';
+
+/**
+ * initial setup
+ */
 async function created() {
-  this.constructAutoComplete(this.pendingPosts);
-}
-
-/**
- * add text to expanded row when clicked.
- *
- * @param value - employee to add
- */
-function clickedRow(value) {
-  if (_.isEmpty(this.expanded) || this.expanded[0].postId != value.postId) {
-    // expand the selected employee if the selected employee not already expanded
-    this.expanded = [];
-    this.expanded.push(value);
-  } else {
-    // collapse the employee if the selected employee is already expanded
-    this.expanded = [];
-  }
-} // clickedRow
-
-/**
- * Constructs the auto complete lists for the employee and expense type filter.
- *
- * @param aggregatedData - expenses data
- */
-function constructAutoComplete(aggregatedData) {
-  // set employees
-  this.employees = _.map(aggregatedData, (data) => {
-    if (data && data.employeeName && data.employeeId) {
-      return {
-        text: data.employeeName,
-        value: data.employeeId
-      };
-    }
-  }).filter((data) => {
-    return data != null;
+  window.EventBus.$on('canceled-delete-BlogPost', () => {
+    this.deleting = false;
+    this.midAction = false;
   });
-} // constructAutoComplete
+  window.EventBus.$on('confirm-delete-BlogPost', this.deleteBlogPost);
+} // created
 
 /**
- * Checks if there is data about a post to display. Returns true if there is data to display
+ * Get path to post editor for edit
  *
- * @item item - post to check
- * @return boolean - post has data to display
+ * @param item - selected item from table
+ * @return - returns blog path to post editor to edit
  */
-function isDisplayData(item) {
-  //TODO: refactor for this component
-  //   let valid =
-  //     !this.userIsAdmin() &&
-  //     this.isEmpty(item.prime) &&
-  //     this.isEmpty(item.contract) &&
-  //     this.isEmpty(item.jobRole) &&
-  //     this.isEmpty(item.github) &&
-  //     this.isEmpty(item.twitter);
-  //   return valid;
-  console.log(item);
-  return true;
-} // isDisplayData
+function blogPath(item) {
+  if (item.blogNumber) {
+    return `/postEditor/${item.blogNumber}`; //this is legacy set up
+  }
+  return `/postEditor/${item.id}`;
+} // blogPath
 
 /**
- * Checks if an employee is being edited.
+ * Get path to post previewer
  *
- * @return boolean - an employee is being edited
+ * @param item - selected item from table
+ * @return - returns blog path to post preview
  */
-function isEditing() {
-  //TODO: refactor for this component
-  return false;
-} // isEditing
-
-/**
- * Checks if a value is empty. Returns true if the value is null or a single character space String.
- *
- * @param value - value to check
- * @return boolean - value is empty
- */
-function isEmpty(value) {
-  return value == null || value === ' ' || value === '';
-} // isEmpty
-
-/**
- * Checks to see if an employee is expanded in the datatable.
- *
- * @param item - employee to check
- * @return boolean - the employee is expanded
- */
-function isFocus(item) {
-  let expanded = !_.isEmpty(this.expanded) && item.postId == this.expanded[0].postId;
-  return expanded || false;
-} // isFocus
-
-function onSelect(item) {
-  this.$emit('edit', item);
+function previewPath(item) {
+  return `/blogPreview/${item.blogNumber}`;
 }
+
 /**
- * Checks to see if the user is an admin. Returns true if the user's role is an admin, otherwise returns false.
+ * redirect to post editor for edit
+ *
+ * @param item - selected item from table
  */
-function userIsBlogger() {
-  //TODO: make this thing
-  return true;
-} // userIsBlogger
+function handleEdit(item) {
+  this.$router.push(blogPath(item));
+} //handleEdit
+
+/**
+ * redirect to post preview
+ *
+ * @param item - selected item from table
+ */
+function handlePreview(item) {
+  this.$router.push(previewPath(item));
+} // handle preview
+
+/**
+ * delete blog post and files
+ */
+async function deleteBlogPost() {
+  if (this.propBlogPost.id) {
+    // blogPost is selected
+    let deleted = await api.deleteItem(api.BLOG, this.propBlogPost.id);
+    if (deleted.id) {
+      // successfully deletes blogPost
+      this.$emit('successfulDelete');
+      // delete attachment from s3 if deleted expense has a receipt
+      let deletedBlogFile = await api.deleteBlogFile(deleted);
+
+      if (deletedBlogFile.code) {
+        // emit alert if error deleting file
+        this.$emit('displayError', `Error Deleting Receipt: ${deletedBlogFile.message}`);
+      }
+    } else {
+      // fails to delete expense
+      this.$emit('displayError', 'Error Deleting Expense');
+    }
+    this.deleting = false;
+    this.midAction = false;
+  }
+} // deletedBlogPost
 
 export default {
   props: ['posts', 'model'],
+  components: {
+    DeleteModal
+  },
   created,
+  beforeDestroy() {
+    window.EventBus.$off('canceled-delete-BlogPost');
+    window.EventBus.$off('confirm-delete-BlogPost');
+  },
   methods: {
-    clickedRow,
-    constructAutoComplete,
-    isDisplayData,
-    isEditing,
     isEmpty,
-    isFocus,
-    userIsBlogger,
-    onSelect
+    blogPath,
+    handleEdit,
+    handlePreview,
+    deleteBlogPost
   },
   data() {
     return {
@@ -252,14 +220,16 @@ export default {
       itemsPerPage: -1,
       search: '', // query text for datatable search field
       loading: false,
-      midAction: false
+      midAction: false,
+      deleting: false,
+      propBlogPost: null
     };
   },
   filters: {
     // formats a date by month, day, year (e.g. Aug 18th, 2020)
     dateFormat: (value) => {
       if (!isEmpty(value)) {
-        let date = moment(new Date(value)).format('MMM Do, YYYY');
+        let date = moment(value).format('MMM Do, YYYY');
         return date;
       } else {
         return '';
@@ -271,7 +241,8 @@ export default {
       } else {
         return 'no';
       }
-    }
+    },
+    monthDayYearFormat
   }
 };
 </script>

@@ -143,7 +143,6 @@ function exportCSVFile(items, fileTitle) {
 // |--------------------------------------------------|
 
 export default {
-  props: ['expenses', 'midAction'], // expenses to export
   data() {
     return {
       employees: [],
@@ -156,11 +155,12 @@ export default {
     download,
     getData,
     exportCSVFile
-  }
+  },
+  props: ['expenses', 'midAction'] // expenses to export
 };
 </script>
 
-<style>
+<style scoped>
 .download {
   font-size: 20px;
   cursor: pointer;

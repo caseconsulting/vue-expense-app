@@ -1,0 +1,251 @@
+.filterUnderline {
+  border-bottom: 3px solid #e74c3c;
+}
+
+.home {
+  padding-top: 20px;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 435px !important;
+
+}
+.post {
+  margin-top: 30px;
+  border: 1px solid #eee;
+  box-shadow: 0 2px 3px #ccc;
+  background-color: white;
+}
+
+.title {
+  text-align: center;
+  font-size: 40px;
+  font-family: inherit;
+  color: #333333;
+  padding-top:30px;
+  padding-bottom: 30px;
+}
+
+.description {
+  font-size: 14px;
+  color: #333333;
+  font-family: inherit;
+  //text-align: justify;
+}
+
+.meta {
+font-size: 12px;
+color: #464646;
+border-bottom: 1px solid #eaecef;
+padding-bottom: 0.25rem;
+}
+
+.tagsScroll {
+  overflow: auto;
+  white-space: nowrap;
+}
+
+.tagsScroll::-webkit-scrollbar {
+  display: none;
+}
+
+.tagsScroll a {
+  margin-right: 10px;
+  color: #ccc;
+  font-size: 14px;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+.tagsScroll a:hover {
+  color: gray;
+  text-decoration: none;
+}
+
+.w3-display-container {
+  padding-top: 20px;
+  padding-left: 20px;
+  padding-right: 20px;
+  position:relative;
+  width: 100%;
+}
+
+
+
+@media (pointer: fine) {
+.w3-display-container:hover .w3-display-hover {
+  display:block;
+}
+
+.w3-display-container:hover {
+  display:inline-block;
+}
+
+.w3-display-hover {
+  display:none;
+}
+
+
+.posts :hover {
+box-shadow: 0px 2px 5px gray;
+}
+
+.post :hover {
+box-shadow: none;
+text-decoration: none;
+}
+}
+
+//@media only screen and (max-width: 767px) {
+  
+//}
+
+
+.w3-display-topright {
+  position:absolute;
+  margin-right: 20px;
+  margin-top: 6px;
+  right:0;
+  top:0;
+}
+
+.w3-display-topright p {
+line-height: 0;
+font-size: 13px;
+color: gray;
+}
+
+.tagsHome {
+padding-bottom: 20px;
+}
+
+.content p {
+  //text-align: justify;
+}
+
+.content {
+  width: 80%;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.mainImage {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
+  max-width: 650px;
+}
+
+/* BlogPost */
+
+.postPage {
+  margin-top: 80px;
+}
+
+.arrow-nav {
+  margin-left: auto;
+  margin-right: auto;
+  width: 90%;
+  cursor: pointer;
+}
+
+.nav-form .form-group {
+  transition: all 0.35s, border-radius 0s;
+  width: 0px;
+  height: 28px;
+  /* background-color: #fff; */
+  /* box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset; */
+  /* border-radius: 25px; */
+  /* border: 1px solid #ccc; */
+}
+
+.right .nav-form .form-group {
+  float: right;
+  padding-right: 40px;
+}
+
+.left .nav-form .form-group {
+  /* margin-left: 40px; */
+}
+
+.nav-form .form-group p.form-control {
+  /* padding-right: 20px; */
+  /* border: 0 none; */
+  border: none;
+  height: 100%;
+  background: transparent;
+  box-shadow: none;
+  overflow: hidden;
+  white-space: nowrap;
+  font-size: 14px;
+  text-align: right;
+  color: black;
+  display: none;
+  /*set to none*/
+}
+
+.right .nav-form .form-group p.form-control {
+  text-align: right;
+}
+
+.left .nav-form .form-group p.form-control {
+  text-align: left;
+}
+
+.nav-form .form-group p.form-control::-webkit-input-placeholder {
+  display: none;
+}
+.nav-form .form-group p.form-control:-moz-placeholder {
+  /* Firefox 18- */
+  display: none;
+}
+.nav-form .form-group p.form-control::-moz-placeholder {
+  /* Firefox 19+ */
+  display: none;
+}
+.nav-form .form-group p.form-control:-ms-input-placeholder {
+  display: none;
+}
+
+.nav-form .form-group:hover,
+.nav-form .form-group.hover {
+  /* width: 100%; */
+  width: 100%;
+  /* background-color: green; */
+  /* border-radius: 4px 25px 25px 4px; */
+}
+
+.right .nav-form .form-group:hover p.form-control,
+.right .nav-form .form-group.hover p.form-control {
+  /* color: black; */
+  display: inline-block;
+  padding-right: 0px;
+  /* border-radius: 4px 25px 25px 4px; */
+}
+
+.left .nav-form .form-group:hover p.form-control,
+.left .nav-form .form-group.hover p.form-control {
+  /* color: black; */
+  display: inline-block;
+  padding-left: 40px;
+  /* border-radius: 4px 25px 25px 4px; */
+}
+
+.nav-form .form-group span.form-control-feedback {
+  position: absolute;
+  top: 0px;
+  display: block;
+  color: firebrick;
+  font-size: 50px;
+}
+
+.right .form-control-feedback {
+  right: 16px;
+  left: auto;
+}
+
+.left .form-control-feedback {
+  left: 0px;
+  right: auto;
+}
