@@ -108,8 +108,15 @@ npm run deploy:test
 
 **To download prod .env and then deploy to the prod environment:**
 
+
+make a pull request from master to release in git hub
+
 ```
+git checkout release
+git pull
+npm ci
 npm run deploy:prod
+git checkout master
 ```
 
 To reset for local development, after a deployment:
