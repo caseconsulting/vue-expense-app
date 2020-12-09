@@ -3,7 +3,7 @@
     <!-- Loop Education -->
     <div
       class="py-3 px-5"
-      style="border: 1px solid grey;"
+      style="border: 1px solid grey"
       v-for="(degree, index) in model.degrees"
       :key="'degree: ' + degree.name + index"
     >

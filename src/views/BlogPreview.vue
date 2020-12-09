@@ -9,13 +9,13 @@
       <img class="mainImage" :src="model.mainPicture" />
     </div>
     <div class="content">
-      <p class="meta" style="font-size: 15px; padding-top: 5px;">
+      <p class="meta" style="font-size: 15px; padding-top: 5px">
         <br />
         <!-- category -->
         <span>{{ this.model.category }}</span>
         <br />By
         <!-- author -->
-        <span style="color: tomato;">{{ this.metaData.author }}</span>
+        <span style="color: tomato">{{ this.metaData.author }}</span>
         ◆
         <!-- date -->
         {{ this.metaData.date }}

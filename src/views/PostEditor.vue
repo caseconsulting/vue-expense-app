@@ -13,9 +13,7 @@
       <v-card-title headline color="white">
         <span class="headline">{{ status.statusMessage }}</span>
       </v-card-title>
-      <v-btn color="white" text @click="clearStatus">
-        Close
-      </v-btn>
+      <v-btn color="white" text @click="clearStatus"> Close </v-btn>
     </v-snackbar>
     <!-- Cancel Button -->
     <v-btn to="/blog" color="white" class="ma-2"> <icon class="mr-1" name="ban"></icon>Cancel</v-btn>
@@ -28,7 +26,7 @@
       <v-text-field v-model="model.title" :rules="requiredRules" label="Blog Post Title"></v-text-field>
       <!-- Main Picture -->
       <file-upload
-        style="padding-top: 0px; padding-bottom: 0px;"
+        style="padding-top: 0px; padding-bottom: 0px"
         @fileSelected="setFile"
         :passedRules="mainPictureRules"
         :customFileTypes="customFileTypes"

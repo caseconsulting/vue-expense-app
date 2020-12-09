@@ -3,7 +3,7 @@
     <v-container>
       <v-row>
         <v-col cols="12" sm="4">
-          <h1 style="font-size: 35px;">Trainings</h1>
+          <h1 style="font-size: 35px">Trainings</h1>
         </v-col>
 
         <v-col cols="12" sm="8">

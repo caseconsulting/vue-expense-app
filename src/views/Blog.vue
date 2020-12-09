@@ -13,9 +13,7 @@
       <v-card-title headline color="white">
         <span class="headline">{{ status.statusMessage }}</span>
       </v-card-title>
-      <v-btn color="white" text @click="clearStatus">
-        Close
-      </v-btn>
+      <v-btn color="white" text @click="clearStatus"> Close </v-btn>
     </v-snackbar>
     <!-- title -->
     <v-row>
@@ -34,7 +32,7 @@
     <!-- Rekognition and comprehend -->
     <v-row>
       <v-file-input
-        style="width: 50px;"
+        style="width: 50px"
         v-model="inputFile"
         label="Select image to rekognize"
         :accept="acceptedFileTypes"

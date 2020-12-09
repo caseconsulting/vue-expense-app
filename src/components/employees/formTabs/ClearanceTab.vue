@@ -3,7 +3,7 @@
     <!-- Loop Clearances -->
     <div
       v-for="(clearance, cIndex) in model.clearances"
-      style="border: 1px solid grey;"
+      style="border: 1px solid grey"
       class="pt-3 pb-1 px-5"
       :key="cIndex"
     >

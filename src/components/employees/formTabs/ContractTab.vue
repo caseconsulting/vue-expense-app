@@ -5,7 +5,7 @@
       v-for="(contract, index) in model.contracts"
       class="pt-3 pb-1 px-5"
       :key="'contract: ' + contract.name + index"
-      style="border: 1px solid grey;"
+      style="border: 1px solid grey"
     >
       <!-- Name of Contract -->
       <v-combobox

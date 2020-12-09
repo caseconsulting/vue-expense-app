@@ -3,7 +3,7 @@
     <!-- Loop Awards -->
     <div
       v-for="(award, index) in model.awards"
-      style="border: 1px solid grey;"
+      style="border: 1px solid grey"
       class="pt-3 pb-1 px-5"
       :key="'award: ' + award.name + index"
     >

@@ -47,7 +47,7 @@
                 <v-tooltip top>
                   <template v-slot:activator="{ on }">
                     <v-btn :disabled="midAction" text icon @click.stop="handleEdit(item)" v-on="on">
-                      <v-icon style="color: #606060;">edit</v-icon>
+                      <v-icon style="color: #606060">edit</v-icon>
                     </v-btn>
                   </template>
                   <span>Edit</span>
@@ -66,9 +66,7 @@
                       "
                       v-on="on"
                     >
-                      <v-icon style="color: #606060;">
-                        delete
-                      </v-icon>
+                      <v-icon style="color: #606060"> delete </v-icon>
                     </v-btn>
                   </template>
                   <span>Delete</span>

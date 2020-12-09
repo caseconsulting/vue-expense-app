@@ -3,7 +3,7 @@
     <!-- Loop Certifications -->
     <div
       v-for="(certification, index) in model.certifications"
-      style="border: 1px solid grey;"
+      style="border: 1px solid grey"
       class="pt-3 pb-1 px-5"
       :key="'certification: ' + certification.name + index"
     >

@@ -196,7 +196,7 @@
             </template>
             <!-- Budget slot -->
             <template v-slot:item.budget="{ item }">
-              <p style="margin-bottom: 0px;">{{ item.budget | moneyValue }}</p>
+              <p style="margin-bottom: 0px">{{ item.budget | moneyValue }}</p>
             </template>
             <!-- Actions -->
             <template v-slot:item.actions="{ item }">
@@ -212,7 +212,7 @@
                     "
                     v-on="on"
                   >
-                    <v-icon style="color: #606060;">edit</v-icon>
+                    <v-icon style="color: #606060">edit</v-icon>
                   </v-btn>
                 </template>
                 <span>Edit</span>
@@ -220,7 +220,7 @@
               <v-tooltip top>
                 <template v-slot:activator="{ on }">
                   <v-btn :disabled="isEditing() || midAction" text icon @click="validateDelete(item)" v-on="on">
-                    <v-icon style="color: #606060;">delete</v-icon>
+                    <v-icon style="color: #606060">delete</v-icon>
                   </v-btn>
                 </template>
                 <slot>Delete</slot>
@@ -312,11 +312,11 @@
                           <v-card color="#bc3825">
                             <!-- Dialog Title -->
                             <v-card-title>
-                              <span class="headline" style="color: white;">Accessible By</span>
+                              <span class="headline" style="color: white">Accessible By</span>
                             </v-card-title>
                             <v-divider color="black"></v-divider>
                             <!-- List of employee names/ISSUES -->
-                            <v-card-text class="pb-0" style="max-height: 300px; background-color: #f0f0f0;">
+                            <v-card-text class="pb-0" style="max-height: 300px; background-color: #f0f0f0">
                               <v-row>
                                 <v-list color="#f0f0f0" width="376">
                                   <template v-for="employee in getEmployeeList(item.accessibleBy)">

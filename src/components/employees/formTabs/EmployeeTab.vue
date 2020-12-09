@@ -65,7 +65,7 @@
       offset-y
       max-width="290px"
       min-width="290px"
-      style="padding-right: 20px; padding-bottom: 20px;"
+      style="padding-right: 20px; padding-bottom: 20px"
       :disabled="!admin"
     >
       <template v-slot:activator="{ on }">
@@ -150,7 +150,7 @@
       offset-y
       max-width="290px"
       min-width="290px"
-      style="padding-right: 20px; padding-bottom: 20px;"
+      style="padding-right: 20px; padding-bottom: 20px"
       :disabled="!admin"
     >
       <template v-slot:activator="{ on }">

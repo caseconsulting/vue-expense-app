@@ -137,7 +137,7 @@
         ></v-autocomplete>
 
         <!-- Accessibility -->
-        <div style="color: dimgray;">
+        <div style="color: dimgray">
           Employee Access
           <v-btn to="/help/expenseTypes" class="mb-4" x-small icon><v-icon color="#3f51b5">info</v-icon></v-btn>
         </div>

@@ -2,7 +2,7 @@
   <div>
     <!-- Prime -->
     <v-combobox
-      style="padding-right: 20px; padding-left: 10px;"
+      style="padding-right: 20px; padding-left: 10px"
       v-model="model.prime"
       :items="employeeInfo.primes"
       label="Prime"
@@ -11,7 +11,7 @@
 
     <!-- Contract -->
     <v-combobox
-      style="padding-right: 20px; padding-left: 10px;"
+      style="padding-right: 20px; padding-left: 10px"
       v-model="model.contract"
       :items="employeeInfo.contracts"
       label="Contract"
@@ -20,7 +20,7 @@
 
     <!-- Github -->
     <v-text-field
-      style="padding-right: 20px; padding-left: 10px;"
+      style="padding-right: 20px; padding-left: 10px"
       v-model="model.github"
       label="Github"
       data-vv-name="Github"
@@ -28,7 +28,7 @@
 
     <!-- Twitter -->
     <v-text-field
-      style="padding-right: 20px; padding-left: 10px;"
+      style="padding-right: 20px; padding-left: 10px"
       v-model="model.twitter"
       label="Twitter"
       data-vv-name="Twitter"
@@ -36,7 +36,7 @@
 
     <!-- Job Role -->
     <v-autocomplete
-      style="padding-right: 20px; padding-left: 10px;"
+      style="padding-right: 20px; padding-left: 10px"
       :items="jobTitles"
       v-model="model.jobRole"
       item-text="text"
@@ -53,7 +53,7 @@
       offset-y
       max-width="290px"
       min-width="290px"
-      style="padding-right: 20px; padding-bottom: 20px;"
+      style="padding-right: 20px; padding-bottom: 20px"
     >
       <template v-slot:activator="{ on }">
         <v-text-field
@@ -79,11 +79,11 @@
     ></v-switch>
 
     <!-- Place of Birth -->
-    <p style="font-size: 17px; padding-left: 10px; padding-top: 10px;">Place of Birth</p>
-    <div style="padding-right: 20px; padding-left: 30px; padding-bottom: 10px;">
-      <div style="border-left-style: groove; padding-right: 20px; padding-left: 10px;">
+    <p style="font-size: 17px; padding-left: 10px; padding-top: 10px">Place of Birth</p>
+    <div style="padding-right: 20px; padding-left: 30px; padding-bottom: 10px">
+      <div style="border-left-style: groove; padding-right: 20px; padding-left: 10px">
         <!-- Place of Birth: City text field -->
-        <v-text-field v-model="model.city" label="City" data-vv-name="City" style="padding-top: 0px;"></v-text-field>
+        <v-text-field v-model="model.city" label="City" data-vv-name="City" style="padding-top: 0px"></v-text-field>
 
         <!-- Place of Birth: Country autocomplete -->
         <v-autocomplete
@@ -91,7 +91,7 @@
           v-model="model.country"
           item-text="text"
           label="Country"
-          style="padding-top: 0px; padding-bottom: 0px;"
+          style="padding-top: 0px; padding-bottom: 0px"
         ></v-autocomplete>
 
         <!-- Place of Birth: State autocomplete -->
@@ -101,7 +101,7 @@
           v-model="model.st"
           item-text="text"
           label="State"
-          style="padding-top: 0px;"
+          style="padding-top: 0px"
         ></v-autocomplete>
       </div>
     </div>

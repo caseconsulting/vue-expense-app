@@ -3,7 +3,7 @@
     <v-row class="pb-4">
       <!-- Title -->
       <v-col cols="12" md="6">
-        <v-row style="height: 100%;" align="center" justify="center">
+        <v-row style="height: 100%" align="center" justify="center">
           <h1>Hello, {{ employee.firstName }}!</h1>
         </v-row>
       </v-col>

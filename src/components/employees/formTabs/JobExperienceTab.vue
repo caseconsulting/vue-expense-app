@@ -1,7 +1,7 @@
 <template>
   <div>
     <!-- Experience in IC -->
-    <div style="border: 1px solid grey;" class="pt-3 pb-1 px-5">
+    <div style="border: 1px solid grey" class="pt-3 pb-1 px-5">
       <!-- Experience in IC Header -->
       <div class="pb-2">
         <b>Experience in IC:</b>
@@ -53,7 +53,7 @@
     <!-- End Experience in IC -->
 
     <!-- Case Info -->
-    <div style="border: 1px solid grey;" class="pt-3 pb-1 px-5">
+    <div style="border: 1px solid grey" class="pt-3 pb-1 px-5">
       <!-- Company Name -->
       <v-text-field label="Company" data-vv-name="Company" readonly value="Case Consulting"></v-text-field>
 
@@ -76,7 +76,7 @@
     <!-- Loop Jobs -->
     <div
       v-for="(job, index) in model.jobs"
-      style="border: 1px solid grey;"
+      style="border: 1px solid grey"
       class="pt-3 pb-1 px-5"
       :key="'company: ' + job.company + index"
     >

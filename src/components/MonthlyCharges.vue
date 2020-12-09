@@ -27,7 +27,7 @@
           <!-- User has hours -->
           <div v-else>
             <!-- Display Charge Code Hours -->
-            <div class="pt-3 px-5" style="border: 1px solid grey;">
+            <div class="pt-3 px-5" style="border: 1px solid grey">
               <v-row v-for="job in tsheetsData.jobcodeHours" :key="job.name">
                 {{ job.name }}:
                 <v-spacer></v-spacer>
@@ -38,7 +38,7 @@
                 <v-spacer></v-spacer>
                 <div>
                   <p v-if="remainingHours > 0">{{ formatHours(totalHours) }} / {{ formatHours(workHours) }}</p>
-                  <p v-else style="color: green;">{{ formatHours(totalHours) }} / {{ formatHours(workHours) }}</p>
+                  <p v-else style="color: green">{{ formatHours(totalHours) }} / {{ formatHours(workHours) }}</p>
                 </div>
               </v-row>
             </div>
@@ -47,7 +47,7 @@
               Remaining Avg Hours/Day:
               <v-spacer></v-spacer>
               <p v-if="this.estimatedDailyHours < 24">{{ formatHours(this.estimatedDailyHours) }}</p>
-              <p v-else style="color: red;">{{ formatHours(this.estimatedDailyHours) }}</p>
+              <p v-else style="color: red">{{ formatHours(this.estimatedDailyHours) }}</p>
             </v-row>
             <!-- Button to Show More -->
             <div v-if="!showMore" @click="showMore = true" align="center">
@@ -67,7 +67,7 @@
                 <p v-if="this.workedHours < this.workHours - this.workDayHours * this.remainingWorkDays">
                   {{ formatHours(this.workedHours) }}
                 </p>
-                <p v-else style="color: green;">{{ formatHours(this.workedHours) }}</p>
+                <p v-else style="color: green">{{ formatHours(this.workedHours) }}</p>
               </v-row>
               <!-- Hours worked today -->
               <v-row>
@@ -76,7 +76,7 @@
                 <p v-if="this.todaysHours < this.workDayHours">
                   {{ formatHours(this.todaysHours) }}
                 </p>
-                <p v-else style="color: green;">{{ formatHours(this.todaysHours) }}</p>
+                <p v-else style="color: green">{{ formatHours(this.todaysHours) }}</p>
               </v-row>
               <!-- Future hours for this month -->
               <v-row>
@@ -85,7 +85,7 @@
                 <p v-if="this.futureHours < this.workDayHours * (this.remainingWorkDays - 1)">
                   {{ formatHours(this.futureHours) }}
                 </p>
-                <p v-else style="color: green;">{{ formatHours(this.futureHours) }}</p>
+                <p v-else style="color: green">{{ formatHours(this.futureHours) }}</p>
               </v-row>
               <!-- Work days left -->
               <v-row>
@@ -97,7 +97,7 @@
                       <input
                         type="text"
                         class="text-right"
-                        style="max-width: 40px;"
+                        style="max-width: 40px"
                         :value="this.userWorkDays"
                         @input="updateEstimate"
                       />

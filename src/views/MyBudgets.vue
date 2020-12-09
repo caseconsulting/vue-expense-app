@@ -18,7 +18,7 @@
 
     <!-- Title -->
     <v-col v-if="!isMobile" cols="12" lg="8">
-      <v-row style="height: 100%;" align="center" justify="center">
+      <v-row style="height: 100%" align="center" justify="center">
         <h1>Budget Statistics for {{ employee.firstName }} {{ employee.lastName }}</h1>
       </v-row>
     </v-col>
@@ -43,7 +43,7 @@
             <div class="pt-4 font-14">[Inactive Budget]</div>
           </div>
           <v-spacer></v-spacer>
-          <v-icon style="margin-right: 10px;">history</v-icon>
+          <v-icon style="margin-right: 10px">history</v-icon>
         </v-card-title>
       </v-card>
     </v-col>

@@ -5,7 +5,7 @@
       v-for="(exp, index) in model.customerOrgExp"
       class="pt-3 pb-1 px-5"
       :key="'exp: ' + exp.name + index"
-      style="border: 1px solid grey;"
+      style="border: 1px solid grey"
     >
       <!-- Name of Customer Organization -->
       <v-combobox

@@ -13,9 +13,7 @@
       <v-card-title headline color="white">
         <span class="headline">{{ status.statusMessage }}</span>
       </v-card-title>
-      <v-btn color="white" text @click="clearStatus">
-        Close
-      </v-btn>
+      <v-btn color="white" text @click="clearStatus"> Close </v-btn>
     </v-snackbar>
 
     <v-col cols="12" lg="8">
@@ -75,9 +73,7 @@
                 <!-- Show Active and Inactive -->
                 <v-tooltip top>
                   <template v-slot:activator="{ on }">
-                    <v-btn value="both" v-on="on" text>
-                      BOTH
-                    </v-btn>
+                    <v-btn value="both" v-on="on" text> BOTH </v-btn>
                   </template>
                   <span>Show All</span>
                 </v-tooltip>
@@ -112,9 +108,7 @@
                 <!-- Show Reimbursed and Pending -->
                 <v-tooltip top>
                   <template v-slot:activator="{ on }">
-                    <v-btn value="both" v-on="on" text>
-                      BOTH
-                    </v-btn>
+                    <v-btn value="both" v-on="on" text> BOTH </v-btn>
                   </template>
                   <span>Show All</span>
                 </v-tooltip>
@@ -189,7 +183,7 @@
                       "
                       v-on="on"
                     >
-                      <v-icon style="color: #606060;">edit</v-icon>
+                      <v-icon style="color: #606060">edit</v-icon>
                     </v-btn>
                   </template>
                   <span>Edit</span>
@@ -208,9 +202,7 @@
                       "
                       v-on="on"
                     >
-                      <v-icon style="color: #606060;">
-                        delete
-                      </v-icon>
+                      <v-icon style="color: #606060"> delete </v-icon>
                     </v-btn>
                   </template>
                   <span>Delete</span>
@@ -229,9 +221,7 @@
                       "
                       v-on="on"
                     >
-                      <v-icon style="color: #606060;">
-                        money_off
-                      </v-icon>
+                      <v-icon style="color: #606060"> money_off </v-icon>
                     </v-btn>
                   </template>
                   <span>Unreimburse</span>

@@ -19,7 +19,7 @@
           <v-card-title class="header_style" v-if="!editing">
             <h3>{{ this.model.firstName }} {{ this.model.lastName }}</h3>
             <v-spacer></v-spacer>
-            <v-icon v-if="displayTSheetsAndBalances" @click="editing = true" style="color: white;" align="right"
+            <v-icon v-if="displayTSheetsAndBalances" @click="editing = true" style="color: white" align="right"
               >edit</v-icon
             >
           </v-card-title>

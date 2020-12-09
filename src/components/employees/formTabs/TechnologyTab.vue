@@ -5,7 +5,7 @@
       v-for="(technology, index) in model.technologies"
       class="pt-3 pb-1 px-5"
       :key="'technology: ' + technology.name + index"
-      style="border: 1px solid grey;"
+      style="border: 1px solid grey"
     >
       <!-- Name of Technology -->
       <v-combobox
