@@ -78,7 +78,7 @@
   </v-container>
 </template>
 <script>
-import CKEditor from '@ckeditor/ckeditor5-vue';
+import CKEditor from '@ckeditor/ckeditor5-vue2';
 import ClassicEditor from '@ckeditor/ckeditor5-editor-classic/src/classiceditor';
 import { v4 as uuid } from 'uuid';
 import api from '@/shared/api.js';

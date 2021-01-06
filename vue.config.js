@@ -7,6 +7,7 @@ module.exports = {
   devServer: {
     disableHostCheck: true
   },
+  parallel: false,
 
   // The source of CKEditor is encapsulated in ES6 modules. By default, the code
   // from the node_modules directory is not transpiled, so you must explicitly tell

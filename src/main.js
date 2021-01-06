@@ -6,7 +6,7 @@ import moment from 'moment';
 import vuetify from './vuetify';
 
 import(/* webpackMode: "eager" */ 'vuetify/dist/vuetify.min.css');
-import CKEditor from '@ckeditor/ckeditor5-vue';
+import CKEditor from '@ckeditor/ckeditor5-vue2';
 
 // BEGIN VUE AWESOME
 import 'vue-awesome/icons/regular/times-circle';
