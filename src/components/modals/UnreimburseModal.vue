@@ -8,11 +8,26 @@
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn color="gray darken-1" text @click.native="emit(`canceled-unreimburse-expense`)">
+          <v-btn
+            color="gray darken-1"
+            text
+            @click.native="
+              emit(`canceled-unreimburse-expense`);
+              activate = false;
+            "
+          >
             No, keep reimbursed
           </v-btn>
           <v-spacer></v-spacer>
-          <v-btn color="red" text @click.native="emit(`confirm-unreimburse-expense`)">Unreimburse</v-btn>
+          <v-btn
+            color="red"
+            text
+            @click.native="
+              emit(`confirm-unreimburse-expense`);
+              activate = false;
+            "
+            >Unreimburse</v-btn
+          >
           <v-spacer></v-spacer>
         </v-card-actions>
       </v-card>
@@ -50,12 +65,22 @@ function emit(msg, data) {
 // |--------------------------------------------------|
 
 export default {
+  data() {
+    return {
+      activate: false // dialog activator
+    };
+  },
   methods: {
     emit
   },
   props: [
-    'activate', // dialog activator
+    'toggleUnreimburseModal', // dialog activator
     'expense' // expense to unreimburse
-  ]
+  ],
+  watch: {
+    toggleUnreimburseModal: function () {
+      this.activate = true;
+    }
+  }
 };
 </script>

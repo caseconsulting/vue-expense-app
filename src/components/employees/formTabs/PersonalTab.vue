@@ -3,7 +3,7 @@
     <!-- Prime -->
     <v-combobox
       style="padding-right: 20px; padding-left: 10px"
-      v-model="model.prime"
+      v-model="editedPersonalInfo.prime"
       :items="employeeInfo.primes"
       label="Prime"
       data-vv-name="Prime"
@@ -12,7 +12,7 @@
     <!-- Contract -->
     <v-combobox
       style="padding-right: 20px; padding-left: 10px"
-      v-model="model.contract"
+      v-model="editedPersonalInfo.contract"
       :items="employeeInfo.contracts"
       label="Contract"
       data-vv-name="Contract"
@@ -21,7 +21,7 @@
     <!-- Github -->
     <v-text-field
       style="padding-right: 20px; padding-left: 10px"
-      v-model="model.github"
+      v-model="editedPersonalInfo.github"
       label="Github"
       data-vv-name="Github"
     ></v-text-field>
@@ -29,7 +29,7 @@
     <!-- Twitter -->
     <v-text-field
       style="padding-right: 20px; padding-left: 10px"
-      v-model="model.twitter"
+      v-model="editedPersonalInfo.twitter"
       label="Twitter"
       data-vv-name="Twitter"
     ></v-text-field>
@@ -38,7 +38,7 @@
     <v-autocomplete
       style="padding-right: 20px; padding-left: 10px"
       :items="jobTitles"
-      v-model="model.jobRole"
+      v-model="editedPersonalInfo.jobRole"
       item-text="text"
       label="Job Role"
     ></v-autocomplete>
@@ -64,16 +64,16 @@
           hint="MM/DD/YYYY format"
           persistent-hint
           prepend-icon="event"
-          @blur="model.birthday = parseDate(birthdayFormat)"
+          @blur="editedPersonalInfo.birthday = parseDate(birthdayFormat)"
           v-on="on"
         ></v-text-field>
       </template>
-      <v-date-picker v-model="model.birthday" no-title @input="BirthdayMenu = false"></v-date-picker>
+      <v-date-picker v-model="editedPersonalInfo.birthday" no-title @input="BirthdayMenu = false"></v-date-picker>
     </v-menu>
 
     <!-- Show Birthday -->
     <v-switch
-      v-model="model.birthdayFeed"
+      v-model="editedPersonalInfo.birthdayFeed"
       label="Have birthday recognized on company feed?"
       :disabled="disableBirthdayFeed()"
     ></v-switch>
@@ -83,12 +83,17 @@
     <div style="padding-right: 20px; padding-left: 30px; padding-bottom: 10px">
       <div style="border-left-style: groove; padding-right: 20px; padding-left: 10px">
         <!-- Place of Birth: City text field -->
-        <v-text-field v-model="model.city" label="City" data-vv-name="City" style="padding-top: 0px"></v-text-field>
+        <v-text-field
+          v-model="editedPersonalInfo.city"
+          label="City"
+          data-vv-name="City"
+          style="padding-top: 0px"
+        ></v-text-field>
 
         <!-- Place of Birth: Country autocomplete -->
         <v-autocomplete
           :items="countries"
-          v-model="model.country"
+          v-model="editedPersonalInfo.country"
           item-text="text"
           label="Country"
           style="padding-top: 0px; padding-bottom: 0px"
@@ -98,7 +103,7 @@
         <v-autocomplete
           v-if="isUSA"
           :items="states"
-          v-model="model.st"
+          v-model="editedPersonalInfo.st"
           item-text="text"
           label="State"
           style="padding-top: 0px"
@@ -130,11 +135,11 @@ async function created() {
   // get all employees
   this.employees = await api.getItems(api.EMPLOYEES);
   // set formatted birthday date
-  this.birthdayFormat = formatDate(this.model.birthday) || this.birthdayFormat;
+  this.birthdayFormat = formatDate(this.editedPersonalInfo.birthday) || this.birthdayFormat;
   // fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
-  if (this.model.birthday !== null && !formatDate(this.model.birthday)) {
+  if (this.editedPersonalInfo.birthday !== null && !formatDate(this.editedPersonalInfo.birthday)) {
     // clear birthday date if fails to format
-    this.model.birthday = null;
+    this.editedPersonalInfo.birthday = null;
   }
   // filter primes and contracts
   this.filterPrimes();
@@ -154,10 +159,10 @@ async function created() {
  * @param boolan - USA is selected for countries
  */
 function isUSA() {
-  if (this.model.country == 'United States of America') {
+  if (this.editedPersonalInfo.country == 'United States of America') {
     return true;
   } else {
-    this.model.st = null;
+    this.editedPersonalInfo.st = null;
     return false;
   }
 } // isUSA
@@ -174,11 +179,11 @@ function isUSA() {
  * @return boolean - birthday feed is disabled
  */
 function disableBirthdayFeed() {
-  if (this.model.birthday == null) {
-    this.model.birthdayFeed = false;
+  if (this.editedPersonalInfo.birthday == null) {
+    this.editedPersonalInfo.birthdayFeed = false;
     return true;
   }
-  this.model.birthdayFeed = true;
+  this.editedPersonalInfo.birthdayFeed = true;
   return false;
 } // disableBirthdayFeed
 
@@ -217,7 +222,7 @@ function validateFields() {
     hasErrors = !this.$refs.formFields.validate;
   }
 
-  window.EventBus.$emit('doneValidating', 'personal'); // emit done validating
+  window.EventBus.$emit('doneValidating', 'personal', this.editedPersonalInfo); // emit done validating
   window.EventBus.$emit('personalStatus', hasErrors); // emit error status
 } // validateFields
 
@@ -236,6 +241,7 @@ export default {
           return !isEmpty(v) ? /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v) || 'Date must be valid. Format: MM/DD/YYYY' : true;
         }
       ], // rules for an optional date
+      editedPersonalInfo: _.cloneDeep(this.model), //employee personal info that can be edited
       employeeInfo: {
         primes: [],
         contracts: []
@@ -328,11 +334,15 @@ export default {
   },
   props: ['model', 'validating'],
   watch: {
-    'model.birthday': function () {
-      this.birthdayFormat = formatDate(this.model.birthday) || this.birthdayFormat;
+    'model.id': function () {
+      //when select an employee with a different ID the personal info reflects the employee that was chosen
+      this.editedPersonalInfo = _.cloneDeep(this.model);
+    },
+    'editedPersonalInfo.birthday': function () {
+      this.birthdayFormat = formatDate(this.editedPersonalInfo.birthday) || this.birthdayFormat;
       //fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
-      if (this.model.birthday !== null && !formatDate(this.model.birthday)) {
-        this.model.birthday = null;
+      if (this.editedPersonalInfo.birthday !== null && !formatDate(this.editedPersonalInfo.birthday)) {
+        this.editedPersonalInfo.birthday = null;
       }
     },
     validating: function (val) {

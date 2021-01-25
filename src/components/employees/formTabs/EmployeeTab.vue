@@ -3,21 +3,21 @@
     <!-- Name -->
     <v-text-field
       ref="formFields"
-      v-model="model.firstName"
+      v-model="editedEmployee.firstName"
       :rules="requiredRules"
       label="First Name"
       data-vv-name="First Name"
       :disabled="!admin"
     ></v-text-field>
     <v-text-field
-      v-model="model.middleName"
+      v-model="editedEmployee.middleName"
       label="Middle Name (optional)"
       data-vv-name="Middle Name"
       :disabled="!admin"
     ></v-text-field>
     <v-text-field
       ref="formFields"
-      v-model="model.lastName"
+      v-model="editedEmployee.lastName"
       :rules="requiredRules"
       label="Last Name"
       data-vv-name="Last Name"
@@ -27,7 +27,7 @@
     <!-- Employee # -->
     <v-text-field
       ref="formFields"
-      v-model="model.employeeNumber"
+      v-model="editedEmployee.employeeNumber"
       :rules="numberRules"
       label="Employee #"
       data-vv-name="Employee #"
@@ -37,7 +37,7 @@
     <!-- Email -->
     <v-text-field
       ref="formFields"
-      v-model="model.email"
+      v-model="editedEmployee.email"
       :rules="emailRules"
       label="Email"
       data-vv-name="Email"
@@ -52,7 +52,7 @@
       :rules="requiredRules"
       v-model="employeeRoleFormatted"
       label="Employee Role"
-      @blur="model.employeeRole = formatKebabCase(employeeRoleFormatted)"
+      @blur="editedEmployee.employeeRole = formatKebabCase(employeeRoleFormatted)"
     ></v-autocomplete>
 
     <!-- Hire Date -->
@@ -78,11 +78,16 @@
           hint="MM/DD/YYYY format"
           persistent-hint
           prepend-icon="event"
-          @blur="model.hireDate = parseDate(hireDateFormatted)"
+          @blur="editedEmployee.hireDate = parseDate(hireDateFormatted)"
           v-on="on"
         ></v-text-field>
       </template>
-      <v-date-picker v-model="model.hireDate" no-title @input="hireMenu = false" :disabled="!admin"></v-date-picker>
+      <v-date-picker
+        v-model="editedEmployee.hireDate"
+        no-title
+        @input="hireMenu = false"
+        :disabled="!admin"
+      ></v-date-picker>
     </v-menu>
 
     <!-- Full/Part/Inactive Status [MOBILE] -->
@@ -162,13 +167,13 @@
           hint="MM/DD/YYYY format"
           persistent-hint
           prepend-icon="event"
-          @blur="model.deptDate = parseDate(deptDateFormatted)"
+          @blur="editedEmployee.deptDate = parseDate(deptDateFormatted)"
           v-on="on"
           :disabled="!admin"
         ></v-text-field>
       </template>
       <v-date-picker
-        v-model="model.deptDate"
+        v-model="editedEmployee.deptDate"
         no-title
         @input="departureMenu = false"
         :disabled="!admin"
@@ -196,23 +201,27 @@ const regex = /^(([^<>()[\]\\.,;:\s@#"]+(\.[^<>()[\]\\.,;:\s@#"]+)*)|(".+"))@con
  */
 async function created() {
   window.EventBus.$emit('created', 'employee'); // emit employee tab was created
+
+  this.editedEmployee = _.cloneDeep(this.model);
   // set formatted hire date
-  this.hireDateFormatted = formatDate(this.model.hireDate) || this.hireDateFormatted;
+  this.hireDateFormatted = formatDate(this.editedEmployee.hireDate) || this.hireDateFormatted;
   // set formatted depature date
-  this.deptDateFormatted = formatDate(this.model.deptDate) || this.deptDateFormatted;
+  this.deptDateFormatted = formatDate(this.editedEmployee.deptDate) || this.deptDateFormatted;
   // fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
-  if (this.model.deptDate !== null && !formatDate(this.model.deptDate)) {
+  if (this.editedEmployee.deptDate !== null && !formatDate(this.editedEmployee.deptDate)) {
     // clear depature date if fails to format
-    this.model.deptDate = null;
+    this.editedEmployee.deptDate = null;
   }
   // capitalize the employee role
-  this.employeeRoleFormatted = _.startCase(this.model.employeeRole);
+  this.employeeRoleFormatted = _.startCase(this.editedEmployee.employeeRole);
   // determine if employee has expenses
-  this.hasExpenses = this.model.id ? _.size(await api.getAllEmployeeExpenses(this.model.id)) > 0 : false;
+  this.hasExpenses = this.editedEmployee.id
+    ? _.size(await api.getAllEmployeeExpenses(this.editedEmployee.id)) > 0
+    : false;
 
-  if (this.model.workStatus != null) {
+  if (this.editedEmployee.workStatus != null) {
     // set work status buttons if the status exists
-    this.status = this.model.workStatus.toString(); // convert employee work status to string
+    this.status = this.editedEmployee.workStatus.toString(); // convert employee work status to string
     // set status radio
     if (this.status == '100') {
       this.statusRadio = 'full';
@@ -223,7 +232,7 @@ async function created() {
     }
   }
   // set works status value to a string
-  this.value = this.model.workStatus.toString();
+  this.value = this.editedEmployee.workStatus.toString();
 } // created
 
 // |--------------------------------------------------|
@@ -296,7 +305,7 @@ function validateFields() {
     hasErrors = !this.$refs.formFields.validate();
   }
 
-  window.EventBus.$emit('doneValidating', 'employee'); // emit done validating
+  window.EventBus.$emit('doneValidating', 'employee', this.editedEmployee); // emit done validating
   window.EventBus.$emit('employeeStatus', hasErrors); // emit error status
 } // validateFields
 
@@ -304,8 +313,8 @@ function validateFields() {
  * Sets the status to an employee if part time, otherwise sets it to an empty string.
  */
 function viewStatus() {
-  if (this.model.workStatus && this.model.workStatus > 0 && this.model.workStatus < 100) {
-    this.status = this.model.workStatus;
+  if (this.editedEmployee.workStatus && this.editedEmployee.workStatus > 0 && this.editedEmployee.workStatus < 100) {
+    this.status = this.editedEmployee.workStatus;
   } else {
     this.status = null;
   }
@@ -321,6 +330,7 @@ export default {
       ], // rules for a required date
       deptDateFormatted: null, // formatted departure date
       departureMenu: false, // display depature menu
+      editedEmployee: _.cloneDeep(this.model), //employee that can be edited
       emailRules: [
         (v) => !isEmpty(v) || 'Email is required',
         (v) => regex.test(v) || 'Not a valid @consultwithcase email address'
@@ -353,43 +363,48 @@ export default {
   },
   props: ['admin', 'model', 'validating'],
   watch: {
-    'model.employeeRole': function () {
-      if (this.model.employeeRole != 'User') {
-        this.employeeRoleFormatted = _.startCase(this.model.employeeRole);
+    'model.id': function () {
+      this.editedEmployee = _.cloneDeep(this.model);
+    },
+    'editedEmployee.employeeRole': function () {
+      if (this.editedEmployee.employeeRole != 'User') {
+        this.employeeRoleFormatted = _.startCase(this.editedEmployee.employeeRole);
       }
     },
-    'model.deptDate': function () {
-      this.deptDateFormatted = formatDate(this.model.deptDate) || this.deptDateFormatted;
+    'editedEmployee.deptDate': function () {
+      this.deptDateFormatted = formatDate(this.editedEmployee.deptDate) || this.deptDateFormatted;
       //fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
-      if (this.model.deptDate !== null && !formatDate(this.model.deptDate)) {
-        this.model.deptDate = null;
+      if (this.editedEmployee.deptDate !== null && !formatDate(this.editedEmployee.deptDate)) {
+        this.editedEmployee.deptDate = null;
       }
     },
-    'model.hireDate': async function () {
-      this.hasExpenses = this.model.id ? _.size(await api.getAllEmployeeExpenses(this.model.id)) > 0 : false;
-      this.hireDateFormatted = formatDate(this.model.hireDate) || this.hireDateFormatted;
+    'editedEmployee.hireDate': async function () {
+      this.hasExpenses = this.editedEmployee.id
+        ? _.size(await api.getAllEmployeeExpenses(this.editedEmployee.id)) > 0
+        : false;
+      this.hireDateFormatted = formatDate(this.editedEmployee.hireDate) || this.hireDateFormatted;
       //fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
-      if (this.model.hireDate !== null && !formatDate(this.model.hireDate)) {
-        this.model.hireDate = null;
+      if (this.editedEmployee.hireDate !== null && !formatDate(this.editedEmployee.hireDate)) {
+        this.editedEmployee.hireDate = null;
       }
     },
     statusRadio: function () {
       if (this.statusRadio == 'full') {
         this.status = '100';
-        this.model.workStatus = 100;
-        this.model.deptDate = null;
+        this.editedEmployee.workStatus = 100;
+        this.editedEmployee.deptDate = null;
       } else if (this.statusRadio == 'inactive') {
         this.status = '0';
-        this.model.workStatus = 0;
+        this.editedEmployee.workStatus = 0;
       } else {
-        this.model.deptDate = null;
+        this.editedEmployee.deptDate = null;
       }
     },
     status: function () {
       if (this.status) {
-        this.model.workStatus = parseInt(this.status);
+        this.editedEmployee.workStatus = parseInt(this.status);
       } else {
-        this.model.workStatus = null;
+        this.editedEmployee.workStatus = null;
       }
     },
     validating: function (val) {

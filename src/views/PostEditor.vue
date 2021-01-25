@@ -18,7 +18,7 @@
     <!-- Cancel Button -->
     <v-btn to="/blog" color="white" class="ma-2"> <icon class="mr-1" name="ban"></icon>Cancel</v-btn>
     <!-- Submit Button -->
-    <v-btn outlined @click="confirming = true" color="success" class="ma-2">
+    <v-btn outlined @click="confirming = !confirming" color="success" class="ma-2">
       <icon class="mr-1" name="save"></icon>Submit</v-btn
     >
     <v-form ref="form" v-model="valid" lazy-validation>
@@ -70,11 +70,11 @@
     <v-btn to="/blog" color="white" class="ma-2"> <icon class="mr-1" name="ban"></icon>Cancel </v-btn>
 
     <!-- Submit Button -->
-    <v-btn outlined @click="confirming = true" color="success" class="ma-2">
+    <v-btn outlined @click="confirming = !confirming" color="success" class="ma-2">
       <icon class="mr-1" name="save"></icon>Submit</v-btn
     >
     <!-- Submission check -->
-    <form-submission-confirmation :activate="this.confirming"></form-submission-confirmation>
+    <form-submission-confirmation :toggleSubmissionConfirmation="this.confirming"></form-submission-confirmation>
   </v-container>
 </template>
 <script>
@@ -117,7 +117,7 @@ import Font from '@ckeditor/ckeditor5-font/src/font';
  */
 async function created() {
   window.EventBus.$on('confirmed', () => {
-    this.confirming = false;
+    //this.confirming = false;
     if (!this.hasTriedSubmitting && (this.editorData == null || this.editorData == '')) {
       this.error = true;
     }
@@ -125,9 +125,9 @@ async function created() {
     this.checkSubmit();
   });
 
-  window.EventBus.$on('canceled', () => {
-    this.confirming = false;
-  });
+  // window.EventBus.$on('canceled', () => {
+  //   this.confirming = false;
+  // });
 
   this.user = await api.getUser();
 

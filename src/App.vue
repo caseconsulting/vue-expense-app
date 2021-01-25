@@ -92,8 +92,8 @@
         </v-container>
       </v-main>
       <v-footer app></v-footer>
-      <time-out-modal :activate="timedOut"></time-out-modal>
-      <time-out-warning-modal :activate="session"></time-out-warning-modal>
+      <time-out-modal :toggleTimeOut="timedOut"></time-out-modal>
+      <time-out-warning-modal :toggleWarning="session"></time-out-warning-modal>
     </v-app>
   </div>
 </template>
@@ -131,8 +131,6 @@ function isMobile() {
  * Logout of expense app
  */
 function handleLogout() {
-  this.session = false;
-  this.timedOut = false;
   logout();
 }
 
@@ -147,7 +145,6 @@ function onResize() {
 // |--------------------------------------------------|
 
 async function created() {
-  window.EventBus.$on('sessionContinue', () => (this.session = false)); // Confirm 5 minute warning
   window.EventBus.$on('relog', handleLogout); // Session end - log out
   // set expiration date if access token received
   let accessToken = getAccessToken();
@@ -158,12 +155,12 @@ async function created() {
     let timeRemaining = this.date - this.now; // default access key (2 hours)
 
     window.setTimeout(() => {
-      this.timedOut = true;
+      this.timedOut = !this.timedOut;
     }, timeRemaining);
 
     if (timeRemaining > 300000) {
       window.setTimeout(() => {
-        this.session = true;
+        this.session = !this.session;
       }, timeRemaining - 300000);
     }
   }

@@ -36,8 +36,24 @@
         <v-card-actions>
           <v-spacer></v-spacer>
           <div>
-            <v-btn color="red" text @click.native="emit('canceledSubmit')">No, take me back</v-btn>
-            <v-btn color="green darken-1" text @click.native="emit('confirmSubmit', expense)">Yes, submit</v-btn>
+            <v-btn
+              color="red"
+              text
+              @click.native="
+                emit('canceledSubmit');
+                activate = false;
+              "
+              >No, take me back</v-btn
+            >
+            <v-btn
+              color="green darken-1"
+              text
+              @click.native="
+                emit('confirmSubmit', expense);
+                activate = false;
+              "
+              >Yes, submit</v-btn
+            >
           </div>
         </v-card-actions>
       </v-card>
@@ -96,6 +112,11 @@ function emit(msg, data) {
 // |--------------------------------------------------|
 
 export default {
+  data() {
+    return {
+      activate: false // dialog activator
+    };
+  },
   filters: {
     moneyValue: (value) => {
       return `${new Intl.NumberFormat('en-US', {
@@ -112,9 +133,14 @@ export default {
   },
   props: [
     'expense', // expense to confirm
-    'activate', // dialog activator
+    'toggleConfirmationBox', // dialog activator
     'isCovered',
     'isOverCovered'
-  ]
+  ],
+  watch: {
+    toggleConfirmationBox: function () {
+      this.activate = true;
+    }
+  }
 };
 </script>

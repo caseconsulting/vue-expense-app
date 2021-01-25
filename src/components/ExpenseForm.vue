@@ -17,7 +17,7 @@
           :rules="requiredRules"
           :filter="customFilter"
           :disabled="isReimbursed || isEdit || isInactive"
-          v-model="expense.employeeId"
+          v-model="editedExpense.employeeId"
           item-text="text"
           label="Employee"
           class="form_padding"
@@ -29,7 +29,7 @@
           :items="filteredExpenseTypes()"
           :rules="requiredRules"
           :disabled="isInactive"
-          v-model="expense.expenseTypeId"
+          v-model="editedExpense.expenseTypeId"
           label="Expense Type"
           :hint="hint"
           persistent-hint
@@ -42,7 +42,7 @@
           :items="filteredExpenseTypes()"
           :disabled="isInactive"
           :rules="requiredRules"
-          v-model="expense.expenseTypeId"
+          v-model="editedExpense.expenseTypeId"
           label="Expense Type"
           :hint="hint"
           persistent-hint
@@ -55,7 +55,7 @@
           v-if="getCategories() != null && getCategories().length >= 1"
           :rules="requiredRules"
           :disabled="isInactive"
-          v-model="expense.category"
+          v-model="editedExpense.category"
           :items="getCategories()"
           label="Select Category"
           clearable
@@ -65,7 +65,7 @@
         <!-- Cost -->
         <v-text-field
           prefix="$"
-          v-model="expense.cost"
+          v-model="editedExpense.cost"
           :rules="costRules"
           :disabled="isReimbursed || isInactive || isHighFive"
           label="Cost"
@@ -78,7 +78,7 @@
           :items="this.recipientOptions"
           :rules="requiredRules"
           :disabled="isReimbursed"
-          v-model="expense.recipient"
+          v-model="editedExpense.recipient"
           label="Recipient"
           class="form_padding"
           :placeholder="recipientPlaceholder"
@@ -87,7 +87,7 @@
         <!-- Description -->
         <v-text-field
           v-if="!this.reqRecipient"
-          v-model="expense.description"
+          v-model="editedExpense.description"
           :rules="descriptionRules"
           :disabled="isInactive"
           label="Description"
@@ -116,11 +116,11 @@
               hint="MM/DD/YYYY format"
               persistent-hint
               prepend-icon="event"
-              @blur="expense.purchaseDate = parseDate(purchaseDateFormatted)"
+              @blur="editedExpense.purchaseDate = parseDate(purchaseDateFormatted)"
               v-on="on"
             ></v-text-field>
           </template>
-          <v-date-picker v-model="expense.purchaseDate" no-title @input="purchaseMenu = false"></v-date-picker>
+          <v-date-picker v-model="editedExpense.purchaseDate" no-title @input="purchaseMenu = false"></v-date-picker>
         </v-menu>
 
         <!-- Reimbursed Date -->
@@ -145,11 +145,11 @@
               hint="MM/DD/YYYY format "
               persistent-hint
               prepend-icon="event"
-              @blur="expense.reimbursedDate = parseDate(reimbursedDateFormatted)"
+              @blur="editedExpense.reimbursedDate = parseDate(reimbursedDateFormatted)"
               v-on="on"
             ></v-text-field>
           </template>
-          <v-date-picker v-model="expense.reimbursedDate" no-title @input="reimburseMenu = false"></v-date-picker>
+          <v-date-picker v-model="editedExpense.reimbursedDate" no-title @input="reimburseMenu = false"></v-date-picker>
         </v-menu>
 
         <!-- Receipt Uploading -->
@@ -172,7 +172,7 @@
         <v-card-text
           style="padding: 0px 0px 3px 0px; font: inherit; font-size: 16px; color: #0000008a"
           v-if="!isEmpty(expense.receipt) && isEdit"
-          >Current Receipt: {{ this.expense.receipt }}</v-card-text
+          >Current Receipt: {{ this.editedExpense.receipt }}</v-card-text
         >
 
         <!-- Scan Receipt Button -->
@@ -196,7 +196,7 @@
 
         <!-- Notes -->
         <v-textarea
-          v-model="expense.note"
+          v-model="editedExpense.note"
           :rules="notesRules"
           :label="notesLabel"
           data-vv-name="Description"
@@ -204,13 +204,18 @@
         ></v-textarea>
 
         <!-- URL -->
-        <v-text-field v-model="expense.url" :rules="urlRules" :label="urlLabel" :disabled="isInactive"></v-text-field>
+        <v-text-field
+          v-model="editedExpense.url"
+          :rules="urlRules"
+          :label="urlLabel"
+          :disabled="isInactive"
+        ></v-text-field>
 
         <!-- Show On Feed -->
         <v-switch
           v-if="isAdmin"
           :disabled="isInactive"
-          v-model="expense.showOnFeed"
+          v-model="editedExpense.showOnFeed"
           label="Have expense show on company feed?"
         ></v-switch>
 
@@ -236,7 +241,7 @@
       <confirmation-box
         :isCovered="isCovered"
         :isOverCovered="isOverCovered"
-        :activate="confirming"
+        :toggleConfirmationBox="confirming"
         :expense="expense"
       ></confirmation-box>
     </v-container>
@@ -270,7 +275,7 @@ const IsoFormat = 'YYYY-MM-DD';
  */
 function getCategories() {
   this.selectedExpenseType = _.find(this.expenseTypes, (expenseType) => {
-    if (expenseType.value === this.expense.expenseTypeId) {
+    if (expenseType.value === this.editedExpense.expenseTypeId) {
       return expenseType;
     }
   });
@@ -298,7 +303,7 @@ function isAdmin() {
  */
 function receiptRequired() {
   this.selectedExpenseType = _.find(this.expenseTypes, (expenseType) => {
-    if (expenseType.value === this.expense.expenseTypeId) {
+    if (expenseType.value === this.editedExpense.expenseTypeId) {
       return expenseType;
     }
   });
@@ -360,7 +365,7 @@ function notesLabel() {
  * @return string - label
  */
 function urlLabel() {
-  return this.expense.requireURL ? 'URL' : 'URL (optional)';
+  return this.editedExpense.requireURL ? 'URL' : 'URL (optional)';
 }
 
 // |--------------------------------------------------|
@@ -451,10 +456,10 @@ async function checkCoverage() {
     this.$emit('startAction');
     // form is validated
     this.loading = true; // set loading status to true
-    if (this.expense) {
+    if (this.editedExpense) {
       // expense exists
       // get expense type
-      let expenseType = _.find(this.expenseTypes, (type) => this.expense.expenseTypeId === type.value);
+      let expenseType = _.find(this.expenseTypes, (type) => this.editedExpense.expenseTypeId === type.value);
 
       // get employee
       if (this.asUser) {
@@ -462,11 +467,11 @@ async function checkCoverage() {
         this.employee = await api.getUser();
       } else {
         // creating or updating an expense as an admin
-        this.employee = await api.getItem(api.EMPLOYEES, this.expense.employeeId);
+        this.employee = await api.getItem(api.EMPLOYEES, this.editedExpense.employeeId);
       }
 
       // get budget
-      let budget = await api.getEmployeeBudget(this.employee.id, expenseType.value, this.expense.purchaseDate);
+      let budget = await api.getEmployeeBudget(this.employee.id, expenseType.value, this.editedExpense.purchaseDate);
 
       if (this.employee.workStatus == 0) {
         // emit error if user is inactive
@@ -480,7 +485,7 @@ async function checkCoverage() {
         // -- if you parse the Expense object's cost field itself into a float, it drops the second
         //    decimal place, then fails validation
         // -- remove commas from the input
-        let cost = parseFloat(this.expense.cost);
+        let cost = parseFloat(this.editedExpense.cost);
 
         //I used this comment to help me understand this function and the chnages I needed to make. I'm leaving it for posterity
 
@@ -522,12 +527,12 @@ async function checkCoverage() {
           let committedAmount = budget.pendingAmount + budget.reimbursedAmount;
           let allExpenses = await api.getAllAggregateExpenses();
           let match = _.find(allExpenses, (entry) => {
-            return entry.id === this.expense.id;
+            return entry.id === this.editedExpense.id;
           });
           // for subsequent calculations, remove matched entry cost from committed amount
           let newCommittedAmount;
           newCommittedAmount = match ? committedAmount - match.cost : committedAmount;
-          if (this.originalExpense && this.originalExpense.expenseTypeId != this.expense.expenseTypeId) {
+          if (this.originalExpense && this.originalExpense.expenseTypeId != this.editedExpense.expenseTypeId) {
             newCommittedAmount = committedAmount;
           }
           if (expenseType.odFlag && this.isFullTime(this.employee)) {
@@ -539,39 +544,39 @@ async function checkCoverage() {
                 this.submit();
               } else if (newCommittedAmount + cost <= 2 * expenseType.budget) {
                 // BRANCH 4.2 goes over initial budget with new expense but stays below overdraft budget
-                this.$set(this.expense, 'budget', expenseType.budget);
-                this.$set(this.expense, 'remaining', expenseType.budget - newCommittedAmount);
-                this.$set(this.expense, 'od', true);
+                this.$set(this.editedExpense, 'budget', expenseType.budget);
+                this.$set(this.editedExpense, 'remaining', expenseType.budget - newCommittedAmount);
+                this.$set(this.editedExpensee, 'od', true);
                 this.isCovered = true;
                 this.isOverCovered = false;
-                this.confirming = true;
+                this.confirming = !this.confirming;
               } else {
                 // BRANCH 4.3 goes over overdraft budget completely
-                this.$set(this.expense, 'budget', expenseType.budget);
-                this.$set(this.expense, 'remaining', 2 * expenseType.budget - newCommittedAmount);
-                this.$set(this.expense, 'od', true);
+                this.$set(this.editedExpense, 'budget', expenseType.budget);
+                this.$set(this.editedExpense, 'remaining', 2 * expenseType.budget - newCommittedAmount);
+                this.$set(this.editedExpense, 'od', true);
                 this.isCovered = false;
                 this.isOverCovered = false;
-                this.confirming = true;
+                this.confirming = !this.confirming;
               }
             } else if (2 * expenseType.budget > newCommittedAmount) {
               // BRANCH 3.2 under overdraft budget -- expense is able to be made
               if (newCommittedAmount + cost <= 2 * expenseType.budget) {
                 // BRANCH 5.1 above initial budget but below overdraft budget TODO: add condirmation box handling? new flag?
-                this.$set(this.expense, 'budget', expenseType.budget);
-                this.$set(this.expense, 'remaining', 2 * expenseType.budget - newCommittedAmount);
-                this.$set(this.expense, 'od', true);
+                this.$set(this.editedExpense, 'budget', expenseType.budget);
+                this.$set(this.editedExpense, 'remaining', 2 * expenseType.budget - newCommittedAmount);
+                this.$set(this.editedExpense, 'od', true);
                 this.isCovered = true;
                 this.isOverCovered = true;
-                this.confirming = true;
+                this.confirming = !this.confirming;
               } else {
                 // BRANCH 5.2 budget not maxed out before this expense (going over overdraft) but expense not fully covered. Show adusted confirmation dialog
-                this.$set(this.expense, 'budget', expenseType.budget);
-                this.$set(this.expense, 'remaining', 2 * expenseType.budget - newCommittedAmount);
-                this.$set(this.expense, 'od', true);
+                this.$set(this.editedExpense, 'budget', expenseType.budget);
+                this.$set(this.editedExpense, 'remaining', 2 * expenseType.budget - newCommittedAmount);
+                this.$set(this.editedExpense, 'od', true);
                 this.isCovered = false;
                 this.isOverCovered = false;
-                this.confirming = true;
+                this.confirming = !this.confirming;
               }
             } else {
               // BRANCH 3.3 budget is already maxed out for overdraft expense can't be made
@@ -581,7 +586,7 @@ async function checkCoverage() {
             }
           } else {
             // BRANCH 2.2 selected expense type does not allow overdraft or employee is not full time
-            this.$set(this.expense, 'od', false);
+            this.$set(this.editedExpense, 'od', false);
             if (newCommittedAmount <= budget.amount) {
               // BRANCH 6.1 starts under initial budget
               if (newCommittedAmount + cost <= budget.amount) {
@@ -590,11 +595,11 @@ async function checkCoverage() {
                 this.submit();
               } else {
                 // BRANCH 7.2 goes over budget
-                this.$set(this.expense, 'budget', budget.amount);
-                this.$set(this.expense, 'remaining', budget.amount - newCommittedAmount);
+                this.$set(this.editedExpense, 'budget', budget.amount);
+                this.$set(this.editedExpense, 'remaining', budget.amount - newCommittedAmount);
                 this.isCovered = false;
                 this.isOverCovered = false;
-                this.confirming = true;
+                this.confirming = !this.confirming;
               }
             } else {
               // BRANCH 6.2 budget is maxed out
@@ -612,24 +617,24 @@ async function checkCoverage() {
               this.submit();
             } else if (cost <= 2 * expenseType.budget) {
               // the expense goes into overdraft but fully covered
-              this.$set(this.expense, 'budget', expenseType.budget);
-              this.$set(this.expense, 'remaining', expenseType.budget);
-              this.$set(this.expense, 'od', true);
+              this.$set(this.editedExpense, 'budget', expenseType.budget);
+              this.$set(this.editedExpense, 'remaining', expenseType.budget);
+              this.$set(this.editedExpense, 'od', true);
               this.isCovered = true;
               this.isOverCovered = false;
-              this.confirming = true;
+              this.confirming = !this.confirming;
             } else {
               // expense goes past overdraft budget completely and is partially covered
-              this.$set(this.expense, 'budget', expenseType.budget);
-              this.$set(this.expense, 'remaining', 2 * expenseType.budget);
-              this.$set(this.expense, 'od', true);
+              this.$set(this.editedExpense, 'budget', expenseType.budget);
+              this.$set(this.editedExpense, 'remaining', 2 * expenseType.budget);
+              this.$set(this.editedExpense, 'od', true);
               this.isCovered = false;
               this.isOverCovered = false;
-              this.confirming = true;
+              this.confirming = !this.confirming;
             }
           } else {
             // BRANCH 8.2 selected expense type does not allow overdraft or employee is not full time
-            this.$set(this.expense, 'od', false);
+            this.$set(this.editedExpense, 'od', false);
             // calculate adjusted budget amount based on employee's current work status
             let adjustedBudget = this.calcAdjustedBudget(this.employee, expenseType);
             if (cost <= adjustedBudget) {
@@ -637,11 +642,11 @@ async function checkCoverage() {
               this.submit();
             } else {
               // expense exceeds the budget but the expense not fully covered
-              this.$set(this.expense, 'budget', adjustedBudget);
-              this.$set(this.expense, 'remaining', adjustedBudget);
+              this.$set(this.editedExpense, 'budget', adjustedBudget);
+              this.$set(this.editedExpense, 'remaining', adjustedBudget);
               this.isCovered = false;
               this.isOverCovered = false;
-              this.confirming = true;
+              this.confirming = !this.confirming;
             }
           }
         }
@@ -700,7 +705,8 @@ function clearForm() {
 
   this.reqRecipient = false;
   this.recipientPlaceholder = null;
-  this.originalExpense = this.expense;
+  this.editedExpense = this.expense;
+  this.originalExpense = this.editedExpense;
   this.purchaseDateFormatted = null;
   this.file = null;
 
@@ -717,17 +723,17 @@ async function createNewEntry() {
   let updatedExpense;
 
   let newUUID = uuid();
-  this.$set(this.expense, 'id', newUUID);
-  this.$set(this.expense, 'createdAt', moment().format('YYYY-MM-DD'));
+  this.$set(this.editedExpense, 'id', newUUID);
+  this.$set(this.editedExpense, 'createdAt', moment().format('YYYY-MM-DD'));
   if (this.isReceiptRequired() && this.file) {
     // if receipt required and updating receipt
     // stores file name for lookup later
-    this.$set(this.expense, 'receipt', this.file.name);
+    this.$set(this.editedExpense, 'receipt', this.file.name);
     // upload attachment to S3
-    updatedAttachment = await api.createAttachment(this.expense, this.file);
+    updatedAttachment = await api.createAttachment(this.editedExpense, this.file);
     if (updatedAttachment.key) {
       // successfully uploads file
-      updatedExpense = await api.createItem(api.EXPENSES, this.expense);
+      updatedExpense = await api.createItem(api.EXPENSES, this.editedExpense);
 
       if (updatedExpense.id) {
         // successfully updates expense
@@ -736,7 +742,7 @@ async function createNewEntry() {
           await this.addURLInfo(updatedExpense);
         }
 
-        this.$set(this.expense, 'id', updatedExpense.id);
+        this.$set(this.editedExpense, 'id', updatedExpense.id);
         this.$emit('add', updatedExpense);
         window.EventBus.$emit('showSnackbar', updatedExpense);
         window.EventBus.$emit('refreshChart', updatedExpense);
@@ -744,20 +750,20 @@ async function createNewEntry() {
       } else {
         // emit error if fails to update expense
         this.$emit('error', updatedExpense.response.data.message);
-        this.$set(this.expense, 'id', '');
+        this.$set(this.editedExpense, 'id', '');
       }
     } else {
       // emit error if fails to upload file
       this.$emit('error', updatedAttachment.message);
-      this.$set(this.expense, 'id', '');
+      this.$set(this.editedExpense, 'id', '');
     }
   } else {
     // if receipt not required or not updating receipt
     if (!this.isReceiptRequired()) {
       this.file = null;
-      this.$set(this.expense, 'receipt', null);
+      this.$set(this.editedExpense, 'receipt', null);
     }
-    updatedExpense = await api.createItem(api.EXPENSES, this.expense);
+    updatedExpense = await api.createItem(api.EXPENSES, this.editedExpense);
 
     if (updatedExpense.id) {
       // successfully updates expense
@@ -767,7 +773,7 @@ async function createNewEntry() {
         await this.addURLInfo(updatedExpense);
       }
 
-      this.$set(this.expense, 'id', updatedExpense.id);
+      this.$set(this.editedExpense, 'id', updatedExpense.id);
       this.$emit('add', updatedExpense);
       window.EventBus.$emit('showSnackbar', updatedExpense);
       window.EventBus.$emit('refreshChart', updatedExpense);
@@ -775,7 +781,7 @@ async function createNewEntry() {
     } else {
       // emit error if fails to update expense
       this.$emit('error', updatedExpense.response.data.message);
-      this.$set(this.expense, 'id', '');
+      this.$set(this.editedExpense, 'id', '');
     }
   }
 } // createNewEntry
@@ -810,7 +816,7 @@ async function encodeUrl(url) {
  */
 function filteredExpenseTypes() {
   let filteredExpType = [];
-  let selectedEmployee = _.find(this.employees, ['value', this.expense.employeeId]);
+  let selectedEmployee = _.find(this.employees, ['value', this.editedExpense.employeeId]);
   if (!this.asUser) {
     // creating or updating an expense as a user
     _.forEach(this.expenseTypes, (expenseType) => {
@@ -867,8 +873,8 @@ function formatDate(date) {
  * @return Object - expense type selected
  */
 function getExpenseTypeSelected(expenseTypeId) {
-  if (this.expense.expenseTypeId != expenseTypeId) {
-    this.expense.category = '';
+  if (this.editedExpense.expenseTypeId != expenseTypeId) {
+    this.editedExpense.category = '';
   }
   return (this.selectedExpenseType = _.find(this.expenseTypes, (expenseType) => {
     if (expenseType.value === expenseTypeId) {
@@ -909,8 +915,8 @@ async function incrementURLHits() {
  * @return boolean - expense type is changed
  */
 function isDifferentExpenseType() {
-  if (this.expense && this.originalExpense) {
-    return this.expense.expenseTypeId != this.originalExpense.expenseTypeId;
+  if (this.editedExpense && this.originalExpense) {
+    return this.editedExpense.expenseTypeId != this.originalExpense.expenseTypeId;
   }
   return false;
 } // isDifferentExpenseType
@@ -922,7 +928,7 @@ function isDifferentExpenseType() {
  */
 function isReceiptRequired() {
   this.selectedExpenseType = _.find(this.expenseTypes, (expenseType) => {
-    if (expenseType.value === this.expense.expenseTypeId) {
+    if (expenseType.value === this.editedExpense.expenseTypeId) {
       return expenseType;
     }
   });
@@ -991,11 +997,11 @@ async function setFile(file) {
   if (file) {
     this.isInactive = true;
     this.file = file;
-    this.$set(this.expense, 'receipt', file.name);
+    this.$set(this.editedExpense, 'receipt', file.name);
     this.isInactive = false;
   } else {
     this.file = null;
-    this.$set(this.expense, 'receipt', null);
+    this.$set(this.editedExpense, 'receipt', null);
     this.receipt = null;
   }
 } // setFile
@@ -1158,20 +1164,20 @@ async function scanFile() {
     }
     this.isInactive = false;
 
-    if (firstDate != null && this.expense.purchaseDate == null) {
+    if (firstDate != null && this.editedExpense.purchaseDate == null) {
       let date = moment(firstDate);
       date = parseDate(date.format('YYYY-MM-DD'));
-      this.expense.purchaseDate = date;
+      this.editedExpense.purchaseDate = date;
     }
-    if (!failed && (this.expense.cost == 0 || this.expense.cost == null)) {
-      this.expense.cost = totalPrice;
+    if (!failed && (this.editedExpense.cost == 0 || this.editedExpense.cost == null)) {
+      this.editedExpense.cost = totalPrice;
     }
-    if (!isEmpty(this.expense.note)) {
+    if (!isEmpty(this.editedExpense.note)) {
       // expense has a note
-      this.expense.note += `\n\n${adjustNote}`;
+      this.editedExpense.note += `\n\n${adjustNote}`;
     } else {
       // expense does not have a note
-      this.expense.note = adjustNote;
+      this.editedExpense.note = adjustNote;
     }
   }
 } // scanFile
@@ -1183,8 +1189,12 @@ function setRecipientOptions() {
   // creating or updating an expense as an admin
   this.recipientOptions = _.compact(
     this.activeEmployees.map((employee) => {
-      if (employee.value == this.userInfo.id || employee.workStatus == 0 || this.expense.employeeId == employee.value) {
-        if (this.userInfo.id != this.expense.employeeId && !this.asUser) {
+      if (
+        employee.value == this.userInfo.id ||
+        employee.workStatus == 0 ||
+        this.editedExpense.employeeId == employee.value
+      ) {
+        if (this.userInfo.id != this.editedExpense.employeeId && !this.asUser) {
           // return employeeUtils.fullName(employee);
           return employee;
         }
@@ -1207,18 +1217,18 @@ async function submit() {
 
       // set the description if a recipient is required
       if (this.reqRecipient) {
-        let giver = _.find(this.employees, (employee) => employee.value == this.expense.employeeId);
-        let receiver = _.find(this.employees, (employee) => employee.value == this.expense.recipient);
-        let expenseType = _.find(this.expenseTypes, (type) => this.expense.expenseTypeId === type.value);
+        let giver = _.find(this.employees, (employee) => employee.value == this.editedExpense.employeeId);
+        let receiver = _.find(this.employees, (employee) => employee.value == this.editedExpense.recipient);
+        let expenseType = _.find(this.expenseTypes, (type) => this.editedExpense.expenseTypeId === type.value);
 
         if (giver && receiver && expenseType) {
-          this.expense.description = `${giver.text} gave ${receiver.text} a ${expenseType.budgetName}`;
+          this.editedExpense.description = `${giver.text} gave ${receiver.text} a ${expenseType.budgetName}`;
         }
       } else {
-        this.expense.recipient = null;
+        this.editedExpense.recipient = null;
       }
 
-      if (this.isEmpty(this.expense.id)) {
+      if (this.isEmpty(this.editedExpense.id)) {
         // creating a new expense
         await this.createNewEntry();
       } else {
@@ -1244,16 +1254,16 @@ async function updateExistingEntry() {
   if (this.isReceiptRequired() && this.file) {
     // if receipt required and updating receipt
     // stores file name for lookup later
-    this.$set(this.expense, 'receipt', this.file.name);
+    this.$set(this.editedExpense, 'receipt', this.file.name);
     // upload attachment to S3
-    updatedAttachment = await api.createAttachment(this.expense, this.file);
+    updatedAttachment = await api.createAttachment(this.editedExpense, this.file);
     if (updatedAttachment.key) {
       // successfully uploaded file
       // update item in database
-      updatedExpense = await api.updateItem(api.EXPENSES, this.expense);
+      updatedExpense = await api.updateItem(api.EXPENSES, this.editedExpense);
       if (updatedExpense.id) {
         // successfully updates expense
-        if (this.expense.expenseTypeId == this.originalExpense.expenseTypeId) {
+        if (this.editedExpense.expenseTypeId == this.originalExpense.expenseTypeId) {
           // same expense type
           this.$emit('update', updatedExpense);
         } else {
@@ -1274,14 +1284,14 @@ async function updateExistingEntry() {
     // if not updating receipt
     if (!this.isReceiptRequired()) {
       this.file = null;
-      this.$set(this.expense, 'receipt', null);
+      this.$set(this.editedExpense, 'receipt', null);
     }
 
     // update item in database
-    updatedExpense = await api.updateItem(api.EXPENSES, this.expense);
+    updatedExpense = await api.updateItem(api.EXPENSES, this.editedExpense);
     if (updatedExpense.id) {
       // successfully updates expense
-      if (this.expense.expenseTypeId == this.originalExpense.expenseTypeId) {
+      if (this.editedExpense.expenseTypeId == this.originalExpense.expenseTypeId) {
         // same expense type
         this.$emit('update', updatedExpense);
       } else {
@@ -1309,14 +1319,13 @@ async function updateExistingEntry() {
 async function created() {
   this.employeeRole = getRole();
   this.userInfo = await api.getUser();
+  this.editedExpense = _.cloneDeep(this.expense);
 
   window.EventBus.$on('canceledSubmit', () => {
-    this.confirming = false;
     this.loading = false; // set loading status to false
     this.$emit('endAction');
   });
   window.EventBus.$on('confirmSubmit', () => {
-    this.confirming = false;
     this.submit(); // submit expense
   });
 
@@ -1326,8 +1335,8 @@ async function created() {
 
   if (this.asUser) {
     // creating or updating an expense as a user
-    this.$set(this.expense, 'employeeName', this.userInfo.id);
-    this.$set(this.expense, 'employeeId', this.userInfo.id);
+    this.$set(this.editedExpense, 'employeeName', this.userInfo.id);
+    this.$set(this.editedExpense, 'employeeId', this.userInfo.id);
   }
   // creating or updating an expense as an admin
   let employees = await api.getItems(api.EMPLOYEES);
@@ -1440,6 +1449,7 @@ export default {
         (v) => (!isEmpty(v) && v.replace(/\s/g, '').length > 0) || 'Description is a required field'
       ], // rules for description
       disableScan: true, // receipt scanned disabled
+      editedExpense: {}, // data being edited --
       employee: null, // employee selected
       employeeRole: '', // employee role
       employees: [], // employees
@@ -1474,7 +1484,7 @@ export default {
         hits: 0
       }, // training url info
       urlRules: [
-        (v) => !this.expense.requireURL || !isEmpty(v) || 'URL is required. Only http(s) are accepted.',
+        (v) => !this.editedExpense.requireURL || !isEmpty(v) || 'URL is required. Only http(s) are accepted.',
         (v) =>
           isEmpty(v) ||
           /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)/.test(
@@ -1519,17 +1529,25 @@ export default {
   ],
   watch: {
     'expense.id': function () {
-      this.originalExpense = _.cloneDeep(this.expense);
-
+      this.editedExpense = _.cloneDeep(this.expense);
+      this.originalExpense = _.cloneDeep(this.editedExpense);
       this.selectedExpenseType = _.find(this.expenseTypes, (expenseType) => {
-        if (expenseType.value === this.expense.expenseTypeId) {
+        if (expenseType.value === this.editedExpense.expenseTypeId) {
           return expenseType;
         }
       });
     },
-    'expense.expenseTypeId': function () {
+    'editedExpense.id': function () {
+      this.originalExpense = _.cloneDeep(this.editedExpense);
       this.selectedExpenseType = _.find(this.expenseTypes, (expenseType) => {
-        return expenseType.value === this.expense.expenseTypeId;
+        if (expenseType.value === this.editedExpense.expenseTypeId) {
+          return expenseType;
+        }
+      });
+    },
+    'editedExpense.expenseTypeId': function () {
+      this.selectedExpenseType = _.find(this.expenseTypes, (expenseType) => {
+        return expenseType.value === this.editedExpense.expenseTypeId;
       });
       this.requireURLET = this.selectedExpenseType && this.selectedExpenseType.requireURL;
 
@@ -1544,7 +1562,7 @@ export default {
         // set high five cost
         // HARD CODE
         if (this.selectedExpenseType.budgetName === 'High Five') {
-          this.$set(this.expense, 'cost', moneyFilter(50));
+          this.$set(this.editedExpense, 'cost', moneyFilter(50));
           this.isHighFive = true;
         } else {
           this.isHighFive = false;
@@ -1553,113 +1571,113 @@ export default {
         // set requires recipient
         this.reqRecipient = this.selectedExpenseType.hasRecipient;
 
-        let localRecipient = _.find(this.employees, (employee) => employee.value == this.expense.recipient);
+        let localRecipient = _.find(this.employees, (employee) => employee.value == this.editedExpense.recipient);
         this.recipientPlaceholder = localRecipient ? localRecipient.text : '';
 
         // set show on company feed and require url
-        if (!_.isEqual(this.originalExpense, this.expense) || _.isNil(this.expense.id)) {
+        if (!_.isEqual(this.originalExpense, this.editedExpense) || _.isNil(this.editedExpense.id)) {
           // changing the expense type
           if (this.selectedExpenseType.alwaysOnFeed) {
             // if expense type is always on feed
-            this.expense.showOnFeed = true;
+            this.editedExpense.showOnFeed = true;
           } else {
             // if expense type is not always on feed
             if (_.isEmpty(this.selectedExpenseType.categories)) {
               // expense type does not have categories
-              this.expense.showOnFeed = false;
+              this.editedExpense.showOnFeed = false;
             } else {
               // expense type has categories
               let category = _.find(this.selectedExpenseType.categories, (category) => {
-                return category == this.expense.category;
+                return category == this.editedExpense.category;
               });
-              this.expense.showOnFeed = category ? category.showOnFeed : false;
+              this.editedExpense.showOnFeed = category ? category.showOnFeed : false;
             }
           }
         }
 
         if (this.selectedExpenseType.requireURL) {
           // if expense type always requires url
-          this.expense.requireURL = true;
+          this.editedExpense.requireURL = true;
         } else {
           // if expense type does not always require url
           if (_.isEmpty(this.selectedExpenseType.categories)) {
             // expense type does not have categories
-            this.expense.requireURL = false;
+            this.editedExpense.requireURL = false;
           } else {
             // expense type has categories
             let category = _.find(this.selectedExpenseType.categories, (category) => {
-              return category == this.expense.category;
+              return category == this.editedExpense.category;
             });
-            this.expense.requireURL = category ? category.requireURL : false;
+            this.editedExpense.requireURL = category ? category.requireURL : false;
           }
         }
       } else {
         this.hint = '';
       }
     },
-    'expense.category': function () {
+    'editedExpense.category': function () {
       if (
         !_.isNil(this.selectedExpenseType) &&
-        (!_.isEqual(this.originalExpense.category, this.expense.category) ||
-          !_.isEqual(this.originalExpense.expenseTypeId, this.expense.expenseTypeId) ||
-          _.isNil(this.expense.id))
+        (!_.isEqual(this.originalExpense.category, this.editedExpense.category) ||
+          !_.isEqual(this.originalExpense.expenseTypeId, this.editedExpense.expenseTypeId) ||
+          _.isNil(this.editedExpense.id))
       ) {
         // category or expense type is changed
         if (this.selectedExpenseType.alwaysOnFeed) {
           // if expense type is always on feed
-          this.expense.showOnFeed = true;
+          this.editedExpense.showOnFeed = true;
         } else {
           // if expense type is not always on feed
           if (_.isEmpty(this.selectedExpenseType.categories)) {
             // expense type does not have categories
-            this.expense.showOnFeed = false;
+            this.editedExpense.showOnFeed = false;
           } else {
             // expense type has categories
             let category = _.find(this.selectedExpenseType.categories, (category) => {
-              return category.name == this.expense.category;
+              return category.name == this.editedExpense.category;
             });
-            this.expense.showOnFeed = category ? category.showOnFeed : false;
+            this.editedExpense.showOnFeed = category ? category.showOnFeed : false;
           }
         }
       } else {
         // category and expense type are not changed
-        this.expense.showOnFeed = this.originalExpense.showOnFeed;
+        this.editedExpense.showOnFeed = this.originalExpense.showOnFeed;
       }
 
       if (!_.isNil(this.selectedExpenseType)) {
         if (this.selectedExpenseType.requireURL) {
           // if expense type requires url
-          this.expense.requireURL = true;
+          this.editedExpenserequireURL = true;
         } else {
           // if expense type does not always require url
           if (_.isEmpty(this.selectedExpenseType.categories)) {
             // expense type does not have categories
-            this.expense.requireURL = false;
+            this.editedExpense.requireURL = false;
           } else {
             // expense type has categories
             let category = _.find(this.selectedExpenseType.categories, (category) => {
-              return category.name == this.expense.category;
+              return category.name == this.editedExpense.category;
             });
-            this.expense.requireURL = category ? category.requireURL : false;
+            this.editedExpense.requireURL = category ? category.requireURL : false;
           }
         }
       }
     },
-    'expense.employeeId': function () {
+    'editedExpense.employeeId': function () {
       this.setRecipientOptions();
     },
-    'expense.purchaseDate': function () {
-      this.purchaseDateFormatted = this.formatDate(this.expense.purchaseDate) || this.purchaseDateFormatted;
+    'editedExpense.purchaseDate': function () {
+      this.purchaseDateFormatted = this.formatDate(this.editedExpense.purchaseDate) || this.purchaseDateFormatted;
       //fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
-      if (this.expense.purchaseDate !== null && !this.formatDate(this.expense.purchaseDate)) {
-        this.expense.purchaseDate = null;
+      if (this.editedExpense.purchaseDate !== null && !this.formatDate(this.editedExpense.purchaseDate)) {
+        this.editedExpense.purchaseDate = null;
       }
     },
-    'expense.reimbursedDate': function () {
-      this.reimbursedDateFormatted = this.formatDate(this.expense.reimbursedDate) || this.reimbursedDateFormatted;
+    'editedExpense.reimbursedDate': function () {
+      this.reimbursedDateFormatted = this.formatDate(this.editedExpense.reimbursedDate) || this.reimbursedDateFormatted;
       //fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
-      if (this.expense.reimbursedDate !== null && !this.formatDate(this.expense.reimbursedDate)) {
-        this.expense.reimbursedDate = null;
+      if (this.editedExpense.reimbursedDate !== null && !this.formatDate(this.editedExpense.reimbursedDate)) {
+        this.editedExpense.reimbursedDate = null;
       }
     },
     file: function () {

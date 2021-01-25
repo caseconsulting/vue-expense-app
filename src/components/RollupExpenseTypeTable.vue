@@ -44,7 +44,7 @@
           @click:row="clickedRow"
         >
           <!-- Select item slot in data table -->
-          <template v-slot:item.data-table-select="{ item }">
+          <template v-slot:[`item.data-table-select`]="{ item }">
             <v-checkbox
               :input-value="item.checkBox.all"
               :indeterminate="item.checkBox.indeterminate"
@@ -59,7 +59,7 @@
             </v-checkbox>
           </template>
           <!-- Employee Name slot in data table-->
-          <template v-slot:item.employeeName="{ item }"
+          <template v-slot:[`item.employeeName`]="{ item }"
             ><v-badge
               v-if="item.expenses.length > 1"
               :content="item.expenses.length"
@@ -71,7 +71,7 @@
             {{ item.employeeName }}</template
           >
           <!-- Show on feed item slot in data table -->
-          <template v-slot:item.showOnFeed="{ item }">
+          <template v-slot:[`item.showOnFeed`]="{ item }">
             <v-switch
               :input-value="item.showSwitch && item.selected"
               @click.native.stop
@@ -80,11 +80,11 @@
             ></v-switch>
           </template>
           <!-- Item cost in data table slot -->
-          <template v-slot:item.cost="{ item }">
+          <template v-slot:[`item.cost`]="{ item }">
             <p id="money-team" style="margin-bottom: 0px">{{ getBudgetTotal(item.expenses) | moneyValue }}</p>
           </template>
           <!-- Header select slot in data table -->
-          <template v-slot:header.data-table-select>
+          <template v-slot:[`header.data-table-select`]>
             <v-checkbox
               :input-value="mainCheckBox.all"
               :indeterminate="mainCheckBox.indeterminate"
@@ -110,7 +110,7 @@
         <!-- Reimburse Button -->
         <v-fab-transition class="reimburse_button">
           <v-btn
-            @click="buttonClicked = true"
+            @click="buttonClicked = !buttonClicked"
             id="custom-button-color"
             :loading="reimbursing"
             v-show="showReimburseButton"
@@ -129,7 +129,7 @@
 
       <!-- Activate Reimburse Modal -->
       <reimburse-modal
-        :activate="buttonClicked"
+        :toggleReimburseModal="buttonClicked"
         :selectedReimbursements="getSelectedExpensesToReimburse"
         v-on:confirm-reimburse="reimburseExpenses"
       ></reimburse-modal>
@@ -466,7 +466,7 @@ async function reimburseExpenses() {
   if (this.buttonClicked) {
     // reimburse button is clicked
     let expensesToReimburse = [];
-    this.buttonClicked = false;
+    //this.buttonClicked = false;
     this.reimbursing = true; // set reimbursing status to true
 
     // get selected expenses and set reimburse date
@@ -708,7 +708,7 @@ async function created() {
   window.EventBus.$on('selectExpense', this.selectExpense);
   window.EventBus.$on('toggleExpense', this.toggleShowOnFeed);
 
-  window.EventBus.$on('canceled-reimburse', () => (this.buttonClicked = false));
+  //window.EventBus.$on('canceled-reimburse', () => (this.buttonClicked = false));
   window.EventBus.$on('confirm-reimburse', () => this.reimburseExpenses());
   let aggregatedData = await api.getAllAggregateExpenses();
 

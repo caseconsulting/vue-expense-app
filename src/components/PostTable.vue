@@ -60,7 +60,7 @@
                       text
                       icon
                       @click.stop="
-                        deleting = true;
+                        deleting = !deleting;
                         midAction = true;
                         propBlogPost = item;
                       "
@@ -101,7 +101,6 @@ import api from '@/shared/api.js';
  */
 async function created() {
   window.EventBus.$on('canceled-delete-BlogPost', () => {
-    this.deleting = false;
     this.midAction = false;
   });
   window.EventBus.$on('confirm-delete-BlogPost', this.deleteBlogPost);
@@ -169,7 +168,6 @@ async function deleteBlogPost() {
       // fails to delete expense
       this.$emit('displayError', 'Error Deleting Expense');
     }
-    this.deleting = false;
     this.midAction = false;
   }
 } // deletedBlogPost

@@ -88,7 +88,7 @@
           <!-- End form action buttons -->
         </v-form>
         <!-- Confirmation Model -->
-        <form-submission-confirmation :activate="this.confirming"></form-submission-confirmation>
+        <form-submission-confirmation :toggleSubmissionConfirmation="this.confirming"></form-submission-confirmation>
       </v-container>
     </v-card>
   </div>
@@ -344,7 +344,7 @@ function confirm() {
   });
 
   if (this.$refs.form.validate()) {
-    this.confirming = true;
+    this.confirming = !this.confirming;
   }
 } // confirm
 
@@ -420,22 +420,47 @@ function userIsAdmin() {
 
 async function created() {
   window.EventBus.$on('confirmed', () => {
-    this.confirming = false;
+    //this.confirming = false;
     this.submit();
   });
 
-  window.EventBus.$on('canceled', () => {
-    this.confirming = false;
-  });
+  // window.EventBus.$on('canceled', () => {
+  //   this.confirming = false;
+  // });
 
   // set tab mounted
   window.EventBus.$on('created', (tab) => {
     this.tabCreated[tab] = true;
   });
 
-  // reset validating status
-  window.EventBus.$on('doneValidating', (tab) => {
+  // reset validating status and sets the data based on the tab
+  window.EventBus.$on('doneValidating', (tab, data) => {
     this.validating[tab] = false;
+    if (tab == 'employee') {
+      this.$set(this.model, 'firstName', data.firstName);
+      this.$set(this.model, 'middleName', data.middleName);
+      this.$set(this.model, 'lastName', data.lastName);
+      this.$set(this.model, 'employeeNumber', data.employeeNumber);
+      this.$set(this.model, 'email', data.email);
+      this.$set(this.model, 'employeeRole', data.employeeRole);
+      this.$set(this.model, 'hireDate', data.hireDate);
+      this.$set(this.model, 'workStatus', data.workStatus);
+      this.$set(this.model, 'deptDate', data.deptDate);
+    } else if (tab == 'personal') {
+      this.$set(this.model, 'prime', data.prime);
+      this.$set(this.model, 'contract', data.contract);
+      this.$set(this.model, 'github', data.github);
+      this.$set(this.model, 'twitter', data.twitter);
+      this.$set(this.model, 'jobRole', data.jobRole);
+      this.$set(this.model, 'birthday', data.birthday);
+      this.$set(this.model, 'birthdayFeed', data.birthdayFeed);
+      this.$set(this.model, 'city', data.city);
+      this.$set(this.model, 'country', data.country);
+      this.$set(this.model, 'st', data.st);
+    } else if (tab == 'jobExperience') {
+      this.$set(this.model, 'icTimeFrames', data.icTimeFrames);
+      this.$set(this.model, 'jobs', data.jobs);
+    }
   });
 
   // set tab error status

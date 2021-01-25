@@ -191,15 +191,15 @@
             @click:row="clickedRow"
           >
             <!-- Budget Name slot -->
-            <template v-slot:item.budgetName="{ item }">
+            <template v-slot:[`item.budgetName`]="{ item }">
               <td>{{ item.budgetName | limitedText }}</td>
             </template>
             <!-- Budget slot -->
-            <template v-slot:item.budget="{ item }">
+            <template v-slot:[`item.budget`]="{ item }">
               <p style="margin-bottom: 0px">{{ item.budget | moneyValue }}</p>
             </template>
             <!-- Actions -->
-            <template v-slot:item.actions="{ item }">
+            <template v-slot:[`item.actions`]="{ item }">
               <v-tooltip top>
                 <template v-slot:activator="{ on }">
                   <v-btn
@@ -379,8 +379,12 @@
           <!-- END EXPENSE TYPE Datatable -->
 
           <!-- Confirmation Modals -->
-          <delete-modal :activate="deleting" :deleteInfo="'(' + deleteType + ')'" :type="'expense-type'"></delete-modal>
-          <delete-error-modal :activate="invalidDelete" type="expense type"></delete-error-modal>
+          <delete-modal
+            :toggleDeleteModal="deleting"
+            :deleteInfo="'(' + deleteType + ')'"
+            :type="'expense-type'"
+          ></delete-modal>
+          <delete-error-modal :toggleDeleteErrorModal="invalidDelete" type="expense type"></delete-error-modal>
           <!-- End Confirmation Modals -->
         </v-container>
       </v-card>
@@ -563,7 +567,6 @@ function clickedRow(value) {
  * Delete an expense type and display status.
  */
 async function deleteExpenseType() {
-  this.deleting = false; // collapse delete confirmation model
   let et = await api.deleteItem(api.EXPENSE_TYPES, this.deleteModel.id);
   if (et.id) {
     // successfully deletes expense type
@@ -895,9 +898,9 @@ async function validateDelete(item) {
     });
   if (x) {
     this.$set(this.deleteModel, 'id', item.id);
-    this.deleting = true;
+    this.deleting = !this.deleting;
   } else {
-    this.invalidDelete = true;
+    this.invalidDelete = !this.invalidDelete;
   }
 } // validateDelete
 
@@ -912,12 +915,10 @@ async function validateDelete(item) {
  */
 async function created() {
   window.EventBus.$on('canceled-delete-expense-type', () => {
-    this.deleting = false;
     this.midAction = false;
   });
   window.EventBus.$on('confirm-delete-expense-type', this.deleteExpenseType);
   window.EventBus.$on('invalid-expense type-delete', () => {
-    this.invalidDelete = false;
     this.midAction = false;
   });
 

@@ -8,10 +8,10 @@
     </v-card-title>
 
     <v-container fluid>
-      <v-form ref="form" v-model="valid" lazy-validation>
+      <v-form ref="expenseTypeForm" v-model="valid" lazy-validation>
         <!-- Budget Name -->
         <v-text-field
-          v-model="model.budgetName"
+          v-model="editedExpenseType.budgetName"
           :rules="requiredRules"
           label="Budget Name"
           data-vv-name="Budget Name"
@@ -29,7 +29,7 @@
           :search-input.sync="categoryInput"
         >
           <template v-slot:selection="{ attrs, item }">
-            <v-chip close outlined label color="gray" @click:close="removeCategory(item)">
+            <v-chip :attrs="attrs" close outlined label color="gray" @click:close="removeCategory(item)">
               <strong>{{ item }}</strong
               >&nbsp;
             </v-chip>
@@ -39,7 +39,7 @@
         <!-- Budget Amount -->
         <v-text-field
           prefix="$"
-          v-model="model.budget"
+          v-model="editedExpenseType.budget"
           :rules="budgetRules"
           label="Budget"
           data-vv-name="Budget"
@@ -49,22 +49,22 @@
         <v-container grid-list-md text-xs-center>
           <v-row>
             <v-col cols="6">
-              <v-checkbox label="Overdraft Flag" v-model="model.odFlag"></v-checkbox>
+              <v-checkbox label="Overdraft Flag" v-model="editedExpenseType.odFlag"></v-checkbox>
 
-              <v-checkbox label="Recurring Flag" v-model="model.recurringFlag"></v-checkbox>
+              <v-checkbox label="Recurring Flag" v-model="editedExpenseType.recurringFlag"></v-checkbox>
             </v-col>
 
             <v-col cols="6">
-              <v-checkbox label="Receipt Required" v-model="model.requiredFlag"></v-checkbox>
+              <v-checkbox label="Receipt Required" v-model="editedExpenseType.requiredFlag"></v-checkbox>
 
-              <v-checkbox label="Mark as Inactive" v-model="model.isInactive"></v-checkbox>
+              <v-checkbox label="Mark as Inactive" v-model="editedExpenseType.isInactive"></v-checkbox>
             </v-col>
           </v-row>
         </v-container>
 
         <!-- Start Date -->
         <v-menu
-          v-if="!model.recurringFlag"
+          v-if="!editedExpenseType.recurringFlag"
           :rules="requiredRules"
           :close-on-content-click="true"
           :nudge-right="40"
@@ -81,18 +81,18 @@
               hint="MM/DD/YYYY format"
               persistent-hint
               prepend-icon="event"
-              @blur="model.startDate = parseDate(startDateFormatted)"
+              @blur="editedExpenseType.startDate = parseDate(startDateFormatted)"
               v-on="on"
             ></v-text-field>
           </template>
 
-          <v-date-picker v-model="model.startDate" no-title></v-date-picker>
+          <v-date-picker v-model="editedExpenseType.startDate" no-title></v-date-picker>
         </v-menu>
 
         <!-- End Date -->
 
         <v-menu
-          v-if="!model.recurringFlag"
+          v-if="!editedExpenseType.recurringFlag"
           :rules="requiredRules"
           :close-on-content-click="true"
           :nudge-right="40"
@@ -109,17 +109,17 @@
               hint="MM/DD/YYYY format"
               persistent-hint
               prepend-icon="event"
-              @blur="model.endDate = parseDate(endDateFormatted)"
+              @blur="editedExpenseType.endDate = parseDate(endDateFormatted)"
               v-on="on"
             ></v-text-field>
           </template>
 
-          <v-date-picker v-model="model.endDate" no-title></v-date-picker>
+          <v-date-picker v-model="editedExpenseType.endDate" no-title></v-date-picker>
         </v-menu>
 
         <!-- Description -->
         <v-textarea
-          v-model="model.description"
+          v-model="editedExpenseType.description"
           :rules="requiredRules"
           label="Description "
           data-vv-name="Description "
@@ -129,7 +129,7 @@
         <!-- Campfires autocomplete -->
         <v-autocomplete
           :items="campfires"
-          v-model="model.campfire"
+          v-model="editedExpenseType.campfire"
           item-text="name"
           item-value="url"
           label="Basecamp Campfire (optional)"
@@ -142,7 +142,7 @@
           <v-btn to="/help/expenseTypes" class="mb-4" x-small icon><v-icon color="#3f51b5">info</v-icon></v-btn>
         </div>
 
-        <v-radio-group v-model="model.accessibleBy" class="smallRadio ma-0" row mandatory>
+        <v-radio-group v-model="editedExpenseType.accessibleBy" class="smallRadio ma-0" row mandatory>
           <v-radio label="All" value="ALL"></v-radio>
 
           <v-radio label="Full" value="FULL"></v-radio>
@@ -154,7 +154,7 @@
 
         <!-- Employee Access List -->
         <v-autocomplete
-          v-if="model.accessibleBy == 'CUSTOM'"
+          v-if="editedExpenseType.accessibleBy == 'CUSTOM'"
           v-model="customAccess"
           :items="activeEmployees"
           no-data-text="No Employees Available"
@@ -183,29 +183,29 @@
         </v-autocomplete>
 
         <!-- Require Recipient -->
-        <v-switch v-model="model.hasRecipient" label="Does this expense type have a recipient?"></v-switch>
+        <v-switch v-model="editedExpenseType.hasRecipient" label="Does this expense type have a recipient?"></v-switch>
 
         <!-- always show on feed -->
         <v-switch
-          v-model="model.alwaysOnFeed"
+          v-model="editedExpenseType.alwaysOnFeed"
           @change="toggleShowAllCategories()"
           label="Have this expense type show on the company feed?"
         ></v-switch>
 
         <!-- require url for expense type -->
         <v-switch
-          v-model="model.requireURL"
+          v-model="editedExpenseType.requireURL"
           @change="toggleRequireURL()"
           label="Require a url for this expense?"
         ></v-switch>
 
         <v-container class="pb-0 mb-0">
-          <v-row v-if="model.categories.length > 0">
+          <v-row v-if="editedExpenseType.categories && editedExpenseType.categories.length > 0">
             <v-col>Category</v-col>
             <v-col>Show on Feed?</v-col>
             <v-col>Require Url?</v-col>
           </v-row>
-          <v-row v-for="(category, index) in model.categories" :key="index">
+          <v-row v-for="(category, index) in editedExpenseType.categories" :key="index">
             <v-col>{{ category.name }}</v-col>
             <v-col>
               <div>
@@ -214,7 +214,7 @@
                   v-if="!submitting"
                   light
                   v-model="category.showOnFeed"
-                  @click.stop="checkSelection(category)"
+                  @click.stop="checkSelection()"
                 ></v-checkbox>
               </div>
             </v-col>
@@ -225,7 +225,7 @@
                 light
                 justify="center"
                 v-model="category.requireURL"
-                @click.stop="checkRequireURL(category)"
+                @click.stop="checkRequireURL()"
               ></v-checkbox>
             </v-col>
           </v-row>
@@ -239,14 +239,17 @@
           class="ma-2"
           color="success"
           :loading="submitting"
-          @click="submitting = true"
+          @click="
+            submitForm = !submitForm;
+            submitting = true;
+          "
           :disabled="!valid"
         >
           <icon class="mr-1" name="save"></icon>Submit
         </v-btn>
         <!-- End Buttons -->
       </v-form>
-      <form-submission-confirmation :activate="this.submitting"></form-submission-confirmation>
+      <form-submission-confirmation :toggleSubmissionConfirmation="submitForm"></form-submission-confirmation>
     </v-container>
   </v-card>
 </template>
@@ -267,50 +270,50 @@ import { formatDate, isEmpty, parseDate } from '@/utils/utils';
 /**
  * Set required url for expense type if all category required url checkboxes are enabled.
  */
-function checkRequireURL(category) {
+function checkRequireURL() {
   // find index of category selected
-  let index = _.findIndex(this.model.categories, (cat) => {
-    return cat.name == category.name;
-  });
+  // let index = _.findIndex(this.editedExpenseType.categories, (cat) => {
+  //   return cat.name == category.name;
+  // });
 
   // toggle the category require url
-  this.model.categories[index].requireURL = !this.model.categories[index].requireURL;
+  //this.editedExpenseType.categories[index].requireURL = !this.editedExpenseType.categories[index].requireURL;
 
   // check if any categories do not require a url
-  let somethingIsFalse = _.find(this.model.categories, (category) => {
+  let somethingIsFalse = _.find(this.editedExpenseType.categories, (category) => {
     return !category.requireURL;
   });
 
   // update require url for expense type
   if (somethingIsFalse) {
-    this.model.requireURL = false;
+    this.editedExpenseType.requireURL = false;
   } else {
-    this.model.requireURL = true;
+    this.editedExpenseType.requireURL = true;
   }
 } // checkRequireURL
 
 /**
  * Set always on feed for expense type if all category show on feed checkboxes are enabled.
  */
-function checkSelection(category) {
+function checkSelection() {
   // find index of category selected
-  let index = _.findIndex(this.model.categories, (cat) => {
-    return cat.name == category.name;
-  });
+  // let index = _.findIndex(this.editedExpenseType.categories, (cat) => {
+  //   return cat.name == category.name;
+  // });
 
   // toggle the category show on feed
-  this.model.categories[index].showOnFeed = !this.model.categories[index].showOnFeed;
+  // this.editedExpenseType.categories[index].showOnFeed = !this.editedExpenseType.categories[index].showOnFeed;
 
   // check if any categories are hidden on feed
-  let somethingIsFalse = _.find(this.model.categories, (category) => {
+  let somethingIsFalse = _.find(this.editedExpenseType.categories, (category) => {
     return !category.showOnFeed;
   });
 
   // update always on feed for expense type
   if (somethingIsFalse) {
-    this.model.alwaysOnFeed = false;
+    this.editedExpenseType.alwaysOnFeed = false;
   } else {
-    this.model.alwaysOnFeed = true;
+    this.editedExpenseType.alwaysOnFeed = true;
   }
 } // checkSelection
 
@@ -318,7 +321,7 @@ function checkSelection(category) {
  * Clears the form and sets all fields to a default state.
  */
 function clearForm() {
-  this.$refs.form.reset();
+  this.$refs.expenseTypeForm.reset();
   this.$set(this.model, 'id', '');
   this.$set(this.model, 'budget', 0);
   this.$set(this.model, 'budgetName', '');
@@ -334,6 +337,8 @@ function clearForm() {
   this.$set(this.model, 'hasRecipient', false);
   this.$set(this.model, 'alwaysOnFeed', false);
   this.$set(this.model, 'requireURL', false);
+  //TODO: set all stuff for editedExpenseType not model
+  this.editedExpenseType = _.cloneDeep(this.model); //sets edited expense type to model
   this.startDateFormatted = null;
   this.endDateFormatted = null;
   this.customAccess = [];
@@ -346,7 +351,7 @@ function clearForm() {
  * @return boolean - all employees have access at a percentage rate
  */
 function isAllSelected() {
-  return this.model.accessibleBy == 'ALL';
+  return this.editedExpenseType.accessibleBy == 'ALL';
 } // isAllSelected
 
 /**
@@ -356,7 +361,7 @@ function isAllSelected() {
  * @return boolean - custom employees have access
  */
 function isCustomSelected() {
-  return this.model.accessibleBy == 'CUSTOM';
+  return this.editedExpenseType.accessibleBy == 'CUSTOM';
 } // isCustomSelected
 
 /**
@@ -366,7 +371,7 @@ function isCustomSelected() {
  * @return boolean - all employees have access at a full rate
  */
 function isFullSelected() {
-  return this.model.accessibleBy == 'FULL';
+  return this.editedExpenseType.accessibleBy == 'FULL';
 } // isFullSelected
 
 /**
@@ -376,7 +381,7 @@ function isFullSelected() {
  * @return boolean - all full time employees have access
  */
 function isFullTimeSelected() {
-  return this.model.accessibleBy == 'FULL TIME';
+  return this.editedExpenseType.accessibleBy == 'FULL TIME';
 } // isFullTimeSelected
 
 /**
@@ -385,8 +390,8 @@ function isFullTimeSelected() {
  * @param category - category to remove
  */
 function removeCategory(category) {
-  this.model.categories.splice(this.model.categories.indexOf(category), 1);
-  this.model.categories = [...this.model.categories];
+  this.editedExpenseType.categories.splice(this.editedExpenseType.categories.indexOf(category), 1);
+  this.editedExpenseType.categories = [...this.editedExpenseType.categories];
   this.categories.splice(this.categories.indexOf(category), 1);
   this.categories = [...this.categories];
 } // removeCategory
@@ -400,47 +405,46 @@ async function submit() {
 
   // set accessibleBy based on access radio
   if (this.isCustomSelected()) {
-    this.model.accessibleBy = this.customAccess;
+    this.editedExpenseType.accessibleBy = this.customAccess;
   }
 
   // convert budget input into a floating point number
-  this.model.budget = parseFloat(this.model.budget);
+  this.editedExpenseType.budget = parseFloat(this.editedExpenseType.budget);
 
-  if (this.model.odFlag == null) {
+  if (this.editedExpenseType.odFlag == null) {
     // set overdraft flag to false if checkbox is null
-    this.model.odFlag = false;
+    this.editedExpenseType.odFlag = false;
   }
 
-  if (this.model.recurringFlag == null) {
+  if (this.editedExpenseType.recurringFlag == null) {
     // set recurring flag to false if checkbox is null
-    this.model.recurringFlag = false;
+    this.editedExpenseType.recurringFlag = false;
   }
 
-  if (this.model.requiredFlag == null) {
+  if (this.editedExpenseType.requiredFlag == null) {
     // set receipt required flag to false if checkbox is null
-    this.model.requiredFlag = false;
+    this.editedExpenseType.requiredFlag = false;
   }
 
-  if (this.model.isInactive == null) {
+  if (this.editedExpenseType.isInactive == null) {
     // set is inactive flag to false if checkbox is null
-    this.model.isInactive = false;
+    this.editedExpenseType.isInactive = false;
   }
 
-  for (var i = 0; i < this.model.categories.length; i++) {
-    this.model.categories[i] = JSON.stringify(this.model.categories[i]);
-  }
-
-  if (this.$refs.form.validate()) {
+  if (this.$refs.expenseTypeForm && this.$refs.expenseTypeForm.validate()) {
+    for (var i = 0; i < this.editedExpenseType.categories.length; i++) {
+      this.editedExpenseType.categories[i] = JSON.stringify(this.editedExpenseType.categories[i]);
+    }
     // form is validated
-    if (this.model.recurringFlag) {
+    if (this.editedExpenseType.recurringFlag) {
       // clear start and end date fields if expense type is recurring
-      this.$set(this.model, 'startDate', null);
-      this.$set(this.model, 'endDate', null);
+      this.$set(this.editedExpenseType, 'startDate', null);
+      this.$set(this.editedExpenseType, 'endDate', null);
     }
 
-    if (this.model.id) {
+    if (this.editedExpenseType.id) {
       // editing an expense type
-      let newExpenseType = await api.updateItem(api.EXPENSE_TYPES, this.model);
+      let newExpenseType = await api.updateItem(api.EXPENSE_TYPES, this.editedExpenseType);
 
       if (newExpenseType.id) {
         // successfully updates expense type
@@ -453,18 +457,18 @@ async function submit() {
     } else {
       // creating a new expense type
       let newUUID = uuid();
-      this.$set(this.model, 'id', newUUID);
-      let newExpenseType = await api.createItem(api.EXPENSE_TYPES, this.model);
+      this.$set(this.editedExpenseType, 'id', newUUID);
+      let newExpenseType = await api.createItem(api.EXPENSE_TYPES, this.editedExpenseType);
 
       if (newExpenseType.id) {
         // successfully creates an expense type
-        this.$set(this.model, 'id', newExpenseType.id);
+        this.$set(this.editedExpenseType, 'id', newExpenseType.id);
         this.$emit('add', newExpenseType);
         this.clearForm();
       } else {
         // emit error if fails to create an expense type
         this.$emit('error', newExpenseType.response.data.message);
-        this.$set(this.model, 'id', '');
+        this.$set(this.editedExpenseType, 'id', '');
       }
     }
   }
@@ -479,9 +483,9 @@ async function submit() {
  */
 function toggleShowAllCategories() {
   if (!this.submitting) {
-    let alwaysOF = this.model.alwaysOnFeed;
+    let alwaysOF = this.editedExpenseType.alwaysOnFeed;
 
-    _.forEach(this.model.categories, (category) => {
+    _.forEach(this.editedExpenseType.categories, (category) => {
       category.showOnFeed = alwaysOF;
     });
   }
@@ -492,9 +496,9 @@ function toggleShowAllCategories() {
  */
 function toggleRequireURL() {
   if (!this.submitting) {
-    let requireURL = this.model.requireURL;
+    let requireURL = this.editedExpenseType.requireURL;
 
-    _.forEach(this.model.categories, (category) => {
+    _.forEach(this.editedExpenseType.categories, (category) => {
       category.requireURL = requireURL;
     });
   }
@@ -533,6 +537,7 @@ async function created() {
   activeEmployees = _.sortBy(activeEmployees, ['text']); // sort employees
   this.activeEmployees = activeEmployees;
   this.campfires = await api.getBasecampCampfires();
+  this.editedExpenseType = _.cloneDeep(this.model);
   this.clearForm();
 } // created
 
@@ -566,9 +571,11 @@ export default {
         (v) => (!isEmpty(v) && /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v)) || 'Date must be valid. Format: MM/DD/YYYY'
       ], // rule for a required date
       endDateFormatted: null, // formatted end date
+      editedExpenseType: { categories: [] }, //used to store edits made to an expense type or when creating new expense type
       requiredRules: [(v) => !isEmpty(v) || 'This field is required'],
       startDateFormatted: null, // formatted start date
       submitting: false, // submitting form
+      submitForm: false, //triggers submit form modal when changed
       valid: false // form is valid
     };
   },
@@ -591,19 +598,20 @@ export default {
   props: ['model'], // expense type to be created/updated
   watch: {
     'model.id': function () {
-      if (this.model.id != null) {
-        this.categories = _.map(this.model.categories, (category) => {
+      this.editedExpenseType = _.cloneDeep(this.model);
+      if (this.editedExpenseType.id != null) {
+        this.categories = _.map(this.editedExpenseType.categories, (category) => {
           return category.name;
         });
       }
     },
-    'model.accessibleBy': function (val) {
-      if (!this.submitting) {
+    'editedExpenseType.accessibleBy': function (val) {
+      if (!this.submitting && this.editedExpenseType.accessibleBy) {
         if (!['ALL', 'FULL TIME', 'FULL', 'CUSTOM'].includes(val)) {
           // set employee access form field when populating form with an existing expense type
           // filter out employees that do not have access
           this.customAccess = _.filter(this.activeEmployees, (employee) => {
-            return this.model.accessibleBy.includes(employee.value);
+            return this.editedExpenseType.accessibleBy.includes(employee.value);
           });
 
           // map employee values
@@ -611,7 +619,7 @@ export default {
             return employee.value;
           });
 
-          this.model.accessibleBy = 'CUSTOM';
+          this.editedExpenseType.accessibleBy = 'CUSTOM';
         }
       }
     },
@@ -619,13 +627,13 @@ export default {
       // limit categories to less than 10
       if (val.length > 10) {
         this.$nextTick(() => this.categories.pop());
-        this.$nextTick(() => this.model.categories.pop());
+        this.$nextTick(() => this.editedExpenseType.categories.pop());
       }
 
       // update categories checkboxes
-      if (val.length > this.model.categories.length) {
+      if (val.length > this.editedExpenseType.categories.length) {
         // category was added
-        let c = _.map(this.model.categories, (category) => {
+        let c = _.map(this.editedExpenseType.categories, (category) => {
           return category.name;
         });
 
@@ -633,30 +641,30 @@ export default {
           return !c.includes(x);
         });
 
-        this.model.categories.push({
+        this.editedExpenseType.categories.push({
           name: val[index],
-          showOnFeed: this.model.alwaysOnFeed,
-          requireURL: this.model.requireURL
+          showOnFeed: this.editedExpenseType.alwaysOnFeed,
+          requireURL: this.editedExpenseType.requireURL
         });
-      } else if (val.length < this.model.categories.length) {
+      } else if (val.length < this.editedExpenseType.categories.length) {
         // category was removed
-        this.model.categories = _.filter(this.model.categories, (category) => {
+        this.editedExpenseType.categories = _.filter(this.editedExpenseType.categories, (category) => {
           return val.includes(category.name);
         });
       }
     },
-    'model.endDate': function () {
-      this.endDateFormatted = this.formatDate(this.model.endDate) || this.endDateFormatted;
+    'editedExpenseType.endDate': function () {
+      this.endDateFormatted = this.formatDate(this.editedExpenseType.endDate) || this.endDateFormatted;
       //fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
-      if (this.model.endDate !== null && !this.formatDate(this.model.endDate)) {
-        this.model.endDate = null;
+      if (this.editedExpenseType.endDate !== null && !this.formatDate(this.editedExpenseType.endDate)) {
+        this.editedExpenseType.endDate = null;
       }
     },
-    'model.startDate': function () {
-      this.startDateFormatted = this.formatDate(this.model.startDate) || this.startDateFormatted;
+    'editedExpenseType.startDate': function () {
+      this.startDateFormatted = this.formatDate(this.editedExpenseType.startDate) || this.startDateFormatted;
       //fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
-      if (this.model.startDate !== null && !this.formatDate(this.model.startDate)) {
-        this.model.startDate = null;
+      if (this.editedExpenseType.startDate !== null && !this.formatDate(this.editedExpenseType.startDate)) {
+        this.editedExpenseType.startDate = null;
       }
     }
   }

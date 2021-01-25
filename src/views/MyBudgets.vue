@@ -25,7 +25,7 @@
 
     <!-- Anniversary Date -->
     <v-col cols="12" lg="4" v-if="!isMobile">
-      <v-card @click="changingBudgetView = true" hover>
+      <v-card @click="changingBudgetView = !changingBudgetView" hover>
         <v-card-title>
           <!-- display the next anniversary date -->
           <div v-if="viewingCurrentBudgetYear">
@@ -71,7 +71,7 @@
       </div>
     </v-col>
     <budget-select-modal
-      :activate="changingBudgetView"
+      :toggleBudgetSelectModal="changingBudgetView"
       :budgetYears="this.budgetYears"
       :current="this.fiscalDateView"
       :hireDate="this.hireDate"
@@ -554,15 +554,12 @@ async function updateData() {
  */
 async function created() {
   window.EventBus.$on('refreshChart', this.updateData);
-  window.EventBus.$on('cancel-budget-year', () => {
-    this.changingBudgetView = false;
-  });
+
   window.EventBus.$on('selected-budget-year', (data) => {
     if (data.format(IsoFormat) != this.fiscalDateView) {
       this.fiscalDateView = data.format(IsoFormat);
       this.refreshBudget();
     }
-    this.changingBudgetView = false;
   });
   this.refreshEmployee();
   this.addOneSecondToActualTimeEverySecond();

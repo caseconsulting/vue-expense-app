@@ -27,7 +27,7 @@
 
           <!-- Cancel Button -->
           <template>
-            <v-list-item ripple @click.native="emit(`cancel-budget-year`)" class="list-hover">
+            <v-list-item ripple @click.native="activate = false" class="list-hover">
               <v-list-item-content>
                 <v-list-item-title><h2 class="center-text">Cancel</h2></v-list-item-title>
               </v-list-item-content>
@@ -87,6 +87,7 @@ function select(budgetYear) {
   let fiscalYear = Moment(this.hireDate, IsoFormat);
   fiscalYear.year(budgetYear);
   this.emit(`selected-budget-year`, fiscalYear);
+  this.activate = false;
 } // select
 
 // |--------------------------------------------------|
@@ -96,17 +97,27 @@ function select(budgetYear) {
 // |--------------------------------------------------|
 
 export default {
+  data() {
+    return {
+      activate: false // dialog activator
+    };
+  },
   methods: {
     emit,
     isCurrent,
     select
   },
   props: [
-    'activate', // dialog activator
+    'toggleBudgetSelectModal', // dialog activator
     'budgetYears', // all budget years
     'current', // current fiscal date view
     'hireDate' // employee hire date
-  ]
+  ],
+  watch: {
+    toggleBudgetSelectModal: function () {
+      this.activate = true;
+    }
+  }
 };
 </script>
 

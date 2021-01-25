@@ -5,9 +5,25 @@
         <v-card-title class="headline">Are you sure you want to submit?</v-card-title>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn color="gray darken-1" text @click.native="emit('canceled')">No</v-btn>
+          <v-btn
+            color="gray darken-1"
+            text
+            @click.native="
+              emit('canceled');
+              activate = false;
+            "
+            >No</v-btn
+          >
           <v-spacer></v-spacer>
-          <v-btn color="red" text @click.native="emit('confirmed')">Yes</v-btn>
+          <v-btn
+            color="red"
+            text
+            @click.native="
+              emit('confirmed');
+              activate = false;
+            "
+            >Yes</v-btn
+          >
           <v-spacer></v-spacer>
         </v-card-actions>
       </v-card>
@@ -37,11 +53,21 @@ function emit(msg) {
 // |--------------------------------------------------|
 
 export default {
+  data() {
+    return {
+      activate: false // dialog activator
+    };
+  },
   methods: {
     emit
   },
   props: [
-    'activate' // dialog activator
-  ]
+    'toggleSubmissionConfirmation' // dialog activator
+  ],
+  watch: {
+    toggleSubmissionConfirmation: function () {
+      this.activate = true;
+    }
+  }
 };
 </script>

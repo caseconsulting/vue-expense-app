@@ -14,10 +14,10 @@
         @click:row="expenseClicked"
       >
         <!-- Remove Check Box in header -->
-        <template v-slot:header.data-table-select></template>
+        <template v-slot: header.data-table-select></template>
 
         <!-- Group Checkbox -->
-        <template v-slot:item.data-table-select="{ item }">
+        <template v-slot:[`item.data-table-select`]="{ item }">
           <v-checkbox
             :input-value="item.selected"
             @click.stop="
@@ -31,26 +31,26 @@
         </template>
 
         <!-- Item cost -->
-        <template v-slot:item.cost="{ item }">
+        <template v-slot:[`item.cost`]="{ item }">
           <p id="money-team" :class="{ failed: item.failed }" style="margin-bottom: 0px">
             {{ item.cost | moneyValue }}
           </p>
         </template>
 
         <!-- Purchase Date -->
-        <template v-slot:item.purchaseDate="{ item }">
+        <template v-slot:[`item.purchaseDate`]="{ item }">
           <p :class="{ failed: item.failed }" style="margin-bottom: 0px">
             {{ item.purchaseDate | monthDayYearFormat }}
           </p>
         </template>
 
         <!-- Description -->
-        <template v-slot:item.description="{ item }">
+        <template v-slot:[`item.description`]="{ item }">
           <p :class="{ failed: item.failed }" style="margin-bottom: 0px">{{ item.description | descripFormat }}</p>
         </template>
 
         <!-- Show on Feed -->
-        <template v-slot:item.showOnFeed="{ item }">
+        <template v-slot:[`item.showOnFeed`]="{ item }">
           <v-switch
             :input-value="item.showOnFeed && item.selected"
             @change="expenseToggle(item)"

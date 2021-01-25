@@ -87,7 +87,7 @@
           @click:row="handleClick"
         >
           <!-- Delete Action Item Slot -->
-          <template v-slot:item.actions="{ item }">
+          <template v-slot:[`item.actions`]="{ item }">
             <div class="datatable_btn layout" v-if="userIsAdmin()">
               <v-tooltip top>
                 <template v-slot:activator="{ on }">
@@ -101,7 +101,7 @@
           </template>
 
           <!-- Avatar Item Slot -->
-          <template v-slot:item.avatars="{ item }">
+          <template v-slot:[`item.avatars`]="{ item }">
             <!-- Valid Avatar -->
             <v-avatar v-if="item.avatar" size="35">
               <img :src="item.avatar" @error="changeAvatar(employee)" />
@@ -115,35 +115,35 @@
           </template>
 
           <!-- Employee Number Item Slot -->
-          <template v-slot:item.employeeNumber="{ item }">
+          <template v-slot:[`item.employeeNumber`]="{ item }">
             <p :class="{ inactiveStyle: isInactive(item), selectFocus: isFocus(item) }" style="margin-bottom: 0px">
               {{ item.employeeNumber }}
             </p>
           </template>
 
           <!-- First Name Item Slot -->
-          <template v-slot:item.firstName="{ item }">
+          <template v-slot:[`item.firstName`]="{ item }">
             <p :class="{ inactiveStyle: isInactive(item), selectFocus: isFocus(item) }" style="margin-bottom: 0px">
               {{ item.firstName }}
             </p>
           </template>
 
           <!-- Last Name Item Slot -->
-          <template v-slot:item.lastName="{ item }">
+          <template v-slot:[`item.lastName`]="{ item }">
             <p :class="{ inactiveStyle: isInactive(item), selectFocus: isFocus(item) }" style="margin-bottom: 0px">
               {{ item.lastName }}
             </p>
           </template>
 
           <!-- Date Item Slot -->
-          <template v-slot:item.hireDate="{ item }">
+          <template v-slot:[`item.hireDate`]="{ item }">
             <p :class="{ inactiveStyle: isInactive(item), selectFocus: isFocus(item) }" style="margin-bottom: 0px">
               {{ item.hireDate | monthDayYearFormat }}
             </p>
           </template>
 
           <!-- Email Item Slot -->
-          <template v-slot:item.email="{ item }">
+          <template v-slot:[`item.email`]="{ item }">
             <p :class="{ inactiveStyle: isInactive(item), selectFocus: isFocus(item) }" style="margin-bottom: 0px">
               {{ item.email }}
             </p>
@@ -168,8 +168,8 @@
         </v-card-actions>
 
         <!-- Confirmation Modals -->
-        <delete-modal :activate="deleting" :type="'employee'"></delete-modal>
-        <delete-error-modal :activate="invalidDelete" type="employee"></delete-error-modal>
+        <delete-modal :toggleDeleteModal="deleting" :type="'employee'"></delete-modal>
+        <delete-error-modal :toggleDeleteErrorModal="invalidDelete" type="employee"></delete-error-modal>
         <!-- End Confirmation Modals -->
       </v-container>
     </v-card>
@@ -223,7 +223,6 @@ function clearStatus() {
  * Delete an employee and display status.
  */
 async function deleteEmployee() {
-  this.deleting = false; // deactive modal to confirm delete
   let e = await api.deleteItem(api.EMPLOYEES, this.deleteModel.id); // delete employee from api
   if (e.id) {
     // update data if successfully deletes employee
@@ -340,10 +339,10 @@ async function validateDelete(item) {
   if (valid) {
     // employee can be deleted
     this.$set(this.deleteModel, 'id', item.id);
-    this.deleting = true; // activate model to confirm delete
+    this.deleting = !this.deleting; // activate model to confirm delete
   } else {
     // employee cannot be deleted
-    this.invalidDelete = true;
+    this.invalidDelete = !this.invalidDelete;
   }
 } // validateDelete
 
@@ -361,12 +360,10 @@ async function created() {
     this.createEmployee = false;
   });
   window.EventBus.$on('canceled-delete-employee', () => {
-    this.deleting = false;
     this.midAction = false;
   });
   window.EventBus.$on('confirm-delete-employee', this.deleteEmployee);
   window.EventBus.$on('invalid-employee-delete', () => {
-    this.invalidDelete = false;
     this.midAction = false;
   });
 

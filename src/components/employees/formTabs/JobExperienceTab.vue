@@ -15,7 +15,7 @@
       </div>
 
       <!-- Loop Time Frames -->
-      <div v-for="(timeFrame, index) in model.icTimeFrames" :key="index">
+      <div v-for="(timeFrame, index) in editedJobExperienceInfo.icTimeFrames" :key="index">
         <!-- Range -->
         <v-menu
           v-model="timeFrame.showRangeMenu"
@@ -58,12 +58,17 @@
       <v-text-field label="Company" data-vv-name="Company" readonly value="Case Consulting"></v-text-field>
 
       <!-- Job Position -->
-      <v-text-field v-model="model.jobRole" readonly label="Position" data-vv-name="Position"></v-text-field>
+      <v-text-field
+        v-model="editedJobExperienceInfo.jobRole"
+        readonly
+        label="Position"
+        data-vv-name="Position"
+      ></v-text-field>
 
       <v-row class="px-3">
         <!-- Start Date -->
         <v-text-field
-          :value="formatDateDashToSlash(model.hireDate)"
+          :value="formatDateDashToSlash(editedJobExperienceInfo.hireDate)"
           label="Start Date"
           prepend-icon="event_available"
           readonly
@@ -75,7 +80,7 @@
 
     <!-- Loop Jobs -->
     <div
-      v-for="(job, index) in model.jobs"
+      v-for="(job, index) in editedJobExperienceInfo.jobs"
       style="border: 1px solid grey"
       class="pt-3 pb-1 px-5"
       :key="'company: ' + job.company + index"
@@ -209,7 +214,7 @@ async function created() {
  * Adds an IC Time Frame.
  */
 function addICTimeFrame() {
-  this.model.icTimeFrames.push({
+  this.editedJobExperienceInfo.icTimeFrames.push({
     range: [],
     showRangeMenu: false
   });
@@ -219,7 +224,7 @@ function addICTimeFrame() {
  * Adds a Job.
  */
 function addJob() {
-  this.model.jobs.push({
+  this.editedJobExperienceInfo.jobs.push({
     company: null,
     position: null,
     startDate: null,
@@ -235,7 +240,7 @@ function addJob() {
  * @param index - array index of IC time frame to delete
  */
 function deleteICTimeFrame(index) {
-  this.model.icTimeFrames.splice(index, 1);
+  this.editedJobExperienceInfo.icTimeFrames.splice(index, 1);
 } // deleteICTimeFrame
 
 /**
@@ -244,7 +249,7 @@ function deleteICTimeFrame(index) {
  * @param index - array index of job to delete
  */
 function deleteJob(index) {
-  this.model.jobs.splice(index, 1);
+  this.editedJobExperienceInfo.jobs.splice(index, 1);
 } // deleteJob
 
 /**
@@ -335,7 +340,7 @@ function validateFields() {
     hasErrors = !this.$refs.formFields.validate();
   }
 
-  window.EventBus.$emit('doneValidating', 'jobExperience'); // emit done validating
+  window.EventBus.$emit('doneValidating', 'jobExperience', this.editedJobExperienceInfo); // emit done validating
   window.EventBus.$emit('jobExperienceStatus', hasErrors); // emit error status
 } // validateFields
 
@@ -353,6 +358,7 @@ export default {
         (v) => !isEmpty(v) || 'Date required',
         (v) => (!isEmpty(v) && /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v)) || 'Date must be valid. Format: MM/DD/YYYY'
       ], // rules for a required date
+      editedJobExperienceInfo: _.cloneDeep(this.model), //edited job experience info
       requiredRules: [(v) => !isEmpty(v) || 'This field is required'] // rules for required fields
     };
   },

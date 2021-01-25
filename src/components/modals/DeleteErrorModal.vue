@@ -6,7 +6,15 @@
         <v-card-text>Cannot delete {{ type }}. Expenses for this {{ type }} exist.</v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn color="gray darken-1" text @click.native="emit(`invalid-${type}-delete`)">Ok</v-btn>
+          <v-btn
+            color="gray darken-1"
+            text
+            @click.native="
+              emit(`invalid-${type}-delete`);
+              activate = false;
+            "
+            >Ok</v-btn
+          >
           <v-spacer></v-spacer>
         </v-card-actions>
       </v-card>
@@ -37,12 +45,22 @@ function emit(msg) {
 // |--------------------------------------------------|
 
 export default {
+  data() {
+    return {
+      activate: false // dialog activator
+    };
+  },
   methods: {
     emit
   },
   props: [
-    'activate', // dialog activator
+    'toggleDeleteErrorModal', // dialog activator
     'type' // type of object being deleted
-  ]
+  ],
+  watch: {
+    toggleDeleteErrorModal: function () {
+      this.activate = true;
+    }
+  }
 };
 </script>

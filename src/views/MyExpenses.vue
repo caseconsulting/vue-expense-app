@@ -135,36 +135,31 @@
             @click:row="clickedRow"
           >
             <!-- Cost slot -->
-            <template v-slot:item.cost="{ item }">
+            <template v-slot:[`item.cost`]="{ item }">
               <td>{{ item.cost | moneyValue }}</td>
             </template>
             <!-- Purchase date slot -->
-            <template v-slot:item.purchaseDate="{ item }">
+            <template v-slot:[`item.purchaseDate`]="{ item }">
               <td>{{ item.purchaseDate | monthDayYearFormat }}</td>
             </template>
             <!-- Reimburse date Slot -->
-            <template v-slot:item.reimburseDate="{ item }">
+            <template v-slot:[`item.reimburseDate`]="{ item }">
               <td>{{ item.reimbursedDate | monthDayYearFormat }}</td>
             </template>
             <!-- Creation date slot -->
-            <template v-slot:item.createdAt="{ item }">
-              <td>{{ item.createdAt | monthDayYearFormat }}</td>
-            </template>
-            <!-- Creation date slot -->
-            <template v-slot:item.createdAt="{ item }">
+            <template v-slot:[`item.createdAt`]="{ item }">
               <td>{{ item.createdAt | monthDayYearFormat }}</td>
             </template>
             <!-- Employee name slot-->
-            <template v-slot: item.employeeName="{item}">
+            <template v-slot:[`item.employeeName`]="{ item }">
               <td v-if="isAdmin">{{ item.employeeName }}</td>
             </template>
             <!-- Budget Name Slot -->
-            <template v-slot: item.budgetName="{item}">
+            <template v-slot:[`item.budgetName`]="{ item }">
               <td v-if="isAdmin">{{ item.budgetName }}</td>
             </template>
             <!--Action Items-->
-
-            <template v-slot:item.actions="{ item }">
+            <template v-slot:[`item.actions`]="{ item }">
               <!-- Download Button-->
               <td class="datatable_btn layout" @click="clickedRow(item)">
                 <!-- Download Attachment Button -->
@@ -196,7 +191,7 @@
                       text
                       icon
                       @click="
-                        deleting = true;
+                        deleting = !deleting;
                         midAction = true;
                         propExpense = item;
                       "
@@ -215,7 +210,7 @@
                       text
                       icon
                       @click="
-                        unreimbursing = true;
+                        unreimbursing = !unreimbursing;
                         midAction = true;
                         propExpense = item;
                       "
@@ -284,8 +279,8 @@
           </v-card-actions>
 
           <!-- Confirmation Modals -->
-          <unreimburse-modal :activate="unreimbursing" :expense="propExpense"></unreimburse-modal>
-          <delete-modal :activate="deleting" :type="'expense'"></delete-modal>
+          <unreimburse-modal :toggleUnreimburseModal="unreimbursing" :expense="propExpense"></unreimburse-modal>
+          <delete-modal :toggleDeleteModal="deleting" :type="'expense'"></delete-modal>
           <!-- End Confirmation Modals -->
         </v-container>
       </v-card>
@@ -491,7 +486,6 @@ function customFilter(item, queryText) {
  * Delete a selected expense.
  */
 async function deleteExpense() {
-  this.deleting = false; // collapse delete confirmation model
   this.loading = true; // set loading status to true
   if (this.propExpense.id) {
     // expense is selected
@@ -671,7 +665,6 @@ function toTopOfForm() {
  */
 async function unreimburseExpense() {
   this.loading = true; // set loading status to true
-  this.unreimbursing = false; // collapse unreimburse confirmation modal
 
   this.propExpense.reimbursedDate = null; // clear reimburse date field
   let updatedExpense = await api.updateItem(api.EXPENSES, this.propExpense);
@@ -730,13 +723,11 @@ function useInactiveStyle(expense) {
  */
 async function created() {
   window.EventBus.$on('canceled-unreimburse-expense', () => {
-    this.unreimbursing = false;
     this.midAction = false;
   });
   window.EventBus.$on('confirm-unreimburse-expense', this.unreimburseExpense);
 
   window.EventBus.$on('canceled-delete-expense', () => {
-    this.deleting = false;
     this.midAction = false;
   });
   window.EventBus.$on('confirm-delete-expense', this.deleteExpense);
@@ -884,7 +875,7 @@ export default {
         statusMessage: '',
         color: ''
       }, // snackbar action status
-      unreimbursing: false, // activate unreimburse model
+      unreimbursing: false, // activate unreimburse model when value changes
       userInfo: null // user information
     };
   },
