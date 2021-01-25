@@ -460,6 +460,8 @@ async function created() {
     } else if (tab == 'jobExperience') {
       this.$set(this.model, 'icTimeFrames', data.icTimeFrames);
       this.$set(this.model, 'jobs', data.jobs);
+    } else if (tab == 'technologies') {
+      this.$set(this.model, 'technologies', data); //sets technologies to data returned from technologies tab
     }
   });
 

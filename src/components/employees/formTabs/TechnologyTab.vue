@@ -2,7 +2,7 @@
   <div>
     <!-- Loop Technologies -->
     <div
-      v-for="(technology, index) in model.technologies"
+      v-for="(technology, index) in editedTechnologies"
       class="pt-3 pb-1 px-5"
       :key="'technology: ' + technology.name + index"
       style="border: 1px solid grey"
@@ -93,7 +93,7 @@ async function created() {
  * Add a Technology.
  */
 function addTechnology() {
-  this.model.technologies.push({
+  this.editedTechnologies.push({
     name: '',
     years: 0,
     current: false
@@ -106,7 +106,7 @@ function addTechnology() {
  * @param index - array index of technology to delete
  */
 function deleteTechnology(index) {
-  this.model.technologies.splice(index, 1);
+  this.editedTechnologies.splice(index, 1);
 } // deleteTechnology
 
 /**
@@ -141,7 +141,7 @@ function validateFields() {
     hasErrors = !this.$refs.formFields.validate();
   }
 
-  window.EventBus.$emit('doneValidating', 'technologies'); // emit done validating
+  window.EventBus.$emit('doneValidating', 'technologies', this.editedTechnologies); // emit done validating
   window.EventBus.$emit('technologiesStatus', hasErrors); // emit error status
 } // validateFields
 
@@ -159,6 +159,7 @@ export default {
         (v) => !isEmpty(v) || 'Date required',
         (v) => (!isEmpty(v) && /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v)) || 'Date must be valid. Format: MM/DD/YYYY'
       ], // rules for a required date
+      editedTechnologies: _.cloneDeep(this.model.technologies), //stores edited technology info
       experienceRequired: [
         (v) => !isEmpty(v) || 'This field is required',
         (v) => v >= 0 || 'Value cannot be negative',
