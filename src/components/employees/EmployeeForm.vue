@@ -441,46 +441,8 @@ async function created() {
 
   // reset validating status and sets the data based on the tab
   window.EventBus.$on('doneValidating', (tab, data) => {
+    this.setFormData(tab, data); //sets the form data
     this.validating[tab] = false;
-    if (tab == 'employee') {
-      this.$set(this.model, 'firstName', data.firstName);
-      this.$set(this.model, 'middleName', data.middleName);
-      this.$set(this.model, 'lastName', data.lastName);
-      this.$set(this.model, 'employeeNumber', data.employeeNumber);
-      this.$set(this.model, 'email', data.email);
-      this.$set(this.model, 'employeeRole', data.employeeRole);
-      this.$set(this.model, 'hireDate', data.hireDate);
-      this.$set(this.model, 'workStatus', data.workStatus);
-      this.$set(this.model, 'deptDate', data.deptDate);
-    } else if (tab == 'personal') {
-      this.$set(this.model, 'prime', data.prime);
-      this.$set(this.model, 'contract', data.contract);
-      this.$set(this.model, 'github', data.github);
-      this.$set(this.model, 'twitter', data.twitter);
-      this.$set(this.model, 'jobRole', data.jobRole);
-      this.$set(this.model, 'birthday', data.birthday);
-      this.$set(this.model, 'birthdayFeed', data.birthdayFeed);
-      this.$set(this.model, 'city', data.city);
-      this.$set(this.model, 'country', data.country);
-      this.$set(this.model, 'st', data.st);
-    } else if (tab == 'jobExperience') {
-      this.$set(this.model, 'icTimeFrames', data.icTimeFrames);
-      this.$set(this.model, 'jobs', data.jobs);
-    } else if (tab == 'technologies') {
-      this.$set(this.model, 'technologies', data); //sets technologies to data returned from technologies tab
-    } else if (tab == 'education') {
-      this.$set(this.model, 'degrees', data); //sets degrees to data returned from education tab
-    } else if (tab == 'customerOrgExp') {
-      this.$set(this.model, 'customerOrgExp', data); //sets degrees to data returned from education tab
-    } else if (tab == 'contracts') {
-      this.$set(this.model, 'contracts', data); //sets contracts to data returned from contracts tab
-    } else if (tab == 'certifications') {
-      this.$set(this.model, 'certifications', data); //sets certifications to data returned from certifications tab
-    } else if (tab == 'awards') {
-      this.$set(this.model, 'awards', data); //sets awards to data returned from awards tab
-    } else if (tab == 'clearance') {
-      this.$set(this.model, 'clearances', data); //sets clearances to data returned from clearance tab
-    }
   });
 
   // set tab error status
@@ -529,6 +491,56 @@ async function created() {
   this.formTab = this.currentTab;
   this.afterCreate = true;
 } // created
+
+/**
+ * Sets the form data based on the given tab.
+ * @param tab - the tab the data came from
+ * @param data - the data to be saved
+ */
+function setFormData(tab, data) {
+  if (tab == 'employee') {
+    //sets all employee info to data returned from employee tab
+    this.$set(this.model, 'firstName', data.firstName);
+    this.$set(this.model, 'middleName', data.middleName);
+    this.$set(this.model, 'lastName', data.lastName);
+    this.$set(this.model, 'employeeNumber', data.employeeNumber);
+    this.$set(this.model, 'email', data.email);
+    this.$set(this.model, 'employeeRole', data.employeeRole);
+    this.$set(this.model, 'hireDate', data.hireDate);
+    this.$set(this.model, 'workStatus', data.workStatus);
+    this.$set(this.model, 'deptDate', data.deptDate);
+  } else if (tab == 'personal') {
+    //sets all personal info to data returned from personal tab
+    this.$set(this.model, 'prime', data.prime);
+    this.$set(this.model, 'contract', data.contract);
+    this.$set(this.model, 'github', data.github);
+    this.$set(this.model, 'twitter', data.twitter);
+    this.$set(this.model, 'jobRole', data.jobRole);
+    this.$set(this.model, 'birthday', data.birthday);
+    this.$set(this.model, 'birthdayFeed', data.birthdayFeed);
+    this.$set(this.model, 'city', data.city);
+    this.$set(this.model, 'country', data.country);
+    this.$set(this.model, 'st', data.st);
+  } else if (tab == 'education') {
+    this.$set(this.model, 'degrees', data); //sets degrees to data returned from education tab
+  } else if (tab == 'jobExperience') {
+    //sets all jobExperience info to data returned from job experience tab
+    this.$set(this.model, 'icTimeFrames', data.icTimeFrames);
+    this.$set(this.model, 'jobs', data.jobs);
+  } else if (tab == 'certifications') {
+    this.$set(this.model, 'certifications', data); //sets certifications to data returned from certifications tab
+  } else if (tab == 'awards') {
+    this.$set(this.model, 'awards', data); //sets awards to data returned from awards tab
+  } else if (tab == 'technologies') {
+    this.$set(this.model, 'technologies', data); //sets technologies to data returned from technologies tab
+  } else if (tab == 'customerOrgExp') {
+    this.$set(this.model, 'customerOrgExp', data); //sets degrees to data returned from education tab
+  } else if (tab == 'contracts') {
+    this.$set(this.model, 'contracts', data); //sets contracts to data returned from contracts tab
+  } else if (tab == 'clearance') {
+    this.$set(this.model, 'clearances', data); //sets clearances to data returned from clearance tab
+  }
+} //setFormData
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -643,6 +655,7 @@ export default {
     clearStatus,
     confirm,
     displayError,
+    setFormData,
     submit,
     userIsAdmin
   },
