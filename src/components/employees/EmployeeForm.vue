@@ -68,7 +68,10 @@
             </v-tab-item>
             <!-- Customer Org Experience -->
             <v-tab-item id="customerOrgExp" class="mt-6 mb-4">
-              <customer-org-tab :model="model" :validating="validating.customerOrgExp"></customer-org-tab>
+              <customer-org-tab
+                :model="model.customerOrgExp"
+                :validating="validating.customerOrgExp"
+              ></customer-org-tab>
             </v-tab-item>
             <!-- Contracts -->
             <v-tab-item id="contracts" class="mt-6 mb-4">
@@ -464,6 +467,8 @@ async function created() {
       this.$set(this.model, 'technologies', data); //sets technologies to data returned from technologies tab
     } else if (tab == 'education') {
       this.$set(this.model, 'degrees', data); //sets degrees to data returned from education tab
+    } else if (tab == 'customerOrgExp') {
+      this.$set(this.model, 'customerOrgExp', data); //sets degrees to data returned from education tab
     }
   });
 

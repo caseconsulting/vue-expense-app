@@ -2,7 +2,7 @@
   <div>
     <!-- Loop Customer Organization -->
     <div
-      v-for="(exp, index) in model.customerOrgExp"
+      v-for="(exp, index) in editedCustomerOrgExp"
       class="pt-3 pb-1 px-5"
       :key="'exp: ' + exp.name + index"
       style="border: 1px solid grey"
@@ -93,7 +93,7 @@ async function created() {
  * Adds a Customer Organization.
  */
 function addExperience() {
-  this.model.customerOrgExp.push({
+  this.editedCustomerOrgExp.push({
     name: '',
     years: 0,
     current: false
@@ -106,7 +106,7 @@ function addExperience() {
  * @param index - array index of customer organization to delete
  */
 function deleteExperience(index) {
-  this.model.customerOrgExp.splice(index, 1);
+  this.editedCustomerOrgExp.splice(index, 1);
 } // deleteExperience
 
 /**
@@ -141,7 +141,7 @@ function validateFields() {
     hasErrors = !this.$refs.formFields.validate();
   }
 
-  window.EventBus.$emit('doneValidating', 'customerOrgExp'); // emit done validating
+  window.EventBus.$emit('doneValidating', 'customerOrgExp', this.editedCustomerOrgExp); // emit done validating and send edited data to parent
   window.EventBus.$emit('customerOrgExpStatus', hasErrors); // emit error status
 } // validateFields
 
@@ -159,6 +159,7 @@ export default {
         (v) => !isEmpty(v) || 'Date required',
         (v) => (!isEmpty(v) && /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v)) || 'Date must be valid. Format: MM/DD/YYYY'
       ], // rules for a required date
+      editedCustomerOrgExp: _.cloneDeep(this.model), //stores edited customer orgs info
       experienceRequired: [
         (v) => !isEmpty(v) || 'This field is required',
         (v) => v >= 0 || 'Value cannot be negative',
