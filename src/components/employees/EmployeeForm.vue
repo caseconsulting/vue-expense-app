@@ -82,7 +82,7 @@
             </v-tab-item>
             <!-- Clearance -->
             <v-tab-item id="clearance" class="mt-6 mb-4">
-              <clearance-tab :model="model" :validating="validating.clearance"></clearance-tab>
+              <clearance-tab :model="model.clearances" :validating="validating.clearance"></clearance-tab>
             </v-tab-item>
           </v-tabs>
 
@@ -478,6 +478,8 @@ async function created() {
       this.$set(this.model, 'certifications', data); //sets certifications to data returned from certifications tab
     } else if (tab == 'awards') {
       this.$set(this.model, 'awards', data); //sets awards to data returned from awards tab
+    } else if (tab == 'clearance') {
+      this.$set(this.model, 'clearances', data); //sets clearances to data returned from clearance tab
     }
   });
 
