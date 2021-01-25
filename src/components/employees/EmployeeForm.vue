@@ -56,7 +56,10 @@
             </v-tab-item>
             <!-- Certifications -->
             <v-tab-item id="certifications" class="mt-6 mb-4">
-              <certification-tab :model="model" :validating="validating.certifications"></certification-tab>
+              <certification-tab
+                :model="model.certifications"
+                :validating="validating.certifications"
+              ></certification-tab>
             </v-tab-item>
             <!-- Awards -->
             <v-tab-item id="awards" class="mt-6 mb-4">
@@ -75,7 +78,7 @@
             </v-tab-item>
             <!-- Contracts -->
             <v-tab-item id="contracts" class="mt-6 mb-4">
-              <contract-tab :model="model" :validating="validating.contracts"></contract-tab>
+              <contract-tab :model="model.contracts" :validating="validating.contracts"></contract-tab>
             </v-tab-item>
             <!-- Clearance -->
             <v-tab-item id="clearance" class="mt-6 mb-4">
@@ -469,6 +472,10 @@ async function created() {
       this.$set(this.model, 'degrees', data); //sets degrees to data returned from education tab
     } else if (tab == 'customerOrgExp') {
       this.$set(this.model, 'customerOrgExp', data); //sets degrees to data returned from education tab
+    } else if (tab == 'contracts') {
+      this.$set(this.model, 'contracts', data); //sets contracts to data returned from contracts tab
+    } else if (tab == 'certifications') {
+      this.$set(this.model, 'certifications', data); //sets certifications to data returned from certifications tab
     }
   });
 

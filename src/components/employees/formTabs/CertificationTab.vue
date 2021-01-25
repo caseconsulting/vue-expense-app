@@ -2,7 +2,7 @@
   <div>
     <!-- Loop Certifications -->
     <div
-      v-for="(certification, index) in model.certifications"
+      v-for="(certification, index) in editedCertifications"
       style="border: 1px solid grey"
       class="pt-3 pb-1 px-5"
       :key="'certification: ' + certification.name + index"
@@ -127,7 +127,7 @@ async function created() {
  * Adds a certification.
  */
 function addCertification() {
-  this.model.certifications.push({
+  this.editedCertifications.push({
     name: null,
     dateReceived: null,
     expirationDate: null,
@@ -142,7 +142,7 @@ function addCertification() {
  * @param index - array index of certification to delete
  */
 function deleteCertification(index) {
-  this.model.certifications.splice(index, 1);
+  this.editedCertifications.splice(index, 1);
 } // deleteCertification
 
 /**
@@ -177,7 +177,7 @@ function validateFields() {
     hasErrors = !this.$refs.formFields.validate();
   }
 
-  window.EventBus.$emit('doneValidating', 'certifications'); // emit done validating
+  window.EventBus.$emit('doneValidating', 'certifications', this.editedCertifications); // emit done validating and sends edited data back to parent
   window.EventBus.$emit('certificationsStatus', hasErrors); // emit error status
 } // validateFields
 
@@ -195,6 +195,7 @@ export default {
         (v) => !isEmpty(v) || 'Date required',
         (v) => (!isEmpty(v) && /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v)) || 'Date must be valid. Format: MM/DD/YYYY'
       ], // rules for a required date
+      editedCertifications: _.cloneDeep(this.model), // stores edited certifications info
       requiredRules: [
         (v) => !isEmpty(v) || 'This field is required. You must enter information or delete the field if possible'
       ] // rules for a required field

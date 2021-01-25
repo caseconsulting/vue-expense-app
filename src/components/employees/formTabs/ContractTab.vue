@@ -2,7 +2,7 @@
   <div>
     <!-- Loop Contracts -->
     <div
-      v-for="(contract, index) in model.contracts"
+      v-for="(contract, index) in editedContracts"
       class="pt-3 pb-1 px-5"
       :key="'contract: ' + contract.name + index"
       style="border: 1px solid grey"
@@ -104,7 +104,7 @@ async function created() {
  * Adds a Contract.
  */
 function addContract() {
-  this.model.contracts.push({
+  this.editedContracts.push({
     name: '',
     prime: '',
     years: 0,
@@ -118,7 +118,7 @@ function addContract() {
  * @param index - array index of contract to delete
  */
 function deleteContract(index) {
-  this.model.contracts.splice(index, 1);
+  this.editedContracts.splice(index, 1);
 } // deleteContract
 
 /**
@@ -154,7 +154,7 @@ function validateFields() {
     hasErrors = !this.$refs.formFields.validate();
   }
 
-  window.EventBus.$emit('doneValidating', 'contracts'); // emit done validating
+  window.EventBus.$emit('doneValidating', 'contracts', this.editedContracts); // emit done validating and sends edited data back to parent
   window.EventBus.$emit('contractsStatus', hasErrors); // emit error status
 } // validateFields
 
@@ -172,6 +172,7 @@ export default {
         (v) => !isEmpty(v) || 'Date required',
         (v) => (!isEmpty(v) && /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v)) || 'Date must be valid. Format: MM/DD/YYYY'
       ], // rules for a required date
+      editedContracts: _.cloneDeep(this.model), // stores edited contracts info
       experienceRequired: [
         (v) => !isEmpty(v) || 'This field is required',
         (v) => v >= 0 || 'Value cannot be negative',
