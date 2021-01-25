@@ -2,7 +2,7 @@
   <div>
     <!-- Loop Awards -->
     <div
-      v-for="(award, index) in model.awards"
+      v-for="(award, index) in editedAwards"
       style="border: 1px solid grey"
       class="pt-3 pb-1 px-5"
       :key="'award: ' + award.name + index"
@@ -90,7 +90,7 @@ async function created() {
  * Add an award.
  */
 function addAward() {
-  this.model.awards.push({
+  this.editedAwards.push({
     name: null,
     dateReceived: null,
     expirationDate: null,
@@ -103,7 +103,7 @@ function addAward() {
  * Delete an award.
  */
 function deleteAward(index) {
-  this.model.awards.splice(index, 1);
+  this.editedAwards.splice(index, 1);
 } // deleteAward
 
 /**
@@ -123,7 +123,7 @@ function validateFields() {
     hasErrors = !this.$refs.formFields.validate();
   }
 
-  window.EventBus.$emit('doneValidating', 'awards'); // emit done validating
+  window.EventBus.$emit('doneValidating', 'awards', this.editedAwards); // emit done validating and sends edited data back to parent
   window.EventBus.$emit('awardStatus', hasErrors); // emit error status
 } // validateFields
 
@@ -140,6 +140,7 @@ export default {
         (v) => !isEmpty(v) || 'Date required',
         (v) => (!isEmpty(v) && /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v)) || 'Date must be valid. Format: MM/DD/YYYY'
       ], // rules for a required date
+      editedAwards: _.cloneDeep(this.model), // stores edited awards info
       requiredRules: [
         (v) => !isEmpty(v) || 'This field is required. You must enter information or delete the field if possible'
       ] // rules for a required field

@@ -63,7 +63,7 @@
             </v-tab-item>
             <!-- Awards -->
             <v-tab-item id="awards" class="mt-6 mb-4">
-              <award-tab :model="model" :validating="validating.awards"></award-tab>
+              <award-tab :model="model.awards" :validating="validating.awards"></award-tab>
             </v-tab-item>
             <!-- Technologies -->
             <v-tab-item id="technologies" class="mt-6 mb-4">
@@ -476,6 +476,8 @@ async function created() {
       this.$set(this.model, 'contracts', data); //sets contracts to data returned from contracts tab
     } else if (tab == 'certifications') {
       this.$set(this.model, 'certifications', data); //sets certifications to data returned from certifications tab
+    } else if (tab == 'awards') {
+      this.$set(this.model, 'awards', data); //sets awards to data returned from awards tab
     }
   });
 
