@@ -4,7 +4,7 @@
     <div
       class="py-3 px-5"
       style="border: 1px solid grey"
-      v-for="(degree, index) in model.degrees"
+      v-for="(degree, index) in editedDegrees"
       :key="'degree: ' + degree.name + index"
     >
       <!-- Name of Degree -->
@@ -170,7 +170,7 @@ async function created() {
  * Adds a Degree.
  */
 function addDegree() {
-  this.model.degrees.push({
+  this.editedDegrees.push({
     concentrations: [],
     date: null,
     majors: [''],
@@ -196,7 +196,7 @@ function addItem(array) {
  * @param index - array index of degree to delete
  */
 function deleteDegree(index) {
-  this.model.degrees.splice(index, 1);
+  this.editedDegrees.splice(index, 1);
 } // deleteDegree
 
 /**
@@ -254,7 +254,7 @@ function validateFields() {
     hasErrors = !this.$refs.formFields.validate();
   }
 
-  window.EventBus.$emit('doneValidating', 'education'); // emit done validating
+  window.EventBus.$emit('doneValidating', 'education', this.editedDegrees); // emit done validating
   window.EventBus.$emit('educationStatus', hasErrors); // emit error status
 } // validateFields
 
@@ -267,6 +267,7 @@ export default {
         (v) => !isEmpty(v) || 'Date must be valid. Format: YYYY-MM',
         (v) => (!isEmpty(v) && /^\d{4}[-](0?[1-9]|1[0-2])$/.test(v)) || 'Date must be valid. Format: YYYY-MM'
       ], // rules for a required date
+      editedDegrees: _.cloneDeep(this.model), // stores edited degree info
       degreeDropDown: [], // autocomplete degree name options
       majorDropDown: [], // autocomplete major options
       minorDropDown: [], // autocomplete minor options

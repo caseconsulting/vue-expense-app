@@ -48,7 +48,7 @@
             </v-tab-item>
             <!-- Education -->
             <v-tab-item id="education" class="mt-6 mb-4">
-              <education-tab :model="model" :validating="validating.education"></education-tab>
+              <education-tab :model="model.degrees" :validating="validating.education"></education-tab>
             </v-tab-item>
             <!-- Experience -->
             <v-tab-item id="jobExperience" class="mt-6 mb-4">
@@ -64,7 +64,7 @@
             </v-tab-item>
             <!-- Technologies -->
             <v-tab-item id="technologies" class="mt-6 mb-4">
-              <technology-tab :model="model" :validating="validating.technologies"></technology-tab>
+              <technology-tab :model="model.technologies" :validating="validating.technologies"></technology-tab>
             </v-tab-item>
             <!-- Customer Org Experience -->
             <v-tab-item id="customerOrgExp" class="mt-6 mb-4">
@@ -462,6 +462,8 @@ async function created() {
       this.$set(this.model, 'jobs', data.jobs);
     } else if (tab == 'technologies') {
       this.$set(this.model, 'technologies', data); //sets technologies to data returned from technologies tab
+    } else if (tab == 'education') {
+      this.$set(this.model, 'degrees', data); //sets degrees to data returned from education tab
     }
   });
 

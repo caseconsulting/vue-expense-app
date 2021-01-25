@@ -159,7 +159,7 @@ export default {
         (v) => !isEmpty(v) || 'Date required',
         (v) => (!isEmpty(v) && /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v)) || 'Date must be valid. Format: MM/DD/YYYY'
       ], // rules for a required date
-      editedTechnologies: _.cloneDeep(this.model.technologies), //stores edited technology info
+      editedTechnologies: _.cloneDeep(this.model), //stores edited technology info
       experienceRequired: [
         (v) => !isEmpty(v) || 'This field is required',
         (v) => v >= 0 || 'Value cannot be negative',
