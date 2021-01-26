@@ -81,7 +81,7 @@
       <!-- End Loop Majors -->
       <!-- Button to Add Major -->
       <div align="center" class="pb-4">
-        <v-btn @click="addItem(degree.majors)" depressed outlined small color="#3f3f3c">Add a Major</v-btn>
+        <v-btn @click="addItem(degree.majors)" depressed outlined small>Add a Major</v-btn>
       </div>
       <!-- End Majors -->
 
@@ -103,7 +103,7 @@
       <!-- End Loops Minors -->
       <!-- Button to Add Minor -->
       <div align="center" class="pb-4">
-        <v-btn @click="addItem(degree.minors)" depressed outlined small color="#3f3f3c">Add a Minor</v-btn>
+        <v-btn @click="addItem(degree.minors)" depressed outlined small>Add a Minor</v-btn>
       </div>
       <!-- End Minors -->
 
@@ -125,9 +125,7 @@
       <!-- End Loop Concentrations -->
       <!-- Button to Add Concentration -->
       <div align="center" class="pb-4">
-        <v-btn @click="addItem(degree.concentrations)" depressed outlined small color="#3f3f3c"
-          >Add a Concentration</v-btn
-        >
+        <v-btn @click="addItem(degree.concentrations)" depressed outlined small>Add a Concentration</v-btn>
       </div>
       <!-- End Concentrations -->
     </div>
@@ -135,7 +133,7 @@
 
     <!-- Button to Add Degress -->
     <div class="pt-4" align="center">
-      <v-btn @click="addDegree()"><v-icon class="pr-1">add</v-icon>Degree</v-btn>
+      <v-btn @click="addDegree()" elevation="2"><v-icon class="pr-1">add</v-icon>Degree</v-btn>
     </div>
   </div>
 </template>

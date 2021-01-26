@@ -47,7 +47,7 @@
 
       <!-- Button to Add IC Time Frame -->
       <div align="center" class="pt-2 pb-4">
-        <v-btn @click="addICTimeFrame()" depressed outlined small color="#3f3f3c">Add a Time Frame</v-btn>
+        <v-btn @click="addICTimeFrame()" depressed outlined small>Add a Time Frame</v-btn>
       </div>
     </div>
     <!-- End Experience in IC -->
@@ -65,7 +65,7 @@
         data-vv-name="Position"
       ></v-text-field>
 
-      <v-row class="px-3">
+      <v-row class="px-3 py-3">
         <!-- Start Date -->
         <v-text-field
           :value="formatDateDashToSlash(editedJobExperienceInfo.hireDate)"
@@ -178,7 +178,7 @@
 
     <!-- Button to Add Jobs -->
     <div class="pt-4" align="center">
-      <v-btn @click="addJob()"><v-icon class="pr-1">add</v-icon>Job</v-btn>
+      <v-btn @click="addJob()" elevation="2"><v-icon class="pr-1">add</v-icon>Job</v-btn>
     </div>
   </div>
 </template>

@@ -20,7 +20,7 @@
       >
       </v-combobox>
 
-      <v-row>
+      <v-row class="py-3">
         <!-- Granted Date -->
         <v-col cols="12" sm="6" md="12" lg="6" class="pt-0">
           <v-menu
@@ -226,14 +226,14 @@
       </div>
       <!-- End Loop BI Dates -->
       <div align="center" class="pt-2 pb-4">
-        <v-btn @click="addBIDates(cIndex)" depressed outlined small color="#3f3f3c">Add BI Dates</v-btn>
+        <v-btn @click="addBIDates(cIndex)" depressed outlined small>Add BI Dates</v-btn>
       </div>
     </div>
     <!-- End Loop Clearances -->
 
     <!-- Button to add Clearances -->
     <div class="pt-4" align="center">
-      <v-btn @click="addClearance"><v-icon class="pr-1">add</v-icon>Clearance</v-btn>
+      <v-btn @click="addClearance" elevation="2"><v-icon class="pr-1">add</v-icon>Clearance</v-btn>
     </div>
   </div>
 </template>

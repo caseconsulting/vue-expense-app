@@ -19,7 +19,7 @@
       >
       </v-combobox>
 
-      <v-row>
+      <v-row class="py-3">
         <v-col cols="12" sm="6" md="12" lg="6" class="pt-0">
           <!-- Received Date -->
           <v-menu
@@ -56,7 +56,7 @@
 
     <!-- Button to Add Awards -->
     <div class="pt-4" align="center">
-      <v-btn @click="addAward()"><v-icon class="pr-1">add</v-icon>Award</v-btn>
+      <v-btn @click="addAward()" elevation="2"><v-icon class="pr-1">add</v-icon>Award</v-btn>
     </div>
   </div>
 </template>

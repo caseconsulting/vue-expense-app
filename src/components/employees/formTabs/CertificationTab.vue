@@ -20,7 +20,7 @@
       >
       </v-combobox>
 
-      <v-row>
+      <v-row class="py-3">
         <v-col cols="12" sm="6" md="12" lg="6" class="pt-0">
           <!-- Received Date -->
           <v-menu
@@ -92,7 +92,7 @@
 
     <!-- Button to Add Certifications -->
     <div class="pt-4" align="center">
-      <v-btn @click="addCertification()"><v-icon class="pr-1">add</v-icon>Certification</v-btn>
+      <v-btn @click="addCertification()" elevation="2"><v-icon class="pr-1">add</v-icon>Certification</v-btn>
     </div>
   </div>
 </template>

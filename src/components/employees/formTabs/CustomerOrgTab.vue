@@ -18,7 +18,7 @@
       >
       </v-combobox>
 
-      <v-row align="center" justify="center">
+      <v-row align="center" class="py-3" justify="center">
         <!-- Current Switch -->
         <v-col cols="6" sm="7" md="6" lg="7">
           <v-switch v-model="exp.current" label="Currently working with this customer organization"></v-switch>
@@ -58,7 +58,7 @@
 
     <!-- Button to Add Customer Organization -->
     <div class="pt-4" align="center">
-      <v-btn @click="addExperience()"><v-icon class="pr-1">add</v-icon>Experience</v-btn>
+      <v-btn @click="addExperience()" elevation="2"><v-icon class="pr-1">add</v-icon>Experience</v-btn>
     </div>
   </div>
 </template>

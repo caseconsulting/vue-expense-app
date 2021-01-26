@@ -29,7 +29,7 @@
       >
       </v-combobox>
 
-      <v-row align="center" justify="center">
+      <v-row align="center" class="py-3" justify="center">
         <!-- Current Switch -->
         <v-col cols="6" sm="7" md="6" lg="7">
           <v-switch v-model="contract.current" label="Currently working with this customer organization"></v-switch>
@@ -69,7 +69,7 @@
 
     <!-- Button to Add Contracts -->
     <div class="pt-4" align="center">
-      <v-btn @click="addContract()"><v-icon class="pr-1">add</v-icon>Contract</v-btn>
+      <v-btn @click="addContract()" elevation="2"><v-icon class="pr-1">add</v-icon>Contract</v-btn>
     </div>
   </div>
 </template>

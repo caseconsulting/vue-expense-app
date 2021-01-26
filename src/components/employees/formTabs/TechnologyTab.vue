@@ -18,7 +18,7 @@
       >
       </v-combobox>
 
-      <v-row align="center" justify="center">
+      <v-row align="center" class="py-3" justify="center">
         <!-- Current Switch -->
         <v-col cols="6" sm="7" md="6" lg="7">
           <v-switch v-model="technology.current" label="Currently working with this technology"></v-switch>
@@ -58,7 +58,7 @@
 
     <!-- Button to Add Technologies -->
     <div class="pt-4" align="center">
-      <v-btn @click="addTechnology()"><v-icon class="pr-1">add</v-icon>Technology</v-btn>
+      <v-btn @click="addTechnology()" elevation="2"><v-icon class="pr-1">add</v-icon>Technology</v-btn>
     </div>
   </div>
 </template>
