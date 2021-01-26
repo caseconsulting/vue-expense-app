@@ -1,5 +1,5 @@
 <template>
-  <v-card hover>
+  <v-card class="mt-3" hover>
     <v-card-title class="header_style">
       <!-- Editing an Expense -->
       <h3 v-if="expense.id && (isAdmin || !isReimbursed)">Edit Expense</h3>
@@ -705,7 +705,7 @@ function clearForm() {
 
   this.reqRecipient = false;
   this.recipientPlaceholder = null;
-  this.editedExpense = this.expense;
+  this.editedExpense = _.cloneDeep(this.expense);
   this.originalExpense = this.editedExpense;
   this.purchaseDateFormatted = null;
   this.file = null;
@@ -1449,7 +1449,8 @@ export default {
         (v) => (!isEmpty(v) && v.replace(/\s/g, '').length > 0) || 'Description is a required field'
       ], // rules for description
       disableScan: true, // receipt scanned disabled
-      editedExpense: {}, // data being edited --
+      //editedExpense: {}, // data being edited --
+      editedExpense: _.cloneDeep(this.expense),
       employee: null, // employee selected
       employeeRole: '', // employee role
       employees: [], // employees

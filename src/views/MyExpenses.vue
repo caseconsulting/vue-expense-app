@@ -17,7 +17,7 @@
     </v-snackbar>
 
     <v-col cols="12" lg="8">
-      <v-card>
+      <v-card class="mt-3">
         <v-container fluid>
           <!-- Title -->
           <v-card-title>
