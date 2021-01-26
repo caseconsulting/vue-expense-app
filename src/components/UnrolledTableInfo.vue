@@ -14,7 +14,7 @@
         @click:row="expenseClicked"
       >
         <!-- Remove Check Box in header -->
-        <template v-slot: header.data-table-select></template>
+        <template v-slot:[`header.data-table-select`]="{}"></template>
 
         <!-- Group Checkbox -->
         <template v-slot:[`item.data-table-select`]="{ item }">

@@ -4,7 +4,7 @@
     <v-alert v-for="(alert, index) in alerts" :key="index" :type="alert.status" :color="alert.color" dense class="mb-1">
       {{ alert.message }}
     </v-alert>
-    <v-card>
+    <v-card class="mt-3">
       <v-container fluid>
         <!-- Table Header -->
         <v-card-title>
