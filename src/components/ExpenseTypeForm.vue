@@ -1,5 +1,5 @@
 <template>
-  <v-card hover>
+  <v-card class="mt-3" hover>
     <!-- Form Header -->
     <v-card-title class="header_style">
       <h3 v-if="model.id">Edit Expense Type</h3>
@@ -46,7 +46,7 @@
         ></v-text-field>
 
         <!-- Flags -->
-        <v-container grid-list-md text-xs-center>
+        <v-container class="my-3 pb-4" grid-list-md text-xs-center>
           <v-row>
             <v-col cols="6">
               <v-checkbox label="Overdraft Flag" v-model="editedExpenseType.odFlag"></v-checkbox>
@@ -232,7 +232,9 @@
         </v-container>
         <!-- Buttons -->
         <!-- Cancel Button -->
-        <v-btn color="white " @click="clearForm" class="ma-2"> <icon class="mr-1" name="ban"></icon>Cancel </v-btn>
+        <v-btn color="white " @click="clearForm" class="ma-2" elevation="2">
+          <icon class="mr-1" name="ban"></icon>Cancel
+        </v-btn>
         <!-- Submit Button -->
         <v-btn
           outlined
@@ -571,7 +573,7 @@ export default {
         (v) => (!isEmpty(v) && /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v)) || 'Date must be valid. Format: MM/DD/YYYY'
       ], // rule for a required date
       endDateFormatted: null, // formatted end date
-      editedExpenseType: { categories: [] }, //used to store edits made to an expense type or when creating new expense type
+      editedExpenseType: _.cloneDeep(this.model), //used to store edits made to an expense type or when creating new expense type
       requiredRules: [(v) => !isEmpty(v) || 'This field is required'],
       startDateFormatted: null, // formatted start date
       submitting: false, // submitting form

@@ -18,7 +18,7 @@
     </v-snackbar>
 
     <v-col cols="12" :lg="userIsAdmin() ? 8 : 12">
-      <v-card>
+      <v-card class="mt-3">
         <v-container fluid>
           <!-- Title -->
           <v-card-title>
