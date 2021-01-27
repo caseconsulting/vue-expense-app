@@ -242,7 +242,7 @@
         :isCovered="isCovered"
         :isOverCovered="isOverCovered"
         :toggleConfirmationBox="confirming"
-        :expense="expense"
+        :expense="editedExpense"
       ></confirmation-box>
     </v-container>
   </v-card>
@@ -683,6 +683,7 @@ function clearForm() {
 
   this.reqRecipient = false;
   this.recipientPlaceholder = null;
+  this.editedExpense = _.cloneDeep(this.expense);
   this.originalExpense = this.editedExpense;
   this.purchaseDateFormatted = null;
   this.file = null;
@@ -787,6 +788,15 @@ async function encodeUrl(url) {
   // return btoa(url).replace(/\//g, '%2F');
   return btoa(url);
 } // encodeUrl
+
+/**
+ * Emits a message and data if it exists.
+ *
+ * @param msg - Message to emit
+ */
+function emit(msg) {
+  window.EventBus.$emit(msg);
+} // emit
 
 /**
  * Filters expense type. Returns the expense types that the employee has access to and the budget amount.
@@ -1484,6 +1494,7 @@ export default {
     createNewEntry,
     customFilter,
     encodeUrl,
+    emit,
     filteredExpenseTypes,
     formatDate,
     getCategories,
@@ -1511,7 +1522,7 @@ export default {
       this.originalExpense = _.cloneDeep(this.editedExpense);
 
       //when model id is not empty then must be editing an expense
-      if (!this.isEmpty(this.model.id)) {
+      if (!this.isEmpty(this.expense.id)) {
         this.emit('editing-expense'); //notify parent that expense is being edited
       }
 

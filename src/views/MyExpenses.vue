@@ -169,7 +169,7 @@
                 <v-tooltip top>
                   <template v-slot:activator="{ on }">
                     <v-btn
-                      :disabled="(isUser && isReimbursed(item)) || midAction"
+                      :disabled="isEditing || (isUser && isReimbursed(item)) || midAction"
                       text
                       icon
                       @click="
@@ -187,7 +187,7 @@
                 <v-tooltip top>
                   <template v-slot:activator="{ on }">
                     <v-btn
-                      :disabled="isReimbursed(item) || midAction"
+                      :disabled="isReimbursed(item) || isEditing || midAction"
                       text
                       icon
                       @click="
@@ -206,7 +206,7 @@
                 <v-tooltip top>
                   <template v-slot:activator="{ on }">
                     <v-btn
-                      :disabled="!isReimbursed(item) || midAction"
+                      :disabled="!isReimbursed(item) || isEditing || midAction"
                       text
                       icon
                       @click="
@@ -290,7 +290,7 @@
     <v-col v-if="isAdmin || !userIsInactive" cols="12" lg="4">
       <expense-form
         ref="form"
-        :isEdit="midAction"
+        :isEdit="isEditing"
         :expense="expense"
         v-on:add="addModelToTable"
         v-on:delete="deleteModelFromTable"
@@ -417,6 +417,7 @@ function addModelToTable() {
  * Clear the selected expense by setting all values to null and if user sets employeeId and employeeName.
  */
 function clearExpense() {
+  this.$set(this.expense, 'description', null);
   this.expense = _.mapValues(this.expense, () => {
     return null;
   });
@@ -722,14 +723,14 @@ function useInactiveStyle(expense) {
  */
 async function created() {
   //no longer editing an expense (clear model and enable buttons)
-  window.EventBus.$on('finished-editing-expense-type', () => {
+  window.EventBus.$on('finished-editing-expense', () => {
     this.clearExpense();
-    this.endAction();
+    this.isEditing = false;
   });
 
   //when expense type is being edited buttons should be disabled
-  window.EventBus.$on('editing-expense-type', () => {
-    this.startAction();
+  window.EventBus.$on('editing-expense', () => {
+    this.isEditing = true;
   });
 
   window.EventBus.$on('canceled-unreimburse-expense', () => {
@@ -857,6 +858,7 @@ export default {
           sortable: false
         }
       ], // datatable headers
+      isEditing: false, //whether or not an expense is being edited
       loading: true, // loading status
       midAction: false,
       propExpense: {
