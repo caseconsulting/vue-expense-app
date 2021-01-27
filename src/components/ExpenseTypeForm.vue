@@ -324,27 +324,20 @@ function checkSelection() {
  */
 function clearForm() {
   this.$refs.expenseTypeForm.reset();
-  this.$set(this.model, 'id', '');
-  this.$set(this.model, 'budget', 0);
-  this.$set(this.model, 'budgetName', '');
-  this.$set(this.model, 'description', '');
-  this.$set(this.model, 'recurringFlag', false);
-  this.$set(this.model, 'startDate', '');
-  this.$set(this.model, 'endDate', '');
-  this.$set(this.model, 'odFlag', false);
-  this.$set(this.model, 'requiredFlag', false);
-  this.$set(this.model, 'isInactive', false);
-  this.$set(this.model, 'categories', []);
-  this.$set(this.model, 'accessibleBy', 'ALL');
-  this.$set(this.model, 'hasRecipient', false);
-  this.$set(this.model, 'alwaysOnFeed', false);
-  this.$set(this.model, 'requireURL', false);
-  //TODO: set all stuff for editedExpenseType not model
-  this.editedExpenseType = _.cloneDeep(this.model); //sets edited expense type to model
+  this.emit('finished-editing-expense-type'); //notify parent no longer editing an expense type
   this.startDateFormatted = null;
   this.endDateFormatted = null;
   this.customAccess = [];
 } // clearForm
+
+/**
+ * Emits a message and data if it exists.
+ *
+ * @param msg - Message to emit
+ */
+function emit(msg) {
+  window.EventBus.$emit(msg);
+} // emit
 
 /**
  * Checks if all employees have access to an expense type and at a percentage rate. Return true if 'ALL' is selected,
@@ -585,6 +578,7 @@ export default {
     checkRequireURL,
     checkSelection,
     clearForm,
+    emit,
     formatDate,
     isAllSelected,
     isCustomSelected,
@@ -600,8 +594,14 @@ export default {
   props: ['model'], // expense type to be created/updated
   watch: {
     'model.id': function () {
-      this.editedExpenseType = _.cloneDeep(this.model);
+      this.editedExpenseType = _.cloneDeep(this.model); //set editedExpense to new value of model
+
+      //when model id is not empty then must be editing an expense
+      if (!this.isEmpty(this.model.id)) {
+        this.emit('editing-expense-type'); //notify parent that expense is being edited
+      }
       if (this.editedExpenseType.id != null) {
+        //map categories
         this.categories = _.map(this.editedExpenseType.categories, (category) => {
           return category.name;
         });

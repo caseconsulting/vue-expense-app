@@ -203,7 +203,7 @@
               <v-tooltip top>
                 <template v-slot:activator="{ on }">
                   <v-btn
-                    :disabled="isEditing() || midAction"
+                    :disabled="midAction"
                     text
                     icon
                     @click="
@@ -219,7 +219,7 @@
               </v-tooltip>
               <v-tooltip top>
                 <template v-slot:activator="{ on }">
-                  <v-btn :disabled="isEditing() || midAction" text icon @click="validateDelete(item)" v-on="on">
+                  <v-btn :disabled="midAction" text icon @click="validateDelete(item)" v-on="on">
                     <v-icon style="color: #606060">delete</v-icon>
                   </v-btn>
                 </template>
@@ -741,15 +741,6 @@ function hasAccess(employee, expenseType) {
 } // hasAccess
 
 /**
- * Checks if an expense is being edited.
- *
- * @return boolean - an expense is being edited
- */
-function isEditing() {
-  return !!this.model.id;
-} // isEditing
-
-/**
  * Checks to see if an expense type is expanded in the datatable.
  *
  * @param item - expense type to check
@@ -914,6 +905,17 @@ async function validateDelete(item) {
  * Set user info, employees, and expense types. Creates event listeners.
  */
 async function created() {
+  //no longer editing an expense (clear model and enable buttons)
+  window.EventBus.$on('finished-editing-expense-type', () => {
+    this.clearModel();
+    this.endAction();
+  });
+
+  //when expense type is being edited buttons should be disabled
+  window.EventBus.$on('editing-expense-type', () => {
+    this.startAction();
+  });
+
   window.EventBus.$on('canceled-delete-expense-type', () => {
     this.midAction = false;
   });
@@ -1056,7 +1058,6 @@ export default {
     getEmployeeList,
     getEmployeeName,
     hasAccess,
-    isEditing,
     isFocus,
     isInactive,
     onSelect,
