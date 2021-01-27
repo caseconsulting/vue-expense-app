@@ -515,8 +515,6 @@ function changeAvatar(item) {
 } // changeAvatar
 
 /**
- * NOTE: Unused?
- *
  * Clear the selected expense type.
  */
 function clearModel() {

@@ -169,7 +169,7 @@
                 <v-tooltip top>
                   <template v-slot:activator="{ on }">
                     <v-btn
-                      :disabled="isEditing() || (isUser && isReimbursed(item)) || midAction"
+                      :disabled="(isUser && isReimbursed(item)) || midAction"
                       text
                       icon
                       @click="
@@ -187,7 +187,7 @@
                 <v-tooltip top>
                   <template v-slot:activator="{ on }">
                     <v-btn
-                      :disabled="isReimbursed(item) || isEditing() || midAction"
+                      :disabled="isReimbursed(item) || midAction"
                       text
                       icon
                       @click="
@@ -206,7 +206,7 @@
                 <v-tooltip top>
                   <template v-slot:activator="{ on }">
                     <v-btn
-                      :disabled="!isReimbursed(item) || isEditing() || midAction"
+                      :disabled="!isReimbursed(item) || midAction"
                       text
                       icon
                       @click="
@@ -290,7 +290,7 @@
     <v-col v-if="isAdmin || !userIsInactive" cols="12" lg="4">
       <expense-form
         ref="form"
-        :isEdit="isEditing()"
+        :isEdit="midAction"
         :expense="expense"
         v-on:add="addModelToTable"
         v-on:delete="deleteModelFromTable"
@@ -414,12 +414,20 @@ function addModelToTable() {
 } // addModelToTable
 
 /**
- * Sets all expense attribute values to null.
+ * Clear the selected expense by setting all values to null and if user sets employeeId and employeeName.
  */
 function clearExpense() {
   this.expense = _.mapValues(this.expense, () => {
     return null;
   });
+  if (this.asUser) {
+    // creating or updating an expense as a user
+    this.$set(this.expense, 'employeeId', this.userInfo.id);
+    this.$set(this.expense, 'employeeName', this.userInfo.id);
+  } else {
+    this.$set(this.expense, 'employeeId', null);
+    this.$set(this.expense, 'employeeName', null);
+  }
 } // clearExpense
 
 /**
@@ -589,15 +597,6 @@ function hasRecipient(expense) {
 }
 
 /**
- * Checks if an expense is being edited.
- *
- * @return boolean - an expense is being edited
- */
-function isEditing() {
-  return !!this.expense.id;
-} // isEditing
-
-/**
  * Checks to see if an expense is expanded in the datatable.
  *
  * @param item - expense to check
@@ -722,6 +721,17 @@ function useInactiveStyle(expense) {
  *  Gets and sets user info, expense types, and expenses. Creates event listeners.
  */
 async function created() {
+  //no longer editing an expense (clear model and enable buttons)
+  window.EventBus.$on('finished-editing-expense-type', () => {
+    this.clearExpense();
+    this.endAction();
+  });
+
+  //when expense type is being edited buttons should be disabled
+  window.EventBus.$on('editing-expense-type', () => {
+    this.startAction();
+  });
+
   window.EventBus.$on('canceled-unreimburse-expense', () => {
     this.midAction = false;
   });
@@ -899,7 +909,6 @@ export default {
     endAction,
     filterExpenses,
     hasRecipient,
-    isEditing,
     isEmpty,
     isFocus,
     isReimbursed,

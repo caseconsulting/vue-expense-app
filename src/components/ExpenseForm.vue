@@ -679,33 +679,10 @@ function clearForm() {
   this.allowReceipt = false;
   this.$refs.form.reset();
 
-  this.$set(this.expense, 'id', null);
-  this.$set(this.expense, 'purchaseDate', null);
-  this.$set(this.expense, 'reimbursedDate', null);
-  this.$set(this.expense, 'note', null);
-  this.$set(this.expense, 'url', null);
-  this.$set(this.expense, 'createdAt', null);
-  this.$set(this.expense, 'receipt', null);
-  this.$set(this.expense, 'cost', null);
-  this.$set(this.expense, 'description', null);
-  if (this.asUser) {
-    // creating or updating an expense as a user
-    this.$set(this.expense, 'employeeId', this.userInfo.id);
-    this.$set(this.expense, 'employeeName', this.userInfo.id);
-  } else {
-    this.$set(this.expense, 'employeeId', null);
-    this.$set(this.expense, 'employeeName', null);
-  }
-  this.$set(this.expense, 'expenseTypeId', null);
-  this.$set(this.expense, 'budgetName', null);
-  this.$set(this.expense, 'category', null);
-  this.$set(this.expense, 'showOnFeed', null);
-  this.$set(this.expense, 'requireURL', null);
-  this.$set(this.expense, 'recipient', null);
+  this.emit('finished-editing-expense'); //notify parent no longer editing an expense
 
   this.reqRecipient = false;
   this.recipientPlaceholder = null;
-  this.editedExpense = _.cloneDeep(this.expense);
   this.originalExpense = this.editedExpense;
   this.purchaseDateFormatted = null;
   this.file = null;
@@ -1532,14 +1509,12 @@ export default {
     'expense.id': function () {
       this.editedExpense = _.cloneDeep(this.expense);
       this.originalExpense = _.cloneDeep(this.editedExpense);
-      this.selectedExpenseType = _.find(this.expenseTypes, (expenseType) => {
-        if (expenseType.value === this.editedExpense.expenseTypeId) {
-          return expenseType;
-        }
-      });
-    },
-    'editedExpense.id': function () {
-      this.originalExpense = _.cloneDeep(this.editedExpense);
+
+      //when model id is not empty then must be editing an expense
+      if (!this.isEmpty(this.model.id)) {
+        this.emit('editing-expense'); //notify parent that expense is being edited
+      }
+
       this.selectedExpenseType = _.find(this.expenseTypes, (expenseType) => {
         if (expenseType.value === this.editedExpense.expenseTypeId) {
           return expenseType;
