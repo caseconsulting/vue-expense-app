@@ -35,7 +35,7 @@
         >
           <v-text-field
             ref="formFields"
-            :value="exp.years"
+            v-model="exp.years"
             flat
             :rules="experienceRequired"
             single-line
