@@ -343,16 +343,25 @@ function clearStatus() {
 /**
  * Validate and confirm form submission.
  */
-function confirm() {
+async function confirm() {
+  this.tabErrorMessage = null; //resets tab error message each time validating
   // validate tabs
-  _.forEach(this.tabCreated, (value, key) => {
+  await _.forEach(this.tabCreated, (value, key) => {
     if (value) {
       this.validating[key] = true;
     }
   });
 
+  //validates forms
   if (this.$refs.form.validate()) {
-    this.confirming = !this.confirming;
+    //checks to see if there are any tabs with errors
+    let hasErrors = await this.hasTabError();
+    if (!hasErrors) {
+      this.confirming = !this.confirming; // if no errors opens confirm submit popup
+    } else if (this.tabErrorMessage) {
+      //if there is a custom error message it is displayed here
+      this.displayError(this.tabErrorMessage);
+    }
   }
 } // confirm
 
@@ -368,10 +377,26 @@ async function displayError(err) {
 } // displayError
 
 /**
+ * Checks to see if any of the form tabs has an error.
+ * @returns boolean - true if any tab has an error false otherwise.
+ */
+async function hasTabError() {
+  let hasErrors = false;
+  //iterates over tabs to see if there are any errors
+  for (var key of Object.keys(this.tabErrors)) {
+    if (this.tabErrors[key]) {
+      hasErrors = true;
+    }
+  }
+  return hasErrors;
+} // hasTabError
+
+/**
  * Submits the employee form.
  */
 async function submit() {
   this.submitting = true;
+
   if (this.$refs.form.validate()) {
     // form validated
     this.$emit('startAction');
@@ -475,8 +500,12 @@ async function created() {
   window.EventBus.$on('personalStatus', (status) => {
     this.tabErrors.personal = status;
   });
-  window.EventBus.$on('technologiesStatus', (status) => {
+  window.EventBus.$on('technologiesStatus', (status, errorMessage) => {
     this.tabErrors.technologies = status;
+    //when there is a custom error message (multiple entries with same name) gets it ready for display
+    if (status && errorMessage) {
+      this.tabErrorMessage = _.cloneDeep(errorMessage);
+    }
   });
 
   // fills model in with populated fields in employee prop
@@ -624,6 +653,7 @@ export default {
         personal: false,
         technologies: false
       }, // tab error status
+      tabErrorMessage: null, //used to display error message in popup if tab has a custom error message
       tabCreated: {
         awards: false,
         certifications: false,
@@ -657,6 +687,7 @@ export default {
     clearStatus,
     confirm,
     displayError,
+    hasTabError,
     setFormData,
     submit,
     userIsAdmin

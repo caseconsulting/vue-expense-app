@@ -4,6 +4,7 @@
     <div
       v-for="(technology, index) in editedTechnologies"
       class="pt-3 pb-1 px-5"
+      v-bind:class="{ errorBox: isDuplicate(technology.name) }"
       :key="'technology: ' + technology.name + index"
       style="border: 1px solid grey"
     >
@@ -110,6 +111,39 @@ function deleteTechnology(index) {
 } // deleteTechnology
 
 /**
+ * Creates an array of all technologies that a user has entered multiple times (based on name).
+ * @returns an array of technology names that a user has entered multiple times
+ */
+function duplicateTechEntries() {
+  //declares function to count unique name properties of js objects
+  const count = (names) =>
+    names.reduce((acc, it) => {
+      acc[it.name] = acc[it.name] + 1 || 1;
+      return acc;
+    }, {});
+
+  //returns an array of objects that had a count of over 1
+  const duplicates = (dict) => Object.keys(dict).filter((a) => dict[a] > 1);
+
+  return this.editedTechnologies ? duplicates(count(this.editedTechnologies)) : [];
+} // duplicateTechEntries
+
+/**
+ * Checks to see if a technology is a duplicate of one that is already entered by a user.
+ * @param tech String - the name of the technology
+ * @returns boolean - true if technology was already entered by user (duplicate) false otherwise
+ */
+function isDuplicate(tech) {
+  let duplicates = this.duplicateTechEntries();
+
+  //checks to see if tech is in duplicates array
+  if (duplicates && _.isArray(duplicates) && duplicates.length > 0) {
+    return duplicates.includes(tech);
+  }
+  return false;
+} // isDuplicate
+
+/**
  * Gets information that other employees have filled out.
  */
 function populateDropDowns() {
@@ -141,8 +175,19 @@ function validateFields() {
     hasErrors = !this.$refs.formFields.validate();
   }
 
+  //checks to see if there are duplicate entries with the same name
+  if (this.duplicateTechEntries().length > 0) {
+    hasErrors = true;
+    //emit error status with a custom message
+    window.EventBus.$emit(
+      'technologiesStatus',
+      hasErrors,
+      'Technology names MUST be UNIQUE. Please remove any duplicates'
+    ); // emit error status
+  } else {
+    window.EventBus.$emit('technologiesStatus', hasErrors); // emit error status
+  }
   window.EventBus.$emit('doneValidating', 'technologies', this.editedTechnologies); // emit done validating
-  window.EventBus.$emit('technologiesStatus', hasErrors); // emit error status
 } // validateFields
 
 export default {
@@ -173,8 +218,10 @@ export default {
   methods: {
     addTechnology,
     deleteTechnology,
+    duplicateTechEntries,
     formatDateDashToSlash,
     formatDateSlashToDash,
+    isDuplicate,
     isEmpty,
     populateDropDowns,
     validateFields
@@ -190,3 +237,9 @@ export default {
   }
 };
 </script>
+<style>
+.errorBox {
+  color: red !important;
+  border: 2px solid red !important;
+}
+</style>
