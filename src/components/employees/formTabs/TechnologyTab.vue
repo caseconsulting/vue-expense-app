@@ -8,6 +8,11 @@
       :key="'technology: ' + technology.name + index"
       style="border: 1px solid grey"
     >
+      <!--Duplicate chip if tech name is already entered by user-->
+      <v-row v-if="isDuplicate(technology.name)" justify="end">
+        <v-chip class="ma-2" color="error" text-color="white"> Duplicate </v-chip>
+      </v-row>
+
       <!-- Name of Technology -->
       <v-combobox
         ref="formFields"
