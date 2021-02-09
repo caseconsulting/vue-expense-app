@@ -366,8 +366,6 @@ function notesLabel() {
  * @return string - label
  */
 function urlLabel() {
-  console.log('urlLabel()');
-  console.log(this.editedExpense.requireURL);
   return this.editedExpense.requireURL ? 'URL' : 'URL (optional)';
 }
 
@@ -1601,6 +1599,7 @@ export default {
             this.editedExpense.requireURL = category ? category.requireURL : false;
           }
         }
+        this.editedExpense = _.cloneDeep(this.editedExpense); //need to clone editedExpense in order to see label URL changes
       } else {
         this.hint = '';
       }
@@ -1637,7 +1636,7 @@ export default {
       if (!_.isNil(this.selectedExpenseType)) {
         if (this.selectedExpenseType.requireURL) {
           // if expense type requires url
-          this.editedExpenserequireURL = true;
+          this.editedExpense.requireURL = true;
         } else {
           // if expense type does not always require url
           if (_.isEmpty(this.selectedExpenseType.categories)) {
@@ -1651,6 +1650,7 @@ export default {
             this.editedExpense.requireURL = category ? category.requireURL : false;
           }
         }
+        this.editedExpense = _.cloneDeep(this.editedExpense); //need to clone editedExpense in order to see label URL changes
       }
     },
     'editedExpense.employeeId': function () {
