@@ -94,6 +94,7 @@
 import { isEmpty, monthDayYearFormat } from '@/utils/utils';
 import DeleteModal from '@/components/modals/DeleteModal.vue';
 import moment from 'moment-timezone';
+moment.tz.setDefault('America/New_York');
 import api from '@/shared/api.js';
 
 /**

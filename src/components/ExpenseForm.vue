@@ -255,7 +255,8 @@ import dateUtils from '@/shared/dateUtils';
 import employeeUtils from '@/shared/employeeUtils';
 import FileUpload from '@/components/FileUpload.vue';
 import { getRole } from '@/utils/auth';
-import moment from 'moment';
+const moment = require('moment-timezone');
+moment.tz.setDefault('America/New_York');
 import { v4 as uuid } from 'uuid';
 import { isEmpty, isFullTime } from '@/utils/utils';
 import _ from 'lodash';
@@ -365,6 +366,8 @@ function notesLabel() {
  * @return string - label
  */
 function urlLabel() {
+  console.log('urlLabel()');
+  console.log(this.editedExpense.requireURL);
   return this.editedExpense.requireURL ? 'URL' : 'URL (optional)';
 }
 

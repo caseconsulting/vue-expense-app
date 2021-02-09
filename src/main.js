@@ -2,7 +2,8 @@ import Vue from 'vue';
 import router from './router';
 import store from './store';
 
-import moment from 'moment';
+const moment = require('moment-timezone');
+moment.tz.setDefault('America/New_York');
 import vuetify from './vuetify';
 
 import(/* webpackMode: "eager" */ 'vuetify/dist/vuetify.min.css');

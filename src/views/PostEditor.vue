@@ -83,6 +83,7 @@ import ClassicEditor from '@ckeditor/ckeditor5-editor-classic/src/classiceditor'
 import { v4 as uuid } from 'uuid';
 import api from '@/shared/api.js';
 import moment from 'moment-timezone';
+moment.tz.setDefault('America/New_York');
 const IsoFormat = 'YYYY-MM-DD';
 import { isEmpty } from '@/utils/utils';
 import _ from 'lodash';

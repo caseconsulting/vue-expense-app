@@ -4,7 +4,7 @@
       <v-card>
         <!-- Anniversary Date -->
         <v-toolbar color="#565651" dark>
-          <v-toolbar-title>Anniversary Date: {{ moment(hireDate).format('MMMM Do') }}</v-toolbar-title>
+          <v-toolbar-title>Anniversary Date: {{ getAnniversaryDate }}</v-toolbar-title>
         </v-toolbar>
         <!-- End Anniversary Date -->
 
@@ -43,7 +43,17 @@
 
 <script>
 const IsoFormat = 'YYYY-MM-DD';
-const Moment = require('moment');
+const moment = require('moment-timezone');
+moment.tz.setDefault('America/New_York');
+
+/**
+ * Gets the anniversary date based on hire date.
+ *
+ * @returns String - anniversary date
+ */
+function getAnniversaryDate() {
+  return moment(this.hireDate).format('MMMM Do');
+} // getAnniversaryDate
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -84,7 +94,7 @@ function isCurrent(budgetYear) {
  * @param budgetYear - int budget year selected
  */
 function select(budgetYear) {
-  let fiscalYear = Moment(this.hireDate, IsoFormat);
+  let fiscalYear = moment(this.hireDate, IsoFormat);
   fiscalYear.year(budgetYear);
   this.emit(`selected-budget-year`, fiscalYear);
   this.activate = false;
@@ -97,6 +107,9 @@ function select(budgetYear) {
 // |--------------------------------------------------|
 
 export default {
+  computed: {
+    getAnniversaryDate
+  },
   data() {
     return {
       activate: false // dialog activator

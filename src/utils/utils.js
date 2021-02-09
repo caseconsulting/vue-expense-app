@@ -1,5 +1,6 @@
 import dateUtils from '@/shared/dateUtils';
-import moment from 'moment';
+const moment = require('moment-timezone');
+moment.tz.setDefault('America/New_York');
 import _ from 'lodash';
 
 /**

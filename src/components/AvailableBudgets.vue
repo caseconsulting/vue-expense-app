@@ -52,6 +52,7 @@ import AvailableBudgetSummary from '@/components/AvailableBudgetSummary.vue';
 import _ from 'lodash';
 // import ReceiptModal from '../components/ReceiptModal.vue';
 import moment from 'moment-timezone';
+moment.tz.setDefault('America/New_York');
 import { moneyValue } from '@/utils/utils';
 
 const IsoFormat = 'YYYY-MM-DD';

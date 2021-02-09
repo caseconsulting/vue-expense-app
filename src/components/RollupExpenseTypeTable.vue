@@ -139,7 +139,8 @@
 
 <script>
 import api from '@/shared/api.js';
-import moment from 'moment';
+const moment = require('moment-timezone');
+moment.tz.setDefault('America/New_York');
 import ReimburseModal from '@/components/modals/ReimburseModal.vue';
 import UnrolledTableInfo from '@/components/UnrolledTableInfo.vue';
 import _ from 'lodash';

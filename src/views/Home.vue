@@ -69,6 +69,7 @@ import api from '@/shared/api.js';
 import ActivityFeed from '@/components/ActivityFeed';
 import AvailableBudgets from '@/components/AvailableBudgets.vue';
 import moment from 'moment-timezone';
+moment.tz.setDefault('America/New_York');
 import TwitterFeed from '@/components/TwitterFeed';
 import TSheetsData from '@/components/TSheetsData.vue';
 import _ from 'lodash';

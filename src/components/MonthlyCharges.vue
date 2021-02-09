@@ -118,7 +118,8 @@
 </template>
 
 <script>
-import moment from 'moment';
+const moment = require('moment-timezone');
+moment.tz.setDefault('America/New_York');
 import api from '@/shared/api.js';
 import _ from 'lodash';
 import { isEmpty } from '@/utils/utils';

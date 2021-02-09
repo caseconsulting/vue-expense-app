@@ -240,7 +240,8 @@
 
 <script>
 import api from '@/shared/api.js';
-import moment from 'moment';
+const moment = require('moment-timezone');
+moment.tz.setDefault('America/New_York');
 import _ from 'lodash';
 import { formatDateDashToSlash, formatDateSlashToDash, isEmpty } from '@/utils/utils';
 

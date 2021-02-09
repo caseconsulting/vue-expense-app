@@ -115,7 +115,8 @@ import FormSubmissionConfirmation from '@/components/modals/FormSubmissionConfir
 import JobExperienceTab from '@/components/employees/formTabs/JobExperienceTab';
 import PersonalTab from '@/components/employees/formTabs/PersonalTab';
 import TechnologyTab from '@/components/employees/formTabs/TechnologyTab';
-import moment from 'moment';
+const moment = require('moment-timezone');
+moment.tz.setDefault('America/New_York');
 import { getRole } from '@/utils/auth';
 import { v4 as uuid } from 'uuid';
 import _ from 'lodash';

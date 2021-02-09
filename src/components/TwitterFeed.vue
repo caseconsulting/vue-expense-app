@@ -41,7 +41,8 @@
 </template>
 
 <script>
-import moment from 'moment';
+const moment = require('moment-timezone');
+moment.tz.setDefault('America/New_York');
 
 export default {
   filters: {
