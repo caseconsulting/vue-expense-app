@@ -74,6 +74,7 @@
     "vue": "^2.6.12",
     "vue-awesome": "^4.1.0",
     "vue-chartjs": "^3.5.1",
+    "vue-google-oauth2": "^1.5.6",
     "vue-router": "^3.4.9",
     "vue-router-multiguard": "^1.0.3",
     "vue2-filters": "^0.11.1",

@@ -611,7 +611,7 @@ export default {
         description: '',
         employeeId: '',
         expenseTypeId: '',
-        catagory: null,
+        category: null,
         showOnFeed: false,
         employeeName: null,
         budgetName: null

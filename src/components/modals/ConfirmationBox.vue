@@ -36,24 +36,8 @@
         <v-card-actions>
           <v-spacer></v-spacer>
           <div>
-            <v-btn
-              color="red"
-              text
-              @click.native="
-                emit('canceledSubmit');
-                activate = false;
-              "
-              >No, take me back</v-btn
-            >
-            <v-btn
-              color="green darken-1"
-              text
-              @click.native="
-                emit('confirmSubmit', expense);
-                activate = false;
-              "
-              >Yes, submit</v-btn
-            >
+            <v-btn color="red" text @click="emit('canceledSubmit')">No, take me back</v-btn>
+            <v-btn color="green darken-1" text @click="emit('confirmSubmit', expense)">Yes, submit</v-btn>
           </div>
         </v-card-actions>
       </v-card>
@@ -103,6 +87,7 @@ function emit(msg, data) {
     // data does not exist
     window.EventBus.$emit(msg);
   }
+  this.activate = false;
 } // emit
 
 // |--------------------------------------------------|

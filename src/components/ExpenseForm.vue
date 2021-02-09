@@ -547,7 +547,7 @@ async function checkCoverage() {
                 // BRANCH 4.2 goes over initial budget with new expense but stays below overdraft budget
                 this.$set(this.editedExpense, 'budget', expenseType.budget);
                 this.$set(this.editedExpense, 'remaining', expenseType.budget - newCommittedAmount);
-                this.$set(this.editedExpensee, 'od', true);
+                // this.$set(this.editedExpensee, 'od', true);
                 this.isCovered = true;
                 this.isOverCovered = false;
                 this.confirming = !this.confirming;
@@ -692,6 +692,12 @@ function clearForm() {
   this.$set(this.urlInfo, 'url', '');
   this.$set(this.urlInfo, 'category', '');
   this.$set(this.urlInfo, 'hits', 0);
+
+  if (this.asUser) {
+    // creating or updating an expense as a user
+    this.$set(this.editedExpense, 'employeeName', this.userInfo.id);
+    this.$set(this.editedExpense, 'employeeId', this.userInfo.id);
+  }
 } // clearForm
 
 /**
