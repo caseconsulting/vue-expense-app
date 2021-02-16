@@ -161,7 +161,7 @@ export default {
           },
           {
             title: 'What file types can I upload as a receipt?',
-            body: 'The following file formats are accepted: .pdf, .gif, .jpeg, .png, .xlsx, .xml, .doc, and .docx'
+            body: 'The following file formats are accepted: .pdf, .gif, .jpeg, .png, .bmp, .xlsx, .xml, .doc, and .docx'
           },
           {
             title: 'How do I convert training dollars to training hours?',
