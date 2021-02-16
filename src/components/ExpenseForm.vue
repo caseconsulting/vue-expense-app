@@ -739,7 +739,7 @@ async function createNewEntry() {
       }
     } else {
       // emit error if fails to upload file
-      this.$emit('error', updatedAttachment.message);
+      this.$emit('error', updatedAttachment.response.data.message);
       this.$set(this.editedExpense, 'id', '');
     }
   } else {
@@ -1208,7 +1208,6 @@ async function submit() {
   if (this.$refs.form != undefined || this.$refs.form != null) {
     if (this.$refs.form.validate()) {
       // NOTE: this second validate may be unnecessary. included in checkCoverage()
-
       // set the description if a recipient is required
       if (this.reqRecipient) {
         let giver = _.find(this.employees, (employee) => employee.value == this.editedExpense.employeeId);
