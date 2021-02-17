@@ -237,7 +237,7 @@
                       <p v-if="!isEmpty(item.note)"><b>Notes: </b>{{ item.note }}</p>
                       <p v-if="!isEmpty(item.receipt)"><b>Receipt: </b>{{ item.receipt }}</p>
                       <p v-if="!isEmpty(item.url)">
-                        <b>Url: </b> <a v-if="item.url" :href="item.url">{{ item.url }}</a>
+                        <b>Url: </b> <a v-if="item.url" :href="item.url" target="_blank">{{ item.url }}</a>
                       </p>
                       <p v-if="!isEmpty(item.category)"><b>Category: </b>{{ item.category }}</p>
                       <div v-if="isAdmin" class="flagExp">
