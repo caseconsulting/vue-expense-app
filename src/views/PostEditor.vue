@@ -16,7 +16,7 @@
       <v-btn color="white" text @click="clearStatus"> Close </v-btn>
     </v-snackbar>
     <!-- Cancel Button -->
-    <v-btn to="/blog" color="white" class="ma-2"> <icon class="mr-1" name="ban"></icon>Cancel</v-btn>
+    <v-btn to="/blog" color="white" class="ma-2" elevation="1"> <icon class="mr-1" name="ban"></icon>Cancel</v-btn>
     <!-- Submit Button -->
     <v-btn outlined @click="confirming = !confirming" color="success" class="ma-2">
       <icon class="mr-1" name="save"></icon>Submit</v-btn
@@ -67,7 +67,7 @@
       <ckeditor :editor="editor" v-model="editorData" :config="editorConfig"></ckeditor>
     </div>
     <!-- Cancel Button -->
-    <v-btn to="/blog" color="white" class="ma-2"> <icon class="mr-1" name="ban"></icon>Cancel </v-btn>
+    <v-btn to="/blog" color="white" class="ma-2" elevation="1"> <icon class="mr-1" name="ban"></icon>Cancel </v-btn>
 
     <!-- Submit Button -->
     <v-btn outlined @click="confirming = !confirming" color="success" class="ma-2">

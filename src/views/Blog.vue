@@ -19,7 +19,7 @@
     <v-row>
       <v-col cols="12">
         <!-- new blog post button -->
-        <v-btn class="mb-5" to="/postEditor/0"> Create a New Blog Post</v-btn>
+        <v-btn class="mb-5" elevation="1" to="/postEditor/0"> Create a New Blog Post</v-btn>
         <!-- Post table -->
         <post-table
           :posts="posts"

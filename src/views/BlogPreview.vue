@@ -1,7 +1,7 @@
 <template>
   <v-container>
     <!-- Return button -->
-    <v-btn class="mb-5" to="/blog"> Return to Blog Page</v-btn>
+    <v-btn class="mb-5" elevation="1" to="/blog"> Return to Blog Page</v-btn>
     <div class="w3-display-container">
       <!-- title -->
       <h1 class="blogTitle">{{ this.metaData.title }}</h1>
