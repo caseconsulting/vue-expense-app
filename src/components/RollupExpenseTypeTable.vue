@@ -815,11 +815,11 @@ export default {
     unCheckAllBoxes
   },
   watch: {
-    expenseType: function () {
+    employee: function () {
       //unchecks all checkboxes when filter changes
       this.unCheckAllBoxes();
     },
-    employee: function () {
+    expenseType: function () {
       //unchecks all checkboxes when filter changes
       this.unCheckAllBoxes();
     }
