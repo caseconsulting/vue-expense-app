@@ -29,7 +29,7 @@
         ></post-table>
       </v-col>
     </v-row>
-    <!-- Rekognition and comprehend -->
+    <!-- Rekognition and comprehend
     <v-row>
       <v-file-input
         style="width: 50px"
@@ -46,7 +46,7 @@
     </v-row>
     <v-row>
       <v-btn @click="comprehend()">comprehend</v-btn>
-    </v-row>
+    </v-row> -->
   </v-container>
 </template>
 <script>
@@ -55,6 +55,9 @@ import PostTable from '@/components/PostTable.vue';
 import _ from 'lodash';
 import { getRole } from '@/utils/auth';
 
+/**
+ * returns the accepted file types for images
+ */
 function acceptedFileTypes() {
   return ['jpg', 'png'].join(',');
 } // acceptedFileTypes
@@ -72,6 +75,7 @@ function isAdmin() {
  * Initial Setup
  */
 async function created() {
+  //get the blog info from aws
   this.posts = await api.getItems(api.BLOG);
   this.employeeRole = getRole();
   if (isAdmin) {
@@ -113,38 +117,42 @@ function onSelect(item) {
   this.blogPost = _.cloneDeep(item.text);
 } // onSelect
 
-async function uploadToS3() {
-  await api.uploadBlogAttachment(this.inputFile);
-}
+// THESE ARE PART OF THE AWS AI SERVICES TESTS
+// /**
+//  * uploads the blog attachment to s3
+//  */
+// async function uploadToS3() {
+//   await api.uploadBlogAttachment(this.inputFile);
+// } // uploadToS3
 
-async function rekognition() {
-  await this.uploadToS3();
-  let result = await api.getModerationLabel(this.inputFile.name);
-  console.log(result);
-}
+// async function rekognition() {
+//   await this.uploadToS3();
+//   let result = await api.getModerationLabel(this.inputFile.name);
+//   console.log(result);
+// }
 
-async function comprehend() {
-  let arr = this.splitInputText();
-  for (let i = 0; i < arr.length; i++) {
-    let result = await api.getKeyPhrases({ inputText: arr[i] });
-    console.log(result);
-  }
-}
+// async function comprehend() {
+//   let arr = this.splitInputText();
+//   for (let i = 0; i < arr.length; i++) {
+//     let result = await api.getKeyPhrases({ inputText: arr[i] });
+//     console.log(result);
+//   }
+// }
 
-function splitInputText() {
-  let strArr = [];
-  if (this.inputText.length > 5000) {
-    let currOffset = 0;
-    while (currOffset < this.inputText.length) {
-      let start = currOffset;
-      currOffset += 5000 % this.inputText.length;
-      strArr.push(this.inputText.substring(start, currOffset));
-    }
-    return strArr;
-  } else {
-    return [this.inputText];
-  }
-}
+// function splitInputText() {
+//   let strArr = [];
+//   if (this.inputText.length > 5000) {
+//     let currOffset = 0;
+//     while (currOffset < this.inputText.length) {
+//       let start = currOffset;
+//       currOffset += 5000 % this.inputText.length;
+//       strArr.push(this.inputText.substring(start, currOffset));
+//     }
+//     return strArr;
+//   } else {
+//     return [this.inputText];
+//   }
+// }
 
 /**
  * refresh blogTable and give successful status message
@@ -209,10 +217,10 @@ export default {
   },
   methods: {
     acceptedFileTypes,
-    comprehend,
-    rekognition,
-    splitInputText,
-    uploadToS3,
+    // comprehend,
+    // rekognition,
+    // splitInputText,
+    // uploadToS3,
     onSelect,
     isAdmin,
     successfulDelete,
