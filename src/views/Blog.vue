@@ -119,26 +119,35 @@ function onSelect(item) {
 
 // THESE ARE PART OF THE AWS AI SERVICES TESTS
 // /**
-//  * uploads the blog attachment to s3
+//  * uploads the blog attachment to s3 to be preapared for rekognition and comprehend
 //  */
 // async function uploadToS3() {
 //   await api.uploadBlogAttachment(this.inputFile);
 // } // uploadToS3
 
+// /**
+//  * Used to detect text in an image and print out what it finds
+//  */
 // async function rekognition() {
 //   await this.uploadToS3();
 //   let result = await api.getModerationLabel(this.inputFile.name);
 //   console.log(result);
-// }
+// } // rekognition
 
+// /**
+//  * retrieves key phrases from text loaded from this.inputText
+//  */
 // async function comprehend() {
 //   let arr = this.splitInputText();
 //   for (let i = 0; i < arr.length; i++) {
 //     let result = await api.getKeyPhrases({ inputText: arr[i] });
 //     console.log(result);
 //   }
-// }
+// } // comprehend
 
+/**
+ * splits up input text if the string is longer than 5000 characters
+ */
 // function splitInputText() {
 //   let strArr = [];
 //   if (this.inputText.length > 5000) {
@@ -152,7 +161,7 @@ function onSelect(item) {
 //   } else {
 //     return [this.inputText];
 //   }
-// }
+// } // splitInputText
 
 /**
  * refresh blogTable and give successful status message
@@ -204,7 +213,7 @@ export default {
       posts: [],
       model: {},
       blogPost: '',
-      inputFile: null,
+      // inputFile: null, remove comment to use rekognition or comprehend
       inputText: null,
       employees: null,
       userInfo: null,
