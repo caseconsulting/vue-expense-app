@@ -82,7 +82,7 @@
           </v-data-table>
           <!-- End employee datatable -->
           <br />
-          <delete-modal :activate="deleting" :type="'BlogPost'"></delete-modal>
+          <delete-modal :toggleDeleteModal="deleting" :type="'BlogPost'"></delete-modal>
         </v-container>
       </v-card>
     </v-col>
@@ -160,7 +160,6 @@ async function deleteBlogPost() {
       this.$emit('successfulDelete');
       // delete attachment from s3 if deleted expense has a receipt
       let deletedBlogFile = await api.deleteBlogFile(deleted);
-
       if (deletedBlogFile.code) {
         // emit alert if error deleting file
         this.$emit('displayError', `Error Deleting Receipt: ${deletedBlogFile.message}`);
