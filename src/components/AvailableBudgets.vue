@@ -2,9 +2,10 @@
   <div id="available-budgets">
     <v-card>
       <v-card-title class="header_style">
-        <router-link to="/myBudgets" style="text-decoration: none">
+        <router-link v-if="isUser" to="/myBudgets" style="text-decoration: none">
           <h3 id="link" class="white--text px-2">Available Budgets</h3>
         </router-link>
+        <h3 v-else id="link" class="white--text px-2">Available Budgets</h3>
       </v-card-title>
       <v-card-text class="px-7 pt-5 pb-1 black--text">
         <div v-if="this.loading" class="pb-4">
@@ -84,6 +85,7 @@ async function created() {
   window.EventBus.$on('close-summary', () => {
     this.showDialog = false;
   });
+  this.currentUser = await api.getUser();
   await this.refreshEmployee();
   this.loading = false;
 } // created
@@ -199,6 +201,23 @@ function selectBudget(budget) {
 
 // |--------------------------------------------------|
 // |                                                  |
+// |                     COMPUTED                     |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * returns as true if the current signed in user has the same id as the employee prop
+ */
+function isUser() {
+  if (this.employee && this.currentUser && this.employee.id == this.currentUser.id) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
+// |--------------------------------------------------|
+// |                                                  |
 // |                      EXPORT                      |
 // |                                                  |
 // |--------------------------------------------------|
@@ -215,6 +234,7 @@ export default {
       allUserBudgets: [],
       budgets: [],
       budgetYears: [],
+      currentUser: null,
       date: '',
       hireDate: '',
       loading: true,
@@ -223,6 +243,9 @@ export default {
       selectReceipt: false,
       showDialog: false
     };
+  },
+  computed: {
+    isUser
   },
   filters: {
     moneyValue
