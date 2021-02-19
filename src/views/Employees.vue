@@ -128,6 +128,13 @@
             </p>
           </template>
 
+          <!-- Middle Name Item Slot -->
+          <template v-slot:[`item.middleName`]="{ item }">
+            <p :class="{ inactiveStyle: isInactive(item), selectFocus: isFocus(item) }" style="margin-bottom: 0px">
+              {{ item.middleName }}
+            </p>
+          </template>
+
           <!-- Last Name Item Slot -->
           <template v-slot:[`item.lastName`]="{ item }">
             <p :class="{ inactiveStyle: isInactive(item), selectFocus: isFocus(item) }" style="margin-bottom: 0px">
@@ -420,6 +427,10 @@ export default {
         {
           text: 'First Name',
           value: 'firstName'
+        },
+        {
+          text: 'Middle Name',
+          value: 'middleName'
         },
         {
           text: 'Last Name',
