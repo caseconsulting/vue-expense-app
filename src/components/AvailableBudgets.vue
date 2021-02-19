@@ -5,7 +5,7 @@
         <router-link v-if="isUser" to="/myBudgets" style="text-decoration: none">
           <h3 id="link" class="white--text px-2">Available Budgets</h3>
         </router-link>
-        <h3 v-else id="link" class="white--text px-2">Available Budgets</h3>
+        <h3 v-else class="white--text px-2">Available Budgets</h3>
       </v-card-title>
       <v-card-text class="px-7 pt-5 pb-1 black--text">
         <div v-if="this.loading" class="pb-4">
