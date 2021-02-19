@@ -168,7 +168,31 @@ function onSelect(item) {
  */
 async function successfulDelete() {
   this.posts = await api.getItems(api.BLOG);
-
+  if (isAdmin) {
+    //get all employee's data and match posts to it.
+    this.posts = _.map(this.posts, (post) => {
+      let employee = _.find(this.employees, (employee) => {
+        return post.authorId == employee.id;
+      });
+      post.employeeName = `${employee.firstName} ${employee.lastName}`;
+      if (post.title == null) {
+        post.title = 'testTitle';
+      }
+      return post;
+    });
+  } else {
+    this.posts = _.map(this.posts, (post) => {
+      if (post.id != this.userInfo.id) {
+        return null;
+      }
+      post.employeeName = `${this.userInfo.firstName} ${this.userInfo.lastName}`;
+      if (post.title == null) {
+        post.title = 'testTitle';
+      }
+      return post;
+    });
+    this.posts = _.compact(this.posts);
+  }
   this.$set(this.status, 'statusType', 'SUCCESS');
   this.$set(this.status, 'statusMessage', 'Item was successfully deleted!');
   this.$set(this.status, 'color', 'green');

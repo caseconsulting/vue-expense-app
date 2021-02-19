@@ -162,11 +162,11 @@ async function deleteBlogPost() {
       let deletedBlogFile = await api.deleteBlogFile(deleted);
       if (deletedBlogFile.code) {
         // emit alert if error deleting file
-        this.$emit('displayError', `Error Deleting Receipt: ${deletedBlogFile.message}`);
+        this.$emit('displayError', `Error Deleting Blog Post: ${deletedBlogFile.message}`);
       }
     } else {
       // fails to delete expense
-      this.$emit('displayError', 'Error Deleting Expense');
+      this.$emit('displayError', 'Error Deleting Blog Post');
     }
     this.midAction = false;
   }
