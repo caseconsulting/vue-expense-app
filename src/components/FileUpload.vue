@@ -54,8 +54,7 @@ function acceptedFileTypes() {
       '.doc',
       '.docx',
       'image/*',
-      '.pdf',
-      '.xml'
+      '.pdf'
     ].join(',');
   }
 } // acceptedFileTypes
