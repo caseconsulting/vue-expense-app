@@ -1213,6 +1213,8 @@ async function submit() {
         let giver = _.find(this.employees, (employee) => employee.value == this.editedExpense.employeeId);
         let receiver = _.find(this.employees, (employee) => employee.value == this.editedExpense.recipient);
         let expenseType = _.find(this.expenseTypes, (type) => this.editedExpense.expenseTypeId === type.value);
+        console.log(giver);
+        console.log(receiver);
 
         if (giver && receiver && expenseType) {
           this.editedExpense.description = `${giver.text} gave ${receiver.text} a ${expenseType.budgetName}`;
@@ -1335,7 +1337,8 @@ async function created() {
   let employees = await api.getItems(api.EMPLOYEES);
   this.employees = employees.map((employee) => {
     return {
-      text: employeeUtils.fullName(employee),
+      //text: employeeUtils.fullName(employee),
+      text: employeeUtils.firstAndLastName(employee),
       value: employee.id,
       workStatus: employee.workStatus
     };
