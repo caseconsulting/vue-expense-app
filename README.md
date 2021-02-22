@@ -1,6 +1,6 @@
 ## Setup
 
-The **Expense Application** is written in **Vue.js** and relies on **Node.js** v12.x+ and the **npm** package management system.
+The **Expense Application** is written in **Vue.js** and relies on **Node.js** v12.x+ and the **npm** package management system. UI is enhanced with **Vuetify.js** and **BootStrap-vue**.
 
 * Download and install Node.js v12.x from: https://nodejs.org/en/ or https://nodejs.org/dist/latest-v12.x/
 * Install required Node.js modules:
@@ -34,6 +34,14 @@ Download this file to the project root directory:
 ```
 npm run download:local:env
 ```
+
+To download a specific environment's .env file:
+
+```
+npm run download:{Stage}:env
+```
+
+Where Stage is the name of the environment (local, dev, test, prod, etc.)
 
 ## Application tasks
 
@@ -124,3 +132,35 @@ To reset for local development, after a deployment:
 ```
 npm run download:local:env
 ```
+
+## Documentation
+
+**Vue:**
+
+https://vuejs.org/v2/guide/
+
+Please note we are currently using Vue2. When we migrate to Vue3 replace the above link.
+
+**Vuetify:**
+
+https://vuetifyjs.com/en/
+
+**Bootstrap-vue:**
+
+https://bootstrap-vue.org/docs
+
+**Lodash:**
+
+https://vuetifyjs.com/en/
+
+**Moment:**
+
+https://momentjs.com/docs/
+
+**Axios:**
+
+https://github.com/axios/axios
+
+**CKEditor:**
+
+https://ckeditor.com/docs/ckeditor5/latest/framework/guides/overview.html
