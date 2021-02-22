@@ -80,7 +80,6 @@ import { formatDateDashToSlash, formatDateSlashToDash, isEmpty } from '@/utils/u
 async function created() {
   window.EventBus.$emit('created', 'customerOrgExp'); // emit customer organization tab was created
   this.employees = await api.getItems(api.EMPLOYEES); // get all employees
-  this.populateDropDowns(); // get autocomplete drop down data
 } // created
 
 // |--------------------------------------------------|
@@ -110,21 +109,6 @@ function deleteExperience(index) {
 } // deleteExperience
 
 /**
- * Populate drop downs with information that other employees have filled out.
- */
-function populateDropDowns() {
-  let employeesExperiences = _.map(this.employees, (employee) => employee.customerOrgExp); //extract experiences
-  employeesExperiences = _.compact(employeesExperiences); //remove falsey values
-  // loop employees
-  _.forEach(employeesExperiences, (experiences) => {
-    // loop contracts
-    _.forEach(experiences, (experience) => {
-      this.experienceDropDown.push(experience.name); // add customer organization name
-    });
-  });
-} // populateDropDowns
-
-/**
  * Validate all input fields are valid. Emit to parent the error status.
  */
 function validateFields() {
@@ -149,7 +133,24 @@ export default {
   created,
   data() {
     return {
-      experienceDropDown: ['DST', 'ADO', 'Talent', 'OMA', 'CCI'], // autocomplete customer organization name options
+      experienceDropDown: [
+        'DIR',
+        'DDI',
+        'DDI/ITE',
+        'DDI/ADO',
+        'DDI/OSE',
+        'DDI/CCI',
+        'DA',
+        'DO',
+        'DST',
+        'DS',
+        'Talent',
+        'Mission Center',
+        'DNI',
+        'NGA',
+        'NRO',
+        'DoD'
+      ], // autocomplete customer organization name options
       dateOptionalRules: [
         (v) => {
           return !isEmpty(v) ? /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v) || 'Date must be valid. Format: MM/DD/YYYY' : true;
@@ -176,7 +177,6 @@ export default {
     formatDateSlashToDash,
     formatDateDashToSlash,
     isEmpty,
-    populateDropDowns,
     validateFields
   },
   props: ['model', 'validating'],
