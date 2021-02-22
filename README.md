@@ -151,7 +151,7 @@ https://bootstrap-vue.org/docs
 
 **Lodash:**
 
-https://vuetifyjs.com/en/
+https://lodash.com/
 
 **Moment:**
 
