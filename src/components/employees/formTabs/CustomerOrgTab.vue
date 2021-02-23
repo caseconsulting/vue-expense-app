@@ -8,7 +8,7 @@
       style="border: 1px solid grey"
     >
       <!-- Name of Customer Organization -->
-      <v-combobox
+      <v-autocomplete
         ref="formFields"
         v-model="exp.name"
         :rules="requiredRules"
@@ -16,7 +16,7 @@
         label="Customer Organization Experience"
         data-vv-name="Customer Organization Experience"
       >
-      </v-combobox>
+      </v-autocomplete>
 
       <v-row align="center" class="py-3" justify="center">
         <!-- Current Switch -->
@@ -149,7 +149,8 @@ export default {
         'DNI',
         'NGA',
         'NRO',
-        'DoD'
+        'DoD',
+        'Other'
       ], // autocomplete customer organization name options
       dateOptionalRules: [
         (v) => {
