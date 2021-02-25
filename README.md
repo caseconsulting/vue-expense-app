@@ -98,6 +98,14 @@ To upgrade to the latest version of a specific Node.js module, which is a develo
 npm update --save-dev <module-name>@latest
 ```
 
+## Blog Post Creator/Editor
+
+The Blog post creator/editor is currently a work in progress that will add functionality for employees to create blog posts within the Portal that will eventually be uploaded to the blog on the Case Consulting website.
+
+Functionality to create, edit and delete posts is currently available in the Portal. Future work will allow those posts to be uploaded directly to the Case Consulting Blog on the website.
+
+To access the blog in the Portal simply go to the URL {app-domain-name}/blog. For example if running app on localhost:8080 URL would be localhost:8080/blog.
+
 ## Deployment
 
 To download dev .env and then deploy to the dev environment:
