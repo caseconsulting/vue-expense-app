@@ -75,7 +75,7 @@
     <v-switch
       v-model="editedPersonalInfo.birthdayFeed"
       label="Have birthday recognized on company feed?"
-      :disabled="disableBirthdayFeed()"
+      :disabled="disableBirthdayFeed"
     ></v-switch>
 
     <!-- Place of Birth -->
@@ -153,6 +153,19 @@ async function created() {
 // |--------------------------------------------------|
 
 /**
+ * Function for handling if the birthdayFeed switch is disabled.
+ *
+ * @return boolean - birthday feed is disabled
+ */
+function disableBirthdayFeed() {
+  if (this.editedPersonalInfo.birthday == null) {
+    this.editedPersonalInfo.birthdayFeed = false;
+    return true;
+  }
+  return false;
+} // disableBirthdayFeed
+
+/**
  * Checks to see if the country is the United States. if it is: returns true
  * otherwise clears state field and returns false.
  *
@@ -172,20 +185,6 @@ function isUSA() {
 // |                     METHODS                      |
 // |                                                  |
 // |--------------------------------------------------|
-
-/**
- * Function for handling if the birthdayFeed switch is disabled.
- *
- * @return boolean - birthday feed is disabled
- */
-function disableBirthdayFeed() {
-  if (this.editedPersonalInfo.birthday == null) {
-    this.editedPersonalInfo.birthdayFeed = false;
-    return true;
-  }
-  this.editedPersonalInfo.birthdayFeed = true;
-  return false;
-} // disableBirthdayFeed
 
 /**
  * Filters out contracts from list of employees.
@@ -229,6 +228,7 @@ function validateFields() {
 export default {
   created,
   computed: {
+    disableBirthdayFeed,
     isUSA
   },
   data() {
@@ -325,7 +325,6 @@ export default {
     };
   },
   methods: {
-    disableBirthdayFeed,
     filterContracts,
     filterPrimes,
     formatDate,
