@@ -26,6 +26,16 @@ export function formatDate(date) {
 } // formatDate
 
 /**
+ * Formats a date (dates that only have months and years).
+ *
+ * @param date - date to format
+ * @return Date - formatted date
+ */
+export function formatDateMonthYear(date) {
+  return dateUtils.formatDateMonthYear(date);
+} // formatDate
+
+/**
  * Returns a date formated from YYYY-MM-DD to MM/DD/YYYY.
  *
  * @param date - YYYY-MM-DD String date
@@ -138,4 +148,14 @@ export function monthDayFormat(date) {
  */
 export function parseDate(date) {
   return dateUtils.parseDate(date);
+} // parseDate
+
+/**
+ * Parse a date to isoformat (YYYY-MM).
+ *
+ * @param Date = date to parse
+ * @return Date - date in isoformat
+ */
+export function parseDateMonthYear(date) {
+  return dateUtils.parseDateMonthYear(date);
 } // parseDate

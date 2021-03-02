@@ -29,6 +29,7 @@
             lazy-validation
             persistent-hint
             hint="(MM/YYYY)"
+            @blur="startIntervalDateEdited = parseDateMonthYear(tempStartIntervalDate)"
           ></v-text-field>
         </template>
         <v-date-picker
@@ -67,6 +68,7 @@
             lazy-validation
             persistent-hint
             hint="(MM/YYYY)"
+            @blur="endIntervalDateEdited = parseDateMonthYear(tempEndIntervalDate)"
           ></v-text-field>
         </template>
         <v-date-picker
@@ -90,7 +92,7 @@
 import _ from 'lodash';
 import { mask } from 'vue-the-mask';
 import moment from 'moment-timezone';
-import { formatDateDashToSlash, formatDateSlashToDash, isEmpty } from '@/utils/utils';
+import { isEmpty, parseDateMonthYear, formatDateMonthYear } from '@/utils/utils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -98,6 +100,23 @@ import { formatDateDashToSlash, formatDateSlashToDash, isEmpty } from '@/utils/u
 // |                                                  |
 // |--------------------------------------------------|
 
+async function created() {
+  //set temp start date interval variable
+  this.tempStartIntervalDate = formatDateMonthYear(this.startIntervalDateEdited) || this.tempStartIntervalDate;
+  // fixes v-date-picker error so that if the format of date is incorrect it is set to null
+  if (this.startIntervalDateEdited !== null && !formatDateMonthYear(this.startIntervalDateEdited)) {
+    // clear birthday date if fails to format
+    this.startIntervalDateEdited = null;
+  }
+
+  //set temp end date interval variable
+  this.tempEndIntervalDate = formatDateMonthYear(this.endIntervalDateEdited) || this.tempEndIntervalDate;
+  // fixes v-date-picker error so that if the format of date is incorrect it is set to null
+  if (this.endIntervalDateEdited !== null && !formatDateMonthYear(this.endIntervalDateEdited)) {
+    // clear birthday date if fails to format
+    this.endIntervalDateEdited = null;
+  }
+}
 // |--------------------------------------------------|
 // |                                                  |
 // |                     METHODS                      |
@@ -107,7 +126,7 @@ import { formatDateDashToSlash, formatDateSlashToDash, isEmpty } from '@/utils/u
 /**
  * Deletes interval from parent.
  */
-function deleteInterval() {
+async function deleteInterval() {
   //TODO: send event to technology tab with index for deleting that entry
   this.tempStartIntervalDate = null;
   this.tempEndIntervalDate = null;
@@ -115,6 +134,7 @@ function deleteInterval() {
 } // deleteTechnology
 
 export default {
+  created,
   data() {
     return {
       startIntervalMenu: false,
@@ -124,126 +144,69 @@ export default {
       tempEndIntervalDate: _.cloneDeep(this.endIntervalDate),
       endIntervalDateEdited: null,
       dateOptionalRules: [
-        (v) => {
-          return !isEmpty(v) ? /^\d{1,2}\/\d{4}$/.test(v) || 'Date must be valid. Format: MM/YYYY' : true;
-        }
+        (v) => isEmpty(v) || /^\d{1,2}\/\d{4}$/.test(v) || 'Date must be valid. Format: MM/YYYY',
+        (v) => isEmpty(v) || moment(v, 'MM/YYYY').isValid() || 'Date must be valid',
+        (v) =>
+          isEmpty(v) || moment(v, 'MM/YYYY').isAfter(this.startIntervalDateEdited) || 'Date must be after start date'
       ], // rules for an optional date
       dateRules: [
         (v) => !isEmpty(v) || 'Date required',
-        (v) => (!isEmpty(v) && /^\d{1,2}\/\d{4}$/.test(v)) || 'Date must be valid. Format: MM/YYYY'
+        (v) => (!isEmpty(v) && /^\d{1,2}\/\d{4}$/.test(v)) || 'Date must be valid. Format: MM/YYYY',
+        (v) => moment(v, 'MM/YYYY').isValid() || 'Date must be valid',
+        (v) =>
+          !this.endIntervalDateEdited ||
+          moment(v, 'MM/YYYY').isBefore(this.endIntervalDateEdited) ||
+          'Date must be before end date'
       ] // rules for a required date
     };
   },
   directives: { mask },
   methods: {
     deleteInterval,
-    formatDateDashToSlash,
-    formatDateSlashToDash,
-    isEmpty
+    isEmpty,
+    parseDateMonthYear,
+    formatDateMonthYear
   },
   props: ['startIntervalDate', 'endIntervalDate', 'technologyIndex', 'intervalIndex'],
   watch: {
     startIntervalDate: function () {
-      this.startIntervalDateEdited = this.startIntervalDate;
+      this.startIntervalDateEdited = _.cloneDeep(this.startIntervalDate);
+      this.$refs.formFields.validate(); //validate dates everytime a date changes
     },
     endIntervalDate: function () {
-      this.endIntervalDateEdited = this.endIntervalDate;
-    },
-    tempStartIntervalDate: function () {
-      //function that updates the date picker when text field is changed
-      if (this.tempStartIntervalDate != null) {
-        let splitDate;
-        if (this.tempStartIntervalDate !== null) {
-          splitDate = this.tempStartIntervalDate.split('/');
-        } else {
-          return null;
-        }
-        let date = moment(this.tempStartIntervalDate, 'MM/YYYY');
-        if (splitDate.length != 2 || !date.isValid()) {
-          return null;
-        }
-        let year = splitDate[1];
-        let month = splitDate[0];
-
-        this.startIntervalDateEdited = year + '-' + month;
-      }
+      this.endIntervalDateEdited = _.cloneDeep(this.endIntervalDate);
+      this.$refs.formFields.validate(); //validate dates everytime a date changes
     },
     startIntervalDateEdited: function () {
       //function that updates the text box when date picker is changed
-      if (this.startIntervalDateEdited != null) {
-        if (this.startIntervalDateEdited !== null) {
-          var splitDate = this.startIntervalDateEdited.split('-');
-        } else {
-          return null;
-        }
-        if (splitDate.length != 2) {
-          return null;
-        }
-        var year = splitDate[0];
-        var month = splitDate[1];
-
-        if (year.length != 4 || month.length < 1 || month.length > 2) {
-          this.startIntervalDateEdited = null;
-          return null;
-        }
-        this.tempStartIntervalDate = month + '/' + year;
-
-        //TODO: send updated startInterval (given index back)
-        window.EventBus.$emit(
-          'update-start-interval-technology',
-          this.technologyIndex,
-          this.intervalIndex,
-          this.startIntervalDateEdited
-        );
+      this.tempStartIntervalDate = formatDateMonthYear(this.startIntervalDateEdited) || this.tempStartIntervalDate;
+      //fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
+      if (this.startIntervalDateEdited !== null && !formatDateMonthYear(this.startIntervalDateEdited)) {
+        this.startIntervalDateEdited = null;
       }
-    },
-    tempEndIntervalDate: function () {
-      //function that updates the date picker when text field is changed
-      if (this.tempEndIntervalDate != null) {
-        let splitDate;
-        if (this.tempEndIntervalDate !== null) {
-          splitDate = this.tempEndIntervalDate.split('/');
-        } else {
-          return null;
-        }
-        let date = moment(this.tempEndIntervalDate, 'MM/YYYY');
-        if (splitDate.length != 2 || !date.isValid()) {
-          return null;
-        }
-        let year = splitDate[1];
-        let month = splitDate[0];
 
-        this.endIntervalDateEdited = year + '-' + month;
-      }
+      //TODO: send updated startInterval (given index back)
+      window.EventBus.$emit(
+        'update-start-interval-technology',
+        this.technologyIndex,
+        this.intervalIndex,
+        this.startIntervalDateEdited
+      );
     },
     endIntervalDateEdited: function () {
       //function that updates the text box when date picker is changed
-      if (this.endIntervalDateEdited != null) {
-        if (this.endIntervalDateEdited !== null) {
-          var splitDate = this.endIntervalDateEdited.split('-');
-        } else {
-          return null;
-        }
-        if (splitDate.length != 2) {
-          return null;
-        }
-        var year = splitDate[0];
-        var month = splitDate[1];
-
-        if (year.length != 4 || month.length < 1 || month.length > 2) {
-          this.endIntervalDateEdited = null;
-          return null;
-        }
-        this.tempEndIntervalDate = month + '/' + year;
-        //TODO: send updated startInterval (given index back)
-
-        window.EventBus.$emit(
-          'update-end-interval-technology',
-          this.technologyIndex,
-          this.intervalIndex,
-          this.endIntervalDateEdited
-        );
+      this.tempEndIntervalDate = formatDateMonthYear(this.endIntervalDateEdited) || this.tempEndIntervalDate;
+      //fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
+      if (this.endIntervalDateEdited !== null && !formatDateMonthYear(this.endIntervalDateEdited)) {
+        this.endIntervalDateEdited = null;
       }
+      //TODO: send updated startInterval (given index back)
+      window.EventBus.$emit(
+        'update-end-interval-technology',
+        this.technologyIndex,
+        this.intervalIndex,
+        this.endIntervalDateEdited
+      );
     }
   }
 };

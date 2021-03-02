@@ -21,11 +21,12 @@
         :items="technologyDropDown"
         label="Technology"
         data-vv-name="Technology"
+        class="pb-5"
       >
       </v-combobox>
 
       <!-- Time Intervals -->
-      <v-row v-if="technology.dateIntervals">
+      <v-row v-if="technology.dateIntervals" justify="center">
         <div
           v-for="(dateInterval, intervalIndex) in technology.dateIntervals"
           class="pt-3 pb-1 px-5"
