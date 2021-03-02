@@ -5,7 +5,7 @@
       v-for="(technology, index) in editedTechnologies"
       class="pt-3 pb-1 px-5"
       v-bind:class="{ errorBox: isDuplicate(technology.name) }"
-      :key="'technology: ' + technology.name + index"
+      :key="'technology: ' + index"
       style="border: 1px solid grey"
     >
       <!--Duplicate chip if tech name is already entered by user-->
@@ -24,44 +24,42 @@
       >
       </v-combobox>
 
+      <!-- Time Intervals -->
+      <v-row v-if="technology.dateIntervals">
+        <div
+          v-for="(dateInterval, intervalIndex) in technology.dateIntervals"
+          class="pt-3 pb-1 px-5"
+          :key="'technology interval: ' + index + intervalIndex"
+          style="border: 1px solid grey"
+        >
+          <date-interval-form
+            :startIntervalDate="dateInterval.startDate"
+            :endIntervalDate="dateInterval.endDate"
+            :technologyIndex="index"
+            :intervalIndex="intervalIndex"
+          ></date-interval-form>
+        </div>
+      </v-row>
+
+      <!--Add a time interval button-->
+      <div class="pt-4" align="center">
+        <v-btn @click="addTimeInterval(index)" elevation="2"><v-icon class="pr-1">add</v-icon>Time Interval</v-btn>
+      </div>
+
+      <!--TODO: remove Current Switch-->
       <v-row align="center" class="py-3" justify="center">
         <!-- Current Switch -->
-        <v-col cols="6" sm="7" md="6" lg="7">
+        <!-- <v-col cols="6" sm="7" md="6" lg="7">
           <v-switch v-model="technology.current" label="Currently working with this technology"></v-switch>
-        </v-col>
-
-        <!-- Years of Experience -->
-        <v-col
-          cols="4"
-          sm="3"
-          md="4"
-          lg="3"
-          class="px-0 pb-0"
-          :class="{ 'px-4': $vuetify.breakpoint.sm, 'px-4': $vuetify.breakpoint.lg }"
-        >
-          <v-text-field
-            ref="formFields"
-            v-model="technology.years"
-            flat
-            :rules="experienceRequired"
-            single-line
-            max="99"
-            min="0"
-            suffix="years"
-            dense
-            type="number"
-            outlined
-          ></v-text-field>
-        </v-col>
+        </v-col> -->
 
         <!-- Button to Delete Technology -->
         <v-col cols="2" class="mb-3" align="center">
           <v-btn text icon><v-icon @click="deleteTechnology(index)">delete</v-icon></v-btn>
         </v-col>
       </v-row>
+      <!-- End Loop Technologies -->
     </div>
-    <!-- End Loop Technologies -->
-
     <!-- Button to Add Technologies -->
     <div class="pt-4" align="center">
       <v-btn @click="addTechnology()" elevation="2"><v-icon class="pr-1">add</v-icon>Technology</v-btn>
@@ -72,7 +70,10 @@
 <script>
 import api from '@/shared/api.js';
 import _ from 'lodash';
+//import moment from 'moment-timezone';
 import { formatDateDashToSlash, formatDateSlashToDash, isEmpty } from '@/utils/utils';
+
+import DateIntervalForm from '@/components/employees/formTabs/DateIntervalForm';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -87,6 +88,21 @@ async function created() {
   window.EventBus.$emit('created', 'technologies'); // emit technologies tab was created
   this.employees = await api.getItems(api.EMPLOYEES); // get all employees
   this.populateDropDowns();
+
+  //delete a date interval based on technology index and dateIntervalIndex
+  window.EventBus.$on('date-interval-delete-technology', (technologyIndex, dateIntervalIndex) => {
+    this.deleteDateInterval(technologyIndex, dateIntervalIndex);
+  });
+
+  //update a start date interval based on technology index and dateIntervalIndex
+  window.EventBus.$on('update-start-interval-technology', (technologyIndex, dateIntervalIndex, editedStartDate) => {
+    this.editedTechnologies[technologyIndex].dateIntervals[dateIntervalIndex].startDate = _.cloneDeep(editedStartDate);
+  });
+
+  //update a end date interval based on technology index and dateIntervalIndex
+  window.EventBus.$on('update-end-interval-technology', (technologyIndex, dateIntervalIndex, editedEndDate) => {
+    this.editedTechnologies[technologyIndex].dateIntervals[dateIntervalIndex].endDate = _.cloneDeep(editedEndDate);
+  });
 } // created
 
 // |--------------------------------------------------|
@@ -101,11 +117,33 @@ async function created() {
 function addTechnology() {
   this.editedTechnologies.push({
     name: '',
+    dateIntervals: [{ startDate: null, endDate: null }],
     years: 0,
     current: false
   });
-} // addTechnology
+}
 
+/**
+ * Add a time interval.
+ * @param index - index the index in array of the technology
+ */
+async function addTimeInterval(index) {
+  this.editedTechnologies[index].dateIntervals.push({ startDate: null, endDate: null });
+} // addTimeInterval
+
+/**
+ * Deletes a time interval for a technology.
+ * @param technologyIndex - index of the technology you want to remove time interval from
+ * @param dateIntervalIndex - index of the date interval you want to remove
+ */
+function deleteDateInterval(technologyIndex, dateIntervalIndex) {
+  if (
+    this.editedTechnologies.length > technologyIndex &&
+    this.editedTechnologies[technologyIndex].dateIntervals.length > dateIntervalIndex
+  ) {
+    this.editedTechnologies[technologyIndex].dateIntervals.splice(dateIntervalIndex, 1);
+  }
+} //deleteDateInterval
 /**
  * Deletes a Technology.
  *
@@ -196,6 +234,9 @@ function validateFields() {
 } // validateFields
 
 export default {
+  components: {
+    DateIntervalForm
+  },
   created,
   data() {
     return {
@@ -222,6 +263,8 @@ export default {
   },
   methods: {
     addTechnology,
+    addTimeInterval,
+    deleteDateInterval,
     deleteTechnology,
     duplicateTechEntries,
     formatDateDashToSlash,

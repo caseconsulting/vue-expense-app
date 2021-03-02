@@ -77,6 +77,7 @@
     "vue-google-oauth2": "^1.5.6",
     "vue-router": "^3.4.9",
     "vue-router-multiguard": "^1.0.3",
+    "vue-the-mask": "^0.11.1",
     "vue2-filters": "^0.11.1",
     "vuejs-datepicker": "^1.6.2",
     "vuetify": "^2.4.1",
