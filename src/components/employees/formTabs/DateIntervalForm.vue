@@ -19,7 +19,7 @@
             color="#A17C6B"
             label="Start Date"
             clearable
-            class="mt-8 shrink"
+            class="mt-8 shrink mx-3"
             prepend-icon="event"
             background-color="white"
             v-bind="attrs"
@@ -30,6 +30,7 @@
             persistent-hint
             hint="(MM/YYYY)"
             @blur="startIntervalDateEdited = parseDateMonthYear(tempStartIntervalDate)"
+            @click:clear="startIntervalDateEdited = parseDateMonthYear(tempStartIntervalDate)"
           ></v-text-field>
         </template>
         <v-date-picker
@@ -58,7 +59,7 @@
             color="#A17C6B"
             label="End Date"
             clearable
-            class="mt-8 shrink"
+            class="mt-8 shrink px-3"
             prepend-icon="event"
             background-color="white"
             v-bind="attrs"
@@ -69,6 +70,7 @@
             persistent-hint
             hint="(MM/YYYY)"
             @blur="endIntervalDateEdited = parseDateMonthYear(tempEndIntervalDate)"
+            @click:clear="endIntervalDateEdited = parseDateMonthYear(tempEndIntervalDate)"
           ></v-text-field>
         </template>
         <v-date-picker
@@ -141,11 +143,15 @@ export default {
       tempStartIntervalDate: null,
       startIntervalDateEdited: _.cloneDeep(this.startIntervalDate),
       endIntervalMenu: false,
-      tempEndIntervalDate: _.cloneDeep(this.endIntervalDate),
-      endIntervalDateEdited: null,
+      tempEndIntervalDate: null,
+      endIntervalDateEdited: _.cloneDeep(this.endIntervalDate),
       dateOptionalRules: [
         (v) => isEmpty(v) || /^\d{1,2}\/\d{4}$/.test(v) || 'Date must be valid. Format: MM/YYYY',
         (v) => isEmpty(v) || moment(v, 'MM/YYYY').isValid() || 'Date must be valid',
+        (v) =>
+          isEmpty(v) ||
+          moment(v, 'MM/YYYY').isBefore(moment()) ||
+          `Date must be before or equal to ${moment().format('MM/YYYY')}.`,
         (v) =>
           isEmpty(v) || moment(v, 'MM/YYYY').isAfter(this.startIntervalDateEdited) || 'Date must be after start date'
       ], // rules for an optional date
@@ -153,6 +159,8 @@ export default {
         (v) => !isEmpty(v) || 'Date required',
         (v) => (!isEmpty(v) && /^\d{1,2}\/\d{4}$/.test(v)) || 'Date must be valid. Format: MM/YYYY',
         (v) => moment(v, 'MM/YYYY').isValid() || 'Date must be valid',
+        (v) =>
+          moment(v, 'MM/YYYY').isBefore(moment()) || `Date must be before or equal to ${moment().format('MM/YYYY')}.`,
         (v) =>
           !this.endIntervalDateEdited ||
           moment(v, 'MM/YYYY').isBefore(this.endIntervalDateEdited) ||

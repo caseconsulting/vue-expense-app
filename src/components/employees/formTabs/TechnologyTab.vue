@@ -71,7 +71,7 @@
 <script>
 import api from '@/shared/api.js';
 import _ from 'lodash';
-//import moment from 'moment-timezone';
+import moment from 'moment-timezone';
 import { formatDateDashToSlash, formatDateSlashToDash, isEmpty } from '@/utils/utils';
 
 import DateIntervalForm from '@/components/employees/formTabs/DateIntervalForm';
@@ -90,6 +90,11 @@ async function created() {
   this.employees = await api.getItems(api.EMPLOYEES); // get all employees
   this.populateDropDowns();
 
+  for (let i = 0; i < this.editedTechnologies.length; i++) {
+    if (_.isEmpty(this.editedTechnologies[i].dateIntervals)) {
+      this.editedTechnologies[i].dateIntervals = [];
+    }
+  }
   //delete a date interval based on technology index and dateIntervalIndex
   window.EventBus.$on('date-interval-delete-technology', (technologyIndex, dateIntervalIndex) => {
     this.deleteDateInterval(technologyIndex, dateIntervalIndex);
@@ -97,12 +102,27 @@ async function created() {
 
   //update a start date interval based on technology index and dateIntervalIndex
   window.EventBus.$on('update-start-interval-technology', (technologyIndex, dateIntervalIndex, editedStartDate) => {
-    this.editedTechnologies[technologyIndex].dateIntervals[dateIntervalIndex].startDate = _.cloneDeep(editedStartDate);
+    if (
+      this.editedTechnologies &&
+      this.editedTechnologies[technologyIndex] &&
+      this.editedTechnologies[technologyIndex].dateIntervals &&
+      this.editedTechnologies[technologyIndex].dateIntervals[dateIntervalIndex]
+    )
+      this.editedTechnologies[technologyIndex].dateIntervals[dateIntervalIndex].startDate = _.cloneDeep(
+        editedStartDate
+      );
   });
 
   //update a end date interval based on technology index and dateIntervalIndex
   window.EventBus.$on('update-end-interval-technology', (technologyIndex, dateIntervalIndex, editedEndDate) => {
-    this.editedTechnologies[technologyIndex].dateIntervals[dateIntervalIndex].endDate = _.cloneDeep(editedEndDate);
+    if (
+      this.editedTechnologies &&
+      this.editedTechnologies[technologyIndex] &&
+      this.editedTechnologies[technologyIndex].dateIntervals &&
+      this.editedTechnologies[technologyIndex].dateIntervals[dateIntervalIndex]
+    ) {
+      this.editedTechnologies[technologyIndex].dateIntervals[dateIntervalIndex].endDate = _.cloneDeep(editedEndDate);
+    }
   });
 } // created
 
@@ -130,6 +150,7 @@ function addTechnology() {
  */
 async function addTimeInterval(index) {
   this.editedTechnologies[index].dateIntervals.push({ startDate: null, endDate: null });
+  this.editedTechnologies = _.cloneDeep(this.editedTechnologies); //ensures that technologies intervals render properly
 } // addTimeInterval
 
 /**
@@ -228,12 +249,57 @@ function validateFields() {
       hasErrors,
       'Technology names MUST be UNIQUE. Please remove any duplicates'
     ); // emit error status
+  } else if (!this.validateTimeIntervals()) {
+    hasErrors = true;
+
+    //emit error status with a custom message
+    window.EventBus.$emit('technologiesStatus', hasErrors, 'Technology intervals MUST NOT OVERLAP.'); // emit error status
   } else {
     window.EventBus.$emit('technologiesStatus', hasErrors); // emit error status
   }
   window.EventBus.$emit('doneValidating', 'technologies', this.editedTechnologies); // emit done validating
 } // validateFields
 
+function validateTimeIntervals() {
+  let valid = true;
+
+  for (let tech = 0; tech < this.editedTechnologies.length; tech++) {
+    let technology = this.editedTechnologies[tech];
+    let dateIntervals = technology.dateIntervals;
+    this.editedTechnologies[tech].current = false; //reset current variable
+    for (let x = 0; x < dateIntervals.length; x++) {
+      if (!dateIntervals[x].endDate) {
+        this.editedTechnologies[tech].current = true; //sets current tech to true if no end date
+      }
+      for (let y = 0; y < dateIntervals.length; y++) {
+        //don't check same index against itself
+        if (x != y) {
+          if (!dateIntervals[y].endDate) {
+            //if no end date date interval cannot be after date interval
+            if (moment(dateIntervals[x].startDate, 'YYYY-MM').isAfter(moment(dateIntervals[y].startDate, 'YYYY-MM'))) {
+              valid = false;
+            }
+          } else if (
+            //start date cannot be in between start end and end date
+            moment(dateIntervals[x].startDate, 'YYYY-MM').isAfter(moment(dateIntervals[y].startDate, 'YYYY-MM')) &&
+            moment(dateIntervals[x].startDate, 'YYYY-MM').isBefore(moment(dateIntervals[y].endDate, 'YYYY-MM'))
+          ) {
+            valid = false;
+          } else if (
+            //end date cannot be in between start and end date
+            moment(dateIntervals[x].endDate, 'YYYY-MM').isAfter(moment(dateIntervals[y].startDate, 'YYYY-MM')) &&
+            moment(dateIntervals[x].endDate, 'YYYY-MM').isBefore(moment(dateIntervals[y].endDate, 'YYYY-MM'))
+          ) {
+            valid = false;
+          }
+        }
+      }
+    }
+  }
+  //});
+
+  return valid;
+}
 export default {
   components: {
     DateIntervalForm
@@ -273,7 +339,8 @@ export default {
     isDuplicate,
     isEmpty,
     populateDropDowns,
-    validateFields
+    validateFields,
+    validateTimeIntervals
   },
   props: ['model', 'validating'],
   watch: {
