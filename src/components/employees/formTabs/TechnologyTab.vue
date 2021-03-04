@@ -29,31 +29,25 @@
       <v-row v-if="technology.dateIntervals" justify="center">
         <div
           v-for="(dateInterval, intervalIndex) in technology.dateIntervals"
-          class="pt-3 pb-1 px-5"
           :key="'technology interval: ' + index + intervalIndex"
-          style="border: 1px solid grey"
         >
           <date-interval-form
             :startIntervalDate="dateInterval.startDate"
             :endIntervalDate="dateInterval.endDate"
+            :allIntervals="technology.dateIntervals"
             :technologyIndex="index"
             :intervalIndex="intervalIndex"
           ></date-interval-form>
         </div>
       </v-row>
+      <!-- End of Time Intervals -->
 
       <!--Add a time interval button-->
       <div class="pt-4" align="center">
         <v-btn @click="addTimeInterval(index)" elevation="2"><v-icon class="pr-1">add</v-icon>Time Interval</v-btn>
       </div>
 
-      <!--TODO: remove Current Switch-->
       <v-row align="center" class="py-3" justify="center">
-        <!-- Current Switch -->
-        <!-- <v-col cols="6" sm="7" md="6" lg="7">
-          <v-switch v-model="technology.current" label="Currently working with this technology"></v-switch>
-        </v-col> -->
-
         <!-- Button to Delete Technology -->
         <v-col cols="2" class="mb-3" align="center">
           <v-btn text icon><v-icon @click="deleteTechnology(index)">delete</v-icon></v-btn>
@@ -111,6 +105,7 @@ async function created() {
       this.editedTechnologies[technologyIndex].dateIntervals[dateIntervalIndex].startDate = _.cloneDeep(
         editedStartDate
       );
+    this.editedTechnologies = _.cloneDeep(this.editedTechnologies);
   });
 
   //update a end date interval based on technology index and dateIntervalIndex
@@ -122,6 +117,19 @@ async function created() {
       this.editedTechnologies[technologyIndex].dateIntervals[dateIntervalIndex]
     ) {
       this.editedTechnologies[technologyIndex].dateIntervals[dateIntervalIndex].endDate = _.cloneDeep(editedEndDate);
+      this.editedTechnologies = _.cloneDeep(this.editedTechnologies);
+    }
+  });
+
+  //update validation results of interval based on technology index and dateIntervalIndex
+  window.EventBus.$on('validated-technology-interval', (technologyIndex, dateIntervalIndex, hasErrors) => {
+    if (
+      this.editedTechnologies &&
+      this.editedTechnologies[technologyIndex] &&
+      this.editedTechnologies[technologyIndex].dateIntervals &&
+      this.editedTechnologies[technologyIndex].dateIntervals[dateIntervalIndex]
+    ) {
+      this.editedTechnologies[technologyIndex].dateIntervals[dateIntervalIndex].hasErrors = _.cloneDeep(hasErrors);
     }
   });
 } // created
@@ -251,55 +259,87 @@ function validateFields() {
     ); // emit error status
   } else if (!this.validateTimeIntervals()) {
     hasErrors = true;
-
-    //emit error status with a custom message
-    window.EventBus.$emit('technologiesStatus', hasErrors, 'Technology intervals MUST NOT OVERLAP.'); // emit error status
   } else {
     window.EventBus.$emit('technologiesStatus', hasErrors); // emit error status
   }
   window.EventBus.$emit('doneValidating', 'technologies', this.editedTechnologies); // emit done validating
 } // validateFields
 
+/**
+ * Validates that all time intervals are error free, also calculates months of experience in a tech, as well as if a tech is currently being used.
+ * @returns boolean based on if all time intervals are valid
+ */
 function validateTimeIntervals() {
-  let valid = true;
-
+  //iterates over each tech
   for (let tech = 0; tech < this.editedTechnologies.length; tech++) {
-    let technology = this.editedTechnologies[tech];
-    let dateIntervals = technology.dateIntervals;
+    let dateIntervals = this.editedTechnologies[tech].dateIntervals; //date intervals for tech
     this.editedTechnologies[tech].current = false; //reset current variable
+
+    let monthsOfExperience = 0;
+
+    if (_.isEmpty(dateIntervals)) {
+      //emit error status with a custom message
+      window.EventBus.$emit(
+        'technologiesStatus',
+        true,
+        `Tecnology ${this.editedTechnologies[tech].name} NEEDS at least one time interval.`
+      ); // emit error status
+      return false;
+    }
+
+    //checks each date interval within a tech
     for (let x = 0; x < dateIntervals.length; x++) {
+      if (dateIntervals[x].hasErrors) {
+        //emit error status with a custom message
+        window.EventBus.$emit('technologiesStatus', true, `Tecnology intervals must NOT OVERLAP`); // emit error status
+        return false; //ends validation if finds any interval has errors
+      }
+
+      monthsOfExperience += monthsPassed(dateIntervals[x].startDate, dateIntervals[x].endDate); // adds number of months of experience for each interval
       if (!dateIntervals[x].endDate) {
         this.editedTechnologies[tech].current = true; //sets current tech to true if no end date
       }
-      for (let y = 0; y < dateIntervals.length; y++) {
-        //don't check same index against itself
-        if (x != y) {
-          if (!dateIntervals[y].endDate) {
-            //if no end date date interval cannot be after date interval
-            if (moment(dateIntervals[x].startDate, 'YYYY-MM').isAfter(moment(dateIntervals[y].startDate, 'YYYY-MM'))) {
-              valid = false;
-            }
-          } else if (
-            //start date cannot be in between start end and end date
-            moment(dateIntervals[x].startDate, 'YYYY-MM').isAfter(moment(dateIntervals[y].startDate, 'YYYY-MM')) &&
-            moment(dateIntervals[x].startDate, 'YYYY-MM').isBefore(moment(dateIntervals[y].endDate, 'YYYY-MM'))
-          ) {
-            valid = false;
-          } else if (
-            //end date cannot be in between start and end date
-            moment(dateIntervals[x].endDate, 'YYYY-MM').isAfter(moment(dateIntervals[y].startDate, 'YYYY-MM')) &&
-            moment(dateIntervals[x].endDate, 'YYYY-MM').isBefore(moment(dateIntervals[y].endDate, 'YYYY-MM'))
-          ) {
-            valid = false;
-          }
-        }
-      }
     }
-  }
-  //});
 
-  return valid;
-}
+    this.editedTechnologies[tech].monthsOfExperience = monthsOfExperience; //sets calculated months of experience for the technology
+  }
+
+  return true;
+} //validateTimeIntervals
+
+/**
+ * Calculates the number of months that have passed between 2 dates in YYYY-MM format.
+ *
+ * @param start - the time interval starting date
+ * @param end - the time interval ending date
+ */
+function monthsPassed(start, end) {
+  let startDate = start;
+  let endDate = end;
+  let totalTimePassed = 0;
+
+  //if there is no end date use interval start - now
+  if (_.isEmpty(endDate)) {
+    endDate = moment().format('YYYY-MM');
+  }
+
+  //makes sure that the start and end date are both not empty
+  if (!_.isEmpty(startDate) && !_.isEmpty(endDate)) {
+    let monthsStart = Number(moment(startDate, 'YYYY-MM').format('MM'));
+    let yearsStart = Number(moment(startDate, 'YYYY-MM').format('YYYY'));
+
+    let monthsEnd = Number(moment(endDate, 'YYYY-MM').format('MM'));
+    let yearsEnd = Number(moment(endDate, 'YYYY-MM').format('YYYY'));
+
+    let absoluteStartMonths = monthsStart + yearsStart * 12; //calculates absolute number of months for start date
+    let absoluteEndMonths = monthsEnd + yearsEnd * 12; //calculates absolute number of years for end date
+
+    totalTimePassed = absoluteEndMonths - absoluteStartMonths; //total number of months
+  }
+
+  return totalTimePassed;
+} //monthsPassed
+
 export default {
   components: {
     DateIntervalForm

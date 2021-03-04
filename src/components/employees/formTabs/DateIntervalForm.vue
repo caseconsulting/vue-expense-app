@@ -1,5 +1,9 @@
 <template>
-  <div>
+  <div style="border: 1px solid grey" class="pt-3 pb-1 px-5" v-bind:class="{ errorText: intervalOverlaps }">
+    <!--Duplicate chip if tech name is already entered by user-->
+    <v-row v-if="intervalOverlaps" justify="end">
+      <v-chip class="ma-2" color="error" text-color="white"> Overlapping Interval </v-chip>
+    </v-row>
     <h3>Time Interval {{ technologyIndex }} {{ intervalIndex }}</h3>
     <v-row class="mb-5">
       <!--Interval  Start Date Picker-->
@@ -85,8 +89,6 @@
       <!-- Button to Delete Interval -->
       <v-btn class="mt-8" text icon><v-icon @click="deleteInterval">delete</v-icon></v-btn>
     </v-row>
-
-    <!-- End Loop Technologies -->
   </div>
 </template>
 
@@ -102,6 +104,9 @@ import { isEmpty, parseDateMonthYear, formatDateMonthYear } from '@/utils/utils'
 // |                                                  |
 // |--------------------------------------------------|
 
+/**
+ * Sets up temp variables.
+ */
 async function created() {
   //set temp start date interval variable
   this.tempStartIntervalDate = formatDateMonthYear(this.startIntervalDateEdited) || this.tempStartIntervalDate;
@@ -118,7 +123,47 @@ async function created() {
     // clear birthday date if fails to format
     this.endIntervalDateEdited = null;
   }
-}
+} //created
+
+/**
+ * Computed property to calculate if interval overlaps any of the other intervals in the allIntervals prop. Sends back the error status to the parent component.
+ *
+ * @returns boolean true if there is an error (interval overlaps) false otherwise
+ */
+function intervalOverlaps() {
+  let hasErrors = false;
+  for (let i = 0; i < this.allIntervals.length; i++) {
+    if (i != this.intervalIndex) {
+      if (!this.allIntervals[i].endDate) {
+        //if no end date date interval cannot be after date interval
+        if (
+          moment(this.startIntervalDateEdited, 'YYYY-MM').isSameOrAfter(
+            moment(this.allIntervals[i].startDate, 'YYYY-MM')
+          )
+        ) {
+          hasErrors = true;
+        }
+      } else if (
+        //start date cannot be in between start end and end date
+        moment(this.startIntervalDateEdited, 'YYYY-MM').isAfter(moment(this.allIntervals[i].startDate, 'YYYY-MM')) &&
+        moment(this.startIntervalDateEdited, 'YYYY-MM').isBefore(moment(this.allIntervals[i].endDate, 'YYYY-MM'))
+      ) {
+        hasErrors = true;
+      } else if (
+        //end date cannot be in between start and end date
+        moment(this.endIntervalDateEdited, 'YYYY-MM').isAfter(moment(this.allIntervals[i].startDate, 'YYYY-MM')) &&
+        moment(this.endIntervalDateEdited, 'YYYY-MM').isBefore(moment(this.allIntervals[i].endDate, 'YYYY-MM'))
+      ) {
+        hasErrors = true;
+      }
+    }
+  }
+
+  //send validation result back to parent
+  window.EventBus.$emit('validated-technology-interval', this.technologyIndex, this.intervalIndex, hasErrors);
+  return hasErrors;
+} //intervalOverlaps
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                     METHODS                      |
@@ -129,7 +174,6 @@ async function created() {
  * Deletes interval from parent.
  */
 async function deleteInterval() {
-  //TODO: send event to technology tab with index for deleting that entry
   this.tempStartIntervalDate = null;
   this.tempEndIntervalDate = null;
   window.EventBus.$emit('date-interval-delete-technology', this.technologyIndex, this.intervalIndex);
@@ -137,6 +181,9 @@ async function deleteInterval() {
 
 export default {
   created,
+  computed: {
+    intervalOverlaps
+  },
   data() {
     return {
       startIntervalMenu: false,
@@ -175,7 +222,7 @@ export default {
     parseDateMonthYear,
     formatDateMonthYear
   },
-  props: ['startIntervalDate', 'endIntervalDate', 'technologyIndex', 'intervalIndex'],
+  props: ['startIntervalDate', 'endIntervalDate', 'technologyIndex', 'intervalIndex', 'allIntervals'],
   watch: {
     startIntervalDate: function () {
       this.startIntervalDateEdited = _.cloneDeep(this.startIntervalDate);
@@ -193,7 +240,7 @@ export default {
         this.startIntervalDateEdited = null;
       }
 
-      //TODO: send updated startInterval (given index back)
+      //send updated startInterval (given index back)
       window.EventBus.$emit(
         'update-start-interval-technology',
         this.technologyIndex,
@@ -208,7 +255,7 @@ export default {
       if (this.endIntervalDateEdited !== null && !formatDateMonthYear(this.endIntervalDateEdited)) {
         this.endIntervalDateEdited = null;
       }
-      //TODO: send updated startInterval (given index back)
+      // send updated startInterval (given index back)
       window.EventBus.$emit(
         'update-end-interval-technology',
         this.technologyIndex,
@@ -220,8 +267,7 @@ export default {
 };
 </script>
 <style>
-.errorBox {
-  color: red !important;
+.errorText {
   border: 2px solid red !important;
 }
 </style>

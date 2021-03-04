@@ -5,7 +5,7 @@
       <!-- Loop Technologies -->
       <div v-for="(technology, index) in model.technologies" :key="technology.name">
         <p><b>Technology: </b>{{ technology.name }}</p>
-        <p><b>Years of Experience: </b>{{ technology.years }}</p>
+        <p><b>Years of Experience: </b>{{ yearsOfExperience(technology) }}</p>
         <p><b>Current: </b>{{ technology.current | current }}</p>
         <hr v-if="index < model.technologies.length - 1" class="mb-3" />
       </div>
@@ -19,6 +19,26 @@
 <script>
 import { isEmpty } from '@/utils/utils';
 
+// |--------------------------------------------------|
+// |                                                  |
+// |                     METHODS                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * Calculates years of experience for a technology based on monthsOfExperience.
+ *
+ * @param technology - technology object
+ * @return years of expierence (decimal with 2 decimal places)
+ */
+function yearsOfExperience(technology) {
+  if (technology.monthsOfExperience) {
+    let years = technology.monthsOfExperience / 12; //calculates years of experience
+    return Math.round((years + Number.EPSILON) * 100) / 100; //rounds to 2 decimal places
+  }
+  return technology.years ? technology.years : 0; //if uses old technology.years then use that or set to 0
+} // yearsOfExperience
+
 export default {
   filters: {
     current: (value) => {
@@ -26,7 +46,8 @@ export default {
     }
   },
   methods: {
-    isEmpty
+    isEmpty,
+    yearsOfExperience
   },
   props: ['model']
 };
