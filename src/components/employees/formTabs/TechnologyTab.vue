@@ -65,7 +65,6 @@
 <script>
 import api from '@/shared/api.js';
 import _ from 'lodash';
-import moment from 'moment-timezone';
 import { formatDateDashToSlash, formatDateSlashToDash, isEmpty } from '@/utils/utils';
 
 import DateIntervalForm from '@/components/employees/formTabs/DateIntervalForm';
@@ -147,7 +146,6 @@ function addTechnology() {
   this.editedTechnologies.push({
     name: '',
     dateIntervals: [{ startDate: null, endDate: null }],
-    years: 0,
     current: false
   });
 }
@@ -266,7 +264,7 @@ function validateFields() {
 } // validateFields
 
 /**
- * Validates that all time intervals are error free, also calculates months of experience in a tech, as well as if a tech is currently being used.
+ * Validates that all time intervals are error free, as well as if a tech is currently being used.
  * @returns boolean based on if all time intervals are valid
  */
 function validateTimeIntervals() {
@@ -275,7 +273,8 @@ function validateTimeIntervals() {
     let dateIntervals = this.editedTechnologies[tech].dateIntervals; //date intervals for tech
     this.editedTechnologies[tech].current = false; //reset current variable
 
-    let monthsOfExperience = 0;
+    //deletes old years property if it exists
+    delete this.editedTechnologies[tech].years;
 
     if (_.isEmpty(dateIntervals)) {
       //emit error status with a custom message
@@ -294,51 +293,15 @@ function validateTimeIntervals() {
         window.EventBus.$emit('technologiesStatus', true, `Tecnology intervals must NOT OVERLAP`); // emit error status
         return false; //ends validation if finds any interval has errors
       }
-
-      monthsOfExperience += monthsPassed(dateIntervals[x].startDate, dateIntervals[x].endDate); // adds number of months of experience for each interval
       if (!dateIntervals[x].endDate) {
         this.editedTechnologies[tech].current = true; //sets current tech to true if no end date
       }
+      delete this.editedTechnologies[tech].dateIntervals[x].hasErrors; //deletes hasErrors property after checked
     }
-
-    this.editedTechnologies[tech].monthsOfExperience = monthsOfExperience; //sets calculated months of experience for the technology
   }
 
   return true;
 } //validateTimeIntervals
-
-/**
- * Calculates the number of months that have passed between 2 dates in YYYY-MM format.
- *
- * @param start - the time interval starting date
- * @param end - the time interval ending date
- */
-function monthsPassed(start, end) {
-  let startDate = start;
-  let endDate = end;
-  let totalTimePassed = 0;
-
-  //if there is no end date use interval start - now
-  if (_.isEmpty(endDate)) {
-    endDate = moment().format('YYYY-MM');
-  }
-
-  //makes sure that the start and end date are both not empty
-  if (!_.isEmpty(startDate) && !_.isEmpty(endDate)) {
-    let monthsStart = Number(moment(startDate, 'YYYY-MM').format('MM'));
-    let yearsStart = Number(moment(startDate, 'YYYY-MM').format('YYYY'));
-
-    let monthsEnd = Number(moment(endDate, 'YYYY-MM').format('MM'));
-    let yearsEnd = Number(moment(endDate, 'YYYY-MM').format('YYYY'));
-
-    let absoluteStartMonths = monthsStart + yearsStart * 12; //calculates absolute number of months for start date
-    let absoluteEndMonths = monthsEnd + yearsEnd * 12; //calculates absolute number of years for end date
-
-    totalTimePassed = absoluteEndMonths - absoluteStartMonths; //total number of months
-  }
-
-  return totalTimePassed;
-} //monthsPassed
 
 export default {
   components: {
