@@ -4,7 +4,7 @@
     <v-row v-if="intervalOverlaps" justify="end">
       <v-chip class="ma-2" color="error" text-color="white"> Overlapping Interval </v-chip>
     </v-row>
-    <h3>Time Interval {{ technologyIndex }} {{ intervalIndex }}</h3>
+    <h3>Time Interval</h3>
     <v-row class="mb-5">
       <!--Interval  Start Date Picker-->
       <v-menu
@@ -61,14 +61,14 @@
             v-model="tempEndIntervalDate"
             v-mask="'##/####'"
             color="#A17C6B"
-            label="End Date"
+            label="End Date (optional)"
             clearable
             class="mt-8 shrink px-3"
             prepend-icon="event"
             background-color="white"
             v-bind="attrs"
             v-on="on"
-            placeholder="End Date"
+            placeholder="End Date (optional)"
             :rules="dateOptionalRules"
             lazy-validation
             persistent-hint
