@@ -4,10 +4,33 @@
     <v-row v-if="intervalOverlaps" justify="end">
       <v-chip class="ma-2" color="error" text-color="white"> Overlapping Interval </v-chip>
     </v-row>
-    <h3>Time Interval</h3>
+
+    <v-row class="pt-5 pl-3">
+      <h3>Time Interval</h3>
+      <v-spacer></v-spacer>
+      <v-btn-toggle v-model="formatToggle" mandatory>
+        <v-tooltip top>
+          <template v-slot:activator="{ on }">
+            <v-btn v-on="on" text>
+              <icon class="mr-1" name="calendar-alt"></icon>
+            </v-btn>
+          </template>
+          <span>MM-YYYY</span>
+        </v-tooltip>
+        <v-tooltip top>
+          <template v-slot:activator="{ on }">
+            <v-btn v-on="on" text>
+              <icon class="mr-1" name="globe-americas"></icon>
+            </v-btn>
+          </template>
+          <span>YYYY</span>
+        </v-tooltip>
+      </v-btn-toggle>
+    </v-row>
     <v-row class="mb-5">
       <!--Interval  Start Date Picker-->
       <v-menu
+        v-if="formatToggle == 0"
         v-model="startIntervalMenu"
         :close-on-content-click="false"
         :nudge-right="40"
@@ -48,6 +71,7 @@
 
       <!--Interval End Date Picker-->
       <v-menu
+        v-if="formatToggle == 0"
         v-model="endIntervalMenu"
         :close-on-content-click="false"
         :nudge-right="40"
@@ -84,6 +108,46 @@
           :landscape="$vuetify.breakpoint.smAndUp"
         ></v-date-picker>
       </v-menu>
+      <!--Interval End Date Picker-->
+
+      <v-text-field
+        v-if="formatToggle == 1"
+        ref="formFields"
+        v-model="yearStart"
+        v-mask="'####'"
+        color="#A17C6B"
+        label="Start Date"
+        clearable
+        class="mt-8 shrink mx-3"
+        prepend-icon="event"
+        background-color="white"
+        placeholder="Start Date"
+        :rules="yearStartRules"
+        lazy-validation
+        persistent-hint
+        hint="(YYYY)"
+      ></v-text-field>
+
+      <!--End of Interval Start Date Picker-->
+
+      <!--Interval End Date Picker-->
+      <v-text-field
+        v-if="formatToggle == 1"
+        ref="formFields"
+        v-model="yearEnd"
+        v-mask="'####'"
+        color="#A17C6B"
+        label="End Date (optional)"
+        clearable
+        class="mt-8 shrink px-3"
+        prepend-icon="event"
+        background-color="white"
+        placeholder="End Date (optional)"
+        :rules="yearEndRules"
+        lazy-validation
+        persistent-hint
+        hint="(YYYY)"
+      ></v-text-field>
       <!--Interval End Date Picker-->
 
       <!-- Button to Delete Interval -->
@@ -132,27 +196,25 @@ async function created() {
  */
 function intervalOverlaps() {
   let hasErrors = false;
+  const startDate = this.formatToggle ? moment([this.yearStart, 0]).format('YYYY-MM') : this.startIntervalDateEdited;
+  const endDate = this.formatToggle ? moment([this.yearEnd, 0]).format('YYYY-MM') : this.endIntervalDateEdited;
   for (let i = 0; i < this.allIntervals.length; i++) {
     if (i != this.intervalIndex) {
       if (!this.allIntervals[i].endDate) {
         //if no end date date interval cannot be after date interval
-        if (
-          moment(this.startIntervalDateEdited, 'YYYY-MM').isSameOrAfter(
-            moment(this.allIntervals[i].startDate, 'YYYY-MM')
-          )
-        ) {
+        if (moment(startDate, 'YYYY-MM').isSameOrAfter(moment(this.allIntervals[i].startDate, 'YYYY-MM'))) {
           hasErrors = true;
         }
       } else if (
         //start date cannot be in between start end and end date
-        moment(this.startIntervalDateEdited, 'YYYY-MM').isAfter(moment(this.allIntervals[i].startDate, 'YYYY-MM')) &&
-        moment(this.startIntervalDateEdited, 'YYYY-MM').isBefore(moment(this.allIntervals[i].endDate, 'YYYY-MM'))
+        moment(startDate, 'YYYY-MM').isAfter(moment(this.allIntervals[i].startDate, 'YYYY-MM')) &&
+        moment(startDate, 'YYYY-MM').isBefore(moment(this.allIntervals[i].endDate, 'YYYY-MM'))
       ) {
         hasErrors = true;
       } else if (
         //end date cannot be in between start and end date
-        moment(this.endIntervalDateEdited, 'YYYY-MM').isAfter(moment(this.allIntervals[i].startDate, 'YYYY-MM')) &&
-        moment(this.endIntervalDateEdited, 'YYYY-MM').isBefore(moment(this.allIntervals[i].endDate, 'YYYY-MM'))
+        moment(endDate, 'YYYY-MM').isAfter(moment(this.allIntervals[i].startDate, 'YYYY-MM')) &&
+        moment(endDate, 'YYYY-MM').isBefore(moment(this.allIntervals[i].endDate, 'YYYY-MM'))
       ) {
         hasErrors = true;
       }
@@ -182,10 +244,49 @@ async function deleteInterval() {
 export default {
   created,
   computed: {
-    intervalOverlaps
+    intervalOverlaps,
+    yearStart: {
+      // getter
+      get: function () {
+        return !isEmpty(this.startIntervalDate) ? this.startIntervalDate.split('-')[0] : null;
+      },
+      // setter
+      set: function (newValue) {
+        if (this.formatToggle == 1) {
+          //send updated startInterval (given index back)
+          window.EventBus.$emit(
+            'update-start-interval-technology',
+            this.technologyIndex,
+            this.intervalIndex,
+            newValue ? newValue + '-01' : undefined
+          );
+        }
+        return newValue;
+      }
+    },
+    yearEnd: {
+      // getter
+      get: function () {
+        return !isEmpty(this.endIntervalDate) ? this.endIntervalDate.split('-')[0] : null;
+      },
+      // setter
+      set: function (newValue) {
+        if (this.formatToggle == 1) {
+          window.EventBus.$emit(
+            'update-end-interval-technology',
+            this.technologyIndex,
+            this.intervalIndex,
+            newValue ? newValue + '-01' : undefined
+          );
+        }
+        return newValue;
+      }
+    }
   },
   data() {
     return {
+      formatToggle: 0,
+      endYear: null,
       startIntervalMenu: false,
       tempStartIntervalDate: null,
       startIntervalDateEdited: _.cloneDeep(this.startIntervalDate),
@@ -212,7 +313,23 @@ export default {
           !this.endIntervalDateEdited ||
           moment(v, 'MM/YYYY').isBefore(this.endIntervalDateEdited) ||
           'Date must be before end date'
-      ] // rules for a required date
+      ], // rules for a required date
+      yearStartRules: [
+        (v) => !isEmpty(v) || 'Date required',
+        (v) => (!isEmpty(v) && /^\d{4}$/.test(v)) || 'Date must be valid. Format: YYYY',
+        (v) => moment(v, 'YYYY').isValid() || 'Date must be valid',
+        (v) => moment(v, 'YYYY').isBefore(moment()) || `Date must be before or equal to ${moment().format('YYYY')}.`,
+        (v) => !this.yearEnd || Number(v) < Number(this.yearEnd) || 'Date must be before end date'
+      ], // rules for an year start date
+      yearEndRules: [
+        (v) => isEmpty(v) || /^\d{4}$/.test(v) || 'Date must be valid. Format: YYYY',
+        (v) => isEmpty(v) || moment(v, 'YYYY').isValid() || 'Date must be valid',
+        (v) =>
+          isEmpty(v) ||
+          moment(v, 'YYYY').isBefore(moment()) ||
+          `Date must be before or equal to ${moment().format('YYYY')}.`,
+        (v) => isEmpty(v) || Number(v) > Number(this.yearStart) || `Date must be after start date ${this.yearStart}`
+      ] // rules for year end date
     };
   },
   directives: { mask },
@@ -224,6 +341,24 @@ export default {
   },
   props: ['startIntervalDate', 'endIntervalDate', 'technologyIndex', 'intervalIndex', 'allIntervals'],
   watch: {
+    formatToggle: function () {
+      //TODO: when format changes send it back
+      //send updated startInterval (given index back)
+      this.$refs.formFields.validate(); //validate dates everytime format changes
+      window.EventBus.$emit(
+        'update-start-interval-technology',
+        this.technologyIndex,
+        this.intervalIndex,
+        this.formatToggle == 1 && this.yearStart ? this.yearStart + '-01' : this.startIntervalDateEdited
+      );
+
+      window.EventBus.$emit(
+        'update-end-interval-technology',
+        this.technologyIndex,
+        this.intervalIndex,
+        this.formatToggle == 1 && this.yearEnd ? this.yearEnd + '-01' : this.endIntervalDateEdited
+      );
+    },
     startIntervalDate: function () {
       this.startIntervalDateEdited = _.cloneDeep(this.startIntervalDate);
       this.$refs.formFields.validate(); //validate dates everytime a date changes
@@ -241,12 +376,14 @@ export default {
       }
 
       //send updated startInterval (given index back)
-      window.EventBus.$emit(
-        'update-start-interval-technology',
-        this.technologyIndex,
-        this.intervalIndex,
-        this.startIntervalDateEdited
-      );
+      if (this.formatToggle == 0) {
+        window.EventBus.$emit(
+          'update-start-interval-technology',
+          this.technologyIndex,
+          this.intervalIndex,
+          this.startIntervalDateEdited
+        );
+      }
     },
     endIntervalDateEdited: function () {
       //function that updates the text box when date picker is changed
@@ -256,12 +393,14 @@ export default {
         this.endIntervalDateEdited = null;
       }
       // send updated startInterval (given index back)
-      window.EventBus.$emit(
-        'update-end-interval-technology',
-        this.technologyIndex,
-        this.intervalIndex,
-        this.endIntervalDateEdited
-      );
+      if (this.formatToggle == 0) {
+        window.EventBus.$emit(
+          'update-end-interval-technology',
+          this.technologyIndex,
+          this.intervalIndex,
+          this.endIntervalDateEdited
+        );
+      }
     }
   }
 };

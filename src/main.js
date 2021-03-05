@@ -50,6 +50,7 @@ import 'vue-awesome/icons/birthday-cake';
 import 'vue-awesome/icons/dollar-sign';
 import 'vue-awesome/icons/calendar-alt';
 import 'vue-awesome/icons/external-link-alt';
+import 'vue-awesome/icons/globe-americas';
 import 'vue-awesome/icons/thumbs-up';
 
 import Icon from 'vue-awesome/components/Icon';
