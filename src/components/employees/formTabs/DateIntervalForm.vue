@@ -113,7 +113,7 @@
       <v-text-field
         v-if="formatToggle == 1"
         ref="formFields"
-        v-model="yearStart"
+        v-model="startIntervalDateEdited"
         v-mask="'####'"
         color="#A17C6B"
         label="Start Date"
@@ -134,7 +134,7 @@
       <v-text-field
         v-if="formatToggle == 1"
         ref="formFields"
-        v-model="yearEnd"
+        v-model="endIntervalDateEdited"
         v-mask="'####'"
         color="#A17C6B"
         label="End Date (optional)"
@@ -196,8 +196,12 @@ async function created() {
  */
 function intervalOverlaps() {
   let hasErrors = false;
-  const startDate = this.formatToggle ? moment([this.yearStart, 0]).format('YYYY-MM') : this.startIntervalDateEdited;
-  const endDate = this.formatToggle ? moment([this.yearEnd, 0]).format('YYYY-MM') : this.endIntervalDateEdited;
+  const startDate = this.formatToggle
+    ? moment([this.startIntervalDateEdited, 0]).format('YYYY-MM')
+    : this.startIntervalDateEdited;
+  const endDate = this.formatToggle
+    ? moment([this.endIntervalDateEdited, 0]).format('YYYY-MM')
+    : this.endIntervalDateEdited;
   for (let i = 0; i < this.allIntervals.length; i++) {
     if (i != this.intervalIndex) {
       if (!this.allIntervals[i].endDate) {
@@ -244,44 +248,7 @@ async function deleteInterval() {
 export default {
   created,
   computed: {
-    intervalOverlaps,
-    yearStart: {
-      // getter
-      get: function () {
-        return !isEmpty(this.startIntervalDate) ? this.startIntervalDate.split('-')[0] : null;
-      },
-      // setter
-      set: function (newValue) {
-        if (this.formatToggle == 1) {
-          //send updated startInterval (given index back)
-          window.EventBus.$emit(
-            'update-start-interval-technology',
-            this.technologyIndex,
-            this.intervalIndex,
-            newValue ? newValue + '-01' : undefined
-          );
-        }
-        return newValue;
-      }
-    },
-    yearEnd: {
-      // getter
-      get: function () {
-        return !isEmpty(this.endIntervalDate) ? this.endIntervalDate.split('-')[0] : null;
-      },
-      // setter
-      set: function (newValue) {
-        if (this.formatToggle == 1) {
-          window.EventBus.$emit(
-            'update-end-interval-technology',
-            this.technologyIndex,
-            this.intervalIndex,
-            newValue ? newValue + '-01' : undefined
-          );
-        }
-        return newValue;
-      }
-    }
+    intervalOverlaps
   },
   data() {
     return {
@@ -319,7 +286,10 @@ export default {
         (v) => (!isEmpty(v) && /^\d{4}$/.test(v)) || 'Date must be valid. Format: YYYY',
         (v) => moment(v, 'YYYY').isValid() || 'Date must be valid',
         (v) => moment(v, 'YYYY').isBefore(moment()) || `Date must be before or equal to ${moment().format('YYYY')}.`,
-        (v) => !this.yearEnd || Number(v) < Number(this.yearEnd) || 'Date must be before end date'
+        (v) =>
+          !this.endIntervalDateEdited ||
+          moment(v, 'YYYY').isBefore(this.endIntervalDateEdited) ||
+          'Date must be before end date'
       ], // rules for an year start date
       yearEndRules: [
         (v) => isEmpty(v) || /^\d{4}$/.test(v) || 'Date must be valid. Format: YYYY',
@@ -328,7 +298,10 @@ export default {
           isEmpty(v) ||
           moment(v, 'YYYY').isBefore(moment()) ||
           `Date must be before or equal to ${moment().format('YYYY')}.`,
-        (v) => isEmpty(v) || Number(v) > Number(this.yearStart) || `Date must be after start date ${this.yearStart}`
+        (v) =>
+          isEmpty(v) ||
+          moment(v, 'YYYY').isAfter(this.startIntervalDateEdited) ||
+          `Date must be after start date ${this.startIntervalDateEdited}`
       ] // rules for year end date
     };
   },
@@ -342,64 +315,72 @@ export default {
   props: ['startIntervalDate', 'endIntervalDate', 'technologyIndex', 'intervalIndex', 'allIntervals'],
   watch: {
     formatToggle: function () {
-      //TODO: when format changes send it back
-      //send updated startInterval (given index back)
-      this.$refs.formFields.validate(); //validate dates everytime format changes
-      window.EventBus.$emit(
-        'update-start-interval-technology',
-        this.technologyIndex,
-        this.intervalIndex,
-        this.formatToggle == 1 && this.yearStart ? this.yearStart + '-01' : this.startIntervalDateEdited
-      );
-
-      window.EventBus.$emit(
-        'update-end-interval-technology',
-        this.technologyIndex,
-        this.intervalIndex,
-        this.formatToggle == 1 && this.yearEnd ? this.yearEnd + '-01' : this.endIntervalDateEdited
-      );
+      if (this.formatToggle == 1) {
+        this.startIntervalDateEdited = !isEmpty(this.startIntervalDate) ? this.startIntervalDate.split('-')[0] : null;
+        this.endIntervalDateEdited = !isEmpty(this.endIntervalDate) ? this.endIntervalDate.split('-')[0] : null;
+      }
+      this.$refs.formFields.resetValidation();
+      this.$refs.formFields.validate();
     },
     startIntervalDate: function () {
-      this.startIntervalDateEdited = _.cloneDeep(this.startIntervalDate);
+      if (this.formatToggle == 1) {
+        this.startIntervalDateEdited = !isEmpty(this.startIntervalDate) ? this.startIntervalDate.split('-')[0] : null;
+      } else {
+        this.startIntervalDateEdited = _.cloneDeep(this.startIntervalDate);
+      }
+      this.$refs.formFields.resetValidation();
       this.$refs.formFields.validate(); //validate dates everytime a date changes
     },
     endIntervalDate: function () {
-      this.endIntervalDateEdited = _.cloneDeep(this.endIntervalDate);
+      if (this.formatToggle == 1) {
+        this.endIntervalDateEdited = !isEmpty(this.endIntervalDate) ? this.endIntervalDate.split('-')[0] : null;
+      } else {
+        this.endIntervalDateEdited = _.cloneDeep(this.endIntervalDate);
+      }
+      this.$refs.formFields.resetValidation();
       this.$refs.formFields.validate(); //validate dates everytime a date changes
     },
     startIntervalDateEdited: function () {
-      //function that updates the text box when date picker is changed
-      this.tempStartIntervalDate = formatDateMonthYear(this.startIntervalDateEdited) || this.tempStartIntervalDate;
-      //fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
-      if (this.startIntervalDateEdited !== null && !formatDateMonthYear(this.startIntervalDateEdited)) {
-        this.startIntervalDateEdited = null;
+      //this.$refs.formFields.validate(); //validate dates everytime a date changes
+      if (this.formatToggle == 0) {
+        //function that updates the text box when date picker is changed
+        this.tempStartIntervalDate = formatDateMonthYear(this.startIntervalDateEdited) || this.tempStartIntervalDate;
+        //fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
+        if (this.startIntervalDateEdited !== null && !formatDateMonthYear(this.startIntervalDateEdited)) {
+          this.startIntervalDateEdited = null;
+        }
       }
 
-      //send updated startInterval (given index back)
-      if (this.formatToggle == 0) {
-        window.EventBus.$emit(
-          'update-start-interval-technology',
-          this.technologyIndex,
-          this.intervalIndex,
-          this.startIntervalDateEdited
-        );
+      //temp variable for checking equality
+      let start =
+        this.formatToggle == 1 && this.startIntervalDateEdited
+          ? this.startIntervalDateEdited + '-01'
+          : this.startIntervalDateEdited;
+
+      //only sends date back to technology tab if in correct format
+      if (start && start != this.startIntervalDate && start.length == 7) {
+        window.EventBus.$emit('update-start-interval-technology', this.technologyIndex, this.intervalIndex, start);
       }
     },
     endIntervalDateEdited: function () {
-      //function that updates the text box when date picker is changed
-      this.tempEndIntervalDate = formatDateMonthYear(this.endIntervalDateEdited) || this.tempEndIntervalDate;
-      //fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
-      if (this.endIntervalDateEdited !== null && !formatDateMonthYear(this.endIntervalDateEdited)) {
-        this.endIntervalDateEdited = null;
-      }
-      // send updated startInterval (given index back)
+      //this.$refs.formFields.validate(); //validate dates everytime a date changes
       if (this.formatToggle == 0) {
-        window.EventBus.$emit(
-          'update-end-interval-technology',
-          this.technologyIndex,
-          this.intervalIndex,
-          this.endIntervalDateEdited
-        );
+        //function that updates the text box when date picker is changed
+        this.tempEndIntervalDate = formatDateMonthYear(this.endIntervalDateEdited) || this.tempEndIntervalDate;
+        //fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
+        if (this.endIntervalDateEdited !== null && !formatDateMonthYear(this.endIntervalDateEdited)) {
+          this.endIntervalDateEdited = null;
+        }
+      }
+      //temp variable for checking equality
+      let end =
+        this.formatToggle == 1 && this.endIntervalDateEdited
+          ? this.endIntervalDateEdited + '-01'
+          : this.endIntervalDateEdited;
+
+      //only sends date back to technology tab if in correct format
+      if (end && end != this.endIntervalDate && end.length == 7) {
+        window.EventBus.$emit('update-end-interval-technology', this.technologyIndex, this.intervalIndex, end);
       }
     }
   }
