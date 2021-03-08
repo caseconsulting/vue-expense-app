@@ -399,8 +399,8 @@ export default {
           ? this.endIntervalDateEdited + '-01'
           : this.endIntervalDateEdited;
 
-      //only sends date back to technology tab if in correct format
-      if (end && end != this.endIntervalDate && end.length == 7) {
+      //only sends date back to technology tab if in correct format (can be null because date is optional)
+      if (end == null || (end && end != this.endIntervalDate && end.length == 7)) {
         window.EventBus.$emit('update-end-interval-technology', this.technologyIndex, this.intervalIndex, end);
       }
 
