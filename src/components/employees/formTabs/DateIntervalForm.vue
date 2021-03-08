@@ -300,7 +300,7 @@ export default {
         (v) => isEmpty(v) || moment(v, 'YYYY').isValid() || 'Date must be valid',
         (v) =>
           isEmpty(v) ||
-          moment(v, 'YYYY').isBefore(moment()) ||
+          Number(v) <= Number(moment().format('YYYY')) ||
           `Date must be before or equal to ${moment().format('YYYY')}.`,
         (v) =>
           isEmpty(v) ||
@@ -345,7 +345,7 @@ export default {
         //MM-YYYY format
         this.startIntervalDateEdited = _.cloneDeep(this.startIntervalDate);
       }
-      this.$refs.formFields.resetValidation();
+
       this.$refs.formFields.validate(); //validate dates everytime a date changes
     },
     endIntervalDate: function () {
@@ -356,7 +356,7 @@ export default {
         //MM-YYYY format
         this.endIntervalDateEdited = _.cloneDeep(this.endIntervalDate);
       }
-      this.$refs.formFields.resetValidation();
+
       this.$refs.formFields.validate(); //validate dates everytime a date changes
     },
     startIntervalDateEdited: function () {
@@ -380,6 +380,8 @@ export default {
       if (start && start != this.startIntervalDate && start.length == 7) {
         window.EventBus.$emit('update-start-interval-technology', this.technologyIndex, this.intervalIndex, start);
       }
+
+      this.$refs.formFields.validate();
     },
     endIntervalDateEdited: function () {
       //MM-YYYY format sets temp variable
@@ -401,6 +403,8 @@ export default {
       if (end && end != this.endIntervalDate && end.length == 7) {
         window.EventBus.$emit('update-end-interval-technology', this.technologyIndex, this.intervalIndex, end);
       }
+
+      this.$refs.formFields.validate();
     }
   }
 };
