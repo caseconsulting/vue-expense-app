@@ -211,14 +211,14 @@ function intervalOverlaps() {
         }
       } else if (
         //start date cannot be in between start end and end date
-        moment(startDate, 'YYYY-MM').isAfter(moment(this.allIntervals[i].startDate, 'YYYY-MM')) &&
+        moment(startDate, 'YYYY-MM').isSameOrAfter(moment(this.allIntervals[i].startDate, 'YYYY-MM')) &&
         moment(startDate, 'YYYY-MM').isBefore(moment(this.allIntervals[i].endDate, 'YYYY-MM'))
       ) {
         hasErrors = true;
       } else if (
         //end date cannot be in between start and end date
         moment(endDate, 'YYYY-MM').isAfter(moment(this.allIntervals[i].startDate, 'YYYY-MM')) &&
-        moment(endDate, 'YYYY-MM').isBefore(moment(this.allIntervals[i].endDate, 'YYYY-MM'))
+        moment(endDate, 'YYYY-MM').isSameOrBefore(moment(this.allIntervals[i].endDate, 'YYYY-MM'))
       ) {
         hasErrors = true;
       }
@@ -318,6 +318,40 @@ export default {
       if (this.formatToggle == 1) {
         this.startIntervalDateEdited = !isEmpty(this.startIntervalDate) ? this.startIntervalDate.split('-')[0] : null;
         this.endIntervalDateEdited = !isEmpty(this.endIntervalDate) ? this.endIntervalDate.split('-')[0] : null;
+
+        //close opened date menus
+        this.startIntervalMenu = false;
+        this.endIntervalMenu = false;
+      }
+
+      //temp variable for checking equality
+      let start =
+        this.formatToggle == 0 && this.startIntervalDateEdited
+          ? this.startIntervalDateEdited + '-01'
+          : this.startIntervalDateEdited;
+
+      //temp variable for checking equality
+      let end =
+        this.formatToggle == 0 && this.endIntervalDateEdited
+          ? this.endIntervalDateEdited + '-01'
+          : this.endIntervalDateEdited;
+
+      if (this.formatToggle == 0) {
+        this.startIntervalDateEdited = start;
+        this.tempStartIntervalDate = formatDateMonthYear(start) || this.tempStartIntervalDate;
+        // fixes v-date-picker error so that if the format of date is incorrect it is set to null
+        if (this.startIntervalDateEdited !== null && !formatDateMonthYear(start)) {
+          // clear birthday date if fails to format
+          this.startIntervalDateEdited = null;
+        }
+
+        //set temp end date interval variable
+        this.tempEndIntervalDate = formatDateMonthYear(end) || this.tempEndIntervalDate;
+        // fixes v-date-picker error so that if the format of date is incorrect it is set to null
+        if (this.endIntervalDateEdited !== null && !formatDateMonthYear(this.endIntervalDateEdited)) {
+          // clear birthday date if fails to format
+          this.endIntervalDateEdited = null;
+        }
       }
       this.$refs.formFields.resetValidation();
       this.$refs.formFields.validate();
@@ -328,8 +362,9 @@ export default {
       } else {
         this.startIntervalDateEdited = _.cloneDeep(this.startIntervalDate);
       }
-      this.$refs.formFields.resetValidation();
+      //this.$refs.formFields.resetValidation();
       this.$refs.formFields.validate(); //validate dates everytime a date changes
+      console.log(this.allIntervals);
     },
     endIntervalDate: function () {
       if (this.formatToggle == 1) {
@@ -337,8 +372,9 @@ export default {
       } else {
         this.endIntervalDateEdited = _.cloneDeep(this.endIntervalDate);
       }
-      this.$refs.formFields.resetValidation();
+      //this.$refs.formFields.resetValidation();
       this.$refs.formFields.validate(); //validate dates everytime a date changes
+      console.log(this.allIntervals);
     },
     startIntervalDateEdited: function () {
       //this.$refs.formFields.validate(); //validate dates everytime a date changes
