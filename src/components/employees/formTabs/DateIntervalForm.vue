@@ -176,7 +176,7 @@ async function created() {
   this.tempStartIntervalDate = formatDateMonthYear(this.startIntervalDateEdited) || this.tempStartIntervalDate;
   // fixes v-date-picker error so that if the format of date is incorrect it is set to null
   if (this.startIntervalDateEdited !== null && !formatDateMonthYear(this.startIntervalDateEdited)) {
-    // clear birthday date if fails to format
+    // clear date if fails to format
     this.startIntervalDateEdited = null;
   }
 
@@ -184,7 +184,7 @@ async function created() {
   this.tempEndIntervalDate = formatDateMonthYear(this.endIntervalDateEdited) || this.tempEndIntervalDate;
   // fixes v-date-picker error so that if the format of date is incorrect it is set to null
   if (this.endIntervalDateEdited !== null && !formatDateMonthYear(this.endIntervalDateEdited)) {
-    // clear birthday date if fails to format
+    // clear date if fails to format
     this.endIntervalDateEdited = null;
   }
 } //created
@@ -196,9 +196,13 @@ async function created() {
  */
 function intervalOverlaps() {
   let hasErrors = false;
+
+  //sets startDate based on format
   const startDate = this.formatToggle
     ? moment([this.startIntervalDateEdited, 0]).format('YYYY-MM')
     : this.startIntervalDateEdited;
+
+  //sets endDate based on format
   const endDate = this.formatToggle
     ? moment([this.endIntervalDateEdited, 0]).format('YYYY-MM')
     : this.endIntervalDateEdited;
@@ -243,7 +247,7 @@ async function deleteInterval() {
   this.tempStartIntervalDate = null;
   this.tempEndIntervalDate = null;
   window.EventBus.$emit('date-interval-delete-technology', this.technologyIndex, this.intervalIndex);
-} // deleteTechnology
+} // deleteInterval
 
 export default {
   created,
@@ -315,6 +319,7 @@ export default {
   props: ['startIntervalDate', 'endIntervalDate', 'technologyIndex', 'intervalIndex', 'allIntervals'],
   watch: {
     formatToggle: function () {
+      // change to YYYY format
       if (this.formatToggle == 1) {
         this.startIntervalDateEdited = !isEmpty(this.startIntervalDate) ? this.startIntervalDate.split('-')[0] : null;
         this.endIntervalDateEdited = !isEmpty(this.endIntervalDate) ? this.endIntervalDate.split('-')[0] : null;
@@ -324,6 +329,7 @@ export default {
         this.endIntervalMenu = false;
       }
 
+      //change to MM-YYYY format
       if (this.formatToggle == 0) {
         this.startIntervalDateEdited = this.startIntervalDate;
         this.endIntervalDateEdited = this.endIntervalDate;
@@ -332,25 +338,29 @@ export default {
       this.$refs.formFields.validate();
     },
     startIntervalDate: function () {
+      //YYYY format
       if (this.formatToggle == 1) {
         this.startIntervalDateEdited = !isEmpty(this.startIntervalDate) ? this.startIntervalDate.split('-')[0] : null;
       } else {
+        //MM-YYYY format
         this.startIntervalDateEdited = _.cloneDeep(this.startIntervalDate);
       }
       this.$refs.formFields.resetValidation();
       this.$refs.formFields.validate(); //validate dates everytime a date changes
     },
     endIntervalDate: function () {
+      //YYYY format
       if (this.formatToggle == 1) {
         this.endIntervalDateEdited = !isEmpty(this.endIntervalDate) ? this.endIntervalDate.split('-')[0] : null;
       } else {
+        //MM-YYYY format
         this.endIntervalDateEdited = _.cloneDeep(this.endIntervalDate);
       }
       this.$refs.formFields.resetValidation();
       this.$refs.formFields.validate(); //validate dates everytime a date changes
     },
     startIntervalDateEdited: function () {
-      //this.$refs.formFields.validate(); //validate dates everytime a date changes
+      //MM-YYYY format sets temp variable
       if (this.formatToggle == 0) {
         //function that updates the text box when date picker is changed
         this.tempStartIntervalDate = formatDateMonthYear(this.startIntervalDateEdited) || this.tempStartIntervalDate;
@@ -372,7 +382,7 @@ export default {
       }
     },
     endIntervalDateEdited: function () {
-      //this.$refs.formFields.validate(); //validate dates everytime a date changes
+      //MM-YYYY format sets temp variable
       if (this.formatToggle == 0) {
         //function that updates the text box when date picker is changed
         this.tempEndIntervalDate = formatDateMonthYear(this.endIntervalDateEdited) || this.tempEndIntervalDate;
