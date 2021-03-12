@@ -7,19 +7,19 @@
       <v-progress-circular :size="70" :width="7" color="#bc3825" indeterminate></v-progress-circular>
     </v-row>
     <v-row v-else>
-      <!-- TSheets and Budgets-->
-      <v-col v-if="displayTSheetsAndBalances" cols="12" md="6" lg="5">
-        <t-sheets-data :employee="this.model" class="mb-6"></t-sheets-data>
+      <!-- QuickBooks Time and Budgets-->
+      <v-col v-if="displayQuickBooksTimeAndBalances" cols="12" md="6" lg="5">
+        <quick-books-time-data :employee="this.model" class="mb-6"></quick-books-time-data>
         <available-budgets v-if="this.model.id" :employee="this.model"></available-budgets>
       </v-col>
 
       <!-- Employee Form -->
-      <v-col cols="12" :md="displayTSheetsAndBalances ? 6 : 12" :lg="displayTSheetsAndBalances ? 7 : 12">
+      <v-col cols="12" :md="displayQuickBooksTimeAndBalances ? 6 : 12" :lg="displayQuickBooksTimeAndBalances ? 7 : 12">
         <v-card class="mt-3">
           <v-card-title class="header_style" v-if="!editing">
             <h3>{{ this.model.firstName }} {{ this.model.lastName }}</h3>
             <v-spacer></v-spacer>
-            <v-icon v-if="displayTSheetsAndBalances" @click="editing = true" style="color: white" align="right"
+            <v-icon v-if="displayQuickBooksTimeAndBalances" @click="editing = true" style="color: white" align="right"
               >edit</v-icon
             >
           </v-card-title>
@@ -37,7 +37,7 @@ import api from '@/shared/api.js';
 import AvailableBudgets from '@/components/AvailableBudgets.vue';
 import EmployeeForm from '@/components/employees/EmployeeForm.vue';
 import EmployeeInfo from '@/components/employees/EmployeeInfo.vue';
-import TSheetsData from '@/components/TSheetsData.vue';
+import QuickBooksTimeData from '@/components/QuickBooksTimeData.vue';
 import { getRole } from '@/utils/auth';
 import _ from 'lodash';
 import { isEmpty } from '@/utils/utils';
@@ -121,7 +121,7 @@ async function created() {
   await this.getEmployee();
   this.user = await api.getUser();
   this.role = getRole();
-  this.displayTSheetsAndBalances = this.userIsAdmin() || this.userIsEmployee();
+  this.displayQuickBooksTimeAndBalances = this.userIsAdmin() || this.userIsEmployee();
   this.loading = false;
 } // created
 
@@ -153,13 +153,13 @@ export default {
     AvailableBudgets,
     EmployeeForm,
     EmployeeInfo,
-    TSheetsData
+    QuickBooksTimeData
   },
   created,
   data() {
     return {
       currentTab: null,
-      displayTSheetsAndBalances: true,
+      displayQuickBooksTimeAndBalances: true,
       editing: false,
       filter: {
         active: ['full', 'part'] // default only shows full and part time employees

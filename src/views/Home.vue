@@ -27,13 +27,13 @@
     </v-row>
     <v-row>
       <v-col wrap cols="12" lg="6">
-        <!-- TSheets -->
+        <!-- QuickBooksTime -->
         <v-col class="pa-4">
           <v-col v-if="loading" class="text-center">
             <v-progress-circular indeterminate size="64" color="#bc3825"></v-progress-circular>
           </v-col>
           <v-col v-else class="pt-0 text-center">
-            <t-sheets-data cols="12" lg="6"></t-sheets-data>
+            <quick-books-time-data cols="12" lg="6"></quick-books-time-data>
           </v-col>
         </v-col>
         <!-- Available Budgets -->
@@ -71,9 +71,9 @@ import AvailableBudgets from '@/components/AvailableBudgets.vue';
 import moment from 'moment-timezone';
 moment.tz.setDefault('America/New_York');
 import TwitterFeed from '@/components/TwitterFeed';
-import TSheetsData from '@/components/TSheetsData.vue';
 import _ from 'lodash';
 import { asyncForEach, isEmpty, isFullTime } from '@/utils/utils';
+import QuickBooksTimeData from '../components/QuickBooksTimeData.vue';
 
 const IsoFormat = 'YYYY-MM-DD';
 
@@ -500,8 +500,8 @@ export default {
   components: {
     ActivityFeed,
     AvailableBudgets,
-    TSheetsData,
-    TwitterFeed
+    TwitterFeed,
+    QuickBooksTimeData
   },
   computed: {
     getAnniversary,

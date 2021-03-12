@@ -21,14 +21,14 @@
         </div>
         <div v-else>
           <!-- If the user has no hours -->
-          <v-row v-if="tsheetsData.jobcodeHours && tsheetsData.jobcodeHours.length == 0" justify="center">
+          <v-row v-if="quickBooksTimeData.jobcodeHours && quickBooksTimeData.jobcodeHours.length == 0" justify="center">
             <p>No hours for this month</p>
           </v-row>
           <!-- User has hours -->
           <div v-else>
             <!-- Display Charge Code Hours -->
             <div class="pt-3 px-5" style="border: 1px solid grey">
-              <v-row v-for="job in tsheetsData.jobcodeHours" :key="job.name">
+              <v-row v-for="job in quickBooksTimeData.jobcodeHours" :key="job.name">
                 {{ job.name }}:
                 <v-spacer></v-spacer>
                 <p>{{ formatHours(job.hours) }}</p>
@@ -222,18 +222,18 @@ async function setMonthlyCharges() {
   if (!isEmpty(this.employee.id)) {
     this.workDayHours *= this.employee.workStatus * 0.01;
     // make call to api to get data
-    this.tsheetsData = await api.getMonthlyHours(this.employee.employeeNumber);
+    this.quickBooksTimeData = await api.getMonthlyHours(this.employee.employeeNumber);
 
     if (
-      _.isNil(this.tsheetsData.previousHours) ||
-      _.isNil(this.tsheetsData.todaysHours) ||
-      _.isNil(this.tsheetsData.futureHours)
+      _.isNil(this.quickBooksTimeData.previousHours) ||
+      _.isNil(this.quickBooksTimeData.todaysHours) ||
+      _.isNil(this.quickBooksTimeData.futureHours)
     ) {
       this.monthlyHourError = true;
     } else {
-      this.workedHours = this.tsheetsData.previousHours;
-      this.todaysHours = this.tsheetsData.todaysHours;
-      this.futureHours = this.tsheetsData.futureHours;
+      this.workedHours = this.quickBooksTimeData.previousHours;
+      this.todaysHours = this.quickBooksTimeData.todaysHours;
+      this.futureHours = this.quickBooksTimeData.futureHours;
       this.totalHours = this.workedHours + this.todaysHours + this.futureHours;
       await this.calcWorkHours();
       this.remainingHours = this.workHours - this.totalHours;
@@ -267,7 +267,7 @@ export default {
       showMore: false, // show more time details
       todaysHours: 0, // hours completed today
       totalHours: 0, // total hours completed this month
-      tsheetsData: {}, // time sheet data
+      quickBooksTimeData: {}, // time sheet data
       userWorkDays: 0, // work days remaining this month
       workDayHours: 8, // average work day hours
       workedHours: 0, // total hours worked this month

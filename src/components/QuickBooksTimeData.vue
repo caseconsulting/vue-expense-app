@@ -2,7 +2,7 @@
   <div id="t-sheets-data">
     <v-card class="mt-3">
       <v-card-title class="header_style">
-        <h3>TSheets Data</h3>
+        <h3>QuickBooks Time Data</h3>
         <v-spacer></v-spacer>
         <!--Switch between minutes and hours-->
         <v-tooltip top nudge-top="10">

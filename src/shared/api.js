@@ -8,7 +8,7 @@ const TRAINING_URLS = 'training-urls';
 const UTILITY = 'utility';
 const BUDGETS = 'budgets';
 const URLS = 'training-urls';
-const TSHEETS = 'tSheets';
+const QUICK_BOOKS_TIME = 'tSheets';
 const TWITTER = 'twitter';
 const BASECAMP = 'basecamp';
 const BLOG = 'blog';
@@ -238,13 +238,13 @@ function deleteBlogFile(blogPost) {
   );
 }
 
-//functions for tSheets
+//functions for QuickBooks time
 function getPTOBalances(employeeNumber) {
-  return execute('get', `/${TSHEETS}/getPTOBalances/${employeeNumber}`);
+  return execute('get', `/${QUICK_BOOKS_TIME}/getPTOBalances/${employeeNumber}`);
 }
 
 function getMonthlyHours(employeeNumber) {
-  return execute('get', `/${TSHEETS}/getMonthlyHours/${employeeNumber}`);
+  return execute('get', `/${QUICK_BOOKS_TIME}/getMonthlyHours/${employeeNumber}`);
 }
 function getTwitterToken() {
   return execute('get', `/${TWITTER}/getTwitterToken`);
@@ -328,7 +328,7 @@ export default {
   UTILITY,
   BUDGETS,
   URLS,
-  TSHEETS,
+  QUICK_BOOKS_TIME,
   TWITTER,
   BLOG,
   BLOG_ATTACHMENT,

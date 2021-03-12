@@ -75,7 +75,7 @@ export default {
       panel: null,
       role: '', // employee role
       sections: {
-        tsheetsHours: [
+        quickBooksTimeHours: [
           'Hours',
           'user',
           {
@@ -90,7 +90,7 @@ export default {
           {
             title: 'What hours fall under Completed, Today, and Futute?',
             body:
-              "Completed hours are any hours logged in TSheets from the first day of the month through the end of the day yesterday. Today's hours are any hours logged in TSheet at any point today. Future hours are any hours logged in TSheets between the beginning of the day tomorrow and the last day of the month."
+              "Completed hours are any hours logged in QuickBooks Time from the first day of the month through the end of the day yesterday. Today's hours are any hours logged in TSheet at any point today. Future hours are any hours logged in QuickBooks Time between the beginning of the day tomorrow and the last day of the month."
           },
           {
             title: 'Why does my Avg Hours/Day or Days Remaining seem wrong?',
@@ -105,7 +105,7 @@ export default {
           {
             title: 'Why do I not see some of my hours for today?',
             body:
-              'If you are using the clock in function on TSheets, those hours may still be accumulating. Try refreshing the page.'
+              'If you are using the clock in function on QuickBooks Time, those hours may still be accumulating. Try refreshing the page.'
           }
         ],
         employeeHome: [
