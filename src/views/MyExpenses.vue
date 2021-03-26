@@ -13,13 +13,11 @@
       <v-card-title headline color="white">
         <span class="headline">{{ status.statusMessage }}</span>
       </v-card-title>
-      <v-btn color="white" text @click="clearStatus">
-        Close
-      </v-btn>
+      <v-btn color="white" text @click="clearStatus"> Close </v-btn>
     </v-snackbar>
 
     <v-col cols="12" lg="8">
-      <v-card>
+      <v-card class="mt-3">
         <v-container fluid>
           <!-- Title -->
           <v-card-title>
@@ -75,9 +73,7 @@
                 <!-- Show Active and Inactive -->
                 <v-tooltip top>
                   <template v-slot:activator="{ on }">
-                    <v-btn value="both" v-on="on" text>
-                      BOTH
-                    </v-btn>
+                    <v-btn value="both" v-on="on" text> BOTH </v-btn>
                   </template>
                   <span>Show All</span>
                 </v-tooltip>
@@ -112,9 +108,7 @@
                 <!-- Show Reimbursed and Pending -->
                 <v-tooltip top>
                   <template v-slot:activator="{ on }">
-                    <v-btn value="both" v-on="on" text>
-                      BOTH
-                    </v-btn>
+                    <v-btn value="both" v-on="on" text> BOTH </v-btn>
                   </template>
                   <span>Show All</span>
                 </v-tooltip>
@@ -141,36 +135,31 @@
             @click:row="clickedRow"
           >
             <!-- Cost slot -->
-            <template v-slot:item.cost="{ item }">
+            <template v-slot:[`item.cost`]="{ item }">
               <td>{{ item.cost | moneyValue }}</td>
             </template>
             <!-- Purchase date slot -->
-            <template v-slot:item.purchaseDate="{ item }">
+            <template v-slot:[`item.purchaseDate`]="{ item }">
               <td>{{ item.purchaseDate | monthDayYearFormat }}</td>
             </template>
             <!-- Reimburse date Slot -->
-            <template v-slot:item.reimburseDate="{ item }">
+            <template v-slot:[`item.reimburseDate`]="{ item }">
               <td>{{ item.reimbursedDate | monthDayYearFormat }}</td>
             </template>
             <!-- Creation date slot -->
-            <template v-slot:item.createdAt="{ item }">
-              <td>{{ item.createdAt | monthDayYearFormat }}</td>
-            </template>
-            <!-- Creation date slot -->
-            <template v-slot:item.createdAt="{ item }">
+            <template v-slot:[`item.createdAt`]="{ item }">
               <td>{{ item.createdAt | monthDayYearFormat }}</td>
             </template>
             <!-- Employee name slot-->
-            <template v-slot: item.employeeName="{item}">
+            <template v-slot:[`item.employeeName`]="{ item }">
               <td v-if="isAdmin">{{ item.employeeName }}</td>
             </template>
             <!-- Budget Name Slot -->
-            <template v-slot: item.budgetName="{item}">
+            <template v-slot:[`item.budgetName`]="{ item }">
               <td v-if="isAdmin">{{ item.budgetName }}</td>
             </template>
             <!--Action Items-->
-
-            <template v-slot:item.actions="{ item }">
+            <template v-slot:[`item.actions`]="{ item }">
               <!-- Download Button-->
               <td class="datatable_btn layout" @click="clickedRow(item)">
                 <!-- Download Attachment Button -->
@@ -180,7 +169,7 @@
                 <v-tooltip top>
                   <template v-slot:activator="{ on }">
                     <v-btn
-                      :disabled="isEditing() || (isUser && isReimbursed(item)) || midAction"
+                      :disabled="isEditing || (isUser && isReimbursed(item)) || midAction"
                       text
                       icon
                       @click="
@@ -189,7 +178,7 @@
                       "
                       v-on="on"
                     >
-                      <v-icon style="color: #606060;">edit</v-icon>
+                      <v-icon style="color: #606060">edit</v-icon>
                     </v-btn>
                   </template>
                   <span>Edit</span>
@@ -198,19 +187,17 @@
                 <v-tooltip top>
                   <template v-slot:activator="{ on }">
                     <v-btn
-                      :disabled="isReimbursed(item) || isEditing() || midAction"
+                      :disabled="isReimbursed(item) || isEditing || midAction"
                       text
                       icon
                       @click="
-                        deleting = true;
+                        deleting = !deleting;
                         midAction = true;
                         propExpense = item;
                       "
                       v-on="on"
                     >
-                      <v-icon style="color: #606060;">
-                        delete
-                      </v-icon>
+                      <v-icon style="color: #606060"> delete </v-icon>
                     </v-btn>
                   </template>
                   <span>Delete</span>
@@ -219,19 +206,17 @@
                 <v-tooltip top>
                   <template v-slot:activator="{ on }">
                     <v-btn
-                      :disabled="!isReimbursed(item) || isEditing() || midAction"
+                      :disabled="!isReimbursed(item) || isEditing || midAction"
                       text
                       icon
                       @click="
-                        unreimbursing = true;
+                        unreimbursing = !unreimbursing;
                         midAction = true;
                         propExpense = item;
                       "
                       v-on="on"
                     >
-                      <v-icon style="color: #606060;">
-                        money_off
-                      </v-icon>
+                      <v-icon style="color: #606060"> money_off </v-icon>
                     </v-btn>
                   </template>
                   <span>Unreimburse</span>
@@ -252,7 +237,7 @@
                       <p v-if="!isEmpty(item.note)"><b>Notes: </b>{{ item.note }}</p>
                       <p v-if="!isEmpty(item.receipt)"><b>Receipt: </b>{{ item.receipt }}</p>
                       <p v-if="!isEmpty(item.url)">
-                        <b>Url: </b> <a v-if="item.url" :href="item.url">{{ item.url }}</a>
+                        <b>Url: </b> <a v-if="item.url" :href="item.url" target="_blank">{{ item.url }}</a>
                       </p>
                       <p v-if="!isEmpty(item.category)"><b>Category: </b>{{ item.category }}</p>
                       <div v-if="isAdmin" class="flagExp">
@@ -294,8 +279,8 @@
           </v-card-actions>
 
           <!-- Confirmation Modals -->
-          <unreimburse-modal :activate="unreimbursing" :expense="propExpense"></unreimburse-modal>
-          <delete-modal :activate="deleting" :type="'expense'"></delete-modal>
+          <unreimburse-modal :toggleUnreimburseModal="unreimbursing" :expense="propExpense"></unreimburse-modal>
+          <delete-modal :toggleDeleteModal="deleting" :type="'expense'"></delete-modal>
           <!-- End Confirmation Modals -->
         </v-container>
       </v-card>
@@ -305,7 +290,7 @@
     <v-col v-if="isAdmin || !userIsInactive" cols="12" lg="4">
       <expense-form
         ref="form"
-        :isEdit="isEditing()"
+        :isEdit="isEditing"
         :expense="expense"
         v-on:add="addModelToTable"
         v-on:delete="deleteModelFromTable"
@@ -429,12 +414,21 @@ function addModelToTable() {
 } // addModelToTable
 
 /**
- * Sets all expense attribute values to null.
+ * Clear the selected expense by setting all values to null and if user sets employeeId and employeeName.
  */
 function clearExpense() {
+  this.$set(this.expense, 'description', null);
   this.expense = _.mapValues(this.expense, () => {
     return null;
   });
+  if (this.asUser) {
+    // creating or updating an expense as a user
+    this.$set(this.expense, 'employeeId', this.userInfo.id);
+    this.$set(this.expense, 'employeeName', this.userInfo.id);
+  } else {
+    this.$set(this.expense, 'employeeId', null);
+    this.$set(this.expense, 'employeeName', null);
+  }
 } // clearExpense
 
 /**
@@ -501,7 +495,6 @@ function customFilter(item, queryText) {
  * Delete a selected expense.
  */
 async function deleteExpense() {
-  this.deleting = false; // collapse delete confirmation model
   this.loading = true; // set loading status to true
   if (this.propExpense.id) {
     // expense is selected
@@ -605,15 +598,6 @@ function hasRecipient(expense) {
 }
 
 /**
- * Checks if an expense is being edited.
- *
- * @return boolean - an expense is being edited
- */
-function isEditing() {
-  return !!this.expense.id;
-} // isEditing
-
-/**
  * Checks to see if an expense is expanded in the datatable.
  *
  * @param item - expense to check
@@ -681,7 +665,6 @@ function toTopOfForm() {
  */
 async function unreimburseExpense() {
   this.loading = true; // set loading status to true
-  this.unreimbursing = false; // collapse unreimburse confirmation modal
 
   this.propExpense.reimbursedDate = null; // clear reimburse date field
   let updatedExpense = await api.updateItem(api.EXPENSES, this.propExpense);
@@ -739,14 +722,23 @@ function useInactiveStyle(expense) {
  *  Gets and sets user info, expense types, and expenses. Creates event listeners.
  */
 async function created() {
+  //no longer editing an expense (clear model and enable buttons)
+  window.EventBus.$on('finished-editing-expense', () => {
+    this.clearExpense();
+    this.isEditing = false;
+  });
+
+  //when expense type is being edited buttons should be disabled
+  window.EventBus.$on('editing-expense', () => {
+    this.isEditing = true;
+  });
+
   window.EventBus.$on('canceled-unreimburse-expense', () => {
-    this.unreimbursing = false;
     this.midAction = false;
   });
   window.EventBus.$on('confirm-unreimburse-expense', this.unreimburseExpense);
 
   window.EventBus.$on('canceled-delete-expense', () => {
-    this.deleting = false;
     this.midAction = false;
   });
   window.EventBus.$on('confirm-delete-expense', this.deleteExpense);
@@ -866,6 +858,7 @@ export default {
           sortable: false
         }
       ], // datatable headers
+      isEditing: false, //whether or not an expense is being edited
       loading: true, // loading status
       midAction: false,
       propExpense: {
@@ -894,7 +887,7 @@ export default {
         statusMessage: '',
         color: ''
       }, // snackbar action status
-      unreimbursing: false, // activate unreimburse model
+      unreimbursing: false, // activate unreimburse model when value changes
       userInfo: null // user information
     };
   },
@@ -918,7 +911,6 @@ export default {
     endAction,
     filterExpenses,
     hasRecipient,
-    isEditing,
     isEmpty,
     isFocus,
     isReimbursed,

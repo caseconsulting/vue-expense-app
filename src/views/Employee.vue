@@ -1,7 +1,7 @@
 <template>
-  <v-container fluid>
+  <v-container class="my-3" fluid>
     <v-row class="pl-3">
-      <v-btn to="/employees"><v-icon class="pr-1">arrow_back</v-icon>Back to Employees Page</v-btn>
+      <v-btn elevation="2" to="/employees"><v-icon class="pr-1">arrow_back</v-icon>Back to Employees Page</v-btn>
     </v-row>
     <v-row v-if="loading" class="my-10" justify="center">
       <v-progress-circular :size="70" :width="7" color="#bc3825" indeterminate></v-progress-circular>
@@ -15,11 +15,11 @@
 
       <!-- Employee Form -->
       <v-col cols="12" :md="displayTSheetsAndBalances ? 6 : 12" :lg="displayTSheetsAndBalances ? 7 : 12">
-        <v-card>
+        <v-card class="mt-3">
           <v-card-title class="header_style" v-if="!editing">
             <h3>{{ this.model.firstName }} {{ this.model.lastName }}</h3>
             <v-spacer></v-spacer>
-            <v-icon v-if="displayTSheetsAndBalances" @click="editing = true" style="color: white;" align="right"
+            <v-icon v-if="displayTSheetsAndBalances" @click="editing = true" style="color: white" align="right"
               >edit</v-icon
             >
           </v-card-title>

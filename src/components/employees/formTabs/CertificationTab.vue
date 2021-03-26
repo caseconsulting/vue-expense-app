@@ -2,8 +2,8 @@
   <div>
     <!-- Loop Certifications -->
     <div
-      v-for="(certification, index) in model.certifications"
-      style="border: 1px solid grey;"
+      v-for="(certification, index) in editedCertifications"
+      style="border: 1px solid grey"
       class="pt-3 pb-1 px-5"
       :key="'certification: ' + certification.name + index"
     >
@@ -20,7 +20,7 @@
       >
       </v-combobox>
 
-      <v-row>
+      <v-row class="py-3">
         <v-col cols="12" sm="6" md="12" lg="6" class="pt-0">
           <!-- Received Date -->
           <v-menu
@@ -92,7 +92,7 @@
 
     <!-- Button to Add Certifications -->
     <div class="pt-4" align="center">
-      <v-btn @click="addCertification()"><v-icon class="pr-1">add</v-icon>Certification</v-btn>
+      <v-btn @click="addCertification()" elevation="2"><v-icon class="pr-1">add</v-icon>Certification</v-btn>
     </div>
   </div>
 </template>
@@ -127,7 +127,7 @@ async function created() {
  * Adds a certification.
  */
 function addCertification() {
-  this.model.certifications.push({
+  this.editedCertifications.push({
     name: null,
     dateReceived: null,
     expirationDate: null,
@@ -142,7 +142,7 @@ function addCertification() {
  * @param index - array index of certification to delete
  */
 function deleteCertification(index) {
-  this.model.certifications.splice(index, 1);
+  this.editedCertifications.splice(index, 1);
 } // deleteCertification
 
 /**
@@ -177,7 +177,7 @@ function validateFields() {
     hasErrors = !this.$refs.formFields.validate();
   }
 
-  window.EventBus.$emit('doneValidating', 'certifications'); // emit done validating
+  window.EventBus.$emit('doneValidating', 'certifications', this.editedCertifications); // emit done validating and sends edited data back to parent
   window.EventBus.$emit('certificationsStatus', hasErrors); // emit error status
 } // validateFields
 
@@ -195,6 +195,7 @@ export default {
         (v) => !isEmpty(v) || 'Date required',
         (v) => (!isEmpty(v) && /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v)) || 'Date must be valid. Format: MM/DD/YYYY'
       ], // rules for a required date
+      editedCertifications: _.cloneDeep(this.model), // stores edited certifications info
       requiredRules: [
         (v) => !isEmpty(v) || 'This field is required. You must enter information or delete the field if possible'
       ] // rules for a required field

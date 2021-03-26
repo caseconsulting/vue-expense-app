@@ -47,7 +47,7 @@
                 <v-tooltip top>
                   <template v-slot:activator="{ on }">
                     <v-btn :disabled="midAction" text icon @click.stop="handleEdit(item)" v-on="on">
-                      <v-icon style="color: #606060;">edit</v-icon>
+                      <v-icon style="color: #606060">edit</v-icon>
                     </v-btn>
                   </template>
                   <span>Edit</span>
@@ -60,15 +60,13 @@
                       text
                       icon
                       @click.stop="
-                        deleting = true;
+                        deleting = !deleting;
                         midAction = true;
                         propBlogPost = item;
                       "
                       v-on="on"
                     >
-                      <v-icon style="color: #606060;">
-                        delete
-                      </v-icon>
+                      <v-icon style="color: #606060"> delete </v-icon>
                     </v-btn>
                   </template>
                   <span>Delete</span>
@@ -84,7 +82,7 @@
           </v-data-table>
           <!-- End employee datatable -->
           <br />
-          <delete-modal :activate="deleting" :type="'BlogPost'"></delete-modal>
+          <delete-modal :toggleDeleteModal="deleting" :type="'BlogPost'"></delete-modal>
         </v-container>
       </v-card>
     </v-col>
@@ -96,6 +94,7 @@
 import { isEmpty, monthDayYearFormat } from '@/utils/utils';
 import DeleteModal from '@/components/modals/DeleteModal.vue';
 import moment from 'moment-timezone';
+moment.tz.setDefault('America/New_York');
 import api from '@/shared/api.js';
 
 /**
@@ -103,7 +102,6 @@ import api from '@/shared/api.js';
  */
 async function created() {
   window.EventBus.$on('canceled-delete-BlogPost', () => {
-    this.deleting = false;
     this.midAction = false;
   });
   window.EventBus.$on('confirm-delete-BlogPost', this.deleteBlogPost);
@@ -162,16 +160,14 @@ async function deleteBlogPost() {
       this.$emit('successfulDelete');
       // delete attachment from s3 if deleted expense has a receipt
       let deletedBlogFile = await api.deleteBlogFile(deleted);
-
       if (deletedBlogFile.code) {
         // emit alert if error deleting file
-        this.$emit('displayError', `Error Deleting Receipt: ${deletedBlogFile.message}`);
+        this.$emit('displayError', `Error Deleting Blog Post: ${deletedBlogFile.message}`);
       }
     } else {
       // fails to delete expense
-      this.$emit('displayError', 'Error Deleting Expense');
+      this.$emit('displayError', 'Error Deleting Blog Post');
     }
-    this.deleting = false;
     this.midAction = false;
   }
 } // deletedBlogPost

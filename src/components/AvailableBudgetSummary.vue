@@ -4,7 +4,7 @@
       <v-toolbar-title v-if="selectedBudget">{{ selectedBudget.expenseTypeName }}</v-toolbar-title>
     </v-toolbar>
     <v-divider></v-divider>
-    <v-list v-if="selectedBudget" style="font-size: 13px;" dense>
+    <v-list v-if="selectedBudget" style="font-size: 13px" dense>
       <!-- Display Start Date -->
       <v-list-item>
         <v-list-item-content>Start Date:</v-list-item-content>

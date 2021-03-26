@@ -2,11 +2,12 @@ import Vue from 'vue';
 import router from './router';
 import store from './store';
 
-import moment from 'moment';
+const moment = require('moment-timezone');
+moment.tz.setDefault('America/New_York');
 import vuetify from './vuetify';
 
 import(/* webpackMode: "eager" */ 'vuetify/dist/vuetify.min.css');
-import CKEditor from '@ckeditor/ckeditor5-vue';
+import CKEditor from '@ckeditor/ckeditor5-vue2';
 
 // BEGIN VUE AWESOME
 import 'vue-awesome/icons/regular/times-circle';
@@ -49,6 +50,7 @@ import 'vue-awesome/icons/birthday-cake';
 import 'vue-awesome/icons/dollar-sign';
 import 'vue-awesome/icons/calendar-alt';
 import 'vue-awesome/icons/external-link-alt';
+import 'vue-awesome/icons/globe-americas';
 import 'vue-awesome/icons/thumbs-up';
 
 import Icon from 'vue-awesome/components/Icon';

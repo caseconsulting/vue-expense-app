@@ -1,13 +1,13 @@
 <template>
   <v-row>
-    <v-container>
-      <v-row>
+    <v-container class="my-3">
+      <v-row class="py-3">
         <v-col cols="12" sm="4">
-          <h1 style="font-size: 35px;">Trainings</h1>
+          <h1 style="font-size: 35px">Trainings</h1>
         </v-col>
 
-        <v-col cols="12" sm="8">
-          <v-toolbar color="white darken-3" class="mb-1" dense elevation="2">
+        <v-col class="mb-1" cols="12" sm="8">
+          <v-toolbar color="white darken-3" class="my-1 py-1" dense elevation="2">
             <v-text-field
               v-model="search"
               clearable
@@ -23,12 +23,13 @@
 
       <!-- Category Filter Buttons -->
       <v-col cols="12" class="text-center">
-        <v-row>
+        <v-row class="py-2">
           <!-- Training Button -->
           <div v-for="category in categories" :key="category.value">
             <v-btn
               @click="filterByCategory(category.value)"
               class="mx-3 pa-12"
+              elevation="6"
               fab
               :rounded="isFocus(category.value)"
               dark
@@ -44,12 +45,12 @@
       <!-- End Category Filter Button -->
 
       <!-- Button/Urls Divider -->
-      <hr class="my-6" />
+      <hr class="my-7" />
 
-      <v-col cols="12">
+      <v-col class="py-3" cols="12">
         <!-- List all url info -->
         <div v-for="url in this.urls" :key="url.id">
-          <v-row dense>
+          <v-row class="pb-1" dense>
             <v-col cols="12">
               <v-card color="#565651" dark :href="url.id" target="_blank">
                 <v-row class="ma-1" dense>

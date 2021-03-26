@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <v-app style="background: #f5f5f5;">
+    <v-app style="background: #f5f5f5">
       <v-navigation-drawer
         light
         v-model="drawer"
@@ -19,12 +19,10 @@
           <img src="@/assets/img/case-logo-circle.png" class="logo-bar" />
         </v-avatar>
         <v-toolbar-title v-show="!isMobile">
-          <h1 class="d-inline" style="text-align: center;">Case Portal</h1>
+          <h1 class="d-inline" style="text-align: center">Case Portal</h1>
         </v-toolbar-title>
         <!-- In Mobile View decrease title size-->
-        <h1 v-show="isMobile" class="font-25" style="text-align: center;">
-          Case Portal
-        </h1>
+        <h1 v-show="isMobile" class="font-25" style="text-align: center">Case Portal</h1>
 
         <v-spacer></v-spacer>
         <!-- Display social media icons and links dropdown menu -->
@@ -81,7 +79,7 @@
             <v-list-item v-for="link in mediaLinks" :key="link.name" :href="link.link" icon target="_blank">
               <icon :name="link.icon"></icon>
               <span class="mr-2"> </span>
-              <v-list-item-title> {{ ( link.name) }}</v-list-item-title>
+              <v-list-item-title> {{ link.name }}</v-list-item-title>
             </v-list-item>
           </v-list>
         </v-menu>
@@ -94,8 +92,8 @@
         </v-container>
       </v-main>
       <v-footer app></v-footer>
-      <time-out-modal :activate="timedOut"></time-out-modal>
-      <time-out-warning-modal :activate="session"></time-out-warning-modal>
+      <time-out-modal :toggleTimeOut="timedOut"></time-out-modal>
+      <time-out-warning-modal :toggleWarning="session"></time-out-warning-modal>
     </v-app>
   </div>
 </template>
@@ -133,8 +131,6 @@ function isMobile() {
  * Logout of expense app
  */
 function handleLogout() {
-  this.session = false;
-  this.timedOut = false;
   logout();
 }
 
@@ -149,7 +145,6 @@ function onResize() {
 // |--------------------------------------------------|
 
 async function created() {
-  window.EventBus.$on('sessionContinue', () => (this.session = false)); // Confirm 5 minute warning
   window.EventBus.$on('relog', handleLogout); // Session end - log out
   // set expiration date if access token received
   let accessToken = getAccessToken();
@@ -160,12 +155,12 @@ async function created() {
     let timeRemaining = this.date - this.now; // default access key (2 hours)
 
     window.setTimeout(() => {
-      this.timedOut = true;
+      this.timedOut = !this.timedOut;
     }, timeRemaining);
 
     if (timeRemaining > 300000) {
       window.setTimeout(() => {
-        this.session = true;
+        this.session = !this.session;
       }, timeRemaining - 300000);
     }
   }

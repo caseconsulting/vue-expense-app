@@ -6,7 +6,15 @@
         <v-card-text>Your session has timed out. Please login again.</v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn color="gray darken-1" text @click.native="emit('relog')">Log In</v-btn>
+          <v-btn
+            color="gray darken-1"
+            text
+            @click.native="
+              emit('relog');
+              activate = false;
+            "
+            >Log In</v-btn
+          >
           <v-spacer></v-spacer>
         </v-card-actions>
       </v-card>
@@ -37,9 +45,19 @@ function emit(msg) {
 // |--------------------------------------------------|
 
 export default {
+  data() {
+    return {
+      activate: false // dialog activator
+    };
+  },
   methods: {
     emit
   },
-  props: ['activate'] // dialog activator
+  props: ['toggleTimeOut'], // dialog activator
+  watch: {
+    toggleTimeOut: function () {
+      this.activate = true;
+    }
+  }
 };
 </script>

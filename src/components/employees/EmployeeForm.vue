@@ -13,9 +13,7 @@
       <v-card-title headline color="white">
         <span class="headline">{{ errorStatus.statusMessage }}</span>
       </v-card-title>
-      <v-btn color="white" text @click="clearStatus">
-        Close
-      </v-btn>
+      <v-btn color="white" text @click="clearStatus"> Close </v-btn>
     </v-snackbar>
     <!-- End Status Alert -->
 
@@ -50,7 +48,7 @@
             </v-tab-item>
             <!-- Education -->
             <v-tab-item id="education" class="mt-6 mb-4">
-              <education-tab :model="model" :validating="validating.education"></education-tab>
+              <education-tab :model="model.degrees" :validating="validating.education"></education-tab>
             </v-tab-item>
             <!-- Experience -->
             <v-tab-item id="jobExperience" class="mt-6 mb-4">
@@ -58,39 +56,47 @@
             </v-tab-item>
             <!-- Certifications -->
             <v-tab-item id="certifications" class="mt-6 mb-4">
-              <certification-tab :model="model" :validating="validating.certifications"></certification-tab>
+              <certification-tab
+                :model="model.certifications"
+                :validating="validating.certifications"
+              ></certification-tab>
             </v-tab-item>
             <!-- Awards -->
             <v-tab-item id="awards" class="mt-6 mb-4">
-              <award-tab :model="model" :validating="validating.awards"></award-tab>
+              <award-tab :model="model.awards" :validating="validating.awards"></award-tab>
             </v-tab-item>
             <!-- Technologies -->
             <v-tab-item id="technologies" class="mt-6 mb-4">
-              <technology-tab :model="model" :validating="validating.technologies"></technology-tab>
+              <technology-tab :model="model.technologies" :validating="validating.technologies"></technology-tab>
             </v-tab-item>
             <!-- Customer Org Experience -->
             <v-tab-item id="customerOrgExp" class="mt-6 mb-4">
-              <customer-org-tab :model="model" :validating="validating.customerOrgExp"></customer-org-tab>
+              <customer-org-tab
+                :model="model.customerOrgExp"
+                :validating="validating.customerOrgExp"
+              ></customer-org-tab>
             </v-tab-item>
             <!-- Contracts -->
             <v-tab-item id="contracts" class="mt-6 mb-4">
-              <contract-tab :model="model" :validating="validating.contracts"></contract-tab>
+              <contract-tab :model="model.contracts" :validating="validating.contracts"></contract-tab>
             </v-tab-item>
             <!-- Clearance -->
             <v-tab-item id="clearance" class="mt-6 mb-4">
-              <clearance-tab :model="model" :validating="validating.clearance"></clearance-tab>
+              <clearance-tab :model="model.clearances" :validating="validating.clearance"></clearance-tab>
             </v-tab-item>
           </v-tabs>
 
           <!-- Form action buttons -->
-          <v-btn class="ma-2" color="white" @click="cancel"><icon class="mr-1" name="ban"></icon>Cancel</v-btn>
+          <v-btn class="ma-2" color="white" @click="cancel" elevation="2"
+            ><icon class="mr-1" name="ban"></icon>Cancel</v-btn
+          >
           <v-btn outlined class="ma-2" color="success" @click="confirm" :disabled="!valid || model.workStatus == null">
             <icon class="mr-1" name="save"></icon>Submit
           </v-btn>
           <!-- End form action buttons -->
         </v-form>
         <!-- Confirmation Model -->
-        <form-submission-confirmation :activate="this.confirming"></form-submission-confirmation>
+        <form-submission-confirmation :toggleSubmissionConfirmation="this.confirming"></form-submission-confirmation>
       </v-container>
     </v-card>
   </div>
@@ -109,7 +115,8 @@ import FormSubmissionConfirmation from '@/components/modals/FormSubmissionConfir
 import JobExperienceTab from '@/components/employees/formTabs/JobExperienceTab';
 import PersonalTab from '@/components/employees/formTabs/PersonalTab';
 import TechnologyTab from '@/components/employees/formTabs/TechnologyTab';
-import moment from 'moment';
+const moment = require('moment-timezone');
+moment.tz.setDefault('America/New_York');
 import { getRole } from '@/utils/auth';
 import { v4 as uuid } from 'uuid';
 import _ from 'lodash';
@@ -337,16 +344,25 @@ function clearStatus() {
 /**
  * Validate and confirm form submission.
  */
-function confirm() {
+async function confirm() {
+  this.tabErrorMessage = null; //resets tab error message each time validating
   // validate tabs
-  _.forEach(this.tabCreated, (value, key) => {
+  await _.forEach(this.tabCreated, (value, key) => {
     if (value) {
       this.validating[key] = true;
     }
   });
 
+  //validates forms
   if (this.$refs.form.validate()) {
-    this.confirming = true;
+    //checks to see if there are any tabs with errors
+    let hasErrors = await this.hasTabError();
+    if (!hasErrors) {
+      this.confirming = !this.confirming; // if no errors opens confirm submit popup
+    } else if (this.tabErrorMessage) {
+      //if there is a custom error message it is displayed here
+      this.displayError(this.tabErrorMessage);
+    }
   }
 } // confirm
 
@@ -362,10 +378,26 @@ async function displayError(err) {
 } // displayError
 
 /**
+ * Checks to see if any of the form tabs has an error.
+ * @returns boolean - true if any tab has an error false otherwise.
+ */
+async function hasTabError() {
+  let hasErrors = false;
+  //iterates over tabs to see if there are any errors
+  for (var key of Object.keys(this.tabErrors)) {
+    if (this.tabErrors[key]) {
+      hasErrors = true;
+    }
+  }
+  return hasErrors;
+} // hasTabError
+
+/**
  * Submits the employee form.
  */
 async function submit() {
   this.submitting = true;
+
   if (this.$refs.form.validate()) {
     // form validated
     this.$emit('startAction');
@@ -422,21 +454,22 @@ function userIsAdmin() {
 
 async function created() {
   window.EventBus.$on('confirmed', () => {
-    this.confirming = false;
+    //this.confirming = false;
     this.submit();
   });
 
-  window.EventBus.$on('canceled', () => {
-    this.confirming = false;
-  });
+  // window.EventBus.$on('canceled', () => {
+  //   this.confirming = false;
+  // });
 
   // set tab mounted
   window.EventBus.$on('created', (tab) => {
     this.tabCreated[tab] = true;
   });
 
-  // reset validating status
-  window.EventBus.$on('doneValidating', (tab) => {
+  // reset validating status and sets the data based on the tab
+  window.EventBus.$on('doneValidating', (tab, data) => {
+    this.setFormData(tab, data); //sets the form data
     this.validating[tab] = false;
   });
 
@@ -468,8 +501,12 @@ async function created() {
   window.EventBus.$on('personalStatus', (status) => {
     this.tabErrors.personal = status;
   });
-  window.EventBus.$on('technologiesStatus', (status) => {
+  window.EventBus.$on('technologiesStatus', (status, errorMessage) => {
     this.tabErrors.technologies = status;
+    //when there is a custom error message (multiple entries with same name) gets it ready for display
+    if (status && errorMessage) {
+      this.tabErrorMessage = _.cloneDeep(errorMessage);
+    }
   });
 
   // fills model in with populated fields in employee prop
@@ -486,6 +523,56 @@ async function created() {
   this.formTab = this.currentTab;
   this.afterCreate = true;
 } // created
+
+/**
+ * Sets the form data based on the given tab.
+ * @param tab - the tab the data came from
+ * @param data - the data to be saved
+ */
+function setFormData(tab, data) {
+  if (tab == 'employee') {
+    //sets all employee info to data returned from employee tab
+    this.$set(this.model, 'firstName', data.firstName);
+    this.$set(this.model, 'middleName', data.middleName);
+    this.$set(this.model, 'lastName', data.lastName);
+    this.$set(this.model, 'employeeNumber', data.employeeNumber);
+    this.$set(this.model, 'email', data.email);
+    this.$set(this.model, 'employeeRole', data.employeeRole);
+    this.$set(this.model, 'hireDate', data.hireDate);
+    this.$set(this.model, 'workStatus', data.workStatus);
+    this.$set(this.model, 'deptDate', data.deptDate);
+  } else if (tab == 'personal') {
+    //sets all personal info to data returned from personal tab
+    this.$set(this.model, 'prime', data.prime);
+    this.$set(this.model, 'contract', data.contract);
+    this.$set(this.model, 'github', data.github);
+    this.$set(this.model, 'twitter', data.twitter);
+    this.$set(this.model, 'jobRole', data.jobRole);
+    this.$set(this.model, 'birthday', data.birthday);
+    this.$set(this.model, 'birthdayFeed', data.birthdayFeed);
+    this.$set(this.model, 'city', data.city);
+    this.$set(this.model, 'country', data.country);
+    this.$set(this.model, 'st', data.st);
+  } else if (tab == 'education') {
+    this.$set(this.model, 'degrees', data); //sets degrees to data returned from education tab
+  } else if (tab == 'jobExperience') {
+    //sets all jobExperience info to data returned from job experience tab
+    this.$set(this.model, 'icTimeFrames', data.icTimeFrames);
+    this.$set(this.model, 'jobs', data.jobs);
+  } else if (tab == 'certifications') {
+    this.$set(this.model, 'certifications', data); //sets certifications to data returned from certifications tab
+  } else if (tab == 'awards') {
+    this.$set(this.model, 'awards', data); //sets awards to data returned from awards tab
+  } else if (tab == 'technologies') {
+    this.$set(this.model, 'technologies', data); //sets technologies to data returned from technologies tab
+  } else if (tab == 'customerOrgExp') {
+    this.$set(this.model, 'customerOrgExp', data); //sets degrees to data returned from education tab
+  } else if (tab == 'contracts') {
+    this.$set(this.model, 'contracts', data); //sets contracts to data returned from contracts tab
+  } else if (tab == 'clearance') {
+    this.$set(this.model, 'clearances', data); //sets clearances to data returned from clearance tab
+  }
+} //setFormData
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -567,6 +654,7 @@ export default {
         personal: false,
         technologies: false
       }, // tab error status
+      tabErrorMessage: null, //used to display error message in popup if tab has a custom error message
       tabCreated: {
         awards: false,
         certifications: false,
@@ -600,6 +688,8 @@ export default {
     clearStatus,
     confirm,
     displayError,
+    hasTabError,
+    setFormData,
     submit,
     userIsAdmin
   },

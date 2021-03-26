@@ -49,6 +49,11 @@ export default {
   methods: {
     emit
   },
-  props: ['activate', 'type', 'deleteInfo']
+  props: ['toggleReimburseModal', 'type', 'deleteInfo'],
+  watch: {
+    toggleReimburseModal: function () {
+      this.activate = true;
+    }
+  }
 };
 </script>

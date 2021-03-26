@@ -18,14 +18,14 @@
 
     <!-- Title -->
     <v-col v-if="!isMobile" cols="12" lg="8">
-      <v-row style="height: 100%;" align="center" justify="center">
+      <v-row class="mt-3" style="height: 100%" align="center" justify="center">
         <h1>Budget Statistics for {{ employee.firstName }} {{ employee.lastName }}</h1>
       </v-row>
     </v-col>
 
     <!-- Anniversary Date -->
     <v-col cols="12" lg="4" v-if="!isMobile">
-      <v-card @click="changingBudgetView = true" hover>
+      <v-card class="mt-3" @click="changingBudgetView = !changingBudgetView" hover>
         <v-card-title>
           <!-- display the next anniversary date -->
           <div v-if="viewingCurrentBudgetYear">
@@ -43,7 +43,7 @@
             <div class="pt-4 font-14">[Inactive Budget]</div>
           </div>
           <v-spacer></v-spacer>
-          <v-icon style="margin-right: 10px;">history</v-icon>
+          <v-icon style="margin-right: 10px">history</v-icon>
         </v-card-title>
       </v-card>
     </v-col>
@@ -55,7 +55,7 @@
       </div>
 
       <div v-else text-center class="pt-0 font-13">
-        <budget-table v-if="!loading" :employee="expenseTypeData"></budget-table>
+        <budget-table v-if="!loading" class="my-3" :employee="expenseTypeData"></budget-table>
         <budget-chart
           v-if="!loading && !isMobile && !adminCall"
           :options="drawGraph.optionSet"
@@ -71,7 +71,7 @@
       </div>
     </v-col>
     <budget-select-modal
-      :activate="changingBudgetView"
+      :toggleBudgetSelectModal="changingBudgetView"
       :budgetYears="this.budgetYears"
       :current="this.fiscalDateView"
       :hireDate="this.hireDate"
@@ -86,7 +86,8 @@ import BudgetSelectModal from '@/components/modals/BudgetSelectModal.vue';
 import BudgetTable from '@/components/BudgetTable.vue';
 import ExpenseForm from '@/components/ExpenseForm.vue';
 import MobileDetect from 'mobile-detect';
-import moment from 'moment';
+const moment = require('moment-timezone');
+moment.tz.setDefault('America/New_York');
 import pattern from 'patternomaly';
 import _ from 'lodash';
 import { asyncForEach, isInactive, isFullTime, moneyValue } from '@/utils/utils';
@@ -554,15 +555,12 @@ async function updateData() {
  */
 async function created() {
   window.EventBus.$on('refreshChart', this.updateData);
-  window.EventBus.$on('cancel-budget-year', () => {
-    this.changingBudgetView = false;
-  });
+
   window.EventBus.$on('selected-budget-year', (data) => {
     if (data.format(IsoFormat) != this.fiscalDateView) {
       this.fiscalDateView = data.format(IsoFormat);
       this.refreshBudget();
     }
-    this.changingBudgetView = false;
   });
   this.refreshEmployee();
   this.addOneSecondToActualTimeEverySecond();
@@ -613,7 +611,7 @@ export default {
         description: '',
         employeeId: '',
         expenseTypeId: '',
-        catagory: null,
+        category: null,
         showOnFeed: false,
         employeeName: null,
         budgetName: null

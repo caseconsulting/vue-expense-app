@@ -1,7 +1,7 @@
 <template>
   <v-container>
     <!-- Return button -->
-    <v-btn class="mb-5" to="/blog"> Return to Blog Page</v-btn>
+    <v-btn class="mb-5" elevation="1" to="/blog"> Return to Blog Page</v-btn>
     <div class="w3-display-container">
       <!-- title -->
       <h1 class="blogTitle">{{ this.metaData.title }}</h1>
@@ -9,13 +9,13 @@
       <img class="mainImage" :src="model.mainPicture" />
     </div>
     <div class="content">
-      <p class="meta" style="font-size: 15px; padding-top: 5px;">
+      <p class="meta" style="font-size: 15px; padding-top: 5px">
         <br />
         <!-- category -->
         <span>{{ this.model.category }}</span>
         <br />By
         <!-- author -->
-        <span style="color: tomato;">{{ this.metaData.author }}</span>
+        <span style="color: tomato">{{ this.metaData.author }}</span>
         ◆
         <!-- date -->
         {{ this.metaData.date }}

@@ -18,7 +18,7 @@
     </v-snackbar>
 
     <v-col cols="12" :lg="userIsAdmin() ? 8 : 12">
-      <v-card>
+      <v-card class="mt-3">
         <v-container fluid>
           <!-- Title -->
           <v-card-title>
@@ -191,19 +191,19 @@
             @click:row="clickedRow"
           >
             <!-- Budget Name slot -->
-            <template v-slot:item.budgetName="{ item }">
+            <template v-slot:[`item.budgetName`]="{ item }">
               <td>{{ item.budgetName | limitedText }}</td>
             </template>
             <!-- Budget slot -->
-            <template v-slot:item.budget="{ item }">
-              <p style="margin-bottom: 0px;">{{ item.budget | moneyValue }}</p>
+            <template v-slot:[`item.budget`]="{ item }">
+              <p style="margin-bottom: 0px">{{ item.budget | moneyValue }}</p>
             </template>
             <!-- Actions -->
-            <template v-slot:item.actions="{ item }">
+            <template v-slot:[`item.actions`]="{ item }">
               <v-tooltip top>
                 <template v-slot:activator="{ on }">
                   <v-btn
-                    :disabled="isEditing() || midAction"
+                    :disabled="midAction"
                     text
                     icon
                     @click="
@@ -212,15 +212,15 @@
                     "
                     v-on="on"
                   >
-                    <v-icon style="color: #606060;">edit</v-icon>
+                    <v-icon style="color: #606060">edit</v-icon>
                   </v-btn>
                 </template>
                 <span>Edit</span>
               </v-tooltip>
               <v-tooltip top>
                 <template v-slot:activator="{ on }">
-                  <v-btn :disabled="isEditing() || midAction" text icon @click="validateDelete(item)" v-on="on">
-                    <v-icon style="color: #606060;">delete</v-icon>
+                  <v-btn :disabled="midAction" text icon @click="validateDelete(item)" v-on="on">
+                    <v-icon style="color: #606060">delete</v-icon>
                   </v-btn>
                 </template>
                 <slot>Delete</slot>
@@ -312,11 +312,11 @@
                           <v-card color="#bc3825">
                             <!-- Dialog Title -->
                             <v-card-title>
-                              <span class="headline" style="color: white;">Accessible By</span>
+                              <span class="headline" style="color: white">Accessible By</span>
                             </v-card-title>
                             <v-divider color="black"></v-divider>
                             <!-- List of employee names/ISSUES -->
-                            <v-card-text class="pb-0" style="max-height: 300px; background-color: #f0f0f0;">
+                            <v-card-text class="pb-0" style="max-height: 300px; background-color: #f0f0f0">
                               <v-row>
                                 <v-list color="#f0f0f0" width="376">
                                   <template v-for="employee in getEmployeeList(item.accessibleBy)">
@@ -379,8 +379,12 @@
           <!-- END EXPENSE TYPE Datatable -->
 
           <!-- Confirmation Modals -->
-          <delete-modal :activate="deleting" :deleteInfo="'(' + deleteType + ')'" :type="'expense-type'"></delete-modal>
-          <delete-error-modal :activate="invalidDelete" type="expense type"></delete-error-modal>
+          <delete-modal
+            :toggleDeleteModal="deleting"
+            :deleteInfo="'(' + deleteType + ')'"
+            :type="'expense-type'"
+          ></delete-modal>
+          <delete-error-modal :toggleDeleteErrorModal="invalidDelete" type="expense type"></delete-error-modal>
           <!-- End Confirmation Modals -->
         </v-container>
       </v-card>
@@ -511,8 +515,6 @@ function changeAvatar(item) {
 } // changeAvatar
 
 /**
- * NOTE: Unused?
- *
  * Clear the selected expense type.
  */
 function clearModel() {
@@ -563,7 +565,6 @@ function clickedRow(value) {
  * Delete an expense type and display status.
  */
 async function deleteExpenseType() {
-  this.deleting = false; // collapse delete confirmation model
   let et = await api.deleteItem(api.EXPENSE_TYPES, this.deleteModel.id);
   if (et.id) {
     // successfully deletes expense type
@@ -738,15 +739,6 @@ function hasAccess(employee, expenseType) {
 } // hasAccess
 
 /**
- * Checks if an expense is being edited.
- *
- * @return boolean - an expense is being edited
- */
-function isEditing() {
-  return !!this.model.id;
-} // isEditing
-
-/**
  * Checks to see if an expense type is expanded in the datatable.
  *
  * @param item - expense type to check
@@ -895,9 +887,9 @@ async function validateDelete(item) {
     });
   if (x) {
     this.$set(this.deleteModel, 'id', item.id);
-    this.deleting = true;
+    this.deleting = !this.deleting;
   } else {
-    this.invalidDelete = true;
+    this.invalidDelete = !this.invalidDelete;
   }
 } // validateDelete
 
@@ -911,13 +903,22 @@ async function validateDelete(item) {
  * Set user info, employees, and expense types. Creates event listeners.
  */
 async function created() {
+  //no longer editing an expense (clear model and enable buttons)
+  window.EventBus.$on('finished-editing-expense-type', () => {
+    this.clearModel();
+    this.endAction();
+  });
+
+  //when expense type is being edited buttons should be disabled
+  window.EventBus.$on('editing-expense-type', () => {
+    this.startAction();
+  });
+
   window.EventBus.$on('canceled-delete-expense-type', () => {
-    this.deleting = false;
     this.midAction = false;
   });
   window.EventBus.$on('confirm-delete-expense-type', this.deleteExpenseType);
   window.EventBus.$on('invalid-expense type-delete', () => {
-    this.invalidDelete = false;
     this.midAction = false;
   });
 
@@ -1055,7 +1056,6 @@ export default {
     getEmployeeList,
     getEmployeeName,
     hasAccess,
-    isEditing,
     isFocus,
     isInactive,
     onSelect,

@@ -52,10 +52,8 @@ function acceptedFileTypes() {
       'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
       'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
       '.doc',
-      '.docx',
       'image/*',
-      '.pdf',
-      '.xml'
+      '.pdf'
     ].join(',');
   }
 } // acceptedFileTypes

@@ -1,7 +1,7 @@
 <template class="twitter-feed">
   <div>
     <!-- title -->
-    <v-card class="white--text" color="#bc3825">
+    <v-card class="mt-3 white--text" color="#bc3825">
       <v-card-title class="header_style">
         <h3>Twitter Feed</h3>
       </v-card-title>
@@ -41,7 +41,8 @@
 </template>
 
 <script>
-import moment from 'moment';
+const moment = require('moment-timezone');
+moment.tz.setDefault('America/New_York');
 
 export default {
   filters: {

@@ -27,7 +27,8 @@
 </template>
 
 <script>
-import moment from 'moment';
+const moment = require('moment-timezone');
+moment.tz.setDefault('America/New_York');
 import _ from 'lodash';
 import { isEmpty, monthDayYearFormat } from '@/utils/utils';
 

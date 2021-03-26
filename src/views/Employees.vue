@@ -13,9 +13,7 @@
       <v-card-title headline color="white">
         <span class="headline">{{ status.statusMessage }}</span>
       </v-card-title>
-      <v-btn color="white" text @click="clearStatus">
-        Close
-      </v-btn>
+      <v-btn color="white" text @click="clearStatus"> Close </v-btn>
     </v-snackbar>
     <v-card>
       <v-container fluid>
@@ -70,7 +68,7 @@
         <br />
         <!-- End Filters -->
         <!-- Create an Employee -->
-        <v-btn class="mb-5" @click="createEmployee = true" v-if="userIsAdmin()">
+        <v-btn class="mb-5" @click="createEmployee = true" elevation="2" v-if="userIsAdmin()">
           Create an Employee<v-icon class="pl-2">person_add</v-icon>
         </v-btn>
 
@@ -89,14 +87,12 @@
           @click:row="handleClick"
         >
           <!-- Delete Action Item Slot -->
-          <template v-slot:item.actions="{ item }">
+          <template v-slot:[`item.actions`]="{ item }">
             <div class="datatable_btn layout" v-if="userIsAdmin()">
               <v-tooltip top>
                 <template v-slot:activator="{ on }">
                   <v-btn :disabled="midAction" text icon @click.stop="validateDelete(item)" v-on="on">
-                    <v-icon style="color: #606060;">
-                      delete
-                    </v-icon>
+                    <v-icon style="color: #606060"> delete </v-icon>
                   </v-btn>
                 </template>
                 <span>Delete</span>
@@ -105,50 +101,57 @@
           </template>
 
           <!-- Avatar Item Slot -->
-          <template v-slot:item.avatars="{ item }">
+          <template v-slot:[`item.avatars`]="{ item }">
             <!-- Valid Avatar -->
             <v-avatar v-if="item.avatar" size="35">
               <img :src="item.avatar" @error="changeAvatar(employee)" />
             </v-avatar>
             <!-- Invalid Avatar -->
             <v-avatar v-else size="35" color="grey darken-2">
-              <div style="color: white; font-family: arial;">
+              <div style="color: white; font-family: arial">
                 <b>{{ item.firstName.substring(0, 1) }}{{ item.lastName.substring(0, 1) }}</b>
               </div>
             </v-avatar>
           </template>
 
           <!-- Employee Number Item Slot -->
-          <template v-slot:item.employeeNumber="{ item }">
-            <p :class="{ inactiveStyle: isInactive(item), selectFocus: isFocus(item) }" style="margin-bottom: 0px;">
+          <template v-slot:[`item.employeeNumber`]="{ item }">
+            <p :class="{ inactiveStyle: isInactive(item), selectFocus: isFocus(item) }" style="margin-bottom: 0px">
               {{ item.employeeNumber }}
             </p>
           </template>
 
           <!-- First Name Item Slot -->
-          <template v-slot:item.firstName="{ item }">
-            <p :class="{ inactiveStyle: isInactive(item), selectFocus: isFocus(item) }" style="margin-bottom: 0px;">
+          <template v-slot:[`item.firstName`]="{ item }">
+            <p :class="{ inactiveStyle: isInactive(item), selectFocus: isFocus(item) }" style="margin-bottom: 0px">
               {{ item.firstName }}
             </p>
           </template>
 
+          <!-- Middle Name Item Slot -->
+          <template v-slot:[`item.middleName`]="{ item }">
+            <p :class="{ inactiveStyle: isInactive(item), selectFocus: isFocus(item) }" style="margin-bottom: 0px">
+              {{ item.middleName }}
+            </p>
+          </template>
+
           <!-- Last Name Item Slot -->
-          <template v-slot:item.lastName="{ item }">
-            <p :class="{ inactiveStyle: isInactive(item), selectFocus: isFocus(item) }" style="margin-bottom: 0px;">
+          <template v-slot:[`item.lastName`]="{ item }">
+            <p :class="{ inactiveStyle: isInactive(item), selectFocus: isFocus(item) }" style="margin-bottom: 0px">
               {{ item.lastName }}
             </p>
           </template>
 
           <!-- Date Item Slot -->
-          <template v-slot:item.hireDate="{ item }">
-            <p :class="{ inactiveStyle: isInactive(item), selectFocus: isFocus(item) }" style="margin-bottom: 0px;">
+          <template v-slot:[`item.hireDate`]="{ item }">
+            <p :class="{ inactiveStyle: isInactive(item), selectFocus: isFocus(item) }" style="margin-bottom: 0px">
               {{ item.hireDate | monthDayYearFormat }}
             </p>
           </template>
 
           <!-- Email Item Slot -->
-          <template v-slot:item.email="{ item }">
-            <p :class="{ inactiveStyle: isInactive(item), selectFocus: isFocus(item) }" style="margin-bottom: 0px;">
+          <template v-slot:[`item.email`]="{ item }">
+            <p :class="{ inactiveStyle: isInactive(item), selectFocus: isFocus(item) }" style="margin-bottom: 0px">
               {{ item.email }}
             </p>
           </template>
@@ -172,8 +175,8 @@
         </v-card-actions>
 
         <!-- Confirmation Modals -->
-        <delete-modal :activate="deleting" :type="'employee'"></delete-modal>
-        <delete-error-modal :activate="invalidDelete" type="employee"></delete-error-modal>
+        <delete-modal :toggleDeleteModal="deleting" :type="'employee'"></delete-modal>
+        <delete-error-modal :toggleDeleteErrorModal="invalidDelete" type="employee"></delete-error-modal>
         <!-- End Confirmation Modals -->
       </v-container>
     </v-card>
@@ -227,7 +230,6 @@ function clearStatus() {
  * Delete an employee and display status.
  */
 async function deleteEmployee() {
-  this.deleting = false; // deactive modal to confirm delete
   let e = await api.deleteItem(api.EMPLOYEES, this.deleteModel.id); // delete employee from api
   if (e.id) {
     // update data if successfully deletes employee
@@ -344,10 +346,10 @@ async function validateDelete(item) {
   if (valid) {
     // employee can be deleted
     this.$set(this.deleteModel, 'id', item.id);
-    this.deleting = true; // activate model to confirm delete
+    this.deleting = !this.deleting; // activate model to confirm delete
   } else {
     // employee cannot be deleted
-    this.invalidDelete = true;
+    this.invalidDelete = !this.invalidDelete;
   }
 } // validateDelete
 
@@ -365,12 +367,10 @@ async function created() {
     this.createEmployee = false;
   });
   window.EventBus.$on('canceled-delete-employee', () => {
-    this.deleting = false;
     this.midAction = false;
   });
   window.EventBus.$on('confirm-delete-employee', this.deleteEmployee);
   window.EventBus.$on('invalid-employee-delete', () => {
-    this.invalidDelete = false;
     this.midAction = false;
   });
 
@@ -427,6 +427,10 @@ export default {
         {
           text: 'First Name',
           value: 'firstName'
+        },
+        {
+          text: 'Middle Name',
+          value: 'middleName'
         },
         {
           text: 'Last Name',

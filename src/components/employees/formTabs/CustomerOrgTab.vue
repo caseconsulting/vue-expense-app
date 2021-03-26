@@ -2,13 +2,13 @@
   <div>
     <!-- Loop Customer Organization -->
     <div
-      v-for="(exp, index) in model.customerOrgExp"
+      v-for="(exp, index) in editedCustomerOrgExp"
       class="pt-3 pb-1 px-5"
       :key="'exp: ' + exp.name + index"
-      style="border: 1px solid grey;"
+      style="border: 1px solid grey"
     >
       <!-- Name of Customer Organization -->
-      <v-combobox
+      <v-autocomplete
         ref="formFields"
         v-model="exp.name"
         :rules="requiredRules"
@@ -16,9 +16,9 @@
         label="Customer Organization Experience"
         data-vv-name="Customer Organization Experience"
       >
-      </v-combobox>
+      </v-autocomplete>
 
-      <v-row align="center" justify="center">
+      <v-row align="center" class="py-3" justify="center">
         <!-- Current Switch -->
         <v-col cols="6" sm="7" md="6" lg="7">
           <v-switch v-model="exp.current" label="Currently working with this customer organization"></v-switch>
@@ -35,7 +35,7 @@
         >
           <v-text-field
             ref="formFields"
-            :value="exp.years"
+            v-model="exp.years"
             flat
             :rules="experienceRequired"
             single-line
@@ -58,7 +58,7 @@
 
     <!-- Button to Add Customer Organization -->
     <div class="pt-4" align="center">
-      <v-btn @click="addExperience()"><v-icon class="pr-1">add</v-icon>Experience</v-btn>
+      <v-btn @click="addExperience()" elevation="2"><v-icon class="pr-1">add</v-icon>Experience</v-btn>
     </div>
   </div>
 </template>
@@ -80,7 +80,6 @@ import { formatDateDashToSlash, formatDateSlashToDash, isEmpty } from '@/utils/u
 async function created() {
   window.EventBus.$emit('created', 'customerOrgExp'); // emit customer organization tab was created
   this.employees = await api.getItems(api.EMPLOYEES); // get all employees
-  this.populateDropDowns(); // get autocomplete drop down data
 } // created
 
 // |--------------------------------------------------|
@@ -93,7 +92,7 @@ async function created() {
  * Adds a Customer Organization.
  */
 function addExperience() {
-  this.model.customerOrgExp.push({
+  this.editedCustomerOrgExp.push({
     name: '',
     years: 0,
     current: false
@@ -106,23 +105,8 @@ function addExperience() {
  * @param index - array index of customer organization to delete
  */
 function deleteExperience(index) {
-  this.model.customerOrgExp.splice(index, 1);
+  this.editedCustomerOrgExp.splice(index, 1);
 } // deleteExperience
-
-/**
- * Populate drop downs with information that other employees have filled out.
- */
-function populateDropDowns() {
-  let employeesExperiences = _.map(this.employees, (employee) => employee.customerOrgExp); //extract experiences
-  employeesExperiences = _.compact(employeesExperiences); //remove falsey values
-  // loop employees
-  _.forEach(employeesExperiences, (experiences) => {
-    // loop contracts
-    _.forEach(experiences, (experience) => {
-      this.experienceDropDown.push(experience.name); // add customer organization name
-    });
-  });
-} // populateDropDowns
 
 /**
  * Validate all input fields are valid. Emit to parent the error status.
@@ -141,7 +125,7 @@ function validateFields() {
     hasErrors = !this.$refs.formFields.validate();
   }
 
-  window.EventBus.$emit('doneValidating', 'customerOrgExp'); // emit done validating
+  window.EventBus.$emit('doneValidating', 'customerOrgExp', this.editedCustomerOrgExp); // emit done validating and send edited data to parent
   window.EventBus.$emit('customerOrgExpStatus', hasErrors); // emit error status
 } // validateFields
 
@@ -149,7 +133,25 @@ export default {
   created,
   data() {
     return {
-      experienceDropDown: ['DST', 'ADO', 'Talent', 'OMA', 'CCI'], // autocomplete customer organization name options
+      experienceDropDown: [
+        'DIR',
+        'DDI',
+        'DDI/ITE',
+        'DDI/ADO',
+        'DDI/OSE',
+        'DDI/CCI',
+        'DA',
+        'DO',
+        'DST',
+        'DS',
+        'Talent',
+        'Mission Center',
+        'DNI',
+        'NGA',
+        'NRO',
+        'DoD',
+        'Other'
+      ], // autocomplete customer organization name options
       dateOptionalRules: [
         (v) => {
           return !isEmpty(v) ? /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v) || 'Date must be valid. Format: MM/DD/YYYY' : true;
@@ -159,6 +161,7 @@ export default {
         (v) => !isEmpty(v) || 'Date required',
         (v) => (!isEmpty(v) && /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v)) || 'Date must be valid. Format: MM/DD/YYYY'
       ], // rules for a required date
+      editedCustomerOrgExp: _.cloneDeep(this.model), //stores edited customer orgs info
       experienceRequired: [
         (v) => !isEmpty(v) || 'This field is required',
         (v) => v >= 0 || 'Value cannot be negative',
@@ -175,7 +178,6 @@ export default {
     formatDateSlashToDash,
     formatDateDashToSlash,
     isEmpty,
-    populateDropDowns,
     validateFields
   },
   props: ['model', 'validating'],

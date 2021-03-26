@@ -1,10 +1,10 @@
 <template>
   <v-row>
-    <v-col cols="12" md="9" offset-lg="1" offset-md="1">
+    <v-col cols="12" md="9" lg="8" xl="9" offset-lg="1" offset-md="1">
       <!-- Expense Table -->
       <rollup-expense-type-table></rollup-expense-type-table>
     </v-col>
-    <v-col cols="12" md="2">
+    <v-col cols="12" md="2" lg="3" xl="2">
       <!-- Expense Info -->
       <expense-info class="jerryrig"></expense-info>
       <!-- Expenses Total -->

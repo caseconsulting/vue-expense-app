@@ -2,8 +2,8 @@
   <div>
     <!-- Loop Clearances -->
     <div
-      v-for="(clearance, cIndex) in model.clearances"
-      style="border: 1px solid grey;"
+      v-for="(clearance, cIndex) in editedClearances"
+      style="border: 1px solid grey"
       class="pt-3 pb-1 px-5"
       :key="cIndex"
     >
@@ -20,7 +20,7 @@
       >
       </v-combobox>
 
-      <v-row>
+      <v-row class="py-3">
         <!-- Granted Date -->
         <v-col cols="12" sm="6" md="12" lg="6" class="pt-0">
           <v-menu
@@ -226,21 +226,22 @@
       </div>
       <!-- End Loop BI Dates -->
       <div align="center" class="pt-2 pb-4">
-        <v-btn @click="addBIDates(cIndex)" depressed outlined small color="#3f3f3c">Add BI Dates</v-btn>
+        <v-btn @click="addBIDates(cIndex)" depressed outlined small>Add BI Dates</v-btn>
       </div>
     </div>
     <!-- End Loop Clearances -->
 
     <!-- Button to add Clearances -->
     <div class="pt-4" align="center">
-      <v-btn @click="addClearance"><v-icon class="pr-1">add</v-icon>Clearance</v-btn>
+      <v-btn @click="addClearance" elevation="2"><v-icon class="pr-1">add</v-icon>Clearance</v-btn>
     </div>
   </div>
 </template>
 
 <script>
 import api from '@/shared/api.js';
-import moment from 'moment';
+const moment = require('moment-timezone');
+moment.tz.setDefault('America/New_York');
 import _ from 'lodash';
 import { formatDateDashToSlash, formatDateSlashToDash, isEmpty } from '@/utils/utils';
 
@@ -273,7 +274,7 @@ async function created() {
  * @param cIndex - array index of clearance to add the BI date to.
  */
 function addBIDates(cIndex) {
-  this.model.clearances[cIndex].biDates.push({
+  this.editedClearances[cIndex].biDates.push({
     range: [],
     showRangeMenu: false
   });
@@ -283,7 +284,7 @@ function addBIDates(cIndex) {
  * Adds a clearance.
  */
 function addClearance() {
-  this.model.clearances.push({
+  this.editedClearances.push({
     adjudicationDates: [],
     biDates: [],
     expirationDate: null,
@@ -306,7 +307,7 @@ function addClearance() {
  * @param biIndex - array index of BI date to remove.
  */
 function deleteBIDate(cIndex, biIndex) {
-  this.model.clearances[cIndex].biDates.splice(biIndex, 1);
+  this.editedClearances[cIndex].biDates.splice(biIndex, 1);
 } // deleteBIDate
 
 /**
@@ -315,7 +316,7 @@ function deleteBIDate(cIndex, biIndex) {
  * @param cIndex - array index of clearance to remove.
  */
 function deleteClearance(cIndex) {
-  this.model.clearances.splice(cIndex, 1);
+  this.editedClearances.splice(cIndex, 1);
 } // deleteClearance
 
 /**
@@ -356,21 +357,21 @@ function formatRange(range) {
  */
 function maxSubmission(cIndex) {
   let max;
-  if (this.model.clearances[cIndex].grantedDate) {
+  if (this.editedClearances[cIndex].grantedDate) {
     // submission date is before granted date
-    max = moment(this.model.clearances[cIndex].grantedDate, ISOFORMAT);
-  } else if (this.model.clearances[cIndex].expirationDate) {
+    max = moment(this.editedClearances[cIndex].grantedDate, ISOFORMAT);
+  } else if (this.editedClearances[cIndex].expirationDate) {
     // submission date is before expiration date
-    max = moment(this.model.clearances[cIndex].expirationDate, ISOFORMAT);
+    max = moment(this.editedClearances[cIndex].expirationDate, ISOFORMAT);
   }
 
   // check submission date is before any poly dates
-  if (!_.isEmpty(this.model.clearances[cIndex].polyDates)) {
+  if (!_.isEmpty(this.editedClearances[cIndex].polyDates)) {
     // poly dates exist
     let earliest = moment(
       _.first(
         // get earliest poly date
-        _.sortBy(this.model.clearances[cIndex].polyDates, (date) => {
+        _.sortBy(this.editedClearances[cIndex].polyDates, (date) => {
           // sort poly dates
           return moment(date, ISOFORMAT);
         })
@@ -383,12 +384,12 @@ function maxSubmission(cIndex) {
   }
 
   // check submission date is before any adjudication dates
-  if (!_.isEmpty(this.model.clearances[cIndex].adjudicationDates)) {
+  if (!_.isEmpty(this.editedClearances[cIndex].adjudicationDates)) {
     // adjudication dates exist
     let earliest = moment(
       _.first(
         // get earliest adjudication date
-        _.sortBy(this.model.clearances[cIndex].adjudicationDates, (date) => {
+        _.sortBy(this.editedClearances[cIndex].adjudicationDates, (date) => {
           // sort adjudication dates
           return moment(date, ISOFORMAT);
         })
@@ -412,10 +413,10 @@ function maxSubmission(cIndex) {
  * @return string - minimum (earliest possible) date
  */
 function minExpiration(cIndex) {
-  if (this.model.clearances[cIndex].grantedDate) {
-    return this.model.clearances[cIndex].grantedDate;
-  } else if (this.model.clearances[cIndex].submissionDate) {
-    return this.model.clearances[cIndex].submissionDate;
+  if (this.editedClearances[cIndex].grantedDate) {
+    return this.editedClearances[cIndex].grantedDate;
+  } else if (this.editedClearances[cIndex].submissionDate) {
+    return this.editedClearances[cIndex].submissionDate;
   }
 } // minExpiration
 
@@ -451,7 +452,7 @@ function validateFields() {
     hasErrors = !this.$refs.formFields.validate();
   }
 
-  window.EventBus.$emit('doneValidating', 'clearance'); // emit done validating
+  window.EventBus.$emit('doneValidating', 'clearance', this.editedClearances); // emit done validating and sends edited data back to parent
   window.EventBus.$emit('clearanceStatus', hasErrors); // emit error status
 } // validateFields
 
@@ -469,6 +470,7 @@ export default {
         (v) => !isEmpty(v) || 'Date required',
         (v) => (!isEmpty(v) && /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v)) || 'Date must be valid. Format: MM/DD/YYYY'
       ], // rules for a required date
+      editedClearances: _.cloneDeep(this.model), // stores edited clearances info
       requiredRules: [(v) => !isEmpty(v) || 'This field is required'] // rules for a required field
     };
   },

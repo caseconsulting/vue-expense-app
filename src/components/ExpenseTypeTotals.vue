@@ -1,15 +1,26 @@
 <template>
   <div>
+    <!--Totals Card-->
     <v-card v-if="totals.length" class="slide-in-blurred-right">
+      <!--Total Card Title-->
       <v-card-title class="subtitle-2">
-        <div class="headline">Totals</div>
-        <div>
-          <p v-for="total in totals" :key="total.id">
-            <span>{{ total.name }}:</span> {{ total.costTotal | moneyValue }}
-          </p>
-        </div>
+        <v-container>
+          <v-row class="headline">Totals</v-row>
+        </v-container>
       </v-card-title>
+      <!--End of Total Card Title-->
+      <v-card-text>
+        <v-container class="pb-0">
+          <!--List of Expense Types and Totals-->
+          <v-row v-for="total in totals" :key="total.id" class="pb-7" style="font-weight: bold">
+            <span>{{ total.name }}: </span>
+            <v-spacer></v-spacer>
+            {{ total.costTotal | moneyValue }}
+          </v-row>
+        </v-container>
+      </v-card-text>
     </v-card>
+    <!--End of Totals Card-->
   </div>
 </template>
 

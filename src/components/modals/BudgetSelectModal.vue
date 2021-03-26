@@ -4,7 +4,7 @@
       <v-card>
         <!-- Anniversary Date -->
         <v-toolbar color="#565651" dark>
-          <v-toolbar-title>Anniversary Date: {{ moment(hireDate).format('MMMM Do') }}</v-toolbar-title>
+          <v-toolbar-title>Anniversary Date: {{ getAnniversaryDate }}</v-toolbar-title>
         </v-toolbar>
         <!-- End Anniversary Date -->
 
@@ -27,7 +27,7 @@
 
           <!-- Cancel Button -->
           <template>
-            <v-list-item ripple @click.native="emit(`cancel-budget-year`)" class="list-hover">
+            <v-list-item ripple @click.native="activate = false" class="list-hover">
               <v-list-item-content>
                 <v-list-item-title><h2 class="center-text">Cancel</h2></v-list-item-title>
               </v-list-item-content>
@@ -43,7 +43,17 @@
 
 <script>
 const IsoFormat = 'YYYY-MM-DD';
-const Moment = require('moment');
+const moment = require('moment-timezone');
+moment.tz.setDefault('America/New_York');
+
+/**
+ * Gets the anniversary date based on hire date.
+ *
+ * @returns String - anniversary date
+ */
+function getAnniversaryDate() {
+  return moment(this.hireDate).format('MMMM Do');
+} // getAnniversaryDate
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -84,9 +94,10 @@ function isCurrent(budgetYear) {
  * @param budgetYear - int budget year selected
  */
 function select(budgetYear) {
-  let fiscalYear = Moment(this.hireDate, IsoFormat);
+  let fiscalYear = moment(this.hireDate, IsoFormat);
   fiscalYear.year(budgetYear);
   this.emit(`selected-budget-year`, fiscalYear);
+  this.activate = false;
 } // select
 
 // |--------------------------------------------------|
@@ -96,17 +107,30 @@ function select(budgetYear) {
 // |--------------------------------------------------|
 
 export default {
+  computed: {
+    getAnniversaryDate
+  },
+  data() {
+    return {
+      activate: false // dialog activator
+    };
+  },
   methods: {
     emit,
     isCurrent,
     select
   },
   props: [
-    'activate', // dialog activator
+    'toggleBudgetSelectModal', // dialog activator
     'budgetYears', // all budget years
     'current', // current fiscal date view
     'hireDate' // employee hire date
-  ]
+  ],
+  watch: {
+    toggleBudgetSelectModal: function () {
+      this.activate = true;
+    }
+  }
 };
 </script>
 

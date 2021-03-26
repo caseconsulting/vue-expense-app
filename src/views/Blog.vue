@@ -13,15 +13,13 @@
       <v-card-title headline color="white">
         <span class="headline">{{ status.statusMessage }}</span>
       </v-card-title>
-      <v-btn color="white" text @click="clearStatus">
-        Close
-      </v-btn>
+      <v-btn color="white" text @click="clearStatus"> Close </v-btn>
     </v-snackbar>
     <!-- title -->
     <v-row>
       <v-col cols="12">
         <!-- new blog post button -->
-        <v-btn class="mb-5" to="/postEditor/0"> Create a New Blog Post</v-btn>
+        <v-btn class="mb-5" elevation="1" to="/postEditor/0"> Create a New Blog Post</v-btn>
         <!-- Post table -->
         <post-table
           :posts="posts"
@@ -31,10 +29,10 @@
         ></post-table>
       </v-col>
     </v-row>
-    <!-- Rekognition and comprehend -->
+    <!-- Rekognition and comprehend
     <v-row>
       <v-file-input
-        style="width: 50px;"
+        style="width: 50px"
         v-model="inputFile"
         label="Select image to rekognize"
         :accept="acceptedFileTypes"
@@ -48,7 +46,7 @@
     </v-row>
     <v-row>
       <v-btn @click="comprehend()">comprehend</v-btn>
-    </v-row>
+    </v-row> -->
   </v-container>
 </template>
 <script>
@@ -57,6 +55,9 @@ import PostTable from '@/components/PostTable.vue';
 import _ from 'lodash';
 import { getRole } from '@/utils/auth';
 
+/**
+ * returns the accepted file types for images
+ */
 function acceptedFileTypes() {
   return ['jpg', 'png'].join(',');
 } // acceptedFileTypes
@@ -74,6 +75,7 @@ function isAdmin() {
  * Initial Setup
  */
 async function created() {
+  //get the blog info from aws
   this.posts = await api.getItems(api.BLOG);
   this.employeeRole = getRole();
   if (isAdmin) {
@@ -115,45 +117,82 @@ function onSelect(item) {
   this.blogPost = _.cloneDeep(item.text);
 } // onSelect
 
-async function uploadToS3() {
-  await api.uploadBlogAttachment(this.inputFile);
-}
+// THESE ARE PART OF THE AWS AI SERVICES TESTS
+// /**
+//  * uploads the blog attachment to s3 to be preapared for rekognition and comprehend
+//  */
+// async function uploadToS3() {
+//   await api.uploadBlogAttachment(this.inputFile);
+// } // uploadToS3
 
-async function rekognition() {
-  await this.uploadToS3();
-  let result = await api.getModerationLabel(this.inputFile.name);
-  console.log(result);
-}
+// /**
+//  * Used to detect text in an image and print out what it finds
+//  */
+// async function rekognition() {
+//   await this.uploadToS3();
+//   let result = await api.getModerationLabel(this.inputFile.name);
+//   console.log(result);
+// } // rekognition
 
-async function comprehend() {
-  let arr = this.splitInputText();
-  for (let i = 0; i < arr.length; i++) {
-    let result = await api.getKeyPhrases({ inputText: arr[i] });
-    console.log(result);
-  }
-}
+// /**
+//  * retrieves key phrases from text loaded from this.inputText
+//  */
+// async function comprehend() {
+//   let arr = this.splitInputText();
+//   for (let i = 0; i < arr.length; i++) {
+//     let result = await api.getKeyPhrases({ inputText: arr[i] });
+//     console.log(result);
+//   }
+// } // comprehend
 
-function splitInputText() {
-  let strArr = [];
-  if (this.inputText.length > 5000) {
-    let currOffset = 0;
-    while (currOffset < this.inputText.length) {
-      let start = currOffset;
-      currOffset += 5000 % this.inputText.length;
-      strArr.push(this.inputText.substring(start, currOffset));
-    }
-    return strArr;
-  } else {
-    return [this.inputText];
-  }
-}
+/**
+ * splits up input text if the string is longer than 5000 characters
+ */
+// function splitInputText() {
+//   let strArr = [];
+//   if (this.inputText.length > 5000) {
+//     let currOffset = 0;
+//     while (currOffset < this.inputText.length) {
+//       let start = currOffset;
+//       currOffset += 5000 % this.inputText.length;
+//       strArr.push(this.inputText.substring(start, currOffset));
+//     }
+//     return strArr;
+//   } else {
+//     return [this.inputText];
+//   }
+// } // splitInputText
 
 /**
  * refresh blogTable and give successful status message
  */
 async function successfulDelete() {
   this.posts = await api.getItems(api.BLOG);
-
+  if (isAdmin) {
+    //get all employee's data and match posts to it.
+    this.posts = _.map(this.posts, (post) => {
+      let employee = _.find(this.employees, (employee) => {
+        return post.authorId == employee.id;
+      });
+      post.employeeName = `${employee.firstName} ${employee.lastName}`;
+      if (post.title == null) {
+        post.title = 'testTitle';
+      }
+      return post;
+    });
+  } else {
+    this.posts = _.map(this.posts, (post) => {
+      if (post.id != this.userInfo.id) {
+        return null;
+      }
+      post.employeeName = `${this.userInfo.firstName} ${this.userInfo.lastName}`;
+      if (post.title == null) {
+        post.title = 'testTitle';
+      }
+      return post;
+    });
+    this.posts = _.compact(this.posts);
+  }
   this.$set(this.status, 'statusType', 'SUCCESS');
   this.$set(this.status, 'statusMessage', 'Item was successfully deleted!');
   this.$set(this.status, 'color', 'green');
@@ -198,7 +237,7 @@ export default {
       posts: [],
       model: {},
       blogPost: '',
-      inputFile: null,
+      // inputFile: null, remove comment to use rekognition or comprehend
       inputText: null,
       employees: null,
       userInfo: null,
@@ -211,10 +250,10 @@ export default {
   },
   methods: {
     acceptedFileTypes,
-    comprehend,
-    rekognition,
-    splitInputText,
-    uploadToS3,
+    // comprehend,
+    // rekognition,
+    // splitInputText,
+    // uploadToS3,
     onSelect,
     isAdmin,
     successfulDelete,

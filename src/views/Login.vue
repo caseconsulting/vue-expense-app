@@ -1,9 +1,9 @@
 <template>
   <v-container class="text-md-center">
-    <div style="text-align: center;">
+    <div style="text-align: center">
       <img class="case_logo" src="../assets/img/logo-banner.gif" alt="" />
       <h1 class="my-4">Case Portal</h1>
-      <v-btn @click="login()" id="custom-button-color" class="reimburse_button" large>Login</v-btn>
+      <v-btn @click="login()" id="custom-button-color" class="reimburse_button" elevation="1" large>Login</v-btn>
     </div>
   </v-container>
 </template>

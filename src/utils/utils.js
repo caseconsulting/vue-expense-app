@@ -1,5 +1,6 @@
 import dateUtils from '@/shared/dateUtils';
-import moment from 'moment';
+const moment = require('moment-timezone');
+moment.tz.setDefault('America/New_York');
 import _ from 'lodash';
 
 /**
@@ -22,6 +23,16 @@ export async function asyncForEach(array, callback) {
  */
 export function formatDate(date) {
   return dateUtils.formatDate(date);
+} // formatDate
+
+/**
+ * Formats a date (dates that only have months and years).
+ *
+ * @param date - date to format
+ * @return Date - formatted date
+ */
+export function formatDateMonthYear(date) {
+  return dateUtils.formatDateMonthYear(date);
 } // formatDate
 
 /**
@@ -137,4 +148,14 @@ export function monthDayFormat(date) {
  */
 export function parseDate(date) {
   return dateUtils.parseDate(date);
+} // parseDate
+
+/**
+ * Parse a date to isoformat (YYYY-MM).
+ *
+ * @param Date = date to parse
+ * @return Date - date in isoformat
+ */
+export function parseDateMonthYear(date) {
+  return dateUtils.parseDateMonthYear(date);
 } // parseDate

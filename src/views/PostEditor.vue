@@ -13,14 +13,12 @@
       <v-card-title headline color="white">
         <span class="headline">{{ status.statusMessage }}</span>
       </v-card-title>
-      <v-btn color="white" text @click="clearStatus">
-        Close
-      </v-btn>
+      <v-btn color="white" text @click="clearStatus"> Close </v-btn>
     </v-snackbar>
     <!-- Cancel Button -->
-    <v-btn to="/blog" color="white" class="ma-2"> <icon class="mr-1" name="ban"></icon>Cancel</v-btn>
+    <v-btn to="/blog" color="white" class="ma-2" elevation="1"> <icon class="mr-1" name="ban"></icon>Cancel</v-btn>
     <!-- Submit Button -->
-    <v-btn outlined @click="confirming = true" color="success" class="ma-2">
+    <v-btn outlined @click="confirming = !confirming" color="success" class="ma-2">
       <icon class="mr-1" name="save"></icon>Submit</v-btn
     >
     <v-form ref="form" v-model="valid" lazy-validation>
@@ -28,7 +26,7 @@
       <v-text-field v-model="model.title" :rules="requiredRules" label="Blog Post Title"></v-text-field>
       <!-- Main Picture -->
       <file-upload
-        style="padding-top: 0px; padding-bottom: 0px;"
+        style="padding-top: 0px; padding-bottom: 0px"
         @fileSelected="setFile"
         :passedRules="mainPictureRules"
         :customFileTypes="customFileTypes"
@@ -69,22 +67,23 @@
       <ckeditor :editor="editor" v-model="editorData" :config="editorConfig"></ckeditor>
     </div>
     <!-- Cancel Button -->
-    <v-btn to="/blog" color="white" class="ma-2"> <icon class="mr-1" name="ban"></icon>Cancel </v-btn>
+    <v-btn to="/blog" color="white" class="ma-2" elevation="1"> <icon class="mr-1" name="ban"></icon>Cancel </v-btn>
 
     <!-- Submit Button -->
-    <v-btn outlined @click="confirming = true" color="success" class="ma-2">
+    <v-btn outlined @click="confirming = !confirming" color="success" class="ma-2">
       <icon class="mr-1" name="save"></icon>Submit</v-btn
     >
     <!-- Submission check -->
-    <form-submission-confirmation :activate="this.confirming"></form-submission-confirmation>
+    <form-submission-confirmation :toggleSubmissionConfirmation="this.confirming"></form-submission-confirmation>
   </v-container>
 </template>
 <script>
-import CKEditor from '@ckeditor/ckeditor5-vue';
+import CKEditor from '@ckeditor/ckeditor5-vue2';
 import ClassicEditor from '@ckeditor/ckeditor5-editor-classic/src/classiceditor';
 import { v4 as uuid } from 'uuid';
 import api from '@/shared/api.js';
 import moment from 'moment-timezone';
+moment.tz.setDefault('America/New_York');
 const IsoFormat = 'YYYY-MM-DD';
 import { isEmpty } from '@/utils/utils';
 import _ from 'lodash';
@@ -119,7 +118,7 @@ import Font from '@ckeditor/ckeditor5-font/src/font';
  */
 async function created() {
   window.EventBus.$on('confirmed', () => {
-    this.confirming = false;
+    //this.confirming = false;
     if (!this.hasTriedSubmitting && (this.editorData == null || this.editorData == '')) {
       this.error = true;
     }
@@ -127,9 +126,9 @@ async function created() {
     this.checkSubmit();
   });
 
-  window.EventBus.$on('canceled', () => {
-    this.confirming = false;
-  });
+  // window.EventBus.$on('canceled', () => {
+  //   this.confirming = false;
+  // });
 
   this.user = await api.getUser();
 

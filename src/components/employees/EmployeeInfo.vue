@@ -1,5 +1,5 @@
 <template>
-  <v-card-text class="black--text">
+  <v-card-text class="black--text pb-1">
     <div class="savedInfo">
       <v-tabs v-model="infoTab" center-active show-arrows class="ma-4">
         <v-tab href="#employee">Employee</v-tab>
