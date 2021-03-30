@@ -5,14 +5,14 @@ describe('testing sign-in', () => {
 
     test('Test load of Oauth sign in page and its elements', browser => {
         browser
-            .assert.visible('.case_logo')
-            .assert.visible('#custom-button-color')
-            .assert.visible('h1.d-inline')
-            .assert.visible('h1.my-4')
-            .assert.visible('img.logo-bar');
+            .assert.visible('.case_logo') // main case logo
+            .assert.visible('#custom-button-color') // button to log in
+            .assert.visible('h1.d-inline') // text for case
+            .assert.visible('h1.my-4') // case portal text in middle of page
+            .assert.visible('img.logo-bar'); // Logo on the top bar
     });
 
-    test('Test redirect to Oath Signin and then app', browser => {
+    test('Test redirect to Oauth Signin and then app', browser => {
         browser
             .waitForElementVisible('#custom-button-color')
             .click('#custom-button-color')
@@ -21,10 +21,10 @@ describe('testing sign-in', () => {
             .click('div.auth0-lock-social-button-text')
             .waitForElementVisible('input#identifierId')
             .setValue('input#identifierId', process.env.VUE_APP_AUTH0_EMAIL)
-            .click('#identifierNext > div > button')
-            .waitForElementVisible('#password > div.aCsJod.oJeWuf > div > div.Xb9hP > input')
-            .setValue('#password > div.aCsJod.oJeWuf > div > div.Xb9hP > input', process.env.VUE_APP_AUTH0_PASSWORD)
-            .click('#passwordNext > div > button > div.VfPpkd-RLmnJb')
-            .waitForElementVisible('#app > div > header > div > div.v-toolbar__title > h1');
+            .click('div.VfPpkd-RLmnJb')
+            .waitForElementVisible('#password')
+            .setValue('input[type="password"]', process.env.VUE_APP_AUTH0_PASSWORD)
+            .click('div.VfPpkd-RLmnJb')
+            .waitForElementVisible('h1.d-inline'); // header text 'Case Portal'
     });
 });
