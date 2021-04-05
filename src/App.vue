@@ -43,6 +43,7 @@
             class="mx-auto white--text"
             v-for="link in mediaLinks"
             :key="link.name"
+            :id="link.name"
             :href="link.link"
             icon
             target="_blank"

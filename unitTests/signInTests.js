@@ -3,7 +3,9 @@ describe('testing sign-in', () => {
         browser.url('http://localhost:8080');
     });
 
-    test('Test load of Oauth sign in page and its elements', browser => {
+    this.tags = ['sign-in'];
+
+    it('Test load of Oauth sign in page and its elements', browser => {
         browser
             .assert.visible('.case_logo') // main case logo
             .assert.visible('#custom-button-color') // button to log in
@@ -12,19 +14,19 @@ describe('testing sign-in', () => {
             .assert.visible('img.logo-bar'); // Logo on the top bar
     });
 
-    test('Test redirect to Oauth Signin and then app', browser => {
+    it('Test redirect to Oauth Signin and then app', browser => {
         browser
-            .waitForElementVisible('#custom-button-color')
-            .click('#custom-button-color')
-            .assert.visible('img.auth0-lock-header-logo')
-            .assert.visible('div.auth0-lock-content')
-            .click('div.auth0-lock-social-button-text')
-            .waitForElementVisible('input#identifierId')
-            .setValue('input#identifierId', process.env.VUE_APP_AUTH0_EMAIL)
-            .click('div.VfPpkd-RLmnJb')
-            .waitForElementVisible('#password')
-            .setValue('input[type="password"]', process.env.VUE_APP_AUTH0_PASSWORD)
-            .click('div.VfPpkd-RLmnJb')
-            .waitForElementVisible('h1.d-inline'); // header text 'Case Portal'
+            .waitForElementVisible('#custom-button-color') // wait for login button to load
+            .click('#custom-button-color') // click that button
+            .assert.visible('img.auth0-lock-header-logo') // check that the case logo is there in auth0
+            .assert.visible('div.auth0-lock-content') // check that the auth0 login button is visible
+            .click('div.auth0-lock-social-button-text') // click the button
+            .waitForElementVisible('input#identifierId') // wait for email box to be visible
+            .setValue('input#identifierId', process.env.VUE_APP_AUTH0_EMAIL) // input your email
+            .click('div.VfPpkd-RLmnJb') // click continue button
+            .waitForElementVisible('#password') // wait for password field to load
+            .setValue('input[type="password"]', process.env.VUE_APP_AUTH0_PASSWORD) // input your password
+            .click('div.VfPpkd-RLmnJb') // click login button
+            .waitForElementVisible('h1.d-inline'); // wait for header text 'Case Portal'
     });
 });
