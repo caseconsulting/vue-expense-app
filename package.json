@@ -42,7 +42,7 @@
     "@ckeditor/ckeditor5-dev-webpack-plugin": "^23.6.1",
     "@ckeditor/ckeditor5-editor-classic": "^24.0.0",
     "@ckeditor/ckeditor5-essentials": "^24.0.0",
-    "@ckeditor/ckeditor5-font": "^24.0.0",
+    "@ckeditor/ckeditor5-font": "^27.0.0",
     "@ckeditor/ckeditor5-heading": "^24.0.0",
     "@ckeditor/ckeditor5-link": "^24.0.0",
     "@ckeditor/ckeditor5-list": "^24.0.0",
