@@ -46,7 +46,7 @@
     "@ckeditor/ckeditor5-heading": "^24.0.0",
     "@ckeditor/ckeditor5-link": "^24.0.0",
     "@ckeditor/ckeditor5-list": "^27.0.0",
-    "@ckeditor/ckeditor5-markdown-gfm": "^24.0.0",
+    "@ckeditor/ckeditor5-markdown-gfm": "^27.0.0",
     "@ckeditor/ckeditor5-media-embed": "^27.0.0",
     "@ckeditor/ckeditor5-paragraph": "^24.0.0",
     "@ckeditor/ckeditor5-theme-lark": "^24.0.0",
