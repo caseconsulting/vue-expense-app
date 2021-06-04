@@ -13,6 +13,9 @@
           {{ expense.reimbursedDate | monthDayYearFormat }}
         </p>
         <p class="expense_info" v-if="!isEmpty(expense.note)"><span>Notes:</span> {{ expense.note }}</p>
+        <p class="expense_info" v-else><span>Notes:</span> N/A</p>
+        <p class="expense_info" v-if="!isEmpty(expense.category)"><span>Category:</span> {{ expense.category }}</p>
+        <p class="expense_info" v-else><span>Category:</span> N/A</p>
         <attachment :expense="expense" :mode="'adminExpenseInfo'" class="expense_info"></attachment>
       </div>
     </v-card-title>
