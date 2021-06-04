@@ -202,7 +202,7 @@ export default {
     date: null,
     links: [
       { name: 'Basecamp', link: 'https://3.basecamp.com/3097063' },
-      { name: '401k', link: 'https://www.sharebuilder401k.com/' },
+      { name: 'Net Benefits/Fidelity', link: 'https://nb.fidelity.com/public/nb/default/home' },
       { name: 'Health Insurance', link: 'https://3.basecamp.com/3097063/buckets/179119/messages/2306027830' },
       { name: 'QuickBooks Time', link: 'https://caseconsulting.tsheets.com/' },
       { name: 'ADP', link: 'https://my.adp.com/' },
