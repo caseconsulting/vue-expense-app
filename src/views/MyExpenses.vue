@@ -143,7 +143,7 @@
               <td>{{ item.purchaseDate | monthDayYearFormat }}</td>
             </template>
             <!-- Reimburse date Slot -->
-            <template v-slot:[`item.reimburseDate`]="{ item }">
+            <template v-slot:[`item.reimbursedDate`]="{ item }">
               <td>{{ item.reimbursedDate | monthDayYearFormat }}</td>
             </template>
             <!-- Creation date slot -->
