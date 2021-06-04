@@ -156,7 +156,7 @@
             </template>
             <!-- Budget Name Slot -->
             <template v-slot:[`item.budgetName`]="{ item }">
-              <td v-if="isAdmin">{{ item.budgetName }}</td>
+              <td>{{ item.budgetName }}</td>
             </template>
             <!--Action Items-->
             <template v-slot:[`item.actions`]="{ item }">
