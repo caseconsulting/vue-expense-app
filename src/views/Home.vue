@@ -223,6 +223,7 @@ async function createEvents() {
         if (anniversary.isSame(hireDate, 'day')) {
           event.text = a.firstName + ' ' + a.lastName + ' has joined the Case Consulting team!'; //new hire message
           event.icon = 'user-plus';
+          event.type = 'New Hire';
           event.newCampfire = 'https://3.basecamp.com/3097063/buckets/171415/chats/29039726';
         } else {
           if (anniversary.diff(hireDate, 'year') == 1) {
@@ -237,6 +238,7 @@ async function createEvents() {
               ' years at Case Consulting!';
           }
           event.icon = 'glass-cheers';
+          event.type = 'Anniversary';
           event.congratulateCampfire = 'https://3.basecamp.com/3097063/buckets/171415/chats/29039726';
         }
         event.daysFromToday = now.startOf('day').diff(anniversary.startOf('day'), 'days');
@@ -279,6 +281,7 @@ async function createEvents() {
         event.text = b.firstName + ' ' + b.lastName + "'s" + ' birthday!';
       }
       event.icon = 'birthday-cake';
+      event.type = 'Birthday';
       event.color = 'orange';
       event.daysFromToday = now.startOf('day').diff(birthday.startOf('day'), 'days');
       event.birthdayCampfire = 'https://3.basecamp.com/3097063/buckets/171415/chats/29039726';
@@ -306,10 +309,12 @@ async function createEvents() {
       if (a.recipient) {
         event.congratulateCampfire = a.campfire;
         event.icon = 'thumbs-up';
+        event.type = 'Congratulate';
         event.color = 'purple';
       } else {
         event.campfire = a.campfire;
         event.icon = 'dollar-sign';
+        event.type = 'Expense';
         event.color = 'green';
       }
       if (!this.isEmpty(a.recipient)) {
@@ -342,6 +347,7 @@ async function createEvents() {
       event.text = `${a.title} starts today until ${endDate.format('LL')}!`;
     }
     event.icon = 'calendar-alt';
+    event.type = 'Event';
     event.daysFromToday = now.startOf('day').diff(startDate.startOf('day'), 'days');
     if (event.daysFromToday < -6) {
       return null;

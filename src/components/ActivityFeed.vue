@@ -7,14 +7,16 @@
       </v-card-title>
     </v-card>
     <v-card class="overflow-y-auto" max-height="850px">
+      <v-card-text>
+        <v-autocomplete :items="filters" multiple v-model="active" filled chips clearable></v-autocomplete>
+      </v-card-text>
       <!-- Loading Bar -->
       <div v-if="this.loading" class="py-4">
         <v-progress-linear :indeterminate="true"></v-progress-linear>
       </div>
-
-      <!-- Timeline -->
       <v-timeline v-else dense class="pt-0">
-        <v-virtual-scroll :items="events" :item-height="this.itemHeight" height="850" bench="2">
+        <!-- Timeline -->
+        <v-virtual-scroll :items="filterEvents()" :item-height="this.itemHeight" height="850" bench="2">
           <template v-slot="{ item }">
             <div class="pa-4"></div>
             <v-tooltip
@@ -119,6 +121,21 @@ function itemHeight() {
   }
 } // itemHeight
 
+function filterEvents() {
+  console.log(this.events);
+  this.events.forEach((event) => {
+    if (!this.filters.includes(event.type)) {
+      this.filters.push(event.type);
+      this.active.push(event.type);
+    }
+  });
+  var filteredEvents = _.filter(this.events, (event) => {
+    if (this.active.includes(event.type)) {
+      return true;
+    }
+  });
+  return filteredEvents;
+}
 // |--------------------------------------------------|
 // |                                                  |
 // |                     METHODS                      |
@@ -148,14 +165,25 @@ function getURL(item) {
 export default {
   data() {
     return {
-      dense: false
+      dense: false,
+      filters: [],
+      active: []
     };
   },
   computed: {
     itemHeight
   },
   methods: {
-    getURL
+    getURL,
+    filterEvents
+  },
+  created() {
+    this.filterEvents();
+  },
+  watch: {
+    // 'active': function () {
+    //   this.filterEvents();
+    // }
   },
   props: ['events', 'loading']
 };
