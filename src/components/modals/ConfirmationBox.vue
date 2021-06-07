@@ -71,7 +71,7 @@ function emit(msg, data) {
           this.expense.budget
         }. You will be reimbursed $${this.expense.remaining.toFixed(2)} of $${this.expense.cost}`; // added toFixed(2) to resolve decimal issue in notes.
       } else {
-        adjustNote = `Expense type is only covered up to $${2 * this.expense.budget}. You will be reimbursed $${
+        adjustNote = `Expense type is only covered up to $${(2 * this.expense.budget).toFixed(2)}. You will be reimbursed $${
           this.expense.remaining
         } of $${this.expense.cost}`;
       }
