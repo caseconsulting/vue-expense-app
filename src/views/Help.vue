@@ -235,6 +235,11 @@ export default {
             title: 'What are categories?',
             body:
               'Admins may create up to 10 different categories for employees to choose from when submitting and expense. Categories are unique to each expense type and users will be required to select one category if the expense type has them. '
+          },
+          {
+            title: 'How to back-out of an expense',
+            body:
+              'Admins may create expenses with a negative dollar amount. Negative expenses can be used as a short-cut way to unreimburse an expense that has already been reimbursed in a previous anniversary year and was overdrafted. All expenses to be unreimbursed in the current anniversary year however, should be unreimbursed using the unriembursed button on the expense page. '
           }
         ],
         knownIssues: [
