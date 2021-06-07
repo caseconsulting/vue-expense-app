@@ -508,6 +508,13 @@ async function created() {
       this.tabErrorMessage = _.cloneDeep(errorMessage);
     }
   });
+  window.EventBus.$on('educationDuplicateStatus', (status, errorMessage) => {
+    this.tabErrors.education = status;
+    //when there is a custom error message (multiple entries with same name) gets it ready for display
+    if (status && errorMessage) {
+      this.tabErrorMessage = _.cloneDeep(errorMessage);
+    }
+  });
 
   // fills model in with populated fields in employee prop
   this.model = _.cloneDeep(

@@ -5,8 +5,14 @@
       class="py-3 px-5"
       style="border: 1px solid grey"
       v-for="(degree, index) in editedDegrees"
+      v-bind:class="{ errorBox: isDuplicate(degree) }"
       :key="'degree: ' + degree.name + index"
     >
+      <!--Duplicate chip if tech name is already entered by user-->
+      <v-row v-if="isDuplicate(degree)" justify="end">
+        <v-chip class="ma-2" color="error" text-color="white"> Duplicate </v-chip>
+      </v-row>
+
       <!-- Name of Degree -->
       <v-combobox
         ref="formFields"
@@ -208,6 +214,53 @@ function deleteItem(array, index) {
 } // deleteItem
 
 /**
+ * Creates an education object that a user has entered multiple times (based on degree, school, completion date, and major.
+ * @returns an object of tan education that a user has entered multiple times
+ */
+function detectDuplicateEducation() {
+  // get the currently entered education
+  const curEduIndex = this.editedDegrees.length - 1;
+  let duplicateEdu = [];
+  // checks if there are more than 1 entry total, including the current entry
+  if (curEduIndex > 0) {
+    const curEdu = this.editedDegrees[curEduIndex];
+    const submittedEdus = this.editedDegrees.slice(0, curEduIndex);
+    // find any duplicate education with the currently entered on
+    duplicateEdu = submittedEdus.filter(
+      (edu) =>
+        edu.date === curEdu.date &&
+        edu.majors[0] === curEdu.majors[0] &&
+        edu.name === curEdu.name &&
+        edu.school === curEdu.school
+    );
+    // convert from array of one element to object
+    duplicateEdu = duplicateEdu[0];
+  }
+
+  return duplicateEdu;
+} // detectDuplicateEducation
+
+/**
+ * Checks to see if an education is a duplicate of one that is already entered by a user.
+ * @param edu Object - the education object
+ * @returns boolean - true if the education was already entered by user (duplicate) false otherwise
+ */
+function isDuplicate(edu) {
+  let duplicate = this.detectDuplicateEducation();
+
+  //checks to see if tech is in duplicates array
+  if (duplicate && duplicate !== undefined) {
+    return (
+      duplicate.date === edu.date &&
+      duplicate.majors[0] === edu.majors[0] &&
+      duplicate.name === edu.name &&
+      duplicate.school === edu.school
+    );
+  }
+  return false;
+} // isDuplicate
+
+/**
  * Populate drop downs with information that other employees have filled out.
  */
 function populateDropDowns() {
@@ -241,7 +294,15 @@ function populateDropDowns() {
 function validateFields() {
   let hasErrors = false;
 
-  if (_.isArray(this.$refs.formFields)) {
+  if (this.detectDuplicateEducation() !== undefined) {
+    hasErrors = true;
+    //emit error status with a custom message
+    window.EventBus.$emit(
+      'educationDuplicateStatus',
+      hasErrors,
+      'Educations MUST be UNIQUE. Please remove any duplicates'
+    ); // emit error status
+  } else if (_.isArray(this.$refs.formFields)) {
     // more than one TYPE of vuetify component used
     let error = _.find(this.$refs.formFields, (field) => {
       return !field.validate();
@@ -280,6 +341,8 @@ export default {
     addItem,
     deleteDegree,
     deleteItem,
+    detectDuplicateEducation,
+    isDuplicate,
     isEmpty,
     populateDropDowns,
     validateFields
