@@ -61,11 +61,17 @@
           </template>
           <v-list v-if="!(isLoggedIn() && (isMobile || isSmallScreen))">
             <v-list-item>
+              <v-btn text @click="handleProfile()">Profile</v-btn>
+            </v-list-item>
+            <v-list-item>
               <v-btn text @click="handleLogout()">Logout</v-btn>
             </v-list-item>
           </v-list>
           <!--In MOBILE VIEW/Smaller Screen sizes display all links under the user image dropdown-->
           <v-list class="scrollLink" v-else>
+            <v-list-item>
+              <v-btn text @click="handleProfile()">Profile</v-btn>
+            </v-list-item>
             <v-list-item>
               <v-btn text @click="handleLogout()">Logout</v-btn>
             </v-list-item>
@@ -106,6 +112,7 @@ import MobileDetect from 'mobile-detect';
 import TimeOutModal from '@/components/modals/TimeOutModal.vue';
 import TimeOutWarningModal from '@/components/modals/TimeOutWarningModal.vue';
 import floorPlan from '@/assets/img/MakeOfficesfloorplan.jpg';
+import api from '@/shared/api.js';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -133,6 +140,11 @@ function isMobile() {
  */
 function handleLogout() {
   logout();
+}
+
+async function handleProfile() {
+  var user = await api.getUser();
+  this.$router.push(`/employee/${user.employeeNumber}`);
 }
 
 function onResize() {
@@ -234,6 +246,7 @@ export default {
   },
   methods: {
     handleLogout,
+    handleProfile,
     isLoggedIn,
     onResize
   },
