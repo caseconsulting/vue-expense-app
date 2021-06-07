@@ -23,7 +23,7 @@
 
       <!-- Category Filter Buttons -->
       <v-col cols="12" class="text-center">
-        <v-row class="py-2">
+        <v-row justify="center" class="py-2">
           <!-- Training Button -->
           <div v-for="category in categories" :key="category.value">
             <v-btn
