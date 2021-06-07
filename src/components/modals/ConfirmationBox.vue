@@ -67,7 +67,9 @@ function emit(msg, data) {
     if (!this.isCovered) {
       let adjustNote = '';
       if (!this.expense.od) {
-        adjustNote = `Expense type is only covered up to $${this.expense.budget}. You will be reimbursed $${this.expense.remaining} of $${this.expense.cost}`;
+        adjustNote = `Expense type is only covered up to $${
+          this.expense.budget
+        }. You will be reimbursed $${this.expense.remaining.toFixed(2)} of $${this.expense.cost}`; // added toFixed(2) to resolve decimal issue in notes.
       } else {
         adjustNote = `Expense type is only covered up to $${2 * this.expense.budget}. You will be reimbursed $${
           this.expense.remaining
