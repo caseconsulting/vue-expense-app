@@ -25,7 +25,7 @@
               class="px-4"
             >
               <v-card flat class="transparent"
-                >{{ tweet.full_text | removeLink }}&nbsp;<icon
+                >{{ tweet.full_text | fixHTMLencoding | removeLink }}&nbsp;<icon
                   height="12"
                   width="12"
                   name="external-link-alt"
@@ -69,6 +69,43 @@ export default {
         splits.pop();
       }
       return splits.join('https');
+    },
+    fixHTMLencoding: function (tweet) {
+      var newTweet = tweet;
+      if (tweet.includes('&amp;')) {
+        newTweet = newTweet.replace('&amp;', '&');
+      }
+      if (tweet.includes('&lt;')) {
+        newTweet = newTweet.replace('&lt;', '<');
+      }
+      if (tweet.includes('&gt;')) {
+        newTweet = newTweet.replace('&gt;', '>');
+      }
+      if (tweet.includes('&quot;')) {
+        newTweet = newTweet.replace('&quot;', '"');
+      }
+      if (tweet.includes('&apos;')) {
+        newTweet = newTweet.replace('&apos;', "'");
+      }
+      if (tweet.includes('&cent;')) {
+        newTweet = newTweet.replace('&cent;', '¢');
+      }
+      if (tweet.includes('&yen;')) {
+        newTweet = newTweet.replace('&yen;', '¥');
+      }
+      if (tweet.includes('&euro;')) {
+        newTweet = newTweet.replace('&euro;', '€');
+      }
+      if (tweet.includes('&copy;')) {
+        newTweet = newTweet.replace('&copy;', '©');
+      }
+      if (tweet.includes('&reg;')) {
+        newTweet = newTweet.replace('&reg;', '®');
+      }
+      if (tweet.includes('&trade;')) {
+        newTweet = newTweet.replace('&trade;', '™');
+      }
+      return newTweet;
     }
   },
   props: ['tweets', 'loading']
