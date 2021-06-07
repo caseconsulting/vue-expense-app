@@ -178,7 +178,7 @@
 
           <!--EXPENSE TYPE DATA TABLE -->
           <v-data-table
-            :headers="headers"
+            :headers="_headers"
             :items="expenseTypeList"
             :sort-by.sync="sortBy"
             :sort-desc.sync="sortDesc"
@@ -199,10 +199,11 @@
               <p style="margin-bottom: 0px">{{ item.budget | moneyValue }}</p>
             </template>
             <!-- Actions -->
-            <template v-slot:[`item.actions`]="{ item }">
+            <template v-if="userIsAdmin()" v-slot:[`item.actions`]="{ item }">
               <v-tooltip top>
                 <template v-slot:activator="{ on }">
                   <v-btn
+                    v-if="userIsAdmin()"
                     :disabled="midAction"
                     text
                     icon
@@ -219,7 +220,7 @@
               </v-tooltip>
               <v-tooltip top>
                 <template v-slot:activator="{ on }">
-                  <v-btn :disabled="midAction" text icon @click="validateDelete(item)" v-on="on">
+                  <v-btn v-if="userIsAdmin()" :disabled="midAction" text icon @click="validateDelete(item)" v-on="on">
                     <v-icon style="color: #606060">delete</v-icon>
                   </v-btn>
                 </template>
@@ -952,7 +953,14 @@ export default {
     ExpenseTypeForm
   },
   computed: {
-    expenseTypeList
+    expenseTypeList,
+    _headers() {
+      if (userIsAdmin()) {
+        return this.headers;
+      } else {
+        return this.headers.filter((x) => x.show);
+      }
+    }
   },
   created,
   data() {
@@ -977,23 +985,28 @@ export default {
       headers: [
         {
           text: 'Expense Type',
-          value: 'budgetName'
+          value: 'budgetName',
+          show: true
         },
         {
           text: 'Budget',
-          value: 'budget'
+          value: 'budget',
+          show: true
         },
         {
           text: 'Start Date',
-          value: 'startDate'
+          value: 'startDate',
+          show: true
         },
         {
           text: 'End Date',
-          value: 'endDate'
+          value: 'endDate',
+          show: true
         },
         {
           value: 'actions',
-          sortable: false
+          sortable: false,
+          show: false
         }
       ], // datatable headers
       invalidDelete: false, // invalid delete status
