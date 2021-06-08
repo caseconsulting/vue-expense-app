@@ -8,7 +8,17 @@
     </v-card>
     <v-card class="overflow-y-hidden" max-height="850px">
       <v-card-text>
-        <v-autocomplete :items="filters" multiple v-model="activeFilters" filled chips clearable></v-autocomplete>
+        <v-autocomplete 
+          :items="filters" 
+          multiple 
+          v-model="activeFilters" 
+          filled chips 
+          deletable-chips 
+          clearable
+          :search-input.sync="searchString"
+          @change="searchString=''"
+        >
+        </v-autocomplete>
       </v-card-text>
       <!-- Loading Bar -->
       <div v-if="this.loading" class="py-4">
@@ -140,6 +150,15 @@ function filterEvents() {
   });
   return filteredEvents;
 }
+
+function removeEvent(e) {
+  console.log("here")
+  this.activeFilters = _.filter(this.activeFilters, (filter) => {
+    if (filter !== e.target.value) {
+      return true;
+    }
+  });
+}
 // |--------------------------------------------------|
 // |                                                  |
 // |                     METHODS                      |
@@ -171,7 +190,8 @@ export default {
     return {
       dense: false,
       filters: [],
-      activeFilters: []
+      activeFilters: [],
+      searchString: ''
     };
   },
   computed: {
@@ -179,7 +199,8 @@ export default {
   },
   methods: {
     getURL,
-    filterEvents
+    filterEvents,
+    removeEvent
   },
   created() {
     this.filterEvents();
