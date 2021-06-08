@@ -4,9 +4,20 @@
     <div v-if="!isEmpty(model.technologies)">
       <!-- Loop Technologies -->
       <div v-for="(technology, index) in model.technologies" :key="technology.name">
-        <p><b>Technology: </b>{{ technology.name }}</p>
+        <v-row>
+          <v-col>
+            <p><b>Technology: </b>{{ technology.name }}</p>
+          </v-col>
+          <v-col>
+            <v-tooltip v-if="technology.current" right>
+              <template v-slot:activator="{ on }">
+                <v-icon v-on="on">check</v-icon>
+              </template>
+              <span>Current Skill</span>
+            </v-tooltip>
+          </v-col>
+        </v-row>
         <p><b>Years of Experience: </b>{{ yearsOfExperience(technology) }}</p>
-        <p><b>Current: </b>{{ technology.current | current }}</p>
         <hr v-if="index < model.technologies.length - 1" class="mb-3" />
       </div>
       <!-- End Loop Technologies -->
