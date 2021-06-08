@@ -215,7 +215,7 @@ function deleteItem(array, index) {
 
 /**
  * Creates an education object that a user has entered multiple times (based on degree, school, completion date, and major.
- * @returns an object of tan education that a user has entered multiple times
+ * @returns an object of an education that a user has entered multiple times
  */
 function detectDuplicateEducation() {
   // get the currently entered education
