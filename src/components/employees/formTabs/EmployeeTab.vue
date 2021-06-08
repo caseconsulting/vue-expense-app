@@ -51,6 +51,30 @@
       :disabled="!admin"
     ></v-text-field>
 
+    <!-- Prime -->
+    <v-combobox
+      v-model="editedEmployee.prime"
+      :items="employeeInfo.primes"
+      label="Prime"
+      data-vv-name="Prime"
+    ></v-combobox>
+
+    <!-- Contract -->
+    <v-combobox
+      v-model="editedEmployee.contract"
+      :items="employeeInfo.contracts"
+      label="Contract"
+      data-vv-name="Contract"
+    ></v-combobox>
+
+    <!-- Job Role -->
+    <v-autocomplete
+      :items="jobTitles"
+      v-model="editedEmployee.jobRole"
+      item-text="text"
+      label="Job Role"
+    ></v-autocomplete>
+
     <!-- Employee Role -->
     <v-autocomplete
       ref="formFields"
@@ -209,7 +233,8 @@ const regex = /^(([^<>()[\]\\.,;:\s@#"]+(\.[^<>()[\]\\.,;:\s@#"]+)*)|(".+"))@con
 async function created() {
   window.EventBus.$emit('created', 'employee'); // emit employee tab was created
 
-  this.editedEmployee = _.cloneDeep(this.model);
+  // get all employees
+  this.employees = await api.getItems(api.EMPLOYEES);
   // set formatted hire date
   this.hireDateFormatted = formatDate(this.editedEmployee.hireDate) || this.hireDateFormatted;
   // set formatted depature date
@@ -240,6 +265,9 @@ async function created() {
   }
   // set works status value to a string
   this.value = this.editedEmployee.workStatus.toString();
+  // filter primes and contracts
+  this.filterPrimes();
+  this.filterContracts();
 } // created
 
 // |--------------------------------------------------|
@@ -247,6 +275,24 @@ async function created() {
 // |                     METHODS                      |
 // |                                                  |
 // |--------------------------------------------------|
+
+/**
+ * Filters out contracts from list of employees.
+ */
+function filterContracts() {
+  let tempContracts = _.map(this.employees, (a) => a.contract); //extract contracts
+  tempContracts = _.compact(tempContracts); //remove falsey values
+  this.employeeInfo.contracts = [...new Set(tempContracts)]; //remove duplicates
+} // filterContracts
+
+/**
+ * Filters out primes from list of employees.
+ */
+function filterPrimes() {
+  let tempPrimes = _.map(this.employees, (a) => a.prime); //extract primes
+  tempPrimes = _.compact(tempPrimes); //remove falsey values
+  this.employeeInfo.primes = [...new Set(tempPrimes)]; //remove duplicates and set
+} // filterPrimes
 
 /**
  * Converts a string to kebab case.
@@ -342,9 +388,27 @@ export default {
         (v) => !isEmpty(v) || 'Email is required',
         (v) => regex.test(v) || 'Not a valid @consultwithcase email address'
       ], // rules for an employee email
+      employeeInfo: {
+        primes: [],
+        contracts: []
+      }, // employee prime and contract info
+      employeeRoleFormatted: null,
+      employees: [], // all employees
       hasExpenses: false, // employee has expenses
       hireDateFormatted: null, // formatted hire date
       hireMenu: false, // display hire menu
+      jobTitles: [
+        'Software Developer',
+        'Project Manager',
+        'System Engineer',
+        'Cloud Architect',
+        'Cloud Engineer',
+        'Data Scientist',
+        'QA/Tester',
+        'Intern',
+        'Accountant',
+        'Other'
+      ], // job title options
       numberRules: [
         (v) => !isEmpty(v) || 'Employee # is required',
         (v) => /^\d+$/.test(v) || 'Employee # must be a positive number'
@@ -359,6 +423,8 @@ export default {
   methods: {
     formatDate,
     formatKebabCase,
+    filterContracts,
+    filterPrimes,
     isEmpty,
     isInactive,
     isMobile,

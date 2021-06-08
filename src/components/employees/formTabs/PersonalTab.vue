@@ -1,23 +1,5 @@
 <template>
   <div>
-    <!-- Prime -->
-    <v-combobox
-      style="padding-right: 20px; padding-left: 10px"
-      v-model="editedPersonalInfo.prime"
-      :items="employeeInfo.primes"
-      label="Prime"
-      data-vv-name="Prime"
-    ></v-combobox>
-
-    <!-- Contract -->
-    <v-combobox
-      style="padding-right: 20px; padding-left: 10px"
-      v-model="editedPersonalInfo.contract"
-      :items="employeeInfo.contracts"
-      label="Contract"
-      data-vv-name="Contract"
-    ></v-combobox>
-
     <!-- Github -->
     <v-text-field
       style="padding-right: 20px; padding-left: 10px"
@@ -33,15 +15,6 @@
       label="Twitter"
       data-vv-name="Twitter"
     ></v-text-field>
-
-    <!-- Job Role -->
-    <v-autocomplete
-      style="padding-right: 20px; padding-left: 10px"
-      :items="jobTitles"
-      v-model="editedPersonalInfo.jobRole"
-      item-text="text"
-      label="Job Role"
-    ></v-autocomplete>
 
     <!-- Birthday Picker -->
     <v-menu
@@ -132,8 +105,6 @@ async function created() {
   // get countries
   this.countries = _.map(await api.getCountries(), 'name');
   this.countries.unshift('United States of America');
-  // get all employees
-  this.employees = await api.getItems(api.EMPLOYEES);
   // set formatted birthday date
   this.birthdayFormat = formatDate(this.editedPersonalInfo.birthday) || this.birthdayFormat;
   // fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
@@ -141,9 +112,6 @@ async function created() {
     // clear birthday date if fails to format
     this.editedPersonalInfo.birthday = null;
   }
-  // filter primes and contracts
-  this.filterPrimes();
-  this.filterContracts();
 } // created
 
 // |--------------------------------------------------|
@@ -187,24 +155,6 @@ function isUSA() {
 // |--------------------------------------------------|
 
 /**
- * Filters out contracts from list of employees.
- */
-function filterContracts() {
-  let tempContracts = _.map(this.employees, (a) => a.contract); //extract contracts
-  tempContracts = _.compact(tempContracts); //remove falsey values
-  this.employeeInfo.contracts = [...new Set(tempContracts)]; //remove duplicates
-} // filterContracts
-
-/**
- * Filters out primes from list of employees.
- */
-function filterPrimes() {
-  let tempPrimes = _.map(this.employees, (a) => a.prime); //extract primes
-  tempPrimes = _.compact(tempPrimes); //remove falsey values
-  this.employeeInfo.primes = [...new Set(tempPrimes)]; //remove duplicates and set
-} // filterPrimes
-
-/**
  * Validate all input fields are valid. Emit to parent the error status.
  */
 function validateFields() {
@@ -242,23 +192,6 @@ export default {
         }
       ], // rules for an optional date
       editedPersonalInfo: _.cloneDeep(this.model), //employee personal info that can be edited
-      employeeInfo: {
-        primes: [],
-        contracts: []
-      }, // employee prime and contract info
-      employees: [], // all employees
-      jobTitles: [
-        'Software Developer',
-        'Project Manager',
-        'System Engineer',
-        'Cloud Architect',
-        'Cloud Engineer',
-        'Data Scientist',
-        'QA/Tester',
-        'Intern',
-        'Accountant',
-        'Other'
-      ], // job title options
       states: [
         'Alabama',
         'Alaska',
@@ -325,8 +258,6 @@ export default {
     };
   },
   methods: {
-    filterContracts,
-    filterPrimes,
     formatDate,
     parseDate,
     validateFields

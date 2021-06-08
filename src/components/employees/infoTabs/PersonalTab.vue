@@ -1,8 +1,5 @@
 <template>
   <div class="infoTab">
-    <p v-if="!isEmpty(this.model.prime)"><b>Prime:</b> {{ this.model.prime }}</p>
-    <p v-if="!isEmpty(this.model.contract)"><b>Contract:</b> {{ this.model.contract }}</p>
-    <p v-if="!isEmpty(this.model.jobRole)"><b>Job Role:</b> {{ this.model.jobRole }}</p>
     <p v-if="!isEmpty(this.model.github)">
       <b>Github: </b><a :href="'https://github.com/' + this.model.github" target="_blank"> {{ this.model.github }}</a>
     </p>
