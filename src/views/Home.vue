@@ -6,6 +6,9 @@
         <v-row class="pt-6" style="height: 100%" align="center" justify="center">
           <h1>Hello, {{ employee.firstName }}!</h1>
         </v-row>
+        <v-row align="center" justify="center">
+          <v-btn class="mb-10" @click="handleProfile()" color="#bc3825" dark>Profile</v-btn>
+        </v-row>
       </v-col>
       <!-- Anniversary Date -->
 
@@ -395,6 +398,14 @@ async function getTweets() {
 } // getTweets
 
 /**
+ * Routes user to their employee page
+ */
+async function handleProfile() {
+  var user = await api.getUser();
+  this.$router.push(`/employee/${user.employeeNumber}`);
+}
+
+/**
  * Set and display an error action status in the snackbar.
  *
  * @param err - String error message
@@ -563,7 +574,8 @@ export default {
     isFullTime,
     refreshEmployee,
     showSuccessfulSubmit,
-    updateData
+    updateData,
+    handleProfile
   }
 };
 </script>
