@@ -127,6 +127,7 @@
             <v-tab href="#customerOrgExp" v-bind:class="{ errorTab: tabErrors.customerOrgExp }">Customer Org</v-tab>
             <v-tab href="#contracts" v-bind:class="{ errorTab: tabErrors.contracts }">Contracts</v-tab>
             <v-tab href="#clearance" v-bind:class="{ errorTab: tabErrors.clearance }">Clearance</v-tab>
+            <v-tab href="#languages" v-bind:class="{ errorTab: tabErrors.languages }">Languages</v-tab>
             <!-- Employee -->
             <v-tab-item id="employee" class="mt-6 mb-4">
               <employee-tab :admin="userIsAdmin()" :model="model" :validating="validating.employee"></employee-tab>
@@ -173,6 +174,10 @@
             <v-tab-item id="clearance" class="mt-6 mb-4">
               <clearance-tab :model="model.clearances" :validating="validating.clearance"></clearance-tab>
             </v-tab-item>
+            <!-- Languages -->
+            <v-tab-item id="languages" class="mt-6 mb-4">
+              <languages-tab :model="model.languages" :validating="validating.languages"></languages-tab>
+            </v-tab-item>
           </v-tabs>
 
           <!-- Form action buttons -->
@@ -202,6 +207,7 @@ import EducationTab from '@/components/employees/formTabs/EducationTab';
 import EmployeeTab from '@/components/employees/formTabs/EmployeeTab';
 import FormSubmissionConfirmation from '@/components/modals/FormSubmissionConfirmation.vue';
 import JobExperienceTab from '@/components/employees/formTabs/JobExperienceTab';
+import LanguagesTab from '@/components/employees/formTabs/LanguagesTab';
 import PersonalTab from '@/components/employees/formTabs/PersonalTab';
 import TechnologyTab from '@/components/employees/formTabs/TechnologyTab';
 const moment = require('moment-timezone');
@@ -298,6 +304,10 @@ function cleanUpData() {
   // technologies
   if (_.isEmpty(this.model.technologies)) {
     this.model.technologies = null;
+  }
+
+  if (_.isEmpty(this.model.languages)) {
+    this.model.languages = null;
   }
 
   // customer Org
@@ -611,6 +621,9 @@ async function created() {
       this.tabErrorMessage = _.cloneDeep(errorMessage);
     }
   });
+  window.EventBus.$on('languagesStatus', (status) => {
+    this.tabErrors.languages = status;
+  });
 
   // fills model in with populated fields in employee prop
   this.model = _.cloneDeep(
@@ -675,6 +688,8 @@ function setFormData(tab, data) {
     this.$set(this.model, 'contracts', data); //sets contracts to data returned from contracts tab
   } else if (tab == 'clearance') {
     this.$set(this.model, 'clearances', data); //sets clearances to data returned from clearance tab
+  } else if (tab == 'languages') {
+    this.$set(this.model, 'languages', data); //sets clearances to data returned from clearance tab
   }
 } //setFormData
 
@@ -700,7 +715,8 @@ export default {
     FormSubmissionConfirmation,
     JobExperienceTab,
     PersonalTab,
-    TechnologyTab
+    TechnologyTab,
+    LanguagesTab
   },
   created,
   data() {
@@ -737,6 +753,7 @@ export default {
         id: null,
         jobRole: null,
         jobs: [],
+        languages: [],
         lastName: null,
         middleName: null,
         nickname: null,
@@ -756,6 +773,7 @@ export default {
         education: false,
         employee: false,
         jobExperience: false,
+        languages: false,
         personal: false,
         technologies: false
       }, // tab error status
@@ -769,6 +787,7 @@ export default {
         education: false,
         employee: false,
         jobExperience: false,
+        languages: false,
         personal: false,
         technologies: false
       }, // tab component created
@@ -782,6 +801,7 @@ export default {
         education: false,
         employee: false,
         jobExperience: false,
+        languages: false,
         personal: false,
         technologies: false
       } // signal to child tabs to validate
