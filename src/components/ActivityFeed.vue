@@ -6,9 +6,9 @@
         <h3>Activity Feed</h3>
       </v-card-title>
     </v-card>
-    <v-card class="overflow-y-auto" max-height="850px">
+    <v-card class="overflow-y-hidden" max-height="850px">
       <v-card-text>
-        <v-autocomplete :items="filters" multiple v-model="active" filled chips clearable></v-autocomplete>
+        <v-autocomplete :items="filters" multiple v-model="activeFilters" filled chips clearable></v-autocomplete>
       </v-card-text>
       <!-- Loading Bar -->
       <div v-if="this.loading" class="py-4">
@@ -121,16 +121,20 @@ function itemHeight() {
   }
 } // itemHeight
 
+/**
+ * Used to remove events that the user has filtered out, 
+ * then the remaining events will be displayed in the 
+ * activity feed
+ */
 function filterEvents() {
-  console.log(this.events);
   this.events.forEach((event) => {
     if (!this.filters.includes(event.type)) {
       this.filters.push(event.type);
-      this.active.push(event.type);
+      this.activeFilters.push(event.type);
     }
   });
   var filteredEvents = _.filter(this.events, (event) => {
-    if (this.active.includes(event.type)) {
+    if (this.activeFilters.includes(event.type)) {
       return true;
     }
   });
@@ -167,7 +171,7 @@ export default {
     return {
       dense: false,
       filters: [],
-      active: []
+      activeFilters: []
     };
   },
   computed: {
@@ -179,11 +183,6 @@ export default {
   },
   created() {
     this.filterEvents();
-  },
-  watch: {
-    // 'active': function () {
-    //   this.filterEvents();
-    // }
   },
   props: ['events', 'loading']
 };
