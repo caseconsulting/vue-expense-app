@@ -8,15 +8,16 @@
     </v-card>
     <v-card class="overflow-y-hidden" max-height="850px">
       <v-card-text>
-        <v-autocomplete 
-          :items="filters" 
-          multiple 
-          v-model="activeFilters" 
-          filled chips 
-          deletable-chips 
+        <v-autocomplete
+          :items="filters"
+          multiple
+          v-model="activeFilters"
+          filled
+          chips
+          deletable-chips
           clearable
           :search-input.sync="searchString"
-          @change="searchString=''"
+          @change="searchString = ''"
         >
         </v-autocomplete>
       </v-card-text>
@@ -132,8 +133,8 @@ function itemHeight() {
 } // itemHeight
 
 /**
- * Used to remove events that the user has filtered out, 
- * then the remaining events will be displayed in the 
+ * Used to remove events that the user has filtered out,
+ * then the remaining events will be displayed in the
  * activity feed
  */
 function filterEvents() {
@@ -149,15 +150,6 @@ function filterEvents() {
     }
   });
   return filteredEvents;
-}
-
-function removeEvent(e) {
-  console.log("here")
-  this.activeFilters = _.filter(this.activeFilters, (filter) => {
-    if (filter !== e.target.value) {
-      return true;
-    }
-  });
 }
 // |--------------------------------------------------|
 // |                                                  |
@@ -199,8 +191,7 @@ export default {
   },
   methods: {
     getURL,
-    filterEvents,
-    removeEvent
+    filterEvents
   },
   created() {
     this.filterEvents();
