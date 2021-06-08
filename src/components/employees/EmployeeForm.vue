@@ -26,8 +26,95 @@
 
       <v-container fluid>
         <v-form ref="form" v-model="valid" lazy-validation class="my-1 mx-5">
-          <!-- Tabs -->
-          <v-tabs v-model="formTab" center-active show-arrows class="pb-0">
+          <div v-if="useDropDown">
+            <!-- For smaller screens -->
+            <v-menu class="ma-4">
+              <template v-slot:activator="{ on, attrs }">
+                <v-btn text x-large class="pt-5 font-weight-bold" v-bind="attrs" v-on="on">{{ parsedInfoTab }}</v-btn>
+              </template>
+              <v-list>
+                <v-list-item @click="selectDropDown('employee')" v-bind:class="{ errorTab: tabErrors.employee }"
+                  >Employee</v-list-item
+                >
+                <v-list-item @click="selectDropDown('personal')" v-bind:class="{ errorTab: tabErrors.personal }"
+                  >Personal</v-list-item
+                >
+                <v-list-item @click="selectDropDown('education')" v-bind:class="{ errorTab: tabErrors.education }"
+                  >Education</v-list-item
+                >
+                <v-list-item
+                  @click="selectDropDown('jobExperience')"
+                  v-bind:class="{ errorTab: tabErrors.jobExperience }"
+                  >Job Experience</v-list-item
+                >
+                <v-list-item
+                  @click="selectDropDown('certification')"
+                  v-bind:class="{ errorTab: tabErrors.certification }"
+                  >Certifications</v-list-item
+                >
+                <v-list-item @click="selectDropDown('awards')" v-bind:class="{ errorTab: tabErrors.awards }"
+                  >Awards</v-list-item
+                >
+                <v-list-item @click="selectDropDown('technologies')" v-bind:class="{ errorTab: tabErrors.technologies }"
+                  >Technologies</v-list-item
+                >
+                <v-list-item
+                  @click="selectDropDown('customerOrgExp')"
+                  v-bind:class="{ errorTab: tabErrors.customerOrgExp }"
+                  >Customer Org</v-list-item
+                >
+                <v-list-item @click="selectDropDown('contracts')" v-bind:class="{ errorTab: tabErrors.contracts }"
+                  >Contracts</v-list-item
+                >
+                <v-list-item @click="selectDropDown('clearance')" v-bind:class="{ errorTab: tabErrors.clearance }"
+                  >Clearance</v-list-item
+                >
+              </v-list>
+            </v-menu>
+            <hr class="my-3" />
+            <employee-tab
+              v-if="formTab === 'employee'"
+              :admin="userIsAdmin()"
+              :validating="validating.employee"
+              :model="model"
+            >
+            </employee-tab>
+            <personal-tab v-if="formTab === 'personal'" :validating="validating.personal" :model="model">
+            </personal-tab>
+            <education-tab v-if="formTab === 'education'" :validating="validating.education" :model="model.degrees">
+            </education-tab>
+            <job-experience-tab
+              v-if="formTab === 'jobExperience'"
+              :validating="validating.jobExperience"
+              :model="model"
+            >
+            </job-experience-tab>
+            <certification-tab
+              v-if="formTab === 'certification'"
+              :validating="validating.certifications"
+              :model="model.certifications"
+            >
+            </certification-tab>
+            <award-tab v-if="formTab === 'awards'" :validating="validating.awards" :model="model.awards"></award-tab>
+            <technology-tab
+              v-if="formTab === 'technologies'"
+              :validating="validating.technologies"
+              :model="model.technologies"
+            >
+            </technology-tab>
+            <customer-org-tab
+              v-if="formTab === 'customerOrgExp'"
+              :validating="validating.customerOrgExp"
+              :model="model.customerOrgExp"
+            >
+            </customer-org-tab>
+            <contract-tab v-if="formTab === 'contracts'" :validating="validating.contracts" :model="model.contracts">
+            </contract-tab>
+            <clearance-tab v-if="formTab === 'clearance'" :validating="validating.clearance" :model="model.clearances">
+            </clearance-tab>
+          </div>
+          <!-- Tabs for larger screens -->
+          <v-tabs v-if="!useDropDown" v-model="formTab" center-active show-arrows class="pb-0">
             <v-tab href="#employee" v-bind:class="{ errorTab: tabErrors.employee }">Employee</v-tab>
             <v-tab href="#personal" v-bind:class="{ errorTab: tabErrors.personal }">Personal</v-tab>
             <v-tab href="#education" v-bind:class="{ errorTab: tabErrors.education }">Education</v-tab>
@@ -126,6 +213,13 @@ import _ from 'lodash';
 // |                     METHODS                      |
 // |                                                  |
 // |--------------------------------------------------|
+
+/**
+ * Selects the currect form tab for the menu
+ */
+function selectDropDown(tab) {
+  this.formTab = tab;
+}
 
 /**
  * Resets back to employee info.
@@ -700,7 +794,8 @@ export default {
     hasTabError,
     setFormData,
     submit,
-    userIsAdmin
+    userIsAdmin,
+    selectDropDown
   },
   props: ['currentTab', 'employee'], // employee to be created/updated
   watch: {
@@ -711,6 +806,25 @@ export default {
           window.EventBus.$emit('tabChange', val); // emit to parent tab was changed
         }
       }
+    }
+  },
+  computed: {
+    useDropDown() {
+      switch (this.$vuetify.breakpoint.name) {
+        case 'xs':
+          return true;
+        default:
+          return false;
+      }
+    },
+    parsedInfoTab() {
+      let parseTab = !this.formTab ? 'Select Info' : this.formTab;
+      if (this.formTab === 'customerOrgExp') {
+        parseTab = 'Customer Org';
+      } else if (this.formTab === 'jobExperience') {
+        parseTab = 'Job Experience';
+      }
+      return parseTab.toUpperCase();
     }
   }
 };
