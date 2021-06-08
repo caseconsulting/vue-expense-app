@@ -206,6 +206,7 @@
                 <v-tooltip top>
                   <template v-slot:activator="{ on }">
                     <v-btn
+                      v-if="isAdmin"
                       :disabled="!isReimbursed(item) || isEditing || midAction"
                       text
                       icon
