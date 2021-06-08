@@ -185,6 +185,7 @@ export default {
         jobRole: '',
         lastName: '',
         middleName: '',
+        nickname: '',
         prime: '',
         st: '',
         technologies: [],

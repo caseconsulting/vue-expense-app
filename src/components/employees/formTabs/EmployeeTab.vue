@@ -23,6 +23,13 @@
       data-vv-name="Last Name"
       :disabled="!admin"
     ></v-text-field>
+    <v-text-field
+      ref="formFields"
+      v-model="editedEmployee.nickname"
+      label="Nickname (optional)"
+      data-vv-name="Nickname"
+      :disabled="!admin"
+    ></v-text-field>
 
     <!-- Employee # -->
     <v-text-field

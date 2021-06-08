@@ -542,6 +542,7 @@ function setFormData(tab, data) {
     this.$set(this.model, 'firstName', data.firstName);
     this.$set(this.model, 'middleName', data.middleName);
     this.$set(this.model, 'lastName', data.lastName);
+    this.$set(this.model, 'nickname', data.nickname);
     this.$set(this.model, 'employeeNumber', data.employeeNumber);
     this.$set(this.model, 'email', data.email);
     this.$set(this.model, 'employeeRole', data.employeeRole);
@@ -642,6 +643,7 @@ export default {
         jobs: [],
         lastName: null,
         middleName: null,
+        nickname: null,
         prime: null,
         st: null,
         technologies: [],
