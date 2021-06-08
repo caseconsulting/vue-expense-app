@@ -220,7 +220,7 @@ function deleteItem(array, index) {
 function detectDuplicateEducation() {
   // get the currently entered education
   const curEduIndex = this.editedDegrees.length - 1;
-  let duplicateEdu = [];
+  let duplicateEdu = undefined;
   // checks if there are more than 1 entry total, including the current entry
   if (curEduIndex > 0) {
     const curEdu = this.editedDegrees[curEduIndex];
@@ -229,14 +229,13 @@ function detectDuplicateEducation() {
     duplicateEdu = submittedEdus.filter(
       (edu) =>
         edu.date === curEdu.date &&
-        edu.majors[0] === curEdu.majors[0] &&
+        _.isEmpty(_.xor(edu.majors, curEdu.majors)) &&
         edu.name === curEdu.name &&
         edu.school === curEdu.school
     );
     // convert from array of one element to object
     duplicateEdu = duplicateEdu[0];
   }
-
   return duplicateEdu;
 } // detectDuplicateEducation
 
@@ -252,7 +251,7 @@ function isDuplicate(edu) {
   if (duplicate && duplicate !== undefined) {
     return (
       duplicate.date === edu.date &&
-      duplicate.majors[0] === edu.majors[0] &&
+      _.isEmpty(_.xor(duplicate.majors, edu.majors)) &&
       duplicate.name === edu.name &&
       duplicate.school === edu.school
     );
