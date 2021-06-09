@@ -1336,7 +1336,7 @@ async function created() {
   this.employees = employees.map((employee) => {
     return {
       //text: employeeUtils.fullName(employee),
-      text: employeeUtils.firstAndLastName(employee),
+      text: employeeUtils.nicknameAndLastName(employee),
       value: employee.id,
       workStatus: employee.workStatus
     };

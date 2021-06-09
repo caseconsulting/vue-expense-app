@@ -203,6 +203,11 @@ async function createEvents() {
   this.aggregatedExpenses = eventData.expenses;
   this.scheduleEntries = _.flatten(eventData.schedules);
 
+  //we want to use their nicknames if they have one
+  this.employees.forEach((employee) => {
+    employee.firstName = employee.nickname ? employee.nickname : employee.firstName;
+  });
+
   //generate anniversaries
   let anniversaries = _.map(this.employees, (a) => {
     let hireDate = moment(a.hireDate, 'YYYY-MM-DD');
