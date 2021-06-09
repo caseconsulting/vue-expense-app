@@ -16,6 +16,15 @@
       data-vv-name="Twitter"
     ></v-text-field>
 
+    <!-- LinkedIn -->
+    <v-text-field
+      style="padding-right: 20px; padding-left: 10px"
+      v-model="editedPersonalInfo.linkedIn"
+      label="LinkedIn"
+      :rules="urlRules"
+      data-vv-name="LinkedIn"
+    ></v-text-field>
+
     <!-- Birthday Picker -->
     <v-menu
       ref="BirthdayMenu"
@@ -191,6 +200,14 @@ export default {
           return !isEmpty(v) ? /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v) || 'Date must be valid. Format: MM/DD/YYYY' : true;
         }
       ], // rules for an optional date
+      urlRules: [
+        (v) =>
+          isEmpty(v) ||
+          /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)/.test(
+            v
+          ) ||
+          'URL must be valid. Only http(s) are accepted.'
+      ], // rules for training url
       editedPersonalInfo: _.cloneDeep(this.model), //employee personal info that can be edited
       states: [
         'Alabama',

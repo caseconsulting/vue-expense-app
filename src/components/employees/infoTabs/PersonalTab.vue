@@ -7,6 +7,9 @@
       <b>Twitter: </b
       ><a :href="'https://twitter.com/' + this.model.twitter" target="_blank"> {{ this.model.twitter }}</a>
     </p>
+    <p v-if="!isEmpty(this.model.linkedIn)">
+      <b>LinkedIn: </b><a :href="this.model.linkedIn" target="_blank"> {{ this.model.linkedIn }}</a>
+    </p>
     <p v-if="!isEmpty(this.model.birthday) && (admin || employee)">
       <b>Birthday:</b> {{ this.model.birthday | monthDayYearFormat }}
     </p>
