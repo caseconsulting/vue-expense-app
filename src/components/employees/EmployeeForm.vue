@@ -30,7 +30,9 @@
             <!-- For smaller screens -->
             <v-menu class="ma-4">
               <template v-slot:activator="{ on, attrs }">
-                <v-btn text x-large class="pt-5 font-weight-bold" v-bind="attrs" v-on="on">{{ parsedInfoTab }}</v-btn>
+                <v-btn text x-large class="pt-5 font-weight-bold" v-bind="attrs" v-on="on"
+                  >{{ parsedInfoTab }} <v-icon class="pb-1">expand_more</v-icon>
+                </v-btn>
               </template>
               <v-list>
                 <v-list-item @click="selectDropDown('employee')" v-bind:class="{ errorTab: tabErrors.employee }"
