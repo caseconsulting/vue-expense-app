@@ -2,43 +2,36 @@
   <div>
     <!-- Loop Languages -->
     <div
-      v-for="(language, index) in editedLanguages"
+      v-for="(languages, index) in editedLanguages"
       class="pt-3 pb-1 px-5"
-      v-bind:class="{ errorBox: isDuplicate(language.name) }"
+      v-bind:class="{ errorBox: isDuplicate(languages.name) }"
       :key="'language: ' + index"
       style="border: 1px solid grey"
     >
-      <!--Duplicate chip if tech name is already entered by user-->
-      <v-row v-if="isDuplicate(language.name)" justify="end">
+      <!--Duplicate chip if language name is already entered by user-->
+      <v-row v-if="isDuplicate(languages.name)" justify="end">
         <v-chip class="ma-2" color="error" text-color="white"> Duplicate </v-chip>
       </v-row>
 
-      <!-- Name of Technology -->
-      <!-- <v-combobox
-        ref="formFields"
-        v-model="technology.name"
-        :rules="requiredRules"
-        :items="technologyDropDown"
-        label="Language"
-        data-vv-name="Technology"
-        class="pb-5"
-      >
-      </v-combobox> -->
-
       <!-- Name of Language Field -->
-      <v-text-field
+
+      <v-combobox
+        ref="formFields"
         style="padding-right: 20px; padding-left: 10px"
-        v-model="language.name"
+        v-model="languages.name"
         :rules="requiredRules"
+        :items="languageDropDown"
         label="Language"
         data-vv-name="Language"
-      ></v-text-field>
+        class="pb-5"
+      >
+      </v-combobox>
 
       <!-- Language Proficiency -->
       <v-autocomplete
         style="padding-right: 20px; padding-left: 10px"
         :items="proficiencyTypes"
-        v-model="language.proficiency"
+        v-model="languages.proficiency"
         :rules="requiredRules"
         item-text="text"
         label="Level of proficiency"
@@ -60,7 +53,7 @@
 </template>
 
 <script>
-//import api from '@/shared/api.js';
+import api from '@/shared/api.js';
 import _ from 'lodash';
 import { isEmpty } from '@/utils/utils';
 
@@ -73,7 +66,11 @@ import { isEmpty } from '@/utils/utils';
 /**
  * Emits to parent the component was created and get data.
  */
-async function created() {} // created
+async function created() {
+  window.EventBus.$emit('created', 'languages');
+  this.employees = await api.getItems(api.EMPLOYEES); // get all employees
+  this.populateDropDowns();
+} // created
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -126,12 +123,27 @@ function duplicateLangEntries() {
 function isDuplicate(lang) {
   let duplicates = this.duplicateLangEntries();
 
-  //checks to see if tech is in duplicates array
+  //checks to see if the language is in duplicates array
   if (duplicates && _.isArray(duplicates) && duplicates.length > 0) {
     return duplicates.includes(lang);
   }
   return false;
 } // isDuplicate
+
+/**
+ * Gets information that other employees have filled out.
+ */
+function populateDropDowns() {
+  let employeesLanguage = _.map(this.employees, (employee) => employee.languages); //extract languages
+  employeesLanguage = _.compact(employeesLanguage); //remove falsey values
+  // loop employees
+  _.forEach(employeesLanguage, (languages) => {
+    // loop languages
+    _.forEach(languages, (languages) => {
+      this.languageDropDown.push(languages.name); // add language name
+    });
+  });
+} // populateDropDowns
 
 /**
  * Validate all input fields are valid. Emit to parent the error status.
@@ -151,7 +163,7 @@ function validateFields() {
   }
 
   //checks to see if there are duplicate entries with the same name
-  if (this.duplicateTechEntries().length > 0) {
+  if (this.duplicateLangEntries().length > 0) {
     hasErrors = true;
     //emit error status with a custom message
     window.EventBus.$emit('languagesStatus', hasErrors, 'Languages MUST be UNIQUE. Please remove any duplicates'); // emit error status
@@ -166,6 +178,7 @@ export default {
   created,
   data() {
     return {
+      languageDropDown: [],
       editedLanguages: _.cloneDeep(this.model), //stores edited languages info
       proficiencyTypes: [
         'Basic - Most basic words that everyone uses',
@@ -184,6 +197,7 @@ export default {
     duplicateLangEntries,
     isDuplicate,
     isEmpty,
+    populateDropDowns,
     validateFields
   },
   props: ['model', 'validating'],

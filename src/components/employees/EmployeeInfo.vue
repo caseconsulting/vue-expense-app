@@ -49,6 +49,7 @@
         <v-tab href="#customerOrgExp">Customer Org</v-tab>
         <v-tab href="#contracts">Contracts</v-tab>
         <v-tab href="#clearance" v-if="userIsAdmin() || userIsEmployee()">Clearance</v-tab>
+        <v-tab href="#languages">Languages</v-tab>
         <v-tab-item id="employee" class="ma-6">
           <employee-tab :admin="userIsAdmin()" :employee="userIsEmployee()" :model="model"></employee-tab>
         </v-tab-item>
@@ -79,6 +80,9 @@
         <v-tab-item id="clearance" v-if="userIsAdmin() || userIsEmployee()" class="ma-6">
           <clearance-tab :model="model"></clearance-tab>
         </v-tab-item>
+        <v-tab-item id="languages" class="ma-6">
+          <languages-tab :model="model"></languages-tab>
+        </v-tab-item>
       </v-tabs>
     </div>
   </v-card-text>
@@ -96,6 +100,7 @@ import CustomerOrgTab from '@/components/employees/infoTabs/CustomerOrgTab';
 import EducationTab from '@/components/employees/infoTabs/EducationTab';
 import EmployeeTab from '@/components/employees/infoTabs/EmployeeTab';
 import JobExperienceTab from '@/components/employees/infoTabs/JobExperienceTab';
+import LanguagesTab from '@/components/employees/infoTabs/LanguagesTab';
 import PersonalTab from '@/components/employees/infoTabs/PersonalTab';
 import TechnologiesTab from '@/components/employees/infoTabs/TechnologiesTab';
 
@@ -149,6 +154,7 @@ export default {
     EducationTab,
     EmployeeTab,
     JobExperienceTab,
+    LanguagesTab,
     PersonalTab,
     TechnologiesTab
   },

@@ -621,8 +621,12 @@ async function created() {
       this.tabErrorMessage = _.cloneDeep(errorMessage);
     }
   });
-  window.EventBus.$on('languagesStatus', (status) => {
+  window.EventBus.$on('languagesStatus', (status, errorMessage) => {
     this.tabErrors.languages = status;
+    //when there is a custom error message (multiple entries with same name) gets it ready for display
+    if (status && errorMessage) {
+      this.tabErrorMessage = _.cloneDeep(errorMessage);
+    }
   });
 
   // fills model in with populated fields in employee prop
