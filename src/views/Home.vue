@@ -2,12 +2,12 @@
   <v-container class="my-3">
     <v-row class="pb-4">
       <!-- Title -->
-      <v-col cols="12" md="6">
-        <v-row class="pt-3" style="height: 100%" align="center" justify="center">
+      <v-col cols="10" md="6">
+        <v-row style="height: 80%" align="center" justify="center">
           <h1>Hello, {{ employee.firstName }}!</h1>
         </v-row>
-        <v-row align="center" justify="center">
-          <v-btn @click="handleProfile()" color="#bc3825" dark>Profile</v-btn>
+        <v-row justify="center">
+          <v-btn class="mb-10" @click="handleProfile()" color="#bc3825" dark>View Profile</v-btn>
         </v-row>
       </v-col>
       <!-- Anniversary Date -->
