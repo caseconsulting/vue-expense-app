@@ -177,7 +177,7 @@
 
     <!-- If inactive, set Departure Date -->
     <v-menu
-      v-if="isInactive()"
+      v-if="isInactive() || (isPartTime() && status && status == 0)"
       ref="departureMenu"
       :close-on-content-click="true"
       v-model="departureMenu"
