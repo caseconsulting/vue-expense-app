@@ -413,7 +413,7 @@ export default {
         (v) => !isEmpty(v) || 'Employee # is required',
         (v) => /^\d+$/.test(v) || 'Employee # must be a positive number'
       ], // rules for an employee number
-      permissions: ['Admin', 'User'], // employee role options
+      permissions: ['Admin', 'User', 'Intern'], // employee role options
       requiredRules: [(v) => !isEmpty(v) || 'This field is required'], // rules for a required field
       status: '100', // work status value
       statusRadio: 'full', // work status button
