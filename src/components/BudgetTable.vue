@@ -55,6 +55,14 @@
                       <div>{{ odFlagMessage(item) }}</div>
                     </v-list-item-content>
                   </v-list-item>
+
+                  <!-- Display when available -->
+                  <v-list-item>
+                    <v-list-item-content>Available:</v-list-item-content>
+                    <v-list-item-content class="text-right">
+                      <div>{{ getDate(item) }}</div>
+                    </v-list-item-content>
+                  </v-list-item>
                 </v-list>
               </v-card>
             </v-col>
@@ -68,6 +76,7 @@
 
 <script>
 import { moneyValue } from '@/utils/utils';
+import { formatDateDashToSlash } from '@/utils/utils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -99,6 +108,18 @@ function calcRemaining(budget) {
 function getAmount(budget) {
   return budget.budgetObject ? budget.budgetObject.amount : 0;
 } // getAmount
+
+/**
+ * Date
+ */
+function getDate(item) {
+  console.log(item.budgetObject);
+  return (
+    formatDateDashToSlash(item.budgetObject.fiscalStartDate) +
+    ' to ' +
+    formatDateDashToSlash(item.budgetObject.fiscalEndDate)
+  );
+} // getDate
 
 /**
  * Get the reimbursed amount of an aggregate budget. Returns the reimbursed amount if exists. Returns zero if the
@@ -154,6 +175,7 @@ export default {
   methods: {
     calcRemaining,
     getAmount,
+    getDate,
     getReimbursed,
     getPending,
     noRemaining,
