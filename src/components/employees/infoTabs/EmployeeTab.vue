@@ -1,6 +1,7 @@
 <template>
   <div>
     <p><b>Full Name:</b> {{ fullName }}</p>
+    <p v-if="!isEmpty(this.model.nickname)"><b>Nickname:</b> {{ this.model.nickname }}</p>
     <p><b>Employee Number:</b> {{ this.model.employeeNumber }}</p>
     <p><b>Email:</b> {{ this.model.email }}</p>
     <p v-if="!isEmpty(this.model.prime)"><b>Prime:</b> {{ this.model.prime }}</p>
