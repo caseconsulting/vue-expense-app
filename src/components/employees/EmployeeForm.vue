@@ -71,6 +71,9 @@
                 <v-list-item @click="selectDropDown('clearance')" v-bind:class="{ errorTab: tabErrors.clearance }"
                   >Clearance</v-list-item
                 >
+                <v-list-item @click="selectDropDown('languages')" v-bind:class="{ errorTab: tabErrors.languages }"
+                  >Languages</v-list-item
+                >
               </v-list>
             </v-menu>
             <hr class="my-3" />
@@ -114,6 +117,8 @@
             </contract-tab>
             <clearance-tab v-if="formTab === 'clearance'" :validating="validating.clearance" :model="model.clearances">
             </clearance-tab>
+            <languages-tab v-if="formTab === 'languages'" :validating="validating.languages" :model="model.languages">
+            </languages-tab>
           </div>
           <!-- Tabs for larger screens -->
           <v-tabs v-if="!useDropDown" v-model="formTab" center-active show-arrows class="pb-0">

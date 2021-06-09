@@ -20,6 +20,7 @@
             <v-list-item @click="selectDropDown('customerOrgExp')">Customer Org</v-list-item>
             <v-list-item @click="selectDropDown('contracts')">Contracts</v-list-item>
             <v-list-item @click="selectDropDown('clearance')">Clearance</v-list-item>
+            <v-list-item @click="selectDropDown('languages')">Languages</v-list-item>
           </v-list>
         </v-menu>
         <hr class="my-3" />
@@ -36,6 +37,7 @@
         <contracts-tab v-if="infoTab === 'contracts'" :model="model"></contracts-tab>
         <clearance-tab v-if="infoTab === 'clearance' && (userIsAdmin() || userIsEmployee())" :model="model">
         </clearance-tab>
+        <languages-tab v-if="infoTab === 'languages'" :model="model"></languages-tab>
       </div>
       <!-- For larger screens -->
       <v-tabs v-if="!useDropDown" v-model="infoTab" center-active show-arrows class="ma-4">
