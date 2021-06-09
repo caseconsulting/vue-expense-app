@@ -54,19 +54,13 @@ import { isEmpty } from '@/utils/utils';
 
 /**
  * Checks if there is data about an employee to display. Returns true if the user is an admin or if there is data
- * on the employee's prime, contract, job role, github, or twitter, otherwise returns false.
+ * on the employee's github or twitter, otherwise returns false.
  *
  * @item item - employee to check
  * @return boolean - employee has data to display
  */
 function isDisplayData(item) {
-  let valid =
-    !this.userIsAdmin() &&
-    this.isEmpty(item.prime) &&
-    this.isEmpty(item.contract) &&
-    this.isEmpty(item.jobRole) &&
-    this.isEmpty(item.github) &&
-    this.isEmpty(item.twitter);
+  let valid = !this.userIsAdmin() && this.isEmpty(item.github) && this.isEmpty(item.twitter);
   return valid;
 } // isDisplayData
 

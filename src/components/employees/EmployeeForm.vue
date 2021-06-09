@@ -641,17 +641,17 @@ function setFormData(tab, data) {
     this.$set(this.model, 'nickname', data.nickname);
     this.$set(this.model, 'employeeNumber', data.employeeNumber);
     this.$set(this.model, 'email', data.email);
+    this.$set(this.model, 'prime', data.prime);
+    this.$set(this.model, 'contract', data.contract);
+    this.$set(this.model, 'jobRole', data.jobRole);
     this.$set(this.model, 'employeeRole', data.employeeRole);
     this.$set(this.model, 'hireDate', data.hireDate);
     this.$set(this.model, 'workStatus', data.workStatus);
     this.$set(this.model, 'deptDate', data.deptDate);
   } else if (tab == 'personal') {
     //sets all personal info to data returned from personal tab
-    this.$set(this.model, 'prime', data.prime);
-    this.$set(this.model, 'contract', data.contract);
     this.$set(this.model, 'github', data.github);
     this.$set(this.model, 'twitter', data.twitter);
-    this.$set(this.model, 'jobRole', data.jobRole);
     this.$set(this.model, 'birthday', data.birthday);
     this.$set(this.model, 'birthdayFeed', data.birthdayFeed);
     this.$set(this.model, 'city', data.city);
