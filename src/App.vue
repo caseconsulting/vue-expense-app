@@ -98,7 +98,9 @@
           <router-view></router-view>
         </v-container>
       </v-main>
-      <v-footer app></v-footer>
+      <v-footer padless>
+        <v-col class="text-right text-caption" cols="12"><strong>Version</strong> {{ version }}</v-col>
+      </v-footer>
       <time-out-modal :toggleTimeOut="timedOut"></time-out-modal>
       <time-out-warning-modal :toggleWarning="session"></time-out-warning-modal>
     </v-app>
@@ -183,6 +185,9 @@ async function created() {
   if (pic) {
     this.profilePic = pic;
   }
+
+  //This has some security implications
+  this.version = require('../package.json').version;
 }
 
 async function beforeDestroy() {
