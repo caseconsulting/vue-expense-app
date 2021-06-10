@@ -95,7 +95,7 @@
 
       <v-main>
         <v-container fluid grid-list-lg>
-          <router-view :key="$route"></router-view>
+          <router-view></router-view>
         </v-container>
       </v-main>
       <v-footer padless>
@@ -130,7 +130,6 @@ function isMobile() {
   let md = new MobileDetect(window.navigator.userAgent);
   return md.os() === 'AndroidOS' || md.os() === 'iOS';
 }
-
 // |--------------------------------------------------|
 // |                                                  |
 // |                     METHODS                      |
@@ -248,6 +247,11 @@ export default {
     MainNav,
     TimeOutModal,
     TimeOutWarningModal
+  },
+  watch: {
+    $route: function () {
+      this.loadData();
+    }
   },
   methods: {
     handleLogout,
