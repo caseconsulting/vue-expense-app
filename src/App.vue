@@ -95,7 +95,7 @@
 
       <v-main>
         <v-container fluid grid-list-lg>
-          <router-view></router-view>
+          <router-view :key="$route"></router-view>
         </v-container>
       </v-main>
       <v-footer padless>
