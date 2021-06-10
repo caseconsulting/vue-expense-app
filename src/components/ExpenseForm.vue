@@ -62,6 +62,18 @@
           chips
         ></v-select>
 
+        <v-card class="mt-2">
+          <v-card-text class="py-1 text-subtitle-1 grey-lighten-2--text">
+            <span v-if="expenseTypeName">
+              Remaining budget for {{ expenseTypeName }}
+              <span :class="{negativeBudget: (remainingBudget < 0)}">{{ remainingBudget }}</span>
+            </span>
+            <span v-else>
+              Please choose a budget to see remaining balance.
+            </span>
+          </v-card-text>
+        </v-card>
+
         <!-- Cost -->
         <v-text-field
           prefix="$"
@@ -374,6 +386,20 @@ function urlLabel() {
 // |                     METHODS                      |
 // |                                                  |
 // |--------------------------------------------------|
+
+/**
+ * Gets the remaining budget for the current expense type
+ */
+async function getRemainingBudget() {
+  if (this.editedExpense.expenseTypeId && this.editedExpense.employeeId) {
+    let budgets = await api.getAllActiveEmployeeBudgets(this.editedExpense.employeeId);
+    if (budgets)
+    {
+      let budget = budgets.find((currBudget) => currBudget.expenseTypeId === this.editedExpense.expenseTypeId);
+      return budget;
+    }
+  }
+}
 
 /**
  * Adds an expenses url and category to the training urls page.
@@ -1209,6 +1235,7 @@ async function submit() {
     if (this.$refs.form.validate()) {
       // NOTE: this second validate may be unnecessary. included in checkCoverage()
       // set the description if a recipient is required
+
       if (this.reqRecipient) {
         let giver = _.find(this.employees, (employee) => employee.value == this.editedExpense.employeeId);
         let receiver = _.find(this.employees, (employee) => employee.value == this.editedExpense.recipient);
@@ -1449,6 +1476,7 @@ export default {
       employeeRole: '', // employee role
       employees: [], // employees
       expenseTypes: [], // expense types
+      expenseTypeName: null, //expense type name for budget
       file: undefined, // receipt
       hint: '', // form hints
       isCovered: false, // expense is fully covered
@@ -1468,6 +1496,7 @@ export default {
       recipientPlaceholder: '',
       reimbursedDateFormatted: null, // formatted reimburse date
       reimburseMenu: false, // display reimburse menu
+      remainingBudget: 0,
       reqRecipient: false, // expense requires recipient
       requiredRules: [(v) => !isEmpty(v) || 'Required field'], // rules for required fields
       selectedEmployee: {}, // selected employees
@@ -1506,6 +1535,7 @@ export default {
     formatDate,
     getCategories,
     getExpenseTypeSelected,
+    getRemainingBudget,
     hasAccess,
     incrementURLHits,
     isEmpty,
@@ -1536,6 +1566,21 @@ export default {
       this.selectedExpenseType = _.find(this.expenseTypes, (expenseType) => {
         if (expenseType.value === this.editedExpense.expenseTypeId) {
           return expenseType;
+        }
+      });
+    },
+    'editedExpense.cost': function () {
+      //update remaining budget
+      this.getRemainingBudget().then((budget) => {
+        if (budget) {
+          this.remainingBudget = budget.budgetObject.amount -
+            budget.budgetObject.pendingAmount -
+            budget.budgetObject.reimbursedAmount -
+            this.editedExpense.cost;
+          this.expenseTypeName = budget.expenseTypeName;
+        } else {
+          this.remainingBudget = "";
+          this.expenseTypeName = "expense type not available.";
         }
       });
     },
@@ -1609,6 +1654,20 @@ export default {
       } else {
         this.hint = '';
       }
+
+      //update remaining budget
+      this.getRemainingBudget().then((budget) => {
+        if (budget) {
+          this.remainingBudget = budget.budgetObject.amount -
+            budget.budgetObject.pendingAmount -
+            budget.budgetObject.reimbursedAmount -
+            this.editedExpense.cost;
+          this.expenseTypeName = budget.expenseTypeName;
+        } else {
+          this.remainingBudget = "";
+          this.expenseTypeName = "expense type is not available.";
+        }
+      });
     },
     'editedExpense.category': function () {
       if (
@@ -1695,5 +1754,9 @@ export default {
 <style scoped>
 .optional {
   font-size: 0.5em;
+}
+
+.negativeBudget {
+  color: red;
 }
 </style>
