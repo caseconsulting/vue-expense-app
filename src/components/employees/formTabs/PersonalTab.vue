@@ -40,6 +40,7 @@
       <template v-slot:activator="{ on }">
         <v-text-field
           ref="formFields"
+          v-mask="'##/##/####'"
           v-model="birthdayFormat"
           :rules="dateOptionalRules"
           label="Birthday"
@@ -99,6 +100,7 @@
 import api from '@/shared/api.js';
 import _ from 'lodash';
 import { formatDate, isEmpty, parseDate } from '@/utils/utils';
+import { mask } from 'vue-the-mask';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -274,6 +276,7 @@ export default {
       ] // state options
     };
   },
+  directives: { mask },
   methods: {
     formatDate,
     parseDate,
