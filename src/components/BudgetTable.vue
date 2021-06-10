@@ -113,7 +113,6 @@ function getAmount(budget) {
  * Date
  */
 function getDate(item) {
-  console.log(item.budgetObject);
   return (
     formatDateDashToSlash(item.budgetObject.fiscalStartDate) +
     ' to ' +
