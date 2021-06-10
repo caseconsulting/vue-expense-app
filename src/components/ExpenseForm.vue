@@ -1578,7 +1578,7 @@ export default {
           this.expenseTypeName = budget.expenseTypeName;
         } else {
           this.remainingBudget = '';
-          this.expenseTypeName = 'expense type not available.';
+          this.expenseTypeName = 'expense type not applicable.';
         }
       });
     },
@@ -1664,7 +1664,7 @@ export default {
           this.expenseTypeName = budget.expenseTypeName;
         } else {
           this.remainingBudget = '';
-          this.expenseTypeName = 'expense type is not available.';
+          this.expenseTypeName = 'expense type is not applicable.';
         }
       });
     },
