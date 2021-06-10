@@ -66,11 +66,9 @@
           <v-card-text class="py-1 text-subtitle-1 grey-lighten-2--text">
             <span v-if="expenseTypeName">
               Remaining budget for {{ expenseTypeName }}
-              <span :class="{negativeBudget: (remainingBudget < 0)}">{{ remainingBudget }}</span>
+              <span :class="{ negativeBudget: remainingBudget < 0 }">{{ remainingBudget }}</span>
             </span>
-            <span v-else>
-              Please choose a budget to see remaining balance.
-            </span>
+            <span v-else> Please choose a budget to see remaining balance. </span>
           </v-card-text>
         </v-card>
 
@@ -393,8 +391,7 @@ function urlLabel() {
 async function getRemainingBudget() {
   if (this.editedExpense.expenseTypeId && this.editedExpense.employeeId) {
     let budgets = await api.getAllActiveEmployeeBudgets(this.editedExpense.employeeId);
-    if (budgets)
-    {
+    if (budgets) {
       let budget = budgets.find((currBudget) => currBudget.expenseTypeId === this.editedExpense.expenseTypeId);
       return budget;
     }
@@ -1573,14 +1570,15 @@ export default {
       //update remaining budget
       this.getRemainingBudget().then((budget) => {
         if (budget) {
-          this.remainingBudget = budget.budgetObject.amount -
+          this.remainingBudget =
+            budget.budgetObject.amount -
             budget.budgetObject.pendingAmount -
             budget.budgetObject.reimbursedAmount -
             this.editedExpense.cost;
           this.expenseTypeName = budget.expenseTypeName;
         } else {
-          this.remainingBudget = "";
-          this.expenseTypeName = "expense type not available.";
+          this.remainingBudget = '';
+          this.expenseTypeName = 'expense type not available.';
         }
       });
     },
@@ -1658,14 +1656,15 @@ export default {
       //update remaining budget
       this.getRemainingBudget().then((budget) => {
         if (budget) {
-          this.remainingBudget = budget.budgetObject.amount -
+          this.remainingBudget =
+            budget.budgetObject.amount -
             budget.budgetObject.pendingAmount -
             budget.budgetObject.reimbursedAmount -
             this.editedExpense.cost;
           this.expenseTypeName = budget.expenseTypeName;
         } else {
-          this.remainingBudget = "";
-          this.expenseTypeName = "expense type is not available.";
+          this.remainingBudget = '';
+          this.expenseTypeName = 'expense type is not available.';
         }
       });
     },
