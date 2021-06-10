@@ -641,6 +641,7 @@ async function refreshExpenses() {
   if (this.isAdmin || this.isUser) {
     // load expenses if employee role is user or admin
     this.expenses = await api.getAllAggregateExpenses();
+    this.constructAutoComplete(this.expenses); // set autocomplete options
   }
 
   this.filterExpenses(); // filter expenses
@@ -771,9 +772,6 @@ async function created() {
   });
 
   this.refreshExpenses(); // refresh and update expenses
-
-  let aggregatedExpenses = await api.getAllAggregateExpenses(); // get aggregate expenses
-  this.constructAutoComplete(aggregatedExpenses); // set autocomplete options
 } // created
 
 // |--------------------------------------------------|
