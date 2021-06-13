@@ -145,7 +145,7 @@ function handleLogout() {
 
 async function handleProfile() {
   var user = await api.getUser();
-  this.$router.push(`/employee/${user.employeeNumber}`);
+  this.$router.push({ name: 'employee', params: { id: `${user.employeeNumber}` } });
 }
 
 function onResize() {
@@ -248,17 +248,21 @@ export default {
     TimeOutModal,
     TimeOutWarningModal
   },
-  watch: {
-    $route: function () {
-      this.loadData();
-    }
-  },
   methods: {
     handleLogout,
     handleProfile,
     isLoggedIn,
     onResize
   },
+  watch: {
+    //fixes when you're on another employee's page and want to access your profile
+    $route(to, from) {
+      if (to.params.id && from.params.id) {
+        this.$router.go(this.$router.currentPath);
+      }
+    }
+  },
+
   beforeDestroy,
   mounted,
   created
