@@ -195,6 +195,36 @@
       </v-menu>
       <!-- End Adjudication Dates -->
 
+      <!-- Badge Expiration date -->
+      <v-menu
+        v-model="clearance.showBadgeExpiration"
+        :close-on-content-click="false"
+        transition="scale-transition"
+        offset-y
+        max-width="290px"
+        min-width="290px"
+      >
+        <template v-slot:activator="{ on, attrs }">
+          <v-text-field
+            ref="formFields"
+            :value="formatDateDashToSlash(clearance.badgeExpirationDate)"
+            label="Badge Expiration Date"
+            prepend-icon="event_busy"
+            clearable
+            :rules="dateOptionalRules"
+            readonly
+            v-bind="attrs"
+            v-on="on"
+            @click:clear="clearance.badgeExpirationDate = null"
+          ></v-text-field>
+        </template>
+        <v-date-picker
+          v-model="clearance.badgeExpirationDate"
+          :min="minExpiration(cIndex)"
+          no-title
+          @input="clearance.showBadgeExpiration = false"
+        ></v-date-picker>
+      </v-menu>
       <!-- Loop BI Dates -->
       <div v-for="(bi, biIndex) in clearance.biDates" :key="biIndex">
         <!-- Range -->
@@ -287,10 +317,12 @@ function addClearance() {
   this.editedClearances.push({
     adjudicationDates: [],
     biDates: [],
+    badgeExpirationDate: null,
     expirationDate: null,
     grantedDate: null,
     polyDates: [],
     showAdjudicationMenu: false,
+    showBadgeMenu: false,
     showExpirationMenu: false,
     showGrantedMenu: false,
     showPolyMenu: false,

@@ -30,6 +30,11 @@
           </li>
         </ul>
 
+        <!-- Badge Expiration Date -->
+        <p v-if="clearance.badgeExpirationDate">
+          <b>Badge Expiration Date: </b>{{ clearance.badgeExpirationDate | monthDayYearFormat }}
+        </p>
+
         <!-- BI Dates -->
         <p v-if="clearance.biDates.length > 0" class="mb-2"><b>BI Dates: </b></p>
         <ul v-if="clearance.biDates.length > 0" class="mb-4">
