@@ -91,6 +91,7 @@
             <div class="datatable_btn layout" v-if="userIsAdmin()">
               <v-tooltip top>
                 <template v-slot:activator="{ on }">
+                  <convert-employee-to-csv :midAction="midAction" :employee="item" v-on="on"></convert-employee-to-csv>
                   <v-btn :disabled="midAction" text icon @click.stop="validateDelete(item)" v-on="on">
                     <v-icon style="color: #606060"> delete </v-icon>
                   </v-btn>
@@ -193,6 +194,7 @@ import EmployeeForm from '@/components/employees/EmployeeForm.vue';
 import _ from 'lodash';
 import { getRole } from '@/utils/auth';
 import { isEmpty, isFullTime, isInactive, isPartTime, monthDayYearFormat } from '@/utils/utils';
+import ConvertEmployeeToCsv from '../components/ConvertEmployeeToCsv.vue';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -399,7 +401,8 @@ export default {
     ConvertEmployeesToCsv,
     DeleteErrorModal,
     DeleteModal,
-    EmployeeForm
+    EmployeeForm,
+    ConvertEmployeeToCsv
   },
   created,
   data() {
