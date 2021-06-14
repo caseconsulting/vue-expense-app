@@ -62,13 +62,18 @@
           chips
         ></v-select>
 
+        <!-- Remaining budget total -->
         <v-card class="mt-2">
           <v-card-text class="py-1 text-subtitle-1 grey-lighten-2--text">
-            <span v-if="expenseTypeName">
-              Remaining budget for {{ expenseTypeName }}
-              <span :class="{ negativeBudget: remainingBudget < 0 }">{{ remainingBudget }}</span>
+            <span v-if="!editedExpense.employeeId">Please choose an employee to see remaining balance.</span>
+            <span v-else-if="!editedExpense.expenseTypeId">
+              Please choose an expense type to see remaining balance.
             </span>
-            <span v-else> Please choose a budget to see remaining balance. </span>
+            <span v-else-if="remainingBudget === ''">Remaining budget for current expense type is not available.</span>
+            <span v-else-if="expenseTypeName">
+              Remaining budget for {{ expenseTypeName }}:
+              <span :class="{ negativeBudget: remainingBudget <= 0 }">{{ remainingBudget.toFixed(2) }}</span>
+            </span>
           </v-card-text>
         </v-card>
 
@@ -1578,7 +1583,6 @@ export default {
           this.expenseTypeName = budget.expenseTypeName;
         } else {
           this.remainingBudget = '';
-          this.expenseTypeName = 'expense type not applicable.';
         }
       });
     },
@@ -1664,7 +1668,6 @@ export default {
           this.expenseTypeName = budget.expenseTypeName;
         } else {
           this.remainingBudget = '';
-          this.expenseTypeName = 'expense type is not applicable.';
         }
       });
     },
