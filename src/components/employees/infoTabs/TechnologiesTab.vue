@@ -2,8 +2,45 @@
   <div class="infoTab">
     <!-- Employee has Technology Experience -->
     <div v-if="!isEmpty(model.technologies)">
+      <!--Tech Filters -->
+      <div class="mb-3">
+        <fieldset class="filter_border">
+          <legend class="legend_style">Sort By</legend>
+          <v-col cols="12">
+            <v-btn-toggle borderless>
+              <v-tooltip top>
+                <template v-slot:activator="{ on }">
+                  <v-btn v-on="on" @click="sortByCurrent">
+                    <v-icon>check</v-icon>
+                  </v-btn>
+                </template>
+                <span>Current</span>
+              </v-tooltip>
+
+              <v-tooltip top>
+                <template v-slot:activator="{ on }">
+                  <v-btn v-on="on" @click="sortByDate">
+                    <icon name="calendar-day"></icon>
+                  </v-btn>
+                </template>
+                <span>By Date</span>
+              </v-tooltip>
+
+              <v-tooltip top>
+                <template v-slot:activator="{ on }">
+                  <v-btn v-on="on" @click="sortByName">
+                    <icon name="sort-alpha-down"></icon>
+                  </v-btn>
+                </template>
+                <span>Alphabetical</span>
+              </v-tooltip>
+            </v-btn-toggle>
+          </v-col>
+        </fieldset>
+      </div>
+      <!-- End of Sort Filters -->
       <!-- Loop Technologies -->
-      <div v-for="(technology, index) in model.technologies" :key="technology.name">
+      <div v-for="(technology, index) in sortedTech" :key="technology.name">
         <v-row>
           <v-col>
             <p><b>Technology: </b>{{ technology.name }}</p>
@@ -30,6 +67,7 @@
 <script>
 import { isEmpty } from '@/utils/utils';
 import moment from 'moment-timezone';
+import _ from 'lodash';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -90,7 +128,44 @@ function monthsPassed(start, end) {
   return totalTimePassed;
 } //monthsPassed
 
+function sortByName() {
+  const iteratees = (obj) => obj.name;
+  this.sortedTech = _.sortBy(this.model.technologies, iteratees);
+}
+
+function sortByCurrent() {
+  this.sortedTech.sort((a, b) => {
+    if (a.current === b.current) {
+      return 0;
+    }
+
+    if (a.current) {
+      return -1;
+    }
+
+    if (b.current) {
+      return 1;
+    }
+  });
+}
+
+function sortByDate() {
+  _.forEach(this.model.technologies, (tech) => {
+    let startDate = tech.dateIntervals[0].startDate;
+    let endDate = tech.dateIntervals[0].endDate;
+    tech.length = monthsPassed(startDate, endDate);
+  });
+
+  const iteratees = (obj) => -obj.length;
+  this.sortedTech = _.sortBy(this.model.technologies, iteratees);
+}
+
 export default {
+  data() {
+    return {
+      sortedTech: this.model.technologies
+    };
+  },
   filters: {
     current: (value) => {
       return value ? 'Yes' : 'No';
@@ -98,7 +173,10 @@ export default {
   },
   methods: {
     isEmpty,
-    yearsOfExperience
+    yearsOfExperience,
+    sortByName,
+    sortByCurrent,
+    sortByDate
   },
   props: ['model']
 };
