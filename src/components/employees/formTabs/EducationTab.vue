@@ -48,14 +48,15 @@
         <template v-slot:activator="{ on }">
           <v-text-field
             ref="formFields"
-            :value="degree.date"
+            v-model="degreeDatesFormatted[index]"
             label="Completion Date"
             prepend-icon="event"
             :rules="dateRules"
-            readonly
-            hint="YYYY-MM format"
+            hint="MM/YYYY format"
             persistent-hint
+            v-mask="'##/####'"
             v-on="on"
+            @blur="degree.date = parseDateMonthYear(degreeDatesFormatted[index])"
           ></v-text-field>
         </template>
         <v-date-picker
@@ -147,7 +148,9 @@
 <script>
 import api from '@/shared/api.js';
 import _ from 'lodash';
-import { isEmpty } from '@/utils/utils';
+import { isEmpty, formatDateMonthYear, parseDateMonthYear } from '@/utils/utils';
+import { mask } from 'vue-the-mask';
+import { moment } from 'moment';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -162,6 +165,14 @@ async function created() {
   window.EventBus.$emit('created', 'education'); // emit education tab was created
   this.employees = await api.getItems(api.EMPLOYEES); // get all employees
   this.populateDropDowns(); // get autocomplete drop down data
+  this.editedDegrees.forEach((degree) => {
+    this.degreeDatesFormatted.push(formatDateMonthYear(degree.date));
+    // fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
+    if (degree.date !== null && !formatDateMonthYear(degree.date)) {
+      // clear birthday date if fails to format
+      degree.date = null;
+    }
+  });
 } // created
 
 // |--------------------------------------------------|
@@ -183,6 +194,7 @@ function addDegree() {
     school: '',
     showEducationMenu: false
   });
+  this.degreeDatesFormatted.push(null);
 } // addDegree
 
 /**
@@ -201,6 +213,7 @@ function addItem(array) {
  */
 function deleteDegree(index) {
   this.editedDegrees.splice(index, 1);
+  this.degreeDatesFormatted.splice(index, 1);
 } // deleteDegree
 
 /**
@@ -322,9 +335,10 @@ export default {
     return {
       concentrationDropDown: [], // autocomplete concentration options
       dateRules: [
-        (v) => !isEmpty(v) || 'Date must be valid. Format: YYYY-MM',
-        (v) => (!isEmpty(v) && /^\d{4}[-](0?[1-9]|1[0-2])$/.test(v)) || 'Date must be valid. Format: YYYY-MM'
+        (v) => !isEmpty(v) || 'Date must be valid. Format: MM/YYYY',
+        (v) => (!isEmpty(v) && /^\d{1,2}\/\d{4}$/.test(v)) || 'Date must be valid. Format: MM/YYYY'
       ], // rules for a required date
+      degreeDatesFormatted: [],
       editedDegrees: _.cloneDeep(this.model), // stores edited degree info
       degreeDropDown: [], // autocomplete degree name options
       majorDropDown: [], // autocomplete major options
@@ -335,14 +349,30 @@ export default {
       schoolDropDown: [] // autocomplete school options
     };
   },
+  directives: { mask },
+  filters: {
+    formatDate: function (date) {
+      if (!date) return null;
+      else {
+        const [year, month] = date.split('-');
+        if (moment(`${month}/${year}`, 'MM/YYYY', true).isValid()) {
+          return `${month}/${year}`;
+        } else {
+          return null;
+        }
+      }
+    }
+  },
   methods: {
     addDegree,
     addItem,
     deleteDegree,
     deleteItem,
     detectDuplicateEducation,
+    formatDateMonthYear,
     isDuplicate,
     isEmpty,
+    parseDateMonthYear,
     populateDropDowns,
     validateFields
   },
@@ -353,6 +383,19 @@ export default {
         // parent component triggers validation
         this.validateFields();
       }
+    },
+    editedDegrees: {
+      handler: function () {
+        this.editedDegrees.forEach((degree, index) => {
+          this.degreeDatesFormatted[index] = formatDateMonthYear(degree.date) || this.degreeDatesFormatted[index];
+          // fixes v-date-picker error so that if the format of date is incorrect the date is set to null
+          if (degree.date !== null && !formatDateMonthYear(degree.date)) {
+            // clear birthday date if fails to format
+            degree.date = null;
+          }
+        });
+      },
+      deep: true
     }
   }
 };
