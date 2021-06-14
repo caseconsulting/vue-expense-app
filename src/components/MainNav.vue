@@ -209,6 +209,14 @@ export default {
           active: false
         },
         {
+          title: 'Employee Stats',
+          alias: ['employeeStats'],
+          icon: 'chart-bar',
+          route: 'employeeStats',
+          permission: ['admin', 'user'],
+          active: false
+        },
+        {
           title: 'Training',
           icon: 'fire',
           route: 'training',

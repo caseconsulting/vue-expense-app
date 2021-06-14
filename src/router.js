@@ -6,6 +6,7 @@ import LoginFailed from '@/views/LoginFailed.vue';
 import ExpenseTypes from '@/views/ExpenseTypes.vue';
 import Employees from '@/views/Employees.vue';
 import Employee from '@/views/Employee.vue';
+import EmployeeStats from '@/views/EmployeeStats.vue';
 import Expenses from '@/views/MyExpenses.vue';
 import Help from '@/views/Help.vue';
 import Callback from '@/views/Callback';
@@ -49,6 +50,12 @@ const router = new Router({
       path: '/employees',
       name: 'employees',
       component: Employees,
+      beforeEnter: requireAuth
+    },
+    {
+      path: '/employeeStats',
+      name: 'employeeStats',
+      component: EmployeeStats,
       beforeEnter: requireAuth
     },
     {

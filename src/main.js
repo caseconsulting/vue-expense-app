@@ -52,6 +52,7 @@ import 'vue-awesome/icons/calendar-alt';
 import 'vue-awesome/icons/external-link-alt';
 import 'vue-awesome/icons/globe-americas';
 import 'vue-awesome/icons/thumbs-up';
+import 'vue-awesome/icons/chart-bar';
 
 import Icon from 'vue-awesome/components/Icon';
 import App from './App.vue';
