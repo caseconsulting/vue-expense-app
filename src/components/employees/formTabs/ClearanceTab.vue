@@ -208,6 +208,7 @@
           <v-text-field
             ref="formFields"
             :value="formatDateDashToSlash(clearance.badgeExpirationDate)"
+            v-mask="'##/##/####'"
             label="Badge Expiration Date"
             prepend-icon="event_busy"
             clearable
@@ -274,6 +275,7 @@ const moment = require('moment-timezone');
 moment.tz.setDefault('America/New_York');
 import _ from 'lodash';
 import { formatDateDashToSlash, formatDateSlashToDash, isEmpty } from '@/utils/utils';
+import { mask } from 'vue-the-mask';
 
 const ISOFORMAT = 'YYYY-MM-DD';
 
@@ -520,6 +522,7 @@ export default {
     populateDropDowns,
     validateFields
   },
+  directives: { mask },
   props: ['model', 'validating'],
   watch: {
     validating: function (val) {
