@@ -51,7 +51,19 @@
     <!-- Expense Data -->
     <v-col cols="12" lg="8">
       <div v-if="loading" text-center>
-        <v-progress-circular indeterminate size="64" color="#bc3825"></v-progress-circular>
+        <!-- <v-progress-circular indeterminate size="64" color="#bc3825"></v-progress-circular> -->
+        <v-row>
+          <!-- <v-col v-for="item in expenseTypeData" :key="item.name" cols="12" sm="6" lg="6"> -->
+          <v-col cols="12" sm="6" lg="6">
+            <v-skeleton-loader class="my-3" min-width="300" type="card-heading, list-item@6"></v-skeleton-loader>
+          </v-col>
+          <v-col cols="12" sm="6" lg="6">
+            <v-skeleton-loader class="my-3" min-width="300" type="card-heading, list-item@6"></v-skeleton-loader>
+          </v-col>
+          <v-col cols="12" sm="6" lg="6">
+            <v-skeleton-loader class="my-3" min-width="300" type="card-heading, list-item@6"></v-skeleton-loader>
+          </v-col>
+        </v-row>
       </div>
 
       <div v-else text-center class="pt-0 font-13">
@@ -593,6 +605,10 @@ export default {
   created,
   data() {
     return {
+      attrs: {
+        class: 'my-3'
+        // $skeleton-loader-image-height: 100px;
+      },
       actualTime: moment().format('X'), // current time (unix ms timestamp)
       allUserBudgets: null, // all user budgets
       budgetYears: [], // list of options for chaning budget year view
