@@ -391,6 +391,7 @@ function cleanUpData() {
           delete clearance.showSubmissionMenu;
           delete clearance.showPolyMenu;
           delete clearance.showAdjudicationMenu;
+          delete clearance.showBadgeMenu;
 
           // delete null attributes
           _.forEach(clearance, (value, key) => {

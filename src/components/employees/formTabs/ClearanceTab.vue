@@ -197,7 +197,7 @@
 
       <!-- Badge Expiration date -->
       <v-menu
-        v-model="clearance.showBadgeExpiration"
+        v-model="clearance.showBadgeMenu"
         :close-on-content-click="false"
         transition="scale-transition"
         offset-y
@@ -223,7 +223,7 @@
           v-model="clearance.badgeExpirationDate"
           :min="minExpiration(cIndex)"
           no-title
-          @input="clearance.showBadgeExpiration = false"
+          @input="clearance.showBadgeMenu = false"
         ></v-date-picker>
       </v-menu>
       <!-- Loop BI Dates -->
