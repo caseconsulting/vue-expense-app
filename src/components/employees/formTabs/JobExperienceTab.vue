@@ -121,13 +121,16 @@
             <template v-slot:activator="{ on, attrs }">
               <v-text-field
                 ref="formFields"
-                :value="formatDateDashToSlash(job.startDate)"
+                v-model="jobDatesFormatted[index].startDate"
                 label="Start Date"
                 prepend-icon="event_available"
                 :rules="dateRules"
-                readonly
+                hint="MM/DD/YYYY format"
+                persistent-hint
+                v-mask="'##/##/####'"
                 v-bind="attrs"
                 v-on="on"
+                @blur="job.startDate = parseDate(jobDatesFormatted[index].startDate)"
               ></v-text-field>
             </template>
             <v-date-picker
@@ -152,14 +155,17 @@
             <template v-slot:activator="{ on, attrs }">
               <v-text-field
                 ref="formFields"
-                :value="formatDateDashToSlash(job.endDate)"
+                v-model="jobDatesFormatted[index].endDate"
                 label="End Date (optional)"
                 prepend-icon="event_busy"
                 :rules="dateOptionalRules"
-                readonly
+                hint="MM/DD/YYYY format"
+                persistent-hint
+                v-mask="'##/##/####'"
                 v-bind="attrs"
                 v-on="on"
                 clearable
+                @blur="job.endDate = parseDate(jobDatesFormatted[index].endDate)"
                 @click:clear="job.endDate = null"
               ></v-text-field>
             </template>
@@ -188,7 +194,8 @@ import api from '@/shared/api.js';
 const moment = require('moment-timezone');
 moment.tz.setDefault('America/New_York');
 import _ from 'lodash';
-import { isEmpty } from '@/utils/utils';
+import { isEmpty, parseDate } from '@/utils/utils';
+import { mask } from 'vue-the-mask';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -203,6 +210,21 @@ async function created() {
   window.EventBus.$emit('created', 'jobExperience'); // emit education tab was created
   this.employees = await api.getItems(api.EMPLOYEES); // get all employees
   this.populateDropDowns(); // get autocomplete drop down data
+  this.editedJobExperienceInfo.jobs.forEach((job) => {
+    this.jobDatesFormatted.push({
+      startDate: formatDateDashToSlash(job.startDate),
+      endDate: formatDateDashToSlash(job.endDate)
+    });
+    // fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
+    if (job.startDate !== null && !formatDateDashToSlash(job.startDate)) {
+      // clear job date if fails to format
+      job.startDate = null;
+    }
+    if (job.endDate !== null && !formatDateDashToSlash(job.endDate)) {
+      // clear job date if fails to format
+      job.endDate = null;
+    }
+  });
 } // created
 
 // |--------------------------------------------------|
@@ -233,6 +255,10 @@ function addJob() {
     showStartMenu: false,
     showEndMenu: false
   });
+  this.jobDatesFormatted.push({
+    startDate: null,
+    endDate: null
+  });
 } // addJob
 
 /**
@@ -251,6 +277,7 @@ function deleteICTimeFrame(index) {
  */
 function deleteJob(index) {
   this.editedJobExperienceInfo.jobs.splice(index, 1);
+  this.jobDatesFormatted.splice(index, 1);
 } // deleteJob
 
 /**
@@ -360,9 +387,11 @@ export default {
         (v) => (!isEmpty(v) && /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v)) || 'Date must be valid. Format: MM/DD/YYYY'
       ], // rules for a required date
       editedJobExperienceInfo: _.cloneDeep(this.model), //edited job experience info
+      jobDatesFormatted: [],
       requiredRules: [(v) => !isEmpty(v) || 'This field is required'] // rules for required fields
     };
   },
+  directives: { mask },
   methods: {
     addICTimeFrame,
     addJob,
@@ -372,6 +401,7 @@ export default {
     formatDateDashToSlash,
     formatRange,
     isEmpty,
+    parseDate,
     populateDropDowns,
     validateFields
   },
@@ -382,6 +412,22 @@ export default {
         // parent component triggers validation
         this.validateFields();
       }
+    },
+    editedJobExperienceInfo: {
+      handler: function () {
+        this.editedJobExperienceInfo.jobs.forEach((job, index) => {
+          this.jobDatesFormatted[index].startDate =
+            formatDateDashToSlash(job.startDate) || this.jobDatesFormatted[index].startDate;
+          this.jobDatesFormatted[index].endDate =
+            formatDateDashToSlash(job.endDate) || this.jobDatesFormatted[index].endDate;
+          // fixes v-date-picker error so that if the format of date is incorrect the date is set to null
+          if (job.startDate !== null && !formatDateDashToSlash(job.startDate)) {
+            // clear birthday date if fails to format
+            job.startDate = null;
+          }
+        });
+      },
+      deep: true
     }
   }
 };

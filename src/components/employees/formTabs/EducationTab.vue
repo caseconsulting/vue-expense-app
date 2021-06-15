@@ -169,7 +169,7 @@ async function created() {
     this.degreeDatesFormatted.push(formatDateMonthYear(degree.date));
     // fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
     if (degree.date !== null && !formatDateMonthYear(degree.date)) {
-      // clear birthday date if fails to format
+      // clear educationDate date if fails to format
       degree.date = null;
     }
   });
@@ -390,7 +390,7 @@ export default {
           this.degreeDatesFormatted[index] = formatDateMonthYear(degree.date) || this.degreeDatesFormatted[index];
           // fixes v-date-picker error so that if the format of date is incorrect the date is set to null
           if (degree.date !== null && !formatDateMonthYear(degree.date)) {
-            // clear birthday date if fails to format
+            // clear degree date if fails to format
             degree.date = null;
           }
         });
