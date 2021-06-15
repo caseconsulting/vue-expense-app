@@ -23,7 +23,7 @@
                     <icon name="calendar-day"></icon>
                   </v-btn>
                 </template>
-                <span>By Date</span>
+                <span>Date</span>
               </v-tooltip>
 
               <v-tooltip top>
