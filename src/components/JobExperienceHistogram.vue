@@ -1,11 +1,17 @@
 <script>
 import { Bar, mixins } from 'vue-chartjs';
 
+// |--------------------------------------------------|
+// |                                                  |
+// |                      EXPORT                      |
+// |                                                  |
+// |--------------------------------------------------|
+
 export default {
   extends: Bar,
   mixins: [mixins.reactiveProp],
   mounted() {
-    this.renderChart(this.charData, this.options);
+    this.renderChart(this.chartData, this.options);
   },
   props: [
     'chartData', // chart data to render
