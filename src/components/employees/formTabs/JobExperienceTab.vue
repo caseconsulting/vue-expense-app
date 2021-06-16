@@ -158,8 +158,10 @@
                 label="End Date (optional)"
                 prepend-icon="event_busy"
                 :rules="dateOptionalRules"
+<<<<<<< HEAD
                 hint="MM/DD/YYYY format"
                 v-mask="'##/##/####'"
+>>>>>>> 2291-Make-bar-chart-that-shows-num-case-employee-with-certain-technology: Bar chart protoype working
                 v-bind="attrs"
                 v-on="on"
                 clearable
@@ -341,7 +343,7 @@ export default {
       ], // rules for an optional date
       dateRules: [
         (v) => !isEmpty(v) || 'Date required',
-        (v) => (!isEmpty(v) && /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v)) || 'Date must be valid. Format: MM/DD/YYYY'
+        (v) => (!isEmpty(v) && (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v) || /\d{1,2}\/\d{4}$/.test(v))) || 'Date must be valid. Format: MM/DD/YYYY or MM/YYYY'
       ], // rules for a required date
       editedJobExperienceInfo: _.cloneDeep(this.model), //edited job experience info
       requiredRules: [(v) => !isEmpty(v) || 'This field is required'] // rules for required fields
