@@ -62,6 +62,8 @@ function exportCSVFile(person, fileTitle) {
   let clearances = getInfo(person.clearances);
   let languages = getInfo(person.languages);
 
+  console.log(technologies);
+
   let tempEmployee = [
     person.firstName || '', //Start of employee
     person.middleName || '',
@@ -206,11 +208,40 @@ function getInfo(info) {
 
   let infoList = [];
   info.forEach((currInfo) => {
-    infoList.push(Object.entries(currInfo));
+    currInfo = Object.entries(currInfo);
+    for (let i = 0; i < currInfo.length; i++) {
+      if (currInfo[i][1].length === 0) {
+        currInfo[i][1] = 'N/A';
+      }
+      if (currInfo[i][0] === 'dateIntervals') {
+        currInfo[i][1] = parseDateInterval(currInfo[i][1]);
+      }
+    }
+
+    console.log(currInfo);
+    infoList.push(currInfo);
   });
 
   return infoList;
 } // getInfo
+
+/**
+ * Parses the dateInterval object into a string to be put into the excel
+ * file
+ *
+ * @param dateInterval - The date interval being parsed
+ * @return String - the parsed date interval
+ */
+function parseDateInterval(dateInterval) {
+  let out = '';
+  if (dateInterval) {
+    dateInterval.forEach((interval, index) => {
+      out += 'Interval ' + (index + 1) + ': Start: ' + interval.startDate + ' End: ' + interval.endDate + ' ';
+    });
+  }
+
+  return out;
+} // parseDateInterval
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -229,7 +260,8 @@ export default {
     download,
     exportCSVFile,
     getWorkStatus,
-    getInfo
+    getInfo,
+    parseDateInterval
   },
   props: ['employee', 'midAction'] // employees to export
 };
