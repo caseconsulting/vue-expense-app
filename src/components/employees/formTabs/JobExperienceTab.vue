@@ -68,7 +68,7 @@
       <v-row class="px-3 py-3">
         <!-- Start Date -->
         <v-text-field
-          :value="formatDateDashToSlash(editedJobExperienceInfo.hireDate)"
+          :value="formatDate(editedJobExperienceInfo.hireDate)"
           label="Start Date"
           prepend-icon="event_available"
           readonly
@@ -121,16 +121,15 @@
             <template v-slot:activator="{ on, attrs }">
               <v-text-field
                 ref="formFields"
-                v-model="jobDatesFormatted[index].startDate"
+                :value="job.startDate | formatDate"
                 label="Start Date"
+                hint="MM/DD/YYYY format"
+                v-mask="'##/##/####'"
                 prepend-icon="event_available"
                 :rules="dateRules"
-                hint="MM/DD/YYYY format"
-                persistent-hint
-                v-mask="'##/##/####'"
                 v-bind="attrs"
                 v-on="on"
-                @blur="job.startDate = parseDate(jobDatesFormatted[index].startDate)"
+                @blur="job.startDate = parseEventDate($event)"
               ></v-text-field>
             </template>
             <v-date-picker
@@ -155,18 +154,17 @@
             <template v-slot:activator="{ on, attrs }">
               <v-text-field
                 ref="formFields"
-                v-model="jobDatesFormatted[index].endDate"
+                :value="job.endDate | formatDate"
                 label="End Date (optional)"
                 prepend-icon="event_busy"
                 :rules="dateOptionalRules"
                 hint="MM/DD/YYYY format"
-                persistent-hint
                 v-mask="'##/##/####'"
                 v-bind="attrs"
                 v-on="on"
                 clearable
-                @blur="job.endDate = parseDate(jobDatesFormatted[index].endDate)"
                 @click:clear="job.endDate = null"
+                @blur="job.endDate = parseEventDate($event)"
               ></v-text-field>
             </template>
             <v-date-picker
@@ -194,7 +192,7 @@ import api from '@/shared/api.js';
 const moment = require('moment-timezone');
 moment.tz.setDefault('America/New_York');
 import _ from 'lodash';
-import { isEmpty, parseDate } from '@/utils/utils';
+import { isEmpty, formatDate, parseDate } from '@/utils/utils';
 import { mask } from 'vue-the-mask';
 
 // |--------------------------------------------------|
@@ -210,21 +208,6 @@ async function created() {
   window.EventBus.$emit('created', 'jobExperience'); // emit education tab was created
   this.employees = await api.getItems(api.EMPLOYEES); // get all employees
   this.populateDropDowns(); // get autocomplete drop down data
-  this.editedJobExperienceInfo.jobs.forEach((job) => {
-    this.jobDatesFormatted.push({
-      startDate: formatDateDashToSlash(job.startDate),
-      endDate: formatDateDashToSlash(job.endDate)
-    });
-    // fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
-    if (job.startDate !== null && !formatDateDashToSlash(job.startDate)) {
-      // clear job date if fails to format
-      job.startDate = null;
-    }
-    if (job.endDate !== null && !formatDateDashToSlash(job.endDate)) {
-      // clear job date if fails to format
-      job.endDate = null;
-    }
-  });
 } // created
 
 // |--------------------------------------------------|
@@ -255,10 +238,6 @@ function addJob() {
     showStartMenu: false,
     showEndMenu: false
   });
-  this.jobDatesFormatted.push({
-    startDate: null,
-    endDate: null
-  });
 } // addJob
 
 /**
@@ -277,36 +256,7 @@ function deleteICTimeFrame(index) {
  */
 function deleteJob(index) {
   this.editedJobExperienceInfo.jobs.splice(index, 1);
-  this.jobDatesFormatted.splice(index, 1);
 } // deleteJob
-
-/**
- * Returns a date formated from MM/DD/YYYY to YYYY-MM-DD.
- *
- * @param date - MM/DD/YYYY String date
- * @return String - YYYY-MM-DD date
- */
-function formatDateSlashToDash(date) {
-  if (!date) {
-    return null;
-  }
-  const [month, day, year] = date.split('/');
-  return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`; // formatDateSlashToDash
-} // formatDateSlashToDash
-
-/**
- * Returns a date formated from YYYY-MM-DD to MM/DD/YYYY.
- *
- * @param date - YYYY-MM-DD String date
- * @return String - MM/DD/YYYY date
- */
-function formatDateDashToSlash(date) {
-  if (!date) {
-    return null;
-  }
-  const [year, month, day] = date.split('-');
-  return `${month}/${day}/${year}`;
-} // formatDateDashToSlash
 
 /**
  * Format date range as 'Month YYYY' - 'Month YYYY' in chronological order.
@@ -335,6 +285,13 @@ function formatRange(range) {
     return `${start.format('MMMM YYYY')} - Present`;
   }
 } // formatRange
+
+/**
+ * Parse the date after losing focus.
+ */
+function parseEventDate() {
+  return parseDate(event.target.value);
+} //parseEventDate
 
 /**
  * Populate drop downs with information that other employees have filled out.
@@ -387,21 +344,23 @@ export default {
         (v) => (!isEmpty(v) && /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v)) || 'Date must be valid. Format: MM/DD/YYYY'
       ], // rules for a required date
       editedJobExperienceInfo: _.cloneDeep(this.model), //edited job experience info
-      jobDatesFormatted: [],
       requiredRules: [(v) => !isEmpty(v) || 'This field is required'] // rules for required fields
     };
   },
   directives: { mask },
+  filters: {
+    formatDate
+  },
   methods: {
     addICTimeFrame,
     addJob,
     deleteICTimeFrame,
     deleteJob,
-    formatDateSlashToDash,
-    formatDateDashToSlash,
+    formatDate,
+    parseDate,
+    parseEventDate,
     formatRange,
     isEmpty,
-    parseDate,
     populateDropDowns,
     validateFields
   },
@@ -412,22 +371,6 @@ export default {
         // parent component triggers validation
         this.validateFields();
       }
-    },
-    editedJobExperienceInfo: {
-      handler: function () {
-        this.editedJobExperienceInfo.jobs.forEach((job, index) => {
-          this.jobDatesFormatted[index].startDate =
-            formatDateDashToSlash(job.startDate) || this.jobDatesFormatted[index].startDate;
-          this.jobDatesFormatted[index].endDate =
-            formatDateDashToSlash(job.endDate) || this.jobDatesFormatted[index].endDate;
-          // fixes v-date-picker error so that if the format of date is incorrect the date is set to null
-          if (job.startDate !== null && !formatDateDashToSlash(job.startDate)) {
-            // clear birthday date if fails to format
-            job.startDate = null;
-          }
-        });
-      },
-      deep: true
     }
   }
 };
