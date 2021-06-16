@@ -17,7 +17,6 @@ async function jobExperienceData() {
   for (let i = 0; i < MAXIMUM_INDEX; i++) {
     this.jobExperience.push(0);
   }
-  console.log(this.employees);
   this.employees.forEach((employee) => {
     if (employee.hireDate !== undefined) {
       // find time at case
@@ -109,12 +108,10 @@ function drawJobExpHistGraph() {
 } // drawJobExpHistGraph
 
 function googleJobExpHistGraph() {
-  console.log(this.jobExperience);
   var dataArray = [['Year']];
   for (var i = 0; i < this.jobExperienceHist.length; i++) {
     dataArray.push([this.jobExperienceHist[i]]);
   }
-  console.log(dataArray);
   // eslint-disable-next-line no-undef
   var data = google.visualization.arrayToDataTable(dataArray);
   var options = {
