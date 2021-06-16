@@ -29,14 +29,14 @@
         <v-item-group class="hidden-sm-and-down" v-show="isLoggedIn() && !isMobile">
           <v-menu open-on-hover offset-y>
             <template v-slot:activator="{ on, attrs }">
-              <v-btn top text small class="my-2" v-bind="attrs" v-on="on">Links &#9662; </v-btn>
+              <v-btn top text small class="my-2" v-bind="attrs" v-on="on" id="links-btn">Links &#9662; </v-btn>
             </template>
 
             <v-list>
-              <v-list-item v-for="(l, index) in links" :key="index" :href="l.link" target="_blank">
+              <v-list-item v-for="(l, index) in links" :key="index" :id="l.link" :href="l.link" target="_blank">
                 <v-list-item-title>{{ l.name }}</v-list-item-title>
               </v-list-item>
-              <v-list-item :href="floorPlan" target="_blank">MakeOffices Map</v-list-item>
+              <v-list-item :href="floorPlan" target="_blank" id="floorPlan">MakeOffices Map</v-list-item>
             </v-list>
           </v-menu>
           <v-btn
@@ -80,7 +80,7 @@
             <v-list-item v-for="(l, index) in links" :key="index" :href="l.link" target="_blank">
               <v-list-item-title>{{ l.name }}</v-list-item-title>
             </v-list-item>
-            <v-list-item :href="floorPlan" target="_blank">MakeOffices Map</v-list-item>
+            <v-list-item :href="floorPlan" target="_blank" id="floorPlan">MakeOffices Map</v-list-item>
             <hr role="separator" aria-orientation="horizontal" class="v-divider theme--light" :inset="inset" vertical />
             <div class="v-subheader theme--light">Social</div>
             <v-list-item v-for="link in mediaLinks" :key="link.name" :href="link.link" icon target="_blank">
@@ -235,7 +235,7 @@ export default {
       { name: 'Basecamp', link: 'https://3.basecamp.com/3097063' },
       { name: 'Net Benefits/Fidelity', link: 'https://nb.fidelity.com/public/nb/default/home' },
       { name: 'Health Insurance', link: 'https://3.basecamp.com/3097063/buckets/179119/messages/2306027830' },
-      { name: 'QuickBooks Time', link: 'https://caseconsulting.tsheets.com/' },
+      { name: 'QuickBooks Time', link: 'https://tsheets.intuit.com/page/login_oii' },
       { name: 'ADP', link: 'https://my.adp.com/' },
       { name: 'Life Insurance', link: 'https://www.reliancestandard.com/home/' },
       {
