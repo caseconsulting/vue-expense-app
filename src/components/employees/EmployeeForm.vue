@@ -327,6 +327,7 @@ function cleanUpData() {
 
   // jobs
   if (!_.isEmpty(this.model.jobs)) {
+    this.model.jobs = updateJobs(this.model.jobs, this.model.companies);
     this.model.jobs = _.reverse(
       _.sortBy(
         _.map(this.model.jobs, (job) => {
@@ -452,6 +453,28 @@ function clearStatus() {
   this.$set(this.errorStatus, 'statusMessage', null);
   this.$set(this.errorStatus, 'color', null);
 } // clearStatus
+
+function updateJobs(jobs, companies) {
+  jobs = [];
+  _.forEach(companies, (company) => {
+    let companyName = company.companyName;
+    _.forEach(company.positions, (pos) => {
+      let position = pos.title;
+      let startDate = pos.startDate;
+      let endDate = pos.endDate;
+      if (position !== null) {
+        jobs.push({
+          company: companyName,
+          position: position,
+          startDate: startDate,
+          endDate: endDate
+        });
+      }
+    });
+  });
+  console.log(jobs);
+  return jobs;
+}
 
 /**
  * Validate and confirm form submission.
@@ -687,6 +710,7 @@ function setFormData(tab, data) {
     //sets all jobExperience info to data returned from job experience tab
     this.$set(this.model, 'icTimeFrames', data.icTimeFrames);
     this.$set(this.model, 'jobs', data.jobs);
+    this.$set(this.model, 'companies', data.companies);
   } else if (tab == 'certifications') {
     this.$set(this.model, 'certifications', data); //sets certifications to data returned from certifications tab
   } else if (tab == 'awards') {
@@ -709,7 +733,6 @@ function setFormData(tab, data) {
 // |                      EXPORT                      |
 // |                                                  |
 // |--------------------------------------------------|
-
 export default {
   beforeDestroy() {
     window.EventBus.$off('confirmed');
@@ -748,6 +771,7 @@ export default {
         certifications: [],
         city: null,
         clearances: [],
+        companies: [],
         contract: null,
         contracts: [],
         country: null,
@@ -827,6 +851,7 @@ export default {
     hasTabError,
     setFormData,
     submit,
+    updateJobs,
     userIsAdmin,
     selectDropDown
   },

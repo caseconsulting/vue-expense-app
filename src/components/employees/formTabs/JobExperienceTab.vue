@@ -80,109 +80,111 @@
 
     <!-- Loop Jobs -->
     <div
-      v-for="(job, index) in editedJobExperienceInfo.jobs"
+      v-for="(company, index) in editedJobExperienceInfo.companies"
       style="border: 1px solid grey"
       class="pt-3 pb-1 px-5"
-      :key="'company: ' + job.company + index"
+      :key="'company: ' + company.companyName + index"
     >
       <!-- Company Name -->
       <v-combobox
         ref="formFields"
-        v-model="job.company"
+        v-model="company.companyName"
         :rules="requiredRules"
         :items="companyDropDown"
         label="Company"
         data-vv-name="Company"
         append-outer-icon="delete"
-        @click:append-outer="deleteJob(index)"
+        @click:append-outer="deleteCompany(company)"
       >
       </v-combobox>
+      <div v-for="(position, index) in company.positions" :key="index">
+        <!-- Job Position -->
+        <v-combobox
+          ref="formFields"
+          v-model="position.title"
+          :rules="requiredRules"
+          label="Position"
+          data-vv-name="Position"
+          append-outer-icon="delete"
+          @click:append-outer="deletePosition(company, position.title)"
+        ></v-combobox>
 
-      <!-- Job Position -->
-      <v-combobox
-        ref="formFields"
-        v-model="job.position"
-        :rules="requiredRules"
-        label="Position"
-        data-vv-name="Position"
-      ></v-combobox>
-
-      <v-row>
-        <v-col cols="12" sm="6" md="12" lg="6" class="pt-0">
-          <!-- Start Date -->
-          <v-menu
-            v-model="job.showStartMenu"
-            :close-on-content-click="false"
-            transition="scale-transition"
-            offset-y
-            max-width="290px"
-            min-width="290px"
-          >
-            <template v-slot:activator="{ on, attrs }">
-              <v-text-field
-                ref="formFields"
-                :value="job.startDate | formatDate"
-                label="Start Date"
-                hint="MM/DD/YYYY format"
-                v-mask="'##/##/####'"
-                prepend-icon="event_available"
-                :rules="dateRules"
-                v-bind="attrs"
-                v-on="on"
-                @blur="job.startDate = parseEventDate($event)"
-              ></v-text-field>
-            </template>
-            <v-date-picker
-              v-model="job.startDate"
-              :max="job.endDate"
-              no-title
-              @input="job.showStartMenu = false"
-            ></v-date-picker>
-          </v-menu>
-          <!-- End Start Date -->
-        </v-col>
-        <v-col cols="12" sm="6" md="12" lg="6" class="pt-0">
-          <!-- End Date -->
-          <v-menu
-            v-model="job.showEndMenu"
-            :close-on-content-click="false"
-            transition="scale-transition"
-            offset-y
-            max-width="290px"
-            min-width="290px"
-          >
-            <template v-slot:activator="{ on, attrs }">
-              <v-text-field
-                ref="formFields"
-                :value="job.endDate | formatDate"
-                label="End Date (optional)"
-                prepend-icon="event_busy"
-                :rules="dateOptionalRules"
-                hint="MM/DD/YYYY format"
-                v-mask="'##/##/####'"
-                v-bind="attrs"
-                v-on="on"
-                clearable
-                @click:clear="job.endDate = null"
-                @blur="job.endDate = parseEventDate($event)"
-              ></v-text-field>
-            </template>
-            <v-date-picker
-              v-model="job.endDate"
-              :min="job.startDate"
-              no-title
-              @input="job.showEndMenu = false"
-            ></v-date-picker>
-          </v-menu>
-          <!-- End End Date -->
-        </v-col>
-      </v-row>
+        <v-row>
+          <v-col cols="12" sm="6" md="12" lg="6" class="pt-0">
+            <!-- Start Date -->
+            <v-menu
+              v-model="position.showStartMenu"
+              :close-on-content-click="false"
+              transition="scale-transition"
+              offset-y
+              max-width="290px"
+              min-width="290px"
+            >
+              <template v-slot:activator="{ on, attrs }">
+                <v-text-field
+                  ref="formFields"
+                  :value="formatDateDashToSlash(position.startDate)"
+                  label="Start Date"
+                  prepend-icon="event_available"
+                  :rules="dateRules"
+                  readonly
+                  v-bind="attrs"
+                  v-on="on"
+                ></v-text-field>
+              </template>
+              <v-date-picker
+                v-model="position.startDate"
+                :max="position.endDate"
+                no-title
+                @input="position.showStartMenu = false"
+              ></v-date-picker>
+            </v-menu>
+            <!-- End Start Date -->
+          </v-col>
+          <v-col cols="12" sm="6" md="12" lg="6" class="pt-0">
+            <!-- End Date -->
+            <v-menu
+              v-model="position.showEndMenu"
+              :close-on-content-click="false"
+              transition="scale-transition"
+              offset-y
+              max-width="290px"
+              min-width="290px"
+            >
+              <template v-slot:activator="{ on, attrs }">
+                <v-text-field
+                  ref="formFields"
+                  :value="formatDateDashToSlash(position.endDate)"
+                  label="End Date (optional)"
+                  prepend-icon="event_busy"
+                  :rules="dateOptionalRules"
+                  readonly
+                  v-bind="attrs"
+                  v-on="on"
+                  clearable
+                  @click:clear="position.endDate = null"
+                ></v-text-field>
+              </template>
+              <v-date-picker
+                v-model="position.endDate"
+                :min="position.startDate"
+                no-title
+                @input="position.showEndMenu = false"
+              ></v-date-picker>
+            </v-menu>
+            <!-- End End Date -->
+          </v-col>
+        </v-row>
+      </div>
+      <div class="pt-4" align="center">
+        <v-btn @click="addJob(company.companyName)" elevation="2"><v-icon class="pr-1">add</v-icon>Position</v-btn>
+      </div>
     </div>
     <!-- End Loop Jobs -->
 
     <!-- Button to Add Jobs -->
     <div class="pt-4" align="center">
-      <v-btn @click="addJob()" elevation="2"><v-icon class="pr-1">add</v-icon>Job</v-btn>
+      <v-btn @click="addJob('')" elevation="2"><v-icon class="pr-1">add</v-icon>Job</v-btn>
     </div>
   </div>
 </template>
@@ -208,6 +210,8 @@ async function created() {
   window.EventBus.$emit('created', 'jobExperience'); // emit education tab was created
   this.employees = await api.getItems(api.EMPLOYEES); // get all employees
   this.populateDropDowns(); // get autocomplete drop down data
+  let companies = createCompanies(this.editedJobExperienceInfo.jobs);
+  this.$set(this.editedJobExperienceInfo, 'companies', companies);
 } // created
 
 // |--------------------------------------------------|
@@ -215,6 +219,46 @@ async function created() {
 // |                     METHODS                      |
 // |                                                  |
 // |--------------------------------------------------|
+
+function createCompanies(jobs) {
+  let newJobs = [];
+  let companies = [];
+  _.forEach(jobs, (job) => {
+    //iterates thru every job a user inputted
+    //only one position for a job
+    if (!companies.includes(job.company)) {
+      newJobs.push({
+        companyName: job.company,
+        positions: [
+          {
+            title: job.position,
+            endDate: job.endDate,
+            startDate: job.startDate,
+            showStartMenu: false,
+            showEndMenu: false
+          }
+        ]
+      });
+      companies.push(job.company);
+    }
+    //same job, multiple positions
+    else {
+      _.forEach(newJobs, (newJob) => {
+        if (newJob.companyName === job.company) {
+          //iterates thru all read jobs
+          newJob.positions.push({
+            title: job.position,
+            endDate: job.endDate,
+            startDate: job.startDate,
+            showStartMenu: false,
+            showEndMenu: false
+          });
+        }
+      });
+    }
+  });
+  return newJobs;
+}
 
 /**
  * Adds an IC Time Frame.
@@ -229,15 +273,32 @@ function addICTimeFrame() {
 /**
  * Adds a Job.
  */
-function addJob() {
-  this.editedJobExperienceInfo.jobs.push({
-    company: null,
-    position: null,
-    startDate: null,
-    endDate: null,
-    showStartMenu: false,
-    showEndMenu: false
+function addJob(company) {
+  var found = false;
+  _.forEach(this.editedJobExperienceInfo.companies, (comp) => {
+    if (comp.companyName === undefined) {
+      found = true;
+    }
+    if (comp.companyName === company) {
+      comp.positions.push({
+        title: null,
+        startDate: null,
+        endDate: null,
+        showStartMenu: false,
+        showEndMenu: false
+      });
+      found = true;
+    }
   });
+  if (!found) {
+    this.editedJobExperienceInfo.jobs.push({
+      companyName: '',
+      position: null,
+      startDate: null,
+      endDate: null
+    });
+    this.$set(this.editedJobExperienceInfo, 'companies', createCompanies(this.editedJobExperienceInfo.jobs));
+  }
 } // addJob
 
 /**
@@ -254,9 +315,28 @@ function deleteICTimeFrame(index) {
  *
  * @param index - array index of job to delete
  */
-function deleteJob(index) {
-  this.editedJobExperienceInfo.jobs.splice(index, 1);
+function deleteCompany(company) {
+  let newCompanies = [];
+  _.forEach(this.editedJobExperienceInfo.companies, (comp) => {
+    if (comp.companyName !== company.companyName) {
+      console.log(comp);
+      newCompanies.push(comp);
+    }
+  });
+  this.$set(this.editedJobExperienceInfo, 'companies', newCompanies);
 } // deleteJob
+
+function deletePosition(company, positionTitle) {
+  console.log(this.editedJobExperienceInfo.companies);
+  let positions = [];
+  _.forEach(company.positions, (pos) => {
+    if (pos.title !== positionTitle) {
+      positions.push(pos);
+    }
+  });
+  company.positions = positions;
+  this.$set(this.editedJobExperienceInfo, 'companies', this.editedJobExperienceInfo.companies);
+}
 
 /**
  * Format date range as 'Month YYYY' - 'Month YYYY' in chronological order.
@@ -356,11 +436,12 @@ export default {
   methods: {
     addICTimeFrame,
     addJob,
+    createCompanies,
     deleteICTimeFrame,
-    deleteJob,
-    formatDate,
-    parseDate,
-    parseEventDate,
+    deleteCompany,
+    deletePosition,
+    formatDateSlashToDash,
+    formatDateDashToSlash,
     formatRange,
     isEmpty,
     populateDropDowns,
