@@ -33,13 +33,15 @@
             <template v-slot:activator="{ on, attrs }">
               <v-text-field
                 ref="formFields"
-                :value="formatDateDashToSlash(award.dateReceived)"
+                :value="award.dateReceived | formatDate"
                 label="Date Received"
                 prepend-icon="event_available"
                 :rules="dateRules"
-                readonly
+                hint="MM/DD/YYYY format"
+                v-mask="'##/##/####'"
                 v-bind="attrs"
                 v-on="on"
+                @blur="award.dateReceived = parseEventDate($event)"
               ></v-text-field>
             </template>
             <v-date-picker
@@ -64,7 +66,8 @@
 <script>
 import api from '@/shared/api.js';
 import _ from 'lodash';
-import { formatDateDashToSlash, formatDateSlashToDash, isEmpty } from '@/utils/utils';
+import { formatDate, parseDate, isEmpty } from '@/utils/utils';
+import { mask } from 'vue-the-mask';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -107,6 +110,13 @@ function deleteAward(index) {
 } // deleteAward
 
 /**
+ * Parse the date after losing focus.
+ */
+function parseEventDate() {
+  return parseDate(event.target.value);
+} //parseEventDate
+
+/**
  * Validate all input fields are valid. Emit to parent the error status.
  */
 function validateFields() {
@@ -146,11 +156,14 @@ export default {
       ] // rules for a required field
     };
   },
+  directives: { mask },
+  filters: {
+    formatDate
+  },
   methods: {
     addAward,
     deleteAward,
-    formatDateSlashToDash,
-    formatDateDashToSlash,
+    parseEventDate,
     isEmpty,
     validateFields
   },
