@@ -34,15 +34,17 @@
             <template v-slot:activator="{ on, attrs }">
               <v-text-field
                 ref="formFields"
-                :value="formatDateDashToSlash(clearance.grantedDate)"
+                :value="clearance.grantedDate | formatDate"
                 label="Granted Date"
                 prepend-icon="event_available"
                 clearable
                 :rules="dateOptionalRules"
-                readonly
+                hint="MM/DD/YYYY format"
+                v-mask="'##/##/####'"
                 v-bind="attrs"
                 v-on="on"
                 @click:clear="clearance.grantedDate = null"
+                @blur="clearance.grantedDate = parseEventDate($event)"
               ></v-text-field>
             </template>
             <v-date-picker
@@ -68,15 +70,17 @@
             <template v-slot:activator="{ on, attrs }">
               <v-text-field
                 ref="formFields"
-                :value="formatDateDashToSlash(clearance.expirationDate)"
+                :value="clearance.expirationDate | formatDate"
                 label="Expiration Date"
                 prepend-icon="event_busy"
                 clearable
                 :rules="dateOptionalRules"
-                readonly
+                hint="MM/DD/YYYY format"
+                v-mask="'##/##/####'"
                 v-bind="attrs"
                 v-on="on"
                 @click:clear="clearance.expirationDate = null"
+                @blur="clearance.expirationDate = parseEventDate($event)"
               ></v-text-field>
             </template>
             <v-date-picker
@@ -101,15 +105,17 @@
             <template v-slot:activator="{ on, attrs }">
               <v-text-field
                 ref="formFields"
-                :value="formatDateDashToSlash(clearance.submissionDate)"
+                :value="clearance.submissionDate | formatDate"
                 label="Submission Date"
                 prepend-icon="event_note"
                 clearable
                 :rules="dateOptionalRules"
-                readonly
+                hint="MM/DD/YYYY format"
+                v-mask="'##/##/####'"
                 v-bind="attrs"
                 v-on="on"
                 @click:clear="clearance.submissionDate = null"
+                @blur="clearance.submissionDate = parseEventDate($event)"
               ></v-text-field>
             </template>
             <v-date-picker
@@ -135,7 +141,7 @@
       >
         <template v-slot:activator="{ on, attrs }">
           <v-combobox
-            v-model="clearance.polyDates"
+            :value="clearance.polyDates | formatDates"
             multiple
             chips
             small-chips
@@ -145,6 +151,7 @@
             readonly
             v-bind="attrs"
             v-on="on"
+            @click:clear="clearance.polyDates = []"
           ></v-combobox>
         </template>
         <v-date-picker v-model="clearance.polyDates" :min="clearance.submissionDate" multiple no-title scrollable>
@@ -167,7 +174,7 @@
       >
         <template v-slot:activator="{ on, attrs }">
           <v-combobox
-            v-model="clearance.adjudicationDates"
+            :value="clearance.adjudicationDates | formatDates"
             multiple
             chips
             small-chips
@@ -177,6 +184,7 @@
             readonly
             v-bind="attrs"
             v-on="on"
+            @click:clear="clearance.adjudicationDates = []"
           ></v-combobox>
         </template>
         <v-date-picker
@@ -207,16 +215,17 @@
         <template v-slot:activator="{ on, attrs }">
           <v-text-field
             ref="formFields"
-            :value="formatDateDashToSlash(clearance.badgeExpirationDate)"
-            v-mask="'##/##/####'"
+            :value="clearance.badgeExpirationDate | formatDate"
             label="Badge Expiration Date"
             prepend-icon="event_busy"
             clearable
             :rules="dateOptionalRules"
-            readonly
+            hint="MM/DD/YYYY format"
+            v-mask="'##/##/####'"
             v-bind="attrs"
             v-on="on"
             @click:clear="clearance.badgeExpirationDate = null"
+            @blur="clearance.badgeExpirationDate = parseEventDate($event)"
           ></v-text-field>
         </template>
         <v-date-picker
@@ -274,7 +283,7 @@ import api from '@/shared/api.js';
 const moment = require('moment-timezone');
 moment.tz.setDefault('America/New_York');
 import _ from 'lodash';
-import { formatDateDashToSlash, formatDateSlashToDash, isEmpty } from '@/utils/utils';
+import { formatDate, parseDate, isEmpty } from '@/utils/utils';
 import { mask } from 'vue-the-mask';
 
 const ISOFORMAT = 'YYYY-MM-DD';
@@ -455,6 +464,13 @@ function minExpiration(cIndex) {
 } // minExpiration
 
 /**
+ * Parse the date after losing focus.
+ */
+function parseEventDate() {
+  return parseDate(event.target.value);
+} //parseEventDate
+
+/**
  * Populate drop downs with information that other employees have filled out.
  */
 function populateDropDowns() {
@@ -508,21 +524,30 @@ export default {
       requiredRules: [(v) => !isEmpty(v) || 'This field is required'] // rules for a required field
     };
   },
+  directives: { mask },
+  filters: {
+    formatDate,
+    formatDates: function (array) {
+      let formattedDates = [];
+      array.forEach((date) => {
+        formattedDates.push(formatDate(date));
+      });
+      return formattedDates;
+    }
+  },
   methods: {
     addBIDates,
     addClearance,
     deleteBIDate,
     deleteClearance,
-    formatDateSlashToDash,
-    formatDateDashToSlash,
     formatRange,
     isEmpty,
     maxSubmission,
     minExpiration,
+    parseEventDate,
     populateDropDowns,
     validateFields
   },
-  directives: { mask },
   props: ['model', 'validating'],
   watch: {
     validating: function (val) {
