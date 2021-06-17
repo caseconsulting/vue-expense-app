@@ -61,7 +61,7 @@
           </template>
           <v-list v-if="!(isLoggedIn() && (isMobile || isSmallScreen))">
             <v-list-item>
-              <v-btn text @click="handleProfile()">Profile</v-btn>
+              <v-btn :disabled="onUserProfile" text @click="handleProfile()">Profile</v-btn>
             </v-list-item>
             <v-list-item>
               <v-btn text @click="handleLogout()">Logout</v-btn>
@@ -130,6 +130,18 @@ function isMobile() {
   let md = new MobileDetect(window.navigator.userAgent);
   return md.os() === 'AndroidOS' || md.os() === 'iOS';
 }
+
+/**
+ * Checks if the user is visiting their own profile or not
+ *
+ * @return boolean - if the user is visiting their profile
+ */
+function onUserProfile() {
+  if (this.userId == null) {
+    return false;
+  }
+  return this.$route.params.id === this.userId.toString();
+}
 // |--------------------------------------------------|
 // |                                                  |
 // |                     METHODS                      |
@@ -162,7 +174,6 @@ async function created() {
   window.EventBus.$on('relog', handleLogout); // Session end - log out
   // set expiration date if access token received
   let accessToken = getAccessToken();
-
   if (accessToken && isLoggedIn()) {
     this.date = Math.trunc(getTokenExpirationDate(accessToken).getTime());
     this.now = Math.trunc(new Date().getTime());
@@ -177,6 +188,9 @@ async function created() {
         this.session = !this.session;
       }, timeRemaining - 300000);
     }
+    //stores the employee number
+    var user = await api.getUser();
+    this.userId = user.employeeNumber;
   }
 
   let pic = getProfile();
@@ -215,6 +229,7 @@ export default {
     timedOut: false,
     session: false,
     now: Math.trunc(new Date().getTime() / 1000),
+    userId: null,
     date: null,
     links: [
       { name: 'Basecamp', link: 'https://3.basecamp.com/3097063' },
@@ -235,13 +250,15 @@ export default {
       { name: 'Twitter', link: 'https://twitter.com/consultwithcase?lang=en', icon: 'brands/twitter' },
       { name: 'Facebook', link: 'https://www.facebook.com/ConsultwithCase/', icon: 'brands/facebook' }
     ],
-    isSmallScreen: false
+    isSmallScreen: false,
+    version: null
   }),
   props: {
     source: String
   },
   computed: {
-    isMobile
+    isMobile,
+    onUserProfile
   },
   components: {
     MainNav,
