@@ -158,10 +158,8 @@
                 label="End Date (optional)"
                 prepend-icon="event_busy"
                 :rules="dateOptionalRules"
-<<<<<<< HEAD
                 hint="MM/DD/YYYY format"
                 v-mask="'##/##/####'"
->>>>>>> 2291-Make-bar-chart-that-shows-num-case-employee-with-certain-technology: Bar chart protoype working
                 v-bind="attrs"
                 v-on="on"
                 clearable
