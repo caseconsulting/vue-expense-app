@@ -62,8 +62,6 @@ function exportCSVFile(person, fileTitle) {
   let clearances = getInfo(person.clearances);
   let languages = getInfo(person.languages);
 
-  console.log(technologies);
-
   let tempEmployee = [
     person.firstName || '', //Start of employee
     person.middleName || '',
@@ -218,7 +216,6 @@ function getInfo(info) {
       }
     }
 
-    console.log(currInfo);
     infoList.push(currInfo);
   });
 
