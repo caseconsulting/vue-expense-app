@@ -127,6 +127,7 @@
               v-model="purchaseDateFormatted"
               :rules="dateRules"
               :disabled="(isReimbursed && !isDifferentExpenseType) || isInactive"
+              v-mask="'##/##/####'"
               label="Purchase Date"
               hint="MM/DD/YYYY format"
               persistent-hint
@@ -156,6 +157,7 @@
               v-model="reimbursedDateFormatted"
               :rules="optionalDateRules"
               :disabled="(isReimbursed && !isDifferentExpenseType) || isInactive"
+              v-mask="'##/##/####'"
               label="Reimburse Date (optional)"
               hint="MM/DD/YYYY format "
               persistent-hint
@@ -274,6 +276,7 @@ const moment = require('moment-timezone');
 moment.tz.setDefault('America/New_York');
 import { v4 as uuid } from 'uuid';
 import { isEmpty, isFullTime } from '@/utils/utils';
+import { mask } from 'vue-the-mask';
 import _ from 'lodash';
 
 const IsoFormat = 'YYYY-MM-DD';
@@ -1522,6 +1525,7 @@ export default {
       valid: false // form validity
     };
   },
+  directives: { mask },
   methods: {
     addURLInfo,
     betweenDates,
