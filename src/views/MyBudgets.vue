@@ -605,10 +605,6 @@ export default {
   created,
   data() {
     return {
-      attrs: {
-        class: 'my-3'
-        // $skeleton-loader-image-height: 100px;
-      },
       actualTime: moment().format('X'), // current time (unix ms timestamp)
       allUserBudgets: null, // all user budgets
       budgetYears: [], // list of options for chaning budget year view
