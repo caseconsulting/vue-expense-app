@@ -34,13 +34,15 @@
             <template v-slot:activator="{ on, attrs }">
               <v-text-field
                 ref="formFields"
-                :value="formatDateDashToSlash(certification.dateReceived)"
+                :value="certification.dateReceived | formatDate"
                 label="Date Received"
                 prepend-icon="event_available"
                 :rules="dateRules"
-                readonly
+                hint="MM/DD/YYYY format"
+                v-mask="'##/##/####'"
                 v-bind="attrs"
                 v-on="on"
+                @blur="certification.dateReceived = parseEventDate($event)"
               ></v-text-field>
             </template>
             <v-date-picker
@@ -65,16 +67,18 @@
             <template v-slot:activator="{ on, attrs }">
               <v-text-field
                 ref="formFields"
-                :value="formatDateDashToSlash(certification.expirationDate)"
+                :value="certification.expirationDate | formatDate"
                 label="Expiration Date (optional)"
                 prepend-icon="event_busy"
                 :rules="dateOptionalRules"
-                readonly
+                hint="MM/DD/YYYY format"
+                v-mask="'##/##/####'"
                 v-bind="attrs"
                 v-on="on"
                 clearable
                 hide-details
                 @click:clear="certification.expirationDate = null"
+                @blur="certification.expirationDate = parseEventDate($event)"
               ></v-text-field>
             </template>
             <v-date-picker
@@ -100,7 +104,8 @@
 <script>
 import api from '@/shared/api.js';
 import _ from 'lodash';
-import { formatDateDashToSlash, formatDateSlashToDash, isEmpty } from '@/utils/utils';
+import { formatDate, parseDate, isEmpty } from '@/utils/utils';
+import { mask } from 'vue-the-mask';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -144,6 +149,13 @@ function addCertification() {
 function deleteCertification(index) {
   this.editedCertifications.splice(index, 1);
 } // deleteCertification
+
+/**
+ * Parse the date after losing focus.
+ */
+function parseEventDate() {
+  return parseDate(event.target.value);
+} //parseEventDate
 
 /**
  * Populate drop downs with information that other employees have filled out.
@@ -201,12 +213,15 @@ export default {
       ] // rules for a required field
     };
   },
+  directives: { mask },
+  filters: {
+    formatDate
+  },
   methods: {
     addCertification,
     deleteCertification,
-    formatDateSlashToDash,
-    formatDateDashToSlash,
     isEmpty,
+    parseEventDate,
     populateDropDowns,
     validateFields
   },
