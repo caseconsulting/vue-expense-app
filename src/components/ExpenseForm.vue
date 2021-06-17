@@ -401,7 +401,17 @@ async function getRemainingBudget() {
     let budgets = await api.getAllActiveEmployeeBudgets(this.editedExpense.employeeId);
     if (budgets) {
       let budget = budgets.find((currBudget) => currBudget.expenseTypeId === this.editedExpense.expenseTypeId);
-      return budget;
+
+      if (budget) {
+        this.remainingBudget =
+          budget.budgetObject.amount -
+          budget.budgetObject.pendingAmount -
+          budget.budgetObject.reimbursedAmount -
+          this.editedExpense.cost;
+        this.expenseTypeName = budget.expenseTypeName;
+      } else {
+        this.remainingBudget = '';
+      }
     }
   }
 }
@@ -1577,18 +1587,7 @@ export default {
     },
     'editedExpense.cost': function () {
       //update remaining budget
-      this.getRemainingBudget().then((budget) => {
-        if (budget) {
-          this.remainingBudget =
-            budget.budgetObject.amount -
-            budget.budgetObject.pendingAmount -
-            budget.budgetObject.reimbursedAmount -
-            this.editedExpense.cost;
-          this.expenseTypeName = budget.expenseTypeName;
-        } else {
-          this.remainingBudget = '';
-        }
-      });
+      this.getRemainingBudget();
     },
     'editedExpense.expenseTypeId': function () {
       this.selectedExpenseType = _.find(this.expenseTypes, (expenseType) => {
@@ -1662,18 +1661,7 @@ export default {
       }
 
       //update remaining budget
-      this.getRemainingBudget().then((budget) => {
-        if (budget) {
-          this.remainingBudget =
-            budget.budgetObject.amount -
-            budget.budgetObject.pendingAmount -
-            budget.budgetObject.reimbursedAmount -
-            this.editedExpense.cost;
-          this.expenseTypeName = budget.expenseTypeName;
-        } else {
-          this.remainingBudget = '';
-        }
-      });
+      this.getRemainingBudget();
     },
     'editedExpense.category': function () {
       if (
@@ -1726,6 +1714,7 @@ export default {
     },
     'editedExpense.employeeId': function () {
       this.setRecipientOptions();
+      this.getRemainingBudget();
     },
     'editedExpense.purchaseDate': function () {
       this.purchaseDateFormatted = this.formatDate(this.editedExpense.purchaseDate) || this.purchaseDateFormatted;
