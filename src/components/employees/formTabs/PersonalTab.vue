@@ -98,6 +98,7 @@
 
 <script>
 import api from '@/shared/api.js';
+import moment from 'moment-timezone';
 import _ from 'lodash';
 import { formatDate, isEmpty, parseDate } from '@/utils/utils';
 import { mask } from 'vue-the-mask';
@@ -200,7 +201,9 @@ export default {
       dateOptionalRules: [
         (v) => {
           return !isEmpty(v) ? /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v) || 'Date must be valid. Format: MM/DD/YYYY' : true;
-        }
+        },
+        (v) => moment(v, 'MM/DD/YYYY').isValid() || 'Date must be valid',
+        (v) => moment(v).isBefore(moment()) || 'Date must not be a future date'
       ], // rules for an optional date
       urlRules: [
         (v) =>
