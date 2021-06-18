@@ -98,10 +98,11 @@
 
 <script>
 import api from '@/shared/api.js';
-import moment from 'moment-timezone';
 import _ from 'lodash';
 import { formatDate, isEmpty, parseDate } from '@/utils/utils';
 import { mask } from 'vue-the-mask';
+const moment = require('moment-timezone');
+moment.tz.setDefault('America/New_York');
 
 // |--------------------------------------------------|
 // |                                                  |

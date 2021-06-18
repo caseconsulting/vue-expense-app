@@ -150,6 +150,8 @@ import api from '@/shared/api.js';
 import _ from 'lodash';
 import { isEmpty, formatDateMonthYear, parseDateMonthYear } from '@/utils/utils';
 import { mask } from 'vue-the-mask';
+const moment = require('moment-timezone');
+moment.tz.setDefault('America/New_York');
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -332,7 +334,8 @@ export default {
       concentrationDropDown: [], // autocomplete concentration options
       dateRules: [
         (v) => !isEmpty(v) || 'Date must be valid. Format: MM/YYYY',
-        (v) => (!isEmpty(v) && /[\d]{2}\/[\d]{4}/.test(v)) || 'Date must be valid. Format: MM/YYYY'
+        (v) => (!isEmpty(v) && /[\d]{2}\/[\d]{4}/.test(v)) || 'Date must be valid. Format: MM/YYYY',
+        (v) => moment(v, 'MM/YYYY').isValid() || 'Date must be valid'
       ], // rules for a required date
       editedDegrees: _.cloneDeep(this.model), // stores edited degree info
       degreeDropDown: [], // autocomplete degree name options
