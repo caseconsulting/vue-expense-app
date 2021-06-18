@@ -79,6 +79,7 @@
               :rules="dateRules"
               label="Start Date"
               hint="MM/DD/YYYY format"
+              v-mask="'##/##/####'"
               persistent-hint
               prepend-icon="event"
               @blur="editedExpenseType.startDate = parseDate(startDateFormatted)"
@@ -107,6 +108,7 @@
               :rules="dateRules"
               label="End Date"
               hint="MM/DD/YYYY format"
+              v-mask="'##/##/####'"
               persistent-hint
               prepend-icon="event"
               @blur="editedExpenseType.endDate = parseDate(endDateFormatted)"
@@ -262,6 +264,7 @@ import FormSubmissionConfirmation from '@/components/modals/FormSubmissionConfir
 import _ from 'lodash';
 import { v4 as uuid } from 'uuid';
 import { formatDate, isEmpty, parseDate } from '@/utils/utils';
+import { mask } from 'vue-the-mask';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -574,6 +577,7 @@ export default {
       valid: false // form is valid
     };
   },
+  directives: { mask },
   methods: {
     checkRequireURL,
     checkSelection,
