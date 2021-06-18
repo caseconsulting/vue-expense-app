@@ -280,11 +280,11 @@
 
 <script>
 import api from '@/shared/api.js';
-const moment = require('moment-timezone');
-moment.tz.setDefault('America/New_York');
 import _ from 'lodash';
 import { formatDate, parseDate, isEmpty } from '@/utils/utils';
 import { mask } from 'vue-the-mask';
+const moment = require('moment-timezone');
+moment.tz.setDefault('America/New_York');
 
 const ISOFORMAT = 'YYYY-MM-DD';
 
@@ -514,11 +514,13 @@ export default {
       dateOptionalRules: [
         (v) => {
           return !isEmpty(v) ? /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v) || 'Date must be valid. Format: MM/DD/YYYY' : true;
-        }
+        },
+        (v) => (!isEmpty(v) ? moment(v, 'MM/DD/YYYY').isValid() || 'Date must be valid' : true)
       ], // rules for an optional date
       dateRules: [
         (v) => !isEmpty(v) || 'Date required',
-        (v) => (!isEmpty(v) && /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v)) || 'Date must be valid. Format: MM/DD/YYYY'
+        (v) => (!isEmpty(v) && /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v)) || 'Date must be valid. Format: MM/DD/YYYY',
+        (v) => moment(v, 'MM/DD/YYYY').isValid() || 'Date must be valid'
       ], // rules for a required date
       editedClearances: _.cloneDeep(this.model), // stores edited clearances info
       requiredRules: [(v) => !isEmpty(v) || 'This field is required'] // rules for a required field
