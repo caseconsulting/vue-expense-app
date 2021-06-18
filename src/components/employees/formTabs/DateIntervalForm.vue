@@ -342,10 +342,12 @@ export default {
         this.formatToggle == 1 && this.endIntervalDateEdited
           ? this.endIntervalDateEdited + '-01'
           : this.endIntervalDateEdited;
+
       //only sends date back to technology tab if in correct format (can be null because date is optional)
-      if (end && end != this.endIntervalDate && end.length == 7) {
+      if (end == null || (end && end != this.endIntervalDate && end.length == 7)) {
         this.$emit('end', this.technologyIndex, this.intervalIndex, end);
       }
+
       this.$refs.formFields.validate();
     }
   }
