@@ -37,6 +37,10 @@
             :allIntervals="technology.dateIntervals"
             :technologyIndex="index"
             :intervalIndex="intervalIndex"
+            @delete="deleteDateInterval"
+            @validated="validateDateInterval"
+            @start="updateStartInterval"
+            @end="updateEndInterval"
           ></date-interval-form>
         </div>
       </v-row>
@@ -88,49 +92,6 @@ async function created() {
       this.editedTechnologies[i].dateIntervals = [];
     }
   }
-  //delete a date interval based on technology index and dateIntervalIndex
-  window.EventBus.$on('date-interval-delete-technology', (technologyIndex, dateIntervalIndex) => {
-    this.deleteDateInterval(technologyIndex, dateIntervalIndex);
-  });
-
-  //update a start date interval based on technology index and dateIntervalIndex
-  window.EventBus.$on('update-start-interval-technology', (technologyIndex, dateIntervalIndex, editedStartDate) => {
-    if (
-      this.editedTechnologies &&
-      this.editedTechnologies[technologyIndex] &&
-      this.editedTechnologies[technologyIndex].dateIntervals &&
-      this.editedTechnologies[technologyIndex].dateIntervals[dateIntervalIndex]
-    )
-      this.editedTechnologies[technologyIndex].dateIntervals[dateIntervalIndex].startDate = _.cloneDeep(
-        editedStartDate
-      );
-    this.editedTechnologies = _.cloneDeep(this.editedTechnologies);
-  });
-
-  //update a end date interval based on technology index and dateIntervalIndex
-  window.EventBus.$on('update-end-interval-technology', (technologyIndex, dateIntervalIndex, editedEndDate) => {
-    if (
-      this.editedTechnologies &&
-      this.editedTechnologies[technologyIndex] &&
-      this.editedTechnologies[technologyIndex].dateIntervals &&
-      this.editedTechnologies[technologyIndex].dateIntervals[dateIntervalIndex]
-    ) {
-      this.editedTechnologies[technologyIndex].dateIntervals[dateIntervalIndex].endDate = _.cloneDeep(editedEndDate);
-      this.editedTechnologies = _.cloneDeep(this.editedTechnologies);
-    }
-  });
-
-  //update validation results of interval based on technology index and dateIntervalIndex
-  window.EventBus.$on('validated-technology-interval', (technologyIndex, dateIntervalIndex, hasErrors) => {
-    if (
-      this.editedTechnologies &&
-      this.editedTechnologies[technologyIndex] &&
-      this.editedTechnologies[technologyIndex].dateIntervals &&
-      this.editedTechnologies[technologyIndex].dateIntervals[dateIntervalIndex]
-    ) {
-      this.editedTechnologies[technologyIndex].dateIntervals[dateIntervalIndex].hasErrors = _.cloneDeep(hasErrors);
-    }
-  });
 } // created
 
 // |--------------------------------------------------|
@@ -160,6 +121,63 @@ async function addTimeInterval(index) {
 } // addTimeInterval
 
 /**
+ * The function that's triggered when the @validated event gets triggered
+ *
+ * @param technologyIndex the index in the array of technology
+ * @param dateIntervalIndex the index in the list of dateIntervals for a given technology
+ * @param hasErrors indicated whether or not the date interval has errors
+ */
+function validateDateInterval(technologyIndex, dateIntervalIndex, hasErrors) {
+  if (
+    this.editedTechnologies &&
+    this.editedTechnologies[technologyIndex] &&
+    this.editedTechnologies[technologyIndex].dateIntervals &&
+    this.editedTechnologies[technologyIndex].dateIntervals[dateIntervalIndex]
+  ) {
+    this.editedTechnologies[technologyIndex].dateIntervals[dateIntervalIndex].hasErrors = _.cloneDeep(hasErrors);
+  }
+} // validateDateInterval
+
+/**
+ * The function that's triggered when the @start event gets triggered.
+ * It updates the start date for the date interval at position dateIntervalIndex
+ *
+ * @param technologyIndex the index in the array of technology
+ * @param dateIntervalIndex the index in the list of dateIntervals for a given technology
+ * @param editedStartDate the new start date
+ */
+function updateStartInterval(technologyIndex, dateIntervalIndex, editedStartDate) {
+  if (
+    this.editedTechnologies &&
+    this.editedTechnologies[technologyIndex] &&
+    this.editedTechnologies[technologyIndex].dateIntervals &&
+    this.editedTechnologies[technologyIndex].dateIntervals[dateIntervalIndex]
+  )
+    this.editedTechnologies[technologyIndex].dateIntervals[dateIntervalIndex].startDate = _.cloneDeep(editedStartDate);
+  this.editedTechnologies = _.cloneDeep(this.editedTechnologies);
+} //updateStartInterval
+
+/**
+ * The function that's triggered when the @start event gets triggered.
+ * It updates the end date for the date interval at position dateIntervalIndex
+ *
+ * @param technologyIndex the index in the array of technology
+ * @param dateIntervalIndex the index in the list of dateIntervals for a given technology
+ * @param editedEndDate the new end date
+ */
+function updateEndInterval(technologyIndex, dateIntervalIndex, editedEndDate) {
+  if (
+    this.editedTechnologies &&
+    this.editedTechnologies[technologyIndex] &&
+    this.editedTechnologies[technologyIndex].dateIntervals &&
+    this.editedTechnologies[technologyIndex].dateIntervals[dateIntervalIndex]
+  ) {
+    this.editedTechnologies[technologyIndex].dateIntervals[dateIntervalIndex].endDate = _.cloneDeep(editedEndDate);
+    this.editedTechnologies = _.cloneDeep(this.editedTechnologies);
+  }
+} //updateEndInterval
+
+/**
  * Deletes a time interval for a technology.
  * @param technologyIndex - index of the technology you want to remove time interval from
  * @param dateIntervalIndex - index of the date interval you want to remove
@@ -172,6 +190,7 @@ function deleteDateInterval(technologyIndex, dateIntervalIndex) {
     this.editedTechnologies[technologyIndex].dateIntervals.splice(dateIntervalIndex, 1);
   }
 } //deleteDateInterval
+
 /**
  * Deletes a Technology.
  *
@@ -342,8 +361,11 @@ export default {
     isDuplicate,
     isEmpty,
     populateDropDowns,
+    updateEndInterval,
+    updateStartInterval,
     validateFields,
-    validateTimeIntervals
+    validateTimeIntervals,
+    validateDateInterval
   },
   props: ['model', 'validating'],
   watch: {

@@ -41,7 +41,7 @@
         <template v-slot:activator="{ on, attrs }">
           <v-text-field
             ref="formFields"
-            v-model="tempStartIntervalDate"
+            :value="startIntervalDateEdited | formatDateMonthYear"
             v-mask="'##/####'"
             color="#A17C6B"
             label="Start Date"
@@ -56,8 +56,8 @@
             lazy-validation
             persistent-hint
             hint="(MM/YYYY)"
-            @blur="startIntervalDateEdited = parseDateMonthYear(tempStartIntervalDate)"
-            @click:clear="startIntervalDateEdited = parseDateMonthYear(tempStartIntervalDate)"
+            @blur="startIntervalDateEdited = parseDateMonthYear($event.target.value)"
+            @click:clear="startIntervalDateEdited = parseDateMonthYear($event.target.value)"
           ></v-text-field>
         </template>
         <v-date-picker
@@ -82,7 +82,7 @@
         <template v-slot:activator="{ on, attrs }">
           <v-text-field
             ref="formFields"
-            v-model="tempEndIntervalDate"
+            :value="endIntervalDateEdited | formatDateMonthYear"
             v-mask="'##/####'"
             color="#A17C6B"
             label="End Date (optional)"
@@ -97,8 +97,8 @@
             lazy-validation
             persistent-hint
             hint="(MM/YYYY)"
-            @blur="endIntervalDateEdited = parseDateMonthYear(tempEndIntervalDate)"
-            @click:clear="endIntervalDateEdited = parseDateMonthYear(tempEndIntervalDate)"
+            @blur="endIntervalDateEdited = parseDateMonthYear($event.target.value)"
+            @click:clear="endIntervalDateEdited = parseDateMonthYear($event.target.value)"
           ></v-text-field>
         </template>
         <v-date-picker
@@ -153,6 +153,9 @@
       <!-- Button to Delete Interval -->
       <v-btn class="mt-8" text icon><v-icon @click="deleteInterval">delete</v-icon></v-btn>
     </v-row>
+    <v-row class="pb-5 caption text--darken-2 grey--text">
+      If you are unsure about the exact date, please put an approximate one.
+    </v-row>
   </div>
 </template>
 
@@ -161,33 +164,11 @@ import _ from 'lodash';
 import { mask } from 'vue-the-mask';
 import moment from 'moment-timezone';
 import { isEmpty, parseDateMonthYear, formatDateMonthYear } from '@/utils/utils';
-
 // |--------------------------------------------------|
 // |                                                  |
 // |                 LIFECYCLE HOOKS                  |
 // |                                                  |
 // |--------------------------------------------------|
-
-/**
- * Sets up temp variables.
- */
-async function created() {
-  //set temp start date interval variable
-  this.tempStartIntervalDate = formatDateMonthYear(this.startIntervalDateEdited) || this.tempStartIntervalDate;
-  // fixes v-date-picker error so that if the format of date is incorrect it is set to null
-  if (this.startIntervalDateEdited !== null && !formatDateMonthYear(this.startIntervalDateEdited)) {
-    // clear date if fails to format
-    this.startIntervalDateEdited = null;
-  }
-
-  //set temp end date interval variable
-  this.tempEndIntervalDate = formatDateMonthYear(this.endIntervalDateEdited) || this.tempEndIntervalDate;
-  // fixes v-date-picker error so that if the format of date is incorrect it is set to null
-  if (this.endIntervalDateEdited !== null && !formatDateMonthYear(this.endIntervalDateEdited)) {
-    // clear date if fails to format
-    this.endIntervalDateEdited = null;
-  }
-} //created
 
 /**
  * Computed property to calculate if interval overlaps any of the other intervals in the allIntervals prop. Sends back the error status to the parent component.
@@ -196,12 +177,10 @@ async function created() {
  */
 function intervalOverlaps() {
   let hasErrors = false;
-
   //sets startDate based on format
   const startDate = this.formatToggle
     ? moment([this.startIntervalDateEdited, 0]).format('YYYY-MM')
     : this.startIntervalDateEdited;
-
   //sets endDate based on format
   const endDate = this.formatToggle
     ? moment([this.endIntervalDateEdited, 0]).format('YYYY-MM')
@@ -228,29 +207,25 @@ function intervalOverlaps() {
       }
     }
   }
-
   //send validation result back to parent
-  window.EventBus.$emit('validated-technology-interval', this.technologyIndex, this.intervalIndex, hasErrors);
+  this.$emit('validated', this.technologyIndex, this.intervalIndex, hasErrors);
   return hasErrors;
 } //intervalOverlaps
-
 // |--------------------------------------------------|
 // |                                                  |
 // |                     METHODS                      |
 // |                                                  |
 // |--------------------------------------------------|
-
 /**
  * Deletes interval from parent.
  */
 async function deleteInterval() {
   this.tempStartIntervalDate = null;
   this.tempEndIntervalDate = null;
-  window.EventBus.$emit('date-interval-delete-technology', this.technologyIndex, this.intervalIndex);
+  this.$emit('delete', this.technologyIndex, this.intervalIndex);
 } // deleteInterval
 
 export default {
-  created,
   computed: {
     intervalOverlaps
   },
@@ -310,6 +285,16 @@ export default {
     };
   },
   directives: { mask },
+  filters: {
+    formatDateMonthYear,
+    getYear(date) {
+      if (!date) {
+        return null;
+      }
+      const [year] = date.split('-');
+      return year;
+    }
+  },
   methods: {
     deleteInterval,
     isEmpty,
@@ -323,87 +308,44 @@ export default {
       if (this.formatToggle == 1) {
         this.startIntervalDateEdited = !isEmpty(this.startIntervalDate) ? this.startIntervalDate.split('-')[0] : null;
         this.endIntervalDateEdited = !isEmpty(this.endIntervalDate) ? this.endIntervalDate.split('-')[0] : null;
-
         //close opened date menus
         this.startIntervalMenu = false;
         this.endIntervalMenu = false;
       }
-
       //change to MM-YYYY format
       if (this.formatToggle == 0) {
         this.startIntervalDateEdited = this.startIntervalDate;
         this.endIntervalDateEdited = this.endIntervalDate;
       }
+
+      this.$emit('start', this.technologyIndex, this.intervalIndex, this.startIntervalDateEdited);
+      this.$emit('end', this.technologyIndex, this.intervalIndex, this.endIntervalDateEdited);
+
       this.$refs.formFields.resetValidation();
       this.$refs.formFields.validate();
     },
-    startIntervalDate: function () {
-      //YYYY format
-      if (this.formatToggle == 1) {
-        this.startIntervalDateEdited = !isEmpty(this.startIntervalDate) ? this.startIntervalDate.split('-')[0] : null;
-      } else {
-        //MM-YYYY format
-        this.startIntervalDateEdited = _.cloneDeep(this.startIntervalDate);
-      }
-
-      this.$refs.formFields.validate(); //validate dates everytime a date changes
-    },
-    endIntervalDate: function () {
-      //YYYY format
-      if (this.formatToggle == 1) {
-        this.endIntervalDateEdited = !isEmpty(this.endIntervalDate) ? this.endIntervalDate.split('-')[0] : null;
-      } else {
-        //MM-YYYY format
-        this.endIntervalDateEdited = _.cloneDeep(this.endIntervalDate);
-      }
-
-      this.$refs.formFields.validate(); //validate dates everytime a date changes
-    },
     startIntervalDateEdited: function () {
-      //MM-YYYY format sets temp variable
-      if (this.formatToggle == 0) {
-        //function that updates the text box when date picker is changed
-        this.tempStartIntervalDate = formatDateMonthYear(this.startIntervalDateEdited) || this.tempStartIntervalDate;
-        //fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
-        if (this.startIntervalDateEdited !== null && !formatDateMonthYear(this.startIntervalDateEdited)) {
-          this.startIntervalDateEdited = null;
-        }
-      }
-
       //temp variable for checking equality
       let start =
         this.formatToggle == 1 && this.startIntervalDateEdited
           ? this.startIntervalDateEdited + '-01'
           : this.startIntervalDateEdited;
-
       //only sends date back to technology tab if in correct format
       if (start && start != this.startIntervalDate && start.length == 7) {
-        window.EventBus.$emit('update-start-interval-technology', this.technologyIndex, this.intervalIndex, start);
+        this.$emit('start', this.technologyIndex, this.intervalIndex, start);
       }
-
       this.$refs.formFields.validate();
     },
     endIntervalDateEdited: function () {
-      //MM-YYYY format sets temp variable
-      if (this.formatToggle == 0) {
-        //function that updates the text box when date picker is changed
-        this.tempEndIntervalDate = formatDateMonthYear(this.endIntervalDateEdited) || this.tempEndIntervalDate;
-        //fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
-        if (this.endIntervalDateEdited !== null && !formatDateMonthYear(this.endIntervalDateEdited)) {
-          this.endIntervalDateEdited = null;
-        }
-      }
       //temp variable for checking equality
       let end =
         this.formatToggle == 1 && this.endIntervalDateEdited
           ? this.endIntervalDateEdited + '-01'
           : this.endIntervalDateEdited;
-
       //only sends date back to technology tab if in correct format (can be null because date is optional)
-      if (end == null || (end && end != this.endIntervalDate && end.length == 7)) {
-        window.EventBus.$emit('update-end-interval-technology', this.technologyIndex, this.intervalIndex, end);
+      if (end && end != this.endIntervalDate && end.length == 7) {
+        this.$emit('end', this.technologyIndex, this.intervalIndex, end);
       }
-
       this.$refs.formFields.validate();
     }
   }
