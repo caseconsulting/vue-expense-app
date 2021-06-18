@@ -76,7 +76,6 @@
                 v-bind="attrs"
                 v-on="on"
                 clearable
-                hide-details
                 @click:clear="certification.expirationDate = null"
                 @blur="certification.expirationDate = parseEventDate($event)"
               ></v-text-field>
@@ -106,6 +105,8 @@ import api from '@/shared/api.js';
 import _ from 'lodash';
 import { formatDate, parseDate, isEmpty } from '@/utils/utils';
 import { mask } from 'vue-the-mask';
+const moment = require('moment-timezone');
+moment.tz.setDefault('America/New_York');
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -201,11 +202,13 @@ export default {
       dateOptionalRules: [
         (v) => {
           return !isEmpty(v) ? /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v) || 'Date must be valid. Format: MM/DD/YYYY' : true;
-        }
+        },
+        (v) => (!isEmpty(v) ? moment(v, 'MM/DD/YYYY').isValid() || 'Date must be valid' : true)
       ], // rules for an optional date
       dateRules: [
         (v) => !isEmpty(v) || 'Date required',
-        (v) => (!isEmpty(v) && /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v)) || 'Date must be valid. Format: MM/DD/YYYY'
+        (v) => (!isEmpty(v) && /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v)) || 'Date must be valid. Format: MM/DD/YYYY',
+        (v) => moment(v, 'MM/DD/YYYY').isValid() || 'Date must be valid'
       ], // rules for a required date
       editedCertifications: _.cloneDeep(this.model), // stores edited certifications info
       requiredRules: [
