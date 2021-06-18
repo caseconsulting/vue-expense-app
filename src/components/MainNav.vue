@@ -165,7 +165,7 @@ export default {
           title: 'Home',
           icon: 'home',
           route: 'home',
-          permission: ['user', 'admin'],
+          permission: ['user', 'admin', 'intern'],
           active: false
         },
         {
@@ -205,7 +205,7 @@ export default {
           alias: ['employee'],
           icon: 'users',
           route: 'employees',
-          permission: ['admin', 'user'],
+          permission: ['admin', 'user', 'intern'],
           active: false
         },
         {

@@ -69,6 +69,7 @@ function isDisplayData(item) {
  */
 async function getEmployee() {
   let employees = await api.getItems(api.EMPLOYEES);
+  console.log(employees);
   this.model = _.find(employees, (employee) => {
     return employee.employeeNumber == this.$route.params.id;
   });
