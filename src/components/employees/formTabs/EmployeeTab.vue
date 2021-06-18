@@ -105,6 +105,7 @@
           v-model="hireDateFormatted"
           :rules="dateRules"
           :disabled="hasExpenses || !admin"
+          v-mask="'##/##/####'"
           label="Hire Date"
           hint="MM/DD/YYYY format"
           persistent-hint
@@ -218,6 +219,7 @@ import api from '@/shared/api.js';
 import MobileDetect from 'mobile-detect';
 import _ from 'lodash';
 import { formatDate, isEmpty, parseDate } from '@/utils/utils';
+import { mask } from 'vue-the-mask';
 
 const regex = /^(([^<>()[\]\\.,;:\s@#"]+(\.[^<>()[\]\\.,;:\s@#"]+)*)|(".+"))@consultwithcase.com/;
 
@@ -420,6 +422,7 @@ export default {
       value: '' // used for removing non-number characters from the workstatus
     };
   },
+  directives: { mask },
   methods: {
     formatDate,
     formatKebabCase,
