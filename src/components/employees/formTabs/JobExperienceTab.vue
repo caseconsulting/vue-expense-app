@@ -227,7 +227,7 @@ async function created() {
 /**
  * Takes the jobs field from this.model and converts it into an object that can support
  * company + position nested relationships for the form
- * 
+ *
  * @param jobs - this.model.jobs
  */
 function createCompanies(jobs) {
@@ -286,19 +286,21 @@ function addICTimeFrame() {
 function addCompany() {
   this.editedJobExperienceInfo.companies.push({
     companyName: '',
-    positions: [{
-      title: '',
-      endDate: null,
-      startDate: null,
-      showStartMenu: false,
-      showEndMenu: false
-    }]
+    positions: [
+      {
+        title: '',
+        endDate: null,
+        startDate: null,
+        showStartMenu: false,
+        showEndMenu: false
+      }
+    ]
   });
 } // addCompany
 
 /**
  * Adds a position form underneath the respective company.
- * 
+ *
  * @param compIndex - company to place the position under
  */
 function addPosition(compIndex) {
@@ -332,7 +334,7 @@ function deleteCompany(index) {
 /**
  * Deletes a single position. Will delete the entire company entry if there are no positions
  * remaining
- * 
+ *
  * @param compIndex - index of the company form
  * @param posIndex - index of the position form
  */
