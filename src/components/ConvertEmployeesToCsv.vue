@@ -55,9 +55,8 @@ function exportCSVFile(items, fileTitle) {
   let tempEmployees = [];
   for (var i = 0; i < items.length; i++) {
     let person = items[i];
-
+    console.log(person);
     let placeOfBirth = (person.city || ' ') + ' ' + (person.st || ' ') + ' ' + (person.country || ' ');
-    console.log(typeof person.awards);
     tempEmployees[i] = [
       person.employeeNumber || '',
       person.firstName || '',
@@ -74,7 +73,17 @@ function exportCSVFile(items, fileTitle) {
       person.github || '',
       person.employeeRole || '',
       getWorkStatus(person.workStatus) || '',
-      person.id || ''
+      person.id || '',
+      filterUndefined(person.awards, getAwards) || ''
+      // certifications || '',
+      // clearance || '',
+      // contract || '',
+      // customerOrg || '',
+      // education || '',
+      // employee || '',
+      // jobExperience || '',
+      // personal || '',
+      // technology || ''
     ];
   }
 
@@ -95,7 +104,16 @@ function exportCSVFile(items, fileTitle) {
     'Expense App Role',
     'Status',
     'id',
-    'Awards'
+    'Awards',
+    'Certifications',
+    'Clearance',
+    'Contract',
+    'Customer Org',
+    'Education',
+    'Employee',
+    'Job Experience',
+    'Personal',
+    'Technology'
   ];
 
   tempEmployees.sort((a, b) => {
@@ -152,21 +170,35 @@ function getWorkStatus(workStatus) {
 } // getWorkStatus
 
 /**
- * Returns a work status 'Full Time', 'Part Time', 'Inactive', or 'Invalid Status'.
+ * Filters out undefined elements of employee data
  *
- * @param employeeAwards - employee work status
- * @return String - work status description
+ * @param data - An array of objects. Some will be undefined.
+ * @return String - specific employee data
  */
-// function getAwards(awards) {
-//   console.log(typeof awards);
-//   console.log(awards);
-//   console.log(Object.entries(awards));
-//   // for (var i = 0; i < awardArray.length; i++) {
-//   //   if (awardsArray[i] !== undefined) {
-//   //     console.log(Object.entries(awardArray[i]));
-//   //   }
-//   // }
-// } // getAwards
+function filterUndefined(data, func) {
+  let a = '';
+  if (typeof data !== 'undefined') {
+    a = func(data);
+  }
+  return a;
+}
+
+/**
+ * Returns award data for employee
+ *
+ * @param awards - An array of objects.
+ * @return String - awards
+ */
+function getAwards(awards) {
+  let a = '';
+  for (let i = 0; i < awards.length; i++) {
+    a += awards[i].name + ' - ' + awards[i].dateReceived;
+    if (i + 1 < awards.length) {
+      a += ', ';
+    }
+  }
+  return a;
+} // getAwards
 
 // |--------------------------------------------------|
 // |                                                  |
