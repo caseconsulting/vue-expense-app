@@ -202,7 +202,10 @@
           <!-- End form action buttons -->
         </v-form>
         <!-- Confirmation Model -->
-        <form-submission-confirmation v-if="!this.hasErrors" :toggleSubmissionConfirmation="this.confirming"></form-submission-confirmation>
+        <form-submission-confirmation
+          v-if="!this.hasErrors"
+          :toggleSubmissionConfirmation="this.confirming"
+        ></form-submission-confirmation>
         <many-form-errors v-else :toggleSubmissionConfirmation="this.confirming"></many-form-errors>
         <p>{{ this.hasErrors }}</p>
       </v-container>
@@ -230,7 +233,6 @@ moment.tz.setDefault('America/New_York');
 import { getRole } from '@/utils/auth';
 import { v4 as uuid } from 'uuid';
 import _ from 'lodash';
-
 
 // |--------------------------------------------------|
 // |                                                  |

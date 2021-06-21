@@ -5,13 +5,20 @@
         <v-card-title class="headline">Errors found across multiple tabs</v-card-title>
         <v-card-text>
           Errors Found
-            <!-- <ul>
+          <!-- <ul>
                 <li v-for="tab in errorTabs" :key="tab">{{ tab }}</li>
             </ul> -->
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn text @click.native="emit('canceled'); activate = false;">Ok</v-btn>
+          <v-btn
+            text
+            @click.native="
+              emit('canceled');
+              activate = false;
+            "
+            >Ok</v-btn
+          >
           <v-spacer></v-spacer>
         </v-card-actions>
       </v-card>
@@ -20,7 +27,6 @@
 </template>
 
 <script>
-
 /**
  * Emits a message and data if it exists.
  *
@@ -42,7 +48,7 @@ export default {
     };
   },
   methods: {
-      emit
+    emit
   },
   props: [
     'toggleSubmissionConfirmation' // dialog activator
