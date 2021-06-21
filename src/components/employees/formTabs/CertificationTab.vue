@@ -206,32 +206,26 @@ export default {
         (v) => {
           return !isEmpty(v) ? /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v) || 'Date must be valid. Format: MM/DD/YYYY' : true;
         },
-<<<<<<< HEAD
-        (v) => (!isEmpty(v) ? moment(v, 'MM/DD/YYYY').isValid() || 'Date must be valid' : true)
-=======
+        (v) => (!isEmpty(v) ? moment(v, 'MM/DD/YYYY').isValid() || 'Date must be valid' : true),
         (v) => {
           let cert = this.editedCertifications[this.certificationIndex];
           return !isEmpty(v) && moment(v) && cert.dateReceived
             ? moment(v).add(1, 'd').isAfter(moment(cert.dateReceived)) ||
-                'Date received must be the same as or come before expiration date'
+                'Expiration date must be at or after date received'
             : true;
         }
->>>>>>> 2347-ensure-start-and-end-dates-are-before-and-after-one-another-when-typing: validate certification start and end date together
       ], // rules for an optional date
       dateRules: [
         (v) => !isEmpty(v) || 'Date required',
         (v) => (!isEmpty(v) && /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v)) || 'Date must be valid. Format: MM/DD/YYYY',
-<<<<<<< HEAD
-        (v) => moment(v, 'MM/DD/YYYY').isValid() || 'Date must be valid'
-=======
+        (v) => moment(v, 'MM/DD/YYYY').isValid() || 'Date must be valid',
         (v) => {
           let cert = this.editedCertifications[this.certificationIndex];
           return !isEmpty(v) && moment(v) && cert.expirationDate
             ? moment(v).isBefore(moment(cert.expirationDate).add(1, 'd')) ||
-                'Expiration date must be same as or come after date received'
+                'Date received must be at or before expiration date'
             : true;
         }
->>>>>>> 2347-ensure-start-and-end-dates-are-before-and-after-one-another-when-typing: validate certification start and end date together
       ], // rules for a required date
       editedCertifications: _.cloneDeep(this.model), // stores edited certifications info
       requiredRules: [

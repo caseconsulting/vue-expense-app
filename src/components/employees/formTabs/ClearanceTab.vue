@@ -38,13 +38,14 @@
                 label="Granted Date"
                 prepend-icon="event_available"
                 clearable
-                :rules="dateOptionalRules"
+                :rules="dateOptionalRules.concat(dateGrantedRules)"
                 hint="MM/DD/YYYY format"
                 v-mask="'##/##/####'"
                 v-bind="attrs"
                 v-on="on"
                 @click:clear="clearance.grantedDate = null"
                 @blur="clearance.grantedDate = parseEventDate($event)"
+                @focus="clearanceElement = clearance"
               ></v-text-field>
             </template>
             <v-date-picker
@@ -74,13 +75,14 @@
                 label="Expiration Date"
                 prepend-icon="event_busy"
                 clearable
-                :rules="dateOptionalRules"
+                :rules="dateOptionalRules.concat(dateExpirationRules)"
                 hint="MM/DD/YYYY format"
                 v-mask="'##/##/####'"
                 v-bind="attrs"
                 v-on="on"
                 @click:clear="clearance.expirationDate = null"
                 @blur="clearance.expirationDate = parseEventDate($event)"
+                @focus="clearanceElement = clearance"
               ></v-text-field>
             </template>
             <v-date-picker
@@ -109,13 +111,14 @@
                 label="Submission Date"
                 prepend-icon="event_note"
                 clearable
-                :rules="dateOptionalRules"
+                :rules="dateOptionalRules.concat(dateSubmissionRules)"
                 hint="MM/DD/YYYY format"
                 v-mask="'##/##/####'"
                 v-bind="attrs"
                 v-on="on"
                 @click:clear="clearance.submissionDate = null"
                 @blur="clearance.submissionDate = parseEventDate($event)"
+                @focus="clearanceElement = clearance"
               ></v-text-field>
             </template>
             <v-date-picker
@@ -219,13 +222,14 @@
             label="Badge Expiration Date"
             prepend-icon="event_busy"
             clearable
-            :rules="dateOptionalRules"
+            :rules="dateOptionalRules.concat(dateBadgeRules)"
             hint="MM/DD/YYYY format"
             v-mask="'##/##/####'"
             v-bind="attrs"
             v-on="on"
             @click:clear="clearance.badgeExpirationDate = null"
             @blur="clearance.badgeExpirationDate = parseEventDate($event)"
+            @focus="clearanceElement = clearance"
           ></v-text-field>
         </template>
         <v-date-picker
@@ -391,6 +395,34 @@ function formatRange(range) {
 } // formatRange
 
 /**
+ * Checks to see if the first date is at or after the second date, if not, it uses an error message.
+ *
+ * @param firstDate - The date that should come first
+ * @param secondDate - The date that should come second
+ * @param errMessage - The message to display if the dates are incorrectly ordered
+ * @return boolean - True if the first date is at or after the second date
+ */
+function isAfter(firstDate, secondDate, errMessage) {
+  return !isEmpty(firstDate) && secondDate
+    ? moment(firstDate).add(1, 'd').isAfter(moment(secondDate)) || errMessage
+    : true;
+}
+
+/**
+ * Checks to see if the first date is at or before the second date, if not, it uses an error message.
+ *
+ * @param firstDate - The date that should come first
+ * @param secondDate - The date that should come second
+ * @param errMessage - The message to display if the dates are incorrectly ordered
+ * @return boolean - True if the first date is at or before the second date
+ */
+function isBefore(firstDate, secondDate, errMessage) {
+  return !isEmpty(firstDate) && secondDate
+    ? moment(firstDate).isBefore(moment(secondDate).add(1, 'd')) || errMessage
+    : true;
+}
+
+/**
  * Return the maximum available date to be selected for submission date. Returns the granted date if it exists.
  * Returns the expiration date if the expiration date exists and the granted date does not exists. Returns null if
  * neither the granted date or expiration date exist.
@@ -510,19 +542,36 @@ export default {
   created,
   data() {
     return {
+      clearanceElement: {},
       clearanceTypeDropDown: [], // autocomplete clearance type options
+      dateBadgeRules: [
+        (v) => isAfter(v, this.clearanceElement.grantedDate, 'Badge expiration date must be at or after granted date'),
+        (v) =>
+          isAfter(v, this.clearanceElement.submissionDate, 'Badge expiration date must be at or after submission date')
+      ],
+      dateExpirationRules: [
+        (v) => isAfter(v, this.clearanceElement.grantedDate, 'Expiration date must be at or after granted date'),
+        (v) => isAfter(v, this.clearanceElement.submissionDate, 'Expiration date must be at or after submission date')
+      ],
       dateOptionalRules: [
         (v) => {
           return !isEmpty(v) ? /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v) || 'Date must be valid. Format: MM/DD/YYYY' : true;
         },
         (v) => (!isEmpty(v) ? moment(v, 'MM/DD/YYYY').isValid() || 'Date must be valid' : true)
       ], // rules for an optional date
+      dateSubmissionRules: [
+        (v) => isBefore(v, this.clearanceElement.grantedDate, 'Submission date must be at or before granted date')
+      ],
       dateRules: [
         (v) => !isEmpty(v) || 'Date required',
         (v) => (!isEmpty(v) && /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v)) || 'Date must be valid. Format: MM/DD/YYYY',
         (v) => moment(v, 'MM/DD/YYYY').isValid() || 'Date must be valid'
       ], // rules for a required date
       editedClearances: _.cloneDeep(this.model), // stores edited clearances info
+      dateGrantedRules: [
+        (v) => isAfter(v, this.clearanceElement.submissionDate, 'Granted date must be at or after submission date'),
+        (v) => isBefore(v, this.clearanceElement.expirationDate, 'Granted date must be at or before expiration date')
+      ],
       requiredRules: [(v) => !isEmpty(v) || 'This field is required'] // rules for a required field
     };
   },
@@ -543,6 +592,8 @@ export default {
     deleteBIDate,
     deleteClearance,
     formatRange,
+    isAfter,
+    isBefore,
     isEmpty,
     maxSubmission,
     minExpiration,
