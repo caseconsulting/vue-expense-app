@@ -1,7 +1,7 @@
 <template>
   <v-tooltip top>
     <template v-slot:activator="{ on }">
-      <v-btn v-on="on" @click="sortByDate" text icon>
+      <v-btn v-on="on" @click="download" text icon>
         <i class="material-icons">file_download</i>
       </v-btn>
     </template>
