@@ -444,9 +444,8 @@ export default {
         (v) => (!isEmpty(v) ? moment(v, 'MM/DD/YYYY').isValid() || 'Date must be valid' : true),
         (v) => {
           let position = this.editedJobExperienceInfo.companies[this.companyIndex].positions[this.positionIndex];
-          return !isEmpty(v) && moment(v) && position.endDate
-            ? moment(v).isBefore(moment(position.endDate).add(1, 'd')) ||
-                'End date must be same as or come after start date'
+          return !isEmpty(v) && moment(v) && position.startDate
+            ? moment(v).add(1, 'd').isAfter(moment(position.startDate)) || 'End date must be at or after start date'
             : true;
         }
       ], // rules for an optional date
@@ -456,9 +455,8 @@ export default {
         (v) => moment(v, 'MM/DD/YYYY').isValid() || 'Date must be valid',
         (v) => {
           let position = this.editedJobExperienceInfo.companies[this.companyIndex].positions[this.positionIndex];
-          return !isEmpty(v) && moment(v) && position.startDate
-            ? moment(v).add(1, 'd').isAfter(moment(position.startDate)) ||
-                'Start date must be the same as or come before end date'
+          return !isEmpty(v) && moment(v) && position.endDate
+            ? moment(v).isBefore(moment(position.endDate).add(1, 'd')) || 'Start date must be at or before end date'
             : true;
         }
       ], // rules for an optional date
