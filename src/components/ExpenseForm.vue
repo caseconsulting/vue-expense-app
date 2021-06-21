@@ -272,12 +272,12 @@ import dateUtils from '@/shared/dateUtils';
 import employeeUtils from '@/shared/employeeUtils';
 import FileUpload from '@/components/FileUpload.vue';
 import { getRole } from '@/utils/auth';
-const moment = require('moment-timezone');
-moment.tz.setDefault('America/New_York');
 import { v4 as uuid } from 'uuid';
 import { isEmpty, isFullTime } from '@/utils/utils';
 import { mask } from 'vue-the-mask';
 import _ from 'lodash';
+const moment = require('moment-timezone');
+moment.tz.setDefault('America/New_York');
 
 const IsoFormat = 'YYYY-MM-DD';
 
@@ -1478,7 +1478,8 @@ export default {
       date: null, // NOTE: Unused?
       dateRules: [
         (v) => !isEmpty(v) || 'Date must be valid. Format: MM/DD/YYYY',
-        (v) => (!isEmpty(v) && /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v)) || 'Date must be valid. Format: MM/DD/YYYY'
+        (v) => (!isEmpty(v) && /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v)) || 'Date must be valid. Format: MM/DD/YYYY',
+        (v) => moment(v, 'MM/DD/YYYY').isValid() || 'Date must be valid'
       ], // rules for dates
       descriptionRules: [
         (v) => !isEmpty(v) || 'Description is a required field',
@@ -1501,7 +1502,8 @@ export default {
       loading: false, // loading
       myBudgetsView: false, // if on myBudgetsView page
       optionalDateRules: [
-        (v) => isEmpty(v) || /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v) || 'Date must be valid. Format: MM/DD/YYYY'
+        (v) => isEmpty(v) || /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v) || 'Date must be valid. Format: MM/DD/YYYY',
+        (v) => (!isEmpty(v) ? moment(v, 'MM/DD/YYYY').isValid() || 'Date must be valid' : true)
       ], // option date rules
       originalExpense: null, // expense before changes
       purchaseDateFormatted: null, // formatted purchase date
