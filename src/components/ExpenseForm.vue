@@ -111,7 +111,7 @@
 
         <!-- Purchase Date -->
         <v-menu
-          v-if="isUser || isAdmin"
+          v-if="isUser || isAdmin || isIntern"
           ref="purchaseMenu"
           :close-on-content-click="true"
           v-model="purchaseMenu"
@@ -313,6 +313,15 @@ function getCategories() {
  */
 function isAdmin() {
   return this.employeeRole === 'admin';
+} // isAdmin
+
+/**
+ * Checks if the employee is an intern. Returns true if the employee is an intern, otherwise returns false.
+ *
+ * @return boolean - employee is an intern
+ */
+function isIntern() {
+  return this.employeeRole === 'intern';
 } // isAdmin
 
 /**
@@ -1366,7 +1375,7 @@ async function created() {
 
   this.myBudgetsView = this.$route.path === '/myBudgets';
   this.isInactive = this.myBudgetsView && this.userInfo.workStatus == 0;
-  this.asUser = this.myBudgetsView || this.employeeRole == 'user';
+  this.asUser = this.myBudgetsView || this.employeeRole == 'user' || this.employeeRole == 'intern';
 
   if (this.asUser) {
     // creating or updating an expense as a user
@@ -1453,6 +1462,7 @@ export default {
   computed: {
     isAdmin,
     isDifferentExpenseType,
+    isIntern,
     isReimbursed,
     isUser,
     receiptRequired,

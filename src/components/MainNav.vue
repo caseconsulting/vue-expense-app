@@ -182,7 +182,7 @@ export default {
               title: 'My Expenses',
               icon: 'dollar-sign',
               route: 'expenses',
-              permission: ['admin', 'user']
+              permission: ['admin', 'user', 'intern']
             },
             {
               title: 'Expense Types',
@@ -197,7 +197,7 @@ export default {
               permission: ['admin']
             }
           ],
-          permission: ['user', 'admin'],
+          permission: ['user', 'admin', 'intern'],
           active: false
         },
         {

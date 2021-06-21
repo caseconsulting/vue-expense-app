@@ -21,7 +21,7 @@
         <v-container fluid>
           <!-- Title -->
           <v-card-title>
-            <h2 v-if="isUser">{{ getUserName }}'s Expenses</h2>
+            <h2 v-if="isUser || isIntern">{{ getUserName }}'s Expenses</h2>
             <h3 v-else>My Expenses</h3>
             <v-spacer></v-spacer>
 
@@ -169,7 +169,7 @@
                 <v-tooltip top>
                   <template v-slot:activator="{ on }">
                     <v-btn
-                      :disabled="isEditing || (isUser && isReimbursed(item)) || midAction"
+                      :disabled="isEditing || ((isUser || isIntern) && isReimbursed(item)) || midAction"
                       text
                       icon
                       @click="
@@ -338,6 +338,15 @@ function getUserName() {
 function isAdmin() {
   return this.userInfo ? this.userInfo.employeeRole === 'admin' : false;
 } // isAdmin
+
+/**
+ * Checks if the user's role is an intern. Returns true if the user's role is an intern, otherwise returns false.
+ *
+ * @return boolean - user's role is an intern
+ */
+function isIntern() {
+  return this.userInfo ? this.userInfo.employeeRole === 'intern' : false;
+} // isIntern
 
 /**
  * Checks if the user's role is a user. Returns true if the user's role is a user, otherwise returns false.
@@ -638,7 +647,7 @@ function onSelect(item) {
 async function refreshExpenses() {
   this.loading = true; // set loading status to true
 
-  if (this.isAdmin || this.isUser) {
+  if (this.isAdmin || this.isUser || this.isIntern) {
     // load expenses if employee role is user or admin
     this.expenses = await api.getAllAggregateExpenses();
     this.constructAutoComplete(this.expenses); // set autocomplete options
@@ -791,6 +800,7 @@ export default {
   computed: {
     getUserName,
     isAdmin,
+    isIntern,
     isUser,
     roleHeaders,
     userIsInactive
