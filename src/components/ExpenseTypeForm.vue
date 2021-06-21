@@ -87,7 +87,11 @@
             ></v-text-field>
           </template>
 
-          <v-date-picker v-model="editedExpenseType.startDate" no-title></v-date-picker>
+          <v-date-picker
+            v-model="editedExpenseType.startDate"
+            :max="editedExpenseType.endDate"
+            no-title
+          ></v-date-picker>
         </v-menu>
 
         <!-- End Date -->
@@ -116,7 +120,11 @@
             ></v-text-field>
           </template>
 
-          <v-date-picker v-model="editedExpenseType.endDate" no-title></v-date-picker>
+          <v-date-picker
+            v-model="editedExpenseType.endDate"
+            :min="editedExpenseType.startDate"
+            no-title
+          ></v-date-picker>
         </v-menu>
 
         <!-- Description -->
@@ -569,7 +577,19 @@ export default {
       dateRules: [
         (v) => !isEmpty(v) || 'Date must be valid. Format: MM/DD/YYYY',
         (v) => (!isEmpty(v) && /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v)) || 'Date must be valid. Format: MM/DD/YYYY',
-        (v) => moment(v, 'MM/DD/YYYY').isValid() || 'Date must be valid'
+        (v) => moment(v, 'MM/DD/YYYY').isValid() || 'Date must be valid',
+        (v) => {
+          return !isEmpty(v) && moment(v) && this.editedExpenseType.endDate
+            ? moment(v).isBefore(moment(this.editedExpenseType.endDate).add(1, 'd')) ||
+                'Start date must be at or before end date'
+            : true;
+        },
+        (v) => {
+          return !isEmpty(v) && moment(v) && this.editedExpenseType.startDate
+            ? moment(v).add(1, 'd').isAfter(moment(this.editedExpenseType.startDate)) ||
+                'End date must be at or after start date'
+            : true;
+        }
       ], // rule for a required date
       endDateFormatted: null, // formatted end date
       editedExpenseType: _.cloneDeep(this.model), //used to store edits made to an expense type or when creating new expense type
