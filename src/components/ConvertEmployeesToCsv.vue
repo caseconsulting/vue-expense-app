@@ -55,7 +55,6 @@ function exportCSVFile(items, fileTitle) {
   let tempEmployees = [];
   for (var i = 0; i < items.length; i++) {
     let person = items[i];
-    console.log(person);
     let placeOfBirth = (person.city || ' ') + ' ' + (person.st || ' ') + ' ' + (person.country || ' ');
     tempEmployees[i] = [
       person.employeeNumber || '',
@@ -74,16 +73,14 @@ function exportCSVFile(items, fileTitle) {
       person.employeeRole || '',
       getWorkStatus(person.workStatus) || '',
       person.id || '',
-      filterUndefined(person.awards, getAwards) || ''
-      // certifications || '',
-      // clearance || '',
-      // contract || '',
-      // customerOrg || '',
-      // education || '',
-      // employee || '',
-      // jobExperience || '',
-      // personal || '',
-      // technology || ''
+      filterUndefined(person.awards, getAwards) || '',
+      filterUndefined(person.certifications, getCertifications) || '',
+      filterUndefined(person.clearances, getClearances) || '',
+      filterUndefined(person.contracts, getContracts) || '',
+      filterUndefined(person.customerOrgExp, getCustomerOrgExp) || '',
+      filterUndefined(person.degrees, getEducation) || '',
+      filterUndefined(person.jobs, getJobs) || '',
+      filterUndefined(person.technologies, getTechnologies) || ''
     ];
   }
 
@@ -110,9 +107,7 @@ function exportCSVFile(items, fileTitle) {
     'Contract',
     'Customer Org',
     'Education',
-    'Employee',
     'Job Experience',
-    'Personal',
     'Technology'
   ];
 
@@ -177,7 +172,7 @@ function getWorkStatus(workStatus) {
  */
 function filterUndefined(data, func) {
   let a = '';
-  if (typeof data !== 'undefined') {
+  if (typeof data === 'object') {
     a = func(data);
   }
   return a;
@@ -199,6 +194,147 @@ function getAwards(awards) {
   }
   return a;
 } // getAwards
+
+/**
+ * Returns certification data for employee
+ *
+ * @param certification - An array of objects.
+ * @return String - certifications
+ */
+function getCertifications(certification) {
+  let a = '';
+  for (let i = 0; i < certification.length; i++) {
+    a += certification[i].name + ' - ' + certification[i].dateReceived;
+    if (certification[i].expirationDate) {
+      a += ' to ' + certification[i].expirationDate;
+    }
+    if (i + 1 < certification.length) {
+      a += ', ';
+    }
+  }
+  return a;
+} // getCertifications
+
+/**
+ * Returns clearance data for employee
+ *
+ * @param clearance - An array of objects.
+ * @return String - clearance
+ */
+function getClearances(clearance) {
+  let a = '';
+  for (let i = 0; i < clearance.length; i++) {
+    a += clearance[i].type;
+    if (typeof clearance[i].grantedDate !== 'undefined') {
+      a += ' - ' + clearance[i].grantedDate;
+    }
+    if (typeof clearance[i].expirationDate !== 'undefined') {
+      a += ' to ' + clearance[i].expirationDate;
+    }
+    if (i + 1 < clearance.length) {
+      a += ', ';
+    }
+  }
+  return a;
+} // getClearance
+
+/**
+ * Returns contract data for employee
+ *
+ * @param contract - An array of objects.
+ * @return String - contract
+ */
+function getContracts(contract) {
+  let a = '';
+  for (let i = 0; i < contract.length; i++) {
+    a += contract[i].name + ' - ' + contract[i].prime;
+    if (typeof contract[i].years !== 'undefined') {
+      a += ' - ' + contract[i].years + ' years';
+    }
+    if (i + 1 < contract.length) {
+      a += ', ';
+    }
+  }
+  return a;
+} // getContracts
+
+/**
+ * Returns experience data for employee
+ *
+ * @param exp - An array of objects.
+ * @return String - experience
+ */
+function getCustomerOrgExp(exp) {
+  let a = '';
+  for (let i = 0; i < exp.length; i++) {
+    a += exp[i].name;
+    if (typeof exp[i].years !== 'undefined') {
+      a += ' - ' + exp[i].years + ' years';
+    }
+    if (i + 1 < exp.length) {
+      a += ', ';
+    }
+  }
+  return a;
+} // getCustomerOrgExp
+
+/**
+ * Returns education data for employee
+ *
+ * @param edu - An array of objects.
+ * @return String - education
+ */
+function getEducation(edu) {
+  let a = '';
+  for (let i = 0; i < edu.length; i++) {
+    a += edu[i].school + ' - ' + edu[i].name;
+    for (let j = 0; j < edu[i].majors.length; j++) {
+      a += ' - ' + edu[i].majors[j];
+    }
+    a += ' - ' + edu[i].date;
+    if (i + 1 < edu.length) {
+      a += ', ';
+    }
+  }
+  return a;
+} // getEducation
+
+/**
+ * Returns job data for employee
+ *
+ * @param job - An array of objects.
+ * @return String - jobs
+ */
+function getJobs(job) {
+  let a = '';
+  for (let i = 0; i < job.length; i++) {
+    a += job[i].company + ' - ' + job[i].position + ' - ' + job[i].startDate;
+    if (typeof job[i].endDate !== 'undefined') {
+      a += ' - ' + job[i].endDate;
+    }
+    if (i + 1 < job.length) {
+      a += ', ';
+    }
+  }
+  return a;
+} // getJobs
+
+/**
+ * Returns tech data for employee
+ *
+ * @param tech - An array of objects.
+ * @return String - technologies
+ */
+function getTechnologies(tech) {
+  let a = '';
+  for (let i = 0; i < tech.length; i++) {
+    a += tech[i].name;
+    if (i + 1 < tech.length) {
+      a += ', ';
+    }
+  }
+  return a;
+} // getTechnologies
 
 // |--------------------------------------------------|
 // |                                                  |
