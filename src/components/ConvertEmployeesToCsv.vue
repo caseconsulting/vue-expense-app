@@ -57,7 +57,7 @@ function exportCSVFile(items, fileTitle) {
     let person = items[i];
 
     let placeOfBirth = (person.city || ' ') + ' ' + (person.st || ' ') + ' ' + (person.country || ' ');
-
+    console.log(typeof person.awards);
     tempEmployees[i] = [
       person.employeeNumber || '',
       person.firstName || '',
@@ -94,7 +94,8 @@ function exportCSVFile(items, fileTitle) {
     'Github',
     'Expense App Role',
     'Status',
-    'id'
+    'id',
+    'Awards'
   ];
 
   tempEmployees.sort((a, b) => {
@@ -149,6 +150,23 @@ function getWorkStatus(workStatus) {
     return 'Invalid Status';
   }
 } // getWorkStatus
+
+/**
+ * Returns a work status 'Full Time', 'Part Time', 'Inactive', or 'Invalid Status'.
+ *
+ * @param employeeAwards - employee work status
+ * @return String - work status description
+ */
+// function getAwards(awards) {
+//   console.log(typeof awards);
+//   console.log(awards);
+//   console.log(Object.entries(awards));
+//   // for (var i = 0; i < awardArray.length; i++) {
+//   //   if (awardsArray[i] !== undefined) {
+//   //     console.log(Object.entries(awardArray[i]));
+//   //   }
+//   // }
+// } // getAwards
 
 // |--------------------------------------------------|
 // |                                                  |
