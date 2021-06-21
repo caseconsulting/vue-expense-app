@@ -9,7 +9,12 @@
           <template v-slot:activator>
             <!-- Parent Item Icon -->
             <v-list-item-icon style="width: 24px">
-              <icon :name="item.icon" v-bind:class="{ iconSelected: item.active }" class="navbar-icons"></icon>
+              <icon
+                :id="item.icon"
+                :name="item.icon"
+                v-bind:class="{ iconSelected: item.active }"
+                class="navbar-icons"
+              ></icon>
             </v-list-item-icon>
 
             <!-- Parent Item Title -->

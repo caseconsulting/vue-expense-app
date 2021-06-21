@@ -20,6 +20,7 @@
           v-model="editedExpense.employeeId"
           item-text="text"
           label="Employee"
+          id="employeeName"
           class="form_padding"
         ></v-autocomplete>
 
@@ -31,6 +32,7 @@
           :disabled="isInactive"
           v-model="editedExpense.expenseTypeId"
           label="Expense Type"
+          id="expenseType"
           :hint="hint"
           persistent-hint
           @input="getExpenseTypeSelected"
@@ -84,6 +86,7 @@
           :rules="costRules"
           :disabled="isReimbursed || isInactive || isHighFive"
           label="Cost"
+          id="cost"
           data-vv-name="Cost"
         ></v-text-field>
 
@@ -95,6 +98,7 @@
           :disabled="isReimbursed"
           v-model="editedExpense.recipient"
           label="Recipient"
+          id="recipient"
           class="form_padding"
           :placeholder="recipientPlaceholder"
         ></v-autocomplete>
@@ -105,6 +109,7 @@
           v-model="editedExpense.description"
           :rules="descriptionRules"
           :disabled="isInactive"
+          id="description"
           label="Description"
           data-vv-name="Description"
         ></v-text-field>
@@ -125,6 +130,7 @@
           <template v-slot:activator="{ on }">
             <v-text-field
               v-model="purchaseDateFormatted"
+              id="purchaseDate"
               :rules="dateRules"
               :disabled="(isReimbursed && !isDifferentExpenseType) || isInactive"
               v-mask="'##/##/####'"
@@ -155,6 +161,7 @@
           <template v-slot:activator="{ on }">
             <v-text-field
               v-model="reimbursedDateFormatted"
+              id="reimburseDate"
               :rules="optionalDateRules"
               :disabled="(isReimbursed && !isDifferentExpenseType) || isInactive"
               v-mask="'##/##/####'"
@@ -216,6 +223,7 @@
           v-model="editedExpense.note"
           :rules="notesRules"
           :label="notesLabel"
+          id="notes"
           data-vv-name="Description"
           :disabled="isInactive"
         ></v-textarea>
@@ -248,6 +256,7 @@
           color="success"
           @click="checkCoverage"
           :disabled="!valid || (!isAdmin && isReimbursed) || isInactive"
+          id="submitButton"
           :loading="loading"
           class="ma-2"
         >

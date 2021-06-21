@@ -18,6 +18,7 @@
           <v-spacer></v-spacer>
           <v-btn
             color="red"
+            id="confirmDelete"
             text
             @click.native="
               emit(`confirm-delete-${type}`);

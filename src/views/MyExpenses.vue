@@ -33,13 +33,21 @@
               :filter="customFilter"
               v-model="employee"
               item-text="text"
+              id="employeeIdFilter"
               label="Filter by Employee"
               clearable
             ></v-autocomplete>
             <p v-if="isAdmin">&nbsp;</p>
 
             <!-- Search Bar -->
-            <v-text-field v-model="search" append-icon="search" label="Search" single-line hide-details></v-text-field>
+            <v-text-field
+              v-model="search"
+              append-icon="search"
+              id="search"
+              label="Search"
+              single-line
+              hide-details
+            ></v-text-field>
           </v-card-title>
 
           <!-- Filters -->
@@ -190,6 +198,7 @@
                       :disabled="isReimbursed(item) || isEditing || midAction"
                       text
                       icon
+                      id="delete"
                       @click="
                         deleting = !deleting;
                         midAction = true;
