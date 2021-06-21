@@ -53,8 +53,8 @@ const router = new Router({
       beforeEnter: requireAuth
     },
     {
-      path: '/employeeStats',
-      name: 'employeeStats',
+      path: '/stats',
+      name: 'stats',
       component: EmployeeStats,
       beforeEnter: requireAuth
     },

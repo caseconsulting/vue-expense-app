@@ -209,11 +209,11 @@ export default {
           active: false
         },
         {
-          title: 'Employee Stats',
-          alias: ['employeeStats'],
+          title: 'Statistics Dashboard',
+          alias: ['stats'],
           icon: 'chart-bar',
-          route: 'employeeStats',
-          permission: ['admin', 'user'],
+          route: 'stats',
+          permission: ['admin', 'user', 'intern'],
           active: false
         },
         {
