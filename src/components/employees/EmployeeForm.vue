@@ -202,7 +202,9 @@
           <!-- End form action buttons -->
         </v-form>
         <!-- Confirmation Model -->
-        <form-submission-confirmation :toggleSubmissionConfirmation="this.confirming"></form-submission-confirmation>
+        <form-submission-confirmation v-if="!this.hasErrors" :toggleSubmissionConfirmation="this.confirming"></form-submission-confirmation>
+        <many-form-errors v-else :toggleSubmissionConfirmation="this.confirming"></many-form-errors>
+        <p>{{ this.hasErrors }}</p>
       </v-container>
     </v-card>
   </div>
@@ -220,6 +222,7 @@ import EmployeeTab from '@/components/employees/formTabs/EmployeeTab';
 import FormSubmissionConfirmation from '@/components/modals/FormSubmissionConfirmation.vue';
 import JobExperienceTab from '@/components/employees/formTabs/JobExperienceTab';
 import LanguagesTab from '@/components/employees/formTabs/LanguagesTab';
+import ManyFormErrors from '../modals/ManyFormErrors.vue';
 import PersonalTab from '@/components/employees/formTabs/PersonalTab';
 import TechnologyTab from '@/components/employees/formTabs/TechnologyTab';
 const moment = require('moment-timezone');
@@ -227,6 +230,7 @@ moment.tz.setDefault('America/New_York');
 import { getRole } from '@/utils/auth';
 import { v4 as uuid } from 'uuid';
 import _ from 'lodash';
+
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -499,12 +503,15 @@ async function confirm() {
   if (this.$refs.form.validate()) {
     //checks to see if there are any tabs with errors
     let hasErrors = await this.hasTabError();
+    this.hasErrors = hasErrors;
     if (!hasErrors) {
       this.confirming = !this.confirming; // if no errors opens confirm submit popup
     } else if (this.tabErrorMessage) {
       //if there is a custom error message it is displayed here
       this.displayError(this.tabErrorMessage);
     }
+  } else {
+    this.hasErrors = true;
   }
 } // confirm
 
@@ -600,9 +607,9 @@ async function created() {
     this.submit();
   });
 
-  // window.EventBus.$on('canceled', () => {
-  //   this.confirming = false;
-  // });
+  window.EventBus.$on('canceled', () => {
+    this.confirming = false;
+  });
 
   // set tab mounted
   window.EventBus.$on('created', (tab) => {
@@ -757,7 +764,8 @@ export default {
     JobExperienceTab,
     PersonalTab,
     TechnologyTab,
-    LanguagesTab
+    LanguagesTab,
+    ManyFormErrors
   },
   created,
   data() {
@@ -769,6 +777,7 @@ export default {
         statusMessage: null,
         color: null
       }, // snack bar error
+      hasErrors: false,
       formTab: null, // currently active tab
       fullName: '', // employee's first and last name
       model: {
