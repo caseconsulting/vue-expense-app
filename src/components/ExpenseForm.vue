@@ -74,7 +74,7 @@
             <span v-else-if="remainingBudget === ''">Remaining budget for current expense type is not available.</span>
             <span v-else-if="expenseTypeName">
               Remaining budget for {{ expenseTypeName }}:
-              <span :class="{ negativeBudget: remainingBudget <= 0 }">{{ remainingBudget.toFixed(2) }}</span>
+              <span :class="{ negativeBudget: remainingBudget <= 0 }">${{ remainingBudget.toFixed(2) }}</span>
             </span>
           </v-card-text>
         </v-card>

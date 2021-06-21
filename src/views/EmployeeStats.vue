@@ -96,6 +96,10 @@ function drawJobExpHistGraph() {
         {
           ticks: {
             beginAtZero: true
+          },
+          scaleLabel: {
+            display: true,
+            labelString: 'Number of Employees'
           }
         }
       ],
@@ -103,6 +107,10 @@ function drawJobExpHistGraph() {
         {
           ticks: {
             autoSkip: false
+          },
+          scaleLabel: {
+            display: true,
+            labelString: 'Years of Job Experience'
           }
         }
       ]
@@ -189,6 +197,18 @@ async function fillData() {
         {
           ticks: {
             beginAtZero: true
+          },
+          scaleLabel: {
+            display: true,
+            labelString: 'Number of Employees'
+          }
+        }
+      ],
+      yAxes: [
+        {
+          scaleLabel: {
+            display: true,
+            labelString: 'Name of Technology'
           }
         }
       ]
@@ -198,10 +218,8 @@ async function fillData() {
     },
     title: {
       display: true,
-      text: 'Types of Technologies used by Employees'
-    },
-    responsive: true,
-    maintainAspectRatio: false
+      text: 'Top 5 Technologies Used By Employees'
+    }
   };
   this.techChartDataReceived = true;
 }

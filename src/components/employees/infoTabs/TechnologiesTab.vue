@@ -23,7 +23,7 @@
                     <icon name="calendar-day"></icon>
                   </v-btn>
                 </template>
-                <span>Date</span>
+                <span>Years of Experience</span>
               </v-tooltip>
 
               <v-tooltip top>
