@@ -131,6 +131,16 @@ export function monthDayYearFormat(date) {
 } // monthDayYearFormat
 
 /**
+ * Returns a date formated as 'MMM YYYY' (Aug 2020).
+ *
+ * @param date - date to format
+ * @return String - date formated
+ */
+export function monthYearFormat(date) {
+  return !isEmpty(date) ? moment(date).format('MMM YYYY') : '';
+} // monthYearFormat
+
+/**
  * Returns a date formated as 'MMM Do' (Aug 18th).
  *
  * @param date - date to format

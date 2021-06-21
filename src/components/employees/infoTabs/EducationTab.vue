@@ -6,7 +6,7 @@
       <div v-for="(degree, index) in model.degrees" :key="degree.name">
         <p><b>Degree: </b>{{ degree.name }}</p>
         <p><b>School: </b>{{ degree.school }}</p>
-        <p><b>Completion Date: </b>{{ degree.date | monthDayYearFormat }}</p>
+        <p><b>Completion Date: </b>{{ degree.date | monthYearFormat }}</p>
 
         <!-- Majors -->
         <p class="mb-2"><b>Majors: </b></p>
@@ -41,11 +41,11 @@
 </template>
 
 <script>
-import { isEmpty, monthDayYearFormat } from '@/utils/utils';
+import { isEmpty, monthYearFormat } from '@/utils/utils';
 
 export default {
   filters: {
-    monthDayYearFormat
+    monthYearFormat
   },
   methods: {
     isEmpty
