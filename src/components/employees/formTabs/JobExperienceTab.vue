@@ -132,6 +132,7 @@
                   v-bind="attrs"
                   v-on="on"
                   @blur="position.startDate = parseEventDate($event)"
+                  @focus="setIndices(compIndex, index)"
                 ></v-text-field>
               </template>
               <v-date-picker
@@ -167,6 +168,7 @@
                   clearable
                   @click:clear="position.endDate = null"
                   @blur="position.endDate = parseEventDate($event)"
+                  @focus="setIndices(compIndex, index)"
                 ></v-text-field>
               </template>
               <v-date-picker
@@ -397,6 +399,17 @@ function populateDropDowns() {
 } // populateDropDowns
 
 /**
+ * Sets the indexes for purposes of validating date fields.
+ *
+ * @param companyIndex - The index of the company
+ * @param positionIndex - The index of the position
+ */
+function setIndices(companyIndex, positionIndex) {
+  this.companyIndex = companyIndex;
+  this.positionIndex = positionIndex;
+}
+
+/**
  * Validate all input fields are valid. Emit to parent the error status.
  */
 function validateFields() {
@@ -422,17 +435,33 @@ export default {
   data() {
     return {
       companyDropDown: [], // autocomplete company name options
+      companyIndex: 0,
+      positionIndex: 0,
       dateOptionalRules: [
         (v) => {
           return !isEmpty(v) ? /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v) || 'Date must be valid. Format: MM/DD/YYYY' : true;
         },
-        (v) => (!isEmpty(v) ? moment(v, 'MM/DD/YYYY').isValid() || 'Date must be valid' : true)
+        (v) => (!isEmpty(v) ? moment(v, 'MM/DD/YYYY').isValid() || 'Date must be valid' : true),
+        (v) => {
+          let position = this.editedJobExperienceInfo.companies[this.companyIndex].positions[this.positionIndex];
+          return !isEmpty(v) && moment(v) && position.endDate
+            ? moment(v).isBefore(moment(position.endDate).add(1, 'd')) ||
+                'End date must be same as or come after start date'
+            : true;
+        }
       ], // rules for an optional date
       dateRules: [
         (v) => !isEmpty(v) || 'Date required',
         (v) => (!isEmpty(v) && /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v)) || 'Date must be valid. Format: MM/DD/YYYY',
-        (v) => moment(v, 'MM/DD/YYYY').isValid() || 'Date must be valid'
-      ], // rules for a required date
+        (v) => moment(v, 'MM/DD/YYYY').isValid() || 'Date must be valid',
+        (v) => {
+          let position = this.editedJobExperienceInfo.companies[this.companyIndex].positions[this.positionIndex];
+          return !isEmpty(v) && moment(v) && position.startDate
+            ? moment(v).add(1, 'd').isAfter(moment(position.startDate)) ||
+                'Start date must be the same as or come before end date'
+            : true;
+        }
+      ], // rules for an optional date
       editedJobExperienceInfo: _.cloneDeep(this.model), //edited job experience info
       requiredRules: [(v) => !isEmpty(v) || 'This field is required'] // rules for required fields
     };
@@ -455,6 +484,7 @@ export default {
     formatRange,
     isEmpty,
     populateDropDowns,
+    setIndices,
     validateFields
   },
   props: ['model', 'validating'],
