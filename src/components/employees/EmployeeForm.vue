@@ -186,10 +186,17 @@
           </v-tabs>
 
           <!-- Form action buttons -->
-          <v-btn class="ma-2" color="white" @click="cancel" elevation="2"
+          <v-btn id="employeeCancelBtn" class="ma-2" color="white" @click="cancel" elevation="2"
             ><icon class="mr-1" name="ban"></icon>Cancel</v-btn
           >
-          <v-btn outlined class="ma-2" color="success" @click="confirm" :disabled="!valid || model.workStatus == null">
+          <v-btn
+            id="employeeSubmitBtn"
+            outlined
+            class="ma-2"
+            color="success"
+            @click="confirm"
+            :disabled="!valid || model.workStatus == null"
+          >
             <icon class="mr-1" name="save"></icon>Submit
           </v-btn>
           <!-- End form action buttons -->

@@ -21,7 +21,14 @@
         <v-card-title>
           <h2>Employees</h2>
           <v-spacer></v-spacer>
-          <v-text-field v-model="search" append-icon="search" label="Search" single-line hide-details></v-text-field>
+          <v-text-field
+            id="employeesSearch"
+            v-model="search"
+            append-icon="search"
+            label="Search"
+            single-line
+            hide-details
+          ></v-text-field>
         </v-card-title>
 
         <!-- Filters -->
@@ -68,7 +75,7 @@
         <br />
         <!-- End Filters -->
         <!-- Create an Employee -->
-        <v-btn class="mb-5" @click="createEmployee = true" elevation="2" v-if="userIsAdmin()">
+        <v-btn id="createEmployeeBtn" class="mb-5" @click="createEmployee = true" elevation="2" v-if="userIsAdmin()">
           Create an Employee<v-icon class="pl-2">person_add</v-icon>
         </v-btn>
 
@@ -92,7 +99,14 @@
               <v-tooltip top>
                 <template v-slot:activator="{ on }">
                   <convert-employee-to-csv :midAction="midAction" :employee="item" v-on="on"></convert-employee-to-csv>
-                  <v-btn :disabled="midAction" text icon @click.stop="validateDelete(item)" v-on="on">
+                  <v-btn
+                    id="employeesDeleteBtn"
+                    :disabled="midAction"
+                    text
+                    icon
+                    @click.stop="validateDelete(item)"
+                    v-on="on"
+                  >
                     <v-icon style="color: #606060"> delete </v-icon>
                   </v-btn>
                 </template>

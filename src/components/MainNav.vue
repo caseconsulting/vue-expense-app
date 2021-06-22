@@ -41,6 +41,7 @@
         <!-- Individual Navavigation Links -->
         <v-list-item
           v-else
+          :id="item.icon"
           :key="item.title"
           active-class="red--text v-list__tile--active"
           :to="{ name: item.route }"

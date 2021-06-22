@@ -2,6 +2,7 @@
   <div>
     <!-- Name -->
     <v-text-field
+      id="employeeFirstName"
       ref="formFields"
       v-model="editedEmployee.firstName"
       :rules="requiredRules"
@@ -10,12 +11,14 @@
       :disabled="!admin"
     ></v-text-field>
     <v-text-field
+      id="employeeMiddleName"
       v-model="editedEmployee.middleName"
       label="Middle Name (optional)"
       data-vv-name="Middle Name"
       :disabled="!admin"
     ></v-text-field>
     <v-text-field
+      id="employeeLastName"
       ref="formFields"
       v-model="editedEmployee.lastName"
       :rules="requiredRules"
@@ -24,6 +27,7 @@
       :disabled="!admin"
     ></v-text-field>
     <v-text-field
+      id="employeeNickname"
       ref="formFields"
       v-model="editedEmployee.nickname"
       label="Nickname (optional)"
@@ -33,6 +37,7 @@
 
     <!-- Employee # -->
     <v-text-field
+      id="employeeNumber"
       ref="formFields"
       v-model="editedEmployee.employeeNumber"
       :rules="numberRules"
@@ -43,6 +48,7 @@
 
     <!-- Email -->
     <v-text-field
+      id="employeeEmail"
       ref="formFields"
       v-model="editedEmployee.email"
       :rules="emailRules"
@@ -53,6 +59,7 @@
 
     <!-- Prime -->
     <v-combobox
+      id="employeePrime"
       v-model="editedEmployee.prime"
       :items="employeeInfo.primes"
       label="Prime"
@@ -61,6 +68,7 @@
 
     <!-- Contract -->
     <v-combobox
+      id="employeeContract"
       v-model="editedEmployee.contract"
       :items="employeeInfo.contracts"
       label="Contract"
@@ -68,15 +76,17 @@
     ></v-combobox>
 
     <!-- Job Role -->
-    <v-autocomplete
+    <v-combobox
+      id="employeeJobRole"
       :items="jobTitles"
       v-model="editedEmployee.jobRole"
       item-text="text"
       label="Job Role"
-    ></v-autocomplete>
+    ></v-combobox>
 
     <!-- Employee Role -->
     <v-autocomplete
+      id="employeeRole"
       ref="formFields"
       :disabled="!admin"
       :items="permissions"
@@ -101,6 +111,7 @@
     >
       <template v-slot:activator="{ on }">
         <v-text-field
+          id="employeeHireDateField"
           ref="formFields"
           v-model="hireDateFormatted"
           :rules="dateRules"

@@ -1,7 +1,9 @@
 <template>
   <v-container class="my-3" fluid>
     <v-row class="pl-3">
-      <v-btn elevation="2" to="/employees"><v-icon class="pr-1">arrow_back</v-icon>Back to Employees Page</v-btn>
+      <v-btn id="backToEmployeesBtn" elevation="2" to="/employees"
+        ><v-icon class="pr-1">arrow_back</v-icon>Back to Employees Page</v-btn
+      >
     </v-row>
     <v-row v-if="loading" class="my-10" justify="center">
       <v-progress-circular :size="70" :width="7" color="#bc3825" indeterminate></v-progress-circular>
@@ -17,7 +19,7 @@
       <v-col cols="12" :md="displayQuickBooksTimeAndBalances ? 6 : 12" :lg="displayQuickBooksTimeAndBalances ? 7 : 12">
         <v-card class="mt-3">
           <v-card-title class="header_style" v-if="!editing">
-            <h3>{{ this.model.firstName }} {{ this.model.lastName }}</h3>
+            <h3 id="employeeName">{{ this.model.firstName }} {{ this.model.lastName }}</h3>
             <v-spacer></v-spacer>
             <v-icon
               v-if="displayQuickBooksTimeAndBalances && this.currentTab"
