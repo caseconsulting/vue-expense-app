@@ -189,25 +189,19 @@
           <v-btn id="employeeCancelBtn" class="ma-2" color="white" @click="cancel" elevation="2"
             ><icon class="mr-1" name="ban"></icon>Cancel</v-btn
           >
-          <v-btn
-            id="employeeSubmitBtn"
-            outlined
-            class="ma-2"
-            color="success"
-            @click="confirm"
-            :disabled="!valid || model.workStatus == null"
-          >
+          <v-btn id="employeeSubmitBtn" outlined class="ma-2" color="success" @click="confirm">
             <icon class="mr-1" name="save"></icon>Submit
           </v-btn>
           <!-- End form action buttons -->
         </v-form>
         <!-- Confirmation Model -->
         <form-submission-confirmation
-          v-if="!this.hasErrors"
-          :toggleSubmissionConfirmation="this.confirming"
+          :toggleSubmissionConfirmation="this.confirmingValid"
         ></form-submission-confirmation>
-        <many-form-errors v-else :toggleSubmissionConfirmation="this.confirming"></many-form-errors>
-        <p>{{ this.hasErrors }}</p>
+        <many-form-errors
+          :toggleSubmissionConfirmation="this.confirmingError"
+          :errorTabs="errorTabNames"
+        ></many-form-errors>
       </v-container>
     </v-card>
   </div>
@@ -225,7 +219,7 @@ import EmployeeTab from '@/components/employees/formTabs/EmployeeTab';
 import FormSubmissionConfirmation from '@/components/modals/FormSubmissionConfirmation.vue';
 import JobExperienceTab from '@/components/employees/formTabs/JobExperienceTab';
 import LanguagesTab from '@/components/employees/formTabs/LanguagesTab';
-import ManyFormErrors from '../modals/ManyFormErrors.vue';
+import ManyFormErrors from '@/components/modals/ManyFormErrors.vue';
 import PersonalTab from '@/components/employees/formTabs/PersonalTab';
 import TechnologyTab from '@/components/employees/formTabs/TechnologyTab';
 const moment = require('moment-timezone');
@@ -233,27 +227,23 @@ moment.tz.setDefault('America/New_York');
 import { getRole } from '@/utils/auth';
 import { v4 as uuid } from 'uuid';
 import _ from 'lodash';
-
 // |--------------------------------------------------|
 // |                                                  |
 // |                     METHODS                      |
 // |                                                  |
 // |--------------------------------------------------|
-
 /**
  * Selects the currect form tab for the menu
  */
 function selectDropDown(tab) {
   this.formTab = tab;
 }
-
 /**
  * Resets back to employee info.
  */
 function cancel() {
   window.EventBus.$emit('cancel-form');
 } // cancel
-
 /**
  * Removes unnecessary attributes from the employee data.
  */
@@ -263,81 +253,68 @@ function cleanUpData() {
     this.model.degrees = _.map(this.model.degrees, (degree) => {
       // remove date picker menu booleans
       delete degree.showEducationMenu;
-
       // delete null attributes
       _.forEach(degree, (value, key) => {
         if (_.isNil(value)) {
           delete degree[key];
         }
       });
-
       // return updated degree
       return degree;
     });
   } else {
     this.model.degrees = null;
   }
-
   // certifications
   if (!_.isEmpty(this.model.certifications)) {
     this.model.certifications = _.map(this.model.certifications, (certification) => {
       // remove date picker menu booleans
       delete certification.showReceivedMenu;
       delete certification.showExpirationMenu;
-
       // delete null attributes
       _.forEach(certification, (value, key) => {
         if (_.isNil(value)) {
           delete certification[key];
         }
       });
-
       // return updated certification
       return certification;
     });
   } else {
     this.model.certifications = null;
   }
-
   // awards
   if (!_.isEmpty(this.model.awards)) {
     this.model.awards = _.map(this.model.awards, (award) => {
       // remove date picker menu booleans
       delete award.showReceivedMenu;
-
       // delete null attributes
       _.forEach(award, (value, key) => {
         if (_.isNil(value)) {
           delete award[key];
         }
       });
-
       // return updated award
       return award;
     });
   } else {
     this.model.awards = null;
   }
-
   // technologies
   if (_.isEmpty(this.model.technologies)) {
     this.model.technologies = null;
   }
-
   if (_.isEmpty(this.model.languages)) {
     this.model.languages = null;
   }
-
   // customer Org
   if (_.isEmpty(this.model.customerOrgExp)) {
     this.model.customerOrgExp = null;
   }
-
   // contracts
   if (_.isEmpty(this.model.contracts)) {
     this.model.contracts = null;
   }
-
   // jobs
   if (!_.isEmpty(this.model.jobs)) {
     this.model.jobs = updateJobs(this.model.jobs, this.model.companies);
@@ -347,14 +324,12 @@ function cleanUpData() {
           // remove date picker menu booleans
           delete job.showEndMenu;
           delete job.showStartMenu;
-
           // delete null attributes
           _.forEach(job, (value, key) => {
             if (_.isNil(value)) {
               delete job[key];
             }
           });
-
           // return updated job
           return job;
         }),
@@ -366,7 +341,6 @@ function cleanUpData() {
   } else {
     this.model.jobs = null;
   }
-
   // IC time frames
   if (!_.isEmpty(this.model.icTimeFrames)) {
     this.model.icTimeFrames = _.reverse(
@@ -374,14 +348,11 @@ function cleanUpData() {
         _.map(this.model.icTimeFrames, (timeFrame) => {
           // remove date picker menu booleans
           delete timeFrame.showRangeMenu;
-
           // sort range dates
           let chronologicalRange = _.sortBy(timeFrame.range, (monthYear) => {
             return moment(monthYear, 'YYYY-MM');
           });
-
           timeFrame.range = chronologicalRange;
-
           // return updated time frame
           return timeFrame;
         }),
@@ -393,7 +364,6 @@ function cleanUpData() {
   } else {
     this.model.icTimeFrames = null;
   }
-
   // clearances
   if (!_.isEmpty(this.model.clearances)) {
     this.model.clearances = _.reverse(
@@ -406,14 +376,12 @@ function cleanUpData() {
           delete clearance.showPolyMenu;
           delete clearance.showAdjudicationMenu;
           delete clearance.showBadgeMenu;
-
           // delete null attributes
           _.forEach(clearance, (value, key) => {
             if (_.isNil(value)) {
               delete clearance[key];
             }
           });
-
           // clean up and sort BI Dates
           clearance.biDates = _.reverse(
             _.sortBy(
@@ -430,21 +398,18 @@ function cleanUpData() {
               }
             )
           );
-
           // sort adjudication dates
           clearance.adjudicationDates = _.reverse(
             _.sortBy(clearance.adjudicationDates, (date) => {
               return moment(date, 'YYYY-MM-DD');
             })
           );
-
           // sort poly dates
           clearance.polyDates = _.reverse(
             _.sortBy(clearance.polyDates, (date) => {
               return moment(date, 'YYYY-MM-DD');
             })
           );
-
           // return updated clearance
           return clearance;
         }),
@@ -457,7 +422,6 @@ function cleanUpData() {
     this.model.clearances = null;
   }
 } // cleanUpData
-
 /**
  * Clear the action status that is displayed in the snackbar.
  */
@@ -466,7 +430,6 @@ function clearStatus() {
   this.$set(this.errorStatus, 'statusMessage', null);
   this.$set(this.errorStatus, 'color', null);
 } // clearStatus
-
 function updateJobs(jobs, companies) {
   jobs = [];
   _.forEach(companies, (company) => {
@@ -485,10 +448,8 @@ function updateJobs(jobs, companies) {
       }
     });
   });
-  console.log(jobs);
   return jobs;
 }
-
 /**
  * Validate and confirm form submission.
  */
@@ -500,23 +461,20 @@ async function confirm() {
       this.validating[key] = true;
     }
   });
-
   //validates forms
   if (this.$refs.form.validate()) {
     //checks to see if there are any tabs with errors
     let hasErrors = await this.hasTabError();
-    this.hasErrors = hasErrors;
     if (!hasErrors) {
-      this.confirming = !this.confirming; // if no errors opens confirm submit popup
+      this.confirmingValid = !this.confirmingValid; // if no errors opens confirm submit popup
     } else if (this.tabErrorMessage) {
       //if there is a custom error message it is displayed here
       this.displayError(this.tabErrorMessage);
     }
   } else {
-    this.hasErrors = true;
+    this.confirmingError = !this.confirmingError;
   }
 } // confirm
-
 /**
  * Set and display an error action status in the snackbar.
  *
@@ -527,7 +485,6 @@ async function displayError(err) {
   this.$set(this.errorStatus, 'statusMessage', err);
   this.$set(this.errorStatus, 'color', 'red');
 } // displayError
-
 /**
  * Checks to see if any of the form tabs has an error.
  * @returns boolean - true if any tab has an error false otherwise.
@@ -542,19 +499,15 @@ async function hasTabError() {
   }
   return hasErrors;
 } // hasTabError
-
 /**
  * Submits the employee form.
  */
 async function submit() {
   this.submitting = true;
-
   if (this.$refs.form.validate()) {
     // form validated
     this.$emit('startAction');
-
     this.cleanUpData();
-
     if (this.model.id) {
       // updating employee
       let updatedEmployee = await api.updateItem(api.EMPLOYEES, this.model);
@@ -587,7 +540,6 @@ async function submit() {
   }
   this.submitting = false;
 } // submit
-
 /**
  * Check if the user is an admin. Returns true if the user is an admin, otherwise returns false.
  *
@@ -597,60 +549,70 @@ function userIsAdmin() {
   return getRole() === 'admin';
 } // userIsAdmin
 
+function addErrorTab(name, status) {
+  if (status && !this.errorTabNames.includes(name)) {
+    this.errorTabNames.push(name);
+  }
+}
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                 LIFECYCLE HOOKS                  |
 // |                                                  |
 // |--------------------------------------------------|
-
 async function created() {
   window.EventBus.$on('confirmed', () => {
     //this.confirming = false;
     this.submit();
   });
-
   window.EventBus.$on('canceled', () => {
-    this.confirming = false;
+    this.errorTabNames = [];
   });
-
   // set tab mounted
   window.EventBus.$on('created', (tab) => {
     this.tabCreated[tab] = true;
   });
-
   // reset validating status and sets the data based on the tab
   window.EventBus.$on('doneValidating', (tab, data) => {
     this.setFormData(tab, data); //sets the form data
     this.validating[tab] = false;
   });
-
   // set tab error status
   window.EventBus.$on('awardStatus', (status) => {
     this.tabErrors.awards = status;
+    this.addErrorTab('Awards', status);
   });
   window.EventBus.$on('certificationsStatus', (status) => {
     this.tabErrors.certifications = status;
+    this.addErrorTab('Certifications', status);
   });
   window.EventBus.$on('clearanceStatus', (status) => {
     this.tabErrors.clearance = status;
+    this.addErrorTab('Clearance', status);
   });
   window.EventBus.$on('contractsStatus', (status) => {
     this.tabErrors.contracts = status;
+    this.addErrorTab('Contracts', status);
   });
   window.EventBus.$on('customerOrgExpStatus', (status) => {
     this.tabErrors.customerOrgExp = status;
+    this.addErrorTab('Customer Org', status);
   });
   window.EventBus.$on('educationStatus', (status) => {
     this.tabErrors.education = status;
+    this.addErrorTab('Education', status);
   });
   window.EventBus.$on('employeeStatus', (status) => {
     this.tabErrors.employee = status;
+    this.addErrorTab('Employee', status);
   });
   window.EventBus.$on('jobExperienceStatus', (status) => {
     this.tabErrors.jobExperience = status;
+    this.addErrorTab('Job Experience', status);
   });
   window.EventBus.$on('personalStatus', (status) => {
     this.tabErrors.personal = status;
+    this.addErrorTab('Personal', status);
   });
   window.EventBus.$on('technologiesStatus', (status, errorMessage) => {
     this.tabErrors.technologies = status;
@@ -658,6 +620,7 @@ async function created() {
     if (status && errorMessage) {
       this.tabErrorMessage = _.cloneDeep(errorMessage);
     }
+    this.addErrorTab('Technologies', status);
   });
   window.EventBus.$on('educationDuplicateStatus', (status, errorMessage) => {
     this.tabErrors.education = status;
@@ -665,6 +628,7 @@ async function created() {
     if (status && errorMessage) {
       this.tabErrorMessage = _.cloneDeep(errorMessage);
     }
+    this.addErrorTab('Education', status);
   });
   window.EventBus.$on('languagesStatus', (status, errorMessage) => {
     this.tabErrors.languages = status;
@@ -672,23 +636,20 @@ async function created() {
     if (status && errorMessage) {
       this.tabErrorMessage = _.cloneDeep(errorMessage);
     }
+    this.addErrorTab('Technologies', status);
   });
-
   // fills model in with populated fields in employee prop
   this.model = _.cloneDeep(
     _.mergeWith(this.model, this.employee, (modelValue, employeeValue) => {
       return _.isNil(employeeValue) ? modelValue : employeeValue;
     })
   );
-
   if (this.employee) {
     this.fullName = `${this.employee.firstName} ${this.employee.lastName}`;
   }
-
   this.formTab = this.currentTab;
   this.afterCreate = true;
 } // created
-
 /**
  * Sets the form data based on the given tab.
  * @param tab - the tab the data came from
@@ -743,7 +704,6 @@ function setFormData(tab, data) {
     this.$set(this.model, 'languages', data); //sets clearances to data returned from clearance tab
   }
 } //setFormData
-
 // |--------------------------------------------------|
 // |                                                  |
 // |                      EXPORT                      |
@@ -773,13 +733,14 @@ export default {
   data() {
     return {
       afterCreate: false, // component has been created
-      confirming: false, // confirming form submission
+      confirmingValid: false, // confirming form submission
+      confirmingError: false,
       errorStatus: {
         statusType: undefined,
         statusMessage: null,
         color: null
       }, // snack bar error
-      hasErrors: false,
+      errorTabNames: [],
       formTab: null, // currently active tab
       fullName: '', // employee's first and last name
       model: {
@@ -861,6 +822,7 @@ export default {
     };
   },
   methods: {
+    addErrorTab,
     cancel,
     cleanUpData,
     clearStatus,

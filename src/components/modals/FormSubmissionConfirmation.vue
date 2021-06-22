@@ -1,6 +1,6 @@
 <template>
   <div>
-    <v-dialog v-model="activate" persistent max-width="350">
+    <v-dialog v-model="activate" max-width="350">
       <v-card>
         <v-card-title class="headline">Are you sure you want to submit?</v-card-title>
         <v-card-actions>

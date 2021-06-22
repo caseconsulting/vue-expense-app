@@ -2,12 +2,11 @@
   <div>
     <v-dialog v-model="activate" persistent max-width="350">
       <v-card>
-        <v-card-title class="headline">Errors found across multiple tabs</v-card-title>
+        <v-card-title class="headline">Error(s) found across tabs</v-card-title>
         <v-card-text>
-          Errors Found
-          <!-- <ul>
-                <li v-for="tab in errorTabs" :key="tab">{{ tab }}</li>
-            </ul> -->
+          <ul>
+            <li v-for="tab in errorTabs" :key="tab">{{ tab }}</li>
+          </ul>
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
@@ -51,6 +50,7 @@ export default {
     emit
   },
   props: [
+    'errorTabs',
     'toggleSubmissionConfirmation' // dialog activator
   ],
   watch: {
@@ -60,3 +60,9 @@ export default {
   }
 };
 </script>
+
+<style scoped>
+li {
+  color: red;
+}
+</style>
