@@ -16,7 +16,11 @@
             </div>
           </v-col>
           <v-col>
-            <div id="chart_div"></div>
+            <tech-bar-chart
+              v-if="certChartDataReceived"
+              :chart-data="certChartData"
+              :options="certChartOptions"
+            ></tech-bar-chart>
           </v-col>
         </v-row>
       </v-container>
@@ -222,6 +226,104 @@ async function fillData() {
     }
   };
   this.techChartDataReceived = true;
+} //fillData
+
+async function fillCertData() {
+  //Get data
+  //Put into dictionary where key is kinda tech and value is quantity
+  let employees = await api.getItems(api.EMPLOYEES);
+  let certifications = {};
+
+  employees.forEach((employee) => {
+    if (employee.certifications) {
+      employee.certifications.forEach((currCert) => {
+        if (!certifications[currCert.name]) {
+          certifications[currCert.name] = 1;
+        } else {
+          certifications[currCert.name] += 1;
+        }
+      });
+    }
+  });
+
+  //We now sort the entries
+  let certificationPairs = Object.entries(certifications);
+  certificationPairs = certificationPairs.sort((a, b) => {
+    return b[1] - a[1];
+  });
+
+  certificationPairs = certificationPairs.slice(0, 5);
+
+  let labels = [];
+  let values = [];
+
+  for (let i = 0; i < certificationPairs.length; i++) {
+    labels.push(certificationPairs[i][0]);
+    values.push(certificationPairs[i][1]);
+  }
+
+  //We cycle through these colors to get the bar colors
+  let colors = [
+    'rgba(254, 147, 140, 1)',
+    'rgba(230, 184, 156, 1)',
+    'rgba(234, 210, 172, 1)',
+    'rgba(156, 175, 183, 1)',
+    'rgba(66, 129, 164, 1)'
+  ];
+
+  let backgroundColors = [];
+  let borderColors = [];
+
+  //Set the background and border colors
+  for (let i = 0; i < labels.length; i++) {
+    backgroundColors[i] = colors[i];
+    borderColors[i] = colors[i];
+  }
+
+  //Set the chart data
+  this.certChartData = {
+    labels: labels,
+    datasets: [
+      {
+        label: null,
+        data: values,
+        backgroundColor: backgroundColors,
+        borderColor: borderColors,
+        borderWidth: 1
+      }
+    ]
+  };
+  this.certChartOptions = {
+    scales: {
+      xAxes: [
+        {
+          ticks: {
+            beginAtZero: true
+          },
+          scaleLabel: {
+            display: true,
+            labelString: 'Number of Employees'
+          }
+        }
+      ],
+      yAxes: [
+        {
+          scaleLabel: {
+            display: true,
+            labelString: 'Name of Certification'
+          }
+        }
+      ]
+    },
+    legend: {
+      display: false
+    },
+    title: {
+      display: true,
+      text: 'Top 5 Certifications Used By Employees'
+    }
+  };
+  this.certChartDataReceived = true;
 }
 
 function stringToDate(dateAsString) {
@@ -236,6 +338,9 @@ export default {
   },
   data() {
     return {
+      certChartData: null,
+      certChartOptions: null,
+      certChartDataReceived: false,
       techChartData: null,
       techChartOptions: null,
       techChartDataReceived: false,
@@ -249,12 +354,14 @@ export default {
   methods: {
     fillData,
     calculateTimeDifference,
+    fillCertData,
     drawJobExpHistGraph,
     jobExperienceData,
     stringToDate
   },
   mounted() {
     this.fillData();
+    this.fillCertData();
   },
   created: async function () {
     // eslint-disable-next-line no-undef
