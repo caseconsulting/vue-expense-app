@@ -298,7 +298,8 @@ async function fillCertData() {
       xAxes: [
         {
           ticks: {
-            beginAtZero: true
+            beginAtZero: true,
+            stepSize: 1
           },
           scaleLabel: {
             display: true,
@@ -320,7 +321,7 @@ async function fillCertData() {
     },
     title: {
       display: true,
-      text: 'Top 5 Certifications Used By Employees'
+      text: 'Top ' + values.length + ' Certifications Used By Employees'
     }
   };
   this.certChartDataReceived = true;
