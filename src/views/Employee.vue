@@ -10,13 +10,13 @@
     </v-row>
     <v-row v-else>
       <!-- QuickBooks Time and Budgets-->
-      <v-col v-if="displayQuickBooksTimeAndBalances" cols="12" md="6" lg="5">
+      <v-col v-if="displayQuickBooksTimeAndBalances" cols="12" md="5" lg="4">
         <quick-books-time-data :employee="this.model" class="mb-6"></quick-books-time-data>
         <available-budgets v-if="this.model.id" :employee="this.model"></available-budgets>
       </v-col>
 
       <!-- Employee Form -->
-      <v-col cols="12" :md="displayQuickBooksTimeAndBalances ? 6 : 12" :lg="displayQuickBooksTimeAndBalances ? 7 : 12">
+      <v-col cols="12" :md="displayQuickBooksTimeAndBalances ? 7 : 12" :lg="displayQuickBooksTimeAndBalances ? 8 : 12">
         <v-card class="mt-3">
           <v-card-title class="header_style" v-if="!editing">
             <h3 id="employeeName">{{ this.model.firstName }} {{ this.model.lastName }}</h3>
