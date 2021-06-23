@@ -12,6 +12,7 @@
         <!-- Budget Name -->
         <v-text-field
           v-model="editedExpenseType.budgetName"
+          id="budgetName"
           :rules="requiredRules"
           label="Budget Name"
           data-vv-name="Budget Name"
@@ -40,6 +41,7 @@
         <v-text-field
           prefix="$"
           v-model="editedExpenseType.budget"
+          id="budgetAmount"
           :rules="budgetRules"
           label="Budget"
           data-vv-name="Budget"
@@ -76,6 +78,7 @@
           <template v-slot:activator="{ on }">
             <v-text-field
               v-model="startDateFormatted"
+              id="startDate"
               :rules="dateRules"
               label="Start Date"
               hint="MM/DD/YYYY format"
@@ -109,6 +112,7 @@
           <template v-slot:activator="{ on }">
             <v-text-field
               v-model="endDateFormatted"
+              id="endDate"
               :rules="dateRules"
               label="End Date"
               hint="MM/DD/YYYY format"
@@ -130,6 +134,7 @@
         <!-- Description -->
         <v-textarea
           v-model="editedExpenseType.description"
+          id="description"
           :rules="requiredRules"
           label="Description "
           data-vv-name="Description "
@@ -250,6 +255,7 @@
           outlined
           class="ma-2"
           color="success"
+          id="submitButton"
           :loading="submitting"
           @click="
             submitForm = !submitForm;
