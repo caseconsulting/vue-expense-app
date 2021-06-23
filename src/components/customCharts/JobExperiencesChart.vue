@@ -10,7 +10,7 @@ import moment from 'moment-timezone';
 import api from '@/shared/api.js';
 moment.tz.setDefault('America/New_York');
 
-async function jobExperienceData() {
+function jobExperienceData() {
   //init the jobExperience array
   const MAXIMUM_INDEX = 10;
   for (let i = 0; i < MAXIMUM_INDEX; i++) {
@@ -135,7 +135,7 @@ export default {
   created: async function () {
     // eslint-disable-next-line no-undef
     this.employees = await api.getItems(api.EMPLOYEES);
-    await this.jobExperienceData();
+    this.jobExperienceData();
     this.drawJobExpHistGraph();
   }
 };

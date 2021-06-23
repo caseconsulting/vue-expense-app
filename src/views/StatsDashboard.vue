@@ -19,6 +19,11 @@
               <job-experiences-chart />
             </div>
           </v-col>
+          <v-col>
+            <div class="chart">
+              <ic-chart />
+            </div>
+          </v-col>
         </v-row>
       </v-container>
     </div>
@@ -29,19 +34,21 @@
 import TechBarChart from '../components/customCharts/TechBarChart.vue';
 import JobExperiencesChart from '../components/customCharts/JobExperiencesChart.vue';
 import CertificationChart from '../components/customCharts/CertificationChart.vue';
+import IcChart from '../components/customCharts/ICChart.vue';
 
 export default {
   components: {
     TechBarChart,
     JobExperiencesChart,
-    CertificationChart
+    CertificationChart,
+    IcChart
   }
 };
 </script>
 
 <style>
 .chart {
-  height: 50%;
+  height: 20%;
   width: 100%;
 }
 </style>
