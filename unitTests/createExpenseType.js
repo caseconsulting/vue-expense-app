@@ -32,6 +32,7 @@ describe('testing expense types', () => {
     browser
       .waitForElementVisible('#budgetName')
       .setValue('#budgetName', 'This is a test') //inputs value for the name of the budget
+      .setValue('#budgetName', 'This is a test') //inputs value for the name of the budget
       .waitForElementVisible('#budgetAmount')
       .click('#budgetAmount')
       .setValue('#budgetAmount', '99') //inputs value for the budget amount
@@ -111,7 +112,6 @@ describe('testing expense types', () => {
       .waitForElementVisible('#delete') //waits for the delete icon
       .click('#delete') //clicks the delete icon
       .waitForElementVisible('#confirmDelete') //waits for delete modal to appear
-      .click('#confirmDelete') //selects the delete button in the pop-up
-      .pause(5000);
+      .click('#confirmDelete'); //selects the delete button in the pop-up
   });
 });
