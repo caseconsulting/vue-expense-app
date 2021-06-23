@@ -1,10 +1,10 @@
 <template>
-  <bar-chart v-if="dataReceived" :options="options" :chartData="chartData"></bar-chart>
+  <horizontal-bar-chart v-if="dataReceived" :options="options" :chartData="chartData"></horizontal-bar-chart>
 </template>
 
 <script>
 import api from '@/shared/api.js';
-import BarChart from '../baseCharts/BarChart.vue';
+import HorizontalBarChart from '../baseCharts/HorizontalBarChart.vue';
 async function fillCertData() {
   let employees = await api.getItems(api.EMPLOYEES);
   //Get data
@@ -104,7 +104,7 @@ async function fillCertData() {
   this.dataReceived = true;
 }
 export default {
-  components: { BarChart },
+  components: { HorizontalBarChart },
   data() {
     return {
       options: null,
