@@ -29,6 +29,11 @@
               <job-role-chart />
             </div>
           </v-row>
+          <v-row>
+            <div class="chart">
+              <highest-degree-chart />
+            </div>
+          </v-row>
         </v-col>
       </v-container>
     </div>
@@ -41,6 +46,7 @@ import JobExperiencesChart from '../components/customCharts/JobExperiencesChart.
 import CertificationChart from '../components/customCharts/CertificationChart.vue';
 import IcChart from '../components/customCharts/ICChart.vue';
 import JobRoleChart from '../components/customCharts/JobRoleChart.vue';
+import HighestDegreeChart from '../components/customCharts/HighestDegreeChart.vue';
 
 export default {
   components: {
@@ -48,7 +54,8 @@ export default {
     JobExperiencesChart,
     CertificationChart,
     IcChart,
-    JobRoleChart
+    JobRoleChart,
+    HighestDegreeChart
   }
 };
 </script>
