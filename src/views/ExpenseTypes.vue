@@ -284,6 +284,11 @@
                       <!-- Flags -->
                       <v-row>
                         <v-col cols="12" sm="6" class="flag py-0">
+                          <p>Pro-rated:</p>
+                          <icon v-if="item.proRated" id="marks" class="mr-1" name="regular/check-circle"></icon>
+                          <icon v-else class="mr-1" id="marks" name="regular/times-circle"></icon>
+                        </v-col>
+                        <v-col cols="12" sm="6" class="flag py-0">
                           <p>Overdraft Allowed:</p>
                           <icon v-if="item.odFlag" id="marks" class="mr-1" name="regular/check-circle"></icon>
                           <icon v-else class="mr-1" id="marks" name="regular/times-circle"></icon>

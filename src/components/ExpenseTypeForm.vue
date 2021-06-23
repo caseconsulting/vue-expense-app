@@ -157,7 +157,37 @@
           <v-btn to="/help/expenseTypes" class="mb-4" x-small icon><v-icon color="#3f51b5">info</v-icon></v-btn>
         </div>
 
-        <v-radio-group v-model="editedExpenseType.accessibleBy" class="smallRadio ma-0" row mandatory>
+        <v-row>
+          <v-checkbox
+            label="Full-time"
+            value="FullTime"
+            v-model="editedExpenseType.accessibleBy"
+            :rules="checkboxRules"
+            class="shrink ml-3"
+          ></v-checkbox>
+          <v-checkbox
+            label="Part-time"
+            value="PartTime"
+            v-model="editedExpenseType.accessibleBy"
+            class="shrink ml-6"
+          ></v-checkbox>
+          <v-checkbox
+            label="Intern"
+            value="Intern"
+            v-model="editedExpenseType.accessibleBy"
+            class="shrink ml-6"
+          ></v-checkbox>
+          <v-checkbox
+            label="Custom"
+            value="Custom"
+            v-model="editedExpenseType.accessibleBy"
+            class="shrink ml-6"
+          ></v-checkbox>
+        </v-row>
+
+        <v-switch v-model="editedExpenseType.proRated" label="Should this expense be pro-rated?"></v-switch>
+
+        <!-- <v-radio-group v-model="editedExpenseType.accessibleBy" class="smallRadio ma-0" row mandatory>
           <v-radio label="All" value="ALL"></v-radio>
 
           <v-radio label="Full" value="FULL"></v-radio>
@@ -165,11 +195,11 @@
           <v-radio label="Full Time" value="FULL TIME"></v-radio>
 
           <v-radio label="Custom" value="CUSTOM"></v-radio>
-        </v-radio-group>
+        </v-radio-group> -->
 
         <!-- Employee Access List -->
         <v-autocomplete
-          v-if="editedExpenseType.accessibleBy == 'CUSTOM'"
+          v-if="editedExpenseType.accessibleBy && editedExpenseType.accessibleBy.includes('Custom')"
           v-model="customAccess"
           :items="activeEmployees"
           no-data-text="No Employees Available"
@@ -183,16 +213,12 @@
           class="mt-0 pt-0"
         >
           <template v-slot:label>
-            <span class="grey--text caption">No Employee Access</span>
+            <span class="grey--text caption">No custom employee access</span>
           </template>
 
           <template v-slot:selection="{ index }">
-            <span v-if="index === 0 && customAccess.length == 1" class="grey--text caption"
-              >Accessible by {{ customAccess.length }} employee</span
-            >
-
-            <span v-else-if="index === 0" class="grey--text caption"
-              >Accessible by {{ customAccess.length }} employees</span
+            <span v-if="index === 0" class="grey--text caption"
+              >{{ customAccess.length }} employee(s) have custom access to this expense type</span
             >
           </template>
         </v-autocomplete>
@@ -347,6 +373,7 @@ function clearForm() {
   this.startDateFormatted = null;
   this.endDateFormatted = null;
   this.customAccess = [];
+  this.editedExpenseType.accessibleBy = [];
 } // clearForm
 
 /**
@@ -358,15 +385,15 @@ function emit(msg) {
   window.EventBus.$emit(msg);
 } // emit
 
-/**
- * Checks if all employees have access to an expense type and at a percentage rate. Return true if 'ALL' is selected,
- * otherwise returns false.
- *
- * @return boolean - all employees have access at a percentage rate
- */
-function isAllSelected() {
-  return this.editedExpenseType.accessibleBy == 'ALL';
-} // isAllSelected
+// /**
+//  * Checks if all employees have access to an expense type and at a percentage rate. Return true if 'ALL' is selected,
+//  * otherwise returns false.
+//  *
+//  * @return boolean - all employees have access at a percentage rate
+//  */
+// function isAllSelected() {
+//   return this.editedExpenseType.accessibleBy == 'ALL';
+// } // isAllSelected
 
 /**
  * Checks if custom access of employees have acess to an expense type at a percentage rate. Returns true if 'CUSTOM'
@@ -375,18 +402,18 @@ function isAllSelected() {
  * @return boolean - custom employees have access
  */
 function isCustomSelected() {
-  return this.editedExpenseType.accessibleBy == 'CUSTOM';
+  return this.editedExpenseType.accessibleBy && this.editedExpenseType.accessibleBy.includes('Custom');
 } // isCustomSelected
 
-/**
- * Checks if all employees have access to an expense type and at a full rate. Return true if 'FULL' is selected,
- * otherwise returns false.
- *
- * @return boolean - all employees have access at a full rate
- */
-function isFullSelected() {
-  return this.editedExpenseType.accessibleBy == 'FULL';
-} // isFullSelected
+// /**
+//  * Checks if all employees have access to an expense type and at a full rate. Return true if 'FULL' is selected,
+//  * otherwise returns false.
+//  *
+//  * @return boolean - all employees have access at a full rate
+//  */
+// function isFullSelected() {
+//   return this.editedExpenseType.accessibleBy == 'FULL';
+// } // isFullSelected
 
 /**
  * Checks if all full time employees have access to an expense type. Return true if 'FULL TIME' is selected, otherwise
@@ -395,7 +422,7 @@ function isFullSelected() {
  * @return boolean - all full time employees have access
  */
 function isFullTimeSelected() {
-  return this.editedExpenseType.accessibleBy == 'FULL TIME';
+  return this.editedExpenseType.accessibleBy.includes('FullTime');
 } // isFullTimeSelected
 
 /**
@@ -419,7 +446,7 @@ async function submit() {
 
   // set accessibleBy based on access radio
   if (this.isCustomSelected()) {
-    this.editedExpenseType.accessibleBy = this.customAccess;
+    this.editedExpenseType.accessibleBy = _.union(this.editedExpenseType.accessibleBy, this.customAccess); // merge unique vals
   }
 
   // convert budget input into a floating point number
@@ -443,6 +470,10 @@ async function submit() {
   if (this.editedExpenseType.isInactive == null) {
     // set is inactive flag to false if checkbox is null
     this.editedExpenseType.isInactive = false;
+  }
+
+  if (this.editedExpenseType.proRated == null) {
+    this.editedExpenseType.proRated = false;
   }
 
   if (this.$refs.expenseTypeForm && this.$refs.expenseTypeForm.validate()) {
@@ -579,6 +610,11 @@ export default {
       campfires: [], // basecamp campfires
       categories: [], // list of expense type categories
       categoryInput: null, // category combobox input
+      checkboxRules: [
+        () =>
+          (this.editedExpenseType.accessibleBy && this.editedExpenseType.accessibleBy.length > 0) ||
+          'At least one checkbox must be checked'
+      ],
       customAccess: [], // list of employees with custom access
       dateRules: [
         (v) => !isEmpty(v) || 'Date must be valid. Format: MM/DD/YYYY',
@@ -613,10 +649,8 @@ export default {
     clearForm,
     emit,
     formatDate,
-    isAllSelected,
     isCustomSelected,
     isEmpty,
-    isFullSelected,
     isFullTimeSelected,
     parseDate,
     removeCategory,
@@ -638,24 +672,6 @@ export default {
         this.categories = _.map(this.editedExpenseType.categories, (category) => {
           return category.name;
         });
-      }
-    },
-    'editedExpenseType.accessibleBy': function (val) {
-      if (!this.submitting && this.editedExpenseType.accessibleBy) {
-        if (!['ALL', 'FULL TIME', 'FULL', 'CUSTOM'].includes(val)) {
-          // set employee access form field when populating form with an existing expense type
-          // filter out employees that do not have access
-          this.customAccess = _.filter(this.activeEmployees, (employee) => {
-            return this.editedExpenseType.accessibleBy.includes(employee.value);
-          });
-
-          // map employee values
-          this.customAccess = _.map(this.customAccess, (employee) => {
-            return employee.value;
-          });
-
-          this.editedExpenseType.accessibleBy = 'CUSTOM';
-        }
       }
     },
     categories: function (val) {
@@ -688,6 +704,25 @@ export default {
         });
       }
     },
+    // 'editedExpenseType.accessibleBy': function (val) {
+    //   if (!this.submitting && this.editedExpenseType.accessibleBy) {
+    //     if (!['FullTime', 'PartTime', 'Intern', 'Custom'].includes(val)) {
+    //       // set employee access form field when populating form with an existing expense type
+    //       // filter out employees that do not have access
+    //       console.log(this.customAccess);
+    //       console.log(this.editedExpenseType.accessibleBy);
+    //       this.customAccess = _.filter(this.activeEmployees, (employee) => {
+    //         return this.editedExpenseType.accessibleBy.includes(employee.value);
+    //       });
+    //       console.log(this.customAccess);
+    //       // map employee values
+    //       this.customAccess = _.map(this.customAccess, (employee) => {
+    //         return employee.value;
+    //       });
+    //       console.log(this.customAccess);
+    //     }
+    //   }
+    // },
     'editedExpenseType.endDate': function () {
       this.endDateFormatted = this.formatDate(this.editedExpenseType.endDate) || this.endDateFormatted;
       //fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
