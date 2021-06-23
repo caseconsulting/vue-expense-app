@@ -509,6 +509,8 @@ async function submit() {
     this.$emit('startAction');
     this.cleanUpData();
     if (this.model.id) {
+      // convert appropriate fields to title case
+      this.convertAutocompleteToTitlecase();
       // updating employee
       let updatedEmployee = await api.updateItem(api.EMPLOYEES, this.model);
       if (updatedEmployee.id) {
@@ -704,6 +706,59 @@ function setFormData(tab, data) {
     this.$set(this.model, 'languages', data); //sets clearances to data returned from clearance tab
   }
 } //setFormData
+
+/**
+ * Changes the format of the string to title case
+ * @param str - the string to be converted
+ * @return the title case formatted string
+ */
+function titleCase(str) {
+  str = str.toLowerCase().split(' ');
+  for (var i = 0; i < str.length; i++) {
+    str[i] = str[i].charAt(0).toUpperCase() + str[i].slice(1);
+  }
+  return str.join(' ');
+} //titleCase
+
+/**
+ * Converts all the autocomplete fields to title case capitalization
+ */
+function convertAutocompleteToTitlecase() {
+  //Convert autocomplete technology field to title case
+  if (this.model.technologies !== null && this.model.technologies.length != 0) {
+    this.model.technologies.forEach((currTech) => {
+      currTech.name = titleCase(currTech.name);
+    });
+  }
+
+  //Convert autocomplete certification field to title case
+  if (this.model.certifications !== null && this.model.certifications.length != 0) {
+    this.model.certifications.forEach((currCert) => {
+      currCert.name = titleCase(currCert.name);
+    });
+  }
+
+  //Convert autocomplete award field to title case
+  if (this.model.awards !== null && this.model.awards.length != 0) {
+    this.model.awards.forEach((currAward) => {
+      currAward.name = titleCase(currAward.name);
+    });
+  }
+
+  //Convert autocomplete language field to title case
+  if (this.model.languages !== null && this.model.languages.length != 0) {
+    this.model.languages.forEach((currLang) => {
+      currLang.name = titleCase(currLang.name);
+    });
+  }
+
+  //Convert autocomplete School field to title case
+  if (this.model.degrees !== null && this.model.degrees.length != 0) {
+    this.model.degrees.forEach((currDeg) => {
+      currDeg.school = titleCase(currDeg.school);
+    });
+  }
+} //convertAutocompleteToTitlecase
 // |--------------------------------------------------|
 // |                                                  |
 // |                      EXPORT                      |
@@ -827,10 +882,12 @@ export default {
     cleanUpData,
     clearStatus,
     confirm,
+    convertAutocompleteToTitlecase,
     displayError,
     hasTabError,
     setFormData,
     submit,
+    titleCase,
     updateJobs,
     userIsAdmin,
     selectDropDown
