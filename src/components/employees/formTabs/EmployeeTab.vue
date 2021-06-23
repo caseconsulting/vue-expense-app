@@ -62,7 +62,7 @@
       id="employeePrime"
       v-model="editedEmployee.prime"
       :items="employeeInfo.primes"
-      label="Prime"
+      label="Prime (optional)"
       data-vv-name="Prime"
     ></v-combobox>
 
@@ -71,7 +71,7 @@
       id="employeeContract"
       v-model="editedEmployee.contract"
       :items="employeeInfo.contracts"
-      label="Contract"
+      label="Contract (optional)"
       data-vv-name="Contract"
     ></v-combobox>
 
@@ -81,7 +81,7 @@
       :items="jobTitles"
       v-model="editedEmployee.jobRole"
       item-text="text"
-      label="Job Role"
+      label="Job Role (optional)"
     ></v-combobox>
 
     <!-- Employee Role -->
