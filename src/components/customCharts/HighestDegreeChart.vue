@@ -3,7 +3,7 @@
 </template>
 
 <script>
-import PieChart from '../baseCharts/PieChart.vue'
+import PieChart from '../baseCharts/PieChart.vue';
 import api from '@/shared/api.js';
 
 function fillData() {
