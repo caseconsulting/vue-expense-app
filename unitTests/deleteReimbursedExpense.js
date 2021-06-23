@@ -30,10 +30,12 @@ describe('delete riembursed expense', () => {
 
   it('Test setting filters for expenses', (browser) => {
     browser
+      .waitForElementVisible('#search') // wait for search bar to load
+      .click('#search') // click on search bar (because this is not part of the shadow dom)
       .useXpath()
-      .waitForElementVisible("//*[contains(text(),'active')]") // wait for filter button to load
-      .click("//*[contains(text(),'active')]") // set filter to active expenses
-      .click("//*[contains(text(),'reimbursed')]") // set filter to reimbursed expenses
-      .click("//*[contains(text(),'delete')]"); // attempt to delete reimbursed expenses
+      .click("//*[@id='app']/div[1]/main/div/div/div/div[2]/div/div/fieldset/div[1]/div/button[1]") // set filter to active expenses
+      .click("//*[@id='app']/div[1]/main/div/div/div/div[2]/div/div/fieldset/div[2]/div/button[1]") // set filter to reimbursed expenses
+      .useCss()
+      .assert.attributeEquals('#delete', 'disabled', 'true'); // ensure that the delete button on a reimbursed expense is disabled
   });
 });
