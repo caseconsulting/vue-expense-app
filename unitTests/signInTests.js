@@ -1,6 +1,7 @@
 describe('testing sign-in', () => {
     before(browser => {
         browser.url('http://localhost:8080');
+        browser.windowMaximize('current') // maximize window
     });
 
     this.tags = ['sign-in'];

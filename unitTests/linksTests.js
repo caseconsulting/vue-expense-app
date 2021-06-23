@@ -2,6 +2,7 @@ describe('testing links', () => {
   before((browser) => {
     browser
       .url('http://localhost:8080')
+      .windowMaximize('current') // maximize window
       .waitForElementVisible('#custom-button-color') // wait for login button to load
       .click('#custom-button-color') // click that button
       .assert.visible('img.auth0-lock-header-logo') // check that the case logo is there in auth0
