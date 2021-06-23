@@ -26,7 +26,14 @@
             <v-spacer></v-spacer>
 
             <!-- Search Bar -->
-            <v-text-field v-model="search" append-icon="search" label="Search" single-line hide-details></v-text-field>
+            <v-text-field
+              v-model="search"
+              id="search"
+              append-icon="search"
+              label="Search"
+              single-line
+              hide-details
+            ></v-text-field>
           </v-card-title>
 
           <!-- Filters -->
@@ -220,7 +227,15 @@
               </v-tooltip>
               <v-tooltip top>
                 <template v-slot:activator="{ on }">
-                  <v-btn v-if="userIsAdmin()" :disabled="midAction" text icon @click="validateDelete(item)" v-on="on">
+                  <v-btn
+                    v-if="userIsAdmin()"
+                    id="delete"
+                    :disabled="midAction"
+                    text
+                    icon
+                    @click="validateDelete(item)"
+                    v-on="on"
+                  >
                     <v-icon style="color: #606060">delete</v-icon>
                   </v-btn>
                 </template>

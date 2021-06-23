@@ -66,14 +66,14 @@ describe('testing expense types', () => {
       .setValue('#employeeName', 'Test Guy')
       .keys(browser.Keys.ENTER) // enter to confirm the first auto-fill option
       .waitForElementVisible('#expenseType')
-      .setValue('#expenseType', 'This is a test - $99') // using High-Five as it does not require a receipt
+      .setValue('#expenseType', 'This is a test') // using High-Five as it does not require a receipt
       .keys(browser.Keys.ENTER)
       .waitForElementVisible('#cost')
       .setValue('#cost', '25')
       .waitForElementVisible('#description')
       .setValue('#description', '25 buckaroos')
       .waitForElementVisible('#purchaseDate')
-      .setValue('#purchaseDate', '06/20/2021') //make cause error in future bc it may be invalid
+      .setValue('#purchaseDate', '06/10/2021') //make cause error in future bc it may be invalid
       .waitForElementVisible('#notes')
       .setValue('#notes', 'test')
       .waitForElementVisible('#submitButton')
@@ -87,6 +87,28 @@ describe('testing expense types', () => {
       .waitForElementVisible('#employeeIdFilter')
       .setValue('#employeeIdFilter', 'Test Guy') //Accessing Filter By Employee
       .keys(browser.Keys.ENTER) //selects the first auto-fill option
+      .waitForElementVisible('#delete') //waits for the delete icon
+      .click('#delete') //clicks the delete icon
+      .waitForElementVisible('#confirmDelete') //waits for delete modal to appear
+      .click('#confirmDelete');
+  });
+
+  it('Test clicking on Expense Types in nav bar again', (browser) => {
+    browser
+      .waitForElementVisible('#dollar-sign')
+      .click('#dollar-sign')
+      .click('#dollar-sign')
+      .useXpath()
+      .waitForElementVisible("//*[contains(text(),'Expense Types')]")
+      .click("//*[contains(text(),'Expense Types')]")
+      .useCss();
+  });
+
+  it('Test deleting an expense type', (browser) => {
+    browser
+      .waitForElementVisible('#search')
+      .setValue('#search', 'This is a test') //Accessing Filter By Employee
+      //.keys(browser.Keys.ENTER) //selects the first auto-fill option
       .waitForElementVisible('#delete') //waits for the delete icon
       .click('#delete') //clicks the delete icon
       .waitForElementVisible('#confirmDelete') //waits for delete modal to appear
