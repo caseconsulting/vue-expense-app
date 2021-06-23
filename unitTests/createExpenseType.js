@@ -21,30 +21,30 @@ describe('testing expense types', () => {
   it('Test clicking on Expense Types in nav bar', (browser) => {
     browser
       .waitForElementVisible('#dollar-sign')
-      .click('#dollar-sign')
+      .click('#dollar-sign') //expands the expenses menu
       .useXpath()
       .waitForElementVisible("//*[contains(text(),'Expense Types')]")
-      .click("//*[contains(text(),'Expense Types')]")
+      .click("//*[contains(text(),'Expense Types')]") //clicks on the expense type button
       .useCss();
   });
 
   it('Test creating an expenseType', (browser) => {
     browser
-      .waitForElementVisible('#budgetName') // selects the Employee input box
-      .setValue('#budgetName', 'This is a test')
+      .waitForElementVisible('#budgetName')
+      .setValue('#budgetName', 'This is a test') //inputs value for the name of the budget
       .waitForElementVisible('#budgetAmount')
       .click('#budgetAmount')
-      .setValue('#budgetAmount', '99')
+      .setValue('#budgetAmount', '99') //inputs value for the budget amount
       .waitForElementVisible('#startDate')
-      .setValue('#startDate', '06/02/2021')
+      .setValue('#startDate', '06/02/2021') //inputs the start date
       .waitForElementVisible('#endDate')
-      .setValue('#endDate', '06/15/2021')
+      .setValue('#endDate', '06/15/2021') //inputs the end date
       .waitForElementVisible('#description')
-      .setValue('#description', 'pls pls y u do dis')
+      .setValue('#description', 'pls pls y u do dis') //inputs the description
       .waitForElementVisible('#submitButton')
-      .click('#submitButton')
+      .click('#submitButton') //submits the expense type
       .waitForElementVisible('#submitYesBtn')
-      .click('#submitYesBtn')
+      .click('#submitYesBtn') //confirms the submission
       .waitForElementVisible('span.headline') //validates the confirmation pop-up after submitting
       .assert.containsText('span.headline', 'Item was successfully submitted!');
   });
@@ -53,10 +53,10 @@ describe('testing expense types', () => {
     browser
       .waitForElementVisible('#dollar-sign')
       .click('#dollar-sign')
-      .click('#dollar-sign')
+      .click('#dollar-sign') //Expands the menu
       .useXpath()
       .waitForElementVisible("//*[contains(text(),'My Expenses')]")
-      .click("//*[contains(text(),'My Expenses')]")
+      .click("//*[contains(text(),'My Expenses')]") //goes to the my expenses page
       .useCss();
   });
 
@@ -66,18 +66,18 @@ describe('testing expense types', () => {
       .setValue('#employeeName', 'Test Guy')
       .keys(browser.Keys.ENTER) // enter to confirm the first auto-fill option
       .waitForElementVisible('#expenseType')
-      .setValue('#expenseType', 'This is a test') // using High-Five as it does not require a receipt
+      .setValue('#expenseType', 'This is a test') // using new expense type
       .keys(browser.Keys.ENTER)
       .waitForElementVisible('#cost')
-      .setValue('#cost', '25')
+      .setValue('#cost', '25') //inputs the cost
       .waitForElementVisible('#description')
-      .setValue('#description', '25 buckaroos')
+      .setValue('#description', '25 buckaroos') //inputs the description
       .waitForElementVisible('#purchaseDate')
       .setValue('#purchaseDate', '06/10/2021') //make cause error in future bc it may be invalid
       .waitForElementVisible('#notes')
-      .setValue('#notes', 'test')
+      .setValue('#notes', 'test') //inputs a value to the notes field
       .waitForElementVisible('#submitButton')
-      .click('#submitButton')
+      .click('#submitButton') //clicks on the submit button
       .waitForElementVisible('span.headline') //validates the confirmation pop-up after submitting
       .assert.containsText('span.headline', 'Item was successfully submitted!');
   });
@@ -97,9 +97,9 @@ describe('testing expense types', () => {
     browser
       .waitForElementVisible('#dollar-sign')
       .click('#dollar-sign')
-      .click('#dollar-sign')
+      .click('#dollar-sign') //expands the expenses menu
       .useXpath()
-      .waitForElementVisible("//*[contains(text(),'Expense Types')]")
+      .waitForElementVisible("//*[contains(text(),'Expense Types')]") //Clicks on the Expense Types button
       .click("//*[contains(text(),'Expense Types')]")
       .useCss();
   });
@@ -107,8 +107,7 @@ describe('testing expense types', () => {
   it('Test deleting an expense type', (browser) => {
     browser
       .waitForElementVisible('#search')
-      .setValue('#search', 'This is a test') //Accessing Filter By Employee
-      //.keys(browser.Keys.ENTER) //selects the first auto-fill option
+      .setValue('#search', 'This is a test') //Accessing Filter By Name
       .waitForElementVisible('#delete') //waits for the delete icon
       .click('#delete') //clicks the delete icon
       .waitForElementVisible('#confirmDelete') //waits for delete modal to appear
