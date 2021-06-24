@@ -315,14 +315,9 @@
                       <v-row v-if="userIsAdmin()">
                         <!-- Display number of employees accessed by -->
                         <div class="pt-2 px-3">
-                          <p v-if="getAccess(item)">
+                          <p>
                             <b>Access:</b>
                             {{ getAccess(item) }}
-                          </p>
-                          <p v-else-if="item.accessibleBy.length == 1"><b>Access:</b> 1 Employee</p>
-                          <p v-else>
-                            <b>Access:</b>
-                            {{ item.accessibleBy.length }} Employees
                           </p>
                         </div>
                         <!-- Button to view names of employees with access -->
@@ -702,7 +697,6 @@ function getCampfire(url) {
  */
 function getEmployeeList(accessibleBy) {
   let employeesList = [];
-  console.log(accessibleBy);
   if (accessibleBy.includes('FullTime')) {
     // accessible by all employees
     employeesList = employeesList.concat(
