@@ -504,13 +504,17 @@ async function hasTabError() {
  */
 async function submit() {
   this.submitting = true;
-  if (this.$refs.form.validate()) {
+  // convert appropriate fields to title case
+  await this.convertAutocompleteToTitlecase();
+  let hasErrors = await this.hasTabError();
+  //console.log(this.$refs.form.validate());
+  if (this.$refs.form.validate() && !hasErrors) {
     // form validated
     this.$emit('startAction');
     this.cleanUpData();
     if (this.model.id) {
-      // convert appropriate fields to title case
-      this.convertAutocompleteToTitlecase();
+      // // convert appropriate fields to title case
+      // this.convertAutocompleteToTitlecase();
       // updating employee
       let updatedEmployee = await api.updateItem(api.EMPLOYEES, this.model);
       if (updatedEmployee.id) {
@@ -723,7 +727,7 @@ function titleCase(str) {
 /**
  * Converts all the autocomplete fields to title case capitalization
  */
-function convertAutocompleteToTitlecase() {
+async function convertAutocompleteToTitlecase() {
   //Convert autocomplete technology field to title case
   if (this.model.technologies !== null && this.model.technologies.length != 0) {
     this.model.technologies.forEach((currTech) => {
@@ -758,6 +762,7 @@ function convertAutocompleteToTitlecase() {
       currDeg.school = titleCase(currDeg.school);
     });
   }
+  await this.confirm();
 } //convertAutocompleteToTitlecase
 // |--------------------------------------------------|
 // |                                                  |
