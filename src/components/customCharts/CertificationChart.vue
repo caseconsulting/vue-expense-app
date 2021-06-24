@@ -99,7 +99,8 @@ async function fillCertData() {
     title: {
       display: true,
       text: 'Top ' + values.length + ' Certifications Used By Employees'
-    }
+    },
+    maintainAspectRatio: false
   };
   this.dataReceived = true;
 }

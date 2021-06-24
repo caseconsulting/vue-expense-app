@@ -93,7 +93,8 @@ function fillData(that) {
     title: {
       display: true,
       text: `Top ${pairs.length} Technologies Used By Employees`
-    }
+    },
+    maintainAspectRatio: false
   };
   that.dataReceived = true;
   window.EventBus.$emit('updateChart-tech', that.options);

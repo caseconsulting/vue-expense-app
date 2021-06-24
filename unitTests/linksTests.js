@@ -23,9 +23,8 @@ describe('testing links', () => {
     browser
       .waitForElementVisible('#links-btn') //waiting for Link dropdown button to render
       .click('#links-btn')
-      .pause(2500)
+      .waitForElementVisible('a[id="https://3.basecamp.com/3097063"]')
       .click('a[id="https://3.basecamp.com/3097063"]') //clicks Basecamp link
-      .pause(5000)
       .windowHandles(function (result) {
         //switches window
         browser.switchWindow(result.value[1]);
@@ -41,9 +40,8 @@ describe('testing links', () => {
     browser
       .waitForElementVisible('#links-btn')
       .click('#links-btn')
-      .pause(2500)
+      .waitForElementVisible('a[id="https://nb.fidelity.com/public/nb/default/home"]')
       .click('a[id="https://nb.fidelity.com/public/nb/default/home"]')
-      .pause(2500)
       .windowHandles(function (result) {
         browser.switchWindow(result.value[1]);
         browser.assert.urlEquals('https://nb.fidelity.com/public/nb/default/home');
@@ -58,9 +56,8 @@ describe('testing links', () => {
     browser
       .waitForElementVisible('#links-btn')
       .click('#links-btn')
-      .pause(2500)
+      .waitForElementVisible('a[id="https://3.basecamp.com/3097063/buckets/179119/messages/2306027830"]')
       .click('a[id="https://3.basecamp.com/3097063/buckets/179119/messages/2306027830"]')
-      .pause(2500)
       .windowHandles(function (result) {
         browser.switchWindow(result.value[1]);
         browser.assert.urlEquals('https://launchpad.37signals.com/bc3/3078589/signin');
@@ -75,9 +72,8 @@ describe('testing links', () => {
     browser
       .waitForElementVisible('#links-btn')
       .click('#links-btn')
-      .pause(5000)
+      .waitForElementVisible('a[id="https://tsheets.intuit.com/page/login_oii"]')
       .click('a[id="https://tsheets.intuit.com/page/login_oii"]')
-      .pause(5000)
       .windowHandles(function (result) {
         browser.switchWindow(result.value[1]);
         browser.assert.urlEquals('https://tsheets.intuit.com/page/login_oii');
@@ -93,9 +89,8 @@ describe('testing links', () => {
     browser
       .waitForElementVisible('#links-btn')
       .click('#links-btn')
-      .pause(2500)
+      .waitForElementVisible('a[id="https://my.adp.com/"]')
       .click('a[id="https://my.adp.com/"]')
-      .pause(2500)
       .windowHandles(function (result) {
         browser.switchWindow(result.value[1]);
         browser.assert.urlEquals(
@@ -113,9 +108,8 @@ describe('testing links', () => {
     browser
       .waitForElementVisible('#links-btn')
       .click('#links-btn')
-      .pause(2500)
+      .waitForElementVisible('a[id="https://www.reliancestandard.com/home/"]')
       .click('a[id="https://www.reliancestandard.com/home/"]')
-      .pause(2500)
       .windowHandles(function (result) {
         browser.switchWindow(result.value[1]);
         browser.assert.urlEquals('https://www.reliancestandard.com/home/');
@@ -130,9 +124,8 @@ describe('testing links', () => {
     browser
       .waitForElementVisible('#links-btn')
       .click('#links-btn')
-      .pause(2500)
+      .waitForElementVisible('a[id="https://redmine.consultwithcase.com"]')
       .click('a[id="https://redmine.consultwithcase.com"]')
-      .pause(2500)
       .windowHandles(function (result) {
         browser.switchWindow(result.value[1]);
         browser.assert.urlEquals(
@@ -149,9 +142,8 @@ describe('testing links', () => {
     browser
       .waitForElementVisible('#links-btn')
       .click('#links-btn')
-      .pause(2500)
+      .waitForElementVisible('#floorPlan')
       .click('#floorPlan')
-      .pause(2500)
       .windowHandles(function (result) {
         browser.switchWindow(result.value[1]);
         browser.assert.urlEquals('http://localhost:8080/img/MakeOfficesfloorplan.0d9c2602.jpg');
@@ -166,7 +158,6 @@ describe('testing links', () => {
     browser
       .waitForElementVisible('#links-btn')
       .click('#Github')
-      .pause(2500)
       .windowHandles(function (result) {
         browser.switchWindow(result.value[1]);
         browser.assert.urlEquals('https://github.com/caseconsulting');
@@ -181,7 +172,6 @@ describe('testing links', () => {
     browser
       .waitForElementVisible('#links-btn')
       .click('#LinkedIn')
-      .pause(2500)
       .windowHandles(function (result) {
         browser.switchWindow(result.value[1]);
         browser.assert.urlContains('case-consulting-inc');
@@ -196,7 +186,6 @@ describe('testing links', () => {
     browser
       .waitForElementVisible('#links-btn')
       .click('#Youtube')
-      .pause(2500)
       .windowHandles(function (result) {
         browser.switchWindow(result.value[1]);
         browser.assert.urlEquals('https://www.youtube.com/channel/UC_oJY4OrOpLNrIBAN7Y-9fA');
@@ -211,7 +200,6 @@ describe('testing links', () => {
     browser
       .waitForElementVisible('#links-btn')
       .click('#Twitter')
-      .pause(2500)
       .windowHandles(function (result) {
         browser.switchWindow(result.value[1]);
         browser.assert.urlEquals('https://twitter.com/consultwithcase?lang=en');
@@ -226,10 +214,9 @@ describe('testing links', () => {
     browser
       .waitForElementVisible('#links-btn')
       .click('#Facebook')
-      .pause(2500)
       .windowHandles(function (result) {
         browser.switchWindow(result.value[1]);
-        browser.assert.urlEquals('https://www.facebook.com/ConsultwithCase/');
+        browser.assert.urlEquals('https://www.facebook.com/login/?next=https%3A%2F%2Fwww.facebook.com%2FConsultwithCase%2F');
         browser.closeWindow();
         browser.pause(2500);
         browser.switchWindow(result.value[0]);
