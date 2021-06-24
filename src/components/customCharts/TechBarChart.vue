@@ -1,7 +1,7 @@
 <template>
   <v-card>
-    <v-btn @click="oneLessColumn">-</v-btn>
-    <v-btn @click="oneMoreColumn">+</v-btn>
+    <v-btn :disabled="reachedMin" @click="oneLessColumn">-</v-btn>
+    <v-btn :disabled="reachedMax" @click="oneMoreColumn">+</v-btn>
     <v-container>
       <horizontal-bar v-if="dataReceived" :options="options" :chartData="chartData" chartType="tech"></horizontal-bar>
     </v-container>
@@ -12,6 +12,10 @@
 import HorizontalBar from '../baseCharts/HorizontalBarChart.vue';
 import api from '@/shared/api.js';
 
+/**
+ * Takes data that was captured upon load and displays it on the chart
+ * @param that this passed as that (had issues with this being 'undefined')
+ */
 function fillData(that) {
   let pairs = that.technologyPairs.sort((a, b) => {
     return b[1] - a[1];
@@ -25,7 +29,6 @@ function fillData(that) {
     labels.push(pairs[i][0]);
     values.push(pairs[i][1]);
   }
-  console.log('PAIRS LENGTH: ' + pairs.length);
   //We cycle through these colors to get the bar colors
   let colors = [
     'rgba(255, 99, 132, 1)',
@@ -95,24 +98,30 @@ function fillData(that) {
  * Increases the number of columns on the chart
  */
 function oneMoreColumn() {
-  console.log(this.numOfColumns);
   if (this.numOfColumns < 10 && this.numOfColumns < this.technologyPairs.length) {
+    this.reachedMin = false;
     this.numOfColumns++;
-    fillData(this);
+    fillData(this); // Refresh the chart
   }
-  console.log(this.numOfColumns);
+  // Disable the "+" button if the max has been reached
+  if (this.numOfColumns == this.technologyPairs.length) {
+    this.reachedMax = true;
+  }
 } //oneMoreColumn
 
 /**
  * Decreases the number of columns on the chart
  */
 function oneLessColumn() {
-  console.log(this.numOfColumns);
-  if (this.numOfColumns > 2) {
+  if (this.numOfColumns > this.numOfColumnsMin) {
+    this.reachedMax = false;
     this.numOfColumns--;
-    fillData(this);
+    fillData(this); // Refresh the chart
   }
-  console.log(this.numOfColumns);
+  // Disable the "-" button if the min has been reached
+  if (this.numOfColumns == this.numOfColumnsMin) {
+    this.reachedMin = true;
+  }
 } //oneLessColumn
 
 async function mounted() {
@@ -145,17 +154,14 @@ export default {
   },
   data() {
     return {
+      reachedMax: false,
+      reachedMin: false,
       dataReceived: false,
       chartData: null,
       options: null,
       numOfColumns: 5,
-      technologyPairs: 0
+      numOfColumnsMin: 2
     };
-  },
-  computed: {
-    a: function () {
-      return this.numOfColumns;
-    }
   },
   methods: {
     fillData,
