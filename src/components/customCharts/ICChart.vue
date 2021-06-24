@@ -77,8 +77,12 @@ function fillData() {
   this.options = {
     title: {
       display: true,
-      text: 'IC Experience'
-    }
+      text: 'IC Experience (in years)'
+    },
+    legend: {
+      display: false
+    },
+    maintainAspectRatio: false
   };
 
   this.dataReceived = true;

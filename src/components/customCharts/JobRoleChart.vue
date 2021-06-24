@@ -17,7 +17,6 @@ function fillData() {
       }
     }
   });
-
   //sorts contents from most common roles to least
   let sortedRoles = Object.entries(roles);
   sortedRoles = sortedRoles.sort((a, b) => {
@@ -27,10 +26,11 @@ function fillData() {
   let jobQuantities = [];
   //10 is just a limit to prevent an extremely long and crammed graph
   for (let i = 0; i < 10; i++) {
-    jobTitles.push(sortedRoles[i][0]);
-    jobQuantities.push(sortedRoles[i][1]);
+    if (sortedRoles.length > i) {
+      jobTitles.push(sortedRoles[i][0]);
+      jobQuantities.push(sortedRoles[i][1]);
+    }
   }
-
   let colors = [
     'rgba(255, 99, 132, 1)',
     'rgba(54, 162, 235, 1)',
