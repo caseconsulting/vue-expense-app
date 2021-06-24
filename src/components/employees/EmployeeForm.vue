@@ -507,14 +507,11 @@ async function submit() {
   // convert appropriate fields to title case
   await this.convertAutocompleteToTitlecase();
   let hasErrors = await this.hasTabError();
-  //console.log(this.$refs.form.validate());
   if (this.$refs.form.validate() && !hasErrors) {
     // form validated
     this.$emit('startAction');
     this.cleanUpData();
     if (this.model.id) {
-      // // convert appropriate fields to title case
-      // this.convertAutocompleteToTitlecase();
       // updating employee
       let updatedEmployee = await api.updateItem(api.EMPLOYEES, this.model);
       if (updatedEmployee.id) {
