@@ -1,46 +1,31 @@
 <template>
-  <horizontal-bar v-if="dataReceived" :options="options" :chartData="chartData"></horizontal-bar>
+  <v-card>
+    <v-btn @click="oneLessColumn">-</v-btn>
+    <v-btn @click="oneMoreColumn">+</v-btn>
+    <v-container>
+      <horizontal-bar v-if="dataReceived" :options="options" :chartData="chartData" chartType="tech"></horizontal-bar>
+    </v-container>
+  </v-card>
 </template>
 
 <script>
 import HorizontalBar from '../baseCharts/HorizontalBarChart.vue';
 import api from '@/shared/api.js';
 
-async function fillData() {
-  //Get data
-  //Put into dictionary where key is kinda tech and value is quantity
-  let employees = await api.getItems(api.EMPLOYEES);
-
-  let technologies = {};
-
-  employees.forEach((employee) => {
-    if (employee.technologies) {
-      employee.technologies.forEach((currTech) => {
-        if (!technologies[currTech.name]) {
-          technologies[currTech.name] = 1;
-        } else {
-          technologies[currTech.name] += 1;
-        }
-      });
-    }
-  });
-
-  //We now sort the entries
-  let technologyPairs = Object.entries(technologies);
-  technologyPairs = technologyPairs.sort((a, b) => {
+function fillData(that) {
+  let pairs = that.technologyPairs.sort((a, b) => {
     return b[1] - a[1];
   });
 
-  technologyPairs = technologyPairs.slice(0, 5);
-
+  pairs = pairs.slice(0, that.numOfColumns);
   let labels = [];
   let values = [];
 
-  for (let i = 0; i < technologyPairs.length; i++) {
-    labels.push(technologyPairs[i][0]);
-    values.push(technologyPairs[i][1]);
+  for (let i = 0; i < pairs.length; i++) {
+    labels.push(pairs[i][0]);
+    values.push(pairs[i][1]);
   }
-
+  console.log('PAIRS LENGTH: ' + pairs.length);
   //We cycle through these colors to get the bar colors
   let colors = [
     'rgba(255, 99, 132, 1)',
@@ -60,7 +45,7 @@ async function fillData() {
   }
 
   //Set the chart data
-  this.chartData = {
+  that.chartData = {
     labels: labels,
     datasets: [
       {
@@ -72,7 +57,7 @@ async function fillData() {
       }
     ]
   };
-  this.options = {
+  that.options = {
     scales: {
       xAxes: [
         {
@@ -99,11 +84,61 @@ async function fillData() {
     },
     title: {
       display: true,
-      text: 'Top 5 Technologies Used By Employees'
+      text: `Top ${pairs.length} Technologies Used By Employees`
     }
   };
-  this.dataReceived = true;
+  that.dataReceived = true;
+  window.EventBus.$emit('updateChart-tech', that.options);
 } //fillData
+
+/**
+ * Increases the number of columns on the chart
+ */
+function oneMoreColumn() {
+  console.log(this.numOfColumns);
+  if (this.numOfColumns < 10 && this.numOfColumns < this.technologyPairs.length) {
+    this.numOfColumns++;
+    fillData(this);
+  }
+  console.log(this.numOfColumns);
+} //oneMoreColumn
+
+/**
+ * Decreases the number of columns on the chart
+ */
+function oneLessColumn() {
+  console.log(this.numOfColumns);
+  if (this.numOfColumns > 2) {
+    this.numOfColumns--;
+    fillData(this);
+  }
+  console.log(this.numOfColumns);
+} //oneLessColumn
+
+async function mounted() {
+  //Get data
+  //Put into dictionary where key is kinda tech and value is quantity
+  let employees = await api.getItems(api.EMPLOYEES);
+
+  let technologies = {};
+
+  employees.forEach((employee) => {
+    if (employee.technologies) {
+      employee.technologies.forEach((currTech) => {
+        if (!technologies[currTech.name]) {
+          technologies[currTech.name] = 1;
+        } else {
+          technologies[currTech.name] += 1;
+        }
+      });
+    }
+  });
+
+  //We now sort the entries
+  this.technologyPairs = Object.entries(technologies);
+  this.fillData(this);
+}
+
 export default {
   components: {
     HorizontalBar
@@ -112,15 +147,22 @@ export default {
     return {
       dataReceived: false,
       chartData: null,
-      options: null
+      options: null,
+      numOfColumns: 5,
+      technologyPairs: 0
     };
   },
-  methods: {
-    fillData
+  computed: {
+    a: function () {
+      return this.numOfColumns;
+    }
   },
-  mounted() {
-    this.fillData();
-  }
+  methods: {
+    fillData,
+    oneMoreColumn,
+    oneLessColumn
+  },
+  mounted
 };
 </script>
 
