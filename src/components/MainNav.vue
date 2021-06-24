@@ -182,7 +182,7 @@ export default {
               title: 'My Budgets',
               icon: 'hand-holding-usd',
               route: 'myBudgets',
-              permission: ['user', 'admin']
+              permission: ['user', 'admin', 'intern']
             },
             {
               title: 'My Expenses',

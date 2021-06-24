@@ -550,7 +550,7 @@ function clearModel() {
   this.$set(this.model, 'requiredFlag', false);
   this.$set(this.model, 'isInactive', false);
   this.$set(this.model, 'categories', []);
-  this.$set(this.model, 'accessibleBy', 'ALL');
+  this.$set(this.model, 'accessibleBy', ['FullTime']);
   this.$set(this.model, 'hasRecipient', false);
   this.$set(this.model, 'alwaysOnFeed', false);
   this.$set(this.model, 'campfire', null);
@@ -670,22 +670,16 @@ function filterExpenseTypes() {
 } // filterExpenseTypes
 
 /**
- * Check who the expense type is accessible by. Returns a string description if the expense type is accessible by
- * 'ALL', 'FULL', or 'FULL TIME', otherwise returns false.
+ * Check who the expense type is accessible by. Returns a list of access types.
  *
  * @param expenseType - expesne type to check
  * @return String - accessible by description
  */
 function getAccess(expenseType) {
-  if (expenseType.accessibleBy == 'ALL') {
-    return 'All Employees';
-  } else if (expenseType.accessibleBy == 'FULL') {
-    return 'Full - 100% of budget';
-  } else if (expenseType.accessibleBy == 'FULL TIME') {
-    return 'Full Time Employees';
-  } else {
-    return false;
-  }
+  let accessList = _.filter(expenseType.accessibleBy, (accessType) => {
+    return accessType == 'FullTime' || accessType == 'PartTime' || accessType == 'Intern' || accessType == 'Custom';
+  });
+  return accessList.join(', ');
 } // getAccess
 
 /**
@@ -707,23 +701,41 @@ function getCampfire(url) {
  * @return Array - list of employees with access
  */
 function getEmployeeList(accessibleBy) {
-  let employeesList;
-
-  if (accessibleBy === 'ALL' || accessibleBy === 'FULL') {
+  let employeesList = [];
+  console.log(accessibleBy);
+  if (accessibleBy.includes('FullTime')) {
     // accessible by all employees
-    employeesList = this.employees;
-  } else if (accessibleBy === 'FULL TIME') {
-    // accessible by full time employees only
-    employeesList = _.filter(this.employees, (employee) => {
-      return employee.workStatus == 100;
-    });
-  } else {
-    // custom access list
-    employeesList = _.filter(this.employees, (employee) => {
-      return accessibleBy.includes(employee.id);
-    });
+    employeesList = employeesList.concat(
+      _.filter(this.employees, (employee) => {
+        return employee.workStatus == 100 && employee.employeeRole != 'intern';
+      })
+    );
   }
-
+  if (accessibleBy.includes('PartTime')) {
+    // accessible by full time employees only
+    employeesList = employeesList.concat(
+      _.filter(this.employees, (employee) => {
+        return employee.workStatus < 100 && employee.workStatus > 0 && employee.employeeRole != 'intern';
+      })
+    );
+  }
+  if (accessibleBy.includes('Intern')) {
+    // accessible by full time employees only
+    employeesList = employeesList.concat(
+      _.filter(this.employees, (employee) => {
+        return employee.workStatus > 0 && employee.employeeRole == 'intern';
+      })
+    );
+  }
+  if (accessibleBy.includes('Custom')) {
+    // custom access list
+    employeesList = employeesList.concat(
+      _.filter(this.employees, (employee) => {
+        return accessibleBy.includes(employee.id);
+      })
+    );
+  }
+  employeesList = [...new Set(employeesList)];
   this.showAccessLength = employeesList.length;
   return _.sortBy(employeesList, [
     (employee) => employee.firstName.toLowerCase(),
@@ -750,13 +762,28 @@ function getEmployeeName(employeeId) {
  * @return Boolean - employee has access to expense type
  */
 function hasAccess(employee, expenseType) {
-  if (expenseType.accessibleBy == 'ALL' || expenseType.accessibleBy == 'FULL') {
-    return true;
-  } else if (expenseType.accessibleBy == 'FULL TIME') {
-    return employee.workStatus == 100;
+  let result = false;
+  if (employee.workStatus == 0) {
+    result = false;
+  } else if (expenseType.accessibleBy.includes('Intern') && employee.employeeRole == 'intern') {
+    result = true;
+  } else if (
+    expenseType.accessibleBy.includes('FullTime') &&
+    employee.employeeRole != 'intern' &&
+    employee.workStatus == 100
+  ) {
+    result = true;
+  } else if (
+    expenseType.accessibleBy.includes('PartTime') &&
+    employee.employeeRole != 'intern' &&
+    employee.workStatus < 100
+  ) {
+    result = true;
   } else {
-    return expenseType.accessibleBy.includes(employee.id);
+    result = expenseType.accessibleBy.includes(employee.id);
   }
+
+  return result;
 } // hasAccess
 
 /**
@@ -1034,7 +1061,7 @@ export default {
       itemsPerPage: -1, // items per datatable page
       loading: false, // loading status
       model: {
-        accessibleBy: [],
+        accessibleBy: ['FullTime'],
         alwaysOnFeed: false,
         budget: 0,
         budgetName: '',

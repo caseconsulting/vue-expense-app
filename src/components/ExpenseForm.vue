@@ -500,15 +500,16 @@ function betweenDates(start, end) {
  * @return Number - adjusted budget amount
  */
 function calcAdjustedBudget(employee, expenseType) {
+  let result = 0;
   if (hasAccess(employee, expenseType)) {
-    if (expenseType.accessibleBy == 'FULL' || expenseType.accessibleBy == 'FULL TIME') {
-      return expenseType.budget;
+    if (!expenseType.proRated) {
+      result = expenseType.budget;
     } else {
-      return Number((expenseType.budget * (employee.workStatus / 100.0)).toFixed(2));
+      result = Number((expenseType.budget * (employee.workStatus / 100.0)).toFixed(2));
     }
-  } else {
-    return 0;
   }
+
+  return result;
 } // calcAdjustedBudget
 
 /**
@@ -948,13 +949,28 @@ function getExpenseTypeSelected(expenseTypeId) {
  * @return Boolean - employee has access to expense type
  */
 function hasAccess(employee, expenseType) {
-  if (expenseType.accessibleBy == 'ALL' || expenseType.accessibleBy == 'FULL') {
-    return true;
-  } else if (expenseType.accessibleBy == 'FULL TIME') {
-    return employee.workStatus == 100;
+  let result = false;
+  if (employee.workStatus == 0) {
+    result = false;
+  } else if (expenseType.accessibleBy.includes('Intern') && employee.employeeRole == 'intern') {
+    result = true;
+  } else if (
+    expenseType.accessibleBy.includes('FullTime') &&
+    employee.employeeRole != 'intern' &&
+    employee.workStatus == 100
+  ) {
+    result = true;
+  } else if (
+    expenseType.accessibleBy.includes('PartTime') &&
+    employee.employeeRole != 'intern' &&
+    employee.workStatus < 100
+  ) {
+    result = true;
   } else {
-    return expenseType.accessibleBy.includes(employee.id);
+    result = expenseType.accessibleBy.includes(employee.id);
   }
+
+  return result;
 } // hasAccess
 
 /**

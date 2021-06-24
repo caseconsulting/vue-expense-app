@@ -373,7 +373,7 @@ function clearForm() {
   this.startDateFormatted = null;
   this.endDateFormatted = null;
   this.customAccess = [];
-  this.editedExpenseType.accessibleBy = [];
+  this.editedExpenseType.accessibleBy = ['FullTime'];
 } // clearForm
 
 /**
