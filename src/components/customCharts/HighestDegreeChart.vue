@@ -180,8 +180,9 @@ function fillData() {
   this.options = {
     title: {
       display: true,
-      text: 'Highest Achieved Degrees by Employees'
-    }
+      text: 'Highest Degrees Obtained by Employees'
+    },
+    maintainAspectRatio: false
   };
   this.dataReceived = true;
 }
