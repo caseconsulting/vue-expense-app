@@ -184,19 +184,6 @@
             class="shrink ml-6"
           ></v-checkbox>
         </v-row>
-
-        <v-switch v-model="editedExpenseType.proRated" label="Should this expense be pro-rated?"></v-switch>
-
-        <!-- <v-radio-group v-model="editedExpenseType.accessibleBy" class="smallRadio ma-0" row mandatory>
-          <v-radio label="All" value="ALL"></v-radio>
-
-          <v-radio label="Full" value="FULL"></v-radio>
-
-          <v-radio label="Full Time" value="FULL TIME"></v-radio>
-
-          <v-radio label="Custom" value="CUSTOM"></v-radio>
-        </v-radio-group> -->
-
         <!-- Employee Access List -->
         <v-autocomplete
           v-if="editedExpenseType.accessibleBy && editedExpenseType.accessibleBy.includes('Custom')"
@@ -222,6 +209,8 @@
             >
           </template>
         </v-autocomplete>
+
+        <v-switch v-model="editedExpenseType.proRated" label="Should this expense be pro-rated?"></v-switch>
 
         <!-- Require Recipient -->
         <v-switch v-model="editedExpenseType.hasRecipient" label="Does this expense type have a recipient?"></v-switch>
@@ -373,6 +362,7 @@ function clearForm() {
   this.startDateFormatted = null;
   this.endDateFormatted = null;
   this.customAccess = [];
+  this.editedExpenseType.id = null;
   this.editedExpenseType.accessibleBy = ['FullTime'];
 } // clearForm
 
