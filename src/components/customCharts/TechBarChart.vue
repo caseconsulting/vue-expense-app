@@ -3,7 +3,7 @@
     <v-btn :disabled="reachedMin" @click="oneLessColumn">-</v-btn>
     <v-btn :disabled="reachedMax" @click="oneMoreColumn">+</v-btn>
     <v-container>
-      <horizontal-bar v-if="dataReceived" :options="options" :chartData="chartData" chartType="tech"></horizontal-bar>
+      <horizontal-bar v-if="dataReceived" :options="options" :chartData="chartData"></horizontal-bar>
     </v-container>
   </v-card>
 </template>
@@ -97,7 +97,6 @@ function fillData(that) {
     maintainAspectRatio: false
   };
   that.dataReceived = true;
-  window.EventBus.$emit('updateChart-tech', that.options);
 } //fillData
 
 /**
