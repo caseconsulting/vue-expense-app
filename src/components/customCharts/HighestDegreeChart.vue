@@ -1,12 +1,18 @@
 <template>
-  <div>
-    <pie-chart v-if="dataReceived" :options="options" :chartData="chartData" />
-    <h4 v-if="degrees">Total Degrees: {{ degreeCount }}</h4>
-  </div>
+  <v-row>
+    <v-col>
+      <pie-chart v-if="dataReceived" :options="options" :chartData="chartData" />
+      <h4 v-if="degrees">Total Degrees: {{ degreeCount }}</h4>
+    </v-col>
+    <v-col>
+      <MajorsChart />
+    </v-col>
+  </v-row>
 </template>
 
 <script>
 import PieChart from '../baseCharts/PieChart.vue';
+import MajorsChart from './MajorsChart.vue';
 import api from '@/shared/api.js';
 import _ from 'lodash';
 
@@ -156,9 +162,14 @@ function getDegreeName(value) {
 function fillData() {
   let labels = Object.keys(this.degrees);
   let quantities = [];
-  for (let i = 0; i < labels.length; i++) {
-    quantities.push(Object.keys(Object.entries(this.degrees)[i][1]).length);
-  }
+  _.forEach(this.degrees, (degree) => {
+    let quantity = 0;
+    _.forEach(Object.keys(degree), (major) => {
+      quantity += degree[major];
+      this.degreeCount += degree[major];
+    });
+    quantities.push(quantity);
+  });
 
   let colors = [
     'rgba(54, 162, 235, 1)',
@@ -167,7 +178,6 @@ function fillData() {
     'rgba(153, 102, 255, 1)',
     'rgba(255, 99, 132, 1)'
   ];
-
   this.chartData = {
     labels: labels,
     datasets: [
@@ -182,19 +192,39 @@ function fillData() {
       display: true,
       text: 'Highest Degrees Obtained by Employees'
     },
-    maintainAspectRatio: false
+    maintainAspectRatio: false,
+    responsive: true,
+    onClick: (_, item) => {
+      this.majorsEmit(labels[item[0]._index]);
+    }
   };
   this.dataReceived = true;
 }
 
+/**
+ * Sends data to create the second pie chart that displays
+ * info about degree majors
+ * @param degree - object that holds the name of the degree as a key and holds
+ * a nested object w/ key of the major and value of the quantity
+ */
+function majorsEmit(degree) {
+  let majorsData = {};
+  majorsData.majors = this.degrees[degree];
+  majorsData.degree = degree;
+  this.showMajors = true;
+  window.EventBus.$emit('majors-update', majorsData);
+}
+
 export default {
-  components: { PieChart },
+  components: { PieChart, MajorsChart },
   data() {
     return {
       dataReceived: false,
       options: null,
       chartData: null,
-      degrees: null
+      degrees: null,
+      showMajors: false,
+      degreeCount: 0
     };
   },
   methods: {
@@ -203,16 +233,8 @@ export default {
     compareDegree,
     initDegrees,
     getDegreeValue,
-    getDegreeName
-  },
-  computed: {
-    degreeCount() {
-      var count = 0;
-      _.forEach(this.degrees, (degree) => {
-        count += Object.keys(degree).length;
-      });
-      return count;
-    }
+    getDegreeName,
+    majorsEmit
   },
   async created() {
     this.employees = await api.getItems(api.EMPLOYEES);

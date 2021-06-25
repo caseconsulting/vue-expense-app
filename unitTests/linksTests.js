@@ -30,7 +30,6 @@ describe('testing links', () => {
         browser.switchWindow(result.value[1]);
         browser.assert.urlEquals('https://launchpad.37signals.com/bc3/3078589/signin');
         browser.closeWindow();
-        browser.pause(2500);
         browser.switchWindow(result.value[0]);
         browser.assert.urlEquals('http://localhost:8080/reimbursements');
       });
@@ -46,7 +45,6 @@ describe('testing links', () => {
         browser.switchWindow(result.value[1]);
         browser.assert.urlEquals('https://nb.fidelity.com/public/nb/default/home');
         browser.closeWindow();
-        browser.pause(2500);
         browser.switchWindow(result.value[0]);
         browser.assert.urlEquals('http://localhost:8080/reimbursements');
       });
@@ -62,7 +60,6 @@ describe('testing links', () => {
         browser.switchWindow(result.value[1]);
         browser.assert.urlEquals('https://launchpad.37signals.com/bc3/3078589/signin');
         browser.closeWindow();
-        browser.pause(2500);
         browser.switchWindow(result.value[0]);
         browser.assert.urlEquals('http://localhost:8080/reimbursements');
       });
@@ -78,7 +75,6 @@ describe('testing links', () => {
         browser.switchWindow(result.value[1]);
         browser.assert.urlEquals('https://tsheets.intuit.com/page/login_oii');
         browser.closeWindow();
-        browser.pause(2500);
         browser.switchWindow(result.value[0]);
         browser.assert.urlEquals('http://localhost:8080/reimbursements');
       })
@@ -97,7 +93,6 @@ describe('testing links', () => {
           'https://online.adp.com/signin/v1/?APPID=RDBX&productId=80e309c3-70c6-bae1-e053-3505430b5495&returnURL=https://my.adp.com/&callingAppId=RDBX&TARGET=-SM-https://my.adp.com/static/redbox/'
         );
         browser.closeWindow();
-        browser.pause(2500);
         browser.switchWindow(result.value[0]);
         browser.assert.urlEquals('http://localhost:8080/reimbursements');
       })
@@ -114,7 +109,6 @@ describe('testing links', () => {
         browser.switchWindow(result.value[1]);
         browser.assert.urlEquals('https://www.reliancestandard.com/home/');
         browser.closeWindow();
-        browser.pause(2500);
         browser.switchWindow(result.value[0]);
         browser.assert.urlEquals('http://localhost:8080/reimbursements');
       });
@@ -132,7 +126,6 @@ describe('testing links', () => {
           'https://redmine.consultwithcase.com/login?back_url=https%3A%2F%2Fredmine.consultwithcase.com%2F'
         );
         browser.closeWindow();
-        browser.pause(2500);
         browser.switchWindow(result.value[0]);
         browser.assert.urlEquals('http://localhost:8080/reimbursements');
       });
@@ -148,7 +141,6 @@ describe('testing links', () => {
         browser.switchWindow(result.value[1]);
         browser.assert.urlEquals('http://localhost:8080/img/MakeOfficesfloorplan.0d9c2602.jpg');
         browser.closeWindow();
-        browser.pause(2500);
         browser.switchWindow(result.value[0]);
         browser.assert.urlEquals('http://localhost:8080/reimbursements');
       });
@@ -162,7 +154,6 @@ describe('testing links', () => {
         browser.switchWindow(result.value[1]);
         browser.assert.urlEquals('https://github.com/caseconsulting');
         browser.closeWindow();
-        browser.pause(2500);
         browser.switchWindow(result.value[0]);
         browser.assert.urlEquals('http://localhost:8080/reimbursements');
       });
@@ -176,7 +167,6 @@ describe('testing links', () => {
         browser.switchWindow(result.value[1]);
         browser.assert.urlContains('case-consulting-inc');
         browser.closeWindow();
-        browser.pause(2500);
         browser.switchWindow(result.value[0]);
         browser.assert.urlEquals('http://localhost:8080/reimbursements');
       });
@@ -190,7 +180,6 @@ describe('testing links', () => {
         browser.switchWindow(result.value[1]);
         browser.assert.urlEquals('https://www.youtube.com/channel/UC_oJY4OrOpLNrIBAN7Y-9fA');
         browser.closeWindow();
-        browser.pause(2500);
         browser.switchWindow(result.value[0]);
         browser.assert.urlEquals('http://localhost:8080/reimbursements');
       });
@@ -204,7 +193,6 @@ describe('testing links', () => {
         browser.switchWindow(result.value[1]);
         browser.assert.urlEquals('https://twitter.com/consultwithcase?lang=en');
         browser.closeWindow();
-        browser.pause(2500);
         browser.switchWindow(result.value[0]);
         browser.assert.urlEquals('http://localhost:8080/reimbursements');
       });
@@ -218,7 +206,6 @@ describe('testing links', () => {
         browser.switchWindow(result.value[1]);
         browser.assert.urlEquals('https://www.facebook.com/login/?next=https%3A%2F%2Fwww.facebook.com%2FConsultwithCase%2F');
         browser.closeWindow();
-        browser.pause(2500);
         browser.switchWindow(result.value[0]);
         browser.assert.urlEquals('http://localhost:8080/reimbursements');
       });
