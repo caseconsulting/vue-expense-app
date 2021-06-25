@@ -109,7 +109,7 @@ function oneMoreColumn() {
     fillData(this); // Refresh the chart
   }
   // Disable the "+" button if the max has been reached
-  if (this.numOfColumns == this.technologyPairs.length) {
+  if (this.numOfColumns === 10 || this.numOfColumns === this.technologyPairs.length) {
     this.reachedMax = true;
   }
 } //oneMoreColumn
