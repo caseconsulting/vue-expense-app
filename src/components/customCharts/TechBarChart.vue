@@ -103,13 +103,13 @@ function fillData(that) {
  * Increases the number of columns on the chart
  */
 function oneMoreColumn() {
-  if (this.numOfColumns < 10 && this.numOfColumns < this.technologyPairs.length) {
+  if (this.numOfColumns < this.numOfColumnsMax && this.numOfColumns < this.technologyPairs.length) {
     this.reachedMin = false;
     this.numOfColumns++;
     fillData(this); // Refresh the chart
   }
   // Disable the "+" button if the max has been reached
-  if (this.numOfColumns === 10 || this.numOfColumns === this.technologyPairs.length) {
+  if (this.numOfColumns === this.numOfColumnsMax || this.numOfColumns === this.technologyPairs.length) {
     this.reachedMax = true;
   }
 } //oneMoreColumn
@@ -165,7 +165,8 @@ export default {
       chartData: null,
       options: null,
       numOfColumns: 5,
-      numOfColumnsMin: 2
+      numOfColumnsMin: 2,
+      numOfColumnsMax: 10
     };
   },
   methods: {
