@@ -218,7 +218,6 @@
         <!-- always show on feed -->
         <v-switch
           v-model="editedExpenseType.alwaysOnFeed"
-          id="showOnFeed"
           @change="toggleShowAllCategories()"
           label="Have this expense type show on the company feed?"
         ></v-switch>

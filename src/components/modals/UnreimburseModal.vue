@@ -21,6 +21,7 @@
           <v-spacer></v-spacer>
           <v-btn
             color="red"
+            id="confirmUnreimbursed"
             text
             @click.native="
               emit(`confirm-unreimburse-expense`);

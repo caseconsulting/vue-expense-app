@@ -116,7 +116,7 @@
                 <!-- Show Reimbursed and Pending -->
                 <v-tooltip top>
                   <template v-slot:activator="{ on }">
-                    <v-btn value="both" v-on="on" text> BOTH </v-btn>
+                    <v-btn id="bothReimbursed" value="both" v-on="on" text> BOTH </v-btn>
                   </template>
                   <span>Show All</span>
                 </v-tooltip>
@@ -219,6 +219,7 @@
                       :disabled="!isReimbursed(item) || isEditing || midAction"
                       text
                       icon
+                      id="unreimburse"
                       @click="
                         unreimbursing = !unreimbursing;
                         midAction = true;

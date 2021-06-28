@@ -1,7 +1,15 @@
 <template>
   <div>
     <!-- Status Alert -->
-    <v-alert v-for="(alert, index) in alerts" :key="index" :type="alert.status" :color="alert.color" dense class="mb-1">
+    <v-alert
+      v-for="(alert, index) in alerts"
+      :key="index"
+      :type="alert.status"
+      :color="alert.color"
+      dense
+      class="mb-1"
+      id="alert"
+    >
       {{ alert.message }}
     </v-alert>
     <v-card class="mt-3">
@@ -15,6 +23,7 @@
           <v-autocomplete
             :items="employees"
             v-model="employee"
+            id="filterEmployee"
             item-text="text"
             label="Filter by Employee"
             clearable
@@ -46,6 +55,7 @@
           <!-- Select item slot in data table -->
           <template v-slot:[`item.data-table-select`]="{ item }">
             <v-checkbox
+              id="itemCheckbox"
               :input-value="item.checkBox.all"
               :indeterminate="item.checkBox.indeterminate"
               primary

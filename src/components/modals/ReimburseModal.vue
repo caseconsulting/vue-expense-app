@@ -9,6 +9,7 @@
           <v-spacer></v-spacer>
           <v-btn
             color="green"
+            id="reimburse"
             text
             @click.native="
               emit(`confirm-reimburse`);
