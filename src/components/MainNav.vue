@@ -226,14 +226,14 @@ export default {
           title: 'Training',
           icon: 'fire',
           route: 'training',
-          permission: ['admin', 'user'],
+          permission: ['admin', 'user', 'intern'],
           active: false
         },
         {
           title: 'Help',
           icon: 'life-ring',
           route: 'help',
-          permission: ['admin', 'user'],
+          permission: ['admin', 'user', 'intern'],
           active: false
         }
       ], // navigation options
