@@ -157,6 +157,13 @@
             </p>
           </template>
 
+          <!-- Last Name Item Slot -->
+          <template v-slot:[`item.lastLogin`]="{ item }">
+            <p :class="{ inactiveStyle: isInactive(item), selectFocus: isFocus(item) }" style="margin-bottom: 0px">
+              {{ item.lastLogin }}
+            </p>
+          </template>
+
           <!-- Date Item Slot -->
           <template v-slot:[`item.hireDate`]="{ item }">
             <p :class="{ inactiveStyle: isInactive(item), selectFocus: isFocus(item) }" style="margin-bottom: 0px">
@@ -452,6 +459,10 @@ export default {
         {
           text: 'Last Name',
           value: 'lastName'
+        },
+        {
+          text: 'Last Login',
+          value: 'lastLogin'
         },
         {
           text: 'Hire Date',
