@@ -144,7 +144,7 @@
             </v-menu>
             <!-- End Start Date -->
           </v-col>
-          <v-col cols="12" sm="6" md="12" lg="6" class="pt-0">
+          <v-col cols="12" sm="6" md="12" lg="6" class="pt-3">
             <!-- End Date -->
             <v-menu
               v-model="position.showEndMenu"
