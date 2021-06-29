@@ -53,7 +53,7 @@
     <!-- End Experience in IC -->
 
     <!-- Case Info -->
-    <div style="border: 1px solid grey" class="pt-3 pb-1 px-5">
+    <div style="border: 1px solid grey" class="pt-2 pb-1 px-5">
       <!-- Company Name -->
       <v-text-field label="Company" data-vv-name="Company" readonly value="Case Consulting"></v-text-field>
 
@@ -110,7 +110,7 @@
         ></v-combobox>
 
         <v-row>
-          <v-col cols="12" sm="6" md="12" lg="6" class="pt-0">
+          <v-col cols="12" sm="6" md="12" lg="6" class="pt-3">
             <!-- Start Date -->
             <v-menu
               v-model="position.showStartMenu"
