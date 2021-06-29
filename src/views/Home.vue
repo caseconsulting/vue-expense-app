@@ -2,7 +2,7 @@
   <v-container class="my-3">
     <span v-if="loading">
       <v-row>
-        <v-col cols="10" md="6">
+        <v-col cols="12" md="6">
           <v-skeleton-loader class="my-3" type="list-item@2"></v-skeleton-loader>
         </v-col>
         <v-col cols="12" md="6" class="pa-4">
@@ -31,7 +31,7 @@
     <span v-else>
       <v-row class="pb-4">
         <!-- Title -->
-        <v-col cols="10" md="6">
+        <v-col cols="12" md="6">
           <v-row style="height: 80%" align="center" justify="center">
             <h1>Hello, {{ employee.firstName }}!</h1>
           </v-row>
