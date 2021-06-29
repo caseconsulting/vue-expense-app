@@ -22,7 +22,7 @@ import { isLoggedIn, login, getRole } from '@/utils/auth';
 import api from '../shared/api';
 const moment = require('moment-timezone');
 moment.tz.setDefault('America/New_York');
-const format1 = "YYYY-MM-DD HH:mm:ss"
+const login_format = 'YYYY-MM-DD HH:mm:ss';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -49,7 +49,7 @@ async function created() {
 
 async function recordLogin() {
   let employee = await api.getUser();
-  employee.lastLogin = moment(new Date()).format(format1);
+  employee.lastLogin = moment(new Date()).format(login_format);
   await api.updateItem(api.EMPLOYEES, employee);
 } // created
 

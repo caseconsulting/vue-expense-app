@@ -13,7 +13,7 @@
     <p v-if="!isEmpty(this.model.deptDate) && admin">
       <b>Departure Date:</b> {{ this.model.deptDate | monthDayYearFormat }}
     </p>
-   <p v-if="!isEmpty(this.model.lastLogin)"><b>Last Logged In:</b> {{ this.model.lastLogin }}</p>
+    <p v-if="!isEmpty(this.model.lastLogin)"><b>Last Logged In:</b> {{ this.model.lastLogin }}</p>
   </div>
 </template>
 
