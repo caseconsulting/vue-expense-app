@@ -31,7 +31,7 @@ describe('testing expense type to show on feed', () => {
 
   it('Test creating an expenseType', (browser) => {
     browser
-      .pause(500)
+      .pause(550)
       .waitForElementVisible('#budgetName')
       .setValue('#budgetName', 'Feed Test') //inputs value for the name of the budget
       //.setValue('#budgetName', 'Feed Test') //inputs value for the name of the budget
