@@ -182,7 +182,7 @@
             class="shrink ml-6"
           ></v-checkbox>
         </v-row>
-        <p id='error' v-if='checkBoxRule'>At least one checkbox must be checked</p>
+        <p id="error" v-if="checkBoxRule">At least one checkbox must be checked</p>
         <!-- Employee Access List -->
         <v-autocomplete
           v-if="editedExpenseType.accessibleBy && editedExpenseType.accessibleBy.includes('Custom')"
@@ -732,7 +732,7 @@ export default {
 
 <style scoped>
 #error {
-  color: #FF5252;
+  color: #ff5252;
   font-size: 12px;
 }
 
