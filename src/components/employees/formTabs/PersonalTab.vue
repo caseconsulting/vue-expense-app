@@ -186,7 +186,7 @@ function validateFields() {
     }
   } else if (this.$refs.formFields) {
     // single vuetify component
-    hasErrors = !this.$refs.formFields.validate;
+    hasErrors = !this.$refs.formFields.validate();
   }
   window.EventBus.$emit('doneValidating', 'personal', this.editedPersonalInfo); // emit done validating
   window.EventBus.$emit('personalStatus', [hasErrors, errorCount]); // emit error status
