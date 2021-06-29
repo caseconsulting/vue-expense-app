@@ -1,162 +1,164 @@
 <template>
-  <div style="border: 1px solid grey" class="pt-3 pb-1 px-5" v-bind:class="{ errorText: intervalOverlaps }">
-    <!--Duplicate chip if tech name is already entered by user-->
-    <v-row v-if="intervalOverlaps" justify="end">
-      <v-chip class="ma-2" color="error" text-color="white"> Overlapping Interval </v-chip>
-    </v-row>
+  <v-form ref="form">
+    <div style="border: 1px solid grey" class="pt-3 pb-1 px-5" v-bind:class="{ errorText: intervalOverlaps }">
+      <!--Duplicate chip if tech name is already entered by user-->
+      <v-row v-if="intervalOverlaps" justify="end">
+        <v-chip class="ma-2" color="error" text-color="white"> Overlapping Interval </v-chip>
+      </v-row>
 
-    <v-row class="pt-5 pl-3">
-      <h3>Time Interval</h3>
-      <v-spacer></v-spacer>
-      <v-btn-toggle v-model="formatToggle" mandatory>
-        <v-tooltip top>
-          <template v-slot:activator="{ on }">
-            <v-btn v-on="on" text>
-              <icon class="mr-1" name="calendar-alt"></icon>
-            </v-btn>
+      <v-row class="pt-5 pl-3">
+        <h3>Time Interval</h3>
+        <v-spacer></v-spacer>
+        <v-btn-toggle v-model="formatToggle" mandatory>
+          <v-tooltip top>
+            <template v-slot:activator="{ on }">
+              <v-btn v-on="on" text>
+                <icon class="mr-1" name="calendar-alt"></icon>
+              </v-btn>
+            </template>
+            <span>MM-YYYY</span>
+          </v-tooltip>
+          <v-tooltip top>
+            <template v-slot:activator="{ on }">
+              <v-btn v-on="on" text>
+                <icon class="mr-1" name="globe-americas"></icon>
+              </v-btn>
+            </template>
+            <span>YYYY</span>
+          </v-tooltip>
+        </v-btn-toggle>
+      </v-row>
+      <v-row class="mb-5">
+        <!--Interval  Start Date Picker-->
+        <v-menu
+          v-if="formatToggle == 0"
+          v-model="startIntervalMenu"
+          :close-on-content-click="false"
+          :nudge-right="40"
+          transition="scale-transition"
+          offset-y
+          min-width="290px"
+        >
+          <template v-slot:activator="{ on, attrs }">
+            <v-text-field
+              ref="formFields"
+              :value="startIntervalDateEdited | formatDateMonthYear"
+              v-mask="'##/####'"
+              color="#A17C6B"
+              label="Start Date"
+              clearable
+              class="mt-8 shrink mx-3"
+              prepend-icon="event"
+              background-color="white"
+              v-bind="attrs"
+              v-on="on"
+              placeholder="Start Date"
+              :rules="dateRules"
+              lazy-validation
+              persistent-hint
+              hint="(MM/YYYY)"
+              @blur="startIntervalDateEdited = parseDateMonthYear($event.target.value)"
+              @click:clear="startIntervalDateEdited = parseDateMonthYear($event.target.value)"
+            ></v-text-field>
           </template>
-          <span>MM-YYYY</span>
-        </v-tooltip>
-        <v-tooltip top>
-          <template v-slot:activator="{ on }">
-            <v-btn v-on="on" text>
-              <icon class="mr-1" name="globe-americas"></icon>
-            </v-btn>
+          <v-date-picker
+            v-model="startIntervalDateEdited"
+            @input="startIntervalMenu = false"
+            type="month"
+            :landscape="$vuetify.breakpoint.smAndUp"
+          ></v-date-picker>
+        </v-menu>
+        <!--End of Interval Start Date Picker-->
+
+        <!--Interval End Date Picker-->
+        <v-menu
+          v-if="formatToggle == 0"
+          v-model="endIntervalMenu"
+          :close-on-content-click="false"
+          :nudge-right="40"
+          transition="scale-transition"
+          offset-y
+          min-width="290px"
+        >
+          <template v-slot:activator="{ on, attrs }">
+            <v-text-field
+              ref="formFields"
+              :value="endIntervalDateEdited | formatDateMonthYear"
+              v-mask="'##/####'"
+              color="#A17C6B"
+              label="End Date (optional)"
+              clearable
+              class="mt-8 shrink px-3"
+              prepend-icon="event"
+              background-color="white"
+              v-bind="attrs"
+              v-on="on"
+              placeholder="End Date (optional)"
+              :rules="dateOptionalRules"
+              lazy-validation
+              persistent-hint
+              hint="(MM/YYYY)"
+              @blur="endIntervalDateEdited = parseDateMonthYear($event.target.value)"
+              @click:clear="endIntervalDateEdited = parseDateMonthYear($event.target.value)"
+            ></v-text-field>
           </template>
-          <span>YYYY</span>
-        </v-tooltip>
-      </v-btn-toggle>
-    </v-row>
-    <v-row class="mb-5">
-      <!--Interval  Start Date Picker-->
-      <v-menu
-        v-if="formatToggle == 0"
-        v-model="startIntervalMenu"
-        :close-on-content-click="false"
-        :nudge-right="40"
-        transition="scale-transition"
-        offset-y
-        min-width="290px"
-      >
-        <template v-slot:activator="{ on, attrs }">
-          <v-text-field
-            ref="formFields"
-            :value="startIntervalDateEdited | formatDateMonthYear"
-            v-mask="'##/####'"
-            color="#A17C6B"
-            label="Start Date"
-            clearable
-            class="mt-8 shrink mx-3"
-            prepend-icon="event"
-            background-color="white"
-            v-bind="attrs"
-            v-on="on"
-            placeholder="Start Date"
-            :rules="dateRules"
-            lazy-validation
-            persistent-hint
-            hint="(MM/YYYY)"
-            @blur="startIntervalDateEdited = parseDateMonthYear($event.target.value)"
-            @click:clear="startIntervalDateEdited = parseDateMonthYear($event.target.value)"
-          ></v-text-field>
-        </template>
-        <v-date-picker
+          <v-date-picker
+            v-model="endIntervalDateEdited"
+            @input="endIntervalMenu = false"
+            type="month"
+            :landscape="$vuetify.breakpoint.smAndUp"
+          ></v-date-picker>
+        </v-menu>
+        <!--Interval End Date Picker-->
+
+        <v-text-field
+          v-if="formatToggle == 1"
+          ref="formFields"
           v-model="startIntervalDateEdited"
-          @input="startIntervalMenu = false"
-          type="month"
-          :landscape="$vuetify.breakpoint.smAndUp"
-        ></v-date-picker>
-      </v-menu>
-      <!--End of Interval Start Date Picker-->
+          v-mask="'####'"
+          color="#A17C6B"
+          label="Start Date"
+          clearable
+          class="mt-8 shrink mx-3"
+          prepend-icon="event"
+          background-color="white"
+          placeholder="Start Date"
+          :rules="yearStartRules"
+          lazy-validation
+          persistent-hint
+          hint="(YYYY)"
+        ></v-text-field>
 
-      <!--Interval End Date Picker-->
-      <v-menu
-        v-if="formatToggle == 0"
-        v-model="endIntervalMenu"
-        :close-on-content-click="false"
-        :nudge-right="40"
-        transition="scale-transition"
-        offset-y
-        min-width="290px"
-      >
-        <template v-slot:activator="{ on, attrs }">
-          <v-text-field
-            ref="formFields"
-            :value="endIntervalDateEdited | formatDateMonthYear"
-            v-mask="'##/####'"
-            color="#A17C6B"
-            label="End Date (optional)"
-            clearable
-            class="mt-8 shrink px-3"
-            prepend-icon="event"
-            background-color="white"
-            v-bind="attrs"
-            v-on="on"
-            placeholder="End Date (optional)"
-            :rules="dateOptionalRules"
-            lazy-validation
-            persistent-hint
-            hint="(MM/YYYY)"
-            @blur="endIntervalDateEdited = parseDateMonthYear($event.target.value)"
-            @click:clear="endIntervalDateEdited = parseDateMonthYear($event.target.value)"
-          ></v-text-field>
-        </template>
-        <v-date-picker
+        <!--End of Interval Start Date Picker-->
+
+        <!--Interval End Date Picker-->
+        <v-text-field
+          v-if="formatToggle == 1"
+          ref="formFields"
           v-model="endIntervalDateEdited"
-          @input="endIntervalMenu = false"
-          type="month"
-          :landscape="$vuetify.breakpoint.smAndUp"
-        ></v-date-picker>
-      </v-menu>
-      <!--Interval End Date Picker-->
+          v-mask="'####'"
+          color="#A17C6B"
+          label="End Date (optional)"
+          clearable
+          class="mt-8 shrink px-3"
+          prepend-icon="event"
+          background-color="white"
+          placeholder="End Date (optional)"
+          :rules="yearEndRules"
+          lazy-validation
+          persistent-hint
+          hint="(YYYY)"
+        ></v-text-field>
+        <!--Interval End Date Picker-->
 
-      <v-text-field
-        v-if="formatToggle == 1"
-        ref="formFields"
-        v-model="startIntervalDateEdited"
-        v-mask="'####'"
-        color="#A17C6B"
-        label="Start Date"
-        clearable
-        class="mt-8 shrink mx-3"
-        prepend-icon="event"
-        background-color="white"
-        placeholder="Start Date"
-        :rules="yearStartRules"
-        lazy-validation
-        persistent-hint
-        hint="(YYYY)"
-      ></v-text-field>
-
-      <!--End of Interval Start Date Picker-->
-
-      <!--Interval End Date Picker-->
-      <v-text-field
-        v-if="formatToggle == 1"
-        ref="formFields"
-        v-model="endIntervalDateEdited"
-        v-mask="'####'"
-        color="#A17C6B"
-        label="End Date (optional)"
-        clearable
-        class="mt-8 shrink px-3"
-        prepend-icon="event"
-        background-color="white"
-        placeholder="End Date (optional)"
-        :rules="yearEndRules"
-        lazy-validation
-        persistent-hint
-        hint="(YYYY)"
-      ></v-text-field>
-      <!--Interval End Date Picker-->
-
-      <!-- Button to Delete Interval -->
-      <v-btn class="mt-8" text icon><v-icon @click="deleteInterval">delete</v-icon></v-btn>
-    </v-row>
-    <v-row class="pb-5 caption text--darken-2 grey--text">
-      If you are unsure about the exact date, please put an approximate one.
-    </v-row>
-  </div>
+        <!-- Button to Delete Interval -->
+        <v-btn class="mt-8" text icon><v-icon @click="deleteInterval">delete</v-icon></v-btn>
+      </v-row>
+      <v-row class="pb-5 caption text--darken-2 grey--text">
+        If you are unsure about the exact date, please put an approximate one.
+      </v-row>
+    </div>
+  </v-form>
 </template>
 
 <script>
@@ -321,8 +323,8 @@ export default {
       this.$emit('start', this.technologyIndex, this.intervalIndex, this.startIntervalDateEdited);
       this.$emit('end', this.technologyIndex, this.intervalIndex, this.endIntervalDateEdited);
 
-      this.$refs.formFields.resetValidation();
-      this.$refs.formFields.validate();
+      this.$refs.form.resetValidation();
+      this.$refs.form.validate();
     },
     startIntervalDateEdited: function () {
       //temp variable for checking equality
@@ -334,7 +336,7 @@ export default {
       if (start && start != this.startIntervalDate && start.length == 7) {
         this.$emit('start', this.technologyIndex, this.intervalIndex, start);
       }
-      this.$refs.formFields.validate();
+      this.$refs.form.validate();
     },
     endIntervalDateEdited: function () {
       //temp variable for checking equality
@@ -347,8 +349,7 @@ export default {
       if (end == null || (end && end != this.endIntervalDate && end.length == 7)) {
         this.$emit('end', this.technologyIndex, this.intervalIndex, end);
       }
-
-      this.$refs.formFields.validate();
+      this.$refs.form.validate();
     }
   }
 };

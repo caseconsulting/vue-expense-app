@@ -64,72 +64,75 @@
           </v-row>
         </v-container>
 
-        <!-- Start Date -->
-        <v-menu
-          v-if="!editedExpenseType.recurringFlag"
-          :rules="requiredRules"
-          :close-on-content-click="true"
-          :nudge-right="40"
-          transition="scale-transition"
-          offset-y
-          max-width="290px"
-          min-width="290px"
-        >
-          <template v-slot:activator="{ on }">
-            <v-text-field
-              v-model="startDateFormatted"
-              id="startDate"
-              :rules="dateRules"
-              label="Start Date"
-              hint="MM/DD/YYYY format"
-              v-mask="'##/##/####'"
-              persistent-hint
-              prepend-icon="event"
-              @blur="editedExpenseType.startDate = parseDate(startDateFormatted)"
-              v-on="on"
-            ></v-text-field>
-          </template>
+        <v-form ref="dates">
+          <!-- Start Date -->
+          <v-menu
+            v-if="!editedExpenseType.recurringFlag"
+            :rules="requiredRules"
+            :close-on-content-click="true"
+            :nudge-right="40"
+            transition="scale-transition"
+            offset-y
+            max-width="290px"
+            min-width="290px"
+          >
+            <template v-slot:activator="{ on }">
+              <v-text-field
+                v-model="startDateFormatted"
+                id="startDate"
+                ref="dates"
+                :rules="dateStartRules"
+                label="Start Date"
+                hint="MM/DD/YYYY format"
+                v-mask="'##/##/####'"
+                persistent-hint
+                prepend-icon="event"
+                @blur="editedExpenseType.startDate = parseDate(startDateFormatted)"
+                v-on="on"
+              ></v-text-field>
+            </template>
 
-          <v-date-picker
-            v-model="editedExpenseType.startDate"
-            :max="editedExpenseType.endDate"
-            no-title
-          ></v-date-picker>
-        </v-menu>
+            <v-date-picker
+              v-model="editedExpenseType.startDate"
+              :max="editedExpenseType.endDate"
+              no-title
+            ></v-date-picker>
+          </v-menu>
 
-        <!-- End Date -->
+          <!-- End Date -->
 
-        <v-menu
-          v-if="!editedExpenseType.recurringFlag"
-          :rules="requiredRules"
-          :close-on-content-click="true"
-          :nudge-right="40"
-          transition="scale-transition"
-          offset-y
-          max-width="290px"
-          min-width="290px"
-        >
-          <template v-slot:activator="{ on }">
-            <v-text-field
-              v-model="endDateFormatted"
-              id="endDate"
-              :rules="dateRules"
-              label="End Date"
-              hint="MM/DD/YYYY format"
-              v-mask="'##/##/####'"
-              persistent-hint
-              prepend-icon="event"
-              @blur="editedExpenseType.endDate = parseDate(endDateFormatted)"
-              v-on="on"
-            ></v-text-field>
-          </template>
+          <v-menu
+            v-if="!editedExpenseType.recurringFlag"
+            :rules="requiredRules"
+            :close-on-content-click="true"
+            :nudge-right="40"
+            transition="scale-transition"
+            offset-y
+            max-width="290px"
+            min-width="290px"
+          >
+            <template v-slot:activator="{ on }">
+              <v-text-field
+                v-model="endDateFormatted"
+                id="endDate"
+                :rules="dateEndRules"
+                label="End Date"
+                hint="MM/DD/YYYY format"
+                v-mask="'##/##/####'"
+                persistent-hint
+                prepend-icon="event"
+                @blur="editedExpenseType.endDate = parseDate(endDateFormatted)"
+                v-on="on"
+              ></v-text-field>
+            </template>
 
-          <v-date-picker
-            v-model="editedExpenseType.endDate"
-            :min="editedExpenseType.startDate"
-            no-title
-          ></v-date-picker>
-        </v-menu>
+            <v-date-picker
+              v-model="editedExpenseType.endDate"
+              :min="editedExpenseType.startDate"
+              no-title
+            ></v-date-picker>
+          </v-menu>
+        </v-form>
 
         <!-- Description -->
         <v-textarea
@@ -292,7 +295,7 @@ import api from '@/shared/api.js';
 import FormSubmissionConfirmation from '@/components/modals/FormSubmissionConfirmation.vue';
 import _ from 'lodash';
 import { v4 as uuid } from 'uuid';
-import { formatDate, isEmpty, parseDate } from '@/utils/utils';
+import { formatDate, isEmpty, parseDate, formatDateSlashToDash } from '@/utils/utils';
 import { mask } from 'vue-the-mask';
 const moment = require('moment-timezone');
 moment.tz.setDefault('America/New_York');
@@ -606,18 +609,23 @@ export default {
           'At least one checkbox must be checked'
       ],
       customAccess: [], // list of employees with custom access
-      dateRules: [
+      dateStartRules: [
         (v) => !isEmpty(v) || 'Date must be valid. Format: MM/DD/YYYY',
         (v) => (!isEmpty(v) && /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v)) || 'Date must be valid. Format: MM/DD/YYYY',
         (v) => moment(v, 'MM/DD/YYYY').isValid() || 'Date must be valid',
         (v) => {
-          return !isEmpty(v) && moment(v) && this.editedExpenseType.endDate
+          return !isEmpty(v) && moment(v, 'MM/DD/YYYY') && this.editedExpenseType.endDate
             ? moment(v).isBefore(moment(this.editedExpenseType.endDate).add(1, 'd')) ||
                 'Start date must be at or before end date'
             : true;
-        },
+        }
+      ],
+      dateEndRules: [
+        (v) => !isEmpty(v) || 'Date must be valid. Format: MM/DD/YYYY',
+        (v) => (!isEmpty(v) && /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v)) || 'Date must be valid. Format: MM/DD/YYYY',
+        (v) => moment(v, 'MM/DD/YYYY').isValid() || 'Date must be valid',
         (v) => {
-          return !isEmpty(v) && moment(v) && this.editedExpenseType.startDate
+          return !isEmpty(v) && moment(v, 'MM/DD/YYYY') && this.editedExpenseType.startDate
             ? moment(v).add(1, 'd').isAfter(moment(this.editedExpenseType.startDate)) ||
                 'End date must be at or after start date'
             : true;
@@ -639,6 +647,7 @@ export default {
     clearForm,
     emit,
     formatDate,
+    formatDateSlashToDash,
     isCustomSelected,
     isEmpty,
     isFullTimeSelected,
@@ -719,6 +728,7 @@ export default {
       if (this.editedExpenseType.endDate !== null && !this.formatDate(this.editedExpenseType.endDate)) {
         this.editedExpenseType.endDate = null;
       }
+      this.$refs.dates.validate();
     },
     'editedExpenseType.startDate': function () {
       this.startDateFormatted = this.formatDate(this.editedExpenseType.startDate) || this.startDateFormatted;
@@ -726,6 +736,7 @@ export default {
       if (this.editedExpenseType.startDate !== null && !this.formatDate(this.editedExpenseType.startDate)) {
         this.editedExpenseType.startDate = null;
       }
+      this.$refs.dates.validate();
     }
   }
 };
