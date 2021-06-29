@@ -1,69 +1,99 @@
 <template>
   <v-container class="my-3">
-    <v-row class="pb-4">
-      <!-- Title -->
-      <v-col cols="10" md="6">
-        <v-row style="height: 80%" align="center" justify="center">
-          <h1>Hello, {{ employee.firstName }}!</h1>
-        </v-row>
-        <v-row justify="center">
-          <v-btn class="mb-10" @click="handleProfile()" color="#bc3825" dark>View Profile</v-btn>
-        </v-row>
-      </v-col>
-      <!-- Anniversary Date -->
+    <span v-if="loading">
+      <v-row>
+        <v-col cols="10" md="6">
+          <v-skeleton-loader class="my-3" type="list-item@2"></v-skeleton-loader>
+        </v-col>
+        <v-col cols="12" md="6" class="pa-4">
+          <v-skeleton-loader class="my-3" type="list-item@2"></v-skeleton-loader>
+        </v-col>
+      </v-row>
+      <v-row>
+        <v-col wrap cols="12" lg="6">
+          <v-col class="pa-4">
+            <v-skeleton-loader class="my-3" type="heading, list-item@6"></v-skeleton-loader>
+          </v-col>
+          <v-col class="pa-4">
+            <v-skeleton-loader class="my-3" type="heading, list-item@6"></v-skeleton-loader>
+          </v-col>
+        </v-col>
+        <v-col cols="12" lg="6">
+          <v-skeleton-loader class="my-3" type="heading, list-item@14"></v-skeleton-loader>
+        </v-col>
+      </v-row>
+      <v-row>
+        <v-col mt-0 class="pt-4">
+          <v-skeleton-loader class="my-3" type="heading, list-item@14"></v-skeleton-loader>
+        </v-col>
+      </v-row>
+    </span>
+    <span v-else>
+      <v-row class="pb-4">
+        <!-- Title -->
+        <v-col cols="10" md="6">
+          <v-row style="height: 80%" align="center" justify="center">
+            <h1>Hello, {{ employee.firstName }}!</h1>
+          </v-row>
+          <v-row justify="center">
+            <v-btn class="mb-10" @click="handleProfile()" color="#bc3825" dark>View Profile</v-btn>
+          </v-row>
+        </v-col>
+        <!-- Anniversary Date -->
 
-      <v-col cols="12" md="6" class="pa-4">
-        <v-card>
-          <v-card-title>
-            <!-- display the next anniversary date -->
-            <div>
-              <h3 class="pt-4 font-16">Anniversary Date: {{ getAnniversary }}</h3>
-              <div @mouseover="display = !display" @mouseleave="display = !display" class="pt-4 font-14">
-                <div v-if="display">Days Until: {{ getDaysUntil }}</div>
-                <div v-else>Seconds Until: {{ getSecondsUntil }}</div>
+        <v-col cols="12" md="6" class="pa-4">
+          <v-card>
+            <v-card-title>
+              <!-- display the next anniversary date -->
+              <div>
+                <h3 class="pt-4 font-16">Anniversary Date: {{ getAnniversary }}</h3>
+                <div @mouseover="display = !display" @mouseleave="display = !display" class="pt-4 font-14">
+                  <div v-if="display">Days Until: {{ getDaysUntil }}</div>
+                  <div v-else>Seconds Until: {{ getSecondsUntil }}</div>
+                </div>
               </div>
-            </div>
-            <v-spacer></v-spacer>
-          </v-card-title>
-        </v-card>
-      </v-col>
-    </v-row>
-    <v-row>
-      <v-col wrap cols="12" lg="6">
-        <!-- QuickBooksTime -->
-        <v-col class="pa-4">
-          <v-col v-if="loading" class="text-center">
-            <v-progress-circular indeterminate size="64" color="#bc3825"></v-progress-circular>
+              <v-spacer></v-spacer>
+            </v-card-title>
+          </v-card>
+        </v-col>
+      </v-row>
+      <v-row>
+        <v-col wrap cols="12" lg="6">
+          <!-- QuickBooksTime -->
+          <v-col class="pa-4">
+            <v-col v-if="loading" class="text-center">
+              <v-progress-circular indeterminate size="64" color="#bc3825"></v-progress-circular>
+            </v-col>
+            <v-col v-else class="pt-0 text-center">
+              <quick-books-time-data cols="12" lg="6"></quick-books-time-data>
+            </v-col>
           </v-col>
-          <v-col v-else class="pt-0 text-center">
-            <quick-books-time-data cols="12" lg="6"></quick-books-time-data>
+          <!-- Available Budgets -->
+          <v-col class="pa-4">
+            <v-col v-if="loading" text-center>
+              <v-progress-circular indeterminate size="64" color="#bc3825"></v-progress-circular>
+            </v-col>
+            <v-col v-else class="pt-0 text-center">
+              <available-budgets :employee="this.employee" :fiscalDateView="this.fiscalDateView"></available-budgets>
+            </v-col>
           </v-col>
         </v-col>
-        <!-- Available Budgets -->
-        <v-col class="pa-4">
-          <v-col v-if="loading" text-center>
-            <v-progress-circular indeterminate size="64" color="#bc3825"></v-progress-circular>
-          </v-col>
-          <v-col v-else class="pt-0 text-center">
-            <available-budgets :employee="this.employee" :fiscalDateView="this.fiscalDateView"></available-budgets>
+        <!-- Activity Feed -->
+        <v-col cols="12" lg="6">
+          <v-col mt-0 class="pt-4">
+            <activity-feed :events="events" :loading="loading"></activity-feed>
           </v-col>
         </v-col>
-      </v-col>
-      <!-- Activity Feed -->
-      <v-col cols="12" lg="6">
-        <v-col mt-0 class="pt-4">
-          <activity-feed :events="events" :loading="loading"></activity-feed>
+      </v-row>
+      <v-row>
+        <!-- Twitter Feed -->
+        <v-col>
+          <v-col mt-0 class="pt-4">
+            <twitter-feed :tweets="tweets" :loading="loading"></twitter-feed>
+          </v-col>
         </v-col>
-      </v-col>
-    </v-row>
-    <v-row>
-      <!-- Twitter Feed -->
-      <v-col>
-        <v-col mt-0 class="pt-4">
-          <twitter-feed :tweets="tweets" :loading="loading"></twitter-feed>
-        </v-col>
-      </v-col>
-    </v-row>
+      </v-row>
+    </span>
   </v-container>
 </template>
 
