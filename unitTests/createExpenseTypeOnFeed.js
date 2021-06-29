@@ -31,11 +31,13 @@ describe('testing expense type to show on feed', () => {
 
   it('Test creating an expenseType', (browser) => {
     browser
+      .pause(500)
       .waitForElementVisible('#budgetName')
       .setValue('#budgetName', 'Feed Test') //inputs value for the name of the budget
-      .setValue('#budgetName', 'Feed Test') //inputs value for the name of the budget
+      //.setValue('#budgetName', 'Feed Test') //inputs value for the name of the budget
+      // .pause(50)
       .waitForElementVisible('#budgetAmount')
-      .click('#budgetAmount')
+      //.click('#budgetAmount')
       .setValue('#budgetAmount', '200') //inputs value for the budget amount
       .waitForElementVisible('#startDate')
       .setValue('#startDate', '06/26/2021') //inputs the start date
@@ -147,7 +149,9 @@ describe('testing expense type to show on feed', () => {
       .waitForElementVisible('#delete') //waits for the delete icon
       .click('#delete') //clicks the delete icon
       .waitForElementVisible('#confirmDelete') //waits for delete modal to appear
-      .click('#confirmDelete');
+      .click('#confirmDelete')
+      .waitForElementVisible('span.headline') //validates the confirmation pop-up after submitting
+      .assert.containsText('span.headline', 'Item was successfully deleted!');
   });
 
   it('Test clicking on Expense Types in nav bar again', (browser) => {
@@ -168,6 +172,8 @@ describe('testing expense type to show on feed', () => {
       .waitForElementVisible('#delete') //waits for the delete icon
       .click('#delete') //clicks the delete icon
       .waitForElementVisible('#confirmDelete') //waits for delete modal to appear
-      .click('#confirmDelete'); //selects the delete button in the pop-up
+      .click('#confirmDelete') //selects the delete button in the pop-up
+      .waitForElementVisible('span.headline') //validates the confirmation pop-up after submitting
+      .assert.containsText('span.headline', 'Item was successfully deleted!');
   });
 });
