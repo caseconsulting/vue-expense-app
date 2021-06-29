@@ -12,19 +12,19 @@
       <v-row>
         <v-col wrap cols="12" lg="6">
           <v-col class="pa-4">
-            <v-skeleton-loader class="my-3" type="heading, list-item@6"></v-skeleton-loader>
+            <v-skeleton-loader class="my-3" type="card-heading, list-item@6"></v-skeleton-loader>
           </v-col>
           <v-col class="pa-4">
-            <v-skeleton-loader class="my-3" type="heading, list-item@6"></v-skeleton-loader>
+            <v-skeleton-loader class="my-3" type="card-heading, list-item@6"></v-skeleton-loader>
           </v-col>
         </v-col>
         <v-col cols="12" lg="6">
-          <v-skeleton-loader class="my-3" type="heading, list-item@14"></v-skeleton-loader>
+          <v-skeleton-loader class="my-3" type="card-heading, list-item@14"></v-skeleton-loader>
         </v-col>
       </v-row>
       <v-row>
         <v-col mt-0 class="pt-4">
-          <v-skeleton-loader class="my-3" type="heading, list-item@14"></v-skeleton-loader>
+          <v-skeleton-loader class="my-3" type="card-heading, list-item@14"></v-skeleton-loader>
         </v-col>
       </v-row>
     </span>
