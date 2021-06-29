@@ -9,17 +9,23 @@
     <p v-if="model.jobRole"><b>Position: </b>{{ model.jobRole }}</p>
     <p><b>Start Date: </b>{{ model.hireDate | monthDayYearFormat }}</p>
     <p v-if="model.deptDate"><b>End Date: </b>{{ model.deptDate | monthDayYearFormat }}</p>
-    <hr v-if="model.jobs && model.jobs.length > 0" class="mb-3" />
+    <hr v-if="model.companies && model.companies.length > 0" class="mb-3" />
 
     <!-- Other Jobs -->
-    <div v-if="!isEmpty(model.jobs)">
+    <div v-if="!isEmpty(model.companies)">
       <!-- Loop Jobs -->
-      <div v-for="(job, index) in model.jobs" :key="job.company + index">
-        <p><b>Company: </b>{{ job.company }}</p>
-        <p><b>Position: </b>{{ job.position }}</p>
-        <p><b>Start Date: </b>{{ job.startDate | monthDayYearFormat }}</p>
-        <p v-if="job.endDate"><b>End Date: </b>{{ job.endDate | monthDayYearFormat }}</p>
-        <hr v-if="index < model.jobs.length - 1" class="mb-3" />
+      <div v-for="(company, index) in model.companies" :key="company.companyName + index">
+        <p><b>Company: </b>{{ company.companyName }}</p>
+        <div v-for="(position, posIndex) in company.positions" :key="position.title + posIndex">
+          <p v-if="company.positions.length > 1">
+            <b>Position {{ posIndex + 1 }}: </b>{{ position.title }}
+          </p>
+          <p v-else><b>Position: </b>{{ position.title }}</p>
+          <p><b>Start Date: </b>{{ position.startDate | monthDayYearFormat }}</p>
+          <p v-if="position.endDate"><b>End Date: </b>{{ position.endDate | monthDayYearFormat }}</p>
+          <hr v-if="posIndex < company.positions.length - 1" class="horizontalBar mb-3" />
+        </div>
+        <hr v-if="index < model.companies.length - 1" class="mb-3" />
       </div>
       <!-- End Loop Jobs -->
     </div>
@@ -98,3 +104,9 @@ export default {
   props: ['model']
 };
 </script>
+
+<style scoped>
+.horizontalBar {
+  border-top: 1px dashed;
+}
+</style>

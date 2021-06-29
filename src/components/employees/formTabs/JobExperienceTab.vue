@@ -108,79 +108,86 @@
           append-outer-icon="delete"
           @click:append-outer="deletePosition(compIndex, index)"
         ></v-combobox>
-
-        <v-row>
-          <v-col cols="12" sm="6" md="12" lg="6" class="pt-3">
-            <!-- Start Date -->
-            <v-menu
-              v-model="position.showStartMenu"
-              :close-on-content-click="false"
-              transition="scale-transition"
-              offset-y
-              max-width="290px"
-              min-width="290px"
-            >
-              <template v-slot:activator="{ on, attrs }">
-                <v-text-field
-                  ref="formFields"
-                  :value="position.startDate | formatDate"
-                  label="Start Date"
-                  hint="MM/DD/YYYY format"
-                  v-mask="'##/##/####'"
-                  prepend-icon="event_available"
-                  :rules="dateRules"
-                  v-bind="attrs"
-                  v-on="on"
-                  @blur="position.startDate = parseEventDate($event)"
-                  @focus="setIndices(compIndex, index)"
-                ></v-text-field>
-              </template>
-              <v-date-picker
-                v-model="position.startDate"
-                :max="position.endDate"
-                no-title
-                @input="position.showStartMenu = false"
-              ></v-date-picker>
-            </v-menu>
-            <!-- End Start Date -->
-          </v-col>
-          <v-col cols="12" sm="6" md="12" lg="6" class="pt-3">
-            <!-- End Date -->
-            <v-menu
-              v-model="position.showEndMenu"
-              :close-on-content-click="false"
-              transition="scale-transition"
-              offset-y
-              max-width="290px"
-              min-width="290px"
-            >
-              <template v-slot:activator="{ on, attrs }">
-                <v-text-field
-                  ref="formFields"
-                  :value="position.endDate | formatDate"
-                  label="End Date (optional)"
-                  prepend-icon="event_busy"
-                  :rules="dateOptionalRules"
-                  hint="MM/DD/YYYY format"
-                  v-mask="'##/##/####'"
-                  v-bind="attrs"
-                  v-on="on"
-                  clearable
-                  @click:clear="position.endDate = null"
-                  @blur="position.endDate = parseEventDate($event)"
-                  @focus="setIndices(compIndex, index)"
-                ></v-text-field>
-              </template>
-              <v-date-picker
-                v-model="position.endDate"
-                :min="position.startDate"
-                no-title
-                @input="position.showEndMenu = false"
-              ></v-date-picker>
-            </v-menu>
-            <!-- End End Date -->
-          </v-col>
-        </v-row>
+        <v-form :ref="'dates-' + index">
+          <v-row>
+            <v-col cols="12" sm="6" md="12" lg="6" class="pt-3">
+              <!-- Start Date -->
+              <v-menu
+                v-model="position.showStartMenu"
+                :close-on-content-click="false"
+                transition="scale-transition"
+                offset-y
+                max-width="290px"
+                min-width="290px"
+              >
+                <template v-slot:activator="{ on, attrs }">
+                  <v-text-field
+                    ref="formFields"
+                    :value="position.startDate | formatDate"
+                    label="Start Date"
+                    hint="MM/DD/YYYY format"
+                    v-mask="'##/##/####'"
+                    prepend-icon="event_available"
+                    :rules="dateRules"
+                    v-bind="attrs"
+                    v-on="on"
+                    @blur="
+                      position.startDate = parseEventDate($event);
+                      validateDates(index);
+                    "
+                    @focus="setIndices(compIndex, index)"
+                  ></v-text-field>
+                </template>
+                <v-date-picker
+                  v-model="position.startDate"
+                  :max="position.endDate"
+                  no-title
+                  @input="position.showStartMenu = false"
+                ></v-date-picker>
+              </v-menu>
+              <!-- End Start Date -->
+            </v-col>
+            <v-col cols="12" sm="6" md="12" lg="6" class="pt-3">
+              <!-- End Date -->
+              <v-menu
+                v-model="position.showEndMenu"
+                :close-on-content-click="false"
+                transition="scale-transition"
+                offset-y
+                max-width="290px"
+                min-width="290px"
+              >
+                <template v-slot:activator="{ on, attrs }">
+                  <v-text-field
+                    ref="formFields"
+                    :value="position.endDate | formatDate"
+                    label="End Date (optional)"
+                    prepend-icon="event_busy"
+                    :rules="dateOptionalRules"
+                    hint="MM/DD/YYYY format"
+                    v-mask="'##/##/####'"
+                    v-bind="attrs"
+                    v-on="on"
+                    clearable
+                    @click:clear="position.endDate = null"
+                    @blur="
+                      position.endDate = parseEventDate($event);
+                      validateDates(index);
+                    "
+                    @focus="setIndices(compIndex, index)"
+                  ></v-text-field>
+                </template>
+                <v-date-picker
+                  v-model="position.endDate"
+                  :min="position.startDate"
+                  no-title
+                  @input="position.showEndMenu = false"
+                ></v-date-picker>
+              </v-menu>
+              <!-- End End Date -->
+            </v-col>
+          </v-row>
+        </v-form>
       </div>
       <div class="pb-4" align="center">
         <v-btn @click="addPosition(compIndex)" elevation="2"><v-icon class="pr-1">add</v-icon>Position</v-btn>
@@ -216,8 +223,6 @@ async function created() {
   window.EventBus.$emit('created', 'jobExperience'); // emit education tab was created
   this.employees = await api.getItems(api.EMPLOYEES); // get all employees
   this.populateDropDowns(); // get autocomplete drop down data
-  let companies = createCompanies(this.editedJobExperienceInfo.jobs);
-  this.$set(this.editedJobExperienceInfo, 'companies', companies);
 } // created
 
 // |--------------------------------------------------|
@@ -225,52 +230,6 @@ async function created() {
 // |                     METHODS                      |
 // |                                                  |
 // |--------------------------------------------------|
-
-/**
- * Takes the jobs field from this.model and converts it into an object that can support
- * company + position nested relationships for the form
- *
- * @param jobs - this.model.jobs
- */
-function createCompanies(jobs) {
-  let newJobs = [];
-  let companies = [];
-  _.forEach(jobs, (job) => {
-    //iterates thru every job a user inputted
-    //only one position for a job
-    if (!companies.includes(job.company)) {
-      newJobs.push({
-        companyName: job.company,
-        positions: [
-          {
-            title: job.position,
-            endDate: job.endDate,
-            startDate: job.startDate,
-            showStartMenu: false,
-            showEndMenu: false
-          }
-        ]
-      });
-      companies.push(job.company);
-    }
-    //same job, multiple positions
-    else {
-      _.forEach(newJobs, (newJob) => {
-        if (newJob.companyName === job.company) {
-          //iterates thru all read jobs
-          newJob.positions.push({
-            title: job.position,
-            endDate: job.endDate,
-            startDate: job.startDate,
-            showStartMenu: false,
-            showEndMenu: false
-          });
-        }
-      });
-    }
-  });
-  return newJobs;
-}
 
 /**
  * Adds an IC Time Frame.
@@ -410,6 +369,15 @@ function setIndices(companyIndex, positionIndex) {
 }
 
 /**
+ * Validate the dates
+ *
+ * @params refIndex the index in the v-for loop
+ */
+function validateDates(refIndex) {
+  this.$refs[`dates-${refIndex}`][0].validate();
+} //validateDates
+
+/**
  * Validate all input fields are valid. Emit to parent the error status.
  */
 function validateFields() {
@@ -472,7 +440,6 @@ export default {
     addICTimeFrame,
     addCompany,
     addPosition,
-    createCompanies,
     deleteICTimeFrame,
     deleteCompany,
     deletePosition,
@@ -483,6 +450,7 @@ export default {
     isEmpty,
     populateDropDowns,
     setIndices,
+    validateDates,
     validateFields
   },
   props: ['model', 'validating'],

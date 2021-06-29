@@ -526,10 +526,12 @@ function populateDropDowns() {
 
 /**
  * Validate the dates
+ *
+ * @params refIndex the index in the v-for loop
  */
 function validateDates(refIndex) {
   this.$refs[`dates-${refIndex}`][0].validate();
-}
+} //validateDates
 
 /**
  * Validate all input fields are valid. Emit to parent the error status.
