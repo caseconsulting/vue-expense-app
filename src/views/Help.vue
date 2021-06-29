@@ -199,7 +199,27 @@ export default {
           {
             title: 'What are the employee access options for expense types?',
             body:
-              'Expense types accessible by All will provide all employees access to a prorated budget based on their work status. Expense types accessible by Full will provide both full time and part time employees with access to 100% of the budget. Expense types accessible by Full Time will provide only full time employees with access to the budget. Expense types accessible by Custom will provide the selected employees access to a prorated budget based on their work status.'
+              'There are 4 available employee access options to choose from, Full-time, Part-time, Intern, and Custom. The Full-time access option allow the expense type to be viewed and accessed by all employees that are full time. The Part-time option enables the expense type to be used for those who are part-time and have a percentage less than 100%. The Intern option allows the expense type to be viewed to those that have the Intern role. Finally, the Custom option allows you to pick one or more individuals to view the expense type regardless of their role.'
+          },
+          {
+            title: 'What does the "Should the expense be pro-rated?" switch mean?',
+            body:
+              'By toggling this switch, it would mean that all part-time employees that can access the expense type would have a percentage of the budget amount based on their part-time percentage.'
+          },
+          {
+            title: 'What does the "Does this expense type have a recipient?" switch mean?',
+            body:
+              'This would mean that upon creating an expense for this expense type, the user would have to assign someone else within the company to receive the amount provided within the expense.'
+          },
+          {
+            title: 'What does the "Have this expense type show on the company feed?" switch mean?',
+            body:
+              'When a user creates an expense and after being reimbursed, it will display info about the expense on the activity feed in the Home page. This feature can be toggled off by the user when creating an expense or by the person reimbursing the expense.'
+          },
+          {
+            title: 'What does the "Require a url for this expense?" switch mean?',
+            body:
+              'When a user creates an expense, by default entering a url is optional. However, by enabling this feature, this would make entering a url mandatory.'
           }
         ],
         employees: [
