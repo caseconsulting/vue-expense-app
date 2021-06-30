@@ -12,24 +12,24 @@ function fillData(majors) {
   let labels = [];
   let quantities = [];
   if (majors) {
-    text = `${this.degree} degree majors`
+    text = `${this.degree} degree majors`;
     enabled = true;
     let labels = Object.keys(majors);
     _.forEach(labels, (label) => {
       quantities.push(majors[label]);
     });
 
-  colors = [
-    'rgba(54, 162, 235, 1)',
-    'rgba(255, 206, 86, 1)',
-    'rgba(75, 192, 192, 1)',
-    'rgba(153, 102, 255, 1)',
-    'rgba(255, 99, 132, 1)',
-    'rgba(230, 184, 156, 1)',
-    'rgba(234, 210, 172, 1)',
-    'rgba(156, 175, 183, 1)',
-    'rgba(66, 129, 164, 1)'
-  ];
+    colors = [
+      'rgba(54, 162, 235, 1)',
+      'rgba(255, 206, 86, 1)',
+      'rgba(75, 192, 192, 1)',
+      'rgba(153, 102, 255, 1)',
+      'rgba(255, 99, 132, 1)',
+      'rgba(230, 184, 156, 1)',
+      'rgba(234, 210, 172, 1)',
+      'rgba(156, 175, 183, 1)',
+      'rgba(66, 129, 164, 1)'
+    ];
   } else {
     //these presets are when a degree has not been selected
     quantities.push(1);
