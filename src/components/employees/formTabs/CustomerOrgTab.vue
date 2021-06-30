@@ -121,7 +121,7 @@ function validateFields() {
         errorCount++;
       }
     });
-    
+
     if (errorCount > 0) {
       hasErrors = true;
     }

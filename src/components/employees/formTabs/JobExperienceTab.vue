@@ -391,7 +391,7 @@ function validateFields() {
         errorCount++;
       }
     });
-    
+
     if (errorCount > 0) {
       hasErrors = true;
     }
@@ -423,8 +423,9 @@ export default {
         }
       ], // rules for an optional date
       dateRules: [
-        (v) => { 
-          return !isEmpty(v) || 'Date required'; },
+        (v) => {
+          return !isEmpty(v) || 'Date required';
+        },
         (v) => (!isEmpty(v) && /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v)) || 'Date must be valid. Format: MM/DD/YYYY',
         (v) => moment(v, 'MM/DD/YYYY').isValid() || 'Date must be valid',
         (v) => {
