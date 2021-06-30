@@ -6,13 +6,20 @@
 import PieChart from '../baseCharts/PieChart.vue';
 import _ from 'lodash';
 function fillData(majors) {
-  let labels = Object.keys(majors);
+  let text;
+  let colors;
+  let enabled;
+  let labels = [];
   let quantities = [];
-  _.forEach(labels, (label) => {
-    quantities.push(majors[label]);
-  });
+  if (majors) {
+    text = `${this.degree} degree majors`
+    enabled = true;
+    let labels = Object.keys(majors);
+    _.forEach(labels, (label) => {
+      quantities.push(majors[label]);
+    });
 
-  let colors = [
+  colors = [
     'rgba(54, 162, 235, 1)',
     'rgba(255, 206, 86, 1)',
     'rgba(75, 192, 192, 1)',
@@ -23,6 +30,13 @@ function fillData(majors) {
     'rgba(156, 175, 183, 1)',
     'rgba(66, 129, 164, 1)'
   ];
+  } else {
+    //these presets are when a degree has not been selected
+    quantities.push(1);
+    enabled = false;
+    text = 'Click a degree on the Highest Degrees Obtained by Employees to see degree majors';
+    colors = ['grey'];
+  }
   this.chartData = {
     labels: labels,
     datasets: [
@@ -32,13 +46,15 @@ function fillData(majors) {
       }
     ]
   };
-  let text = `${this.degree} degree majors`;
   this.options = {
     title: {
       display: true,
       text: text
     },
-    maintainAspectRatio: false
+    maintainAspectRatio: false,
+    tooltips: {
+      enabled: enabled
+    }
   };
   this.dataReceived = true;
 }
@@ -63,6 +79,9 @@ export default {
       this.degree = receiveMajors.degree;
       this.fillData(majors);
     });
+  },
+  created() {
+    this.fillData(null);
   }
 };
 </script>

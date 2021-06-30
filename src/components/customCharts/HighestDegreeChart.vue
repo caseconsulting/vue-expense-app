@@ -2,7 +2,7 @@
   <v-row>
     <v-col>
       <pie-chart v-if="dataReceived" :options="options" :chartData="chartData" />
-      <h4 v-if="degrees">Total Degrees: {{ degreeCount }}</h4>
+      <h4 v-if="dataReceived">Total Degrees: {{ degreeCount }}</h4>
     </v-col>
     <v-col>
       <MajorsChart />
