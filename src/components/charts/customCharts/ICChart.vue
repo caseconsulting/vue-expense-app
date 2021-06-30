@@ -10,7 +10,7 @@
 <script>
 import api from '@/shared/api.js';
 import _ from 'lodash';
-import PieChart from '@/components/baseCharts/PieChart.vue';
+import PieChart from '../baseCharts/PieChart.vue';
 const moment = require('moment-timezone');
 moment.tz.setDefault('America/New_York');
 

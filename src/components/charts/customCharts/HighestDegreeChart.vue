@@ -1,13 +1,15 @@
 <template>
-  <v-row>
-    <v-col>
-      <pie-chart v-if="dataReceived" :options="options" :chartData="chartData" />
-      <h4 v-if="dataReceived">Total Degrees: {{ degreeCount }}</h4>
-    </v-col>
-    <v-col>
-      <MajorsChart />
-    </v-col>
-  </v-row>
+  <v-container>
+    <v-row>
+      <v-col md="6" sm="12">
+        <pie-chart v-if="dataReceived" :options="options" :chartData="chartData" />
+        <h4 v-if="degrees">Total Degrees: {{ degreeCount }}</h4>
+      </v-col>
+      <v-col md="6" sm="12">
+        <MajorsChart />
+      </v-col>
+    </v-row>
+  </v-container>
 </template>
 
 <script>
