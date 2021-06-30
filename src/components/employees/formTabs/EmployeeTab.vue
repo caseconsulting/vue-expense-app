@@ -172,7 +172,11 @@
         <!-- End Full/Part/Inactive Status [DESKTOP] -->
       </v-radio-group>
       <!-- End [DESKTOP] -->
-
+      <v-switch
+        v-model="mifiStatus"
+        label="Use Mifi instead of added technology budget ($150)"
+        :v-if="editedEmployee.employeeRole !== ('User' || 'Admin')"
+      ></v-switch>
       <!-- If inactive, set Departure Date -->
       <v-menu
         v-if="isInactive() || (isPartTime() && status && status == 0)"
@@ -265,6 +269,10 @@ async function created() {
     } else {
       this.statusRadio = 'part';
     }
+  }
+
+  if (this.editedEmployee.mifiStatus != null) {
+    this.mifiStatus = this.editedEmployee.mifiStatus;
   }
   // set works status value to a string
   this.value = this.editedEmployee.workStatus.toString();
@@ -368,7 +376,7 @@ function validateFields() {
     // single vuetify component
     hasErrors = !this.$refs.formFields.validate();
   }
-
+  console.log(this.editedEmployee);
   window.EventBus.$emit('doneValidating', 'employee', this.editedEmployee); // emit done validating
   window.EventBus.$emit('employeeStatus', [hasErrors, errorCount]); // emit error status
 } // validateFields
@@ -417,6 +425,7 @@ export default {
         'Accountant',
         'Other'
       ], // job title options
+      mifiStatus: true,
       numberRules: [
         (v) => !isEmpty(v) || 'Employee # is required',
         (v) => /^\d+$/.test(v) || 'Employee # must be a positive number'
@@ -489,6 +498,14 @@ export default {
       } else {
         this.editedEmployee.workStatus = null;
       }
+    },
+    mifiStatus: function () {
+      console.log(this.mifiStatus);
+
+      this.editedEmployee.mifiStatus = this.mifiStatus;
+
+      console.log('in mifistatus temp value watch');
+      console.log(this.editedEmployee);
     },
     validating: function (val) {
       if (val) {

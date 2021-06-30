@@ -683,6 +683,7 @@ function setFormData(tab, data) {
     this.$set(this.model, 'hireDate', data.hireDate);
     this.$set(this.model, 'workStatus', data.workStatus);
     this.$set(this.model, 'deptDate', data.deptDate);
+    this.$set(this.model, 'mifiStatus', data.mifiStatus);
   } else if (tab == 'personal') {
     //sets all personal info to data returned from personal tab
     this.$set(this.model, 'github', data.github);
@@ -838,6 +839,7 @@ export default {
         languages: [],
         lastName: null,
         middleName: null,
+        mifiStatus: true,
         nickname: null,
         prime: null,
         st: null,
