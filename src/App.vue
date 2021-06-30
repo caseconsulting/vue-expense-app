@@ -72,7 +72,7 @@
           <!--In MOBILE VIEW/Smaller Screen sizes display all links under the user image dropdown-->
           <v-list class="scrollLink" v-else>
             <v-list-item>
-              <v-btn text @click="handleProfile()">Profile</v-btn>
+              <v-btn text :disabled="onUserProfile" @click="handleProfile()">Profile</v-btn>
             </v-list-item>
             <v-list-item>
               <v-btn text @click="handleLogout()">Logout</v-btn>
