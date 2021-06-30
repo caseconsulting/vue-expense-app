@@ -5,7 +5,9 @@
         <v-card-title class="headline">Error(s) found across tabs</v-card-title>
         <v-card-text>
           <ul>
-            <li v-for="tab in errorTabs" :key="tab">{{ tab }}</li>
+            <li v-for="tab in Object.keys(errorTabs)" :key="tab">
+              {{ tab }}: found {{ errorTabs[tab] }} invalid entr{{ isPlural(errorTabs[tab]) }}
+            </li>
           </ul>
         </v-card-text>
         <v-card-actions>
@@ -47,7 +49,13 @@ export default {
     };
   },
   methods: {
-    emit
+    emit,
+    isPlural(val) {
+      if (val === 1) {
+        return 'y';
+      }
+      return 'ies';
+    }
   },
   props: [
     'errorTabs',

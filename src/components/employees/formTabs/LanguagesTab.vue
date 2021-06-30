@@ -29,6 +29,7 @@
 
       <!-- Language Proficiency -->
       <v-autocomplete
+        ref="formFields"
         style="padding-right: 20px; padding-left: 10px"
         :items="proficiencyTypes"
         v-model="languages.proficiency"
@@ -150,25 +151,33 @@ function populateDropDowns() {
  */
 function validateFields() {
   let hasErrors = false;
-
+  let errorCount = 0;
   if (_.isArray(this.$refs.formFields)) {
     // more than one TYPE of vuetify component used
-    let error = _.find(this.$refs.formFields, (field) => {
-      return !field.validate();
+    _.forEach(this.$refs.formFields, (field) => {
+      if (!field.validate()) {
+        errorCount++;
+      }
     });
-    hasErrors = _.isNil(error) ? false : true;
+    if (errorCount > 0) {
+      hasErrors = true;
+    }
   } else if (this.$refs.formFields) {
     // single vuetify component
     hasErrors = !this.$refs.formFields.validate();
   }
-
   //checks to see if there are duplicate entries with the same name
   if (this.duplicateLangEntries().length > 0) {
     hasErrors = true;
     //emit error status with a custom message
-    window.EventBus.$emit('languagesStatus', hasErrors, 'Languages MUST be UNIQUE. Please remove any duplicates'); // emit error status
+    window.EventBus.$emit(
+      'languagesStatus',
+      [hasErrors, errorCount++],
+      'Languages MUST be UNIQUE. Please remove any duplicates'
+    );
+    // emit error status
   } else {
-    window.EventBus.$emit('languagesStatus', hasErrors); // emit error status
+    window.EventBus.$emit('languagesStatus', [hasErrors, errorCount]); // emit error status
   }
   window.EventBus.$emit('doneValidating', 'languages', this.editedLanguages); // emit done validating
 } // validateFields

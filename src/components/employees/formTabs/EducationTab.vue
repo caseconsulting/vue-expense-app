@@ -303,7 +303,7 @@ function populateDropDowns() {
  */
 function validateFields() {
   let hasErrors = false;
-
+  let errorCount = 0;
   if (this.detectDuplicateEducation() !== undefined) {
     hasErrors = true;
     //emit error status with a custom message
@@ -314,17 +314,21 @@ function validateFields() {
     ); // emit error status
   } else if (_.isArray(this.$refs.formFields)) {
     // more than one TYPE of vuetify component used
-    let error = _.find(this.$refs.formFields, (field) => {
-      return !field.validate();
+    _.forEach(this.$refs.formFields, (field) => {
+      if (!field.validate()) {
+        errorCount++;
+      }
     });
-    hasErrors = _.isNil(error) ? false : true;
+    if (errorCount > 0) {
+      hasErrors = true;
+    }
   } else if (this.$refs.formFields) {
     // single vuetify component
     hasErrors = !this.$refs.formFields.validate();
   }
 
   window.EventBus.$emit('doneValidating', 'education', this.editedDegrees); // emit done validating
-  window.EventBus.$emit('educationStatus', hasErrors); // emit error status
+  window.EventBus.$emit('educationStatus', [hasErrors, errorCount]); // emit error status
 } // validateFields
 
 export default {

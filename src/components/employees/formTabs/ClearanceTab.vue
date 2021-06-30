@@ -538,20 +538,24 @@ function validateDates(refIndex) {
  */
 function validateFields() {
   let hasErrors = false;
-
+  let errorCount = 0;
   if (_.isArray(this.$refs.formFields)) {
     // more than one TYPE of vuetify component used
-    let error = _.find(this.$refs.formFields, (field) => {
-      return !field.validate();
+    _.forEach(this.$refs.formFields, (field) => {
+      if (!field.validate()) {
+        errorCount++;
+      }
     });
-    hasErrors = _.isNil(error) ? false : true;
+    if (errorCount > 0) {
+      hasErrors = true;
+    }
   } else if (this.$refs.formFields) {
     // single vuetify component
     hasErrors = !this.$refs.formFields.validate();
   }
 
   window.EventBus.$emit('doneValidating', 'clearance', this.editedClearances); // emit done validating and sends edited data back to parent
-  window.EventBus.$emit('clearanceStatus', hasErrors); // emit error status
+  window.EventBus.$emit('clearanceStatus', [hasErrors, errorCount]); // emit error status
 } // validateFields
 
 export default {

@@ -253,13 +253,17 @@ function populateDropDowns() {
  */
 function validateFields() {
   let hasErrors = false;
-
+  let errorCount = 0;
   if (_.isArray(this.$refs.formFields)) {
     // more than one TYPE of vuetify component used
-    let error = _.find(this.$refs.formFields, (field) => {
-      return !field.validate();
+    _.forEach(this.$refs.formFields, (field) => {
+      if (!field.validate()) {
+        errorCount++;
+      }
     });
-    hasErrors = _.isNil(error) ? false : true;
+    if (errorCount > 0) {
+      hasErrors = true;
+    }
   } else if (this.$refs.formFields) {
     // single vuetify component
     hasErrors = !this.$refs.formFields.validate();
@@ -271,13 +275,13 @@ function validateFields() {
     //emit error status with a custom message
     window.EventBus.$emit(
       'technologiesStatus',
-      hasErrors,
+      [hasErrors, errorCount++],
       'Technology names MUST be UNIQUE. Please remove any duplicates'
     ); // emit error status
   } else if (!this.validateTimeIntervals()) {
     hasErrors = true;
   } else {
-    window.EventBus.$emit('technologiesStatus', hasErrors); // emit error status
+    window.EventBus.$emit('technologiesStatus', [hasErrors, errorCount]); // emit error status
   }
   window.EventBus.$emit('doneValidating', 'technologies', this.editedTechnologies); // emit done validating
 } // validateFields
@@ -299,8 +303,8 @@ function validateTimeIntervals() {
       //emit error status with a custom message
       window.EventBus.$emit(
         'technologiesStatus',
-        true,
-        `Tecnology ${this.editedTechnologies[tech].name} NEEDS at least one time interval.`
+        [true, 1],
+        `Technology ${this.editedTechnologies[tech].name} NEEDS at least one time interval.`
       ); // emit error status
       return false;
     }
@@ -309,7 +313,7 @@ function validateTimeIntervals() {
     for (let x = 0; x < dateIntervals.length; x++) {
       if (dateIntervals[x].hasErrors) {
         //emit error status with a custom message
-        window.EventBus.$emit('technologiesStatus', true, `Tecnology intervals must NOT OVERLAP`); // emit error status
+        window.EventBus.$emit('technologiesStatus', [true, 1], `Technology intervals must NOT OVERLAP`); // emit error status
         return false; //ends validation if finds any interval has errors
       }
       if (!dateIntervals[x].endDate) {

@@ -382,20 +382,25 @@ function validateDates(refIndex) {
  */
 function validateFields() {
   let hasErrors = false;
-
+  let errorCount = 0;
   if (_.isArray(this.$refs.formFields)) {
     // more than one TYPE of vuetify component used
-    let error = _.find(this.$refs.formFields, (field) => {
-      return !field.validate();
+
+    _.forEach(this.$refs.formFields, (field) => {
+      if (!field.validate()) {
+        errorCount++;
+      }
     });
-    hasErrors = _.isNil(error) ? false : true;
+    
+    if (errorCount > 0) {
+      hasErrors = true;
+    }
   } else if (this.$refs.formFields) {
     // single vuetify component
     hasErrors = !this.$refs.formFields.validate();
   }
-
   window.EventBus.$emit('doneValidating', 'jobExperience', this.editedJobExperienceInfo); // emit done validating
-  window.EventBus.$emit('jobExperienceStatus', hasErrors); // emit error status
+  window.EventBus.$emit('jobExperienceStatus', [hasErrors, errorCount]); // emit error status
 } // validateFields
 
 export default {
@@ -418,7 +423,8 @@ export default {
         }
       ], // rules for an optional date
       dateRules: [
-        (v) => !isEmpty(v) || 'Date required',
+        (v) => { 
+          return !isEmpty(v) || 'Date required'; },
         (v) => (!isEmpty(v) && /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v)) || 'Date must be valid. Format: MM/DD/YYYY',
         (v) => moment(v, 'MM/DD/YYYY').isValid() || 'Date must be valid',
         (v) => {
