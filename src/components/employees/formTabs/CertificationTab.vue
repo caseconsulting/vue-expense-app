@@ -34,6 +34,7 @@
               <template v-slot:activator="{ on, attrs }">
                 <v-text-field
                   :value="certification.dateReceived | formatDate"
+                  ref="formFields"
                   label="Date Received"
                   prepend-icon="event_available"
                   :rules="dateRules"
@@ -71,6 +72,7 @@
                 <v-text-field
                   :value="certification.expirationDate | formatDate"
                   label="Expiration Date (optional)"
+                  ref="formFields"
                   prepend-icon="event_busy"
                   :rules="dateOptionalRules"
                   hint="MM/DD/YYYY format"
