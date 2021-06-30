@@ -39,10 +39,10 @@ function getPlaceOfBirth() {
   let placeOfBirth = '';
   if (!isEmpty(this.model.city)) {
     placeOfBirth += `${this.model.city}, `;
-  } 
+  }
   if (!isEmpty(this.model.st)) {
     placeOfBirth += `${this.model.st}, `;
-  } 
+  }
   if (!isEmpty(this.model.country)) {
     placeOfBirth += `${this.model.country},`;
   }
