@@ -3,7 +3,7 @@
     <!-- Employee has Customer Organization Experience -->
     <div v-if="!isEmpty(model.customerOrgExp)">
       <!-- Loop Customer Organizations -->
-      <div v-for="(exp, index) in model.customerOrgExp" :key="exp.name">
+      <div v-for="(exp, index) in model.customerOrgExp" :key="exp.name + index">
         <p><b>Customer Organization Experience: </b>{{ exp.name }}</p>
         <p><b>Years of Experience: </b>{{ exp.years }}</p>
         <p><b>Current: </b>{{ exp.current | current }}</p>

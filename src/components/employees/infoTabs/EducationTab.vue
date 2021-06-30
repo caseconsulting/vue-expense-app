@@ -3,7 +3,7 @@
     <!-- Employee has Degrees -->
     <div v-if="!isEmpty(model.degrees)">
       <!-- Loop Degrees -->
-      <div v-for="(degree, index) in model.degrees" :key="degree.name">
+      <div v-for="(degree, index) in model.degrees" :key="degree.name + index">
         <p><b>Degree: </b>{{ degree.name }}</p>
         <p><b>School: </b>{{ degree.school }}</p>
         <p><b>Completion Date: </b>{{ degree.date | monthYearFormat }}</p>

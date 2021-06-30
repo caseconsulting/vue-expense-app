@@ -3,7 +3,7 @@
     <!-- Employee has Certifications -->
     <div v-if="!isEmpty(model.certifications)">
       <!-- Loop Certifications -->
-      <div v-for="(certification, index) in model.certifications" :key="certification.name">
+      <div v-for="(certification, index) in model.certifications" :key="certification.name + index">
         <p><b>Certification: </b>{{ certification.name }}</p>
         <p><b>Date Received: </b>{{ certification.dateReceived | monthDayYearFormat }}</p>
         <p v-if="certification.expirationDate">

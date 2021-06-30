@@ -40,7 +40,7 @@
       </div>
       <!-- End of Sort Filters -->
       <!-- Loop Technologies -->
-      <div v-for="(technology, index) in sortedTech" :key="technology.name">
+      <div v-for="(technology, index) in sortedTech" :key="technology.name + index">
         <v-row>
           <v-col>
             <p><b>Technology: </b>{{ technology.name }}</p>

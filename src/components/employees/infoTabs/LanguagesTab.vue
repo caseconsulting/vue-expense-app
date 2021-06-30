@@ -3,7 +3,7 @@
     <!-- Employee has entered languages-->
     <div v-if="!isEmpty(model.languages)">
       <!-- Loop Languages -->
-      <div v-for="(languages, index) in model.languages" :key="languages.name">
+      <div v-for="(languages, index) in model.languages" :key="languages.name + index">
         <v-row>
           <v-col>
             <p><b>Language: </b>{{ languages.name }}</p>
