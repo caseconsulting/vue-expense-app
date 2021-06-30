@@ -36,17 +36,19 @@ import { isEmpty, monthDayFormat, monthDayYearFormat } from '@/utils/utils';
  * @return String - place of birth.
  */
 function getPlaceOfBirth() {
-  if (!isEmpty(this.model.city) && !isEmpty(this.model.st) && !isEmpty(this.model.country)) {
-    return `${this.model.city}, ${this.model.st}, ${this.model.country}`;
-  } else if (!isEmpty(this.model.city) && !isEmpty(this.model.st)) {
-    return `${this.model.city}, ${this.model.st}`;
-  } else if (!isEmpty(this.model.city) && !isEmpty(this.model.country)) {
-    return `${this.model.city}, ${this.model.country}`;
-  } else if (!isEmpty(this.model.country)) {
-    return `${this.model.country}`;
-  } else {
-    return '';
+  let placeOfBirth = '';
+  if (!isEmpty(this.model.city)) {
+    placeOfBirth += `${this.model.city}, `;
+  } 
+  if (!isEmpty(this.model.st)) {
+    placeOfBirth += `${this.model.st}, `;
+  } 
+  if (!isEmpty(this.model.country)) {
+    placeOfBirth += `${this.model.country},`;
   }
+
+  placeOfBirth = placeOfBirth.slice(0, -1);
+  return placeOfBirth;
 } // getPlaceOfBirth
 
 export default {
