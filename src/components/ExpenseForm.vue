@@ -76,7 +76,12 @@
               Remaining budget for {{ expenseTypeName }}:
               <span :class="{ negativeBudget: remainingBudget <= 0 }"
                 >${{ remainingBudget.toFixed(2) }}
-                <span v-if="remainingBudget < 0 && selectedExpenseType.odFlag"> (Overdraftable)</span>
+                <span v-if="remainingBudget < 0 && remainingBudget >= -overdraftBudget && selectedExpenseType.odFlag">
+                  (Overdraftable and within ${{ overdraftBudget }} limit)
+                </span>
+                <span v-else-if="remainingBudget < -overdraftBudget && selectedExpenseType.odFlag">
+                  (Exceeds overdraftable amount of ${{ overdraftBudget }})
+                </span>
                 <span v-else-if="remainingBudget < 0 && !selectedExpenseType.odFlag"> (Not Overdraftable)</span>
               </span>
             </span>
@@ -431,12 +436,13 @@ async function getRemainingBudget() {
           budget.budgetObject.reimbursedAmount -
           this.editedExpense.cost;
         this.expenseTypeName = budget.expenseTypeName;
+        this.overdraftBudget = budget.budgetObject.amount * 2;
       } else {
         this.remainingBudget = '';
       }
     }
   }
-}
+} //getRemainingBudget
 
 /**
  * Adds an expenses url and category to the training urls page.
@@ -1545,6 +1551,7 @@ export default {
         (v) => (!isEmpty(v) ? moment(v, 'MM/DD/YYYY').isValid() || 'Date must be valid' : true)
       ], // option date rules
       originalExpense: null, // expense before changes
+      overdraftBudget: 0,
       purchaseDateFormatted: null, // formatted purchase date
       purchaseMenu: false, // display purchase menu
       receiptRules: [(v) => !isEmpty(v) || 'Receipts are required'], // rules for receipt
