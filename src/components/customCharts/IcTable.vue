@@ -20,6 +20,10 @@
 <script>
 import api from '@/shared/api.js';
 import _ from 'lodash';
+<<<<<<< HEAD:src/components/charts/customCharts/ICChart.vue
+import PieChart from '../baseCharts/PieChart.vue';
+=======
+>>>>>>> 2380-better-IC-chart: changed ICChart to be a table, and added customerorgchart pie chart:src/components/customCharts/IcTable.vue
 const moment = require('moment-timezone');
 moment.tz.setDefault('America/New_York');
 
