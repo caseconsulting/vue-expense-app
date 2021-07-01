@@ -128,7 +128,7 @@
                     hint="MM/DD/YYYY format"
                     v-mask="'##/##/####'"
                     prepend-icon="event_available"
-                    :rules="dateRules"
+                    :rules="[dateRules[0], dateRules[1], dateRules[2], dateOrderRule(compIndex, index)]"
                     v-bind="attrs"
                     v-on="on"
                     @blur="
@@ -163,7 +163,7 @@
                     :value="position.endDate | formatDate"
                     label="End Date (optional)"
                     prepend-icon="event_busy"
-                    :rules="dateOptionalRules"
+                    :rules="[dateOptionalRules[0], dateOptionalRules[1], dateOrderRule(compIndex, index)]"
                     hint="MM/DD/YYYY format"
                     v-mask="'##/##/####'"
                     v-bind="attrs"
@@ -410,30 +410,30 @@ export default {
       companyDropDown: [], // autocomplete company name options
       companyIndex: 0,
       positionIndex: 0,
+      dateOrderRule: (compIndex, posIndex) => {
+        if (this.editedJobExperienceInfo !== undefined) {
+          let position = this.editedJobExperienceInfo.companies[compIndex].positions[posIndex];
+          return !isEmpty(position.endDate) && moment(position.endDate) && position.startDate
+            ? moment(position.endDate).add(1, 'd').isAfter(moment(position.startDate)) ||
+                'End date must be at or after start date'
+            : true;
+        } else {
+          return true;
+        }
+      },
       dateOptionalRules: [
+        //end date validation
         (v) => {
           return !isEmpty(v) ? /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v) || 'Date must be valid. Format: MM/DD/YYYY' : true;
         },
-        (v) => (!isEmpty(v) ? moment(v, 'MM/DD/YYYY').isValid() || 'Date must be valid' : true),
-        (v) => {
-          let position = this.editedJobExperienceInfo.companies[this.companyIndex].positions[this.positionIndex];
-          return !isEmpty(v) && moment(v) && position.startDate
-            ? moment(v).add(1, 'd').isAfter(moment(position.startDate)) || 'End date must be at or after start date'
-            : true;
-        }
+        (v) => (!isEmpty(v) ? moment(v, 'MM/DD/YYYY').isValid() || 'Date must be valid' : true)
       ], // rules for an optional date
       dateRules: [
         (v) => {
           return !isEmpty(v) || 'Date required';
         },
         (v) => (!isEmpty(v) && /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v)) || 'Date must be valid. Format: MM/DD/YYYY',
-        (v) => moment(v, 'MM/DD/YYYY').isValid() || 'Date must be valid',
-        (v) => {
-          let position = this.editedJobExperienceInfo.companies[this.companyIndex].positions[this.positionIndex];
-          return !isEmpty(v) && moment(v) && position.endDate
-            ? moment(v).isBefore(moment(position.endDate).add(1, 'd')) || 'Start date must be at or before end date'
-            : true;
-        }
+        (v) => moment(v, 'MM/DD/YYYY').isValid() || 'Date must be valid'
       ], // rules for an optional date
       editedJobExperienceInfo: _.cloneDeep(this.model), //edited job experience info
       requiredRules: [(v) => !isEmpty(v) || 'This field is required'] // rules for required fields
