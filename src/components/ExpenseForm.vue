@@ -436,7 +436,7 @@ async function getRemainingBudget() {
           budget.budgetObject.reimbursedAmount -
           this.editedExpense.cost;
         this.expenseTypeName = budget.expenseTypeName;
-        this.overdraftBudget = budget.budgetObject.amount * 2;
+        this.overdraftBudget = budget.budgetObject.amount;
       } else {
         this.remainingBudget = '';
       }
