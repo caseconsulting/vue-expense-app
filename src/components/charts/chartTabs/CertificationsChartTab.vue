@@ -2,28 +2,29 @@
   <v-container>
     <v-row>
       <v-col md="6" sm="12">
-        <certification-chart></certification-chart>
+        <customer-org-chart />
       </v-col>
       <v-col md="6" sm="12">
-        <Ic-Chart></Ic-Chart>
+        <i-c-table />
       </v-col>
     </v-row>
     <v-row>
       <v-col md="6" sm="12">
-        <certification-chart></certification-chart>
+        <certification-chart />
       </v-col>
       <v-col md="6" sm="12">
-        <Ic-Chart></Ic-Chart>
+        <certification-chart />
       </v-col>
     </v-row>
   </v-container>
 </template>
 
 <script>
+import ICTable from '../customCharts/IcTable.vue';
 import CertificationChart from '../customCharts/CertificationChart.vue';
-import IcChart from '../customCharts/ICChart.vue';
+import CustomerOrgChart from '../customCharts/CustomerOrgChart.vue';
 
 export default {
-  components: { CertificationChart, IcChart }
+  components: { CertificationChart, ICTable, CustomerOrgChart }
 };
 </script>
