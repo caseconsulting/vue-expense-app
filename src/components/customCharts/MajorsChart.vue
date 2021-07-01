@@ -14,11 +14,10 @@ function fillData(majors) {
   if (majors) {
     text = `${this.degree} degree majors`;
     enabled = true;
-    let labels = Object.keys(majors);
-    _.forEach(labels, (label) => {
+    _.forEach(Object.keys(majors), (label) => {
       quantities.push(majors[label]);
+      labels.push(label);
     });
-
     colors = [
       'rgba(54, 162, 235, 1)',
       'rgba(255, 206, 86, 1)',
