@@ -27,14 +27,15 @@
       </v-select>
 
       <!-- Name of School -->
-      <v-combobox
+      <v-autocomplete
         ref="formFields"
         v-model="degree.school"
         :rules="requiredRules"
         :items="schoolDropDown"
         label="School"
+        @input.native="updateSchoolDropDown(index)"
         data-vv-name="School"
-      ></v-combobox>
+      ></v-autocomplete>
 
       <!-- Month and Year of Completion -->
       <v-menu
@@ -274,29 +275,53 @@ function isDuplicate(edu) {
  * Populate drop downs with information that other employees have filled out.
  */
 function populateDropDowns() {
-  // let employeesDegrees = _.map(this.employees, (employee) => employee.degrees); //extract contracts
-  // employeesDegrees = _.compact(employeesDegrees); //remove falsey values
-  // // loop employees
-  // _.forEach(employeesDegrees, (degrees) => {
-  //   // loop degrees
-  //   _.forEach(degrees, (degree) => {
-  //     this.degreeDropDown.push(degree.name); // add degree name
-  //     this.schoolDropDown.push(degree.school); // add school
-  //     // loop majors
-  //     _.forEach(degree.majors, (major) => {
-  //       this.majorDropDown.push(major); // add major
-  //     });
-  //     // loop minors
-  //     _.forEach(degree.minors, (minor) => {
-  //       this.minorDropDown.push(minor); // add minor
-  //     });
-  //     // loop concentrations
-  //     _.forEach(degree.concentrations, (conc) => {
-  //       this.concentrationDropDown.push(conc); // add concentration
-  //     });
-  //   });
-  // });
+  //This is pretty expensive, but I couldn't find a better way
+  //This gets all colleges and filters out the previous colleges so that they are only legal
+  //ones from the list
+  api.getColleges('').then((colleges) => {
+    let employeesDegrees = _.map(this.employees, (employee) => employee.degrees); //extract contracts
+    employeesDegrees = _.compact(employeesDegrees); //remove falsey values
+    this.prevColleges = [];
+    _.forEach(employeesDegrees, (degrees) => {
+      _.forEach(degrees, (degree) => {
+        this.prevColleges.push(degree.school);
+      });
+    });
+
+    //Only put colleges in the list that are the same from both lists
+    for (let i = 0; i < colleges.length; i++) {
+      for (let j = 0; j < this.prevColleges.length; j++) {
+        let college1 = toTitleCase(colleges[i]);
+        let college2 = toTitleCase(this.prevColleges[j]);
+        if (college1 == college2) {
+          this.schoolDropDown.push(college1);
+        }
+      }
+    }
+  });
 } // populateDropDowns
+
+/**
+ * Formats the college strings so that they are uniform with each other
+ *
+ * @param str is the string to be converted
+ * @returns the converted string
+ */
+function toTitleCase(str) {
+  str = str.toLowerCase().split(' ');
+  for (var i = 0; i < str.length; i++) {
+    str[i] = str[i].charAt(0).toUpperCase() + str[i].slice(1);
+  }
+  return str.join(' ');
+}
+
+function updateSchoolDropDown() {
+  let eventInfo = event.target.value;
+  api.getColleges(eventInfo).then((res) => {
+    res = _.map(res, (elem) => toTitleCase(elem));
+    this.schoolDropDown = [...res, ...this.prevColleges];
+  });
+}
 
 /**
  * Validate all input fields are valid. Emit to parent the error status.
@@ -345,6 +370,7 @@ export default {
       degreeDropDown: ['Associates', 'Bachelors', 'Masters', 'PhD/Doctorate', 'Other (trade school, etc)'], // autocomplete degree name options
       majorDropDown: [], // autocomplete major options
       minorDropDown: [], // autocomplete minor options
+      prevColleges: [],
       requiredRules: [
         (v) => !isEmpty(v) || 'This field is required. You must enter information or delete the field if possible.'
       ], // rules for a required field
@@ -366,6 +392,8 @@ export default {
     isEmpty,
     parseDateMonthYear,
     populateDropDowns,
+    toTitleCase,
+    updateSchoolDropDown,
     validateFields
   },
   props: ['model', 'validating'],

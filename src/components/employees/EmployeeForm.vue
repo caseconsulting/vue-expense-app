@@ -493,7 +493,7 @@ async function hasTabError() {
   let hasErrors = false;
   //iterates over tabs to see if there are any errors
   for (var key of Object.keys(this.tabErrors)) {
-    if (this.tabErrors[key]) {
+    if (this.tabErrors[key][0]) {
       hasErrors = true;
     }
   }
@@ -552,9 +552,9 @@ function userIsAdmin() {
   return getRole() === 'admin';
 } // userIsAdmin
 
-function addErrorTab(name, errors) {
-  if (errors !== 0 && !this.errorTabNames[name]) {
-    this.errorTabNames[name] = errors;
+function addErrorTab(name, status) {
+  if (status && !this.errorTabNames.includes(name)) {
+    this.errorTabNames.push(name);
   }
 }
 
@@ -569,7 +569,7 @@ async function created() {
     this.submit();
   });
   window.EventBus.$on('canceled', () => {
-    this.errorTabNames = {};
+    this.errorTabNames = [];
   });
   // set tab mounted
   window.EventBus.$on('created', (tab) => {
@@ -581,65 +581,65 @@ async function created() {
     this.validating[tab] = false;
   });
   // set tab error status
-  window.EventBus.$on('awardStatus', (data) => {
-    this.tabErrors.awards = data[0]; //boolean if there are errors
-    this.addErrorTab('Awards', data[1]); //error count
+  window.EventBus.$on('awardStatus', (status) => {
+    this.tabErrors.awards = status;
+    this.addErrorTab('Awards', status);
   });
-  window.EventBus.$on('certificationsStatus', (data) => {
-    this.tabErrors.certifications = data[0];
-    this.addErrorTab('Certifications', data[1]);
+  window.EventBus.$on('certificationsStatus', (status) => {
+    this.tabErrors.certifications = status;
+    this.addErrorTab('Certifications', status);
   });
-  window.EventBus.$on('clearanceStatus', (data) => {
-    this.tabErrors.clearance = data[0];
-    this.addErrorTab('Clearance', data[1]);
+  window.EventBus.$on('clearanceStatus', (status) => {
+    this.tabErrors.clearance = status;
+    this.addErrorTab('Clearance', status);
   });
-  window.EventBus.$on('contractsStatus', (data) => {
-    this.tabErrors.contracts = data[0];
-    this.addErrorTab('Contracts', data[1]);
+  window.EventBus.$on('contractsStatus', (status) => {
+    this.tabErrors.contracts = status;
+    this.addErrorTab('Contracts', status);
   });
-  window.EventBus.$on('customerOrgExpStatus', (data) => {
-    this.tabErrors.customerOrgExp = data[0];
-    this.addErrorTab('Customer Org', data[1]);
+  window.EventBus.$on('customerOrgExpStatus', (status) => {
+    this.tabErrors.customerOrgExp = status;
+    this.addErrorTab('Customer Org', status);
   });
-  window.EventBus.$on('educationStatus', (data) => {
-    this.tabErrors.education = data[0];
-    this.addErrorTab('Education', data[1]);
+  window.EventBus.$on('educationStatus', (status) => {
+    this.tabErrors.education = status;
+    this.addErrorTab('Education', status);
   });
-  window.EventBus.$on('employeeStatus', (data) => {
-    this.tabErrors.employee = data[0];
-    this.addErrorTab('Employee', data[1]);
+  window.EventBus.$on('employeeStatus', (status) => {
+    this.tabErrors.employee = status;
+    this.addErrorTab('Employee', status);
   });
-  window.EventBus.$on('jobExperienceStatus', (data) => {
-    this.tabErrors.jobExperience = data[0];
-    this.addErrorTab('Job Experience', data[1]);
+  window.EventBus.$on('jobExperienceStatus', (status) => {
+    this.tabErrors.jobExperience = status;
+    this.addErrorTab('Job Experience', status);
   });
-  window.EventBus.$on('personalStatus', (data) => {
-    this.tabErrors.personal = data[0];
-    this.addErrorTab('Personal', data[1]);
+  window.EventBus.$on('personalStatus', (status) => {
+    this.tabErrors.personal = status;
+    this.addErrorTab('Personal', status);
   });
-  window.EventBus.$on('technologiesStatus', (data, errorMessage) => {
-    this.tabErrors.technologies = data[0];
+  window.EventBus.$on('technologiesStatus', (status, errorMessage) => {
+    this.tabErrors.technologies = status;
     //when there is a custom error message (multiple entries with same name) gets it ready for display
-    if (data[0] && errorMessage) {
+    if (status && errorMessage) {
       this.tabErrorMessage = _.cloneDeep(errorMessage);
     }
-    this.addErrorTab('Technologies', data[1]);
+    this.addErrorTab('Technologies', status);
   });
-  window.EventBus.$on('educationDuplicateStatus', (data, errorMessage) => {
-    this.tabErrors.education = data[0];
+  window.EventBus.$on('educationDuplicateStatus', (status, errorMessage) => {
+    this.tabErrors.education = status;
     //when there is a custom error message (multiple entries with same name) gets it ready for display
-    if (data[0] && errorMessage) {
+    if (status && errorMessage) {
       this.tabErrorMessage = _.cloneDeep(errorMessage);
     }
-    this.addErrorTab('Education', data[1]);
+    this.addErrorTab('Education', status);
   });
-  window.EventBus.$on('languagesStatus', (data, errorMessage) => {
-    this.tabErrors.languages = data[0];
+  window.EventBus.$on('languagesStatus', (status, errorMessage) => {
+    this.tabErrors.languages = status;
     //when there is a custom error message (multiple entries with same name) gets it ready for display
-    if (data[0] && errorMessage) {
+    if (status && errorMessage) {
       this.tabErrorMessage = _.cloneDeep(errorMessage);
     }
-    this.addErrorTab('Languages', data[1]);
+    this.addErrorTab('Technologies', status);
   });
   // fills model in with populated fields in employee prop
   this.model = _.cloneDeep(
@@ -797,7 +797,7 @@ export default {
         statusMessage: null,
         color: null
       }, // snack bar error
-      errorTabNames: {},
+      errorTabNames: [],
       formTab: null, // currently active tab
       fullName: '', // employee's first and last name
       model: {

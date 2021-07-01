@@ -290,6 +290,16 @@ async function uploadBlogAttachment(file) {
     });
 }
 
+function getColleges(inputValue) {
+  return execute('get', `http://universities.hipolabs.com/search?name=${inputValue}`).then((list) => {
+    let finalColleges = [];
+    for (let i = 0; i < list.length; i++) {
+      finalColleges.push(list[i].name);
+    }
+    return finalColleges;
+  });
+}
+
 export default {
   createAttachment,
   createBlogFile,
@@ -310,6 +320,7 @@ export default {
   getBasecampAvatars,
   getBasecampCampfires,
   getCaseTimeline,
+  getColleges,
   getCountries,
   getEmployeeBudget,
   getEmployeeBudgets,
