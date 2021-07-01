@@ -3,9 +3,8 @@
     <div style="border: 1px solid grey" class="pt-3 pb-1 px-5" v-bind:class="{ errorText: intervalOverlaps }">
       <!--Duplicate chip if tech name is already entered by user-->
       <v-row v-if="intervalOverlaps" justify="end">
-        <v-chip class="ma-2" color="error" text-color="white"> Overlapping Interval </v-chip>
+        <v-chip class="ma-2" color="error" text-color="white"> Overlapping interval or field error </v-chip>
       </v-row>
-
       <v-row class="pt-5 pl-3">
         <h3>Time Interval</h3>
         <v-spacer></v-spacer>
@@ -209,6 +208,11 @@ function intervalOverlaps() {
       }
     }
   }
+
+  if (this.$refs.form && !hasErrors) {
+    hasErrors = !this.$refs.form.validate();
+  }
+
   //send validation result back to parent
   this.$emit('validated', this.technologyIndex, this.intervalIndex, hasErrors);
   return hasErrors;
@@ -302,6 +306,9 @@ export default {
     isEmpty,
     parseDateMonthYear,
     formatDateMonthYear
+  },
+  mounted() {
+    this.$refs.form.validate();
   },
   props: ['startIntervalDate', 'endIntervalDate', 'technologyIndex', 'intervalIndex', 'allIntervals'],
   watch: {
