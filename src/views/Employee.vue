@@ -21,13 +21,13 @@
           <v-card-title class="header_style" v-if="!editing">
             <h3 id="employeeName">{{ this.model.firstName }} {{ this.model.lastName }}</h3>
             <v-spacer></v-spacer>
-            <v-icon
-              v-if="displayQuickBooksTimeAndBalances && this.currentTab"
-              @click="editing = true"
-              style="color: white"
-              align="right"
-              >edit</v-icon
-            >
+            <convert-employee-to-csv :employee="this.model" color="white" />
+            <v-tooltip v-if="displayQuickBooksTimeAndBalances && this.currentTab" top>
+              <template #activator="{ on }">
+                <v-icon class="pr-2" @click="editing = true" style="color: white" align="right" v-on="on">edit</v-icon>
+              </template>
+              <span>Edit Profile</span>
+            </v-tooltip>
           </v-card-title>
           <employee-info :model="this.model" :currentTab="this.currentTab" v-if="!editing"></employee-info>
         </v-card>
@@ -47,6 +47,7 @@ import QuickBooksTimeData from '@/components/QuickBooksTimeData.vue';
 import { getRole } from '@/utils/auth';
 import _ from 'lodash';
 import { isEmpty } from '@/utils/utils';
+import ConvertEmployeeToCsv from '../components/ConvertEmployeeToCsv.vue';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -153,7 +154,8 @@ export default {
     AvailableBudgets,
     EmployeeForm,
     EmployeeInfo,
-    QuickBooksTimeData
+    QuickBooksTimeData,
+    ConvertEmployeeToCsv
   },
   created,
   data() {
