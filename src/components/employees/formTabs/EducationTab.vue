@@ -14,7 +14,7 @@
       </v-row>
 
       <!-- Name of Degree -->
-      <v-combobox
+      <v-select
         ref="formFields"
         v-model="degree.name"
         :rules="requiredRules"
@@ -24,7 +24,7 @@
         append-outer-icon="delete"
         @click:append-outer="deleteDegree(index)"
       >
-      </v-combobox>
+      </v-select>
 
       <!-- Name of School -->
       <v-combobox
@@ -274,28 +274,28 @@ function isDuplicate(edu) {
  * Populate drop downs with information that other employees have filled out.
  */
 function populateDropDowns() {
-  let employeesDegrees = _.map(this.employees, (employee) => employee.degrees); //extract contracts
-  employeesDegrees = _.compact(employeesDegrees); //remove falsey values
-  // loop employees
-  _.forEach(employeesDegrees, (degrees) => {
-    // loop degrees
-    _.forEach(degrees, (degree) => {
-      this.degreeDropDown.push(degree.name); // add degree name
-      this.schoolDropDown.push(degree.school); // add school
-      // loop majors
-      _.forEach(degree.majors, (major) => {
-        this.majorDropDown.push(major); // add major
-      });
-      // loop minors
-      _.forEach(degree.minors, (minor) => {
-        this.minorDropDown.push(minor); // add minor
-      });
-      // loop concentrations
-      _.forEach(degree.concentrations, (conc) => {
-        this.concentrationDropDown.push(conc); // add concentration
-      });
-    });
-  });
+  // let employeesDegrees = _.map(this.employees, (employee) => employee.degrees); //extract contracts
+  // employeesDegrees = _.compact(employeesDegrees); //remove falsey values
+  // // loop employees
+  // _.forEach(employeesDegrees, (degrees) => {
+  //   // loop degrees
+  //   _.forEach(degrees, (degree) => {
+  //     this.degreeDropDown.push(degree.name); // add degree name
+  //     this.schoolDropDown.push(degree.school); // add school
+  //     // loop majors
+  //     _.forEach(degree.majors, (major) => {
+  //       this.majorDropDown.push(major); // add major
+  //     });
+  //     // loop minors
+  //     _.forEach(degree.minors, (minor) => {
+  //       this.minorDropDown.push(minor); // add minor
+  //     });
+  //     // loop concentrations
+  //     _.forEach(degree.concentrations, (conc) => {
+  //       this.concentrationDropDown.push(conc); // add concentration
+  //     });
+  //   });
+  // });
 } // populateDropDowns
 
 /**
@@ -342,7 +342,7 @@ export default {
         (v) => moment(v, 'MM/YYYY').isValid() || 'Date must be valid'
       ], // rules for a required date
       editedDegrees: _.cloneDeep(this.model), // stores edited degree info
-      degreeDropDown: [], // autocomplete degree name options
+      degreeDropDown: ['Associates', 'Bachelors', 'Masters', 'PhD/Doctorate', 'Other (trade school, etc)'], // autocomplete degree name options
       majorDropDown: [], // autocomplete major options
       minorDropDown: [], // autocomplete minor options
       requiredRules: [
