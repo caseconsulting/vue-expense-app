@@ -21,7 +21,7 @@
           <v-card-title class="header_style" v-if="!editing">
             <h3 id="employeeName">{{ this.model.firstName }} {{ this.model.lastName }}</h3>
             <v-spacer></v-spacer>
-            <convert-employee-to-csv :employee="this.model" color="white" />
+            <convert-employee-to-csv v-if="userIsAdmin()" :employee="this.model" color="white" />
             <v-tooltip v-if="displayQuickBooksTimeAndBalances && this.currentTab" top>
               <template #activator="{ on }">
                 <v-icon class="pr-2" @click="editing = true" style="color: white" align="right" v-on="on">edit</v-icon>
