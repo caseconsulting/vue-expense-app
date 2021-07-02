@@ -14,7 +14,7 @@
       </v-row>
 
       <!-- Name of Technology -->
-      <v-combobox
+      <!-- <v-combobox
         ref="formFields"
         v-model="technology.name"
         :rules="requiredRules"
@@ -23,7 +23,18 @@
         data-vv-name="Technology"
         class="pb-5"
       >
-      </v-combobox>
+      </v-combobox> -->
+
+      <v-autocomplete
+        ref="formFields"
+        v-model="technology.name"
+        :rules="requiredRules"
+        :items="technologyDropDown"
+        label="Technology"
+        data-vv-name="Technology"
+        @input.native="updateTechDropDown(index)"
+      >
+      </v-autocomplete>
 
       <!-- Time Intervals -->
       <v-row v-if="technology.dateIntervals" justify="center">
@@ -248,6 +259,11 @@ function populateDropDowns() {
   });
 } // populateDropDowns
 
+function updateTechDropDown() {
+  let query = event.target.value;
+  api.getTechSkills(query);
+}
+
 /**
  * Validate all input fields are valid. Emit to parent the error status.
  */
@@ -371,6 +387,7 @@ export default {
     populateDropDowns,
     updateEndInterval,
     updateStartInterval,
+    updateTechDropDown,
     validateFields,
     validateTimeIntervals,
     validateDateInterval
