@@ -15,6 +15,7 @@
 
       <!-- Name of Technology -->
       <v-combobox
+        class="pb-5"
         ref="formFields"
         v-model="technology.name"
         :rules="requiredRules"
@@ -24,6 +25,17 @@
         @input.native="updateTechDropDown(index)"
       >
       </v-combobox>
+
+      <!-- <v-combobox
+        ref="formFields"
+        v-model="technology.name"
+        :rules="requiredRules"
+        :items="technologyDropDown"
+        label="Technology"
+        data-vv-name="Technology"
+        @input.native="updateTechDropDown(index)"
+      >
+      </v-comboxbox> -->
 
       <!-- Time Intervals -->
       <v-row v-if="technology.dateIntervals" justify="center">
@@ -250,7 +262,11 @@ function populateDropDowns() {
 
 function updateTechDropDown() {
   let query = event.target.value;
-  api.getTechSkills(query);
+  if (query > 2) {
+    let techList = api.getTechSkills(query);
+    let techNames = techList.map(techList.data, 'name');
+    console.log(techNames);
+  }
 }
 
 /**

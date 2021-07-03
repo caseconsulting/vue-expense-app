@@ -4,6 +4,7 @@ import { getAccessToken } from '@/utils/auth';
 const EXPENSE_TYPES = 'expense-types';
 const EXPENSES = 'expenses';
 const EMPLOYEES = 'employees';
+const EMSI = 'emsi';
 const TRAINING_URLS = 'training-urls';
 const UTILITY = 'utility';
 const BUDGETS = 'budgets';
@@ -22,7 +23,6 @@ const client = axios.create({
   baseURL: `${PROTOCOL}${API_HOSTNAME}${PORT}`,
   json: true
 });
-const oauth = require('axios-oauth-client');
 
 async function execute(method, resource, data) {
   // inject the accessToken for each request
@@ -57,30 +57,7 @@ function getCountries() {
 }
 
 async function getTechSkills(tech) {
-  //gets fresh token
-  const token = await oauth.client(axios.create(), {
-    url: 'https://auth.emsicloud.com/connect/token',
-    grant_type: 'client_credentials',
-    client_id: 'ij4t48a91zkw30tq',
-    client_secret: 'G1sWyMUo',
-    scope: 'emsi_open'
-  })().access_token;
-
-  var config = {
-    method: 'get',
-    url: `https://emsiservices.com/skills/versions/latest/skills?q=${tech}&fields=name,type`,
-    headers: {
-      Authorization: `Bearer ${token}`
-    }
-  };
-
-  axios(config)
-    .then(function (response) {
-      console.log(JSON.stringify(response.data));
-    })
-    .catch(function (error) {
-      console.log(error);
-    });
+  return execute('get', `/${EMSI}/getTechSkills/${tech}`);
 }
 
 function getAllActiveEmployeeBudgets(id) {
