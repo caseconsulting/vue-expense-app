@@ -262,10 +262,18 @@ function populateDropDowns() {
 
 function updateTechDropDown() {
   let query = event.target.value;
-  if (query > 2) {
-    let techList = api.getTechSkills(query);
-    let techNames = techList.map(techList.data, 'name');
-    console.log(techNames);
+  if (query.length > 2) {
+    let techList = await api.getTechSkills(query);
+    let techNames = techList.data.map((a) => a.name);
+    this.technologyDropDown.splice(0);
+    //removes unnecessary paranthesis from tech name
+    //ex: Java (programming language) ==> Java
+    for (let i = 0; i < techNames.length; i++) {
+      if (techNames[i].includes('(')) {
+        techNames[i] = techNames[i].split(' (')[0];
+      }
+    }
+    this.technologyDropDown = techNames;
   }
 }
 
