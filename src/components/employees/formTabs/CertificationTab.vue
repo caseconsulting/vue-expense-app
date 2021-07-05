@@ -19,86 +19,77 @@
         @click:append-outer="deleteCertification(index)"
       >
       </v-combobox>
-      <v-form :ref="'formFields-' + index">
-        <v-row class="py-3">
-          <v-col cols="12" sm="6" md="12" lg="6" class="pt-0">
-            <!-- Received Date -->
-            <v-menu
-              v-model="certification.showReceivedMenu"
-              :close-on-content-click="false"
-              transition="scale-transition"
-              offset-y
-              max-width="290px"
-              min-width="290px"
-            >
-              <template v-slot:activator="{ on, attrs }">
-                <v-text-field
-                  :value="certification.dateReceived | formatDate"
-                  ref="formFields"
-                  label="Date Received"
-                  prepend-icon="event_available"
-                  :rules="dateRules"
-                  hint="MM/DD/YYYY format"
-                  v-mask="'##/##/####'"
-                  v-bind="attrs"
-                  v-on="on"
-                  @blur="
-                    certification.dateReceived = parseEventDate($event);
-                    validateDates(index);
-                  "
-                  @focus="certificationIndex = index"
-                ></v-text-field>
-              </template>
-              <v-date-picker
-                v-model="certification.dateReceived"
-                :max="certification.expirationDate"
-                no-title
-                @input="certification.showReceivedMenu = false"
-              ></v-date-picker>
-            </v-menu>
-            <!-- End Received Date -->
-          </v-col>
-          <v-col cols="12" sm="6" md="12" lg="6" class="pt-0">
-            <!-- Expiration Date -->
-            <v-menu
-              v-model="certification.showExpirationMenu"
-              :close-on-content-click="false"
-              transition="scale-transition"
-              offset-y
-              max-width="290px"
-              min-width="290px"
-            >
-              <template v-slot:activator="{ on, attrs }">
-                <v-text-field
-                  :value="certification.expirationDate | formatDate"
-                  label="Expiration Date (optional)"
-                  ref="formFields"
-                  prepend-icon="event_busy"
-                  :rules="dateOptionalRules"
-                  hint="MM/DD/YYYY format"
-                  v-mask="'##/##/####'"
-                  v-bind="attrs"
-                  v-on="on"
-                  clearable
-                  @click:clear="certification.expirationDate = null"
-                  @blur="
-                    certification.expirationDate = parseEventDate($event);
-                    validateDates(index);
-                  "
-                  @focus="certificationIndex = index"
-                ></v-text-field>
-              </template>
-              <v-date-picker
-                v-model="certification.expirationDate"
-                :min="certification.dateReceived"
-                no-title
-                @input="certification.showExpirationMenu = false"
-              ></v-date-picker>
-            </v-menu>
-            <!-- End Expiration Date -->
-          </v-col>
-        </v-row>
-      </v-form>
+      <v-row class="py-3">
+        <v-col cols="12" sm="6" md="12" lg="6" class="pt-0">
+          <!-- Received Date -->
+          <v-menu
+            v-model="certification.showReceivedMenu"
+            :close-on-content-click="false"
+            transition="scale-transition"
+            offset-y
+            max-width="290px"
+            min-width="290px"
+          >
+            <template v-slot:activator="{ on, attrs }">
+              <v-text-field
+                ref="formFields"
+                :value="certification.dateReceived | formatDate"
+                label="Date Received"
+                prepend-icon="event_available"
+                :rules="[dateRules[0], dateRules[1], dateRules[2], dateOrderRules(index)]"
+                hint="MM/DD/YYYY format"
+                v-mask="'##/##/####'"
+                v-bind="attrs"
+                v-on="on"
+                @blur="certification.dateReceived = parseEventDate($event)"
+                @focus="certificationIndex = index"
+              ></v-text-field>
+            </template>
+            <v-date-picker
+              v-model="certification.dateReceived"
+              :max="certification.expirationDate"
+              no-title
+              @input="certification.showReceivedMenu = false"
+            ></v-date-picker>
+          </v-menu>
+          <!-- End Received Date -->
+        </v-col>
+        <v-col cols="12" sm="6" md="12" lg="6" class="pt-0">
+          <!-- Expiration Date -->
+          <v-menu
+            v-model="certification.showExpirationMenu"
+            :close-on-content-click="false"
+            transition="scale-transition"
+            offset-y
+            max-width="290px"
+            min-width="290px"
+          >
+            <template v-slot:activator="{ on, attrs }">
+              <v-text-field
+                :value="certification.expirationDate | formatDate"
+                label="Expiration Date (optional)"
+                prepend-icon="event_busy"
+                :rules="[dateOptionalRules[0], dateOptionalRules[1], dateOrderRules(index)]"
+                hint="MM/DD/YYYY format"
+                v-mask="'##/##/####'"
+                v-bind="attrs"
+                v-on="on"
+                clearable
+                @click:clear="certification.expirationDate = null"
+                @blur="certification.expirationDate = parseEventDate($event)"
+                @focus="certificationIndex = index"
+              ></v-text-field>
+            </template>
+            <v-date-picker
+              v-model="certification.expirationDate"
+              :min="certification.dateReceived"
+              no-title
+              @input="certification.showExpirationMenu = false"
+            ></v-date-picker>
+          </v-menu>
+          <!-- End Expiration Date -->
+        </v-col>
+      </v-row>
     </div>
     <!-- End Loop Certifications -->
 
@@ -220,30 +211,27 @@ export default {
     return {
       certificationDropDown: [], // autocomplete certification name options
       certificationIndex: 0,
+      dateOrderRules: (certIndex) => {
+        if (this.editedCertifications) {
+          let position = this.editedCertifications[certIndex];
+          return !isEmpty(position.expirationDate) && moment(position.expirationDate) && position.dateReceived
+            ? moment(position.expirationDate).add(1, 'd').isAfter(moment(position.dateReceived)) ||
+                'End date must be at or after start date'
+            : true;
+        } else {
+          return true;
+        }
+      },
       dateOptionalRules: [
         (v) => {
           return !isEmpty(v) ? /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v) || 'Date must be valid. Format: MM/DD/YYYY' : true;
         },
         (v) => (!isEmpty(v) ? moment(v, 'MM/DD/YYYY').isValid() || 'Date must be valid' : true),
-        (v) => {
-          let cert = this.editedCertifications[this.certificationIndex];
-          return !isEmpty(v) && moment(v) && cert.dateReceived
-            ? moment(v).add(1, 'd').isAfter(moment(cert.dateReceived)) ||
-                'Expiration date must be at or after date received'
-            : true;
-        }
       ], // rules for an optional date
       dateRules: [
         (v) => !isEmpty(v) || 'Date required',
         (v) => (!isEmpty(v) && /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v)) || 'Date must be valid. Format: MM/DD/YYYY',
         (v) => moment(v, 'MM/DD/YYYY').isValid() || 'Date must be valid',
-        (v) => {
-          let cert = this.editedCertifications[this.certificationIndex];
-          return !isEmpty(v) && moment(v) && cert.expirationDate
-            ? moment(v).isBefore(moment(cert.expirationDate).add(1, 'd')) ||
-                'Date received must be at or before expiration date'
-            : true;
-        }
       ], // rules for a required date
       editedCertifications: _.cloneDeep(this.model), // stores edited certifications info
       requiredRules: [
