@@ -55,7 +55,7 @@ function created() {
  * number.
  */
 function onPageChange() {
-  var startIndex = 5 * (this.page - 1); //each page contains 5 education entries
+  var startIndex = 5 * (this.page - 1); //each page contains 5 certification entries
   var endIndex = startIndex + 5;
   this.filteredList = this.model.certifications.slice(startIndex, endIndex);
 }
