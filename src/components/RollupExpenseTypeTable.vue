@@ -42,8 +42,7 @@
         <v-data-table
           :headers="headers"
           :items="filteredItems"
-          :sort-by.sync="sortBy"
-          :sort-desc.sync="sortDesc"
+          :custom-sort="customSort"
           :expanded.sync="expanded"
           :loading="loading"
           :items-per-page.sync="itemsPerPage"
@@ -179,6 +178,7 @@ function filteredItems() {
       return budget.employeeId === this.employee && budget.expenseTypeId === this.expenseType;
     }
   });
+  data.sort((a, b) => (a.lastName < b.lastName ? 1 : -1));
   return data;
 } // filteredItems
 
@@ -386,6 +386,39 @@ function emitSelectionChange(expense, newSelect) {
     window.EventBus.$emit('expenseChange', expense);
   }
 } // emitSelectionChange
+
+/**
+ * Custom sorter for each column in the table.
+ * @param items - a users buget item
+ * @param index - the index name of the array
+ * @param isDesc - true if the sorted is in descending order
+ * @return Array - the sorted array
+ */
+function customSort(items, index, isDesc) {
+  if (index[0] === 'employeeName') {
+    // sort by last name
+    if (!isDesc[0]) {
+      items.sort((a, b) => (a.lastName > b.lastName ? 1 : -1));
+    } else {
+      items.sort((a, b) => (b.lastName > a.lastName ? 1 : -1));
+    }
+  } else if (index[0] === 'cost') {
+    // sort by the total expenses per budget
+    if (!isDesc[0]) {
+      items.sort((a, b) => (getBudgetTotal(a.expenses) > getBudgetTotal(b.expenses) ? 1 : -1));
+    } else {
+      items.sort((a, b) => (getBudgetTotal(b.expenses) > getBudgetTotal(a.expenses) ? 1 : -1));
+    }
+  } else {
+    // sort alphabetically/numerically
+    if (!isDesc[0]) {
+      items.sort((a, b) => (a[index] > b[index] ? 1 : -1));
+    } else {
+      items.sort((a, b) => (b[index] > a[index] ? 1 : -1));
+    }
+  }
+  return items;
+} // customSort
 
 /**
  * Remove reimbursed expenses and returns a list of pending expenses.
@@ -788,8 +821,6 @@ export default {
     loading: true, // is loading
     pendingExpenses: [], // pending expenses
     reimbursing: false, // is reimbursing
-    sortBy: 'employeeName', // sort datatable items
-    sortDesc: false, // sort datatable items
     status: {
       statusType: undefined,
       statusMessage: '',
@@ -804,6 +835,7 @@ export default {
     checkAllBoxes,
     clickedRow,
     constructAutoComplete,
+    customSort,
     determineShowOnFeed,
     displayError,
     emitSelectionChange,
