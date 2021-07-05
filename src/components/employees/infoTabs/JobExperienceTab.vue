@@ -34,7 +34,7 @@
           <p v-if="position.endDate"><b>End Date: </b>{{ position.endDate | monthDayYearFormat }}</p>
           <hr v-if="posIndex < company.positions.length - 1" class="horizontalBar mb-3" />
         </div>
-        <hr v-if="index < model.companies.length - 1" class="mb-3" />
+        <hr v-if="index < filteredList.length - 1" class="mb-3" />
       </div>
       <!-- End Loop Jobs -->
       <div v-if="!isEmpty(this.model.companies)" class="text-center">

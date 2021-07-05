@@ -31,7 +31,7 @@
             {{ concentration }}
           </li>
         </ul>
-        <hr v-if="index < model.degrees.length - 1" class="mb-3" />
+        <hr v-if="index < filteredList.length - 1" class="mb-3" />
       </div>
       <!-- End Loop Degrees -->
     </div>
@@ -86,8 +86,8 @@ export default {
   created,
   data() {
     return {
-      page: 1,
-      filteredList: []
+      filteredList: [],
+      page: 1
     };
   },
   filters: {
