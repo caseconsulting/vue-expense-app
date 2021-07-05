@@ -5,11 +5,14 @@
     <hr class="my-3" />
 
     <!-- Case Consulting -->
-    <p><b>Company: </b>Case Consulting</p>
+    <p><b>Case Consulting Info</b></p>
     <p v-if="model.jobRole"><b>Position: </b>{{ model.jobRole }}</p>
     <p><b>Start Date: </b>{{ model.hireDate | monthDayYearFormat }}</p>
     <p v-if="model.deptDate"><b>End Date: </b>{{ model.deptDate | monthDayYearFormat }}</p>
     <hr v-if="model.companies && model.companies.length > 0" class="mb-3" />
+    <br />
+    
+    <h3>Job History</h3>
     <v-combobox
       label="Filter by Company Name"
       :items="companyNames"
@@ -99,7 +102,7 @@ function icExperience() {
 function updateCompanies() {
   let query = event.target.value;
   this.filterCompanies = _.filter(this.model.companies, (company) => {
-    if (company.companyName.includes(query)) {
+    if (company.companyName.toLowerCase().includes(query)) {
       return true;
     }
   });
