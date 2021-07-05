@@ -65,7 +65,6 @@
           </v-col>
         </v-row>
       </div>
-
       <div v-else text-center class="pt-0 font-13">
         <budget-table v-if="!loading" class="my-3" :employee="expenseTypeData"></budget-table>
         <budget-chart
@@ -73,6 +72,18 @@
           :options="drawGraph.optionSet"
           :chart-data="drawGraph.dataSet"
         ></budget-chart>
+        <v-autocomplete
+          :items="allBudgetNames"
+          multiple
+          v-model="selectedBudgets"
+          filled
+          chips
+          :menu-props="{ bottom: true, offsetY: true }"
+          deletable-chips
+          clearable
+          :search-input.sync="searchString"
+          @change="searchString = ''"
+        />
       </div>
     </v-col>
 
@@ -128,52 +139,54 @@ function budgets() {
   if (this.expenseTypeData !== undefined) {
     let expenseTypes = this.expenseTypeData;
     _.forEach(expenseTypes, (expenseType) => {
-      budgetNames.push(expenseType.expenseTypeName);
-      let budget = expenseType.budgetObject;
-      if (budget) {
-        // if a current budget exists for this expense type
-        if (!expenseType.odFlag) {
-          // if the expense type does not allow overdraft
-          reimbursed.push(budget.reimbursedAmount);
-          unreimbursed.push(budget.pendingAmount);
-          let difference = Math.max(budget.amount - budget.reimbursedAmount - budget.pendingAmount, 0);
-          budgetDifference.push(difference);
-          odReimbursed.push(0);
-          odUnreimbursed.push(0);
-        } else {
-          if (budget.amount - budget.reimbursedAmount < 0) {
-            // if the reimbursed amount is more than the adjusted expense type budget
-            let difference = 0;
-            reimbursed.push(budget.amount);
-            budgetDifference.push(difference);
-            unreimbursed.push(0);
-            odReimbursed.push(budget.reimbursedAmount - budget.amount);
-            odUnreimbursed.push(budget.pendingAmount);
-          } else if (budget.amount - budget.reimbursedAmount - budget.pendingAmount < 0) {
-            // if the reimburse + pending amount is more than the adjusted expense type budget
-            let difference = 0;
-            budgetDifference.push(difference);
-            reimbursed.push(budget.reimbursedAmount);
-            odReimbursed.push(0);
-            let temp = budget.amount - budget.reimbursedAmount;
-            unreimbursed.push(temp);
-            odUnreimbursed.push(budget.pendingAmount - temp);
-          } else {
+      if (this.selectedBudgets.includes(expenseType.expenseTypeName)) {
+        budgetNames.push(expenseType.expenseTypeName);
+        let budget = expenseType.budgetObject;
+        if (budget) {
+          // if a current budget exists for this expense type
+          if (!expenseType.odFlag) {
+            // if the expense type does not allow overdraft
             reimbursed.push(budget.reimbursedAmount);
             unreimbursed.push(budget.pendingAmount);
             let difference = Math.max(budget.amount - budget.reimbursedAmount - budget.pendingAmount, 0);
             budgetDifference.push(difference);
             odReimbursed.push(0);
             odUnreimbursed.push(0);
+          } else {
+            if (budget.amount - budget.reimbursedAmount < 0) {
+              // if the reimbursed amount is more than the adjusted expense type budget
+              let difference = 0;
+              reimbursed.push(budget.amount);
+              budgetDifference.push(difference);
+              unreimbursed.push(0);
+              odReimbursed.push(budget.reimbursedAmount - budget.amount);
+              odUnreimbursed.push(budget.pendingAmount);
+            } else if (budget.amount - budget.reimbursedAmount - budget.pendingAmount < 0) {
+              // if the reimburse + pending amount is more than the adjusted expense type budget
+              let difference = 0;
+              budgetDifference.push(difference);
+              reimbursed.push(budget.reimbursedAmount);
+              odReimbursed.push(0);
+              let temp = budget.amount - budget.reimbursedAmount;
+              unreimbursed.push(temp);
+              odUnreimbursed.push(budget.pendingAmount - temp);
+            } else {
+              reimbursed.push(budget.reimbursedAmount);
+              unreimbursed.push(budget.pendingAmount);
+              let difference = Math.max(budget.amount - budget.reimbursedAmount - budget.pendingAmount, 0);
+              budgetDifference.push(difference);
+              odReimbursed.push(0);
+              odUnreimbursed.push(0);
+            }
           }
+        } else {
+          // if a current budget does not exist for this expense type
+          budgetDifference.push(budget.amount);
+          reimbursed.push(0);
+          unreimbursed.push(0);
+          odReimbursed.push(0);
+          odUnreimbursed.push(0);
         }
-      } else {
-        // if a current budget does not exist for this expense type
-        budgetDifference.push(budget.amount);
-        reimbursed.push(0);
-        unreimbursed.push(0);
-        odReimbursed.push(0);
-        odUnreimbursed.push(0);
       }
     });
   }
@@ -465,7 +478,6 @@ async function refreshBudget() {
 
   // get existing budgets for the budget year being viewed
   let existingBudgets = await api.getFiscalDateViewBudgets(this.employee.id, this.fiscalDateView);
-
   // append inactive tag to end of budget expense type name
   // the existing budget duplicates will later be removed (order in array comes after active budgets)
   _.forEach(existingBudgets, (budget) => {
@@ -477,7 +489,8 @@ async function refreshBudget() {
   budgetsVar = _.sortBy(budgetsVar, (budget) => {
     return budget.expenseTypeName;
   }); // sort by expense type name
-
+  this.selectedBudgets = budgetsVar.map((a) => a.expenseTypeName);
+  this.allBudgetNames = budgetsVar.map((a) => a.expenseTypeName);
   // prohibit overdraft if employee is not full time
   _.forEach(budgetsVar, async (budget) => {
     if (!isFullTime(this.employee)) {
@@ -606,6 +619,7 @@ export default {
   data() {
     return {
       actualTime: moment().format('X'), // current time (unix ms timestamp)
+      allBudgetNames: [],
       allUserBudgets: null, // all user budgets
       budgetYears: [], // list of options for chaning budget year view
       changingBudgetView: false, // change budget year view activator
@@ -632,7 +646,9 @@ export default {
       fiscalDateView: '', // current budget year view by anniversary day
       hireDate: '', // employee hire date
       loading: false, // loading status
+      searchString: '',
       seconds: 0, // seconds until next anniversary date
+      selectedBudgets: [],
       status: {
         statusType: undefined,
         statusMessage: '',
