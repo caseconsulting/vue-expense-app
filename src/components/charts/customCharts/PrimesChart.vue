@@ -10,7 +10,6 @@ async function fillCertData() {
   //Get data
   //Put into dictionary where key is kinda tech and value is quantity
   let primes = {};
-  console.log(employees);
   employees.forEach((employee) => {
     let currPrime = employee.prime;
     if (currPrime) {
