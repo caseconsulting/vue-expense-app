@@ -1,5 +1,16 @@
 <template>
-  <pie-chart v-if="dataReceived" :options="options" :chartData="chartData"></pie-chart>
+  <div>
+    <pie-chart v-if="dataReceived" :options="options" :chartData="chartData"></pie-chart>
+    <v-container class="ma-0">
+      <v-row justify="center" no-gutters>
+        <v-radio-group row v-model="showCurrent">
+          <v-radio label="Current" value="Current"></v-radio>
+          <v-radio label="All" value="All"></v-radio>
+          <v-radio label="Past" value="Past"></v-radio>
+        </v-radio-group>
+      </v-row>
+    </v-container>
+  </div>
 </template>
 
 <script>
@@ -10,8 +21,11 @@ function fillData() {
       _.forEach(emp.customerOrgExp, (org) => {
         let orgName = org.name;
         let orgYears = org.years;
+        //We get whether or not we want to show current or past info
+        let orgCurrent = this.showCurrent === 'Current' ? org.current : !org.current;
+
         //error checks if orgYears is undefined
-        if (orgYears) {
+        if (orgYears && (orgCurrent || this.showCurrent === 'All')) {
           if (allCompOrgExp.orgName) {
             allCompOrgExp[orgName] += Number(orgYears);
           } else {
@@ -51,7 +65,7 @@ function fillData() {
   this.options = {
     title: {
       display: true,
-      text: 'Employee Customer Org Experience (in years)'
+      text: `${this.showCurrent} Employee Customer Org Experience (in years)`
     },
 
     maintainAspectRatio: false
@@ -70,13 +84,19 @@ export default {
       dataReceived: false,
       chartData: null,
       options: null,
-      employees: null
+      employees: null,
+      showCurrent: 'All'
     };
   },
   methods: { fillData },
   async created() {
     this.employees = await api.getItems(api.EMPLOYEES);
     this.fillData();
+  },
+  watch: {
+    showCurrent() {
+      this.fillData();
+    }
   }
 };
 </script>
