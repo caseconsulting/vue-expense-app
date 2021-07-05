@@ -284,41 +284,20 @@ function populateDropDowns() {
     this.prevColleges = [];
     _.forEach(employeesDegrees, (degrees) => {
       _.forEach(degrees, (degree) => {
-        this.prevColleges.push(degree.school);
+        _.forEach(colleges, (college) => {
+          if (college === degree.school) {
+            this.schoolDropDown.push(degree.school);
+            this.prevColleges.push(degree.school);
+          }
+        });
       });
     });
-
-    //Only put colleges in the list that are the same from both lists
-    for (let i = 0; i < colleges.length; i++) {
-      for (let j = 0; j < this.prevColleges.length; j++) {
-        let college1 = toTitleCase(colleges[i]);
-        let college2 = toTitleCase(this.prevColleges[j]);
-        if (college1 == college2) {
-          this.schoolDropDown.push(college1);
-        }
-      }
-    }
   });
 } // populateDropDowns
-
-/**
- * Formats the college strings so that they are uniform with each other
- *
- * @param str is the string to be converted
- * @returns the converted string
- */
-function toTitleCase(str) {
-  str = str.toLowerCase().split(' ');
-  for (var i = 0; i < str.length; i++) {
-    str[i] = str[i].charAt(0).toUpperCase() + str[i].slice(1);
-  }
-  return str.join(' ');
-}
 
 function updateSchoolDropDown() {
   let eventInfo = event.target.value;
   api.getColleges(eventInfo).then((res) => {
-    res = _.map(res, (elem) => toTitleCase(elem));
     this.schoolDropDown = [...res, ...this.prevColleges];
   });
 }
@@ -392,7 +371,6 @@ export default {
     isEmpty,
     parseDateMonthYear,
     populateDropDowns,
-    toTitleCase,
     updateSchoolDropDown,
     validateFields
   },

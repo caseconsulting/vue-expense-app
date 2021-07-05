@@ -38,7 +38,7 @@
                   label="Granted Date"
                   prepend-icon="event_available"
                   clearable
-                  :rules="dateOptionalRules.concat(dateGrantedRules)"
+                  :rules="[dateOptionalRules[0], dateOptionalRules[1], dateGrantedRules(cIndex)]"
                   hint="MM/DD/YYYY format"
                   v-mask="'##/##/####'"
                   v-bind="attrs"
@@ -78,7 +78,7 @@
                   label="Expiration Date"
                   prepend-icon="event_busy"
                   clearable
-                  :rules="dateOptionalRules.concat(dateExpirationRules)"
+                  :rules="[dateOptionalRules[0], dateOptionalRules[1], dateExpirationRules(cIndex)]"
                   hint="MM/DD/YYYY format"
                   v-mask="'##/##/####'"
                   v-bind="attrs"
@@ -117,7 +117,7 @@
                   label="Submission Date"
                   prepend-icon="event_note"
                   clearable
-                  :rules="dateOptionalRules.concat(dateSubmissionRules)"
+                  :rules="[dateOptionalRules[0], dateOptionalRules[1], dateSubmissionRules(cIndex)]"
                   hint="MM/DD/YYYY format"
                   v-mask="'##/##/####'"
                   v-bind="attrs"
@@ -229,7 +229,7 @@
             label="Badge Expiration Date"
             prepend-icon="event_busy"
             clearable
-            :rules="dateOptionalRules.concat(dateBadgeRules)"
+            :rules="[dateOptionalRules[0], dateOptionalRules[1], dateBadgeRules(cIndex)]"
             hint="MM/DD/YYYY format"
             v-mask="'##/##/####'"
             v-bind="attrs"
@@ -564,34 +564,49 @@ export default {
     return {
       clearanceElement: {},
       clearanceTypeDropDown: [], // autocomplete clearance type options
-      dateBadgeRules: [
-        (v) => isAfter(v, this.clearanceElement.grantedDate, 'Badge expiration date must be at or after granted date'),
-        (v) =>
-          isAfter(v, this.clearanceElement.submissionDate, 'Badge expiration date must be at or after submission date')
-      ],
-      dateExpirationRules: [
-        (v) => isAfter(v, this.clearanceElement.grantedDate, 'Expiration date must be at or after granted date'),
-        (v) => isAfter(v, this.clearanceElement.submissionDate, 'Expiration date must be at or after submission date')
-      ],
+      dateBadgeRules: (index) => {
+        let currClearance = this.editedClearances[index];
+        return currClearance.grantedDate && currClearance.badgeExpirationDate && currClearance.submissionDate
+          ? (moment(currClearance.badgeExpirationDate).isAfter(moment(currClearance.grantedDate)) &&
+              moment(currClearance.badgeExpirationDate).isAfter(moment(currClearance.submissionDate))) ||
+              'Badge expiration date must come after grant and submission date'
+          : true;
+      },
+      dateExpirationRules: (index) => {
+        let currClearance = this.editedClearances[index];
+        return currClearance.grantedDate && currClearance.expirationDate && currClearance.submissionDate
+          ? (moment(currClearance.expirationDate).isAfter(moment(currClearance.grantedDate)) &&
+              moment(currClearance.expirationDate).isAfter(moment(currClearance.submissionDate))) ||
+              'Expiration date must come after grant and submission date'
+          : true;
+      },
       dateOptionalRules: [
         (v) => {
           return !isEmpty(v) ? /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v) || 'Date must be valid. Format: MM/DD/YYYY' : true;
         },
         (v) => (!isEmpty(v) ? moment(v, 'MM/DD/YYYY').isValid() || 'Date must be valid' : true)
       ], // rules for an optional date
-      dateSubmissionRules: [
-        (v) => isBefore(v, this.clearanceElement.grantedDate, 'Submission date must be at or before granted date')
-      ],
+      dateSubmissionRules: (index) => {
+        let currClearance = this.editedClearances[index];
+        return currClearance.grantedDate && currClearance.submissionDate
+          ? moment(currClearance.submissionDate).isBefore(moment(currClearance.grantedDate)) ||
+              'Submission date must be before grant date'
+          : true;
+      },
       dateRules: [
         (v) => !isEmpty(v) || 'Date required',
         (v) => (!isEmpty(v) && /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v)) || 'Date must be valid. Format: MM/DD/YYYY',
         (v) => moment(v, 'MM/DD/YYYY').isValid() || 'Date must be valid'
       ], // rules for a required date
       editedClearances: _.cloneDeep(this.model), // stores edited clearances info
-      dateGrantedRules: [
-        (v) => isAfter(v, this.clearanceElement.submissionDate, 'Granted date must be at or after submission date'),
-        (v) => isBefore(v, this.clearanceElement.expirationDate, 'Granted date must be at or before expiration date')
-      ],
+      dateGrantedRules: (index) => {
+        let currClearance = this.editedClearances[index];
+        return currClearance.grantedDate && currClearance.expirationDate && currClearance.submissionDate
+          ? (moment(currClearance.grantedDate).isAfter(moment(currClearance.submissionDate)) &&
+              moment(currClearance.grantedDate).isBefore(moment(currClearance.expirationDate))) ||
+              'Grant date must lie between submission and expiration date'
+          : true;
+      },
       requiredRules: [(v) => !isEmpty(v) || 'This field is required'] // rules for a required field
     };
   },
