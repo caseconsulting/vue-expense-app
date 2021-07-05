@@ -260,7 +260,7 @@ function populateDropDowns() {
   });
 } // populateDropDowns
 
-function updateTechDropDown() {
+async function updateTechDropDown() {
   let query = event.target.value;
   if (query.length > 2) {
     let techList = await api.getTechSkills(query);
@@ -274,6 +274,7 @@ function updateTechDropDown() {
       }
     }
     this.technologyDropDown = techNames;
+    console.log(techNames);
   }
 }
 
