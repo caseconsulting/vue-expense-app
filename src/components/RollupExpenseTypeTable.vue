@@ -314,6 +314,39 @@ function createExpenses(aggregatedData) {
 } // createExpenses
 
 /**
+ * Custom sorter for each column in the table.
+ * @param items - a users buget item
+ * @param index - the index name of the array
+ * @param isDesc - true if the sorted is in descending order
+ * @return Array - the sorted array
+ */
+function customSort(items, index, isDesc) {
+  if (index[0] === 'employeeName') {
+    // sort by last name
+    if (!isDesc[0]) {
+      items.sort((a, b) => (a.lastName > b.lastName ? 1 : -1));
+    } else {
+      items.sort((a, b) => (b.lastName > a.lastName ? 1 : -1));
+    }
+  } else if (index[0] === 'cost') {
+    // sort by the total expenses per budget
+    if (!isDesc[0]) {
+      items.sort((a, b) => (getBudgetTotal(a.expenses) > getBudgetTotal(b.expenses) ? 1 : -1));
+    } else {
+      items.sort((a, b) => (getBudgetTotal(b.expenses) > getBudgetTotal(a.expenses) ? 1 : -1));
+    }
+  } else {
+    // sort alphabetically/numerically
+    if (!isDesc[0]) {
+      items.sort((a, b) => (a[index] > b[index] ? 1 : -1));
+    } else {
+      items.sort((a, b) => (b[index] > a[index] ? 1 : -1));
+    }
+  }
+  return items;
+} // customSort
+
+/**
  * Determine the state of the group check box based on expenses.
  *
  * @param budget - budget group selected
@@ -386,39 +419,6 @@ function emitSelectionChange(expense, newSelect) {
     window.EventBus.$emit('expenseChange', expense);
   }
 } // emitSelectionChange
-
-/**
- * Custom sorter for each column in the table.
- * @param items - a users buget item
- * @param index - the index name of the array
- * @param isDesc - true if the sorted is in descending order
- * @return Array - the sorted array
- */
-function customSort(items, index, isDesc) {
-  if (index[0] === 'employeeName') {
-    // sort by last name
-    if (!isDesc[0]) {
-      items.sort((a, b) => (a.lastName > b.lastName ? 1 : -1));
-    } else {
-      items.sort((a, b) => (b.lastName > a.lastName ? 1 : -1));
-    }
-  } else if (index[0] === 'cost') {
-    // sort by the total expenses per budget
-    if (!isDesc[0]) {
-      items.sort((a, b) => (getBudgetTotal(a.expenses) > getBudgetTotal(b.expenses) ? 1 : -1));
-    } else {
-      items.sort((a, b) => (getBudgetTotal(b.expenses) > getBudgetTotal(a.expenses) ? 1 : -1));
-    }
-  } else {
-    // sort alphabetically/numerically
-    if (!isDesc[0]) {
-      items.sort((a, b) => (a[index] > b[index] ? 1 : -1));
-    } else {
-      items.sort((a, b) => (b[index] > a[index] ? 1 : -1));
-    }
-  }
-  return items;
-} // customSort
 
 /**
  * Remove reimbursed expenses and returns a list of pending expenses.
