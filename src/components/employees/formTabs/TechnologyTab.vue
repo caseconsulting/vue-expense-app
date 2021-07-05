@@ -14,18 +14,7 @@
       </v-row>
 
       <!-- Name of Technology -->
-      <!-- <v-combobox
-        ref="formFields"
-        v-model="technology.name"
-        :rules="requiredRules"
-        :items="technologyDropDown"
-        label="Technology"
-        data-vv-name="Technology"
-        class="pb-5"
-      >
-      </v-combobox> -->
-
-      <v-autocomplete
+      <v-combobox
         ref="formFields"
         v-model="technology.name"
         :rules="requiredRules"
@@ -34,7 +23,7 @@
         data-vv-name="Technology"
         @input.native="updateTechDropDown(index)"
       >
-      </v-autocomplete>
+      </v-combobox>
 
       <!-- Time Intervals -->
       <v-row v-if="technology.dateIntervals" justify="center">

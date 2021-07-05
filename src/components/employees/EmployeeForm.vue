@@ -726,11 +726,11 @@ function titleCase(str) {
  */
 async function convertAutocompleteToTitlecase() {
   //Convert autocomplete technology field to title case
-  if (this.model.technologies !== null && this.model.technologies.length != 0) {
-    this.model.technologies.forEach((currTech) => {
-      currTech.name = titleCase(currTech.name);
-    });
-  }
+  // if (this.model.technologies !== null && this.model.technologies.length != 0) {
+  //   this.model.technologies.forEach((currTech) => {
+  //     currTech.name = titleCase(currTech.name);
+  //   });
+  // }
 
   //Convert autocomplete certification field to title case
   if (this.model.certifications !== null && this.model.certifications.length != 0) {
@@ -754,11 +754,11 @@ async function convertAutocompleteToTitlecase() {
   }
 
   //Convert autocomplete School field to title case
-  if (this.model.degrees !== null && this.model.degrees.length != 0) {
-    this.model.degrees.forEach((currDeg) => {
-      currDeg.school = titleCase(currDeg.school);
-    });
-  }
+  // if (this.model.degrees !== null && this.model.degrees.length != 0) {
+  //   this.model.degrees.forEach((currDeg) => {
+  //     currDeg.school = titleCase(currDeg.school);
+  //   });
+  // }
   await this.confirm();
 } //convertAutocompleteToTitlecase
 // |--------------------------------------------------|
