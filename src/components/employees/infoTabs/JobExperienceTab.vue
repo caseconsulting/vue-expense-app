@@ -5,7 +5,7 @@
     <hr class="my-3" />
 
     <!-- Case Consulting -->
-    <p><b>Case Consulting Info</b></p>
+    <p><b>Company: </b>Case Consulting</p>
     <p v-if="model.jobRole"><b>Position: </b>{{ model.jobRole }}</p>
     <p><b>Start Date: </b>{{ model.hireDate | monthDayYearFormat }}</p>
     <p v-if="model.deptDate"><b>End Date: </b>{{ model.deptDate | monthDayYearFormat }}</p>
@@ -23,7 +23,7 @@
     <!-- Other Jobs -->
     <div v-if="!isEmpty(model.companies)">
       <!-- Loop Jobs -->
-      <div v-for="(company, index) in filterCompanies" :key="company.companyName + index">
+      <div v-for="(company, index) in model.companies" :key="company.companyName + index">
         <p><b>Company: </b>{{ company.companyName }}</p>
         <div v-for="(position, posIndex) in company.positions" :key="position.title + posIndex">
           <p v-if="company.positions.length > 1">
@@ -37,6 +37,14 @@
         <hr v-if="index < model.companies.length - 1" class="mb-3" />
       </div>
       <!-- End Loop Jobs -->
+      <div v-if="!isEmpty(this.model.companies)" class="text-center">
+        <v-pagination
+          v-model="page"
+          :length="Math.ceil((model.companies.length + 1) / 5)"
+          :total-visible="8"
+          @input="onPageChange"
+        ></v-pagination>
+      </div>
     </div>
   </div>
 </template>

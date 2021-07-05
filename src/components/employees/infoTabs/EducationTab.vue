@@ -66,6 +66,12 @@ function created() {
   }
 }
 
+// |--------------------------------------------------|
+// |                                                  |
+// |                     METHODS                      |
+// |                                                  |
+// |--------------------------------------------------|
+
 /**
  * When the page is changed, grab the corresponding entries based on the page
  * number.
