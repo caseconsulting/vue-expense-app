@@ -226,12 +226,12 @@ export default {
         (v) => {
           return !isEmpty(v) ? /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v) || 'Date must be valid. Format: MM/DD/YYYY' : true;
         },
-        (v) => (!isEmpty(v) ? moment(v, 'MM/DD/YYYY').isValid() || 'Date must be valid' : true),
+        (v) => (!isEmpty(v) ? moment(v, 'MM/DD/YYYY').isValid() || 'Date must be valid' : true)
       ], // rules for an optional date
       dateRules: [
         (v) => !isEmpty(v) || 'Date required',
         (v) => (!isEmpty(v) && /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v)) || 'Date must be valid. Format: MM/DD/YYYY',
-        (v) => moment(v, 'MM/DD/YYYY').isValid() || 'Date must be valid',
+        (v) => moment(v, 'MM/DD/YYYY').isValid() || 'Date must be valid'
       ], // rules for a required date
       editedCertifications: _.cloneDeep(this.model), // stores edited certifications info
       requiredRules: [
