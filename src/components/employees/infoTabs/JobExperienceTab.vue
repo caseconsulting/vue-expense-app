@@ -11,13 +11,14 @@
     <p v-if="model.deptDate"><b>End Date: </b>{{ model.deptDate | monthDayYearFormat }}</p>
     <hr v-if="model.companies && model.companies.length > 0" class="mb-3" />
     <br />
-    
+
     <h3>Job History</h3>
     <v-combobox
       label="Filter by Company Name"
+      v-model="filter"
+      @input.native="updateCompanies()"
       :items="companyNames"
       :menu-props="{ top: true, offsetY: true }"
-      @input.native="updateCompanies()"
     ></v-combobox>
     <!-- Other Jobs -->
     <div v-if="!isEmpty(model.companies)">
@@ -99,31 +100,41 @@ function icExperience() {
   return `${totalYearOutput}${totalMonthOutput}`;
 } // icExperience
 
-function updateCompanies() {
-  let query = event.target.value;
-  this.filterCompanies = _.filter(this.model.companies, (company) => {
-    if (company.companyName.toLowerCase().includes(query.toLowerCase())) {
-      return true;
-    }
-  });
+function updateCompanies(query) {
+  if (query === undefined) {
+    query = event.target.value;
+  }
+  if (query !== undefined) {
+    this.filterCompanies = _.filter(this.model.companies, (company) => {
+      if (company.companyName.toLowerCase().includes(query.toLowerCase())) {
+        return true;
+      }
+    });
+  }
 }
 
 export default {
   data() {
     return {
       companyNames: _.map(this.model.companies, 'companyName'),
-      filterCompanies: _.cloneDeep(this.model.companies)
+      filterCompanies: _.cloneDeep(this.model.companies),
+      filter: ''
     };
-  },
-  computed: {
-    icExperience
-  },
-  filters: {
-    monthDayYearFormat
   },
   methods: {
     isEmpty,
     updateCompanies
+  },
+  computed: {
+    icExperience
+  },
+  watch: {
+    filter: function () {
+      this.updateCompanies(this.filter);
+    }
+  },
+  filters: {
+    monthDayYearFormat
   },
   props: ['model']
 };
