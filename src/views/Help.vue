@@ -14,7 +14,10 @@
       <v-expansion-panels accordion v-model="panel">
         <v-expansion-panel v-for="section in sections" :key="section[0]">
           <!-- Header -->
-          <v-expansion-panel-header :id="section[0]" v-if="section[1] == role || role == 'admin' || section[1] == 'user'">
+          <v-expansion-panel-header
+            :id="section[0]"
+            v-if="section[1] == role || role == 'admin' || section[1] == 'user'"
+          >
             {{ section[0] }}
           </v-expansion-panel-header>
 
