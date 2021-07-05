@@ -1,9 +1,9 @@
 <template>
   <div class="infoTab">
     <!-- Employee has Degrees -->
-    <div v-if="!isEmpty(model.degrees)">
+    <div v-if="!isEmpty(this.filteredList)">
       <!-- Loop Degrees -->
-      <div v-for="(degree, index) in model.degrees" :key="degree.name + index">
+      <div v-for="(degree, index) in this.filteredList" :key="degree.name + index">
         <p><b>Degree: </b>{{ degree.name }}</p>
         <p><b>School: </b>{{ degree.school }}</p>
         <p><b>Completion Date: </b>{{ degree.date | monthYearFormat }}</p>
@@ -37,18 +37,59 @@
     </div>
     <!-- Employee does not have Degrees -->
     <p v-else>No Education information</p>
+    <div v-if="!isEmpty(this.model.degrees)" class="text-center">
+      <v-pagination
+        v-model="page"
+        :length="Math.ceil(model.degrees.length / 4)"
+        :total-visible="8"
+        @input="onPageChange"
+      ></v-pagination>
+    </div>
   </div>
 </template>
 
 <script>
 import { isEmpty, monthYearFormat } from '@/utils/utils';
 
+// |--------------------------------------------------|
+// |                                                  |
+// |                 LIFECYCLE HOOKS                  |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * Emits to parent the component was created and get data for the list.
+ */
+function created() {
+  if (!isEmpty(this.model.degrees)) {
+    this.filteredList = this.model.degrees.slice(0, 4);
+  }
+}
+
+/**
+ * When the page is changed, grab the corresponding entries based on the page
+ * number.
+ */
+function onPageChange() {
+  var startIndex = 4 * (this.page - 1); //each page contains 4 education entries
+  var endIndex = startIndex + 4;
+  this.filteredList = this.model.degrees.slice(startIndex, endIndex);
+}
+
 export default {
+  created,
+  data() {
+    return {
+      page: 1,
+      filteredList: []
+    };
+  },
   filters: {
     monthYearFormat
   },
   methods: {
-    isEmpty
+    isEmpty,
+    onPageChange
   },
   props: ['model']
 };
