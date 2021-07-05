@@ -722,20 +722,11 @@ function titleCase(str) {
  */
 async function convertAutocompleteToTitlecase() {
   //Convert autocomplete technology field to title case
-<<<<<<< HEAD
   // if (this.model.technologies !== null && this.model.technologies.length != 0) {
   //   this.model.technologies.forEach((currTech) => {
   //     currTech.name = titleCase(currTech.name);
   //   });
   // }
-
-=======
-  if (this.model.technologies !== null && this.model.technologies.length != 0) {
-    this.model.technologies.forEach((currTech) => {
-      currTech.name = titleCase(currTech.name);
-    });
-  }
->>>>>>> 2418-Unify-the-selection-for-college-in-education-tab: Starting to fix tab validation
   //Convert autocomplete certification field to title case
   if (this.model.certifications !== null && this.model.certifications.length != 0) {
     this.model.certifications.forEach((currCert) => {
