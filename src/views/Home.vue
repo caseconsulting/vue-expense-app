@@ -33,7 +33,7 @@
         <!-- Title -->
         <v-col cols="12" md="6">
           <v-row style="height: 80%" align="center" justify="center">
-            <h1>Hello, {{ employee.firstName }}!</h1>
+            <h1 id="home-greeting">Hello, {{ employee.firstName }}!</h1>
           </v-row>
           <v-row justify="center">
             <v-btn class="mb-10" @click="handleProfile()" color="#bc3825" dark>View Profile</v-btn>
@@ -45,7 +45,7 @@
           <v-card>
             <v-card-title>
               <!-- display the next anniversary date -->
-              <div>
+              <div id="home-anniversary">
                 <h3 class="pt-4 font-16">Anniversary Date: {{ getAnniversary }}</h3>
                 <div @mouseover="display = !display" @mouseleave="display = !display" class="pt-4 font-14">
                   <div v-if="display">Days Until: {{ getDaysUntil }}</div>
@@ -74,14 +74,18 @@
               <v-progress-circular indeterminate size="64" color="#bc3825"></v-progress-circular>
             </v-col>
             <v-col v-else class="pt-0 text-center">
-              <available-budgets :employee="this.employee" :fiscalDateView="this.fiscalDateView"></available-budgets>
+              <available-budgets
+                id="home-available-budgets"
+                :employee="this.employee"
+                :fiscalDateView="this.fiscalDateView"
+              ></available-budgets>
             </v-col>
           </v-col>
         </v-col>
         <!-- Activity Feed -->
         <v-col cols="12" lg="6">
           <v-col mt-0 class="pt-4">
-            <activity-feed :events="events" :loading="loading"></activity-feed>
+            <activity-feed id="home-activity-feed" :events="events" :loading="loading"></activity-feed>
           </v-col>
         </v-col>
       </v-row>
@@ -89,7 +93,7 @@
         <!-- Twitter Feed -->
         <v-col>
           <v-col mt-0 class="pt-4">
-            <twitter-feed :tweets="tweets" :loading="loading"></twitter-feed>
+            <twitter-feed id="home-twitter-feed" :tweets="tweets" :loading="loading"></twitter-feed>
           </v-col>
         </v-col>
       </v-row>
