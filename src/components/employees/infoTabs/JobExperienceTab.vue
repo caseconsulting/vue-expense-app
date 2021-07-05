@@ -10,11 +10,16 @@
     <p><b>Start Date: </b>{{ model.hireDate | monthDayYearFormat }}</p>
     <p v-if="model.deptDate"><b>End Date: </b>{{ model.deptDate | monthDayYearFormat }}</p>
     <hr v-if="model.companies && model.companies.length > 0" class="mb-3" />
-
+    <v-combobox
+      label="Filter by Company Name"
+      :items="companyNames"
+      :menu-props="{ top: true, offsetY: true }"
+      @input.native="updateCompanies()"
+    ></v-combobox>
     <!-- Other Jobs -->
     <div v-if="!isEmpty(model.companies)">
       <!-- Loop Jobs -->
-      <div v-for="(company, index) in model.companies" :key="company.companyName + index">
+      <div v-for="(company, index) in filterCompanies" :key="company.companyName + index">
         <p><b>Company: </b>{{ company.companyName }}</p>
         <div v-for="(position, posIndex) in company.positions" :key="position.title + posIndex">
           <p v-if="company.positions.length > 1">
@@ -91,7 +96,22 @@ function icExperience() {
   return `${totalYearOutput}${totalMonthOutput}`;
 } // icExperience
 
+function updateCompanies() {
+  let query = event.target.value
+  this.filterCompanies = _.filter(this.model.companies, (company) => {
+    if (company.companyName.includes(query)) {
+      return true;
+    }
+  });
+}
+
 export default {
+  data() {
+    return {
+      companyNames: _.map(this.model.companies, 'companyName'),
+      filterCompanies: _.cloneDeep(this.model.companies)
+    }
+  },
   computed: {
     icExperience
   },
@@ -99,7 +119,8 @@ export default {
     monthDayYearFormat
   },
   methods: {
-    isEmpty
+    isEmpty,
+    updateCompanies
   },
   props: ['model']
 };
