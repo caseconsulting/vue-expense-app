@@ -34,6 +34,7 @@
         :items="schoolDropDown"
         label="School"
         @input.native="updateSchoolDropDown(index)"
+        @change="addSelectedCollege"
         data-vv-name="School"
       ></v-autocomplete>
 
@@ -295,6 +296,9 @@ function populateDropDowns() {
   });
 } // populateDropDowns
 
+/**
+ * Fills the college dropdown as the user is typing
+ */
 function updateSchoolDropDown() {
   let eventInfo = event.target.value;
   api.getColleges(eventInfo).then((res) => {
@@ -302,6 +306,15 @@ function updateSchoolDropDown() {
   });
 }
 
+/**
+ * This function adds a selected college to the drop down menu, so it does
+ * not disappear when editing another school
+ *
+ * @param selectedCollege the newly selected college
+ */
+function addSelectedCollege(selectedCollege) {
+  this.prevColleges.push(selectedCollege);
+}
 /**
  * Validate all input fields are valid. Emit to parent the error status.
  */
@@ -364,6 +377,7 @@ export default {
     parseEventDate,
     addDegree,
     addItem,
+    addSelectedCollege,
     deleteDegree,
     deleteItem,
     detectDuplicateEducation,
