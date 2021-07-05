@@ -2,7 +2,7 @@
   <v-container>
     <!-- Help Title -->
     <div>
-      <h1 style="text-align: center">HELP</h1>
+      <h1 style="text-align: center" id="help-title">HELP</h1>
     </div>
     <br />
     <br />
@@ -14,7 +14,7 @@
       <v-expansion-panels accordion v-model="panel">
         <v-expansion-panel v-for="section in sections" :key="section[0]">
           <!-- Header -->
-          <v-expansion-panel-header v-if="section[1] == role || role == 'admin' || section[1] == 'user'">
+          <v-expansion-panel-header :id="section[0]" v-if="section[1] == role || role == 'admin' || section[1] == 'user'">
             {{ section[0] }}
           </v-expansion-panel-header>
 
@@ -22,9 +22,9 @@
           <v-expansion-panel-content v-if="section[1] == role || role == 'admin' || section[1] == 'user'">
             <v-card>
               <v-card-text class="grey lighten-3">
-                <li v-for="ques in section" :key="ques.title">
+                <li v-for="(ques, index) in section" :key="ques.title">
                   <div v-if="ques.title" style="padding-bottom: 10px">
-                    <body style="font-style: italic">
+                    <body style="font-style: italic" :id="section[0] + '-' + index">
                       <icon name="space-shuttle" /> {{ ques.title }}
                     </body>
                     {{ ques.body }}
