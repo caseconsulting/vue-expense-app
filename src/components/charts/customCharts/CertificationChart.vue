@@ -35,7 +35,11 @@ async function fillCertData() {
   let values = [];
 
   for (let i = 0; i < certificationPairs.length; i++) {
-    labels.push(certificationPairs[i][0]);
+    if (certificationPairs[i][0].length > 30) {
+      labels.push(breakSentence(certificationPairs[i][0]));
+    } else {
+      labels.push(certificationPairs[i][0]);
+    }
     values.push(certificationPairs[i][1]);
   }
 
@@ -103,7 +107,22 @@ async function fillCertData() {
     maintainAspectRatio: false
   };
   this.dataReceived = true;
-}
+} //fillCertData
+
+function breakSentence(s) {
+  var middle = Math.floor(s.length / 2);
+  var before = s.lastIndexOf(' ', middle);
+  var after = s.indexOf(' ', middle + 1);
+
+  if (middle - before < after - middle) {
+    middle = before;
+  } else {
+    middle = after;
+  }
+  var returnArr = [s.substr(0, middle), s.substr(middle + 1)];
+  return returnArr;
+} //breakSentence
+
 export default {
   components: { HorizontalBarChart },
   data() {
@@ -114,7 +133,8 @@ export default {
     };
   },
   methods: {
-    fillCertData
+    fillCertData,
+    breakSentence
   },
   mounted() {
     this.fillCertData();

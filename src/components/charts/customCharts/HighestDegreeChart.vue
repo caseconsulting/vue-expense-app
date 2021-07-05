@@ -3,7 +3,10 @@
     <v-row>
       <v-col md="6" sm="12">
         <pie-chart v-if="dataReceived" :options="options" :chartData="chartData" />
-        <h4 v-if="degrees">Total Degrees: {{ degreeCount }}</h4>
+        <!-- <h4 v-if="degrees">Total Degrees: {{ degreeCount }}</h4> -->
+        <div class="center">
+          <p class="font-weight-normal">Total Degrees: {{ degreeCount }}</p>
+        </div>
       </v-col>
       <v-col md="6" sm="12">
         <MajorsChart />
@@ -246,4 +249,9 @@ export default {
 };
 </script>
 
-<style></style>
+<style>
+.center {
+  padding-top: 15px;
+  text-align: center;
+}
+</style>
