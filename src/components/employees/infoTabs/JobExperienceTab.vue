@@ -102,7 +102,7 @@ function icExperience() {
 function updateCompanies() {
   let query = event.target.value;
   this.filterCompanies = _.filter(this.model.companies, (company) => {
-    if (company.companyName.toLowerCase().includes(query)) {
+    if (company.companyName.toLowerCase().includes(query.toLowerCase())) {
       return true;
     }
   });
