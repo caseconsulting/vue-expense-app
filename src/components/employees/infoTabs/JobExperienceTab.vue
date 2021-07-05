@@ -97,7 +97,7 @@ function icExperience() {
 } // icExperience
 
 function updateCompanies() {
-  let query = event.target.value
+  let query = event.target.value;
   this.filterCompanies = _.filter(this.model.companies, (company) => {
     if (company.companyName.includes(query)) {
       return true;
@@ -110,7 +110,7 @@ export default {
     return {
       companyNames: _.map(this.model.companies, 'companyName'),
       filterCompanies: _.cloneDeep(this.model.companies)
-    }
+    };
   },
   computed: {
     icExperience
