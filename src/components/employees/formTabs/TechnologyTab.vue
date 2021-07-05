@@ -274,7 +274,6 @@ async function updateTechDropDown() {
       }
     }
     this.technologyDropDown = techNames;
-    console.log(techNames);
   }
 }
 

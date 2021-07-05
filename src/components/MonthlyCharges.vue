@@ -20,96 +20,89 @@
           <v-progress-linear :indeterminate="true"></v-progress-linear>
         </div>
         <div v-else>
-          <!-- If the user has no hours -->
-          <v-row v-if="quickBooksTimeData.jobcodeHours && quickBooksTimeData.jobcodeHours.length == 0" justify="center">
-            <p>No hours for this month</p>
-          </v-row>
-          <!-- User has hours -->
-          <div v-else>
-            <!-- Display Charge Code Hours -->
-            <div class="pt-3 px-5" style="border: 1px solid grey">
-              <v-row v-for="job in quickBooksTimeData.jobcodeHours" :key="job.name">
-                {{ job.name }}:
-                <v-spacer></v-spacer>
-                <p>{{ formatHours(job.hours) }}</p>
-              </v-row>
-              <v-row class="bold">
-                Total:
-                <v-spacer></v-spacer>
-                <div>
-                  <p v-if="remainingHours > 0">{{ formatHours(totalHours) }} / {{ formatHours(workHours) }}</p>
-                  <p v-else style="color: green">{{ formatHours(totalHours) }} / {{ formatHours(workHours) }}</p>
-                </div>
-              </v-row>
-            </div>
-            <!-- Average Hours per Day -->
-            <v-row class="pt-3">
-              Remaining Avg Hours/Day:
+          <!-- Display Charge Code Hours -->
+          <div class="pt-3 px-5" style="border: 1px solid grey">
+            <v-row v-for="job in quickBooksTimeData.jobcodeHours" :key="job.name">
+              {{ job.name }}:
               <v-spacer></v-spacer>
-              <p v-if="this.estimatedDailyHours < 24">{{ formatHours(this.estimatedDailyHours) }}</p>
-              <p v-else style="color: red">{{ formatHours(this.estimatedDailyHours) }}</p>
+              <p>{{ formatHours(job.hours) }}</p>
             </v-row>
-            <!-- Button to Show More -->
-            <div v-if="!showMore" @click="showMore = true" align="center">
-              <v-btn @click="showMore = true" top text small class="my-2">Show More &#9662; </v-btn>
-            </div>
-            <div v-if="showMore" max-width="400">
-              <!-- Hours left this month -->
-              <v-row>
-                Remaining:
-                <v-spacer></v-spacer>
-                <p>{{ formatHours(this.remainingHours) }}</p>
-              </v-row>
-              <!-- Hours worked this month -->
-              <v-row>
-                Completed:
-                <v-spacer></v-spacer>
-                <p v-if="this.workedHours < this.workHours - this.workDayHours * this.remainingWorkDays">
-                  {{ formatHours(this.workedHours) }}
-                </p>
-                <p v-else style="color: green">{{ formatHours(this.workedHours) }}</p>
-              </v-row>
-              <!-- Hours worked today -->
-              <v-row>
-                Today:
-                <v-spacer></v-spacer>
-                <p v-if="this.todaysHours < this.workDayHours">
-                  {{ formatHours(this.todaysHours) }}
-                </p>
-                <p v-else style="color: green">{{ formatHours(this.todaysHours) }}</p>
-              </v-row>
-              <!-- Future hours for this month -->
-              <v-row>
-                Future:
-                <v-spacer></v-spacer>
-                <p v-if="this.futureHours < this.workDayHours * (this.remainingWorkDays - 1)">
-                  {{ formatHours(this.futureHours) }}
-                </p>
-                <p v-else style="color: green">{{ formatHours(this.futureHours) }}</p>
-              </v-row>
-              <!-- Work days left -->
-              <v-row>
-                Days Remaining:
-                <v-spacer></v-spacer>
+            <v-row class="bold">
+              Total:
+              <v-spacer></v-spacer>
+              <div>
+                <p v-if="remainingHours > 0">{{ formatHours(totalHours) }} / {{ formatHours(workHours) }}</p>
+                <p v-else style="color: green">{{ formatHours(totalHours) }} / {{ formatHours(workHours) }}</p>
+              </div>
+            </v-row>
+          </div>
+          <!-- Average Hours per Day -->
+          <v-row class="pt-3">
+            Remaining Avg Hours/Day:
+            <v-spacer></v-spacer>
+            <p v-if="this.estimatedDailyHours < 24">{{ formatHours(this.estimatedDailyHours) }}</p>
+            <p v-else style="color: red">{{ formatHours(this.estimatedDailyHours) }}</p>
+          </v-row>
+          <!-- Button to Show More -->
+          <div v-if="!showMore" @click="showMore = true" align="center">
+            <v-btn @click="showMore = true" top text small class="my-2">Show More &#9662; </v-btn>
+          </div>
+          <div v-if="showMore" max-width="400">
+            <!-- Hours left this month -->
+            <v-row>
+              Remaining:
+              <v-spacer></v-spacer>
+              <p>{{ formatHours(this.remainingHours) }}</p>
+            </v-row>
+            <!-- Hours worked this month -->
+            <v-row>
+              Completed:
+              <v-spacer></v-spacer>
+              <p v-if="this.workedHours < this.workHours - this.workDayHours * this.remainingWorkDays">
+                {{ formatHours(this.workedHours) }}
+              </p>
+              <p v-else style="color: green">{{ formatHours(this.workedHours) }}</p>
+            </v-row>
+            <!-- Hours worked today -->
+            <v-row>
+              Today:
+              <v-spacer></v-spacer>
+              <p v-if="this.todaysHours < this.workDayHours">
+                {{ formatHours(this.todaysHours) }}
+              </p>
+              <p v-else style="color: green">{{ formatHours(this.todaysHours) }}</p>
+            </v-row>
+            <!-- Future hours for this month -->
+            <v-row>
+              Future:
+              <v-spacer></v-spacer>
+              <p v-if="this.futureHours < this.workDayHours * (this.remainingWorkDays - 1)">
+                {{ formatHours(this.futureHours) }}
+              </p>
+              <p v-else style="color: green">{{ formatHours(this.futureHours) }}</p>
+            </v-row>
+            <!-- Work days left -->
+            <v-row>
+              Days Remaining:
+              <v-spacer></v-spacer>
+              <div>
                 <div>
-                  <div>
-                    <p>
-                      <input
-                        type="text"
-                        class="text-right"
-                        style="max-width: 40px"
-                        :value="this.userWorkDays"
-                        @input="updateEstimate"
-                      />
-                    </p>
-                  </div>
+                  <p>
+                    <input
+                      type="text"
+                      class="text-right"
+                      style="max-width: 40px"
+                      :value="this.userWorkDays"
+                      @input="updateEstimate"
+                    />
+                  </p>
                 </div>
-              </v-row>
-            </div>
-            <!-- Button to Show Less -->
-            <div v-if="showMore" align="center">
-              <v-btn @click="showMore = false" top text small class="my-2">Show Less &#9650; </v-btn>
-            </div>
+              </div>
+            </v-row>
+          </div>
+          <!-- Button to Show Less -->
+          <div v-if="showMore" align="center">
+            <v-btn @click="showMore = false" top text small class="my-2">Show Less &#9650; </v-btn>
           </div>
         </div>
       </v-card-text>
