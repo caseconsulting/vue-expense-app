@@ -73,6 +73,14 @@ async function fillCertData() {
     scales: {
       xAxes: [
         {
+          scaleLabel: {
+            display: true,
+            labelString: 'Prime'
+          }
+        }
+      ],
+      yAxes: [
+        {
           ticks: {
             beginAtZero: true,
             stepSize: 1
@@ -80,14 +88,6 @@ async function fillCertData() {
           scaleLabel: {
             display: true,
             labelString: 'Number of Employees'
-          }
-        }
-      ],
-      yAxes: [
-        {
-          scaleLabel: {
-            display: true,
-            labelString: 'Primes'
           }
         }
       ]

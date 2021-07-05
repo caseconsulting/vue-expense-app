@@ -4,8 +4,8 @@
     <v-container class="ma-0">
       <v-row justify="center" no-gutters>
         <v-radio-group row v-model="showCurrent">
-          <v-radio label="Current" value="Current"></v-radio>
           <v-radio label="All" value="All"></v-radio>
+          <v-radio label="Current" value="Current"></v-radio>
           <v-radio label="Past" value="Past"></v-radio>
         </v-radio-group>
       </v-row>
