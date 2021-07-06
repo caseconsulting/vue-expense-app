@@ -23,7 +23,7 @@
     <!-- Other Jobs -->
     <div v-if="!isEmpty(model.companies)">
       <!-- Loop Jobs -->
-      <div v-for="(company, index) in filterCompanies" :key="company.companyName + index">
+      <div v-for="(company, index) in this.pageList" :key="company.companyName + index">
         <p><b>Company: </b>{{ company.companyName }}</p>
         <div v-for="(position, posIndex) in company.positions" :key="position.title + posIndex">
           <p v-if="company.positions.length > 1">
@@ -37,6 +37,14 @@
         <hr v-if="index < model.companies.length - 1" class="mb-3" />
       </div>
       <!-- End Loop Jobs -->
+      <div v-if="!isEmpty(this.model.awards)" class="text-center">
+        <v-pagination
+          v-model="page"
+          :length="Math.ceil(filterCompanies.length / 4)"
+          :total-visible="8"
+          @input="onPageChange"
+        ></v-pagination>
+      </div>
     </div>
   </div>
 </template>
@@ -46,6 +54,22 @@ const moment = require('moment-timezone');
 moment.tz.setDefault('America/New_York');
 import _ from 'lodash';
 import { isEmpty, monthDayYearFormat } from '@/utils/utils';
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                 LIFECYCLE HOOKS                  |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * Emits to parent the component was created and get data for the list.
+ */
+function created() {
+  if (!isEmpty(this.model.awards)) {
+    this.pageList = this.filterCompanies.slice(0, 4);
+  }
+}
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                     COMPUTED                     |
@@ -93,6 +117,23 @@ function icExperience() {
   }
   return `${totalYearOutput}${totalMonthOutput}`;
 } // icExperience
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     METHODS                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * When the page is changed, grab the corresponding entries based on the page
+ * number.
+ */
+function onPageChange() {
+  var startIndex = 4 * (this.page - 1); //each page contains 4 job entries
+  var endIndex = startIndex + 4;
+  this.pageList = this.filterCompanies.slice(startIndex, endIndex);
+}
+
 function updateCompanies(query) {
   if (query === undefined) {
     query = event.target.value;
@@ -103,19 +144,25 @@ function updateCompanies(query) {
         return true;
       }
     });
+    this.page = 1;
+    this.pageList = this.filterCompanies.slice(0, 4);
   }
 }
 export default {
+  created,
   data() {
     return {
       companyNames: _.map(this.model.companies, 'companyName'),
       filterCompanies: _.cloneDeep(this.model.companies),
-      filter: ''
+      filter: '',
+      page: 1,
+      pageList: []
     };
   },
   methods: {
     isEmpty,
-    updateCompanies
+    updateCompanies,
+    onPageChange
   },
   computed: {
     icExperience
