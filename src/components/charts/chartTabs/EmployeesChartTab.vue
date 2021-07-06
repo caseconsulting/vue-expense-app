@@ -1,18 +1,18 @@
 <template>
   <v-container>
     <v-row>
-      <v-col md="6" sm="12">
+      <v-col md="6" sm="12" class="mt-4">
         <job-experiences-chart></job-experiences-chart>
       </v-col>
-      <v-col md="6" sm="12">
+      <v-col md="6" sm="12" class="mt-4">
         <case-years-chart></case-years-chart>
       </v-col>
     </v-row>
     <v-row>
-      <v-col md="6" sm="12">
+      <v-col md="6" sm="12" class="mt-4">
         <primes-chart></primes-chart>
       </v-col>
-      <v-col md="6" sm="12">
+      <v-col md="6" sm="12" class="my-4">
         <job-role-chart></job-role-chart>
       </v-col>
     </v-row>
