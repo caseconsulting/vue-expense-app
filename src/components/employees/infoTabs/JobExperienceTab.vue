@@ -10,7 +10,10 @@
     <p><b>Start Date: </b>{{ model.hireDate | monthDayYearFormat }}</p>
     <p v-if="model.deptDate"><b>End Date: </b>{{ model.deptDate | monthDayYearFormat }}</p>
     <hr v-if="model.companies && model.companies.length > 0" class="mb-3" />
+<<<<<<< HEAD
     <br />
+=======
+>>>>>>> 2384-Adding-pages-for-infoTabs: Reverting changes due to a later commit changing the logic of the page
 
     <h3>Job History</h3>
     <v-combobox
@@ -34,17 +37,9 @@
           <p v-if="position.endDate"><b>End Date: </b>{{ position.endDate | monthDayYearFormat }}</p>
           <hr v-if="posIndex < company.positions.length - 1" class="horizontalBar mb-3" />
         </div>
-        <hr v-if="index < filteredList.length - 1" class="mb-3" />
+        <hr v-if="index < model.companies.length - 1" class="mb-3" />
       </div>
       <!-- End Loop Jobs -->
-      <div v-if="!isEmpty(this.model.companies)" class="text-center">
-        <v-pagination
-          v-model="page"
-          :length="Math.ceil((model.companies.length + 1) / 5)"
-          :total-visible="8"
-          @input="onPageChange"
-        ></v-pagination>
-      </div>
     </div>
   </div>
 </template>
@@ -54,13 +49,15 @@ const moment = require('moment-timezone');
 moment.tz.setDefault('America/New_York');
 import _ from 'lodash';
 import { isEmpty, monthDayYearFormat } from '@/utils/utils';
+<<<<<<< HEAD
 
+=======
+>>>>>>> 2384-Adding-pages-for-infoTabs: Reverting changes due to a later commit changing the logic of the page
 // |--------------------------------------------------|
 // |                                                  |
 // |                     COMPUTED                     |
 // |                                                  |
 // |--------------------------------------------------|
-
 /**
  * Calculate and return text for Experience in IC duration.
  *
@@ -69,7 +66,6 @@ import { isEmpty, monthDayYearFormat } from '@/utils/utils';
 function icExperience() {
   let ranges = _.mapValues(this.model.icTimeFrames, 'range');
   let totalDurationMonths = 0; // total months
-
   // loop each reach to get total duration in months
   _.forEach(ranges, (range) => {
     let start = moment(range[0], 'YYYY-MM');
@@ -84,7 +80,6 @@ function icExperience() {
     let duration = end.diff(start, 'months') + 1; // calculate range duration
     totalDurationMonths += Math.max(duration, 0); // remove negative values
   });
-
   // set year output text
   let totalYearOutput = _.floor(totalDurationMonths / 12);
   if (totalYearOutput < 1) {
@@ -94,7 +89,6 @@ function icExperience() {
   } else {
     totalYearOutput += ' Years';
   }
-
   // set month output text
   let totalMonthOutput = totalDurationMonths % 12;
   if (totalMonthOutput < 1) {
@@ -104,9 +98,9 @@ function icExperience() {
   } else {
     totalMonthOutput = totalYearOutput.length > 0 ? ` and ${totalMonthOutput} Months` : `${totalMonthOutput} Months`;
   }
-
   return `${totalYearOutput}${totalMonthOutput}`;
 } // icExperience
+<<<<<<< HEAD
 
 function updateCompanies(query) {
   if (query === undefined) {
@@ -143,6 +137,17 @@ export default {
   },
   filters: {
     monthDayYearFormat
+=======
+export default {
+  computed: {
+    icExperience
+  },
+  filters: {
+    monthDayYearFormat
+  },
+  methods: {
+    isEmpty
+>>>>>>> 2384-Adding-pages-for-infoTabs: Reverting changes due to a later commit changing the logic of the page
   },
   props: ['model']
 };
