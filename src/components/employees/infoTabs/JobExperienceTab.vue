@@ -34,7 +34,7 @@
           <p v-if="position.endDate"><b>End Date: </b>{{ position.endDate | monthDayYearFormat }}</p>
           <hr v-if="posIndex < company.positions.length - 1" class="horizontalBar mb-3" />
         </div>
-        <hr v-if="index < model.companies.length - 1" class="mb-3" />
+        <hr v-if="index < pageList.length - 1" class="mb-3" />
       </div>
       <!-- End Loop Jobs -->
       <div v-if="!isEmpty(this.model.awards)" class="text-center">
@@ -132,7 +132,7 @@ function onPageChange() {
   var startIndex = 4 * (this.page - 1); //each page contains 4 job entries
   var endIndex = startIndex + 4;
   this.pageList = this.filterCompanies.slice(startIndex, endIndex);
-}
+} //onPageChange
 
 function updateCompanies(query) {
   if (query === undefined) {

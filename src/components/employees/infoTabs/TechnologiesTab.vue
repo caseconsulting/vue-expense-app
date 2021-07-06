@@ -40,7 +40,7 @@
       </div>
       <!-- End of Sort Filters -->
       <!-- Loop Technologies -->
-      <div v-for="(technology, index) in sortedTech" :key="technology.name + index">
+      <div v-for="(technology, index) in this.pageList" :key="technology.name + index">
         <v-row>
           <v-col>
             <p><b>Technology: </b>{{ technology.name }}</p>
@@ -55,9 +55,17 @@
           </v-col>
         </v-row>
         <p><b>Years of Experience: </b>{{ yearsOfExperience(technology) }}</p>
-        <hr v-if="index < model.technologies.length - 1" class="mb-3" />
+        <hr v-if="index < pageList.length - 1" class="mb-3" />
       </div>
       <!-- End Loop Technologies -->
+      <div v-if="!isEmpty(this.sortedTech)" class="text-center">
+        <v-pagination
+          v-model="page"
+          :length="Math.ceil(this.sortedTech.length / 5)"
+          :total-visible="8"
+          @input="onPageChange"
+        ></v-pagination>
+      </div>
     </div>
     <!-- Employee does not have Technology Experience -->
     <p v-else>No Technology Information</p>
@@ -68,12 +76,36 @@
 import { isEmpty } from '@/utils/utils';
 import moment from 'moment-timezone';
 import _ from 'lodash';
+// |--------------------------------------------------|
+// |                                                  |
+// |                 LIFECYCLE HOOKS                  |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * Emits to parent the component was created and get data for the list.
+ */
+function created() {
+  if (!isEmpty(this.model.awards)) {
+    this.pageList = this.sortedTech.slice(0, 5);
+  }
+}
 
 // |--------------------------------------------------|
 // |                                                  |
 // |                     METHODS                      |
 // |                                                  |
 // |--------------------------------------------------|
+
+/**
+ * When the page is changed, grab the corresponding entries based on the page
+ * number.
+ */
+function onPageChange() {
+  var startIndex = 5 * (this.page - 1); //each page contains 5 tech entries
+  var endIndex = startIndex + 5;
+  this.pageList = this.sortedTech.slice(startIndex, endIndex);
+} //onPageChange
 
 /**
  * Calculates years of experience for a technology based on monthsOfExperience.
@@ -131,6 +163,8 @@ function monthsPassed(start, end) {
 function sortByName() {
   const iteratees = (obj) => obj.name;
   this.sortedTech = _.sortBy(this.model.technologies, iteratees);
+  this.page = 1;
+  this.pageList = this.sortedTech.slice(0, 5);
 }
 
 function sortByCurrent() {
@@ -147,6 +181,8 @@ function sortByCurrent() {
       return 1;
     }
   });
+  this.page = 1;
+  this.pageList = this.sortedTech.slice(0, 5);
 }
 
 function sortByDate() {
@@ -158,11 +194,17 @@ function sortByDate() {
 
   const iteratees = (obj) => -obj.length;
   this.sortedTech = _.sortBy(this.model.technologies, iteratees);
+
+  this.page = 1;
+  this.pageList = this.sortedTech.slice(0, 5);
 }
 
 export default {
+  created,
   data() {
     return {
+      page: 1,
+      pageList: [],
       sortedTech: this.model.technologies
     };
   },
@@ -173,6 +215,7 @@ export default {
   },
   methods: {
     isEmpty,
+    onPageChange,
     yearsOfExperience,
     sortByName,
     sortByCurrent,
