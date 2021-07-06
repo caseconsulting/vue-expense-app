@@ -2,14 +2,33 @@
   <div>
     <v-card :elevation="3" class="">
       <v-card color="#bc3825">
-        <v-card-title headline>
-          <h2 class="white--text">Stats Dashboard</h2>
+        <v-card-title headline v-bind:class="{ 'justify-center': isMobile }">
+          <h2 class="text-center white--text">Stats Dashboard</h2>
         </v-card-title>
       </v-card>
       <v-container fluid>
-        <div v-if="useDropDown">
-          <v-menu></v-menu>
+        <!-- user is mobile -->
+        <div v-if="isMobile" class="text-center">
+          <v-menu offset-y>
+            <template v-slot:activator="{ on, attrs }">
+              <v-btn text color="#bc3825" dark class="font-weight-bold" v-bind="attrs" v-on="on"
+                >{{ statsTab.toUpperCase() }} <v-icon class="pb-1">expand_more</v-icon>
+              </v-btn>
+            </template>
+            <v-list>
+              <v-list-item @click="selectDropDown('employees')">Employees</v-list-item>
+              <v-list-item @click="selectDropDown('education')">Education</v-list-item>
+              <v-list-item @click="selectDropDown('technology')">Technology</v-list-item>
+              <v-list-item @click="selectDropDown('certifications')">Certifications</v-list-item>
+            </v-list>
+          </v-menu>
+          <hr class="my-1" />
+          <employees-chart-tab v-if="statsTab === 'employees'"></employees-chart-tab>
+          <education-chart-tab v-if="statsTab === 'education'"></education-chart-tab>
+          <tech-chart-tab v-if="statsTab === 'technology'"></tech-chart-tab>
+          <certifications-chart-tab v-if="statsTab === 'certifications'"></certifications-chart-tab>
         </div>
+        <!-- user is not mobile -->
         <v-tabs v-else color="basil" center-active grow show-arrows class="">
           <v-tab href="#employees">Employees</v-tab>
           <v-tab href="#education">Education</v-tab>
@@ -39,6 +58,14 @@ import EmployeesChartTab from '../components/charts/chartTabs/EmployeesChartTab.
 import TechChartTab from '../components/charts/chartTabs/TechChartTab.vue';
 import EducationChartTab from '../components/charts/chartTabs/EducationChartTab.vue';
 
+/**
+ * This is used to select the correct tab on mobile devices
+ * @param tabName - The name of the tab
+ */
+function selectDropDown(tabName) {
+  this.statsTab = tabName;
+} // selectDropDown
+
 export default {
   components: {
     CertificationsChartTab,
@@ -47,7 +74,7 @@ export default {
     EducationChartTab
   },
   computed: {
-    useDropDown() {
+    isMobile() {
       switch (this.$vuetify.breakpoint.name) {
         case 'xs':
           return true;
@@ -55,6 +82,14 @@ export default {
           return false;
       }
     }
+  },
+  data() {
+    return {
+      statsTab: 'employees'
+    };
+  },
+  methods: {
+    selectDropDown
   }
 };
 </script>
