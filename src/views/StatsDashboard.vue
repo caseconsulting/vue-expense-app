@@ -7,7 +7,10 @@
         </v-card-title>
       </v-card>
       <v-container fluid>
-        <v-tabs color="basil" center-active grow show-arrows class="">
+        <div v-if="useDropDown">
+          <v-menu></v-menu>
+        </div>
+        <v-tabs v-else color="basil" center-active grow show-arrows class="">
           <v-tab href="#employees">Employees</v-tab>
           <v-tab href="#education">Education</v-tab>
           <v-tab href="#technologies">Technology</v-tab>
@@ -42,6 +45,16 @@ export default {
     EmployeesChartTab,
     TechChartTab,
     EducationChartTab
+  },
+  computed: {
+    useDropDown() {
+      switch (this.$vuetify.breakpoint.name) {
+        case 'xs':
+          return true;
+        default:
+          return false;
+      }
+    }
   }
 };
 </script>
