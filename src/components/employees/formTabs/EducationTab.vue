@@ -33,7 +33,7 @@
         :rules="requiredRules"
         :items="schoolDropDown"
         label="School"
-        @input.native="updateSchoolDropDown(index)"
+        @input.native="updateSchoolDropDown()"
         @change="addSelectedCollege"
         data-vv-name="School"
       ></v-autocomplete>
@@ -72,20 +72,20 @@
 
       <!-- Majors -->
       <!-- Loop Majors -->
-      <div v-for="(major, index) in degree.majors" :key="'major: ' + major + index">
-        <v-combobox
+      <div v-for="(major, mIndex) in degree.majors" :key="'major: ' + major + mIndex">
+        <!-- Majors -->
+        <v-autocomplete
           ref="formFields"
-          v-model="degree.majors[index]"
+          v-model="degree.majors[mIndex]"
           :rules="requiredRules"
           :items="majorDropDown"
           label="Major"
+          @input.native="updateMajorDropDown()"
+          @change="addSelectedMajor"
           data-vv-name="Major"
-        >
-          <!-- Button to Delete Major  -->
-          <template v-slot:append-outer>
-            <v-icon v-if="index > 0" @click="deleteItem(degree.majors, index)">delete</v-icon>
-          </template>
-        </v-combobox>
+          append-outer-icon="delete"
+          @click:append-outer="deleteItem(degree.majors, mIndex)"
+        ></v-autocomplete>
       </div>
       <!-- End Loop Majors -->
       <!-- Button to Add Major -->
@@ -96,18 +96,20 @@
 
       <!-- Minors -->
       <!-- Loops Minors -->
-      <div v-for="(minor, index) in degree.minors" :key="'minor: ' + minor + index">
-        <v-combobox
+      <div v-for="(minor, mIndex) in degree.minors" :key="'minor: ' + minor + mIndex">
+        <!-- Name of School -->
+        <v-autocomplete
           ref="formFields"
-          v-model="degree.minors[index]"
+          v-model="degree.minors[mIndex]"
           :rules="requiredRules"
           :items="minorDropDown"
           label="Minor"
-          data-vv-name="Minor"
+          @input.native="updateMinorDropDown()"
+          @change="addSelectedMinor"
           append-outer-icon="delete"
-          @click:append-outer="deleteItem(degree.minors, index)"
-        >
-        </v-combobox>
+          @click:append-outer="deleteItem(degree.minors, mIndex)"
+          data-vv-name="Minor"
+        ></v-autocomplete>
       </div>
       <!-- End Loops Minors -->
       <!-- Button to Add Minor -->
@@ -275,20 +277,44 @@ function isDuplicate(edu) {
 /**
  * Populate drop downs with information that other employees have filled out.
  */
-function populateDropDowns() {
+async function populateDropDowns() {
   //This is pretty expensive, but I couldn't find a better way
   //This gets all colleges and filters out the previous colleges so that they are only legal
   //ones from the list
-  api.getColleges('').then((colleges) => {
-    let employeesDegrees = _.map(this.employees, (employee) => employee.degrees); //extract contracts
-    employeesDegrees = _.compact(employeesDegrees); //remove falsey values
-    this.prevColleges = [];
-    _.forEach(employeesDegrees, (degrees) => {
-      _.forEach(degrees, (degree) => {
-        _.forEach(colleges, (college) => {
-          if (college === degree.school) {
-            this.schoolDropDown.push(degree.school);
-            this.prevColleges.push(degree.school);
+  let colleges = await api.getColleges('');
+
+  let employeesDegrees = _.map(this.employees, (employee) => employee.degrees); //extract contracts
+  employeesDegrees = _.compact(employeesDegrees); //remove falsey values
+
+  let majors = await api.getMajors();
+
+  this.prevColleges = [];
+  this.prevMajors = [];
+  this.prevMinors = [];
+
+  _.forEach(employeesDegrees, (degrees) => {
+    _.forEach(degrees, (degree) => {
+      _.forEach(colleges, (college) => {
+        if (college === degree.school) {
+          this.schoolDropDown.push(degree.school);
+          this.prevColleges.push(degree.school);
+        }
+      });
+
+      _.forEach(majors, (major) => {
+        _.forEach(degree.majors, (degreeMajor) => {
+          if (major === degreeMajor) {
+            this.majorDropDown.push(degreeMajor);
+            this.prevMajors.push(degreeMajor);
+          }
+        });
+      });
+
+      _.forEach(majors, (major) => {
+        _.forEach(degree.minors, (degreeMinor) => {
+          if (major === degreeMinor) {
+            this.minorDropDown.push(degreeMinor);
+            this.prevMinors.push(degreeMinor);
           }
         });
       });
@@ -299,11 +325,28 @@ function populateDropDowns() {
 /**
  * Fills the college dropdown as the user is typing
  */
-function updateSchoolDropDown() {
+async function updateSchoolDropDown() {
   let eventInfo = event.target.value;
-  api.getColleges(eventInfo).then((res) => {
-    this.schoolDropDown = [...res, ...this.prevColleges];
-  });
+  let res = await api.getColleges(eventInfo);
+  this.schoolDropDown = [...res, ...this.prevColleges];
+}
+
+/**
+ * Fills the majors dropdown as the user is typing
+ */
+async function updateMajorDropDown() {
+  let eventInfo = event.target.value;
+  let res = await api.getMajors(eventInfo);
+  this.majorDropDown = [...res, ...this.prevMajors];
+}
+
+/**
+ * Fills the minors dropdown as the user is typing
+ */
+async function updateMinorDropDown() {
+  let eventInfo = event.target.value;
+  let res = await api.getMajors(eventInfo);
+  this.minorDropDown = [...res, ...this.prevMinors];
 }
 
 /**
@@ -314,6 +357,26 @@ function updateSchoolDropDown() {
  */
 function addSelectedCollege(selectedCollege) {
   this.prevColleges.push(selectedCollege);
+}
+
+/**
+ * This function adds a selected major to the drop down menu, so it does
+ * not disappear when editing another school
+ *
+ * @param selectedMajor the newly selected major
+ */
+function addSelectedMajor(selectedMajor) {
+  this.prevMajors.push(selectedMajor);
+}
+
+/**
+ * This function adds a selected minor to the drop down menu, so it does
+ * not disappear when editing another school
+ *
+ * @param selectedMinor the newly selected minor
+ */
+function addSelectedMinor(selectedMinor) {
+  this.prevMinors.push(selectedMinor);
 }
 /**
  * Validate all input fields are valid. Emit to parent the error status.
@@ -363,6 +426,8 @@ export default {
       majorDropDown: [], // autocomplete major options
       minorDropDown: [], // autocomplete minor options
       prevColleges: [],
+      prevMajors: [],
+      prevMinors: [],
       requiredRules: [
         (v) => !isEmpty(v) || 'This field is required. You must enter information or delete the field if possible.'
       ], // rules for a required field
@@ -378,6 +443,8 @@ export default {
     addDegree,
     addItem,
     addSelectedCollege,
+    addSelectedMajor,
+    addSelectedMinor,
     deleteDegree,
     deleteItem,
     detectDuplicateEducation,
@@ -385,6 +452,8 @@ export default {
     isEmpty,
     parseDateMonthYear,
     populateDropDowns,
+    updateMajorDropDown,
+    updateMinorDropDown,
     updateSchoolDropDown,
     validateFields
   },
