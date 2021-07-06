@@ -10,10 +10,7 @@
     <p><b>Start Date: </b>{{ model.hireDate | monthDayYearFormat }}</p>
     <p v-if="model.deptDate"><b>End Date: </b>{{ model.deptDate | monthDayYearFormat }}</p>
     <hr v-if="model.companies && model.companies.length > 0" class="mb-3" />
-<<<<<<< HEAD
     <br />
-=======
->>>>>>> 2384-Adding-pages-for-infoTabs: Reverting changes due to a later commit changing the logic of the page
 
     <h3>Job History</h3>
     <v-combobox
@@ -49,10 +46,6 @@ const moment = require('moment-timezone');
 moment.tz.setDefault('America/New_York');
 import _ from 'lodash';
 import { isEmpty, monthDayYearFormat } from '@/utils/utils';
-<<<<<<< HEAD
-
-=======
->>>>>>> 2384-Adding-pages-for-infoTabs: Reverting changes due to a later commit changing the logic of the page
 // |--------------------------------------------------|
 // |                                                  |
 // |                     COMPUTED                     |
@@ -100,7 +93,6 @@ function icExperience() {
   }
   return `${totalYearOutput}${totalMonthOutput}`;
 } // icExperience
-<<<<<<< HEAD
 
 function updateCompanies(query) {
   if (query === undefined) {
@@ -137,17 +129,6 @@ export default {
   },
   filters: {
     monthDayYearFormat
-=======
-export default {
-  computed: {
-    icExperience
-  },
-  filters: {
-    monthDayYearFormat
-  },
-  methods: {
-    isEmpty
->>>>>>> 2384-Adding-pages-for-infoTabs: Reverting changes due to a later commit changing the logic of the page
   },
   props: ['model']
 };
