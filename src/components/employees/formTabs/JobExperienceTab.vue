@@ -194,7 +194,9 @@
         </v-form>
       </div>
       <div class="pb-4" align="center">
-        <v-btn @click="addPosition(compIndex)" :id="'add-pos-'+ compIndex" elevation="2"><v-icon class="pr-1">add</v-icon>Position</v-btn>
+        <v-btn @click="addPosition(compIndex)" :id="'add-pos-' + compIndex" elevation="2"
+          ><v-icon class="pr-1">add</v-icon>Position</v-btn
+        >
       </div>
       <v-row v-if="!hasEndDatesFilled(compIndex)" class="py-5 caption text--darken-2 grey--text">
         Note that leaving the end date blank means you are currently working at that position.

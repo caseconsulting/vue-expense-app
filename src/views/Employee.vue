@@ -24,7 +24,9 @@
             <convert-employee-to-csv v-if="userIsAdmin()" :employee="this.model" color="white" />
             <v-tooltip v-if="displayQuickBooksTimeAndBalances && this.currentTab" top>
               <template #activator="{ on }">
-                <v-icon class="pr-2" @click="editing = true" style="color: white" align="right" v-on="on" id="edit">edit</v-icon>
+                <v-icon class="pr-2" @click="editing = true" style="color: white" align="right" v-on="on" id="edit"
+                  >edit</v-icon
+                >
               </template>
               <span>Edit Profile</span>
             </v-tooltip>
