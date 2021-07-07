@@ -15,7 +15,10 @@
     </div>
     <!-- Employee does not have Certifications -->
     <p v-else>No Certification information</p>
-    <div v-if="!isEmpty(this.model.certifications)" class="text-center">
+    <div
+      v-if="!isEmpty(this.model.certifications) && Math.ceil(model.certifications.length / 5) != 1"
+      class="text-center"
+    >
       <v-pagination
         v-model="page"
         :length="Math.ceil(model.certifications.length / 5)"

@@ -58,7 +58,7 @@
         <hr v-if="index < pageList.length - 1" class="mb-3" />
       </div>
       <!-- End Loop Technologies -->
-      <div v-if="!isEmpty(this.sortedTech)" class="text-center">
+      <div v-if="!isEmpty(this.sortedTech) && Math.ceil(this.sortedTech.length / 5) != 1" class="text-center">
         <v-pagination
           v-model="page"
           :length="Math.ceil(this.sortedTech.length / 5)"

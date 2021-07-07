@@ -12,7 +12,7 @@
     </div>
     <!-- Employee does not have Awards -->
     <p v-else>No Award Information</p>
-    <div v-if="!isEmpty(this.model.awards)" class="text-center">
+    <div v-if="!isEmpty(this.model.awards) && Math.ceil(model.awards.length / 5) != 1" class="text-center">
       <v-pagination
         v-model="page"
         :length="Math.ceil(model.awards.length / 5)"
