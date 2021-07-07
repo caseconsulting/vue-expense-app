@@ -154,7 +154,7 @@
         <!-- Accessibility -->
         <div style="color: dimgray">
           Employee Access
-          <v-btn to="/help/expenseTypes" class="mb-4" x-small icon><v-icon color="#3f51b5">info</v-icon></v-btn>
+          <v-btn @click="toFAQ()" class="mb-4" x-small icon><v-icon color="#3f51b5">info</v-icon></v-btn>
         </div>
         <v-row>
           <v-checkbox
@@ -414,6 +414,11 @@ function isFullTimeSelected() {
   return this.editedExpenseType.accessibleBy.includes('FullTime');
 } // isFullTimeSelected
 
+function toFAQ() {
+  let faq = this.$router.resolve({ path: '/help/expenseTypes' });
+  window.open(faq.href, '_blank');
+}
+
 /**
  * Removes a category from the list of expense type categories.
  *
@@ -643,6 +648,7 @@ export default {
     parseDate,
     removeCategory,
     submit,
+    toFAQ,
     toggleRequireURL,
     toggleShowAllCategories
   },
