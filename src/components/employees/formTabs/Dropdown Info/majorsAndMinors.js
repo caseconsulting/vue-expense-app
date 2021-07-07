@@ -1,3 +1,7 @@
+/**
+ * This array is from data taken from this article on Wikipedia:
+ * https://en.wikipedia.org/wiki/List_of_academic_fields
+ */
 export let majorsAndMinors = [
   'Anthropology',
   'Anthropological criminology',
