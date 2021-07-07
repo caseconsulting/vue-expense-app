@@ -282,11 +282,10 @@ async function populateDropDowns() {
   let employeesDegrees = _.map(this.employees, (employee) => employee.degrees); //extract contracts
   employeesDegrees = _.compact(employeesDegrees); //remove falsey values
 
-  let majors = await api.getMajors();
+  this.majorDropDown = await api.getMajors();
+  this.minorDropDown = await api.getMajors();
 
   this.prevColleges = [];
-  this.prevMajors = [];
-  this.prevMinors = [];
 
   _.forEach(employeesDegrees, (degrees) => {
     _.forEach(degrees, (degree) => {
@@ -295,24 +294,6 @@ async function populateDropDowns() {
           this.schoolDropDown.push(degree.school);
           this.prevColleges.push(degree.school);
         }
-      });
-
-      _.forEach(majors, (major) => {
-        _.forEach(degree.majors, (degreeMajor) => {
-          if (major === degreeMajor) {
-            this.majorDropDown.push(degreeMajor);
-            this.prevMajors.push(degreeMajor);
-          }
-        });
-      });
-
-      _.forEach(majors, (major) => {
-        _.forEach(degree.minors, (degreeMinor) => {
-          if (major === degreeMinor) {
-            this.minorDropDown.push(degreeMinor);
-            this.prevMinors.push(degreeMinor);
-          }
-        });
       });
     });
   });
