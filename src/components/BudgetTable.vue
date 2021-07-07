@@ -69,6 +69,9 @@
             <!-- End Loop all budgets -->
           </v-row>
         </template>
+        <template slot="no-data">
+          <div></div>
+        </template>
       </v-data-iterator>
     </v-container>
   </div>
@@ -179,6 +182,10 @@ export default {
     getPending,
     noRemaining,
     odFlagMessage
+  },
+  updated() {
+    this.$emit('rendered'); //This is to ensure that the
+    //chart renders after the table
   },
   props: ['employee'] // employee of budgets
 };

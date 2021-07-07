@@ -50,25 +50,24 @@
 
     <!-- Expense Data -->
     <v-col cols="12" lg="8">
-      <div v-if="loading" text-center>
-        <!-- <v-progress-circular indeterminate size="64" color="#bc3825"></v-progress-circular> -->
+      <v-container v-if="!displayChart">
         <v-row>
-          <!-- <v-col v-for="item in expenseTypeData" :key="item.name" cols="12" sm="6" lg="6"> -->
-          <v-col cols="12" sm="6" lg="6">
-            <v-skeleton-loader class="my-3" min-width="300" type="card-heading, list-item@6"></v-skeleton-loader>
-          </v-col>
-          <v-col cols="12" sm="6" lg="6">
-            <v-skeleton-loader class="my-3" min-width="300" type="card-heading, list-item@6"></v-skeleton-loader>
-          </v-col>
-          <v-col cols="12" sm="6" lg="6">
-            <v-skeleton-loader class="my-3" min-width="300" type="card-heading, list-item@6"></v-skeleton-loader>
+          <v-col v-for="index in 4" :key="index" cols="12" sm="6" lg="6">
+            <v-skeleton-loader class="my-3" type="card-heading, list-item@6"></v-skeleton-loader>
           </v-col>
         </v-row>
-      </div>
-      <div v-else text-center class="pt-0 font-13">
-        <budget-table v-if="!loading" class="my-3" :employee="expenseTypeData"></budget-table>
+        <v-skeleton-loader class="my-3" type="card-heading, list-item@6"></v-skeleton-loader>
+      </v-container>
+      <div v-if="!loading" text-center class="pt-0 font-13">
+        <!-- The @rendered event is to ensure that budget chart renders after the table -->
+        <budget-table
+          v-if="!loading"
+          class="my-3"
+          :employee="expenseTypeData"
+          @rendered="displayChart = !displayChart"
+        ></budget-table>
         <budget-chart
-          v-if="!loading && !isMobile && !adminCall"
+          v-if="!loading && !isMobile && !adminCall && displayChart"
           :options="drawGraph.optionSet"
           :chart-data="drawGraph.dataSet"
         ></budget-chart>
@@ -76,6 +75,7 @@
           :items="allBudgetNames"
           multiple
           v-model="selectedBudgets"
+          v-if="!loading && !isMobile && !adminCall && displayChart"
           filled
           chips
           :menu-props="{ bottom: true, offsetY: true }"
@@ -624,6 +624,7 @@ export default {
       budgetYears: [], // list of options for chaning budget year view
       changingBudgetView: false, // change budget year view activator
       display: true, // show seconds till anniversary activator
+      displayChart: false,
       employee: {}, // employee
       expense: {
         id: '',
