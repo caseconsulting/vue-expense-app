@@ -88,6 +88,7 @@
       <!-- Company Name -->
       <v-combobox
         ref="formFields"
+        :id="'comp-' + compIndex"
         v-model.trim="company.companyName"
         :rules="requiredRules"
         :items="companyDropDown"
@@ -101,6 +102,7 @@
         <!-- Job Position -->
         <v-combobox
           ref="formFields"
+          :id="'pos-field-' + compIndex + '-' + index"
           v-model.trim="position.title"
           :rules="requiredRules"
           label="Position"
@@ -122,6 +124,7 @@
               >
                 <template v-slot:activator="{ on, attrs }">
                   <v-text-field
+                    :id="'start-field-' + compIndex + '-' + index"
                     ref="formFields"
                     :value="position.startDate | formatDate"
                     label="Start Date"
@@ -159,6 +162,7 @@
               >
                 <template v-slot:activator="{ on, attrs }">
                   <v-text-field
+                    :id="'end-field-' + compIndex + '-' + index"
                     ref="formFields"
                     :value="position.endDate | formatDate"
                     label="End Date (optional)"
@@ -190,7 +194,7 @@
         </v-form>
       </div>
       <div class="pb-4" align="center">
-        <v-btn @click="addPosition(compIndex)" elevation="2"><v-icon class="pr-1">add</v-icon>Position</v-btn>
+        <v-btn @click="addPosition(compIndex)" :id="'add-pos-'+ compIndex" elevation="2"><v-icon class="pr-1">add</v-icon>Position</v-btn>
       </div>
       <v-row v-if="!hasEndDatesFilled(compIndex)" class="py-5 caption text--darken-2 grey--text">
         Note that leaving the end date blank means you are currently working at that position.
@@ -200,7 +204,7 @@
 
     <!-- Button to Add Jobs -->
     <div class="pt-4" align="center">
-      <v-btn @click="addCompany()" elevation="2"><v-icon class="pr-1">add</v-icon>Job</v-btn>
+      <v-btn @click="addCompany()" elevation="2" id="add-job"><v-icon class="pr-1">add</v-icon>Job</v-btn>
     </div>
   </div>
 </template>
