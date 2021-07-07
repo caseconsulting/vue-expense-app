@@ -116,18 +116,17 @@
 
       <!-- Concentrations -->
       <!-- Loop Concentrations -->
-      <div v-for="(concentration, index) in degree.concentrations" :key="'conc: ' + concentration + index">
-        <v-combobox
+      <div v-for="(concentration, cIndex) in degree.concentrations" :key="'conc: ' + concentration + cIndex">
+        <v-autocomplete
           ref="formFields"
-          v-model="degree.concentrations[index]"
+          v-model="degree.concentrations[cIndex]"
           :rules="requiredRules"
           :items="concentrationDropDown"
           label="Concentration"
           data-vv-name="Concentration"
           append-outer-icon="delete"
-          @click:append-outer="deleteItem(degree.concentrations, index)"
-        >
-        </v-combobox>
+          @click:append-outer="deleteItem(degree.concentrations, cIndex)"
+        ></v-autocomplete>
       </div>
       <!-- End Loop Concentrations -->
       <!-- Button to Add Concentration -->
@@ -317,6 +316,19 @@ function addSelectedCollege(selectedCollege) {
 }
 
 /**
+ * Changes the format of the string to title case
+ * @param str - the string to be converted
+ * @return the title case formatted string
+ */
+function titleCase(str) {
+  str = str.toLowerCase().split(' ');
+  for (var i = 0; i < str.length; i++) {
+    str[i] = str[i].charAt(0).toUpperCase() + str[i].slice(1);
+  }
+  return str.join(' ');
+} //titleCase
+
+/**
  * Validate all input fields are valid. Emit to parent the error status.
  */
 function validateFields() {
@@ -353,7 +365,7 @@ export default {
   created,
   data() {
     return {
-      concentrationDropDown: majorsAndMinors, // autocomplete concentration options
+      concentrationDropDown: _.map(majorsAndMinors, (elem) => titleCase(elem)), // autocomplete concentration options
       dateRules: [
         (v) => !isEmpty(v) || 'Date must be valid. Format: MM/YYYY',
         (v) => (!isEmpty(v) && /[\d]{2}\/[\d]{4}/.test(v)) || 'Date must be valid. Format: MM/YYYY',
@@ -361,8 +373,8 @@ export default {
       ], // rules for a required date
       editedDegrees: _.cloneDeep(this.model), // stores edited degree info
       degreeDropDown: ['Associates', 'Bachelors', 'Masters', 'PhD/Doctorate', 'Other (trade school, etc)'], // autocomplete degree name options
-      majorDropDown: majorsAndMinors, // autocomplete major options
-      minorDropDown: majorsAndMinors, // autocomplete minor options
+      majorDropDown: _.map(majorsAndMinors, (elem) => titleCase(elem)), // autocomplete major options
+      minorDropDown: _.map(majorsAndMinors, (elem) => titleCase(elem)), // autocomplete minor options
       prevColleges: [],
       requiredRules: [
         (v) => !isEmpty(v) || 'This field is required. You must enter information or delete the field if possible.'
@@ -386,6 +398,7 @@ export default {
     isEmpty,
     parseDateMonthYear,
     populateDropDowns,
+    titleCase,
     updateSchoolDropDown,
     validateFields
   },
