@@ -255,7 +255,7 @@
 
         <!-- Buttons -->
         <!-- Cancel Button -->
-        <v-btn color="white" elevation="2" @click="clearForm" class="ma-2" :disabled="isInactive">
+        <v-btn color="white" elevation="2" @click="clearForm" class="ma-2" :disabled="isInactive" id="cancelButton">
           <icon class="mr-1" name="ban"></icon>Cancel
         </v-btn>
 

@@ -180,6 +180,7 @@
                       :disabled="isEditing || ((isUser || isIntern) && isReimbursed(item)) || midAction"
                       text
                       icon
+                      id="edit"
                       @click="
                         toTopOfForm();
                         onSelect(item);

@@ -50,11 +50,26 @@ describe('testing links', () => {
       .assert.containsText('span.headline', 'Item was successfully submitted!');
   });
 
-  it('Test deleting an expense', (browser) => {
+  it('Test editing an expense', (browser) => {
     browser
       .waitForElementVisible('#employeeIdFilter')
       .setValue('#employeeIdFilter', 'Test Guy') //Accessing Filter By Employee
       .keys(browser.Keys.ENTER) //selects the first auto-fill option
+      .waitForElementVisible('#edit') //waits for the edit icon
+      .click('#edit') //clicks the edit icon
+      .waitForElementVisible('#employeeName')
+      .assert.attributeEquals('#employeeName', 'disabled', 'true') // ensure that the employee name field is disabled
+      .assert.value('#employeeName', 'Test Guy') // check all fields in form are exactly the same
+      .assert.value('#expenseType', 'High Five - $100')
+      .assert.value('#notes', 'test')
+      .assert.value('#purchaseDate', '06/20/2021')
+      .assert.value('#recipient', 'George Doe')
+      .waitForElementVisible('#cancelButton')
+      .click('#cancelButton'); // close out of form to continue tests
+  });
+
+  it('Test deleting an expense', (browser) => {
+    browser
       .waitForElementVisible('#delete') //waits for the delete icon
       .click('#delete') //clicks the delete icon
       .waitForElementVisible('#confirmDelete') //waits for delete modal to appear
