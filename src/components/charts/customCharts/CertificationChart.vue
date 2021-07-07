@@ -1,10 +1,10 @@
 <template>
-  <horizontal-bar-chart v-if="dataReceived" :options="options" :chartData="chartData"></horizontal-bar-chart>
+  <bar-chart v-if="dataReceived" :options="options" :chartData="chartData"></bar-chart>
 </template>
 
 <script>
 import api from '@/shared/api.js';
-import HorizontalBarChart from '../baseCharts/HorizontalBarChart.vue';
+import BarChart from '../baseCharts/BarChart.vue';
 async function fillCertData() {
   let employees = await api.getItems(api.EMPLOYEES);
   //Get data
@@ -79,8 +79,7 @@ async function fillCertData() {
       xAxes: [
         {
           ticks: {
-            beginAtZero: true,
-            stepSize: 1
+            beginAtZero: true
           },
           scaleLabel: {
             display: true,
@@ -90,6 +89,9 @@ async function fillCertData() {
       ],
       yAxes: [
         {
+          ticks: {
+            beginAtZero: true
+          },
           scaleLabel: {
             display: true,
             labelString: 'Name of Certification'
@@ -124,7 +126,7 @@ function breakSentence(s) {
 } //breakSentence
 
 export default {
-  components: { HorizontalBarChart },
+  components: { BarChart },
   data() {
     return {
       options: null,
