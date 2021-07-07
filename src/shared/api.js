@@ -136,13 +136,11 @@ function getURLInfo(id, category) {
  */
 async function getMajors() {
   let majorsDOM = await execute('get', `/${COLLEGE_VINE_SCRAPE}/getMajors`);
-  let doc = new DOMParser().parseFromString(majorsDOM, 'text/html');
-  let liElems = Array.prototype.slice.call(doc.querySelectorAll('li'));
-  let majorsLi = _.map(
-    liElems.filter((elem) => elem.ariaLevel === '1'),
-    (liMajor) => liMajor.textContent
-  );
-  return majorsLi;
+  let doc = new DOMParser().parseFromString(majorsDOM, 'text/html'); //Convert string to dom model
+  let liElems = [...doc.querySelectorAll('li')]; //Get the li tags in dom
+  let majorLi = liElems.filter((elem) => elem.attributes[0] && elem.attributes[0].name === 'aria-level'); //get the li tags with major info
+  let majorsText = _.map(majorLi, (liMajor) => liMajor.textContent); //get the majors
+  return majorsText;
 }
 
 function createItem(type, data) {

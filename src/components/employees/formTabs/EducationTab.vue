@@ -80,8 +80,6 @@
           :rules="requiredRules"
           :items="majorDropDown"
           label="Major"
-          @input.native="updateMajorDropDown()"
-          @change="addSelectedMajor"
           data-vv-name="Major"
           append-outer-icon="delete"
           @click:append-outer="deleteItem(degree.majors, mIndex)"
@@ -104,8 +102,6 @@
           :rules="requiredRules"
           :items="minorDropDown"
           label="Minor"
-          @input.native="updateMinorDropDown()"
-          @change="addSelectedMinor"
           append-outer-icon="delete"
           @click:append-outer="deleteItem(degree.minors, mIndex)"
           data-vv-name="Minor"
@@ -332,24 +328,6 @@ async function updateSchoolDropDown() {
 }
 
 /**
- * Fills the majors dropdown as the user is typing
- */
-async function updateMajorDropDown() {
-  let eventInfo = event.target.value;
-  let res = await api.getMajors(eventInfo);
-  this.majorDropDown = [...res, ...this.prevMajors];
-}
-
-/**
- * Fills the minors dropdown as the user is typing
- */
-async function updateMinorDropDown() {
-  let eventInfo = event.target.value;
-  let res = await api.getMajors(eventInfo);
-  this.minorDropDown = [...res, ...this.prevMinors];
-}
-
-/**
  * This function adds a selected college to the drop down menu, so it does
  * not disappear when editing another school
  *
@@ -359,25 +337,6 @@ function addSelectedCollege(selectedCollege) {
   this.prevColleges.push(selectedCollege);
 }
 
-/**
- * This function adds a selected major to the drop down menu, so it does
- * not disappear when editing another school
- *
- * @param selectedMajor the newly selected major
- */
-function addSelectedMajor(selectedMajor) {
-  this.prevMajors.push(selectedMajor);
-}
-
-/**
- * This function adds a selected minor to the drop down menu, so it does
- * not disappear when editing another school
- *
- * @param selectedMinor the newly selected minor
- */
-function addSelectedMinor(selectedMinor) {
-  this.prevMinors.push(selectedMinor);
-}
 /**
  * Validate all input fields are valid. Emit to parent the error status.
  */
@@ -443,8 +402,6 @@ export default {
     addDegree,
     addItem,
     addSelectedCollege,
-    addSelectedMajor,
-    addSelectedMinor,
     deleteDegree,
     deleteItem,
     detectDuplicateEducation,
@@ -452,8 +409,6 @@ export default {
     isEmpty,
     parseDateMonthYear,
     populateDropDowns,
-    updateMajorDropDown,
-    updateMinorDropDown,
     updateSchoolDropDown,
     validateFields
   },
