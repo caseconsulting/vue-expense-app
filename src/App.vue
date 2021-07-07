@@ -57,7 +57,7 @@
         <!-- User image and logout -->
         <v-menu bottom offset-y open-on-hover v-if="isLoggedIn()">
           <template v-slot:activator="{ on }">
-            <v-avatar size="50" color="grey lighten-4">
+            <v-avatar id="profile" size="50" color="grey lighten-4">
               <img :src="profilePic" alt="avatar" v-on="on" />
             </v-avatar>
           </template>
@@ -66,7 +66,7 @@
               <v-btn :disabled="onUserProfile" text @click="handleProfile()">Profile</v-btn>
             </v-list-item>
             <v-list-item>
-              <v-btn text @click="handleLogout()">Logout</v-btn>
+              <v-btn id="logoutBtn" text @click="handleLogout()">Logout</v-btn>
             </v-list-item>
           </v-list>
           <!--In MOBILE VIEW/Smaller Screen sizes display all links under the user image dropdown-->
