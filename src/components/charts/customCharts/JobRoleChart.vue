@@ -84,7 +84,7 @@ function fillData() {
     },
     title: {
       display: true,
-      text: 'Top Job Roles at Case Consulting Inc.'
+      text: 'Top Job Roles at Case Consulting'
     },
     maintainAspectRatio: false
   };

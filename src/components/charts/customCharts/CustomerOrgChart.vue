@@ -65,7 +65,7 @@ function fillData() {
   this.options = {
     title: {
       display: true,
-      text: `${this.showCurrent} Employee Customer Org Experience (in years)`
+      text: `${this.showCurrent} Employee Customer Org Experience (in Years)`
     },
 
     maintainAspectRatio: false

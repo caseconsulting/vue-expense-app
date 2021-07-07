@@ -96,7 +96,7 @@ async function fillCertData() {
     },
     title: {
       display: true,
-      text: 'Top ' + values.length + ' Primes that we Subcontract'
+      text: 'Top ' + values.length + ' Primes That We Subcontract'
     },
     maintainAspectRatio: false
   };

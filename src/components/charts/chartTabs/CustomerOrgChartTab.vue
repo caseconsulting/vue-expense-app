@@ -1,16 +1,17 @@
 <template>
-  <v-container fluid>
+  <v-container>
     <v-row justify="center">
       <v-col md="6" sm="12" class="mt-4">
-        <tech-bar-chart></tech-bar-chart>
+        <customer-org-chart />
       </v-col>
     </v-row>
   </v-container>
 </template>
 
 <script>
-import TechBarChart from '../customCharts/TechBarChart.vue';
+import CustomerOrgChart from '../customCharts/CustomerOrgChart.vue';
+
 export default {
-  components: { TechBarChart }
+  components: { CustomerOrgChart }
 };
 </script>

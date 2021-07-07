@@ -57,8 +57,8 @@ function fillData() {
 
   this.tableContents = [
     { title: 'Total Employees', value: this.employees.length },
-    { title: 'Company wide IC experience', value: totalYears.toFixed(2) + ' years' },
-    { title: 'Average IC experience per employee', value: averageYoE.toFixed(2) + ' years' }
+    { title: 'Company Wide IC Experience', value: totalYears.toFixed(2) + ' Years' },
+    { title: 'Average IC Experience per Employee', value: averageYoE.toFixed(2) + ' Years' }
   ];
 
   this.headers = [

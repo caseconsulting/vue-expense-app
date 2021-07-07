@@ -92,7 +92,7 @@ function fillData(that) {
     },
     title: {
       display: true,
-      text: `Top ${pairs.length} Technologies Used By Employees`
+      text: `Top ${pairs.length} Technologies Used by Employees`
     },
     maintainAspectRatio: false
   };

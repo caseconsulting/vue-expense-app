@@ -18,8 +18,9 @@
             <v-list>
               <v-list-item @click="selectDropDown('employees')">Employees</v-list-item>
               <v-list-item @click="selectDropDown('education')">Education</v-list-item>
-              <v-list-item @click="selectDropDown('technology')">Technology</v-list-item>
               <v-list-item @click="selectDropDown('certifications')">Certifications</v-list-item>
+              <v-list-item @click="selectDropDown('technology')">Technology</v-list-item>
+              <v-list-item @click="selectDropDown('customerOrg')">Certifications</v-list-item>
             </v-list>
           </v-menu>
           <hr class="my-1" />
@@ -27,6 +28,7 @@
           <education-chart-tab v-if="statsTab === 'education'"></education-chart-tab>
           <tech-chart-tab v-if="statsTab === 'technology'"></tech-chart-tab>
           <certifications-chart-tab v-if="statsTab === 'certifications'"></certifications-chart-tab>
+          <customer-org-charts-tab v-if="statsTab === 'customerOrg'"></customer-org-charts-tab>
         </div>
         <!-- user is not mobile -->
         <v-tabs v-else color="basil" center-active grow show-arrows class="">
@@ -34,6 +36,7 @@
           <v-tab href="#education">Education</v-tab>
           <v-tab href="#technologies">Technology</v-tab>
           <v-tab href="#certifications">Certifications</v-tab>
+          <v-tab href="#customerOrg">Customer Org</v-tab>
           <v-tab-item id="employees" class="mx-2 my-6">
             <employees-chart-tab></employees-chart-tab>
           </v-tab-item>
@@ -46,6 +49,9 @@
           <v-tab-item id="certifications" class="mx-2 my-6">
             <certifications-chart-tab></certifications-chart-tab>
           </v-tab-item>
+          <v-tab-item id="customerOrg" class="mx-2 my-6">
+            <customer-org-chart-tab></customer-org-chart-tab>
+          </v-tab-item>
         </v-tabs>
       </v-container>
     </v-card>
@@ -57,6 +63,7 @@ import CertificationsChartTab from '../components/charts/chartTabs/Certification
 import EmployeesChartTab from '../components/charts/chartTabs/EmployeesChartTab.vue';
 import TechChartTab from '../components/charts/chartTabs/TechChartTab.vue';
 import EducationChartTab from '../components/charts/chartTabs/EducationChartTab.vue';
+import CustomerOrgChartTab from '../components/charts/chartTabs/CustomerOrgChartTab.vue';
 
 /**
  * This is used to select the correct tab on mobile devices
@@ -71,7 +78,8 @@ export default {
     CertificationsChartTab,
     EmployeesChartTab,
     TechChartTab,
-    EducationChartTab
+    EducationChartTab,
+    CustomerOrgChartTab
   },
   computed: {
     isMobile() {
