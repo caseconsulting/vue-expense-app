@@ -192,6 +192,9 @@
       <div class="pb-4" align="center">
         <v-btn @click="addPosition(compIndex)" elevation="2"><v-icon class="pr-1">add</v-icon>Position</v-btn>
       </div>
+      <v-row class="py-5 caption text--darken-2 grey--text">
+        Note that leaving the end date blank means you are currently working at that position.
+      </v-row>
     </div>
     <!-- End Loop Jobs -->
 
