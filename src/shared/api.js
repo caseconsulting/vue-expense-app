@@ -1,7 +1,6 @@
 import axios from 'axios';
 import { API_CONFIG } from './api-variables';
 import { getAccessToken } from '@/utils/auth';
-import _ from 'lodash';
 const EXPENSE_TYPES = 'expense-types';
 const EXPENSES = 'expenses';
 const EMPLOYEES = 'employees';
@@ -16,7 +15,6 @@ const BASECAMP = 'basecamp';
 const BLOG = 'blog';
 const BLOG_FILE = 'blogFile';
 const BLOG_ATTACHMENT = 'blogAttachment';
-const COLLEGE_VINE_SCRAPE = 'collegeVineScrape';
 const API_HOSTNAME = API_CONFIG.apiHostname;
 const API_PORT = API_CONFIG.apiPort;
 const PORT = API_PORT === '443' ? '' : `:${API_PORT}`;
@@ -126,21 +124,6 @@ function getAllExpenseTypeExpenses(id) {
 
 function getURLInfo(id, category) {
   return execute('get', `/${TRAINING_URLS}/'${id}'/${category}`);
-}
-
-/**
- * This gets a list of majors using the website https://blog.collegevine.com/list-of-college-majors/
- * and returns and array of all of the majors
- *
- * @returns an array of all of the majors from the website
- */
-async function getMajors() {
-  let majorsDOM = await execute('get', `/${COLLEGE_VINE_SCRAPE}/getMajors`);
-  let doc = new DOMParser().parseFromString(majorsDOM, 'text/html'); //Convert string to dom model
-  let liElems = [...doc.querySelectorAll('li')]; //Get the li tags in dom
-  let majorLi = liElems.filter((elem) => elem.attributes[0] && elem.attributes[0].name === 'aria-level'); //get the li tags with major info
-  let majorsText = _.map(majorLi, (liMajor) => liMajor.textContent); //get the majors
-  return majorsText;
 }
 
 function createItem(type, data) {
@@ -358,7 +341,6 @@ export default {
   getTwitterToken,
   getURLInfo,
   getUser,
-  getMajors,
   updateItem,
   uploadBlogAttachment,
   EXPENSE_TYPES,

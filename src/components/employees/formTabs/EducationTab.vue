@@ -150,6 +150,7 @@ import api from '@/shared/api.js';
 import _ from 'lodash';
 import { isEmpty, formatDateMonthYear, parseDateMonthYear } from '@/utils/utils';
 import { mask } from 'vue-the-mask';
+import { majorsAndMinors } from './Dropdown Info/majorsAndMinors';
 const moment = require('moment-timezone');
 moment.tz.setDefault('America/New_York');
 
@@ -282,9 +283,6 @@ async function populateDropDowns() {
   let employeesDegrees = _.map(this.employees, (employee) => employee.degrees); //extract contracts
   employeesDegrees = _.compact(employeesDegrees); //remove falsey values
 
-  this.majorDropDown = await api.getMajors();
-  this.minorDropDown = await api.getMajors();
-
   this.prevColleges = [];
 
   _.forEach(employeesDegrees, (degrees) => {
@@ -355,7 +353,7 @@ export default {
   created,
   data() {
     return {
-      concentrationDropDown: [], // autocomplete concentration options
+      concentrationDropDown: majorsAndMinors, // autocomplete concentration options
       dateRules: [
         (v) => !isEmpty(v) || 'Date must be valid. Format: MM/YYYY',
         (v) => (!isEmpty(v) && /[\d]{2}\/[\d]{4}/.test(v)) || 'Date must be valid. Format: MM/YYYY',
@@ -363,11 +361,9 @@ export default {
       ], // rules for a required date
       editedDegrees: _.cloneDeep(this.model), // stores edited degree info
       degreeDropDown: ['Associates', 'Bachelors', 'Masters', 'PhD/Doctorate', 'Other (trade school, etc)'], // autocomplete degree name options
-      majorDropDown: [], // autocomplete major options
-      minorDropDown: [], // autocomplete minor options
+      majorDropDown: majorsAndMinors, // autocomplete major options
+      minorDropDown: majorsAndMinors, // autocomplete minor options
       prevColleges: [],
-      prevMajors: [],
-      prevMinors: [],
       requiredRules: [
         (v) => !isEmpty(v) || 'This field is required. You must enter information or delete the field if possible.'
       ], // rules for a required field
