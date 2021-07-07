@@ -20,7 +20,7 @@
         style="padding-right: 20px; padding-left: 10px"
         v-model="languages.name"
         :rules="requiredRules"
-        :items="languageDropDown"
+        :items="languagesList"
         label="Language"
         data-vv-name="Language"
         class="pb-5"
@@ -48,7 +48,7 @@
     </div>
     <!-- Button to Add A Language -->
     <div class="pt-4" align="center">
-      <v-btn @click="addLanguage()" elevation="2"><v-icon class="pr-1">add</v-icon>Language</v-btn>
+      <v-btn @click="getLanguages()" elevation="2"><v-icon class="pr-1">add</v-icon>Language</v-btn>
     </div>
   </div>
 </template>
@@ -185,21 +185,6 @@ function validateFields() {
 export default {
   components: {},
   created,
-  data() {
-    return {
-      languageDropDown: [],
-      editedLanguages: _.cloneDeep(this.model), //stores edited languages info
-      proficiencyTypes: [
-        'Basic - Most basic words that everyone uses',
-        'Personal - words you know depending on your day-to-day activities (experiences, work, country, friends)',
-        'Native-like - ability to use the language like a native speaker',
-        'Literacy - fluency and broad vocabulary associated with high levels of education'
-      ], // job title options
-      requiredRules: [
-        (v) => !isEmpty(v) || 'This field is required. You must enter information or delete the field if possible'
-      ] // rules for a required field
-    };
-  },
   methods: {
     addLanguage,
     deleteLanguage,
@@ -217,6 +202,100 @@ export default {
         this.validateFields();
       }
     }
+  },
+  data() {
+    return {
+      languageDropDown: [],
+      editedLanguages: _.cloneDeep(this.model), //stores edited languages info
+      languagesList: [
+        'Afrikaans',
+        'Arabic',
+        'Bengali',
+        'Bulgarian',
+        'Catalan',
+        'Cantonese',
+        'Croatian',
+        'Czech',
+        'Danish',
+        'Dutch',
+        'Lithuanian',
+        'Malay',
+        'Malayalam',
+        'Panjabi',
+        'Tamil',
+        'English',
+        'Finnish',
+        'French',
+        'German',
+        'Greek',
+        'Hebrew',
+        'Hindi',
+        'Hungarian',
+        'Indonesian',
+        'Italian',
+        'Japanese',
+        'Javanese',
+        'Korean',
+        'Norwegian',
+        'Polish',
+        'Portuguese',
+        'Romanian',
+        'Russian',
+        'Serbian',
+        'Slovak',
+        'Slovene',
+        'Spanish',
+        'Swedish',
+        'Telugu',
+        'Thai',
+        'Turkish',
+        'Ukrainian',
+        'Vietnamese',
+        'Welsh',
+        'Sign language',
+        'Algerian',
+        'Aramaic',
+        'Armenian',
+        'Berber',
+        'Burmese',
+        'Bosnian',
+        'Brazilian',
+        'Bulgarian',
+        'Cypriot',
+        'Corsica',
+        'Creole',
+        'Scottish',
+        'Egyptian',
+        'Esperanto',
+        'Estonian',
+        'Finn',
+        'Flemish',
+        'Georgian',
+        'Hawaiian',
+        'Indonesian',
+        'Inuit',
+        'Irish',
+        'Icelandic',
+        'Latin',
+        'Mandarin',
+        'Nepalese',
+        'Sanskrit',
+        'Tagalog',
+        'Tahitian',
+        'Tibetan',
+        'Gypsy',
+        'Wu'
+      ],
+      proficiencyTypes: [
+        'Basic - Most basic words that everyone uses',
+        'Personal - words you know depending on your day-to-day activities (experiences, work, country, friends)',
+        'Native-like - ability to use the language like a native speaker',
+        'Literacy - fluency and broad vocabulary associated with high levels of education'
+      ], // job title options
+      requiredRules: [
+        (v) => !isEmpty(v) || 'This field is required. You must enter information or delete the field if possible'
+      ] // rules for a required field
+    };
   }
 };
 </script>
