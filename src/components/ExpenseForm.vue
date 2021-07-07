@@ -1524,7 +1524,7 @@ export default {
       dateRules: [
         (v) => !isEmpty(v) || 'Date must be valid. Format: MM/DD/YYYY',
         (v) => (!isEmpty(v) && /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v)) || 'Date must be valid. Format: MM/DD/YYYY',
-        (v) => moment(v, 'MM/DD/YYYY').isValid() || 'Date must be valid'
+        (v) => moment(v, 'MM/DD/YYYY', true).isValid() || 'Date must be valid'
       ], // rules for dates
       descriptionRules: [
         (v) => !isEmpty(v) || 'Description is a required field',
@@ -1548,7 +1548,7 @@ export default {
       myBudgetsView: false, // if on myBudgetsView page
       optionalDateRules: [
         (v) => isEmpty(v) || /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v) || 'Date must be valid. Format: MM/DD/YYYY',
-        (v) => (!isEmpty(v) ? moment(v, 'MM/DD/YYYY').isValid() || 'Date must be valid' : true)
+        (v) => (!isEmpty(v) ? moment(v, 'MM/DD/YYYY', true).isValid() || 'Date must be valid' : true)
       ], // option date rules
       originalExpense: null, // expense before changes
       overdraftBudget: 0,

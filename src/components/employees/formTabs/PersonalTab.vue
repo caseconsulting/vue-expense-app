@@ -208,7 +208,7 @@ export default {
           return !isEmpty(v) ? /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v) || 'Date must be valid. Format: MM/DD/YYYY' : true;
         },
         (v) => moment(v, 'MM/DD/YYYY').isValid() || 'Date must be valid',
-        (v) => moment(v).isBefore(moment()) || 'Date must not be a future date'
+        (v) => moment(v, 'MM/DD/YYYY').isBefore(moment()) || 'Date must not be a future date'
       ], // rules for an optional date
       urlRules: [
         (v) =>

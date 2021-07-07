@@ -79,7 +79,7 @@
             <v-text-field
               v-model="startDateFormatted"
               id="startDate"
-              :rules="dateRules"
+              :rules="dateRules.concat(startDateRules)"
               label="Start Date"
               hint="MM/DD/YYYY format"
               v-mask="'##/##/####'"
@@ -113,7 +113,7 @@
             <v-text-field
               v-model="endDateFormatted"
               id="endDate"
-              :rules="dateRules"
+              :rules="dateRules.concat(endDateRules)"
               label="End Date"
               hint="MM/DD/YYYY format"
               v-mask="'##/##/####'"
@@ -603,20 +603,24 @@ export default {
       dateRules: [
         (v) => !isEmpty(v) || 'Date must be valid. Format: MM/DD/YYYY',
         (v) => (!isEmpty(v) && /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v)) || 'Date must be valid. Format: MM/DD/YYYY',
-        (v) => moment(v, 'MM/DD/YYYY').isValid() || 'Date must be valid',
+        (v) => moment(v, 'MM/DD/YYYY', true).isValid() || 'Date must be valid'
+      ], // rule for a required date
+      startDateRules: [
         (v) => {
-          return !isEmpty(v) && moment(v) && this.editedExpenseType.endDate
-            ? moment(v).isBefore(moment(this.editedExpenseType.endDate).add(1, 'd')) ||
+          return !isEmpty(v) && moment(v, 'MM/DD/YYYY', true).isValid() && this.editedExpenseType.endDate
+            ? moment(v, 'MM/DD/YYYY', true).isSameOrBefore(moment(this.editedExpenseType.endDate)) ||
                 'Start date must be at or before end date'
             : true;
-        },
+        }
+      ],
+      endDateRules: [
         (v) => {
-          return !isEmpty(v) && moment(v) && this.editedExpenseType.startDate
-            ? moment(v).add(1, 'd').isAfter(moment(this.editedExpenseType.startDate)) ||
+          return !isEmpty(v) && moment(v, 'MM/DD/YYYY', true).isValid() && this.editedExpenseType.startDate
+            ? moment(v, 'MM/DD/YYYY', true).isSameOrAfter(moment(this.editedExpenseType.startDate)) ||
                 'End date must be at or after start date'
             : true;
         }
-      ], // rule for a required date
+      ],
       endDateFormatted: null, // formatted end date
       editedExpenseType: _.cloneDeep(this.model), //used to store edits made to an expense type or when creating new expense type
       requiredRules: [(v) => !isEmpty(v) || 'This field is required'],
@@ -693,25 +697,6 @@ export default {
         });
       }
     },
-    // 'editedExpenseType.accessibleBy': function (val) {
-    //   if (!this.submitting && this.editedExpenseType.accessibleBy) {
-    //     if (!['FullTime', 'PartTime', 'Intern', 'Custom'].includes(val)) {
-    //       // set employee access form field when populating form with an existing expense type
-    //       // filter out employees that do not have access
-    //       console.log(this.customAccess);
-    //       console.log(this.editedExpenseType.accessibleBy);
-    //       this.customAccess = _.filter(this.activeEmployees, (employee) => {
-    //         return this.editedExpenseType.accessibleBy.includes(employee.value);
-    //       });
-    //       console.log(this.customAccess);
-    //       // map employee values
-    //       this.customAccess = _.map(this.customAccess, (employee) => {
-    //         return employee.value;
-    //       });
-    //       console.log(this.customAccess);
-    //     }
-    //   }
-    // },
     'editedExpenseType.endDate': function () {
       this.endDateFormatted = this.formatDate(this.editedExpenseType.endDate) || this.endDateFormatted;
       //fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
