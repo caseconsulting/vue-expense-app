@@ -28,7 +28,7 @@
     <!-- Birthday Picker -->
     <v-menu
       ref="BirthdayMenu"
-      :close-on-content-click="true"
+      :close-on-content-click="false"
       v-model="BirthdayMenu"
       :nudge-right="40"
       transition="scale-transition"
