@@ -1,4 +1,4 @@
-describe('testing links', () => {
+describe('testing logout from home page', () => {
   before((browser) => {
     browser
       .url('http://localhost:8080')
@@ -20,16 +20,16 @@ describe('testing links', () => {
   this.tags = ['logout'];
 
   it('Test clicking on Home in nav bar', (browser) => {
-    browser.waitForElementVisible('#home').click('#home');
+    browser.waitForElementVisible('#home').click('#home'); //go to home page
   });
 
   it('Logging out', (browser) => {
     browser
       .waitForElementVisible('#profile')
-      .click('#profile')
+      .click('#profile') //hover over the profile icon
       .waitForElementVisible('#logoutBtn')
-      .click('#logoutBtn')
-      .waitForElementVisible('#caseLogo')
-      .waitForElementVisible('#custom-button-color');
+      .click('#logoutBtn') //click on the logout button
+      .waitForElementVisible('#caseLogo') //check if we're at the login page by checking if it has the logo
+      .waitForElementVisible('#custom-button-color'); //check if we're at the login page by checking if it has the login button
   });
 });
