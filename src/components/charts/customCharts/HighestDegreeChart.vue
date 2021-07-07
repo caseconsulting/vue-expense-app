@@ -11,6 +11,9 @@
       <v-col md="6" sm="12">
         <MajorsChart />
       </v-col>
+      <v-col md="6" sm="12">
+        <MinorsChart />
+      </v-col>
     </v-row>
   </v-container>
 </template>
@@ -18,6 +21,7 @@
 <script>
 import PieChart from '../baseCharts/PieChart.vue';
 import MajorsChart from './MajorsChart.vue';
+import MinorsChart from './MinorsChart.vue';
 import api from '@/shared/api.js';
 import _ from 'lodash';
 
@@ -113,6 +117,36 @@ function compareDegree(oldDegree, newDegree) {
 }
 
 /**
+ * Get the object of minors for a degree and the count of each minor.
+ * @param degreeName - The name of the degree
+ * @return Object - An object of minors with the number of occurrences found
+ */
+function getDegreeMinors(degreeName) {
+  let minorsData = {};
+  // loop through each employee
+  this.employees.forEach((employee) => {
+    if (employee.degrees) {
+      // loop through each employee's degree
+      employee.degrees.forEach((degree) => {
+        // generalize each degree name to match pie chart categories (Bachelors of Science = Bachelors)
+        if (getDegreeName(getDegreeValue(degree.name)) === degreeName) {
+          // loop through each minor
+          degree.minors.forEach((minor) => {
+            /// count up each occurrence of a minor
+            if (minorsData[minor]) {
+              minorsData[minor] += 1;
+            } else {
+              minorsData[minor] = 1;
+            }
+          });
+        }
+      });
+    }
+  });
+  return minorsData;
+} // getDegreeMinors
+
+/**
  * Assigns a value to each degree. If a degree is
  * not matched to a traditional college degree, it assumes
  * that the employee attended a different institution by
@@ -201,6 +235,7 @@ function fillData() {
     responsive: true,
     onClick: (_, item) => {
       this.majorsEmit(labels[item[0]._index]);
+      this.minorsEmit(labels[item[0]._index]);
     }
   };
   this.dataReceived = true;
@@ -219,9 +254,19 @@ function majorsEmit(degree) {
   this.showMajors = true;
   window.EventBus.$emit('majors-update', majorsData);
 }
+/**
+ * Send data to create a pie chart to display the minors for a degree.
+ * @param degree - The name of the degree
+ */
+function minorsEmit(degree) {
+  let minorsData = {};
+  minorsData.minors = this.getDegreeMinors(degree);
+  minorsData.degree = degree;
+  window.EventBus.$emit('minors-update', minorsData);
+}
 
 export default {
-  components: { PieChart, MajorsChart },
+  components: { PieChart, MajorsChart, MinorsChart },
   data() {
     return {
       dataReceived: false,
@@ -238,8 +283,10 @@ export default {
     compareDegree,
     initDegrees,
     getDegreeValue,
+    getDegreeMinors,
     getDegreeName,
-    majorsEmit
+    majorsEmit,
+    minorsEmit
   },
   async created() {
     this.employees = await api.getItems(api.EMPLOYEES);
