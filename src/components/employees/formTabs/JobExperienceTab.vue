@@ -192,7 +192,7 @@
       <div class="pb-4" align="center">
         <v-btn @click="addPosition(compIndex)" elevation="2"><v-icon class="pr-1">add</v-icon>Position</v-btn>
       </div>
-      <v-row class="py-5 caption text--darken-2 grey--text">
+      <v-row v-if="!hasEndDatesFilled(compIndex)" class="py-5 caption text--darken-2 grey--text">
         Note that leaving the end date blank means you are currently working at that position.
       </v-row>
     </div>
@@ -339,6 +339,21 @@ function formatRange(range) {
 } // formatRange
 
 /**
+ * Checks if the current company has any positions without an end date
+ *
+ * @param index The index of the company in the editedJobExperienceInfo.companies
+ * @return whether or not the positions for that company have all their end dates filled
+ */
+function hasEndDatesFilled(index) {
+  let hasEndDatesFilled = true;
+  _.forEach(this.editedJobExperienceInfo.companies[index].positions, (position) => {
+    hasEndDatesFilled &= !!position.endDate;
+  });
+
+  return hasEndDatesFilled;
+}
+
+/**
  * Parse the date after losing focus.
  */
 function parseEventDate() {
@@ -454,6 +469,7 @@ export default {
     deleteCompany,
     deletePosition,
     formatDate,
+    hasEndDatesFilled,
     parseDate,
     parseEventDate,
     formatRange,
