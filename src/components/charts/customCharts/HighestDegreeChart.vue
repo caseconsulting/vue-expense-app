@@ -268,9 +268,11 @@ function fillData() {
     maintainAspectRatio: false,
     responsive: true,
     onClick: (_, item) => {
-      this.majorsEmit(labels[item[0]._index]);
-      this.minorsEmit(labels[item[0]._index]);
-      this.concentrationsEmit(labels[item[0]._index]);
+      if (item[0]) {
+        this.majorsEmit(labels[item[0]._index]);
+        this.minorsEmit(labels[item[0]._index]);
+        this.concentrationsEmit(labels[item[0]._index]);
+      }
     }
   };
   this.dataReceived = true;
