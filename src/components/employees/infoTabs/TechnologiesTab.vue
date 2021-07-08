@@ -86,7 +86,7 @@ import _ from 'lodash';
  * Emits to parent the component was created and get data for the list.
  */
 function created() {
-  if (!isEmpty(this.model.awards)) {
+  if (!isEmpty(this.model.technologies)) {
     this.pageList = this.sortedTech.slice(0, 5);
   }
 }

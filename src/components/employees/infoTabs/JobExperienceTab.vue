@@ -65,7 +65,7 @@ import { isEmpty, monthDayYearFormat } from '@/utils/utils';
  * Emits to parent the component was created and get data for the list.
  */
 function created() {
-  if (!isEmpty(this.model.awards)) {
+  if (!isEmpty(this.model.companies)) {
     this.pageList = this.filterCompanies.slice(0, 4);
   }
 }
