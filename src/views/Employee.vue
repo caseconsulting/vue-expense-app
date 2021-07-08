@@ -36,6 +36,9 @@
         <!-- Edit Info (Form) -->
         <employee-form :employee="this.model" :currentTab="this.currentTab" v-if="editing"></employee-form>
       </v-col>
+      <v-col>
+        <anniversary-card :employee="this.model"></anniversary-card>
+      </v-col>
     </v-row>
   </v-container>
 </template>
@@ -50,6 +53,7 @@ import { getRole } from '@/utils/auth';
 import _ from 'lodash';
 import { isEmpty } from '@/utils/utils';
 import ConvertEmployeeToCsv from '../components/ConvertEmployeeToCsv.vue';
+import AnniversaryCard from '@/components/AnniversaryCard.vue';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -157,7 +161,8 @@ export default {
     EmployeeForm,
     EmployeeInfo,
     QuickBooksTimeData,
-    ConvertEmployeeToCsv
+    ConvertEmployeeToCsv,
+    AnniversaryCard
   },
   created,
   data() {
