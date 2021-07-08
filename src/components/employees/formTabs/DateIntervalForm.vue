@@ -68,7 +68,6 @@
           ></v-date-picker>
         </v-menu>
         <!--End of Interval Start Date Picker-->
-
         <!--Interval End Date Picker-->
         <v-menu
           v-if="formatToggle == 0"
@@ -332,6 +331,20 @@ export default {
 
       this.$refs.form.resetValidation();
       this.$refs.form.validate();
+    },
+    startIntervalDate: function () {
+      if (this.formatToggle === 0) {
+        this.startIntervalDateEdited = this.parseDateMonthYear(this.startIntervalDate);
+      } else {
+        this.startIntervalDateEdited = this.parseDateMonthYear(this.startIntervalDate).split('-')[0];
+      }
+    },
+    endIntervalDate: function () {
+      if (this.formatToggle === 0) {
+        this.endIntervalDateEdited = this.parseDateMonthYear(this.endIntervalDate);
+      } else {
+        this.endIntervalDateEdited = this.parseDateMonthYear(this.endIntervalDate).split('-')[0];
+      }
     },
     startIntervalDateEdited: function () {
       //temp variable for checking equality
