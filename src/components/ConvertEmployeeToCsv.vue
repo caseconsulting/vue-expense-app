@@ -2,7 +2,7 @@
   <v-tooltip top>
     <template v-slot:activator="{ on }">
       <v-btn v-on="on" @click.stop="download" text icon>
-        <i class="material-icons">file_download</i>
+        <i class="material-icons pt-1" :style="iconColor()">file_download</i>
       </v-btn>
     </template>
     <span>Download CSV</span>
@@ -215,6 +215,15 @@ function getInfo(info) {
 
   return infoList;
 } // getInfo
+
+/**
+ * Gets the icon color depending if the page is employees or an employee profile
+ */
+function iconColor() {
+  if (this.color) {
+    return 'color: ' + this.color + ';';
+  }
+}
 
 /**
  * Parses the dateInterval object into a string to be put into the excel
@@ -544,11 +553,12 @@ export default {
     getJobs,
     getTechnologies,
     getLanguages,
+    iconColor,
     isEmpty,
     yearsOfExperience,
     monthsPassed
   },
-  props: ['employee', 'midAction'] // employees to export
+  props: ['employee', 'midAction', 'color'] // employees to export
 };
 </script>
 
@@ -556,5 +566,9 @@ export default {
 .download {
   font-size: 20px;
   cursor: pointer;
+}
+
+.icon-white {
+  color: white;
 }
 </style>
