@@ -307,6 +307,7 @@ export default {
     formatDateMonthYear
   },
   mounted() {
+    this.$emit('validated', this.technologyIndex, this.intervalIndex, 1);
     this.$refs.form.validate();
   },
   props: ['startIntervalDate', 'endIntervalDate', 'technologyIndex', 'intervalIndex', 'allIntervals'],

@@ -327,7 +327,6 @@ function validateTimeIntervals() {
 
     //deletes old years property if it exists
     delete this.editedTechnologies[tech].years;
-
     if (_.isEmpty(dateIntervals)) {
       //emit error status with a custom message
       window.EventBus.$emit(
