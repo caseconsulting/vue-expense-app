@@ -270,7 +270,6 @@ async function refreshBudget() {
 // |--------------------------------------------------|
 function created() {
   this.addOneSecondToActualTimeEverySecond();
-  console.log(this.employee);
 }
 // |--------------------------------------------------|
 // |                                                  |
@@ -312,7 +311,6 @@ export default {
   props: ['employee'],
   watch: {
     employee: async function () {
-      console.log('test');
       this.hireDate = this.employee.hireDate;
       this.fiscalDateView = this.getCurrentBudgetYear();
       this.refreshBudget(); // refresh employee budgets
