@@ -1,7 +1,7 @@
 <template>
   <v-row>
     <!-- Anniversary Date -->
-    <v-col cols="12" lg="4" v-if="!isMobile">
+    <v-col cols="12" lg="12" v-if="!isMobile">
       <v-card class="mt-3" @click="changingBudgetView = !changingBudgetView" hover>
         <v-card-title>
           <!-- display the next anniversary date -->

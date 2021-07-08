@@ -85,8 +85,6 @@ function budgets() {
       }
     });
   }
-  console.log('BUDGET NAMES FROM BUDGETS');
-  console.log(budgetNames);
   return {
     names: budgetNames,
     difference: budgetDifference,
@@ -229,10 +227,8 @@ async function refreshBudget() {
   }
 
   // get existing budgets for the budget year being viewed
-  console.log(this.employee.id);
-  console.log(this.fiscalDateView);
   let existingBudgets = await api.getFiscalDateViewBudgets(this.employee.id, this.fiscalDateView);
-  console.log(existingBudgets);
+
   // append inactive tag to end of budget expense type name
   // the existing budget duplicates will later be removed (order in array comes after active budgets)
   _.forEach(existingBudgets, (budget) => {
@@ -349,8 +345,8 @@ export default {
     refreshBudgetYears,
     refreshBudget
   },
-  mounted() {
-    this.refreshBudget();
+  async mounted() {
+    await this.refreshBudget();
     this.drawGraph();
   },
   props: ['employee']

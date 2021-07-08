@@ -12,7 +12,8 @@
       <!-- QuickBooks Time and Budgets-->
       <v-col v-if="displayQuickBooksTimeAndBalances" cols="12" md="5" lg="4">
         <quick-books-time-data :employee="this.model" class="mb-6"></quick-books-time-data>
-        <available-budgets v-if="this.model.id" :employee="this.model"></available-budgets>
+        <available-budgets class="mb-4" v-if="this.model.id" :employee="this.model"></available-budgets>
+        <anniversary-card :employee="this.model"></anniversary-card>
       </v-col>
 
       <!-- Employee Form -->
@@ -35,12 +36,7 @@
         </v-card>
         <!-- Edit Info (Form) -->
         <employee-form :employee="this.model" :currentTab="this.currentTab" v-if="editing"></employee-form>
-      </v-col>
-      <v-col>
-        <anniversary-card :employee="this.model"></anniversary-card>
-      </v-col>
-      <v-col>
-        <budget-chart :employee="this.model"></budget-chart>
+        <budget-chart class="pt-4" :employee="this.model"></budget-chart>
       </v-col>
     </v-row>
   </v-container>
