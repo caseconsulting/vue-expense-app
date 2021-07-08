@@ -18,7 +18,7 @@ function fillData(concentrations) {
       enabled = false;
       colors = ['grey'];
     } else {
-      text = `${this.degree} degree concentrations`;
+      text = `${this.degree} Degree Concentrations`;
       enabled = true;
       _.forEach(Object.keys(concentrations), (label) => {
         quantities.push(concentrations[label]);

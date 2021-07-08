@@ -12,7 +12,7 @@ function fillData(majors) {
   let labels = [];
   let quantities = [];
   if (majors) {
-    text = `${this.degree} degree majors`;
+    text = `${this.degree} Degree Majors`;
     enabled = true;
     _.forEach(Object.keys(majors), (label) => {
       quantities.push(majors[label]);

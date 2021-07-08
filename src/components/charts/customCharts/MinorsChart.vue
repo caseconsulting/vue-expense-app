@@ -18,7 +18,7 @@ function fillData(minors) {
       enabled = false;
       colors = ['grey'];
     } else {
-      text = `${this.degree} degree minors`;
+      text = `${this.degree} Degree Minors`;
       enabled = true;
       _.forEach(Object.keys(minors), (label) => {
         quantities.push(minors[label]);
