@@ -66,11 +66,7 @@
           :employee="expenseTypeData"
           @rendered="displayChart = !displayChart"
         ></budget-table>
-        <budget-chart
-          v-if="!loading && !isMobile && !adminCall && displayChart"
-          :options="drawGraph.optionSet"
-          :chart-data="drawGraph.dataSet"
-        ></budget-chart>
+        <budget-chart v-if="!loading && !isMobile && !adminCall && displayChart" :employee="employee"></budget-chart>
         <v-autocomplete
           :items="allBudgetNames"
           multiple
