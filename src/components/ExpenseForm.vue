@@ -127,7 +127,7 @@
         <v-menu
           v-if="isUser || isAdmin || isIntern"
           ref="purchaseMenu"
-          :close-on-content-click="true"
+          :close-on-content-click="false"
           v-model="purchaseMenu"
           :nudge-right="40"
           :disabled="isReimbursed && !isDifferentExpenseType"
