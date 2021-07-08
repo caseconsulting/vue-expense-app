@@ -144,7 +144,7 @@
           >
             <!-- Cost slot -->
             <template v-slot:[`item.cost`]="{ item }">
-              <td>{{ item.cost | moneyValue }}</td>
+              <td>{{ convertToMoneyString(item.cost) }}</td>
             </template>
             <!-- Purchase date slot -->
             <template v-slot:[`item.purchaseDate`]="{ item }">
@@ -324,7 +324,7 @@ import employeeUtils from '@/shared/employeeUtils';
 import ExpenseForm from '@/components/ExpenseForm.vue';
 import UnreimburseModal from '@/components/modals/UnreimburseModal.vue';
 import _ from 'lodash';
-import { isEmpty, monthDayYearFormat } from '@/utils/utils';
+import { isEmpty, monthDayYearFormat, convertToMoneyString } from '@/utils/utils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -912,11 +912,7 @@ export default {
     };
   },
   filters: {
-    monthDayYearFormat,
-    moneyValue: (value) => {
-      // formats a value as US currency with cents (e.g. $100.00)
-      return `$${moneyFilter(value)}`;
-    }
+    monthDayYearFormat
   },
   methods: {
     addModelToTable,
@@ -924,6 +920,7 @@ export default {
     clearStatus,
     clickedRow,
     constructAutoComplete,
+    convertToMoneyString,
     customFilter,
     deleteExpense,
     deleteModelFromTable,

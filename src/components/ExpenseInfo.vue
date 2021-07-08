@@ -6,7 +6,7 @@
         <p class="expense_info"><span>Description:</span> {{ expense.description }}</p>
         <p class="expense_info"><span>Employee:</span> {{ expense.employeeName }}</p>
         <p class="expense_info"><span>Budget:</span> {{ expense.budgetName }}</p>
-        <p class="expense_info"><span>Cost:</span> {{ expense.cost | moneyValue }}</p>
+        <p class="expense_info"><span>Cost:</span> {{ convertToMoneyString(expense.cost) }}</p>
         <p class="expense_info"><span>Purchased On:</span> {{ expense.purchaseDate | monthDayYearFormat }}</p>
         <p class="expense_info" v-if="!isEmpty(expense.reimbursedDate)">
           <span>Reimbursed On:</span>
@@ -24,7 +24,7 @@
 
 <script>
 import Attachment from '@/components/Attachment.vue';
-import { isEmpty, moneyValue, monthDayYearFormat } from '@/utils/utils';
+import { isEmpty, convertToMoneyString, monthDayYearFormat } from '@/utils/utils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -75,12 +75,12 @@ export default {
     };
   },
   methods: {
+    convertToMoneyString,
     displayExpense,
     isEmpty
   },
   filters: {
-    monthDayYearFormat,
-    moneyValue
+    monthDayYearFormat
   }
 };
 </script>

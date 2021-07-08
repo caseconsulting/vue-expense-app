@@ -113,7 +113,7 @@ const moment = require('moment-timezone');
 moment.tz.setDefault('America/New_York');
 import pattern from 'patternomaly';
 import _ from 'lodash';
-import { asyncForEach, isInactive, isFullTime, moneyValue } from '@/utils/utils';
+import { asyncForEach, isInactive, isFullTime } from '@/utils/utils';
 
 const IsoFormat = 'YYYY-MM-DD';
 
@@ -656,9 +656,6 @@ export default {
         color: ''
       } // snackbar action status
     };
-  },
-  filters: {
-    moneyValue
   },
   methods: {
     addOneSecondToActualTimeEverySecond,

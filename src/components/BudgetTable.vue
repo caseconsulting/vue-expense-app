@@ -17,7 +17,7 @@
                   <v-list-item>
                     <v-list-item-content>Budget:</v-list-item-content>
                     <v-list-item-content class="text-right">
-                      <div>{{ getAmount(item) | moneyValue }}</div>
+                      <div>{{ convertToMoneyString(getAmount(item)) }}</div>
                     </v-list-item-content>
                   </v-list-item>
 
@@ -25,7 +25,7 @@
                   <v-list-item>
                     <v-list-item-content>Reimbursed:</v-list-item-content>
                     <v-list-item-content class="text-right">
-                      <div>{{ getReimbursed(item) | moneyValue }}</div>
+                      <div>{{ convertToMoneyString(getReimbursed(item)) }}</div>
                     </v-list-item-content>
                   </v-list-item>
 
@@ -33,7 +33,7 @@
                   <v-list-item>
                     <v-list-item-content>Pending:</v-list-item-content>
                     <v-list-item-content class="text-right">
-                      <div>{{ getPending(item) | moneyValue }}</div>
+                      <div>{{ convertToMoneyString(getPending(item)) }}</div>
                     </v-list-item-content>
                   </v-list-item>
 
@@ -41,10 +41,10 @@
                   <v-list-item>
                     <v-list-item-content class="bold">Remaining:</v-list-item-content>
                     <v-list-item-content v-if="noRemaining(item)" class="text-right bold red--text">
-                      <div>{{ calcRemaining(item) | moneyValue }}</div>
+                      <div>{{ convertToMoneyString(calcRemaining(item)) }}</div>
                     </v-list-item-content>
                     <v-list-item-content v-else class="text-right bold black--text">
-                      <div>{{ calcRemaining(item) | moneyValue }}</div>
+                      <div>{{ convertToMoneyString(calcRemaining(item)) }}</div>
                     </v-list-item-content>
                   </v-list-item>
 
@@ -78,7 +78,7 @@
 </template>
 
 <script>
-import { moneyValue } from '@/utils/utils';
+import { convertToMoneyString } from '@/utils/utils';
 import { formatDateDashToSlash } from '@/utils/utils';
 
 // |--------------------------------------------------|
@@ -171,11 +171,9 @@ function noRemaining(budget) {
 // |--------------------------------------------------|
 
 export default {
-  filters: {
-    moneyValue
-  },
   methods: {
     calcRemaining,
+    convertToMoneyString,
     getAmount,
     getDate,
     getReimbursed,

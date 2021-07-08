@@ -10,26 +10,27 @@
         <v-card-text>
           <!-- Overdraft Allowed start above overdraft and not going over overdraft limit -->
           <p v-if="isOverCovered">
-            You are already above the initial budget of {{ expense.budget | moneyValue }}. However you are still within
-            the overdraft limit of {{ (expense.budget * 2) | moneyValue }}. You will be reimbursed the full amount but
-            will be charged next year for an additional {{ expense.cost | moneyValue }}.
+            You are already above the initial budget of {{ convertToMoneyString(expense.budget) }}. However you are
+            still within within within the overdraft limit of {{ convertToMoneyString(expense.budget * 2) }}. You will
+            be reimbursed will be charged next year for an additional {{ convertToMoneyString(expense.cost) }}.
           </p>
           <!-- Overdraft Allowed and Going over initial budget-->
           <p v-else-if="expense.od && isCovered">
-            The expense type you are about to submit is covered up to {{ expense.budget | moneyValue }} but allows
-            overdraft. You will be reimbursed but will be charged the following year for
-            {{ (expense.cost - expense.remaining) | moneyValue }}.
+            The expense type you are about to submit is covered up to {{ convertToMoneyString(expense.budget) }} but
+            allows overdraft. You will be reimbursed but will be charged the following year for
+            {{ convertToMoneyString(expense.cost - expense.remaining) }}.
           </p>
           <!-- Overdraft Allowed and going over overdraft budget -->
           <p v-else-if="expense.od && !isCovered">
-            The expense type you are about to submit is only covered up to {{ (expense.budget * 2) | moneyValue }} with
-            overdraft. You will be reimbursed {{ expense.remaining | moneyValue }} of {{ expense.cost | moneyValue }}.
+            The expense type you are about to submit is only covered up to
+            {{ convertToMoneyString(expense.budget * 2) }} with overdraft. You will be reimbursed
+            {{ convertToMoneyString(expense.remaining) }} of {{ convertToMoneyString(expense.cost) }}.
           </p>
           <!-- Overdraft not allowed and going over budget -->
           <p v-else>
-            The expense type you are about to submit is only covered up to {{ expense.budget | moneyValue }} and does
-            not allow overdraft. You will be reimbursed {{ expense.remaining | moneyValue }} of
-            {{ expense.cost | moneyValue }}.
+            The expense type you are about to submit is only covered up to
+            {{ convertToMoneyString(expense.budget) }} and does not allow overdraft. You will be reimbursed
+            {{ convertToMoneyString(expense.remaining) }} of {{ convertToMoneyString(expense.cost) }}.
           </p>
           <p>Do you want to continue?</p>
         </v-card-text>
@@ -46,7 +47,7 @@
 </template>
 
 <script>
-import { isEmpty } from '@/utils/utils';
+import { isEmpty, convertToMoneyString } from '@/utils/utils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -104,17 +105,8 @@ export default {
       activate: false // dialog activator
     };
   },
-  filters: {
-    moneyValue: (value) => {
-      return `${new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: 'USD',
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
-      }).format(value)}`;
-    }
-  },
   methods: {
+    convertToMoneyString,
     emit,
     isEmpty
   },

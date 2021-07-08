@@ -33,7 +33,7 @@
         <!-- Item cost -->
         <template v-slot:[`item.cost`]="{ item }">
           <p id="money-team" :class="{ failed: item.failed }" style="margin-bottom: 0px">
-            {{ item.cost | moneyValue }}
+            {{ convertToMoneyString(item.cost) }}
           </p>
         </template>
 
@@ -63,7 +63,7 @@
 </template>
 
 <script>
-import { moneyValue, monthDayYearFormat } from '@/utils/utils';
+import { convertToMoneyString, monthDayYearFormat } from '@/utils/utils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -140,10 +140,10 @@ export default {
       // split strings that exceed 250 characters with eclipses
       return val.length > 250 ? val.substring(0, 250) + '...' : val;
     },
-    moneyValue,
     monthDayYearFormat
   },
   methods: {
+    convertToMoneyString,
     expenseClicked,
     expenseSelected,
     expenseToggle

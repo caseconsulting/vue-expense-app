@@ -90,7 +90,7 @@
           </template>
           <!-- Item cost in data table slot -->
           <template v-slot:[`item.cost`]="{ item }">
-            <p id="money-team" style="margin-bottom: 0px">{{ getBudgetTotal(item.expenses) | moneyValue }}</p>
+            <p id="money-team" style="margin-bottom: 0px">{{ convertToMoneyString(getBudgetTotal(item.expenses)) }}</p>
           </template>
           <!-- Header select slot in data table -->
           <template v-slot:[`header.data-table-select`]>
@@ -153,7 +153,7 @@ moment.tz.setDefault('America/New_York');
 import ReimburseModal from '@/components/modals/ReimburseModal.vue';
 import UnrolledTableInfo from '@/components/UnrolledTableInfo.vue';
 import _ from 'lodash';
-import { asyncForEach, isEmpty, moneyValue } from '@/utils/utils';
+import { asyncForEach, isEmpty, convertToMoneyString } from '@/utils/utils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -827,14 +827,12 @@ export default {
       color: ''
     } // reimburse status
   }),
-  filters: {
-    moneyValue
-  },
   methods: {
     asyncForEach,
     checkAllBoxes,
     clickedRow,
     constructAutoComplete,
+    convertToMoneyString,
     customSort,
     determineShowOnFeed,
     displayError,

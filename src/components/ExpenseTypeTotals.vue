@@ -15,7 +15,7 @@
           <v-row v-for="total in totals" :key="total.id" class="pb-7" style="font-weight: bold">
             <span>{{ total.name }}: </span>
             <v-spacer></v-spacer>
-            {{ total.costTotal | moneyValue }}
+            {{ convertToMoneyString(total.costTotal) }}
           </v-row>
         </v-container>
       </v-card-text>
@@ -26,7 +26,7 @@
 
 <script>
 import _ from 'lodash';
-import { moneyValue } from '@/utils/utils';
+import { convertToMoneyString } from '@/utils/utils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -65,6 +65,7 @@ function totals() {
 // |                     METHODS                      |
 // |                                                  |
 // |--------------------------------------------------|
+
 /**
  * Update the expense types selected.
  *
@@ -125,10 +126,8 @@ export default {
       selected: []
     };
   },
-  filters: {
-    moneyValue
-  },
   methods: {
+    convertToMoneyString,
     updateSelected
   }
 };

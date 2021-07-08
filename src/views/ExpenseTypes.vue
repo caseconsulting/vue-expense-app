@@ -203,7 +203,7 @@
             </template>
             <!-- Budget slot -->
             <template v-slot:[`item.budget`]="{ item }">
-              <p style="margin-bottom: 0px">{{ item.budget | moneyValue }}</p>
+              <p style="margin-bottom: 0px">{{ convertToMoneyString(item.budget) }}</p>
             </template>
             <!-- Actions -->
             <template v-if="userIsAdmin()" v-slot:[`item.actions`]="{ item }">
@@ -428,7 +428,7 @@ import DeleteModal from '@/components/modals/DeleteModal.vue';
 import ExpenseTypeForm from '@/components/ExpenseTypeForm.vue';
 import { getRole } from '@/utils/auth';
 import _ from 'lodash';
-import { moneyValue } from '@/utils/utils';
+import { convertToMoneyString } from '@/utils/utils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -1088,8 +1088,7 @@ export default {
     limitedText: (val) => {
       // limits text displayed to 50 characters on table view
       return val.length > 50 ? `${val.substring(0, 50)}...` : val;
-    },
-    moneyValue
+    }
   },
   methods: {
     addModelToTable,
@@ -1100,6 +1099,7 @@ export default {
     clearModel, // NOTE: Unused?
     clearStatus,
     clickedRow,
+    convertToMoneyString,
     deleteExpenseType,
     deleteModelFromTable,
     displayError,

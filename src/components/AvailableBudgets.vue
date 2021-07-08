@@ -28,8 +28,7 @@
               :dense="true"
               >{{ budget.expenseTypeName }}:
               <v-spacer></v-spacer>
-              <p v-if="noRemaining(budget)">{{ calcRemaining(budget) | moneyValue }}</p>
-              <p v-else>{{ calcRemaining(budget) | moneyValue }}</p>
+              <p>{{ convertToMoneyString(calcRemaining(budget)) }}</p>
             </v-list-item>
             <div style="height: 20px"></div>
             <!-- End Loop all budgets -->
@@ -54,7 +53,7 @@ import _ from 'lodash';
 // import ReceiptModal from '../components/ReceiptModal.vue';
 import moment from 'moment-timezone';
 moment.tz.setDefault('America/New_York');
-import { moneyValue } from '@/utils/utils';
+import { convertToMoneyString } from '@/utils/utils';
 
 const IsoFormat = 'YYYY-MM-DD';
 
@@ -247,11 +246,9 @@ export default {
   computed: {
     isUser
   },
-  filters: {
-    moneyValue
-  },
   methods: {
     calcRemaining,
+    convertToMoneyString,
     getCurrentBudgetYear,
     noRemaining,
     refreshBudget,
