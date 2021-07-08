@@ -3,9 +3,6 @@
     <v-row class="my-4">
       <highest-degree-chart></highest-degree-chart>
     </v-row>
-    <v-row class="my-4">
-      <highest-degree-chart></highest-degree-chart>
-    </v-row>
   </v-container>
 </template>
 
