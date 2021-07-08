@@ -67,19 +67,6 @@
           @rendered="displayChart = !displayChart"
         ></budget-table>
         <budget-chart v-if="!loading && !isMobile && !adminCall && displayChart" :employee="employee"></budget-chart>
-        <v-autocomplete
-          :items="allBudgetNames"
-          multiple
-          v-model="selectedBudgets"
-          v-if="!loading && !isMobile && !adminCall && displayChart"
-          filled
-          chips
-          :menu-props="{ bottom: true, offsetY: true }"
-          deletable-chips
-          clearable
-          :search-input.sync="searchString"
-          @change="searchString = ''"
-        />
       </div>
     </v-col>
 

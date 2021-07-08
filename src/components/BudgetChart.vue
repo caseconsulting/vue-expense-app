@@ -1,5 +1,22 @@
 <template>
-  <bar-chart v-if="dataReceived" :options="options" :chart-data="chartData"></bar-chart>
+  <div>
+    <bar-chart v-if="dataReceived" :options="options" :chart-data="chartData"></bar-chart>
+    <v-autocomplete
+      :items="allBudgetNames"
+      multiple
+      v-model="selectedBudgets"
+      filled
+      chips
+      :menu-props="{ bottom: true, offsetY: true }"
+      deletable-chips
+      clearable
+      :search-input.sync="searchString"
+      @change="
+        searchString = '';
+        drawGraph();
+      "
+    />
+  </div>
 </template>
 
 <script>
