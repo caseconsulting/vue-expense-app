@@ -74,8 +74,8 @@
             <span v-else-if="remainingBudget === ''">Remaining budget for current expense type is not available.</span>
             <span v-else-if="expenseTypeName">
               Remaining budget for {{ expenseTypeName }}:
-              <span :class="{ negativeBudget: remainingBudget <= 0 }"
-                >${{ remainingBudget.toFixed(2) }}
+              <span :class="{ negativeBudget: remainingBudget <= 0 }">
+                {{ convertToMoneyString(remainingBudget) }}
                 <span v-if="remainingBudget < 0 && remainingBudget >= -overdraftBudget && selectedExpenseType.odFlag">
                   (Overdraftable and within ${{ overdraftBudget }} limit)
                 </span>
@@ -291,7 +291,7 @@ import employeeUtils from '@/shared/employeeUtils';
 import FileUpload from '@/components/FileUpload.vue';
 import { getRole } from '@/utils/auth';
 import { v4 as uuid } from 'uuid';
-import { isEmpty, isFullTime } from '@/utils/utils';
+import { isEmpty, isFullTime, convertToMoneyString } from '@/utils/utils';
 import { mask } from 'vue-the-mask';
 import _ from 'lodash';
 const moment = require('moment-timezone');
@@ -1592,6 +1592,7 @@ export default {
     checkExpenseDate,
     clearForm,
     createNewEntry,
+    convertToMoneyString,
     customFilter,
     encodeUrl,
     emit,
