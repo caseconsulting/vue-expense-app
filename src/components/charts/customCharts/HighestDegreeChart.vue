@@ -198,13 +198,10 @@ function getDegreeValue(degree) {
   if (degreeLower.includes('master')) {
     return 2;
   }
-  if (degreeLower.includes('doctor')) {
+  if (degreeLower.includes('doctor') || degreeLower.includes('phd')) {
     return 3;
-  }
-  if (degreeLower.includes('phd')) {
-    return 4;
   } else {
-    return 5;
+    return 4;
   }
 }
 
@@ -221,9 +218,7 @@ function getDegreeName(value) {
     case 2:
       return 'Master';
     case 3:
-      return 'Doctorate';
-    case 4:
-      return 'PHD';
+      return 'PhD/Doctorate';
     default:
       return 'Other';
   }
