@@ -14,6 +14,9 @@
       <v-col md="6" sm="12">
         <MinorsChart />
       </v-col>
+      <v-col md="6" sm="12">
+        <ConcentrationsChart />
+      </v-col>
     </v-row>
   </v-container>
 </template>
@@ -22,6 +25,7 @@
 import PieChart from '../baseCharts/PieChart.vue';
 import MajorsChart from './MajorsChart.vue';
 import MinorsChart from './MinorsChart.vue';
+import ConcentrationsChart from './ConcentrationsChart.vue';
 import api from '@/shared/api.js';
 import _ from 'lodash';
 
@@ -115,6 +119,36 @@ function compareDegree(oldDegree, newDegree) {
     return 0;
   }
 }
+
+/**
+ * Get the object of concentrations for a degree and the count of each concentration.
+ * @param degreeName - The name of the degree
+ * @return Object - An object of concentrations with the number of occurrences found
+ */
+function getDegreeConcentrations(degreeName) {
+  let concentrationsData = {};
+  // loop through each employee
+  this.employees.forEach((employee) => {
+    if (employee.degrees) {
+      // loop through each employee's degree
+      employee.degrees.forEach((degree) => {
+        // generalize each degree name to match pie chart categories (Bachelors of Science = Bachelors)
+        if (getDegreeName(getDegreeValue(degree.name)) === degreeName) {
+          // loop through each concentration
+          degree.concentrations.forEach((concentration) => {
+            /// count up each occurrence of a concentration
+            if (concentrationsData[concentration]) {
+              concentrationsData[concentration] += 1;
+            } else {
+              concentrationsData[concentration] = 1;
+            }
+          });
+        }
+      });
+    }
+  });
+  return concentrationsData;
+} // getDegreeConcentrations
 
 /**
  * Get the object of minors for a degree and the count of each minor.
@@ -236,6 +270,7 @@ function fillData() {
     onClick: (_, item) => {
       this.majorsEmit(labels[item[0]._index]);
       this.minorsEmit(labels[item[0]._index]);
+      this.concentrationsEmit(labels[item[0]._index]);
     }
   };
   this.dataReceived = true;
@@ -265,8 +300,19 @@ function minorsEmit(degree) {
   window.EventBus.$emit('minors-update', minorsData);
 }
 
+/**
+ * Send data to create a pie chart to display the concentrations for a degree.
+ * @param degree - The name of the degree
+ */
+function concentrationsEmit(degree) {
+  let concentrationsData = {};
+  concentrationsData.concentrations = this.getDegreeConcentrations(degree);
+  concentrationsData.degree = degree;
+  window.EventBus.$emit('concentrations-update', concentrationsData);
+}
+
 export default {
-  components: { PieChart, MajorsChart, MinorsChart },
+  components: { PieChart, MajorsChart, MinorsChart, ConcentrationsChart },
   data() {
     return {
       dataReceived: false,
@@ -284,9 +330,11 @@ export default {
     initDegrees,
     getDegreeValue,
     getDegreeMinors,
+    getDegreeConcentrations,
     getDegreeName,
     majorsEmit,
-    minorsEmit
+    minorsEmit,
+    concentrationsEmit
   },
   async created() {
     this.employees = await api.getItems(api.EMPLOYEES);
