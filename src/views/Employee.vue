@@ -39,10 +39,8 @@
       <v-col>
         <anniversary-card :employee="this.model"></anniversary-card>
       </v-col>
-    </v-row>
-    <v-row>
       <v-col>
-        <budget-chart-with-data :employee="this.model"></budget-chart-with-data>
+        <budget-chart :employee="this.model"></budget-chart>
       </v-col>
     </v-row>
   </v-container>
@@ -59,7 +57,7 @@ import _ from 'lodash';
 import { isEmpty } from '@/utils/utils';
 import ConvertEmployeeToCsv from '../components/ConvertEmployeeToCsv.vue';
 import AnniversaryCard from '@/components/AnniversaryCard.vue';
-import BudgetChartWithData from '@/components/BudgetChartWithData.vue';
+import BudgetChart from '@/components/BudgetChart.vue';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -169,7 +167,7 @@ export default {
     QuickBooksTimeData,
     ConvertEmployeeToCsv,
     AnniversaryCard,
-    BudgetChartWithData
+    BudgetChart
   },
   created,
   data() {

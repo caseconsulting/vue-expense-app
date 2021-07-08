@@ -263,6 +263,13 @@ async function refreshBudget() {
   this.loading = false; // set loading status to false
 } // refreshBudget
 
+async function loadData() {
+  this.hireDate = this.employee.hireDate;
+  this.fiscalDateView = this.getCurrentBudgetYear();
+  this.refreshBudget(); // refresh employee budgets
+  this.allUserBudgets = await api.getEmployeeBudgets(this.employee.id); // set all employee budgets
+}
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                 LIFECYCLE HOOKS                  |
@@ -270,6 +277,7 @@ async function refreshBudget() {
 // |--------------------------------------------------|
 function created() {
   this.addOneSecondToActualTimeEverySecond();
+  this.loadData();
 }
 // |--------------------------------------------------|
 // |                                                  |
@@ -306,16 +314,9 @@ export default {
     addOneSecondToActualTimeEverySecond,
     getCurrentBudgetYear,
     refreshBudgetYears,
-    refreshBudget
+    refreshBudget,
+    loadData
   },
-  props: ['employee'],
-  watch: {
-    employee: async function () {
-      this.hireDate = this.employee.hireDate;
-      this.fiscalDateView = this.getCurrentBudgetYear();
-      this.refreshBudget(); // refresh employee budgets
-      this.allUserBudgets = await api.getEmployeeBudgets(this.employee.id); // set all employee budgets
-    }
-  }
+  props: ['employee']
 };
 </script>
