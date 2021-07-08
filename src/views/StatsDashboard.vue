@@ -20,7 +20,7 @@
               <v-list-item @click="selectDropDown('education')">Education</v-list-item>
               <v-list-item @click="selectDropDown('certifications')">Certifications</v-list-item>
               <v-list-item @click="selectDropDown('technology')">Technology</v-list-item>
-              <v-list-item @click="selectDropDown('customerOrg')">Certifications</v-list-item>
+              <v-list-item @click="selectDropDown('customerOrg')">Customer Org</v-list-item>
             </v-list>
           </v-menu>
           <hr class="my-1" />
@@ -28,7 +28,7 @@
           <education-chart-tab v-if="statsTab === 'education'"></education-chart-tab>
           <tech-chart-tab v-if="statsTab === 'technology'"></tech-chart-tab>
           <certifications-chart-tab v-if="statsTab === 'certifications'"></certifications-chart-tab>
-          <customer-org-charts-tab v-if="statsTab === 'customerOrg'"></customer-org-charts-tab>
+          <customer-org-chart-tab v-if="statsTab === 'customerOrg'"></customer-org-chart-tab>
         </div>
         <!-- user is not mobile -->
         <v-tabs v-else color="basil" center-active grow show-arrows class="">
