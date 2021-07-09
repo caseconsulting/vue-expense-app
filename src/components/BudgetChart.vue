@@ -7,6 +7,7 @@
       v-model="selectedBudgets"
       filled
       chips
+      v-if="!loading"
       :menu-props="{ bottom: true, offsetY: true }"
       deletable-chips
       clearable
@@ -119,6 +120,7 @@ function budgets() {
  */
 function drawGraph() {
   let budgets = this.budgets;
+  console.log(this.budgets);
   let data = {
     labels: budgets.names,
     datasets: [

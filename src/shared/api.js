@@ -14,6 +14,7 @@ const TWITTER = 'twitter';
 const BASECAMP = 'basecamp';
 const BLOG = 'blog';
 const BLOG_FILE = 'blogFile';
+const HIPPO_LAB = 'hippoLabs';
 const BLOG_ATTACHMENT = 'blogAttachment';
 const API_HOSTNAME = API_CONFIG.apiHostname;
 const API_PORT = API_CONFIG.apiPort;
@@ -295,13 +296,20 @@ async function uploadBlogAttachment(file) {
  * @returns a list of colleges that match that query
  */
 async function getColleges(inputValue) {
-  let list = await execute('get', `http://universities.hipolabs.com/search?name=${inputValue}`);
+  return execute('get', `/${HIPPO_LAB}/getColleges/${inputValue}`)
+    .then((response) => {
+      return response;
+    })
+    .catch(() => {
+      return [];
+    });
+  // let list = await execute('get', `http://universities.hipolabs.com/search?name=${inputValue}`);
 
-  let finalColleges = [];
-  for (let i = 0; i < list.length; i++) {
-    finalColleges.push(list[i].name);
-  }
-  return finalColleges;
+  // let finalColleges = [];
+  // for (let i = 0; i < list.length; i++) {
+  //   finalColleges.push(list[i].name);
+  // }
+  //return finalColleges;
 }
 
 export default {
