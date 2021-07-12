@@ -2,7 +2,7 @@
   <div id="monthly-charges">
     <h3 align="center">
       Hours for {{ month }} {{ year }}
-      <v-btn to="/help/hoursInfo" class="mb-4" x-small icon><v-icon color="#3f51b5">info</v-icon></v-btn>
+      <v-btn @click="toFAQ()" class="mb-4" x-small icon><v-icon color="#3f51b5">info</v-icon></v-btn>
     </h3>
     <!-- Error Getting Monthly Hours -->
     <div v-if="monthlyHourError" class="pt-2 pb-6" align="center">
@@ -237,6 +237,14 @@ async function setMonthlyCharges() {
   }
 } // setMonthlyCharges
 
+/**
+ * Opens new tab when info icon is selected w/in Quickbooks time box
+ */
+function toFAQ() {
+  let faq = this.$router.resolve({ path: '/help/hoursInfo' });
+  window.open(faq.href, '_blank');
+}
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                      EXPORT                      |
@@ -272,6 +280,7 @@ export default {
     formatHours,
     isEmpty,
     setMonthlyCharges,
+    toFAQ,
     updateEstimate: function (event) {
       if (event.target.value > 0) {
         this.userWorkDays = event.target.value;
