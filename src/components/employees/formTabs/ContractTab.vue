@@ -29,6 +29,26 @@
       >
       </v-combobox>
 
+      <div v-for="(project, projIndex) in contract.projects" class="pt-3 pb-1 px-5" :key="index + '-' + projIndex">
+        <v-combobox
+          ref="formFields"
+          :id="'proj-' + projIndex + '-' + index"
+          v-model.trim="project.name"
+          :rules="requiredRules"
+          :label="'Project ' + (projIndex + 1)"
+          data-vv-name="Project"
+          append-outer-icon="delete"
+          @click:append-outer="deleteProject(index, projIndex)"
+        >
+        </v-combobox>
+      </div>
+
+      <div class="pb-4" align="center">
+        <v-btn @click="addProject(index)" :id="'add-proj-' + index" elevation="2"
+          ><v-icon class="pr-1">add</v-icon>Project</v-btn
+        >
+      </div>
+
       <v-row align="center" class="py-3" justify="center">
         <!-- Current Switch -->
         <v-col cols="6" sm="7" md="6" lg="7">
@@ -92,6 +112,15 @@ async function created() {
   window.EventBus.$emit('created', 'contracts'); // emit contracts tab was created
   this.employees = await api.getItems(api.EMPLOYEES); // get all employees
   this.populateDropDowns(); // get autocomplete drop down data
+  this.editedContracts.forEach((contract) => {
+    if (!contract.projects) {
+      contract.projects = [
+        {
+          name: ''
+        }
+      ];
+    }
+  });
 } // created
 
 // |--------------------------------------------------|
@@ -108,9 +137,20 @@ function addContract() {
     name: '',
     prime: '',
     years: 0,
-    current: false
+    current: false,
+    projects: [
+      {
+        name: ''
+      }
+    ]
   });
 } // addContract
+
+function addProject(contractIndex) {
+  this.editedContracts[contractIndex].projects.push({
+    name: ''
+  });
+}
 
 /**
  * Deletes a Contract.
@@ -121,6 +161,13 @@ function deleteContract(index) {
   this.editedContracts.splice(index, 1);
 } // deleteContract
 
+function deleteProject(contractIndex, projectIndex) {
+  if (this.editedContracts[contractIndex].projects.length === 1) {
+    this.editedContracts[contractIndex].projects.splice(contractIndex, 1);
+  } else {
+    this.editedContracts[contractIndex].projects.splice(projectIndex, 1);
+  }
+}
 /**
  * Populate drop downs with information that other employees have filled out.
  */
@@ -191,7 +238,9 @@ export default {
   },
   methods: {
     addContract,
+    addProject,
     deleteContract,
+    deleteProject,
     formatDateSlashToDash,
     formatDateDashToSlash,
     isEmpty,
