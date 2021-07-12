@@ -324,9 +324,9 @@ function customSort(items, index, isDesc) {
   if (index[0] === 'employeeName') {
     // sort by last name
     if (!isDesc[0]) {
-      items.sort((a, b) => (a.lastName > b.lastName ? 1 : -1));
+      items.sort((a, b) => (a.lastName.toUpperCase() > b.lastName.toUpperCase() ? 1 : -1));
     } else {
-      items.sort((a, b) => (b.lastName > a.lastName ? 1 : -1));
+      items.sort((a, b) => (b.lastName.toUpperCase() > a.lastName.toUpperCase() ? 1 : -1));
     }
   } else if (index[0] === 'cost') {
     // sort by the total expenses per budget
