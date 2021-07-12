@@ -28,6 +28,8 @@ import MinorsChart from './MinorsChart.vue';
 import ConcentrationsChart from './ConcentrationsChart.vue';
 import api from '@/shared/api.js';
 import _ from 'lodash';
+const moment = require('moment-timezone');
+moment.tz.setDefault('America/New_York');
 
 /**
  * Initializes the degrees data field, this function retrieves the highest
@@ -40,31 +42,29 @@ function initDegrees() {
   this.employees.forEach((emp) => {
     let highestDegrees = [];
     if (emp.degrees) {
-      let first = false;
       _.forEach(emp.degrees, (degree) => {
-        //iterates thru all degrees per employees
-        if (highestDegrees.length === 0) {
-          highestDegrees.push({
-            name: this.getDegreeName(this.getDegreeValue(degree.name)),
-            majors: degree.majors
-          });
+        if (moment(degree.date).isBefore(moment(new Date()))) {
+          if (highestDegrees.length != 0) {
+            let result = compareDegree(highestDegrees[0].name, degree.name);
+            //if a degree of a higher prestige is found, remove all previous entries
+            if (result === 1) {
+              highestDegrees.length = 0;
+            }
+            //Adds to highestDegrees, excluding degrees with a lower prestige
+            if (result > -1) {
+              highestDegrees.push({
+                name: this.getDegreeName(this.getDegreeValue(degree.name)),
+                majors: degree.majors
+              });
+            }
+          } else {
+            //Adds the first degree found to the array
+            highestDegrees.push({
+              name: this.getDegreeName(this.getDegreeValue(degree.name)),
+              majors: degree.majors
+            });
+          }
         }
-        let result = compareDegree(highestDegrees[0].name, degree.name);
-        if (result === 1) {
-          //if a higher level degree is found
-          highestDegrees = [];
-          highestDegrees.push({
-            name: this.getDegreeName(this.getDegreeValue(degree.name)),
-            majors: degree.majors
-          });
-        } else if (result === 0 && first) {
-          //if another degree of the same presitige is found
-          highestDegrees.push({
-            name: this.getDegreeName(this.getDegreeValue(degree.name)),
-            majors: degree.majors
-          });
-        }
-        first = true;
       });
       degrees = addToDegrees(degrees, highestDegrees);
     }
@@ -77,6 +77,7 @@ function initDegrees() {
  * in degrees and adds onto it
  */
 function addToDegrees(degrees, highestDegrees) {
+  //console.log(highestDegrees);
   highestDegrees.forEach((highestDegree) => {
     if (!degrees[highestDegree.name]) {
       //if the name of the degree isnt in collection
