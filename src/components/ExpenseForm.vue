@@ -77,10 +77,10 @@
               <span :class="{ negativeBudget: remainingBudget <= 0 }">
                 {{ convertToMoneyString(remainingBudget) }}
                 <span v-if="remainingBudget < 0 && remainingBudget >= -overdraftBudget && selectedExpenseType.odFlag">
-                  (Overdraftable and within ${{ overdraftBudget }} limit)
+                  (Overdraftable and within {{ convertToMoneyString(overdraftBudget) }} limit)
                 </span>
                 <span v-else-if="remainingBudget < -overdraftBudget && selectedExpenseType.odFlag">
-                  (Exceeds overdraftable amount of ${{ overdraftBudget }})
+                  (Exceeds overdraftable amount of {{ convertToMoneyString(overdraftBudget) }})
                 </span>
                 <span v-else-if="remainingBudget < 0 && !selectedExpenseType.odFlag"> (Not Overdraftable)</span>
               </span>
