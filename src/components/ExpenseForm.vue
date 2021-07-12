@@ -800,7 +800,7 @@ async function createNewEntry() {
         this.$set(this.editedExpense, 'id', updatedExpense.id);
         this.$emit('add', updatedExpense);
         window.EventBus.$emit('showSnackbar', updatedExpense);
-        window.EventBus.$emit('refreshChart', updatedExpense);
+        window.EventBus.$emit('updateData', updatedExpense);
         this.clearForm();
       } else {
         // emit error if fails to update expense
@@ -831,7 +831,7 @@ async function createNewEntry() {
       this.$set(this.editedExpense, 'id', updatedExpense.id);
       this.$emit('add', updatedExpense);
       window.EventBus.$emit('showSnackbar', updatedExpense);
-      window.EventBus.$emit('refreshChart', updatedExpense);
+      window.EventBus.$emit('updateData', updatedExpense);
       this.clearForm();
     } else {
       // emit error if fails to update expense

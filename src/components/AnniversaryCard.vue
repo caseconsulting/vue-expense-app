@@ -14,9 +14,7 @@
           </div>
           <!-- Display the budget history year -->
           <div v-else>
-            <h3 class="pt-4 font-16">
-              Viewing budgets from {{ this.getFiscalYearView }} - {{ this.getFiscalYearView + 1 }}
-            </h3>
+            <h3 class="pt-4 font-16">Viewing budgets from {{ getFiscalYearView }} - {{ getFiscalYearView + 1 }}</h3>
             <div class="pt-4 font-14">[Inactive Budget]</div>
           </div>
           <v-spacer></v-spacer>
@@ -26,22 +24,18 @@
     </v-col>
     <budget-select-modal
       :toggleBudgetSelectModal="changingBudgetView"
-      :budgetYears="this.budgetYears"
-      :current="this.fiscalDateView"
-      :hireDate="this.hireDate"
+      :budgetYears="budgetYears"
+      :current="fiscalDateView"
+      :hireDate="hireDate"
     ></budget-select-modal>
   </v-row>
 </template>
 
 <script>
-import api from '@/shared/api.js';
 import BudgetSelectModal from '@/components/modals/BudgetSelectModal.vue';
 import MobileDetect from 'mobile-detect';
 const moment = require('moment-timezone');
 moment.tz.setDefault('America/New_York');
-import _ from 'lodash';
-import { isFullTime } from '@/utils/utils';
-
 const IsoFormat = 'YYYY-MM-DD';
 
 // |--------------------------------------------------|
@@ -194,80 +188,9 @@ function getCurrentBudgetYear() {
   return currentBudgetYear.format(IsoFormat);
 } // getCurrentBudgetYear
 
-/**
- * Refresh and sets the budget year view options for the employee.
- */
-function refreshBudgetYears() {
-  let budgetYears = [];
-
-  // push all employee budget years
-  let budgetDates = _.uniqBy(_.map(this.allUserBudgets, 'fiscalStartDate'));
-  budgetDates.forEach((date) => {
-    const [year] = date.split('-');
-    budgetYears.push(parseInt(year));
-  });
-
-  // push active budget year
-  let [currYear] = this.getCurrentBudgetYear().split('-');
-  budgetYears.push(parseInt(currYear));
-
-  // remove duplicate years and filter to include only active and previous years
-  budgetYears = _.filter(_.uniqBy(budgetYears), (year) => {
-    return parseInt(year) <= parseInt(currYear);
-  });
-
-  this.budgetYears = _.reverse(_.sortBy(budgetYears)); // sort budgets from current to past
-} // refreshBudgetYears
-
-/**
- * Refresh and sets the aggregated budgets for the employee budget year view.
- */
-async function refreshBudget() {
-  this.loading = true; // set loading status to true
-  let budgetsVar;
-
-  if (this.fiscalDateView == this.getCurrentBudgetYear()) {
-    // viewing active budget year
-    budgetsVar = await api.getAllActiveEmployeeBudgets(this.employee.id);
-  }
-
-  // get existing budgets for the budget year being viewed
-  let existingBudgets = await api.getFiscalDateViewBudgets(this.employee.id, this.fiscalDateView);
-
-  // append inactive tag to end of budget expense type name
-  // the existing budget duplicates will later be removed (order in array comes after active budgets)
-  _.forEach(existingBudgets, (budget) => {
-    budget.expenseTypeName += ' (Inactive)';
-  });
-
-  budgetsVar = _.union(budgetsVar, existingBudgets); // combine existing and active budgets
-  budgetsVar = _.uniqBy(budgetsVar, 'expenseTypeId'); // remove duplicate expense types
-  budgetsVar = _.sortBy(budgetsVar, (budget) => {
-    return budget.expenseTypeName;
-  }); // sort by expense type name
-
-  // prohibit overdraft if employee is not full time
-  _.forEach(budgetsVar, async (budget) => {
-    if (!isFullTime(this.employee)) {
-      budget.odFlag = false;
-    }
-  });
-
-  // remove any budgets where budget amount is 0 and 0 total expenses
-  this.expenseTypeData = _.filter(budgetsVar, (data) => {
-    let budget = data.budgetObject;
-    return budget.amount != 0 || budget.reimbursedAmount != 0 || budget.pendingAmount != 0;
-  });
-
-  this.refreshBudgetYears(); // refresh the budget year view options
-  this.loading = false; // set loading status to false
-} // refreshBudget
-
-async function loadData() {
+function loadData() {
   this.hireDate = this.employee.hireDate;
   this.fiscalDateView = this.getCurrentBudgetYear();
-  this.refreshBudget(); // refresh employee budgets
-  this.allUserBudgets = await api.getEmployeeBudgets(this.employee.id); // set all employee budgets
 }
 
 // |--------------------------------------------------|
@@ -313,8 +236,6 @@ export default {
   methods: {
     addOneSecondToActualTimeEverySecond,
     getCurrentBudgetYear,
-    refreshBudgetYears,
-    refreshBudget,
     loadData
   },
   props: ['employee']
