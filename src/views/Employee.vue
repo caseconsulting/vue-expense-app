@@ -81,7 +81,7 @@ function isDisplayData(item) {
  * @return String - current active anniversary budget date (YYYY-MM-DD)
  */
 function getCurrentBudgetYear() {
-  let currentBudgetYear = moment(this.user.hireDate, IsoFormat);
+  let currentBudgetYear = moment(this.model.hireDate, IsoFormat);
   if (moment().isAfter(currentBudgetYear)) {
     currentBudgetYear.year(moment().year());
     if (moment().isBefore(currentBudgetYear)) {
@@ -149,7 +149,6 @@ async function created() {
   this.displayQuickBooksTimeAndBalances = this.userIsAdmin() || this.userIsEmployee();
   this.loading = false;
   this.fiscalDateView = this.getCurrentBudgetYear();
-  console.log(this.model);
 } // created
 
 /**
