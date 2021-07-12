@@ -102,7 +102,7 @@ export function isAdmin(to, from, next) {
 export function isLoggedIn() {
   try {
     const idToken = getIdToken();
-    let isEmployee = getRole() === 'admin' || getRole() === 'user' || getRole() === 'intern';
+    let isEmployee = getRole() === 'admin' || getRole() === 'user' || getRole() === 'intern' || getRole() === 'manager';
     return !!idToken && !isTokenExpired(idToken) && isEmployee;
   } catch (error) {
     return false;

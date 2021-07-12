@@ -171,7 +171,7 @@ export default {
           title: 'Home',
           icon: 'home',
           route: 'home',
-          permission: ['user', 'admin', 'intern'],
+          permission: ['user', 'admin', 'intern', 'manager'],
           active: false
         },
         {
@@ -211,7 +211,7 @@ export default {
           alias: ['employee'],
           icon: 'users',
           route: 'employees',
-          permission: ['admin', 'user', 'intern'],
+          permission: ['admin', 'user', 'intern', 'manager'],
           active: false
         },
         {
@@ -219,7 +219,7 @@ export default {
           alias: ['stats'],
           icon: 'chart-bar',
           route: 'stats',
-          permission: ['admin', 'user', 'intern'],
+          permission: ['admin', 'user', 'intern', 'manager'],
           active: false
         },
         {
@@ -241,14 +241,14 @@ export default {
           title: 'Training',
           icon: 'fire',
           route: 'training',
-          permission: ['admin', 'user', 'intern'],
+          permission: ['admin', 'user', 'intern', 'manager'],
           active: false
         },
         {
           title: 'Help',
           icon: 'life-ring',
           route: 'help',
-          permission: ['admin', 'user', 'intern'],
+          permission: ['admin', 'user', 'intern', 'manager'],
           active: false
         }
       ], // navigation options
