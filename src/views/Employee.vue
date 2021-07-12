@@ -12,7 +12,7 @@
       <!-- QuickBooks Time and Budgets-->
       <v-col v-if="displayQuickBooksTimeAndBalances" cols="12" md="5" lg="4">
         <quick-books-time-data :employee="this.model" class="mb-6"></quick-books-time-data>
-        <available-budgets class="mb-4" v-if="this.model.id" :employee="this.model"></available-budgets>
+        <available-budgets v-if="!userIsManager()" class="mb-4" :employee="this.model"></available-budgets>
         <anniversary-card :employee="this.model"></anniversary-card>
       </v-col>
 
@@ -36,7 +36,13 @@
         </v-card>
         <!-- Edit Info (Form) -->
         <employee-form :employee="this.model" :currentTab="this.currentTab" v-if="editing"></employee-form>
+<<<<<<< HEAD
         <budget-chart class="pt-4" :employee="this.model" :fiscalDateView="fiscalDateView"></budget-chart>
+=======
+        <div v-if="userIsAdmin() || userIsEmployee()">
+          <budget-chart class="pt-4" :employee="this.model"></budget-chart>
+        </div>
+>>>>>>> 2485-manager-page-access: made routing fixes for manager and removed all expense related info from being visible
       </v-col>
     </v-row>
   </v-container>
@@ -121,6 +127,13 @@ function getWorkStatus(workStatus) {
  */
 function userIsAdmin() {
   return this.role === 'admin';
+} // userIsAdmin
+
+/**
+ * Checks to see if the user is an admin. Returns true if the user's role is an admin, otherwise returns false.
+ */
+function userIsManager() {
+  return this.role === 'manager';
 } // userIsAdmin
 
 /**
@@ -250,7 +263,8 @@ export default {
     getCurrentBudgetYear,
     getWorkStatus,
     userIsAdmin,
-    userIsEmployee
+    userIsEmployee,
+    userIsManager
   },
   mounted
 };

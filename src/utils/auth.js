@@ -100,7 +100,7 @@ export function isAdmin(to, from, next) {
 } // isAdmin
 
 export function isNotManager(to, from, next) {
-  if (!getRole() === 'manager') {
+  if (getRole() !== 'manager') {
     next();
   } else {
     next({
