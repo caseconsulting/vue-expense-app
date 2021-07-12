@@ -39,7 +39,7 @@ function jobExperienceData() {
       // push time to array
       if (amOfYears > 45) amOfYears = 45;
       else if (amOfYears < 0) amOfYears = 0; // min years for data control
-      let index = Math.round(Math.round(amOfYears) / 5);
+      let index = Math.floor(Math.round(amOfYears) / 5);
       if (this.jobExperience[index] !== undefined) {
         this.jobExperience[index] += 1; // bumps counter
       } else {
@@ -68,7 +68,7 @@ function calculateTimeDifference(startDate, endDate) {
  */
 function drawJobExpHistGraph() {
   let experienceNum = this.jobExperience;
-  let chartLabels = ['0-5', '5-10', '10-15', '15-20', '20-25', '25-30', '30-35', '35-40', '40-45', '45+'];
+  let chartLabels = ['0-4', '5-9', '10-14', '15-19', '20-24', '25-29', '30-34', '35-39', '40-44', '45+'];
   let maxIndex = this.findMaxIndex();
   let data = {
     labels: chartLabels.splice(0, maxIndex + 1),

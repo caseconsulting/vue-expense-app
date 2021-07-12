@@ -23,8 +23,7 @@ function caseYearsData() {
       // push time to array
       if (amOfYears > 18) amOfYears = 18;
       else if (amOfYears < 0) amOfYears = 0;
-      this.caseYearsHist.push(Math.round(amOfYears));
-      this.caseYears[Math.round(Math.round(amOfYears) / 2)] += 1;
+      this.caseYears[Math.floor(Math.round(amOfYears) / 2)] += 1;
     }
   });
 } //caseYearsData
@@ -42,7 +41,7 @@ function calculateTimeDifference(startDate) {
  */
 function drawCaseYearsHistGraph() {
   let experienceNum = this.caseYears;
-  let chartLabels = ['0-2', '2-4', '4-6', '6-8', '8-10', '10-12', '12-14', '14-16', '16-18', '18+'];
+  let chartLabels = ['0-1', '2-3', '4-5', '6-7', '8-9', '10-11', '12-13', '14-15', '16-17', '18+'];
   let maxIndex = this.findMaxIndex();
   let data = {
     labels: chartLabels.splice(0, maxIndex + 1),
@@ -117,8 +116,7 @@ export default {
       chartData: null,
       dataReceived: false,
       employees: null,
-      caseYears: [],
-      caseYearsHist: []
+      caseYears: []
     };
   },
   methods: {
