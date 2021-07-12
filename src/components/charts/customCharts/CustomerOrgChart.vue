@@ -26,7 +26,7 @@ function fillData() {
 
         //error checks if orgYears is undefined
         if (orgYears && (orgCurrent || this.showCurrent === 'All')) {
-          if (allCompOrgExp.orgName) {
+          if (allCompOrgExp[orgName]) {
             allCompOrgExp[orgName] += Number(orgYears);
           } else {
             allCompOrgExp[orgName] = Number(orgYears);
@@ -35,23 +35,34 @@ function fillData() {
       });
     }
   });
+  let text = '';
+  let colors = [];
+  let enabled = true;
   let labels = Object.keys(allCompOrgExp);
   let quantities = [];
   _.forEach(labels, (label) => {
     quantities.push(allCompOrgExp[label]);
   });
 
-  let colors = [
-    'rgba(54, 162, 235, 1)',
-    'rgba(255, 206, 86, 1)',
-    'rgba(75, 192, 192, 1)',
-    'rgba(153, 102, 255, 1)',
-    'rgba(255, 99, 132, 1)',
-    'rgba(230, 184, 156, 1)',
-    'rgba(234, 210, 172, 1)',
-    'rgba(156, 175, 183, 1)',
-    'rgba(66, 129, 164, 1)'
-  ];
+  if (_.isEmpty(quantities)) {
+    text = 'No Customer Org Data Found';
+    quantities.push(1);
+    enabled = false;
+    colors = ['grey'];
+  } else {
+    colors = [
+      'rgba(54, 162, 235, 1)',
+      'rgba(255, 206, 86, 1)',
+      'rgba(75, 192, 192, 1)',
+      'rgba(153, 102, 255, 1)',
+      'rgba(255, 99, 132, 1)',
+      'rgba(230, 184, 156, 1)',
+      'rgba(234, 210, 172, 1)',
+      'rgba(156, 175, 183, 1)',
+      'rgba(66, 129, 164, 1)'
+    ];
+    text = `${this.showCurrent} Employee Customer Org Experience (in Years)`;
+  }
   this.chartData = {
     labels: labels,
     datasets: [
@@ -65,10 +76,13 @@ function fillData() {
   this.options = {
     title: {
       display: true,
-      text: `${this.showCurrent} Employee Customer Org Experience (in Years)`
+      text: text
     },
 
-    maintainAspectRatio: false
+    maintainAspectRatio: false,
+    tooltips: {
+      enabled: enabled
+    }
   };
 
   this.dataReceived = true;
