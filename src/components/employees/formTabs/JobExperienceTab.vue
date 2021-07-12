@@ -164,10 +164,16 @@
                   <v-text-field
                     :id="'end-field-' + compIndex + '-' + index"
                     ref="formFields"
+                    :disabled="presentBox"
                     :value="position.endDate | formatDate"
                     label="End Date (optional)"
                     prepend-icon="event_busy"
-                    :rules="[dateOptionalRules[0], dateOptionalRules[1], dateOrderRule(compIndex, index)]"
+                    :rules="[
+                      dateOptionalRules[0],
+                      dateOptionalRules[1],
+                      dateOptionalRules[2],
+                      dateOrderRule(compIndex, index)
+                    ]"
                     hint="MM/DD/YYYY format"
                     v-mask="'##/##/####'"
                     v-bind="attrs"
@@ -190,7 +196,31 @@
               </v-menu>
               <!-- End End Date -->
             </v-col>
+            <v-col></v-col>
+            <v-col>
+              <v-layout justify-start class="pl-2">
+                <v-checkbox
+                  class="ma-0 pa-0"
+                  v-model="presentBox"
+                  :label="`Present`"
+                  @click="position.endDate = null"
+                ></v-checkbox>
+              </v-layout>
+            </v-col>
           </v-row>
+          <!-- <v-row>
+            <v-col cols="0" sm="0" md="0" lg="6"></v-col>
+            <v-col cols="12" sm="12" md="12" lg="12" class="pt-0">
+              <v-layout justify-start class="pl-2">
+                <v-checkbox
+                  class="ma-0 pa-0"
+                  v-model="presentBox"
+                  :label="`Present`"
+                  @click="position.endDate = null"
+                ></v-checkbox>
+              </v-layout>
+            </v-col>
+          </v-row> -->
         </v-form>
       </div>
       <div class="pb-4" align="center">
@@ -198,9 +228,9 @@
           ><v-icon class="pr-1">add</v-icon>Position</v-btn
         >
       </div>
-      <v-row v-if="!hasEndDatesFilled(compIndex)" class="py-5 caption text--darken-2 grey--text">
+      <!-- <v-row v-if="!hasEndDatesFilled(compIndex)" class="py-5 caption text--darken-2 grey--text">
         Note that leaving the end date blank means you are currently working at that position.
-      </v-row>
+      </v-row> -->
     </div>
     <!-- End Loop Jobs -->
 
@@ -433,6 +463,7 @@ export default {
     return {
       companyDropDown: [], // autocomplete company name options
       companyIndex: 0,
+      presentBox: false,
       positionIndex: 0,
       dateOrderRule: (compIndex, posIndex) => {
         if (this.editedJobExperienceInfo !== undefined) {
@@ -450,7 +481,10 @@ export default {
         (v) => {
           return !isEmpty(v) ? /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v) || 'Date must be valid. Format: MM/DD/YYYY' : true;
         },
-        (v) => (!isEmpty(v) ? moment(v, 'MM/DD/YYYY').isValid() || 'Date must be valid' : true)
+        (v) => (!isEmpty(v) ? moment(v, 'MM/DD/YYYY').isValid() || 'Date must be valid' : true),
+        (v) => {
+          return !isEmpty(v) || this.presentBox == true || 'Date required';
+        }
       ], // rules for an optional date
       dateRules: [
         (v) => {
