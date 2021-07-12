@@ -228,6 +228,13 @@ export default {
           icon: 'clipboard-check',
           route: 'audits',
           permission: ['admin'],
+        },
+        {
+          title: 'Reports',
+          alias: ['reports'],
+          icon: 'clipboard-list',
+          route: 'reports',
+          permission: ['admin', 'user', 'intern', 'manager'],
           active: false
         },
         {
