@@ -42,8 +42,10 @@ function calculateTimeDifference(startDate) {
  */
 function drawCaseYearsHistGraph() {
   let experienceNum = this.caseYears;
+  let chartLabels = ['0-2', '2-4', '4-6', '6-8', '8-10', '10-12', '12-14', '14-16', '16-18', '18+'];
+  let maxIndex = this.findMaxIndex();
   let data = {
-    labels: ['0-2', '2-4', '4-6', '6-8', '8-10', '10-12', '12-14', '14-16', '16-18', '18+'],
+    labels: chartLabels.splice(0, maxIndex + 1),
     datasets: [
       {
         backgroundColor: '#BC3825',
@@ -92,6 +94,16 @@ function drawCaseYearsHistGraph() {
   this.dataReceived = true;
 } // drawCaseYearsHistGraph
 
+function findMaxIndex() {
+  let max = 0;
+  this.caseYears.forEach((element, index) => {
+    if (element !== undefined || element !== null) {
+      if (element > 0) max = index;
+    }
+  });
+  return max;
+}
+
 function stringToDate(dateAsString) {
   var date = moment(dateAsString);
   return date;
@@ -110,9 +122,10 @@ export default {
     };
   },
   methods: {
-    drawCaseYearsHistGraph,
     caseYearsData,
     calculateTimeDifference,
+    drawCaseYearsHistGraph,
+    findMaxIndex,
     stringToDate
   },
 
