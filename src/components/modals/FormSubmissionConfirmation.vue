@@ -12,7 +12,9 @@
             @click.native="
               emit('canceled');
               activate = false;
+              loading = true;
             "
+            :loading="loading"
             >No</v-btn
           >
           <v-spacer></v-spacer>
@@ -23,7 +25,9 @@
             @click.native="
               emit('confirmed');
               activate = false;
+              loading = true;
             "
+            :loading="loading"
             >Yes</v-btn
           >
           <v-spacer></v-spacer>
@@ -57,7 +61,8 @@ function emit(msg) {
 export default {
   data() {
     return {
-      activate: false // dialog activator
+      activate: false, // dialog activator
+      loading: false // loading
     };
   },
   methods: {
