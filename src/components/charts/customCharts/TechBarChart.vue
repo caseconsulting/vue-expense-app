@@ -20,7 +20,7 @@ function fillData(that) {
   let pairs = that.technologyPairs.sort((a, b) => {
     return b[1] - a[1];
   });
-
+  console.log(that.numOfColumns);
   pairs = pairs.slice(0, that.numOfColumns);
   let labels = [];
   let values = [];
@@ -124,14 +124,14 @@ function oneLessColumn() {
     fillData(this); // Refresh the chart
   }
   // Disable the "-" button if the min has been reached
-  if (this.numOfColumns == this.numOfColumnsMin) {
+  if (this.numOfColumns === this.numOfColumnsMin) {
     this.reachedMin = true;
   }
 } //oneLessColumn
 
 async function mounted() {
   //Get data
-  //Put into dictionary where key is kinda tech and value is quantity
+  //Put into dictionary where key is tech type and value is quantity
   let employees = await api.getItems(api.EMPLOYEES);
 
   let technologies = {};
@@ -150,6 +150,20 @@ async function mounted() {
 
   //We now sort the entries
   this.technologyPairs = Object.entries(technologies);
+  console.log(this.technologyPairs);
+  if (this.technologyPairs.length <= this.numOfColumnsMin) {
+    this.numOfColumns = this.technologyPairs.length;
+    this.numOfColumnsMin = this.technologyPairs.length;
+    this.reachedMin = true;
+    this.reachedMax = true;
+    console.log('min');
+  }
+  if (this.technologyPairs.length <= this.numOfColumns) {
+    this.numOfColumns = this.technologyPairs.length;
+    this.reachedMax = true;
+    console.log('max');
+  }
+  console.log(this.numOfColumns);
   this.fillData(this);
 }
 
