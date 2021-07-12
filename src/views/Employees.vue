@@ -501,7 +501,11 @@ export default {
         city: null,
         st: null,
         country: null,
-        deptDate: null
+        deptDate: null,
+        currentCity: null,
+        currentState: null,
+        currentStreet: null,
+        currentZIP: null
       }, // selected employee
       search: null, // query text for datatable search field
       sortBy: 'employeeNumber', // sort datatable items

@@ -93,6 +93,42 @@
         ></v-autocomplete>
       </div>
     </div>
+    <!-- Current Address -->
+    <p style="font-size: 17px; padding-left: 10px; padding-top: 10px">Current Address</p>
+    <div style="padding-right: 20px; padding-left: 30px; padding-bottom: 10px">
+      <div style="border-left-style: groove; padding-right: 20px; padding-left: 10px">
+        <!-- Current Address: Street text field -->
+        <v-text-field
+          v-model="editedPersonalInfo.currentStreet"
+          label="Street"
+          data-vv-name="Street"
+          style="padding-top: 0px"
+        ></v-text-field>
+        <!-- Current Address: City text field -->
+        <v-text-field
+          v-model="editedPersonalInfo.currentCity"
+          label="City"
+          data-vv-name="Current City"
+          style="padding-top: 0px"
+        ></v-text-field>
+        <!-- Current Address: State autocomplete -->
+        <v-autocomplete
+          :items="states"
+          v-model="editedPersonalInfo.currentState"
+          item-text="text"
+          label="State"
+          style="padding-top: 0px"
+        ></v-autocomplete>
+        <!-- Current Address: ZIP text field -->
+        <v-text-field
+          v-model="editedPersonalInfo.currentZIP"
+          v-mask="'#####'"
+          label="ZIP"
+          data-vv-name="Current ZIP"
+          style="padding-top: 0px"
+        ></v-text-field>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -220,6 +256,7 @@ export default {
       ], // rules for training url
       editedPersonalInfo: _.cloneDeep(this.model), //employee personal info that can be edited
       states: [
+        '',
         'Alabama',
         'Alaska',
         'American Samoa',

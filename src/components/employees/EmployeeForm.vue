@@ -682,6 +682,10 @@ function setFormData(tab, data) {
     this.$set(this.model, 'city', data.city);
     this.$set(this.model, 'country', data.country);
     this.$set(this.model, 'st', data.st);
+    this.$set(this.model, 'currentCity', data.currentCity);
+    this.$set(this.model, 'currentState', data.currentState);
+    this.$set(this.model, 'currentStreet', data.currentStreet);
+    this.$set(this.model, 'currentZIP', data.currentZIP);
   } else if (tab == 'education') {
     this.$set(this.model, 'degrees', data); //sets degrees to data returned from education tab
   } else if (tab == 'jobExperience') {
@@ -803,6 +807,10 @@ export default {
         contract: null,
         contracts: [],
         country: null,
+        currentCity: null,
+        currentState: null,
+        currentStreet: null,
+        currentZIP: null,
         customerOrgExp: [],
         degrees: [],
         deptDate: null,
