@@ -384,7 +384,7 @@ async function createEvents() {
       return null;
     }
     if (startDate.startOf('day').isSame(endDate.startOf('day'), 'days')) {
-      event.text = `${a.title} is today!`;
+      event.text = `${a.title}`;
     } else {
       event.text = `${a.title} starts today until ${endDate.format('LL')}!`;
     }
