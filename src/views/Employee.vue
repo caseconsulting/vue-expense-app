@@ -36,7 +36,7 @@
         </v-card>
         <!-- Edit Info (Form) -->
         <employee-form :employee="this.model" :currentTab="this.currentTab" v-if="editing"></employee-form>
-        <budget-chart class="pt-4" :employee="this.model"></budget-chart>
+        <budget-chart class="pt-4" :employee="this.model" :fiscalDateView="fiscalDateView"></budget-chart>
       </v-col>
     </v-row>
   </v-container>
@@ -54,6 +54,8 @@ import { isEmpty } from '@/utils/utils';
 import ConvertEmployeeToCsv from '../components/ConvertEmployeeToCsv.vue';
 import AnniversaryCard from '@/components/AnniversaryCard.vue';
 import BudgetChart from '@/components/BudgetChart.vue';
+const moment = require('moment');
+const IsoFormat = 'YYYY-MM-DD';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -72,6 +74,22 @@ function isDisplayData(item) {
   let valid = !this.userIsAdmin() && this.isEmpty(item.github) && this.isEmpty(item.twitter);
   return valid;
 } // isDisplayData
+
+/**
+ * Gets the current active anniversary budget year starting date in isoformat.
+ *
+ * @return String - current active anniversary budget date (YYYY-MM-DD)
+ */
+function getCurrentBudgetYear() {
+  let currentBudgetYear = moment(this.user.hireDate, IsoFormat);
+  if (moment().isAfter(currentBudgetYear)) {
+    currentBudgetYear.year(moment().year());
+    if (moment().isBefore(currentBudgetYear)) {
+      currentBudgetYear = currentBudgetYear.subtract(1, 'years');
+    }
+  }
+  return currentBudgetYear.format(IsoFormat);
+} // getCurrentBudgetYear
 
 /**
  * Get employee data.
@@ -130,6 +148,8 @@ async function created() {
   this.role = getRole();
   this.displayQuickBooksTimeAndBalances = this.userIsAdmin() || this.userIsEmployee();
   this.loading = false;
+  this.fiscalDateView = this.getCurrentBudgetYear();
+  console.log(this.model);
 } // created
 
 /**
@@ -146,6 +166,13 @@ async function mounted() {
 
   window.EventBus.$on('tabChange', (tab) => {
     this.currentTab = tab;
+  });
+
+  window.EventBus.$on('selected-budget-year', (data) => {
+    if (data.format(IsoFormat) != this.fiscalDateView) {
+      this.fiscalDateView = data.format(IsoFormat);
+      this.refreshBudget();
+    }
   });
 } // mounted
 
@@ -193,6 +220,7 @@ export default {
         employeeNumber: null,
         employeeRole: '',
         firstName: '',
+        fiscalDateView: '',
         github: '',
         hireDate: null,
         id: null,
@@ -220,6 +248,7 @@ export default {
     isDisplayData,
     isEmpty,
     getEmployee,
+    getCurrentBudgetYear,
     getWorkStatus,
     userIsAdmin,
     userIsEmployee
