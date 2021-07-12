@@ -22,7 +22,7 @@ import { isLoggedIn, login, getRole } from '@/utils/auth';
 import api from '../shared/api';
 const moment = require('moment-timezone');
 moment.tz.setDefault('America/New_York');
-const login_format = 'YYYY-MM-DD HH:mm:ss';
+const login_format = 'MMM Do, YYYY HH:mm:ss';
 
 // |--------------------------------------------------|
 // |                                                  |
