@@ -69,18 +69,20 @@
             </v-col>
           </v-col>
           <!-- Available Budgets -->
-          <v-col class="pa-4">
-            <v-col v-if="loading" text-center>
-              <v-progress-circular indeterminate size="64" color="#bc3825"></v-progress-circular>
+          <div v-if="!isManager()">
+            <v-col class="pa-4">
+              <v-col v-if="loading" text-center>
+                <v-progress-circular indeterminate size="64" color="#bc3825"></v-progress-circular>
+              </v-col>
+              <v-col v-else class="pt-0 text-center">
+                <available-budgets
+                  id="home-available-budgets"
+                  :employee="this.employee"
+                  :fiscalDateView="this.fiscalDateView"
+                ></available-budgets>
+              </v-col>
             </v-col>
-            <v-col v-else class="pt-0 text-center">
-              <available-budgets
-                id="home-available-budgets"
-                :employee="this.employee"
-                :fiscalDateView="this.fiscalDateView"
-              ></available-budgets>
-            </v-col>
-          </v-col>
+          </div>
         </v-col>
         <!-- Activity Feed -->
         <v-col cols="12" lg="6">
@@ -110,6 +112,7 @@ moment.tz.setDefault('America/New_York');
 import TwitterFeed from '@/components/TwitterFeed';
 import _ from 'lodash';
 import { asyncForEach, isEmpty, isFullTime } from '@/utils/utils';
+import { getRole } from '@/utils/auth';
 import QuickBooksTimeData from '../components/QuickBooksTimeData.vue';
 
 const IsoFormat = 'YYYY-MM-DD';
@@ -493,6 +496,14 @@ function getCurrentBudgetYear() {
 } // getCurrentBudgetYear
 
 /**
+ * Checks whether or not the user role is a manager, used to omit expense related components
+ * on the page
+ */
+function isManager() {
+  return getRole() === 'manager';
+}
+
+/**
  * Refresh and sets employee information.
  */
 async function refreshEmployee() {
@@ -601,6 +612,7 @@ export default {
     getTweets,
     isEmpty,
     isFullTime,
+    isManager,
     refreshEmployee,
     showSuccessfulSubmit,
     updateData,
