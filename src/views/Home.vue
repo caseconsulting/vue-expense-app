@@ -100,6 +100,11 @@
         </v-col>
       </v-row>
     </span>
+    <badge-expiration-modal
+      v-if="this.badgeExpiring && !loading"
+      :badgeExpiring="badgeExpiring"
+      :timesUntilExp="timesUntilBadgeExpiration"
+    ></badge-expiration-modal>
   </v-container>
 </template>
 
@@ -107,6 +112,7 @@
 import api from '@/shared/api.js';
 import ActivityFeed from '@/components/ActivityFeed';
 import AvailableBudgets from '@/components/AvailableBudgets.vue';
+import BadgeExpirationModal from '@/components/modals/BadgeExpirationModal.vue';
 import moment from 'moment-timezone';
 moment.tz.setDefault('America/New_York');
 import TwitterFeed from '@/components/TwitterFeed';
@@ -220,6 +226,25 @@ function addOneSecondToActualTimeEverySecond() {
     component.addOneSecondToActualTimeEverySecond();
   }, 1000);
 } // addOneSecondToActualTimeEverySecond
+
+/**
+ * Checks to see if the user has any badges expiring.
+ */
+async function checkWarnings() {
+  let user = await api.getUser();
+  if (user.clearances) {
+    user.clearances.forEach((clearance) => {
+      // determines if a user has a badge/badges expiring in either 30, 15, or 5 days
+      if (clearance.badgeExpirationDate) {
+        let daysUntilExpiration = moment(clearance.badgeExpirationDate).diff(moment(), 'days');
+        if (daysUntilExpiration === 30 || daysUntilExpiration === 15 || daysUntilExpiration === 5) {
+          this.badgeExpiring = true;
+          this.timesUntilBadgeExpiration.push(daysUntilExpiration);
+        }
+      }
+    });
+  }
+}
 
 /**
  * Clear the action status that is displayed in the snackbar.
@@ -546,6 +571,7 @@ async function created() {
   this.refreshEmployee();
   this.addOneSecondToActualTimeEverySecond();
   this.getTweets();
+  this.checkWarnings();
 } // created
 
 // |--------------------------------------------------|
@@ -558,6 +584,7 @@ export default {
   components: {
     ActivityFeed,
     AvailableBudgets,
+    BadgeExpirationModal,
     TwitterFeed,
     QuickBooksTimeData
   },
@@ -572,6 +599,7 @@ export default {
       actualTime: moment().format('X'),
       aggregatedExpenses: [],
       allUserBudgets: null, // all user budgets
+      badgeExpiring: false,
       budgetYears: [], // list of options for chaning budget year view
       display: true, // show seconds till anniversary activator
       employee: {}, // employee
@@ -584,6 +612,7 @@ export default {
       scheduleEntries: [],
       seconds: 0, // seconds until next anniversary date
       textMaxLength: 110,
+      timesUntilBadgeExpiration: [],
       tweets: [],
       status: {
         statusType: undefined,
@@ -595,6 +624,7 @@ export default {
   methods: {
     addOneSecondToActualTimeEverySecond,
     asyncForEach,
+    checkWarnings,
     clearStatus,
     createEvents,
     displayError,
