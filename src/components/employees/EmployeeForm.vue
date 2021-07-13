@@ -438,12 +438,14 @@ function updateJobs(jobs, companies) {
       let position = pos.title;
       let startDate = pos.startDate;
       let endDate = pos.endDate;
+      let presentDate = pos.presentDate;
       if (position !== null) {
         jobs.push({
           company: companyName,
           position: position,
           startDate: startDate,
-          endDate: endDate
+          endDate: endDate,
+          presentDate: presentDate
         });
       }
     });

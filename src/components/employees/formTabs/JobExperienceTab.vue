@@ -164,15 +164,15 @@
                   <v-text-field
                     :id="'end-field-' + compIndex + '-' + index"
                     ref="formFields"
-                    :disabled="presentBox"
+                    :disabled="position.presentDate"
                     :value="position.endDate | formatDate"
-                    label="End Date (optional)"
+                    label="End Date"
                     prepend-icon="event_busy"
                     :rules="[
                       dateOptionalRules[0],
                       dateOptionalRules[1],
-                      dateOptionalRules[2],
-                      dateOrderRule(compIndex, index)
+                      dateOrderRule(compIndex, index),
+                      endDatePresentRule(compIndex, index)
                     ]"
                     hint="MM/DD/YYYY format"
                     v-mask="'##/##/####'"
@@ -201,7 +201,7 @@
               <v-layout justify-start class="pl-2">
                 <v-checkbox
                   class="ma-0 pa-0"
-                  v-model="presentBox"
+                  v-model="position.presentDate"
                   :label="`Present`"
                   @click="position.endDate = null"
                 ></v-checkbox>
@@ -292,7 +292,8 @@ function addCompany() {
         endDate: null,
         startDate: null,
         showStartMenu: false,
-        showEndMenu: false
+        showEndMenu: false,
+        presentDate: false
       }
     ]
   });
@@ -309,7 +310,8 @@ function addPosition(compIndex) {
     endDate: null,
     startDate: null,
     showStartMenu: false,
-    showEndMenu: false
+    showEndMenu: false,
+    presentDate: false
   });
 }
 
@@ -439,8 +441,9 @@ function validateFields() {
   let errorCount = 0;
   if (_.isArray(this.$refs.formFields)) {
     // more than one TYPE of vuetify component used
-
+    //this.$refs.formFields.validate();
     _.forEach(this.$refs.formFields, (field) => {
+      field.validate();
       if (!field.validate()) {
         errorCount++;
       }
@@ -463,7 +466,6 @@ export default {
     return {
       companyDropDown: [], // autocomplete company name options
       companyIndex: 0,
-      presentBox: false,
       positionIndex: 0,
       dateOrderRule: (compIndex, posIndex) => {
         if (this.editedJobExperienceInfo !== undefined) {
@@ -481,10 +483,7 @@ export default {
         (v) => {
           return !isEmpty(v) ? /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v) || 'Date must be valid. Format: MM/DD/YYYY' : true;
         },
-        (v) => (!isEmpty(v) ? moment(v, 'MM/DD/YYYY').isValid() || 'Date must be valid' : true),
-        (v) => {
-          return !isEmpty(v) || this.presentBox == true || 'Date required';
-        }
+        (v) => (!isEmpty(v) ? moment(v, 'MM/DD/YYYY').isValid() || 'Date must be valid' : true)
       ], // rules for an optional date
       dateRules: [
         (v) => {
@@ -493,6 +492,18 @@ export default {
         (v) => (!isEmpty(v) && /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v)) || 'Date must be valid. Format: MM/DD/YYYY',
         (v) => moment(v, 'MM/DD/YYYY').isValid() || 'Date must be valid'
       ], // rules for an optional date
+      endDatePresentRule: (compIndex, posIndex) => {
+        if (this.editedJobExperienceInfo !== undefined) {
+          let position = this.editedJobExperienceInfo.companies[compIndex].positions[posIndex];
+          if (position.presentDate == false && isEmpty(position.endDate)) {
+            return 'End Date is required';
+          } else {
+            return true;
+          }
+        } else {
+          return false;
+        }
+      },
       editedJobExperienceInfo: _.cloneDeep(this.model), //edited job experience info
       requiredRules: [(v) => !isEmpty(v) || 'This field is required'] // rules for required fields
     };
