@@ -12,8 +12,8 @@
       <!-- QuickBooks Time and Budgets-->
       <v-col v-if="displayQuickBooksTimeAndBalances" cols="12" md="5" lg="4">
         <quick-books-time-data :employee="this.model" class="mb-6"></quick-books-time-data>
-        <available-budgets class="mb-4" :employee="this.model"></available-budgets>
-        <anniversary-card :employee="this.model"></anniversary-card>
+        <available-budgets class="mb-4" v-if="this.model.id" :employee="this.model"></available-budgets>
+        <anniversary-card v-if="!minimizeWindow" :employee="this.model"></anniversary-card>
       </v-col>
 
       <!-- Employee Form -->
@@ -36,6 +36,7 @@
         </v-card>
         <!-- Edit Info (Form) -->
         <employee-form :employee="this.model" :currentTab="this.currentTab" v-if="editing"></employee-form>
+        <anniversary-card v-if="minimizeWindow" :employee="this.model"></anniversary-card>
         <budget-chart
           v-if="userIsAdmin() || userIsEmployee()"
           class="pt-4"
@@ -120,6 +121,17 @@ function getWorkStatus(workStatus) {
     return 'Invalid Status';
   }
 } // getWorkStatus
+
+function minimizeWindow() {
+  switch (this.$vuetify.breakpoint.name) {
+    case 'xs':
+      return true;
+    case 'sm':
+      return true;
+    default:
+      return false;
+  }
+}
 
 /**
  * Checks to see if the user is an admin. Returns true if the user's role is an admin, otherwise returns false.
@@ -260,6 +272,9 @@ export default {
     getWorkStatus,
     userIsAdmin,
     userIsEmployee
+  },
+  computed: {
+    minimizeWindow
   },
   mounted
 };
