@@ -276,7 +276,6 @@ function validateFields() {
     // more than one TYPE of vuetify component used
     _.forEach(this.$refs.formFields, (field) => {
       if (!field.validate()) {
-        console.log(field);
         errorCount++;
       }
     });
@@ -300,7 +299,6 @@ export default {
       contractsDropDown: [], // autocomplete contract name options
       dateOrderRule: (compIndex, projIndex) => {
         if (this.editedContracts) {
-          console.log('got here');
           let project = this.editedContracts[compIndex].projects[projIndex];
           return !isEmpty(project.endDate) && moment(project.endDate) && project.startDate
             ? moment(project.endDate).add(1, 'd').isAfter(moment(project.startDate)) ||
