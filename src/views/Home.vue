@@ -69,7 +69,7 @@
             </v-col>
           </v-col>
           <!-- Available Budgets -->
-          <div v-if="!isManager()">
+          <div>
             <v-col class="pa-4">
               <v-col v-if="loading" text-center>
                 <v-progress-circular indeterminate size="64" color="#bc3825"></v-progress-circular>
@@ -112,7 +112,6 @@ moment.tz.setDefault('America/New_York');
 import TwitterFeed from '@/components/TwitterFeed';
 import _ from 'lodash';
 import { asyncForEach, isEmpty, isFullTime } from '@/utils/utils';
-import { getRole } from '@/utils/auth';
 import QuickBooksTimeData from '../components/QuickBooksTimeData.vue';
 
 const IsoFormat = 'YYYY-MM-DD';
@@ -496,14 +495,6 @@ function getCurrentBudgetYear() {
 } // getCurrentBudgetYear
 
 /**
- * Checks whether or not the user role is a manager, used to omit expense related components
- * on the page
- */
-function isManager() {
-  return getRole() === 'manager';
-}
-
-/**
  * Refresh and sets employee information.
  */
 async function refreshEmployee() {
@@ -612,7 +603,6 @@ export default {
     getTweets,
     isEmpty,
     isFullTime,
-    isManager,
     refreshEmployee,
     showSuccessfulSubmit,
     updateData,

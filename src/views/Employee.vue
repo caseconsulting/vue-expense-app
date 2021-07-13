@@ -36,13 +36,9 @@
         </v-card>
         <!-- Edit Info (Form) -->
         <employee-form :employee="this.model" :currentTab="this.currentTab" v-if="editing"></employee-form>
-<<<<<<< HEAD
-        <budget-chart class="pt-4" :employee="this.model" :fiscalDateView="fiscalDateView"></budget-chart>
-=======
         <div v-if="userIsAdmin() || userIsEmployee()">
           <budget-chart class="pt-4" :employee="this.model"></budget-chart>
         </div>
->>>>>>> 2485-manager-page-access: made routing fixes for manager and removed all expense related info from being visible
       </v-col>
     </v-row>
   </v-container>

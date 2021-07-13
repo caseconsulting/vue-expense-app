@@ -18,7 +18,7 @@ import Blog from '@/views/Blog.vue';
 import BlogPreview from '@/views/BlogPreview.vue';
 import PostEditor from '@/views/PostEditor.vue';
 import TrainingAnalytics from '@/views/TrainingAnalytics';
-import { requireAuth, isAdmin, isNotManager } from '@/utils/auth';
+import { requireAuth, isAdmin } from '@/utils/auth';
 import multiguard from 'vue-router-multiguard';
 
 Vue.use(Router);
@@ -46,7 +46,7 @@ const router = new Router({
       path: '/expenseTypes',
       name: 'expenseTypes',
       component: ExpenseTypes,
-      beforeEnter: multiguard([requireAuth, isNotManager])
+      beforeEnter: requireAuth
     },
     {
       path: '/employees',
@@ -76,7 +76,7 @@ const router = new Router({
       path: '/myExpenses',
       name: 'expenses',
       component: Expenses,
-      beforeEnter: multiguard([requireAuth, isNotManager])
+      beforeEnter: requireAuth
     },
     {
       path: '/help',
@@ -100,7 +100,7 @@ const router = new Router({
       path: '/myBudgets',
       name: 'myBudgets',
       component: EmployeeHome,
-      beforeEnter: multiguard([requireAuth, isNotManager])
+      beforeEnter: requireAuth
     },
     {
       path: '/home',

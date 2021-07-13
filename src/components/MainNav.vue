@@ -182,19 +182,19 @@ export default {
               title: 'My Budgets',
               icon: 'hand-holding-usd',
               route: 'myBudgets',
-              permission: ['user', 'admin', 'intern']
+              permission: ['user', 'admin', 'intern', 'manager']
             },
             {
               title: 'My Expenses',
               icon: 'dollar-sign',
               route: 'expenses',
-              permission: ['admin', 'user', 'intern']
+              permission: ['admin', 'user', 'intern', 'manager']
             },
             {
               title: 'Expense Types',
               icon: 'book',
               route: 'expenseTypes',
-              permission: ['admin', 'user']
+              permission: ['admin', 'user', 'manager']
             },
             {
               title: 'Reimbursements',
@@ -203,7 +203,7 @@ export default {
               permission: ['admin']
             }
           ],
-          permission: ['user', 'admin', 'intern'],
+          permission: ['user', 'admin', 'intern', 'manager'],
           active: false
         },
         {

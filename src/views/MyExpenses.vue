@@ -21,7 +21,7 @@
         <v-container fluid>
           <!-- Title -->
           <v-card-title>
-            <h2 v-if="isUser || isIntern">{{ getUserName }}'s Expenses</h2>
+            <h2 v-if="isUser || isIntern || isManager">{{ getUserName }}'s Expenses</h2>
             <h3 v-else>My Expenses</h3>
             <v-spacer></v-spacer>
 
@@ -177,7 +177,7 @@
                 <v-tooltip top>
                   <template v-slot:activator="{ on }">
                     <v-btn
-                      :disabled="isEditing || ((isUser || isIntern) && isReimbursed(item)) || midAction"
+                      :disabled="isEditing || (!isAdmin && isReimbursed(item)) || midAction"
                       text
                       icon
                       id="edit"
@@ -338,7 +338,9 @@ import { isEmpty, monthDayYearFormat, convertToMoneyString } from '@/utils/utils
  * @return String - user's full name
  */
 function getUserName() {
-  return employeeUtils.fullName(this.userInfo);
+  if (this.userInfo) {
+    return employeeUtils.fullName(this.userInfo);
+  }
 } // getUserName
 
 /**
@@ -358,6 +360,10 @@ function isAdmin() {
 function isIntern() {
   return this.userInfo ? this.userInfo.employeeRole === 'intern' : false;
 } // isIntern
+
+function isManager() {
+  return this.userInfo ? this.userInfo.employeeRole === 'manager' : false;
+}
 
 /**
  * Checks if the user's role is a user. Returns true if the user's role is a user, otherwise returns false.
@@ -657,12 +663,9 @@ function onSelect(item) {
  */
 async function refreshExpenses() {
   this.loading = true; // set loading status to true
-
-  if (this.isAdmin || this.isUser || this.isIntern) {
-    // load expenses if employee role is user or admin
-    this.expenses = await api.getAllAggregateExpenses();
-    this.constructAutoComplete(this.expenses); // set autocomplete options
-  }
+  // load expenses if employee role is user or admin
+  this.expenses = await api.getAllAggregateExpenses();
+  this.constructAutoComplete(this.expenses); // set autocomplete options
 
   this.filterExpenses(); // filter expenses
 
@@ -930,6 +933,7 @@ export default {
     hasRecipient,
     isEmpty,
     isFocus,
+    isManager,
     isReimbursed,
     onSelect,
     refreshExpenses,

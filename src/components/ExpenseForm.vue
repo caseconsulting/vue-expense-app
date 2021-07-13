@@ -125,7 +125,6 @@
 
         <!-- Purchase Date -->
         <v-menu
-          v-if="isUser || isAdmin || isIntern"
           ref="purchaseMenu"
           :close-on-content-click="false"
           v-model="purchaseMenu"
@@ -1410,7 +1409,11 @@ async function created() {
 
   this.myBudgetsView = this.$route.path === '/myBudgets';
   this.isInactive = this.myBudgetsView && this.userInfo.workStatus == 0;
-  this.asUser = this.myBudgetsView || this.employeeRole == 'user' || this.employeeRole == 'intern';
+  this.asUser =
+    this.myBudgetsView ||
+    this.employeeRole === 'user' ||
+    this.employeeRole === 'intern' ||
+    this.employeeRole === 'manager';
 
   if (this.asUser) {
     // creating or updating an expense as a user
