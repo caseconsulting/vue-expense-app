@@ -157,7 +157,12 @@ function drawGraph() {
     ]
   };
 
+  let [year] = this.fiscalDateView.split('-');
   let options = {
+    title: {
+      display: true,
+      text: 'Budget Overview For Fiscal Year ' + year + '-' + (Number(year) + 1)
+    },
     scales: {
       yAxes: [
         {
@@ -301,6 +306,12 @@ export default {
     await this.refreshBudget();
     this.drawGraph();
   },
-  props: ['employee', 'fiscalDateView']
+  props: ['employee', 'fiscalDateView'],
+  watch: {
+    fiscalDateView: async function () {
+      await this.refreshBudget();
+      this.drawGraph();
+    }
+  }
 };
 </script>

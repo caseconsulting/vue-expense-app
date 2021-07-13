@@ -16,6 +16,12 @@ export default {
   props: [
     'chartData', // chart data to render
     'options' // chart options
-  ]
+  ],
+  watch: {
+    options() {
+      // If options change, re-render chart
+      this.renderChart(this.chartData, this.options);
+    }
+  }
 };
 </script>

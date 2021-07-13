@@ -203,7 +203,6 @@ async function mounted() {
   window.EventBus.$on('selected-budget-year', (data) => {
     if (data.format(IsoFormat) != this.fiscalDateView) {
       this.fiscalDateView = data.format(IsoFormat);
-      this.refreshBudget();
     }
   });
 } // mounted
@@ -233,6 +232,7 @@ export default {
       filter: {
         active: ['full', 'part'] // default only shows full and part time employees
       }, // datatable filter
+      fiscalDateView: '',
       loading: false, // loading status
       model: {
         awards: [],

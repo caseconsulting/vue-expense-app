@@ -34,6 +34,8 @@
 <script>
 import BudgetSelectModal from '@/components/modals/BudgetSelectModal.vue';
 import MobileDetect from 'mobile-detect';
+import _ from 'lodash';
+import api from '@/shared/api.js';
 const moment = require('moment-timezone');
 moment.tz.setDefault('America/New_York');
 const IsoFormat = 'YYYY-MM-DD';
@@ -188,11 +190,33 @@ function getCurrentBudgetYear() {
   return currentBudgetYear.format(IsoFormat);
 } // getCurrentBudgetYear
 
-function loadData() {
+async function loadData() {
   this.hireDate = this.employee.hireDate;
   this.fiscalDateView = this.getCurrentBudgetYear();
+  this.allUserBudgets = await api.getEmployeeBudgets(this.employee.id);
+  this.refreshBudgetYears();
 }
 
+/**
+ * Refresh and sets the budget year view options for the employee.
+ */
+function refreshBudgetYears() {
+  let budgetYears = [];
+  // push all employee budget years
+  let budgetDates = _.uniqBy(_.map(this.allUserBudgets, 'fiscalStartDate'));
+  budgetDates.forEach((date) => {
+    const [year] = date.split('-');
+    budgetYears.push(parseInt(year));
+  });
+  // push active budget year
+  let [currYear] = this.getCurrentBudgetYear().split('-');
+  budgetYears.push(parseInt(currYear));
+  // remove duplicate years and filter to include only active and previous years
+  budgetYears = _.filter(_.uniqBy(budgetYears), (year) => {
+    return parseInt(year) <= parseInt(currYear);
+  });
+  this.budgetYears = _.reverse(_.sortBy(budgetYears)); // sort budgets from current to past
+} // refreshBudgetYears
 // |--------------------------------------------------|
 // |                                                  |
 // |                 LIFECYCLE HOOKS                  |
@@ -236,7 +260,8 @@ export default {
   methods: {
     addOneSecondToActualTimeEverySecond,
     getCurrentBudgetYear,
-    loadData
+    loadData,
+    refreshBudgetYears
   },
   props: ['employee']
 };
