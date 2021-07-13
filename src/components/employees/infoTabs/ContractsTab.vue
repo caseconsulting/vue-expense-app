@@ -40,6 +40,8 @@ function created() {
   if (!isEmpty(this.model.contracts)) {
     this.filteredList = this.model.contracts.slice(0, 5);
   }
+  console.log(this.model.contracts);
+  console.log(this.filteredList);
 }
 
 // |--------------------------------------------------|
