@@ -57,24 +57,6 @@
       :disabled="!admin"
     ></v-text-field>
 
-    <!-- Prime -->
-    <v-combobox
-      id="employeePrime"
-      v-model="editedEmployee.prime"
-      :items="employeeInfo.primes"
-      label="Prime (optional)"
-      data-vv-name="Prime"
-    ></v-combobox>
-
-    <!-- Contract -->
-    <v-combobox
-      id="employeeContract"
-      v-model="editedEmployee.contract"
-      :items="employeeInfo.contracts"
-      label="Contract (optional)"
-      data-vv-name="Contract"
-    ></v-combobox>
-
     <!-- Job Role -->
     <v-combobox
       id="employeeJobRole"
@@ -280,9 +262,6 @@ async function created() {
   }
   // set works status value to a string
   this.value = this.editedEmployee.workStatus.toString();
-  // filter primes and contracts
-  this.filterPrimes();
-  this.filterContracts();
 } // created
 
 // |--------------------------------------------------|
@@ -290,24 +269,6 @@ async function created() {
 // |                     METHODS                      |
 // |                                                  |
 // |--------------------------------------------------|
-
-/**
- * Filters out contracts from list of employees.
- */
-function filterContracts() {
-  let tempContracts = _.map(this.employees, (a) => a.contract); //extract contracts
-  tempContracts = _.compact(tempContracts); //remove falsey values
-  this.employeeInfo.contracts = [...new Set(tempContracts)]; //remove duplicates
-} // filterContracts
-
-/**
- * Filters out primes from list of employees.
- */
-function filterPrimes() {
-  let tempPrimes = _.map(this.employees, (a) => a.prime); //extract primes
-  tempPrimes = _.compact(tempPrimes); //remove falsey values
-  this.employeeInfo.primes = [...new Set(tempPrimes)]; //remove duplicates and set
-} // filterPrimes
 
 /**
  * Converts a string to kebab case.
@@ -409,10 +370,6 @@ export default {
         (v) => !isEmpty(v) || 'Email is required',
         (v) => regex.test(v) || 'Not a valid @consultwithcase email address'
       ], // rules for an employee email
-      employeeInfo: {
-        primes: [],
-        contracts: []
-      }, // employee prime and contract info
       employeeRoleFormatted: null,
       employees: [], // all employees
       hasExpenses: false, // employee has expenses
@@ -445,8 +402,6 @@ export default {
   methods: {
     formatDate,
     formatKebabCase,
-    filterContracts,
-    filterPrimes,
     isEmpty,
     isInactive,
     isMobile,
