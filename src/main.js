@@ -55,6 +55,7 @@ import 'vue-awesome/icons/thumbs-up';
 import 'vue-awesome/icons/chart-bar';
 import 'vue-awesome/icons/calendar-day';
 import 'vue-awesome/icons/sort-alpha-down';
+import 'vue-awesome/icons/clipboard-check';
 import Icon from 'vue-awesome/components/Icon';
 import App from './App.vue';
 import Vue2Filters from 'vue2-filters';

@@ -223,6 +223,14 @@ export default {
           active: false
         },
         {
+          title: 'Audits',
+          alias: ['audit'],
+          icon: 'clipboard-check',
+          route: 'audits',
+          permission: ['admin'],
+          active: false
+        },
+        {
           title: 'Training',
           icon: 'fire',
           route: 'training',
