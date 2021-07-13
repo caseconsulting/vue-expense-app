@@ -201,6 +201,11 @@ function addContract() {
   });
 } // addContract
 
+/**
+ * Adds a project to a given contract
+ *
+ * @param contractIndex The index of the contract
+ */
 function addProject(contractIndex) {
   this.editedContracts[contractIndex].projects.push({
     name: '',
