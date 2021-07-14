@@ -271,6 +271,7 @@ async function created() {
     }
   }
 
+  //set the mifiStatus switch initial value
   if (this.editedEmployee.mifiStatus != null) {
     this.mifiStatus = this.editedEmployee.mifiStatus;
   }
@@ -376,7 +377,6 @@ function validateFields() {
     // single vuetify component
     hasErrors = !this.$refs.formFields.validate();
   }
-  console.log(this.editedEmployee);
   window.EventBus.$emit('doneValidating', 'employee', this.editedEmployee); // emit done validating
   window.EventBus.$emit('employeeStatus', [hasErrors, errorCount]); // emit error status
 } // validateFields
@@ -500,12 +500,7 @@ export default {
       }
     },
     mifiStatus: function () {
-      console.log(this.mifiStatus);
-
       this.editedEmployee.mifiStatus = this.mifiStatus;
-
-      console.log('in mifistatus temp value watch');
-      console.log(this.editedEmployee);
     },
     validating: function (val) {
       if (val) {

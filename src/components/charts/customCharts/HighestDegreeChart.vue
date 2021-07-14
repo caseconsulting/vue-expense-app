@@ -77,7 +77,6 @@ function initDegrees() {
  * in degrees and adds onto it
  */
 function addToDegrees(degrees, highestDegrees) {
-  //console.log(highestDegrees);
   highestDegrees.forEach((highestDegree) => {
     if (!degrees[highestDegree.name]) {
       //if the name of the degree isnt in collection

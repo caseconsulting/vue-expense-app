@@ -177,7 +177,9 @@
                 <v-tooltip top>
                   <template v-slot:activator="{ on }">
                     <v-btn
-                      :disabled="isEditing || (!isAdmin && isReimbursed(item)) || midAction"
+                      :disabled="
+                        isEditing || (!isAdmin && isReimbursed(item)) || midAction || (!isAdmin && !canDelete(item))
+                      "
                       text
                       icon
                       id="edit"
@@ -196,7 +198,7 @@
                 <v-tooltip top>
                   <template v-slot:activator="{ on }">
                     <v-btn
-                      :disabled="isReimbursed(item) || isEditing || midAction"
+                      :disabled="isReimbursed(item) || isEditing || midAction || (!isAdmin && !canDelete(item))"
                       text
                       icon
                       id="delete"
@@ -645,6 +647,21 @@ function isReimbursed(expense) {
 } // isReimbursed
 
 /**
+ * Checks the canDelete optional boolean and if it exists and is true returns true
+ *
+ * @param expense - expense to check
+ * @return boolean - disables the delete and edit button if false
+ */
+function canDelete(expense) {
+  if (expense.canDelete !== undefined && expense.canDelete !== null && !expense.canDelete) {
+    //canDelete is present and equals false
+    return false;
+  } else {
+    return true;
+  }
+} // canDelete
+
+/**
  * Store the attributes of a selected expense.
  *
  * @param item - expense selected
@@ -919,6 +936,7 @@ export default {
   },
   methods: {
     addModelToTable,
+    canDelete,
     clearExpense,
     clearStatus,
     clickedRow,
