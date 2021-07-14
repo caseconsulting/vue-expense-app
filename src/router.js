@@ -143,6 +143,14 @@ const router = new Router({
       name: 'postEditor',
       component: PostEditor,
       beforeEnter: requireAuth
+    },
+    //Below catch-all code works for Vue 2
+    //For Vue 3 change the path variable to path: '/:pathMatch(.*)*'
+    {
+      path: '*',
+      name: 'pageNotFound',
+      component: Home,
+      beforeEnter: requireAuth
     }
   ]
 });
