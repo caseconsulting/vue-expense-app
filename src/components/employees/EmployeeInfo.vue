@@ -24,9 +24,19 @@
           </v-list>
         </v-menu>
         <hr class="my-3" />
-        <employee-tab v-if="infoTab === 'employee'" :admin="userIsAdmin()" :employee="userIsEmployee()" :model="model">
+        <employee-tab
+          v-if="infoTab === 'employee'"
+          :admin="hasAdminPermissions()"
+          :employee="userIsEmployee()"
+          :model="model"
+        >
         </employee-tab>
-        <personal-tab v-if="infoTab === 'personal'" :admin="userIsAdmin()" :employee="userIsEmployee()" :model="model">
+        <personal-tab
+          v-if="infoTab === 'personal'"
+          :admin="hasAdminPermissions()"
+          :employee="userIsEmployee()"
+          :model="model"
+        >
         </personal-tab>
         <education-tab v-if="infoTab === 'education'" :model="model"></education-tab>
         <job-experience-tab v-if="infoTab === 'jobExperience'" :model="model"></job-experience-tab>
@@ -35,7 +45,7 @@
         <technologies-tab v-if="infoTab === 'technologies'" :model="model"></technologies-tab>
         <customer-org-tab v-if="infoTab === 'customerOrgExp'" :model="model"></customer-org-tab>
         <contracts-tab v-if="infoTab === 'contracts'" :model="model"></contracts-tab>
-        <clearance-tab v-if="infoTab === 'clearance' && (userIsAdmin() || userIsEmployee())" :model="model">
+        <clearance-tab v-if="infoTab === 'clearance' && (hasAdminPermissions() || userIsEmployee())" :model="model">
         </clearance-tab>
         <languages-tab v-if="infoTab === 'languages'" :model="model"></languages-tab>
       </div>
@@ -50,13 +60,13 @@
         <v-tab href="#technologies">Technologies</v-tab>
         <v-tab href="#customerOrgExp">Customer Org</v-tab>
         <v-tab href="#contracts">Contracts</v-tab>
-        <v-tab href="#clearance" v-if="userIsAdmin() || userIsEmployee()">Clearance</v-tab>
+        <v-tab href="#clearance" v-if="hasAdminPermissions() || userIsEmployee()">Clearance</v-tab>
         <v-tab href="#languages">Languages</v-tab>
         <v-tab-item id="employee" class="ma-6">
-          <employee-tab :admin="userIsAdmin()" :employee="userIsEmployee()" :model="model"></employee-tab>
+          <employee-tab :admin="hasAdminPermissions()" :employee="userIsEmployee()" :model="model"></employee-tab>
         </v-tab-item>
         <v-tab-item id="personal" class="ma-6">
-          <personal-tab :admin="userIsAdmin()" :employee="userIsEmployee()" :model="model"></personal-tab>
+          <personal-tab :admin="hasAdminPermissions()" :employee="userIsEmployee()" :model="model"></personal-tab>
         </v-tab-item>
         <v-tab-item id="education" class="ma-6">
           <education-tab :model="model"></education-tab>
@@ -79,7 +89,7 @@
         <v-tab-item id="contracts" class="ma-6">
           <contracts-tab :model="model"></contracts-tab>
         </v-tab-item>
-        <v-tab-item id="clearance" v-if="userIsAdmin() || userIsEmployee()" class="ma-6">
+        <v-tab-item id="clearance" v-if="hasAdminPermissions() || userIsEmployee()" class="ma-6">
           <clearance-tab :model="model"></clearance-tab>
         </v-tab-item>
         <v-tab-item id="languages" class="ma-6">
@@ -107,13 +117,14 @@ import PersonalTab from '@/components/employees/infoTabs/PersonalTab';
 import TechnologiesTab from '@/components/employees/infoTabs/TechnologiesTab';
 
 /**
- * Check if the user is an admin. Returns true if the user is an admin, otherwise returns false.
+ * Check if the user has admin permissions. Returns true if the user is an admin or a manager,
+ * otherwise returns false.
  *
- * @return boolean - user is an admin
+ * @return boolean - returns true if user is an admin or manager
  */
-function userIsAdmin() {
-  return getRole() === 'admin';
-} // userIsAdmin
+function hasAdminPermissions() {
+  return getRole() === 'admin' || getRole() === 'manager';
+} // hasAdminPermissions
 
 /**
  * Check if the user the employee displayed. Returns true if the user is the employee displayed, otherwise returns false.
@@ -169,7 +180,7 @@ export default {
     };
   },
   methods: {
-    userIsAdmin,
+    hasAdminPermissions,
     userIsEmployee,
     selectDropDown
   },

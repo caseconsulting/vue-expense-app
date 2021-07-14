@@ -79,7 +79,7 @@
             <hr class="my-3" />
             <employee-tab
               v-if="formTab === 'employee'"
-              :admin="userIsAdmin()"
+              :admin="hasAdminPermissions()"
               :validating="validating.employee"
               :model="model"
             >
@@ -135,7 +135,11 @@
             <v-tab href="#languages" v-bind:class="{ errorTab: tabErrors.languages }">Languages</v-tab>
             <!-- Employee -->
             <v-tab-item id="employee" class="mt-6 mb-4">
-              <employee-tab :admin="userIsAdmin()" :model="model" :validating="validating.employee"></employee-tab>
+              <employee-tab
+                :admin="hasAdminPermissions()"
+                :model="model"
+                :validating="validating.employee"
+              ></employee-tab>
             </v-tab-item>
             <!-- Personal Info -->
             <v-tab-item id="personal" class="mt-6 mb-4">
@@ -487,6 +491,18 @@ async function displayError(err) {
   this.$set(this.errorStatus, 'statusMessage', err);
   this.$set(this.errorStatus, 'color', 'red');
 } // displayError
+
+/**
+ * Check if the user has admin privileges
+ * Returns true if the user is an admin or a manager,
+ * otherwise returns false.
+ *
+ * @return boolean - user is an admin or manager
+ */
+function hasAdminPermissions() {
+  return getRole() === 'admin' || getRole() === 'manager';
+} // hasAdminPermissions
+
 /**
  * Checks to see if any of the form tabs has an error.
  * @returns boolean - true if any tab has an error false otherwise.
@@ -545,14 +561,7 @@ async function submit() {
   }
   this.submitting = false;
 } // submit
-/**
- * Check if the user is an admin. Returns true if the user is an admin, otherwise returns false.
- *
- * @return boolean - user is an admin
- */
-function userIsAdmin() {
-  return getRole() === 'admin';
-} // userIsAdmin
+
 function addErrorTab(name, errors) {
   if (errors !== 0 && !this.errorTabNames[name]) {
     this.errorTabNames[name] = errors;
@@ -888,12 +897,12 @@ export default {
     confirm,
     convertAutocompleteToTitlecase,
     displayError,
+    hasAdminPermissions,
     hasTabError,
     setFormData,
     submit,
     titleCase,
     updateJobs,
-    userIsAdmin,
     selectDropDown
   },
   props: ['currentTab', 'employee'], // employee to be created/updated

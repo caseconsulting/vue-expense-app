@@ -12,7 +12,7 @@
       <!-- QuickBooks Time and Budgets-->
       <v-col v-if="displayQuickBooksTimeAndBalances" cols="12" md="5" lg="4">
         <quick-books-time-data :employee="this.model" class="mb-6"></quick-books-time-data>
-        <available-budgets v-if="!userIsManager()" class="mb-4" :employee="this.model"></available-budgets>
+        <available-budgets class="mb-4" :employee="this.model"></available-budgets>
         <anniversary-card :employee="this.model"></anniversary-card>
       </v-col>
 
@@ -23,7 +23,7 @@
             <h3 id="employeeName">{{ this.model.firstName }} {{ this.model.lastName }}</h3>
             <v-spacer></v-spacer>
             <convert-employee-to-csv v-if="userIsAdmin()" :employee="this.model" color="white" />
-            <v-tooltip v-if="displayQuickBooksTimeAndBalances && this.currentTab" top>
+            <v-tooltip v-if="hasAdminPermissions() || userIsEmployee()" top>
               <template #activator="{ on }">
                 <v-icon class="pr-2" @click="editing = true" style="color: white" align="right" v-on="on" id="edit"
                   >edit</v-icon
@@ -125,13 +125,9 @@ function userIsAdmin() {
   return this.role === 'admin';
 } // userIsAdmin
 
-/**
- * Checks to see if the user is an admin. Returns true if the user's role is an admin, otherwise returns false.
- */
-function userIsManager() {
-  return this.role === 'manager';
-} // userIsAdmin
-
+function hasAdminPermissions() {
+  return this.role === 'admin' || this.role === 'manager';
+} // hasAdminPermissions
 /**
  * Check if the user the employee displayed. Returns true if the user is the employee displayed, otherwise returns false.
  *
@@ -253,14 +249,14 @@ export default {
     };
   },
   methods: {
+    hasAdminPermissions,
     isDisplayData,
     isEmpty,
     getEmployee,
     getCurrentBudgetYear,
     getWorkStatus,
     userIsAdmin,
-    userIsEmployee,
-    userIsManager
+    userIsEmployee
   },
   mounted
 };

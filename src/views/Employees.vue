@@ -32,7 +32,7 @@
         </v-card-title>
 
         <!-- Filters -->
-        <fieldset v-if="userIsAdmin()" class="filter_border">
+        <fieldset v-if="hasAdminPermissions()" class="filter_border">
           <legend class="legend_style">Filters</legend>
 
           <!-- Active Filter -->
@@ -75,7 +75,13 @@
         <br />
         <!-- End Filters -->
         <!-- Create an Employee -->
-        <v-btn id="createEmployeeBtn" class="mb-5" @click="createEmployee = true" elevation="2" v-if="userIsAdmin()">
+        <v-btn
+          id="createEmployeeBtn"
+          class="mb-5"
+          @click="createEmployee = true"
+          elevation="2"
+          v-if="hasAdminPermissions()"
+        >
           Create an Employee<v-icon class="pl-2">person_add</v-icon>
         </v-btn>
 
@@ -95,11 +101,17 @@
         >
           <!-- Delete Action Item Slot -->
           <template v-slot:[`item.actions`]="{ item }">
-            <div class="datatable_btn layout" v-if="userIsAdmin()">
+            <div class="datatable_btn layout">
               <v-tooltip top>
                 <template v-slot:activator="{ on }">
-                  <convert-employee-to-csv :midAction="midAction" :employee="item" v-on="on"></convert-employee-to-csv>
+                  <convert-employee-to-csv
+                    v-if="userIsAdmin()"
+                    :midAction="midAction"
+                    :employee="item"
+                    v-on="on"
+                  ></convert-employee-to-csv>
                   <v-btn
+                    v-if="hasAdminPermissions()"
                     id="employeesDeleteBtn"
                     :disabled="midAction"
                     text
@@ -311,6 +323,14 @@ function handleClick(item) {
 } //handleClick
 
 /**
+ * Checks to see if the user has admin permissions. Returns true if the user's role is an admin or manager, otherwise returns false.
+ * @return boolean - true if user's employeeRole is either a admin or a manager
+ */
+function hasAdminPermissions() {
+  return getRole() === 'admin' || getRole() === 'manager';
+} // hasAdminPermissions
+
+/**
  * Checks to see if an employee is expanded in the datatable.
  *
  * @param item - employee to check
@@ -400,7 +420,7 @@ async function created() {
   this.refreshEmployees();
 
   // remove employee action button header if user view
-  if (!this.userIsAdmin()) {
+  if (!this.hasAdminPermissions()) {
     this.headers.pop();
   }
 } // created
@@ -529,6 +549,7 @@ export default {
     employeePath,
     filterEmployees,
     handleClick,
+    hasAdminPermissions,
     isEmpty,
     isFocus,
     isFullTime,

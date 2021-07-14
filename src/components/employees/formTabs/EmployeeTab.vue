@@ -70,7 +70,7 @@
     <v-autocomplete
       id="employeeRole"
       ref="formFields"
-      :disabled="!admin"
+      :disabled="!userIsAdmin() && userIsEmployee()"
       :items="permissions"
       :rules="requiredRules"
       v-model="employeeRoleFormatted"
@@ -213,6 +213,7 @@ import MobileDetect from 'mobile-detect';
 import _ from 'lodash';
 import { formatDate, isEmpty, parseDate } from '@/utils/utils';
 import { mask } from 'vue-the-mask';
+import { getRole } from '@/utils/auth';
 const moment = require('moment-timezone');
 moment.tz.setDefault('America/New_York');
 
@@ -262,6 +263,8 @@ async function created() {
   }
   // set works status value to a string
   this.value = this.editedEmployee.workStatus.toString();
+  let user = await api.getUser();
+  this.userId = user.employeeNumber;
 } // created
 
 // |--------------------------------------------------|
@@ -307,6 +310,28 @@ function isMobile() {
 function isPartTime() {
   return this.statusRadio == 'part';
 } // isPartTime
+
+/**
+ * Checks whether the current user role is admin, used specifically
+ * to prevent the manager from changing their own role on the Employee tab
+ * @return - boolean: true if the user role is admin
+ */
+function userIsAdmin() {
+  return getRole() === 'admin';
+} //userIsAdmin
+
+/**
+ * Checks if the profile accessed is the signed-in user's profile,
+ * specifically used to prevent a manager from editing their own role
+ *
+ * @returns boolean - true if the profile is the user's profile
+ */
+function userIsEmployee() {
+  if (this.$route.params.id == this.userId) {
+    return true;
+  }
+  return false;
+} //userIsEmployee
 
 /**
  * Checks if the work status is empty.
@@ -391,10 +416,11 @@ export default {
         (v) => !isEmpty(v) || 'Employee # is required',
         (v) => /^\d+$/.test(v) || 'Employee # must be a positive number'
       ], // rules for an employee number
-      permissions: ['Admin', 'User', 'Intern'], // employee role options
+      permissions: ['Admin', 'User', 'Intern', 'Manager'], // employee role options
       requiredRules: [(v) => !isEmpty(v) || 'This field is required'], // rules for a required field
       status: '100', // work status value
       statusRadio: 'full', // work status button
+      userId: null,
       value: '' // used for removing non-number characters from the workstatus
     };
   },
@@ -408,6 +434,8 @@ export default {
     isPartTime,
     isStatusEmpty,
     parseDate,
+    userIsAdmin,
+    userIsEmployee,
     validateFields,
     viewStatus
   },
