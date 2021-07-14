@@ -18,6 +18,7 @@ import Blog from '@/views/Blog.vue';
 import BlogPreview from '@/views/BlogPreview.vue';
 import PostEditor from '@/views/PostEditor.vue';
 import TrainingAnalytics from '@/views/TrainingAnalytics';
+import PageNotFound from '@/views/PageNotFound';
 import { requireAuth, isAdmin } from '@/utils/auth';
 import multiguard from 'vue-router-multiguard';
 
@@ -149,7 +150,7 @@ const router = new Router({
     {
       path: '*',
       name: 'pageNotFound',
-      component: Home,
+      component: PageNotFound,
       beforeEnter: requireAuth
     }
   ]
