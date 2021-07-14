@@ -102,7 +102,7 @@
     </span>
     <!-- Pops up if a user has expiring badges upon login -->
     <badge-expiration-modal
-      v-if="!loading && employee.employeeRole === 'admin'"
+      v-if="!loading && (employee.employeeRole === 'user' || employee.employeeRole === 'manager')"
       :employee="employee"
     ></badge-expiration-modal>
   </v-container>
