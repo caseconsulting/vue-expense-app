@@ -269,10 +269,10 @@ function addCompany() {
       {
         title: '',
         endDate: null,
+        presentDate: false,
         startDate: null,
         showStartMenu: false,
-        showEndMenu: false,
-        presentDate: false
+        showEndMenu: false
       }
     ]
   });

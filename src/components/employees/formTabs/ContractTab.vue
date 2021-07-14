@@ -91,10 +91,16 @@
                 <v-text-field
                   :id="'end-field-' + index + '-' + projIndex"
                   ref="formFields"
+                  :disabled="project.presentDate"
                   :value="project.endDate | formatDate"
-                  label="End Date (optional)"
+                  label="End Date"
                   prepend-icon="event_busy"
-                  :rules="[dateOptionalRules[0], dateOptionalRules[1], dateOrderRule(index, projIndex)]"
+                  :rules="[
+                    dateOptionalRules[0],
+                    dateOptionalRules[1],
+                    dateOrderRule(index, projIndex),
+                    endDatePresentRule(index, projIndex)
+                  ]"
                   hint="MM/DD/YYYY format"
                   v-mask="'##/##/####'"
                   v-bind="attrs"
@@ -113,6 +119,17 @@
             </v-menu>
             <!-- End End Date -->
           </v-col>
+          <v-col></v-col>
+          <v-col>
+            <v-layout justify-start class="pl-2">
+              <v-checkbox
+                class="ma-0 pa-0"
+                v-model="project.presentDate"
+                :label="`Present`"
+                @click="project.endDate = null"
+              ></v-checkbox>
+            </v-layout>
+          </v-col>
         </v-row>
       </div>
       <!-- End of project loop -->
@@ -122,9 +139,9 @@
           ><v-icon class="pr-1">add</v-icon>Project</v-btn
         >
       </div>
-      <v-row v-if="!hasEndDatesFilled(index)" class="py-5 px-5 caption text--darken-2 grey--text">
+      <!-- <v-row v-if="!hasEndDatesFilled(index)" class="py-5 px-5 caption text--darken-2 grey--text">
         Note that leaving the end date blank means you are currently working on that project.
-      </v-row>
+      </v-row> -->
     </div>
     <!-- End Loop Contracts -->
 
@@ -161,6 +178,7 @@ async function created() {
         {
           name: '',
           endDate: null,
+          presentDate: false,
           startDate: null,
           showStartMenu: false,
           showEndMenu: false
@@ -202,6 +220,7 @@ function addProject(contractIndex) {
   this.editedContracts[contractIndex].projects.push({
     name: '',
     endDate: null,
+    presentDate: false,
     startDate: null,
     showStartMenu: false,
     showEndMenu: false
@@ -317,6 +336,18 @@ export default {
         (v) => moment(v, 'MM/DD/YYYY').isValid() || 'Date must be valid'
       ], // rules for an optional date
       editedContracts: _.cloneDeep(this.model), // stores edited contracts info
+      endDatePresentRule: (compIndex, projIndex) => {
+        if (this.editedContracts !== undefined) {
+          let position = this.editedContracts[compIndex].projects[projIndex];
+          if (position.presentDate == false && isEmpty(position.endDate)) {
+            return 'End Date is required';
+          } else {
+            return true;
+          }
+        } else {
+          return false;
+        }
+      },
       experienceRequired: [
         (v) => !isEmpty(v) || 'This field is required',
         (v) => v >= 0 || 'Value cannot be negative',

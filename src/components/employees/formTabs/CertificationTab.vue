@@ -67,9 +67,10 @@
             <template v-slot:activator="{ on, attrs }">
               <v-text-field
                 :value="certification.expirationDate | formatDate"
-                label="Expiration Date (optional)"
+                :disabled="certification.noExpiry"
+                label="Expiration Date"
                 prepend-icon="event_busy"
-                :rules="[dateOptionalRules[0], dateOptionalRules[1], dateOrderRules(index)]"
+                :rules="[dateOptionalRules[0], dateOptionalRules[1], dateOrderRules(index), expDateRule(index)]"
                 hint="MM/DD/YYYY format"
                 v-mask="'##/##/####'"
                 v-bind="attrs"
@@ -88,6 +89,17 @@
             ></v-date-picker>
           </v-menu>
           <!-- End Expiration Date -->
+        </v-col>
+        <v-col></v-col>
+        <v-col>
+          <v-layout justify-start class="pl-2">
+            <v-checkbox
+              class="ma-0 pa-0"
+              v-model="certification.noExpiry"
+              :label="`Present`"
+              @click="certification.expirationDate = null"
+            ></v-checkbox>
+          </v-layout>
         </v-col>
       </v-row>
     </div>
@@ -137,6 +149,7 @@ function addCertification() {
     name: null,
     dateReceived: null,
     expirationDate: null,
+    noExpiry: false,
     showReceivedMenu: false,
     showExpirationMenu: false
   });
@@ -234,6 +247,18 @@ export default {
         (v) => moment(v, 'MM/DD/YYYY').isValid() || 'Date must be valid'
       ], // rules for a required date
       editedCertifications: _.cloneDeep(this.model), // stores edited certifications info
+      expDateRule: (compIndex) => {
+        if (this.editedCertifications !== undefined) {
+          let position = this.editedCertifications[compIndex];
+          if (position.noExpiry == false && isEmpty(position.expirationDate)) {
+            return 'Expiration Date is required';
+          } else {
+            return true;
+          }
+        } else {
+          return false;
+        }
+      },
       requiredRules: [
         (v) => !isEmpty(v) || 'This field is required. You must enter information or delete the field if possible'
       ] // rules for a required field
