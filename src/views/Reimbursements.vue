@@ -10,13 +10,23 @@
       <!-- Expenses Total -->
       <expense-type-totals></expense-type-totals>
     </v-col>
+    <badge-expiration-modal v-if="isAdmin" :employee="employee"></badge-expiration-modal>
   </v-row>
 </template>
 
 <script>
+import api from '@/shared/api.js';
+import BadgeExpirationModal from '@/components/modals/BadgeExpirationModal.vue';
 import ExpenseInfo from '@/components/ExpenseInfo.vue';
 import ExpenseTypeTotals from '@/components/ExpenseTypeTotals.vue';
 import RollupExpenseTypeTable from '@/components/RollupExpenseTypeTable.vue';
+
+async function created() {
+  this.employee = await api.getUser();
+  if (this.employee.employeeRole === 'admin') {
+    this.isAdmin = true;
+  }
+}
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -26,9 +36,17 @@ import RollupExpenseTypeTable from '@/components/RollupExpenseTypeTable.vue';
 
 export default {
   components: {
+    BadgeExpirationModal,
     ExpenseInfo,
     ExpenseTypeTotals,
     RollupExpenseTypeTable
+  },
+  created,
+  data() {
+    return {
+      employee: {},
+      isAdmin: false
+    };
   }
 };
 </script>
