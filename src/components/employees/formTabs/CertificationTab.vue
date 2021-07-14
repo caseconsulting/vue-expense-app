@@ -96,7 +96,7 @@
             <v-checkbox
               class="ma-0 pa-0"
               v-model="certification.noExpiry"
-              :label="`Present`"
+              :label="`No Expiration Date`"
               @click="certification.expirationDate = null"
             ></v-checkbox>
           </v-layout>
