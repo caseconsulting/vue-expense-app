@@ -60,6 +60,7 @@ import { isEmpty } from '@/utils/utils';
 import ConvertEmployeeToCsv from '../components/ConvertEmployeeToCsv.vue';
 import AnniversaryCard from '@/components/AnniversaryCard.vue';
 import BudgetChart from '@/components/BudgetChart.vue';
+import MobileDetect from 'mobile-detect';
 const moment = require('moment');
 const IsoFormat = 'YYYY-MM-DD';
 
@@ -122,7 +123,19 @@ function getWorkStatus(workStatus) {
   }
 } // getWorkStatus
 
+/**
+ * Checks if the current device used is mobile. Return true if it is mobile. Returns false if it is not mobile.
+ *
+ * @return boolean - if the device is mobile
+ */
+function isMobile() {
+  let md = new MobileDetect(window.navigator.userAgent);
+  console.log(md.os());
+  return md.os() === 'AndroidOS' || md.os() === 'iOS';
+} // isMobile
+
 function minimizeWindow() {
+  console.log(this.$vuetify.breakpoint.name);
   switch (this.$vuetify.breakpoint.name) {
     case 'xs':
       return true;
@@ -267,6 +280,7 @@ export default {
     hasAdminPermissions,
     isDisplayData,
     isEmpty,
+    isMobile,
     getEmployee,
     getCurrentBudgetYear,
     getWorkStatus,
