@@ -1,137 +1,144 @@
 <template>
   <div>
-    <!-- We have to put the fields in a v-for
-      in order the 'ref=formFields' to be placed into
-      an array -->
-    <div v-for="i in [0]" :key="i">
-      <!-- Github -->
-      <v-text-field
-        style="padding-right: 20px; padding-left: 10px"
-        v-model="editedPersonalInfo.github"
-        label="Github"
-        data-vv-name="Github"
-      ></v-text-field>
+    <!-- Github -->
+    <v-text-field
+      style="padding-right: 20px; padding-left: 10px"
+      v-model="editedPersonalInfo.github"
+      label="Github"
+      data-vv-name="Github"
+    ></v-text-field>
 
-      <!-- Twitter -->
-      <v-text-field
-        style="padding-right: 20px; padding-left: 10px"
-        v-model="editedPersonalInfo.twitter"
-        label="Twitter"
-        data-vv-name="Twitter"
-      ></v-text-field>
+    <!-- Twitter -->
+    <v-text-field
+      style="padding-right: 20px; padding-left: 10px"
+      v-model="editedPersonalInfo.twitter"
+      label="Twitter"
+      data-vv-name="Twitter"
+    ></v-text-field>
 
-      <!-- LinkedIn -->
-      <v-text-field
-        style="padding-right: 20px; padding-left: 10px"
-        v-model="editedPersonalInfo.linkedIn"
-        label="LinkedIn"
-        :rules="urlRules"
-        data-vv-name="LinkedIn"
-      ></v-text-field>
+    <!-- LinkedIn -->
+    <v-text-field
+      style="padding-right: 20px; padding-left: 10px"
+      v-model="editedPersonalInfo.linkedIn"
+      label="LinkedIn"
+      :rules="urlRules"
+      data-vv-name="LinkedIn"
+    ></v-text-field>
 
-      <!-- Birthday Picker -->
-      <v-menu
-        ref="BirthdayMenu"
-        :close-on-content-click="false"
-        v-model="BirthdayMenu"
-        :nudge-right="40"
-        transition="scale-transition"
-        offset-y
-        max-width="290px"
-        min-width="290px"
-        style="padding-right: 20px; padding-bottom: 20px"
-      >
-        <template v-slot:activator="{ on }">
-          <v-text-field
-            ref="formFields"
-            v-mask="'##/##/####'"
-            v-model="birthdayFormat"
-            :rules="dateOptionalRules"
-            label="Birthday"
-            hint="MM/DD/YYYY format"
-            persistent-hint
-            prepend-icon="event"
-            @blur="editedPersonalInfo.birthday = parseDate(birthdayFormat)"
-            v-on="on"
-          ></v-text-field>
-        </template>
-        <v-date-picker v-model="editedPersonalInfo.birthday" no-title @input="BirthdayMenu = false"></v-date-picker>
-      </v-menu>
+    <!-- Birthday Picker -->
+    <v-menu
+      ref="BirthdayMenu"
+      :close-on-content-click="false"
+      v-model="BirthdayMenu"
+      :nudge-right="40"
+      transition="scale-transition"
+      offset-y
+      max-width="290px"
+      min-width="290px"
+      style="padding-right: 20px; padding-bottom: 20px"
+    >
+      <template v-slot:activator="{ on }">
+        <v-text-field
+          ref="formFields"
+          v-mask="'##/##/####'"
+          v-model="birthdayFormat"
+          :rules="dateOptionalRules"
+          label="Birthday"
+          hint="MM/DD/YYYY format"
+          persistent-hint
+          prepend-icon="event"
+          @blur="editedPersonalInfo.birthday = parseDate(birthdayFormat)"
+          v-on="on"
+        ></v-text-field>
+      </template>
+      <v-date-picker v-model="editedPersonalInfo.birthday" no-title @input="BirthdayMenu = false"></v-date-picker>
+    </v-menu>
 
-      <!-- Show Birthday -->
-      <v-switch
-        v-model="editedPersonalInfo.birthdayFeed"
-        label="Have birthday recognized on company feed?"
-        :disabled="disableBirthdayFeed"
-      ></v-switch>
+    <!-- Show Birthday -->
+    <v-switch
+      v-model="editedPersonalInfo.birthdayFeed"
+      label="Have birthday recognized on company feed?"
+      :disabled="disableBirthdayFeed"
+    ></v-switch>
 
-      <!-- Place of Birth -->
-      <p style="font-size: 17px; padding-left: 10px; padding-top: 10px">Place of Birth</p>
-      <div style="padding-right: 20px; padding-left: 30px; padding-bottom: 10px">
-        <div style="border-left-style: groove; padding-right: 20px; padding-left: 10px">
-          <!-- Place of Birth: City text field -->
-          <v-text-field
-            v-model="editedPersonalInfo.city"
-            label="City"
-            data-vv-name="City"
-            style="padding-top: 0px"
-          ></v-text-field>
+    <!-- Place of Birth -->
+    <p style="font-size: 17px; padding-left: 10px; padding-top: 10px">Place of Birth</p>
+    <div style="padding-right: 20px; padding-left: 30px; padding-bottom: 10px">
+      <div style="border-left-style: groove; padding-right: 20px; padding-left: 10px">
+        <!-- Place of Birth: City text field -->
+        <v-text-field
+          v-model="editedPersonalInfo.city"
+          label="City"
+          data-vv-name="City"
+          style="padding-top: 0px"
+        ></v-text-field>
 
-          <!-- Place of Birth: Country autocomplete -->
-          <v-autocomplete
-            :items="countries"
-            v-model="editedPersonalInfo.country"
-            item-text="text"
-            label="Country"
-            style="padding-top: 0px; padding-bottom: 0px"
-          ></v-autocomplete>
+        <!-- Place of Birth: Country autocomplete -->
+        <v-autocomplete
+          :items="countries"
+          v-model="editedPersonalInfo.country"
+          item-text="text"
+          label="Country"
+          style="padding-top: 0px; padding-bottom: 0px"
+        ></v-autocomplete>
 
-          <!-- Place of Birth: State autocomplete -->
-          <v-autocomplete
-            v-if="isUSA"
-            :items="states"
-            v-model="editedPersonalInfo.st"
-            item-text="text"
-            label="State"
-            style="padding-top: 0px"
-          ></v-autocomplete>
-        </div>
+        <!-- Place of Birth: State autocomplete -->
+        <v-autocomplete
+          v-if="isUSA"
+          :items="Object.values(states)"
+          v-model="editedPersonalInfo.st"
+          item-text="text"
+          label="State"
+          style="padding-top: 0px"
+        ></v-autocomplete>
       </div>
-      <!-- Current Address -->
-      <p style="font-size: 17px; padding-left: 10px; padding-top: 10px">Current Address</p>
-      <div style="padding-right: 20px; padding-left: 30px; padding-bottom: 10px">
-        <div style="border-left-style: groove; padding-right: 20px; padding-left: 10px">
-          <!-- Current Address: Street text field -->
-          <v-text-field
-            v-model="editedPersonalInfo.currentStreet"
-            label="Street"
-            data-vv-name="Street"
-            style="padding-top: 0px"
-          ></v-text-field>
-          <!-- Current Address: City text field -->
-          <v-text-field
-            v-model="editedPersonalInfo.currentCity"
-            label="City"
-            data-vv-name="Current City"
-            style="padding-top: 0px"
-          ></v-text-field>
-          <!-- Current Address: State autocomplete -->
-          <v-autocomplete
-            :items="states"
-            v-model="editedPersonalInfo.currentState"
-            item-text="text"
-            label="State"
-            style="padding-top: 0px"
-          ></v-autocomplete>
-          <!-- Current Address: ZIP text field -->
-          <v-text-field
-            v-model="editedPersonalInfo.currentZIP"
-            v-mask="'#####'"
-            label="ZIP"
-            data-vv-name="Current ZIP"
-            style="padding-top: 0px"
-          ></v-text-field>
-        </div>
+    </div>
+    <!-- Current Address -->
+    <p style="font-size: 17px; padding-left: 10px; padding-top: 10px">Current Address</p>
+    <v-combobox
+      class="pb-3"
+      style="padding-top: 0px"
+      @input.native="updateAddressDropDown"
+      :items="Object.keys(placeIds)"
+      v-model="searchString"
+      :search-input.sync="searchString"
+      @change="updateBoxes"
+      outlined
+      hint="Search address and select option to auto-fill fields below"
+      persistent-hint
+    ></v-combobox>
+    <div style="padding-right: 20px; padding-left: 30px; padding-bottom: 10px">
+      <div style="border-left-style: groove; padding-right: 20px; padding-left: 10px">
+        <!-- Current Address: Street text field -->
+        <v-text-field
+          v-model="editedPersonalInfo.currentStreet"
+          label="Street"
+          data-vv-name="Street"
+          style="padding-top: 0px"
+        ></v-text-field>
+        <!-- Current Address: City text field -->
+        <v-text-field
+          v-model="editedPersonalInfo.currentCity"
+          label="City"
+          data-vv-name="Current City"
+          style="padding-top: 0px"
+        ></v-text-field>
+        <!-- Current Address: State autocomplete -->
+        <v-autocomplete
+          :items="Object.values(states)"
+          v-model="editedPersonalInfo.currentState"
+          item-text="text"
+          label="State"
+          style="padding-top: 0px"
+        ></v-autocomplete>
+        <!-- Current Address: ZIP text field -->
+        <v-text-field
+          v-model="editedPersonalInfo.currentZIP"
+          v-mask="'#####'"
+          label="ZIP"
+          data-vv-name="Current ZIP"
+          style="padding-top: 0px"
+        ></v-text-field>
       </div>
     </div>
   </div>
@@ -209,6 +216,49 @@ function isUSA() {
 // |--------------------------------------------------|
 
 /**
+ * Updates the address dropdown according to the user's input
+ */
+async function updateAddressDropDown() {
+  let query = event.target.value;
+  if (query.length > 0) {
+    let locations = await api.getLocation(query);
+    //object used to contain addresses and their respective ID's
+    //needed later to obtain the selected address's zip code
+    this.placeIds = {};
+    _.forEach(locations.predictions, (location) => {
+      this.placeIds[location.description] = location.place_id;
+    });
+  }
+} //updateAddressDropDown
+
+/**
+ * Once an address has been selected, it autofills the city, street, and state fields.
+ * It also updates the zip code field making an additional Google Maps API call
+ * to obtain the selected address's zip code.
+ */
+async function updateBoxes() {
+  let fullAddress = this.searchString.split(', ');
+  //fills in the first three fields
+  this.editedPersonalInfo.currentCity = fullAddress[1];
+  this.editedPersonalInfo.currentStreet = fullAddress[0];
+  this.editedPersonalInfo.currentState = this.states[fullAddress[2]];
+  //obtains the selected address's ID needed for the zip code API call
+  let selectedAddress = this.placeIds[this.searchString];
+  this.searchString = '';
+  let res = await api.getZipCode(selectedAddress);
+  //Response contains an array of objects, with each object containing
+  //a field title 'type'. 'Type' is another array and we want the one
+  //containing the postal_code string
+  _.forEach(res.result.address_components, (field) => {
+    if (field.types.includes('postal_code')) {
+      this.editedPersonalInfo.currentZIP = field.short_name;
+    }
+  });
+  //resets addresses and ID's in dropdown
+  this.placeIds = {};
+} //updateBoxes
+
+/**
  * Validate all input fields are valid. Emit to parent the error status.
  */
 function validateFields() {
@@ -241,6 +291,7 @@ export default {
   },
   data() {
     return {
+      addressDropDown: [],
       birthdayFormat: null, // formatted birthday
       BirthdayMenu: false, // display birthday menu
       countries: [], // list of countries
@@ -259,77 +310,78 @@ export default {
           ) ||
           'URL must be valid. Only http(s) are accepted.'
       ], // rules for training url
+      searchString: '',
+      placeIds: {},
       editedPersonalInfo: _.cloneDeep(this.model), //employee personal info that can be edited
-      states: [
-        '',
-        'Alabama',
-        'Alaska',
-        'American Samoa',
-        'Arizona',
-        'Arkansas',
-        'California',
-        'Colorado',
-        'Connecticut',
-        'Delaware',
-        'District of Columbia',
-        'Federated States of Micronesia',
-        'Florida',
-        'Georgia',
-        'Guam',
-        'Hawaii',
-        'Idaho',
-        'Illinois',
-        'Indiana',
-        'Iowa',
-        'Kansas',
-        'Kentucky',
-        'Louisiana',
-        'Maine',
-        'Marshall Islands',
-        'Maryland',
-        'Massachusetts',
-        'Michigan',
-        'Minnesota',
-        'Minor Outlying Islands',
-        'Mississippi',
-        'Missouri',
-        'Montana',
-        'Nebraska',
-        'Nevada',
-        'New Hampshire',
-        'New Jersey',
-        'New Mexico',
-        'New York',
-        'North Carolina',
-        'North Dakota',
-        'Northern Mariana Islands',
-        'Ohio',
-        'Oklahoma',
-        'Oregon',
-        'Pennsylvania',
-        'Puerto Rico',
-        'Republic of Palau',
-        'Rhode Island',
-        'South Carolina',
-        'South Dakota',
-        'Tennessee',
-        'Texas',
-        'U.S. Minor Outlying Islands',
-        'U.S. Virgin Islands',
-        'Utah',
-        'Vermont',
-        'Virginia',
-        'Washington',
-        'West Virginia',
-        'Wisconsin',
-        'Wyoming'
-      ] // state options
+      states: {
+        AL: 'Alabama',
+        AK: 'Alaska',
+        AS: 'American Samoa',
+        AZ: 'Arizona',
+        AR: 'Arkansas',
+        CA: 'California',
+        CO: 'Colorado',
+        CT: 'Connecticut',
+        DE: 'Delaware',
+        DC: 'District Of Columbia',
+        FM: 'Federated States Of Micronesia',
+        FL: 'Florida',
+        GA: 'Georgia',
+        GU: 'Guam',
+        HI: 'Hawaii',
+        ID: 'Idaho',
+        IL: 'Illinois',
+        IN: 'Indiana',
+        IA: 'Iowa',
+        KS: 'Kansas',
+        KY: 'Kentucky',
+        LA: 'Louisiana',
+        ME: 'Maine',
+        MH: 'Marshall Islands',
+        MD: 'Maryland',
+        MA: 'Massachusetts',
+        MI: 'Michigan',
+        MN: 'Minnesota',
+        MS: 'Mississippi',
+        MO: 'Missouri',
+        MT: 'Montana',
+        NE: 'Nebraska',
+        NV: 'Nevada',
+        NH: 'New Hampshire',
+        NJ: 'New Jersey',
+        NM: 'New Mexico',
+        NY: 'New York',
+        NC: 'North Carolina',
+        ND: 'North Dakota',
+        MP: 'Northern Mariana Islands',
+        OH: 'Ohio',
+        OK: 'Oklahoma',
+        OR: 'Oregon',
+        PW: 'Palau',
+        PA: 'Pennsylvania',
+        PR: 'Puerto Rico',
+        RI: 'Rhode Island',
+        SC: 'South Carolina',
+        SD: 'South Dakota',
+        TN: 'Tennessee',
+        TX: 'Texas',
+        UT: 'Utah',
+        VT: 'Vermont',
+        VI: 'Virgin Islands',
+        VA: 'Virginia',
+        WA: 'Washington',
+        WV: 'West Virginia',
+        WI: 'Wisconsin',
+        WY: 'Wyoming'
+      } //states
     };
   },
   directives: { mask },
   methods: {
     formatDate,
     parseDate,
+    updateAddressDropDown,
+    updateBoxes,
     validateFields
   },
   props: ['model', 'validating'],

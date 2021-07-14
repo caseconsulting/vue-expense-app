@@ -15,6 +15,7 @@ const BASECAMP = 'basecamp';
 const BLOG = 'blog';
 const BLOG_FILE = 'blogFile';
 const HIPPO_LAB = 'hippoLabs';
+const GOOGLE_MAPS = 'googleMaps';
 const BLOG_ATTACHMENT = 'blogAttachment';
 const API_HOSTNAME = API_CONFIG.apiHostname;
 const API_PORT = API_CONFIG.apiPort;
@@ -164,6 +165,14 @@ function getBlogFile(authorId, blogId) {
 
 function getPictureFile(authorId, blogId, mainPicture) {
   return execute('get', `${BLOG_FILE}/${authorId}/${blogId}/${mainPicture}`);
+}
+
+function getLocation(locationQuery) {
+  return execute('get', `${GOOGLE_MAPS}/getLocation/${locationQuery}`);
+}
+
+function getZipCode(addressId) {
+  return execute('get', `${GOOGLE_MAPS}/getZipCode/${addressId}`);
 }
 
 async function extractText(file) {
@@ -398,6 +407,7 @@ export default {
   getItem,
   getItems,
   getKeyPhrases,
+  getLocation,
   getModerationLabel,
   getPTOBalances,
   getResume,
@@ -406,6 +416,7 @@ export default {
   getTechSkills,
   getTwitterToken,
   getURLInfo,
+  getZipCode,
   getUser,
   updateItem,
   uploadBlogAttachment,
