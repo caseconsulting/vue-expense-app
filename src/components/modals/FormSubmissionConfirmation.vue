@@ -74,6 +74,11 @@ export default {
   watch: {
     toggleSubmissionConfirmation: function () {
       this.activate = true;
+    },
+    activate: function () {
+      if (this.activate) {
+        this.loading = false;
+      }
     }
   }
 };
