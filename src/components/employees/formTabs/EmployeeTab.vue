@@ -1,210 +1,215 @@
 <template>
   <div>
-    <!-- Name -->
-    <v-text-field
-      id="employeeFirstName"
-      ref="formFields"
-      v-model="editedEmployee.firstName"
-      :rules="requiredRules"
-      label="First Name"
-      data-vv-name="First Name"
-      :disabled="!admin"
-    ></v-text-field>
-    <v-text-field
-      id="employeeMiddleName"
-      v-model="editedEmployee.middleName"
-      label="Middle Name (optional)"
-      data-vv-name="Middle Name"
-      :disabled="!admin"
-    ></v-text-field>
-    <v-text-field
-      id="employeeLastName"
-      ref="formFields"
-      v-model="editedEmployee.lastName"
-      :rules="requiredRules"
-      label="Last Name"
-      data-vv-name="Last Name"
-      :disabled="!admin"
-    ></v-text-field>
-    <v-text-field
-      id="employeeNickname"
-      ref="formFields"
-      v-model="editedEmployee.nickname"
-      label="Nickname (optional)"
-      data-vv-name="Nickname"
-      :disabled="!admin"
-    ></v-text-field>
-
-    <!-- Employee # -->
-    <v-text-field
-      id="employeeNumber"
-      ref="formFields"
-      v-model="editedEmployee.employeeNumber"
-      :rules="numberRules"
-      label="Employee #"
-      data-vv-name="Employee #"
-      :disabled="!admin"
-    ></v-text-field>
-
-    <!-- Email -->
-    <v-text-field
-      id="employeeEmail"
-      ref="formFields"
-      v-model="editedEmployee.email"
-      :rules="emailRules"
-      label="Email"
-      data-vv-name="Email"
-      :disabled="!admin"
-    ></v-text-field>
-
-    <!-- Job Role -->
-    <v-combobox
-      id="employeeJobRole"
-      :items="jobTitles"
-      v-model="editedEmployee.jobRole"
-      item-text="text"
-      label="Job Role (optional)"
-    ></v-combobox>
-
-    <!-- Employee Role -->
-    <v-autocomplete
-      id="employeeRole"
-      ref="formFields"
-      :disabled="!userIsAdmin() && userIsEmployee()"
-      :items="permissions"
-      :rules="requiredRules"
-      v-model="employeeRoleFormatted"
-      label="Employee Role"
-      @blur="editedEmployee.employeeRole = formatKebabCase(employeeRoleFormatted)"
-    ></v-autocomplete>
-
-    <!-- Hire Date -->
-    <v-menu
-      ref="hireMenu"
-      :close-on-content-click="true"
-      v-model="hireMenu"
-      :nudge-right="40"
-      transition="scale-transition"
-      offset-y
-      max-width="290px"
-      min-width="290px"
-      style="padding-right: 20px; padding-bottom: 20px"
-      :disabled="!admin"
-    >
-      <template v-slot:activator="{ on }">
-        <v-text-field
-          id="employeeHireDateField"
-          ref="formFields"
-          v-model="hireDateFormatted"
-          :rules="dateRules"
-          :disabled="hasExpenses || !admin"
-          v-mask="'##/##/####'"
-          label="Hire Date"
-          hint="MM/DD/YYYY format"
-          persistent-hint
-          prepend-icon="event"
-          @blur="editedEmployee.hireDate = parseDate(hireDateFormatted)"
-          v-on="on"
-        ></v-text-field>
-      </template>
-      <v-date-picker
-        v-model="editedEmployee.hireDate"
-        no-title
-        @input="hireMenu = false"
+    <!-- We have to put the fields in a v-for
+      in order the 'ref=formFields' to be placed into
+      an array -->
+    <div v-for="i in [0]" :key="i">
+      <!-- Name -->
+      <v-text-field
+        id="employeeFirstName"
+        ref="formFields"
+        v-model="editedEmployee.firstName"
+        :rules="requiredRules"
+        label="First Name"
+        data-vv-name="First Name"
         :disabled="!admin"
-      ></v-date-picker>
-    </v-menu>
+      ></v-text-field>
+      <v-text-field
+        id="employeeMiddleName"
+        v-model="editedEmployee.middleName"
+        label="Middle Name (optional)"
+        data-vv-name="Middle Name"
+        :disabled="!admin"
+      ></v-text-field>
+      <v-text-field
+        id="employeeLastName"
+        ref="formFields"
+        v-model="editedEmployee.lastName"
+        :rules="requiredRules"
+        label="Last Name"
+        data-vv-name="Last Name"
+        :disabled="!admin"
+      ></v-text-field>
+      <v-text-field
+        id="employeeNickname"
+        ref="formFields"
+        v-model="editedEmployee.nickname"
+        label="Nickname (optional)"
+        data-vv-name="Nickname"
+        :disabled="!admin"
+      ></v-text-field>
 
-    <!-- Full/Part/Inactive Status [MOBILE] -->
-    <v-radio-group v-if="isMobile()" v-model="statusRadio" row mandatory :disabled="!admin">
-      <v-row class="ml-0">
-        <v-col cols="6" sm="3">
-          <v-radio label="Full Time" value="full"></v-radio>
-        </v-col>
-        <v-col cols="6" sm="3">
-          <v-radio label="Part Time" value="part" @change="viewStatus()"></v-radio>
-        </v-col>
-        <v-col cols="6" sm="3">
-          <v-radio label="Inactive" value="inactive"></v-radio>
-        </v-col>
-        <!-- Custom Input Field -->
-        <v-col cols="6" sm="3">
-          <div :class="{ customInput: isPartTime() }">
-            <div :class="['percentageBox', { disabled: !isPartTime(), inputError: isStatusEmpty() }]">
-              <input
-                v-model="status"
-                type="text"
-                oninput="this.value = this.value.replace(/[^0-9]/g, '');"
-                maxlength="2"
-                :disabled="!isPartTime()"
-              />
-              <div>%</div>
-            </div>
-          </div>
-        </v-col>
-        <!-- End Custom Input Field -->
-      </v-row>
-    </v-radio-group>
-    <!-- End [Full/Part/Inactive Status [MOBILE]] -->
+      <!-- Employee # -->
+      <v-text-field
+        id="employeeNumber"
+        ref="formFields"
+        v-model="editedEmployee.employeeNumber"
+        :rules="numberRules"
+        label="Employee #"
+        data-vv-name="Employee #"
+        :disabled="!admin"
+      ></v-text-field>
 
-    <!-- Full/Part/Inactive Status [DESKTOP] -->
-    <v-radio-group v-else v-model="statusRadio" row mandatory hide-details :disabled="!admin">
-      <v-radio label="Full Time" value="full"></v-radio>
-      <v-radio label="Part Time" value="part" @change="viewStatus()"></v-radio>
-      <v-radio label="Inactive" value="inactive"></v-radio>
-      <!-- custom input field -->
-      <div :class="{ customInput: isPartTime() }">
-        <div :class="['percentageBox', { disabled: !isPartTime(), inputError: isStatusEmpty() }]">
-          <input
-            v-model="status"
-            type="text"
-            oninput="this.value = this.value.replace(/[^0-9]/g, '');"
-            maxlength="2"
-            :disabled="!isPartTime()"
-          />
-          <div>%</div>
-        </div>
-      </div>
-      <!-- End Full/Part/Inactive Status [DESKTOP] -->
-    </v-radio-group>
-    <!-- End [DESKTOP] -->
+      <!-- Email -->
+      <v-text-field
+        id="employeeEmail"
+        ref="formFields"
+        v-model="editedEmployee.email"
+        :rules="emailRules"
+        label="Email"
+        data-vv-name="Email"
+        :disabled="!admin"
+      ></v-text-field>
 
-    <!-- If inactive, set Departure Date -->
-    <v-menu
-      v-if="isInactive() || (isPartTime() && status && status == 0)"
-      ref="departureMenu"
-      :close-on-content-click="true"
-      v-model="departureMenu"
-      :nudge-right="40"
-      transition="scale-transition"
-      offset-y
-      max-width="290px"
-      min-width="290px"
-      style="padding-right: 20px; padding-bottom: 20px"
-      :disabled="!admin"
-    >
-      <template v-slot:activator="{ on }">
-        <v-text-field
-          ref="formFields"
-          v-model="deptDateFormatted"
-          :rules="dateRules"
-          label="Departure Date"
-          hint="MM/DD/YYYY format"
-          persistent-hint
-          prepend-icon="event"
-          @blur="editedEmployee.deptDate = parseDate(deptDateFormatted)"
-          v-on="on"
+      <!-- Job Role -->
+      <v-combobox
+        id="employeeJobRole"
+        :items="jobTitles"
+        v-model="editedEmployee.jobRole"
+        item-text="text"
+        label="Job Role (optional)"
+      ></v-combobox>
+
+      <!-- Employee Role -->
+      <v-autocomplete
+        id="employeeRole"
+        ref="formFields"
+        :disabled="!userIsAdmin() && userIsEmployee()"
+        :items="permissions"
+        :rules="requiredRules"
+        v-model="employeeRoleFormatted"
+        label="Employee Role"
+        @blur="editedEmployee.employeeRole = formatKebabCase(employeeRoleFormatted)"
+      ></v-autocomplete>
+
+      <!-- Hire Date -->
+      <v-menu
+        ref="hireMenu"
+        :close-on-content-click="true"
+        v-model="hireMenu"
+        :nudge-right="40"
+        transition="scale-transition"
+        offset-y
+        max-width="290px"
+        min-width="290px"
+        style="padding-right: 20px; padding-bottom: 20px"
+        :disabled="!admin"
+      >
+        <template v-slot:activator="{ on }">
+          <v-text-field
+            id="employeeHireDateField"
+            ref="formFields"
+            v-model="hireDateFormatted"
+            :rules="dateRules"
+            :disabled="hasExpenses || !admin"
+            v-mask="'##/##/####'"
+            label="Hire Date"
+            hint="MM/DD/YYYY format"
+            persistent-hint
+            prepend-icon="event"
+            @blur="editedEmployee.hireDate = parseDate(hireDateFormatted)"
+            v-on="on"
+          ></v-text-field>
+        </template>
+        <v-date-picker
+          v-model="editedEmployee.hireDate"
+          no-title
+          @input="hireMenu = false"
           :disabled="!admin"
-        ></v-text-field>
-      </template>
-      <v-date-picker
-        v-model="editedEmployee.deptDate"
-        no-title
-        @input="departureMenu = false"
+        ></v-date-picker>
+      </v-menu>
+
+      <!-- Full/Part/Inactive Status [MOBILE] -->
+      <v-radio-group v-if="isMobile()" v-model="statusRadio" row mandatory :disabled="!admin">
+        <v-row class="ml-0">
+          <v-col cols="6" sm="3">
+            <v-radio label="Full Time" value="full"></v-radio>
+          </v-col>
+          <v-col cols="6" sm="3">
+            <v-radio label="Part Time" value="part" @change="viewStatus()"></v-radio>
+          </v-col>
+          <v-col cols="6" sm="3">
+            <v-radio label="Inactive" value="inactive"></v-radio>
+          </v-col>
+          <!-- Custom Input Field -->
+          <v-col cols="6" sm="3">
+            <div :class="{ customInput: isPartTime() }">
+              <div :class="['percentageBox', { disabled: !isPartTime(), inputError: isStatusEmpty() }]">
+                <input
+                  v-model="status"
+                  type="text"
+                  oninput="this.value = this.value.replace(/[^0-9]/g, '');"
+                  maxlength="2"
+                  :disabled="!isPartTime()"
+                />
+                <div>%</div>
+              </div>
+            </div>
+          </v-col>
+          <!-- End Custom Input Field -->
+        </v-row>
+      </v-radio-group>
+      <!-- End [Full/Part/Inactive Status [MOBILE]] -->
+
+      <!-- Full/Part/Inactive Status [DESKTOP] -->
+      <v-radio-group v-else v-model="statusRadio" row mandatory hide-details :disabled="!admin">
+        <v-radio label="Full Time" value="full"></v-radio>
+        <v-radio label="Part Time" value="part" @change="viewStatus()"></v-radio>
+        <v-radio label="Inactive" value="inactive"></v-radio>
+        <!-- custom input field -->
+        <div :class="{ customInput: isPartTime() }">
+          <div :class="['percentageBox', { disabled: !isPartTime(), inputError: isStatusEmpty() }]">
+            <input
+              v-model="status"
+              type="text"
+              oninput="this.value = this.value.replace(/[^0-9]/g, '');"
+              maxlength="2"
+              :disabled="!isPartTime()"
+            />
+            <div>%</div>
+          </div>
+        </div>
+        <!-- End Full/Part/Inactive Status [DESKTOP] -->
+      </v-radio-group>
+      <!-- End [DESKTOP] -->
+
+      <!-- If inactive, set Departure Date -->
+      <v-menu
+        v-if="isInactive() || (isPartTime() && status && status == 0)"
+        ref="departureMenu"
+        :close-on-content-click="true"
+        v-model="departureMenu"
+        :nudge-right="40"
+        transition="scale-transition"
+        offset-y
+        max-width="290px"
+        min-width="290px"
+        style="padding-right: 20px; padding-bottom: 20px"
         :disabled="!admin"
-      ></v-date-picker>
-    </v-menu>
-    <!-- End Full/Part/Inactive Status [DESKTOP] -->
+      >
+        <template v-slot:activator="{ on }">
+          <v-text-field
+            ref="formFields"
+            v-model="deptDateFormatted"
+            :rules="dateRules"
+            label="Departure Date"
+            hint="MM/DD/YYYY format"
+            persistent-hint
+            prepend-icon="event"
+            @blur="editedEmployee.deptDate = parseDate(deptDateFormatted)"
+            v-on="on"
+            :disabled="!admin"
+          ></v-text-field>
+        </template>
+        <v-date-picker
+          v-model="editedEmployee.deptDate"
+          no-title
+          @input="departureMenu = false"
+          :disabled="!admin"
+        ></v-date-picker>
+      </v-menu>
+      <!-- End Full/Part/Inactive Status [DESKTOP] -->
+    </div>
   </div>
 </template>
 <script>

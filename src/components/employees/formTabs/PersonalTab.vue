@@ -1,132 +1,137 @@
 <template>
   <div>
-    <!-- Github -->
-    <v-text-field
-      style="padding-right: 20px; padding-left: 10px"
-      v-model="editedPersonalInfo.github"
-      label="Github"
-      data-vv-name="Github"
-    ></v-text-field>
+    <!-- We have to put the fields in a v-for
+      in order the 'ref=formFields' to be placed into
+      an array -->
+    <div v-for="i in [0]" :key="i">
+      <!-- Github -->
+      <v-text-field
+        style="padding-right: 20px; padding-left: 10px"
+        v-model="editedPersonalInfo.github"
+        label="Github"
+        data-vv-name="Github"
+      ></v-text-field>
 
-    <!-- Twitter -->
-    <v-text-field
-      style="padding-right: 20px; padding-left: 10px"
-      v-model="editedPersonalInfo.twitter"
-      label="Twitter"
-      data-vv-name="Twitter"
-    ></v-text-field>
+      <!-- Twitter -->
+      <v-text-field
+        style="padding-right: 20px; padding-left: 10px"
+        v-model="editedPersonalInfo.twitter"
+        label="Twitter"
+        data-vv-name="Twitter"
+      ></v-text-field>
 
-    <!-- LinkedIn -->
-    <v-text-field
-      style="padding-right: 20px; padding-left: 10px"
-      v-model="editedPersonalInfo.linkedIn"
-      label="LinkedIn"
-      :rules="urlRules"
-      data-vv-name="LinkedIn"
-    ></v-text-field>
+      <!-- LinkedIn -->
+      <v-text-field
+        style="padding-right: 20px; padding-left: 10px"
+        v-model="editedPersonalInfo.linkedIn"
+        label="LinkedIn"
+        :rules="urlRules"
+        data-vv-name="LinkedIn"
+      ></v-text-field>
 
-    <!-- Birthday Picker -->
-    <v-menu
-      ref="BirthdayMenu"
-      :close-on-content-click="false"
-      v-model="BirthdayMenu"
-      :nudge-right="40"
-      transition="scale-transition"
-      offset-y
-      max-width="290px"
-      min-width="290px"
-      style="padding-right: 20px; padding-bottom: 20px"
-    >
-      <template v-slot:activator="{ on }">
-        <v-text-field
-          ref="formFields"
-          v-mask="'##/##/####'"
-          v-model="birthdayFormat"
-          :rules="dateOptionalRules"
-          label="Birthday"
-          hint="MM/DD/YYYY format"
-          persistent-hint
-          prepend-icon="event"
-          @blur="editedPersonalInfo.birthday = parseDate(birthdayFormat)"
-          v-on="on"
-        ></v-text-field>
-      </template>
-      <v-date-picker v-model="editedPersonalInfo.birthday" no-title @input="BirthdayMenu = false"></v-date-picker>
-    </v-menu>
+      <!-- Birthday Picker -->
+      <v-menu
+        ref="BirthdayMenu"
+        :close-on-content-click="false"
+        v-model="BirthdayMenu"
+        :nudge-right="40"
+        transition="scale-transition"
+        offset-y
+        max-width="290px"
+        min-width="290px"
+        style="padding-right: 20px; padding-bottom: 20px"
+      >
+        <template v-slot:activator="{ on }">
+          <v-text-field
+            ref="formFields"
+            v-mask="'##/##/####'"
+            v-model="birthdayFormat"
+            :rules="dateOptionalRules"
+            label="Birthday"
+            hint="MM/DD/YYYY format"
+            persistent-hint
+            prepend-icon="event"
+            @blur="editedPersonalInfo.birthday = parseDate(birthdayFormat)"
+            v-on="on"
+          ></v-text-field>
+        </template>
+        <v-date-picker v-model="editedPersonalInfo.birthday" no-title @input="BirthdayMenu = false"></v-date-picker>
+      </v-menu>
 
-    <!-- Show Birthday -->
-    <v-switch
-      v-model="editedPersonalInfo.birthdayFeed"
-      label="Have birthday recognized on company feed?"
-      :disabled="disableBirthdayFeed"
-    ></v-switch>
+      <!-- Show Birthday -->
+      <v-switch
+        v-model="editedPersonalInfo.birthdayFeed"
+        label="Have birthday recognized on company feed?"
+        :disabled="disableBirthdayFeed"
+      ></v-switch>
 
-    <!-- Place of Birth -->
-    <p style="font-size: 17px; padding-left: 10px; padding-top: 10px">Place of Birth</p>
-    <div style="padding-right: 20px; padding-left: 30px; padding-bottom: 10px">
-      <div style="border-left-style: groove; padding-right: 20px; padding-left: 10px">
-        <!-- Place of Birth: City text field -->
-        <v-text-field
-          v-model="editedPersonalInfo.city"
-          label="City"
-          data-vv-name="City"
-          style="padding-top: 0px"
-        ></v-text-field>
+      <!-- Place of Birth -->
+      <p style="font-size: 17px; padding-left: 10px; padding-top: 10px">Place of Birth</p>
+      <div style="padding-right: 20px; padding-left: 30px; padding-bottom: 10px">
+        <div style="border-left-style: groove; padding-right: 20px; padding-left: 10px">
+          <!-- Place of Birth: City text field -->
+          <v-text-field
+            v-model="editedPersonalInfo.city"
+            label="City"
+            data-vv-name="City"
+            style="padding-top: 0px"
+          ></v-text-field>
 
-        <!-- Place of Birth: Country autocomplete -->
-        <v-autocomplete
-          :items="countries"
-          v-model="editedPersonalInfo.country"
-          item-text="text"
-          label="Country"
-          style="padding-top: 0px; padding-bottom: 0px"
-        ></v-autocomplete>
+          <!-- Place of Birth: Country autocomplete -->
+          <v-autocomplete
+            :items="countries"
+            v-model="editedPersonalInfo.country"
+            item-text="text"
+            label="Country"
+            style="padding-top: 0px; padding-bottom: 0px"
+          ></v-autocomplete>
 
-        <!-- Place of Birth: State autocomplete -->
-        <v-autocomplete
-          v-if="isUSA"
-          :items="states"
-          v-model="editedPersonalInfo.st"
-          item-text="text"
-          label="State"
-          style="padding-top: 0px"
-        ></v-autocomplete>
+          <!-- Place of Birth: State autocomplete -->
+          <v-autocomplete
+            v-if="isUSA"
+            :items="states"
+            v-model="editedPersonalInfo.st"
+            item-text="text"
+            label="State"
+            style="padding-top: 0px"
+          ></v-autocomplete>
+        </div>
       </div>
-    </div>
-    <!-- Current Address -->
-    <p style="font-size: 17px; padding-left: 10px; padding-top: 10px">Current Address</p>
-    <div style="padding-right: 20px; padding-left: 30px; padding-bottom: 10px">
-      <div style="border-left-style: groove; padding-right: 20px; padding-left: 10px">
-        <!-- Current Address: Street text field -->
-        <v-text-field
-          v-model="editedPersonalInfo.currentStreet"
-          label="Street"
-          data-vv-name="Street"
-          style="padding-top: 0px"
-        ></v-text-field>
-        <!-- Current Address: City text field -->
-        <v-text-field
-          v-model="editedPersonalInfo.currentCity"
-          label="City"
-          data-vv-name="Current City"
-          style="padding-top: 0px"
-        ></v-text-field>
-        <!-- Current Address: State autocomplete -->
-        <v-autocomplete
-          :items="states"
-          v-model="editedPersonalInfo.currentState"
-          item-text="text"
-          label="State"
-          style="padding-top: 0px"
-        ></v-autocomplete>
-        <!-- Current Address: ZIP text field -->
-        <v-text-field
-          v-model="editedPersonalInfo.currentZIP"
-          v-mask="'#####'"
-          label="ZIP"
-          data-vv-name="Current ZIP"
-          style="padding-top: 0px"
-        ></v-text-field>
+      <!-- Current Address -->
+      <p style="font-size: 17px; padding-left: 10px; padding-top: 10px">Current Address</p>
+      <div style="padding-right: 20px; padding-left: 30px; padding-bottom: 10px">
+        <div style="border-left-style: groove; padding-right: 20px; padding-left: 10px">
+          <!-- Current Address: Street text field -->
+          <v-text-field
+            v-model="editedPersonalInfo.currentStreet"
+            label="Street"
+            data-vv-name="Street"
+            style="padding-top: 0px"
+          ></v-text-field>
+          <!-- Current Address: City text field -->
+          <v-text-field
+            v-model="editedPersonalInfo.currentCity"
+            label="City"
+            data-vv-name="Current City"
+            style="padding-top: 0px"
+          ></v-text-field>
+          <!-- Current Address: State autocomplete -->
+          <v-autocomplete
+            :items="states"
+            v-model="editedPersonalInfo.currentState"
+            item-text="text"
+            label="State"
+            style="padding-top: 0px"
+          ></v-autocomplete>
+          <!-- Current Address: ZIP text field -->
+          <v-text-field
+            v-model="editedPersonalInfo.currentZIP"
+            v-mask="'#####'"
+            label="ZIP"
+            data-vv-name="Current ZIP"
+            style="padding-top: 0px"
+          ></v-text-field>
+        </div>
       </div>
     </div>
   </div>
