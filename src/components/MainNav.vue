@@ -227,7 +227,7 @@ export default {
           alias: ['audit'],
           icon: 'clipboard-check',
           route: 'audits',
-          permission: ['admin'],
+          permission: ['admin']
         },
         {
           title: 'Reports',
