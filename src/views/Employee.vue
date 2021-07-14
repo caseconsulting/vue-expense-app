@@ -36,9 +36,12 @@
         </v-card>
         <!-- Edit Info (Form) -->
         <employee-form :employee="this.model" :currentTab="this.currentTab" v-if="editing"></employee-form>
-        <div v-if="userIsAdmin() || userIsEmployee()">
-          <budget-chart class="pt-4" :employee="this.model"></budget-chart>
-        </div>
+        <budget-chart
+          v-if="userIsAdmin() || userIsEmployee()"
+          class="pt-4"
+          :employee="this.model"
+          :fiscalDateView="fiscalDateView"
+        ></budget-chart>
       </v-col>
     </v-row>
   </v-container>
