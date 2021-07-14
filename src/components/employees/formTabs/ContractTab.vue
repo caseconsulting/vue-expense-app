@@ -43,85 +43,77 @@
           @click:append-outer="deleteProject(index, projIndex)"
         >
         </v-combobox>
-        <v-form :ref="'dates-' + projIndex">
-          <v-row>
-            <v-col cols="12" sm="6" md="12" lg="6" class="pt-3">
-              <!-- Start Date -->
-              <v-menu
-                v-model="project.showStartMenu"
-                :close-on-content-click="false"
-                transition="scale-transition"
-                offset-y
-                max-width="290px"
-                min-width="290px"
-              >
-                <template v-slot:activator="{ on, attrs }">
-                  <v-text-field
-                    :id="'start-field-' + index + '-' + projIndex"
-                    ref="formFields"
-                    :value="project.startDate | formatDate"
-                    label="Start Date"
-                    hint="MM/DD/YYYY format"
-                    v-mask="'##/##/####'"
-                    prepend-icon="event_available"
-                    :rules="[requiredRules[0], dateRules[0], dateRules[1], dateOrderRule(index, projIndex)]"
-                    v-bind="attrs"
-                    v-on="on"
-                    @blur="
-                      project.startDate = parseEventDate($event);
-                      validateFields();
-                    "
-                  ></v-text-field>
-                </template>
-                <v-date-picker
-                  v-model="project.startDate"
-                  :max="project.endDate"
-                  no-title
-                  @input="project.showStartMenu = false"
-                ></v-date-picker>
-              </v-menu>
-            </v-col>
-            <v-col cols="12" sm="6" md="12" lg="6" class="pt-3">
-              <!-- End Date -->
-              <v-menu
-                v-model="project.showEndMenu"
-                :close-on-content-click="false"
-                transition="scale-transition"
-                offset-y
-                max-width="290px"
-                min-width="290px"
-              >
-                <template v-slot:activator="{ on, attrs }">
-                  <v-text-field
-                    :id="'end-field-' + index + '-' + projIndex"
-                    ref="formFields"
-                    :value="project.endDate | formatDate"
-                    label="End Date (optional)"
-                    prepend-icon="event_busy"
-                    :rules="[dateOptionalRules[0], dateOptionalRules[1], dateOrderRule(index, projIndex)]"
-                    hint="MM/DD/YYYY format"
-                    v-mask="'##/##/####'"
-                    v-bind="attrs"
-                    v-on="on"
-                    clearable
-                    @click:clear="project.endDate = null"
-                    @blur="
-                      project.endDate = parseEventDate($event);
-                      validateFields();
-                    "
-                  ></v-text-field>
-                </template>
-                <v-date-picker
-                  v-model="project.endDate"
-                  :min="project.startDate"
-                  no-title
-                  @input="project.showEndMenu = false"
-                ></v-date-picker>
-              </v-menu>
-              <!-- End End Date -->
-            </v-col>
-          </v-row>
-        </v-form>
+        <v-row>
+          <v-col cols="12" sm="6" md="12" lg="6" class="pt-3">
+            <!-- Start Date -->
+            <v-menu
+              v-model="project.showStartMenu"
+              :close-on-content-click="false"
+              transition="scale-transition"
+              offset-y
+              max-width="290px"
+              min-width="290px"
+            >
+              <template v-slot:activator="{ on, attrs }">
+                <v-text-field
+                  :id="'start-field-' + index + '-' + projIndex"
+                  ref="formFields"
+                  :value="project.startDate | formatDate"
+                  label="Start Date"
+                  hint="MM/DD/YYYY format"
+                  v-mask="'##/##/####'"
+                  prepend-icon="event_available"
+                  :rules="[requiredRules[0], dateRules[0], dateRules[1], dateOrderRule(index, projIndex)]"
+                  v-bind="attrs"
+                  v-on="on"
+                  @blur="project.startDate = parseEventDate($event)"
+                ></v-text-field>
+              </template>
+              <v-date-picker
+                v-model="project.startDate"
+                :max="project.endDate"
+                no-title
+                @input="project.showStartMenu = false"
+              ></v-date-picker>
+            </v-menu>
+          </v-col>
+          <v-col cols="12" sm="6" md="12" lg="6" class="pt-3">
+            <!-- End Date -->
+            <v-menu
+              v-model="project.showEndMenu"
+              :close-on-content-click="false"
+              transition="scale-transition"
+              offset-y
+              max-width="290px"
+              min-width="290px"
+            >
+              <template v-slot:activator="{ on, attrs }">
+                <v-text-field
+                  :id="'end-field-' + index + '-' + projIndex"
+                  ref="formFields"
+                  :value="project.endDate | formatDate"
+                  label="End Date (optional)"
+                  prepend-icon="event_busy"
+                  :rules="[dateOptionalRules[0], dateOptionalRules[1], dateOrderRule(index, projIndex)]"
+                  hint="MM/DD/YYYY format"
+                  v-mask="'##/##/####'"
+                  v-bind="attrs"
+                  v-on="on"
+                  clearable
+                  @click:clear="project.endDate = null"
+                  @blur="project.endDate = parseEventDate($event)"
+                ></v-text-field>
+              </template>
+              <v-date-picker
+                v-model="project.endDate"
+                :min="project.startDate"
+                no-title
+                @input="project.showEndMenu = false"
+              ></v-date-picker>
+            </v-menu>
+            <!-- End End Date -->
+          </v-col>
+        </v-row>
       </div>
       <!-- End of project loop -->
 
