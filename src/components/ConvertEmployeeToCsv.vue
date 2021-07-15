@@ -93,6 +93,7 @@ function exportCSVFile(person, fileTitle) {
     [person.employeeRole || ''],
     [person.hireDate || ''],
     [getWorkStatus(person.workStatus) || ''],
+    [person.mifiStatus != undefined && person.mifiStatus != null ? person.mifiStatus : 'true'],
     [person.github || ''], //Start of personal
     [person.twitter || ''],
     [person.linkedIn || ''],
@@ -122,6 +123,7 @@ function exportCSVFile(person, fileTitle) {
     ['Expense App Role'],
     ['Hire Date (yyyy-mm-dd)'],
     ['Status'],
+    ['Mifi Status'],
     ['Github'],
     ['Twitter'],
     ['LinkedIn'],
