@@ -44,6 +44,7 @@
           :key="'technology interval: ' + index + intervalIndex"
         >
           <date-interval-form
+            ref="dateInterval"
             :startIntervalDate="dateInterval.startDate"
             :endIntervalDate="dateInterval.endDate"
             :allIntervals="technology.dateIntervals"
@@ -339,6 +340,10 @@ function validateTimeIntervals() {
 
     //checks each date interval within a tech
     for (let x = 0; x < dateIntervals.length; x++) {
+      //Validates the date intervals
+      _.forEach(this.$refs.dateInterval, (dateInterval) => {
+        dateInterval.$refs.form.validate();
+      });
       if (dateIntervals[x].hasErrors) {
         //emit error status with a custom message
         window.EventBus.$emit(
