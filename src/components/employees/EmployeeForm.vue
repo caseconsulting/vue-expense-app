@@ -482,7 +482,7 @@ async function confirm() {
     //checks to see if there are any tabs with errors
     let hasErrors = await this.hasTabError();
     if (!hasErrors) {
-      this.confirmingValid = !this.confirmingValid; // if no errors opens confirm submit popup
+      this.confirmingValid = true; // if no errors opens confirm submit popup
     } else if (this.tabErrorMessage) {
       //if there is a custom error message it is displayed here
       this.displayError(this.tabErrorMessage);
@@ -589,6 +589,7 @@ async function created() {
   });
   window.EventBus.$on('canceled', () => {
     this.errorTabNames = {};
+    this.confirmingValid = false;
   });
   // set tab mounted
   window.EventBus.$on('created', (tab) => {
