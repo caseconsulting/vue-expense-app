@@ -36,7 +36,7 @@
         v-model="editedEmployee.nickname"
         label="Nickname (optional)"
         data-vv-name="Nickname"
-        :disabled="!userIsAdmin() && !userIsEmployee()"
+        :disabled="!userIsAdmin() && !userIsEmployee() && !userIsManager()"
       ></v-text-field>
 
       <!-- Employee # -->
@@ -348,6 +348,14 @@ function userIsEmployee() {
 } //userIsEmployee
 
 /**
+ * Checks whether the current user role is manager
+ * @return - boolean: true if the user role is a manager
+ */
+function userIsManager() {
+  return getRole() === 'manager';
+} //userIsManager
+
+/**
  * Checks if the work status is empty.
  *
  * @return boolean - work status is empty
@@ -450,6 +458,7 @@ export default {
     parseDate,
     userIsAdmin,
     userIsEmployee,
+    userIsManager,
     validateFields,
     viewStatus
   },
