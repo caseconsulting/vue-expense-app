@@ -81,7 +81,7 @@
           :items="majorDropDown"
           label="Major"
           data-vv-name="Major"
-          append-outer-icon="delete"
+          :append-outer-icon="degree.majors.length > 1 ? 'delete' : undefined"
           @click:append-outer="deleteItem(degree.majors, mIndex)"
         ></v-autocomplete>
       </div>
