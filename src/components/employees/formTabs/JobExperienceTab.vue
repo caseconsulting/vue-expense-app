@@ -100,16 +100,29 @@
       </v-combobox>
       <div v-for="(position, index) in company.positions" :key="index">
         <!-- Job Position -->
-        <v-combobox
-          ref="formFields"
-          :id="'pos-field-' + compIndex + '-' + index"
-          v-model.trim="position.title"
-          :rules="requiredRules"
-          label="Position"
-          data-vv-name="Position"
-          append-outer-icon="delete"
-          @click:append-outer="deletePosition(compIndex, index)"
-        ></v-combobox>
+        <div v-if="editedJobExperienceInfo.companies[compIndex].positions.length === 1">
+          <v-combobox
+            ref="formFields"
+            :id="'pos-field-' + compIndex + '-' + index"
+            v-model.trim="position.title"
+            :rules="requiredRules"
+            label="Position"
+            data-vv-name="Position"
+          ></v-combobox>
+        </div>
+        <div v-else>
+          <v-combobox
+            ref="formFields"
+            :id="'pos-field-' + compIndex + '-' + index"
+            v-model.trim="position.title"
+            :rules="requiredRules"
+            label="Position"
+            data-vv-name="Position"
+            append-outer-icon="delete"
+            @click:append-outer="deletePosition(compIndex, index)"
+          ></v-combobox>
+        </div>
+
         <v-row>
           <v-col cols="12" sm="6" md="12" lg="6" class="pt-3">
             <!-- Start Date -->
@@ -189,7 +202,7 @@
             </v-menu>
             <!-- End End Date -->
           </v-col>
-          <v-col v-if="isMobile"></v-col>
+          <v-col v-if="!isMobile"></v-col>
           <v-col>
             <v-layout justify-start class="pl-2">
               <v-checkbox
@@ -321,6 +334,7 @@ function deleteCompany(index) {
  */
 function deletePosition(compIndex, posIndex) {
   if (this.editedJobExperienceInfo.companies[compIndex].positions.length === 1) {
+    //Should never enter here
     this.editedJobExperienceInfo.companies.splice(compIndex, 1);
   } else {
     this.editedJobExperienceInfo.companies[compIndex].positions.splice(posIndex, 1);

@@ -119,7 +119,7 @@
             </v-menu>
             <!-- End End Date -->
           </v-col>
-          <v-col v-if="isMobile"></v-col>
+          <v-col v-if="!isMobile"></v-col>
           <v-col>
             <v-layout justify-start class="pl-2">
               <v-checkbox
