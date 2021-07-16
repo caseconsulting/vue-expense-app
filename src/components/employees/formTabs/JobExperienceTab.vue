@@ -83,7 +83,7 @@
       v-for="(company, compIndex) in editedJobExperienceInfo.companies"
       style="border: 1px solid grey"
       class="pt-3 pb-1 px-5"
-      :key="'company: ' + company.companyName + compIndex"
+      :key="compIndex"
     >
       <!-- Company Name -->
       <v-combobox
