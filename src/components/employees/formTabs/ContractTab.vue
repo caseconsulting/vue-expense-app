@@ -4,7 +4,7 @@
     <div
       v-for="(contract, index) in editedContracts"
       class="pt-3 pb-1 px-5"
-      :key="'contract: ' + contract.name + index"
+      :key="index"
       style="border: 1px solid grey"
     >
       <!-- Name of Contract -->

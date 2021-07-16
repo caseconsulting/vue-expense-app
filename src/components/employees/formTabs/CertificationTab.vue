@@ -5,7 +5,7 @@
       v-for="(certification, index) in editedCertifications"
       style="border: 1px solid grey"
       class="pt-3 pb-1 px-5"
-      :key="'certification: ' + certification.name + index"
+      :key="index"
     >
       <!-- Name of Certification -->
       <v-combobox

@@ -1,12 +1,7 @@
 <template>
   <div>
     <!-- Loop Awards -->
-    <div
-      v-for="(award, index) in editedAwards"
-      style="border: 1px solid grey"
-      class="pt-3 pb-1 px-5"
-      :key="'award: ' + award.name + index"
-    >
+    <div v-for="(award, index) in editedAwards" style="border: 1px solid grey" class="pt-3 pb-1 px-5" :key="index">
       <!-- Name of Award -->
       <v-combobox
         ref="formFields"
