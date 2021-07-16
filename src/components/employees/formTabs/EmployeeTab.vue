@@ -36,7 +36,7 @@
         v-model="editedEmployee.nickname"
         label="Nickname (optional)"
         data-vv-name="Nickname"
-        :disabled="!admin"
+        :disabled="!userIsAdmin() && !userIsEmployee()"
       ></v-text-field>
 
       <!-- Employee # -->
