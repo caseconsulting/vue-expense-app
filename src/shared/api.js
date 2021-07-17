@@ -334,10 +334,6 @@ function getKeyPhrases(data) {
   return execute('post', `${BLOG_ATTACHMENT}/getKeyPhrases`, data);
 }
 
-function getZipCode(addressId) {
-  return execute('get', `${GOOGLE_MAPS}/getZipCode/${addressId}`);
-}
-
 async function uploadBlogAttachment(file) {
   let formData = new FormData();
   formData.append('image', file);
@@ -422,7 +418,6 @@ export default {
   getURLInfo,
   getZipCode,
   getUser,
-  getZipCode,
   updateItem,
   uploadBlogAttachment,
   EXPENSE_TYPES,

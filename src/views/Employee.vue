@@ -154,12 +154,10 @@ function getWorkStatus(workStatus) {
  */
 function isMobile() {
   let md = new MobileDetect(window.navigator.userAgent);
-  console.log(md.os());
   return md.os() === 'AndroidOS' || md.os() === 'iOS';
 } // isMobile
 
 function minimizeWindow() {
-  console.log(this.$vuetify.breakpoint.name);
   switch (this.$vuetify.breakpoint.name) {
     case 'xs':
       return true;
