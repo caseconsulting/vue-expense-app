@@ -249,7 +249,9 @@ async function updateBoxes() {
   //Response contains an array of objects, with each object containing
   //a field title 'type'. 'Type' is another array and we want the one
   //containing the postal_code string
+  this.editedPersonalInfo.currentZIP = '';
   _.forEach(res.result.address_components, (field) => {
+    console.log(field);
     if (field.types.includes('postal_code')) {
       this.editedPersonalInfo.currentZIP = field.short_name;
     }
