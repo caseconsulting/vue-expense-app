@@ -1,5 +1,7 @@
-$case-red: #bc3825;
-$case-darkgray: #3f3f3c;
+.v-card-text {
+  background-color: var(--v-secondary-lighten1) !important;
+}
+
 
 /* RolledupExpenseTypeTable.vue */
 #money-team {
@@ -24,9 +26,13 @@ $case-darkgray: #3f3f3c;
   float: right;
 }
 
+.v-application {
+  background-color: var(--v-background-base) !important;
+}
+
 .header_style {
   /* border-radius: 5px; */
-  background-color: $case-red;
+  background-color: var(--v-primary-base);
   color: white;
   font-size: 16px;
 }
@@ -40,17 +46,17 @@ $case-darkgray: #3f3f3c;
 }
 
 .reimburse_button {
-  background-color: $case-red !important;
+  background-color: var(--v-primary-base) !important;
   color: white !important;
   padding: 4px 2px;
 }
 
 .home_buttons {
-  color: $case-red !important;
+  color: var(--v-primary-base) !important;
   background-color: white !important;
   padding: 8px 8px;
   margin-bottom: 16px;
-  border: 0.5px solid $case-red;
+  border: 0.5px solid var(--v-primary-base);
   border-radius: 5px;
   text-transform: uppercase;
   text-emphasis: bold;
@@ -58,7 +64,7 @@ $case-darkgray: #3f3f3c;
 }
 
 .table_color {
-  background-color: $case-red;
+  background-color: var(--v-primary-base);
   opacity: 0.2;
 }
 
@@ -67,11 +73,11 @@ $case-darkgray: #3f3f3c;
 }
 
 .nav-color {
-  background-color: #565651 !important;
+  background-color: var(--v-secondary-base) !important;
 }
 
 .user-circle {
-  color: #565651;
+  color: var(--v-secondary-base);
 }
 
 .inactiveStyle {
@@ -98,7 +104,7 @@ $case-darkgray: #3f3f3c;
 
 @-webkit-keyframes login-change {
   0% {
-    color: $case-darkgray;
+    color: var(--v-secondary-darken1);
   }
 
   100% {
@@ -108,7 +114,7 @@ $case-darkgray: #3f3f3c;
 
 @-moz-keyframes login-change {
   0% {
-    color: $case-darkgray;
+    color: var(--v-secondary-base);
   }
 
   100% {
@@ -118,7 +124,7 @@ $case-darkgray: #3f3f3c;
 
 @-ms-keyframes login-change {
   0% {
-    color: $case-darkgray;
+    color: var(--v-secondary-base);
   }
 
   100% {
@@ -128,7 +134,7 @@ $case-darkgray: #3f3f3c;
 
 @-o-keyframes login-change {
   0% {
-    color: $case-darkgray;
+    color: var(--v-secondary-base);
   }
 
   100% {
@@ -138,7 +144,7 @@ $case-darkgray: #3f3f3c;
 
 @keyframes login-change {
   0% {
-    color: $case-darkgray;
+    color: var(--v-secondary-base);
   }
 
   100% {
@@ -161,7 +167,7 @@ $case-darkgray: #3f3f3c;
   }
 
   100% {
-    color: $case-red;
+    color: var(--v-primary-base);
   }
 }
 
@@ -171,7 +177,7 @@ $case-darkgray: #3f3f3c;
   }
 
   100% {
-    color: $case-red;
+    color: var(--v-primary-base);
   }
 }
 
@@ -181,7 +187,7 @@ $case-darkgray: #3f3f3c;
   }
 
   100% {
-    color: $case-red;
+    color: var(--v-primary-base);
   }
 }
 
@@ -191,7 +197,7 @@ $case-darkgray: #3f3f3c;
   }
 
   100% {
-    color: $case-red;
+    color: var(--v-primary-base);
   }
 }
 
@@ -201,7 +207,7 @@ $case-darkgray: #3f3f3c;
   }
 
   100% {
-    color: $case-red;
+    color: var(--v-primary-base);
   }
 }
 
@@ -241,7 +247,7 @@ $case-darkgray: #3f3f3c;
 }
 
 fieldset {
-  border: 1.5px solid #cccc;
+  border: 1.5px solid var(--v-secondary-lighten1);
 }
 
 fieldset legend {

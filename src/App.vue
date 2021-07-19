@@ -1,111 +1,132 @@
 <template>
   <div id="app">
-    <v-app style="background: #f5f5f5">
-      <v-navigation-drawer
-        light
-        v-model="drawer"
-        fixed
-        app
-        disableResizeWatcher
-        :expand-on-hover="!isMobile"
-        :permanent="isLoggedIn() && !isMobile"
-        clipped
-      >
-        <main-nav></main-nav>
-      </v-navigation-drawer>
-      <v-app-bar class="nav-color" dark fixed app clipped-left>
-        <v-app-bar-nav-icon v-show="isLoggedIn() && isMobile" @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
-        <v-avatar size="40" color="grey lighten-4" class="mr-2">
-          <img src="@/assets/img/case-logo-circle.png" class="logo-bar" />
-        </v-avatar>
-        <v-toolbar-title v-show="!isMobile">
-          <h1 class="d-inline" style="text-align: center">Case Portal</h1>
-        </v-toolbar-title>
-        <!-- In Mobile View decrease title size-->
-        <h1 v-show="isMobile" class="font-25" style="text-align: center">Case Portal</h1>
+    <v-theme-provider root>
+      <v-app>
+        <v-navigation-drawer
+          light
+          v-model="drawer"
+          fixed
+          app
+          disableResizeWatcher
+          :expand-on-hover="!isMobile"
+          :permanent="isLoggedIn() && !isMobile"
+          clipped
+        >
+          <main-nav></main-nav>
+        </v-navigation-drawer>
+        <v-app-bar class="nav-color" dark fixed app clipped-left>
+          <v-app-bar-nav-icon v-show="isLoggedIn() && isMobile" @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
+          <v-avatar size="40" color="grey lighten-4" class="mr-2">
+            <img src="@/assets/img/case-logo-circle.png" class="logo-bar" />
+          </v-avatar>
+          <v-toolbar-title v-show="!isMobile">
+            <h1 class="d-inline" style="text-align: center">Case Portal</h1>
+          </v-toolbar-title>
+          <!-- In Mobile View decrease title size-->
+          <h1 v-show="isMobile" class="font-25" style="text-align: center">Case Portal</h1>
+          <v-switch
+            v-model="$vuetify.theme.dark"
+            hint="This toggles the global state of the Vuetify theme"
+            inset
+            label="Vuetify Theme Dark"
+            persistent-hint
+          ></v-switch>
 
-        <v-spacer></v-spacer>
-        <!-- Display social media icons and links dropdown menu -->
-        <v-item-group class="hidden-sm-and-down" v-show="isLoggedIn() && !isMobile">
-          <v-menu open-on-hover offset-y>
-            <template v-slot:activator="{ on, attrs }">
-              <v-btn top text small class="my-2" v-bind="attrs" v-on="on" id="links-btn">Links &#9662; </v-btn>
+          <v-spacer></v-spacer>
+          <!-- Display social media icons and links dropdown menu -->
+          <v-item-group class="hidden-sm-and-down" v-show="isLoggedIn() && !isMobile">
+            <v-menu open-on-hover offset-y>
+              <template v-slot:activator="{ on, attrs }">
+                <v-btn top text small class="my-2" v-bind="attrs" v-on="on" id="links-btn">Links &#9662; </v-btn>
+              </template>
+
+              <v-list>
+                <v-list-item v-for="(l, index) in links" :key="index" :id="l.link" :href="l.link" target="_blank">
+                  <v-list-item-title>{{ l.name }}</v-list-item-title>
+                </v-list-item>
+                <v-list-item :href="floorPlan" target="_blank" id="floorPlan"
+                  >Workspace at Reston Town Center Map</v-list-item
+                >
+              </v-list>
+            </v-menu>
+            <v-btn
+              class="mx-auto white--text"
+              v-for="link in mediaLinks"
+              :key="link.name"
+              :id="link.name"
+              :href="link.link"
+              icon
+              target="_blank"
+            >
+              <icon :name="link.icon"></icon>
+            </v-btn>
+          </v-item-group>
+
+          <!-- User image and logout -->
+          <v-menu bottom offset-y open-on-hover v-if="isLoggedIn()">
+            <template v-slot:activator="{ on }">
+              <v-avatar id="profile" size="50" color="grey lighten-4">
+                <img :src="profilePic" alt="avatar" v-on="on" />
+              </v-avatar>
             </template>
-
-            <v-list>
-              <v-list-item v-for="(l, index) in links" :key="index" :id="l.link" :href="l.link" target="_blank">
+            <v-list v-if="!(isLoggedIn() && (isMobile || isSmallScreen))">
+              <v-list-item>
+                <v-btn :disabled="onUserProfile" text @click="handleProfile()">Profile</v-btn>
+              </v-list-item>
+              <v-list-item>
+                <v-btn id="logoutBtn" text @click="handleLogout()">Logout</v-btn>
+              </v-list-item>
+            </v-list>
+            <!--In MOBILE VIEW/Smaller Screen sizes display all links under the user image dropdown-->
+            <v-list class="scrollLink" v-else>
+              <v-list-item>
+                <v-btn text :disabled="onUserProfile" @click="handleProfile()">Profile</v-btn>
+              </v-list-item>
+              <v-list-item>
+                <v-btn text @click="handleLogout()">Logout</v-btn>
+              </v-list-item>
+              <hr
+                role="separator"
+                aria-orientation="horizontal"
+                class="v-divider theme--light"
+                :inset="inset"
+                vertical
+              />
+              <div class="v-subheader theme--light">Company Links</div>
+              <v-list-item v-for="(l, index) in links" :key="index" :href="l.link" target="_blank">
                 <v-list-item-title>{{ l.name }}</v-list-item-title>
               </v-list-item>
-              <v-list-item :href="floorPlan" target="_blank" id="floorPlan"
-                >Workspace at Reston Town Center Map</v-list-item
-              >
+              <v-list-item :href="floorPlan" target="_blank" id="floorPlan">MakeOffices Map</v-list-item>
+              <hr
+                role="separator"
+                aria-orientation="horizontal"
+                class="v-divider theme--light"
+                :inset="inset"
+                vertical
+              />
+              <div class="v-subheader theme--light">Social</div>
+              <v-list-item v-for="link in mediaLinks" :key="link.name" :href="link.link" icon target="_blank">
+                <icon :name="link.icon"></icon>
+                <span class="mr-2"> </span>
+                <v-list-item-title> {{ link.name }}</v-list-item-title>
+              </v-list-item>
             </v-list>
           </v-menu>
-          <v-btn
-            class="mx-auto white--text"
-            v-for="link in mediaLinks"
-            :key="link.name"
-            :id="link.name"
-            :href="link.link"
-            icon
-            target="_blank"
-          >
-            <icon :name="link.icon"></icon>
-          </v-btn>
-        </v-item-group>
+          <!-- End user image and logout -->
+        </v-app-bar>
 
-        <!-- User image and logout -->
-        <v-menu bottom offset-y open-on-hover v-if="isLoggedIn()">
-          <template v-slot:activator="{ on }">
-            <v-avatar id="profile" size="50" color="grey lighten-4">
-              <img :src="profilePic" alt="avatar" v-on="on" />
-            </v-avatar>
-          </template>
-          <v-list v-if="!(isLoggedIn() && (isMobile || isSmallScreen))">
-            <v-list-item>
-              <v-btn :disabled="onUserProfile" text @click="handleProfile()">Profile</v-btn>
-            </v-list-item>
-            <v-list-item>
-              <v-btn id="logoutBtn" text @click="handleLogout()">Logout</v-btn>
-            </v-list-item>
-          </v-list>
-          <!--In MOBILE VIEW/Smaller Screen sizes display all links under the user image dropdown-->
-          <v-list class="scrollLink" v-else>
-            <v-list-item>
-              <v-btn text :disabled="onUserProfile" @click="handleProfile()">Profile</v-btn>
-            </v-list-item>
-            <v-list-item>
-              <v-btn text @click="handleLogout()">Logout</v-btn>
-            </v-list-item>
-            <hr role="separator" aria-orientation="horizontal" class="v-divider theme--light" :inset="inset" vertical />
-            <div class="v-subheader theme--light">Company Links</div>
-            <v-list-item v-for="(l, index) in links" :key="index" :href="l.link" target="_blank">
-              <v-list-item-title>{{ l.name }}</v-list-item-title>
-            </v-list-item>
-            <v-list-item :href="floorPlan" target="_blank" id="floorPlan">MakeOffices Map</v-list-item>
-            <hr role="separator" aria-orientation="horizontal" class="v-divider theme--light" :inset="inset" vertical />
-            <div class="v-subheader theme--light">Social</div>
-            <v-list-item v-for="link in mediaLinks" :key="link.name" :href="link.link" icon target="_blank">
-              <icon :name="link.icon"></icon>
-              <span class="mr-2"> </span>
-              <v-list-item-title> {{ link.name }}</v-list-item-title>
-            </v-list-item>
-          </v-list>
-        </v-menu>
-        <!-- End user image and logout -->
-      </v-app-bar>
-
-      <v-main>
-        <v-container fluid grid-list-lg>
-          <router-view></router-view>
-        </v-container>
-      </v-main>
-      <v-footer padless>
-        <v-col class="text-right text-caption" cols="12"><strong>Version</strong> {{ version }}</v-col>
-      </v-footer>
-      <time-out-modal :toggleTimeOut="timedOut"></time-out-modal>
-      <time-out-warning-modal :toggleWarning="session"></time-out-warning-modal>
-    </v-app>
+        <v-main>
+          <v-container fluid grid-list-lg>
+            <router-view></router-view>
+          </v-container>
+        </v-main>
+        <v-footer padless>
+          <v-col class="text-right text-caption" cols="12"><strong>Version</strong> {{ version }}</v-col>
+        </v-footer>
+        <time-out-modal :toggleTimeOut="timedOut"></time-out-modal>
+        <time-out-warning-modal :toggleWarning="session"></time-out-warning-modal>
+      </v-app>
+    </v-theme-provider>
   </div>
 </template>
 
