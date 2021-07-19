@@ -10,9 +10,9 @@
             </v-col>
           </v-row>
           <v-row>
-            <v-col cols="10" class="pr-0"><v-file-input label="Resume"></v-file-input></v-col>
+            <v-col cols="10" class="pr-0"><v-file-input v-model="file" label="Resume"></v-file-input></v-col>
             <v-col cols="2" class="text-center">
-              <v-btn color="green" outlined>Submit</v-btn>
+              <v-btn @click="submit" color="green" outlined>Submit</v-btn>
             </v-col>
           </v-row>
           <v-row class="text-center">
@@ -47,11 +47,31 @@
 </template>
 
 <script>
+import api from '@/shared/api.js';
+
+async function submit() {
+  console.log(this.file);
+  if (this.file) {
+    this.resumeObject = await api.extractText(this.file);
+    console.log(this.resumeObject);
+    if (this.resumeObject instanceof Error) {
+      this.isInactive = false;
+      this.resumeObject = null;
+      return;
+    }
+  }
+}
+
 export default {
   data() {
     return {
-      activate: false
+      activate: false,
+      file: null,
+      resumeObject: null
     };
+  },
+  methods: {
+    submit
   },
   props: ['toggleResumeParser'],
   watch: {
