@@ -189,6 +189,29 @@ async function extractText(file) {
     });
 }
 
+async function extractResumeText(employeeId, file) {
+  let formData = new FormData();
+  formData.append('receipt', file);
+
+  // inject the accessToken for each request
+  let accessToken = getAccessToken();
+
+  return client({
+    method: 'post',
+    url: `/resume/${employeeId}/${file.name}`,
+    data: formData,
+    headers: {
+      Authorization: `Bearer ${accessToken}`
+    }
+  })
+    .then((response) => {
+      return response.data;
+    })
+    .catch((err) => {
+      return err;
+    });
+}
+
 async function createAttachment(expense, file) {
   let formData = new FormData();
   formData.append('receipt', file);
@@ -320,6 +343,7 @@ export default {
   deleteBlogFile,
   deleteItem,
   extractText,
+  extractResumeText,
   getAllActiveEmployeeBudgets,
   getAllAggregateExpenses,
   getAllEmployeeExpenses,

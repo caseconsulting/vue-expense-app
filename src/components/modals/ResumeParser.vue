@@ -52,7 +52,7 @@ import api from '@/shared/api.js';
 async function submit() {
   console.log(this.file);
   if (this.file) {
-    this.resumeObject = await api.extractText(this.file);
+    this.resumeObject = await api.extractResumeText(this.$route.params.id, this.file);
     console.log(this.resumeObject);
     if (this.resumeObject instanceof Error) {
       this.isInactive = false;
