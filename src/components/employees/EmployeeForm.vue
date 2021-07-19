@@ -12,6 +12,7 @@
     >
       <v-card-title headline color="white">
         <span class="headline">{{ errorStatus.statusMessage }}</span>
+        <span>Edit Profile</span>
       </v-card-title>
       <v-btn color="white" text @click="clearStatus"> Close </v-btn>
     </v-snackbar>
@@ -20,7 +21,14 @@
     <v-card hover>
       <!-- Form Header -->
       <v-card-title class="header_style">
-        <h3 v-if="model.id">Editing {{ fullName }}</h3>
+        <v-row v-if="model.id">
+          <v-col col="6" class="text-left">
+            <h3>Editing {{ fullName }}</h3>
+          </v-col>
+          <v-col col="6" class="text-right">
+            <v-btn @click="toggleResumeParser = !toggleResumeParser">Upload Resume</v-btn>
+          </v-col>
+        </v-row>
         <h3 v-else>New Employee</h3>
       </v-card-title>
 
@@ -206,6 +214,7 @@
           :toggleSubmissionConfirmation="this.confirmingError"
           :errorTabs="errorTabNames"
         ></many-form-errors>
+        <resume-parser :toggleResumeParser="this.toggleResumeParser"></resume-parser>
       </v-container>
     </v-card>
   </div>
@@ -226,6 +235,7 @@ import LanguagesTab from '@/components/employees/formTabs/LanguagesTab';
 import ManyFormErrors from '@/components/modals/ManyFormErrors.vue';
 import PersonalTab from '@/components/employees/formTabs/PersonalTab';
 import TechnologyTab from '@/components/employees/formTabs/TechnologyTab';
+import ResumeParser from '@/components/modals/ResumeParser';
 const moment = require('moment-timezone');
 moment.tz.setDefault('America/New_York');
 import { getRole } from '@/utils/auth';
@@ -792,7 +802,8 @@ export default {
     PersonalTab,
     TechnologyTab,
     LanguagesTab,
-    ManyFormErrors
+    ManyFormErrors,
+    ResumeParser
   },
   created,
   data() {
@@ -875,6 +886,7 @@ export default {
         personal: false,
         technologies: false
       }, // tab component created
+      toggleResumeParser: false,
       valid: false, // form validity
       validating: {
         awards: false,
