@@ -65,7 +65,8 @@ async function submit() {
       this.resumeObject = null;
       return;
     }
-
+    window.EventBus.$emit('updated-resume-parser', 'true');
+    window.EventBus.$emit('updated-resume-parser-form', 'true');
     let techComprehend = this.resumeObject.filter((entity) => {
       return entity.Type === 'TITLE';
     });
