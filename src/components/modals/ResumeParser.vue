@@ -12,7 +12,7 @@
           <v-row>
             <v-col cols="10" class="pr-0"><v-file-input v-model="file" label="Resume"></v-file-input></v-col>
             <v-col cols="2" class="text-center">
-              <v-btn @click="submit" color="green" outlined>Submit</v-btn>
+              <v-btn @click="submit" color="green" outlined :loading="loading">Submit</v-btn>
             </v-col>
           </v-row>
           <v-row class="text-center">
@@ -50,15 +50,15 @@
 import api from '@/shared/api.js';
 
 async function submit() {
-  console.log(this.file);
   if (this.file) {
+    this.loading = true;
     this.resumeObject = await api.extractResumeText(this.$route.params.id, this.file);
-    console.log(this.resumeObject);
     if (this.resumeObject instanceof Error) {
       this.isInactive = false;
       this.resumeObject = null;
       return;
     }
+    this.loading = false;
   }
 }
 
@@ -67,7 +67,8 @@ export default {
     return {
       activate: false,
       file: null,
-      resumeObject: null
+      resumeObject: null,
+      loading: false
     };
   },
   methods: {
