@@ -171,7 +171,11 @@
 
           <!-- Last Name Item Slot -->
           <template v-slot:[`item.lastLogin`]="{ item }">
-            <p :class="{ inactiveStyle: isInactive(item), selectFocus: isFocus(item) }" style="margin-bottom: 0px">
+            <p
+              v-if="userIsAdmin()"
+              :class="{ inactiveStyle: isInactive(item), selectFocus: isFocus(item) }"
+              style="margin-bottom: 0px"
+            >
               {{ item.lastLogin }}
             </p>
           </template>
@@ -423,6 +427,12 @@ async function created() {
   if (!this.hasAdminPermissions()) {
     this.headers.pop();
   }
+  if (this.userIsAdmin()) {
+    this.headers.splice(this.headers.length - 1, 0, {
+      text: 'Last Login',
+      value: 'lastLogin'
+    });
+  }
 } // created
 
 // |--------------------------------------------------|
@@ -479,10 +489,6 @@ export default {
         {
           text: 'Last Name',
           value: 'lastName'
-        },
-        {
-          text: 'Last Login',
-          value: 'lastLogin'
         },
         {
           text: 'Hire Date',
