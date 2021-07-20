@@ -251,7 +251,6 @@ async function updateBoxes() {
   //containing the postal_code string
   this.editedPersonalInfo.currentZIP = '';
   _.forEach(res.result.address_components, (field) => {
-    console.log(field);
     if (field.types.includes('postal_code')) {
       this.editedPersonalInfo.currentZIP = field.short_name;
     }
