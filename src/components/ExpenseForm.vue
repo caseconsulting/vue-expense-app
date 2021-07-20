@@ -223,7 +223,7 @@
               </v-btn>
             </span>
           </template>
-          <span>Scanning only works for pngs and jpegs.</span>
+          <span>Scanning only works for pdfs, pngs, and jpegs.</span>
         </v-tooltip>
 
         <!-- Notes -->
@@ -1787,7 +1787,11 @@ export default {
       if (this.file == null) {
         //if no file
         this.disableScan = true;
-      } else if (this.file.type != 'image/jpeg' && this.file.type != 'image/png') {
+      } else if (
+        this.file.type != 'image/jpeg' &&
+        this.file.type != 'image/png' &&
+        this.file.type != 'application/pdf'
+      ) {
         //if file isn't jpg or png
         this.disableScan = true;
       } else {
