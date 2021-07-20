@@ -3,6 +3,7 @@
     <v-row>
       <v-col md="6" sm="12">
         <pie-chart v-if="dataReceived" :options="options" :chartData="chartData" />
+        <v-skeleton-loader v-else type="image"></v-skeleton-loader>
         <!-- <h4 v-if="degrees">Total Degrees: {{ degreeCount }}</h4> -->
         <div class="center">
           <p class="font-weight-normal">Total Degrees: {{ degreeCount }}</p>

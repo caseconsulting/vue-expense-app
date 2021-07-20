@@ -1,6 +1,7 @@
 <template>
   <div>
     <pie-chart v-if="dataReceived" :options="options" :chartData="chartData"></pie-chart>
+    <v-skeleton-loader v-else type="avatar" width="100%"></v-skeleton-loader>
     <v-container class="ma-0">
       <v-row justify="center" no-gutters>
         <v-radio-group row v-model="showCurrent">

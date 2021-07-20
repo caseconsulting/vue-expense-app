@@ -3,7 +3,10 @@
     <v-btn :disabled="reachedMin" @click="oneLessColumn">-</v-btn>
     <v-btn :disabled="reachedMax" @click="oneMoreColumn">+</v-btn>
     <v-container>
-      <horizontal-bar v-if="dataReceived" :options="options" :chartData="chartData"></horizontal-bar>
+      <horizontal-bar v-if="!dataReceived" :options="options" :chartData="chartData"></horizontal-bar>
+      <div v-else>
+        <v-skeleton-loader type="text, divider, text"></v-skeleton-loader>
+      </div>
     </v-container>
   </v-card>
 </template>

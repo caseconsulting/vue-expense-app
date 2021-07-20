@@ -1,5 +1,6 @@
 <template>
   <bar-chart v-if="dataReceived" :options="options" :chartData="chartData" />
+  <v-skeleton-loader v-else type="image"></v-skeleton-loader>
 </template>
 
 <script>

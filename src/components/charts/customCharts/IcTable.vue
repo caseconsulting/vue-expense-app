@@ -14,6 +14,7 @@
         </v-toolbar>
       </template>
     </v-data-table>
+    <v-skeleton-loader v-else type="image"></v-skeleton-loader>
   </div>
 </template>
 

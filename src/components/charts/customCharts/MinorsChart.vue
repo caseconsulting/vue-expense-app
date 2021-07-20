@@ -1,5 +1,6 @@
 <template>
   <pie-chart v-if="dataReceived" :options="options" :chartData="chartData"></pie-chart>
+  <v-skeleton-loader v-else type="image"></v-skeleton-loader>
 </template>
 
 <script>

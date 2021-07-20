@@ -1,5 +1,6 @@
 <template>
-  <bar-chart v-if="dataReceived" :options="options" :chartData="chartData"></bar-chart>
+  <bar-chart v-if="!dataReceived" :options="options" :chartData="chartData"></bar-chart>
+  <v-skeleton-loader v-else type="table-tbody"></v-skeleton-loader>
 </template>
 
 <script>
