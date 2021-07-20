@@ -212,6 +212,39 @@ async function extractResumeText(employeeId, file) {
     });
 }
 
+async function getResume(employeeId) {
+  // inject the accessToken for each request
+  let accessToken = getAccessToken();
+  return client({
+    method: 'get',
+    url: `resume/${employeeId}`,
+    headers: {
+      Authorization: `Bearer ${accessToken}`
+    }
+  })
+    .then((response) => {
+      return response.data;
+    })
+    .catch(() => {
+      return null;
+    });
+
+  // try {
+  //   return await execute('get', `resume/${employeeId}`)
+  //     .then((res) => {
+  //       console.log(res + 'here1');
+  //       return res;
+  //     })
+  //     .catch((err) => {
+  //       console.log(err + 'here2');
+  //       return err;
+  //     });
+  // } catch (err) {
+  //   console.log(err);
+  //   return err;
+  // }
+}
+
 async function createAttachment(expense, file) {
   let formData = new FormData();
   formData.append('receipt', file);
@@ -367,6 +400,7 @@ export default {
   getKeyPhrases,
   getModerationLabel,
   getPTOBalances,
+  getResume,
   getRole,
   getMonthlyHours,
   getTechSkills,

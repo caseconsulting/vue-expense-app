@@ -25,6 +25,23 @@
             <convert-employee-to-csv v-if="userIsAdmin()" :employee="this.model" color="white" />
             <v-tooltip v-if="hasAdminPermissions() || userIsEmployee()" top>
               <template #activator="{ on }">
+                <div v-on="on">
+                  <v-icon
+                    :disabled="!hasResume"
+                    class="pr-2"
+                    @click="downloadResume()"
+                    style="color: white"
+                    align="right"
+                    v-on="on"
+                    id="edit"
+                    >sim_card_download</v-icon
+                  >
+                </div>
+              </template>
+              <span>{{ hasResume ? 'Download Resume' : 'No resume available' }}</span>
+            </v-tooltip>
+            <v-tooltip v-if="hasAdminPermissions() || userIsEmployee()" top>
+              <template #activator="{ on }">
                 <v-icon class="pr-2" @click="editing = true" style="color: white" align="right" v-on="on" id="edit"
                   >edit</v-icon
                 >
@@ -69,6 +86,13 @@ const IsoFormat = 'YYYY-MM-DD';
 // |                     METHODS                      |
 // |                                                  |
 // |--------------------------------------------------|
+
+async function downloadResume() {
+  let signedURL = await api.getResume(this.$route.params.id);
+  if (signedURL !== null) {
+    window.open(signedURL, '_blank');
+  }
+}
 
 /**
  * Checks if there is data about an employee to display. Returns true if the user is an admin or if there is data
@@ -182,6 +206,7 @@ async function created() {
   this.displayQuickBooksTimeAndBalances = this.userIsAdmin() || this.userIsEmployee();
   this.loading = false;
   this.fiscalDateView = this.getCurrentBudgetYear();
+  this.hasResume = (await api.getResume(this.$route.params.id)) != null;
 } // created
 
 /**
@@ -233,6 +258,7 @@ export default {
         active: ['full', 'part'] // default only shows full and part time employees
       }, // datatable filter
       fiscalDateView: '',
+      hasResume: false,
       loading: false, // loading status
       model: {
         awards: [],
@@ -277,6 +303,7 @@ export default {
     };
   },
   methods: {
+    downloadResume,
     hasAdminPermissions,
     isDisplayData,
     isEmpty,
