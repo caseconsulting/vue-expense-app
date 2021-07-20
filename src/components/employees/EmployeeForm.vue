@@ -26,7 +26,8 @@
             <h3>Editing {{ fullName }}</h3>
           </v-col>
           <v-col col="6" class="text-right">
-            <v-btn @click="toggleResumeParser = !toggleResumeParser">Upload Resume</v-btn>
+            <v-btn class="ma-2" @click="toggleResumeParser = !toggleResumeParser">Upload Resume</v-btn>
+            <v-btn class="ma-2" @click="deleteResume" :disabled="!hasResume">Delete Resume</v-btn>
           </v-col>
         </v-row>
         <h3 v-else>New Employee</h3>
@@ -748,6 +749,12 @@ async function created() {
   }
   this.formTab = this.currentTab;
   this.afterCreate = true;
+  this.hasResume = (await api.getResume(this.$route.params.id)) != null;
+  window.EventBus.$on('updated-resume-parser-form', (newResume) => {
+    if (newResume != null) {
+      this.hasResume = newResume;
+    }
+  });
 } // created
 /**
  * Sets the form data based on the given tab.
@@ -856,6 +863,12 @@ async function convertAutocompleteToTitlecase() {
   // }
   await this.confirm();
 } //convertAutocompleteToTitlecase
+
+async function deleteResume() {
+  await api.deleteResume(this.$route.params.id);
+  this.hasResume = false;
+  window.EventBus.$emit('updated-resume-form', this.hasResume);
+}
 // |--------------------------------------------------|
 // |                                                  |
 // |                      EXPORT                      |
@@ -896,6 +909,7 @@ export default {
       errorTabNames: {},
       formTab: null, // currently active tab
       fullName: '', // employee's first and last name
+      hasResume: false,
       model: {
         awards: [],
         birthday: null,
@@ -987,6 +1001,7 @@ export default {
     clearStatus,
     confirm,
     convertAutocompleteToTitlecase,
+    deleteResume,
     displayError,
     hasAdminPermissions,
     hasTabError,

@@ -205,6 +205,16 @@ async function created() {
   this.loading = false;
   this.fiscalDateView = this.getCurrentBudgetYear();
   this.hasResume = (await api.getResume(this.$route.params.id)) != null;
+  window.EventBus.$on('updated-resume-form', (newResume) => {
+    if (newResume != null) {
+      this.hasResume = newResume;
+    }
+  });
+  window.EventBus.$on('updated-resume-parser', (newResume) => {
+    if (newResume != null) {
+      this.hasResume = newResume;
+    }
+  });
 } // created
 
 /**
