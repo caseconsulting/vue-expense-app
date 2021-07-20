@@ -15,8 +15,9 @@
         <p v-else><b>Project: </b>{{ project.name }}</p>
       </div>
     </div>
-    <p v-if="admin || employee"><b> Hire Date:</b> {{ this.model.hireDate | monthDayYearFormat }}</p>
+    <p v-if="!isEmpty(this.model.jobRole)"><b>Job Role:</b> {{ this.model.jobRole }}</p>
     <p v-if="admin"><b>Employee Role:</b> {{ this.model.employeeRole | startCase }}</p>
+    <p v-if="admin || employee"><b> Hire Date:</b> {{ this.model.hireDate | monthDayYearFormat }}</p>
     <p v-if="admin || employee"><b>Status:</b> {{ getWorkStatus(this.model.workStatus) }}</p>
     <p v-if="admin || employee">
       <b>Mifi Status:</b> {{ !isEmpty(this.model.mifiStatus) ? this.model.mifiStatus : true }}
