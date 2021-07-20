@@ -25,6 +25,17 @@
             <h3 v-if="model.id">Editing {{ fullName }}</h3>
             <h3 v-else>New Employee</h3>
           </v-col>
+          <v-col col="6" class="text-right">
+            <v-tooltip v-if="uploadDisabled" right>
+              <template v-slot:activator="{ on }">
+                <div v-on="on">
+                  <v-btn :disabled="true" @click="openUpload()">Upload Resume</v-btn>
+                </div>
+              </template>
+              <span>Please provide valid employee #</span>
+            </v-tooltip>
+            <v-btn v-else @click="openUpload()">Upload Resume</v-btn>
+          </v-col>
         </v-row>
       </v-card-title>
 
@@ -589,7 +600,7 @@ function hasAdminPermissions() {
  * Checks to see if any of the form tabs has an error.
  * @returns boolean - true if any tab has an error false otherwise.
  */
-async function hasTabError() {
+function hasTabError() {
   let hasErrors = false;
   //iterates over tabs to see if there are any errors
   for (var key of Object.keys(this.tabErrors)) {
@@ -652,15 +663,38 @@ function addErrorTab(name, errors) {
     this.errorTabNames[name] = errors;
   }
 }
+
+async function openUpload() {
+  let employees = await api.getItems(api.EMPLOYEES);
+  if (employees.some((emp) => emp.employeeNumber == this.employeeNumber)) {
+    let message = 'Duplicate employee number, please change to a unique employee number to upload resume';
+    this.displayError(message);
+  } else {
+    this.toggleResumeParser = !this.toggleResumeParser;
+  }
+
+  //check validation of employee number
+  //if no error
+  //this.toggleResumeParser = !this.toggleResumeParser;
+  //if error
+  //pop-up modal with invalid number
+  //let err = 'duplicate ID found'
+  //this.display(err)
+}
 // |--------------------------------------------------|
 // |                                                  |
 // |                 LIFECYCLE HOOKS                  |
 // |                                                  |
 // |--------------------------------------------------|
 async function created() {
-  window.EventBus.$on('confirmed', async () => {
+  window.EventBus.$on('disableUpload', (result, employeeNumber) => {
+    this.uploadDisabled = result;
+    this.employeeNumber = employeeNumber;
+  });
+
+  window.EventBus.$on('confirmed', () => {
     //this.confirming = false;
-    await this.submit();
+    this.submit();
   });
   window.EventBus.$on('canceled', () => {
     this.errorTabNames = {};
@@ -976,6 +1010,7 @@ export default {
         technologies: false
       }, // tab component created
       toggleResumeParser: false,
+      uploadDisabled: true,
       valid: false, // form validity
       validating: {
         awards: false,
@@ -1002,6 +1037,7 @@ export default {
     displayError,
     hasAdminPermissions,
     hasTabError,
+    openUpload,
     setFormData,
     submit,
     titleCase,

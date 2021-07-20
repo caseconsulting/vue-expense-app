@@ -483,6 +483,14 @@ export default {
         this.editedEmployee.hireDate = null;
       }
     },
+    'editedEmployee.employeeNumber': function () {
+      let empNum = this.editedEmployee.employeeNumber;
+      if (empNum !== '' && !isNaN(empNum) && parseInt(empNum) > 0) {
+        window.EventBus.$emit('disableUpload', false, empNum);
+      } else {
+        window.EventBus.$emit('disableUpload', true, empNum);
+      }
+    },
     statusRadio: function () {
       if (this.statusRadio == 'full') {
         this.status = '100';
