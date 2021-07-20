@@ -20,12 +20,12 @@
     <v-card hover>
       <!-- Form Header -->
       <v-card-title class="header_style">
-        <v-row v-if="model.id">
+        <v-row>
           <v-col col="6" class="text-left">
-            <h3>Editing {{ fullName }}</h3>
+            <h3 v-if="model.id">Editing {{ fullName }}</h3>
+            <h3 v-else>New Employee</h3>
           </v-col>
         </v-row>
-        <h3 v-else>New Employee</h3>
       </v-card-title>
 
       <v-container fluid>
