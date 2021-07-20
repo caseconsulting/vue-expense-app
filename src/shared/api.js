@@ -191,14 +191,14 @@ async function extractText(file) {
 
 async function extractResumeText(employeeId, file) {
   let formData = new FormData();
-  formData.append('receipt', file);
+  formData.append('resume', file);
 
   // inject the accessToken for each request
   let accessToken = getAccessToken();
 
   return client({
-    method: 'post',
-    url: `/resume/${employeeId}/${file.name}`,
+    method: 'put',
+    url: `/resume/${employeeId}`,
     data: formData,
     headers: {
       Authorization: `Bearer ${accessToken}`
