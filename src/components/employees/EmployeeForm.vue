@@ -27,7 +27,9 @@
           </v-col>
           <v-col col="6" class="text-right">
             <v-btn class="ma-2" @click="toggleResumeParser = !toggleResumeParser">Upload Resume</v-btn>
-            <v-btn class="ma-2" @click="deleteResume" :disabled="!hasResume">Delete Resume</v-btn>
+            <v-btn class="ma-2" @click="deleteResume" :disabled="!hasResume" :loading="deleteLoading"
+              >Delete Resume</v-btn
+            >
           </v-col>
         </v-row>
         <h3 v-else>New Employee</h3>
@@ -866,7 +868,9 @@ async function convertAutocompleteToTitlecase() {
 } //convertAutocompleteToTitlecase
 
 async function deleteResume() {
+  this.deleteLoading = true;
   await api.deleteResume(this.$route.params.id);
+  this.deleteLoading = false;
   this.hasResume = false;
   window.EventBus.$emit('delete-resume', this.hasResume);
 }
@@ -903,6 +907,7 @@ export default {
       afterCreate: false, // component has been created
       confirmingValid: false, // confirming form submission
       confirmingError: false,
+      deleteLoading: false,
       errorStatus: {
         statusType: undefined,
         statusMessage: null,
