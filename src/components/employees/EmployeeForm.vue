@@ -290,7 +290,7 @@
           :toggleSubmissionConfirmation="this.confirmingError"
           :errorTabs="errorTabNames"
         ></many-form-errors>
-        <resume-parser :toggleResumeParser="this.toggleResumeParser"></resume-parser>
+        <resume-parser :toggleResumeParser="this.toggleResumeParser" :employee="this.model"></resume-parser>
       </v-container>
     </v-card>
   </div>
