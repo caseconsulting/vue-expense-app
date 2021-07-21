@@ -79,11 +79,13 @@
           v-model="degree.majors[mIndex]"
           :rules="requiredRules"
           :items="majorDropDown"
-          label="Major"
+          :label="!duplicateDiscipline('majors', major, index) ? 'Major' : 'Major - DUPLICATE'"
           data-vv-name="Major"
+          :class="{ errorBox: duplicateDiscipline('majors', major, index) }"
           :append-outer-icon="degree.majors.length > 1 ? 'delete' : undefined"
           @click:append-outer="deleteItem(degree.majors, mIndex)"
-        ></v-autocomplete>
+        >
+        </v-autocomplete>
       </div>
       <!-- End Loop Majors -->
       <!-- Button to Add Major -->
@@ -101,8 +103,9 @@
           v-model="degree.minors[mIndex]"
           :rules="requiredRules"
           :items="minorDropDown"
-          label="Minor"
+          :label="!duplicateDiscipline('minors', minor, index) ? 'Minor' : 'Minor - DUPLICATE'"
           append-outer-icon="delete"
+          :class="{ errorBox: duplicateDiscipline('minors', minor, index) }"
           @click:append-outer="deleteItem(degree.minors, mIndex)"
           data-vv-name="Minor"
         ></v-autocomplete>
@@ -122,11 +125,15 @@
           v-model="degree.concentrations[cIndex]"
           :rules="requiredRules"
           :items="concentrationDropDown"
-          label="Concentration"
           data-vv-name="Concentration"
           append-outer-icon="delete"
+          :label="
+            !duplicateDiscipline('concentrations', concentration, index) ? 'Concentration' : 'Concentration - DUPLICATE'
+          "
+          :class="{ errorBox: duplicateDiscipline('concentrations', concentration, index) }"
           @click:append-outer="deleteItem(degree.concentrations, cIndex)"
-        ></v-autocomplete>
+        >
+        </v-autocomplete>
       </div>
       <!-- End Loop Concentrations -->
       <!-- Button to Add Concentration -->
@@ -250,6 +257,30 @@ function detectDuplicateEducation() {
   return duplicateEdu;
 } // detectDuplicateEducation
 
+function duplicateDiscipline(title, discipline, schoolIndex) {
+  console.log(title);
+  let disciplines = this.editedDegrees[schoolIndex][title];
+  console.log(disciplines);
+  let count = _.countBy(disciplines, (dis) => {
+    return dis === discipline;
+  });
+  return count.true > 1;
+}
+
+function detectDuplicateDiscipline() {
+  let dup = false;
+  _.forEach(this.editedDegrees, (degree) => {
+    if (
+      _.uniq(degree.majors).length !== degree.majors.length ||
+      _.uniq(degree.minors).length !== degree.minors.length ||
+      _.uniq(degree.concentrations).length !== degree.concentrations.length
+    ) {
+      dup = true;
+    }
+  });
+  return dup;
+}
+
 /**
  * Checks to see if an education is a duplicate of one that is already entered by a user.
  * @param edu Object - the education object
@@ -334,7 +365,7 @@ function titleCase(str) {
 function validateFields() {
   let hasErrors = false;
   let errorCount = 0;
-  if (this.detectDuplicateEducation() !== undefined) {
+  if (this.detectDuplicateEducation() !== undefined || this.detectDuplicateDiscipline()) {
     hasErrors = true;
     //emit error status with a custom message
     window.EventBus.$emit(
@@ -394,6 +425,8 @@ export default {
     deleteDegree,
     deleteItem,
     detectDuplicateEducation,
+    duplicateDiscipline,
+    detectDuplicateDiscipline,
     isDuplicate,
     isEmpty,
     parseDateMonthYear,

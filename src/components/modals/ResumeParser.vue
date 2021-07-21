@@ -74,6 +74,8 @@ async function submit() {
     let techComprehend = this.resumeObject.filter((entity) => {
       return entity.Type === 'TITLE';
     });
+    //delete when techComprehend is used, this is here to shut up eslint
+    techComprehend;
 
     this.loading = false;
   }
