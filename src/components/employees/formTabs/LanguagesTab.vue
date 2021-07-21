@@ -24,6 +24,7 @@
         label="Language"
         data-vv-name="Language"
         class="pb-5"
+        clearable
       >
       </v-combobox>
 
@@ -36,6 +37,7 @@
         :rules="requiredRules"
         item-text="text"
         label="Level of proficiency"
+        clearable
       ></v-autocomplete>
 
       <v-row align="center" class="py-3" justify="center">
@@ -47,7 +49,7 @@
                 ><v-icon style="color: grey">delete</v-icon></v-btn
               >
             </template>
-            <span>Delete BI Date</span>
+            <span>Delete Language</span>
           </v-tooltip>
         </v-col>
       </v-row>
