@@ -61,12 +61,12 @@ async function submit() {
     this.loading = true;
     this.resumeObject = (await api.extractResumeText(this.$route.params.id, this.file)).comprehend;
     if (this.resumeObject instanceof Error) {
+      console.log('Im over here');
       this.isInactive = false;
       this.resumeObject = null;
       return;
     }
-    window.EventBus.$emit('updated-resume-parser', 'true');
-    window.EventBus.$emit('updated-resume-parser-form', 'true');
+    window.EventBus.$emit('upload-resume-complete-to-form', 'true');
     let techComprehend = this.resumeObject.filter((entity) => {
       return entity.Type === 'TITLE';
     });
