@@ -740,8 +740,6 @@ async function created() {
   });
   window.EventBus.$on('upload-resume-complete-to-form', (newResume) => {
     window.EventBus.$emit('upload-resume-complete', newResume);
-    console.log(newResume);
-    console.log('This is a test');
     if (newResume != null) {
       this.hasResume = newResume;
     }

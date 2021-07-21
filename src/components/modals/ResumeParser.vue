@@ -66,7 +66,6 @@ async function submit() {
     this.loading = true;
     this.resumeObject = (await api.extractResumeText(this.$route.params.id, this.file)).comprehend;
     if (this.resumeObject instanceof Error) {
-      console.log('Im over here');
       this.isInactive = false;
       this.resumeObject = null;
       return;
