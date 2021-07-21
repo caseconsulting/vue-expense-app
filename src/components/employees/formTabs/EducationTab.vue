@@ -80,7 +80,7 @@ Education
         <v-autocomplete
           ref="formFields"
           v-model="degree.majors[mIndex]"
-          :rules="requiredRules"
+          :rules="[requiredRules[0], duplicateDiscipline('majors', major, index)]"
           :items="majorDropDown"
           label="Major"
           data-vv-name="Major"
@@ -110,7 +110,7 @@ Education
         <v-autocomplete
           ref="formFields"
           v-model="degree.minors[mIndex]"
-          :rules="requiredRules"
+          :rules="[requiredRules[0], duplicateDiscipline('minors', minor, index)]"
           :items="minorDropDown"
           label="Minor"
           data-vv-name="Minor"
@@ -139,9 +139,8 @@ Education
         <v-autocomplete
           ref="formFields"
           v-model="degree.concentrations[cIndex]"
-          :rules="requiredRules"
+          :rules="[requiredRules[0], duplicateDiscipline('concentrations', concentration, index)]"
           :items="concentrationDropDown"
-          label="Concentration"
           data-vv-name="Concentration"
           clearable
         >
@@ -287,6 +286,30 @@ function detectDuplicateEducation() {
   return duplicateEdu;
 } // detectDuplicateEducation
 
+function duplicateDiscipline(title, discipline, schoolIndex) {
+  console.log(title);
+  let disciplines = this.editedDegrees[schoolIndex][title];
+  console.log(disciplines);
+  let count = _.countBy(disciplines, (dis) => {
+    return dis === discipline;
+  });
+  return count.true > 1;
+}
+
+function detectDuplicateDiscipline() {
+  let dup = false;
+  _.forEach(this.editedDegrees, (degree) => {
+    if (
+      _.uniq(degree.majors).length !== degree.majors.length ||
+      _.uniq(degree.minors).length !== degree.minors.length ||
+      _.uniq(degree.concentrations).length !== degree.concentrations.length
+    ) {
+      dup = true;
+    }
+  });
+  return dup;
+}
+
 /**
  * Checks to see if an education is a duplicate of one that is already entered by a user.
  * @param edu Object - the education object
@@ -371,7 +394,7 @@ function titleCase(str) {
 function validateFields() {
   let hasErrors = false;
   let errorCount = 0;
-  if (this.detectDuplicateEducation() !== undefined) {
+  if (this.detectDuplicateEducation() !== undefined || this.detectDuplicateDiscipline()) {
     hasErrors = true;
     //emit error status with a custom message
     window.EventBus.$emit(
@@ -431,6 +454,8 @@ export default {
     deleteDegree,
     deleteItem,
     detectDuplicateEducation,
+    duplicateDiscipline,
+    detectDuplicateDiscipline,
     isDuplicate,
     isEmpty,
     parseDateMonthYear,

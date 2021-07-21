@@ -649,7 +649,7 @@ async function created() {
   window.EventBus.$on('educationDuplicateStatus', (data, errorMessage) => {
     this.tabErrors.education = data[0];
     //when there is a custom error message (multiple entries with same name) gets it ready for display
-    if (data[0] && errorMessage) {
+    if (data && errorMessage) {
       this.tabErrorMessage = _.cloneDeep(errorMessage);
     }
     this.addErrorTab('Education', data[1]);
