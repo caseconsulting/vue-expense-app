@@ -55,7 +55,6 @@ async function submit() {
     // and is png or jpg or jpeg or pdf
     this.loading = true;
     this.resumeObject = (await api.extractResumeText(this.$route.params.id, this.file)).comprehend;
-    console.log(this.resumeObject);
     if (this.resumeObject instanceof Error) {
       this.isInactive = false;
       this.resumeObject = null;
@@ -64,10 +63,7 @@ async function submit() {
 
     this.loading = false;
 
-    // EMPLOYEE
-    // NAME
-    //   ONLY ADMIN
-
+    // PERSONAL info
     let personalComprehend = this.resumeObject.filter((entity) => {
       return entity.Type === 'OTHER' || entity.Type === 'LOCATION';
     });
@@ -109,47 +105,50 @@ async function submit() {
     });
 
     let locations = await api.getLocation(location[0]);
-    console.log(location[0]);
-    console.log(locations);
-    if (locations.predictions.length == 1) {
-      this.newPersonal.location = location.description;
+    if (locations.predictions.length >= 1) {
+      this.newPersonal.location = locations.predictions[0].description;
     }
 
-    // PERSONAL
-    // GITHUB
-    // TWITTER
-    // LINKEDIN
-    // CURRENT ADDRESS
-    // PHONE NUMBER
-
+    // EDUCATION
     let educationComprehend = this.resumeObject.filter((entity) => {
       return entity.Type === 'ORGANIZATION';
     });
-    educationComprehend.forEach(async (educationEntity) => {
-      let collegeList = await api.getColleges(educationEntity.Text);
-      console.log(collegeList);
-      if (collegeList.some((item) => item.name === educationEntity.Text)) {
-        this.newEducation.push(educationEntity.Text);
-      }
-    });
-    // EDUCATION
-    // SCHOOL
 
+    for (let i = 0; i < educationComprehend.length; i++) {
+      let educationEntity = educationComprehend[i];
+      let collegeList = await api.getColleges(educationEntity.Text);
+      if (collegeList.length == 1 && !this.newEducation.includes(collegeList[0])) {
+        if (this.employee.degrees && this.employee.degrees.length > 0) {
+          if (this.employee.degrees.filter((e) => e.school === collegeList[0]).length == 0) {
+            this.newEducation.push(collegeList[0]);
+          }
+        } else {
+          this.newEducation.push(collegeList[0]);
+        }
+      }
+    }
+
+    // TECH
     let techComprehend = this.resumeObject.filter((entity) => {
       return entity.Type === 'TITLE' || entity.Type === 'OTHER';
     });
     techComprehend.forEach(async (tech) => {
       let techList = await api.getTechSkills(tech.Text);
-      if (techList.some((item) => item.toLowerCase() === tech.Text.toLowerCase())) {
-        this.newTechnology.push(tech.Text);
+      // check if the tech list contains the tech from the resume
+      let techs = techList.filter((item) => {
+        return item.toLowerCase() === tech.Text.toLowerCase();
+      });
+      // add if there are no duplicates
+      if (techs.length == 1 && !this.newTechnology.includes(techs[0])) {
+        if (this.employee.technologies && this.employee.technologies.length > 0) {
+          if (this.employee.technologies.filter((e) => e.name === techs[0]).length == 0) {
+            this.newTechnology.push(techs[0]);
+          }
+        } else {
+          this.newTechnology.push(techs[0]);
+        }
       }
     });
-    // TECHNOLOGY
-    // TECH NAMES
-    console.log(this.newTechnology);
-    console.log(this.newEducation);
-    console.log(this.newPersonal);
-    console.log(this.newEmployee);
   }
 }
 
@@ -163,8 +162,7 @@ export default {
       resumeObject: [],
       newEducation: [],
       newTechnology: [],
-      newPersonal: {},
-      newEmployee: []
+      newPersonal: {}
     };
   },
   methods: {

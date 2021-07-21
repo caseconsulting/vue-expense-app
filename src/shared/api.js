@@ -60,12 +60,15 @@ function getCountries() {
 
 async function getTechSkills(tech) {
   let techList = await execute('get', `/${EMSI}/getTechSkills/${tech}`);
-  let techNames = techList.data.map((a) => a.name);
-  //removes unnecessary paranthesis from tech name
-  //ex: Java (programming language) ==> Java
-  for (let i = 0; i < techNames.length; i++) {
-    if (techNames[i].includes('(')) {
-      techNames[i] = techNames[i].split(' (')[0];
+  let techNames = [];
+  if (techList.data) {
+    techNames = techList.data.map((a) => a.name);
+    //removes unnecessary paranthesis from tech name
+    //ex: Java (programming language) ==> Java
+    for (let i = 0; i < techNames.length; i++) {
+      if (techNames[i].includes('(')) {
+        techNames[i] = techNames[i].split(' (')[0];
+      }
     }
   }
 
