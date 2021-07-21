@@ -48,9 +48,11 @@
 
 <script>
 import api from '@/shared/api.js';
+import _ from 'lodash';
 
 async function submit() {
   if (this.file) {
+    // and is png or jpg or jpeg or pdf
     this.loading = true;
     this.resumeObject = (await api.extractResumeText(this.$route.params.id, this.file)).comprehend;
     console.log(this.resumeObject);
@@ -60,12 +62,94 @@ async function submit() {
       return;
     }
 
-    let techComprehend = this.resumeObject.filter((entity) => {
-      return entity.Type === 'TITLE';
-    });
-    console.log(techComprehend);
-
     this.loading = false;
+
+    // EMPLOYEE
+    // NAME
+    //   ONLY ADMIN
+
+    let personalComprehend = this.resumeObject.filter((entity) => {
+      return entity.Type === 'OTHER' || entity.Type === 'LOCATION';
+    });
+    let location = [];
+    let locationCounter = 0;
+    _.forEach(personalComprehend, async (personalEntity) => {
+      // Links
+      if (
+        personalEntity.Text.includes('github') ||
+        personalEntity.Text.includes('linkedIn') ||
+        personalEntity.Text.includes('twitter')
+      ) {
+        this.newPersonal.github = personalEntity.Text;
+      }
+
+      // Phone Number
+      if (personalEntity.Text.match(/^\(?(\d{3})\)?[- ]?(\d{3})[- ]?(\d{4})$/)) {
+        let phoneNumber = '';
+        for (let i = 0; i < personalEntity.Text.length; i++) {
+          if (personalEntity.Text.charAt(i) >= '0' && personalEntity.Text.charAt(i) <= '9') {
+            phoneNumber += personalEntity.Text.charAt(i);
+          }
+          if (phoneNumber.length == 3 || phoneNumber.length == 7) {
+            phoneNumber += '-';
+          }
+        }
+        this.newPersonal.phoneNumber = phoneNumber;
+      }
+
+      // Address
+      if (personalEntity.Type === 'LOCATION') {
+        if (locationCounter % 2 === 0) {
+          location.push(personalEntity.Text + ' ');
+        } else {
+          location[location.length - 1] += personalEntity.Text + ' ';
+        }
+        locationCounter++;
+      }
+    });
+
+    let locations = await api.getLocation(location[0]);
+    console.log(location[0]);
+    console.log(locations);
+    if (locations.predictions.length == 1) {
+      this.newPersonal.location = location.description;
+    }
+
+    // PERSONAL
+    // GITHUB
+    // TWITTER
+    // LINKEDIN
+    // CURRENT ADDRESS
+    // PHONE NUMBER
+
+    let educationComprehend = this.resumeObject.filter((entity) => {
+      return entity.Type === 'ORGANIZATION';
+    });
+    educationComprehend.forEach(async (educationEntity) => {
+      let collegeList = await api.getColleges(educationEntity.Text);
+      console.log(collegeList);
+      if (collegeList.some((item) => item.name === educationEntity.Text)) {
+        this.newEducation.push(educationEntity.Text);
+      }
+    });
+    // EDUCATION
+    // SCHOOL
+
+    let techComprehend = this.resumeObject.filter((entity) => {
+      return entity.Type === 'TITLE' || entity.Type === 'OTHER';
+    });
+    techComprehend.forEach(async (tech) => {
+      let techList = await api.getTechSkills(tech.Text);
+      if (techList.some((item) => item.toLowerCase() === tech.Text.toLowerCase())) {
+        this.newTechnology.push(tech.Text);
+      }
+    });
+    // TECHNOLOGY
+    // TECH NAMES
+    console.log(this.newTechnology);
+    console.log(this.newEducation);
+    console.log(this.newPersonal);
+    console.log(this.newEmployee);
   }
 }
 
@@ -75,17 +159,18 @@ export default {
       activate: false,
       file: null,
       loading: false,
+      validFileType: true,
       resumeObject: [],
       newEducation: [],
       newTechnology: [],
-      newPersonal: [],
+      newPersonal: {},
       newEmployee: []
     };
   },
   methods: {
     submit
   },
-  props: ['toggleResumeParser'],
+  props: ['toggleResumeParser', 'employee'],
   watch: {
     toggleResumeParser: function () {
       this.activate = true;
