@@ -56,12 +56,10 @@
 import api from '@/shared/api.js';
 
 async function submit() {
-  console.log(this.resumeObject);
   if (this.file) {
     this.resumeObject.length = 0;
     this.loading = true;
     this.resumeObject = (await api.extractResumeText(this.$route.params.id, this.file)).comprehend;
-    console.log(this.resumeObject);
     if (this.resumeObject instanceof Error) {
       this.isInactive = false;
       this.resumeObject = null;
@@ -71,7 +69,6 @@ async function submit() {
     let techComprehend = this.resumeObject.filter((entity) => {
       return entity.Type === 'TITLE';
     });
-    console.log(techComprehend);
 
     this.loading = false;
   }
