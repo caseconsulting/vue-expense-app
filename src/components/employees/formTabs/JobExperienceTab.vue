@@ -35,9 +35,17 @@
               readonly
               v-bind="attrs"
               v-on="on"
-              append-outer-icon="delete"
-              @click:append-outer="deleteICTimeFrame(index)"
-            ></v-text-field>
+              clearable
+            >
+              <v-tooltip top slot="append-outer">
+                <template v-slot:activator="{ on }">
+                  <v-btn class="pb-3" v-on="on" text @click="deleteICTimeFrame(index)"
+                    ><v-icon style="color: grey">delete</v-icon></v-btn
+                  >
+                </template>
+                <span>Delete IC Time Frame</span>
+              </v-tooltip>
+            </v-text-field>
           </template>
           <v-date-picker v-model="timeFrame.range" no-title type="month" range></v-date-picker>
         </v-menu>
@@ -72,6 +80,7 @@
           label="Start Date"
           prepend-icon="event_available"
           readonly
+          clearable
         ></v-text-field>
         <!-- End Start Date -->
       </v-row>
@@ -94,8 +103,7 @@
         :items="companyDropDown"
         label="Company"
         data-vv-name="Company"
-        append-outer-icon="delete"
-        @click:append-outer="deleteCompany(compIndex)"
+        clearable
       >
       </v-combobox>
       <div v-for="(position, index) in company.positions" :key="index">
@@ -108,6 +116,7 @@
             :rules="requiredRules"
             label="Position"
             data-vv-name="Position"
+            clearable
           ></v-combobox>
         </div>
         <div v-else>
@@ -119,8 +128,17 @@
             label="Position"
             data-vv-name="Position"
             append-outer-icon="delete"
-            @click:append-outer="deletePosition(compIndex, index)"
-          ></v-combobox>
+            clearable
+          >
+            <v-tooltip bottom slot="append-outer">
+              <template v-slot:activator="{ on }">
+                <v-btn text v-on="on" @click="deletePosition(compIndex, index)"
+                  ><v-icon style="color: grey">delete</v-icon></v-btn
+                >
+              </template>
+              <span>Delete Position</span>
+            </v-tooltip>
+          </v-combobox>
         </div>
 
         <v-row>
@@ -148,6 +166,7 @@
                   v-on="on"
                   @blur="position.startDate = parseEventDate($event)"
                   @focus="setIndices(compIndex, index)"
+                  clearable
                 ></v-text-field>
               </template>
               <v-date-picker
@@ -219,6 +238,14 @@
         <v-btn @click="addPosition(compIndex)" :id="'add-pos-' + compIndex" elevation="2"
           ><v-icon class="pr-1">add</v-icon>Position</v-btn
         >
+      </div>
+      <div class="pb-4" align="center">
+        <v-tooltip bottom>
+          <template v-slot:activator="{ on }">
+            <v-btn text v-on="on" @click="deleteCompany(compIndex)"><v-icon style="color: grey">delete</v-icon></v-btn>
+          </template>
+          <span>Delete Company</span>
+        </v-tooltip>
       </div>
       <!-- <v-row v-if="!hasEndDatesFilled(compIndex)" class="py-5 caption text--darken-2 grey--text">
         Note that leaving the end date blank means you are currently working at that position.

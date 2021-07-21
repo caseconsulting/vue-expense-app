@@ -9,8 +9,7 @@
         :rules="requiredRules"
         label="Award"
         data-vv-name="Award"
-        append-outer-icon="delete"
-        @click:append-outer="deleteAward(index)"
+        clearable
       >
       </v-combobox>
 
@@ -37,6 +36,7 @@
                 v-bind="attrs"
                 v-on="on"
                 @blur="award.dateReceived = parseEventDate($event)"
+                clearable
               ></v-text-field>
             </template>
             <v-date-picker
@@ -48,6 +48,16 @@
           <!-- End Received Date -->
         </v-col>
       </v-row>
+      <div class="pb-4" align="center">
+        <v-tooltip bottom>
+          <template v-slot:activator="{ on }">
+            <v-btn v-on="on" @click="deleteAward(index)" text
+              ><v-icon style="color: grey" class="pr-1">delete</v-icon></v-btn
+            >
+          </template>
+          <span>Delete Award</span>
+        </v-tooltip>
+      </div>
     </div>
     <!-- Loop Awards -->
 

@@ -15,8 +15,7 @@
         :items="certificationDropDown"
         label="Certification"
         data-vv-name="Certification"
-        append-outer-icon="delete"
-        @click:append-outer="deleteCertification(index)"
+        clearable
       >
       </v-combobox>
       <v-row class="py-3">
@@ -43,6 +42,7 @@
                 v-on="on"
                 @blur="certification.dateReceived = parseEventDate($event)"
                 @focus="certificationIndex = index"
+                clearable
               ></v-text-field>
             </template>
             <v-date-picker
@@ -102,6 +102,16 @@
           </v-layout>
         </v-col>
       </v-row>
+      <div class="pb-4" align="center">
+        <v-tooltip bottom>
+          <template v-slot:activator="{ on }">
+            <v-btn v-on="on" @click="deleteCertification(index)" text
+              ><v-icon style="color: grey" class="pr-1">delete</v-icon></v-btn
+            >
+          </template>
+          <span>Delete Certification</span>
+        </v-tooltip>
+      </div>
     </div>
     <!-- End Loop Certifications -->
 
