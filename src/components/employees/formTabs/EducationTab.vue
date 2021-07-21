@@ -87,7 +87,7 @@ Education
         >
           <v-tooltip v-if="degree.majors.length > 1" bottom slot="append-outer">
             <template v-slot:activator="{ on }">
-              <v-btn text v-on="on" @click="deleteItem(degree.majors, mIndex)"
+              <v-btn text icon v-on="on" @click="deleteItem(degree.majors, mIndex)"
                 ><v-icon style="color: grey">delete</v-icon></v-btn
               >
             </template>
@@ -117,7 +117,7 @@ Education
         >
           <v-tooltip bottom slot="append-outer">
             <template v-slot:activator="{ on }">
-              <v-btn text v-on="on" @click="deleteItem(degree.minors, mIndex)">
+              <v-btn text icon v-on="on" @click="deleteItem(degree.minors, mIndex)">
                 <v-icon style="color: grey">delete</v-icon>
               </v-btn>
             </template>
@@ -146,7 +146,7 @@ Education
         >
           <v-tooltip bottom slot="append-outer">
             <template v-slot:activator="{ on }">
-              <v-btn text v-on="on" @click="deleteItem(degree.concentrations, cIndex)">
+              <v-btn text icon v-on="on" @click="deleteItem(degree.concentrations, cIndex)">
                 <v-icon style="color: grey">delete</v-icon>
               </v-btn>
             </template>
@@ -163,7 +163,7 @@ Education
       <div align="center" class="pb-4">
         <v-tooltip bottom>
           <template v-slot:activator="{ on }">
-            <v-btn v-on="on" @click="deleteDegree(index)" text
+            <v-btn v-on="on" @click="deleteDegree(index)" text icon
               ><v-icon style="color: grey" class="pr-1">delete</v-icon></v-btn
             >
           </template>

@@ -67,7 +67,14 @@
       <v-row align="center" class="py-3" justify="center">
         <!-- Button to Delete Technology -->
         <v-col cols="2" class="mb-3" align="center">
-          <v-btn text icon><v-icon @click="deleteTechnology(index)">delete</v-icon></v-btn>
+          <v-tooltip bottom slot="append-outer">
+            <template v-slot:activator="{ on }">
+              <v-btn text icon v-on="on" @click="deleteTechnology(index)"
+                ><v-icon style="color: grey">delete</v-icon></v-btn
+              >
+            </template>
+            <span>Delete Technology</span>
+          </v-tooltip>
         </v-col>
       </v-row>
       <!-- End Loop Technologies -->

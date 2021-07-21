@@ -15,8 +15,7 @@
         :items="contractsDropDown"
         label="Contract"
         data-vv-name="Contract"
-        append-outer-icon="delete"
-        @click:append-outer="deleteContract(index)"
+        clearable
       >
       </v-combobox>
 
@@ -28,10 +27,11 @@
         :items="primesDropDown"
         label="Prime"
         data-vv-name="Prime"
+        clearable
       >
       </v-combobox>
       <!-- Start of project loop -->
-      <div v-for="(project, projIndex) in contract.projects" class="pt-3 pb-1 px-4" :key="index + '-' + projIndex">
+      <div v-for="(project, projIndex) in contract.projects" class="pt-3 pb-1" :key="index + '-' + projIndex">
         <v-combobox
           ref="formFields"
           :id="'proj-' + projIndex + '-' + index"
@@ -39,9 +39,16 @@
           :rules="requiredRules"
           :label="'Project ' + (projIndex + 1)"
           data-vv-name="Project"
-          append-outer-icon="delete"
-          @click:append-outer="deleteProject(index, projIndex)"
+          clearable
         >
+          <v-tooltip v-if="contract.projects.length > 1" bottom slot="append-outer">
+            <template v-slot:activator="{ on }">
+              <v-btn text icon v-on="on" @click="deleteProject(index, projIndex)"
+                ><v-icon style="color: grey">delete</v-icon></v-btn
+              >
+            </template>
+            <span>Delete Project</span>
+          </v-tooltip>
         </v-combobox>
         <v-row>
           <v-col cols="12" sm="6" md="12" lg="6" class="pt-3">
@@ -67,6 +74,7 @@
                   v-bind="attrs"
                   v-on="on"
                   @blur="project.startDate = parseEventDate($event)"
+                  clearable
                 ></v-text-field>
               </template>
               <v-date-picker
@@ -138,6 +146,17 @@
         <v-btn @click="addProject(index)" :id="'add-proj-' + index" elevation="2"
           ><v-icon class="pr-1">add</v-icon>Project</v-btn
         >
+      </div>
+
+      <div class="pb-4" align="center">
+        <v-tooltip bottom>
+          <template v-slot:activator="{ on }">
+            <v-btn v-on="on" @click="deleteContract(index)" icon text
+              ><v-icon style="color: grey" class="pr-1">delete</v-icon></v-btn
+            >
+          </template>
+          <span>Delete Certification</span>
+        </v-tooltip>
       </div>
       <!-- <v-row v-if="!hasEndDatesFilled(index)" class="py-5 px-5 caption text--darken-2 grey--text">
         Note that leaving the end date blank means you are currently working on that project.

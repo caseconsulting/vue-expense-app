@@ -39,7 +39,7 @@
             >
               <v-tooltip top slot="append-outer">
                 <template v-slot:activator="{ on }">
-                  <v-btn class="pb-3" v-on="on" text @click="deleteICTimeFrame(index)"
+                  <v-btn class="pb-3" v-on="on" icon text @click="deleteICTimeFrame(index)"
                     ><v-icon style="color: grey">delete</v-icon></v-btn
                   >
                 </template>
@@ -132,7 +132,7 @@
           >
             <v-tooltip bottom slot="append-outer">
               <template v-slot:activator="{ on }">
-                <v-btn text v-on="on" @click="deletePosition(compIndex, index)"
+                <v-btn text icon v-on="on" @click="deletePosition(compIndex, index)"
                   ><v-icon style="color: grey">delete</v-icon></v-btn
                 >
               </template>
@@ -242,7 +242,9 @@
       <div class="pb-4" align="center">
         <v-tooltip bottom>
           <template v-slot:activator="{ on }">
-            <v-btn text v-on="on" @click="deleteCompany(compIndex)"><v-icon style="color: grey">delete</v-icon></v-btn>
+            <v-btn text icon v-on="on" @click="deleteCompany(compIndex)"
+              ><v-icon style="color: grey">delete</v-icon></v-btn
+            >
           </template>
           <span>Delete Company</span>
         </v-tooltip>

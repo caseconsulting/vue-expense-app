@@ -15,6 +15,7 @@
         :items="experienceDropDown"
         label="Customer Organization Experience"
         data-vv-name="Customer Organization Experience"
+        clearable
       >
       </v-autocomplete>
 
@@ -50,7 +51,14 @@
 
         <!-- Button to Delete Customer Organization -->
         <v-col cols="2" class="mb-3" align="center">
-          <v-btn text icon><v-icon @click="deleteExperience(index)">delete</v-icon></v-btn>
+          <v-tooltip bottom>
+            <template v-slot:activator="{ on }">
+              <v-btn v-on="on" @click="deleteExperience(index)" text icon
+                ><v-icon style="color: grey" class="pr-1">delete</v-icon></v-btn
+              >
+            </template>
+            <span>Delete Experience</span>
+          </v-tooltip>
         </v-col>
       </v-row>
     </div>

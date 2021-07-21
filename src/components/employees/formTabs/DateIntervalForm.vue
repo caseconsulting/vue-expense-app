@@ -150,7 +150,14 @@
         <!--Interval End Date Picker-->
 
         <!-- Button to Delete Interval -->
-        <v-btn class="mt-8" text icon><v-icon @click="deleteInterval">delete</v-icon></v-btn>
+        <v-tooltip bottom slot="append-outer">
+          <template v-slot:activator="{ on }">
+            <v-btn class="mt-8" icon text v-on="on" @click="deleteInterval"
+              ><v-icon style="color: grey">delete</v-icon></v-btn
+            >
+          </template>
+          <span>Delete Interval</span>
+        </v-tooltip>
       </v-row>
       <v-row class="pb-5 caption text--darken-2 grey--text">
         If you are unsure about the exact date, please put an approximate one.

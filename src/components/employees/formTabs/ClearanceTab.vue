@@ -15,8 +15,7 @@
         :items="clearanceTypeDropDown"
         label="Type"
         data-vv-name="Type"
-        append-outer-icon="delete"
-        @click:append-outer="deleteClearance(cIndex)"
+        clearable
       >
       </v-combobox>
       <v-row class="py-3">
@@ -258,10 +257,18 @@
               prepend-icon="date_range"
               readonly
               v-bind="attrs"
+              clearable
               v-on="on"
-              append-outer-icon="delete"
-              @click:append-outer="deleteBIDate(cIndex, biIndex)"
-            ></v-text-field>
+            >
+              <v-tooltip bottom slot="append-outer">
+                <template v-slot:activator="{ on }">
+                  <v-btn text icon v-on="on" @click="deleteBIDate(cIndex, biIndex)"
+                    ><v-icon style="color: grey">delete</v-icon></v-btn
+                  >
+                </template>
+                <span>Delete BI Date</span>
+              </v-tooltip></v-text-field
+            >
           </template>
           <v-date-picker v-model="bi.range" :min="clearance.submissionDate" no-title range></v-date-picker>
         </v-menu>
@@ -270,6 +277,16 @@
       <!-- End Loop BI Dates -->
       <div align="center" class="pt-2 pb-4">
         <v-btn @click="addBIDates(cIndex)" depressed outlined small>Add BI Dates</v-btn>
+      </div>
+      <div align="center">
+        <v-tooltip bottom slot="append-outer">
+          <template v-slot:activator="{ on }">
+            <v-btn text icon v-on="on" @click="deleteClearance(cIndex)"
+              ><v-icon style="color: grey">delete</v-icon></v-btn
+            >
+          </template>
+          <span>Delete Project</span>
+        </v-tooltip>
       </div>
     </div>
     <!-- End Loop Clearances -->

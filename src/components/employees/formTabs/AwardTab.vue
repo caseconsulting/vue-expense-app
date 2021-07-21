@@ -51,7 +51,7 @@
       <div class="pb-4" align="center">
         <v-tooltip bottom>
           <template v-slot:activator="{ on }">
-            <v-btn v-on="on" @click="deleteAward(index)" text
+            <v-btn v-on="on" @click="deleteAward(index)" icon text
               ><v-icon style="color: grey" class="pr-1">delete</v-icon></v-btn
             >
           </template>
