@@ -71,9 +71,9 @@ async function submit() {
       return;
     }
 
-    let techComprehend = this.resumeObject.filter((entity) => {
-      return entity.Type === 'TITLE';
-    });
+    // let techComprehend = this.resumeObject.filter((entity) => {
+    //   return entity.Type === 'TITLE';
+    // });
 
     this.loading = false;
   }
