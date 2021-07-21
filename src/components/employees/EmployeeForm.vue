@@ -488,7 +488,7 @@ async function confirm() {
       this.displayError(this.tabErrorMessage);
     }
   } else {
-    this.confirmingError = !this.confirmingError;
+    this.confirmingError = true;
   }
 } // confirm
 /**
@@ -583,9 +583,10 @@ function addErrorTab(name, errors) {
 // |                                                  |
 // |--------------------------------------------------|
 async function created() {
-  window.EventBus.$on('confirmed', () => {
+  window.EventBus.$on('confirmed', async () => {
     //this.confirming = false;
-    this.submit();
+    await this.submit();
+    this.confirmingValid = false;
   });
   window.EventBus.$on('canceled', () => {
     this.errorTabNames = {};

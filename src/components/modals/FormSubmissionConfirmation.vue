@@ -11,9 +11,10 @@
             text
             @click.native="
               emit('canceled');
-              activate = false;
+              loading = true;
             "
-            :disabled="!activate"
+            :loading="loading"
+            :disabled="loading"
             >No</v-btn
           >
           <v-spacer></v-spacer>
@@ -23,9 +24,10 @@
             text
             @click.native="
               emit('confirmed');
-              activate = false;
+              loading = true;
             "
-            :disabled="!activate"
+            :loading="loading"
+            :disabled="loading"
             >Yes</v-btn
           >
           <v-spacer></v-spacer>
@@ -66,11 +68,12 @@ export default {
     emit
   },
   props: [
-    'toggleSubmissionConfirmation' // dialog activator
+    'toggleSubmissionConfirmation' // dialog activator,
   ],
   watch: {
     toggleSubmissionConfirmation: function () {
       this.activate = this.toggleSubmissionConfirmation;
+      this.loading = false;
     }
   }
 };
