@@ -23,19 +23,6 @@
               <v-progress-linear color="#bc3825" indeterminate></v-progress-linear>
             </div>
             <div v-if="resumeObject.length !== 0">
-              <!-- <v-row>
-                <v-col class="text-center">
-                  <h1>Add Your Resume Here</h1>
-                </v-col>
-              </v-row>
-              <v-row>
-                <v-col cols="10" class="pr-0"
-                  ><v-file-input :rules="fileRules" v-model="file" label="Resume"></v-file-input
-                ></v-col>
-                <v-col cols="2" class="text-center">
-                  <v-btn @click="submit" color="green" outlined :loading="loading">Submit</v-btn>
-                </v-col>
-              </v-row> -->
               <v-row class="text-center">
                 <v-col>
                   <h1>Pending Changes</h1>
@@ -74,7 +61,6 @@ import api from '@/shared/api.js';
 import { isEmpty } from '@/utils/utils';
 
 async function submit() {
-  this.validFile = this.$refs.submit.validate();
   if (this.validFile) {
     this.resumeObject.length = 0;
     this.loading = true;
