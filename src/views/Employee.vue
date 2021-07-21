@@ -203,7 +203,6 @@ async function created() {
     }
   });
   window.EventBus.$on('upload-resume-complete', (newResume) => {
-    console.log(newResume);
     if (newResume != null) {
       this.hasResume = newResume;
     }
