@@ -1,3 +1,4 @@
+Education
 <template>
   <div>
     <!-- Loop Education -->
@@ -21,8 +22,7 @@
         :items="degreeDropDown"
         label="Degree"
         data-vv-name="Degree"
-        append-outer-icon="delete"
-        @click:append-outer="deleteDegree(index)"
+        clearable
       >
       </v-select>
 
@@ -36,6 +36,7 @@
         @input.native="updateSchoolDropDown()"
         @change="addSelectedCollege"
         data-vv-name="School"
+        clearable
       ></v-autocomplete>
 
       <!-- Month and Year of Completion -->
@@ -59,6 +60,7 @@
             persistent-hint
             v-on="on"
             @blur="degree.date = parseEventDate($event)"
+            clearable
           ></v-text-field>
         </template>
         <v-date-picker
@@ -81,9 +83,17 @@
           :items="majorDropDown"
           label="Major"
           data-vv-name="Major"
-          :append-outer-icon="degree.majors.length > 1 ? 'delete' : undefined"
-          @click:append-outer="deleteItem(degree.majors, mIndex)"
-        ></v-autocomplete>
+          clearable
+        >
+          <v-tooltip v-if="degree.majors.length > 1" bottom slot="append-outer">
+            <template v-slot:activator="{ on }">
+              <v-btn text v-on="on" @click="deleteItem(degree.majors, mIndex)"
+                ><v-icon style="color: grey">delete</v-icon></v-btn
+              >
+            </template>
+            <span>Delete Major</span>
+          </v-tooltip>
+        </v-autocomplete>
       </div>
       <!-- End Loop Majors -->
       <!-- Button to Add Major -->
@@ -102,10 +112,18 @@
           :rules="requiredRules"
           :items="minorDropDown"
           label="Minor"
-          append-outer-icon="delete"
-          @click:append-outer="deleteItem(degree.minors, mIndex)"
           data-vv-name="Minor"
-        ></v-autocomplete>
+          clearable
+        >
+          <v-tooltip bottom slot="append-outer">
+            <template v-slot:activator="{ on }">
+              <v-btn text v-on="on" @click="deleteItem(degree.minors, mIndex)">
+                <v-icon style="color: grey">delete</v-icon>
+              </v-btn>
+            </template>
+            <span>Delete Minor</span>
+          </v-tooltip>
+        </v-autocomplete>
       </div>
       <!-- End Loops Minors -->
       <!-- Button to Add Minor -->
@@ -124,9 +142,17 @@
           :items="concentrationDropDown"
           label="Concentration"
           data-vv-name="Concentration"
-          append-outer-icon="delete"
-          @click:append-outer="deleteItem(degree.concentrations, cIndex)"
-        ></v-autocomplete>
+          clearable
+        >
+          <v-tooltip bottom slot="append-outer">
+            <template v-slot:activator="{ on }">
+              <v-btn text v-on="on" @click="deleteItem(degree.concentrations, cIndex)">
+                <v-icon style="color: grey">delete</v-icon>
+              </v-btn>
+            </template>
+            <span>Delete Concentration</span>
+          </v-tooltip>
+        </v-autocomplete>
       </div>
       <!-- End Loop Concentrations -->
       <!-- Button to Add Concentration -->
@@ -134,6 +160,16 @@
         <v-btn @click="addItem(degree.concentrations)" depressed outlined small>Add a Concentration</v-btn>
       </div>
       <!-- End Concentrations -->
+      <div align="center" class="pb-4">
+        <v-tooltip bottom>
+          <template v-slot:activator="{ on }">
+            <v-btn v-on="on" @click="deleteDegree(index)" text
+              ><v-icon style="color: grey" class="pr-1">delete</v-icon></v-btn
+            >
+          </template>
+          <span>Delete Education</span>
+        </v-tooltip>
+      </div>
     </div>
     <!-- End Loop Education -->
 
