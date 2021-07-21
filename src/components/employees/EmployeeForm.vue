@@ -738,6 +738,14 @@ async function created() {
     }
     this.addErrorTab('Languages', data[1]);
   });
+  window.EventBus.$on('upload-resume-complete-to-form', (newResume) => {
+    window.EventBus.$emit('upload-resume-complete', newResume);
+    console.log(newResume);
+    console.log('This is a test');
+    if (newResume != null) {
+      this.hasResume = newResume;
+    }
+  });
   // fills model in with populated fields in employee prop
   this.model = _.cloneDeep(
     _.mergeWith(this.model, this.employee, (modelValue, employeeValue) => {
@@ -750,11 +758,6 @@ async function created() {
   this.formTab = this.currentTab;
   this.afterCreate = true;
   this.hasResume = (await api.getResume(this.$route.params.id)) != null;
-  window.EventBus.$on('updated-resume-parser-form', (newResume) => {
-    if (newResume != null) {
-      this.hasResume = newResume;
-    }
-  });
 } // created
 /**
  * Sets the form data based on the given tab.
@@ -867,7 +870,7 @@ async function convertAutocompleteToTitlecase() {
 async function deleteResume() {
   await api.deleteResume(this.$route.params.id);
   this.hasResume = false;
-  window.EventBus.$emit('updated-resume-form', this.hasResume);
+  window.EventBus.$emit('delete-resume', this.hasResume);
 }
 // |--------------------------------------------------|
 // |                                                  |
@@ -878,6 +881,7 @@ export default {
   beforeDestroy() {
     window.EventBus.$off('confirmed');
     window.EventBus.$off('canceled');
+    window.EventBus.$off('upload-resume-complete-to-form');
   },
   components: {
     AwardTab,

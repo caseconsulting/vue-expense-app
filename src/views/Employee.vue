@@ -197,6 +197,17 @@ function userIsEmployee() {
  *  Adjust datatable header for user view.
  */
 async function created() {
+  window.EventBus.$on('delete-resume', (newResume) => {
+    if (newResume != null) {
+      this.hasResume = newResume;
+    }
+  });
+  window.EventBus.$on('upload-resume-complete', (newResume) => {
+    console.log(newResume);
+    if (newResume != null) {
+      this.hasResume = newResume;
+    }
+  });
   this.loading = true;
   await this.getEmployee();
   this.user = await api.getUser();
@@ -205,16 +216,6 @@ async function created() {
   this.loading = false;
   this.fiscalDateView = this.getCurrentBudgetYear();
   this.hasResume = (await api.getResume(this.$route.params.id)) != null;
-  window.EventBus.$on('updated-resume-form', (newResume) => {
-    if (newResume != null) {
-      this.hasResume = newResume;
-    }
-  });
-  window.EventBus.$on('updated-resume-parser', (newResume) => {
-    if (newResume != null) {
-      this.hasResume = newResume;
-    }
-  });
 } // created
 
 /**
@@ -247,6 +248,10 @@ async function mounted() {
 // |--------------------------------------------------|
 
 export default {
+  beforeDestroy() {
+    window.EventBus.$off('upload-resume-complete');
+    window.EventBus.$off('delete-resume');
+  },
   components: {
     AvailableBudgets,
     EmployeeForm,
