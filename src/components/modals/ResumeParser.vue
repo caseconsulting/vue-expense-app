@@ -74,6 +74,7 @@ async function submit() {
     let techComprehend = this.resumeObject.filter((entity) => {
       return entity.Type === 'TITLE';
     });
+    console.log(techComprehend);
 
     this.loading = false;
   }

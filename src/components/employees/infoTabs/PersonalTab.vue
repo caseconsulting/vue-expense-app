@@ -18,12 +18,15 @@
       <b>Birthday on Feed:</b> {{ this.model.birthdayFeed | birthdayFeedResponse }}
     </p>
     <p v-if="!isEmpty(getPlaceOfBirth) && (admin || employee)"><b>Place of Birth:</b> {{ getPlaceOfBirth }}</p>
-    <p v-if="!isEmpty(getCurrentAddress) && admin"><b>Current Address:</b> {{ getCurrentAddress }}</p>
+    <p v-if="!isEmpty(getCurrentAddress) && (userIsAdmin() || userIsEmployee())">
+      <b>Current Address:</b> {{ getCurrentAddress }}
+    </p>
   </div>
 </template>
 
 <script>
 import { isEmpty, monthDayFormat, monthDayYearFormat } from '@/utils/utils';
+import { getRole } from '@/utils/auth';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -79,6 +82,27 @@ function getPlaceOfBirth() {
   return placeOfBirth;
 } // getPlaceOfBirth
 
+/**
+ * Checks whether the current user role is admin, used specifically
+ * to prevent the manager from changing their own role on the Employee tab
+ * @return - boolean: true if the user role is admin
+ */
+function userIsAdmin() {
+  return getRole() === 'admin';
+} //userIsAdmin
+
+/**
+ * Checks if the profile accessed is the signed-in user's profile
+ *
+ * @returns boolean - true if the profile is the user's profile
+ */
+function userIsEmployee() {
+  if (this.$route.params.id == this.userId) {
+    return true;
+  }
+  return false;
+} //userIsEmployee
+
 export default {
   computed: {
     getCurrentAddress,
@@ -92,7 +116,9 @@ export default {
     monthDayFormat
   },
   methods: {
-    isEmpty
+    isEmpty,
+    userIsAdmin,
+    userIsEmployee
   },
   props: ['admin', 'employee', 'model']
 };
