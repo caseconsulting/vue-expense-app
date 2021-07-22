@@ -25,6 +25,16 @@
       data-vv-name="LinkedIn"
     ></v-text-field>
 
+    <!-- Phone Number -->
+    <v-text-field
+      style="padding-right: 20px; padding-left: 10px"
+      v-model="editedPersonalInfo.phoneNumber"
+      v-mask="'###-###-####'"
+      hint="###-###-#### format"
+      label="Phone Number"
+      data-vv-name="Phone Number"
+    ></v-text-field>
+
     <!-- Birthday Picker -->
     <v-menu
       ref="BirthdayMenu"

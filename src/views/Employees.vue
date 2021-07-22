@@ -539,6 +539,7 @@ export default {
         contract: null,
         github: null,
         twitter: null,
+        phoneNumber: null,
         city: null,
         st: null,
         country: null,

@@ -10,6 +10,9 @@
     <p v-if="!isEmpty(this.model.linkedIn)">
       <b>LinkedIn: </b><a :href="this.model.linkedIn" target="_blank"> {{ this.model.linkedIn }}</a>
     </p>
+    <p v-if="!isEmpty(this.model.phoneNumber) && (userIsAdmin() || userIsEmployee() || userIsManager())">
+      <b>Phone Number:</b> {{ this.model.phoneNumber }}
+    </p>
     <p v-if="!isEmpty(this.model.birthday) && (admin || employee)">
       <b>Birthday:</b> {{ this.model.birthday | monthDayYearFormat }}
     </p>
@@ -118,6 +121,15 @@ function userIsEmployee() {
   return false;
 } //userIsEmployee
 
+/**
+ * Checks if the users role is manager.
+ *
+ * @returns boolean - true if the user is a manager
+ */
+function userIsManager() {
+  return getRole() === 'manager';
+}
+
 export default {
   computed: {
     getCurrentAddress,
@@ -139,7 +151,8 @@ export default {
   methods: {
     isEmpty,
     userIsAdmin,
-    userIsEmployee
+    userIsEmployee,
+    userIsManager
   },
   props: ['admin', 'employee', 'model']
 };

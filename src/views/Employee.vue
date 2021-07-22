@@ -298,6 +298,7 @@ export default {
         lastName: '',
         middleName: '',
         nickname: '',
+        phoneNumber: '',
         prime: '',
         st: '',
         technologies: [],
