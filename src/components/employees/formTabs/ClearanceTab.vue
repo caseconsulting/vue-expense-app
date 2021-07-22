@@ -43,6 +43,7 @@
                 v-on="on"
                 @click:clear="clearance.grantedDate = null"
                 @blur="clearance.grantedDate = parseEventDate($event)"
+                @input="clearance.showGrantedMenu = false"
                 @focus="clearanceElement = clearance"
               ></v-text-field>
             </template>
@@ -80,6 +81,7 @@
                 v-on="on"
                 @click:clear="clearance.expirationDate = null"
                 @blur="clearance.expirationDate = parseEventDate($event)"
+                @input="clearance.showExpirationMenu = false"
                 @focus="clearanceElement = clearance"
               ></v-text-field>
             </template>
@@ -116,6 +118,7 @@
                 v-on="on"
                 @click:clear="clearance.submissionDate = null"
                 @blur="clearance.submissionDate = parseEventDate($event)"
+                @input="clearance.showSubmissionMenu = false"
                 @focus="clearanceElement = clearance"
               ></v-text-field>
             </template>
@@ -227,6 +230,7 @@
             v-on="on"
             @click:clear="clearance.badgeExpirationDate = null"
             @blur="clearance.badgeExpirationDate = parseEventDate($event)"
+            @input="clearance.showBadgeMenu = false"
             @focus="clearanceElement = clearance"
           ></v-text-field>
         </template>

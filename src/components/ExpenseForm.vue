@@ -147,6 +147,7 @@
               persistent-hint
               prepend-icon="event"
               @blur="editedExpense.purchaseDate = parseDate(purchaseDateFormatted)"
+              @input="purchaseMenu = false"
               v-on="on"
             ></v-text-field>
           </template>
@@ -178,6 +179,7 @@
               persistent-hint
               prepend-icon="event"
               @blur="editedExpense.reimbursedDate = parseDate(reimbursedDateFormatted)"
+              @input="reimburseMenu = false"
               v-on="on"
             ></v-text-field>
           </template>
