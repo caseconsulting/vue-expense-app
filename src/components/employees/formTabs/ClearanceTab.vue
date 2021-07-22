@@ -285,7 +285,7 @@
               ><v-icon style="color: grey">delete</v-icon></v-btn
             >
           </template>
-          <span>Delete Project</span>
+          <span>Delete Clearance</span>
         </v-tooltip>
       </div>
     </div>
