@@ -119,7 +119,7 @@ function budgets() {
  * @return Object - budget chart data
  */
 function drawGraph() {
-  let budgets = this.budgets;
+  let budgets = getFinalBudgetsData(this.budgets);
   let data = {
     labels: budgets.names,
     datasets: [
@@ -238,6 +238,23 @@ function getCurrentBudgetYear() {
 } // getCurrentBudgetYear
 
 /**
+ * Checks if there are any negative values in each budget data to make sure the graph does not show negative values.
+ * @param budgets - The user's budgets
+ */
+function getFinalBudgetsData(budgets) {
+  Object.keys(budgets).forEach((budget) => {
+    budgets[budget] = budgets[budget].map((item) => {
+      if (!isNaN(item) && item < 0) {
+        return 0;
+      } else {
+        return item;
+      }
+    });
+  });
+  return budgets;
+} // getFinalBudgetsData
+
+/**
  * Refresh and sets the aggregated budgets to draw the graph
  */
 async function refreshBudget() {
@@ -300,6 +317,7 @@ export default {
   methods: {
     drawGraph,
     getCurrentBudgetYear,
+    getFinalBudgetsData,
     refreshBudget
   },
   async mounted() {
