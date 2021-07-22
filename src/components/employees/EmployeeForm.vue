@@ -12,7 +12,6 @@
     >
       <v-card-title headline color="white">
         <span class="headline">{{ errorStatus.statusMessage }}</span>
-        <span>Edit Profile</span>
       </v-card-title>
       <v-btn color="white" text @click="clearStatus"> Close </v-btn>
     </v-snackbar>
