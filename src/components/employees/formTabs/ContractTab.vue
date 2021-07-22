@@ -157,7 +157,7 @@
               ><v-icon style="color: grey" class="pr-1">delete</v-icon></v-btn
             >
           </template>
-          <span>Delete Certification</span>
+          <span>Delete Contract</span>
         </v-tooltip>
       </div>
       <!-- <v-row v-if="!hasEndDatesFilled(index)" class="py-5 px-5 caption text--darken-2 grey--text">
