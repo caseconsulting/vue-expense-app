@@ -67,6 +67,7 @@
                   v-bind="attrs"
                   v-on="on"
                   @blur="project.startDate = parseEventDate($event)"
+                  @input="project.showStartMenu = false"
                 ></v-text-field>
               </template>
               <v-date-picker
@@ -108,6 +109,7 @@
                   clearable
                   @click:clear="project.endDate = null"
                   @blur="project.endDate = parseEventDate($event)"
+                  @input="project.showEndMenu = false"
                 ></v-text-field>
               </template>
               <v-date-picker

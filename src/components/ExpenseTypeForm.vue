@@ -66,9 +66,10 @@
 
         <!-- Start Date -->
         <v-menu
+          v-model="showStartMenu"
           v-if="!editedExpenseType.recurringFlag"
           :rules="requiredRules"
-          :close-on-content-click="false"
+          :close-on-content-click="true"
           :nudge-right="40"
           transition="scale-transition"
           offset-y
@@ -86,12 +87,14 @@
               persistent-hint
               prepend-icon="event"
               @blur="editedExpenseType.startDate = parseDate(startDateFormatted)"
+              @input="showStartMenu = false"
               v-on="on"
             ></v-text-field>
           </template>
 
           <v-date-picker
             v-model="editedExpenseType.startDate"
+            @input="showStartMenu = false"
             :max="editedExpenseType.endDate"
             no-title
           ></v-date-picker>
@@ -100,6 +103,7 @@
         <!-- End Date -->
 
         <v-menu
+          v-model="showEndMenu"
           v-if="!editedExpenseType.recurringFlag"
           :rules="requiredRules"
           :close-on-content-click="false"
@@ -120,12 +124,14 @@
               persistent-hint
               prepend-icon="event"
               @blur="editedExpenseType.endDate = parseDate(endDateFormatted)"
+              @input="showEndMenu = false"
               v-on="on"
             ></v-text-field>
           </template>
 
           <v-date-picker
             v-model="editedExpenseType.endDate"
+            @input="showEndMenu = false"
             :min="editedExpenseType.startDate"
             no-title
           ></v-date-picker>
@@ -629,6 +635,8 @@ export default {
       endDateFormatted: null, // formatted end date
       editedExpenseType: _.cloneDeep(this.model), //used to store edits made to an expense type or when creating new expense type
       requiredRules: [(v) => !isEmpty(v) || 'This field is required'],
+      showStartMenu: false, // boolean for showing date picker
+      showEndMenu: false, // boolean for showing date picker
       startDateFormatted: null, // formatted start date
       submitting: false, // submitting form
       submitForm: false, //triggers submit form modal when changed

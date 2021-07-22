@@ -59,6 +59,7 @@
             persistent-hint
             v-on="on"
             @blur="degree.date = parseEventDate($event)"
+            @input="degree.showEducationMenu = false"
           ></v-text-field>
         </template>
         <v-date-picker

@@ -108,6 +108,7 @@
             persistent-hint
             prepend-icon="event"
             @blur="editedEmployee.hireDate = parseDate(hireDateFormatted)"
+            @input="hireMenu = false"
             v-on="on"
           ></v-text-field>
         </template>
@@ -201,6 +202,7 @@
             persistent-hint
             prepend-icon="event"
             @blur="editedEmployee.deptDate = parseDate(deptDateFormatted)"
+            @input="departureMenu = false"
             v-on="on"
             :disabled="!admin"
           ></v-text-field>

@@ -57,6 +57,7 @@
               persistent-hint
               hint="(MM/YYYY)"
               @blur="startIntervalDateEdited = parseDateMonthYear($event.target.value)"
+              @input="startIntervalMenu = false"
               @click:clear="startIntervalDateEdited = parseDateMonthYear($event.target.value)"
             ></v-text-field>
           </template>
@@ -97,6 +98,7 @@
               persistent-hint
               hint="(MM/YYYY)"
               @blur="endIntervalDateEdited = parseDateMonthYear($event.target.value)"
+              @input="endIntervalMenu = false"
               @click:clear="endIntervalDateEdited = parseDateMonthYear($event.target.value)"
             ></v-text-field>
           </template>
