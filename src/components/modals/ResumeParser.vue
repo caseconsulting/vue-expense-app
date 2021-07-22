@@ -22,6 +22,7 @@
               <p align="center">Processing resume data, this may take up to 20 seconds</p>
               <v-progress-linear color="#bc3825" indeterminate></v-progress-linear>
             </div>
+          </v-form>
           <span v-if="resumeProcessed && (showTech || showAddress || showPhoneNumber)">
             <v-row class="text-center pb-3">
               <v-col>
@@ -280,6 +281,7 @@ async function submit() {
         }
         this.newPersonal.phoneNumber = phoneNumber;
       }
+      console.log(personalComprehend);
 
       // Address
       if (personalEntity.Type === 'LOCATION') {
@@ -370,6 +372,8 @@ async function submit() {
       }
     });
     this.resumeProcessed = true;
+
+    console.log(this.newPersonal);
   }
 }
 
@@ -443,7 +447,6 @@ function updateEndInterval(technologyIndex, dateIntervalIndex, editedEndDate) {
 
 function submitForm() {
   if (this.showTech || this.showPhoneNumber || this.showAddress) {
-    console.log(this.toggleResumeFormErrorModal);
     this.toggleResumeFormErrorModal = true;
   } else {
     window.EventBus.$emit('resume', this.editedEmployeeForm);
@@ -465,12 +468,24 @@ export default {
     newPhoneNumber,
     showTech
   },
+  created() {
+    this.editedEmployeeForm = _.cloneDeep(this.employee);
+    if (!this.editedEmployeeForm.technologies) {
+      this.editedEmployeeForm.technologies = [];
+    }
+    if (!this.editedEmployeeForm.phoneNumber) {
+      this.editedEmployeeForm.phoneNumber = '';
+    }
+    if (!this.editedEmployeeForm.address) {
+      this.editedEmployeeForm.address = '';
+    }
+  },
   data() {
     return {
       activate: false,
       addressCanceled: false,
       phoneCanceled: false,
-      editedEmployeeForm: _.clone(this.employee),
+      editedEmployeeForm: null,
       file: null,
       loading: false,
       validFile: false,
@@ -581,9 +596,6 @@ export default {
     file: function () {
       this.validFile = this.$refs.submit.validate();
     }
-  },
-  created() {
-    console.log(this.employee);
   }
 };
 </script>

@@ -188,6 +188,7 @@ async function created() {
     // clear birthday date if fails to format
     this.editedPersonalInfo.birthday = null;
   }
+
   let user = await api.getUser();
   this.userId = user.employeeNumber;
 } // created
@@ -348,7 +349,10 @@ export default {
           ) ||
           'URL must be valid. Only http(s) are accepted.'
       ], // rules for training url
-      phoneRules: [(v) => v.length == 0 || v.length == 12 || 'Phone number must be valid. Format: ###-###-####'],
+      phoneRules: [
+        (v) =>
+          !isEmpty(v) ? v.length == 0 || v.length == 12 || 'Phone number must be valid. Format: ###-###-####' : true
+      ],
       searchString: '',
       placeIds: {},
       editedPersonalInfo: _.cloneDeep(this.model), //employee personal info that can be edited

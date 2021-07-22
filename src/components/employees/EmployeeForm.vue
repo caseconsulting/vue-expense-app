@@ -24,15 +24,11 @@
           <v-col col="6" class="text-left">
             <h3>Editing {{ fullName }}</h3>
           </v-col>
-<<<<<<< HEAD
           <v-col col="6" class="text-right">
-            <v-btn class="ma-2" @click="toggleResumeParser = !toggleResumeParser">Upload Resume</v-btn>
             <v-btn class="ma-2" @click="deleteResume" :disabled="!hasResume" :loading="deleteLoading"
               >Delete Resume</v-btn
             >
           </v-col>
-=======
->>>>>>> Add-resume-comprehend-employee-profile-edit-functionality: Added functionality for making changes to personal and tech info from resume information
         </v-row>
         <h3 v-else>New Employee</h3>
       </v-card-title>

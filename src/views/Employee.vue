@@ -69,7 +69,7 @@
         ></budget-chart>
       </v-col>
     </v-row>
-    <resume-parser :toggleResumeParser="this.toggleResumeParser" :employee="this.model"></resume-parser>
+    <resume-parser v-if="!loading" :toggleResumeParser="this.toggleResumeParser" :employee="this.model"></resume-parser>
   </v-container>
 </template>
 
@@ -250,9 +250,9 @@ async function mounted() {
   });
 
   window.EventBus.$on('resume', async (newEmployeeForm) => {
-    console.log(newEmployeeForm);
     this.model = newEmployeeForm;
-    await api.updateItem(api.EMPLOYEES, newEmployeeForm);
+    console.log(newEmployeeForm);
+    await api.updateItem(api.EMPLOYEES, this.model);
   });
 } // mounted
 

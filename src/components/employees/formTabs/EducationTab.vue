@@ -202,6 +202,7 @@ async function created() {
   window.EventBus.$emit('created', 'education'); // emit education tab was created
   this.employees = await api.getItems(api.EMPLOYEES); // get all employees
   this.populateDropDowns(); // get autocomplete drop down data
+  console.log(this.model);
 } // created
 
 // |--------------------------------------------------|
