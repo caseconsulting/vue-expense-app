@@ -78,7 +78,10 @@
         <v-btn
           id="createEmployeeBtn"
           class="mb-5"
-          @click="createEmployee = true"
+          @click="
+            createEmployee = true;
+            childKey++;
+          "
           elevation="2"
           v-if="hasAdminPermissions()"
         >
@@ -407,7 +410,6 @@ async function validateDelete(item) {
  */
 function clearCreateEmployee() {
   //used to automatically update the employee form child component
-  this.childKey++;
   this.createEmployee = false;
 }
 
