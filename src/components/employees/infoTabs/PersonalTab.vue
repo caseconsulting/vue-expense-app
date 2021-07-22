@@ -27,6 +27,21 @@
 <script>
 import { isEmpty, monthDayFormat, monthDayYearFormat } from '@/utils/utils';
 import { getRole } from '@/utils/auth';
+import api from '@/shared/api.js';
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                 LIFECYCLE HOOKS                  |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * Emits to parent the component was created and get data.
+ */
+async function created() {
+  let user = await api.getUser();
+  this.userId = user.employeeNumber;
+} //created
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -107,6 +122,12 @@ export default {
   computed: {
     getCurrentAddress,
     getPlaceOfBirth
+  },
+  created,
+  data() {
+    return {
+      userId: null
+    };
   },
   filters: {
     birthdayFeedResponse: (value) => {

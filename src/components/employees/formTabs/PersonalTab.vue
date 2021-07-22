@@ -95,51 +95,53 @@
       </div>
     </div>
     <!-- Current Address -->
-    <p style="font-size: 17px; padding-left: 10px; padding-top: 10px">Current Address</p>
-    <v-combobox
-      class="pb-3"
-      style="padding-top: 0px"
-      @input.native="updateAddressDropDown"
-      :items="Object.keys(placeIds)"
-      v-model="searchString"
-      :search-input.sync="searchString"
-      @change="updateBoxes"
-      outlined
-      hint="Search address and select option to auto-fill fields below"
-      persistent-hint
-    ></v-combobox>
-    <div style="padding-right: 20px; padding-left: 30px; padding-bottom: 10px">
-      <div style="border-left-style: groove; padding-right: 20px; padding-left: 10px">
-        <!-- Current Address: Street text field -->
-        <v-text-field
-          v-model="editedPersonalInfo.currentStreet"
-          label="Street"
-          data-vv-name="Street"
-          style="padding-top: 0px"
-        ></v-text-field>
-        <!-- Current Address: City text field -->
-        <v-text-field
-          v-model="editedPersonalInfo.currentCity"
-          label="City"
-          data-vv-name="Current City"
-          style="padding-top: 0px"
-        ></v-text-field>
-        <!-- Current Address: State autocomplete -->
-        <v-autocomplete
-          :items="Object.values(states)"
-          v-model="editedPersonalInfo.currentState"
-          item-text="text"
-          label="State"
-          style="padding-top: 0px"
-        ></v-autocomplete>
-        <!-- Current Address: ZIP text field -->
-        <v-text-field
-          v-model="editedPersonalInfo.currentZIP"
-          v-mask="'#####'"
-          label="ZIP"
-          data-vv-name="Current ZIP"
-          style="padding-top: 0px"
-        ></v-text-field>
+    <div v-if="userIsAdmin() || userIsEmployee()">
+      <p style="font-size: 17px; padding-left: 10px; padding-top: 10px">Current Address</p>
+      <v-combobox
+        class="pb-3"
+        style="padding-top: 0px"
+        @input.native="updateAddressDropDown"
+        :items="Object.keys(placeIds)"
+        v-model="searchString"
+        :search-input.sync="searchString"
+        @change="updateBoxes"
+        outlined
+        hint="Search address and select option to auto-fill fields below"
+        persistent-hint
+      ></v-combobox>
+      <div style="padding-right: 20px; padding-left: 30px; padding-bottom: 10px">
+        <div style="border-left-style: groove; padding-right: 20px; padding-left: 10px">
+          <!-- Current Address: Street text field -->
+          <v-text-field
+            v-model="editedPersonalInfo.currentStreet"
+            label="Street"
+            data-vv-name="Street"
+            style="padding-top: 0px"
+          ></v-text-field>
+          <!-- Current Address: City text field -->
+          <v-text-field
+            v-model="editedPersonalInfo.currentCity"
+            label="City"
+            data-vv-name="Current City"
+            style="padding-top: 0px"
+          ></v-text-field>
+          <!-- Current Address: State autocomplete -->
+          <v-autocomplete
+            :items="Object.values(states)"
+            v-model="editedPersonalInfo.currentState"
+            item-text="text"
+            label="State"
+            style="padding-top: 0px"
+          ></v-autocomplete>
+          <!-- Current Address: ZIP text field -->
+          <v-text-field
+            v-model="editedPersonalInfo.currentZIP"
+            v-mask="'#####'"
+            label="ZIP"
+            data-vv-name="Current ZIP"
+            style="padding-top: 0px"
+          ></v-text-field>
+        </div>
       </div>
     </div>
   </div>
@@ -150,6 +152,7 @@ import api from '@/shared/api.js';
 import _ from 'lodash';
 import { formatDate, isEmpty, parseDate } from '@/utils/utils';
 import { mask } from 'vue-the-mask';
+import { getRole } from '@/utils/auth';
 const moment = require('moment-timezone');
 moment.tz.setDefault('America/New_York');
 
@@ -174,6 +177,8 @@ async function created() {
     // clear birthday date if fails to format
     this.editedPersonalInfo.birthday = null;
   }
+  let user = await api.getUser();
+  this.userId = user.employeeNumber;
 } // created
 
 // |--------------------------------------------------|
@@ -261,6 +266,27 @@ async function updateBoxes() {
 } //updateBoxes
 
 /**
+ * Checks whether the current user role is admin, used specifically
+ * to prevent the manager from changing their own role on the Employee tab
+ * @return - boolean: true if the user role is admin
+ */
+function userIsAdmin() {
+  return getRole() === 'admin';
+} //userIsAdmin
+
+/**
+ * Checks if the profile accessed is the signed-in user's profile
+ *
+ * @returns boolean - true if the profile is the user's profile
+ */
+function userIsEmployee() {
+  if (this.$route.params.id == this.userId) {
+    return true;
+  }
+  return false;
+} //userIsEmployee
+
+/**
  * Validate all input fields are valid. Emit to parent the error status.
  */
 function validateFields() {
@@ -315,6 +341,7 @@ export default {
       searchString: '',
       placeIds: {},
       editedPersonalInfo: _.cloneDeep(this.model), //employee personal info that can be edited
+      userId: null,
       states: {
         AL: 'Alabama',
         AK: 'Alaska',
@@ -384,6 +411,8 @@ export default {
     parseDate,
     updateAddressDropDown,
     updateBoxes,
+    userIsAdmin,
+    userIsEmployee,
     validateFields
   },
   props: ['model', 'validating'],
