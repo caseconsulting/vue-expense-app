@@ -100,6 +100,7 @@ async function created() {
  * Adds a Customer Organization.
  */
 function addExperience() {
+  if (!this.editedCustomerOrgExp) this.editedCustomerOrgExp = [];
   this.editedCustomerOrgExp.push({
     name: '',
     years: 0,

@@ -349,6 +349,7 @@ function addBIDates(cIndex) {
  * Adds a clearance.
  */
 function addClearance() {
+  if (!this.editedClearances) this.editedClearances = [];
   this.editedClearances.push({
     adjudicationDates: [],
     biDates: [],

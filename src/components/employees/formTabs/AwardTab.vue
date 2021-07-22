@@ -101,6 +101,7 @@ async function created() {
  * Add an award.
  */
 function addAward() {
+  if (!this.editedAwards) this.editedAwards = [];
   this.editedAwards.push({
     name: null,
     dateReceived: null,

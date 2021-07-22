@@ -157,6 +157,7 @@ async function created() {
  * Adds a certification.
  */
 function addCertification() {
+  if (!this.editedCertifications) this.editedCertifications = [];
   this.editedCertifications.push({
     name: null,
     dateReceived: null,

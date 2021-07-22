@@ -221,6 +221,7 @@ function parseEventDate() {
  * Adds a Degree.
  */
 function addDegree() {
+  if (!this.editedDegrees) this.editedDegrees = [];
   this.editedDegrees.push({
     concentrations: [],
     date: null,

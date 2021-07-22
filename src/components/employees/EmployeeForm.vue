@@ -616,8 +616,8 @@ async function submit() {
   if (this.$refs.form.validate() && !hasErrors) {
     // form validated
     this.$emit('startAction');
+    this.cleanUpData();
     if (this.model.id) {
-      this.cleanUpData();
       // updating employee
       let updatedEmployee = await api.updateItem(api.EMPLOYEES, this.model);
       if (updatedEmployee.id) {

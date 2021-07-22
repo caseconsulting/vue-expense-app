@@ -124,6 +124,7 @@ async function created() {
  * Add a Technology.
  */
 function addTechnology() {
+  if (!this.editedTechnologies) this.editedTechnologies = [];
   this.editedTechnologies.push({
     name: '',
     dateIntervals: [{ startDate: null, endDate: null }],

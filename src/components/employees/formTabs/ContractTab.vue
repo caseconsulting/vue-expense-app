@@ -219,6 +219,7 @@ async function created() {
  * Adds a Contract.
  */
 function addContract() {
+  if (!this.editedContracts) this.editedContracts = [];
   this.editedContracts.push({
     name: '',
     prime: '',

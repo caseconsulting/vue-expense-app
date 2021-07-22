@@ -92,6 +92,7 @@ async function created() {
  * Add a Language.
  */
 function addLanguage() {
+  if (!this.editedLanguages) this.editedLanguages = [];
   this.editedLanguages.push({
     name: '',
     proficiency: ''
