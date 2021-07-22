@@ -61,7 +61,8 @@ function emit(msg) {
 export default {
   data() {
     return {
-      activate: false // dialog activator
+      activate: false, // dialog activator
+      loading: false // loading circle
     };
   },
   methods: {
