@@ -75,6 +75,11 @@ export default {
     toggleSubmissionConfirmation: function () {
       this.activate = this.toggleSubmissionConfirmation;
       this.loading = false;
+    },
+    activate: function () {
+      if (!this.activate) {
+        emit('closeModal');
+      }
     }
   }
 };

@@ -563,6 +563,7 @@ async function confirm() {
     } else if (this.tabErrorMessage) {
       //if there is a custom error message it is displayed here
       this.displayError(this.tabErrorMessage);
+      this.confirmingValid = false;
     }
   } else {
     this.confirmingError = true;
@@ -616,8 +617,8 @@ async function submit() {
   if (this.$refs.form.validate() && !hasErrors) {
     // form validated
     this.$emit('startAction');
-    this.cleanUpData();
     if (this.model.id) {
+      this.cleanUpData();
       // updating employee
       let updatedEmployee = await api.updateItem(api.EMPLOYEES, this.model);
       if (updatedEmployee.id) {
@@ -664,10 +665,11 @@ async function created() {
   window.EventBus.$on('confirmed', async () => {
     //this.confirming = false;
     await this.submit();
-    this.confirmingValid = false;
   });
   window.EventBus.$on('canceled', () => {
     this.errorTabNames = {};
+  });
+  window.EventBus.$on('closeModal', () => {
     this.confirmingValid = false;
   });
   // set tab mounted
