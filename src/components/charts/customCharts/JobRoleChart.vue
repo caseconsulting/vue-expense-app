@@ -1,6 +1,8 @@
 <template>
-  <bar-chart v-if="dataReceived" :options="options" :chartData="chartData" />
-  <v-skeleton-loader v-else type="image"></v-skeleton-loader>
+  <v-card v-if="dataReceived" class="pa-5">
+    <bar-chart :options="options" :chartData="chartData" />
+  </v-card>
+  <v-skeleton-loader v-else type="paragraph@5"></v-skeleton-loader>
 </template>
 
 <script>
@@ -63,7 +65,8 @@ function fillData() {
           },
           scaleLabel: {
             display: true,
-            labelString: 'Name of Position'
+            labelString: 'Name of Position',
+            fontStyle: 'bold'
           }
         }
       ],
@@ -75,7 +78,8 @@ function fillData() {
           },
           scaleLabel: {
             display: true,
-            labelString: 'Number of Employees'
+            labelString: 'Number of Employees',
+            fontStyle: 'bold'
           }
         }
       ]
@@ -85,7 +89,8 @@ function fillData() {
     },
     title: {
       display: true,
-      text: 'Top Job Roles at Case Consulting'
+      text: 'Top Job Roles at Case Consulting',
+      fontSize: 15
     },
     maintainAspectRatio: false
   };

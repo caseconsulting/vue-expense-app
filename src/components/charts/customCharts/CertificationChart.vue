@@ -1,6 +1,8 @@
 <template>
-  <bar-chart v-if="!dataReceived" :options="options" :chartData="chartData"></bar-chart>
-  <v-skeleton-loader v-else type="table-tbody"></v-skeleton-loader>
+  <v-card v-if="dataReceived" class="pa-5">
+    <bar-chart :options="options" :chartData="chartData"></bar-chart>
+  </v-card>
+  <v-skeleton-loader v-else type="paragraph@5"></v-skeleton-loader>
 </template>
 
 <script>
@@ -84,7 +86,8 @@ async function fillCertData() {
           },
           scaleLabel: {
             display: true,
-            labelString: 'Number of Employees'
+            labelString: 'Number of Employees',
+            fontStyle: 'bold'
           }
         }
       ],
@@ -95,7 +98,8 @@ async function fillCertData() {
           },
           scaleLabel: {
             display: true,
-            labelString: 'Name of Certification'
+            labelString: 'Name of Certification',
+            fontStyle: 'bold'
           }
         }
       ]
@@ -105,7 +109,8 @@ async function fillCertData() {
     },
     title: {
       display: true,
-      text: 'Top ' + values.length + ' Certifications Used by Employees'
+      text: 'Top ' + values.length + ' Certifications Used by Employees',
+      fontSize: 15
     },
     maintainAspectRatio: false
   };

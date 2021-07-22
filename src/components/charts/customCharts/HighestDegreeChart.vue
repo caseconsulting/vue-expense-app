@@ -2,12 +2,13 @@
   <v-container>
     <v-row>
       <v-col md="6" sm="12">
-        <pie-chart v-if="dataReceived" :options="options" :chartData="chartData" />
-        <v-skeleton-loader v-else type="image"></v-skeleton-loader>
-        <!-- <h4 v-if="degrees">Total Degrees: {{ degreeCount }}</h4> -->
-        <div class="center">
-          <p class="font-weight-normal">Total Degrees: {{ degreeCount }}</p>
-        </div>
+        <v-card v-if="dataReceived">
+          <pie-chart :options="options" :chartData="chartData" />
+          <div class="center">
+            <p class="font-weight-normal">Total Degrees: {{ degreeCount }}</p>
+          </div>
+        </v-card>
+        <v-skeleton-loader v-else type="paragraph@5"></v-skeleton-loader>
       </v-col>
       <v-col md="6" sm="12">
         <MajorsChart />
@@ -259,7 +260,8 @@ function fillData() {
   this.options = {
     title: {
       display: true,
-      text: 'Highest Degrees Obtained by Employees'
+      text: 'Highest Degrees Obtained by Employees',
+      fontSize: 15
     },
     maintainAspectRatio: false,
     responsive: true,

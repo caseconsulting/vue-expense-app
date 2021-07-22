@@ -1,6 +1,8 @@
 <template>
-  <pie-chart v-if="dataReceived" :options="options" :chartData="chartData"></pie-chart>
-  <v-skeleton-loader v-else type="image"></v-skeleton-loader>
+  <v-card v-if="dataReceived" class="pa-5">
+    <pie-chart :options="options" :chartData="chartData"></pie-chart>
+  </v-card>
+  <v-skeleton-loader v-else type="paragraph@5"></v-skeleton-loader>
 </template>
 
 <script>
@@ -34,7 +36,7 @@ function fillData(majors) {
     //these presets are when a degree has not been selected
     quantities.push(1);
     enabled = false;
-    text = 'Click a degree on the Highest Degrees Obtained by Employees to see degree majors';
+    text = 'Click on a degree to see majors';
     colors = ['grey'];
   }
   this.chartData = {
@@ -49,7 +51,8 @@ function fillData(majors) {
   this.options = {
     title: {
       display: true,
-      text: text
+      text: text,
+      fontSize: 15
     },
     maintainAspectRatio: false,
     tooltips: {

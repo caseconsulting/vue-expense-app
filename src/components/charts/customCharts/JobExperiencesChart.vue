@@ -1,8 +1,8 @@
 <template>
-  <div>
-    <bar-chart v-if="dataReceived" :options="options" :chartData="chartData" />
-    <v-skeleton-loader v-else type="image"></v-skeleton-loader>
-  </div>
+  <v-card v-if="dataReceived" class="pa-5">
+    <bar-chart :options="options" :chartData="chartData" />
+  </v-card>
+  <v-skeleton-loader v-else type="paragraph@5"></v-skeleton-loader>
 </template>
 
 <script>
@@ -84,7 +84,8 @@ function drawJobExpHistGraph() {
   let options = {
     title: {
       display: true,
-      text: 'Number of Years of Job Experience for Employees'
+      text: 'Number of Years of Job Experience for Employees',
+      fontSize: 15
     },
     scales: {
       yAxes: [
@@ -94,7 +95,8 @@ function drawJobExpHistGraph() {
           },
           scaleLabel: {
             display: true,
-            labelString: 'Number of Employees'
+            labelString: 'Number of Employees',
+            fontStyle: 'bold'
           }
         }
       ],
@@ -105,7 +107,8 @@ function drawJobExpHistGraph() {
           },
           scaleLabel: {
             display: true,
-            labelString: 'Years of Job Experience'
+            labelString: 'Years of Job Experience',
+            fontStyle: 'bold'
           }
         }
       ]

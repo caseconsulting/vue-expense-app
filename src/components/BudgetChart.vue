@@ -161,7 +161,8 @@ function drawGraph() {
   let options = {
     title: {
       display: true,
-      text: 'Budget Overview For Fiscal Year ' + year + '-' + (Number(year) + 1)
+      text: 'Budget Overview For Fiscal Year ' + year + '-' + (Number(year) + 1),
+      fontSize: 20
     },
     scales: {
       yAxes: [

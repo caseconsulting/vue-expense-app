@@ -1,14 +1,10 @@
 <template>
-  <v-card>
+  <v-card v-if="dataReceived" class="pa-5">
     <v-btn :disabled="reachedMin" @click="oneLessColumn">-</v-btn>
     <v-btn :disabled="reachedMax" @click="oneMoreColumn">+</v-btn>
-    <v-container>
-      <horizontal-bar v-if="!dataReceived" :options="options" :chartData="chartData"></horizontal-bar>
-      <div v-else>
-        <v-skeleton-loader type="text, divider, text"></v-skeleton-loader>
-      </div>
-    </v-container>
+    <horizontal-bar :options="options" :chartData="chartData"></horizontal-bar>
   </v-card>
+  <v-skeleton-loader v-else type="paragraph@5"></v-skeleton-loader>
 </template>
 
 <script>
@@ -76,7 +72,8 @@ function fillData(that) {
           },
           scaleLabel: {
             display: true,
-            labelString: 'Number of Employees'
+            labelString: 'Number of Employees',
+            fontStyle: 'bold'
           }
         }
       ],
@@ -84,7 +81,8 @@ function fillData(that) {
         {
           scaleLabel: {
             display: true,
-            labelString: 'Name of Technology'
+            labelString: 'Name of Technology',
+            fontStyle: 'bold'
           }
         }
       ]
@@ -94,7 +92,8 @@ function fillData(that) {
     },
     title: {
       display: true,
-      text: `Top ${pairs.length} Technologies Used by Employees`
+      text: `Top ${pairs.length} Technologies Used by Employees`,
+      fontSize: 15
     },
     maintainAspectRatio: false
   };

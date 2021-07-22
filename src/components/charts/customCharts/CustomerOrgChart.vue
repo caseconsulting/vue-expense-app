@@ -1,7 +1,6 @@
 <template>
-  <div>
-    <pie-chart v-if="dataReceived" :options="options" :chartData="chartData"></pie-chart>
-    <v-skeleton-loader v-else type="avatar" width="100%"></v-skeleton-loader>
+  <v-card v-if="dataReceived" class="pa-5">
+    <pie-chart :options="options" :chartData="chartData"></pie-chart>
     <v-container class="ma-0">
       <v-row justify="center" no-gutters>
         <v-radio-group row v-model="showCurrent">
@@ -11,7 +10,8 @@
         </v-radio-group>
       </v-row>
     </v-container>
-  </div>
+  </v-card>
+  <v-skeleton-loader v-else type="paragraph@5"></v-skeleton-loader>
 </template>
 
 <script>
@@ -77,7 +77,8 @@ function fillData() {
   this.options = {
     title: {
       display: true,
-      text: text
+      text: text,
+      fontSize: 15
     },
 
     maintainAspectRatio: false,

@@ -1,6 +1,8 @@
 <template>
-  <pie-chart v-if="dataReceived" :options="options" :chartData="chartData"></pie-chart>
-  <v-skeleton-loader v-else type="image"></v-skeleton-loader>
+  <v-card v-if="dataReceived" class="pa-5">
+    <pie-chart :options="options" :chartData="chartData"></pie-chart>
+  </v-card>
+  <v-skeleton-loader v-else type="paragraph@5"></v-skeleton-loader>
 </template>
 
 <script>
@@ -42,7 +44,7 @@ function fillData(minors) {
     if (!_.isEmpty(minors)) {
       text = 'There are no minors for this type of degree';
     } else {
-      text = 'Click a degree on the Highest Degrees Obtained by Employees to see degree minors';
+      text = 'Click on a degree to see minors';
     }
     quantities.push(1);
     enabled = false;
@@ -60,7 +62,8 @@ function fillData(minors) {
   this.options = {
     title: {
       display: true,
-      text: text
+      text: text,
+      fontSize: 15
     },
     maintainAspectRatio: false,
     tooltips: {
