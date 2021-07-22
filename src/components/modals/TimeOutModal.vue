@@ -56,7 +56,7 @@ export default {
   props: ['toggleTimeOut'], // dialog activator
   watch: {
     toggleTimeOut: function () {
-      this.activate = true;
+      this.activate = this.toggleTimeOut;
     }
   }
 };

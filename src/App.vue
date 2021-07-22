@@ -181,13 +181,18 @@ async function created() {
     this.now = Math.trunc(new Date().getTime());
     let timeRemaining = this.date - this.now; // default access key (2 hours)
 
+    // TO MAKE TESTING EASIER DECREASE TIME FROM 120 min to 10 min
+    // timeRemaining -= 300000 * 22;
+
     window.setTimeout(() => {
-      this.timedOut = !this.timedOut;
+      this.timedOut = true;
+      this.session = false;
     }, timeRemaining);
 
+    // Time minus 300000 = - 5 min
     if (timeRemaining > 300000) {
       window.setTimeout(() => {
-        this.session = !this.session;
+        this.session = true;
       }, timeRemaining - 300000);
     }
     //stores the employee number
