@@ -31,6 +31,7 @@
       v-model="editedPersonalInfo.phoneNumber"
       v-mask="'###-###-####'"
       hint="###-###-#### format"
+      :rules="phoneRules"
       label="Phone Number"
       data-vv-name="Phone Number"
     ></v-text-field>
@@ -347,6 +348,7 @@ export default {
           ) ||
           'URL must be valid. Only http(s) are accepted.'
       ], // rules for training url
+      phoneRules: [(v) => v.length == 0 || v.length == 12 || 'Phone number must be valid. Format: ###/###/####'],
       searchString: '',
       placeIds: {},
       editedPersonalInfo: _.cloneDeep(this.model), //employee personal info that can be edited
