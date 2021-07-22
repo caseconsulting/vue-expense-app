@@ -111,7 +111,7 @@ export default {
               'If you are using the clock in function on QuickBooks Time, those hours may still be accumulating. Try refreshing the page.'
           }
         ],
-        employeeHome: [
+        myBudgets: [
           'My Budgets',
           'user',
           {
@@ -181,9 +181,17 @@ export default {
             body: 'An expense cannot be deleted if it has been reimbursed or you are editing an expense.'
           }
         ],
+        myEpensesAdmin: [
+          'My Expenses (admin only)',
+          {
+            title: 'How to back-out of an expense',
+            body:
+              'Admins may create expenses with a negative dollar amount. Negative expenses can be used as a short-cut way to unreimburse an expense that has already been reimbursed in a previous anniversary year and was overdrafted. All expenses to be unreimbursed in the current anniversary year however, should be unreimbursed using the unriembursed button on the expense page. '
+          }
+        ],
         expenseTypes: [
           'Expense Types',
-          'admin',
+          'user',
           {
             title: 'What is a recurring expense type?',
             body:
@@ -193,6 +201,15 @@ export default {
             title: 'What is the overdraft flag?',
             body:
               'This allows an expense type to be charged up to twice the defined amount. Subtracting the overage from next years budget.'
+          }
+        ],
+        expenseTypesAdmin: [
+          'Expense Types (admin only)',
+          'admin',
+          {
+            title: 'What are categories?',
+            body:
+              'Admins may create up to 10 different categories for employees to choose from when submitting and expense. Categories are unique to each expense type and users will be required to select one category if the expense type has them. '
           },
           {
             title: "Why can't I delete an expense type?",
@@ -214,6 +231,7 @@ export default {
             body:
               'This would mean that upon creating an expense for this expense type, the user would have to assign someone else within the company to receive the amount provided within the expense.'
           },
+
           {
             title: 'What does the "Have this expense type show on the company feed?" switch mean?',
             body:
@@ -225,13 +243,36 @@ export default {
               'When a user creates an expense, by default entering a url is optional. However, by enabling this feature, this would make entering a url mandatory.'
           }
         ],
-        employees: [
-          'Employees',
+        reimbursements: [
+          'Reimbursements',
           'admin',
           {
+            title: 'How do I reimburse an expense?',
+            body:
+              'Select the expenses that you would like to reimburse by clicking the select box either on a row (to select all expenses for that employee under that expense type) or on each of their individual expenses. Next select the $ icon at the bottom left of the page and then confirm the reimbursement.'
+          }
+        ],
+        employees: [
+          'Employees',
+          'user',
+          {
             title: 'What is an Employee #?',
-            body: "An employee's ID number will be a user's hire order."
+            body: "An employee's ID number will be a user's hire order. This number also corresponds to TSheets data."
           },
+          {
+            title: 'What are the different employee roles?',
+            body:
+              'There are currently 4 employee roles (user, admin, manager, intern). Users main function is to be able to submit expenses. Admins have all functionality. Managers have the same access as a user but can also edit any employee data. Interns do not have access to any budgets by default.'
+          }
+        ],
+        employeesAdmin: [
+          'Employees (admin only)',
+          {
+            title: 'What capabilities do Admins have?',
+            body:
+              "Admins may view reimbursements, reimburse expenses, and create expense types, view each employee's budget home view, create new employees, and create expenses for other employees"
+          },
+          'admin',
           {
             title: 'What does it mean to mark an employee inactive?',
             body: "This will freeze the user's ability to submit new expenses."
@@ -239,30 +280,6 @@ export default {
           {
             title: "Why can't I delete an employee?",
             body: 'An employee cannot be deleted if the employee has expenses or you are editing an employee.'
-          }
-        ],
-        forAdmins: [
-          'For Admins',
-          'admin',
-          {
-            title: 'What capabilities do Admins have?',
-            body:
-              "Admins may view reimbursements, reimburse expenses, and create expense types, view each employee's budget home view, create new employees, and create expenses for other employees"
-          },
-          {
-            title: 'How do I reimburse an expense?',
-            body:
-              'Go to Reimbursements and select the expenses that you would like to reimburse by clicking the select box either on a row (to select all expenses for that employee under that expense type) or on each of their individual expenses. Next select the $ icon at the bottom left of the page and then confirm the reimbursement.'
-          },
-          {
-            title: 'What are categories?',
-            body:
-              'Admins may create up to 10 different categories for employees to choose from when submitting and expense. Categories are unique to each expense type and users will be required to select one category if the expense type has them. '
-          },
-          {
-            title: 'How to back-out of an expense',
-            body:
-              'Admins may create expenses with a negative dollar amount. Negative expenses can be used as a short-cut way to unreimburse an expense that has already been reimbursed in a previous anniversary year and was overdrafted. All expenses to be unreimbursed in the current anniversary year however, should be unreimbursed using the unriembursed button on the expense page. '
           }
         ],
         knownIssues: [
