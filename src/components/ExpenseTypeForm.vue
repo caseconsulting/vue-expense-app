@@ -69,7 +69,7 @@
           v-model="showStartMenu"
           v-if="!editedExpenseType.recurringFlag"
           :rules="requiredRules"
-          :close-on-content-click="true"
+          :close-on-content-click="false"
           :nudge-right="40"
           transition="scale-transition"
           offset-y
