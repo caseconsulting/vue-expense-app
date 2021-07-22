@@ -199,6 +199,7 @@
             :rules="dateRules"
             label="Departure Date"
             hint="MM/DD/YYYY format"
+            v-mask="'##/##/####'"
             persistent-hint
             prepend-icon="event"
             @blur="editedEmployee.deptDate = parseDate(deptDateFormatted)"
