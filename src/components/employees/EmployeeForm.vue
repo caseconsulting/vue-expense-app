@@ -130,17 +130,91 @@
           </div>
           <!-- Tabs for larger screens -->
           <v-tabs v-if="!useDropDown" v-model="formTab" center-active show-arrows class="pb-0">
-            <v-tab href="#employee" v-bind:class="{ errorTab: tabErrors.employee }">Employee</v-tab>
-            <v-tab href="#personal" v-bind:class="{ errorTab: tabErrors.personal }">Personal</v-tab>
-            <v-tab href="#education" v-bind:class="{ errorTab: tabErrors.education }">Education</v-tab>
-            <v-tab href="#jobExperience" v-bind:class="{ errorTab: tabErrors.jobExperience }">Job Experience</v-tab>
-            <v-tab href="#certifications" v-bind:class="{ errorTab: tabErrors.certifications }">Certifications</v-tab>
-            <v-tab href="#awards" v-bind:class="{ errorTab: tabErrors.awards }">Awards</v-tab>
-            <v-tab href="#technologies" v-bind:class="{ errorTab: tabErrors.technologies }">Technologies</v-tab>
-            <v-tab href="#customerOrgExp" v-bind:class="{ errorTab: tabErrors.customerOrgExp }">Customer Org</v-tab>
-            <v-tab href="#contracts" v-bind:class="{ errorTab: tabErrors.contracts }">Contracts</v-tab>
-            <v-tab href="#clearance" v-bind:class="{ errorTab: tabErrors.clearance }">Clearance</v-tab>
-            <v-tab href="#languages" v-bind:class="{ errorTab: tabErrors.languages }">Languages</v-tab>
+            <v-tooltip top>
+              <template v-slot:activator="{ on }">
+                <v-tab v-on="on" href="#employee" v-bind:class="{ errorTab: tabErrors.employee }">Employee</v-tab>
+              </template>
+              <span v-if="tabErrors.employee">Submit to update tab validation</span>
+              <span v-else>Employee Tab</span>
+            </v-tooltip>
+            <v-tooltip top>
+              <template v-slot:activator="{ on }">
+                <v-tab v-on="on" href="#personal" v-bind:class="{ errorTab: tabErrors.personal }">Personal</v-tab>
+              </template>
+              <span v-if="tabErrors.personal">Submit to update tab validation</span>
+              <span v-else>Personal Tab</span>
+            </v-tooltip>
+            <v-tooltip top>
+              <template v-slot:activator="{ on }">
+                <v-tab v-on="on" href="#education" v-bind:class="{ errorTab: tabErrors.education }">Education</v-tab>
+              </template>
+              <span v-if="tabErrors.education">Submit to update tab validation</span>
+              <span v-else>Education Tab</span>
+            </v-tooltip>
+            <v-tooltip top>
+              <template v-slot:activator="{ on }">
+                <v-tab v-on="on" href="#jobExperience" v-bind:class="{ errorTab: tabErrors.jobExperience }"
+                  >Job Experience</v-tab
+                >
+              </template>
+              <span v-if="tabErrors.jobExperience">Submit to update tab validation</span>
+              <span v-else>Job Experience Tab</span>
+            </v-tooltip>
+            <v-tooltip top>
+              <template v-slot:activator="{ on }">
+                <v-tab v-on="on" href="#certifications" v-bind:class="{ errorTab: tabErrors.certifications }"
+                  >Certifications</v-tab
+                >
+              </template>
+              <span v-if="tabErrors.certifications">Submit to update tab validation</span>
+              <span v-else>Certifications Tab</span>
+            </v-tooltip>
+            <v-tooltip top>
+              <template v-slot:activator="{ on }">
+                <v-tab v-on="on" href="#awards" v-bind:class="{ errorTab: tabErrors.awards }">Awards</v-tab>
+              </template>
+              <span v-if="tabErrors.awards">Submit to update tab validation</span>
+              <span v-else>Awards Tab</span>
+            </v-tooltip>
+            <v-tooltip top>
+              <template v-slot:activator="{ on }">
+                <v-tab v-on="on" href="#technologies" v-bind:class="{ errorTab: tabErrors.technologies }"
+                  >Technologies</v-tab
+                >
+              </template>
+              <span v-if="tabErrors.technologies">Submit to update tab validation</span>
+              <span v-else>Technologies Tab</span>
+            </v-tooltip>
+            <v-tooltip top>
+              <template v-slot:activator="{ on }">
+                <v-tab v-on="on" href="#customerOrgExp" v-bind:class="{ errorTab: tabErrors.customerOrgExp }"
+                  >Customer Org</v-tab
+                >
+              </template>
+              <span v-if="tabErrors.customerOrgExp">Submit to update tab validation</span>
+              <span v-else>Customer Org Tab</span>
+            </v-tooltip>
+            <v-tooltip top>
+              <template v-slot:activator="{ on }">
+                <v-tab v-on="on" href="#contracts" v-bind:class="{ errorTab: tabErrors.contracts }">Contracts</v-tab>
+              </template>
+              <span v-if="tabErrors.contracts">Submit to update tab validation</span>
+              <span v-else>Contracts Tab</span>
+            </v-tooltip>
+            <v-tooltip top>
+              <template v-slot:activator="{ on }">
+                <v-tab v-on="on" href="#clearance" v-bind:class="{ errorTab: tabErrors.clearance }">Clearance</v-tab>
+              </template>
+              <span v-if="tabErrors.clearance">Submit to update tab validation</span>
+              <span v-else>Clearance Tab</span>
+            </v-tooltip>
+            <v-tooltip top>
+              <template v-slot:activator="{ on }">
+                <v-tab v-on="on" href="#languages" v-bind:class="{ errorTab: tabErrors.languages }">Languages</v-tab>
+              </template>
+              <span v-if="tabErrors.languages">Submit to update tab validation</span>
+              <span v-else>Languages Tab</span>
+            </v-tooltip>
             <!-- Employee -->
             <v-tab-item id="employee" class="mt-6 mb-4">
               <employee-tab
