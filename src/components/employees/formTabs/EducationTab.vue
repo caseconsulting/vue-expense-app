@@ -286,30 +286,6 @@ function detectDuplicateEducation() {
   return duplicateEdu;
 } // detectDuplicateEducation
 
-function duplicateDiscipline(title, discipline, schoolIndex) {
-  console.log(title);
-  let disciplines = this.editedDegrees[schoolIndex][title];
-  console.log(disciplines);
-  let count = _.countBy(disciplines, (dis) => {
-    return dis === discipline;
-  });
-  return count.true > 1;
-}
-
-function detectDuplicateDiscipline() {
-  let dup = false;
-  _.forEach(this.editedDegrees, (degree) => {
-    if (
-      _.uniq(degree.majors).length !== degree.majors.length ||
-      _.uniq(degree.minors).length !== degree.minors.length ||
-      _.uniq(degree.concentrations).length !== degree.concentrations.length
-    ) {
-      dup = true;
-    }
-  });
-  return dup;
-}
-
 /**
  * Checks to see if an education is a duplicate of one that is already entered by a user.
  * @param edu Object - the education object
@@ -394,7 +370,7 @@ function titleCase(str) {
 function validateFields() {
   let hasErrors = false;
   let errorCount = 0;
-  if (this.detectDuplicateEducation() !== undefined || this.detectDuplicateDiscipline()) {
+  if (this.detectDuplicateEducation() !== undefined) {
     hasErrors = true;
     //emit error status with a custom message
     window.EventBus.$emit(
@@ -431,6 +407,14 @@ export default {
         (v) => (!isEmpty(v) && /[\d]{2}\/[\d]{4}/.test(v)) || 'Date must be valid. Format: MM/YYYY',
         (v) => moment(v, 'MM/YYYY').isValid() || 'Date must be valid'
       ], // rules for a required date
+      duplicateDiscipline: (title, discipline, schoolIndex) => {
+        let disciplines = this.editedDegrees[schoolIndex][title];
+        let count = _.countBy(disciplines, (dis) => {
+          return dis === discipline;
+        });
+
+        return count.true < 2 || 'Duplicate field found, please remove duplicate entries';
+      },
       editedDegrees: _.cloneDeep(this.model), // stores edited degree info
       degreeDropDown: ['Associates', 'Bachelors', 'Masters', 'PhD/Doctorate', 'Other (trade school, etc)'], // autocomplete degree name options
       majorDropDown: _.map(majorsAndMinors, (elem) => titleCase(elem)), // autocomplete major options
@@ -454,8 +438,6 @@ export default {
     deleteDegree,
     deleteItem,
     detectDuplicateEducation,
-    duplicateDiscipline,
-    detectDuplicateDiscipline,
     isDuplicate,
     isEmpty,
     parseDateMonthYear,
