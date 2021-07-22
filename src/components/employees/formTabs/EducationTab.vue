@@ -98,7 +98,7 @@ Education
       </div>
       <!-- End Loop Majors -->
       <!-- Button to Add Major -->
-      <div align="center" class="pb-4">
+      <div align="center" class="py-2">
         <v-btn @click="addItem(degree.majors)" depressed outlined small>Add a Major</v-btn>
       </div>
       <!-- End Majors -->
@@ -128,7 +128,7 @@ Education
       </div>
       <!-- End Loops Minors -->
       <!-- Button to Add Minor -->
-      <div align="center" class="pb-4">
+      <div align="center" class="py-2">
         <v-btn @click="addItem(degree.minors)" depressed outlined small>Add a Minor</v-btn>
       </div>
       <!-- End Minors -->
@@ -156,7 +156,7 @@ Education
       </div>
       <!-- End Loop Concentrations -->
       <!-- Button to Add Concentration -->
-      <div align="center" class="pb-4">
+      <div align="center" class="py-2">
         <v-btn @click="addItem(degree.concentrations)" depressed outlined small>Add a Concentration</v-btn>
       </div>
       <!-- End Concentrations -->
@@ -412,8 +412,7 @@ export default {
         let count = _.countBy(disciplines, (dis) => {
           return dis === discipline;
         });
-
-        return count.true < 2 || 'Duplicate field found, please remove duplicate entries';
+        return count.true === 1 || 'Duplicate field found, please remove duplicate entries';
       },
       editedDegrees: _.cloneDeep(this.model), // stores edited degree info
       degreeDropDown: ['Associates', 'Bachelors', 'Masters', 'PhD/Doctorate', 'Other (trade school, etc)'], // autocomplete degree name options
