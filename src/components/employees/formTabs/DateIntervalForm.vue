@@ -1,6 +1,6 @@
 <template>
   <v-form ref="form">
-    <div style="border: 1px solid grey" class="pt-3 pb-1 px-5" v-bind:class="{ errorText: intervalOverlaps }">
+    <div style="border: 1px solid grey" class="pt-3 pb-1 px-5">
       <!--Duplicate chip if tech name is already entered by user-->
       <v-row v-if="intervalOverlaps" justify="end">
         <v-chip class="ma-2" color="error" text-color="white"> Overlapping interval or field error </v-chip>

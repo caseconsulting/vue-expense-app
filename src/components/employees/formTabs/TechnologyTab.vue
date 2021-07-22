@@ -351,15 +351,6 @@ function validateTimeIntervals() {
       _.forEach(this.$refs.dateInterval, (dateInterval) => {
         dateInterval.$refs.form.validate();
       });
-      if (dateIntervals[x].hasErrors) {
-        //emit error status with a custom message
-        window.EventBus.$emit(
-          'technologiesStatus',
-          [true, 1],
-          `Technology intervals must not overlap, and the fields must not have errors.`
-        ); // emit error status
-        return false; //ends validation if finds any interval has errors
-      }
       if (!dateIntervals[x].endDate) {
         this.editedTechnologies[tech].current = true; //sets current tech to true if no end date
       }
