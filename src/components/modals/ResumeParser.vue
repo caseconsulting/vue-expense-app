@@ -22,37 +22,143 @@
               <p align="center">Processing resume data, this may take up to 20 seconds</p>
               <v-progress-linear color="#bc3825" indeterminate></v-progress-linear>
             </div>
-            <div v-if="resumeObject.length !== 0">
-              <v-row class="text-center">
+          <span v-if="resumeProcessed && (showTech || showAddress || showPhoneNumber)">
+            <v-row class="text-center pb-3">
+              <v-col>
+                <h1>Pending Changes</h1>
+              </v-col>
+            </v-row>
+            <span v-if="showAddress || showPhoneNumber">
+              <v-row class="text-left">
                 <v-col>
-                  <h1>Pending Changes</h1>
+                  <h2>Personal Info Changes</h2>
+                  <hr />
                 </v-col>
               </v-row>
               <v-row class="text-center">
                 <v-col cols="5">
-                  <h3>Currently on the Form</h3>
+                  <h3>Personal Info Currently on Form</h3>
                 </v-col>
                 <v-col cols="5">
-                  <h3>New Content</h3>
+                  <h3>New Personal Info</h3>
                 </v-col>
               </v-row>
-              <v-row class="text-center">
+              <!-- Address -->
+              <v-row v-if="showAddress" class="text-center">
                 <v-col cols="5">
-                  <v-text-field disabled label="Main"> </v-text-field>
+                  <v-text-field v-model="address" disabled label="Old Address"> </v-text-field>
                 </v-col>
                 <v-col cols="5">
-                  <v-text-field label="Main"> </v-text-field>
+                  <v-text-field v-model="newAddress" readonly label="New Address"> </v-text-field>
                 </v-col>
                 <v-col cols="2" class="pt-7">
-                  <v-icon large left color="green">done</v-icon>
-                  <v-icon large right color="red">close</v-icon>
+                  <v-icon
+                    large
+                    left
+                    color="green"
+                    @click="
+                      submitInfo('address', newAddress);
+                      addressCanceled = true;
+                    "
+                    >done</v-icon
+                  >
+                  <v-icon large right color="red" @click="addressCanceled = true">close</v-icon>
                 </v-col>
               </v-row>
-            </div>
-          </v-form>
+              <!-- Phone Number -->
+              <v-row v-if="showPhoneNumber" class="text-center">
+                <v-col cols="5">
+                  <v-text-field v-model="phoneNumber" disabled label="Old Phone Number"> </v-text-field>
+                </v-col>
+                <v-col cols="5">
+                  <v-text-field v-model="newPhoneNumber" readonly label="New Phone Number"> </v-text-field>
+                </v-col>
+                <v-col cols="2" class="pt-7">
+                  <v-icon
+                    large
+                    left
+                    color="green"
+                    @click="
+                      submitInfo('phoneNumber', newPhoneNumber);
+                      phoneCanceled = true;
+                    "
+                    >done</v-icon
+                  >
+                  <v-icon large right color="red" @click="phoneCanceled = true">close</v-icon>
+                </v-col>
+              </v-row>
+            </span>
+            <span v-if="showTech">
+              <!-- Technology -->
+              <v-row class="text-left">
+                <v-col>
+                  <h2>Technology Additions</h2>
+                  <hr />
+                </v-col>
+              </v-row>
+
+              <v-row class="ma-5" align="center" justify="center">
+                <v-col v-for="(tech, index) in newTechnology" :key="index" cols="10">
+                  <div v-if="!tech.canceled" style="border: 1px solid grey" class="pt-2 pb-1 px-3 mx-5 my-3">
+                    <!-- Loop Technologies -->
+                    <!-- Name of Technology -->
+                    <v-text-field class="pb-5" :value="tech.tech" readonly label="Technology"></v-text-field>
+
+                    <!-- Time Intervals -->
+                    <v-row justify="center">
+                      <div
+                        v-for="(dateInterval, intervalIndex) in tech.dateIntervals"
+                        :key="'technology interval: ' + index + intervalIndex"
+                        class="mb-3"
+                      >
+                        <date-interval-form
+                          ref="dateInterval"
+                          :startIntervalDate="dateInterval.startDate"
+                          :endIntervalDate="dateInterval.endDate"
+                          :allIntervals="tech.dateIntervals"
+                          :technologyIndex="index"
+                          :intervalIndex="intervalIndex"
+                          @delete="deleteDateInterval"
+                          @validated="validateDateInterval"
+                          @start="updateStartInterval"
+                          @end="updateEndInterval"
+                        ></date-interval-form>
+                      </div>
+                    </v-row>
+                    <!-- End of Time Intervals -->
+
+                    <!--Add a time interval button-->
+                    <div class="pt-4 mb-3" align="center">
+                      <v-btn @click="addTimeInterval(index)" elevation="2"
+                        ><v-icon class="pr-1">add</v-icon>Time Interval</v-btn
+                      >
+                    </div>
+
+                    <v-row align="center" class="py-3" justify="center">
+                      <v-icon large left color="green" @click="submitInfo('technology', index)">done</v-icon>
+                      <v-icon large right color="red" @click="tech.canceled = true">close</v-icon>
+                    </v-row>
+                  </div>
+                </v-col>
+              </v-row>
+              <!-- Education -->
+            </span>
+          </span>
+          <v-row class="text-center" v-if="resumeProcessed">
+            <v-col>
+              <v-btn color="green" class="mr-1" outlined @click="submitForm">Submit Form</v-btn>
+              <v-btn color="red" outlined @click="activate = !activate">Cancel Form Edits</v-btn>
+            </v-col>
+          </v-row>
         </v-container>
       </v-card-text>
     </v-card>
+    <v-dialog v-model="toggleResumeFormErrorModal" max-width="350">
+      <v-card>
+        <v-card-title> Please make sure you process all pending changes. </v-card-title>
+        <v-btn text color="red" @click="toggleResumeFormErrorModal = false">Close</v-btn>
+      </v-card>
+    </v-dialog>
   </v-dialog>
 </template>
 
@@ -60,6 +166,71 @@
 import api from '@/shared/api.js';
 import { isEmpty } from '@/utils/utils';
 import _ from 'lodash';
+import dateIntervalForm from '@/components/employees/formTabs/DateIntervalForm';
+
+function showAddress() {
+  return this.newPersonal.location && !this.addressCanceled;
+}
+
+function address() {
+  let currentAddress = '';
+  if (!isEmpty(this.employee.currentStreet)) {
+    currentAddress += `${this.employee.currentStreet}, `;
+  }
+  if (!isEmpty(this.employee.currentCity)) {
+    currentAddress += `${this.employee.currentCity}, `;
+  }
+  if (!isEmpty(this.employee.currentState)) {
+    currentAddress += `${this.employee.currentState} `;
+  }
+  if (!isEmpty(this.employee.currentZIP)) {
+    currentAddress += `${this.employee.currentZIP} `;
+  }
+  if (currentAddress.charAt(currentAddress.length - 2) === ',') {
+    currentAddress = currentAddress.slice(0, -2);
+  } else {
+    currentAddress = currentAddress.slice(0, -1);
+  }
+  return currentAddress === '' ? 'No address on form' : currentAddress;
+}
+
+function newAddress() {
+  if (
+    this.newPersonal.currentStreet &&
+    this.newPersonal.currentCity &&
+    this.newPersonal.currentState &&
+    this.newPersonal.currentZIP
+  ) {
+    return `${this.newPersonal.currentStreet}, ${this.newPersonal.currentCity}, ${this.newPersonal.currentState} ${this.newPersonal.currentZIP}`;
+  } else {
+    return null;
+  }
+}
+
+function showPhoneNumber() {
+  return this.newPersonal.phoneNumber && !this.phoneCanceled;
+}
+
+function phoneNumber() {
+  return this.employee.phoneNumber ? this.employee.phoneNumber : 'No phone number on form';
+}
+
+function newPhoneNumber() {
+  return this.newPersonal.phoneNumber ? this.newPersonal.phoneNumber : null;
+}
+
+function showTech() {
+  return this.newTechnology.filter((tech) => !tech.canceled).length != 0;
+}
+
+/**
+ * Add a time interval.
+ * @param index - index the index in array of the technology
+ */
+async function addTimeInterval(index) {
+  this.newTechnology[index].dateIntervals.push({ startDate: null, endDate: null });
+  this.newTechnology = _.cloneDeep(this.newTechnology); //ensures that technologies intervals render properly
+} // addTimeInterval
 
 async function submit() {
   if (this.validFile) {
@@ -124,6 +295,25 @@ async function submit() {
     let locations = await api.getLocation(location[0]);
     if (locations.predictions.length >= 1) {
       this.newPersonal.location = locations.predictions[0].description;
+      this.newPersonal.place_id = locations.predictions[0].place_id;
+
+      let fullAddress = this.newPersonal.location.split(', ');
+      let state = fullAddress[2].split(' ')[0];
+
+      let res = await api.getZipCode(this.newPersonal.place_id);
+      //Response contains an array of objects, with each object containing
+      //a field title 'type'. 'Type' is another array and we want the one
+      //containing the postal_code string
+      let currentZIP = '';
+      _.forEach(res.result.address_components, (field) => {
+        if (field.types.includes('postal_code')) {
+          currentZIP = field.short_name;
+        }
+      });
+      this.newPersonal.currentStreet = fullAddress[0];
+      this.newPersonal.currentCity = fullAddress[1];
+      this.newPersonal.currentState = this.states[state];
+      this.newPersonal.currentZIP = currentZIP;
     }
 
     // EDUCATION
@@ -149,38 +339,144 @@ async function submit() {
     let techComprehend = this.resumeObject.filter((entity) => {
       return entity.Type === 'TITLE' || entity.Type === 'OTHER';
     });
+
+    let newTech = [];
     techComprehend.forEach(async (tech) => {
       let techList = await api.getTechSkills(tech.Text);
       // check if the tech list contains the tech from the resume
       let techs = techList.filter((item) => {
         return item.toLowerCase() === tech.Text.toLowerCase();
       });
+
       // add if there are no duplicates
-      if (techs.length == 1 && !this.newTechnology.includes(techs[0])) {
+      if (techs.length == 1 && !newTech.includes(techs[0])) {
         if (this.employee.technologies && this.employee.technologies.length > 0) {
           if (this.employee.technologies.filter((e) => e.name === techs[0]).length == 0) {
-            this.newTechnology.push(techs[0]);
+            this.newTechnology.push({
+              tech: techs[0],
+              dateIntervals: [{ startDate: null, endDate: null }],
+              canceled: false
+            });
+            newTech.push(techs[0]);
           }
         } else {
-          this.newTechnology.push(techs[0]);
+          this.newTechnology.push({
+            tech: techs[0],
+            dateIntervals: [{ startDate: null, endDate: null }],
+            canceled: false
+          });
+          newTech.push(techs[0]);
         }
       }
     });
+    this.resumeProcessed = true;
+  }
+}
+
+function isCurrent(tech) {
+  return tech.dateIntervals.filter((dateInterval) => !dateInterval.endDate).length > 0;
+} //isCurrent
+
+function submitInfo(field, value) {
+  if (field === 'address') {
+    this.editedEmployeeForm.currentStreet = this.newPersonal.currentStreet;
+    this.editedEmployeeForm.currentCity = this.newPersonal.currentCity;
+    this.editedEmployeeForm.currentState = this.newPersonal.currentState;
+    this.editedEmployeeForm.currentZIP = this.newPersonal.currentZIP;
+  } else if (field === 'phoneNumber') {
+    this.editedEmployeeForm.phoneNumber = this.newPersonal.phoneNumber;
+  } else if (field === 'technology') {
+    let techHasErrors = this.newTechnology[value].dateIntervals.filter((dateInterval) => dateInterval.hasErrors);
+    if (techHasErrors.length == 0 && this.newTechnology[value].dateIntervals.length > 0) {
+      this.newTechnology[value].canceled = true;
+      this.editedEmployeeForm.technologies.push({
+        name: this.newTechnology[value].tech,
+        current: isCurrent(this.newTechnology[value]),
+        dateIntervals: this.newTechnology[value].dateIntervals
+      });
+    }
+  }
+}
+
+function deleteDateInterval(technologyIndex, dateIntervalIndex) {
+  if (
+    this.newTechnology.length > technologyIndex &&
+    this.newTechnology[technologyIndex].dateIntervals.length > dateIntervalIndex
+  ) {
+    this.newTechnology[technologyIndex].dateIntervals.splice(dateIntervalIndex, 1);
+  }
+}
+
+function validateDateInterval(technologyIndex, dateIntervalIndex, hasErrors) {
+  if (
+    this.newTechnology &&
+    this.newTechnology[technologyIndex] &&
+    this.newTechnology[technologyIndex].dateIntervals &&
+    this.newTechnology[technologyIndex].dateIntervals[dateIntervalIndex]
+  ) {
+    this.newTechnology[technologyIndex].dateIntervals[dateIntervalIndex].hasErrors = _.cloneDeep(hasErrors);
+  }
+} // validateDateInterval
+
+function updateStartInterval(technologyIndex, dateIntervalIndex, editedStartDate) {
+  if (
+    this.newTechnology &&
+    this.newTechnology[technologyIndex] &&
+    this.newTechnology[technologyIndex].dateIntervals &&
+    this.newTechnology[technologyIndex].dateIntervals[dateIntervalIndex]
+  )
+    this.newTechnology[technologyIndex].dateIntervals[dateIntervalIndex].startDate = _.cloneDeep(editedStartDate);
+  this.newTechnology = _.cloneDeep(this.newTechnology);
+} //updateStartInterval
+
+function updateEndInterval(technologyIndex, dateIntervalIndex, editedEndDate) {
+  if (
+    this.newTechnology &&
+    this.newTechnology[technologyIndex] &&
+    this.newTechnology[technologyIndex].dateIntervals &&
+    this.newTechnology[technologyIndex].dateIntervals[dateIntervalIndex]
+  ) {
+    this.newTechnology[technologyIndex].dateIntervals[dateIntervalIndex].endDate = _.cloneDeep(editedEndDate);
+    this.newTechnology = _.cloneDeep(this.newTechnology);
+  }
+}
+
+function submitForm() {
+  if (this.showTech || this.showPhoneNumber || this.showAddress) {
+    console.log(this.toggleResumeFormErrorModal);
+    this.toggleResumeFormErrorModal = true;
+  } else {
+    window.EventBus.$emit('resume', this.editedEmployeeForm);
+    this.activate = !this.activate;
+    this.resumeProcessed = false;
   }
 }
 
 export default {
+  components: {
+    dateIntervalForm
+  },
+  computed: {
+    showAddress,
+    address,
+    newAddress,
+    showPhoneNumber,
+    phoneNumber,
+    newPhoneNumber,
+    showTech
+  },
   data() {
     return {
       activate: false,
+      addressCanceled: false,
+      phoneCanceled: false,
+      editedEmployeeForm: _.clone(this.employee),
       file: null,
       loading: false,
       validFile: false,
       resumeObject: [],
       newEducation: [],
       newTechnology: [],
-      newPersonal: [],
-      newEmployee: [],
       fileRules: [
         (v) => {
           return !isEmpty(v) || 'File required (.png, .pdf, or .jpeg)';
@@ -192,10 +488,89 @@ export default {
             'File unsupported, please submit a .png, .pdf, or a .jpeg file'
           );
         }
-      ]
+      ],
+      newPersonal: {
+        phoneNumber: null,
+        location: null,
+        currentCity: null,
+        currentState: null,
+        currentStreet: null,
+        currentZIP: null
+      },
+      toggleResumeFormErrorModal: false,
+      resumeProcessed: false,
+      states: {
+        AL: 'Alabama',
+        AK: 'Alaska',
+        AS: 'American Samoa',
+        AZ: 'Arizona',
+        AR: 'Arkansas',
+        CA: 'California',
+        CO: 'Colorado',
+        CT: 'Connecticut',
+        DE: 'Delaware',
+        DC: 'District Of Columbia',
+        FM: 'Federated States Of Micronesia',
+        FL: 'Florida',
+        GA: 'Georgia',
+        GU: 'Guam',
+        HI: 'Hawaii',
+        ID: 'Idaho',
+        IL: 'Illinois',
+        IN: 'Indiana',
+        IA: 'Iowa',
+        KS: 'Kansas',
+        KY: 'Kentucky',
+        LA: 'Louisiana',
+        ME: 'Maine',
+        MH: 'Marshall Islands',
+        MD: 'Maryland',
+        MA: 'Massachusetts',
+        MI: 'Michigan',
+        MN: 'Minnesota',
+        MS: 'Mississippi',
+        MO: 'Missouri',
+        MT: 'Montana',
+        NE: 'Nebraska',
+        NV: 'Nevada',
+        NH: 'New Hampshire',
+        NJ: 'New Jersey',
+        NM: 'New Mexico',
+        NY: 'New York',
+        NC: 'North Carolina',
+        ND: 'North Dakota',
+        MP: 'Northern Mariana Islands',
+        OH: 'Ohio',
+        OK: 'Oklahoma',
+        OR: 'Oregon',
+        PW: 'Palau',
+        PA: 'Pennsylvania',
+        PR: 'Puerto Rico',
+        RI: 'Rhode Island',
+        SC: 'South Carolina',
+        SD: 'South Dakota',
+        TN: 'Tennessee',
+        TX: 'Texas',
+        UT: 'Utah',
+        VT: 'Vermont',
+        VI: 'Virgin Islands',
+        VA: 'Virginia',
+        WA: 'Washington',
+        WV: 'West Virginia',
+        WI: 'Wisconsin',
+        WY: 'Wyoming'
+      } //states
     };
   },
   methods: {
+    addTimeInterval,
+    deleteDateInterval,
+    isCurrent,
+    updateStartInterval,
+    updateEndInterval,
+    validateDateInterval,
+    submitForm,
+    submitInfo,
     submit
   },
   props: ['toggleResumeParser', 'employee'],
@@ -206,6 +581,9 @@ export default {
     file: function () {
       this.validFile = this.$refs.submit.validate();
     }
+  },
+  created() {
+    console.log(this.employee);
   }
 };
 </script>

@@ -24,12 +24,15 @@
           <v-col col="6" class="text-left">
             <h3>Editing {{ fullName }}</h3>
           </v-col>
+<<<<<<< HEAD
           <v-col col="6" class="text-right">
             <v-btn class="ma-2" @click="toggleResumeParser = !toggleResumeParser">Upload Resume</v-btn>
             <v-btn class="ma-2" @click="deleteResume" :disabled="!hasResume" :loading="deleteLoading"
               >Delete Resume</v-btn
             >
           </v-col>
+=======
+>>>>>>> Add-resume-comprehend-employee-profile-edit-functionality: Added functionality for making changes to personal and tech info from resume information
         </v-row>
         <h3 v-else>New Employee</h3>
       </v-card-title>
@@ -290,7 +293,6 @@
           :toggleSubmissionConfirmation="this.confirmingError"
           :errorTabs="errorTabNames"
         ></many-form-errors>
-        <resume-parser :toggleResumeParser="this.toggleResumeParser" :employee="this.model"></resume-parser>
       </v-container>
     </v-card>
   </div>
@@ -311,7 +313,6 @@ import LanguagesTab from '@/components/employees/formTabs/LanguagesTab';
 import ManyFormErrors from '@/components/modals/ManyFormErrors.vue';
 import PersonalTab from '@/components/employees/formTabs/PersonalTab';
 import TechnologyTab from '@/components/employees/formTabs/TechnologyTab';
-import ResumeParser from '@/components/modals/ResumeParser';
 const moment = require('moment-timezone');
 moment.tz.setDefault('America/New_York');
 import { getRole } from '@/utils/auth';
@@ -901,8 +902,7 @@ export default {
     PersonalTab,
     TechnologyTab,
     LanguagesTab,
-    ManyFormErrors,
-    ResumeParser
+    ManyFormErrors
   },
   created,
   data() {

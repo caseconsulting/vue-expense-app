@@ -152,6 +152,7 @@
         <!--Interval End Date Picker-->
 
         <!-- Button to Delete Interval -->
+<<<<<<< HEAD
         <v-tooltip bottom slot="append-outer">
           <template v-slot:activator="{ on }">
             <v-btn class="mt-8" icon text v-on="on" @click="deleteInterval"
@@ -160,6 +161,11 @@
           </template>
           <span>Delete Interval</span>
         </v-tooltip>
+=======
+        <v-btn class="mt-8" text icon v-if="allIntervals.length > 1"
+          ><v-icon @click="deleteInterval">delete</v-icon></v-btn
+        >
+>>>>>>> Add-resume-comprehend-employee-profile-edit-functionality: Added functionality for making changes to personal and tech info from resume information
       </v-row>
       <v-row class="pb-5 caption text--darken-2 grey--text">
         If you are unsure about the exact date, please put an approximate one.

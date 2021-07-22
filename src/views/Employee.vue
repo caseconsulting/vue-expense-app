@@ -1,9 +1,16 @@
 <template>
   <v-container class="my-3" fluid>
     <v-row class="pl-3">
-      <v-btn id="backToEmployeesBtn" elevation="2" to="/employees"
-        ><v-icon class="pr-1">arrow_back</v-icon>Back to Employees Page</v-btn
-      >
+      <v-col align="left" justify="left">
+        <v-btn id="backToEmployeesBtn" elevation="2" to="/employees"
+          ><v-icon class="pr-1">arrow_back</v-icon>Back to Employees Page</v-btn
+        >
+      </v-col>
+      <v-col align="right" justify="right">
+        <v-btn @click="toggleResumeParser = !toggleResumeParser" v-if="!editing" color="#bc3825" class="white--text"
+          ><b>Upload Resume</b></v-btn
+        >
+      </v-col>
     </v-row>
     <v-row v-if="loading" class="my-10" justify="center">
       <v-progress-circular :size="70" :width="7" color="#bc3825" indeterminate></v-progress-circular>
@@ -62,6 +69,7 @@
         ></budget-chart>
       </v-col>
     </v-row>
+    <resume-parser :toggleResumeParser="this.toggleResumeParser" :employee="this.model"></resume-parser>
   </v-container>
 </template>
 
@@ -78,6 +86,8 @@ import ConvertEmployeeToCsv from '../components/ConvertEmployeeToCsv.vue';
 import AnniversaryCard from '@/components/AnniversaryCard.vue';
 import BudgetChart from '@/components/BudgetChart.vue';
 import MobileDetect from 'mobile-detect';
+import ResumeParser from '@/components/modals/ResumeParser';
+
 const moment = require('moment');
 const IsoFormat = 'YYYY-MM-DD';
 
@@ -238,6 +248,12 @@ async function mounted() {
       this.fiscalDateView = data.format(IsoFormat);
     }
   });
+
+  window.EventBus.$on('resume', async (newEmployeeForm) => {
+    console.log(newEmployeeForm);
+    this.model = newEmployeeForm;
+    await api.updateItem(api.EMPLOYEES, newEmployeeForm);
+  });
 } // mounted
 
 // |--------------------------------------------------|
@@ -258,7 +274,8 @@ export default {
     QuickBooksTimeData,
     ConvertEmployeeToCsv,
     AnniversaryCard,
-    BudgetChart
+    BudgetChart,
+    ResumeParser
   },
   created,
   data() {
@@ -312,6 +329,7 @@ export default {
         statusMessage: '',
         color: ''
       }, // snackbar action status
+      toggleResumeParser: false,
       user: null
     };
   },

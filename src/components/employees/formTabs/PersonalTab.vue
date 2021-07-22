@@ -258,10 +258,10 @@ async function updateBoxes() {
   //fills in the first three fields
   this.editedPersonalInfo.currentCity = fullAddress[1];
   this.editedPersonalInfo.currentStreet = fullAddress[0];
-  this.editedPersonalInfo.currentState = this.states[fullAddress[2]];
+  this.editedPersonalInfo.currentState = this.states[fullAddress[2].split(' ')[0]];
+
   //obtains the selected address's ID needed for the zip code API call
   let selectedAddress = this.placeIds[this.searchString];
-  this.searchString = '';
   let res = await api.getZipCode(selectedAddress);
   //Response contains an array of objects, with each object containing
   //a field title 'type'. 'Type' is another array and we want the one
