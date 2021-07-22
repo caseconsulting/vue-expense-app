@@ -85,7 +85,7 @@
       <!-- Hire Date -->
       <v-menu
         ref="hireMenu"
-        :close-on-content-click="true"
+        :close-on-content-click="false"
         v-model="hireMenu"
         :nudge-right="40"
         transition="scale-transition"
@@ -182,7 +182,7 @@
       <v-menu
         v-if="isInactive() || (isPartTime() && status && status == 0)"
         ref="departureMenu"
-        :close-on-content-click="true"
+        :close-on-content-click="false"
         v-model="departureMenu"
         :nudge-right="40"
         transition="scale-transition"
