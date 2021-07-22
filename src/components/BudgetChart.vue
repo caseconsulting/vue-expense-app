@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <v-card class="px-10 my-7">
     <bar-chart v-if="dataReceived" :options="options" :chart-data="chartData"></bar-chart>
     <v-autocomplete
       :items="allBudgetNames"
@@ -17,7 +17,7 @@
         drawGraph();
       "
     />
-  </div>
+  </v-card>
 </template>
 
 <script>
