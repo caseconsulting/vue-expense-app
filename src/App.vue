@@ -181,9 +181,6 @@ async function created() {
     this.now = Math.trunc(new Date().getTime());
     let timeRemaining = this.date - this.now; // default access key (2 hours)
 
-    // TO MAKE TESTING EASIER DECREASE TIME FROM 120 min to 10 min
-    // timeRemaining -= 300000 * 22;
-
     window.setTimeout(() => {
       this.timedOut = true;
       this.session = false;
