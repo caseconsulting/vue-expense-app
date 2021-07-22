@@ -218,7 +218,9 @@
         <!-- End Confirmation Modals -->
       </v-container>
     </v-card>
-    <v-dialog v-model="createEmployee"><employee-form :model="this.model"></employee-form></v-dialog>
+    <v-dialog @click:outside="clearCreateEmployee" v-model="createEmployee"
+      ><employee-form :key="childKey" :model="this.model"></employee-form
+    ></v-dialog>
   </div>
 </template>
 
@@ -400,6 +402,15 @@ async function validateDelete(item) {
   }
 } // validateDelete
 
+/**
+ * Called to reset the data on the employee form if exited w/out submitting
+ */
+function clearCreateEmployee() {
+  //used to automatically update the employee form child component
+  this.childKey++;
+  this.createEmployee = false;
+}
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                 LIFECYCLE HOOKS                  |
@@ -411,7 +422,8 @@ async function validateDelete(item) {
  */
 async function created() {
   window.EventBus.$on('cancel-form', () => {
-    this.createEmployee = false;
+    //used to reset the employee form modal
+    this.clearCreateEmployee();
   });
   window.EventBus.$on('canceled-delete-employee', () => {
     this.midAction = false;
@@ -458,6 +470,7 @@ export default {
   created,
   data() {
     return {
+      childKey: 0,
       createEmployee: false,
       deleteModel: {
         id: null
@@ -548,6 +561,7 @@ export default {
   },
   methods: {
     changeAvatar,
+    clearCreateEmployee,
     clearStatus,
     deleteEmployee,
     deleteModelFromTable,

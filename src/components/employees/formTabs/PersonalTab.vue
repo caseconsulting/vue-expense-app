@@ -295,20 +295,19 @@ function validateFields() {
   if (_.isArray(this.$refs.formFields)) {
     // more than one TYPE of vuetify component used
     _.forEach(this.$refs.formFields, (field) => {
+      console.log(field);
       if (!field.validate()) {
         errorCount++;
+        hasErrors = true;
       }
     });
-
-    if (errorCount > 0) {
-      hasErrors = true;
-    }
   } else if (this.$refs.formFields) {
     // single vuetify component
     hasErrors = !this.$refs.formFields.validate();
+    errorCount++;
   }
-  window.EventBus.$emit('doneValidating', 'personal', this.editedPersonalInfo); // emit done validating
   window.EventBus.$emit('personalStatus', [hasErrors, errorCount]); // emit error status
+  window.EventBus.$emit('doneValidating', 'personal', this.editedPersonalInfo); // emit done validating
 } // validateFields
 
 export default {
