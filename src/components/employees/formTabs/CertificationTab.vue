@@ -41,6 +41,7 @@
                 v-bind="attrs"
                 v-on="on"
                 @blur="certification.dateReceived = parseEventDate($event)"
+                @input="certification.showReceivedMenu = false"
                 @focus="certificationIndex = index"
                 clearable
               ></v-text-field>
@@ -78,6 +79,7 @@
                 clearable
                 @click:clear="certification.expirationDate = null"
                 @blur="certification.expirationDate = parseEventDate($event)"
+                @input="certification.showExpirationMenu = false"
                 @focus="certificationIndex = index"
               ></v-text-field>
             </template>

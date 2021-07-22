@@ -37,6 +37,7 @@
                 v-on="on"
                 @blur="award.dateReceived = parseEventDate($event)"
                 clearable
+                @input="award.showReceivedMenu = false"
               ></v-text-field>
             </template>
             <v-date-picker

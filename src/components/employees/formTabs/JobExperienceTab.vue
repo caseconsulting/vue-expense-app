@@ -165,6 +165,7 @@
                   v-bind="attrs"
                   v-on="on"
                   @blur="position.startDate = parseEventDate($event)"
+                  @input="position.showStartMenu = false"
                   @focus="setIndices(compIndex, index)"
                   clearable
                 ></v-text-field>
@@ -209,6 +210,7 @@
                   clearable
                   @click:clear="position.endDate = null"
                   @blur="position.endDate = parseEventDate($event)"
+                  @input="position.showEndMenu = false"
                   @focus="setIndices(compIndex, index)"
                 ></v-text-field>
               </template>

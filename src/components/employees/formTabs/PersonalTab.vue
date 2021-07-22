@@ -48,6 +48,7 @@
           persistent-hint
           prepend-icon="event"
           @blur="editedPersonalInfo.birthday = parseDate(birthdayFormat)"
+          @input="BirthdayMenu = false"
           v-on="on"
         ></v-text-field>
       </template>
