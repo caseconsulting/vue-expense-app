@@ -563,7 +563,6 @@ async function confirm() {
     } else if (this.tabErrorMessage) {
       //if there is a custom error message it is displayed here
       this.displayError(this.tabErrorMessage);
-      this.confirmingValid = false;
     }
   } else {
     this.confirmingError = true;
@@ -630,6 +629,7 @@ async function submit() {
         // failed to update employee
         this.$emit('error', updatedEmployee.response.data.message);
         this.displayError(updatedEmployee.response.data.message);
+        this.confirmingValid = false;
         // this.$emit('cancel-form');
       }
     } else {
@@ -644,6 +644,7 @@ async function submit() {
         this.$emit('error', newEmployee.response.data.message);
         this.displayError(newEmployee.response.data.message);
         this.$set(this.model, 'id', null); // reset id
+        this.confirmingValid = false;
         // this.$emit('endAction');
       }
     }
