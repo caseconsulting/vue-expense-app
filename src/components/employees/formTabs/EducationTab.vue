@@ -77,11 +77,10 @@
         <v-autocomplete
           ref="formFields"
           v-model="degree.majors[mIndex]"
-          :rules="requiredRules"
+          :rules="[requiredRules[0], duplicateDiscipline('majors', major, index)]"
           :items="majorDropDown"
-          :label="!duplicateDiscipline('majors', major, index) ? 'Major' : 'Major - DUPLICATE'"
+          label="Major"
           data-vv-name="Major"
-          :class="{ errorBox: duplicateDiscipline('majors', major, index) }"
           :append-outer-icon="degree.majors.length > 1 ? 'delete' : undefined"
           @click:append-outer="deleteItem(degree.majors, mIndex)"
         >
@@ -101,11 +100,10 @@
         <v-autocomplete
           ref="formFields"
           v-model="degree.minors[mIndex]"
-          :rules="requiredRules"
+          :rules="[requiredRules[0], duplicateDiscipline('minors', minor, index)]"
           :items="minorDropDown"
-          :label="!duplicateDiscipline('minors', minor, index) ? 'Minor' : 'Minor - DUPLICATE'"
+          label="Minor"
           append-outer-icon="delete"
-          :class="{ errorBox: duplicateDiscipline('minors', minor, index) }"
           @click:append-outer="deleteItem(degree.minors, mIndex)"
           data-vv-name="Minor"
         ></v-autocomplete>
@@ -123,14 +121,11 @@
         <v-autocomplete
           ref="formFields"
           v-model="degree.concentrations[cIndex]"
-          :rules="requiredRules"
+          :rules="[requiredRules[0], duplicateDiscipline('concentrations', concentration, index)]"
           :items="concentrationDropDown"
           data-vv-name="Concentration"
           append-outer-icon="delete"
-          :label="
-            !duplicateDiscipline('concentrations', concentration, index) ? 'Concentration' : 'Concentration - DUPLICATE'
-          "
-          :class="{ errorBox: duplicateDiscipline('concentrations', concentration, index) }"
+          label="Concentration"
           @click:append-outer="deleteItem(degree.concentrations, cIndex)"
         >
         </v-autocomplete>
@@ -257,30 +252,6 @@ function detectDuplicateEducation() {
   return duplicateEdu;
 } // detectDuplicateEducation
 
-function duplicateDiscipline(title, discipline, schoolIndex) {
-  console.log(title);
-  let disciplines = this.editedDegrees[schoolIndex][title];
-  console.log(disciplines);
-  let count = _.countBy(disciplines, (dis) => {
-    return dis === discipline;
-  });
-  return count.true > 1;
-}
-
-function detectDuplicateDiscipline() {
-  let dup = false;
-  _.forEach(this.editedDegrees, (degree) => {
-    if (
-      _.uniq(degree.majors).length !== degree.majors.length ||
-      _.uniq(degree.minors).length !== degree.minors.length ||
-      _.uniq(degree.concentrations).length !== degree.concentrations.length
-    ) {
-      dup = true;
-    }
-  });
-  return dup;
-}
-
 /**
  * Checks to see if an education is a duplicate of one that is already entered by a user.
  * @param edu Object - the education object
@@ -365,7 +336,7 @@ function titleCase(str) {
 function validateFields() {
   let hasErrors = false;
   let errorCount = 0;
-  if (this.detectDuplicateEducation() !== undefined || this.detectDuplicateDiscipline()) {
+  if (this.detectDuplicateEducation() !== undefined) {
     hasErrors = true;
     //emit error status with a custom message
     window.EventBus.$emit(
@@ -402,6 +373,14 @@ export default {
         (v) => (!isEmpty(v) && /[\d]{2}\/[\d]{4}/.test(v)) || 'Date must be valid. Format: MM/YYYY',
         (v) => moment(v, 'MM/YYYY').isValid() || 'Date must be valid'
       ], // rules for a required date
+      duplicateDiscipline: (title, discipline, schoolIndex) => {
+        let disciplines = this.editedDegrees[schoolIndex][title];
+        let count = _.countBy(disciplines, (dis) => {
+          return dis === discipline;
+        });
+
+        return count.true < 2 || 'Duplicate field found, please remove duplicate entries';
+      },
       editedDegrees: _.cloneDeep(this.model), // stores edited degree info
       degreeDropDown: ['Associates', 'Bachelors', 'Masters', 'PhD/Doctorate', 'Other (trade school, etc)'], // autocomplete degree name options
       majorDropDown: _.map(majorsAndMinors, (elem) => titleCase(elem)), // autocomplete major options
@@ -425,8 +404,6 @@ export default {
     deleteDegree,
     deleteItem,
     detectDuplicateEducation,
-    duplicateDiscipline,
-    detectDuplicateDiscipline,
     isDuplicate,
     isEmpty,
     parseDateMonthYear,

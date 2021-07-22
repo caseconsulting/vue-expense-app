@@ -573,9 +573,7 @@ async function submit() {
 } // submit
 
 function addErrorTab(name, errors) {
-  if (errors !== 0 && !this.errorTabNames[name]) {
-    this.errorTabNames[name] = errors;
-  }
+  this.errorTabNames[name] = errors;
 }
 // |--------------------------------------------------|
 // |                                                  |
