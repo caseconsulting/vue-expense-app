@@ -287,12 +287,12 @@ export default {
           {
             title: 'What does it mean to mark an employee inactive?',
             body: "This will freeze the user's ability to submit new expenses.",
-            employeeRole: 'admin'
+            employeeRole: 'manager'
           },
           {
             title: "Why can't I delete an employee?",
             body: 'An employee cannot be deleted if the employee has expenses or you are editing an employee.',
-            employeeRole: 'admin'
+            employeeRole: 'manager'
           }
         ],
         knownIssues: [
