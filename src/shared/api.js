@@ -205,7 +205,7 @@ async function deleteResume(employeeId) {
     });
 }
 
-async function extractText(file) {
+async function extractText(employeeId, file) {
   let formData = new FormData();
   formData.append('receipt', file);
 
@@ -214,7 +214,7 @@ async function extractText(file) {
 
   return client({
     method: 'put',
-    url: `/attachment/${file.name}`,
+    url: `/attachment/${employeeId}/${file.name}`,
     data: formData,
     headers: {
       Authorization: `Bearer ${accessToken}`

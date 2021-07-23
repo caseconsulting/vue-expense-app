@@ -1095,7 +1095,7 @@ async function scanFile() {
     this.isInactive = true;
     //go get text data from textract and comprehend
 
-    this.receiptObject = await api.extractText(file);
+    this.receiptObject = await api.extractText(this.userInfo.id, file);
     if (this.receiptObject instanceof Error) {
       this.isInactive = false;
       this.receiptObject = null;
