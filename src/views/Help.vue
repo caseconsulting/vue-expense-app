@@ -274,7 +274,8 @@ export default {
           },
           {
             title: 'What is the manager role for?',
-            body: 'Managers have the same access as a user but can also edit or view any employee data. They should have the same access as admins on the employee pages.',
+            body:
+              'Managers have the same access as a user but can also edit or view any employee data. They should have the same access as admins on the employee pages.',
             employeeRole: 'manager'
           },
           {
