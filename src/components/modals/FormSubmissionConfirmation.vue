@@ -11,7 +11,8 @@
             text
             @click.native="
               emit('canceled');
-              loading = false;
+              activate = false;
+              loading = true;
             "
             :loading="loading"
             :disabled="loading"
@@ -24,6 +25,7 @@
             text
             @click.native="
               emit('confirmed');
+              activate = false;
               loading = true;
             "
             :loading="loading"
