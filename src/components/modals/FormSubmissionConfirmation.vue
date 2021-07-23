@@ -11,9 +11,10 @@
             text
             @click.native="
               emit('canceled');
-              activate = false;
+              loading = false;
             "
-            :loading="!activate"
+            :loading="loading"
+            :disabled="loading"
             >No</v-btn
           >
           <v-spacer></v-spacer>
@@ -23,9 +24,10 @@
             text
             @click.native="
               emit('confirmed');
-              activate = false;
+              loading = true;
             "
-            :loading="!activate"
+            :loading="loading"
+            :disabled="loading"
             >Yes</v-btn
           >
           <v-spacer></v-spacer>
