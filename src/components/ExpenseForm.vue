@@ -222,13 +222,15 @@
                 @click="scanFile"
                 class="ma-2"
                 :disabled="isInactive || disableScan"
+                :loading="scanLoading"
                 v-bind="attrs"
               >
                 Scan Receipt
               </v-btn>
             </span>
           </template>
-          <span>Scanning only works for pdfs, pngs, and jpegs.</span>
+          <span v-if="!scanLoading">Scanning only works for pdfs, pngs, and jpegs.</span>
+          <span v-else>Scanning your receipt, this may take up to 15 seconds</span>
         </v-tooltip>
 
         <!-- Notes -->
@@ -1116,6 +1118,7 @@ async function setFile(file) {
  * Scans the receipt file.
  */
 async function scanFile() {
+  this.scanLoading = true;
   let file = this.file;
   if (file) {
     this.isInactive = true;
@@ -1125,6 +1128,7 @@ async function scanFile() {
     if (this.receiptObject instanceof Error) {
       this.isInactive = false;
       this.receiptObject = null;
+      this.scanLoading = false;
       return;
     }
 
@@ -1286,6 +1290,7 @@ async function scanFile() {
       this.editedExpense.note = adjustNote;
     }
   }
+  this.scanLoading = false;
 } // scanFile
 
 /**
@@ -1593,6 +1598,7 @@ export default {
       remainingBudget: 0,
       reqRecipient: false, // expense requires recipient
       requiredRules: [(v) => !isEmpty(v) || 'Required field'], // rules for required fields
+      scanLoading: false, // determines if the scanning functionality is loading
       selectedEmployee: {}, // selected employees
       selectedExpenseType: {}, // selected expense types
       selectedRecipient: {}, // the recipient selected for a high five
