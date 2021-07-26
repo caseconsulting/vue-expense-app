@@ -91,12 +91,14 @@
         <!-- Cost -->
         <v-text-field
           prefix="$"
-          v-model="editedExpense.cost"
+          v-model="costFormatted"
           :rules="costRules"
           :disabled="isReimbursed || isInactive || isHighFive"
           label="Cost"
           id="cost"
           data-vv-name="Cost"
+          @blur="editedExpense.cost = parseCost(costFormatted)"
+          @input="formatCost(costFormatted)"
         ></v-text-field>
 
         <!-- Employee Selection List -->
@@ -921,6 +923,16 @@ function filteredExpenseTypes() {
 } // filteredExpenseTypes
 
 /**
+ * Formats the cost on the form for a nicer display.
+ */
+function formatCost() {
+  this.editedExpense.cost = parseCost(this.costFormatted);
+  if (Number(this.editedExpense.cost)) {
+    this.costFormatted = Number(this.editedExpense.cost).toLocaleString().toString();
+  }
+}
+
+/**
  * Formats a date.
  *
  * @param date - date to format
@@ -1027,6 +1039,18 @@ function moneyFilter(value) {
     maximumFractionDigits: 2
   }).format(value)}`;
 } // moneyFilter
+
+/**
+ * Parses the cost to get rid of commas.
+ * @returns String - The cost without formatting
+ */
+function parseCost(cost) {
+  if (cost && !_.isEmpty(cost)) {
+    return cost.replace(/[,\s]/g, '');
+  } else {
+    return cost;
+  }
+}
 
 /**
  * Parse a date to isoformat (YYYY-MM-DD).
@@ -1400,6 +1424,7 @@ async function created() {
   this.employeeRole = getRole();
   this.userInfo = await api.getUser();
   this.editedExpense = _.cloneDeep(this.expense);
+  console.log(this.editedExpense.cost);
 
   window.EventBus.$on('canceledSubmit', () => {
     this.loading = false; // set loading status to false
@@ -1517,13 +1542,14 @@ export default {
       allowReceipt: false, // allow receipt to be uploaded
       asUser: true, // user view
       confirming: false, // budget overage confirmation box activator
+      costFormatted: '',
       costRules: [
         (v) => !isEmpty(v) || 'Cost is a required field',
         (v) => !isEmpty(v) > 0 || 'Cost must be a positive number',
         (v) =>
           /^[+-]?[0-9]{1,3}(?:,?[0-9]{3})*(?:\.[0-9]{2})?$/.test(v) ||
           'Expense amount must be a number with two decimal digits',
-        (v) => v < 1000000000 || 'Nice try' //when a user tries to fill out expense that is over a million
+        (v) => parseCost(v) < 1000000000 || 'Nice try' //when a user tries to fill out expense that is over a million
       ], // rules for cost
       date: null, // NOTE: Unused?
       dateRules: [
@@ -1602,6 +1628,7 @@ export default {
     encodeUrl,
     emit,
     filteredExpenseTypes,
+    formatCost,
     formatDate,
     getCategories,
     getExpenseTypeSelected,
@@ -1612,6 +1639,7 @@ export default {
     isFullTime,
     isReceiptRequired,
     moneyFilter,
+    parseCost,
     parseDate,
     scanFile,
     setFile,
@@ -1627,10 +1655,10 @@ export default {
     'expense.id': function () {
       this.editedExpense = _.cloneDeep(this.expense);
       this.originalExpense = _.cloneDeep(this.editedExpense);
-
       //when model id is not empty then must be editing an expense
       if (!this.isEmpty(this.expense.id)) {
         this.emit('editing-expense'); //notify parent that expense is being edited
+        this.costFormatted = this.editedExpense.cost;
       }
 
       this.selectedExpenseType = _.find(this.expenseTypes, (expenseType) => {
