@@ -29,7 +29,6 @@
         <!-- Timeline -->
         <v-virtual-scroll :items="filterEvents()" :item-height="this.itemHeight" height="700" bench="2">
           <template v-slot="{ item }">
-            <div class="pa-4"></div>
             <v-tooltip
               open-on-hover
               top
