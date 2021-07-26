@@ -1,22 +1,26 @@
 <template>
   <v-card class="px-10 my-7">
-    <bar-chart v-if="dataReceived" :options="options" :chart-data="chartData"></bar-chart>
-    <v-autocomplete
-      :items="allBudgetNames"
-      multiple
-      v-model="selectedBudgets"
-      filled
-      chips
-      v-if="!loading"
-      :menu-props="{ bottom: true, offsetY: true }"
-      deletable-chips
-      clearable
-      :search-input.sync="searchString"
-      @change="
-        searchString = '';
-        drawGraph();
-      "
-    />
+    <div v-if="dataReceived">
+      <bar-chart :options="options" :chart-data="chartData"></bar-chart>
+
+      <v-autocomplete
+        :items="allBudgetNames"
+        multiple
+        v-model="selectedBudgets"
+        filled
+        chips
+        v-if="!loading"
+        :menu-props="{ bottom: true, offsetY: true }"
+        deletable-chips
+        clearable
+        :search-input.sync="searchString"
+        @change="
+          searchString = '';
+          drawGraph();
+        "
+      />
+    </div>
+    <v-skeleton-loader v-else type="table-tbody"></v-skeleton-loader>
   </v-card>
 </template>
 
