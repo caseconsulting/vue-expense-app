@@ -23,7 +23,6 @@
         </v-toolbar-title>
         <!-- In Mobile View decrease title size-->
         <h1 v-show="isMobile" class="font-25" style="text-align: center">Case Portal</h1>
-
         <v-spacer></v-spacer>
         <!-- Display social media icons and links dropdown menu -->
         <v-item-group class="hidden-sm-and-down" v-show="isLoggedIn() && !isMobile">
@@ -96,6 +95,7 @@
       </v-app-bar>
 
       <v-main>
+        <badge-expiration-banner :key="badgeKey" />
         <v-container fluid grid-list-lg>
           <router-view></router-view>
         </v-container>
@@ -115,14 +115,19 @@ import MainNav from '@/components/MainNav.vue';
 import MobileDetect from 'mobile-detect';
 import TimeOutModal from '@/components/modals/TimeOutModal.vue';
 import TimeOutWarningModal from '@/components/modals/TimeOutWarningModal.vue';
+import BadgeExpirationBanner from '@/components/modals/BadgeExpirationBanner.vue';
 import floorPlan from '@/assets/img/MakeOfficesfloorplan.jpg';
 import api from '@/shared/api.js';
+// import _ from 'lodash';
+import moment from 'moment-timezone';
+moment.tz.setDefault('America/New_York');
 
 // |--------------------------------------------------|
 // |                                                  |
 // |                     COMPUTED                     |
 // |                                                  |
 // |--------------------------------------------------|
+
 /**
  * Checks if the current device used is mobile. Return true if it is mobile. Returns false if it is not mobile.
  *
@@ -157,9 +162,8 @@ function handleLogout() {
   logout();
 }
 
-async function handleProfile() {
-  var user = await api.getUser();
-  this.$router.push({ name: 'employee', params: { id: `${user.employeeNumber}` } });
+function handleProfile() {
+  this.$router.push(`employee/${this.userId}`);
 }
 
 function onResize() {
@@ -226,6 +230,7 @@ async function mounted() {
 
 export default {
   data: () => ({
+    alert: null,
     floorPlan: floorPlan,
     drawer: isLoggedIn(),
     inset: false,
@@ -234,6 +239,7 @@ export default {
     session: false,
     now: Math.trunc(new Date().getTime() / 1000),
     userId: null,
+    badgeKey: 0,
     date: null,
     links: [
       { name: 'Basecamp', link: 'https://3.basecamp.com/3097063' },
@@ -267,7 +273,8 @@ export default {
   components: {
     MainNav,
     TimeOutModal,
-    TimeOutWarningModal
+    TimeOutWarningModal,
+    BadgeExpirationBanner
   },
   methods: {
     handleLogout,
@@ -281,9 +288,12 @@ export default {
       if (to.params.id && from.params.id) {
         this.$router.go(this.$router.currentPath);
       }
+      //updates badge expiration warning whenever you leave your user profile
+      if (from.params.id) {
+        this.badgeKey++;
+      }
     }
   },
-
   beforeDestroy,
   mounted,
   created
