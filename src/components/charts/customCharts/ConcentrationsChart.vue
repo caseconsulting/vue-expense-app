@@ -44,7 +44,7 @@ function fillData(concentrations) {
     if (!_.isEmpty(concentrations)) {
       text = 'There are no concentrations for this type of degree';
     } else {
-      text = 'Click on a degree to see concentrations';
+      text = 'Click on a Degree To See Concentrations';
     }
     quantities.push(1);
     enabled = false;

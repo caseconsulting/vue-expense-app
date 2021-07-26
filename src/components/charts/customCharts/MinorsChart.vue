@@ -44,7 +44,7 @@ function fillData(minors) {
     if (!_.isEmpty(minors)) {
       text = 'There are no minors for this type of degree';
     } else {
-      text = 'Click on a degree to see minors';
+      text = 'Click on a Degree To See Minors';
     }
     quantities.push(1);
     enabled = false;

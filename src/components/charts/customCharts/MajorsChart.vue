@@ -36,7 +36,7 @@ function fillData(majors) {
     //these presets are when a degree has not been selected
     quantities.push(1);
     enabled = false;
-    text = 'Click on a degree to see majors';
+    text = 'Click on a Degree To See Majors';
     colors = ['grey'];
   }
   this.chartData = {
