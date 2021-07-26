@@ -23,7 +23,8 @@
       <b>Departure Date:</b> {{ this.model.deptDate | monthDayYearFormat }}
     </p>
     <p v-if="admin || employee">
-      <b>Mifi Opted In:</b> {{ !isEmpty(this.model.mifiStatus) && this.model.mifiStatus === true ? 'Yes' : 'No' }}
+      <b>Mifi Status:</b>
+      {{ !isEmpty(this.model.mifiStatus) ? (this.model.mifiStatus === true ? 'Yes' : 'No') : 'Yes' }}
     </p>
     <p v-if="admin && !isEmpty(this.model.lastLogin)"><b>Last Logged In:</b> {{ this.model.lastLogin }}</p>
   </div>
