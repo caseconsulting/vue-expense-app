@@ -225,7 +225,11 @@
             </v-tab-item>
             <!-- Education -->
             <v-tab-item id="education" class="mt-6 mb-4">
-              <education-tab :model="model.degrees" :validating="validating.education"></education-tab>
+              <education-tab
+                :model="model.degrees"
+                :validating="validating.education"
+                :allowAdditions="true"
+              ></education-tab>
             </v-tab-item>
             <!-- Experience -->
             <v-tab-item id="jobExperience" class="mt-6 mb-4">

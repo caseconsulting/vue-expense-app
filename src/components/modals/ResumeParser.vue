@@ -1,5 +1,5 @@
 <template>
-  <v-dialog v-model="activate" max-width="1000">
+  <v-dialog v-model="activate" max-width="1000" @click:outside="clearForm">
     <v-card>
       <v-card-title class="header_style"><strong>Upload Resume</strong></v-card-title>
       <v-card-text class="pa-5">
@@ -23,7 +23,7 @@
               <v-progress-linear color="#bc3825" indeterminate></v-progress-linear>
             </div>
           </v-form>
-          <span v-if="resumeProcessed && (showTech || showAddress || showPhoneNumber)">
+          <span v-if="resumeProcessed && (showTech || showAddress || showPhoneNumber || showEducation)">
             <v-row class="text-center pb-3">
               <v-col>
                 <h1>Pending Changes</h1>
@@ -97,7 +97,6 @@
                   <hr />
                 </v-col>
               </v-row>
-
               <v-row class="ma-5" align="center" justify="center">
                 <v-col v-for="(tech, index) in newTechnology" :key="index" cols="10">
                   <div v-if="!tech.canceled" style="border: 1px solid grey" class="pt-2 pb-1 px-3 mx-5 my-3">
@@ -142,13 +141,34 @@
                   </div>
                 </v-col>
               </v-row>
-              <!-- Education -->
             </span>
+            <div v-if="showEducation">
+              <!-- Education -->
+              <v-row class="text-left">
+                <v-col>
+                  <h2>Education Additions</h2>
+                  <hr />
+                </v-col>
+              </v-row>
+              <v-form v-for="(education, index) in newEducation" :key="index" :ref="'education' + index" class="ma-5">
+                <education-tab
+                  v-if="!education.canceled"
+                  :allowAdditions="false"
+                  :model="[education]"
+                  @deny="education.canceled = true"
+                  @confirm="
+                    submitInfo('education', index, $event);
+                    education.canceled = true;
+                  "
+                ></education-tab>
+                <hr v-if="index < newEducation.length - 1" />
+              </v-form>
+            </div>
           </span>
           <v-row class="text-center" v-if="resumeProcessed">
             <v-col>
               <v-btn color="green" class="mr-1" outlined @click="submitForm">Submit Form</v-btn>
-              <v-btn color="red" outlined @click="activate = !activate">Cancel Form Edits</v-btn>
+              <v-btn color="red" outlined @click="clearForm">Cancel Form Edits</v-btn>
             </v-col>
           </v-row>
         </v-container>
@@ -168,9 +188,10 @@ import api from '@/shared/api.js';
 import { isEmpty } from '@/utils/utils';
 import _ from 'lodash';
 import dateIntervalForm from '@/components/employees/formTabs/DateIntervalForm';
+import educationTab from '@/components/employees/formTabs/EducationTab';
 
 function showAddress() {
-  return this.newPersonal.location && !this.addressCanceled;
+  return this.newPersonal.currentStreet && !this.addressCanceled;
 }
 
 function address() {
@@ -224,6 +245,11 @@ function showTech() {
   return this.newTechnology.filter((tech) => !tech.canceled).length != 0;
 }
 
+function showEducation() {
+  let filtered = this.newEducation.filter((education) => !education.canceled);
+  return filtered.length != 0;
+}
+
 /**
  * Add a time interval.
  * @param index - index the index in array of the technology
@@ -238,16 +264,15 @@ async function submit() {
     this.resumeObject.length = 0;
     // and is png or jpg or jpeg or pdf
     this.loading = true;
+    this.resumeProcessed = false;
     this.resumeObject = (await api.extractResumeText(this.$route.params.id, this.file)).comprehend;
     if (this.resumeObject instanceof Error) {
       this.isInactive = false;
       this.resumeObject = null;
       return;
     }
-    window.EventBus.$emit('upload-resume-complete', 'true');
-    // let techComprehend = this.resumeObject.filter((entity) => {
-    //   return entity.Type === 'TITLE';
-    // });
+    window.EventBus.$emit('updated-resume-parser', 'true');
+    window.EventBus.$emit('updated-resume-parser-form', 'true');
 
     this.loading = false;
 
@@ -280,7 +305,6 @@ async function submit() {
         }
         this.newPersonal.phoneNumber = phoneNumber;
       }
-      console.log(personalComprehend);
 
       // Address
       if (personalEntity.Type === 'LOCATION') {
@@ -295,13 +319,13 @@ async function submit() {
 
     let locations = await api.getLocation(location[0]);
     if (locations.predictions.length >= 1) {
-      this.newPersonal.location = locations.predictions[0].description;
-      this.newPersonal.place_id = locations.predictions[0].place_id;
+      let location = locations.predictions[0].description;
+      let place_id = locations.predictions[0].place_id;
 
-      let fullAddress = this.newPersonal.location.split(', ');
+      let fullAddress = location.split(', ');
       let state = fullAddress[2].split(' ')[0];
 
-      let res = await api.getZipCode(this.newPersonal.place_id);
+      let res = await api.getZipCode(place_id);
       //Response contains an array of objects, with each object containing
       //a field title 'type'. 'Type' is another array and we want the one
       //containing the postal_code string
@@ -311,10 +335,17 @@ async function submit() {
           currentZIP = field.short_name;
         }
       });
-      this.newPersonal.currentStreet = fullAddress[0];
-      this.newPersonal.currentCity = fullAddress[1];
-      this.newPersonal.currentState = this.states[state];
-      this.newPersonal.currentZIP = currentZIP;
+      if (
+        fullAddress[0] != this.employee.currentStreet &&
+        fullAddress[1] != this.employee.currentCity &&
+        this.states[state] != this.employee.currentState &&
+        currentZIP != this.employee.currentZIP
+      ) {
+        this.newPersonal.currentStreet = fullAddress[0];
+        this.newPersonal.currentCity = fullAddress[1];
+        this.newPersonal.currentState = this.states[state];
+        this.newPersonal.currentZIP = currentZIP;
+      }
     }
 
     // EDUCATION
@@ -328,10 +359,28 @@ async function submit() {
       if (collegeList.length == 1 && !this.newEducation.includes(collegeList[0])) {
         if (this.employee.degrees && this.employee.degrees.length > 0) {
           if (this.employee.degrees.filter((e) => e.school === collegeList[0]).length == 0) {
-            this.newEducation.push(collegeList[0]);
+            this.newEducation.push({
+              school: collegeList[0],
+              concentrations: [],
+              minors: [],
+              majors: [''],
+              canceled: false,
+              showEducationMenu: false,
+              name: '',
+              date: null
+            });
           }
         } else {
-          this.newEducation.push(collegeList[0]);
+          this.newEducation.push({
+            school: collegeList[0],
+            concentrations: [],
+            minors: [],
+            majors: [''],
+            canceled: false,
+            showEducationMenu: false,
+            name: '',
+            date: null
+          });
         }
       }
     }
@@ -371,8 +420,6 @@ async function submit() {
       }
     });
     this.resumeProcessed = true;
-
-    console.log(this.newPersonal);
   }
 }
 
@@ -380,7 +427,7 @@ function isCurrent(tech) {
   return tech.dateIntervals.filter((dateInterval) => !dateInterval.endDate).length > 0;
 } //isCurrent
 
-function submitInfo(field, value) {
+function submitInfo(field, value, newValue) {
   if (field === 'address') {
     this.editedEmployeeForm.currentStreet = this.newPersonal.currentStreet;
     this.editedEmployeeForm.currentCity = this.newPersonal.currentCity;
@@ -398,6 +445,21 @@ function submitInfo(field, value) {
         dateIntervals: this.newTechnology[value].dateIntervals
       });
     }
+  } else if (field === 'education' && this.$refs['education' + value][0].validate()) {
+    this.newEducation[value].date = newValue[0].date;
+    this.newEducation[value].majors = newValue[0].majors;
+    this.newEducation[value].minors = newValue[0].minors;
+    this.newEducation[value].name = newValue[0].name;
+    this.newEducation[value].school = newValue[0].school;
+    this.newEducation[value].canceled = true;
+    this.editedEmployeeForm.degrees.push({
+      concentrations: this.newEducation[value].concentrations,
+      date: this.newEducation[value].date,
+      majors: this.newEducation[value].majors,
+      minors: this.newEducation[value].minors,
+      name: this.newEducation[value].name,
+      school: this.newEducation[value].school
+    });
   }
 }
 
@@ -445,7 +507,7 @@ function updateEndInterval(technologyIndex, dateIntervalIndex, editedEndDate) {
 }
 
 function submitForm() {
-  if (this.showTech || this.showPhoneNumber || this.showAddress) {
+  if (this.showTech || this.showPhoneNumber || this.showAddress || this.showEducation) {
     this.toggleResumeFormErrorModal = true;
   } else {
     window.EventBus.$emit('resume', this.editedEmployeeForm);
@@ -454,30 +516,44 @@ function submitForm() {
   }
 }
 
+function clearForm() {
+  this.resumeObject = [];
+  this.newEducation = [];
+  this.newTechnlogy = [];
+  this.newPersonal = {
+    phoneNumber: null,
+    location: null,
+    currentCity: null,
+    currentState: null,
+    currentStreet: null,
+    currentZIP: null
+  };
+  this.activate = false;
+  this.addressCanceled = false;
+  this.phoneCanceled = false;
+  this.editedEmployeeForm = null;
+  this.file = null;
+  this.loading = false;
+  this.validFile = false;
+  this.resumeProcessed = false;
+  this.toggleResumeFormErrorModal = false;
+  this.activate = false;
+}
+
 export default {
   components: {
-    dateIntervalForm
+    dateIntervalForm,
+    educationTab
   },
   computed: {
-    showAddress,
     address,
     newAddress,
-    showPhoneNumber,
-    phoneNumber,
     newPhoneNumber,
+    phoneNumber,
+    showAddress,
+    showEducation,
+    showPhoneNumber,
     showTech
-  },
-  created() {
-    this.editedEmployeeForm = _.cloneDeep(this.employee);
-    if (!this.editedEmployeeForm.technologies) {
-      this.editedEmployeeForm.technologies = [];
-    }
-    if (!this.editedEmployeeForm.phoneNumber) {
-      this.editedEmployeeForm.phoneNumber = '';
-    }
-    if (!this.editedEmployeeForm.address) {
-      this.editedEmployeeForm.address = '';
-    }
   },
   data() {
     return {
@@ -578,14 +654,15 @@ export default {
   },
   methods: {
     addTimeInterval,
+    clearForm,
     deleteDateInterval,
     isCurrent,
-    updateStartInterval,
-    updateEndInterval,
-    validateDateInterval,
     submitForm,
     submitInfo,
-    submit
+    submit,
+    updateStartInterval,
+    updateEndInterval,
+    validateDateInterval
   },
   props: ['toggleResumeParser', 'employee'],
   watch: {
@@ -594,6 +671,20 @@ export default {
     },
     file: function () {
       this.validFile = this.$refs.submit.validate();
+    },
+    activate: function () {
+      if (this.activate) {
+        this.editedEmployeeForm = _.cloneDeep(this.employee);
+        if (!this.editedEmployeeForm.technologies) {
+          this.editedEmployeeForm.technologies = [];
+        }
+        if (!this.editedEmployeeForm.phoneNumber) {
+          this.editedEmployeeForm.phoneNumber = '';
+        }
+        if (!this.editedEmployeeForm.address) {
+          this.editedEmployeeForm.address = '';
+        }
+      }
     }
   }
 };

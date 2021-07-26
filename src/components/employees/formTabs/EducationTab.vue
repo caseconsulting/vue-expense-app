@@ -6,7 +6,7 @@ Education
       class="py-3 px-5"
       style="border: 1px solid grey"
       v-for="(degree, index) in editedDegrees"
-      v-bind:class="{ errorBox: isDuplicate(degree) }"
+      v-bind:class="[{ errorBox: isDuplicate(degree) }]"
       :key="'degree: ' + degree.name + index"
     >
       <!--Duplicate chip if tech name is already entered by user-->
@@ -160,7 +160,7 @@ Education
         <v-btn @click="addItem(degree.concentrations)" depressed outlined small>Add a Concentration</v-btn>
       </div>
       <!-- End Concentrations -->
-      <div align="center" class="pb-4">
+      <div v-if="allowAdditions" align="center" class="pb-4">
         <v-tooltip bottom>
           <template v-slot:activator="{ on }">
             <v-btn v-on="on" @click="deleteDegree(index)" text icon
@@ -170,11 +170,15 @@ Education
           <span>Delete Education</span>
         </v-tooltip>
       </div>
+      <div v-else align="center" class="pb-4">
+        <v-icon large left color="green" @click="confirmEducation">done</v-icon>
+        <v-icon large right color="red" @click="denyEducation">close</v-icon>
+      </div>
     </div>
     <!-- End Loop Education -->
 
     <!-- Button to Add Degress -->
-    <div class="pt-4" align="center">
+    <div v-if="allowAdditions" class="pt-4" align="center">
       <v-btn @click="addDegree()" elevation="2"><v-icon class="pr-1">add</v-icon>Degree</v-btn>
     </div>
   </div>
@@ -209,6 +213,14 @@ async function created() {
 // |                     METHODS                      |
 // |                                                  |
 // |--------------------------------------------------|
+
+function confirmEducation() {
+  this.$emit('confirm', this.editedDegrees);
+}
+
+function denyEducation() {
+  this.$emit('deny');
+}
 
 /**
  * Parse the date after losing focus.
@@ -418,6 +430,8 @@ export default {
     formatDateMonthYear
   },
   methods: {
+    confirmEducation,
+    denyEducation,
     parseEventDate,
     addDegree,
     addItem,
@@ -433,7 +447,8 @@ export default {
     updateSchoolDropDown,
     validateFields
   },
-  props: ['model', 'validating'],
+  //Education index is only used in the resume parser
+  props: ['model', 'validating', 'allowAdditions'],
   watch: {
     validating: function (val) {
       if (val) {
