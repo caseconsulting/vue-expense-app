@@ -99,6 +99,17 @@ export function isAdmin(to, from, next) {
   }
 } // isAdmin
 
+export function isAdminOrManager(to, from, next) {
+  if (getRole() === 'admin' || getRole() === 'manager') {
+    next();
+  } else {
+    next({
+      path: '/home',
+      query: { redirect: to.fullPath }
+    });
+  }
+} // isAdmin
+
 export function isLoggedIn() {
   try {
     const idToken = getIdToken();

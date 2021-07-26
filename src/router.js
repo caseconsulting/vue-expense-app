@@ -19,7 +19,7 @@ import BlogPreview from '@/views/BlogPreview.vue';
 import PostEditor from '@/views/PostEditor.vue';
 import TrainingAnalytics from '@/views/TrainingAnalytics';
 import PageNotFound from '@/views/PageNotFound';
-import { requireAuth, isAdmin } from '@/utils/auth';
+import { requireAuth, isAdmin, isAdminOrManager } from '@/utils/auth';
 import multiguard from 'vue-router-multiguard';
 
 Vue.use(Router);
@@ -59,7 +59,7 @@ const router = new Router({
       path: '/audits',
       name: 'audits',
       component: Audit,
-      beforeEnter: multiguard([requireAuth, isAdmin])
+      beforeEnter: multiguard([requireAuth, isAdminOrManager])
     },
     {
       path: '/stats',
