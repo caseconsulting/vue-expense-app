@@ -51,7 +51,11 @@
         <v-container class="my-3 pb-4" grid-list-md text-xs-center>
           <v-row>
             <v-col cols="6">
-              <v-checkbox label="Overdraft Flag" v-model="editedExpenseType.odFlag"></v-checkbox>
+              <v-checkbox
+                label="Overdraft Flag"
+                :disabled="!!model.id && model.odFlag"
+                v-model="editedExpenseType.odFlag"
+              ></v-checkbox>
 
               <v-checkbox label="Recurring Flag" v-model="editedExpenseType.recurringFlag"></v-checkbox>
             </v-col>
