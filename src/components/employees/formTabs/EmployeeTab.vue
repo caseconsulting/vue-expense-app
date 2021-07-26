@@ -213,7 +213,7 @@
       <!-- End Full/Part/Inactive Status [DESKTOP] -->
       <v-switch
         v-model="mifiStatus"
-        label="Use Mifi instead of added technology budget ($150)"
+        label="Use Mifi instead of increased technology budget ($150)"
         :v-if="editedEmployee.employeeRole !== ('User' || 'Admin')"
       ></v-switch>
     </div>
