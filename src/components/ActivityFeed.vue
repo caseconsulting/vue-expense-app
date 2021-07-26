@@ -27,7 +27,7 @@
       </div>
       <v-timeline v-else dense class="pt-0">
         <!-- Timeline -->
-        <v-virtual-scroll :items="filterEvents()" :item-height="this.itemHeight" height="850" bench="2">
+        <v-virtual-scroll :items="filterEvents()" :item-height="this.itemHeight" height="700" bench="2">
           <template v-slot="{ item }">
             <div class="pa-4"></div>
             <v-tooltip
@@ -207,5 +207,10 @@ export default {
 
 .v-tooltip__content.menuable__content__active {
   opacity: 1 !important;
+}
+
+.v-timeline::before {
+  top: 55px;
+  height: calc(100% - 110px);
 }
 </style>
