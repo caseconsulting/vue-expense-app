@@ -501,10 +501,6 @@ export default {
           value: 'employeeNumber'
         },
         {
-          text: 'Nickname',
-          value: 'nickname'
-        },
-        {
           text: 'First Name',
           value: 'firstName'
         },
@@ -515,6 +511,10 @@ export default {
         {
           text: 'Last Name',
           value: 'lastName'
+        },
+        {
+          text: 'Nickname',
+          value: 'nickname'
         },
         {
           text: 'Hire Date',
