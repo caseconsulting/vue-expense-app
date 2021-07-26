@@ -55,8 +55,9 @@
                 label="Overdraft Flag"
                 :disabled="!!model.id && model.odFlag"
                 v-model="editedExpenseType.odFlag"
+                persistent-hint
+                :hint="odFlagHint()"
               ></v-checkbox>
-
               <v-checkbox label="Recurring Flag" v-model="editedExpenseType.recurringFlag"></v-checkbox>
             </v-col>
 
@@ -424,6 +425,16 @@ function isFullTimeSelected() {
   return this.editedExpenseType.accessibleBy.includes('FullTime');
 } // isFullTimeSelected
 
+function odFlagHint() {
+  if (!!this.model.id && this.model.odFlag) {
+    return 'Cannot be undone';
+  } else if (this.editedExpenseType.odFlag) {
+    return 'Cannot be undone once submitted';
+  } else {
+    return '';
+  }
+}
+
 function toFAQ() {
   let faq = this.$router.resolve({ path: '/help/expenseTypes' });
   window.open(faq.href, '_blank');
@@ -657,6 +668,7 @@ export default {
     isCustomSelected,
     isEmpty,
     isFullTimeSelected,
+    odFlagHint,
     parseDate,
     removeCategory,
     submit,
