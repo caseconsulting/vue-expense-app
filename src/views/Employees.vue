@@ -172,7 +172,14 @@
             </p>
           </template>
 
-          <!-- Last Name Item Slot -->
+          <!-- Nickname Item Slot -->
+          <template v-slot:[`item.nickname`]="{ item }">
+            <p :class="{ inactiveStyle: isInactive(item), selectFocus: isFocus(item) }" style="margin-bottom: 0px">
+              {{ item.nickname }}
+            </p>
+          </template>
+
+          <!-- Last Login Item Slot -->
           <template v-slot:[`item.lastLogin`]="{ item }">
             <p
               v-if="userIsAdmin()"
@@ -494,6 +501,10 @@ export default {
           value: 'employeeNumber'
         },
         {
+          text: 'Nickname',
+          value: 'nickname'
+        },
+        {
           text: 'First Name',
           value: 'firstName'
         },
@@ -527,6 +538,7 @@ export default {
         firstName: null,
         middleName: null,
         lastName: null,
+        nickname: null,
         email: '@consultwithcase.com',
         employeeRole: null,
         employeeNumber: null,
