@@ -16,7 +16,6 @@
     <p v-if="!isEmpty(this.model.birthday) && (admin || employee)">
       <b>Birthday:</b> {{ this.model.birthday | monthDayYearFormat }}
     </p>
-    <p v-else><b>Birthday:</b> {{ this.model.birthday | monthDayFormat }}</p>
     <p v-if="!isEmpty(this.model.birthdayFeed) && (admin || employee)">
       <b>Birthday on Feed:</b> {{ this.model.birthdayFeed | birthdayFeedResponse }}
     </p>
