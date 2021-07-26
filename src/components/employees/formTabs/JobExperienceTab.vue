@@ -27,7 +27,6 @@
         >
           <template v-slot:activator="{ on, attrs }">
             <v-text-field
-              ref="formFields"
               :value="formatRange(timeFrame.range)"
               :rules="requiredRules"
               label="Date Range"
@@ -76,11 +75,11 @@
       <v-row class="px-3 py-3">
         <!-- Start Date -->
         <v-text-field
+          ref="formFields"
           :value="formatDate(editedJobExperienceInfo.hireDate)"
           label="Start Date"
           prepend-icon="event_available"
           readonly
-          clearable
         ></v-text-field>
         <!-- End Start Date -->
       </v-row>
@@ -454,19 +453,13 @@ function setIndices(companyIndex, positionIndex) {
  */
 function validateFields() {
   let errorCount = 0;
-  if (_.isArray(this.$refs.formFields)) {
-    // more than one TYPE of vuetify component used
-    //this.$refs.formFields.validate();
-    _.forEach(this.$refs.formFields, (field) => {
-      field.validate();
-      if (!field.validate()) {
-        errorCount++;
-      }
-    });
-  } else if (!this.$refs.formFields.validate()) {
-    // single vuetify component
-    errorCount++;
-  }
+  //ensures that refs are put in an array so we can reuse forEach loop
+  let components = !_.isArray(this.$refs.formFields) ? [this.$refs.formFields] : this.$refs.formFields;
+  _.forEach(components, (field) => {
+    if (!field.validate()) {
+      errorCount++;
+    }
+  });
   window.EventBus.$emit('doneValidating', 'jobExperience', this.editedJobExperienceInfo); // emit done validating
   window.EventBus.$emit('jobExperienceStatus', errorCount); // emit error status
 } // validateFields

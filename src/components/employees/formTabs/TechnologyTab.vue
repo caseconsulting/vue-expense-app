@@ -284,22 +284,28 @@ async function updateTechDropDown() {
  */
 function validateFields() {
   let errorCount = 0;
-  if (_.isArray(this.$refs.formFields)) {
-    // more than one TYPE of vuetify component used
-    _.forEach(this.$refs.formFields, (field) => {
-      if (!field.validate()) {
-        errorCount++;
-      }
-    });
-  }
+  //ensures that refs are put in an array so we can reuse forEach loop
+  let components = !_.isArray(this.$refs.formFields) ? [this.$refs.formFields] : this.$refs.formFields;
+  _.forEach(components, (field) => {
+    if (!field.validate()) {
+      errorCount++;
+    }
+  });
   //checks to see if there are duplicate entries with the same name
-  if (this.duplicateTechEntries().length > 0) {
-    //emit error status with a custom message
-    window.EventBus.$emit('technologiesErrStatus', 'Technology names MUST be UNIQUE. Please remove any duplicates'); // emit error status
-  } else if (!this.validateTimeIntervals()) {
+  if (!this.validateTimeIntervals()) {
     errorCount++;
   }
-  errorCount > 0 ? window.EventBus.$emit('technologiesStatus', errorCount) : null; // emit error status
+  //we want the many errors modal to only appear if there are multiple errors, else show the duplicate red error modal
+  if (errorCount === 0) {
+    this.duplicateTechEntries().length > 0
+      ? window.EventBus.$emit('technologiesErrStatus', 'Technology names MUST be UNIQUE. Please remove any duplicates')
+      : null;
+  } else {
+    errorCount > 0 ? window.EventBus.$emit('technologiesStatus', errorCount) : null;
+  }
+  //emit error status with a custom message
+  // emit error status
+
   window.EventBus.$emit('doneValidating', 'technologies', this.editedTechnologies); // emit done validating
 } // validateFields
 
@@ -397,6 +403,7 @@ export default {
   }
 };
 </script>
+
 <style>
 .errorBox {
   color: red !important;

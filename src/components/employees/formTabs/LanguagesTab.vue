@@ -161,14 +161,13 @@ function populateDropDowns() {
  */
 function validateFields() {
   let errorCount = 0;
-  if (_.isArray(this.$refs.formFields)) {
-    // more than one TYPE of vuetify component used
-    _.forEach(this.$refs.formFields, (field) => {
-      if (!field.validate()) {
-        errorCount++;
-      }
-    });
-  }
+  //ensures that refs are put in an array so we can reuse forEach loop
+  let components = !_.isArray(this.$refs.formFields) ? [this.$refs.formFields] : this.$refs.formFields;
+  _.forEach(components, (field) => {
+    if (!field.validate()) {
+      errorCount++;
+    }
+  });
   //checks to see if there are duplicate entries with the same name
   if (this.duplicateLangEntries().length < 0 || errorCount >= 1) {
     window.EventBus.$emit('languagesStatus', errorCount); // emit error status
