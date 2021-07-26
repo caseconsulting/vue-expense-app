@@ -9,19 +9,18 @@
     <p v-if="model.jobRole"><b>Position: </b>{{ model.jobRole }}</p>
     <p><b>Start Date: </b>{{ model.hireDate | monthDayYearFormat }}</p>
     <p v-if="model.deptDate"><b>End Date: </b>{{ model.deptDate | monthDayYearFormat }}</p>
-    <hr v-if="model.companies && model.companies.length > 0" class="mb-3" />
-    <br />
+    <hr class="mb-3" />
 
-    <h3>Job History</h3>
-    <v-combobox
-      label="Filter by Company Name"
-      v-model="filter"
-      @input.native="updateCompanies()"
-      :items="companyNames"
-      :menu-props="{ top: true, offsetY: true }"
-    ></v-combobox>
-    <!-- Other Jobs -->
     <div v-if="!isEmpty(model.companies)">
+      <h3>Job History</h3>
+      <v-combobox
+        label="Filter by Company Name"
+        v-model="filter"
+        @input.native="updateCompanies()"
+        :items="companyNames"
+        :menu-props="{ top: true, offsetY: true }"
+      ></v-combobox>
+      <!-- Other Jobs -->
       <!-- Loop Jobs -->
       <div v-for="(company, index) in this.pageList" :key="company.companyName + index">
         <p><b>Company: </b>{{ company.companyName }}</p>
@@ -45,6 +44,9 @@
           @input="onPageChange"
         ></v-pagination>
       </div>
+    </div>
+    <div v-else>
+      <p>No Job History Information</p>
     </div>
   </div>
 </template>
