@@ -173,11 +173,6 @@
         <!-- End Full/Part/Inactive Status [DESKTOP] -->
       </v-radio-group>
       <!-- End [DESKTOP] -->
-      <v-switch
-        v-model="mifiStatus"
-        label="Use Mifi instead of added technology budget ($150)"
-        :v-if="editedEmployee.employeeRole !== ('User' || 'Admin')"
-      ></v-switch>
       <!-- If inactive, set Departure Date -->
       <v-menu
         v-if="isInactive() || (isPartTime() && status && status == 0)"
@@ -216,6 +211,11 @@
         ></v-date-picker>
       </v-menu>
       <!-- End Full/Part/Inactive Status [DESKTOP] -->
+      <v-switch
+        v-model="mifiStatus"
+        label="Use Mifi instead of added technology budget ($150)"
+        :v-if="editedEmployee.employeeRole !== ('User' || 'Admin')"
+      ></v-switch>
     </div>
   </div>
 </template>
