@@ -202,7 +202,6 @@ async function created() {
   window.EventBus.$emit('created', 'education'); // emit education tab was created
   this.employees = await api.getItems(api.EMPLOYEES); // get all employees
   this.populateDropDowns(); // get autocomplete drop down data
-  console.log(this.model);
 } // created
 
 // |--------------------------------------------------|
@@ -370,33 +369,21 @@ function titleCase(str) {
  * Validate all input fields are valid. Emit to parent the error status.
  */
 function validateFields() {
-  let hasErrors = false;
-  let errorCount = 0;
   if (this.detectDuplicateEducation() !== undefined) {
-    hasErrors = true;
     //emit error status with a custom message
-    window.EventBus.$emit(
-      'educationDuplicateStatus',
-      hasErrors,
-      'Educations MUST be UNIQUE. Please remove any duplicates'
-    ); // emit error status
-  } else if (_.isArray(this.$refs.formFields)) {
+    window.EventBus.$emit('educationDuplicateStatus', 'Educations MUST be UNIQUE. Please remove any duplicates'); // emit error status
+  }
+  let errorCount = 0;
+  if (_.isArray(this.$refs.formFields)) {
     // more than one TYPE of vuetify component used
     _.forEach(this.$refs.formFields, (field) => {
       if (!field.validate()) {
         errorCount++;
       }
     });
-    if (errorCount > 0) {
-      hasErrors = true;
-    }
-  } else if (this.$refs.formFields) {
-    // single vuetify component
-    hasErrors = !this.$refs.formFields.validate();
   }
-
   window.EventBus.$emit('doneValidating', 'education', this.editedDegrees); // emit done validating
-  window.EventBus.$emit('educationStatus', [hasErrors, errorCount]); // emit error status
+  window.EventBus.$emit('educationStatus', errorCount); // emit error status
 } // validateFields
 
 export default {

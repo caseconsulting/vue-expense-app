@@ -160,7 +160,6 @@ function populateDropDowns() {
  * Validate all input fields are valid. Emit to parent the error status.
  */
 function validateFields() {
-  let hasErrors = false;
   let errorCount = 0;
   if (_.isArray(this.$refs.formFields)) {
     // more than one TYPE of vuetify component used
@@ -169,25 +168,14 @@ function validateFields() {
         errorCount++;
       }
     });
-    if (errorCount > 0) {
-      hasErrors = true;
-    }
-  } else if (this.$refs.formFields) {
-    // single vuetify component
-    hasErrors = !this.$refs.formFields.validate();
   }
   //checks to see if there are duplicate entries with the same name
-  if (this.duplicateLangEntries().length > 0) {
-    hasErrors = true;
+  if (this.duplicateLangEntries().length < 0 || errorCount >= 1) {
+    window.EventBus.$emit('languagesStatus', errorCount); // emit error status
+  } else if (this.duplicateLangEntries().length > 0) {
     //emit error status with a custom message
-    window.EventBus.$emit(
-      'languagesStatus',
-      [hasErrors, errorCount++],
-      'Languages MUST be UNIQUE. Please remove any duplicates'
-    );
+    window.EventBus.$emit('languagesDuplicateStatus', 'Languages MUST be UNIQUE. Please remove any duplicates');
     // emit error status
-  } else {
-    window.EventBus.$emit('languagesStatus', [hasErrors, errorCount]); // emit error status
   }
   window.EventBus.$emit('doneValidating', 'languages', this.editedLanguages); // emit done validating
 } // validateFields

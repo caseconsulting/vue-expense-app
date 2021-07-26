@@ -453,7 +453,6 @@ function setIndices(companyIndex, positionIndex) {
  * Validate all input fields are valid. Emit to parent the error status.
  */
 function validateFields() {
-  let hasErrors = false;
   let errorCount = 0;
   if (_.isArray(this.$refs.formFields)) {
     // more than one TYPE of vuetify component used
@@ -464,16 +463,12 @@ function validateFields() {
         errorCount++;
       }
     });
-
-    if (errorCount > 0) {
-      hasErrors = true;
-    }
-  } else if (this.$refs.formFields) {
+  } else if (!this.$refs.formFields.validate()) {
     // single vuetify component
-    hasErrors = !this.$refs.formFields.validate();
+    errorCount++;
   }
   window.EventBus.$emit('doneValidating', 'jobExperience', this.editedJobExperienceInfo); // emit done validating
-  window.EventBus.$emit('jobExperienceStatus', [hasErrors, errorCount]); // emit error status
+  window.EventBus.$emit('jobExperienceStatus', errorCount); // emit error status
 } // validateFields
 
 export default {

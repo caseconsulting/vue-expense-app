@@ -251,7 +251,6 @@ async function mounted() {
 
   window.EventBus.$on('resume', async (newEmployeeForm) => {
     this.model = newEmployeeForm;
-    console.log(newEmployeeForm);
     await api.updateItem(api.EMPLOYEES, this.model);
   });
 } // mounted

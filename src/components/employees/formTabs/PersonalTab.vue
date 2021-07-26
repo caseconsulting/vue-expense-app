@@ -302,23 +302,16 @@ function userIsEmployee() {
  * Validate all input fields are valid. Emit to parent the error status.
  */
 function validateFields() {
-  let hasErrors = false;
   let errorCount = 0;
   if (_.isArray(this.$refs.formFields)) {
     // more than one TYPE of vuetify component used
     _.forEach(this.$refs.formFields, (field) => {
-      console.log(field);
       if (!field.validate()) {
         errorCount++;
-        hasErrors = true;
       }
     });
-  } else if (this.$refs.formFields) {
-    // single vuetify component
-    hasErrors = !this.$refs.formFields.validate();
-    errorCount++;
   }
-  window.EventBus.$emit('personalStatus', [hasErrors, errorCount]); // emit error status
+  window.EventBus.$emit('personalStatus', errorCount); // emit error status
   window.EventBus.$emit('doneValidating', 'personal', this.editedPersonalInfo); // emit done validating
 } // validateFields
 

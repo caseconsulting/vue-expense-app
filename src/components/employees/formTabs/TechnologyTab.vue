@@ -23,6 +23,7 @@
         label="Technology"
         data-vv-name="Technology"
         @input.native="updateTechDropDown(index)"
+        clearable
       >
       </v-combobox>
 
@@ -282,7 +283,6 @@ async function updateTechDropDown() {
  * Validate all input fields are valid. Emit to parent the error status.
  */
 function validateFields() {
-  let hasErrors = false;
   let errorCount = 0;
   if (_.isArray(this.$refs.formFields)) {
     // more than one TYPE of vuetify component used
@@ -291,28 +291,15 @@ function validateFields() {
         errorCount++;
       }
     });
-    if (errorCount > 0) {
-      hasErrors = true;
-    }
-  } else if (this.$refs.formFields) {
-    // single vuetify component
-    hasErrors = !this.$refs.formFields.validate();
   }
-
   //checks to see if there are duplicate entries with the same name
   if (this.duplicateTechEntries().length > 0) {
-    hasErrors = true;
     //emit error status with a custom message
-    window.EventBus.$emit(
-      'technologiesStatus',
-      [hasErrors, errorCount++],
-      'Technology names MUST be UNIQUE. Please remove any duplicates'
-    ); // emit error status
+    window.EventBus.$emit('technologiesErrStatus', 'Technology names MUST be UNIQUE. Please remove any duplicates'); // emit error status
   } else if (!this.validateTimeIntervals()) {
-    hasErrors = true;
-  } else {
-    window.EventBus.$emit('technologiesStatus', [hasErrors, errorCount]); // emit error status
+    errorCount++;
   }
+  errorCount > 0 ? window.EventBus.$emit('technologiesStatus', errorCount) : null; // emit error status
   window.EventBus.$emit('doneValidating', 'technologies', this.editedTechnologies); // emit done validating
 } // validateFields
 
@@ -331,8 +318,7 @@ function validateTimeIntervals() {
     if (_.isEmpty(dateIntervals)) {
       //emit error status with a custom message
       window.EventBus.$emit(
-        'technologiesStatus',
-        [true, 1],
+        'technologiesErrStatus',
         `Technology ${this.editedTechnologies[tech].name} NEEDS at least one time interval.`
       ); // emit error status
       return false;

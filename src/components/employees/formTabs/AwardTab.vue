@@ -129,7 +129,6 @@ function parseEventDate() {
  * Validate all input fields are valid. Emit to parent the error status.
  */
 function validateFields() {
-  let hasErrors = false;
   let errorCount = 0;
   if (_.isArray(this.$refs.formFields)) {
     // more than one TYPE of vuetify component used
@@ -138,16 +137,9 @@ function validateFields() {
         errorCount++;
       }
     });
-    if (errorCount > 0) {
-      hasErrors = true;
-    }
-  } else if (this.$refs.formFields) {
-    // single vuetify component
-    hasErrors = !this.$refs.formFields.validate();
   }
-
   window.EventBus.$emit('doneValidating', 'awards', this.editedAwards); // emit done validating and sends edited data back to parent
-  window.EventBus.$emit('awardStatus', [hasErrors, errorCount]); // emit error status
+  window.EventBus.$emit('awardStatus', errorCount); // emit error status
 } // validateFields
 
 export default {

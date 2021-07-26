@@ -67,6 +67,7 @@
           >
             <template v-slot:activator="{ on, attrs }">
               <v-text-field
+                ref="formFields"
                 :value="certification.expirationDate | formatDate"
                 :disabled="certification.noExpiry"
                 label="Expiration Date"
@@ -210,7 +211,6 @@ function populateDropDowns() {
  * Validate all input fields are valid. Emit to parent the error status.
  */
 function validateFields() {
-  let hasErrors = false;
   let errorCount = 0;
   if (_.isArray(this.$refs.formFields)) {
     // more than one TYPE of vuetify component used
@@ -219,16 +219,9 @@ function validateFields() {
         errorCount++;
       }
     });
-    if (errorCount > 0) {
-      hasErrors = true;
-    }
-  } else if (this.$refs.formFields) {
-    // single vuetify component
-    hasErrors = !this.$refs.formFields.validate();
   }
-
   window.EventBus.$emit('doneValidating', 'certifications', this.editedCertifications); // emit done validating and sends edited data back to parent
-  window.EventBus.$emit('certificationsStatus', [hasErrors, errorCount]); // emit error status
+  window.EventBus.$emit('certificationsStatus', errorCount); // emit error status
 } // validateFields
 
 export default {

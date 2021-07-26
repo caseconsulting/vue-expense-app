@@ -371,7 +371,6 @@ function isStatusEmpty() {
  * Validate all input fields are valid. Emit to parent the error status.
  */
 function validateFields() {
-  let hasErrors = false;
   let errorCount = 0;
   if (_.isArray(this.$refs.formFields)) {
     // more than one TYPE of vuetify component used
@@ -380,16 +379,9 @@ function validateFields() {
         errorCount++;
       }
     });
-
-    if (errorCount > 0) {
-      hasErrors = true;
-    }
-  } else if (this.$refs.formFields) {
-    // single vuetify component
-    hasErrors = !this.$refs.formFields.validate();
   }
   window.EventBus.$emit('doneValidating', 'employee', this.editedEmployee); // emit done validating
-  window.EventBus.$emit('employeeStatus', [hasErrors, errorCount]); // emit error status
+  window.EventBus.$emit('employeeStatus', errorCount); // emit error status
 } // validateFields
 
 /**
