@@ -7,8 +7,20 @@
         >
       </v-col>
       <v-col align="right" justify="right">
-        <v-btn @click="toggleResumeParser = !toggleResumeParser" v-if="!editing" color="#bc3825" class="white--text"
+        <v-btn
+          @click="toggleResumeParser = !toggleResumeParser"
+          v-if="!editing"
+          color="#bc3825"
+          class="white--text ma-2"
           ><b>Upload Resume</b></v-btn
+        >
+        <v-btn
+          class="white--text ma-2"
+          color="#bc3825"
+          @click="deleteResume"
+          :disabled="!hasResume"
+          :loading="deleteLoading"
+          ><b>Delete Resume</b></v-btn
         >
       </v-col>
     </v-row>
@@ -197,6 +209,14 @@ function userIsEmployee() {
   return !_.isNil(this.model) && !_.isNil(this.user) ? this.user.employeeNumber === this.model.employeeNumber : false;
 } // userIsEmployee
 
+async function deleteResume() {
+  this.deleteLoading = true;
+  await api.deleteResume(this.$route.params.id);
+  this.deleteLoading = false;
+  this.hasResume = false;
+  window.EventBus.$emit('delete-resume', this.hasResume);
+} //deleteResume
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                 LIFECYCLE HOOKS                  |
@@ -263,8 +283,8 @@ async function mounted() {
 
 export default {
   beforeDestroy() {
-    window.EventBus.$off('upload-resume-complete');
     window.EventBus.$off('delete-resume');
+    window.EventBus.$off('upload-resume-complete');
   },
   components: {
     AvailableBudgets,
@@ -280,6 +300,7 @@ export default {
   data() {
     return {
       currentTab: null,
+      deleteLoading: false,
       displayQuickBooksTimeAndBalances: true,
       editing: false,
       filter: {
@@ -333,6 +354,7 @@ export default {
     };
   },
   methods: {
+    deleteResume,
     downloadResume,
     hasAdminPermissions,
     isDisplayData,

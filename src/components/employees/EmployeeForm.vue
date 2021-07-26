@@ -24,11 +24,6 @@
           <v-col col="6" class="text-left">
             <h3>Editing {{ fullName }}</h3>
           </v-col>
-          <v-col col="6" class="text-right">
-            <v-btn class="ma-2" @click="deleteResume" :disabled="!hasResume" :loading="deleteLoading"
-              >Delete Resume</v-btn
-            >
-          </v-col>
         </v-row>
         <h3 v-else>New Employee</h3>
       </v-card-title>
@@ -745,12 +740,6 @@ async function created() {
       this.tabErrorMessage = _.cloneDeep(errorMessage);
     }
   });
-  window.EventBus.$on('upload-resume-complete-to-form', (newResume) => {
-    window.EventBus.$emit('upload-resume-complete', newResume);
-    if (newResume != null) {
-      this.hasResume = newResume;
-    }
-  });
   // fills model in with populated fields in employee prop
   this.model = _.cloneDeep(
     _.mergeWith(this.model, this.employee, (modelValue, employeeValue) => {
@@ -873,13 +862,6 @@ async function convertAutocompleteToTitlecase() {
   await this.confirm();
 } //convertAutocompleteToTitlecase
 
-async function deleteResume() {
-  this.deleteLoading = true;
-  await api.deleteResume(this.$route.params.id);
-  this.deleteLoading = false;
-  this.hasResume = false;
-  window.EventBus.$emit('delete-resume', this.hasResume);
-}
 // |--------------------------------------------------|
 // |                                                  |
 // |                      EXPORT                      |
@@ -889,7 +871,6 @@ export default {
   beforeDestroy() {
     window.EventBus.$off('confirmed');
     window.EventBus.$off('canceled');
-    window.EventBus.$off('upload-resume-complete-to-form');
   },
   components: {
     AwardTab,
@@ -1014,7 +995,6 @@ export default {
     clearStatus,
     confirm,
     convertAutocompleteToTitlecase,
-    deleteResume,
     displayError,
     hasAdminPermissions,
     hasTabError,
