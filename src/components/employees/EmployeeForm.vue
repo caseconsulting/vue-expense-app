@@ -665,6 +665,7 @@ async function created() {
   });
   window.EventBus.$on('canceled', () => {
     this.errorTabNames = {};
+    this.confirmingError = false;
   });
   window.EventBus.$on('closeModal', () => {
     this.confirmingValid = false;

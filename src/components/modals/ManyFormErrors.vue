@@ -63,7 +63,7 @@ export default {
   ],
   watch: {
     toggleSubmissionConfirmation: function () {
-      this.activate = true;
+      this.activate = this.toggleSubmissionConfirmation;
     }
   }
 };
