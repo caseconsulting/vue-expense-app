@@ -15,7 +15,7 @@
                 ><v-file-input :rules="fileRules" v-model="file" label="Resume"></v-file-input
               ></v-col>
               <v-col cols="2" class="text-center mt-2">
-                <v-btn @click="submit" color="green" outlined :disabled="!validFile">Submit</v-btn>
+                <v-btn @click="submit" color="green" outlined :disabled="!validFile || loading">Submit</v-btn>
               </v-col>
             </v-row>
             <div v-if="loading">
