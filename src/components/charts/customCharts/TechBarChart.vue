@@ -68,7 +68,8 @@ function fillData(that) {
       xAxes: [
         {
           ticks: {
-            beginAtZero: true
+            beginAtZero: true,
+            stepSize: 1
           },
           scaleLabel: {
             display: true,
