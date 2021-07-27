@@ -355,7 +355,7 @@ export default {
       duplicateContractName: (conIndex) => {
         let contractNames = _.map(this.editedContracts, (contract) => contract.name);
         let contractName = contractNames[conIndex];
-        contractNames.splice(contractName, 1);
+        contractNames.splice(conIndex, 1);
         return !contractNames.includes(contractName) || 'Duplicate contract name';
       },
       editedContracts: _.cloneDeep(this.model), // stores edited contracts info

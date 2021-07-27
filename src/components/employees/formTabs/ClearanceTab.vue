@@ -606,7 +606,7 @@ export default {
       duplicateClearanceTypes: (cIndex) => {
         let clearanceNames = _.map(this.editedClearances, (clearance) => clearance.type);
         let clearanceName = clearanceNames[cIndex];
-        clearanceNames.splice(clearanceName, 1);
+        clearanceNames.splice(cIndex, 1);
         return !clearanceNames.includes(clearanceName) || 'Duplicate clearance name';
       },
       requiredRules: [(v) => !isEmpty(v) || 'This field is required'] // rules for a required field
