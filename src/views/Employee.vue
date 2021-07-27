@@ -6,7 +6,7 @@
           ><v-icon class="pr-1">arrow_back</v-icon>Back to Employees Page</v-btn
         >
       </v-col>
-      <v-col align="right" justify="right">
+      <v-col v-if="hasAdminPermissions() || userIsEmployee()" align="right" justify="right">
         <v-btn
           @click="toggleResumeParser = !toggleResumeParser"
           v-if="!editing"
