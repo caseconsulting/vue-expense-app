@@ -1658,7 +1658,6 @@ export default {
       if (!this.isEmpty(this.expense.id)) {
         this.emit('editing-expense'); //notify parent that expense is being edited
         this.costFormatted = Number(this.editedExpense.cost).toLocaleString();
-        console.log(this.costFormatted);
       }
 
       this.selectedExpenseType = _.find(this.expenseTypes, (expenseType) => {
