@@ -156,12 +156,8 @@
                   :allowAdditions="false"
                   :model="[education]"
                   @deny="education.canceled = true"
-                  @confirm="
-                    submitInfo('education', index, $event);
-                    education.canceled = true;
-                  "
+                  @confirm="submitInfo('education', index, $event)"
                 ></education-tab>
-                <hr v-if="index < newEducation.length - 1" />
               </v-form>
             </div>
           </span>
@@ -370,7 +366,7 @@ async function submit() {
               date: null
             });
           }
-        } else {
+        } else if (this.newEducation.filter((e) => e.school === collegeList[0]).length == 0) {
           this.newEducation.push({
             school: collegeList[0],
             concentrations: [],
@@ -439,6 +435,9 @@ function submitInfo(field, value, newValue) {
     let techHasErrors = this.newTechnology[value].dateIntervals.filter((dateInterval) => dateInterval.hasErrors);
     if (techHasErrors.length == 0 && this.newTechnology[value].dateIntervals.length > 0) {
       this.newTechnology[value].canceled = true;
+      if (!this.editedEmployeeForm.technologies) {
+        this.editedEmployeeForm.technologies = [];
+      }
       this.editedEmployeeForm.technologies.push({
         name: this.newTechnology[value].tech,
         current: isCurrent(this.newTechnology[value]),
@@ -446,12 +445,16 @@ function submitInfo(field, value, newValue) {
       });
     }
   } else if (field === 'education' && this.$refs['education' + value][0].validate()) {
+    this.newEducation[value].canceled = true;
     this.newEducation[value].date = newValue[0].date;
     this.newEducation[value].majors = newValue[0].majors;
     this.newEducation[value].minors = newValue[0].minors;
     this.newEducation[value].name = newValue[0].name;
     this.newEducation[value].school = newValue[0].school;
     this.newEducation[value].canceled = true;
+    if (!this.editedEmployeeForm.degrees) {
+      this.editedEmployeeForm.degrees = [];
+    }
     this.editedEmployeeForm.degrees.push({
       concentrations: this.newEducation[value].concentrations,
       date: this.newEducation[value].date,

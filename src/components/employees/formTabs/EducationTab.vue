@@ -343,6 +343,10 @@ async function populateDropDowns() {
       });
     });
   });
+
+  _.forEach(this.editedDegrees, (degree) => {
+    this.schoolDropDown.push(degree.school);
+  });
 } // populateDropDowns
 
 /**
