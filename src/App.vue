@@ -54,9 +54,9 @@
         </v-item-group>
 
         <!-- User image and logout -->
-        <v-menu bottom offset-y open-on-hover v-if="isLoggedIn()">
+        <v-menu bottom offset-y open-on-click v-if="isLoggedIn()">
           <template v-slot:activator="{ on }">
-            <v-avatar id="profile" size="50" color="grey lighten-4">
+            <v-avatar id="profile" class="profile-button" size="50" color="grey lighten-4">
               <img :src="profilePic" alt="avatar" v-on="on" />
             </v-avatar>
           </template>
@@ -332,5 +332,9 @@ export default {
 .scroll::-webkit-scrollbar {
   width: 0 px;
   background: transparent;
+}
+
+.profile-button {
+  cursor: pointer;
 }
 </style>
