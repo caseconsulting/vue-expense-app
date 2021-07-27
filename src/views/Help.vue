@@ -104,7 +104,7 @@ export default {
               'The Remaining hours for the month divided by the Days Remaining. This can be changed by editing the Days Remaining. Days Remaining includes today.'
           },
           {
-            title: 'What hours fall under Completed, Today, and Futute?',
+            title: 'What hours fall under Completed, Today, and Future?',
             body:
               "Completed hours are any hours logged in QuickBooks Time from the first day of the month through the end of the day yesterday. Today's hours are any hours logged in QuickBooks Time at any point today. Future hours are any hours logged in QuickBooks Time between the beginning of the day tomorrow and the last day of the month."
           },
@@ -270,7 +270,8 @@ export default {
           'user',
           {
             title: 'What is an Employee #?',
-            body: "An employee's ID number will be a user's hire order. This number also corresponds to QuickBooks Time data."
+            body:
+              "An employee's ID number will be a user's hire order. This number also corresponds to QuickBooks Time data."
           },
           {
             title: 'What is the manager role for?',
