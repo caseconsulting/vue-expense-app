@@ -181,13 +181,29 @@
 
           <!-- Last Login Item Slot -->
           <template v-slot:[`item.lastLogin`]="{ item }">
-            <p
-              v-if="userIsAdmin()"
-              :class="{ inactiveStyle: isInactive(item), selectFocus: isFocus(item) }"
-              style="margin-bottom: 0px"
-            >
-              {{ item.lastLogin }}
-            </p>
+            <v-hover v-slot="{ hover }">
+              <p
+                v-if="userIsAdmin() && hover && item.lastLogin !== undefined"
+                :class="{ inactiveStyle: isInactive(item), selectFocus: isFocus(item) }"
+                style="margin-bottom: 0px"
+              >
+                {{ moment(item.lastLogin).format('MMM Do, YYYY HH:mm:ss') }}
+              </p>
+              <p
+                v-else-if="userIsAdmin() && item.lastLogin !== undefined"
+                :class="{ inactiveStyle: isInactive(item), selectFocus: isFocus(item) }"
+                style="margin-bottom: 0px"
+              >
+                {{ moment(item.lastLogin).format('MMM Do, YYYY') }}
+              </p>
+              <p
+                v-else-if="userIsAdmin()"
+                :class="{ inactiveStyle: isInactive(item), selectFocus: isFocus(item) }"
+                style="margin-bottom: 0px"
+              >
+                {{ item.lastLogin }}
+              </p>
+            </v-hover>
           </template>
 
           <!-- Date Item Slot -->
@@ -240,6 +256,7 @@ import ConvertEmployeesToCsv from '@/components/ConvertEmployeesToCsv.vue';
 import DeleteErrorModal from '@/components/modals/DeleteErrorModal.vue';
 import DeleteModal from '@/components/modals/DeleteModal.vue';
 import EmployeeForm from '@/components/employees/EmployeeForm.vue';
+import moment from 'moment-timezone';
 import _ from 'lodash';
 import { getRole } from '@/utils/auth';
 import { isEmpty, isFullTime, isInactive, isPartTime, monthDayYearFormat } from '@/utils/utils';
@@ -363,6 +380,11 @@ function isFocus(item) {
 async function refreshEmployees() {
   this.loading = true; // set loading status to true
   this.employees = await api.getItems(api.EMPLOYEES); // get all employees
+  this.employees.forEach((currentEmp) => {
+    if (currentEmp.lastLogin) {
+      currentEmp.lastLogin = moment(currentEmp.lastLogin, ['MMM Do, YYYY HH:mm:ss', 'YYYY-MM-DD HH:mm:ss']);
+    }
+  });
   this.filterEmployees(); // filter employees
   this.expanded = []; // collapse any expanded rows in the database
 
