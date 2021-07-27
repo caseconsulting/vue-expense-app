@@ -22,6 +22,9 @@
               <p align="center">Processing resume data, this may take up to 20 seconds</p>
               <v-progress-linear color="#bc3825" indeterminate></v-progress-linear>
             </div>
+            <div v-if="!loading && timeoutError">
+              <p align="center">Timeout error, please try again.</p>
+            </div>
           </v-form>
           <span v-if="resumeProcessed && (showTech || showAddress || showPhoneNumber || showEducation)">
             <v-row class="text-center pb-3">
@@ -98,8 +101,8 @@
                 </v-col>
               </v-row>
               <v-row class="ma-5" align="center" justify="center">
-                <v-col v-for="(tech, index) in newTechnology" :key="index" cols="10">
-                  <div v-if="!tech.canceled" style="border: 1px solid grey" class="pt-2 pb-1 px-3 mx-5 my-3">
+                <div v-for="(tech, index) in newTechnology" :key="index" cols="10">
+                  <v-col v-if="!tech.canceled" style="border: 1px solid grey" class="pt-2 pb-1 px-3 mx-5 my-3">
                     <!-- Loop Technologies -->
                     <!-- Name of Technology -->
                     <v-text-field class="pb-5" :value="tech.tech" readonly label="Technology"></v-text-field>
@@ -138,8 +141,8 @@
                       <v-icon large left color="green" @click="submitInfo('technology', index)">done</v-icon>
                       <v-icon large right color="red" @click="tech.canceled = true">close</v-icon>
                     </v-row>
-                  </div>
-                </v-col>
+                  </v-col>
+                </div>
               </v-row>
             </span>
             <div v-if="showEducation">
@@ -187,7 +190,7 @@ import dateIntervalForm from '@/components/employees/formTabs/DateIntervalForm';
 import educationTab from '@/components/employees/formTabs/EducationTab';
 
 function showAddress() {
-  return this.newPersonal.currentStreet && !this.addressCanceled;
+  return this.newAddress && !this.addressCanceled;
 }
 
 function address() {
@@ -256,37 +259,53 @@ async function addTimeInterval(index) {
 } // addTimeInterval
 
 async function submit() {
+  this.resumeObject = [];
+  this.newEducation = [];
+  this.newTechnology = [];
+  this.newPersonal = {
+    phoneNumber: null,
+    location: null,
+    currentCity: null,
+    currentState: null,
+    currentStreet: null,
+    currentZIP: null
+  };
+  this.addressCanceled = false;
+  this.phoneCanceled = false;
+  this.editedEmployeeForm = _.cloneDeep(this.employee);
+
   if (this.validFile) {
     this.resumeObject.length = 0;
     // and is png or jpg or jpeg or pdf
     this.loading = true;
     this.resumeProcessed = false;
     this.resumeObject = (await api.extractResumeText(this.$route.params.id, this.file)).comprehend;
-    if (this.resumeObject instanceof Error) {
+    if (this.resumeObject instanceof Error || !this.resumeObject) {
       this.isInactive = false;
       this.resumeObject = null;
+      this.timeoutError = true;
+      this.loading = false;
       return;
     }
     window.EventBus.$emit('updated-resume-parser', 'true');
     window.EventBus.$emit('updated-resume-parser-form', 'true');
 
-    this.loading = false;
-
     // PERSONAL info
     let personalComprehend = this.resumeObject.filter((entity) => {
       return entity.Type === 'OTHER' || entity.Type === 'LOCATION';
     });
+
     let location = [];
     let locationCounter = 0;
     _.forEach(personalComprehend, async (personalEntity) => {
       // Links
-      if (
-        personalEntity.Text.includes('github') ||
-        personalEntity.Text.includes('linkedIn') ||
-        personalEntity.Text.includes('twitter')
-      ) {
-        this.newPersonal.github = personalEntity.Text;
-      }
+      // if (
+      //   personalEntity.Text.includes('github') ||
+      //   personalEntity.Text.includes('linkedIn') ||
+      //   personalEntity.Text.includes('twitter')
+      // ) {
+      //   this.newPersonal.github = personalEntity.Text;
+      // }
 
       // Phone Number
       if (personalEntity.Text.match(/^\(?(\d{3})\)?[- ]?(\d{3})[- ]?(\d{4})$/)) {
@@ -299,7 +318,9 @@ async function submit() {
             phoneNumber += '-';
           }
         }
-        this.newPersonal.phoneNumber = phoneNumber;
+        if (phoneNumber !== this.employee.phoneNumber) {
+          this.newPersonal.phoneNumber = phoneNumber;
+        }
       }
 
       // Address
@@ -352,21 +373,15 @@ async function submit() {
     for (let i = 0; i < educationComprehend.length; i++) {
       let educationEntity = educationComprehend[i];
       let collegeList = await api.getColleges(educationEntity.Text);
-      if (collegeList.length == 1 && !this.newEducation.includes(collegeList[0])) {
-        if (this.employee.degrees && this.employee.degrees.length > 0) {
-          if (this.employee.degrees.filter((e) => e.school === collegeList[0]).length == 0) {
-            this.newEducation.push({
-              school: collegeList[0],
-              concentrations: [],
-              minors: [],
-              majors: [''],
-              canceled: false,
-              showEducationMenu: false,
-              name: '',
-              date: null
-            });
-          }
-        } else if (this.newEducation.filter((e) => e.school === collegeList[0]).length == 0) {
+      if (collegeList.length == 1) {
+        // Remove duplicate
+        if (
+          (!this.employee.degrees ||
+            (this.employee.degrees &&
+              this.employee.degrees.length > 0 &&
+              this.employee.degrees.filter((e) => e.school === collegeList[0]).length == 0)) &&
+          this.newEducation.filter((e) => e.school === collegeList[0]).length == 0
+        ) {
           this.newEducation.push({
             school: collegeList[0],
             concentrations: [],
@@ -388,7 +403,10 @@ async function submit() {
 
     let newTech = [];
     techComprehend.forEach(async (tech) => {
-      let techList = await api.getTechSkills(tech.Text);
+      let techList = [];
+      if (!tech.Text.includes('/')) {
+        techList = await api.getTechSkills(tech.Text);
+      }
       // check if the tech list contains the tech from the resume
       let techs = techList.filter((item) => {
         return item.toLowerCase() === tech.Text.toLowerCase();
@@ -396,16 +414,12 @@ async function submit() {
 
       // add if there are no duplicates
       if (techs.length == 1 && !newTech.includes(techs[0])) {
-        if (this.employee.technologies && this.employee.technologies.length > 0) {
-          if (this.employee.technologies.filter((e) => e.name === techs[0]).length == 0) {
-            this.newTechnology.push({
-              tech: techs[0],
-              dateIntervals: [{ startDate: null, endDate: null }],
-              canceled: false
-            });
-            newTech.push(techs[0]);
-          }
-        } else {
+        if (
+          !this.employee.technologies ||
+          (this.employee.technologies &&
+            this.employee.technologies.length > 0 &&
+            this.employee.technologies.filter((e) => e.name === techs[0]).length == 0)
+        ) {
           this.newTechnology.push({
             tech: techs[0],
             dateIntervals: [{ startDate: null, endDate: null }],
@@ -415,6 +429,8 @@ async function submit() {
         }
       }
     });
+
+    this.loading = false;
     this.resumeProcessed = true;
   }
 }
@@ -522,7 +538,7 @@ function submitForm() {
 function clearForm() {
   this.resumeObject = [];
   this.newEducation = [];
-  this.newTechnlogy = [];
+  this.newTechonlogy = [];
   this.newPersonal = {
     phoneNumber: null,
     location: null,
@@ -534,13 +550,13 @@ function clearForm() {
   this.activate = false;
   this.addressCanceled = false;
   this.phoneCanceled = false;
-  this.editedEmployeeForm = null;
+  this.editedEmployeeForm = _.cloneDeep(this.employee);
   this.file = null;
   this.loading = false;
   this.validFile = false;
   this.resumeProcessed = false;
   this.toggleResumeFormErrorModal = false;
-  this.activate = false;
+  this.$refs.submit.reset();
 }
 
 export default {
@@ -584,13 +600,13 @@ export default {
       ],
       newPersonal: {
         phoneNumber: null,
-        location: null,
         currentCity: null,
         currentState: null,
         currentStreet: null,
         currentZIP: null
       },
       toggleResumeFormErrorModal: false,
+      timeoutError: false,
       resumeProcessed: false,
       states: {
         AL: 'Alabama',

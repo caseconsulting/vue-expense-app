@@ -330,12 +330,13 @@ function validateTimeIntervals() {
       return false;
     }
 
+    _.forEach(this.$refs.dateInterval, (dateInterval) => {
+      dateInterval.$refs.form.validate();
+    });
+
     //checks each date interval within a tech
     for (let x = 0; x < dateIntervals.length; x++) {
       //Validates the date intervals
-      _.forEach(this.$refs.dateInterval, (dateInterval) => {
-        dateInterval.$refs.form.validate();
-      });
       if (!dateIntervals[x].endDate) {
         this.editedTechnologies[tech].current = true; //sets current tech to true if no end date
       }
