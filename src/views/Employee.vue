@@ -16,6 +16,7 @@
         >
         <v-btn
           class="white--text ma-2"
+          v-if="!editing"
           color="#bc3825"
           @click="deleteResume"
           :disabled="!hasResume"
