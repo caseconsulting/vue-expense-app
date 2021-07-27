@@ -112,14 +112,16 @@
         class="pb-3"
         style="padding-top: 0px"
         @input.native="updateAddressDropDown"
-        :items="Object.keys(placeIds)"
+        :items="Object.keys(this.placeIds)"
         v-model="searchString"
         :search-input.sync="searchString"
         @change="updateBoxes"
         outlined
-        hint="Search address and select option to auto-fill fields below. Powered By Google."
+        hint="Search address and select option to auto-fill fields below."
         persistent-hint
-      ></v-combobox>
+      >
+        <v-list-tile slot="append-item" class="grey--text"> Powered By Google </v-list-tile>
+      </v-combobox>
       <div style="padding-right: 20px; padding-left: 30px; padding-bottom: 10px">
         <div style="border-left-style: groove; padding-right: 20px; padding-left: 10px">
           <!-- Current Address: Street text field -->

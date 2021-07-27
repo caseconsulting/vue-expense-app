@@ -99,6 +99,7 @@
           data-vv-name="Cost"
           @blur="editedExpense.cost = parseCost(costFormatted)"
           @input="formatCost(costFormatted)"
+          validate-on-blur
         ></v-text-field>
 
         <!-- Employee Selection List -->
@@ -1692,6 +1693,7 @@ export default {
           this.isHighFive = true;
         } else {
           this.isHighFive = false;
+          this.editedExpense.cost = '';
         }
 
         // set requires recipient
