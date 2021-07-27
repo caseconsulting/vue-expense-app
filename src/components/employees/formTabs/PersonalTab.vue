@@ -120,7 +120,7 @@
         hint="Search address and select option to auto-fill fields below."
         persistent-hint
       >
-        <v-list-tile slot="append-item" class="grey--text"> Powered By Google </v-list-tile>
+        <v-list slot="append-item" name="joe" class="grey--text"> Powered By Google </v-list>
       </v-combobox>
       <div style="padding-right: 20px; padding-left: 30px; padding-bottom: 10px">
         <div style="border-left-style: groove; padding-right: 20px; padding-left: 10px">
@@ -279,6 +279,7 @@ async function updateBoxes() {
   });
   //resets addresses and ID's in dropdown
   this.placeIds = {};
+  this.searchString = '';
 } //updateBoxes
 
 /**
