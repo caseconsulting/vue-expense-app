@@ -117,7 +117,7 @@
         :search-input.sync="searchString"
         @change="updateBoxes"
         outlined
-        hint="Search address and select option to auto-fill fields below"
+        hint="Search address and select option to auto-fill fields below. Powered By Google."
         persistent-hint
       ></v-combobox>
       <div style="padding-right: 20px; padding-left: 30px; padding-bottom: 10px">
@@ -238,7 +238,7 @@ function isUSA() {
  */
 async function updateAddressDropDown() {
   let query = event.target.value;
-  if (query.length > 0) {
+  if (query.length > 3) {
     let locations = await api.getLocation(query);
     //object used to contain addresses and their respective ID's
     //needed later to obtain the selected address's zip code
@@ -246,6 +246,8 @@ async function updateAddressDropDown() {
     _.forEach(locations.predictions, (location) => {
       this.placeIds[location.description] = location.place_id;
     });
+  } else {
+    this.placeIds = {};
   }
 } //updateAddressDropDown
 
