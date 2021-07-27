@@ -14,7 +14,7 @@
       <!-- End Loop Certifications -->
     </div>
     <!-- Employee does not have Certifications -->
-    <p v-else>No Certification information</p>
+    <p v-else>No Certification Information</p>
     <div
       v-if="!isEmpty(this.model.certifications) && Math.ceil(model.certifications.length / 5) != 1"
       class="text-center"

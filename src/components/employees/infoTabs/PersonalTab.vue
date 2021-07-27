@@ -1,5 +1,5 @@
 <template>
-  <div class="infoTab">
+  <div v-if="childrenVisible" class="infoTab" id="personalTab">
     <p v-if="!isEmpty(this.model.github)">
       <b>Github: </b><a :href="'https://github.com/' + this.model.github" target="_blank"> {{ this.model.github }}</a>
     </p>
@@ -24,6 +24,7 @@
       <b>Current Address:</b> {{ getCurrentAddress }}
     </p>
   </div>
+  <p v-else>No Personal Information</p>
 </template>
 
 <script>
@@ -43,6 +44,7 @@ import api from '@/shared/api.js';
 async function created() {
   let user = await api.getUser();
   this.userId = user.employeeNumber;
+  this.checkEmptyPersonalInfo();
 } //created
 
 // |--------------------------------------------------|
@@ -50,6 +52,19 @@ async function created() {
 // |                     COMPUTED                     |
 // |                                                  |
 // |--------------------------------------------------|
+
+/**
+ * Checks the body of the personal tab and if it does not contain any fields/info, text will be shown there is no info.
+ */
+function checkEmptyPersonalInfo() {
+  let nodeArr = [];
+  // convert to array because childNodes is an object that cannot use .every()
+  document.querySelector('#personalTab').childNodes.forEach((node) => {
+    nodeArr.push(node);
+  });
+  // there are visible elements if not every child node is a comment
+  this.childrenVisible = !nodeArr.every((node) => node.nodeType === Node.COMMENT_NODE);
+} // checkEmptyPersonalInfo
 
 /**
  * Returns Employee's Current Address.
@@ -137,7 +152,8 @@ export default {
   created,
   data() {
     return {
-      userId: null
+      userId: null,
+      childrenVisible: true
     };
   },
   filters: {
@@ -148,6 +164,7 @@ export default {
     monthDayFormat
   },
   methods: {
+    checkEmptyPersonalInfo,
     isEmpty,
     userIsAdmin,
     userIsEmployee,
