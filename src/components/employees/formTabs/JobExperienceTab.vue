@@ -98,7 +98,7 @@
         ref="formFields"
         :id="'comp-' + compIndex"
         v-model.trim="company.companyName"
-        :rules="requiredRules"
+        :rules="[requiredRules[0], duplicateCompanyName(compIndex)]"
         :items="companyDropDown"
         label="Company"
         data-vv-name="Company"
@@ -501,6 +501,12 @@ export default {
         (v) => (!isEmpty(v) && /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v)) || 'Date must be valid. Format: MM/DD/YYYY',
         (v) => moment(v, 'MM/DD/YYYY').isValid() || 'Date must be valid'
       ], // rules for an optional date
+      duplicateCompanyName: (compIndex) => {
+        let compNames = _.map(this.editedJobExperienceInfo.companies, (company) => company.companyName);
+        let company = compNames[compIndex];
+        compNames.splice(compIndex, 1);
+        return !compNames.includes(company) || 'Duplicate company name';
+      },
       endDatePresentRule: (compIndex, posIndex) => {
         if (this.editedJobExperienceInfo !== undefined) {
           let position = this.editedJobExperienceInfo.companies[compIndex].positions[posIndex];

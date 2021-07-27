@@ -11,7 +11,7 @@
       <v-combobox
         ref="formFields"
         v-model="contract.name"
-        :rules="requiredRules"
+        :rules="[requiredRules[0], duplicateContractName(index)]"
         :items="contractsDropDown"
         label="Contract"
         data-vv-name="Contract"
@@ -352,6 +352,12 @@ export default {
         (v) => (!isEmpty(v) && /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v)) || 'Date must be valid. Format: MM/DD/YYYY',
         (v) => moment(v, 'MM/DD/YYYY').isValid() || 'Date must be valid'
       ], // rules for an optional date
+      duplicateContractName: (conIndex) => {
+        let contractNames = _.map(this.editedContracts, (contract) => contract.name);
+        let contractName = contractNames[conIndex];
+        contractNames.splice(contractName, 1);
+        return !contractNames.includes(contractName) || 'Duplicate contract name';
+      },
       editedContracts: _.cloneDeep(this.model), // stores edited contracts info
       endDatePresentRule: (compIndex, projIndex) => {
         if (this.editedContracts !== undefined) {
