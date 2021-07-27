@@ -891,11 +891,12 @@ function filteredExpenseTypes() {
         // expense type is active
         if (!selectedEmployee) {
           // add expense type if no employees are selected
+          expenseType.text = `${expenseType.budgetName} - $${Number(expenseType.budget).toLocaleString().toString()}`;
           filteredExpType.push(expenseType);
         } else if (hasAccess({ id: selectedEmployee.value, workStatus: selectedEmployee.workStatus }, expenseType)) {
           // add expense type if the employee is selected and has access
           let amount = calcAdjustedBudget(selectedEmployee, expenseType); // calculate budget
-          expenseType.text = `${expenseType.budgetName} - $${amount}`;
+          expenseType.text = `${expenseType.budgetName} - $${Number(amount).toLocaleString().toString()}`;
           filteredExpType.push(expenseType);
         }
       }
@@ -911,7 +912,7 @@ function filteredExpenseTypes() {
           if (expenseType.recurringFlag || betweenDates(expenseType.startDate, expenseType.endDate)) {
             // expense type is active
             let amount = calcAdjustedBudget(employee, expenseType);
-            expenseType.text = `${expenseType.budgetName} - $${amount}`;
+            expenseType.text = `${expenseType.budgetName} - $${Number(amount).toLocaleString().toString()}`;
             filteredExpType.push(expenseType);
           }
         }
@@ -930,7 +931,7 @@ function formatCost() {
   if (Number(this.editedExpense.cost)) {
     this.costFormatted = Number(this.editedExpense.cost).toLocaleString().toString();
   }
-}
+} // formatCost
 
 /**
  * Formats a date.
@@ -1050,7 +1051,7 @@ function parseCost(cost) {
   } else {
     return cost;
   }
-}
+} // parseCost
 
 /**
  * Parse a date to isoformat (YYYY-MM-DD).
@@ -1423,8 +1424,6 @@ async function updateExistingEntry() {
 async function created() {
   this.employeeRole = getRole();
   this.userInfo = await api.getUser();
-  this.editedExpense = _.cloneDeep(this.expense);
-  console.log(this.editedExpense.cost);
 
   window.EventBus.$on('canceledSubmit', () => {
     this.loading = false; // set loading status to false

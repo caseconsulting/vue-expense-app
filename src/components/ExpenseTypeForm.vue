@@ -40,11 +40,13 @@
         <!-- Budget Amount -->
         <v-text-field
           prefix="$"
-          v-model="editedExpenseType.budget"
+          v-model="budgetFormatted"
           id="budgetAmount"
           :rules="budgetRules"
           label="Budget"
           data-vv-name="Budget"
+          @blur="editedExpenseType.budget = parseBudget(budgetFormatted)"
+          @input="formatBudget(budgetFormatted)"
         ></v-text-field>
 
         <!-- Flags -->
@@ -385,6 +387,16 @@ function emit(msg) {
   window.EventBus.$emit(msg);
 } // emit
 
+/**
+ * Formats the budget on the form for a nicer display.
+ */
+function formatBudget() {
+  this.editedExpenseType.budget = parseBudget(this.budgetFormatted);
+  if (Number(this.editedExpenseType.budget)) {
+    this.budgetFormatted = Number(this.editedExpenseType.budget).toLocaleString().toString();
+  }
+} // formatBudget
+
 // /**
 //  * Checks if all employees have access to an expense type and at a percentage rate. Return true if 'ALL' is selected,
 //  * otherwise returns false.
@@ -434,6 +446,18 @@ function odFlagHint() {
     return '';
   }
 }
+
+/**
+ * Parses the budget to get rid of commas.
+ * @returns String - The budget without formatting
+ */
+function parseBudget(budget) {
+  if (budget && !_.isEmpty(budget)) {
+    return budget.replace(/[,\s]/g, '');
+  } else {
+    return budget;
+  }
+} // parseBudget
 
 function toFAQ() {
   let faq = this.$router.resolve({ path: '/help/expenseTypes' });
@@ -615,6 +639,7 @@ export default {
   data() {
     return {
       activeEmployees: null, // list of active employees
+      budgetFormatted: '',
       budgetRules: [
         (v) => !!v || 'Budget amount is required',
         (v) => parseFloat(v, 10) > 0 || 'Budget must be greater than 0.',
@@ -664,11 +689,13 @@ export default {
     checkSelection,
     clearForm,
     emit,
+    formatBudget,
     formatDate,
     isCustomSelected,
     isEmpty,
     isFullTimeSelected,
     odFlagHint,
+    parseBudget,
     parseDate,
     removeCategory,
     submit,
