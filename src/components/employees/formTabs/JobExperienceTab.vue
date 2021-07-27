@@ -308,7 +308,6 @@ function addICTimeFrame() {
  * Adds an empty company to the bottom of the form list.
  */
 function addCompany() {
-  console.log(this.editedJobExperienceInfo);
   if (!this.editedJobExperienceInfo) this.editedJobExperienceInfo = [];
   this.editedJobExperienceInfo.companies.push({
     companyName: '',
