@@ -1,8 +1,8 @@
 <template>
   <v-col cols="12" v-if="badgeExpiring">
-    <v-alert prominent v-if="alert" :type="alert.status" :color="alert.color" dense id="alert">
+    <v-alert v-if="alert" :type="alert.status" :color="alert.color" dense id="alert" justify="center">
       {{ alert.message }}
-      <v-btn class="right-shift" color="#F44336" @click="handleProfile()" :disabled="onUserProfile"
+      <v-btn class="right-shift" color="#F44336" @click="handleProfile()" :disabled="onUserProfile" small
         >Go To Profile</v-btn
       >
     </v-alert>
@@ -20,16 +20,17 @@ moment.tz.setDefault('America/New_York');
 function checkWarnings() {
   if (this.employee.clearances) {
     this.employee.clearances.forEach((clearance) => {
-      // determines if a user has a badge/badges expiring in either 30, 15, or 5 days
+      // determines if a user has a badge/badges expiring within 30 days
       if (clearance.badgeExpirationDate) {
         let daysUntilExpiration = moment(clearance.badgeExpirationDate).diff(moment(), 'days');
+        let momentDate = moment(clearance.badgeExpirationDate).format('MMM Do, YYYY');
         if (daysUntilExpiration <= 30 && daysUntilExpiration > 0) {
           this.badgeExpiring = true;
-          let msg = `Badge expiring on ${clearance.badgeExpirationDate} for clearance: ${clearance.type}`;
+          let msg = `Badge expiring on ${momentDate} for clearance: ${clearance.type}`;
           this.alert = { status: 'error', message: msg, color: 'red' };
         } else if (daysUntilExpiration <= 0) {
           this.badgeExpiring = true;
-          let msg = `Badge expired on ${clearance.badgeExpirationDate} for clearance: ${clearance.type}`;
+          let msg = `Badge expired on ${momentDate} for clearance: ${clearance.type}`;
           this.alert = { status: 'error', message: msg, color: 'red' };
         }
       }
