@@ -3,19 +3,19 @@
     <v-card>
       <v-card-title class="header_style"><strong>Upload Resume</strong></v-card-title>
       <v-card-text class="pa-5">
-        <v-container fluid>
-          <v-form ref="submit">
+        <v-form ref="submit" class="ma-3">
+          <v-container fluid>
             <v-row>
               <v-col class="text-center">
                 <h1>Add Your Resume Here</h1>
               </v-col>
             </v-row>
-            <v-row>
-              <v-col cols="10" class="pr-0"
+            <v-row justify="center" align="center">
+              <v-col xl="10" lg="10" md="10" sm="10" xs="2" class="pr-0"
                 ><v-file-input :rules="fileRules" v-model="file" label="Resume"></v-file-input
               ></v-col>
-              <v-col cols="2" class="text-center mt-2">
-                <v-btn @click="submit" color="green" outlined :disabled="!validFile || loading">Submit</v-btn>
+              <v-col xl="2" lg="2" md="2" sm="2" xs="2" class="text-center">
+                <v-btn @click="submit" color="green" outlined :disabled="!validFile || loading">Upload</v-btn>
               </v-col>
             </v-row>
             <v-row>
@@ -32,37 +32,38 @@
             <div v-if="!loading && timeoutError">
               <p align="center" class="error-text">Timeout error, please try again.</p>
             </div>
-          </v-form>
-          <span v-if="resumeProcessed && (showTech || showAddress || showPhoneNumber || showEducation)">
-            <v-row class="text-center pb-3">
-              <v-col>
-                <h1>Pending Changes</h1>
-              </v-col>
-            </v-row>
-            <span v-if="showAddress || showPhoneNumber">
+          </v-container>
+        </v-form>
+        <span v-if="resumeProcessed && (showTech || showAddress || showPhoneNumber || showEducation)">
+          <v-row class="text-center pb-3">
+            <v-col>
+              <h1>Pending Changes</h1>
+            </v-col>
+          </v-row>
+          <span v-if="showAddress || showPhoneNumber">
+            <v-container fluid>
               <v-row class="text-left">
                 <v-col>
                   <h2>Personal Info Changes</h2>
-                  <hr />
                 </v-col>
               </v-row>
               <v-row class="text-center">
-                <v-col cols="5">
+                <v-col xl="5" lg="5" md="5" sm="6" xs="6">
                   <h3>Personal Info Currently on Form</h3>
                 </v-col>
-                <v-col cols="5">
+                <v-col xl="5" lg="5" md="5" sm="6" xs="6">
                   <h3>New Personal Info</h3>
                 </v-col>
               </v-row>
               <!-- Address -->
-              <v-row v-if="showAddress" class="text-center">
-                <v-col cols="5">
+              <v-row v-if="showAddress">
+                <v-col xl="5" lg="5" md="5" sm="6" cols="6">
                   <v-text-field v-model="address" disabled label="Old Address"> </v-text-field>
                 </v-col>
-                <v-col cols="5">
+                <v-col xl="5" lg="5" md="5" sm="6" cols="6">
                   <v-text-field v-model="newAddress" readonly label="New Address"> </v-text-field>
                 </v-col>
-                <v-col cols="2" class="pt-7">
+                <v-col xl="2" lg="2" md="2" sm="12" cols="12" class="pt-md-6 pt-0 text-center">
                   <v-icon
                     large
                     left
@@ -78,13 +79,13 @@
               </v-row>
               <!-- Phone Number -->
               <v-row v-if="showPhoneNumber" class="text-center">
-                <v-col cols="5">
+                <v-col xl="5" lg="5" md="5" sm="6" cols="6">
                   <v-text-field v-model="phoneNumber" disabled label="Old Phone Number"> </v-text-field>
                 </v-col>
-                <v-col cols="5">
+                <v-col xl="5" lg="5" md="5" sm="6" cols="6">
                   <v-text-field v-model="newPhoneNumber" readonly label="New Phone Number"> </v-text-field>
                 </v-col>
-                <v-col cols="2" class="pt-7">
+                <v-col xl="2" lg="2" md="2" sm="12" cols="12" class="pt-md-6 pt-0 text-center">
                   <v-icon
                     large
                     left
@@ -98,86 +99,84 @@
                   <v-icon large right color="red" @click="phoneCanceled = true">close</v-icon>
                 </v-col>
               </v-row>
-            </span>
-            <span v-if="showTech">
-              <!-- Technology -->
-              <v-row class="text-left">
-                <v-col>
-                  <h2>Technology Additions</h2>
-                  <hr />
-                </v-col>
-              </v-row>
-              <v-row class="ma-5" align="center" justify="center">
-                <div v-for="(tech, index) in newTechnology" :key="index" cols="10">
-                  <v-col v-if="!tech.canceled" style="border: 1px solid grey" class="pt-2 pb-1 px-3 mx-5 my-3">
-                    <!-- Loop Technologies -->
-                    <!-- Name of Technology -->
-                    <v-text-field class="pb-5" :value="tech.tech" readonly label="Technology"></v-text-field>
+            </v-container>
+          </span>
+          <span v-if="showTech">
+            <!-- Technology -->
+            <v-row class="text-left my-2">
+              <v-col>
+                <h2>Technology Additions</h2>
+                <hr />
+              </v-col>
+            </v-row>
+            <div v-for="(tech, index) in newTechnology" :key="index">
+              <div v-if="!tech.canceled" style="border: 1px solid grey" class="pt-3 pb-1 px-5 ma-1">
+                <!-- Loop Technologies -->
+                <!-- Name of Technology -->
+                <v-text-field class="pb-5" :value="tech.tech" readonly label="Technology"></v-text-field>
 
-                    <!-- Time Intervals -->
-                    <v-row justify="center">
-                      <div
-                        v-for="(dateInterval, intervalIndex) in tech.dateIntervals"
-                        :key="'technology interval: ' + index + intervalIndex"
-                        class="mb-3"
-                      >
-                        <date-interval-form
-                          ref="dateInterval"
-                          :startIntervalDate="dateInterval.startDate"
-                          :endIntervalDate="dateInterval.endDate"
-                          :allIntervals="tech.dateIntervals"
-                          :technologyIndex="index"
-                          :intervalIndex="intervalIndex"
-                          @delete="deleteDateInterval"
-                          @validated="validateDateInterval"
-                          @start="updateStartInterval"
-                          @end="updateEndInterval"
-                        ></date-interval-form>
-                      </div>
-                    </v-row>
-                    <!-- End of Time Intervals -->
+                <!-- Time Intervals -->
+                <v-row justify="center">
+                  <div
+                    v-for="(dateInterval, intervalIndex) in tech.dateIntervals"
+                    :key="'technology interval: ' + index + intervalIndex"
+                    class="mb-3"
+                  >
+                    <date-interval-form
+                      ref="dateInterval"
+                      :startIntervalDate="dateInterval.startDate"
+                      :endIntervalDate="dateInterval.endDate"
+                      :allIntervals="tech.dateIntervals"
+                      :technologyIndex="index"
+                      :intervalIndex="intervalIndex"
+                      @delete="deleteDateInterval"
+                      @validated="validateDateInterval"
+                      @start="updateStartInterval"
+                      @end="updateEndInterval"
+                    ></date-interval-form>
+                  </div>
+                </v-row>
+                <!-- End of Time Intervals -->
 
-                    <!--Add a time interval button-->
-                    <div class="pt-4 mb-3" align="center">
-                      <v-btn @click="addTimeInterval(index)" elevation="2"
-                        ><v-icon class="pr-1">add</v-icon>Time Interval</v-btn
-                      >
-                    </div>
-
-                    <v-row align="center" class="py-3" justify="center">
-                      <v-icon large left color="green" @click="submitInfo('technology', index)">done</v-icon>
-                      <v-icon large right color="red" @click="tech.canceled = true">close</v-icon>
-                    </v-row>
-                  </v-col>
+                <!--Add a time interval button-->
+                <div class="pt-4 mb-3" align="center">
+                  <v-btn @click="addTimeInterval(index)" elevation="2"
+                    ><v-icon class="pr-1">add</v-icon>Time Interval</v-btn
+                  >
                 </div>
-              </v-row>
-            </span>
-            <div v-if="showEducation">
-              <!-- Education -->
-              <v-row class="text-left">
-                <v-col>
-                  <h2>Education Additions</h2>
-                  <hr />
-                </v-col>
-              </v-row>
-              <v-form v-for="(education, index) in newEducation" :key="index" :ref="'education' + index" class="ma-5">
-                <education-tab
-                  v-if="!education.canceled"
-                  :allowAdditions="false"
-                  :model="[education]"
-                  @deny="education.canceled = true"
-                  @confirm="submitInfo('education', index, $event)"
-                ></education-tab>
-              </v-form>
+
+                <v-row align="center" class="py-3" justify="center">
+                  <v-icon large left color="green" @click="submitInfo('technology', index)">done</v-icon>
+                  <v-icon large right color="red" @click="tech.canceled = true">close</v-icon>
+                </v-row>
+              </div>
             </div>
           </span>
-          <v-row class="text-center" v-if="resumeProcessed">
-            <v-col>
-              <v-btn color="green" class="mr-1" outlined @click="submitForm">Submit Form</v-btn>
-              <v-btn color="red" outlined @click="clearForm">Cancel Form Edits</v-btn>
-            </v-col>
-          </v-row>
-        </v-container>
+          <div v-if="showEducation" class="mt-4">
+            <!-- Education -->
+            <v-row class="text-left">
+              <v-col>
+                <h2>Education Additions</h2>
+                <hr />
+              </v-col>
+            </v-row>
+            <v-form v-for="(education, index) in newEducation" :key="index" :ref="'education' + index" class="ma-5">
+              <education-tab
+                v-if="!education.canceled"
+                :allowAdditions="false"
+                :model="[education]"
+                @deny="education.canceled = true"
+                @confirm="submitInfo('education', index, $event)"
+              ></education-tab>
+            </v-form>
+          </div>
+        </span>
+        <v-row class="text-center" v-if="resumeProcessed">
+          <v-col>
+            <v-btn color="green" class="ma-3" outlined @click="submitForm">Submit Form</v-btn>
+            <v-btn color="red" outlined @click="clearForm">Cancel Form Edits</v-btn>
+          </v-col>
+        </v-row>
       </v-card-text>
     </v-card>
     <v-dialog v-model="toggleResumeFormErrorModal" max-width="350">
