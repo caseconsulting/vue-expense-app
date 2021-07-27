@@ -106,7 +106,7 @@ export default {
           {
             title: 'What hours fall under Completed, Today, and Futute?',
             body:
-              "Completed hours are any hours logged in QuickBooks Time from the first day of the month through the end of the day yesterday. Today's hours are any hours logged in TSheet at any point today. Future hours are any hours logged in QuickBooks Time between the beginning of the day tomorrow and the last day of the month."
+              "Completed hours are any hours logged in QuickBooks Time from the first day of the month through the end of the day yesterday. Today's hours are any hours logged in QuickBooks Time at any point today. Future hours are any hours logged in QuickBooks Time between the beginning of the day tomorrow and the last day of the month."
           },
           {
             title: 'Why does my Avg Hours/Day or Days Remaining seem wrong?',
@@ -270,7 +270,7 @@ export default {
           'user',
           {
             title: 'What is an Employee #?',
-            body: "An employee's ID number will be a user's hire order. This number also corresponds to TSheets data."
+            body: "An employee's ID number will be a user's hire order. This number also corresponds to QuickBooks Time data."
           },
           {
             title: 'What is the manager role for?',
