@@ -1657,7 +1657,8 @@ export default {
       //when model id is not empty then must be editing an expense
       if (!this.isEmpty(this.expense.id)) {
         this.emit('editing-expense'); //notify parent that expense is being edited
-        this.costFormatted = this.editedExpense.cost;
+        this.costFormatted = Number(this.editedExpense.cost).toLocaleString();
+        console.log(this.costFormatted);
       }
 
       this.selectedExpenseType = _.find(this.expenseTypes, (expenseType) => {
@@ -1687,7 +1688,8 @@ export default {
         // set high five cost
         // HARD CODE
         if (this.selectedExpenseType.budgetName === 'High Five') {
-          this.$set(this.editedExpense, 'cost', moneyFilter(50));
+          this.costFormatted = moneyFilter(50);
+          this.editedExpense.cost = moneyFilter(50);
           this.isHighFive = true;
         } else {
           this.isHighFive = false;
