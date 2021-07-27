@@ -155,10 +155,10 @@
                 <v-text-field
                   :id="'start-field-' + compIndex + '-' + index"
                   ref="formFields"
-                  :value="position.startDate | formatDate"
+                  :value="position.startDate | formatDateMonthYear"
                   label="Start Date"
-                  hint="MM/DD/YYYY format"
-                  v-mask="'##/##/####'"
+                  hint="MM/YYYY format"
+                  v-mask="'##/####'"
                   prepend-icon="event_available"
                   :rules="[dateRules[0], dateRules[1], dateRules[2], dateOrderRule(compIndex, index)]"
                   v-bind="attrs"
@@ -173,6 +173,7 @@
                 v-model="position.startDate"
                 :max="position.endDate"
                 no-title
+                type="month"
                 @input="position.showStartMenu = false"
               ></v-date-picker>
             </v-menu>
@@ -193,7 +194,7 @@
                   :id="'end-field-' + compIndex + '-' + index"
                   ref="formFields"
                   :disabled="position.presentDate"
-                  :value="position.endDate | formatDate"
+                  :value="position.endDate | formatDateMonthYear"
                   label="End Date"
                   prepend-icon="event_busy"
                   :rules="[
@@ -202,8 +203,8 @@
                     dateOrderRule(compIndex, index),
                     endDatePresentRule(compIndex, index)
                   ]"
-                  hint="MM/DD/YYYY format"
-                  v-mask="'##/##/####'"
+                  hint="MM/YYYY format"
+                  v-mask="'##/####'"
                   v-bind="attrs"
                   v-on="on"
                   clearable
@@ -217,6 +218,7 @@
                 v-model="position.endDate"
                 :min="position.startDate"
                 no-title
+                type="month"
                 @input="position.showEndMenu = false"
               ></v-date-picker>
             </v-menu>
@@ -266,7 +268,7 @@
 <script>
 import api from '@/shared/api.js';
 import _ from 'lodash';
-import { isEmpty, formatDate, parseDate } from '@/utils/utils';
+import { isEmpty, formatDate, formatDateMonthYear, parseDateMonthYear } from '@/utils/utils';
 import { mask } from 'vue-the-mask';
 const moment = require('moment-timezone');
 moment.tz.setDefault('America/New_York');
@@ -306,6 +308,7 @@ function addICTimeFrame() {
  * Adds an empty company to the bottom of the form list.
  */
 function addCompany() {
+  console.log(this.editedJobExperienceInfo);
   if (!this.editedJobExperienceInfo) this.editedJobExperienceInfo = [];
   this.editedJobExperienceInfo.companies.push({
     companyName: '',
@@ -419,7 +422,7 @@ function hasEndDatesFilled(index) {
  * Parse the date after losing focus.
  */
 function parseEventDate() {
-  return parseDate(event.target.value);
+  return parseDateMonthYear(event.target.value);
 } //parseEventDate
 
 /**
@@ -490,16 +493,16 @@ export default {
       dateOptionalRules: [
         //end date validation
         (v) => {
-          return !isEmpty(v) ? /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v) || 'Date must be valid. Format: MM/DD/YYYY' : true;
+          return !isEmpty(v) ? /^\d{1,2}\/\d{4}$/.test(v) || 'Date must be valid. Format: MM/YYYY' : true;
         },
-        (v) => (!isEmpty(v) ? moment(v, 'MM/DD/YYYY').isValid() || 'Date must be valid' : true)
+        (v) => (!isEmpty(v) ? moment(v, 'MM/YYYY').isValid() || 'Date must be valid' : true)
       ], // rules for an optional date
       dateRules: [
         (v) => {
           return !isEmpty(v) || 'Date required';
         },
-        (v) => (!isEmpty(v) && /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v)) || 'Date must be valid. Format: MM/DD/YYYY',
-        (v) => moment(v, 'MM/DD/YYYY').isValid() || 'Date must be valid'
+        (v) => (!isEmpty(v) && /^\d{1,2}\/\d{4}$/.test(v)) || 'Date must be valid. Format: MM/YYYY',
+        (v) => moment(v, 'MM/YYYY').isValid() || 'Date must be valid'
       ], // rules for an optional date
       duplicateCompanyName: (compIndex) => {
         let compNames = _.map(this.editedJobExperienceInfo.companies, (company) => company.companyName);
@@ -525,7 +528,8 @@ export default {
   },
   directives: { mask },
   filters: {
-    formatDate
+    formatDate,
+    formatDateMonthYear
   },
   methods: {
     addICTimeFrame,
@@ -536,7 +540,6 @@ export default {
     deletePosition,
     formatDate,
     hasEndDatesFilled,
-    parseDate,
     parseEventDate,
     formatRange,
     isEmpty,

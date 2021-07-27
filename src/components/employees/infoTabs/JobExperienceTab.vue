@@ -29,8 +29,8 @@
             <b>Position {{ posIndex + 1 }}: </b>{{ position.title }}
           </p>
           <p v-else><b>Position: </b>{{ position.title }}</p>
-          <p><b>Start Date: </b>{{ position.startDate | monthDayYearFormat }}</p>
-          <p v-if="position.endDate"><b>End Date: </b>{{ position.endDate | monthDayYearFormat }}</p>
+          <p><b>Start Date: </b>{{ position.startDate | monthYearFormat }}</p>
+          <p v-if="position.endDate"><b>End Date: </b>{{ position.endDate | monthYearFormat }}</p>
           <hr v-if="posIndex < company.positions.length - 1" class="horizontalBar mb-3" />
         </div>
         <hr v-if="index < pageList.length - 1" class="mb-3" />
@@ -55,7 +55,7 @@
 const moment = require('moment-timezone');
 moment.tz.setDefault('America/New_York');
 import _ from 'lodash';
-import { isEmpty, monthDayYearFormat } from '@/utils/utils';
+import { isEmpty, monthDayYearFormat, monthYearFormat } from '@/utils/utils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -175,7 +175,8 @@ export default {
     }
   },
   filters: {
-    monthDayYearFormat
+    monthDayYearFormat,
+    monthYearFormat
   },
   props: ['model']
 };
