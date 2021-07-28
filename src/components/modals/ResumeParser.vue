@@ -313,16 +313,20 @@ async function submit() {
     this.loadingMessage = 'Processing resume data, this may take up to 30 seconds';
 
     setTimeout(() => {
-      this.loadingMessage = 'Sooooooo, how are you doing?';
+      if (!this.resumeProcessed && this.activate) {
+        this.loadingMessage = 'Sooooooo, how are you doing?';
+        setTimeout(() => {
+          if (!this.resumeProcessed && this.activate) {
+            this.loadingMessage = 'You must have a beefy resume!';
+            setTimeout(() => {
+              if (!this.resumeProcessed && this.activate) {
+                this.loadingMessage = 'You may want to try again...';
+              }
+            }, 15000);
+          }
+        }, 15000);
+      }
     }, 15000);
-
-    setTimeout(() => {
-      this.loadingMessage = 'You must have a beefy resume!';
-    }, 25000);
-
-    setTimeout(() => {
-      this.loadingMessage = 'You may want to try again...';
-    }, 40000);
 
     this.resumeObject = (await api.extractResumeText(this.$route.params.id, this.file)).comprehend;
     if (this.resumeObject instanceof Error || !this.resumeObject) {
