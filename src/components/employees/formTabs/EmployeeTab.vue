@@ -133,14 +133,17 @@
             <v-radio label="Inactive" value="inactive"></v-radio>
           </v-col>
           <!-- Custom Input Field -->
-          <v-col cols="6" sm="3">
+          <v-col v-if="isPartTime()" cols="6" sm="3">
             <div :class="{ customInput: isPartTime() }">
               <div :class="['percentageBox', { disabled: !isPartTime(), inputError: isStatusEmpty() }]">
                 <input
                   v-model="status"
                   type="text"
                   oninput="this.value = this.value.replace(/[^0-9]/g, '');"
+                  max="99"
                   maxlength="2"
+                  min="1"
+                  pattern="(?!0+)\d+"
                   :disabled="!isPartTime()"
                 />
                 <div>%</div>
@@ -158,11 +161,11 @@
         <v-radio label="Part Time" value="part" @change="viewStatus()"></v-radio>
         <v-radio label="Inactive" value="inactive"></v-radio>
         <!-- custom input field -->
-        <div :class="{ customInput: isPartTime() }">
+        <div v-if="isPartTime()" :class="{ customInput: isPartTime() }">
           <div :class="['percentageBox', { disabled: !isPartTime(), inputError: isStatusEmpty() }]">
             <input
               v-model="status"
-              type="text"
+              type="number"
               oninput="this.value = this.value.replace(/[^0-9]/g, '');"
               maxlength="2"
               :disabled="!isPartTime()"
