@@ -18,12 +18,19 @@
                 <v-btn @click="submit" color="green" outlined :disabled="!validFile || loading">Submit</v-btn>
               </v-col>
             </v-row>
+            <v-row>
+              <v-checkbox
+                class="ml-4"
+                v-model="extractResume"
+                label="Extract resume data and add data on profile"
+              ></v-checkbox>
+            </v-row>
             <div v-if="loading">
               <p align="center">Processing resume data, this may take up to 20 seconds</p>
               <v-progress-linear color="#bc3825" indeterminate></v-progress-linear>
             </div>
             <div v-if="!loading && timeoutError">
-              <p align="center">Timeout error, please try again.</p>
+              <p align="center" class="error-text">Timeout error, please try again.</p>
             </div>
           </v-form>
           <span v-if="resumeProcessed && (showTech || showAddress || showPhoneNumber || showEducation)">
@@ -258,7 +265,31 @@ async function addTimeInterval(index) {
   this.newTechnology = _.cloneDeep(this.newTechnology); //ensures that technologies intervals render properly
 } // addTimeInterval
 
+/**
+ * When the checkbox is not selected on the resume modal, it uploads the resume and closes the window upon
+ * successful completion
+ */
+async function onlyUploadResume() {
+  this.loading = true;
+  let uploadResult = await api.uploadResume(this.$route.params.id, this.file);
+  this.loading = false;
+  if (uploadResult instanceof Error) {
+    this.timeoutError = true;
+  } else {
+    window.EventBus.$emit('uploaded', true);
+    this.clearForm();
+  }
+}
+
+/**
+ * Clear the action status that is displayed in the snackbar.
+ */
+
 async function submit() {
+  if (!this.extractResume) {
+    this.onlyUploadResume();
+    return;
+  }
   this.resumeObject = [];
   this.newEducation = [];
   this.newTechnology = [];
@@ -608,6 +639,7 @@ export default {
       toggleResumeFormErrorModal: false,
       timeoutError: false,
       resumeProcessed: false,
+      extractResume: true,
       states: {
         AL: 'Alabama',
         AK: 'Alaska',
@@ -681,6 +713,7 @@ export default {
     submit,
     updateStartInterval,
     updateEndInterval,
+    onlyUploadResume,
     validateDateInterval
   },
   props: ['toggleResumeParser', 'employee'],
@@ -709,4 +742,8 @@ export default {
 };
 </script>
 
-<style></style>
+<style>
+.error-text {
+  color: red;
+}
+</style>

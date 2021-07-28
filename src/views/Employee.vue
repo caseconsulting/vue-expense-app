@@ -1,5 +1,19 @@
 <template>
   <v-container class="my-3" fluid>
+    <v-snackbar
+      v-model="uploadStatus.statusType"
+      :color="uploadStatus.color"
+      :multi-line="true"
+      :right="true"
+      :timeout="3000"
+      :top="true"
+      :vertical="true"
+    >
+      <v-card-title headline color="white">
+        <span class="headline">{{ uploadStatus.statusMessage }}</span>
+      </v-card-title>
+      <v-btn color="white" text @click="clearStatus"> Close </v-btn>
+    </v-snackbar>
     <v-row class="pl-3">
       <v-col align="left" justify="left">
         <v-btn id="backToEmployeesBtn" elevation="2" to="/employees"
@@ -110,6 +124,12 @@ const IsoFormat = 'YYYY-MM-DD';
 // |                                                  |
 // |--------------------------------------------------|
 
+function clearStatus() {
+  this.$set(this.uploadStatus, 'statusType', undefined);
+  this.$set(this.uploadStatus, 'statusMessage', null);
+  this.$set(this.uploadStatus, 'color', null);
+} // clearStatus
+
 async function downloadResume() {
   let signedURL = await api.getResume(this.$route.params.id);
   if (signedURL !== null) {
@@ -210,12 +230,23 @@ function userIsEmployee() {
   return !_.isNil(this.model) && !_.isNil(this.user) ? this.user.employeeNumber === this.model.employeeNumber : false;
 } // userIsEmployee
 
+function displayMessage(type, msg, color) {
+  this.$set(this.uploadStatus, 'statusType', type);
+  this.$set(this.uploadStatus, 'statusMessage', msg);
+  this.$set(this.uploadStatus, 'color', color);
+}
+
 async function deleteResume() {
   this.deleteLoading = true;
-  await api.deleteResume(this.$route.params.id);
+  let deleteResult = await api.deleteResume(this.$route.params.id);
+  if (!(deleteResult instanceof Error)) {
+    this.hasResume = false;
+    this.displayMessage('SUCCESS', 'Successfully deleted resume', 'green');
+    window.EventBus.$emit('delete-resume', this.hasResume);
+  } else {
+    this.displayMessage('ERROR', 'Failure to delete resume', 'red');
+  }
   this.deleteLoading = false;
-  this.hasResume = false;
-  window.EventBus.$emit('delete-resume', this.hasResume);
 } //deleteResume
 
 // |--------------------------------------------------|
@@ -258,6 +289,11 @@ async function mounted() {
 
   window.EventBus.$on('update', (updatedEmployee) => {
     this.model = updatedEmployee;
+  });
+
+  window.EventBus.$on('uploaded', (isUploaded) => {
+    this.hasResume = isUploaded;
+    this.displayMessage('SUCCESS', 'Successfully uploaded resume', 'green');
   });
 
   window.EventBus.$on('tabChange', (tab) => {
@@ -351,11 +387,18 @@ export default {
         color: ''
       }, // snackbar action status
       toggleResumeParser: false,
+      uploadStatus: {
+        statusType: undefined,
+        statusMessage: null,
+        color: null
+      },
       user: null
     };
   },
   methods: {
+    clearStatus,
     deleteResume,
+    displayMessage,
     downloadResume,
     hasAdminPermissions,
     isDisplayData,

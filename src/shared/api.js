@@ -17,6 +17,7 @@ const BLOG_FILE = 'blogFile';
 const HIPPO_LAB = 'hippoLabs';
 const GOOGLE_MAPS = 'googleMaps';
 const BLOG_ATTACHMENT = 'blogAttachment';
+const RESUME = 'resume';
 const API_HOSTNAME = API_CONFIG.apiHostname;
 const API_PORT = API_CONFIG.apiPort;
 const PORT = API_PORT === '443' ? '' : `:${API_PORT}`;
@@ -192,7 +193,7 @@ async function deleteResume(employeeId) {
   let accessToken = getAccessToken();
   return client({
     method: 'delete',
-    url: `resume/${employeeId}`,
+    url: `${RESUME}/${employeeId}`,
     headers: {
       Authorization: `Bearer ${accessToken}`
     }
@@ -237,7 +238,7 @@ async function extractResumeText(employeeId, file) {
 
   return client({
     method: 'put',
-    url: `/resume/${employeeId}`,
+    url: `/${RESUME}/${employeeId}`,
     data: formData,
     headers: {
       Authorization: `Bearer ${accessToken}`
@@ -256,7 +257,7 @@ async function getResume(employeeId) {
   let accessToken = getAccessToken();
   return client({
     method: 'get',
-    url: `resume/${employeeId}`,
+    url: `${RESUME}/${employeeId}`,
     headers: {
       Authorization: `Bearer ${accessToken}`
     }
@@ -364,6 +365,29 @@ function getKeyPhrases(data) {
   return execute('post', `${BLOG_ATTACHMENT}/getKeyPhrases`, data);
 }
 
+function uploadResume(employeeId, file) {
+  let formData = new FormData();
+  formData.append('resume', file);
+
+  // inject the accessToken for each request
+  let accessToken = getAccessToken();
+
+  return client({
+    method: 'post',
+    url: `/${RESUME}/${employeeId}`,
+    data: formData,
+    headers: {
+      Authorization: `Bearer ${accessToken}`
+    }
+  })
+    .then((response) => {
+      return response.data;
+    })
+    .catch((err) => {
+      return err;
+    });
+}
+
 async function uploadBlogAttachment(file) {
   let formData = new FormData();
   formData.append('image', file);
@@ -451,6 +475,7 @@ export default {
   getUser,
   updateItem,
   uploadBlogAttachment,
+  uploadResume,
   EXPENSE_TYPES,
   EXPENSES,
   EMPLOYEES,
