@@ -39,7 +39,7 @@ function checkWarnings() {
 }
 
 function handleProfile() {
-  this.$router.push(`employee/${this.employee.employeeNumber}`);
+  this.$router.push({ name: 'employee', params: { id: `${this.employee.employeeNumber}` } });
 }
 
 function onUserProfile() {

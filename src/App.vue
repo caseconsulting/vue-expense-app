@@ -163,7 +163,7 @@ function handleLogout() {
 }
 
 function handleProfile() {
-  this.$router.push(`employee/${this.userId}`);
+  this.$router.push({ name: 'employee', params: { id: `${this.userId}` } });
 }
 
 function onResize() {
