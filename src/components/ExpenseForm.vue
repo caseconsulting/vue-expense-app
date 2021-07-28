@@ -52,6 +52,55 @@
           class="form_padding"
         ></v-autocomplete>
 
+        <!-- Receipt Uploading -->
+        <v-checkbox
+          v-if="receiptRequired && isEdit && !isEmpty(expense.receipt)"
+          style="padding-top: 0px; padding-bottom: 0px"
+          v-model="allowReceipt"
+          label="Update the Receipt?"
+          :disabled="isInactive"
+        ></v-checkbox>
+        <v-row no-gutters class="ma-0">
+          <v-col cols="12" xl="8" lg="7">
+            <file-upload
+              v-if="receiptRequired && ((allowReceipt && isEdit) || !isEdit || isEmpty(expense.receipt))"
+              style="padding-top: 0px; padding-bottom: 0px"
+              @fileSelected="setFile"
+              :passedRules="receiptRules"
+              :receipt="expense.receipt"
+            ></file-upload>
+          </v-col>
+          <v-col cols="2">
+            <!-- Scan Receipt Button -->
+            <v-tooltip bottom>
+              <template v-slot:activator="{ on, attrs }">
+                <span v-on="on">
+                  <v-btn
+                    v-if="receiptRequired && ((allowReceipt && isEdit) || !isEdit || isEmpty(expense.receipt))"
+                    color="white"
+                    @click="scanFile"
+                    class="ma-2"
+                    :disabled="isInactive || disableScan"
+                    :loading="scanLoading"
+                    v-bind="attrs"
+                  >
+                    Scan Receipt
+                  </v-btn>
+                </span>
+              </template>
+              <span v-if="!scanLoading">Scanning only works for pdfs, pngs, and jpegs.</span>
+              <span v-else>Scanning your receipt, this may take up to 15 seconds</span>
+            </v-tooltip>
+          </v-col>
+        </v-row>
+
+        <!-- Receipt Name -->
+        <v-card-text
+          style="padding: 0px 0px 3px 0px; font: inherit; font-size: 16px; color: #0000008a"
+          v-if="!isEmpty(expense.receipt) && isEdit"
+          >Current Receipt: {{ this.editedExpense.receipt }}</v-card-text
+        >
+
         <!-- Category -->
         <v-select
           v-if="getCategories() != null && getCategories().length >= 1"
@@ -188,50 +237,6 @@
           </template>
           <v-date-picker v-model="editedExpense.reimbursedDate" no-title @input="reimburseMenu = false"></v-date-picker>
         </v-menu>
-
-        <!-- Receipt Uploading -->
-        <v-checkbox
-          v-if="receiptRequired && isEdit && !isEmpty(expense.receipt)"
-          style="padding-top: 20px; padding-bottom: 0px"
-          v-model="allowReceipt"
-          label="Update the Receipt?"
-          :disabled="isInactive"
-        ></v-checkbox>
-        <file-upload
-          v-if="receiptRequired && ((allowReceipt && isEdit) || !isEdit || isEmpty(expense.receipt))"
-          style="padding-top: 0px; padding-bottom: 0px"
-          @fileSelected="setFile"
-          :passedRules="receiptRules"
-          :receipt="expense.receipt"
-        ></file-upload>
-
-        <!-- Receipt Name -->
-        <v-card-text
-          style="padding: 0px 0px 3px 0px; font: inherit; font-size: 16px; color: #0000008a"
-          v-if="!isEmpty(expense.receipt) && isEdit"
-          >Current Receipt: {{ this.editedExpense.receipt }}</v-card-text
-        >
-
-        <!-- Scan Receipt Button -->
-        <v-tooltip bottom>
-          <template v-slot:activator="{ on, attrs }">
-            <span v-on="on">
-              <v-btn
-                v-if="receiptRequired && ((allowReceipt && isEdit) || !isEdit || isEmpty(expense.receipt))"
-                color="white"
-                @click="scanFile"
-                class="ma-2"
-                :disabled="isInactive || disableScan"
-                :loading="scanLoading"
-                v-bind="attrs"
-              >
-                Scan Receipt
-              </v-btn>
-            </span>
-          </template>
-          <span v-if="!scanLoading">Scanning only works for pdfs, pngs, and jpegs.</span>
-          <span v-else>Scanning your receipt, this may take up to 15 seconds</span>
-        </v-tooltip>
 
         <!-- Notes -->
         <v-textarea
