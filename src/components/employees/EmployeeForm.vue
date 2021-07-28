@@ -26,15 +26,15 @@
             <h3 v-else>New Employee</h3>
           </v-col>
           <v-col col="6" class="text-right">
-            <v-tooltip v-if="uploadDisabled" right>
+            <v-tooltip v-if="!model.id && uploadDisabled" right>
               <template v-slot:activator="{ on }">
                 <div v-on="on">
-                  <v-btn :disabled="true" @click="openUpload()">Upload Resume</v-btn>
+                  <v-btn :disabled="true">Upload Resume</v-btn>
                 </div>
               </template>
               <span>Please provide valid employee #</span>
             </v-tooltip>
-            <v-btn v-else @click="openUpload()">Upload Resume</v-btn>
+            <v-btn v-if="!model.id && !uploadDisabled" @click="openUpload()">Upload Resume</v-btn>
           </v-col>
         </v-row>
       </v-card-title>
@@ -299,6 +299,7 @@
           :toggleSubmissionConfirmation="this.confirmingError"
           :errorTabs="errorTabNames"
         ></many-form-errors>
+        <resume-parser :toggleResumeParser="this.toggleResumeParser" :employee="model"></resume-parser>
       </v-container>
     </v-card>
   </div>
@@ -318,6 +319,7 @@ import JobExperienceTab from '@/components/employees/formTabs/JobExperienceTab';
 import LanguagesTab from '@/components/employees/formTabs/LanguagesTab';
 import ManyFormErrors from '@/components/modals/ManyFormErrors.vue';
 import PersonalTab from '@/components/employees/formTabs/PersonalTab';
+import ResumeParser from '@/components/modals/ResumeParser';
 import TechnologyTab from '@/components/employees/formTabs/TechnologyTab';
 const moment = require('moment-timezone');
 moment.tz.setDefault('America/New_York');
@@ -921,6 +923,7 @@ export default {
     FormSubmissionConfirmation,
     JobExperienceTab,
     PersonalTab,
+    ResumeParser,
     TechnologyTab,
     LanguagesTab,
     ManyFormErrors
