@@ -755,6 +755,9 @@ async function created() {
     this.tabErrors.personal = errorCount > 0 ? true : false;
     this.addErrorTab('Personal', errorCount);
   });
+  window.EventBus.$on('resume', (newEmployeeForm) => {
+    this.model = newEmployeeForm;
+  });
   window.EventBus.$on('technologiesStatus', (errorCount) => {
     this.tabErrors.technologies = errorCount > 0 ? true : false;
     this.addErrorTab('Technologies', errorCount);
