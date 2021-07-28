@@ -226,7 +226,6 @@ export default {
   watch: {
     model: function (val) {
       if (!isEmpty(val.technologies)) {
-        console.log(this.sortFunction);
         this.sortedTech = val.technologies;
         if (this.sortFunction == 0) {
           this.sortByCurrent();
