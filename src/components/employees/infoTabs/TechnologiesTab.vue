@@ -7,7 +7,7 @@
         <fieldset class="filter_border">
           <legend class="legend_style">Sort By</legend>
           <v-col cols="12">
-            <v-btn-toggle borderless>
+            <v-btn-toggle v-model="sortFunction" borderless>
               <v-tooltip top>
                 <template v-slot:activator="{ on }">
                   <v-btn v-on="on" @click="sortByCurrent">
@@ -205,6 +205,7 @@ export default {
     return {
       page: 1,
       pageList: [],
+      sortFunction: null,
       sortedTech: this.model.technologies
     };
   },
@@ -221,6 +222,22 @@ export default {
     sortByCurrent,
     sortByDate
   },
-  props: ['model']
+  props: ['model'],
+  watch: {
+    model: function (val) {
+      if (!isEmpty(val.technologies)) {
+        console.log(this.sortFunction);
+        this.sortedTech = val.technologies;
+        if (this.sortFunction == 0) {
+          this.sortByCurrent();
+        } else if (this.sortFunction == 1) {
+          this.sortByDate();
+        } else if (this.sortFunction == 2) {
+          this.sortByName();
+        }
+        this.pageList = this.sortedTech.slice(0, 5);
+      }
+    }
+  }
 };
 </script>

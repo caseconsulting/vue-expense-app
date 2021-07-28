@@ -97,6 +97,13 @@ export default {
     isEmpty,
     onPageChange
   },
-  props: ['model']
+  props: ['model'],
+  watch: {
+    model: function (val) {
+      if (!isEmpty(val)) {
+        this.filteredList = val.degrees.slice(0, 4);
+      }
+    }
+  }
 };
 </script>
