@@ -26,7 +26,7 @@
               ></v-checkbox>
             </v-row>
             <div v-if="loading">
-              <p align="center">Processing resume data, this may take up to 20 seconds</p>
+              <p align="center">{{ loadingMessage }}</p>
               <v-progress-linear color="#bc3825" indeterminate></v-progress-linear>
             </div>
             <div v-if="!loading && timeoutError">
@@ -309,6 +309,21 @@ async function submit() {
     // and is png or jpg or jpeg or pdf
     this.loading = true;
     this.resumeProcessed = false;
+
+    this.loadingMessage = 'Processing resume data, this may take up to 30 seconds';
+
+    setTimeout(() => {
+      this.loadingMessage = 'Sooooooo, how are you doing?';
+    }, 15000);
+
+    setTimeout(() => {
+      this.loadingMessage = 'You must have a beefy resume!';
+    }, 25000);
+
+    setTimeout(() => {
+      this.loadingMessage = 'You may want to try again...';
+    }, 40000);
+
     this.resumeObject = (await api.extractResumeText(this.$route.params.id, this.file)).comprehend;
     if (this.resumeObject instanceof Error || !this.resumeObject) {
       this.isInactive = false;
@@ -612,6 +627,7 @@ export default {
       editedEmployeeForm: null,
       file: null,
       loading: false,
+      loadingMessage: '',
       validFile: false,
       resumeObject: [],
       newEducation: [],
