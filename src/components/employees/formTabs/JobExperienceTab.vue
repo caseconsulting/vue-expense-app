@@ -160,7 +160,13 @@
                   hint="MM/YYYY format"
                   v-mask="'##/####'"
                   prepend-icon="event_available"
-                  :rules="[dateRules[0], dateRules[1], dateRules[2], dateOrderRule(compIndex, index)]"
+                  :rules="[
+                    dateRules[0],
+                    dateRules[1],
+                    dateRules[2],
+                    dateOptionalRules[2],
+                    dateOrderRule(compIndex, index)
+                  ]"
                   v-bind="attrs"
                   v-on="on"
                   @blur="position.startDate = parseEventDate($event)"
@@ -200,6 +206,7 @@
                   :rules="[
                     dateOptionalRules[0],
                     dateOptionalRules[1],
+                    dateOptionalRules[2],
                     dateOrderRule(compIndex, index),
                     endDatePresentRule(compIndex, index)
                   ]"
@@ -494,7 +501,8 @@ export default {
         (v) => {
           return !isEmpty(v) ? /^\d{1,2}\/\d{4}$/.test(v) || 'Date must be valid. Format: MM/YYYY' : true;
         },
-        (v) => (!isEmpty(v) ? moment(v, 'MM/YYYY').isValid() || 'Date must be valid' : true)
+        (v) => (!isEmpty(v) ? moment(v, 'MM/YYYY').isValid() || 'Date must be valid' : true),
+        (v) => (!isEmpty(v) ? moment(v, 'MM/YYYY').isBefore(moment()) || 'Date must not be a future date' : true)
       ], // rules for an optional date
       dateRules: [
         (v) => {
