@@ -87,6 +87,7 @@ export default {
     fillData
   },
   async created() {
+    this.$forceUpdate();
     this.employees = await api.getItems(api.EMPLOYEES);
     this.fillData();
   }

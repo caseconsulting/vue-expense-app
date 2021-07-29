@@ -135,7 +135,7 @@ export default {
     this.drawCaseYearsHistGraph();
   },
   created: async function () {
-    // eslint-disable-next-line no-undef
+    this.$forceUpdate();
     this.employees = await api.getItems(api.EMPLOYEES);
     this.caseYearsData();
     this.drawCaseYearsHistGraph();

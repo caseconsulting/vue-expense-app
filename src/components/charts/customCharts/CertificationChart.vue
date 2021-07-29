@@ -145,6 +145,7 @@ export default {
     breakSentence
   },
   mounted() {
+    this.$forceUpdate();
     this.fillCertData();
   }
 };

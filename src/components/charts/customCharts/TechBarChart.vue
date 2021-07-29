@@ -163,6 +163,7 @@ async function mounted() {
     this.reachedMax = true;
   }
   this.fillData(this);
+  this.$forceUpdate();
 }
 
 export default {

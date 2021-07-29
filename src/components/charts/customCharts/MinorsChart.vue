@@ -95,6 +95,7 @@ export default {
     });
   },
   created() {
+    //this.$forceUpdate();
     this.fillData(null);
   }
 };

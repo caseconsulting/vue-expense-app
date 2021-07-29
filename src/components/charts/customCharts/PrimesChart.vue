@@ -158,6 +158,7 @@ export default {
   },
   mounted() {
     this.fillCertData();
+    this.$forceUpdate();
   }
 };
 </script>

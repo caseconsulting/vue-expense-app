@@ -41,6 +41,7 @@ function fillData() {
   let enabled = true;
   let labels = Object.keys(allCompOrgExp);
   let quantities = [];
+
   _.forEach(labels, (label) => {
     quantities.push(allCompOrgExp[label]);
   });
@@ -93,6 +94,7 @@ function fillData() {
 import PieChart from '../baseCharts/PieChart.vue';
 import _ from 'lodash';
 import api from '@/shared/api.js';
+
 export default {
   components: { PieChart },
   data() {
@@ -108,6 +110,7 @@ export default {
   async created() {
     this.employees = await api.getItems(api.EMPLOYEES);
     this.fillData();
+    this.$forceUpdate();
   },
   watch: {
     showCurrent() {
