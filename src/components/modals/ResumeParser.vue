@@ -302,6 +302,7 @@ async function submit() {
   };
   this.addressCanceled = false;
   this.phoneCanceled = false;
+  this.timeoutError = false;
   this.editedEmployeeForm = _.cloneDeep(this.employee);
 
   if (this.validFile) {
@@ -586,6 +587,7 @@ function clearForm() {
   this.validFile = false;
   this.resumeProcessed = false;
   this.toggleResumeFormErrorModal = false;
+  this.timeoutError = false;
   this.$refs.submit.reset();
 }
 
