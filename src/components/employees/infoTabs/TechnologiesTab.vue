@@ -54,7 +54,7 @@
             </v-tooltip>
           </v-col>
         </v-row>
-        <p><b>Years of Experience: </b>{{ yearsOfExperience(technology) }}</p>
+        <p><b>Years of Experience: </b>{{ technology.years }}</p>
         <hr v-if="index < pageList.length - 1" class="mb-3" />
       </div>
       <!-- End Loop Technologies -->
@@ -74,7 +74,6 @@
 
 <script>
 import { isEmpty } from '@/utils/utils';
-import moment from 'moment-timezone';
 import _ from 'lodash';
 // |--------------------------------------------------|
 // |                                                  |
@@ -95,8 +94,7 @@ function created() {
 // |                                                  |
 // |                     METHODS                      |
 // |                                                  |
-// |--------------------------------------------------|
-
+// |---------------------------------------------------
 /**
  * When the page is changed, grab the corresponding entries based on the page
  * number.
@@ -108,65 +106,18 @@ function onPageChange() {
 } //onPageChange
 
 /**
- * Calculates years of experience for a technology based on monthsOfExperience.
- *
- * @param technology - technology object
- * @return years of expierence (decimal with 2 decimal places)
+ * Sorts technology entries alphabetically by name
  */
-function yearsOfExperience(technology) {
-  let totalMonths = 0;
-  //calculates total number of months
-  for (let i = 0; !isEmpty(technology.dateIntervals) && i < technology.dateIntervals.length; i++) {
-    totalMonths += monthsPassed(technology.dateIntervals[i].startDate, technology.dateIntervals[i].endDate);
-  }
-
-  if (totalMonths > 0) {
-    let years = totalMonths / 12; //calculates years of experience
-    return Math.round((years + Number.EPSILON) * 100) / 100; //rounds to 2 decimal places
-  }
-  return technology.years ? technology.years : 0; //if uses old technology.years then use that or set to 0
-} // yearsOfExperience
-
-/**
- * Calculates the number of months that have passed between 2 dates in YYYY-MM format.
- *
- * @param start - the time interval starting date
- * @param end - the time interval ending date
- */
-function monthsPassed(start, end) {
-  let startDate = start;
-  let endDate = end;
-  let totalTimePassed = 0;
-
-  //if there is no end date use interval start - now
-  if (isEmpty(endDate)) {
-    endDate = moment().format('YYYY-MM');
-  }
-
-  //makes sure that the start and end date are both not empty
-  if (!isEmpty(startDate) && !isEmpty(endDate)) {
-    let monthsStart = Number(moment(startDate, 'YYYY-MM').format('MM'));
-    let yearsStart = Number(moment(startDate, 'YYYY-MM').format('YYYY'));
-
-    let monthsEnd = Number(moment(endDate, 'YYYY-MM').format('MM'));
-    let yearsEnd = Number(moment(endDate, 'YYYY-MM').format('YYYY'));
-
-    let absoluteStartMonths = monthsStart + yearsStart * 12; //calculates absolute number of months for start date
-    let absoluteEndMonths = monthsEnd + yearsEnd * 12; //calculates absolute number of years for end date
-
-    totalTimePassed = absoluteEndMonths - absoluteStartMonths; //total number of months
-  }
-
-  return totalTimePassed;
-} //monthsPassed
-
 function sortByName() {
   const iteratees = (obj) => obj.name;
   this.sortedTech = _.sortBy(this.model.technologies, iteratees);
   this.page = 1;
   this.pageList = this.sortedTech.slice(0, 5);
-}
+} //sortByName
 
+/**
+ * Sorts technology so that the current entries are on top
+ */
 function sortByCurrent() {
   this.sortedTech.sort((a, b) => {
     if (a.current === b.current) {
@@ -183,21 +134,18 @@ function sortByCurrent() {
   });
   this.page = 1;
   this.pageList = this.sortedTech.slice(0, 5);
-}
+} //sortByCurrent
 
+/**
+ * Sorts technology by years of experience in descending order
+ */
 function sortByDate() {
-  _.forEach(this.model.technologies, (tech) => {
-    let startDate = tech.dateIntervals[0].startDate;
-    let endDate = tech.dateIntervals[0].endDate;
-    tech.length = monthsPassed(startDate, endDate);
-  });
-
-  const iteratees = (obj) => -obj.length;
+  const iteratees = (obj) => -obj.years;
   this.sortedTech = _.sortBy(this.model.technologies, iteratees);
 
   this.page = 1;
   this.pageList = this.sortedTech.slice(0, 5);
-}
+} //sortByDate
 
 export default {
   created,
@@ -217,7 +165,6 @@ export default {
   methods: {
     isEmpty,
     onPageChange,
-    yearsOfExperience,
     sortByName,
     sortByCurrent,
     sortByDate
