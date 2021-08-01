@@ -658,6 +658,7 @@ async function submit() {
     }
   }
   this.submitting = false;
+  window.EventBus.$emit('badgeExp');
 } // submit
 
 function addErrorTab(name, errors) {

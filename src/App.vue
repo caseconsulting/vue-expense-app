@@ -178,6 +178,9 @@ function onResize() {
 
 async function created() {
   window.EventBus.$on('relog', handleLogout); // Session end - log out
+  window.EventBus.$on('badgeExp', () => {
+    this.badgeKey++;
+  }); // used to refresh badge expiration banner
   // set expiration date if access token received
   let accessToken = getAccessToken();
   if (accessToken && isLoggedIn()) {

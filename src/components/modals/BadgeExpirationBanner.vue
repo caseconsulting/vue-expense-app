@@ -2,7 +2,7 @@
   <v-col cols="12" v-if="badgeExpiring">
     <v-alert v-if="alert" :type="alert.status" :color="alert.color" dense id="alert" justify="center">
       {{ alert.message }}
-      <v-btn class="right-shift" color="#F44336" @click="handleProfile()" :disabled="onUserProfile" small
+      <v-btn class="right-shift black--text" color="#f5f5f5" @click="handleProfile()" :disabled="onUserProfile" small
         >Go To Profile</v-btn
       >
     </v-alert>
@@ -25,13 +25,9 @@ function checkWarnings() {
         let daysUntilExpiration = moment(clearance.badgeExpirationDate).diff(moment(), 'days');
         let momentDate = moment(clearance.badgeExpirationDate).format('MMM Do, YYYY');
         if (daysUntilExpiration <= 30 && daysUntilExpiration > 0) {
-          this.badgeExpiring = true;
-          let msg = `Badge expiring on ${momentDate} for clearance: ${clearance.type}`;
-          this.alert = { status: 'error', message: msg, color: 'red' };
+          return this.createAlert(`Badge expiring on ${momentDate} for clearance: ${clearance.type}`);
         } else if (daysUntilExpiration <= 0) {
-          this.badgeExpiring = true;
-          let msg = `Badge expired on ${momentDate} for clearance: ${clearance.type}`;
-          this.alert = { status: 'error', message: msg, color: 'red' };
+          return this.createAlert(`Badge expired on ${momentDate} for clearance: ${clearance.type}`);
         }
       }
     });
@@ -40,6 +36,11 @@ function checkWarnings() {
 
 function handleProfile() {
   this.$router.push({ name: 'employee', params: { id: `${this.employee.employeeNumber}` } });
+}
+
+function createAlert(msg) {
+  this.badgeExpiring = true;
+  this.alert = { status: 'error', message: msg, color: 'red' };
 }
 
 function onUserProfile() {
@@ -68,6 +69,7 @@ export default {
   },
   methods: {
     checkWarnings,
+    createAlert,
     handleProfile
   }
 };
