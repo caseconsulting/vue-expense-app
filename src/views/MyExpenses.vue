@@ -671,7 +671,7 @@ function onSelect(item) {
   this.expense = _.mergeWith(this.expense, item, (expenseValue, itemValue) => {
     return _.isNil(itemValue) ? expenseValue : itemValue;
   });
-
+  this.expense.edit = true;
   this.$set(this.expense, 'cost', moneyFilter(item.cost));
 } // onSelect
 

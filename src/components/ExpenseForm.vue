@@ -1702,11 +1702,13 @@ export default {
           this.costFormatted = moneyFilter(50);
           this.editedExpense.cost = moneyFilter(50);
           this.isHighFive = true;
-        } else {
-          this.isHighFive = false;
+          // dont clear when selecting a previous expense to edit
+        } else if (!this.editedExpense.edit) {
+          this.costFormatted = '';
           this.editedExpense.cost = '';
+          this.isHighFive = false;
         }
-
+        this.editedExpense.edit = false;
         // set requires recipient
         this.reqRecipient = this.selectedExpenseType.hasRecipient;
 
