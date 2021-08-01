@@ -32,7 +32,7 @@
           class="white--text ma-2"
           v-if="!editing"
           color="#bc3825"
-          @click="deleteResume"
+          @click="toggleDeleteModal = !toggleDeleteModal"
           :disabled="!hasResume"
           :loading="deleteLoading"
           ><b>Delete Resume</b></v-btn
@@ -97,6 +97,7 @@
       </v-col>
     </v-row>
     <resume-parser v-if="!loading" :toggleResumeParser="this.toggleResumeParser" :employee="this.model"></resume-parser>
+    <delete-modal :toggleDeleteModal="this.toggleDeleteModal" type="resume"></delete-modal>
   </v-container>
 </template>
 
@@ -114,6 +115,7 @@ import AnniversaryCard from '@/components/AnniversaryCard.vue';
 import BudgetChart from '@/components/BudgetChart.vue';
 import MobileDetect from 'mobile-detect';
 import ResumeParser from '@/components/modals/ResumeParser';
+import DeleteModal from '@/components/modals/DeleteModal';
 
 const moment = require('moment');
 const IsoFormat = 'YYYY-MM-DD';
@@ -259,6 +261,13 @@ async function deleteResume() {
  *  Adjust datatable header for user view.
  */
 async function created() {
+  window.EventBus.$on('confirm-delete-resume', () => {
+    this.toggleDeleteModal = true;
+    this.deleteResume();
+  });
+  window.EventBus.$on('cancel-delete-resume', () => {
+    this.toggleDeleteModal = true;
+  });
   window.EventBus.$on('delete-resume', (newResume) => {
     if (newResume != null) {
       this.hasResume = newResume;
@@ -325,6 +334,7 @@ export default {
   },
   components: {
     AvailableBudgets,
+    DeleteModal,
     EmployeeForm,
     EmployeeInfo,
     QuickBooksTimeData,
@@ -386,6 +396,7 @@ export default {
         statusMessage: '',
         color: ''
       }, // snackbar action status
+      toggleDeleteModal: false,
       toggleResumeParser: false,
       uploadStatus: {
         statusType: undefined,
