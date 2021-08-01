@@ -282,7 +282,7 @@ export default {
           {
             title: 'What capabilities do Admins have?',
             body:
-              "Admins may view reimbursements, reimburse expenses, and create expense types, view each employee's budget home view, create new employees, and create expenses for other employees",
+              "Admins may create expenses for other employees, create expense types, view each employee's budget home view, create new employees, and have acess to view and create expense reimbursements ",
             employeeRole: 'admin'
           },
           {
