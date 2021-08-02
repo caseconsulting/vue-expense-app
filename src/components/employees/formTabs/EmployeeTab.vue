@@ -122,7 +122,7 @@
 
       <!-- Full/Part/Inactive Status [MOBILE] -->
       <v-radio-group v-if="isMobile()" v-model="statusRadio" row mandatory :disabled="!admin">
-        <v-row class="ml-0">
+        <v-row class="ma-0">
           <v-col cols="6" sm="3">
             <v-radio label="Full Time" value="full"></v-radio>
           </v-col>
@@ -134,21 +134,16 @@
           </v-col>
           <!-- Custom Input Field -->
           <v-col v-if="isPartTime()" cols="6" sm="3">
-            <div :class="{ customInput: isPartTime() }">
-              <div :class="['percentageBox', { disabled: !isPartTime(), inputError: isStatusEmpty() }]">
-                <input
-                  v-model="status"
-                  type="text"
-                  oninput="this.value = this.value.replace(/[^0-9]/g, '');"
-                  max="99"
-                  maxlength="2"
-                  min="1"
-                  pattern="(?!0+)\d+"
-                  :disabled="!isPartTime()"
-                />
-                <div>%</div>
-              </div>
-            </div>
+            <v-text-field
+              class="employeeStatusBox"
+              height="40"
+              outlined
+              ref="formFields"
+              :rules="statusRules"
+              suffix="%"
+              v-mask="'##'"
+              v-model="status"
+            ></v-text-field>
           </v-col>
           <!-- End Custom Input Field -->
         </v-row>
@@ -161,24 +156,24 @@
         <v-radio label="Part Time" value="part" @change="viewStatus()"></v-radio>
         <v-radio label="Inactive" value="inactive"></v-radio>
         <!-- custom input field -->
-        <div v-if="isPartTime()" :class="{ customInput: isPartTime() }">
-          <div :class="['percentageBox', { disabled: !isPartTime(), inputError: isStatusEmpty() }]">
-            <input
-              v-model="status"
-              type="number"
-              oninput="this.value = this.value.replace(/[^0-9]/g, '');"
-              maxlength="2"
-              :disabled="!isPartTime()"
-            />
-            <div>%</div>
-          </div>
+        <div v-if="isPartTime()">
+          <v-text-field
+            class="employeeStatusBox"
+            height="40"
+            outlined
+            ref="formFields"
+            :rules="statusRules"
+            suffix="%"
+            v-mask="'##'"
+            v-model="status"
+          ></v-text-field>
         </div>
         <!-- End Full/Part/Inactive Status [DESKTOP] -->
       </v-radio-group>
       <!-- End [DESKTOP] -->
       <!-- If inactive, set Departure Date -->
       <v-menu
-        v-if="isInactive() || (isPartTime() && status && status == 0)"
+        v-if="isInactive()"
         ref="departureMenu"
         :close-on-content-click="false"
         v-model="departureMenu"
@@ -439,6 +434,7 @@ export default {
       requiredRules: [(v) => !isEmpty(v) || 'This field is required'], // rules for a required field
       status: '100', // work status value
       statusRadio: 'full', // work status button
+      statusRules: [(v) => !isEmpty(v) || '', (v) => (v !== '0' && v !== '00') || ''],
       userId: null,
       value: '' // used for removing non-number characters from the workstatus
     };
@@ -502,6 +498,9 @@ export default {
       } else if (this.statusRadio == 'inactive') {
         this.status = '0';
         this.editedEmployee.workStatus = 0;
+        if (this.deptDateFormatted && parseDate(this.deptDateFormatted)) {
+          this.editedEmployee.deptDate = parseDate(this.deptDateFormatted);
+        }
       } else {
         this.editedEmployee.deptDate = null;
       }
@@ -529,6 +528,15 @@ export default {
 <style scoped>
 .customInput :hover {
   border: solid 1px black;
+}
+
+.employeeStatusBox {
+  width: 65px;
+  height: 55px;
+}
+
+.employeeStatusBox >>> input {
+  text-align: center;
 }
 
 .inputError {
