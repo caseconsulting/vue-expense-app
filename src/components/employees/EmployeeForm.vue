@@ -340,9 +340,14 @@ function selectDropDown(tab) {
   this.formTab = tab;
 }
 /**
- * Resets back to employee info.
+ * Resets back to employee info. Also deletes resume when creating an employee if
+ * you decide to cancel your submission
  */
-function cancel() {
+async function cancel() {
+  //creating an employee
+  if (this.model.employeeNumber && this.$route.params.id === undefined) {
+    await api.deleteResume(this.model.employeeNumber);
+  }
   window.EventBus.$emit('cancel-form');
 } // cancel
 /**
@@ -694,16 +699,20 @@ async function openUpload() {
 // |--------------------------------------------------|
 async function created() {
   window.EventBus.$on('disableUpload', (result, employeeNumber) => {
+    //disables upload resume button if invalid employee number
     this.uploadDisabled = result;
+    //used to send up to Employees creating employee form
     this.employeeNumber = employeeNumber;
+    //used to send to employee tab
+    this.model.employeeNumber = employeeNumber;
   });
 
   window.EventBus.$on('uploadedResume', (result) => {
-    this.uploadDisabled = result;
     this.disableEmpNum = result;
     if (this.uploadDisabled) {
       this.uploadResumeTooltip = 'Resume already uploaded';
     }
+    window.EventBus.$emit('empNum', this.employeeNumber);
   });
 
   window.EventBus.$on('confirmed', () => {

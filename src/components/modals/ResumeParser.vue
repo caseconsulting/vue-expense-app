@@ -268,9 +268,9 @@ async function addTimeInterval(index) {
  * When the checkbox is not selected on the resume modal, it uploads the resume and closes the window upon
  * successful completion
  */
-async function onlyUploadResume() {
+async function onlyUploadResume(employeeNumber) {
   this.loading = true;
-  let uploadResult = await api.uploadResume(this.$route.params.id, this.file);
+  let uploadResult = await api.uploadResume(employeeNumber, this.file);
   this.loading = false;
   if (uploadResult instanceof Error) {
     this.timeoutError = true;
@@ -285,8 +285,9 @@ async function onlyUploadResume() {
  */
 
 async function submit() {
+  let employeeNumber = !this.$route.params.id ? this.employee.employeeNumber : this.$route.params.id;
   if (!this.extractResume) {
-    this.onlyUploadResume();
+    this.onlyUploadResume(employeeNumber);
     window.EventBus.$emit('uploadedResume', true);
     return;
   }
@@ -330,7 +331,7 @@ async function submit() {
       }
     }, 15000);
 
-    this.resumeObject = (await api.extractResumeText(this.$route.params.id, this.file)).comprehend;
+    this.resumeObject = (await api.extractResumeText(employeeNumber, this.file)).comprehend;
     if (this.resumeObject instanceof Error || !this.resumeObject) {
       this.isInactive = false;
       this.resumeObject = null;

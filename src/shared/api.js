@@ -207,24 +207,6 @@ async function deleteResume(employeeId) {
     });
 }
 
-async function deleteResumeDirectory(employeeId) {
-  // inject the accessToken for each request
-  let accessToken = getAccessToken();
-  return client({
-    method: 'delete',
-    url: `${RESUME}/${employeeId}/directory`,
-    headers: {
-      Authorization: `Bearer ${accessToken}`
-    }
-  })
-    .then((response) => {
-      return response.data;
-    })
-    .catch(() => {
-      return null;
-    });
-}
-
 async function extractText(employeeId, file) {
   let formData = new FormData();
   formData.append('receipt', file);
@@ -458,7 +440,6 @@ export default {
   deleteBlogFile,
   deleteItem,
   deleteResume,
-  deleteResumeDirectory,
   extractText,
   extractResumeText,
   getAllActiveEmployeeBudgets,

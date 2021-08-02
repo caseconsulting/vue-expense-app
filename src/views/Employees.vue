@@ -78,10 +78,7 @@
         <v-btn
           id="createEmployeeBtn"
           class="mb-5"
-          @click="
-            createEmployee = true;
-            childKey++;
-          "
+          @click="renderCreateEmployee()"
           elevation="2"
           v-if="hasAdminPermissions()"
         >
@@ -399,6 +396,11 @@ async function refreshEmployees() {
   this.loading = false; // set loading status to false
 } // refreshEmployees
 
+function renderCreateEmployee() {
+  this.createEmployee = true;
+  this.childKey++;
+}
+
 /**
  * Checks to see if the user is an admin. Returns true if the user's role is an admin, otherwise returns false.
  */
@@ -437,8 +439,10 @@ async function validateDelete(item) {
 /**
  * Called to reset the data on the employee form if exited w/out submitting
  */
-function clearCreateEmployee() {
-  //used to automatically update the employee form child component
+async function clearCreateEmployee() {
+  if (this.employeeNumber) {
+    await api.deleteResume(this.employeeNumber);
+  }
   this.createEmployee = false;
 }
 
@@ -464,6 +468,9 @@ async function created() {
     this.midAction = false;
   });
 
+  window.EventBus.$on('empNum', (empNum) => {
+    this.employeeNumber = empNum;
+  });
   this.refreshEmployees();
 
   // remove employee action button header if user view
@@ -508,6 +515,7 @@ export default {
       }, // employee to delete
       deleting: false, // activate delete confirmation model
       employees: [], // employees
+      employeeNumber: null,
       expanded: [], // datatable expanded
       filter: {
         active: ['full', 'part'] // default only shows full and part time employees
@@ -613,6 +621,7 @@ export default {
     isInactive,
     isPartTime,
     refreshEmployees,
+    renderCreateEmployee,
     userIsAdmin,
     validateDelete
   },
