@@ -32,7 +32,7 @@
                   <v-btn :disabled="true">Upload Resume</v-btn>
                 </div>
               </template>
-              <span>{{ uploadResumeTooltip }}</span>
+              <span>Please enter a valid employee #</span>
             </v-tooltip>
             <v-btn v-if="!model.id && !uploadDisabled" @click="openUpload()">Upload Resume</v-btn>
           </v-col>
@@ -709,9 +709,6 @@ async function created() {
 
   window.EventBus.$on('uploadedResume', (result) => {
     this.disableEmpNum = result;
-    if (this.uploadDisabled) {
-      this.uploadResumeTooltip = 'Resume already uploaded';
-    }
     window.EventBus.$emit('empNum', this.employeeNumber);
   });
 
@@ -1040,7 +1037,6 @@ export default {
       toggleResumeParser: false,
       updateEmpTab: 0,
       uploadDisabled: true,
-      uploadResumeTooltip: 'Please enter a valid employee #',
       valid: false, // form validity
       validating: {
         awards: false,

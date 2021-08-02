@@ -66,7 +66,6 @@ import EducationChartTab from '../components/charts/chartTabs/EducationChartTab.
 import CustomerOrgChartTab from '../components/charts/chartTabs/CustomerOrgChartTab.vue';
 
 function changeTab(event) {
-  console.log(event);
   this.currentTab = event;
 }
 
