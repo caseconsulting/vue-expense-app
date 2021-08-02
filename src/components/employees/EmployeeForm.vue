@@ -695,15 +695,15 @@ async function openUpload() {
 async function created() {
   window.EventBus.$on('disableUpload', (result, employeeNumber) => {
     this.uploadDisabled = result;
-    if (employeeNumber) {
-      this.employeeNumber = employeeNumber;
-    }
+    this.employeeNumber = employeeNumber;
+  });
 
+  window.EventBus.$on('uploadedResume', (result) => {
+    this.uploadDisabled = result;
+    this.disableEmpNum = result;
     if (this.uploadDisabled) {
       this.uploadResumeTooltip = 'Resume already uploaded';
     }
-
-    this.disableEmpNum = result;
   });
 
   window.EventBus.$on('confirmed', () => {

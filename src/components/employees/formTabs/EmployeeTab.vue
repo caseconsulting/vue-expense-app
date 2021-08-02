@@ -40,6 +40,7 @@
       ></v-text-field>
 
       <!-- Employee # -->
+      <p>{{ disableEmpNum }}</p>
       <v-text-field
         id="employeeNumber"
         ref="formFields"

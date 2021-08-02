@@ -287,7 +287,7 @@ async function onlyUploadResume() {
 async function submit() {
   if (!this.extractResume) {
     this.onlyUploadResume();
-    window.EventBus.$emit('disableUpload', true);
+    window.EventBus.$emit('uploadedResume', true);
     return;
   }
   this.resumeObject = [];
@@ -581,7 +581,7 @@ function submitForm() {
     this.toggleResumeFormErrorModal = true;
   } else {
     window.EventBus.$emit('resume', this.editedEmployeeForm);
-    window.EventBus.$emit('disableUpload', true);
+    window.EventBus.$emit('uploadedResume', true);
     this.activate = !this.activate;
     this.resumeProcessed = false;
   }

@@ -188,12 +188,31 @@ function getLocation(locationQuery) {
 function getZipCode(addressId) {
   return execute('get', `${GOOGLE_MAPS}/getZipCode/${addressId}`);
 }
+
 async function deleteResume(employeeId) {
   // inject the accessToken for each request
   let accessToken = getAccessToken();
   return client({
     method: 'delete',
     url: `${RESUME}/${employeeId}`,
+    headers: {
+      Authorization: `Bearer ${accessToken}`
+    }
+  })
+    .then((response) => {
+      return response.data;
+    })
+    .catch(() => {
+      return null;
+    });
+}
+
+async function deleteResumeDirectory(employeeId) {
+  // inject the accessToken for each request
+  let accessToken = getAccessToken();
+  return client({
+    method: 'delete',
+    url: `${RESUME}/${employeeId}/directory`,
     headers: {
       Authorization: `Bearer ${accessToken}`
     }
@@ -439,6 +458,7 @@ export default {
   deleteBlogFile,
   deleteItem,
   deleteResume,
+  deleteResumeDirectory,
   extractText,
   extractResumeText,
   getAllActiveEmployeeBudgets,
