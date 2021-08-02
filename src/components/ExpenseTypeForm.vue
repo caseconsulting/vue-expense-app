@@ -719,6 +719,9 @@ export default {
           return category.name;
         });
       }
+      this.editedExpenseType.budget = this.model.budget;
+      this.budgetFormatted = this.editedExpenseType.budget;
+      this.formatBudget();
     },
     categories: function (val) {
       // limit categories to less than 10
