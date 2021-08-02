@@ -21,12 +21,19 @@ function fillData(minors) {
       enabled = false;
       colors = ['grey'];
     } else {
-      text = `${this.degree} Degree Minors`;
       enabled = true;
-      _.forEach(Object.keys(minors), (label) => {
-        quantities.push(minors[label]);
-        labels.push(label);
-      });
+      const sortable = Object.entries(minors)
+        .sort(([, a], [, b]) => b - a)
+        .reduce((r, [k, v]) => ({ ...r, [k]: v }), {});
+
+      for (let i = 0; i < 10; i++) {
+        let minor = Object.keys(sortable)[i];
+        if (minor) {
+          quantities.push(sortable[minor]);
+          labels.push(minor);
+        }
+      }
+      text = `Top ${this.degree} Degree Minors`;
       colors = [
         'rgba(54, 162, 235, 1)',
         'rgba(255, 206, 86, 1)',

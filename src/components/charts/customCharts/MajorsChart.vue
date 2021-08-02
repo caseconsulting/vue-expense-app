@@ -7,7 +7,6 @@
 
 <script>
 import PieChart from '../baseCharts/PieChart.vue';
-import _ from 'lodash';
 function fillData(majors) {
   let text;
   let colors;
@@ -15,12 +14,19 @@ function fillData(majors) {
   let labels = [];
   let quantities = [];
   if (majors) {
-    text = `${this.degree} Degree Majors`;
     enabled = true;
-    _.forEach(Object.keys(majors), (label) => {
-      quantities.push(majors[label]);
-      labels.push(label);
-    });
+    const sortable = Object.entries(majors)
+      .sort(([, a], [, b]) => b - a)
+      .reduce((r, [k, v]) => ({ ...r, [k]: v }), {});
+
+    for (let i = 0; i < 10; i++) {
+      let major = Object.keys(sortable)[i];
+      if (major) {
+        quantities.push(sortable[major]);
+        labels.push(major);
+      }
+    }
+    text = `Top ${this.degree} Degree Majors`;
     colors = [
       'rgba(54, 162, 235, 1)',
       'rgba(255, 206, 86, 1)',
@@ -36,7 +42,7 @@ function fillData(majors) {
     //these presets are when a degree has not been selected
     quantities.push(1);
     enabled = false;
-    text = 'Click on a Degree To See Majors';
+    text = `Click on a Degree To See the Top Majors`;
     colors = ['grey'];
   }
   this.chartData = {

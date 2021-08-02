@@ -23,10 +23,18 @@ function fillData(concentrations) {
     } else {
       text = `${this.degree} Degree Concentrations`;
       enabled = true;
-      _.forEach(Object.keys(concentrations), (label) => {
-        quantities.push(concentrations[label]);
-        labels.push(label);
-      });
+      const sortable = Object.entries(concentrations)
+        .sort(([, a], [, b]) => b - a)
+        .reduce((r, [k, v]) => ({ ...r, [k]: v }), {});
+
+      for (let i = 0; i < 10; i++) {
+        let con = Object.keys(sortable)[i];
+        if (con) {
+          quantities.push(sortable[con]);
+          labels.push(con);
+        }
+      }
+      text = `Top ${this.degree} Degree Concentrations`;
       colors = [
         'rgba(54, 162, 235, 1)',
         'rgba(255, 206, 86, 1)',
