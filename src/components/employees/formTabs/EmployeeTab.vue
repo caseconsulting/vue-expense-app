@@ -47,7 +47,7 @@
         :rules="numberRules"
         label="Employee #"
         data-vv-name="Employee #"
-        :disabled="!admin"
+        :disabled="!admin || disableEmpNum"
       ></v-text-field>
 
       <!-- Email -->
@@ -455,7 +455,7 @@ export default {
     validateFields,
     viewStatus
   },
-  props: ['admin', 'model', 'validating'],
+  props: ['admin', 'model', 'validating', 'disableEmpNum'],
   watch: {
     'model.id': function () {
       this.editedEmployee = _.cloneDeep(this.model);

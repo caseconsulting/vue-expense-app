@@ -32,7 +32,7 @@
                   <v-btn :disabled="true">Upload Resume</v-btn>
                 </div>
               </template>
-              <span>Please provide valid employee #</span>
+              <span>{{ uploadResumeTooltip }}</span>
             </v-tooltip>
             <v-btn v-if="!model.id && !uploadDisabled" @click="openUpload()">Upload Resume</v-btn>
           </v-col>
@@ -225,9 +225,11 @@
             <!-- Employee -->
             <v-tab-item id="employee" class="mt-6 mb-4">
               <employee-tab
+                :disableEmpNum="disableEmpNum"
                 :admin="hasAdminPermissions()"
                 :model="model"
                 :validating="validating.employee"
+                :key="updateEmpTab"
               ></employee-tab>
             </v-tab-item>
             <!-- Personal Info -->
@@ -671,6 +673,7 @@ async function openUpload() {
   let employees = await api.getItems(api.EMPLOYEES);
   if (employees.some((emp) => emp.employeeNumber == this.employeeNumber)) {
     let message = 'Duplicate employee number, please change to a unique employee number to upload resume';
+    this.uploadDisabled = true;
     this.displayError(message);
   } else {
     this.toggleResumeParser = !this.toggleResumeParser;
@@ -692,7 +695,15 @@ async function openUpload() {
 async function created() {
   window.EventBus.$on('disableUpload', (result, employeeNumber) => {
     this.uploadDisabled = result;
-    this.employeeNumber = employeeNumber;
+    if (employeeNumber) {
+      this.employeeNumber = employeeNumber;
+    }
+
+    if (this.uploadDisabled) {
+      this.uploadResumeTooltip = 'Resume already uploaded';
+    }
+
+    this.disableEmpNum = result;
   });
 
   window.EventBus.$on('confirmed', () => {
@@ -939,6 +950,7 @@ export default {
       confirmingValid: false, // confirming form submission
       confirmingError: false,
       deleteLoading: false,
+      disableEmpNum: false,
       errorStatus: {
         statusType: undefined,
         statusMessage: null,
@@ -1017,7 +1029,9 @@ export default {
         technologies: false
       }, // tab component created
       toggleResumeParser: false,
+      updateEmpTab: 0,
       uploadDisabled: true,
+      uploadResumeTooltip: 'Please enter a valid employee #',
       valid: false, // form validity
       validating: {
         awards: false,
