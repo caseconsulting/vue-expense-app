@@ -1,6 +1,14 @@
 <template>
-  <h1>Reports</h1>
+  <div>
+    <h1>Reports</h1>
+    <employee-contract-table></employee-contract-table>
+  </div>
 </template>
 <script>
-export default {};
+import EmployeeContractTable from '@/components/EmployeeContractTable.vue';
+export default {
+  components: {
+    EmployeeContractTable
+  }
+};
 </script>
