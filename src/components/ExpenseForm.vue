@@ -113,30 +113,6 @@
           chips
         ></v-select>
 
-        <!-- Remaining budget total -->
-        <v-card class="mt-2">
-          <v-card-text class="py-1 text-subtitle-1 grey-lighten-2--text">
-            <span v-if="!editedExpense.employeeId">Please choose an employee to see remaining balance.</span>
-            <span v-else-if="!editedExpense.expenseTypeId">
-              Please choose an expense type to see remaining balance.
-            </span>
-            <span v-else-if="remainingBudget === ''">Remaining budget for current expense type is not available.</span>
-            <span v-else-if="expenseTypeName">
-              Remaining budget for {{ expenseTypeName }}:
-              <span :class="{ negativeBudget: remainingBudget <= 0 }">
-                {{ convertToMoneyString(remainingBudget) }}
-                <span v-if="remainingBudget < 0 && remainingBudget >= -overdraftBudget && selectedExpenseType.odFlag">
-                  (Overdraftable and within {{ convertToMoneyString(overdraftBudget) }} limit)
-                </span>
-                <span v-else-if="remainingBudget < -overdraftBudget && selectedExpenseType.odFlag">
-                  (Exceeds overdraftable amount of {{ convertToMoneyString(overdraftBudget) }})
-                </span>
-                <span v-else-if="remainingBudget < 0 && !selectedExpenseType.odFlag"> (Not Overdraftable)</span>
-              </span>
-            </span>
-          </v-card-text>
-        </v-card>
-
         <!-- Cost -->
         <v-text-field
           prefix="$"
@@ -146,10 +122,16 @@
           label="Cost"
           id="cost"
           data-vv-name="Cost"
+          persistent-hint
+          :hint="costHint()"
           @blur="editedExpense.cost = parseCost(costFormatted)"
           @input="formatCost(costFormatted)"
           validate-on-blur
-        ></v-text-field>
+        >
+          <template v-slot:message="{ message }">
+            <span v-html="message"></span>
+          </template>
+        </v-text-field>
 
         <!-- Employee Selection List -->
         <v-autocomplete
@@ -780,6 +762,36 @@ function clearForm() {
     this.$set(this.editedExpense, 'employeeId', this.userInfo.id);
   }
 } // clearForm
+
+/**
+ * Determines which hint to display for the cost field.
+ * @returns String - The hint to display
+ */
+function costHint() {
+  if (!this.editedExpense.employeeId) {
+    return 'Please choose an employee to see remaining balance.';
+  } else if (!this.editedExpense.expenseTypeId) {
+    return 'Please choose an expense type to see remaining balance.';
+  } else if (this.remainingBudget === '') {
+    return 'Remaining budget for current expense type is not available.';
+  } else if (this.expenseTypeName) {
+    let str = `Remaining budget for ${this.expenseTypeName}: `;
+    if (this.remainingBudget <= 0) {
+      str += `<span class=red--text>${convertToMoneyString(this.remainingBudget)}`;
+    } else {
+      str += convertToMoneyString(this.remainingBudget);
+    }
+    if (this.remainingBudget < 0 && this.remainingBudget >= -this.overdraftBudget && this.selectedExpenseType.odFlag) {
+      str += ` (Overdraftable and within ${convertToMoneyString(this.overdraftBudget)} limit)`;
+    } else if (this.remainingBudget < -this.overdraftBudget && this.selectedExpenseType.odFlag) {
+      str += ` (Exceeds overdraftable amount of ${convertToMoneyString(this.overdraftBudget)})`;
+    } else if (this.remainingBudget < 0 && !this.selectedExpenseType.odFlag) {
+      str += ' (Not Overdraftable)';
+    }
+    str += '</span>';
+    return str;
+  }
+} // costHint
 
 /**
  * Creates a new expense.
@@ -1635,6 +1647,7 @@ export default {
     clearForm,
     createNewEntry,
     convertToMoneyString,
+    costHint,
     customFilter,
     encodeUrl,
     emit,
