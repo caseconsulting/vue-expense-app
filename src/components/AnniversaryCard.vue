@@ -27,7 +27,7 @@
       :budgetYears="budgetYears"
       :current="fiscalDateView"
       :hireDate="hireDate"
-      :hasAccessToBudgets="hasAccessToBudgets"
+      :hasBudgets="hasBudgets"
     ></budget-select-modal>
   </v-row>
 </template>
@@ -270,6 +270,6 @@ export default {
     loadData,
     refreshBudgetYears
   },
-  props: ['employee', 'clickable']
+  props: ['employee', 'hasBudgets']
 };
 </script>

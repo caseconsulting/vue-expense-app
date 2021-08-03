@@ -1,6 +1,6 @@
 <template>
   <div>
-    <v-dialog v-if="hasAccessToBudgets" v-model="activate" persistent max-width="400">
+    <v-dialog v-if="hasBudgets" v-model="activate" persistent max-width="400">
       <v-card>
         <!-- Anniversary Date -->
         <v-toolbar color="#565651" dark>
@@ -161,7 +161,7 @@ export default {
     'budgetYears', // all budget years
     'current', // current fiscal date view
     'hireDate', // employee hire date
-    'hasAccessToBudgets'
+    'hasBudgets'
   ],
   watch: {
     toggleBudgetSelectModal: function () {
