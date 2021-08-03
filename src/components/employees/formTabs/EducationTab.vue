@@ -33,8 +33,6 @@ Education
         :rules="requiredRules"
         :items="schoolDropDown"
         label="School"
-        @input.native="updateSchoolDropDown()"
-        @change="addSelectedCollege"
         data-vv-name="School"
         clearable
       ></v-autocomplete>
@@ -205,7 +203,7 @@ moment.tz.setDefault('America/New_York');
 async function created() {
   window.EventBus.$emit('created', 'education'); // emit education tab was created
   this.employees = await api.getItems(api.EMPLOYEES); // get all employees
-  this.populateDropDowns(); // get autocomplete drop down data
+  this.schoolDropDown = await api.getColleges('');
 } // created
 
 // |--------------------------------------------------|
@@ -320,55 +318,6 @@ function isDuplicate(edu) {
 } // isDuplicate
 
 /**
- * Populate drop downs with information that other employees have filled out.
- */
-async function populateDropDowns() {
-  //This is pretty expensive, but I couldn't find a better way
-  //This gets all colleges and filters out the previous colleges so that they are only legal
-  //ones from the list
-  let colleges = await api.getColleges('');
-
-  let employeesDegrees = _.map(this.employees, (employee) => employee.degrees); //extract contracts
-  employeesDegrees = _.compact(employeesDegrees); //remove falsey values
-
-  this.prevColleges = [];
-
-  _.forEach(employeesDegrees, (degrees) => {
-    _.forEach(degrees, (degree) => {
-      _.forEach(colleges, (college) => {
-        if (college === degree.school) {
-          this.schoolDropDown.push(degree.school);
-          this.prevColleges.push(degree.school);
-        }
-      });
-    });
-  });
-
-  _.forEach(this.editedDegrees, (degree) => {
-    this.schoolDropDown.push(degree.school);
-  });
-} // populateDropDowns
-
-/**
- * Fills the college dropdown as the user is typing
- */
-async function updateSchoolDropDown() {
-  let eventInfo = event.target.value;
-  let res = await api.getColleges(eventInfo);
-  this.schoolDropDown = [...res, ...this.prevColleges];
-}
-
-/**
- * This function adds a selected college to the drop down menu, so it does
- * not disappear when editing another school
- *
- * @param selectedCollege the newly selected college
- */
-function addSelectedCollege(selectedCollege) {
-  this.prevColleges.push(selectedCollege);
-}
-
-/**
  * Changes the format of the string to title case
  * @param str - the string to be converted
  * @return the title case formatted string
@@ -422,7 +371,6 @@ export default {
       degreeDropDown: ['Associates', 'Bachelors', 'Masters', 'PhD/Doctorate', 'Other (trade school, etc)'], // autocomplete degree name options
       majorDropDown: _.map(majorsAndMinors, (elem) => titleCase(elem)), // autocomplete major options
       minorDropDown: _.map(majorsAndMinors, (elem) => titleCase(elem)), // autocomplete minor options
-      prevColleges: [],
       requiredRules: [
         (v) => !isEmpty(v) || 'This field is required. You must enter information or delete the field if possible.'
       ], // rules for a required field
@@ -439,16 +387,13 @@ export default {
     parseEventDate,
     addDegree,
     addItem,
-    addSelectedCollege,
     deleteDegree,
     deleteItem,
     detectDuplicateEducation,
     isDuplicate,
     isEmpty,
     parseDateMonthYear,
-    populateDropDowns,
     titleCase,
-    updateSchoolDropDown,
     validateFields
   },
   //Education index is only used in the resume parser
