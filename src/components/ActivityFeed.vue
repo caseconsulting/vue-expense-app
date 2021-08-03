@@ -7,7 +7,7 @@
       </v-card-title>
     </v-card>
     <v-card class="overflow-y-hidden" max-height="850px">
-      <v-card-text>
+      <v-card-text class="pb-0">
         <v-autocomplete
           :items="filters"
           multiple
@@ -209,7 +209,7 @@ export default {
 }
 
 .v-timeline::before {
-  top: 55px;
-  height: calc(100% - 110px);
+  top: -29px;
+  height: calc(100% - -25px);
 }
 </style>
