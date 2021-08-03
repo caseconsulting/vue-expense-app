@@ -344,7 +344,6 @@ function selectDropDown(tab) {
  * you decide to cancel your submission
  */
 async function cancel() {
-  console.log(this.model);
   //creating an employee
   if (this.model.employeeNumber && this.$route.params.id === undefined) {
     await api.deleteResume(this.model.employeeNumber);
