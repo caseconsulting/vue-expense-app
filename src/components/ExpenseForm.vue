@@ -251,15 +251,34 @@
 
         <!-- Buttons -->
         <!-- Cancel Button -->
-        <v-btn color="white" elevation="2" @click="clearForm" class="ma-2" :disabled="isInactive" id="cancelButton">
+        <!-- <v-btn color="white" elevation="2" @click="clearForm" class="ma-2" :disabled="isInactive" id="cancelButton">
+          <icon class="mr-1" name="ban"></icon>Cancel
+        </v-btn> -->
+        <v-btn
+          color="white"
+          elevation="2"
+          @click="confirmBackingOut = true"
+          class="ma-2"
+          :disabled="isInactive"
+          id="cancelButton"
+        >
           <icon class="mr-1" name="ban"></icon>Cancel
         </v-btn>
 
         <!-- Submit Button -->
-        <v-btn
+        <!-- <v-btn
           outlined
           color="success"
           @click="checkCoverage"
+          :disabled="!valid || (!isAdmin && isReimbursed) || isInactive"
+          id="submitButton"
+          :loading="loading"
+          class="ma-2"
+        > -->
+        <v-btn
+          outlined
+          color="success"
+          @click="confirmingValid = true"
           :disabled="!valid || (!isAdmin && isReimbursed) || isInactive"
           id="submitButton"
           :loading="loading"
@@ -275,16 +294,25 @@
         :toggleConfirmationBox="confirming"
         :expense="editedExpense"
       ></confirmation-box>
+      <!-- Confirmation Model -->
+      <form-submission-confirmation
+        :toggleSubmissionConfirmation="this.confirmingValid"
+        type="expense"
+      ></form-submission-confirmation>
+      <!-- Cancel Confirmation Model -->
+      <cancel-confirmation :toggleSubmissionConfirmation="this.confirmBackingOut" type="expense"> </cancel-confirmation>
     </v-container>
   </v-card>
 </template>
 
 <script>
 import api from '@/shared/api.js';
+import CancelConfirmation from '@/components/modals/CancelConfirmation.vue';
 import ConfirmationBox from '@/components/modals/ConfirmationBox.vue';
 import dateUtils from '@/shared/dateUtils';
 import employeeUtils from '@/shared/employeeUtils';
 import FileUpload from '@/components/FileUpload.vue';
+import FormSubmissionConfirmation from '@/components/modals/FormSubmissionConfirmation.vue';
 import { getRole } from '@/utils/auth';
 import { v4 as uuid } from 'uuid';
 import { isEmpty, isFullTime, convertToMoneyString } from '@/utils/utils';
@@ -1458,6 +1486,20 @@ async function created() {
   window.EventBus.$on('confirmSubmit', () => {
     this.submit(); // submit expense
   });
+  window.EventBus.$on('confirmed-expense', () => {
+    this.confirmingValid = false;
+    this.checkCoverage();
+  });
+  window.EventBus.$on('canceled-expense', () => {
+    this.confirmingValid = false;
+  });
+  window.EventBus.$on('backout-canceled-expense', () => {
+    this.confirmBackingOut = false;
+  });
+  window.EventBus.$on('backout-confirmed-expense', () => {
+    this.confirmBackingOut = false;
+    this.clearForm();
+  });
 
   this.myBudgetsView = this.$route.path === '/myBudgets';
   this.isInactive = this.myBudgetsView && this.userInfo.workStatus == 0;
@@ -1544,10 +1586,16 @@ export default {
   beforeDestroy() {
     window.EventBus.$off('canceledSubmit');
     window.EventBus.$off('confirmSubmit');
+    window.EventBus.$off('confirmed-expense');
+    window.EventBus.$off('canceled-expense');
+    window.EventBus.$off('backout-canceled-expense');
+    window.EventBus.$off('backout-confirmed-expense');
   },
   components: {
+    CancelConfirmation,
     ConfirmationBox,
-    FileUpload
+    FileUpload,
+    FormSubmissionConfirmation
   },
   computed: {
     isAdmin,
@@ -1567,6 +1615,8 @@ export default {
       allowReceipt: false, // allow receipt to be uploaded
       asUser: true, // user view
       confirming: false, // budget overage confirmation box activator
+      confirmingValid: false,
+      confirmBackingOut: false,
       costFormatted: '',
       costRules: [
         (v) => !isEmpty(v) || 'Cost is a required field',
