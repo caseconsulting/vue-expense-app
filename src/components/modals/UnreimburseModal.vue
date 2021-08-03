@@ -9,7 +9,7 @@
         <v-card-actions>
           <v-spacer></v-spacer>
           <v-btn
-            color="gray darken-1"
+            color="red"
             text
             @click.native="
               emit(`canceled-unreimburse-expense`);
@@ -20,7 +20,7 @@
           </v-btn>
           <v-spacer></v-spacer>
           <v-btn
-            color="red"
+            color="green darken-1"
             id="confirmUnreimbursed"
             text
             @click.native="

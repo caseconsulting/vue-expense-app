@@ -7,7 +7,7 @@
         <v-card-actions>
           <v-spacer></v-spacer>
           <v-btn
-            color="gray darken-1"
+            color="red"
             text
             @click.native="
               emit(`canceled-delete-${type}`);
@@ -17,7 +17,7 @@
           >
           <v-spacer></v-spacer>
           <v-btn
-            color="red"
+            color="green darken-1"
             id="confirmDelete"
             text
             @click.native="
