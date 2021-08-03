@@ -171,7 +171,26 @@
             </v-form>
           </div>
         </span>
-        <v-row class="text-center" v-if="resumeProcessed">
+        <v-row
+          class="text-center mt-3"
+          v-if="!changesMade && resumeProcessed && !(showTech || showAddress || showPhoneNumber || showEducation)"
+        >
+          <v-col>
+            <h2>No changes found!</h2>
+          </v-col>
+        </v-row>
+        <v-row
+          class="text-center"
+          v-if="!changesMade && resumeProcessed && !(showTech || showAddress || showPhoneNumber || showEducation)"
+        >
+          <v-col>
+            <v-btn color="red" outlined @click="clearForm">Close Form</v-btn>
+          </v-col>
+        </v-row>
+        <v-row
+          class="text-center"
+          v-if="resumeProcessed && (showTech || showAddress || showPhoneNumber || showEducation || changesMade)"
+        >
           <v-col>
             <v-btn color="green" class="ma-3" outlined @click="submitForm">Submit Form</v-btn>
             <v-btn color="red" outlined @click="confirmBackingOut = true">Cancel Form Edits</v-btn>
@@ -223,6 +242,10 @@ async function created() {
     this.clearForm();
   });
 }
+function changesMade() {
+  return !_.isEqual(this.editedEmployeeForm, this.employee);
+}
+
 function showAddress() {
   return this.newAddress && !this.addressCanceled;
 }
@@ -648,6 +671,7 @@ export default {
   },
   computed: {
     address,
+    changesMade,
     newAddress,
     newPhoneNumber,
     phoneNumber,
@@ -665,11 +689,10 @@ export default {
       confirmingValid: false,
       confirmBackingOut: false,
       editedEmployeeForm: null,
+      extractResume: true,
       file: null,
       loading: false,
       loadingMessage: '',
-      validFile: false,
-      resumeObject: [],
       newEducation: [],
       newTechnology: [],
       fileRules: [
@@ -693,8 +716,8 @@ export default {
       },
       toggleResumeFormErrorModal: false,
       timeoutError: false,
+      resumeObject: [],
       resumeProcessed: false,
-      extractResume: true,
       states: {
         AL: 'Alabama',
         AK: 'Alaska',
@@ -755,7 +778,8 @@ export default {
         WV: 'West Virginia',
         WI: 'Wisconsin',
         WY: 'Wyoming'
-      } //states
+      }, //states
+      validFile: false
     };
   },
   methods: {
@@ -763,12 +787,12 @@ export default {
     clearForm,
     deleteDateInterval,
     isCurrent,
+    onlyUploadResume,
     submitForm,
     submitInfo,
     submit,
     updateStartInterval,
     updateEndInterval,
-    onlyUploadResume,
     validateDateInterval
   },
   props: ['toggleResumeParser', 'employee'],
