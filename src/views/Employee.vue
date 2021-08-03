@@ -89,7 +89,7 @@
         <employee-form :employee="this.model" :currentTab="this.currentTab" v-if="editing"></employee-form>
         <anniversary-card v-if="minimizeWindow" :employee="this.model"></anniversary-card>
         <budget-chart
-          v-if="userIsAdmin() || userIsEmployee()"
+          v-if="(userIsAdmin() || userIsEmployee()) && hasAccessToBudgets"
           class="pt-4"
           :employee="this.model"
           :fiscalDateView="fiscalDateView"
@@ -251,6 +251,17 @@ async function deleteResume() {
   this.deleteLoading = false;
 } //deleteResume
 
+/**
+ * Checks if the user has access to any budgets
+ */
+async function checkForBudgetAccess() {
+  let accessibleBudgets = await api.getAllActiveEmployeeBudgets(this.user.id);
+  if (accessibleBudgets.length == 0) {
+    // does not have access to any budgets
+    this.hasAccessToBudgets = false; // disable budget chart
+  }
+} // checkForBudgetAccess
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                 LIFECYCLE HOOKS                  |
@@ -281,6 +292,7 @@ async function created() {
   this.loading = true;
   await this.getEmployee();
   this.user = await api.getUser();
+  this.checkForBudgetAccess();
   this.role = getRole();
   this.displayQuickBooksTimeAndBalances = this.userIsAdmin() || this.userIsEmployee();
   this.loading = false;
@@ -403,7 +415,8 @@ export default {
         statusMessage: null,
         color: null
       },
-      user: null
+      user: null,
+      hasAccessToBudgets: true
     };
   },
   methods: {
@@ -419,7 +432,8 @@ export default {
     getCurrentBudgetYear,
     getWorkStatus,
     userIsAdmin,
-    userIsEmployee
+    userIsEmployee,
+    checkForBudgetAccess
   },
   computed: {
     minimizeWindow

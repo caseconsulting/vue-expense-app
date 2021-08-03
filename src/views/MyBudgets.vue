@@ -19,13 +19,20 @@
     <!-- Title -->
     <v-col v-if="!isMobile" cols="12" lg="8">
       <v-row class="mt-3" style="height: 100%" align="center" justify="center">
-        <h1 v-if="!loading">Budget Statistics for {{ employee.firstName }} {{ employee.lastName }}</h1>
+        <h1 v-if="!loading && hasAccessToBudgets">
+          Budget Statistics for {{ employee.firstName }} {{ employee.lastName }}
+        </h1>
+        <h1 v-else>No Budgets Available for {{ employee.firstName }} {{ employee.lastName }}</h1>
       </v-row>
     </v-col>
 
     <!-- Anniversary Date -->
     <v-col cols="12" lg="4" v-if="!isMobile">
-      <anniversary-card v-if="!loading" :employee="employee"></anniversary-card>
+      <anniversary-card
+        v-if="!loading"
+        :employee="employee"
+        :hasAccessToBudgets="hasAccessToBudgets"
+      ></anniversary-card>
     </v-col>
 
     <!-- Expense Data -->
@@ -48,7 +55,7 @@
           @rendered="displayChart = !displayChart"
         ></budget-table>
         <budget-chart
-          v-if="!loading && !isMobile && !adminCall && displayChart"
+          v-if="!loading && !isMobile && !adminCall && displayChart && hasAccessToBudgets"
           :employee="employee"
           :fiscalDateView="fiscalDateView"
         ></budget-chart>
@@ -158,6 +165,11 @@ async function refreshEmployee() {
     this.employee = this.employ;
   }
 
+  let accessibleBudgets = await api.getAllActiveEmployeeBudgets(this.employee.id);
+  if (accessibleBudgets.length == 0) {
+    // does not have access to any budgets
+    this.hasAccessToBudgets = false; // disable budget chart
+  }
   this.hireDate = this.employee.hireDate;
   this.fiscalDateView = this.getCurrentBudgetYear();
   this.loading = false; // set loading status to false
@@ -241,6 +253,7 @@ export default {
         budgetName: null
       }, // blank expense for the expense form
       fiscalDateView: '', // current budget year view by anniversary day
+      hasAccessToBudgets: true, // user has access to one or more budgets
       hireDate: '', // employee hire date
       loading: false, // loading status
       status: {

@@ -1,6 +1,6 @@
 <template>
   <div>
-    <v-dialog v-model="activate" persistent max-width="400">
+    <v-dialog v-if="hasAccessToBudgets" v-model="activate" persistent max-width="400">
       <v-card>
         <!-- Anniversary Date -->
         <v-toolbar color="#565651" dark>
@@ -22,6 +22,42 @@
               </v-list-item-content>
             </v-list-item>
             <v-divider :key="index"></v-divider>
+          </template>
+          <!-- End Budget List -->
+
+          <!-- Cancel Button -->
+          <template>
+            <v-list-item ripple @click.native="activate = false" class="list-hover">
+              <v-list-item-content>
+                <v-list-item-title><h2 class="center-text">Cancel</h2></v-list-item-title>
+              </v-list-item-content>
+            </v-list-item>
+          </template>
+          <!-- End Cancel Button -->
+        </v-list>
+        <!-- End Buttons -->
+      </v-card>
+    </v-dialog>
+    <v-dialog v-else v-model="activate" persistent max-width="400">
+      <v-card>
+        <!-- Anniversary Date -->
+        <v-toolbar color="#565651" dark>
+          <v-toolbar-title>Anniversary Date: {{ getAnniversaryDate }}</v-toolbar-title>
+        </v-toolbar>
+        <!-- End Anniversary Date -->
+
+        <!-- Buttons -->
+        <v-list two-line>
+          <!-- Budget List -->
+          <template>
+            <v-list-item>
+              <v-list-item-content>
+                <v-list-item-title>
+                  <h2>No Previous Years</h2>
+                </v-list-item-title>
+              </v-list-item-content>
+            </v-list-item>
+            <v-divider></v-divider>
           </template>
           <!-- End Budget List -->
 
@@ -124,7 +160,8 @@ export default {
     'toggleBudgetSelectModal', // dialog activator
     'budgetYears', // all budget years
     'current', // current fiscal date view
-    'hireDate' // employee hire date
+    'hireDate', // employee hire date
+    'hasAccessToBudgets'
   ],
   watch: {
     toggleBudgetSelectModal: function () {
