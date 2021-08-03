@@ -296,6 +296,7 @@
         <!-- Confirmation Model -->
         <form-submission-confirmation
           :toggleSubmissionConfirmation="this.confirmingValid"
+          type="form"
         ></form-submission-confirmation>
         <many-form-errors
           :toggleSubmissionConfirmation="this.confirmingError"
@@ -639,7 +640,7 @@ async function submit() {
         // successfully updated employee
         this.fullName = `${updatedEmployee.firstName} ${updatedEmployee.lastName}`;
         window.EventBus.$emit('update', updatedEmployee);
-        cancel();
+        this.cancel();
       } else {
         // failed to update employee
         this.$emit('error', updatedEmployee.response.data.message);
@@ -712,11 +713,11 @@ async function created() {
     window.EventBus.$emit('empNum', this.employeeNumber);
   });
 
-  window.EventBus.$on('confirmed', () => {
+  window.EventBus.$on('confirmed-form', () => {
     //this.confirming = false;
     this.submit();
   });
-  window.EventBus.$on('canceled', () => {
+  window.EventBus.$on('canceled-form', () => {
     this.errorTabNames = {};
     this.confirmingError = false;
   });

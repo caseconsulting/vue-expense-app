@@ -1,5 +1,5 @@
 <template>
-  <v-dialog v-model="activate" max-width="1000" @click:outside="clearForm">
+  <v-dialog v-model="activate" persistent max-width="1000" @click:outside="confirmBackingOut = true">
     <v-card>
       <v-card-title class="header_style"><strong>Upload Resume</strong></v-card-title>
       <v-card-text class="pa-5">
@@ -174,7 +174,7 @@
         <v-row class="text-center" v-if="resumeProcessed">
           <v-col>
             <v-btn color="green" class="ma-3" outlined @click="submitForm">Submit Form</v-btn>
-            <v-btn color="red" outlined @click="clearForm">Cancel Form Edits</v-btn>
+            <v-btn color="red" outlined @click="confirmBackingOut = true">Cancel Form Edits</v-btn>
           </v-col>
         </v-row>
       </v-card-text>
@@ -185,6 +185,13 @@
         <v-btn text color="red" @click="toggleResumeFormErrorModal = false">Close</v-btn>
       </v-card>
     </v-dialog>
+    <!-- Confirmation Model -->
+    <form-submission-confirmation
+      :toggleSubmissionConfirmation="this.confirmingValid"
+      type="parser"
+    ></form-submission-confirmation>
+    <!-- Cancel Confirmation Model -->
+    <cancel-confirmation :toggleSubmissionConfirmation="this.confirmBackingOut" type="parser"> </cancel-confirmation>
   </v-dialog>
 </template>
 
@@ -192,9 +199,30 @@
 import api from '@/shared/api.js';
 import { isEmpty } from '@/utils/utils';
 import _ from 'lodash';
+import CancelConfirmation from '@/components/modals/CancelConfirmation.vue';
 import dateIntervalForm from '@/components/employees/formTabs/DateIntervalForm';
 import educationTab from '@/components/employees/formTabs/EducationTab';
+import FormSubmissionConfirmation from '@/components/modals/FormSubmissionConfirmation.vue';
 
+async function created() {
+  window.EventBus.$on('confirmed-parser', () => {
+    window.EventBus.$emit('resume', this.editedEmployeeForm);
+    window.EventBus.$emit('uploadedResume', true);
+    this.resumeProcessed = false;
+    this.confirmingValid = false;
+    this.activate = !this.activate;
+  });
+  window.EventBus.$on('canceled-parser', () => {
+    this.confirmingValid = false;
+  });
+  window.EventBus.$on('backout-canceled-parser', () => {
+    this.confirmBackingOut = false;
+  });
+  window.EventBus.$on('backout-confirmed-parser', () => {
+    this.confirmBackingOut = false;
+    this.clearForm();
+  });
+}
 function showAddress() {
   return this.newAddress && !this.addressCanceled;
 }
@@ -581,10 +609,7 @@ function submitForm() {
   if (this.showTech || this.showPhoneNumber || this.showAddress || this.showEducation) {
     this.toggleResumeFormErrorModal = true;
   } else {
-    window.EventBus.$emit('resume', this.editedEmployeeForm);
-    window.EventBus.$emit('uploadedResume', true);
-    this.activate = !this.activate;
-    this.resumeProcessed = false;
+    this.confirmingValid = true;
   }
 }
 
@@ -610,13 +635,16 @@ function clearForm() {
   this.resumeProcessed = false;
   this.toggleResumeFormErrorModal = false;
   this.timeoutError = false;
+  this.confirmingValid = false;
   this.$refs.submit.reset();
 }
 
 export default {
   components: {
+    CancelConfirmation,
     dateIntervalForm,
-    educationTab
+    educationTab,
+    FormSubmissionConfirmation
   },
   computed: {
     address,
@@ -628,11 +656,14 @@ export default {
     showPhoneNumber,
     showTech
   },
+  created,
   data() {
     return {
       activate: false,
       addressCanceled: false,
       phoneCanceled: false,
+      confirmingValid: false,
+      confirmBackingOut: false,
       editedEmployeeForm: null,
       file: null,
       loading: false,
