@@ -61,7 +61,14 @@
           :disabled="isInactive"
         ></v-checkbox>
 
-        <v-row class="mt-1">
+        <!-- Old Receipt Name -->
+        <v-card-text
+          style="padding: 0px 0px 3px 0px; font: inherit; font-size: 16px; color: #0000008a"
+          v-if="!isEmpty(expense.receipt) && isEdit"
+          >Current Receipt: {{ this.submittedReceipt }}</v-card-text
+        >
+
+        <v-row>
           <file-upload
             v-if="receiptRequired && ((allowReceipt && isEdit) || !isEdit || isEmpty(expense.receipt))"
             style="padding-top: 0px; padding-bottom: 0px; width: 60%"
@@ -93,14 +100,6 @@
             <span v-else>Scanning your receipt, this may take up to 15 seconds</span>
           </v-tooltip>
         </v-row>
-
-        <!-- Receipt Name -->
-        <v-card-text
-          class="mt-2"
-          style="padding: 0px 0px 3px 0px; font: inherit; font-size: 16px; color: #0000008a"
-          v-if="!isEmpty(expense.receipt) && isEdit"
-          >Current Receipt: {{ this.editedExpense.receipt }}</v-card-text
-        >
 
         <!-- Category -->
         <v-select
@@ -1623,6 +1622,7 @@ export default {
       selectedEmployee: {}, // selected employees
       selectedExpenseType: {}, // selected expense types
       selectedRecipient: {}, // the recipient selected for a high five
+      submittedReceipt: null, // the receipt to show when editing an expense
       urlInfo: {
         id: null,
         category: null,
@@ -1687,6 +1687,7 @@ export default {
       if (!this.isEmpty(this.expense.id)) {
         this.emit('editing-expense'); //notify parent that expense is being edited
         this.costFormatted = Number(this.editedExpense.cost).toLocaleString();
+        this.submittedReceipt = this.editedExpense.receipt;
       }
 
       this.selectedExpenseType = _.find(this.expenseTypes, (expenseType) => {
