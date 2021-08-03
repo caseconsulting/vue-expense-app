@@ -113,36 +113,41 @@
               <div v-if="!tech.canceled" style="border: 1px solid grey" class="pt-3 pb-1 px-5 ma-1">
                 <!-- Loop Technologies -->
                 <!-- Name of Technology -->
-                <v-text-field class="pb-5" :value="tech.tech" readonly label="Technology"></v-text-field>
+                <v-text-field class="pb-5" :value="tech.name" readonly label="Technology"></v-text-field>
 
                 <!-- Time Intervals -->
-                <v-row justify="center">
-                  <div
-                    v-for="(dateInterval, intervalIndex) in tech.dateIntervals"
-                    :key="'technology interval: ' + index + intervalIndex"
-                    class="mb-3"
-                  >
-                    <date-interval-form
-                      ref="dateInterval"
-                      :startIntervalDate="dateInterval.startDate"
-                      :endIntervalDate="dateInterval.endDate"
-                      :allIntervals="tech.dateIntervals"
-                      :technologyIndex="index"
-                      :intervalIndex="intervalIndex"
-                      @delete="deleteDateInterval"
-                      @validated="validateDateInterval"
-                      @start="updateStartInterval"
-                      @end="updateEndInterval"
-                    ></date-interval-form>
-                  </div>
-                </v-row>
-                <!-- End of Time Intervals -->
+                <div class="mb-3">
+                  <v-row justify="center" align="center" class="py-3">
+                    <!-- Current Switch -->
+                    <v-col cols="4" sm="4" md="4" lg="4">
+                      <v-switch v-model="tech.current" label="Currently know this technology"></v-switch>
+                    </v-col>
 
-                <!--Add a time interval button-->
-                <div class="pt-4 mb-3" align="center">
-                  <v-btn @click="addTimeInterval(index)" elevation="2"
-                    ><v-icon class="pr-1">add</v-icon>Time Interval</v-btn
-                  >
+                    <!-- Years of Experience -->
+                    <v-col
+                      cols="5"
+                      sm="6"
+                      md="4"
+                      lg="3"
+                      class="px-0 pb-0"
+                      :class="{ 'px-4': $vuetify.breakpoint.sm, 'px-4': $vuetify.breakpoint.lg }"
+                    >
+                      <v-text-field
+                        class="px-3"
+                        ref="formFields"
+                        v-model="tech.years"
+                        flat
+                        :rules="experienceRequired"
+                        single-line
+                        max="99"
+                        min="0"
+                        suffix="years"
+                        dense
+                        type="number"
+                        outlined
+                      ></v-text-field>
+                    </v-col>
+                  </v-row>
                 </div>
 
                 <v-row align="center" class="py-3" justify="center">
@@ -219,7 +224,6 @@ import api from '@/shared/api.js';
 import { isEmpty } from '@/utils/utils';
 import _ from 'lodash';
 import CancelConfirmation from '@/components/modals/CancelConfirmation.vue';
-import dateIntervalForm from '@/components/employees/formTabs/DateIntervalForm';
 import educationTab from '@/components/employees/formTabs/EducationTab';
 import FormSubmissionConfirmation from '@/components/modals/FormSubmissionConfirmation.vue';
 
@@ -305,15 +309,6 @@ function showEducation() {
   let filtered = this.newEducation.filter((education) => !education.canceled);
   return filtered.length != 0;
 }
-
-/**
- * Add a time interval.
- * @param index - index the index in array of the technology
- */
-async function addTimeInterval(index) {
-  this.newTechnology[index].dateIntervals.push({ startDate: null, endDate: null });
-  this.newTechnology = _.cloneDeep(this.newTechnology); //ensures that technologies intervals render properly
-} // addTimeInterval
 
 /**
  * When the checkbox is not selected on the resume modal, it uploads the resume and closes the window upon
@@ -524,9 +519,10 @@ async function submit() {
             this.employee.technologies.filter((e) => e.name === techs[0]).length == 0)
         ) {
           this.newTechnology.push({
-            tech: techs[0],
-            dateIntervals: [{ startDate: null, endDate: null }],
-            canceled: false
+            name: techs[0],
+            current: false,
+            canceled: false,
+            years: 0
           });
           newTech.push(techs[0]);
         }
@@ -538,10 +534,6 @@ async function submit() {
   }
 }
 
-function isCurrent(tech) {
-  return tech.dateIntervals.filter((dateInterval) => !dateInterval.endDate).length > 0;
-} //isCurrent
-
 function submitInfo(field, value, newValue) {
   if (field === 'address') {
     this.editedEmployeeForm.currentStreet = this.newPersonal.currentStreet;
@@ -551,18 +543,25 @@ function submitInfo(field, value, newValue) {
   } else if (field === 'phoneNumber') {
     this.editedEmployeeForm.phoneNumber = this.newPersonal.phoneNumber;
   } else if (field === 'technology') {
-    let techHasErrors = this.newTechnology[value].dateIntervals.filter((dateInterval) => dateInterval.hasErrors);
-    if (techHasErrors.length == 0 && this.newTechnology[value].dateIntervals.length > 0) {
-      this.newTechnology[value].canceled = true;
-      if (!this.editedEmployeeForm.technologies) {
-        this.editedEmployeeForm.technologies = [];
-      }
-      this.editedEmployeeForm.technologies.push({
-        name: this.newTechnology[value].tech,
-        current: isCurrent(this.newTechnology[value]),
-        dateIntervals: this.newTechnology[value].dateIntervals
-      });
+    this.newTechnology[value].canceled = true;
+    if (!this.editedEmployeeForm.technologies) {
+      this.editedEmployeeForm.technologies = [];
     }
+    this.editedEmployeeForm.technologies.push({
+      name: this.newTechnology[value].name,
+      current: this.newTechnology[value].current,
+      years: this.newTechnology[value].years
+    });
+
+    // if (!this.editedEmployeeForm.technologies) {
+    //   this.editedEmployeeForm.technologies = [];
+    // }
+    // this.editedEmployeeForm.technologies.push({
+    //   name: this.newTechnology[value].name,
+    //   current: this.newTechnology[value].current,
+    //   canceled: true,
+    //   years: this.newTechnology[value].years
+    // });
   } else if (field === 'education' && this.$refs['education' + value][0].validate()) {
     this.newEducation[value].canceled = true;
     this.newEducation[value].date = newValue[0].date;
@@ -582,49 +581,6 @@ function submitInfo(field, value, newValue) {
       name: this.newEducation[value].name,
       school: this.newEducation[value].school
     });
-  }
-}
-
-function deleteDateInterval(technologyIndex, dateIntervalIndex) {
-  if (
-    this.newTechnology.length > technologyIndex &&
-    this.newTechnology[technologyIndex].dateIntervals.length > dateIntervalIndex
-  ) {
-    this.newTechnology[technologyIndex].dateIntervals.splice(dateIntervalIndex, 1);
-  }
-}
-
-function validateDateInterval(technologyIndex, dateIntervalIndex, hasErrors) {
-  if (
-    this.newTechnology &&
-    this.newTechnology[technologyIndex] &&
-    this.newTechnology[technologyIndex].dateIntervals &&
-    this.newTechnology[technologyIndex].dateIntervals[dateIntervalIndex]
-  ) {
-    this.newTechnology[technologyIndex].dateIntervals[dateIntervalIndex].hasErrors = _.cloneDeep(hasErrors);
-  }
-} // validateDateInterval
-
-function updateStartInterval(technologyIndex, dateIntervalIndex, editedStartDate) {
-  if (
-    this.newTechnology &&
-    this.newTechnology[technologyIndex] &&
-    this.newTechnology[technologyIndex].dateIntervals &&
-    this.newTechnology[technologyIndex].dateIntervals[dateIntervalIndex]
-  )
-    this.newTechnology[technologyIndex].dateIntervals[dateIntervalIndex].startDate = _.cloneDeep(editedStartDate);
-  this.newTechnology = _.cloneDeep(this.newTechnology);
-} //updateStartInterval
-
-function updateEndInterval(technologyIndex, dateIntervalIndex, editedEndDate) {
-  if (
-    this.newTechnology &&
-    this.newTechnology[technologyIndex] &&
-    this.newTechnology[technologyIndex].dateIntervals &&
-    this.newTechnology[technologyIndex].dateIntervals[dateIntervalIndex]
-  ) {
-    this.newTechnology[technologyIndex].dateIntervals[dateIntervalIndex].endDate = _.cloneDeep(editedEndDate);
-    this.newTechnology = _.cloneDeep(this.newTechnology);
   }
 }
 
@@ -665,7 +621,6 @@ function clearForm() {
 export default {
   components: {
     CancelConfirmation,
-    dateIntervalForm,
     educationTab,
     FormSubmissionConfirmation
   },
@@ -706,6 +661,14 @@ export default {
             'File unsupported, please submit a .png, .pdf, or a .jpeg file'
           );
         }
+      ],
+      requiredRules: [
+        (v) => !isEmpty(v) || 'This field is required. You must enter information or delete the field if possible'
+      ], // rules for a required field
+      experienceRequired: [
+        (v) => !isEmpty(v) || 'This field is required',
+        (v) => v > 0 || 'Value must be greater than 0',
+        (v) => v < 100 || 'Value must be less than 100'
       ],
       newPersonal: {
         phoneNumber: null,
@@ -783,17 +746,11 @@ export default {
     };
   },
   methods: {
-    addTimeInterval,
     clearForm,
-    deleteDateInterval,
-    isCurrent,
-    onlyUploadResume,
     submitForm,
     submitInfo,
     submit,
-    updateStartInterval,
-    updateEndInterval,
-    validateDateInterval
+    onlyUploadResume
   },
   props: ['toggleResumeParser', 'employee'],
   watch: {

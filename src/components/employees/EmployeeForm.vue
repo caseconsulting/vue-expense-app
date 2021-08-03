@@ -229,7 +229,6 @@
                 :admin="hasAdminPermissions()"
                 :model="model"
                 :validating="validating.employee"
-                :key="updateEmpTab"
               ></employee-tab>
             </v-tab-item>
             <!-- Personal Info -->
@@ -1036,7 +1035,6 @@ export default {
         technologies: false
       }, // tab component created
       toggleResumeParser: false,
-      updateEmpTab: 0,
       uploadDisabled: true,
       valid: false, // form validity
       validating: {

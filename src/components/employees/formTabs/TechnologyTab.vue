@@ -31,11 +31,7 @@
       <v-row align="center" class="py-3" justify="center">
         <!-- Current Switch -->
         <v-col cols="6" sm="7" md="6" lg="7">
-          <v-switch
-            @change="updateYears(technology)"
-            v-model="technology.current"
-            label="Currently know this technology"
-          ></v-switch>
+          <v-switch v-model="technology.current" label="Currently know this technology"></v-switch>
         </v-col>
 
         <!-- Years of Experience -->
@@ -59,7 +55,6 @@
             dense
             type="number"
             outlined
-            @input="updateYears(technology)"
           >
           </v-text-field>
         </v-col>
@@ -195,20 +190,6 @@ async function updateTechDropDown() {
 } //updateTechDropDown
 
 /**
- * Used to respond to determining whether or not a technology has been set
- * to current. If it is current, a current start date will be assigned to calculate
- * the years field as time passes. If not current, it deletes the currentStartDate if
- * there was one
- */
-function updateYears(tech) {
-  if (tech.current) {
-    tech.currentStartDate = moment().format('YYYY-MM-DD');
-  } else if (tech.currentStartDate) {
-    delete tech.currentStartDate;
-  }
-}
-
-/**
  * Validate all input fields are valid. Emit to parent the error status.
  */
 function validateFields() {
@@ -265,7 +246,6 @@ export default {
     isEmpty,
     populateDropDowns,
     updateTechDropDown,
-    updateYears,
     validateFields
   },
   props: ['model', 'validating'],

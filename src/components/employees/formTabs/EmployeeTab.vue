@@ -455,7 +455,7 @@ export default {
     validateFields,
     viewStatus
   },
-  props: ['admin', 'model', 'validating', 'disableEmpNum'],
+  props: ['admin', 'model', 'validating'],
   watch: {
     'model.id': function () {
       this.editedEmployee = _.cloneDeep(this.model);

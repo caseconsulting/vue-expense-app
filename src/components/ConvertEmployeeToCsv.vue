@@ -437,14 +437,13 @@ function getJobs(job) {
  * @return String - technologies
  */
 function getTechnologies(tech) {
+  console.log(tech);
   let str = '';
   let result = [];
   if (tech) {
     for (let i = 0; i < tech.length; i++) {
       str = tech[i].name + ' - ';
-      let years = 0;
-      years = yearsOfExperience(tech[i]);
-      str += years + ' years';
+      str += tech[i].years + ' years';
       if (tech[i].current) {
         str += ' - current';
       }
@@ -454,26 +453,6 @@ function getTechnologies(tech) {
   }
   return result;
 } // getTechnologies
-
-/**
- * Calculates years of experience for a technology based on monthsOfExperience.
- *
- * @param technology - technology object
- * @return years of expierence (decimal with 2 decimal places)
- */
-function yearsOfExperience(technology) {
-  let totalMonths = 0;
-  //calculates total number of months
-  for (let i = 0; !isEmpty(technology.dateIntervals) && i < technology.dateIntervals.length; i++) {
-    totalMonths += monthsPassed(technology.dateIntervals[i].startDate, technology.dateIntervals[i].endDate);
-  }
-
-  if (totalMonths > 0) {
-    let years = totalMonths / 12; //calculates years of experience
-    return Math.round((years + Number.EPSILON) * 100) / 100; //rounds to 2 decimal places
-  }
-  return technology.years ? technology.years : 0; //if uses old technology.years then use that or set to 0
-} // yearsOfExperience
 
 /**
  * Calculates the number of months that have passed between 2 dates in YYYY-MM format.
@@ -557,7 +536,6 @@ export default {
     getLanguages,
     iconColor,
     isEmpty,
-    yearsOfExperience,
     monthsPassed
   },
   props: ['employee', 'midAction', 'color'] // employees to export

@@ -155,26 +155,9 @@ function selectDropDown(name) {
  */
 async function created() {
   this.user = await api.getUser();
-  Object.assign(this.model.technologies, this.user.technologies);
   this.infoTab = this.currentTab;
   this.afterCreate = true;
-  this.calculateCurrentYears(this.model.technologies);
 } // created
-
-/**
- * Used to update the current technology fields total years of experience as of
- * when they enabled the toggle on the technology form
- */
-function calculateCurrentYears(techs) {
-  _.forEach(techs, (tech) => {
-    if (tech.current) {
-      let today = moment();
-      let startDate = moment(tech.currentStartDate, 'YYYY-MM-DD');
-      let months = Number(((today.diff(startDate, 'months') % 12) / 12).toFixed(2));
-      tech.years = Number(tech.years) + moment().diff(tech.currentStartDate, 'years') + months;
-    }
-  });
-} //calculateCurrentYears
 
 export default {
   components: {
@@ -199,7 +182,6 @@ export default {
     };
   },
   methods: {
-    calculateCurrentYears,
     hasAdminPermissions,
     userIsEmployee,
     selectDropDown
