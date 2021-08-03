@@ -7,7 +7,7 @@
           <v-spacer></v-spacer>
           <v-btn
             id="submitNoBtn"
-            color="gray darken-1"
+            color="red"
             text
             @click.native="
               emit(`backout-canceled-${type}`);
@@ -21,7 +21,7 @@
           <v-spacer></v-spacer>
           <v-btn
             id="submitYesBtn"
-            color="red"
+            color="green darken-1"
             text
             @click.native="
               emit(`backout-confirmed-${type}`);
