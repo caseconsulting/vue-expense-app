@@ -61,7 +61,7 @@
           :disabled="isInactive"
         ></v-checkbox>
 
-        <v-row>
+        <v-row class="mt-1">
           <file-upload
             v-if="receiptRequired && ((allowReceipt && isEdit) || !isEdit || isEmpty(expense.receipt))"
             style="padding-top: 0px; padding-bottom: 0px; width: 60%"
@@ -78,7 +78,7 @@
                   v-if="receiptRequired && ((allowReceipt && isEdit) || !isEdit || isEmpty(expense.receipt))"
                   color="white"
                   @click="scanFile"
-                  class="ma-2"
+                  class="ma-3"
                   :disabled="isInactive || disableScan"
                   :loading="scanLoading"
                   v-bind="attrs"
@@ -96,6 +96,7 @@
 
         <!-- Receipt Name -->
         <v-card-text
+          class="mt-2"
           style="padding: 0px 0px 3px 0px; font: inherit; font-size: 16px; color: #0000008a"
           v-if="!isEmpty(expense.receipt) && isEdit"
           >Current Receipt: {{ this.editedExpense.receipt }}</v-card-text
@@ -121,6 +122,8 @@
           :disabled="isReimbursed || isInactive || isHighFive"
           label="Cost"
           id="cost"
+          class="mt-4"
+          maxlength="12"
           data-vv-name="Cost"
           persistent-hint
           :hint="costHint()"
@@ -153,6 +156,7 @@
           :rules="descriptionRules"
           :disabled="isInactive"
           id="description"
+          class="mt-4"
           label="Description"
           data-vv-name="Description"
         ></v-text-field>
