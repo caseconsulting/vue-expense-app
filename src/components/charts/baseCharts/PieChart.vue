@@ -11,7 +11,10 @@ export default {
   extends: Pie,
   mixins: [mixins.reactiveProp],
   mounted() {
-    this.renderChart(this.chartData, this.options);
+    setTimeout(() => {
+      this.renderChart(this.chartData, this.options);
+    }, 0);
+    //this.renderChart(this.chartData, this.options);
   },
   props: [
     'chartData', // chart data to render

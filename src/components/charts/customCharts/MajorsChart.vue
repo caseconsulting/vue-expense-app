@@ -1,6 +1,6 @@
 <template>
   <v-card v-if="dataReceived" class="pa-5">
-    <pie-chart :options="options" :chartData="chartData"></pie-chart>
+    <pie-chart ref="chart" :options="options" :chartData="chartData"></pie-chart>
   </v-card>
   <v-skeleton-loader v-else type="paragraph@5"></v-skeleton-loader>
 </template>
@@ -90,7 +90,6 @@ export default {
     });
   },
   created() {
-    //this.$forceUpdate();
     this.fillData(null);
   }
 };

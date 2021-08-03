@@ -1,33 +1,15 @@
 <template>
-  <v-container>
-    <v-row>
-      <v-col md="6" sm="12">
-        <v-card v-if="dataReceived">
-          <pie-chart :options="options" :chartData="chartData" />
-          <div class="center">
-            <p class="font-weight-normal">Total Degrees: {{ degreeCount }}</p>
-          </div>
-        </v-card>
-        <v-skeleton-loader v-else type="paragraph@5"></v-skeleton-loader>
-      </v-col>
-      <v-col md="6" sm="12">
-        <MajorsChart />
-      </v-col>
-      <v-col md="6" sm="12">
-        <MinorsChart />
-      </v-col>
-      <v-col md="6" sm="12">
-        <ConcentrationsChart />
-      </v-col>
-    </v-row>
-  </v-container>
+  <v-card v-if="dataReceived">
+    <pie-chart :options="options" :chartData="chartData" />
+    <div class="center">
+      <p class="font-weight-normal">Total Degrees: {{ degreeCount }}</p>
+    </div>
+  </v-card>
+  <v-skeleton-loader v-else type="paragraph@5"></v-skeleton-loader>
 </template>
 
 <script>
 import PieChart from '../baseCharts/PieChart.vue';
-import MajorsChart from './MajorsChart.vue';
-import MinorsChart from './MinorsChart.vue';
-import ConcentrationsChart from './ConcentrationsChart.vue';
 import api from '@/shared/api.js';
 import _ from 'lodash';
 const moment = require('moment-timezone');
@@ -274,6 +256,7 @@ function fillData() {
     }
   };
   this.dataReceived = true;
+  window.EventBus.$emit('hello');
 }
 
 /**
@@ -312,7 +295,7 @@ function concentrationsEmit(degree) {
 }
 
 export default {
-  components: { PieChart, MajorsChart, MinorsChart, ConcentrationsChart },
+  components: { PieChart },
   data() {
     return {
       dataReceived: false,
@@ -337,6 +320,7 @@ export default {
     concentrationsEmit
   },
   async created() {
+    this.$forceUpdate();
     this.employees = await api.getItems(api.EMPLOYEES);
     this.degrees = this.initDegrees();
     this.fillData();
