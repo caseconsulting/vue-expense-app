@@ -12,10 +12,9 @@
             @click.native="
               emit(`canceled-${type}`);
               activate = false;
-              loading = true;
             "
-            :loading="loading"
-            :disabled="loading"
+            :loading="!activate"
+            :disabled="!activate"
             >No</v-btn
           >
           <v-spacer></v-spacer>
@@ -26,10 +25,9 @@
             @click.native="
               emit(`confirmed-${type}`);
               activate = false;
-              loading = true;
             "
-            :loading="loading"
-            :disabled="loading"
+            :loading="!activate"
+            :disabled="!activate"
             >Yes</v-btn
           >
           <v-spacer></v-spacer>
@@ -63,8 +61,7 @@ function emit(msg) {
 export default {
   data() {
     return {
-      activate: false, // dialog activator
-      loading: false // loading circle
+      activate: false // dialog activator
     };
   },
   methods: {
@@ -77,9 +74,9 @@ export default {
   watch: {
     toggleSubmissionConfirmation: function () {
       this.activate = this.toggleSubmissionConfirmation;
-      this.loading = false;
     },
     activate: function () {
+      console.log(this.activate);
       if (!this.activate) {
         emit('closeModal');
       }

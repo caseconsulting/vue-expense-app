@@ -574,6 +574,7 @@ async function confirm() {
     //checks to see if there are any tabs with errors
     let hasErrors = await this.hasTabError();
     if (!hasErrors) {
+      console.log('hi');
       this.confirmingValid = true; // if no errors opens confirm submit popup
     } else if (this.tabErrorMessage) {
       //if there is a custom error message it is displayed here
@@ -627,6 +628,7 @@ async function submit() {
   this.submitting = true;
   // convert appropriate fields to title case
   await this.convertAutocompleteToTitlecase();
+  this.confirmingValid = false;
   let hasErrors = await this.hasTabError();
   if (this.$refs.form.validate() && !hasErrors) {
     // form validated
