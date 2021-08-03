@@ -208,15 +208,11 @@
           clearable
           small-chips
           deletable-chips
-          single-line
           class="mt-0 pt-0"
         >
           <template v-slot:label>
-            <span class="grey--text caption">No custom employee access</span>
-          </template>
-
-          <template v-slot:selection="{ index }">
-            <span v-if="index === 0" class="grey--text caption"
+            <span v-if="customAccess.length == 0" class="grey--text caption">No custom employee access</span>
+            <span v-else class="grey--text caption"
               >{{ customAccess.length }} employee(s) have custom access to this expense type</span
             >
           </template>
