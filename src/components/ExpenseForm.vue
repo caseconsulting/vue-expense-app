@@ -68,7 +68,7 @@
           >Current Receipt: {{ this.submittedReceipt }}</v-card-text
         >
 
-        <v-row>
+        <v-row class="mt-2">
           <file-upload
             v-if="receiptRequired && ((allowReceipt && isEdit) || !isEdit || isEmpty(expense.receipt))"
             style="padding-top: 0px; padding-bottom: 0px; width: 60%"
@@ -121,7 +121,7 @@
           :disabled="isReimbursed || isInactive || isHighFive"
           label="Cost"
           id="cost"
-          class="mt-4"
+          class="mt-3"
           maxlength="12"
           data-vv-name="Cost"
           persistent-hint
