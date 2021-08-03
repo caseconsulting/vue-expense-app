@@ -272,14 +272,12 @@ async function checkForBudgetAccess() {
  *  Adjust datatable header for user view.
  */
 async function created() {
-  window.EventBus.$on('confirm-delete-resume', () => {
-    this.toggleDeleteModal = true;
-    this.deleteResume();
+  window.EventBus.$on('confirm-delete-resume', async () => {
+    await this.deleteResume();
   });
-  window.EventBus.$on('cancel-delete-resume', () => {
-    this.toggleDeleteModal = true;
-  });
+
   window.EventBus.$on('delete-resume', (newResume) => {
+    console.log('delete-reusme');
     if (newResume != null) {
       this.hasResume = newResume;
     }
