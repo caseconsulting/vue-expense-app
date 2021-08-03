@@ -344,6 +344,7 @@ function selectDropDown(tab) {
  * you decide to cancel your submission
  */
 async function cancel() {
+  console.log(this.model);
   //creating an employee
   if (this.model.employeeNumber && this.$route.params.id === undefined) {
     await api.deleteResume(this.model.employeeNumber);
@@ -574,7 +575,6 @@ async function confirm() {
     //checks to see if there are any tabs with errors
     let hasErrors = await this.hasTabError();
     if (!hasErrors) {
-      console.log('hi');
       this.confirmingValid = true; // if no errors opens confirm submit popup
     } else if (this.tabErrorMessage) {
       //if there is a custom error message it is displayed here

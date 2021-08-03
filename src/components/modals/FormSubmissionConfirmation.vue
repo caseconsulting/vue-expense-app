@@ -76,7 +76,6 @@ export default {
       this.activate = this.toggleSubmissionConfirmation;
     },
     activate: function () {
-      console.log(this.activate);
       if (!this.activate) {
         emit('closeModal');
       }
