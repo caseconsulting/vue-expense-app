@@ -333,9 +333,8 @@ async function onlyUploadResume(employeeNumber) {
 }
 
 /**
- * Clear the action status that is displayed in the snackbar.
+ * Submit new resume and parse it
  */
-
 async function submit() {
   let employeeNumber = !this.$route.params.id ? this.employee.employeeNumber : this.$route.params.id;
   if (!this.extractResume) {
@@ -375,21 +374,46 @@ async function submit() {
             setTimeout(() => {
               if (!this.resumeProcessed && this.activate) {
                 this.loadingMessage = 'You may want to try again...';
+              } else {
+                this.loadingMessage = 'Processing resume data, this may take up to 30 seconds';
               }
             }, 15000);
+          } else {
+            this.loadingMessage = 'Processing resume data, this may take up to 30 seconds';
           }
         }, 15000);
+      } else {
+        this.loadingMessage = 'Processing resume data, this may take up to 30 seconds';
       }
     }, 15000);
 
-    this.resumeObject = (await api.extractResumeText(employeeNumber, this.file)).comprehend;
     window.EventBus.$emit('uploaded', true);
     //when creating an employee
     if (this.$route.params.id === undefined) {
       window.EventBus.$emit('disableEmpNum', true);
     }
+    // This is used to check if the extract task is canceled before finishing
+    let checkFormCancel = async () => {
+      // eslint-disable-next-line no-constant-condition
+      while (true) {
+        if (this.activate) {
+          // This loops until the task is finished
+          await new Promise((resolve) => setTimeout(resolve, 10));
+        } else {
+          return null;
+        }
+      }
+    };
+
+    // This checks if the form has been closed while the resume was being parsed
+    let resumeCancelCheck = await Promise.race([checkFormCancel(), api.extractResumeText(employeeNumber, this.file)]);
+    if (!resumeCancelCheck) {
+      this.clearForm();
+      return;
+    }
+
+    this.resumeObject = resumeCancelCheck.comprehend;
     if (this.resumeObject instanceof Error || !this.resumeObject) {
-      this.isInactive = false;
       this.resumeObject = null;
       this.timeoutError = true;
       this.loading = false;
@@ -543,7 +567,7 @@ async function submit() {
     this.loading = false;
     this.resumeProcessed = true;
   }
-}
+} //submit
 
 function submitInfo(field, value, newValue) {
   if (field === 'address') {
