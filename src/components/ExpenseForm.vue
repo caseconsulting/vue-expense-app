@@ -279,7 +279,7 @@
           outlined
           color="success"
           @click="confirmingValid = true"
-          :disabled="!valid || (!isAdmin && isReimbursed) || isInactive"
+          :disabled="(!isAdmin && isReimbursed) || isInactive"
           id="submitButton"
           :loading="loading"
           class="ma-2"
