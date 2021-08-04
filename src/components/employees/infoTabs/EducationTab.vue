@@ -9,28 +9,40 @@
         <p><b>Completion Date: </b>{{ degree.date | monthYearFormat }}</p>
 
         <!-- Majors -->
-        <p class="mb-2"><b>Majors: </b></p>
-        <ul class="mb-4">
-          <li v-for="(major, majorIndex) in degree.majors" :key="majorIndex">
-            {{ major }}
-          </li>
-        </ul>
+        <div v-if="degree.majors.length > 1">
+          <p class="mb-2"><b>Majors: </b></p>
+          <ul class="mb-2">
+            <li v-for="(major, majorIndex) in degree.majors" :key="majorIndex">
+              {{ major }}
+            </li>
+          </ul>
+        </div>
+        <p class="mb-4" v-else-if="degree.minors.length === 1"><b>Major: </b> {{ degree.majors[0] }}</p>
 
         <!-- Minors -->
-        <p v-if="degree.minors.length > 0" class="mb-2"><b>Minors: </b></p>
-        <ul v-if="degree.minors.length > 0" class="mb-4">
-          <li v-for="(minor, minorIndex) in degree.minors" :key="minorIndex">
-            {{ minor }}
-          </li>
-        </ul>
+        <div v-if="degree.minors.length > 1">
+          <p class="mb-2"><b>Minors: </b></p>
+          <ul class="mb-2">
+            <li v-for="(minor, minorIndex) in degree.minors" :key="minorIndex">
+              {{ minor }}
+            </li>
+          </ul>
+        </div>
+        <p v-else-if="degree.minors.length === 1" class="mb-4"><b>Minor: </b> {{ degree.minors[0] }}</p>
 
         <!-- Concentrations -->
-        <p v-if="degree.concentrations.length > 0" class="mb-2"><b>Concentrations: </b></p>
-        <ul v-if="degree.concentrations.length > 0" class="mb-4">
-          <li v-for="(concentration, concentrationsIndex) in degree.concentrations" :key="concentrationsIndex">
-            {{ concentration }}
-          </li>
-        </ul>
+        <div v-if="degree.concentrations.length > 1">
+          <p class="mb-2"><b>Concentrations: </b></p>
+          <ul class="mb-2">
+            <li v-for="(concentration, concentrationsIndex) in degree.concentrations" :key="concentrationsIndex">
+              {{ concentration }}
+            </li>
+          </ul>
+        </div>
+        <p v-else-if="degree.concentrations.length === 1" class="mb-2">
+          <b>Concentration:</b> {{ degree.concentrations[0] }}
+        </p>
+
         <hr v-if="index < filteredList.length - 1" class="mb-3" />
       </div>
       <!-- End Loop Degrees -->
