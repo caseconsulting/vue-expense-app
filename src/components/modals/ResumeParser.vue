@@ -232,7 +232,6 @@ async function created() {
   window.EventBus.$on('confirmed-parser', () => {
     if (this.editedEmployeeForm) {
       window.EventBus.$emit('resume', this.editedEmployeeForm);
-      window.EventBus.$emit('uploadedResume', true);
       this.resumeProcessed = false;
       this.confirmingValid = false;
       this.activate = !this.activate;
