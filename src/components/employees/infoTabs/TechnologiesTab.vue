@@ -54,7 +54,7 @@
             </v-tooltip>
           </v-col>
         </v-row>
-        <p><b>Years of Experience: </b>{{ technology.years }}</p>
+        <p><b>Years of Experience: </b>{{ Number(technology.years) }}</p>
         <hr v-if="index < pageList.length - 1" class="mb-3" />
       </div>
       <!-- End Loop Technologies -->

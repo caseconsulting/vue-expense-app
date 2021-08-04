@@ -55,6 +55,7 @@
             dense
             type="number"
             outlined
+            @input="technology.years = formatNumber(technology.years)"
           >
           </v-text-field>
         </v-col>
@@ -144,6 +145,10 @@ function duplicateTechEntries() {
 
   return this.editedTechnologies ? duplicates(count(this.editedTechnologies)) : [];
 } // duplicateTechEntries
+
+function formatNumber(number) {
+  return Number(number);
+}
 
 /**
  * Checks to see if a technology is a duplicate of one that is already entered by a user.
@@ -240,6 +245,7 @@ export default {
     duplicateTechEntries,
     formatDateDashToSlash,
     formatDateSlashToDash,
+    formatNumber,
     isDuplicate,
     isEmpty,
     populateDropDowns,
