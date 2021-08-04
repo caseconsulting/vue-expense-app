@@ -395,6 +395,7 @@ async function submit() {
       this.loading = false;
       return;
     }
+    window.EventBus.$emit('upload-resume-complete', true);
     window.EventBus.$emit('updated-resume-parser', 'true');
     window.EventBus.$emit('updated-resume-parser-form', 'true');
 
