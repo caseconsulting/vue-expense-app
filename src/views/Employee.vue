@@ -277,7 +277,6 @@ async function created() {
   });
 
   window.EventBus.$on('delete-resume', (newResume) => {
-    console.log('delete-reusme');
     if (newResume != null) {
       this.hasResume = newResume;
     }
