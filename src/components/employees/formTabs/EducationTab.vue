@@ -141,6 +141,7 @@ Education
           :items="concentrationDropDown"
           data-vv-name="Concentration"
           clearable
+          label="Concentration"
         >
           <v-tooltip bottom slot="append-outer">
             <template v-slot:activator="{ on }">
