@@ -1399,6 +1399,7 @@ async function submit() {
     this.$emit('endAction');
     this.isHighFive = false; // set high five back to false
     this.reqRecipient = false;
+    this.clearForm();
   }
 } // submit
 
