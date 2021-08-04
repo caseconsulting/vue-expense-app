@@ -305,7 +305,9 @@ async function mounted() {
   });
 
   window.EventBus.$on('update', (updatedEmployee) => {
-    this.model = updatedEmployee;
+    if (updatedEmployee) {
+      this.model = updatedEmployee;
+    }
   });
 
   window.EventBus.$on('uploaded', (isUploaded) => {

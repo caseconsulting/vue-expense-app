@@ -230,11 +230,13 @@ import FormSubmissionConfirmation from '@/components/modals/FormSubmissionConfir
 
 async function created() {
   window.EventBus.$on('confirmed-parser', () => {
-    window.EventBus.$emit('resume', this.editedEmployeeForm);
-    window.EventBus.$emit('uploadedResume', true);
-    this.resumeProcessed = false;
-    this.confirmingValid = false;
-    this.activate = !this.activate;
+    if (this.editedEmployeeForm) {
+      window.EventBus.$emit('resume', this.editedEmployeeForm);
+      window.EventBus.$emit('uploadedResume', true);
+      this.resumeProcessed = false;
+      this.confirmingValid = false;
+      this.activate = !this.activate;
+    }
   });
   window.EventBus.$on('canceled-parser', () => {
     this.confirmingValid = false;
@@ -325,10 +327,6 @@ async function onlyUploadResume(employeeNumber) {
     //confirmation upload pop-up in employee.vue
     window.EventBus.$emit('uploaded', true);
     //disables employee number field in employeeTab.vue
-    //when creating an employee
-    if (this.$route.params.id === undefined) {
-      window.EventBus.$emit('disableEmpNum', true);
-    }
   }
 }
 
