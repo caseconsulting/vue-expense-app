@@ -616,7 +616,9 @@ function clearForm() {
   this.toggleResumeFormErrorModal = false;
   this.timeoutError = false;
   this.confirmingValid = false;
-  this.$refs.submit.reset();
+  if (this.$refs.submit !== undefined) {
+    this.$refs.submit.reset();
+  }
 }
 
 export default {
