@@ -17,7 +17,7 @@
             </li>
           </ul>
         </div>
-        <p class="mb-4" v-else-if="degree.minors.length === 1"><b>Major: </b> {{ degree.majors[0] }}</p>
+        <p class="mb-2" v-else-if="degree.majors.length === 1"><b>Major: </b> {{ degree.majors[0] }}</p>
 
         <!-- Minors -->
         <div v-if="degree.minors.length > 1">
@@ -28,7 +28,7 @@
             </li>
           </ul>
         </div>
-        <p v-else-if="degree.minors.length === 1" class="mb-4"><b>Minor: </b> {{ degree.minors[0] }}</p>
+        <p v-else-if="degree.minors.length === 1" class="mb-2"><b>Minor: </b> {{ degree.minors[0] }}</p>
 
         <!-- Concentrations -->
         <div v-if="degree.concentrations.length > 1">
