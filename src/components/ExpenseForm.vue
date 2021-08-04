@@ -1169,12 +1169,10 @@ async function scanFile() {
   this.scanLoading = true;
   let file = this.file;
   if (file) {
-    this.isInactive = true;
     //go get text data from textract and comprehend
 
     this.receiptObject = await api.extractText(this.userInfo.id, file);
     if (this.receiptObject instanceof Error) {
-      this.isInactive = false;
       this.receiptObject = null;
       this.scanLoading = false;
       return;
@@ -1320,7 +1318,6 @@ async function scanFile() {
         })
         .join(' ');
     }
-    this.isInactive = false;
 
     if (firstDate != null && this.editedExpense.purchaseDate == null) {
       let date = moment(firstDate);
