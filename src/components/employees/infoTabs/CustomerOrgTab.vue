@@ -4,9 +4,20 @@
     <div v-if="!isEmpty(model.customerOrgExp)">
       <!-- Loop Customer Organizations -->
       <div v-for="(exp, index) in this.filteredList" :key="exp.name + index">
-        <p><b>Customer Organization Experience: </b>{{ exp.name }}</p>
+        <v-row>
+          <v-col>
+            <p><b>Customer Organization Experience: </b>{{ exp.name }}</p>
+          </v-col>
+          <v-col>
+            <v-tooltip v-if="exp.current" right>
+              <template v-slot:activator="{ on }">
+                <v-icon v-on="on">check</v-icon>
+              </template>
+              <span>Current Organization</span>
+            </v-tooltip>
+          </v-col>
+        </v-row>
         <p><b>Years of Experience: </b>{{ exp.years }}</p>
-        <p><b>Current: </b>{{ exp.current | current }}</p>
         <hr v-if="index < filteredList.length - 1" class="mb-3" />
       </div>
       <!-- End Loop Customer Organizations -->
