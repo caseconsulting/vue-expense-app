@@ -13,8 +13,8 @@
               emit(`canceled-${type}`);
               activate = false;
             "
-            :loading="!activate"
-            :disabled="!activate"
+            :loading="!activate || submitting"
+            :disabled="!activate || submitting"
             >No</v-btn
           >
           <v-spacer></v-spacer>
@@ -26,8 +26,8 @@
               emit(`confirmed-${type}`);
               activate = false;
             "
-            :loading="!activate"
-            :disabled="!activate"
+            :loading="!activate || submitting"
+            :disabled="!activate || submitting"
             >Yes</v-btn
           >
           <v-spacer></v-spacer>
@@ -68,6 +68,7 @@ export default {
     emit
   },
   props: [
+    'submitting',
     'toggleSubmissionConfirmation', // dialog activator,
     'type' //sends appropriate emits based on where its called
   ],

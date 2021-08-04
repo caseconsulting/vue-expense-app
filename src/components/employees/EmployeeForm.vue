@@ -294,6 +294,7 @@
         </v-form>
         <!-- Confirmation Model -->
         <form-submission-confirmation
+          :submitting="this.submitting"
           :toggleSubmissionConfirmation="this.confirmingValid"
           type="form"
         ></form-submission-confirmation>
@@ -627,7 +628,6 @@ async function submit() {
   this.submitting = true;
   // convert appropriate fields to title case
   await this.convertAutocompleteToTitlecase();
-  this.confirmingValid = false;
   let hasErrors = await this.hasTabError();
   if (this.$refs.form.validate() && !hasErrors) {
     // form validated
@@ -645,7 +645,6 @@ async function submit() {
         // failed to update employee
         this.$emit('error', updatedEmployee.response.data.message);
         this.displayError(updatedEmployee.response.data.message);
-        this.confirmingValid = false;
         // this.$emit('cancel-form');
       }
     } else {
@@ -660,7 +659,6 @@ async function submit() {
         this.$emit('error', newEmployee.response.data.message);
         this.displayError(newEmployee.response.data.message);
         this.$set(this.model, 'id', null); // reset id
-        this.confirmingValid = false;
         // this.$emit('endAction');
       }
     }
@@ -715,6 +713,7 @@ async function created() {
 
   window.EventBus.$on('confirmed-form', () => {
     this.submit();
+    this.confirmingValid = false;
   });
   window.EventBus.$on('canceled-form', () => {
     this.errorTabNames = {};
