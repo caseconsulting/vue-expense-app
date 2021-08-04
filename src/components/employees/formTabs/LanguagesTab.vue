@@ -169,12 +169,12 @@ function validateFields() {
     }
   });
   //checks to see if there are duplicate entries with the same name
-  if (this.duplicateLangEntries().length < 0 || errorCount >= 1) {
-    window.EventBus.$emit('languagesStatus', errorCount); // emit error status
-  } else if (this.duplicateLangEntries().length > 0) {
+  if (this.duplicateLangEntries().length > 0) {
     //emit error status with a custom message
     window.EventBus.$emit('languagesDuplicateStatus', 'Languages MUST be UNIQUE. Please remove any duplicates');
     // emit error status
+  } else {
+    window.EventBus.$emit('languagesStatus', errorCount);
   }
   window.EventBus.$emit('doneValidating', 'languages', this.editedLanguages); // emit done validating
 } // validateFields

@@ -10,9 +10,9 @@
             color="red"
             text
             @click.native="
-              emit(`backout-canceled-${type}`);
               activate = false;
               loading = true;
+              emit(`backout-canceled-${type}`);
             "
             :loading="loading"
             :disabled="loading"

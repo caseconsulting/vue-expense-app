@@ -175,6 +175,7 @@
       <v-menu
         v-if="isInactive()"
         ref="departureMenu"
+        :rules="requiredRules"
         :close-on-content-click="false"
         v-model="departureMenu"
         :nudge-right="40"
@@ -455,7 +456,7 @@ export default {
     validateFields,
     viewStatus
   },
-  props: ['admin', 'model', 'validating'],
+  props: ['admin', 'model', 'validating', 'disableEmpNum'],
   watch: {
     'model.id': function () {
       this.editedEmployee = _.cloneDeep(this.model);

@@ -437,7 +437,6 @@ function getJobs(job) {
  * @return String - technologies
  */
 function getTechnologies(tech) {
-  console.log(tech);
   let str = '';
   let result = [];
   if (tech) {

@@ -110,51 +110,52 @@
               </v-col>
             </v-row>
             <div v-for="(tech, index) in newTechnology" :key="index">
-              <div v-if="!tech.canceled" style="border: 1px solid grey" class="pt-3 pb-1 px-5 ma-1">
-                <!-- Loop Technologies -->
-                <!-- Name of Technology -->
-                <v-text-field class="pb-5" :value="tech.name" readonly label="Technology"></v-text-field>
+              <v-form :ref="'tech' + index">
+                <div v-if="!tech.canceled" style="border: 1px solid grey" class="pt-3 pb-1 px-5 ma-1">
+                  <!-- Loop Technologies -->
+                  <!-- Name of Technology -->
+                  <v-text-field class="pb-5" :value="tech.name" readonly label="Technology"></v-text-field>
 
-                <!-- Time Intervals -->
-                <div class="mb-3">
-                  <v-row justify="center" align="center" class="py-3">
-                    <!-- Current Switch -->
-                    <v-col cols="4" sm="4" md="4" lg="4">
-                      <v-switch v-model="tech.current" label="Currently know this technology"></v-switch>
-                    </v-col>
+                  <!-- Time Intervals -->
+                  <div class="mb-3">
+                    <v-row justify="center" align="center" class="py-3">
+                      <!-- Current Switch -->
+                      <v-col cols="4" sm="4" md="4" lg="4">
+                        <v-switch v-model="tech.current" label="Currently know this technology"></v-switch>
+                      </v-col>
 
-                    <!-- Years of Experience -->
-                    <v-col
-                      cols="5"
-                      sm="6"
-                      md="4"
-                      lg="3"
-                      class="px-0 pb-0"
-                      :class="{ 'px-4': $vuetify.breakpoint.sm, 'px-4': $vuetify.breakpoint.lg }"
-                    >
-                      <v-text-field
-                        class="px-3"
-                        ref="formFields"
-                        v-model="tech.years"
-                        flat
-                        :rules="experienceRequired"
-                        single-line
-                        max="99"
-                        min="0"
-                        suffix="years"
-                        dense
-                        type="number"
-                        outlined
-                      ></v-text-field>
-                    </v-col>
+                      <!-- Years of Experience -->
+                      <v-col
+                        cols="5"
+                        sm="6"
+                        md="4"
+                        lg="3"
+                        class="px-0 pb-0"
+                        :class="{ 'px-4': $vuetify.breakpoint.sm, 'px-4': $vuetify.breakpoint.lg }"
+                      >
+                        <v-text-field
+                          class="px-3"
+                          v-model="tech.years"
+                          flat
+                          :rules="experienceRequired"
+                          single-line
+                          max="99"
+                          min="0"
+                          suffix="years"
+                          dense
+                          type="number"
+                          outlined
+                        ></v-text-field>
+                      </v-col>
+                    </v-row>
+                  </div>
+
+                  <v-row align="center" class="py-3" justify="center">
+                    <v-icon large left color="green" @click="submitInfo('technology', index)">done</v-icon>
+                    <v-icon large right color="red" @click="tech.canceled = true">close</v-icon>
                   </v-row>
                 </div>
-
-                <v-row align="center" class="py-3" justify="center">
-                  <v-icon large left color="green" @click="submitInfo('technology', index)">done</v-icon>
-                  <v-icon large right color="red" @click="tech.canceled = true">close</v-icon>
-                </v-row>
-              </div>
+              </v-form>
             </div>
           </span>
           <div v-if="showEducation" class="mt-4">
@@ -321,8 +322,13 @@ async function onlyUploadResume(employeeNumber) {
   if (uploadResult instanceof Error) {
     this.timeoutError = true;
   } else {
+    //confirmation upload pop-up in employee.vue
     window.EventBus.$emit('uploaded', true);
-    this.clearForm();
+    //disables employee number field in employeeTab.vue
+    //when creating an employee
+    if (this.$route.params.id === undefined) {
+      window.EventBus.$emit('disableEmpNum', true);
+    }
   }
 }
 
@@ -334,7 +340,6 @@ async function submit() {
   let employeeNumber = !this.$route.params.id ? this.employee.employeeNumber : this.$route.params.id;
   if (!this.extractResume) {
     this.onlyUploadResume(employeeNumber);
-    window.EventBus.$emit('uploadedResume', true);
     return;
   }
   this.resumeObject = [];
@@ -378,6 +383,11 @@ async function submit() {
     }, 15000);
 
     this.resumeObject = (await api.extractResumeText(employeeNumber, this.file)).comprehend;
+    window.EventBus.$emit('uploaded', true);
+    //when creating an employee
+    if (this.$route.params.id === undefined) {
+      window.EventBus.$emit('disableEmpNum', true);
+    }
     if (this.resumeObject instanceof Error || !this.resumeObject) {
       this.isInactive = false;
       this.resumeObject = null;
@@ -542,7 +552,7 @@ function submitInfo(field, value, newValue) {
     this.editedEmployeeForm.currentZIP = this.newPersonal.currentZIP;
   } else if (field === 'phoneNumber') {
     this.editedEmployeeForm.phoneNumber = this.newPersonal.phoneNumber;
-  } else if (field === 'technology') {
+  } else if (field === 'technology' && this.$refs['tech' + value][0].validate()) {
     this.newTechnology[value].canceled = true;
     if (!this.editedEmployeeForm.technologies) {
       this.editedEmployeeForm.technologies = [];
@@ -552,16 +562,6 @@ function submitInfo(field, value, newValue) {
       current: this.newTechnology[value].current,
       years: this.newTechnology[value].years
     });
-
-    // if (!this.editedEmployeeForm.technologies) {
-    //   this.editedEmployeeForm.technologies = [];
-    // }
-    // this.editedEmployeeForm.technologies.push({
-    //   name: this.newTechnology[value].name,
-    //   current: this.newTechnology[value].current,
-    //   canceled: true,
-    //   years: this.newTechnology[value].years
-    // });
   } else if (field === 'education' && this.$refs['education' + value][0].validate()) {
     this.newEducation[value].canceled = true;
     this.newEducation[value].date = newValue[0].date;

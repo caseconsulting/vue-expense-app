@@ -440,10 +440,10 @@ async function validateDelete(item) {
  * Called to reset the data on the employee form if exited w/out submitting
  */
 async function clearCreateEmployee() {
+  this.createEmployee = false;
   if (this.employeeNumber) {
     await api.deleteResume(this.employeeNumber);
   }
-  this.createEmployee = false;
 }
 
 // |--------------------------------------------------|

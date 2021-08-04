@@ -15,7 +15,7 @@
           <v-btn
             text
             @click.native="
-              emit('canceled');
+              emit('canceled-form');
               activate = false;
             "
             >Ok</v-btn

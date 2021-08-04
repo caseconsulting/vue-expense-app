@@ -707,13 +707,12 @@ async function created() {
     this.model.employeeNumber = employeeNumber;
   });
 
-  window.EventBus.$on('uploadedResume', (result) => {
+  window.EventBus.$on('disableEmpNum', (result) => {
     this.disableEmpNum = result;
     window.EventBus.$emit('empNum', this.employeeNumber);
   });
 
   window.EventBus.$on('confirmed-form', () => {
-    //this.confirming = false;
     this.submit();
   });
   window.EventBus.$on('canceled-form', () => {

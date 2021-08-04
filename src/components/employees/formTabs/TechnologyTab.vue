@@ -206,12 +206,10 @@ function validateFields() {
     this.duplicateTechEntries().length > 0
       ? window.EventBus.$emit('technologiesErrStatus', 'Technology names MUST be UNIQUE. Please remove any duplicates')
       : null;
-  } else {
-    errorCount > 0 ? window.EventBus.$emit('technologiesStatus', errorCount) : null;
   }
   //emit error status with a custom message
   // emit error status
-
+  window.EventBus.$emit('technologiesStatus', errorCount);
   window.EventBus.$emit('doneValidating', 'technologies', this.editedTechnologies); // emit done validating
 } // validateFields
 

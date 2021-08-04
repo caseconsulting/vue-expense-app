@@ -244,7 +244,6 @@ async function deleteResume() {
   if (!(deleteResult instanceof Error)) {
     this.hasResume = false;
     this.displayMessage('SUCCESS', 'Successfully deleted resume', 'green');
-    window.EventBus.$emit('delete-resume', this.hasResume);
   } else {
     this.displayMessage('ERROR', 'Failure to delete resume', 'red');
   }
