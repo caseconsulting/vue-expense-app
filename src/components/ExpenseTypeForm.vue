@@ -280,17 +280,17 @@
           color="success"
           id="submitButton"
           :loading="submitting"
-          @click="
-            submitForm = !submitForm;
-            submitting = true;
-          "
+          @click="submitForm = true"
           :disabled="!valid"
         >
           <icon class="mr-1" name="save"></icon>Submit
         </v-btn>
         <!-- End Buttons -->
       </v-form>
-      <form-submission-confirmation :toggleSubmissionConfirmation="submitForm"></form-submission-confirmation>
+      <form-submission-confirmation
+        type="type"
+        :toggleSubmissionConfirmation="submitForm"
+      ></form-submission-confirmation>
     </v-container>
   </v-card>
 </template>
@@ -594,11 +594,13 @@ function toggleRequireURL() {
  * Gets and sets all employees.
  */
 async function created() {
-  window.EventBus.$on('confirmed', () => {
+  window.EventBus.$on('confirmed-type', () => {
+    this.submitForm = false;
     this.submit();
   });
-  window.EventBus.$on('canceled', () => {
+  window.EventBus.$on('canceled-type', () => {
     this.submitting = false;
+    this.submitForm = false;
   });
   // get all employees
   let employees = await api.getItems(api.EMPLOYEES);
