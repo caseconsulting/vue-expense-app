@@ -229,6 +229,7 @@
                 :admin="hasAdminPermissions()"
                 :model="model"
                 :validating="validating.employee"
+                :key="updateEmpTab"
               ></employee-tab>
             </v-tab-item>
             <!-- Personal Info -->
@@ -571,7 +572,7 @@ async function confirm() {
     }
   });
   //validates forms
-  if (this.$refs.form.validate()) {
+  if (this.$refs.form !== undefined && this.$refs.form.validate()) {
     //checks to see if there are any tabs with errors
     let hasErrors = await this.hasTabError();
     if (!hasErrors) {
@@ -629,7 +630,7 @@ async function submit() {
   // convert appropriate fields to title case
   await this.convertAutocompleteToTitlecase();
   let hasErrors = await this.hasTabError();
-  if (this.$refs.form.validate() && !hasErrors) {
+  if (this.$refs.form !== undefined && this.$refs.form.validate() && !hasErrors) {
     // form validated
     this.$emit('startAction');
     this.cleanUpData();
@@ -706,13 +707,13 @@ async function created() {
     this.model.employeeNumber = employeeNumber;
   });
 
-  window.EventBus.$on('disableEmpNum', (result) => {
+  window.EventBus.$on('uploadedResume', (result) => {
     this.disableEmpNum = result;
     window.EventBus.$emit('empNum', this.employeeNumber);
   });
 
-  window.EventBus.$on('confirmed-form', () => {
-    this.submit();
+  window.EventBus.$on('confirmed-form', async () => {
+    await this.submit();
     this.confirmingValid = false;
   });
   window.EventBus.$on('canceled-form', () => {
@@ -889,12 +890,6 @@ function titleCase(str) {
  * Converts all the autocomplete fields to title case capitalization
  */
 async function convertAutocompleteToTitlecase() {
-  //Convert autocomplete technology field to title case
-  // if (this.model.technologies !== null && this.model.technologies.length != 0) {
-  //   this.model.technologies.forEach((currTech) => {
-  //     currTech.name = titleCase(currTech.name);
-  //   });
-  // }
   //Convert autocomplete certification field to title case
   if (this.model.certifications !== null && this.model.certifications.length != 0) {
     this.model.certifications.forEach((currCert) => {
@@ -913,12 +908,6 @@ async function convertAutocompleteToTitlecase() {
       currLang.name = titleCase(currLang.name);
     });
   }
-  //Convert autocomplete School field to title case
-  // if (this.model.degrees !== null && this.model.degrees.length != 0) {
-  //   this.model.degrees.forEach((currDeg) => {
-  //     currDeg.school = titleCase(currDeg.school);
-  //   });
-  // }
   await this.confirm();
 } //convertAutocompleteToTitlecase
 
@@ -1034,6 +1023,7 @@ export default {
         technologies: false
       }, // tab component created
       toggleResumeParser: false,
+      updateEmpTab: 0,
       uploadDisabled: true,
       valid: false, // form validity
       validating: {
