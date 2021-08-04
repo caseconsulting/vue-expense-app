@@ -230,6 +230,8 @@ import FormSubmissionConfirmation from '@/components/modals/FormSubmissionConfir
 
 async function created() {
   window.EventBus.$on('confirmed-parser', () => {
+    // For some reason confirmed-parser gets called twice
+    // Where one of the editedEmployeeForms is null
     if (this.editedEmployeeForm) {
       window.EventBus.$emit('resume', this.editedEmployeeForm);
       this.resumeProcessed = false;
@@ -360,6 +362,7 @@ async function submit() {
     this.loading = true;
     this.resumeProcessed = false;
 
+    // The set timeouts are for the loading message
     this.loadingMessage = 'Processing resume data, this may take up to 30 seconds';
 
     setTimeout(() => {
@@ -568,16 +571,25 @@ async function submit() {
 
 function submitInfo(field, value, newValue) {
   if (field === 'address') {
+    if (!this.editedEmployeeForm.currentStreet) {
+      this.$set(this.editedEmployeeForm, 'currentStreet', '');
+      this.$set(this.editedEmployeeForm, 'currentCity', '');
+      this.$set(this.editedEmployeeForm, 'currentState', '');
+      this.$set(this.editedEmployeeForm, 'currentZIP', '');
+    }
     this.editedEmployeeForm.currentStreet = this.newPersonal.currentStreet;
     this.editedEmployeeForm.currentCity = this.newPersonal.currentCity;
     this.editedEmployeeForm.currentState = this.newPersonal.currentState;
     this.editedEmployeeForm.currentZIP = this.newPersonal.currentZIP;
   } else if (field === 'phoneNumber') {
+    if (!this.editedEmployeeForm.phoneNumber) {
+      this.$set(this.editedEmployeeForm, 'phoneNumber', '');
+    }
     this.editedEmployeeForm.phoneNumber = this.newPersonal.phoneNumber;
   } else if (field === 'technology' && this.$refs['tech' + value][0].validate()) {
     this.newTechnology[value].canceled = true;
     if (!this.editedEmployeeForm.technologies) {
-      this.editedEmployeeForm.technologies = [];
+      this.$set(this.editedEmployeeForm, 'technologies', []);
     }
     this.editedEmployeeForm.technologies.push({
       name: this.newTechnology[value].name,
@@ -593,7 +605,7 @@ function submitInfo(field, value, newValue) {
     this.newEducation[value].school = newValue[0].school;
     this.newEducation[value].canceled = true;
     if (!this.editedEmployeeForm.degrees) {
-      this.editedEmployeeForm.degrees = [];
+      this.$set(this.editedEmployeeForm, 'degrees', []);
     }
     this.editedEmployeeForm.degrees.push({
       concentrations: this.newEducation[value].concentrations,
@@ -787,15 +799,6 @@ export default {
     activate: function () {
       if (this.activate) {
         this.editedEmployeeForm = _.cloneDeep(this.employee);
-        if (!this.editedEmployeeForm.technologies) {
-          this.editedEmployeeForm.technologies = [];
-        }
-        if (!this.editedEmployeeForm.phoneNumber) {
-          this.editedEmployeeForm.phoneNumber = '';
-        }
-        if (!this.editedEmployeeForm.address) {
-          this.editedEmployeeForm.address = '';
-        }
       }
     }
   }
