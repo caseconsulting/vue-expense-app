@@ -1,15 +1,71 @@
 <template>
-  <v-card v-if="dataReceived" class="pa-5">
-    <v-btn :disabled="reachedMin" @click="oneLessColumn">-</v-btn>
-    <v-btn :disabled="reachedMax" @click="oneMoreColumn">+</v-btn>
-    <horizontal-bar :options="options" :chartData="chartData"></horizontal-bar>
+  <v-card v-if="enoughData" class="pa-5">
+    <v-container v-if="dataReceived" class="ma-0">
+      <v-row align="center" justify="end">
+        <v-col cols="4" class="text-right">
+          <v-tooltip top>
+            <template v-slot:activator="{ on }">
+              <v-btn v-on="on" v-if="!isMobile" :disabled="reachedMin" @click="oneLessColumn" small class="mr-2"
+                >-</v-btn
+              >
+            </template>
+            <span>Decrease Number of Columns Shown</span>
+          </v-tooltip>
+          <v-tooltip top>
+            <template v-slot:activator="{ on }">
+              <v-btn v-on="on" v-if="!isMobile" :disabled="reachedMax" @click="oneMoreColumn" small class="mr-2"
+                >+</v-btn
+              >
+            </template>
+            <span>Increase Number of Columns Shown</span>
+          </v-tooltip>
+        </v-col>
+      </v-row>
+      <horizontal-bar :options="options" :chartData="chartData"></horizontal-bar>
+      <v-row justify="center" no-gutters>
+        <v-radio-group row v-model="showCurrent" class="mt-8 mb-0">
+          <v-radio label="All" value="All"></v-radio>
+          <v-radio label="Current" value="Current"></v-radio>
+          <v-radio label="Past" value="Past"></v-radio>
+        </v-radio-group>
+      </v-row>
+    </v-container>
+    <v-skeleton-loader v-else type="paragraph@5"></v-skeleton-loader>
   </v-card>
-  <v-skeleton-loader v-else type="paragraph@5"></v-skeleton-loader>
+  <v-card v-else>
+    <div class="pa-15 text-center">
+      <h2>Not Enough Data Avaliable.</h2>
+      <h5 class="pt-3">Try adding some information to your profile!</h5>
+    </div>
+  </v-card>
 </template>
 
 <script>
 import HorizontalBar from '../baseCharts/HorizontalBarChart.vue';
 import api from '@/shared/api.js';
+import MobileDetect from 'mobile-detect';
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     COMPUTED                     |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * Checks if the current device used is mobile. Return true if it is mobile. Returns false if it is not mobile.
+ *
+ * @return boolean - if the device is mobile
+ */
+function isMobile() {
+  let md = new MobileDetect(window.navigator.userAgent);
+  return md.os() === 'AndroidOS' || md.os() === 'iOS';
+} // isMobile
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     METHOD                       |
+// |                                                  |
+// |--------------------------------------------------|
 
 /**
  * Takes data that was captured upon load and displays it on the chart
@@ -93,7 +149,9 @@ function fillData(that) {
     },
     title: {
       display: true,
-      text: `Top ${pairs.length} Technologies Used by Employees`,
+      text: `Top ${pairs.length} ${
+        that.showCurrent === 'All' ? '' : that.showCurrent + ' '
+      }Technologies Used by Employees`,
       fontSize: 15
     },
     maintainAspectRatio: false
@@ -131,27 +189,26 @@ function oneLessColumn() {
   }
 } //oneLessColumn
 
-async function mounted() {
-  //Get data
-  //Put into dictionary where key is tech type and value is quantity
-  let employees = await api.getItems(api.EMPLOYEES);
+/**
+ * Sets num of columns to show when radio buttons are changed
+ */
+function setNumOfColumns(techArray) {
+  if (techArray.length <= 5) {
+    this.numOfColumns = techArray.length;
+    this.reachedMax = true;
+  } else {
+    this.numOfColumns = 5;
+    this.reachedMax = false;
+    this.reachedMin = false;
+  }
+} //setNumOfColumns
 
-  let technologies = {};
-
-  employees.forEach((employee) => {
-    if (employee.technologies) {
-      employee.technologies.forEach((currTech) => {
-        if (!technologies[currTech.name]) {
-          technologies[currTech.name] = 1;
-        } else {
-          technologies[currTech.name] += 1;
-        }
-      });
-    }
-  });
-
+/**
+ * Sorts array of tech skills
+ */
+function sortTech(techArray) {
   //We now sort the entries
-  this.technologyPairs = Object.entries(technologies);
+  this.technologyPairs = Object.entries(techArray);
   if (this.technologyPairs.length <= this.numOfColumnsMin) {
     this.numOfColumns = this.technologyPairs.length;
     this.numOfColumnsMin = this.technologyPairs.length;
@@ -162,6 +219,59 @@ async function mounted() {
     this.numOfColumns = this.technologyPairs.length;
     this.reachedMax = true;
   }
+  // Set number of columns to display
+  this.setNumOfColumns(techArray);
+} //sortTech
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                  LIFECYCLE HOOKS                 |
+// |                                                  |
+// |--------------------------------------------------|
+
+async function mounted() {
+  //Get data
+  //Put into dictionary where key is tech type and value is quantity
+  let employees = await api.getItems(api.EMPLOYEES);
+
+  employees.forEach((employee) => {
+    if (employee.technologies) {
+      employee.technologies.forEach((currTech) => {
+        // **** ALL TECH ****
+        if (!this.technologies[currTech.name]) {
+          this.technologies[currTech.name] = 1;
+        } else {
+          this.technologies[currTech.name] += 1;
+        }
+        // **** CURRENT TECH ****
+        // Not in array yet, but is current
+        if (!this.currentTechnologies[currTech.name] && currTech.current) {
+          this.currentTechnologies[currTech.name] = 1;
+        }
+        // Already in array, but is current
+        else if (this.currentTechnologies[currTech.name] && currTech.current) {
+          this.currentTechnologies[currTech.name] += 1;
+        }
+        // **** NON CURRENT TECH ****
+        // Not in array yet, and is not current
+        else if (!this.nonCurrentTechnologies[currTech.name] && !currTech.current) {
+          this.nonCurrentTechnologies[currTech.name] = 1;
+        }
+        // Already in array, and is not current
+        else if (this.nonCurrentTechnologies[currTech.name] && !currTech.current) {
+          this.nonCurrentTechnologies[currTech.name] += 1;
+        }
+      });
+    }
+  });
+
+  // Check if there is enough data to display chart
+  if (this.technologies.length >= 2) {
+    this.enoughData = false;
+  }
+  // Sort tech by number of occurances
+  this.sortTech(this.technologies);
+
   this.fillData(this);
   this.$forceUpdate();
 }
@@ -169,6 +279,9 @@ async function mounted() {
 export default {
   components: {
     HorizontalBar
+  },
+  computed: {
+    isMobile
   },
   data() {
     return {
@@ -179,16 +292,39 @@ export default {
       options: null,
       numOfColumns: 5,
       numOfColumnsMin: 2,
-      numOfColumnsMax: 10
+      numOfColumnsMax: 10,
+      technologies: {},
+      currentTechnologies: {},
+      nonCurrentTechnologies: {},
+      showCurrent: 'All',
+      enoughData: true
     };
   },
   methods: {
     fillData,
     oneMoreColumn,
-    oneLessColumn
+    oneLessColumn,
+    sortTech,
+    setNumOfColumns
   },
-  mounted
+  mounted,
+  watch: {
+    showCurrent() {
+      if (this.showCurrent === 'All') {
+        this.sortTech(this.technologies);
+      } else if (this.showCurrent === 'Current') {
+        this.sortTech(this.currentTechnologies);
+      } else {
+        this.sortTech(this.nonCurrentTechnologies);
+      }
+      this.fillData(this);
+    }
+  }
 };
 </script>
 
-<style></style>
+<style>
+button {
+  top: 30px;
+}
+</style>
