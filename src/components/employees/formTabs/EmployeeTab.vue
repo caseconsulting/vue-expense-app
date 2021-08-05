@@ -72,9 +72,9 @@
 
       <!-- Employee Role -->
       <v-autocomplete
+        v-if="!loading && (userIsAdmin() || (userIsManager() && !userIsEmployee()))"
         id="employeeRole"
         ref="formFields"
-        :disabled="!userIsAdmin() && userIsEmployee()"
         :items="permissions"
         :rules="requiredRules"
         v-model="employeeRoleFormatted"
@@ -281,6 +281,7 @@ async function created() {
   this.value = this.editedEmployee.workStatus.toString();
   let user = await api.getUser();
   this.userId = user.employeeNumber;
+  this.loading = false;
 } // created
 
 // |--------------------------------------------------|
@@ -426,6 +427,7 @@ export default {
         'Accountant',
         'Other'
       ], // job title options
+      loading: true,
       mifiStatus: true,
       numberRules: [
         (v) => !isEmpty(v) || 'Employee # is required',
