@@ -186,6 +186,27 @@ function searchPrime() {
 } // searchPrime
 
 /**
+ * Sets a mapping of employee name to employee id of an expense for the autocomplete options.
+ *
+ * @param aggregatedData - aggregated expenses
+ */
+function constructAutoComplete(aggregatedData) {
+  this.employees = _.sortBy(
+    _.map(aggregatedData, (data) => {
+      if (data && data.employeeName && data.employeeId) {
+        return {
+          text: data.employeeName,
+          value: data.employeeId
+        };
+      }
+    }).filter((data) => {
+      return data != null;
+    }),
+    (employee) => employee.text.toLowerCase()
+  );
+} // constructAutoComplete
+
+/**
  * Clears the other search forms and searches the table by prime
  */
 // function searchNorm() {
@@ -300,7 +321,8 @@ export default {
     populateDropDowns,
     refreshList,
     searchContract,
-    searchPrime
+    searchPrime,
+    constructAutoComplete
   }
 };
 </script>
