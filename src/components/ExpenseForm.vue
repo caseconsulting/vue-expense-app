@@ -1331,6 +1331,7 @@ async function scanFile() {
     }
     if (!failed && (this.editedExpense.cost == 0 || this.editedExpense.cost == null)) {
       this.editedExpense.cost = totalPrice;
+      this.costFormatted = formatCost(totalPrice);
     }
     if (!isEmpty(this.editedExpense.note)) {
       // expense has a note
