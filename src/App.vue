@@ -162,8 +162,11 @@ function handleLogout() {
   logout();
 }
 
-function handleProfile() {
-  this.$router.push({ name: 'employee', params: { id: `${this.userId}` } });
+async function handleProfile() {
+  // We don't use this.userId becuase it may be null by the time we click the button
+  var user = await api.getUser();
+  let userId = user.employeeNumber;
+  this.$router.push({ name: 'employee', params: { id: `${userId}` } });
 }
 
 function onResize() {

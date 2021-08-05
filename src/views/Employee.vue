@@ -1,5 +1,8 @@
 <template>
-  <v-container class="my-3" fluid>
+  <div v-if="model == null && !loading">
+    <h1 class="text-center">Invalid Employee!</h1>
+  </div>
+  <v-container v-else class="my-3" fluid>
     <v-snackbar
       v-model="uploadStatus.statusType"
       :color="uploadStatus.color"
@@ -295,13 +298,15 @@ async function created() {
   });
   this.loading = true;
   await this.getEmployee();
-  this.user = await api.getUser();
-  this.checkForBudgetAccess();
-  this.role = getRole();
-  this.displayQuickBooksTimeAndBalances = this.userIsAdmin() || this.userIsEmployee();
+  if (this.model) {
+    this.user = await api.getUser();
+    this.checkForBudgetAccess();
+    this.role = getRole();
+    this.displayQuickBooksTimeAndBalances = this.userIsAdmin() || this.userIsEmployee();
+    this.fiscalDateView = this.getCurrentBudgetYear();
+    this.hasResume = (await api.getResume(this.$route.params.id)) != null;
+  }
   this.loading = false;
-  this.fiscalDateView = this.getCurrentBudgetYear();
-  this.hasResume = (await api.getResume(this.$route.params.id)) != null;
 } // created
 
 /**
