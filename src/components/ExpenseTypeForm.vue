@@ -208,6 +208,7 @@
           no-data-text="No Employees Available"
           item-color="gray"
           multiple
+          :rules="customAccessRules"
           chips
           clearable
           small-chips
@@ -658,6 +659,11 @@ export default {
         }
       ],
       customAccess: [], // list of employees with custom access
+      customAccessRules: [
+        () => {
+          return this.customAccess.length > 0 || 'Select at least one employee or uncheck the Custom checkbox';
+        }
+      ],
       dateRules: [
         (v) => !isEmpty(v) || 'Date must be valid. Format: MM/DD/YYYY',
         (v) => (!isEmpty(v) && /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v)) || 'Date must be valid. Format: MM/DD/YYYY',
