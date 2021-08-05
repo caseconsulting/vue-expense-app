@@ -28,19 +28,19 @@
       </v-combobox>
 
       <!-- Time Intervals -->
-      <v-row align="center" justify="center">
+      <v-row justify="center">
         <!-- Current Switch -->
-        <v-col cols="6" sm="7" md="6" lg="7">
+        <v-col cols="10" sm="6" md="6" lg="6" class="ml-3 ml-sm-0">
           <v-switch class="mt-0 pb-2" v-model="technology.current" label="Currently know this technology"></v-switch>
         </v-col>
 
         <!-- Years of Experience -->
         <v-col
-          cols="3"
-          sm="3"
+          cols="8"
+          sm="4"
           md="4"
-          lg="3"
-          class="px-0 mt-0"
+          lg="4"
+          class="px-0 px-sm-0 pb-0"
           :class="{ 'px-4': $vuetify.breakpoint.sm, 'px-4': $vuetify.breakpoint.lg }"
         >
           <v-text-field
@@ -59,7 +59,7 @@
           >
           </v-text-field>
         </v-col>
-        <v-col cols="2" class="mt-0 mb-5" align="center">
+        <v-col cols="2" class="mt-0 mb-5 text-center">
           <v-tooltip bottom slot="append-outer">
             <template v-slot:activator="{ on }">
               <v-btn text icon v-on="on" @click="deleteTechnology(index)"
