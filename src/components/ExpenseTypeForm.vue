@@ -174,24 +174,28 @@
             label="Full-time"
             value="FullTime"
             v-model="editedExpenseType.accessibleBy"
+            :rules="checkBoxValid"
             class="shrink ml-3"
           ></v-checkbox>
           <v-checkbox
             label="Part-time"
             value="PartTime"
             v-model="editedExpenseType.accessibleBy"
+            :rules="checkBoxValid"
             class="shrink ml-6"
           ></v-checkbox>
           <v-checkbox
             label="Intern"
             value="Intern"
             v-model="editedExpenseType.accessibleBy"
+            :rules="checkBoxValid"
             class="shrink ml-6"
           ></v-checkbox>
           <v-checkbox
             label="Custom"
             value="Custom"
             v-model="editedExpenseType.accessibleBy"
+            :rules="checkBoxValid"
             class="shrink ml-6"
           ></v-checkbox>
         </v-row>
@@ -648,6 +652,11 @@ export default {
       campfires: [], // basecamp campfires
       categories: [], // list of expense type categories
       categoryInput: null, // category combobox input
+      checkBoxValid: [
+        () => {
+          return !this.checkBoxRule;
+        }
+      ],
       customAccess: [], // list of employees with custom access
       dateRules: [
         (v) => !isEmpty(v) || 'Date must be valid. Format: MM/DD/YYYY',
