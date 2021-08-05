@@ -226,7 +226,6 @@ function refreshBudgetYears() {
 function created() {
   this.addOneSecondToActualTimeEverySecond();
   this.loadData();
-  console.log('Anniversary' + this.hasBudgets);
 
   window.EventBus.$on('selected-budget-year', (data) => {
     if (data.format(IsoFormat) != this.fiscalDateView) {

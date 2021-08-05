@@ -47,7 +47,11 @@
       <v-col v-if="displayQuickBooksTimeAndBalances" cols="12" md="5" lg="4">
         <quick-books-time-data :employee="this.model" class="mb-6"></quick-books-time-data>
         <available-budgets class="mb-4" v-if="this.model.id" :employee="this.model"></available-budgets>
-        <anniversary-card v-if="!minimizeWindow" :employee="this.model"></anniversary-card>
+        <anniversary-card
+          v-if="!minimizeWindow"
+          :employee="this.model"
+          :hasBudgets="this.hasAccessToBudgets"
+        ></anniversary-card>
       </v-col>
 
       <!-- Employee Form -->
@@ -90,7 +94,7 @@
         <anniversary-card
           v-if="minimizeWindow"
           :employee="this.model"
-          :hasBudgets="hasAccessToBudgets"
+          :hasBudgets="this.hasAccessToBudgets"
         ></anniversary-card>
         <budget-chart
           v-if="(userIsAdmin() || userIsEmployee()) && hasAccessToBudgets"
@@ -259,8 +263,6 @@ async function deleteResume() {
  */
 async function checkForBudgetAccess() {
   let accessibleBudgets = await api.getAllActiveEmployeeBudgets(this.model.id);
-  console.log(this.model);
-  console.log(accessibleBudgets);
   if (accessibleBudgets.length == 0) {
     // does not have access to any budgets
     this.hasAccessToBudgets = false; // disable budget chart
