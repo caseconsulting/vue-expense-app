@@ -23,7 +23,7 @@
       </v-row>
       <horizontal-bar :options="options" :chartData="chartData"></horizontal-bar>
       <v-row justify="center" no-gutters>
-        <v-radio-group row v-model="showCurrent" class="mt-8 mb-0">
+        <v-radio-group row v-model="showCurrent" class="mt-8 mb-0 mx-0">
           <v-radio label="All" value="All"></v-radio>
           <v-radio label="Current" value="Current"></v-radio>
           <v-radio label="Past" value="Past"></v-radio>
@@ -43,7 +43,6 @@
 <script>
 import HorizontalBar from '../baseCharts/HorizontalBarChart.vue';
 import api from '@/shared/api.js';
-import MobileDetect from 'mobile-detect';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -57,8 +56,12 @@ import MobileDetect from 'mobile-detect';
  * @return boolean - if the device is mobile
  */
 function isMobile() {
-  let md = new MobileDetect(window.navigator.userAgent);
-  return md.os() === 'AndroidOS' || md.os() === 'iOS';
+  switch (this.$vuetify.breakpoint.name) {
+    case 'xs':
+      return true;
+    default:
+      return false;
+  }
 } // isMobile
 
 // |--------------------------------------------------|
@@ -323,7 +326,7 @@ export default {
 };
 </script>
 
-<style>
+<style scoped>
 button {
   top: 30px;
 }

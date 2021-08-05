@@ -9,7 +9,7 @@
       <v-container fluid>
         <!-- user is mobile -->
         <div v-if="isMobile" class="text-center">
-          <v-menu eager offset-y>
+          <v-menu offset-y>
             <template v-slot:activator="{ on, attrs }">
               <v-btn text color="#bc3825" dark class="font-weight-bold" v-bind="attrs" v-on="on"
                 >{{ statsTab.toUpperCase() }} <v-icon class="pb-1">expand_more</v-icon>
