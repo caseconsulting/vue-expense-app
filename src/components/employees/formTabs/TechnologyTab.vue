@@ -31,7 +31,7 @@
       <v-row align="center" justify="center">
         <!-- Current Switch -->
         <v-col cols="6" sm="7" md="6" lg="7">
-          <v-switch class="pt-1" v-model="technology.current" label="Currently know this technology"></v-switch>
+          <v-switch class="mt-0 pb-2" v-model="technology.current" label="Currently know this technology"></v-switch>
         </v-col>
 
         <!-- Years of Experience -->
@@ -40,7 +40,7 @@
           sm="3"
           md="4"
           lg="3"
-          class="px-0 pb-0"
+          class="px-0 mt-0"
           :class="{ 'px-4': $vuetify.breakpoint.sm, 'px-4': $vuetify.breakpoint.lg }"
         >
           <v-text-field
@@ -59,7 +59,7 @@
           >
           </v-text-field>
         </v-col>
-        <v-col cols="2" class="mb-3" align="center">
+        <v-col cols="2" class="mt-0 mb-5" align="center">
           <v-tooltip bottom slot="append-outer">
             <template v-slot:activator="{ on }">
               <v-btn text icon v-on="on" @click="deleteTechnology(index)"
@@ -263,7 +263,6 @@ export default {
   }
 };
 </script>
-
 <style>
 .errorBox {
   color: red !important;

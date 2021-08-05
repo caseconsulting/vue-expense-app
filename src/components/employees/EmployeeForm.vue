@@ -44,7 +44,7 @@
           <div v-if="useDropDown">
             <!-- For smaller screens -->
             <v-row>
-              <v-col align="center">
+              <v-col align="center" justify="center">
                 <v-menu align-center class="ma-4">
                   <template v-slot:activator="{ on, attrs }">
                     <v-btn text x-large class="pt-5 font-weight-bold" v-bind="attrs" v-on="on"
@@ -95,51 +95,67 @@
                     >
                   </v-list>
                 </v-menu>
+                <hr class="my-3" />
+                <employee-tab
+                  v-if="formTab === 'employee'"
+                  :admin="hasAdminPermissions()"
+                  :validating="validating.employee"
+                  :model="model"
+                >
+                </employee-tab>
+                <personal-tab v-if="formTab === 'personal'" :validating="validating.personal" :model="model">
+                </personal-tab>
+                <education-tab v-if="formTab === 'education'" :validating="validating.education" :model="model.degrees">
+                </education-tab>
+                <job-experience-tab
+                  v-if="formTab === 'jobExperience'"
+                  :validating="validating.jobExperience"
+                  :model="model"
+                >
+                </job-experience-tab>
+                <certification-tab
+                  v-if="formTab === 'certification'"
+                  :validating="validating.certifications"
+                  :model="model.certifications"
+                >
+                </certification-tab>
+                <award-tab
+                  v-if="formTab === 'awards'"
+                  :validating="validating.awards"
+                  :model="model.awards"
+                ></award-tab>
+                <technology-tab
+                  v-if="formTab === 'technologies'"
+                  :validating="validating.technologies"
+                  :model="model.technologies"
+                >
+                </technology-tab>
+                <customer-org-tab
+                  v-if="formTab === 'customerOrgExp'"
+                  :validating="validating.customerOrgExp"
+                  :model="model.customerOrgExp"
+                >
+                </customer-org-tab>
+                <contract-tab
+                  v-if="formTab === 'contracts'"
+                  :validating="validating.contracts"
+                  :model="model.contracts"
+                >
+                </contract-tab>
+                <clearance-tab
+                  v-if="formTab === 'clearance'"
+                  :validating="validating.clearance"
+                  :model="model.clearances"
+                >
+                </clearance-tab>
+                <languages-tab
+                  v-if="formTab === 'languages'"
+                  :validating="validating.languages"
+                  :model="model.languages"
+                >
+                </languages-tab>
               </v-col>
             </v-row>
-            <hr class="my-3" />
-            <employee-tab
-              v-if="formTab === 'employee'"
-              :admin="hasAdminPermissions()"
-              :validating="validating.employee"
-              :model="model"
-            >
-            </employee-tab>
-            <personal-tab v-if="formTab === 'personal'" :validating="validating.personal" :model="model">
-            </personal-tab>
-            <education-tab v-if="formTab === 'education'" :validating="validating.education" :model="model.degrees">
-            </education-tab>
-            <job-experience-tab
-              v-if="formTab === 'jobExperience'"
-              :validating="validating.jobExperience"
-              :model="model"
-            >
-            </job-experience-tab>
-            <certification-tab
-              v-if="formTab === 'certification'"
-              :validating="validating.certifications"
-              :model="model.certifications"
-            >
-            </certification-tab>
-            <award-tab v-if="formTab === 'awards'" :validating="validating.awards" :model="model.awards"></award-tab>
-            <technology-tab
-              v-if="formTab === 'technologies'"
-              :validating="validating.technologies"
-              :model="model.technologies"
-            >
-            </technology-tab>
-            <customer-org-tab
-              v-if="formTab === 'customerOrgExp'"
-              :validating="validating.customerOrgExp"
-              :model="model.customerOrgExp"
-            >
-            </customer-org-tab>
-            <contract-tab v-if="formTab === 'contracts'" :validating="validating.contracts" :model="model.contracts">
-            </contract-tab>
-            <clearance-tab v-if="formTab === 'clearance'" :validating="validating.clearance" :model="model.clearances">
-            </clearance-tab>
-            <languages-tab v-if="formTab === 'languages'" :validating="validating.languages" :model="model.languages">
-            </languages-tab>
           </div>
           <!-- Tabs for larger screens -->
           <v-tabs v-if="!useDropDown" v-model="formTab" center-active show-arrows class="pb-0">
