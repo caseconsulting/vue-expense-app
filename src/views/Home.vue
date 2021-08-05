@@ -100,11 +100,6 @@
         </v-col>
       </v-row>
     </span>
-    <!-- Pops up if a user has expiring badges upon login -->
-    <badge-expiration-modal
-      v-if="!loading && (employee.employeeRole === 'user' || employee.employeeRole === 'manager')"
-      :employee="employee"
-    ></badge-expiration-modal>
   </v-container>
 </template>
 
@@ -112,7 +107,6 @@
 import api from '@/shared/api.js';
 import ActivityFeed from '@/components/ActivityFeed';
 import AvailableBudgets from '@/components/AvailableBudgets.vue';
-import BadgeExpirationModal from '@/components/modals/BadgeExpirationModal.vue';
 import moment from 'moment-timezone';
 moment.tz.setDefault('America/New_York');
 import TwitterFeed from '@/components/TwitterFeed';
@@ -564,7 +558,6 @@ export default {
   components: {
     ActivityFeed,
     AvailableBudgets,
-    BadgeExpirationModal,
     TwitterFeed,
     QuickBooksTimeData
   },
