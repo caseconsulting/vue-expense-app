@@ -1,7 +1,7 @@
 <template>
   <v-card v-if="expense" raised id="expense-info" class="mt-3 white--text slide-in-blurred-right">
-    <v-card-title primary-title class="subtitle-2 color-change-2x">
-      <div class="headline expense_info_title">Expense Info</div>
+    <v-card-title primary-title class="subtitle-2">
+      <div class="headline expense_info">Expense Info</div>
       <div class="expense_info">
         <p class="expense_info"><span>Description:</span> {{ expense.description }}</p>
         <p class="expense_info"><span>Employee:</span> {{ expense.employeeName }}</p>
@@ -86,10 +86,10 @@ export default {
 </script>
 
 <style scoped>
-.color-change-2x {
+/* .color-change-2x {
   -webkit-animation: color-change-2x 10s linear infinite alternate both;
   animation: color-change-2x 10s linear infinite alternate both;
-}
+} */
 
 p {
   color: #38424d;
@@ -105,29 +105,25 @@ span {
  * ----------------------------------------
  */
 
-@-webkit-keyframes color-change-2x {
+/* @-webkit-keyframes color-change-2x {
   0% {
-    /* background: #819ca9; */
     background: #83837d;
   }
 
   100% {
-    /* background: #bdbdbd; */
     background: #f5694f;
   }
 }
 
 @keyframes color-change-2x {
   0% {
-    /* background: #819ca9; */
     background: #83837d;
   }
 
   100% {
-    /* background: #bdbdbd; */
     background: #f5694f;
   }
-}
+} */
 
 .slide-in-blurred-right {
   animation: slide-in-blurred-right 0.5s ease-in forwards;
