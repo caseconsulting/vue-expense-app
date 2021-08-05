@@ -302,6 +302,7 @@ async function created() {
     this.user = await api.getUser();
     this.checkForBudgetAccess();
     this.role = getRole();
+    this.loading = false;
     this.displayQuickBooksTimeAndBalances = this.userIsAdmin() || this.userIsEmployee();
     this.fiscalDateView = this.getCurrentBudgetYear();
     this.hasResume = (await api.getResume(this.$route.params.id)) != null;
