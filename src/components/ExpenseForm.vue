@@ -4,9 +4,10 @@
       <!-- Editing an Expense -->
       <h3 v-if="expense.id && (isAdmin || !isReimbursed)">Edit Expense</h3>
       <!-- Creating an Expense -->
-      <h3 v-else-if="!isInactive">Create New Expense</h3>
+      <!-- <h3 v-else-if="!isInactive">Create New Expense</h3> -->
+      <h3 v-else>Create New Expense</h3>
       <!-- Inactive Employee -->
-      <h3 v-else>Inactive Employee</h3>
+      <!-- <h3 v-else>Inactive Employee</h3> -->
     </v-card-title>
     <v-container fluid>
       <v-form ref="form" v-model="valid" lazy-validation>
@@ -76,6 +77,7 @@
             @fileSelected="setFile"
             :passedRules="receiptRules"
             :receipt="expense.receipt"
+            :disabled="isInactive"
           ></file-upload>
           <!-- Scan Receipt Button -->
           <v-tooltip bottom>
@@ -1169,10 +1171,12 @@ async function scanFile() {
   this.scanLoading = true;
   let file = this.file;
   if (file) {
+    this.isInactive = true;
     //go get text data from textract and comprehend
 
     this.receiptObject = await api.extractText(this.userInfo.id, file);
     if (this.receiptObject instanceof Error) {
+      this.isInactive = false;
       this.receiptObject = null;
       this.scanLoading = false;
       return;
@@ -1318,6 +1322,7 @@ async function scanFile() {
         })
         .join(' ');
     }
+    this.isInactive = false;
 
     if (firstDate != null && this.editedExpense.purchaseDate == null) {
       let date = moment(firstDate);

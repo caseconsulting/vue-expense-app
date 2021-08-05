@@ -6,7 +6,13 @@
     </v-alert>
 
     <!-- Receipt Input -->
-    <v-file-input v-model="inputFile" :rules="passedRules" :label="label" :accept="acceptedFileTypes"></v-file-input>
+    <v-file-input
+      v-model="inputFile"
+      :rules="passedRules"
+      :label="label"
+      :accept="acceptedFileTypes"
+      :disabled="disabled"
+    ></v-file-input>
   </div>
 </template>
 
@@ -129,6 +135,6 @@ export default {
       }
     }
   },
-  props: ['passedRules', 'receipt', 'customLabel', 'customFileTypes'] // file text field rules
+  props: ['passedRules', 'receipt', 'customLabel', 'customFileTypes', 'disabled'] // file text field rules
 };
 </script>
