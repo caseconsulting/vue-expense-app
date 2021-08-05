@@ -1,6 +1,6 @@
 <template>
   <div>
-    <v-dialog v-model="activate" persistent max-width="350">
+    <v-dialog v-model="activate" persistent max-width="330">
       <v-card>
         <v-card-title class="headline">Error(s) found across tabs</v-card-title>
         <v-card-text>

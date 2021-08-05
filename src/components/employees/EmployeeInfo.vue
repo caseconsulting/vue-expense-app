@@ -3,26 +3,30 @@
     <div class="savedInfo">
       <!-- For smaller screens -->
       <div v-if="useDropDown">
-        <v-menu>
-          <template v-slot:activator="{ on, attrs }">
-            <v-btn text x-large class="pt-5 font-weight-bold" v-bind="attrs" v-on="on"
-              >{{ parsedInfoTab }} <v-icon class="pb-1">expand_more</v-icon>
-            </v-btn>
-          </template>
-          <v-list>
-            <v-list-item @click="selectDropDown('employee')">Employee</v-list-item>
-            <v-list-item @click="selectDropDown('personal')">Personal</v-list-item>
-            <v-list-item @click="selectDropDown('education')">Education</v-list-item>
-            <v-list-item @click="selectDropDown('jobExperience')">Job Experience</v-list-item>
-            <v-list-item @click="selectDropDown('certifications')">Certifications</v-list-item>
-            <v-list-item @click="selectDropDown('awards')">Awards</v-list-item>
-            <v-list-item @click="selectDropDown('technologies')">Technologies</v-list-item>
-            <v-list-item @click="selectDropDown('customerOrgExp')">Customer Org</v-list-item>
-            <v-list-item @click="selectDropDown('contracts')">Contracts</v-list-item>
-            <v-list-item @click="selectDropDown('clearance')">Clearance</v-list-item>
-            <v-list-item @click="selectDropDown('languages')">Languages</v-list-item>
-          </v-list>
-        </v-menu>
+        <v-row>
+          <v-col cols="12" align="center">
+            <v-menu>
+              <template v-slot:activator="{ on, attrs }">
+                <v-btn text x-large class="pt-5 font-weight-bold" v-bind="attrs" v-on="on"
+                  >{{ parsedInfoTab }} <v-icon class="pb-1">expand_more</v-icon>
+                </v-btn>
+              </template>
+              <v-list>
+                <v-list-item @click="selectDropDown('employee')">Employee</v-list-item>
+                <v-list-item @click="selectDropDown('personal')">Personal</v-list-item>
+                <v-list-item @click="selectDropDown('education')">Education</v-list-item>
+                <v-list-item @click="selectDropDown('jobExperience')">Job Experience</v-list-item>
+                <v-list-item @click="selectDropDown('certifications')">Certifications</v-list-item>
+                <v-list-item @click="selectDropDown('awards')">Awards</v-list-item>
+                <v-list-item @click="selectDropDown('technologies')">Technologies</v-list-item>
+                <v-list-item @click="selectDropDown('customerOrgExp')">Customer Org</v-list-item>
+                <v-list-item @click="selectDropDown('contracts')">Contracts</v-list-item>
+                <v-list-item @click="selectDropDown('clearance')">Clearance</v-list-item>
+                <v-list-item @click="selectDropDown('languages')">Languages</v-list-item>
+              </v-list>
+            </v-menu>
+          </v-col>
+        </v-row>
         <hr class="my-3" />
         <employee-tab
           v-if="infoTab === 'employee'"

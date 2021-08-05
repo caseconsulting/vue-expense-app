@@ -43,54 +43,60 @@
         <v-form ref="form" v-model="valid" lazy-validation class="my-1 mx-5">
           <div v-if="useDropDown">
             <!-- For smaller screens -->
-            <v-menu class="ma-4">
-              <template v-slot:activator="{ on, attrs }">
-                <v-btn text x-large class="pt-5 font-weight-bold" v-bind="attrs" v-on="on"
-                  >{{ parsedInfoTab }} <v-icon class="pb-1">expand_more</v-icon>
-                </v-btn>
-              </template>
-              <v-list>
-                <v-list-item @click="selectDropDown('employee')" v-bind:class="{ errorTab: tabErrors.employee }"
-                  >Employee</v-list-item
-                >
-                <v-list-item @click="selectDropDown('personal')" v-bind:class="{ errorTab: tabErrors.personal }"
-                  >Personal</v-list-item
-                >
-                <v-list-item @click="selectDropDown('education')" v-bind:class="{ errorTab: tabErrors.education }"
-                  >Education</v-list-item
-                >
-                <v-list-item
-                  @click="selectDropDown('jobExperience')"
-                  v-bind:class="{ errorTab: tabErrors.jobExperience }"
-                  >Job Experience</v-list-item
-                >
-                <v-list-item
-                  @click="selectDropDown('certification')"
-                  v-bind:class="{ errorTab: tabErrors.certification }"
-                  >Certifications</v-list-item
-                >
-                <v-list-item @click="selectDropDown('awards')" v-bind:class="{ errorTab: tabErrors.awards }"
-                  >Awards</v-list-item
-                >
-                <v-list-item @click="selectDropDown('technologies')" v-bind:class="{ errorTab: tabErrors.technologies }"
-                  >Technologies</v-list-item
-                >
-                <v-list-item
-                  @click="selectDropDown('customerOrgExp')"
-                  v-bind:class="{ errorTab: tabErrors.customerOrgExp }"
-                  >Customer Org</v-list-item
-                >
-                <v-list-item @click="selectDropDown('contracts')" v-bind:class="{ errorTab: tabErrors.contracts }"
-                  >Contracts</v-list-item
-                >
-                <v-list-item @click="selectDropDown('clearance')" v-bind:class="{ errorTab: tabErrors.clearance }"
-                  >Clearance</v-list-item
-                >
-                <v-list-item @click="selectDropDown('languages')" v-bind:class="{ errorTab: tabErrors.languages }"
-                  >Languages</v-list-item
-                >
-              </v-list>
-            </v-menu>
+            <v-row>
+              <v-col align="center">
+                <v-menu align-center class="ma-4">
+                  <template v-slot:activator="{ on, attrs }">
+                    <v-btn text x-large class="pt-5 font-weight-bold" v-bind="attrs" v-on="on"
+                      >{{ parsedInfoTab }} <v-icon class="pb-1">expand_more</v-icon>
+                    </v-btn>
+                  </template>
+                  <v-list>
+                    <v-list-item @click="selectDropDown('employee')" v-bind:class="{ errorTab: tabErrors.employee }"
+                      >Employee</v-list-item
+                    >
+                    <v-list-item @click="selectDropDown('personal')" v-bind:class="{ errorTab: tabErrors.personal }"
+                      >Personal</v-list-item
+                    >
+                    <v-list-item @click="selectDropDown('education')" v-bind:class="{ errorTab: tabErrors.education }"
+                      >Education</v-list-item
+                    >
+                    <v-list-item
+                      @click="selectDropDown('jobExperience')"
+                      v-bind:class="{ errorTab: tabErrors.jobExperience }"
+                      >Job Experience</v-list-item
+                    >
+                    <v-list-item
+                      @click="selectDropDown('certification')"
+                      v-bind:class="{ errorTab: tabErrors.certification }"
+                      >Certifications</v-list-item
+                    >
+                    <v-list-item @click="selectDropDown('awards')" v-bind:class="{ errorTab: tabErrors.awards }"
+                      >Awards</v-list-item
+                    >
+                    <v-list-item
+                      @click="selectDropDown('technologies')"
+                      v-bind:class="{ errorTab: tabErrors.technologies }"
+                      >Technologies</v-list-item
+                    >
+                    <v-list-item
+                      @click="selectDropDown('customerOrgExp')"
+                      v-bind:class="{ errorTab: tabErrors.customerOrgExp }"
+                      >Customer Org</v-list-item
+                    >
+                    <v-list-item @click="selectDropDown('contracts')" v-bind:class="{ errorTab: tabErrors.contracts }"
+                      >Contracts</v-list-item
+                    >
+                    <v-list-item @click="selectDropDown('clearance')" v-bind:class="{ errorTab: tabErrors.clearance }"
+                      >Clearance</v-list-item
+                    >
+                    <v-list-item @click="selectDropDown('languages')" v-bind:class="{ errorTab: tabErrors.languages }"
+                      >Languages</v-list-item
+                    >
+                  </v-list>
+                </v-menu>
+              </v-col>
+            </v-row>
             <hr class="my-3" />
             <employee-tab
               v-if="formTab === 'employee'"

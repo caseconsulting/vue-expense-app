@@ -48,17 +48,17 @@
           </v-menu>
           <!-- End Received Date -->
         </v-col>
+        <v-col class="pb-1" sm="6" md="12" lg="6" align="center">
+          <v-tooltip bottom>
+            <template v-slot:activator="{ on }">
+              <v-btn v-on="on" @click="deleteAward(index)" icon text
+                ><v-icon style="color: grey" class="pr-1">delete</v-icon></v-btn
+              >
+            </template>
+            <span>Delete Award</span>
+          </v-tooltip>
+        </v-col>
       </v-row>
-      <div class="pb-4" align="center">
-        <v-tooltip bottom>
-          <template v-slot:activator="{ on }">
-            <v-btn v-on="on" @click="deleteAward(index)" icon text
-              ><v-icon style="color: grey" class="pr-1">delete</v-icon></v-btn
-            >
-          </template>
-          <span>Delete Award</span>
-        </v-tooltip>
-      </div>
     </div>
     <!-- Loop Awards -->
 

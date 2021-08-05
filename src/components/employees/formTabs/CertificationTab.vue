@@ -18,7 +18,7 @@
         clearable
       >
       </v-combobox>
-      <v-row class="py-3">
+      <v-row class="pt-1">
         <v-col cols="12" sm="6" md="12" lg="6" class="pt-0">
           <!-- Received Date -->
           <v-menu
@@ -93,28 +93,19 @@
           </v-menu>
           <!-- End Expiration Date -->
         </v-col>
-        <v-col v-if="!isMobile"></v-col>
-        <v-col>
-          <v-layout justify-start class="pl-2">
-            <v-checkbox
-              class="ma-0 pa-0"
-              v-model="certification.noExpiry"
-              :label="`No Expiration Date`"
-              @click="certification.expirationDate = null"
-            ></v-checkbox>
-          </v-layout>
+      </v-row>
+      <v-row>
+        <v-col cols="12" align="center" justify="center" class="pb-4 mb-2">
+          <v-tooltip bottom>
+            <template v-slot:activator="{ on }">
+              <v-btn v-on="on" @click="deleteCertification(index)" icon text
+                ><v-icon style="color: grey">delete</v-icon></v-btn
+              >
+            </template>
+            <span>Delete Certification</span>
+          </v-tooltip>
         </v-col>
       </v-row>
-      <div class="pb-4" align="center">
-        <v-tooltip bottom>
-          <template v-slot:activator="{ on }">
-            <v-btn v-on="on" @click="deleteCertification(index)" icon text
-              ><v-icon style="color: grey" class="pr-1">delete</v-icon></v-btn
-            >
-          </template>
-          <span>Delete Certification</span>
-        </v-tooltip>
-      </div>
     </div>
     <!-- End Loop Certifications -->
 
@@ -226,7 +217,8 @@ function validateFields() {
 export default {
   computed: {
     isMobile() {
-      return this.$vuetify.breakpoint.sm;
+      console.log(!(this.$vuetify.breakpoint.xl || this.$vuetify.breakpoint.lg));
+      return !(this.$vuetify.breakpoint.xl || this.$vuetify.breakpoint.lg);
     }
   },
   created,

@@ -28,10 +28,10 @@
       </v-combobox>
 
       <!-- Time Intervals -->
-      <v-row align="center" class="py-3" justify="center">
+      <v-row align="center" justify="center">
         <!-- Current Switch -->
         <v-col cols="6" sm="7" md="6" lg="7">
-          <v-switch v-model="technology.current" label="Currently know this technology"></v-switch>
+          <v-switch class="pt-1" v-model="technology.current" label="Currently know this technology"></v-switch>
         </v-col>
 
         <!-- Years of Experience -->
