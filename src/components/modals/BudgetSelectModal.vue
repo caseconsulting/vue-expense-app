@@ -146,6 +146,9 @@ export default {
   computed: {
     getAnniversaryDate
   },
+  created() {
+    console.log(this.hasBudgets);
+  },
   data() {
     return {
       activate: false // dialog activator

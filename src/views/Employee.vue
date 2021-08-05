@@ -87,7 +87,11 @@
         </v-card>
         <!-- Edit Info (Form) -->
         <employee-form :employee="this.model" :currentTab="this.currentTab" v-if="editing"></employee-form>
-        <anniversary-card v-if="minimizeWindow" :employee="this.model"></anniversary-card>
+        <anniversary-card
+          v-if="minimizeWindow"
+          :employee="this.model"
+          :hasBudgets="hasAccessToBudgets"
+        ></anniversary-card>
         <budget-chart
           v-if="(userIsAdmin() || userIsEmployee()) && hasAccessToBudgets"
           class="pt-4"
@@ -254,7 +258,9 @@ async function deleteResume() {
  * Checks if the user has access to any budgets
  */
 async function checkForBudgetAccess() {
-  let accessibleBudgets = await api.getAllActiveEmployeeBudgets(this.user.id);
+  let accessibleBudgets = await api.getAllActiveEmployeeBudgets(this.model.id);
+  console.log(this.model);
+  console.log(accessibleBudgets);
   if (accessibleBudgets.length == 0) {
     // does not have access to any budgets
     this.hasAccessToBudgets = false; // disable budget chart

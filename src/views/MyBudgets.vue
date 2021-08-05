@@ -28,7 +28,7 @@
 
     <!-- Anniversary Date -->
     <v-col cols="12" lg="4" v-if="!isMobile">
-      <anniversary-card v-if="!loading" :employee="employee" :clickable="hasAccessToBudgets"></anniversary-card>
+      <anniversary-card v-if="!loading" :employee="employee" :hasBudgets="hasAccessToBudgets"></anniversary-card>
     </v-col>
 
     <!-- Expense Data -->
