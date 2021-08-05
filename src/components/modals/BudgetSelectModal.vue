@@ -53,7 +53,7 @@
             <v-list-item>
               <v-list-item-content>
                 <v-list-item-title>
-                  <h2>No Previous Years</h2>
+                  <h2 class="text-center">No Previous Years</h2>
                 </v-list-item-title>
               </v-list-item-content>
             </v-list-item>
@@ -178,6 +178,7 @@ export default {
 
 .list-hover:hover {
   background-color: #f0f0f0;
+  cursor: pointer;
 }
 
 .underline-text {
