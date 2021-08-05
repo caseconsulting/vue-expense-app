@@ -326,7 +326,9 @@ async function onlyUploadResume(employeeNumber) {
     this.timeoutError = true;
   } else {
     //confirmation upload pop-up in employee.vue
-    window.EventBus.$emit('uploaded', true);
+    window.EventBus.$emit('uploaded', true, true);
+    this.clearForm();
+    this.activate = false;
     //disables employee number field in employeeTab.vue
   }
 }
@@ -387,7 +389,7 @@ async function submit() {
       }
     }, 15000);
 
-    window.EventBus.$emit('uploaded', true);
+    window.EventBus.$emit('uploaded', true, false);
     //when creating an employee
     if (this.$route.params.id === undefined) {
       window.EventBus.$emit('disableEmpNum', true);

@@ -310,9 +310,11 @@ async function mounted() {
     }
   });
 
-  window.EventBus.$on('uploaded', (isUploaded) => {
+  window.EventBus.$on('uploaded', (isUploaded, displayMessage) => {
     this.hasResume = isUploaded;
-    this.displayMessage('SUCCESS', 'Successfully uploaded resume', 'green');
+    if (displayMessage) {
+      this.displayMessage('SUCCESS', 'Successfully uploaded resume', 'green');
+    }
   });
 
   window.EventBus.$on('tabChange', (tab) => {
