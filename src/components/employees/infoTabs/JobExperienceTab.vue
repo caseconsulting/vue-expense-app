@@ -23,17 +23,27 @@
       <!-- Other Jobs -->
       <!-- Loop Jobs -->
       <div v-for="(company, index) in this.pageList" :key="company.companyName + index">
-        <p><b>Company: </b>{{ company.companyName }}</p>
-        <div v-for="(position, posIndex) in company.positions" :key="position.title + posIndex">
-          <p v-if="company.positions.length > 1">
-            <b>Position {{ posIndex + 1 }}: </b>{{ position.title }}
-          </p>
-          <p v-else><b>Position: </b>{{ position.title }}</p>
-          <p><b>Start Date: </b>{{ position.startDate | monthYearFormat }}</p>
-          <p v-if="position.endDate"><b>End Date: </b>{{ position.endDate | monthYearFormat }}</p>
-          <hr v-if="posIndex < company.positions.length - 1" class="horizontalBar mb-3" />
+        <p class="mb-1"><b>Company: </b>{{ company.companyName }}</p>
+        <div class="ml-4" v-if="company.positions.length > 1">
+          <p class="my-0"><b>Positions: </b></p>
+          <ul>
+            <li v-for="(position, posIndex) in company.positions" :key="position.title + posIndex">
+              {{ position.title }}
+              <ul>
+                <li>Start Date: {{ position.startDate | monthYearFormat }}</li>
+                <li v-if="position.endDate">End Date: {{ position.endDate | monthYearFormat }}</li>
+              </ul>
+            </li>
+          </ul>
         </div>
-        <hr v-if="index < pageList.length - 1" class="mb-3" />
+        <div class="ml-4" v-else>
+          <p class="my-0"><b>Position:</b> {{ company.positions[0].title }}</p>
+          <ul>
+            <li>Start Date: {{ company.positions[0].startDate | monthYearFormat }}</li>
+            <li v-if="company.positions[0].endDate">End Date: {{ company.positions[0].endDate | monthYearFormat }}</li>
+          </ul>
+        </div>
+        <hr v-if="index < pageList.length - 1" class="my-3" />
       </div>
       <!-- End Loop Jobs -->
       <div v-if="!isEmpty(this.model.companies) && Math.ceil(filterCompanies.length / 4) != 1" class="text-center">
