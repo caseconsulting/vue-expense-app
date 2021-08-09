@@ -217,7 +217,7 @@ function validateFields() {
 export default {
   computed: {
     isMobile() {
-      console.log(!(this.$vuetify.breakpoint.xl || this.$vuetify.breakpoint.lg));
+      //console.log(!(this.$vuetify.breakpoint.xl || this.$vuetify.breakpoint.lg));
       return !(this.$vuetify.breakpoint.xl || this.$vuetify.breakpoint.lg);
     }
   },
