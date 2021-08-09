@@ -114,8 +114,16 @@ function populateDropDowns() {
   _.forEach(employeesContracts, (contracts) => {
     // loop contracts
     _.forEach(contracts, (contract) => {
-      this.contractsDropDown.push(contract.name); // add contract name
-      this.primesDropDown.push(contract.prime); // add contract prime
+      // loop through projects to test if contract is current (this was added to make sure only current contracts/primes were listed in Reports autocomplete dropdowns)
+      _.forEach(contract, (projects) => {
+        // loop project
+        _.forEach(projects, (project) => {
+          if (project.presentDate) {
+            this.contractsDropDown.push(contract.name); // add contract name
+            this.primesDropDown.push(contract.prime); // add contract prime
+          }
+        });
+      });
     });
   });
 } // populateDropDowns
