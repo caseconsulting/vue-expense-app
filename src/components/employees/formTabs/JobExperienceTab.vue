@@ -62,12 +62,12 @@
     <!-- Case Info -->
     <div style="border: 1px solid grey" class="pt-2 pb-1 px-5">
       <!-- Company Name -->
-      <v-text-field label="Company" data-vv-name="Company" readonly value="Case Consulting"></v-text-field>
+      <v-text-field label="Company" data-vv-name="Company" disabled value="Case Consulting"></v-text-field>
 
       <!-- Job Position -->
       <v-text-field
         v-model="editedJobExperienceInfo.jobRole"
-        readonly
+        disabled
         label="Position"
         data-vv-name="Position"
       ></v-text-field>
@@ -79,7 +79,7 @@
           :value="formatDate(editedJobExperienceInfo.hireDate)"
           label="Start Date"
           prepend-icon="event_available"
-          readonly
+          disabled
         ></v-text-field>
         <!-- End Start Date -->
       </v-row>
