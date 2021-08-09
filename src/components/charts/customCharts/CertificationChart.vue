@@ -86,7 +86,7 @@ async function fillCertData() {
           },
           scaleLabel: {
             display: true,
-            labelString: 'Number of Employees',
+            labelString: 'Name of Certification',
             fontStyle: 'bold'
           }
         }
@@ -99,7 +99,7 @@ async function fillCertData() {
           },
           scaleLabel: {
             display: true,
-            labelString: 'Name of Certification',
+            labelString: 'Number of Employees',
             fontStyle: 'bold'
           }
         }
