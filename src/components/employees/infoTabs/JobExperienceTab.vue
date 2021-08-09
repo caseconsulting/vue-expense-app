@@ -36,7 +36,7 @@
         <hr v-if="index < pageList.length - 1" class="mb-3" />
       </div>
       <!-- End Loop Jobs -->
-      <div v-if="!isEmpty(this.model.awards) && Math.ceil(filterCompanies.length / 4) != 1" class="text-center">
+      <div v-if="!isEmpty(this.model.companies) && Math.ceil(filterCompanies.length / 4) != 1" class="text-center">
         <v-pagination
           v-model="page"
           :length="Math.ceil(filterCompanies.length / 4)"
