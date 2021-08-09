@@ -44,7 +44,7 @@
         id="employeeNumber"
         ref="formFields"
         v-model="editedEmployee.employeeNumber"
-        :rules="numberRules"
+        :rules="[...numberRules, ...duplicateEmployeeNumberRule]"
         label="Employee #"
         data-vv-name="Employee #"
         :disabled="!admin || disableEmpNum"
@@ -433,6 +433,17 @@ export default {
         (v) => !isEmpty(v) || 'Employee # is required',
         (v) => /^\d+$/.test(v) || 'Employee # must be a positive number'
       ], // rules for an employee number
+      duplicateEmployeeNumberRule: [
+        (v) => {
+          let duplicate = false;
+          _.forEach(this.employees, (employee) => {
+            if (employee.employeeNumber != this.userId && employee.employeeNumber == v) {
+              duplicate = true;
+            }
+          });
+          return !duplicate || 'This employee id is already in use';
+        }
+      ],
       permissions: ['Admin', 'User', 'Intern', 'Manager'], // employee role options
       requiredRules: [(v) => !isEmpty(v) || 'This field is required'], // rules for a required field
       status: '100', // work status value
