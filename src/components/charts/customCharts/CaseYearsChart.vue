@@ -18,7 +18,7 @@ function caseYearsData() {
     this.caseYears.push(0);
   }
   this.employees.forEach((employee) => {
-    if (employee.hireDate !== undefined) {
+    if (employee.hireDate !== undefined && employee.workStatus != 0) {
       // find time at case
       var amOfYears = calculateTimeDifference(employee.hireDate);
       // push time to array

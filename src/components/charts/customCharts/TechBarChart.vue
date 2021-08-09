@@ -238,7 +238,7 @@ async function mounted() {
   let employees = await api.getItems(api.EMPLOYEES);
 
   employees.forEach((employee) => {
-    if (employee.technologies) {
+    if (employee.technologies && employee.workStatus != 0) {
       employee.technologies.forEach((currTech) => {
         // **** ALL TECH ****
         if (!this.technologies[currTech.name]) {

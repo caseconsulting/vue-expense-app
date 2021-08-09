@@ -15,7 +15,7 @@ async function fillCertData() {
   let certifications = {};
 
   employees.forEach((employee) => {
-    if (employee.certifications) {
+    if (employee.certifications && employee.workStatus != 0) {
       employee.certifications.forEach((currCert) => {
         if (!certifications[currCert.name]) {
           certifications[currCert.name] = 1;

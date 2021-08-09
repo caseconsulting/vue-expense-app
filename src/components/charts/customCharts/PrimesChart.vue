@@ -44,19 +44,21 @@ async function fillCertData() {
   //Put into dictionary where key is prime and value is quantity
   let primes = {};
   employees.forEach((employee) => {
-    let currContracts = getCurrentProjects(employee);
-    let currPrimes = {};
-    currContracts.forEach((contract) => {
-      let currPrime = contract.prime;
-      //This if statement is to consider if different current contracts have the same prime
-      if (!currPrimes[currPrime]) {
-        if (!primes[currPrime]) {
-          primes[currPrime] = 1;
-        } else {
-          primes[currPrime] += 1;
+    if (employee.workStatus != 0) {
+      let currContracts = getCurrentProjects(employee);
+      let currPrimes = {};
+      currContracts.forEach((contract) => {
+        let currPrime = contract.prime;
+        //This if statement is to consider if different current contracts have the same prime
+        if (!currPrimes[currPrime]) {
+          if (!primes[currPrime]) {
+            primes[currPrime] = 1;
+          } else {
+            primes[currPrime] += 1;
+          }
         }
-      }
-    });
+      });
+    }
   });
 
   //We now sort the entries

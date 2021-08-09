@@ -25,7 +25,7 @@ function initDegrees() {
   let degrees = {};
   this.employees.forEach((emp) => {
     let highestDegrees = [];
-    if (emp.degrees) {
+    if (emp.degrees && emp.workStatus != 0) {
       _.forEach(emp.degrees, (degree) => {
         if (moment(degree.date).isBefore(moment(new Date()))) {
           if (highestDegrees.length != 0) {

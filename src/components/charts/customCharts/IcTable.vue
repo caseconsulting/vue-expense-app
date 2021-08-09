@@ -28,7 +28,7 @@ function fillData() {
   let ICData = {};
   let totalYears = 0;
   this.employees.forEach((emp) => {
-    if (emp.icTimeFrames) {
+    if (emp.icTimeFrames && emp.workStatus != 0) {
       let totalDurationYears = 0;
       let ranges = _.mapValues(emp.icTimeFrames, 'range');
       _.forEach(ranges, (range) => {

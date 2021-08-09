@@ -18,7 +18,7 @@
 function fillData() {
   let allCompOrgExp = {};
   this.employees.forEach((emp) => {
-    if (emp.customerOrgExp) {
+    if (emp.customerOrgExp && emp.workStatus != 0) {
       _.forEach(emp.customerOrgExp, (org) => {
         let orgName = org.name;
         let orgYears = org.years;
