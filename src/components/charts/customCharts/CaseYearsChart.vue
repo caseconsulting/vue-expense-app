@@ -130,10 +130,6 @@ export default {
     findMaxIndex,
     stringToDate
   },
-
-  mounted() {
-    this.drawCaseYearsHistGraph();
-  },
   created: async function () {
     this.$forceUpdate();
     this.employees = await api.getItems(api.EMPLOYEES);

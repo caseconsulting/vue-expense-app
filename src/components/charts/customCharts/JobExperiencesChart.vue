@@ -147,10 +147,6 @@ export default {
     calculateTimeDifference,
     stringToDate
   },
-
-  mounted() {
-    this.drawJobExpHistGraph();
-  },
   created: async function () {
     // eslint-disable-next-line no-undef
     this.$forceUpdate();

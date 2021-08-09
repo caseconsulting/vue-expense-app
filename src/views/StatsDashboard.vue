@@ -36,9 +36,9 @@
           <v-tab href="#education">Education</v-tab>
           <v-tab href="#technologies">Technology</v-tab>
           <v-tab href="#certifications">Certifications</v-tab>
-          <v-tab href="#customerorg">Customer Org</v-tab>
-          <v-tab-item id="employees" v-if="currentTab === 'employees'" class="mx-2 my-6">
-            <employees-chart-tab></employees-chart-tab>
+          <v-tab href="#customerOrg">Customer Org</v-tab>
+          <v-tab-item id="employees" class="mx-2 my-6">
+            <employees-chart-tab v-if="currentTab === 'employees'"></employees-chart-tab>
           </v-tab-item>
           <v-tab-item id="education" class="mx-2 my-6">
             <education-chart-tab v-if="currentTab === 'education'"></education-chart-tab>
