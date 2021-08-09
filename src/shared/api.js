@@ -418,20 +418,7 @@ async function uploadBlogAttachment(file) {
 async function getColleges(inputValue) {
   return execute('get', `/${HIPPO_LAB}/getColleges/${inputValue}`)
     .then((response) => {
-      // These college pseudonyms were chosen since people searching for these will
-      // Not find their normal university easily otherwise.
-      // Taken from https://en.wikipedia.org/wiki/List_of_colloquial_names_for_universities_and_colleges_in_the_United_States
-      let pseudonyms = [
-        'Caltech',
-        'City Tech',
-        'Florida Tech',
-        'Georgia Tech',
-        'NoVa',
-        'Ole Miss',
-        'Virginia Tech',
-        'West Point'
-      ];
-      return response.concat(pseudonyms.filter((school) => school.includes(inputValue)));
+      return response;
     })
     .catch(() => {
       return [];

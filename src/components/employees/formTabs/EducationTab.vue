@@ -205,6 +205,22 @@ async function created() {
   window.EventBus.$emit('created', 'education'); // emit education tab was created
   this.employees = await api.getItems(api.EMPLOYEES); // get all employees
   this.schoolDropDown = await api.getColleges('');
+  let alias = this.schoolDropDown.indexOf('Virginia Polytechnic Institute and State University');
+  this.schoolDropDown[alias] = 'Virginia Polytechnic Institute and State University (Virginia Tech)';
+  alias = this.schoolDropDown.indexOf('University of Mississippi');
+  this.schoolDropDown[alias] = 'University of Mississippi (Ole Miss)';
+  alias = this.schoolDropDown.indexOf('United States Military Academy');
+  this.schoolDropDown[alias] = 'United States Military Academy (West Point)';
+  alias = this.schoolDropDown.indexOf('Northern Virginia Community College');
+  this.schoolDropDown[alias] = 'Northern Virginia Community College (NoVa)';
+  alias = this.schoolDropDown.indexOf('Georgia Institute of Technology');
+  this.schoolDropDown[alias] = 'Georgia Institute of Technology (Georgia Tech)';
+  alias = this.schoolDropDown.indexOf('Florida Institute of Technology');
+  this.schoolDropDown[alias] = 'Florida Institute of Technology (Florida Tech)';
+  alias = this.schoolDropDown.indexOf('City University of New York');
+  this.schoolDropDown[alias] = 'City University of New York (City Tech)';
+  alias = this.schoolDropDown.indexOf('California Institute of Technology');
+  this.schoolDropDown[alias] = 'California Institute of Technology (Caltech)';
 } // created
 
 // |--------------------------------------------------|
