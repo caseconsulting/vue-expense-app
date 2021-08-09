@@ -213,7 +213,7 @@
       <v-switch
         v-model="mifiStatus"
         label="Use Mifi instead of increased technology budget ($150)"
-        :v-if="editedEmployee.employeeRole !== ('User' || 'Admin')"
+        v-if="editedEmployee.employeeRole !== 'intern' && !isInactive()"
       ></v-switch>
     </div>
   </div>

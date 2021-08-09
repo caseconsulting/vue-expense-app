@@ -22,7 +22,7 @@
     <p v-if="!isEmpty(this.model.deptDate) && admin">
       <b>Departure Date:</b> {{ this.model.deptDate | monthDayYearFormat }}
     </p>
-    <p v-if="admin || employee">
+    <p v-if="this.model.employeeRole !== 'intern' && this.model.workStatus !== 0">
       <b>Mifi Status:</b>
       {{ !isEmpty(this.model.mifiStatus) ? (this.model.mifiStatus === true ? 'Yes' : 'No') : 'Yes' }}
     </p>
