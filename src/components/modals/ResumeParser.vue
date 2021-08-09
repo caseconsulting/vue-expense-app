@@ -1,5 +1,5 @@
 <template>
-  <v-dialog v-model="activate" persistent max-width="1000" @click:outside="confirmBackingOut = true">
+  <v-dialog v-model="activate" persistent max-width="1000" @click:outside="confirmBackingOut = !loading">
     <v-card>
       <v-card-title class="header_style"><strong>Upload Resume</strong></v-card-title>
       <v-card-text class="pa-5">
@@ -394,27 +394,8 @@ async function submit() {
     if (this.$route.params.id === undefined) {
       window.EventBus.$emit('disableEmpNum', true);
     }
-    // This is used to check if the extract task is canceled before finishing
-    let checkFormCancel = async () => {
-      // eslint-disable-next-line no-constant-condition
-      while (true) {
-        if (this.activate) {
-          // This loops until the task is finished
-          await new Promise((resolve) => setTimeout(resolve, 10));
-        } else {
-          return null;
-        }
-      }
-    };
 
-    // This checks if the form has been closed while the resume was being parsed
-    let resumeCancelCheck = await Promise.race([checkFormCancel(), api.extractResumeText(employeeNumber, this.file)]);
-    if (!resumeCancelCheck) {
-      this.clearForm();
-      return;
-    }
-
-    this.resumeObject = resumeCancelCheck.comprehend;
+    this.resumeObject = (await api.extractResumeText(employeeNumber, this.file)).comprehend;
     if (this.resumeObject instanceof Error || !this.resumeObject) {
       this.resumeObject = null;
       this.timeoutError = true;
