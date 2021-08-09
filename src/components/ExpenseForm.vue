@@ -1325,7 +1325,7 @@ async function scanFile() {
     this.isInactive = false;
 
     if (firstDate != null && this.editedExpense.purchaseDate == null) {
-      let date = moment(firstDate);
+      let date = moment(new Date(firstDate));
       date = parseDate(date.format('YYYY-MM-DD'));
       this.editedExpense.purchaseDate = date;
     }
