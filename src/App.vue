@@ -248,6 +248,7 @@ export default {
     badgeKey: 0,
     date: null,
     links: [
+      { name: 'Case Website', link: 'https://www.consultwithcase.com/' },
       { name: 'Basecamp', link: 'https://3.basecamp.com/3097063' },
       { name: 'Net Benefits/Fidelity', link: 'https://nb.fidelity.com/public/nb/default/home' },
       { name: 'Health Insurance', link: 'https://3.basecamp.com/3097063/buckets/179119/messages/2306027830' },
