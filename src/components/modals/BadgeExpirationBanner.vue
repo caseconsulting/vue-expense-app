@@ -1,8 +1,14 @@
 <template>
-  <v-col cols="12" v-if="badgeExpiring">
-    <v-alert v-if="alert" :type="alert.status" :color="alert.color" dense id="alert" justify="center">
+  <v-col class="pb-0" cols="12" v-if="badgeExpiring">
+    <v-alert v-if="alert" :type="alert.status" color="#f27311" dense id="alert" justify="center">
       {{ alert.message }}
-      <v-btn class="right-shift black--text" color="#f5f5f5" @click="handleProfile()" :disabled="onUserProfile" small
+      <v-btn
+        class="right-shift black--text"
+        elevation="0"
+        color="#f5f5f5"
+        @click="handleProfile()"
+        :disabled="onUserProfile"
+        small
         >Go To Profile</v-btn
       >
     </v-alert>
