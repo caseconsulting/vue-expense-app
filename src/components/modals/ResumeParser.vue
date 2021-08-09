@@ -18,22 +18,25 @@
                 <v-btn @click="submit" color="green" outlined :disabled="!validFile || loading">Upload</v-btn>
               </v-col>
             </v-row>
-            <v-row>
-              <v-checkbox
-                class="ml-4"
-                v-model="extractResume"
-                label="Extract resume data and add data on profile"
-              ></v-checkbox>
-            </v-row>
-            <div v-if="loading">
-              <p align="center">{{ loadingMessage }}</p>
-              <v-progress-linear color="#bc3825" indeterminate></v-progress-linear>
-            </div>
-            <div v-if="!loading && timeoutError">
-              <p align="center" class="error-text">Timeout error, please try again.</p>
-            </div>
           </v-container>
         </v-form>
+        <div class="ma-3">
+          <v-row>
+            <v-checkbox
+              class="ml-4"
+              v-model="extractResume"
+              label="Extract resume data and add data on profile"
+              :disabled="loading"
+            ></v-checkbox>
+          </v-row>
+          <div v-if="loading">
+            <p align="center">{{ loadingMessage }}</p>
+            <v-progress-linear color="#bc3825" indeterminate></v-progress-linear>
+          </div>
+          <div v-if="!loading && timeoutError">
+            <p align="center" class="error-text">Timeout error, please try again.</p>
+          </div>
+        </div>
         <span v-if="resumeProcessed && (showTech || showAddress || showPhoneNumber || showEducation)">
           <v-row class="text-center pb-3">
             <v-col>
@@ -623,7 +626,6 @@ function clearForm() {
     currentStreet: null,
     currentZIP: null
   };
-  this.activate = false;
   this.addressCanceled = false;
   this.phoneCanceled = false;
   this.editedEmployeeForm = _.cloneDeep(this.employee);
@@ -634,9 +636,13 @@ function clearForm() {
   this.toggleResumeFormErrorModal = false;
   this.timeoutError = false;
   this.confirmingValid = false;
+  this.activate = false;
+
   if (this.$refs.submit !== undefined) {
     this.$refs.submit.reset();
   }
+  console.log(this.extractResume);
+  this.extractResume = true;
 }
 
 export default {
