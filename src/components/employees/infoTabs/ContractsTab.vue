@@ -97,11 +97,13 @@ function getContractLengthInYears(contract) {
 function getProjectLengthInYears(project) {
   let startMoment = moment(project.startDate);
   let endMoment = moment(project.endDate);
+  let length;
   if (project.endDate) {
-    return moment.duration(endMoment.diff(startMoment)).asYears().toFixed(3);
+    length = moment.duration(endMoment.diff(startMoment)).asYears().toFixed(3);
   } else {
-    return moment.duration(moment().diff(startMoment)).asYears().toFixed(3);
+    length = moment.duration(moment().diff(startMoment)).asYears().toFixed(3);
   }
+  return length < 0 ? '0.000' : length;
 }
 
 export default {
