@@ -8,6 +8,8 @@
 <script>
 import api from '@/shared/api.js';
 import BarChart from '../baseCharts/BarChart.vue';
+import moment from 'moment-timezone';
+
 async function fillCertData() {
   let employees = await api.getItems(api.EMPLOYEES);
   //Get data
@@ -17,10 +19,12 @@ async function fillCertData() {
   employees.forEach((employee) => {
     if (employee.certifications && employee.workStatus != 0) {
       employee.certifications.forEach((currCert) => {
-        if (!certifications[currCert.name]) {
-          certifications[currCert.name] = 1;
-        } else {
-          certifications[currCert.name] += 1;
+        if (moment().isBefore(moment(currCert.expirationDate))) {
+          if (!certifications[currCert.name]) {
+            certifications[currCert.name] = 1;
+          } else {
+            certifications[currCert.name] += 1;
+          }
         }
       });
     }
