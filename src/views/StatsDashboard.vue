@@ -36,7 +36,7 @@
           <v-tab href="#education">Education</v-tab>
           <v-tab href="#technologies">Technology</v-tab>
           <v-tab href="#certifications">Certifications</v-tab>
-          <v-tab href="#customerOrg">Customer Org</v-tab>
+          <v-tab href="#customerorg">Customer Org</v-tab>
           <v-tab-item id="employees" v-if="currentTab === 'employees'" class="mx-2 my-6">
             <employees-chart-tab></employees-chart-tab>
           </v-tab-item>
@@ -49,8 +49,8 @@
           <v-tab-item id="certifications" class="mx-2 my-6">
             <certifications-chart-tab v-if="currentTab === 'certifications'"></certifications-chart-tab>
           </v-tab-item>
-          <v-tab-item id="customerOrg" class="mx-2 my-6">
-            <customer-org-chart-tab v-if="currentTab === 'customerOrg'"></customer-org-chart-tab>
+          <v-tab-item id="customerorg" class="mx-2 my-6">
+            <customer-org-chart-tab v-if="currentTab === 'customerorg'"></customer-org-chart-tab>
           </v-tab-item>
         </v-tabs>
       </v-container>
@@ -66,7 +66,7 @@ import EducationChartTab from '../components/charts/chartTabs/EducationChartTab.
 import CustomerOrgChartTab from '../components/charts/chartTabs/CustomerOrgChartTab.vue';
 
 function changeTab(event) {
-  //console.log(event);
+  console.log(event);
   this.currentTab = event;
 }
 

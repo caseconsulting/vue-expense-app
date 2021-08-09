@@ -155,7 +155,6 @@ export default {
     // eslint-disable-next-line no-undef
     this.$forceUpdate();
     this.employees = (await api.getItems(api.EMPLOYEES)).filter((employee) => employee.workStatus != 0);
-    console.log(this.employees);
     this.jobExperienceData();
     this.drawJobExpHistGraph();
   }
