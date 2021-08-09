@@ -182,7 +182,7 @@
           v-if="!changesMade && resumeProcessed && !(showTech || showAddress || showPhoneNumber || showEducation)"
         >
           <v-col>
-            <h2>No changes found!</h2>
+            <h2>No new profile additions found!</h2>
           </v-col>
         </v-row>
         <v-row
