@@ -214,6 +214,8 @@
           small-chips
           deletable-chips
           class="mt-0 pt-0"
+          :search-input.sync="searchString"
+          @change="searchString = ''"
         >
           <template v-slot:label>
             <span v-if="customAccess.length == 0" class="grey--text caption">No custom employee access</span>
@@ -688,6 +690,7 @@ export default {
       endDateFormatted: null, // formatted end date
       editedExpenseType: _.cloneDeep(this.model), //used to store edits made to an expense type or when creating new expense type
       requiredRules: [(v) => !isEmpty(v) || 'This field is required'],
+      searchString: '',
       showStartMenu: false, // boolean for showing date picker
       showEndMenu: false, // boolean for showing date picker
       startDateFormatted: null, // formatted start date
