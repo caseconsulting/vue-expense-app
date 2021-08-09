@@ -170,8 +170,8 @@ Education
         </v-tooltip>
       </div>
       <div v-else align="center" class="pb-4">
-        <v-icon large left color="green" @click="confirmEducation">done</v-icon>
         <v-icon large right color="red" @click="denyEducation">close</v-icon>
+        <v-icon large left color="green" @click="confirmEducation">done</v-icon>
       </div>
     </div>
     <!-- End Loop Education -->

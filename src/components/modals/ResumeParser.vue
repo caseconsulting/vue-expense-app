@@ -64,6 +64,7 @@
                   <v-text-field v-model="newAddress" readonly label="New Address"> </v-text-field>
                 </v-col>
                 <v-col xl="2" lg="2" md="2" sm="12" cols="12" class="pt-md-6 pt-0 text-center">
+                  <v-icon large right color="red" @click="addressCanceled = true">close</v-icon>
                   <v-icon
                     large
                     left
@@ -74,7 +75,6 @@
                     "
                     >done</v-icon
                   >
-                  <v-icon large right color="red" @click="addressCanceled = true">close</v-icon>
                 </v-col>
               </v-row>
               <!-- Phone Number -->
@@ -86,6 +86,7 @@
                   <v-text-field v-model="newPhoneNumber" readonly label="New Phone Number"> </v-text-field>
                 </v-col>
                 <v-col xl="2" lg="2" md="2" sm="12" cols="12" class="pt-md-6 pt-0 text-center">
+                  <v-icon large right color="red" @click="phoneCanceled = true">close</v-icon>
                   <v-icon
                     large
                     left
@@ -96,7 +97,6 @@
                     "
                     >done</v-icon
                   >
-                  <v-icon large right color="red" @click="phoneCanceled = true">close</v-icon>
                 </v-col>
               </v-row>
             </v-container>
@@ -151,8 +151,8 @@
                   </div>
 
                   <v-row align="center" class="py-3" justify="center">
-                    <v-icon large left color="green" @click="submitInfo('technology', index)">done</v-icon>
                     <v-icon large right color="red" @click="tech.canceled = true">close</v-icon>
+                    <v-icon large left color="green" @click="submitInfo('technology', index)">done</v-icon>
                   </v-row>
                 </div>
               </v-form>
@@ -197,9 +197,11 @@
           class="text-center"
           v-if="resumeProcessed && (showTech || showAddress || showPhoneNumber || showEducation || changesMade)"
         >
-          <v-col>
-            <v-btn color="green" class="ma-3" outlined @click="submitForm">Submit Form</v-btn>
-            <v-btn color="red" outlined @click="confirmBackingOut = true">Cancel Form Edits</v-btn>
+          <v-col class="text-right">
+            <v-btn color="red" class="mx-0 my-3" outlined @click="confirmBackingOut = true">Cancel Form Edits</v-btn>
+          </v-col>
+          <v-col class="text-left">
+            <v-btn color="green" class="mx-0 my-3" outlined @click="submitForm">Submit Form</v-btn>
           </v-col>
         </v-row>
       </v-card-text>
