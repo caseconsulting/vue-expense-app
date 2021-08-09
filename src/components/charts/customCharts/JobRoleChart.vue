@@ -12,7 +12,7 @@ import api from '@/shared/api.js';
 function fillData() {
   let roles = {};
   this.employees.forEach((emp) => {
-    if (emp.jobRole) {
+    if (emp.jobRole && emp.workStatus != 0) {
       if (roles[emp.jobRole]) {
         roles[emp.jobRole] += 1;
       } else {
