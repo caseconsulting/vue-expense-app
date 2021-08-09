@@ -369,7 +369,10 @@ function selectDropDown(tab) {
  */
 async function cancel() {
   //creating an employee
-  if (this.model.employeeNumber && this.$route.params.id === undefined) {
+  let employees = await api.getItems(api.EMPLOYEES);
+  //if the user types an employee number that matches another employee's
+  let existingResume = employees.some((emp) => emp.employeeNumber == this.employeeNumber);
+  if (this.model.employeeNumber && this.$route.params.id === undefined && !existingResume) {
     await api.deleteResume(this.model.employeeNumber);
   }
   window.EventBus.$emit('cancel-form');
