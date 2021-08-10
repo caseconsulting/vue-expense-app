@@ -372,7 +372,9 @@ function checkSelection() {
  * Clears the form and sets all fields to a default state.
  */
 function clearForm() {
-  this.$refs.expenseTypeForm.reset();
+  if (this.$refs.expenseTypeForm) {
+    this.$refs.expenseTypeForm.reset();
+  }
   this.emit('finished-editing-expense-type'); //notify parent no longer editing an expense type
   this.startDateFormatted = null;
   this.endDateFormatted = null;
