@@ -101,8 +101,8 @@
                 </v-col>
                 <v-col xl="2" lg="2" md="2" sm="12" cols="12" class="pt-md-6 pt-0 text-center">
                   <v-tooltip top>
-                    <template>
-                      <v-icon large right color="red" @click="phoneCanceled = true">close</v-icon>
+                    <template v-slot:activator="{ on }">
+                      <v-icon v-on="on" large right color="red" @click="phoneCanceled = true">close</v-icon>
                     </template>
                     <span>Ignore Pending Change</span>
                   </v-tooltip>
