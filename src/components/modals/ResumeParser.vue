@@ -641,7 +641,6 @@ function clearForm() {
   if (this.$refs.submit !== undefined) {
     this.$refs.submit.reset();
   }
-  console.log(this.extractResume);
   this.extractResume = true;
 }
 
