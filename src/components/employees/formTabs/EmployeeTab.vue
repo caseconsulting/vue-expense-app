@@ -48,6 +48,7 @@
         label="Employee #"
         data-vv-name="Employee #"
         :disabled="!admin || disableEmpNum"
+        @input.native="duplicateEmployeeNum"
       ></v-text-field>
 
       <!-- Email -->
@@ -279,8 +280,8 @@ async function created() {
   }
   // set works status value to a string
   this.value = this.editedEmployee.workStatus.toString();
-  let user = await api.getUser();
-  this.userId = user.employeeNumber;
+  //let user = await api.getUser();
+  this.userId = this.model.employeeNumber;
   this.loading = false;
 } // created
 
@@ -394,6 +395,10 @@ function viewStatus() {
   }
 } // viewStatus
 
+function duplicateEmployeeNum() {
+  window.EventBus.$emit('disableUpload', this.duplicate, this.editedEmployee.employeeNumber);
+}
+
 export default {
   created,
   data() {
@@ -435,13 +440,13 @@ export default {
       ], // rules for an employee number
       duplicateEmployeeNumberRule: [
         (v) => {
-          let duplicate = false;
+          this.duplicate = false;
           _.forEach(this.employees, (employee) => {
             if (employee.employeeNumber != this.userId && employee.employeeNumber == v) {
-              duplicate = true;
+              this.duplicate = true;
             }
           });
-          return !duplicate || 'This employee id is already in use';
+          return !this.duplicate || 'This employee id is already in use';
         }
       ],
       permissions: ['Admin', 'User', 'Intern', 'Manager'], // employee role options
@@ -455,6 +460,7 @@ export default {
   },
   directives: { mask },
   methods: {
+    duplicateEmployeeNum,
     formatDate,
     formatKebabCase,
     isEmpty,

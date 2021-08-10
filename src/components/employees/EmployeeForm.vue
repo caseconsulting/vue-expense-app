@@ -34,7 +34,7 @@
               </template>
               <span>Please enter a valid employee #</span>
             </v-tooltip>
-            <v-btn v-if="!model.id && !uploadDisabled" @click="openUpload()">Upload Resume</v-btn>
+            <v-btn v-if="!model.id && !uploadDisabled" @click="openUpload">Upload Resume</v-btn>
           </v-col>
         </v-row>
       </v-card-title>
@@ -377,6 +377,7 @@ async function cancel() {
   }
   window.EventBus.$emit('cancel-form');
 } // cancel
+
 /**
  * Removes unnecessary attributes from the employee data.
  */
