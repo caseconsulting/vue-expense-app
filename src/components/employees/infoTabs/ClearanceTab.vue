@@ -17,7 +17,7 @@
         </p>
 
         <!-- Poly Dates -->
-        <p v-if="clearance.polyDates.length == 1" class="mb-2">
+        <p v-if="clearance.polyDates.length == 1">
           <b>Poly Date: </b> {{ clearance.polyDates[0] | monthDayYearFormat }}
         </p>
         <p v-if="clearance.polyDates.length > 1" class="mb-2"><b>Poly Dates: </b></p>
