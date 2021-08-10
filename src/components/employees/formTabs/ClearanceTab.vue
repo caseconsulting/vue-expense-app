@@ -241,47 +241,38 @@
           @input="clearance.showBadgeMenu = false"
         ></v-date-picker>
       </v-menu>
-      <!-- Loop BI Dates -->
-      <div v-for="(bi, biIndex) in clearance.biDates" :key="biIndex">
-        <!-- Range -->
-        <v-menu
-          v-model="bi.showRangeMenu"
-          :close-on-content-click="false"
-          transition="scale-transition"
-          offset-y
-          max-width="290px"
-          min-width="290px"
-        >
-          <template v-slot:activator="{ on, attrs }">
-            <v-text-field
-              ref="formFields"
-              :value="formatRange(bi.range)"
-              :rules="requiredRules"
-              label="BI Dates"
-              prepend-icon="date_range"
-              readonly
-              v-bind="attrs"
-              clearable
-              v-on="on"
-            >
-              <v-tooltip bottom slot="append-outer">
-                <template v-slot:activator="{ on }">
-                  <v-btn text icon v-on="on" @click="deleteBIDate(cIndex, biIndex)"
-                    ><v-icon style="color: grey">delete</v-icon></v-btn
-                  >
-                </template>
-                <span>Delete BI Date</span>
-              </v-tooltip></v-text-field
-            >
-          </template>
-          <v-date-picker v-model="bi.range" :min="clearance.submissionDate" no-title range></v-date-picker>
-        </v-menu>
-        <!-- End Range -->
-      </div>
-      <!-- End Loop BI Dates -->
-      <div align="center" class="pt-2 pb-4">
-        <v-btn @click="addBIDates(cIndex)" depressed outlined small>Add BI Dates</v-btn>
-      </div>
+      <!-- BI Dates -->
+      <v-menu
+        ref="biMenu"
+        v-model="clearance.showBIMenu"
+        :close-on-content-click="false"
+        :return-value.sync="clearance.biDates"
+        transition="scale-transition"
+        offset-y
+        min-width="290px"
+      >
+        <template v-slot:activator="{ on, attrs }">
+          <v-combobox
+            :value="clearance.biDates | formatDates"
+            multiple
+            chips
+            small-chips
+            label="BI Dates"
+            prepend-icon="event"
+            clearable
+            readonly
+            v-bind="attrs"
+            v-on="on"
+            @click:clear="clearance.biDates = []"
+          ></v-combobox>
+        </template>
+        <v-date-picker v-model="clearance.biDates" :min="clearance.submissionDate" multiple no-title scrollable>
+          <v-spacer></v-spacer>
+          <v-btn text color="primary" @click="clearance.showBIMenu = false">Cancel</v-btn>
+          <v-btn text color="primary" @click="$refs.biMenu[cIndex].save(clearance.biDates)">OK</v-btn>
+        </v-date-picker>
+      </v-menu>
+      <!-- End BI Dates -->
       <div align="center">
         <v-tooltip bottom slot="append-outer">
           <template v-slot:activator="{ on }">
@@ -334,18 +325,6 @@ async function created() {
 // |--------------------------------------------------|
 
 /**
- * Add BI dates to a clearance
- *
- * @param cIndex - array index of clearance to add the BI date to.
- */
-function addBIDates(cIndex) {
-  this.editedClearances[cIndex].biDates.push({
-    range: [],
-    showRangeMenu: false
-  });
-} // addBIDates
-
-/**
  * Adds a clearance.
  */
 function addClearance() {
@@ -359,6 +338,7 @@ function addClearance() {
     polyDates: [],
     showAdjudicationMenu: false,
     showBadgeMenu: false,
+    showBIMenu: false,
     showExpirationMenu: false,
     showGrantedMenu: false,
     showPolyMenu: false,
@@ -367,16 +347,6 @@ function addClearance() {
     type: null
   });
 } // addClearance
-
-/**
- * Deletes a BI Date from a clearance.
- *
- * @param cIndex - array index of clearance to remove the BI date from.
- * @param biIndex - array index of BI date to remove.
- */
-function deleteBIDate(cIndex, biIndex) {
-  this.editedClearances[cIndex].biDates.splice(biIndex, 1);
-} // deleteBIDate
 
 /**
  * Deletes a clearance.
@@ -629,9 +599,7 @@ export default {
     }
   },
   methods: {
-    addBIDates,
     addClearance,
-    deleteBIDate,
     deleteClearance,
     formatRange,
     isAfter,

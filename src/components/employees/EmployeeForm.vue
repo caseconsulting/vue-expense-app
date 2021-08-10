@@ -495,27 +495,18 @@ function cleanUpData() {
           delete clearance.showPolyMenu;
           delete clearance.showAdjudicationMenu;
           delete clearance.showBadgeMenu;
+          delete clearance.showBIMenu;
           // delete null attributes
           _.forEach(clearance, (value, key) => {
             if (_.isNil(value)) {
               delete clearance[key];
             }
           });
-          // clean up and sort BI Dates
+          // sort bi dates
           clearance.biDates = _.reverse(
-            _.sortBy(
-              _.map(clearance.biDates, (biDates) => {
-                let chronologicalRange = _.sortBy(biDates.range, (date) => {
-                  return moment(date, 'YYYY-MM-DD');
-                });
-                return {
-                  range: chronologicalRange
-                };
-              }),
-              (biDates) => {
-                return biDates.range[0];
-              }
-            )
+            _.sortBy(clearance.biDates, (date) => {
+              return moment(date, 'YYYY-MM-DD');
+            })
           );
           // sort adjudication dates
           clearance.adjudicationDates = _.reverse(

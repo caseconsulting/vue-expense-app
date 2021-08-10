@@ -42,7 +42,14 @@
         </p>
 
         <!-- BI Dates -->
-        <p v-if="clearance.biDates.length == 1 && clearance.biDates[0].range.length == 1" class="mb-2">
+        <p v-if="clearance.biDates.length == 1"><b>Bi Date: </b> {{ clearance.biDates[0] | monthDayYearFormat }}</p>
+        <p v-if="clearance.biDates.length > 1" class="mb-2"><b>Bi Dates: </b></p>
+        <ul v-if="clearance.biDates.length > 1" class="mb-4">
+          <li v-for="(biDate, pIndex) in clearance.biDates" :key="pIndex">{{ biDate | monthDayYearFormat }}</li>
+        </ul>
+
+        <!-- BI Dates -->
+        <!-- <p v-if="clearance.biDates.length == 1 && clearance.biDates[0].range.length == 1" class="mb-2">
           <b>BI Range: </b>On-going ({{ clearance.biDates[0].range[0] | monthDayYearFormat }})
         </p>
         <p v-if="clearance.biDates.length == 1 && clearance.biDates[0].range.length > 1" class="mb-2">
@@ -57,7 +64,7 @@
             </div>
             <div v-else>On-going ({{ biDates.range[0] | monthDayYearFormat }})</div>
           </li>
-        </ul>
+        </ul> -->
         <hr v-if="index < filteredList.length - 1" class="mb-3" />
       </div>
       <!-- End Loop Clearances -->
