@@ -353,7 +353,7 @@ function userIsEmployee() {
 
 /**
  * Checks whether the current user role is manager
- * @return - boolean: true if the user role is a manager
+ * @returns - boolean: true if the user role is a manager
  */
 function userIsManager() {
   return getRole() === 'manager';
@@ -362,7 +362,7 @@ function userIsManager() {
 /**
  * Checks if the work status is empty.
  *
- * @return boolean - work status is empty
+ * @returns boolean - work status is empty
  */
 function isStatusEmpty() {
   return _.isString(this.status) ? this.status.length == 0 || (this.isPartTime() && this.status <= 0) : true;
@@ -395,9 +395,12 @@ function viewStatus() {
   }
 } // viewStatus
 
+/**
+ * Emits the duplicated employee number.
+ */
 function duplicateEmployeeNum() {
   window.EventBus.$emit('disableUpload', this.duplicate, this.editedEmployee.employeeNumber);
-}
+} // duplicateEmployeeNum
 
 export default {
   created,
@@ -504,6 +507,7 @@ export default {
     },
     'editedEmployee.employeeNumber': function () {
       let empNum = this.editedEmployee.employeeNumber;
+      // determine if the resume button should be disabled or not
       if (empNum !== '' && !isNaN(empNum) && parseInt(empNum) > 0) {
         window.EventBus.$emit('disableUpload', false, empNum);
       } else {
@@ -561,32 +565,5 @@ export default {
 
 .inputError {
   border: solid 1px red !important;
-}
-
-.percentageBox {
-  border: solid 1px gray;
-  width: 46px;
-  height: 34px;
-  border-radius: 2px;
-  font-size: 14px;
-  display: flex;
-}
-
-.percentageBox div {
-  padding-top: 6px;
-  margin-left: 2px;
-}
-
-.percentageBox div:hover {
-  border: none;
-}
-
-.percentageBox input {
-  text-align: right;
-  width: 60%;
-}
-
-.percentageBox input:hover {
-  border: none;
 }
 </style>

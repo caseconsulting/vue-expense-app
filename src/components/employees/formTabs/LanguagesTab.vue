@@ -97,7 +97,7 @@ function addLanguage() {
     name: '',
     proficiency: ''
   });
-}
+} // addLanguage
 
 /**
  * Deletes a Language.

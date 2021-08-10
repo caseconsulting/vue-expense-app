@@ -120,10 +120,11 @@ function deleteAward(index) {
 
 /**
  * Parse the date after losing focus.
+ * @returns String - The date in YYYY-MM-DD format
  */
 function parseEventDate() {
   return parseDate(event.target.value);
-} //parseEventDate
+} // parseEventDate
 
 /**
  * Validate all input fields are valid. Emit to parent the error status.

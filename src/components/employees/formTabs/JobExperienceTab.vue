@@ -345,7 +345,7 @@ function addPosition(compIndex) {
     showEndMenu: false,
     presentDate: false
   });
-}
+} // addPosition
 
 /**
  * Deletes an IC Time Frame.
@@ -363,7 +363,7 @@ function deleteICTimeFrame(index) {
  */
 function deleteCompany(index) {
   this.editedJobExperienceInfo.companies.splice(index, 1);
-}
+} // deleteCompany
 
 /**
  * Deletes a single position. Will delete the entire company entry if there are no positions
@@ -379,7 +379,7 @@ function deletePosition(compIndex, posIndex) {
   } else {
     this.editedJobExperienceInfo.companies[compIndex].positions.splice(posIndex, 1);
   }
-}
+} // deletePosition
 
 /**
  * Format date range as 'Month YYYY' - 'Month YYYY' in chronological order.
@@ -422,10 +422,11 @@ function hasEndDatesFilled(index) {
   });
 
   return hasEndDatesFilled;
-}
+} // hasEndDatesFilled
 
 /**
  * Parse the date after losing focus.
+ * @returns String - the date in YYYY-MM format
  */
 function parseEventDate() {
   return parseDateMonthYear(event.target.value);
@@ -455,7 +456,7 @@ function populateDropDowns() {
 function setIndices(companyIndex, positionIndex) {
   this.companyIndex = companyIndex;
   this.positionIndex = positionIndex;
-}
+} // setIndices
 
 /**
  * Validate all input fields are valid. Emit to parent the error status.

@@ -259,7 +259,7 @@ function isUSA() {
 // |--------------------------------------------------|
 
 /**
- * Updates the address dropdown according to the user's input
+ * Updates the address dropdown according to the user's input.
  */
 async function updateAddressDropDown() {
   let query = event.target.value;
@@ -303,19 +303,19 @@ async function updateBoxes() {
   //resets addresses and ID's in dropdown
   this.placeIds = {};
   this.searchString = '';
-} //updateBoxes
+} // updateBoxes
 
 /**
  * Checks whether the current user role is admin, used specifically
- * to prevent the manager from changing their own role on the Employee tab
+ * to prevent the manager from changing their own role on the Employee tab.
  * @return - boolean: true if the user role is admin
  */
 function userIsAdmin() {
   return getRole() === 'admin';
-} //userIsAdmin
+} // userIsAdmin
 
 /**
- * Checks if the profile accessed is the signed-in user's profile
+ * Checks if the profile accessed is the signed-in user's profile.
  *
  * @returns boolean - true if the profile is the user's profile
  */
@@ -324,7 +324,7 @@ function userIsEmployee() {
     return true;
   }
   return false;
-} //userIsEmployee
+} // userIsEmployee
 
 /**
  * Validate all input fields are valid. Emit to parent the error status.

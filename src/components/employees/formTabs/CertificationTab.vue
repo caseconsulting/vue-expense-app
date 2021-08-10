@@ -171,17 +171,11 @@ function deleteCertification(index) {
 
 /**
  * Parse the date after losing focus.
+ * @returns String - The date in YYYY-MM-DD format
  */
 function parseEventDate() {
   return parseDate(event.target.value);
 } //parseEventDate
-
-// /**
-//  * Validate the dates
-//  */
-// function validateDates(refIndex) {
-//   this.$refs[`dates-${refIndex}`][0].validate();
-// }
 
 /**
  * Populate drop downs with information that other employees have filled out.
@@ -216,8 +210,11 @@ function validateFields() {
 
 export default {
   computed: {
+    /**
+     * Determines if the user is using mobile view.
+     * @returns Boolean - True if the user is mobile
+     */
     isMobile() {
-      //console.log(!(this.$vuetify.breakpoint.xl || this.$vuetify.breakpoint.lg));
       return !(this.$vuetify.breakpoint.xl || this.$vuetify.breakpoint.lg);
     }
   },
