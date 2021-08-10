@@ -72,7 +72,7 @@ function download() {
 function exportCSVFile(person, fileTitle) {
   let placeOfBirth = getPlaceOfBirth(person.city, person.st, person.country);
   let education = getEducation(person.degrees);
-  let jobExperience = getJobs(person.jobs);
+  let jobExperience = getCompanies(person.companies);
   let certifications = getCertifications(person.certifications);
   let awards = getAwards(person.awards);
   let technologies = getTechnologies(person.technologies);
@@ -412,23 +412,27 @@ function getEducation(edu) {
  * Returns job data for employee
  *
  * @param job - An array of objects.
- * @return String - jobs
+ * @return String - companies
  */
-function getJobs(job) {
-  let str = '';
+function getCompanies(companies) {
   let result = [];
-  if (job) {
-    for (let i = 0; i < job.length; i++) {
-      str = job[i].company + ' - ' + job[i].position + ' - ' + job[i].startDate;
-      if (job[i].endDate) {
-        str += ' to ' + job[i].endDate;
+  for (let i = 0; i < companies.length; i++) {
+    result.push(`${companies[i].companyName}`);
+    let positions = companies[i].positions;
+    let pos;
+    for (let j = 0; j < positions.length; j++) {
+      pos = `    ${positions[j].title} - ${positions[j].startDate}`;
+      if (positions[j].endDate !== null) {
+        pos += ` to ${positions[j].endDate}`;
+      } else {
+        pos += ' to present';
       }
-      result.push(str);
+      result.push(pos);
     }
-    return result;
   }
+  console.log(result);
   return result;
-} // getJobs
+} // getCompanies
 
 /**
  * Returns tech data for employee
@@ -530,7 +534,7 @@ export default {
     getContracts,
     getCustomerOrgExp,
     getEducation,
-    getJobs,
+    getCompanies,
     getTechnologies,
     getLanguages,
     iconColor,

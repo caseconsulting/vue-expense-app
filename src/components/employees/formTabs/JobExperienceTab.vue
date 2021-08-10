@@ -435,13 +435,13 @@ function parseEventDate() {
  * Populate drop downs with information that other employees have filled out.
  */
 function populateDropDowns() {
-  let employeesJobs = _.map(this.employees, (employee) => employee.jobs); //extract jobs
+  let employeesJobs = _.map(this.employees, (employee) => employee.companies); //extract jobs
   employeesJobs = _.compact(employeesJobs); //remove falsey values
   // loop employees
   _.forEach(employeesJobs, (jobs) => {
     // loop jobs
     _.forEach(jobs, (job) => {
-      this.companyDropDown.push(job.company); // add company name
+      this.companyDropDown.push(job.companyName); // add company name
     });
   });
 } // populateDropDowns

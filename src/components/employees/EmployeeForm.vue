@@ -450,30 +450,15 @@ function cleanUpData() {
     this.model.contracts = null;
   }
   // jobs
-  if (!_.isEmpty(this.model.jobs)) {
-    this.model.jobs = updateJobs(this.model.jobs, this.model.companies);
-    this.model.jobs = _.reverse(
-      _.sortBy(
-        _.map(this.model.jobs, (job) => {
-          // remove date picker menu booleans
-          delete job.showEndMenu;
-          delete job.showStartMenu;
-          // delete null attributes
-          _.forEach(job, (value, key) => {
-            if (_.isNil(value)) {
-              delete job[key];
-            }
-          });
-          // return updated job
-          return job;
-        }),
-        (job) => {
-          return moment(job.startDate);
-        }
-      )
-    );
+  if (!_.isEmpty(this.model.companies)) {
+    this.model.companies = _.forEach(this.model.companies, (company) => {
+      _.forEach(company.positions, (pos) => {
+        delete pos.showStartMenu;
+        delete pos.showEndMenu;
+      });
+    });
   } else {
-    this.model.jobs = null;
+    this.model.companies = null;
   }
   // IC time frames
   if (!_.isEmpty(this.model.icTimeFrames)) {
@@ -564,28 +549,7 @@ function clearStatus() {
   this.$set(this.errorStatus, 'statusMessage', null);
   this.$set(this.errorStatus, 'color', null);
 } // clearStatus
-function updateJobs(jobs, companies) {
-  jobs = [];
-  _.forEach(companies, (company) => {
-    let companyName = company.companyName;
-    _.forEach(company.positions, (pos) => {
-      let position = pos.title;
-      let startDate = pos.startDate;
-      let endDate = pos.endDate;
-      let presentDate = pos.presentDate;
-      if (position !== null) {
-        jobs.push({
-          company: companyName,
-          position: position,
-          startDate: startDate,
-          endDate: endDate,
-          presentDate: presentDate
-        });
-      }
-    });
-  });
-  return jobs;
-}
+
 /**
  * Validate and confirm form submission.
  */
@@ -884,7 +848,6 @@ function setFormData(tab, data) {
   } else if (tab == 'jobExperience') {
     //sets all jobExperience info to data returned from job experience tab
     this.$set(this.model, 'icTimeFrames', data.icTimeFrames);
-    this.$set(this.model, 'jobs', data.jobs);
     this.$set(this.model, 'companies', data.companies);
   } else if (tab == 'certifications') {
     this.$set(this.model, 'certifications', data); //sets certifications to data returned from certifications tab
@@ -1083,7 +1046,6 @@ export default {
     setFormData,
     submit,
     titleCase,
-    updateJobs,
     selectDropDown
   },
   props: ['currentTab', 'employee'], // employee to be created/updated

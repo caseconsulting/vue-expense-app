@@ -80,7 +80,7 @@ function exportCSVFile(items, fileTitle) {
       filterUndefined(person.contracts, getContracts) || '',
       filterUndefined(person.customerOrgExp, getCustomerOrgExp) || '',
       filterUndefined(person.degrees, getEducation) || '',
-      filterUndefined(person.jobs, getJobs) || '',
+      filterUndefined(person.companies, getCompanies) || '',
       filterUndefined(person.technologies, getTechnologies) || ''
     ];
   }
@@ -305,21 +305,21 @@ function getEducation(edu) {
  * Returns job data for employee
  *
  * @param job - An array of objects.
- * @return String - jobs
+ * @return String - companies
  */
-function getJobs(job) {
+function getCompanies(companies) {
   let a = '';
-  for (let i = 0; i < job.length; i++) {
-    a += job[i].company + ' - ' + job[i].position + ' - ' + job[i].startDate;
-    if (typeof job[i].endDate !== 'undefined') {
-      a += ' - ' + job[i].endDate;
-    }
-    if (i + 1 < job.length) {
-      a += ', ';
+  for (let i = 0; i < companies.length; i++) {
+    a += `${companies[i].companyName}`;
+    let positions = companies[i].positions;
+    for (let j = 0; j < positions.length; j++) {
+      a += `${positions[j].title} - ${positions[j].startDate}`;
+      positions[j].endDate ? (a += ` - ${positions[j].endDate}`) : ' - to present';
+      if (j > positions.length) a += ', ';
     }
   }
   return a;
-} // getJobs
+} // getCompanies
 
 /**
  * Returns tech data for employee
