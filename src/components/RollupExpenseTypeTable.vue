@@ -517,6 +517,8 @@ async function reimburseExpenses() {
     this.empBudgets = _.forEach(this.empBudgets, async (budget) => {
       return await _.forEach(budget.expenses, async (expense) => {
         if (expense.selected) {
+          //to remove the expense type data in the ExpenseTypeTotal modal
+          window.EventBus.$emit('expenseChange', expense);
           expense.reimbursedDate = moment().format('YYYY-MM-DD');
           expensesToReimburse.push(removeAggregateExpenseData(expense));
         }
