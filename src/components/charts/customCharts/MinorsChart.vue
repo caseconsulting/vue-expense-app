@@ -8,6 +8,11 @@
 <script>
 import PieChart from '../baseCharts/PieChart.vue';
 import _ from 'lodash';
+
+/**
+ * Sets the chart formatting and options data.
+ * @param minors - The array of minors for a degree
+ */
 function fillData(minors) {
   let text;
   let colors;
@@ -78,7 +83,7 @@ function fillData(minors) {
     }
   };
   this.dataReceived = true;
-}
+} // fillData
 
 export default {
   components: { PieChart },
@@ -95,6 +100,7 @@ export default {
     fillData
   },
   mounted() {
+    // emit comes from HighestDegreeChart.vue when a pie slice is clicked
     window.EventBus.$on('minors-update', (receiveMinors) => {
       this.degree = receiveMinors.degree;
       this.minors = receiveMinors.minors;
@@ -107,5 +113,3 @@ export default {
   }
 };
 </script>
-
-<style></style>

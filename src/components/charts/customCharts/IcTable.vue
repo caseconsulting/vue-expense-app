@@ -24,6 +24,9 @@ import _ from 'lodash';
 const moment = require('moment-timezone');
 moment.tz.setDefault('America/New_York');
 
+/**
+ * Gets the IC data, and sets the chart formatting and data options
+ */
 function fillData() {
   let ICData = {};
   let totalYears = 0;
@@ -71,8 +74,7 @@ function fillData() {
     { text: 'val', value: 'value' }
   ];
   this.dataReceived = true;
-  //return [averageYoE, totalYears];
-}
+} // fillData
 
 export default {
   data() {
@@ -93,5 +95,3 @@ export default {
   }
 };
 </script>
-
-<style></style>

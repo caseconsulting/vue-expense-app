@@ -9,6 +9,10 @@
 import BarChart from '../baseCharts/BarChart.vue';
 import api from '@/shared/api.js';
 
+/**
+ * Extracts the job role from each employee and tallies up each role for active
+ * employees. Also sets the chart formatting and options data.
+ */
 function fillData() {
   let roles = {};
   this.employees.forEach((emp) => {
@@ -95,7 +99,7 @@ function fillData() {
     maintainAspectRatio: false
   };
   this.dataReceived = true;
-}
+} // fillData
 
 export default {
   components: { BarChart },
@@ -117,5 +121,3 @@ export default {
   }
 };
 </script>
-
-<style></style>

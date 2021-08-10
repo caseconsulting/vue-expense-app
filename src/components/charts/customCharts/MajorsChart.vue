@@ -7,6 +7,11 @@
 
 <script>
 import PieChart from '../baseCharts/PieChart.vue';
+
+/**
+ * Sets the chart formatting and options data.
+ * @param majors - The array of majors for a degree
+ */
 function fillData(majors) {
   let text;
   let colors;
@@ -66,7 +71,7 @@ function fillData(majors) {
     }
   };
   this.dataReceived = true;
-}
+} // fillData
 
 export default {
   components: { PieChart },
@@ -83,6 +88,7 @@ export default {
     fillData
   },
   mounted() {
+    // emit comes from HighestDegreeChart when a pie slice is clicked
     window.EventBus.$on('majors-update', (receiveMajors) => {
       let majors = receiveMajors.majors;
       this.degree = receiveMajors.degree;
@@ -94,5 +100,3 @@ export default {
   }
 };
 </script>
-
-<style></style>

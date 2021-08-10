@@ -66,12 +66,12 @@ function isMobile() {
 
 // |--------------------------------------------------|
 // |                                                  |
-// |                     METHOD                       |
+// |                     METHODS                      |
 // |                                                  |
 // |--------------------------------------------------|
 
 /**
- * Takes data that was captured upon load and displays it on the chart
+ * Takes data that was captured upon load and displays it on the chart.
  * @param that this passed as that (had issues with this being 'undefined')
  */
 function fillData(that) {
@@ -208,6 +208,7 @@ function setNumOfColumns(techArray) {
 
 /**
  * Sorts array of tech skills
+ * @param techArray - The array of different technologies
  */
 function sortTech(techArray) {
   //We now sort the entries

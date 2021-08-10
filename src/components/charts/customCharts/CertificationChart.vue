@@ -10,12 +10,15 @@ import api from '@/shared/api.js';
 import BarChart from '../baseCharts/BarChart.vue';
 import moment from 'moment-timezone';
 
+/**
+ * Extract each employees certifications and tally up each one. Also formats and sets data options for the chart.
+ */
 async function fillCertData() {
   let employees = await api.getItems(api.EMPLOYEES);
   //Get data
   //Put into dictionary where key is kinda tech and value is quantity
   let certifications = {};
-
+  // tally up each certification
   employees.forEach((employee) => {
     if (employee.certifications && employee.workStatus != 0) {
       employee.certifications.forEach((currCert) => {
@@ -35,12 +38,13 @@ async function fillCertData() {
   certificationPairs = certificationPairs.sort((a, b) => {
     return b[1] - a[1];
   });
-
+  // take the top 5 obtained certifications
   certificationPairs = certificationPairs.slice(0, 5);
 
   let labels = [];
   let values = [];
-
+  // if a certification text becomes too long for the chart, break the cert up into two lines
+  // could be problematic for really long certifications
   for (let i = 0; i < certificationPairs.length; i++) {
     if (certificationPairs[i][0].length > 30) {
       labels.push(breakSentence(certificationPairs[i][0]));
@@ -122,6 +126,11 @@ async function fillCertData() {
   this.dataReceived = true;
 } //fillCertData
 
+/**
+ * Helper function to split the text into two sections.
+ * @param s - The text of the certification
+ * @returns Array - An array of 2 with the split text
+ */
 function breakSentence(s) {
   var middle = Math.floor(s.length / 2);
   var before = s.lastIndexOf(' ', middle);
@@ -155,5 +164,3 @@ export default {
   }
 };
 </script>
-
-<style></style>

@@ -17,7 +17,7 @@ moment.tz.setDefault('America/New_York');
 
 /**
  * Initializes the degrees data field, this function retrieves the highest
- * degree for each employee
+ * degree for each employee.
  * @return array of objects - key: employee name, value: another array
  * containing objects w/ degree names + majors
  */
@@ -54,11 +54,14 @@ function initDegrees() {
     }
   });
   return degrees;
-}
+} // initDegrees
 
 /**
  * Helper function that parses through the existing data
- * in degrees and adds onto it
+ * in degrees and adds onto it.
+ * @param degrees - The array of the highest degrees tallied up
+ * @param highestDegrees - The array of all highest degrees
+ * @returns Array - The finaly tally of each highest degrees
  */
 function addToDegrees(degrees, highestDegrees) {
   highestDegrees.forEach((highestDegree) => {
@@ -82,7 +85,7 @@ function addToDegrees(degrees, highestDegrees) {
     }
   });
   return degrees;
-}
+} // addToDegrees
 
 /**
  * Compares the relationship between two degrees,
@@ -102,7 +105,7 @@ function compareDegree(oldDegree, newDegree) {
   if (oldDegree === newDegree) {
     return 0;
   }
-}
+} // compareDegree
 
 /**
  * Get the object of concentrations for a degree and the count of each concentration.
@@ -187,11 +190,13 @@ function getDegreeValue(degree) {
   } else {
     return 4;
   }
-}
+} // getDegreeValue
 
 /**
  * Used to standardize the names of degrees
  * for labels
+ * @param value - The number that the degree is associated with
+ * @returns String - The name of the degree
  */
 function getDegreeName(value) {
   switch (value) {
@@ -249,15 +254,18 @@ function fillData() {
     responsive: true,
     onClick: (_, item) => {
       if (item[0]) {
+        // emits to MajorsChart.vue when pie slice is clicked
         this.majorsEmit(labels[item[0]._index]);
+        // emits to MinorsChart.vue when pie slice is clicked
         this.minorsEmit(labels[item[0]._index]);
+        // emits to ConcentrationsChart.vue when pie slice is clicked
         this.concentrationsEmit(labels[item[0]._index]);
       }
     }
   };
   this.dataReceived = true;
   window.EventBus.$emit('hello');
-}
+} // fillData
 
 /**
  * Sends data to create the second pie chart that displays

@@ -8,6 +8,11 @@
 <script>
 import PieChart from '../baseCharts/PieChart.vue';
 import _ from 'lodash';
+
+/**
+ * Sets up the formatting and data options for the chart.
+ * @param concentations - An array of the highest degree concentrations
+ */
 function fillData(concentrations) {
   let text;
   let colors;
@@ -79,7 +84,8 @@ function fillData(concentrations) {
     }
   };
   this.dataReceived = true;
-}
+} // fillData
+
 export default {
   components: { PieChart },
   data() {
@@ -95,6 +101,7 @@ export default {
     fillData
   },
   mounted() {
+    // emit comes from HighestDegreeChart.vue when a pie slice is clicked
     window.EventBus.$on('concentrations-update', (receiveConcentrations) => {
       this.degree = receiveConcentrations.degree;
       this.concentrations = receiveConcentrations.concentrations;
@@ -106,5 +113,3 @@ export default {
   }
 };
 </script>
-
-<style></style>

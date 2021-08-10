@@ -38,6 +38,9 @@ function getCurrentProjects(employee) {
   return contracts;
 }
 
+/**
+ * Extracts and tallies up each employees primes, and sets the chart formatting and options data.
+ */
 async function fillCertData() {
   let employees = await api.getItems(api.EMPLOYEES);
   //Get data
@@ -164,5 +167,3 @@ export default {
   }
 };
 </script>
-
-<style></style>
