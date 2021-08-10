@@ -34,7 +34,14 @@
       :rules="phoneRules"
       label="Phone Number"
       data-vv-name="Phone Number"
-    ></v-text-field>
+    >
+      <v-tooltip bottom slot="append-outer">
+        <template v-slot:activator="{ on }">
+          <v-btn class="pb-1" text icon v-on="on"><v-icon style="color: grey">lock</v-icon></v-btn>
+        </template>
+        <span>Only Visible to You and Admins</span>
+      </v-tooltip>
+    </v-text-field>
 
     <!-- Birthday Picker -->
     <v-menu
@@ -74,7 +81,15 @@
     ></v-switch>
 
     <!-- Place of Birth -->
-    <p style="font-size: 17px; padding-left: 10px; padding-top: 10px">Place of Birth</p>
+    <p style="font-size: 17px; padding-left: 10px; padding-top: 10px">
+      Place of Birth
+      <v-tooltip bottom slot="append-outer">
+        <template v-slot:activator="{ on }">
+          <v-btn class="pb-1" text icon v-on="on"><v-icon style="color: grey">lock</v-icon></v-btn>
+        </template>
+        <span>Only Visible to You and Admins</span>
+      </v-tooltip>
+    </p>
     <div style="padding-right: 20px; padding-left: 30px; padding-bottom: 10px">
       <div style="border-left-style: groove; padding-right: 20px; padding-left: 10px">
         <!-- Place of Birth: City text field -->
@@ -107,7 +122,15 @@
     </div>
     <!-- Current Address -->
     <div v-if="userIsAdmin() || userIsEmployee()">
-      <p style="font-size: 17px; padding-left: 10px; padding-top: 10px">Current Address</p>
+      <p style="font-size: 17px; padding-left: 10px; padding-top: 10px">
+        Current Address
+        <v-tooltip bottom slot="append-outer">
+          <template v-slot:activator="{ on }">
+            <v-btn class="pb-1" text icon v-on="on"><v-icon style="color: grey">lock</v-icon></v-btn>
+          </template>
+          <span>Only Visible to You and Admins</span>
+        </v-tooltip>
+      </p>
       <v-combobox
         class="pb-3"
         style="padding-top: 0px"
