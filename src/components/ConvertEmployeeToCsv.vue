@@ -430,7 +430,6 @@ function getCompanies(companies) {
       result.push(pos);
     }
   }
-  console.log(result);
   return result;
 } // getCompanies
 
