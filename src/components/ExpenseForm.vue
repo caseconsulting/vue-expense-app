@@ -774,7 +774,9 @@ function checkExpenseDate(purchaseDate, budget) {
  */
 function clearForm() {
   this.allowReceipt = false;
-  this.$refs.form.reset();
+  if (this.$refs.form) {
+    this.$refs.form.reset();
+  }
 
   this.emit('finished-editing-expense'); //notify parent no longer editing an expense
 
