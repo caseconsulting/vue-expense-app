@@ -510,7 +510,6 @@ async function submit() {
       if (
         fullAddress[0] != this.employee.currentStreet &&
         fullAddress[1] != this.employee.currentCity &&
-        this.states[state] != this.employee.currentState &&
         currentZIP != this.employee.currentZIP
       ) {
         this.newPersonal.currentStreet = fullAddress[0];
