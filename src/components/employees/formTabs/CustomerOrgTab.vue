@@ -38,7 +38,7 @@
             ref="formFields"
             v-model="exp.years"
             flat
-            :rules="experienceRequired"
+            :rules="[experienceRequired[0], experienceRequired[1](exp.years, index), experienceRequired[2]]"
             single-line
             max="99"
             min="0"
@@ -46,6 +46,7 @@
             dense
             type="number"
             outlined
+            @input="exp.years = Number(exp.years)"
           ></v-text-field>
         </v-col>
 
@@ -168,7 +169,7 @@ export default {
       editedCustomerOrgExp: _.cloneDeep(this.model), //stores edited customer orgs info
       experienceRequired: [
         (v) => !isEmpty(v) || 'This field is required',
-        (v) => v >= 0 || 'Value cannot be negative',
+        (v, index) => v > 0 || this.editedCustomerOrgExp[index].current || 'Value must be greater than 0',
         (v) => v < 100 || 'Value must be less than 100'
       ], // rules for years of experience
       requiredRules: [

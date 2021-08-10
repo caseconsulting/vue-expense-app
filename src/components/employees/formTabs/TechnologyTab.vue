@@ -47,7 +47,7 @@
             ref="formFields"
             v-model="technology.years"
             flat
-            :rules="experienceRequired"
+            :rules="[experienceRequired[0], experienceRequired[1](technology.years, index), experienceRequired[2]]"
             single-line
             max="99"
             min="0"
@@ -55,7 +55,7 @@
             dense
             type="number"
             outlined
-            @input="technology.years = formatNumber(technology.years)"
+            @input="technology.years = Number(technology.years)"
           >
           </v-text-field>
         </v-col>
@@ -146,10 +146,6 @@ function duplicateTechEntries() {
   return this.editedTechnologies ? duplicates(count(this.editedTechnologies)) : [];
 } // duplicateTechEntries
 
-function formatNumber(number) {
-  return Number(number);
-}
-
 /**
  * Checks to see if a technology is a duplicate of one that is already entered by a user.
  * @param tech String - the name of the technology
@@ -234,7 +230,7 @@ export default {
       ], // rules for a required field
       experienceRequired: [
         (v) => !isEmpty(v) || 'This field is required',
-        (v) => v > 0 || 'Value must be greater than 0',
+        (v, index) => v > 0 || this.editedTechnologies[index].current || 'Value must be greater than 0',
         (v) => v < 100 || 'Value must be less than 100'
       ]
     };
@@ -245,7 +241,6 @@ export default {
     duplicateTechEntries,
     formatDateDashToSlash,
     formatDateSlashToDash,
-    formatNumber,
     isDuplicate,
     isEmpty,
     populateDropDowns,
