@@ -170,8 +170,18 @@ Education
         </v-tooltip>
       </div>
       <div v-else align="center" class="pb-4">
-        <v-icon large right color="red" @click="denyEducation">close</v-icon>
-        <v-icon large left color="green" @click="confirmEducation">done</v-icon>
+        <v-tooltip top>
+          <template v-slot:activator="{ on }">
+            <v-icon v-on="on" large right color="red" @click="denyEducation">close</v-icon>
+          </template>
+          <span>Ignore Pending Change</span>
+        </v-tooltip>
+        <v-tooltip top>
+          <template v-slot:activator="{ on }">
+            <v-icon v-on="on" large left color="green" @click="confirmEducation">done</v-icon>
+          </template>
+          <span>Add Pending Change</span>
+        </v-tooltip>
       </div>
     </div>
     <!-- End Loop Education -->
