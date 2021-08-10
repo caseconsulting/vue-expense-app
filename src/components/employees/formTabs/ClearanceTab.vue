@@ -421,7 +421,7 @@ function formatRange(range) {
  * @param firstDate - The date that should come first
  * @param secondDate - The date that should come second
  * @param errMessage - The message to display if the dates are incorrectly ordered
- * @return boolean - True if the first date is at or after the second date
+ * @return Boolean - True if the first date is at or after the second date
  */
 function isAfter(firstDate, secondDate, errMessage) {
   return !isEmpty(firstDate) && secondDate
@@ -518,6 +518,7 @@ function minExpiration(cIndex) {
 
 /**
  * Parse the date after losing focus.
+ * @returns String - The date in YYYY-MM-DD format
  */
 function parseEventDate() {
   return parseDate(event.target.value);
@@ -615,6 +616,10 @@ export default {
   directives: { mask },
   filters: {
     formatDate,
+    /**
+     * Formats multiple dates at once in MM/DD/YYYY format.
+     * @returns Array - The array of formatted dates
+     */
     formatDates: function (array) {
       let formattedDates = [];
       array.forEach((date) => {

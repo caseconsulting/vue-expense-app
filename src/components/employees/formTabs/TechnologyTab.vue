@@ -117,7 +117,7 @@ function addTechnology() {
     years: 0,
     current: false
   });
-}
+} // addTechnology
 
 /**
  * Deletes a Technology.
@@ -213,11 +213,6 @@ function validateFields() {
   window.EventBus.$emit('technologiesStatus', errorCount);
   window.EventBus.$emit('doneValidating', 'technologies', this.editedTechnologies); // emit done validating
 } // validateFields
-
-/**
- * Validates that all time intervals are error free, as well as if a tech is currently being used.
- * @returns boolean based on if all time intervals are valid
- */
 
 export default {
   created,

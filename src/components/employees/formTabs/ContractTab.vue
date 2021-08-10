@@ -160,9 +160,6 @@
           <span>Delete Contract</span>
         </v-tooltip>
       </div>
-      <!-- <v-row v-if="!hasEndDatesFilled(index)" class="py-5 px-5 caption text--darken-2 grey--text">
-        Note that leaving the end date blank means you are currently working on that project.
-      </v-row> -->
     </div>
     <!-- End Loop Contracts -->
 
@@ -234,7 +231,7 @@ function addContract() {
 } // addContract
 
 /**
- * Adds a project to a given contract
+ * Adds a project to a given contract.
  *
  * @param contractIndex The index of the contract
  */
@@ -247,24 +244,28 @@ function addProject(contractIndex) {
     showStartMenu: false,
     showEndMenu: false
   });
-}
+} // addProject
 
 /**
  * Deletes a Contract.
- *
  * @param index - array index of contract to delete
  */
 function deleteContract(index) {
   this.editedContracts.splice(index, 1);
 } // deleteContract
 
+/**
+ * Deletes a project.
+ * @param contractIndex - The index of the contract
+ * @param projectIndex - The index of the project
+ */
 function deleteProject(contractIndex, projectIndex) {
   if (this.editedContracts[contractIndex].projects.length === 1) {
     this.editedContracts[contractIndex].projects.splice(contractIndex, 1);
   } else {
     this.editedContracts[contractIndex].projects.splice(projectIndex, 1);
   }
-}
+} // deleteProject
 
 /**
  * Checks if the current contract has any projects without an end date
@@ -279,10 +280,11 @@ function hasEndDatesFilled(index) {
   });
 
   return hasEndDatesFilled;
-}
+} // hasEndDatesFilled
 
 /**
  * Parse the date after losing focus.
+ * @returns String - The date in YYYY-MM-DD format
  */
 function parseEventDate() {
   return parseDate(event.target.value);

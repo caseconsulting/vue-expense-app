@@ -260,16 +260,23 @@ async function created() {
 // |                                                  |
 // |--------------------------------------------------|
 
+/**
+ * Emits the degrees.
+ */
 function confirmEducation() {
   this.$emit('confirm', this.editedDegrees);
-}
+} // confirmEducation
 
+/**
+ * Emits a message if the education is denied by user.
+ */
 function denyEducation() {
   this.$emit('deny');
-}
+} // denyEducation
 
 /**
  * Parse the date after losing focus.
+ * @returns String - The date in YYYY-MM format
  */
 function parseEventDate() {
   return parseDateMonthYear(event.target.value);
@@ -348,7 +355,7 @@ function detectDuplicateEducation() {
 /**
  * Checks to see if an education is a duplicate of one that is already entered by a user.
  * @param edu Object - the education object
- * @returns boolean - true if the education was already entered by user (duplicate) false otherwise
+ * @returns Boolean - true if the education was already entered by user (duplicate) false otherwise
  */
 function isDuplicate(edu) {
   let duplicate = this.detectDuplicateEducation();
