@@ -18,7 +18,7 @@ Education
       <v-select
         ref="formFields"
         v-model="degree.name"
-        :rules="requiredRules"
+        :rules="[requiredRules[0]]"
         :items="degreeDropDown"
         label="Degree"
         data-vv-name="Degree"
@@ -351,18 +351,20 @@ function detectDuplicateEducation() {
  * @returns boolean - true if the education was already entered by user (duplicate) false otherwise
  */
 function isDuplicate(edu) {
-  let duplicate = this.detectDuplicateEducation();
+  if (!_.isEmpty(edu)) {
+    let duplicate = this.detectDuplicateEducation();
 
-  //checks to see if tech is in duplicates array
-  if (duplicate && duplicate !== undefined) {
-    return (
-      duplicate.date === edu.date &&
-      _.isEmpty(_.xor(duplicate.majors, edu.majors)) &&
-      duplicate.name === edu.name &&
-      duplicate.school === edu.school
-    );
+    //checks to see if tech is in duplicates array
+    if (duplicate && duplicate !== undefined) {
+      return (
+        duplicate.date === edu.date &&
+        _.isEmpty(_.xor(duplicate.majors, edu.majors)) &&
+        duplicate.name === edu.name &&
+        duplicate.school === edu.school
+      );
+    }
+    return false;
   }
-  return false;
 } // isDuplicate
 
 /**
@@ -382,20 +384,17 @@ function titleCase(str) {
  * Validate all input fields are valid. Emit to parent the error status.
  */
 function validateFields() {
-  if (this.detectDuplicateEducation() !== undefined) {
-    //emit error status with a custom message
-    window.EventBus.$emit('educationDuplicateStatus', 'Educations MUST be UNIQUE. Please remove any duplicates'); // emit error status
-  }
   let errorCount = 0;
   //ensures that refs are put in an array so we can reuse forEach loop
   let components = !_.isArray(this.$refs.formFields) ? [this.$refs.formFields] : this.$refs.formFields;
-  _.forEach(components, (field) => {
-    if (field && !field.validate()) {
-      errorCount++;
-    }
+  _.forEach(this.editedDegrees, (degree) => {
+    if (this.isDuplicate(degree)) errorCount++;
   });
-  window.EventBus.$emit('doneValidating', 'education', this.editedDegrees); // emit done validating
+  _.forEach(components, (field) => {
+    if (field && !field.validate()) errorCount++;
+  });
   window.EventBus.$emit('educationStatus', errorCount); // emit error status
+  window.EventBus.$emit('doneValidating', 'education', this.editedDegrees); // emit done validating
 } // validateFields
 
 export default {

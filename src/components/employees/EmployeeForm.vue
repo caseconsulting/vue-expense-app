@@ -567,9 +567,8 @@ async function confirm() {
     let hasErrors = await this.hasTabError();
     if (!hasErrors) {
       this.confirmingValid = true; // if no errors opens confirm submit popup
-    } else if (this.tabErrorMessage) {
-      //if there is a custom error message it is displayed here
-      this.displayError(this.tabErrorMessage);
+    } else {
+      this.confirmingError = true;
     }
   } else {
     this.confirmingError = true;
@@ -771,27 +770,6 @@ async function created() {
   window.EventBus.$on('technologiesStatus', (errorCount) => {
     this.tabErrors.technologies = errorCount > 0 ? true : false;
     this.addErrorTab('Technologies', errorCount);
-  });
-  window.EventBus.$on('technologiesErrStatus', (errorMessage) => {
-    this.tabErrors.technologies = true;
-    //when there is a custom error message (multiple entries with same name) gets it ready for display
-    if (errorMessage) {
-      this.tabErrorMessage = _.cloneDeep(errorMessage);
-    }
-  });
-  window.EventBus.$on('educationDuplicateStatus', (errorMessage) => {
-    //when there is a custom error message (multiple entries with same name) gets it ready for display
-    this.tabErrors.education = true;
-    if (errorMessage) {
-      this.tabErrorMessage = _.cloneDeep(errorMessage);
-    }
-  });
-  window.EventBus.$on('languagesDuplicateStatus', (errorMessage) => {
-    //when there is a custom error message (multiple entries with same name) gets it ready for display
-    this.tabErrors.languages = true;
-    if (errorMessage) {
-      this.tabErrorMessage = _.cloneDeep(errorMessage);
-    }
   });
   // fills model in with populated fields in employee prop
   this.model = _.cloneDeep(
