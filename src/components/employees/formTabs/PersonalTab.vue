@@ -35,7 +35,7 @@
       label="Phone Number"
       data-vv-name="Phone Number"
     >
-      <v-tooltip bottom slot="append-outer">
+      <v-tooltip bottom slot="append">
         <template v-slot:activator="{ on }">
           <v-btn class="pb-1" text icon v-on="on"><v-icon style="color: grey">lock</v-icon></v-btn>
         </template>
