@@ -71,7 +71,7 @@ async function fillCertData() {
     backgroundColors[i] = colors[i];
     borderColors[i] = colors[i];
   }
-
+  console.log(labels);
   //Set the chart data
   this.chartData = {
     labels: labels,

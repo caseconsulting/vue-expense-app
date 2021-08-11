@@ -40,14 +40,19 @@
           </div>
         </div>
         <!-- Pending Changes Section -->
-        <span v-if="resumeProcessed && (showTech || showAddress || showPhoneNumber || showEducation)">
+        <span
+          v-if="
+            resumeProcessed &&
+            (showTech || showAddress || showPhoneNumber || showEducation || showGitHub || showLinkedIn)
+          "
+        >
           <v-row class="text-center pb-3">
             <v-col>
               <h1>Pending Changes</h1>
             </v-col>
           </v-row>
           <!-- Personal Info Section -->
-          <span v-if="showAddress || showPhoneNumber">
+          <span v-if="showAddress || showPhoneNumber || showGitHub || showLinkedIn">
             <v-container fluid>
               <v-row class="text-left">
                 <v-col>
@@ -120,6 +125,72 @@
                         @click="
                           submitInfo('phoneNumber', newPhoneNumber);
                           phoneCanceled = true;
+                        "
+                        >done</v-icon
+                      >
+                    </template>
+                    <span>Add Pending Change</span>
+                  </v-tooltip>
+                </v-col>
+              </v-row>
+              <!-- GitHub -->
+              <v-row v-if="showGitHub" class="text-center">
+                <v-col xl="5" lg="5" md="5" sm="6" cols="6">
+                  <v-text-field :value="employee.github" disabled label="Old GitHub"> </v-text-field>
+                </v-col>
+                <v-col xl="5" lg="5" md="5" sm="6" cols="6">
+                  <v-text-field v-model="newPersonal.github" readonly label="New GitHub"> </v-text-field>
+                </v-col>
+                <v-col xl="2" lg="2" md="2" sm="12" cols="12" class="pt-md-6 pt-0 text-center">
+                  <v-tooltip top>
+                    <template v-slot:activator="{ on }">
+                      <v-icon v-on="on" large right color="red" @click="gitHubCanceled = true">close</v-icon>
+                    </template>
+                    <span>Ignore Pending Change</span>
+                  </v-tooltip>
+                  <v-tooltip top>
+                    <template v-slot:activator="{ on }">
+                      <v-icon
+                        v-on="on"
+                        large
+                        left
+                        color="green"
+                        @click="
+                          submitInfo('github', newPersonal.github);
+                          gitHubCanceled = true;
+                        "
+                        >done</v-icon
+                      >
+                    </template>
+                    <span>Add Pending Change</span>
+                  </v-tooltip>
+                </v-col>
+              </v-row>
+              <!-- LinkedIn -->
+              <v-row v-if="showLinkedIn" class="text-center">
+                <v-col xl="5" lg="5" md="5" sm="6" cols="6">
+                  <v-text-field :value="employee.linkedIn" disabled label="Old LinkedIn"> </v-text-field>
+                </v-col>
+                <v-col xl="5" lg="5" md="5" sm="6" cols="6">
+                  <v-text-field v-model="newPersonal.linkedIn" readonly label="New LinkedIn"> </v-text-field>
+                </v-col>
+                <v-col xl="2" lg="2" md="2" sm="12" cols="12" class="pt-md-6 pt-0 text-center">
+                  <v-tooltip top>
+                    <template v-slot:activator="{ on }">
+                      <v-icon v-on="on" large right color="red" @click="linkedInCanceled = true">close</v-icon>
+                    </template>
+                    <span>Ignore Pending Change</span>
+                  </v-tooltip>
+                  <v-tooltip top>
+                    <template v-slot:activator="{ on }">
+                      <v-icon
+                        v-on="on"
+                        large
+                        left
+                        color="green"
+                        @click="
+                          submitInfo('linkedIn', newPersonal.linkedIn);
+                          linkedInCanceled = true;
                         "
                         >done</v-icon
                       >
@@ -222,7 +293,11 @@
         <!-- No changes -->
         <v-row
           class="text-center mt-3"
-          v-if="!changesMade && resumeProcessed && !(showTech || showAddress || showPhoneNumber || showEducation)"
+          v-if="
+            !changesMade &&
+            resumeProcessed &&
+            !(showTech || showAddress || showPhoneNumber || showEducation || showGitHub || showLinkedIn)
+          "
         >
           <v-col>
             <h2>No new profile additions found!</h2>
@@ -230,7 +305,11 @@
         </v-row>
         <v-row
           class="text-center"
-          v-if="!changesMade && resumeProcessed && !(showTech || showAddress || showPhoneNumber || showEducation)"
+          v-if="
+            !changesMade &&
+            resumeProcessed &&
+            !(showTech || showAddress || showPhoneNumber || showEducation || showGitHub || showLinkedIn)
+          "
         >
           <v-col>
             <v-btn color="red" outlined @click="clearForm">Close Form</v-btn>
@@ -239,7 +318,10 @@
         <!-- Changes exist -->
         <v-row
           class="text-center"
-          v-if="resumeProcessed && (showTech || showAddress || showPhoneNumber || showEducation || changesMade)"
+          v-if="
+            resumeProcessed &&
+            (showTech || showAddress || showPhoneNumber || showEducation || showGitHub || changesMade || showLinkedIn)
+          "
         >
           <v-col class="text-right">
             <v-btn color="red" class="mx-0 my-3" outlined @click="confirmBackingOut = true">Cancel Form Edits</v-btn>
@@ -327,6 +409,18 @@ function changesMade() {
 function showAddress() {
   return this.newAddress && !this.addressCanceled;
 } // showAddress
+
+/**
+ * Determines if the github username should be shown, i.e. does one exist or has the pending
+ * change been denied
+ */
+function showGitHub() {
+  return this.newPersonal.github && !this.gitHubCanceled;
+}
+
+function showLinkedIn() {
+  return this.newPersonal.linkedIn && !this.linkedInCanceled;
+}
 
 /**
  * Formats the old employee address
@@ -513,14 +607,25 @@ async function submit() {
     let location = [];
     let locationCounter = 0;
     _.forEach(personalComprehend, async (personalEntity) => {
-      // Links
-      // if (
-      //   personalEntity.Text.includes('github') ||
-      //   personalEntity.Text.includes('linkedIn') ||
-      //   personalEntity.Text.includes('twitter')
-      // ) {
-      //   this.newPersonal.github = personalEntity.Text;
-      // }
+      // // Links
+
+      if (personalEntity.Text.includes('github')) {
+        let githubURL = personalEntity.Text + '/';
+        let githubUsername = githubURL.substring(
+          githubURL.indexOf('/', 9) + 1,
+          githubURL.indexOf('/', githubURL.indexOf('/', 9) + 1)
+        );
+        if (githubUsername !== this.employee.github) {
+          this.newPersonal.github = githubUsername;
+        }
+      }
+
+      if (
+        personalEntity.Text.includes('https://www.linkedin.com/in') &&
+        personalEntity.Text !== this.employee.linkedIn
+      ) {
+        this.newPersonal.linkedIn = personalEntity.Text;
+      }
 
       // Phone Number
       if (personalEntity.Text.match(/^\(?(\d{3})\)?[- ]?(\d{3})[- ]?(\d{4})$/)) {
@@ -684,6 +789,16 @@ function submitInfo(field, value, newValue) {
       this.$set(this.editedEmployeeForm, 'phoneNumber', '');
     }
     this.editedEmployeeForm.phoneNumber = this.newPersonal.phoneNumber;
+  } else if (field === 'github') {
+    if (!this.editedEmployeeForm.github) {
+      this.$set(this.editedEmployeeForm, 'github', '');
+    }
+    this.editedEmployeeForm.github = this.newPersonal.github;
+  } else if (field === 'linkedIn') {
+    if (!this.editedEmployeeForm.linkedIn) {
+      this.$set(this.editedEmployeeForm, 'linkedIn', '');
+    }
+    this.editedEmployeeForm.linkedIn = this.newPersonal.linkedIn;
   } else if (field === 'technology' && this.$refs['tech' + value][0].validate()) {
     this.newTechnology[value].canceled = true;
     // Create fields in editedEmployeeForm if they don't exist
@@ -784,7 +899,9 @@ export default {
     newPhoneNumber,
     phoneNumber,
     showAddress,
+    showGitHub,
     showEducation,
+    showLinkedIn,
     showPhoneNumber,
     showTech
   },
@@ -799,6 +916,8 @@ export default {
       editedEmployeeForm: null,
       extractResume: true, // whether or not we want to just upload resume or extract data too
       file: null,
+      gitHubCanceled: false,
+      linkedInCanceled: false,
       loading: false,
       loadingMessage: '',
       newEducation: [],
