@@ -1,7 +1,7 @@
 <template>
   <v-container>
     <v-row justify="center">
-      <v-col md="6" sm="12" class="mt-4">
+      <v-col xl="6" lg="8" sm="12" class="mt-4">
         <certification-chart />
       </v-col>
     </v-row>

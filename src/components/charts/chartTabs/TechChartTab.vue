@@ -1,7 +1,7 @@
 <template>
   <v-container fluid>
     <v-row justify="center">
-      <v-col class="mt-4">
+      <v-col xl="6" lg="8" sm="12" class="mt-4">
         <tech-bar-chart></tech-bar-chart>
       </v-col>
     </v-row>
