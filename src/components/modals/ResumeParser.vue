@@ -572,7 +572,11 @@ async function submit() {
       });
 
       // Set info if we have all the necessary parts
-      if (fullAddress[0] != this.employee.currentStreet && fullAddress[1] && currentZIP && this.states[state]) {
+      if (
+        (fullAddress[0] != this.employee.currentStreet || fullAddress[1] != this.employee.currentCity) &&
+        currentZIP &&
+        this.states[state]
+      ) {
         this.newPersonal.currentStreet = fullAddress[0];
         this.newPersonal.currentCity = fullAddress[1];
         this.newPersonal.currentState = this.states[state];
