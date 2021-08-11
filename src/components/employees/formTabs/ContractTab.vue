@@ -318,6 +318,16 @@ function validateFields() {
       errorCount++;
     }
   });
+
+  // fail safe if someone tries to force a contract that's present and has an end date
+  _.forEach(this.editedContracts, (contract) => {
+    _.forEach(contract.projects, (project) => {
+      if (project.endDate && project.presentDate) {
+        project.presentDate = false;
+      }
+    });
+  });
+
   window.EventBus.$emit('doneValidating', 'contracts', this.editedContracts); // emit done validating and sends edited data back to parent
   window.EventBus.$emit('contractsStatus', errorCount); // emit error status
 } // validateFields

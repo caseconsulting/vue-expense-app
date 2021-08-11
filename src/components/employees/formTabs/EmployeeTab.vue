@@ -380,6 +380,20 @@ function validateFields() {
       errorCount++;
     }
   });
+
+  // Fail safe in case users or inters somehow change their disabled info
+  // Without this, they could change the html to change their data
+  if (getRole() === 'user' || getRole() === 'intern') {
+    this.editedEmployee.firstName = this.model.firstName;
+    this.editedEmployee.middleName = this.model.middleName;
+    this.editedEmployee.lastName = this.model.lastName;
+    this.editedEmployee.employeeNumber = this.model.employeeNumber;
+    this.editedEmployee.email = this.model.email;
+    this.editedEmployee.employeeRole = this.model.employeeRole;
+    this.editedEmployee.hireDate = this.model.hireDate;
+    this.editedEmployee.workStatus = this.model.workStatus;
+  }
+
   window.EventBus.$emit('doneValidating', 'employee', this.editedEmployee); // emit done validating
   window.EventBus.$emit('employeeStatus', errorCount); // emit error status
 } // validateFields

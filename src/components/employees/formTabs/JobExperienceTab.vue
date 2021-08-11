@@ -277,6 +277,7 @@ import api from '@/shared/api.js';
 import _ from 'lodash';
 import { isEmpty, formatDate, formatDateMonthYear, parseDateMonthYear } from '@/utils/utils';
 import { mask } from 'vue-the-mask';
+import { getRole } from '@/utils/auth';
 const moment = require('moment-timezone');
 moment.tz.setDefault('America/New_York');
 
@@ -470,6 +471,21 @@ function validateFields() {
       errorCount++;
     }
   });
+
+  // Fail safe in case users or inters somehow change their disabled info
+  if (getRole() === 'user' || getRole() === 'intern') {
+    this.editedJobExperienceInfo.jobRole = this.model.jobRole;
+    this.editedJobExperienceInfo.hireDate = this.model.hireDate;
+  }
+
+  _.forEach(this.editedJobExperienceInfo.companies, (company) => {
+    _.forEach(company.positions, (position) => {
+      if (position.endDate && position.presentDate) {
+        position.presentDate = false;
+      }
+    });
+  });
+
   window.EventBus.$emit('doneValidating', 'jobExperience', this.editedJobExperienceInfo); // emit done validating
   window.EventBus.$emit('jobExperienceStatus', errorCount); // emit error status
 } // validateFields
