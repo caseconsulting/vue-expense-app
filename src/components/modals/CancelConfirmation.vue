@@ -54,6 +54,7 @@
 function emit(msg) {
   window.EventBus.$emit(msg);
 } // emit
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                      EXPORT                      |

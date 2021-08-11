@@ -3,6 +3,7 @@
     <v-card>
       <v-card-title class="header_style"><strong>Upload Resume</strong></v-card-title>
       <v-card-text class="pa-5">
+        <!-- File upload -->
         <v-form ref="submit" class="ma-3">
           <v-container fluid>
             <v-row>
@@ -20,6 +21,7 @@
             </v-row>
           </v-container>
         </v-form>
+        <!-- Extract checkbox and loading bar -->
         <div class="ma-3">
           <v-row>
             <v-checkbox
@@ -37,12 +39,14 @@
             <p align="center" class="error-text">Timeout error, please try again.</p>
           </div>
         </div>
+        <!-- Pending Changes Section -->
         <span v-if="resumeProcessed && (showTech || showAddress || showPhoneNumber || showEducation)">
           <v-row class="text-center pb-3">
             <v-col>
               <h1>Pending Changes</h1>
             </v-col>
           </v-row>
+          <!-- Personal Info Section -->
           <span v-if="showAddress || showPhoneNumber">
             <v-container fluid>
               <v-row class="text-left">
@@ -126,8 +130,8 @@
               </v-row>
             </v-container>
           </span>
+          <!-- Technology -->
           <span v-if="showTech">
-            <!-- Technology -->
             <v-row class="text-left my-2">
               <v-col>
                 <h2>Technology Additions</h2>
@@ -141,7 +145,7 @@
                   <!-- Name of Technology -->
                   <v-text-field class="pb-5" :value="tech.name" readonly label="Technology"></v-text-field>
 
-                  <!-- Time Intervals -->
+                  <!-- Current and Years of Experience -->
                   <div class="mb-3">
                     <v-row justify="center" align="center" class="py-3">
                       <!-- Current Switch -->
@@ -214,6 +218,8 @@
             </v-form>
           </div>
         </span>
+        <!-- End of Pending Changes Section -->
+        <!-- No changes -->
         <v-row
           class="text-center mt-3"
           v-if="!changesMade && resumeProcessed && !(showTech || showAddress || showPhoneNumber || showEducation)"
@@ -230,6 +236,7 @@
             <v-btn color="red" outlined @click="clearForm">Close Form</v-btn>
           </v-col>
         </v-row>
+        <!-- Changes exist -->
         <v-row
           class="text-center"
           v-if="resumeProcessed && (showTech || showAddress || showPhoneNumber || showEducation || changesMade)"
@@ -243,18 +250,19 @@
         </v-row>
       </v-card-text>
     </v-card>
+    <!-- Failed to submit all pending changes Modal -->
     <v-dialog v-model="toggleResumeFormErrorModal" max-width="350">
       <v-card>
         <v-card-title> Please make sure you process all pending changes. </v-card-title>
         <v-btn text color="red" @click="toggleResumeFormErrorModal = false">Close</v-btn>
       </v-card>
     </v-dialog>
-    <!-- Confirmation Model -->
+    <!-- Confirmation Modal -->
     <form-submission-confirmation
       :toggleSubmissionConfirmation="this.confirmingValid"
       type="parser"
     ></form-submission-confirmation>
-    <!-- Cancel Confirmation Model -->
+    <!-- Cancel Confirmation Modal -->
     <cancel-confirmation :toggleSubmissionConfirmation="this.confirmBackingOut" type="parser"> </cancel-confirmation>
   </v-dialog>
 </template>
@@ -267,6 +275,15 @@ import CancelConfirmation from '@/components/modals/CancelConfirmation.vue';
 import educationTab from '@/components/employees/formTabs/EducationTab';
 import FormSubmissionConfirmation from '@/components/modals/FormSubmissionConfirmation.vue';
 
+// |--------------------------------------------------|
+// |                                                  |
+// |                 LIFECYCLE HOOKS                  |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * Sets up event listeners for confirming and canceling resume parser
+ */
 async function created() {
   window.EventBus.$on('confirmed-parser', () => {
     // For some reason confirmed-parser gets called twice
@@ -288,15 +305,32 @@ async function created() {
     this.confirmBackingOut = false;
     this.clearForm();
   });
-}
+} // created
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                 COMPUTED                         |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * Determines if any pending changes have been submitted
+ */
 function changesMade() {
   return !_.isEqual(this.editedEmployeeForm, this.employee);
-}
+} // changesMade
 
+/**
+ * Determines if the address should be shown, i.e. does one exist or has the pending
+ * change been denied
+ */
 function showAddress() {
   return this.newAddress && !this.addressCanceled;
-}
+} // showAddress
 
+/**
+ * Formats the old employee address
+ */
 function address() {
   let currentAddress = '';
   if (!isEmpty(this.employee.currentStreet)) {
@@ -317,8 +351,11 @@ function address() {
     currentAddress = currentAddress.slice(0, -1);
   }
   return currentAddress === '' ? 'No address on form' : currentAddress;
-}
+} // address
 
+/**
+ * Formats the new employee address (if one exists)
+ */
 function newAddress() {
   if (
     this.newPersonal.currentStreet &&
@@ -330,36 +367,58 @@ function newAddress() {
   } else {
     return null;
   }
-}
+} // newAddress
 
+// Checks if a the phone number should be shown
 function showPhoneNumber() {
   return this.newPersonal.phoneNumber && !this.phoneCanceled;
-}
+} // showPhoneNumber
 
+/**
+ * Displays whether or not an old phone number existed
+ */
 function phoneNumber() {
   return this.employee.phoneNumber ? this.employee.phoneNumber : 'No phone number on form';
-}
+} // phoneNumber
 
+/**
+ * Shows the newPhoneNumber if it exists
+ */
 function newPhoneNumber() {
   return this.newPersonal.phoneNumber ? this.newPersonal.phoneNumber : null;
-}
+} // newPhoneNumber
 
+/**
+ * Determines if the tech should be show. Goes through all tech
+ * and makes sure all of them have been canceled
+ */
 function showTech() {
   return this.newTechnology.filter((tech) => !tech.canceled).length != 0;
-}
+} // showTech
 
+/**
+ * Determines if the education section should be shown. Goes through all education
+ * and makes sure all of them have been canceled
+ */
 function showEducation() {
-  let filtered = this.newEducation.filter((education) => !education.canceled);
-  return filtered.length != 0;
-}
+  return this.newEducation.filter((education) => !education.canceled).length != 0;
+} // showEducation
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     METHODS                      |
+// |                                                  |
+// |--------------------------------------------------|
 
 /**
  * When the checkbox is not selected on the resume modal, it uploads the resume and closes the window upon
  * successful completion
+ *
+ * @param employeeNumber - the employee number
  */
 async function onlyUploadResume(employeeNumber) {
   this.loading = true;
-  let uploadResult = await api.uploadResume(employeeNumber, this.file);
+  let uploadResult = await api.uploadResume(employeeNumber, this.file); //uploads resume to s3
   this.loading = false;
   if (uploadResult instanceof Error) {
     this.timeoutError = true;
@@ -370,17 +429,21 @@ async function onlyUploadResume(employeeNumber) {
     this.activate = false;
     //disables employee number field in employeeTab.vue
   }
-}
+} //onlyUploadResume
 
 /**
  * Submit new resume and parse it
  */
 async function submit() {
   let employeeNumber = !this.$route.params.id ? this.employee.employeeNumber : this.$route.params.id;
+
+  // If we only want to upload resume and not parse it
   if (!this.extractResume) {
     this.onlyUploadResume(employeeNumber);
     return;
   }
+
+  // Start of parsing resume -- reset the fields
   this.resumeObject = [];
   this.newEducation = [];
   this.newTechnology = [];
@@ -397,50 +460,47 @@ async function submit() {
   this.timeoutError = false;
   this.editedEmployeeForm = _.cloneDeep(this.employee);
 
+  // checks if the file uploaded is a pdf/png/jpg
   if (this.validFile) {
     this.resumeObject.length = 0;
-    // and is png or jpg or jpeg or pdf
     this.loading = true;
     this.resumeProcessed = false;
 
-    // The set timeouts are for the loading message
+    // The set timeouts are for the loading message (it's kind of buggy if you reopen the modal quickly)
     this.loadingMessage = 'Processing resume data, this may take up to 30 seconds';
 
     setTimeout(() => {
-      if (!this.resumeProcessed && this.activate) {
+      if (this.loading && this.activate) {
         this.loadingMessage = 'Sooooooo, how are you doing?';
         setTimeout(() => {
-          if (!this.resumeProcessed && this.activate) {
+          if (this.loading && this.activate) {
             this.loadingMessage = 'You must have a beefy resume!';
             setTimeout(() => {
-              if (!this.resumeProcessed && this.activate) {
+              if (this.loading && this.activate) {
                 this.loadingMessage = 'You may want to try again...';
-              } else {
-                this.loadingMessage = 'Processing resume data, this may take up to 30 seconds';
               }
             }, 15000);
-          } else {
-            this.loadingMessage = 'Processing resume data, this may take up to 30 seconds';
           }
         }, 15000);
-      } else {
-        this.loadingMessage = 'Processing resume data, this may take up to 30 seconds';
       }
     }, 15000);
 
-    window.EventBus.$emit('uploaded', true, false);
     //when creating an employee
     if (this.$route.params.id === undefined) {
-      window.EventBus.$emit('disableEmpNum', true);
+      window.EventBus.$emit('disableEmpNum', true); // after uploading resume, you can't change employee num
     }
 
     this.resumeObject = (await api.extractResumeText(employeeNumber, this.file)).comprehend;
+
+    // If it takes too long it should timeout
     if (this.resumeObject instanceof Error || !this.resumeObject) {
       this.resumeObject = null;
       this.timeoutError = true;
       this.loading = false;
       return;
     }
+
+    // Notify employee component that resume has been uploaded and parsed
     window.EventBus.$emit('upload-resume-complete', true);
     window.EventBus.$emit('updated-resume-parser', 'true');
     window.EventBus.$emit('updated-resume-parser-form', 'true');
@@ -489,7 +549,10 @@ async function submit() {
       }
     });
 
+    // Gets the locations from Google Maps
     let locations = await api.getLocation(location[0]);
+
+    // We choose to go with the first thing that Google Maps gives us (if anything)
     if (locations.predictions.length >= 1) {
       let location = locations.predictions[0].description;
       let place_id = locations.predictions[0].place_id;
@@ -498,20 +561,18 @@ async function submit() {
       let state = fullAddress[2].split(' ')[0];
 
       let res = await api.getZipCode(place_id);
-      //Response contains an array of objects, with each object containing
-      //a field title 'type'. 'Type' is another array and we want the one
-      //containing the postal_code string
+      // Response contains an array of objects, with each object containing
+      // a field title 'type'. 'Type' is another array and we want the one
+      // containing the postal_code string
       let currentZIP = '';
       _.forEach(res.result.address_components, (field) => {
         if (field.types.includes('postal_code')) {
           currentZIP = field.short_name;
         }
       });
-      if (
-        fullAddress[0] != this.employee.currentStreet &&
-        fullAddress[1] != this.employee.currentCity &&
-        currentZIP != this.employee.currentZIP
-      ) {
+
+      // Set info if we have all the necessary parts
+      if (fullAddress[0] != this.employee.currentStreet && fullAddress[1] && currentZIP && this.states[state]) {
         this.newPersonal.currentStreet = fullAddress[0];
         this.newPersonal.currentCity = fullAddress[1];
         this.newPersonal.currentState = this.states[state];
@@ -519,14 +580,17 @@ async function submit() {
       }
     }
 
+    // ---- THE EDUCATION AND TECH PARSING COULD BE CLEANED UP
     // EDUCATION
     let educationComprehend = this.resumeObject.filter((entity) => {
       return entity.Type === 'ORGANIZATION';
     });
 
+    // Go through organization an see if they are a school
     for (let i = 0; i < educationComprehend.length; i++) {
       let educationEntity = educationComprehend[i];
       let collegeList = await api.getColleges(educationEntity.Text);
+      // If the exact college exists
       if (collegeList.length == 1) {
         // Remove duplicate
         if (
@@ -590,8 +654,16 @@ async function submit() {
   }
 } //submit
 
+/**
+ * Adds the submitted info into the editedEmployeeForms
+ *
+ * @param field - The type of info to be submitted (address/phoneNumber/education/technology)
+ * @param value - For education and tech, the index of the education/technology in the parsed info arrays
+ * @param newValue - Used for education the new education to be submitted
+ */
 function submitInfo(field, value, newValue) {
   if (field === 'address') {
+    // Create fields in editedEmployeeForm if they don't exist
     if (!this.editedEmployeeForm.currentStreet) {
       this.$set(this.editedEmployeeForm, 'currentStreet', '');
       this.$set(this.editedEmployeeForm, 'currentCity', '');
@@ -603,15 +675,18 @@ function submitInfo(field, value, newValue) {
     this.editedEmployeeForm.currentState = this.newPersonal.currentState;
     this.editedEmployeeForm.currentZIP = this.newPersonal.currentZIP;
   } else if (field === 'phoneNumber') {
+    // Create fields in editedEmployeeForm if they don't exist
     if (!this.editedEmployeeForm.phoneNumber) {
       this.$set(this.editedEmployeeForm, 'phoneNumber', '');
     }
     this.editedEmployeeForm.phoneNumber = this.newPersonal.phoneNumber;
   } else if (field === 'technology' && this.$refs['tech' + value][0].validate()) {
     this.newTechnology[value].canceled = true;
+    // Create fields in editedEmployeeForm if they don't exist
     if (!this.editedEmployeeForm.technologies) {
       this.$set(this.editedEmployeeForm, 'technologies', []);
     }
+    // Add new tech
     this.editedEmployeeForm.technologies.push({
       name: this.newTechnology[value].name,
       current: this.newTechnology[value].current,
@@ -625,9 +700,11 @@ function submitInfo(field, value, newValue) {
     this.newEducation[value].name = newValue[0].name;
     this.newEducation[value].school = newValue[0].school;
     this.newEducation[value].canceled = true;
+    // Create fields in editedEmployeeForm if they don't exist
     if (!this.editedEmployeeForm.degrees) {
       this.$set(this.editedEmployeeForm, 'degrees', []);
     }
+    // Add new education
     this.editedEmployeeForm.degrees.push({
       concentrations: this.newEducation[value].concentrations,
       date: this.newEducation[value].date,
@@ -637,16 +714,23 @@ function submitInfo(field, value, newValue) {
       school: this.newEducation[value].school
     });
   }
-}
+} // submitInfo
 
+/**
+ * Submits the form. Checks to see if all pending changes have been submitted.
+ * If not, it displays a modal to do so.
+ */
 function submitForm() {
   if (this.showTech || this.showPhoneNumber || this.showAddress || this.showEducation) {
     this.toggleResumeFormErrorModal = true;
   } else {
     this.confirmingValid = true;
   }
-}
+} // submitForm
 
+/**
+ * Clears the form
+ */
 function clearForm() {
   this.resumeObject = [];
   this.newEducation = [];
@@ -675,7 +759,13 @@ function clearForm() {
     this.$refs.submit.reset();
   }
   this.extractResume = true;
-}
+} // clearForm
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      EXPORT                      |
+// |                                                  |
+// |--------------------------------------------------|
 
 export default {
   components: {
@@ -697,13 +787,13 @@ export default {
   created,
   data() {
     return {
-      activate: false,
+      activate: false, // whether or not the modal is open
       addressCanceled: false,
       phoneCanceled: false,
       confirmingValid: false,
       confirmBackingOut: false,
       editedEmployeeForm: null,
-      extractResume: true,
+      extractResume: true, // whether or not we want to just upload resume or extract data too
       file: null,
       loading: false,
       loadingMessage: '',
@@ -723,12 +813,12 @@ export default {
       ],
       requiredRules: [
         (v) => !isEmpty(v) || 'This field is required. You must enter information or delete the field if possible'
-      ], // rules for a required field
+      ],
       experienceRequired: [
         (v) => !isEmpty(v) || 'This field is required',
         (v) => v > 0 || 'Value must be greater than 0',
         (v) => v < 100 || 'Value must be less than 100'
-      ],
+      ], // Used for technology years
       newPersonal: {
         phoneNumber: null,
         currentCity: null,

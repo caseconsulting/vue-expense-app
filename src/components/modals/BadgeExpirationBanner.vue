@@ -20,6 +20,12 @@ import api from '@/shared/api.js';
 import moment from 'moment-timezone';
 moment.tz.setDefault('America/New_York');
 
+// |--------------------------------------------------|
+// |                                                  |
+// |                     METHODS                      |
+// |                                                  |
+// |--------------------------------------------------|
+
 /**
  * Checks to see if the user has any badges expiring.
  */
@@ -38,20 +44,43 @@ function checkWarnings() {
       }
     });
   }
-}
+} // checkWarnings
 
+/**
+ * Takes users to their profile page
+ */
 function handleProfile() {
   this.$router.push({ name: 'employee', params: { id: `${this.employee.employeeNumber}` } });
-}
+} // handleProfile
 
+/**
+ * Sets the alert status and message
+ *
+ * @param msg - message to display
+ */
 function createAlert(msg) {
   this.badgeExpiring = true;
   this.alert = { status: 'error', message: msg, color: 'red' };
-}
+} // createAlert
 
+// |--------------------------------------------------|
+// |                                                  |
+// |                     COMPUTED                     |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * Checks if the current profile someone is on is the user's profile
+ */
 function onUserProfile() {
   return this.$route.params.id == this.employee.employeeNumber;
-}
+} // onUserProfile
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                 LIFECYCLE HOOKS                  |
+// |                                                  |
+// |--------------------------------------------------|
 
 /**
  * Checks if there are any expiring badges and sorts by days until expiration.
@@ -59,7 +88,13 @@ function onUserProfile() {
 async function created() {
   this.employee = await api.getUser();
   this.checkWarnings();
-}
+} // created
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      EXPORT                      |
+// |                                                  |
+// |--------------------------------------------------|
 
 export default {
   created,
