@@ -1,7 +1,7 @@
 <template>
   <div>
     <!--Totals Card-->
-    <v-card v-if="totals.length" class="slide-in-blurred-right">
+    <v-card v-if="totals.length" class="slide-in-blurred-right mr-3">
       <!--Total Card Title-->
       <v-card-title class="subtitle-2">
         <v-container>
@@ -133,7 +133,7 @@ export default {
 };
 </script>
 
-<style>
+<style scoped>
 .slide-in-blurred-right {
   animation: slide-in-blurred-right 0.5s ease-in forwards;
 }

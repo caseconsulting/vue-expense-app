@@ -5,10 +5,12 @@
       <rollup-expense-type-table></rollup-expense-type-table>
     </v-col>
     <v-col cols="12" md="2" lg="3" xl="2">
-      <!-- Expense Info -->
-      <expense-info class="jerryrig"></expense-info>
-      <!-- Expenses Total -->
-      <expense-type-totals></expense-type-totals>
+      <div class="followScroll">
+        <!-- Expense Info -->
+        <expense-info class="jerryrig"></expense-info>
+        <!-- Expenses Total -->
+        <expense-type-totals></expense-type-totals>
+      </div>
     </v-col>
   </v-row>
 </template>
@@ -51,5 +53,9 @@ export default {
 <style>
 .jerryrig {
   margin-bottom: 15px;
+}
+
+.followScroll {
+  position: fixed;
 }
 </style>

@@ -1,5 +1,5 @@
 <template>
-  <v-card v-if="expense" raised id="expense-info" class="mt-3 white--text slide-in-blurred-right">
+  <v-card v-if="expense" raised id="expense-info" class="mt-3 mr-3 white--text slide-in-blurred-right followScroll">
     <v-card-title primary-title class="subtitle-2">
       <div class="headline expense_info">Expense Info</div>
       <div class="expense_info">
