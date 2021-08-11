@@ -1,25 +1,33 @@
 <template>
   <div v-if="childrenVisible" class="infoTab" id="personalTab">
+    <!-- GitHub -->
     <p v-if="!isEmpty(this.model.github)">
       <b>Github: </b><a :href="'https://github.com/' + this.model.github" target="_blank"> {{ this.model.github }}</a>
     </p>
+    <!-- Twitter -->
     <p v-if="!isEmpty(this.model.twitter)">
       <b>Twitter: </b
       ><a :href="'https://twitter.com/' + this.model.twitter" target="_blank"> {{ this.model.twitter }}</a>
     </p>
+    <!-- LinkedIn -->
     <p v-if="!isEmpty(this.model.linkedIn)">
       <b>LinkedIn: </b><a :href="this.model.linkedIn" target="_blank"> {{ this.model.linkedIn }}</a>
     </p>
+    <!-- Phone Number -->
     <p v-if="!isEmpty(this.model.phoneNumber) && (userIsAdmin() || userIsEmployee() || userIsManager())">
       <b>Phone Number:</b> {{ this.model.phoneNumber }}
     </p>
+    <!-- Birthday -->
     <p v-if="!isEmpty(this.model.birthday) && (admin || employee)">
       <b>Birthday:</b> {{ this.model.birthday | monthDayYearFormat }}
     </p>
+    <!-- Birthday Feed -->
     <p v-if="!isEmpty(this.model.birthdayFeed) && (admin || employee)">
       <b>Birthday on Feed:</b> {{ this.model.birthdayFeed | birthdayFeedResponse }}
     </p>
+    <!-- Place of Birth -->
     <p v-if="!isEmpty(getPlaceOfBirth) && (admin || employee)"><b>Place of Birth:</b> {{ getPlaceOfBirth }}</p>
+    <!-- Current Address -->
     <p v-if="!isEmpty(getCurrentAddress) && (userIsAdmin() || userIsEmployee())">
       <b>Current Address:</b> {{ getCurrentAddress }}
     </p>
@@ -91,7 +99,7 @@ function getCurrentAddress() {
     currentAddress = currentAddress.slice(0, -1);
   }
   return currentAddress;
-}
+} // getCurrentAddress
 
 /**
  * Returns Employee's Place of Birth.

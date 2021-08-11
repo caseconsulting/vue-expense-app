@@ -1,10 +1,16 @@
 <template>
   <div>
+    <!-- Full Name -->
     <p id="full-name"><b>Full Name:</b> {{ fullName }}</p>
+    <!-- Nickname -->
     <p v-if="!isEmpty(this.model.nickname)"><b>Nickname:</b> {{ this.model.nickname }}</p>
+    <!-- Employee Number -->
     <p><b>Employee Number:</b> {{ this.model.employeeNumber }}</p>
+    <!-- Email -->
     <p><b>Email:</b> {{ this.model.email }}</p>
+    <!-- Current Projects -->
     <p><b>Current Projects: </b> {{ getCurrentProjects.length === 0 ? 'None' : '' }}</p>
+    <!-- Loop for Current Projects -->
     <div v-for="(contract, contractIndex) in getCurrentProjects" :key="contractIndex" class="pb-1 px-4">
       <p><b>Contract: </b>{{ contract.name }}</p>
       <p><b>Prime: </b>{{ contract.prime }}</p>
@@ -15,17 +21,24 @@
         <p v-else><b>Project: </b>{{ project.name }}</p>
       </div>
     </div>
+    <!-- Job Role -->
     <p v-if="!isEmpty(this.model.jobRole)"><b>Job Role:</b> {{ this.model.jobRole }}</p>
+    <!-- Employee Role -->
     <p v-if="admin"><b>Employee Role:</b> {{ this.model.employeeRole | startCase }}</p>
+    <!-- Hire Date -->
     <p v-if="admin || employee"><b> Hire Date:</b> {{ this.model.hireDate | monthDayYearFormat }}</p>
+    <!-- Status -->
     <p v-if="admin || employee"><b>Status:</b> {{ getWorkStatus(this.model.workStatus) }}</p>
+    <!-- Departure Date -->
     <p v-if="!isEmpty(this.model.deptDate) && admin">
       <b>Departure Date:</b> {{ this.model.deptDate | monthDayYearFormat }}
     </p>
+    <!-- Mifi Status -->
     <p v-if="this.model.employeeRole !== 'intern' && this.model.workStatus !== 0">
       <b>Mifi Status:</b>
       {{ !isEmpty(this.model.mifiStatus) ? (this.model.mifiStatus === true ? 'Yes' : 'No') : 'Yes' }}
     </p>
+    <!-- Last Login -->
     <p v-if="admin && !isEmpty(this.model.lastLogin)"><b>Last Logged In:</b> {{ this.model.lastLogin }}</p>
   </div>
 </template>

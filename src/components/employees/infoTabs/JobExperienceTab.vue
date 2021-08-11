@@ -46,6 +46,7 @@
         <hr v-if="index < pageList.length - 1" class="my-3" />
       </div>
       <!-- End Loop Jobs -->
+      <!-- Pagination -->
       <div v-if="!isEmpty(this.model.companies) && Math.ceil(filterCompanies.length / 4) != 1" class="text-center">
         <v-pagination
           v-model="page"
@@ -146,6 +147,9 @@ function onPageChange() {
   this.pageList = this.filterCompanies.slice(startIndex, endIndex);
 } //onPageChange
 
+/**
+ * The function updates the company that is shown to the user based on filters
+ */
 function updateCompanies(query) {
   if (query === undefined) {
     query = event.target.value;

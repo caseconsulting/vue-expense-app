@@ -71,6 +71,7 @@
     </div>
     <!-- Employee does not have Clearances -->
     <p v-else>No Clearance Information</p>
+    <!-- Pagination -->
     <div v-if="!isEmpty(this.model.clearances) && Math.ceil(model.clearances.length / 5) != 1" class="text-center">
       <v-pagination
         v-model="page"

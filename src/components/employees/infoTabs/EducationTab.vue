@@ -49,6 +49,7 @@
     </div>
     <!-- Employee does not have Degrees -->
     <p v-else>No Education Information</p>
+    <!-- Pagination -->
     <div v-if="!isEmpty(this.model.degrees) && Math.ceil(model.degrees.length / 4) != 1" class="text-center">
       <v-pagination
         v-model="page"

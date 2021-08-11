@@ -19,6 +19,7 @@
       v-if="!isEmpty(this.model.certifications) && Math.ceil(model.certifications.length / 5) != 1"
       class="text-center"
     >
+      <!-- Pagination -->
       <v-pagination
         v-model="page"
         :length="Math.ceil(model.certifications.length / 5)"

@@ -31,6 +31,7 @@
     </div>
     <!-- Employee does not have Contracts -->
     <p v-else>No Contracts Information</p>
+    <!-- Pagination -->
     <div v-if="!isEmpty(this.model.contracts) && Math.ceil(this.model.contracts.length / 5) != 1" class="text-center">
       <v-pagination
         v-model="page"

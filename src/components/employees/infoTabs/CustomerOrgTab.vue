@@ -28,6 +28,7 @@
       v-if="!isEmpty(this.model.customerOrgExp) && Math.ceil(model.customerOrgExp.length / 5) != 1"
       class="text-center"
     >
+      <!-- Pagination -->
       <v-pagination
         v-model="page"
         :length="Math.ceil(model.customerOrgExp.length / 5)"

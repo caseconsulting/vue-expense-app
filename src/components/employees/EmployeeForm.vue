@@ -96,6 +96,7 @@
                   </v-list>
                 </v-menu>
                 <hr class="my-3" />
+                <!-- Employee Tab -->
                 <employee-tab
                   v-if="formTab === 'employee'"
                   :admin="hasAdminPermissions()"
@@ -103,51 +104,61 @@
                   :model="model"
                 >
                 </employee-tab>
+                <!-- Personal Tab -->
                 <personal-tab v-if="formTab === 'personal'" :validating="validating.personal" :model="model">
                 </personal-tab>
+                <!-- Education Tab -->
                 <education-tab v-if="formTab === 'education'" :validating="validating.education" :model="model.degrees">
                 </education-tab>
+                <!-- Job Experience Tab -->
                 <job-experience-tab
                   v-if="formTab === 'jobExperience'"
                   :validating="validating.jobExperience"
                   :model="model"
                 >
                 </job-experience-tab>
+                <!-- Certification Tab -->
                 <certification-tab
                   v-if="formTab === 'certification'"
                   :validating="validating.certifications"
                   :model="model.certifications"
                 >
                 </certification-tab>
+                <!-- Award Tab -->
                 <award-tab
                   v-if="formTab === 'awards'"
                   :validating="validating.awards"
                   :model="model.awards"
                 ></award-tab>
+                <!-- Technology Tab -->
                 <technology-tab
                   v-if="formTab === 'technologies'"
                   :validating="validating.technologies"
                   :model="model.technologies"
                 >
                 </technology-tab>
+                <!-- Customer Org Tab -->
                 <customer-org-tab
                   v-if="formTab === 'customerOrgExp'"
                   :validating="validating.customerOrgExp"
                   :model="model.customerOrgExp"
                 >
                 </customer-org-tab>
+                <!-- Contract Tab -->
                 <contract-tab
                   v-if="formTab === 'contracts'"
                   :validating="validating.contracts"
                   :model="model.contracts"
                 >
                 </contract-tab>
+                <!-- Clearance Tab -->
                 <clearance-tab
                   v-if="formTab === 'clearance'"
                   :validating="validating.clearance"
                   :model="model.clearances"
                 >
                 </clearance-tab>
+                <!-- Languages Tab -->
                 <languages-tab
                   v-if="formTab === 'languages'"
                   :validating="validating.languages"
@@ -686,20 +697,22 @@ async function created() {
     //used to send to employee tab
     this.model.employeeNumber = employeeNumber;
   });
-
+  // Starts listener to check if resume is uploaded
   window.EventBus.$on('uploaded', (result) => {
     this.disableEmpNum = result;
     window.EventBus.$emit('empNum', this.employeeNumber);
   });
-
+  // Starts listener to see if the user confirmed to submit the form
   window.EventBus.$on('confirmed-form', async () => {
     await this.submit();
     this.confirmingValid = false;
   });
+  // Starts listener to see if the user cancelled to submit the form
   window.EventBus.$on('canceled-form', () => {
     this.errorTabNames = {};
     this.confirmingError = false;
   });
+  // Starts listener to check of the modal is closed
   window.EventBus.$on('closeModal', () => {
     this.confirmingValid = false;
   });
@@ -717,38 +730,47 @@ async function created() {
     this.tabErrors.awards = errorCount > 0 ? true : false; //boolean if there are errors
     this.addErrorTab('Awards', errorCount); //error count
   });
+  // Starts listener to check the Certifications tab has any errors
   window.EventBus.$on('certificationsStatus', (errorCount) => {
     this.tabErrors.certifications = errorCount > 0 ? true : false;
     this.addErrorTab('Certifications', errorCount);
   });
+  // Starts listener to check the Clearance tab has any errors
   window.EventBus.$on('clearanceStatus', (errorCount) => {
     this.tabErrors.clearance = errorCount > 0 ? true : false;
     this.addErrorTab('Clearance', errorCount);
   });
+  // Starts listener to check the Contracts tab has any errors
   window.EventBus.$on('contractsStatus', (errorCount) => {
     this.tabErrors.contracts = errorCount > 0 ? true : false;
     this.addErrorTab('Contracts', errorCount);
   });
+  // Starts listener to check the Customer Org tab has any errors
   window.EventBus.$on('customerOrgExpStatus', (errorCount) => {
     this.tabErrors.customerOrgExp = errorCount > 0 ? true : false;
     this.addErrorTab('Customer Org', errorCount);
   });
+  // Starts listener to check the Education tab has any errors
   window.EventBus.$on('educationStatus', (errorCount) => {
     this.tabErrors.education = errorCount > 0 ? true : false;
     this.addErrorTab('Education', errorCount);
   });
+  // Starts listener to check the Employee tab has any errors
   window.EventBus.$on('employeeStatus', (errorCount) => {
     this.tabErrors.employee = errorCount > 0 ? true : false;
     this.addErrorTab('Employee', errorCount);
   });
+  // Starts listener to check the Job Experience tab has any errors
   window.EventBus.$on('jobExperienceStatus', (errorCount) => {
     this.tabErrors.jobExperience = errorCount > 0 ? true : false;
     this.addErrorTab('Job Experience', errorCount);
   });
+  // Starts listener to check the Languages tab has any errors
   window.EventBus.$on('languagesStatus', (errorCount) => {
     this.tabErrors.languages = errorCount > 0 ? true : false;
     this.addErrorTab('Languages', errorCount);
   });
+  // Starts listener to check the Personal tab has any errors
   window.EventBus.$on('personalStatus', (errorCount) => {
     this.tabErrors.personal = errorCount > 0 ? true : false;
     this.addErrorTab('Personal', errorCount);
@@ -758,6 +780,7 @@ async function created() {
       this.model = newEmployeeForm;
     }
   });
+  // Starts listener to check the Technologies tab has any errors
   window.EventBus.$on('technologiesStatus', (errorCount) => {
     this.tabErrors.technologies = errorCount > 0 ? true : false;
     this.addErrorTab('Technologies', errorCount);
