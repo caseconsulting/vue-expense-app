@@ -1335,13 +1335,14 @@ async function scanFile() {
       this.editedExpense.cost = totalPrice;
       this.costFormatted = Number(this.editedExpense.cost).toLocaleString().toString();
     }
-    if (!isEmpty(this.editedExpense.note)) {
-      // expense has a note
-      this.editedExpense.note += `\n\n${adjustNote}`;
-    } else {
-      // expense does not have a note
-      this.editedExpense.note = adjustNote;
-    }
+    //Below code appends data in notes to the new generated values
+    // if (!isEmpty(this.editedExpense.note)) {
+    //   // expense has a note
+    //   this.editedExpense.note += `\n\n${adjustNote}`;
+    // } else {
+    // expense does not have a note
+    this.editedExpense.note = adjustNote;
+    // }
   }
   this.scanLoading = false;
 } // scanFile
