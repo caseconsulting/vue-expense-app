@@ -101,9 +101,6 @@
         </v-container>
       </v-main>
       <v-footer padless>
-        <v-col class="text-center text-caption pb-0" cols="12">Case Consulting Inc.</v-col>
-        <v-col class="text-center text-caption pb-0" cols="12">18425 Rustling Woods Court, Leesburg, VA 20175</v-col>
-        <v-col class="text-center text-caption pb-0" cols="12">703-728-0294</v-col>
         <v-col class="text-right text-caption" cols="12"><strong>Version</strong> {{ version }}</v-col>
       </v-footer>
       <time-out-modal :toggleTimeOut="timedOut"></time-out-modal>
@@ -252,6 +249,7 @@ export default {
     date: null,
     links: [
       { name: 'Case Website', link: 'https://www.consultwithcase.com/' },
+      { name: 'Case Information', link: 'https://3.basecamp.com/3097063/buckets/4708396/messages/650777910' },
       { name: 'Basecamp', link: 'https://3.basecamp.com/3097063' },
       { name: 'Net Benefits/Fidelity', link: 'https://nb.fidelity.com/public/nb/default/home' },
       { name: 'Health Insurance', link: 'https://3.basecamp.com/3097063/buckets/179119/messages/2306027830' },
