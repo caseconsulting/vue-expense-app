@@ -76,10 +76,8 @@
     <!-- Show Birthday -->
     <v-switch
       v-model="editedPersonalInfo.birthdayFeed"
-      label="Have birthday recognized on company feed?"
+      label="Have birthday (MM/DD format) recognized on company feed?"
       :disabled="disableBirthdayFeed"
-      hint="MM/DD format"
-      persistent-hint
     ></v-switch>
 
     <!-- Place of Birth -->
