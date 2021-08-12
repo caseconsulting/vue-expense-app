@@ -4,21 +4,15 @@
     <div
       v-for="(technology, index) in editedTechnologies"
       class="pt-3 pb-1 px-5"
-      v-bind:class="{ errorBox: isDuplicate(technology.name) }"
       :key="'technology: ' + index"
       style="border: 1px solid grey"
     >
-      <!--Duplicate chip if tech name is already entered by user-->
-      <v-row v-if="isDuplicate(technology.name)" justify="end">
-        <v-chip class="ma-2" color="error" text-color="white"> Duplicate </v-chip>
-      </v-row>
-
       <!-- Name of Technology -->
       <v-combobox
         class="pb-5"
         ref="formFields"
         v-model="technology.name"
-        :rules="requiredRules"
+        :rules="[duplicateRules(technology.name), requiredRules[0]]"
         :items="technologyDropDown"
         label="Technology"
         data-vv-name="Technology"
@@ -136,13 +130,14 @@ function duplicateTechEntries() {
   //declares function to count unique name properties of js objects
   const count = (names) =>
     names.reduce((acc, it) => {
-      acc[it.name] = acc[it.name] + 1 || 1;
+      if (it.name !== '') {
+        acc[it.name] = acc[it.name] + 1 || 1;
+      }
       return acc;
     }, {});
 
   //returns an array of objects that had a count of over 1
   const duplicates = (dict) => Object.keys(dict).filter((a) => dict[a] > 1);
-
   return this.editedTechnologies ? duplicates(count(this.editedTechnologies)) : [];
 } // duplicateTechEntries
 
@@ -202,12 +197,6 @@ function validateFields() {
       errorCount++;
     }
   });
-  //we want the many errors modal to only appear if there are multiple errors, else show the duplicate red error modal
-  if (errorCount === 0) {
-    this.duplicateTechEntries().length > 0
-      ? window.EventBus.$emit('technologiesErrStatus', 'Technology names MUST be UNIQUE. Please remove any duplicates')
-      : null;
-  }
   //emit error status with a custom message
   // emit error status
   window.EventBus.$emit('technologiesStatus', errorCount);
@@ -223,6 +212,9 @@ export default {
       requiredRules: [
         (v) => !isEmpty(v) || 'This field is required. You must enter information or delete the field if possible'
       ], // rules for a required field
+      duplicateRules: (tech) => {
+        return !this.isDuplicate(tech) || 'Duplicate technology found, please remove duplicate entries';
+      },
       experienceRequired: [
         (v) => !isEmpty(v) || 'This field is required',
         (v, index) => v > 0 || this.editedTechnologies[index].current || 'Value must be greater than 0',
