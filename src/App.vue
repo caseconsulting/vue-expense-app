@@ -101,6 +101,9 @@
         </v-container>
       </v-main>
       <v-footer padless>
+        <v-col class="text-center text-caption pb-0" cols="12">Case Consulting Inc.</v-col>
+        <v-col class="text-center text-caption pb-0" cols="12">18425 Rustling Woods Court, Leesburg, VA 20175</v-col>
+        <v-col class="text-center text-caption pb-0" cols="12">703-728-0294</v-col>
         <v-col class="text-right text-caption" cols="12"><strong>Version</strong> {{ version }}</v-col>
       </v-footer>
       <time-out-modal :toggleTimeOut="timedOut"></time-out-modal>
