@@ -1,8 +1,56 @@
 <template>
-  <v-card v-if="expense" raised id="expense-info" class="mt-3 mr-3 white--text slide-in-blurred-right followScroll">
+  <v-card v-if="expense" id="expense-info" class="mt-3 mr-3 slide-in-blurred-right">
     <v-card-title primary-title class="subtitle-2">
       <div class="headline expense_info">Expense Info</div>
-      <div class="expense_info">
+    </v-card-title>
+    <v-card-text>
+      <v-container class="pb-2" fluid>
+        <v-row dense>
+          <v-col> <b>Description:</b></v-col>
+          <v-col> {{ expense.description }}</v-col>
+        </v-row>
+        <v-row dense>
+          <v-col> <b>Employee:</b></v-col>
+          <v-col>{{ expense.employeeName }}</v-col>
+        </v-row>
+        <v-row dense>
+          <v-col><b>Budget:</b></v-col>
+          <v-col>{{ expense.budgetName }}</v-col>
+        </v-row>
+        <v-row dense>
+          <v-col><b>Cost:</b></v-col>
+          <v-col>{{ convertToMoneyString(expense.cost) }}</v-col>
+        </v-row>
+        <v-row dense>
+          <v-col><b>Purchased On:</b></v-col>
+          <v-col> {{ expense.purchaseDate | monthDayYearFormat }} </v-col>
+        </v-row>
+        <v-row dense v-if="!isEmpty(expense.reimbursedDate)">
+          <v-col><b>Reimbursed On:</b></v-col>
+          <v-col> {{ expense.reimbursedDate | monthDayYearForm }}</v-col>
+        </v-row>
+        <v-row dense v-if="!isEmpty(expense.note)">
+          <v-col><b>Notes:</b></v-col>
+          <v-col> {{ expense.note }}</v-col>
+        </v-row>
+        <v-row dense v-else>
+          <v-col><b>Notes:</b></v-col>
+          <v-col>N/A</v-col>
+        </v-row>
+        <v-row dense v-if="!isEmpty(expense.category)">
+          <v-col><b>Category:</b></v-col>
+          <v-col> {{ expense.category }}</v-col>
+        </v-row>
+        <v-row dense v-else>
+          <v-col><b>Category:</b></v-col>
+          <v-col>N/A</v-col>
+        </v-row>
+        <v-row>
+          <attachment :expense="expense" :mode="'adminExpenseInfo'" class="expense_info"></attachment>
+        </v-row>
+      </v-container>
+    </v-card-text>
+    <!-- <div class="expense_info">
         <p class="expense_info"><span>Description:</span> {{ expense.description }}</p>
         <p class="expense_info"><span>Employee:</span> {{ expense.employeeName }}</p>
         <p class="expense_info"><span>Budget:</span> {{ expense.budgetName }}</p>
@@ -18,7 +66,7 @@
         <p class="expense_info" v-else><span>Category:</span> N/A</p>
         <attachment :expense="expense" :mode="'adminExpenseInfo'" class="expense_info"></attachment>
       </div>
-    </v-card-title>
+    </v-card-title> -->
   </v-card>
 </template>
 

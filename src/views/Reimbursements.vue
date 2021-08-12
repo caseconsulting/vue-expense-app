@@ -1,18 +1,24 @@
 <template>
-  <v-row>
-    <v-col cols="12" md="9" lg="8" xl="9" offset-lg="1" offset-md="1">
-      <!-- Expense Table -->
-      <rollup-expense-type-table></rollup-expense-type-table>
-    </v-col>
-    <v-col cols="12" md="2" lg="3" xl="2">
-      <div class="followScroll">
+  <v-container fluid>
+    <v-row>
+      <v-col cols="12" md="9">
+        <!-- Expense Table -->
+        <rollup-expense-type-table></rollup-expense-type-table>
+      </v-col>
+      <v-col v-if="!isMobile" cols="3" class="followScroll">
         <!-- Expense Info -->
-        <expense-info class="jerryrig"></expense-info>
+        <expense-info class="mb-3"></expense-info>
         <!-- Expenses Total -->
         <expense-type-totals></expense-type-totals>
-      </div>
-    </v-col>
-  </v-row>
+      </v-col>
+      <v-col v-else cols="12">
+        <!-- Expense Info -->
+        <expense-info class="mb-3"></expense-info>
+        <!-- Expenses Total -->
+        <expense-type-totals></expense-type-totals>
+      </v-col>
+    </v-row>
+  </v-container>
 </template>
 
 <script>
@@ -20,6 +26,13 @@ import api from '@/shared/api.js';
 import ExpenseInfo from '@/components/ExpenseInfo.vue';
 import ExpenseTypeTotals from '@/components/ExpenseTypeTotals.vue';
 import RollupExpenseTypeTable from '@/components/RollupExpenseTypeTable.vue';
+
+function isMobile() {
+  if (this.$vuetify.breakpoint.xs || this.$vuetify.breakpoint.sm) {
+    return true;
+  }
+  return false;
+}
 
 async function created() {
   this.employee = await api.getUser();
@@ -40,6 +53,9 @@ export default {
     ExpenseTypeTotals,
     RollupExpenseTypeTable
   },
+  computed: {
+    isMobile
+  },
   created,
   data() {
     return {
@@ -51,11 +67,8 @@ export default {
 </script>
 
 <style>
-.jerryrig {
-  margin-bottom: 15px;
-}
-
 .followScroll {
   position: fixed;
+  left: 75%;
 }
 </style>
