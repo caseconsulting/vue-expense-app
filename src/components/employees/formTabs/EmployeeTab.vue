@@ -4,7 +4,7 @@
       in order the 'ref=formFields' to be placed into
       an array -->
     <div v-for="i in [0]" :key="i">
-      <!-- Name -->
+      <!-- First Name -->
       <v-text-field
         id="employeeFirstName"
         ref="formFields"
@@ -14,6 +14,7 @@
         data-vv-name="First Name"
         :disabled="!admin"
       ></v-text-field>
+      <!-- Middle Name -->
       <v-text-field
         id="employeeMiddleName"
         v-model="editedEmployee.middleName"
@@ -21,6 +22,7 @@
         data-vv-name="Middle Name"
         :disabled="!admin"
       ></v-text-field>
+      <!-- Last Name -->
       <v-text-field
         id="employeeLastName"
         ref="formFields"
@@ -30,6 +32,7 @@
         data-vv-name="Last Name"
         :disabled="!admin"
       ></v-text-field>
+      <!-- Nickname -->
       <v-text-field
         id="employeeNickname"
         ref="formFields"
