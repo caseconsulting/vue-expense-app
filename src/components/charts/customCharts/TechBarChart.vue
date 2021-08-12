@@ -56,7 +56,6 @@ import api from '@/shared/api.js';
  * @return boolean - if the device is mobile
  */
 function isMobile() {
-  console.log(this.$vuetify.breakpoint.name);
   switch (this.$vuetify.breakpoint.name) {
     case 'xs':
       return true;
