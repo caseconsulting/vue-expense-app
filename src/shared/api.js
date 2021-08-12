@@ -17,6 +17,7 @@ const BLOG_FILE = 'blogFile';
 const HIPPO_LAB = 'hippoLabs';
 const GOOGLE_MAPS = 'googleMaps';
 const BLOG_ATTACHMENT = 'blogAttachment';
+const AUDIT = 'audits';
 const RESUME = 'resume';
 const API_HOSTNAME = API_CONFIG.apiHostname;
 const API_PORT = API_CONFIG.apiPort;
@@ -487,5 +488,6 @@ export default {
   TWITTER,
   BLOG,
   BLOG_ATTACHMENT,
-  BLOG_FILE
+  BLOG_FILE,
+  AUDIT
 };

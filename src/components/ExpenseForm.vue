@@ -876,6 +876,7 @@ async function createNewEntry() {
       this.file = null;
       this.$set(this.editedExpense, 'receipt', null);
     }
+    console.log(this.editedExpense);
     updatedExpense = await api.createItem(api.EXPENSES, this.editedExpense);
 
     if (updatedExpense.id) {
