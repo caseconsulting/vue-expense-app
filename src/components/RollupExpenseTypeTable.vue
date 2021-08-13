@@ -519,6 +519,7 @@ async function reimburseExpenses() {
         if (expense.selected) {
           //to remove the expense type data in the ExpenseTypeTotal modal
           window.EventBus.$emit('expenseChange', expense);
+          window.EventBus.$emit('expenseClicked', undefined);
           expense.reimbursedDate = moment().format('YYYY-MM-DD');
           expensesToReimburse.push(removeAggregateExpenseData(expense));
         }
