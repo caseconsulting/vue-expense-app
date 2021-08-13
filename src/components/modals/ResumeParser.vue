@@ -356,6 +356,7 @@ import _ from 'lodash';
 import CancelConfirmation from '@/components/modals/CancelConfirmation.vue';
 import educationTab from '@/components/employees/formTabs/EducationTab';
 import FormSubmissionConfirmation from '@/components/modals/FormSubmissionConfirmation.vue';
+import { v4 as uuid } from 'uuid';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -375,6 +376,16 @@ async function created() {
       this.resumeProcessed = false;
       this.confirmingValid = false;
       this.activate = !this.activate;
+
+      // Create an audit of the success
+      api.createItem(api.AUDIT, {
+        id: uuid(),
+        type: 'resume',
+        tags: ['submit'],
+        employeeId: this.employee.id,
+        description: `${this.employee.firstName} ${this.employee.lastName} made changes to their profile through the resume parser.`,
+        timeToLive: 60
+      });
     }
   });
   window.EventBus.$on('canceled-parser', () => {
@@ -591,8 +602,29 @@ async function submit() {
       this.resumeObject = null;
       this.timeoutError = true;
       this.loading = false;
+
+      // Create an audit of the timeout
+      api.createItem(api.AUDIT, {
+        id: uuid(),
+        type: 'resume',
+        tags: ['upload', 'failure'],
+        employeeId: this.employee.id,
+        description: `${this.employee.firstName} ${this.employee.lastName} timed out on resume upload.`,
+        timeToLive: 60
+      });
+
       return;
     }
+
+    // Create an audit of the success
+    api.createItem(api.AUDIT, {
+      id: uuid(),
+      type: 'resume',
+      tags: ['upload', 'success'],
+      employeeId: this.employee.id,
+      description: `${this.employee.firstName} ${this.employee.lastName} successfully uploaded a resume.`,
+      timeToLive: 60
+    });
 
     // Notify employee component that resume has been uploaded and parsed
     window.EventBus.$emit('upload-resume-complete', true);

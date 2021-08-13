@@ -123,6 +123,10 @@ function getAllEvents() {
 //   return execute('get', `/${UTILITY}/getEmployeeBudgets/${id}/${date}/${expenseTypeId}`);
 // }
 
+function getAudits(type, days) {
+  return execute('get', `/${AUDIT}/${type}/${days}`);
+}
+
 function getItems(type) {
   return execute('get', `/${type}`);
 }
@@ -450,6 +454,7 @@ export default {
   getAllExpenses,
   getAllExpenseTypeExpenses,
   getAttachment,
+  getAudits,
   getBlogFile,
   getPictureFile,
   getBasecampAvatars,

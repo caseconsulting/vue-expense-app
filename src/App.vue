@@ -178,15 +178,8 @@ function onResize() {
 // |                 LIFECYCLE HOOKS                  |
 // |                                                  |
 // |--------------------------------------------------|
-import { v4 as uuid } from 'uuid';
 
 async function created() {
-  api.createItem(api.AUDIT, {
-    id: uuid(),
-    type: 'test',
-    employeeId: '123456',
-    description: 'this is a test'
-  });
   window.EventBus.$on('relog', handleLogout); // Session end - log out
   window.EventBus.$on('badgeExp', () => {
     this.badgeKey++;
