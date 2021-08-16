@@ -3,26 +3,26 @@
     <v-container fluid>
       <v-row>
         <v-col>
-          <v-text-field
+          <v-combobox
             id="employeesSearch"
             v-model="search"
             append-icon="search"
-            label="Search"
+            label="Search By Employee"
+            @change="refreshList()"
+            @click:clear="search = null"
+            :items="employeeNames"
             single-line
-            hide-details
-          ></v-text-field>
+            clearable
+          ></v-combobox>
         </v-col>
         <v-col>
           <v-autocomplete
             v-model="contract"
             :items="contractsDropDown"
             label="Search By Contract"
-            @change="searchContract()"
             clearable
-            @click:clear="
-              contract = null;
-              refreshList();
-            "
+            @change="refreshList()"
+            @click:clear="contract = null"
           >
           </v-autocomplete>
         </v-col>
@@ -31,12 +31,9 @@
             v-model="prime"
             :items="primesDropDown"
             label="Search By Prime"
-            @change="searchPrime()"
             clearable
-            @click:clear="
-              prime = null;
-              refreshList();
-            "
+            @change="refreshList()"
+            @click:clear="prime = null"
           ></v-autocomplete>
         </v-col>
       </v-row>
@@ -59,21 +56,11 @@
           </p>
         </template>
         <!-- First Name Item Slot -->
-        <template v-slot:[`item.firstName`]="{ item }">
+        <template v-slot:[`item.fullName`]="{ item }">
           <p :class="{ selectFocus: isFocus(item) }" style="margin-bottom: 0px">
-            {{ item.firstName + ' ' + item.lastName }}
+            {{ item.fullName }}
           </p>
         </template>
-        <!-- Contracts Item Slot -->
-        <!-- <template v-slot:[`item.contracts`]="{ item }">
-          <p v-if="item.contracts !== undefined" :class="{ selectFocus: isFocus(item) }" style="margin-bottom: 0px">
-            {{
-              item.contracts.forEach((current) => {
-                current.name;
-              })
-            }}
-          </p> -->
-        <!-- </template> -->
         <!-- Alert for no search results -->
         <v-alert slot="no-results" :value="true" color="error" icon="warning">
           Your search for "{{ search }}" found no results.
@@ -107,8 +94,17 @@ function isFocus(item) {
 /**
  * Populate drop downs with information that other employees have filled out.
  */
-function populateDropDowns() {
-  let employeesContracts = _.map(this.employeesInfo, (employee) => employee.contracts); // extract contracts
+function populateDropDowns(employees) {
+  //resets dropdowns after each query
+  this.contractsDropDown = [];
+  this.primesDropDown = [];
+  this.employeeNames = [];
+  //creates list of employee names for dropdown
+  _.forEach(employees, (emp) => {
+    this.employeeNames.push(`${emp.firstName} ${emp.lastName}`);
+    emp.fullName = `${emp.firstName} ${emp.lastName}`;
+  });
+  let employeesContracts = _.map(employees, (employee) => employee.contracts); // extract contracts
   employeesContracts = _.compact(employeesContracts); // remove falsey values
   // loop employees
   _.forEach(employeesContracts, (contracts) => {
@@ -134,33 +130,39 @@ function populateDropDowns() {
 function refreshList() {
   if (this.contract) {
     this.searchContract();
-  } else if (this.prime) {
+  }
+  if (this.prime) {
     this.searchPrime();
-  } else {
+  }
+  if (this.search) {
+    this.filteredEmployees = _.filter(this.filteredEmployees, (employee) => {
+      return employee.fullName.includes(this.search);
+    });
+  }
+  if (this.search === null && this.contract === null && this.prime === null) {
     this.filteredEmployees = this.employeesInfo;
   }
+  this.populateDropDowns(this.filteredEmployees);
 } // refreshList
 
 /**
  * Clears the other search forms and searches the table by contract
  */
 function searchContract() {
-  //this.search = this.contract;
-  //this.prime = null;
   if (this.contract) {
     if (this.prime) {
       this.filteredEmployees = _.filter(this.employeesInfo, (employee) => {
         if (employee.contractNames) {
           return (
-            employee.contractNames.findIndex((element) => element.includes(this.contract)) > -1 &&
-            employee.contractNames.findIndex((element) => element.includes(this.prime)) > -1
+            employee.contractNames.split(' | ').findIndex((element) => element.includes(this.contract)) > -1 &&
+            employee.contractNames.split(' | ').findIndex((element) => element.includes(this.prime)) > -1
           );
         } else return false;
       });
     } else {
       this.filteredEmployees = _.filter(this.employeesInfo, (employee) => {
         if (employee.contractNames) {
-          return employee.contractNames.findIndex((element) => element.includes(this.contract)) > -1;
+          return employee.contractNames.split(' | ').findIndex((element) => element.includes(this.contract)) > -1;
         } else return false;
       });
     }
@@ -171,56 +173,25 @@ function searchContract() {
  * Clears the other search forms and searches the table by prime
  */
 function searchPrime() {
-  //   this.search = this.prime;
-  //   this.contract = null;
   if (this.prime) {
     if (this.contract) {
       this.filteredEmployees = _.filter(this.employeesInfo, (employee) => {
         if (employee.contractNames) {
           return (
-            employee.contractNames.findIndex((element) => element.includes(this.contract)) > -1 &&
-            employee.contractNames.findIndex((element) => element.includes(this.prime)) > -1
+            employee.contractNames.split(' | ').findIndex((element) => element.includes(this.contract)) > -1 &&
+            employee.contractNames.split(' | ').findIndex((element) => element.includes(this.prime)) > -1
           );
         } else return false;
       });
     } else {
       this.filteredEmployees = _.filter(this.employeesInfo, (employee) => {
         if (employee.contractNames) {
-          return employee.contractNames.findIndex((element) => element.includes(this.prime)) > -1;
+          return employee.contractNames.split(' | ').findIndex((element) => element.includes(this.prime)) > -1;
         } else return false;
       });
     }
   }
 } // searchPrime
-
-/**
- * Sets a mapping of employee name to employee id of an expense for the autocomplete options.
- *
- * @param aggregatedData - aggregated expenses
- */
-function constructAutoComplete(aggregatedData) {
-  this.employees = _.sortBy(
-    _.map(aggregatedData, (data) => {
-      if (data && data.employeeName && data.employeeId) {
-        return {
-          text: data.employeeName,
-          value: data.employeeId
-        };
-      }
-    }).filter((data) => {
-      return data != null;
-    }),
-    (employee) => employee.text.toLowerCase()
-  );
-} // constructAutoComplete
-
-/**
- * Clears the other search forms and searches the table by prime
- */
-// function searchNorm() {
-//   this.prime = null;
-//   this.contract = null;
-// } // searchPrime
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -234,13 +205,12 @@ function constructAutoComplete(aggregatedData) {
 async function created() {
   this.loading = true; // set loading status to true
   this.employeesInfo = await api.getItems(api.EMPLOYEES); // get all employees
-  this.populateDropDowns();
+  this.populateDropDowns(this.employeesInfo);
   this.employeesInfo.forEach((currentEmp) => {
     if (currentEmp.contracts) {
-      var contractNames = [];
+      var contractNames = '';
       currentEmp.contracts.forEach((currentCon) => {
         var current = false;
-        //console.log(currentCon);
         if (currentCon.projects) {
           currentCon.projects.forEach((currProj) => {
             if (!currProj.endDate) {
@@ -249,9 +219,10 @@ async function created() {
           });
         }
         if (current == true) {
-          contractNames.push(' ' + currentCon.name + ' - ' + currentCon.prime);
+          contractNames += `${currentCon.name} - ${currentCon.prime} | `;
         }
       });
+      contractNames = contractNames.slice(0, -2);
       currentEmp.contractNames = contractNames;
     }
   });
@@ -265,6 +236,7 @@ export default {
       contractsDropDown: [],
       contract: null,
       employeesInfo: [],
+      employeeNames: [],
       expanded: [],
       filteredEmployees: [],
       headers: [
@@ -274,7 +246,7 @@ export default {
         },
         {
           text: 'Name',
-          value: 'firstName'
+          value: 'fullName'
         },
         {
           text: 'Current Contract and Prime',
@@ -329,8 +301,7 @@ export default {
     populateDropDowns,
     refreshList,
     searchContract,
-    searchPrime,
-    constructAutoComplete
+    searchPrime
   }
 };
 </script>
