@@ -341,9 +341,12 @@ async function mounted() {
     }
   });
 
-  window.EventBus.$on('resume', async (newEmployeeForm) => {
+  window.EventBus.$on('resume', async (newEmployeeForm, changes) => {
     this.model = newEmployeeForm;
     await api.updateItem(api.EMPLOYEES, this.model);
+    if (changes && changes > 0) {
+      this.displayMessage('SUCCESS', `Added ${changes} change(s) to profile!`, 'green');
+    }
   });
 } // mounted
 

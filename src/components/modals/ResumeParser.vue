@@ -371,10 +371,6 @@ async function created() {
   window.EventBus.$on('confirmed-parser', () => {
     // For some reason confirmed-parser gets called twice
     // Where one of the editedEmployeeForms is null
-    window.EventBus.$emit('resume', this.editedEmployeeForm);
-    this.resumeProcessed = false;
-    this.confirmingValid = false;
-    this.activate = !this.activate;
 
     // Create an audit of the success
     api.createItem(api.AUDIT, {
@@ -385,6 +381,13 @@ async function created() {
       description: `${this.employee.firstName} ${this.employee.lastName} made changes to their profile through the resume parser.`,
       timeToLive: 60
     });
+    if (this.editedEmployeeForm) {
+      window.EventBus.$emit('resume', this.editedEmployeeForm, this.totalChanges);
+      this.resumeProcessed = false;
+      this.confirmingValid = false;
+      this.totalChanges = 0;
+      this.activate = false;
+    }
   });
   window.EventBus.$on('canceled-parser', () => {
     this.confirmingValid = false;
@@ -801,6 +804,7 @@ async function submit() {
  * @param newValue - Used for education the new education to be submitted
  */
 function submitInfo(field, value, newValue) {
+  this.totalChanges++;
   if (field === 'address') {
     // Create fields in editedEmployeeForm if they don't exist
     if (!this.editedEmployeeForm.currentStreet) {
@@ -903,6 +907,7 @@ function clearForm() {
   this.timeoutError = false;
   this.confirmingValid = false;
   this.activate = false;
+  this.totalChanges = 0;
 
   if (this.$refs.submit !== undefined) {
     this.$refs.submit.reset();
@@ -980,6 +985,7 @@ export default {
         currentZIP: null
       },
       toggleResumeFormErrorModal: false,
+      totalChanges: 0,
       timeoutError: false,
       resumeObject: [],
       resumeProcessed: false,
