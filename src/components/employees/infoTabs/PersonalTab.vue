@@ -28,7 +28,7 @@
     <!-- Place of Birth -->
     <p v-if="!isEmpty(getPlaceOfBirth) && (admin || employee)"><b>Place of Birth:</b> {{ getPlaceOfBirth }}</p>
     <!-- Current Address -->
-    <p v-if="!isEmpty(getCurrentAddress) && (userIsAdmin() || userIsEmployee())">
+    <p v-if="!isEmpty(getCurrentAddress) && (userIsAdmin() || userIsManager() || userIsEmployee())">
       <b>Current Address:</b> {{ getCurrentAddress }}
     </p>
   </div>

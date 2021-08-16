@@ -37,9 +37,9 @@
     >
       <v-tooltip bottom slot="append">
         <template v-slot:activator="{ on }">
-          <v-btn class="pb-1" text icon v-on="on"><v-icon style="color: grey">lock</v-icon></v-btn>
+          <v-btn class="pb-1" text icon v-on="on"><v-icon style="color: grey">shield</v-icon></v-btn>
         </template>
-        <span>Only Visible to You and Admins</span>
+        <span>Only Visible to You, Managers, and Admins</span>
       </v-tooltip>
     </v-text-field>
 
@@ -85,9 +85,9 @@
       Place of Birth
       <v-tooltip bottom slot="append-outer">
         <template v-slot:activator="{ on }">
-          <v-btn class="pb-1" text icon v-on="on"><v-icon style="color: grey">lock</v-icon></v-btn>
+          <v-btn class="pb-1" text icon v-on="on"><v-icon style="color: grey">shield</v-icon></v-btn>
         </template>
-        <span>Only Visible to You and Admins</span>
+        <span>Only Visible to You, Managers, and Admins</span>
       </v-tooltip>
     </p>
     <div style="padding-right: 20px; padding-left: 30px; padding-bottom: 10px">
@@ -121,14 +121,14 @@
       </div>
     </div>
     <!-- Current Address -->
-    <div v-if="userIsAdmin() || userIsEmployee()">
+    <div v-if="userhasAdminPermissions() || userIsEmployee()">
       <p style="font-size: 17px; padding-left: 10px; padding-top: 10px">
         Current Address
         <v-tooltip bottom slot="append-outer">
           <template v-slot:activator="{ on }">
-            <v-btn class="pb-1" text icon v-on="on"><v-icon style="color: grey">lock</v-icon></v-btn>
+            <v-btn class="pb-1" text icon v-on="on"><v-icon style="color: grey">shield</v-icon></v-btn>
           </template>
-          <span>Only Visible to You and Admins</span>
+          <span>Only Visible to You, Managers, and Admins</span>
         </v-tooltip>
       </p>
       <v-combobox
@@ -306,13 +306,13 @@ async function updateBoxes() {
 } // updateBoxes
 
 /**
- * Checks whether the current user role is admin, used specifically
+ * Checks whether the current user role has admin permissions, used specifically
  * to prevent the manager from changing their own role on the Employee tab.
  * @return - boolean: true if the user role is admin
  */
-function userIsAdmin() {
-  return getRole() === 'admin';
-} // userIsAdmin
+function userhasAdminPermissions() {
+  return getRole() === 'admin' || getRole() === 'manager';
+} // userhasAdminPermissions
 
 /**
  * Checks if the profile accessed is the signed-in user's profile.
@@ -444,7 +444,7 @@ export default {
     parseDate,
     updateAddressDropDown,
     updateBoxes,
-    userIsAdmin,
+    userhasAdminPermissions,
     userIsEmployee,
     validateFields
   },
