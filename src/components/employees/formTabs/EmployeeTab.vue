@@ -9,7 +9,7 @@
         id="employeeFirstName"
         ref="formFields"
         v-model="editedEmployee.firstName"
-        :rules="requiredRules"
+        :rules="getRequiredRules()"
         label="First Name"
         data-vv-name="First Name"
         :disabled="!admin"
@@ -27,7 +27,7 @@
         id="employeeLastName"
         ref="formFields"
         v-model="editedEmployee.lastName"
-        :rules="requiredRules"
+        :rules="getRequiredRules()"
         label="Last Name"
         data-vv-name="Last Name"
         :disabled="!admin"
@@ -47,7 +47,7 @@
         id="employeeNumber"
         ref="formFields"
         v-model="editedEmployee.employeeNumber"
-        :rules="[...numberRules, ...duplicateEmployeeNumberRule]"
+        :rules="[...getRequiredRules(), ...getNumberRules(), ...duplicateEmployeeNumberRule]"
         label="Employee #"
         data-vv-name="Employee #"
         :disabled="!admin || disableEmpNum"
@@ -80,7 +80,7 @@
         id="employeeRole"
         ref="formFields"
         :items="permissions"
-        :rules="requiredRules"
+        :rules="getRequiredRules()"
         v-model="employeeRoleFormatted"
         label="Employee Role"
         @blur="editedEmployee.employeeRole = formatKebabCase(employeeRoleFormatted)"
@@ -104,7 +104,7 @@
             id="employeeHireDateField"
             ref="formFields"
             v-model="hireDateFormatted"
-            :rules="dateRules"
+            :rules="getDateRules()"
             :disabled="hasExpenses || !admin"
             v-mask="'##/##/####'"
             label="Hire Date"
@@ -179,7 +179,7 @@
       <v-menu
         v-if="isInactive()"
         ref="departureMenu"
-        :rules="requiredRules"
+        :rules="getRequiredRules()"
         :close-on-content-click="false"
         v-model="departureMenu"
         :nudge-right="40"
@@ -194,7 +194,7 @@
           <v-text-field
             ref="formFields"
             v-model="deptDateFormatted"
-            :rules="dateRules"
+            :rules="getDateRules()"
             label="Departure Date"
             hint="MM/DD/YYYY format"
             v-mask="'##/##/####'"
@@ -226,6 +226,7 @@
 import api from '@/shared/api.js';
 import MobileDetect from 'mobile-detect';
 import _ from 'lodash';
+import { getDateRules, getNumberRules, getRequiredRules } from '@/shared/validationUtils.js';
 import { formatDate, isEmpty, parseDate } from '@/utils/utils';
 import { mask } from 'vue-the-mask';
 import { getRole } from '@/utils/auth';
@@ -421,11 +422,6 @@ export default {
   created,
   data() {
     return {
-      dateRules: [
-        (v) => !isEmpty(v) || 'Date must be valid. Format: MM/DD/YYYY',
-        (v) => (!isEmpty(v) && /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v)) || 'Date must be valid. Format: MM/DD/YYYY',
-        (v) => moment(v, 'MM/DD/YYYY').isValid() || 'Date must be valid'
-      ], // rules for a required date
       deptDateFormatted: null, // formatted departure date
       departureMenu: false, // display depature menu
       editedEmployee: _.cloneDeep(this.model), //employee that can be edited
@@ -452,10 +448,6 @@ export default {
       ], // job title options
       loading: true,
       mifiStatus: true,
-      numberRules: [
-        (v) => !isEmpty(v) || 'Employee # is required',
-        (v) => /^\d+$/.test(v) || 'Employee # must be a positive number'
-      ], // rules for an employee number
       duplicateEmployeeNumberRule: [
         (v) => {
           this.duplicate = false;
@@ -468,7 +460,6 @@ export default {
         }
       ],
       permissions: ['Admin', 'User', 'Intern', 'Manager'], // employee role options
-      requiredRules: [(v) => !isEmpty(v) || 'This field is required'], // rules for a required field
       status: '100', // work status value
       statusRadio: 'full', // work status button
       statusRules: [(v) => !isEmpty(v) || '', (v) => (v !== '0' && v !== '00') || ''],
@@ -481,6 +472,9 @@ export default {
     duplicateEmployeeNum,
     formatDate,
     formatKebabCase,
+    getDateRules,
+    getNumberRules,
+    getRequiredRules,
     isEmpty,
     isInactive,
     isMobile,

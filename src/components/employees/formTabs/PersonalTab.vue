@@ -60,7 +60,7 @@
           ref="formFields"
           v-mask="'##/##/####'"
           v-model="birthdayFormat"
-          :rules="dateOptionalRules"
+          :rules="[...getDateOptionalRules(), ...getNonFutureDateRules()]"
           label="Birthday"
           hint="MM/DD/YYYY format"
           persistent-hint
@@ -186,6 +186,7 @@
 <script>
 import api from '@/shared/api.js';
 import _ from 'lodash';
+import { getDateOptionalRules, getNonFutureDateRules } from '@/shared/validationUtils.js';
 import { formatDate, isEmpty, parseDate } from '@/utils/utils';
 import { mask } from 'vue-the-mask';
 import { getRole } from '@/utils/auth';
@@ -352,13 +353,6 @@ export default {
       birthdayFormat: null, // formatted birthday
       BirthdayMenu: false, // display birthday menu
       countries: [], // list of countries
-      dateOptionalRules: [
-        (v) => {
-          return !isEmpty(v) ? /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v) || 'Date must be valid. Format: MM/DD/YYYY' : true;
-        },
-        (v) => (!isEmpty(v) ? moment(v, 'MM/DD/YYYY').isValid() || 'Date must be valid' : true),
-        (v) => (!isEmpty(v) ? moment(v, 'MM/DD/YYYY').isBefore(moment()) || 'Date must not be a future date' : true)
-      ], // rules for an optional date
       urlRules: [
         (v) =>
           isEmpty(v) ||
@@ -441,6 +435,8 @@ export default {
   directives: { mask },
   methods: {
     formatDate,
+    getDateOptionalRules,
+    getNonFutureDateRules,
     parseDate,
     updateAddressDropDown,
     updateBoxes,
