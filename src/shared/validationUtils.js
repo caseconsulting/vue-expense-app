@@ -13,6 +13,16 @@ export function getDateOptionalRules() {
   ]; // rules for an optional date
 }
 
+export function getDateMonthYearOptionalRules() {
+  return [
+    (v) => {
+      return !isEmpty(v)
+        ? (/[\d]{2}\/[\d]{4}/.test(v) && moment(v, 'MM/YYYY').isValid()) || 'Date must be valid. Format: MM/DD/YYYY'
+        : true;
+    }
+  ]; // rules for an optional date
+}
+
 export function getDateRules() {
   return [
     (v) =>
@@ -21,11 +31,11 @@ export function getDateRules() {
   ]; // rules for a required MM/DD/YYYY date
 }
 
-export function getMonthYearDateRules() {
+export function getDateMonthYearRules() {
   // rules for a required MM/YYYY date
   return [
     (v) =>
-      (!isEmpty(v) && /[\d]{2}\/[\d]{4}/.test(v) && !moment(v, 'MM/YYYY').isValid()) ||
+      (!isEmpty(v) && /[\d]{2}\/[\d]{4}/.test(v) && moment(v, 'MM/YYYY').isValid()) ||
       'Date must be valid. Format: MM/YYYY'
   ];
 }

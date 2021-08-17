@@ -7,7 +7,7 @@ Education
       <v-autocomplete
         ref="formFields"
         v-model="school.name"
-        :rules="[requiredRules[0], duplicateSchool(school.name)]"
+        :rules="[...getRequiredRules(), duplicateSchool(school.name)]"
         :items="schoolDropDown"
         label="School"
         data-vv-name="School"
@@ -20,7 +20,7 @@ Education
           <v-select
             ref="formFields"
             v-model="degree.degreeType"
-            :rules="[requiredRules[0]]"
+            :rules="getRequiredRules()"
             :items="degreeDropDown"
             label="Degree"
             data-vv-name="Degree"
@@ -32,7 +32,7 @@ Education
           <v-select
             ref="formFields"
             v-model="degree.degreeType"
-            :rules="[requiredRules[0]]"
+            :rules="getRequiredRules()"
             :items="degreeDropDown"
             label="Degree"
             data-vv-name="Degree"
@@ -65,7 +65,7 @@ Education
               :value="degree.completionDate | formatDateMonthYear"
               label="Completion Date"
               prepend-icon="event"
-              :rules="dateRules"
+              :rules="getDateMonthYearRules()"
               hint="MM/YYYY format"
               v-mask="'##/####'"
               persistent-hint
@@ -91,7 +91,7 @@ Education
           <v-autocomplete
             ref="formFields"
             v-model="degree.majors[mIndex]"
-            :rules="[requiredRules[0], duplicateDiscipline('majors', major, index, dIndex)]"
+            :rules="[...getRequiredRules(), duplicateDiscipline('majors', major, index, dIndex)]"
             :items="majorDropDown"
             label="Major"
             data-vv-name="Major"
@@ -120,7 +120,7 @@ Education
           <v-autocomplete
             ref="formFields"
             v-model="degree.minors[mIndex]"
-            :rules="[requiredRules[0], duplicateDiscipline('minors', minor, index, dIndex)]"
+            :rules="[...getRequiredRules(), duplicateDiscipline('minors', minor, index, dIndex)]"
             :items="minorDropDown"
             label="Minor"
             data-vv-name="Minor"
@@ -149,7 +149,7 @@ Education
           <v-autocomplete
             ref="formFields"
             v-model="degree.concentrations[cIndex]"
-            :rules="[requiredRules[0], duplicateDiscipline('concentrations', concentration, index, dIndex)]"
+            :rules="[...getRequiredRules(), duplicateDiscipline('concentrations', concentration, index, dIndex)]"
             :items="concentrationDropDown"
             data-vv-name="Concentration"
             clearable
@@ -214,6 +214,7 @@ Education
 <script>
 import api from '@/shared/api.js';
 import _ from 'lodash';
+import { getDateMonthYearRules, getRequiredRules } from '@/shared/validationUtils.js';
 import { isEmpty, formatDateMonthYear, parseDateMonthYear } from '@/utils/utils';
 import { mask } from 'vue-the-mask';
 import { majorsAndMinors } from './Dropdown Info/majorsAndMinors';
@@ -409,11 +410,6 @@ export default {
   data() {
     return {
       concentrationDropDown: _.map(majorsAndMinors, (elem) => titleCase(elem)), // autocomplete concentration options
-      dateRules: [
-        (v) => !isEmpty(v) || 'Date must be valid. Format: MM/YYYY',
-        (v) => (!isEmpty(v) && /[\d]{2}\/[\d]{4}/.test(v)) || 'Date must be valid. Format: MM/YYYY',
-        (v) => moment(v, 'MM/YYYY').isValid() || 'Date must be valid'
-      ], // rules for a required date
       duplicateDiscipline: (title, discipline, schoolIndex, degreeIndex) => {
         let disciplines = this.editedDegrees[schoolIndex].degrees[degreeIndex][title];
         let count = _.countBy(disciplines, (dis) => {
@@ -431,9 +427,6 @@ export default {
       degreeDropDown: ['Associates', 'Bachelors', 'Masters', 'PhD/Doctorate', 'Other (trade school, etc)'], // autocomplete degree name options
       majorDropDown: _.map(majorsAndMinors, (elem) => titleCase(elem)), // autocomplete major options
       minorDropDown: _.map(majorsAndMinors, (elem) => titleCase(elem)), // autocomplete minor options
-      requiredRules: [
-        (v) => !isEmpty(v) || 'This field is required. You must enter information or delete the field if possible.'
-      ], // rules for a required field
       schoolDropDown: [] // autocomplete school options
     };
   },
@@ -444,6 +437,8 @@ export default {
   methods: {
     confirmEducation,
     denyEducation,
+    getDateMonthYearRules,
+    getRequiredRules,
     parseEventDate,
     addSchool,
     addItem,

@@ -28,7 +28,7 @@
           <template v-slot:activator="{ on, attrs }">
             <v-text-field
               :value="formatRange(timeFrame.range)"
-              :rules="requiredRules"
+              :rules="getRequiredRules()"
               label="Date Range"
               prepend-icon="date_range"
               readonly
@@ -98,7 +98,7 @@
         ref="formFields"
         :id="'comp-' + compIndex"
         v-model.trim="company.companyName"
-        :rules="[requiredRules[0], duplicateCompanyName(compIndex)]"
+        :rules="[...getRequiredRules(), duplicateCompanyName(compIndex)]"
         :items="companyDropDown"
         label="Company"
         data-vv-name="Company"
@@ -112,7 +112,7 @@
             ref="formFields"
             :id="'pos-field-' + compIndex + '-' + index"
             v-model.trim="position.title"
-            :rules="requiredRules"
+            :rules="getRequiredRules()"
             label="Position"
             data-vv-name="Position"
             clearable
@@ -123,7 +123,7 @@
             ref="formFields"
             :id="'pos-field-' + compIndex + '-' + index"
             v-model.trim="position.title"
-            :rules="requiredRules"
+            :rules="getRequiredRules()"
             label="Position"
             data-vv-name="Position"
             append-outer-icon="delete"
@@ -160,13 +160,7 @@
                   hint="MM/YYYY format"
                   v-mask="'##/####'"
                   prepend-icon="event_available"
-                  :rules="[
-                    dateRules[0],
-                    dateRules[1],
-                    dateRules[2],
-                    dateOptionalRules[2],
-                    dateOrderRule(compIndex, index)
-                  ]"
+                  :rules="[...getDateMonthYearRules(), dateOrderRule(compIndex, index)]"
                   v-bind="attrs"
                   v-on="on"
                   @blur="position.startDate = parseEventDate($event)"
@@ -204,9 +198,7 @@
                   label="End Date"
                   prepend-icon="event_busy"
                   :rules="[
-                    dateOptionalRules[0],
-                    dateOptionalRules[1],
-                    dateOptionalRules[2],
+                    ...getDateMonthYearOptionalRules(),
                     dateOrderRule(compIndex, index),
                     endDatePresentRule(compIndex, index)
                   ]"
@@ -275,6 +267,7 @@
 <script>
 import api from '@/shared/api.js';
 import _ from 'lodash';
+import { getDateMonthYearRules, getDateMonthYearOptionalRules, getRequiredRules } from '@/shared/validationUtils.js';
 import { isEmpty, formatDate, formatDateMonthYear, parseDateMonthYear } from '@/utils/utils';
 import { mask } from 'vue-the-mask';
 import { getRole } from '@/utils/auth';
@@ -511,21 +504,6 @@ export default {
           return true;
         }
       },
-      dateOptionalRules: [
-        //end date validation
-        (v) => {
-          return !isEmpty(v) ? /^\d{1,2}\/\d{4}$/.test(v) || 'Date must be valid. Format: MM/YYYY' : true;
-        },
-        (v) => (!isEmpty(v) ? moment(v, 'MM/YYYY').isValid() || 'Date must be valid' : true),
-        (v) => (!isEmpty(v) ? moment(v, 'MM/YYYY').isBefore(moment()) || 'Date must not be a future date' : true)
-      ], // rules for an optional date
-      dateRules: [
-        (v) => {
-          return !isEmpty(v) || 'Date required';
-        },
-        (v) => (!isEmpty(v) && /^\d{1,2}\/\d{4}$/.test(v)) || 'Date must be valid. Format: MM/YYYY',
-        (v) => moment(v, 'MM/YYYY').isValid() || 'Date must be valid'
-      ], // rules for an optional date
       duplicateCompanyName: (compIndex) => {
         let compNames = _.map(this.editedJobExperienceInfo.companies, (company) => company.companyName);
         let company = compNames[compIndex];
@@ -544,8 +522,7 @@ export default {
           return false;
         }
       },
-      editedJobExperienceInfo: _.cloneDeep(this.model), //edited job experience info
-      requiredRules: [(v) => !isEmpty(v) || 'This field is required'] // rules for required fields
+      editedJobExperienceInfo: _.cloneDeep(this.model) //edited job experience info
     };
   },
   directives: { mask },
@@ -561,6 +538,9 @@ export default {
     deleteCompany,
     deletePosition,
     formatDate,
+    getDateMonthYearRules,
+    getDateMonthYearOptionalRules,
+    getRequiredRules,
     hasEndDatesFilled,
     parseEventDate,
     formatRange,
