@@ -3,6 +3,7 @@
  * https://en.wikipedia.org/wiki/List_of_academic_fields
  */
 export let majorsAndMinors = [
+  'Computer Information Systems',
   'Anthropology',
   'Anthropological criminology',
   'Anthropological linguistics',
@@ -1349,7 +1350,7 @@ export let majorsAndMinors = [
   'Object database',
   'Information retrieval',
   'Information management',
-  'Information system',
+  'Information systems',
   'Information technology',
   'Knowledge management',
   'Multimedia, hypermedia',

@@ -4,34 +4,34 @@
     <div v-if="!isEmpty(this.filteredList)">
       <!-- Loop Degrees -->
       <div v-for="(school, index) in this.filteredList" :key="school.name + index">
-        <p class="mb-1"><b>School: </b>{{ school.name }}</p>
+        <p class="mb-0"><b>School: </b>{{ school.name }}</p>
         <div class="ml-4" v-if="school.degrees.length > 1">
           <p class="my-0"><b>Degrees: </b></p>
           <ul>
-            <li v-for="(degree, index) in school.degrees" :key="degree + index">
+            <li v-for="(degree, index) in school.degrees" :key="degree + index" class="mb-2">
               <b>{{ degree.degreeType }}</b>
               <ul>
-                <li>Completion Date: {{ degree.completionDate | monthYearFormat }}</li>
+                <li><b>Completion Date: </b>{{ degree.completionDate | monthYearFormat }}</li>
                 <li v-if="degree.majors.length > 1">
-                  <p class="mb-0">Majors:</p>
+                  <p class="mb-0"><b>Majors:</b></p>
                   <ul class="mb-0">
                     <li v-for="(major, majorIndex) in degree.majors" :key="majorIndex">
                       {{ major }}
                     </li>
                   </ul>
                 </li>
-                <li class="mb-0" v-else-if="degree.majors.length === 1">Major: {{ degree.majors[0] }}</li>
+                <li class="mb-0" v-else-if="degree.majors.length === 1"><b>Major: </b>{{ degree.majors[0] }}</li>
                 <li v-if="degree.minors.length > 1">
-                  <p class="mb-0">Minors:</p>
+                  <p class="mb-0"><b>Minors:</b></p>
                   <ul class="mb-0">
                     <li v-for="(minor, minorIndex) in degree.minors" :key="minorIndex">
                       {{ minor }}
                     </li>
                   </ul>
                 </li>
-                <li v-else-if="degree.minors.length === 1" class="mb-0">Minor: {{ degree.minors[0] }}</li>
+                <li v-else-if="degree.minors.length === 1" class="mb-0"><b>Minor: </b>{{ degree.minors[0] }}</li>
                 <li v-if="degree.concentrations.length > 1">
-                  <p class="mb-0">Concentrations:</p>
+                  <p class="mb-0"><b>Concentrations:</b></p>
                   <ul class="mb-0">
                     <li
                       v-for="(concentration, concentrationsIndex) in degree.concentrations"
@@ -41,8 +41,8 @@
                     </li>
                   </ul>
                 </li>
-                <li v-else-if="degree.concentrations.length === 1" class="mb-2">
-                  Concentration: {{ degree.concentrations[0] }}
+                <li v-else-if="degree.concentrations.length === 1" class="mb-0">
+                  <b>Concentration: </b>{{ degree.concentrations[0] }}
                 </li>
               </ul>
             </li>
@@ -55,7 +55,7 @@
           <ul>
             <li><b>Completion Date:</b> {{ school.degrees[0].completionDate | monthYearFormat }}</li>
             <li v-if="school.degrees[0].majors.length > 1">
-              <p class="mb-0">Majors:</p>
+              <p class="mb-0"><b>Majors:</b></p>
               <ul class="mb-0">
                 <li v-for="(major, majorIndex) in school.degrees[0].majors" :key="majorIndex">
                   {{ major }}
@@ -63,10 +63,10 @@
               </ul>
             </li>
             <li class="mb-0" v-else-if="school.degrees[0].majors.length === 1">
-              Major: {{ school.degrees[0].majors[0] }}
+              <b>Major: </b>{{ school.degrees[0].majors[0] }}
             </li>
             <li v-if="school.degrees[0].minors.length > 1">
-              <p class="mb-0">Minors:</p>
+              <p class="mb-0"><b>Minors:</b></p>
               <ul class="mb-0">
                 <li v-for="(minor, minorIndex) in school.degrees[0].minors" :key="minorIndex">
                   {{ minor }}
@@ -74,10 +74,10 @@
               </ul>
             </li>
             <li v-else-if="school.degrees[0].minors.length === 1" class="mb-0">
-              Minor: {{ school.degrees[0].minors[0] }}
+              <b>Minor: </b>{{ school.degrees[0].minors[0] }}
             </li>
             <li v-if="school.degrees[0].concentrations.length > 1">
-              <p class="mb-0">Concentrations:</p>
+              <p class="mb-0"><b>Concentrations:</b></p>
               <ul class="mb-0">
                 <li
                   v-for="(concentration, concentrationsIndex) in school.degrees[0].concentrations"
@@ -88,7 +88,7 @@
               </ul>
             </li>
             <li v-else-if="school.degrees[0].concentrations.length === 1" class="mb-0">
-              Concentration: {{ school.degrees[0].concentrations[0] }}
+              <b>Concentration: </b>{{ school.degrees[0].concentrations[0] }}
             </li>
           </ul>
           <hr v-if="index < filteredList.length - 1" class="mt-3 mb-3" />
