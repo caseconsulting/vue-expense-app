@@ -371,22 +371,20 @@ async function created() {
   window.EventBus.$on('confirmed-parser', () => {
     // For some reason confirmed-parser gets called twice
     // Where one of the editedEmployeeForms is null
-    if (this.editedEmployeeForm) {
-      window.EventBus.$emit('resume', this.editedEmployeeForm);
-      this.resumeProcessed = false;
-      this.confirmingValid = false;
-      this.activate = !this.activate;
+    window.EventBus.$emit('resume', this.editedEmployeeForm);
+    this.resumeProcessed = false;
+    this.confirmingValid = false;
+    this.activate = !this.activate;
 
-      // Create an audit of the success
-      api.createItem(api.AUDIT, {
-        id: uuid(),
-        type: 'resume',
-        tags: ['submit'],
-        employeeId: this.employee.id,
-        description: `${this.employee.firstName} ${this.employee.lastName} made changes to their profile through the resume parser.`,
-        timeToLive: 60
-      });
-    }
+    // Create an audit of the success
+    api.createItem(api.AUDIT, {
+      id: uuid(),
+      type: 'resume',
+      tags: ['submit'],
+      employeeId: this.employee.id,
+      description: `${this.employee.firstName} ${this.employee.lastName} made changes to their profile through the resume parser.`,
+      timeToLive: 60
+    });
   });
   window.EventBus.$on('canceled-parser', () => {
     this.confirmingValid = false;
