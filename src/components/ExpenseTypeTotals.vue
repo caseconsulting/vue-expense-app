@@ -1,6 +1,6 @@
 <template>
   <!--Totals Card-->
-  <v-card v-if="totals.length" class="slide-in-blurred-right mr-3">
+  <v-card v-if="totals.length" class="slide-in-blurred-right mt-3 mr-3">
     <!--Total Card Title-->
     <v-card-title class="subtitle-2">
       <v-container>
