@@ -1,17 +1,5 @@
 <template>
   <div>
-    <!-- Status Alert -->
-    <v-alert
-      v-for="(alert, index) in alerts"
-      :key="index"
-      :type="alert.status"
-      :color="alert.color"
-      dense
-      class="mb-1"
-      id="alert"
-    >
-      {{ alert.message }}
-    </v-alert>
     <v-card class="mt-3">
       <v-container fluid>
         <!-- Table Header -->
@@ -557,6 +545,7 @@ async function reimburseExpenses() {
           self.alerts.shift();
         }, 10000);
       }
+      window.EventBus.$emit('reimburseAlert', this.alerts);
     });
 
     this.refreshExpenses();

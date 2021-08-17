@@ -10,12 +10,35 @@
         <expense-info class="mb-3"></expense-info>
         <!-- Expenses Total -->
         <expense-type-totals></expense-type-totals>
+        <!-- Status Alert -->
+        <v-alert
+          v-for="(alert, index) in alerts"
+          :key="index"
+          :type="alert.status"
+          :color="alert.color"
+          dense
+          class="mt-1"
+          id="alert"
+        >
+          {{ alert.message }}
+        </v-alert>
       </v-col>
       <v-col v-else cols="12">
         <!-- Expense Info -->
         <expense-info class="mb-3"></expense-info>
         <!-- Expenses Total -->
         <expense-type-totals></expense-type-totals>
+        <!-- Status Alert -->
+        <v-alert
+          v-for="(alert, index) in alerts"
+          :key="index"
+          :type="alert.status"
+          :color="alert.color"
+          dense
+          id="alert"
+        >
+          {{ alert.message }}
+        </v-alert>
       </v-col>
     </v-row>
   </v-container>
@@ -39,6 +62,9 @@ async function created() {
   if (this.employee.employeeRole === 'admin') {
     this.isAdmin = true;
   }
+  window.EventBus.$on('reimburseAlert', (alerts) => {
+    this.alerts = alerts;
+  });
 }
 
 // |--------------------------------------------------|
@@ -59,6 +85,7 @@ export default {
   created,
   data() {
     return {
+      alerts: [], // status alerts
       employee: {},
       isAdmin: false
     };
