@@ -148,15 +148,15 @@
             </template>
             <!-- Purchase date slot -->
             <template v-slot:[`item.purchaseDate`]="{ item }">
-              <td>{{ item.purchaseDate | monthDayYearFormat }}</td>
+              <td>{{ monthDayYearFormat(item.purchaseDate) }}</td>
             </template>
             <!-- Reimburse date Slot -->
             <template v-slot:[`item.reimbursedDate`]="{ item }">
-              <td>{{ item.reimbursedDate | monthDayYearFormat }}</td>
+              <td>{{ monthDayYearFormat(item.reimbursedDate) }}</td>
             </template>
             <!-- Creation date slot -->
             <template v-slot:[`item.createdAt`]="{ item }">
-              <td>{{ item.createdAt | monthDayYearFormat }}</td>
+              <td>{{ monthDayYearFormat(item.createdAt) }}</td>
             </template>
             <!-- Employee name slot-->
             <template v-slot:[`item.employeeName`]="{ item }">
@@ -931,9 +931,6 @@ export default {
       userInfo: null // user information
     };
   },
-  filters: {
-    monthDayYearFormat
-  },
   methods: {
     addModelToTable,
     canDelete,
@@ -953,6 +950,7 @@ export default {
     isFocus,
     isManager,
     isReimbursed,
+    monthDayYearFormat,
     onSelect,
     refreshExpenses,
     startAction,

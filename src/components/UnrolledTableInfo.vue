@@ -40,7 +40,7 @@
         <!-- Purchase Date -->
         <template v-slot:[`item.purchaseDate`]="{ item }">
           <p :class="{ failed: item.failed }" style="margin-bottom: 0px">
-            {{ item.purchaseDate | monthDayYearFormat }}
+            {{ monthDayYearFormat(item.purchaseDate) }}
           </p>
         </template>
 
@@ -139,14 +139,14 @@ export default {
     descripFormat: (val) => {
       // split strings that exceed 250 characters with eclipses
       return val.length > 250 ? val.substring(0, 250) + '...' : val;
-    },
-    monthDayYearFormat
+    }
   },
   methods: {
     convertToMoneyString,
     expenseClicked,
     expenseSelected,
-    expenseToggle
+    expenseToggle,
+    monthDayYearFormat
   },
   props: ['expenses'] // list of expenses
 };

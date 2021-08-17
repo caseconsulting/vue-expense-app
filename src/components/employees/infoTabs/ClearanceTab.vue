@@ -9,62 +9,44 @@
 
         <!-- Submission, Granted, Expiration Date -->
         <p v-if="clearance.submissionDate">
-          <b>Submission Date: </b>{{ clearance.submissionDate | monthDayYearFormat }}
+          <b>Submission Date: </b>{{ monthDayYearFormat(clearance.submissionDate) }}
         </p>
-        <p v-if="clearance.grantedDate"><b>Granted Date: </b>{{ clearance.grantedDate | monthDayYearFormat }}</p>
+        <p v-if="clearance.grantedDate"><b>Granted Date: </b>{{ monthDayYearFormat(clearance.grantedDate) }}</p>
         <p v-if="clearance.expirationDate">
-          <b>Expiration Date: </b>{{ clearance.expirationDate | monthDayYearFormat }}
+          <b>Expiration Date: </b>{{ monthDayYearFormat(clearance.expirationDate) }}
         </p>
 
         <!-- Poly Dates -->
         <p v-if="clearance.polyDates.length == 1">
-          <b>Poly Date: </b> {{ clearance.polyDates[0] | monthDayYearFormat }}
+          <b>Poly Date: </b> {{ monthDayYearFormat(clearance.polyDates[0]) }}
         </p>
         <p v-if="clearance.polyDates.length > 1" class="mb-2"><b>Poly Dates: </b></p>
         <ul v-if="clearance.polyDates.length > 1" class="mb-4">
-          <li v-for="(polyDate, pIndex) in clearance.polyDates" :key="pIndex">{{ polyDate | monthDayYearFormat }}</li>
+          <li v-for="(polyDate, pIndex) in clearance.polyDates" :key="pIndex">{{ monthDayYearFormat(polyDate) }}</li>
         </ul>
 
         <!-- Adjudication Dates -->
         <p v-if="clearance.adjudicationDates.length == 1" class="mb-2">
-          <b>Adjudication Date: </b>{{ clearance.adjudicationDates[0] | monthDayYearFormat }}
+          <b>Adjudication Date: </b>{{ monthDayYearFormat(clearance.adjudicationDates[0]) }}
         </p>
         <p v-if="clearance.adjudicationDates.length > 1" class="mb-2"><b>Adjudication Dates: </b></p>
         <ul v-if="clearance.adjudicationDates.length > 1" class="mb-4">
           <li v-for="(adjudicationDate, aIndex) in clearance.adjudicationDates" :key="aIndex">
-            {{ adjudicationDate | monthDayYearFormat }}
+            {{ monthDayYearFormat(adjudicationDate) }}
           </li>
         </ul>
 
         <!-- Badge Expiration Date -->
         <p v-if="clearance.badgeExpirationDate">
-          <b>Badge Expiration Date: </b>{{ clearance.badgeExpirationDate | monthDayYearFormat }}
+          <b>Badge Expiration Date: </b>{{ monthDayYearFormat(clearance.badgeExpirationDate) }}
         </p>
 
         <!-- BI Dates -->
-        <p v-if="clearance.biDates.length == 1"><b>Bi Date: </b> {{ clearance.biDates[0] | monthDayYearFormat }}</p>
+        <p v-if="clearance.biDates.length == 1"><b>Bi Date: </b> {{ monthDayYearFormat(clearance.biDates[0]) }}</p>
         <p v-if="clearance.biDates.length > 1" class="mb-2"><b>Bi Dates: </b></p>
         <ul v-if="clearance.biDates.length > 1" class="mb-4">
-          <li v-for="(biDate, pIndex) in clearance.biDates" :key="pIndex">{{ biDate | monthDayYearFormat }}</li>
+          <li v-for="(biDate, pIndex) in clearance.biDates" :key="pIndex">{{ monthDayYearFormat(biDate) }}</li>
         </ul>
-
-        <!-- BI Dates -->
-        <!-- <p v-if="clearance.biDates.length == 1 && clearance.biDates[0].range.length == 1" class="mb-2">
-          <b>BI Range: </b>On-going ({{ clearance.biDates[0].range[0] | monthDayYearFormat }})
-        </p>
-        <p v-if="clearance.biDates.length == 1 && clearance.biDates[0].range.length > 1" class="mb-2">
-          <b>BI Range: </b>{{ clearance.biDates[0].range[0] | monthDayYearFormat }} -
-          {{ clearance.biDates[0].range[1] | monthDayYearFormat }}
-        </p>
-        <p v-if="clearance.biDates.length > 1" class="mb-2"><b>BI Ranges: </b></p>
-        <ul v-if="clearance.biDates.length > 1" class="mb-4">
-          <li v-for="(biDates, biIndex) in clearance.biDates" :key="biIndex">
-            <div v-if="biDates.range.length > 1">
-              {{ biDates.range[0] | monthDayYearFormat }} - {{ biDates.range[1] | monthDayYearFormat }}
-            </div>
-            <div v-else>On-going ({{ biDates.range[0] | monthDayYearFormat }})</div>
-          </li>
-        </ul> -->
         <hr v-if="index < filteredList.length - 1" class="mb-3" />
       </div>
       <!-- End Loop Clearances -->
@@ -125,11 +107,9 @@ export default {
       page: 1
     };
   },
-  filters: {
-    monthDayYearFormat
-  },
   methods: {
     isEmpty,
+    monthDayYearFormat,
     onPageChange
   },
   props: ['model']
