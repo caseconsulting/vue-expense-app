@@ -14,7 +14,14 @@
       </v-row>
       <v-row>
         <v-col>
-          <v-data-table :headers="headers" :items="resumeAudits" class="elevation-1"> </v-data-table>
+          <v-data-table
+            :headers="headers"
+            :items="resumeAudits"
+            :custom-sort="customDateSort"
+            :sort-by.sync="sortBy"
+            :sort-desc.sync="sortDesc"
+            class="elevation-1"
+          ></v-data-table>
         </v-col>
       </v-row>
     </v-container>
@@ -141,6 +148,26 @@ async function fillData() {
   };
 }
 
+function customDateSort(items, sortBy, sortDesc) {
+  if (!sortDesc) {
+    return this.resumeAudits;
+  }
+
+  if (sortBy[0] === 'dateCreated') {
+    return items.sort((a, b) => {
+      a = moment(a.dateCreated, 'MMMM Do YYYY, h:mm:ss a');
+      b = moment(b.dateCreated, 'MMMM Do YYYY, h:mm:ss a');
+      return sortDesc[0] ? a.diff(b) : b.diff(a);
+    });
+  } else if (sortBy[0] === 'description') {
+    return items.sort((a, b) => {
+      return sortDesc[0] ? a.description.localeCompare(b.description) : b.description.localeCompare(a.description);
+    });
+  }
+
+  return this.resumeAudits;
+}
+
 export default {
   components: { PieChart },
   component: {
@@ -165,10 +192,13 @@ export default {
       resumeChartOptions: null,
       resumeChartData: null,
       resumeChart2Options: null,
-      resumeChart2Data: null
+      resumeChart2Data: null,
+      sortBy: 'dateCreated',
+      sortDesc: false
     };
   },
   methods: {
+    customDateSort,
     fillData
   },
   props: ['numDaysBackToQuery'],
