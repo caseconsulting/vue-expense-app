@@ -547,6 +547,7 @@ async function reimburseExpenses() {
         let expenseIndex = _.findIndex(this.empBudgets[groupIndex].expenses, { id: expense.id });
         this.empBudgets[groupIndex].expenses[expenseIndex].reimbursedDate = null;
         this.empBudgets[groupIndex].expenses[expenseIndex].failed = true;
+        this.empBudgets[groupIndex].expenses[expenseIndex].selected = false;
       } else {
         // successfully reimbursed expense
         msg = 'Successfully reimbursed expense';
