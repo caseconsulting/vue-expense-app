@@ -70,11 +70,6 @@ export default {
   watch: {
     toggleSubmissionConfirmation: function () {
       this.activate = this.toggleSubmissionConfirmation;
-    },
-    activate: function () {
-      if (!this.activate) {
-        emit('closeModal');
-      }
     }
   }
 };

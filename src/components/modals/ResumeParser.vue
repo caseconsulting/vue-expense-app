@@ -369,9 +369,6 @@ import { v4 as uuid } from 'uuid';
  */
 async function created() {
   window.EventBus.$on('confirmed-parser', () => {
-    // For some reason confirmed-parser gets called twice
-    // Where one of the editedEmployeeForms is null
-
     // Create an audit of the success
     api.createItem(api.AUDIT, {
       id: uuid(),
@@ -381,13 +378,12 @@ async function created() {
       description: `${this.employee.firstName} ${this.employee.lastName} made changes to their profile through the resume parser.`,
       timeToLive: 60
     });
-    if (this.editedEmployeeForm) {
-      window.EventBus.$emit('resume', this.editedEmployeeForm, this.totalChanges);
-      this.resumeProcessed = false;
-      this.confirmingValid = false;
-      this.totalChanges = 0;
-      this.activate = false;
-    }
+
+    this.$emit('resume', this.editedEmployeeForm, this.totalChanges);
+    this.resumeProcessed = false;
+    this.confirmingValid = false;
+    this.activate = !this.activate;
+    this.totalChanges = 0;
   });
   window.EventBus.$on('canceled-parser', () => {
     this.confirmingValid = false;
@@ -736,21 +732,25 @@ async function submit() {
       if (collegeList.length == 1) {
         // Remove duplicate
         if (
-          (!this.employee.degrees ||
-            (this.employee.degrees &&
-              this.employee.degrees.length > 0 &&
-              this.employee.degrees.filter((e) => e.school === collegeList[0]).length == 0)) &&
-          this.newEducation.filter((e) => e.school === collegeList[0]).length == 0
+          (!this.employee.schools ||
+            (this.employee.schools &&
+              this.employee.schools.length > 0 &&
+              this.employee.schools.filter((e) => e.name === collegeList[0]).length == 0)) &&
+          this.newEducation.filter((e) => e.name === collegeList[0]).length == 0
         ) {
           this.newEducation.push({
-            school: collegeList[0],
-            concentrations: [],
-            minors: [],
-            majors: [''],
-            canceled: false,
-            showEducationMenu: false,
-            name: '',
-            date: null
+            name: collegeList[0],
+            degrees: [
+              {
+                completionDate: null,
+                concentrations: [],
+                degreeType: '',
+                majors: [''],
+                minors: [],
+                showEducationMenu: false
+              }
+            ],
+            canceled: false
           });
         }
       }
@@ -847,24 +847,16 @@ function submitInfo(field, value, newValue) {
     });
   } else if (field === 'education' && this.$refs['education' + value][0].validate()) {
     this.newEducation[value].canceled = true;
-    this.newEducation[value].date = newValue[0].date;
-    this.newEducation[value].majors = newValue[0].majors;
-    this.newEducation[value].minors = newValue[0].minors;
     this.newEducation[value].name = newValue[0].name;
-    this.newEducation[value].school = newValue[0].school;
-    this.newEducation[value].canceled = true;
+    this.newEducation[value].degrees = newValue[0].degrees;
     // Create fields in editedEmployeeForm if they don't exist
-    if (!this.editedEmployeeForm.degrees) {
-      this.$set(this.editedEmployeeForm, 'degrees', []);
+    if (!this.editedEmployeeForm.schools) {
+      this.$set(this.editedEmployeeForm, 'schools', []);
     }
     // Add new education
-    this.editedEmployeeForm.degrees.push({
-      concentrations: this.newEducation[value].concentrations,
-      date: this.newEducation[value].date,
-      majors: this.newEducation[value].majors,
-      minors: this.newEducation[value].minors,
+    this.editedEmployeeForm.schools.push({
       name: this.newEducation[value].name,
-      school: this.newEducation[value].school
+      degrees: this.newEducation[value].degrees
     });
   }
 } // submitInfo
@@ -922,6 +914,9 @@ function clearForm() {
 // |--------------------------------------------------|
 
 export default {
+  beforeDestroy() {
+    window.EventBus.$off('confirmed-parser');
+  },
   components: {
     CancelConfirmation,
     educationTab,

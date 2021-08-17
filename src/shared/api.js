@@ -423,6 +423,25 @@ async function uploadBlogAttachment(file) {
 async function getColleges(inputValue) {
   return execute('get', `/${HIPPO_LAB}/getColleges/${inputValue}`)
     .then((response) => {
+      for (let i = 0; i < response.length; i++) {
+        if (response[i] === 'Virginia Polytechnic Institute and State University') {
+          response[i] = 'Virginia Polytechnic Institute and State University (Virginia Tech)';
+        } else if (response[i] === 'University of Mississippi') {
+          response[i] = 'University of Mississippi (Ole Miss)';
+        } else if (response[i] === 'United States Military Academy') {
+          response[i] = 'United States Military Academy (West Point)';
+        } else if (response[i] === 'Northern Virginia Community College') {
+          response[i] = 'Northern Virginia Community College (NoVa)';
+        } else if (response[i] === 'Georgia Institute of Technology') {
+          response[i] = 'Georgia Institute of Technology (Georgia Tech)';
+        } else if (response[i] === 'Florida Institute of Technology') {
+          response[i] = 'Florida Institute of Technology (Florida Tech)';
+        } else if (response[i] === 'City University of New York') {
+          response[i] = 'City University of New York (City Tech)';
+        } else if (response[i] === 'California Institute of Technology') {
+          response[i] = 'California Institute of Technology (Caltech)';
+        }
+      }
       return response;
     })
     .catch(() => {

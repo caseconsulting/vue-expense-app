@@ -173,10 +173,10 @@ Education
         <!-- End Concentrations -->
       </div>
       <!-- Button to Add Degrees -->
-      <div v-if="allowAdditions" class="pt-4" align="center">
+      <div class="pt-4" align="center">
         <v-btn @click="addDegree(index)" elevation="2"><v-icon class="pr-1">add</v-icon>Degree</v-btn>
       </div>
-      <div v-else align="center" class="pb-4">
+      <div v-if="!allowAdditions" align="center" class="pb-4">
         <v-tooltip top>
           <template v-slot:activator="{ on }">
             <v-icon v-on="on" large right color="red" @click="denyEducation">close</v-icon>
@@ -191,7 +191,7 @@ Education
         </v-tooltip>
       </div>
       <!-- Button to Delete School -->
-      <div class="pb-4" align="center">
+      <div class="pb-4" align="center" v-if="allowAdditions">
         <v-tooltip bottom>
           <template v-slot:activator="{ on }">
             <v-btn v-on="on" @click="deleteSchool(index)" text icon
@@ -235,25 +235,25 @@ async function created() {
   this.employees = await api.getItems(api.EMPLOYEES); // get all employees
   this.schoolDropDown = await api.getColleges('');
 
-  _.forEach(this.editedDegrees, (school) => {
-    if (school.school === 'Virginia Polytechnic Institute and State University') {
-      school.school = 'Virginia Polytechnic Institute and State University (Virginia Tech)';
-    } else if (school.school === 'University of Mississippi') {
-      school.school = 'University of Mississippi (Ole Miss)';
-    } else if (school.school === 'United States Military Academy') {
-      school.school = 'United States Military Academy (West Point)';
-    } else if (school.school === 'Northern Virginia Community College') {
-      school.school = 'Northern Virginia Community College (NoVa)';
-    } else if (school.school === 'Georgia Institute of Technology') {
-      school.school = 'Georgia Institute of Technology (Georgia Tech)';
-    } else if (school.school === 'Florida Institute of Technology') {
-      school.school = 'Florida Institute of Technology (Florida Tech)';
-    } else if (school.school === 'City University of New York') {
-      school.school = 'City University of New York (City Tech)';
-    } else if (school.school === 'California Institute of Technology') {
-      school.school = 'California Institute of Technology (Caltech)';
-    }
-  });
+  // _.forEach(this.editedDegrees, (school) => {
+  //   if (school.name === 'Virginia Polytechnic Institute and State University') {
+  //     school.name = 'Virginia Polytechnic Institute and State University (Virginia Tech)';
+  //   } else if (school.name === 'University of Mississippi') {
+  //     school.name = 'University of Mississippi (Ole Miss)';
+  //   } else if (school.name === 'United States Military Academy') {
+  //     school.name = 'United States Military Academy (West Point)';
+  //   } else if (school.name === 'Northern Virginia Community College') {
+  //     school.name = 'Northern Virginia Community College (NoVa)';
+  //   } else if (school.name === 'Georgia Institute of Technology') {
+  //     school.name = 'Georgia Institute of Technology (Georgia Tech)';
+  //   } else if (school.name === 'Florida Institute of Technology') {
+  //     school.name = 'Florida Institute of Technology (Florida Tech)';
+  //   } else if (school.name === 'City University of New York') {
+  //     school.name = 'City University of New York (City Tech)';
+  //   } else if (school.name === 'California Institute of Technology') {
+  //     school.name = 'California Institute of Technology (Caltech)';
+  //   }
+  // });
 
   let alias = this.schoolDropDown.indexOf('Virginia Polytechnic Institute and State University');
   this.schoolDropDown[alias] = 'Virginia Polytechnic Institute and State University (Virginia Tech)';

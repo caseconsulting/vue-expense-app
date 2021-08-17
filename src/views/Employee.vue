@@ -107,7 +107,12 @@
         ></budget-chart>
       </v-col>
     </v-row>
-    <resume-parser v-if="!loading" :toggleResumeParser="this.toggleResumeParser" :employee="this.model"></resume-parser>
+    <resume-parser
+      v-if="!loading && !editing"
+      :toggleResumeParser="this.toggleResumeParser"
+      :employee="this.model"
+      @resume="resumeReceived"
+    ></resume-parser>
     <delete-modal :toggleDeleteModal="this.toggleDeleteModal" type="resume"></delete-modal>
   </v-container>
 </template>
@@ -136,6 +141,20 @@ const IsoFormat = 'YYYY-MM-DD';
 // |                     METHODS                      |
 // |                                                  |
 // |--------------------------------------------------|
+
+/**
+ * Event called when a resume is submitted
+ *
+ * @param newEmployeeForm is the new employee model after parsing the resume
+ */
+function resumeReceived(newEmployeeForm, changes) {
+  if (changes && changes > 0) {
+    this.displayMessage('SUCCESS', `Added ${changes} change(s) to profile!`, 'green');
+  }
+
+  this.model = newEmployeeForm;
+  api.updateItem(api.EMPLOYEES, this.model);
+}
 
 function clearStatus() {
   this.$set(this.uploadStatus, 'statusType', undefined);
@@ -340,14 +359,6 @@ async function mounted() {
       this.fiscalDateView = data.format(IsoFormat);
     }
   });
-
-  window.EventBus.$on('resume', async (newEmployeeForm, changes) => {
-    this.model = newEmployeeForm;
-    await api.updateItem(api.EMPLOYEES, this.model);
-    if (changes && changes > 0) {
-      this.displayMessage('SUCCESS', `Added ${changes} change(s) to profile!`, 'green');
-    }
-  });
 } // mounted
 
 // |--------------------------------------------------|
@@ -448,6 +459,7 @@ export default {
     getEmployee,
     getCurrentBudgetYear,
     getWorkStatus,
+    resumeReceived,
     userIsAdmin,
     userIsEmployee,
     checkForBudgetAccess

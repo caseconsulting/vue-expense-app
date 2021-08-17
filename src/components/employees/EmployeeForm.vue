@@ -336,7 +336,12 @@
           :toggleSubmissionConfirmation="this.confirmingError"
           :errorTabs="errorTabNames"
         ></many-form-errors>
-        <resume-parser :toggleResumeParser="this.toggleResumeParser" :employee="model"></resume-parser>
+        <resume-parser
+          v-if="!model.id"
+          :toggleResumeParser="this.toggleResumeParser"
+          :employee="model"
+          @resume="resumeReceived"
+        ></resume-parser>
       </v-container>
     </v-card>
   </div>
@@ -368,6 +373,18 @@ import _ from 'lodash';
 // |                     METHODS                      |
 // |                                                  |
 // |--------------------------------------------------|
+
+/**
+ * Event called when a resume is submitted
+ *
+ * @param newEmployeeForm is the new employee model after parsing the resume
+ */
+function resumeReceived(newEmployeeForm) {
+  if (this.model) {
+    this.model = newEmployeeForm;
+  }
+}
+
 /**
  * Selects the currect form tab for the menu
  */
@@ -712,10 +729,6 @@ async function created() {
     this.errorTabNames = {};
     this.confirmingError = false;
   });
-  // Starts listener to check of the modal is closed
-  window.EventBus.$on('closeModal', () => {
-    this.confirmingValid = false;
-  });
   // set tab mounted
   window.EventBus.$on('created', (tab) => {
     this.tabCreated[tab] = true;
@@ -774,11 +787,6 @@ async function created() {
   window.EventBus.$on('personalStatus', (errorCount) => {
     this.tabErrors.personal = errorCount > 0 ? true : false;
     this.addErrorTab('Personal', errorCount);
-  });
-  window.EventBus.$on('resume', (newEmployeeForm) => {
-    if (this.model) {
-      this.model = newEmployeeForm;
-    }
   });
   // Starts listener to check the Technologies tab has any errors
   window.EventBus.$on('technologiesStatus', (errorCount) => {
@@ -1040,6 +1048,7 @@ export default {
     setFormData,
     submit,
     titleCase,
+    resumeReceived,
     selectDropDown
   },
   props: ['currentTab', 'employee'], // employee to be created/updated
