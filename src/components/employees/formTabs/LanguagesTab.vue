@@ -13,7 +13,7 @@
         ref="formFields"
         style="padding-right: 20px; padding-left: 10px"
         v-model="languages.name"
-        :rules="[requiredRules[0], duplicateRules[0]]"
+        :rules="getRequiredRules()"
         :items="languagesList"
         label="Language"
         data-vv-name="Language"
@@ -28,7 +28,7 @@
         style="padding-right: 20px; padding-left: 10px"
         :items="proficiencyTypes"
         v-model="languages.proficiency"
-        :rules="requiredRules"
+        :rules="getRequiredRules()"
         item-text="text"
         label="Level of proficiency"
         clearable
@@ -59,6 +59,7 @@
 <script>
 import api from '@/shared/api.js';
 import _ from 'lodash';
+import { getRequiredRules } from '@/shared/validationUtils.js';
 import { isEmpty } from '@/utils/utils';
 
 // |--------------------------------------------------|
@@ -173,6 +174,7 @@ export default {
     addLanguage,
     deleteLanguage,
     duplicateLangEntries,
+    getRequiredRules,
     isDuplicate,
     isEmpty,
     populateDropDowns,

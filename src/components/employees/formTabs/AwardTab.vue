@@ -6,7 +6,7 @@
       <v-combobox
         ref="formFields"
         v-model="award.name"
-        :rules="requiredRules"
+        :rules="getRequiredRules()"
         label="Award"
         data-vv-name="Award"
         clearable
@@ -30,7 +30,7 @@
                 :value="award.dateReceived | formatDate"
                 label="Date Received"
                 prepend-icon="event_available"
-                :rules="dateRules"
+                :rules="getDateRules()"
                 hint="MM/DD/YYYY format"
                 v-mask="'##/##/####'"
                 v-bind="attrs"
@@ -72,6 +72,7 @@
 <script>
 import api from '@/shared/api.js';
 import _ from 'lodash';
+import { getDateRules, getDateOptionalRules, getRequiredRules } from '@/shared/validationUtils.js';
 import { formatDate, parseDate, isEmpty } from '@/utils/utils';
 import { mask } from 'vue-the-mask';
 const moment = require('moment-timezone');
@@ -144,20 +145,7 @@ export default {
   created,
   data() {
     return {
-      dateOptionalRules: [
-        (v) => {
-          return !isEmpty(v) ? /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v) || 'Date must be valid. Format: MM/DD/YYYY' : true;
-        }
-      ], // rules for an optional date
-      dateRules: [
-        (v) => !isEmpty(v) || 'Date required',
-        (v) => (!isEmpty(v) && /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v)) || 'Date must be valid. Format: MM/DD/YYYY',
-        (v) => moment(v, 'MM/DD/YYYY').isValid() || 'Date must be valid'
-      ], // rules for a required date
-      editedAwards: _.cloneDeep(this.model), // stores edited awards info
-      requiredRules: [
-        (v) => !isEmpty(v) || 'This field is required. You must enter information or delete the field if possible'
-      ] // rules for a required field
+      editedAwards: _.cloneDeep(this.model) // stores edited awards info
     };
   },
   directives: { mask },
@@ -167,6 +155,9 @@ export default {
   methods: {
     addAward,
     deleteAward,
+    getDateRules,
+    getDateOptionalRules,
+    getRequiredRules,
     parseEventDate,
     isEmpty,
     validateFields

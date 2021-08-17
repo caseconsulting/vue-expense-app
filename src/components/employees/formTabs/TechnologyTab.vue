@@ -12,7 +12,7 @@
         class="pb-5"
         ref="formFields"
         v-model="technology.name"
-        :rules="[duplicateRules(technology.name), requiredRules[0]]"
+        :rules="[duplicateRules(technology.name), ...getRequiredRules()]"
         :items="technologyDropDown"
         label="Technology"
         data-vv-name="Technology"
@@ -41,7 +41,7 @@
             ref="formFields"
             v-model="technology.years"
             flat
-            :rules="[experienceRequired[0], experienceRequired[1](technology.years, index), experienceRequired[2]]"
+            :rules="[...getRequiredRules(), experienceRequired[0](technology.years, index), experienceRequired[1]]"
             single-line
             max="99"
             min="0"
@@ -76,6 +76,7 @@
 <script>
 import api from '@/shared/api.js';
 import _ from 'lodash';
+import { getRequiredRules } from '@/shared/validationUtils.js';
 import { formatDateDashToSlash, formatDateSlashToDash, isEmpty } from '@/utils/utils';
 const moment = require('moment-timezone');
 moment.tz.setDefault('America/New_York');
@@ -209,14 +210,10 @@ export default {
     return {
       technologyDropDown: [], // autocomplete technology name options
       editedTechnologies: _.cloneDeep(this.model), //stores edited technology info
-      requiredRules: [
-        (v) => !isEmpty(v) || 'This field is required. You must enter information or delete the field if possible'
-      ], // rules for a required field
       duplicateRules: (tech) => {
         return !this.isDuplicate(tech) || 'Duplicate technology found, please remove duplicate entries';
       },
       experienceRequired: [
-        (v) => !isEmpty(v) || 'This field is required',
         (v, index) => v > 0 || this.editedTechnologies[index].current || 'Value must be greater than 0',
         (v) => v < 100 || 'Value must be less than 100'
       ]
@@ -228,6 +225,7 @@ export default {
     duplicateTechEntries,
     formatDateDashToSlash,
     formatDateSlashToDash,
+    getRequiredRules,
     isDuplicate,
     isEmpty,
     populateDropDowns,

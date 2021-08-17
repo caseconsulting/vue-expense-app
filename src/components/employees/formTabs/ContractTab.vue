@@ -11,7 +11,7 @@
       <v-combobox
         ref="formFields"
         v-model="contract.name"
-        :rules="[requiredRules[0], duplicateContractName(index)]"
+        :rules="[...getRequiredRules(), duplicateContractName(index)]"
         :items="contractsDropDown"
         label="Contract"
         data-vv-name="Contract"
@@ -23,7 +23,7 @@
       <v-combobox
         ref="formFields"
         v-model="contract.prime"
-        :rules="requiredRules"
+        :rules="getRequiredRules()"
         :items="primesDropDown"
         label="Prime"
         data-vv-name="Prime"
@@ -36,7 +36,7 @@
           ref="formFields"
           :id="'proj-' + projIndex + '-' + index"
           v-model.trim="project.name"
-          :rules="requiredRules"
+          :rules="getRequiredRules()"
           :label="'Project ' + (projIndex + 1)"
           data-vv-name="Project"
           clearable
@@ -70,7 +70,7 @@
                   hint="MM/DD/YYYY format"
                   v-mask="'##/##/####'"
                   prepend-icon="event_available"
-                  :rules="[requiredRules[0], dateRules[0], dateRules[1], dateOrderRule(index, projIndex)]"
+                  :rules="[...getRequiredRules(), ...getDateRules(), dateOrderRule(index, projIndex)]"
                   v-bind="attrs"
                   v-on="on"
                   @blur="project.startDate = parseEventDate($event)"
@@ -105,8 +105,7 @@
                   label="End Date"
                   prepend-icon="event_busy"
                   :rules="[
-                    dateOptionalRules[0],
-                    dateOptionalRules[1],
+                    ...getDateOptionalRules(),
                     dateOrderRule(index, projIndex),
                     endDatePresentRule(index, projIndex)
                   ]"
@@ -174,6 +173,7 @@
 import api from '@/shared/api.js';
 import _ from 'lodash';
 import { mask } from 'vue-the-mask';
+import { getDateRules, getDateOptionalRules, getRequiredRules } from '@/shared/validationUtils.js';
 import { formatDateDashToSlash, formatDateSlashToDash, isEmpty, formatDate, parseDate } from '@/utils/utils';
 const moment = require('moment');
 
@@ -351,17 +351,6 @@ export default {
           return true;
         }
       },
-      dateOptionalRules: [
-        //end date validation
-        (v) => {
-          return !isEmpty(v) ? /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v) || 'Date must be valid. Format: MM/DD/YYYY' : true;
-        },
-        (v) => (!isEmpty(v) ? moment(v, 'MM/DD/YYYY').isValid() || 'Date must be valid' : true)
-      ], // rules for an optional date
-      dateRules: [
-        (v) => (!isEmpty(v) && /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v)) || 'Date must be valid. Format: MM/DD/YYYY',
-        (v) => moment(v, 'MM/DD/YYYY').isValid() || 'Date must be valid'
-      ], // rules for an optional date
       duplicateContractName: (conIndex) => {
         let contractNames = _.map(this.editedContracts, (contract) => contract.name);
         let contractName = contractNames[conIndex];
@@ -386,10 +375,7 @@ export default {
         (v) => v >= 0 || 'Value cannot be negative',
         (v) => v < 100 || 'Value must be less than 100'
       ], // rules for years of experience
-      primesDropDown: [], // autocomplete contract prime options
-      requiredRules: [
-        (v) => !isEmpty(v) || 'This field is required. You must enter information or delete the field if possible'
-      ] // rules for a required field
+      primesDropDown: [] // autocomplete contract prime options
     };
   },
   directives: { mask },
@@ -403,6 +389,9 @@ export default {
     deleteProject,
     formatDateSlashToDash,
     formatDateDashToSlash,
+    getDateRules,
+    getDateOptionalRules,
+    getRequiredRules,
     hasEndDatesFilled,
     isEmpty,
     parseDate,
