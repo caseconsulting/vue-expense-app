@@ -108,7 +108,7 @@ async function fillData() {
     labels = ['Only Successful Parse', 'Submitted Changes'];
     data = [successes - numSubmits, numSubmits];
     backgroundColor = ['rgba(134, 31, 65, 1)', 'rgba(232, 119, 34, 1)'];
-    text = 'Proportion of People Who Submitted Changes After a Successful Parse';
+    text = 'Proportion of People Who Submitted Changes';
     showToolTips = true;
   } else {
     data = [1];
