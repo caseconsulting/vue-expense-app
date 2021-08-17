@@ -21,7 +21,7 @@
       style="padding-right: 20px; padding-left: 10px"
       v-model="editedPersonalInfo.linkedIn"
       label="LinkedIn"
-      :rules="urlRules"
+      :rules="getURLRules()"
       data-vv-name="LinkedIn"
     ></v-text-field>
 
@@ -186,7 +186,7 @@
 <script>
 import api from '@/shared/api.js';
 import _ from 'lodash';
-import { getDateOptionalRules, getNonFutureDateRules } from '@/shared/validationUtils.js';
+import { getDateOptionalRules, getNonFutureDateRules, getURLRules } from '@/shared/validationUtils.js';
 import { formatDate, isEmpty, parseDate } from '@/utils/utils';
 import { mask } from 'vue-the-mask';
 import { getRole } from '@/utils/auth';
@@ -353,14 +353,6 @@ export default {
       birthdayFormat: null, // formatted birthday
       BirthdayMenu: false, // display birthday menu
       countries: [], // list of countries
-      urlRules: [
-        (v) =>
-          isEmpty(v) ||
-          /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)/.test(
-            v
-          ) ||
-          'URL must be valid. Only http(s) are accepted.'
-      ], // rules for training url
       phoneRules: [
         (v) =>
           !isEmpty(v) ? v.length == 0 || v.length == 12 || 'Phone number must be valid. Format: ###-###-####' : true
@@ -437,6 +429,7 @@ export default {
     formatDate,
     getDateOptionalRules,
     getNonFutureDateRules,
+    getURLRules,
     parseDate,
     updateAddressDropDown,
     updateBoxes,

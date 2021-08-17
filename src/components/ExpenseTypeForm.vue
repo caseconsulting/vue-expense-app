@@ -13,7 +13,7 @@
         <v-text-field
           v-model="editedExpenseType.budgetName"
           id="budgetName"
-          :rules="requiredRules"
+          :rules="getRequiredRules()"
           label="Budget Name"
           data-vv-name="Budget Name"
           class="type_form_padding"
@@ -75,7 +75,7 @@
         <v-menu
           v-model="showStartMenu"
           v-if="!editedExpenseType.recurringFlag"
-          :rules="requiredRules"
+          :rules="getRequiredRules()"
           :close-on-content-click="false"
           :nudge-right="40"
           transition="scale-transition"
@@ -87,7 +87,7 @@
             <v-text-field
               v-model="startDateFormatted"
               id="startDate"
-              :rules="dateRules.concat(startDateRules)"
+              :rules="[...getDateRules(), ...startDateRules]"
               label="Start Date"
               hint="MM/DD/YYYY format"
               v-mask="'##/##/####'"
@@ -112,7 +112,7 @@
         <v-menu
           v-model="showEndMenu"
           v-if="!editedExpenseType.recurringFlag"
-          :rules="requiredRules"
+          :rules="getRequiredRules()"
           :close-on-content-click="false"
           :nudge-right="40"
           transition="scale-transition"
@@ -124,7 +124,7 @@
             <v-text-field
               v-model="endDateFormatted"
               id="endDate"
-              :rules="dateRules.concat(endDateRules)"
+              :rules="[...getDateRules(), ...endDateRules]"
               label="End Date"
               hint="MM/DD/YYYY format"
               v-mask="'##/##/####'"
@@ -148,7 +148,7 @@
         <v-textarea
           v-model="editedExpenseType.description"
           id="description"
-          :rules="requiredRules"
+          :rules="getRequiredRules()"
           label="Description "
           data-vv-name="Description "
           rows="3"
@@ -307,6 +307,7 @@ import api from '@/shared/api.js';
 import FormSubmissionConfirmation from '@/components/modals/FormSubmissionConfirmation.vue';
 import _ from 'lodash';
 import { v4 as uuid } from 'uuid';
+import { getDateRules, getRequiredRules } from '@/shared/validationUtils.js';
 import { formatDate, isEmpty, parseDate } from '@/utils/utils';
 import { mask } from 'vue-the-mask';
 const moment = require('moment-timezone');
@@ -668,11 +669,6 @@ export default {
           return this.customAccess.length > 0 || 'Select at least one employee or uncheck the Custom checkbox';
         }
       ],
-      dateRules: [
-        (v) => !isEmpty(v) || 'Date must be valid. Format: MM/DD/YYYY',
-        (v) => (!isEmpty(v) && /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v)) || 'Date must be valid. Format: MM/DD/YYYY',
-        (v) => moment(v, 'MM/DD/YYYY', true).isValid() || 'Date must be valid'
-      ], // rule for a required date
       startDateRules: [
         (v) => {
           return !isEmpty(v) && moment(v, 'MM/DD/YYYY', true).isValid() && this.editedExpenseType.endDate
@@ -691,7 +687,6 @@ export default {
       ],
       endDateFormatted: null, // formatted end date
       editedExpenseType: _.cloneDeep(this.model), //used to store edits made to an expense type or when creating new expense type
-      requiredRules: [(v) => !isEmpty(v) || 'This field is required'],
       searchString: '',
       showStartMenu: false, // boolean for showing date picker
       showEndMenu: false, // boolean for showing date picker
@@ -709,6 +704,8 @@ export default {
     emit,
     formatBudget,
     formatDate,
+    getDateRules,
+    getRequiredRules,
     isCustomSelected,
     isEmpty,
     isFullTimeSelected,

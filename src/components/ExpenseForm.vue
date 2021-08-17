@@ -15,7 +15,7 @@
         <v-autocomplete
           v-if="!asUser"
           :items="activeEmployees"
-          :rules="requiredRules"
+          :rules="getRequiredRules()"
           :filter="customFilter"
           :disabled="isReimbursed || isEdit || isInactive"
           v-model="editedExpense.employeeId"
@@ -29,7 +29,7 @@
         <v-autocomplete
           v-if="!asUser"
           :items="filteredExpenseTypes()"
-          :rules="requiredRules"
+          :rules="getRequiredRules()"
           :disabled="isInactive"
           v-model="editedExpense.expenseTypeId"
           label="Expense Type"
@@ -44,7 +44,7 @@
           v-else
           :items="filteredExpenseTypes()"
           :disabled="isInactive"
-          :rules="requiredRules"
+          :rules="getRequiredRules()"
           v-model="editedExpense.expenseTypeId"
           label="Expense Type"
           :hint="hint"
@@ -106,7 +106,7 @@
         <!-- Category -->
         <v-select
           v-if="getCategories() != null && getCategories().length >= 1"
-          :rules="requiredRules"
+          :rules="getRequiredRules()"
           :disabled="isInactive"
           v-model="editedExpense.category"
           :items="getCategories()"
@@ -141,7 +141,7 @@
         <v-autocomplete
           v-if="this.reqRecipient"
           :items="this.recipientOptions"
-          :rules="requiredRules"
+          :rules="getRequiredRules()"
           :disabled="isReimbursed"
           v-model="editedExpense.recipient"
           label="Recipient"
@@ -178,7 +178,7 @@
             <v-text-field
               v-model="purchaseDateFormatted"
               id="purchaseDate"
-              :rules="dateRules"
+              :rules="getDateRules()"
               :disabled="(isReimbursed && !isDifferentExpenseType) || isInactive"
               v-mask="'##/##/####'"
               label="Purchase Date"
@@ -210,7 +210,7 @@
             <v-text-field
               v-model="reimbursedDateFormatted"
               id="reimburseDate"
-              :rules="optionalDateRules"
+              :rules="getDateOptionalRules()"
               :disabled="(isReimbursed && !isDifferentExpenseType) || isInactive"
               v-mask="'##/##/####'"
               label="Reimburse Date (optional)"
@@ -238,7 +238,7 @@
         <!-- URL -->
         <v-text-field
           v-model="editedExpense.url"
-          :rules="urlRules"
+          :rules="[...getRequiredRules(), ...getURLRules()]"
           :label="urlLabel"
           :disabled="isInactive"
         ></v-text-field>
@@ -317,6 +317,7 @@ import FileUpload from '@/components/FileUpload.vue';
 import FormSubmissionConfirmation from '@/components/modals/FormSubmissionConfirmation.vue';
 import { getRole } from '@/utils/auth';
 import { v4 as uuid } from 'uuid';
+import { getDateRules, getDateOptionalRules, getRequiredRules, getURLRules } from '@/shared/validationUtils.js';
 import { isEmpty, isFullTime, convertToMoneyString } from '@/utils/utils';
 import { mask } from 'vue-the-mask';
 import _ from 'lodash';
@@ -1642,11 +1643,6 @@ export default {
         (v) => parseCost(v) < 1000000000 || 'Nice try' //when a user tries to fill out expense that is over a million
       ], // rules for cost
       date: null, // NOTE: Unused?
-      dateRules: [
-        (v) => !isEmpty(v) || 'Date must be valid. Format: MM/DD/YYYY',
-        (v) => (!isEmpty(v) && /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v)) || 'Date must be valid. Format: MM/DD/YYYY',
-        (v) => moment(v, 'MM/DD/YYYY', true).isValid() || 'Date must be valid'
-      ], // rules for dates
       descriptionRules: [
         (v) => !isEmpty(v) || 'Description is a required field',
         (v) => (!isEmpty(v) && v.replace(/\s/g, '').length > 0) || 'Description is a required field'
@@ -1667,10 +1663,6 @@ export default {
       isOverCovered: false, // expense is only partially covered
       loading: false, // loading
       myBudgetsView: false, // if on myBudgetsView page
-      optionalDateRules: [
-        (v) => isEmpty(v) || /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v) || 'Date must be valid. Format: MM/DD/YYYY',
-        (v) => (!isEmpty(v) ? moment(v, 'MM/DD/YYYY', true).isValid() || 'Date must be valid' : true)
-      ], // option date rules
       originalExpense: null, // expense before changes
       overdraftBudget: 0,
       purchaseDateFormatted: null, // formatted purchase date
@@ -1682,7 +1674,6 @@ export default {
       reimburseMenu: false, // display reimburse menu
       remainingBudget: 0,
       reqRecipient: false, // expense requires recipient
-      requiredRules: [(v) => !isEmpty(v) || 'Required field'], // rules for required fields
       scanLoading: false, // determines if the scanning functionality is loading
       selectedEmployee: {}, // selected employees
       selectedExpenseType: {}, // selected expense types
@@ -1693,15 +1684,6 @@ export default {
         category: null,
         hits: 0
       }, // training url info
-      urlRules: [
-        (v) => !this.editedExpense.requireURL || !isEmpty(v) || 'URL is required. Only http(s) are accepted.',
-        (v) =>
-          isEmpty(v) ||
-          /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)/.test(
-            v
-          ) ||
-          'URL must be valid. Only http(s) are accepted.'
-      ], // rules for training url
       userInfo: {}, // user info
       valid: false // form validity
     };
@@ -1724,8 +1706,12 @@ export default {
     formatCost,
     formatDate,
     getCategories,
+    getDateRules,
+    getDateOptionalRules,
     getExpenseTypeSelected,
     getRemainingBudget,
+    getRequiredRules,
+    getURLRules,
     hasAccess,
     incrementURLHits,
     isEmpty,

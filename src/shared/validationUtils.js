@@ -79,3 +79,16 @@ export function getNumberRules() {
 export function getRequiredRules() {
   return [(v) => !isEmpty(v) || 'This field is required']; // rules for a required field
 } // getRequiredRules
+
+/**
+ * Gets the URL rules
+ * @returns Array - The array of rule functions
+ */
+export function getURLRules() {
+  return [
+    (v) =>
+      isEmpty(v) ||
+      /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)/.test(v) ||
+      'URL must be valid. Only http(s) are accepted.'
+  ]; // rules for training url
+}
