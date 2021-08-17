@@ -108,7 +108,7 @@
                 <personal-tab v-if="formTab === 'personal'" :validating="validating.personal" :model="model">
                 </personal-tab>
                 <!-- Education Tab -->
-                <education-tab v-if="formTab === 'education'" :validating="validating.education" :model="model.degrees">
+                <education-tab v-if="formTab === 'education'" :validating="validating.education" :model="model.schools">
                 </education-tab>
                 <!-- Job Experience Tab -->
                 <job-experience-tab
@@ -272,7 +272,7 @@
             <!-- Education -->
             <v-tab-item id="education" class="mt-6 mb-4">
               <education-tab
-                :model="model.degrees"
+                :model="model.schools"
                 :validating="validating.education"
                 :allowAdditions="true"
               ></education-tab>
@@ -393,22 +393,22 @@ async function cancel() {
  * Removes unnecessary attributes from the employee data.
  */
 function cleanUpData() {
-  // degrees
-  if (!_.isEmpty(this.model.degrees)) {
-    this.model.degrees = _.map(this.model.degrees, (degree) => {
+  // schools
+  if (!_.isEmpty(this.model.schools)) {
+    this.model.schools = _.map(this.model.schools, (school) => {
       // remove date picker menu booleans
-      delete degree.showEducationMenu;
+      delete school.showEducationMenu;
       // delete null attributes
-      _.forEach(degree, (value, key) => {
+      _.forEach(school, (value, key) => {
         if (_.isNil(value)) {
-          delete degree[key];
+          delete school[key];
         }
       });
-      // return updated degree
-      return degree;
+      // return updated school
+      return school;
     });
   } else {
-    this.model.degrees = null;
+    this.model.schools = null;
   }
   // certifications
   if (!_.isEmpty(this.model.certifications)) {
@@ -798,6 +798,7 @@ async function created() {
   this.afterCreate = true;
   this.hasResume = (await api.getResume(this.$route.params.id)) != null;
 } // created
+
 /**
  * Sets the form data based on the given tab.
  * @param tab - the tab the data came from
@@ -836,7 +837,7 @@ function setFormData(tab, data) {
     this.$set(this.model, 'currentStreet', data.currentStreet);
     this.$set(this.model, 'currentZIP', data.currentZIP);
   } else if (tab == 'education') {
-    this.$set(this.model, 'degrees', data); //sets degrees to data returned from education tab
+    this.$set(this.model, 'schools', data); //sets schools to data returned from education tab
   } else if (tab == 'jobExperience') {
     //sets all jobExperience info to data returned from job experience tab
     this.$set(this.model, 'icTimeFrames', data.icTimeFrames);
@@ -972,6 +973,7 @@ export default {
         nickname: null,
         phoneNumber: null,
         prime: null,
+        schools: [],
         st: null,
         technologies: [],
         twitter: null,
