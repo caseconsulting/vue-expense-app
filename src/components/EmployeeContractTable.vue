@@ -58,7 +58,7 @@
         <!-- First Name Item Slot -->
         <template v-slot:[`item.fullName`]="{ item }">
           <p :class="{ selectFocus: isFocus(item) }" style="margin-bottom: 0px">
-            {{ item.fullName }}
+            {{ getFullName(item) }}
           </p>
         </template>
         <!-- Alert for no search results -->
@@ -88,7 +88,7 @@ import _ from 'lodash';
  */
 function isFocus(item) {
   let expanded = !_.isEmpty(this.expanded) && item.employeeNumber == this.expanded[0].employeeNumber;
-  return expanded || this.model.id == item.id;
+  return expanded;
 } // isFocus
 
 /**
@@ -168,6 +168,15 @@ function searchContract() {
     }
   }
 } // searchContract
+
+/**
+ * Gets the full name of an employee.
+ * @returns String - The employees first name
+ */
+function getFullName(item) {
+  item.fullName = item.firstName + ' ' + item.lastName;
+  return item.fullName;
+} // getFullName
 
 /**
  * Clears the other search forms and searches the table by prime
@@ -259,36 +268,6 @@ export default {
       ], // datatable headers
       itemsPerPage: -1,
       loading: false,
-      model: {
-        id: null,
-        firstName: null,
-        middleName: null,
-        lastName: null,
-        nickname: null,
-        email: '@consultwithcase.com',
-        employeeRole: null,
-        employeeNumber: null,
-        hireDate: null,
-        workStatus: 100,
-        birthday: null,
-        birthdayFeed: false,
-        jobRole: null,
-        prime: null,
-        contract: null,
-        contracts: [],
-        contractNames: [],
-        github: null,
-        twitter: null,
-        phoneNumber: null,
-        city: null,
-        st: null,
-        country: null,
-        deptDate: null,
-        currentCity: null,
-        currentState: null,
-        currentStreet: null,
-        currentZIP: null
-      }, // selected employee
       prime: null,
       primesDropDown: [],
       search: null, // query text for datatable search field
@@ -297,6 +276,7 @@ export default {
     };
   },
   methods: {
+    getFullName,
     isFocus,
     populateDropDowns,
     refreshList,
