@@ -876,7 +876,6 @@ async function createNewEntry() {
       this.file = null;
       this.$set(this.editedExpense, 'receipt', null);
     }
-    console.log(this.editedExpense);
     updatedExpense = await api.createItem(api.EXPENSES, this.editedExpense);
 
     if (updatedExpense.id) {
@@ -908,10 +907,15 @@ async function createNewEntry() {
  * @return
  */
 function customFilter(item, queryText) {
-  const hasValue = (val) => (val != null ? val : '');
-  const text = hasValue(item.text);
-  const query = hasValue(queryText);
-  return text.toString().toLowerCase().indexOf(query.toString().toLowerCase()) > -1;
+  const query = queryText ? queryText : '';
+  const nickNameFullName = item.nickname ? `${item.nickname} ${item.lastName}` : '';
+  const firstNameFullName = `${item.firstName} ${item.lastName}`;
+
+  const queryContainsNickName = nickNameFullName.toString().toLowerCase().indexOf(query.toString().toLowerCase()) >= 0;
+  const queryContainsFirstName =
+    firstNameFullName.toString().toLowerCase().indexOf(query.toString().toLowerCase()) >= 0;
+
+  return queryContainsNickName || queryContainsFirstName;
 } // customFilter
 
 /**
@@ -1529,7 +1533,10 @@ async function created() {
       //text: employeeUtils.fullName(employee),
       text: employeeUtils.nicknameAndLastName(employee),
       value: employee.id,
-      workStatus: employee.workStatus
+      workStatus: employee.workStatus,
+      firstName: employee.firstName,
+      nickname: employee.nickname,
+      lastName: employee.lastName
     };
   });
   //only active employees
