@@ -25,30 +25,32 @@ function initDegrees() {
   let degrees = {};
   this.employees.forEach((emp) => {
     let highestDegrees = [];
-    if (emp.degrees && emp.workStatus != 0) {
-      _.forEach(emp.degrees, (degree) => {
-        if (moment(degree.date).isBefore(moment(new Date()))) {
-          if (highestDegrees.length != 0) {
-            let result = compareDegree(highestDegrees[0].name, degree.name);
-            //if a degree of a higher prestige is found, remove all previous entries
-            if (result === 1) {
-              highestDegrees.length = 0;
-            }
-            //Adds to highestDegrees, excluding degrees with a lower prestige
-            if (result > -1) {
+    if (emp.schools && emp.workStatus != 0) {
+      _.forEach(emp.schools, (school) => {
+        _.forEach(school.degrees, (degree) => {
+          if (moment(degree.completionDate).isBefore(moment(new Date()))) {
+            if (highestDegrees.length != 0) {
+              let result = compareDegree(highestDegrees[0].name, degree.degreeType);
+              //if a degree of a higher prestige is found, remove all previous entries
+              if (result === 1) {
+                highestDegrees.length = 0;
+              }
+              //Adds to highestDegrees, excluding degrees with a lower prestige
+              if (result > -1) {
+                highestDegrees.push({
+                  name: this.getDegreeName(this.getDegreeValue(degree.degreeType)),
+                  majors: degree.majors
+                });
+              }
+            } else {
+              //Adds the first degree found to the array
               highestDegrees.push({
-                name: this.getDegreeName(this.getDegreeValue(degree.name)),
+                name: this.getDegreeName(this.getDegreeValue(degree.degreeType)),
                 majors: degree.majors
               });
             }
-          } else {
-            //Adds the first degree found to the array
-            highestDegrees.push({
-              name: this.getDegreeName(this.getDegreeValue(degree.name)),
-              majors: degree.majors
-            });
           }
-        }
+        });
       });
       degrees = addToDegrees(degrees, highestDegrees);
     }
