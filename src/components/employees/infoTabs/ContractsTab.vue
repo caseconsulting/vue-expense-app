@@ -14,9 +14,9 @@
             </p>
             <p v-else><b>Project: </b>{{ project.name }}</p>
             <p><b>Time on Project (in Years): </b>{{ getProjectLengthInYears(project) }}</p>
-            <p><b>Start Date: </b>{{ project.startDate | monthDayYearFormat }}</p>
+            <p><b>Start Date: </b>{{ monthDayYearFormat(project.startDate) }}</p>
             <div v-if="project.endDate">
-              <p><b>End Date: </b>{{ project.endDate | monthDayYearFormat }}</p>
+              <p><b>End Date: </b>{{ monthDayYearFormat(project.endDate) }}</p>
               <p><b>Current: </b>No</p>
             </div>
             <div v-else>
@@ -118,13 +118,13 @@ export default {
   filters: {
     current: (value) => {
       return value ? 'Yes' : 'No';
-    },
-    monthDayYearFormat
+    }
   },
   methods: {
     getContractLengthInYears,
     getProjectLengthInYears,
     isEmpty,
+    monthDayYearFormat,
     onPageChange
   },
   props: ['model']

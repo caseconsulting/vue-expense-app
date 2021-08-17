@@ -9,14 +9,14 @@
       <v-list-item>
         <v-list-item-content>Start Date:</v-list-item-content>
         <v-list-item-content class="text-right">
-          <div>{{ selectedBudget.budgetObject.fiscalStartDate | monthDayYearFormat }}</div>
+          <div>{{ monthDayYearFormat(selectedBudget.budgetObject.fiscalStartDate) }}</div>
         </v-list-item-content>
       </v-list-item>
       <!-- Display End Date -->
       <v-list-item>
         <v-list-item-content>End Date:</v-list-item-content>
         <v-list-item-content class="text-right">
-          <div>{{ selectedBudget.budgetObject.fiscalEndDate | monthDayYearFormat }}</div>
+          <div>{{ monthDayYearFormat(selectedBudget.budgetObject.fiscalEndDate) }}</div>
         </v-list-item-content>
       </v-list-item>
 
@@ -181,15 +181,13 @@ export default {
     getPending,
     isEmpty,
     odFlagMessage,
+    monthDayYearFormat,
     noRemaining
   },
   props: [
     'activator', // dialog activator
     'selectedBudget' // selected budget
   ],
-  filters: {
-    monthDayYearFormat
-  },
   watch: {
     activator: function () {
       this.showDialog = this.activator;

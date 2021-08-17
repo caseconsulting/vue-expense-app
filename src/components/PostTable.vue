@@ -36,7 +36,7 @@
 
             <!-- Date  slot -->
             <template v-slot:[`item.createDate`]="{ item }">
-              <td>{{ item.createDate | dateFormat }}</td>
+              <td>{{ monthDayYearFormat(item.createDate) }}</td>
             </template>
 
             <!-- Action Icons -->
@@ -187,7 +187,8 @@ export default {
     blogPath,
     handleEdit,
     handlePreview,
-    deleteBlogPost
+    deleteBlogPost,
+    monthDayYearFormat
   },
   data() {
     return {
@@ -222,23 +223,13 @@ export default {
     };
   },
   filters: {
-    // formats a date by month, day, year (e.g. Aug 18th, 2020)
-    dateFormat: (value) => {
-      if (!isEmpty(value)) {
-        let date = moment(value).format('MMM Do, YYYY');
-        return date;
-      } else {
-        return '';
-      }
-    },
     birthdayFeedResponse: (value) => {
       if (value == true) {
         return 'yes';
       } else {
         return 'no';
       }
-    },
-    monthDayYearFormat
+    }
   }
 };
 </script>

@@ -206,7 +206,7 @@
           <!-- Date Item Slot -->
           <template v-slot:[`item.hireDate`]="{ item }">
             <p :class="{ inactiveStyle: isInactive(item), selectFocus: isFocus(item) }" style="margin-bottom: 0px">
-              {{ item.hireDate | monthDayYearFormat }}
+              {{ monthDayYearFormat(item.hireDate) }}
             </p>
           </template>
 
@@ -601,9 +601,6 @@ export default {
       } // snackbar action status
     };
   },
-  filters: {
-    monthDayYearFormat
-  },
   methods: {
     changeAvatar,
     clearCreateEmployee,
@@ -620,6 +617,7 @@ export default {
     isFullTime,
     isInactive,
     isPartTime,
+    monthDayYearFormat,
     refreshEmployees,
     renderCreateEmployee,
     userIsAdmin,

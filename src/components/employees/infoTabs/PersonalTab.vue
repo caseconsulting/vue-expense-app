@@ -19,7 +19,7 @@
     </p>
     <!-- Birthday -->
     <p v-if="!isEmpty(this.model.birthday) && (admin || employee)">
-      <b>Birthday:</b> {{ this.model.birthday | monthDayYearFormat }}
+      <b>Birthday:</b> {{ monthDayYearFormat(this.model.birthday) }}
     </p>
     <!-- Birthday Feed -->
     <p v-if="!isEmpty(this.model.birthdayFeed) && (admin || employee)">
@@ -36,7 +36,7 @@
 </template>
 
 <script>
-import { isEmpty, monthDayFormat, monthDayYearFormat } from '@/utils/utils';
+import { isEmpty, monthDayYearFormat } from '@/utils/utils';
 import { getRole } from '@/utils/auth';
 import api from '@/shared/api.js';
 
@@ -167,13 +167,12 @@ export default {
   filters: {
     birthdayFeedResponse: (value) => {
       return value ? 'Yes' : 'No';
-    },
-    monthDayYearFormat,
-    monthDayFormat
+    }
   },
   methods: {
     checkEmptyPersonalInfo,
     isEmpty,
+    monthDayYearFormat,
     userIsAdmin,
     userIsEmployee,
     userIsManager

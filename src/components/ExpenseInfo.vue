@@ -23,11 +23,11 @@
         </v-row>
         <v-row dense>
           <v-col><b>Purchased On:</b></v-col>
-          <v-col> {{ expense.purchaseDate | monthDayYearFormat }} </v-col>
+          <v-col> {{ monthDayYearFormat(expense.purchaseDate) }} </v-col>
         </v-row>
         <v-row dense v-if="!isEmpty(expense.reimbursedDate)">
           <v-col><b>Reimbursed On:</b></v-col>
-          <v-col> {{ expense.reimbursedDate | monthDayYearForm }}</v-col>
+          <v-col> {{ monthDayYearForm(expense.reimbursedDate) }}</v-col>
         </v-row>
         <v-row dense v-if="!isEmpty(expense.note)">
           <v-col><b>Notes:</b></v-col>
@@ -50,23 +50,6 @@
         </v-row>
       </v-container>
     </v-card-text>
-    <!-- <div class="expense_info">
-        <p class="expense_info"><span>Description:</span> {{ expense.description }}</p>
-        <p class="expense_info"><span>Employee:</span> {{ expense.employeeName }}</p>
-        <p class="expense_info"><span>Budget:</span> {{ expense.budgetName }}</p>
-        <p class="expense_info"><span>Cost:</span> {{ convertToMoneyString(expense.cost) }}</p>
-        <p class="expense_info"><span>Purchased On:</span> {{ expense.purchaseDate | monthDayYearFormat }}</p>
-        <p class="expense_info" v-if="!isEmpty(expense.reimbursedDate)">
-          <span>Reimbursed On:</span>
-          {{ expense.reimbursedDate | monthDayYearFormat }}
-        </p>
-        <p class="expense_info" v-if="!isEmpty(expense.note)"><span>Notes:</span> {{ expense.note }}</p>
-        <p class="expense_info" v-else><span>Notes:</span> N/A</p>
-        <p class="expense_info" v-if="!isEmpty(expense.category)"><span>Category:</span> {{ expense.category }}</p>
-        <p class="expense_info" v-else><span>Category:</span> N/A</p>
-        <attachment :expense="expense" :mode="'adminExpenseInfo'" class="expense_info"></attachment>
-      </div>
-    </v-card-title> -->
   </v-card>
 </template>
 
@@ -125,9 +108,7 @@ export default {
   methods: {
     convertToMoneyString,
     displayExpense,
-    isEmpty
-  },
-  filters: {
+    isEmpty,
     monthDayYearFormat
   }
 };

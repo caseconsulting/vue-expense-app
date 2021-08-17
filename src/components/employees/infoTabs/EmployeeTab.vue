@@ -26,12 +26,12 @@
     <!-- Employee Role -->
     <p v-if="admin"><b>Employee Role:</b> {{ this.model.employeeRole | startCase }}</p>
     <!-- Hire Date -->
-    <p v-if="admin || employee"><b> Hire Date:</b> {{ this.model.hireDate | monthDayYearFormat }}</p>
+    <p v-if="admin || employee"><b> Hire Date:</b> {{ monthDayYearFormat(this.model.hireDate) }}</p>
     <!-- Status -->
     <p v-if="admin || employee"><b>Status:</b> {{ getWorkStatus(this.model.workStatus) }}</p>
     <!-- Departure Date -->
     <p v-if="!isEmpty(this.model.deptDate) && admin">
-      <b>Departure Date:</b> {{ this.model.deptDate | monthDayYearFormat }}
+      <b>Departure Date:</b> {{ monthDayYearFormat(this.model.deptDate) }}
     </p>
     <!-- Mifi Status -->
     <p v-if="this.model.employeeRole !== 'intern' && this.model.workStatus !== 0">
@@ -118,14 +118,14 @@ export default {
     getCurrentProjects
   },
   filters: {
-    monthDayYearFormat,
     startCase: (value) => {
       return _.startCase(value);
     }
   },
   methods: {
     getWorkStatus,
-    isEmpty
+    isEmpty,
+    monthDayYearFormat
   },
   props: ['admin', 'employee', 'model']
 };
