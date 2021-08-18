@@ -12,6 +12,20 @@
           <pie-chart :options="resumeChart2Options" :chartData="resumeChart2Data"></pie-chart>
         </v-col>
       </v-row>
+      <v-divider class="mt-5"></v-divider>
+      <h1 class="mx-2 mt-2">Audits</h1>
+      <v-row class="mx-2 pa-0">
+        <v-col cols="4">
+          <v-text-field
+            id="employeesSearch"
+            v-model="search"
+            append-icon="search"
+            label="Search"
+            single-line
+            hide-details
+          ></v-text-field>
+        </v-col>
+      </v-row>
       <v-row>
         <v-col>
           <v-data-table
@@ -20,6 +34,7 @@
             :custom-sort="customDateSort"
             :sort-by.sync="sortBy"
             :sort-desc.sync="sortDesc"
+            :search="search"
             class="elevation-1"
           ></v-data-table>
         </v-col>
@@ -42,7 +57,18 @@ async function fillData() {
 
   _.forEach(resumeAudits, (audit) => {
     audit.dateCreated = moment(audit.dateCreated).format(IsoFormat);
-    this.resumeAudits.push({ dateCreated: audit.dateCreated, description: audit.description });
+    let employee = _.find(this.employees, (emp) => {
+      return emp.id === audit.employeeId;
+    });
+    let employeeName = employee.nickname
+      ? `${employee.nickname} ${employee.lastName}`
+      : `${employee.firstName} ${employee.lastName}`;
+
+    this.resumeAudits.push({
+      dateCreated: audit.dateCreated,
+      description: audit.description,
+      employeeName: employeeName
+    });
   });
 
   let resumeParseSuccesses = resumeAudits.filter((audit) => {
@@ -159,7 +185,7 @@ function customDateSort(items, sortBy, sortDesc) {
       b = moment(b.dateCreated, 'MMMM Do YYYY, h:mm:ss a');
       return sortDesc[0] ? a.diff(b) : b.diff(a);
     });
-  } else if (sortBy[0] === 'description') {
+  } else if (sortBy[0] === 'description' || sortBy[0] === 'employeeName') {
     return items.sort((a, b) => {
       return sortDesc[0] ? a.description.localeCompare(b.description) : b.description.localeCompare(a.description);
     });
@@ -173,15 +199,21 @@ export default {
   component: {
     PieChart
   },
-  created() {
+  async created() {
+    this.employees = await api.getItems(api.EMPLOYEES); // get all employees
     this.fillData();
   },
   data() {
     return {
+      employees: [],
       headers: [
         {
           text: 'Event Date',
           value: 'dateCreated'
+        },
+        {
+          text: 'Employee Name',
+          value: 'employeeName'
         },
         {
           text: 'Description',
@@ -193,6 +225,7 @@ export default {
       resumeChartData: null,
       resumeChart2Options: null,
       resumeChart2Data: null,
+      search: null,
       sortBy: 'dateCreated',
       sortDesc: false
     };
