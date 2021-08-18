@@ -205,6 +205,7 @@
           v-if="editedExpenseType.accessibleBy && editedExpenseType.accessibleBy.includes('Custom')"
           v-model="customAccess"
           :items="activeEmployees"
+          :filter="customFilter"
           no-data-text="No Employees Available"
           item-color="gray"
           multiple
@@ -383,6 +384,25 @@ function clearForm() {
   this.editedExpenseType.id = null;
   this.editedExpenseType.accessibleBy = ['FullTime'];
 } // clearForm
+
+/**
+ * Custom filter for employee autocomplete options.
+ *firstName: data.firstName
+ * @param item -
+ * @param queryText -
+ * @return
+ */
+function customFilter(item, queryText) {
+  const query = queryText ? queryText : '';
+  const nickNameFullName = item.nickname ? `${item.nickname} ${item.lastName}` : '';
+  const firstNameFullName = `${item.firstName} ${item.lastName}`;
+
+  const queryContainsNickName = nickNameFullName.toString().toLowerCase().indexOf(query.toString().toLowerCase()) >= 0;
+  const queryContainsFirstName =
+    firstNameFullName.toString().toLowerCase().indexOf(query.toString().toLowerCase()) >= 0;
+
+  return queryContainsNickName || queryContainsFirstName;
+} // customFilter
 
 /**
  * Emits a message and data if it exists.
@@ -621,7 +641,10 @@ async function created() {
     if (employee.workStatus > 0) {
       activeEmployees.push({
         value: employee.id,
-        text: `${employee.firstName} ${employee.lastName}`
+        text: `${employee.firstName} ${employee.lastName}`,
+        nickname: employee.nickname,
+        firstName: employee.firstName,
+        lastName: employee.lastName
       });
     }
   });
@@ -701,6 +724,7 @@ export default {
     checkRequireURL,
     checkSelection,
     clearForm,
+    customFilter,
     emit,
     formatBudget,
     formatDate,

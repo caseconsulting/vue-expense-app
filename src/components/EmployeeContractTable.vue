@@ -6,13 +6,14 @@
           <v-autocomplete
             id="employeesSearch"
             v-model="search"
-            append-icon="search"
-            label="Search By Employee"
-            @change="refreshList()"
-            @click:clear="search = null"
-            :items="employeeNames"
-            single-line
+            :filter="customFilter"
+            :items="employees"
+            label="Search"
             clearable
+            @click:clear="
+              search = null;
+              refreshList();
+            "
           ></v-autocomplete>
         </v-col>
         <v-col>
@@ -79,6 +80,50 @@ import _ from 'lodash';
 // |                     METHODS                      |
 // |                                                  |
 // |--------------------------------------------------|
+
+/**
+ * Sets a mapping of employee name to employee id of an expense for the autocomplete options.
+ *
+ * @param empData - The list of employees
+ */
+function constructAutoComplete(empData) {
+  this.employees = _.sortBy(
+    _.map(empData, (data) => {
+      if (data && data.firstName && data.lastName && data.employeeNumber) {
+        return {
+          text: data.firstName + ' ' + data.lastName,
+          value: data.employeeNumber.toString(),
+          nickname: data.nickname,
+          firstName: data.firstName,
+          lastName: data.lastName
+        };
+      }
+    }).filter((data) => {
+      return data != null;
+    }),
+    (employee) => employee.text.toLowerCase()
+  );
+} // constructAutoComplete
+
+/**
+ * Custom filter for employee autocomplete options.
+ *firstName: data.firstName
+ * @param item -
+ * @param queryText -
+ * @return
+ */
+function customFilter(item, queryText) {
+  const query = queryText ? queryText : '';
+  const nickNameFullName = item.nickname ? `${item.nickname} ${item.lastName}` : '';
+  const firstNameFullName = `${item.firstName} ${item.lastName}`;
+
+  const queryContainsNickName = nickNameFullName.toString().toLowerCase().indexOf(query.toString().toLowerCase()) >= 0;
+  const queryContainsFirstName =
+    firstNameFullName.toString().toLowerCase().indexOf(query.toString().toLowerCase()) >= 0;
+  const queryContainsEmployeeNumber = item.value.toString().indexOf(query.toString()) >= 0;
+
+  return queryContainsNickName || queryContainsFirstName || queryContainsEmployeeNumber;
+} // customFilter
 
 /**
  * Checks to see if an employee is expanded in the datatable.
@@ -236,6 +281,7 @@ async function created() {
     }
   });
   this.filteredEmployees = this.employeesInfo;
+  this.constructAutoComplete(this.filteredEmployees);
   this.loading = false;
 } //created
 export default {
@@ -244,6 +290,7 @@ export default {
     return {
       contractsDropDown: [],
       contract: null,
+      employees: [],
       employeesInfo: [],
       employeeNames: [],
       expanded: [],
@@ -276,6 +323,8 @@ export default {
     };
   },
   methods: {
+    constructAutoComplete,
+    customFilter,
     getFullName,
     isFocus,
     populateDropDowns,
