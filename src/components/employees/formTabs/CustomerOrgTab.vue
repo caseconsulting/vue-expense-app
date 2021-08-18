@@ -22,7 +22,14 @@
       <v-row align="center" class="py-3" justify="center">
         <!-- Current Switch -->
         <v-col cols="6" sm="7" md="6" lg="7">
-          <v-switch v-model="exp.current" label="Currently working with this customer organization"></v-switch>
+          <v-tooltip top nudge-left="75" nudge-bottom="10" max-width="300">
+            <template v-slot:activator="{ on }">
+              <div v-on="on">
+                <v-switch v-model="exp.current" label="Currently working with this customer organization"></v-switch>
+              </div>
+            </template>
+            <span>Enabling this will auto-increment the years of experience every month</span>
+          </v-tooltip>
         </v-col>
 
         <!-- Years of Experience -->

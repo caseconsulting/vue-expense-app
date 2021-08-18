@@ -25,7 +25,14 @@
       <v-row justify="center">
         <!-- Current Switch -->
         <v-col cols="10" sm="6" md="6" lg="6" class="ml-3 ml-sm-0">
-          <v-switch class="mt-0 pb-2" v-model="technology.current" label="Currently know this technology"></v-switch>
+          <v-tooltip top nudge-left="75" nudge-bottom="10" max-width="300">
+            <template v-slot:activator="{ on }">
+              <div v-on="on">
+                <v-switch v-model="technology.current" label="Currently know this technology"></v-switch>
+              </div>
+            </template>
+            <span>Enabling this will auto-increment the years of experience every month</span>
+          </v-tooltip>
         </v-col>
 
         <!-- Years of Experience -->
