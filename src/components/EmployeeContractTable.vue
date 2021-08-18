@@ -154,15 +154,15 @@ function searchContract() {
       this.filteredEmployees = _.filter(this.employeesInfo, (employee) => {
         if (employee.contractNames) {
           return (
-            employee.contractNames.split(' | ').findIndex((element) => element.includes(this.contract)) > -1 &&
-            employee.contractNames.split(' | ').findIndex((element) => element.includes(this.prime)) > -1
+            employee.contractNames.split(' & ').findIndex((element) => element.includes(this.contract)) > -1 &&
+            employee.contractNames.split(' & ').findIndex((element) => element.includes(this.prime)) > -1
           );
         } else return false;
       });
     } else {
       this.filteredEmployees = _.filter(this.employeesInfo, (employee) => {
         if (employee.contractNames) {
-          return employee.contractNames.split(' | ').findIndex((element) => element.includes(this.contract)) > -1;
+          return employee.contractNames.split(' & ').findIndex((element) => element.includes(this.contract)) > -1;
         } else return false;
       });
     }
@@ -178,15 +178,15 @@ function searchPrime() {
       this.filteredEmployees = _.filter(this.employeesInfo, (employee) => {
         if (employee.contractNames) {
           return (
-            employee.contractNames.split(' | ').findIndex((element) => element.includes(this.contract)) > -1 &&
-            employee.contractNames.split(' | ').findIndex((element) => element.includes(this.prime)) > -1
+            employee.contractNames.split(' & ').findIndex((element) => element.includes(this.contract)) > -1 &&
+            employee.contractNames.split(' & ').findIndex((element) => element.includes(this.prime)) > -1
           );
         } else return false;
       });
     } else {
       this.filteredEmployees = _.filter(this.employeesInfo, (employee) => {
         if (employee.contractNames) {
-          return employee.contractNames.split(' | ').findIndex((element) => element.includes(this.prime)) > -1;
+          return employee.contractNames.split(' & ').findIndex((element) => element.includes(this.prime)) > -1;
         } else return false;
       });
     }
@@ -219,7 +219,7 @@ async function created() {
           });
         }
         if (current == true) {
-          contractNames += `${currentCon.name} - ${currentCon.prime} | `;
+          contractNames += `${currentCon.name} - ${currentCon.prime} & `;
         }
       });
       contractNames = contractNames.slice(0, -2);
@@ -249,7 +249,7 @@ export default {
           value: 'fullName'
         },
         {
-          text: 'Current Contract and Prime',
+          text: 'Current Contract - Prime',
           value: 'contractNames'
         },
         {
@@ -306,4 +306,8 @@ export default {
 };
 </script>
 
-<style></style>
+<style>
+.v-autocomplete.v-select--is-menu-active .v-input__icon--append .v-icon {
+  transform: none;
+}
+</style>
