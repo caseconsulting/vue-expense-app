@@ -813,9 +813,10 @@ function costHint() {
   } else if (this.expenseTypeName) {
     let str = `Remaining budget for ${this.expenseTypeName}: `;
     if (this.remainingBudget <= 0) {
-      str += `<span class=red--text>${convertToMoneyString(this.remainingBudget)}`;
+      str += `<span class="red--text">${convertToMoneyString(this.remainingBudget)}`;
     } else {
       str += convertToMoneyString(this.remainingBudget);
+      return str;
     }
     if (this.remainingBudget < 0 && this.remainingBudget >= -this.overdraftBudget && this.selectedExpenseType.odFlag) {
       str += ` (Overdraftable and within ${convertToMoneyString(this.overdraftBudget)} limit)`;
