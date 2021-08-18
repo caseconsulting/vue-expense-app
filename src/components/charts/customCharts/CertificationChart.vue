@@ -112,6 +112,17 @@ async function fillCertData() {
         }
       ]
     },
+    tooltips: {
+      callbacks: {
+        title: (tooltipItem) => {
+          if (Array.isArray(tooltipItem[0].xLabel)) {
+            return tooltipItem[0].label.split(',').join(' ');
+          } else {
+            return tooltipItem[0].label;
+          }
+        }
+      }
+    },
     legend: {
       display: false
     },
