@@ -60,14 +60,12 @@ async function fillData() {
     let employee = _.find(this.employees, (emp) => {
       return emp.id === audit.employeeId;
     });
-    let employeeName = employee.nickname
-      ? `${employee.nickname} ${employee.lastName}`
-      : `${employee.firstName} ${employee.lastName}`;
 
     this.resumeAudits.push({
       dateCreated: audit.dateCreated,
       description: audit.description,
-      employeeName: employeeName
+      employeeName: `${employee.firstName} ${employee.lastName}`,
+      nickname: employee.nickname ? employee.nickname : ''
     });
   });
 
@@ -218,6 +216,12 @@ export default {
         {
           text: 'Description',
           value: 'description'
+        },
+        {
+          text: '',
+          value: 'nickname',
+          width: 0,
+          cellClass: 'clear'
         }
       ], // datatable headers
       resumeAudits: [],
@@ -246,4 +250,8 @@ export default {
 };
 </script>
 
-<style></style>
+<style>
+.clear {
+  color: rgba(0, 0, 0, 0);
+}
+</style>
