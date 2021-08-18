@@ -116,7 +116,9 @@ async function fillCertData() {
       callbacks: {
         title: (tooltipItem) => {
           if (Array.isArray(tooltipItem[0].xLabel)) {
-            return tooltipItem[0].label.split(',').join(' ');
+            let label = '';
+            tooltipItem[0].xLabel.forEach((item) => (label += item + ' '));
+            return label.trim();
           } else {
             return tooltipItem[0].label;
           }
