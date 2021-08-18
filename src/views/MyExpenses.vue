@@ -34,6 +34,7 @@
               v-model="employee"
               item-text="text"
               id="employeeIdFilter"
+              class="mr-3"
               label="Filter by Employee"
               clearable
             ></v-autocomplete>
@@ -496,7 +497,10 @@ function constructAutoComplete(aggregatedData) {
       if (data && data.employeeName && data.employeeId) {
         return {
           text: data.employeeName,
-          value: data.employeeId
+          value: data.employeeId,
+          nickname: data.nickname,
+          firstName: data.firstName,
+          lastName: data.lastName
         };
       }
     }).filter((data) => {
@@ -507,17 +511,22 @@ function constructAutoComplete(aggregatedData) {
 } // constructAutoComplete
 
 /**
- * Filters autocomplete options for items that have a value.
- *
- * @param item - autocomplete object
- * @param queryText - query text string
- * @return boolean - value exists
+ * Custom filter for employee autocomplete options.
+ *firstName: data.firstName
+ * @param item -
+ * @param queryText -
+ * @return
  */
 function customFilter(item, queryText) {
-  const hasValue = (val) => (val != null ? val : '');
-  const text = hasValue(item.text);
-  const query = hasValue(queryText);
-  return text.toString().toLowerCase().indexOf(query.toString().toLowerCase()) > -1;
+  const query = queryText ? queryText : '';
+  const nickNameFullName = item.nickname ? `${item.nickname} ${item.lastName}` : '';
+  const firstNameFullName = `${item.firstName} ${item.lastName}`;
+
+  const queryContainsNickName = nickNameFullName.toString().toLowerCase().indexOf(query.toString().toLowerCase()) >= 0;
+  const queryContainsFirstName =
+    firstNameFullName.toString().toLowerCase().indexOf(query.toString().toLowerCase()) >= 0;
+
+  return queryContainsNickName || queryContainsFirstName;
 } // customFilter
 
 /**

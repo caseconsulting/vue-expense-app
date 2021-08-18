@@ -10,8 +10,10 @@
           <!-- Search Filters -->
           <v-autocomplete
             :items="employees"
+            :filter="customFilter"
             v-model="employee"
             id="filterEmployee"
+            class="mr-3"
             item-text="text"
             label="Filter by Employee"
             clearable
@@ -261,7 +263,10 @@ function constructAutoComplete(aggregatedData) {
     if (data && data.employeeName && data.employeeId) {
       return {
         text: data.employeeName,
-        value: data.employeeId
+        value: data.employeeId,
+        nickname: data.nickname,
+        firstName: data.firstName,
+        lastName: data.lastName
       };
     }
   }).filter((data) => {
@@ -300,6 +305,25 @@ function createExpenses(aggregatedData) {
     return _.merge(expense, additionalAttributes);
   });
 } // createExpenses
+
+/**
+ * Custom filter for employee autocomplete options.
+ *firstName: data.firstName
+ * @param item -
+ * @param queryText -
+ * @return
+ */
+function customFilter(item, queryText) {
+  const query = queryText ? queryText : '';
+  const nickNameFullName = item.nickname ? `${item.nickname} ${item.lastName}` : '';
+  const firstNameFullName = `${item.firstName} ${item.lastName}`;
+
+  const queryContainsNickName = nickNameFullName.toString().toLowerCase().indexOf(query.toString().toLowerCase()) >= 0;
+  const queryContainsFirstName =
+    firstNameFullName.toString().toLowerCase().indexOf(query.toString().toLowerCase()) >= 0;
+
+  return queryContainsNickName || queryContainsFirstName;
+} // customFilter
 
 /**
  * Custom sorter for each column in the table.
@@ -826,6 +850,7 @@ export default {
     clickedRow,
     constructAutoComplete,
     convertToMoneyString,
+    customFilter,
     customSort,
     determineShowOnFeed,
     displayError,
