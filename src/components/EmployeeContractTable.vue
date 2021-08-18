@@ -3,7 +3,7 @@
     <v-container fluid>
       <v-row>
         <v-col>
-          <v-combobox
+          <v-autocomplete
             id="employeesSearch"
             v-model="search"
             append-icon="search"
@@ -13,7 +13,7 @@
             :items="employeeNames"
             single-line
             clearable
-          ></v-combobox>
+          ></v-autocomplete>
         </v-col>
         <v-col>
           <v-autocomplete
@@ -307,7 +307,7 @@ export default {
 </script>
 
 <style>
-.v-autocomplete.v-select--is-menu-active .v-input__icon--append .v-icon {
-  transform: none;
+.notranslate {
+  transform: none !important;
 }
 </style>
