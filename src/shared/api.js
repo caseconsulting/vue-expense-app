@@ -123,8 +123,8 @@ function getAllEvents() {
 //   return execute('get', `/${UTILITY}/getEmployeeBudgets/${id}/${date}/${expenseTypeId}`);
 // }
 
-function getAudits(type, days) {
-  return execute('get', `/${AUDIT}/${type}/${days}`);
+function getAudits(type, startDate, endDate) {
+  return execute('get', `/${AUDIT}/${type}/${startDate}/${endDate}`);
 }
 
 function getItems(type) {

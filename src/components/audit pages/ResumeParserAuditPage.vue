@@ -38,7 +38,7 @@ const IsoFormat = 'MMMM Do YYYY, h:mm:ss a';
 
 async function fillData() {
   this.resumeAudits = [];
-  let resumeAudits = await api.getAudits('resume', this.numDaysBackToQuery);
+  let resumeAudits = await api.getAudits('resume', this.queryStartDate, this.queryEndDate);
 
   _.forEach(resumeAudits, (audit) => {
     audit.dateCreated = moment(audit.dateCreated).format(IsoFormat);
@@ -201,9 +201,12 @@ export default {
     customDateSort,
     fillData
   },
-  props: ['numDaysBackToQuery'],
+  props: ['queryStartDate', 'queryEndDate'],
   watch: {
-    numDaysBackToQuery() {
+    queryStartDate() {
+      this.fillData();
+    },
+    queryEndDate() {
       this.fillData();
     }
   }
