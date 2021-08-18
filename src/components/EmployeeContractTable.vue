@@ -2,6 +2,14 @@
   <div>
     <v-container fluid>
       <v-row>
+        <v-col cols="2">
+          <v-autocomplete
+            id="reportsDataType"
+            v-model="dataType"
+            :items="dataTypes"
+            label="Type of Data"
+          ></v-autocomplete>
+        </v-col>
         <v-col>
           <v-autocomplete
             id="employeesSearch"
@@ -16,7 +24,7 @@
             "
           ></v-autocomplete>
         </v-col>
-        <v-col>
+        <v-col v-if="dataType === 'Contracts'">
           <v-autocomplete
             v-model="contract"
             :items="contractsDropDown"
@@ -27,7 +35,7 @@
           >
           </v-autocomplete>
         </v-col>
-        <v-col>
+        <v-col v-if="dataType === 'Contracts'">
           <v-autocomplete
             v-model="prime"
             :items="primesDropDown"
@@ -35,6 +43,16 @@
             clearable
             @change="refreshList()"
             @click:clear="prime = null"
+          ></v-autocomplete>
+        </v-col>
+        <v-col v-else>
+          <v-autocomplete
+            v-model="dataTypeSearch"
+            :items="dataTypeDropDown"
+            :label="`Search By ${dataType}`"
+            clearable
+            @change="refreshDataTypeList()"
+            @click:clear="dataTypeSearch = null"
           ></v-autocomplete>
         </v-col>
       </v-row>
@@ -82,6 +100,46 @@ import _ from 'lodash';
 // |--------------------------------------------------|
 
 /**
+ * Gets all of the current contracts and displays the column on the table.
+ */
+function buildContractsColumn() {
+  this.employeesInfo.forEach((currentEmp) => {
+    if (currentEmp.contracts) {
+      var contractNames = '';
+      currentEmp.contracts.forEach((currentCon) => {
+        var current = false;
+        if (currentCon.projects) {
+          currentCon.projects.forEach((currProj) => {
+            if (!currProj.endDate) {
+              current = true;
+            }
+          });
+        }
+        if (current == true) {
+          contractNames += `${currentCon.name} - ${currentCon.prime} & `;
+        }
+      });
+      contractNames = contractNames.slice(0, -2);
+      currentEmp.contractNames = contractNames;
+    }
+  });
+  this.headers.splice(2, 1, {
+    text: 'Current Contract - Prime',
+    value: 'contractNames'
+  });
+} // buildContractsColumn
+
+/**
+ * Replaces the third column with job role information.
+ */
+function buildJobRolesColumn() {
+  this.headers.splice(2, 1, {
+    text: 'Job Role',
+    value: 'jobRole'
+  });
+} // buildJobRolesColumn
+
+/**
  * Sets a mapping of employee name to employee id of an expense for the autocomplete options.
  *
  * @param empData - The list of employees
@@ -126,6 +184,15 @@ function customFilter(item, queryText) {
 } // customFilter
 
 /**
+ * Gets the full name of an employee.
+ * @returns String - The employees first name
+ */
+function getFullName(item) {
+  item.fullName = item.firstName + ' ' + item.lastName;
+  return item.fullName;
+} // getFullName
+
+/**
  * Checks to see if an employee is expanded in the datatable.
  *
  * @param item - employee to check
@@ -135,6 +202,21 @@ function isFocus(item) {
   let expanded = !_.isEmpty(this.expanded) && item.employeeNumber == this.expanded[0].employeeNumber;
   return expanded;
 } // isFocus
+
+/**
+ * Populates the drop down for the filter based on the data type that is chosen.
+ */
+function populateDataTypeDropDowns() {
+  // reset dropdowwn after each query
+  this.dataTypeDropDown = [];
+  if (this.dataType === 'Job Roles') {
+    let employeeJobRoles = _.map(this.employeesInfo, (employee) => employee.jobRole);
+    employeeJobRoles = _.compact(employeeJobRoles);
+    _.forEach(employeeJobRoles, (jobRole) => this.dataTypeDropDown.push(jobRole));
+  } else {
+    this.filteredEmployees = this.employeesInfo;
+  }
+} // populateDataTypeDropDowns
 
 /**
  * Populate drop downs with information that other employees have filled out.
@@ -168,6 +250,18 @@ function populateDropDowns(employees) {
     });
   });
 } // populateDropDowns
+
+/**
+ * Refresh the filter dropdown to display matched data to the search.
+ */
+function refreshDataTypeList() {
+  if (this.dataTypeSearch) {
+    this.searchDataType();
+  } else {
+    this.filteredEmployees = this.employeesInfo;
+  }
+  this.populateDataTypeDropDowns();
+} // refreshDataTypeList
 
 /**
  * Refresh the list based on the current queries
@@ -215,13 +309,21 @@ function searchContract() {
 } // searchContract
 
 /**
- * Gets the full name of an employee.
- * @returns String - The employees first name
+ * Checks the filter query with the dropdown data to see if anything matches. Edits the data table based on the selected query.
  */
-function getFullName(item) {
-  item.fullName = item.firstName + ' ' + item.lastName;
-  return item.fullName;
-} // getFullName
+function searchDataType() {
+  if (this.dataType === 'Job Roles') {
+    if (this.dataTypeSearch) {
+      this.filteredEmployees = _.filter(this.employeesInfo, (employee) => {
+        if (employee.jobRole) {
+          return employee.jobRole.includes(this.dataTypeSearch);
+        } else {
+          return false;
+        }
+      });
+    }
+  }
+} // searchDataType
 
 /**
  * Clears the other search forms and searches the table by prime
@@ -260,26 +362,7 @@ async function created() {
   this.loading = true; // set loading status to true
   this.employeesInfo = await api.getItems(api.EMPLOYEES); // get all employees
   this.populateDropDowns(this.employeesInfo);
-  this.employeesInfo.forEach((currentEmp) => {
-    if (currentEmp.contracts) {
-      var contractNames = '';
-      currentEmp.contracts.forEach((currentCon) => {
-        var current = false;
-        if (currentCon.projects) {
-          currentCon.projects.forEach((currProj) => {
-            if (!currProj.endDate) {
-              current = true;
-            }
-          });
-        }
-        if (current == true) {
-          contractNames += `${currentCon.name} - ${currentCon.prime} & `;
-        }
-      });
-      contractNames = contractNames.slice(0, -2);
-      currentEmp.contractNames = contractNames;
-    }
-  });
+  this.buildContractsColumn();
   this.filteredEmployees = this.employeesInfo;
   this.constructAutoComplete(this.filteredEmployees);
   this.loading = false;
@@ -290,6 +373,10 @@ export default {
     return {
       contractsDropDown: [],
       contract: null,
+      dataType: 'Contracts',
+      dataTypes: ['Contracts', 'Job Roles'],
+      dataTypeDropDown: [],
+      dataTypeSearch: null,
       employees: [],
       employeesInfo: [],
       employeeNames: [],
@@ -323,14 +410,38 @@ export default {
     };
   },
   methods: {
+    buildContractsColumn,
+    buildJobRolesColumn,
     constructAutoComplete,
     customFilter,
     getFullName,
     isFocus,
+    populateDataTypeDropDowns,
     populateDropDowns,
+    refreshDataTypeList,
     refreshList,
     searchContract,
+    searchDataType,
     searchPrime
+  },
+  watch: {
+    dataType: function () {
+      if (this.dataTypes.includes(this.dataType)) {
+        // builds the data for the third column based off the data type chosen by the user
+        switch (this.dataType) {
+          case 'Contracts':
+            this.buildContractsColumn();
+            break;
+          case 'Job Roles':
+            this.buildJobRolesColumn();
+            break;
+          default:
+            this.buildContractsColumn();
+        }
+      }
+      this.dataTypeSearch = null;
+      this.populateDataTypeDropDowns();
+    }
   }
 };
 </script>
