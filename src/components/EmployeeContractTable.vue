@@ -16,7 +16,7 @@
             v-model="search"
             :filter="customFilter"
             :items="employees"
-            label="Search"
+            label="Search By Employee Name"
             clearable
             @click:clear="
               search = null;
