@@ -19,7 +19,10 @@
           <img src="@/assets/img/case-logo-circle.png" class="logo-bar" />
         </v-avatar>
         <v-toolbar-title v-show="!isMobile">
-          <h1 class="d-inline" style="text-align: center">Case Portal</h1>
+          <h1 class="d-inline" style="text-align: center">
+            Case
+            <a id="P" class="white--text" target="_blank" href="https://tinyurl.com/2u2vhzw9">P</a>ortal
+          </h1>
         </v-toolbar-title>
         <!-- In Mobile View decrease title size-->
         <h1 v-show="isMobile" class="font-25" style="text-align: center">Case Portal</h1>
@@ -32,7 +35,14 @@
             </template>
 
             <v-list>
-              <v-list-item v-for="(l, index) in links" :key="index" :id="l.link" :href="l.link" target="_blank">
+              <v-list-item
+                v-for="(l, index) in links"
+                @click="badumbadumdodooodoo(index)"
+                :key="index"
+                :id="l.link"
+                :href="l.link"
+                target="_blank"
+              >
                 <v-list-item-title>{{ l.name }}</v-list-item-title>
               </v-list-item>
               <v-list-item :href="floorPlan" target="_blank" id="floorPlan"
@@ -154,6 +164,18 @@ function onUserProfile() {
 // |                     METHODS                      |
 // |                                                  |
 // |--------------------------------------------------|
+
+function badumbadumdodooodoo(index) {
+  let oldLink = this.links[index].link;
+  let roll = Math.floor(Math.random() * 100);
+  console.log(roll);
+  if (roll < 2) {
+    this.links[index].link = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ';
+    setTimeout(() => {
+      this.links[index].link = oldLink;
+    }, 2);
+  }
+}
 
 /*
  * Logout of expense app
@@ -285,6 +307,7 @@ export default {
     BadgeExpirationBanner
   },
   methods: {
+    badumbadumdodooodoo,
     handleLogout,
     handleProfile,
     isLoggedIn,
@@ -344,5 +367,9 @@ export default {
 
 .profile-button {
   cursor: pointer;
+}
+
+#P {
+  text-decoration: none;
 }
 </style>
