@@ -3,6 +3,19 @@
     <v-row class="mb-3">
       <h1>Audits</h1>
     </v-row>
+    <v-row>
+      <v-menu>
+        <template v-slot:activator="{ on, attrs }">
+          <v-btn text color="#bc3825" dark class="font-weight-bold" v-bind="attrs" v-on="on"
+            >{{ selectedDropdown }}<v-icon class="pb-1">expand_more</v-icon>
+          </v-btn>
+        </template>
+        <v-list>
+          <v-list-item @click="selectDropDown('Resume Parser')">Resume Parser</v-list-item>
+          <v-list-item @click="selectDropDown('Login')">Login</v-list-item>
+        </v-list>
+      </v-menu>
+    </v-row>
     <v-row class="mx-2 mb-2">
       <v-col cols="4">
         <v-form ref="dateRange">
@@ -35,15 +48,27 @@
         <v-btn class="mt-3 ml-2" @click="setDateRange">Apply</v-btn>
       </v-col>
     </v-row>
+    <v-card color="#bc3825">
+      <v-card-title
+        ><h2 class="white--text">{{ selectedDropdown }} Audits</h2>
+      </v-card-title>
+    </v-card>
     <resume-parser-audit-page
+      v-if="selectedDropdown === 'Resume Parser'"
       :queryStartDate="auditsQueryFormatted.range[0]"
       :queryEndDate="auditsQueryFormatted.range[1]"
     ></resume-parser-audit-page>
+    <login-audit-page
+      v-if="selectedDropdown === 'Login'"
+      :queryStartDate="auditsQueryFormatted.range[0]"
+      :queryEndDate="auditsQueryFormatted.range[1]"
+    ></login-audit-page>
   </v-container>
 </template>
 
 <script>
 import ResumeParserAuditPage from '@/components/audit pages/ResumeParserAuditPage.vue';
+import LoginAuditPage from '@/components/audit pages/LoginAuditPage.vue';
 const moment = require('moment-timezone');
 moment.tz.setDefault('America/New_York');
 import _ from 'lodash';
@@ -91,12 +116,18 @@ function formatRange(range) {
   }
 } // formatRange
 
+function selectDropDown(tab) {
+  this.selectedDropdown = tab;
+}
+
 export default {
   components: {
-    ResumeParserAuditPage
+    ResumeParserAuditPage,
+    LoginAuditPage
   },
   data() {
     return {
+      selectedDropdown: 'Resume Parser',
       editedNumDaysBackToQuery: 1,
       numDaysBackToQuery: 1,
       numDaysBackRules: [(v) => v >= 0 || 'Number of days back cannot be negative'],
@@ -112,7 +143,8 @@ export default {
   },
   methods: {
     setDateRange,
-    formatRange
+    formatRange,
+    selectDropDown
   },
   watch: {
     editedNumDaysBackToQuery: function (val) {
@@ -122,4 +154,8 @@ export default {
 };
 </script>
 
-<style></style>
+<style>
+.clear {
+  color: rgba(0, 0, 0, 0);
+}
+</style>

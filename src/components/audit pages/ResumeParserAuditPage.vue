@@ -1,8 +1,5 @@
 <template>
   <v-card>
-    <v-card color="#bc3825">
-      <v-card-title><h2 class="white--text">Resume Audits</h2></v-card-title>
-    </v-card>
     <v-container fluid>
       <v-row>
         <v-col>
@@ -13,32 +10,7 @@
         </v-col>
       </v-row>
       <v-divider class="mt-5"></v-divider>
-      <h1 class="mx-2 mt-2">Audits</h1>
-      <v-row class="mx-2 pa-0">
-        <v-col cols="4">
-          <v-text-field
-            id="employeesSearch"
-            v-model="search"
-            append-icon="search"
-            label="Search"
-            single-line
-            hide-details
-          ></v-text-field>
-        </v-col>
-      </v-row>
-      <v-row>
-        <v-col>
-          <v-data-table
-            :headers="headers"
-            :items="resumeAudits"
-            :custom-sort="customDateSort"
-            :sort-by.sync="sortBy"
-            :sort-desc.sync="sortDesc"
-            :search="search"
-            class="elevation-1"
-          ></v-data-table>
-        </v-col>
-      </v-row>
+      <audit-table :audits="resumeAudits"></audit-table>
     </v-container>
   </v-card>
 </template>
@@ -47,6 +19,7 @@
 import api from '@/shared/api';
 import _ from 'lodash';
 import PieChart from '@/components/charts/baseCharts/PieChart.vue';
+import AuditTable from '@/components/AuditTable';
 const moment = require('moment-timezone');
 moment.tz.setDefault('America/New_York');
 const IsoFormat = 'MMMM Do YYYY, h:mm:ss a';
@@ -172,31 +145,9 @@ async function fillData() {
   };
 }
 
-function customDateSort(items, sortBy, sortDesc) {
-  if (!sortDesc) {
-    return this.resumeAudits;
-  }
-
-  if (sortBy[0] === 'dateCreated') {
-    return items.sort((a, b) => {
-      a = moment(a.dateCreated, 'MMMM Do YYYY, h:mm:ss a');
-      b = moment(b.dateCreated, 'MMMM Do YYYY, h:mm:ss a');
-      return sortDesc[0] ? a.diff(b) : b.diff(a);
-    });
-  } else if (sortBy[0] === 'description' || sortBy[0] === 'employeeName') {
-    return items.sort((a, b) => {
-      return sortDesc[0] ? a.description.localeCompare(b.description) : b.description.localeCompare(a.description);
-    });
-  }
-
-  return this.resumeAudits;
-}
-
 export default {
-  components: { PieChart },
-  component: {
-    PieChart
-  },
+  components: { AuditTable, PieChart },
+
   async created() {
     this.employees = await api.getItems(api.EMPLOYEES); // get all employees
     this.fillData();
@@ -229,13 +180,10 @@ export default {
       resumeChartData: null,
       resumeChart2Options: null,
       resumeChart2Data: null,
-      search: null,
-      sortBy: 'dateCreated',
-      sortDesc: false
+      search: null
     };
   },
   methods: {
-    customDateSort,
     fillData
   },
   props: ['queryStartDate', 'queryEndDate'],
@@ -249,9 +197,3 @@ export default {
   }
 };
 </script>
-
-<style>
-.clear {
-  color: rgba(0, 0, 0, 0);
-}
-</style>
