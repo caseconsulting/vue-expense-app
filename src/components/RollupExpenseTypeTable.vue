@@ -130,7 +130,6 @@
       <reimburse-modal
         :toggleReimburseModal="buttonClicked"
         :selectedReimbursements="getSelectedExpensesToReimburse"
-        v-on:confirm-reimburse="reimburseExpenses"
       ></reimburse-modal>
     </v-card>
   </div>
@@ -519,62 +518,60 @@ function refreshExpenses() {
  * Reimburse the selected list of expenses.
  */
 async function reimburseExpenses() {
-  if (this.buttonClicked) {
-    // reimburse button is clicked
-    let expensesToReimburse = [];
-    //this.buttonClicked = false;
-    this.reimbursing = true; // set reimbursing status to true
+  // reimburse button is clicked
+  let expensesToReimburse = [];
+  //this.buttonClicked = false;
+  this.reimbursing = true; // set reimbursing status to true
 
-    // get selected expenses and set reimburse date
-    this.empBudgets = _.forEach(this.empBudgets, async (budget) => {
-      return await _.forEach(budget.expenses, async (expense) => {
-        if (expense.selected) {
-          //to remove the expense type data in the ExpenseTypeTotal modal
-          window.EventBus.$emit('expenseChange', expense);
-          window.EventBus.$emit('expenseClicked', undefined);
-          expense.reimbursedDate = moment().format('YYYY-MM-DD');
-          expensesToReimburse.push(removeAggregateExpenseData(expense));
-        }
-      });
-    });
-
-    // reimburse expense on back end
-    await this.asyncForEach(expensesToReimburse, async (expense) => {
-      let reimbursedExpense = await api.updateItem(api.EXPENSES, expense);
-      let msg;
-      if (!reimbursedExpense.id) {
-        // failed to reimburse expense
-        msg = reimbursedExpense.response.data.message;
-        this.alerts.push({ status: 'error', message: msg, color: 'red' });
-        let self = this;
-        setTimeout(function () {
-          self.alerts.shift();
-        }, 10000);
-
-        // revert reimburse date change
-        let groupIndex = _.findIndex(this.empBudgets, {
-          employeeId: expense.employeeId,
-          expenseTypeId: expense.expenseTypeId
-        });
-        let expenseIndex = _.findIndex(this.empBudgets[groupIndex].expenses, { id: expense.id });
-        this.empBudgets[groupIndex].expenses[expenseIndex].reimbursedDate = null;
-        this.empBudgets[groupIndex].expenses[expenseIndex].failed = true;
-        this.empBudgets[groupIndex].expenses[expenseIndex].selected = false;
-      } else {
-        // successfully reimbursed expense
-        msg = 'Successfully reimbursed expense';
-        this.alerts.push({ status: 'success', message: msg, color: 'green' });
-        let self = this;
-        setTimeout(function () {
-          self.alerts.shift();
-        }, 10000);
+  // get selected expenses and set reimburse date
+  this.empBudgets = _.forEach(this.empBudgets, async (budget) => {
+    return await _.forEach(budget.expenses, async (expense) => {
+      if (expense.selected) {
+        //to remove the expense type data in the ExpenseTypeTotal modal
+        window.EventBus.$emit('expenseChange', expense);
+        window.EventBus.$emit('expenseClicked', undefined);
+        expense.reimbursedDate = moment().format('YYYY-MM-DD');
+        expensesToReimburse.push(removeAggregateExpenseData(expense));
       }
-      window.EventBus.$emit('reimburseAlert', this.alerts);
     });
+  });
 
-    this.refreshExpenses();
-    this.reimbursing = false; // set reimbursing status to false
-  }
+  // reimburse expense on back end
+  await this.asyncForEach(expensesToReimburse, async (expense) => {
+    let reimbursedExpense = await api.updateItem(api.EXPENSES, expense);
+    let msg;
+    if (!reimbursedExpense.id) {
+      // failed to reimburse expense
+      msg = reimbursedExpense.response.data.message;
+      this.alerts.push({ status: 'error', message: msg, color: 'red' });
+      let self = this;
+      setTimeout(function () {
+        self.alerts.shift();
+      }, 10000);
+
+      // revert reimburse date change
+      let groupIndex = _.findIndex(this.empBudgets, {
+        employeeId: expense.employeeId,
+        expenseTypeId: expense.expenseTypeId
+      });
+      let expenseIndex = _.findIndex(this.empBudgets[groupIndex].expenses, { id: expense.id });
+      this.empBudgets[groupIndex].expenses[expenseIndex].reimbursedDate = null;
+      this.empBudgets[groupIndex].expenses[expenseIndex].failed = true;
+      this.empBudgets[groupIndex].expenses[expenseIndex].selected = false;
+    } else {
+      // successfully reimbursed expense
+      msg = 'Successfully reimbursed expense';
+      this.alerts.push({ status: 'success', message: msg, color: 'green' });
+      let self = this;
+      setTimeout(function () {
+        self.alerts.shift();
+      }, 10000);
+    }
+    window.EventBus.$emit('reimburseAlert', this.alerts);
+  });
+
+  this.refreshExpenses();
+  this.reimbursing = false; // set reimbursing status to false
 } // reimburseExpenses
 
 /**
@@ -789,6 +786,9 @@ async function created() {
 // |--------------------------------------------------|
 
 export default {
+  beforeDestroy() {
+    window.EventBus.$off('confirm-reimburse');
+  },
   prop: ['confirmReimburse'],
   components: {
     ReimburseModal,
