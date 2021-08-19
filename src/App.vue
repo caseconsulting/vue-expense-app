@@ -25,7 +25,9 @@
           </h1>
         </v-toolbar-title>
         <!-- In Mobile View decrease title size-->
-        <h1 v-show="isMobile" class="font-25" style="text-align: center">Case Portal</h1>
+        <h1 v-show="isMobile" class="font-25" style="text-align: center">
+          Case <a id="P" class="white--text" target="_blank" href="https://tinyurl.com/2u2vhzw9">P</a>ortal
+        </h1>
         <v-spacer></v-spacer>
         <!-- Display social media icons and links dropdown menu -->
         <v-item-group class="hidden-sm-and-down" v-show="isLoggedIn() && !isMobile">
@@ -111,7 +113,18 @@
         </v-container>
       </v-main>
       <v-footer padless>
-        <v-col class="text-right text-caption" cols="12"><strong>Version</strong> {{ version }}</v-col>
+        <v-col class="text-right text-caption" cols="12"
+          ><strong
+            >V<a
+              id="P"
+              class="black--text"
+              target="_blank"
+              href="https://www.youtube.com/watch?v=dfdGd31gNjI&t=3s&ab_channel=GrayWalf"
+              >e</a
+            >rsion</strong
+          >
+          {{ version }}</v-col
+        >
       </v-footer>
       <time-out-modal :toggleTimeOut="timedOut"></time-out-modal>
       <time-out-warning-modal :toggleWarning="session"></time-out-warning-modal>
@@ -165,17 +178,31 @@ function onUserProfile() {
 // |                                                  |
 // |--------------------------------------------------|
 
+/**
+ * idk what this does
+ */
 function badumbadumdodooodoo(index) {
   let oldLink = this.links[index].link;
-  let roll = Math.floor(Math.random() * 100);
-  console.log(roll);
-  if (roll < 2) {
-    this.links[index].link = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ';
+  let roll = Math.ceil(
+    Math.random() *
+      Math.ceil((Math.sin(Math.PI * 2) * (50 * 4)) / (1 << 1) - 100 + ((2 << 5) + 1) * 3 + 4 + Math.log(Math.E))
+  );
+
+  if (roll === 69 || roll == 42.0) {
+    this.links[index].link = `https://ww
+    w.yo
+    utu
+    be
+    .co
+    m/w
+    atch?v=dQ
+    w4w9Wg
+    XcQ`.replace(/\s/g, '');
     setTimeout(() => {
       this.links[index].link = oldLink;
-    }, 2);
+    }, 2000);
   }
-}
+} // badumbadumdodooodoo
 
 /*
  * Logout of expense app
