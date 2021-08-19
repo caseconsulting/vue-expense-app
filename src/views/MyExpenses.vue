@@ -830,6 +830,9 @@ async function created() {
 // |--------------------------------------------------|
 
 export default {
+  beforeDestroy() {
+    window.EventBus.$off('confirm-delete-expense');
+  },
   components: {
     Attachment,
     ConvertExpensesToCsv,

@@ -9,7 +9,10 @@
             id="submitNoBtn"
             color="red"
             text
-            @click.native="emit(`canceled-${type}`)"
+            @click.native="
+              emit(`canceled-${type}`);
+              activate = false;
+            "
             :loading="!activate || submitting"
             :disabled="!activate || submitting"
             >No</v-btn
@@ -19,7 +22,10 @@
             id="submitYesBtn"
             color="green darken-1"
             text
-            @click.native="emit(`confirmed-${type}`)"
+            @click.native="
+              emit(`confirmed-${type}`);
+              activate = false;
+            "
             :loading="!activate || submitting"
             :disabled="!activate || submitting"
             >Yes</v-btn
