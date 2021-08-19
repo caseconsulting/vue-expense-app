@@ -728,6 +728,7 @@ async function created() {
   window.EventBus.$on('canceled-form', () => {
     this.errorTabNames = {};
     this.confirmingError = false;
+    this.confirmingValid = false;
   });
   // set tab mounted
   window.EventBus.$on('created', (tab) => {
@@ -912,6 +913,7 @@ export default {
   beforeDestroy() {
     window.EventBus.$off('confirmed');
     window.EventBus.$off('canceled');
+    window.EventBus.$off('canceled-form');
   },
   components: {
     AwardTab,
