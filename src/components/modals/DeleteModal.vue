@@ -6,18 +6,11 @@
         <v-card-text> Are you sure you want to delete this {{ type }}? {{ deleteInfo }}</v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn
-            color="gray darken-1"
-            text
-            @click.native="
-              emit(`canceled-delete-${type}`);
-              activate = false;
-            "
-            >No, keep {{ type }}</v-btn
-          >
+          <v-btn color="red" text @click.native="activate = false">No, keep {{ type }}</v-btn>
           <v-spacer></v-spacer>
           <v-btn
-            color="red"
+            color="green darken-1"
+            id="confirmDelete"
             text
             @click.native="
               emit(`confirm-delete-${type}`);

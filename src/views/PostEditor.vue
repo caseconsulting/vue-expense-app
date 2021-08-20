@@ -97,7 +97,6 @@ import BoldPlugin from '@ckeditor/ckeditor5-basic-styles/src/bold';
 import ItalicPlugin from '@ckeditor/ckeditor5-basic-styles/src/italic';
 import Underline from '@ckeditor/ckeditor5-basic-styles/src/underline';
 import LinkPlugin from '@ckeditor/ckeditor5-link/src/link';
-import ParagraphPlugin from '@ckeditor/ckeditor5-paragraph/src/paragraph';
 import Image from '@ckeditor/ckeditor5-image/src/image';
 import ImageResize from '@ckeditor/ckeditor5-image/src/imageresize';
 import ImageToolbar from '@ckeditor/ckeditor5-image/src/imagetoolbar';
@@ -107,7 +106,6 @@ import Heading from '@ckeditor/ckeditor5-heading/src/heading';
 import ImageUpload from '@ckeditor/ckeditor5-image/src/imageupload';
 import Link from '@ckeditor/ckeditor5-link/src/link';
 import List from '@ckeditor/ckeditor5-list/src/list';
-import Paragraph from '@ckeditor/ckeditor5-paragraph/src/paragraph';
 import Alignment from '@ckeditor/ckeditor5-alignment/src/alignment';
 import BlockQuote from '@ckeditor/ckeditor5-block-quote/src/blockquote';
 import MediaEmbed from '@ckeditor/ckeditor5-media-embed/src/mediaembed';
@@ -367,12 +365,10 @@ export default {
           BoldPlugin,
           ItalicPlugin,
           LinkPlugin,
-          ParagraphPlugin,
           Base64UploadAdapter,
           Heading,
           Link,
           List,
-          Paragraph,
           Alignment,
           BlockQuote,
           MediaEmbed,
@@ -382,7 +378,6 @@ export default {
         toolbar: {
           items: [
             'heading',
-            'paragrah',
             'alignment',
             '|',
             'bold',

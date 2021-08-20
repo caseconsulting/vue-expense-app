@@ -1,7 +1,7 @@
 <template>
   <div id="budget-table">
-    <v-container fluid class="pt-0">
-      <v-data-iterator :items="employee" hide-default-footer>
+    <v-container fluid class="pt-0" v-if="expenseTypeData">
+      <v-data-iterator :items="expenseTypeData" hide-default-footer>
         <template v-slot:default="props">
           <v-row>
             <!-- Loop all budgets -->
@@ -17,7 +17,7 @@
                   <v-list-item>
                     <v-list-item-content>Budget:</v-list-item-content>
                     <v-list-item-content class="text-right">
-                      <div>{{ getAmount(item) | moneyValue }}</div>
+                      <div>{{ convertToMoneyString(getAmount(item)) }}</div>
                     </v-list-item-content>
                   </v-list-item>
 
@@ -25,7 +25,7 @@
                   <v-list-item>
                     <v-list-item-content>Reimbursed:</v-list-item-content>
                     <v-list-item-content class="text-right">
-                      <div>{{ getReimbursed(item) | moneyValue }}</div>
+                      <div>{{ convertToMoneyString(getReimbursed(item)) }}</div>
                     </v-list-item-content>
                   </v-list-item>
 
@@ -33,7 +33,7 @@
                   <v-list-item>
                     <v-list-item-content>Pending:</v-list-item-content>
                     <v-list-item-content class="text-right">
-                      <div>{{ getPending(item) | moneyValue }}</div>
+                      <div>{{ convertToMoneyString(getPending(item)) }}</div>
                     </v-list-item-content>
                   </v-list-item>
 
@@ -41,10 +41,10 @@
                   <v-list-item>
                     <v-list-item-content class="bold">Remaining:</v-list-item-content>
                     <v-list-item-content v-if="noRemaining(item)" class="text-right bold red--text">
-                      <div>{{ calcRemaining(item) | moneyValue }}</div>
+                      <div>{{ convertToMoneyString(calcRemaining(item)) }}</div>
                     </v-list-item-content>
                     <v-list-item-content v-else class="text-right bold black--text">
-                      <div>{{ calcRemaining(item) | moneyValue }}</div>
+                      <div>{{ convertToMoneyString(calcRemaining(item)) }}</div>
                     </v-list-item-content>
                   </v-list-item>
 
@@ -55,11 +55,22 @@
                       <div>{{ odFlagMessage(item) }}</div>
                     </v-list-item-content>
                   </v-list-item>
+
+                  <!-- Display when available -->
+                  <v-list-item>
+                    <v-list-item-content>Available:</v-list-item-content>
+                    <v-list-item-content class="text-right">
+                      <div>{{ getDate(item) }}</div>
+                    </v-list-item-content>
+                  </v-list-item>
                 </v-list>
               </v-card>
             </v-col>
             <!-- End Loop all budgets -->
           </v-row>
+        </template>
+        <template slot="no-data">
+          <div></div>
         </template>
       </v-data-iterator>
     </v-container>
@@ -67,7 +78,11 @@
 </template>
 
 <script>
-import { moneyValue } from '@/utils/utils';
+import { convertToMoneyString, isFullTime, formatDateDashToSlash } from '@/utils/utils';
+import api from '@/shared/api';
+import _ from 'lodash';
+const moment = require('moment');
+const IsoFormat = 'YYYY-MM-DD';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -99,6 +114,17 @@ function calcRemaining(budget) {
 function getAmount(budget) {
   return budget.budgetObject ? budget.budgetObject.amount : 0;
 } // getAmount
+
+/**
+ * Date
+ */
+function getDate(item) {
+  return (
+    formatDateDashToSlash(item.budgetObject.fiscalStartDate) +
+    ' to ' +
+    formatDateDashToSlash(item.budgetObject.fiscalEndDate)
+  );
+} // getDate
 
 /**
  * Get the reimbursed amount of an aggregate budget. Returns the reimbursed amount if exists. Returns zero if the
@@ -141,6 +167,57 @@ function noRemaining(budget) {
   return this.calcRemaining(budget) <= 0;
 } // noRemaining
 
+/**
+ * Sets the data for the budgets given an employee id
+ */
+async function created() {
+  let budgetsVar;
+  budgetsVar = await api.getAllActiveEmployeeBudgets(this.employee.id);
+
+  // get existing budgets for the budget year being viewed
+  let existingBudgets = await api.getFiscalDateViewBudgets(this.employee.id, this.fiscalDateView);
+  // append inactive tag to end of budget expense type name
+  // the existing budget duplicates will later be removed (order in array comes after active budgets)
+  _.forEach(existingBudgets, (budget) => {
+    budget.expenseTypeName += ' (Inactive)';
+  });
+
+  budgetsVar = _.union(budgetsVar, existingBudgets); // combine existing and active budgets
+  budgetsVar = _.uniqBy(budgetsVar, 'expenseTypeId'); // remove duplicate expense types
+  budgetsVar = _.sortBy(budgetsVar, (budget) => {
+    return budget.expenseTypeName;
+  }); // sort by expense type name
+
+  // prohibit overdraft if employee is not full time
+  _.forEach(budgetsVar, async (budget) => {
+    if (!isFullTime(this.employee)) {
+      budget.odFlag = false;
+    }
+  });
+
+  // remove any budgets where budget amount is 0 and 0 total expenses
+  this.expenseTypeData = _.filter(budgetsVar, (data) => {
+    let budget = data.budgetObject;
+    return budget.amount != 0 || budget.reimbursedAmount != 0 || budget.pendingAmount != 0;
+  });
+}
+
+/**
+ * Gets the current active anniversary budget year starting date in isoformat.
+ *
+ * @return String - current active anniversary budget date (YYYY-MM-DD)
+ */
+function getCurrentBudgetYear() {
+  let currentBudgetYear = moment(this.hireDate, IsoFormat);
+  if (moment().isAfter(currentBudgetYear)) {
+    currentBudgetYear.year(moment().year());
+    if (moment().isBefore(currentBudgetYear)) {
+      currentBudgetYear = currentBudgetYear.subtract(1, 'years');
+    }
+  }
+  return currentBudgetYear.format(IsoFormat);
+} // getCurrentBudgetYear
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                      EXPORT                      |
@@ -148,18 +225,28 @@ function noRemaining(budget) {
 // |--------------------------------------------------|
 
 export default {
-  filters: {
-    moneyValue
+  created,
+  data() {
+    return {
+      expenseTypeData: null
+    };
   },
   methods: {
     calcRemaining,
+    convertToMoneyString,
     getAmount,
+    getCurrentBudgetYear,
+    getDate,
     getReimbursed,
     getPending,
     noRemaining,
     odFlagMessage
   },
-  props: ['employee'] // employee of budgets
+  updated() {
+    this.$emit('rendered'); //This is to ensure that the
+    //chart renders after the table
+  },
+  props: ['employee', 'fiscalDateView'] // employee of budgets
 };
 </script>
 

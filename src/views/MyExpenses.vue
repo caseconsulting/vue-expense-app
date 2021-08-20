@@ -21,7 +21,7 @@
         <v-container fluid>
           <!-- Title -->
           <v-card-title>
-            <h2 v-if="isUser">{{ getUserName }}'s Expenses</h2>
+            <h2 v-if="isUser || isIntern || isManager">{{ getUserName }}'s Expenses</h2>
             <h3 v-else>My Expenses</h3>
             <v-spacer></v-spacer>
 
@@ -33,13 +33,21 @@
               :filter="customFilter"
               v-model="employee"
               item-text="text"
+              id="employeeIdFilter"
               label="Filter by Employee"
               clearable
             ></v-autocomplete>
             <p v-if="isAdmin">&nbsp;</p>
 
             <!-- Search Bar -->
-            <v-text-field v-model="search" append-icon="search" label="Search" single-line hide-details></v-text-field>
+            <v-text-field
+              v-model="search"
+              append-icon="search"
+              id="search"
+              label="Search"
+              single-line
+              hide-details
+            ></v-text-field>
           </v-card-title>
 
           <!-- Filters -->
@@ -108,7 +116,7 @@
                 <!-- Show Reimbursed and Pending -->
                 <v-tooltip top>
                   <template v-slot:activator="{ on }">
-                    <v-btn value="both" v-on="on" text> BOTH </v-btn>
+                    <v-btn id="bothReimbursed" value="both" v-on="on" text> BOTH </v-btn>
                   </template>
                   <span>Show All</span>
                 </v-tooltip>
@@ -136,14 +144,14 @@
           >
             <!-- Cost slot -->
             <template v-slot:[`item.cost`]="{ item }">
-              <td>{{ item.cost | moneyValue }}</td>
+              <td>{{ convertToMoneyString(item.cost) }}</td>
             </template>
             <!-- Purchase date slot -->
             <template v-slot:[`item.purchaseDate`]="{ item }">
               <td>{{ item.purchaseDate | monthDayYearFormat }}</td>
             </template>
             <!-- Reimburse date Slot -->
-            <template v-slot:[`item.reimburseDate`]="{ item }">
+            <template v-slot:[`item.reimbursedDate`]="{ item }">
               <td>{{ item.reimbursedDate | monthDayYearFormat }}</td>
             </template>
             <!-- Creation date slot -->
@@ -156,7 +164,7 @@
             </template>
             <!-- Budget Name Slot -->
             <template v-slot:[`item.budgetName`]="{ item }">
-              <td v-if="isAdmin">{{ item.budgetName }}</td>
+              <td>{{ item.budgetName }}</td>
             </template>
             <!--Action Items-->
             <template v-slot:[`item.actions`]="{ item }">
@@ -169,9 +177,12 @@
                 <v-tooltip top>
                   <template v-slot:activator="{ on }">
                     <v-btn
-                      :disabled="isEditing || (isUser && isReimbursed(item)) || midAction"
+                      :disabled="
+                        isEditing || (!isAdmin && isReimbursed(item)) || midAction || (!isAdmin && !canDelete(item))
+                      "
                       text
                       icon
+                      id="edit"
                       @click="
                         toTopOfForm();
                         onSelect(item);
@@ -187,9 +198,10 @@
                 <v-tooltip top>
                   <template v-slot:activator="{ on }">
                     <v-btn
-                      :disabled="isReimbursed(item) || isEditing || midAction"
+                      :disabled="isReimbursed(item) || isEditing || midAction || (!isAdmin && !canDelete(item))"
                       text
                       icon
+                      id="delete"
                       @click="
                         deleting = !deleting;
                         midAction = true;
@@ -206,9 +218,11 @@
                 <v-tooltip top>
                   <template v-slot:activator="{ on }">
                     <v-btn
+                      v-if="isAdmin"
                       :disabled="!isReimbursed(item) || isEditing || midAction"
                       text
                       icon
+                      id="unreimburse"
                       @click="
                         unreimbursing = !unreimbursing;
                         midAction = true;
@@ -312,7 +326,7 @@ import employeeUtils from '@/shared/employeeUtils';
 import ExpenseForm from '@/components/ExpenseForm.vue';
 import UnreimburseModal from '@/components/modals/UnreimburseModal.vue';
 import _ from 'lodash';
-import { isEmpty, monthDayYearFormat } from '@/utils/utils';
+import { isEmpty, monthDayYearFormat, convertToMoneyString } from '@/utils/utils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -326,7 +340,9 @@ import { isEmpty, monthDayYearFormat } from '@/utils/utils';
  * @return String - user's full name
  */
 function getUserName() {
-  return employeeUtils.fullName(this.userInfo);
+  if (this.userInfo) {
+    return employeeUtils.fullName(this.userInfo);
+  }
 } // getUserName
 
 /**
@@ -337,6 +353,19 @@ function getUserName() {
 function isAdmin() {
   return this.userInfo ? this.userInfo.employeeRole === 'admin' : false;
 } // isAdmin
+
+/**
+ * Checks if the user's role is an intern. Returns true if the user's role is an intern, otherwise returns false.
+ *
+ * @return boolean - user's role is an intern
+ */
+function isIntern() {
+  return this.userInfo ? this.userInfo.employeeRole === 'intern' : false;
+} // isIntern
+
+function isManager() {
+  return this.userInfo ? this.userInfo.employeeRole === 'manager' : false;
+}
 
 /**
  * Checks if the user's role is a user. Returns true if the user's role is a user, otherwise returns false.
@@ -618,6 +647,21 @@ function isReimbursed(expense) {
 } // isReimbursed
 
 /**
+ * Checks the canDelete optional boolean and if it exists and is true returns true
+ *
+ * @param expense - expense to check
+ * @return boolean - disables the delete and edit button if false
+ */
+function canDelete(expense) {
+  if (expense.canDelete !== undefined && expense.canDelete !== null && !expense.canDelete) {
+    //canDelete is present and equals false
+    return false;
+  } else {
+    return true;
+  }
+} // canDelete
+
+/**
  * Store the attributes of a selected expense.
  *
  * @param item - expense selected
@@ -627,7 +671,7 @@ function onSelect(item) {
   this.expense = _.mergeWith(this.expense, item, (expenseValue, itemValue) => {
     return _.isNil(itemValue) ? expenseValue : itemValue;
   });
-
+  this.expense.edit = true;
   this.$set(this.expense, 'cost', moneyFilter(item.cost));
 } // onSelect
 
@@ -636,11 +680,9 @@ function onSelect(item) {
  */
 async function refreshExpenses() {
   this.loading = true; // set loading status to true
-
-  if (this.isAdmin || this.isUser) {
-    // load expenses if employee role is user or admin
-    this.expenses = await api.getAllAggregateExpenses();
-  }
+  // load expenses if employee role is user or admin
+  this.expenses = await api.getAllAggregateExpenses();
+  this.constructAutoComplete(this.expenses); // set autocomplete options
 
   this.filterExpenses(); // filter expenses
 
@@ -770,9 +812,6 @@ async function created() {
   });
 
   this.refreshExpenses(); // refresh and update expenses
-
-  let aggregatedExpenses = await api.getAllAggregateExpenses(); // get aggregate expenses
-  this.constructAutoComplete(aggregatedExpenses); // set autocomplete options
 } // created
 
 // |--------------------------------------------------|
@@ -792,6 +831,7 @@ export default {
   computed: {
     getUserName,
     isAdmin,
+    isIntern,
     isUser,
     roleHeaders,
     userIsInactive
@@ -892,18 +932,16 @@ export default {
     };
   },
   filters: {
-    monthDayYearFormat,
-    moneyValue: (value) => {
-      // formats a value as US currency with cents (e.g. $100.00)
-      return `$${moneyFilter(value)}`;
-    }
+    monthDayYearFormat
   },
   methods: {
     addModelToTable,
+    canDelete,
     clearExpense,
     clearStatus,
     clickedRow,
     constructAutoComplete,
+    convertToMoneyString,
     customFilter,
     deleteExpense,
     deleteModelFromTable,
@@ -913,6 +951,7 @@ export default {
     hasRecipient,
     isEmpty,
     isFocus,
+    isManager,
     isReimbursed,
     onSelect,
     refreshExpenses,

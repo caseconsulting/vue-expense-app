@@ -1,12 +1,7 @@
 <template>
   <div>
     <!-- Loop Awards -->
-    <div
-      v-for="(award, index) in editedAwards"
-      style="border: 1px solid grey"
-      class="pt-3 pb-1 px-5"
-      :key="'award: ' + award.name + index"
-    >
+    <div v-for="(award, index) in editedAwards" style="border: 1px solid grey" class="pt-3 pb-1 px-5" :key="index">
       <!-- Name of Award -->
       <v-combobox
         ref="formFields"
@@ -14,8 +9,7 @@
         :rules="requiredRules"
         label="Award"
         data-vv-name="Award"
-        append-outer-icon="delete"
-        @click:append-outer="deleteAward(index)"
+        clearable
       >
       </v-combobox>
 
@@ -33,13 +27,17 @@
             <template v-slot:activator="{ on, attrs }">
               <v-text-field
                 ref="formFields"
-                :value="formatDateDashToSlash(award.dateReceived)"
+                :value="award.dateReceived | formatDate"
                 label="Date Received"
                 prepend-icon="event_available"
                 :rules="dateRules"
-                readonly
+                hint="MM/DD/YYYY format"
+                v-mask="'##/##/####'"
                 v-bind="attrs"
                 v-on="on"
+                @blur="award.dateReceived = parseEventDate($event)"
+                clearable
+                @input="award.showReceivedMenu = false"
               ></v-text-field>
             </template>
             <v-date-picker
@@ -49,6 +47,16 @@
             ></v-date-picker>
           </v-menu>
           <!-- End Received Date -->
+        </v-col>
+        <v-col class="pb-1" sm="6" md="12" lg="6" align="center">
+          <v-tooltip bottom>
+            <template v-slot:activator="{ on }">
+              <v-btn v-on="on" @click="deleteAward(index)" icon text
+                ><v-icon style="color: grey" class="pr-1">delete</v-icon></v-btn
+              >
+            </template>
+            <span>Delete Award</span>
+          </v-tooltip>
         </v-col>
       </v-row>
     </div>
@@ -64,7 +72,10 @@
 <script>
 import api from '@/shared/api.js';
 import _ from 'lodash';
-import { formatDateDashToSlash, formatDateSlashToDash, isEmpty } from '@/utils/utils';
+import { formatDate, parseDate, isEmpty } from '@/utils/utils';
+import { mask } from 'vue-the-mask';
+const moment = require('moment-timezone');
+moment.tz.setDefault('America/New_York');
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -90,6 +101,7 @@ async function created() {
  * Add an award.
  */
 function addAward() {
+  if (!this.editedAwards) this.editedAwards = [];
   this.editedAwards.push({
     name: null,
     dateReceived: null,
@@ -107,24 +119,26 @@ function deleteAward(index) {
 } // deleteAward
 
 /**
+ * Parse the date after losing focus.
+ */
+function parseEventDate() {
+  return parseDate(event.target.value);
+} //parseEventDate
+
+/**
  * Validate all input fields are valid. Emit to parent the error status.
  */
 function validateFields() {
-  let hasErrors = false;
-
-  if (_.isArray(this.$refs.formFields)) {
-    // more than one TYPE of vuetify component used
-    let error = _.find(this.$refs.formFields, (field) => {
-      return !field.validate();
-    });
-    hasErrors = _.isNil(error) ? false : true;
-  } else if (this.$refs.formFields) {
-    // single vuetify component
-    hasErrors = !this.$refs.formFields.validate();
-  }
-
+  let errorCount = 0;
+  //ensures that refs are put in an array so we can reuse forEach loop
+  let components = !_.isArray(this.$refs.formFields) ? [this.$refs.formFields] : this.$refs.formFields;
+  _.forEach(components, (field) => {
+    if (field && !field.validate()) {
+      errorCount++;
+    }
+  });
   window.EventBus.$emit('doneValidating', 'awards', this.editedAwards); // emit done validating and sends edited data back to parent
-  window.EventBus.$emit('awardStatus', hasErrors); // emit error status
+  window.EventBus.$emit('awardStatus', errorCount); // emit error status
 } // validateFields
 
 export default {
@@ -138,7 +152,8 @@ export default {
       ], // rules for an optional date
       dateRules: [
         (v) => !isEmpty(v) || 'Date required',
-        (v) => (!isEmpty(v) && /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v)) || 'Date must be valid. Format: MM/DD/YYYY'
+        (v) => (!isEmpty(v) && /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v)) || 'Date must be valid. Format: MM/DD/YYYY',
+        (v) => moment(v, 'MM/DD/YYYY').isValid() || 'Date must be valid'
       ], // rules for a required date
       editedAwards: _.cloneDeep(this.model), // stores edited awards info
       requiredRules: [
@@ -146,11 +161,14 @@ export default {
       ] // rules for a required field
     };
   },
+  directives: { mask },
+  filters: {
+    formatDate
+  },
   methods: {
     addAward,
     deleteAward,
-    formatDateSlashToDash,
-    formatDateDashToSlash,
+    parseEventDate,
     isEmpty,
     validateFields
   },

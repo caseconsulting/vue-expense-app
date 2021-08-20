@@ -99,10 +99,21 @@ export function isAdmin(to, from, next) {
   }
 } // isAdmin
 
+export function isAdminOrManager(to, from, next) {
+  if (getRole() === 'admin' || getRole() === 'manager') {
+    next();
+  } else {
+    next({
+      path: '/home',
+      query: { redirect: to.fullPath }
+    });
+  }
+} // isAdmin
+
 export function isLoggedIn() {
   try {
     const idToken = getIdToken();
-    let isEmployee = getRole() === 'admin' || getRole() === 'user';
+    let isEmployee = getRole() === 'admin' || getRole() === 'user' || getRole() === 'intern' || getRole() === 'manager';
     return !!idToken && !isTokenExpired(idToken) && isEmployee;
   } catch (error) {
     return false;

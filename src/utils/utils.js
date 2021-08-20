@@ -111,14 +111,14 @@ export function isPartTime(employee) {
  * @param value - value to convert
  * @return String - money format
  */
-export function moneyValue(value) {
+export function convertToMoneyString(value) {
   return `${new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'USD',
     minimumFractionDigits: 2,
     maximumFractionDigits: 2
   }).format(value)}`;
-} // moneyValue
+} // convertToMoneyString
 
 /**
  * Returns a date formated as 'MMM Do, YYYY' (Aug 18th, 2020).
@@ -129,6 +129,16 @@ export function moneyValue(value) {
 export function monthDayYearFormat(date) {
   return !isEmpty(date) ? moment(date).format('MMM Do, YYYY') : '';
 } // monthDayYearFormat
+
+/**
+ * Returns a date formated as 'MMM YYYY' (Aug 2020).
+ *
+ * @param date - date to format
+ * @return String - date formated
+ */
+export function monthYearFormat(date) {
+  return !isEmpty(date) ? moment(date).format('MMM YYYY') : '';
+} // monthYearFormat
 
 /**
  * Returns a date formated as 'MMM Do' (Aug 18th).

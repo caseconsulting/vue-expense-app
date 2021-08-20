@@ -21,11 +21,18 @@
         <v-card-title>
           <h2>Employees</h2>
           <v-spacer></v-spacer>
-          <v-text-field v-model="search" append-icon="search" label="Search" single-line hide-details></v-text-field>
+          <v-text-field
+            id="employeesSearch"
+            v-model="search"
+            append-icon="search"
+            label="Search"
+            single-line
+            hide-details
+          ></v-text-field>
         </v-card-title>
 
         <!-- Filters -->
-        <fieldset v-if="userIsAdmin()" class="filter_border">
+        <fieldset v-if="hasAdminPermissions()" class="filter_border">
           <legend class="legend_style">Filters</legend>
 
           <!-- Active Filter -->
@@ -35,7 +42,7 @@
               <!-- Full Time -->
               <v-tooltip top>
                 <template v-slot:activator="{ on }">
-                  <v-btn value="full" v-on="on" text>
+                  <v-btn value="full" id="full" v-on="on" text>
                     <icon class="mr-1" name="clock" color="black"></icon>
                   </v-btn>
                 </template>
@@ -45,7 +52,7 @@
               <!-- Part Time -->
               <v-tooltip top>
                 <template v-slot:activator="{ on }">
-                  <v-btn value="part" v-on="on" text>
+                  <v-btn value="part" id="part" v-on="on" text>
                     <icon name="regular/clock" color="black"></icon>
                   </v-btn>
                 </template>
@@ -55,7 +62,7 @@
               <!-- Inactive -->
               <v-tooltip top>
                 <template v-slot:activator="{ on }">
-                  <v-btn value="inactive" v-on="on" text>
+                  <v-btn value="inactive" id="inactive" v-on="on" text>
                     <icon name="regular/stop-circle" color="black"></icon>
                   </v-btn>
                 </template>
@@ -68,7 +75,13 @@
         <br />
         <!-- End Filters -->
         <!-- Create an Employee -->
-        <v-btn class="mb-5" @click="createEmployee = true" elevation="2" v-if="userIsAdmin()">
+        <v-btn
+          id="createEmployeeBtn"
+          class="mb-5"
+          @click="renderCreateEmployee()"
+          elevation="2"
+          v-if="hasAdminPermissions()"
+        >
           Create an Employee<v-icon class="pl-2">person_add</v-icon>
         </v-btn>
 
@@ -88,10 +101,24 @@
         >
           <!-- Delete Action Item Slot -->
           <template v-slot:[`item.actions`]="{ item }">
-            <div class="datatable_btn layout" v-if="userIsAdmin()">
+            <div class="datatable_btn layout">
               <v-tooltip top>
                 <template v-slot:activator="{ on }">
-                  <v-btn :disabled="midAction" text icon @click.stop="validateDelete(item)" v-on="on">
+                  <convert-employee-to-csv
+                    v-if="userIsAdmin()"
+                    :midAction="midAction"
+                    :employee="item"
+                    v-on="on"
+                  ></convert-employee-to-csv>
+                  <v-btn
+                    v-if="hasAdminPermissions()"
+                    id="employeesDeleteBtn"
+                    :disabled="midAction"
+                    text
+                    icon
+                    @click.stop="validateDelete(item)"
+                    v-on="on"
+                  >
                     <v-icon style="color: #606060"> delete </v-icon>
                   </v-btn>
                 </template>
@@ -142,6 +169,40 @@
             </p>
           </template>
 
+          <!-- Nickname Item Slot -->
+          <template v-slot:[`item.nickname`]="{ item }">
+            <p :class="{ inactiveStyle: isInactive(item), selectFocus: isFocus(item) }" style="margin-bottom: 0px">
+              {{ item.nickname }}
+            </p>
+          </template>
+
+          <!-- Last Login Item Slot -->
+          <template v-slot:[`item.lastLogin`]="{ item }">
+            <v-hover v-slot="{ hover }">
+              <p
+                v-if="userIsAdmin() && hover && item.lastLogin !== undefined"
+                :class="{ inactiveStyle: isInactive(item), selectFocus: isFocus(item) }"
+                style="margin-bottom: 0px"
+              >
+                {{ moment(item.lastLogin).format('MMM Do, YYYY HH:mm:ss') }}
+              </p>
+              <p
+                v-else-if="userIsAdmin() && item.lastLogin !== undefined"
+                :class="{ inactiveStyle: isInactive(item), selectFocus: isFocus(item) }"
+                style="margin-bottom: 0px"
+              >
+                {{ moment(item.lastLogin).format('MMM Do, YYYY') }}
+              </p>
+              <p
+                v-else-if="userIsAdmin()"
+                :class="{ inactiveStyle: isInactive(item), selectFocus: isFocus(item) }"
+                style="margin-bottom: 0px"
+              >
+                {{ item.lastLogin }}
+              </p>
+            </v-hover>
+          </template>
+
           <!-- Date Item Slot -->
           <template v-slot:[`item.hireDate`]="{ item }">
             <p :class="{ inactiveStyle: isInactive(item), selectFocus: isFocus(item) }" style="margin-bottom: 0px">
@@ -180,7 +241,9 @@
         <!-- End Confirmation Modals -->
       </v-container>
     </v-card>
-    <v-dialog v-model="createEmployee"><employee-form :model="this.model"></employee-form></v-dialog>
+    <v-dialog @click:outside="clearCreateEmployee" v-model="createEmployee"
+      ><employee-form :key="childKey" :model="this.model"></employee-form
+    ></v-dialog>
   </div>
 </template>
 
@@ -190,9 +253,11 @@ import ConvertEmployeesToCsv from '@/components/ConvertEmployeesToCsv.vue';
 import DeleteErrorModal from '@/components/modals/DeleteErrorModal.vue';
 import DeleteModal from '@/components/modals/DeleteModal.vue';
 import EmployeeForm from '@/components/employees/EmployeeForm.vue';
+import moment from 'moment-timezone';
 import _ from 'lodash';
 import { getRole } from '@/utils/auth';
 import { isEmpty, isFullTime, isInactive, isPartTime, monthDayYearFormat } from '@/utils/utils';
+import ConvertEmployeeToCsv from '../components/ConvertEmployeeToCsv.vue';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -288,6 +353,14 @@ function handleClick(item) {
 } //handleClick
 
 /**
+ * Checks to see if the user has admin permissions. Returns true if the user's role is an admin or manager, otherwise returns false.
+ * @return boolean - true if user's employeeRole is either a admin or a manager
+ */
+function hasAdminPermissions() {
+  return getRole() === 'admin' || getRole() === 'manager';
+} // hasAdminPermissions
+
+/**
  * Checks to see if an employee is expanded in the datatable.
  *
  * @param item - employee to check
@@ -304,6 +377,11 @@ function isFocus(item) {
 async function refreshEmployees() {
   this.loading = true; // set loading status to true
   this.employees = await api.getItems(api.EMPLOYEES); // get all employees
+  this.employees.forEach((currentEmp) => {
+    if (currentEmp.lastLogin) {
+      currentEmp.lastLogin = moment(currentEmp.lastLogin, ['MMM Do, YYYY HH:mm:ss', 'YYYY-MM-DD HH:mm:ss']);
+    }
+  });
   this.filterEmployees(); // filter employees
   this.expanded = []; // collapse any expanded rows in the database
 
@@ -317,6 +395,11 @@ async function refreshEmployees() {
   });
   this.loading = false; // set loading status to false
 } // refreshEmployees
+
+function renderCreateEmployee() {
+  this.createEmployee = true;
+  this.childKey++;
+}
 
 /**
  * Checks to see if the user is an admin. Returns true if the user's role is an admin, otherwise returns false.
@@ -353,6 +436,16 @@ async function validateDelete(item) {
   }
 } // validateDelete
 
+/**
+ * Called to reset the data on the employee form if exited w/out submitting
+ */
+async function clearCreateEmployee() {
+  this.createEmployee = false;
+  if (this.employeeNumber) {
+    await api.deleteResume(this.employeeNumber);
+  }
+}
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                 LIFECYCLE HOOKS                  |
@@ -364,7 +457,8 @@ async function validateDelete(item) {
  */
 async function created() {
   window.EventBus.$on('cancel-form', () => {
-    this.createEmployee = false;
+    //used to reset the employee form modal
+    this.clearCreateEmployee();
   });
   window.EventBus.$on('canceled-delete-employee', () => {
     this.midAction = false;
@@ -374,11 +468,20 @@ async function created() {
     this.midAction = false;
   });
 
+  window.EventBus.$on('empNum', (empNum) => {
+    this.employeeNumber = empNum;
+  });
   this.refreshEmployees();
 
   // remove employee action button header if user view
-  if (!this.userIsAdmin()) {
+  if (!this.hasAdminPermissions()) {
     this.headers.pop();
+  }
+  if (this.userIsAdmin()) {
+    this.headers.splice(this.headers.length - 1, 0, {
+      text: 'Last Login',
+      value: 'lastLogin'
+    });
   }
 } // created
 
@@ -399,17 +502,20 @@ export default {
     ConvertEmployeesToCsv,
     DeleteErrorModal,
     DeleteModal,
-    EmployeeForm
+    EmployeeForm,
+    ConvertEmployeeToCsv
   },
   created,
   data() {
     return {
+      childKey: 0,
       createEmployee: false,
       deleteModel: {
         id: null
       }, // employee to delete
       deleting: false, // activate delete confirmation model
       employees: [], // employees
+      employeeNumber: null,
       expanded: [], // datatable expanded
       filter: {
         active: ['full', 'part'] // default only shows full and part time employees
@@ -437,6 +543,10 @@ export default {
           value: 'lastName'
         },
         {
+          text: 'Nickname',
+          value: 'nickname'
+        },
+        {
           text: 'Hire Date',
           value: 'hireDate'
         },
@@ -458,6 +568,7 @@ export default {
         firstName: null,
         middleName: null,
         lastName: null,
+        nickname: null,
         email: '@consultwithcase.com',
         employeeRole: null,
         employeeNumber: null,
@@ -470,10 +581,15 @@ export default {
         contract: null,
         github: null,
         twitter: null,
+        phoneNumber: null,
         city: null,
         st: null,
         country: null,
-        deptDate: null
+        deptDate: null,
+        currentCity: null,
+        currentState: null,
+        currentStreet: null,
+        currentZIP: null
       }, // selected employee
       search: null, // query text for datatable search field
       sortBy: 'employeeNumber', // sort datatable items
@@ -490,6 +606,7 @@ export default {
   },
   methods: {
     changeAvatar,
+    clearCreateEmployee,
     clearStatus,
     deleteEmployee,
     deleteModelFromTable,
@@ -497,12 +614,14 @@ export default {
     employeePath,
     filterEmployees,
     handleClick,
+    hasAdminPermissions,
     isEmpty,
     isFocus,
     isFullTime,
     isInactive,
     isPartTime,
     refreshEmployees,
+    renderCreateEmployee,
     userIsAdmin,
     validateDelete
   },

@@ -5,10 +5,11 @@
         <v-card-title class="headline">Are you sure you want to reimburse these expenses?</v-card-title>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn color="info" text @click.native="activate = false">No</v-btn>
+          <v-btn color="red" text @click.native="activate = false">No</v-btn>
           <v-spacer></v-spacer>
           <v-btn
             color="green"
+            id="reimburse"
             text
             @click.native="
               emit(`confirm-reimburse`);

@@ -1,23 +1,5 @@
 <template>
   <div>
-    <!-- Prime -->
-    <v-combobox
-      style="padding-right: 20px; padding-left: 10px"
-      v-model="editedPersonalInfo.prime"
-      :items="employeeInfo.primes"
-      label="Prime"
-      data-vv-name="Prime"
-    ></v-combobox>
-
-    <!-- Contract -->
-    <v-combobox
-      style="padding-right: 20px; padding-left: 10px"
-      v-model="editedPersonalInfo.contract"
-      :items="employeeInfo.contracts"
-      label="Contract"
-      data-vv-name="Contract"
-    ></v-combobox>
-
     <!-- Github -->
     <v-text-field
       style="padding-right: 20px; padding-left: 10px"
@@ -34,19 +16,37 @@
       data-vv-name="Twitter"
     ></v-text-field>
 
-    <!-- Job Role -->
-    <v-autocomplete
+    <!-- LinkedIn -->
+    <v-text-field
       style="padding-right: 20px; padding-left: 10px"
-      :items="jobTitles"
-      v-model="editedPersonalInfo.jobRole"
-      item-text="text"
-      label="Job Role"
-    ></v-autocomplete>
+      v-model="editedPersonalInfo.linkedIn"
+      label="LinkedIn"
+      :rules="urlRules"
+      data-vv-name="LinkedIn"
+    ></v-text-field>
+
+    <!-- Phone Number -->
+    <v-text-field
+      style="padding-right: 20px; padding-left: 10px"
+      v-model="editedPersonalInfo.phoneNumber"
+      v-mask="'###-###-####'"
+      hint="###-###-#### format"
+      :rules="phoneRules"
+      label="Phone Number"
+      data-vv-name="Phone Number"
+    >
+      <v-tooltip bottom slot="append">
+        <template v-slot:activator="{ on }">
+          <v-btn class="pb-1" text icon v-on="on"><v-icon style="color: grey">lock</v-icon></v-btn>
+        </template>
+        <span>Only Visible to You and Admins</span>
+      </v-tooltip>
+    </v-text-field>
 
     <!-- Birthday Picker -->
     <v-menu
       ref="BirthdayMenu"
-      :close-on-content-click="true"
+      :close-on-content-click="false"
       v-model="BirthdayMenu"
       :nudge-right="40"
       transition="scale-transition"
@@ -58,6 +58,7 @@
       <template v-slot:activator="{ on }">
         <v-text-field
           ref="formFields"
+          v-mask="'##/##/####'"
           v-model="birthdayFormat"
           :rules="dateOptionalRules"
           label="Birthday"
@@ -65,6 +66,7 @@
           persistent-hint
           prepend-icon="event"
           @blur="editedPersonalInfo.birthday = parseDate(birthdayFormat)"
+          @input="BirthdayMenu = false"
           v-on="on"
         ></v-text-field>
       </template>
@@ -79,7 +81,15 @@
     ></v-switch>
 
     <!-- Place of Birth -->
-    <p style="font-size: 17px; padding-left: 10px; padding-top: 10px">Place of Birth</p>
+    <p style="font-size: 17px; padding-left: 10px; padding-top: 10px">
+      Place of Birth
+      <v-tooltip bottom slot="append-outer">
+        <template v-slot:activator="{ on }">
+          <v-btn class="pb-1" text icon v-on="on"><v-icon style="color: grey">lock</v-icon></v-btn>
+        </template>
+        <span>Only Visible to You and Admins</span>
+      </v-tooltip>
+    </p>
     <div style="padding-right: 20px; padding-left: 30px; padding-bottom: 10px">
       <div style="border-left-style: groove; padding-right: 20px; padding-left: 10px">
         <!-- Place of Birth: City text field -->
@@ -102,12 +112,72 @@
         <!-- Place of Birth: State autocomplete -->
         <v-autocomplete
           v-if="isUSA"
-          :items="states"
+          :items="Object.values(states)"
           v-model="editedPersonalInfo.st"
           item-text="text"
           label="State"
           style="padding-top: 0px"
         ></v-autocomplete>
+      </div>
+    </div>
+    <!-- Current Address -->
+    <div v-if="userIsAdmin() || userIsEmployee()">
+      <p style="font-size: 17px; padding-left: 10px; padding-top: 10px">
+        Current Address
+        <v-tooltip bottom slot="append-outer">
+          <template v-slot:activator="{ on }">
+            <v-btn class="pb-1" text icon v-on="on"><v-icon style="color: grey">lock</v-icon></v-btn>
+          </template>
+          <span>Only Visible to You and Admins</span>
+        </v-tooltip>
+      </p>
+      <v-combobox
+        class="pb-3"
+        style="padding-top: 0px"
+        @input.native="updateAddressDropDown"
+        :items="Object.keys(this.placeIds)"
+        v-model="searchString"
+        :search-input.sync="searchString"
+        @change="updateBoxes"
+        outlined
+        hint="Search address and select option to auto-fill fields below."
+        persistent-hint
+      >
+        <v-list slot="append-item" name="joe" class="grey--text"> Powered By Google </v-list>
+      </v-combobox>
+      <div style="padding-right: 20px; padding-left: 30px; padding-bottom: 10px">
+        <div style="border-left-style: groove; padding-right: 20px; padding-left: 10px">
+          <!-- Current Address: Street text field -->
+          <v-text-field
+            v-model="editedPersonalInfo.currentStreet"
+            label="Street"
+            data-vv-name="Street"
+            style="padding-top: 0px"
+          ></v-text-field>
+          <!-- Current Address: City text field -->
+          <v-text-field
+            v-model="editedPersonalInfo.currentCity"
+            label="City"
+            data-vv-name="Current City"
+            style="padding-top: 0px"
+          ></v-text-field>
+          <!-- Current Address: State autocomplete -->
+          <v-autocomplete
+            :items="Object.values(states)"
+            v-model="editedPersonalInfo.currentState"
+            item-text="text"
+            label="State"
+            style="padding-top: 0px"
+          ></v-autocomplete>
+          <!-- Current Address: ZIP text field -->
+          <v-text-field
+            v-model="editedPersonalInfo.currentZIP"
+            v-mask="'#####'"
+            label="ZIP"
+            data-vv-name="Current ZIP"
+            style="padding-top: 0px"
+          ></v-text-field>
+        </div>
       </div>
     </div>
   </div>
@@ -117,6 +187,10 @@
 import api from '@/shared/api.js';
 import _ from 'lodash';
 import { formatDate, isEmpty, parseDate } from '@/utils/utils';
+import { mask } from 'vue-the-mask';
+import { getRole } from '@/utils/auth';
+const moment = require('moment-timezone');
+moment.tz.setDefault('America/New_York');
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -132,8 +206,6 @@ async function created() {
   // get countries
   this.countries = _.map(await api.getCountries(), 'name');
   this.countries.unshift('United States of America');
-  // get all employees
-  this.employees = await api.getItems(api.EMPLOYEES);
   // set formatted birthday date
   this.birthdayFormat = formatDate(this.editedPersonalInfo.birthday) || this.birthdayFormat;
   // fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
@@ -141,9 +213,9 @@ async function created() {
     // clear birthday date if fails to format
     this.editedPersonalInfo.birthday = null;
   }
-  // filter primes and contracts
-  this.filterPrimes();
-  this.filterContracts();
+
+  let user = await api.getUser();
+  this.userId = user.employeeNumber;
 } // created
 
 // |--------------------------------------------------|
@@ -187,42 +259,87 @@ function isUSA() {
 // |--------------------------------------------------|
 
 /**
- * Filters out contracts from list of employees.
+ * Updates the address dropdown according to the user's input
  */
-function filterContracts() {
-  let tempContracts = _.map(this.employees, (a) => a.contract); //extract contracts
-  tempContracts = _.compact(tempContracts); //remove falsey values
-  this.employeeInfo.contracts = [...new Set(tempContracts)]; //remove duplicates
-} // filterContracts
+async function updateAddressDropDown() {
+  let query = event.target.value;
+  if (query.length > 3) {
+    let locations = await api.getLocation(query);
+    //object used to contain addresses and their respective ID's
+    //needed later to obtain the selected address's zip code
+    this.placeIds = {};
+    _.forEach(locations.predictions, (location) => {
+      this.placeIds[location.description] = location.place_id;
+    });
+  } else {
+    this.placeIds = {};
+  }
+} //updateAddressDropDown
 
 /**
- * Filters out primes from list of employees.
+ * Once an address has been selected, it autofills the city, street, and state fields.
+ * It also updates the zip code field making an additional Google Maps API call
+ * to obtain the selected address's zip code.
  */
-function filterPrimes() {
-  let tempPrimes = _.map(this.employees, (a) => a.prime); //extract primes
-  tempPrimes = _.compact(tempPrimes); //remove falsey values
-  this.employeeInfo.primes = [...new Set(tempPrimes)]; //remove duplicates and set
-} // filterPrimes
+async function updateBoxes() {
+  let fullAddress = this.searchString.split(', ');
+  //fills in the first three fields
+  this.editedPersonalInfo.currentCity = fullAddress[1];
+  this.editedPersonalInfo.currentStreet = fullAddress[0];
+  this.editedPersonalInfo.currentState = this.states[fullAddress[2].split(' ')[0]];
+
+  //obtains the selected address's ID needed for the zip code API call
+  let selectedAddress = this.placeIds[this.searchString];
+  let res = await api.getZipCode(selectedAddress);
+  //Response contains an array of objects, with each object containing
+  //a field title 'type'. 'Type' is another array and we want the one
+  //containing the postal_code string
+  this.editedPersonalInfo.currentZIP = '';
+  _.forEach(res.result.address_components, (field) => {
+    if (field.types.includes('postal_code')) {
+      this.editedPersonalInfo.currentZIP = field.short_name;
+    }
+  });
+  //resets addresses and ID's in dropdown
+  this.placeIds = {};
+  this.searchString = '';
+} //updateBoxes
+
+/**
+ * Checks whether the current user role is admin, used specifically
+ * to prevent the manager from changing their own role on the Employee tab
+ * @return - boolean: true if the user role is admin
+ */
+function userIsAdmin() {
+  return getRole() === 'admin';
+} //userIsAdmin
+
+/**
+ * Checks if the profile accessed is the signed-in user's profile
+ *
+ * @returns boolean - true if the profile is the user's profile
+ */
+function userIsEmployee() {
+  if (this.$route.params.id == this.userId) {
+    return true;
+  }
+  return false;
+} //userIsEmployee
 
 /**
  * Validate all input fields are valid. Emit to parent the error status.
  */
 function validateFields() {
-  let hasErrors = false;
-
-  if (_.isArray(this.$refs.formFields)) {
-    // more than one TYPE of vuetify component used
-    let error = _.find(this.$refs.formFields, (field) => {
-      return !field.validate();
-    });
-    hasErrors = _.isNil(error) ? false : true;
-  } else if (this.$refs.formFields) {
-    // single vuetify component
-    hasErrors = !this.$refs.formFields.validate;
-  }
-
+  let errorCount = 0;
+  //ensures that refs are put in an array so we can reuse forEach loop
+  let components = !_.isArray(this.$refs.formFields) ? [this.$refs.formFields] : this.$refs.formFields;
+  _.forEach(components, (field) => {
+    if (field && !field.validate()) {
+      errorCount++;
+    }
+  });
+  window.EventBus.$emit('personalStatus', errorCount); // emit error status
   window.EventBus.$emit('doneValidating', 'personal', this.editedPersonalInfo); // emit done validating
-  window.EventBus.$emit('personalStatus', hasErrors); // emit error status
 } // validateFields
 
 export default {
@@ -233,102 +350,104 @@ export default {
   },
   data() {
     return {
+      addressDropDown: [],
       birthdayFormat: null, // formatted birthday
       BirthdayMenu: false, // display birthday menu
       countries: [], // list of countries
       dateOptionalRules: [
         (v) => {
           return !isEmpty(v) ? /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v) || 'Date must be valid. Format: MM/DD/YYYY' : true;
-        }
+        },
+        (v) => (!isEmpty(v) ? moment(v, 'MM/DD/YYYY').isValid() || 'Date must be valid' : true),
+        (v) => (!isEmpty(v) ? moment(v, 'MM/DD/YYYY').isBefore(moment()) || 'Date must not be a future date' : true)
       ], // rules for an optional date
+      urlRules: [
+        (v) =>
+          isEmpty(v) ||
+          /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)/.test(
+            v
+          ) ||
+          'URL must be valid. Only http(s) are accepted.'
+      ], // rules for training url
+      phoneRules: [
+        (v) =>
+          !isEmpty(v) ? v.length == 0 || v.length == 12 || 'Phone number must be valid. Format: ###-###-####' : true
+      ],
+      searchString: '',
+      placeIds: {},
       editedPersonalInfo: _.cloneDeep(this.model), //employee personal info that can be edited
-      employeeInfo: {
-        primes: [],
-        contracts: []
-      }, // employee prime and contract info
-      employees: [], // all employees
-      jobTitles: [
-        'Software Developer',
-        'Project Manager',
-        'System Engineer',
-        'Cloud Architect',
-        'Cloud Engineer',
-        'Data Scientist',
-        'QA/Tester',
-        'Intern',
-        'Accountant',
-        'Other'
-      ], // job title options
-      states: [
-        'Alabama',
-        'Alaska',
-        'American Samoa',
-        'Arizona',
-        'Arkansas',
-        'California',
-        'Colorado',
-        'Connecticut',
-        'Delaware',
-        'District of Columbia',
-        'Federated States of Micronesia',
-        'Florida',
-        'Georgia',
-        'Guam',
-        'Hawaii',
-        'Idaho',
-        'Illinois',
-        'Indiana',
-        'Iowa',
-        'Kansas',
-        'Kentucky',
-        'Louisiana',
-        'Maine',
-        'Marshall Islands',
-        'Maryland',
-        'Massachusetts',
-        'Michigan',
-        'Minnesota',
-        'Minor Outlying Islands',
-        'Mississippi',
-        'Missouri',
-        'Montana',
-        'Nebraska',
-        'Nevada',
-        'New Hampshire',
-        'New Jersey',
-        'New Mexico',
-        'New York',
-        'North Carolina',
-        'North Dakota',
-        'Northern Mariana Islands',
-        'Ohio',
-        'Oklahoma',
-        'Oregon',
-        'Pennsylvania',
-        'Puerto Rico',
-        'Republic of Palau',
-        'Rhode Island',
-        'South Carolina',
-        'South Dakota',
-        'Tennessee',
-        'Texas',
-        'U.S. Minor Outlying Islands',
-        'U.S. Virgin Islands',
-        'Utah',
-        'Vermont',
-        'Virginia',
-        'Washington',
-        'West Virginia',
-        'Wisconsin',
-        'Wyoming'
-      ] // state options
+      userId: null,
+      states: {
+        AL: 'Alabama',
+        AK: 'Alaska',
+        AS: 'American Samoa',
+        AZ: 'Arizona',
+        AR: 'Arkansas',
+        CA: 'California',
+        CO: 'Colorado',
+        CT: 'Connecticut',
+        DE: 'Delaware',
+        DC: 'District Of Columbia',
+        FM: 'Federated States Of Micronesia',
+        FL: 'Florida',
+        GA: 'Georgia',
+        GU: 'Guam',
+        HI: 'Hawaii',
+        ID: 'Idaho',
+        IL: 'Illinois',
+        IN: 'Indiana',
+        IA: 'Iowa',
+        KS: 'Kansas',
+        KY: 'Kentucky',
+        LA: 'Louisiana',
+        ME: 'Maine',
+        MH: 'Marshall Islands',
+        MD: 'Maryland',
+        MA: 'Massachusetts',
+        MI: 'Michigan',
+        MN: 'Minnesota',
+        MS: 'Mississippi',
+        MO: 'Missouri',
+        MT: 'Montana',
+        NE: 'Nebraska',
+        NV: 'Nevada',
+        NH: 'New Hampshire',
+        NJ: 'New Jersey',
+        NM: 'New Mexico',
+        NY: 'New York',
+        NC: 'North Carolina',
+        ND: 'North Dakota',
+        MP: 'Northern Mariana Islands',
+        OH: 'Ohio',
+        OK: 'Oklahoma',
+        OR: 'Oregon',
+        PW: 'Palau',
+        PA: 'Pennsylvania',
+        PR: 'Puerto Rico',
+        RI: 'Rhode Island',
+        SC: 'South Carolina',
+        SD: 'South Dakota',
+        TN: 'Tennessee',
+        TX: 'Texas',
+        UT: 'Utah',
+        VT: 'Vermont',
+        VI: 'Virgin Islands',
+        VA: 'Virginia',
+        WA: 'Washington',
+        WV: 'West Virginia',
+        WI: 'Wisconsin',
+        WY: 'Wyoming'
+      } //states
     };
   },
+  directives: { mask },
   methods: {
-    filterContracts,
-    filterPrimes,
     formatDate,
     parseDate,
+    updateAddressDropDown,
+    updateBoxes,
+    userIsAdmin,
+    userIsEmployee,
     validateFields
   },
   props: ['model', 'validating'],

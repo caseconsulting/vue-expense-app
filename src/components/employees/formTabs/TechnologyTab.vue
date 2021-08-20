@@ -15,42 +15,59 @@
 
       <!-- Name of Technology -->
       <v-combobox
+        class="pb-5"
         ref="formFields"
         v-model="technology.name"
         :rules="requiredRules"
         :items="technologyDropDown"
         label="Technology"
         data-vv-name="Technology"
-        class="pb-5"
+        @input.native="updateTechDropDown(index)"
+        clearable
       >
       </v-combobox>
 
       <!-- Time Intervals -->
-      <v-row v-if="technology.dateIntervals" justify="center">
-        <div
-          v-for="(dateInterval, intervalIndex) in technology.dateIntervals"
-          :key="'technology interval: ' + index + intervalIndex"
+      <v-row justify="center">
+        <!-- Current Switch -->
+        <v-col cols="10" sm="6" md="6" lg="6" class="ml-3 ml-sm-0">
+          <v-switch class="mt-0 pb-2" v-model="technology.current" label="Currently know this technology"></v-switch>
+        </v-col>
+
+        <!-- Years of Experience -->
+        <v-col
+          cols="8"
+          sm="4"
+          md="4"
+          lg="4"
+          class="px-0 px-sm-0 pb-0"
+          :class="{ 'px-4': $vuetify.breakpoint.sm, 'px-4': $vuetify.breakpoint.lg }"
         >
-          <date-interval-form
-            :startIntervalDate="dateInterval.startDate"
-            :endIntervalDate="dateInterval.endDate"
-            :allIntervals="technology.dateIntervals"
-            :technologyIndex="index"
-            :intervalIndex="intervalIndex"
-          ></date-interval-form>
-        </div>
-      </v-row>
-      <!-- End of Time Intervals -->
-
-      <!--Add a time interval button-->
-      <div class="pt-4" align="center">
-        <v-btn @click="addTimeInterval(index)" elevation="2"><v-icon class="pr-1">add</v-icon>Time Interval</v-btn>
-      </div>
-
-      <v-row align="center" class="py-3" justify="center">
-        <!-- Button to Delete Technology -->
-        <v-col cols="2" class="mb-3" align="center">
-          <v-btn text icon><v-icon @click="deleteTechnology(index)">delete</v-icon></v-btn>
+          <v-text-field
+            ref="formFields"
+            v-model="technology.years"
+            flat
+            :rules="experienceRequired"
+            single-line
+            max="99"
+            min="0"
+            suffix="years"
+            dense
+            type="number"
+            outlined
+            @input="technology.years = formatNumber(technology.years)"
+          >
+          </v-text-field>
+        </v-col>
+        <v-col cols="2" class="mt-0 mb-5 text-center">
+          <v-tooltip bottom slot="append-outer">
+            <template v-slot:activator="{ on }">
+              <v-btn text icon v-on="on" @click="deleteTechnology(index)"
+                ><v-icon style="color: grey">delete</v-icon></v-btn
+              >
+            </template>
+            <span>Delete Technology</span>
+          </v-tooltip>
         </v-col>
       </v-row>
       <!-- End Loop Technologies -->
@@ -66,8 +83,8 @@
 import api from '@/shared/api.js';
 import _ from 'lodash';
 import { formatDateDashToSlash, formatDateSlashToDash, isEmpty } from '@/utils/utils';
-
-import DateIntervalForm from '@/components/employees/formTabs/DateIntervalForm';
+const moment = require('moment-timezone');
+moment.tz.setDefault('America/New_York');
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -82,55 +99,6 @@ async function created() {
   window.EventBus.$emit('created', 'technologies'); // emit technologies tab was created
   this.employees = await api.getItems(api.EMPLOYEES); // get all employees
   this.populateDropDowns();
-
-  for (let i = 0; i < this.editedTechnologies.length; i++) {
-    if (_.isEmpty(this.editedTechnologies[i].dateIntervals)) {
-      this.editedTechnologies[i].dateIntervals = [];
-    }
-  }
-  //delete a date interval based on technology index and dateIntervalIndex
-  window.EventBus.$on('date-interval-delete-technology', (technologyIndex, dateIntervalIndex) => {
-    this.deleteDateInterval(technologyIndex, dateIntervalIndex);
-  });
-
-  //update a start date interval based on technology index and dateIntervalIndex
-  window.EventBus.$on('update-start-interval-technology', (technologyIndex, dateIntervalIndex, editedStartDate) => {
-    if (
-      this.editedTechnologies &&
-      this.editedTechnologies[technologyIndex] &&
-      this.editedTechnologies[technologyIndex].dateIntervals &&
-      this.editedTechnologies[technologyIndex].dateIntervals[dateIntervalIndex]
-    )
-      this.editedTechnologies[technologyIndex].dateIntervals[dateIntervalIndex].startDate = _.cloneDeep(
-        editedStartDate
-      );
-    this.editedTechnologies = _.cloneDeep(this.editedTechnologies);
-  });
-
-  //update a end date interval based on technology index and dateIntervalIndex
-  window.EventBus.$on('update-end-interval-technology', (technologyIndex, dateIntervalIndex, editedEndDate) => {
-    if (
-      this.editedTechnologies &&
-      this.editedTechnologies[technologyIndex] &&
-      this.editedTechnologies[technologyIndex].dateIntervals &&
-      this.editedTechnologies[technologyIndex].dateIntervals[dateIntervalIndex]
-    ) {
-      this.editedTechnologies[technologyIndex].dateIntervals[dateIntervalIndex].endDate = _.cloneDeep(editedEndDate);
-      this.editedTechnologies = _.cloneDeep(this.editedTechnologies);
-    }
-  });
-
-  //update validation results of interval based on technology index and dateIntervalIndex
-  window.EventBus.$on('validated-technology-interval', (technologyIndex, dateIntervalIndex, hasErrors) => {
-    if (
-      this.editedTechnologies &&
-      this.editedTechnologies[technologyIndex] &&
-      this.editedTechnologies[technologyIndex].dateIntervals &&
-      this.editedTechnologies[technologyIndex].dateIntervals[dateIntervalIndex]
-    ) {
-      this.editedTechnologies[technologyIndex].dateIntervals[dateIntervalIndex].hasErrors = _.cloneDeep(hasErrors);
-    }
-  });
 } // created
 
 // |--------------------------------------------------|
@@ -143,35 +111,14 @@ async function created() {
  * Add a Technology.
  */
 function addTechnology() {
+  if (!this.editedTechnologies) this.editedTechnologies = [];
   this.editedTechnologies.push({
     name: '',
-    dateIntervals: [{ startDate: null, endDate: null }],
+    years: 0,
     current: false
   });
 }
 
-/**
- * Add a time interval.
- * @param index - index the index in array of the technology
- */
-async function addTimeInterval(index) {
-  this.editedTechnologies[index].dateIntervals.push({ startDate: null, endDate: null });
-  this.editedTechnologies = _.cloneDeep(this.editedTechnologies); //ensures that technologies intervals render properly
-} // addTimeInterval
-
-/**
- * Deletes a time interval for a technology.
- * @param technologyIndex - index of the technology you want to remove time interval from
- * @param dateIntervalIndex - index of the date interval you want to remove
- */
-function deleteDateInterval(technologyIndex, dateIntervalIndex) {
-  if (
-    this.editedTechnologies.length > technologyIndex &&
-    this.editedTechnologies[technologyIndex].dateIntervals.length > dateIntervalIndex
-  ) {
-    this.editedTechnologies[technologyIndex].dateIntervals.splice(dateIntervalIndex, 1);
-  }
-} //deleteDateInterval
 /**
  * Deletes a Technology.
  *
@@ -198,6 +145,10 @@ function duplicateTechEntries() {
 
   return this.editedTechnologies ? duplicates(count(this.editedTechnologies)) : [];
 } // duplicateTechEntries
+
+function formatNumber(number) {
+  return Number(number);
+}
 
 /**
  * Checks to see if a technology is a duplicate of one that is already entered by a user.
@@ -230,36 +181,40 @@ function populateDropDowns() {
 } // populateDropDowns
 
 /**
+ * Retrieves list of skills to display a dropdown
+ * related to what the user just typed in
+ */
+async function updateTechDropDown() {
+  let query = event.target.value;
+  if (query.length > 2) {
+    let techList = await api.getTechSkills(query);
+    this.technologyDropDown = techList;
+  } else if (this.technologyDropDown.length >= 0) {
+    this.technologyDropDown = [];
+  }
+} //updateTechDropDown
+
+/**
  * Validate all input fields are valid. Emit to parent the error status.
  */
 function validateFields() {
-  let hasErrors = false;
-
-  if (_.isArray(this.$refs.formFields)) {
-    // more than one TYPE of vuetify component used
-    let error = _.find(this.$refs.formFields, (field) => {
-      return !field.validate();
-    });
-    hasErrors = _.isNil(error) ? false : true;
-  } else if (this.$refs.formFields) {
-    // single vuetify component
-    hasErrors = !this.$refs.formFields.validate();
+  let errorCount = 0;
+  //ensures that refs are put in an array so we can reuse forEach loop
+  let components = !_.isArray(this.$refs.formFields) ? [this.$refs.formFields] : this.$refs.formFields;
+  _.forEach(components, (field) => {
+    if (field && !field.validate()) {
+      errorCount++;
+    }
+  });
+  //we want the many errors modal to only appear if there are multiple errors, else show the duplicate red error modal
+  if (errorCount === 0) {
+    this.duplicateTechEntries().length > 0
+      ? window.EventBus.$emit('technologiesErrStatus', 'Technology names MUST be UNIQUE. Please remove any duplicates')
+      : null;
   }
-
-  //checks to see if there are duplicate entries with the same name
-  if (this.duplicateTechEntries().length > 0) {
-    hasErrors = true;
-    //emit error status with a custom message
-    window.EventBus.$emit(
-      'technologiesStatus',
-      hasErrors,
-      'Technology names MUST be UNIQUE. Please remove any duplicates'
-    ); // emit error status
-  } else if (!this.validateTimeIntervals()) {
-    hasErrors = true;
-  } else {
-    window.EventBus.$emit('technologiesStatus', hasErrors); // emit error status
-  }
+  //emit error status with a custom message
+  // emit error status
+  window.EventBus.$emit('technologiesStatus', errorCount);
   window.EventBus.$emit('doneValidating', 'technologies', this.editedTechnologies); // emit done validating
 } // validateFields
 
@@ -267,83 +222,35 @@ function validateFields() {
  * Validates that all time intervals are error free, as well as if a tech is currently being used.
  * @returns boolean based on if all time intervals are valid
  */
-function validateTimeIntervals() {
-  //iterates over each tech
-  for (let tech = 0; tech < this.editedTechnologies.length; tech++) {
-    let dateIntervals = this.editedTechnologies[tech].dateIntervals; //date intervals for tech
-    this.editedTechnologies[tech].current = false; //reset current variable
-
-    //deletes old years property if it exists
-    delete this.editedTechnologies[tech].years;
-
-    if (_.isEmpty(dateIntervals)) {
-      //emit error status with a custom message
-      window.EventBus.$emit(
-        'technologiesStatus',
-        true,
-        `Tecnology ${this.editedTechnologies[tech].name} NEEDS at least one time interval.`
-      ); // emit error status
-      return false;
-    }
-
-    //checks each date interval within a tech
-    for (let x = 0; x < dateIntervals.length; x++) {
-      if (dateIntervals[x].hasErrors) {
-        //emit error status with a custom message
-        window.EventBus.$emit('technologiesStatus', true, `Tecnology intervals must NOT OVERLAP`); // emit error status
-        return false; //ends validation if finds any interval has errors
-      }
-      if (!dateIntervals[x].endDate) {
-        this.editedTechnologies[tech].current = true; //sets current tech to true if no end date
-      }
-      delete this.editedTechnologies[tech].dateIntervals[x].hasErrors; //deletes hasErrors property after checked
-    }
-  }
-
-  return true;
-} //validateTimeIntervals
 
 export default {
-  components: {
-    DateIntervalForm
-  },
   created,
   data() {
     return {
       technologyDropDown: [], // autocomplete technology name options
-      dateOptionalRules: [
-        (v) => {
-          return !isEmpty(v) ? /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v) || 'Date must be valid. Format: MM/DD/YYYY' : true;
-        }
-      ], // rules for an optional date
-      dateRules: [
-        (v) => !isEmpty(v) || 'Date required',
-        (v) => (!isEmpty(v) && /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v)) || 'Date must be valid. Format: MM/DD/YYYY'
-      ], // rules for a required date
       editedTechnologies: _.cloneDeep(this.model), //stores edited technology info
-      experienceRequired: [
-        (v) => !isEmpty(v) || 'This field is required',
-        (v) => v >= 0 || 'Value cannot be negative',
-        (v) => v < 100 || 'Value must be less than 100'
-      ], // rules for years of experience
       requiredRules: [
         (v) => !isEmpty(v) || 'This field is required. You must enter information or delete the field if possible'
-      ] // rules for a required field
+      ], // rules for a required field
+      experienceRequired: [
+        (v) => !isEmpty(v) || 'This field is required',
+        (v) => v > 0 || 'Value must be greater than 0',
+        (v) => v < 100 || 'Value must be less than 100'
+      ]
     };
   },
   methods: {
     addTechnology,
-    addTimeInterval,
-    deleteDateInterval,
     deleteTechnology,
     duplicateTechEntries,
     formatDateDashToSlash,
     formatDateSlashToDash,
+    formatNumber,
     isDuplicate,
     isEmpty,
     populateDropDowns,
-    validateFields,
-    validateTimeIntervals
+    updateTechDropDown,
+    validateFields
   },
   props: ['model', 'validating'],
   watch: {

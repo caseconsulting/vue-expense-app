@@ -9,7 +9,12 @@
           <template v-slot:activator>
             <!-- Parent Item Icon -->
             <v-list-item-icon style="width: 24px">
-              <icon :name="item.icon" v-bind:class="{ iconSelected: item.active }" class="navbar-icons"></icon>
+              <icon
+                :id="item.icon"
+                :name="item.icon"
+                v-bind:class="{ iconSelected: item.active }"
+                class="navbar-icons"
+              ></icon>
             </v-list-item-icon>
 
             <!-- Parent Item Title -->
@@ -36,6 +41,7 @@
         <!-- Individual Navavigation Links -->
         <v-list-item
           v-else
+          :id="item.icon"
           :key="item.title"
           active-class="red--text v-list__tile--active"
           :to="{ name: item.route }"
@@ -165,7 +171,7 @@ export default {
           title: 'Home',
           icon: 'home',
           route: 'home',
-          permission: ['user', 'admin'],
+          permission: ['user', 'admin', 'intern', 'manager'],
           active: false
         },
         {
@@ -176,19 +182,19 @@ export default {
               title: 'My Budgets',
               icon: 'hand-holding-usd',
               route: 'myBudgets',
-              permission: ['user', 'admin']
+              permission: ['user', 'admin', 'intern', 'manager']
             },
             {
               title: 'My Expenses',
               icon: 'dollar-sign',
               route: 'expenses',
-              permission: ['admin', 'user']
+              permission: ['admin', 'user', 'intern', 'manager']
             },
             {
               title: 'Expense Types',
               icon: 'book',
               route: 'expenseTypes',
-              permission: ['admin', 'user']
+              permission: ['admin', 'user', 'manager']
             },
             {
               title: 'Reimbursements',
@@ -197,7 +203,7 @@ export default {
               permission: ['admin']
             }
           ],
-          permission: ['user', 'admin'],
+          permission: ['user', 'admin', 'intern', 'manager'],
           active: false
         },
         {
@@ -205,21 +211,44 @@ export default {
           alias: ['employee'],
           icon: 'users',
           route: 'employees',
-          permission: ['admin', 'user'],
+          permission: ['admin', 'user', 'intern', 'manager'],
+          active: false
+        },
+        {
+          title: 'Statistics Dashboard',
+          alias: ['stats'],
+          icon: 'chart-bar',
+          route: 'stats',
+          permission: ['admin', 'user', 'intern', 'manager'],
+          active: false
+        },
+        {
+          title: 'Audits',
+          alias: ['audit'],
+          icon: 'clipboard-check',
+          route: 'audits',
+          permission: ['admin', 'manager']
+        },
+        {
+          title: 'Reports',
+          alias: ['reports'],
+          icon: 'clipboard-list',
+          route: 'reports',
+          permission: ['admin', 'user', 'intern', 'manager'],
           active: false
         },
         {
           title: 'Training',
           icon: 'fire',
           route: 'training',
-          permission: ['admin', 'user'],
+          permission: ['admin', 'user', 'intern', 'manager'],
           active: false
         },
         {
           title: 'Help',
           icon: 'life-ring',
           route: 'help',
-          permission: ['admin', 'user'],
+          permission: ['admin', 'user', 'intern', 'manager'],
           active: false
         }
       ], // navigation options

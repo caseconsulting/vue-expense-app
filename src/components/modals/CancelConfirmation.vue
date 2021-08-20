@@ -1,0 +1,89 @@
+<template>
+  <div>
+    <v-dialog v-model="activate" persistent max-width="350">
+      <v-card>
+        <v-card-title class="headline">Are you sure you want to cancel?</v-card-title>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn
+            id="submitNoBtn"
+            color="red"
+            text
+            @click.native="
+              activate = false;
+              loading = true;
+              emit(`backout-canceled-${type}`);
+            "
+            :loading="loading"
+            :disabled="loading"
+            >No</v-btn
+          >
+          <v-spacer></v-spacer>
+          <v-btn
+            id="submitYesBtn"
+            color="green darken-1"
+            text
+            @click.native="
+              emit(`backout-confirmed-${type}`);
+              activate = false;
+              loading = true;
+            "
+            :loading="loading"
+            :disabled="loading"
+            >Yes</v-btn
+          >
+          <v-spacer></v-spacer>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+  </div>
+</template>
+
+<script>
+// |--------------------------------------------------|
+// |                                                  |
+// |                     METHODS                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * Emits a message and data if it exists.
+ *
+ * @param msg - Message to emit
+ */
+function emit(msg) {
+  window.EventBus.$emit(msg);
+} // emit
+// |--------------------------------------------------|
+// |                                                  |
+// |                      EXPORT                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+export default {
+  data() {
+    return {
+      activate: false, // dialog activator
+      loading: false // loading circle
+    };
+  },
+  methods: {
+    emit
+  },
+  props: [
+    'toggleSubmissionConfirmation', // dialog activator,
+    'type' //sends appropriate emits based on where its called
+  ],
+  watch: {
+    toggleSubmissionConfirmation: function () {
+      this.activate = this.toggleSubmissionConfirmation;
+      this.loading = false;
+    },
+    activate: function () {
+      if (!this.activate) {
+        emit('closeModal');
+      }
+    }
+  }
+};
+</script>

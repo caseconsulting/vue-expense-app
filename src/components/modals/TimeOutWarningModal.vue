@@ -30,7 +30,7 @@ export default {
   props: ['toggleWarning'], // dialog activator
   watch: {
     toggleWarning: function () {
-      this.activate = true;
+      this.activate = this.toggleWarning;
     }
   }
 };

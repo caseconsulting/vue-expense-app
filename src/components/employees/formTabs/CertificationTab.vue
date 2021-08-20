@@ -5,7 +5,7 @@
       v-for="(certification, index) in editedCertifications"
       style="border: 1px solid grey"
       class="pt-3 pb-1 px-5"
-      :key="'certification: ' + certification.name + index"
+      :key="index"
     >
       <!-- Name of Certification -->
       <v-combobox
@@ -15,12 +15,10 @@
         :items="certificationDropDown"
         label="Certification"
         data-vv-name="Certification"
-        append-outer-icon="delete"
-        @click:append-outer="deleteCertification(index)"
+        clearable
       >
       </v-combobox>
-
-      <v-row class="py-3">
+      <v-row class="pt-1">
         <v-col cols="12" sm="6" md="12" lg="6" class="pt-0">
           <!-- Received Date -->
           <v-menu
@@ -34,13 +32,18 @@
             <template v-slot:activator="{ on, attrs }">
               <v-text-field
                 ref="formFields"
-                :value="formatDateDashToSlash(certification.dateReceived)"
+                :value="certification.dateReceived | formatDate"
                 label="Date Received"
                 prepend-icon="event_available"
-                :rules="dateRules"
-                readonly
+                :rules="[dateRules[0], dateRules[1], dateRules[2], dateOrderRules(index)]"
+                hint="MM/DD/YYYY format"
+                v-mask="'##/##/####'"
                 v-bind="attrs"
                 v-on="on"
+                @blur="certification.dateReceived = parseEventDate($event)"
+                @input="certification.showReceivedMenu = false"
+                @focus="certificationIndex = index"
+                clearable
               ></v-text-field>
             </template>
             <v-date-picker
@@ -65,16 +68,20 @@
             <template v-slot:activator="{ on, attrs }">
               <v-text-field
                 ref="formFields"
-                :value="formatDateDashToSlash(certification.expirationDate)"
-                label="Expiration Date (optional)"
+                :value="certification.expirationDate | formatDate"
+                :disabled="certification.noExpiry"
+                label="Expiration Date"
                 prepend-icon="event_busy"
-                :rules="dateOptionalRules"
-                readonly
+                :rules="[dateOptionalRules[0], dateOptionalRules[1], dateOrderRules(index), expDateRule(index)]"
+                hint="MM/DD/YYYY format"
+                v-mask="'##/##/####'"
                 v-bind="attrs"
                 v-on="on"
                 clearable
-                hide-details
                 @click:clear="certification.expirationDate = null"
+                @blur="certification.expirationDate = parseEventDate($event)"
+                @input="certification.showExpirationMenu = false"
+                @focus="certificationIndex = index"
               ></v-text-field>
             </template>
             <v-date-picker
@@ -85,6 +92,18 @@
             ></v-date-picker>
           </v-menu>
           <!-- End Expiration Date -->
+        </v-col>
+      </v-row>
+      <v-row>
+        <v-col cols="12" align="center" justify="center" class="pb-4 mb-2">
+          <v-tooltip bottom>
+            <template v-slot:activator="{ on }">
+              <v-btn v-on="on" @click="deleteCertification(index)" icon text
+                ><v-icon style="color: grey">delete</v-icon></v-btn
+              >
+            </template>
+            <span>Delete Certification</span>
+          </v-tooltip>
         </v-col>
       </v-row>
     </div>
@@ -100,7 +119,10 @@
 <script>
 import api from '@/shared/api.js';
 import _ from 'lodash';
-import { formatDateDashToSlash, formatDateSlashToDash, isEmpty } from '@/utils/utils';
+import { formatDate, parseDate, isEmpty } from '@/utils/utils';
+import { mask } from 'vue-the-mask';
+const moment = require('moment-timezone');
+moment.tz.setDefault('America/New_York');
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -127,10 +149,12 @@ async function created() {
  * Adds a certification.
  */
 function addCertification() {
+  if (!this.editedCertifications) this.editedCertifications = [];
   this.editedCertifications.push({
     name: null,
     dateReceived: null,
     expirationDate: null,
+    noExpiry: false,
     showReceivedMenu: false,
     showExpirationMenu: false
   });
@@ -144,6 +168,20 @@ function addCertification() {
 function deleteCertification(index) {
   this.editedCertifications.splice(index, 1);
 } // deleteCertification
+
+/**
+ * Parse the date after losing focus.
+ */
+function parseEventDate() {
+  return parseDate(event.target.value);
+} //parseEventDate
+
+// /**
+//  * Validate the dates
+//  */
+// function validateDates(refIndex) {
+//   this.$refs[`dates-${refIndex}`][0].validate();
+// }
 
 /**
  * Populate drop downs with information that other employees have filled out.
@@ -164,49 +202,79 @@ function populateDropDowns() {
  * Validate all input fields are valid. Emit to parent the error status.
  */
 function validateFields() {
-  let hasErrors = false;
-
-  if (_.isArray(this.$refs.formFields)) {
-    // more than one TYPE of vuetify component used
-    let error = _.find(this.$refs.formFields, (field) => {
-      return !field.validate();
-    });
-    hasErrors = _.isNil(error) ? false : true;
-  } else if (this.$refs.formFields) {
-    // single vuetify component
-    hasErrors = !this.$refs.formFields.validate();
-  }
-
+  let errorCount = 0;
+  //ensures that refs are put in an array so we can reuse forEach loop
+  let components = !_.isArray(this.$refs.formFields) ? [this.$refs.formFields] : this.$refs.formFields;
+  _.forEach(components, (field) => {
+    if (field && !field.validate()) {
+      errorCount++;
+    }
+  });
   window.EventBus.$emit('doneValidating', 'certifications', this.editedCertifications); // emit done validating and sends edited data back to parent
-  window.EventBus.$emit('certificationsStatus', hasErrors); // emit error status
+  window.EventBus.$emit('certificationsStatus', errorCount); // emit error status
 } // validateFields
 
 export default {
+  computed: {
+    isMobile() {
+      //console.log(!(this.$vuetify.breakpoint.xl || this.$vuetify.breakpoint.lg));
+      return !(this.$vuetify.breakpoint.xl || this.$vuetify.breakpoint.lg);
+    }
+  },
   created,
   data() {
     return {
       certificationDropDown: [], // autocomplete certification name options
+      certificationIndex: 0,
+      dateOrderRules: (certIndex) => {
+        if (this.editedCertifications) {
+          let position = this.editedCertifications[certIndex];
+          return !isEmpty(position.expirationDate) && moment(position.expirationDate) && position.dateReceived
+            ? moment(position.expirationDate).add(1, 'd').isAfter(moment(position.dateReceived)) ||
+                'End date must be at or after start date'
+            : true;
+        } else {
+          return true;
+        }
+      },
       dateOptionalRules: [
         (v) => {
           return !isEmpty(v) ? /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v) || 'Date must be valid. Format: MM/DD/YYYY' : true;
-        }
+        },
+        (v) => (!isEmpty(v) ? moment(v, 'MM/DD/YYYY').isValid() || 'Date must be valid' : true)
       ], // rules for an optional date
       dateRules: [
         (v) => !isEmpty(v) || 'Date required',
-        (v) => (!isEmpty(v) && /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v)) || 'Date must be valid. Format: MM/DD/YYYY'
+        (v) => (!isEmpty(v) && /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v)) || 'Date must be valid. Format: MM/DD/YYYY',
+        (v) => moment(v, 'MM/DD/YYYY').isValid() || 'Date must be valid'
       ], // rules for a required date
       editedCertifications: _.cloneDeep(this.model), // stores edited certifications info
+      expDateRule: (compIndex) => {
+        if (this.editedCertifications !== undefined) {
+          let position = this.editedCertifications[compIndex];
+          if (position.noExpiry == false && isEmpty(position.expirationDate)) {
+            return 'Expiration Date is required';
+          } else {
+            return true;
+          }
+        } else {
+          return false;
+        }
+      },
       requiredRules: [
         (v) => !isEmpty(v) || 'This field is required. You must enter information or delete the field if possible'
       ] // rules for a required field
     };
   },
+  directives: { mask },
+  filters: {
+    formatDate
+  },
   methods: {
     addCertification,
     deleteCertification,
-    formatDateSlashToDash,
-    formatDateDashToSlash,
     isEmpty,
+    parseEventDate,
     populateDropDowns,
     validateFields
   },

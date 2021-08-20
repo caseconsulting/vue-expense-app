@@ -15,6 +15,7 @@
         :items="experienceDropDown"
         label="Customer Organization Experience"
         data-vv-name="Customer Organization Experience"
+        clearable
       >
       </v-autocomplete>
 
@@ -50,7 +51,14 @@
 
         <!-- Button to Delete Customer Organization -->
         <v-col cols="2" class="mb-3" align="center">
-          <v-btn text icon><v-icon @click="deleteExperience(index)">delete</v-icon></v-btn>
+          <v-tooltip bottom>
+            <template v-slot:activator="{ on }">
+              <v-btn v-on="on" @click="deleteExperience(index)" text icon
+                ><v-icon style="color: grey" class="pr-1">delete</v-icon></v-btn
+              >
+            </template>
+            <span>Delete Experience</span>
+          </v-tooltip>
         </v-col>
       </v-row>
     </div>
@@ -92,6 +100,7 @@ async function created() {
  * Adds a Customer Organization.
  */
 function addExperience() {
+  if (!this.editedCustomerOrgExp) this.editedCustomerOrgExp = [];
   this.editedCustomerOrgExp.push({
     name: '',
     years: 0,
@@ -112,21 +121,16 @@ function deleteExperience(index) {
  * Validate all input fields are valid. Emit to parent the error status.
  */
 function validateFields() {
-  let hasErrors = false;
-
-  if (_.isArray(this.$refs.formFields)) {
-    // more than one TYPE of vuetify component used
-    let error = _.find(this.$refs.formFields, (field) => {
-      return !field.validate();
-    });
-    hasErrors = _.isNil(error) ? false : true;
-  } else if (this.$refs.formFields) {
-    // single vuetify component
-    hasErrors = !this.$refs.formFields.validate();
-  }
-
+  let errorCount = 0;
+  //ensures that refs are put in an array so we can reuse forEach loop
+  let components = !_.isArray(this.$refs.formFields) ? [this.$refs.formFields] : this.$refs.formFields;
+  _.forEach(components, (field) => {
+    if (field && !field.validate()) {
+      errorCount++;
+    }
+  });
   window.EventBus.$emit('doneValidating', 'customerOrgExp', this.editedCustomerOrgExp); // emit done validating and send edited data to parent
-  window.EventBus.$emit('customerOrgExpStatus', hasErrors); // emit error status
+  window.EventBus.$emit('customerOrgExpStatus', errorCount); // emit error status
 } // validateFields
 
 export default {

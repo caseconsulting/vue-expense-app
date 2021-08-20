@@ -11,15 +11,13 @@
       <v-combobox
         ref="formFields"
         v-model="clearance.type"
-        :rules="requiredRules"
+        :rules="[requiredRules[0], duplicateClearanceTypes(cIndex)]"
         :items="clearanceTypeDropDown"
         label="Type"
         data-vv-name="Type"
-        append-outer-icon="delete"
-        @click:append-outer="deleteClearance(cIndex)"
+        clearable
       >
       </v-combobox>
-
       <v-row class="py-3">
         <!-- Granted Date -->
         <v-col cols="12" sm="6" md="12" lg="6" class="pt-0">
@@ -34,15 +32,19 @@
             <template v-slot:activator="{ on, attrs }">
               <v-text-field
                 ref="formFields"
-                :value="formatDateDashToSlash(clearance.grantedDate)"
+                :value="clearance.grantedDate | formatDate"
                 label="Granted Date"
                 prepend-icon="event_available"
                 clearable
-                :rules="dateOptionalRules"
-                readonly
+                :rules="[dateOptionalRules[0], dateOptionalRules[1], dateGrantedRules(cIndex)]"
+                hint="MM/DD/YYYY format"
+                v-mask="'##/##/####'"
                 v-bind="attrs"
                 v-on="on"
                 @click:clear="clearance.grantedDate = null"
+                @blur="clearance.grantedDate = parseEventDate($event)"
+                @input="clearance.showGrantedMenu = false"
+                @focus="clearanceElement = clearance"
               ></v-text-field>
             </template>
             <v-date-picker
@@ -68,15 +70,19 @@
             <template v-slot:activator="{ on, attrs }">
               <v-text-field
                 ref="formFields"
-                :value="formatDateDashToSlash(clearance.expirationDate)"
+                :value="clearance.expirationDate | formatDate"
                 label="Expiration Date"
                 prepend-icon="event_busy"
                 clearable
-                :rules="dateOptionalRules"
-                readonly
+                :rules="[dateOptionalRules[0], dateOptionalRules[1], dateExpirationRules(cIndex)]"
+                hint="MM/DD/YYYY format"
+                v-mask="'##/##/####'"
                 v-bind="attrs"
                 v-on="on"
                 @click:clear="clearance.expirationDate = null"
+                @blur="clearance.expirationDate = parseEventDate($event)"
+                @input="clearance.showExpirationMenu = false"
+                @focus="clearanceElement = clearance"
               ></v-text-field>
             </template>
             <v-date-picker
@@ -101,15 +107,19 @@
             <template v-slot:activator="{ on, attrs }">
               <v-text-field
                 ref="formFields"
-                :value="formatDateDashToSlash(clearance.submissionDate)"
+                :value="clearance.submissionDate | formatDate"
                 label="Submission Date"
                 prepend-icon="event_note"
                 clearable
-                :rules="dateOptionalRules"
-                readonly
+                :rules="[dateOptionalRules[0], dateOptionalRules[1], dateSubmissionRules(cIndex)]"
+                hint="MM/DD/YYYY format"
+                v-mask="'##/##/####'"
                 v-bind="attrs"
                 v-on="on"
                 @click:clear="clearance.submissionDate = null"
+                @blur="clearance.submissionDate = parseEventDate($event)"
+                @input="clearance.showSubmissionMenu = false"
+                @focus="clearanceElement = clearance"
               ></v-text-field>
             </template>
             <v-date-picker
@@ -135,7 +145,7 @@
       >
         <template v-slot:activator="{ on, attrs }">
           <v-combobox
-            v-model="clearance.polyDates"
+            :value="clearance.polyDates | formatDates"
             multiple
             chips
             small-chips
@@ -145,6 +155,7 @@
             readonly
             v-bind="attrs"
             v-on="on"
+            @click:clear="clearance.polyDates = []"
           ></v-combobox>
         </template>
         <v-date-picker v-model="clearance.polyDates" :min="clearance.submissionDate" multiple no-title scrollable>
@@ -167,7 +178,7 @@
       >
         <template v-slot:activator="{ on, attrs }">
           <v-combobox
-            v-model="clearance.adjudicationDates"
+            :value="clearance.adjudicationDates | formatDates"
             multiple
             chips
             small-chips
@@ -177,6 +188,7 @@
             readonly
             v-bind="attrs"
             v-on="on"
+            @click:clear="clearance.adjudicationDates = []"
           ></v-combobox>
         </template>
         <v-date-picker
@@ -195,6 +207,40 @@
       </v-menu>
       <!-- End Adjudication Dates -->
 
+      <!-- Badge Expiration date -->
+      <v-menu
+        v-model="clearance.showBadgeMenu"
+        :close-on-content-click="false"
+        transition="scale-transition"
+        offset-y
+        max-width="290px"
+        min-width="290px"
+      >
+        <template v-slot:activator="{ on, attrs }">
+          <v-text-field
+            ref="formFields"
+            :value="clearance.badgeExpirationDate | formatDate"
+            label="Badge Expiration Date"
+            prepend-icon="event_busy"
+            clearable
+            :rules="[dateOptionalRules[0], dateOptionalRules[1], dateBadgeRules(cIndex)]"
+            hint="MM/DD/YYYY format"
+            v-mask="'##/##/####'"
+            v-bind="attrs"
+            v-on="on"
+            @click:clear="clearance.badgeExpirationDate = null"
+            @blur="clearance.badgeExpirationDate = parseEventDate($event)"
+            @input="clearance.showBadgeMenu = false"
+            @focus="clearanceElement = clearance"
+          ></v-text-field>
+        </template>
+        <v-date-picker
+          v-model="clearance.badgeExpirationDate"
+          :min="minExpiration(cIndex)"
+          no-title
+          @input="clearance.showBadgeMenu = false"
+        ></v-date-picker>
+      </v-menu>
       <!-- Loop BI Dates -->
       <div v-for="(bi, biIndex) in clearance.biDates" :key="biIndex">
         <!-- Range -->
@@ -215,10 +261,18 @@
               prepend-icon="date_range"
               readonly
               v-bind="attrs"
+              clearable
               v-on="on"
-              append-outer-icon="delete"
-              @click:append-outer="deleteBIDate(cIndex, biIndex)"
-            ></v-text-field>
+            >
+              <v-tooltip bottom slot="append-outer">
+                <template v-slot:activator="{ on }">
+                  <v-btn text icon v-on="on" @click="deleteBIDate(cIndex, biIndex)"
+                    ><v-icon style="color: grey">delete</v-icon></v-btn
+                  >
+                </template>
+                <span>Delete BI Date</span>
+              </v-tooltip></v-text-field
+            >
           </template>
           <v-date-picker v-model="bi.range" :min="clearance.submissionDate" no-title range></v-date-picker>
         </v-menu>
@@ -227,6 +281,16 @@
       <!-- End Loop BI Dates -->
       <div align="center" class="pt-2 pb-4">
         <v-btn @click="addBIDates(cIndex)" depressed outlined small>Add BI Dates</v-btn>
+      </div>
+      <div align="center">
+        <v-tooltip bottom slot="append-outer">
+          <template v-slot:activator="{ on }">
+            <v-btn text icon v-on="on" @click="deleteClearance(cIndex)"
+              ><v-icon style="color: grey">delete</v-icon></v-btn
+            >
+          </template>
+          <span>Delete Clearance</span>
+        </v-tooltip>
       </div>
     </div>
     <!-- End Loop Clearances -->
@@ -240,10 +304,11 @@
 
 <script>
 import api from '@/shared/api.js';
+import _ from 'lodash';
+import { formatDate, parseDate, isEmpty } from '@/utils/utils';
+import { mask } from 'vue-the-mask';
 const moment = require('moment-timezone');
 moment.tz.setDefault('America/New_York');
-import _ from 'lodash';
-import { formatDateDashToSlash, formatDateSlashToDash, isEmpty } from '@/utils/utils';
 
 const ISOFORMAT = 'YYYY-MM-DD';
 
@@ -284,13 +349,16 @@ function addBIDates(cIndex) {
  * Adds a clearance.
  */
 function addClearance() {
+  if (!this.editedClearances) this.editedClearances = [];
   this.editedClearances.push({
     adjudicationDates: [],
     biDates: [],
+    badgeExpirationDate: null,
     expirationDate: null,
     grantedDate: null,
     polyDates: [],
     showAdjudicationMenu: false,
+    showBadgeMenu: false,
     showExpirationMenu: false,
     showGrantedMenu: false,
     showPolyMenu: false,
@@ -346,6 +414,34 @@ function formatRange(range) {
     return `${start.format('MM/DD/YYYY')} - Present`;
   }
 } // formatRange
+
+/**
+ * Checks to see if the first date is at or after the second date, if not, it uses an error message.
+ *
+ * @param firstDate - The date that should come first
+ * @param secondDate - The date that should come second
+ * @param errMessage - The message to display if the dates are incorrectly ordered
+ * @return boolean - True if the first date is at or after the second date
+ */
+function isAfter(firstDate, secondDate, errMessage) {
+  return !isEmpty(firstDate) && secondDate
+    ? moment(firstDate).add(1, 'd').isAfter(moment(secondDate)) || errMessage
+    : true;
+}
+
+/**
+ * Checks to see if the first date is at or before the second date, if not, it uses an error message.
+ *
+ * @param firstDate - The date that should come first
+ * @param secondDate - The date that should come second
+ * @param errMessage - The message to display if the dates are incorrectly ordered
+ * @return boolean - True if the first date is at or before the second date
+ */
+function isBefore(firstDate, secondDate, errMessage) {
+  return !isEmpty(firstDate) && secondDate
+    ? moment(firstDate).isBefore(moment(secondDate).add(1, 'd')) || errMessage
+    : true;
+}
 
 /**
  * Return the maximum available date to be selected for submission date. Returns the granted date if it exists.
@@ -421,6 +517,13 @@ function minExpiration(cIndex) {
 } // minExpiration
 
 /**
+ * Parse the date after losing focus.
+ */
+function parseEventDate() {
+  return parseDate(event.target.value);
+} //parseEventDate
+
+/**
  * Populate drop downs with information that other employees have filled out.
  */
 function populateDropDowns() {
@@ -439,52 +542,99 @@ function populateDropDowns() {
  * Validate all input fields are valid. Emit to parent the error status.
  */
 function validateFields() {
-  let hasErrors = false;
-
-  if (_.isArray(this.$refs.formFields)) {
-    // more than one TYPE of vuetify component used
-    let error = _.find(this.$refs.formFields, (field) => {
-      return !field.validate();
-    });
-    hasErrors = _.isNil(error) ? false : true;
-  } else if (this.$refs.formFields) {
-    // single vuetify component
-    hasErrors = !this.$refs.formFields.validate();
-  }
-
+  let errorCount = 0;
+  //ensures that refs are put in an array so we can reuse forEach loop
+  let components = !_.isArray(this.$refs.formFields) ? [this.$refs.formFields] : this.$refs.formFields;
+  _.forEach(components, (field) => {
+    if (field && !field.validate()) {
+      errorCount++;
+    }
+  });
   window.EventBus.$emit('doneValidating', 'clearance', this.editedClearances); // emit done validating and sends edited data back to parent
-  window.EventBus.$emit('clearanceStatus', hasErrors); // emit error status
+  window.EventBus.$emit('clearanceStatus', errorCount); // emit error status
 } // validateFields
 
 export default {
   created,
   data() {
     return {
+      clearanceElement: {},
       clearanceTypeDropDown: [], // autocomplete clearance type options
+      dateBadgeRules: (index) => {
+        let currClearance = this.editedClearances[index];
+        return currClearance.grantedDate && currClearance.badgeExpirationDate && currClearance.submissionDate
+          ? (moment(currClearance.badgeExpirationDate).isAfter(moment(currClearance.grantedDate)) &&
+              moment(currClearance.badgeExpirationDate).isAfter(moment(currClearance.submissionDate))) ||
+              'Badge expiration date must come after grant and submission date'
+          : true;
+      },
+      dateExpirationRules: (index) => {
+        let currClearance = this.editedClearances[index];
+        return currClearance.grantedDate && currClearance.expirationDate && currClearance.submissionDate
+          ? (moment(currClearance.expirationDate).isAfter(moment(currClearance.grantedDate)) &&
+              moment(currClearance.expirationDate).isAfter(moment(currClearance.submissionDate))) ||
+              'Expiration date must come after grant and submission date'
+          : true;
+      },
       dateOptionalRules: [
         (v) => {
           return !isEmpty(v) ? /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v) || 'Date must be valid. Format: MM/DD/YYYY' : true;
-        }
+        },
+        (v) => (!isEmpty(v) ? moment(v, 'MM/DD/YYYY').isValid() || 'Date must be valid' : true)
       ], // rules for an optional date
+      dateSubmissionRules: (index) => {
+        let currClearance = this.editedClearances[index];
+        return currClearance.grantedDate && currClearance.submissionDate
+          ? moment(currClearance.submissionDate).isBefore(moment(currClearance.grantedDate)) ||
+              'Submission date must be before grant date'
+          : true;
+      },
       dateRules: [
         (v) => !isEmpty(v) || 'Date required',
-        (v) => (!isEmpty(v) && /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v)) || 'Date must be valid. Format: MM/DD/YYYY'
+        (v) => (!isEmpty(v) && /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v)) || 'Date must be valid. Format: MM/DD/YYYY',
+        (v) => moment(v, 'MM/DD/YYYY').isValid() || 'Date must be valid'
       ], // rules for a required date
       editedClearances: _.cloneDeep(this.model), // stores edited clearances info
+      dateGrantedRules: (index) => {
+        let currClearance = this.editedClearances[index];
+        return currClearance.grantedDate && currClearance.expirationDate && currClearance.submissionDate
+          ? (moment(currClearance.grantedDate).isAfter(moment(currClearance.submissionDate)) &&
+              moment(currClearance.grantedDate).isBefore(moment(currClearance.expirationDate))) ||
+              'Grant date must lie between submission and expiration date'
+          : true;
+      },
+      duplicateClearanceTypes: (cIndex) => {
+        let clearanceNames = _.map(this.editedClearances, (clearance) => clearance.type);
+        let clearanceName = clearanceNames[cIndex];
+        clearanceNames.splice(cIndex, 1);
+        return !clearanceNames.includes(clearanceName) || 'Duplicate clearance name';
+      },
       requiredRules: [(v) => !isEmpty(v) || 'This field is required'] // rules for a required field
     };
+  },
+  directives: { mask },
+  filters: {
+    formatDate,
+    formatDates: function (array) {
+      let formattedDates = [];
+      array.forEach((date) => {
+        formattedDates.push(formatDate(date));
+      });
+      return formattedDates;
+    }
   },
   methods: {
     addBIDates,
     addClearance,
     deleteBIDate,
     deleteClearance,
-    formatDateSlashToDash,
-    formatDateDashToSlash,
     formatRange,
+    isAfter,
+    isBefore,
     isEmpty,
     maxSubmission,
     minExpiration,
+    parseEventDate,
     populateDropDowns,
     validateFields
   },

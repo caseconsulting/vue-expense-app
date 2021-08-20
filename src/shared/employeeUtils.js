@@ -17,7 +17,18 @@ function firstAndLastName(employee) {
   return `${employee.firstName}` + ' ' + `${employee.lastName}`;
 }
 
+/**
+ * Given an employee returns the employee nickname (when available) and last name
+ * @param {JSON} employee - employee object
+ * @returns Employee nick name in format First Last
+ */
+function nicknameAndLastName(employee) {
+  let firstName = employee.nickname ? employee.nickname : employee.firstName;
+  return `${firstName}` + ' ' + `${employee.lastName}`;
+}
+
 export default {
   fullName,
-  firstAndLastName
+  firstAndLastName,
+  nicknameAndLastName
 };

@@ -5,23 +5,58 @@
     <hr class="my-3" />
 
     <!-- Case Consulting -->
-    <p><b>Company: </b>Case Consulting</p>
+    <p><b>Case Consulting Info</b></p>
     <p v-if="model.jobRole"><b>Position: </b>{{ model.jobRole }}</p>
     <p><b>Start Date: </b>{{ model.hireDate | monthDayYearFormat }}</p>
     <p v-if="model.deptDate"><b>End Date: </b>{{ model.deptDate | monthDayYearFormat }}</p>
-    <hr v-if="model.jobs && model.jobs.length > 0" class="mb-3" />
+    <hr class="mb-3" />
 
-    <!-- Other Jobs -->
-    <div v-if="!isEmpty(model.jobs)">
+    <div v-if="!isEmpty(model.companies)">
+      <h3>Job History</h3>
+      <v-combobox
+        label="Filter by Company Name"
+        v-model="filter"
+        @input.native="updateCompanies()"
+        :items="companyNames"
+        :menu-props="{ top: true, offsetY: true }"
+      ></v-combobox>
+      <!-- Other Jobs -->
       <!-- Loop Jobs -->
-      <div v-for="(job, index) in model.jobs" :key="job.company + index">
-        <p><b>Company: </b>{{ job.company }}</p>
-        <p><b>Position: </b>{{ job.position }}</p>
-        <p><b>Start Date: </b>{{ job.startDate | monthDayYearFormat }}</p>
-        <p v-if="job.endDate"><b>End Date: </b>{{ job.endDate | monthDayYearFormat }}</p>
-        <hr v-if="index < model.jobs.length - 1" class="mb-3" />
+      <div v-for="(company, index) in this.pageList" :key="company.companyName + index">
+        <p class="mb-1"><b>Company: </b>{{ company.companyName }}</p>
+        <div class="ml-4" v-if="company.positions.length > 1">
+          <p class="my-0"><b>Positions: </b></p>
+          <ul>
+            <li v-for="(position, posIndex) in company.positions" :key="position.title + posIndex">
+              {{ position.title }}
+              <ul>
+                <li>Start Date: {{ position.startDate | monthYearFormat }}</li>
+                <li v-if="position.endDate">End Date: {{ position.endDate | monthYearFormat }}</li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+        <div class="ml-4" v-else>
+          <p class="my-0"><b>Position:</b> {{ company.positions[0].title }}</p>
+          <ul>
+            <li>Start Date: {{ company.positions[0].startDate | monthYearFormat }}</li>
+            <li v-if="company.positions[0].endDate">End Date: {{ company.positions[0].endDate | monthYearFormat }}</li>
+          </ul>
+        </div>
+        <hr v-if="index < pageList.length - 1" class="my-3" />
       </div>
       <!-- End Loop Jobs -->
+      <div v-if="!isEmpty(this.model.companies) && Math.ceil(filterCompanies.length / 4) != 1" class="text-center">
+        <v-pagination
+          v-model="page"
+          :length="Math.ceil(filterCompanies.length / 4)"
+          :total-visible="8"
+          @input="onPageChange"
+        ></v-pagination>
+      </div>
+    </div>
+    <div v-else>
+      <p>No Job History Information</p>
     </div>
   </div>
 </template>
@@ -30,14 +65,28 @@
 const moment = require('moment-timezone');
 moment.tz.setDefault('America/New_York');
 import _ from 'lodash';
-import { isEmpty, monthDayYearFormat } from '@/utils/utils';
+import { isEmpty, monthDayYearFormat, monthYearFormat } from '@/utils/utils';
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                 LIFECYCLE HOOKS                  |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * Emits to parent the component was created and get data for the list.
+ */
+function created() {
+  if (!isEmpty(this.model.companies)) {
+    this.pageList = this.filterCompanies.slice(0, 4);
+  }
+}
 
 // |--------------------------------------------------|
 // |                                                  |
 // |                     COMPUTED                     |
 // |                                                  |
 // |--------------------------------------------------|
-
 /**
  * Calculate and return text for Experience in IC duration.
  *
@@ -46,7 +95,6 @@ import { isEmpty, monthDayYearFormat } from '@/utils/utils';
 function icExperience() {
   let ranges = _.mapValues(this.model.icTimeFrames, 'range');
   let totalDurationMonths = 0; // total months
-
   // loop each reach to get total duration in months
   _.forEach(ranges, (range) => {
     let start = moment(range[0], 'YYYY-MM');
@@ -61,7 +109,6 @@ function icExperience() {
     let duration = end.diff(start, 'months') + 1; // calculate range duration
     totalDurationMonths += Math.max(duration, 0); // remove negative values
   });
-
   // set year output text
   let totalYearOutput = _.floor(totalDurationMonths / 12);
   if (totalYearOutput < 1) {
@@ -71,7 +118,6 @@ function icExperience() {
   } else {
     totalYearOutput += ' Years';
   }
-
   // set month output text
   let totalMonthOutput = totalDurationMonths % 12;
   if (totalMonthOutput < 1) {
@@ -81,20 +127,73 @@ function icExperience() {
   } else {
     totalMonthOutput = totalYearOutput.length > 0 ? ` and ${totalMonthOutput} Months` : `${totalMonthOutput} Months`;
   }
-
   return `${totalYearOutput}${totalMonthOutput}`;
 } // icExperience
 
+// |--------------------------------------------------|
+// |                                                  |
+// |                     METHODS                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * When the page is changed, grab the corresponding entries based on the page
+ * number.
+ */
+function onPageChange() {
+  var startIndex = 4 * (this.page - 1); //each page contains 4 job entries
+  var endIndex = startIndex + 4;
+  this.pageList = this.filterCompanies.slice(startIndex, endIndex);
+} //onPageChange
+
+function updateCompanies(query) {
+  if (query === undefined) {
+    query = event.target.value;
+  }
+  if (query !== undefined) {
+    this.filterCompanies = _.filter(this.model.companies, (company) => {
+      if (company.companyName.toLowerCase().includes(query.toLowerCase())) {
+        return true;
+      }
+    });
+    this.page = 1;
+    this.pageList = this.filterCompanies.slice(0, 4);
+  }
+}
 export default {
+  created,
+  data() {
+    return {
+      companyNames: _.map(this.model.companies, 'companyName'),
+      filterCompanies: _.cloneDeep(this.model.companies),
+      filter: '',
+      page: 1,
+      pageList: []
+    };
+  },
+  methods: {
+    isEmpty,
+    updateCompanies,
+    onPageChange
+  },
   computed: {
     icExperience
   },
-  filters: {
-    monthDayYearFormat
+  watch: {
+    filter: function () {
+      this.updateCompanies(this.filter);
+    }
   },
-  methods: {
-    isEmpty
+  filters: {
+    monthDayYearFormat,
+    monthYearFormat
   },
   props: ['model']
 };
 </script>
+
+<style scoped>
+.horizontalBar {
+  border-top: 1px dashed;
+}
+</style>

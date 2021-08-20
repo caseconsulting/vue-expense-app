@@ -24,7 +24,7 @@
       <v-list-item>
         <v-list-item-content>Budget:</v-list-item-content>
         <v-list-item-content class="text-right">
-          <div>{{ getAmount(selectedBudget) | moneyValue }}</div>
+          <div>{{ convertToMoneyString(getAmount(selectedBudget)) }}</div>
         </v-list-item-content>
       </v-list-item>
 
@@ -32,7 +32,7 @@
       <v-list-item>
         <v-list-item-content>Reimbursed:</v-list-item-content>
         <v-list-item-content class="text-right">
-          <div>{{ getReimbursed(selectedBudget) | moneyValue }}</div>
+          <div>{{ convertToMoneyString(getReimbursed(selectedBudget)) }}</div>
         </v-list-item-content>
       </v-list-item>
 
@@ -40,7 +40,7 @@
       <v-list-item>
         <v-list-item-content>Pending:</v-list-item-content>
         <v-list-item-content class="text-right">
-          <div>{{ getPending(selectedBudget) | moneyValue }}</div>
+          <div>{{ convertToMoneyString(getPending(selectedBudget)) }}</div>
         </v-list-item-content>
       </v-list-item>
 
@@ -48,10 +48,10 @@
       <v-list-item>
         <v-list-item-content class="bold">Remaining:</v-list-item-content>
         <v-list-item-content v-if="noRemaining(selectedBudget)" class="text-right bold red--text">
-          <div>{{ calcRemaining(selectedBudget) | moneyValue }}</div>
+          <div>{{ convertToMoneyString(calcRemaining(selectedBudget)) }}</div>
         </v-list-item-content>
         <v-list-item-content v-else class="text-right bold black--text">
-          <div>{{ calcRemaining(selectedBudget) | moneyValue }}</div>
+          <div>{{ convertToMoneyString(calcRemaining(selectedBudget)) }}</div>
         </v-list-item-content>
       </v-list-item>
 
@@ -67,7 +67,7 @@
 </template>
 
 <script>
-import { isEmpty, moneyValue, monthDayYearFormat } from '@/utils/utils';
+import { isEmpty, convertToMoneyString, monthDayYearFormat } from '@/utils/utils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -174,6 +174,7 @@ export default {
   },
   methods: {
     calcRemaining,
+    convertToMoneyString,
     emit,
     getAmount,
     getReimbursed,
@@ -187,8 +188,7 @@ export default {
     'selectedBudget' // selected budget
   ],
   filters: {
-    monthDayYearFormat,
-    moneyValue
+    monthDayYearFormat
   },
   watch: {
     activator: function () {

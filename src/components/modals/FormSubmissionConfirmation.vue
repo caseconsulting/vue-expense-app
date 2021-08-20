@@ -6,22 +6,28 @@
         <v-card-actions>
           <v-spacer></v-spacer>
           <v-btn
-            color="gray darken-1"
+            id="submitNoBtn"
+            color="red"
             text
             @click.native="
-              emit('canceled');
+              emit(`canceled-${type}`);
               activate = false;
             "
+            :loading="!activate || submitting"
+            :disabled="!activate || submitting"
             >No</v-btn
           >
           <v-spacer></v-spacer>
           <v-btn
-            color="red"
+            id="submitYesBtn"
+            color="green darken-1"
             text
             @click.native="
-              emit('confirmed');
+              emit(`confirmed-${type}`);
               activate = false;
             "
+            :loading="!activate || submitting"
+            :disabled="!activate || submitting"
             >Yes</v-btn
           >
           <v-spacer></v-spacer>
@@ -62,11 +68,18 @@ export default {
     emit
   },
   props: [
-    'toggleSubmissionConfirmation' // dialog activator
+    'submitting',
+    'toggleSubmissionConfirmation', // dialog activator,
+    'type' //sends appropriate emits based on where its called
   ],
   watch: {
     toggleSubmissionConfirmation: function () {
-      this.activate = true;
+      this.activate = this.toggleSubmissionConfirmation;
+    },
+    activate: function () {
+      if (!this.activate) {
+        emit('closeModal');
+      }
     }
   }
 };

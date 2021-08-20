@@ -19,6 +19,10 @@
 
 <script>
 import { isLoggedIn, login, getRole } from '@/utils/auth';
+import api from '../shared/api';
+const moment = require('moment-timezone');
+moment.tz.setDefault('America/New_York');
+const login_format = 'MMM Do, YYYY HH:mm:ss';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -31,6 +35,7 @@ import { isLoggedIn, login, getRole } from '@/utils/auth';
  */
 async function created() {
   if (this.isLoggedIn()) {
+    recordLogin();
     // logged in
     if (getRole() === 'admin') {
       // user's role is admin
@@ -40,6 +45,12 @@ async function created() {
       this.$router.push('home');
     }
   }
+}
+
+async function recordLogin() {
+  let employee = await api.getUser();
+  employee.lastLogin = moment(new Date()).format(login_format);
+  await api.updateItem(api.EMPLOYEES, employee);
 } // created
 
 // |--------------------------------------------------|
@@ -52,7 +63,8 @@ export default {
   created,
   methods: {
     login,
-    isLoggedIn
+    isLoggedIn,
+    recordLogin
   }
 };
 </script>

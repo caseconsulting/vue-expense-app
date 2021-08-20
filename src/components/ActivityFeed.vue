@@ -6,17 +6,29 @@
         <h3>Activity Feed</h3>
       </v-card-title>
     </v-card>
-    <v-card class="overflow-y-auto" max-height="850px">
+    <v-card class="overflow-y-hidden" max-height="850px">
+      <v-card-text class="pb-0">
+        <v-autocomplete
+          :items="filters"
+          multiple
+          v-model="activeFilters"
+          filled
+          chips
+          deletable-chips
+          clearable
+          :search-input.sync="searchString"
+          @change="searchString = ''"
+        >
+        </v-autocomplete>
+      </v-card-text>
       <!-- Loading Bar -->
       <div v-if="this.loading" class="py-4">
         <v-progress-linear :indeterminate="true"></v-progress-linear>
       </div>
-
-      <!-- Timeline -->
       <v-timeline v-else dense class="pt-0">
-        <v-virtual-scroll :items="events" :item-height="this.itemHeight" height="850" bench="2">
+        <!-- Timeline -->
+        <v-virtual-scroll :items="filterEvents()" :item-height="this.itemHeight" height="700" bench="2">
           <template v-slot="{ item }">
-            <div class="pa-4"></div>
             <v-tooltip
               open-on-hover
               top
@@ -119,6 +131,25 @@ function itemHeight() {
   }
 } // itemHeight
 
+/**
+ * Used to remove events that the user has filtered out,
+ * then the remaining events will be displayed in the
+ * activity feed
+ */
+function filterEvents() {
+  this.events.forEach((event) => {
+    if (!this.filters.includes(event.type)) {
+      this.filters.push(event.type);
+      this.activeFilters.push(event.type);
+    }
+  });
+  var filteredEvents = _.filter(this.events, (event) => {
+    if (this.activeFilters.includes(event.type)) {
+      return true;
+    }
+  });
+  return filteredEvents;
+}
 // |--------------------------------------------------|
 // |                                                  |
 // |                     METHODS                      |
@@ -148,14 +179,21 @@ function getURL(item) {
 export default {
   data() {
     return {
-      dense: false
+      dense: false,
+      filters: [],
+      activeFilters: [],
+      searchString: ''
     };
   },
   computed: {
     itemHeight
   },
   methods: {
-    getURL
+    getURL,
+    filterEvents
+  },
+  created() {
+    this.filterEvents();
   },
   props: ['events', 'loading']
 };
@@ -168,5 +206,10 @@ export default {
 
 .v-tooltip__content.menuable__content__active {
   opacity: 1 !important;
+}
+
+.v-timeline::before {
+  top: -29px;
+  height: calc(100% - -25px);
 }
 </style>

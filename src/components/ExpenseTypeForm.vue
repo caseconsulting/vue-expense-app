@@ -12,6 +12,7 @@
         <!-- Budget Name -->
         <v-text-field
           v-model="editedExpenseType.budgetName"
+          id="budgetName"
           :rules="requiredRules"
           label="Budget Name"
           data-vv-name="Budget Name"
@@ -39,18 +40,26 @@
         <!-- Budget Amount -->
         <v-text-field
           prefix="$"
-          v-model="editedExpenseType.budget"
+          v-model="budgetFormatted"
+          id="budgetAmount"
           :rules="budgetRules"
           label="Budget"
           data-vv-name="Budget"
+          @blur="editedExpenseType.budget = parseBudget(budgetFormatted)"
+          @input="formatBudget(budgetFormatted)"
         ></v-text-field>
 
         <!-- Flags -->
         <v-container class="my-3 pb-4" grid-list-md text-xs-center>
           <v-row>
             <v-col cols="6">
-              <v-checkbox label="Overdraft Flag" v-model="editedExpenseType.odFlag"></v-checkbox>
-
+              <v-checkbox
+                label="Overdraft Flag"
+                :disabled="!!model.id && model.odFlag"
+                v-model="editedExpenseType.odFlag"
+                persistent-hint
+                :hint="odFlagHint()"
+              ></v-checkbox>
               <v-checkbox label="Recurring Flag" v-model="editedExpenseType.recurringFlag"></v-checkbox>
             </v-col>
 
@@ -64,9 +73,10 @@
 
         <!-- Start Date -->
         <v-menu
+          v-model="showStartMenu"
           v-if="!editedExpenseType.recurringFlag"
           :rules="requiredRules"
-          :close-on-content-click="true"
+          :close-on-content-click="false"
           :nudge-right="40"
           transition="scale-transition"
           offset-y
@@ -76,25 +86,34 @@
           <template v-slot:activator="{ on }">
             <v-text-field
               v-model="startDateFormatted"
-              :rules="dateRules"
+              id="startDate"
+              :rules="dateRules.concat(startDateRules)"
               label="Start Date"
               hint="MM/DD/YYYY format"
+              v-mask="'##/##/####'"
               persistent-hint
               prepend-icon="event"
               @blur="editedExpenseType.startDate = parseDate(startDateFormatted)"
+              @input="showStartMenu = false"
               v-on="on"
             ></v-text-field>
           </template>
 
-          <v-date-picker v-model="editedExpenseType.startDate" no-title></v-date-picker>
+          <v-date-picker
+            v-model="editedExpenseType.startDate"
+            @input="showStartMenu = false"
+            :max="editedExpenseType.endDate"
+            no-title
+          ></v-date-picker>
         </v-menu>
 
         <!-- End Date -->
 
         <v-menu
+          v-model="showEndMenu"
           v-if="!editedExpenseType.recurringFlag"
           :rules="requiredRules"
-          :close-on-content-click="true"
+          :close-on-content-click="false"
           :nudge-right="40"
           transition="scale-transition"
           offset-y
@@ -104,22 +123,31 @@
           <template v-slot:activator="{ on }">
             <v-text-field
               v-model="endDateFormatted"
-              :rules="dateRules"
+              id="endDate"
+              :rules="dateRules.concat(endDateRules)"
               label="End Date"
               hint="MM/DD/YYYY format"
+              v-mask="'##/##/####'"
               persistent-hint
               prepend-icon="event"
               @blur="editedExpenseType.endDate = parseDate(endDateFormatted)"
+              @input="showEndMenu = false"
               v-on="on"
             ></v-text-field>
           </template>
 
-          <v-date-picker v-model="editedExpenseType.endDate" no-title></v-date-picker>
+          <v-date-picker
+            v-model="editedExpenseType.endDate"
+            @input="showEndMenu = false"
+            :min="editedExpenseType.startDate"
+            no-title
+          ></v-date-picker>
         </v-menu>
 
         <!-- Description -->
         <v-textarea
           v-model="editedExpenseType.description"
+          id="description"
           :rules="requiredRules"
           label="Description "
           data-vv-name="Description "
@@ -139,48 +167,65 @@
         <!-- Accessibility -->
         <div style="color: dimgray">
           Employee Access
-          <v-btn to="/help/expenseTypes" class="mb-4" x-small icon><v-icon color="#3f51b5">info</v-icon></v-btn>
+          <v-btn @click="toFAQ()" class="mb-4" x-small icon><v-icon color="#3f51b5">info</v-icon></v-btn>
         </div>
-
-        <v-radio-group v-model="editedExpenseType.accessibleBy" class="smallRadio ma-0" row mandatory>
-          <v-radio label="All" value="ALL"></v-radio>
-
-          <v-radio label="Full" value="FULL"></v-radio>
-
-          <v-radio label="Full Time" value="FULL TIME"></v-radio>
-
-          <v-radio label="Custom" value="CUSTOM"></v-radio>
-        </v-radio-group>
-
+        <v-row>
+          <v-checkbox
+            label="Full-time"
+            value="FullTime"
+            v-model="editedExpenseType.accessibleBy"
+            :rules="checkBoxValid"
+            class="shrink ml-3"
+          ></v-checkbox>
+          <v-checkbox
+            label="Part-time"
+            value="PartTime"
+            v-model="editedExpenseType.accessibleBy"
+            :rules="checkBoxValid"
+            class="shrink ml-6"
+          ></v-checkbox>
+          <v-checkbox
+            label="Intern"
+            value="Intern"
+            v-model="editedExpenseType.accessibleBy"
+            :rules="checkBoxValid"
+            class="shrink ml-6"
+          ></v-checkbox>
+          <v-checkbox
+            label="Custom"
+            value="Custom"
+            v-model="editedExpenseType.accessibleBy"
+            :rules="checkBoxValid"
+            class="shrink ml-6"
+          ></v-checkbox>
+        </v-row>
+        <p id="error" v-if="checkBoxRule">At least one checkbox must be checked</p>
         <!-- Employee Access List -->
         <v-autocomplete
-          v-if="editedExpenseType.accessibleBy == 'CUSTOM'"
+          v-if="editedExpenseType.accessibleBy && editedExpenseType.accessibleBy.includes('Custom')"
           v-model="customAccess"
           :items="activeEmployees"
           no-data-text="No Employees Available"
           item-color="gray"
           multiple
+          :rules="customAccessRules"
           chips
           clearable
           small-chips
           deletable-chips
-          single-line
           class="mt-0 pt-0"
+          :search-input.sync="searchString"
+          @change="searchString = ''"
         >
           <template v-slot:label>
-            <span class="grey--text caption">No Employee Access</span>
-          </template>
-
-          <template v-slot:selection="{ index }">
-            <span v-if="index === 0 && customAccess.length == 1" class="grey--text caption"
-              >Accessible by {{ customAccess.length }} employee</span
-            >
-
-            <span v-else-if="index === 0" class="grey--text caption"
-              >Accessible by {{ customAccess.length }} employees</span
+            <span v-if="customAccess.length == 0" class="grey--text caption">No custom employee access</span>
+            <span v-else class="grey--text caption"
+              >{{ customAccess.length }} employee(s) have custom access to this expense type</span
             >
           </template>
         </v-autocomplete>
+
+        <v-switch v-model="editedExpenseType.proRated" label="Should this expense be pro-rated?"></v-switch>
 
         <!-- Require Recipient -->
         <v-switch v-model="editedExpenseType.hasRecipient" label="Does this expense type have a recipient?"></v-switch>
@@ -240,18 +285,19 @@
           outlined
           class="ma-2"
           color="success"
+          id="submitButton"
           :loading="submitting"
-          @click="
-            submitForm = !submitForm;
-            submitting = true;
-          "
+          @click="submitForm = true"
           :disabled="!valid"
         >
           <icon class="mr-1" name="save"></icon>Submit
         </v-btn>
         <!-- End Buttons -->
       </v-form>
-      <form-submission-confirmation :toggleSubmissionConfirmation="submitForm"></form-submission-confirmation>
+      <form-submission-confirmation
+        type="type"
+        :toggleSubmissionConfirmation="submitForm"
+      ></form-submission-confirmation>
     </v-container>
   </v-card>
 </template>
@@ -262,6 +308,9 @@ import FormSubmissionConfirmation from '@/components/modals/FormSubmissionConfir
 import _ from 'lodash';
 import { v4 as uuid } from 'uuid';
 import { formatDate, isEmpty, parseDate } from '@/utils/utils';
+import { mask } from 'vue-the-mask';
+const moment = require('moment-timezone');
+moment.tz.setDefault('America/New_York');
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -328,6 +377,8 @@ function clearForm() {
   this.startDateFormatted = null;
   this.endDateFormatted = null;
   this.customAccess = [];
+  this.editedExpenseType.id = null;
+  this.editedExpenseType.accessibleBy = ['FullTime'];
 } // clearForm
 
 /**
@@ -340,14 +391,24 @@ function emit(msg) {
 } // emit
 
 /**
- * Checks if all employees have access to an expense type and at a percentage rate. Return true if 'ALL' is selected,
- * otherwise returns false.
- *
- * @return boolean - all employees have access at a percentage rate
+ * Formats the budget on the form for a nicer display.
  */
-function isAllSelected() {
-  return this.editedExpenseType.accessibleBy == 'ALL';
-} // isAllSelected
+function formatBudget() {
+  this.editedExpenseType.budget = parseBudget(this.budgetFormatted);
+  if (Number(this.editedExpenseType.budget)) {
+    this.budgetFormatted = Number(this.editedExpenseType.budget).toLocaleString().toString();
+  }
+} // formatBudget
+
+// /**
+//  * Checks if all employees have access to an expense type and at a percentage rate. Return true if 'ALL' is selected,
+//  * otherwise returns false.
+//  *
+//  * @return boolean - all employees have access at a percentage rate
+//  */
+// function isAllSelected() {
+//   return this.editedExpenseType.accessibleBy == 'ALL';
+// } // isAllSelected
 
 /**
  * Checks if custom access of employees have acess to an expense type at a percentage rate. Returns true if 'CUSTOM'
@@ -356,18 +417,18 @@ function isAllSelected() {
  * @return boolean - custom employees have access
  */
 function isCustomSelected() {
-  return this.editedExpenseType.accessibleBy == 'CUSTOM';
+  return this.editedExpenseType.accessibleBy && this.editedExpenseType.accessibleBy.includes('Custom');
 } // isCustomSelected
 
-/**
- * Checks if all employees have access to an expense type and at a full rate. Return true if 'FULL' is selected,
- * otherwise returns false.
- *
- * @return boolean - all employees have access at a full rate
- */
-function isFullSelected() {
-  return this.editedExpenseType.accessibleBy == 'FULL';
-} // isFullSelected
+// /**
+//  * Checks if all employees have access to an expense type and at a full rate. Return true if 'FULL' is selected,
+//  * otherwise returns false.
+//  *
+//  * @return boolean - all employees have access at a full rate
+//  */
+// function isFullSelected() {
+//   return this.editedExpenseType.accessibleBy == 'FULL';
+// } // isFullSelected
 
 /**
  * Checks if all full time employees have access to an expense type. Return true if 'FULL TIME' is selected, otherwise
@@ -376,8 +437,35 @@ function isFullSelected() {
  * @return boolean - all full time employees have access
  */
 function isFullTimeSelected() {
-  return this.editedExpenseType.accessibleBy == 'FULL TIME';
+  return this.editedExpenseType.accessibleBy.includes('FullTime');
 } // isFullTimeSelected
+
+function odFlagHint() {
+  if (!!this.model.id && this.model.odFlag) {
+    return 'Cannot be undone';
+  } else if (this.editedExpenseType.odFlag) {
+    return 'Cannot be undone once submitted';
+  } else {
+    return '';
+  }
+}
+
+/**
+ * Parses the budget to get rid of commas.
+ * @returns String - The budget without formatting
+ */
+function parseBudget(budget) {
+  if (budget && !_.isEmpty(budget)) {
+    return budget.replace(/[,\s]/g, '');
+  } else {
+    return budget;
+  }
+} // parseBudget
+
+function toFAQ() {
+  let faq = this.$router.resolve({ path: '/help/expenseTypes' });
+  window.open(faq.href, '_blank');
+}
 
 /**
  * Removes a category from the list of expense type categories.
@@ -400,7 +488,7 @@ async function submit() {
 
   // set accessibleBy based on access radio
   if (this.isCustomSelected()) {
-    this.editedExpenseType.accessibleBy = this.customAccess;
+    this.editedExpenseType.accessibleBy = _.union(this.editedExpenseType.accessibleBy, this.customAccess); // merge unique vals
   }
 
   // convert budget input into a floating point number
@@ -424,6 +512,10 @@ async function submit() {
   if (this.editedExpenseType.isInactive == null) {
     // set is inactive flag to false if checkbox is null
     this.editedExpenseType.isInactive = false;
+  }
+
+  if (this.editedExpenseType.proRated == null) {
+    this.editedExpenseType.proRated = false;
   }
 
   if (this.$refs.expenseTypeForm && this.$refs.expenseTypeForm.validate()) {
@@ -509,11 +601,13 @@ function toggleRequireURL() {
  * Gets and sets all employees.
  */
 async function created() {
-  window.EventBus.$on('confirmed', () => {
+  window.EventBus.$on('confirmed-type', () => {
+    this.submitForm = false;
     this.submit();
   });
-  window.EventBus.$on('canceled', () => {
+  window.EventBus.$on('canceled-type', () => {
     this.submitting = false;
+    this.submitForm = false;
   });
   // get all employees
   let employees = await api.getItems(api.EMPLOYEES);
@@ -550,6 +644,7 @@ export default {
   data() {
     return {
       activeEmployees: null, // list of active employees
+      budgetFormatted: '',
       budgetRules: [
         (v) => !!v || 'Budget amount is required',
         (v) => parseFloat(v, 10) > 0 || 'Budget must be greater than 0.',
@@ -560,38 +655,76 @@ export default {
       campfires: [], // basecamp campfires
       categories: [], // list of expense type categories
       categoryInput: null, // category combobox input
+      checkBoxValid: [
+        () => {
+          return !this.checkBoxRule;
+        }
+      ],
       customAccess: [], // list of employees with custom access
+      customAccessRules: [
+        () => {
+          return this.customAccess.length > 0 || 'Select at least one employee or uncheck the Custom checkbox';
+        }
+      ],
       dateRules: [
         (v) => !isEmpty(v) || 'Date must be valid. Format: MM/DD/YYYY',
-        (v) => (!isEmpty(v) && /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v)) || 'Date must be valid. Format: MM/DD/YYYY'
+        (v) => (!isEmpty(v) && /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v)) || 'Date must be valid. Format: MM/DD/YYYY',
+        (v) => moment(v, 'MM/DD/YYYY', true).isValid() || 'Date must be valid'
       ], // rule for a required date
+      startDateRules: [
+        (v) => {
+          return !isEmpty(v) && moment(v, 'MM/DD/YYYY', true).isValid() && this.editedExpenseType.endDate
+            ? moment(v, 'MM/DD/YYYY', true).isSameOrBefore(moment(this.editedExpenseType.endDate)) ||
+                'Start date must be at or before end date'
+            : true;
+        }
+      ],
+      endDateRules: [
+        (v) => {
+          return !isEmpty(v) && moment(v, 'MM/DD/YYYY', true).isValid() && this.editedExpenseType.startDate
+            ? moment(v, 'MM/DD/YYYY', true).isSameOrAfter(moment(this.editedExpenseType.startDate)) ||
+                'End date must be at or after start date'
+            : true;
+        }
+      ],
       endDateFormatted: null, // formatted end date
       editedExpenseType: _.cloneDeep(this.model), //used to store edits made to an expense type or when creating new expense type
       requiredRules: [(v) => !isEmpty(v) || 'This field is required'],
+      searchString: '',
+      showStartMenu: false, // boolean for showing date picker
+      showEndMenu: false, // boolean for showing date picker
       startDateFormatted: null, // formatted start date
       submitting: false, // submitting form
       submitForm: false, //triggers submit form modal when changed
       valid: false // form is valid
     };
   },
+  directives: { mask },
   methods: {
     checkRequireURL,
     checkSelection,
     clearForm,
     emit,
+    formatBudget,
     formatDate,
-    isAllSelected,
     isCustomSelected,
     isEmpty,
-    isFullSelected,
     isFullTimeSelected,
+    odFlagHint,
+    parseBudget,
     parseDate,
     removeCategory,
     submit,
+    toFAQ,
     toggleRequireURL,
     toggleShowAllCategories
   },
   props: ['model'], // expense type to be created/updated
+  computed: {
+    checkBoxRule() {
+      return !(this.editedExpenseType.accessibleBy && this.editedExpenseType.accessibleBy.length > 0);
+    }
+  },
   watch: {
     'model.id': function () {
       this.editedExpenseType = _.cloneDeep(this.model); //set editedExpense to new value of model
@@ -606,24 +739,9 @@ export default {
           return category.name;
         });
       }
-    },
-    'editedExpenseType.accessibleBy': function (val) {
-      if (!this.submitting && this.editedExpenseType.accessibleBy) {
-        if (!['ALL', 'FULL TIME', 'FULL', 'CUSTOM'].includes(val)) {
-          // set employee access form field when populating form with an existing expense type
-          // filter out employees that do not have access
-          this.customAccess = _.filter(this.activeEmployees, (employee) => {
-            return this.editedExpenseType.accessibleBy.includes(employee.value);
-          });
-
-          // map employee values
-          this.customAccess = _.map(this.customAccess, (employee) => {
-            return employee.value;
-          });
-
-          this.editedExpenseType.accessibleBy = 'CUSTOM';
-        }
-      }
+      this.editedExpenseType.budget = this.model.budget;
+      this.budgetFormatted = this.editedExpenseType.budget;
+      this.formatBudget();
     },
     categories: function (val) {
       // limit categories to less than 10
@@ -674,6 +792,11 @@ export default {
 </script>
 
 <style scoped>
+#error {
+  color: #ff5252;
+  font-size: 12px;
+}
+
 .smallRadio {
   margin: 0 !important;
 }

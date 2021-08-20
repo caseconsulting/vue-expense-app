@@ -2,6 +2,9 @@
 node_modules
 /dist
 
+/tests_output
+chromedriver.log
+
 tests/e2e/reports/
 tests/e2e/screenshots/
 tests/e2e/videos/

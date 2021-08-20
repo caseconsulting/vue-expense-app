@@ -6,8 +6,11 @@ import LoginFailed from '@/views/LoginFailed.vue';
 import ExpenseTypes from '@/views/ExpenseTypes.vue';
 import Employees from '@/views/Employees.vue';
 import Employee from '@/views/Employee.vue';
+import StatsDashboard from '@/views/StatsDashboard.vue';
+import Audit from '@/views/Audit.vue';
 import Expenses from '@/views/MyExpenses.vue';
 import Help from '@/views/Help.vue';
+import Reports from '@/views/Reports.vue';
 import Callback from '@/views/Callback';
 import EmployeeHome from '@/views/MyBudgets.vue';
 import Home from '@/views/Home.vue';
@@ -15,7 +18,8 @@ import Blog from '@/views/Blog.vue';
 import BlogPreview from '@/views/BlogPreview.vue';
 import PostEditor from '@/views/PostEditor.vue';
 import TrainingAnalytics from '@/views/TrainingAnalytics';
-import { requireAuth, isAdmin } from '@/utils/auth';
+import PageNotFound from '@/views/PageNotFound';
+import { requireAuth, isAdmin, isAdminOrManager } from '@/utils/auth';
 import multiguard from 'vue-router-multiguard';
 
 Vue.use(Router);
@@ -49,6 +53,24 @@ const router = new Router({
       path: '/employees',
       name: 'employees',
       component: Employees,
+      beforeEnter: requireAuth
+    },
+    {
+      path: '/audits',
+      name: 'audits',
+      component: Audit,
+      beforeEnter: multiguard([requireAuth, isAdminOrManager])
+    },
+    {
+      path: '/stats',
+      name: 'stats',
+      component: StatsDashboard,
+      beforeEnter: requireAuth
+    },
+    {
+      path: '/reports',
+      name: 'reports',
+      component: Reports,
       beforeEnter: requireAuth
     },
     {
@@ -121,6 +143,14 @@ const router = new Router({
       path: '/postEditor/:id',
       name: 'postEditor',
       component: PostEditor,
+      beforeEnter: requireAuth
+    },
+    //Below catch-all code works for Vue 2
+    //For Vue 3 change the path variable to path: '/:pathMatch(.*)*'
+    {
+      path: '*',
+      name: 'pageNotFound',
+      component: PageNotFound,
       beforeEnter: requireAuth
     }
   ]

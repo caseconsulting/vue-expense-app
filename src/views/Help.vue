@@ -2,7 +2,7 @@
   <v-container>
     <!-- Help Title -->
     <div>
-      <h1 style="text-align: center">HELP</h1>
+      <h1 style="text-align: center" id="help-title">HELP</h1>
     </div>
     <br />
     <br />
@@ -14,17 +14,20 @@
       <v-expansion-panels accordion v-model="panel">
         <v-expansion-panel v-for="section in sections" :key="section[0]">
           <!-- Header -->
-          <v-expansion-panel-header v-if="section[1] == role || role == 'admin' || section[1] == 'user'">
+          <v-expansion-panel-header :id="section[0]" v-if="canView(section[1])">
             {{ section[0] }}
           </v-expansion-panel-header>
 
           <!-- Content -->
-          <v-expansion-panel-content v-if="section[1] == role || role == 'admin' || section[1] == 'user'">
+          <v-expansion-panel-content v-if="canView(section[1])">
             <v-card>
               <v-card-text class="grey lighten-3">
-                <li v-for="ques in section" :key="ques.title">
-                  <div v-if="ques.title" style="padding-bottom: 10px">
-                    <body style="font-style: italic">
+                <li v-for="(ques, index) in section" :key="ques.title">
+                  <div
+                    v-if="ques.title && (!ques.employeeRole || canView(ques.employeeRole))"
+                    style="padding-bottom: 10px"
+                  >
+                    <body style="font-style: italic" :id="section[0] + '-' + index">
                       <icon name="space-shuttle" /> {{ ques.title }}
                     </body>
                     {{ ques.body }}
@@ -64,6 +67,19 @@ async function created() {
 
 // |--------------------------------------------------|
 // |                                                  |
+// |                     METHODS                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * Determine if userr can view.
+ */
+function canView(qRole) {
+  return qRole == this.role || this.role == 'admin' || qRole == 'user';
+} // created
+
+// |--------------------------------------------------|
+// |                                                  |
 // |                      EXPORT                      |
 // |                                                  |
 // |--------------------------------------------------|
@@ -75,7 +91,7 @@ export default {
       panel: null,
       role: '', // employee role
       sections: {
-        tsheetsHours: [
+        quickBooksTimeHours: [
           'Hours',
           'user',
           {
@@ -88,9 +104,9 @@ export default {
               'The Remaining hours for the month divided by the Days Remaining. This can be changed by editing the Days Remaining. Days Remaining includes today.'
           },
           {
-            title: 'What hours fall under Completed, Today, and Futute?',
+            title: 'What hours fall under Completed, Today, and Future?',
             body:
-              "Completed hours are any hours logged in TSheets from the first day of the month through the end of the day yesterday. Today's hours are any hours logged in TSheet at any point today. Future hours are any hours logged in TSheets between the beginning of the day tomorrow and the last day of the month."
+              "Completed hours are any hours logged in QuickBooks Time from the first day of the month through the end of the day yesterday. Today's hours are any hours logged in QuickBooks Time at any point today. Future hours are any hours logged in QuickBooks Time between the beginning of the day tomorrow and the last day of the month."
           },
           {
             title: 'Why does my Avg Hours/Day or Days Remaining seem wrong?',
@@ -105,10 +121,10 @@ export default {
           {
             title: 'Why do I not see some of my hours for today?',
             body:
-              'If you are using the clock in function on TSheets, those hours may still be accumulating. Try refreshing the page.'
+              'If you are using the clock in function on QuickBooks Time, those hours may still be accumulating. Try refreshing the page.'
           }
         ],
-        employeeHome: [
+        myBudgets: [
           'My Budgets',
           'user',
           {
@@ -176,11 +192,17 @@ export default {
           {
             title: "Why can't I delete an expense?",
             body: 'An expense cannot be deleted if it has been reimbursed or you are editing an expense.'
+          },
+          {
+            title: 'How to back-out of an expense',
+            body:
+              'Admins may create expenses with a negative dollar amount. Negative expenses can be used as a short-cut way to unreimburse an expense that has already been reimbursed in a previous anniversary year and was overdrafted. All expenses to be unreimbursed in the current anniversary year however, should be unreimbursed using the unriembursed button on the expense page. ',
+            employeeRole: 'admin'
           }
         ],
         expenseTypes: [
           'Expense Types',
-          'admin',
+          'user',
           {
             title: 'What is a recurring expense type?',
             body:
@@ -192,49 +214,86 @@ export default {
               'This allows an expense type to be charged up to twice the defined amount. Subtracting the overage from next years budget.'
           },
           {
+            title: 'What are categories?',
+            body:
+              'Admins may create up to 10 different categories for employees to choose from when submitting and expense. Categories are unique to each expense type and users will be required to select one category if the expense type has them. ',
+            employeeRole: 'admin'
+          },
+          {
             title: "Why can't I delete an expense type?",
             body:
-              'An expense type cannot be deleted if there are expenses for that expense type or you are editing an expense type.'
+              'An expense type cannot be deleted if there are expenses for that expense type or you are editing an expense type.',
+            employeeRole: 'admin'
           },
           {
             title: 'What are the employee access options for expense types?',
             body:
-              'Expense types accessible by All will provide all employees access to a prorated budget based on their work status. Expense types accessible by Full will provide both full time and part time employees with access to 100% of the budget. Expense types accessible by Full Time will provide only full time employees with access to the budget. Expense types accessible by Custom will provide the selected employees access to a prorated budget based on their work status.'
+              'There are 4 available employee access options to choose from, Full-time, Part-time, Intern, and Custom. The Full-time access option allow the expense type to be viewed and accessed by all employees that are full time. The Part-time option enables the expense type to be used for those who are part-time and have a percentage less than 100%. The Intern option allows the expense type to be viewed to those that have the Intern role. Finally, the Custom option allows you to pick one or more individuals to view the expense type regardless of their role.',
+            employeeRole: 'admin'
+          },
+          {
+            title: 'What does the "Should the expense be pro-rated?" switch mean?',
+            body:
+              'By toggling this switch, it would mean that all part-time employees that can access the expense type would have a percentage of the budget amount based on their part-time percentage.',
+            employeeRole: 'admin'
+          },
+          {
+            title: 'What does the "Does this expense type have a recipient?" switch mean?',
+            body:
+              'This would mean that upon creating an expense for this expense type, the user would have to assign someone else within the company to receive the amount provided within the expense.',
+            employeeRole: 'admin'
+          },
+          {
+            title: 'What does the "Have this expense type show on the company feed?" switch mean?',
+            body:
+              'When a user creates an expense and after being reimbursed, it will display info about the expense on the activity feed in the Home page. This feature can be toggled off by the user when creating an expense or by the person reimbursing the expense.',
+            employeeRole: 'admin'
+          },
+          {
+            title: 'What does the "Require a url for this expense?" switch mean?',
+            body:
+              'When a user creates an expense, by default entering a url is optional. However, by enabling this feature, this would make entering a url mandatory.',
+            employeeRole: 'admin'
+          }
+        ],
+        reimbursements: [
+          'Reimbursements',
+          'admin',
+          {
+            title: 'How do I reimburse an expense?',
+            body:
+              'Select the expenses that you would like to reimburse by clicking the select box either on a row (to select all expenses for that employee under that expense type) or on each of their individual expenses. Next select the $ icon at the bottom left of the page and then confirm the reimbursement.'
           }
         ],
         employees: [
           'Employees',
-          'admin',
+          'user',
           {
             title: 'What is an Employee #?',
-            body: "An employee's ID number will be a user's hire order."
+            body:
+              "An employee's ID number will be a user's hire order. This number also corresponds to QuickBooks Time data."
           },
           {
-            title: 'What does it mean to mark an employee inactive?',
-            body: "This will freeze the user's ability to submit new expenses."
+            title: 'What is the manager role for?',
+            body:
+              'Managers have the same access as a user but can also edit or view any employee data. They should have the same access as admins on the employee pages.',
+            employeeRole: 'manager'
           },
-          {
-            title: "Why can't I delete an employee?",
-            body: 'An employee cannot be deleted if the employee has expenses or you are editing an employee.'
-          }
-        ],
-        forAdmins: [
-          'For Admins',
-          'admin',
           {
             title: 'What capabilities do Admins have?',
             body:
-              "Admins may view reimbursements, reimburse expenses, and create expense types, view each employee's budget home view, create new employees, and create expenses for other employees"
+              "Admins may create expenses for other employees, create expense types, view each employee's budget home view, create new employees, and have acess to view and create expense reimbursements ",
+            employeeRole: 'admin'
           },
           {
-            title: 'How do I reimburse an expense?',
-            body:
-              'Go to Reimbursements and select the expenses that you would like to reimburse by clicking the select box either on a row (to select all expenses for that employee under that expense type) or on each of their individual expenses. Next select the $ icon at the bottom left of the page and then confirm the reimbursement.'
+            title: 'What does it mean to mark an employee inactive?',
+            body: "This will freeze the user's ability to submit new expenses.",
+            employeeRole: 'manager'
           },
           {
-            title: 'What are categories?',
-            body:
-              'Admins may create up to 10 different categories for employees to choose from when submitting and expense. Categories are unique to each expense type and users will be required to select one category if the expense type has them. '
+            title: "Why can't I delete an employee?",
+            body: 'An employee cannot be deleted if the employee has expenses or you are editing an employee.',
+            employeeRole: 'manager'
           }
         ],
         knownIssues: [
@@ -247,6 +306,9 @@ export default {
         ]
       } // faq sections
     };
+  },
+  methods: {
+    canView
   }
 };
 </script>

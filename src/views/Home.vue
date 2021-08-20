@@ -1,66 +1,105 @@
 <template>
   <v-container class="my-3">
-    <v-row class="pb-4">
-      <!-- Title -->
-      <v-col cols="12" md="6">
-        <v-row class="pt-6" style="height: 100%" align="center" justify="center">
-          <h1>Hello, {{ employee.firstName }}!</h1>
-        </v-row>
-      </v-col>
-      <!-- Anniversary Date -->
+    <span v-if="loading">
+      <v-row>
+        <v-col cols="12" md="6">
+          <v-skeleton-loader class="my-3" type="list-item@2"></v-skeleton-loader>
+        </v-col>
+        <v-col cols="12" md="6" class="pa-4">
+          <v-skeleton-loader class="my-3" type="list-item@2"></v-skeleton-loader>
+        </v-col>
+      </v-row>
+      <v-row>
+        <v-col wrap cols="12" lg="6">
+          <v-col class="pa-4">
+            <v-skeleton-loader class="my-3" type="card-heading, list-item@6"></v-skeleton-loader>
+          </v-col>
+          <v-col class="pa-4">
+            <v-skeleton-loader class="my-3" type="card-heading, list-item@6"></v-skeleton-loader>
+          </v-col>
+        </v-col>
+        <v-col cols="12" lg="6">
+          <v-skeleton-loader class="my-3" type="card-heading, list-item@14"></v-skeleton-loader>
+        </v-col>
+      </v-row>
+      <v-row>
+        <v-col mt-0 class="pt-4">
+          <v-skeleton-loader class="my-3" type="card-heading, list-item@14"></v-skeleton-loader>
+        </v-col>
+      </v-row>
+    </span>
+    <span v-else>
+      <v-row class="pb-4">
+        <!-- Title -->
+        <v-col cols="12" md="6">
+          <v-row style="height: 80%" align="center" justify="center">
+            <h1 id="home-greeting">Hello, {{ employee.firstName }}!</h1>
+          </v-row>
+          <v-row justify="center">
+            <v-btn class="mb-10" @click="handleProfile()" color="#bc3825" dark>View Profile</v-btn>
+          </v-row>
+        </v-col>
+        <!-- Anniversary Date -->
 
-      <v-col cols="12" md="6" class="pa-4">
-        <v-card>
-          <v-card-title>
-            <!-- display the next anniversary date -->
-            <div>
-              <h3 class="pt-4 font-16">Anniversary Date: {{ getAnniversary }}</h3>
-              <div @mouseover="display = !display" @mouseleave="display = !display" class="pt-4 font-14">
-                <div v-if="display">Days Until: {{ getDaysUntil }}</div>
-                <div v-else>Seconds Until: {{ getSecondsUntil }}</div>
+        <v-col cols="12" md="6" class="pa-4">
+          <v-card>
+            <v-card-title>
+              <!-- display the next anniversary date -->
+              <div id="home-anniversary">
+                <h3 class="pt-4 font-16">Anniversary Date: {{ getAnniversary }}</h3>
+                <div @mouseover="display = !display" @mouseleave="display = !display" class="pt-4 font-14">
+                  <div v-if="display">Days Until: {{ getDaysUntil }}</div>
+                  <div v-else>Seconds Until: {{ getSecondsUntil }}</div>
+                </div>
               </div>
-            </div>
-            <v-spacer></v-spacer>
-          </v-card-title>
-        </v-card>
-      </v-col>
-    </v-row>
-    <v-row>
-      <v-col wrap cols="12" lg="6">
-        <!-- TSheets -->
-        <v-col class="pa-4">
-          <v-col v-if="loading" class="text-center">
-            <v-progress-circular indeterminate size="64" color="#bc3825"></v-progress-circular>
+              <v-spacer></v-spacer>
+            </v-card-title>
+          </v-card>
+        </v-col>
+      </v-row>
+      <v-row>
+        <v-col wrap cols="12" lg="6">
+          <!-- QuickBooksTime -->
+          <v-col class="pa-4">
+            <v-col v-if="loading" class="text-center">
+              <v-progress-circular indeterminate size="64" color="#bc3825"></v-progress-circular>
+            </v-col>
+            <v-col v-else class="pt-0 text-center">
+              <quick-books-time-data cols="12" lg="6"></quick-books-time-data>
+            </v-col>
           </v-col>
-          <v-col v-else class="pt-0 text-center">
-            <t-sheets-data cols="12" lg="6"></t-sheets-data>
+          <!-- Available Budgets -->
+          <div>
+            <v-col class="pa-4">
+              <v-col v-if="loading" text-center>
+                <v-progress-circular indeterminate size="64" color="#bc3825"></v-progress-circular>
+              </v-col>
+              <v-col v-else class="pt-0 text-center">
+                <available-budgets
+                  id="home-available-budgets"
+                  :employee="this.employee"
+                  :fiscalDateView="this.fiscalDateView"
+                ></available-budgets>
+              </v-col>
+            </v-col>
+          </div>
+        </v-col>
+        <!-- Activity Feed -->
+        <v-col cols="12" lg="6">
+          <v-col mt-0 class="pt-4">
+            <activity-feed id="home-activity-feed" :events="events" :loading="loading"></activity-feed>
           </v-col>
         </v-col>
-        <!-- Available Budgets -->
-        <v-col class="pa-4">
-          <v-col v-if="loading" text-center>
-            <v-progress-circular indeterminate size="64" color="#bc3825"></v-progress-circular>
+      </v-row>
+      <v-row>
+        <!-- Twitter Feed -->
+        <v-col>
+          <v-col mt-0 class="pt-4">
+            <twitter-feed id="home-twitter-feed" :tweets="tweets" :loading="loading"></twitter-feed>
           </v-col>
-          <v-col v-else class="pt-0 text-center">
-            <available-budgets :employee="this.employee" :fiscalDateView="this.fiscalDateView"></available-budgets>
-          </v-col>
         </v-col>
-      </v-col>
-      <!-- Activity Feed -->
-      <v-col cols="12" lg="6">
-        <v-col mt-0 class="pt-4">
-          <activity-feed :events="events" :loading="loading"></activity-feed>
-        </v-col>
-      </v-col>
-    </v-row>
-    <v-row>
-      <!-- Twitter Feed -->
-      <v-col>
-        <v-col mt-0 class="pt-4">
-          <twitter-feed :tweets="tweets" :loading="loading"></twitter-feed>
-        </v-col>
-      </v-col>
-    </v-row>
+      </v-row>
+    </span>
   </v-container>
 </template>
 
@@ -71,9 +110,9 @@ import AvailableBudgets from '@/components/AvailableBudgets.vue';
 import moment from 'moment-timezone';
 moment.tz.setDefault('America/New_York');
 import TwitterFeed from '@/components/TwitterFeed';
-import TSheetsData from '@/components/TSheetsData.vue';
 import _ from 'lodash';
 import { asyncForEach, isEmpty, isFullTime } from '@/utils/utils';
+import QuickBooksTimeData from '../components/QuickBooksTimeData.vue';
 
 const IsoFormat = 'YYYY-MM-DD';
 
@@ -200,6 +239,11 @@ async function createEvents() {
   this.aggregatedExpenses = eventData.expenses;
   this.scheduleEntries = _.flatten(eventData.schedules);
 
+  //we want to use their nicknames if they have one
+  this.employees.forEach((employee) => {
+    employee.firstName = employee.nickname ? employee.nickname : employee.firstName;
+  });
+
   //generate anniversaries
   let anniversaries = _.map(this.employees, (a) => {
     let hireDate = moment(a.hireDate, 'YYYY-MM-DD');
@@ -223,6 +267,7 @@ async function createEvents() {
         if (anniversary.isSame(hireDate, 'day')) {
           event.text = a.firstName + ' ' + a.lastName + ' has joined the Case Consulting team!'; //new hire message
           event.icon = 'user-plus';
+          event.type = 'New Hire';
           event.newCampfire = 'https://3.basecamp.com/3097063/buckets/171415/chats/29039726';
         } else {
           if (anniversary.diff(hireDate, 'year') == 1) {
@@ -237,6 +282,7 @@ async function createEvents() {
               ' years at Case Consulting!';
           }
           event.icon = 'glass-cheers';
+          event.type = 'Anniversary';
           event.congratulateCampfire = 'https://3.basecamp.com/3097063/buckets/171415/chats/29039726';
         }
         event.daysFromToday = now.startOf('day').diff(anniversary.startOf('day'), 'days');
@@ -279,6 +325,7 @@ async function createEvents() {
         event.text = b.firstName + ' ' + b.lastName + "'s" + ' birthday!';
       }
       event.icon = 'birthday-cake';
+      event.type = 'Birthday';
       event.color = 'orange';
       event.daysFromToday = now.startOf('day').diff(birthday.startOf('day'), 'days');
       event.birthdayCampfire = 'https://3.basecamp.com/3097063/buckets/171415/chats/29039726';
@@ -306,10 +353,12 @@ async function createEvents() {
       if (a.recipient) {
         event.congratulateCampfire = a.campfire;
         event.icon = 'thumbs-up';
+        event.type = 'Congratulate';
         event.color = 'purple';
       } else {
         event.campfire = a.campfire;
         event.icon = 'dollar-sign';
+        event.type = 'Expense';
         event.color = 'green';
       }
       if (!this.isEmpty(a.recipient)) {
@@ -337,11 +386,12 @@ async function createEvents() {
       return null;
     }
     if (startDate.startOf('day').isSame(endDate.startOf('day'), 'days')) {
-      event.text = `${a.title} is today!`;
+      event.text = `${a.title}`;
     } else {
       event.text = `${a.title} starts today until ${endDate.format('LL')}!`;
     }
     event.icon = 'calendar-alt';
+    event.type = 'Event';
     event.daysFromToday = now.startOf('day').diff(startDate.startOf('day'), 'days');
     if (event.daysFromToday < -6) {
       return null;
@@ -387,6 +437,14 @@ function getEventDateMessage(date) {
 async function getTweets() {
   this.tweets = await api.getCaseTimeline();
 } // getTweets
+
+/**
+ * Routes user to their employee page
+ */
+async function handleProfile() {
+  var user = await api.getUser();
+  this.$router.push(`/employee/${user.employeeNumber}`);
+}
 
 /**
  * Set and display an error action status in the snackbar.
@@ -500,8 +558,8 @@ export default {
   components: {
     ActivityFeed,
     AvailableBudgets,
-    TSheetsData,
-    TwitterFeed
+    TwitterFeed,
+    QuickBooksTimeData
   },
   computed: {
     getAnniversary,
@@ -534,16 +592,6 @@ export default {
       }
     };
   },
-  filters: {
-    moneyValue: (value) => {
-      return `${new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: 'USD',
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
-      }).format(value)}`;
-    }
-  },
   methods: {
     addOneSecondToActualTimeEverySecond,
     asyncForEach,
@@ -557,7 +605,8 @@ export default {
     isFullTime,
     refreshEmployee,
     showSuccessfulSubmit,
-    updateData
+    updateData,
+    handleProfile
   }
 };
 </script>

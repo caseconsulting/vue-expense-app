@@ -1,7 +1,15 @@
 <template>
   <div>
     <!-- Status Alert -->
-    <v-alert v-for="(alert, index) in alerts" :key="index" :type="alert.status" :color="alert.color" dense class="mb-1">
+    <v-alert
+      v-for="(alert, index) in alerts"
+      :key="index"
+      :type="alert.status"
+      :color="alert.color"
+      dense
+      class="mb-1"
+      id="alert"
+    >
       {{ alert.message }}
     </v-alert>
     <v-card class="mt-3">
@@ -15,6 +23,7 @@
           <v-autocomplete
             :items="employees"
             v-model="employee"
+            id="filterEmployee"
             item-text="text"
             label="Filter by Employee"
             clearable
@@ -33,8 +42,7 @@
         <v-data-table
           :headers="headers"
           :items="filteredItems"
-          :sort-by.sync="sortBy"
-          :sort-desc.sync="sortDesc"
+          :custom-sort="customSort"
           :expanded.sync="expanded"
           :loading="loading"
           :items-per-page.sync="itemsPerPage"
@@ -46,6 +54,7 @@
           <!-- Select item slot in data table -->
           <template v-slot:[`item.data-table-select`]="{ item }">
             <v-checkbox
+              id="itemCheckbox"
               :input-value="item.checkBox.all"
               :indeterminate="item.checkBox.indeterminate"
               primary
@@ -81,7 +90,7 @@
           </template>
           <!-- Item cost in data table slot -->
           <template v-slot:[`item.cost`]="{ item }">
-            <p id="money-team" style="margin-bottom: 0px">{{ getBudgetTotal(item.expenses) | moneyValue }}</p>
+            <p id="money-team" style="margin-bottom: 0px">{{ convertToMoneyString(getBudgetTotal(item.expenses)) }}</p>
           </template>
           <!-- Header select slot in data table -->
           <template v-slot:[`header.data-table-select`]>
@@ -144,7 +153,7 @@ moment.tz.setDefault('America/New_York');
 import ReimburseModal from '@/components/modals/ReimburseModal.vue';
 import UnrolledTableInfo from '@/components/UnrolledTableInfo.vue';
 import _ from 'lodash';
-import { asyncForEach, isEmpty, moneyValue } from '@/utils/utils';
+import { asyncForEach, isEmpty, convertToMoneyString } from '@/utils/utils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -169,6 +178,7 @@ function filteredItems() {
       return budget.employeeId === this.employee && budget.expenseTypeId === this.expenseType;
     }
   });
+  data.sort((a, b) => (a.lastName < b.lastName ? 1 : -1));
   return data;
 } // filteredItems
 
@@ -302,6 +312,39 @@ function createExpenses(aggregatedData) {
     return _.merge(expense, additionalAttributes);
   });
 } // createExpenses
+
+/**
+ * Custom sorter for each column in the table.
+ * @param items - a users buget item
+ * @param index - the index name of the array
+ * @param isDesc - true if the sorted is in descending order
+ * @return Array - the sorted array
+ */
+function customSort(items, index, isDesc) {
+  if (index[0] === 'employeeName') {
+    // sort by last name
+    if (!isDesc[0]) {
+      items.sort((a, b) => (a.lastName.toUpperCase() > b.lastName.toUpperCase() ? 1 : -1));
+    } else {
+      items.sort((a, b) => (b.lastName.toUpperCase() > a.lastName.toUpperCase() ? 1 : -1));
+    }
+  } else if (index[0] === 'cost') {
+    // sort by the total expenses per budget
+    if (!isDesc[0]) {
+      items.sort((a, b) => (getBudgetTotal(a.expenses) > getBudgetTotal(b.expenses) ? 1 : -1));
+    } else {
+      items.sort((a, b) => (getBudgetTotal(b.expenses) > getBudgetTotal(a.expenses) ? 1 : -1));
+    }
+  } else {
+    // sort alphabetically/numerically
+    if (!isDesc[0]) {
+      items.sort((a, b) => (a[index] > b[index] ? 1 : -1));
+    } else {
+      items.sort((a, b) => (b[index] > a[index] ? 1 : -1));
+    }
+  }
+  return items;
+} // customSort
 
 /**
  * Determine the state of the group check box based on expenses.
@@ -474,6 +517,8 @@ async function reimburseExpenses() {
     this.empBudgets = _.forEach(this.empBudgets, async (budget) => {
       return await _.forEach(budget.expenses, async (expense) => {
         if (expense.selected) {
+          //to remove the expense type data in the ExpenseTypeTotal modal
+          window.EventBus.$emit('expenseChange', expense);
           expense.reimbursedDate = moment().format('YYYY-MM-DD');
           expensesToReimburse.push(removeAggregateExpenseData(expense));
         }
@@ -778,22 +823,19 @@ export default {
     loading: true, // is loading
     pendingExpenses: [], // pending expenses
     reimbursing: false, // is reimbursing
-    sortBy: 'employeeName', // sort datatable items
-    sortDesc: false, // sort datatable items
     status: {
       statusType: undefined,
       statusMessage: '',
       color: ''
     } // reimburse status
   }),
-  filters: {
-    moneyValue
-  },
   methods: {
     asyncForEach,
     checkAllBoxes,
     clickedRow,
     constructAutoComplete,
+    convertToMoneyString,
+    customSort,
     determineShowOnFeed,
     displayError,
     emitSelectionChange,

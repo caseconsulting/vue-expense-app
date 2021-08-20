@@ -4,16 +4,20 @@ import { getAccessToken } from '@/utils/auth';
 const EXPENSE_TYPES = 'expense-types';
 const EXPENSES = 'expenses';
 const EMPLOYEES = 'employees';
+const EMSI = 'emsi';
 const TRAINING_URLS = 'training-urls';
 const UTILITY = 'utility';
 const BUDGETS = 'budgets';
 const URLS = 'training-urls';
-const TSHEETS = 'tSheets';
+const QUICK_BOOKS_TIME = 'tSheets';
 const TWITTER = 'twitter';
 const BASECAMP = 'basecamp';
 const BLOG = 'blog';
 const BLOG_FILE = 'blogFile';
+const HIPPO_LAB = 'hippoLabs';
+const GOOGLE_MAPS = 'googleMaps';
 const BLOG_ATTACHMENT = 'blogAttachment';
+const RESUME = 'resume';
 const API_HOSTNAME = API_CONFIG.apiHostname;
 const API_PORT = API_CONFIG.apiPort;
 const PORT = API_PORT === '443' ? '' : `:${API_PORT}`;
@@ -53,6 +57,23 @@ function getCountries() {
     .catch((err) => {
       return err;
     });
+}
+
+async function getTechSkills(tech) {
+  let techList = await execute('get', `/${EMSI}/getTechSkills/${tech}`);
+  let techNames = [];
+  if (techList.data) {
+    techNames = techList.data.map((a) => a.name);
+    //removes unnecessary paranthesis from tech name
+    //ex: Java (programming language) ==> Java
+    for (let i = 0; i < techNames.length; i++) {
+      if (techNames[i].includes('(')) {
+        techNames[i] = techNames[i].split(' (')[0];
+      }
+    }
+  }
+
+  return techNames;
 }
 
 function getAllActiveEmployeeBudgets(id) {
@@ -160,7 +181,33 @@ function getPictureFile(authorId, blogId, mainPicture) {
   return execute('get', `${BLOG_FILE}/${authorId}/${blogId}/${mainPicture}`);
 }
 
-async function extractText(file) {
+function getLocation(locationQuery) {
+  return execute('get', `${GOOGLE_MAPS}/getLocation/${locationQuery}`);
+}
+
+function getZipCode(addressId) {
+  return execute('get', `${GOOGLE_MAPS}/getZipCode/${addressId}`);
+}
+
+async function deleteResume(employeeId) {
+  // inject the accessToken for each request
+  let accessToken = getAccessToken();
+  return client({
+    method: 'delete',
+    url: `${RESUME}/${employeeId}`,
+    headers: {
+      Authorization: `Bearer ${accessToken}`
+    }
+  })
+    .then((response) => {
+      return response.data;
+    })
+    .catch(() => {
+      return null;
+    });
+}
+
+async function extractText(employeeId, file) {
   let formData = new FormData();
   formData.append('receipt', file);
 
@@ -169,7 +216,7 @@ async function extractText(file) {
 
   return client({
     method: 'put',
-    url: `/attachment/${file.name}`,
+    url: `/attachment/${employeeId}/${file.name}`,
     data: formData,
     headers: {
       Authorization: `Bearer ${accessToken}`
@@ -181,6 +228,62 @@ async function extractText(file) {
     .catch((err) => {
       return err;
     });
+}
+
+async function extractResumeText(employeeId, file) {
+  let formData = new FormData();
+  formData.append('resume', file);
+
+  // inject the accessToken for each request
+  let accessToken = getAccessToken();
+
+  return client({
+    method: 'put',
+    url: `/${RESUME}/${employeeId}`,
+    data: formData,
+    headers: {
+      Authorization: `Bearer ${accessToken}`
+    }
+  })
+    .then((response) => {
+      return response.data;
+    })
+    .catch((err) => {
+      return err;
+    });
+}
+
+async function getResume(employeeId) {
+  // inject the accessToken for each request
+  let accessToken = getAccessToken();
+  return client({
+    method: 'get',
+    url: `${RESUME}/${employeeId}`,
+    headers: {
+      Authorization: `Bearer ${accessToken}`
+    }
+  })
+    .then((response) => {
+      return response.data;
+    })
+    .catch(() => {
+      return null;
+    });
+
+  // try {
+  //   return await execute('get', `resume/${employeeId}`)
+  //     .then((res) => {
+  //       console.log(res + 'here1');
+  //       return res;
+  //     })
+  //     .catch((err) => {
+  //       console.log(err + 'here2');
+  //       return err;
+  //     });
+  // } catch (err) {
+  //   console.log(err);
+  //   return err;
+  // }
 }
 
 async function createAttachment(expense, file) {
@@ -238,13 +341,13 @@ function deleteBlogFile(blogPost) {
   );
 }
 
-//functions for tSheets
+//functions for QuickBooks time
 function getPTOBalances(employeeNumber) {
-  return execute('get', `/${TSHEETS}/getPTOBalances/${employeeNumber}`);
+  return execute('get', `/${QUICK_BOOKS_TIME}/getPTOBalances/${employeeNumber}`);
 }
 
 function getMonthlyHours(employeeNumber) {
-  return execute('get', `/${TSHEETS}/getMonthlyHours/${employeeNumber}`);
+  return execute('get', `/${QUICK_BOOKS_TIME}/getMonthlyHours/${employeeNumber}`);
 }
 function getTwitterToken() {
   return execute('get', `/${TWITTER}/getTwitterToken`);
@@ -261,6 +364,29 @@ function getModerationLabel(img) {
 
 function getKeyPhrases(data) {
   return execute('post', `${BLOG_ATTACHMENT}/getKeyPhrases`, data);
+}
+
+function uploadResume(employeeId, file) {
+  let formData = new FormData();
+  formData.append('resume', file);
+
+  // inject the accessToken for each request
+  let accessToken = getAccessToken();
+
+  return client({
+    method: 'post',
+    url: `/${RESUME}/${employeeId}`,
+    data: formData,
+    headers: {
+      Authorization: `Bearer ${accessToken}`
+    }
+  })
+    .then((response) => {
+      return response.data;
+    })
+    .catch((err) => {
+      return err;
+    });
 }
 
 async function uploadBlogAttachment(file) {
@@ -285,6 +411,27 @@ async function uploadBlogAttachment(file) {
     });
 }
 
+/**
+ * @param inputValue This is the query for the college
+ * @returns a list of colleges that match that query
+ */
+async function getColleges(inputValue) {
+  return execute('get', `/${HIPPO_LAB}/getColleges/${inputValue}`)
+    .then((response) => {
+      return response;
+    })
+    .catch(() => {
+      return [];
+    });
+  // let list = await execute('get', `http://universities.hipolabs.com/search?name=${inputValue}`);
+
+  // let finalColleges = [];
+  // for (let i = 0; i < list.length; i++) {
+  //   finalColleges.push(list[i].name);
+  // }
+  //return finalColleges;
+}
+
 export default {
   createAttachment,
   createBlogFile,
@@ -292,7 +439,9 @@ export default {
   deleteAttachment,
   deleteBlogFile,
   deleteItem,
+  deleteResume,
   extractText,
+  extractResumeText,
   getAllActiveEmployeeBudgets,
   getAllAggregateExpenses,
   getAllEmployeeExpenses,
@@ -305,6 +454,7 @@ export default {
   getBasecampAvatars,
   getBasecampCampfires,
   getCaseTimeline,
+  getColleges,
   getCountries,
   getEmployeeBudget,
   getEmployeeBudgets,
@@ -313,22 +463,27 @@ export default {
   getItem,
   getItems,
   getKeyPhrases,
+  getLocation,
   getModerationLabel,
   getPTOBalances,
+  getResume,
   getRole,
   getMonthlyHours,
+  getTechSkills,
   getTwitterToken,
   getURLInfo,
+  getZipCode,
   getUser,
   updateItem,
   uploadBlogAttachment,
+  uploadResume,
   EXPENSE_TYPES,
   EXPENSES,
   EMPLOYEES,
   UTILITY,
   BUDGETS,
   URLS,
-  TSHEETS,
+  QUICK_BOOKS_TIME,
   TWITTER,
   BLOG,
   BLOG_ATTACHMENT,

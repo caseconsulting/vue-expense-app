@@ -2,11 +2,17 @@
   <div class="text-xs-center text-sm-center text-md-center text-lg-center">
     <!-- Receipt Size Error -->
     <v-alert :value="fileTooBig" type="error">
-      The file you selected is {{ megabytes }} MBs which exceeds the maximum file size of 6MB.
+      The file you selected is {{ megabytes }} MBs which exceeds the maximum file size of {{ fileSizeLimit }}MB.
     </v-alert>
 
     <!-- Receipt Input -->
-    <v-file-input v-model="inputFile" :rules="passedRules" :label="label" :accept="acceptedFileTypes"></v-file-input>
+    <v-file-input
+      v-model="inputFile"
+      :rules="passedRules"
+      :label="label"
+      :accept="acceptedFileTypes"
+      :disabled="disabled"
+    ></v-file-input>
   </div>
 </template>
 
@@ -23,14 +29,12 @@ function created() {
 // |--------------------------------------------------|
 
 /**
- * Check if file is too large. Returns true if the file is 6 megabytes or larger, otherwise return false.
+ * Check if file is too large. Returns true if the file exceeds the limit, otherwise return false.
  *
  * @return boolean - file is too large
  */
 function fileTooBig() {
-  let sizeLimit = 6;
-
-  return this.megabytes > sizeLimit;
+  return this.megabytes > this.fileSizeLimit;
 } // fileTooBig
 
 /**
@@ -110,6 +114,7 @@ export default {
   },
   data: () => ({
     dialog: false,
+    fileSizeLimit: 5,
     previewURL: '',
     title: 'receipt upload',
     inputFile: null,
@@ -130,6 +135,6 @@ export default {
       }
     }
   },
-  props: ['passedRules', 'receipt', 'customLabel', 'customFileTypes'] // file text field rules
+  props: ['passedRules', 'receipt', 'customLabel', 'customFileTypes', 'disabled'] // file text field rules
 };
 </script>

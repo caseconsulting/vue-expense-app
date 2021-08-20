@@ -26,7 +26,14 @@
             <v-spacer></v-spacer>
 
             <!-- Search Bar -->
-            <v-text-field v-model="search" append-icon="search" label="Search" single-line hide-details></v-text-field>
+            <v-text-field
+              v-model="search"
+              id="search"
+              append-icon="search"
+              label="Search"
+              single-line
+              hide-details
+            ></v-text-field>
           </v-card-title>
 
           <!-- Filters -->
@@ -178,7 +185,7 @@
 
           <!--EXPENSE TYPE DATA TABLE -->
           <v-data-table
-            :headers="headers"
+            :headers="_headers"
             :items="expenseTypeList"
             :sort-by.sync="sortBy"
             :sort-desc.sync="sortDesc"
@@ -196,13 +203,14 @@
             </template>
             <!-- Budget slot -->
             <template v-slot:[`item.budget`]="{ item }">
-              <p style="margin-bottom: 0px">{{ item.budget | moneyValue }}</p>
+              <p style="margin-bottom: 0px">{{ convertToMoneyString(item.budget) }}</p>
             </template>
             <!-- Actions -->
-            <template v-slot:[`item.actions`]="{ item }">
+            <template v-if="userIsAdmin()" v-slot:[`item.actions`]="{ item }">
               <v-tooltip top>
                 <template v-slot:activator="{ on }">
                   <v-btn
+                    v-if="userIsAdmin()"
                     :disabled="midAction"
                     text
                     icon
@@ -219,7 +227,15 @@
               </v-tooltip>
               <v-tooltip top>
                 <template v-slot:activator="{ on }">
-                  <v-btn :disabled="midAction" text icon @click="validateDelete(item)" v-on="on">
+                  <v-btn
+                    v-if="userIsAdmin()"
+                    id="delete"
+                    :disabled="midAction"
+                    text
+                    icon
+                    @click="validateDelete(item)"
+                    v-on="on"
+                  >
                     <v-icon style="color: #606060">delete</v-icon>
                   </v-btn>
                 </template>
@@ -268,6 +284,11 @@
                       <!-- Flags -->
                       <v-row>
                         <v-col cols="12" sm="6" class="flag py-0">
+                          <p>Pro-rated:</p>
+                          <icon v-if="item.proRated" id="marks" class="mr-1" name="regular/check-circle"></icon>
+                          <icon v-else class="mr-1" id="marks" name="regular/times-circle"></icon>
+                        </v-col>
+                        <v-col cols="12" sm="6" class="flag py-0">
                           <p>Overdraft Allowed:</p>
                           <icon v-if="item.odFlag" id="marks" class="mr-1" name="regular/check-circle"></icon>
                           <icon v-else class="mr-1" id="marks" name="regular/times-circle"></icon>
@@ -294,14 +315,9 @@
                       <v-row v-if="userIsAdmin()">
                         <!-- Display number of employees accessed by -->
                         <div class="pt-2 px-3">
-                          <p v-if="getAccess(item)">
+                          <p>
                             <b>Access:</b>
                             {{ getAccess(item) }}
-                          </p>
-                          <p v-else-if="item.accessibleBy.length == 1"><b>Access:</b> 1 Employee</p>
-                          <p v-else>
-                            <b>Access:</b>
-                            {{ item.accessibleBy.length }} Employees
                           </p>
                         </div>
                         <!-- Button to view names of employees with access -->
@@ -412,7 +428,7 @@ import DeleteModal from '@/components/modals/DeleteModal.vue';
 import ExpenseTypeForm from '@/components/ExpenseTypeForm.vue';
 import { getRole } from '@/utils/auth';
 import _ from 'lodash';
-import { moneyValue } from '@/utils/utils';
+import { convertToMoneyString } from '@/utils/utils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -529,7 +545,7 @@ function clearModel() {
   this.$set(this.model, 'requiredFlag', false);
   this.$set(this.model, 'isInactive', false);
   this.$set(this.model, 'categories', []);
-  this.$set(this.model, 'accessibleBy', 'ALL');
+  this.$set(this.model, 'accessibleBy', ['FullTime']);
   this.$set(this.model, 'hasRecipient', false);
   this.$set(this.model, 'alwaysOnFeed', false);
   this.$set(this.model, 'campfire', null);
@@ -649,22 +665,16 @@ function filterExpenseTypes() {
 } // filterExpenseTypes
 
 /**
- * Check who the expense type is accessible by. Returns a string description if the expense type is accessible by
- * 'ALL', 'FULL', or 'FULL TIME', otherwise returns false.
+ * Check who the expense type is accessible by. Returns a list of access types.
  *
  * @param expenseType - expesne type to check
  * @return String - accessible by description
  */
 function getAccess(expenseType) {
-  if (expenseType.accessibleBy == 'ALL') {
-    return 'All Employees';
-  } else if (expenseType.accessibleBy == 'FULL') {
-    return 'Full - 100% of budget';
-  } else if (expenseType.accessibleBy == 'FULL TIME') {
-    return 'Full Time Employees';
-  } else {
-    return false;
-  }
+  let accessList = _.filter(expenseType.accessibleBy, (accessType) => {
+    return accessType == 'FullTime' || accessType == 'PartTime' || accessType == 'Intern' || accessType == 'Custom';
+  });
+  return accessList.join(', ');
 } // getAccess
 
 /**
@@ -686,23 +696,40 @@ function getCampfire(url) {
  * @return Array - list of employees with access
  */
 function getEmployeeList(accessibleBy) {
-  let employeesList;
-
-  if (accessibleBy === 'ALL' || accessibleBy === 'FULL') {
+  let employeesList = [];
+  if (accessibleBy.includes('FullTime')) {
     // accessible by all employees
-    employeesList = this.employees;
-  } else if (accessibleBy === 'FULL TIME') {
-    // accessible by full time employees only
-    employeesList = _.filter(this.employees, (employee) => {
-      return employee.workStatus == 100;
-    });
-  } else {
-    // custom access list
-    employeesList = _.filter(this.employees, (employee) => {
-      return accessibleBy.includes(employee.id);
-    });
+    employeesList = employeesList.concat(
+      _.filter(this.employees, (employee) => {
+        return employee.workStatus == 100 && employee.employeeRole != 'intern';
+      })
+    );
   }
-
+  if (accessibleBy.includes('PartTime')) {
+    // accessible by full time employees only
+    employeesList = employeesList.concat(
+      _.filter(this.employees, (employee) => {
+        return employee.workStatus < 100 && employee.workStatus > 0 && employee.employeeRole != 'intern';
+      })
+    );
+  }
+  if (accessibleBy.includes('Intern')) {
+    // accessible by full time employees only
+    employeesList = employeesList.concat(
+      _.filter(this.employees, (employee) => {
+        return employee.workStatus > 0 && employee.employeeRole == 'intern';
+      })
+    );
+  }
+  if (accessibleBy.includes('Custom')) {
+    // custom access list
+    employeesList = employeesList.concat(
+      _.filter(this.employees, (employee) => {
+        return accessibleBy.includes(employee.id);
+      })
+    );
+  }
+  employeesList = [...new Set(employeesList)];
   this.showAccessLength = employeesList.length;
   return _.sortBy(employeesList, [
     (employee) => employee.firstName.toLowerCase(),
@@ -729,13 +756,28 @@ function getEmployeeName(employeeId) {
  * @return Boolean - employee has access to expense type
  */
 function hasAccess(employee, expenseType) {
-  if (expenseType.accessibleBy == 'ALL' || expenseType.accessibleBy == 'FULL') {
-    return true;
-  } else if (expenseType.accessibleBy == 'FULL TIME') {
-    return employee.workStatus == 100;
+  let result = false;
+  if (employee.workStatus == 0) {
+    result = false;
+  } else if (expenseType.accessibleBy.includes('Intern') && employee.employeeRole == 'intern') {
+    result = true;
+  } else if (
+    expenseType.accessibleBy.includes('FullTime') &&
+    employee.employeeRole != 'intern' &&
+    employee.workStatus == 100
+  ) {
+    result = true;
+  } else if (
+    expenseType.accessibleBy.includes('PartTime') &&
+    employee.employeeRole != 'intern' &&
+    employee.workStatus < 100
+  ) {
+    result = true;
   } else {
-    return expenseType.accessibleBy.includes(employee.id);
+    result = expenseType.accessibleBy.includes(employee.id);
   }
+
+  return result;
 } // hasAccess
 
 /**
@@ -952,7 +994,14 @@ export default {
     ExpenseTypeForm
   },
   computed: {
-    expenseTypeList
+    expenseTypeList,
+    _headers() {
+      if (userIsAdmin()) {
+        return this.headers;
+      } else {
+        return this.headers.filter((x) => x.show);
+      }
+    }
   },
   created,
   data() {
@@ -977,23 +1026,28 @@ export default {
       headers: [
         {
           text: 'Expense Type',
-          value: 'budgetName'
+          value: 'budgetName',
+          show: true
         },
         {
           text: 'Budget',
-          value: 'budget'
+          value: 'budget',
+          show: true
         },
         {
           text: 'Start Date',
-          value: 'startDate'
+          value: 'startDate',
+          show: true
         },
         {
           text: 'End Date',
-          value: 'endDate'
+          value: 'endDate',
+          show: true
         },
         {
           value: 'actions',
-          sortable: false
+          sortable: false,
+          show: false
         }
       ], // datatable headers
       invalidDelete: false, // invalid delete status
@@ -1001,7 +1055,7 @@ export default {
       itemsPerPage: -1, // items per datatable page
       loading: false, // loading status
       model: {
-        accessibleBy: [],
+        accessibleBy: ['FullTime'],
         alwaysOnFeed: false,
         budget: 0,
         budgetName: '',
@@ -1034,8 +1088,7 @@ export default {
     limitedText: (val) => {
       // limits text displayed to 50 characters on table view
       return val.length > 50 ? `${val.substring(0, 50)}...` : val;
-    },
-    moneyValue
+    }
   },
   methods: {
     addModelToTable,
@@ -1046,6 +1099,7 @@ export default {
     clearModel, // NOTE: Unused?
     clearStatus,
     clickedRow,
+    convertToMoneyString,
     deleteExpenseType,
     deleteModelFromTable,
     displayError,

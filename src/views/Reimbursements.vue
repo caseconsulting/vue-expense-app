@@ -14,9 +14,17 @@
 </template>
 
 <script>
+import api from '@/shared/api.js';
 import ExpenseInfo from '@/components/ExpenseInfo.vue';
 import ExpenseTypeTotals from '@/components/ExpenseTypeTotals.vue';
 import RollupExpenseTypeTable from '@/components/RollupExpenseTypeTable.vue';
+
+async function created() {
+  this.employee = await api.getUser();
+  if (this.employee.employeeRole === 'admin') {
+    this.isAdmin = true;
+  }
+}
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -29,6 +37,13 @@ export default {
     ExpenseInfo,
     ExpenseTypeTotals,
     RollupExpenseTypeTable
+  },
+  created,
+  data() {
+    return {
+      employee: {},
+      isAdmin: false
+    };
   }
 };
 </script>

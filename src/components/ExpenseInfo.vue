@@ -1,18 +1,21 @@
 <template>
   <v-card v-if="expense" raised id="expense-info" class="mt-3 white--text slide-in-blurred-right">
-    <v-card-title primary-title class="subtitle-2 color-change-2x">
-      <div class="headline expense_info_title">Expense Info</div>
+    <v-card-title primary-title class="subtitle-2">
+      <div class="headline expense_info">Expense Info</div>
       <div class="expense_info">
         <p class="expense_info"><span>Description:</span> {{ expense.description }}</p>
         <p class="expense_info"><span>Employee:</span> {{ expense.employeeName }}</p>
         <p class="expense_info"><span>Budget:</span> {{ expense.budgetName }}</p>
-        <p class="expense_info"><span>Cost:</span> {{ expense.cost | moneyValue }}</p>
+        <p class="expense_info"><span>Cost:</span> {{ convertToMoneyString(expense.cost) }}</p>
         <p class="expense_info"><span>Purchased On:</span> {{ expense.purchaseDate | monthDayYearFormat }}</p>
         <p class="expense_info" v-if="!isEmpty(expense.reimbursedDate)">
           <span>Reimbursed On:</span>
           {{ expense.reimbursedDate | monthDayYearFormat }}
         </p>
         <p class="expense_info" v-if="!isEmpty(expense.note)"><span>Notes:</span> {{ expense.note }}</p>
+        <p class="expense_info" v-else><span>Notes:</span> N/A</p>
+        <p class="expense_info" v-if="!isEmpty(expense.category)"><span>Category:</span> {{ expense.category }}</p>
+        <p class="expense_info" v-else><span>Category:</span> N/A</p>
         <attachment :expense="expense" :mode="'adminExpenseInfo'" class="expense_info"></attachment>
       </div>
     </v-card-title>
@@ -21,7 +24,7 @@
 
 <script>
 import Attachment from '@/components/Attachment.vue';
-import { isEmpty, moneyValue, monthDayYearFormat } from '@/utils/utils';
+import { isEmpty, convertToMoneyString, monthDayYearFormat } from '@/utils/utils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -72,21 +75,21 @@ export default {
     };
   },
   methods: {
+    convertToMoneyString,
     displayExpense,
     isEmpty
   },
   filters: {
-    monthDayYearFormat,
-    moneyValue
+    monthDayYearFormat
   }
 };
 </script>
 
 <style scoped>
-.color-change-2x {
+/* .color-change-2x {
   -webkit-animation: color-change-2x 10s linear infinite alternate both;
   animation: color-change-2x 10s linear infinite alternate both;
-}
+} */
 
 p {
   color: #38424d;
@@ -102,29 +105,25 @@ span {
  * ----------------------------------------
  */
 
-@-webkit-keyframes color-change-2x {
+/* @-webkit-keyframes color-change-2x {
   0% {
-    /* background: #819ca9; */
     background: #83837d;
   }
 
   100% {
-    /* background: #bdbdbd; */
     background: #f5694f;
   }
 }
 
 @keyframes color-change-2x {
   0% {
-    /* background: #819ca9; */
     background: #83837d;
   }
 
   100% {
-    /* background: #bdbdbd; */
     background: #f5694f;
   }
-}
+} */
 
 .slide-in-blurred-right {
   animation: slide-in-blurred-right 0.5s ease-in forwards;

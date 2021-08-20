@@ -23,26 +23,28 @@
         </v-toolbar-title>
         <!-- In Mobile View decrease title size-->
         <h1 v-show="isMobile" class="font-25" style="text-align: center">Case Portal</h1>
-
         <v-spacer></v-spacer>
         <!-- Display social media icons and links dropdown menu -->
         <v-item-group class="hidden-sm-and-down" v-show="isLoggedIn() && !isMobile">
           <v-menu open-on-hover offset-y>
             <template v-slot:activator="{ on, attrs }">
-              <v-btn top text small class="my-2" v-bind="attrs" v-on="on">Links &#9662; </v-btn>
+              <v-btn top text small class="my-2" v-bind="attrs" v-on="on" id="links-btn">Links &#9662; </v-btn>
             </template>
 
             <v-list>
-              <v-list-item v-for="(l, index) in links" :key="index" :href="l.link" target="_blank">
+              <v-list-item v-for="(l, index) in links" :key="index" :id="l.link" :href="l.link" target="_blank">
                 <v-list-item-title>{{ l.name }}</v-list-item-title>
               </v-list-item>
-              <v-list-item :href="floorPlan" target="_blank">MakeOffices Map</v-list-item>
+              <v-list-item :href="floorPlan" target="_blank" id="floorPlan"
+                >Workspace at Reston Town Center Map</v-list-item
+              >
             </v-list>
           </v-menu>
           <v-btn
             class="mx-auto white--text"
             v-for="link in mediaLinks"
             :key="link.name"
+            :id="link.name"
             :href="link.link"
             icon
             target="_blank"
@@ -52,19 +54,25 @@
         </v-item-group>
 
         <!-- User image and logout -->
-        <v-menu bottom offset-y open-on-hover v-if="isLoggedIn()">
+        <v-menu bottom offset-y open-on-click v-if="isLoggedIn()">
           <template v-slot:activator="{ on }">
-            <v-avatar size="50" color="grey lighten-4">
+            <v-avatar id="profile" class="profile-button" size="50" color="grey lighten-4">
               <img :src="profilePic" alt="avatar" v-on="on" />
             </v-avatar>
           </template>
           <v-list v-if="!(isLoggedIn() && (isMobile || isSmallScreen))">
             <v-list-item>
-              <v-btn text @click="handleLogout()">Logout</v-btn>
+              <v-btn :disabled="onUserProfile" text @click="handleProfile()">Profile</v-btn>
+            </v-list-item>
+            <v-list-item>
+              <v-btn id="logoutBtn" text @click="handleLogout()">Logout</v-btn>
             </v-list-item>
           </v-list>
           <!--In MOBILE VIEW/Smaller Screen sizes display all links under the user image dropdown-->
           <v-list class="scrollLink" v-else>
+            <v-list-item>
+              <v-btn text :disabled="onUserProfile" @click="handleProfile()">Profile</v-btn>
+            </v-list-item>
             <v-list-item>
               <v-btn text @click="handleLogout()">Logout</v-btn>
             </v-list-item>
@@ -73,7 +81,7 @@
             <v-list-item v-for="(l, index) in links" :key="index" :href="l.link" target="_blank">
               <v-list-item-title>{{ l.name }}</v-list-item-title>
             </v-list-item>
-            <v-list-item :href="floorPlan" target="_blank">MakeOffices Map</v-list-item>
+            <v-list-item :href="floorPlan" target="_blank" id="floorPlan">MakeOffices Map</v-list-item>
             <hr role="separator" aria-orientation="horizontal" class="v-divider theme--light" :inset="inset" vertical />
             <div class="v-subheader theme--light">Social</div>
             <v-list-item v-for="link in mediaLinks" :key="link.name" :href="link.link" icon target="_blank">
@@ -87,11 +95,14 @@
       </v-app-bar>
 
       <v-main>
+        <badge-expiration-banner :key="badgeKey" />
         <v-container fluid grid-list-lg>
           <router-view></router-view>
         </v-container>
       </v-main>
-      <v-footer app></v-footer>
+      <v-footer padless>
+        <v-col class="text-right text-caption" cols="12"><strong>Version</strong> {{ version }}</v-col>
+      </v-footer>
       <time-out-modal :toggleTimeOut="timedOut"></time-out-modal>
       <time-out-warning-modal :toggleWarning="session"></time-out-warning-modal>
     </v-app>
@@ -104,13 +115,19 @@ import MainNav from '@/components/MainNav.vue';
 import MobileDetect from 'mobile-detect';
 import TimeOutModal from '@/components/modals/TimeOutModal.vue';
 import TimeOutWarningModal from '@/components/modals/TimeOutWarningModal.vue';
+import BadgeExpirationBanner from '@/components/modals/BadgeExpirationBanner.vue';
 import floorPlan from '@/assets/img/MakeOfficesfloorplan.jpg';
+import api from '@/shared/api.js';
+// import _ from 'lodash';
+import moment from 'moment-timezone';
+moment.tz.setDefault('America/New_York');
 
 // |--------------------------------------------------|
 // |                                                  |
 // |                     COMPUTED                     |
 // |                                                  |
 // |--------------------------------------------------|
+
 /**
  * Checks if the current device used is mobile. Return true if it is mobile. Returns false if it is not mobile.
  *
@@ -121,6 +138,17 @@ function isMobile() {
   return md.os() === 'AndroidOS' || md.os() === 'iOS';
 }
 
+/**
+ * Checks if the user is visiting their own profile or not
+ *
+ * @return boolean - if the user is visiting their profile
+ */
+function onUserProfile() {
+  if (this.userId == null) {
+    return false;
+  }
+  return this.$route.params.id === this.userId.toString();
+}
 // |--------------------------------------------------|
 // |                                                  |
 // |                     METHODS                      |
@@ -132,6 +160,13 @@ function isMobile() {
  */
 function handleLogout() {
   logout();
+}
+
+async function handleProfile() {
+  // We don't use this.userId becuase it may be null by the time we click the button
+  var user = await api.getUser();
+  let userId = user.employeeNumber;
+  this.$router.push({ name: 'employee', params: { id: `${userId}` } });
 }
 
 function onResize() {
@@ -146,23 +181,30 @@ function onResize() {
 
 async function created() {
   window.EventBus.$on('relog', handleLogout); // Session end - log out
+  window.EventBus.$on('badgeExp', () => {
+    this.badgeKey++;
+  }); // used to refresh badge expiration banner
   // set expiration date if access token received
   let accessToken = getAccessToken();
-
   if (accessToken && isLoggedIn()) {
     this.date = Math.trunc(getTokenExpirationDate(accessToken).getTime());
     this.now = Math.trunc(new Date().getTime());
     let timeRemaining = this.date - this.now; // default access key (2 hours)
 
     window.setTimeout(() => {
-      this.timedOut = !this.timedOut;
+      this.timedOut = true;
+      this.session = false;
     }, timeRemaining);
 
+    // Time minus 300000 = - 5 min
     if (timeRemaining > 300000) {
       window.setTimeout(() => {
-        this.session = !this.session;
+        this.session = true;
       }, timeRemaining - 300000);
     }
+    //stores the employee number
+    var user = await api.getUser();
+    this.userId = user.employeeNumber;
   }
 
   let pic = getProfile();
@@ -170,6 +212,9 @@ async function created() {
   if (pic) {
     this.profilePic = pic;
   }
+
+  //This has some security implications
+  this.version = require('../package.json').version;
 }
 
 async function beforeDestroy() {
@@ -191,6 +236,7 @@ async function mounted() {
 
 export default {
   data: () => ({
+    alert: null,
     floorPlan: floorPlan,
     drawer: isLoggedIn(),
     inset: false,
@@ -198,12 +244,15 @@ export default {
     timedOut: false,
     session: false,
     now: Math.trunc(new Date().getTime() / 1000),
+    userId: null,
+    badgeKey: 0,
     date: null,
     links: [
+      { name: 'Case Website', link: 'https://www.consultwithcase.com/' },
       { name: 'Basecamp', link: 'https://3.basecamp.com/3097063' },
-      { name: '401k', link: 'https://www.sharebuilder401k.com/' },
+      { name: 'Net Benefits/Fidelity', link: 'https://nb.fidelity.com/public/nb/default/home' },
       { name: 'Health Insurance', link: 'https://3.basecamp.com/3097063/buckets/179119/messages/2306027830' },
-      { name: 'TSheets', link: 'https://caseconsulting.tsheets.com/' },
+      { name: 'QuickBooks Time', link: 'https://tsheets.intuit.com/page/login_oii' },
       { name: 'ADP', link: 'https://my.adp.com/' },
       { name: 'Life Insurance', link: 'https://www.reliancestandard.com/home/' },
       {
@@ -218,23 +267,39 @@ export default {
       { name: 'Twitter', link: 'https://twitter.com/consultwithcase?lang=en', icon: 'brands/twitter' },
       { name: 'Facebook', link: 'https://www.facebook.com/ConsultwithCase/', icon: 'brands/facebook' }
     ],
-    isSmallScreen: false
+    isSmallScreen: false,
+    version: null
   }),
   props: {
     source: String
   },
   computed: {
-    isMobile
+    isMobile,
+    onUserProfile
   },
   components: {
     MainNav,
     TimeOutModal,
-    TimeOutWarningModal
+    TimeOutWarningModal,
+    BadgeExpirationBanner
   },
   methods: {
     handleLogout,
+    handleProfile,
     isLoggedIn,
     onResize
+  },
+  watch: {
+    //fixes when you're on another employee's page and want to access your profile
+    $route(to, from) {
+      if (to.params.id && from.params.id) {
+        this.$router.go(this.$router.currentPath);
+      }
+      //updates badge expiration warning whenever you leave your user profile
+      if (from.params.id) {
+        this.badgeKey++;
+      }
+    }
   },
   beforeDestroy,
   mounted,
@@ -272,7 +337,11 @@ export default {
 }
 
 .scroll::-webkit-scrollbar {
-  width: 0 px; // remove space
-  background: transparent; // make scroll bar invisible
+  width: 0 px;
+  background: transparent;
+}
+
+.profile-button {
+  cursor: pointer;
 }
 </style>

@@ -4,9 +4,10 @@
       <!-- Editing an Expense -->
       <h3 v-if="expense.id && (isAdmin || !isReimbursed)">Edit Expense</h3>
       <!-- Creating an Expense -->
-      <h3 v-else-if="!isInactive">Create New Expense</h3>
+      <!-- <h3 v-else-if="!isInactive">Create New Expense</h3> -->
+      <h3 v-else>Create New Expense</h3>
       <!-- Inactive Employee -->
-      <h3 v-else>Inactive Employee</h3>
+      <!-- <h3 v-else>Inactive Employee</h3> -->
     </v-card-title>
     <v-container fluid>
       <v-form ref="form" v-model="valid" lazy-validation>
@@ -20,6 +21,7 @@
           v-model="editedExpense.employeeId"
           item-text="text"
           label="Employee"
+          id="employeeName"
           class="form_padding"
         ></v-autocomplete>
 
@@ -31,6 +33,7 @@
           :disabled="isInactive"
           v-model="editedExpense.expenseTypeId"
           label="Expense Type"
+          id="expenseType"
           :hint="hint"
           persistent-hint
           @input="getExpenseTypeSelected"
@@ -50,6 +53,56 @@
           class="form_padding"
         ></v-autocomplete>
 
+        <!-- Receipt Uploading -->
+        <v-checkbox
+          v-if="receiptRequired && isEdit && !isEmpty(expense.receipt)"
+          style="padding-top: 0px; padding-bottom: 0px"
+          v-model="allowReceipt"
+          label="Update the Receipt?"
+          :disabled="isInactive"
+        ></v-checkbox>
+
+        <!-- Old Receipt Name -->
+        <v-card-text
+          style="padding: 0px 0px 3px 0px; font: inherit; font-size: 16px; color: #0000008a"
+          v-if="!isEmpty(expense.receipt) && isEdit"
+          >Current Receipt: {{ this.submittedReceipt }}</v-card-text
+        >
+
+        <v-row class="mt-2">
+          <file-upload
+            v-if="receiptRequired && ((allowReceipt && isEdit) || !isEdit || isEmpty(expense.receipt))"
+            style="padding-top: 0px; padding-bottom: 0px; width: 60%"
+            class="ml-1"
+            @fileSelected="setFile"
+            :passedRules="receiptRules"
+            :receipt="expense.receipt"
+            :disabled="isInactive"
+          ></file-upload>
+          <!-- Scan Receipt Button -->
+          <v-tooltip bottom>
+            <template v-slot:activator="{ on, attrs }">
+              <span v-on="on">
+                <v-btn
+                  v-if="receiptRequired && ((allowReceipt && isEdit) || !isEdit || isEmpty(expense.receipt))"
+                  color="white"
+                  @click="scanFile"
+                  class="ma-3"
+                  :disabled="isInactive || disableScan"
+                  :loading="scanLoading"
+                  v-bind="attrs"
+                >
+                  Scan
+                </v-btn>
+              </span>
+            </template>
+            <span v-if="!scanLoading"
+              >Scans the receipt and autofills fields. Scanning only works for pdfs, pngs, and jpegs.</span
+            >
+            <span v-else>Scanning your receipt, this may take up to 15 seconds</span>
+          </v-tooltip>
+        </v-row>
+
         <!-- Category -->
         <v-select
           v-if="getCategories() != null && getCategories().length >= 1"
@@ -65,12 +118,24 @@
         <!-- Cost -->
         <v-text-field
           prefix="$"
-          v-model="editedExpense.cost"
+          v-model="costFormatted"
           :rules="costRules"
           :disabled="isReimbursed || isInactive || isHighFive"
           label="Cost"
+          id="cost"
+          class="mt-3"
+          maxlength="12"
           data-vv-name="Cost"
-        ></v-text-field>
+          persistent-hint
+          :hint="costHint()"
+          @blur="editedExpense.cost = parseCost(costFormatted)"
+          @input="formatCost(costFormatted)"
+          validate-on-blur
+        >
+          <template v-slot:message="{ message }">
+            <span v-html="message"></span>
+          </template>
+        </v-text-field>
 
         <!-- Employee Selection List -->
         <v-autocomplete
@@ -80,6 +145,7 @@
           :disabled="isReimbursed"
           v-model="editedExpense.recipient"
           label="Recipient"
+          id="recipient"
           class="form_padding"
           :placeholder="recipientPlaceholder"
         ></v-autocomplete>
@@ -90,15 +156,16 @@
           v-model="editedExpense.description"
           :rules="descriptionRules"
           :disabled="isInactive"
+          id="description"
+          class="mt-4"
           label="Description"
           data-vv-name="Description"
         ></v-text-field>
 
         <!-- Purchase Date -->
         <v-menu
-          v-if="isUser || isAdmin"
           ref="purchaseMenu"
-          :close-on-content-click="true"
+          :close-on-content-click="false"
           v-model="purchaseMenu"
           :nudge-right="40"
           :disabled="isReimbursed && !isDifferentExpenseType"
@@ -110,13 +177,16 @@
           <template v-slot:activator="{ on }">
             <v-text-field
               v-model="purchaseDateFormatted"
+              id="purchaseDate"
               :rules="dateRules"
               :disabled="(isReimbursed && !isDifferentExpenseType) || isInactive"
+              v-mask="'##/##/####'"
               label="Purchase Date"
               hint="MM/DD/YYYY format"
               persistent-hint
               prepend-icon="event"
               @blur="editedExpense.purchaseDate = parseDate(purchaseDateFormatted)"
+              @input="purchaseMenu = false"
               v-on="on"
             ></v-text-field>
           </template>
@@ -139,66 +209,28 @@
           <template v-slot:activator="{ on }">
             <v-text-field
               v-model="reimbursedDateFormatted"
+              id="reimburseDate"
               :rules="optionalDateRules"
               :disabled="(isReimbursed && !isDifferentExpenseType) || isInactive"
+              v-mask="'##/##/####'"
               label="Reimburse Date (optional)"
               hint="MM/DD/YYYY format "
               persistent-hint
               prepend-icon="event"
               @blur="editedExpense.reimbursedDate = parseDate(reimbursedDateFormatted)"
+              @input="reimburseMenu = false"
               v-on="on"
             ></v-text-field>
           </template>
           <v-date-picker v-model="editedExpense.reimbursedDate" no-title @input="reimburseMenu = false"></v-date-picker>
         </v-menu>
 
-        <!-- Receipt Uploading -->
-        <v-checkbox
-          v-if="receiptRequired && isEdit && !isEmpty(expense.receipt)"
-          style="padding-top: 20px; padding-bottom: 0px"
-          v-model="allowReceipt"
-          label="Update the Receipt?"
-          :disabled="isInactive"
-        ></v-checkbox>
-        <file-upload
-          v-if="receiptRequired && ((allowReceipt && isEdit) || !isEdit || isEmpty(expense.receipt))"
-          style="padding-top: 0px; padding-bottom: 0px"
-          @fileSelected="setFile"
-          :passedRules="receiptRules"
-          :receipt="expense.receipt"
-        ></file-upload>
-
-        <!-- Receipt Name -->
-        <v-card-text
-          style="padding: 0px 0px 3px 0px; font: inherit; font-size: 16px; color: #0000008a"
-          v-if="!isEmpty(expense.receipt) && isEdit"
-          >Current Receipt: {{ this.editedExpense.receipt }}</v-card-text
-        >
-
-        <!-- Scan Receipt Button -->
-        <v-tooltip bottom>
-          <template v-slot:activator="{ on, attrs }">
-            <span v-on="on">
-              <v-btn
-                v-if="receiptRequired && ((allowReceipt && isEdit) || !isEdit || isEmpty(expense.receipt))"
-                color="white"
-                @click="scanFile"
-                class="ma-2"
-                :disabled="isInactive || disableScan"
-                v-bind="attrs"
-              >
-                Scan Receipt
-              </v-btn>
-            </span>
-          </template>
-          <span>Scanning only works for pngs and jpegs.</span>
-        </v-tooltip>
-
         <!-- Notes -->
         <v-textarea
           v-model="editedExpense.note"
           :rules="notesRules"
           :label="notesLabel"
+          id="notes"
           data-vv-name="Description"
           :disabled="isInactive"
         ></v-textarea>
@@ -221,16 +253,36 @@
 
         <!-- Buttons -->
         <!-- Cancel Button -->
-        <v-btn color="white" elevation="2" @click="clearForm" class="ma-2" :disabled="isInactive">
+        <!-- <v-btn color="white" elevation="2" @click="clearForm" class="ma-2" :disabled="isInactive" id="cancelButton">
+          <icon class="mr-1" name="ban"></icon>Cancel
+        </v-btn> -->
+        <v-btn
+          color="white"
+          elevation="2"
+          @click="confirmBackingOut = true"
+          class="ma-2"
+          :disabled="isInactive"
+          id="cancelButton"
+        >
           <icon class="mr-1" name="ban"></icon>Cancel
         </v-btn>
 
         <!-- Submit Button -->
-        <v-btn
+        <!-- <v-btn
           outlined
           color="success"
           @click="checkCoverage"
           :disabled="!valid || (!isAdmin && isReimbursed) || isInactive"
+          id="submitButton"
+          :loading="loading"
+          class="ma-2"
+        > -->
+        <v-btn
+          outlined
+          color="success"
+          @click="confirmingValid = true"
+          :disabled="(!isAdmin && isReimbursed) || isInactive"
+          id="submitButton"
           :loading="loading"
           class="ma-2"
         >
@@ -244,22 +296,32 @@
         :toggleConfirmationBox="confirming"
         :expense="editedExpense"
       ></confirmation-box>
+      <!-- Confirmation Model -->
+      <form-submission-confirmation
+        :toggleSubmissionConfirmation="this.confirmingValid"
+        type="expense"
+      ></form-submission-confirmation>
+      <!-- Cancel Confirmation Model -->
+      <cancel-confirmation :toggleSubmissionConfirmation="this.confirmBackingOut" type="expense"> </cancel-confirmation>
     </v-container>
   </v-card>
 </template>
 
 <script>
 import api from '@/shared/api.js';
+import CancelConfirmation from '@/components/modals/CancelConfirmation.vue';
 import ConfirmationBox from '@/components/modals/ConfirmationBox.vue';
 import dateUtils from '@/shared/dateUtils';
 import employeeUtils from '@/shared/employeeUtils';
 import FileUpload from '@/components/FileUpload.vue';
+import FormSubmissionConfirmation from '@/components/modals/FormSubmissionConfirmation.vue';
 import { getRole } from '@/utils/auth';
+import { v4 as uuid } from 'uuid';
+import { isEmpty, isFullTime, convertToMoneyString } from '@/utils/utils';
+import { mask } from 'vue-the-mask';
+import _ from 'lodash';
 const moment = require('moment-timezone');
 moment.tz.setDefault('America/New_York');
-import { v4 as uuid } from 'uuid';
-import { isEmpty, isFullTime } from '@/utils/utils';
-import _ from 'lodash';
 
 const IsoFormat = 'YYYY-MM-DD';
 
@@ -295,6 +357,15 @@ function getCategories() {
  */
 function isAdmin() {
   return this.employeeRole === 'admin';
+} // isAdmin
+
+/**
+ * Checks if the employee is an intern. Returns true if the employee is an intern, otherwise returns false.
+ *
+ * @return boolean - employee is an intern
+ */
+function isIntern() {
+  return this.employeeRole === 'intern';
 } // isAdmin
 
 /**
@@ -376,6 +447,30 @@ function urlLabel() {
 // |--------------------------------------------------|
 
 /**
+ * Gets the remaining budget for the current expense type
+ */
+async function getRemainingBudget() {
+  if (this.editedExpense.expenseTypeId && this.editedExpense.employeeId) {
+    let budgets = await api.getAllActiveEmployeeBudgets(this.editedExpense.employeeId);
+    if (budgets) {
+      let budget = budgets.find((currBudget) => currBudget.expenseTypeId === this.editedExpense.expenseTypeId);
+
+      if (budget) {
+        this.remainingBudget =
+          budget.budgetObject.amount -
+          budget.budgetObject.pendingAmount -
+          budget.budgetObject.reimbursedAmount -
+          this.editedExpense.cost;
+        this.expenseTypeName = budget.expenseTypeName;
+        this.overdraftBudget = budget.budgetObject.amount;
+      } else {
+        this.remainingBudget = '';
+      }
+    }
+  }
+} //getRemainingBudget
+
+/**
  * Adds an expenses url and category to the training urls page.
  *
  * @param newExpense - new expense with url and category
@@ -437,15 +532,16 @@ function betweenDates(start, end) {
  * @return Number - adjusted budget amount
  */
 function calcAdjustedBudget(employee, expenseType) {
+  let result = 0;
   if (hasAccess(employee, expenseType)) {
-    if (expenseType.accessibleBy == 'FULL' || expenseType.accessibleBy == 'FULL TIME') {
-      return expenseType.budget;
+    if (!expenseType.proRated) {
+      result = expenseType.budget;
     } else {
-      return Number((expenseType.budget * (employee.workStatus / 100.0)).toFixed(2));
+      result = Number((expenseType.budget * (employee.workStatus / 100.0)).toFixed(2));
     }
-  } else {
-    return 0;
   }
+
+  return result;
 } // calcAdjustedBudget
 
 /**
@@ -701,6 +797,36 @@ function clearForm() {
 } // clearForm
 
 /**
+ * Determines which hint to display for the cost field.
+ * @returns String - The hint to display
+ */
+function costHint() {
+  if (!this.editedExpense.employeeId) {
+    return 'Please choose an employee to see remaining balance.';
+  } else if (!this.editedExpense.expenseTypeId) {
+    return 'Please choose an expense type to see remaining balance.';
+  } else if (this.remainingBudget === '') {
+    return 'Remaining budget for current expense type is not available.';
+  } else if (this.expenseTypeName) {
+    let str = `Remaining budget for ${this.expenseTypeName}: `;
+    if (this.remainingBudget <= 0) {
+      str += `<span class=red--text>${convertToMoneyString(this.remainingBudget)}`;
+    } else {
+      str += convertToMoneyString(this.remainingBudget);
+    }
+    if (this.remainingBudget < 0 && this.remainingBudget >= -this.overdraftBudget && this.selectedExpenseType.odFlag) {
+      str += ` (Overdraftable and within ${convertToMoneyString(this.overdraftBudget)} limit)`;
+    } else if (this.remainingBudget < -this.overdraftBudget && this.selectedExpenseType.odFlag) {
+      str += ` (Exceeds overdraftable amount of ${convertToMoneyString(this.overdraftBudget)})`;
+    } else if (this.remainingBudget < 0 && !this.selectedExpenseType.odFlag) {
+      str += ' (Not Overdraftable)';
+    }
+    str += '</span>';
+    return str;
+  }
+} // costHint
+
+/**
  * Creates a new expense.
  */
 async function createNewEntry() {
@@ -730,7 +856,7 @@ async function createNewEntry() {
         this.$set(this.editedExpense, 'id', updatedExpense.id);
         this.$emit('add', updatedExpense);
         window.EventBus.$emit('showSnackbar', updatedExpense);
-        window.EventBus.$emit('refreshChart', updatedExpense);
+        window.EventBus.$emit('updateData', updatedExpense);
         this.clearForm();
       } else {
         // emit error if fails to update expense
@@ -761,7 +887,7 @@ async function createNewEntry() {
       this.$set(this.editedExpense, 'id', updatedExpense.id);
       this.$emit('add', updatedExpense);
       window.EventBus.$emit('showSnackbar', updatedExpense);
-      window.EventBus.$emit('refreshChart', updatedExpense);
+      window.EventBus.$emit('updateData', updatedExpense);
       this.clearForm();
     } else {
       // emit error if fails to update expense
@@ -818,11 +944,12 @@ function filteredExpenseTypes() {
         // expense type is active
         if (!selectedEmployee) {
           // add expense type if no employees are selected
+          expenseType.text = `${expenseType.budgetName} - $${Number(expenseType.budget).toLocaleString().toString()}`;
           filteredExpType.push(expenseType);
         } else if (hasAccess({ id: selectedEmployee.value, workStatus: selectedEmployee.workStatus }, expenseType)) {
           // add expense type if the employee is selected and has access
           let amount = calcAdjustedBudget(selectedEmployee, expenseType); // calculate budget
-          expenseType.text = `${expenseType.budgetName} - $${amount}`;
+          expenseType.text = `${expenseType.budgetName} - $${Number(amount).toLocaleString().toString()}`;
           filteredExpType.push(expenseType);
         }
       }
@@ -838,7 +965,7 @@ function filteredExpenseTypes() {
           if (expenseType.recurringFlag || betweenDates(expenseType.startDate, expenseType.endDate)) {
             // expense type is active
             let amount = calcAdjustedBudget(employee, expenseType);
-            expenseType.text = `${expenseType.budgetName} - $${amount}`;
+            expenseType.text = `${expenseType.budgetName} - $${Number(amount).toLocaleString().toString()}`;
             filteredExpType.push(expenseType);
           }
         }
@@ -848,6 +975,16 @@ function filteredExpenseTypes() {
 
   return filteredExpType;
 } // filteredExpenseTypes
+
+/**
+ * Formats the cost on the form for a nicer display.
+ */
+function formatCost() {
+  this.editedExpense.cost = parseCost(this.costFormatted);
+  if (Number(this.editedExpense.cost)) {
+    this.costFormatted = Number(this.editedExpense.cost).toLocaleString().toString();
+  }
+} // formatCost
 
 /**
  * Formats a date.
@@ -885,13 +1022,28 @@ function getExpenseTypeSelected(expenseTypeId) {
  * @return Boolean - employee has access to expense type
  */
 function hasAccess(employee, expenseType) {
-  if (expenseType.accessibleBy == 'ALL' || expenseType.accessibleBy == 'FULL') {
-    return true;
-  } else if (expenseType.accessibleBy == 'FULL TIME') {
-    return employee.workStatus == 100;
+  let result = false;
+  if (employee.workStatus == 0) {
+    result = false;
+  } else if (expenseType.accessibleBy.includes('Intern') && employee.employeeRole == 'intern') {
+    result = true;
+  } else if (
+    expenseType.accessibleBy.includes('FullTime') &&
+    employee.employeeRole != 'intern' &&
+    employee.workStatus == 100
+  ) {
+    result = true;
+  } else if (
+    expenseType.accessibleBy.includes('PartTime') &&
+    employee.employeeRole != 'intern' &&
+    employee.workStatus < 100
+  ) {
+    result = true;
   } else {
-    return expenseType.accessibleBy.includes(employee.id);
+    result = expenseType.accessibleBy.includes(employee.id);
   }
+
+  return result;
 } // hasAccess
 
 /**
@@ -941,6 +1093,18 @@ function moneyFilter(value) {
     maximumFractionDigits: 2
   }).format(value)}`;
 } // moneyFilter
+
+/**
+ * Parses the cost to get rid of commas.
+ * @returns String - The cost without formatting
+ */
+function parseCost(cost) {
+  if (cost && !_.isEmpty(cost)) {
+    return cost.replace(/[,\s]/g, '');
+  } else {
+    return cost;
+  }
+} // parseCost
 
 /**
  * Parse a date to isoformat (YYYY-MM-DD).
@@ -1004,15 +1168,17 @@ async function setFile(file) {
  * Scans the receipt file.
  */
 async function scanFile() {
+  this.scanLoading = true;
   let file = this.file;
   if (file) {
     this.isInactive = true;
     //go get text data from textract and comprehend
 
-    this.receiptObject = await api.extractText(file);
+    this.receiptObject = await api.extractText(this.userInfo.id, file);
     if (this.receiptObject instanceof Error) {
       this.isInactive = false;
       this.receiptObject = null;
+      this.scanLoading = false;
       return;
     }
 
@@ -1159,12 +1325,13 @@ async function scanFile() {
     this.isInactive = false;
 
     if (firstDate != null && this.editedExpense.purchaseDate == null) {
-      let date = moment(firstDate);
+      let date = moment(new Date(firstDate));
       date = parseDate(date.format('YYYY-MM-DD'));
       this.editedExpense.purchaseDate = date;
     }
     if (!failed && (this.editedExpense.cost == 0 || this.editedExpense.cost == null)) {
       this.editedExpense.cost = totalPrice;
+      this.costFormatted = Number(this.editedExpense.cost).toLocaleString().toString();
     }
     if (!isEmpty(this.editedExpense.note)) {
       // expense has a note
@@ -1174,6 +1341,7 @@ async function scanFile() {
       this.editedExpense.note = adjustNote;
     }
   }
+  this.scanLoading = false;
 } // scanFile
 
 /**
@@ -1209,6 +1377,7 @@ async function submit() {
     if (this.$refs.form.validate()) {
       // NOTE: this second validate may be unnecessary. included in checkCoverage()
       // set the description if a recipient is required
+
       if (this.reqRecipient) {
         let giver = _.find(this.employees, (employee) => employee.value == this.editedExpense.employeeId);
         let receiver = _.find(this.employees, (employee) => employee.value == this.editedExpense.recipient);
@@ -1233,6 +1402,7 @@ async function submit() {
     this.$emit('endAction');
     this.isHighFive = false; // set high five back to false
     this.reqRecipient = false;
+    this.clearForm();
   }
 } // submit
 
@@ -1312,7 +1482,6 @@ async function updateExistingEntry() {
 async function created() {
   this.employeeRole = getRole();
   this.userInfo = await api.getUser();
-  this.editedExpense = _.cloneDeep(this.expense);
 
   window.EventBus.$on('canceledSubmit', () => {
     this.loading = false; // set loading status to false
@@ -1321,10 +1490,28 @@ async function created() {
   window.EventBus.$on('confirmSubmit', () => {
     this.submit(); // submit expense
   });
+  window.EventBus.$on('confirmed-expense', () => {
+    this.confirmingValid = false;
+    this.checkCoverage();
+  });
+  window.EventBus.$on('canceled-expense', () => {
+    this.confirmingValid = false;
+  });
+  window.EventBus.$on('backout-canceled-expense', () => {
+    this.confirmBackingOut = false;
+  });
+  window.EventBus.$on('backout-confirmed-expense', () => {
+    this.confirmBackingOut = false;
+    this.clearForm();
+  });
 
   this.myBudgetsView = this.$route.path === '/myBudgets';
   this.isInactive = this.myBudgetsView && this.userInfo.workStatus == 0;
-  this.asUser = this.myBudgetsView || this.employeeRole == 'user';
+  this.asUser =
+    this.myBudgetsView ||
+    this.employeeRole === 'user' ||
+    this.employeeRole === 'intern' ||
+    this.employeeRole === 'manager';
 
   if (this.asUser) {
     // creating or updating an expense as a user
@@ -1336,7 +1523,7 @@ async function created() {
   this.employees = employees.map((employee) => {
     return {
       //text: employeeUtils.fullName(employee),
-      text: employeeUtils.firstAndLastName(employee),
+      text: employeeUtils.nicknameAndLastName(employee),
       value: employee.id,
       workStatus: employee.workStatus
     };
@@ -1403,14 +1590,21 @@ export default {
   beforeDestroy() {
     window.EventBus.$off('canceledSubmit');
     window.EventBus.$off('confirmSubmit');
+    window.EventBus.$off('confirmed-expense');
+    window.EventBus.$off('canceled-expense');
+    window.EventBus.$off('backout-canceled-expense');
+    window.EventBus.$off('backout-confirmed-expense');
   },
   components: {
+    CancelConfirmation,
     ConfirmationBox,
-    FileUpload
+    FileUpload,
+    FormSubmissionConfirmation
   },
   computed: {
     isAdmin,
     isDifferentExpenseType,
+    isIntern,
     isReimbursed,
     isUser,
     receiptRequired,
@@ -1425,18 +1619,22 @@ export default {
       allowReceipt: false, // allow receipt to be uploaded
       asUser: true, // user view
       confirming: false, // budget overage confirmation box activator
+      confirmingValid: false,
+      confirmBackingOut: false,
+      costFormatted: '',
       costRules: [
         (v) => !isEmpty(v) || 'Cost is a required field',
         (v) => !isEmpty(v) > 0 || 'Cost must be a positive number',
         (v) =>
           /^[+-]?[0-9]{1,3}(?:,?[0-9]{3})*(?:\.[0-9]{2})?$/.test(v) ||
           'Expense amount must be a number with two decimal digits',
-        (v) => v < 1000000000 || 'Nice try' //when a user tries to fill out expense that is over a million
+        (v) => parseCost(v) < 1000000000 || 'Nice try' //when a user tries to fill out expense that is over a million
       ], // rules for cost
       date: null, // NOTE: Unused?
       dateRules: [
         (v) => !isEmpty(v) || 'Date must be valid. Format: MM/DD/YYYY',
-        (v) => (!isEmpty(v) && /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v)) || 'Date must be valid. Format: MM/DD/YYYY'
+        (v) => (!isEmpty(v) && /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v)) || 'Date must be valid. Format: MM/DD/YYYY',
+        (v) => moment(v, 'MM/DD/YYYY', true).isValid() || 'Date must be valid'
       ], // rules for dates
       descriptionRules: [
         (v) => !isEmpty(v) || 'Description is a required field',
@@ -1449,6 +1647,7 @@ export default {
       employeeRole: '', // employee role
       employees: [], // employees
       expenseTypes: [], // expense types
+      expenseTypeName: null, //expense type name for budget
       file: undefined, // receipt
       hint: '', // form hints
       isCovered: false, // expense is fully covered
@@ -1458,9 +1657,11 @@ export default {
       loading: false, // loading
       myBudgetsView: false, // if on myBudgetsView page
       optionalDateRules: [
-        (v) => isEmpty(v) || /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v) || 'Date must be valid. Format: MM/DD/YYYY'
+        (v) => isEmpty(v) || /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v) || 'Date must be valid. Format: MM/DD/YYYY',
+        (v) => (!isEmpty(v) ? moment(v, 'MM/DD/YYYY', true).isValid() || 'Date must be valid' : true)
       ], // option date rules
       originalExpense: null, // expense before changes
+      overdraftBudget: 0,
       purchaseDateFormatted: null, // formatted purchase date
       purchaseMenu: false, // display purchase menu
       receiptRules: [(v) => !isEmpty(v) || 'Receipts are required'], // rules for receipt
@@ -1468,11 +1669,14 @@ export default {
       recipientPlaceholder: '',
       reimbursedDateFormatted: null, // formatted reimburse date
       reimburseMenu: false, // display reimburse menu
+      remainingBudget: 0,
       reqRecipient: false, // expense requires recipient
       requiredRules: [(v) => !isEmpty(v) || 'Required field'], // rules for required fields
+      scanLoading: false, // determines if the scanning functionality is loading
       selectedEmployee: {}, // selected employees
       selectedExpenseType: {}, // selected expense types
       selectedRecipient: {}, // the recipient selected for a high five
+      submittedReceipt: null, // the receipt to show when editing an expense
       urlInfo: {
         id: null,
         category: null,
@@ -1491,6 +1695,7 @@ export default {
       valid: false // form validity
     };
   },
+  directives: { mask },
   methods: {
     addURLInfo,
     betweenDates,
@@ -1499,19 +1704,24 @@ export default {
     checkExpenseDate,
     clearForm,
     createNewEntry,
+    convertToMoneyString,
+    costHint,
     customFilter,
     encodeUrl,
     emit,
     filteredExpenseTypes,
+    formatCost,
     formatDate,
     getCategories,
     getExpenseTypeSelected,
+    getRemainingBudget,
     hasAccess,
     incrementURLHits,
     isEmpty,
     isFullTime,
     isReceiptRequired,
     moneyFilter,
+    parseCost,
     parseDate,
     scanFile,
     setFile,
@@ -1527,10 +1737,11 @@ export default {
     'expense.id': function () {
       this.editedExpense = _.cloneDeep(this.expense);
       this.originalExpense = _.cloneDeep(this.editedExpense);
-
       //when model id is not empty then must be editing an expense
       if (!this.isEmpty(this.expense.id)) {
         this.emit('editing-expense'); //notify parent that expense is being edited
+        this.costFormatted = Number(this.editedExpense.cost).toLocaleString();
+        this.submittedReceipt = this.editedExpense.receipt;
       }
 
       this.selectedExpenseType = _.find(this.expenseTypes, (expenseType) => {
@@ -1538,6 +1749,10 @@ export default {
           return expenseType;
         }
       });
+    },
+    'editedExpense.cost': function () {
+      //update remaining budget
+      this.getRemainingBudget();
     },
     'editedExpense.expenseTypeId': function () {
       this.selectedExpenseType = _.find(this.expenseTypes, (expenseType) => {
@@ -1556,12 +1771,16 @@ export default {
         // set high five cost
         // HARD CODE
         if (this.selectedExpenseType.budgetName === 'High Five') {
-          this.$set(this.editedExpense, 'cost', moneyFilter(50));
+          this.costFormatted = moneyFilter(50);
+          this.editedExpense.cost = moneyFilter(50);
           this.isHighFive = true;
-        } else {
+          // dont clear when selecting a previous expense to edit
+        } else if (!this.editedExpense.edit) {
+          this.costFormatted = '';
+          this.editedExpense.cost = '';
           this.isHighFive = false;
         }
-
+        this.editedExpense.edit = false;
         // set requires recipient
         this.reqRecipient = this.selectedExpenseType.hasRecipient;
 
@@ -1609,6 +1828,9 @@ export default {
       } else {
         this.hint = '';
       }
+
+      //update remaining budget
+      this.getRemainingBudget();
     },
     'editedExpense.category': function () {
       if (
@@ -1661,6 +1883,7 @@ export default {
     },
     'editedExpense.employeeId': function () {
       this.setRecipientOptions();
+      this.getRemainingBudget();
     },
     'editedExpense.purchaseDate': function () {
       this.purchaseDateFormatted = this.formatDate(this.editedExpense.purchaseDate) || this.purchaseDateFormatted;
@@ -1681,7 +1904,11 @@ export default {
       if (this.file == null) {
         //if no file
         this.disableScan = true;
-      } else if (this.file.type != 'image/jpeg' && this.file.type != 'image/png') {
+      } else if (
+        this.file.type != 'image/jpeg' &&
+        this.file.type != 'image/png' &&
+        this.file.type != 'application/pdf'
+      ) {
         //if file isn't jpg or png
         this.disableScan = true;
       } else {
@@ -1695,5 +1922,9 @@ export default {
 <style scoped>
 .optional {
   font-size: 0.5em;
+}
+
+.negativeBudget {
+  color: red;
 }
 </style>
