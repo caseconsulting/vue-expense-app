@@ -41,7 +41,6 @@ async function fillData() {
       nickname: employee.nickname ? employee.nickname : ''
     });
   });
-  console.log(this.loginAudits);
   let title;
   let colors;
   let showTooltips;
