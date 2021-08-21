@@ -2,7 +2,7 @@
   <v-card>
     <v-container fluid>
       <v-row>
-        <v-col>
+        <v-col cols="12">
           <pie-chart :options="resumeChartOptions" :chartData="resumeChartData"></pie-chart>
         </v-col>
         <v-col>
