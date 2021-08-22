@@ -106,16 +106,6 @@ function getCurrentBudgetYear() {
 } // getCurrentBudgetYear
 
 /**
- * Determines if a budget has no remaining budget. Returns true if the budget is zero or negative. False otherwise.
- *
- * @param budget - budget to check
- * @return boolean - budget has no remaining budget
- */
-function noRemaining(budget) {
-  return this.calcRemaining(budget) <= 0 && !budget.odFlag;
-} // noRemaining
-
-/**
  * Refresh and sets the aggregated budgets for the employee budget year view.
  */
 async function refreshBudget() {
@@ -250,7 +240,6 @@ export default {
     calcRemaining,
     convertToMoneyString,
     getCurrentBudgetYear,
-    noRemaining,
     refreshBudget,
     refreshBudgetYears,
     refreshEmployee,

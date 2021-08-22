@@ -20,7 +20,7 @@ import { isLoggedIn, login } from '@/utils/auth';
 /**
  * Route to home page on log in.
  */
-async function created() {
+function created() {
   if (this.isLoggedIn()) {
     this.$router.push('home');
   }

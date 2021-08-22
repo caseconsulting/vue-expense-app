@@ -161,8 +161,8 @@ export default {
     getCurrentProjects,
     fillCertData
   },
-  mounted() {
-    this.fillCertData();
+  async mounted() {
+    await this.fillCertData();
     this.$forceUpdate();
   }
 };

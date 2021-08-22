@@ -76,7 +76,7 @@ import AnniversaryCard from '@/components/AnniversaryCard.vue';
 import MobileDetect from 'mobile-detect';
 const moment = require('moment-timezone');
 moment.tz.setDefault('America/New_York');
-import { asyncForEach, isInactive, isFullTime } from '@/utils/utils';
+import { isInactive } from '@/utils/utils';
 
 const IsoFormat = 'YYYY-MM-DD';
 
@@ -125,7 +125,7 @@ function clearStatus() {
  *
  * @param err - String error message
  */
-async function displayError(err) {
+function displayError(err) {
   this.$set(this.status, 'statusType', 'ERROR');
   this.$set(this.status, 'statusMessage', err);
   this.$set(this.status, 'color', 'red');
@@ -174,7 +174,7 @@ async function refreshEmployee() {
 /**
  * Set and display a successful submit status in the snackbar.
  */
-async function showSuccessfulSubmit() {
+function showSuccessfulSubmit() {
   this.$set(this.status, 'statusType', 'SUCCESS');
   this.$set(this.status, 'statusMessage', 'Item was successfully submitted!');
   this.$set(this.status, 'color', 'green');
@@ -184,7 +184,7 @@ async function showSuccessfulSubmit() {
  * Updates the budget data and display a successful submit.
  */
 async function updateData() {
-  this.refreshEmployee();
+  await this.refreshEmployee();
   this.showSuccessfulSubmit();
 } // updateData
 
@@ -198,14 +198,16 @@ async function updateData() {
  *  Set budget charts and information for employee. Creates event listeners.
  */
 async function created() {
-  window.EventBus.$on('updateData', this.updateData);
+  window.EventBus.$on('updateData', async () => {
+    await this.updateData();
+  });
 
   window.EventBus.$on('selected-budget-year', (data) => {
     if (data.format(IsoFormat) != this.fiscalDateView) {
       this.fiscalDateView = data.format(IsoFormat);
     }
   });
-  this.refreshEmployee();
+  await this.refreshEmployee();
 } // created
 
 // |--------------------------------------------------|
@@ -260,11 +262,9 @@ export default {
     };
   },
   methods: {
-    asyncForEach,
     clearStatus,
     displayError,
     getCurrentBudgetYear,
-    isFullTime,
     refreshEmployee,
     showSuccessfulSubmit,
     updateData
@@ -278,8 +278,8 @@ export default {
     } // employee (admin employee view)
   },
   watch: {
-    employ: function () {
-      this.refreshEmployee();
+    employ: async function () {
+      await this.refreshEmployee();
     }
   }
 };

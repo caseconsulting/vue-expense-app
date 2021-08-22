@@ -81,8 +81,6 @@
 import { convertToMoneyString, isFullTime, formatDateDashToSlash } from '@/utils/utils';
 import api from '@/shared/api';
 import _ from 'lodash';
-const moment = require('moment');
-const IsoFormat = 'YYYY-MM-DD';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -189,7 +187,7 @@ async function created() {
   }); // sort by expense type name
 
   // prohibit overdraft if employee is not full time
-  _.forEach(budgetsVar, async (budget) => {
+  _.forEach(budgetsVar, (budget) => {
     if (!isFullTime(this.employee)) {
       budget.odFlag = false;
     }
@@ -201,22 +199,6 @@ async function created() {
     return budget.amount != 0 || budget.reimbursedAmount != 0 || budget.pendingAmount != 0;
   });
 }
-
-/**
- * Gets the current active anniversary budget year starting date in isoformat.
- *
- * @return String - current active anniversary budget date (YYYY-MM-DD)
- */
-function getCurrentBudgetYear() {
-  let currentBudgetYear = moment(this.hireDate, IsoFormat);
-  if (moment().isAfter(currentBudgetYear)) {
-    currentBudgetYear.year(moment().year());
-    if (moment().isBefore(currentBudgetYear)) {
-      currentBudgetYear = currentBudgetYear.subtract(1, 'years');
-    }
-  }
-  return currentBudgetYear.format(IsoFormat);
-} // getCurrentBudgetYear
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -235,7 +217,6 @@ export default {
     calcRemaining,
     convertToMoneyString,
     getAmount,
-    getCurrentBudgetYear,
     getDate,
     getReimbursed,
     getPending,

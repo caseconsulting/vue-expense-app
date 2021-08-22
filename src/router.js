@@ -114,7 +114,6 @@ const router = new Router({
       name: 'callback',
       component: Callback
     },
-    // commenting in-progress training page out before deploying
     {
       path: '/training',
       name: 'training',

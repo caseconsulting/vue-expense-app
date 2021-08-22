@@ -364,15 +364,6 @@ function userIsManager() {
 } //userIsManager
 
 /**
- * Checks if the work status is empty.
- *
- * @returns boolean - work status is empty
- */
-function isStatusEmpty() {
-  return _.isString(this.status) ? this.status.length == 0 || (this.isPartTime() && this.status <= 0) : true;
-} // isStatusEmpty
-
-/**
  * Validate all input fields are valid. Emit to parent the error status.
  */
 function validateFields() {
@@ -479,7 +470,6 @@ export default {
     isInactive,
     isMobile,
     isPartTime,
-    isStatusEmpty,
     parseDate,
     userIsAdmin,
     userIsEmployee,

@@ -83,7 +83,6 @@
 import api from '@/shared/api.js';
 import _ from 'lodash';
 import { getRequiredRules } from '@/shared/validationUtils.js';
-import { formatDateDashToSlash, formatDateSlashToDash, isEmpty } from '@/utils/utils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -173,10 +172,7 @@ export default {
   methods: {
     addExperience,
     deleteExperience,
-    formatDateSlashToDash,
-    formatDateDashToSlash,
     getRequiredRules,
-    isEmpty,
     validateFields
   },
   props: ['model', 'validating'],

@@ -67,7 +67,7 @@
 </template>
 
 <script>
-import { isEmpty, convertToMoneyString, monthDayYearFormat } from '@/utils/utils';
+import { convertToMoneyString, monthDayYearFormat } from '@/utils/utils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -179,7 +179,6 @@ export default {
     getAmount,
     getReimbursed,
     getPending,
-    isEmpty,
     odFlagMessage,
     monthDayYearFormat,
     noRemaining

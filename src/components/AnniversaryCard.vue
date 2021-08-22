@@ -223,9 +223,9 @@ function refreshBudgetYears() {
 // |                 LIFECYCLE HOOKS                  |
 // |                                                  |
 // |--------------------------------------------------|
-function created() {
+async function created() {
   this.addOneSecondToActualTimeEverySecond();
-  this.loadData();
+  await this.loadData();
 
   window.EventBus.$on('selected-budget-year', (data) => {
     if (data.format(IsoFormat) != this.fiscalDateView) {

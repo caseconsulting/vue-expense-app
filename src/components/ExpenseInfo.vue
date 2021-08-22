@@ -85,7 +85,7 @@ function displayExpense(clickedExpense) {
 /**
  * Creates event listeners.
  */
-async function created() {
+function created() {
   window.EventBus.$on('expenseClicked', this.displayExpense);
 } // created
 

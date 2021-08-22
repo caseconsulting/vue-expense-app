@@ -453,8 +453,8 @@ function expenseTypeList() {
 /**
  * Refresh and updates expense type list and displays a successful create status in the snackbar.
  */
-function addModelToTable() {
-  this.refreshExpenseTypes();
+async function addModelToTable() {
+  await this.refreshExpenseTypes();
 
   this.$set(this.status, 'statusType', 'SUCCESS');
   this.$set(this.status, 'statusMessage', 'Item was successfully submitted!');
@@ -584,7 +584,7 @@ async function deleteExpenseType() {
   let et = await api.deleteItem(api.EXPENSE_TYPES, this.deleteModel.id);
   if (et.id) {
     // successfully deletes expense type
-    this.deleteModelFromTable();
+    await this.deleteModelFromTable();
   } else {
     // fails to delete expense type
     this.displayError(et.response.data.message);
@@ -595,8 +595,8 @@ async function deleteExpenseType() {
 /**
  * Refresh and updates expense type list and displays a successful delete status in the snackbar.
  */
-function deleteModelFromTable() {
-  this.refreshExpenseTypes();
+async function deleteModelFromTable() {
+  await this.refreshExpenseTypes();
 
   this.$set(this.status, 'statusType', 'SUCCESS');
   this.$set(this.status, 'statusMessage', 'Item was successfully deleted!');
@@ -781,16 +781,6 @@ function hasAccess(employee, expenseType) {
 } // hasAccess
 
 /**
- * Checks to see if an expense type is expanded in the datatable.
- *
- * @param item - expense type to check
- * @return boolean - the expense type is expanded
- */
-function isFocus(item) {
-  return (!_.isEmpty(this.expanded) && item.id == this.expanded[0].id) || this.model.id == item.id;
-} // isFocus
-
-/**
  * Check if an expense type is inactive. Returns 'Not Active' if the expense type is not active, otherwise returns an
  * empty String.
  *
@@ -895,8 +885,8 @@ function toTopOfForm() {
 /**
  * Refresh and updates expense type list and displays a successful update status in the snackbar.
  */
-function updateModelInTable() {
-  this.refreshExpenseTypes();
+async function updateModelInTable() {
+  await this.refreshExpenseTypes();
 
   this.$set(this.status, 'statusType', 'SUCCESS');
   this.$set(this.status, 'statusMessage', 'Item was successfully updated!');
@@ -959,7 +949,9 @@ async function created() {
   window.EventBus.$on('canceled-delete-expense-type', () => {
     this.midAction = false;
   });
-  window.EventBus.$on('confirm-delete-expense-type', this.deleteExpenseType);
+  window.EventBus.$on('confirm-delete-expense-type', async () => {
+    await this.deleteExpenseType();
+  });
   window.EventBus.$on('invalid-expense type-delete', () => {
     this.midAction = false;
   });
@@ -967,7 +959,7 @@ async function created() {
   this.userInfo = await api.getUser();
   this.employees = await api.getItems(api.EMPLOYEES);
 
-  this.refreshExpenseTypes();
+  await this.refreshExpenseTypes();
 
   // set employee avatar
   let avatars = await api.getBasecampAvatars();
@@ -1110,7 +1102,6 @@ export default {
     getEmployeeList,
     getEmployeeName,
     hasAccess,
-    isFocus,
     isInactive,
     onSelect,
     refreshExpenseTypes,

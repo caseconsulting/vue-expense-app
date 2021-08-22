@@ -359,34 +359,6 @@ function deleteClearance(cIndex) {
 } // deleteClearance
 
 /**
- * Format date range as 'MM/DD/YYYY' - 'MM/DD/YYYY' in chronological order.
- *
- * @param range - Array of String dates in isoformat
- * @return String - 'MM/DD/YYYY' - 'MM/DD/YYYY' date range
- */
-function formatRange(range) {
-  if (_.isEmpty(range)) {
-    return null;
-  }
-
-  let start = moment(range[0], ISOFORMAT);
-  if (range[1]) {
-    // end date selected
-    let end = moment(range[1], ISOFORMAT);
-    if (start.isAfter(end)) {
-      // start date is listed after end date
-      return `${end.format('MM/DD/YYYY')} - ${start.format('MM/DD/YYYY')}`;
-    } else {
-      // start date is listed before end date
-      return `${start.format('MM/DD/YYYY')} - ${end.format('MM/DD/YYYY')}`;
-    }
-  } else {
-    // no end date selected
-    return `${start.format('MM/DD/YYYY')} - Present`;
-  }
-} // formatRange
-
-/**
  * Checks to see if the first date is at or after the second date, if not, it uses an error message.
  *
  * @param firstDate - The date that should come first
@@ -589,7 +561,6 @@ export default {
   methods: {
     addClearance,
     deleteClearance,
-    formatRange,
     getDateOptionalRules,
     getRequiredRules,
     isAfter,

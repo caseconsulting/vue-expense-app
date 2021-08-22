@@ -435,8 +435,8 @@ function moneyFilter(value) {
 /**
  * Refresh and updates expense list and displays a successful create status in the snackbar.
  */
-function addModelToTable() {
-  this.refreshExpenses();
+async function addModelToTable() {
+  await this.refreshExpenses();
 
   this.$set(this.status, 'statusType', 'SUCCESS');
   this.$set(this.status, 'statusMessage', 'Item was successfully submitted!');
@@ -540,7 +540,7 @@ async function deleteExpense() {
     let deleted = await api.deleteItem(api.EXPENSES, this.propExpense.id);
     if (deleted.id) {
       // successfully deletes expense
-      this.deleteModelFromTable(deletedExpense);
+      await this.deleteModelFromTable(deletedExpense);
       if (!this.isEmpty(deletedExpense.receipt)) {
         // delete attachment from s3 if deleted expense has a receipt
         let deletedAttachment = await api.deleteAttachment(deleted);
@@ -561,8 +561,8 @@ async function deleteExpense() {
 /**
  * Refresh and updates expense list and displays a successful delete status in the snackbar.
  */
-function deleteModelFromTable() {
-  this.refreshExpenses();
+async function deleteModelFromTable() {
+  await this.refreshExpenses();
 
   this.$set(this.status, 'statusType', 'SUCCESS');
   this.$set(this.status, 'statusMessage', 'Item was successfully deleted!');
@@ -634,16 +634,6 @@ function hasRecipient(expense) {
   let expenseType = _.find(this.expenseTypes, (type) => expense.expenseTypeId === type.value);
   return !isEmpty(expenseType.hasRecipient) && expenseType.hasRecipient;
 }
-
-/**
- * Checks to see if an expense is expanded in the datatable.
- *
- * @param item - expense to check
- * @return boolean - the expense is expanded
- */
-function isFocus(item) {
-  return (!_.isEmpty(this.expanded) && item.id == this.expanded[0].id) || this.expense.id == item.id;
-} // isFocus
 
 /**
  * Checks if the expense is reimbursed. Returns true if the expense is reimbursed, otherwise returns false.
@@ -730,7 +720,7 @@ async function unreimburseExpense() {
     this.displayError('Error Unreimburseing Expense');
   }
 
-  this.refreshExpenses();
+  await this.refreshExpenses();
   this.loading = false; // set loading status to false
   this.midAction = false;
 } // unreimburseExpense
@@ -738,8 +728,8 @@ async function unreimburseExpense() {
 /**
  * Refresh and updates expense list and displays a successful update status in the snackbar.
  */
-function updateModelInTable() {
-  this.refreshExpenses();
+async function updateModelInTable() {
+  await this.refreshExpenses();
 
   this.$set(this.status, 'statusType', 'SUCCESS');
   this.$set(this.status, 'statusMessage', 'Item was successfully updated!');
@@ -787,12 +777,16 @@ async function created() {
   window.EventBus.$on('canceled-unreimburse-expense', () => {
     this.midAction = false;
   });
-  window.EventBus.$on('confirm-unreimburse-expense', this.unreimburseExpense);
+  window.EventBus.$on('confirm-unreimburse-expense', async () => {
+    await this.unreimburseExpense();
+  });
 
   window.EventBus.$on('canceled-delete-expense', () => {
     this.midAction = false;
   });
-  window.EventBus.$on('confirm-delete-expense', this.deleteExpense);
+  window.EventBus.$on('confirm-delete-expense', async () => {
+    await this.deleteExpense();
+  });
 
   // get user info
   this.userInfo = await api.getUser();
@@ -820,7 +814,7 @@ async function created() {
     };
   });
 
-  this.refreshExpenses(); // refresh and update expenses
+  await this.refreshExpenses(); // refresh and update expenses
 } // created
 
 // |--------------------------------------------------|
@@ -959,7 +953,6 @@ export default {
     filterExpenses,
     hasRecipient,
     isEmpty,
-    isFocus,
     isManager,
     isReimbursed,
     monthDayYearFormat,

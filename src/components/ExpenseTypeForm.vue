@@ -423,16 +423,6 @@ function formatBudget() {
   }
 } // formatBudget
 
-// /**
-//  * Checks if all employees have access to an expense type and at a percentage rate. Return true if 'ALL' is selected,
-//  * otherwise returns false.
-//  *
-//  * @return boolean - all employees have access at a percentage rate
-//  */
-// function isAllSelected() {
-//   return this.editedExpenseType.accessibleBy == 'ALL';
-// } // isAllSelected
-
 /**
  * Checks if custom access of employees have acess to an expense type at a percentage rate. Returns true if 'CUSTOM'
  * is selected, otherwise returns false.
@@ -442,26 +432,6 @@ function formatBudget() {
 function isCustomSelected() {
   return this.editedExpenseType.accessibleBy && this.editedExpenseType.accessibleBy.includes('Custom');
 } // isCustomSelected
-
-// /**
-//  * Checks if all employees have access to an expense type and at a full rate. Return true if 'FULL' is selected,
-//  * otherwise returns false.
-//  *
-//  * @return boolean - all employees have access at a full rate
-//  */
-// function isFullSelected() {
-//   return this.editedExpenseType.accessibleBy == 'FULL';
-// } // isFullSelected
-
-/**
- * Checks if all full time employees have access to an expense type. Return true if 'FULL TIME' is selected, otherwise
- * returns false.
- *
- * @return boolean - all full time employees have access
- */
-function isFullTimeSelected() {
-  return this.editedExpenseType.accessibleBy.includes('FullTime');
-} // isFullTimeSelected
 
 function odFlagHint() {
   if (!!this.model.id && this.model.odFlag) {
@@ -624,9 +594,9 @@ function toggleRequireURL() {
  * Gets and sets all employees.
  */
 async function created() {
-  window.EventBus.$on('confirmed-type', () => {
+  window.EventBus.$on('confirmed-type', async () => {
     this.submitForm = false;
-    this.submit();
+    await this.submit();
   });
   window.EventBus.$on('canceled-type', () => {
     this.submitting = false;
@@ -732,7 +702,6 @@ export default {
     getRequiredRules,
     isCustomSelected,
     isEmpty,
-    isFullTimeSelected,
     odFlagHint,
     parseBudget,
     parseDate,

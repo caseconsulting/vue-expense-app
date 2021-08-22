@@ -111,7 +111,7 @@ import moment from 'moment-timezone';
 moment.tz.setDefault('America/New_York');
 import TwitterFeed from '@/components/TwitterFeed';
 import _ from 'lodash';
-import { asyncForEach, isEmpty, isFullTime } from '@/utils/utils';
+import { isEmpty } from '@/utils/utils';
 import QuickBooksTimeData from '../components/QuickBooksTimeData.vue';
 
 const IsoFormat = 'YYYY-MM-DD';
@@ -220,15 +220,6 @@ function addOneSecondToActualTimeEverySecond() {
     component.addOneSecondToActualTimeEverySecond();
   }, 1000);
 } // addOneSecondToActualTimeEverySecond
-
-/**
- * Clear the action status that is displayed in the snackbar.
- */
-function clearStatus() {
-  this.$set(this.status, 'statusType', undefined);
-  this.$set(this.status, 'statusMessage', '');
-  this.$set(this.status, 'color', '');
-} // clearStatus
 
 /**
  * Create the events to populate the activity feed
@@ -444,39 +435,7 @@ async function getTweets() {
 async function handleProfile() {
   var user = await api.getUser();
   this.$router.push(`/employee/${user.employeeNumber}`);
-}
-
-/**
- * Set and display an error action status in the snackbar.
- *
- * @param err - String error message
- */
-async function displayError(err) {
-  this.$set(this.status, 'statusType', 'ERROR');
-  this.$set(this.status, 'statusMessage', err);
-  this.$set(this.status, 'color', 'red');
-} // displayError
-
-/**
- * Filters out events that have the following categories:
- * Lodging, Meals, Travel, Transportation
- *
- * @param expenses aggregate expenses
- * @return array of filtered out expenses by category
- */
-function filterOutExpensesByCategory(expenses) {
-  return _.filter(expenses, (expense) => {
-    if (
-      expense.category != 'Lodging' &&
-      expense.category != 'Meals' &&
-      expense.category != 'Travel' &&
-      expense.category != 'Transportation'
-    ) {
-      return true;
-    }
-    return false;
-  });
-} // filterOutExpensesByCategory
+} // handleProfile
 
 /**
  * Gets the current active anniversary budget year starting date in isoformat.
@@ -512,22 +471,6 @@ async function refreshEmployee() {
   this.loading = false; // set loading status to false
 } // refreshEmployee
 
-/**
- * Set and display a successful submit status in the snackbar.
- */
-async function showSuccessfulSubmit() {
-  this.$set(this.status, 'statusType', 'SUCCESS');
-  this.$set(this.status, 'statusMessage', 'Item was successfully submitted!');
-  this.$set(this.status, 'color', 'green');
-} // showSuccessfulSubmit
-
-/**
- * Updates the budget data and display a successful submit.
- */
-async function updateData() {
-  this.showSuccessfulSubmit();
-} // updateData
-
 // |--------------------------------------------------|
 // |                                                  |
 // |                 LIFECYCLE HOOKS                  |
@@ -539,11 +482,11 @@ async function updateData() {
  */
 async function created() {
   this.loading = true;
-  this.createEvents();
+  await this.createEvents();
   this.loading = false;
-  this.refreshEmployee();
+  await this.refreshEmployee();
   this.addOneSecondToActualTimeEverySecond();
-  this.getTweets();
+  await this.getTweets();
 } // created
 
 // |--------------------------------------------------|
@@ -592,18 +535,11 @@ export default {
   },
   methods: {
     addOneSecondToActualTimeEverySecond,
-    asyncForEach,
-    clearStatus,
     createEvents,
-    displayError,
-    filterOutExpensesByCategory,
     getCurrentBudgetYear,
     getTweets,
     isEmpty,
-    isFullTime,
     refreshEmployee,
-    showSuccessfulSubmit,
-    updateData,
     handleProfile
   }
 };

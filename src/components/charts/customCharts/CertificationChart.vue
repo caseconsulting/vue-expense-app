@@ -170,9 +170,9 @@ export default {
     fillCertData,
     breakSentence
   },
-  mounted() {
+  async mounted() {
     this.$forceUpdate();
-    this.fillCertData();
+    await this.fillCertData();
   }
 };
 </script>

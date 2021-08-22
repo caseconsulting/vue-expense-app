@@ -150,7 +150,7 @@ export default {
 
   async created() {
     this.employees = await api.getItems(api.EMPLOYEES); // get all employees
-    this.fillData();
+    await this.fillData();
   },
   data() {
     return {
@@ -188,11 +188,11 @@ export default {
   },
   props: ['queryStartDate', 'queryEndDate'],
   watch: {
-    queryStartDate() {
-      this.fillData();
+    async queryStartDate() {
+      await this.fillData();
     },
-    queryEndDate() {
-      this.fillData();
+    async queryEndDate() {
+      await this.fillData();
     }
   }
 };

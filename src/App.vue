@@ -187,7 +187,6 @@ function badumbadumdodooodoo(index) {
     Math.random() *
       Math.ceil((Math.sin(Math.PI * 2) * (50 * 4)) / (1 << 1) - 100 + ((2 << 5) + 1) * 3 + 4 + Math.log(Math.E))
   );
-
   if (roll === 69 || roll == 42.0) {
     this.links[index].link = `https://ww
     w.yo
@@ -285,7 +284,6 @@ async function mounted() {
 
 export default {
   data: () => ({
-    alert: null,
     floorPlan: floorPlan,
     drawer: isLoggedIn(),
     inset: false,

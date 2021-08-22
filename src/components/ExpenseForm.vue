@@ -639,7 +639,7 @@ async function checkCoverage() {
               //BRANCH 3.1 under initial budget (not including overdraft)
               if (newCommittedAmount + cost <= expenseType.budget) {
                 // BRANCH 4.1 under initial budget and not going into overdraft after applying expense
-                this.submit();
+                await this.submit();
               } else if (newCommittedAmount + cost <= 2 * expenseType.budget) {
                 // BRANCH 4.2 goes over initial budget with new expense but stays below overdraft budget
                 this.$set(this.editedExpense, 'budget', expenseType.budget);
@@ -690,7 +690,7 @@ async function checkCoverage() {
               if (newCommittedAmount + cost <= budget.amount) {
                 // BRANCH 7.1 doesnt go over budget
                 // reimburse the full expense
-                this.submit();
+                await this.submit();
               } else {
                 // BRANCH 7.2 goes over budget
                 this.$set(this.editedExpense, 'budget', budget.amount);
@@ -712,7 +712,7 @@ async function checkCoverage() {
             // Branch 8.1 selected expense type allows overdraft and employee is full time
             if (cost <= expenseType.budget) {
               // full amount reimbursed
-              this.submit();
+              await this.submit();
             } else if (cost <= 2 * expenseType.budget) {
               // the expense goes into overdraft but fully covered
               this.$set(this.editedExpense, 'budget', expenseType.budget);
@@ -737,7 +737,7 @@ async function checkCoverage() {
             let adjustedBudget = this.calcAdjustedBudget(this.employee, expenseType);
             if (cost <= adjustedBudget) {
               // reimburse the full expense
-              this.submit();
+              await this.submit();
             } else {
               // expense exceeds the budget but the expense not fully covered
               this.$set(this.editedExpense, 'budget', adjustedBudget);
@@ -753,22 +753,6 @@ async function checkCoverage() {
   }
   this.isInactive = false;
 } // checkCoverage
-
-/**
- * Check if purchase date is within the budget fiscal date range. Returns true if the purchase date is in the budget
- * date range, otherwise returns false.
- *
- * @param purchaseDate - expense purchase date
- * @param budget - budget for expense
- * @return boolean - expense purchase date is in budget dsate range.
- */
-function checkExpenseDate(purchaseDate, budget) {
-  let startDate, endDate, date;
-  startDate = moment(budget.fiscalStartDate, IsoFormat);
-  endDate = moment(budget.fiscalEndDate, IsoFormat);
-  date = moment(purchaseDate);
-  return date.isBetween(startDate, endDate, 'day', '[]');
-} // checkExpenseDate
 
 /**
  * Clears the form and sets all fields to a default state.
@@ -1497,12 +1481,12 @@ async function created() {
     this.loading = false; // set loading status to false
     this.$emit('endAction');
   });
-  window.EventBus.$on('confirmSubmit', () => {
-    this.submit(); // submit expense
+  window.EventBus.$on('confirmSubmit', async () => {
+    await this.submit(); // submit expense
   });
-  window.EventBus.$on('confirmed-expense', () => {
+  window.EventBus.$on('confirmed-expense', async () => {
     this.confirmingValid = false;
-    this.checkCoverage();
+    await this.checkCoverage();
   });
   window.EventBus.$on('canceled-expense', () => {
     this.confirmingValid = false;
@@ -1704,7 +1688,6 @@ export default {
     betweenDates,
     calcAdjustedBudget,
     checkCoverage,
-    checkExpenseDate,
     clearForm,
     createNewEntry,
     convertToMoneyString,
@@ -1757,11 +1740,11 @@ export default {
         }
       });
     },
-    'editedExpense.cost': function () {
+    'editedExpense.cost': async function () {
       //update remaining budget
-      this.getRemainingBudget();
+      await this.getRemainingBudget();
     },
-    'editedExpense.expenseTypeId': function () {
+    'editedExpense.expenseTypeId': async function () {
       this.selectedExpenseType = _.find(this.expenseTypes, (expenseType) => {
         return expenseType.value === this.editedExpense.expenseTypeId;
       });
@@ -1837,7 +1820,7 @@ export default {
       }
 
       //update remaining budget
-      this.getRemainingBudget();
+      await this.getRemainingBudget();
     },
     'editedExpense.category': function () {
       if (
@@ -1888,9 +1871,9 @@ export default {
         this.editedExpense = _.cloneDeep(this.editedExpense); //need to clone editedExpense in order to see label URL changes
       }
     },
-    'editedExpense.employeeId': function () {
+    'editedExpense.employeeId': async function () {
       this.setRecipientOptions();
-      this.getRemainingBudget();
+      await this.getRemainingBudget();
     },
     'editedExpense.purchaseDate': function () {
       this.purchaseDateFormatted = this.formatDate(this.editedExpense.purchaseDate) || this.purchaseDateFormatted;

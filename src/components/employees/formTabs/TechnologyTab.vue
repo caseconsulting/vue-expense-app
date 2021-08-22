@@ -84,7 +84,6 @@
 import api from '@/shared/api.js';
 import _ from 'lodash';
 import { getRequiredRules } from '@/shared/validationUtils.js';
-import { formatDateDashToSlash, formatDateSlashToDash, isEmpty } from '@/utils/utils';
 const moment = require('moment-timezone');
 moment.tz.setDefault('America/New_York');
 
@@ -230,11 +229,8 @@ export default {
     addTechnology,
     deleteTechnology,
     duplicateTechEntries,
-    formatDateDashToSlash,
-    formatDateSlashToDash,
     getRequiredRules,
     isDuplicate,
-    isEmpty,
     populateDropDowns,
     updateTechDropDown,
     validateFields

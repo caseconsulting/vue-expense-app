@@ -36,7 +36,6 @@ const login_format = 'MMM Do, YYYY HH:mm:ss';
  */
 async function created() {
   if (this.isLoggedIn()) {
-    recordLogin();
     // logged in
     if (getRole() === 'admin') {
       // user's role is admin
@@ -45,6 +44,7 @@ async function created() {
       // user's role is not admin
       this.$router.push('home');
     }
+    await recordLogin();
   }
 }
 

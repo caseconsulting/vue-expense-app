@@ -168,7 +168,7 @@ async function created() {
 // |                                                  |
 // |--------------------------------------------------|
 
-async function calcWorkHours() {
+function calcWorkHours() {
   let workHours = 0;
   let day = moment().set('date', 1);
   let currMonth = day.month();
@@ -228,7 +228,7 @@ async function setMonthlyCharges() {
       this.todaysHours = this.quickBooksTimeData.todaysHours;
       this.futureHours = this.quickBooksTimeData.futureHours;
       this.totalHours = this.workedHours + this.todaysHours + this.futureHours;
-      await this.calcWorkHours();
+      this.calcWorkHours();
       this.remainingHours = this.workHours - this.totalHours;
       this.userWorkDays = this.remainingWorkDays;
       this.estimatedDailyHours = this.remainingHours / this.userWorkDays;

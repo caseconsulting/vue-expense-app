@@ -233,7 +233,7 @@ function intervalOverlaps() {
 /**
  * Deletes interval from parent.
  */
-async function deleteInterval() {
+function deleteInterval() {
   this.tempStartIntervalDate = null;
   this.tempEndIntervalDate = null;
   this.$emit('delete', this.technologyIndex, this.intervalIndex);

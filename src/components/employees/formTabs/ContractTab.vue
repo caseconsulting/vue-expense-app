@@ -174,7 +174,7 @@ import api from '@/shared/api.js';
 import _ from 'lodash';
 import { mask } from 'vue-the-mask';
 import { getDateRules, getDateOptionalRules, getRequiredRules } from '@/shared/validationUtils.js';
-import { formatDateDashToSlash, formatDateSlashToDash, isEmpty, formatDate, parseDate } from '@/utils/utils';
+import { isEmpty, formatDate, parseDate } from '@/utils/utils';
 const moment = require('moment');
 
 // |--------------------------------------------------|
@@ -387,8 +387,6 @@ export default {
     addProject,
     deleteContract,
     deleteProject,
-    formatDateSlashToDash,
-    formatDateDashToSlash,
     getDateRules,
     getDateOptionalRules,
     getRequiredRules,

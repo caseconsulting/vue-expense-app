@@ -90,8 +90,7 @@
 </template>
 
 <script>
-// import _ from 'lodash';
-import { isEmpty, monthDayYearFormat } from '@/utils/utils';
+import { monthDayYearFormat } from '@/utils/utils';
 import DeleteModal from '@/components/modals/DeleteModal.vue';
 import moment from 'moment-timezone';
 moment.tz.setDefault('America/New_York');
@@ -100,11 +99,13 @@ import api from '@/shared/api.js';
 /**
  * initial setup
  */
-async function created() {
+function created() {
   window.EventBus.$on('canceled-delete-BlogPost', () => {
     this.midAction = false;
   });
-  window.EventBus.$on('confirm-delete-BlogPost', this.deleteBlogPost);
+  window.EventBus.$on('confirm-delete-BlogPost', async () => {
+    await this.deleteBlogPost();
+  });
 } // created
 
 /**
@@ -183,7 +184,6 @@ export default {
     window.EventBus.$off('confirm-delete-BlogPost');
   },
   methods: {
-    isEmpty,
     blogPath,
     handleEdit,
     handlePreview,

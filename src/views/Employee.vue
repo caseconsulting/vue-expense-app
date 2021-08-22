@@ -125,11 +125,9 @@ import EmployeeInfo from '@/components/employees/EmployeeInfo.vue';
 import QuickBooksTimeData from '@/components/QuickBooksTimeData.vue';
 import { getRole } from '@/utils/auth';
 import _ from 'lodash';
-import { isEmpty } from '@/utils/utils';
 import ConvertEmployeeToCsv from '../components/ConvertEmployeeToCsv.vue';
 import AnniversaryCard from '@/components/AnniversaryCard.vue';
 import BudgetChart from '@/components/BudgetChart.vue';
-import MobileDetect from 'mobile-detect';
 import ResumeParser from '@/components/modals/ResumeParser';
 import DeleteModal from '@/components/modals/DeleteModal';
 
@@ -170,18 +168,6 @@ async function downloadResume() {
 }
 
 /**
- * Checks if there is data about an employee to display. Returns true if the user is an admin or if there is data
- * on the employee's github or twitter, otherwise returns false.
- *
- * @item item - employee to check
- * @return boolean - employee has data to display
- */
-function isDisplayData(item) {
-  let valid = !this.userIsAdmin() && this.isEmpty(item.github) && this.isEmpty(item.twitter);
-  return valid;
-} // isDisplayData
-
-/**
  * Gets the current active anniversary budget year starting date in isoformat.
  *
  * @return String - current active anniversary budget date (YYYY-MM-DD)
@@ -206,31 +192,6 @@ async function getEmployee() {
     return employee.employeeNumber == this.$route.params.id;
   });
 } // getEmployee
-
-/**
- * Returns Full Time, Part Time, or Inactive based on the work status
- */
-function getWorkStatus(workStatus) {
-  if (workStatus == 100) {
-    return 'Full Time';
-  } else if (workStatus == 0) {
-    return 'Inactive';
-  } else if (workStatus > 0 && workStatus < 100) {
-    return `Part Time (${workStatus}%)`;
-  } else {
-    return 'Invalid Status';
-  }
-} // getWorkStatus
-
-/**
- * Checks if the current device used is mobile. Return true if it is mobile. Returns false if it is not mobile.
- *
- * @return boolean - if the device is mobile
- */
-function isMobile() {
-  let md = new MobileDetect(window.navigator.userAgent);
-  return md.os() === 'AndroidOS' || md.os() === 'iOS';
-} // isMobile
 
 function minimizeWindow() {
   switch (this.$vuetify.breakpoint.name) {
@@ -319,7 +280,7 @@ async function created() {
   await this.getEmployee();
   if (this.model) {
     this.user = await api.getUser();
-    this.checkForBudgetAccess();
+    await this.checkForBudgetAccess();
     this.role = getRole();
     this.loading = false;
     this.displayQuickBooksTimeAndBalances = this.userIsAdmin() || this.userIsEmployee();
@@ -332,7 +293,7 @@ async function created() {
 /**
  * Mount event listeners.
  */
-async function mounted() {
+function mounted() {
   window.EventBus.$on('cancel-form', () => {
     this.editing = false;
   });
@@ -453,12 +414,8 @@ export default {
     displayMessage,
     downloadResume,
     hasAdminPermissions,
-    isDisplayData,
-    isEmpty,
-    isMobile,
     getEmployee,
     getCurrentBudgetYear,
-    getWorkStatus,
     resumeReceived,
     userIsAdmin,
     userIsEmployee,

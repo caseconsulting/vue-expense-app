@@ -367,7 +367,7 @@ import { v4 as uuid } from 'uuid';
 /**
  * Sets up event listeners for confirming and canceling resume parser
  */
-async function created() {
+function created() {
   window.EventBus.$on('confirmed-parser', () => {
     // Create an audit of the success
     api.createItem(api.AUDIT, {
@@ -541,7 +541,7 @@ async function submit() {
 
   // If we only want to upload resume and not parse it
   if (!this.extractResume) {
-    this.onlyUploadResume(employeeNumber);
+    await this.onlyUploadResume(employeeNumber);
     return;
   }
 

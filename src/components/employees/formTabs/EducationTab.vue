@@ -215,7 +215,7 @@ Education
 import api from '@/shared/api.js';
 import _ from 'lodash';
 import { getDateMonthYearRules, getRequiredRules } from '@/shared/validationUtils.js';
-import { isEmpty, formatDateMonthYear, parseDateMonthYear } from '@/utils/utils';
+import { formatDateMonthYear, parseDateMonthYear } from '@/utils/utils';
 import { mask } from 'vue-the-mask';
 import { majorsAndMinors } from './Dropdown Info/majorsAndMinors';
 const moment = require('moment-timezone');
@@ -446,7 +446,6 @@ export default {
     deleteDegree,
     deleteSchool,
     deleteItem,
-    isEmpty,
     parseDateMonthYear,
     titleCase,
     validateFields

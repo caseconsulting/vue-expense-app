@@ -115,13 +115,13 @@ import Font from '@ckeditor/ckeditor5-font/src/font';
  * Initial setup
  */
 async function created() {
-  window.EventBus.$on('confirmed', () => {
+  window.EventBus.$on('confirmed', async () => {
     //this.confirming = false;
     if (!this.hasTriedSubmitting && (this.editorData == null || this.editorData == '')) {
       this.error = true;
     }
     this.hasTriedSubmitting = true;
-    this.checkSubmit();
+    await this.checkSubmit();
   });
 
   // window.EventBus.$on('canceled', () => {
@@ -323,7 +323,7 @@ function displaySuccess(message) {
  *
  * @param file - mainPicture
  */
-async function setFile(file) {
+function setFile(file) {
   if (file) {
     this.mainPictureFile = file;
     this.$set(this.model, 'mainPicture', file.name);

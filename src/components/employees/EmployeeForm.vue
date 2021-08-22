@@ -598,7 +598,7 @@ async function confirm() {
  *
  * @param err - String error message
  */
-async function displayError(err) {
+function displayError(err) {
   this.$set(this.errorStatus, 'statusType', 'ERROR');
   this.$set(this.errorStatus, 'statusMessage', err);
   this.$set(this.errorStatus, 'color', 'red');
@@ -649,7 +649,7 @@ async function submit() {
         // successfully updated employee
         this.fullName = `${updatedEmployee.firstName} ${updatedEmployee.lastName}`;
         window.EventBus.$emit('update', updatedEmployee);
-        this.cancel();
+        await this.cancel();
       } else {
         // failed to update employee
         this.$emit('error', updatedEmployee.response.data.message);

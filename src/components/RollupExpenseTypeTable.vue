@@ -411,15 +411,6 @@ function determineShowSwitch(budget) {
 } // determineShowSwitch
 
 /**
- * Displays an error in the response status snackbar.
- */
-async function displayError(err) {
-  this.$set(this.status, 'statusType', 'ERROR');
-  this.$set(this.status, 'statusMessage', err);
-  this.$set(this.status, 'color', 'red');
-} // displayError
-
-/**
  * Emits expense select change for expense type totals component.
  *
  * @param expense - expense changed
@@ -767,7 +758,7 @@ async function created() {
   window.EventBus.$on('toggleExpense', this.toggleShowOnFeed);
 
   //window.EventBus.$on('canceled-reimburse', () => (this.buttonClicked = false));
-  window.EventBus.$on('confirm-reimburse', () => this.reimburseExpenses());
+  window.EventBus.$on('confirm-reimburse', async () => await this.reimburseExpenses());
   let aggregatedData = await api.getAllAggregateExpenses();
 
   let allExpenses = createExpenses(aggregatedData);
@@ -853,7 +844,6 @@ export default {
     customFilter,
     customSort,
     determineShowOnFeed,
-    displayError,
     emitSelectionChange,
     filterOutReimbursed,
     getBudgetTotal,

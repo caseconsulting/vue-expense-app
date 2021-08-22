@@ -72,8 +72,8 @@
 <script>
 import api from '@/shared/api.js';
 import _ from 'lodash';
-import { getDateRules, getDateOptionalRules, getRequiredRules } from '@/shared/validationUtils.js';
-import { formatDate, parseDate, isEmpty } from '@/utils/utils';
+import { getDateRules, getRequiredRules } from '@/shared/validationUtils.js';
+import { formatDate, parseDate } from '@/utils/utils';
 import { mask } from 'vue-the-mask';
 const moment = require('moment-timezone');
 moment.tz.setDefault('America/New_York');
@@ -156,10 +156,8 @@ export default {
     addAward,
     deleteAward,
     getDateRules,
-    getDateOptionalRules,
     getRequiredRules,
     parseEventDate,
-    isEmpty,
     validateFields
   },
   props: ['model', 'validating'],

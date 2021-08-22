@@ -103,7 +103,7 @@ function updateSelected(item) {
 /**
  *  Creates event listeners.
  */
-async function created() {
+function created() {
   window.EventBus.$on('selectExpense', this.updateSelected);
   window.EventBus.$on('expenseChange', this.updateSelected);
 } // created
