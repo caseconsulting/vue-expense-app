@@ -1576,6 +1576,16 @@ async function created() {
       requireURL: expenseType.requireURL
     };
   });
+
+  // adjust costRules to prevent users from using negative expenses
+  if (this.employeeRole && this.employeeRole == 'admin') {
+    console.log('is admin');
+    this.costRules.splice(1, 0, (v) => (!isEmpty(v) && v != 0) || 'Cost cannot be zero');
+  } else {
+    console.log('is user');
+    this.costRules.splice(1, 0, (v) => (!isEmpty(v) && v > 0) || 'Cost must be a positive number');
+  }
+
   this.clearForm();
 } // created
 
@@ -1637,7 +1647,6 @@ export default {
       costFormatted: '',
       costRules: [
         (v) => !isEmpty(v) || 'Cost is a required field',
-        (v) => !isEmpty(v) > 0 || 'Cost must be a positive number',
         (v) =>
           /^[+-]?[0-9]{1,3}(?:,?[0-9]{3})*(?:\.[0-9]{2})?$/.test(v) ||
           'Expense amount must be a number with two decimal digits',
