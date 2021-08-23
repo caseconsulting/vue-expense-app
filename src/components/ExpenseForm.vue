@@ -238,7 +238,7 @@
         <!-- URL -->
         <v-text-field
           v-model="editedExpense.url"
-          :rules="[...getRequiredRules(), ...getURLRules()]"
+          :rules="[...getURLRules(), ...getRequireURL]"
           :label="urlLabel"
           :disabled="isInactive"
         ></v-text-field>
@@ -326,11 +326,6 @@ const IsoFormat = 'YYYY-MM-DD';
  * @return
  */
 function getCategories() {
-  this.selectedExpenseType = _.find(this.expenseTypes, (expenseType) => {
-    if (expenseType.value === this.editedExpense.expenseTypeId) {
-      return expenseType;
-    }
-  });
   if (this.selectedExpenseType) {
     return _.map(this.selectedExpenseType.categories, (category) => {
       return category.name;
@@ -338,6 +333,26 @@ function getCategories() {
   }
   return [];
 } // getCategories
+
+/**
+ * Determine if a URL is required.
+ *
+ * @return requiredRules if URL is required
+ */
+function getRequireURL() {
+  if (!this.selectedExpenseType) {
+    return true;
+  }
+  if (this.selectedExpenseType.requireURL) {
+    return getRequiredRules();
+  }
+  _.forEach(getCategories(), (cat) => {
+    if (cat.requireURL) {
+      return getRequiredRules();
+    }
+  });
+  return true;
+} // getRequireURL
 
 /**
  * Checks if the employee is an admin. Returns true if the employee is an admin, otherwise returns false.
@@ -1664,6 +1679,7 @@ export default {
   },
   directives: { mask },
   methods: {
+    getRequireURL,
     addURLInfo,
     betweenDates,
     calcAdjustedBudget,
