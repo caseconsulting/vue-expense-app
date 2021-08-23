@@ -8,7 +8,6 @@ const EMSI = 'emsi';
 const TRAINING_URLS = 'training-urls';
 const UTILITY = 'utility';
 const BUDGETS = 'budgets';
-const URLS = 'training-urls';
 const QUICK_BOOKS_TIME = 'tSheets';
 const TWITTER = 'twitter';
 const BASECAMP = 'basecamp';
@@ -507,7 +506,6 @@ export default {
   EMPLOYEES,
   UTILITY,
   BUDGETS,
-  URLS,
   QUICK_BOOKS_TIME,
   TWITTER,
   BLOG,

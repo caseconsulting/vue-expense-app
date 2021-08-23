@@ -506,7 +506,7 @@ async function addURLInfo(newExpense) {
       this.$set(this.urlInfo, 'category', null);
     }
     this.$set(this.urlInfo, 'hits', 1);
-    await api.createItem(api.URLS, this.urlInfo);
+    await api.createItem(api.TRAINING_URLS, this.urlInfo);
   }
 } // addURLInfo
 
@@ -1045,7 +1045,7 @@ function hasAccess(employee, expenseType) {
 async function incrementURLHits() {
   this.urlInfo.hits = this.urlInfo.hits + 1;
 
-  return await api.updateItem(api.URLS, this.urlInfo);
+  return await api.updateItem(api.TRAINING_URLS, this.urlInfo);
 } // incrementURLHits
 
 /**
