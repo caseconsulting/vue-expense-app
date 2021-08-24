@@ -487,7 +487,7 @@ async function addURLInfo(newExpense) {
     newExpense.url = newExpense.url.replace(/www\./, '');
   }
 
-  let encodedURL = await this.encodeUrl(newExpense.url); // encode url
+  let encodedURL = this.encodeUrl(newExpense.url); // encode url
 
   // get url info
   let item = await api.getURLInfo(encodedURL, newExpense.category);
@@ -910,7 +910,7 @@ function customFilter(item, queryText) {
  * @param url - url to encode
  * @return String - encoded url
  */
-async function encodeUrl(url) {
+function encodeUrl(url) {
   // return btoa(url).replace(/\//g, '%2F');
   return btoa(url);
 } // encodeUrl
@@ -1144,7 +1144,7 @@ function preformatFloat(float) {
  *
  * @param file - receipt
  */
-async function setFile(file) {
+function setFile(file) {
   if (file) {
     this.isInactive = true;
     this.file = file;
