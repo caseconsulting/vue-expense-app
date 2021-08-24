@@ -33,7 +33,7 @@ function caseYearsData() {
   this.employees.forEach((employee) => {
     if (employee.hireDate !== undefined && employee.workStatus != 0) {
       // find time at case
-      var amOfYears = calculateTimeDifference(employee.hireDate);
+      var amOfYears = this.calculateTimeDifference(employee.hireDate);
       // push time to array
       if (amOfYears > 18) amOfYears = 18;
       else if (amOfYears < 0) amOfYears = 0;
@@ -46,7 +46,7 @@ function caseYearsData() {
  * Helper function to determine how long an employee has worked from their hire date.
  */
 function calculateTimeDifference(startDate) {
-  var start = stringToDate(startDate);
+  var start = this.stringToDate(startDate);
   var end = moment();
   return end.diff(start, 'years', true); //Provides decimal value
 } //calculateTimeDifference

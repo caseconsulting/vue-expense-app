@@ -129,7 +129,7 @@ moment.tz.setDefault('America/New_York');
  * @return boolean - returns true if user is an admin or manager
  */
 function hasAdminPermissions() {
-  return getRole() === 'admin' || getRole() === 'manager';
+  return this.getRole() === 'admin' || this.getRole() === 'manager';
 } // hasAdminPermissions
 
 /**
@@ -217,6 +217,7 @@ export default {
     };
   },
   methods: {
+    getRole,
     hasAdminPermissions,
     userIsEmployee,
     selectDropDown

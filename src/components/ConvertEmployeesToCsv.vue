@@ -72,16 +72,16 @@ function exportCSVFile(items, fileTitle) {
       person.twitter || '',
       person.github || '',
       person.employeeRole || '',
-      getWorkStatus(person.workStatus) || '',
+      this.getWorkStatus(person.workStatus) || '',
       person.id || '',
-      filterUndefined(person.awards, getAwards) || '',
-      filterUndefined(person.certifications, getCertifications) || '',
-      filterUndefined(person.clearances, getClearances) || '',
-      filterUndefined(person.contracts, getContracts) || '',
-      filterUndefined(person.customerOrgExp, getCustomerOrgExp) || '',
-      filterUndefined(person.degrees, getEducation) || '',
-      filterUndefined(person.companies, getCompanies) || '',
-      filterUndefined(person.technologies, getTechnologies) || ''
+      this.filterUndefined(person.awards, getAwards) || '',
+      this.filterUndefined(person.certifications, getCertifications) || '',
+      this.filterUndefined(person.clearances, getClearances) || '',
+      this.filterUndefined(person.contracts, getContracts) || '',
+      this.filterUndefined(person.customerOrgExp, getCustomerOrgExp) || '',
+      this.filterUndefined(person.degrees, getEducation) || '',
+      this.filterUndefined(person.companies, getCompanies) || '',
+      this.filterUndefined(person.technologies, getTechnologies) || ''
     ];
   }
 
@@ -354,6 +354,7 @@ export default {
     convertToCSV,
     download,
     exportCSVFile,
+    filterUndefined,
     getWorkStatus
   },
   props: ['employees', 'midAction'] // employees to export

@@ -132,9 +132,9 @@ function getAmount(budget) {
  */
 function getDate(item) {
   return (
-    formatDateDashToSlash(item.budgetObject.fiscalStartDate) +
+    this.formatDateDashToSlash(item.budgetObject.fiscalStartDate) +
     ' to ' +
-    formatDateDashToSlash(item.budgetObject.fiscalEndDate)
+    this.formatDateDashToSlash(item.budgetObject.fiscalEndDate)
   );
 } // getDate
 
@@ -230,6 +230,7 @@ export default {
   methods: {
     calcRemaining,
     convertToMoneyString,
+    formatDateDashToSlash,
     getAmount,
     getDate,
     getReimbursed,

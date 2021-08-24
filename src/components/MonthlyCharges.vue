@@ -203,7 +203,7 @@ function formatHours(hours) {
     hours = hrs + 'h ' + min + 'm';
     return hours;
   }
-  hours = roundHours(hours);
+  hours = this.roundHours(hours);
   return `${hours}h`;
 } // formatHours
 
@@ -212,7 +212,7 @@ function formatHours(hours) {
  */
 async function setMonthlyCharges() {
   this.employee = this.isEmployeeView ? this.passedEmployee : await api.getUser();
-  if (!isEmpty(this.employee.id)) {
+  if (!this.isEmpty(this.employee.id)) {
     this.workDayHours *= this.employee.workStatus * 0.01;
     // make call to api to get data
     this.quickBooksTimeData = await api.getMonthlyHours(this.employee.employeeNumber);
@@ -292,9 +292,20 @@ export default {
     calcWorkHours,
     formatHours,
     isEmpty,
+    roundHours,
     setMonthlyCharges,
     toFAQ,
+<<<<<<< HEAD
     updateEstimate
+=======
+    updateEstimate: function (event) {
+      if (event.target.value > 0) {
+        this.userWorkDays = event.target.value;
+        this.estimatedDailyHours = this.remainingHours / this.userWorkDays;
+        this.estimatedDailyHours = this.roundHours(this.estimatedDailyHours);
+      }
+    }
+>>>>>>> d3ecaf5 (2854-making-sure-we-are-calling-methods-correctly: proper this and export method placing)
   },
   props: ['passedEmployee', 'showMinutes'],
   watch: {

@@ -150,7 +150,7 @@ function oneMoreColumn() {
   if (this.numOfColumns < this.numOfColumnsMax && this.numOfColumns < this.technologyPairs.length) {
     this.reachedMin = false;
     this.numOfColumns++;
-    fillData(this); // Refresh the chart
+    this.fillData(this); // Refresh the chart
   }
   // Disable the "+" button if the max has been reached
   if (this.numOfColumns === this.numOfColumnsMax || this.numOfColumns === this.technologyPairs.length) {
@@ -165,7 +165,7 @@ function oneLessColumn() {
   if (this.numOfColumns > this.numOfColumnsMin) {
     this.reachedMax = false;
     this.numOfColumns--;
-    fillData(this); // Refresh the chart
+    this.fillData(this); // Refresh the chart
   }
   // Disable the "-" button if the min has been reached
   if (this.numOfColumns === this.numOfColumnsMin) {

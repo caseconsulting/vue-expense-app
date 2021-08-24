@@ -55,7 +55,7 @@ import { getRole } from '@/utils/auth';
  * Gets the user's role.
  */
 function created() {
-  this.role = getRole();
+  this.role = this.getRole();
   let route = this.$route.name;
   if (route == 'help2') {
     this.panel = 0;
@@ -308,7 +308,8 @@ export default {
     };
   },
   methods: {
-    canView
+    canView,
+    getRole
   }
 };
 </script>

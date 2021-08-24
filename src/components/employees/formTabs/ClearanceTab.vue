@@ -553,7 +553,7 @@ export default {
     formatDates: function (array) {
       let formattedDates = [];
       array.forEach((date) => {
-        formattedDates.push(formatDate(date));
+        formattedDates.push(this.formatDate(date));
       });
       return formattedDates;
     }

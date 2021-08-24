@@ -285,7 +285,7 @@ async function created() {
   if (this.model) {
     this.user = await api.getUser();
     await this.checkForBudgetAccess();
-    this.role = getRole();
+    this.role = this.getRole();
     this.loading = false;
     this.displayQuickBooksTimeAndBalances = this.userIsAdmin() || this.userIsEmployee();
     this.fiscalDateView = this.getCurrentBudgetYear();
@@ -425,6 +425,7 @@ export default {
     deleteResume,
     displayMessage,
     downloadResume,
+    getRole,
     hasAdminPermissions,
     getEmployee,
     getCurrentBudgetYear,

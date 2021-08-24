@@ -906,7 +906,7 @@ async function updateModelInTable() {
  * Checks if the user is an admin. Returns true if the role is 'admin', otherwise returns false.
  */
 function userIsAdmin() {
-  return getRole() === 'admin';
+  return this.getRole() === 'admin';
 } // userIsAdmin
 
 /**
@@ -1116,6 +1116,7 @@ export default {
     getCampfire,
     getEmployeeList,
     getEmployeeName,
+    getRole,
     hasAccess,
     isInactive,
     onSelect,

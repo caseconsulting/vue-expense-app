@@ -230,7 +230,7 @@ function titleFormat(value) {
 async function created() {
   let allURLS = await api.getItems(api.TRAINING_URLS);
   this.urlsOriginal = _.forEach(allURLS, (urlObject) => {
-    urlObject.title = titleFormat(urlObject.title);
+    urlObject.title = this.titleFormat(urlObject.title);
     if (urlObject.logo != null) {
       urlObject.display = urlObject.logo;
     } else if (urlObject.image != null) {
@@ -292,7 +292,8 @@ export default {
     changeDisplay,
     filterByCategory,
     isEmpty,
-    isFocus
+    isFocus,
+    titleFormat
   }
 };
 </script>

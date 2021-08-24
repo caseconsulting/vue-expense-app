@@ -149,7 +149,7 @@ function scrollUp() {
  *  Set permissions by user role.
  */
 function created() {
-  this.permissions = getRole();
+  this.permissions = this.getRole();
   this.route = this.$route.name;
 } // created
 
@@ -258,6 +258,7 @@ export default {
   },
   methods: {
     checkActive,
+    getRole,
     scrollUp
   },
   watch: {

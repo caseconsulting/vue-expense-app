@@ -77,8 +77,8 @@ function isAdmin() {
 async function created() {
   //get the blog info from aws
   this.posts = await api.getItems(api.BLOG);
-  this.employeeRole = getRole();
-  if (isAdmin) {
+  this.employeeRole = this.getRole();
+  if (this.isAdmin()) {
     //get all employee's data and match posts to it.
     this.employees = await api.getItems(api.EMPLOYEES);
     this.posts = _.map(this.posts, (post) => {
@@ -168,7 +168,7 @@ function onSelect(item) {
  */
 async function successfulDelete() {
   this.posts = await api.getItems(api.BLOG);
-  if (isAdmin) {
+  if (this.isAdmin()) {
     //get all employee's data and match posts to it.
     this.posts = _.map(this.posts, (post) => {
       let employee = _.find(this.employees, (employee) => {
@@ -254,6 +254,7 @@ export default {
     // rekognition,
     // splitInputText,
     // uploadToS3,
+    getRole,
     onSelect,
     isAdmin,
     successfulDelete,

@@ -208,9 +208,9 @@ async function created() {
   this.countries = _.map(await api.getCountries(), 'name');
   this.countries.unshift('United States of America');
   // set formatted birthday date
-  this.birthdayFormat = formatDate(this.editedPersonalInfo.birthday) || this.birthdayFormat;
+  this.birthdayFormat = this.formatDate(this.editedPersonalInfo.birthday) || this.birthdayFormat;
   // fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
-  if (this.editedPersonalInfo.birthday !== null && !formatDate(this.editedPersonalInfo.birthday)) {
+  if (this.editedPersonalInfo.birthday !== null && !this.formatDate(this.editedPersonalInfo.birthday)) {
     // clear birthday date if fails to format
     this.editedPersonalInfo.birthday = null;
   }
@@ -444,9 +444,9 @@ export default {
       this.editedPersonalInfo = _.cloneDeep(this.model);
     },
     'editedPersonalInfo.birthday': function () {
-      this.birthdayFormat = formatDate(this.editedPersonalInfo.birthday) || this.birthdayFormat;
+      this.birthdayFormat = this.formatDate(this.editedPersonalInfo.birthday) || this.birthdayFormat;
       //fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
-      if (this.editedPersonalInfo.birthday !== null && !formatDate(this.editedPersonalInfo.birthday)) {
+      if (this.editedPersonalInfo.birthday !== null && !this.formatDate(this.editedPersonalInfo.birthday)) {
         this.editedPersonalInfo.birthday = null;
       }
     },

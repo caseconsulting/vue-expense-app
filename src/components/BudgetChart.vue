@@ -137,7 +137,7 @@ function budgets() {
  * @return Object - budget chart data
  */
 function drawGraph() {
-  let budgets = getFinalBudgetsData(this.budgets);
+  let budgets = this.getFinalBudgetsData(this.budgets);
   let data = {
     labels: budgets.names,
     datasets: [
@@ -292,7 +292,7 @@ async function refreshBudget() {
 
   // prohibit overdraft if employee is not full time
   _.forEach(budgetsVar, async (budget) => {
-    if (!isFullTime(this.employee)) {
+    if (!this.isFullTime(this.employee)) {
       budget.odFlag = false;
     }
   });
@@ -335,6 +335,7 @@ export default {
     drawGraph,
     getCurrentBudgetYear,
     getFinalBudgetsData,
+    isFullTime,
     refreshBudget
   },
   mounted,

@@ -247,7 +247,7 @@ async function createEvents() {
         //hire date is before today
         let anniversary = moment([now.year(), hireDate.month(), hireDate.date()]); //set anniversary to hiredate but this year
         let diff = now.startOf('day').diff(anniversary.startOf('day'), 'day'); //difference between today and anniversary
-        event.date = getEventDateMessage(anniversary);
+        event.date = this.getEventDateMessage(anniversary);
         if (diff < -6) {
           anniversary.subtract(1, 'years');
           event.date = anniversary.format('ll');
@@ -301,7 +301,7 @@ async function createEvents() {
 
       let diff = now.startOf('day').diff(birthday.startOf('day'), 'day');
       // Get event date text
-      event.date = getEventDateMessage(birthday);
+      event.date = this.getEventDateMessage(birthday);
       if (diff < -6) {
         birthday.subtract(1, 'years');
         event.date = birthday.format('ll');
@@ -335,7 +335,7 @@ async function createEvents() {
       let now = moment();
       let reimbursedDate = moment(a.reimbursedDate, 'YYYY-MM-DD');
       let event = {};
-      event.date = getEventDateMessage(reimbursedDate);
+      event.date = this.getEventDateMessage(reimbursedDate);
       if (!this.isEmpty(a.url)) {
         event.link = a.url;
       }
@@ -372,7 +372,7 @@ async function createEvents() {
     let startDate = moment(a.starts_at);
     let endDate = moment(a.ends_at);
     let event = {};
-    event.date = getEventDateMessage(startDate);
+    event.date = this.getEventDateMessage(startDate);
     if (cutOff.isAfter(startDate.startOf('day'))) {
       return null;
     }
@@ -537,6 +537,7 @@ export default {
     addOneSecondToActualTimeEverySecond,
     createEvents,
     getCurrentBudgetYear,
+    getEventDateMessage,
     getTweets,
     isEmpty,
     refreshEmployee,

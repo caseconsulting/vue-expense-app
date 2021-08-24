@@ -401,7 +401,7 @@ function emit(msg) {
  * Formats the budget on the form for a nicer display.
  */
 function formatBudget() {
-  this.editedExpenseType.budget = parseBudget(this.budgetFormatted);
+  this.editedExpenseType.budget = this.parseBudget(this.budgetFormatted);
   if (Number(this.editedExpenseType.budget)) {
     this.budgetFormatted = Number(this.editedExpenseType.budget).toLocaleString().toString();
   }
@@ -655,7 +655,7 @@ export default {
       ],
       startDateRules: [
         (v) => {
-          return !isEmpty(v) && moment(v, 'MM/DD/YYYY', true).isValid() && this.editedExpenseType.endDate
+          return !this.isEmpty(v) && moment(v, 'MM/DD/YYYY', true).isValid() && this.editedExpenseType.endDate
             ? moment(v, 'MM/DD/YYYY', true).isSameOrBefore(moment(this.editedExpenseType.endDate)) ||
                 'Start date must be at or before end date'
             : true;
@@ -663,7 +663,7 @@ export default {
       ],
       endDateRules: [
         (v) => {
-          return !isEmpty(v) && moment(v, 'MM/DD/YYYY', true).isValid() && this.editedExpenseType.startDate
+          return !this.isEmpty(v) && moment(v, 'MM/DD/YYYY', true).isValid() && this.editedExpenseType.startDate
             ? moment(v, 'MM/DD/YYYY', true).isSameOrAfter(moment(this.editedExpenseType.startDate)) ||
                 'End date must be at or after start date'
             : true;

@@ -40,7 +40,7 @@ function initDegrees() {
         _.forEach(school.degrees, (degree) => {
           if (moment(degree.completionDate).isBefore(moment(new Date()))) {
             if (highestDegrees.length != 0) {
-              let result = compareDegree(highestDegrees[0].name, degree.degreeType);
+              let result = this.compareDegree(highestDegrees[0].name, degree.degreeType);
               //if a degree of a higher prestige is found, remove all previous entries
               if (result === 1) {
                 highestDegrees.length = 0;
@@ -62,7 +62,7 @@ function initDegrees() {
           }
         });
       });
-      degrees = addToDegrees(degrees, highestDegrees);
+      degrees = this.addToDegrees(degrees, highestDegrees);
     }
   });
   return degrees;
@@ -106,8 +106,8 @@ function addToDegrees(degrees, highestDegrees) {
  * @return 0: degrees have the same prestige
  */
 function compareDegree(oldDegree, newDegree) {
-  oldDegree = getDegreeValue(oldDegree);
-  newDegree = getDegreeValue(newDegree);
+  oldDegree = this.getDegreeValue(oldDegree);
+  newDegree = this.getDegreeValue(newDegree);
   if (oldDegree > newDegree) {
     return -1;
   }
@@ -132,7 +132,7 @@ function getDegreeConcentrations(degreeName) {
       // loop through each employee's degree
       employee.degrees.forEach((degree) => {
         // generalize each degree name to match pie chart categories (Bachelors of Science = Bachelors)
-        if (getDegreeName(getDegreeValue(degree.name)) === degreeName) {
+        if (this.getDegreeName(this.getDegreeValue(degree.name)) === degreeName) {
           // loop through each concentration
           degree.concentrations.forEach((concentration) => {
             /// count up each occurrence of a concentration
@@ -162,7 +162,7 @@ function getDegreeMinors(degreeName) {
       // loop through each employee's degree
       employee.degrees.forEach((degree) => {
         // generalize each degree name to match pie chart categories (Bachelors of Science = Bachelors)
-        if (getDegreeName(getDegreeValue(degree.name)) === degreeName) {
+        if (this.getDegreeName(this.getDegreeValue(degree.name)) === degreeName) {
           // loop through each minor
           degree.minors.forEach((minor) => {
             /// count up each occurrence of a minor

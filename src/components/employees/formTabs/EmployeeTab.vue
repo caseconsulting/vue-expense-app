@@ -257,11 +257,11 @@ async function created() {
   // get all employees
   this.employees = await api.getItems(api.EMPLOYEES);
   // set formatted hire date
-  this.hireDateFormatted = formatDate(this.editedEmployee.hireDate) || this.hireDateFormatted;
+  this.hireDateFormatted = this.formatDate(this.editedEmployee.hireDate) || this.hireDateFormatted;
   // set formatted depature date
-  this.deptDateFormatted = formatDate(this.editedEmployee.deptDate) || this.deptDateFormatted;
+  this.deptDateFormatted = this.formatDate(this.editedEmployee.deptDate) || this.deptDateFormatted;
   // fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
-  if (this.editedEmployee.deptDate !== null && !formatDate(this.editedEmployee.deptDate)) {
+  if (this.editedEmployee.deptDate !== null && !this.formatDate(this.editedEmployee.deptDate)) {
     // clear depature date if fails to format
     this.editedEmployee.deptDate = null;
   }
@@ -491,9 +491,9 @@ export default {
       }
     },
     'editedEmployee.deptDate': function () {
-      this.deptDateFormatted = formatDate(this.editedEmployee.deptDate) || this.deptDateFormatted;
+      this.deptDateFormatted = this.formatDate(this.editedEmployee.deptDate) || this.deptDateFormatted;
       //fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
-      if (this.editedEmployee.deptDate !== null && !formatDate(this.editedEmployee.deptDate)) {
+      if (this.editedEmployee.deptDate !== null && !this.formatDate(this.editedEmployee.deptDate)) {
         this.editedEmployee.deptDate = null;
       }
     },
@@ -501,9 +501,9 @@ export default {
       this.hasExpenses = this.editedEmployee.id
         ? _.size(await api.getAllEmployeeExpenses(this.editedEmployee.id)) > 0
         : false;
-      this.hireDateFormatted = formatDate(this.editedEmployee.hireDate) || this.hireDateFormatted;
+      this.hireDateFormatted = this.formatDate(this.editedEmployee.hireDate) || this.hireDateFormatted;
       //fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
-      if (this.editedEmployee.hireDate !== null && !formatDate(this.editedEmployee.hireDate)) {
+      if (this.editedEmployee.hireDate !== null && !this.formatDate(this.editedEmployee.hireDate)) {
         this.editedEmployee.hireDate = null;
       }
     },
@@ -524,8 +524,8 @@ export default {
       } else if (this.statusRadio == 'inactive') {
         this.status = '0';
         this.editedEmployee.workStatus = 0;
-        if (this.deptDateFormatted && parseDate(this.deptDateFormatted)) {
-          this.editedEmployee.deptDate = parseDate(this.deptDateFormatted);
+        if (this.deptDateFormatted && this.parseDate(this.deptDateFormatted)) {
+          this.editedEmployee.deptDate = this.parseDate(this.deptDateFormatted);
         }
       } else {
         this.editedEmployee.deptDate = null;

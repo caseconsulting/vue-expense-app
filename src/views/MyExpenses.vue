@@ -604,10 +604,10 @@ function filterExpenses() {
     this.filteredExpenses = _.filter(this.filteredExpenses, (expense) => {
       if (this.filter.reimbursed == 'notReimbursed') {
         // filter for pending expenses
-        return !isReimbursed(expense);
+        return !this.isReimbursed(expense);
       } else {
         // filter for reimbursed expenses
-        return isReimbursed(expense);
+        return this.isReimbursed(expense);
       }
     });
   }
@@ -632,7 +632,7 @@ function filterExpenses() {
  */
 function hasRecipient(expense) {
   let expenseType = _.find(this.expenseTypes, (type) => expense.expenseTypeId === type.value);
-  return !isEmpty(expenseType.hasRecipient) && expenseType.hasRecipient;
+  return !this.isEmpty(expenseType.hasRecipient) && expenseType.hasRecipient;
 }
 
 /**
@@ -642,7 +642,7 @@ function hasRecipient(expense) {
  * @return boolean - expense is reimbursed
  */
 function isReimbursed(expense) {
-  return expense && !isEmpty(expense.reimbursedDate);
+  return expense && !this.isEmpty(expense.reimbursedDate);
 } // isReimbursed
 
 /**

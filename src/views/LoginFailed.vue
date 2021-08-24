@@ -44,7 +44,7 @@ async function created() {
       // user's role is not admin
       this.$router.push('home');
     }
-    await recordLogin();
+    await this.recordLogin();
   }
 }
 

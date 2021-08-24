@@ -231,7 +231,7 @@ function checkAllBoxes() {
     budget.checkBox.all = true;
     budget.checkBox.indeterminate = false;
     return _.forEach(budget.expenses, (expense) => {
-      emitSelectionChange(expense, true);
+      this.emitSelectionChange(expense, true);
       expense.selected = true;
     });
   });
@@ -342,9 +342,9 @@ function customSort(items, index, isDesc) {
   } else if (index[0] === 'cost') {
     // sort by the total expenses per budget
     if (!isDesc[0]) {
-      items.sort((a, b) => (getBudgetTotal(a.expenses) > getBudgetTotal(b.expenses) ? 1 : -1));
+      items.sort((a, b) => (this.getBudgetTotal(a.expenses) > this.getBudgetTotal(b.expenses) ? 1 : -1));
     } else {
-      items.sort((a, b) => (getBudgetTotal(b.expenses) > getBudgetTotal(a.expenses) ? 1 : -1));
+      items.sort((a, b) => (this.getBudgetTotal(b.expenses) > this.getBudgetTotal(a.expenses) ? 1 : -1));
     }
   } else {
     // sort alphabetically/numerically
@@ -429,7 +429,7 @@ function emitSelectionChange(expense, newSelect) {
  * @return Array - pending expenses
  */
 function filterOutReimbursed(expenses) {
-  return _.filter(expenses, (expense) => !isReimbursed(expense));
+  return _.filter(expenses, (expense) => !this.isReimbursed(expense));
 } // filterOutReimbursed
 
 /**
@@ -458,7 +458,7 @@ function groupEmployeeExpenses(expenses) {
   // Create a list of expenses under each group
   data = _.forEach(data, (item) => {
     return (item.expenses = _.filter(expenses, (expense) => {
-      return matchingEmployeeAndExpenseType(expense, item);
+      return this.matchingEmployeeAndExpenseType(expense, item);
     }));
   });
 
@@ -485,7 +485,7 @@ function isReimbursed(expense) {
  * @return boolean - item not reimbursed and employee and expense type match
  */
 function matchingEmployeeAndExpenseType(expense, item) {
-  let reimbursed = isReimbursed(item);
+  let reimbursed = this.isReimbursed(item);
   return expense.employeeId === item.employeeId && expense.expenseTypeId === item.expenseTypeId && !reimbursed;
 } // matchingEmployeeAndExpenseType
 
@@ -496,12 +496,12 @@ function refreshExpenses() {
   this.pendingExpenses = [];
   _.forEach(this.empBudgets, (budget) => {
     _.forEach(budget.expenses, (budgetExpense) => {
-      if (!isReimbursed(budgetExpense)) {
+      if (!this.isReimbursed(budgetExpense)) {
         this.pendingExpenses.push(budgetExpense);
       }
     });
   });
-  this.empBudgets = groupEmployeeExpenses(this.pendingExpenses);
+  this.empBudgets = this.groupEmployeeExpenses(this.pendingExpenses);
   this.unCheckAllBoxes();
 } // refreshExpenses
 
@@ -577,10 +577,10 @@ function selectExpense(expense) {
         if (expense === budgetExpense) {
           budgetExpense.selected = !budgetExpense.selected;
           if (!budgetExpense.selected) {
-            budget.showSwitch = determineShowSwitch(budget);
+            budget.showSwitch = this.determineShowSwitch(budget);
           } else {
             budgetExpense.showOnFeed = expense.showOnFeed;
-            budget.showSwitch = determineShowSwitch(budget);
+            budget.showSwitch = this.determineShowSwitch(budget);
           }
         }
       });
@@ -589,7 +589,7 @@ function selectExpense(expense) {
 
   this.empBudgets = _.forEach(this.empBudgets, (budget) => {
     if (expense.key === budget.key) {
-      budget.checkBox = determineCheckBox(budget);
+      budget.checkBox = this.determineCheckBox(budget);
     }
   });
 } // selectExpense
@@ -612,7 +612,7 @@ function toggleShowOnFeed(expense) {
 
   this.empBudgets = _.forEach(this.empBudgets, (budget) => {
     if (expense.key === budget.key) {
-      budget.showSwitch = determineShowSwitch(budget);
+      budget.showSwitch = this.determineShowSwitch(budget);
     }
   });
 } // toggleShowOnFeed
@@ -625,7 +625,7 @@ function toggleShowOnFeed(expense) {
 function determineShowOnFeed(expense) {
   this.empBudgets = _.forEach(this.empBudgets, (budget) => {
     if (expense.key === budget.key) {
-      budget.showSwitch = determineShowSwitch(budget);
+      budget.showSwitch = this.determineShowSwitch(budget);
     }
   });
 } // determineShowOnFeed
@@ -669,16 +669,16 @@ function toggleGroup(value) {
   this.empBudgets = _.forEach(this.empBudgets, (budget) => {
     if (value === budget) {
       // matching budget
-      if (determineCheckBox(budget).all) {
+      if (this.determineCheckBox(budget).all) {
         // unselect all expenses
         return _.forEach(budget.expenses, (expense) => {
-          emitSelectionChange(expense, false);
+          this.emitSelectionChange(expense, false);
           expense.selected = false;
         });
       } else {
         // select all expenses
         return _.forEach(budget.expenses, (expense) => {
-          emitSelectionChange(expense, true);
+          this.emitSelectionChange(expense, true);
           expense.selected = true;
         });
       }
@@ -688,7 +688,7 @@ function toggleGroup(value) {
   // set the group check box
   this.empBudgets = _.forEach(this.empBudgets, (budget) => {
     if (value === budget) {
-      budget.checkBox = determineCheckBox(budget);
+      budget.checkBox = this.determineCheckBox(budget);
     }
   });
 } // toggleGroup
@@ -716,7 +716,7 @@ function toggleShowOnFeedGroup(value) {
   // set the group check box
   this.empBudgets = _.forEach(this.empBudgets, (budget) => {
     if (value === budget) {
-      budget.showSwitch = determineShowSwitch(budget);
+      budget.showSwitch = this.determineShowSwitch(budget);
     }
   });
 } // toggleShowOnFeedGroup
@@ -729,7 +729,7 @@ function unCheckAllBoxes() {
     budget.checkBox.all = false;
     budget.checkBox.indeterminate = false;
     return _.forEach(budget.expenses, (expense) => {
-      emitSelectionChange(expense, false);
+      this.emitSelectionChange(expense, false);
       expense.selected = false;
     });
   });
@@ -761,10 +761,10 @@ async function created() {
   window.EventBus.$on('confirm-reimburse', async () => await this.reimburseExpenses());
   let aggregatedData = await api.getAllAggregateExpenses();
 
-  let allExpenses = createExpenses(aggregatedData);
-  this.pendingExpenses = filterOutReimbursed(allExpenses);
+  let allExpenses = this.createExpenses(aggregatedData);
+  this.pendingExpenses = this.filterOutReimbursed(allExpenses);
   this.constructAutoComplete(this.pendingExpenses);
-  this.empBudgets = groupEmployeeExpenses(this.pendingExpenses);
+  this.empBudgets = this.groupEmployeeExpenses(this.pendingExpenses);
   this.unCheckAllBoxes();
   this.resetShowOnFeedToggles();
   this.loading = false;
@@ -846,9 +846,12 @@ export default {
     clickedRow,
     constructAutoComplete,
     convertToMoneyString,
+    createExpenses,
     customFilter,
     customSort,
+    determineCheckBox,
     determineShowOnFeed,
+    determineShowSwitch,
     emitSelectionChange,
     filterOutReimbursed,
     getBudgetTotal,

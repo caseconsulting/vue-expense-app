@@ -911,19 +911,19 @@ async function convertAutocompleteToTitlecase() {
   //Convert autocomplete certification field to title case
   if (this.model.certifications !== null) {
     this.model.certifications.forEach((currCert) => {
-      currCert.name = titleCase(currCert.name);
+      currCert.name = this.titleCase(currCert.name);
     });
   }
   //Convert autocomplete award field to title case
   if (this.model.awards !== null) {
     this.model.awards.forEach((currAward) => {
-      currAward.name = titleCase(currAward.name);
+      currAward.name = this.titleCase(currAward.name);
     });
   }
   //Convert autocomplete language field to title case
   if (this.model.languages !== null) {
     this.model.languages.forEach((currLang) => {
-      currLang.name = titleCase(currLang.name);
+      currLang.name = this.titleCase(currLang.name);
     });
   }
   await this.confirm();

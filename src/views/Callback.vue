@@ -7,10 +7,10 @@ import { setIdToken, setAccessToken, setRole, setProfile } from '@/utils/auth';
 function mounted() {
   this.$nextTick(async function () {
     try {
-      setAccessToken();
-      setIdToken();
-      setProfile();
-      await setRole();
+      this.setAccessToken();
+      this.setIdToken();
+      this.setProfile();
+      await this.setRole();
       window.location.href = '/loginFailed';
     } catch (error) {
       window.location.href = '/loginFailed';
@@ -26,6 +26,12 @@ function mounted() {
 
 export default {
   mounted,
+  methods: {
+    setAccessToken,
+    setIdToken,
+    setProfile,
+    setRole
+  },
   name: 'callback'
 };
 </script>

@@ -128,7 +128,7 @@ function formatHours(hours) {
  */
 async function setPTOBalances() {
   this.employee = this.isEmployeeView ? this.passedEmployee : await api.getUser();
-  if (!isEmpty(this.employee.id)) {
+  if (!this.isEmpty(this.employee.id)) {
     // employee exists
     let ptoBalances = await api.getPTOBalances(this.employee.employeeNumber); // call api
     if (_.isNil(ptoBalances.results)) {

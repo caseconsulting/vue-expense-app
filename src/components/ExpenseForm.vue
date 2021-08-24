@@ -400,7 +400,7 @@ function receiptRequired() {
  * @return boolean - expense is reimbursed
  */
 function isReimbursed() {
-  return this.isEdit && this.originalExpense && !isEmpty(this.originalExpense.reimbursedDate);
+  return this.isEdit && this.originalExpense && !this.isEmpty(this.originalExpense.reimbursedDate);
 } // isReimbursed
 
 /**
@@ -422,7 +422,7 @@ function notesRules() {
   const notesRules = [];
 
   if (this.reqRecipient) {
-    const notesRule = (v) => !isEmpty(v) || 'Notes is a required field';
+    const notesRule = (v) => !this.isEmpty(v) || 'Notes is a required field';
     notesRules.push(notesRule);
   }
 
@@ -542,7 +542,7 @@ function betweenDates(start, end) {
  */
 function calcAdjustedBudget(employee, expenseType) {
   let result = 0;
-  if (hasAccess(employee, expenseType)) {
+  if (this.hasAccess(employee, expenseType)) {
     if (!expenseType.proRated) {
       result = expenseType.budget;
     } else {
@@ -805,15 +805,15 @@ function costHint() {
   } else if (this.expenseTypeName) {
     let str = `Remaining budget for ${this.expenseTypeName}: `;
     if (this.remainingBudget <= 0) {
-      str += `<span class="red--text">${convertToMoneyString(this.remainingBudget)}`;
+      str += `<span class="red--text">${this.convertToMoneyString(this.remainingBudget)}`;
     } else {
-      str += convertToMoneyString(this.remainingBudget);
+      str += this.convertToMoneyString(this.remainingBudget);
       return str;
     }
     if (this.remainingBudget < 0 && this.remainingBudget >= -this.overdraftBudget && this.selectedExpenseType.odFlag) {
-      str += ` (Overdraftable and within ${convertToMoneyString(this.overdraftBudget)} limit)`;
+      str += ` (Overdraftable and within ${this.convertToMoneyString(this.overdraftBudget)} limit)`;
     } else if (this.remainingBudget < -this.overdraftBudget && this.selectedExpenseType.odFlag) {
-      str += ` (Exceeds overdraftable amount of ${convertToMoneyString(this.overdraftBudget)})`;
+      str += ` (Exceeds overdraftable amount of ${this.convertToMoneyString(this.overdraftBudget)})`;
     } else if (this.remainingBudget < 0 && !this.selectedExpenseType.odFlag) {
       str += ' (Not Overdraftable)';
     }
@@ -829,7 +829,7 @@ async function createNewEntry() {
   let updatedAttachment;
   let updatedExpense;
 
-  let newUUID = uuid();
+  let newUUID = this.uuid();
   this.$set(this.editedExpense, 'id', newUUID);
   this.$set(this.editedExpense, 'createdAt', moment().format('YYYY-MM-DD'));
   if (this.isReceiptRequired() && this.file) {
@@ -845,7 +845,7 @@ async function createNewEntry() {
       if (updatedExpense.id) {
         // successfully updates expense
         // TODO: Only add if training expense type.
-        if (!isEmpty(updatedExpense.url) && !isEmpty(updatedExpense.category)) {
+        if (!this.isEmpty(updatedExpense.url) && !this.isEmpty(updatedExpense.category)) {
           await this.addURLInfo(updatedExpense);
         }
 
@@ -875,7 +875,7 @@ async function createNewEntry() {
     if (updatedExpense.id) {
       // successfully updates expense
       // TODO: Only add if training expense type. Allow empty category
-      if (!isEmpty(updatedExpense.url) && !isEmpty(updatedExpense.category)) {
+      if (!this.isEmpty(updatedExpense.url) && !this.isEmpty(updatedExpense.category)) {
         // add training url if url and category exist
         await this.addURLInfo(updatedExpense);
       }
@@ -947,9 +947,11 @@ function filteredExpenseTypes() {
           // add expense type if no employees are selected
           expenseType.text = `${expenseType.budgetName} - $${Number(expenseType.budget).toLocaleString().toString()}`;
           filteredExpType.push(expenseType);
-        } else if (hasAccess({ id: selectedEmployee.value, workStatus: selectedEmployee.workStatus }, expenseType)) {
+        } else if (
+          this.hasAccess({ id: selectedEmployee.value, workStatus: selectedEmployee.workStatus }, expenseType)
+        ) {
           // add expense type if the employee is selected and has access
-          let amount = calcAdjustedBudget(selectedEmployee, expenseType); // calculate budget
+          let amount = this.calcAdjustedBudget(selectedEmployee, expenseType); // calculate budget
           expenseType.text = `${expenseType.budgetName} - $${Number(amount).toLocaleString().toString()}`;
           filteredExpType.push(expenseType);
         }
@@ -961,11 +963,11 @@ function filteredExpenseTypes() {
     _.forEach(this.expenseTypes, (expenseType) => {
       if (!expenseType.isInactive) {
         // expense type is active
-        if (hasAccess(employee, expenseType)) {
+        if (this.hasAccess(employee, expenseType)) {
           // user has access to the expense type
-          if (expenseType.recurringFlag || betweenDates(expenseType.startDate, expenseType.endDate)) {
+          if (expenseType.recurringFlag || this.betweenDates(expenseType.startDate, expenseType.endDate)) {
             // expense type is active
-            let amount = calcAdjustedBudget(employee, expenseType);
+            let amount = this.calcAdjustedBudget(employee, expenseType);
             expenseType.text = `${expenseType.budgetName} - $${Number(amount).toLocaleString().toString()}`;
             filteredExpType.push(expenseType);
           }
@@ -981,7 +983,7 @@ function filteredExpenseTypes() {
  * Formats the cost on the form for a nicer display.
  */
 function formatCost() {
-  this.editedExpense.cost = parseCost(this.costFormatted);
+  this.editedExpense.cost = this.parseCost(this.costFormatted);
   if (Number(this.editedExpense.cost)) {
     this.costFormatted = Number(this.editedExpense.cost).toLocaleString().toString();
   }
@@ -1208,7 +1210,7 @@ async function scanFile() {
           valConfidence = Math.min(valConfidence, value.Confidence); //key: Total: Values: USD confidence 99 141500 confidence 50
         });
         //set string to format that parsefloat will like and parse it
-        valText = preformatFloat(valText);
+        valText = this.preformatFloat(valText);
         totalPrice = parseFloat(valText.replace(/[^\d.]/g, ''));
 
         //check to see if the confidence is above acceptable values and that the parse worked
@@ -1228,7 +1230,7 @@ async function scanFile() {
           if (word.Confidence >= 90) {
             //if the confidence is higher than 90/100 parse the word to look for a number
             let number = word.Text;
-            number = preformatFloat(number);
+            number = this.preformatFloat(number);
             currentTotal = parseFloat(number.replace(/[^\d.]/g, ''));
             if (typeof currentTotal != 'number' || isNaN(currentTotal)) {
               //if it wasn't a number or parsefloat screwed up it failed
@@ -1327,7 +1329,7 @@ async function scanFile() {
 
     if (firstDate != null && this.editedExpense.purchaseDate == null) {
       let date = moment(new Date(firstDate));
-      date = parseDate(date.format('YYYY-MM-DD'));
+      date = this.parseDate(date.format('YYYY-MM-DD'));
       this.editedExpense.purchaseDate = date;
     }
     if (!failed && (this.editedExpense.cost == 0 || this.editedExpense.cost == null)) {
@@ -1474,7 +1476,7 @@ async function updateExistingEntry() {
  * Set employee role, user info, expense types, and current user view. Creates event listeners.
  */
 async function created() {
-  this.employeeRole = getRole();
+  this.employeeRole = this.getRole();
   this.userInfo = await api.getUser();
 
   window.EventBus.$on('canceledSubmit', () => {
@@ -1633,16 +1635,16 @@ export default {
       confirmBackingOut: false,
       costFormatted: '',
       costRules: [
-        (v) => !isEmpty(v) || 'Cost is a required field',
+        (v) => !this.isEmpty(v) || 'Cost is a required field',
         (v) =>
           /^[+-]?[0-9]{1,3}(?:,?[0-9]{3})*(?:\.[0-9]{2})?$/.test(v) ||
           'Expense amount must be a number with two decimal digits',
-        (v) => parseCost(v) < 1000000000 || 'Nice try' //when a user tries to fill out expense that is over a million
+        (v) => this.parseCost(v) < 1000000000 || 'Nice try' //when a user tries to fill out expense that is over a million
       ], // rules for cost
       date: null, // NOTE: Unused?
       descriptionRules: [
-        (v) => !isEmpty(v) || 'Description is a required field',
-        (v) => (!isEmpty(v) && v.replace(/\s/g, '').length > 0) || 'Description is a required field'
+        (v) => !this.isEmpty(v) || 'Description is a required field',
+        (v) => (!this.isEmpty(v) && v.replace(/\s/g, '').length > 0) || 'Description is a required field'
       ], // rules for description
       disableScan: true, // receipt scanned disabled
       //editedExpense: {}, // data being edited --
@@ -1664,7 +1666,7 @@ export default {
       overdraftBudget: 0,
       purchaseDateFormatted: null, // formatted purchase date
       purchaseMenu: false, // display purchase menu
-      receiptRules: [(v) => !isEmpty(v) || 'Receipts are required'], // rules for receipt
+      receiptRules: [(v) => !this.isEmpty(v) || 'Receipts are required'], // rules for receipt
       recipientOptions: [], // list of active employees to choose for high five
       recipientPlaceholder: '',
       reimbursedDateFormatted: null, // formatted reimburse date
@@ -1706,6 +1708,7 @@ export default {
     getDateRules,
     getDateOptionalRules,
     getExpenseTypeSelected,
+    getRole,
     getRemainingBudget,
     getRequiredRules,
     getURLRules,
@@ -1717,11 +1720,13 @@ export default {
     moneyFilter,
     parseCost,
     parseDate,
+    preformatFloat,
     scanFile,
     setFile,
     setRecipientOptions,
     submit,
-    updateExistingEntry
+    updateExistingEntry,
+    uuid
   },
   props: [
     'expense', // expense to be created/updated
@@ -1758,15 +1763,15 @@ export default {
         // set hint
         this.hint = this.selectedExpenseType.recurringFlag
           ? 'Recurring Expense Type'
-          : `Available from ${formatDate(this.selectedExpenseType.startDate)} - ${formatDate(
+          : `Available from ${this.formatDate(this.selectedExpenseType.startDate)} - ${this.formatDate(
               this.selectedExpenseType.endDate
             )}`;
 
         // set high five cost
         // HARD CODE
         if (this.selectedExpenseType.budgetName === 'High Five') {
-          this.costFormatted = moneyFilter(50);
-          this.editedExpense.cost = moneyFilter(50);
+          this.costFormatted = this.moneyFilter(50);
+          this.editedExpense.cost = this.moneyFilter(50);
           this.isHighFive = true;
           // dont clear when selecting a previous expense to edit
         } else if (!this.editedExpense.edit) {

@@ -56,7 +56,7 @@ async function fillCertData() {
   let primes = {};
   employees.forEach((employee) => {
     if (employee.workStatus != 0) {
-      let currContracts = getCurrentProjects(employee);
+      let currContracts = this.getCurrentProjects(employee);
       let currPrimes = {};
       currContracts.forEach((contract) => {
         let currPrime = contract.prime;

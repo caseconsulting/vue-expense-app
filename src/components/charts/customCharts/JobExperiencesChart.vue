@@ -44,14 +44,14 @@ function jobExperienceData() {
   this.employees.forEach((employee) => {
     if (employee.hireDate !== undefined) {
       // find time at case
-      var amOfYears = calculateTimeDifference(employee.hireDate, undefined);
+      var amOfYears = this.calculateTimeDifference(employee.hireDate, undefined);
       if (employee.companies !== undefined) {
         //we do a for each on the jobs array
         //calculate the difference in the startDate and the endDate (today's date if endDate is undefined)
         employee.companies.forEach((company) => {
           if (company.positions !== undefined) {
             company.positions.forEach((position) => {
-              amOfYears += calculateTimeDifference(position.startDate, position.endDate);
+              amOfYears += this.calculateTimeDifference(position.startDate, position.endDate);
             });
           }
         });
@@ -75,13 +75,13 @@ function jobExperienceData() {
  * @returns Number - The amount of years difference
  */
 function calculateTimeDifference(startDate, endDate) {
-  var start = stringToDate(startDate);
+  var start = this.stringToDate(startDate);
   var end = endDate;
   //Checks if endDate is valid or not
   if (end === undefined || end === null) {
     end = moment(); //Provides today's date
   } else {
-    end = stringToDate(endDate);
+    end = this.stringToDate(endDate);
   }
   return end.diff(start, 'years', true); //Provides decimal value
 } //calculateTimeDifference

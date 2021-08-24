@@ -55,7 +55,7 @@ async function fillCertData() {
   // could be problematic for really long certifications
   for (let i = 0; i < certificationPairs.length; i++) {
     if (certificationPairs[i][0].length > 30) {
-      labels.push(breakSentence(certificationPairs[i][0]));
+      labels.push(this.breakSentence(certificationPairs[i][0]));
     } else {
       labels.push(certificationPairs[i][0]);
     }

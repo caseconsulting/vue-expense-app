@@ -148,7 +148,7 @@ async function created() {
     //this.mainPictureFile = pictureObj.file;
     //this.mainPictureFile.name = this.model.mainPicture;
 
-    blogFile = removeMetaData(blogFile);
+    blogFile = this.removeMetaData(blogFile);
     //this.$set(this.model, 'mainPicture', pictureObj.file.name);
 
     this.editorData = blogFile;
@@ -174,12 +174,12 @@ function beforeDestroy() {
  */
 async function checkSubmit() {
   //check to see if there is any data
-  if (this.$refs.form.validate() && !isEmpty(this.editorData)) {
+  if (this.$refs.form.validate() && !this.isEmpty(this.editorData)) {
     //begin creating the object
     let blogPost;
     let newDate = moment().format(IsoFormat);
     if (!this.editing) {
-      let newUUID = uuid();
+      let newUUID = this.uuid();
       this.$set(this.model, 'id', newUUID);
       this.$set(this.model, 'blogNumber', this.createBlogNumber());
       this.$set(this.model, 'authorId', this.user.id);
@@ -194,7 +194,7 @@ async function checkSubmit() {
       blogPost = await api.updateItem(api.BLOG, this.model);
     }
     if (blogPost.id) {
-      let metaData = await createMetaData(this.model);
+      let metaData = await this.createMetaData(this.model);
       //generate md file and upload it to s3
       let file = new Blob([metaData, this.editorData], { type: 'text/markdown' });
       //upload file
@@ -442,12 +442,12 @@ export default {
         placeholder: 'Create a New Blog Post'
       },
       user: null, //current user
-      requiredRules: [(v) => !isEmpty(v) || 'Required field'], // rules for required fields
+      requiredRules: [(v) => !this.isEmpty(v) || 'Required field'], // rules for required fields
       descriptionRules: [
-        (v) => !isEmpty(v) || 'Description is a required field',
-        (v) => (!isEmpty(v) && v.replace(/\s/g, '').length > 0) || 'Description is a required field'
+        (v) => !this.isEmpty(v) || 'Description is a required field',
+        (v) => (!this.isEmpty(v) && v.replace(/\s/g, '').length > 0) || 'Description is a required field'
       ], // rules for description
-      mainPictureRules: [(v) => !isEmpty(v) || this.editing || 'mainPicture is required'], // rules for mainPicture
+      mainPictureRules: [(v) => !this.isEmpty(v) || this.editing || 'mainPicture is required'], // rules for mainPicture
       model: {
         id: '', //UUID for blog
         blogNumber: 0, //id for blog so we dont have to use huge id for things
@@ -484,12 +484,15 @@ export default {
   methods: {
     checkSubmit,
     clearForm,
+    createMetaData,
     removeMetaData,
     createBlogNumber,
     setFile,
     clearStatus,
     displayError,
-    displaySuccess
+    displaySuccess,
+    isEmpty,
+    uuid
   },
   watch: {
     editorData: function () {

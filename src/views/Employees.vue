@@ -357,7 +357,7 @@ function handleClick(item) {
  * @return boolean - true if user's employeeRole is either a admin or a manager
  */
 function hasAdminPermissions() {
-  return getRole() === 'admin' || getRole() === 'manager';
+  return this.getRole() === 'admin' || this.getRole() === 'manager';
 } // hasAdminPermissions
 
 /**
@@ -405,7 +405,7 @@ function renderCreateEmployee() {
  * Checks to see if the user is an admin. Returns true if the user's role is an admin, otherwise returns false.
  */
 function userIsAdmin() {
-  return getRole() === 'admin';
+  return this.getRole() === 'admin';
 } // userIsAdmin
 
 /**
@@ -617,6 +617,7 @@ export default {
     displayError,
     employeePath,
     filterEmployees,
+    getRole,
     handleClick,
     hasAdminPermissions,
     isEmpty,
