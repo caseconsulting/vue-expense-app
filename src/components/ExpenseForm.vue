@@ -326,7 +326,7 @@ const IsoFormat = 'YYYY-MM-DD';
  * @return
  */
 function getCategories() {
-  if (this.selectedExpenseType) {
+  if (this && this.selectedExpenseType) {
     return _.map(this.selectedExpenseType.categories, (category) => {
       return category.name;
     });
