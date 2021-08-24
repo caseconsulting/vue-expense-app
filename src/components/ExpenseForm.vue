@@ -238,7 +238,7 @@
         <!-- URL -->
         <v-text-field
           v-model="editedExpense.url"
-          :rules="[...getURLRules(), ...getRequireURL]"
+          :rules="[...getURLRules(), ...getRequireURL()]"
           :label="urlLabel"
           :disabled="isInactive"
         ></v-text-field>
@@ -326,7 +326,7 @@ const IsoFormat = 'YYYY-MM-DD';
  * @return
  */
 function getCategories() {
-  if (this && this.selectedExpenseType) {
+  if (this.selectedExpenseType) {
     return _.map(this.selectedExpenseType.categories, (category) => {
       return category.name;
     });
@@ -346,11 +346,16 @@ function getRequireURL() {
   if (this.selectedExpenseType.requireURL) {
     return getRequiredRules();
   }
-  _.forEach(getCategories(), (cat) => {
-    if (cat.requireURL) {
+  if (this.editedExpense.category) {
+    let selectedCategory = _.find(this.selectedExpenseType.categories, (category) => {
+      if (category.name === this.editedExpense.category) {
+        return category;
+      }
+    });
+    if (selectedCategory.requireURL) {
       return getRequiredRules();
     }
-  });
+  }
   return true;
 } // getRequireURL
 
