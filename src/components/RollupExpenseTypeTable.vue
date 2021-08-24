@@ -516,7 +516,7 @@ async function reimburseExpenses() {
 
   // get selected expenses and set reimburse date
   this.empBudgets = _.forEach(this.empBudgets, (budget) => {
-    return _.forEach(budget.expenses, async (expense) => {
+    return _.forEach(budget.expenses, (expense) => {
       if (expense.selected) {
         //to remove the expense type data in the ExpenseTypeTotal modal
         window.EventBus.$emit('expenseChange', expense);
