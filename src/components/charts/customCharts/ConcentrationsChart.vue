@@ -10,6 +10,25 @@ import PieChart from '../baseCharts/PieChart.vue';
 import _ from 'lodash';
 
 /**
+ * mounted lifecycle hook
+ */
+function mounted() {
+  // emit comes from HighestDegreeChart.vue when a pie slice is clicked
+  window.EventBus.$on('concentrations-update', (receiveConcentrations) => {
+    this.degree = receiveConcentrations.degree;
+    this.concentrations = receiveConcentrations.concentrations;
+    this.fillData(this.concentrations);
+  });
+} // mounted
+
+/**
+ * created lifecycle hook
+ */
+function created() {
+  this.fillData(null);
+} // created
+
+/**
  * Sets up the formatting and data options for the chart.
  * @param concentations - An array of the highest degree concentrations
  */
@@ -100,16 +119,7 @@ export default {
   methods: {
     fillData
   },
-  mounted() {
-    // emit comes from HighestDegreeChart.vue when a pie slice is clicked
-    window.EventBus.$on('concentrations-update', (receiveConcentrations) => {
-      this.degree = receiveConcentrations.degree;
-      this.concentrations = receiveConcentrations.concentrations;
-      this.fillData(this.concentrations);
-    });
-  },
-  created() {
-    this.fillData(null);
-  }
+  mounted,
+  created
 };
 </script>

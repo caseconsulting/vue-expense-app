@@ -36,6 +36,20 @@ const IsoFormat = 'YYYY-MM-DD';
 
 // |--------------------------------------------------|
 // |                                                  |
+// |               LIFECYCLE HOOKS                    |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * mounted lifecycle hook
+ */
+async function mounted() {
+  await this.refreshBudget();
+  this.drawGraph();
+} // mounted
+
+// |--------------------------------------------------|
+// |                                                  |
 // |                     COMPUTED                     |
 // |                                                  |
 // |--------------------------------------------------|
@@ -323,10 +337,7 @@ export default {
     getFinalBudgetsData,
     refreshBudget
   },
-  async mounted() {
-    await this.refreshBudget();
-    this.drawGraph();
-  },
+  mounted,
   props: ['employee', 'fiscalDateView'],
   watch: {
     fiscalDateView: async function () {

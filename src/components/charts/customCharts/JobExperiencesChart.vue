@@ -12,6 +12,17 @@ import api from '@/shared/api.js';
 moment.tz.setDefault('America/New_York');
 
 /**
+ * created lifecycle hook
+ */
+async function created() {
+  // eslint-disable-next-line no-undef
+  this.$forceUpdate();
+  this.employees = (await api.getItems(api.EMPLOYEES)).filter((employee) => employee.workStatus != 0);
+  this.jobExperienceData();
+  this.drawJobExpHistGraph();
+} // created
+
+/**
  * Finds the last index that has an element greater than 0 to prevent too many labels showing up on the chart.
  * @returns Number - The index greater than 0
  */
@@ -163,12 +174,6 @@ export default {
     calculateTimeDifference,
     stringToDate
   },
-  created: async function () {
-    // eslint-disable-next-line no-undef
-    this.$forceUpdate();
-    this.employees = (await api.getItems(api.EMPLOYEES)).filter((employee) => employee.workStatus != 0);
-    this.jobExperienceData();
-    this.drawJobExpHistGraph();
-  }
+  created
 };
 </script>

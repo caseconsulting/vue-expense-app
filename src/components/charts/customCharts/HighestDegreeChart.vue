@@ -16,6 +16,16 @@ const moment = require('moment-timezone');
 moment.tz.setDefault('America/New_York');
 
 /**
+ * created lifecycle hook
+ */
+async function created() {
+  this.$forceUpdate();
+  this.employees = await api.getItems(api.EMPLOYEES);
+  this.degrees = this.initDegrees();
+  this.fillData();
+} // created
+
+/**
  * Initializes the degrees data field, this function retrieves the highest
  * degree for each employee.
  * @return array of objects - key: employee name, value: another array
@@ -329,12 +339,7 @@ export default {
     minorsEmit,
     concentrationsEmit
   },
-  async created() {
-    this.$forceUpdate();
-    this.employees = await api.getItems(api.EMPLOYEES);
-    this.degrees = this.initDegrees();
-    this.fillData();
-  }
+  created
 };
 </script>
 

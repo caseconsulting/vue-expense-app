@@ -20,6 +20,15 @@ import _ from 'lodash';
 import api from '@/shared/api.js';
 
 /**
+ * created lifecycle hook
+ */
+async function created() {
+  this.employees = await api.getItems(api.EMPLOYEES);
+  this.fillData();
+  this.$forceUpdate();
+} // created
+
+/**
  * Sets up the chart formatting and data options.
  */
 function fillData() {
@@ -111,11 +120,7 @@ export default {
     };
   },
   methods: { fillData },
-  async created() {
-    this.employees = await api.getItems(api.EMPLOYEES);
-    this.fillData();
-    this.$forceUpdate();
-  },
+  created,
   watch: {
     showCurrent() {
       this.fillData(); // renders a different chart every time the radio button changes

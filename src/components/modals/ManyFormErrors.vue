@@ -29,6 +29,12 @@
 </template>
 
 <script>
+// |--------------------------------------------------|
+// |                                                  |
+// |                      Methods                     |
+// |                                                  |
+// |--------------------------------------------------|
+
 /**
  * Emits a message and data if it exists.
  *
@@ -37,6 +43,18 @@
 function emit(msg) {
   window.EventBus.$emit(msg);
 } // emit
+
+/**
+ * changes text based on if there is one or if there is more than one
+ *
+ * @param val - the number that we go off of
+ */
+function isPlural(val) {
+  if (val === 1) {
+    return 'y';
+  }
+  return 'ies';
+} // isPlural
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -52,12 +70,7 @@ export default {
   },
   methods: {
     emit,
-    isPlural(val) {
-      if (val === 1) {
-        return 'y';
-      }
-      return 'ies';
-    }
+    isPlural
   },
   props: [
     'errorTabs',

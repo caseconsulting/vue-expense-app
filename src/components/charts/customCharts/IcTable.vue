@@ -25,6 +25,15 @@ const moment = require('moment-timezone');
 moment.tz.setDefault('America/New_York');
 
 /**
+ * created lifecycle hook
+ */
+async function created() {
+  this.$forceUpdate();
+  this.employees = await api.getItems(api.EMPLOYEES);
+  this.fillData();
+} // created
+
+/**
  * Gets the IC data, and sets the chart formatting and data options
  */
 function fillData() {
@@ -88,10 +97,6 @@ export default {
   methods: {
     fillData
   },
-  async created() {
-    this.$forceUpdate();
-    this.employees = await api.getItems(api.EMPLOYEES);
-    this.fillData();
-  }
+  created
 };
 </script>

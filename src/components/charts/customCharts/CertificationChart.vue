@@ -11,6 +11,14 @@ import BarChart from '../baseCharts/BarChart.vue';
 import moment from 'moment-timezone';
 
 /**
+ * mounted lifecycle hook
+ */
+async function mounted() {
+  this.$forceUpdate();
+  await this.fillCertData();
+} // mounted
+
+/**
  * Extract each employees certifications and tally up each one. Also formats and sets data options for the chart.
  */
 async function fillCertData() {
@@ -170,9 +178,6 @@ export default {
     fillCertData,
     breakSentence
   },
-  async mounted() {
-    this.$forceUpdate();
-    await this.fillCertData();
-  }
+  mounted
 };
 </script>

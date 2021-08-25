@@ -10,6 +10,14 @@ import api from '@/shared/api.js';
 import BarChart from '../baseCharts/BarChart.vue';
 
 /**
+ * mounted lifecycle hook
+ */
+async function mounted() {
+  await this.fillCertData();
+  this.$forceUpdate();
+} // mounted
+
+/**
  * Gets all of the current projects the user has
  */
 function getCurrentProjects(employee) {
@@ -150,6 +158,7 @@ async function fillCertData() {
 }
 export default {
   components: { BarChart },
+  mounted,
   data() {
     return {
       options: null,
@@ -160,10 +169,6 @@ export default {
   methods: {
     getCurrentProjects,
     fillCertData
-  },
-  async mounted() {
-    await this.fillCertData();
-    this.$forceUpdate();
   }
 };
 </script>

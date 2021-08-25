@@ -1,6 +1,13 @@
 <script>
 import { Bar, mixins } from 'vue-chartjs';
 
+/**
+ * mounted lifecycle hook
+ */
+function mounted() {
+  this.renderChart(this.chartData, this.options);
+} // mounted
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                      EXPORT                      |
@@ -10,9 +17,7 @@ import { Bar, mixins } from 'vue-chartjs';
 export default {
   extends: Bar,
   mixins: [mixins.reactiveProp],
-  mounted() {
-    this.renderChart(this.chartData, this.options);
-  },
+  mounted,
   props: [
     'chartData', // chart data to render
     'options' // chart options

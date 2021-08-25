@@ -163,6 +163,37 @@ async function created() {
   this.afterCreate = true;
 } // created
 
+// |--------------------------------------------------|
+// |                                                  |
+// |                    COMPUTED                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * computed boolean to decide whether or not to use dropdown
+ */
+function useDropDown() {
+  switch (this.$vuetify.breakpoint.name) {
+    case 'xs':
+      return true;
+    default:
+      return false;
+  }
+} // useDropDown
+
+/**
+ * computed value for selected info tab
+ */
+function parsedInfoTab() {
+  let parseTab = !this.infoTab ? 'Select Info' : this.infoTab;
+  if (this.infoTab === 'customerOrgExp') {
+    parseTab = 'Customer Org';
+  } else if (this.infoTab === 'jobExperience') {
+    parseTab = 'Job Experience';
+  }
+  return parseTab.toUpperCase();
+} // parsedInfoTab
+
 export default {
   components: {
     AwardsTab,
@@ -192,23 +223,8 @@ export default {
   },
   props: ['model', 'currentTab'],
   computed: {
-    useDropDown() {
-      switch (this.$vuetify.breakpoint.name) {
-        case 'xs':
-          return true;
-        default:
-          return false;
-      }
-    },
-    parsedInfoTab() {
-      let parseTab = !this.infoTab ? 'Select Info' : this.infoTab;
-      if (this.infoTab === 'customerOrgExp') {
-        parseTab = 'Customer Org';
-      } else if (this.infoTab === 'jobExperience') {
-        parseTab = 'Job Experience';
-      }
-      return parseTab.toUpperCase();
-    }
+    useDropDown,
+    parsedInfoTab
   },
   watch: {
     infoTab: function (val) {

@@ -134,6 +134,13 @@ async function fillData() {
   this.chartLoaded = true;
 }
 
+/**
+ * returns the combined date range computed value
+ */
+function dateRange() {
+  return `${this.queryStartDate} ${this.queryEndDate}`;
+} //dateRange
+
 export default {
   components: { BarChart, AuditTable },
   async created() {
@@ -149,9 +156,7 @@ export default {
     };
   },
   computed: {
-    dateRange() {
-      return `${this.queryStartDate} ${this.queryEndDate}`;
-    }
+    dateRange
   },
   methods: { fillData },
   props: ['queryStartDate', 'queryEndDate'],

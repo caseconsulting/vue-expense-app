@@ -145,13 +145,17 @@ async function fillData() {
   };
 }
 
+/**
+ * created lifecycle hook
+ */
+async function created() {
+  this.employees = await api.getItems(api.EMPLOYEES); // get all employees
+  await this.fillData();
+} //created
+
 export default {
   components: { AuditTable, PieChart },
-
-  async created() {
-    this.employees = await api.getItems(api.EMPLOYEES); // get all employees
-    await this.fillData();
-  },
+  created,
   data() {
     return {
       employees: [],

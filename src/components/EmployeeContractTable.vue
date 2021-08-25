@@ -367,6 +367,7 @@ async function created() {
   this.constructAutoComplete(this.filteredEmployees);
   this.loading = false;
 } //created
+
 export default {
   created,
   data() {

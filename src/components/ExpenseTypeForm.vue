@@ -568,6 +568,13 @@ function toggleRequireURL() {
   }
 } // toggleRequireURL
 
+/**
+ * boolean for checkBox appearance
+ */
+function checkBoxRule() {
+  return !(this.editedExpenseType.accessibleBy && this.editedExpenseType.accessibleBy.length > 0);
+} // checkBoxRule
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                 LIFECYCLE HOOKS                  |
@@ -697,9 +704,7 @@ export default {
   },
   props: ['model'], // expense type to be created/updated
   computed: {
-    checkBoxRule() {
-      return !(this.editedExpenseType.accessibleBy && this.editedExpenseType.accessibleBy.length > 0);
-    }
+    checkBoxRule
   },
   watch: {
     'model.id': function () {

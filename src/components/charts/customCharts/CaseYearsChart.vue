@@ -12,6 +12,16 @@ import api from '@/shared/api.js';
 moment.tz.setDefault('America/New_York');
 
 /**
+ * created lifecycle hook
+ */
+async function created() {
+  this.$forceUpdate();
+  this.employees = await api.getItems(api.EMPLOYEES);
+  this.caseYearsData();
+  this.drawCaseYearsHistGraph();
+} // created
+
+/**
  * Puts an employee in an array based on a time interval of 2 years for each index from their hire date.
  */
 function caseYearsData() {
@@ -142,11 +152,6 @@ export default {
     findMaxIndex,
     stringToDate
   },
-  created: async function () {
-    this.$forceUpdate();
-    this.employees = await api.getItems(api.EMPLOYEES);
-    this.caseYearsData();
-    this.drawCaseYearsHistGraph();
-  }
+  created
 };
 </script>

@@ -770,6 +770,13 @@ async function created() {
   this.loading = false;
 } // created
 
+/**
+ * beforeDestroy lifecycle hook
+ */
+function beforeDestroy() {
+  window.EventBus.$off('confirm-reimburse');
+} //beforeDestroy
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                      EXPORT                      |
@@ -777,9 +784,7 @@ async function created() {
 // |--------------------------------------------------|
 
 export default {
-  beforeDestroy() {
-    window.EventBus.$off('confirm-reimburse');
-  },
+  beforeDestroy,
   prop: ['confirmReimburse'],
   components: {
     ReimburseModal,

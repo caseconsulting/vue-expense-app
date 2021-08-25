@@ -805,6 +805,12 @@ async function created() {
   this.hasResume = (await api.getResume(this.$route.params.id)) != null;
 } // created
 
+// |--------------------------------------------------|
+// |                                                  |
+// |                    METHODS                       |
+// |                                                  |
+// |--------------------------------------------------|
+
 /**
  * Sets the form data based on the given tab.
  * @param tab - the tab the data came from
@@ -900,6 +906,37 @@ async function convertAutocompleteToTitlecase() {
   }
   await this.confirm();
 } //convertAutocompleteToTitlecase
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                    COMPUTED                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * choose whether to use the drop down or not with a boolean computed value
+ */
+function useDropDown() {
+  switch (this.$vuetify.breakpoint.name) {
+    case 'xs':
+      return true;
+    default:
+      return false;
+  }
+} // useDropDown
+
+/**
+ * computed value of which tab is selected
+ */
+function parsedInfoTab() {
+  let parseTab = !this.formTab ? 'Select Info' : this.formTab;
+  if (this.formTab === 'customerOrgExp') {
+    parseTab = 'Customer Org';
+  } else if (this.formTab === 'jobExperience') {
+    parseTab = 'Job Experience';
+  }
+  return parseTab.toUpperCase();
+} // parsedInfoTab
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -1062,23 +1099,8 @@ export default {
     }
   },
   computed: {
-    useDropDown() {
-      switch (this.$vuetify.breakpoint.name) {
-        case 'xs':
-          return true;
-        default:
-          return false;
-      }
-    },
-    parsedInfoTab() {
-      let parseTab = !this.formTab ? 'Select Info' : this.formTab;
-      if (this.formTab === 'customerOrgExp') {
-        parseTab = 'Customer Org';
-      } else if (this.formTab === 'jobExperience') {
-        parseTab = 'Job Experience';
-      }
-      return parseTab.toUpperCase();
-    }
+    useDropDown,
+    parsedInfoTab
   }
 };
 </script>

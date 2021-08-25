@@ -84,6 +84,20 @@ import _ from 'lodash';
 
 // |--------------------------------------------------|
 // |                                                  |
+// |              LIFECYCLE HOOKS                     |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * updated lifecycle hook
+ */
+function updated() {
+  this.$emit('rendered'); //This is to ensure that the
+  //chart renders after the table
+} // updated
+
+// |--------------------------------------------------|
+// |                                                  |
 // |                     METHODS                      |
 // |                                                  |
 // |--------------------------------------------------|
@@ -223,10 +237,7 @@ export default {
     noRemaining,
     odFlagMessage
   },
-  updated() {
-    this.$emit('rendered'); //This is to ensure that the
-    //chart renders after the table
-  },
+  updated,
   props: ['employee', 'fiscalDateView'] // employee of budgets
 };
 </script>

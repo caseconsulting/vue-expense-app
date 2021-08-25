@@ -107,6 +107,19 @@ import _ from 'lodash';
 
 // |--------------------------------------------------|
 // |                                                  |
+// |               LIFECYCLE HOOKS                    |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * created lifecycle hook
+ */
+function created() {
+  this.filterEvents();
+} // created
+
+// |--------------------------------------------------|
+// |                                                  |
 // |                     COMPUTED                     |
 // |                                                  |
 // |--------------------------------------------------|
@@ -192,9 +205,7 @@ export default {
     getURL,
     filterEvents
   },
-  created() {
-    this.filterEvents();
-  },
+  created,
   props: ['events', 'loading']
 };
 </script>
