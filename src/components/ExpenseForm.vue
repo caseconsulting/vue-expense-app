@@ -1563,10 +1563,8 @@ async function created() {
 
   // adjust costRules to prevent users from using negative expenses
   if (this.employeeRole && this.employeeRole == 'admin') {
-    console.log('is admin');
     this.costRules.splice(1, 0, (v) => (!isEmpty(v) && v != 0) || 'Cost cannot be zero');
   } else {
-    console.log('is user');
     this.costRules.splice(1, 0, (v) => (!isEmpty(v) && v > 0) || 'Cost must be a positive number');
   }
 
