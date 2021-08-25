@@ -437,10 +437,6 @@ import { convertToMoneyString } from '@/utils/utils';
 // |--------------------------------------------------|
 
 function expenseTypeList() {
-  // this commented out code does not (but should) include old expense types who the user no longer has access to
-  // return _.filter(this.filteredExpenseTypes, type => {
-  //   return this.userIsAdmin() || this.hasAccess(this.userInfo, type);
-  // });
   return this.filteredExpenseTypes;
 } // expenseTypeList
 

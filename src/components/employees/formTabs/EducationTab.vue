@@ -235,26 +235,6 @@ async function created() {
   this.employees = await api.getItems(api.EMPLOYEES); // get all employees
   this.schoolDropDown = await api.getColleges('');
 
-  // _.forEach(this.editedDegrees, (school) => {
-  //   if (school.name === 'Virginia Polytechnic Institute and State University') {
-  //     school.name = 'Virginia Polytechnic Institute and State University (Virginia Tech)';
-  //   } else if (school.name === 'University of Mississippi') {
-  //     school.name = 'University of Mississippi (Ole Miss)';
-  //   } else if (school.name === 'United States Military Academy') {
-  //     school.name = 'United States Military Academy (West Point)';
-  //   } else if (school.name === 'Northern Virginia Community College') {
-  //     school.name = 'Northern Virginia Community College (NoVa)';
-  //   } else if (school.name === 'Georgia Institute of Technology') {
-  //     school.name = 'Georgia Institute of Technology (Georgia Tech)';
-  //   } else if (school.name === 'Florida Institute of Technology') {
-  //     school.name = 'Florida Institute of Technology (Florida Tech)';
-  //   } else if (school.name === 'City University of New York') {
-  //     school.name = 'City University of New York (City Tech)';
-  //   } else if (school.name === 'California Institute of Technology') {
-  //     school.name = 'California Institute of Technology (Caltech)';
-  //   }
-  // });
-
   let alias = this.schoolDropDown.indexOf('Virginia Polytechnic Institute and State University');
   this.schoolDropDown[alias] = 'Virginia Polytechnic Institute and State University (Virginia Tech)';
   alias = this.schoolDropDown.indexOf('University of Mississippi');

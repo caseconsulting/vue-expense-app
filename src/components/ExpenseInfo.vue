@@ -115,11 +115,6 @@ export default {
 </script>
 
 <style scoped>
-/* .color-change-2x {
-  -webkit-animation: color-change-2x 10s linear infinite alternate both;
-  animation: color-change-2x 10s linear infinite alternate both;
-} */
-
 p {
   color: #38424d;
 }
@@ -127,32 +122,6 @@ p {
 span {
   font-weight: bold;
 }
-
-/**
- * ----------------------------------------
- * animation color-change-2x
- * ----------------------------------------
- */
-
-/* @-webkit-keyframes color-change-2x {
-  0% {
-    background: #83837d;
-  }
-
-  100% {
-    background: #f5694f;
-  }
-}
-
-@keyframes color-change-2x {
-  0% {
-    background: #83837d;
-  }
-
-  100% {
-    background: #f5694f;
-  }
-} */
 
 .slide-in-blurred-right {
   animation: slide-in-blurred-right 0.5s ease-in forwards;

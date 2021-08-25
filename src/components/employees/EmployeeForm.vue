@@ -684,21 +684,18 @@ function addErrorTab(name, errors) {
 
 async function openUpload() {
   let employees = await api.getItems(api.EMPLOYEES);
+  //check validation of employee number
   if (employees.some((emp) => emp.employeeNumber == this.employeeNumber)) {
+    //if error
+    //let err = 'duplicate ID found'
     let message = 'Duplicate employee number, please change to a unique employee number to upload resume';
     this.uploadDisabled = true;
     this.displayError(message);
   } else {
+    //if no error
     this.toggleResumeParser = !this.toggleResumeParser;
+    // open pop-up modal for resume parser
   }
-
-  //check validation of employee number
-  //if no error
-  //this.toggleResumeParser = !this.toggleResumeParser;
-  //if error
-  //pop-up modal with invalid number
-  //let err = 'duplicate ID found'
-  //this.display(err)
 }
 // |--------------------------------------------------|
 // |                                                  |

@@ -324,14 +324,6 @@ moment.tz.setDefault('America/New_York');
  * Set required url for expense type if all category required url checkboxes are enabled.
  */
 function checkRequireURL() {
-  // find index of category selected
-  // let index = _.findIndex(this.editedExpenseType.categories, (cat) => {
-  //   return cat.name == category.name;
-  // });
-
-  // toggle the category require url
-  //this.editedExpenseType.categories[index].requireURL = !this.editedExpenseType.categories[index].requireURL;
-
   // check if any categories do not require a url
   let somethingIsFalse = _.find(this.editedExpenseType.categories, (category) => {
     return !category.requireURL;
@@ -349,14 +341,6 @@ function checkRequireURL() {
  * Set always on feed for expense type if all category show on feed checkboxes are enabled.
  */
 function checkSelection() {
-  // find index of category selected
-  // let index = _.findIndex(this.editedExpenseType.categories, (cat) => {
-  //   return cat.name == category.name;
-  // });
-
-  // toggle the category show on feed
-  // this.editedExpenseType.categories[index].showOnFeed = !this.editedExpenseType.categories[index].showOnFeed;
-
   // check if any categories are hidden on feed
   let somethingIsFalse = _.find(this.editedExpenseType.categories, (category) => {
     return !category.showOnFeed;

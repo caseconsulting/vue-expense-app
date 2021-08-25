@@ -251,9 +251,6 @@
           <span>Delete Company</span>
         </v-tooltip>
       </div>
-      <!-- <v-row v-if="!hasEndDatesFilled(compIndex)" class="py-5 caption text--darken-2 grey--text">
-        Note that leaving the end date blank means you are currently working at that position.
-      </v-row> -->
     </div>
     <!-- End Loop Jobs -->
 

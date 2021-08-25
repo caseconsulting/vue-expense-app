@@ -253,9 +253,6 @@
 
         <!-- Buttons -->
         <!-- Cancel Button -->
-        <!-- <v-btn color="white" elevation="2" @click="clearForm" class="ma-2" :disabled="isInactive" id="cancelButton">
-          <icon class="mr-1" name="ban"></icon>Cancel
-        </v-btn> -->
         <v-btn
           color="white"
           elevation="2"
@@ -268,15 +265,6 @@
         </v-btn>
 
         <!-- Submit Button -->
-        <!-- <v-btn
-          outlined
-          color="success"
-          @click="checkCoverage"
-          :disabled="!valid || (!isAdmin && isReimbursed) || isInactive"
-          id="submitButton"
-          :loading="loading"
-          class="ma-2"
-        > -->
         <v-btn
           outlined
           color="success"
@@ -1326,12 +1314,6 @@ async function scanFile() {
       this.editedExpense.cost = totalPrice;
       this.costFormatted = Number(this.editedExpense.cost).toLocaleString().toString();
     }
-    //Below code appends data in notes to the new generated values
-    // if (!isEmpty(this.editedExpense.note)) {
-    //   // expense has a note
-    //   this.editedExpense.note += `\n\n${adjustNote}`;
-    // } else {
-    // expense does not have a note
     this.editedExpense.note = adjustNote;
     // }
   }
@@ -1351,12 +1333,10 @@ function setRecipientOptions() {
         this.editedExpense.employeeId == employee.value
       ) {
         if (this.userInfo.id != this.editedExpense.employeeId && !this.asUser) {
-          // return employeeUtils.fullName(employee);
           return employee;
         }
         return;
       }
-      // return employeeUtils.fullName(employee);
       return employee;
     })
   );

@@ -273,21 +273,6 @@ async function getResume(employeeId) {
     .catch(() => {
       return null;
     });
-
-  // try {
-  //   return await execute('get', `resume/${employeeId}`)
-  //     .then((res) => {
-  //       console.log(res + 'here1');
-  //       return res;
-  //     })
-  //     .catch((err) => {
-  //       console.log(err + 'here2');
-  //       return err;
-  //     });
-  // } catch (err) {
-  //   console.log(err);
-  //   return err;
-  // }
 }
 
 async function createAttachment(expense, file) {
