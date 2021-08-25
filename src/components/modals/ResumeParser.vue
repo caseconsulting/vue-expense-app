@@ -397,6 +397,13 @@ function created() {
   });
 } // created
 
+/**
+ * sestroyListener
+ */
+function beforeDestroy() {
+  window.EventBus.$off('confirmed-parser');
+} // beforeDestroy
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                 COMPUTED                         |
@@ -914,9 +921,7 @@ function clearForm() {
 // |--------------------------------------------------|
 
 export default {
-  beforeDestroy() {
-    window.EventBus.$off('confirmed-parser');
-  },
+  beforeDestroy,
   components: {
     CancelConfirmation,
     educationTab,

@@ -20,6 +20,11 @@ const moment = require('moment-timezone');
 moment.tz.setDefault('America/New_York');
 const IsoFormat = 'MMMM Do YYYY, h:mm:ss a';
 
+async function created() {
+  this.employees = await api.getItems(api.EMPLOYEES); // get all employees
+  this.fillData();
+}
+
 /**
  * Generates chart data and table
  */
@@ -143,10 +148,7 @@ function dateRange() {
 
 export default {
   components: { BarChart, AuditTable },
-  async created() {
-    this.employees = await api.getItems(api.EMPLOYEES); // get all employees
-    this.fillData();
-  },
+  created,
   data() {
     return {
       chartLoaded: false,

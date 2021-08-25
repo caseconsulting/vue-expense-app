@@ -109,6 +109,14 @@ function created() {
 } // created
 
 /**
+ * destroy listeners
+ */
+function beforeDestroy() {
+  window.EventBus.$off('canceled-delete-BlogPost');
+  window.EventBus.$off('confirm-delete-BlogPost');
+} // beforeDestroy
+
+/**
  * Get path to post editor for edit
  *
  * @param item - selected item from table
@@ -179,10 +187,7 @@ export default {
     DeleteModal
   },
   created,
-  beforeDestroy() {
-    window.EventBus.$off('canceled-delete-BlogPost');
-    window.EventBus.$off('confirm-delete-BlogPost');
-  },
+  beforeDestroy,
   methods: {
     blogPath,
     handleEdit,

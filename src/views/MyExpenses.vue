@@ -817,6 +817,10 @@ async function created() {
   await this.refreshExpenses(); // refresh and update expenses
 } // created
 
+function beforeDestroy() {
+  window.EventBus.$off('confirm-delete-expense');
+} // beforeDestroy
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                      EXPORT                      |
@@ -824,9 +828,7 @@ async function created() {
 // |--------------------------------------------------|
 
 export default {
-  beforeDestroy() {
-    window.EventBus.$off('confirm-delete-expense');
-  },
+  beforeDestroy,
   components: {
     Attachment,
     ConvertExpensesToCsv,

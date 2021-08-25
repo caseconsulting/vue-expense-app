@@ -440,6 +440,19 @@ function expenseTypeList() {
   return this.filteredExpenseTypes;
 } // expenseTypeList
 
+/**
+ * returns the headers to show
+ *
+ * @return - headers to show
+ */
+function _headers() {
+  if (userIsAdmin()) {
+    return this.headers;
+  } else {
+    return this.headers.filter((x) => x.show);
+  }
+} // _headers
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                     METHODS                      |
@@ -983,13 +996,7 @@ export default {
   },
   computed: {
     expenseTypeList,
-    _headers() {
-      if (userIsAdmin()) {
-        return this.headers;
-      } else {
-        return this.headers.filter((x) => x.show);
-      }
-    }
+    _headers
   },
   created,
   data() {

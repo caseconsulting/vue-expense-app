@@ -1572,6 +1572,18 @@ async function created() {
 } // created
 
 /**
+ * destroy listeners
+ */
+function beforeDestroy() {
+  window.EventBus.$off('canceledSubmit');
+  window.EventBus.$off('confirmSubmit');
+  window.EventBus.$off('confirmed-expense');
+  window.EventBus.$off('canceled-expense');
+  window.EventBus.$off('backout-canceled-expense');
+  window.EventBus.$off('backout-confirmed-expense');
+} // beforeDestroy
+
+/**
  * Extends the Number object to populate a given size with zeros.
  *
  * @param size - size of number
@@ -1592,14 +1604,7 @@ Number.prototype.pad = function (size) {
 // |--------------------------------------------------|
 
 export default {
-  beforeDestroy() {
-    window.EventBus.$off('canceledSubmit');
-    window.EventBus.$off('confirmSubmit');
-    window.EventBus.$off('confirmed-expense');
-    window.EventBus.$off('canceled-expense');
-    window.EventBus.$off('backout-canceled-expense');
-    window.EventBus.$off('backout-confirmed-expense');
-  },
+  beforeDestroy,
   components: {
     CancelConfirmation,
     ConfirmationBox,

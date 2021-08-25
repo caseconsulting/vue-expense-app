@@ -322,6 +322,14 @@ function mounted() {
   });
 } // mounted
 
+/**
+ * destroy listeners
+ */
+function beforeDestroy() {
+  window.EventBus.$off('delete-resume');
+  window.EventBus.$off('upload-resume-complete');
+} // beforeDestroy
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                      EXPORT                      |
@@ -329,10 +337,7 @@ function mounted() {
 // |--------------------------------------------------|
 
 export default {
-  beforeDestroy() {
-    window.EventBus.$off('delete-resume');
-    window.EventBus.$off('upload-resume-complete');
-  },
+  beforeDestroy,
   components: {
     AvailableBudgets,
     DeleteModal,

@@ -805,6 +805,15 @@ async function created() {
   this.hasResume = (await api.getResume(this.$route.params.id)) != null;
 } // created
 
+/**
+ * destroying all listeners
+ */
+function beforeDestroy() {
+  window.EventBus.$off('confirmed');
+  window.EventBus.$off('canceled');
+  window.EventBus.$off('canceled-form');
+} // beforeDestroy
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                    METHODS                       |
@@ -944,11 +953,7 @@ function parsedInfoTab() {
 // |                                                  |
 // |--------------------------------------------------|
 export default {
-  beforeDestroy() {
-    window.EventBus.$off('confirmed');
-    window.EventBus.$off('canceled');
-    window.EventBus.$off('canceled-form');
-  },
+  beforeDestroy,
   components: {
     AwardTab,
     CertificationTab,

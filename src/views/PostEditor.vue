@@ -162,6 +162,14 @@ async function created() {
 } //created
 
 /**
+ * destroy the listeners
+ */
+function beforeDestroy() {
+  window.EventBus.$off('confirmed');
+  window.EventBus.$off('canceled');
+} // beforeDestroy
+
+/**
  * Check validation and then attempt to submit blog
  */
 async function checkSubmit() {
@@ -342,10 +350,7 @@ export default {
     FormSubmissionConfirmation
   },
   created,
-  beforeDestroy() {
-    window.EventBus.$off('confirmed');
-    window.EventBus.$off('canceled');
-  },
+  beforeDestroy,
   data() {
     return {
       editor: ClassicEditor,

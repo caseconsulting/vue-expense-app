@@ -487,6 +487,16 @@ async function created() {
   }
 } // created
 
+/**
+ * destroy listeners
+ */
+function beforeDestroy() {
+  window.EventBus.$off('cancel-form');
+  window.EventBus.$off('canceled-delete-employee');
+  window.EventBus.$off('confirm-delete-employee');
+  window.EventBus.$off('invalid-employee-delete');
+} // beforeDestroy
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                      EXPORT                      |
@@ -494,12 +504,7 @@ async function created() {
 // |--------------------------------------------------|
 
 export default {
-  beforeDestroy() {
-    window.EventBus.$off('cancel-form');
-    window.EventBus.$off('canceled-delete-employee');
-    window.EventBus.$off('confirm-delete-employee');
-    window.EventBus.$off('invalid-employee-delete');
-  },
+  beforeDestroy,
   components: {
     ConvertEmployeesToCsv,
     DeleteErrorModal,
