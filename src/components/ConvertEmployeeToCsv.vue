@@ -407,42 +407,6 @@ function getTechnologies(tech) {
 } // getTechnologies
 
 /**
-<<<<<<< HEAD
-=======
- * Calculates the number of months that have passed between 2 dates in YYYY-MM format.
- *
- * @param start - the time interval starting date
- * @param end - the time interval ending date
- */
-function monthsPassed(start, end) {
-  let startDate = start;
-  let endDate = end;
-  let totalTimePassed = 0;
-
-  //if there is no end date use interval start - now
-  if (this.isEmpty(endDate)) {
-    endDate = moment().format('YYYY-MM');
-  }
-
-  //makes sure that the start and end date are both not empty
-  if (!this.isEmpty(startDate) && !this.isEmpty(endDate)) {
-    let monthsStart = Number(moment(startDate, 'YYYY-MM').format('MM'));
-    let yearsStart = Number(moment(startDate, 'YYYY-MM').format('YYYY'));
-
-    let monthsEnd = Number(moment(endDate, 'YYYY-MM').format('MM'));
-    let yearsEnd = Number(moment(endDate, 'YYYY-MM').format('YYYY'));
-
-    let absoluteStartMonths = monthsStart + yearsStart * 12; //calculates absolute number of months for start date
-    let absoluteEndMonths = monthsEnd + yearsEnd * 12; //calculates absolute number of years for end date
-
-    totalTimePassed = absoluteEndMonths - absoluteStartMonths; //total number of months
-  }
-
-  return totalTimePassed;
-} //monthsPassed
-
-/**
->>>>>>> ddbb584 (2854-making-sure-we-are-calling-methods-correctly: further added this to statements)
  * Returns language data for employee
  *
  * @param lang - An array of objects.

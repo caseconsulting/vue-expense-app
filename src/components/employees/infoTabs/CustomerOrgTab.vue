@@ -25,7 +25,7 @@
     <!-- Employee does not have Customer Organization Experience -->
     <p v-else>No Customer Organization Experience Information</p>
     <div
-      v-if="!isEmpty(this.model.customerOrgExp) && Math.ceil(model.customerOrgExp.length / 5) != 1"
+      v-if="!this.isEmpty(this.model.customerOrgExp) && Math.ceil(model.customerOrgExp.length / 5) != 1"
       class="text-center"
     >
       <!-- Pagination -->

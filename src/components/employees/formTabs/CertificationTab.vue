@@ -219,7 +219,7 @@ export default {
       dateOrderRules: (certIndex) => {
         if (this.editedCertifications) {
           let position = this.editedCertifications[certIndex];
-          return !isEmpty(position.expirationDate) && moment(position.expirationDate) && position.dateReceived
+          return !this.isEmpty(position.expirationDate) && moment(position.expirationDate) && position.dateReceived
             ? moment(position.expirationDate).add(1, 'd').isAfter(moment(position.dateReceived)) ||
                 'End date must be at or after start date'
             : true;

@@ -355,7 +355,9 @@ export default {
       countries: [], // list of countries
       phoneRules: [
         (v) =>
-          !isEmpty(v) ? v.length == 0 || v.length == 12 || 'Phone number must be valid. Format: ###-###-####' : true
+          !this.isEmpty(v)
+            ? v.length == 0 || v.length == 12 || 'Phone number must be valid. Format: ###-###-####'
+            : true
       ],
       searchString: '',
       placeIds: {},
@@ -431,6 +433,7 @@ export default {
     getNonFutureDateRules,
     getURLRules,
     getRole,
+    isEmpty,
     parseDate,
     updateAddressDropDown,
     updateBoxes,

@@ -491,7 +491,7 @@ export default {
       dateOrderRule: (compIndex, posIndex) => {
         if (this.editedJobExperienceInfo !== undefined) {
           let position = this.editedJobExperienceInfo.companies[compIndex].positions[posIndex];
-          return !isEmpty(position.endDate) && moment(position.endDate) && position.startDate
+          return !this.isEmpty(position.endDate) && moment(position.endDate) && position.startDate
             ? moment(position.endDate).add(1, 'd').isAfter(moment(position.startDate)) ||
                 'End date must be at or after start date'
             : true;

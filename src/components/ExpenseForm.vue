@@ -1565,9 +1565,9 @@ async function created() {
 
   // adjust costRules to prevent users from using negative expenses
   if (this.employeeRole && this.employeeRole == 'admin') {
-    this.costRules.splice(1, 0, (v) => (!isEmpty(v) && v != 0) || 'Cost cannot be zero');
+    this.costRules.splice(1, 0, (v) => (!this.isEmpty(v) && v != 0) || 'Cost cannot be zero');
   } else {
-    this.costRules.splice(1, 0, (v) => (!isEmpty(v) && v > 0) || 'Cost must be a positive number');
+    this.costRules.splice(1, 0, (v) => (!this.isEmpty(v) && v > 0) || 'Cost must be a positive number');
   }
 
   this.clearForm();
