@@ -76,7 +76,7 @@ function emit(msg, data) {
           2
         )}. You will be reimbursed $${this.expense.remaining} of $${this.expense.cost}`;
       }
-      if (!isEmpty(this.expense.note)) {
+      if (!this.isEmpty(this.expense.note)) {
         // expense has a note
         this.expense.note += `\n\n${adjustNote}`;
       } else {

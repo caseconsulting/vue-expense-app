@@ -43,7 +43,7 @@ import { isEmpty, monthDayYearFormat } from '@/utils/utils';
  * Emits to parent the component was created and get data for the list.
  */
 function created() {
-  if (!isEmpty(this.model.certifications)) {
+  if (!this.isEmpty(this.model.certifications)) {
     this.filteredList = this.model.certifications.slice(0, 5);
   }
 }

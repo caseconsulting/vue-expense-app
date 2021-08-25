@@ -312,7 +312,7 @@ async function updateBoxes() {
  * @return - boolean: true if the user role is admin
  */
 function userhasAdminPermissions() {
-  return getRole() === 'admin' || getRole() === 'manager';
+  return this.getRole() === 'admin' || this.getRole() === 'manager';
 } // userhasAdminPermissions
 
 /**
@@ -430,6 +430,7 @@ export default {
     getDateOptionalRules,
     getNonFutureDateRules,
     getURLRules,
+    getRole,
     parseDate,
     updateAddressDropDown,
     updateBoxes,

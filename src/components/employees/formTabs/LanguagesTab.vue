@@ -278,7 +278,7 @@ export default {
         'Literacy - fluency and broad vocabulary associated with high levels of education'
       ], // job title options
       requiredRules: [
-        (v) => !isEmpty(v) || 'This field is required. You must enter information or delete the field if possible'
+        (v) => !this.isEmpty(v) || 'This field is required. You must enter information or delete the field if possible'
       ], // rules for a required field
       duplicateRules: [
         (lang) => {

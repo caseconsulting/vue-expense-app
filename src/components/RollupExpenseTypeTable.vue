@@ -474,7 +474,7 @@ function groupEmployeeExpenses(expenses) {
  * @return boolean - expense is reimbursed
  */
 function isReimbursed(expense) {
-  return expense && !isEmpty(expense.reimbursedDate);
+  return expense && !this.isEmpty(expense.reimbursedDate);
 } // isReimbursed
 
 /**

@@ -261,18 +261,20 @@ export default {
       tempEndIntervalDate: null,
       endIntervalDateEdited: _.cloneDeep(this.endIntervalDate),
       dateOptionalRules: [
-        (v) => isEmpty(v) || /^\d{1,2}\/\d{4}$/.test(v) || 'Date must be valid. Format: MM/YYYY',
-        (v) => isEmpty(v) || moment(v, 'MM/YYYY').isValid() || 'Date must be valid',
+        (v) => this.isEmpty(v) || /^\d{1,2}\/\d{4}$/.test(v) || 'Date must be valid. Format: MM/YYYY',
+        (v) => this.isEmpty(v) || moment(v, 'MM/YYYY').isValid() || 'Date must be valid',
         (v) =>
-          isEmpty(v) ||
+          this.isEmpty(v) ||
           moment(v, 'MM/YYYY').isBefore(moment()) ||
           `Date must be before or equal to ${moment().format('MM/YYYY')}.`,
         (v) =>
-          isEmpty(v) || moment(v, 'MM/YYYY').isAfter(this.startIntervalDateEdited) || 'Date must be after start date'
+          this.isEmpty(v) ||
+          moment(v, 'MM/YYYY').isAfter(this.startIntervalDateEdited) ||
+          'Date must be after start date'
       ], // rules for an optional date
       dateRules: [
-        (v) => !isEmpty(v) || 'Date required',
-        (v) => (!isEmpty(v) && /^\d{1,2}\/\d{4}$/.test(v)) || 'Date must be valid. Format: MM/YYYY',
+        (v) => !this.isEmpty(v) || 'Date required',
+        (v) => (!this.isEmpty(v) && /^\d{1,2}\/\d{4}$/.test(v)) || 'Date must be valid. Format: MM/YYYY',
         (v) => moment(v, 'MM/YYYY').isValid() || 'Date must be valid',
         (v) =>
           moment(v, 'MM/YYYY').isBefore(moment()) || `Date must be before or equal to ${moment().format('MM/YYYY')}.`,
@@ -282,8 +284,8 @@ export default {
           'Date must be before end date'
       ], // rules for a required date
       yearStartRules: [
-        (v) => !isEmpty(v) || 'Date required',
-        (v) => (!isEmpty(v) && /^\d{4}$/.test(v)) || 'Date must be valid. Format: YYYY',
+        (v) => !this.isEmpty(v) || 'Date required',
+        (v) => (!this.isEmpty(v) && /^\d{4}$/.test(v)) || 'Date must be valid. Format: YYYY',
         (v) => moment(v, 'YYYY').isValid() || 'Date must be valid',
         (v) => moment(v, 'YYYY').isBefore(moment()) || `Date must be before or equal to ${moment().format('YYYY')}.`,
         (v) =>
@@ -292,14 +294,14 @@ export default {
           'Date must be before end date'
       ], // rules for an year start date
       yearEndRules: [
-        (v) => isEmpty(v) || /^\d{4}$/.test(v) || 'Date must be valid. Format: YYYY',
-        (v) => isEmpty(v) || moment(v, 'YYYY').isValid() || 'Date must be valid',
+        (v) => this.isEmpty(v) || /^\d{4}$/.test(v) || 'Date must be valid. Format: YYYY',
+        (v) => this.isEmpty(v) || moment(v, 'YYYY').isValid() || 'Date must be valid',
         (v) =>
-          isEmpty(v) ||
+          this.isEmpty(v) ||
           Number(v) <= Number(moment().format('YYYY')) ||
           `Date must be before or equal to ${moment().format('YYYY')}.`,
         (v) =>
-          isEmpty(v) ||
+          this.isEmpty(v) ||
           moment(v, 'YYYY').isAfter(this.startIntervalDateEdited) ||
           `Date must be after start date ${this.startIntervalDateEdited}`
       ] // rules for year end date
@@ -322,14 +324,27 @@ export default {
     parseDateMonthYear,
     formatDateMonthYear
   },
+<<<<<<< HEAD
   mounted,
+=======
+  mounted() {
+    this.$emit('validated', this.technologyIndex, this.intervalIndex, 1);
+  },
+>>>>>>> b34addb (2854-making-sure-we-are-calling-methods-correctly: further added this to statements)
   props: ['startIntervalDate', 'endIntervalDate', 'technologyIndex', 'intervalIndex', 'allIntervals'],
   watch: {
     formatToggle: function () {
       // change to YYYY format
       if (this.formatToggle == 1) {
+<<<<<<< HEAD
         this.startIntervalDateEdited = !isEmpty(this.startIntervalDate) ? this.startIntervalDate.split('-')[0] : null;
         this.endIntervalDateEdited = !isEmpty(this.endIntervalDate) ? this.endIntervalDate.split('-')[0] : null;
+=======
+        this.startIntervalDateEdited = !this.isEmpty(this.startIntervalDate)
+          ? this.startIntervalDate.split('-')[0]
+          : null;
+        this.endIntervalDateEdited = !this.isEmpty(this.endIntervalDate) ? this.endIntervalDate.split('-')[0] : null;
+>>>>>>> b34addb (2854-making-sure-we-are-calling-methods-correctly: further added this to statements)
         //close opened date menus
         this.startIntervalMenu = false;
         this.endIntervalMenu = false;

@@ -52,7 +52,7 @@ import { isEmpty } from '@/utils/utils';
  * Emits to parent the component was created and get data for the list.
  */
 function created() {
-  if (!isEmpty(this.model.customerOrgExp)) {
+  if (!this.isEmpty(this.model.customerOrgExp)) {
     this.filteredList = this.model.customerOrgExp.slice(0, 5);
   }
 }

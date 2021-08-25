@@ -175,7 +175,7 @@ function deleteCertification(index) {
  * @returns String - The date in YYYY-MM-DD format
  */
 function parseEventDate() {
-  return parseDate(event.target.value);
+  return this.parseDate(event.target.value);
 } //parseEventDate
 
 /**
@@ -231,7 +231,7 @@ export default {
       expDateRule: (compIndex) => {
         if (this.editedCertifications !== undefined) {
           let position = this.editedCertifications[compIndex];
-          if (position.noExpiry == false && isEmpty(position.expirationDate)) {
+          if (position.noExpiry == false && this.isEmpty(position.expirationDate)) {
             return 'Expiration Date is required';
           } else {
             return true;
@@ -253,6 +253,7 @@ export default {
     getDateRules,
     getRequiredRules,
     isEmpty,
+    parseDate,
     parseEventDate,
     populateDropDowns,
     validateFields

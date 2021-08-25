@@ -278,7 +278,7 @@ function denyEducation() {
  * @returns String - The date in YYYY-MM format
  */
 function parseEventDate() {
-  return parseDateMonthYear(event.target.value);
+  return this.parseDateMonthYear(event.target.value);
 } //parseEventDate
 
 /**

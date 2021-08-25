@@ -287,7 +287,7 @@ function hasEndDatesFilled(index) {
  * @returns String - The date in YYYY-MM-DD format
  */
 function parseEventDate() {
-  return parseDate(event.target.value);
+  return this.parseDate(event.target.value);
 } //parseEventDate
 
 /**
@@ -341,7 +341,7 @@ export default {
       dateOrderRule: (compIndex, projIndex) => {
         if (this.editedContracts) {
           let project = this.editedContracts[compIndex].projects[projIndex];
-          return !isEmpty(project.endDate) && moment(project.endDate) && project.startDate
+          return !this.isEmpty(project.endDate) && moment(project.endDate) && project.startDate
             ? moment(project.endDate).add(1, 'd').isAfter(moment(project.startDate)) ||
                 'End date must be at or after start date'
             : true;
@@ -359,7 +359,7 @@ export default {
       endDatePresentRule: (compIndex, projIndex) => {
         if (this.editedContracts !== undefined) {
           let position = this.editedContracts[compIndex].projects[projIndex];
-          if (position.presentDate == false && isEmpty(position.endDate)) {
+          if (position.presentDate == false && this.isEmpty(position.endDate)) {
             return 'End Date is required';
           } else {
             return true;
@@ -369,7 +369,7 @@ export default {
         }
       },
       experienceRequired: [
-        (v) => !isEmpty(v) || 'This field is required',
+        (v) => !this.isEmpty(v) || 'This field is required',
         (v) => v >= 0 || 'Value cannot be negative',
         (v) => v < 100 || 'Value must be less than 100'
       ], // rules for years of experience

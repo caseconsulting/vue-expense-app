@@ -85,7 +85,7 @@ import _ from 'lodash';
  * Emits to parent the component was created and get data for the list.
  */
 function created() {
-  if (!isEmpty(this.model.technologies)) {
+  if (!this.isEmpty(this.model.technologies)) {
     this.pageList = this.sortedTech.slice(0, 5);
   }
 } //created
@@ -172,7 +172,7 @@ export default {
   props: ['model'],
   watch: {
     model: function (val) {
-      if (!isEmpty(val.technologies)) {
+      if (!this.isEmpty(val.technologies)) {
         this.sortedTech = val.technologies;
         if (this.sortFunction == 0) {
           this.sortByCurrent();

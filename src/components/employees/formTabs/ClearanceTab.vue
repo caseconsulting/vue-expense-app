@@ -367,7 +367,7 @@ function deleteClearance(cIndex) {
  * @return Boolean - True if the first date is at or after the second date
  */
 function isAfter(firstDate, secondDate, errMessage) {
-  return !isEmpty(firstDate) && secondDate
+  return !this.isEmpty(firstDate) && secondDate
     ? moment(firstDate).add(1, 'd').isAfter(moment(secondDate)) || errMessage
     : true;
 }
@@ -381,7 +381,7 @@ function isAfter(firstDate, secondDate, errMessage) {
  * @return boolean - True if the first date is at or before the second date
  */
 function isBefore(firstDate, secondDate, errMessage) {
-  return !isEmpty(firstDate) && secondDate
+  return !this.isEmpty(firstDate) && secondDate
     ? moment(firstDate).isBefore(moment(secondDate).add(1, 'd')) || errMessage
     : true;
 }
@@ -464,7 +464,7 @@ function minExpiration(cIndex) {
  * @returns String - The date in YYYY-MM-DD format
  */
 function parseEventDate() {
-  return parseDate(event.target.value);
+  return this.parseDate(event.target.value);
 } //parseEventDate
 
 /**
@@ -540,7 +540,7 @@ export default {
         clearanceNames.splice(cIndex, 1);
         return !clearanceNames.includes(clearanceName) || 'Duplicate clearance name';
       },
-      requiredRules: [(v) => !isEmpty(v) || 'This field is required'] // rules for a required field
+      requiredRules: [(v) => !this.isEmpty(v) || 'This field is required'] // rules for a required field
     };
   },
   directives: { mask },
@@ -568,6 +568,7 @@ export default {
     isEmpty,
     maxSubmission,
     minExpiration,
+    parseDate,
     parseEventDate,
     populateDropDowns,
     validateFields

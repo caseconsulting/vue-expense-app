@@ -335,7 +335,7 @@ function isPartTime() {
  * @return - boolean: true if the user role is admin
  */
 function userIsAdmin() {
-  return getRole() === 'admin';
+  return this.getRole() === 'admin';
 } //userIsAdmin
 
 /**
@@ -356,7 +356,7 @@ function userIsEmployee() {
  * @returns - boolean: true if the user role is a manager
  */
 function userIsManager() {
-  return getRole() === 'manager';
+  return this.getRole() === 'manager';
 } //userIsManager
 
 /**
@@ -372,7 +372,7 @@ function validateFields() {
 
   // Fail safe in case users or inters somehow change their disabled info
   // Without this, they could change the html to change their data
-  if (getRole() === 'user' || getRole() === 'intern') {
+  if (this.getRole() === 'user' || this.getRole() === 'intern') {
     this.editedEmployee.firstName = this.model.firstName;
     this.editedEmployee.middleName = this.model.middleName;
     this.editedEmployee.noMiddleName = this.model.noMiddleName;
@@ -414,7 +414,7 @@ export default {
       departureMenu: false, // display depature menu
       editedEmployee: _.cloneDeep(this.model), //employee that can be edited
       emailRules: [
-        (v) => !isEmpty(v) || 'Email is required',
+        (v) => !this.isEmpty(v) || 'Email is required',
         (v) => regex.test(v) || 'Not a valid @consultwithcase email address'
       ], // rules for an employee email
       employeeRoleFormatted: null,
@@ -456,7 +456,7 @@ export default {
       permissions: ['Admin', 'User', 'Intern', 'Manager'], // employee role options
       status: '100', // work status value
       statusRadio: 'full', // work status button
-      statusRules: [(v) => !isEmpty(v) || '', (v) => (v !== '0' && v !== '00') || ''],
+      statusRules: [(v) => !this.isEmpty(v) || '', (v) => (v !== '0' && v !== '00') || ''],
       userId: null,
       value: '' // used for removing non-number characters from the workstatus
     };
@@ -469,6 +469,7 @@ export default {
     getDateRules,
     getNumberRules,
     getRequiredRules,
+    getRole,
     isEmpty,
     isInactive,
     isMobile,

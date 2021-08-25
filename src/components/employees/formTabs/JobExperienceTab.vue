@@ -420,7 +420,7 @@ function hasEndDatesFilled(index) {
  * @returns String - the date in YYYY-MM format
  */
 function parseEventDate() {
-  return parseDateMonthYear(event.target.value);
+  return this.parseDateMonthYear(event.target.value);
 } //parseEventDate
 
 /**
@@ -461,7 +461,7 @@ function validateFields() {
   });
 
   // Fail safe in case users or inters somehow change their disabled info
-  if (getRole() === 'user' || getRole() === 'intern') {
+  if (this.getRole() === 'user' || this.getRole() === 'intern') {
     this.editedJobExperienceInfo.jobRole = this.model.jobRole;
     this.editedJobExperienceInfo.hireDate = this.model.hireDate;
   }
@@ -508,7 +508,7 @@ export default {
       endDatePresentRule: (compIndex, posIndex) => {
         if (this.editedJobExperienceInfo !== undefined) {
           let position = this.editedJobExperienceInfo.companies[compIndex].positions[posIndex];
-          if (position.presentDate == false && isEmpty(position.endDate)) {
+          if (position.presentDate == false && this.isEmpty(position.endDate)) {
             return 'End Date is required';
           } else {
             return true;
@@ -537,8 +537,10 @@ export default {
     getDateMonthYearOptionalRules,
     getRequiredRules,
     hasEndDatesFilled,
+    parseDateMonthYear,
     parseEventDate,
     formatRange,
+    getRole,
     isEmpty,
     populateDropDowns,
     setIndices,

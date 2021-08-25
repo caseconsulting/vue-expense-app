@@ -73,6 +73,7 @@ export default {
   created,
   methods: {
     login,
+    getRole,
     isLoggedIn,
     recordLogin
   }

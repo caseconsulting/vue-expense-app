@@ -81,16 +81,16 @@ function checkEmptyPersonalInfo() {
  */
 function getCurrentAddress() {
   let currentAddress = '';
-  if (!isEmpty(this.model.currentStreet)) {
+  if (!this.isEmpty(this.model.currentStreet)) {
     currentAddress += `${this.model.currentStreet}, `;
   }
-  if (!isEmpty(this.model.currentCity)) {
+  if (!this.isEmpty(this.model.currentCity)) {
     currentAddress += `${this.model.currentCity}, `;
   }
-  if (!isEmpty(this.model.currentState)) {
+  if (!this.isEmpty(this.model.currentState)) {
     currentAddress += `${this.model.currentState} `;
   }
-  if (!isEmpty(this.model.currentZIP)) {
+  if (!this.isEmpty(this.model.currentZIP)) {
     currentAddress += `${this.model.currentZIP} `;
   }
   if (currentAddress[currentAddress.length - 2] === ',') {
@@ -108,13 +108,13 @@ function getCurrentAddress() {
  */
 function getPlaceOfBirth() {
   let placeOfBirth = '';
-  if (!isEmpty(this.model.city)) {
+  if (!this.isEmpty(this.model.city)) {
     placeOfBirth += `${this.model.city}, `;
   }
-  if (!isEmpty(this.model.st)) {
+  if (!this.isEmpty(this.model.st)) {
     placeOfBirth += `${this.model.st}, `;
   }
-  if (!isEmpty(this.model.country)) {
+  if (!this.isEmpty(this.model.country)) {
     placeOfBirth += `${this.model.country}, `;
   }
 
@@ -128,7 +128,7 @@ function getPlaceOfBirth() {
  * @return - boolean: true if the user role is admin
  */
 function userIsAdmin() {
-  return getRole() === 'admin';
+  return this.getRole() === 'admin';
 } //userIsAdmin
 
 /**
@@ -149,7 +149,7 @@ function userIsEmployee() {
  * @returns boolean - true if the user is a manager
  */
 function userIsManager() {
-  return getRole() === 'manager';
+  return this.getRole() === 'manager';
 }
 
 export default {
@@ -172,6 +172,7 @@ export default {
   methods: {
     checkEmptyPersonalInfo,
     isEmpty,
+    getRole,
     monthDayYearFormat,
     userIsAdmin,
     userIsEmployee,

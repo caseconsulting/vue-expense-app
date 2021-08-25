@@ -146,10 +146,11 @@ export default {
       auditsQueryFormatted: {
         range: [moment().subtract(1, 'd').format(), moment().format()]
       },
-      requiredRules: [(v) => !isEmpty(v) || 'This field is required'] // rules for a required field
+      requiredRules: [(v) => !this.isEmpty(v) || 'This field is required'] // rules for a required field
     };
   },
   methods: {
+    isEmpty,
     setDateRange,
     formatRange,
     selectDropDown

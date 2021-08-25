@@ -124,7 +124,7 @@ function deleteAward(index) {
  * @returns String - The date in YYYY-MM-DD format
  */
 function parseEventDate() {
-  return parseDate(event.target.value);
+  return this.parseDate(event.target.value);
 } // parseEventDate
 
 /**
@@ -157,6 +157,7 @@ export default {
     deleteAward,
     getDateRules,
     getRequiredRules,
+    parseDate,
     parseEventDate,
     validateFields
   },

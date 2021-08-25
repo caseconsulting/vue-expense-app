@@ -124,7 +124,7 @@ import { isEmpty, monthYearFormat } from '@/utils/utils';
  * Emits to parent the component was created and get data for the list.
  */
 function created() {
-  if (!isEmpty(this.model.schools)) {
+  if (!this.isEmpty(this.model.schools)) {
     this.filteredList = this.model.schools.slice(0, 4);
   }
 }
@@ -163,7 +163,7 @@ export default {
   props: ['model'],
   watch: {
     model: function (val) {
-      if (!isEmpty(val)) {
+      if (!this.isEmpty(val)) {
         this.filteredList = val.schools.slice(0, 4);
       }
     }

@@ -612,7 +612,7 @@ function displayError(err) {
  * @return boolean - user is an admin or manager
  */
 function hasAdminPermissions() {
-  return getRole() === 'admin' || getRole() === 'manager';
+  return this.getRole() === 'admin' || this.getRole() === 'manager';
 } // hasAdminPermissions
 
 /**
@@ -1098,6 +1098,7 @@ export default {
     confirm,
     convertAutocompleteToTitlecase,
     displayError,
+    getRole,
     hasAdminPermissions,
     hasTabError,
     openUpload,

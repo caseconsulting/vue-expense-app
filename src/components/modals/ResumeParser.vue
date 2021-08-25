@@ -442,16 +442,16 @@ function showLinkedIn() {
  */
 function address() {
   let currentAddress = '';
-  if (!isEmpty(this.employee.currentStreet)) {
+  if (!this.isEmpty(this.employee.currentStreet)) {
     currentAddress += `${this.employee.currentStreet}, `;
   }
-  if (!isEmpty(this.employee.currentCity)) {
+  if (!this.isEmpty(this.employee.currentCity)) {
     currentAddress += `${this.employee.currentCity}, `;
   }
-  if (!isEmpty(this.employee.currentState)) {
+  if (!this.isEmpty(this.employee.currentState)) {
     currentAddress += `${this.employee.currentState} `;
   }
-  if (!isEmpty(this.employee.currentZIP)) {
+  if (!this.isEmpty(this.employee.currentZIP)) {
     currentAddress += `${this.employee.currentZIP} `;
   }
   if (currentAddress.charAt(currentAddress.length - 2) === ',') {
@@ -959,21 +959,21 @@ export default {
       newTechnology: [],
       fileRules: [
         (v) => {
-          return !isEmpty(v) || 'File required (.png, .pdf, or .jpeg)';
+          return !this.isEmpty(v) || 'File required (.png, .pdf, or .jpeg)';
         },
         (v) => {
           return (
-            (!isEmpty(v) &&
+            (!this.isEmpty(v) &&
               (v.type.includes('application/pdf') || v.type.includes('image/png') || v.type.includes('image/jpeg'))) ||
             'File unsupported, please submit a .png, .pdf, or a .jpeg file'
           );
         }
       ],
       requiredRules: [
-        (v) => !isEmpty(v) || 'This field is required. You must enter information or delete the field if possible'
+        (v) => !this.isEmpty(v) || 'This field is required. You must enter information or delete the field if possible'
       ],
       experienceRequired: [
-        (v) => !isEmpty(v) || 'This field is required',
+        (v) => !this.isEmpty(v) || 'This field is required',
         (v) => v > 0 || 'Value must be greater than 0',
         (v) => v < 100 || 'Value must be less than 100'
       ], // Used for technology years
@@ -1055,6 +1055,7 @@ export default {
   },
   methods: {
     clearForm,
+    isEmpty,
     submitForm,
     submitInfo,
     submit,

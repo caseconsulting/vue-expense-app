@@ -77,7 +77,7 @@ import moment from 'moment-timezone';
  * Emits to parent the component was created and get data for the list.
  */
 function created() {
-  if (!isEmpty(this.model.contracts)) {
+  if (!this.isEmpty(this.model.contracts)) {
     this.filteredList = this.model.contracts.slice(0, 5);
   }
 }
