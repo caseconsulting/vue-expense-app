@@ -13,6 +13,7 @@
         <v-list>
           <v-list-item @click="selectDropDown('Resume Parser')">Resume Parser</v-list-item>
           <v-list-item @click="selectDropDown('Login')">Login</v-list-item>
+          <v-list-item @click="selectDropDown('Mifi Status Changes')">Mifi Status Changes</v-list-item>
         </v-list>
       </v-menu>
     </v-row>
@@ -63,12 +64,18 @@
       :queryStartDate="auditsQueryFormatted.range[0]"
       :queryEndDate="auditsQueryFormatted.range[1]"
     ></login-audit-page>
+    <mifi-log-audit
+      v-if="selectedDropdown === 'Mifi Status Changes'"
+      :queryStartDate="auditsQueryFormatted.range[0]"
+      :queryEndDate="auditsQueryFormatted.range[1]"
+    ></mifi-log-audit>
   </v-container>
 </template>
 
 <script>
 import ResumeParserAuditPage from '@/components/audit pages/ResumeParserAuditPage.vue';
 import LoginAuditPage from '@/components/audit pages/LoginAuditPage.vue';
+import MifiLogAudit from '@/components/audit pages/MifiLogAudit.vue';
 const moment = require('moment-timezone');
 moment.tz.setDefault('America/New_York');
 import _ from 'lodash';
@@ -123,7 +130,8 @@ function selectDropDown(tab) {
 export default {
   components: {
     ResumeParserAuditPage,
-    LoginAuditPage
+    LoginAuditPage,
+    MifiLogAudit
   },
   data() {
     return {

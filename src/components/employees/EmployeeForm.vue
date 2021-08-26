@@ -656,6 +656,17 @@ async function submit() {
         this.displayError(updatedEmployee.response.data.message);
         // this.$emit('cancel-form');
       }
+      // If mifiStatus on page load is different than the submitted mifiStatus value, create audit log
+      if (this.mifiStatusOnLoad !== updatedEmployee.mifiStatus) {
+        api.createItem(api.AUDIT, {
+          id: uuid(),
+          type: 'mifi',
+          tags: ['submit', `mifi set to ${this.model.mifiStatus}`],
+          employeeId: this.employee.id,
+          description: `${this.model.firstName} ${this.model.lastName} changed their mifi status to ${this.model.mifiStatus}.`,
+          timeToLive: 60
+        });
+      }
     } else {
       // creating employee
       this.model.id = uuid();
@@ -803,6 +814,7 @@ async function created() {
   this.formTab = this.currentTab;
   this.afterCreate = true;
   this.hasResume = (await api.getResume(this.$route.params.id)) != null;
+  this.mifiStatusOnLoad = this.employee.mifiStatus;
 } // created
 
 /**
@@ -987,6 +999,7 @@ export default {
       formTab: null, // currently active tab
       fullName: '', // employee's first and last name
       hasResume: false,
+      mifiStatusOnLoad: null, // used as a way to see if mifi status was changed (to updated audit log)
       model: {
         awards: [],
         birthday: null,
