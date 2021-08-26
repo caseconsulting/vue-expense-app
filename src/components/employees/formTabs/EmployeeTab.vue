@@ -17,6 +17,7 @@
       <!-- Middle Name -->
       <v-text-field
         id="employeeMiddleName"
+        ref="formFields"
         v-model="editedEmployee.middleName"
         :rules="middleNameRules()"
         label="Middle Name"
@@ -446,8 +447,9 @@ export default {
         }
       ],
       middleNameRules: () => {
+        // if noMiddleName checkbox is not checked
         if (!this.editedEmployee.noMiddleName) {
-          return [(v) => !isEmpty(v) || 'This field is required']; // rules for a required field
+          return this.getRequiredRules();
         }
       },
       permissions: ['Admin', 'User', 'Intern', 'Manager'], // employee role options
