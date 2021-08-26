@@ -388,6 +388,7 @@ export default {
         lastName: '',
         middleName: '',
         nickname: '',
+        noMiddleName: false,
         phoneNumber: '',
         prime: '',
         st: '',

@@ -18,10 +18,17 @@
       <v-text-field
         id="employeeMiddleName"
         v-model="editedEmployee.middleName"
-        label="Middle Name (optional)"
+        :rules="middleNameRules()"
+        label="Middle Name"
         data-vv-name="Middle Name"
-        :disabled="!admin"
+        :disabled="!admin || editedEmployee.noMiddleName"
       ></v-text-field>
+      <v-checkbox
+        class="mt-0"
+        label="Do not have a middle name"
+        v-model="editedEmployee.noMiddleName"
+        @click="editedEmployee.middleName = null"
+      ></v-checkbox>
       <!-- Last Name -->
       <v-text-field
         id="employeeLastName"
@@ -282,8 +289,6 @@ async function created() {
     this.mifiStatus = this.editedEmployee.mifiStatus;
   }
   // set works status value to a string
-  this.value = this.editedEmployee.workStatus.toString();
-  //let user = await api.getUser();
   this.userId = this.model.employeeNumber;
   this.loading = false;
 } // created
@@ -368,6 +373,7 @@ function validateFields() {
   if (getRole() === 'user' || getRole() === 'intern') {
     this.editedEmployee.firstName = this.model.firstName;
     this.editedEmployee.middleName = this.model.middleName;
+    this.editedEmployee.noMiddleName = this.model.noMiddleName;
     this.editedEmployee.lastName = this.model.lastName;
     this.editedEmployee.employeeNumber = this.model.employeeNumber;
     this.editedEmployee.email = this.model.email;
@@ -439,6 +445,11 @@ export default {
           return !this.duplicate || 'This employee id is already in use';
         }
       ],
+      middleNameRules: () => {
+        if (!this.editedEmployee.noMiddleName) {
+          return [(v) => !isEmpty(v) || 'This field is required']; // rules for a required field
+        }
+      },
       permissions: ['Admin', 'User', 'Intern', 'Manager'], // employee role options
       status: '100', // work status value
       statusRadio: 'full', // work status button

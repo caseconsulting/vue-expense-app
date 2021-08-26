@@ -842,6 +842,7 @@ function setFormData(tab, data) {
     //sets all employee info to data returned from employee tab
     this.$set(this.model, 'firstName', data.firstName);
     this.$set(this.model, 'middleName', data.middleName);
+    this.$set(this.model, 'noMiddleName', data.noMiddleName);
     this.$set(this.model, 'lastName', data.lastName);
     this.$set(this.model, 'nickname', data.nickname);
     this.$set(this.model, 'employeeNumber', data.employeeNumber);
@@ -1033,6 +1034,7 @@ export default {
         middleName: null,
         mifiStatus: true,
         nickname: null,
+        noMiddleName: false,
         phoneNumber: null,
         prime: null,
         schools: [],
