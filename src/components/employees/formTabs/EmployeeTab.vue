@@ -290,6 +290,7 @@ async function created() {
     this.mifiStatus = this.editedEmployee.mifiStatus;
   }
   // set works status value to a string
+  this.value = this.editedEmployee.workStatus.toString();
   this.userId = this.model.employeeNumber;
   this.loading = false;
 } // created
