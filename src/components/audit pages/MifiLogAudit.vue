@@ -98,12 +98,20 @@ async function fillData() {
   this.chartLoaded = true;
 }
 
+function dateRange() {
+  return `${this.queryStartDate} ${this.queryEndDate}`;
+}
+
+async function created() {
+  this.employees = await api.getItems(api.EMPLOYEES); // get all employees
+  this.fillData();
+}
 export default {
   components: { PieChart, AuditTable },
-  async created() {
-    this.employees = await api.getItems(api.EMPLOYEES); // get all employees
-    this.fillData();
+  computed: {
+    dateRange
   },
+  created,
   data() {
     return {
       chartLoaded: false,
@@ -111,11 +119,6 @@ export default {
       mifiChartOptions: null,
       mifiChartData: null
     };
-  },
-  computed: {
-    dateRange() {
-      return `${this.queryStartDate} ${this.queryEndDate}`;
-    }
   },
   methods: { fillData },
   props: ['queryStartDate', 'queryEndDate'],
