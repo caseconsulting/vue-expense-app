@@ -134,8 +134,8 @@
 
 <script>
 import { isLoggedIn, logout, getProfile, getTokenExpirationDate, getAccessToken } from '@/utils/auth';
+import { isMobile } from '@/utils/utils';
 import MainNav from '@/components/MainNav.vue';
-import MobileDetect from 'mobile-detect';
 import TimeOutModal from '@/components/modals/TimeOutModal.vue';
 import TimeOutWarningModal from '@/components/modals/TimeOutWarningModal.vue';
 import BadgeExpirationBanner from '@/components/modals/BadgeExpirationBanner.vue';
@@ -150,16 +150,6 @@ moment.tz.setDefault('America/New_York');
 // |                     COMPUTED                     |
 // |                                                  |
 // |--------------------------------------------------|
-
-/**
- * Checks if the current device used is mobile. Return true if it is mobile. Returns false if it is not mobile.
- *
- * @return boolean - if the device is mobile
- */
-function isMobile() {
-  let md = new MobileDetect(window.navigator.userAgent);
-  return md.os() === 'AndroidOS' || md.os() === 'iOS';
-}
 
 /**
  * Checks if the user is visiting their own profile or not

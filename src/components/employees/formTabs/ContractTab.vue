@@ -174,7 +174,7 @@ import api from '@/shared/api.js';
 import _ from 'lodash';
 import { mask } from 'vue-the-mask';
 import { getDateRules, getDateOptionalRules, getRequiredRules } from '@/shared/validationUtils.js';
-import { isEmpty, formatDate, parseDate } from '@/utils/utils';
+import { isEmpty, formatDate, parseDate, isMobile } from '@/utils/utils';
 const moment = require('moment');
 
 // |--------------------------------------------------|
@@ -332,9 +332,7 @@ function validateFields() {
 
 export default {
   computed: {
-    isMobile() {
-      return this.$vuetify.breakpoint.sm;
-    }
+    isMobile
   },
   created,
   data() {

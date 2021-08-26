@@ -64,6 +64,7 @@ import EmployeesChartTab from '../components/charts/chartTabs/EmployeesChartTab.
 import TechChartTab from '../components/charts/chartTabs/TechChartTab.vue';
 import EducationChartTab from '../components/charts/chartTabs/EducationChartTab.vue';
 import CustomerOrgChartTab from '../components/charts/chartTabs/CustomerOrgChartTab.vue';
+import { isMobile } from '@/utils/utils';
 
 function changeTab(event) {
   this.currentTab = event;
@@ -86,14 +87,7 @@ export default {
     CustomerOrgChartTab
   },
   computed: {
-    isMobile() {
-      switch (this.$vuetify.breakpoint.name) {
-        case 'xs':
-          return true;
-        default:
-          return false;
-      }
-    }
+    isMobile
   },
   data() {
     return {

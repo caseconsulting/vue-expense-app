@@ -73,10 +73,9 @@ import BudgetChart from '@/components/BudgetChart.vue';
 import BudgetTable from '@/components/BudgetTable.vue';
 import ExpenseForm from '@/components/ExpenseForm.vue';
 import AnniversaryCard from '@/components/AnniversaryCard.vue';
-import MobileDetect from 'mobile-detect';
 const moment = require('moment-timezone');
 moment.tz.setDefault('America/New_York');
-import { isInactive } from '@/utils/utils';
+import { isInactive, isMobile } from '@/utils/utils';
 
 const IsoFormat = 'YYYY-MM-DD';
 
@@ -85,16 +84,6 @@ const IsoFormat = 'YYYY-MM-DD';
 // |                     COMPUTED                     |
 // |                                                  |
 // |--------------------------------------------------|
-
-/**
- * Checks if the current device used is mobile. Return true if it is mobile. Returns false if it is not mobile.
- *
- * @return boolean - if the device is mobile
- */
-function isMobile() {
-  let md = new MobileDetect(window.navigator.userAgent);
-  return md.os() === 'AndroidOS' || md.os() === 'iOS';
-} // isMobile
 
 /**
  * Viewing the current active budget year. Returns true if the budget year being viwed is todays budget.

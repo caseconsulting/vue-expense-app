@@ -49,13 +49,7 @@ import api from '@/shared/api.js';
 import ExpenseInfo from '@/components/ExpenseInfo.vue';
 import ExpenseTypeTotals from '@/components/ExpenseTypeTotals.vue';
 import RollupExpenseTypeTable from '@/components/RollupExpenseTypeTable.vue';
-
-function isMobile() {
-  if (this.$vuetify.breakpoint.xs || this.$vuetify.breakpoint.sm) {
-    return true;
-  }
-  return false;
-}
+import { isMobile } from '@/utils/utils';
 
 async function created() {
   this.employee = await api.getUser();

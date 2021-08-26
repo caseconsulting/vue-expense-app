@@ -224,10 +224,9 @@
 </template>
 <script>
 import api from '@/shared/api.js';
-import MobileDetect from 'mobile-detect';
 import _ from 'lodash';
 import { getDateRules, getNumberRules, getRequiredRules } from '@/shared/validationUtils.js';
-import { formatDate, isEmpty, parseDate } from '@/utils/utils';
+import { formatDate, isEmpty, parseDate, isMobile } from '@/utils/utils';
 import { mask } from 'vue-the-mask';
 import { getRole } from '@/utils/auth';
 const moment = require('moment-timezone');
@@ -313,16 +312,6 @@ function formatKebabCase(value) {
 function isInactive() {
   return this.statusRadio == 'inactive';
 } // isInactive
-
-/**
- * Checks if the current device used is mobile. Return true if it is mobile. Returns false if it is not mobile.
- *
- * @return boolean - if the device is mobile
- */
-function isMobile() {
-  let md = new MobileDetect(window.navigator.userAgent);
-  return md.os() === 'AndroidOS' || md.os() === 'iOS';
-} // isMobile
 
 /**
  * Checks if part time work status button is selected.

@@ -265,7 +265,7 @@
 import api from '@/shared/api.js';
 import _ from 'lodash';
 import { getDateMonthYearRules, getDateMonthYearOptionalRules, getRequiredRules } from '@/shared/validationUtils.js';
-import { isEmpty, formatDate, formatDateMonthYear, parseDateMonthYear } from '@/utils/utils';
+import { isEmpty, formatDate, formatDateMonthYear, parseDateMonthYear, isMobile } from '@/utils/utils';
 import { mask } from 'vue-the-mask';
 import { getRole } from '@/utils/auth';
 const moment = require('moment-timezone');
@@ -480,9 +480,7 @@ function validateFields() {
 
 export default {
   computed: {
-    isMobile() {
-      return this.$vuetify.breakpoint.sm;
-    }
+    isMobile
   },
   created,
   data() {

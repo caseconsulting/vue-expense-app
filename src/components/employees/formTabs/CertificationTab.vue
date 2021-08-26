@@ -120,7 +120,7 @@
 import api from '@/shared/api.js';
 import _ from 'lodash';
 import { getDateRules, getDateOptionalRules, getRequiredRules } from '@/shared/validationUtils.js';
-import { formatDate, parseDate, isEmpty } from '@/utils/utils';
+import { formatDate, parseDate, isEmpty, isMobile } from '@/utils/utils';
 import { mask } from 'vue-the-mask';
 const moment = require('moment-timezone');
 moment.tz.setDefault('America/New_York');
@@ -209,13 +209,7 @@ function validateFields() {
 
 export default {
   computed: {
-    /**
-     * Determines if the user is using mobile view.
-     * @returns Boolean - True if the user is mobile
-     */
-    isMobile() {
-      return !(this.$vuetify.breakpoint.xl || this.$vuetify.breakpoint.lg);
-    }
+    isMobile
   },
   created,
   data() {

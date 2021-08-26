@@ -42,27 +42,8 @@
 
 <script>
 import HorizontalBar from '../baseCharts/HorizontalBarChart.vue';
+import { isMobile } from '@/utils/utils';
 import api from '@/shared/api.js';
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                     COMPUTED                     |
-// |                                                  |
-// |--------------------------------------------------|
-
-/**
- * Checks if the current device used is mobile. Return true if it is mobile. Returns false if it is not mobile.
- *
- * @return boolean - if the device is mobile
- */
-function isMobile() {
-  switch (this.$vuetify.breakpoint.name) {
-    case 'xs':
-      return true;
-    default:
-      return false;
-  }
-} // isMobile
 
 // |--------------------------------------------------|
 // |                                                  |

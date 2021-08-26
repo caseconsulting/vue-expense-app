@@ -34,7 +34,7 @@
 
 <script>
 import BudgetSelectModal from '@/components/modals/BudgetSelectModal.vue';
-import MobileDetect from 'mobile-detect';
+import { isMobile } from '@/utils/utils';
 import _ from 'lodash';
 import api from '@/shared/api.js';
 const moment = require('moment-timezone');
@@ -46,16 +46,6 @@ const IsoFormat = 'YYYY-MM-DD';
 // |                     COMPUTED                     |
 // |                                                  |
 // |--------------------------------------------------|
-
-/**
- * Checks if the current device used is mobile. Return true if it is mobile. Returns false if it is not mobile.
- *
- * @return boolean - if the device is mobile
- */
-function isMobile() {
-  let md = new MobileDetect(window.navigator.userAgent);
-  return md.os() === 'AndroidOS' || md.os() === 'iOS';
-} // isMobile
 
 /**
  * Viewing the current active budget year. Returns true if the budget year being viwed is todays budget.
