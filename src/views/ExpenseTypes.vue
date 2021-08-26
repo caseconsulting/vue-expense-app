@@ -941,6 +941,17 @@ async function validateDelete(item) {
 // |--------------------------------------------------|
 
 /**
+ * destroy listeners
+ */
+function beforeDestroy() {
+  window.EventBus.$off('canceled-delete-expense-type');
+  window.EventBus.$off('confirm-delete-expense-type');
+  window.EventBus.$off('finished-editing-expense-type');
+  window.EventBus.$off('editing-expense-type');
+  window.EventBus.$off('invalid-expense type-delete');
+} // beforeDestroy
+
+/**
  * Set user info, employees, and expense types. Creates event listeners.
  */
 async function created() {
@@ -989,6 +1000,7 @@ async function created() {
 // |--------------------------------------------------|
 
 export default {
+  beforeDestroy,
   components: {
     DeleteErrorModal,
     DeleteModal,

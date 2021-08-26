@@ -817,8 +817,16 @@ async function created() {
   await this.refreshExpenses(); // refresh and update expenses
 } // created
 
+/**
+ * destroy listeners
+ */
 function beforeDestroy() {
+  window.EventBus.$off('canceled-delete-expense');
   window.EventBus.$off('confirm-delete-expense');
+  window.EventBus.$off('finished-editing-expense');
+  window.EventBus.$off('editing-expense');
+  window.EventBus.$off('confirm-unreimburse-expense');
+  window.EventBus.$off('canceled-unreimburse-expense');
 } // beforeDestroy
 
 // |--------------------------------------------------|

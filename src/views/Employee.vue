@@ -266,6 +266,10 @@ async function created() {
     await this.deleteResume();
   });
 
+  window.EventBus.$on('canceled-delete-resume', () => {
+    this.midAction = false;
+  });
+
   window.EventBus.$on('delete-resume', (newResume) => {
     if (newResume != null) {
       this.hasResume = newResume;
@@ -328,6 +332,8 @@ function mounted() {
 function beforeDestroy() {
   window.EventBus.$off('delete-resume');
   window.EventBus.$off('upload-resume-complete');
+  window.EventBus.$off('confirm-delete-resume');
+  window.EventBus.$off('canceled-delete-resume');
 } // beforeDestroy
 
 // |--------------------------------------------------|
