@@ -168,7 +168,6 @@ function validateFields() {
 } // validateFields
 
 export default {
-  components: {},
   created,
   methods: {
     addLanguage,
