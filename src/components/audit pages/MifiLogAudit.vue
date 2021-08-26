@@ -24,7 +24,7 @@ const IsoFormat = 'MMMM Do YYYY, h:mm:ss a';
  * Generates chart data and table
  */
 async function fillData() {
-  //obtains all login related entries in dev-audits
+  //obtains all mifi related entries in the audits DB
   //set to null so its data is reset each time the chart renders (changing date ranges)
   this.mifiAudits = [];
   let mifiData = await api.getAudits('mifi', this.queryStartDate, this.queryEndDate);
@@ -41,7 +41,6 @@ async function fillData() {
       nickname: employee.nickname ? employee.nickname : ''
     });
   });
-  console.log(this.mifiAudits);
   let haveMifiEnabled = mifiData.filter((audit) => {
     if (audit.tags) {
       return audit.tags.includes('mifi set to true');
@@ -52,25 +51,26 @@ async function fillData() {
       return audit.tags.includes('mifi set to false');
     }
   });
-  let numberOfEnabled = haveMifiEnabled.length;
-  let numberOfDisabled = haveMifiDisabled.length;
 
-  let data;
-  let title;
   let colors;
+  let data;
+  let labels = [];
   let showToolTips;
-  let labels = ['Enabled', 'Disabled'];
-  if (mifiData.length === 0) {
+  let title;
+
+  if (haveMifiEnabled.length === 0 && haveMifiDisabled.length === 0) {
     colors = 'grey';
-    title = 'No Login Trend Data Found For Selected Date Range';
+    data = [1];
     showToolTips = false;
+    title = 'No Mifi Data Found For Selected Date Range';
   } else {
-    data = [numberOfEnabled, numberOfDisabled];
     colors = ['#450084', '#CBB677'];
-    title = `Login Trend Data From ${moment(this.queryStartDate).format('MM/DD/YY')} to ${moment(
+    data = [haveMifiEnabled.length, haveMifiDisabled.length];
+    labels = ['Enabled', 'Disabled'];
+    showToolTips = true;
+    title = `Mifi Trend Data From ${moment(this.queryStartDate).format('MM/DD/YY')} to ${moment(
       this.queryEndDate
     ).format('MM/DD/YY')}`;
-    showToolTips = true;
   }
 
   this.mifiChartData = {
