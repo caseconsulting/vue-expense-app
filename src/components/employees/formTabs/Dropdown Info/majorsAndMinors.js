@@ -2346,5 +2346,7 @@ export let majorsAndMinors = [
   'Computer Security & Information Assurance',
   'Honors Interdisciplinary Studies',
   'Environmental Humanities',
-  'Internet Software Development'
+  'Internet Software Development',
+  'Accounting information systems',
+  'Technology Management'
 ];
