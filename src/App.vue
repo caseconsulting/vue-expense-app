@@ -113,18 +113,21 @@
         </v-container>
       </v-main>
       <v-footer padless>
-        <v-col class="text-right text-caption" cols="12"
-          ><strong
-            >V<a
-              id="P"
-              class="black--text"
-              target="_blank"
-              href="https://www.youtube.com/watch?v=dfdGd31gNjI&t=3s&ab_channel=GrayWalf"
-              >e</a
-            >rsion</strong
-          >
-          {{ version }}</v-col
-        >
+        <v-col class="text-right text-caption" cols="12">
+          <v-tooltip top>
+            <template v-slot:activator="{ on }">
+              <a
+                v-on="on"
+                id="P"
+                class="black--text"
+                target="_blank"
+                href="https://3.basecamp.com/3097063/buckets/4708396/messages/4095343123"
+                ><strong>Version</strong> {{ version }}</a
+              >
+            </template>
+            <span>View Release Notes</span>
+          </v-tooltip>
+        </v-col>
       </v-footer>
       <time-out-modal :toggleTimeOut="timedOut"></time-out-modal>
       <time-out-warning-modal :toggleWarning="session"></time-out-warning-modal>
