@@ -1771,7 +1771,7 @@ export let majorsAndMinors = [
   'Architectural engineering',
   'Structural mechanics',
   'Surveying',
-  'Electrical engineerin',
+  'Electrical engineering',
   'Applied physics',
   'Computer engineering ',
   'Computer science',
@@ -2342,5 +2342,9 @@ export let majorsAndMinors = [
   'Operations research',
   'Mass transit',
   'Travel',
-  'Vehicles'
+  'Vehicles',
+  'Computer Security & Information Assurance',
+  'Honors Interdisciplinary Studies',
+  'Environmental Humanities',
+  'Internet Software Development'
 ];
