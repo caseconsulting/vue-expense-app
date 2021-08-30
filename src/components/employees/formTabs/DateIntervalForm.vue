@@ -324,27 +324,16 @@ export default {
     parseDateMonthYear,
     formatDateMonthYear
   },
-<<<<<<< HEAD
   mounted,
-=======
-  mounted() {
-    this.$emit('validated', this.technologyIndex, this.intervalIndex, 1);
-  },
->>>>>>> b34addb (2854-making-sure-we-are-calling-methods-correctly: further added this to statements)
   props: ['startIntervalDate', 'endIntervalDate', 'technologyIndex', 'intervalIndex', 'allIntervals'],
   watch: {
     formatToggle: function () {
       // change to YYYY format
       if (this.formatToggle == 1) {
-<<<<<<< HEAD
-        this.startIntervalDateEdited = !isEmpty(this.startIntervalDate) ? this.startIntervalDate.split('-')[0] : null;
-        this.endIntervalDateEdited = !isEmpty(this.endIntervalDate) ? this.endIntervalDate.split('-')[0] : null;
-=======
         this.startIntervalDateEdited = !this.isEmpty(this.startIntervalDate)
           ? this.startIntervalDate.split('-')[0]
           : null;
         this.endIntervalDateEdited = !this.isEmpty(this.endIntervalDate) ? this.endIntervalDate.split('-')[0] : null;
->>>>>>> b34addb (2854-making-sure-we-are-calling-methods-correctly: further added this to statements)
         //close opened date menus
         this.startIntervalMenu = false;
         this.endIntervalMenu = false;

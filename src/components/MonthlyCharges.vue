@@ -295,17 +295,7 @@ export default {
     roundHours,
     setMonthlyCharges,
     toFAQ,
-<<<<<<< HEAD
     updateEstimate
-=======
-    updateEstimate: function (event) {
-      if (event.target.value > 0) {
-        this.userWorkDays = event.target.value;
-        this.estimatedDailyHours = this.remainingHours / this.userWorkDays;
-        this.estimatedDailyHours = this.roundHours(this.estimatedDailyHours);
-      }
-    }
->>>>>>> d3ecaf5 (2854-making-sure-we-are-calling-methods-correctly: proper this and export method placing)
   },
   props: ['passedEmployee', 'showMinutes'],
   watch: {
