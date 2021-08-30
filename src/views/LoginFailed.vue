@@ -37,7 +37,7 @@ const login_format = 'MMM Do, YYYY HH:mm:ss';
 async function created() {
   if (this.isLoggedIn()) {
     // logged in
-    if (getRole() === 'admin') {
+    if (this.getRole() === 'admin') {
       // user's role is admin
       this.$router.push('reimbursements');
     } else {

@@ -106,7 +106,7 @@ function onPageChange() {
 function getContractLengthInYears(contract) {
   let total = 0;
   if (contract.projects) {
-    contract.projects.forEach((project) => (total += Number(getProjectLengthInYears(project))));
+    contract.projects.forEach((project) => (total += Number(this.getProjectLengthInYears(project))));
   }
   return total.toFixed(3);
 }
