@@ -19,6 +19,12 @@ import PieChart from '../baseCharts/PieChart.vue';
 import _ from 'lodash';
 import api from '@/shared/api.js';
 
+// |--------------------------------------------------|
+// |                                                  |
+// |                 LIFECYCLE HOOKS                  |
+// |                                                  |
+// |--------------------------------------------------|
+
 /**
  * created lifecycle hook
  */
@@ -27,6 +33,12 @@ async function created() {
   this.fillData();
   this.$forceUpdate();
 } // created
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     METHODS                      |
+// |                                                  |
+// |--------------------------------------------------|
 
 /**
  * Sets up the chart formatting and data options.
@@ -108,6 +120,19 @@ function fillData() {
   this.dataReceived = true;
 } // fillData
 
+// |--------------------------------------------------|
+// |                                                  |
+// |                     WATCHERS                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * watcher for showCurrent - fills data
+ */
+function watchShowCurrent() {
+  this.fillData(); // renders a different chart every time the radio button changes
+} // watchShowCurrent
+
 export default {
   components: { PieChart },
   data() {
@@ -122,9 +147,7 @@ export default {
   methods: { fillData },
   created,
   watch: {
-    showCurrent() {
-      this.fillData(); // renders a different chart every time the radio button changes
-    }
+    showCurrent: watchShowCurrent
   }
 };
 </script>

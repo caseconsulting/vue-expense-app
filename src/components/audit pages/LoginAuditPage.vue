@@ -18,10 +18,22 @@ const moment = require('moment-timezone');
 moment.tz.setDefault('America/New_York');
 const IsoFormat = 'MMMM Do YYYY, h:mm:ss a';
 
+// |--------------------------------------------------|
+// |                                                  |
+// |                 LIFECYCLE HOOKS                  |
+// |                                                  |
+// |--------------------------------------------------|
+
 async function created() {
   this.employees = await api.getItems(api.EMPLOYEES); // get all employees
   this.fillData();
 }
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     METHODS                      |
+// |                                                  |
+// |--------------------------------------------------|
 
 /**
  * Generates chart data and table
@@ -157,12 +169,33 @@ async function fillData() {
   this.chartLoaded = true;
 }
 
+// |--------------------------------------------------|
+// |                                                  |
+// |                     COMPUTED                     |
+// |                                                  |
+// |--------------------------------------------------|
+
 /**
  * returns the combined date range computed value
+ *
+ * @return - full date range
  */
 function dateRange() {
   return `${this.queryStartDate} ${this.queryEndDate}`;
 } //dateRange
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     WATCHERS                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * fills data when dateRange changes
+ */
+function watchDateRange() {
+  this.fillData();
+} // watchDateRange
 
 export default {
   components: { BarChart, AuditTable },
@@ -181,9 +214,7 @@ export default {
   methods: { fillData },
   props: ['queryStartDate', 'queryEndDate', 'show24HourTitle'],
   watch: {
-    dateRange() {
-      this.fillData();
-    }
+    dateRange: watchDateRange
   }
 };
 </script>

@@ -9,6 +9,12 @@
 import PieChart from '../baseCharts/PieChart.vue';
 import _ from 'lodash';
 
+// |--------------------------------------------------|
+// |                                                  |
+// |                 LIFECYCLE HOOKS                  |
+// |                                                  |
+// |--------------------------------------------------|
+
 /**
  * mounted lifecycle hook
  */
@@ -28,6 +34,12 @@ function created() {
   //this.$forceUpdate();
   this.fillData(null);
 } // created
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     METHODS                      |
+// |                                                  |
+// |--------------------------------------------------|
 
 /**
  * Sets the chart formatting and options data.

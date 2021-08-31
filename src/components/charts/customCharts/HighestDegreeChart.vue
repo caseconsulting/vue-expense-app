@@ -15,6 +15,12 @@ import _ from 'lodash';
 const moment = require('moment-timezone');
 moment.tz.setDefault('America/New_York');
 
+// |--------------------------------------------------|
+// |                                                  |
+// |                 LIFECYCLE HOOKS                  |
+// |                                                  |
+// |--------------------------------------------------|
+
 /**
  * created lifecycle hook
  */
@@ -24,6 +30,12 @@ async function created() {
   this.degrees = this.initDegrees();
   this.fillData();
 } // created
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     METHODS                      |
+// |                                                  |
+// |--------------------------------------------------|
 
 /**
  * Initializes the degrees data field, this function retrieves the highest

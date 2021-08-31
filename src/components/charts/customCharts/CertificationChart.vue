@@ -10,6 +10,12 @@ import api from '@/shared/api.js';
 import BarChart from '../baseCharts/BarChart.vue';
 import moment from 'moment-timezone';
 
+// |--------------------------------------------------|
+// |                                                  |
+// |                 LIFECYCLE HOOKS                  |
+// |                                                  |
+// |--------------------------------------------------|
+
 /**
  * mounted lifecycle hook
  */
@@ -17,6 +23,12 @@ async function mounted() {
   this.$forceUpdate();
   await this.fillCertData();
 } // mounted
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                    METHODS                       |
+// |                                                  |
+// |--------------------------------------------------|
 
 /**
  * Extract each employees certifications and tally up each one. Also formats and sets data options for the chart.

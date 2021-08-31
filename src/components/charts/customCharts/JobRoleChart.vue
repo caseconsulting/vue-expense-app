@@ -9,6 +9,12 @@
 import BarChart from '../baseCharts/BarChart.vue';
 import api from '@/shared/api.js';
 
+// |--------------------------------------------------|
+// |                                                  |
+// |                 LIFECYCLE HOOKS                  |
+// |                                                  |
+// |--------------------------------------------------|
+
 /**
  * created lifecycle hook
  */
@@ -17,6 +23,13 @@ async function created() {
   this.employees = await api.getItems(api.EMPLOYEES);
   this.fillData();
 } // created
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     METHODS                      |
+// |                                                  |
+// |--------------------------------------------------|
+
 /**
  * Extracts the job role from each employee and tallies up each role for active
  * employees. Also sets the chart formatting and options data.

@@ -402,6 +402,115 @@ function duplicateEmployeeNum() {
   window.EventBus.$emit('disableUpload', this.duplicate, this.editedEmployee.employeeNumber);
 } // duplicateEmployeeNum
 
+// |--------------------------------------------------|
+// |                                                  |
+// |                     WATCHERS                     |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * watcher for model.id - update the edited employee with the new model
+ */
+function watchModelID() {
+  this.editedEmployee = _.cloneDeep(this.model);
+} // watchModelID
+
+/**
+ * watcher for editedEmployee.employeeRole - format role
+ */
+function watchEditedEmployeeEmployeeRole() {
+  if (this.editedEmployee.employeeRole != 'User') {
+    this.employeeRoleFormatted = _.startCase(this.editedEmployee.employeeRole);
+  }
+} // watchEditedEmployeeEmployeeRole
+
+/**
+ * watcher for editedEmployee.deptDate - format date on change
+ */
+function watchEditedEmployeeDeptDate() {
+  this.deptDateFormatted = formatDate(this.editedEmployee.deptDate) || this.deptDateFormatted;
+  //fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
+  if (this.editedEmployee.deptDate !== null && !this.formatDate(this.editedEmployee.deptDate)) {
+    this.editedEmployee.deptDate = null;
+  }
+} // watchEditedEmployeeDeptDate
+
+/**
+ * watcher for editedEmployee.hireDate - format date on change
+ */
+async function watchEditedEmployeeHireDate() {
+  this.hasExpenses = this.editedEmployee.id
+    ? _.size(await api.getAllEmployeeExpenses(this.editedEmployee.id)) > 0
+    : false;
+  this.hireDateFormatted = this.formatDate(this.editedEmployee.hireDate) || this.hireDateFormatted;
+  //fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
+  if (this.editedEmployee.hireDate !== null && !this.formatDate(this.editedEmployee.hireDate)) {
+    this.editedEmployee.hireDate = null;
+  }
+} // watchEditedEmployeeHireDate
+
+/**
+ * watcher for editedEmployee.employeeNumber - determines disable on resume button
+ */
+function watchEditedEmployeeEmployeeNumber() {
+  let empNum = this.editedEmployee.employeeNumber;
+  // determine if the resume button should be disabled or not
+  if (empNum !== '' && !isNaN(empNum) && parseInt(empNum) > 0) {
+    window.EventBus.$emit('disableUpload', false, empNum);
+  } else {
+    window.EventBus.$emit('disableUpload', true, empNum);
+  }
+} // watchEditedEmployeeEmployeeNumber
+
+/**
+ * watcher for statusRadio - sets the status and edited employee work status
+ */
+function watchStatusRadio() {
+  if (this.statusRadio == 'full') {
+    this.status = '100';
+    this.editedEmployee.workStatus = 100;
+    this.editedEmployee.deptDate = null;
+  } else if (this.statusRadio == 'inactive') {
+    this.status = '0';
+    this.editedEmployee.workStatus = 0;
+    if (this.deptDateFormatted && this.parseDate(this.deptDateFormatted)) {
+      this.editedEmployee.deptDate = this.parseDate(this.deptDateFormatted);
+    }
+  } else {
+    this.editedEmployee.deptDate = null;
+  }
+} // watchStatusRadio
+
+/**
+ * watcher for status - sets workStatus for the edited employee
+ */
+function watchStatus() {
+  if (this.status) {
+    this.editedEmployee.workStatus = parseInt(this.status);
+  } else {
+    this.editedEmployee.workStatus = null;
+  }
+} // watchStatus
+
+/**
+ * watcher for mifiStatus sets the editedEmployee when mifiStatus changes
+ */
+function watchMifiStatus() {
+  this.editedEmployee.mifiStatus = this.mifiStatus;
+} // watchMifiStatus
+
+/**
+ * watcher for validating - validates fields
+ *
+ * @param val - val prop that needs to exist before validating
+ */
+function watchValidating(val) {
+  if (val) {
+    // parent component triggers validation
+    this.validateFields();
+  }
+} // watchValidating
+
 export default {
   created,
   data() {
@@ -479,71 +588,15 @@ export default {
   },
   props: ['admin', 'model', 'validating', 'disableEmpNum'],
   watch: {
-    'model.id': function () {
-      this.editedEmployee = _.cloneDeep(this.model);
-    },
-    'editedEmployee.employeeRole': function () {
-      if (this.editedEmployee.employeeRole != 'User') {
-        this.employeeRoleFormatted = _.startCase(this.editedEmployee.employeeRole);
-      }
-    },
-    'editedEmployee.deptDate': function () {
-      this.deptDateFormatted = this.formatDate(this.editedEmployee.deptDate) || this.deptDateFormatted;
-      //fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
-      if (this.editedEmployee.deptDate !== null && !this.formatDate(this.editedEmployee.deptDate)) {
-        this.editedEmployee.deptDate = null;
-      }
-    },
-    'editedEmployee.hireDate': async function () {
-      this.hasExpenses = this.editedEmployee.id
-        ? _.size(await api.getAllEmployeeExpenses(this.editedEmployee.id)) > 0
-        : false;
-      this.hireDateFormatted = this.formatDate(this.editedEmployee.hireDate) || this.hireDateFormatted;
-      //fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
-      if (this.editedEmployee.hireDate !== null && !this.formatDate(this.editedEmployee.hireDate)) {
-        this.editedEmployee.hireDate = null;
-      }
-    },
-    'editedEmployee.employeeNumber': function () {
-      let empNum = this.editedEmployee.employeeNumber;
-      // determine if the resume button should be disabled or not
-      if (empNum !== '' && !isNaN(empNum) && parseInt(empNum) > 0) {
-        window.EventBus.$emit('disableUpload', false, empNum);
-      } else {
-        window.EventBus.$emit('disableUpload', true, empNum);
-      }
-    },
-    statusRadio: function () {
-      if (this.statusRadio == 'full') {
-        this.status = '100';
-        this.editedEmployee.workStatus = 100;
-        this.editedEmployee.deptDate = null;
-      } else if (this.statusRadio == 'inactive') {
-        this.status = '0';
-        this.editedEmployee.workStatus = 0;
-        if (this.deptDateFormatted && this.parseDate(this.deptDateFormatted)) {
-          this.editedEmployee.deptDate = this.parseDate(this.deptDateFormatted);
-        }
-      } else {
-        this.editedEmployee.deptDate = null;
-      }
-    },
-    status: function () {
-      if (this.status) {
-        this.editedEmployee.workStatus = parseInt(this.status);
-      } else {
-        this.editedEmployee.workStatus = null;
-      }
-    },
-    mifiStatus: function () {
-      this.editedEmployee.mifiStatus = this.mifiStatus;
-    },
-    validating: function (val) {
-      if (val) {
-        // parent component triggers validation
-        this.validateFields();
-      }
-    }
+    'model.id': watchModelID,
+    'editedEmployee.employeeRole': watchEditedEmployeeEmployeeRole,
+    'editedEmployee.deptDate': watchEditedEmployeeDeptDate,
+    'editedEmployee.hireDate': watchEditedEmployeeHireDate,
+    'editedEmployee.employeeNumber': watchEditedEmployeeEmployeeNumber,
+    statusRadio: watchStatusRadio,
+    status: watchStatus,
+    mifiStatus: watchMifiStatus,
+    validating: watchValidating
   }
 };
 </script>

@@ -11,6 +11,12 @@ import moment from 'moment-timezone';
 import api from '@/shared/api.js';
 moment.tz.setDefault('America/New_York');
 
+// |--------------------------------------------------|
+// |                                                  |
+// |                 LIFECYCLE HOOKS                  |
+// |                                                  |
+// |--------------------------------------------------|
+
 /**
  * created lifecycle hook
  */
@@ -21,6 +27,12 @@ async function created() {
   this.jobExperienceData();
   this.drawJobExpHistGraph();
 } // created
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     METHODS                      |
+// |                                                  |
+// |--------------------------------------------------|
 
 /**
  * Finds the last index that has an element greater than 0 to prevent too many labels showing up on the chart.

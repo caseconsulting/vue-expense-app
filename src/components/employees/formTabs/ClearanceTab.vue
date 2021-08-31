@@ -491,6 +491,42 @@ function validateFields() {
   window.EventBus.$emit('clearanceStatus', errorCount); // emit error status
 } // validateFields
 
+// |--------------------------------------------------|
+// |                                                  |
+// |                     WATCHERS                     |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * watcher for validating - validates fields
+ *
+ * @param val - val prop that needs to exist before validating
+ */
+function watchValidating(val) {
+  if (val) {
+    // parent component triggers validation
+    this.validateFields();
+  }
+} // watchValidating
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     FILTERS                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * Formats multiple dates at once in MM/DD/YYYY format.
+ * @returns Array - The array of formatted dates
+ */
+function formatDates(array) {
+  let formattedDates = [];
+  array.forEach((date) => {
+    formattedDates.push(this.formatDate(date));
+  });
+  return formattedDates;
+} // formatDates
+
 export default {
   created,
   data() {
@@ -541,17 +577,7 @@ export default {
   directives: { mask },
   filters: {
     formatDate,
-    /**
-     * Formats multiple dates at once in MM/DD/YYYY format.
-     * @returns Array - The array of formatted dates
-     */
-    formatDates: function (array) {
-      let formattedDates = [];
-      array.forEach((date) => {
-        formattedDates.push(this.formatDate(date));
-      });
-      return formattedDates;
-    }
+    formatDates
   },
   methods: {
     addClearance,
@@ -570,12 +596,7 @@ export default {
   },
   props: ['model', 'validating'],
   watch: {
-    validating: function (val) {
-      if (val) {
-        // parent component triggers validation
-        this.validateFields();
-      }
-    }
+    validating: watchValidating
   }
 };
 </script>

@@ -22,6 +22,12 @@ const moment = require('moment-timezone');
 moment.tz.setDefault('America/New_York');
 const IsoFormat = 'MMMM Do YYYY, h:mm:ss a';
 
+// |--------------------------------------------------|
+// |                                                  |
+// |                    METHODS                       |
+// |                                                  |
+// |--------------------------------------------------|
+
 async function fillData() {
   this.resumeAudits = [];
   let resumeAudits = await api.getAudits('resume', this.queryStartDate, this.queryEndDate);
@@ -147,6 +153,12 @@ async function fillData() {
   };
 }
 
+// |--------------------------------------------------|
+// |                                                  |
+// |                 LIFECYCLE HOOKS                  |
+// |                                                  |
+// |--------------------------------------------------|
+
 /**
  * created lifecycle hook
  */
@@ -154,6 +166,26 @@ async function created() {
   this.employees = await api.getItems(api.EMPLOYEES); // get all employees
   await this.fillData();
 } //created
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     WATCHERS                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * watcher for queryStartDate - fillData
+ */
+async function watchQueryStartDate() {
+  await this.fillData();
+} // watchQueryStartDate
+
+/**
+ * watcher for queryEndDate - fillData
+ */
+async function watchQueryEndDate() {
+  await this.fillData();
+} // watchQueryEndDate
 
 export default {
   components: { AuditTable, PieChart },
@@ -194,12 +226,8 @@ export default {
   },
   props: ['queryStartDate', 'queryEndDate', 'show24HourTitle'],
   watch: {
-    async queryStartDate() {
-      await this.fillData();
-    },
-    async queryEndDate() {
-      await this.fillData();
-    }
+    queryStartDate: watchQueryStartDate,
+    queryEndDate: watchQueryEndDate
   }
 };
 </script>

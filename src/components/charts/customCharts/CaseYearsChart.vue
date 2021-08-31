@@ -11,6 +11,12 @@ import moment from 'moment-timezone';
 import api from '@/shared/api.js';
 moment.tz.setDefault('America/New_York');
 
+// |--------------------------------------------------|
+// |                                                  |
+// |                 LIFECYCLE HOOKS                  |
+// |                                                  |
+// |--------------------------------------------------|
+
 /**
  * created lifecycle hook
  */
@@ -20,6 +26,12 @@ async function created() {
   this.caseYearsData();
   this.drawCaseYearsHistGraph();
 } // created
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                    METHODS                       |
+// |                                                  |
+// |--------------------------------------------------|
 
 /**
  * Puts an employee in an array based on a time interval of 2 years for each index from their hire date.

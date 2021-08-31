@@ -8,6 +8,12 @@
 <script>
 import PieChart from '../baseCharts/PieChart.vue';
 
+// |--------------------------------------------------|
+// |                                                  |
+// |                 LIFECYCLE HOOKS                  |
+// |                                                  |
+// |--------------------------------------------------|
+
 /**
  * mounted lifecycle hook
  */
@@ -26,6 +32,12 @@ function mounted() {
 function created() {
   this.fillData(null);
 } // created
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     METHODS                      |
+// |                                                  |
+// |--------------------------------------------------|
 
 /**
  * Sets the chart formatting and options data.

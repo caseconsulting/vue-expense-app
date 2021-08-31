@@ -385,6 +385,24 @@ function validateFields() {
   window.EventBus.$emit('doneValidating', 'education', this.editedDegrees); // emit done validating
 } // validateFields
 
+// |--------------------------------------------------|
+// |                                                  |
+// |                     WATCHERS                     |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * watcher for validating - validates fields
+ *
+ * @param val - val prop that needs to exist before validating
+ */
+function watchValidating(val) {
+  if (val) {
+    // parent component triggers validation
+    this.validateFields();
+  }
+} // watchValidating
+
 export default {
   created,
   data() {
@@ -433,12 +451,7 @@ export default {
   //Education index is only used in the resume parser
   props: ['model', 'validating', 'allowAdditions'],
   watch: {
-    validating: function (val) {
-      if (val) {
-        // parent component triggers validation
-        this.validateFields();
-      }
-    }
+    validating: watchValidating
   }
 };
 </script>

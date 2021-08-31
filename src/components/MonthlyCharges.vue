@@ -254,6 +254,21 @@ function updateEstimate(event) {
 
 // |--------------------------------------------------|
 // |                                                  |
+// |                     WATCHERS                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * watcher for passedEmployee.id
+ */
+async function watchPassedEmployeeID() {
+  if (this.isEmployeeView) {
+    await this.setMonthlyCharges();
+  }
+} // watchPassedEmployeeID
+
+// |--------------------------------------------------|
+// |                                                  |
 // |                      EXPORT                      |
 // |                                                  |
 // |--------------------------------------------------|
@@ -293,11 +308,7 @@ export default {
   },
   props: ['passedEmployee', 'showMinutes'],
   watch: {
-    'passedEmployee.id': async function () {
-      if (this.isEmployeeView) {
-        await this.setMonthlyCharges();
-      }
-    }
+    'passedEmployee.id': watchPassedEmployeeID
   }
 };
 </script>

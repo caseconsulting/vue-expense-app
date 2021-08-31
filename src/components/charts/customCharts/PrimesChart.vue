@@ -9,6 +9,12 @@
 import api from '@/shared/api.js';
 import BarChart from '../baseCharts/BarChart.vue';
 
+// |--------------------------------------------------|
+// |                                                  |
+// |                 LIFECYCLE HOOKS                  |
+// |                                                  |
+// |--------------------------------------------------|
+
 /**
  * mounted lifecycle hook
  */
@@ -16,6 +22,12 @@ async function mounted() {
   await this.fillCertData();
   this.$forceUpdate();
 } // mounted
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     METHODS                      |
+// |                                                  |
+// |--------------------------------------------------|
 
 /**
  * Gets all of the current projects the user has

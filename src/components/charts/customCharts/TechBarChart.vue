@@ -261,6 +261,26 @@ async function mounted() {
   this.$forceUpdate();
 }
 
+// |--------------------------------------------------|
+// |                                                  |
+// |                     WATCHERS                     |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * watcher for showCurrent - sorts tech info and then fills data
+ */
+function watchShowCurrent() {
+  if (this.showCurrent === 'All') {
+    this.sortTech(this.technologies);
+  } else if (this.showCurrent === 'Current') {
+    this.sortTech(this.currentTechnologies);
+  } else {
+    this.sortTech(this.nonCurrentTechnologies);
+  }
+  this.fillData(this);
+} // watchShowCurrent
+
 export default {
   components: {
     HorizontalBar
@@ -294,16 +314,7 @@ export default {
   },
   mounted,
   watch: {
-    showCurrent() {
-      if (this.showCurrent === 'All') {
-        this.sortTech(this.technologies);
-      } else if (this.showCurrent === 'Current') {
-        this.sortTech(this.currentTechnologies);
-      } else {
-        this.sortTech(this.nonCurrentTechnologies);
-      }
-      this.fillData(this);
-    }
+    showCurrent: watchShowCurrent
   }
 };
 </script>
