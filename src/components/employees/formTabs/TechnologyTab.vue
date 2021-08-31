@@ -14,7 +14,7 @@
         v-model="technology.name"
         :rules="[duplicateRules(technology.name), ...getRequiredRules()]"
         :items="technologyDropDown"
-        label="Technology"
+        label="Technology or Skill"
         data-vv-name="Technology"
         @input.native="updateTechDropDown(index)"
         clearable
@@ -28,7 +28,7 @@
           <v-tooltip top nudge-left="75" nudge-bottom="10" max-width="300">
             <template v-slot:activator="{ on }">
               <div v-on="on">
-                <v-switch v-model="technology.current" label="Currently know this technology"></v-switch>
+                <v-switch v-model="technology.current" label="Currently know this technology / skill"></v-switch>
               </div>
             </template>
             <span>Enabling this will auto-increment the years of experience every month</span>

@@ -77,7 +77,7 @@
                     <v-list-item
                       @click="selectDropDown('technologies')"
                       v-bind:class="{ errorTab: tabErrors.technologies }"
-                      >Technologies</v-list-item
+                      >Tech and Skills</v-list-item
                     >
                     <v-list-item
                       @click="selectDropDown('customerOrgExp')"
@@ -219,11 +219,11 @@
             <v-tooltip top>
               <template v-slot:activator="{ on }">
                 <v-tab v-on="on" href="#technologies" v-bind:class="{ errorTab: tabErrors.technologies }"
-                  >Technologies</v-tab
+                  >Tech and Skills</v-tab
                 >
               </template>
               <span v-if="tabErrors.technologies">Submit to update tab validation</span>
-              <span v-else>Technologies Tab</span>
+              <span v-else>Tech and Skills Tab</span>
             </v-tooltip>
             <v-tooltip top>
               <template v-slot:activator="{ on }">
