@@ -12,7 +12,6 @@
         :rules="getRequiredRules()"
         label="First Name"
         data-vv-name="First Name"
-        :disabled="!admin"
       ></v-text-field>
       <!-- Middle Name -->
       <v-text-field
@@ -22,7 +21,7 @@
         :rules="middleNameRules()"
         label="Middle Name"
         data-vv-name="Middle Name"
-        :disabled="!admin || editedEmployee.noMiddleName"
+        :disabled="editedEmployee.noMiddleName"
       ></v-text-field>
       <v-checkbox
         class="mt-0"
@@ -38,7 +37,6 @@
         :rules="getRequiredRules()"
         label="Last Name"
         data-vv-name="Last Name"
-        :disabled="!admin"
       ></v-text-field>
       <!-- Nickname -->
       <v-text-field
