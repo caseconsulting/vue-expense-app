@@ -1,14 +1,12 @@
 <template>
-  <v-card>
-    <v-container fluid>
-      <v-row>
-        <v-col>
-          <bar-chart v-if="chartLoaded" :options="loginChartOptions" :chartData="loginChartData"></bar-chart>
-        </v-col>
-      </v-row>
-      <audit-table :audits="loginAudits"></audit-table>
-    </v-container>
-  </v-card>
+  <v-container fluid>
+    <v-row>
+      <v-col>
+        <bar-chart v-if="chartLoaded" :options="loginChartOptions" :chartData="loginChartData"></bar-chart>
+      </v-col>
+    </v-row>
+    <audit-table :audits="loginAudits"></audit-table>
+  </v-container>
 </template>
 
 <script>
@@ -51,27 +49,47 @@ async function fillData() {
   let showTooltips;
   if (this.loginAudits.length === 0) {
     colors = 'grey';
-    title = 'No Login Trend Data Found For Selected Date Range';
+    title = this.show24HourTitle
+      ? 'No Login Trend Data In Last 24 Hours'
+      : 'No Login Trend Data In Selected Date Range';
     showTooltips = false;
   } else {
     colors = '#bc3825';
-    title = `Login Trend Data From ${moment(this.queryStartDate).format('MM/DD/YY')} to ${moment(
-      this.queryEndDate
-    ).format('MM/DD/YY')}`;
+    title = this.show24HourTitle
+      ? 'Login Trend Data For Last 24 Hours'
+      : `Login Trend Data From ${moment(this.queryStartDate).format('MM/DD/YY')} to ${moment(this.queryEndDate).format(
+          'MM/DD/YY'
+        )}`;
     showTooltips = true;
   }
   //used to collect login time data, with the keys representing a specific hour and
   //each respective value representing the number of users logged in at that hour
-  let hoursAndLogins = {};
-  for (let i = 1; i < 25; i++) {
-    let hour;
-    if (i > 12) {
-      hour = i - 12 + 'pm';
-    } else {
-      hour = i + 'am';
-    }
-    hoursAndLogins[hour] = 0;
-  }
+  let hoursAndLogins = {
+    '1am': 0,
+    '2am': 0,
+    '3am': 0,
+    '4am': 0,
+    '5am': 0,
+    '6am': 0,
+    '7am': 0,
+    '8am': 0,
+    '9am': 0,
+    '10am': 0,
+    '11am': 0,
+    '12pm': 0,
+    '1pm': 0,
+    '2pm': 0,
+    '3pm': 0,
+    '4pm': 0,
+    '5pm': 0,
+    '6pm': 0,
+    '7pm': 0,
+    '8pm': 0,
+    '9pm': 0,
+    '10pm': 0,
+    '11pm': 0,
+    '12am': 0
+  };
   //gets the dateCreated attribute for each login audit and grabs the hour and meidiem (am or pm)
   //to accumulate on the hoursAndLogins map
   _.forEach(this.loginAudits, (login) => {
@@ -161,7 +179,7 @@ export default {
     dateRange
   },
   methods: { fillData },
-  props: ['queryStartDate', 'queryEndDate'],
+  props: ['queryStartDate', 'queryEndDate', 'show24HourTitle'],
   watch: {
     dateRange() {
       this.fillData();

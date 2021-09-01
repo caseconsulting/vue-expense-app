@@ -1,75 +1,88 @@
 <template>
-  <v-container fluid>
-    <v-row class="mb-3">
-      <h1>Audits</h1>
-    </v-row>
-    <v-row>
-      <v-menu>
-        <template v-slot:activator="{ on, attrs }">
-          <v-btn text color="#bc3825" dark class="font-weight-bold" v-bind="attrs" v-on="on"
-            >{{ selectedDropdown }}<v-icon class="pb-1">expand_more</v-icon>
-          </v-btn>
-        </template>
-        <v-list>
-          <v-list-item @click="selectDropDown('Resume Parser')">Resume Parser</v-list-item>
-          <v-list-item @click="selectDropDown('Login')">Login</v-list-item>
-          <v-list-item @click="selectDropDown('Mifi Status Changes')">Mifi Status Changes</v-list-item>
-        </v-list>
-      </v-menu>
-    </v-row>
-    <v-row class="mx-2 mb-2">
-      <v-col cols="4">
-        <v-form ref="dateRange">
-          <v-menu
-            v-model="auditsQuery.showRangeMenu"
-            :close-on-content-click="false"
-            transition="scale-transition"
-            offset-y
-            max-width="290px"
-            min-width="290px"
-          >
-            <template v-slot:activator="{ on, attrs }">
-              <v-text-field
-                :value="formatRange(auditsQuery.range)"
-                label="Date Range"
-                prepend-icon="date_range"
-                readonly
-                v-bind="attrs"
-                v-on="on"
-                clearable
-                @click:clear="auditsQuery.range = []"
-                :rules="requiredRules"
-              ></v-text-field>
-            </template>
-            <v-date-picker v-model="auditsQuery.range" no-title type="date" range></v-date-picker>
-          </v-menu>
-        </v-form>
-      </v-col>
-      <v-col cols="2">
-        <v-btn class="mt-3 ml-2" @click="setDateRange">Apply</v-btn>
-      </v-col>
-    </v-row>
+  <v-card>
     <v-card color="#bc3825">
-      <v-card-title
+      <v-card-title headline
         ><h2 class="white--text">{{ selectedDropdown }} Audits</h2>
       </v-card-title>
     </v-card>
-    <resume-parser-audit-page
-      v-if="selectedDropdown === 'Resume Parser'"
-      :queryStartDate="auditsQueryFormatted.range[0]"
-      :queryEndDate="auditsQueryFormatted.range[1]"
-    ></resume-parser-audit-page>
-    <login-audit-page
-      v-if="selectedDropdown === 'Login'"
-      :queryStartDate="auditsQueryFormatted.range[0]"
-      :queryEndDate="auditsQueryFormatted.range[1]"
-    ></login-audit-page>
-    <mifi-log-audit
-      v-if="selectedDropdown === 'Mifi Status Changes'"
-      :queryStartDate="auditsQueryFormatted.range[0]"
-      :queryEndDate="auditsQueryFormatted.range[1]"
-    ></mifi-log-audit>
-  </v-container>
+    <v-container fluid>
+      <v-row>
+        <v-col cols="2" align-self="center">
+          <v-menu offset-y>
+            <template v-slot:activator="{ on, attrs }">
+              <v-btn text color="#bc3825" dark class="font-weight-bold" v-bind="attrs" v-on="on"
+                >{{ selectedDropdown }}<v-icon>expand_more</v-icon>
+              </v-btn>
+            </template>
+            <v-list>
+              <v-list-item v-if="selectedDropdown !== 'Resume Parser'" @click="selectDropDown('Resume Parser')"
+                >Resume Parser</v-list-item
+              >
+              <v-list-item v-if="selectedDropdown !== 'User Logins'" @click="selectDropDown('User Logins')"
+                >User Logins</v-list-item
+              >
+              <v-list-item
+                v-if="selectedDropdown !== 'Mifi Status Changes'"
+                @click="selectDropDown('Mifi Status Changes')"
+                >Mifi Status Changes</v-list-item
+              >
+            </v-list>
+          </v-menu>
+        </v-col>
+      </v-row>
+      <v-row>
+        <v-col cols="2">
+          <v-form ref="dateRange">
+            <v-menu
+              v-model="auditsQuery.showRangeMenu"
+              :close-on-content-click="false"
+              transition="scale-transition"
+              offset-y
+              max-width="290px"
+              min-width="290px"
+            >
+              <template v-slot:activator="{ on, attrs }">
+                <v-text-field
+                  class="mt-0 ml-1 pt-0"
+                  :value="formatRange(auditsQuery.range)"
+                  label="Date Range"
+                  prepend-icon="date_range"
+                  readonly
+                  v-bind="attrs"
+                  v-on="on"
+                  clearable
+                  @click:clear="auditsQuery.range = []"
+                  :rules="requiredRules"
+                ></v-text-field>
+              </template>
+              <v-date-picker v-model="auditsQuery.range" no-title type="date" range></v-date-picker>
+            </v-menu>
+          </v-form>
+        </v-col>
+        <v-col cols="1">
+          <v-btn class="mt-1 ml-2" @click="setDateRange">Apply</v-btn>
+        </v-col>
+      </v-row>
+      <resume-parser-audit-page
+        v-if="selectedDropdown === 'Resume Parser'"
+        :queryStartDate="auditsQueryFormatted.range[0]"
+        :queryEndDate="auditsQueryFormatted.range[1]"
+        :show24HourTitle="firstLoad"
+      ></resume-parser-audit-page>
+      <login-audit-page
+        v-if="selectedDropdown === 'User Logins'"
+        :queryStartDate="auditsQueryFormatted.range[0]"
+        :queryEndDate="auditsQueryFormatted.range[1]"
+        :show24HourTitle="firstLoad"
+      ></login-audit-page>
+      <mifi-log-audit
+        v-if="selectedDropdown === 'Mifi Status Changes'"
+        :queryStartDate="auditsQueryFormatted.range[0]"
+        :queryEndDate="auditsQueryFormatted.range[1]"
+        :show24HourTitle="firstLoad"
+      ></mifi-log-audit>
+    </v-container>
+  </v-card>
 </template>
 
 <script>
@@ -93,6 +106,8 @@ function setDateRange() {
     // Then sets values to a date array which is passed to the parser audit page
     this.auditsQueryFormatted.range[1] = start.isAfter(end) ? start.format() : end.format();
     this.auditsQueryFormatted.range[0] = start.isAfter(end) ? end.format() : start.format();
+    // Display chart titles with date ranges rather than 'last 24 hours'
+    this.firstLoad = false;
   }
 }
 
@@ -124,6 +139,15 @@ function formatRange(range) {
 } // formatRange
 
 function selectDropDown(tab) {
+  // Clear date query field
+  this.$refs.dateRange.reset();
+  // Set query to last 24 hours
+  this.auditsQueryFormatted = {
+    range: [moment().subtract(1, 'd').format(), moment().format()]
+  };
+  // Reset variable to show 'last 24 hours' chart title
+  this.firstLoad = true;
+  // Change the view to selected tab
   this.selectedDropdown = tab;
 }
 
@@ -135,10 +159,6 @@ export default {
   },
   data() {
     return {
-      selectedDropdown: 'Resume Parser',
-      editedNumDaysBackToQuery: 1,
-      numDaysBackToQuery: 1,
-      numDaysBackRules: [(v) => v >= 0 || 'Number of days back cannot be negative'],
       auditsQuery: {
         range: [],
         showRangeMenu: false
@@ -146,7 +166,9 @@ export default {
       auditsQueryFormatted: {
         range: [moment().subtract(1, 'd').format(), moment().format()]
       },
-      requiredRules: [(v) => !this.isEmpty(v) || 'This field is required'] // rules for a required field
+      firstLoad: true, // this is used to set chart titles to "last 24 hours" if a custom date range has not been set
+      selectedDropdown: 'Resume Parser',
+      requiredRules: [(v) => !isEmpty(v) || 'This field is required'] // rules for a required field
     };
   },
   methods: {
@@ -154,11 +176,6 @@ export default {
     setDateRange,
     formatRange,
     selectDropDown
-  },
-  watch: {
-    editedNumDaysBackToQuery: function (val) {
-      this.editedNumDaysBackToQuery = Number(val);
-    }
   }
 };
 </script>
