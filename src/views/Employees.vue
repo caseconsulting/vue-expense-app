@@ -415,24 +415,23 @@ function userIsAdmin() {
  */
 async function validateDelete(item) {
   this.midAction = true;
-  let valid = await api
-    .getAllEmployeeExpenses(item.id) // get employee expenses
-    .then((result) => {
-      // return if the employee has expenses
-      return result.length <= 0;
-    })
-    .catch((err) => {
-      // error getting employee expenses
-      this.displayError(err);
-    });
+  try {
+    let valid = await api.getAllEmployeeExpenses(item.id); // get employee expenses
 
-  if (valid) {
-    // employee can be deleted
-    this.$set(this.deleteModel, 'id', item.id);
-    this.deleting = !this.deleting; // activate model to confirm delete
-  } else {
-    // employee cannot be deleted
-    this.invalidDelete = !this.invalidDelete;
+    if (valid.length > 0) {
+      return false; // return false if the employee has expenses
+    }
+
+    if (valid) {
+      // employee can be deleted
+      this.$set(this.deleteModel, 'id', item.id);
+      this.deleting = !this.deleting; // activate model to confirm delete
+    } else {
+      // employee cannot be deleted
+      this.invalidDelete = !this.invalidDelete;
+    }
+  } catch (err) {
+    this.displayError(err);
   }
 } // validateDelete
 
