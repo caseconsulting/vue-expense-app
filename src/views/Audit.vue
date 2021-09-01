@@ -1,11 +1,13 @@
 <template>
   <v-card>
+    <!-- Red header title -->
     <v-card color="#bc3825">
       <v-card-title headline
         ><h2 class="white--text">{{ selectedDropdown }} Audits</h2>
       </v-card-title>
     </v-card>
     <v-container fluid>
+      <!-- Drop down for selecting audit tabs -->
       <v-row>
         <v-col cols="2" align-self="center">
           <v-menu offset-y>
@@ -31,6 +33,7 @@
         </v-col>
       </v-row>
       <v-row>
+        <!-- Data Picker for Query -->
         <v-col cols="2">
           <v-form ref="dateRange">
             <v-menu
@@ -59,10 +62,17 @@
             </v-menu>
           </v-form>
         </v-col>
+        <!-- Submit Button -->
         <v-col cols="1">
-          <v-btn class="mt-1 ml-2" @click="setDateRange">Apply</v-btn>
+          <v-tooltip top>
+            <template v-slot:activator="{ on, attrs }">
+              <v-btn class="mt-1 ml-2" @click="setDateRange" v-bind="attrs" v-on="on">Apply</v-btn>
+            </template>
+            <span>Show data from 12am on start date up to 12am on end date</span>
+          </v-tooltip>
         </v-col>
       </v-row>
+      <!-- Displays of Audit Data -->
       <resume-parser-audit-page
         v-if="selectedDropdown === 'Resume Parser'"
         :queryStartDate="auditsQueryFormatted.range[0]"
