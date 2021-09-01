@@ -107,7 +107,7 @@
       <div v-for="(position, index) in company.positions" :key="index">
         <!-- Job Position -->
         <div v-if="editedJobExperienceInfo.companies[compIndex].positions.length === 1">
-          <v-combobox
+          <v-text-field
             ref="formFields"
             :id="'pos-field-' + compIndex + '-' + index"
             v-model.trim="position.title"
@@ -115,10 +115,10 @@
             label="Position"
             data-vv-name="Position"
             clearable
-          ></v-combobox>
+          ></v-text-field>
         </div>
         <div v-else>
-          <v-combobox
+          <v-text-field
             ref="formFields"
             :id="'pos-field-' + compIndex + '-' + index"
             v-model.trim="position.title"
@@ -136,7 +136,7 @@
               </template>
               <span>Delete Position</span>
             </v-tooltip>
-          </v-combobox>
+          </v-text-field>
         </div>
 
         <v-row>

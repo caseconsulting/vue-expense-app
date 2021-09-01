@@ -3,7 +3,7 @@
     <!-- Loop Awards -->
     <div v-for="(award, index) in editedAwards" class="gray-border ma-0 pt-3 pb-1 px-5" :key="index">
       <!-- Name of Award -->
-      <v-combobox
+      <v-text-field
         ref="formFields"
         v-model="award.name"
         :rules="getRequiredRules()"
@@ -11,7 +11,7 @@
         data-vv-name="Award"
         clearable
       >
-      </v-combobox>
+      </v-text-field>
 
       <v-row class="py-3">
         <v-col cols="12" sm="6" md="12" lg="6" class="pt-0">

@@ -27,7 +27,7 @@
       </v-combobox>
       <!-- Start of project loop -->
       <div v-for="(project, projIndex) in contract.projects" class="pt-3 pb-1" :key="index + '-' + projIndex">
-        <v-combobox
+        <v-text-field
           ref="formFields"
           :id="'proj-' + projIndex + '-' + index"
           v-model.trim="project.name"
@@ -44,7 +44,7 @@
             </template>
             <span>Delete Project</span>
           </v-tooltip>
-        </v-combobox>
+        </v-text-field>
         <v-row>
           <v-col cols="12" sm="6" md="12" lg="6" class="pt-3">
             <!-- Start Date -->
