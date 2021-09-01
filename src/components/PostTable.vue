@@ -181,6 +181,28 @@ async function deleteBlogPost() {
   }
 } // deletedBlogPost
 
+// |--------------------------------------------------|
+// |                                                  |
+// |                     FILTERS                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * filter that converts boolean to yes/no
+ */
+function birthdayFeedResponse(value) {
+  if (value == true) {
+    return 'yes';
+  } else {
+    return 'no';
+  }
+} // birthdayFeedResponse
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      EXPORT                      |
+// |                                                  |
+// |--------------------------------------------------|
 export default {
   props: ['posts', 'model'],
   components: {
@@ -228,13 +250,7 @@ export default {
     };
   },
   filters: {
-    birthdayFeedResponse: (value) => {
-      if (value == true) {
-        return 'yes';
-      } else {
-        return 'no';
-      }
-    }
+    birthdayFeedResponse: birthdayFeedResponse
   }
 };
 </script>

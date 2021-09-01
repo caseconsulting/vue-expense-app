@@ -194,6 +194,32 @@ function parsedInfoTab() {
   return parseTab.toUpperCase();
 } // parsedInfoTab
 
+// |--------------------------------------------------|
+// |                                                  |
+// |                    WATCHERS                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * watcher for infoTab - track and emit tab when switching
+ *
+ * @param val - tab being tracked
+ */
+function watchInfoTab(val) {
+  // track current tab when switching between info and form
+  if (this.afterCreate) {
+    if (!_.isEqual(val, this.currentTab)) {
+      window.EventBus.$emit('tabChange', val);
+    }
+  }
+} // watchInfoTab
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      EXPORT                      |
+// |                                                  |
+// |--------------------------------------------------|
+
 export default {
   components: {
     AwardsTab,
@@ -228,14 +254,7 @@ export default {
     parsedInfoTab
   },
   watch: {
-    infoTab: function (val) {
-      // track current tab when switching between info and form
-      if (this.afterCreate) {
-        if (!_.isEqual(val, this.currentTab)) {
-          window.EventBus.$emit('tabChange', val);
-        }
-      }
-    }
+    infoTab: watchInfoTab
   }
 };
 </script>

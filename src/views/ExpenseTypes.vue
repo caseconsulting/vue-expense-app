@@ -995,6 +995,19 @@ async function created() {
 
 // |--------------------------------------------------|
 // |                                                  |
+// |                     WATCHERS                     |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * watcher for filter.active, filter.receipt, filter.recurring, filter.overdraft
+ */
+function watchFilterExpenseTypes() {
+  this.filterExpenseTypes();
+} // watchFilterExpenseTypes
+
+// |--------------------------------------------------|
+// |                                                  |
 // |                      EXPORT                      |
 // |                                                  |
 // |--------------------------------------------------|
@@ -1129,21 +1142,10 @@ export default {
     validateDelete
   },
   watch: {
-    'filter.active': function () {
-      this.filterExpenseTypes();
-    },
-    'filter.receipt': function () {
-      this.filterExpenseTypes();
-    },
-    'filter.recurring': function () {
-      this.filterExpenseTypes();
-    },
-    'filter.overdraft': function () {
-      this.filterExpenseTypes();
-    },
-    deleteInfo: function () {
-      return;
-    }
+    'filter.active': watchFilterExpenseTypes,
+    'filter.receipt': watchFilterExpenseTypes,
+    'filter.recurring': watchFilterExpenseTypes,
+    'filter.overdraft': watchFilterExpenseTypes
   }
 };
 </script>

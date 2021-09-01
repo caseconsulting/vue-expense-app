@@ -145,6 +145,21 @@ function onPageChange() {
   this.filteredList = this.model.schools.slice(startIndex, endIndex);
 }
 
+// |--------------------------------------------------|
+// |                                                  |
+// |                    WATCHERS                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * watcher for model
+ */
+function watchModel(val) {
+  if (!this.isEmpty(val)) {
+    this.filteredList = val.schools.slice(0, 4);
+  }
+} // watchModel
+
 export default {
   created,
   data() {
@@ -162,11 +177,7 @@ export default {
   },
   props: ['model'],
   watch: {
-    model: function (val) {
-      if (!this.isEmpty(val)) {
-        this.filteredList = val.schools.slice(0, 4);
-      }
-    }
+    model: watchModel
   }
 };
 </script>

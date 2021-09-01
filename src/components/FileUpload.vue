@@ -95,6 +95,28 @@ function receiptChange() {
 
 // |--------------------------------------------------|
 // |                                                  |
+// |                     WATCHERS                     |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * watcher for inputFile
+ */
+function watchInputFile() {
+  this.receiptChange();
+} // watchInputFile
+
+/**
+ * watcher for receiptFile
+ */
+function watchReceipt() {
+  if (this.receipt == null) {
+    this.inputFile = null;
+  }
+} // watchReceipt
+
+// |--------------------------------------------------|
+// |                                                  |
 // |                      EXPORT                      |
 // |                                                  |
 // |--------------------------------------------------|
@@ -118,14 +140,8 @@ export default {
     receiptChange
   },
   watch: {
-    inputFile: function () {
-      this.receiptChange();
-    },
-    receipt: function () {
-      if (this.receipt == null) {
-        this.inputFile = null;
-      }
-    }
+    inputFile: watchInputFile,
+    receipt: watchReceipt
   },
   props: ['passedRules', 'receipt', 'customLabel', 'customFileTypes', 'disabled'] // file text field rules
 };

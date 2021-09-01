@@ -147,6 +147,45 @@ function sortByDate() {
   this.pageList = this.sortedTech.slice(0, 5);
 } //sortByDate
 
+// |--------------------------------------------------|
+// |                                                  |
+// |                    WATCHERS                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * watcher for model - chooses what to sort by
+ */
+function watchModel(val) {
+  if (!this.isEmpty(val.technologies)) {
+    this.sortedTech = val.technologies;
+    if (this.sortFunction == 0) {
+      this.sortByCurrent();
+    } else if (this.sortFunction == 1) {
+      this.sortByDate();
+    } else if (this.sortFunction == 2) {
+      this.sortByName();
+    }
+    this.pageList = this.sortedTech.slice(0, 5);
+  }
+} // watchModel
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     FILTERS                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * filter that checks if value exists for current
+ *
+ * @param value - value to check
+ * @return - either 'yes' if it exists or 'no' otherwise
+ */
+function current(value) {
+  return value ? 'Yes' : 'No';
+} // current
+
 export default {
   created,
   data() {
@@ -158,9 +197,7 @@ export default {
     };
   },
   filters: {
-    current: (value) => {
-      return value ? 'Yes' : 'No';
-    }
+    current
   },
   methods: {
     isEmpty,
@@ -171,19 +208,7 @@ export default {
   },
   props: ['model'],
   watch: {
-    model: function (val) {
-      if (!this.isEmpty(val.technologies)) {
-        this.sortedTech = val.technologies;
-        if (this.sortFunction == 0) {
-          this.sortByCurrent();
-        } else if (this.sortFunction == 1) {
-          this.sortByDate();
-        } else if (this.sortFunction == 2) {
-          this.sortByName();
-        }
-        this.pageList = this.sortedTech.slice(0, 5);
-      }
-    }
+    model: watchModel
   }
 };
 </script>

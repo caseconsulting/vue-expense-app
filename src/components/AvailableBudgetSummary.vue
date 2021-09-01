@@ -162,7 +162,29 @@ function noRemaining(budget) {
 
 // |--------------------------------------------------|
 // |                                                  |
-// |                      EXPORT                      |
+// |                    WATCHERS                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * watcher for activator - activates dialog if activator changes
+ */
+function watchActivator() {
+  this.showDialog = this.activator;
+} // watchActivator
+
+/**
+ * watcher for showDialog - emits if false
+ */
+function watchShowDialog() {
+  if (!this.showDialog) {
+    this.emit('close-summary');
+  }
+} // watchShowDialog
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     EXPORT                       |
 // |                                                  |
 // |--------------------------------------------------|
 
@@ -188,14 +210,8 @@ export default {
     'selectedBudget' // selected budget
   ],
   watch: {
-    activator: function () {
-      this.showDialog = this.activator;
-    },
-    showDialog: function () {
-      if (!this.showDialog) {
-        this.emit('close-summary');
-      }
-    }
+    activator: watchActivator,
+    showDialog: watchShowDialog
   }
 };
 </script>

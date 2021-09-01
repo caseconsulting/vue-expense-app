@@ -161,6 +161,12 @@ function selectDropDown(tab) {
   this.selectedDropdown = tab;
 }
 
+// |--------------------------------------------------|
+// |                                                  |
+// |                      EXPORT                      |
+// |                                                  |
+// |--------------------------------------------------|
+
 export default {
   components: {
     ResumeParserAuditPage,

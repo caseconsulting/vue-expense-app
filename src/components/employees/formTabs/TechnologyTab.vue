@@ -209,6 +209,24 @@ function validateFields() {
   window.EventBus.$emit('doneValidating', 'technologies', this.editedTechnologies); // emit done validating
 } // validateFields
 
+// |--------------------------------------------------|
+// |                                                  |
+// |                     WATCHERS                     |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * watcher for validating - validates fields
+ *
+ * @param val - val prop that needs to exist before validating
+ */
+function watchValidating(val) {
+  if (val) {
+    // parent component triggers validation
+    this.validateFields();
+  }
+} // watchValidating
+
 export default {
   created,
   data() {
@@ -236,12 +254,7 @@ export default {
   },
   props: ['model', 'validating'],
   watch: {
-    validating: function (val) {
-      if (val) {
-        // parent component triggers validation
-        this.validateFields();
-      }
-    }
+    validating: watchValidating
   }
 };
 </script>

@@ -340,7 +340,30 @@ function setFile(file) {
     this.$set(this.model, 'mainPicture', null);
   }
 } // setFile
+// |--------------------------------------------------|
+// |                                                  |
+// |                     WATCHERS                     |
+// |                                                  |
+// |--------------------------------------------------|
 
+/**
+ * watcher for editorData
+ */
+function watchEditorData() {
+  if (this.hasTriedSubmitting) {
+    if (this.editorData == null || this.editorData == '') {
+      this.error = true;
+    } else {
+      this.error = false;
+    }
+  }
+} // watchEditorData
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      EXPORT                      |
+// |                                                  |
+// |--------------------------------------------------|
 export default {
   name: 'app',
   components: {
@@ -495,15 +518,7 @@ export default {
     uuid
   },
   watch: {
-    editorData: function () {
-      if (this.hasTriedSubmitting) {
-        if (this.editorData == null || this.editorData == '') {
-          this.error = true;
-        } else {
-          this.error = false;
-        }
-      }
-    }
+    editorData: watchEditorData
   }
 };
 </script>

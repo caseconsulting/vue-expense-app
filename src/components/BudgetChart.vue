@@ -308,6 +308,20 @@ async function refreshBudget() {
 
 // |--------------------------------------------------|
 // |                                                  |
+// |                    WATCHERS                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * watcher for fiscalDateView - refresh budgets and draw graph
+ */
+async function watchFiscalDateView() {
+  await this.refreshBudget();
+  this.drawGraph();
+} // watchFiscalDateView
+
+// |--------------------------------------------------|
+// |                                                  |
 // |                      EXPORT                      |
 // |                                                  |
 // |--------------------------------------------------|
@@ -341,10 +355,7 @@ export default {
   mounted,
   props: ['employee', 'fiscalDateView'],
   watch: {
-    fiscalDateView: async function () {
-      await this.refreshBudget();
-      this.drawGraph();
-    }
+    fiscalDateView: watchFiscalDateView
   }
 };
 </script>

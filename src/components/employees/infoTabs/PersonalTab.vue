@@ -152,6 +152,22 @@ function userIsManager() {
   return this.getRole() === 'manager';
 }
 
+// |--------------------------------------------------|
+// |                                                  |
+// |                     FILTERS                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * filter to replace boolean with yes/no
+ *
+ * @param value - boolean value to check
+ * @return yes if value is true no otherwise
+ */
+function birthdayFeedResponse(value) {
+  return value ? 'Yes' : 'No';
+} // birthdayFeedResponse
+
 export default {
   computed: {
     getCurrentAddress,
@@ -165,9 +181,7 @@ export default {
     };
   },
   filters: {
-    birthdayFeedResponse: (value) => {
-      return value ? 'Yes' : 'No';
-    }
+    birthdayFeedResponse
   },
   methods: {
     checkEmptyPersonalInfo,

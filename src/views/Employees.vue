@@ -499,6 +499,20 @@ function beforeDestroy() {
 
 // |--------------------------------------------------|
 // |                                                  |
+// |                     WATCHERS                     |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * watcher for filterActive - filter employees again
+ */
+function watchFilterActive() {
+  // filter employees based on datatable active filter
+  this.filterEmployees();
+} // watchFilterActive
+
+// |--------------------------------------------------|
+// |                                                  |
 // |                      EXPORT                      |
 // |                                                  |
 // |--------------------------------------------------|
@@ -632,10 +646,7 @@ export default {
     validateDelete
   },
   watch: {
-    'filter.active': function () {
-      // filter employees based on datatable active filter
-      this.filterEmployees();
-    }
+    'filter.active': watchFilterActive
   }
 };
 </script>

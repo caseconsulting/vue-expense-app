@@ -112,15 +112,26 @@ function getWorkStatus(workStatus) {
   }
 } // getWorkStatus
 
+// |--------------------------------------------------|
+// |                                                  |
+// |                     FILTERS                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * startCase filter - uses lodash startCase as filter
+ */
+function startCase(value) {
+  return _.startCase(value);
+} // startCase
+
 export default {
   computed: {
     fullName,
     getCurrentProjects
   },
   filters: {
-    startCase: (value) => {
-      return _.startCase(value);
-    }
+    startCase
   },
   methods: {
     getWorkStatus,

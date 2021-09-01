@@ -779,6 +779,28 @@ function beforeDestroy() {
 
 // |--------------------------------------------------|
 // |                                                  |
+// |                     WATCHERS                     |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * watcher for employee
+ */
+function watchEmployee() {
+  //unchecks all checkboxes when filter changes
+  this.unCheckAllBoxes();
+} // watchEmployee
+
+/**
+ * watcher for expenseType
+ */
+function watchExpenseType() {
+  //unchecks all checkboxes when filter changes
+  this.unCheckAllBoxes();
+} // watchExpenseType
+
+// |--------------------------------------------------|
+// |                                                  |
 // |                      EXPORT                      |
 // |                                                  |
 // |--------------------------------------------------|
@@ -871,14 +893,8 @@ export default {
     unCheckAllBoxes
   },
   watch: {
-    employee: function () {
-      //unchecks all checkboxes when filter changes
-      this.unCheckAllBoxes();
-    },
-    expenseType: function () {
-      //unchecks all checkboxes when filter changes
-      this.unCheckAllBoxes();
-    }
+    employee: watchEmployee,
+    expenseType: watchExpenseType
   }
 };
 </script>

@@ -201,6 +201,19 @@ async function created() {
 
 // |--------------------------------------------------|
 // |                                                  |
+// |                     WATCHERS                     |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * watcher of employ - refresh employee
+ */
+async function watchEmploy() {
+  await this.refreshEmployee();
+} // watchEmploy
+
+// |--------------------------------------------------|
+// |                                                  |
 // |                      EXPORT                      |
 // |                                                  |
 // |--------------------------------------------------|
@@ -267,9 +280,7 @@ export default {
     } // employee (admin employee view)
   },
   watch: {
-    employ: async function () {
-      await this.refreshEmployee();
-    }
+    employ: watchEmploy
   }
 };
 </script>

@@ -271,6 +271,25 @@ async function mounted() {
 
 // |--------------------------------------------------|
 // |                                                  |
+// |                     WATCHERS                     |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * fixes route to profile
+ */
+function $route(to, from) {
+  if (to.params.id && from.params.id) {
+    this.$router.go(this.$router.currentPath);
+  }
+  //updates badge expiration warning whenever you leave your user profile
+  if (from.params.id) {
+    this.badgeKey++;
+  }
+} // $route
+
+// |--------------------------------------------------|
+// |                                                  |
 // |                      EXPORT                      |
 // |                                                  |
 // |--------------------------------------------------|
@@ -332,16 +351,7 @@ export default {
     onResize
   },
   watch: {
-    //fixes when you're on another employee's page and want to access your profile
-    $route(to, from) {
-      if (to.params.id && from.params.id) {
-        this.$router.go(this.$router.currentPath);
-      }
-      //updates badge expiration warning whenever you leave your user profile
-      if (from.params.id) {
-        this.badgeKey++;
-      }
-    }
+    $route
   },
   beforeDestroy,
   mounted,

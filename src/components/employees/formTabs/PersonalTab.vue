@@ -317,6 +317,43 @@ function validateFields() {
   window.EventBus.$emit('doneValidating', 'personal', this.editedPersonalInfo); // emit done validating
 } // validateFields
 
+// |--------------------------------------------------|
+// |                                                  |
+// |                     WATCHERS                     |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * watcher for model.id - update edited personal info
+ */
+function watchModelID() {
+  //when select an employee with a different ID the personal info reflects the employee that was chosen
+  this.editedPersonalInfo = _.cloneDeep(this.model);
+} // watchModelID
+
+/**
+ * watcher for editedPersonalInfo.birthday
+ */
+function watchEditedPersonalInfoBirthday() {
+  this.birthdayFormat = this.formatDate(this.editedPersonalInfo.birthday) || this.birthdayFormat;
+  //fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
+  if (this.editedPersonalInfo.birthday !== null && !this.formatDate(this.editedPersonalInfo.birthday)) {
+    this.editedPersonalInfo.birthday = null;
+  }
+} // watchEditedPersonalInfoBirthday
+
+/**
+ * watcher for validating - validates fields
+ *
+ * @param val - val prop that needs to exist before validating
+ */
+function watchValidating(val) {
+  if (val) {
+    // parent component triggers validation
+    this.validateFields();
+  }
+} // watchValidating
+
 export default {
   created,
   computed: {
@@ -419,22 +456,9 @@ export default {
   },
   props: ['model', 'validating'],
   watch: {
-    'model.id': function () {
-      //when select an employee with a different ID the personal info reflects the employee that was chosen
-      this.editedPersonalInfo = _.cloneDeep(this.model);
-    },
-    'editedPersonalInfo.birthday': function () {
-      this.birthdayFormat = this.formatDate(this.editedPersonalInfo.birthday) || this.birthdayFormat;
-      //fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
-      if (this.editedPersonalInfo.birthday !== null && !this.formatDate(this.editedPersonalInfo.birthday)) {
-        this.editedPersonalInfo.birthday = null;
-      }
-    },
-    validating: function (val) {
-      if (val) {
-        this.validateFields();
-      }
-    }
+    'model.id': watchModelID,
+    'editedPersonalInfo.birthday': watchEditedPersonalInfoBirthday,
+    validating: watchValidating
   }
 };
 </script>

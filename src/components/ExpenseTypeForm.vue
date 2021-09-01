@@ -619,6 +619,91 @@ async function created() {
 
 // |--------------------------------------------------|
 // |                                                  |
+// |                     WATCHERS                     |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * watcher for model.id - sets the model as the editedExpenseType and check if it is editing
+ */
+function watchModelID() {
+  this.editedExpenseType = _.cloneDeep(this.model); //set editedExpense to new value of model
+
+  //when model id is not empty then must be editing an expense
+  if (!this.isEmpty(this.model.id)) {
+    this.emit('editing-expense-type'); //notify parent that expense is being edited
+  }
+  if (this.editedExpenseType.id != null) {
+    //map categories
+    this.categories = _.map(this.editedExpenseType.categories, (category) => {
+      return category.name;
+    });
+  }
+  this.editedExpenseType.budget = this.model.budget;
+  this.budgetFormatted = this.editedExpenseType.budget;
+  this.formatBudget();
+} // watchModelID
+
+/**
+ * watcher for categories - limits categories and updates checkboxes
+ *
+ * @param val - categories list
+ */
+function watchCategories(val) {
+  // limit categories to less than 10
+  if (val.length > 10) {
+    this.$nextTick(() => this.categories.pop());
+    this.$nextTick(() => this.editedExpenseType.categories.pop());
+  }
+
+  // update categories checkboxes
+  if (val.length > this.editedExpenseType.categories.length) {
+    // category was added
+    let c = _.map(this.editedExpenseType.categories, (category) => {
+      return category.name;
+    });
+
+    let index = _.findIndex(val, (x) => {
+      return !c.includes(x);
+    });
+
+    this.editedExpenseType.categories.push({
+      name: val[index],
+      showOnFeed: this.editedExpenseType.alwaysOnFeed,
+      requireURL: this.editedExpenseType.requireURL
+    });
+  } else if (val.length < this.editedExpenseType.categories.length) {
+    // category was removed
+    this.editedExpenseType.categories = _.filter(this.editedExpenseType.categories, (category) => {
+      return val.includes(category.name);
+    });
+  }
+} // watchCategories
+
+/**
+ * watcher for editedExpenseType.endDate - formats date
+ */
+function watchEditedExpenseTypeEndDate() {
+  this.endDateFormatted = this.formatDate(this.editedExpenseType.endDate) || this.endDateFormatted;
+  //fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
+  if (this.editedExpenseType.endDate !== null && !this.formatDate(this.editedExpenseType.endDate)) {
+    this.editedExpenseType.endDate = null;
+  }
+} // watchEditedExpenseTypeEndDate
+
+/**
+ * watcher for editedExpenseType.startDate - format date
+ */
+function watchEditedExpenseTypeStartDate() {
+  this.startDateFormatted = this.formatDate(this.editedExpenseType.startDate) || this.startDateFormatted;
+  //fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
+  if (this.editedExpenseType.startDate !== null && !this.formatDate(this.editedExpenseType.startDate)) {
+    this.editedExpenseType.startDate = null;
+  }
+} // watchEditedExpenseTypeStartDate
+
+// |--------------------------------------------------|
+// |                                                  |
 // |                      EXPORT                      |
 // |                                                  |
 // |--------------------------------------------------|
@@ -707,67 +792,10 @@ export default {
     checkBoxRule
   },
   watch: {
-    'model.id': function () {
-      this.editedExpenseType = _.cloneDeep(this.model); //set editedExpense to new value of model
-
-      //when model id is not empty then must be editing an expense
-      if (!this.isEmpty(this.model.id)) {
-        this.emit('editing-expense-type'); //notify parent that expense is being edited
-      }
-      if (this.editedExpenseType.id != null) {
-        //map categories
-        this.categories = _.map(this.editedExpenseType.categories, (category) => {
-          return category.name;
-        });
-      }
-      this.editedExpenseType.budget = this.model.budget;
-      this.budgetFormatted = this.editedExpenseType.budget;
-      this.formatBudget();
-    },
-    categories: function (val) {
-      // limit categories to less than 10
-      if (val.length > 10) {
-        this.$nextTick(() => this.categories.pop());
-        this.$nextTick(() => this.editedExpenseType.categories.pop());
-      }
-
-      // update categories checkboxes
-      if (val.length > this.editedExpenseType.categories.length) {
-        // category was added
-        let c = _.map(this.editedExpenseType.categories, (category) => {
-          return category.name;
-        });
-
-        let index = _.findIndex(val, (x) => {
-          return !c.includes(x);
-        });
-
-        this.editedExpenseType.categories.push({
-          name: val[index],
-          showOnFeed: this.editedExpenseType.alwaysOnFeed,
-          requireURL: this.editedExpenseType.requireURL
-        });
-      } else if (val.length < this.editedExpenseType.categories.length) {
-        // category was removed
-        this.editedExpenseType.categories = _.filter(this.editedExpenseType.categories, (category) => {
-          return val.includes(category.name);
-        });
-      }
-    },
-    'editedExpenseType.endDate': function () {
-      this.endDateFormatted = this.formatDate(this.editedExpenseType.endDate) || this.endDateFormatted;
-      //fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
-      if (this.editedExpenseType.endDate !== null && !this.formatDate(this.editedExpenseType.endDate)) {
-        this.editedExpenseType.endDate = null;
-      }
-    },
-    'editedExpenseType.startDate': function () {
-      this.startDateFormatted = this.formatDate(this.editedExpenseType.startDate) || this.startDateFormatted;
-      //fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
-      if (this.editedExpenseType.startDate !== null && !this.formatDate(this.editedExpenseType.startDate)) {
-        this.editedExpenseType.startDate = null;
-      }
-    }
+    'model.id': watchModelID,
+    categories: watchCategories,
+    'editedExpenseType.endDate': watchEditedExpenseTypeEndDate,
+    'editedExpenseType.startDate': watchEditedExpenseTypeStartDate
   }
 };
 </script>

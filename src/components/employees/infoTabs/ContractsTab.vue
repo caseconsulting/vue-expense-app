@@ -127,6 +127,22 @@ function getProjectLengthInYears(project) {
   return length < 0 ? '0.000' : length;
 }
 
+// |--------------------------------------------------|
+// |                                                  |
+// |                     FILTERS                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * filter that checks if value exists for current
+ *
+ * @param value - value to check
+ * @return - either 'yes' if it exists or 'no' otherwise
+ */
+function current(value) {
+  return value ? 'Yes' : 'No';
+} // current
+
 export default {
   created,
   data() {
@@ -136,9 +152,7 @@ export default {
     };
   },
   filters: {
-    current: (value) => {
-      return value ? 'Yes' : 'No';
-    }
+    current
   },
   methods: {
     getContractLengthInYears,

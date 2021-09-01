@@ -155,6 +155,19 @@ function created() {
 
 // |--------------------------------------------------|
 // |                                                  |
+// |                     WATCHERS                     |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * handler for watcher of the route
+ */
+function watchRouteHandler() {
+  this.route = this.$route.name;
+} // watchRouteHandler
+
+// |--------------------------------------------------|
+// |                                                  |
 // |                      EXPORT                      |
 // |                                                  |
 // |--------------------------------------------------|
@@ -263,9 +276,7 @@ export default {
   },
   watch: {
     '$route.name': {
-      handler: function () {
-        this.route = this.$route.name;
-      },
+      handler: watchRouteHandler,
       deep: true
     },
     route: checkActive

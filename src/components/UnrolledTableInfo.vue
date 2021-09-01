@@ -100,6 +100,20 @@ function expenseToggle(toggledExpense) {
 
 // |--------------------------------------------------|
 // |                                                  |
+// |                     WATCHERS                     |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * watcher for descripFormat - cuts down on length
+ */
+function watchDescripFormat(val) {
+  // split strings that exceed 250 characters with eclipses
+  return val.length > 250 ? val.substring(0, 250) + '...' : val;
+} // watchDescripFormat
+
+// |--------------------------------------------------|
+// |                                                  |
 // |                      EXPORT                      |
 // |                                                  |
 // |--------------------------------------------------|
@@ -136,10 +150,7 @@ export default {
     };
   },
   filters: {
-    descripFormat: (val) => {
-      // split strings that exceed 250 characters with eclipses
-      return val.length > 250 ? val.substring(0, 250) + '...' : val;
-    }
+    descripFormat: watchDescripFormat
   },
   methods: {
     convertToMoneyString,

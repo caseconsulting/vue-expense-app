@@ -164,6 +164,20 @@ function updateCompanies(query) {
     this.pageList = this.filterCompanies.slice(0, 4);
   }
 }
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                    WATCHERS                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * watcher for filter - updateCompanies based on filter
+ */
+function watchFilter() {
+  this.updateCompanies(this.filter);
+} // watchFilter
+
 export default {
   created,
   data() {
@@ -186,9 +200,7 @@ export default {
     icExperience
   },
   watch: {
-    filter: function () {
-      this.updateCompanies(this.filter);
-    }
+    filter: watchFilter
   },
   props: ['model']
 };

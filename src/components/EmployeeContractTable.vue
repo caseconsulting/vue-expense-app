@@ -368,6 +368,38 @@ async function created() {
   this.loading = false;
 } //created
 
+// |--------------------------------------------------|
+// |                                                  |
+// |                     WATCHERS                     |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * watcher for dataType - decides which column to render
+ */
+function watchDataType() {
+  if (this.dataTypes.includes(this.dataType)) {
+    // builds the data for the third column based off the data type chosen by the user
+    switch (this.dataType) {
+      case 'Contracts':
+        this.buildContractsColumn();
+        break;
+      case 'Job Roles':
+        this.buildJobRolesColumn();
+        break;
+      default:
+        this.buildContractsColumn();
+    }
+  }
+  this.dataTypeSearch = null;
+  this.populateDataTypeDropDowns();
+} // watchDataType
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      EXPORT                      |
+// |                                                  |
+// |--------------------------------------------------|
 export default {
   created,
   data() {
@@ -426,23 +458,7 @@ export default {
     searchPrime
   },
   watch: {
-    dataType: function () {
-      if (this.dataTypes.includes(this.dataType)) {
-        // builds the data for the third column based off the data type chosen by the user
-        switch (this.dataType) {
-          case 'Contracts':
-            this.buildContractsColumn();
-            break;
-          case 'Job Roles':
-            this.buildJobRolesColumn();
-            break;
-          default:
-            this.buildContractsColumn();
-        }
-      }
-      this.dataTypeSearch = null;
-      this.populateDataTypeDropDowns();
-    }
+    dataType: watchDataType
   }
 };
 </script>

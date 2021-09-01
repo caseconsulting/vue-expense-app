@@ -159,6 +159,21 @@ async function setPTOBalances() {
 
 // |--------------------------------------------------|
 // |                                                  |
+// |                    WATCHERS                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * watcher for passedEmployee.id - if it is employee view it will set or reset PTOBalances
+ */
+async function watchPassedEmployeeID() {
+  if (this.isEmployeeView) {
+    await this.setPTOBalances();
+  }
+} // watchPassedEmployeeID
+
+// |--------------------------------------------------|
+// |                                                  |
 // |                      EXPORT                      |
 // |                                                  |
 // |--------------------------------------------------|
@@ -188,11 +203,7 @@ export default {
   },
   props: ['passedEmployee', 'showMinutes'],
   watch: {
-    'passedEmployee.id': async function () {
-      if (this.isEmployeeView) {
-        await this.setPTOBalances();
-      }
-    }
+    'passedEmployee.id': watchPassedEmployeeID
   }
 };
 </script>

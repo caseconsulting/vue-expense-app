@@ -962,9 +962,30 @@ function parsedInfoTab() {
 
 // |--------------------------------------------------|
 // |                                                  |
+// |                    WATCHERS                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * watcher for formTab - tracks current tab and emits if changed
+ *
+ * @param val - the value that represents current tab
+ */
+function watchFormTab(val) {
+  // track current tab when switching between form and info
+  if (this.afterCreate) {
+    if (!_.isEqual(val, this.currentTab)) {
+      window.EventBus.$emit('tabChange', val); // emit to parent tab was changed
+    }
+  }
+} // watchFormTab
+
+// |--------------------------------------------------|
+// |                                                  |
 // |                      EXPORT                      |
 // |                                                  |
 // |--------------------------------------------------|
+
 export default {
   beforeDestroy,
   components: {
@@ -1110,14 +1131,7 @@ export default {
   },
   props: ['currentTab', 'employee'], // employee to be created/updated
   watch: {
-    formTab: function (val) {
-      // track current tab when switching between form and info
-      if (this.afterCreate) {
-        if (!_.isEqual(val, this.currentTab)) {
-          window.EventBus.$emit('tabChange', val); // emit to parent tab was changed
-        }
-      }
-    }
+    formTab: watchFormTab
   },
   computed: {
     useDropDown,

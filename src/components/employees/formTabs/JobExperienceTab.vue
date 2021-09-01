@@ -477,6 +477,24 @@ function validateFields() {
   window.EventBus.$emit('jobExperienceStatus', errorCount); // emit error status
 } // validateFields
 
+// |--------------------------------------------------|
+// |                                                  |
+// |                     WATCHERS                     |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * watcher for validating - validates fields
+ *
+ * @param val - val prop that needs to exist before validating
+ */
+function watchValidating(val) {
+  if (val) {
+    // parent component triggers validation
+    this.validateFields();
+  }
+} // watchValidating
+
 export default {
   computed: {
     isMobile
@@ -547,12 +565,7 @@ export default {
   },
   props: ['model', 'validating'],
   watch: {
-    validating: function (val) {
-      if (val) {
-        // parent component triggers validation
-        this.validateFields();
-      }
-    }
+    validating: watchValidating
   }
 };
 </script>

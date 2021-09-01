@@ -831,6 +831,19 @@ function beforeDestroy() {
 
 // |--------------------------------------------------|
 // |                                                  |
+// |                     WATCHERS                     |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * watcher for employee, filter.active, filter.reimbursed - filters expenses
+ */
+function watchFilterExpenses() {
+  this.filterExpenses();
+} // watchFilterExpenses
+
+// |--------------------------------------------------|
+// |                                                  |
 // |                      EXPORT                      |
 // |                                                  |
 // |--------------------------------------------------|
@@ -975,15 +988,9 @@ export default {
     useInactiveStyle
   },
   watch: {
-    employee: function () {
-      this.filterExpenses();
-    },
-    'filter.active': function () {
-      this.filterExpenses();
-    },
-    'filter.reimbursed': function () {
-      this.filterExpenses();
-    }
+    employee: watchFilterExpenses,
+    'filter.active': watchFilterExpenses,
+    'filter.reimbursed': watchFilterExpenses
   }
 };
 </script>
