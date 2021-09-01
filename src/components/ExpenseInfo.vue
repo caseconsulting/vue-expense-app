@@ -89,6 +89,13 @@ function created() {
   window.EventBus.$on('expenseClicked', this.displayExpense);
 } // created
 
+/**
+ * beforeDestroy lifecycle hook
+ */
+async function beforeDestroy() { 
+  window.EventBus.$off('expenseClicked');
+} //beforeDestroy
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                      EXPORT                      |
@@ -100,6 +107,7 @@ export default {
     Attachment
   },
   created,
+  beforeDestroy,
   data() {
     return {
       expense: undefined // expense info

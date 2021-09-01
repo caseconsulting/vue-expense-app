@@ -774,6 +774,8 @@ async function created() {
  * beforeDestroy lifecycle hook
  */
 function beforeDestroy() {
+  window.EventBus.$off('selectExpense');
+  window.EventBus.$off('toggleExpense');
   window.EventBus.$off('confirm-reimburse');
 } //beforeDestroy
 

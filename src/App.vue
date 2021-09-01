@@ -258,11 +258,16 @@ async function created() {
   this.version = require('../package.json').version;
 }
 
+/**
+ * beforeDestroy lifecycle hook
+ */
 async function beforeDestroy() {
   if (typeof window !== 'undefined') {
     window.removeEventListener('resize', this.onResize, { passive: true });
   }
-}
+  window.EventBus.$off('relog');
+  window.EventBus.$off('badgeExp');
+} //beforeDestroy
 
 async function mounted() {
   this.onResize();

@@ -199,6 +199,14 @@ async function created() {
   await this.refreshEmployee();
 } // created
 
+/**
+ * beforeDestroy lifecycle hook
+ */
+async function beforeDestroy() { 
+  window.EventBus.$off('updateData');
+  window.EventBus.$off('selected-budget-year');
+} //beforeDestroy
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                     WATCHERS                     |
@@ -231,6 +239,7 @@ export default {
     viewingCurrentBudgetYear
   },
   created,
+  beforeDestroy,
   data() {
     return {
       displayChart: false,

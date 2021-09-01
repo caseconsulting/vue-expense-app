@@ -491,6 +491,7 @@ function beforeDestroy() {
   window.EventBus.$off('canceled-delete-employee');
   window.EventBus.$off('confirm-delete-employee');
   window.EventBus.$off('invalid-employee-delete');
+  window.EventBus.$off('empNum');
 } // beforeDestroy
 
 // |--------------------------------------------------|

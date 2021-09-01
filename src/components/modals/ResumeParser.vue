@@ -402,6 +402,9 @@ async function created() {
  */
 function beforeDestroy() {
   window.EventBus.$off('confirmed-parser');
+  window.EventBus.$off('canceled-parser');
+  window.EventBus.$off('backout-canceled-parser');
+  window.EventBus.$off('backout-confirmed-parser');
 } // beforeDestroy
 
 // |--------------------------------------------------|

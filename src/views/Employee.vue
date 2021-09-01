@@ -334,6 +334,11 @@ function beforeDestroy() {
   window.EventBus.$off('upload-resume-complete');
   window.EventBus.$off('confirm-delete-resume');
   window.EventBus.$off('canceled-delete-resume');
+  window.EventBus.$off('cancel-form');
+  window.EventBus.$off('update');
+  window.EventBus.$off('uploaded');
+  window.EventBus.$off('tabChange');
+  window.EventBus.$off('selected-budget-year');
 } // beforeDestroy
 
 // |--------------------------------------------------|

@@ -90,6 +90,13 @@ async function created() {
 } // created
 
 /**
+ * beforeDestroy lifecycle hook
+ */
+async function beforeDestroy() { 
+  window.EventBus.$off('close-summary');
+} //beforeDestroy
+
+/**
  * Gets the current active anniversary budget year starting date in isoformat.
  *
  * @return String - current active anniversary budget date (YYYY-MM-DD)
@@ -217,6 +224,7 @@ export default {
     // ReceiptModal
   },
   created,
+  beforeDestroy,
   data() {
     return {
       active: false,

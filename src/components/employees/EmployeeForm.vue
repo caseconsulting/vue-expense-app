@@ -821,9 +821,25 @@ async function created() {
  * destroying all listeners
  */
 function beforeDestroy() {
+  window.EventBus.$off('disableUpload');
+  window.EventBus.$off('uploaded');
   window.EventBus.$off('confirmed');
   window.EventBus.$off('canceled');
+  window.EventBus.$off('confirmed-form');
   window.EventBus.$off('canceled-form');
+  window.EventBus.$off('created');
+  window.EventBus.$off('doneValidating');
+  window.EventBus.$off('awardStatus');
+  window.EventBus.$off('certificationsStatus');
+  window.EventBus.$off('clearanceStatus');
+  window.EventBus.$off('contractsStatus');
+  window.EventBus.$off('customerOrgExpStatus');
+  window.EventBus.$off('educationStatus');
+  window.EventBus.$off('employeeStatus');
+  window.EventBus.$off('jobExperienceStatus');
+  window.EventBus.$off('languagesStatus');
+  window.EventBus.$off('personalStatus');
+  window.EventBus.$off('technologiesStatus');
 } // beforeDestroy
 
 // |--------------------------------------------------|

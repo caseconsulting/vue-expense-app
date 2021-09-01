@@ -61,6 +61,13 @@ async function created() {
   });
 }
 
+/**
+ * beforeDestroy lifecycle hook
+ */
+async function beforeDestroy() { 
+  window.EventBus.$off('reimburseAlert');
+} //beforeDestroy
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                      EXPORT                      |
@@ -77,6 +84,7 @@ export default {
     isMobile
   },
   created,
+  beforeDestroy,
   data() {
     return {
       alerts: [], // status alerts

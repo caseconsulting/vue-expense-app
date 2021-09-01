@@ -108,6 +108,14 @@ function created() {
   window.EventBus.$on('expenseChange', this.updateSelected);
 } // created
 
+/**
+ * beforeDestroy lifecycle hook
+ */
+async function beforeDestroy() { 
+  window.EventBus.$off('selectExpense');
+  window.EventBus.$off('expenseChange');
+}  //beforeDestroy
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                      EXPORT                      |
@@ -119,6 +127,7 @@ export default {
     totals
   },
   created,
+  beforeDestroy,
   data() {
     return {
       selected: []

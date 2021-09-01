@@ -223,6 +223,14 @@ async function created() {
     }
   });
 }
+
+/**
+ * beforeDestroy lifecycle hook
+ */
+async function beforeDestroy() { 
+  window.EventBus.$off('selected-budget-year');
+} //beforeDestroy
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                      EXPORT                      |
@@ -254,6 +262,7 @@ export default {
     };
   },
   created,
+  beforeDestroy,
   methods: {
     addOneSecondToActualTimeEverySecond,
     getCurrentBudgetYear,

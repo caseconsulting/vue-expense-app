@@ -41,6 +41,14 @@ function created() {
 // |--------------------------------------------------|
 
 /**
+ * beforeDestroy lifecycle hook
+ */
+async function beforeDestroy() { 
+  window.EventBus.$off('concentrations-update');
+}  //beforeDestroy
+
+
+/**
  * Sets up the formatting and data options for the chart.
  * @param concentations - An array of the highest degree concentrations
  */
@@ -132,6 +140,7 @@ export default {
     fillData
   },
   mounted,
-  created
+  created,
+  beforeDestroy
 };
 </script>

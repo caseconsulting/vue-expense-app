@@ -617,6 +617,15 @@ async function created() {
   this.clearForm();
 } // created
 
+/**
+ * beforeDestroy lifecycle hook
+ */
+async function beforeDestroy() { 
+  window.EventBus.$off('confirmed-type');
+  window.EventBus.$off('canceled-type');
+} //beforeDestroy
+
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                     WATCHERS                     |
@@ -730,6 +739,7 @@ export default {
     FormSubmissionConfirmation
   },
   created,
+  beforeDestroy,
   data() {
     return {
       activeEmployees: null, // list of active employees

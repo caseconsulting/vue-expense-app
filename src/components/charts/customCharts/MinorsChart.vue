@@ -42,6 +42,13 @@ function created() {
 // |--------------------------------------------------|
 
 /**
+ * beforeDestroy lifecycle hook
+ */
+async function beforeDestroy() { 
+  window.EventBus.$off('minors-update');
+} //beforeDestroy
+
+/**
  * Sets the chart formatting and options data.
  * @param minors - The array of minors for a degree
  */
@@ -132,6 +139,7 @@ export default {
     fillData
   },
   mounted,
-  created
+  created,
+  beforeDestroy
 };
 </script>

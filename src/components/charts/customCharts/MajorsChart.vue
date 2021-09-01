@@ -40,6 +40,13 @@ function created() {
 // |--------------------------------------------------|
 
 /**
+ * beforeDestroy lifecycle hook
+ */
+async function beforeDestroy() { 
+  window.EventBus.$off('majors-update');
+} //beforeDestroy
+
+/**
  * Sets the chart formatting and options data.
  * @param majors - The array of majors for a degree
  */
@@ -119,6 +126,7 @@ export default {
     fillData
   },
   mounted,
-  created
+  created,
+  beforeDestroy
 };
 </script>
