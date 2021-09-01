@@ -354,7 +354,7 @@ export default {
       endDatePresentRule: (compIndex, projIndex) => {
         if (this.editedContracts !== undefined) {
           let position = this.editedContracts[compIndex].projects[projIndex];
-          if (position.presentDate == false && this.isEmpty(position.endDate)) {
+          if (!position.presentDate && this.isEmpty(position.endDate)) {
             return 'End Date is required';
           } else {
             return true;
