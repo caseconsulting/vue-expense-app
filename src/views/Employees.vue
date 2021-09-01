@@ -416,11 +416,8 @@ function userIsAdmin() {
 async function validateDelete(item) {
   this.midAction = true;
   try {
-    let valid = await api.getAllEmployeeExpenses(item.id); // get employee expenses
-
-    if (valid.length > 0) {
-      return false; // return false if the employee has expenses
-    }
+    let expenses = await api.getAllEmployeeExpenses(item.id); // get employee expenses
+    let valid = expenses.length <= 0; // valid if no expenses
 
     if (valid) {
       // employee can be deleted
