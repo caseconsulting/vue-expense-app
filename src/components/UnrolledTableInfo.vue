@@ -1,5 +1,5 @@
 <template>
-  <v-container fluid style="background: grey">
+  <v-container fluid class="grey-background">
     <div>
       <v-data-table
         :headers="headers"
@@ -32,21 +32,21 @@
 
         <!-- Item cost -->
         <template v-slot:[`item.cost`]="{ item }">
-          <p id="money-team" :class="{ failed: item.failed }" style="margin-bottom: 0px">
+          <p id="money-team" :class="{ failed: item.failed }" class="mb-0">
             {{ convertToMoneyString(item.cost) }}
           </p>
         </template>
 
         <!-- Purchase Date -->
         <template v-slot:[`item.purchaseDate`]="{ item }">
-          <p :class="{ failed: item.failed }" style="margin-bottom: 0px">
+          <p :class="{ failed: item.failed }" class="mb-0">
             {{ monthDayYearFormat(item.purchaseDate) }}
           </p>
         </template>
 
         <!-- Description -->
         <template v-slot:[`item.description`]="{ item }">
-          <p :class="{ failed: item.failed }" style="margin-bottom: 0px">{{ item.description | descripFormat }}</p>
+          <p :class="{ failed: item.failed }" class="mb-0">{{ item.description | descripFormat }}</p>
         </template>
 
         <!-- Show on Feed -->

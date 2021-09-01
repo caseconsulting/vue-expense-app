@@ -1,7 +1,7 @@
 <template>
   <div>
     <!-- Experience in IC -->
-    <div style="border: 1px solid grey" class="pt-3 pb-1 px-5">
+    <div class="gray-border ma-0 pt-3 pb-1 px-5">
       <!-- Experience in IC Header -->
       <div class="pb-2">
         <b>Experience in IC:</b>
@@ -39,7 +39,7 @@
               <v-tooltip top slot="append-outer">
                 <template v-slot:activator="{ on }">
                   <v-btn class="pb-3" v-on="on" icon text @click="deleteICTimeFrame(index)"
-                    ><v-icon style="color: grey">delete</v-icon></v-btn
+                    ><v-icon class="case-gray">delete</v-icon></v-btn
                   >
                 </template>
                 <span>Delete IC Time Frame</span>
@@ -60,7 +60,7 @@
     <!-- End Experience in IC -->
 
     <!-- Case Info -->
-    <div style="border: 1px solid grey" class="pt-2 pb-1 px-5">
+    <div class="gray-border ma-0 pt-2 pb-1 px-5">
       <!-- Company Name -->
       <v-text-field label="Company" data-vv-name="Company" disabled value="Case Consulting"></v-text-field>
 
@@ -89,8 +89,7 @@
     <!-- Loop Jobs -->
     <div
       v-for="(company, compIndex) in editedJobExperienceInfo.companies"
-      style="border: 1px solid grey"
-      class="pt-3 pb-1 px-5"
+      class="gray-border ma-0 pt-3 pb-1 px-5"
       :key="compIndex"
     >
       <!-- Company Name -->
@@ -132,7 +131,7 @@
             <v-tooltip bottom slot="append-outer">
               <template v-slot:activator="{ on }">
                 <v-btn text icon v-on="on" @click="deletePosition(compIndex, index)"
-                  ><v-icon style="color: grey">delete</v-icon></v-btn
+                  ><v-icon class="case-gray">delete</v-icon></v-btn
                 >
               </template>
               <span>Delete Position</span>
@@ -245,7 +244,7 @@
         <v-tooltip bottom>
           <template v-slot:activator="{ on }">
             <v-btn text icon v-on="on" @click="deleteCompany(compIndex)"
-              ><v-icon style="color: grey">delete</v-icon></v-btn
+              ><v-icon class="case-gray">delete</v-icon></v-btn
             >
           </template>
           <span>Delete Company</span>

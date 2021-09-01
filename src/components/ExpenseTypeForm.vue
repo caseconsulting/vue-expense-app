@@ -165,7 +165,7 @@
         ></v-autocomplete>
 
         <!-- Accessibility -->
-        <div style="color: dimgray">
+        <div class="form-text">
           Employee Access
           <v-btn @click="toFAQ()" class="mb-4" x-small icon><v-icon color="#3f51b5">info</v-icon></v-btn>
         </div>

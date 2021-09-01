@@ -190,7 +190,7 @@
                       "
                       v-on="on"
                     >
-                      <v-icon style="color: #606060">edit</v-icon>
+                      <v-icon class="case-gray">edit</v-icon>
                     </v-btn>
                   </template>
                   <span>Edit</span>
@@ -210,7 +210,7 @@
                       "
                       v-on="on"
                     >
-                      <v-icon style="color: #606060"> delete </v-icon>
+                      <v-icon class="case-gray"> delete </v-icon>
                     </v-btn>
                   </template>
                   <span>Delete</span>
@@ -231,7 +231,7 @@
                       "
                       v-on="on"
                     >
-                      <v-icon style="color: #606060"> money_off </v-icon>
+                      <v-icon class="case-gray"> money_off </v-icon>
                     </v-btn>
                   </template>
                   <span>Unreimburse</span>

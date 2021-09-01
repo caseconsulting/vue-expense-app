@@ -56,24 +56,21 @@
         <!-- Receipt Uploading -->
         <v-checkbox
           v-if="receiptRequired && isEdit && !isEmpty(expense.receipt)"
-          style="padding-top: 0px; padding-bottom: 0px"
+          class="py-0"
           v-model="allowReceipt"
           label="Update the Receipt?"
           :disabled="isInactive"
         ></v-checkbox>
 
         <!-- Old Receipt Name -->
-        <v-card-text
-          style="padding: 0px 0px 3px 0px; font: inherit; font-size: 16px; color: #0000008a"
-          v-if="!isEmpty(expense.receipt) && isEdit"
+        <v-card-text class="pa-0 font-16 form-text" v-if="!isEmpty(expense.receipt) && isEdit"
           >Current Receipt: {{ this.submittedReceipt }}</v-card-text
         >
 
         <v-row class="mt-2">
           <file-upload
             v-if="receiptRequired && ((allowReceipt && isEdit) || !isEdit || isEmpty(expense.receipt))"
-            style="padding-top: 0px; padding-bottom: 0px; width: 60%"
-            class="ml-1"
+            class="ml-1 py-0 w-60"
             @fileSelected="setFile"
             :passedRules="receiptRules"
             :receipt="expense.receipt"

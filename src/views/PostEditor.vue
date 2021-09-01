@@ -26,7 +26,7 @@
       <v-text-field v-model="model.title" :rules="requiredRules" label="Blog Post Title"></v-text-field>
       <!-- Main Picture -->
       <file-upload
-        style="padding-top: 0px; padding-bottom: 0px"
+        class="py-0"
         @fileSelected="setFile"
         :passedRules="mainPictureRules"
         :customFileTypes="customFileTypes"

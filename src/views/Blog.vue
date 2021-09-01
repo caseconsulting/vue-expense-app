@@ -32,7 +32,6 @@
     <!-- Rekognition and comprehend
     <v-row>
       <v-file-input
-        style="width: 50px"
         v-model="inputFile"
         label="Select image to rekognize"
         :accept="acceptedFileTypes"

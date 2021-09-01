@@ -32,10 +32,10 @@
       <v-row class="pb-4">
         <!-- Title -->
         <v-col cols="12" md="6">
-          <v-row style="height: 80%" align="center" justify="center">
+          <v-row class="pt-5" align="center" justify="center">
             <h1 id="home-greeting">Hello, {{ employee.firstName }}!</h1>
           </v-row>
-          <v-row justify="center">
+          <v-row class="pt-2" justify="center">
             <v-btn class="mb-10" @click="handleProfile()" color="#bc3825" dark>View Profile</v-btn>
           </v-row>
         </v-col>

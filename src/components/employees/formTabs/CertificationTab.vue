@@ -1,12 +1,7 @@
 <template>
   <div>
     <!-- Loop Certifications -->
-    <div
-      v-for="(certification, index) in editedCertifications"
-      style="border: 1px solid grey"
-      class="pt-3 pb-1 px-5"
-      :key="index"
-    >
+    <div v-for="(certification, index) in editedCertifications" class="gray-border ma-0 pt-3 pb-1 px-5" :key="index">
       <!-- Name of Certification -->
       <v-combobox
         ref="formFields"
@@ -99,7 +94,7 @@
           <v-tooltip bottom>
             <template v-slot:activator="{ on }">
               <v-btn v-on="on" @click="deleteCertification(index)" icon text
-                ><v-icon style="color: grey">delete</v-icon></v-btn
+                ><v-icon class="case-gray">delete</v-icon></v-btn
               >
             </template>
             <span>Delete Certification</span>

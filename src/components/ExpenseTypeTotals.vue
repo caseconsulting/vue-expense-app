@@ -11,8 +11,8 @@
     <v-card-text>
       <v-container class="pb-0">
         <!--List of Expense Types and Totals-->
-        <v-row v-for="total in totals" :key="total.id" class="pb-7" style="font-weight: bold">
-          <span>{{ total.name }}: </span>
+        <v-row v-for="total in totals" :key="total.id" class="pb-7">
+          <span class="font-weight-bold">{{ total.name }}: </span>
           <v-spacer></v-spacer>
           {{ convertToMoneyString(total.costTotal) }}
         </v-row>

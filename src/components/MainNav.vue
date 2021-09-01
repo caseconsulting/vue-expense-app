@@ -8,7 +8,7 @@
         <v-list-group v-if="item.subItems" :key="item.title" no-action active-class="red--text v-list__tile--active">
           <template v-slot:activator>
             <!-- Parent Item Icon -->
-            <v-list-item-icon style="width: 24px">
+            <v-list-item-icon>
               <icon
                 :id="item.icon"
                 :name="item.icon"
@@ -50,7 +50,7 @@
           <!--NavBar icons-->
           <!-- Item Icon -->
 
-          <v-list-item-icon style="width: 24px">
+          <v-list-item-icon>
             <icon :name="item.icon" v-bind:class="{ iconSelected: item.active }" class="navbar-icons"></icon>
           </v-list-item-icon>
 

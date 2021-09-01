@@ -18,10 +18,10 @@
 
     <!-- Title -->
     <v-col v-if="!isMobile" cols="12" lg="8">
-      <v-row class="mt-3" style="height: 100%" align="center" justify="center" v-if="hasAccessToBudgets">
+      <v-row class="mt-3" align="center" justify="center" v-if="hasAccessToBudgets">
         <h1 v-if="!loading">Budget Statistics for {{ employee.firstName }} {{ employee.lastName }}</h1>
       </v-row>
-      <v-row class="mt-3" style="height: 100%" align="center" justify="center" v-else>
+      <v-row class="mt-3" align="center" justify="center" v-else>
         <h1 v-if="!loading">No Budgets Available for {{ employee.firstName }} {{ employee.lastName }}</h1>
       </v-row>
     </v-col>

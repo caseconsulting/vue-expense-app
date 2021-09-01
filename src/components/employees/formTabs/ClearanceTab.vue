@@ -1,12 +1,7 @@
 <template>
   <div>
     <!-- Loop Clearances -->
-    <div
-      v-for="(clearance, cIndex) in editedClearances"
-      style="border: 1px solid grey"
-      class="pt-3 pb-1 px-5"
-      :key="cIndex"
-    >
+    <div v-for="(clearance, cIndex) in editedClearances" class="gray-border ma-0 pt-3 pb-1 px-5" :key="cIndex">
       <!-- Type of Clearance -->
       <v-combobox
         ref="formFields"
@@ -277,7 +272,7 @@
         <v-tooltip bottom slot="append-outer">
           <template v-slot:activator="{ on }">
             <v-btn text icon v-on="on" @click="deleteClearance(cIndex)"
-              ><v-icon style="color: grey">delete</v-icon></v-btn
+              ><v-icon class="case-gray">delete</v-icon></v-btn
             >
           </template>
           <span>Delete Clearance</span>

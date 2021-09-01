@@ -2,7 +2,7 @@ Education
 <template>
   <div>
     <!-- Loop Education -->
-    <div class="py-3 px-5" style="border: 1px solid grey" v-for="(school, index) in editedDegrees" :key="index">
+    <div class="gray-border ma-0 py-3 px-5" v-for="(school, index) in editedDegrees" :key="index">
       <!-- Name of School -->
       <v-autocomplete
         ref="formFields"
@@ -42,7 +42,7 @@ Education
             <v-tooltip bottom slot="append-outer">
               <template v-slot:activator="{ on }">
                 <v-btn v-on="on" @click="deleteDegree(index, dIndex)" text icon
-                  ><v-icon style="color: grey" class="pr-1">delete</v-icon></v-btn
+                  ><v-icon class="case-gray pr-1">delete</v-icon></v-btn
                 >
               </template>
               <span>Delete Degree</span>
@@ -100,7 +100,7 @@ Education
             <v-tooltip v-if="degree.majors.length > 1" bottom slot="append-outer">
               <template v-slot:activator="{ on }">
                 <v-btn text icon v-on="on" @click="deleteItem(degree.majors, mIndex)"
-                  ><v-icon style="color: grey">delete</v-icon></v-btn
+                  ><v-icon class="case-gray">delete</v-icon></v-btn
                 >
               </template>
               <span>Delete Major</span>
@@ -129,7 +129,7 @@ Education
             <v-tooltip bottom slot="append-outer">
               <template v-slot:activator="{ on }">
                 <v-btn text icon v-on="on" @click="deleteItem(degree.minors, mIndex)">
-                  <v-icon style="color: grey">delete</v-icon>
+                  <v-icon class="case-gray">delete</v-icon>
                 </v-btn>
               </template>
               <span>Delete Minor</span>
@@ -158,7 +158,7 @@ Education
             <v-tooltip bottom slot="append-outer">
               <template v-slot:activator="{ on }">
                 <v-btn text icon v-on="on" @click="deleteItem(degree.concentrations, cIndex)">
-                  <v-icon style="color: grey">delete</v-icon>
+                  <v-icon class="case-gray">delete</v-icon>
                 </v-btn>
               </template>
               <span>Delete Concentration</span>
@@ -195,7 +195,7 @@ Education
         <v-tooltip bottom>
           <template v-slot:activator="{ on }">
             <v-btn v-on="on" @click="deleteSchool(index)" text icon
-              ><v-icon style="color: grey" class="pr-1">delete</v-icon></v-btn
+              ><v-icon class="case-gray pr-1">delete</v-icon></v-btn
             >
           </template>
           <span>Delete School</span>

@@ -1,7 +1,7 @@
 <template>
   <div>
     <!-- Loop Awards -->
-    <div v-for="(award, index) in editedAwards" style="border: 1px solid grey" class="pt-3 pb-1 px-5" :key="index">
+    <div v-for="(award, index) in editedAwards" class="gray-border ma-0 pt-3 pb-1 px-5" :key="index">
       <!-- Name of Award -->
       <v-combobox
         ref="formFields"
@@ -52,7 +52,7 @@
           <v-tooltip bottom>
             <template v-slot:activator="{ on }">
               <v-btn v-on="on" @click="deleteAward(index)" icon text
-                ><v-icon style="color: grey" class="pr-1">delete</v-icon></v-btn
+                ><v-icon class="case-gray pr-1">delete</v-icon></v-btn
               >
             </template>
             <span>Delete Award</span>

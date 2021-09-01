@@ -3,7 +3,7 @@
     <!-- Anniversary Date -->
     <v-col cols="12" lg="12">
       <v-card class="mt-3" @click="changingBudgetView = !changingBudgetView" hover>
-        <v-card-title>
+        <v-card-title class="mx-1">
           <!-- display the next anniversary date -->
           <div v-if="viewingCurrentBudgetYear">
             <h3 class="pt-4 font-16">Anniversary Date: {{ getAnniversary }}</h3>
@@ -18,7 +18,7 @@
             <div class="pt-4 font-14">[Inactive Budget]</div>
           </div>
           <v-spacer></v-spacer>
-          <v-icon style="margin-right: 10px">history</v-icon>
+          <v-icon>history</v-icon>
         </v-card-title>
       </v-card>
     </v-col>

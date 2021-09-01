@@ -119,7 +119,7 @@
                     @click.stop="validateDelete(item)"
                     v-on="on"
                   >
-                    <v-icon style="color: #606060"> delete </v-icon>
+                    <v-icon class="case-gray"> delete </v-icon>
                   </v-btn>
                 </template>
                 <span>Delete</span>
@@ -135,7 +135,7 @@
             </v-avatar>
             <!-- Invalid Avatar -->
             <v-avatar v-else size="35" color="grey darken-2">
-              <div style="color: white; font-family: arial">
+              <div class="white--text">
                 <b>{{ item.firstName.substring(0, 1) }}{{ item.lastName.substring(0, 1) }}</b>
               </div>
             </v-avatar>
@@ -143,35 +143,35 @@
 
           <!-- Employee Number Item Slot -->
           <template v-slot:[`item.employeeNumber`]="{ item }">
-            <p :class="{ inactiveStyle: isInactive(item), selectFocus: isFocus(item) }" style="margin-bottom: 0px">
+            <p :class="{ inactiveStyle: isInactive(item), selectFocus: isFocus(item) }" class="mb-0">
               {{ item.employeeNumber }}
             </p>
           </template>
 
           <!-- First Name Item Slot -->
           <template v-slot:[`item.firstName`]="{ item }">
-            <p :class="{ inactiveStyle: isInactive(item), selectFocus: isFocus(item) }" style="margin-bottom: 0px">
+            <p :class="{ inactiveStyle: isInactive(item), selectFocus: isFocus(item) }" class="mb-0">
               {{ item.firstName }}
             </p>
           </template>
 
           <!-- Middle Name Item Slot -->
           <template v-slot:[`item.middleName`]="{ item }">
-            <p :class="{ inactiveStyle: isInactive(item), selectFocus: isFocus(item) }" style="margin-bottom: 0px">
+            <p :class="{ inactiveStyle: isInactive(item), selectFocus: isFocus(item) }" class="mb-0">
               {{ item.middleName }}
             </p>
           </template>
 
           <!-- Last Name Item Slot -->
           <template v-slot:[`item.lastName`]="{ item }">
-            <p :class="{ inactiveStyle: isInactive(item), selectFocus: isFocus(item) }" style="margin-bottom: 0px">
+            <p :class="{ inactiveStyle: isInactive(item), selectFocus: isFocus(item) }" class="mb-0">
               {{ item.lastName }}
             </p>
           </template>
 
           <!-- Nickname Item Slot -->
           <template v-slot:[`item.nickname`]="{ item }">
-            <p :class="{ inactiveStyle: isInactive(item), selectFocus: isFocus(item) }" style="margin-bottom: 0px">
+            <p :class="{ inactiveStyle: isInactive(item), selectFocus: isFocus(item) }" class="mb-0">
               {{ item.nickname }}
             </p>
           </template>
@@ -182,21 +182,21 @@
               <p
                 v-if="userIsAdmin() && hover && item.lastLogin !== undefined"
                 :class="{ inactiveStyle: isInactive(item), selectFocus: isFocus(item) }"
-                style="margin-bottom: 0px"
+                class="mb-0"
               >
                 {{ moment(item.lastLogin).format('MMM Do, YYYY HH:mm:ss') }}
               </p>
               <p
                 v-else-if="userIsAdmin() && item.lastLogin !== undefined"
                 :class="{ inactiveStyle: isInactive(item), selectFocus: isFocus(item) }"
-                style="margin-bottom: 0px"
+                class="mb-0"
               >
                 {{ moment(item.lastLogin).format('MMM Do, YYYY') }}
               </p>
               <p
                 v-else-if="userIsAdmin()"
                 :class="{ inactiveStyle: isInactive(item), selectFocus: isFocus(item) }"
-                style="margin-bottom: 0px"
+                class="mb-0"
               >
                 {{ item.lastLogin }}
               </p>
@@ -205,14 +205,14 @@
 
           <!-- Date Item Slot -->
           <template v-slot:[`item.hireDate`]="{ item }">
-            <p :class="{ inactiveStyle: isInactive(item), selectFocus: isFocus(item) }" style="margin-bottom: 0px">
+            <p :class="{ inactiveStyle: isInactive(item), selectFocus: isFocus(item) }" class="mb-0">
               {{ monthDayYearFormat(item.hireDate) }}
             </p>
           </template>
 
           <!-- Email Item Slot -->
           <template v-slot:[`item.email`]="{ item }">
-            <p :class="{ inactiveStyle: isInactive(item), selectFocus: isFocus(item) }" style="margin-bottom: 0px">
+            <p :class="{ inactiveStyle: isInactive(item), selectFocus: isFocus(item) }" class="mb-0">
               {{ item.email }}
             </p>
           </template>

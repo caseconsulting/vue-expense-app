@@ -71,7 +71,7 @@
                     :disabled="!hasResume"
                     class="pr-2"
                     @click="downloadResume()"
-                    style="color: white"
+                    color="white"
                     align="right"
                     v-on="on"
                     id="edit"
@@ -83,7 +83,7 @@
             </v-tooltip>
             <v-tooltip v-if="hasAdminPermissions() || userIsEmployee()" top>
               <template #activator="{ on }">
-                <v-icon class="pr-2" @click="editing = true" style="color: white" align="right" v-on="on" id="edit"
+                <v-icon class="pr-2" @click="editing = true" color="white" align="right" v-on="on" id="edit"
                   >edit</v-icon
                 >
               </template>

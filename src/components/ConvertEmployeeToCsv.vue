@@ -2,7 +2,7 @@
   <v-tooltip top>
     <template v-slot:activator="{ on }">
       <v-btn v-on="on" @click.stop="download" text icon>
-        <i class="material-icons pt-1" :style="iconColor()">file_download</i>
+        <icon class="mx-2 mt-1" scale="1.5" :color="iconColor()" name="cloud-download-alt"></icon>
       </v-btn>
     </template>
     <span>Download CSV</span>
@@ -191,8 +191,9 @@ function getWorkStatus(workStatus) {
  */
 function iconColor() {
   if (this.color) {
-    return 'color: ' + this.color + ';';
+    return this.color;
   }
+  return '#3f3f3c';
 }
 
 /**

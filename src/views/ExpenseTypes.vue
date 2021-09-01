@@ -203,7 +203,7 @@
             </template>
             <!-- Budget slot -->
             <template v-slot:[`item.budget`]="{ item }">
-              <p style="margin-bottom: 0px">{{ convertToMoneyString(item.budget) }}</p>
+              <p class="mb-0">{{ convertToMoneyString(item.budget) }}</p>
             </template>
             <!-- Actions -->
             <template v-if="userIsAdmin()" v-slot:[`item.actions`]="{ item }">
@@ -220,7 +220,7 @@
                     "
                     v-on="on"
                   >
-                    <v-icon style="color: #606060">edit</v-icon>
+                    <v-icon class="case-gray">edit</v-icon>
                   </v-btn>
                 </template>
                 <span>Edit</span>
@@ -236,7 +236,7 @@
                     @click="validateDelete(item)"
                     v-on="on"
                   >
-                    <v-icon style="color: #606060">delete</v-icon>
+                    <v-icon class="case-gray">delete</v-icon>
                   </v-btn>
                 </template>
                 <slot>Delete</slot>
@@ -328,11 +328,11 @@
                           <v-card color="#bc3825">
                             <!-- Dialog Title -->
                             <v-card-title>
-                              <span class="headline" style="color: white">Accessible By</span>
+                              <span class="headline white--text">Accessible By</span>
                             </v-card-title>
                             <v-divider color="black"></v-divider>
                             <!-- List of employee names/ISSUES -->
-                            <v-card-text class="pb-0" style="max-height: 300px; background-color: #f0f0f0">
+                            <v-card-text class="pb-0">
                               <v-row>
                                 <v-list color="#f0f0f0" width="376">
                                   <template v-for="employee in getEmployeeList(item.accessibleBy)">
@@ -446,7 +446,7 @@ function expenseTypeList() {
  * @return - headers to show
  */
 function _headers() {
-  if (userIsAdmin()) {
+  if (this.userIsAdmin()) {
     return this.headers;
   } else {
     return this.headers.filter((x) => x.show);

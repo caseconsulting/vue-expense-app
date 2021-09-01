@@ -3,9 +3,8 @@
     <!-- Loop Technologies -->
     <div
       v-for="(technology, index) in editedTechnologies"
-      class="pt-3 pb-1 px-5"
+      class="gray-border ma-0 pt-3 pb-1 px-5"
       :key="'technology: ' + index"
-      style="border: 1px solid grey"
     >
       <!-- Name of Technology -->
       <v-combobox
@@ -64,7 +63,7 @@
           <v-tooltip bottom slot="append-outer">
             <template v-slot:activator="{ on }">
               <v-btn text icon v-on="on" @click="deleteTechnology(index)"
-                ><v-icon style="color: grey">delete</v-icon></v-btn
+                ><v-icon class="case-gray">delete</v-icon></v-btn
               >
             </template>
             <span>Delete Technology</span>

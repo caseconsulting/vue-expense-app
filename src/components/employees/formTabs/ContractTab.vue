@@ -1,12 +1,7 @@
 <template>
   <div>
     <!-- Loop Contracts -->
-    <div
-      v-for="(contract, index) in editedContracts"
-      class="pt-3 pb-1 px-5"
-      :key="index"
-      style="border: 1px solid grey"
-    >
+    <div v-for="(contract, index) in editedContracts" class="gray-border ma-0 pt-3 pb-1 px-5" :key="index">
       <!-- Name of Contract -->
       <v-combobox
         ref="formFields"
@@ -44,7 +39,7 @@
           <v-tooltip v-if="contract.projects.length > 1" bottom slot="append-outer">
             <template v-slot:activator="{ on }">
               <v-btn text icon v-on="on" @click="deleteProject(index, projIndex)"
-                ><v-icon style="color: grey">delete</v-icon></v-btn
+                ><v-icon class="case-gray">delete</v-icon></v-btn
               >
             </template>
             <span>Delete Project</span>
@@ -153,7 +148,7 @@
         <v-tooltip bottom>
           <template v-slot:activator="{ on }">
             <v-btn v-on="on" @click="deleteContract(index)" icon text
-              ><v-icon style="color: grey" class="pr-1">delete</v-icon></v-btn
+              ><v-icon class="case-gray pr-1">delete</v-icon></v-btn
             >
           </template>
           <span>Delete Contract</span>

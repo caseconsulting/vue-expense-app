@@ -2,7 +2,7 @@
   <div id="available-budgets">
     <v-card>
       <v-card-title class="header_style">
-        <router-link v-if="isUser" to="/myBudgets" style="text-decoration: none">
+        <router-link class="no-decoration" v-if="isUser" to="/myBudgets">
           <h3 id="link" class="white--text px-2">Available Budgets</h3>
         </router-link>
         <h3 v-else class="white--text px-2">Available Budgets</h3>
@@ -30,9 +30,9 @@
               <v-spacer></v-spacer>
               <p>{{ convertToMoneyString(calcRemaining(budget)) }}</p>
             </v-list-item>
-            <div style="height: 20px"></div>
+            <div class="mt-2"></div>
             <!-- End Loop all budgets -->
-            <router-link v-if="this.fiscalDateView" to="/myExpenses" style="text-decoration: none">
+            <router-link v-if="this.fiscalDateView" to="/myExpenses" class="no-decoration">
               <button class="home_buttons" @click="selectReceipt = true">Create an Expense</button>
             </router-link>
             <!-- Pop-up modal to upload receipt from home page

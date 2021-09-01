@@ -3,15 +3,13 @@
     <!-- Loop Languages -->
     <div
       v-for="(languages, index) in editedLanguages"
-      class="pt-3 pb-1 px-5"
+      class="gray-border ma-0 pt-3 pb-1 px-5"
       :key="'language: ' + index"
-      style="border: 1px solid grey"
     >
       <!-- Name of Language Field -->
 
       <v-combobox
         ref="formFields"
-        style="padding-right: 20px; padding-left: 10px"
         v-model="languages.name"
         :rules="getRequiredRules()"
         :items="languagesList"
@@ -25,7 +23,6 @@
       <!-- Language Proficiency -->
       <v-autocomplete
         ref="formFields"
-        style="padding-right: 20px; padding-left: 10px"
         :items="proficiencyTypes"
         v-model="languages.proficiency"
         :rules="getRequiredRules()"
@@ -40,7 +37,7 @@
           <v-tooltip bottom slot="append-outer">
             <template v-slot:activator="{ on }">
               <v-btn text icon v-on="on" @click="deleteLanguage(index)"
-                ><v-icon style="color: grey">delete</v-icon></v-btn
+                ><v-icon class="case-gray">delete</v-icon></v-btn
               >
             </template>
             <span>Delete Language</span>

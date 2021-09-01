@@ -70,13 +70,13 @@
         class="elevation-1"
       >
         <template v-slot:[`item.employeeNumber`]="{ item }">
-          <p :class="{ selectFocus: isFocus(item) }" style="margin-bottom: 0px">
+          <p :class="{ selectFocus: isFocus(item) } + ' mb-0'">
             {{ item.employeeNumber }}
           </p>
         </template>
         <!-- First Name Item Slot -->
         <template v-slot:[`item.fullName`]="{ item }">
-          <p :class="{ selectFocus: isFocus(item) }" style="margin-bottom: 0px">
+          <p :class="{ selectFocus: isFocus(item) } + ' mb-0'">
             {{ getFullName(item) }}
           </p>
         </template>

@@ -211,7 +211,7 @@
             </v-row>
             <div v-for="(tech, index) in newTechnology" :key="index">
               <v-form :ref="'tech' + index">
-                <div v-if="!tech.canceled" style="border: 1px solid grey" class="pt-3 pb-1 px-5 ma-1">
+                <div v-if="!tech.canceled" class="gray-border pt-3 pb-1 px-5 ma-1">
                   <!-- Loop Technologies -->
                   <!-- Name of Technology -->
                   <v-text-field class="pb-5" :value="tech.name" readonly label="Technology"></v-text-field>

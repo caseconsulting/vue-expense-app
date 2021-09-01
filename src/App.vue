@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <v-app style="background: #f5f5f5">
+    <v-app>
       <v-navigation-drawer
         light
         v-model="drawer"
@@ -19,13 +19,13 @@
           <img src="@/assets/img/case-logo-circle.png" class="logo-bar" />
         </v-avatar>
         <v-toolbar-title v-show="!isMobile">
-          <h1 class="d-inline" style="text-align: center">
+          <h1 class="d-inline">
             Case
             <a id="P" class="white--text" target="_blank" href="https://tinyurl.com/2u2vhzw9">P</a>ortal
           </h1>
         </v-toolbar-title>
         <!-- In Mobile View decrease title size-->
-        <h1 v-show="isMobile" class="font-25" style="text-align: center">
+        <h1 v-show="isMobile" class="font-25">
           Case <a id="P" class="white--text" target="_blank" href="https://tinyurl.com/2u2vhzw9">P</a>ortal
         </h1>
         <v-spacer></v-spacer>
@@ -358,6 +358,7 @@ export default {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   color: #3f3f3c;
+  background: #f5f5f5;
 }
 
 .e {

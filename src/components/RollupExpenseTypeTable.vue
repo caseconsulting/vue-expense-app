@@ -80,7 +80,7 @@
           </template>
           <!-- Item cost in data table slot -->
           <template v-slot:[`item.cost`]="{ item }">
-            <p id="money-team" style="margin-bottom: 0px">{{ convertToMoneyString(getBudgetTotal(item.expenses)) }}</p>
+            <p id="money-team" class="mb-0">{{ convertToMoneyString(getBudgetTotal(item.expenses)) }}</p>
           </template>
           <!-- Header select slot in data table -->
           <template v-slot:[`header.data-table-select`]>

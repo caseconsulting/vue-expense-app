@@ -3,9 +3,8 @@
     <!-- Loop Customer Organization -->
     <div
       v-for="(exp, index) in editedCustomerOrgExp"
-      class="pt-3 pb-1 px-5"
+      class="gray-border ma-0 pt-3 pb-1 px-5"
       :key="'exp: ' + exp.name + index"
-      style="border: 1px solid grey"
     >
       <!-- Name of Customer Organization -->
       <v-autocomplete
@@ -62,7 +61,7 @@
           <v-tooltip bottom>
             <template v-slot:activator="{ on }">
               <v-btn v-on="on" @click="deleteExperience(index)" text icon
-                ><v-icon style="color: grey" class="pr-1">delete</v-icon></v-btn
+                ><v-icon class="case-gray pr-1">delete</v-icon></v-btn
               >
             </template>
             <span>Delete Experience</span>

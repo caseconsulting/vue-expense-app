@@ -1,24 +1,13 @@
 <template>
   <div>
     <!-- Github -->
-    <v-text-field
-      style="padding-right: 20px; padding-left: 10px"
-      v-model="editedPersonalInfo.github"
-      label="Github"
-      data-vv-name="Github"
-    ></v-text-field>
+    <v-text-field v-model="editedPersonalInfo.github" label="Github" data-vv-name="Github"></v-text-field>
 
     <!-- Twitter -->
-    <v-text-field
-      style="padding-right: 20px; padding-left: 10px"
-      v-model="editedPersonalInfo.twitter"
-      label="Twitter"
-      data-vv-name="Twitter"
-    ></v-text-field>
+    <v-text-field v-model="editedPersonalInfo.twitter" label="Twitter" data-vv-name="Twitter"></v-text-field>
 
     <!-- LinkedIn -->
     <v-text-field
-      style="padding-right: 20px; padding-left: 10px"
       v-model="editedPersonalInfo.linkedIn"
       label="LinkedIn"
       :rules="getURLRules()"
@@ -27,7 +16,6 @@
 
     <!-- Phone Number -->
     <v-text-field
-      style="padding-right: 20px; padding-left: 10px"
       v-model="editedPersonalInfo.phoneNumber"
       v-mask="'###-###-####'"
       hint="###-###-#### format"
@@ -37,7 +25,7 @@
     >
       <v-tooltip bottom slot="append">
         <template v-slot:activator="{ on }">
-          <v-btn class="pb-1" text icon v-on="on"><v-icon style="color: grey">shield</v-icon></v-btn>
+          <v-btn class="pb-1" text icon v-on="on"><v-icon class="case-gray">shield</v-icon></v-btn>
         </template>
         <span>Only Visible to You, Managers, and Admins</span>
       </v-tooltip>
@@ -53,7 +41,6 @@
       offset-y
       max-width="290px"
       min-width="290px"
-      style="padding-right: 20px; padding-bottom: 20px"
     >
       <template v-slot:activator="{ on }">
         <v-text-field
@@ -81,59 +68,50 @@
     ></v-switch>
 
     <!-- Place of Birth -->
-    <p style="font-size: 17px; padding-left: 10px; padding-top: 10px">
+    <p>
       Place of Birth
       <v-tooltip bottom slot="append-outer">
         <template v-slot:activator="{ on }">
-          <v-btn class="pb-1" text icon v-on="on"><v-icon style="color: grey">shield</v-icon></v-btn>
+          <v-btn class="pb-1" text icon v-on="on"><v-icon class="case-gray">shield</v-icon></v-btn>
         </template>
         <span>Only Visible to You, Managers, and Admins</span>
       </v-tooltip>
     </p>
-    <div style="padding-right: 20px; padding-left: 30px; padding-bottom: 10px">
-      <div style="border-left-style: groove; padding-right: 20px; padding-left: 10px">
-        <!-- Place of Birth: City text field -->
-        <v-text-field
-          v-model="editedPersonalInfo.city"
-          label="City"
-          data-vv-name="City"
-          style="padding-top: 0px"
-        ></v-text-field>
+    <div class="groove pr-5 pl-2">
+      <!-- Place of Birth: City text field -->
+      <v-text-field v-model="editedPersonalInfo.city" label="City" data-vv-name="City" class="pt-0"></v-text-field>
 
-        <!-- Place of Birth: Country autocomplete -->
-        <v-autocomplete
-          :items="countries"
-          v-model="editedPersonalInfo.country"
-          item-text="text"
-          label="Country"
-          style="padding-top: 0px; padding-bottom: 0px"
-        ></v-autocomplete>
+      <!-- Place of Birth: Country autocomplete -->
+      <v-autocomplete
+        :items="countries"
+        v-model="editedPersonalInfo.country"
+        item-text="text"
+        label="Country"
+      ></v-autocomplete>
 
-        <!-- Place of Birth: State autocomplete -->
-        <v-autocomplete
-          v-if="isUSA"
-          :items="Object.values(states)"
-          v-model="editedPersonalInfo.st"
-          item-text="text"
-          label="State"
-          style="padding-top: 0px"
-        ></v-autocomplete>
-      </div>
+      <!-- Place of Birth: State autocomplete -->
+      <v-autocomplete
+        v-if="isUSA"
+        :items="Object.values(states)"
+        v-model="editedPersonalInfo.st"
+        item-text="text"
+        label="State"
+        class="pt-0"
+      ></v-autocomplete>
     </div>
     <!-- Current Address -->
     <div v-if="userhasAdminPermissions() || userIsEmployee()">
-      <p style="font-size: 17px; padding-left: 10px; padding-top: 10px">
+      <p class="pt-4 mb-0 pb-0">
         Current Address
         <v-tooltip bottom slot="append-outer">
           <template v-slot:activator="{ on }">
-            <v-btn class="pb-1" text icon v-on="on"><v-icon style="color: grey">shield</v-icon></v-btn>
+            <v-btn class="pb-1" text icon v-on="on"><v-icon class="case-gray">shield</v-icon></v-btn>
           </template>
           <span>Only Visible to You, Managers, and Admins</span>
         </v-tooltip>
       </p>
       <v-combobox
-        class="pb-3"
-        style="padding-top: 0px"
+        class="pb-3 pt-0"
         @input.native="updateAddressDropDown"
         :items="Object.keys(this.placeIds)"
         v-model="searchString"
@@ -143,41 +121,39 @@
         hint="Search address and select option to auto-fill fields below."
         persistent-hint
       >
-        <v-list slot="append-item" name="joe" class="grey--text"> Powered By Google </v-list>
+        <v-list slot="append-item" name="joe" class="case-gray"> Powered By Google </v-list>
       </v-combobox>
-      <div style="padding-right: 20px; padding-left: 30px; padding-bottom: 10px">
-        <div style="border-left-style: groove; padding-right: 20px; padding-left: 10px">
-          <!-- Current Address: Street text field -->
-          <v-text-field
-            v-model="editedPersonalInfo.currentStreet"
-            label="Street"
-            data-vv-name="Street"
-            style="padding-top: 0px"
-          ></v-text-field>
-          <!-- Current Address: City text field -->
-          <v-text-field
-            v-model="editedPersonalInfo.currentCity"
-            label="City"
-            data-vv-name="Current City"
-            style="padding-top: 0px"
-          ></v-text-field>
-          <!-- Current Address: State autocomplete -->
-          <v-autocomplete
-            :items="Object.values(states)"
-            v-model="editedPersonalInfo.currentState"
-            item-text="text"
-            label="State"
-            style="padding-top: 0px"
-          ></v-autocomplete>
-          <!-- Current Address: ZIP text field -->
-          <v-text-field
-            v-model="editedPersonalInfo.currentZIP"
-            v-mask="'#####'"
-            label="ZIP"
-            data-vv-name="Current ZIP"
-            style="padding-top: 0px"
-          ></v-text-field>
-        </div>
+      <div class="groove pr-5 pl-2">
+        <!-- Current Address: Street text field -->
+        <v-text-field
+          v-model="editedPersonalInfo.currentStreet"
+          label="Street"
+          data-vv-name="Street"
+          class="pt-0"
+        ></v-text-field>
+        <!-- Current Address: City text field -->
+        <v-text-field
+          v-model="editedPersonalInfo.currentCity"
+          label="City"
+          data-vv-name="Current City"
+          class="pt-0"
+        ></v-text-field>
+        <!-- Current Address: State autocomplete -->
+        <v-autocomplete
+          :items="Object.values(states)"
+          v-model="editedPersonalInfo.currentState"
+          item-text="text"
+          label="State"
+          class="pt-0"
+        ></v-autocomplete>
+        <!-- Current Address: ZIP text field -->
+        <v-text-field
+          v-model="editedPersonalInfo.currentZIP"
+          v-mask="'#####'"
+          label="ZIP"
+          data-vv-name="Current ZIP"
+          class="pt-0"
+        ></v-text-field>
       </div>
     </div>
   </div>
