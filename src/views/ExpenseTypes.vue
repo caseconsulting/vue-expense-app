@@ -918,19 +918,16 @@ function userIsAdmin() {
 async function validateDelete(item) {
   this.midAction = true;
   this.deleteType = item.budgetName;
-  let x = await api
-    .getAllExpenseTypeExpenses(item.id)
-    .then((result) => {
-      return result.length <= 0;
-    })
-    .catch((err) => {
-      this.displayError(err);
-    });
-  if (x) {
-    this.$set(this.deleteModel, 'id', item.id);
-    this.deleting = !this.deleting;
-  } else {
-    this.invalidDelete = !this.invalidDelete;
+  try {
+    let expenses = await api.getAllExpenseTypeExpenses(item.id);
+    if (expenses.length <= 0) {
+      this.$set(this.deleteModel, 'id', item.id);
+      this.deleting = !this.deleting;
+    } else {
+      this.invalidDelete = !this.invalidDelete;
+    }
+  } catch (err) {
+    this.displayError(err);
   }
 } // validateDelete
 
