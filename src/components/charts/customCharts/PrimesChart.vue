@@ -19,7 +19,7 @@ import BarChart from '../baseCharts/BarChart.vue';
  * mounted lifecycle hook
  */
 async function mounted() {
-  await this.fillCertData();
+  await this.fillPrimeData();
   this.$forceUpdate();
 } // mounted
 
@@ -61,7 +61,7 @@ function getCurrentProjects(employee) {
 /**
  * Extracts and tallies up each employees primes, and sets the chart formatting and options data.
  */
-async function fillCertData() {
+async function fillPrimeData() {
   let employees = await api.getItems(api.EMPLOYEES);
   //Get data
   //Put into dictionary where key is prime and value is quantity
@@ -180,7 +180,7 @@ export default {
   },
   methods: {
     getCurrentProjects,
-    fillCertData
+    fillPrimeData
   }
 };
 </script>
