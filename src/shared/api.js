@@ -30,20 +30,20 @@ const client = axios.create({
 async function execute(method, resource, data) {
   // inject the accessToken for each request
   let accessToken = getAccessToken();
-  return client({
-    method,
-    url: resource,
-    data,
-    headers: {
-      Authorization: `Bearer ${accessToken}`
-    }
-  })
-    .then((response) => {
-      return response.data;
-    })
-    .catch((err) => {
-      return err;
+
+  try {
+    let c = await client({
+      method,
+      url: resource,
+      data,
+      headers: {
+        Authorization: `Bearer ${accessToken}`
+      }
     });
+    return c.data;
+  } catch (err) {
+    return err;
+  }
 }
 
 async function getCountries() {
