@@ -46,17 +46,12 @@ async function execute(method, resource, data) {
     });
 }
 
-function getCountries() {
-  return client({
+async function getCountries() {
+  let countries = await client({
     method: 'get',
     url: 'https://restcountries.eu/rest/v2/all'
-  })
-    .then((response) => {
-      return response.data;
-    })
-    .catch((err) => {
-      return err;
-    });
+  });
+  return countries.data;
 }
 
 async function getTechSkills(tech) {
