@@ -367,10 +367,10 @@ import { v4 as uuid } from 'uuid';
 /**
  * Sets up event listeners for confirming and canceling resume parser
  */
-function created() {
-  window.EventBus.$on('confirmed-parser', () => {
+async function created() {
+  window.EventBus.$on('confirmed-parser', async () => {
     // Create an audit of the success
-    api.createItem(api.AUDIT, {
+    await api.createItem(api.AUDIT, {
       id: uuid(),
       type: 'resume',
       tags: ['submit'],
@@ -608,7 +608,7 @@ async function submit() {
       this.loading = false;
 
       // Create an audit of the timeout
-      api.createItem(api.AUDIT, {
+      await api.createItem(api.AUDIT, {
         id: uuid(),
         type: 'resume',
         tags: ['upload', 'failure'],
@@ -621,7 +621,7 @@ async function submit() {
     }
 
     // Create an audit of the success
-    api.createItem(api.AUDIT, {
+    await api.createItem(api.AUDIT, {
       id: uuid(),
       type: 'resume',
       tags: ['upload', 'success'],

@@ -145,13 +145,13 @@ const IsoFormat = 'YYYY-MM-DD';
  *
  * @param newEmployeeForm is the new employee model after parsing the resume
  */
-function resumeReceived(newEmployeeForm, changes) {
+async function resumeReceived(newEmployeeForm, changes) {
   if (changes && changes > 0) {
     this.displayMessage('SUCCESS', `Added ${changes} change(s) to profile!`, 'green');
   }
 
   this.model = newEmployeeForm;
-  api.updateItem(api.EMPLOYEES, this.model);
+  await api.updateItem(api.EMPLOYEES, this.model);
 }
 
 function clearStatus() {

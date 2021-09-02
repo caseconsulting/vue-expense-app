@@ -53,7 +53,7 @@ async function recordLogin() {
   employee.lastLogin = moment(new Date()).format(login_format);
   await api.updateItem(api.EMPLOYEES, employee);
   // Create an audit of the success
-  api.createItem(api.AUDIT, {
+  await api.createItem(api.AUDIT, {
     id: uuid(),
     type: 'login',
     tags: ['account'],

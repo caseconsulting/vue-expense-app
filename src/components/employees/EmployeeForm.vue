@@ -658,7 +658,7 @@ async function submit() {
       }
       // If mifiStatus on page load is different than the submitted mifiStatus value, create audit log
       if (this.mifiStatusOnLoad !== updatedEmployee.mifiStatus) {
-        api.createItem(api.AUDIT, {
+        await api.createItem(api.AUDIT, {
           id: uuid(),
           type: 'mifi',
           tags: ['submit', `mifi set to ${this.model.mifiStatus}`],
