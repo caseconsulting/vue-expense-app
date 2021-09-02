@@ -1,62 +1,42 @@
 <template>
   <div>
     <v-dialog v-model="activate" persistent max-width="400">
-      <v-card v-if="hasBudgets">
+      <v-card>
         <!-- Anniversary Date -->
         <v-toolbar color="#565651" dark>
           <v-toolbar-title>Anniversary Date: {{ getAnniversaryDate }}</v-toolbar-title>
         </v-toolbar>
         <!-- End Anniversary Date -->
-
         <!-- Buttons -->
         <v-list two-line>
           <!-- Budget List -->
-          <template v-for="(budgetYear, index) in budgetYears">
-            <v-list-item :key="budgetYear" ripple @click.native="select(budgetYear)" class="list-hover">
-              <v-list-item-content>
-                <v-list-item-title>
-                  <h2 v-bind:class="{ 'center-text': true, 'underline-text': isCurrent(budgetYear) }">
-                    {{ budgetYear }} - {{ budgetYear + 1 }}
-                  </h2>
-                </v-list-item-title>
-              </v-list-item-content>
-            </v-list-item>
-            <v-divider :key="index"></v-divider>
-          </template>
-          <!-- End Budget List -->
-
-          <!-- Cancel Button -->
-          <template>
-            <v-list-item ripple @click.native="activate = false" class="list-hover">
-              <v-list-item-content>
-                <v-list-item-title><h2 class="center-text">Cancel</h2></v-list-item-title>
-              </v-list-item-content>
-            </v-list-item>
-          </template>
-          <!-- End Cancel Button -->
-        </v-list>
-        <!-- End Buttons -->
-      </v-card>
-      <v-card v-else>
-        <!-- Anniversary Date -->
-        <v-toolbar color="#565651" dark>
-          <v-toolbar-title>Anniversary Date: {{ getAnniversaryDate }}</v-toolbar-title>
-        </v-toolbar>
-        <!-- End Anniversary Date -->
-
-        <!-- Buttons -->
-        <v-list two-line>
+          <div v-if="hasBudgets">
+            <template v-for="(budgetYear, index) in budgetYears">
+              <v-list-item :key="budgetYear" ripple @click.native="select(budgetYear)" class="list-hover">
+                <v-list-item-content>
+                  <v-list-item-title>
+                    <h2 v-bind:class="{ 'center-text': true, 'underline-text': isCurrent(budgetYear) }">
+                      {{ budgetYear }} - {{ budgetYear + 1 }}
+                    </h2>
+                  </v-list-item-title>
+                </v-list-item-content>
+              </v-list-item>
+              <v-divider :key="index"></v-divider>
+            </template>
+          </div>
           <!-- Budget List -->
-          <template>
-            <v-list-item>
-              <v-list-item-content>
-                <v-list-item-title>
-                  <h2 class="text-center">No Previous Years</h2>
-                </v-list-item-title>
-              </v-list-item-content>
-            </v-list-item>
-            <v-divider></v-divider>
-          </template>
+          <div v-else>
+            <template>
+              <v-list-item>
+                <v-list-item-content>
+                  <v-list-item-title>
+                    <h2 class="text-center">No Previous Years</h2>
+                  </v-list-item-title>
+                </v-list-item-content>
+              </v-list-item>
+              <v-divider></v-divider>
+            </template>
+          </div>
           <!-- End Budget List -->
 
           <!-- Cancel Button -->
