@@ -146,6 +146,12 @@ function watchDateRange() {
   this.fillData();
 } // watchDateRange
 
+// |--------------------------------------------------|
+// |                                                  |
+// |                      EXPORT                      |
+// |                                                  |
+// |--------------------------------------------------|
+
 export default {
   components: { PieChart, AuditTable },
   computed: {

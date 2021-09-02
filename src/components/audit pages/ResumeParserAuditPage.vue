@@ -24,10 +24,13 @@ const IsoFormat = 'MMMM Do YYYY, h:mm:ss a';
 
 // |--------------------------------------------------|
 // |                                                  |
-// |                    METHODS                       |
+// |                      METHODS                     |
 // |                                                  |
 // |--------------------------------------------------|
 
+/**
+ * Generates chart data and table
+ */
 async function fillData() {
   this.resumeAudits = [];
   let resumeAudits = await api.getAudits('resume', this.queryStartDate, this.queryEndDate);
@@ -151,7 +154,7 @@ async function fillData() {
       enabled: showToolTips
     }
   };
-}
+} // fillData
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -169,7 +172,7 @@ async function created() {
 
 // |--------------------------------------------------|
 // |                                                  |
-// |                     WATCHERS                      |
+// |                     WATCHERS                     |
 // |                                                  |
 // |--------------------------------------------------|
 
@@ -186,6 +189,12 @@ async function watchQueryStartDate() {
 async function watchQueryEndDate() {
   await this.fillData();
 } // watchQueryEndDate
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      EXPORT                      |
+// |                                                  |
+// |--------------------------------------------------|
 
 export default {
   components: { AuditTable, PieChart },

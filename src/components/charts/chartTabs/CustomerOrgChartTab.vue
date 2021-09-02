@@ -14,6 +14,12 @@
 import CustomerOrgChart from '../customCharts/CustomerOrgChart.vue';
 import ICTable from '../customCharts/IcTable.vue';
 
+// |--------------------------------------------------|
+// |                                                  |
+// |                      EXPORT                      |
+// |                                                  |
+// |--------------------------------------------------|
+
 export default {
   components: { CustomerOrgChart, ICTable }
 };

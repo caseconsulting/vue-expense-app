@@ -35,7 +35,7 @@ function created() {
 
 // |--------------------------------------------------|
 // |                                                  |
-// |                     METHODS                      |
+// |                      METHODS                     |
 // |                                                  |
 // |--------------------------------------------------|
 
@@ -48,6 +48,7 @@ async function beforeDestroy() {
 
 /**
  * Sets the chart formatting and options data.
+ *
  * @param majors - The array of majors for a degree
  */
 function fillData(majors) {
@@ -110,6 +111,12 @@ function fillData(majors) {
   };
   this.dataReceived = true;
 } // fillData
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      EXPORT                      |
+// |                                                  |
+// |--------------------------------------------------|
 
 export default {
   components: { PieChart },

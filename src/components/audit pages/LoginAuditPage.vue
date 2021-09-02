@@ -24,10 +24,13 @@ const IsoFormat = 'MMMM Do YYYY, h:mm:ss a';
 // |                                                  |
 // |--------------------------------------------------|
 
+/**
+ * created lifecycle hook
+ */
 async function created() {
   this.employees = await api.getItems(api.EMPLOYEES); // get all employees
   this.fillData();
-}
+} // created
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -167,7 +170,7 @@ async function fillData() {
     }
   };
   this.chartLoaded = true;
-}
+} // fillData
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -186,7 +189,7 @@ function dateRange() {
 
 // |--------------------------------------------------|
 // |                                                  |
-// |                     WATCHERS                      |
+// |                     WATCHERS                     |
 // |                                                  |
 // |--------------------------------------------------|
 
@@ -196,6 +199,12 @@ function dateRange() {
 function watchDateRange() {
   this.fillData();
 } // watchDateRange
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      EXPORT                      |
+// |                                                  |
+// |--------------------------------------------------|
 
 export default {
   components: { BarChart, AuditTable },

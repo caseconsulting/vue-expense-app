@@ -175,6 +175,8 @@ function oneLessColumn() {
 
 /**
  * Sets num of columns to show when radio buttons are changed
+ *
+ * @param techArray - The array of different technologies
  */
 function setNumOfColumns(techArray) {
   if (techArray.length <= 5) {
@@ -214,6 +216,9 @@ function sortTech(techArray) {
 // |                                                  |
 // |--------------------------------------------------|
 
+/**
+ * mounted lifecycle hook - get items, organize them and fill data
+ */
 async function mounted() {
   //Get data
   //Put into dictionary where key is tech type and value is quantity
@@ -259,7 +264,13 @@ async function mounted() {
 
   this.fillData(this);
   this.$forceUpdate();
-}
+} // mounted
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      EXPORT                      |
+// |                                                  |
+// |--------------------------------------------------|
 
 // |--------------------------------------------------|
 // |                                                  |

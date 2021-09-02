@@ -37,7 +37,7 @@ function created() {
 
 // |--------------------------------------------------|
 // |                                                  |
-// |                     METHODS                      |
+// |                      METHODS                     |
 // |                                                  |
 // |--------------------------------------------------|
 
@@ -50,6 +50,7 @@ async function beforeDestroy() {
 
 /**
  * Sets the chart formatting and options data.
+ *
  * @param minors - The array of minors for a degree
  */
 function fillData(minors) {
@@ -123,6 +124,12 @@ function fillData(minors) {
   };
   this.dataReceived = true;
 } // fillData
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      EXPORT                      |
+// |                                                  |
+// |--------------------------------------------------|
 
 export default {
   components: { PieChart },

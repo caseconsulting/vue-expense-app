@@ -30,12 +30,13 @@ async function created() {
 
 // |--------------------------------------------------|
 // |                                                  |
-// |                     METHODS                      |
+// |                      METHODS                     |
 // |                                                  |
 // |--------------------------------------------------|
 
 /**
  * Finds the last index that has an element greater than 0 to prevent too many labels showing up on the chart.
+ *
  * @returns Number - The index greater than 0
  */
 function findMaxIndex() {
@@ -84,6 +85,9 @@ function jobExperienceData() {
 
 /**
  * Gets the time difference in years between the job start and end date.
+ *
+ * @param startDate - the start of the difference
+ * @param endDate - the end of the difference
  * @returns Number - The amount of years difference
  */
 function calculateTimeDifference(startDate, endDate) {
@@ -160,6 +164,7 @@ function drawJobExpHistGraph() {
 
 /**
  * Creates a moment object out of a String that is a date.
+ *
  * @param dateAsString - The date
  * @returns Object - The Moment date object
  */
@@ -167,6 +172,12 @@ function stringToDate(dateAsString) {
   var date = moment(dateAsString);
   return date;
 } //stringToDate
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      EXPORT                      |
+// |                                                  |
+// |--------------------------------------------------|
 
 export default {
   components: { BarChart },

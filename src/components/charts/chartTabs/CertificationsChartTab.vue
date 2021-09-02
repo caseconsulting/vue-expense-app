@@ -11,6 +11,12 @@
 <script>
 import CertificationChart from '../customCharts/CertificationChart.vue';
 
+// |--------------------------------------------------|
+// |                                                  |
+// |                      EXPORT                      |
+// |                                                  |
+// |--------------------------------------------------|
+
 export default {
   components: { CertificationChart }
 };

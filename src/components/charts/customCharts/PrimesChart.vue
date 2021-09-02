@@ -25,12 +25,15 @@ async function mounted() {
 
 // |--------------------------------------------------|
 // |                                                  |
-// |                     METHODS                      |
+// |                      METHODS                     |
 // |                                                  |
 // |--------------------------------------------------|
 
 /**
  * Gets all of the current projects the user has
+ *
+ * @param employee - the employee that we are getting the current projects for
+ * @return array - the current contracts
  */
 function getCurrentProjects(employee) {
   let contracts = [];
@@ -56,7 +59,7 @@ function getCurrentProjects(employee) {
   }
 
   return contracts;
-}
+} // getCurrentProjects
 
 /**
  * Extracts and tallies up each employees primes, and sets the chart formatting and options data.
@@ -167,7 +170,14 @@ async function fillPrimeData() {
     maintainAspectRatio: false
   };
   this.dataReceived = true;
-}
+} // fillCertData
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      EXPORT                      |
+// |                                                  |
+// |--------------------------------------------------|
+
 export default {
   components: { BarChart },
   mounted,

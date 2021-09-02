@@ -16,7 +16,7 @@ function mounted() {
 
 // |--------------------------------------------------|
 // |                                                  |
-// |                     WATCHERS                      |
+// |                     WATCHERS                     |
 // |                                                  |
 // |--------------------------------------------------|
 
@@ -27,6 +27,12 @@ function watchOptions() {
   // If options change, re-render chart
   this.renderChart(this.chartData, this.options);
 } // watchOptions
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      EXPORT                      |
+// |                                                  |
+// |--------------------------------------------------|
 
 export default {
   extends: HorizontalBar,

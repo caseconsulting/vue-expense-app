@@ -25,6 +25,12 @@ import JobExperiencesChart from '../customCharts/JobExperiencesChart.vue';
 import JobRoleChart from '../customCharts/JobRoleChart.vue';
 import PrimesChart from '../customCharts/PrimesChart.vue';
 
+// |--------------------------------------------------|
+// |                                                  |
+// |                      EXPORT                      |
+// |                                                  |
+// |--------------------------------------------------|
+
 export default {
   components: {
     CaseYearsChart,

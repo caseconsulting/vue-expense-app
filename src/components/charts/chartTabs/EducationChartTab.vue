@@ -23,6 +23,12 @@ import MajorsChart from '../customCharts/MajorsChart.vue';
 import MinorsChart from '../customCharts/MinorsChart.vue';
 import ConcentrationsChart from '../customCharts/ConcentrationsChart.vue';
 
+// |--------------------------------------------------|
+// |                                                  |
+// |                      EXPORT                      |
+// |                                                  |
+// |--------------------------------------------------|
+
 export default {
   components: { HighestDegreeChart, MajorsChart, MinorsChart, ConcentrationsChart }
 };

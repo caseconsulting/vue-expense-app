@@ -36,7 +36,7 @@ async function created() {
 
 // |--------------------------------------------------|
 // |                                                  |
-// |                     METHODS                      |
+// |                      METHODS                     |
 // |                                                  |
 // |--------------------------------------------------|
 
@@ -132,6 +132,12 @@ function fillData() {
 function watchShowCurrent() {
   this.fillData(); // renders a different chart every time the radio button changes
 } // watchShowCurrent
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      EXPORT                      |
+// |                                                  |
+// |--------------------------------------------------|
 
 export default {
   components: { PieChart },

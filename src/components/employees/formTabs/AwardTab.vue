@@ -160,6 +160,12 @@ function watchValidating(val) {
   }
 } // watchValidating
 
+// |--------------------------------------------------|
+// |                                                  |
+// |                      EXPORT                      |
+// |                                                  |
+// |--------------------------------------------------|
+
 export default {
   created,
   data() {

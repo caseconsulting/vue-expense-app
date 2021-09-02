@@ -26,7 +26,7 @@ async function mounted() {
 
 // |--------------------------------------------------|
 // |                                                  |
-// |                    METHODS                       |
+// |                      METHODS                     |
 // |                                                  |
 // |--------------------------------------------------|
 
@@ -176,6 +176,12 @@ function breakSentence(s) {
   var returnArr = [s.substr(0, middle), s.substr(middle + 1)];
   return returnArr;
 } //breakSentence
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      EXPORT                      |
+// |                                                  |
+// |--------------------------------------------------|
 
 export default {
   components: { BarChart },

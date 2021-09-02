@@ -29,7 +29,7 @@ async function created() {
 
 // |--------------------------------------------------|
 // |                                                  |
-// |                    METHODS                       |
+// |                      METHODS                     |
 // |                                                  |
 // |--------------------------------------------------|
 
@@ -56,6 +56,9 @@ function caseYearsData() {
 
 /**
  * Helper function to determine how long an employee has worked from their hire date.
+ *
+ * @param startDate - date to compare to now
+ * @return - the decimal value of the difference
  */
 function calculateTimeDifference(startDate) {
   var start = this.stringToDate(startDate);
@@ -127,6 +130,8 @@ function drawCaseYearsHistGraph() {
 
 /**
  * Finds the last index where the element is greater than 0 to ensure the chart does not show all of the labels are there is no data.
+ *
+ * @return - last index that is greater than 0
  */
 function findMaxIndex() {
   let max = 0;
@@ -140,11 +145,20 @@ function findMaxIndex() {
 
 /**
  * Converts a date as a string into a moment objects.
+ *
+ * @param dateAsString - date that is currently a string
+ * @return - the moment date object
  */
 function stringToDate(dateAsString) {
   var date = moment(dateAsString);
   return date;
 } //stringToDate
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      EXPORT                      |
+// |                                                  |
+// |--------------------------------------------------|
 
 export default {
   components: { BarChart },

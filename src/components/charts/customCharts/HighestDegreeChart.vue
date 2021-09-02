@@ -33,13 +33,14 @@ async function created() {
 
 // |--------------------------------------------------|
 // |                                                  |
-// |                     METHODS                      |
+// |                      METHODS                     |
 // |                                                  |
 // |--------------------------------------------------|
 
 /**
  * Initializes the degrees data field, this function retrieves the highest
  * degree for each employee.
+ *
  * @return array of objects - key: employee name, value: another array
  * containing objects w/ degree names + majors
  */
@@ -83,9 +84,10 @@ function initDegrees() {
 /**
  * Helper function that parses through the existing data
  * in degrees and adds onto it.
+ *
  * @param degrees - The array of the highest degrees tallied up
  * @param highestDegrees - The array of all highest degrees
- * @returns Array - The finaly tally of each highest degrees
+ * @return Array - The finaly tally of each highest degrees
  */
 function addToDegrees(degrees, highestDegrees) {
   highestDegrees.forEach((highestDegree) => {
@@ -113,6 +115,9 @@ function addToDegrees(degrees, highestDegrees) {
 
 /**
  * Compares the relationship between two degrees,
+ *
+ * @param oldDegree - the older Degree
+ * @param newDegree - the newer Degree
  * @return 1: newDegree is more prestigious
  * @return -1: oldDegree is more presitigious
  * @return 0: degrees have the same prestige
@@ -133,6 +138,7 @@ function compareDegree(oldDegree, newDegree) {
 
 /**
  * Get the object of concentrations for a degree and the count of each concentration.
+ *
  * @param degreeName - The name of the degree
  * @return Object - An object of concentrations with the number of occurrences found
  */
@@ -163,6 +169,7 @@ function getDegreeConcentrations(degreeName) {
 
 /**
  * Get the object of minors for a degree and the count of each minor.
+ *
  * @param degreeName - The name of the degree
  * @return Object - An object of minors with the number of occurrences found
  */
@@ -219,6 +226,7 @@ function getDegreeValue(degree) {
 /**
  * Used to standardize the names of degrees
  * for labels
+ *
  * @param value - The number that the degree is associated with
  * @returns String - The name of the degree
  */
@@ -235,7 +243,7 @@ function getDegreeName(value) {
     default:
       return 'Other';
   }
-}
+} // getDegreeName
 
 /**
  * Populates the data to display
@@ -294,6 +302,7 @@ function fillData() {
 /**
  * Sends data to create the second pie chart that displays
  * info about degree majors
+ *
  * @param degree - object that holds the name of the degree as a key and holds
  * a nested object w/ key of the major and value of the quantity
  */
@@ -303,9 +312,11 @@ function majorsEmit(degree) {
   majorsData.degree = degree;
   this.showMajors = true;
   window.EventBus.$emit('majors-update', majorsData);
-}
+} // majorsEmit
+
 /**
  * Send data to create a pie chart to display the minors for a degree.
+ *
  * @param degree - The name of the degree
  */
 function minorsEmit(degree) {
@@ -313,10 +324,11 @@ function minorsEmit(degree) {
   minorsData.minors = this.getDegreeMinors(degree);
   minorsData.degree = degree;
   window.EventBus.$emit('minors-update', minorsData);
-}
+} // minorsEmit
 
 /**
  * Send data to create a pie chart to display the concentrations for a degree.
+ *
  * @param degree - The name of the degree
  */
 function concentrationsEmit(degree) {
@@ -324,7 +336,13 @@ function concentrationsEmit(degree) {
   concentrationsData.concentrations = this.getDegreeConcentrations(degree);
   concentrationsData.degree = degree;
   window.EventBus.$emit('concentrations-update', concentrationsData);
-}
+} // concentrationsEmit
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      EXPORT                      |
+// |                                                  |
+// |--------------------------------------------------|
 
 export default {
   components: { PieChart },

@@ -10,6 +10,13 @@
 
 <script>
 import TechBarChart from '../customCharts/TechBarChart.vue';
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      EXPORT                      |
+// |                                                  |
+// |--------------------------------------------------|
+
 export default {
   components: { TechBarChart }
 };
