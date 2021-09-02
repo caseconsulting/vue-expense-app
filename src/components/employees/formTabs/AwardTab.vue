@@ -122,7 +122,8 @@ function deleteAward(index) {
 
 /**
  * Parse the date after losing focus.
- * @returns String - The date in YYYY-MM format
+ *
+ * @return String - The date in YYYY-MM format
  */
 function parseEventDate() {
   return this.parseDateMonthYear(event.target.value);

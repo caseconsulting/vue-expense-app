@@ -99,6 +99,8 @@ function getCurrentProjects() {
 
 /**
  * Returns Full Time, Part Time, or Inactive based on the work status
+ *
+ * @param workStatus - the workStatus of the employee from 0 to 100
  */
 function getWorkStatus(workStatus) {
   if (workStatus == 100) {
@@ -124,6 +126,12 @@ function getWorkStatus(workStatus) {
 function startCase(value) {
   return _.startCase(value);
 } // startCase
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      EXPORT                      |
+// |                                                  |
+// |--------------------------------------------------|
 
 export default {
   computed: {

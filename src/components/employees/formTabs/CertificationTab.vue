@@ -167,7 +167,8 @@ function deleteCertification(index) {
 
 /**
  * Parse the date after losing focus.
- * @returns String - The date in YYYY-MM-DD format
+ *
+ * @return String - The date in YYYY-MM-DD format
  */
 function parseEventDate() {
   return this.parseDate(event.target.value);
@@ -219,6 +220,12 @@ function watchValidating(val) {
     this.validateFields();
   }
 } // watchValidating
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      EXPORT                      |
+// |                                                  |
+// |--------------------------------------------------|
 
 export default {
   computed: {

@@ -127,7 +127,7 @@ function created() {
   if (!this.isEmpty(this.model.schools)) {
     this.filteredList = this.model.schools.slice(0, 4);
   }
-}
+} // created
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -143,7 +143,13 @@ function onPageChange() {
   var startIndex = 4 * (this.page - 1); //each page contains 4 education entries
   var endIndex = startIndex + 4;
   this.filteredList = this.model.schools.slice(startIndex, endIndex);
-}
+} // onPageChange
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      EXPORT                      |
+// |                                                  |
+// |--------------------------------------------------|
 
 // |--------------------------------------------------|
 // |                                                  |

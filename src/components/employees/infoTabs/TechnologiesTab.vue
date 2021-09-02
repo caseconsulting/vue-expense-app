@@ -186,6 +186,12 @@ function current(value) {
   return value ? 'Yes' : 'No';
 } // current
 
+// |--------------------------------------------------|
+// |                                                  |
+// |                      EXPORT                      |
+// |                                                  |
+// |--------------------------------------------------|
+
 export default {
   created,
   data() {

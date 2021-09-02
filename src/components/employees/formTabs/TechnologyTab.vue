@@ -130,7 +130,8 @@ function deleteTechnology(index) {
 
 /**
  * Creates an array of all technologies that a user has entered multiple times (based on name).
- * @returns an array of technology names that a user has entered multiple times
+ *
+ * @return array - an array of technology names that a user has entered multiple times
  */
 function duplicateTechEntries() {
   //declares function to count unique name properties of js objects
@@ -149,8 +150,9 @@ function duplicateTechEntries() {
 
 /**
  * Checks to see if a technology is a duplicate of one that is already entered by a user.
- * @param tech String - the name of the technology
- * @returns boolean - true if technology was already entered by user (duplicate) false otherwise
+ *
+ * @param tech - the string name of the technology
+ * @return boolean - true if technology was already entered by user (duplicate) false otherwise
  */
 function isDuplicate(tech) {
   let duplicates = this.duplicateTechEntries();
@@ -226,6 +228,12 @@ function watchValidating(val) {
     this.validateFields();
   }
 } // watchValidating
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      EXPORT                      |
+// |                                                  |
+// |--------------------------------------------------|
 
 export default {
   created,

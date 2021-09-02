@@ -191,6 +191,7 @@ function setNumOfColumns(techArray) {
 
 /**
  * Sorts array of tech skills
+ *
  * @param techArray - The array of different technologies
  */
 function sortTech(techArray) {

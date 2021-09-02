@@ -81,7 +81,7 @@ function created() {
   if (!this.isEmpty(this.model.companies)) {
     this.pageList = this.filterCompanies.slice(0, 4);
   }
-}
+} // created
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -149,6 +149,8 @@ function onPageChange() {
 
 /**
  * The function updates the company that is shown to the user based on filters
+ *
+ * @param query - the query used for the filter
  */
 function updateCompanies(query) {
   if (query === undefined) {
@@ -177,6 +179,12 @@ function updateCompanies(query) {
 function watchFilter() {
   this.updateCompanies(this.filter);
 } // watchFilter
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      EXPORT                      |
+// |                                                  |
+// |--------------------------------------------------|
 
 export default {
   created,

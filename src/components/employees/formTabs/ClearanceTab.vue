@@ -365,7 +365,7 @@ function isAfter(firstDate, secondDate, errMessage) {
   return !this.isEmpty(firstDate) && secondDate
     ? moment(firstDate).add(1, 'd').isAfter(moment(secondDate)) || errMessage
     : true;
-}
+} // isAfter
 
 /**
  * Checks to see if the first date is at or before the second date, if not, it uses an error message.
@@ -379,7 +379,7 @@ function isBefore(firstDate, secondDate, errMessage) {
   return !this.isEmpty(firstDate) && secondDate
     ? moment(firstDate).isBefore(moment(secondDate).add(1, 'd')) || errMessage
     : true;
-}
+} // isBefore
 
 /**
  * Return the maximum available date to be selected for submission date. Returns the granted date if it exists.
@@ -456,11 +456,12 @@ function minExpiration(cIndex) {
 
 /**
  * Parse the date after losing focus.
+ *
  * @returns String - The date in YYYY-MM-DD format
  */
 function parseEventDate() {
   return this.parseDate(event.target.value);
-} //parseEventDate
+} // parseEventDate
 
 /**
  * Populate drop downs with information that other employees have filled out.
@@ -526,6 +527,12 @@ function formatDates(array) {
   });
   return formattedDates;
 } // formatDates
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      EXPORT                      |
+// |                                                  |
+// |--------------------------------------------------|
 
 export default {
   created,

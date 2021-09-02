@@ -173,6 +173,7 @@ import _ from 'lodash';
 import { mask } from 'vue-the-mask';
 import moment from 'moment-timezone';
 import { isEmpty, parseDateMonthYear, formatDateMonthYear } from '@/utils/utils';
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                 LIFECYCLE HOOKS                  |
@@ -189,7 +190,7 @@ function mounted() {
 /**
  * Computed property to calculate if interval overlaps any of the other intervals in the allIntervals prop. Sends back the error status to the parent component.
  *
- * @returns boolean true if there is an error (interval overlaps) false otherwise
+ * @return boolean - true if there is an error (interval overlaps) false otherwise
  */
 function intervalOverlaps() {
   let hasErrors = false;
@@ -231,7 +232,8 @@ function intervalOverlaps() {
   //send validation result back to parent
   this.$emit('validated', this.technologyIndex, this.intervalIndex, hasErrors);
   return hasErrors;
-} //intervalOverlaps
+} // intervalOverlaps
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                     METHODS                      |
@@ -348,6 +350,12 @@ function getYear(date) {
   const [year] = date.split('-');
   return year;
 } // getYear
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      EXPORT                      |
+// |                                                  |
+// |--------------------------------------------------|
 
 export default {
   computed: {

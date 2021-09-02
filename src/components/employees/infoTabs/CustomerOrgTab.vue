@@ -55,7 +55,7 @@ function created() {
   if (!this.isEmpty(this.model.customerOrgExp)) {
     this.filteredList = this.model.customerOrgExp.slice(0, 5);
   }
-}
+} // created
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -71,7 +71,13 @@ function onPageChange() {
   var startIndex = 5 * (this.page - 1); //each page contains 5 Customer Org entries
   var endIndex = startIndex + 5;
   this.filteredList = this.model.customerOrgExp.slice(startIndex, endIndex);
-}
+} // onPageChange
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      EXPORT                      |
+// |                                                  |
+// |--------------------------------------------------|
 
 // |--------------------------------------------------|
 // |                                                  |

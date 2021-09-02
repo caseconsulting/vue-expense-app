@@ -327,6 +327,7 @@ function isPartTime() {
 /**
  * Checks whether the current user role is admin, used specifically
  * to prevent the manager from changing their own role on the Employee tab
+ *
  * @return - boolean: true if the user role is admin
  */
 function userIsAdmin() {
@@ -337,7 +338,7 @@ function userIsAdmin() {
  * Checks if the profile accessed is the signed-in user's profile,
  * specifically used to prevent a manager from editing their own role
  *
- * @returns boolean - true if the profile is the user's profile
+ * @return boolean - true if the profile is the user's profile
  */
 function userIsEmployee() {
   if (this.$route.params.id == this.userId) {
@@ -348,7 +349,8 @@ function userIsEmployee() {
 
 /**
  * Checks whether the current user role is manager
- * @returns - boolean: true if the user role is a manager
+ *
+ * @return - boolean: true if the user role is a manager
  */
 function userIsManager() {
   return this.getRole() === 'manager';
@@ -509,6 +511,12 @@ function watchValidating(val) {
     this.validateFields();
   }
 } // watchValidating
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      EXPORT                      |
+// |                                                  |
+// |--------------------------------------------------|
 
 export default {
   created,

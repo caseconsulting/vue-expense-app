@@ -245,6 +245,7 @@ function addProject(contractIndex) {
 
 /**
  * Deletes a Contract.
+ *
  * @param index - array index of contract to delete
  */
 function deleteContract(index) {
@@ -253,6 +254,7 @@ function deleteContract(index) {
 
 /**
  * Deletes a project.
+ *
  * @param contractIndex - The index of the contract
  * @param projectIndex - The index of the project
  */
@@ -268,7 +270,7 @@ function deleteProject(contractIndex, projectIndex) {
  * Checks if the current contract has any projects without an end date
  *
  * @param index The index of the contract in this.editedContracts
- * @return whether or not the projects for that contract have all their end dates filled
+ * @return boolean - whether or not the projects for that contract have all their end dates filled
  */
 function hasEndDatesFilled(index) {
   let hasEndDatesFilled = true;
@@ -344,6 +346,12 @@ function watchValidating(val) {
     this.validateFields();
   }
 } // watchValidating
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      EXPORT                      |
+// |                                                  |
+// |--------------------------------------------------|
 
 export default {
   computed: {

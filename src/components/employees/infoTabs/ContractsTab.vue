@@ -80,7 +80,7 @@ function created() {
   if (!this.isEmpty(this.model.contracts)) {
     this.filteredList = this.model.contracts.slice(0, 5);
   }
-}
+} // created
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -96,12 +96,13 @@ function onPageChange() {
   var startIndex = 5 * (this.page - 1); //each page contains 5 contract entries
   var endIndex = startIndex + 5;
   this.filteredList = this.model.contracts.slice(startIndex, endIndex);
-}
+} // onPageChange
 
 /**
  * Converts the contracts' projects' dates to number of years on the contract
  *
  * @param contract the contract to get the info from
+ * @return number - number of years on the contract
  */
 function getContractLengthInYears(contract) {
   let total = moment.duration();
@@ -111,8 +112,13 @@ function getContractLengthInYears(contract) {
     });
   }
   return dateReadable(total);
-}
+} // getContractLengthInYears
 
+/**
+ * returns a readable format of the date/time
+ *
+ * @param time - the date/time
+ */
 function dateReadable(time) {
   let read = '';
   let comma = false;
@@ -140,17 +146,23 @@ function dateReadable(time) {
   }
 
   return read;
-}
+} // dateReadable
 
+/**
+ * return a readable project length instead of some other format
+ *
+ * @param project - the project
+ */
 function getProjectLengthInYearsReadable(project) {
   let length = getProjectLengthInYears(project);
   return dateReadable(length);
-}
+} // getProjectLengthInYearsReadable
 
 /**
  * Converts the intervals to length of time in years
  *
  * @param project the project to convert
+ * @return number - time in years
  */
 function getProjectLengthInYears(project) {
   let startMoment = moment(project.startDate);
@@ -179,6 +191,12 @@ function getProjectLengthInYears(project) {
 function current(value) {
   return value ? 'Yes' : 'No';
 } // current
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      EXPORT                      |
+// |                                                  |
+// |--------------------------------------------------|
 
 export default {
   created,

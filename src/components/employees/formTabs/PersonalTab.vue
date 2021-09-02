@@ -285,6 +285,7 @@ async function updateBoxes() {
 /**
  * Checks whether the current user role has admin permissions, used specifically
  * to prevent the manager from changing their own role on the Employee tab.
+ *
  * @return - boolean: true if the user role is admin
  */
 function userhasAdminPermissions() {
@@ -294,7 +295,7 @@ function userhasAdminPermissions() {
 /**
  * Checks if the profile accessed is the signed-in user's profile.
  *
- * @returns boolean - true if the profile is the user's profile
+ * @return boolean - true if the profile is the user's profile
  */
 function userIsEmployee() {
   if (this.$route.params.id == this.userId) {
@@ -353,6 +354,12 @@ function watchValidating(val) {
     this.validateFields();
   }
 } // watchValidating
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      EXPORT                      |
+// |                                                  |
+// |--------------------------------------------------|
 
 export default {
   created,

@@ -275,7 +275,8 @@ function denyEducation() {
 
 /**
  * Parse the date after losing focus.
- * @returns String - The date in YYYY-MM format
+ *
+ * @return String - The date in YYYY-MM format
  */
 function parseEventDate() {
   return this.parseDateMonthYear(event.target.value);
@@ -302,7 +303,7 @@ function addSchool() {
 } // addSchool
 
 /**
- * Add a minor/major/concentration.
+ * Add an empty minor/major/concentration.
  *
  * @param array - array to add item to.
  */
@@ -311,7 +312,7 @@ function addItem(array) {
 } //addItem
 
 /**
- * Add a Degree for a school.
+ * Add an empty Degree for a school.
  *
  * @param index - index of school to add degree to
  */
@@ -359,8 +360,9 @@ function deleteItem(array, index) {
 
 /**
  * Changes the format of the string to title case
+ *
  * @param str - the string to be converted
- * @return the title case formatted string
+ * @return string - the title case formatted string
  */
 function titleCase(str) {
   str = str.toLowerCase().split(' ');
@@ -368,7 +370,7 @@ function titleCase(str) {
     str[i] = str[i].charAt(0).toUpperCase() + str[i].slice(1);
   }
   return str.join(' ');
-} //titleCase
+} // titleCase
 
 /**
  * Validate all input fields are valid. Emit to parent the error status.
@@ -402,6 +404,12 @@ function watchValidating(val) {
     this.validateFields();
   }
 } // watchValidating
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      EXPORT                      |
+// |                                                  |
+// |--------------------------------------------------|
 
 export default {
   created,

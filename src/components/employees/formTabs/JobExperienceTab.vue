@@ -403,7 +403,7 @@ function formatRange(range) {
  * Checks if the current company has any positions without an end date
  *
  * @param index The index of the company in the editedJobExperienceInfo.companies
- * @return whether or not the positions for that company have all their end dates filled
+ * @return boolean - whether or not the positions for that company have all their end dates filled
  */
 function hasEndDatesFilled(index) {
   let hasEndDatesFilled = true;
@@ -416,7 +416,8 @@ function hasEndDatesFilled(index) {
 
 /**
  * Parse the date after losing focus.
- * @returns String - the date in YYYY-MM format
+ *
+ * @return String - the date in YYYY-MM format
  */
 function parseEventDate() {
   return this.parseDateMonthYear(event.target.value);
@@ -494,6 +495,12 @@ function watchValidating(val) {
     this.validateFields();
   }
 } // watchValidating
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      EXPORT                      |
+// |                                                  |
+// |--------------------------------------------------|
 
 export default {
   computed: {

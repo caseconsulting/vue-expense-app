@@ -40,7 +40,7 @@ function created() {
   if (!this.isEmpty(this.model.awards)) {
     this.filteredList = this.model.awards.slice(0, 5);
   }
-}
+} // created
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -56,7 +56,13 @@ function onPageChange() {
   var startIndex = 5 * (this.page - 1); //each page contains 5 award entries
   var endIndex = startIndex + 5;
   this.filteredList = this.model.awards.slice(startIndex, endIndex);
-}
+} // onPageChange
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      EXPORT                      |
+// |                                                  |
+// |--------------------------------------------------|
 
 export default {
   created,

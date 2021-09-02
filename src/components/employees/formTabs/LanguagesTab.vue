@@ -102,7 +102,8 @@ function deleteLanguage(index) {
 
 /**
  * Creates an array of all languages that a user has entered multiple times (based on name).
- * @returns an array of language names that a user has entered multiple times
+ *
+ * @return array  - array of language names that a user has entered multiple times
  */
 function duplicateLangEntries() {
   //declares function to count unique name properties of js objects
@@ -120,8 +121,9 @@ function duplicateLangEntries() {
 
 /**
  * Checks to see if a language is a duplicate of one that is already entered by a user.
- * @param lang String - the name of the language
- * @returns boolean - true if the language was already entered by user (duplicate) false otherwise
+ *
+ * @param lang - the string name of the language
+ * @return boolean - true if the language was already entered by user (duplicate) false otherwise
  */
 function isDuplicate(lang) {
   let duplicates = this.duplicateLangEntries();
@@ -181,6 +183,12 @@ function watchValidating(val) {
     this.validateFields();
   }
 } // watchValidating
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      EXPORT                      |
+// |                                                  |
+// |--------------------------------------------------|
 
 export default {
   created,
