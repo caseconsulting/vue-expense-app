@@ -629,6 +629,23 @@ async function created() {
 function watchModelID() {
   this.editedExpenseType = _.cloneDeep(this.model); //set editedExpense to new value of model
 
+  // set array used for custom access chip-selector to previously saved data but without the access strings
+  // This code sucks
+  if (this.editedExpenseType.accessibleBy.includes('Custom')) {
+    let index = 1;
+    if (this.editedExpenseType.accessibleBy.includes('FullTime')) {
+      index++;
+    }
+    if (this.editedExpenseType.accessibleBy.includes('PartTime')) {
+      index++;
+    }
+    if (this.editedExpenseType.accessibleBy.includes('Intern')) {
+      index++;
+    }
+    // set only the ids of people with custom access (don't include the access type)
+    this.customAccess = this.editedExpenseType.accessibleBy.splice(index, this.editedExpenseType.accessibleBy.length);
+  }
+
   //when model id is not empty then must be editing an expense
   if (!this.isEmpty(this.model.id)) {
     this.emit('editing-expense-type'); //notify parent that expense is being edited
