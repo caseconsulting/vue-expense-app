@@ -138,6 +138,19 @@ function select(budgetYear) {
 
 // |--------------------------------------------------|
 // |                                                  |
+// |                    WATCHERS                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * watcher for toggleBudgetSelectModal
+ */
+function watchToggleBudgetSelectModal() {
+  this.activate = true;
+} // watchToggleBudgetSelectModal
+
+// |--------------------------------------------------|
+// |                                                  |
 // |                      EXPORT                      |
 // |                                                  |
 // |--------------------------------------------------|
@@ -164,9 +177,7 @@ export default {
     'hasBudgets'
   ],
   watch: {
-    toggleBudgetSelectModal: function () {
-      this.activate = true;
-    }
+    toggleBudgetSelectModal: watchToggleBudgetSelectModal
   }
 };
 </script>

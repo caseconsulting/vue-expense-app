@@ -17,6 +17,19 @@
 <script>
 // |--------------------------------------------------|
 // |                                                  |
+// |                    WATCHERS                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * watcher for toggleWarning
+ */
+function watchToggleWarning() {
+  this.activate = this.toggleWarning;
+} // watchToggleWarning
+
+// |--------------------------------------------------|
+// |                                                  |
 // |                      EXPORT                      |
 // |                                                  |
 // |--------------------------------------------------|
@@ -29,9 +42,7 @@ export default {
   },
   props: ['toggleWarning'], // dialog activator
   watch: {
-    toggleWarning: function () {
-      this.activate = this.toggleWarning;
-    }
+    toggleWarning: watchToggleWarning
   }
 };
 </script>

@@ -58,6 +58,19 @@ function isPlural(val) {
 
 // |--------------------------------------------------|
 // |                                                  |
+// |                    WATCHERS                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * watcher for toggleSubmissionConfirmation
+ */
+function watchToggleSubmissionConfirmation() {
+  this.activate = this.toggleSubmissionConfirmation;
+} // watchToggleSubmissionConfirmation
+
+// |--------------------------------------------------|
+// |                                                  |
 // |                      EXPORT                      |
 // |                                                  |
 // |--------------------------------------------------|
@@ -77,9 +90,7 @@ export default {
     'toggleSubmissionConfirmation' // dialog activator
   ],
   watch: {
-    toggleSubmissionConfirmation: function () {
-      this.activate = this.toggleSubmissionConfirmation;
-    }
+    toggleSubmissionConfirmation: watchToggleSubmissionConfirmation
   }
 };
 </script>

@@ -61,6 +61,19 @@ function emit(msg, data) {
 
 // |--------------------------------------------------|
 // |                                                  |
+// |                    WATCHERS                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * watcher for toggleUnreimburseModal
+ */
+function watchToggleUnreimburseModal() {
+  this.activate = true;
+} // watchToggleUnreimburseModal
+
+// |--------------------------------------------------|
+// |                                                  |
 // |                      EXPORT                      |
 // |                                                  |
 // |--------------------------------------------------|
@@ -79,9 +92,7 @@ export default {
     'expense' // expense to unreimburse
   ],
   watch: {
-    toggleUnreimburseModal: function () {
-      this.activate = true;
-    }
+    toggleUnreimburseModal: watchToggleUnreimburseModal
   }
 };
 </script>

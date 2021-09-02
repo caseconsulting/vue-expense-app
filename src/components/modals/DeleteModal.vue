@@ -58,6 +58,19 @@ function emit(msg, data) {
 
 // |--------------------------------------------------|
 // |                                                  |
+// |                    WATCHERS                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * watcher for toggleDeleteModal
+ */
+function watchToggleDeleteModal() {
+  this.activate = true;
+} // watchToggleDeleteModal
+
+// |--------------------------------------------------|
+// |                                                  |
 // |                      EXPORT                      |
 // |                                                  |
 // |--------------------------------------------------|
@@ -77,9 +90,7 @@ export default {
     'deleteInfo' //delete info to be displayed
   ],
   watch: {
-    toggleDeleteModal: function () {
-      this.activate = true;
-    }
+    toggleDeleteModal: watchToggleDeleteModal
   }
 };
 </script>

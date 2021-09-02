@@ -916,6 +916,35 @@ function clearForm() {
 
 // |--------------------------------------------------|
 // |                                                  |
+// |                    WATCHERS                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * watcher for toggleResumeParser
+ */
+function watchToggleResumeParser() {
+  this.activate = true;
+} // watchToggleResumeParser
+
+/**
+ * watcher for file
+ */
+function watchFile() {
+  this.validFile = this.$refs.submit.validate();
+} // watchFile
+
+/**
+ * watcher for watchActivate - set the editedEmployeeForm if activate is true
+ */
+function watchActivate() {
+  if (this.activate) {
+    this.editedEmployeeForm = _.cloneDeep(this.employee);
+  }
+} // watchActivate
+
+// |--------------------------------------------------|
+// |                                                  |
 // |                      EXPORT                      |
 // |                                                  |
 // |--------------------------------------------------|
@@ -1063,17 +1092,9 @@ export default {
   },
   props: ['toggleResumeParser', 'employee'],
   watch: {
-    toggleResumeParser: function () {
-      this.activate = true;
-    },
-    file: function () {
-      this.validFile = this.$refs.submit.validate();
-    },
-    activate: function () {
-      if (this.activate) {
-        this.editedEmployeeForm = _.cloneDeep(this.employee);
-      }
-    }
+    toggleResumeParser: watchToggleResumeParser,
+    file: watchFile,
+    activate: watchActivate
   }
 };
 </script>

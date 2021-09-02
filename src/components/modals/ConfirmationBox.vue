@@ -95,6 +95,19 @@ function emit(msg, data) {
 
 // |--------------------------------------------------|
 // |                                                  |
+// |                    WATCHERS                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * watcher for toggleConfirmationBox
+ */
+function watchToggleConfirmationBox() {
+  this.activate = true;
+} // watchToggleConfirmationBox
+
+// |--------------------------------------------------|
+// |                                                  |
 // |                      EXPORT                      |
 // |                                                  |
 // |--------------------------------------------------|
@@ -117,9 +130,7 @@ export default {
     'isOverCovered'
   ],
   watch: {
-    toggleConfirmationBox: function () {
-      this.activate = true;
-    }
+    toggleConfirmationBox: watchToggleConfirmationBox
   }
 };
 </script>

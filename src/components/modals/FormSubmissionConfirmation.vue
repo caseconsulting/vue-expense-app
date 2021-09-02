@@ -55,6 +55,19 @@ function emit(msg) {
 
 // |--------------------------------------------------|
 // |                                                  |
+// |                    WATCHERS                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * watcher for toggleSubmissionConfirmation
+ */
+function watchToggleSubmissionConfirmation() {
+  this.activate = this.toggleSubmissionConfirmation;
+} // watchToggleSubmissionConfirmation
+
+// |--------------------------------------------------|
+// |                                                  |
 // |                      EXPORT                      |
 // |                                                  |
 // |--------------------------------------------------|
@@ -74,9 +87,7 @@ export default {
     'type' //sends appropriate emits based on where its called
   ],
   watch: {
-    toggleSubmissionConfirmation: function () {
-      this.activate = this.toggleSubmissionConfirmation;
-    }
+    toggleSubmissionConfirmation: watchToggleSubmissionConfirmation
   }
 };
 </script>

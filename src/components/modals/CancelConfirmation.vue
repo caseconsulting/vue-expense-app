@@ -57,6 +57,29 @@ function emit(msg) {
 
 // |--------------------------------------------------|
 // |                                                  |
+// |                    WATCHERS                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * watcher for toggleSubmissionConfirmation
+ */
+function watchToggleSubmissionConfirmation() {
+  this.activate = this.toggleSubmissionConfirmation;
+  this.loading = false;
+} // watchToggleSubmissionConfirmation
+
+/**
+ * watcher for activate - emit close if it is false
+ */
+function watchActivate() {
+  if (!this.activate) {
+    emit('closeModal');
+  }
+} // watchActivate
+
+// |--------------------------------------------------|
+// |                                                  |
 // |                      EXPORT                      |
 // |                                                  |
 // |--------------------------------------------------|
@@ -76,15 +99,8 @@ export default {
     'type' //sends appropriate emits based on where its called
   ],
   watch: {
-    toggleSubmissionConfirmation: function () {
-      this.activate = this.toggleSubmissionConfirmation;
-      this.loading = false;
-    },
-    activate: function () {
-      if (!this.activate) {
-        emit('closeModal');
-      }
-    }
+    toggleSubmissionConfirmation: watchToggleSubmissionConfirmation,
+    activate: watchActivate
   }
 };
 </script>
