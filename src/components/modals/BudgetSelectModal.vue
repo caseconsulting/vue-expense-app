@@ -1,7 +1,7 @@
 <template>
   <div>
-    <v-dialog v-if="hasBudgets" v-model="activate" persistent max-width="400">
-      <v-card>
+    <v-dialog v-model="activate" persistent max-width="400">
+      <v-card v-if="hasBudgets">
         <!-- Anniversary Date -->
         <v-toolbar color="#565651" dark>
           <v-toolbar-title>Anniversary Date: {{ getAnniversaryDate }}</v-toolbar-title>
@@ -37,9 +37,7 @@
         </v-list>
         <!-- End Buttons -->
       </v-card>
-    </v-dialog>
-    <v-dialog v-else v-model="activate" persistent max-width="400">
-      <v-card>
+      <v-card v-else>
         <!-- Anniversary Date -->
         <v-toolbar color="#565651" dark>
           <v-toolbar-title>Anniversary Date: {{ getAnniversaryDate }}</v-toolbar-title>
