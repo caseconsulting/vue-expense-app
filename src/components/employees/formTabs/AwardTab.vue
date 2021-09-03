@@ -24,16 +24,16 @@
             max-width="290px"
             min-width="290px"
           >
-            <template v-slot:activator="{ on, attrs }">
+            <template v-slot:activator="{ on }">
               <v-text-field
                 ref="formFields"
-                :value="award.dateReceived | formatDate"
+                :value="award.dateReceived | formatDateMonthYear"
                 label="Date Received"
                 prepend-icon="event_available"
-                :rules="getDateRules()"
-                hint="MM/DD/YYYY format"
-                v-mask="'##/##/####'"
-                v-bind="attrs"
+                :rules="getDateMonthYearRules()"
+                hint="MM/YYYY format"
+                v-mask="'##/####'"
+                persistent-hint
                 v-on="on"
                 @blur="award.dateReceived = parseEventDate($event)"
                 clearable
@@ -44,6 +44,7 @@
               v-model="award.dateReceived"
               no-title
               @input="award.showReceivedMenu = false"
+              type="month"
             ></v-date-picker>
           </v-menu>
           <!-- End Received Date -->
@@ -72,8 +73,8 @@
 <script>
 import api from '@/shared/api.js';
 import _ from 'lodash';
-import { getDateRules, getRequiredRules } from '@/shared/validationUtils.js';
-import { formatDate, parseDate } from '@/utils/utils';
+import { getDateMonthYearRules, getRequiredRules } from '@/shared/validationUtils.js';
+import { formatDateMonthYear, parseDate } from '@/utils/utils';
 import { mask } from 'vue-the-mask';
 const moment = require('moment-timezone');
 moment.tz.setDefault('America/New_York');
@@ -121,10 +122,10 @@ function deleteAward(index) {
 
 /**
  * Parse the date after losing focus.
- * @returns String - The date in YYYY-MM-DD format
+ * @returns String - The date in YYYY-MM format
  */
 function parseEventDate() {
-  return this.parseDate(event.target.value);
+  return this.parseDateMonthYear(event.target.value);
 } // parseEventDate
 
 /**
@@ -168,12 +169,12 @@ export default {
   },
   directives: { mask },
   filters: {
-    formatDate
+    formatDateMonthYear
   },
   methods: {
     addAward,
     deleteAward,
-    getDateRules,
+    getDateMonthYearRules,
     getRequiredRules,
     parseDate,
     parseEventDate,
