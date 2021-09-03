@@ -27,12 +27,12 @@
     <p v-if="admin"><b>Employee Role:</b> {{ this.model.employeeRole | startCase }}</p>
     <!-- Hire Date -->
     <p v-if="admin || employee"><b> Hire Date:</b> {{ monthDayYearFormat(this.model.hireDate) }}</p>
-    <!-- Status -->
-    <p v-if="admin || employee"><b>Status:</b> {{ getWorkStatus(this.model.workStatus) }}</p>
     <!-- Departure Date -->
     <p v-if="!isEmpty(this.model.deptDate) && admin">
       <b>Departure Date:</b> {{ monthDayYearFormat(this.model.deptDate) }}
     </p>
+    <!-- Status -->
+    <p v-if="admin || employee"><b>Status:</b> {{ getWorkStatus(this.model.workStatus) }}</p>
     <!-- Mifi Status -->
     <p v-if="this.model.employeeRole !== 'intern' && this.model.workStatus !== 0">
       <b>Mifi Status:</b>

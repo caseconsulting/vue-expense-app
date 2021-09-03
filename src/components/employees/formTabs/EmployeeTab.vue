@@ -128,7 +128,44 @@
           :disabled="!admin"
         ></v-date-picker>
       </v-menu>
-
+      <!-- If inactive, set Departure Date -->
+      <v-menu
+        v-if="isInactive()"
+        ref="departureMenu"
+        :rules="getRequiredRules()"
+        :close-on-content-click="false"
+        v-model="departureMenu"
+        :nudge-right="40"
+        transition="scale-transition"
+        offset-y
+        max-width="290px"
+        min-width="290px"
+        :disabled="!admin"
+      >
+        <template v-slot:activator="{ on }">
+          <v-text-field
+            ref="formFields"
+            v-model="deptDateFormatted"
+            :rules="getDateRules()"
+            label="Departure Date"
+            hint="MM/DD/YYYY format"
+            v-mask="'##/##/####'"
+            persistent-hint
+            prepend-icon="event"
+            @blur="editedEmployee.deptDate = parseDate(deptDateFormatted)"
+            @input="departureMenu = false"
+            v-on="on"
+            :disabled="!admin"
+          ></v-text-field>
+        </template>
+        <v-date-picker
+          v-model="editedEmployee.deptDate"
+          no-title
+          :min="editedEmployee.hireDate"
+          @input="departureMenu = false"
+          :disabled="!admin"
+        ></v-date-picker>
+      </v-menu>
       <!-- Full/Part/Inactive Status [MOBILE] -->
       <v-radio-group v-if="isMobile()" v-model="statusRadio" row mandatory :disabled="!admin">
         <v-row class="ma-0">
@@ -180,45 +217,6 @@
         <!-- End Full/Part/Inactive Status [DESKTOP] -->
       </v-radio-group>
       <!-- End [DESKTOP] -->
-      <!-- If inactive, set Departure Date -->
-      <v-menu
-        v-if="isInactive()"
-        ref="departureMenu"
-        :rules="getRequiredRules()"
-        :close-on-content-click="false"
-        v-model="departureMenu"
-        :nudge-right="40"
-        transition="scale-transition"
-        offset-y
-        max-width="290px"
-        min-width="290px"
-        :disabled="!admin"
-      >
-        <template v-slot:activator="{ on }">
-          <v-text-field
-            ref="formFields"
-            v-model="deptDateFormatted"
-            :rules="getDateRules()"
-            label="Departure Date"
-            hint="MM/DD/YYYY format"
-            v-mask="'##/##/####'"
-            persistent-hint
-            prepend-icon="event"
-            @blur="editedEmployee.deptDate = parseDate(deptDateFormatted)"
-            @input="departureMenu = false"
-            v-on="on"
-            :disabled="!admin"
-          ></v-text-field>
-        </template>
-        <v-date-picker
-          v-model="editedEmployee.deptDate"
-          no-title
-          :min="editedEmployee.hireDate"
-          @input="departureMenu = false"
-          :disabled="!admin"
-        ></v-date-picker>
-      </v-menu>
-      <!-- End Full/Part/Inactive Status [DESKTOP] -->
       <v-switch
         v-model="mifiStatus"
         label="Use Mifi instead of increased technology budget ($150)"
