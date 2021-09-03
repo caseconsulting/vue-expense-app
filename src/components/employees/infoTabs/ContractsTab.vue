@@ -38,9 +38,9 @@
               </v-row>
             </p>
             <p><b>Time on Project (in Years): </b>{{ getProjectLengthInYears(project) }}</p>
-            <p><b>Start Date: </b>{{ monthDayYearFormat(project.startDate) }}</p>
+            <p><b>Start Date: </b>{{ project.startDate | monthYearFormat }}</p>
             <div v-if="project.endDate">
-              <p><b>End Date: </b>{{ monthDayYearFormat(project.endDate) }}</p>
+              <p><b>End Date: </b>{{ project.endDate | monthYearFormat }}</p>
             </div>
             <hr v-if="projIndex < contract.projects.length - 1" class="horizontalBar mb-3" />
           </div>
@@ -64,7 +64,7 @@
 </template>
 
 <script>
-import { isEmpty, monthDayYearFormat } from '@/utils/utils';
+import { isEmpty, monthYearFormat } from '@/utils/utils';
 import moment from 'moment-timezone';
 
 // |--------------------------------------------------|
@@ -152,13 +152,13 @@ export default {
     };
   },
   filters: {
-    current
+    current,
+    monthYearFormat
   },
   methods: {
     getContractLengthInYears,
     getProjectLengthInYears,
     isEmpty,
-    monthDayYearFormat,
     onPageChange
   },
   props: ['model']

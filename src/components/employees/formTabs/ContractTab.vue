@@ -60,12 +60,12 @@
                 <v-text-field
                   :id="'start-field-' + index + '-' + projIndex"
                   ref="formFields"
-                  :value="project.startDate | formatDate"
+                  :value="project.startDate | formatDateMonthYear"
                   label="Start Date"
-                  hint="MM/DD/YYYY format"
-                  v-mask="'##/##/####'"
+                  hint="MM/YYYY format"
+                  v-mask="'##/####'"
                   prepend-icon="event_available"
-                  :rules="[...getRequiredRules(), ...getDateRules(), dateOrderRule(index, projIndex)]"
+                  :rules="[...getRequiredRules(), ...getDateMonthYearRules(), dateOrderRule(index, projIndex)]"
                   v-bind="attrs"
                   v-on="on"
                   @blur="project.startDate = parseEventDate($event)"
@@ -78,6 +78,7 @@
                 :max="project.endDate"
                 no-title
                 @input="project.showStartMenu = false"
+                type="month"
               ></v-date-picker>
             </v-menu>
           </v-col>
@@ -96,16 +97,16 @@
                   :id="'end-field-' + index + '-' + projIndex"
                   ref="formFields"
                   :disabled="project.presentDate"
-                  :value="project.endDate | formatDate"
+                  :value="project.endDate | formatDateMonthYear"
                   label="End Date"
                   prepend-icon="event_busy"
                   :rules="[
-                    ...getDateOptionalRules(),
+                    ...getDateMonthYearOptionalRules(),
                     dateOrderRule(index, projIndex),
                     endDatePresentRule(index, projIndex)
                   ]"
-                  hint="MM/DD/YYYY format"
-                  v-mask="'##/##/####'"
+                  hint="MM/YYYY format"
+                  v-mask="'##/####'"
                   v-bind="attrs"
                   v-on="on"
                   clearable
@@ -119,6 +120,7 @@
                 :min="project.startDate"
                 no-title
                 @input="project.showEndMenu = false"
+                type="month"
               ></v-date-picker>
             </v-menu>
             <!-- End End Date -->
@@ -168,8 +170,8 @@
 import api from '@/shared/api.js';
 import _ from 'lodash';
 import { mask } from 'vue-the-mask';
-import { getDateRules, getDateOptionalRules, getRequiredRules } from '@/shared/validationUtils.js';
-import { isEmpty, formatDate, parseDate, isMobile } from '@/utils/utils';
+import { getDateMonthYearRules, getDateMonthYearOptionalRules, getRequiredRules } from '@/shared/validationUtils.js';
+import { isEmpty, formatDateMonthYear, parseDateMonthYear, isMobile } from '@/utils/utils';
 const moment = require('moment');
 
 // |--------------------------------------------------|
@@ -282,7 +284,7 @@ function hasEndDatesFilled(index) {
  * @returns String - The date in YYYY-MM-DD format
  */
 function parseEventDate() {
-  return this.parseDate(event.target.value);
+  return this.parseDateMonthYear(event.target.value);
 } //parseEventDate
 
 /**
@@ -391,19 +393,19 @@ export default {
   },
   directives: { mask },
   filters: {
-    formatDate
+    formatDateMonthYear
   },
   methods: {
     addContract,
     addProject,
     deleteContract,
     deleteProject,
-    getDateRules,
-    getDateOptionalRules,
+    getDateMonthYearRules,
+    getDateMonthYearOptionalRules,
     getRequiredRules,
     hasEndDatesFilled,
     isEmpty,
-    parseDate,
+    parseDateMonthYear,
     parseEventDate,
     populateDropDowns,
     validateFields
