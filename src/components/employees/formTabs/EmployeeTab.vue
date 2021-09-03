@@ -213,6 +213,7 @@
         <v-date-picker
           v-model="editedEmployee.deptDate"
           no-title
+          :min="editedEmployee.hireDate"
           @input="departureMenu = false"
           :disabled="!admin"
         ></v-date-picker>
@@ -249,7 +250,6 @@ const regex = /^(([^<>()[\]\\.,;:\s@#"]+(\.[^<>()[\]\\.,;:\s@#"]+)*)|(".+"))@con
  */
 async function created() {
   window.EventBus.$emit('created', 'employee'); // emit employee tab was created
-
   // get all employees
   this.employees = await api.getItems(api.EMPLOYEES);
   // set formatted hire date
