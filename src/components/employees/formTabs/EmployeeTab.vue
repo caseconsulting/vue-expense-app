@@ -147,7 +147,7 @@
           <v-text-field
             ref="formFields"
             v-model="deptDateFormatted"
-            :rules="getDateRules()"
+            :rules="[...getDateRules(), ...validateDates()]"
             label="Departure Date"
             hint="MM/DD/YYYY format"
             v-mask="'##/##/####'"
@@ -201,7 +201,7 @@
       <v-radio-group v-else v-model="statusRadio" row mandatory hide-details :disabled="!admin">
         <v-radio label="Full Time" value="full"></v-radio>
         <v-radio label="Part Time" value="part" @change="viewStatus()"></v-radio>
-        <v-radio label="Inactive" value="inactive" @click="checkDate()"></v-radio>
+        <v-radio label="Inactive" value="inactive"></v-radio>
         <!-- custom input field -->
         <div v-if="isPartTime()">
           <v-text-field
@@ -229,7 +229,7 @@
 <script>
 import api from '@/shared/api.js';
 import _ from 'lodash';
-import { getDateRules, getNumberRules, getRequiredRules } from '@/shared/validationUtils.js';
+import { getDateRules, getNumberRules, getRequiredRules, getValidateFalse } from '@/shared/validationUtils.js';
 import { formatDate, isEmpty, parseDate, isMobile } from '@/utils/utils';
 import { mask } from 'vue-the-mask';
 import { getRole } from '@/utils/auth';
@@ -561,6 +561,14 @@ export default {
       status: '100', // work status value
       statusRadio: 'full', // work status button
       statusRules: [(v) => !this.isEmpty(v) || '', (v) => (v !== '0' && v !== '00') || ''],
+      validateDates: () => {
+        // if the hire date is later than the departure date
+        if (this.editedEmployee.hireDate > this.editedEmployee.deptDate) {
+          return this.getValidateFalse();
+        } else {
+          return true;
+        }
+      },
       userId: null,
       value: '' // used for removing non-number characters from the workstatus
     };
@@ -574,6 +582,7 @@ export default {
     getNumberRules,
     getRequiredRules,
     getRole,
+    getValidateFalse,
     isEmpty,
     isInactive,
     isMobile,

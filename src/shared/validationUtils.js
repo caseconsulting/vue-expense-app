@@ -92,3 +92,11 @@ export function getURLRules() {
       'URL must be valid. Only http(s) are accepted.'
   ]; // rules for training url
 } // getURLRules
+
+/**
+ * Gets the rules for validating employee hire/departure dates
+ * @returns Array - The array of rule functions
+ */
+export function getValidateFalse() {
+  return [(v) => isEmpty(v) || 'Departure date must be after hire date'];
+} // getValidateRules
