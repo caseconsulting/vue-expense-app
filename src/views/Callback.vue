@@ -10,8 +10,15 @@ function mounted() {
       this.setAccessToken();
       this.setIdToken();
       this.setProfile();
-      await this.setRole();
-      window.location.href = '/loginFailed';
+      let employeeRole = await this.setRole();
+
+      if (employeeRole === 'admin') {
+        // user's role is admin
+        window.location.href = '/reimbursements';
+      } else {
+        // user's role is not admin
+        window.location.href = '/';
+      }
     } catch (error) {
       window.location.href = '/loginFailed';
     }

@@ -18,49 +18,15 @@
 </template>
 
 <script>
-import { isLoggedIn, login, getRole } from '@/utils/auth';
-import api from '../shared/api';
-import { v4 as uuid } from 'uuid';
-const moment = require('moment-timezone');
-moment.tz.setDefault('America/New_York');
-const login_format = 'MMM Do, YYYY HH:mm:ss';
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                 LIFECYCLE HOOKS                  |
-// |                                                  |
-// |--------------------------------------------------|
+import { isLoggedIn, login } from '@/utils/auth';
 
 /**
- * Route to admin page if user role is admin, otherwise route to home page
+ * Route to home page on log in.
  */
-async function created() {
+function created() {
   if (this.isLoggedIn()) {
-    // logged in
-    if (this.getRole() === 'admin') {
-      // user's role is admin
-      this.$router.push('reimbursements');
-    } else {
-      // user's role is not admin
-      this.$router.push('home');
-    }
-    await this.recordLogin();
+    this.$router.push('home');
   }
-}
-
-async function recordLogin() {
-  let employee = await api.getUser();
-  employee.lastLogin = moment(new Date()).format(login_format);
-  await api.updateItem(api.EMPLOYEES, employee);
-  // Create an audit of the success
-  await api.createItem(api.AUDIT, {
-    id: uuid(),
-    type: 'login',
-    tags: ['account'],
-    employeeId: employee.id,
-    description: `${employee.firstName} ${employee.lastName} has logged in`,
-    timeToLive: 60
-  });
 } // created
 
 // |--------------------------------------------------|
@@ -72,10 +38,8 @@ async function recordLogin() {
 export default {
   created,
   methods: {
-    login,
-    getRole,
     isLoggedIn,
-    recordLogin
+    login
   }
 };
 </script>
