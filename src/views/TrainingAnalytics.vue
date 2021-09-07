@@ -240,7 +240,7 @@ async function created() {
       urlObject.isCaseLogo = true;
     }
   });
-}
+} // created
 
 // |--------------------------------------------------|
 // |                                                  |

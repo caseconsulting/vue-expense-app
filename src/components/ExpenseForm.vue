@@ -320,7 +320,7 @@ const IsoFormat = 'YYYY-MM-DD';
 /**
  * Get the category options for the selected expense type. Returns a sorted list of categories for the expense type.
  *
- * @return
+ * @return array - categories
  */
 function getCategories() {
   if (this.selectedExpenseType) {
@@ -372,7 +372,7 @@ function isAdmin() {
  */
 function isIntern() {
   return this.employeeRole === 'intern';
-} // isAdmin
+} // isIntern
 
 /**
  * Checks if a receipt is required. Returns true if the receipt is required, otherwise returns false.
@@ -424,7 +424,8 @@ function notesRules() {
   }
 
   return notesRules;
-}
+} // notesRules
+
 /**
  * Creates the label for the notes section base on if it is optional
  *
@@ -436,7 +437,8 @@ function notesLabel() {
   } else {
     return 'Notes (optional)';
   }
-}
+} // notesLabel
+
 /**
  * Creates the label for the url section base on if it is optional
  *
@@ -444,7 +446,7 @@ function notesLabel() {
  */
 function urlLabel() {
   return this.editedExpense.requireURL ? 'URL' : 'URL (optional)';
-}
+} // urlLabel
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -790,7 +792,8 @@ function clearForm() {
 
 /**
  * Determines which hint to display for the cost field.
- * @returns String - The hint to display
+ *
+ * @return String - The hint to display
  */
 function costHint() {
   if (!this.editedExpense.employeeId) {
@@ -893,9 +896,9 @@ async function createNewEntry() {
 /**
  * Custom filter for employee autocomplete options.
  *
- * @param item -
- * @param queryText -
- * @return
+ * @param item - employee
+ * @param queryText - text used for filtering
+ * @return string - filtered employee name
  */
 function customFilter(item, queryText) {
   const query = queryText ? queryText : '';
@@ -931,6 +934,8 @@ function emit(msg) {
 
 /**
  * Filters expense type. Returns the expense types that the employee has access to and the budget amount.
+ *
+ * @return - filtered expense types
  */
 function filteredExpenseTypes() {
   let filteredExpType = [];
@@ -1084,7 +1089,12 @@ function isReceiptRequired() {
   return true;
 } // isReceiptRequired
 
-//Returns a number with two decimal point precision as a string.
+/**
+ * Returns a number with two decimal point precision as a string.
+ *
+ * @param value the original number
+ * @return string - formatted number
+ */
 function moneyFilter(value) {
   return `${new Intl.NumberFormat('en-US', {
     style: 'decimal',
@@ -1096,7 +1106,9 @@ function moneyFilter(value) {
 
 /**
  * Parses the cost to get rid of commas.
- * @returns String - The cost without formatting
+ *
+ * @param cost - preformatted cost
+ * @return String - The cost without formatting
  */
 function parseCost(cost) {
   if (cost && !_.isEmpty(cost)) {
@@ -1120,6 +1132,7 @@ function parseDate(date) {
  * preformats different US/Europe money formats for parsing
  *
  * @param float - number to be formatted
+ * @return string - formatted number
  */
 function preformatFloat(float) {
   if (!float) {

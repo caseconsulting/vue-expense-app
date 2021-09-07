@@ -128,7 +128,10 @@ function getAmount(budget) {
 } // getAmount
 
 /**
- * Date
+ * formatted date
+ *
+ * @param item - expenseTypeData item
+ * @return string - string formatted from item object dates
  */
 function getDate(item) {
   return (
@@ -164,6 +167,7 @@ function getPending(budget) {
  * Returns 'Allowed' or 'Not Allowed' depending on whether an expense type allows overdraft.
  *
  * @param expenseType - expense type to check
+ * @return String - boolean that has been converted to human readable format
  */
 function odFlagMessage(expenseType) {
   return expenseType.odFlag ? 'Allowed' : 'Not Allowed';

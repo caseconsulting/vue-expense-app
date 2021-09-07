@@ -97,7 +97,7 @@ moment.tz.setDefault('America/New_York');
 import api from '@/shared/api.js';
 
 /**
- * initial setup
+ * initial listener setup
  */
 function created() {
   window.EventBus.$on('canceled-delete-BlogPost', () => {
@@ -189,6 +189,8 @@ async function deleteBlogPost() {
 
 /**
  * filter that converts boolean to yes/no
+ *
+ * @return string - yes or no based on boolean value
  */
 function birthdayFeedResponse(value) {
   if (value == true) {

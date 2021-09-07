@@ -436,6 +436,11 @@ import { convertToMoneyString } from '@/utils/utils';
 // |                                                  |
 // |--------------------------------------------------|
 
+/**
+ * the list of expense types
+ *
+ * @return array - the filtered expense types
+ */
 function expenseTypeList() {
   return this.filteredExpenseTypes;
 } // expenseTypeList
@@ -472,6 +477,9 @@ async function addModelToTable() {
 
 /**
  * Returns a string of category names.
+ *
+ * @param categories - the categories to stringify
+ * @return string - the string of categories
  */
 function categoriesToString(categories) {
   let string = '';
@@ -486,6 +494,9 @@ function categoriesToString(categories) {
 
 /**
  * Returns a string of category names that are on the feed.
+ *
+ * @param categories - the categories to stringify
+ * @return string - the string of categories on the feed
  */
 function categoriesOnFeed(categories) {
   let string = '';
@@ -505,6 +516,9 @@ function categoriesOnFeed(categories) {
 
 /**
  * Returns a string of category names that require a url.
+ *
+ * @param categories - the categories to stringify
+ * @return string - the string of categories that require a url
  */
 function categoriesReqUrl(categories) {
   let string = '';
@@ -882,7 +896,7 @@ async function refreshExpenseTypes() {
  */
 function startAction() {
   this.midAction = true;
-}
+} // startAction
 
 /**
  * Scrolls window back to the top of the form.
@@ -904,6 +918,8 @@ async function updateModelInTable() {
 
 /**
  * Checks if the user is an admin. Returns true if the role is 'admin', otherwise returns false.
+ *
+ * @return boolean - whether the user is an admin
  */
 function userIsAdmin() {
   return this.getRole() === 'admin';
@@ -1005,6 +1021,23 @@ function watchFilterExpenseTypes() {
 
 // |--------------------------------------------------|
 // |                                                  |
+// |                     FILTERS                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * limits the length of the text
+ *
+ * @param val - the string to be shortened
+ * @return string - the shortened string
+ */
+function limitedText(val) {
+  // limits text displayed to 50 characters on table view
+  return val.length > 50 ? `${val.substring(0, 50)}...` : val;
+} // limitedText
+
+// |--------------------------------------------------|
+// |                                                  |
 // |                      EXPORT                      |
 // |                                                  |
 // |--------------------------------------------------|
@@ -1102,10 +1135,7 @@ export default {
     };
   },
   filters: {
-    limitedText: (val) => {
-      // limits text displayed to 50 characters on table view
-      return val.length > 50 ? `${val.substring(0, 50)}...` : val;
-    }
+    limitedText
   },
   methods: {
     addModelToTable,

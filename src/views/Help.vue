@@ -67,7 +67,9 @@ function created() {
 // |--------------------------------------------------|
 
 /**
- * Determine if userr can view.
+ * Determine if user can view.
+ *
+ * @return boolean - whether the user can view the component
  */
 function canView(qRole) {
   return qRole == this.role || this.role == 'admin' || qRole == 'user';

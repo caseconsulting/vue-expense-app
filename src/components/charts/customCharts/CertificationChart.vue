@@ -161,7 +161,7 @@ async function fillCertData() {
 /**
  * Helper function to split the text into two sections.
  * @param s - The text of the certification
- * @returns Array - An array of 2 with the split text
+ * @return Array - An array of 2 with the split text
  */
 function breakSentence(s) {
   var middle = Math.floor(s.length / 2);

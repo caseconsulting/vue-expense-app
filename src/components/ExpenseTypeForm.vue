@@ -429,7 +429,7 @@ function odFlagHint() {
 
 /**
  * Parses the budget to get rid of commas.
- * @returns String - The budget without formatting
+ * @return String - The budget without formatting
  */
 function parseBudget(budget) {
   if (budget && !_.isEmpty(budget)) {

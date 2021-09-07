@@ -104,6 +104,9 @@ moment.tz.setDefault('America/New_York');
 import _ from 'lodash';
 import { isEmpty } from '@/utils/utils';
 
+/**
+ * sets the dateRange of the audits to get
+ */
 function setDateRange() {
   if (this.$refs.dateRange.validate()) {
     // Hide the calendar popup
@@ -119,7 +122,7 @@ function setDateRange() {
     // Display chart titles with date ranges rather than 'last 24 hours'
     this.firstLoad = false;
   }
-}
+} // setDateRange
 
 /**
  * Format date range as 'DD/MM/YY' - 'DD/MM/YY' in chronological order.
@@ -148,6 +151,9 @@ function formatRange(range) {
   }
 } // formatRange
 
+/**
+ * selects the view to show
+ */
 function selectDropDown(tab) {
   // Clear date query field
   this.$refs.dateRange.reset();
@@ -159,7 +165,7 @@ function selectDropDown(tab) {
   this.firstLoad = true;
   // Change the view to selected tab
   this.selectedDropdown = tab;
-}
+} // selectDropDown
 
 // |--------------------------------------------------|
 // |                                                  |

@@ -398,7 +398,7 @@ async function created() {
 } // created
 
 /**
- * sestroyListener
+ * destroy listeners
  */
 function beforeDestroy() {
   window.EventBus.$off('confirmed-parser');
@@ -415,6 +415,8 @@ function beforeDestroy() {
 
 /**
  * Determines if any pending changes have been submitted
+ *
+ * @return boolean - if the changes have been submitted
  */
 function changesMade() {
   return !_.isEqual(this.editedEmployeeForm, this.employee);
@@ -423,6 +425,8 @@ function changesMade() {
 /**
  * Determines if the address should be shown, i.e. does one exist or has the pending
  * change been denied
+ *
+ * @return boolean - whether or not to show address
  */
 function showAddress() {
   return this.newAddress && !this.addressCanceled;
@@ -431,17 +435,25 @@ function showAddress() {
 /**
  * Determines if the github username should be shown, i.e. does one exist or has the pending
  * change been denied
+ *
+ * @return boolean - whether or not to show github
  */
 function showGitHub() {
   return this.newPersonal.github && !this.gitHubCanceled;
-}
+} // showGitHub
 
+/**
+ * Determines if the linkedIn should be shown, i.e. does one exist or has the pending
+ * change been denied
+ */
 function showLinkedIn() {
   return this.newPersonal.linkedIn && !this.linkedInCanceled;
-}
+} // showLinkedIn
 
 /**
  * Formats the old employee address
+ *
+ * @return String - address or string denoting that there isn't one
  */
 function address() {
   let currentAddress = '';
@@ -467,6 +479,8 @@ function address() {
 
 /**
  * Formats the new employee address (if one exists)
+ *
+ * @return String - the formatted address
  */
 function newAddress() {
   if (
@@ -481,13 +495,19 @@ function newAddress() {
   }
 } // newAddress
 
-// Checks if a the phone number should be shown
+/**
+ * Checks if a the phone number should be shown
+ *
+ * @return boolean - whether to show number
+ */
 function showPhoneNumber() {
   return this.newPersonal.phoneNumber && !this.phoneCanceled;
 } // showPhoneNumber
 
 /**
  * Displays whether or not an old phone number existed
+ *
+ * @return boolean - whether or not employee old number existed
  */
 function phoneNumber() {
   return this.employee.phoneNumber ? this.employee.phoneNumber : 'No phone number on form';
@@ -495,6 +515,8 @@ function phoneNumber() {
 
 /**
  * Shows the newPhoneNumber if it exists
+ *
+ * @return boolean - whether new phone number exists
  */
 function newPhoneNumber() {
   return this.newPersonal.phoneNumber ? this.newPersonal.phoneNumber : null;
@@ -503,6 +525,8 @@ function newPhoneNumber() {
 /**
  * Determines if the tech should be show. Goes through all tech
  * and makes sure all of them have been canceled
+ *
+ * @return boolean - if there are any techs to show
  */
 function showTech() {
   return this.newTechnology.filter((tech) => !tech.canceled).length != 0;
@@ -511,6 +535,8 @@ function showTech() {
 /**
  * Determines if the education section should be shown. Goes through all education
  * and makes sure all of them have been canceled
+ *
+ * @return boolean - if the education section should be shown
  */
 function showEducation() {
   return this.newEducation.filter((education) => !education.canceled).length != 0;

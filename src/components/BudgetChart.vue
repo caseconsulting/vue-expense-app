@@ -256,7 +256,9 @@ function getCurrentBudgetYear() {
 
 /**
  * Checks if there are any negative values in each budget data to make sure the graph does not show negative values.
+ *
  * @param budgets - The user's budgets
+ * @return array - the budget data
  */
 function getFinalBudgetsData(budgets) {
   Object.keys(budgets).forEach((budget) => {

@@ -66,9 +66,20 @@ import EducationChartTab from '../components/charts/chartTabs/EducationChartTab.
 import CustomerOrgChartTab from '../components/charts/chartTabs/CustomerOrgChartTab.vue';
 import { isMobile } from '@/utils/utils';
 
+// |--------------------------------------------------|
+// |                                                  |
+// |                     METHODS                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * changes the tab
+ *
+ * @param event - the new tab
+ */
 function changeTab(event) {
   this.currentTab = event;
-}
+} // changeTab
 
 /**
  * This is used to select the correct tab on mobile devices
@@ -77,6 +88,12 @@ function changeTab(event) {
 function selectDropDown(tabName) {
   this.statsTab = tabName;
 } // selectDropDown
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      EXPORT                      |
+// |                                                  |
+// |--------------------------------------------------|
 
 export default {
   components: {

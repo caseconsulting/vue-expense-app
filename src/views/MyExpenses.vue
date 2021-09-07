@@ -364,9 +364,14 @@ function isIntern() {
   return this.userInfo ? this.userInfo.employeeRole === 'intern' : false;
 } // isIntern
 
+/**
+ * Checks if the user's role is an manager. Returns true if the user's role is an manager, otherwise returns false.
+ *
+ * @return boolean - user's role is an manager
+ */
 function isManager() {
   return this.userInfo ? this.userInfo.employeeRole === 'manager' : false;
-}
+} // isManager
 
 /**
  * Checks if the user's role is a user. Returns true if the user's role is a user, otherwise returns false.
@@ -512,10 +517,10 @@ function constructAutoComplete(aggregatedData) {
 
 /**
  * Custom filter for employee autocomplete options.
- *firstName: data.firstName
- * @param item -
- * @param queryText -
- * @return
+ *
+ * @param item - the employee
+ * @param queryText - the query for the employee
+ * @return boolean - whether the name or nickname contains the query
  */
 function customFilter(item, queryText) {
   const query = queryText ? queryText : '';
@@ -585,7 +590,8 @@ function displayError(err) {
  */
 function endAction() {
   this.midAction = false;
-}
+} // endAction
+
 /**
  * Filters expenses based on filter selections.
  */
@@ -629,11 +635,14 @@ function filterExpenses() {
 
 /**
  * Checks if expense type has recipient.
+ *
+ * @param expense - the expense object
+ * @return boolean - whether the expense has a recipient
  */
 function hasRecipient(expense) {
   let expenseType = _.find(this.expenseTypes, (type) => expense.expenseTypeId === type.value);
   return !this.isEmpty(expenseType.hasRecipient) && expenseType.hasRecipient;
-}
+} // hasRecipient
 
 /**
  * Checks if the expense is reimbursed. Returns true if the expense is reimbursed, otherwise returns false.
@@ -693,7 +702,8 @@ async function refreshExpenses() {
  */
 function startAction() {
   this.midAction = true;
-}
+} // startAction
+
 /**
  * Scrolls window back to the top of the form.
  */

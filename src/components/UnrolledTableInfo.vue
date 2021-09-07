@@ -100,17 +100,20 @@ function expenseToggle(toggledExpense) {
 
 // |--------------------------------------------------|
 // |                                                  |
-// |                     WATCHERS                     |
+// |                     FILTERS                      |
 // |                                                  |
 // |--------------------------------------------------|
 
 /**
  * watcher for descripFormat - cuts down on length
+ *
+ * @param val - value to filter
+ * @return string - shortened value
  */
-function watchDescripFormat(val) {
+function descripFormat(val) {
   // split strings that exceed 250 characters with eclipses
   return val.length > 250 ? val.substring(0, 250) + '...' : val;
-} // watchDescripFormat
+} // descripFormat
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -150,7 +153,7 @@ export default {
     };
   },
   filters: {
-    descripFormat: watchDescripFormat
+    descripFormat
   },
   methods: {
     convertToMoneyString,

@@ -146,7 +146,7 @@ function userIsEmployee() {
  */
 function selectDropDown(name) {
   this.infoTab = name;
-}
+} // selectDropDown
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -171,6 +171,8 @@ async function created() {
 
 /**
  * computed boolean to decide whether or not to use dropdown
+ *
+ * @return boolean - returns true for small screens
  */
 function useDropDown() {
   switch (this.$vuetify.breakpoint.name) {

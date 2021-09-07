@@ -148,6 +148,8 @@ function itemHeight() {
  * Used to remove events that the user has filtered out,
  * then the remaining events will be displayed in the
  * activity feed
+ *
+ * @return array - filtered events array
  */
 function filterEvents() {
   this.events.forEach((event) => {

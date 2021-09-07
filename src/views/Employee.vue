@@ -144,6 +144,7 @@ const IsoFormat = 'YYYY-MM-DD';
  * Event called when a resume is submitted
  *
  * @param newEmployeeForm is the new employee model after parsing the resume
+ * @param changes - number of changes that were made
  */
 async function resumeReceived(newEmployeeForm, changes) {
   if (changes && changes > 0) {
@@ -152,20 +153,26 @@ async function resumeReceived(newEmployeeForm, changes) {
 
   this.model = newEmployeeForm;
   await api.updateItem(api.EMPLOYEES, this.model);
-}
+} // resumeReceived
 
+/**
+ * clears the status message of the uploadStatus
+ */
 function clearStatus() {
   this.$set(this.uploadStatus, 'statusType', undefined);
   this.$set(this.uploadStatus, 'statusMessage', null);
   this.$set(this.uploadStatus, 'color', null);
 } // clearStatus
 
+/**
+ * downloads the resume of the employee
+ */
 async function downloadResume() {
   let signedURL = await api.getResume(this.$route.params.id);
   if (signedURL !== null) {
     window.open(signedURL, '_blank');
   }
-}
+} // downloadResume
 
 /**
  * Gets the current active anniversary budget year starting date in isoformat.
@@ -193,6 +200,9 @@ async function getEmployee() {
   });
 } // getEmployee
 
+/**
+ * checks window size and if it is xs or s minimize the window
+ */
 function minimizeWindow() {
   switch (this.$vuetify.breakpoint.name) {
     case 'xs':
@@ -202,33 +212,51 @@ function minimizeWindow() {
     default:
       return false;
   }
-}
+} // minimizeWindow
 
 /**
  * Checks to see if the user is an admin. Returns true if the user's role is an admin, otherwise returns false.
+ *
+ * @return boolean - whether the user is an admin
  */
 function userIsAdmin() {
   return this.role === 'admin';
 } // userIsAdmin
 
+/**
+ * checks to see if the user has admin permissions
+ *
+ * @return boolean - whether the user is an admin or manager
+ */
 function hasAdminPermissions() {
   return this.role === 'admin' || this.role === 'manager';
 } // hasAdminPermissions
+
 /**
- * Check if the user the employee displayed. Returns true if the user is the employee displayed, otherwise returns false.
+ * Check if the user the employee that is displayed. Returns true if the user is the employee displayed, otherwise returns false.
  *
- * @return boolean - user is the employee displayed
+ * @return boolean - user is the employee that is displayed
  */
 function userIsEmployee() {
   return !_.isNil(this.model) && !_.isNil(this.user) ? this.user.employeeNumber === this.model.employeeNumber : false;
 } // userIsEmployee
 
+/**
+ * displays the message
+ *
+ * @param type - the type of message
+ * @param msg - the message to display
+ * @param color - the color of the banner
+ */
 function displayMessage(type, msg, color) {
   this.$set(this.uploadStatus, 'statusType', type);
   this.$set(this.uploadStatus, 'statusMessage', msg);
   this.$set(this.uploadStatus, 'color', color);
-}
+} // displayMessage
 
+/**
+ * deletes the resume
+ */
 async function deleteResume() {
   this.deleteLoading = true;
   let deleteResult = await api.deleteResume(this.$route.params.id);

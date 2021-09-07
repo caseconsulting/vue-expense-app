@@ -92,6 +92,8 @@ function getAnniversary() {
 
 /**
  * Get the days until the employee's next anniversary date.
+ *
+ * @return number - returns the number of days until next anniversary
  */
 function getDaysUntil() {
   let now = moment();
@@ -115,6 +117,8 @@ function getDaysUntil() {
 
 /**
  * Get the seconds until the employee's next anniversary date.
+ *
+ * @return number - return number of seconds until next anniversary
  */
 function getSecondsUntil() {
   if (this.actualTime) {
@@ -181,12 +185,15 @@ function getCurrentBudgetYear() {
   return currentBudgetYear.format(IsoFormat);
 } // getCurrentBudgetYear
 
+/**
+ * load the data and api call to get budgets
+ */
 async function loadData() {
   this.hireDate = this.employee.hireDate;
   this.fiscalDateView = this.getCurrentBudgetYear();
   this.allUserBudgets = await api.getEmployeeBudgets(this.employee.id);
   this.refreshBudgetYears();
-}
+} // loadData
 
 /**
  * Refresh and sets the budget year view options for the employee.
@@ -208,11 +215,16 @@ function refreshBudgetYears() {
   });
   this.budgetYears = _.reverse(_.sortBy(budgetYears)); // sort budgets from current to past
 } // refreshBudgetYears
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                 LIFECYCLE HOOKS                  |
 // |                                                  |
 // |--------------------------------------------------|
+
+/**
+ * created lifecycle hook
+ */
 async function created() {
   this.addOneSecondToActualTimeEverySecond();
   await this.loadData();
@@ -222,7 +234,7 @@ async function created() {
       this.fiscalDateView = data.format(IsoFormat);
     }
   });
-}
+} // created
 
 /**
  * beforeDestroy lifecycle hook

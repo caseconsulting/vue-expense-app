@@ -158,6 +158,8 @@ function getAnniversary() {
 
 /**
  * Get the days until the employee's next anniversary date.
+ *
+ * @return int - returns the difference between now and the anniversary in days
  */
 function getDaysUntil() {
   let now = moment();
@@ -181,6 +183,8 @@ function getDaysUntil() {
 
 /**
  * Get the seconds until the employee's next anniversary date.
+ *
+ * @return int - returns the difference between now and the anniversary in seconds
  */
 function getSecondsUntil() {
   if (this.actualTime) {
@@ -403,6 +407,7 @@ async function createEvents() {
  * get's the date message of the event
  *
  * @param date - the date of the event
+ * @return string - string denoting the date of when the event is coming
  */
 function getEventDateMessage(date) {
   let now = moment();

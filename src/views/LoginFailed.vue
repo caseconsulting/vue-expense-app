@@ -20,6 +20,12 @@
 <script>
 import { isLoggedIn, login } from '@/utils/auth';
 
+// |--------------------------------------------------|
+// |                                                  |
+// |                 LIFECYCLE HOOKS                  |
+// |                                                  |
+// |--------------------------------------------------|
+
 /**
  * Route to home page on log in.
  */

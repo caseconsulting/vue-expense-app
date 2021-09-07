@@ -228,7 +228,7 @@ function getDegreeValue(degree) {
  * for labels
  *
  * @param value - The number that the degree is associated with
- * @returns String - The name of the degree
+ * @return String - The name of the degree
  */
 function getDegreeName(value) {
   switch (value) {

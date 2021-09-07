@@ -1,6 +1,12 @@
 <script>
 import { setIdToken, setAccessToken, setRole, setProfile } from '@/utils/auth';
 
+// |--------------------------------------------------|
+// |                                                  |
+// |                 LIFECYCLE HOOKS                  |
+// |                                                  |
+// |--------------------------------------------------|
+
 /**
  * mounted lifecycle hook
  */

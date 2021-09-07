@@ -17,11 +17,21 @@
 </template>
 
 <script>
+// |--------------------------------------------------|
+// |                                                  |
+// |                 LIFECYCLE HOOKS                  |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * created lifecycle hook - set label
+ */
 function created() {
   if (this.customLabel) {
     this.label = this.customLabel;
   }
-}
+} // created
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                     COMPUTED                     |
@@ -46,6 +56,11 @@ function megabytes() {
   return this.inputFile ? this.inputFile.size / 1000000 : 0;
 } // megabytes
 
+/**
+ * Computed array of the accepted file types
+ *
+ * @return array - the accepted file types
+ */
 function acceptedFileTypes() {
   if (this.customFileTypes) {
     return this.customFileTypes.join(',');
@@ -70,8 +85,6 @@ function acceptedFileTypes() {
 
 /**
  * Set file data.
- *
- * @param e - file picked
  */
 function receiptChange() {
   if (this.inputFile) {
@@ -91,7 +104,7 @@ function receiptChange() {
     this.previewURL = '';
     this.$emit('fileSelected', null);
   }
-} // onFilePicked
+} // receiptChanged
 
 // |--------------------------------------------------|
 // |                                                  |

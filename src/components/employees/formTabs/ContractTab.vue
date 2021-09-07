@@ -283,7 +283,7 @@ function hasEndDatesFilled(index) {
 
 /**
  * Parse the date after losing focus.
- * @returns String - The date in YYYY-MM-DD format
+ * @return String - The date in YYYY-MM-DD format
  */
 function parseEventDate() {
   return this.parseDateMonthYear(event.target.value);

@@ -119,6 +119,8 @@ import { isEmpty } from '@/utils/utils';
 
 /**
  * Calculates and returns the remaining work days of the month.
+ *
+ * @return int - number of remaining working days
  */
 function remainingWorkDays() {
   let remainingWorkDays = 0;
@@ -162,6 +164,9 @@ async function created() {
 // |                                                  |
 // |--------------------------------------------------|
 
+/**
+ * calculates remaning work hours and sets workHours
+ */
 function calcWorkHours() {
   let workHours = 0;
   let day = moment().set('date', 1);
@@ -179,13 +184,20 @@ function calcWorkHours() {
 
 /**
  * Rounds hours to 2 decimal places.
+ *
  * @param hours the decimal number of hours
+ * @return number - the rounded number of hours
  */
 function roundHours(hours) {
   hours = Number(hours.toFixed(2));
   return hours;
 } // roundHours
 
+/**
+ * formats hours to a format for display
+ *
+ * @return string - the formatted hours and minutes (if showMinutes is true)
+ */
 function formatHours(hours) {
   if (this.showMinutes) {
     let hrs = parseInt(Number(hours));

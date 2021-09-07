@@ -194,12 +194,14 @@ function iconColor() {
     return this.color;
   }
   return '#3f3f3c';
-}
+} // iconColor
 
 /**
  * Returns formatted place of birth for employee
  *
- * @param city, state, country - strings
+ * @param city
+ * @param state
+ * @param country
  * @return result - string
  */
 function getPlaceOfBirth(city, state, country) {

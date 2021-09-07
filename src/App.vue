@@ -164,7 +164,8 @@ function onUserProfile() {
     return false;
   }
   return this.$route.params.id === this.userId.toString();
-}
+} // onUserProfile
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                     METHODS                      |
@@ -173,6 +174,8 @@ function onUserProfile() {
 
 /**
  * idk what this does
+ *
+ * @param index - the interns did something and i think this is the original link but who knows
  */
 function badumbadumdodooodoo(index) {
   let oldLink = this.links[index].link;
@@ -201,18 +204,24 @@ function badumbadumdodooodoo(index) {
  */
 function handleLogout() {
   logout();
-}
+} // handleLogout
 
+/**
+ * redirects to user's employee page
+ */
 async function handleProfile() {
   // We don't use this.userId becuase it may be null by the time we click the button
   var user = await api.getUser();
   let userId = user.employeeNumber;
   this.$router.push({ name: 'employee', params: { id: `${userId}` } });
-}
+} // handleProfile
 
+/**
+ * resize the window for small screens
+ */
 function onResize() {
   this.isSmallScreen = window.innerWidth < 960;
-}
+} // onResize
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -220,6 +229,9 @@ function onResize() {
 // |                                                  |
 // |--------------------------------------------------|
 
+/**
+ * created lifecycle hook - set up listeners and getting access token and handle things for login
+ */
 async function created() {
   window.EventBus.$on('relog', handleLogout); // Session end - log out
   window.EventBus.$on('badgeExp', () => {
@@ -259,7 +271,7 @@ async function created() {
 }
 
 /**
- * beforeDestroy lifecycle hook
+ * beforeDestroy lifecycle hook - close event listener
  */
 async function beforeDestroy() {
   if (typeof window !== 'undefined') {
@@ -269,10 +281,13 @@ async function beforeDestroy() {
   window.EventBus.$off('badgeExp');
 } //beforeDestroy
 
+/**
+ * mounted lifecycle hook - resize window create event listener
+ */
 async function mounted() {
   this.onResize();
   window.addEventListener('resize', this.onResize, { passive: true });
-}
+} // mounted
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -282,6 +297,9 @@ async function mounted() {
 
 /**
  * fixes route to profile
+ *
+ * @param to - the place to route to
+ * @param from - the place you were routed from
  */
 function $route(to, from) {
   if (to.params.id && from.params.id) {

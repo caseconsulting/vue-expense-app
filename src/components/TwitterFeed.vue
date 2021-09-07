@@ -75,6 +75,9 @@ function formatDate(date) {
 
 /**
  * filter to remove links from tweet
+ *
+ * @param tweet - the tweet
+ * @return string - the string without any https links
  */
 function removeLink(tweet) {
   let splits = [];
@@ -87,6 +90,8 @@ function removeLink(tweet) {
 
 /**
  * filter that replaces html encoding
+ *
+ * @return string - the tweet without encoding
  */
 function fixHTMLencoding(tweet) {
   var newTweet = tweet;

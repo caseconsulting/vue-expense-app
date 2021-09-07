@@ -37,7 +37,7 @@ async function created() {
 /**
  * Finds the last index that has an element greater than 0 to prevent too many labels showing up on the chart.
  *
- * @returns Number - The index greater than 0
+ * @return Number - The index greater than 0
  */
 function findMaxIndex() {
   let max = 0;
@@ -88,7 +88,7 @@ function jobExperienceData() {
  *
  * @param startDate - the start of the difference
  * @param endDate - the end of the difference
- * @returns Number - The amount of years difference
+ * @return Number - The amount of years difference
  */
 function calculateTimeDifference(startDate, endDate) {
   var start = this.stringToDate(startDate);
@@ -166,7 +166,7 @@ function drawJobExpHistGraph() {
  * Creates a moment object out of a String that is a date.
  *
  * @param dateAsString - The date
- * @returns Object - The Moment date object
+ * @return Object - The Moment date object
  */
 function stringToDate(dateAsString) {
   var date = moment(dateAsString);

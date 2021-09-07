@@ -457,7 +457,7 @@ function minExpiration(cIndex) {
 /**
  * Parse the date after losing focus.
  *
- * @returns String - The date in YYYY-MM-DD format
+ * @return String - The date in YYYY-MM-DD format
  */
 function parseEventDate() {
   return this.parseDate(event.target.value);
@@ -518,7 +518,7 @@ function watchValidating(val) {
 
 /**
  * Formats multiple dates at once in MM/DD/YYYY format.
- * @returns Array - The array of formatted dates
+ * @return Array - The array of formatted dates
  */
 function formatDates(array) {
   let formattedDates = [];

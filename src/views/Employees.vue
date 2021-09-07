@@ -348,12 +348,16 @@ function filterEmployees() {
   });
 } // filterEmployees
 
+/**
+ * handles click event of the employee table entry
+ */
 function handleClick(item) {
   this.$router.push(employeePath(item));
 } //handleClick
 
 /**
  * Checks to see if the user has admin permissions. Returns true if the user's role is an admin or manager, otherwise returns false.
+ *
  * @return boolean - true if user's employeeRole is either a admin or a manager
  */
 function hasAdminPermissions() {
@@ -396,13 +400,18 @@ async function refreshEmployees() {
   this.loading = false; // set loading status to false
 } // refreshEmployees
 
+/**
+ * open the create employee form
+ */
 function renderCreateEmployee() {
   this.createEmployee = true;
   this.childKey++;
-}
+} // renderCreateEmployee
 
 /**
  * Checks to see if the user is an admin. Returns true if the user's role is an admin, otherwise returns false.
+ *
+ * @return - whether of not the user is an admin
  */
 function userIsAdmin() {
   return this.getRole() === 'admin';
@@ -440,7 +449,7 @@ async function clearCreateEmployee() {
   if (this.employeeNumber) {
     await api.deleteResume(this.employeeNumber);
   }
-}
+} // clearCreateEmployee
 
 // |--------------------------------------------------|
 // |                                                  |

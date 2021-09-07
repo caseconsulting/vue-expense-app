@@ -36,6 +36,12 @@
 import _ from 'lodash';
 import api from '@/shared/api.js';
 
+// |--------------------------------------------------|
+// |                                                  |
+// |                 LIFECYCLE HOOKS                  |
+// |                                                  |
+// |--------------------------------------------------|
+
 /**
  * Inital setup
  */
@@ -61,6 +67,12 @@ async function created() {
   }
   this.textContent = this.extractTextContent(fileContent);
 } // created
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     METHODS                      |
+// |                                                  |
+// |--------------------------------------------------|
 
 /**
  * Remove text content and return an array of metadata

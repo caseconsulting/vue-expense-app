@@ -89,6 +89,8 @@ function isInactive() {
 /**
  * Returns the balances that are currently shown on the screen.
  * Balances > 0 will always show.
+ *
+ * @return array - the balances that are shown
  */
 function availableBalances() {
   let avaibleBalances = [];
@@ -108,6 +110,8 @@ function availableBalances() {
 
 /**
  * changes hours from a decimal number to hours and minutes
+ *
+ * @param hours - the newly formatted hours
  */
 function formatHours(hours) {
   if (this.showMinutes) {

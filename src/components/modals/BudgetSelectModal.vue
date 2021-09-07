@@ -60,10 +60,16 @@ const IsoFormat = 'YYYY-MM-DD';
 const moment = require('moment-timezone');
 moment.tz.setDefault('America/New_York');
 
+// |--------------------------------------------------|
+// |                                                  |
+// |                    COMPUTED                      |
+// |                                                  |
+// |--------------------------------------------------|
+
 /**
  * Gets the anniversary date based on hire date.
  *
- * @returns String - anniversary date
+ * @return String - anniversary date
  */
 function getAnniversaryDate() {
   return moment(this.hireDate).format('MMMM Do');

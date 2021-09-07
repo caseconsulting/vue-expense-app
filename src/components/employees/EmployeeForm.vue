@@ -368,6 +368,7 @@ moment.tz.setDefault('America/New_York');
 import { getRole } from '@/utils/auth';
 import { v4 as uuid } from 'uuid';
 import _ from 'lodash';
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                     METHODS                      |
@@ -383,14 +384,17 @@ function resumeReceived(newEmployeeForm) {
   if (this.model) {
     this.model = newEmployeeForm;
   }
-}
+} // resumeReceived
 
 /**
  * Selects the currect form tab for the menu
+ *
+ * @param tab - current tab that is being selected
  */
 function selectDropDown(tab) {
   this.formTab = tab;
-}
+} // selectDropDown
+
 /**
  * Resets back to employee info. Also deletes resume when creating an employee if
  * you decide to cancel your submission
@@ -560,6 +564,7 @@ function cleanUpData() {
     this.model.clearances = null;
   }
 } // cleanUpData
+
 /**
  * Clear the action status that is displayed in the snackbar.
  */
@@ -593,6 +598,7 @@ async function confirm() {
     this.confirmingError = true;
   }
 } // confirm
+
 /**
  * Set and display an error action status in the snackbar.
  *
@@ -617,7 +623,8 @@ function hasAdminPermissions() {
 
 /**
  * Checks to see if any of the form tabs has an error.
- * @returns boolean - true if any tab has an error false otherwise.
+ *
+ * @return boolean - true if any tab has an error false otherwise.
  */
 function hasTabError() {
   let hasErrors = false;
@@ -687,12 +694,21 @@ async function submit() {
   window.EventBus.$emit('badgeExp');
 } // submit
 
+/**
+ * add a tab to number of errors in the form
+ *
+ * @param name - the name of the tab
+ * @param errors - the number of errored out tabs
+ */
 function addErrorTab(name, errors) {
   if (errors !== 0) {
     this.errorTabNames[name] = errors;
   }
-}
+} // addErrorTab
 
+/**
+ * opens up the resume parser
+ */
 async function openUpload() {
   let employees = await api.getItems(api.EMPLOYEES);
   //check validation of employee number
@@ -707,12 +723,17 @@ async function openUpload() {
     this.toggleResumeParser = !this.toggleResumeParser;
     // open pop-up modal for resume parser
   }
-}
+} // openUpload
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                 LIFECYCLE HOOKS                  |
 // |                                                  |
 // |--------------------------------------------------|
+
+/**
+ * created lifecycle hook - create all the listeners and set up employee info
+ */
 async function created() {
   window.EventBus.$on('disableUpload', (result, employeeNumber) => {
     //disables upload resume button if invalid employee number
@@ -850,6 +871,7 @@ function beforeDestroy() {
 
 /**
  * Sets the form data based on the given tab.
+ *
  * @param tab - the tab the data came from
  * @param data - the data to be saved
  */
@@ -908,8 +930,10 @@ function setFormData(tab, data) {
     this.$set(this.model, 'languages', data); //sets clearances to data returned from clearance tab
   }
 } //setFormData
+
 /**
  * Changes the format of the string to title case
+ *
  * @param str - the string to be converted
  * @return the title case formatted string
  */
@@ -920,6 +944,7 @@ function titleCase(str) {
   }
   return str.join(' ');
 } //titleCase
+
 /**
  * Converts all the autocomplete fields to title case capitalization
  */
@@ -953,6 +978,8 @@ async function convertAutocompleteToTitlecase() {
 
 /**
  * choose whether to use the drop down or not with a boolean computed value
+ *
+ * @return boolean - returns true for small screens
  */
 function useDropDown() {
   switch (this.$vuetify.breakpoint.name) {

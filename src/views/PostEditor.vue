@@ -111,6 +111,12 @@ import BlockQuote from '@ckeditor/ckeditor5-block-quote/src/blockquote';
 import MediaEmbed from '@ckeditor/ckeditor5-media-embed/src/mediaembed';
 import Font from '@ckeditor/ckeditor5-font/src/font';
 
+// |--------------------------------------------------|
+// |                                                  |
+// |                 LIFECYCLE HOOKS                  |
+// |                                                  |
+// |--------------------------------------------------|
+
 /**
  * Initial setup
  */
@@ -169,6 +175,12 @@ function beforeDestroy() {
   window.EventBus.$off('canceled');
 } // beforeDestroy
 
+// |--------------------------------------------------|
+// |                                                  |
+// |                     METHODS                      |
+// |                                                  |
+// |--------------------------------------------------|
+
 /**
  * Check validation and then attempt to submit blog
  */
@@ -226,6 +238,7 @@ async function checkSubmit() {
  * Set and display an error action status in the snackbar.
  *
  * @param model - current blog info
+ * @return string - metaData to be added to the file
  */
 async function createMetaData(model) {
   let metaData = '---';
@@ -247,6 +260,7 @@ async function createMetaData(model) {
  * Remove metadata header and return blog contents
  *
  * @param post - full contents of the blogFile
+ * @return - post without metadata
  */
 function removeMetaData(post) {
   let firstIndex = post.indexOf('---');
@@ -364,6 +378,7 @@ function watchEditorData() {
 // |                      EXPORT                      |
 // |                                                  |
 // |--------------------------------------------------|
+
 export default {
   name: 'app',
   components: {

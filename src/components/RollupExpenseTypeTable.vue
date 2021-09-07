@@ -199,6 +199,8 @@ function mainCheckBox() {
 
 /**
  * Gets all selected expenses
+ *
+ * @return array - the filtered pending expenses that are just selected
  */
 function getSelectedExpensesToReimburse() {
   return _.filter(this.pendingExpenses, (expense) => {
@@ -288,7 +290,7 @@ function constructAutoComplete(aggregatedData) {
  *  Maps dataset to expenses.
  *
  * @param aggregatedData - data
- * return Array - List of aggregated expenses
+ * @return Array - List of aggregated expenses
  */
 function createExpenses(aggregatedData) {
   return _.map(aggregatedData, (expense) => {
@@ -307,10 +309,10 @@ function createExpenses(aggregatedData) {
 
 /**
  * Custom filter for employee autocomplete options.
- *firstName: data.firstName
- * @param item -
- * @param queryText -
- * @return
+ *
+ * @param item - the employee
+ * @param queryText - the text used for checking for query in the name of the employee
+ * @return boolean - true if the query is in the name with or without nickname
  */
 function customFilter(item, queryText) {
   const query = queryText ? queryText : '';
@@ -326,6 +328,7 @@ function customFilter(item, queryText) {
 
 /**
  * Custom sorter for each column in the table.
+ *
  * @param items - a users buget item
  * @param index - the index name of the array
  * @param isDesc - true if the sorted is in descending order

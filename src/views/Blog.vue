@@ -54,21 +54,11 @@ import PostTable from '@/components/PostTable.vue';
 import _ from 'lodash';
 import { getRole } from '@/utils/auth';
 
-/**
- * returns the accepted file types for images
- */
-function acceptedFileTypes() {
-  return ['jpg', 'png'].join(',');
-} // acceptedFileTypes
-
-/**
- * Checks if the employee is an admin. Returns true if the employee is an admin, otherwise returns false.
- *
- * @return boolean - employee is an admin
- */
-function isAdmin() {
-  return this.employeeRole === 'admin';
-} // isAdmin
+// |--------------------------------------------------|
+// |                                                  |
+// |                 LIFECYCLE HOOKS                  |
+// |                                                  |
+// |--------------------------------------------------|
 
 /**
  * Initial Setup
@@ -106,6 +96,30 @@ async function created() {
     this.posts = _.compact(this.posts);
   }
 } // created
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     METHODS                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * returns the accepted file types for images
+ *
+ * @return - the accepted file types
+ */
+function acceptedFileTypes() {
+  return ['jpg', 'png'].join(',');
+} // acceptedFileTypes
+
+/**
+ * Checks if the employee is an admin. Returns true if the employee is an admin, otherwise returns false.
+ *
+ * @return boolean - employee is an admin
+ */
+function isAdmin() {
+  return this.employeeRole === 'admin';
+} // isAdmin
 
 /**
  * Store the attributes of a selected blog post.
@@ -225,6 +239,13 @@ function clearStatus() {
 function failedDelete(message) {
   this.displayError(message);
 }
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      EXPORT                      |
+// |                                                  |
+// |--------------------------------------------------|
+
 export default {
   components: {
     PostTable

@@ -145,6 +145,7 @@ function getPending(budget) {
  * Returns 'Allowed' or 'Not Allowed' depending on whether an expense type allows overdraft.
  *
  * @param expenseType - expense type to check
+ * @return string - converted boolean to human readable message
  */
 function odFlagMessage(expenseType) {
   return expenseType.odFlag ? 'Allowed' : 'Not Allowed';

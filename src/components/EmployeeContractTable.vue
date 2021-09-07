@@ -165,10 +165,10 @@ function constructAutoComplete(empData) {
 
 /**
  * Custom filter for employee autocomplete options.
- *firstName: data.firstName
- * @param item -
- * @param queryText -
- * @return
+ *
+ * @param item - employee object
+ * @param queryText - query to use to filter
+ * @return string - the filtered name
  */
 function customFilter(item, queryText) {
   const query = queryText ? queryText : '';
@@ -185,7 +185,9 @@ function customFilter(item, queryText) {
 
 /**
  * Gets the full name of an employee.
- * @returns String - The employees first name
+ *
+ * @param item - the employee
+ * @return String - The employees first name
  */
 function getFullName(item) {
   item.fullName = item.firstName + ' ' + item.lastName;
@@ -220,6 +222,8 @@ function populateDataTypeDropDowns() {
 
 /**
  * Populate drop downs with information that other employees have filled out.
+ *
+ * @param employees - array of employees for dropdown and to get contracts
  */
 function populateDropDowns(employees) {
   //resets dropdowns after each query
@@ -400,6 +404,7 @@ function watchDataType() {
 // |                      EXPORT                      |
 // |                                                  |
 // |--------------------------------------------------|
+
 export default {
   created,
   data() {
