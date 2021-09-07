@@ -124,6 +124,7 @@
         <v-date-picker
           v-model="editedEmployee.hireDate"
           no-title
+          :max="editedEmployee.deptDate"
           @input="hireMenu = false"
           :disabled="!admin"
         ></v-date-picker>
@@ -200,7 +201,7 @@
       <v-radio-group v-else v-model="statusRadio" row mandatory hide-details :disabled="!admin">
         <v-radio label="Full Time" value="full"></v-radio>
         <v-radio label="Part Time" value="part" @change="viewStatus()"></v-radio>
-        <v-radio label="Inactive" value="inactive"></v-radio>
+        <v-radio label="Inactive" value="inactive" @click="checkDate()"></v-radio>
         <!-- custom input field -->
         <div v-if="isPartTime()">
           <v-text-field
