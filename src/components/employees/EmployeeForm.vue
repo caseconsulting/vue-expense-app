@@ -898,7 +898,7 @@ function setFormData(tab, data) {
  * @return the title case formatted string
  */
 function titleCase(str) {
-  str = str.toLowerCase().split(' ');
+  str = str.split(' ');
   for (var i = 0; i < str.length; i++) {
     str[i] = str[i].charAt(0).toUpperCase() + str[i].slice(1);
   }
