@@ -462,9 +462,3 @@ export default {
   }
 };
 </script>
-
-<style>
-.notranslate {
-  transform: none !important;
-}
-</style>
