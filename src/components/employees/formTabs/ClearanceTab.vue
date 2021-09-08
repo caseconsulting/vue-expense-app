@@ -522,7 +522,7 @@ function watchValidating(val) {
 function formatDates(array) {
   let formattedDates = [];
   array.forEach((date) => {
-    formattedDates.push(this.formatDate(date));
+    formattedDates.push(formatDate(date));
   });
   return formattedDates;
 } // formatDates
