@@ -64,7 +64,7 @@ async function created() {
 /**
  * beforeDestroy lifecycle hook
  */
-async function beforeDestroy() { 
+async function beforeDestroy() {
   window.EventBus.$off('reimburseAlert');
 } //beforeDestroy
 

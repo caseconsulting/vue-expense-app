@@ -43,10 +43,9 @@ function created() {
 /**
  * beforeDestroy lifecycle hook
  */
-async function beforeDestroy() { 
+async function beforeDestroy() {
   window.EventBus.$off('concentrations-update');
-}  //beforeDestroy
-
+} //beforeDestroy
 
 /**
  * Sets up the formatting and data options for the chart.
