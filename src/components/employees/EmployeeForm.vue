@@ -810,11 +810,11 @@ async function created() {
   );
   if (this.employee) {
     this.fullName = `${this.employee.firstName} ${this.employee.lastName}`;
+    this.mifiStatusOnLoad = this.employee.mifiStatus;
   }
   this.formTab = this.currentTab;
   this.afterCreate = true;
   this.hasResume = (await api.getResume(this.$route.params.id)) != null;
-  this.mifiStatusOnLoad = this.employee.mifiStatus;
 } // created
 
 /**
