@@ -142,8 +142,6 @@
           <v-combobox
             :value="clearance.polyDates | formatDates"
             multiple
-            chips
-            small-chips
             label="Poly Dates"
             prepend-icon="event"
             clearable
@@ -151,6 +149,7 @@
             v-bind="attrs"
             v-on="on"
             @click:clear="clearance.polyDates = []"
+            @input="clearance.showPolyMenu = false"
           ></v-combobox>
         </template>
         <v-date-picker v-model="clearance.polyDates" :min="clearance.submissionDate" multiple no-title scrollable>
@@ -175,8 +174,6 @@
           <v-combobox
             :value="clearance.adjudicationDates | formatDates"
             multiple
-            chips
-            small-chips
             label="Adjudication Dates"
             prepend-icon="event"
             clearable
@@ -250,8 +247,6 @@
           <v-combobox
             :value="clearance.biDates | formatDates"
             multiple
-            chips
-            small-chips
             label="BI Dates"
             prepend-icon="event"
             clearable
@@ -588,6 +583,7 @@ export default {
   },
   methods: {
     addClearance,
+    formatDate,
     deleteClearance,
     getDateOptionalRules,
     getRequiredRules,
