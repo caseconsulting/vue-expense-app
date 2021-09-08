@@ -1,6 +1,16 @@
 <script>
 import { Pie, mixins } from 'vue-chartjs';
 
+/**
+ * mounted lifecycle hook
+ */
+function mounted() {
+  setTimeout(() => {
+    this.renderChart(this.chartData, this.options);
+  }, 0);
+  //this.renderChart(this.chartData, this.options);
+} // mounted
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                      EXPORT                      |
@@ -10,12 +20,7 @@ import { Pie, mixins } from 'vue-chartjs';
 export default {
   extends: Pie,
   mixins: [mixins.reactiveProp],
-  mounted() {
-    setTimeout(() => {
-      this.renderChart(this.chartData, this.options);
-    }, 0);
-    //this.renderChart(this.chartData, this.options);
-  },
+  mounted,
   props: [
     'chartData', // chart data to render
     'options' // chart options

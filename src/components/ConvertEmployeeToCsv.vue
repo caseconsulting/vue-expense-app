@@ -10,7 +10,6 @@
 </template>
 
 <script>
-import moment from 'moment-timezone';
 import { isEmpty } from '@/utils/utils';
 // |--------------------------------------------------|
 // |                                                  |
@@ -70,16 +69,16 @@ function download() {
  * @param fileTitle - title of csv file
  */
 function exportCSVFile(person, fileTitle) {
-  let placeOfBirth = getPlaceOfBirth(person.city, person.st, person.country);
-  let education = getEducation(person.degrees);
-  let jobExperience = getCompanies(person.companies);
-  let certifications = getCertifications(person.certifications);
-  let awards = getAwards(person.awards);
-  let technologies = getTechnologies(person.technologies);
-  let contracts = getContracts(person.contracts);
-  let customerOrg = getCustomerOrgExp(person.customerOrgExp);
-  let clearances = getClearances(person.clearances);
-  let languages = getLanguages(person.languages);
+  let placeOfBirth = this.getPlaceOfBirth(person.city, person.st, person.country);
+  let education = this.getEducation(person.degrees);
+  let jobExperience = this.getCompanies(person.companies);
+  let certifications = this.getCertifications(person.certifications);
+  let awards = this.getAwards(person.awards);
+  let technologies = this.getTechnologies(person.technologies);
+  let contracts = this.getContracts(person.contracts);
+  let customerOrg = this.getCustomerOrgExp(person.customerOrgExp);
+  let clearances = this.getClearances(person.clearances);
+  let languages = this.getLanguages(person.languages);
 
   let tempEmployee = [
     [person.firstName || ''], //Start of employee
@@ -92,7 +91,7 @@ function exportCSVFile(person, fileTitle) {
     [person.jobRole || ''],
     [person.employeeRole || ''],
     [person.hireDate || ''],
-    [getWorkStatus(person.workStatus) || ''],
+    [this.getWorkStatus(person.workStatus) || ''],
     [person.mifiStatus != undefined && person.mifiStatus != null ? person.mifiStatus : 'true'],
     [person.github || ''], //Start of personal
     [person.twitter || ''],
@@ -188,37 +187,6 @@ function getWorkStatus(workStatus) {
 } // getWorkStatus
 
 /**
- * Returns the JSON version of all elements in the current info.
- * For example, the employee info would have an array of different
- * employers in JSON form.
- *
- * @param degrees - employee's degrees
- * @return Array - array of JSONs of the type of info
- */
-function getInfo(info) {
-  if (!info) {
-    return '';
-  }
-
-  let infoList = [];
-  info.forEach((currInfo) => {
-    currInfo = Object.entries(currInfo);
-    for (let i = 0; i < currInfo.length; i++) {
-      if (currInfo[i][1].length === 0) {
-        currInfo[i][1] = 'N/A';
-      }
-      if (currInfo[i][0] === 'dateIntervals') {
-        currInfo[i][1] = parseDateInterval(currInfo[i][1]);
-      }
-    }
-
-    infoList.push(currInfo);
-  });
-
-  return infoList;
-} // getInfo
-
-/**
  * Gets the icon color depending if the page is employees or an employee profile
  */
 function iconColor() {
@@ -226,24 +194,6 @@ function iconColor() {
     return 'color: ' + this.color + ';';
   }
 }
-
-/**
- * Parses the dateInterval object into a string to be put into the excel
- * file
- *
- * @param dateInterval - The date interval being parsed
- * @return String - the parsed date interval
- */
-function parseDateInterval(dateInterval) {
-  let out = '';
-  if (dateInterval) {
-    dateInterval.forEach((interval, index) => {
-      out += 'Interval ' + (index + 1) + ': Start: ' + interval.startDate + ' End: ' + interval.endDate + ' ';
-    });
-  }
-
-  return out;
-} // parseDateInterval
 
 /**
  * Returns formatted place of birth for employee
@@ -336,7 +286,7 @@ function getClearances(clearance) {
     return result;
   }
   return result;
-} // getClearance
+} // getClearances
 
 /**
  * Returns contract data for employee
@@ -457,39 +407,6 @@ function getTechnologies(tech) {
 } // getTechnologies
 
 /**
- * Calculates the number of months that have passed between 2 dates in YYYY-MM format.
- *
- * @param start - the time interval starting date
- * @param end - the time interval ending date
- */
-function monthsPassed(start, end) {
-  let startDate = start;
-  let endDate = end;
-  let totalTimePassed = 0;
-
-  //if there is no end date use interval start - now
-  if (isEmpty(endDate)) {
-    endDate = moment().format('YYYY-MM');
-  }
-
-  //makes sure that the start and end date are both not empty
-  if (!isEmpty(startDate) && !isEmpty(endDate)) {
-    let monthsStart = Number(moment(startDate, 'YYYY-MM').format('MM'));
-    let yearsStart = Number(moment(startDate, 'YYYY-MM').format('YYYY'));
-
-    let monthsEnd = Number(moment(endDate, 'YYYY-MM').format('MM'));
-    let yearsEnd = Number(moment(endDate, 'YYYY-MM').format('YYYY'));
-
-    let absoluteStartMonths = monthsStart + yearsStart * 12; //calculates absolute number of months for start date
-    let absoluteEndMonths = monthsEnd + yearsEnd * 12; //calculates absolute number of years for end date
-
-    totalTimePassed = absoluteEndMonths - absoluteStartMonths; //total number of months
-  }
-
-  return totalTimePassed;
-} //monthsPassed
-
-/**
  * Returns language data for employee
  *
  * @param lang - An array of objects.
@@ -525,20 +442,18 @@ export default {
     download,
     exportCSVFile,
     getWorkStatus,
-    getInfo,
-    parseDateInterval,
     getAwards,
     getCertifications,
     getClearances,
     getContracts,
     getCustomerOrgExp,
     getEducation,
+    getPlaceOfBirth,
     getCompanies,
     getTechnologies,
     getLanguages,
     iconColor,
-    isEmpty,
-    monthsPassed
+    isEmpty
   },
   props: ['employee', 'midAction', 'color'] // employees to export
 };

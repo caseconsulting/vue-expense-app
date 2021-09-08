@@ -7,8 +7,8 @@
     <!-- Case Consulting -->
     <p><b>Case Consulting Info</b></p>
     <p v-if="model.jobRole"><b>Position: </b>{{ model.jobRole }}</p>
-    <p><b>Start Date: </b>{{ model.hireDate | monthDayYearFormat }}</p>
-    <p v-if="model.deptDate"><b>End Date: </b>{{ model.deptDate | monthDayYearFormat }}</p>
+    <p><b>Start Date: </b>{{ monthDayYearFormat(model.hireDate) }}</p>
+    <p v-if="model.deptDate"><b>End Date: </b>{{ monthDayYearFormat(model.deptDate) }}</p>
     <hr class="mb-3" />
 
     <div v-if="!isEmpty(model.companies)">
@@ -30,8 +30,8 @@
             <li v-for="(position, posIndex) in company.positions" :key="position.title + posIndex">
               {{ position.title }}
               <ul>
-                <li>Start Date: {{ position.startDate | monthYearFormat }}</li>
-                <li v-if="position.endDate">End Date: {{ position.endDate | monthYearFormat }}</li>
+                <li>Start Date: {{ monthYearFormat(position.startDate) }}</li>
+                <li v-if="position.endDate">End Date: {{ monthYearFormat(position.endDate) }}</li>
               </ul>
             </li>
           </ul>
@@ -39,13 +39,14 @@
         <div class="ml-4" v-else>
           <p class="my-0"><b>Position:</b> {{ company.positions[0].title }}</p>
           <ul>
-            <li>Start Date: {{ company.positions[0].startDate | monthYearFormat }}</li>
-            <li v-if="company.positions[0].endDate">End Date: {{ company.positions[0].endDate | monthYearFormat }}</li>
+            <li>Start Date: {{ monthYearFormat(company.positions[0].startDate) }}</li>
+            <li v-if="company.positions[0].endDate">End Date: {{ monthYearFormat(company.positions[0].endDate) }}</li>
           </ul>
         </div>
         <hr v-if="index < pageList.length - 1" class="my-3" />
       </div>
       <!-- End Loop Jobs -->
+      <!-- Pagination -->
       <div v-if="!isEmpty(this.model.companies) && Math.ceil(filterCompanies.length / 4) != 1" class="text-center">
         <v-pagination
           v-model="page"
@@ -146,6 +147,9 @@ function onPageChange() {
   this.pageList = this.filterCompanies.slice(startIndex, endIndex);
 } //onPageChange
 
+/**
+ * The function updates the company that is shown to the user based on filters
+ */
 function updateCompanies(query) {
   if (query === undefined) {
     query = event.target.value;
@@ -174,6 +178,8 @@ export default {
   methods: {
     isEmpty,
     updateCompanies,
+    monthDayYearFormat,
+    monthYearFormat,
     onPageChange
   },
   computed: {
@@ -183,10 +189,6 @@ export default {
     filter: function () {
       this.updateCompanies(this.filter);
     }
-  },
-  filters: {
-    monthDayYearFormat,
-    monthYearFormat
   },
   props: ['model']
 };

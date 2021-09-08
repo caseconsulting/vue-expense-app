@@ -1,24 +1,55 @@
 <template>
-  <v-card v-if="expense" raised id="expense-info" class="mt-3 white--text slide-in-blurred-right">
+  <v-card v-if="expense" id="expense-info" class="mt-3 mr-3 slide-in-blurred-right">
     <v-card-title primary-title class="subtitle-2">
       <div class="headline expense_info">Expense Info</div>
-      <div class="expense_info">
-        <p class="expense_info"><span>Description:</span> {{ expense.description }}</p>
-        <p class="expense_info"><span>Employee:</span> {{ expense.employeeName }}</p>
-        <p class="expense_info"><span>Budget:</span> {{ expense.budgetName }}</p>
-        <p class="expense_info"><span>Cost:</span> {{ convertToMoneyString(expense.cost) }}</p>
-        <p class="expense_info"><span>Purchased On:</span> {{ expense.purchaseDate | monthDayYearFormat }}</p>
-        <p class="expense_info" v-if="!isEmpty(expense.reimbursedDate)">
-          <span>Reimbursed On:</span>
-          {{ expense.reimbursedDate | monthDayYearFormat }}
-        </p>
-        <p class="expense_info" v-if="!isEmpty(expense.note)"><span>Notes:</span> {{ expense.note }}</p>
-        <p class="expense_info" v-else><span>Notes:</span> N/A</p>
-        <p class="expense_info" v-if="!isEmpty(expense.category)"><span>Category:</span> {{ expense.category }}</p>
-        <p class="expense_info" v-else><span>Category:</span> N/A</p>
-        <attachment :expense="expense" :mode="'adminExpenseInfo'" class="expense_info"></attachment>
-      </div>
     </v-card-title>
+    <v-card-text>
+      <v-container class="pb-2" fluid>
+        <v-row dense>
+          <v-col> <b>Description:</b></v-col>
+          <v-col> {{ expense.description }}</v-col>
+        </v-row>
+        <v-row dense>
+          <v-col> <b>Employee:</b></v-col>
+          <v-col>{{ expense.employeeName }}</v-col>
+        </v-row>
+        <v-row dense>
+          <v-col><b>Budget:</b></v-col>
+          <v-col>{{ expense.budgetName }}</v-col>
+        </v-row>
+        <v-row dense>
+          <v-col><b>Cost:</b></v-col>
+          <v-col>{{ convertToMoneyString(expense.cost) }}</v-col>
+        </v-row>
+        <v-row dense>
+          <v-col><b>Purchased On:</b></v-col>
+          <v-col> {{ monthDayYearFormat(expense.purchaseDate) }} </v-col>
+        </v-row>
+        <v-row dense v-if="!isEmpty(expense.reimbursedDate)">
+          <v-col><b>Reimbursed On:</b></v-col>
+          <v-col> {{ monthDayYearForm(expense.reimbursedDate) }}</v-col>
+        </v-row>
+        <v-row dense v-if="!isEmpty(expense.note)">
+          <v-col><b>Notes:</b></v-col>
+          <v-col> {{ expense.note }}</v-col>
+        </v-row>
+        <v-row dense v-else>
+          <v-col><b>Notes:</b></v-col>
+          <v-col>N/A</v-col>
+        </v-row>
+        <v-row dense v-if="!isEmpty(expense.category)">
+          <v-col><b>Category:</b></v-col>
+          <v-col> {{ expense.category }}</v-col>
+        </v-row>
+        <v-row dense v-else>
+          <v-col><b>Category:</b></v-col>
+          <v-col>N/A</v-col>
+        </v-row>
+        <v-row>
+          <attachment :expense="expense" :mode="'adminExpenseInfo'" class="expense_info"></attachment>
+        </v-row>
+      </v-container>
+    </v-card-text>
   </v-card>
 </template>
 
@@ -54,7 +85,7 @@ function displayExpense(clickedExpense) {
 /**
  * Creates event listeners.
  */
-async function created() {
+function created() {
   window.EventBus.$on('expenseClicked', this.displayExpense);
 } // created
 
@@ -77,20 +108,13 @@ export default {
   methods: {
     convertToMoneyString,
     displayExpense,
-    isEmpty
-  },
-  filters: {
+    isEmpty,
     monthDayYearFormat
   }
 };
 </script>
 
 <style scoped>
-/* .color-change-2x {
-  -webkit-animation: color-change-2x 10s linear infinite alternate both;
-  animation: color-change-2x 10s linear infinite alternate both;
-} */
-
 p {
   color: #38424d;
 }
@@ -98,32 +122,6 @@ p {
 span {
   font-weight: bold;
 }
-
-/**
- * ----------------------------------------
- * animation color-change-2x
- * ----------------------------------------
- */
-
-/* @-webkit-keyframes color-change-2x {
-  0% {
-    background: #83837d;
-  }
-
-  100% {
-    background: #f5694f;
-  }
-}
-
-@keyframes color-change-2x {
-  0% {
-    background: #83837d;
-  }
-
-  100% {
-    background: #f5694f;
-  }
-} */
 
 .slide-in-blurred-right {
   animation: slide-in-blurred-right 0.5s ease-in forwards;

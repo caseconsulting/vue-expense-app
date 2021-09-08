@@ -5,9 +5,9 @@
       <!-- Loop Certifications -->
       <div v-for="(certification, index) in this.filteredList" :key="certification.name + index">
         <p><b>Certification: </b>{{ certification.name }}</p>
-        <p><b>Date Received: </b>{{ certification.dateReceived | monthDayYearFormat }}</p>
+        <p><b>Date Received: </b>{{ monthDayYearFormat(certification.dateReceived) }}</p>
         <p v-if="certification.expirationDate">
-          <b>Expiration Date: </b>{{ certification.expirationDate | monthDayYearFormat }}
+          <b>Expiration Date: </b>{{ monthDayYearFormat(certification.expirationDate) }}
         </p>
         <hr v-if="index < filteredList.length - 1" class="mb-3" />
       </div>
@@ -19,6 +19,7 @@
       v-if="!isEmpty(this.model.certifications) && Math.ceil(model.certifications.length / 5) != 1"
       class="text-center"
     >
+      <!-- Pagination -->
       <v-pagination
         v-model="page"
         :length="Math.ceil(model.certifications.length / 5)"
@@ -71,11 +72,9 @@ export default {
       page: 1
     };
   },
-  filters: {
-    monthDayYearFormat
-  },
   methods: {
     isEmpty,
+    monthDayYearFormat,
     onPageChange
   },
   props: ['model']

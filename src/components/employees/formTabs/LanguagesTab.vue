@@ -4,22 +4,16 @@
     <div
       v-for="(languages, index) in editedLanguages"
       class="pt-3 pb-1 px-5"
-      v-bind:class="{ errorBox: isDuplicate(languages.name) }"
       :key="'language: ' + index"
       style="border: 1px solid grey"
     >
-      <!--Duplicate chip if language name is already entered by user-->
-      <v-row v-if="isDuplicate(languages.name)" justify="end">
-        <v-chip class="ma-2" color="error" text-color="white"> Duplicate </v-chip>
-      </v-row>
-
       <!-- Name of Language Field -->
 
       <v-combobox
         ref="formFields"
         style="padding-right: 20px; padding-left: 10px"
         v-model="languages.name"
-        :rules="requiredRules"
+        :rules="getRequiredRules()"
         :items="languagesList"
         label="Language"
         data-vv-name="Language"
@@ -34,7 +28,7 @@
         style="padding-right: 20px; padding-left: 10px"
         :items="proficiencyTypes"
         v-model="languages.proficiency"
-        :rules="requiredRules"
+        :rules="getRequiredRules()"
         item-text="text"
         label="Level of proficiency"
         clearable
@@ -65,6 +59,7 @@
 <script>
 import api from '@/shared/api.js';
 import _ from 'lodash';
+import { getRequiredRules } from '@/shared/validationUtils.js';
 import { isEmpty } from '@/utils/utils';
 
 // |--------------------------------------------------|
@@ -97,7 +92,7 @@ function addLanguage() {
     name: '',
     proficiency: ''
   });
-}
+} // addLanguage
 
 /**
  * Deletes a Language.
@@ -168,24 +163,17 @@ function validateFields() {
       errorCount++;
     }
   });
-  //checks to see if there are duplicate entries with the same name
-  if (this.duplicateLangEntries().length > 0) {
-    //emit error status with a custom message
-    window.EventBus.$emit('languagesDuplicateStatus', 'Languages MUST be UNIQUE. Please remove any duplicates');
-    // emit error status
-  } else {
-    window.EventBus.$emit('languagesStatus', errorCount);
-  }
+  window.EventBus.$emit('languagesStatus', errorCount);
   window.EventBus.$emit('doneValidating', 'languages', this.editedLanguages); // emit done validating
 } // validateFields
 
 export default {
-  components: {},
   created,
   methods: {
     addLanguage,
     deleteLanguage,
     duplicateLangEntries,
+    getRequiredRules,
     isDuplicate,
     isEmpty,
     populateDropDowns,
@@ -291,14 +279,16 @@ export default {
       ], // job title options
       requiredRules: [
         (v) => !isEmpty(v) || 'This field is required. You must enter information or delete the field if possible'
-      ] // rules for a required field
+      ], // rules for a required field
+      duplicateRules: [
+        (lang) => {
+          let duplicates = this.duplicateLangEntries();
+          //checks to see if the language is in duplicates array
+          return !duplicates.includes(lang) || 'Duplicate field found, please remove duplicate entries';
+        }
+      ]
     };
   }
 };
 </script>
-<style>
-.errorBox {
-  color: red !important;
-  border: 2px solid red !important;
-}
-</style>
+<style></style>

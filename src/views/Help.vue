@@ -54,7 +54,7 @@ import { getRole } from '@/utils/auth';
 /**
  * Gets the user's role.
  */
-async function created() {
+function created() {
   this.role = getRole();
   let route = this.$route.name;
   if (route == 'help2') {

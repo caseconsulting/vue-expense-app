@@ -28,7 +28,7 @@
           <template v-slot:activator="{ on, attrs }">
             <v-text-field
               :value="formatRange(timeFrame.range)"
-              :rules="requiredRules"
+              :rules="getRequiredRules()"
               label="Date Range"
               prepend-icon="date_range"
               readonly
@@ -98,7 +98,7 @@
         ref="formFields"
         :id="'comp-' + compIndex"
         v-model.trim="company.companyName"
-        :rules="[requiredRules[0], duplicateCompanyName(compIndex)]"
+        :rules="[...getRequiredRules(), duplicateCompanyName(compIndex)]"
         :items="companyDropDown"
         label="Company"
         data-vv-name="Company"
@@ -112,7 +112,7 @@
             ref="formFields"
             :id="'pos-field-' + compIndex + '-' + index"
             v-model.trim="position.title"
-            :rules="requiredRules"
+            :rules="getRequiredRules()"
             label="Position"
             data-vv-name="Position"
             clearable
@@ -123,7 +123,7 @@
             ref="formFields"
             :id="'pos-field-' + compIndex + '-' + index"
             v-model.trim="position.title"
-            :rules="requiredRules"
+            :rules="getRequiredRules()"
             label="Position"
             data-vv-name="Position"
             append-outer-icon="delete"
@@ -160,13 +160,7 @@
                   hint="MM/YYYY format"
                   v-mask="'##/####'"
                   prepend-icon="event_available"
-                  :rules="[
-                    dateRules[0],
-                    dateRules[1],
-                    dateRules[2],
-                    dateOptionalRules[2],
-                    dateOrderRule(compIndex, index)
-                  ]"
+                  :rules="[...getDateMonthYearRules(), dateOrderRule(compIndex, index)]"
                   v-bind="attrs"
                   v-on="on"
                   @blur="position.startDate = parseEventDate($event)"
@@ -204,9 +198,7 @@
                   label="End Date"
                   prepend-icon="event_busy"
                   :rules="[
-                    dateOptionalRules[0],
-                    dateOptionalRules[1],
-                    dateOptionalRules[2],
+                    ...getDateMonthYearOptionalRules(),
                     dateOrderRule(compIndex, index),
                     endDatePresentRule(compIndex, index)
                   ]"
@@ -259,9 +251,6 @@
           <span>Delete Company</span>
         </v-tooltip>
       </div>
-      <!-- <v-row v-if="!hasEndDatesFilled(compIndex)" class="py-5 caption text--darken-2 grey--text">
-        Note that leaving the end date blank means you are currently working at that position.
-      </v-row> -->
     </div>
     <!-- End Loop Jobs -->
 
@@ -275,8 +264,10 @@
 <script>
 import api from '@/shared/api.js';
 import _ from 'lodash';
-import { isEmpty, formatDate, formatDateMonthYear, parseDateMonthYear } from '@/utils/utils';
+import { getDateMonthYearRules, getDateMonthYearOptionalRules, getRequiredRules } from '@/shared/validationUtils.js';
+import { isEmpty, formatDate, formatDateMonthYear, parseDateMonthYear, isMobile } from '@/utils/utils';
 import { mask } from 'vue-the-mask';
+import { getRole } from '@/utils/auth';
 const moment = require('moment-timezone');
 moment.tz.setDefault('America/New_York');
 
@@ -345,7 +336,7 @@ function addPosition(compIndex) {
     showEndMenu: false,
     presentDate: false
   });
-}
+} // addPosition
 
 /**
  * Deletes an IC Time Frame.
@@ -363,7 +354,7 @@ function deleteICTimeFrame(index) {
  */
 function deleteCompany(index) {
   this.editedJobExperienceInfo.companies.splice(index, 1);
-}
+} // deleteCompany
 
 /**
  * Deletes a single position. Will delete the entire company entry if there are no positions
@@ -379,7 +370,7 @@ function deletePosition(compIndex, posIndex) {
   } else {
     this.editedJobExperienceInfo.companies[compIndex].positions.splice(posIndex, 1);
   }
-}
+} // deletePosition
 
 /**
  * Format date range as 'Month YYYY' - 'Month YYYY' in chronological order.
@@ -422,10 +413,11 @@ function hasEndDatesFilled(index) {
   });
 
   return hasEndDatesFilled;
-}
+} // hasEndDatesFilled
 
 /**
  * Parse the date after losing focus.
+ * @returns String - the date in YYYY-MM format
  */
 function parseEventDate() {
   return parseDateMonthYear(event.target.value);
@@ -455,7 +447,7 @@ function populateDropDowns() {
 function setIndices(companyIndex, positionIndex) {
   this.companyIndex = companyIndex;
   this.positionIndex = positionIndex;
-}
+} // setIndices
 
 /**
  * Validate all input fields are valid. Emit to parent the error status.
@@ -465,19 +457,30 @@ function validateFields() {
   //ensures that refs are put in an array so we can reuse forEach loop
   let components = !_.isArray(this.$refs.formFields) ? [this.$refs.formFields] : this.$refs.formFields;
   _.forEach(components, (field) => {
-    if (field && !field.validate()) {
-      errorCount++;
-    }
+    if (field && !field.validate()) errorCount++;
   });
+
+  // Fail safe in case users or inters somehow change their disabled info
+  if (getRole() === 'user' || getRole() === 'intern') {
+    this.editedJobExperienceInfo.jobRole = this.model.jobRole;
+    this.editedJobExperienceInfo.hireDate = this.model.hireDate;
+  }
+
+  _.forEach(this.editedJobExperienceInfo.companies, (company) => {
+    _.forEach(company.positions, (position) => {
+      if (position.endDate && position.presentDate) {
+        position.presentDate = false;
+      }
+    });
+  });
+
   window.EventBus.$emit('doneValidating', 'jobExperience', this.editedJobExperienceInfo); // emit done validating
   window.EventBus.$emit('jobExperienceStatus', errorCount); // emit error status
 } // validateFields
 
 export default {
   computed: {
-    isMobile() {
-      return this.$vuetify.breakpoint.sm;
-    }
+    isMobile
   },
   created,
   data() {
@@ -496,21 +499,6 @@ export default {
           return true;
         }
       },
-      dateOptionalRules: [
-        //end date validation
-        (v) => {
-          return !isEmpty(v) ? /^\d{1,2}\/\d{4}$/.test(v) || 'Date must be valid. Format: MM/YYYY' : true;
-        },
-        (v) => (!isEmpty(v) ? moment(v, 'MM/YYYY').isValid() || 'Date must be valid' : true),
-        (v) => (!isEmpty(v) ? moment(v, 'MM/YYYY').isBefore(moment()) || 'Date must not be a future date' : true)
-      ], // rules for an optional date
-      dateRules: [
-        (v) => {
-          return !isEmpty(v) || 'Date required';
-        },
-        (v) => (!isEmpty(v) && /^\d{1,2}\/\d{4}$/.test(v)) || 'Date must be valid. Format: MM/YYYY',
-        (v) => moment(v, 'MM/YYYY').isValid() || 'Date must be valid'
-      ], // rules for an optional date
       duplicateCompanyName: (compIndex) => {
         let compNames = _.map(this.editedJobExperienceInfo.companies, (company) => company.companyName);
         let company = compNames[compIndex];
@@ -529,8 +517,7 @@ export default {
           return false;
         }
       },
-      editedJobExperienceInfo: _.cloneDeep(this.model), //edited job experience info
-      requiredRules: [(v) => !isEmpty(v) || 'This field is required'] // rules for required fields
+      editedJobExperienceInfo: _.cloneDeep(this.model) //edited job experience info
     };
   },
   directives: { mask },
@@ -546,6 +533,9 @@ export default {
     deleteCompany,
     deletePosition,
     formatDate,
+    getDateMonthYearRules,
+    getDateMonthYearOptionalRules,
+    getRequiredRules,
     hasEndDatesFilled,
     parseEventDate,
     formatRange,

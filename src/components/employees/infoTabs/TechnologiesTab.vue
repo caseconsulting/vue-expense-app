@@ -88,7 +88,7 @@ function created() {
   if (!isEmpty(this.model.technologies)) {
     this.pageList = this.sortedTech.slice(0, 5);
   }
-}
+} //created
 
 // |--------------------------------------------------|
 // |                                                  |

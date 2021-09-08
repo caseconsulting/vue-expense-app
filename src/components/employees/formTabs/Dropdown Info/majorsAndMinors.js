@@ -3,6 +3,7 @@
  * https://en.wikipedia.org/wiki/List_of_academic_fields
  */
 export let majorsAndMinors = [
+  'Computer Information Systems',
   'Anthropology',
   'Anthropological criminology',
   'Anthropological linguistics',
@@ -1349,7 +1350,7 @@ export let majorsAndMinors = [
   'Object database',
   'Information retrieval',
   'Information management',
-  'Information system',
+  'Information systems',
   'Information technology',
   'Knowledge management',
   'Multimedia, hypermedia',
@@ -1770,7 +1771,7 @@ export let majorsAndMinors = [
   'Architectural engineering',
   'Structural mechanics',
   'Surveying',
-  'Electrical engineerin',
+  'Electrical engineering',
   'Applied physics',
   'Computer engineering ',
   'Computer science',
@@ -2341,5 +2342,11 @@ export let majorsAndMinors = [
   'Operations research',
   'Mass transit',
   'Travel',
-  'Vehicles'
+  'Vehicles',
+  'Computer Security & Information Assurance',
+  'Honors Interdisciplinary Studies',
+  'Environmental Humanities',
+  'Internet Software Development',
+  'Accounting information systems',
+  'Technology Management'
 ];

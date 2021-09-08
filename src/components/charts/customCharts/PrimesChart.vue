@@ -10,6 +10,14 @@ import api from '@/shared/api.js';
 import BarChart from '../baseCharts/BarChart.vue';
 
 /**
+ * mounted lifecycle hook
+ */
+async function mounted() {
+  await this.fillCertData();
+  this.$forceUpdate();
+} // mounted
+
+/**
  * Gets all of the current projects the user has
  */
 function getCurrentProjects(employee) {
@@ -38,6 +46,9 @@ function getCurrentProjects(employee) {
   return contracts;
 }
 
+/**
+ * Extracts and tallies up each employees primes, and sets the chart formatting and options data.
+ */
 async function fillCertData() {
   let employees = await api.getItems(api.EMPLOYEES);
   //Get data
@@ -147,6 +158,7 @@ async function fillCertData() {
 }
 export default {
   components: { BarChart },
+  mounted,
   data() {
     return {
       options: null,
@@ -157,12 +169,6 @@ export default {
   methods: {
     getCurrentProjects,
     fillCertData
-  },
-  mounted() {
-    this.fillCertData();
-    this.$forceUpdate();
   }
 };
 </script>
-
-<style></style>

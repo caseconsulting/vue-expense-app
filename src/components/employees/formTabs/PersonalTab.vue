@@ -21,7 +21,7 @@
       style="padding-right: 20px; padding-left: 10px"
       v-model="editedPersonalInfo.linkedIn"
       label="LinkedIn"
-      :rules="urlRules"
+      :rules="getURLRules()"
       data-vv-name="LinkedIn"
     ></v-text-field>
 
@@ -37,9 +37,9 @@
     >
       <v-tooltip bottom slot="append">
         <template v-slot:activator="{ on }">
-          <v-btn class="pb-1" text icon v-on="on"><v-icon style="color: grey">lock</v-icon></v-btn>
+          <v-btn class="pb-1" text icon v-on="on"><v-icon style="color: grey">shield</v-icon></v-btn>
         </template>
-        <span>Only Visible to You and Admins</span>
+        <span>Only Visible to You, Managers, and Admins</span>
       </v-tooltip>
     </v-text-field>
 
@@ -60,7 +60,7 @@
           ref="formFields"
           v-mask="'##/##/####'"
           v-model="birthdayFormat"
-          :rules="dateOptionalRules"
+          :rules="[...getDateOptionalRules(), ...getNonFutureDateRules()]"
           label="Birthday"
           hint="MM/DD/YYYY format"
           persistent-hint
@@ -76,7 +76,7 @@
     <!-- Show Birthday -->
     <v-switch
       v-model="editedPersonalInfo.birthdayFeed"
-      label="Have birthday recognized on company feed?"
+      label="Have birthday (MM/DD format) recognized on company feed?"
       :disabled="disableBirthdayFeed"
     ></v-switch>
 
@@ -85,9 +85,9 @@
       Place of Birth
       <v-tooltip bottom slot="append-outer">
         <template v-slot:activator="{ on }">
-          <v-btn class="pb-1" text icon v-on="on"><v-icon style="color: grey">lock</v-icon></v-btn>
+          <v-btn class="pb-1" text icon v-on="on"><v-icon style="color: grey">shield</v-icon></v-btn>
         </template>
-        <span>Only Visible to You and Admins</span>
+        <span>Only Visible to You, Managers, and Admins</span>
       </v-tooltip>
     </p>
     <div style="padding-right: 20px; padding-left: 30px; padding-bottom: 10px">
@@ -121,14 +121,14 @@
       </div>
     </div>
     <!-- Current Address -->
-    <div v-if="userIsAdmin() || userIsEmployee()">
+    <div v-if="userhasAdminPermissions() || userIsEmployee()">
       <p style="font-size: 17px; padding-left: 10px; padding-top: 10px">
         Current Address
         <v-tooltip bottom slot="append-outer">
           <template v-slot:activator="{ on }">
-            <v-btn class="pb-1" text icon v-on="on"><v-icon style="color: grey">lock</v-icon></v-btn>
+            <v-btn class="pb-1" text icon v-on="on"><v-icon style="color: grey">shield</v-icon></v-btn>
           </template>
-          <span>Only Visible to You and Admins</span>
+          <span>Only Visible to You, Managers, and Admins</span>
         </v-tooltip>
       </p>
       <v-combobox
@@ -186,6 +186,7 @@
 <script>
 import api from '@/shared/api.js';
 import _ from 'lodash';
+import { getDateOptionalRules, getNonFutureDateRules, getURLRules } from '@/shared/validationUtils.js';
 import { formatDate, isEmpty, parseDate } from '@/utils/utils';
 import { mask } from 'vue-the-mask';
 import { getRole } from '@/utils/auth';
@@ -259,7 +260,7 @@ function isUSA() {
 // |--------------------------------------------------|
 
 /**
- * Updates the address dropdown according to the user's input
+ * Updates the address dropdown according to the user's input.
  */
 async function updateAddressDropDown() {
   let query = event.target.value;
@@ -303,19 +304,19 @@ async function updateBoxes() {
   //resets addresses and ID's in dropdown
   this.placeIds = {};
   this.searchString = '';
-} //updateBoxes
+} // updateBoxes
 
 /**
- * Checks whether the current user role is admin, used specifically
- * to prevent the manager from changing their own role on the Employee tab
+ * Checks whether the current user role has admin permissions, used specifically
+ * to prevent the manager from changing their own role on the Employee tab.
  * @return - boolean: true if the user role is admin
  */
-function userIsAdmin() {
-  return getRole() === 'admin';
-} //userIsAdmin
+function userhasAdminPermissions() {
+  return getRole() === 'admin' || getRole() === 'manager';
+} // userhasAdminPermissions
 
 /**
- * Checks if the profile accessed is the signed-in user's profile
+ * Checks if the profile accessed is the signed-in user's profile.
  *
  * @returns boolean - true if the profile is the user's profile
  */
@@ -324,7 +325,7 @@ function userIsEmployee() {
     return true;
   }
   return false;
-} //userIsEmployee
+} // userIsEmployee
 
 /**
  * Validate all input fields are valid. Emit to parent the error status.
@@ -334,9 +335,7 @@ function validateFields() {
   //ensures that refs are put in an array so we can reuse forEach loop
   let components = !_.isArray(this.$refs.formFields) ? [this.$refs.formFields] : this.$refs.formFields;
   _.forEach(components, (field) => {
-    if (field && !field.validate()) {
-      errorCount++;
-    }
+    if (field && !field.validate()) errorCount++;
   });
   window.EventBus.$emit('personalStatus', errorCount); // emit error status
   window.EventBus.$emit('doneValidating', 'personal', this.editedPersonalInfo); // emit done validating
@@ -354,21 +353,6 @@ export default {
       birthdayFormat: null, // formatted birthday
       BirthdayMenu: false, // display birthday menu
       countries: [], // list of countries
-      dateOptionalRules: [
-        (v) => {
-          return !isEmpty(v) ? /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v) || 'Date must be valid. Format: MM/DD/YYYY' : true;
-        },
-        (v) => (!isEmpty(v) ? moment(v, 'MM/DD/YYYY').isValid() || 'Date must be valid' : true),
-        (v) => (!isEmpty(v) ? moment(v, 'MM/DD/YYYY').isBefore(moment()) || 'Date must not be a future date' : true)
-      ], // rules for an optional date
-      urlRules: [
-        (v) =>
-          isEmpty(v) ||
-          /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)/.test(
-            v
-          ) ||
-          'URL must be valid. Only http(s) are accepted.'
-      ], // rules for training url
       phoneRules: [
         (v) =>
           !isEmpty(v) ? v.length == 0 || v.length == 12 || 'Phone number must be valid. Format: ###-###-####' : true
@@ -443,10 +427,13 @@ export default {
   directives: { mask },
   methods: {
     formatDate,
+    getDateOptionalRules,
+    getNonFutureDateRules,
+    getURLRules,
     parseDate,
     updateAddressDropDown,
     updateBoxes,
-    userIsAdmin,
+    userhasAdminPermissions,
     userIsEmployee,
     validateFields
   },

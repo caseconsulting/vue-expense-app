@@ -194,21 +194,6 @@ function filterByCategory(category) {
 } // filterByCategory
 
 /**
- * Get all aggregate trining urls.
- *
- * @return Array - training urls
- */
-async function getUrls() {
-  this.urlsOriginal = await api.getItems(api.URLS);
-  _.forEach(this.urlsOriginal, (urlObject) => {
-    urlObject.title = titleFormat(urlObject.title);
-
-    urlObject.display = urlObject.logo;
-  });
-  return this.urlsOriginal;
-} // getUrls
-
-/**
  * Checks if a category is already the focus. Returns true if the category was already selected, otherwise returns
  * false.
  *
@@ -243,7 +228,7 @@ function titleFormat(value) {
  * Gets all training urls.
  */
 async function created() {
-  let allURLS = await api.getItems(api.URLS);
+  let allURLS = await api.getItems(api.TRAINING_URLS);
   this.urlsOriginal = _.forEach(allURLS, (urlObject) => {
     urlObject.title = titleFormat(urlObject.title);
     if (urlObject.logo != null) {
@@ -306,7 +291,6 @@ export default {
   methods: {
     changeDisplay,
     filterByCategory,
-    getUrls,
     isEmpty,
     isFocus
   }

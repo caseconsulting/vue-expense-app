@@ -93,13 +93,6 @@ function receiptChange() {
   }
 } // onFilePicked
 
-/**
- * Reference the receipt file panel when text field is clicked.
- */
-function pickFile() {
-  this.$refs.receipt.click();
-} // pickFile
-
 // |--------------------------------------------------|
 // |                                                  |
 // |                      EXPORT                      |
@@ -122,8 +115,7 @@ export default {
   }),
   created,
   methods: {
-    receiptChange,
-    pickFile
+    receiptChange
   },
   watch: {
     inputFile: function () {

@@ -13,7 +13,7 @@
         <v-text-field
           v-model="editedExpenseType.budgetName"
           id="budgetName"
-          :rules="requiredRules"
+          :rules="getRequiredRules()"
           label="Budget Name"
           data-vv-name="Budget Name"
           class="type_form_padding"
@@ -75,7 +75,7 @@
         <v-menu
           v-model="showStartMenu"
           v-if="!editedExpenseType.recurringFlag"
-          :rules="requiredRules"
+          :rules="getRequiredRules()"
           :close-on-content-click="false"
           :nudge-right="40"
           transition="scale-transition"
@@ -87,7 +87,7 @@
             <v-text-field
               v-model="startDateFormatted"
               id="startDate"
-              :rules="dateRules.concat(startDateRules)"
+              :rules="[...getDateRules(), ...startDateRules]"
               label="Start Date"
               hint="MM/DD/YYYY format"
               v-mask="'##/##/####'"
@@ -112,7 +112,7 @@
         <v-menu
           v-model="showEndMenu"
           v-if="!editedExpenseType.recurringFlag"
-          :rules="requiredRules"
+          :rules="getRequiredRules()"
           :close-on-content-click="false"
           :nudge-right="40"
           transition="scale-transition"
@@ -124,7 +124,7 @@
             <v-text-field
               v-model="endDateFormatted"
               id="endDate"
-              :rules="dateRules.concat(endDateRules)"
+              :rules="[...getDateRules(), ...endDateRules]"
               label="End Date"
               hint="MM/DD/YYYY format"
               v-mask="'##/##/####'"
@@ -148,7 +148,7 @@
         <v-textarea
           v-model="editedExpenseType.description"
           id="description"
-          :rules="requiredRules"
+          :rules="getRequiredRules()"
           label="Description "
           data-vv-name="Description "
           rows="3"
@@ -205,6 +205,7 @@
           v-if="editedExpenseType.accessibleBy && editedExpenseType.accessibleBy.includes('Custom')"
           v-model="customAccess"
           :items="activeEmployees"
+          :filter="customFilter"
           no-data-text="No Employees Available"
           item-color="gray"
           multiple
@@ -307,6 +308,7 @@ import api from '@/shared/api.js';
 import FormSubmissionConfirmation from '@/components/modals/FormSubmissionConfirmation.vue';
 import _ from 'lodash';
 import { v4 as uuid } from 'uuid';
+import { getDateRules, getRequiredRules } from '@/shared/validationUtils.js';
 import { formatDate, isEmpty, parseDate } from '@/utils/utils';
 import { mask } from 'vue-the-mask';
 const moment = require('moment-timezone');
@@ -322,14 +324,6 @@ moment.tz.setDefault('America/New_York');
  * Set required url for expense type if all category required url checkboxes are enabled.
  */
 function checkRequireURL() {
-  // find index of category selected
-  // let index = _.findIndex(this.editedExpenseType.categories, (cat) => {
-  //   return cat.name == category.name;
-  // });
-
-  // toggle the category require url
-  //this.editedExpenseType.categories[index].requireURL = !this.editedExpenseType.categories[index].requireURL;
-
   // check if any categories do not require a url
   let somethingIsFalse = _.find(this.editedExpenseType.categories, (category) => {
     return !category.requireURL;
@@ -347,14 +341,6 @@ function checkRequireURL() {
  * Set always on feed for expense type if all category show on feed checkboxes are enabled.
  */
 function checkSelection() {
-  // find index of category selected
-  // let index = _.findIndex(this.editedExpenseType.categories, (cat) => {
-  //   return cat.name == category.name;
-  // });
-
-  // toggle the category show on feed
-  // this.editedExpenseType.categories[index].showOnFeed = !this.editedExpenseType.categories[index].showOnFeed;
-
   // check if any categories are hidden on feed
   let somethingIsFalse = _.find(this.editedExpenseType.categories, (category) => {
     return !category.showOnFeed;
@@ -372,7 +358,9 @@ function checkSelection() {
  * Clears the form and sets all fields to a default state.
  */
 function clearForm() {
-  this.$refs.expenseTypeForm.reset();
+  if (this.$refs.expenseTypeForm) {
+    this.$refs.expenseTypeForm.reset();
+  }
   this.emit('finished-editing-expense-type'); //notify parent no longer editing an expense type
   this.startDateFormatted = null;
   this.endDateFormatted = null;
@@ -380,6 +368,25 @@ function clearForm() {
   this.editedExpenseType.id = null;
   this.editedExpenseType.accessibleBy = ['FullTime'];
 } // clearForm
+
+/**
+ * Custom filter for employee autocomplete options.
+ *firstName: data.firstName
+ * @param item -
+ * @param queryText -
+ * @return
+ */
+function customFilter(item, queryText) {
+  const query = queryText ? queryText : '';
+  const nickNameFullName = item.nickname ? `${item.nickname} ${item.lastName}` : '';
+  const firstNameFullName = `${item.firstName} ${item.lastName}`;
+
+  const queryContainsNickName = nickNameFullName.toString().toLowerCase().indexOf(query.toString().toLowerCase()) >= 0;
+  const queryContainsFirstName =
+    firstNameFullName.toString().toLowerCase().indexOf(query.toString().toLowerCase()) >= 0;
+
+  return queryContainsNickName || queryContainsFirstName;
+} // customFilter
 
 /**
  * Emits a message and data if it exists.
@@ -400,16 +407,6 @@ function formatBudget() {
   }
 } // formatBudget
 
-// /**
-//  * Checks if all employees have access to an expense type and at a percentage rate. Return true if 'ALL' is selected,
-//  * otherwise returns false.
-//  *
-//  * @return boolean - all employees have access at a percentage rate
-//  */
-// function isAllSelected() {
-//   return this.editedExpenseType.accessibleBy == 'ALL';
-// } // isAllSelected
-
 /**
  * Checks if custom access of employees have acess to an expense type at a percentage rate. Returns true if 'CUSTOM'
  * is selected, otherwise returns false.
@@ -419,26 +416,6 @@ function formatBudget() {
 function isCustomSelected() {
   return this.editedExpenseType.accessibleBy && this.editedExpenseType.accessibleBy.includes('Custom');
 } // isCustomSelected
-
-// /**
-//  * Checks if all employees have access to an expense type and at a full rate. Return true if 'FULL' is selected,
-//  * otherwise returns false.
-//  *
-//  * @return boolean - all employees have access at a full rate
-//  */
-// function isFullSelected() {
-//   return this.editedExpenseType.accessibleBy == 'FULL';
-// } // isFullSelected
-
-/**
- * Checks if all full time employees have access to an expense type. Return true if 'FULL TIME' is selected, otherwise
- * returns false.
- *
- * @return boolean - all full time employees have access
- */
-function isFullTimeSelected() {
-  return this.editedExpenseType.accessibleBy.includes('FullTime');
-} // isFullTimeSelected
 
 function odFlagHint() {
   if (!!this.model.id && this.model.odFlag) {
@@ -591,6 +568,13 @@ function toggleRequireURL() {
   }
 } // toggleRequireURL
 
+/**
+ * boolean for checkBox appearance
+ */
+function checkBoxRule() {
+  return !(this.editedExpenseType.accessibleBy && this.editedExpenseType.accessibleBy.length > 0);
+} // checkBoxRule
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                 LIFECYCLE HOOKS                  |
@@ -601,9 +585,9 @@ function toggleRequireURL() {
  * Gets and sets all employees.
  */
 async function created() {
-  window.EventBus.$on('confirmed-type', () => {
+  window.EventBus.$on('confirmed-type', async () => {
     this.submitForm = false;
-    this.submit();
+    await this.submit();
   });
   window.EventBus.$on('canceled-type', () => {
     this.submitting = false;
@@ -618,7 +602,10 @@ async function created() {
     if (employee.workStatus > 0) {
       activeEmployees.push({
         value: employee.id,
-        text: `${employee.firstName} ${employee.lastName}`
+        text: `${employee.firstName} ${employee.lastName}`,
+        nickname: employee.nickname,
+        firstName: employee.firstName,
+        lastName: employee.lastName
       });
     }
   });
@@ -666,11 +653,6 @@ export default {
           return this.customAccess.length > 0 || 'Select at least one employee or uncheck the Custom checkbox';
         }
       ],
-      dateRules: [
-        (v) => !isEmpty(v) || 'Date must be valid. Format: MM/DD/YYYY',
-        (v) => (!isEmpty(v) && /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v)) || 'Date must be valid. Format: MM/DD/YYYY',
-        (v) => moment(v, 'MM/DD/YYYY', true).isValid() || 'Date must be valid'
-      ], // rule for a required date
       startDateRules: [
         (v) => {
           return !isEmpty(v) && moment(v, 'MM/DD/YYYY', true).isValid() && this.editedExpenseType.endDate
@@ -689,7 +671,6 @@ export default {
       ],
       endDateFormatted: null, // formatted end date
       editedExpenseType: _.cloneDeep(this.model), //used to store edits made to an expense type or when creating new expense type
-      requiredRules: [(v) => !isEmpty(v) || 'This field is required'],
       searchString: '',
       showStartMenu: false, // boolean for showing date picker
       showEndMenu: false, // boolean for showing date picker
@@ -704,12 +685,14 @@ export default {
     checkRequireURL,
     checkSelection,
     clearForm,
+    customFilter,
     emit,
     formatBudget,
     formatDate,
+    getDateRules,
+    getRequiredRules,
     isCustomSelected,
     isEmpty,
-    isFullTimeSelected,
     odFlagHint,
     parseBudget,
     parseDate,
@@ -721,9 +704,7 @@ export default {
   },
   props: ['model'], // expense type to be created/updated
   computed: {
-    checkBoxRule() {
-      return !(this.editedExpenseType.accessibleBy && this.editedExpenseType.accessibleBy.length > 0);
-    }
+    checkBoxRule
   },
   watch: {
     'model.id': function () {

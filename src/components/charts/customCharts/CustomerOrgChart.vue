@@ -15,8 +15,25 @@
 </template>
 
 <script>
+import PieChart from '../baseCharts/PieChart.vue';
+import _ from 'lodash';
+import api from '@/shared/api.js';
+
+/**
+ * created lifecycle hook
+ */
+async function created() {
+  this.employees = await api.getItems(api.EMPLOYEES);
+  this.fillData();
+  this.$forceUpdate();
+} // created
+
+/**
+ * Sets up the chart formatting and data options.
+ */
 function fillData() {
   let allCompOrgExp = {};
+  // tally up customer org experience for active employees
   this.employees.forEach((emp) => {
     if (emp.customerOrgExp && emp.workStatus != 0) {
       _.forEach(emp.customerOrgExp, (org) => {
@@ -89,11 +106,7 @@ function fillData() {
   };
 
   this.dataReceived = true;
-}
-
-import PieChart from '../baseCharts/PieChart.vue';
-import _ from 'lodash';
-import api from '@/shared/api.js';
+} // fillData
 
 export default {
   components: { PieChart },
@@ -107,17 +120,11 @@ export default {
     };
   },
   methods: { fillData },
-  async created() {
-    this.employees = await api.getItems(api.EMPLOYEES);
-    this.fillData();
-    this.$forceUpdate();
-  },
+  created,
   watch: {
     showCurrent() {
-      this.fillData();
+      this.fillData(); // renders a different chart every time the radio button changes
     }
   }
 };
 </script>
-
-<style></style>

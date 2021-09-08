@@ -24,6 +24,18 @@ import _ from 'lodash';
 const moment = require('moment-timezone');
 moment.tz.setDefault('America/New_York');
 
+/**
+ * created lifecycle hook
+ */
+async function created() {
+  this.$forceUpdate();
+  this.employees = await api.getItems(api.EMPLOYEES);
+  this.fillData();
+} // created
+
+/**
+ * Gets the IC data, and sets the chart formatting and data options
+ */
 function fillData() {
   let ICData = {};
   let totalYears = 0;
@@ -71,8 +83,7 @@ function fillData() {
     { text: 'val', value: 'value' }
   ];
   this.dataReceived = true;
-  //return [averageYoE, totalYears];
-}
+} // fillData
 
 export default {
   data() {
@@ -86,12 +97,6 @@ export default {
   methods: {
     fillData
   },
-  async created() {
-    this.$forceUpdate();
-    this.employees = await api.getItems(api.EMPLOYEES);
-    this.fillData();
-  }
+  created
 };
 </script>
-
-<style></style>

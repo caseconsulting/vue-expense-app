@@ -180,6 +180,13 @@ import { isEmpty, parseDateMonthYear, formatDateMonthYear } from '@/utils/utils'
 // |--------------------------------------------------|
 
 /**
+ * mounted lifecycle hook
+ */
+function mounted() {
+  this.$emit('validated', this.technologyIndex, this.intervalIndex, 1);
+} // mounted
+
+/**
  * Computed property to calculate if interval overlaps any of the other intervals in the allIntervals prop. Sends back the error status to the parent component.
  *
  * @returns boolean true if there is an error (interval overlaps) false otherwise
@@ -315,9 +322,7 @@ export default {
     parseDateMonthYear,
     formatDateMonthYear
   },
-  mounted() {
-    this.$emit('validated', this.technologyIndex, this.intervalIndex, 1);
-  },
+  mounted,
   props: ['startIntervalDate', 'endIntervalDate', 'technologyIndex', 'intervalIndex', 'allIntervals'],
   watch: {
     formatToggle: function () {

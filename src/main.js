@@ -60,12 +60,7 @@ import 'vue-awesome/icons/clipboard-check';
 import Icon from 'vue-awesome/components/Icon';
 import App from './App.vue';
 import Vue2Filters from 'vue2-filters';
-// Vue.use(Vuetify, {
-//   theme: {
-//     primary: '#68caa6',
-//     radioactive: '#0ACF23'
-//   }
-// });
+
 Vue.use(Vue2Filters);
 
 Vue.use(CKEditor);

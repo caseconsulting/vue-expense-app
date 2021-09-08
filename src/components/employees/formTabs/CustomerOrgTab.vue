@@ -11,7 +11,7 @@
       <v-autocomplete
         ref="formFields"
         v-model="exp.name"
-        :rules="requiredRules"
+        :rules="getRequiredRules()"
         :items="experienceDropDown"
         label="Customer Organization Experience"
         data-vv-name="Customer Organization Experience"
@@ -22,7 +22,14 @@
       <v-row align="center" class="py-3" justify="center">
         <!-- Current Switch -->
         <v-col cols="6" sm="7" md="6" lg="7">
-          <v-switch v-model="exp.current" label="Currently working with this customer organization"></v-switch>
+          <v-tooltip top nudge-left="75" nudge-bottom="10" max-width="300">
+            <template v-slot:activator="{ on }">
+              <div v-on="on">
+                <v-switch v-model="exp.current" label="Currently working with this customer organization"></v-switch>
+              </div>
+            </template>
+            <span>Enabling this will auto-increment the years of experience every month</span>
+          </v-tooltip>
         </v-col>
 
         <!-- Years of Experience -->
@@ -38,7 +45,7 @@
             ref="formFields"
             v-model="exp.years"
             flat
-            :rules="experienceRequired"
+            :rules="[...getRequiredRules(), experienceRequired[0](exp.years, index), experienceRequired[1]]"
             single-line
             max="99"
             min="0"
@@ -46,6 +53,7 @@
             dense
             type="number"
             outlined
+            @input="exp.years = Number(exp.years)"
           ></v-text-field>
         </v-col>
 
@@ -74,7 +82,7 @@
 <script>
 import api from '@/shared/api.js';
 import _ from 'lodash';
-import { formatDateDashToSlash, formatDateSlashToDash, isEmpty } from '@/utils/utils';
+import { getRequiredRules } from '@/shared/validationUtils.js';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -125,9 +133,7 @@ function validateFields() {
   //ensures that refs are put in an array so we can reuse forEach loop
   let components = !_.isArray(this.$refs.formFields) ? [this.$refs.formFields] : this.$refs.formFields;
   _.forEach(components, (field) => {
-    if (field && !field.validate()) {
-      errorCount++;
-    }
+    if (field && !field.validate()) errorCount++;
   });
   window.EventBus.$emit('doneValidating', 'customerOrgExp', this.editedCustomerOrgExp); // emit done validating and send edited data to parent
   window.EventBus.$emit('customerOrgExpStatus', errorCount); // emit error status
@@ -156,32 +162,17 @@ export default {
         'DoD',
         'Other'
       ], // autocomplete customer organization name options
-      dateOptionalRules: [
-        (v) => {
-          return !isEmpty(v) ? /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v) || 'Date must be valid. Format: MM/DD/YYYY' : true;
-        }
-      ], // rules for an optional date
-      dateRules: [
-        (v) => !isEmpty(v) || 'Date required',
-        (v) => (!isEmpty(v) && /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v)) || 'Date must be valid. Format: MM/DD/YYYY'
-      ], // rules for a required date
       editedCustomerOrgExp: _.cloneDeep(this.model), //stores edited customer orgs info
       experienceRequired: [
-        (v) => !isEmpty(v) || 'This field is required',
-        (v) => v >= 0 || 'Value cannot be negative',
+        (v, index) => v > 0 || this.editedCustomerOrgExp[index].current || 'Value must be greater than 0',
         (v) => v < 100 || 'Value must be less than 100'
-      ], // rules for years of experience
-      requiredRules: [
-        (v) => !isEmpty(v) || 'This field is required. You must enter information or delete the field if possible'
-      ] // rules for a required field
+      ] // rules for years of experience
     };
   },
   methods: {
     addExperience,
     deleteExperience,
-    formatDateSlashToDash,
-    formatDateDashToSlash,
-    isEmpty,
+    getRequiredRules,
     validateFields
   },
   props: ['model', 'validating'],

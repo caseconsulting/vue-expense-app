@@ -1,17 +1,5 @@
 <template>
   <div>
-    <!-- Status Alert -->
-    <v-alert
-      v-for="(alert, index) in alerts"
-      :key="index"
-      :type="alert.status"
-      :color="alert.color"
-      dense
-      class="mb-1"
-      id="alert"
-    >
-      {{ alert.message }}
-    </v-alert>
     <v-card class="mt-3">
       <v-container fluid>
         <!-- Table Header -->
@@ -22,8 +10,10 @@
           <!-- Search Filters -->
           <v-autocomplete
             :items="employees"
+            :filter="customFilter"
             v-model="employee"
             id="filterEmployee"
+            class="mr-3"
             item-text="text"
             label="Filter by Employee"
             clearable
@@ -140,7 +130,6 @@
       <reimburse-modal
         :toggleReimburseModal="buttonClicked"
         :selectedReimbursements="getSelectedExpensesToReimburse"
-        v-on:confirm-reimburse="reimburseExpenses"
       ></reimburse-modal>
     </v-card>
   </div>
@@ -273,7 +262,10 @@ function constructAutoComplete(aggregatedData) {
     if (data && data.employeeName && data.employeeId) {
       return {
         text: data.employeeName,
-        value: data.employeeId
+        value: data.employeeId,
+        nickname: data.nickname,
+        firstName: data.firstName,
+        lastName: data.lastName
       };
     }
   }).filter((data) => {
@@ -312,6 +304,25 @@ function createExpenses(aggregatedData) {
     return _.merge(expense, additionalAttributes);
   });
 } // createExpenses
+
+/**
+ * Custom filter for employee autocomplete options.
+ *firstName: data.firstName
+ * @param item -
+ * @param queryText -
+ * @return
+ */
+function customFilter(item, queryText) {
+  const query = queryText ? queryText : '';
+  const nickNameFullName = item.nickname ? `${item.nickname} ${item.lastName}` : '';
+  const firstNameFullName = `${item.firstName} ${item.lastName}`;
+
+  const queryContainsNickName = nickNameFullName.toString().toLowerCase().indexOf(query.toString().toLowerCase()) >= 0;
+  const queryContainsFirstName =
+    firstNameFullName.toString().toLowerCase().indexOf(query.toString().toLowerCase()) >= 0;
+
+  return queryContainsNickName || queryContainsFirstName;
+} // customFilter
 
 /**
  * Custom sorter for each column in the table.
@@ -398,15 +409,6 @@ function determineShowSwitch(budget) {
 
   return showSwitch;
 } // determineShowSwitch
-
-/**
- * Displays an error in the response status snackbar.
- */
-async function displayError(err) {
-  this.$set(this.status, 'statusType', 'ERROR');
-  this.$set(this.status, 'statusMessage', err);
-  this.$set(this.status, 'color', 'red');
-} // displayError
 
 /**
  * Emits expense select change for expense type totals component.
@@ -507,59 +509,60 @@ function refreshExpenses() {
  * Reimburse the selected list of expenses.
  */
 async function reimburseExpenses() {
-  if (this.buttonClicked) {
-    // reimburse button is clicked
-    let expensesToReimburse = [];
-    //this.buttonClicked = false;
-    this.reimbursing = true; // set reimbursing status to true
+  // reimburse button is clicked
+  let expensesToReimburse = [];
+  //this.buttonClicked = false;
+  this.reimbursing = true; // set reimbursing status to true
 
-    // get selected expenses and set reimburse date
-    this.empBudgets = _.forEach(this.empBudgets, async (budget) => {
-      return await _.forEach(budget.expenses, async (expense) => {
-        if (expense.selected) {
-          //to remove the expense type data in the ExpenseTypeTotal modal
-          window.EventBus.$emit('expenseChange', expense);
-          expense.reimbursedDate = moment().format('YYYY-MM-DD');
-          expensesToReimburse.push(removeAggregateExpenseData(expense));
-        }
-      });
-    });
-
-    // reimburse expense on back end
-    await this.asyncForEach(expensesToReimburse, async (expense) => {
-      let reimbursedExpense = await api.updateItem(api.EXPENSES, expense);
-      let msg;
-      if (!reimbursedExpense.id) {
-        // failed to reimburse expense
-        msg = reimbursedExpense.response.data.message;
-        this.alerts.push({ status: 'error', message: msg, color: 'red' });
-        let self = this;
-        setTimeout(function () {
-          self.alerts.shift();
-        }, 10000);
-
-        // revert reimburse date change
-        let groupIndex = _.findIndex(this.empBudgets, {
-          employeeId: expense.employeeId,
-          expenseTypeId: expense.expenseTypeId
-        });
-        let expenseIndex = _.findIndex(this.empBudgets[groupIndex].expenses, { id: expense.id });
-        this.empBudgets[groupIndex].expenses[expenseIndex].reimbursedDate = null;
-        this.empBudgets[groupIndex].expenses[expenseIndex].failed = true;
-      } else {
-        // successfully reimbursed expense
-        msg = 'Successfully reimbursed expense';
-        this.alerts.push({ status: 'success', message: msg, color: 'green' });
-        let self = this;
-        setTimeout(function () {
-          self.alerts.shift();
-        }, 10000);
+  // get selected expenses and set reimburse date
+  this.empBudgets = _.forEach(this.empBudgets, (budget) => {
+    return _.forEach(budget.expenses, (expense) => {
+      if (expense.selected) {
+        //to remove the expense type data in the ExpenseTypeTotal modal
+        window.EventBus.$emit('expenseChange', expense);
+        window.EventBus.$emit('expenseClicked', undefined);
+        expense.reimbursedDate = moment().format('YYYY-MM-DD');
+        expensesToReimburse.push(removeAggregateExpenseData(expense));
       }
     });
+  });
 
-    this.refreshExpenses();
-    this.reimbursing = false; // set reimbursing status to false
-  }
+  // reimburse expense on back end
+  await this.asyncForEach(expensesToReimburse, async (expense) => {
+    let reimbursedExpense = await api.updateItem(api.EXPENSES, expense);
+    let msg;
+    if (!reimbursedExpense.id) {
+      // failed to reimburse expense
+      msg = reimbursedExpense.response.data.message;
+      this.alerts.push({ status: 'error', message: msg, color: 'red' });
+      let self = this;
+      setTimeout(function () {
+        self.alerts.shift();
+      }, 10000);
+
+      // revert reimburse date change
+      let groupIndex = _.findIndex(this.empBudgets, {
+        employeeId: expense.employeeId,
+        expenseTypeId: expense.expenseTypeId
+      });
+      let expenseIndex = _.findIndex(this.empBudgets[groupIndex].expenses, { id: expense.id });
+      this.empBudgets[groupIndex].expenses[expenseIndex].reimbursedDate = null;
+      this.empBudgets[groupIndex].expenses[expenseIndex].failed = true;
+      this.empBudgets[groupIndex].expenses[expenseIndex].selected = false;
+    } else {
+      // successfully reimbursed expense
+      msg = 'Successfully reimbursed expense';
+      this.alerts.push({ status: 'success', message: msg, color: 'green' });
+      let self = this;
+      setTimeout(function () {
+        self.alerts.shift();
+      }, 10000);
+    }
+    window.EventBus.$emit('reimburseAlert', this.alerts);
+  });
+
+  this.refreshExpenses();
+  this.reimbursing = false; // set reimbursing status to false
 } // reimburseExpenses
 
 /**
@@ -755,7 +758,7 @@ async function created() {
   window.EventBus.$on('toggleExpense', this.toggleShowOnFeed);
 
   //window.EventBus.$on('canceled-reimburse', () => (this.buttonClicked = false));
-  window.EventBus.$on('confirm-reimburse', () => this.reimburseExpenses());
+  window.EventBus.$on('confirm-reimburse', async () => await this.reimburseExpenses());
   let aggregatedData = await api.getAllAggregateExpenses();
 
   let allExpenses = createExpenses(aggregatedData);
@@ -767,6 +770,13 @@ async function created() {
   this.loading = false;
 } // created
 
+/**
+ * beforeDestroy lifecycle hook
+ */
+function beforeDestroy() {
+  window.EventBus.$off('confirm-reimburse');
+} //beforeDestroy
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                      EXPORT                      |
@@ -774,6 +784,7 @@ async function created() {
 // |--------------------------------------------------|
 
 export default {
+  beforeDestroy,
   prop: ['confirmReimburse'],
   components: {
     ReimburseModal,
@@ -835,9 +846,9 @@ export default {
     clickedRow,
     constructAutoComplete,
     convertToMoneyString,
+    customFilter,
     customSort,
     determineShowOnFeed,
-    displayError,
     emitSelectionChange,
     filterOutReimbursed,
     getBudgetTotal,

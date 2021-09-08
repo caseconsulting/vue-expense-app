@@ -34,6 +34,7 @@
               v-model="employee"
               item-text="text"
               id="employeeIdFilter"
+              class="mr-3"
               label="Filter by Employee"
               clearable
             ></v-autocomplete>
@@ -148,15 +149,15 @@
             </template>
             <!-- Purchase date slot -->
             <template v-slot:[`item.purchaseDate`]="{ item }">
-              <td>{{ item.purchaseDate | monthDayYearFormat }}</td>
+              <td>{{ monthDayYearFormat(item.purchaseDate) }}</td>
             </template>
             <!-- Reimburse date Slot -->
             <template v-slot:[`item.reimbursedDate`]="{ item }">
-              <td>{{ item.reimbursedDate | monthDayYearFormat }}</td>
+              <td>{{ monthDayYearFormat(item.reimbursedDate) }}</td>
             </template>
             <!-- Creation date slot -->
             <template v-slot:[`item.createdAt`]="{ item }">
-              <td>{{ item.createdAt | monthDayYearFormat }}</td>
+              <td>{{ monthDayYearFormat(item.createdAt) }}</td>
             </template>
             <!-- Employee name slot-->
             <template v-slot:[`item.employeeName`]="{ item }">
@@ -434,8 +435,8 @@ function moneyFilter(value) {
 /**
  * Refresh and updates expense list and displays a successful create status in the snackbar.
  */
-function addModelToTable() {
-  this.refreshExpenses();
+async function addModelToTable() {
+  await this.refreshExpenses();
 
   this.$set(this.status, 'statusType', 'SUCCESS');
   this.$set(this.status, 'statusMessage', 'Item was successfully submitted!');
@@ -496,7 +497,10 @@ function constructAutoComplete(aggregatedData) {
       if (data && data.employeeName && data.employeeId) {
         return {
           text: data.employeeName,
-          value: data.employeeId
+          value: data.employeeId,
+          nickname: data.nickname,
+          firstName: data.firstName,
+          lastName: data.lastName
         };
       }
     }).filter((data) => {
@@ -507,17 +511,22 @@ function constructAutoComplete(aggregatedData) {
 } // constructAutoComplete
 
 /**
- * Filters autocomplete options for items that have a value.
- *
- * @param item - autocomplete object
- * @param queryText - query text string
- * @return boolean - value exists
+ * Custom filter for employee autocomplete options.
+ *firstName: data.firstName
+ * @param item -
+ * @param queryText -
+ * @return
  */
 function customFilter(item, queryText) {
-  const hasValue = (val) => (val != null ? val : '');
-  const text = hasValue(item.text);
-  const query = hasValue(queryText);
-  return text.toString().toLowerCase().indexOf(query.toString().toLowerCase()) > -1;
+  const query = queryText ? queryText : '';
+  const nickNameFullName = item.nickname ? `${item.nickname} ${item.lastName}` : '';
+  const firstNameFullName = `${item.firstName} ${item.lastName}`;
+
+  const queryContainsNickName = nickNameFullName.toString().toLowerCase().indexOf(query.toString().toLowerCase()) >= 0;
+  const queryContainsFirstName =
+    firstNameFullName.toString().toLowerCase().indexOf(query.toString().toLowerCase()) >= 0;
+
+  return queryContainsNickName || queryContainsFirstName;
 } // customFilter
 
 /**
@@ -531,7 +540,7 @@ async function deleteExpense() {
     let deleted = await api.deleteItem(api.EXPENSES, this.propExpense.id);
     if (deleted.id) {
       // successfully deletes expense
-      this.deleteModelFromTable(deletedExpense);
+      await this.deleteModelFromTable(deletedExpense);
       if (!this.isEmpty(deletedExpense.receipt)) {
         // delete attachment from s3 if deleted expense has a receipt
         let deletedAttachment = await api.deleteAttachment(deleted);
@@ -552,8 +561,8 @@ async function deleteExpense() {
 /**
  * Refresh and updates expense list and displays a successful delete status in the snackbar.
  */
-function deleteModelFromTable() {
-  this.refreshExpenses();
+async function deleteModelFromTable() {
+  await this.refreshExpenses();
 
   this.$set(this.status, 'statusType', 'SUCCESS');
   this.$set(this.status, 'statusMessage', 'Item was successfully deleted!');
@@ -625,16 +634,6 @@ function hasRecipient(expense) {
   let expenseType = _.find(this.expenseTypes, (type) => expense.expenseTypeId === type.value);
   return !isEmpty(expenseType.hasRecipient) && expenseType.hasRecipient;
 }
-
-/**
- * Checks to see if an expense is expanded in the datatable.
- *
- * @param item - expense to check
- * @return boolean - the expense is expanded
- */
-function isFocus(item) {
-  return (!_.isEmpty(this.expanded) && item.id == this.expanded[0].id) || this.expense.id == item.id;
-} // isFocus
 
 /**
  * Checks if the expense is reimbursed. Returns true if the expense is reimbursed, otherwise returns false.
@@ -721,7 +720,7 @@ async function unreimburseExpense() {
     this.displayError('Error Unreimburseing Expense');
   }
 
-  this.refreshExpenses();
+  await this.refreshExpenses();
   this.loading = false; // set loading status to false
   this.midAction = false;
 } // unreimburseExpense
@@ -729,8 +728,8 @@ async function unreimburseExpense() {
 /**
  * Refresh and updates expense list and displays a successful update status in the snackbar.
  */
-function updateModelInTable() {
-  this.refreshExpenses();
+async function updateModelInTable() {
+  await this.refreshExpenses();
 
   this.$set(this.status, 'statusType', 'SUCCESS');
   this.$set(this.status, 'statusMessage', 'Item was successfully updated!');
@@ -778,12 +777,16 @@ async function created() {
   window.EventBus.$on('canceled-unreimburse-expense', () => {
     this.midAction = false;
   });
-  window.EventBus.$on('confirm-unreimburse-expense', this.unreimburseExpense);
+  window.EventBus.$on('confirm-unreimburse-expense', async () => {
+    await this.unreimburseExpense();
+  });
 
   window.EventBus.$on('canceled-delete-expense', () => {
     this.midAction = false;
   });
-  window.EventBus.$on('confirm-delete-expense', this.deleteExpense);
+  window.EventBus.$on('confirm-delete-expense', async () => {
+    await this.deleteExpense();
+  });
 
   // get user info
   this.userInfo = await api.getUser();
@@ -811,8 +814,20 @@ async function created() {
     };
   });
 
-  this.refreshExpenses(); // refresh and update expenses
+  await this.refreshExpenses(); // refresh and update expenses
 } // created
+
+/**
+ * destroy listeners
+ */
+function beforeDestroy() {
+  window.EventBus.$off('canceled-delete-expense');
+  window.EventBus.$off('confirm-delete-expense');
+  window.EventBus.$off('finished-editing-expense');
+  window.EventBus.$off('editing-expense');
+  window.EventBus.$off('confirm-unreimburse-expense');
+  window.EventBus.$off('canceled-unreimburse-expense');
+} // beforeDestroy
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -821,6 +836,7 @@ async function created() {
 // |--------------------------------------------------|
 
 export default {
+  beforeDestroy,
   components: {
     Attachment,
     ConvertExpensesToCsv,
@@ -931,9 +947,6 @@ export default {
       userInfo: null // user information
     };
   },
-  filters: {
-    monthDayYearFormat
-  },
   methods: {
     addModelToTable,
     canDelete,
@@ -950,9 +963,9 @@ export default {
     filterExpenses,
     hasRecipient,
     isEmpty,
-    isFocus,
     isManager,
     isReimbursed,
+    monthDayYearFormat,
     onSelect,
     refreshExpenses,
     startAction,

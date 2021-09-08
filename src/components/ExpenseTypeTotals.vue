@@ -1,27 +1,25 @@
 <template>
-  <div>
-    <!--Totals Card-->
-    <v-card v-if="totals.length" class="slide-in-blurred-right">
-      <!--Total Card Title-->
-      <v-card-title class="subtitle-2">
-        <v-container>
-          <v-row class="headline">Totals</v-row>
-        </v-container>
-      </v-card-title>
-      <!--End of Total Card Title-->
-      <v-card-text>
-        <v-container class="pb-0">
-          <!--List of Expense Types and Totals-->
-          <v-row v-for="total in totals" :key="total.id" class="pb-7" style="font-weight: bold">
-            <span>{{ total.name }}: </span>
-            <v-spacer></v-spacer>
-            {{ convertToMoneyString(total.costTotal) }}
-          </v-row>
-        </v-container>
-      </v-card-text>
-    </v-card>
-    <!--End of Totals Card-->
-  </div>
+  <!--Totals Card-->
+  <v-card v-if="totals.length" class="slide-in-blurred-right my-3 mr-3">
+    <!--Total Card Title-->
+    <v-card-title class="subtitle-2">
+      <v-container>
+        <v-row class="headline">Totals</v-row>
+      </v-container>
+    </v-card-title>
+    <!--End of Total Card Title-->
+    <v-card-text>
+      <v-container class="pb-0">
+        <!--List of Expense Types and Totals-->
+        <v-row v-for="total in totals" :key="total.id" class="pb-7" style="font-weight: bold">
+          <span>{{ total.name }}: </span>
+          <v-spacer></v-spacer>
+          {{ convertToMoneyString(total.costTotal) }}
+        </v-row>
+      </v-container>
+    </v-card-text>
+  </v-card>
+  <!--End of Totals Card-->
 </template>
 
 <script>
@@ -105,7 +103,7 @@ function updateSelected(item) {
 /**
  *  Creates event listeners.
  */
-async function created() {
+function created() {
   window.EventBus.$on('selectExpense', this.updateSelected);
   window.EventBus.$on('expenseChange', this.updateSelected);
 } // created
@@ -133,7 +131,7 @@ export default {
 };
 </script>
 
-<style>
+<style scoped>
 .slide-in-blurred-right {
   animation: slide-in-blurred-right 0.5s ease-in forwards;
 }

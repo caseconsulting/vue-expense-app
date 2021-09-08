@@ -42,36 +42,17 @@
 
 <script>
 import HorizontalBar from '../baseCharts/HorizontalBarChart.vue';
+import { isMobile } from '@/utils/utils';
 import api from '@/shared/api.js';
 
 // |--------------------------------------------------|
 // |                                                  |
-// |                     COMPUTED                     |
+// |                     METHODS                      |
 // |                                                  |
 // |--------------------------------------------------|
 
 /**
- * Checks if the current device used is mobile. Return true if it is mobile. Returns false if it is not mobile.
- *
- * @return boolean - if the device is mobile
- */
-function isMobile() {
-  switch (this.$vuetify.breakpoint.name) {
-    case 'xs':
-      return true;
-    default:
-      return false;
-  }
-} // isMobile
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                     METHOD                       |
-// |                                                  |
-// |--------------------------------------------------|
-
-/**
- * Takes data that was captured upon load and displays it on the chart
+ * Takes data that was captured upon load and displays it on the chart.
  * @param that this passed as that (had issues with this being 'undefined')
  */
 function fillData(that) {
@@ -208,6 +189,7 @@ function setNumOfColumns(techArray) {
 
 /**
  * Sorts array of tech skills
+ * @param techArray - The array of different technologies
  */
 function sortTech(techArray) {
   //We now sort the entries

@@ -3,6 +3,7 @@
     <v-card>
       <v-card-title class="header_style"><strong>Upload Resume</strong></v-card-title>
       <v-card-text class="pa-5">
+        <!-- File upload -->
         <v-form ref="submit" class="ma-3">
           <v-container fluid>
             <v-row>
@@ -20,6 +21,7 @@
             </v-row>
           </v-container>
         </v-form>
+        <!-- Extract checkbox and loading bar -->
         <div class="ma-3">
           <v-row>
             <v-checkbox
@@ -37,13 +39,20 @@
             <p align="center" class="error-text">Timeout error, please try again.</p>
           </div>
         </div>
-        <span v-if="resumeProcessed && (showTech || showAddress || showPhoneNumber || showEducation)">
+        <!-- Pending Changes Section -->
+        <span
+          v-if="
+            resumeProcessed &&
+            (showTech || showAddress || showPhoneNumber || showEducation || showGitHub || showLinkedIn)
+          "
+        >
           <v-row class="text-center pb-3">
             <v-col>
               <h1>Pending Changes</h1>
             </v-col>
           </v-row>
-          <span v-if="showAddress || showPhoneNumber">
+          <!-- Personal Info Section -->
+          <span v-if="showAddress || showPhoneNumber || showGitHub || showLinkedIn">
             <v-container fluid>
               <v-row class="text-left">
                 <v-col>
@@ -124,10 +133,76 @@
                   </v-tooltip>
                 </v-col>
               </v-row>
+              <!-- GitHub -->
+              <v-row v-if="showGitHub" class="text-center">
+                <v-col xl="5" lg="5" md="5" sm="6" cols="6">
+                  <v-text-field :value="employee.github" disabled label="Old GitHub"> </v-text-field>
+                </v-col>
+                <v-col xl="5" lg="5" md="5" sm="6" cols="6">
+                  <v-text-field v-model="newPersonal.github" readonly label="New GitHub"> </v-text-field>
+                </v-col>
+                <v-col xl="2" lg="2" md="2" sm="12" cols="12" class="pt-md-6 pt-0 text-center">
+                  <v-tooltip top>
+                    <template v-slot:activator="{ on }">
+                      <v-icon v-on="on" large right color="red" @click="gitHubCanceled = true">close</v-icon>
+                    </template>
+                    <span>Ignore Pending Change</span>
+                  </v-tooltip>
+                  <v-tooltip top>
+                    <template v-slot:activator="{ on }">
+                      <v-icon
+                        v-on="on"
+                        large
+                        left
+                        color="green"
+                        @click="
+                          submitInfo('github', newPersonal.github);
+                          gitHubCanceled = true;
+                        "
+                        >done</v-icon
+                      >
+                    </template>
+                    <span>Add Pending Change</span>
+                  </v-tooltip>
+                </v-col>
+              </v-row>
+              <!-- LinkedIn -->
+              <v-row v-if="showLinkedIn" class="text-center">
+                <v-col xl="5" lg="5" md="5" sm="6" cols="6">
+                  <v-text-field :value="employee.linkedIn" disabled label="Old LinkedIn"> </v-text-field>
+                </v-col>
+                <v-col xl="5" lg="5" md="5" sm="6" cols="6">
+                  <v-text-field v-model="newPersonal.linkedIn" readonly label="New LinkedIn"> </v-text-field>
+                </v-col>
+                <v-col xl="2" lg="2" md="2" sm="12" cols="12" class="pt-md-6 pt-0 text-center">
+                  <v-tooltip top>
+                    <template v-slot:activator="{ on }">
+                      <v-icon v-on="on" large right color="red" @click="linkedInCanceled = true">close</v-icon>
+                    </template>
+                    <span>Ignore Pending Change</span>
+                  </v-tooltip>
+                  <v-tooltip top>
+                    <template v-slot:activator="{ on }">
+                      <v-icon
+                        v-on="on"
+                        large
+                        left
+                        color="green"
+                        @click="
+                          submitInfo('linkedIn', newPersonal.linkedIn);
+                          linkedInCanceled = true;
+                        "
+                        >done</v-icon
+                      >
+                    </template>
+                    <span>Add Pending Change</span>
+                  </v-tooltip>
+                </v-col>
+              </v-row>
             </v-container>
           </span>
+          <!-- Technology -->
           <span v-if="showTech">
-            <!-- Technology -->
             <v-row class="text-left my-2">
               <v-col>
                 <h2>Technology Additions</h2>
@@ -141,7 +216,7 @@
                   <!-- Name of Technology -->
                   <v-text-field class="pb-5" :value="tech.name" readonly label="Technology"></v-text-field>
 
-                  <!-- Time Intervals -->
+                  <!-- Current and Years of Experience -->
                   <div class="mb-3">
                     <v-row justify="center" align="center" class="py-3">
                       <!-- Current Switch -->
@@ -214,9 +289,15 @@
             </v-form>
           </div>
         </span>
+        <!-- End of Pending Changes Section -->
+        <!-- No changes -->
         <v-row
           class="text-center mt-3"
-          v-if="!changesMade && resumeProcessed && !(showTech || showAddress || showPhoneNumber || showEducation)"
+          v-if="
+            !changesMade &&
+            resumeProcessed &&
+            !(showTech || showAddress || showPhoneNumber || showEducation || showGitHub || showLinkedIn)
+          "
         >
           <v-col>
             <h2>No new profile additions found!</h2>
@@ -224,15 +305,23 @@
         </v-row>
         <v-row
           class="text-center"
-          v-if="!changesMade && resumeProcessed && !(showTech || showAddress || showPhoneNumber || showEducation)"
+          v-if="
+            !changesMade &&
+            resumeProcessed &&
+            !(showTech || showAddress || showPhoneNumber || showEducation || showGitHub || showLinkedIn)
+          "
         >
           <v-col>
             <v-btn color="red" outlined @click="clearForm">Close Form</v-btn>
           </v-col>
         </v-row>
+        <!-- Changes exist -->
         <v-row
           class="text-center"
-          v-if="resumeProcessed && (showTech || showAddress || showPhoneNumber || showEducation || changesMade)"
+          v-if="
+            resumeProcessed &&
+            (showTech || showAddress || showPhoneNumber || showEducation || showGitHub || changesMade || showLinkedIn)
+          "
         >
           <v-col class="text-right">
             <v-btn color="red" class="mx-0 my-3" outlined @click="confirmBackingOut = true">Cancel Form Edits</v-btn>
@@ -243,18 +332,19 @@
         </v-row>
       </v-card-text>
     </v-card>
+    <!-- Failed to submit all pending changes Modal -->
     <v-dialog v-model="toggleResumeFormErrorModal" max-width="350">
       <v-card>
         <v-card-title> Please make sure you process all pending changes. </v-card-title>
         <v-btn text color="red" @click="toggleResumeFormErrorModal = false">Close</v-btn>
       </v-card>
     </v-dialog>
-    <!-- Confirmation Model -->
+    <!-- Confirmation Modal -->
     <form-submission-confirmation
       :toggleSubmissionConfirmation="this.confirmingValid"
       type="parser"
     ></form-submission-confirmation>
-    <!-- Cancel Confirmation Model -->
+    <!-- Cancel Confirmation Modal -->
     <cancel-confirmation :toggleSubmissionConfirmation="this.confirmBackingOut" type="parser"> </cancel-confirmation>
   </v-dialog>
 </template>
@@ -266,17 +356,34 @@ import _ from 'lodash';
 import CancelConfirmation from '@/components/modals/CancelConfirmation.vue';
 import educationTab from '@/components/employees/formTabs/EducationTab';
 import FormSubmissionConfirmation from '@/components/modals/FormSubmissionConfirmation.vue';
+import { v4 as uuid } from 'uuid';
 
-async function created() {
+// |--------------------------------------------------|
+// |                                                  |
+// |                 LIFECYCLE HOOKS                  |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * Sets up event listeners for confirming and canceling resume parser
+ */
+function created() {
   window.EventBus.$on('confirmed-parser', () => {
-    // For some reason confirmed-parser gets called twice
-    // Where one of the editedEmployeeForms is null
-    if (this.editedEmployeeForm) {
-      window.EventBus.$emit('resume', this.editedEmployeeForm);
-      this.resumeProcessed = false;
-      this.confirmingValid = false;
-      this.activate = !this.activate;
-    }
+    // Create an audit of the success
+    api.createItem(api.AUDIT, {
+      id: uuid(),
+      type: 'resume',
+      tags: ['submit'],
+      employeeId: this.employee.id,
+      description: `${this.employee.firstName} ${this.employee.lastName} made changes to their profile through the resume parser.`,
+      timeToLive: 60
+    });
+
+    this.$emit('resume', this.editedEmployeeForm, this.totalChanges);
+    this.resumeProcessed = false;
+    this.confirmingValid = false;
+    this.activate = !this.activate;
+    this.totalChanges = 0;
   });
   window.EventBus.$on('canceled-parser', () => {
     this.confirmingValid = false;
@@ -288,15 +395,51 @@ async function created() {
     this.confirmBackingOut = false;
     this.clearForm();
   });
-}
+} // created
+
+/**
+ * sestroyListener
+ */
+function beforeDestroy() {
+  window.EventBus.$off('confirmed-parser');
+} // beforeDestroy
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                 COMPUTED                         |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * Determines if any pending changes have been submitted
+ */
 function changesMade() {
   return !_.isEqual(this.editedEmployeeForm, this.employee);
-}
+} // changesMade
 
+/**
+ * Determines if the address should be shown, i.e. does one exist or has the pending
+ * change been denied
+ */
 function showAddress() {
   return this.newAddress && !this.addressCanceled;
+} // showAddress
+
+/**
+ * Determines if the github username should be shown, i.e. does one exist or has the pending
+ * change been denied
+ */
+function showGitHub() {
+  return this.newPersonal.github && !this.gitHubCanceled;
 }
 
+function showLinkedIn() {
+  return this.newPersonal.linkedIn && !this.linkedInCanceled;
+}
+
+/**
+ * Formats the old employee address
+ */
 function address() {
   let currentAddress = '';
   if (!isEmpty(this.employee.currentStreet)) {
@@ -317,8 +460,11 @@ function address() {
     currentAddress = currentAddress.slice(0, -1);
   }
   return currentAddress === '' ? 'No address on form' : currentAddress;
-}
+} // address
 
+/**
+ * Formats the new employee address (if one exists)
+ */
 function newAddress() {
   if (
     this.newPersonal.currentStreet &&
@@ -330,36 +476,58 @@ function newAddress() {
   } else {
     return null;
   }
-}
+} // newAddress
 
+// Checks if a the phone number should be shown
 function showPhoneNumber() {
   return this.newPersonal.phoneNumber && !this.phoneCanceled;
-}
+} // showPhoneNumber
 
+/**
+ * Displays whether or not an old phone number existed
+ */
 function phoneNumber() {
   return this.employee.phoneNumber ? this.employee.phoneNumber : 'No phone number on form';
-}
+} // phoneNumber
 
+/**
+ * Shows the newPhoneNumber if it exists
+ */
 function newPhoneNumber() {
   return this.newPersonal.phoneNumber ? this.newPersonal.phoneNumber : null;
-}
+} // newPhoneNumber
 
+/**
+ * Determines if the tech should be show. Goes through all tech
+ * and makes sure all of them have been canceled
+ */
 function showTech() {
   return this.newTechnology.filter((tech) => !tech.canceled).length != 0;
-}
+} // showTech
 
+/**
+ * Determines if the education section should be shown. Goes through all education
+ * and makes sure all of them have been canceled
+ */
 function showEducation() {
-  let filtered = this.newEducation.filter((education) => !education.canceled);
-  return filtered.length != 0;
-}
+  return this.newEducation.filter((education) => !education.canceled).length != 0;
+} // showEducation
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     METHODS                      |
+// |                                                  |
+// |--------------------------------------------------|
 
 /**
  * When the checkbox is not selected on the resume modal, it uploads the resume and closes the window upon
  * successful completion
+ *
+ * @param employeeNumber - the employee number
  */
 async function onlyUploadResume(employeeNumber) {
   this.loading = true;
-  let uploadResult = await api.uploadResume(employeeNumber, this.file);
+  let uploadResult = await api.uploadResume(employeeNumber, this.file); //uploads resume to s3
   this.loading = false;
   if (uploadResult instanceof Error) {
     this.timeoutError = true;
@@ -370,17 +538,21 @@ async function onlyUploadResume(employeeNumber) {
     this.activate = false;
     //disables employee number field in employeeTab.vue
   }
-}
+} //onlyUploadResume
 
 /**
  * Submit new resume and parse it
  */
 async function submit() {
   let employeeNumber = !this.$route.params.id ? this.employee.employeeNumber : this.$route.params.id;
+
+  // If we only want to upload resume and not parse it
   if (!this.extractResume) {
-    this.onlyUploadResume(employeeNumber);
+    await this.onlyUploadResume(employeeNumber);
     return;
   }
+
+  // Start of parsing resume -- reset the fields
   this.resumeObject = [];
   this.newEducation = [];
   this.newTechnology = [];
@@ -397,50 +569,68 @@ async function submit() {
   this.timeoutError = false;
   this.editedEmployeeForm = _.cloneDeep(this.employee);
 
+  // checks if the file uploaded is a pdf/png/jpg
   if (this.validFile) {
     this.resumeObject.length = 0;
-    // and is png or jpg or jpeg or pdf
     this.loading = true;
     this.resumeProcessed = false;
 
-    // The set timeouts are for the loading message
+    // The set timeouts are for the loading message (it's kind of buggy if you reopen the modal quickly)
     this.loadingMessage = 'Processing resume data, this may take up to 30 seconds';
 
     setTimeout(() => {
-      if (!this.resumeProcessed && this.activate) {
+      if (this.loading && this.activate) {
         this.loadingMessage = 'Sooooooo, how are you doing?';
         setTimeout(() => {
-          if (!this.resumeProcessed && this.activate) {
+          if (this.loading && this.activate) {
             this.loadingMessage = 'You must have a beefy resume!';
             setTimeout(() => {
-              if (!this.resumeProcessed && this.activate) {
+              if (this.loading && this.activate) {
                 this.loadingMessage = 'You may want to try again...';
-              } else {
-                this.loadingMessage = 'Processing resume data, this may take up to 30 seconds';
               }
             }, 15000);
-          } else {
-            this.loadingMessage = 'Processing resume data, this may take up to 30 seconds';
           }
         }, 15000);
-      } else {
-        this.loadingMessage = 'Processing resume data, this may take up to 30 seconds';
       }
     }, 15000);
 
-    window.EventBus.$emit('uploaded', true, false);
     //when creating an employee
     if (this.$route.params.id === undefined) {
-      window.EventBus.$emit('disableEmpNum', true);
+      window.EventBus.$emit('disableEmpNum', true); // after uploading resume, you can't change employee num
     }
 
     this.resumeObject = (await api.extractResumeText(employeeNumber, this.file)).comprehend;
+
+    // If it takes too long it should timeout
     if (this.resumeObject instanceof Error || !this.resumeObject) {
       this.resumeObject = null;
       this.timeoutError = true;
       this.loading = false;
+
+      // Create an audit of the timeout
+      api.createItem(api.AUDIT, {
+        id: uuid(),
+        type: 'resume',
+        tags: ['upload', 'failure'],
+        employeeId: this.employee.id,
+        description: `${this.employee.firstName} ${this.employee.lastName} timed out on resume upload.`,
+        timeToLive: 60
+      });
+
       return;
     }
+
+    // Create an audit of the success
+    api.createItem(api.AUDIT, {
+      id: uuid(),
+      type: 'resume',
+      tags: ['upload', 'success'],
+      employeeId: this.employee.id,
+      description: `${this.employee.firstName} ${this.employee.lastName} successfully uploaded a resume.`,
+      timeToLive: 60
+    });
+
+    // Notify employee component that resume has been uploaded and parsed
     window.EventBus.$emit('upload-resume-complete', true);
     window.EventBus.$emit('updated-resume-parser', 'true');
     window.EventBus.$emit('updated-resume-parser-form', 'true');
@@ -453,14 +643,25 @@ async function submit() {
     let location = [];
     let locationCounter = 0;
     _.forEach(personalComprehend, async (personalEntity) => {
-      // Links
-      // if (
-      //   personalEntity.Text.includes('github') ||
-      //   personalEntity.Text.includes('linkedIn') ||
-      //   personalEntity.Text.includes('twitter')
-      // ) {
-      //   this.newPersonal.github = personalEntity.Text;
-      // }
+      // // Links
+
+      if (personalEntity.Text.includes('github')) {
+        let githubURL = personalEntity.Text + '/';
+        let githubUsername = githubURL.substring(
+          githubURL.indexOf('/', 9) + 1,
+          githubURL.indexOf('/', githubURL.indexOf('/', 9) + 1)
+        );
+        if (githubUsername !== this.employee.github) {
+          this.newPersonal.github = githubUsername;
+        }
+      }
+
+      if (
+        personalEntity.Text.includes('https://www.linkedin.com/in') &&
+        personalEntity.Text !== this.employee.linkedIn
+      ) {
+        this.newPersonal.linkedIn = personalEntity.Text;
+      }
 
       // Phone Number
       if (personalEntity.Text.match(/^\(?(\d{3})\)?[- ]?(\d{3})[- ]?(\d{4})$/)) {
@@ -489,7 +690,10 @@ async function submit() {
       }
     });
 
+    // Gets the locations from Google Maps
     let locations = await api.getLocation(location[0]);
+
+    // We choose to go with the first thing that Google Maps gives us (if anything)
     if (locations.predictions.length >= 1) {
       let location = locations.predictions[0].description;
       let place_id = locations.predictions[0].place_id;
@@ -498,19 +702,21 @@ async function submit() {
       let state = fullAddress[2].split(' ')[0];
 
       let res = await api.getZipCode(place_id);
-      //Response contains an array of objects, with each object containing
-      //a field title 'type'. 'Type' is another array and we want the one
-      //containing the postal_code string
+      // Response contains an array of objects, with each object containing
+      // a field title 'type'. 'Type' is another array and we want the one
+      // containing the postal_code string
       let currentZIP = '';
       _.forEach(res.result.address_components, (field) => {
         if (field.types.includes('postal_code')) {
           currentZIP = field.short_name;
         }
       });
+
+      // Set info if we have all the necessary parts
       if (
-        fullAddress[0] != this.employee.currentStreet &&
-        fullAddress[1] != this.employee.currentCity &&
-        currentZIP != this.employee.currentZIP
+        (fullAddress[0] != this.employee.currentStreet || fullAddress[1] != this.employee.currentCity) &&
+        currentZIP &&
+        this.states[state]
       ) {
         this.newPersonal.currentStreet = fullAddress[0];
         this.newPersonal.currentCity = fullAddress[1];
@@ -519,32 +725,39 @@ async function submit() {
       }
     }
 
+    // ---- THE EDUCATION AND TECH PARSING COULD BE CLEANED UP
     // EDUCATION
     let educationComprehend = this.resumeObject.filter((entity) => {
       return entity.Type === 'ORGANIZATION';
     });
 
+    // Go through organization an see if they are a school
     for (let i = 0; i < educationComprehend.length; i++) {
       let educationEntity = educationComprehend[i];
       let collegeList = await api.getColleges(educationEntity.Text);
+      // If the exact college exists
       if (collegeList.length == 1) {
         // Remove duplicate
         if (
-          (!this.employee.degrees ||
-            (this.employee.degrees &&
-              this.employee.degrees.length > 0 &&
-              this.employee.degrees.filter((e) => e.school === collegeList[0]).length == 0)) &&
-          this.newEducation.filter((e) => e.school === collegeList[0]).length == 0
+          (!this.employee.schools ||
+            (this.employee.schools &&
+              this.employee.schools.length > 0 &&
+              this.employee.schools.filter((e) => e.name === collegeList[0]).length == 0)) &&
+          this.newEducation.filter((e) => e.name === collegeList[0]).length == 0
         ) {
           this.newEducation.push({
-            school: collegeList[0],
-            concentrations: [],
-            minors: [],
-            majors: [''],
-            canceled: false,
-            showEducationMenu: false,
-            name: '',
-            date: null
+            name: collegeList[0],
+            degrees: [
+              {
+                completionDate: null,
+                concentrations: [],
+                degreeType: '',
+                majors: [''],
+                minors: [],
+                showEducationMenu: false
+              }
+            ],
+            canceled: false
           });
         }
       }
@@ -590,8 +803,17 @@ async function submit() {
   }
 } //submit
 
+/**
+ * Adds the submitted info into the editedEmployeeForms
+ *
+ * @param field - The type of info to be submitted (address/phoneNumber/education/technology)
+ * @param value - For education and tech, the index of the education/technology in the parsed info arrays
+ * @param newValue - Used for education the new education to be submitted
+ */
 function submitInfo(field, value, newValue) {
+  this.totalChanges++;
   if (field === 'address') {
+    // Create fields in editedEmployeeForm if they don't exist
     if (!this.editedEmployeeForm.currentStreet) {
       this.$set(this.editedEmployeeForm, 'currentStreet', '');
       this.$set(this.editedEmployeeForm, 'currentCity', '');
@@ -603,15 +825,28 @@ function submitInfo(field, value, newValue) {
     this.editedEmployeeForm.currentState = this.newPersonal.currentState;
     this.editedEmployeeForm.currentZIP = this.newPersonal.currentZIP;
   } else if (field === 'phoneNumber') {
+    // Create fields in editedEmployeeForm if they don't exist
     if (!this.editedEmployeeForm.phoneNumber) {
       this.$set(this.editedEmployeeForm, 'phoneNumber', '');
     }
     this.editedEmployeeForm.phoneNumber = this.newPersonal.phoneNumber;
+  } else if (field === 'github') {
+    if (!this.editedEmployeeForm.github) {
+      this.$set(this.editedEmployeeForm, 'github', '');
+    }
+    this.editedEmployeeForm.github = this.newPersonal.github;
+  } else if (field === 'linkedIn') {
+    if (!this.editedEmployeeForm.linkedIn) {
+      this.$set(this.editedEmployeeForm, 'linkedIn', '');
+    }
+    this.editedEmployeeForm.linkedIn = this.newPersonal.linkedIn;
   } else if (field === 'technology' && this.$refs['tech' + value][0].validate()) {
     this.newTechnology[value].canceled = true;
+    // Create fields in editedEmployeeForm if they don't exist
     if (!this.editedEmployeeForm.technologies) {
       this.$set(this.editedEmployeeForm, 'technologies', []);
     }
+    // Add new tech
     this.editedEmployeeForm.technologies.push({
       name: this.newTechnology[value].name,
       current: this.newTechnology[value].current,
@@ -619,34 +854,35 @@ function submitInfo(field, value, newValue) {
     });
   } else if (field === 'education' && this.$refs['education' + value][0].validate()) {
     this.newEducation[value].canceled = true;
-    this.newEducation[value].date = newValue[0].date;
-    this.newEducation[value].majors = newValue[0].majors;
-    this.newEducation[value].minors = newValue[0].minors;
     this.newEducation[value].name = newValue[0].name;
-    this.newEducation[value].school = newValue[0].school;
-    this.newEducation[value].canceled = true;
-    if (!this.editedEmployeeForm.degrees) {
-      this.$set(this.editedEmployeeForm, 'degrees', []);
+    this.newEducation[value].degrees = newValue[0].degrees;
+    // Create fields in editedEmployeeForm if they don't exist
+    if (!this.editedEmployeeForm.schools) {
+      this.$set(this.editedEmployeeForm, 'schools', []);
     }
-    this.editedEmployeeForm.degrees.push({
-      concentrations: this.newEducation[value].concentrations,
-      date: this.newEducation[value].date,
-      majors: this.newEducation[value].majors,
-      minors: this.newEducation[value].minors,
+    // Add new education
+    this.editedEmployeeForm.schools.push({
       name: this.newEducation[value].name,
-      school: this.newEducation[value].school
+      degrees: this.newEducation[value].degrees
     });
   }
-}
+} // submitInfo
 
+/**
+ * Submits the form. Checks to see if all pending changes have been submitted.
+ * If not, it displays a modal to do so.
+ */
 function submitForm() {
   if (this.showTech || this.showPhoneNumber || this.showAddress || this.showEducation) {
     this.toggleResumeFormErrorModal = true;
   } else {
     this.confirmingValid = true;
   }
-}
+} // submitForm
 
+/**
+ * Clears the form
+ */
 function clearForm() {
   this.resumeObject = [];
   this.newEducation = [];
@@ -670,14 +906,22 @@ function clearForm() {
   this.timeoutError = false;
   this.confirmingValid = false;
   this.activate = false;
+  this.totalChanges = 0;
 
   if (this.$refs.submit !== undefined) {
     this.$refs.submit.reset();
   }
   this.extractResume = true;
-}
+} // clearForm
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      EXPORT                      |
+// |                                                  |
+// |--------------------------------------------------|
 
 export default {
+  beforeDestroy,
   components: {
     CancelConfirmation,
     educationTab,
@@ -690,21 +934,25 @@ export default {
     newPhoneNumber,
     phoneNumber,
     showAddress,
+    showGitHub,
     showEducation,
+    showLinkedIn,
     showPhoneNumber,
     showTech
   },
   created,
   data() {
     return {
-      activate: false,
+      activate: false, // whether or not the modal is open
       addressCanceled: false,
       phoneCanceled: false,
       confirmingValid: false,
       confirmBackingOut: false,
       editedEmployeeForm: null,
-      extractResume: true,
+      extractResume: true, // whether or not we want to just upload resume or extract data too
       file: null,
+      gitHubCanceled: false,
+      linkedInCanceled: false,
       loading: false,
       loadingMessage: '',
       newEducation: [],
@@ -723,12 +971,12 @@ export default {
       ],
       requiredRules: [
         (v) => !isEmpty(v) || 'This field is required. You must enter information or delete the field if possible'
-      ], // rules for a required field
+      ],
       experienceRequired: [
         (v) => !isEmpty(v) || 'This field is required',
         (v) => v > 0 || 'Value must be greater than 0',
         (v) => v < 100 || 'Value must be less than 100'
-      ],
+      ], // Used for technology years
       newPersonal: {
         phoneNumber: null,
         currentCity: null,
@@ -737,6 +985,7 @@ export default {
         currentZIP: null
       },
       toggleResumeFormErrorModal: false,
+      totalChanges: 0,
       timeoutError: false,
       resumeObject: [],
       resumeProcessed: false,

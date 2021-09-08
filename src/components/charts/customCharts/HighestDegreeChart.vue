@@ -16,8 +16,18 @@ const moment = require('moment-timezone');
 moment.tz.setDefault('America/New_York');
 
 /**
+ * created lifecycle hook
+ */
+async function created() {
+  this.$forceUpdate();
+  this.employees = await api.getItems(api.EMPLOYEES);
+  this.degrees = this.initDegrees();
+  this.fillData();
+} // created
+
+/**
  * Initializes the degrees data field, this function retrieves the highest
- * degree for each employee
+ * degree for each employee.
  * @return array of objects - key: employee name, value: another array
  * containing objects w/ degree names + majors
  */
@@ -25,40 +35,45 @@ function initDegrees() {
   let degrees = {};
   this.employees.forEach((emp) => {
     let highestDegrees = [];
-    if (emp.degrees && emp.workStatus != 0) {
-      _.forEach(emp.degrees, (degree) => {
-        if (moment(degree.date).isBefore(moment(new Date()))) {
-          if (highestDegrees.length != 0) {
-            let result = compareDegree(highestDegrees[0].name, degree.name);
-            //if a degree of a higher prestige is found, remove all previous entries
-            if (result === 1) {
-              highestDegrees.length = 0;
-            }
-            //Adds to highestDegrees, excluding degrees with a lower prestige
-            if (result > -1) {
+    if (emp.schools && emp.workStatus != 0) {
+      _.forEach(emp.schools, (school) => {
+        _.forEach(school.degrees, (degree) => {
+          if (moment(degree.completionDate).isBefore(moment(new Date()))) {
+            if (highestDegrees.length != 0) {
+              let result = compareDegree(highestDegrees[0].name, degree.degreeType);
+              //if a degree of a higher prestige is found, remove all previous entries
+              if (result === 1) {
+                highestDegrees.length = 0;
+              }
+              //Adds to highestDegrees, excluding degrees with a lower prestige
+              if (result > -1) {
+                highestDegrees.push({
+                  name: this.getDegreeName(this.getDegreeValue(degree.degreeType)),
+                  majors: degree.majors
+                });
+              }
+            } else {
+              //Adds the first degree found to the array
               highestDegrees.push({
-                name: this.getDegreeName(this.getDegreeValue(degree.name)),
+                name: this.getDegreeName(this.getDegreeValue(degree.degreeType)),
                 majors: degree.majors
               });
             }
-          } else {
-            //Adds the first degree found to the array
-            highestDegrees.push({
-              name: this.getDegreeName(this.getDegreeValue(degree.name)),
-              majors: degree.majors
-            });
           }
-        }
+        });
       });
       degrees = addToDegrees(degrees, highestDegrees);
     }
   });
   return degrees;
-}
+} // initDegrees
 
 /**
  * Helper function that parses through the existing data
- * in degrees and adds onto it
+ * in degrees and adds onto it.
+ * @param degrees - The array of the highest degrees tallied up
+ * @param highestDegrees - The array of all highest degrees
+ * @returns Array - The finaly tally of each highest degrees
  */
 function addToDegrees(degrees, highestDegrees) {
   highestDegrees.forEach((highestDegree) => {
@@ -82,7 +97,7 @@ function addToDegrees(degrees, highestDegrees) {
     }
   });
   return degrees;
-}
+} // addToDegrees
 
 /**
  * Compares the relationship between two degrees,
@@ -102,7 +117,7 @@ function compareDegree(oldDegree, newDegree) {
   if (oldDegree === newDegree) {
     return 0;
   }
-}
+} // compareDegree
 
 /**
  * Get the object of concentrations for a degree and the count of each concentration.
@@ -187,11 +202,13 @@ function getDegreeValue(degree) {
   } else {
     return 4;
   }
-}
+} // getDegreeValue
 
 /**
  * Used to standardize the names of degrees
  * for labels
+ * @param value - The number that the degree is associated with
+ * @returns String - The name of the degree
  */
 function getDegreeName(value) {
   switch (value) {
@@ -249,15 +266,18 @@ function fillData() {
     responsive: true,
     onClick: (_, item) => {
       if (item[0]) {
+        // emits to MajorsChart.vue when pie slice is clicked
         this.majorsEmit(labels[item[0]._index]);
+        // emits to MinorsChart.vue when pie slice is clicked
         this.minorsEmit(labels[item[0]._index]);
+        // emits to ConcentrationsChart.vue when pie slice is clicked
         this.concentrationsEmit(labels[item[0]._index]);
       }
     }
   };
   this.dataReceived = true;
   window.EventBus.$emit('hello');
-}
+} // fillData
 
 /**
  * Sends data to create the second pie chart that displays
@@ -319,12 +339,7 @@ export default {
     minorsEmit,
     concentrationsEmit
   },
-  async created() {
-    this.$forceUpdate();
-    this.employees = await api.getItems(api.EMPLOYEES);
-    this.degrees = this.initDegrees();
-    this.fillData();
-  }
+  created
 };
 </script>
 

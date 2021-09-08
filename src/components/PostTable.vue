@@ -36,7 +36,7 @@
 
             <!-- Date  slot -->
             <template v-slot:[`item.createDate`]="{ item }">
-              <td>{{ item.createDate | dateFormat }}</td>
+              <td>{{ monthDayYearFormat(item.createDate) }}</td>
             </template>
 
             <!-- Action Icons -->
@@ -90,8 +90,7 @@
 </template>
 
 <script>
-// import _ from 'lodash';
-import { isEmpty, monthDayYearFormat } from '@/utils/utils';
+import { monthDayYearFormat } from '@/utils/utils';
 import DeleteModal from '@/components/modals/DeleteModal.vue';
 import moment from 'moment-timezone';
 moment.tz.setDefault('America/New_York');
@@ -100,12 +99,22 @@ import api from '@/shared/api.js';
 /**
  * initial setup
  */
-async function created() {
+function created() {
   window.EventBus.$on('canceled-delete-BlogPost', () => {
     this.midAction = false;
   });
-  window.EventBus.$on('confirm-delete-BlogPost', this.deleteBlogPost);
+  window.EventBus.$on('confirm-delete-BlogPost', async () => {
+    await this.deleteBlogPost();
+  });
 } // created
+
+/**
+ * destroy listeners
+ */
+function beforeDestroy() {
+  window.EventBus.$off('canceled-delete-BlogPost');
+  window.EventBus.$off('confirm-delete-BlogPost');
+} // beforeDestroy
 
 /**
  * Get path to post editor for edit
@@ -178,16 +187,13 @@ export default {
     DeleteModal
   },
   created,
-  beforeDestroy() {
-    window.EventBus.$off('canceled-delete-BlogPost');
-    window.EventBus.$off('confirm-delete-BlogPost');
-  },
+  beforeDestroy,
   methods: {
-    isEmpty,
     blogPath,
     handleEdit,
     handlePreview,
-    deleteBlogPost
+    deleteBlogPost,
+    monthDayYearFormat
   },
   data() {
     return {
@@ -222,23 +228,13 @@ export default {
     };
   },
   filters: {
-    // formats a date by month, day, year (e.g. Aug 18th, 2020)
-    dateFormat: (value) => {
-      if (!isEmpty(value)) {
-        let date = moment(value).format('MMM Do, YYYY');
-        return date;
-      } else {
-        return '';
-      }
-    },
     birthdayFeedResponse: (value) => {
       if (value == true) {
         return 'yes';
       } else {
         return 'no';
       }
-    },
-    monthDayYearFormat
+    }
   }
 };
 </script>

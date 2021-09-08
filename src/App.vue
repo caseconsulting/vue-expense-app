@@ -19,10 +19,15 @@
           <img src="@/assets/img/case-logo-circle.png" class="logo-bar" />
         </v-avatar>
         <v-toolbar-title v-show="!isMobile">
-          <h1 class="d-inline" style="text-align: center">Case Portal</h1>
+          <h1 class="d-inline" style="text-align: center">
+            Case
+            <a id="P" class="white--text" target="_blank" href="https://tinyurl.com/2u2vhzw9">P</a>ortal
+          </h1>
         </v-toolbar-title>
         <!-- In Mobile View decrease title size-->
-        <h1 v-show="isMobile" class="font-25" style="text-align: center">Case Portal</h1>
+        <h1 v-show="isMobile" class="font-25" style="text-align: center">
+          Case <a id="P" class="white--text" target="_blank" href="https://tinyurl.com/2u2vhzw9">P</a>ortal
+        </h1>
         <v-spacer></v-spacer>
         <!-- Display social media icons and links dropdown menu -->
         <v-item-group class="hidden-sm-and-down" v-show="isLoggedIn() && !isMobile">
@@ -32,7 +37,14 @@
             </template>
 
             <v-list>
-              <v-list-item v-for="(l, index) in links" :key="index" :id="l.link" :href="l.link" target="_blank">
+              <v-list-item
+                v-for="(l, index) in links"
+                @click="badumbadumdodooodoo(index)"
+                :key="index"
+                :id="l.link"
+                :href="l.link"
+                target="_blank"
+              >
                 <v-list-item-title>{{ l.name }}</v-list-item-title>
               </v-list-item>
               <v-list-item :href="floorPlan" target="_blank" id="floorPlan"
@@ -101,7 +113,18 @@
         </v-container>
       </v-main>
       <v-footer padless>
-        <v-col class="text-right text-caption" cols="12"><strong>Version</strong> {{ version }}</v-col>
+        <v-col class="text-right text-caption" cols="12"
+          ><strong
+            >V<a
+              id="P"
+              class="black--text"
+              target="_blank"
+              href="https://www.youtube.com/watch?v=dfdGd31gNjI&t=3s&ab_channel=GrayWalf"
+              >e</a
+            >rsion</strong
+          >
+          {{ version }}</v-col
+        >
       </v-footer>
       <time-out-modal :toggleTimeOut="timedOut"></time-out-modal>
       <time-out-warning-modal :toggleWarning="session"></time-out-warning-modal>
@@ -111,8 +134,8 @@
 
 <script>
 import { isLoggedIn, logout, getProfile, getTokenExpirationDate, getAccessToken } from '@/utils/auth';
+import { isMobile } from '@/utils/utils';
 import MainNav from '@/components/MainNav.vue';
-import MobileDetect from 'mobile-detect';
 import TimeOutModal from '@/components/modals/TimeOutModal.vue';
 import TimeOutWarningModal from '@/components/modals/TimeOutWarningModal.vue';
 import BadgeExpirationBanner from '@/components/modals/BadgeExpirationBanner.vue';
@@ -127,16 +150,6 @@ moment.tz.setDefault('America/New_York');
 // |                     COMPUTED                     |
 // |                                                  |
 // |--------------------------------------------------|
-
-/**
- * Checks if the current device used is mobile. Return true if it is mobile. Returns false if it is not mobile.
- *
- * @return boolean - if the device is mobile
- */
-function isMobile() {
-  let md = new MobileDetect(window.navigator.userAgent);
-  return md.os() === 'AndroidOS' || md.os() === 'iOS';
-}
 
 /**
  * Checks if the user is visiting their own profile or not
@@ -154,6 +167,31 @@ function onUserProfile() {
 // |                     METHODS                      |
 // |                                                  |
 // |--------------------------------------------------|
+
+/**
+ * idk what this does
+ */
+function badumbadumdodooodoo(index) {
+  let oldLink = this.links[index].link;
+  let roll = Math.ceil(
+    Math.random() *
+      Math.ceil((Math.sin(Math.PI * 2) * (50 * 4)) / (1 << 1) - 100 + ((2 << 5) + 1) * 3 + 4 + Math.log(Math.E))
+  );
+  if (roll === 69 || roll == 42.0) {
+    this.links[index].link = `https://ww
+    w.yo
+    utu
+    be
+    .co
+    m/w
+    atch?v=dQ
+    w4w9Wg
+    XcQ`.replace(/\s/g, '');
+    setTimeout(() => {
+      this.links[index].link = oldLink;
+    }, 2000);
+  }
+} // badumbadumdodooodoo
 
 /*
  * Logout of expense app
@@ -236,7 +274,6 @@ async function mounted() {
 
 export default {
   data: () => ({
-    alert: null,
     floorPlan: floorPlan,
     drawer: isLoggedIn(),
     inset: false,
@@ -249,6 +286,7 @@ export default {
     date: null,
     links: [
       { name: 'Case Website', link: 'https://www.consultwithcase.com/' },
+      { name: 'Case Information', link: 'https://3.basecamp.com/3097063/buckets/4708396/messages/650777910' },
       { name: 'Basecamp', link: 'https://3.basecamp.com/3097063' },
       { name: 'Net Benefits/Fidelity', link: 'https://nb.fidelity.com/public/nb/default/home' },
       { name: 'Health Insurance', link: 'https://3.basecamp.com/3097063/buckets/179119/messages/2306027830' },
@@ -284,6 +322,7 @@ export default {
     BadgeExpirationBanner
   },
   methods: {
+    badumbadumdodooodoo,
     handleLogout,
     handleProfile,
     isLoggedIn,
@@ -343,5 +382,9 @@ export default {
 
 .profile-button {
   cursor: pointer;
+}
+
+#P {
+  text-decoration: none;
 }
 </style>

@@ -11,7 +11,7 @@
       <v-combobox
         ref="formFields"
         v-model="contract.name"
-        :rules="[requiredRules[0], duplicateContractName(index)]"
+        :rules="[...getRequiredRules(), duplicateContractName(index)]"
         :items="contractsDropDown"
         label="Contract"
         data-vv-name="Contract"
@@ -23,7 +23,7 @@
       <v-combobox
         ref="formFields"
         v-model="contract.prime"
-        :rules="requiredRules"
+        :rules="getRequiredRules()"
         :items="primesDropDown"
         label="Prime"
         data-vv-name="Prime"
@@ -36,7 +36,7 @@
           ref="formFields"
           :id="'proj-' + projIndex + '-' + index"
           v-model.trim="project.name"
-          :rules="requiredRules"
+          :rules="getRequiredRules()"
           :label="'Project ' + (projIndex + 1)"
           data-vv-name="Project"
           clearable
@@ -70,7 +70,7 @@
                   hint="MM/DD/YYYY format"
                   v-mask="'##/##/####'"
                   prepend-icon="event_available"
-                  :rules="[requiredRules[0], dateRules[0], dateRules[1], dateOrderRule(index, projIndex)]"
+                  :rules="[...getRequiredRules(), ...getDateRules(), dateOrderRule(index, projIndex)]"
                   v-bind="attrs"
                   v-on="on"
                   @blur="project.startDate = parseEventDate($event)"
@@ -105,8 +105,7 @@
                   label="End Date"
                   prepend-icon="event_busy"
                   :rules="[
-                    dateOptionalRules[0],
-                    dateOptionalRules[1],
+                    ...getDateOptionalRules(),
                     dateOrderRule(index, projIndex),
                     endDatePresentRule(index, projIndex)
                   ]"
@@ -160,9 +159,6 @@
           <span>Delete Contract</span>
         </v-tooltip>
       </div>
-      <!-- <v-row v-if="!hasEndDatesFilled(index)" class="py-5 px-5 caption text--darken-2 grey--text">
-        Note that leaving the end date blank means you are currently working on that project.
-      </v-row> -->
     </div>
     <!-- End Loop Contracts -->
 
@@ -177,7 +173,8 @@
 import api from '@/shared/api.js';
 import _ from 'lodash';
 import { mask } from 'vue-the-mask';
-import { formatDateDashToSlash, formatDateSlashToDash, isEmpty, formatDate, parseDate } from '@/utils/utils';
+import { getDateRules, getDateOptionalRules, getRequiredRules } from '@/shared/validationUtils.js';
+import { isEmpty, formatDate, parseDate, isMobile } from '@/utils/utils';
 const moment = require('moment');
 
 // |--------------------------------------------------|
@@ -234,7 +231,7 @@ function addContract() {
 } // addContract
 
 /**
- * Adds a project to a given contract
+ * Adds a project to a given contract.
  *
  * @param contractIndex The index of the contract
  */
@@ -247,24 +244,28 @@ function addProject(contractIndex) {
     showStartMenu: false,
     showEndMenu: false
   });
-}
+} // addProject
 
 /**
  * Deletes a Contract.
- *
  * @param index - array index of contract to delete
  */
 function deleteContract(index) {
   this.editedContracts.splice(index, 1);
 } // deleteContract
 
+/**
+ * Deletes a project.
+ * @param contractIndex - The index of the contract
+ * @param projectIndex - The index of the project
+ */
 function deleteProject(contractIndex, projectIndex) {
   if (this.editedContracts[contractIndex].projects.length === 1) {
     this.editedContracts[contractIndex].projects.splice(contractIndex, 1);
   } else {
     this.editedContracts[contractIndex].projects.splice(projectIndex, 1);
   }
-}
+} // deleteProject
 
 /**
  * Checks if the current contract has any projects without an end date
@@ -279,10 +280,11 @@ function hasEndDatesFilled(index) {
   });
 
   return hasEndDatesFilled;
-}
+} // hasEndDatesFilled
 
 /**
  * Parse the date after losing focus.
+ * @returns String - The date in YYYY-MM-DD format
  */
 function parseEventDate() {
   return parseDate(event.target.value);
@@ -312,19 +314,25 @@ function validateFields() {
   //ensures that refs are put in an array so we can reuse forEach loop
   let components = !_.isArray(this.$refs.formFields) ? [this.$refs.formFields] : this.$refs.formFields;
   _.forEach(components, (field) => {
-    if (field && !field.validate()) {
-      errorCount++;
-    }
+    if (field && !field.validate()) errorCount++;
   });
+
+  // fail safe if someone tries to force a contract that's present and has an end date
+  _.forEach(this.editedContracts, (contract) => {
+    _.forEach(contract.projects, (project) => {
+      if (project.endDate && project.presentDate) {
+        project.presentDate = false;
+      }
+    });
+  });
+
   window.EventBus.$emit('doneValidating', 'contracts', this.editedContracts); // emit done validating and sends edited data back to parent
   window.EventBus.$emit('contractsStatus', errorCount); // emit error status
 } // validateFields
 
 export default {
   computed: {
-    isMobile() {
-      return this.$vuetify.breakpoint.sm;
-    }
+    isMobile
   },
   created,
   data() {
@@ -341,17 +349,6 @@ export default {
           return true;
         }
       },
-      dateOptionalRules: [
-        //end date validation
-        (v) => {
-          return !isEmpty(v) ? /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v) || 'Date must be valid. Format: MM/DD/YYYY' : true;
-        },
-        (v) => (!isEmpty(v) ? moment(v, 'MM/DD/YYYY').isValid() || 'Date must be valid' : true)
-      ], // rules for an optional date
-      dateRules: [
-        (v) => (!isEmpty(v) && /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v)) || 'Date must be valid. Format: MM/DD/YYYY',
-        (v) => moment(v, 'MM/DD/YYYY').isValid() || 'Date must be valid'
-      ], // rules for an optional date
       duplicateContractName: (conIndex) => {
         let contractNames = _.map(this.editedContracts, (contract) => contract.name);
         let contractName = contractNames[conIndex];
@@ -376,10 +373,7 @@ export default {
         (v) => v >= 0 || 'Value cannot be negative',
         (v) => v < 100 || 'Value must be less than 100'
       ], // rules for years of experience
-      primesDropDown: [], // autocomplete contract prime options
-      requiredRules: [
-        (v) => !isEmpty(v) || 'This field is required. You must enter information or delete the field if possible'
-      ] // rules for a required field
+      primesDropDown: [] // autocomplete contract prime options
     };
   },
   directives: { mask },
@@ -391,8 +385,9 @@ export default {
     addProject,
     deleteContract,
     deleteProject,
-    formatDateSlashToDash,
-    formatDateDashToSlash,
+    getDateRules,
+    getDateOptionalRules,
+    getRequiredRules,
     hasEndDatesFilled,
     isEmpty,
     parseDate,

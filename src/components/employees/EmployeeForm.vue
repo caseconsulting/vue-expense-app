@@ -96,6 +96,7 @@
                   </v-list>
                 </v-menu>
                 <hr class="my-3" />
+                <!-- Employee Tab -->
                 <employee-tab
                   v-if="formTab === 'employee'"
                   :admin="hasAdminPermissions()"
@@ -103,51 +104,61 @@
                   :model="model"
                 >
                 </employee-tab>
+                <!-- Personal Tab -->
                 <personal-tab v-if="formTab === 'personal'" :validating="validating.personal" :model="model">
                 </personal-tab>
-                <education-tab v-if="formTab === 'education'" :validating="validating.education" :model="model.degrees">
+                <!-- Education Tab -->
+                <education-tab v-if="formTab === 'education'" :validating="validating.education" :model="model.schools">
                 </education-tab>
+                <!-- Job Experience Tab -->
                 <job-experience-tab
                   v-if="formTab === 'jobExperience'"
                   :validating="validating.jobExperience"
                   :model="model"
                 >
                 </job-experience-tab>
+                <!-- Certification Tab -->
                 <certification-tab
                   v-if="formTab === 'certification'"
                   :validating="validating.certifications"
                   :model="model.certifications"
                 >
                 </certification-tab>
+                <!-- Award Tab -->
                 <award-tab
                   v-if="formTab === 'awards'"
                   :validating="validating.awards"
                   :model="model.awards"
                 ></award-tab>
+                <!-- Technology Tab -->
                 <technology-tab
                   v-if="formTab === 'technologies'"
                   :validating="validating.technologies"
                   :model="model.technologies"
                 >
                 </technology-tab>
+                <!-- Customer Org Tab -->
                 <customer-org-tab
                   v-if="formTab === 'customerOrgExp'"
                   :validating="validating.customerOrgExp"
                   :model="model.customerOrgExp"
                 >
                 </customer-org-tab>
+                <!-- Contract Tab -->
                 <contract-tab
                   v-if="formTab === 'contracts'"
                   :validating="validating.contracts"
                   :model="model.contracts"
                 >
                 </contract-tab>
+                <!-- Clearance Tab -->
                 <clearance-tab
                   v-if="formTab === 'clearance'"
                   :validating="validating.clearance"
                   :model="model.clearances"
                 >
                 </clearance-tab>
+                <!-- Languages Tab -->
                 <languages-tab
                   v-if="formTab === 'languages'"
                   :validating="validating.languages"
@@ -261,7 +272,7 @@
             <!-- Education -->
             <v-tab-item id="education" class="mt-6 mb-4">
               <education-tab
-                :model="model.degrees"
+                :model="model.schools"
                 :validating="validating.education"
                 :allowAdditions="true"
               ></education-tab>
@@ -325,7 +336,12 @@
           :toggleSubmissionConfirmation="this.confirmingError"
           :errorTabs="errorTabNames"
         ></many-form-errors>
-        <resume-parser :toggleResumeParser="this.toggleResumeParser" :employee="model"></resume-parser>
+        <resume-parser
+          v-if="!model.id"
+          :toggleResumeParser="this.toggleResumeParser"
+          :employee="model"
+          @resume="resumeReceived"
+        ></resume-parser>
       </v-container>
     </v-card>
   </div>
@@ -357,6 +373,18 @@ import _ from 'lodash';
 // |                     METHODS                      |
 // |                                                  |
 // |--------------------------------------------------|
+
+/**
+ * Event called when a resume is submitted
+ *
+ * @param newEmployeeForm is the new employee model after parsing the resume
+ */
+function resumeReceived(newEmployeeForm) {
+  if (this.model) {
+    this.model = newEmployeeForm;
+  }
+}
+
 /**
  * Selects the currect form tab for the menu
  */
@@ -382,22 +410,22 @@ async function cancel() {
  * Removes unnecessary attributes from the employee data.
  */
 function cleanUpData() {
-  // degrees
-  if (!_.isEmpty(this.model.degrees)) {
-    this.model.degrees = _.map(this.model.degrees, (degree) => {
+  // schools
+  if (!_.isEmpty(this.model.schools)) {
+    this.model.schools = _.map(this.model.schools, (school) => {
       // remove date picker menu booleans
-      delete degree.showEducationMenu;
+      delete school.showEducationMenu;
       // delete null attributes
-      _.forEach(degree, (value, key) => {
+      _.forEach(school, (value, key) => {
         if (_.isNil(value)) {
-          delete degree[key];
+          delete school[key];
         }
       });
-      // return updated degree
-      return degree;
+      // return updated school
+      return school;
     });
   } else {
-    this.model.degrees = null;
+    this.model.schools = null;
   }
   // certifications
   if (!_.isEmpty(this.model.certifications)) {
@@ -495,27 +523,18 @@ function cleanUpData() {
           delete clearance.showPolyMenu;
           delete clearance.showAdjudicationMenu;
           delete clearance.showBadgeMenu;
+          delete clearance.showBIMenu;
           // delete null attributes
           _.forEach(clearance, (value, key) => {
             if (_.isNil(value)) {
               delete clearance[key];
             }
           });
-          // clean up and sort BI Dates
+          // sort bi dates
           clearance.biDates = _.reverse(
-            _.sortBy(
-              _.map(clearance.biDates, (biDates) => {
-                let chronologicalRange = _.sortBy(biDates.range, (date) => {
-                  return moment(date, 'YYYY-MM-DD');
-                });
-                return {
-                  range: chronologicalRange
-                };
-              }),
-              (biDates) => {
-                return biDates.range[0];
-              }
-            )
+            _.sortBy(clearance.biDates, (date) => {
+              return moment(date, 'YYYY-MM-DD');
+            })
           );
           // sort adjudication dates
           clearance.adjudicationDates = _.reverse(
@@ -567,9 +586,8 @@ async function confirm() {
     let hasErrors = await this.hasTabError();
     if (!hasErrors) {
       this.confirmingValid = true; // if no errors opens confirm submit popup
-    } else if (this.tabErrorMessage) {
-      //if there is a custom error message it is displayed here
-      this.displayError(this.tabErrorMessage);
+    } else {
+      this.confirmingError = true;
     }
   } else {
     this.confirmingError = true;
@@ -580,7 +598,7 @@ async function confirm() {
  *
  * @param err - String error message
  */
-async function displayError(err) {
+function displayError(err) {
   this.$set(this.errorStatus, 'statusType', 'ERROR');
   this.$set(this.errorStatus, 'statusMessage', err);
   this.$set(this.errorStatus, 'color', 'red');
@@ -631,12 +649,23 @@ async function submit() {
         // successfully updated employee
         this.fullName = `${updatedEmployee.firstName} ${updatedEmployee.lastName}`;
         window.EventBus.$emit('update', updatedEmployee);
-        this.cancel();
+        await this.cancel();
       } else {
         // failed to update employee
         this.$emit('error', updatedEmployee.response.data.message);
         this.displayError(updatedEmployee.response.data.message);
         // this.$emit('cancel-form');
+      }
+      // If mifiStatus on page load is different than the submitted mifiStatus value, create audit log
+      if (this.mifiStatusOnLoad !== updatedEmployee.mifiStatus) {
+        api.createItem(api.AUDIT, {
+          id: uuid(),
+          type: 'mifi',
+          tags: ['submit', `mifi set to ${this.model.mifiStatus}`],
+          employeeId: this.employee.id,
+          description: `${this.model.firstName} ${this.model.lastName} changed their mifi status to ${this.model.mifiStatus}.`,
+          timeToLive: 60
+        });
       }
     } else {
       // creating employee
@@ -666,21 +695,18 @@ function addErrorTab(name, errors) {
 
 async function openUpload() {
   let employees = await api.getItems(api.EMPLOYEES);
+  //check validation of employee number
   if (employees.some((emp) => emp.employeeNumber == this.employeeNumber)) {
+    //if error
+    //let err = 'duplicate ID found'
     let message = 'Duplicate employee number, please change to a unique employee number to upload resume';
     this.uploadDisabled = true;
     this.displayError(message);
   } else {
+    //if no error
     this.toggleResumeParser = !this.toggleResumeParser;
+    // open pop-up modal for resume parser
   }
-
-  //check validation of employee number
-  //if no error
-  //this.toggleResumeParser = !this.toggleResumeParser;
-  //if error
-  //pop-up modal with invalid number
-  //let err = 'duplicate ID found'
-  //this.display(err)
 }
 // |--------------------------------------------------|
 // |                                                  |
@@ -696,21 +722,20 @@ async function created() {
     //used to send to employee tab
     this.model.employeeNumber = employeeNumber;
   });
-
+  // Starts listener to check if resume is uploaded
   window.EventBus.$on('uploaded', (result) => {
     this.disableEmpNum = result;
     window.EventBus.$emit('empNum', this.employeeNumber);
   });
-
+  // Starts listener to see if the user confirmed to submit the form
   window.EventBus.$on('confirmed-form', async () => {
     await this.submit();
     this.confirmingValid = false;
   });
+  // Starts listener to see if the user cancelled to submit the form
   window.EventBus.$on('canceled-form', () => {
     this.errorTabNames = {};
     this.confirmingError = false;
-  });
-  window.EventBus.$on('closeModal', () => {
     this.confirmingValid = false;
   });
   // set tab mounted
@@ -727,71 +752,55 @@ async function created() {
     this.tabErrors.awards = errorCount > 0 ? true : false; //boolean if there are errors
     this.addErrorTab('Awards', errorCount); //error count
   });
+  // Starts listener to check the Certifications tab has any errors
   window.EventBus.$on('certificationsStatus', (errorCount) => {
     this.tabErrors.certifications = errorCount > 0 ? true : false;
     this.addErrorTab('Certifications', errorCount);
   });
+  // Starts listener to check the Clearance tab has any errors
   window.EventBus.$on('clearanceStatus', (errorCount) => {
     this.tabErrors.clearance = errorCount > 0 ? true : false;
     this.addErrorTab('Clearance', errorCount);
   });
+  // Starts listener to check the Contracts tab has any errors
   window.EventBus.$on('contractsStatus', (errorCount) => {
     this.tabErrors.contracts = errorCount > 0 ? true : false;
     this.addErrorTab('Contracts', errorCount);
   });
+  // Starts listener to check the Customer Org tab has any errors
   window.EventBus.$on('customerOrgExpStatus', (errorCount) => {
     this.tabErrors.customerOrgExp = errorCount > 0 ? true : false;
     this.addErrorTab('Customer Org', errorCount);
   });
+  // Starts listener to check the Education tab has any errors
   window.EventBus.$on('educationStatus', (errorCount) => {
     this.tabErrors.education = errorCount > 0 ? true : false;
     this.addErrorTab('Education', errorCount);
   });
+  // Starts listener to check the Employee tab has any errors
   window.EventBus.$on('employeeStatus', (errorCount) => {
     this.tabErrors.employee = errorCount > 0 ? true : false;
     this.addErrorTab('Employee', errorCount);
   });
+  // Starts listener to check the Job Experience tab has any errors
   window.EventBus.$on('jobExperienceStatus', (errorCount) => {
     this.tabErrors.jobExperience = errorCount > 0 ? true : false;
     this.addErrorTab('Job Experience', errorCount);
   });
+  // Starts listener to check the Languages tab has any errors
   window.EventBus.$on('languagesStatus', (errorCount) => {
     this.tabErrors.languages = errorCount > 0 ? true : false;
     this.addErrorTab('Languages', errorCount);
   });
+  // Starts listener to check the Personal tab has any errors
   window.EventBus.$on('personalStatus', (errorCount) => {
     this.tabErrors.personal = errorCount > 0 ? true : false;
     this.addErrorTab('Personal', errorCount);
   });
-  window.EventBus.$on('resume', (newEmployeeForm) => {
-    if (this.model) {
-      this.model = newEmployeeForm;
-    }
-  });
+  // Starts listener to check the Technologies tab has any errors
   window.EventBus.$on('technologiesStatus', (errorCount) => {
     this.tabErrors.technologies = errorCount > 0 ? true : false;
     this.addErrorTab('Technologies', errorCount);
-  });
-  window.EventBus.$on('technologiesErrStatus', (errorMessage) => {
-    this.tabErrors.technologies = true;
-    //when there is a custom error message (multiple entries with same name) gets it ready for display
-    if (errorMessage) {
-      this.tabErrorMessage = _.cloneDeep(errorMessage);
-    }
-  });
-  window.EventBus.$on('educationDuplicateStatus', (errorMessage) => {
-    //when there is a custom error message (multiple entries with same name) gets it ready for display
-    this.tabErrors.education = true;
-    if (errorMessage) {
-      this.tabErrorMessage = _.cloneDeep(errorMessage);
-    }
-  });
-  window.EventBus.$on('languagesDuplicateStatus', (errorMessage) => {
-    //when there is a custom error message (multiple entries with same name) gets it ready for display
-    this.tabErrors.languages = true;
-    if (errorMessage) {
-      this.tabErrorMessage = _.cloneDeep(errorMessage);
-    }
   });
   // fills model in with populated fields in employee prop
   this.model = _.cloneDeep(
@@ -805,7 +814,24 @@ async function created() {
   this.formTab = this.currentTab;
   this.afterCreate = true;
   this.hasResume = (await api.getResume(this.$route.params.id)) != null;
+  this.mifiStatusOnLoad = this.employee.mifiStatus;
 } // created
+
+/**
+ * destroying all listeners
+ */
+function beforeDestroy() {
+  window.EventBus.$off('confirmed');
+  window.EventBus.$off('canceled');
+  window.EventBus.$off('canceled-form');
+} // beforeDestroy
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                    METHODS                       |
+// |                                                  |
+// |--------------------------------------------------|
+
 /**
  * Sets the form data based on the given tab.
  * @param tab - the tab the data came from
@@ -816,6 +842,7 @@ function setFormData(tab, data) {
     //sets all employee info to data returned from employee tab
     this.$set(this.model, 'firstName', data.firstName);
     this.$set(this.model, 'middleName', data.middleName);
+    this.$set(this.model, 'noMiddleName', data.noMiddleName);
     this.$set(this.model, 'lastName', data.lastName);
     this.$set(this.model, 'nickname', data.nickname);
     this.$set(this.model, 'employeeNumber', data.employeeNumber);
@@ -844,7 +871,7 @@ function setFormData(tab, data) {
     this.$set(this.model, 'currentStreet', data.currentStreet);
     this.$set(this.model, 'currentZIP', data.currentZIP);
   } else if (tab == 'education') {
-    this.$set(this.model, 'degrees', data); //sets degrees to data returned from education tab
+    this.$set(this.model, 'schools', data); //sets schools to data returned from education tab
   } else if (tab == 'jobExperience') {
     //sets all jobExperience info to data returned from job experience tab
     this.$set(this.model, 'icTimeFrames', data.icTimeFrames);
@@ -904,14 +931,42 @@ async function convertAutocompleteToTitlecase() {
 
 // |--------------------------------------------------|
 // |                                                  |
+// |                    COMPUTED                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * choose whether to use the drop down or not with a boolean computed value
+ */
+function useDropDown() {
+  switch (this.$vuetify.breakpoint.name) {
+    case 'xs':
+      return true;
+    default:
+      return false;
+  }
+} // useDropDown
+
+/**
+ * computed value of which tab is selected
+ */
+function parsedInfoTab() {
+  let parseTab = !this.formTab ? 'Select Info' : this.formTab;
+  if (this.formTab === 'customerOrgExp') {
+    parseTab = 'Customer Org';
+  } else if (this.formTab === 'jobExperience') {
+    parseTab = 'Job Experience';
+  }
+  return parseTab.toUpperCase();
+} // parsedInfoTab
+
+// |--------------------------------------------------|
+// |                                                  |
 // |                      EXPORT                      |
 // |                                                  |
 // |--------------------------------------------------|
 export default {
-  beforeDestroy() {
-    window.EventBus.$off('confirmed');
-    window.EventBus.$off('canceled');
-  },
+  beforeDestroy,
   components: {
     AwardTab,
     CertificationTab,
@@ -945,6 +1000,7 @@ export default {
       formTab: null, // currently active tab
       fullName: '', // employee's first and last name
       hasResume: false,
+      mifiStatusOnLoad: null, // used as a way to see if mifi status was changed (to updated audit log)
       model: {
         awards: [],
         birthday: null,
@@ -978,8 +1034,10 @@ export default {
         middleName: null,
         mifiStatus: true,
         nickname: null,
+        noMiddleName: false,
         phoneNumber: null,
         prime: null,
+        schools: [],
         st: null,
         technologies: [],
         twitter: null,
@@ -1046,6 +1104,7 @@ export default {
     setFormData,
     submit,
     titleCase,
+    resumeReceived,
     selectDropDown
   },
   props: ['currentTab', 'employee'], // employee to be created/updated
@@ -1060,23 +1119,8 @@ export default {
     }
   },
   computed: {
-    useDropDown() {
-      switch (this.$vuetify.breakpoint.name) {
-        case 'xs':
-          return true;
-        default:
-          return false;
-      }
-    },
-    parsedInfoTab() {
-      let parseTab = !this.formTab ? 'Select Info' : this.formTab;
-      if (this.formTab === 'customerOrgExp') {
-        parseTab = 'Customer Org';
-      } else if (this.formTab === 'jobExperience') {
-        parseTab = 'Job Experience';
-      }
-      return parseTab.toUpperCase();
-    }
+    useDropDown,
+    parsedInfoTab
   }
 };
 </script>

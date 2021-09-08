@@ -107,7 +107,12 @@
         ></budget-chart>
       </v-col>
     </v-row>
-    <resume-parser v-if="!loading" :toggleResumeParser="this.toggleResumeParser" :employee="this.model"></resume-parser>
+    <resume-parser
+      v-if="!loading && !editing"
+      :toggleResumeParser="this.toggleResumeParser"
+      :employee="this.model"
+      @resume="resumeReceived"
+    ></resume-parser>
     <delete-modal :toggleDeleteModal="this.toggleDeleteModal" type="resume"></delete-modal>
   </v-container>
 </template>
@@ -120,11 +125,9 @@ import EmployeeInfo from '@/components/employees/EmployeeInfo.vue';
 import QuickBooksTimeData from '@/components/QuickBooksTimeData.vue';
 import { getRole } from '@/utils/auth';
 import _ from 'lodash';
-import { isEmpty } from '@/utils/utils';
 import ConvertEmployeeToCsv from '../components/ConvertEmployeeToCsv.vue';
 import AnniversaryCard from '@/components/AnniversaryCard.vue';
 import BudgetChart from '@/components/BudgetChart.vue';
-import MobileDetect from 'mobile-detect';
 import ResumeParser from '@/components/modals/ResumeParser';
 import DeleteModal from '@/components/modals/DeleteModal';
 
@@ -136,6 +139,20 @@ const IsoFormat = 'YYYY-MM-DD';
 // |                     METHODS                      |
 // |                                                  |
 // |--------------------------------------------------|
+
+/**
+ * Event called when a resume is submitted
+ *
+ * @param newEmployeeForm is the new employee model after parsing the resume
+ */
+function resumeReceived(newEmployeeForm, changes) {
+  if (changes && changes > 0) {
+    this.displayMessage('SUCCESS', `Added ${changes} change(s) to profile!`, 'green');
+  }
+
+  this.model = newEmployeeForm;
+  api.updateItem(api.EMPLOYEES, this.model);
+}
 
 function clearStatus() {
   this.$set(this.uploadStatus, 'statusType', undefined);
@@ -149,18 +166,6 @@ async function downloadResume() {
     window.open(signedURL, '_blank');
   }
 }
-
-/**
- * Checks if there is data about an employee to display. Returns true if the user is an admin or if there is data
- * on the employee's github or twitter, otherwise returns false.
- *
- * @item item - employee to check
- * @return boolean - employee has data to display
- */
-function isDisplayData(item) {
-  let valid = !this.userIsAdmin() && this.isEmpty(item.github) && this.isEmpty(item.twitter);
-  return valid;
-} // isDisplayData
 
 /**
  * Gets the current active anniversary budget year starting date in isoformat.
@@ -187,31 +192,6 @@ async function getEmployee() {
     return employee.employeeNumber == this.$route.params.id;
   });
 } // getEmployee
-
-/**
- * Returns Full Time, Part Time, or Inactive based on the work status
- */
-function getWorkStatus(workStatus) {
-  if (workStatus == 100) {
-    return 'Full Time';
-  } else if (workStatus == 0) {
-    return 'Inactive';
-  } else if (workStatus > 0 && workStatus < 100) {
-    return `Part Time (${workStatus}%)`;
-  } else {
-    return 'Invalid Status';
-  }
-} // getWorkStatus
-
-/**
- * Checks if the current device used is mobile. Return true if it is mobile. Returns false if it is not mobile.
- *
- * @return boolean - if the device is mobile
- */
-function isMobile() {
-  let md = new MobileDetect(window.navigator.userAgent);
-  return md.os() === 'AndroidOS' || md.os() === 'iOS';
-} // isMobile
 
 function minimizeWindow() {
   switch (this.$vuetify.breakpoint.name) {
@@ -286,6 +266,10 @@ async function created() {
     await this.deleteResume();
   });
 
+  window.EventBus.$on('canceled-delete-resume', () => {
+    this.midAction = false;
+  });
+
   window.EventBus.$on('delete-resume', (newResume) => {
     if (newResume != null) {
       this.hasResume = newResume;
@@ -300,7 +284,7 @@ async function created() {
   await this.getEmployee();
   if (this.model) {
     this.user = await api.getUser();
-    this.checkForBudgetAccess();
+    await this.checkForBudgetAccess();
     this.role = getRole();
     this.loading = false;
     this.displayQuickBooksTimeAndBalances = this.userIsAdmin() || this.userIsEmployee();
@@ -313,7 +297,7 @@ async function created() {
 /**
  * Mount event listeners.
  */
-async function mounted() {
+function mounted() {
   window.EventBus.$on('cancel-form', () => {
     this.editing = false;
   });
@@ -340,12 +324,17 @@ async function mounted() {
       this.fiscalDateView = data.format(IsoFormat);
     }
   });
-
-  window.EventBus.$on('resume', async (newEmployeeForm) => {
-    this.model = newEmployeeForm;
-    await api.updateItem(api.EMPLOYEES, this.model);
-  });
 } // mounted
+
+/**
+ * destroy listeners
+ */
+function beforeDestroy() {
+  window.EventBus.$off('delete-resume');
+  window.EventBus.$off('upload-resume-complete');
+  window.EventBus.$off('confirm-delete-resume');
+  window.EventBus.$off('canceled-delete-resume');
+} // beforeDestroy
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -354,10 +343,7 @@ async function mounted() {
 // |--------------------------------------------------|
 
 export default {
-  beforeDestroy() {
-    window.EventBus.$off('delete-resume');
-    window.EventBus.$off('upload-resume-complete');
-  },
+  beforeDestroy,
   components: {
     AvailableBudgets,
     DeleteModal,
@@ -408,6 +394,7 @@ export default {
         lastName: '',
         middleName: '',
         nickname: '',
+        noMiddleName: false,
         phoneNumber: '',
         prime: '',
         st: '',
@@ -439,12 +426,9 @@ export default {
     displayMessage,
     downloadResume,
     hasAdminPermissions,
-    isDisplayData,
-    isEmpty,
-    isMobile,
     getEmployee,
     getCurrentBudgetYear,
-    getWorkStatus,
+    resumeReceived,
     userIsAdmin,
     userIsEmployee,
     checkForBudgetAccess

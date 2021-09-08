@@ -10,17 +10,37 @@
         <div v-if="!isEmpty(contract.projects)">
           <div v-for="(project, projIndex) in contract.projects" :key="index + ' ' + projIndex" class="pb-1 px-4">
             <p v-if="contract.projects.length > 1">
-              <b>Project {{ projIndex + 1 }}: </b>{{ project.name }}
+              <v-row>
+                <v-col>
+                  <b>Project {{ projIndex + 1 }}: </b>{{ project.name }}
+                </v-col>
+                <v-col>
+                  <v-tooltip v-if="!project.endDate" right>
+                    <template v-slot:activator="{ on }">
+                      <v-icon v-on="on">check</v-icon>
+                    </template>
+                    <span>Current Project</span>
+                  </v-tooltip>
+                </v-col>
+              </v-row>
             </p>
-            <p v-else><b>Project: </b>{{ project.name }}</p>
+            <p v-else>
+              <v-row>
+                <v-col> <b>Project: </b>{{ project.name }} </v-col>
+                <v-col>
+                  <v-tooltip v-if="!project.endDate" right>
+                    <template v-slot:activator="{ on }">
+                      <v-icon v-on="on">check</v-icon>
+                    </template>
+                    <span>Current Project</span>
+                  </v-tooltip>
+                </v-col>
+              </v-row>
+            </p>
             <p><b>Time on Project (in Years): </b>{{ getProjectLengthInYears(project) }}</p>
-            <p><b>Start Date: </b>{{ project.startDate | monthDayYearFormat }}</p>
+            <p><b>Start Date: </b>{{ monthDayYearFormat(project.startDate) }}</p>
             <div v-if="project.endDate">
-              <p><b>End Date: </b>{{ project.endDate | monthDayYearFormat }}</p>
-              <p><b>Current: </b>No</p>
-            </div>
-            <div v-else>
-              <p><b>Current: </b>Yes</p>
+              <p><b>End Date: </b>{{ monthDayYearFormat(project.endDate) }}</p>
             </div>
             <hr v-if="projIndex < contract.projects.length - 1" class="horizontalBar mb-3" />
           </div>
@@ -31,6 +51,7 @@
     </div>
     <!-- Employee does not have Contracts -->
     <p v-else>No Contracts Information</p>
+    <!-- Pagination -->
     <div v-if="!isEmpty(this.model.contracts) && Math.ceil(this.model.contracts.length / 5) != 1" class="text-center">
       <v-pagination
         v-model="page"
@@ -117,13 +138,13 @@ export default {
   filters: {
     current: (value) => {
       return value ? 'Yes' : 'No';
-    },
-    monthDayYearFormat
+    }
   },
   methods: {
     getContractLengthInYears,
     getProjectLengthInYears,
     isEmpty,
+    monthDayYearFormat,
     onPageChange
   },
   props: ['model']

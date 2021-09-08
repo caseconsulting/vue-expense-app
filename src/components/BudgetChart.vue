@@ -36,6 +36,20 @@ const IsoFormat = 'YYYY-MM-DD';
 
 // |--------------------------------------------------|
 // |                                                  |
+// |               LIFECYCLE HOOKS                    |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * mounted lifecycle hook
+ */
+async function mounted() {
+  await this.refreshBudget();
+  this.drawGraph();
+} // mounted
+
+// |--------------------------------------------------|
+// |                                                  |
 // |                     COMPUTED                     |
 // |                                                  |
 // |--------------------------------------------------|
@@ -186,8 +200,6 @@ function drawGraph() {
       xAxes: [
         {
           stacked: true,
-          // categoryPercentage: 0.5, //Not supported by chartjs 3.x
-          // barPercentage: 1, //Not supported by chartjs 3.x
           ticks: {
             autoSkip: false
           }
@@ -325,10 +337,7 @@ export default {
     getFinalBudgetsData,
     refreshBudget
   },
-  async mounted() {
-    await this.refreshBudget();
-    this.drawGraph();
-  },
+  mounted,
   props: ['employee', 'fiscalDateView'],
   watch: {
     fiscalDateView: async function () {

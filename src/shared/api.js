@@ -8,7 +8,6 @@ const EMSI = 'emsi';
 const TRAINING_URLS = 'training-urls';
 const UTILITY = 'utility';
 const BUDGETS = 'budgets';
-const URLS = 'training-urls';
 const QUICK_BOOKS_TIME = 'tSheets';
 const TWITTER = 'twitter';
 const BASECAMP = 'basecamp';
@@ -17,6 +16,7 @@ const BLOG_FILE = 'blogFile';
 const HIPPO_LAB = 'hippoLabs';
 const GOOGLE_MAPS = 'googleMaps';
 const BLOG_ATTACHMENT = 'blogAttachment';
+const AUDIT = 'audits';
 const RESUME = 'resume';
 const API_HOSTNAME = API_CONFIG.apiHostname;
 const API_PORT = API_CONFIG.apiPort;
@@ -121,6 +121,10 @@ function getAllEvents() {
 // function getBudgetsByDateAndType(id, date, expenseTypeId) {
 //   return execute('get', `/${UTILITY}/getEmployeeBudgets/${id}/${date}/${expenseTypeId}`);
 // }
+
+function getAudits(type, startDate, endDate) {
+  return execute('get', `/${AUDIT}/${type}/${startDate}/${endDate}`);
+}
 
 function getItems(type) {
   return execute('get', `/${type}`);
@@ -269,21 +273,6 @@ async function getResume(employeeId) {
     .catch(() => {
       return null;
     });
-
-  // try {
-  //   return await execute('get', `resume/${employeeId}`)
-  //     .then((res) => {
-  //       console.log(res + 'here1');
-  //       return res;
-  //     })
-  //     .catch((err) => {
-  //       console.log(err + 'here2');
-  //       return err;
-  //     });
-  // } catch (err) {
-  //   console.log(err);
-  //   return err;
-  // }
 }
 
 async function createAttachment(expense, file) {
@@ -418,6 +407,25 @@ async function uploadBlogAttachment(file) {
 async function getColleges(inputValue) {
   return execute('get', `/${HIPPO_LAB}/getColleges/${inputValue}`)
     .then((response) => {
+      for (let i = 0; i < response.length; i++) {
+        if (response[i] === 'Virginia Polytechnic Institute and State University') {
+          response[i] = 'Virginia Polytechnic Institute and State University (Virginia Tech)';
+        } else if (response[i] === 'University of Mississippi') {
+          response[i] = 'University of Mississippi (Ole Miss)';
+        } else if (response[i] === 'United States Military Academy') {
+          response[i] = 'United States Military Academy (West Point)';
+        } else if (response[i] === 'Northern Virginia Community College') {
+          response[i] = 'Northern Virginia Community College (NoVa)';
+        } else if (response[i] === 'Georgia Institute of Technology') {
+          response[i] = 'Georgia Institute of Technology (Georgia Tech)';
+        } else if (response[i] === 'Florida Institute of Technology') {
+          response[i] = 'Florida Institute of Technology (Florida Tech)';
+        } else if (response[i] === 'City University of New York') {
+          response[i] = 'City University of New York (City Tech)';
+        } else if (response[i] === 'California Institute of Technology') {
+          response[i] = 'California Institute of Technology (Caltech)';
+        }
+      }
       return response;
     })
     .catch(() => {
@@ -449,6 +457,7 @@ export default {
   getAllExpenses,
   getAllExpenseTypeExpenses,
   getAttachment,
+  getAudits,
   getBlogFile,
   getPictureFile,
   getBasecampAvatars,
@@ -482,10 +491,11 @@ export default {
   EMPLOYEES,
   UTILITY,
   BUDGETS,
-  URLS,
   QUICK_BOOKS_TIME,
+  TRAINING_URLS,
   TWITTER,
   BLOG,
   BLOG_ATTACHMENT,
-  BLOG_FILE
+  BLOG_FILE,
+  AUDIT
 };

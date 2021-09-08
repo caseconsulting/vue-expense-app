@@ -11,7 +11,7 @@
       <v-combobox
         ref="formFields"
         v-model="clearance.type"
-        :rules="[requiredRules[0], duplicateClearanceTypes(cIndex)]"
+        :rules="[...getRequiredRules(), duplicateClearanceTypes(cIndex)]"
         :items="clearanceTypeDropDown"
         label="Type"
         data-vv-name="Type"
@@ -36,7 +36,7 @@
                 label="Granted Date"
                 prepend-icon="event_available"
                 clearable
-                :rules="[dateOptionalRules[0], dateOptionalRules[1], dateGrantedRules(cIndex)]"
+                :rules="[...getDateOptionalRules(), dateGrantedRules(cIndex)]"
                 hint="MM/DD/YYYY format"
                 v-mask="'##/##/####'"
                 v-bind="attrs"
@@ -74,7 +74,7 @@
                 label="Expiration Date"
                 prepend-icon="event_busy"
                 clearable
-                :rules="[dateOptionalRules[0], dateOptionalRules[1], dateExpirationRules(cIndex)]"
+                :rules="[...getDateOptionalRules(), dateExpirationRules(cIndex)]"
                 hint="MM/DD/YYYY format"
                 v-mask="'##/##/####'"
                 v-bind="attrs"
@@ -111,7 +111,7 @@
                 label="Submission Date"
                 prepend-icon="event_note"
                 clearable
-                :rules="[dateOptionalRules[0], dateOptionalRules[1], dateSubmissionRules(cIndex)]"
+                :rules="[...getDateOptionalRules(), dateSubmissionRules(cIndex)]"
                 hint="MM/DD/YYYY format"
                 v-mask="'##/##/####'"
                 v-bind="attrs"
@@ -223,7 +223,7 @@
             label="Badge Expiration Date"
             prepend-icon="event_busy"
             clearable
-            :rules="[dateOptionalRules[0], dateOptionalRules[1], dateBadgeRules(cIndex)]"
+            :rules="[...getDateOptionalRules(), dateBadgeRules(cIndex)]"
             hint="MM/DD/YYYY format"
             v-mask="'##/##/####'"
             v-bind="attrs"
@@ -241,47 +241,38 @@
           @input="clearance.showBadgeMenu = false"
         ></v-date-picker>
       </v-menu>
-      <!-- Loop BI Dates -->
-      <div v-for="(bi, biIndex) in clearance.biDates" :key="biIndex">
-        <!-- Range -->
-        <v-menu
-          v-model="bi.showRangeMenu"
-          :close-on-content-click="false"
-          transition="scale-transition"
-          offset-y
-          max-width="290px"
-          min-width="290px"
-        >
-          <template v-slot:activator="{ on, attrs }">
-            <v-text-field
-              ref="formFields"
-              :value="formatRange(bi.range)"
-              :rules="requiredRules"
-              label="BI Dates"
-              prepend-icon="date_range"
-              readonly
-              v-bind="attrs"
-              clearable
-              v-on="on"
-            >
-              <v-tooltip bottom slot="append-outer">
-                <template v-slot:activator="{ on }">
-                  <v-btn text icon v-on="on" @click="deleteBIDate(cIndex, biIndex)"
-                    ><v-icon style="color: grey">delete</v-icon></v-btn
-                  >
-                </template>
-                <span>Delete BI Date</span>
-              </v-tooltip></v-text-field
-            >
-          </template>
-          <v-date-picker v-model="bi.range" :min="clearance.submissionDate" no-title range></v-date-picker>
-        </v-menu>
-        <!-- End Range -->
-      </div>
-      <!-- End Loop BI Dates -->
-      <div align="center" class="pt-2 pb-4">
-        <v-btn @click="addBIDates(cIndex)" depressed outlined small>Add BI Dates</v-btn>
-      </div>
+      <!-- BI Dates -->
+      <v-menu
+        ref="biMenu"
+        v-model="clearance.showBIMenu"
+        :close-on-content-click="false"
+        :return-value.sync="clearance.biDates"
+        transition="scale-transition"
+        offset-y
+        min-width="290px"
+      >
+        <template v-slot:activator="{ on, attrs }">
+          <v-combobox
+            :value="clearance.biDates | formatDates"
+            multiple
+            chips
+            small-chips
+            label="BI Dates"
+            prepend-icon="event"
+            clearable
+            readonly
+            v-bind="attrs"
+            v-on="on"
+            @click:clear="clearance.biDates = []"
+          ></v-combobox>
+        </template>
+        <v-date-picker v-model="clearance.biDates" :min="clearance.submissionDate" multiple no-title scrollable>
+          <v-spacer></v-spacer>
+          <v-btn text color="primary" @click="clearance.showBIMenu = false">Cancel</v-btn>
+          <v-btn text color="primary" @click="$refs.biMenu[cIndex].save(clearance.biDates)">OK</v-btn>
+        </v-date-picker>
+      </v-menu>
+      <!-- End BI Dates -->
       <div align="center">
         <v-tooltip bottom slot="append-outer">
           <template v-slot:activator="{ on }">
@@ -305,6 +296,7 @@
 <script>
 import api from '@/shared/api.js';
 import _ from 'lodash';
+import { getDateOptionalRules, getRequiredRules } from '@/shared/validationUtils.js';
 import { formatDate, parseDate, isEmpty } from '@/utils/utils';
 import { mask } from 'vue-the-mask';
 const moment = require('moment-timezone');
@@ -334,18 +326,6 @@ async function created() {
 // |--------------------------------------------------|
 
 /**
- * Add BI dates to a clearance
- *
- * @param cIndex - array index of clearance to add the BI date to.
- */
-function addBIDates(cIndex) {
-  this.editedClearances[cIndex].biDates.push({
-    range: [],
-    showRangeMenu: false
-  });
-} // addBIDates
-
-/**
  * Adds a clearance.
  */
 function addClearance() {
@@ -359,6 +339,7 @@ function addClearance() {
     polyDates: [],
     showAdjudicationMenu: false,
     showBadgeMenu: false,
+    showBIMenu: false,
     showExpirationMenu: false,
     showGrantedMenu: false,
     showPolyMenu: false,
@@ -367,16 +348,6 @@ function addClearance() {
     type: null
   });
 } // addClearance
-
-/**
- * Deletes a BI Date from a clearance.
- *
- * @param cIndex - array index of clearance to remove the BI date from.
- * @param biIndex - array index of BI date to remove.
- */
-function deleteBIDate(cIndex, biIndex) {
-  this.editedClearances[cIndex].biDates.splice(biIndex, 1);
-} // deleteBIDate
 
 /**
  * Deletes a clearance.
@@ -388,40 +359,12 @@ function deleteClearance(cIndex) {
 } // deleteClearance
 
 /**
- * Format date range as 'MM/DD/YYYY' - 'MM/DD/YYYY' in chronological order.
- *
- * @param range - Array of String dates in isoformat
- * @return String - 'MM/DD/YYYY' - 'MM/DD/YYYY' date range
- */
-function formatRange(range) {
-  if (_.isEmpty(range)) {
-    return null;
-  }
-
-  let start = moment(range[0], ISOFORMAT);
-  if (range[1]) {
-    // end date selected
-    let end = moment(range[1], ISOFORMAT);
-    if (start.isAfter(end)) {
-      // start date is listed after end date
-      return `${end.format('MM/DD/YYYY')} - ${start.format('MM/DD/YYYY')}`;
-    } else {
-      // start date is listed before end date
-      return `${start.format('MM/DD/YYYY')} - ${end.format('MM/DD/YYYY')}`;
-    }
-  } else {
-    // no end date selected
-    return `${start.format('MM/DD/YYYY')} - Present`;
-  }
-} // formatRange
-
-/**
  * Checks to see if the first date is at or after the second date, if not, it uses an error message.
  *
  * @param firstDate - The date that should come first
  * @param secondDate - The date that should come second
  * @param errMessage - The message to display if the dates are incorrectly ordered
- * @return boolean - True if the first date is at or after the second date
+ * @return Boolean - True if the first date is at or after the second date
  */
 function isAfter(firstDate, secondDate, errMessage) {
   return !isEmpty(firstDate) && secondDate
@@ -518,6 +461,7 @@ function minExpiration(cIndex) {
 
 /**
  * Parse the date after losing focus.
+ * @returns String - The date in YYYY-MM-DD format
  */
 function parseEventDate() {
   return parseDate(event.target.value);
@@ -546,9 +490,7 @@ function validateFields() {
   //ensures that refs are put in an array so we can reuse forEach loop
   let components = !_.isArray(this.$refs.formFields) ? [this.$refs.formFields] : this.$refs.formFields;
   _.forEach(components, (field) => {
-    if (field && !field.validate()) {
-      errorCount++;
-    }
+    if (field && !field.validate()) errorCount++;
   });
   window.EventBus.$emit('doneValidating', 'clearance', this.editedClearances); // emit done validating and sends edited data back to parent
   window.EventBus.$emit('clearanceStatus', errorCount); // emit error status
@@ -576,12 +518,6 @@ export default {
               'Expiration date must come after grant and submission date'
           : true;
       },
-      dateOptionalRules: [
-        (v) => {
-          return !isEmpty(v) ? /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v) || 'Date must be valid. Format: MM/DD/YYYY' : true;
-        },
-        (v) => (!isEmpty(v) ? moment(v, 'MM/DD/YYYY').isValid() || 'Date must be valid' : true)
-      ], // rules for an optional date
       dateSubmissionRules: (index) => {
         let currClearance = this.editedClearances[index];
         return currClearance.grantedDate && currClearance.submissionDate
@@ -589,11 +525,6 @@ export default {
               'Submission date must be before grant date'
           : true;
       },
-      dateRules: [
-        (v) => !isEmpty(v) || 'Date required',
-        (v) => (!isEmpty(v) && /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v)) || 'Date must be valid. Format: MM/DD/YYYY',
-        (v) => moment(v, 'MM/DD/YYYY').isValid() || 'Date must be valid'
-      ], // rules for a required date
       editedClearances: _.cloneDeep(this.model), // stores edited clearances info
       dateGrantedRules: (index) => {
         let currClearance = this.editedClearances[index];
@@ -615,6 +546,10 @@ export default {
   directives: { mask },
   filters: {
     formatDate,
+    /**
+     * Formats multiple dates at once in MM/DD/YYYY format.
+     * @returns Array - The array of formatted dates
+     */
     formatDates: function (array) {
       let formattedDates = [];
       array.forEach((date) => {
@@ -624,11 +559,10 @@ export default {
     }
   },
   methods: {
-    addBIDates,
     addClearance,
-    deleteBIDate,
     deleteClearance,
-    formatRange,
+    getDateOptionalRules,
+    getRequiredRules,
     isAfter,
     isBefore,
     isEmpty,

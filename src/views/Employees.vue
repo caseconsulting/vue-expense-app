@@ -206,7 +206,7 @@
           <!-- Date Item Slot -->
           <template v-slot:[`item.hireDate`]="{ item }">
             <p :class="{ inactiveStyle: isInactive(item), selectFocus: isFocus(item) }" style="margin-bottom: 0px">
-              {{ item.hireDate | monthDayYearFormat }}
+              {{ monthDayYearFormat(item.hireDate) }}
             </p>
           </template>
 
@@ -298,7 +298,7 @@ async function deleteEmployee() {
   let e = await api.deleteItem(api.EMPLOYEES, this.deleteModel.id); // delete employee from api
   if (e.id) {
     // update data if successfully deletes employee
-    this.deleteModelFromTable();
+    await this.deleteModelFromTable();
   } else {
     // display error if failed to deleted employee
     this.displayError(e.response.data.message);
@@ -309,8 +309,8 @@ async function deleteEmployee() {
 /**
  * Refresh and updates employee list and displays a successful delete status in the snackbar.
  */
-function deleteModelFromTable() {
-  this.refreshEmployees();
+async function deleteModelFromTable() {
+  await this.refreshEmployees();
 
   this.$set(this.status, 'statusType', 'SUCCESS');
   this.$set(this.status, 'statusMessage', 'Employee was successfully deleted!');
@@ -322,7 +322,7 @@ function deleteModelFromTable() {
  *
  * @param err - String error message
  */
-async function displayError(err) {
+function displayError(err) {
   this.$set(this.status, 'statusType', 'ERROR');
   this.$set(this.status, 'statusMessage', err);
   this.$set(this.status, 'color', 'red');
@@ -456,14 +456,16 @@ async function clearCreateEmployee() {
  *  Adjust datatable header for user view. Creates event listeners.
  */
 async function created() {
-  window.EventBus.$on('cancel-form', () => {
+  window.EventBus.$on('cancel-form', async () => {
     //used to reset the employee form modal
-    this.clearCreateEmployee();
+    await this.clearCreateEmployee();
   });
   window.EventBus.$on('canceled-delete-employee', () => {
     this.midAction = false;
   });
-  window.EventBus.$on('confirm-delete-employee', this.deleteEmployee);
+  window.EventBus.$on('confirm-delete-employee', async () => {
+    await this.deleteEmployee();
+  });
   window.EventBus.$on('invalid-employee-delete', () => {
     this.midAction = false;
   });
@@ -471,7 +473,7 @@ async function created() {
   window.EventBus.$on('empNum', (empNum) => {
     this.employeeNumber = empNum;
   });
-  this.refreshEmployees();
+  await this.refreshEmployees();
 
   // remove employee action button header if user view
   if (!this.hasAdminPermissions()) {
@@ -485,6 +487,16 @@ async function created() {
   }
 } // created
 
+/**
+ * destroy listeners
+ */
+function beforeDestroy() {
+  window.EventBus.$off('cancel-form');
+  window.EventBus.$off('canceled-delete-employee');
+  window.EventBus.$off('confirm-delete-employee');
+  window.EventBus.$off('invalid-employee-delete');
+} // beforeDestroy
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                      EXPORT                      |
@@ -492,12 +504,7 @@ async function created() {
 // |--------------------------------------------------|
 
 export default {
-  beforeDestroy() {
-    window.EventBus.$off('cancel-form');
-    window.EventBus.$off('canceled-delete-employee');
-    window.EventBus.$off('confirm-delete-employee');
-    window.EventBus.$off('invalid-employee-delete');
-  },
+  beforeDestroy,
   components: {
     ConvertEmployeesToCsv,
     DeleteErrorModal,
@@ -601,9 +608,6 @@ export default {
       } // snackbar action status
     };
   },
-  filters: {
-    monthDayYearFormat
-  },
   methods: {
     changeAvatar,
     clearCreateEmployee,
@@ -620,6 +624,7 @@ export default {
     isFullTime,
     isInactive,
     isPartTime,
+    monthDayYearFormat,
     refreshEmployees,
     renderCreateEmployee,
     userIsAdmin,

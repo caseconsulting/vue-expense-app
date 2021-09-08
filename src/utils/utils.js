@@ -1,4 +1,5 @@
 import dateUtils from '@/shared/dateUtils';
+import MobileDetect from 'mobile-detect';
 const moment = require('moment-timezone');
 moment.tz.setDefault('America/New_York');
 import _ from 'lodash';
@@ -93,6 +94,16 @@ export function isFullTime(employee) {
 export function isInactive(employee) {
   return employee.workStatus == 0;
 } // isInactive
+
+/**
+ * Checks if the current device used is mobile. Return true if it is mobile. Returns false if it is not mobile.
+ *
+ * @return boolean - if the device is mobile
+ */
+export function isMobile() {
+  let md = new MobileDetect(window.navigator.userAgent);
+  return md.os() === 'AndroidOS' || md.os() === 'iOS';
+} // isMobile
 
 /**
  * Checks if an employee is part time. Returns true if the employee is part time with a work status between 0 and 100,

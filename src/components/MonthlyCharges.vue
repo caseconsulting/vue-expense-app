@@ -168,7 +168,7 @@ async function created() {
 // |                                                  |
 // |--------------------------------------------------|
 
-async function calcWorkHours() {
+function calcWorkHours() {
   let workHours = 0;
   let day = moment().set('date', 1);
   let currMonth = day.month();
@@ -228,7 +228,7 @@ async function setMonthlyCharges() {
       this.todaysHours = this.quickBooksTimeData.todaysHours;
       this.futureHours = this.quickBooksTimeData.futureHours;
       this.totalHours = this.workedHours + this.todaysHours + this.futureHours;
-      await this.calcWorkHours();
+      this.calcWorkHours();
       this.remainingHours = this.workHours - this.totalHours;
       this.userWorkDays = this.remainingWorkDays;
       this.estimatedDailyHours = this.remainingHours / this.userWorkDays;
@@ -244,6 +244,19 @@ function toFAQ() {
   let faq = this.$router.resolve({ path: '/help/hoursInfo' });
   window.open(faq.href, '_blank');
 }
+
+/**
+ * Updates the estimated daily hours based on number of work days and hours remaining
+ *
+ * @param event - the event is used for the number of user work days
+ */
+function updateEstimate(event) {
+  if (event.target.value > 0) {
+    this.userWorkDays = event.target.value;
+    this.estimatedDailyHours = this.remainingHours / this.userWorkDays;
+    this.estimatedDailyHours = roundHours(this.estimatedDailyHours);
+  }
+} //updateEstimate
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -281,13 +294,7 @@ export default {
     isEmpty,
     setMonthlyCharges,
     toFAQ,
-    updateEstimate: function (event) {
-      if (event.target.value > 0) {
-        this.userWorkDays = event.target.value;
-        this.estimatedDailyHours = this.remainingHours / this.userWorkDays;
-        this.estimatedDailyHours = roundHours(this.estimatedDailyHours);
-      }
-    }
+    updateEstimate
   },
   props: ['passedEmployee', 'showMinutes'],
   watch: {

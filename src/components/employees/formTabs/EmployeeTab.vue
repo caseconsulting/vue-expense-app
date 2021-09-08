@@ -4,32 +4,43 @@
       in order the 'ref=formFields' to be placed into
       an array -->
     <div v-for="i in [0]" :key="i">
-      <!-- Name -->
+      <!-- First Name -->
       <v-text-field
         id="employeeFirstName"
         ref="formFields"
         v-model="editedEmployee.firstName"
-        :rules="requiredRules"
+        :rules="getRequiredRules()"
         label="First Name"
         data-vv-name="First Name"
         :disabled="!admin"
       ></v-text-field>
+      <!-- Middle Name -->
       <v-text-field
         id="employeeMiddleName"
+        ref="formFields"
         v-model="editedEmployee.middleName"
-        label="Middle Name (optional)"
+        :rules="middleNameRules()"
+        label="Middle Name"
         data-vv-name="Middle Name"
-        :disabled="!admin"
+        :disabled="!admin || editedEmployee.noMiddleName"
       ></v-text-field>
+      <v-checkbox
+        class="mt-0"
+        label="Do not have a middle name"
+        v-model="editedEmployee.noMiddleName"
+        @click="editedEmployee.middleName = null"
+      ></v-checkbox>
+      <!-- Last Name -->
       <v-text-field
         id="employeeLastName"
         ref="formFields"
         v-model="editedEmployee.lastName"
-        :rules="requiredRules"
+        :rules="getRequiredRules()"
         label="Last Name"
         data-vv-name="Last Name"
         :disabled="!admin"
       ></v-text-field>
+      <!-- Nickname -->
       <v-text-field
         id="employeeNickname"
         ref="formFields"
@@ -44,7 +55,7 @@
         id="employeeNumber"
         ref="formFields"
         v-model="editedEmployee.employeeNumber"
-        :rules="[...numberRules, ...duplicateEmployeeNumberRule]"
+        :rules="[...getRequiredRules(), ...getNumberRules(), ...duplicateEmployeeNumberRule]"
         label="Employee #"
         data-vv-name="Employee #"
         :disabled="!admin || disableEmpNum"
@@ -77,7 +88,7 @@
         id="employeeRole"
         ref="formFields"
         :items="permissions"
-        :rules="requiredRules"
+        :rules="getRequiredRules()"
         v-model="employeeRoleFormatted"
         label="Employee Role"
         @blur="editedEmployee.employeeRole = formatKebabCase(employeeRoleFormatted)"
@@ -101,7 +112,7 @@
             id="employeeHireDateField"
             ref="formFields"
             v-model="hireDateFormatted"
-            :rules="dateRules"
+            :rules="getDateRules()"
             :disabled="hasExpenses || !admin"
             v-mask="'##/##/####'"
             label="Hire Date"
@@ -176,7 +187,7 @@
       <v-menu
         v-if="isInactive()"
         ref="departureMenu"
-        :rules="requiredRules"
+        :rules="getRequiredRules()"
         :close-on-content-click="false"
         v-model="departureMenu"
         :nudge-right="40"
@@ -191,7 +202,7 @@
           <v-text-field
             ref="formFields"
             v-model="deptDateFormatted"
-            :rules="dateRules"
+            :rules="getDateRules()"
             label="Departure Date"
             hint="MM/DD/YYYY format"
             v-mask="'##/##/####'"
@@ -221,9 +232,9 @@
 </template>
 <script>
 import api from '@/shared/api.js';
-import MobileDetect from 'mobile-detect';
 import _ from 'lodash';
-import { formatDate, isEmpty, parseDate } from '@/utils/utils';
+import { getDateRules, getNumberRules, getRequiredRules } from '@/shared/validationUtils.js';
+import { formatDate, isEmpty, parseDate, isMobile } from '@/utils/utils';
 import { mask } from 'vue-the-mask';
 import { getRole } from '@/utils/auth';
 const moment = require('moment-timezone');
@@ -280,7 +291,6 @@ async function created() {
   }
   // set works status value to a string
   this.value = this.editedEmployee.workStatus.toString();
-  //let user = await api.getUser();
   this.userId = this.model.employeeNumber;
   this.loading = false;
 } // created
@@ -309,16 +319,6 @@ function formatKebabCase(value) {
 function isInactive() {
   return this.statusRadio == 'inactive';
 } // isInactive
-
-/**
- * Checks if the current device used is mobile. Return true if it is mobile. Returns false if it is not mobile.
- *
- * @return boolean - if the device is mobile
- */
-function isMobile() {
-  let md = new MobileDetect(window.navigator.userAgent);
-  return md.os() === 'AndroidOS' || md.os() === 'iOS';
-} // isMobile
 
 /**
  * Checks if part time work status button is selected.
@@ -353,20 +353,11 @@ function userIsEmployee() {
 
 /**
  * Checks whether the current user role is manager
- * @return - boolean: true if the user role is a manager
+ * @returns - boolean: true if the user role is a manager
  */
 function userIsManager() {
   return getRole() === 'manager';
 } //userIsManager
-
-/**
- * Checks if the work status is empty.
- *
- * @return boolean - work status is empty
- */
-function isStatusEmpty() {
-  return _.isString(this.status) ? this.status.length == 0 || (this.isPartTime() && this.status <= 0) : true;
-} // isStatusEmpty
 
 /**
  * Validate all input fields are valid. Emit to parent the error status.
@@ -376,10 +367,23 @@ function validateFields() {
   //ensures that refs are put in an array so we can reuse forEach loop
   let components = !_.isArray(this.$refs.formFields) ? [this.$refs.formFields] : this.$refs.formFields;
   _.forEach(components, (field) => {
-    if (field && !field.validate()) {
-      errorCount++;
-    }
+    if (field && !field.validate()) errorCount++;
   });
+
+  // Fail safe in case users or inters somehow change their disabled info
+  // Without this, they could change the html to change their data
+  if (getRole() === 'user' || getRole() === 'intern') {
+    this.editedEmployee.firstName = this.model.firstName;
+    this.editedEmployee.middleName = this.model.middleName;
+    this.editedEmployee.noMiddleName = this.model.noMiddleName;
+    this.editedEmployee.lastName = this.model.lastName;
+    this.editedEmployee.employeeNumber = this.model.employeeNumber;
+    this.editedEmployee.email = this.model.email;
+    this.editedEmployee.employeeRole = this.model.employeeRole;
+    this.editedEmployee.hireDate = this.model.hireDate;
+    this.editedEmployee.workStatus = this.model.workStatus;
+  }
+
   window.EventBus.$emit('doneValidating', 'employee', this.editedEmployee); // emit done validating
   window.EventBus.$emit('employeeStatus', errorCount); // emit error status
 } // validateFields
@@ -395,19 +399,17 @@ function viewStatus() {
   }
 } // viewStatus
 
+/**
+ * Emits the duplicated employee number.
+ */
 function duplicateEmployeeNum() {
   window.EventBus.$emit('disableUpload', this.duplicate, this.editedEmployee.employeeNumber);
-}
+} // duplicateEmployeeNum
 
 export default {
   created,
   data() {
     return {
-      dateRules: [
-        (v) => !isEmpty(v) || 'Date must be valid. Format: MM/DD/YYYY',
-        (v) => (!isEmpty(v) && /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v)) || 'Date must be valid. Format: MM/DD/YYYY',
-        (v) => moment(v, 'MM/DD/YYYY').isValid() || 'Date must be valid'
-      ], // rules for a required date
       deptDateFormatted: null, // formatted departure date
       departureMenu: false, // display depature menu
       editedEmployee: _.cloneDeep(this.model), //employee that can be edited
@@ -434,10 +436,6 @@ export default {
       ], // job title options
       loading: true,
       mifiStatus: true,
-      numberRules: [
-        (v) => !isEmpty(v) || 'Employee # is required',
-        (v) => /^\d+$/.test(v) || 'Employee # must be a positive number'
-      ], // rules for an employee number
       duplicateEmployeeNumberRule: [
         (v) => {
           this.duplicate = false;
@@ -449,8 +447,13 @@ export default {
           return !this.duplicate || 'This employee id is already in use';
         }
       ],
+      middleNameRules: () => {
+        // if noMiddleName checkbox is not checked
+        if (!this.editedEmployee.noMiddleName) {
+          return this.getRequiredRules();
+        }
+      },
       permissions: ['Admin', 'User', 'Intern', 'Manager'], // employee role options
-      requiredRules: [(v) => !isEmpty(v) || 'This field is required'], // rules for a required field
       status: '100', // work status value
       statusRadio: 'full', // work status button
       statusRules: [(v) => !isEmpty(v) || '', (v) => (v !== '0' && v !== '00') || ''],
@@ -463,11 +466,13 @@ export default {
     duplicateEmployeeNum,
     formatDate,
     formatKebabCase,
+    getDateRules,
+    getNumberRules,
+    getRequiredRules,
     isEmpty,
     isInactive,
     isMobile,
     isPartTime,
-    isStatusEmpty,
     parseDate,
     userIsAdmin,
     userIsEmployee,
@@ -504,6 +509,7 @@ export default {
     },
     'editedEmployee.employeeNumber': function () {
       let empNum = this.editedEmployee.employeeNumber;
+      // determine if the resume button should be disabled or not
       if (empNum !== '' && !isNaN(empNum) && parseInt(empNum) > 0) {
         window.EventBus.$emit('disableUpload', false, empNum);
       } else {
@@ -561,32 +567,5 @@ export default {
 
 .inputError {
   border: solid 1px red !important;
-}
-
-.percentageBox {
-  border: solid 1px gray;
-  width: 46px;
-  height: 34px;
-  border-radius: 2px;
-  font-size: 14px;
-  display: flex;
-}
-
-.percentageBox div {
-  padding-top: 6px;
-  margin-left: 2px;
-}
-
-.percentageBox div:hover {
-  border: none;
-}
-
-.percentageBox input {
-  text-align: right;
-  width: 60%;
-}
-
-.percentageBox input:hover {
-  border: none;
 }
 </style>

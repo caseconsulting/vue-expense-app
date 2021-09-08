@@ -11,6 +11,21 @@ import moment from 'moment-timezone';
 import api from '@/shared/api.js';
 moment.tz.setDefault('America/New_York');
 
+/**
+ * created lifecycle hook
+ */
+async function created() {
+  // eslint-disable-next-line no-undef
+  this.$forceUpdate();
+  this.employees = (await api.getItems(api.EMPLOYEES)).filter((employee) => employee.workStatus != 0);
+  this.jobExperienceData();
+  this.drawJobExpHistGraph();
+} // created
+
+/**
+ * Finds the last index that has an element greater than 0 to prevent too many labels showing up on the chart.
+ * @returns Number - The index greater than 0
+ */
 function findMaxIndex() {
   let max = 0;
   this.jobExperience.forEach((element, index) => {
@@ -19,8 +34,12 @@ function findMaxIndex() {
     }
   });
   return max;
-}
+} // findMaxIndex
 
+/**
+ * Extracts each employees job experience and determines how many years they have worked, including time at Case.
+ * Each employees experience will be put in an array slot that is based on an increment of experience of 5 years.
+ */
 function jobExperienceData() {
   this.employees.forEach((employee) => {
     if (employee.hireDate !== undefined) {
@@ -39,6 +58,7 @@ function jobExperienceData() {
       }
       // push time to array
       if (amOfYears > 45) amOfYears = 45;
+      // max years for data control
       else if (amOfYears < 0) amOfYears = 0; // min years for data control
       let index = Math.floor(Math.round(amOfYears) / 5);
       if (this.jobExperience[index] !== undefined) {
@@ -50,6 +70,10 @@ function jobExperienceData() {
   });
 } //jobExperienceData
 
+/**
+ * Gets the time difference in years between the job start and end date.
+ * @returns Number - The amount of years difference
+ */
 function calculateTimeDifference(startDate, endDate) {
   var start = stringToDate(startDate);
   var end = endDate;
@@ -64,8 +88,6 @@ function calculateTimeDifference(startDate, endDate) {
 
 /**
  * Format and set data options for job experience chart.
- *
- * @return Object - job experience chart data
  */
 function drawJobExpHistGraph() {
   let experienceNum = this.jobExperience;
@@ -124,6 +146,11 @@ function drawJobExpHistGraph() {
   this.dataReceived = true;
 } // drawJobExpHistGraph
 
+/**
+ * Creates a moment object out of a String that is a date.
+ * @param dateAsString - The date
+ * @returns Object - The Moment date object
+ */
 function stringToDate(dateAsString) {
   var date = moment(dateAsString);
   return date;
@@ -147,14 +174,6 @@ export default {
     calculateTimeDifference,
     stringToDate
   },
-  created: async function () {
-    // eslint-disable-next-line no-undef
-    this.$forceUpdate();
-    this.employees = (await api.getItems(api.EMPLOYEES)).filter((employee) => employee.workStatus != 0);
-    this.jobExperienceData();
-    this.drawJobExpHistGraph();
-  }
+  created
 };
 </script>
-
-<style></style>

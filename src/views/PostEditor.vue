@@ -115,13 +115,13 @@ import Font from '@ckeditor/ckeditor5-font/src/font';
  * Initial setup
  */
 async function created() {
-  window.EventBus.$on('confirmed', () => {
+  window.EventBus.$on('confirmed', async () => {
     //this.confirming = false;
     if (!this.hasTriedSubmitting && (this.editorData == null || this.editorData == '')) {
       this.error = true;
     }
     this.hasTriedSubmitting = true;
-    this.checkSubmit();
+    await this.checkSubmit();
   });
 
   // window.EventBus.$on('canceled', () => {
@@ -160,6 +160,14 @@ async function created() {
     })
   );
 } //created
+
+/**
+ * destroy the listeners
+ */
+function beforeDestroy() {
+  window.EventBus.$off('confirmed');
+  window.EventBus.$off('canceled');
+} // beforeDestroy
 
 /**
  * Check validation and then attempt to submit blog
@@ -323,7 +331,7 @@ function displaySuccess(message) {
  *
  * @param file - mainPicture
  */
-async function setFile(file) {
+function setFile(file) {
   if (file) {
     this.mainPictureFile = file;
     this.$set(this.model, 'mainPicture', file.name);
@@ -342,10 +350,7 @@ export default {
     FormSubmissionConfirmation
   },
   created,
-  beforeDestroy() {
-    window.EventBus.$off('confirmed');
-    window.EventBus.$off('canceled');
-  },
+  beforeDestroy,
   data() {
     return {
       editor: ClassicEditor,

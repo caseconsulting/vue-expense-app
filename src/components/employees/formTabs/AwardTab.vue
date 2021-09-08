@@ -6,7 +6,7 @@
       <v-combobox
         ref="formFields"
         v-model="award.name"
-        :rules="requiredRules"
+        :rules="getRequiredRules()"
         label="Award"
         data-vv-name="Award"
         clearable
@@ -30,7 +30,7 @@
                 :value="award.dateReceived | formatDate"
                 label="Date Received"
                 prepend-icon="event_available"
-                :rules="dateRules"
+                :rules="getDateRules()"
                 hint="MM/DD/YYYY format"
                 v-mask="'##/##/####'"
                 v-bind="attrs"
@@ -72,7 +72,8 @@
 <script>
 import api from '@/shared/api.js';
 import _ from 'lodash';
-import { formatDate, parseDate, isEmpty } from '@/utils/utils';
+import { getDateRules, getRequiredRules } from '@/shared/validationUtils.js';
+import { formatDate, parseDate } from '@/utils/utils';
 import { mask } from 'vue-the-mask';
 const moment = require('moment-timezone');
 moment.tz.setDefault('America/New_York');
@@ -120,10 +121,11 @@ function deleteAward(index) {
 
 /**
  * Parse the date after losing focus.
+ * @returns String - The date in YYYY-MM-DD format
  */
 function parseEventDate() {
   return parseDate(event.target.value);
-} //parseEventDate
+} // parseEventDate
 
 /**
  * Validate all input fields are valid. Emit to parent the error status.
@@ -133,9 +135,7 @@ function validateFields() {
   //ensures that refs are put in an array so we can reuse forEach loop
   let components = !_.isArray(this.$refs.formFields) ? [this.$refs.formFields] : this.$refs.formFields;
   _.forEach(components, (field) => {
-    if (field && !field.validate()) {
-      errorCount++;
-    }
+    if (field && !field.validate()) errorCount++;
   });
   window.EventBus.$emit('doneValidating', 'awards', this.editedAwards); // emit done validating and sends edited data back to parent
   window.EventBus.$emit('awardStatus', errorCount); // emit error status
@@ -145,20 +145,7 @@ export default {
   created,
   data() {
     return {
-      dateOptionalRules: [
-        (v) => {
-          return !isEmpty(v) ? /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v) || 'Date must be valid. Format: MM/DD/YYYY' : true;
-        }
-      ], // rules for an optional date
-      dateRules: [
-        (v) => !isEmpty(v) || 'Date required',
-        (v) => (!isEmpty(v) && /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v)) || 'Date must be valid. Format: MM/DD/YYYY',
-        (v) => moment(v, 'MM/DD/YYYY').isValid() || 'Date must be valid'
-      ], // rules for a required date
-      editedAwards: _.cloneDeep(this.model), // stores edited awards info
-      requiredRules: [
-        (v) => !isEmpty(v) || 'This field is required. You must enter information or delete the field if possible'
-      ] // rules for a required field
+      editedAwards: _.cloneDeep(this.model) // stores edited awards info
     };
   },
   directives: { mask },
@@ -168,8 +155,9 @@ export default {
   methods: {
     addAward,
     deleteAward,
+    getDateRules,
+    getRequiredRules,
     parseEventDate,
-    isEmpty,
     validateFields
   },
   props: ['model', 'validating'],

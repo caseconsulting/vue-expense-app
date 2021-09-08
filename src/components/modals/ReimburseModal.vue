@@ -37,14 +37,8 @@
  * @param msg - Message to emit
  * @param data - Data to emit
  */
-function emit(msg, data) {
-  if (data) {
-    // data exists
-    this.$emit(msg, data);
-  } else {
-    // data does not exist
-    window.EventBus.$emit(msg);
-  }
+function emit(msg) {
+  window.EventBus.$emit(msg);
 } // emit
 
 // |--------------------------------------------------|

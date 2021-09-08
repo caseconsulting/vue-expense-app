@@ -9,6 +9,18 @@
 import BarChart from '../baseCharts/BarChart.vue';
 import api from '@/shared/api.js';
 
+/**
+ * created lifecycle hook
+ */
+async function created() {
+  this.$forceUpdate();
+  this.employees = await api.getItems(api.EMPLOYEES);
+  this.fillData();
+} // created
+/**
+ * Extracts the job role from each employee and tallies up each role for active
+ * employees. Also sets the chart formatting and options data.
+ */
 function fillData() {
   let roles = {};
   this.employees.forEach((emp) => {
@@ -95,7 +107,7 @@ function fillData() {
     maintainAspectRatio: false
   };
   this.dataReceived = true;
-}
+} // fillData
 
 export default {
   components: { BarChart },
@@ -110,12 +122,6 @@ export default {
   methods: {
     fillData
   },
-  async created() {
-    this.$forceUpdate();
-    this.employees = await api.getItems(api.EMPLOYEES);
-    this.fillData();
-  }
+  created
 };
 </script>
-
-<style></style>

@@ -11,6 +11,19 @@ import moment from 'moment-timezone';
 import api from '@/shared/api.js';
 moment.tz.setDefault('America/New_York');
 
+/**
+ * created lifecycle hook
+ */
+async function created() {
+  this.$forceUpdate();
+  this.employees = await api.getItems(api.EMPLOYEES);
+  this.caseYearsData();
+  this.drawCaseYearsHistGraph();
+} // created
+
+/**
+ * Puts an employee in an array based on a time interval of 2 years for each index from their hire date.
+ */
 function caseYearsData() {
   //init the caseYears array
   const MAXIMUM_INDEX = 10;
@@ -29,6 +42,9 @@ function caseYearsData() {
   });
 } //caseYearsData
 
+/**
+ * Helper function to determine how long an employee has worked from their hire date.
+ */
 function calculateTimeDifference(startDate) {
   var start = stringToDate(startDate);
   var end = moment();
@@ -97,6 +113,9 @@ function drawCaseYearsHistGraph() {
   this.dataReceived = true;
 } // drawCaseYearsHistGraph
 
+/**
+ * Finds the last index where the element is greater than 0 to ensure the chart does not show all of the labels are there is no data.
+ */
 function findMaxIndex() {
   let max = 0;
   this.caseYears.forEach((element, index) => {
@@ -105,8 +124,11 @@ function findMaxIndex() {
     }
   });
   return max;
-}
+} // findMaxIndex
 
+/**
+ * Converts a date as a string into a moment objects.
+ */
 function stringToDate(dateAsString) {
   var date = moment(dateAsString);
   return date;
@@ -130,13 +152,6 @@ export default {
     findMaxIndex,
     stringToDate
   },
-  created: async function () {
-    this.$forceUpdate();
-    this.employees = await api.getItems(api.EMPLOYEES);
-    this.caseYearsData();
-    this.drawCaseYearsHistGraph();
-  }
+  created
 };
 </script>
-
-<style></style>

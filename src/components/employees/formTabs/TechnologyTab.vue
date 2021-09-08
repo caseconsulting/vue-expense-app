@@ -4,21 +4,15 @@
     <div
       v-for="(technology, index) in editedTechnologies"
       class="pt-3 pb-1 px-5"
-      v-bind:class="{ errorBox: isDuplicate(technology.name) }"
       :key="'technology: ' + index"
       style="border: 1px solid grey"
     >
-      <!--Duplicate chip if tech name is already entered by user-->
-      <v-row v-if="isDuplicate(technology.name)" justify="end">
-        <v-chip class="ma-2" color="error" text-color="white"> Duplicate </v-chip>
-      </v-row>
-
       <!-- Name of Technology -->
       <v-combobox
         class="pb-5"
         ref="formFields"
         v-model="technology.name"
-        :rules="requiredRules"
+        :rules="[duplicateRules(technology.name), ...getRequiredRules()]"
         :items="technologyDropDown"
         label="Technology"
         data-vv-name="Technology"
@@ -31,7 +25,14 @@
       <v-row justify="center">
         <!-- Current Switch -->
         <v-col cols="10" sm="6" md="6" lg="6" class="ml-3 ml-sm-0">
-          <v-switch class="mt-0 pb-2" v-model="technology.current" label="Currently know this technology"></v-switch>
+          <v-tooltip top nudge-left="75" nudge-bottom="10" max-width="300">
+            <template v-slot:activator="{ on }">
+              <div v-on="on">
+                <v-switch v-model="technology.current" label="Currently know this technology"></v-switch>
+              </div>
+            </template>
+            <span>Enabling this will auto-increment the years of experience every month</span>
+          </v-tooltip>
         </v-col>
 
         <!-- Years of Experience -->
@@ -47,7 +48,7 @@
             ref="formFields"
             v-model="technology.years"
             flat
-            :rules="experienceRequired"
+            :rules="[...getRequiredRules(), experienceRequired[0](technology.years, index), experienceRequired[1]]"
             single-line
             max="99"
             min="0"
@@ -55,7 +56,7 @@
             dense
             type="number"
             outlined
-            @input="technology.years = formatNumber(technology.years)"
+            @input="technology.years = Number(technology.years)"
           >
           </v-text-field>
         </v-col>
@@ -82,7 +83,7 @@
 <script>
 import api from '@/shared/api.js';
 import _ from 'lodash';
-import { formatDateDashToSlash, formatDateSlashToDash, isEmpty } from '@/utils/utils';
+import { getRequiredRules } from '@/shared/validationUtils.js';
 const moment = require('moment-timezone');
 moment.tz.setDefault('America/New_York');
 
@@ -117,7 +118,7 @@ function addTechnology() {
     years: 0,
     current: false
   });
-}
+} // addTechnology
 
 /**
  * Deletes a Technology.
@@ -136,19 +137,16 @@ function duplicateTechEntries() {
   //declares function to count unique name properties of js objects
   const count = (names) =>
     names.reduce((acc, it) => {
-      acc[it.name] = acc[it.name] + 1 || 1;
+      if (it.name !== '') {
+        acc[it.name] = acc[it.name] + 1 || 1;
+      }
       return acc;
     }, {});
 
   //returns an array of objects that had a count of over 1
   const duplicates = (dict) => Object.keys(dict).filter((a) => dict[a] > 1);
-
   return this.editedTechnologies ? duplicates(count(this.editedTechnologies)) : [];
 } // duplicateTechEntries
-
-function formatNumber(number) {
-  return Number(number);
-}
 
 /**
  * Checks to see if a technology is a duplicate of one that is already entered by a user.
@@ -206,22 +204,11 @@ function validateFields() {
       errorCount++;
     }
   });
-  //we want the many errors modal to only appear if there are multiple errors, else show the duplicate red error modal
-  if (errorCount === 0) {
-    this.duplicateTechEntries().length > 0
-      ? window.EventBus.$emit('technologiesErrStatus', 'Technology names MUST be UNIQUE. Please remove any duplicates')
-      : null;
-  }
   //emit error status with a custom message
   // emit error status
   window.EventBus.$emit('technologiesStatus', errorCount);
   window.EventBus.$emit('doneValidating', 'technologies', this.editedTechnologies); // emit done validating
 } // validateFields
-
-/**
- * Validates that all time intervals are error free, as well as if a tech is currently being used.
- * @returns boolean based on if all time intervals are valid
- */
 
 export default {
   created,
@@ -229,12 +216,11 @@ export default {
     return {
       technologyDropDown: [], // autocomplete technology name options
       editedTechnologies: _.cloneDeep(this.model), //stores edited technology info
-      requiredRules: [
-        (v) => !isEmpty(v) || 'This field is required. You must enter information or delete the field if possible'
-      ], // rules for a required field
+      duplicateRules: (tech) => {
+        return !this.isDuplicate(tech) || 'Duplicate technology found, please remove duplicate entries';
+      },
       experienceRequired: [
-        (v) => !isEmpty(v) || 'This field is required',
-        (v) => v > 0 || 'Value must be greater than 0',
+        (v, index) => v > 0 || this.editedTechnologies[index].current || 'Value must be greater than 0',
         (v) => v < 100 || 'Value must be less than 100'
       ]
     };
@@ -243,11 +229,8 @@ export default {
     addTechnology,
     deleteTechnology,
     duplicateTechEntries,
-    formatDateDashToSlash,
-    formatDateSlashToDash,
-    formatNumber,
+    getRequiredRules,
     isDuplicate,
-    isEmpty,
     populateDropDowns,
     updateTechDropDown,
     validateFields

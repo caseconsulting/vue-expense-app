@@ -15,7 +15,7 @@
         <v-autocomplete
           v-if="!asUser"
           :items="activeEmployees"
-          :rules="requiredRules"
+          :rules="getRequiredRules()"
           :filter="customFilter"
           :disabled="isReimbursed || isEdit || isInactive"
           v-model="editedExpense.employeeId"
@@ -29,7 +29,7 @@
         <v-autocomplete
           v-if="!asUser"
           :items="filteredExpenseTypes()"
-          :rules="requiredRules"
+          :rules="getRequiredRules()"
           :disabled="isInactive"
           v-model="editedExpense.expenseTypeId"
           label="Expense Type"
@@ -44,7 +44,7 @@
           v-else
           :items="filteredExpenseTypes()"
           :disabled="isInactive"
-          :rules="requiredRules"
+          :rules="getRequiredRules()"
           v-model="editedExpense.expenseTypeId"
           label="Expense Type"
           :hint="hint"
@@ -106,7 +106,7 @@
         <!-- Category -->
         <v-select
           v-if="getCategories() != null && getCategories().length >= 1"
-          :rules="requiredRules"
+          :rules="getRequiredRules()"
           :disabled="isInactive"
           v-model="editedExpense.category"
           :items="getCategories()"
@@ -141,7 +141,7 @@
         <v-autocomplete
           v-if="this.reqRecipient"
           :items="this.recipientOptions"
-          :rules="requiredRules"
+          :rules="getRequiredRules()"
           :disabled="isReimbursed"
           v-model="editedExpense.recipient"
           label="Recipient"
@@ -178,7 +178,7 @@
             <v-text-field
               v-model="purchaseDateFormatted"
               id="purchaseDate"
-              :rules="dateRules"
+              :rules="getDateRules()"
               :disabled="(isReimbursed && !isDifferentExpenseType) || isInactive"
               v-mask="'##/##/####'"
               label="Purchase Date"
@@ -210,7 +210,7 @@
             <v-text-field
               v-model="reimbursedDateFormatted"
               id="reimburseDate"
-              :rules="optionalDateRules"
+              :rules="getDateOptionalRules()"
               :disabled="(isReimbursed && !isDifferentExpenseType) || isInactive"
               v-mask="'##/##/####'"
               label="Reimburse Date (optional)"
@@ -238,7 +238,7 @@
         <!-- URL -->
         <v-text-field
           v-model="editedExpense.url"
-          :rules="urlRules"
+          :rules="[...getURLRules(), ...getRequireURL()]"
           :label="urlLabel"
           :disabled="isInactive"
         ></v-text-field>
@@ -253,9 +253,6 @@
 
         <!-- Buttons -->
         <!-- Cancel Button -->
-        <!-- <v-btn color="white" elevation="2" @click="clearForm" class="ma-2" :disabled="isInactive" id="cancelButton">
-          <icon class="mr-1" name="ban"></icon>Cancel
-        </v-btn> -->
         <v-btn
           color="white"
           elevation="2"
@@ -268,15 +265,6 @@
         </v-btn>
 
         <!-- Submit Button -->
-        <!-- <v-btn
-          outlined
-          color="success"
-          @click="checkCoverage"
-          :disabled="!valid || (!isAdmin && isReimbursed) || isInactive"
-          id="submitButton"
-          :loading="loading"
-          class="ma-2"
-        > -->
         <v-btn
           outlined
           color="success"
@@ -317,6 +305,7 @@ import FileUpload from '@/components/FileUpload.vue';
 import FormSubmissionConfirmation from '@/components/modals/FormSubmissionConfirmation.vue';
 import { getRole } from '@/utils/auth';
 import { v4 as uuid } from 'uuid';
+import { getDateRules, getDateOptionalRules, getRequiredRules, getURLRules } from '@/shared/validationUtils.js';
 import { isEmpty, isFullTime, convertToMoneyString } from '@/utils/utils';
 import { mask } from 'vue-the-mask';
 import _ from 'lodash';
@@ -337,11 +326,6 @@ const IsoFormat = 'YYYY-MM-DD';
  * @return
  */
 function getCategories() {
-  this.selectedExpenseType = _.find(this.expenseTypes, (expenseType) => {
-    if (expenseType.value === this.editedExpense.expenseTypeId) {
-      return expenseType;
-    }
-  });
   if (this.selectedExpenseType) {
     return _.map(this.selectedExpenseType.categories, (category) => {
       return category.name;
@@ -349,6 +333,31 @@ function getCategories() {
   }
   return [];
 } // getCategories
+
+/**
+ * Determine if a URL is required.
+ *
+ * @return requiredRules if URL is required
+ */
+function getRequireURL() {
+  if (!this.selectedExpenseType) {
+    return true;
+  }
+  if (this.selectedExpenseType.requireURL) {
+    return getRequiredRules();
+  }
+  if (this.editedExpense.category) {
+    let selectedCategory = _.find(this.selectedExpenseType.categories, (category) => {
+      if (category.name === this.editedExpense.category) {
+        return category;
+      }
+    });
+    if (selectedCategory.requireURL) {
+      return getRequiredRules();
+    }
+  }
+  return true;
+} // getRequireURL
 
 /**
  * Checks if the employee is an admin. Returns true if the employee is an admin, otherwise returns false.
@@ -486,7 +495,7 @@ async function addURLInfo(newExpense) {
     newExpense.url = newExpense.url.replace(/www\./, '');
   }
 
-  let encodedURL = await this.encodeUrl(newExpense.url); // encode url
+  let encodedURL = this.encodeUrl(newExpense.url); // encode url
 
   // get url info
   let item = await api.getURLInfo(encodedURL, newExpense.category);
@@ -505,7 +514,7 @@ async function addURLInfo(newExpense) {
       this.$set(this.urlInfo, 'category', null);
     }
     this.$set(this.urlInfo, 'hits', 1);
-    await api.createItem(api.URLS, this.urlInfo);
+    await api.createItem(api.TRAINING_URLS, this.urlInfo);
   }
 } // addURLInfo
 
@@ -638,7 +647,7 @@ async function checkCoverage() {
               //BRANCH 3.1 under initial budget (not including overdraft)
               if (newCommittedAmount + cost <= expenseType.budget) {
                 // BRANCH 4.1 under initial budget and not going into overdraft after applying expense
-                this.submit();
+                await this.submit();
               } else if (newCommittedAmount + cost <= 2 * expenseType.budget) {
                 // BRANCH 4.2 goes over initial budget with new expense but stays below overdraft budget
                 this.$set(this.editedExpense, 'budget', expenseType.budget);
@@ -689,7 +698,7 @@ async function checkCoverage() {
               if (newCommittedAmount + cost <= budget.amount) {
                 // BRANCH 7.1 doesnt go over budget
                 // reimburse the full expense
-                this.submit();
+                await this.submit();
               } else {
                 // BRANCH 7.2 goes over budget
                 this.$set(this.editedExpense, 'budget', budget.amount);
@@ -711,7 +720,7 @@ async function checkCoverage() {
             // Branch 8.1 selected expense type allows overdraft and employee is full time
             if (cost <= expenseType.budget) {
               // full amount reimbursed
-              this.submit();
+              await this.submit();
             } else if (cost <= 2 * expenseType.budget) {
               // the expense goes into overdraft but fully covered
               this.$set(this.editedExpense, 'budget', expenseType.budget);
@@ -736,7 +745,7 @@ async function checkCoverage() {
             let adjustedBudget = this.calcAdjustedBudget(this.employee, expenseType);
             if (cost <= adjustedBudget) {
               // reimburse the full expense
-              this.submit();
+              await this.submit();
             } else {
               // expense exceeds the budget but the expense not fully covered
               this.$set(this.editedExpense, 'budget', adjustedBudget);
@@ -754,27 +763,13 @@ async function checkCoverage() {
 } // checkCoverage
 
 /**
- * Check if purchase date is within the budget fiscal date range. Returns true if the purchase date is in the budget
- * date range, otherwise returns false.
- *
- * @param purchaseDate - expense purchase date
- * @param budget - budget for expense
- * @return boolean - expense purchase date is in budget dsate range.
- */
-function checkExpenseDate(purchaseDate, budget) {
-  let startDate, endDate, date;
-  startDate = moment(budget.fiscalStartDate, IsoFormat);
-  endDate = moment(budget.fiscalEndDate, IsoFormat);
-  date = moment(purchaseDate);
-  return date.isBetween(startDate, endDate, 'day', '[]');
-} // checkExpenseDate
-
-/**
  * Clears the form and sets all fields to a default state.
  */
 function clearForm() {
   this.allowReceipt = false;
-  this.$refs.form.reset();
+  if (this.$refs.form) {
+    this.$refs.form.reset();
+  }
 
   this.emit('finished-editing-expense'); //notify parent no longer editing an expense
 
@@ -810,9 +805,10 @@ function costHint() {
   } else if (this.expenseTypeName) {
     let str = `Remaining budget for ${this.expenseTypeName}: `;
     if (this.remainingBudget <= 0) {
-      str += `<span class=red--text>${convertToMoneyString(this.remainingBudget)}`;
+      str += `<span class="red--text">${convertToMoneyString(this.remainingBudget)}`;
     } else {
       str += convertToMoneyString(this.remainingBudget);
+      return str;
     }
     if (this.remainingBudget < 0 && this.remainingBudget >= -this.overdraftBudget && this.selectedExpenseType.odFlag) {
       str += ` (Overdraftable and within ${convertToMoneyString(this.overdraftBudget)} limit)`;
@@ -905,10 +901,15 @@ async function createNewEntry() {
  * @return
  */
 function customFilter(item, queryText) {
-  const hasValue = (val) => (val != null ? val : '');
-  const text = hasValue(item.text);
-  const query = hasValue(queryText);
-  return text.toString().toLowerCase().indexOf(query.toString().toLowerCase()) > -1;
+  const query = queryText ? queryText : '';
+  const nickNameFullName = item.nickname ? `${item.nickname} ${item.lastName}` : '';
+  const firstNameFullName = `${item.firstName} ${item.lastName}`;
+
+  const queryContainsNickName = nickNameFullName.toString().toLowerCase().indexOf(query.toString().toLowerCase()) >= 0;
+  const queryContainsFirstName =
+    firstNameFullName.toString().toLowerCase().indexOf(query.toString().toLowerCase()) >= 0;
+
+  return queryContainsNickName || queryContainsFirstName;
 } // customFilter
 
 /**
@@ -917,7 +918,7 @@ function customFilter(item, queryText) {
  * @param url - url to encode
  * @return String - encoded url
  */
-async function encodeUrl(url) {
+function encodeUrl(url) {
   // return btoa(url).replace(/\//g, '%2F');
   return btoa(url);
 } // encodeUrl
@@ -1052,7 +1053,7 @@ function hasAccess(employee, expenseType) {
 async function incrementURLHits() {
   this.urlInfo.hits = this.urlInfo.hits + 1;
 
-  return await api.updateItem(api.URLS, this.urlInfo);
+  return await api.updateItem(api.TRAINING_URLS, this.urlInfo);
 } // incrementURLHits
 
 /**
@@ -1151,7 +1152,7 @@ function preformatFloat(float) {
  *
  * @param file - receipt
  */
-async function setFile(file) {
+function setFile(file) {
   if (file) {
     this.isInactive = true;
     this.file = file;
@@ -1333,13 +1334,8 @@ async function scanFile() {
       this.editedExpense.cost = totalPrice;
       this.costFormatted = Number(this.editedExpense.cost).toLocaleString().toString();
     }
-    if (!isEmpty(this.editedExpense.note)) {
-      // expense has a note
-      this.editedExpense.note += `\n\n${adjustNote}`;
-    } else {
-      // expense does not have a note
-      this.editedExpense.note = adjustNote;
-    }
+    this.editedExpense.note = adjustNote;
+    // }
   }
   this.scanLoading = false;
 } // scanFile
@@ -1357,12 +1353,10 @@ function setRecipientOptions() {
         this.editedExpense.employeeId == employee.value
       ) {
         if (this.userInfo.id != this.editedExpense.employeeId && !this.asUser) {
-          // return employeeUtils.fullName(employee);
           return employee;
         }
         return;
       }
-      // return employeeUtils.fullName(employee);
       return employee;
     })
   );
@@ -1487,12 +1481,12 @@ async function created() {
     this.loading = false; // set loading status to false
     this.$emit('endAction');
   });
-  window.EventBus.$on('confirmSubmit', () => {
-    this.submit(); // submit expense
+  window.EventBus.$on('confirmSubmit', async () => {
+    await this.submit(); // submit expense
   });
-  window.EventBus.$on('confirmed-expense', () => {
+  window.EventBus.$on('confirmed-expense', async () => {
     this.confirmingValid = false;
-    this.checkCoverage();
+    await this.checkCoverage();
   });
   window.EventBus.$on('canceled-expense', () => {
     this.confirmingValid = false;
@@ -1525,7 +1519,10 @@ async function created() {
       //text: employeeUtils.fullName(employee),
       text: employeeUtils.nicknameAndLastName(employee),
       value: employee.id,
-      workStatus: employee.workStatus
+      workStatus: employee.workStatus,
+      firstName: employee.firstName,
+      nickname: employee.nickname,
+      lastName: employee.lastName
     };
   });
   //only active employees
@@ -1563,8 +1560,28 @@ async function created() {
       requireURL: expenseType.requireURL
     };
   });
+
+  // adjust costRules to prevent users from using negative expenses
+  if (this.employeeRole && this.employeeRole == 'admin') {
+    this.costRules.splice(1, 0, (v) => (!isEmpty(v) && v != 0) || 'Cost cannot be zero');
+  } else {
+    this.costRules.splice(1, 0, (v) => (!isEmpty(v) && v > 0) || 'Cost must be a positive number');
+  }
+
   this.clearForm();
 } // created
+
+/**
+ * destroy listeners
+ */
+function beforeDestroy() {
+  window.EventBus.$off('canceledSubmit');
+  window.EventBus.$off('confirmSubmit');
+  window.EventBus.$off('confirmed-expense');
+  window.EventBus.$off('canceled-expense');
+  window.EventBus.$off('backout-canceled-expense');
+  window.EventBus.$off('backout-confirmed-expense');
+} // beforeDestroy
 
 /**
  * Extends the Number object to populate a given size with zeros.
@@ -1587,14 +1604,7 @@ Number.prototype.pad = function (size) {
 // |--------------------------------------------------|
 
 export default {
-  beforeDestroy() {
-    window.EventBus.$off('canceledSubmit');
-    window.EventBus.$off('confirmSubmit');
-    window.EventBus.$off('confirmed-expense');
-    window.EventBus.$off('canceled-expense');
-    window.EventBus.$off('backout-canceled-expense');
-    window.EventBus.$off('backout-confirmed-expense');
-  },
+  beforeDestroy,
   components: {
     CancelConfirmation,
     ConfirmationBox,
@@ -1624,18 +1634,12 @@ export default {
       costFormatted: '',
       costRules: [
         (v) => !isEmpty(v) || 'Cost is a required field',
-        (v) => !isEmpty(v) > 0 || 'Cost must be a positive number',
         (v) =>
           /^[+-]?[0-9]{1,3}(?:,?[0-9]{3})*(?:\.[0-9]{2})?$/.test(v) ||
           'Expense amount must be a number with two decimal digits',
         (v) => parseCost(v) < 1000000000 || 'Nice try' //when a user tries to fill out expense that is over a million
       ], // rules for cost
       date: null, // NOTE: Unused?
-      dateRules: [
-        (v) => !isEmpty(v) || 'Date must be valid. Format: MM/DD/YYYY',
-        (v) => (!isEmpty(v) && /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v)) || 'Date must be valid. Format: MM/DD/YYYY',
-        (v) => moment(v, 'MM/DD/YYYY', true).isValid() || 'Date must be valid'
-      ], // rules for dates
       descriptionRules: [
         (v) => !isEmpty(v) || 'Description is a required field',
         (v) => (!isEmpty(v) && v.replace(/\s/g, '').length > 0) || 'Description is a required field'
@@ -1656,10 +1660,6 @@ export default {
       isOverCovered: false, // expense is only partially covered
       loading: false, // loading
       myBudgetsView: false, // if on myBudgetsView page
-      optionalDateRules: [
-        (v) => isEmpty(v) || /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v) || 'Date must be valid. Format: MM/DD/YYYY',
-        (v) => (!isEmpty(v) ? moment(v, 'MM/DD/YYYY', true).isValid() || 'Date must be valid' : true)
-      ], // option date rules
       originalExpense: null, // expense before changes
       overdraftBudget: 0,
       purchaseDateFormatted: null, // formatted purchase date
@@ -1671,7 +1671,6 @@ export default {
       reimburseMenu: false, // display reimburse menu
       remainingBudget: 0,
       reqRecipient: false, // expense requires recipient
-      requiredRules: [(v) => !isEmpty(v) || 'Required field'], // rules for required fields
       scanLoading: false, // determines if the scanning functionality is loading
       selectedEmployee: {}, // selected employees
       selectedExpenseType: {}, // selected expense types
@@ -1682,26 +1681,17 @@ export default {
         category: null,
         hits: 0
       }, // training url info
-      urlRules: [
-        (v) => !this.editedExpense.requireURL || !isEmpty(v) || 'URL is required. Only http(s) are accepted.',
-        (v) =>
-          isEmpty(v) ||
-          /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)/.test(
-            v
-          ) ||
-          'URL must be valid. Only http(s) are accepted.'
-      ], // rules for training url
       userInfo: {}, // user info
       valid: false // form validity
     };
   },
   directives: { mask },
   methods: {
+    getRequireURL,
     addURLInfo,
     betweenDates,
     calcAdjustedBudget,
     checkCoverage,
-    checkExpenseDate,
     clearForm,
     createNewEntry,
     convertToMoneyString,
@@ -1713,8 +1703,12 @@ export default {
     formatCost,
     formatDate,
     getCategories,
+    getDateRules,
+    getDateOptionalRules,
     getExpenseTypeSelected,
     getRemainingBudget,
+    getRequiredRules,
+    getURLRules,
     hasAccess,
     incrementURLHits,
     isEmpty,
@@ -1750,11 +1744,11 @@ export default {
         }
       });
     },
-    'editedExpense.cost': function () {
+    'editedExpense.cost': async function () {
       //update remaining budget
-      this.getRemainingBudget();
+      await this.getRemainingBudget();
     },
-    'editedExpense.expenseTypeId': function () {
+    'editedExpense.expenseTypeId': async function () {
       this.selectedExpenseType = _.find(this.expenseTypes, (expenseType) => {
         return expenseType.value === this.editedExpense.expenseTypeId;
       });
@@ -1830,7 +1824,7 @@ export default {
       }
 
       //update remaining budget
-      this.getRemainingBudget();
+      await this.getRemainingBudget();
     },
     'editedExpense.category': function () {
       if (
@@ -1881,9 +1875,9 @@ export default {
         this.editedExpense = _.cloneDeep(this.editedExpense); //need to clone editedExpense in order to see label URL changes
       }
     },
-    'editedExpense.employeeId': function () {
+    'editedExpense.employeeId': async function () {
       this.setRecipientOptions();
-      this.getRemainingBudget();
+      await this.getRemainingBudget();
     },
     'editedExpense.purchaseDate': function () {
       this.purchaseDateFormatted = this.formatDate(this.editedExpense.purchaseDate) || this.purchaseDateFormatted;
