@@ -17,7 +17,7 @@
             </v-tooltip>
           </v-col>
         </v-row>
-        <p><b>Years of Experience: </b>{{ exp.years }}</p>
+        <p><b>Experience: </b>{{ Number(exp.years).toFixed(1) }} years</p>
         <hr v-if="index < filteredList.length - 1" class="mb-3" />
       </div>
       <!-- End Loop Customer Organizations -->
