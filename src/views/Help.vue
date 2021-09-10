@@ -69,6 +69,7 @@ function created() {
 /**
  * Determine if user can view.
  *
+ * @param qRole - role of the question
  * @return boolean - whether the user can view the component
  */
 function canView(qRole) {

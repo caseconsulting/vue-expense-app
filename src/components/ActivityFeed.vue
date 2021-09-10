@@ -164,7 +164,8 @@ function filterEvents() {
     }
   });
   return filteredEvents;
-}
+} // filterEvents
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                     METHODS                      |

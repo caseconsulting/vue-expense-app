@@ -330,6 +330,9 @@ function displayError(err) {
 
 /**
  * sets midAction boolean to false
+ *
+ * @param item - the employee
+ * @return the path to the employees profile
  */
 function employeePath(item) {
   return `/employee/${item.employeeNumber}`;
@@ -350,6 +353,8 @@ function filterEmployees() {
 
 /**
  * handles click event of the employee table entry
+ *
+ * @param item - the employee
  */
 function handleClick(item) {
   this.$router.push(employeePath(item));

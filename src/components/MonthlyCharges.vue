@@ -249,7 +249,7 @@ async function setMonthlyCharges() {
 function toFAQ() {
   let faq = this.$router.resolve({ path: '/help/hoursInfo' });
   window.open(faq.href, '_blank');
-}
+} // toFAQ
 
 /**
  * Updates the estimated daily hours based on number of work days and hours remaining

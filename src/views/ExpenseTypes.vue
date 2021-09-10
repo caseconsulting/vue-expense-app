@@ -642,7 +642,7 @@ function displayError(err) {
  */
 function endAction() {
   this.midAction = false;
-}
+} // endAction
 
 /**
  * Filters expense types based on filter selections.

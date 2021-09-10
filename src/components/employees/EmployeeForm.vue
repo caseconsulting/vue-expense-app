@@ -412,6 +412,8 @@ async function cancel() {
 
 /**
  * Removes unnecessary attributes from the employee data.
+ *
+ * @return
  */
 function cleanUpData() {
   // schools
@@ -992,6 +994,8 @@ function useDropDown() {
 
 /**
  * computed value of which tab is selected
+ *
+ * @return string - selected tab capitalized
  */
 function parsedInfoTab() {
   let parseTab = !this.formTab ? 'Select Info' : this.formTab;

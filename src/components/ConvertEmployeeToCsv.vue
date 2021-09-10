@@ -188,6 +188,8 @@ function getWorkStatus(workStatus) {
 
 /**
  * Gets the icon color depending if the page is employees or an employee profile
+ *
+ * @return - the color hex
  */
 function iconColor() {
   if (this.color) {

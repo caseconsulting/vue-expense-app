@@ -91,7 +91,8 @@ function removeLink(tweet) {
 /**
  * filter that replaces html encoding
  *
- * @return string - the tweet without encoding
+ * @param tweet - the tweet
+ * @return string - fixed tweet encoding
  */
 function fixHTMLencoding(tweet) {
   var newTweet = tweet;
@@ -136,6 +137,7 @@ function fixHTMLencoding(tweet) {
 // |                     EXPORT                       |
 // |                                                  |
 // |--------------------------------------------------|
+
 export default {
   filters: {
     formatDate,

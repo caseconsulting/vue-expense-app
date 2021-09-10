@@ -202,6 +202,8 @@ async function getEmployee() {
 
 /**
  * checks window size and if it is xs or s minimize the window
+ *
+ * @return boolean - whether or not to minimize window
  */
 function minimizeWindow() {
   switch (this.$vuetify.breakpoint.name) {

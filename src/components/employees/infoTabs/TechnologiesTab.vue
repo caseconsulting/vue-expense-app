@@ -155,6 +155,8 @@ function sortByDate() {
 
 /**
  * watcher for model - chooses what to sort by
+ *
+ * @param val - model
  */
 function watchModel(val) {
   if (!this.isEmpty(val.technologies)) {

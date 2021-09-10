@@ -152,7 +152,9 @@ function formatRange(range) {
 } // formatRange
 
 /**
- * selects the view to show
+ * selects view to change to
+ *
+ * @param tab - the dropdown to select
  */
 function selectDropDown(tab) {
   // Clear date query field

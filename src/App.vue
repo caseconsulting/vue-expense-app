@@ -175,7 +175,7 @@ function onUserProfile() {
 /**
  * idk what this does
  *
- * @param index - the interns did something and i think this is the original link but who knows
+ * @param index - its a rick roll interns 2021
  */
 function badumbadumdodooodoo(index) {
   let oldLink = this.links[index].link;

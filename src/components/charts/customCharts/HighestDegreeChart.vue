@@ -33,7 +33,7 @@ async function created() {
 
 // |--------------------------------------------------|
 // |                                                  |
-// |                      METHODS                     |
+// |                     METHODS                      |
 // |                                                  |
 // |--------------------------------------------------|
 
@@ -116,8 +116,8 @@ function addToDegrees(degrees, highestDegrees) {
 /**
  * Compares the relationship between two degrees,
  *
- * @param oldDegree - the older Degree
- * @param newDegree - the newer Degree
+ * @param oldDegree - first degree to compare
+ * @param newDegree - second degree to compare
  * @return 1: newDegree is more prestigious
  * @return -1: oldDegree is more presitigious
  * @return 0: degrees have the same prestige
@@ -204,6 +204,9 @@ function getDegreeMinors(degreeName) {
  * that the employee attended a different institution by
  * returning 5.
  * (trade school, etc.)
+ *
+ * @param degree - degree
+ * @return int - number assigned to degree for ordering
  */
 function getDegreeValue(degree) {
   let degreeLower = degree.toLowerCase();

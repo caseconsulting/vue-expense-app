@@ -159,6 +159,8 @@ function onPageChange() {
 
 /**
  * watcher for model
+ *
+ * @param val - param to watch
  */
 function watchModel(val) {
   if (!this.isEmpty(val)) {

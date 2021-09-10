@@ -35,7 +35,6 @@
  * Emits a message and data if it exists.
  *
  * @param msg - Message to emit
- * @param data - Data to emit
  */
 function emit(msg) {
   window.EventBus.$emit(msg);

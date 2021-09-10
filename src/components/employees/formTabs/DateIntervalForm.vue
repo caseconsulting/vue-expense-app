@@ -342,6 +342,9 @@ function watchEndIntervalDateEdited() {
 
 /**
  * filter the year out of the date
+ *
+ * @param date - the date to filter
+ * @return string - the year of that date
  */
 function getYear(date) {
   if (!date) {

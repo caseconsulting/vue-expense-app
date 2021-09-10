@@ -108,6 +108,12 @@ function extractTextContent(fileContent) {
   }
 } // extractTextContent
 
+// |--------------------------------------------------|
+// |                                                  |
+// |                      EXPORT                      |
+// |                                                  |
+// |--------------------------------------------------|
+
 export default {
   data() {
     return {

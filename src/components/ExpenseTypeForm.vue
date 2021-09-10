@@ -371,10 +371,10 @@ function clearForm() {
 
 /**
  * Custom filter for employee autocomplete options.
- *firstName: data.firstName
- * @param item -
- * @param queryText -
- * @return
+ *
+ * @param item - employee
+ * @param queryText - the text used to filter the names
+ * @return string - filtered employee
  */
 function customFilter(item, queryText) {
   const query = queryText ? queryText : '';
@@ -417,6 +417,11 @@ function isCustomSelected() {
   return this.editedExpenseType.accessibleBy && this.editedExpenseType.accessibleBy.includes('Custom');
 } // isCustomSelected
 
+/**
+ * overdraft flag hint
+ *
+ * @return string - the string flag hint
+ */
 function odFlagHint() {
   if (!!this.model.id && this.model.odFlag) {
     return 'Cannot be undone';
@@ -425,7 +430,7 @@ function odFlagHint() {
   } else {
     return '';
   }
-}
+} // odFlagHint
 
 /**
  * Parses the budget to get rid of commas.
@@ -439,10 +444,13 @@ function parseBudget(budget) {
   }
 } // parseBudget
 
+/**
+ * route to FAQ
+ */
 function toFAQ() {
   let faq = this.$router.resolve({ path: '/help/expenseTypes' });
   window.open(faq.href, '_blank');
-}
+} // toFAQ
 
 /**
  * Removes a category from the list of expense type categories.
@@ -570,6 +578,8 @@ function toggleRequireURL() {
 
 /**
  * boolean for checkBox appearance
+ *
+ * @return boolean - whether checkbox appears
  */
 function checkBoxRule() {
   return !(this.editedExpenseType.accessibleBy && this.editedExpenseType.accessibleBy.length > 0);

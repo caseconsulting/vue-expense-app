@@ -219,6 +219,7 @@ function disableBirthdayFeed() {
  * otherwise clears state field and returns false.
  *
  * @param boolan - USA is selected for countries
+ * @return boolean - is the USA
  */
 function isUSA() {
   if (this.editedPersonalInfo.country == 'United States of America') {

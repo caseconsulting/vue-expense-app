@@ -453,7 +453,7 @@ function showLinkedIn() {
 /**
  * Formats the old employee address
  *
- * @return String - address or string denoting that there isn't one
+ * @return string - the formatted address
  */
 function address() {
   let currentAddress = '';

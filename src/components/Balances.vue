@@ -111,7 +111,8 @@ function availableBalances() {
 /**
  * changes hours from a decimal number to hours and minutes
  *
- * @param hours - the newly formatted hours
+ * @param hours - the number of hours
+ * @return string - formatted number of hours
  */
 function formatHours(hours) {
   if (this.showMinutes) {

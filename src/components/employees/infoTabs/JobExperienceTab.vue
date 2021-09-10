@@ -150,7 +150,7 @@ function onPageChange() {
 /**
  * The function updates the company that is shown to the user based on filters
  *
- * @param query - the query used for the filter
+ * @param query - the query used to decide which companies to show
  */
 function updateCompanies(query) {
   if (query === undefined) {
@@ -165,7 +165,7 @@ function updateCompanies(query) {
     this.page = 1;
     this.pageList = this.filterCompanies.slice(0, 4);
   }
-}
+} // updateCompanies
 
 // |--------------------------------------------------|
 // |                                                  |

@@ -137,7 +137,7 @@ function blogPath(item) {
  */
 function previewPath(item) {
   return `/blogPreview/${item.blogNumber}`;
-}
+} // previewPath
 
 /**
  * redirect to post editor for edit
@@ -190,7 +190,8 @@ async function deleteBlogPost() {
 /**
  * filter that converts boolean to yes/no
  *
- * @return string - yes or no based on boolean value
+ * @param value - birthdayFeedBoolean
+ * @return string - yes if true no if false
  */
 function birthdayFeedResponse(value) {
   if (value == true) {

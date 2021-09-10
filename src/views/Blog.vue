@@ -238,7 +238,7 @@ function clearStatus() {
  */
 function failedDelete(message) {
   this.displayError(message);
-}
+} // failedDelete
 
 // |--------------------------------------------------|
 // |                                                  |

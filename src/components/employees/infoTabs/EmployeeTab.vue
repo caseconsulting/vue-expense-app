@@ -65,6 +65,8 @@ function fullName() {
 
 /**
  * Gets all of the current projects the user has
+ *
+ * @return array - the contracts
  */
 function getCurrentProjects() {
   let contracts = [];
@@ -90,7 +92,8 @@ function getCurrentProjects() {
   }
 
   return contracts;
-}
+} // getCurrentProjects
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                     METHODS                      |
@@ -100,7 +103,8 @@ function getCurrentProjects() {
 /**
  * Returns Full Time, Part Time, or Inactive based on the work status
  *
- * @param workStatus - the workStatus of the employee from 0 to 100
+ * @param workStatus - the workstatus number
+ * @return string - readable work status of employee
  */
 function getWorkStatus(workStatus) {
   if (workStatus == 100) {
@@ -121,7 +125,10 @@ function getWorkStatus(workStatus) {
 // |--------------------------------------------------|
 
 /**
- * startCase filter - uses lodash startCase as filter
+ * startCase filter - uses lodash startCase as filter - capitalizes every word
+ *
+ * @param value - value to capitalize
+ * @return string - capitalized string
  */
 function startCase(value) {
   return _.startCase(value);
