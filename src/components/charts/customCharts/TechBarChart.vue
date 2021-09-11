@@ -53,13 +53,12 @@ import api from '@/shared/api.js';
 
 /**
  * Takes data that was captured upon load and displays it on the chart.
- * @param that this passed as that (had issues with this being 'undefined')
  */
-function fillData(that) {
-  let pairs = that.technologyPairs.sort((a, b) => {
+function fillData() {
+  let pairs = this.technologyPairs.sort((a, b) => {
     return b[1] - a[1];
   });
-  pairs = pairs.slice(0, that.numOfColumns);
+  pairs = pairs.slice(0, this.numOfColumns);
   let labels = [];
   let values = [];
 
@@ -91,7 +90,7 @@ function fillData(that) {
   }
 
   //Set the chart data
-  that.chartData = {
+  this.chartData = {
     labels: labels,
     datasets: [
       {
@@ -103,7 +102,7 @@ function fillData(that) {
       }
     ]
   };
-  that.options = {
+  this.options = {
     scales: {
       xAxes: [
         {
@@ -134,13 +133,13 @@ function fillData(that) {
     title: {
       display: true,
       text: `Top ${pairs.length} ${
-        that.showCurrent === 'All' ? '' : that.showCurrent + ' '
+        this.showCurrent === 'All' ? '' : this.showCurrent + ' '
       }Technologies Used by Employees`,
       fontSize: 15
     },
     maintainAspectRatio: false
   };
-  that.dataReceived = true;
+  this.dataReceived = true;
 } //fillData
 
 /**
@@ -150,7 +149,7 @@ function oneMoreColumn() {
   if (this.numOfColumns < this.numOfColumnsMax && this.numOfColumns < this.technologyPairs.length) {
     this.reachedMin = false;
     this.numOfColumns++;
-    this.fillData(this); // Refresh the chart
+    this.fillData(); // Refresh the chart
   }
   // Disable the "+" button if the max has been reached
   if (this.numOfColumns === this.numOfColumnsMax || this.numOfColumns === this.technologyPairs.length) {
@@ -165,7 +164,7 @@ function oneLessColumn() {
   if (this.numOfColumns > this.numOfColumnsMin) {
     this.reachedMax = false;
     this.numOfColumns--;
-    this.fillData(this); // Refresh the chart
+    this.fillData(); // Refresh the chart
   }
   // Disable the "-" button if the min has been reached
   if (this.numOfColumns === this.numOfColumnsMin) {
@@ -263,7 +262,7 @@ async function mounted() {
   // Sort tech by number of occurances
   this.sortTech(this.technologies);
 
-  this.fillData(this);
+  this.fillData();
   this.$forceUpdate();
 } // mounted
 
@@ -290,7 +289,7 @@ function watchShowCurrent() {
   } else {
     this.sortTech(this.nonCurrentTechnologies);
   }
-  this.fillData(this);
+  this.fillData();
 } // watchShowCurrent
 
 export default {
