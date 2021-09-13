@@ -132,7 +132,7 @@
           </v-tooltip>
         </v-col>
       </v-footer>
-      <switch-role-modal :toggleSwitchRole="switchRole"></switch-role-modal>
+      <switch-role-modal :toggleSwitchRole="switchRole" @close="switchRole = false"></switch-role-modal>
       <time-out-modal :toggleTimeOut="timedOut"></time-out-modal>
       <time-out-warning-modal :toggleWarning="session"></time-out-warning-modal>
     </v-app>
