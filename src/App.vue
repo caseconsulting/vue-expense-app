@@ -79,7 +79,7 @@
             <v-list-item>
               <v-btn id="logoutBtn" text @click="handleLogout()">Logout</v-btn>
             </v-list-item>
-            <v-list-item>
+            <v-list-item v-if="enviornment != 'production'">
               <v-btn text @click="switchRole = true">Switch Role</v-btn>
             </v-list-item>
           </v-list>
@@ -132,7 +132,11 @@
           </v-tooltip>
         </v-col>
       </v-footer>
-      <switch-role-modal :toggleSwitchRole="switchRole" @close="switchRole = false"></switch-role-modal>
+      <switch-role-modal
+        v-if="enviornment != 'production'"
+        :toggleSwitchRole="switchRole"
+        @close="switchRole = false"
+      ></switch-role-modal>
       <time-out-modal :toggleTimeOut="timedOut"></time-out-modal>
       <time-out-warning-modal :toggleWarning="session"></time-out-warning-modal>
     </v-app>
@@ -238,6 +242,9 @@ function onResize() {
  * created lifecycle hook - set up listeners and getting access token and handle things for login
  */
 async function created() {
+  // check enviornment
+  this.enviornment = process.env.NODE_ENV;
+
   window.EventBus.$on('relog', handleLogout); // Session end - log out
   window.EventBus.$on('badgeExp', () => {
     this.badgeKey++;
@@ -324,6 +331,7 @@ function $route(to, from) {
 
 export default {
   data: () => ({
+    enviornment: '',
     switchRole: false,
     floorPlan: floorPlan,
     drawer: isLoggedIn(),

@@ -18,7 +18,6 @@
 <script>
 import api from '@/shared/api.js';
 import { getRole, setRole } from '@/utils/auth';
-
 // |--------------------------------------------------|
 // |                                                  |
 // |                 LIFECYCLE HOOKS                  |
