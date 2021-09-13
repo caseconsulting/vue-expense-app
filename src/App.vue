@@ -79,6 +79,9 @@
             <v-list-item>
               <v-btn id="logoutBtn" text @click="handleLogout()">Logout</v-btn>
             </v-list-item>
+            <v-list-item>
+              <v-btn text @click="switchRole = true">Switch Role</v-btn>
+            </v-list-item>
           </v-list>
           <!--In MOBILE VIEW/Smaller Screen sizes display all links under the user image dropdown-->
           <v-list class="scrollLink" v-else>
@@ -129,6 +132,7 @@
           </v-tooltip>
         </v-col>
       </v-footer>
+      <switch-role-modal :toggleSwitchRole="switchRole"></switch-role-modal>
       <time-out-modal :toggleTimeOut="timedOut"></time-out-modal>
       <time-out-warning-modal :toggleWarning="session"></time-out-warning-modal>
     </v-app>
@@ -138,6 +142,7 @@
 <script>
 import { isLoggedIn, logout, getProfile, getTokenExpirationDate, getAccessToken } from '@/utils/auth';
 import { isMobile } from '@/utils/utils';
+import SwitchRoleModal from '@/components/modals/SwitchRoleModal.vue';
 import MainNav from '@/components/MainNav.vue';
 import TimeOutModal from '@/components/modals/TimeOutModal.vue';
 import TimeOutWarningModal from '@/components/modals/TimeOutWarningModal.vue';
@@ -319,6 +324,7 @@ function $route(to, from) {
 
 export default {
   data: () => ({
+    switchRole: false,
     floorPlan: floorPlan,
     drawer: isLoggedIn(),
     inset: false,
@@ -364,7 +370,8 @@ export default {
     MainNav,
     TimeOutModal,
     TimeOutWarningModal,
-    BadgeExpirationBanner
+    BadgeExpirationBanner,
+    SwitchRoleModal
   },
   methods: {
     badumbadumdodooodoo,
