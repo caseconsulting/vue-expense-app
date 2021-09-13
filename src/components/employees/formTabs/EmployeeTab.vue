@@ -370,10 +370,6 @@ function validateFields() {
   // Fail safe in case users or inters somehow change their disabled info
   // Without this, they could change the html to change their data
   if (this.getRole() === 'user' || this.getRole() === 'intern') {
-    this.editedEmployee.firstName = this.model.firstName;
-    this.editedEmployee.middleName = this.model.middleName;
-    this.editedEmployee.noMiddleName = this.model.noMiddleName;
-    this.editedEmployee.lastName = this.model.lastName;
     this.editedEmployee.employeeNumber = this.model.employeeNumber;
     this.editedEmployee.email = this.model.email;
     this.editedEmployee.employeeRole = this.model.employeeRole;
