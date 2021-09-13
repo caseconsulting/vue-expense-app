@@ -1565,7 +1565,11 @@ async function created() {
   if (this.employeeRole && this.employeeRole == 'admin') {
     this.costRules.splice(1, 0, (v) => (!isEmpty(v) && v != 0) || 'Cost cannot be zero');
   } else {
-    this.costRules.splice(1, 0, (v) => (!isEmpty(v) && v > 0) || 'Cost must be a positive number');
+    this.costRules.splice(
+      1,
+      0,
+      (v) => (!this.isEmpty(v) && v.split(',').join('') > 0) || 'Cost must be a positive number'
+    );
   }
 
   this.clearForm();
