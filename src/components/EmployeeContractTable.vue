@@ -45,7 +45,7 @@
             @click:clear="prime = null"
           ></v-autocomplete>
         </v-col>
-        <v-col v-else>
+        <v-col v-else-if="dataType === 'Job Roles'">
           <v-autocomplete
             v-model="dataTypeSearch"
             :items="dataTypeDropDown"
