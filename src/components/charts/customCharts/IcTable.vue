@@ -10,7 +10,7 @@
     >
       <template v-slot:top>
         <v-toolbar flat>
-          <v-toolbar-title>Intelligence Community Stats</v-toolbar-title>
+          <v-toolbar-title>Community Statistics</v-toolbar-title>
         </v-toolbar>
       </template>
     </v-data-table>
@@ -51,8 +51,14 @@ async function created() {
 function fillData() {
   let ICData = {};
   let totalYears = 0;
+
+  // filter out inactive employees (including info) and intern
+  let interns = this.employees.filter((emp) => emp.employeeRole == 'intern');
+
+  this.employees = this.employees.filter((emp) => emp.workStatus != 0 && emp.employeeRole != 'intern');
+
   this.employees.forEach((emp) => {
-    if (emp.icTimeFrames && emp.workStatus != 0) {
+    if (emp.icTimeFrames) {
       let totalDurationYears = 0;
       let ranges = _.mapValues(emp.icTimeFrames, 'range');
       _.forEach(ranges, (range) => {
@@ -82,6 +88,7 @@ function fillData() {
 
   this.tableContents = [
     { title: 'Total Employees', value: this.employees.length },
+    { title: 'Total Interns', value: interns.length },
     { title: 'Company Wide IC Experience', value: totalYears.toFixed(2) + ' Years' },
     { title: 'Average IC Experience per Employee', value: averageYoE.toFixed(2) + ' Years' }
   ];

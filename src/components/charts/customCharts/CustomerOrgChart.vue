@@ -92,7 +92,7 @@ function fillData() {
       'rgba(156, 175, 183, 1)',
       'rgba(66, 129, 164, 1)'
     ];
-    text = `${this.showCurrent} Employee Customer Org Experience (in Years)`;
+    text = `${this.showCurrent} Employee Customer Org Experience (Years)`;
   }
   this.chartData = {
     labels: labels,
