@@ -8,7 +8,7 @@
         <v-list-group v-if="item.subItems" :key="item.title" no-action active-class="red--text v-list__tile--active">
           <template v-slot:activator>
             <!-- Parent Item Icon -->
-            <v-list-item-icon>
+            <v-list-item-icon class="list-icons">
               <icon
                 :id="item.icon"
                 :name="item.icon"
@@ -50,7 +50,7 @@
           <!--NavBar icons-->
           <!-- Item Icon -->
 
-          <v-list-item-icon>
+          <v-list-item-icon class="list-icons">
             <icon :name="item.icon" v-bind:class="{ iconSelected: item.active }" class="navbar-icons"></icon>
           </v-list-item-icon>
 
@@ -285,21 +285,8 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-#main-header {
-  font-family: 'Quicksand', sans-serif;
-  font-weight: bold;
-  font-size: 48px;
-  color: #38424d;
-  padding-top: 1%;
-  padding-bottom: 2%;
-}
-
-.navbar-icons,
-.icon-text {
-  vertical-align: middle;
-}
-
 .navbar-icons {
+  vertical-align: middle;
   color: #646460;
   text-align: center;
   width: 100%;
@@ -308,15 +295,7 @@ export default {
   max-height: 100%;
 }
 
-#nav-button {
-  float: left;
-}
-
-#nav-button :focus {
-  outline: none;
-}
-
-#slider-logo {
-  margin-bottom: 5px;
+.list-icons {
+  width: 24px;
 }
 </style>
