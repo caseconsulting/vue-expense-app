@@ -1,6 +1,10 @@
 <script>
 import { setIdToken, setAccessToken, setRole, setProfile } from '@/utils/auth';
-
+import api from '../shared/api';
+import { v4 as uuid } from 'uuid';
+const moment = require('moment-timezone');
+moment.tz.setDefault('America/New_York');
+const login_format = 'MMM Do, YYYY HH:mm:ss';
 // |--------------------------------------------------|
 // |                                                  |
 // |                 LIFECYCLE HOOKS                  |
@@ -13,10 +17,25 @@ import { setIdToken, setAccessToken, setRole, setProfile } from '@/utils/auth';
 function mounted() {
   this.$nextTick(async function () {
     try {
+      // set tokens
       this.setAccessToken();
       this.setIdToken();
       this.setProfile();
       let employeeRole = await this.setRole();
+
+      // login
+      let employee = await api.getUser();
+      employee.lastLogin = moment(new Date()).format(login_format);
+      await api.updateItem(api.EMPLOYEES, employee);
+      // Create an audit of the success
+      await api.createItem(api.AUDIT, {
+        id: uuid(),
+        type: 'login',
+        tags: ['account'],
+        employeeId: employee.id,
+        description: `${employee.firstName} ${employee.lastName} has logged in`,
+        timeToLive: 60
+      });
 
       if (employeeRole === 'admin') {
         // user's role is admin

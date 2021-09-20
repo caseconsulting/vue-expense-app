@@ -3,11 +3,7 @@ import auth0 from 'auth0-js';
 import { AUTH_CONFIG } from './auth0-variables';
 import Router from 'vue-router';
 import api from '../shared/api';
-import { v4 as uuid } from 'uuid';
 let CryptoJS = require('crypto-js');
-const moment = require('moment-timezone');
-moment.tz.setDefault('America/New_York');
-const login_format = 'MMM Do, YYYY HH:mm:ss';
 
 const AUDIENCE = AUTH_CONFIG.audience;
 const CALLBACK = AUTH_CONFIG.callbackUrl;
@@ -199,18 +195,6 @@ export function isTokenExpired(token) {
  */
 export async function login() {
   auth.authorize();
-  let employee = await api.getUser();
-  employee.lastLogin = moment(new Date()).format(login_format);
-  await api.updateItem(api.EMPLOYEES, employee);
-  // Create an audit of the success
-  await api.createItem(api.AUDIT, {
-    id: uuid(),
-    type: 'login',
-    tags: ['account'],
-    employeeId: employee.id,
-    description: `${employee.firstName} ${employee.lastName} has logged in`,
-    timeToLive: 60
-  });
 } // login
 
 /**
