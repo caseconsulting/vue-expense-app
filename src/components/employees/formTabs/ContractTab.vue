@@ -374,9 +374,16 @@ export default {
       },
       duplicateContractName: (conIndex) => {
         let contractNames = _.map(this.editedContracts, (contract) => contract.name);
+        let primeNames = _.map(this.editedContracts, (contract) => contract.prime);
         let contractName = contractNames[conIndex];
+        let primeName = primeNames[conIndex];
         contractNames.splice(conIndex, 1);
-        return !contractNames.includes(contractName) || 'Duplicate contract name';
+        primeNames.splice(conIndex, 1);
+        return (
+          !contractNames.includes(contractName) ||
+          (contractNames.includes(contractName) && !primeNames.includes(primeName)) ||
+          'Duplicate contract name'
+        );
       },
       editedContracts: _.cloneDeep(this.model), // stores edited contracts info
       endDatePresentRule: (compIndex, projIndex) => {
