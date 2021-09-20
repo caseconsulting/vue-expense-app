@@ -7,7 +7,6 @@
 
 <script>
 import BarChart from '../baseCharts/BarChart.vue';
-import api from '@/shared/api.js';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -18,9 +17,7 @@ import api from '@/shared/api.js';
 /**
  * created lifecycle hook
  */
-async function created() {
-  this.$forceUpdate();
-  this.employees = await api.getItems(api.EMPLOYEES);
+function created() {
   this.fillData();
 } // created
 
@@ -36,7 +33,7 @@ async function created() {
  */
 function fillData() {
   let roles = {};
-  this.employees.forEach((emp) => {
+  this.employees3.forEach((emp) => {
     if (emp.jobRole && emp.workStatus != 0) {
       if (roles[emp.jobRole]) {
         roles[emp.jobRole] += 1;
@@ -141,6 +138,7 @@ export default {
   methods: {
     fillData
   },
-  created
+  created,
+  props: ['employees3']
 };
 </script>

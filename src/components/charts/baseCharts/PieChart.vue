@@ -14,7 +14,6 @@ function mounted() {
   setTimeout(() => {
     this.renderChart(this.chartData, this.options);
   }, 0);
-  //this.renderChart(this.chartData, this.options);
 } // mounted
 
 // |--------------------------------------------------|

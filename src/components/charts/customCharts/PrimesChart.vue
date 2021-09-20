@@ -6,7 +6,6 @@
 </template>
 
 <script>
-import api from '@/shared/api.js';
 import BarChart from '../baseCharts/BarChart.vue';
 
 // |--------------------------------------------------|
@@ -18,9 +17,8 @@ import BarChart from '../baseCharts/BarChart.vue';
 /**
  * mounted lifecycle hook
  */
-async function mounted() {
-  await this.fillPrimeData();
-  this.$forceUpdate();
+function mounted() {
+  this.fillPrimeData();
 } // mounted
 
 // |--------------------------------------------------|
@@ -64,12 +62,11 @@ function getCurrentProjects(employee) {
 /**
  * Extracts and tallies up each employees primes, and sets the chart formatting and options data.
  */
-async function fillPrimeData() {
-  let employees = await api.getItems(api.EMPLOYEES);
+function fillPrimeData() {
   //Get data
   //Put into dictionary where key is prime and value is quantity
   let primes = {};
-  employees.forEach((employee) => {
+  this.employees3.forEach((employee) => {
     if (employee.workStatus != 0) {
       let currContracts = this.getCurrentProjects(employee);
       let currPrimes = {};
@@ -191,6 +188,7 @@ export default {
   methods: {
     getCurrentProjects,
     fillPrimeData
-  }
+  },
+  props: ['employees3']
 };
 </script>

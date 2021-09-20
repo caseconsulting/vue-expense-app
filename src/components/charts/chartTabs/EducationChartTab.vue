@@ -2,7 +2,7 @@
   <v-container>
     <v-row class="my-4">
       <v-col md="6" sm="12">
-        <highest-degree-chart></highest-degree-chart>
+        <highest-degree-chart :employees3="employees2"></highest-degree-chart>
       </v-col>
       <v-col md="6" sm="12">
         <majors-chart></majors-chart>
@@ -30,6 +30,7 @@ import ConcentrationsChart from '../customCharts/ConcentrationsChart.vue';
 // |--------------------------------------------------|
 
 export default {
-  components: { HighestDegreeChart, MajorsChart, MinorsChart, ConcentrationsChart }
+  components: { HighestDegreeChart, MajorsChart, MinorsChart, ConcentrationsChart },
+  props: ['employees2']
 };
 </script>

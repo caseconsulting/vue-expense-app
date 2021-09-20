@@ -8,7 +8,6 @@
 <script>
 import BarChart from '../baseCharts/BarChart.vue';
 import moment from 'moment-timezone';
-import api from '@/shared/api.js';
 moment.tz.setDefault('America/New_York');
 
 // |--------------------------------------------------|
@@ -20,9 +19,7 @@ moment.tz.setDefault('America/New_York');
 /**
  * created lifecycle hook
  */
-async function created() {
-  this.$forceUpdate();
-  this.employees = await api.getItems(api.EMPLOYEES);
+function created() {
   this.caseYearsData();
   this.drawCaseYearsHistGraph();
 } // created
@@ -42,7 +39,7 @@ function caseYearsData() {
   for (let i = 0; i < MAXIMUM_INDEX; i++) {
     this.caseYears.push(0);
   }
-  this.employees.forEach((employee) => {
+  this.employees3.forEach((employee) => {
     if (employee.hireDate !== undefined && employee.workStatus != 0) {
       // find time at case
       var amOfYears = this.calculateTimeDifference(employee.hireDate);
@@ -178,6 +175,7 @@ export default {
     findMaxIndex,
     stringToDate
   },
-  created
+  created,
+  props: ['employees3']
 };
 </script>

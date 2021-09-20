@@ -17,7 +17,6 @@
 <script>
 import PieChart from '../baseCharts/PieChart.vue';
 import _ from 'lodash';
-import api from '@/shared/api.js';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -28,10 +27,8 @@ import api from '@/shared/api.js';
 /**
  * created lifecycle hook
  */
-async function created() {
-  this.employees = await api.getItems(api.EMPLOYEES);
+function created() {
   this.fillData();
-  this.$forceUpdate();
 } // created
 
 // |--------------------------------------------------|
@@ -46,7 +43,7 @@ async function created() {
 function fillData() {
   let allCompOrgExp = {};
   // tally up customer org experience for active employees
-  this.employees.forEach((emp) => {
+  this.employees3.forEach((emp) => {
     if (emp.customerOrgExp && emp.workStatus != 0) {
       _.forEach(emp.customerOrgExp, (org) => {
         let orgName = org.name;
@@ -152,6 +149,7 @@ export default {
   },
   methods: { fillData },
   created,
+  props: ['employees3'],
   watch: {
     showCurrent: watchShowCurrent
   }

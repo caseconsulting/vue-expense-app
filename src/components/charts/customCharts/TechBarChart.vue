@@ -43,7 +43,6 @@
 <script>
 import HorizontalBar from '../baseCharts/HorizontalBarChart.vue';
 import { isMobile } from '@/utils/utils';
-import api from '@/shared/api.js';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -219,12 +218,9 @@ function sortTech(techArray) {
 /**
  * mounted lifecycle hook - get items, organize them and fill data
  */
-async function mounted() {
-  //Get data
+function mounted() {
   //Put into dictionary where key is tech type and value is quantity
-  let employees = await api.getItems(api.EMPLOYEES);
-
-  employees.forEach((employee) => {
+  this.employees3.forEach((employee) => {
     if (employee.technologies && employee.workStatus != 0) {
       employee.technologies.forEach((currTech) => {
         // **** ALL TECH ****
@@ -263,7 +259,6 @@ async function mounted() {
   this.sortTech(this.technologies);
 
   this.fillData();
-  this.$forceUpdate();
 } // mounted
 
 // |--------------------------------------------------|
@@ -324,6 +319,7 @@ export default {
     setNumOfColumns
   },
   mounted,
+  props: ['employees3'],
   watch: {
     showCurrent: watchShowCurrent
   }

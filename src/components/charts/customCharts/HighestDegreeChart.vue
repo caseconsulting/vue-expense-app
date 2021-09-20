@@ -10,7 +10,6 @@
 
 <script>
 import PieChart from '../baseCharts/PieChart.vue';
-import api from '@/shared/api.js';
 import _ from 'lodash';
 const moment = require('moment-timezone');
 moment.tz.setDefault('America/New_York');
@@ -25,8 +24,6 @@ moment.tz.setDefault('America/New_York');
  * created lifecycle hook
  */
 async function created() {
-  this.$forceUpdate();
-  this.employees = await api.getItems(api.EMPLOYEES);
   this.degrees = this.initDegrees();
   this.fillData();
 } // created
@@ -46,7 +43,7 @@ async function created() {
  */
 function initDegrees() {
   let degrees = {};
-  this.employees.forEach((emp) => {
+  this.employees3.forEach((emp) => {
     let highestDegrees = [];
     if (emp.schools && emp.workStatus != 0) {
       _.forEach(emp.schools, (school) => {
@@ -145,7 +142,7 @@ function compareDegree(oldDegree, newDegree) {
 function getDegreeConcentrations(degreeName) {
   let concentrationsData = {};
   // loop through each employee
-  this.employees.forEach((employee) => {
+  this.employees3.forEach((employee) => {
     if (employee.degrees) {
       // loop through each employee's degree
       employee.degrees.forEach((degree) => {
@@ -176,7 +173,7 @@ function getDegreeConcentrations(degreeName) {
 function getDegreeMinors(degreeName) {
   let minorsData = {};
   // loop through each employee
-  this.employees.forEach((employee) => {
+  this.employees3.forEach((employee) => {
     if (employee.degrees) {
       // loop through each employee's degree
       employee.degrees.forEach((degree) => {
@@ -372,7 +369,8 @@ export default {
     minorsEmit,
     concentrationsEmit
   },
-  created
+  created,
+  props: ['employees3']
 };
 </script>
 

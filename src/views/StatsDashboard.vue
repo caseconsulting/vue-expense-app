@@ -37,20 +37,32 @@
           <v-tab href="#technologies">Technology</v-tab>
           <v-tab href="#certifications">Certifications</v-tab>
           <v-tab href="#customerOrg">Customer Org</v-tab>
-          <v-tab-item id="employees" class="mx-2 my-6">
-            <employees-chart-tab v-if="currentTab === 'employees'"></employees-chart-tab>
+          <v-tab-item id="employees" class="mx-2 my-6" :disabled="dataLoaded">
+            <employees-chart-tab
+              v-if="currentTab === 'employees' && dataLoaded"
+              :employees2="employees"
+            ></employees-chart-tab>
           </v-tab-item>
-          <v-tab-item id="education" class="mx-2 my-6">
-            <education-chart-tab v-if="currentTab === 'education'"></education-chart-tab>
+          <v-tab-item id="education" class="mx-2 my-6" :disabled="dataLoaded">
+            <education-chart-tab
+              v-if="currentTab === 'education' && dataLoaded"
+              :employees2="employees"
+            ></education-chart-tab>
           </v-tab-item>
-          <v-tab-item id="technologies" class="mx-2 my-6">
-            <tech-chart-tab v-if="currentTab === 'technologies'"></tech-chart-tab>
+          <v-tab-item id="technologies" class="mx-2 my-6" :disabled="dataLoaded">
+            <tech-chart-tab v-if="currentTab === 'technologies' && dataLoaded" :employees2="employees"></tech-chart-tab>
           </v-tab-item>
-          <v-tab-item id="certifications" class="mx-2 my-6">
-            <certifications-chart-tab v-if="currentTab === 'certifications'"></certifications-chart-tab>
+          <v-tab-item id="certifications" class="mx-2 my-6" :disabled="dataLoaded">
+            <certifications-chart-tab
+              v-if="currentTab === 'certifications' && dataLoaded"
+              :employees2="employees"
+            ></certifications-chart-tab>
           </v-tab-item>
-          <v-tab-item id="customerOrg" class="mx-2 my-6">
-            <customer-org-chart-tab v-if="currentTab === 'customerOrg'"></customer-org-chart-tab>
+          <v-tab-item id="customerOrg" class="mx-2 my-6" :disabled="dataLoaded">
+            <customer-org-chart-tab
+              v-if="currentTab === 'customerOrg' && dataLoaded"
+              :employees2="employees"
+            ></customer-org-chart-tab>
           </v-tab-item>
         </v-tabs>
       </v-container>
@@ -65,6 +77,7 @@ import TechChartTab from '../components/charts/chartTabs/TechChartTab.vue';
 import EducationChartTab from '../components/charts/chartTabs/EducationChartTab.vue';
 import CustomerOrgChartTab from '../components/charts/chartTabs/CustomerOrgChartTab.vue';
 import { isMobile } from '@/utils/utils';
+import api from '@/shared/api.js';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -89,6 +102,11 @@ function selectDropDown(tabName) {
   this.statsTab = tabName;
 } // selectDropDown
 
+async function created() {
+  this.employees = await api.getItems(api.EMPLOYEES);
+  this.dataLoaded = true;
+}
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                      EXPORT                      |
@@ -106,10 +124,13 @@ export default {
   computed: {
     isMobile
   },
+  created,
   data() {
     return {
       currentTab: '',
-      statsTab: 'employees'
+      statsTab: 'employees',
+      employees: null,
+      dataLoaded: false
     };
   },
   methods: {

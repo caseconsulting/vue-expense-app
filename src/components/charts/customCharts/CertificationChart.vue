@@ -6,7 +6,6 @@
 </template>
 
 <script>
-import api from '@/shared/api.js';
 import BarChart from '../baseCharts/BarChart.vue';
 import moment from 'moment-timezone';
 
@@ -19,9 +18,8 @@ import moment from 'moment-timezone';
 /**
  * mounted lifecycle hook
  */
-async function mounted() {
-  this.$forceUpdate();
-  await this.fillCertData();
+function created() {
+  this.fillCertData();
 } // mounted
 
 // |--------------------------------------------------|
@@ -33,13 +31,12 @@ async function mounted() {
 /**
  * Extract each employees certifications and tally up each one. Also formats and sets data options for the chart.
  */
-async function fillCertData() {
-  let employees = await api.getItems(api.EMPLOYEES);
+function fillCertData() {
   //Get data
   //Put into dictionary where key is kinda tech and value is quantity
   let certifications = {};
   // tally up each certification
-  employees.forEach((employee) => {
+  this.employees3.forEach((employee) => {
     if (employee.certifications && employee.workStatus != 0) {
       employee.certifications.forEach((currCert) => {
         if (moment().isBefore(moment(currCert.expirationDate))) {
@@ -185,6 +182,7 @@ function breakSentence(s) {
 
 export default {
   components: { BarChart },
+  created,
   data() {
     return {
       options: null,
@@ -196,6 +194,6 @@ export default {
     fillCertData,
     breakSentence
   },
-  mounted
+  props: ['employees3']
 };
 </script>

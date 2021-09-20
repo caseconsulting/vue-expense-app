@@ -11,7 +11,9 @@ import { Bar, mixins } from 'vue-chartjs';
  * mounted lifecycle hook
  */
 function mounted() {
-  this.renderChart(this.chartData, this.options);
+  setTimeout(() => {
+    this.renderChart(this.chartData, this.options);
+  }, 0);
 } // mounted
 
 // |--------------------------------------------------|

@@ -2,7 +2,7 @@
   <v-container fluid>
     <v-row justify="center">
       <v-col xl="6" lg="8" sm="12" class="mt-4">
-        <tech-bar-chart></tech-bar-chart>
+        <tech-bar-chart :employees3="employees2"></tech-bar-chart>
       </v-col>
     </v-row>
   </v-container>
@@ -18,6 +18,7 @@ import TechBarChart from '../customCharts/TechBarChart.vue';
 // |--------------------------------------------------|
 
 export default {
-  components: { TechBarChart }
+  components: { TechBarChart },
+  props: ['employees2']
 };
 </script>

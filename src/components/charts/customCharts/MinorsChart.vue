@@ -31,7 +31,6 @@ function mounted() {
  * created lifecycle hook
  */
 function created() {
-  //this.$forceUpdate();
   this.fillData(null);
 } // created
 

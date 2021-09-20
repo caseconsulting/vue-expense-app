@@ -19,7 +19,6 @@
 </template>
 
 <script>
-import api from '@/shared/api.js';
 import _ from 'lodash';
 const moment = require('moment-timezone');
 moment.tz.setDefault('America/New_York');
@@ -33,9 +32,7 @@ moment.tz.setDefault('America/New_York');
 /**
  * created lifecycle hook
  */
-async function created() {
-  this.$forceUpdate();
-  this.employees = await api.getItems(api.EMPLOYEES);
+function created() {
   this.fillData();
 } // created
 
@@ -53,11 +50,11 @@ function fillData() {
   let totalYears = 0;
 
   // filter out inactive employees (including info) and intern
-  let interns = this.employees.filter((emp) => emp.employeeRole == 'intern');
+  let interns = this.employees3.filter((emp) => emp.employeeRole == 'intern');
 
-  this.employees = this.employees.filter((emp) => emp.workStatus != 0 && emp.employeeRole != 'intern');
+  this.employees3 = this.employees3.filter((emp) => emp.workStatus != 0 && emp.employeeRole != 'intern');
 
-  this.employees.forEach((emp) => {
+  this.employees3.forEach((emp) => {
     if (emp.icTimeFrames) {
       let totalDurationYears = 0;
       let ranges = _.mapValues(emp.icTimeFrames, 'range');
@@ -84,10 +81,10 @@ function fillData() {
     }
   });
 
-  let averageYoE = totalYears / this.employees.length;
+  let averageYoE = totalYears / this.employees3.length;
 
   this.tableContents = [
-    { title: 'Total Employees', value: this.employees.length },
+    { title: 'Total Employees', value: this.employees3.length },
     { title: 'Total Interns', value: interns.length },
     { title: 'Company Wide IC Experience', value: totalYears.toFixed(2) + ' Years' },
     { title: 'Average IC Experience per Employee', value: averageYoE.toFixed(2) + ' Years' }
@@ -114,7 +111,6 @@ export default {
   data() {
     return {
       dataReceived: false,
-      employees: null,
       tableContents: null,
       headers: null
     };
@@ -122,6 +118,7 @@ export default {
   methods: {
     fillData
   },
-  created
+  created,
+  props: ['employees3']
 };
 </script>

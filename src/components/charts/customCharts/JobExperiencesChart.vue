@@ -8,7 +8,6 @@
 <script>
 import BarChart from '../baseCharts/BarChart.vue';
 import moment from 'moment-timezone';
-import api from '@/shared/api.js';
 moment.tz.setDefault('America/New_York');
 
 // |--------------------------------------------------|
@@ -20,10 +19,8 @@ moment.tz.setDefault('America/New_York');
 /**
  * created lifecycle hook
  */
-async function created() {
+function created() {
   // eslint-disable-next-line no-undef
-  this.$forceUpdate();
-  this.employees = (await api.getItems(api.EMPLOYEES)).filter((employee) => employee.workStatus != 0);
   this.jobExperienceData();
   this.drawJobExpHistGraph();
 } // created
@@ -54,8 +51,9 @@ function findMaxIndex() {
  * Each employees experience will be put in an array slot that is based on an increment of experience of 5 years.
  */
 function jobExperienceData() {
-  this.employees.forEach((employee) => {
-    if (employee.hireDate !== undefined) {
+  this.employees3.forEach((employee) => {
+    // only include active employees
+    if (employee.hireDate !== undefined && employee.workStatus != 0) {
       // find time at case
       var amOfYears = this.calculateTimeDifference(employee.hireDate, undefined);
       if (employee.companies !== undefined) {
@@ -197,6 +195,7 @@ export default {
     calculateTimeDifference,
     stringToDate
   },
-  created
+  created,
+  props: ['employees3']
 };
 </script>
