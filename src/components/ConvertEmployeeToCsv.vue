@@ -371,18 +371,20 @@ function getEducation(edu) {
  */
 function getCompanies(companies) {
   let result = [];
-  for (let i = 0; i < companies.length; i++) {
-    result.push(`${companies[i].companyName}`);
-    let positions = companies[i].positions;
-    let pos;
-    for (let j = 0; j < positions.length; j++) {
-      pos = `    ${positions[j].title} - ${positions[j].startDate}`;
-      if (positions[j].endDate !== null) {
-        pos += ` to ${positions[j].endDate}`;
-      } else {
-        pos += ' to present';
+  if (companies) {
+    for (let i = 0; i < companies.length; i++) {
+      result.push(`${companies[i].companyName}`);
+      let positions = companies[i].positions;
+      let pos;
+      for (let j = 0; j < positions.length; j++) {
+        pos = `    ${positions[j].title} - ${positions[j].startDate}`;
+        if (positions[j].endDate !== null) {
+          pos += ` to ${positions[j].endDate}`;
+        } else {
+          pos += ' to present';
+        }
+        result.push(pos);
       }
-      result.push(pos);
     }
   }
   return result;
