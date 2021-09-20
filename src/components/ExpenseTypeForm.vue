@@ -434,6 +434,8 @@ function odFlagHint() {
 
 /**
  * Parses the budget to get rid of commas.
+ *
+ * @param budget - the budget to parse
  * @return String - The budget without formatting
  */
 function parseBudget(budget) {

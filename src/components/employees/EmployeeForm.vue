@@ -412,8 +412,6 @@ async function cancel() {
 
 /**
  * Removes unnecessary attributes from the employee data.
- *
- * @return
  */
 function cleanUpData() {
   // schools

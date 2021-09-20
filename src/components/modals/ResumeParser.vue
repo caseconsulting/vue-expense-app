@@ -445,6 +445,8 @@ function showGitHub() {
 /**
  * Determines if the linkedIn should be shown, i.e. does one exist or has the pending
  * change been denied
+ *
+ * @return boolean - if the linkedIn should be showed
  */
 function showLinkedIn() {
   return this.newPersonal.linkedIn && !this.linkedInCanceled;
