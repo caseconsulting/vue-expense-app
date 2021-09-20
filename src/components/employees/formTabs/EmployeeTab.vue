@@ -335,7 +335,7 @@ function isPartTime() {
  * @return - boolean: true if the user role is admin
  */
 function userIsAdmin() {
-  return getRole() === 'admin';
+  return this.getRole() === 'admin';
 } //userIsAdmin
 
 /**
@@ -356,7 +356,7 @@ function userIsEmployee() {
  * @returns - boolean: true if the user role is a manager
  */
 function userIsManager() {
-  return getRole() === 'manager';
+  return this.getRole() === 'manager';
 } //userIsManager
 
 /**
@@ -465,6 +465,7 @@ export default {
     getDateRules,
     getNumberRules,
     getRequiredRules,
+    getRole,
     isEmpty,
     isInactive,
     isMobile,
