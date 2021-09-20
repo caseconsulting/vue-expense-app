@@ -285,7 +285,7 @@ async function created() {
 /**
  * beforeDestroy lifecycle hook - close event listener
  */
-async function beforeDestroy() {
+function beforeDestroy() {
   if (typeof window !== 'undefined') {
     window.removeEventListener('resize', this.onResize, { passive: true });
   }

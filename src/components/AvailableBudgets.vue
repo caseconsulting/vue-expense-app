@@ -101,7 +101,7 @@ function calcRemaining(budget) {
 /**
  * beforeDestroy lifecycle hook
  */
-async function beforeDestroy() {
+function beforeDestroy() {
   window.EventBus.$off('close-summary');
 } //beforeDestroy
 

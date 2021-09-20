@@ -202,7 +202,7 @@ async function created() {
 /**
  * beforeDestroy lifecycle hook
  */
-async function beforeDestroy() {
+function beforeDestroy() {
   window.EventBus.$off('updateData');
   window.EventBus.$off('selected-budget-year');
 } //beforeDestroy

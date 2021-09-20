@@ -630,7 +630,7 @@ async function created() {
 /**
  * beforeDestroy lifecycle hook
  */
-async function beforeDestroy() {
+function beforeDestroy() {
   window.EventBus.$off('confirmed-type');
   window.EventBus.$off('canceled-type');
 } //beforeDestroy
