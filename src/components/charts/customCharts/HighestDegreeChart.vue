@@ -5,7 +5,6 @@
       <p class="font-weight-normal">Total Degrees: {{ degreeCount }}</p>
     </div>
   </v-card>
-  <v-skeleton-loader v-else type="paragraph@5"></v-skeleton-loader>
 </template>
 
 <script>

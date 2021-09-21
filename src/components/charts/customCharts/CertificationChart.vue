@@ -2,7 +2,6 @@
   <v-card v-if="dataReceived" class="pa-5">
     <bar-chart :options="options" :chartData="chartData"></bar-chart>
   </v-card>
-  <v-skeleton-loader v-else type="paragraph@5"></v-skeleton-loader>
 </template>
 
 <script>
@@ -16,11 +15,11 @@ import moment from 'moment-timezone';
 // |--------------------------------------------------|
 
 /**
- * mounted lifecycle hook
+ * created lifecycle hook
  */
 function created() {
   this.fillCertData();
-} // mounted
+} // created
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -32,7 +31,6 @@ function created() {
  * Extract each employees certifications and tally up each one. Also formats and sets data options for the chart.
  */
 function fillCertData() {
-  //Get data
   //Put into dictionary where key is kinda tech and value is quantity
   let certifications = {};
   // tally up each certification

@@ -30,7 +30,6 @@
         </v-radio-group>
       </v-row>
     </v-container>
-    <v-skeleton-loader v-else type="paragraph@5"></v-skeleton-loader>
   </v-card>
   <v-card v-else>
     <div class="pa-15 text-center">

@@ -2,7 +2,6 @@
   <v-card v-if="dataReceived" class="pa-5">
     <bar-chart :options="options" :chartData="chartData"></bar-chart>
   </v-card>
-  <v-skeleton-loader v-else type="paragraph@5"></v-skeleton-loader>
 </template>
 
 <script>

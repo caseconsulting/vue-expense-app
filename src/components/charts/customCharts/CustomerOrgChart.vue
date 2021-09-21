@@ -11,7 +11,6 @@
       </v-row>
     </v-container>
   </v-card>
-  <v-skeleton-loader v-else type="paragraph@5"></v-skeleton-loader>
 </template>
 
 <script>
