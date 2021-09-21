@@ -70,7 +70,7 @@ function download() {
  */
 function exportCSVFile(person, fileTitle) {
   let placeOfBirth = this.getPlaceOfBirth(person.city, person.st, person.country);
-  let education = this.getEducation(person.degrees);
+  let education = this.getEducation(person.schools);
   let jobExperience = this.getCompanies(person.companies);
   let certifications = this.getCertifications(person.certifications);
   let awards = this.getAwards(person.awards);
@@ -81,13 +81,13 @@ function exportCSVFile(person, fileTitle) {
   let languages = this.getLanguages(person.languages);
 
   let tempEmployee = [
+    person.employeeNumber || '',
     [person.firstName || ''], //Start of employee
     [person.middleName || ''],
     [person.lastName || ''],
-    [person.employeeNumber || ''],
+    [person.birthday || ''],
+    [placeOfBirth || ''],
     [person.email || ''],
-    [person.prime || ''],
-    [person.contract || ''],
     [person.jobRole || ''],
     [person.employeeRole || ''],
     [person.hireDate || ''],
@@ -96,8 +96,6 @@ function exportCSVFile(person, fileTitle) {
     [person.github || ''], //Start of personal
     [person.twitter || ''],
     [person.linkedIn || ''],
-    [person.birthday || ''],
-    [placeOfBirth || ''],
     education,
     jobExperience,
     certifications,
@@ -111,13 +109,13 @@ function exportCSVFile(person, fileTitle) {
   ];
 
   this.headers = [
+    ['Employee #'],
     ['First Name'],
     ['Middle Name'],
     ['Last Name'],
-    ['Employee #'],
+    ['Birthday (yyyy-mm-dd)'],
+    ['Place of Birth'],
     ['Email'],
-    ['Prime'],
-    ['Contract'],
     ['Job Role'],
     ['Expense App Role'],
     ['Hire Date (yyyy-mm-dd)'],
@@ -126,8 +124,6 @@ function exportCSVFile(person, fileTitle) {
     ['Github'],
     ['Twitter'],
     ['LinkedIn'],
-    ['Birthday (yyyy-mm-dd)'],
-    ['Place of Birth'],
     ['Education'],
     ['Job Experience'],
     ['Certifications'],
@@ -350,13 +346,24 @@ function getEducation(edu) {
   let str = '';
   let result = [];
   if (edu) {
+    // each school
     for (let i = 0; i < edu.length; i++) {
-      str = edu[i].school + ' - ' + edu[i].name;
-      for (let j = 0; j < edu[i].majors.length; j++) {
-        str += ' - ' + edu[i].majors[j];
-      }
-      str += ' - ' + edu[i].date;
-      result.push(str);
+      // each degree within school
+      edu[i].degrees.forEach((degree) => {
+        str = edu[i].name + ': ';
+
+        // each major within degree
+        str += degree.degreeType + ' in ';
+        degree.majors.forEach((major, i) => {
+          if (i != 0) {
+            str += ', ';
+          }
+          str += major;
+        });
+
+        str += ' - ' + degree.completionDate;
+        result.push(str); // push each degree individually
+      });
     }
     return result;
   }

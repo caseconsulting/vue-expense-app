@@ -65,23 +65,22 @@ function exportCSVFile(items, fileTitle) {
       placeOfBirth || '',
       person.hireDate || '',
       person.jobRole || '',
-      person.prime || '',
-      person.contract || '',
       person.email || '',
       person.mifiStatus != undefined && person.mifiStatus != null ? person.mifiStatus : 'true',
       person.twitter || '',
       person.github || '',
+      person.linkedIn || '',
       person.employeeRole || '',
       this.getWorkStatus(person.workStatus) || '',
-      person.id || '',
       this.filterUndefined(person.awards, getAwards) || '',
       this.filterUndefined(person.certifications, getCertifications) || '',
       this.filterUndefined(person.clearances, getClearances) || '',
       this.filterUndefined(person.contracts, getContracts) || '',
       this.filterUndefined(person.customerOrgExp, getCustomerOrgExp) || '',
-      this.filterUndefined(person.degrees, getEducation) || '',
+      this.filterUndefined(person.schools, getEducation) || '',
       this.filterUndefined(person.companies, getCompanies) || '',
-      this.filterUndefined(person.technologies, getTechnologies) || ''
+      this.filterUndefined(person.technologies, getTechnologies) || '',
+      person.id || ''
     ];
   }
 
@@ -94,15 +93,13 @@ function exportCSVFile(items, fileTitle) {
     'Place of Birth',
     'Hire Date',
     'Job Role',
-    'Prime',
-    'Contract',
     'Email',
     'Mifi Status',
     'Twitter',
     'Github',
+    'LinkedIn',
     'Expense App Role',
     'Status',
-    'id',
     'Awards',
     'Certifications',
     'Clearance',
@@ -110,7 +107,8 @@ function exportCSVFile(items, fileTitle) {
     'Customer Org',
     'Education',
     'Job Experience',
-    'Technology'
+    'Technology',
+    'id'
   ];
 
   tempEmployees.sort((a, b) => {
@@ -287,18 +285,30 @@ function getCustomerOrgExp(exp) {
  * @return String - education
  */
 function getEducation(edu) {
-  let a = '';
-  for (let i = 0; i < edu.length; i++) {
-    a += edu[i].school + ' - ' + edu[i].name;
-    for (let j = 0; j < edu[i].majors.length; j++) {
-      a += ' - ' + edu[i].majors[j];
-    }
-    a += ' - ' + edu[i].date;
-    if (i + 1 < edu.length) {
-      a += ', ';
+  let str = '';
+  let result = [];
+  if (edu) {
+    // each school
+    for (let i = 0; i < edu.length; i++) {
+      // each degree within school
+      edu[i].degrees.forEach((degree) => {
+        str = edu[i].name + ': ';
+
+        // each major within degree
+        str += degree.degreeType + ' in ';
+        degree.majors.forEach((major, i) => {
+          if (i != 0) {
+            str += ', ';
+          }
+          str += major;
+        });
+
+        str += ' - ' + degree.completionDate;
+        result.push(str); // push each degree individually
+      });
     }
   }
-  return a;
+  return result;
 } // getEducation
 
 /**
@@ -308,17 +318,24 @@ function getEducation(edu) {
  * @return String - companies
  */
 function getCompanies(companies) {
-  let a = '';
-  for (let i = 0; i < companies.length; i++) {
-    a += `${companies[i].companyName}`;
-    let positions = companies[i].positions;
-    for (let j = 0; j < positions.length; j++) {
-      a += `${positions[j].title} - ${positions[j].startDate}`;
-      positions[j].endDate ? (a += ` - ${positions[j].endDate}`) : ' - to present';
-      if (j > positions.length) a += ', ';
+  let result = [];
+  if (companies) {
+    for (let i = 0; i < companies.length; i++) {
+      result.push(`${companies[i].companyName}`);
+      let positions = companies[i].positions;
+      let pos;
+      for (let j = 0; j < positions.length; j++) {
+        pos = `    ${positions[j].title} - ${positions[j].startDate}`;
+        if (positions[j].endDate !== null) {
+          pos += ` to ${positions[j].endDate}`;
+        } else {
+          pos += ' to present';
+        }
+        result.push(pos);
+      }
     }
   }
-  return a;
+  return result;
 } // getCompanies
 
 /**
