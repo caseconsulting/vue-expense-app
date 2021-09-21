@@ -81,7 +81,7 @@ function exportCSVFile(person, fileTitle) {
   let languages = this.getLanguages(person.languages);
 
   let tempEmployee = [
-    person.employeeNumber || '',
+    [person.employeeNumber || ''],
     [person.firstName || ''], //Start of employee
     [person.middleName || ''],
     [person.lastName || ''],
