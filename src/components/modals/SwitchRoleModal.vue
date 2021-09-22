@@ -32,7 +32,7 @@ function created() {
   if (this.roleOriginial) {
     this.roleSelected = this.roleOriginial.charAt(0).toUpperCase() + this.roleOriginial.slice(1);
   }
-}
+} // created
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -40,6 +40,9 @@ function created() {
 // |                                                  |
 // |--------------------------------------------------|
 
+/**
+ * switches the user role in the app
+ */
 async function switchRole() {
   this.$nextTick(async function () {
     if (this.roleSelected != this.roleOriginial) {
@@ -63,7 +66,7 @@ async function switchRole() {
     }
   });
   this.$emit('close');
-}
+} // switchRole
 
 // |--------------------------------------------------|
 // |                                                  |
