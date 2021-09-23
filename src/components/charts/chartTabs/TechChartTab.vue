@@ -19,6 +19,6 @@ import TechBarChart from '../customCharts/TechBarChart.vue';
 
 export default {
   components: { TechBarChart },
-  props: ['employees2']
+  props: ['employees2'] // stats page (employees) --> tab (employees2) --> chart (employees3)
 };
 </script>

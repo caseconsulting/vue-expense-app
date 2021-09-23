@@ -105,7 +105,7 @@ function selectDropDown(tabName) {
 } // selectDropDown
 
 async function created() {
-  this.employees = await api.getItems(api.EMPLOYEES);
+  this.employees = await api.getItems(api.EMPLOYEES); // stats page (employees) --> tab (employees2) --> chart (employees3)
   this.dataLoaded = true;
 }
 

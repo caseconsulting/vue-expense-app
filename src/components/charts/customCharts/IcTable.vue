@@ -49,11 +49,11 @@ function fillData() {
   let totalYears = 0;
 
   // filter out inactive employees (including info) and intern
-  let interns = this.employees3.filter((emp) => emp.employeeRole == 'intern');
+  let interns = this.employees.filter((emp) => emp.employeeRole == 'intern');
 
-  this.employees3 = this.employees3.filter((emp) => emp.workStatus != 0 && emp.employeeRole != 'intern');
+  this.employees = this.employees.filter((emp) => emp.workStatus != 0 && emp.employeeRole != 'intern');
 
-  this.employees3.forEach((emp) => {
+  this.employees.forEach((emp) => {
     if (emp.icTimeFrames) {
       let totalDurationYears = 0;
       let ranges = _.mapValues(emp.icTimeFrames, 'range');
@@ -80,10 +80,10 @@ function fillData() {
     }
   });
 
-  let averageYoE = totalYears / this.employees3.length;
+  let averageYoE = totalYears / this.employees.length;
 
   this.tableContents = [
-    { title: 'Total Employees', value: this.employees3.length },
+    { title: 'Total Employees', value: this.employees.length },
     { title: 'Total Interns', value: interns.length },
     { title: 'Company Wide IC Experience', value: totalYears.toFixed(2) + ' Years' },
     { title: 'Average IC Experience per Employee', value: averageYoE.toFixed(2) + ' Years' }
@@ -110,6 +110,7 @@ export default {
   data() {
     return {
       dataReceived: false,
+      employees: this.employees3, // copied to fix issue with mutated prop
       tableContents: null,
       headers: null
     };
@@ -118,6 +119,6 @@ export default {
     fillData
   },
   created,
-  props: ['employees3']
+  props: ['employees3'] // stats page (employees) --> tab (employees2) --> chart (employees3)
 };
 </script>

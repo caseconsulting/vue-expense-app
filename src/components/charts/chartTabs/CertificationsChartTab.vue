@@ -19,6 +19,6 @@ import CertificationChart from '../customCharts/CertificationChart.vue';
 
 export default {
   components: { CertificationChart },
-  props: ['employees2']
+  props: ['employees2'] // stats page (employees) --> tab (employees2) --> chart (employees3)
 };
 </script>

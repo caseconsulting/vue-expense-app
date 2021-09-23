@@ -23,6 +23,6 @@ import ICTable from '../customCharts/IcTable.vue';
 
 export default {
   components: { CustomerOrgChart, ICTable },
-  props: ['employees2']
+  props: ['employees2'] // stats page (employees) --> tab (employees2) --> chart (employees3)
 };
 </script>

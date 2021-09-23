@@ -318,7 +318,7 @@ export default {
     setNumOfColumns
   },
   mounted,
-  props: ['employees3'],
+  props: ['employees3'], // stats page (employees) --> tab (employees2) --> chart (employees3)
   watch: {
     showCurrent: watchShowCurrent
   }

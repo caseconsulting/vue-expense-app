@@ -369,7 +369,7 @@ export default {
     concentrationsEmit
   },
   created,
-  props: ['employees3']
+  props: ['employees3'] // stats page (employees) --> tab (employees2) --> chart (employees3)
 };
 </script>
 
