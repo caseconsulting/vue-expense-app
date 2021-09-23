@@ -361,6 +361,15 @@ function getEducation(edu) {
           str += major;
         });
 
+        str += ' (Minors: ';
+        degree.minors.forEach((minor, i) => {
+          if (i != 0) {
+            str += ', ';
+          }
+          str += minor;
+        });
+        str += ')';
+
         str += ' - ' + degree.completionDate;
         result.push(str); // push each degree individually
       });
