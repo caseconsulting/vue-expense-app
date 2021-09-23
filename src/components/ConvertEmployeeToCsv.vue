@@ -11,6 +11,8 @@
 
 <script>
 import { isEmpty } from '@/utils/utils';
+import moment from 'moment-timezone';
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                     METHODS                      |
@@ -142,12 +144,12 @@ function exportCSVFile(person, fileTitle) {
 
   var csv = this.convertToCSV(tempEmployee);
 
-  var exportedFilenmae = fileTitle + '.csv' || 'export.csv';
+  var exportedFilename = fileTitle + '.csv' || 'export.csv';
 
   var blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
   if (navigator.msSaveBlob) {
     // IE 10+
-    navigator.msSaveBlob(blob, exportedFilenmae);
+    navigator.msSaveBlob(blob, exportedFilename);
   } else {
     var link = document.createElement('a');
     if (link.download !== undefined) {
@@ -155,7 +157,7 @@ function exportCSVFile(person, fileTitle) {
       // Browsers that support HTML5 download attribute
       var url = URL.createObjectURL(blob);
       link.setAttribute('href', url);
-      link.setAttribute('download', exportedFilenmae);
+      link.setAttribute('download', exportedFilename);
       link.style.visibility = 'hidden';
       document.body.appendChild(link);
       link.click();
@@ -290,26 +292,63 @@ function getClearances(clearance) {
 } // getClearances
 
 /**
+ * Converts the contracts' projects' dates to number of years on the contract
+ *
+ * @param contract the contract to get the info from
+ * @return number - number of years on the contract
+ */
+function getContractLengthInYears(contract) {
+  let total = moment.duration();
+  if (contract.projects) {
+    contract.projects.forEach((project) => {
+      total.add(moment.duration(this.getProjectLengthInYears(project)));
+    });
+  }
+  return total.asYears().toFixed(1);
+} // getContractLengthInYears
+
+/**
+ * Converts the intervals to length of time in years
+ *
+ * @param project the project to convert
+ * @return number - time in years
+ */
+function getProjectLengthInYears(project) {
+  let startMoment = moment(project.startDate);
+  let endMoment = moment(project.endDate);
+  let length;
+  if (project.endDate) {
+    length = moment.duration(endMoment.diff(startMoment));
+  } else {
+    length = moment.duration(moment().diff(startMoment));
+  }
+  return length.add(1, 'month'); // add one month to include end month in calculation.
+}
+
+/**
  * Returns contract data for employee
  *
  * @param contract - An array of objects.
  * @return String - contract
  */
-function getContracts(contract) {
+function getContracts(contracts) {
   let str = '';
   let result = [];
-  if (contract) {
-    for (let i = 0; i < contract.length; i++) {
-      str = contract[i].name + ' - ' + contract[i].prime;
-      if (contract[i].years) {
-        str += ' - ' + contract[i].years + ' years';
-      }
-      if (contract[i].current) {
-        str += ', Current';
+  if (contracts) {
+    contracts.forEach((contract) => {
+      str = contract.name + ' - ' + contract.prime + ' (Projects: ';
+      contract.projects.forEach((project, i) => {
+        if (i != 0) {
+          str += ', ';
+        }
+        str += project.name + ' - ' + this.getProjectLengthInYears(project).asYears().toFixed(1) + ' years';
+      });
+      str += ')';
+      if (contract.projects.length > 1) {
+        str += ' Total Time: ' + this.getContractLengthInYears(contract) + ' years';
       }
       result.push(str);
-    }
-    return result;
+    });
   }
   return result;
 } // getContracts
@@ -481,6 +520,8 @@ export default {
     getAwards,
     getCertifications,
     getClearances,
+    getContractLengthInYears,
+    getProjectLengthInYears,
     getContracts,
     getCustomerOrgExp,
     getEducation,
