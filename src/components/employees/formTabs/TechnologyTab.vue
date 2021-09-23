@@ -8,7 +8,7 @@
     >
       <!-- Name of Technology -->
       <v-combobox
-        class="pb-5"
+        class="pb-0"
         ref="formFields"
         v-model="technology.name"
         :rules="[duplicateRules(technology.name), ...getRequiredRules()]"
@@ -19,7 +19,11 @@
         clearable
       >
       </v-combobox>
-
+      <p class="emsi">
+        List of Technologies and Skills provided by
+        <a href="https://skills.emsidata.com/emsi-open-skills-license-agreement.pdf">EMSI</a>. Additions made by users
+        are not endorsed by EMSI.
+      </p>
       <!-- Time Intervals -->
       <v-row justify="center">
         <!-- Current Switch -->
@@ -270,5 +274,9 @@ export default {
 .errorBox {
   color: red !important;
   border: 2px solid red !important;
+}
+
+.emsi {
+  font-size: small;
 }
 </style>
