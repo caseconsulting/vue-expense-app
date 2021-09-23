@@ -21,8 +21,8 @@
       </v-combobox>
       <p class="emsi">
         List of Technologies and Skills provided by
-        <a href="https://skills.emsidata.com/emsi-open-skills-license-agreement.pdf">EMSI</a>. Additions made by users
-        are not endorsed by EMSI.
+        <a href="https://skills.emsidata.com/emsi-open-skills-license-agreement.pdf" target="_blank">EMSI</a>. Additions
+        made by users are not endorsed by EMSI.
       </p>
       <!-- Time Intervals -->
       <v-row justify="center">
