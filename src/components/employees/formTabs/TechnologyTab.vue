@@ -180,6 +180,7 @@ function populateDropDowns() {
     _.forEach(technologies, (technology) => {
       this.technologyDropDown.push(technology.name); // add technology name
     });
+    this.technologyDropDown = _.uniq(this.technologyDropDown);
   });
 } // populateDropDowns
 
@@ -192,6 +193,7 @@ async function updateTechDropDown() {
   if (query.length > 2) {
     let techList = await api.getTechSkills(query);
     this.technologyDropDown = techList;
+    this.populateDropDowns();
   } else if (this.technologyDropDown.length >= 0) {
     this.technologyDropDown = [];
   }
