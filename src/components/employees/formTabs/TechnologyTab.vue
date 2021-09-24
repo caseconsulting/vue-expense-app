@@ -1,5 +1,10 @@
 <template>
   <div>
+    <p class="emsi">
+      *List of Technologies and Skills provided by
+      <a href="https://skills.emsidata.com/emsi-open-skills-license-agreement.pdf" target="_blank">EMSI</a>. Additions
+      made by users are not endorsed by EMSI.
+    </p>
     <!-- Loop Technologies -->
     <div
       v-for="(technology, index) in editedTechnologies"
@@ -8,22 +13,17 @@
     >
       <!-- Name of Technology -->
       <v-combobox
-        class="pb-0"
+        class="pb-5"
         ref="formFields"
         v-model="technology.name"
         :rules="[duplicateRules(technology.name), ...getRequiredRules()]"
         :items="technologyDropDown"
-        label="Technology or Skill"
+        label="Technology or Skill*"
         data-vv-name="Technology"
         @input.native="updateTechDropDown(index)"
         clearable
       >
       </v-combobox>
-      <p class="emsi">
-        List of Technologies and Skills provided by
-        <a href="https://skills.emsidata.com/emsi-open-skills-license-agreement.pdf" target="_blank">EMSI</a>. Additions
-        made by users are not endorsed by EMSI.
-      </p>
       <!-- Time Intervals -->
       <v-row justify="center">
         <!-- Current Switch -->
