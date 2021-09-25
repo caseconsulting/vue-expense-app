@@ -68,6 +68,7 @@
         :items-per-page.sync="itemsPerPage"
         :search="search"
         class="elevation-1"
+        @click:row="handleClick"
       >
         <template v-slot:[`item.employeeNumber`]="{ item }">
           <p :class="{ selectFocus: isFocus(item) } + ' mb-0'">
@@ -184,6 +185,16 @@ function customFilter(item, queryText) {
 } // customFilter
 
 /**
+ * sets midAction boolean to false
+ *
+ * @param item - the employee
+ * @return the path to the employees profile
+ */
+function employeePath(item) {
+  return `/employee/${item.employeeNumber}`;
+} // employeePath
+
+/**
  * Gets the full name of an employee.
  *
  * @param item - the employee
@@ -193,6 +204,15 @@ function getFullName(item) {
   item.fullName = item.firstName + ' ' + item.lastName;
   return item.fullName;
 } // getFullName
+
+/**
+ * handles click event of the employee table entry
+ *
+ * @param item - the employee
+ */
+function handleClick(item) {
+  this.$router.push(employeePath(item));
+} //handleClick
 
 /**
  * Checks to see if an employee is expanded in the datatable.
@@ -452,7 +472,9 @@ export default {
     buildJobRolesColumn,
     constructAutoComplete,
     customFilter,
+    employeePath,
     getFullName,
+    handleClick,
     isFocus,
     populateDataTypeDropDowns,
     populateDropDowns,

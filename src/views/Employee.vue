@@ -19,9 +19,7 @@
     </v-snackbar>
     <v-row class="pl-3">
       <v-col align="left" justify="left">
-        <v-btn id="backToEmployeesBtn" elevation="2" to="/employees"
-          ><v-icon class="pr-1">arrow_back</v-icon>Back to Employees Page</v-btn
-        >
+        <v-btn id="backBtn" elevation="2" @click="$router.back()"><v-icon class="pr-1">arrow_back</v-icon>Back</v-btn>
       </v-col>
       <v-col v-if="hasAdminPermissions() || userIsEmployee()" align="right" justify="right">
         <v-btn
