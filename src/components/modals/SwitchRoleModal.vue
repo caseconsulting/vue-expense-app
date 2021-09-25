@@ -1,14 +1,28 @@
 <template>
   <div>
-    <v-dialog v-model="activate" persistent max-width="500">
+    <v-dialog v-model="activate" persistent max-width="310">
       <v-card>
         <v-card-title class="headline">Switch Role</v-card-title>
+        <v-card-subtitle class="mb-0 pb-0">Current Role: {{ roleOriginial }}</v-card-subtitle>
+        <v-card-actions class="my-0 py-0">
+          <v-radio-group v-model="roleSelected" mandatory>
+            <v-radio v-for="role in roles" :key="role" :label="`${role}`" :value="`${role}`"></v-radio>
+          </v-radio-group>
+        </v-card-actions>
         <v-card-actions>
-          <v-autocomplete v-model="roleSelected" :items="roles" clearable @click:clear="roleSelected = null">
-          </v-autocomplete>
-          <v-spacer></v-spacer>
-          <v-btn @click="switchRole()">Ok</v-btn>
-          <v-btn @click.native="$emit('close')">Cancel</v-btn>
+          <v-tooltip top>
+            <template v-slot:activator="{ on }">
+              <v-btn v-on="on" class="ma-2" @click="switchRole(true)">Full</v-btn>
+            </template>
+            <span>Switch role and logout</span>
+          </v-tooltip>
+          <v-tooltip top>
+            <template v-slot:activator="{ on }">
+              <v-btn v-on="on" class="ma-2" @click="switchRole(false)">Partial</v-btn>
+            </template>
+            <span>Switch role and redirect to default page</span>
+          </v-tooltip>
+          <v-btn class="ma-2" @click.native="$emit('close')">Cancel</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -17,7 +31,7 @@
 
 <script>
 import api from '@/shared/api.js';
-import { getRole, setRole } from '@/utils/auth';
+import { getRole, setRole, logout } from '@/utils/auth';
 // |--------------------------------------------------|
 // |                                                  |
 // |                 LIFECYCLE HOOKS                  |
@@ -43,22 +57,25 @@ function created() {
 /**
  * switches the user role in the app
  */
-async function switchRole() {
+async function switchRole(andLogout) {
   this.$nextTick(async function () {
-    if (this.roleSelected != this.roleOriginial) {
+    if (this.roleSelected.toLowerCase() != this.roleOriginial) {
       try {
         let user = await api.getUser();
         user.employeeRole = this.roleSelected.toLowerCase();
         await api.updateItem(api.EMPLOYEES, user); // update user employee role
 
         let employeeRole = await this.setRole();
-
-        if (employeeRole === 'admin') {
-          // user's role is admin
-          window.location.href = '/reimbursements';
+        if (andLogout) {
+          logout();
         } else {
-          // user's role is not admin
-          window.location.href = '/';
+          if (employeeRole === 'admin') {
+            // user's role is admin
+            window.location.href = '/reimbursements';
+          } else {
+            // user's role is not admin
+            window.location.href = '/';
+          }
         }
       } catch (error) {
         console.log(error);
