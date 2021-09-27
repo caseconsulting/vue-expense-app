@@ -74,7 +74,7 @@
             <v-list-item>
               <v-btn id="logoutBtn" text @click="handleLogout()">Logout</v-btn>
             </v-list-item>
-            <v-list-item v-if="enviornment != 'https://app.consultwithcase.com'">
+            <v-list-item v-if="environment != 'https://app.consultwithcase.com'">
               <v-btn text @click="switchRole = true">Switch Role</v-btn>
             </v-list-item>
           </v-list>
@@ -86,7 +86,7 @@
             <v-list-item>
               <v-btn text @click="handleLogout()">Logout</v-btn>
             </v-list-item>
-            <v-list-item v-if="enviornment != 'https://app.consultwithcase.com'">
+            <v-list-item v-if="environment != 'https://app.consultwithcase.com'">
               <v-btn text @click="switchRole = true">Switch Role</v-btn>
             </v-list-item>
             <hr role="separator" aria-orientation="horizontal" class="v-divider theme--light" :inset="inset" vertical />
@@ -131,7 +131,7 @@
         </v-col>
       </v-footer>
       <switch-role-modal
-        v-if="enviornment != 'production'"
+        v-if="environment != 'https://app.consultwithcase.com'"
         :toggleSwitchRole="switchRole"
         @close="switchRole = false"
       ></switch-role-modal>
@@ -240,8 +240,7 @@ function onResize() {
  * created lifecycle hook - set up listeners and getting access token and handle things for login
  */
 async function created() {
-  // check enviornment
-  this.enviornment = process.env.VUE_APP_AUTH0_CALLBACK;
+  this.environment = process.env.VUE_APP_AUTH0_CALLBACK;
 
   window.EventBus.$on('relog', handleLogout); // Session end - log out
   window.EventBus.$on('badgeExp', () => {
@@ -329,7 +328,7 @@ function $route(to, from) {
 
 export default {
   data: () => ({
-    enviornment: '',
+    environment: '',
     switchRole: false,
     floorPlan: floorPlan,
     drawer: isLoggedIn(),
