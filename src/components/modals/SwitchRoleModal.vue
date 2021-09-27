@@ -3,7 +3,9 @@
     <v-dialog v-model="activate" persistent max-width="310">
       <v-card>
         <v-card-title class="headline">Switch Role</v-card-title>
-        <v-card-subtitle class="mb-0 pb-0">Current Role: {{ roleOriginial }}</v-card-subtitle>
+        <v-card-subtitle class="mb-0 pb-0"
+          >Current Role: {{ roleOriginial.charAt(0).toUpperCase() + roleOriginial.slice(1) }}</v-card-subtitle
+        >
         <v-card-actions class="my-0 py-0">
           <v-radio-group v-model="roleSelected" mandatory>
             <v-radio v-for="role in roles" :key="role" :label="`${role}`" :value="`${role}`"></v-radio>
@@ -12,13 +14,7 @@
         <v-card-actions>
           <v-tooltip top>
             <template v-slot:activator="{ on }">
-              <v-btn v-on="on" class="ma-2" @click="switchRole(true)">Full</v-btn>
-            </template>
-            <span>Switch role and logout</span>
-          </v-tooltip>
-          <v-tooltip top>
-            <template v-slot:activator="{ on }">
-              <v-btn v-on="on" class="ma-2" @click="switchRole(false)">Partial</v-btn>
+              <v-btn v-on="on" class="ma-2" @click="switchRole(false)">Switch</v-btn>
             </template>
             <span>Switch role and redirect to default page</span>
           </v-tooltip>
@@ -31,7 +27,7 @@
 
 <script>
 import api from '@/shared/api.js';
-import { getRole, setRole, logout } from '@/utils/auth';
+import { getRole, setRole } from '@/utils/auth';
 // |--------------------------------------------------|
 // |                                                  |
 // |                 LIFECYCLE HOOKS                  |
@@ -57,7 +53,7 @@ function created() {
 /**
  * switches the user role in the app
  */
-async function switchRole(andLogout) {
+async function switchRole() {
   this.$nextTick(async function () {
     if (this.roleSelected.toLowerCase() != this.roleOriginial) {
       try {
@@ -66,16 +62,12 @@ async function switchRole(andLogout) {
         await api.updateItem(api.EMPLOYEES, user); // update user employee role
 
         let employeeRole = await this.setRole();
-        if (andLogout) {
-          logout();
+        if (employeeRole === 'admin') {
+          // user's role is admin
+          window.location.href = '/reimbursements';
         } else {
-          if (employeeRole === 'admin') {
-            // user's role is admin
-            window.location.href = '/reimbursements';
-          } else {
-            // user's role is not admin
-            window.location.href = '/';
-          }
+          // user's role is not admin
+          window.location.href = '/';
         }
       } catch (error) {
         console.log(error);
