@@ -67,14 +67,14 @@
               <img :src="profilePic" alt="avatar" v-on="on" />
             </v-avatar>
           </template>
-          <v-list v-if="!(isLoggedIn() && (isMobile || isSmallScreen))">
+          <v-list v-if="!(isMobile || isSmallScreen)">
             <v-list-item>
               <v-btn :disabled="onUserProfile" text @click="handleProfile()">Profile</v-btn>
             </v-list-item>
             <v-list-item>
               <v-btn id="logoutBtn" text @click="handleLogout()">Logout</v-btn>
             </v-list-item>
-            <v-list-item v-if="enviornment != 'production'">
+            <v-list-item v-if="enviornment != 'https://app.consultwithcase.com'">
               <v-btn text @click="switchRole = true">Switch Role</v-btn>
             </v-list-item>
           </v-list>
@@ -85,6 +85,9 @@
             </v-list-item>
             <v-list-item>
               <v-btn text @click="handleLogout()">Logout</v-btn>
+            </v-list-item>
+            <v-list-item v-if="enviornment != 'https://app.consultwithcase.com'">
+              <v-btn text @click="switchRole = true">Switch Role</v-btn>
             </v-list-item>
             <hr role="separator" aria-orientation="horizontal" class="v-divider theme--light" :inset="inset" vertical />
             <div class="v-subheader theme--light">Company Links</div>
@@ -238,7 +241,7 @@ function onResize() {
  */
 async function created() {
   // check enviornment
-  this.enviornment = process.env.NODE_ENV;
+  this.enviornment = process.env.VUE_APP_AUTH0_CALLBACK;
 
   window.EventBus.$on('relog', handleLogout); // Session end - log out
   window.EventBus.$on('badgeExp', () => {
