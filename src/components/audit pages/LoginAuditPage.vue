@@ -184,9 +184,9 @@ function generateTimeLabels(queryStart, queryEnd) {
     let suffix = currentHour >= 12 ? 'pm' : 'am';
     if (currentHour > 12) {
       currentHour -= 12;
-      if (currentHour == 0) {
-        currentHour = 12;
-      }
+    }
+    if (currentHour == 0) {
+      currentHour = 12;
     }
 
     returnObj[currentHour + suffix] = 0;
