@@ -72,39 +72,14 @@ async function fillData() {
     colors = '#bc3825';
     title = this.show24HourTitle
       ? 'Login Trend Data For Last 24 Hours'
-      : `Login Trend Data From ${moment(this.queryStartDate).format('MM/DD/YY')} to ${moment(this.queryEndDate).format(
-          'MM/DD/YY'
-        )}`;
+      : `Login Trend Data From ${moment(this.queryStartDate).format('MM/DD/YYYY hh:mm')} to ${moment(
+          this.queryEndDate
+        ).format('MM/DD/YYYY hh:mm')}`;
     showTooltips = true;
   }
   //used to collect login time data, with the keys representing a specific hour and
-  //each respective value representing the number of users logged in at that hour
-  let hoursAndLogins = {
-    '1am': 0,
-    '2am': 0,
-    '3am': 0,
-    '4am': 0,
-    '5am': 0,
-    '6am': 0,
-    '7am': 0,
-    '8am': 0,
-    '9am': 0,
-    '10am': 0,
-    '11am': 0,
-    '12pm': 0,
-    '1pm': 0,
-    '2pm': 0,
-    '3pm': 0,
-    '4pm': 0,
-    '5pm': 0,
-    '6pm': 0,
-    '7pm': 0,
-    '8pm': 0,
-    '9pm': 0,
-    '10pm': 0,
-    '11pm': 0,
-    '12am': 0
-  };
+  //each respective value representing the number of users logged in at that hour TODO: make this reactive to the current time
+  let hoursAndLogins = generateTimeLabels(this.queryStartDate, this.queryEndDate);
   //gets the dateCreated attribute for each login audit and grabs the hour and meidiem (am or pm)
   //to accumulate on the hoursAndLogins map
   _.forEach(this.loginAudits, (login) => {
@@ -189,6 +164,40 @@ function dateRange() {
 
 // |--------------------------------------------------|
 // |                                                  |
+// |                     METHODS                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * returns an object for the hours based on the most recent 24 hour period
+ *
+ * @param queryStart - start of the 24 hour period
+ * @param queryEnd - end of the 24 hour period
+ * @return - object with the last 24 hours as keys
+ */
+function generateTimeLabels(queryStart, queryEnd) {
+  let returnObj = {};
+  let currentTime = moment(queryStart);
+
+  while (currentTime.isBefore(moment(queryEnd))) {
+    let currentHour = currentTime.hour();
+    let suffix = currentHour >= 12 ? 'pm' : 'am';
+    if (currentHour > 12) {
+      currentHour -= 12;
+      if (currentHour == 0) {
+        currentHour = 12;
+      }
+    }
+
+    returnObj[currentHour + suffix] = 0;
+    currentTime = currentTime.add(1, 'hour');
+  }
+
+  return returnObj;
+} // generateTimeLabels
+
+// |--------------------------------------------------|
+// |                                                  |
 // |                     WATCHERS                     |
 // |                                                  |
 // |--------------------------------------------------|
@@ -220,7 +229,10 @@ export default {
   computed: {
     dateRange
   },
-  methods: { fillData },
+  methods: {
+    fillData,
+    generateTimeLabels
+  },
   props: ['queryStartDate', 'queryEndDate', 'show24HourTitle'],
   watch: {
     dateRange: watchDateRange
