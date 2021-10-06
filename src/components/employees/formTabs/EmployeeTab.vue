@@ -12,7 +12,6 @@
         :rules="getRequiredRules()"
         label="First Name"
         data-vv-name="First Name"
-        :disabled="!admin"
       ></v-text-field>
       <!-- Middle Name -->
       <v-text-field
@@ -22,7 +21,7 @@
         :rules="middleNameRules()"
         label="Middle Name"
         data-vv-name="Middle Name"
-        :disabled="!admin || editedEmployee.noMiddleName"
+        :disabled="editedEmployee.noMiddleName"
       ></v-text-field>
       <v-checkbox
         class="mt-0"
@@ -38,7 +37,6 @@
         :rules="getRequiredRules()"
         label="Last Name"
         data-vv-name="Last Name"
-        :disabled="!admin"
       ></v-text-field>
       <!-- Nickname -->
       <v-text-field
@@ -104,7 +102,6 @@
         offset-y
         max-width="290px"
         min-width="290px"
-        style="padding-right: 20px; padding-bottom: 20px"
         :disabled="!admin"
       >
         <template v-slot:activator="{ on }">
@@ -127,11 +124,49 @@
         <v-date-picker
           v-model="editedEmployee.hireDate"
           no-title
+          :max="editedEmployee.deptDate"
           @input="hireMenu = false"
           :disabled="!admin"
         ></v-date-picker>
       </v-menu>
-
+      <!-- If inactive, set Departure Date -->
+      <v-menu
+        v-if="isInactive()"
+        ref="departureMenu"
+        :rules="getRequiredRules()"
+        :close-on-content-click="false"
+        v-model="departureMenu"
+        :nudge-right="40"
+        transition="scale-transition"
+        offset-y
+        max-width="290px"
+        min-width="290px"
+        :disabled="!admin"
+      >
+        <template v-slot:activator="{ on }">
+          <v-text-field
+            ref="formFields"
+            v-model="deptDateFormatted"
+            :rules="[...getDateRules(), ...validateDates()]"
+            label="Departure Date"
+            hint="MM/DD/YYYY format"
+            v-mask="'##/##/####'"
+            persistent-hint
+            prepend-icon="event"
+            @blur="editedEmployee.deptDate = parseDate(deptDateFormatted)"
+            @input="departureMenu = false"
+            v-on="on"
+            :disabled="!admin"
+          ></v-text-field>
+        </template>
+        <v-date-picker
+          v-model="editedEmployee.deptDate"
+          no-title
+          :min="editedEmployee.hireDate"
+          @input="departureMenu = false"
+          :disabled="!admin"
+        ></v-date-picker>
+      </v-menu>
       <!-- Full/Part/Inactive Status [MOBILE] -->
       <v-radio-group v-if="isMobile()" v-model="statusRadio" row mandatory :disabled="!admin">
         <v-row class="ma-0">
@@ -183,45 +218,6 @@
         <!-- End Full/Part/Inactive Status [DESKTOP] -->
       </v-radio-group>
       <!-- End [DESKTOP] -->
-      <!-- If inactive, set Departure Date -->
-      <v-menu
-        v-if="isInactive()"
-        ref="departureMenu"
-        :rules="getRequiredRules()"
-        :close-on-content-click="false"
-        v-model="departureMenu"
-        :nudge-right="40"
-        transition="scale-transition"
-        offset-y
-        max-width="290px"
-        min-width="290px"
-        style="padding-right: 20px; padding-bottom: 20px"
-        :disabled="!admin"
-      >
-        <template v-slot:activator="{ on }">
-          <v-text-field
-            ref="formFields"
-            v-model="deptDateFormatted"
-            :rules="getDateRules()"
-            label="Departure Date"
-            hint="MM/DD/YYYY format"
-            v-mask="'##/##/####'"
-            persistent-hint
-            prepend-icon="event"
-            @blur="editedEmployee.deptDate = parseDate(deptDateFormatted)"
-            @input="departureMenu = false"
-            v-on="on"
-            :disabled="!admin"
-          ></v-text-field>
-        </template>
-        <v-date-picker
-          v-model="editedEmployee.deptDate"
-          no-title
-          @input="departureMenu = false"
-          :disabled="!admin"
-        ></v-date-picker>
-      </v-menu>
-      <!-- End Full/Part/Inactive Status [DESKTOP] -->
       <v-switch
         v-model="mifiStatus"
         label="Use Mifi instead of increased technology budget ($150)"
@@ -233,7 +229,7 @@
 <script>
 import api from '@/shared/api.js';
 import _ from 'lodash';
-import { getDateRules, getNumberRules, getRequiredRules } from '@/shared/validationUtils.js';
+import { getDateRules, getNumberRules, getRequiredRules, getValidateFalse } from '@/shared/validationUtils.js';
 import { formatDate, isEmpty, parseDate, isMobile } from '@/utils/utils';
 import { mask } from 'vue-the-mask';
 import { getRole } from '@/utils/auth';
@@ -253,15 +249,14 @@ const regex = /^(([^<>()[\]\\.,;:\s@#"]+(\.[^<>()[\]\\.,;:\s@#"]+)*)|(".+"))@con
  */
 async function created() {
   window.EventBus.$emit('created', 'employee'); // emit employee tab was created
-
   // get all employees
   this.employees = await api.getItems(api.EMPLOYEES);
   // set formatted hire date
-  this.hireDateFormatted = formatDate(this.editedEmployee.hireDate) || this.hireDateFormatted;
+  this.hireDateFormatted = this.formatDate(this.editedEmployee.hireDate) || this.hireDateFormatted;
   // set formatted depature date
-  this.deptDateFormatted = formatDate(this.editedEmployee.deptDate) || this.deptDateFormatted;
+  this.deptDateFormatted = this.formatDate(this.editedEmployee.deptDate) || this.deptDateFormatted;
   // fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
-  if (this.editedEmployee.deptDate !== null && !formatDate(this.editedEmployee.deptDate)) {
+  if (this.editedEmployee.deptDate !== null && !this.formatDate(this.editedEmployee.deptDate)) {
     // clear depature date if fails to format
     this.editedEmployee.deptDate = null;
   }
@@ -332,6 +327,7 @@ function isPartTime() {
 /**
  * Checks whether the current user role is admin, used specifically
  * to prevent the manager from changing their own role on the Employee tab
+ *
  * @return - boolean: true if the user role is admin
  */
 function userIsAdmin() {
@@ -342,7 +338,7 @@ function userIsAdmin() {
  * Checks if the profile accessed is the signed-in user's profile,
  * specifically used to prevent a manager from editing their own role
  *
- * @returns boolean - true if the profile is the user's profile
+ * @return boolean - true if the profile is the user's profile
  */
 function userIsEmployee() {
   if (this.$route.params.id == this.userId) {
@@ -353,7 +349,8 @@ function userIsEmployee() {
 
 /**
  * Checks whether the current user role is manager
- * @returns - boolean: true if the user role is a manager
+ *
+ * @return - boolean: true if the user role is a manager
  */
 function userIsManager() {
   return this.getRole() === 'manager';
@@ -402,6 +399,121 @@ function duplicateEmployeeNum() {
   window.EventBus.$emit('disableUpload', this.duplicate, this.editedEmployee.employeeNumber);
 } // duplicateEmployeeNum
 
+// |--------------------------------------------------|
+// |                                                  |
+// |                     WATCHERS                     |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * watcher for model.id - update the edited employee with the new model
+ */
+function watchModelID() {
+  this.editedEmployee = _.cloneDeep(this.model);
+} // watchModelID
+
+/**
+ * watcher for editedEmployee.employeeRole - format role
+ */
+function watchEditedEmployeeEmployeeRole() {
+  if (this.editedEmployee.employeeRole != 'User') {
+    this.employeeRoleFormatted = _.startCase(this.editedEmployee.employeeRole);
+  }
+} // watchEditedEmployeeEmployeeRole
+
+/**
+ * watcher for editedEmployee.deptDate - format date on change
+ */
+function watchEditedEmployeeDeptDate() {
+  this.deptDateFormatted = formatDate(this.editedEmployee.deptDate) || this.deptDateFormatted;
+  //fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
+  if (this.editedEmployee.deptDate !== null && !this.formatDate(this.editedEmployee.deptDate)) {
+    this.editedEmployee.deptDate = null;
+  }
+} // watchEditedEmployeeDeptDate
+
+/**
+ * watcher for editedEmployee.hireDate - format date on change
+ */
+async function watchEditedEmployeeHireDate() {
+  this.hasExpenses = this.editedEmployee.id
+    ? _.size(await api.getAllEmployeeExpenses(this.editedEmployee.id)) > 0
+    : false;
+  this.hireDateFormatted = this.formatDate(this.editedEmployee.hireDate) || this.hireDateFormatted;
+  //fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
+  if (this.editedEmployee.hireDate !== null && !this.formatDate(this.editedEmployee.hireDate)) {
+    this.editedEmployee.hireDate = null;
+  }
+} // watchEditedEmployeeHireDate
+
+/**
+ * watcher for editedEmployee.employeeNumber - determines disable on resume button
+ */
+function watchEditedEmployeeEmployeeNumber() {
+  let empNum = this.editedEmployee.employeeNumber;
+  // determine if the resume button should be disabled or not
+  if (empNum !== '' && !isNaN(empNum) && parseInt(empNum) > 0) {
+    window.EventBus.$emit('disableUpload', false, empNum);
+  } else {
+    window.EventBus.$emit('disableUpload', true, empNum);
+  }
+} // watchEditedEmployeeEmployeeNumber
+
+/**
+ * watcher for statusRadio - sets the status and edited employee work status
+ */
+function watchStatusRadio() {
+  if (this.statusRadio == 'full') {
+    this.status = '100';
+    this.editedEmployee.workStatus = 100;
+    this.editedEmployee.deptDate = null;
+  } else if (this.statusRadio == 'inactive') {
+    this.status = '0';
+    this.editedEmployee.workStatus = 0;
+    if (this.deptDateFormatted && this.parseDate(this.deptDateFormatted)) {
+      this.editedEmployee.deptDate = this.parseDate(this.deptDateFormatted);
+    }
+  } else {
+    this.editedEmployee.deptDate = null;
+  }
+} // watchStatusRadio
+
+/**
+ * watcher for status - sets workStatus for the edited employee
+ */
+function watchStatus() {
+  if (this.status) {
+    this.editedEmployee.workStatus = parseInt(this.status);
+  } else {
+    this.editedEmployee.workStatus = null;
+  }
+} // watchStatus
+
+/**
+ * watcher for mifiStatus sets the editedEmployee when mifiStatus changes
+ */
+function watchMifiStatus() {
+  this.editedEmployee.mifiStatus = this.mifiStatus;
+} // watchMifiStatus
+
+/**
+ * watcher for validating - validates fields
+ *
+ * @param val - val prop that needs to exist before validating
+ */
+function watchValidating(val) {
+  if (val) {
+    // parent component triggers validation
+    this.validateFields();
+  }
+} // watchValidating
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      EXPORT                      |
+// |                                                  |
+// |--------------------------------------------------|
+
 export default {
   created,
   data() {
@@ -410,7 +522,7 @@ export default {
       departureMenu: false, // display depature menu
       editedEmployee: _.cloneDeep(this.model), //employee that can be edited
       emailRules: [
-        (v) => !isEmpty(v) || 'Email is required',
+        (v) => !this.isEmpty(v) || 'Email is required',
         (v) => regex.test(v) || 'Not a valid @consultwithcase email address'
       ], // rules for an employee email
       employeeRoleFormatted: null,
@@ -452,7 +564,15 @@ export default {
       permissions: ['Admin', 'User', 'Intern', 'Manager'], // employee role options
       status: '100', // work status value
       statusRadio: 'full', // work status button
-      statusRules: [(v) => !isEmpty(v) || '', (v) => (v !== '0' && v !== '00') || ''],
+      statusRules: [(v) => !this.isEmpty(v) || '', (v) => (v !== '0' && v !== '00') || ''],
+      validateDates: () => {
+        // if the hire date is later than the departure date
+        if (this.editedEmployee.hireDate > this.editedEmployee.deptDate) {
+          return this.getValidateFalse();
+        } else {
+          return true;
+        }
+      },
       userId: null,
       value: '' // used for removing non-number characters from the workstatus
     };
@@ -466,6 +586,7 @@ export default {
     getNumberRules,
     getRequiredRules,
     getRole,
+    getValidateFalse,
     isEmpty,
     isInactive,
     isMobile,
@@ -479,71 +600,15 @@ export default {
   },
   props: ['admin', 'model', 'validating', 'disableEmpNum'],
   watch: {
-    'model.id': function () {
-      this.editedEmployee = _.cloneDeep(this.model);
-    },
-    'editedEmployee.employeeRole': function () {
-      if (this.editedEmployee.employeeRole != 'User') {
-        this.employeeRoleFormatted = _.startCase(this.editedEmployee.employeeRole);
-      }
-    },
-    'editedEmployee.deptDate': function () {
-      this.deptDateFormatted = formatDate(this.editedEmployee.deptDate) || this.deptDateFormatted;
-      //fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
-      if (this.editedEmployee.deptDate !== null && !formatDate(this.editedEmployee.deptDate)) {
-        this.editedEmployee.deptDate = null;
-      }
-    },
-    'editedEmployee.hireDate': async function () {
-      this.hasExpenses = this.editedEmployee.id
-        ? _.size(await api.getAllEmployeeExpenses(this.editedEmployee.id)) > 0
-        : false;
-      this.hireDateFormatted = formatDate(this.editedEmployee.hireDate) || this.hireDateFormatted;
-      //fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
-      if (this.editedEmployee.hireDate !== null && !formatDate(this.editedEmployee.hireDate)) {
-        this.editedEmployee.hireDate = null;
-      }
-    },
-    'editedEmployee.employeeNumber': function () {
-      let empNum = this.editedEmployee.employeeNumber;
-      // determine if the resume button should be disabled or not
-      if (empNum !== '' && !isNaN(empNum) && parseInt(empNum) > 0) {
-        window.EventBus.$emit('disableUpload', false, empNum);
-      } else {
-        window.EventBus.$emit('disableUpload', true, empNum);
-      }
-    },
-    statusRadio: function () {
-      if (this.statusRadio == 'full') {
-        this.status = '100';
-        this.editedEmployee.workStatus = 100;
-        this.editedEmployee.deptDate = null;
-      } else if (this.statusRadio == 'inactive') {
-        this.status = '0';
-        this.editedEmployee.workStatus = 0;
-        if (this.deptDateFormatted && parseDate(this.deptDateFormatted)) {
-          this.editedEmployee.deptDate = parseDate(this.deptDateFormatted);
-        }
-      } else {
-        this.editedEmployee.deptDate = null;
-      }
-    },
-    status: function () {
-      if (this.status) {
-        this.editedEmployee.workStatus = parseInt(this.status);
-      } else {
-        this.editedEmployee.workStatus = null;
-      }
-    },
-    mifiStatus: function () {
-      this.editedEmployee.mifiStatus = this.mifiStatus;
-    },
-    validating: function (val) {
-      if (val) {
-        // parent component triggers validation
-        this.validateFields();
-      }
-    }
+    'model.id': watchModelID,
+    'editedEmployee.employeeRole': watchEditedEmployeeEmployeeRole,
+    'editedEmployee.deptDate': watchEditedEmployeeDeptDate,
+    'editedEmployee.hireDate': watchEditedEmployeeHireDate,
+    'editedEmployee.employeeNumber': watchEditedEmployeeEmployeeNumber,
+    statusRadio: watchStatusRadio,
+    status: watchStatus,
+    mifiStatus: watchMifiStatus,
+    validating: watchValidating
   }
 };
 </script>

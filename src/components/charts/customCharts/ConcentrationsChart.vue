@@ -2,12 +2,17 @@
   <v-card v-if="dataReceived" class="pa-5">
     <pie-chart :options="options" :chartData="chartData"></pie-chart>
   </v-card>
-  <v-skeleton-loader v-else type="paragraph@5"></v-skeleton-loader>
 </template>
 
 <script>
 import PieChart from '../baseCharts/PieChart.vue';
 import _ from 'lodash';
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                 LIFECYCLE HOOKS                  |
+// |                                                  |
+// |--------------------------------------------------|
 
 /**
  * mounted lifecycle hook
@@ -27,6 +32,19 @@ function mounted() {
 function created() {
   this.fillData(null);
 } // created
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      METHODS                     |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * beforeDestroy lifecycle hook
+ */
+function beforeDestroy() {
+  window.EventBus.$off('concentrations-update');
+} //beforeDestroy
 
 /**
  * Sets up the formatting and data options for the chart.
@@ -105,6 +123,12 @@ function fillData(concentrations) {
   this.dataReceived = true;
 } // fillData
 
+// |--------------------------------------------------|
+// |                                                  |
+// |                      EXPORT                      |
+// |                                                  |
+// |--------------------------------------------------|
+
 export default {
   components: { PieChart },
   data() {
@@ -120,6 +144,7 @@ export default {
     fillData
   },
   mounted,
-  created
+  created,
+  beforeDestroy
 };
 </script>

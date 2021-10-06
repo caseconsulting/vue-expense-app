@@ -6,7 +6,7 @@
       <div v-for="(contract, index) in this.filteredList" :key="contract.name + index">
         <p><b>Contract: </b>{{ contract.name }}</p>
         <p><b>Prime: </b>{{ contract.prime }}</p>
-        <p><b>Time on Contract (in Years): </b>{{ getContractLengthInYears(contract) }}</p>
+        <p><b>Time on Contract: </b>{{ getContractLengthInYears(contract) }}</p>
         <div v-if="!isEmpty(contract.projects)">
           <div v-for="(project, projIndex) in contract.projects" :key="index + ' ' + projIndex" class="pb-1 px-4">
             <p v-if="contract.projects.length > 1">
@@ -37,11 +37,11 @@
                 </v-col>
               </v-row>
             </p>
-            <p><b>Time on Project (in Years): </b>{{ getProjectLengthInYears(project) }}</p>
-            <p><b>Start Date: </b>{{ monthDayYearFormat(project.startDate) }}</p>
+            <p><b>Start Date: </b>{{ project.startDate | monthYearFormat }}</p>
             <div v-if="project.endDate">
-              <p><b>End Date: </b>{{ monthDayYearFormat(project.endDate) }}</p>
+              <p><b>End Date: </b>{{ project.endDate | monthYearFormat }}</p>
             </div>
+            <p><b>Time on Project: </b>{{ getProjectLengthInYearsReadable(project) }}</p>
             <hr v-if="projIndex < contract.projects.length - 1" class="horizontalBar mb-3" />
           </div>
         </div>
@@ -64,7 +64,7 @@
 </template>
 
 <script>
-import { isEmpty, monthDayYearFormat } from '@/utils/utils';
+import { isEmpty, monthYearFormat } from '@/utils/utils';
 import moment from 'moment-timezone';
 
 // |--------------------------------------------------|
@@ -77,10 +77,10 @@ import moment from 'moment-timezone';
  * Emits to parent the component was created and get data for the list.
  */
 function created() {
-  if (!isEmpty(this.model.contracts)) {
+  if (!this.isEmpty(this.model.contracts)) {
     this.filteredList = this.model.contracts.slice(0, 5);
   }
-}
+} // created
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -96,36 +96,107 @@ function onPageChange() {
   var startIndex = 5 * (this.page - 1); //each page contains 5 contract entries
   var endIndex = startIndex + 5;
   this.filteredList = this.model.contracts.slice(startIndex, endIndex);
-}
+} // onPageChange
 
 /**
  * Converts the contracts' projects' dates to number of years on the contract
  *
  * @param contract the contract to get the info from
+ * @return number - number of years on the contract
  */
 function getContractLengthInYears(contract) {
-  let total = 0;
+  let total = moment.duration();
   if (contract.projects) {
-    contract.projects.forEach((project) => (total += Number(getProjectLengthInYears(project))));
+    contract.projects.forEach((project) => {
+      total.add(moment.duration(this.getProjectLengthInYears(project)));
+    });
   }
-  return total.toFixed(3);
-}
+  return dateReadable(total);
+} // getContractLengthInYears
+
+/**
+ * returns a readable format of the date/time
+ *
+ * @param time - the date/time
+ */
+function dateReadable(time) {
+  let read = '';
+  let comma = false;
+  if (time.years() > 0) {
+    comma = true;
+    read += time.years();
+    if (time.years() === 1) {
+      read += ' year';
+    } else {
+      read += ' years';
+    }
+  }
+
+  if (time.months() > 0) {
+    // add comma if needed
+    if (comma) {
+      read += ', ';
+    }
+    read += time.months();
+    if (time.months() === 1) {
+      read += ' month';
+    } else {
+      read += ' months';
+    }
+  }
+
+  return read;
+} // dateReadable
+
+/**
+ * return a readable project length instead of some other format
+ *
+ * @param project - the project
+ */
+function getProjectLengthInYearsReadable(project) {
+  let length = getProjectLengthInYears(project);
+  return dateReadable(length);
+} // getProjectLengthInYearsReadable
+
 /**
  * Converts the intervals to length of time in years
  *
  * @param project the project to convert
+ * @return number - time in years
  */
 function getProjectLengthInYears(project) {
   let startMoment = moment(project.startDate);
   let endMoment = moment(project.endDate);
   let length;
   if (project.endDate) {
-    length = moment.duration(endMoment.diff(startMoment)).asYears().toFixed(3);
+    length = moment.duration(endMoment.diff(startMoment));
   } else {
-    length = moment.duration(moment().diff(startMoment)).asYears().toFixed(3);
+    length = moment.duration(moment().diff(startMoment));
   }
-  return length < 0 ? '0.000' : length;
+  return length.add(1, 'month'); // add one month to include end month in calculation.
 }
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     FILTERS                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * filter that checks if value exists for current
+ *
+ * @param value - value to check
+ * @return - either 'yes' if it exists or 'no' otherwise
+ */
+function current(value) {
+  return value ? 'Yes' : 'No';
+} // current
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      EXPORT                      |
+// |                                                  |
+// |--------------------------------------------------|
 
 export default {
   created,
@@ -136,15 +207,15 @@ export default {
     };
   },
   filters: {
-    current: (value) => {
-      return value ? 'Yes' : 'No';
-    }
+    current,
+    monthYearFormat
   },
   methods: {
     getContractLengthInYears,
     getProjectLengthInYears,
+    getProjectLengthInYearsReadable,
+    dateReadable,
     isEmpty,
-    monthDayYearFormat,
     onPageChange
   },
   props: ['model']

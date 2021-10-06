@@ -165,7 +165,7 @@
         ></v-autocomplete>
 
         <!-- Accessibility -->
-        <div style="color: dimgray">
+        <div class="form-text">
           Employee Access
           <v-btn @click="toFAQ()" class="mb-4" x-small icon><v-icon color="#3f51b5">info</v-icon></v-btn>
         </div>
@@ -371,10 +371,10 @@ function clearForm() {
 
 /**
  * Custom filter for employee autocomplete options.
- *firstName: data.firstName
- * @param item -
- * @param queryText -
- * @return
+ *
+ * @param item - employee
+ * @param queryText - the text used to filter the names
+ * @return string - filtered employee
  */
 function customFilter(item, queryText) {
   const query = queryText ? queryText : '';
@@ -401,7 +401,7 @@ function emit(msg) {
  * Formats the budget on the form for a nicer display.
  */
 function formatBudget() {
-  this.editedExpenseType.budget = parseBudget(this.budgetFormatted);
+  this.editedExpenseType.budget = this.parseBudget(this.budgetFormatted);
   if (Number(this.editedExpenseType.budget)) {
     this.budgetFormatted = Number(this.editedExpenseType.budget).toLocaleString().toString();
   }
@@ -417,6 +417,11 @@ function isCustomSelected() {
   return this.editedExpenseType.accessibleBy && this.editedExpenseType.accessibleBy.includes('Custom');
 } // isCustomSelected
 
+/**
+ * overdraft flag hint
+ *
+ * @return string - the string flag hint
+ */
 function odFlagHint() {
   if (!!this.model.id && this.model.odFlag) {
     return 'Cannot be undone';
@@ -425,11 +430,13 @@ function odFlagHint() {
   } else {
     return '';
   }
-}
+} // odFlagHint
 
 /**
  * Parses the budget to get rid of commas.
- * @returns String - The budget without formatting
+ *
+ * @param budget - the budget to parse
+ * @return String - The budget without formatting
  */
 function parseBudget(budget) {
   if (budget && !_.isEmpty(budget)) {
@@ -439,10 +446,13 @@ function parseBudget(budget) {
   }
 } // parseBudget
 
+/**
+ * route to FAQ
+ */
 function toFAQ() {
   let faq = this.$router.resolve({ path: '/help/expenseTypes' });
   window.open(faq.href, '_blank');
-}
+} // toFAQ
 
 /**
  * Removes a category from the list of expense type categories.
@@ -570,6 +580,8 @@ function toggleRequireURL() {
 
 /**
  * boolean for checkBox appearance
+ *
+ * @return boolean - whether checkbox appears
  */
 function checkBoxRule() {
   return !(this.editedExpenseType.accessibleBy && this.editedExpenseType.accessibleBy.length > 0);
@@ -617,6 +629,116 @@ async function created() {
   this.clearForm();
 } // created
 
+/**
+ * beforeDestroy lifecycle hook
+ */
+function beforeDestroy() {
+  window.EventBus.$off('confirmed-type');
+  window.EventBus.$off('canceled-type');
+} //beforeDestroy
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     WATCHERS                     |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * watcher for model.id - sets the model as the editedExpenseType and check if it is editing
+ */
+function watchModelID() {
+  this.editedExpenseType = _.cloneDeep(this.model); //set editedExpense to new value of model
+
+  // set array used for custom access chip-selector to previously saved data but without the access strings
+  // This code sucks
+  if (this.editedExpenseType.accessibleBy.includes('Custom')) {
+    let index = 1;
+    if (this.editedExpenseType.accessibleBy.includes('FullTime')) {
+      index++;
+    }
+    if (this.editedExpenseType.accessibleBy.includes('PartTime')) {
+      index++;
+    }
+    if (this.editedExpenseType.accessibleBy.includes('Intern')) {
+      index++;
+    }
+    // set only the ids of people with custom access (don't include the access type)
+    this.customAccess = this.editedExpenseType.accessibleBy.splice(index, this.editedExpenseType.accessibleBy.length);
+  }
+
+  //when model id is not empty then must be editing an expense
+  if (!this.isEmpty(this.model.id)) {
+    this.emit('editing-expense-type'); //notify parent that expense is being edited
+  }
+  if (this.editedExpenseType.id != null) {
+    //map categories
+    this.categories = _.map(this.editedExpenseType.categories, (category) => {
+      return category.name;
+    });
+  }
+  this.editedExpenseType.budget = this.model.budget;
+  this.budgetFormatted = this.editedExpenseType.budget;
+  this.formatBudget();
+} // watchModelID
+
+/**
+ * watcher for categories - limits categories and updates checkboxes
+ *
+ * @param val - categories list
+ */
+function watchCategories(val) {
+  // limit categories to less than 10
+  if (val.length > 10) {
+    this.$nextTick(() => this.categories.pop());
+    this.$nextTick(() => this.editedExpenseType.categories.pop());
+  }
+
+  // update categories checkboxes
+  if (val.length > this.editedExpenseType.categories.length) {
+    // category was added
+    let c = _.map(this.editedExpenseType.categories, (category) => {
+      return category.name;
+    });
+
+    let index = _.findIndex(val, (x) => {
+      return !c.includes(x);
+    });
+
+    this.editedExpenseType.categories.push({
+      name: val[index],
+      showOnFeed: this.editedExpenseType.alwaysOnFeed,
+      requireURL: this.editedExpenseType.requireURL
+    });
+  } else if (val.length < this.editedExpenseType.categories.length) {
+    // category was removed
+    this.editedExpenseType.categories = _.filter(this.editedExpenseType.categories, (category) => {
+      return val.includes(category.name);
+    });
+  }
+} // watchCategories
+
+/**
+ * watcher for editedExpenseType.endDate - formats date
+ */
+function watchEditedExpenseTypeEndDate() {
+  this.endDateFormatted = this.formatDate(this.editedExpenseType.endDate) || this.endDateFormatted;
+  //fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
+  if (this.editedExpenseType.endDate !== null && !this.formatDate(this.editedExpenseType.endDate)) {
+    this.editedExpenseType.endDate = null;
+  }
+} // watchEditedExpenseTypeEndDate
+
+/**
+ * watcher for editedExpenseType.startDate - format date
+ */
+function watchEditedExpenseTypeStartDate() {
+  this.startDateFormatted = this.formatDate(this.editedExpenseType.startDate) || this.startDateFormatted;
+  //fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
+  if (this.editedExpenseType.startDate !== null && !this.formatDate(this.editedExpenseType.startDate)) {
+    this.editedExpenseType.startDate = null;
+  }
+} // watchEditedExpenseTypeStartDate
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                      EXPORT                      |
@@ -628,6 +750,7 @@ export default {
     FormSubmissionConfirmation
   },
   created,
+  beforeDestroy,
   data() {
     return {
       activeEmployees: null, // list of active employees
@@ -655,7 +778,7 @@ export default {
       ],
       startDateRules: [
         (v) => {
-          return !isEmpty(v) && moment(v, 'MM/DD/YYYY', true).isValid() && this.editedExpenseType.endDate
+          return !this.isEmpty(v) && moment(v, 'MM/DD/YYYY', true).isValid() && this.editedExpenseType.endDate
             ? moment(v, 'MM/DD/YYYY', true).isSameOrBefore(moment(this.editedExpenseType.endDate)) ||
                 'Start date must be at or before end date'
             : true;
@@ -663,7 +786,7 @@ export default {
       ],
       endDateRules: [
         (v) => {
-          return !isEmpty(v) && moment(v, 'MM/DD/YYYY', true).isValid() && this.editedExpenseType.startDate
+          return !this.isEmpty(v) && moment(v, 'MM/DD/YYYY', true).isValid() && this.editedExpenseType.startDate
             ? moment(v, 'MM/DD/YYYY', true).isSameOrAfter(moment(this.editedExpenseType.startDate)) ||
                 'End date must be at or after start date'
             : true;
@@ -707,67 +830,10 @@ export default {
     checkBoxRule
   },
   watch: {
-    'model.id': function () {
-      this.editedExpenseType = _.cloneDeep(this.model); //set editedExpense to new value of model
-
-      //when model id is not empty then must be editing an expense
-      if (!this.isEmpty(this.model.id)) {
-        this.emit('editing-expense-type'); //notify parent that expense is being edited
-      }
-      if (this.editedExpenseType.id != null) {
-        //map categories
-        this.categories = _.map(this.editedExpenseType.categories, (category) => {
-          return category.name;
-        });
-      }
-      this.editedExpenseType.budget = this.model.budget;
-      this.budgetFormatted = this.editedExpenseType.budget;
-      this.formatBudget();
-    },
-    categories: function (val) {
-      // limit categories to less than 10
-      if (val.length > 10) {
-        this.$nextTick(() => this.categories.pop());
-        this.$nextTick(() => this.editedExpenseType.categories.pop());
-      }
-
-      // update categories checkboxes
-      if (val.length > this.editedExpenseType.categories.length) {
-        // category was added
-        let c = _.map(this.editedExpenseType.categories, (category) => {
-          return category.name;
-        });
-
-        let index = _.findIndex(val, (x) => {
-          return !c.includes(x);
-        });
-
-        this.editedExpenseType.categories.push({
-          name: val[index],
-          showOnFeed: this.editedExpenseType.alwaysOnFeed,
-          requireURL: this.editedExpenseType.requireURL
-        });
-      } else if (val.length < this.editedExpenseType.categories.length) {
-        // category was removed
-        this.editedExpenseType.categories = _.filter(this.editedExpenseType.categories, (category) => {
-          return val.includes(category.name);
-        });
-      }
-    },
-    'editedExpenseType.endDate': function () {
-      this.endDateFormatted = this.formatDate(this.editedExpenseType.endDate) || this.endDateFormatted;
-      //fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
-      if (this.editedExpenseType.endDate !== null && !this.formatDate(this.editedExpenseType.endDate)) {
-        this.editedExpenseType.endDate = null;
-      }
-    },
-    'editedExpenseType.startDate': function () {
-      this.startDateFormatted = this.formatDate(this.editedExpenseType.startDate) || this.startDateFormatted;
-      //fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
-      if (this.editedExpenseType.startDate !== null && !this.formatDate(this.editedExpenseType.startDate)) {
-        this.editedExpenseType.startDate = null;
-      }
-    }
+    'model.id': watchModelID,
+    categories: watchCategories,
+    'editedExpenseType.endDate': watchEditedExpenseTypeEndDate,
+    'editedExpenseType.startDate': watchEditedExpenseTypeStartDate
   }
 };
 </script>

@@ -6,6 +6,13 @@
 </template>
 <script>
 import EmployeeContractTable from '@/components/EmployeeContractTable.vue';
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      EXPORT                      |
+// |                                                  |
+// |--------------------------------------------------|
+
 export default {
   components: {
     EmployeeContractTable

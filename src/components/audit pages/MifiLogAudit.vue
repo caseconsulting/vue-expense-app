@@ -1,14 +1,12 @@
 <template>
-  <v-card>
-    <v-container fluid>
-      <v-row>
-        <v-col>
-          <pie-chart v-if="chartLoaded" :options="mifiChartOptions" :chartData="mifiChartData"></pie-chart>
-        </v-col>
-      </v-row>
-      <audit-table :audits="mifiAudits"></audit-table>
-    </v-container>
-  </v-card>
+  <v-container fluid>
+    <v-row>
+      <v-col>
+        <pie-chart v-if="chartLoaded" :options="mifiChartOptions" :chartData="mifiChartData"></pie-chart>
+      </v-col>
+    </v-row>
+    <audit-table :audits="mifiAudits"></audit-table>
+  </v-container>
 </template>
 
 <script>
@@ -19,6 +17,26 @@ import AuditTable from '@/components/AuditTable';
 const moment = require('moment-timezone');
 moment.tz.setDefault('America/New_York');
 const IsoFormat = 'MMMM Do YYYY, h:mm:ss a';
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                 LIFECYCLE HOOKS                  |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * created lifecycle hook
+ */
+async function created() {
+  this.employees = await api.getItems(api.EMPLOYEES); // get all employees
+  this.fillData();
+} // created
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     METHODS                      |
+// |                                                  |
+// |--------------------------------------------------|
 
 /**
  * Generates chart data and table
@@ -62,15 +80,17 @@ async function fillData() {
     colors = 'grey';
     data = [1];
     showToolTips = false;
-    title = 'No Mifi Data Found For Selected Date Range';
+    title = this.show24HourTitle ? 'No Mifi Changes In Last 24 Hours' : 'No Mifi Changes In Selected Date Range';
   } else {
     colors = ['#450084', '#CBB677'];
     data = [haveMifiEnabled.length, haveMifiDisabled.length];
     labels = ['Enabled', 'Disabled'];
     showToolTips = true;
-    title = `Mifi Trend Data From ${moment(this.queryStartDate).format('MM/DD/YY')} to ${moment(
-      this.queryEndDate
-    ).format('MM/DD/YY')}`;
+    title = this.show24HourTitle
+      ? 'Mifi Changes For Last 24 Hours'
+      : `Mifi Changes From ${moment(this.queryStartDate).format('MM/DD/YY')} to ${moment(this.queryEndDate).format(
+          'MM/DD/YY'
+        )}`;
   }
 
   this.mifiChartData = {
@@ -96,16 +116,42 @@ async function fillData() {
     }
   };
   this.chartLoaded = true;
-}
+} // fillData
 
+// |--------------------------------------------------|
+// |                                                  |
+// |                     COMPUTED                     |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * returns the combined date range computed value
+ *
+ * @return - full date range
+ */
 function dateRange() {
   return `${this.queryStartDate} ${this.queryEndDate}`;
-}
+} // dateRange
 
-async function created() {
-  this.employees = await api.getItems(api.EMPLOYEES); // get all employees
+// |--------------------------------------------------|
+// |                                                  |
+// |                     WATCHERS                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * fills data when dateRange changes
+ */
+function watchDateRange() {
   this.fillData();
-}
+} // watchDateRange
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      EXPORT                      |
+// |                                                  |
+// |--------------------------------------------------|
+
 export default {
   components: { PieChart, AuditTable },
   computed: {
@@ -121,11 +167,9 @@ export default {
     };
   },
   methods: { fillData },
-  props: ['queryStartDate', 'queryEndDate'],
+  props: ['queryStartDate', 'queryEndDate', 'show24HourTitle'],
   watch: {
-    dateRange() {
-      this.fillData();
-    }
+    dateRange: watchDateRange
   }
 };
 </script>

@@ -2,7 +2,7 @@ Education
 <template>
   <div>
     <!-- Loop Education -->
-    <div class="py-3 px-5" style="border: 1px solid grey" v-for="(school, index) in editedDegrees" :key="index">
+    <div class="gray-border ma-0 py-3 px-5" v-for="(school, index) in editedDegrees" :key="index">
       <!-- Name of School -->
       <v-autocomplete
         ref="formFields"
@@ -42,7 +42,7 @@ Education
             <v-tooltip bottom slot="append-outer">
               <template v-slot:activator="{ on }">
                 <v-btn v-on="on" @click="deleteDegree(index, dIndex)" text icon
-                  ><v-icon style="color: grey" class="pr-1">delete</v-icon></v-btn
+                  ><v-icon class="case-gray pr-1">delete</v-icon></v-btn
                 >
               </template>
               <span>Delete Degree</span>
@@ -88,7 +88,7 @@ Education
         <!-- Loop Majors -->
         <div v-for="(major, mIndex) in degree.majors" :key="'major: ' + major + mIndex">
           <!-- Majors -->
-          <v-autocomplete
+          <v-combobox
             ref="formFields"
             v-model="degree.majors[mIndex]"
             :rules="[...getRequiredRules(), duplicateDiscipline('majors', major, index, dIndex)]"
@@ -100,12 +100,12 @@ Education
             <v-tooltip v-if="degree.majors.length > 1" bottom slot="append-outer">
               <template v-slot:activator="{ on }">
                 <v-btn text icon v-on="on" @click="deleteItem(degree.majors, mIndex)"
-                  ><v-icon style="color: grey">delete</v-icon></v-btn
+                  ><v-icon class="case-gray">delete</v-icon></v-btn
                 >
               </template>
               <span>Delete Major</span>
             </v-tooltip>
-          </v-autocomplete>
+          </v-combobox>
         </div>
         <!-- End Loop Majors -->
         <!-- Button to Add Major -->
@@ -129,7 +129,7 @@ Education
             <v-tooltip bottom slot="append-outer">
               <template v-slot:activator="{ on }">
                 <v-btn text icon v-on="on" @click="deleteItem(degree.minors, mIndex)">
-                  <v-icon style="color: grey">delete</v-icon>
+                  <v-icon class="case-gray">delete</v-icon>
                 </v-btn>
               </template>
               <span>Delete Minor</span>
@@ -158,7 +158,7 @@ Education
             <v-tooltip bottom slot="append-outer">
               <template v-slot:activator="{ on }">
                 <v-btn text icon v-on="on" @click="deleteItem(degree.concentrations, cIndex)">
-                  <v-icon style="color: grey">delete</v-icon>
+                  <v-icon class="case-gray">delete</v-icon>
                 </v-btn>
               </template>
               <span>Delete Concentration</span>
@@ -195,7 +195,7 @@ Education
         <v-tooltip bottom>
           <template v-slot:activator="{ on }">
             <v-btn v-on="on" @click="deleteSchool(index)" text icon
-              ><v-icon style="color: grey" class="pr-1">delete</v-icon></v-btn
+              ><v-icon class="case-gray pr-1">delete</v-icon></v-btn
             >
           </template>
           <span>Delete School</span>
@@ -251,6 +251,9 @@ async function created() {
   this.schoolDropDown[alias] = 'City University of New York (City Tech)';
   alias = this.schoolDropDown.indexOf('California Institute of Technology');
   this.schoolDropDown[alias] = 'California Institute of Technology (Caltech)';
+
+  //update drop downs with majors and minors not on the list
+  this.updateDropdowns();
 } // created
 
 // |--------------------------------------------------|
@@ -275,10 +278,11 @@ function denyEducation() {
 
 /**
  * Parse the date after losing focus.
- * @returns String - The date in YYYY-MM format
+ *
+ * @return String - The date in YYYY-MM format
  */
 function parseEventDate() {
-  return parseDateMonthYear(event.target.value);
+  return this.parseDateMonthYear(event.target.value);
 } //parseEventDate
 
 /**
@@ -302,7 +306,7 @@ function addSchool() {
 } // addSchool
 
 /**
- * Add a minor/major/concentration.
+ * Add an empty minor/major/concentration.
  *
  * @param array - array to add item to.
  */
@@ -311,7 +315,7 @@ function addItem(array) {
 } //addItem
 
 /**
- * Add a Degree for a school.
+ * Add an empty Degree for a school.
  *
  * @param index - index of school to add degree to
  */
@@ -359,8 +363,9 @@ function deleteItem(array, index) {
 
 /**
  * Changes the format of the string to title case
+ *
  * @param str - the string to be converted
- * @return the title case formatted string
+ * @return string - the title case formatted string
  */
 function titleCase(str) {
   str = str.toLowerCase().split(' ');
@@ -368,7 +373,41 @@ function titleCase(str) {
     str[i] = str[i].charAt(0).toUpperCase() + str[i].slice(1);
   }
   return str.join(' ');
-} //titleCase
+} // titleCase
+
+/**
+ * updates the dropdowns with employee data
+ */
+function updateDropdowns() {
+  let employeesMajorsAndMinors = _.map(this.employees, (employee) => {
+    let majorsAndMinors = _.map(employee.schools, (school) => {
+      return _.map(school.degrees, (degree) => {
+        if (degree.majors && degree.minors) {
+          return degree.majors.concat(degree.minors);
+        } else if (degree.majors) {
+          return degree.majors;
+        } else {
+          return degree.minors;
+        }
+      });
+    });
+
+    return _.flattenDeep(majorsAndMinors);
+  }); //extract technology
+
+  //remove empty arrays
+  let majorsAndMinors = _.remove(employeesMajorsAndMinors, (degrees) => {
+    return degrees.length != 0;
+  });
+
+  majorsAndMinors = _.flattenDeep(majorsAndMinors);
+  majorsAndMinors = _.compact(majorsAndMinors);
+
+  // //combine with no duplicates
+  this.concentrationDropDown = _.uniq([...this.concentrationDropDown, ...majorsAndMinors]);
+  this.majorDropDown = _.uniq([...this.majorDropDown, ...majorsAndMinors]);
+  this.minorDropDown = _.uniq([...this.minorDropDown, ...majorsAndMinors]);
+} // updateDropdowns
 
 /**
  * Validate all input fields are valid. Emit to parent the error status.
@@ -384,6 +423,30 @@ function validateFields() {
   window.EventBus.$emit('educationStatus', errorCount); // emit error status
   window.EventBus.$emit('doneValidating', 'education', this.editedDegrees); // emit done validating
 } // validateFields
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     WATCHERS                     |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * watcher for validating - validates fields
+ *
+ * @param val - val prop that needs to exist before validating
+ */
+function watchValidating(val) {
+  if (val) {
+    // parent component triggers validation
+    this.validateFields();
+  }
+} // watchValidating
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      EXPORT                      |
+// |                                                  |
+// |--------------------------------------------------|
 
 export default {
   created,
@@ -428,17 +491,13 @@ export default {
     deleteItem,
     parseDateMonthYear,
     titleCase,
+    updateDropdowns,
     validateFields
   },
   //Education index is only used in the resume parser
   props: ['model', 'validating', 'allowAdditions'],
   watch: {
-    validating: function (val) {
-      if (val) {
-        // parent component triggers validation
-        this.validateFields();
-      }
-    }
+    validating: watchValidating
   }
 };
 </script>

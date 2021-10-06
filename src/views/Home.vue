@@ -32,10 +32,10 @@
       <v-row class="pb-4">
         <!-- Title -->
         <v-col cols="12" md="6">
-          <v-row style="height: 80%" align="center" justify="center">
+          <v-row class="pt-5" align="center" justify="center">
             <h1 id="home-greeting">Hello, {{ employee.firstName }}!</h1>
           </v-row>
-          <v-row justify="center">
+          <v-row class="pt-2" justify="center">
             <v-btn class="mb-10" @click="handleProfile()" color="#bc3825" dark>View Profile</v-btn>
           </v-row>
         </v-col>
@@ -158,6 +158,8 @@ function getAnniversary() {
 
 /**
  * Get the days until the employee's next anniversary date.
+ *
+ * @return int - returns the difference between now and the anniversary in days
  */
 function getDaysUntil() {
   let now = moment();
@@ -181,6 +183,8 @@ function getDaysUntil() {
 
 /**
  * Get the seconds until the employee's next anniversary date.
+ *
+ * @return int - returns the difference between now and the anniversary in seconds
  */
 function getSecondsUntil() {
   if (this.actualTime) {
@@ -247,7 +251,7 @@ async function createEvents() {
         //hire date is before today
         let anniversary = moment([now.year(), hireDate.month(), hireDate.date()]); //set anniversary to hiredate but this year
         let diff = now.startOf('day').diff(anniversary.startOf('day'), 'day'); //difference between today and anniversary
-        event.date = getEventDateMessage(anniversary);
+        event.date = this.getEventDateMessage(anniversary);
         if (diff < -6) {
           anniversary.subtract(1, 'years');
           event.date = anniversary.format('ll');
@@ -301,7 +305,7 @@ async function createEvents() {
 
       let diff = now.startOf('day').diff(birthday.startOf('day'), 'day');
       // Get event date text
-      event.date = getEventDateMessage(birthday);
+      event.date = this.getEventDateMessage(birthday);
       if (diff < -6) {
         birthday.subtract(1, 'years');
         event.date = birthday.format('ll');
@@ -335,7 +339,7 @@ async function createEvents() {
       let now = moment();
       let reimbursedDate = moment(a.reimbursedDate, 'YYYY-MM-DD');
       let event = {};
-      event.date = getEventDateMessage(reimbursedDate);
+      event.date = this.getEventDateMessage(reimbursedDate);
       if (!this.isEmpty(a.url)) {
         event.link = a.url;
       }
@@ -372,7 +376,7 @@ async function createEvents() {
     let startDate = moment(a.starts_at);
     let endDate = moment(a.ends_at);
     let event = {};
-    event.date = getEventDateMessage(startDate);
+    event.date = this.getEventDateMessage(startDate);
     if (cutOff.isAfter(startDate.startOf('day'))) {
       return null;
     }
@@ -403,6 +407,7 @@ async function createEvents() {
  * get's the date message of the event
  *
  * @param date - the date of the event
+ * @return string - string denoting the date of when the event is coming
  */
 function getEventDateMessage(date) {
   let now = moment();
@@ -537,6 +542,7 @@ export default {
     addOneSecondToActualTimeEverySecond,
     createEvents,
     getCurrentBudgetYear,
+    getEventDateMessage,
     getTweets,
     isEmpty,
     refreshEmployee,

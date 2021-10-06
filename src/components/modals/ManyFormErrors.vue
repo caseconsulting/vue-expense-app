@@ -48,6 +48,7 @@ function emit(msg) {
  * changes text based on if there is one or if there is more than one
  *
  * @param val - the number that we go off of
+ * @return String - the ending of the text
  */
 function isPlural(val) {
   if (val === 1) {
@@ -55,6 +56,19 @@ function isPlural(val) {
   }
   return 'ies';
 } // isPlural
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                    WATCHERS                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * watcher for toggleSubmissionConfirmation
+ */
+function watchToggleSubmissionConfirmation() {
+  this.activate = this.toggleSubmissionConfirmation;
+} // watchToggleSubmissionConfirmation
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -77,9 +91,7 @@ export default {
     'toggleSubmissionConfirmation' // dialog activator
   ],
   watch: {
-    toggleSubmissionConfirmation: function () {
-      this.activate = this.toggleSubmissionConfirmation;
-    }
+    toggleSubmissionConfirmation: watchToggleSubmissionConfirmation
   }
 };
 </script>

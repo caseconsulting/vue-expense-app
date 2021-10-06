@@ -1,6 +1,12 @@
 const moment = require('moment-timezone');
 moment.tz.setDefault('America/New_York');
 
+/**
+ * formats the given date in MM/DD/YYYY
+ *
+ * @param date - the date to be formatted
+ * @return - the formatted date
+ */
 function formatDate(date) {
   if (!date) return null;
   else {
@@ -11,7 +17,7 @@ function formatDate(date) {
       return null;
     }
   }
-}
+} // formatDate
 
 /**
  * Takes an date object in ISO format 2020-01 and puts it in slash format 01/2020
@@ -29,6 +35,12 @@ function formatDateMonthYear(date) {
   }
 } // formatDateMonthYear
 
+/**
+ * parses the date to pad out date to return correct format
+ *
+ * @param {*} date - date to parse
+ * @return - the formatted date
+ */
 function parseDate(date) {
   if (!date) return null;
   else {
@@ -43,7 +55,7 @@ function parseDate(date) {
       return date;
     }
   }
-}
+} // parseDate
 
 /**
  * Takes an date object in in slash format MM/YYYY and translates it to valid ISO format YYYY-MM

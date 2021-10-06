@@ -21,7 +21,7 @@
         </div>
         <div v-else>
           <!-- Display Charge Code Hours -->
-          <div class="pt-3 px-5" style="border: 1px solid grey">
+          <div class="pt-3 gray-border">
             <v-row v-for="job in quickBooksTimeData.jobcodeHours" :key="job.name">
               {{ job.name }}:
               <v-spacer></v-spacer>
@@ -32,7 +32,7 @@
               <v-spacer></v-spacer>
               <div>
                 <p v-if="remainingHours > 0">{{ formatHours(totalHours) }} / {{ formatHours(workHours) }}</p>
-                <p v-else style="color: green">{{ formatHours(totalHours) }} / {{ formatHours(workHours) }}</p>
+                <p v-else class="green--text">{{ formatHours(totalHours) }} / {{ formatHours(workHours) }}</p>
               </div>
             </v-row>
           </div>
@@ -41,7 +41,7 @@
             Remaining Avg Hours/Day:
             <v-spacer></v-spacer>
             <p v-if="this.estimatedDailyHours < 24">{{ formatHours(this.estimatedDailyHours) }}</p>
-            <p v-else style="color: red">{{ formatHours(this.estimatedDailyHours) }}</p>
+            <p v-else class="red--text">{{ formatHours(this.estimatedDailyHours) }}</p>
           </v-row>
           <!-- Button to Show More -->
           <div v-if="!showMore" @click="showMore = true" align="center">
@@ -61,7 +61,7 @@
               <p v-if="this.workedHours < this.workHours - this.workDayHours * this.remainingWorkDays">
                 {{ formatHours(this.workedHours) }}
               </p>
-              <p v-else style="color: green">{{ formatHours(this.workedHours) }}</p>
+              <p v-else class="green--text">{{ formatHours(this.workedHours) }}</p>
             </v-row>
             <!-- Hours worked today -->
             <v-row>
@@ -70,7 +70,7 @@
               <p v-if="this.todaysHours < this.workDayHours">
                 {{ formatHours(this.todaysHours) }}
               </p>
-              <p v-else style="color: green">{{ formatHours(this.todaysHours) }}</p>
+              <p v-else class="green--text">{{ formatHours(this.todaysHours) }}</p>
             </v-row>
             <!-- Future hours for this month -->
             <v-row>
@@ -79,7 +79,7 @@
               <p v-if="this.futureHours < this.workDayHours * (this.remainingWorkDays - 1)">
                 {{ formatHours(this.futureHours) }}
               </p>
-              <p v-else style="color: green">{{ formatHours(this.futureHours) }}</p>
+              <p v-else class="green--text">{{ formatHours(this.futureHours) }}</p>
             </v-row>
             <!-- Work days left -->
             <v-row>
@@ -88,13 +88,7 @@
               <div>
                 <div>
                   <p>
-                    <input
-                      type="text"
-                      class="text-right"
-                      style="max-width: 40px"
-                      :value="this.userWorkDays"
-                      @input="updateEstimate"
-                    />
+                    <input type="text" class="text-right mw-50" :value="this.userWorkDays" @input="updateEstimate" />
                   </p>
                 </div>
               </div>
@@ -125,6 +119,8 @@ import { isEmpty } from '@/utils/utils';
 
 /**
  * Calculates and returns the remaining work days of the month.
+ *
+ * @return int - number of remaining working days
  */
 function remainingWorkDays() {
   let remainingWorkDays = 0;
@@ -168,6 +164,9 @@ async function created() {
 // |                                                  |
 // |--------------------------------------------------|
 
+/**
+ * calculates remaning work hours and sets workHours
+ */
 function calcWorkHours() {
   let workHours = 0;
   let day = moment().set('date', 1);
@@ -185,13 +184,20 @@ function calcWorkHours() {
 
 /**
  * Rounds hours to 2 decimal places.
+ *
  * @param hours the decimal number of hours
+ * @return number - the rounded number of hours
  */
 function roundHours(hours) {
   hours = Number(hours.toFixed(2));
   return hours;
 } // roundHours
 
+/**
+ * formats hours to a format for display
+ *
+ * @return string - the formatted hours and minutes (if showMinutes is true)
+ */
 function formatHours(hours) {
   if (this.showMinutes) {
     let hrs = parseInt(Number(hours));
@@ -203,7 +209,7 @@ function formatHours(hours) {
     hours = hrs + 'h ' + min + 'm';
     return hours;
   }
-  hours = roundHours(hours);
+  hours = this.roundHours(hours);
   return `${hours}h`;
 } // formatHours
 
@@ -212,7 +218,7 @@ function formatHours(hours) {
  */
 async function setMonthlyCharges() {
   this.employee = this.isEmployeeView ? this.passedEmployee : await api.getUser();
-  if (!isEmpty(this.employee.id)) {
+  if (!this.isEmpty(this.employee.id)) {
     this.workDayHours *= this.employee.workStatus * 0.01;
     // make call to api to get data
     this.quickBooksTimeData = await api.getMonthlyHours(this.employee.employeeNumber);
@@ -243,7 +249,7 @@ async function setMonthlyCharges() {
 function toFAQ() {
   let faq = this.$router.resolve({ path: '/help/hoursInfo' });
   window.open(faq.href, '_blank');
-}
+} // toFAQ
 
 /**
  * Updates the estimated daily hours based on number of work days and hours remaining
@@ -257,6 +263,21 @@ function updateEstimate(event) {
     this.estimatedDailyHours = roundHours(this.estimatedDailyHours);
   }
 } //updateEstimate
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     WATCHERS                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * watcher for passedEmployee.id
+ */
+async function watchPassedEmployeeID() {
+  if (this.isEmployeeView) {
+    await this.setMonthlyCharges();
+  }
+} // watchPassedEmployeeID
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -292,17 +313,14 @@ export default {
     calcWorkHours,
     formatHours,
     isEmpty,
+    roundHours,
     setMonthlyCharges,
     toFAQ,
     updateEstimate
   },
   props: ['passedEmployee', 'showMinutes'],
   watch: {
-    'passedEmployee.id': async function () {
-      if (this.isEmployeeView) {
-        await this.setMonthlyCharges();
-      }
-    }
+    'passedEmployee.id': watchPassedEmployeeID
   }
 };
 </script>

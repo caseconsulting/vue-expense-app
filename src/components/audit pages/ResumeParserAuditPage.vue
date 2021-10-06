@@ -1,18 +1,16 @@
 <template>
-  <v-card>
-    <v-container fluid>
-      <v-row>
-        <v-col cols="12">
-          <pie-chart :options="resumeChartOptions" :chartData="resumeChartData"></pie-chart>
-        </v-col>
-        <v-col>
-          <pie-chart :options="resumeChart2Options" :chartData="resumeChart2Data"></pie-chart>
-        </v-col>
-      </v-row>
-      <v-divider class="mt-5"></v-divider>
-      <audit-table :audits="resumeAudits"></audit-table>
-    </v-container>
-  </v-card>
+  <v-container fluid>
+    <v-row>
+      <v-col cols="6">
+        <pie-chart :options="resumeChartOptions" :chartData="resumeChartData"></pie-chart>
+      </v-col>
+      <v-col cols="6">
+        <pie-chart :options="resumeChart2Options" :chartData="resumeChart2Data"></pie-chart>
+      </v-col>
+    </v-row>
+    <v-divider class="mt-5"></v-divider>
+    <audit-table :audits="resumeAudits"></audit-table>
+  </v-container>
 </template>
 
 <script>
@@ -24,6 +22,15 @@ const moment = require('moment-timezone');
 moment.tz.setDefault('America/New_York');
 const IsoFormat = 'MMMM Do YYYY, h:mm:ss a';
 
+// |--------------------------------------------------|
+// |                                                  |
+// |                      METHODS                     |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * Generates chart data and table
+ */
 async function fillData() {
   this.resumeAudits = [];
   let resumeAudits = await api.getAudits('resume', this.queryStartDate, this.queryEndDate);
@@ -67,12 +74,14 @@ async function fillData() {
     labels = ['Successful', 'Failed'];
     data = [successes, failures];
     backgroundColor = ['rgba(50, 168, 82, 1)', 'rgba(230, 61, 55, 1)'];
-    text = 'Proportion of Resumes Successfully Parsed';
+    text = this.show24HourTitle
+      ? 'Proportion of Resumes Successfully Parsed In Last 24 Hours'
+      : 'Proportion of Resumes Successfully Parsed';
     showToolTips = true;
   } else {
     data = [1];
     backgroundColor = ['grey'];
-    text = 'No Resume Parser Audits in Time Frame';
+    text = this.show24HourTitle ? 'No Resume Parser Audits In Last 24 Hours' : 'No Resume Parser Audits in Date Range';
     showToolTips = false;
   }
 
@@ -112,12 +121,14 @@ async function fillData() {
     labels = ['Only Successful Parse', 'Submitted Changes'];
     data = [successes - numSubmits, numSubmits];
     backgroundColor = ['rgba(134, 31, 65, 1)', 'rgba(232, 119, 34, 1)'];
-    text = 'Proportion of People Who Submitted Changes';
+    text = this.show24HourTitle
+      ? 'Proportion of People Who Submitted Changes In Last 24 Hours'
+      : 'Proportion of People Who Submitted Changes';
     showToolTips = true;
   } else {
     data = [1];
     backgroundColor = ['grey'];
-    text = 'No Resume Parser Audits in Time Frame';
+    text = this.show24HourTitle ? 'No Resume Parser Audits In Last 24 Hours' : 'No Resume Parser Audits Date Range';
     showToolTips = false;
   }
 
@@ -143,7 +154,13 @@ async function fillData() {
       enabled: showToolTips
     }
   };
-}
+} // fillData
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                 LIFECYCLE HOOKS                  |
+// |                                                  |
+// |--------------------------------------------------|
 
 /**
  * created lifecycle hook
@@ -152,6 +169,32 @@ async function created() {
   this.employees = await api.getItems(api.EMPLOYEES); // get all employees
   await this.fillData();
 } //created
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     WATCHERS                     |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * watcher for queryStartDate - fillData
+ */
+async function watchQueryStartDate() {
+  await this.fillData();
+} // watchQueryStartDate
+
+/**
+ * watcher for queryEndDate - fillData
+ */
+async function watchQueryEndDate() {
+  await this.fillData();
+} // watchQueryEndDate
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      EXPORT                      |
+// |                                                  |
+// |--------------------------------------------------|
 
 export default {
   components: { AuditTable, PieChart },
@@ -190,14 +233,10 @@ export default {
   methods: {
     fillData
   },
-  props: ['queryStartDate', 'queryEndDate'],
+  props: ['queryStartDate', 'queryEndDate', 'show24HourTitle'],
   watch: {
-    async queryStartDate() {
-      await this.fillData();
-    },
-    async queryEndDate() {
-      await this.fillData();
-    }
+    queryStartDate: watchQueryStartDate,
+    queryEndDate: watchQueryEndDate
   }
 };
 </script>

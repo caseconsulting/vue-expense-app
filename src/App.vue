@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <v-app style="background: #f5f5f5">
+    <v-app>
       <v-navigation-drawer
         light
         v-model="drawer"
@@ -19,15 +19,10 @@
           <img src="@/assets/img/case-logo-circle.png" class="logo-bar" />
         </v-avatar>
         <v-toolbar-title v-show="!isMobile">
-          <h1 class="d-inline" style="text-align: center">
-            Case
-            <a id="P" class="white--text" target="_blank" href="https://tinyurl.com/2u2vhzw9">P</a>ortal
-          </h1>
+          <h1 class="d-inline">Case Portal</h1>
         </v-toolbar-title>
         <!-- In Mobile View decrease title size-->
-        <h1 v-show="isMobile" class="font-25" style="text-align: center">
-          Case <a id="P" class="white--text" target="_blank" href="https://tinyurl.com/2u2vhzw9">P</a>ortal
-        </h1>
+        <h1 v-show="isMobile" class="font-25">Case Portal</h1>
         <v-spacer></v-spacer>
         <!-- Display social media icons and links dropdown menu -->
         <v-item-group class="hidden-sm-and-down" v-show="isLoggedIn() && !isMobile">
@@ -72,12 +67,15 @@
               <img :src="profilePic" alt="avatar" v-on="on" />
             </v-avatar>
           </template>
-          <v-list v-if="!(isLoggedIn() && (isMobile || isSmallScreen))">
+          <v-list v-if="!(isMobile || isSmallScreen)">
             <v-list-item>
               <v-btn :disabled="onUserProfile" text @click="handleProfile()">Profile</v-btn>
             </v-list-item>
             <v-list-item>
               <v-btn id="logoutBtn" text @click="handleLogout()">Logout</v-btn>
+            </v-list-item>
+            <v-list-item v-if="environment != 'https://app.consultwithcase.com'">
+              <v-btn text @click="switchRole = true">Switch Role</v-btn>
             </v-list-item>
           </v-list>
           <!--In MOBILE VIEW/Smaller Screen sizes display all links under the user image dropdown-->
@@ -87,6 +85,9 @@
             </v-list-item>
             <v-list-item>
               <v-btn text @click="handleLogout()">Logout</v-btn>
+            </v-list-item>
+            <v-list-item v-if="environment != 'https://app.consultwithcase.com'">
+              <v-btn text @click="switchRole = true">Switch Role</v-btn>
             </v-list-item>
             <hr role="separator" aria-orientation="horizontal" class="v-divider theme--light" :inset="inset" vertical />
             <div class="v-subheader theme--light">Company Links</div>
@@ -113,19 +114,27 @@
         </v-container>
       </v-main>
       <v-footer padless>
-        <v-col class="text-right text-caption" cols="12"
-          ><strong
-            >V<a
-              id="P"
-              class="black--text"
-              target="_blank"
-              href="https://www.youtube.com/watch?v=dfdGd31gNjI&t=3s&ab_channel=GrayWalf"
-              >e</a
-            >rsion</strong
-          >
-          {{ version }}</v-col
-        >
+        <v-col class="text-right text-caption" cols="12">
+          <v-tooltip top>
+            <template v-slot:activator="{ on }">
+              <a
+                v-on="on"
+                id="P"
+                class="black--text"
+                target="_blank"
+                href="https://3.basecamp.com/3097063/buckets/4708396/documents/4131882771"
+                ><strong>Version</strong> {{ version }}</a
+              >
+            </template>
+            <span>View Release Notes</span>
+          </v-tooltip>
+        </v-col>
       </v-footer>
+      <switch-role-modal
+        v-if="environment != 'https://app.consultwithcase.com'"
+        :toggleSwitchRole="switchRole"
+        @close="switchRole = false"
+      ></switch-role-modal>
       <time-out-modal :toggleTimeOut="timedOut"></time-out-modal>
       <time-out-warning-modal :toggleWarning="session"></time-out-warning-modal>
     </v-app>
@@ -135,6 +144,7 @@
 <script>
 import { isLoggedIn, logout, getProfile, getTokenExpirationDate, getAccessToken } from '@/utils/auth';
 import { isMobile } from '@/utils/utils';
+import SwitchRoleModal from '@/components/modals/SwitchRoleModal.vue';
 import MainNav from '@/components/MainNav.vue';
 import TimeOutModal from '@/components/modals/TimeOutModal.vue';
 import TimeOutWarningModal from '@/components/modals/TimeOutWarningModal.vue';
@@ -161,7 +171,8 @@ function onUserProfile() {
     return false;
   }
   return this.$route.params.id === this.userId.toString();
-}
+} // onUserProfile
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                     METHODS                      |
@@ -170,6 +181,8 @@ function onUserProfile() {
 
 /**
  * idk what this does
+ *
+ * @param index - its a rick roll interns 2021
  */
 function badumbadumdodooodoo(index) {
   let oldLink = this.links[index].link;
@@ -198,18 +211,24 @@ function badumbadumdodooodoo(index) {
  */
 function handleLogout() {
   logout();
-}
+} // handleLogout
 
+/**
+ * redirects to user's employee page
+ */
 async function handleProfile() {
   // We don't use this.userId becuase it may be null by the time we click the button
   var user = await api.getUser();
   let userId = user.employeeNumber;
   this.$router.push({ name: 'employee', params: { id: `${userId}` } });
-}
+} // handleProfile
 
+/**
+ * resize the window for small screens
+ */
 function onResize() {
   this.isSmallScreen = window.innerWidth < 960;
-}
+} // onResize
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -217,7 +236,12 @@ function onResize() {
 // |                                                  |
 // |--------------------------------------------------|
 
+/**
+ * created lifecycle hook - set up listeners and getting access token and handle things for login
+ */
 async function created() {
+  this.environment = process.env.VUE_APP_AUTH0_CALLBACK;
+
   window.EventBus.$on('relog', handleLogout); // Session end - log out
   window.EventBus.$on('badgeExp', () => {
     this.badgeKey++;
@@ -255,16 +279,46 @@ async function created() {
   this.version = require('../package.json').version;
 }
 
-async function beforeDestroy() {
+/**
+ * beforeDestroy lifecycle hook - close event listener
+ */
+function beforeDestroy() {
   if (typeof window !== 'undefined') {
     window.removeEventListener('resize', this.onResize, { passive: true });
   }
-}
+  window.EventBus.$off('relog');
+  window.EventBus.$off('badgeExp');
+} //beforeDestroy
 
+/**
+ * mounted lifecycle hook - resize window create event listener
+ */
 async function mounted() {
   this.onResize();
   window.addEventListener('resize', this.onResize, { passive: true });
-}
+} // mounted
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     WATCHERS                     |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * fixes route to profile
+ *
+ * @param to - the place to route to
+ * @param from - the place you were routed from
+ */
+function $route(to, from) {
+  if (to.params.id && from.params.id) {
+    this.$router.go(this.$router.currentPath);
+  }
+  //updates badge expiration warning whenever you leave your user profile
+  if (from.params.id) {
+    this.badgeKey++;
+  }
+} // $route
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -274,6 +328,8 @@ async function mounted() {
 
 export default {
   data: () => ({
+    environment: '',
+    switchRole: false,
     floorPlan: floorPlan,
     drawer: isLoggedIn(),
     inset: false,
@@ -319,7 +375,8 @@ export default {
     MainNav,
     TimeOutModal,
     TimeOutWarningModal,
-    BadgeExpirationBanner
+    BadgeExpirationBanner,
+    SwitchRoleModal
   },
   methods: {
     badumbadumdodooodoo,
@@ -329,16 +386,7 @@ export default {
     onResize
   },
   watch: {
-    //fixes when you're on another employee's page and want to access your profile
-    $route(to, from) {
-      if (to.params.id && from.params.id) {
-        this.$router.go(this.$router.currentPath);
-      }
-      //updates badge expiration warning whenever you leave your user profile
-      if (from.params.id) {
-        this.badgeKey++;
-      }
-    }
+    $route
   },
   beforeDestroy,
   mounted,
@@ -355,6 +403,7 @@ export default {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   color: #3f3f3c;
+  background: #f5f5f5;
 }
 
 .e {

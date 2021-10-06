@@ -1,7 +1,7 @@
 <template>
   <div>
     <!-- Experience in IC -->
-    <div style="border: 1px solid grey" class="pt-3 pb-1 px-5">
+    <div class="gray-border ma-0 pt-3 pb-1 px-5">
       <!-- Experience in IC Header -->
       <div class="pb-2">
         <b>Experience in IC:</b>
@@ -39,7 +39,7 @@
               <v-tooltip top slot="append-outer">
                 <template v-slot:activator="{ on }">
                   <v-btn class="pb-3" v-on="on" icon text @click="deleteICTimeFrame(index)"
-                    ><v-icon style="color: grey">delete</v-icon></v-btn
+                    ><v-icon class="case-gray">delete</v-icon></v-btn
                   >
                 </template>
                 <span>Delete IC Time Frame</span>
@@ -60,7 +60,7 @@
     <!-- End Experience in IC -->
 
     <!-- Case Info -->
-    <div style="border: 1px solid grey" class="pt-2 pb-1 px-5">
+    <div class="gray-border ma-0 pt-2 pb-1 px-5">
       <!-- Company Name -->
       <v-text-field label="Company" data-vv-name="Company" disabled value="Case Consulting"></v-text-field>
 
@@ -89,8 +89,7 @@
     <!-- Loop Jobs -->
     <div
       v-for="(company, compIndex) in editedJobExperienceInfo.companies"
-      style="border: 1px solid grey"
-      class="pt-3 pb-1 px-5"
+      class="gray-border ma-0 pt-3 pb-1 px-5"
       :key="compIndex"
     >
       <!-- Company Name -->
@@ -108,7 +107,7 @@
       <div v-for="(position, index) in company.positions" :key="index">
         <!-- Job Position -->
         <div v-if="editedJobExperienceInfo.companies[compIndex].positions.length === 1">
-          <v-combobox
+          <v-text-field
             ref="formFields"
             :id="'pos-field-' + compIndex + '-' + index"
             v-model.trim="position.title"
@@ -116,10 +115,10 @@
             label="Position"
             data-vv-name="Position"
             clearable
-          ></v-combobox>
+          ></v-text-field>
         </div>
         <div v-else>
-          <v-combobox
+          <v-text-field
             ref="formFields"
             :id="'pos-field-' + compIndex + '-' + index"
             v-model.trim="position.title"
@@ -132,12 +131,12 @@
             <v-tooltip bottom slot="append-outer">
               <template v-slot:activator="{ on }">
                 <v-btn text icon v-on="on" @click="deletePosition(compIndex, index)"
-                  ><v-icon style="color: grey">delete</v-icon></v-btn
+                  ><v-icon class="case-gray">delete</v-icon></v-btn
                 >
               </template>
               <span>Delete Position</span>
             </v-tooltip>
-          </v-combobox>
+          </v-text-field>
         </div>
 
         <v-row>
@@ -245,7 +244,7 @@
         <v-tooltip bottom>
           <template v-slot:activator="{ on }">
             <v-btn text icon v-on="on" @click="deleteCompany(compIndex)"
-              ><v-icon style="color: grey">delete</v-icon></v-btn
+              ><v-icon class="case-gray">delete</v-icon></v-btn
             >
           </template>
           <span>Delete Company</span>
@@ -404,7 +403,7 @@ function formatRange(range) {
  * Checks if the current company has any positions without an end date
  *
  * @param index The index of the company in the editedJobExperienceInfo.companies
- * @return whether or not the positions for that company have all their end dates filled
+ * @return boolean - whether or not the positions for that company have all their end dates filled
  */
 function hasEndDatesFilled(index) {
   let hasEndDatesFilled = true;
@@ -417,10 +416,11 @@ function hasEndDatesFilled(index) {
 
 /**
  * Parse the date after losing focus.
- * @returns String - the date in YYYY-MM format
+ *
+ * @return String - the date in YYYY-MM format
  */
 function parseEventDate() {
-  return parseDateMonthYear(event.target.value);
+  return this.parseDateMonthYear(event.target.value);
 } //parseEventDate
 
 /**
@@ -461,7 +461,7 @@ function validateFields() {
   });
 
   // Fail safe in case users or inters somehow change their disabled info
-  if (getRole() === 'user' || getRole() === 'intern') {
+  if (this.getRole() === 'user' || this.getRole() === 'intern') {
     this.editedJobExperienceInfo.jobRole = this.model.jobRole;
     this.editedJobExperienceInfo.hireDate = this.model.hireDate;
   }
@@ -478,6 +478,30 @@ function validateFields() {
   window.EventBus.$emit('jobExperienceStatus', errorCount); // emit error status
 } // validateFields
 
+// |--------------------------------------------------|
+// |                                                  |
+// |                     WATCHERS                     |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * watcher for validating - validates fields
+ *
+ * @param val - val prop that needs to exist before validating
+ */
+function watchValidating(val) {
+  if (val) {
+    // parent component triggers validation
+    this.validateFields();
+  }
+} // watchValidating
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      EXPORT                      |
+// |                                                  |
+// |--------------------------------------------------|
+
 export default {
   computed: {
     isMobile
@@ -491,7 +515,7 @@ export default {
       dateOrderRule: (compIndex, posIndex) => {
         if (this.editedJobExperienceInfo !== undefined) {
           let position = this.editedJobExperienceInfo.companies[compIndex].positions[posIndex];
-          return !isEmpty(position.endDate) && moment(position.endDate) && position.startDate
+          return !this.isEmpty(position.endDate) && moment(position.endDate) && position.startDate
             ? moment(position.endDate).add(1, 'd').isAfter(moment(position.startDate)) ||
                 'End date must be at or after start date'
             : true;
@@ -508,7 +532,7 @@ export default {
       endDatePresentRule: (compIndex, posIndex) => {
         if (this.editedJobExperienceInfo !== undefined) {
           let position = this.editedJobExperienceInfo.companies[compIndex].positions[posIndex];
-          if (position.presentDate == false && isEmpty(position.endDate)) {
+          if (position.presentDate == false && this.isEmpty(position.endDate)) {
             return 'End Date is required';
           } else {
             return true;
@@ -537,8 +561,10 @@ export default {
     getDateMonthYearOptionalRules,
     getRequiredRules,
     hasEndDatesFilled,
+    parseDateMonthYear,
     parseEventDate,
     formatRange,
+    getRole,
     isEmpty,
     populateDropDowns,
     setIndices,
@@ -546,12 +572,7 @@ export default {
   },
   props: ['model', 'validating'],
   watch: {
-    validating: function (val) {
-      if (val) {
-        // parent component triggers validation
-        this.validateFields();
-      }
-    }
+    validating: watchValidating
   }
 };
 </script>

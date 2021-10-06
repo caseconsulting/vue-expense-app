@@ -18,7 +18,7 @@
                 <v-list-item @click="selectDropDown('jobExperience')">Job Experience</v-list-item>
                 <v-list-item @click="selectDropDown('certifications')">Certifications</v-list-item>
                 <v-list-item @click="selectDropDown('awards')">Awards</v-list-item>
-                <v-list-item @click="selectDropDown('technologies')">Technologies</v-list-item>
+                <v-list-item @click="selectDropDown('technologies')">Tech and Skills</v-list-item>
                 <v-list-item @click="selectDropDown('customerOrgExp')">Customer Org</v-list-item>
                 <v-list-item @click="selectDropDown('contracts')">Contracts</v-list-item>
                 <v-list-item @click="selectDropDown('clearance')">Clearance</v-list-item>
@@ -61,7 +61,7 @@
         <v-tab href="#jobExperience">Job Experience</v-tab>
         <v-tab href="#certifications">Certifications</v-tab>
         <v-tab href="#awards">Awards</v-tab>
-        <v-tab href="#technologies">Technologies</v-tab>
+        <v-tab href="#technologies">Tech and Skills</v-tab>
         <v-tab href="#customerOrgExp">Customer Org</v-tab>
         <v-tab href="#contracts">Contracts</v-tab>
         <v-tab href="#clearance" v-if="hasAdminPermissions() || userIsEmployee()">Clearance</v-tab>
@@ -129,7 +129,7 @@ moment.tz.setDefault('America/New_York');
  * @return boolean - returns true if user is an admin or manager
  */
 function hasAdminPermissions() {
-  return getRole() === 'admin' || getRole() === 'manager';
+  return this.getRole() === 'admin' || this.getRole() === 'manager';
 } // hasAdminPermissions
 
 /**
@@ -146,7 +146,7 @@ function userIsEmployee() {
  */
 function selectDropDown(name) {
   this.infoTab = name;
-}
+} // selectDropDown
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -171,6 +171,8 @@ async function created() {
 
 /**
  * computed boolean to decide whether or not to use dropdown
+ *
+ * @return boolean - returns true for small screens
  */
 function useDropDown() {
   switch (this.$vuetify.breakpoint.name) {
@@ -193,6 +195,32 @@ function parsedInfoTab() {
   }
   return parseTab.toUpperCase();
 } // parsedInfoTab
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                    WATCHERS                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * watcher for infoTab - track and emit tab when switching
+ *
+ * @param val - tab being tracked
+ */
+function watchInfoTab(val) {
+  // track current tab when switching between info and form
+  if (this.afterCreate) {
+    if (!_.isEqual(val, this.currentTab)) {
+      window.EventBus.$emit('tabChange', val);
+    }
+  }
+} // watchInfoTab
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      EXPORT                      |
+// |                                                  |
+// |--------------------------------------------------|
 
 export default {
   components: {
@@ -217,6 +245,7 @@ export default {
     };
   },
   methods: {
+    getRole,
     hasAdminPermissions,
     userIsEmployee,
     selectDropDown
@@ -227,14 +256,7 @@ export default {
     parsedInfoTab
   },
   watch: {
-    infoTab: function (val) {
-      // track current tab when switching between info and form
-      if (this.afterCreate) {
-        if (!_.isEqual(val, this.currentTab)) {
-          window.EventBus.$emit('tabChange', val);
-        }
-      }
-    }
+    infoTab: watchInfoTab
   }
 };
 </script>

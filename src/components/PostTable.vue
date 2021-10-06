@@ -47,7 +47,7 @@
                 <v-tooltip top>
                   <template v-slot:activator="{ on }">
                     <v-btn :disabled="midAction" text icon @click.stop="handleEdit(item)" v-on="on">
-                      <v-icon style="color: #606060">edit</v-icon>
+                      <v-icon class="case-gray">edit</v-icon>
                     </v-btn>
                   </template>
                   <span>Edit</span>
@@ -66,7 +66,7 @@
                       "
                       v-on="on"
                     >
-                      <v-icon style="color: #606060"> delete </v-icon>
+                      <v-icon class="case-gray"> delete </v-icon>
                     </v-btn>
                   </template>
                   <span>Delete</span>
@@ -97,7 +97,7 @@ moment.tz.setDefault('America/New_York');
 import api from '@/shared/api.js';
 
 /**
- * initial setup
+ * initial listener setup
  */
 function created() {
   window.EventBus.$on('canceled-delete-BlogPost', () => {
@@ -137,7 +137,7 @@ function blogPath(item) {
  */
 function previewPath(item) {
   return `/blogPreview/${item.blogNumber}`;
-}
+} // previewPath
 
 /**
  * redirect to post editor for edit
@@ -181,6 +181,31 @@ async function deleteBlogPost() {
   }
 } // deletedBlogPost
 
+// |--------------------------------------------------|
+// |                                                  |
+// |                     FILTERS                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * filter that converts boolean to yes/no
+ *
+ * @param value - birthdayFeedBoolean
+ * @return string - yes if true no if false
+ */
+function birthdayFeedResponse(value) {
+  if (value == true) {
+    return 'yes';
+  } else {
+    return 'no';
+  }
+} // birthdayFeedResponse
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      EXPORT                      |
+// |                                                  |
+// |--------------------------------------------------|
 export default {
   props: ['posts', 'model'],
   components: {
@@ -228,13 +253,7 @@ export default {
     };
   },
   filters: {
-    birthdayFeedResponse: (value) => {
-      if (value == true) {
-        return 'yes';
-      } else {
-        return 'no';
-      }
-    }
+    birthdayFeedResponse: birthdayFeedResponse
   }
 };
 </script>

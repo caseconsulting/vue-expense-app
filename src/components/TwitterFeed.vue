@@ -44,69 +44,105 @@
 const moment = require('moment-timezone');
 moment.tz.setDefault('America/New_York');
 
+// |--------------------------------------------------|
+// |                                                  |
+// |                     FILTERS                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * filter for formatting date for twitter feed
+ *
+ * @param date - the date to change
+ * @return - the formatted date
+ */
+function formatDate(date) {
+  let now = moment();
+  let tweetDate = moment(date, 'ddd MMM DD HH:mm:ss ZZ YYYY');
+  let diff = now.startOf('day').diff(tweetDate.startOf('day'), 'day');
+  if (diff == 0) {
+    return 'Today'; //set date message as today if no difference in date
+  } else if (diff == 1) {
+    return 'Yesterday'; //if it was one day removed message is yesterday
+  } else if (diff <= 6 && diff > 1) {
+    return diff + ' days ago'; //if it is otherwise less than 7 days ago create message
+  } else if (diff == -1) {
+    return 'Tomorrow';
+  } else {
+    return tweetDate.format('ll');
+  }
+} // formatDate
+
+/**
+ * filter to remove links from tweet
+ *
+ * @param tweet - the tweet
+ * @return string - the string without any https links
+ */
+function removeLink(tweet) {
+  let splits = [];
+  splits = tweet.split('https');
+  if (splits.length > 1) {
+    splits.pop();
+  }
+  return splits.join('https');
+} // removeLink
+
+/**
+ * filter that replaces html encoding
+ *
+ * @param tweet - the tweet
+ * @return string - fixed tweet encoding
+ */
+function fixHTMLencoding(tweet) {
+  var newTweet = tweet;
+  if (tweet.includes('&amp;')) {
+    newTweet = newTweet.replace('&amp;', '&');
+  }
+  if (tweet.includes('&lt;')) {
+    newTweet = newTweet.replace('&lt;', '<');
+  }
+  if (tweet.includes('&gt;')) {
+    newTweet = newTweet.replace('&gt;', '>');
+  }
+  if (tweet.includes('&quot;')) {
+    newTweet = newTweet.replace('&quot;', '"');
+  }
+  if (tweet.includes('&apos;')) {
+    newTweet = newTweet.replace('&apos;', "'");
+  }
+  if (tweet.includes('&cent;')) {
+    newTweet = newTweet.replace('&cent;', '¢');
+  }
+  if (tweet.includes('&yen;')) {
+    newTweet = newTweet.replace('&yen;', '¥');
+  }
+  if (tweet.includes('&euro;')) {
+    newTweet = newTweet.replace('&euro;', '€');
+  }
+  if (tweet.includes('&copy;')) {
+    newTweet = newTweet.replace('&copy;', '©');
+  }
+  if (tweet.includes('&reg;')) {
+    newTweet = newTweet.replace('&reg;', '®');
+  }
+  if (tweet.includes('&trade;')) {
+    newTweet = newTweet.replace('&trade;', '™');
+  }
+  return newTweet;
+} // fixHTMLencoding
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     EXPORT                       |
+// |                                                  |
+// |--------------------------------------------------|
+
 export default {
   filters: {
-    formatDate: function (date) {
-      let now = moment();
-      let tweetDate = moment(date, 'ddd MMM DD HH:mm:ss ZZ YYYY');
-      let diff = now.startOf('day').diff(tweetDate.startOf('day'), 'day');
-      if (diff == 0) {
-        return 'Today'; //set date message as today if no difference in date
-      } else if (diff == 1) {
-        return 'Yesterday'; //if it was one day removed message is yesterday
-      } else if (diff <= 6 && diff > 1) {
-        return diff + ' days ago'; //if it is otherwise less than 7 days ago create message
-      } else if (diff == -1) {
-        return 'Tomorrow';
-      } else {
-        return tweetDate.format('ll');
-      }
-    },
-    removeLink: function (tweet) {
-      let splits = [];
-      splits = tweet.split('https');
-      if (splits.length > 1) {
-        splits.pop();
-      }
-      return splits.join('https');
-    },
-    fixHTMLencoding: function (tweet) {
-      var newTweet = tweet;
-      if (tweet.includes('&amp;')) {
-        newTweet = newTweet.replace('&amp;', '&');
-      }
-      if (tweet.includes('&lt;')) {
-        newTweet = newTweet.replace('&lt;', '<');
-      }
-      if (tweet.includes('&gt;')) {
-        newTweet = newTweet.replace('&gt;', '>');
-      }
-      if (tweet.includes('&quot;')) {
-        newTweet = newTweet.replace('&quot;', '"');
-      }
-      if (tweet.includes('&apos;')) {
-        newTweet = newTweet.replace('&apos;', "'");
-      }
-      if (tweet.includes('&cent;')) {
-        newTweet = newTweet.replace('&cent;', '¢');
-      }
-      if (tweet.includes('&yen;')) {
-        newTweet = newTweet.replace('&yen;', '¥');
-      }
-      if (tweet.includes('&euro;')) {
-        newTweet = newTweet.replace('&euro;', '€');
-      }
-      if (tweet.includes('&copy;')) {
-        newTweet = newTweet.replace('&copy;', '©');
-      }
-      if (tweet.includes('&reg;')) {
-        newTweet = newTweet.replace('&reg;', '®');
-      }
-      if (tweet.includes('&trade;')) {
-        newTweet = newTweet.replace('&trade;', '™');
-      }
-      return newTweet;
-    }
+    formatDate,
+    removeLink,
+    fixHTMLencoding
   },
   props: ['tweets', 'loading']
 };

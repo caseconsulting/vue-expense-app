@@ -7,6 +7,7 @@
 
 <script>
 import _ from 'lodash';
+import moment from 'moment-timezone';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -28,7 +29,11 @@ function convertToCSV(objArray) {
     for (var index = 0; index < array[i].length; index++) {
       if (line != '') line += ',';
 
-      line += `"${array[i][index]}"`;
+      if (Array.isArray(array[i][index])) {
+        line += `"${array[i][index].join(', ')}"`;
+      } else {
+        line += `"${array[i][index]}"`;
+      }
     }
     str += line + '\r\n';
   }
@@ -65,23 +70,22 @@ function exportCSVFile(items, fileTitle) {
       placeOfBirth || '',
       person.hireDate || '',
       person.jobRole || '',
-      person.prime || '',
-      person.contract || '',
       person.email || '',
       person.mifiStatus != undefined && person.mifiStatus != null ? person.mifiStatus : 'true',
       person.twitter || '',
       person.github || '',
+      person.linkedIn || '',
       person.employeeRole || '',
-      getWorkStatus(person.workStatus) || '',
-      person.id || '',
-      filterUndefined(person.awards, getAwards) || '',
-      filterUndefined(person.certifications, getCertifications) || '',
-      filterUndefined(person.clearances, getClearances) || '',
-      filterUndefined(person.contracts, getContracts) || '',
-      filterUndefined(person.customerOrgExp, getCustomerOrgExp) || '',
-      filterUndefined(person.degrees, getEducation) || '',
-      filterUndefined(person.companies, getCompanies) || '',
-      filterUndefined(person.technologies, getTechnologies) || ''
+      this.getWorkStatus(person.workStatus) || '',
+      this.filterUndefined(person.awards, getAwards) || '',
+      this.filterUndefined(person.certifications, getCertifications) || '',
+      this.filterUndefined(person.clearances, getClearances) || '',
+      this.filterUndefined(person.contracts, getContracts) || '',
+      this.filterUndefined(person.customerOrgExp, getCustomerOrgExp) || '',
+      this.filterUndefined(person.schools, getEducation) || '',
+      this.filterUndefined(person.companies, getCompanies) || '',
+      this.filterUndefined(person.technologies, getTechnologies) || '',
+      person.id || ''
     ];
   }
 
@@ -94,23 +98,22 @@ function exportCSVFile(items, fileTitle) {
     'Place of Birth',
     'Hire Date',
     'Job Role',
-    'Prime',
-    'Contract',
     'Email',
     'Mifi Status',
     'Twitter',
     'Github',
+    'LinkedIn',
     'Expense App Role',
     'Status',
-    'id',
     'Awards',
     'Certifications',
     'Clearance',
-    'Contract',
+    'Contracts',
     'Customer Org',
     'Education',
     'Job Experience',
-    'Technology'
+    'Technology',
+    'id'
   ];
 
   tempEmployees.sort((a, b) => {
@@ -241,23 +244,65 @@ function getClearances(clearance) {
 } // getClearance
 
 /**
+ * Converts the contracts' projects' dates to number of years on the contract
+ *
+ * @param contract the contract to get the info from
+ * @return number - number of years on the contract
+ */
+function getContractLengthInYears(contract) {
+  let total = moment.duration();
+  if (contract.projects) {
+    contract.projects.forEach((project) => {
+      total.add(moment.duration(getProjectLengthInYears(project)));
+    });
+  }
+  return total.asYears().toFixed(1);
+} // getContractLengthInYears
+
+/**
+ * Converts the intervals to length of time in years
+ *
+ * @param project the project to convert
+ * @return number - time in years
+ */
+function getProjectLengthInYears(project) {
+  let startMoment = moment(project.startDate);
+  let endMoment = moment(project.endDate);
+  let length;
+  if (project.endDate) {
+    length = moment.duration(endMoment.diff(startMoment));
+  } else {
+    length = moment.duration(moment().diff(startMoment));
+  }
+  return length.add(1, 'month'); // add one month to include end month in calculation.
+}
+
+/**
  * Returns contract data for employee
  *
  * @param contract - An array of objects.
  * @return String - contract
  */
-function getContracts(contract) {
-  let a = '';
-  for (let i = 0; i < contract.length; i++) {
-    a += contract[i].name + ' - ' + contract[i].prime;
-    if (typeof contract[i].years !== 'undefined') {
-      a += ' - ' + contract[i].years + ' years';
-    }
-    if (i + 1 < contract.length) {
-      a += ', ';
-    }
+function getContracts(contracts) {
+  let str = '';
+  let result = [];
+  if (contracts) {
+    contracts.forEach((contract) => {
+      str = contract.name + ' - ' + contract.prime + ' (Projects: ';
+      contract.projects.forEach((project, i) => {
+        if (i != 0) {
+          str += ', ';
+        }
+        str += project.name + ' - ' + getProjectLengthInYears(project).asYears().toFixed(1) + ' years';
+      });
+      str += ')';
+      if (contract.projects.length > 1) {
+        str += ' Total Time: ' + getContractLengthInYears(contract) + ' years';
+      }
+      result.push(str);
+    });
   }
-  return a;
+  return result;
 } // getContracts
 
 /**
@@ -287,18 +332,30 @@ function getCustomerOrgExp(exp) {
  * @return String - education
  */
 function getEducation(edu) {
-  let a = '';
-  for (let i = 0; i < edu.length; i++) {
-    a += edu[i].school + ' - ' + edu[i].name;
-    for (let j = 0; j < edu[i].majors.length; j++) {
-      a += ' - ' + edu[i].majors[j];
-    }
-    a += ' - ' + edu[i].date;
-    if (i + 1 < edu.length) {
-      a += ', ';
+  let str = '';
+  let result = [];
+  if (edu) {
+    // each school
+    for (let i = 0; i < edu.length; i++) {
+      // each degree within school
+      edu[i].degrees.forEach((degree) => {
+        str = edu[i].name + ': ';
+
+        // each major within degree
+        str += degree.degreeType + ' in ';
+        degree.majors.forEach((major, i) => {
+          if (i != 0) {
+            str += ', ';
+          }
+          str += major;
+        });
+
+        str += ' - ' + degree.completionDate;
+        result.push(str); // push each degree individually
+      });
     }
   }
-  return a;
+  return result;
 } // getEducation
 
 /**
@@ -308,17 +365,24 @@ function getEducation(edu) {
  * @return String - companies
  */
 function getCompanies(companies) {
-  let a = '';
-  for (let i = 0; i < companies.length; i++) {
-    a += `${companies[i].companyName}`;
-    let positions = companies[i].positions;
-    for (let j = 0; j < positions.length; j++) {
-      a += `${positions[j].title} - ${positions[j].startDate}`;
-      positions[j].endDate ? (a += ` - ${positions[j].endDate}`) : ' - to present';
-      if (j > positions.length) a += ', ';
+  let result = [];
+  if (companies) {
+    for (let i = 0; i < companies.length; i++) {
+      result.push(`${companies[i].companyName}`);
+      let positions = companies[i].positions;
+      let pos;
+      for (let j = 0; j < positions.length; j++) {
+        pos = `    ${positions[j].title} - ${positions[j].startDate}`;
+        if (positions[j].endDate !== null) {
+          pos += ` to ${positions[j].endDate}`;
+        } else {
+          pos += ' to present';
+        }
+        result.push(pos);
+      }
     }
   }
-  return a;
+  return result;
 } // getCompanies
 
 /**
@@ -354,6 +418,7 @@ export default {
     convertToCSV,
     download,
     exportCSVFile,
+    filterUndefined,
     getWorkStatus
   },
   props: ['employees', 'midAction'] // employees to export

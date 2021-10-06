@@ -17,7 +17,7 @@
             </v-tooltip>
           </v-col>
         </v-row>
-        <p><b>Years of Experience: </b>{{ exp.years }}</p>
+        <p><b>Experience: </b>{{ Number(exp.years).toFixed(1) }} years</p>
         <hr v-if="index < filteredList.length - 1" class="mb-3" />
       </div>
       <!-- End Loop Customer Organizations -->
@@ -25,7 +25,7 @@
     <!-- Employee does not have Customer Organization Experience -->
     <p v-else>No Customer Organization Experience Information</p>
     <div
-      v-if="!isEmpty(this.model.customerOrgExp) && Math.ceil(model.customerOrgExp.length / 5) != 1"
+      v-if="!this.isEmpty(this.model.customerOrgExp) && Math.ceil(model.customerOrgExp.length / 5) != 1"
       class="text-center"
     >
       <!-- Pagination -->
@@ -52,10 +52,10 @@ import { isEmpty } from '@/utils/utils';
  * Emits to parent the component was created and get data for the list.
  */
 function created() {
-  if (!isEmpty(this.model.customerOrgExp)) {
+  if (!this.isEmpty(this.model.customerOrgExp)) {
     this.filteredList = this.model.customerOrgExp.slice(0, 5);
   }
-}
+} // created
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -71,7 +71,29 @@ function onPageChange() {
   var startIndex = 5 * (this.page - 1); //each page contains 5 Customer Org entries
   var endIndex = startIndex + 5;
   this.filteredList = this.model.customerOrgExp.slice(startIndex, endIndex);
-}
+} // onPageChange
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      EXPORT                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     FILTERS                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * filter that checks if value exists for current
+ *
+ * @param value - value to check
+ * @return - either 'yes' if it exists or 'no' otherwise
+ */
+function current(value) {
+  return value ? 'Yes' : 'No';
+} // current
 
 export default {
   created,
@@ -82,9 +104,7 @@ export default {
     };
   },
   filters: {
-    current: (value) => {
-      return value ? 'Yes' : 'No';
-    }
+    current
   },
   methods: {
     isEmpty,

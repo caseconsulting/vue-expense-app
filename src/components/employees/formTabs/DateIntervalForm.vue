@@ -173,6 +173,7 @@ import _ from 'lodash';
 import { mask } from 'vue-the-mask';
 import moment from 'moment-timezone';
 import { isEmpty, parseDateMonthYear, formatDateMonthYear } from '@/utils/utils';
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                 LIFECYCLE HOOKS                  |
@@ -189,7 +190,7 @@ function mounted() {
 /**
  * Computed property to calculate if interval overlaps any of the other intervals in the allIntervals prop. Sends back the error status to the parent component.
  *
- * @returns boolean true if there is an error (interval overlaps) false otherwise
+ * @return boolean - true if there is an error (interval overlaps) false otherwise
  */
 function intervalOverlaps() {
   let hasErrors = false;
@@ -231,7 +232,8 @@ function intervalOverlaps() {
   //send validation result back to parent
   this.$emit('validated', this.technologyIndex, this.intervalIndex, hasErrors);
   return hasErrors;
-} //intervalOverlaps
+} // intervalOverlaps
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                     METHODS                      |
@@ -245,6 +247,118 @@ async function deleteInterval() {
   this.tempEndIntervalDate = null;
   this.$emit('delete', this.technologyIndex, this.intervalIndex);
 } // deleteInterval
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     WATCHERS                     |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * watcher for formatToggle - change intervals and validate
+ */
+function watchFormatToggle() {
+  // change to YYYY format
+  if (this.formatToggle == 1) {
+    this.startIntervalDateEdited = !this.isEmpty(this.startIntervalDate) ? this.startIntervalDate.split('-')[0] : null;
+    this.endIntervalDateEdited = !this.isEmpty(this.endIntervalDate) ? this.endIntervalDate.split('-')[0] : null;
+    //close opened date menus
+    this.startIntervalMenu = false;
+    this.endIntervalMenu = false;
+  }
+  //change to MM-YYYY format
+  if (this.formatToggle == 0) {
+    this.startIntervalDateEdited = this.startIntervalDate;
+    this.endIntervalDateEdited = this.endIntervalDate;
+  }
+
+  this.$emit('start', this.technologyIndex, this.intervalIndex, this.startIntervalDateEdited);
+  this.$emit('end', this.technologyIndex, this.intervalIndex, this.endIntervalDateEdited);
+
+  this.$refs.form.resetValidation();
+  this.$refs.form.validate();
+} // watchFormatToggle
+
+/**
+ * watcher for startIntervalDate - format start interval
+ */
+function watchStartIntervalDate() {
+  if (this.formatToggle === 0) {
+    this.startIntervalDateEdited = this.parseDateMonthYear(this.startIntervalDate);
+  } else {
+    this.startIntervalDateEdited = this.parseDateMonthYear(this.startIntervalDate).split('-')[0];
+  }
+} // watchStartIntervalDate
+
+/**
+ * watcher for endIntervalDate - format end interval
+ */
+function watchEndIntervalDate() {
+  if (this.formatToggle === 0) {
+    this.endIntervalDateEdited = this.parseDateMonthYear(this.endIntervalDate);
+  } else {
+    this.endIntervalDateEdited = this.parseDateMonthYear(this.endIntervalDate).split('-')[0];
+  }
+} // watchEndIntervalDate
+
+/**
+ * watcher for startIntervalDateEdited - check if date is in right format and send back if it is
+ */
+function watchStartIntervalDateEdited() {
+  //temp variable for checking equality
+  let start =
+    this.formatToggle == 1 && this.startIntervalDateEdited
+      ? this.startIntervalDateEdited + '-01'
+      : this.startIntervalDateEdited;
+  //only sends date back to technology tab if in correct format
+  if (start && start != this.startIntervalDate && start.length == 7) {
+    this.$emit('start', this.technologyIndex, this.intervalIndex, start);
+  }
+  this.$refs.form.validate();
+} // watchStartIntervalDateEdited
+
+/**
+ * watcher for endIntervalDateEdited - check if date is in right format and send back if it is
+ */
+function watchEndIntervalDateEdited() {
+  //temp variable for checking equality
+  let end =
+    this.formatToggle == 1 && this.endIntervalDateEdited
+      ? this.endIntervalDateEdited + '-01'
+      : this.endIntervalDateEdited;
+
+  //only sends date back to technology tab if in correct format (can be null because date is optional)
+  if (end == null || (end && end != this.endIntervalDate && end.length == 7)) {
+    this.$emit('end', this.technologyIndex, this.intervalIndex, end);
+  }
+  this.$refs.form.validate();
+} // watchEndIntervalDateEdited
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     FILTERS                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * filter the year out of the date
+ *
+ * @param date - the date to filter
+ * @return string - the year of that date
+ */
+function getYear(date) {
+  if (!date) {
+    return null;
+  }
+  const [year] = date.split('-');
+  return year;
+} // getYear
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      EXPORT                      |
+// |                                                  |
+// |--------------------------------------------------|
 
 export default {
   computed: {
@@ -261,18 +375,20 @@ export default {
       tempEndIntervalDate: null,
       endIntervalDateEdited: _.cloneDeep(this.endIntervalDate),
       dateOptionalRules: [
-        (v) => isEmpty(v) || /^\d{1,2}\/\d{4}$/.test(v) || 'Date must be valid. Format: MM/YYYY',
-        (v) => isEmpty(v) || moment(v, 'MM/YYYY').isValid() || 'Date must be valid',
+        (v) => this.isEmpty(v) || /^\d{1,2}\/\d{4}$/.test(v) || 'Date must be valid. Format: MM/YYYY',
+        (v) => this.isEmpty(v) || moment(v, 'MM/YYYY').isValid() || 'Date must be valid',
         (v) =>
-          isEmpty(v) ||
+          this.isEmpty(v) ||
           moment(v, 'MM/YYYY').isBefore(moment()) ||
           `Date must be before or equal to ${moment().format('MM/YYYY')}.`,
         (v) =>
-          isEmpty(v) || moment(v, 'MM/YYYY').isAfter(this.startIntervalDateEdited) || 'Date must be after start date'
+          this.isEmpty(v) ||
+          moment(v, 'MM/YYYY').isAfter(this.startIntervalDateEdited) ||
+          'Date must be after start date'
       ], // rules for an optional date
       dateRules: [
-        (v) => !isEmpty(v) || 'Date required',
-        (v) => (!isEmpty(v) && /^\d{1,2}\/\d{4}$/.test(v)) || 'Date must be valid. Format: MM/YYYY',
+        (v) => !this.isEmpty(v) || 'Date required',
+        (v) => (!this.isEmpty(v) && /^\d{1,2}\/\d{4}$/.test(v)) || 'Date must be valid. Format: MM/YYYY',
         (v) => moment(v, 'MM/YYYY').isValid() || 'Date must be valid',
         (v) =>
           moment(v, 'MM/YYYY').isBefore(moment()) || `Date must be before or equal to ${moment().format('MM/YYYY')}.`,
@@ -282,8 +398,8 @@ export default {
           'Date must be before end date'
       ], // rules for a required date
       yearStartRules: [
-        (v) => !isEmpty(v) || 'Date required',
-        (v) => (!isEmpty(v) && /^\d{4}$/.test(v)) || 'Date must be valid. Format: YYYY',
+        (v) => !this.isEmpty(v) || 'Date required',
+        (v) => (!this.isEmpty(v) && /^\d{4}$/.test(v)) || 'Date must be valid. Format: YYYY',
         (v) => moment(v, 'YYYY').isValid() || 'Date must be valid',
         (v) => moment(v, 'YYYY').isBefore(moment()) || `Date must be before or equal to ${moment().format('YYYY')}.`,
         (v) =>
@@ -292,14 +408,14 @@ export default {
           'Date must be before end date'
       ], // rules for an year start date
       yearEndRules: [
-        (v) => isEmpty(v) || /^\d{4}$/.test(v) || 'Date must be valid. Format: YYYY',
-        (v) => isEmpty(v) || moment(v, 'YYYY').isValid() || 'Date must be valid',
+        (v) => this.isEmpty(v) || /^\d{4}$/.test(v) || 'Date must be valid. Format: YYYY',
+        (v) => this.isEmpty(v) || moment(v, 'YYYY').isValid() || 'Date must be valid',
         (v) =>
-          isEmpty(v) ||
+          this.isEmpty(v) ||
           Number(v) <= Number(moment().format('YYYY')) ||
           `Date must be before or equal to ${moment().format('YYYY')}.`,
         (v) =>
-          isEmpty(v) ||
+          this.isEmpty(v) ||
           moment(v, 'YYYY').isAfter(this.startIntervalDateEdited) ||
           `Date must be after start date ${this.startIntervalDateEdited}`
       ] // rules for year end date
@@ -308,83 +424,21 @@ export default {
   directives: { mask },
   filters: {
     formatDateMonthYear,
-    getYear(date) {
-      if (!date) {
-        return null;
-      }
-      const [year] = date.split('-');
-      return year;
-    }
+    getYear
   },
   methods: {
     deleteInterval,
     isEmpty,
-    parseDateMonthYear,
-    formatDateMonthYear
+    parseDateMonthYear
   },
   mounted,
   props: ['startIntervalDate', 'endIntervalDate', 'technologyIndex', 'intervalIndex', 'allIntervals'],
   watch: {
-    formatToggle: function () {
-      // change to YYYY format
-      if (this.formatToggle == 1) {
-        this.startIntervalDateEdited = !isEmpty(this.startIntervalDate) ? this.startIntervalDate.split('-')[0] : null;
-        this.endIntervalDateEdited = !isEmpty(this.endIntervalDate) ? this.endIntervalDate.split('-')[0] : null;
-        //close opened date menus
-        this.startIntervalMenu = false;
-        this.endIntervalMenu = false;
-      }
-      //change to MM-YYYY format
-      if (this.formatToggle == 0) {
-        this.startIntervalDateEdited = this.startIntervalDate;
-        this.endIntervalDateEdited = this.endIntervalDate;
-      }
-
-      this.$emit('start', this.technologyIndex, this.intervalIndex, this.startIntervalDateEdited);
-      this.$emit('end', this.technologyIndex, this.intervalIndex, this.endIntervalDateEdited);
-
-      this.$refs.form.resetValidation();
-      this.$refs.form.validate();
-    },
-    startIntervalDate: function () {
-      if (this.formatToggle === 0) {
-        this.startIntervalDateEdited = this.parseDateMonthYear(this.startIntervalDate);
-      } else {
-        this.startIntervalDateEdited = this.parseDateMonthYear(this.startIntervalDate).split('-')[0];
-      }
-    },
-    endIntervalDate: function () {
-      if (this.formatToggle === 0) {
-        this.endIntervalDateEdited = this.parseDateMonthYear(this.endIntervalDate);
-      } else {
-        this.endIntervalDateEdited = this.parseDateMonthYear(this.endIntervalDate).split('-')[0];
-      }
-    },
-    startIntervalDateEdited: function () {
-      //temp variable for checking equality
-      let start =
-        this.formatToggle == 1 && this.startIntervalDateEdited
-          ? this.startIntervalDateEdited + '-01'
-          : this.startIntervalDateEdited;
-      //only sends date back to technology tab if in correct format
-      if (start && start != this.startIntervalDate && start.length == 7) {
-        this.$emit('start', this.technologyIndex, this.intervalIndex, start);
-      }
-      this.$refs.form.validate();
-    },
-    endIntervalDateEdited: function () {
-      //temp variable for checking equality
-      let end =
-        this.formatToggle == 1 && this.endIntervalDateEdited
-          ? this.endIntervalDateEdited + '-01'
-          : this.endIntervalDateEdited;
-
-      //only sends date back to technology tab if in correct format (can be null because date is optional)
-      if (end == null || (end && end != this.endIntervalDate && end.length == 7)) {
-        this.$emit('end', this.technologyIndex, this.intervalIndex, end);
-      }
-      this.$refs.form.validate();
-    }
+    formatToggle: watchFormatToggle,
+    startIntervalDate: watchStartIntervalDate,
+    endIntervalDate: watchEndIntervalDate,
+    startIntervalDateEdited: watchStartIntervalDateEdited,
+    endIntervalDateEdited: watchEndIntervalDateEdited
   }
 };
 </script>

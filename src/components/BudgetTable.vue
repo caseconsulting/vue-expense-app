@@ -128,13 +128,16 @@ function getAmount(budget) {
 } // getAmount
 
 /**
- * Date
+ * formatted date
+ *
+ * @param item - expenseTypeData item
+ * @return string - string formatted from item object dates
  */
 function getDate(item) {
   return (
-    formatDateDashToSlash(item.budgetObject.fiscalStartDate) +
+    this.formatDateDashToSlash(item.budgetObject.fiscalStartDate) +
     ' to ' +
-    formatDateDashToSlash(item.budgetObject.fiscalEndDate)
+    this.formatDateDashToSlash(item.budgetObject.fiscalEndDate)
   );
 } // getDate
 
@@ -164,6 +167,7 @@ function getPending(budget) {
  * Returns 'Allowed' or 'Not Allowed' depending on whether an expense type allows overdraft.
  *
  * @param expenseType - expense type to check
+ * @return String - boolean that has been converted to human readable format
  */
 function odFlagMessage(expenseType) {
   return expenseType.odFlag ? 'Allowed' : 'Not Allowed';
@@ -230,6 +234,7 @@ export default {
   methods: {
     calcRemaining,
     convertToMoneyString,
+    formatDateDashToSlash,
     getAmount,
     getDate,
     getReimbursed,

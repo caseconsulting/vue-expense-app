@@ -1,12 +1,7 @@
 <template>
   <div>
     <!-- Loop Clearances -->
-    <div
-      v-for="(clearance, cIndex) in editedClearances"
-      style="border: 1px solid grey"
-      class="pt-3 pb-1 px-5"
-      :key="cIndex"
-    >
+    <div v-for="(clearance, cIndex) in editedClearances" class="gray-border ma-0 pt-3 pb-1 px-5" :key="cIndex">
       <!-- Type of Clearance -->
       <v-combobox
         ref="formFields"
@@ -147,8 +142,6 @@
           <v-combobox
             :value="clearance.polyDates | formatDates"
             multiple
-            chips
-            small-chips
             label="Poly Dates"
             prepend-icon="event"
             clearable
@@ -156,6 +149,7 @@
             v-bind="attrs"
             v-on="on"
             @click:clear="clearance.polyDates = []"
+            @input="clearance.showPolyMenu = false"
           ></v-combobox>
         </template>
         <v-date-picker v-model="clearance.polyDates" :min="clearance.submissionDate" multiple no-title scrollable>
@@ -180,8 +174,6 @@
           <v-combobox
             :value="clearance.adjudicationDates | formatDates"
             multiple
-            chips
-            small-chips
             label="Adjudication Dates"
             prepend-icon="event"
             clearable
@@ -255,8 +247,6 @@
           <v-combobox
             :value="clearance.biDates | formatDates"
             multiple
-            chips
-            small-chips
             label="BI Dates"
             prepend-icon="event"
             clearable
@@ -277,7 +267,7 @@
         <v-tooltip bottom slot="append-outer">
           <template v-slot:activator="{ on }">
             <v-btn text icon v-on="on" @click="deleteClearance(cIndex)"
-              ><v-icon style="color: grey">delete</v-icon></v-btn
+              ><v-icon class="case-gray">delete</v-icon></v-btn
             >
           </template>
           <span>Delete Clearance</span>
@@ -367,10 +357,10 @@ function deleteClearance(cIndex) {
  * @return Boolean - True if the first date is at or after the second date
  */
 function isAfter(firstDate, secondDate, errMessage) {
-  return !isEmpty(firstDate) && secondDate
+  return !this.isEmpty(firstDate) && secondDate
     ? moment(firstDate).add(1, 'd').isAfter(moment(secondDate)) || errMessage
     : true;
-}
+} // isAfter
 
 /**
  * Checks to see if the first date is at or before the second date, if not, it uses an error message.
@@ -381,10 +371,10 @@ function isAfter(firstDate, secondDate, errMessage) {
  * @return boolean - True if the first date is at or before the second date
  */
 function isBefore(firstDate, secondDate, errMessage) {
-  return !isEmpty(firstDate) && secondDate
+  return !this.isEmpty(firstDate) && secondDate
     ? moment(firstDate).isBefore(moment(secondDate).add(1, 'd')) || errMessage
     : true;
-}
+} // isBefore
 
 /**
  * Return the maximum available date to be selected for submission date. Returns the granted date if it exists.
@@ -461,11 +451,12 @@ function minExpiration(cIndex) {
 
 /**
  * Parse the date after losing focus.
- * @returns String - The date in YYYY-MM-DD format
+ *
+ * @return String - The date in YYYY-MM-DD format
  */
 function parseEventDate() {
-  return parseDate(event.target.value);
-} //parseEventDate
+  return this.parseDate(event.target.value);
+} // parseEventDate
 
 /**
  * Populate drop downs with information that other employees have filled out.
@@ -495,6 +486,48 @@ function validateFields() {
   window.EventBus.$emit('doneValidating', 'clearance', this.editedClearances); // emit done validating and sends edited data back to parent
   window.EventBus.$emit('clearanceStatus', errorCount); // emit error status
 } // validateFields
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     WATCHERS                     |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * watcher for validating - validates fields
+ *
+ * @param val - val prop that needs to exist before validating
+ */
+function watchValidating(val) {
+  if (val) {
+    // parent component triggers validation
+    this.validateFields();
+  }
+} // watchValidating
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     FILTERS                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * Formats multiple dates at once in MM/DD/YYYY format.
+ * @return Array - The array of formatted dates
+ */
+function formatDates(array) {
+  let formattedDates = [];
+  array.forEach((date) => {
+    formattedDates.push(formatDate(date));
+  });
+  return formattedDates;
+} // formatDates
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      EXPORT                      |
+// |                                                  |
+// |--------------------------------------------------|
 
 export default {
   created,
@@ -540,26 +573,17 @@ export default {
         clearanceNames.splice(cIndex, 1);
         return !clearanceNames.includes(clearanceName) || 'Duplicate clearance name';
       },
-      requiredRules: [(v) => !isEmpty(v) || 'This field is required'] // rules for a required field
+      requiredRules: [(v) => !this.isEmpty(v) || 'This field is required'] // rules for a required field
     };
   },
   directives: { mask },
   filters: {
     formatDate,
-    /**
-     * Formats multiple dates at once in MM/DD/YYYY format.
-     * @returns Array - The array of formatted dates
-     */
-    formatDates: function (array) {
-      let formattedDates = [];
-      array.forEach((date) => {
-        formattedDates.push(formatDate(date));
-      });
-      return formattedDates;
-    }
+    formatDates
   },
   methods: {
     addClearance,
+    formatDate,
     deleteClearance,
     getDateOptionalRules,
     getRequiredRules,
@@ -568,18 +592,14 @@ export default {
     isEmpty,
     maxSubmission,
     minExpiration,
+    parseDate,
     parseEventDate,
     populateDropDowns,
     validateFields
   },
   props: ['model', 'validating'],
   watch: {
-    validating: function (val) {
-      if (val) {
-        // parent component triggers validation
-        this.validateFields();
-      }
-    }
+    validating: watchValidating
   }
 };
 </script>

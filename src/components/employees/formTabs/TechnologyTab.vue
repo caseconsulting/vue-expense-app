@@ -1,11 +1,15 @@
 <template>
   <div>
+    <p class="emsi">
+      *List of Technologies and Skills provided by
+      <a href="https://skills.emsidata.com/emsi-open-skills-license-agreement.pdf" target="_blank">EMSI</a>. Additions
+      made by users are not endorsed by EMSI.
+    </p>
     <!-- Loop Technologies -->
     <div
       v-for="(technology, index) in editedTechnologies"
-      class="pt-3 pb-1 px-5"
+      class="gray-border ma-0 pt-3 pb-1 px-5"
       :key="'technology: ' + index"
-      style="border: 1px solid grey"
     >
       <!-- Name of Technology -->
       <v-combobox
@@ -14,13 +18,12 @@
         v-model="technology.name"
         :rules="[duplicateRules(technology.name), ...getRequiredRules()]"
         :items="technologyDropDown"
-        label="Technology"
+        label="Technology or Skill*"
         data-vv-name="Technology"
         @input.native="updateTechDropDown(index)"
         clearable
       >
       </v-combobox>
-
       <!-- Time Intervals -->
       <v-row justify="center">
         <!-- Current Switch -->
@@ -28,7 +31,7 @@
           <v-tooltip top nudge-left="75" nudge-bottom="10" max-width="300">
             <template v-slot:activator="{ on }">
               <div v-on="on">
-                <v-switch v-model="technology.current" label="Currently know this technology"></v-switch>
+                <v-switch v-model="technology.current" label="Currently know this technology / skill"></v-switch>
               </div>
             </template>
             <span>Enabling this will auto-increment the years of experience every month</span>
@@ -64,7 +67,7 @@
           <v-tooltip bottom slot="append-outer">
             <template v-slot:activator="{ on }">
               <v-btn text icon v-on="on" @click="deleteTechnology(index)"
-                ><v-icon style="color: grey">delete</v-icon></v-btn
+                ><v-icon class="case-gray">delete</v-icon></v-btn
               >
             </template>
             <span>Delete Technology</span>
@@ -131,7 +134,8 @@ function deleteTechnology(index) {
 
 /**
  * Creates an array of all technologies that a user has entered multiple times (based on name).
- * @returns an array of technology names that a user has entered multiple times
+ *
+ * @return array - an array of technology names that a user has entered multiple times
  */
 function duplicateTechEntries() {
   //declares function to count unique name properties of js objects
@@ -150,8 +154,9 @@ function duplicateTechEntries() {
 
 /**
  * Checks to see if a technology is a duplicate of one that is already entered by a user.
- * @param tech String - the name of the technology
- * @returns boolean - true if technology was already entered by user (duplicate) false otherwise
+ *
+ * @param tech - the string name of the technology
+ * @return boolean - true if technology was already entered by user (duplicate) false otherwise
  */
 function isDuplicate(tech) {
   let duplicates = this.duplicateTechEntries();
@@ -175,6 +180,7 @@ function populateDropDowns() {
     _.forEach(technologies, (technology) => {
       this.technologyDropDown.push(technology.name); // add technology name
     });
+    this.technologyDropDown = _.uniq(this.technologyDropDown);
   });
 } // populateDropDowns
 
@@ -187,6 +193,7 @@ async function updateTechDropDown() {
   if (query.length > 2) {
     let techList = await api.getTechSkills(query);
     this.technologyDropDown = techList;
+    this.populateDropDowns();
   } else if (this.technologyDropDown.length >= 0) {
     this.technologyDropDown = [];
   }
@@ -209,6 +216,30 @@ function validateFields() {
   window.EventBus.$emit('technologiesStatus', errorCount);
   window.EventBus.$emit('doneValidating', 'technologies', this.editedTechnologies); // emit done validating
 } // validateFields
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     WATCHERS                     |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * watcher for validating - validates fields
+ *
+ * @param val - val prop that needs to exist before validating
+ */
+function watchValidating(val) {
+  if (val) {
+    // parent component triggers validation
+    this.validateFields();
+  }
+} // watchValidating
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      EXPORT                      |
+// |                                                  |
+// |--------------------------------------------------|
 
 export default {
   created,
@@ -237,12 +268,7 @@ export default {
   },
   props: ['model', 'validating'],
   watch: {
-    validating: function (val) {
-      if (val) {
-        // parent component triggers validation
-        this.validateFields();
-      }
-    }
+    validating: watchValidating
   }
 };
 </script>
@@ -250,5 +276,9 @@ export default {
 .errorBox {
   color: red !important;
   border: 2px solid red !important;
+}
+
+.emsi {
+  font-size: small;
 }
 </style>

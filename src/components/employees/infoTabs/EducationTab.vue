@@ -124,10 +124,10 @@ import { isEmpty, monthYearFormat } from '@/utils/utils';
  * Emits to parent the component was created and get data for the list.
  */
 function created() {
-  if (!isEmpty(this.model.schools)) {
+  if (!this.isEmpty(this.model.schools)) {
     this.filteredList = this.model.schools.slice(0, 4);
   }
-}
+} // created
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -143,7 +143,30 @@ function onPageChange() {
   var startIndex = 4 * (this.page - 1); //each page contains 4 education entries
   var endIndex = startIndex + 4;
   this.filteredList = this.model.schools.slice(startIndex, endIndex);
-}
+} // onPageChange
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      EXPORT                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                    WATCHERS                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * watcher for model
+ *
+ * @param val - param to watch
+ */
+function watchModel(val) {
+  if (!this.isEmpty(val)) {
+    this.filteredList = val.schools.slice(0, 4);
+  }
+} // watchModel
 
 export default {
   created,
@@ -162,11 +185,7 @@ export default {
   },
   props: ['model'],
   watch: {
-    model: function (val) {
-      if (!isEmpty(val)) {
-        this.filteredList = val.schools.slice(0, 4);
-      }
-    }
+    model: watchModel
   }
 };
 </script>

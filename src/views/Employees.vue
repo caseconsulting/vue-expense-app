@@ -119,7 +119,7 @@
                     @click.stop="validateDelete(item)"
                     v-on="on"
                   >
-                    <v-icon style="color: #606060"> delete </v-icon>
+                    <v-icon class="case-gray"> delete </v-icon>
                   </v-btn>
                 </template>
                 <span>Delete</span>
@@ -135,7 +135,7 @@
             </v-avatar>
             <!-- Invalid Avatar -->
             <v-avatar v-else size="35" color="grey darken-2">
-              <div style="color: white; font-family: arial">
+              <div class="white--text">
                 <b>{{ item.firstName.substring(0, 1) }}{{ item.lastName.substring(0, 1) }}</b>
               </div>
             </v-avatar>
@@ -143,35 +143,35 @@
 
           <!-- Employee Number Item Slot -->
           <template v-slot:[`item.employeeNumber`]="{ item }">
-            <p :class="{ inactiveStyle: isInactive(item), selectFocus: isFocus(item) }" style="margin-bottom: 0px">
+            <p :class="{ inactiveStyle: isInactive(item), selectFocus: isFocus(item) }" class="mb-0">
               {{ item.employeeNumber }}
             </p>
           </template>
 
           <!-- First Name Item Slot -->
           <template v-slot:[`item.firstName`]="{ item }">
-            <p :class="{ inactiveStyle: isInactive(item), selectFocus: isFocus(item) }" style="margin-bottom: 0px">
+            <p :class="{ inactiveStyle: isInactive(item), selectFocus: isFocus(item) }" class="mb-0">
               {{ item.firstName }}
             </p>
           </template>
 
           <!-- Middle Name Item Slot -->
           <template v-slot:[`item.middleName`]="{ item }">
-            <p :class="{ inactiveStyle: isInactive(item), selectFocus: isFocus(item) }" style="margin-bottom: 0px">
+            <p :class="{ inactiveStyle: isInactive(item), selectFocus: isFocus(item) }" class="mb-0">
               {{ item.middleName }}
             </p>
           </template>
 
           <!-- Last Name Item Slot -->
           <template v-slot:[`item.lastName`]="{ item }">
-            <p :class="{ inactiveStyle: isInactive(item), selectFocus: isFocus(item) }" style="margin-bottom: 0px">
+            <p :class="{ inactiveStyle: isInactive(item), selectFocus: isFocus(item) }" class="mb-0">
               {{ item.lastName }}
             </p>
           </template>
 
           <!-- Nickname Item Slot -->
           <template v-slot:[`item.nickname`]="{ item }">
-            <p :class="{ inactiveStyle: isInactive(item), selectFocus: isFocus(item) }" style="margin-bottom: 0px">
+            <p :class="{ inactiveStyle: isInactive(item), selectFocus: isFocus(item) }" class="mb-0">
               {{ item.nickname }}
             </p>
           </template>
@@ -182,21 +182,21 @@
               <p
                 v-if="userIsAdmin() && hover && item.lastLogin !== undefined"
                 :class="{ inactiveStyle: isInactive(item), selectFocus: isFocus(item) }"
-                style="margin-bottom: 0px"
+                class="mb-0"
               >
                 {{ moment(item.lastLogin).format('MMM Do, YYYY HH:mm:ss') }}
               </p>
               <p
                 v-else-if="userIsAdmin() && item.lastLogin !== undefined"
                 :class="{ inactiveStyle: isInactive(item), selectFocus: isFocus(item) }"
-                style="margin-bottom: 0px"
+                class="mb-0"
               >
                 {{ moment(item.lastLogin).format('MMM Do, YYYY') }}
               </p>
               <p
                 v-else-if="userIsAdmin()"
                 :class="{ inactiveStyle: isInactive(item), selectFocus: isFocus(item) }"
-                style="margin-bottom: 0px"
+                class="mb-0"
               >
                 {{ item.lastLogin }}
               </p>
@@ -205,14 +205,14 @@
 
           <!-- Date Item Slot -->
           <template v-slot:[`item.hireDate`]="{ item }">
-            <p :class="{ inactiveStyle: isInactive(item), selectFocus: isFocus(item) }" style="margin-bottom: 0px">
+            <p :class="{ inactiveStyle: isInactive(item), selectFocus: isFocus(item) }" class="mb-0">
               {{ monthDayYearFormat(item.hireDate) }}
             </p>
           </template>
 
           <!-- Email Item Slot -->
           <template v-slot:[`item.email`]="{ item }">
-            <p :class="{ inactiveStyle: isInactive(item), selectFocus: isFocus(item) }" style="margin-bottom: 0px">
+            <p :class="{ inactiveStyle: isInactive(item), selectFocus: isFocus(item) }" class="mb-0">
               {{ item.email }}
             </p>
           </template>
@@ -330,6 +330,9 @@ function displayError(err) {
 
 /**
  * sets midAction boolean to false
+ *
+ * @param item - the employee
+ * @return the path to the employees profile
  */
 function employeePath(item) {
   return `/employee/${item.employeeNumber}`;
@@ -348,16 +351,22 @@ function filterEmployees() {
   });
 } // filterEmployees
 
+/**
+ * handles click event of the employee table entry
+ *
+ * @param item - the employee
+ */
 function handleClick(item) {
   this.$router.push(employeePath(item));
 } //handleClick
 
 /**
  * Checks to see if the user has admin permissions. Returns true if the user's role is an admin or manager, otherwise returns false.
+ *
  * @return boolean - true if user's employeeRole is either a admin or a manager
  */
 function hasAdminPermissions() {
-  return getRole() === 'admin' || getRole() === 'manager';
+  return this.getRole() === 'admin' || this.getRole() === 'manager';
 } // hasAdminPermissions
 
 /**
@@ -396,16 +405,21 @@ async function refreshEmployees() {
   this.loading = false; // set loading status to false
 } // refreshEmployees
 
+/**
+ * open the create employee form
+ */
 function renderCreateEmployee() {
   this.createEmployee = true;
   this.childKey++;
-}
+} // renderCreateEmployee
 
 /**
  * Checks to see if the user is an admin. Returns true if the user's role is an admin, otherwise returns false.
+ *
+ * @return - whether of not the user is an admin
  */
 function userIsAdmin() {
-  return getRole() === 'admin';
+  return this.getRole() === 'admin';
 } // userIsAdmin
 
 /**
@@ -415,24 +429,20 @@ function userIsAdmin() {
  */
 async function validateDelete(item) {
   this.midAction = true;
-  let valid = await api
-    .getAllEmployeeExpenses(item.id) // get employee expenses
-    .then((result) => {
-      // return if the employee has expenses
-      return result.length <= 0;
-    })
-    .catch((err) => {
-      // error getting employee expenses
-      this.displayError(err);
-    });
+  try {
+    let expenses = await api.getAllEmployeeExpenses(item.id); // get employee expenses
+    let valid = expenses.length <= 0; // valid if no expenses
 
-  if (valid) {
-    // employee can be deleted
-    this.$set(this.deleteModel, 'id', item.id);
-    this.deleting = !this.deleting; // activate model to confirm delete
-  } else {
-    // employee cannot be deleted
-    this.invalidDelete = !this.invalidDelete;
+    if (valid) {
+      // employee can be deleted
+      this.$set(this.deleteModel, 'id', item.id);
+      this.deleting = !this.deleting; // activate model to confirm delete
+    } else {
+      // employee cannot be deleted
+      this.invalidDelete = !this.invalidDelete;
+    }
+  } catch (err) {
+    this.displayError(err);
   }
 } // validateDelete
 
@@ -444,7 +454,7 @@ async function clearCreateEmployee() {
   if (this.employeeNumber) {
     await api.deleteResume(this.employeeNumber);
   }
-}
+} // clearCreateEmployee
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -495,7 +505,22 @@ function beforeDestroy() {
   window.EventBus.$off('canceled-delete-employee');
   window.EventBus.$off('confirm-delete-employee');
   window.EventBus.$off('invalid-employee-delete');
+  window.EventBus.$off('empNum');
 } // beforeDestroy
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     WATCHERS                     |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * watcher for filterActive - filter employees again
+ */
+function watchFilterActive() {
+  // filter employees based on datatable active filter
+  this.filterEmployees();
+} // watchFilterActive
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -617,6 +642,7 @@ export default {
     displayError,
     employeePath,
     filterEmployees,
+    getRole,
     handleClick,
     hasAdminPermissions,
     isEmpty,
@@ -631,10 +657,7 @@ export default {
     validateDelete
   },
   watch: {
-    'filter.active': function () {
-      // filter employees based on datatable active filter
-      this.filterEmployees();
-    }
+    'filter.active': watchFilterActive
   }
 };
 </script>

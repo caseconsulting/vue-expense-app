@@ -3,7 +3,7 @@
   <div v-if="this.mode === 'adminExpenseInfo'">
     <!-- admin dashboard has attachment -->
     <v-btn v-if="!isEmpty(this.expense.receipt)" :disabled="midAction" icon color="primary" @click="openDownloadTab">
-      <icon name="cloud-download-alt" style="color: #004c54" scale="2"></icon>
+      <icon name="cloud-download-alt" scale="2"></icon>
     </v-btn>
   </div>
   <!-- End Reimbursements -->
@@ -13,7 +13,7 @@
     <v-tooltip top>
       <template v-slot:activator="{ on }">
         <v-btn :disabled="isEmpty(expense.receipt) || midAction" text icon @click="openDownloadTab" v-on="on">
-          <v-icon style="color: #606060"> cloud_download </v-icon>
+          <v-icon class="case-gray"> cloud_download </v-icon>
         </v-btn>
       </template>
       <span>Download Attachment</span>

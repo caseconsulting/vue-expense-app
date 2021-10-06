@@ -30,7 +30,6 @@
         </v-radio-group>
       </v-row>
     </v-container>
-    <v-skeleton-loader v-else type="paragraph@5"></v-skeleton-loader>
   </v-card>
   <v-card v-else>
     <div class="pa-15 text-center">
@@ -43,7 +42,6 @@
 <script>
 import HorizontalBar from '../baseCharts/HorizontalBarChart.vue';
 import { isMobile } from '@/utils/utils';
-import api from '@/shared/api.js';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -53,13 +51,12 @@ import api from '@/shared/api.js';
 
 /**
  * Takes data that was captured upon load and displays it on the chart.
- * @param that this passed as that (had issues with this being 'undefined')
  */
-function fillData(that) {
-  let pairs = that.technologyPairs.sort((a, b) => {
+function fillData() {
+  let pairs = this.technologyPairs.sort((a, b) => {
     return b[1] - a[1];
   });
-  pairs = pairs.slice(0, that.numOfColumns);
+  pairs = pairs.slice(0, this.numOfColumns);
   let labels = [];
   let values = [];
 
@@ -91,7 +88,7 @@ function fillData(that) {
   }
 
   //Set the chart data
-  that.chartData = {
+  this.chartData = {
     labels: labels,
     datasets: [
       {
@@ -103,7 +100,7 @@ function fillData(that) {
       }
     ]
   };
-  that.options = {
+  this.options = {
     scales: {
       xAxes: [
         {
@@ -134,13 +131,13 @@ function fillData(that) {
     title: {
       display: true,
       text: `Top ${pairs.length} ${
-        that.showCurrent === 'All' ? '' : that.showCurrent + ' '
+        this.showCurrent === 'All' ? '' : this.showCurrent + ' '
       }Technologies Used by Employees`,
       fontSize: 15
     },
     maintainAspectRatio: false
   };
-  that.dataReceived = true;
+  this.dataReceived = true;
 } //fillData
 
 /**
@@ -150,7 +147,7 @@ function oneMoreColumn() {
   if (this.numOfColumns < this.numOfColumnsMax && this.numOfColumns < this.technologyPairs.length) {
     this.reachedMin = false;
     this.numOfColumns++;
-    fillData(this); // Refresh the chart
+    this.fillData(); // Refresh the chart
   }
   // Disable the "+" button if the max has been reached
   if (this.numOfColumns === this.numOfColumnsMax || this.numOfColumns === this.technologyPairs.length) {
@@ -165,7 +162,7 @@ function oneLessColumn() {
   if (this.numOfColumns > this.numOfColumnsMin) {
     this.reachedMax = false;
     this.numOfColumns--;
-    fillData(this); // Refresh the chart
+    this.fillData(); // Refresh the chart
   }
   // Disable the "-" button if the min has been reached
   if (this.numOfColumns === this.numOfColumnsMin) {
@@ -175,6 +172,8 @@ function oneLessColumn() {
 
 /**
  * Sets num of columns to show when radio buttons are changed
+ *
+ * @param techArray - The array of different technologies
  */
 function setNumOfColumns(techArray) {
   if (techArray.length <= 5) {
@@ -189,6 +188,7 @@ function setNumOfColumns(techArray) {
 
 /**
  * Sorts array of tech skills
+ *
  * @param techArray - The array of different technologies
  */
 function sortTech(techArray) {
@@ -214,12 +214,12 @@ function sortTech(techArray) {
 // |                                                  |
 // |--------------------------------------------------|
 
-async function mounted() {
-  //Get data
+/**
+ * mounted lifecycle hook - get items, organize them and fill data
+ */
+function mounted() {
   //Put into dictionary where key is tech type and value is quantity
-  let employees = await api.getItems(api.EMPLOYEES);
-
-  employees.forEach((employee) => {
+  this.employees3.forEach((employee) => {
     if (employee.technologies && employee.workStatus != 0) {
       employee.technologies.forEach((currTech) => {
         // **** ALL TECH ****
@@ -257,9 +257,34 @@ async function mounted() {
   // Sort tech by number of occurances
   this.sortTech(this.technologies);
 
-  this.fillData(this);
-  this.$forceUpdate();
-}
+  this.fillData();
+} // mounted
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      EXPORT                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     WATCHERS                     |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * watcher for showCurrent - sorts tech info and then fills data
+ */
+function watchShowCurrent() {
+  if (this.showCurrent === 'All') {
+    this.sortTech(this.technologies);
+  } else if (this.showCurrent === 'Current') {
+    this.sortTech(this.currentTechnologies);
+  } else {
+    this.sortTech(this.nonCurrentTechnologies);
+  }
+  this.fillData();
+} // watchShowCurrent
 
 export default {
   components: {
@@ -293,17 +318,9 @@ export default {
     setNumOfColumns
   },
   mounted,
+  props: ['employees3'], // stats page (employees) --> tab (employees2) --> chart (employees3)
   watch: {
-    showCurrent() {
-      if (this.showCurrent === 'All') {
-        this.sortTech(this.technologies);
-      } else if (this.showCurrent === 'Current') {
-        this.sortTech(this.currentTechnologies);
-      } else {
-        this.sortTech(this.nonCurrentTechnologies);
-      }
-      this.fillData(this);
-    }
+    showCurrent: watchShowCurrent
   }
 };
 </script>

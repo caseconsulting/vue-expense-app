@@ -203,7 +203,7 @@
             </template>
             <!-- Budget slot -->
             <template v-slot:[`item.budget`]="{ item }">
-              <p style="margin-bottom: 0px">{{ convertToMoneyString(item.budget) }}</p>
+              <p class="mb-0">{{ convertToMoneyString(item.budget) }}</p>
             </template>
             <!-- Actions -->
             <template v-if="userIsAdmin()" v-slot:[`item.actions`]="{ item }">
@@ -220,7 +220,7 @@
                     "
                     v-on="on"
                   >
-                    <v-icon style="color: #606060">edit</v-icon>
+                    <v-icon class="case-gray">edit</v-icon>
                   </v-btn>
                 </template>
                 <span>Edit</span>
@@ -236,7 +236,7 @@
                     @click="validateDelete(item)"
                     v-on="on"
                   >
-                    <v-icon style="color: #606060">delete</v-icon>
+                    <v-icon class="case-gray">delete</v-icon>
                   </v-btn>
                 </template>
                 <slot>Delete</slot>
@@ -328,11 +328,11 @@
                           <v-card color="#bc3825">
                             <!-- Dialog Title -->
                             <v-card-title>
-                              <span class="headline" style="color: white">Accessible By</span>
+                              <span class="headline white--text">Accessible By</span>
                             </v-card-title>
                             <v-divider color="black"></v-divider>
                             <!-- List of employee names/ISSUES -->
-                            <v-card-text class="pb-0" style="max-height: 300px; background-color: #f0f0f0">
+                            <v-card-text class="pb-0">
                               <v-row>
                                 <v-list color="#f0f0f0" width="376">
                                   <template v-for="employee in getEmployeeList(item.accessibleBy)">
@@ -436,6 +436,11 @@ import { convertToMoneyString } from '@/utils/utils';
 // |                                                  |
 // |--------------------------------------------------|
 
+/**
+ * the list of expense types
+ *
+ * @return array - the filtered expense types
+ */
 function expenseTypeList() {
   return this.filteredExpenseTypes;
 } // expenseTypeList
@@ -446,7 +451,7 @@ function expenseTypeList() {
  * @return - headers to show
  */
 function _headers() {
-  if (userIsAdmin()) {
+  if (this.userIsAdmin()) {
     return this.headers;
   } else {
     return this.headers.filter((x) => x.show);
@@ -472,6 +477,9 @@ async function addModelToTable() {
 
 /**
  * Returns a string of category names.
+ *
+ * @param categories - the categories to stringify
+ * @return string - the string of categories
  */
 function categoriesToString(categories) {
   let string = '';
@@ -486,6 +494,9 @@ function categoriesToString(categories) {
 
 /**
  * Returns a string of category names that are on the feed.
+ *
+ * @param categories - the categories to stringify
+ * @return string - the string of categories on the feed
  */
 function categoriesOnFeed(categories) {
   let string = '';
@@ -505,6 +516,9 @@ function categoriesOnFeed(categories) {
 
 /**
  * Returns a string of category names that require a url.
+ *
+ * @param categories - the categories to stringify
+ * @return string - the string of categories that require a url
  */
 function categoriesReqUrl(categories) {
   let string = '';
@@ -628,7 +642,7 @@ function displayError(err) {
  */
 function endAction() {
   this.midAction = false;
-}
+} // endAction
 
 /**
  * Filters expense types based on filter selections.
@@ -882,7 +896,7 @@ async function refreshExpenseTypes() {
  */
 function startAction() {
   this.midAction = true;
-}
+} // startAction
 
 /**
  * Scrolls window back to the top of the form.
@@ -904,9 +918,11 @@ async function updateModelInTable() {
 
 /**
  * Checks if the user is an admin. Returns true if the role is 'admin', otherwise returns false.
+ *
+ * @return boolean - whether the user is an admin
  */
 function userIsAdmin() {
-  return getRole() === 'admin';
+  return this.getRole() === 'admin';
 } // userIsAdmin
 
 /**
@@ -918,19 +934,16 @@ function userIsAdmin() {
 async function validateDelete(item) {
   this.midAction = true;
   this.deleteType = item.budgetName;
-  let x = await api
-    .getAllExpenseTypeExpenses(item.id)
-    .then((result) => {
-      return result.length <= 0;
-    })
-    .catch((err) => {
-      this.displayError(err);
-    });
-  if (x) {
-    this.$set(this.deleteModel, 'id', item.id);
-    this.deleting = !this.deleting;
-  } else {
-    this.invalidDelete = !this.invalidDelete;
+  try {
+    let expenses = await api.getAllExpenseTypeExpenses(item.id);
+    if (expenses.length <= 0) {
+      this.$set(this.deleteModel, 'id', item.id);
+      this.deleting = !this.deleting;
+    } else {
+      this.invalidDelete = !this.invalidDelete;
+    }
+  } catch (err) {
+    this.displayError(err);
   }
 } // validateDelete
 
@@ -992,6 +1005,36 @@ async function created() {
 
   this.campfires = await api.getBasecampCampfires();
 } // created
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     WATCHERS                     |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * watcher for filter.active, filter.receipt, filter.recurring, filter.overdraft
+ */
+function watchFilterExpenseTypes() {
+  this.filterExpenseTypes();
+} // watchFilterExpenseTypes
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     FILTERS                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * limits the length of the text
+ *
+ * @param val - the string to be shortened
+ * @return string - the shortened string
+ */
+function limitedText(val) {
+  // limits text displayed to 50 characters on table view
+  return val.length > 50 ? `${val.substring(0, 50)}...` : val;
+} // limitedText
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -1092,10 +1135,7 @@ export default {
     };
   },
   filters: {
-    limitedText: (val) => {
-      // limits text displayed to 50 characters on table view
-      return val.length > 50 ? `${val.substring(0, 50)}...` : val;
-    }
+    limitedText
   },
   methods: {
     addModelToTable,
@@ -1116,6 +1156,7 @@ export default {
     getCampfire,
     getEmployeeList,
     getEmployeeName,
+    getRole,
     hasAccess,
     isInactive,
     onSelect,
@@ -1128,21 +1169,10 @@ export default {
     validateDelete
   },
   watch: {
-    'filter.active': function () {
-      this.filterExpenseTypes();
-    },
-    'filter.receipt': function () {
-      this.filterExpenseTypes();
-    },
-    'filter.recurring': function () {
-      this.filterExpenseTypes();
-    },
-    'filter.overdraft': function () {
-      this.filterExpenseTypes();
-    },
-    deleteInfo: function () {
-      return;
-    }
+    'filter.active': watchFilterExpenseTypes,
+    'filter.receipt': watchFilterExpenseTypes,
+    'filter.recurring': watchFilterExpenseTypes,
+    'filter.overdraft': watchFilterExpenseTypes
   }
 };
 </script>

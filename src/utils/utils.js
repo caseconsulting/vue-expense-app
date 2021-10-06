@@ -179,4 +179,4 @@ export function parseDate(date) {
  */
 export function parseDateMonthYear(date) {
   return dateUtils.parseDateMonthYear(date);
-} // parseDate
+} // parseDateMonthYear

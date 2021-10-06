@@ -29,16 +29,30 @@ let router = new Router({
   mode: 'history'
 });
 
+/**
+ * clears the cookies
+ */
 function clearCookies() {
   document.cookie.split(';').forEach(function (c) {
     document.cookie = c.replace(/^ +/, '').replace(/=.*/, '=;expires=' + new Date().toUTCString() + ';path=/');
   });
 } // clearCookies
 
+/**
+ * gets the access token from cookies
+ *
+ * @return - the accessToken
+ */
 export function getAccessToken() {
   return getCookie(ACCESS_TOKEN_KEY);
 } // getAccessToken
 
+/**
+ * gets a cookie based on it's cname
+ *
+ * @param {*} cname - the cnmae of the cookie
+ * @return - the cookie
+ */
 function getCookie(cname) {
   let name = `${cname}=`;
   let decodedCookie = decodeURIComponent(document.cookie);
@@ -55,20 +69,40 @@ function getCookie(cname) {
   return '';
 } // getCookie
 
+/**
+ * gets the id token from cookies
+ *
+ * @return - the id token
+ */
 export function getIdToken() {
   return getCookie(ID_TOKEN_KEY);
 } // getIdToken
 
-// Helper function that will allow us to extract the access_token and id_token
+/**
+ * Helper function that will allow us to extract the access_token and id_token
+ *
+ * @param name - name of the parameter
+ * @return - the parameter
+ */
 function getParameterByName(name) {
   let match = RegExp('[#&]' + name + '=([^&]*)').exec(window.location.hash);
   return match && decodeURIComponent(match[1].replace(/\+/g, ' '));
 } // getParameterByName
 
+/**
+ * gets the profile image from the cookies
+ *
+ * @return - the profile img
+ */
 export function getProfile() {
   return getCookie(IMG);
 } // getProfile
 
+/**
+ * gets the role of the user from cookies
+ *
+ * @return - the role of the user
+ */
 export function getRole() {
   const encryptedRole = getCookie(ROLE);
   if (encryptedRole) {
@@ -77,6 +111,12 @@ export function getRole() {
   }
 } // getRole
 
+/**
+ * gets the token expiration date
+ *
+ * @param encodedToken - the encoded token
+ * @return - the date from the decoded token
+ */
 export function getTokenExpirationDate(encodedToken) {
   const token = decode(encodedToken);
   if (!token.exp) {
@@ -88,6 +128,13 @@ export function getTokenExpirationDate(encodedToken) {
   return date;
 } // getTokenExpirationDate
 
+/**
+ * checks to see if the current user is an admin before the router continues
+ *
+ * @param to - path to next page
+ * @param from - page where user was redirected from
+ * @param next - function to continue the router
+ */
 export function isAdmin(to, from, next) {
   if (getRole() === 'admin') {
     next();
@@ -99,6 +146,13 @@ export function isAdmin(to, from, next) {
   }
 } // isAdmin
 
+/**
+ * checks to see if the current user is an admin or manager
+ *
+ * @param to - path to next page
+ * @param from - page where user was redirected from
+ * @param next - function to continue the router
+ */
 export function isAdminOrManager(to, from, next) {
   if (getRole() === 'admin' || getRole() === 'manager') {
     next();
@@ -108,8 +162,13 @@ export function isAdminOrManager(to, from, next) {
       query: { redirect: to.fullPath }
     });
   }
-} // isAdmin
+} // isAdminOrManager
 
+/**
+ * checks to see if the user is logged in
+ *
+ * @return boolean - if the user is logged in
+ */
 export function isLoggedIn() {
   try {
     const idToken = getIdToken();
@@ -120,20 +179,39 @@ export function isLoggedIn() {
   }
 } // isLoggedIn
 
+/**
+ * checks to see if the token is expired
+ *
+ * @param token - the token to check
+ * @return boolean - is the token expired
+ */
 export function isTokenExpired(token) {
   const expirationDate = getTokenExpirationDate(token);
   return expirationDate.getTime() - Date.now() <= 0;
 } // isTokenExpired
 
-export function login() {
+/**
+ * logs in the user
+ */
+export async function login() {
   auth.authorize();
 } // login
 
+/**
+ * logs out the user
+ */
 export function logout() {
   clearCookies();
   router.go('/');
 } // logout
 
+/**
+ * router step to check authorization
+ *
+ * @param to - path to next page
+ * @param from - page where user was redirected from
+ * @param next - function to continue the router
+ */
 export function requireAuth(to, from, next) {
   if (!isLoggedIn()) {
     next({
@@ -145,12 +223,21 @@ export function requireAuth(to, from, next) {
   }
 } // requireAuth
 
-// Get and store access_token in local storage
+/**
+ * Get and store access_token in local storage
+ */
 export function setAccessToken() {
   let accessToken = getParameterByName('access_token');
   setCookie(ACCESS_TOKEN_KEY, accessToken);
 } // setAccessToken
 
+/**
+ * sets the cookie
+ *
+ * @param {*} cname - name of the cookie
+ * @param {*} cvalue - the value of the cookie
+ * @param {*} exdays - number of days before cookie expiration
+ */
 function setCookie(cname, cvalue, exdays) {
   if (exdays) {
     let d = new Date();
@@ -162,22 +249,31 @@ function setCookie(cname, cvalue, exdays) {
   }
 } // setCookie
 
-// Get and store id_token in local storage
+/**
+ * Get and store id_token in local storage
+ */
 export function setIdToken() {
   let idToken = getParameterByName('id_token');
   setCookie(ID_TOKEN_KEY, idToken);
 } // setIdToken
 
+/**
+ * sets the profile in cookies
+ */
 export function setProfile() {
   let profile = decode(getIdToken());
 
   setCookie(IMG, profile.picture);
 } // setProfile
 
+/**
+ * sets the role in cookies
+ */
 export async function setRole() {
   const employeeRole = await api.getRole();
   if (employeeRole) {
     const encryptedRole = CryptoJS.AES.encrypt(employeeRole, process.env.VUE_APP_AES_KEY);
     setCookie(ROLE, encryptedRole);
+    return employeeRole;
   }
 } // setRole

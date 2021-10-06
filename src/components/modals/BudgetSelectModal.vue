@@ -1,64 +1,42 @@
 <template>
   <div>
-    <v-dialog v-if="hasBudgets" v-model="activate" persistent max-width="400">
+    <v-dialog v-model="activate" persistent max-width="400">
       <v-card>
         <!-- Anniversary Date -->
         <v-toolbar color="#565651" dark>
           <v-toolbar-title>Anniversary Date: {{ getAnniversaryDate }}</v-toolbar-title>
         </v-toolbar>
         <!-- End Anniversary Date -->
-
         <!-- Buttons -->
         <v-list two-line>
           <!-- Budget List -->
-          <template v-for="(budgetYear, index) in budgetYears">
-            <v-list-item :key="budgetYear" ripple @click.native="select(budgetYear)" class="list-hover">
-              <v-list-item-content>
-                <v-list-item-title>
-                  <h2 v-bind:class="{ 'center-text': true, 'underline-text': isCurrent(budgetYear) }">
-                    {{ budgetYear }} - {{ budgetYear + 1 }}
-                  </h2>
-                </v-list-item-title>
-              </v-list-item-content>
-            </v-list-item>
-            <v-divider :key="index"></v-divider>
-          </template>
-          <!-- End Budget List -->
-
-          <!-- Cancel Button -->
-          <template>
-            <v-list-item ripple @click.native="activate = false" class="list-hover">
-              <v-list-item-content>
-                <v-list-item-title><h2 class="center-text">Cancel</h2></v-list-item-title>
-              </v-list-item-content>
-            </v-list-item>
-          </template>
-          <!-- End Cancel Button -->
-        </v-list>
-        <!-- End Buttons -->
-      </v-card>
-    </v-dialog>
-    <v-dialog v-else v-model="activate" persistent max-width="400">
-      <v-card>
-        <!-- Anniversary Date -->
-        <v-toolbar color="#565651" dark>
-          <v-toolbar-title>Anniversary Date: {{ getAnniversaryDate }}</v-toolbar-title>
-        </v-toolbar>
-        <!-- End Anniversary Date -->
-
-        <!-- Buttons -->
-        <v-list two-line>
+          <div v-if="hasBudgets">
+            <template v-for="(budgetYear, index) in budgetYears">
+              <v-list-item :key="budgetYear" ripple @click.native="select(budgetYear)" class="list-hover">
+                <v-list-item-content>
+                  <v-list-item-title>
+                    <h2 v-bind:class="{ 'center-text': true, 'underline-text': isCurrent(budgetYear) }">
+                      {{ budgetYear }} - {{ budgetYear + 1 }}
+                    </h2>
+                  </v-list-item-title>
+                </v-list-item-content>
+              </v-list-item>
+              <v-divider :key="index"></v-divider>
+            </template>
+          </div>
           <!-- Budget List -->
-          <template>
-            <v-list-item>
-              <v-list-item-content>
-                <v-list-item-title>
-                  <h2 class="text-center">No Previous Years</h2>
-                </v-list-item-title>
-              </v-list-item-content>
-            </v-list-item>
-            <v-divider></v-divider>
-          </template>
+          <div v-else>
+            <template>
+              <v-list-item>
+                <v-list-item-content>
+                  <v-list-item-title>
+                    <h2 class="text-center">No Previous Years</h2>
+                  </v-list-item-title>
+                </v-list-item-content>
+              </v-list-item>
+              <v-divider></v-divider>
+            </template>
+          </div>
           <!-- End Budget List -->
 
           <!-- Cancel Button -->
@@ -82,10 +60,16 @@ const IsoFormat = 'YYYY-MM-DD';
 const moment = require('moment-timezone');
 moment.tz.setDefault('America/New_York');
 
+// |--------------------------------------------------|
+// |                                                  |
+// |                    COMPUTED                      |
+// |                                                  |
+// |--------------------------------------------------|
+
 /**
  * Gets the anniversary date based on hire date.
  *
- * @returns String - anniversary date
+ * @return String - anniversary date
  */
 function getAnniversaryDate() {
   return moment(this.hireDate).format('MMMM Do');
@@ -138,6 +122,19 @@ function select(budgetYear) {
 
 // |--------------------------------------------------|
 // |                                                  |
+// |                    WATCHERS                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * watcher for toggleBudgetSelectModal
+ */
+function watchToggleBudgetSelectModal() {
+  this.activate = true;
+} // watchToggleBudgetSelectModal
+
+// |--------------------------------------------------|
+// |                                                  |
 // |                      EXPORT                      |
 // |                                                  |
 // |--------------------------------------------------|
@@ -164,9 +161,7 @@ export default {
     'hasBudgets'
   ],
   watch: {
-    toggleBudgetSelectModal: function () {
-      this.activate = true;
-    }
+    toggleBudgetSelectModal: watchToggleBudgetSelectModal
   }
 };
 </script>

@@ -1,5 +1,5 @@
 $case-red: #bc3825;
-$case-darkgray: #3f3f3c;
+$case-darkgray: #6a6a6a;
 
 /* RolledupExpenseTypeTable.vue */
 #money-team {
@@ -273,4 +273,44 @@ fieldset legend {
 #marks {
   width: auto;
   height: 1.5em;
+}
+
+.case-gray {
+  color: $case-darkgray !important;
+}
+
+.no-decoration {
+  text-decoration: none !important;
+}
+
+.form-text {
+  color: #0000008a !important;
+}
+
+.w-60 {
+  width: 60% !important;
+}
+
+.mw-50 {
+  max-width: 50px !important;
+}
+
+.gray-border {
+  border-style: solid;
+  border-color: gray !important;
+  border-width: 1px;
+  padding: 0 15px;
+  margin: -10px;
+}
+
+.grey-background {
+  background: grey;
+}
+
+.italics {
+  font-style: italic;
+}
+
+.groove {
+  border-left-style: groove;
 }

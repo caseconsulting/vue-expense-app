@@ -28,6 +28,8 @@ moment.tz.setDefault('America/New_York');
 
 /**
  * Checks to see if the user has any badges expiring.
+ *
+ * @return alert with message based on if badge has expired or not
  */
 function checkWarnings() {
   if (this.employee.clearances) {
@@ -71,6 +73,8 @@ function createAlert(msg) {
 
 /**
  * Checks if the current profile someone is on is the user's profile
+ *
+ * @return boolean - checks to see if the current banner is on user profile
  */
 function onUserProfile() {
   return this.$route.params.id == this.employee.employeeNumber;

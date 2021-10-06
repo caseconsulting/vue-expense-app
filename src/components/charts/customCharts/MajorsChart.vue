@@ -2,11 +2,16 @@
   <v-card v-if="dataReceived" class="pa-5">
     <pie-chart ref="chart" :options="options" :chartData="chartData"></pie-chart>
   </v-card>
-  <v-skeleton-loader v-else type="paragraph@5"></v-skeleton-loader>
 </template>
 
 <script>
 import PieChart from '../baseCharts/PieChart.vue';
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                 LIFECYCLE HOOKS                  |
+// |                                                  |
+// |--------------------------------------------------|
 
 /**
  * mounted lifecycle hook
@@ -27,8 +32,22 @@ function created() {
   this.fillData(null);
 } // created
 
+// |--------------------------------------------------|
+// |                                                  |
+// |                      METHODS                     |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * beforeDestroy lifecycle hook
+ */
+function beforeDestroy() {
+  window.EventBus.$off('majors-update');
+} //beforeDestroy
+
 /**
  * Sets the chart formatting and options data.
+ *
  * @param majors - The array of majors for a degree
  */
 function fillData(majors) {
@@ -92,6 +111,12 @@ function fillData(majors) {
   this.dataReceived = true;
 } // fillData
 
+// |--------------------------------------------------|
+// |                                                  |
+// |                      EXPORT                      |
+// |                                                  |
+// |--------------------------------------------------|
+
 export default {
   components: { PieChart },
   data() {
@@ -107,6 +132,7 @@ export default {
     fillData
   },
   mounted,
-  created
+  created,
+  beforeDestroy
 };
 </script>

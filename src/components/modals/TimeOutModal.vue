@@ -40,6 +40,19 @@ function emit(msg) {
 
 // |--------------------------------------------------|
 // |                                                  |
+// |                    WATCHERS                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * watcher for toggleTimeOut
+ */
+function watchToggleTimeOut() {
+  this.activate = this.toggleTimeOut;
+} // watchToggleTimeOut
+
+// |--------------------------------------------------|
+// |                                                  |
 // |                      EXPORT                      |
 // |                                                  |
 // |--------------------------------------------------|
@@ -55,9 +68,7 @@ export default {
   },
   props: ['toggleTimeOut'], // dialog activator
   watch: {
-    toggleTimeOut: function () {
-      this.activate = this.toggleTimeOut;
-    }
+    toggleTimeOut: watchToggleTimeOut
   }
 };
 </script>

@@ -10,28 +10,36 @@
     >
       <template v-slot:top>
         <v-toolbar flat>
-          <v-toolbar-title>Intelligence Community Stats</v-toolbar-title>
+          <v-toolbar-title>Community Statistics</v-toolbar-title>
         </v-toolbar>
       </template>
     </v-data-table>
-    <v-skeleton-loader v-else type="paragraph@3"></v-skeleton-loader>
   </div>
 </template>
 
 <script>
-import api from '@/shared/api.js';
 import _ from 'lodash';
 const moment = require('moment-timezone');
 moment.tz.setDefault('America/New_York');
 
+// |--------------------------------------------------|
+// |                                                  |
+// |                 LIFECYCLE HOOKS                  |
+// |                                                  |
+// |--------------------------------------------------|
+
 /**
  * created lifecycle hook
  */
-async function created() {
-  this.$forceUpdate();
-  this.employees = await api.getItems(api.EMPLOYEES);
+function created() {
   this.fillData();
 } // created
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      METHODS                     |
+// |                                                  |
+// |--------------------------------------------------|
 
 /**
  * Gets the IC data, and sets the chart formatting and data options
@@ -39,8 +47,14 @@ async function created() {
 function fillData() {
   let ICData = {};
   let totalYears = 0;
+
+  // filter out inactive employees (including info) and intern
+  let interns = this.employees.filter((emp) => emp.employeeRole == 'intern');
+
+  this.employees = this.employees.filter((emp) => emp.workStatus != 0 && emp.employeeRole != 'intern');
+
   this.employees.forEach((emp) => {
-    if (emp.icTimeFrames && emp.workStatus != 0) {
+    if (emp.icTimeFrames) {
       let totalDurationYears = 0;
       let ranges = _.mapValues(emp.icTimeFrames, 'range');
       _.forEach(ranges, (range) => {
@@ -70,6 +84,7 @@ function fillData() {
 
   this.tableContents = [
     { title: 'Total Employees', value: this.employees.length },
+    { title: 'Total Interns', value: interns.length },
     { title: 'Company Wide IC Experience', value: totalYears.toFixed(2) + ' Years' },
     { title: 'Average IC Experience per Employee', value: averageYoE.toFixed(2) + ' Years' }
   ];
@@ -85,11 +100,17 @@ function fillData() {
   this.dataReceived = true;
 } // fillData
 
+// |--------------------------------------------------|
+// |                                                  |
+// |                      EXPORT                      |
+// |                                                  |
+// |--------------------------------------------------|
+
 export default {
   data() {
     return {
       dataReceived: false,
-      employees: null,
+      employees: this.employees3, // copied to fix issue with mutated prop
       tableContents: null,
       headers: null
     };
@@ -97,6 +118,7 @@ export default {
   methods: {
     fillData
   },
-  created
+  created,
+  props: ['employees3'] // stats page (employees) --> tab (employees2) --> chart (employees3)
 };
 </script>

@@ -1,12 +1,7 @@
 <template>
   <div>
     <!-- Loop Contracts -->
-    <div
-      v-for="(contract, index) in editedContracts"
-      class="pt-3 pb-1 px-5"
-      :key="index"
-      style="border: 1px solid grey"
-    >
+    <div v-for="(contract, index) in editedContracts" class="gray-border ma-0 pt-3 pb-1 px-5" :key="index">
       <!-- Name of Contract -->
       <v-combobox
         ref="formFields"
@@ -32,7 +27,7 @@
       </v-combobox>
       <!-- Start of project loop -->
       <div v-for="(project, projIndex) in contract.projects" class="pt-3 pb-1" :key="index + '-' + projIndex">
-        <v-combobox
+        <v-text-field
           ref="formFields"
           :id="'proj-' + projIndex + '-' + index"
           v-model.trim="project.name"
@@ -44,12 +39,12 @@
           <v-tooltip v-if="contract.projects.length > 1" bottom slot="append-outer">
             <template v-slot:activator="{ on }">
               <v-btn text icon v-on="on" @click="deleteProject(index, projIndex)"
-                ><v-icon style="color: grey">delete</v-icon></v-btn
+                ><v-icon class="case-gray">delete</v-icon></v-btn
               >
             </template>
             <span>Delete Project</span>
           </v-tooltip>
-        </v-combobox>
+        </v-text-field>
         <v-row>
           <v-col cols="12" sm="6" md="12" lg="6" class="pt-3">
             <!-- Start Date -->
@@ -65,12 +60,12 @@
                 <v-text-field
                   :id="'start-field-' + index + '-' + projIndex"
                   ref="formFields"
-                  :value="project.startDate | formatDate"
+                  :value="project.startDate | formatDateMonthYear"
                   label="Start Date"
-                  hint="MM/DD/YYYY format"
-                  v-mask="'##/##/####'"
+                  hint="MM/YYYY format"
+                  v-mask="'##/####'"
                   prepend-icon="event_available"
-                  :rules="[...getRequiredRules(), ...getDateRules(), dateOrderRule(index, projIndex)]"
+                  :rules="[...getRequiredRules(), ...getDateMonthYearRules(), dateOrderRule(index, projIndex)]"
                   v-bind="attrs"
                   v-on="on"
                   @blur="project.startDate = parseEventDate($event)"
@@ -83,6 +78,7 @@
                 :max="project.endDate"
                 no-title
                 @input="project.showStartMenu = false"
+                type="month"
               ></v-date-picker>
             </v-menu>
           </v-col>
@@ -101,16 +97,16 @@
                   :id="'end-field-' + index + '-' + projIndex"
                   ref="formFields"
                   :disabled="project.presentDate"
-                  :value="project.endDate | formatDate"
+                  :value="project.endDate | formatDateMonthYear"
                   label="End Date"
                   prepend-icon="event_busy"
                   :rules="[
-                    ...getDateOptionalRules(),
+                    ...getDateMonthYearOptionalRules(),
                     dateOrderRule(index, projIndex),
                     endDatePresentRule(index, projIndex)
                   ]"
-                  hint="MM/DD/YYYY format"
-                  v-mask="'##/##/####'"
+                  hint="MM/YYYY format"
+                  v-mask="'##/####'"
                   v-bind="attrs"
                   v-on="on"
                   clearable
@@ -124,6 +120,7 @@
                 :min="project.startDate"
                 no-title
                 @input="project.showEndMenu = false"
+                type="month"
               ></v-date-picker>
             </v-menu>
             <!-- End End Date -->
@@ -153,7 +150,7 @@
         <v-tooltip bottom>
           <template v-slot:activator="{ on }">
             <v-btn v-on="on" @click="deleteContract(index)" icon text
-              ><v-icon style="color: grey" class="pr-1">delete</v-icon></v-btn
+              ><v-icon class="case-gray pr-1">delete</v-icon></v-btn
             >
           </template>
           <span>Delete Contract</span>
@@ -173,8 +170,8 @@
 import api from '@/shared/api.js';
 import _ from 'lodash';
 import { mask } from 'vue-the-mask';
-import { getDateRules, getDateOptionalRules, getRequiredRules } from '@/shared/validationUtils.js';
-import { isEmpty, formatDate, parseDate, isMobile } from '@/utils/utils';
+import { getDateMonthYearRules, getDateMonthYearOptionalRules, getRequiredRules } from '@/shared/validationUtils.js';
+import { isEmpty, formatDateMonthYear, parseDateMonthYear, isMobile } from '@/utils/utils';
 const moment = require('moment');
 
 // |--------------------------------------------------|
@@ -248,6 +245,7 @@ function addProject(contractIndex) {
 
 /**
  * Deletes a Contract.
+ *
  * @param index - array index of contract to delete
  */
 function deleteContract(index) {
@@ -256,6 +254,7 @@ function deleteContract(index) {
 
 /**
  * Deletes a project.
+ *
  * @param contractIndex - The index of the contract
  * @param projectIndex - The index of the project
  */
@@ -271,7 +270,7 @@ function deleteProject(contractIndex, projectIndex) {
  * Checks if the current contract has any projects without an end date
  *
  * @param index The index of the contract in this.editedContracts
- * @return whether or not the projects for that contract have all their end dates filled
+ * @return boolean - whether or not the projects for that contract have all their end dates filled
  */
 function hasEndDatesFilled(index) {
   let hasEndDatesFilled = true;
@@ -284,10 +283,10 @@ function hasEndDatesFilled(index) {
 
 /**
  * Parse the date after losing focus.
- * @returns String - The date in YYYY-MM-DD format
+ * @return String - The date in YYYY-MM-DD format
  */
 function parseEventDate() {
-  return parseDate(event.target.value);
+  return this.parseDateMonthYear(event.target.value);
 } //parseEventDate
 
 /**
@@ -330,6 +329,30 @@ function validateFields() {
   window.EventBus.$emit('contractsStatus', errorCount); // emit error status
 } // validateFields
 
+// |--------------------------------------------------|
+// |                                                  |
+// |                     WATCHERS                     |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * watcher for validating - validates fields
+ *
+ * @param val - val prop that needs to exist before validating
+ */
+function watchValidating(val) {
+  if (val) {
+    // parent component triggers validation
+    this.validateFields();
+  }
+} // watchValidating
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      EXPORT                      |
+// |                                                  |
+// |--------------------------------------------------|
+
 export default {
   computed: {
     isMobile
@@ -341,7 +364,7 @@ export default {
       dateOrderRule: (compIndex, projIndex) => {
         if (this.editedContracts) {
           let project = this.editedContracts[compIndex].projects[projIndex];
-          return !isEmpty(project.endDate) && moment(project.endDate) && project.startDate
+          return !this.isEmpty(project.endDate) && moment(project.endDate) && project.startDate
             ? moment(project.endDate).add(1, 'd').isAfter(moment(project.startDate)) ||
                 'End date must be at or after start date'
             : true;
@@ -351,15 +374,22 @@ export default {
       },
       duplicateContractName: (conIndex) => {
         let contractNames = _.map(this.editedContracts, (contract) => contract.name);
+        let primeNames = _.map(this.editedContracts, (contract) => contract.prime);
         let contractName = contractNames[conIndex];
+        let primeName = primeNames[conIndex];
         contractNames.splice(conIndex, 1);
-        return !contractNames.includes(contractName) || 'Duplicate contract name';
+        primeNames.splice(conIndex, 1);
+        return (
+          !contractNames.includes(contractName) ||
+          (contractNames.includes(contractName) && !primeNames.includes(primeName)) ||
+          'Duplicate contract name'
+        );
       },
       editedContracts: _.cloneDeep(this.model), // stores edited contracts info
       endDatePresentRule: (compIndex, projIndex) => {
         if (this.editedContracts !== undefined) {
           let position = this.editedContracts[compIndex].projects[projIndex];
-          if (position.presentDate == false && isEmpty(position.endDate)) {
+          if (!position.presentDate && this.isEmpty(position.endDate)) {
             return 'End Date is required';
           } else {
             return true;
@@ -369,7 +399,7 @@ export default {
         }
       },
       experienceRequired: [
-        (v) => !isEmpty(v) || 'This field is required',
+        (v) => !this.isEmpty(v) || 'This field is required',
         (v) => v >= 0 || 'Value cannot be negative',
         (v) => v < 100 || 'Value must be less than 100'
       ], // rules for years of experience
@@ -378,31 +408,26 @@ export default {
   },
   directives: { mask },
   filters: {
-    formatDate
+    formatDateMonthYear
   },
   methods: {
     addContract,
     addProject,
     deleteContract,
     deleteProject,
-    getDateRules,
-    getDateOptionalRules,
+    getDateMonthYearRules,
+    getDateMonthYearOptionalRules,
     getRequiredRules,
     hasEndDatesFilled,
     isEmpty,
-    parseDate,
+    parseDateMonthYear,
     parseEventDate,
     populateDropDowns,
     validateFields
   },
   props: ['model', 'validating'],
   watch: {
-    validating: function (val) {
-      if (val) {
-        // parent component triggers validation
-        this.validateFields();
-      }
-    }
+    validating: watchValidating
   }
 };
 </script>

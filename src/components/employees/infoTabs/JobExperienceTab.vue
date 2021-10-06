@@ -78,10 +78,10 @@ import { isEmpty, monthDayYearFormat, monthYearFormat } from '@/utils/utils';
  * Emits to parent the component was created and get data for the list.
  */
 function created() {
-  if (!isEmpty(this.model.companies)) {
+  if (!this.isEmpty(this.model.companies)) {
     this.pageList = this.filterCompanies.slice(0, 4);
   }
-}
+} // created
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -149,6 +149,8 @@ function onPageChange() {
 
 /**
  * The function updates the company that is shown to the user based on filters
+ *
+ * @param query - the query used to decide which companies to show
  */
 function updateCompanies(query) {
   if (query === undefined) {
@@ -163,7 +165,27 @@ function updateCompanies(query) {
     this.page = 1;
     this.pageList = this.filterCompanies.slice(0, 4);
   }
-}
+} // updateCompanies
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                    WATCHERS                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * watcher for filter - updateCompanies based on filter
+ */
+function watchFilter() {
+  this.updateCompanies(this.filter);
+} // watchFilter
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      EXPORT                      |
+// |                                                  |
+// |--------------------------------------------------|
+
 export default {
   created,
   data() {
@@ -186,9 +208,7 @@ export default {
     icExperience
   },
   watch: {
-    filter: function () {
-      this.updateCompanies(this.filter);
-    }
+    filter: watchFilter
   },
   props: ['model']
 };

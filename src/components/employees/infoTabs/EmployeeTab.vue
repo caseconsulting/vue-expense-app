@@ -27,12 +27,12 @@
     <p v-if="admin"><b>Employee Role:</b> {{ this.model.employeeRole | startCase }}</p>
     <!-- Hire Date -->
     <p v-if="admin || employee"><b> Hire Date:</b> {{ monthDayYearFormat(this.model.hireDate) }}</p>
-    <!-- Status -->
-    <p v-if="admin || employee"><b>Status:</b> {{ getWorkStatus(this.model.workStatus) }}</p>
     <!-- Departure Date -->
     <p v-if="!isEmpty(this.model.deptDate) && admin">
       <b>Departure Date:</b> {{ monthDayYearFormat(this.model.deptDate) }}
     </p>
+    <!-- Status -->
+    <p v-if="admin || employee"><b>Status:</b> {{ getWorkStatus(this.model.workStatus) }}</p>
     <!-- Mifi Status -->
     <p v-if="this.model.employeeRole !== 'intern' && this.model.workStatus !== 0">
       <b>Mifi Status:</b>
@@ -65,6 +65,8 @@ function fullName() {
 
 /**
  * Gets all of the current projects the user has
+ *
+ * @return array - the contracts
  */
 function getCurrentProjects() {
   let contracts = [];
@@ -90,7 +92,8 @@ function getCurrentProjects() {
   }
 
   return contracts;
-}
+} // getCurrentProjects
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                     METHODS                      |
@@ -99,6 +102,9 @@ function getCurrentProjects() {
 
 /**
  * Returns Full Time, Part Time, or Inactive based on the work status
+ *
+ * @param workStatus - the workstatus number
+ * @return string - readable work status of employee
  */
 function getWorkStatus(workStatus) {
   if (workStatus == 100) {
@@ -112,15 +118,35 @@ function getWorkStatus(workStatus) {
   }
 } // getWorkStatus
 
+// |--------------------------------------------------|
+// |                                                  |
+// |                     FILTERS                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * startCase filter - uses lodash startCase as filter - capitalizes every word
+ *
+ * @param value - value to capitalize
+ * @return string - capitalized string
+ */
+function startCase(value) {
+  return _.startCase(value);
+} // startCase
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      EXPORT                      |
+// |                                                  |
+// |--------------------------------------------------|
+
 export default {
   computed: {
     fullName,
     getCurrentProjects
   },
   filters: {
-    startCase: (value) => {
-      return _.startCase(value);
-    }
+    startCase
   },
   methods: {
     getWorkStatus,

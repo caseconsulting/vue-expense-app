@@ -1,12 +1,7 @@
 <template>
   <div>
     <!-- Loop Certifications -->
-    <div
-      v-for="(certification, index) in editedCertifications"
-      style="border: 1px solid grey"
-      class="pt-3 pb-1 px-5"
-      :key="index"
-    >
+    <div v-for="(certification, index) in editedCertifications" class="gray-border ma-0 pt-3 pb-1 px-5" :key="index">
       <!-- Name of Certification -->
       <v-combobox
         ref="formFields"
@@ -99,7 +94,7 @@
           <v-tooltip bottom>
             <template v-slot:activator="{ on }">
               <v-btn v-on="on" @click="deleteCertification(index)" icon text
-                ><v-icon style="color: grey">delete</v-icon></v-btn
+                ><v-icon class="case-gray">delete</v-icon></v-btn
               >
             </template>
             <span>Delete Certification</span>
@@ -172,10 +167,11 @@ function deleteCertification(index) {
 
 /**
  * Parse the date after losing focus.
- * @returns String - The date in YYYY-MM-DD format
+ *
+ * @return String - The date in YYYY-MM-DD format
  */
 function parseEventDate() {
-  return parseDate(event.target.value);
+  return this.parseDate(event.target.value);
 } //parseEventDate
 
 /**
@@ -207,6 +203,30 @@ function validateFields() {
   window.EventBus.$emit('certificationsStatus', errorCount); // emit error status
 } // validateFields
 
+// |--------------------------------------------------|
+// |                                                  |
+// |                     WATCHERS                     |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * watcher for validating - validates fields
+ *
+ * @param val - val prop that needs to exist before validating
+ */
+function watchValidating(val) {
+  if (val) {
+    // parent component triggers validation
+    this.validateFields();
+  }
+} // watchValidating
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      EXPORT                      |
+// |                                                  |
+// |--------------------------------------------------|
+
 export default {
   computed: {
     isMobile
@@ -219,7 +239,7 @@ export default {
       dateOrderRules: (certIndex) => {
         if (this.editedCertifications) {
           let position = this.editedCertifications[certIndex];
-          return !isEmpty(position.expirationDate) && moment(position.expirationDate) && position.dateReceived
+          return !this.isEmpty(position.expirationDate) && moment(position.expirationDate) && position.dateReceived
             ? moment(position.expirationDate).add(1, 'd').isAfter(moment(position.dateReceived)) ||
                 'End date must be at or after start date'
             : true;
@@ -231,7 +251,7 @@ export default {
       expDateRule: (compIndex) => {
         if (this.editedCertifications !== undefined) {
           let position = this.editedCertifications[compIndex];
-          if (position.noExpiry == false && isEmpty(position.expirationDate)) {
+          if (position.noExpiry == false && this.isEmpty(position.expirationDate)) {
             return 'Expiration Date is required';
           } else {
             return true;
@@ -253,18 +273,14 @@ export default {
     getDateRules,
     getRequiredRules,
     isEmpty,
+    parseDate,
     parseEventDate,
     populateDropDowns,
     validateFields
   },
   props: ['model', 'validating'],
   watch: {
-    validating: function (val) {
-      if (val) {
-        // parent component triggers validation
-        this.validateFields();
-      }
-    }
+    validating: watchValidating
   }
 };
 </script>

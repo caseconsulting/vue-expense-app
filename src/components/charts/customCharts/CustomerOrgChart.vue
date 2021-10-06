@@ -11,22 +11,30 @@
       </v-row>
     </v-container>
   </v-card>
-  <v-skeleton-loader v-else type="paragraph@5"></v-skeleton-loader>
 </template>
 
 <script>
 import PieChart from '../baseCharts/PieChart.vue';
 import _ from 'lodash';
-import api from '@/shared/api.js';
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                 LIFECYCLE HOOKS                  |
+// |                                                  |
+// |--------------------------------------------------|
 
 /**
  * created lifecycle hook
  */
-async function created() {
-  this.employees = await api.getItems(api.EMPLOYEES);
+function created() {
   this.fillData();
-  this.$forceUpdate();
 } // created
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      METHODS                     |
+// |                                                  |
+// |--------------------------------------------------|
 
 /**
  * Sets up the chart formatting and data options.
@@ -34,7 +42,7 @@ async function created() {
 function fillData() {
   let allCompOrgExp = {};
   // tally up customer org experience for active employees
-  this.employees.forEach((emp) => {
+  this.employees3.forEach((emp) => {
     if (emp.customerOrgExp && emp.workStatus != 0) {
       _.forEach(emp.customerOrgExp, (org) => {
         let orgName = org.name;
@@ -80,7 +88,7 @@ function fillData() {
       'rgba(156, 175, 183, 1)',
       'rgba(66, 129, 164, 1)'
     ];
-    text = `${this.showCurrent} Employee Customer Org Experience (in Years)`;
+    text = `${this.showCurrent} Employee Customer Org Experience (Years)`;
   }
   this.chartData = {
     labels: labels,
@@ -108,6 +116,25 @@ function fillData() {
   this.dataReceived = true;
 } // fillData
 
+// |--------------------------------------------------|
+// |                                                  |
+// |                     WATCHERS                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * watcher for showCurrent - fills data
+ */
+function watchShowCurrent() {
+  this.fillData(); // renders a different chart every time the radio button changes
+} // watchShowCurrent
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      EXPORT                      |
+// |                                                  |
+// |--------------------------------------------------|
+
 export default {
   components: { PieChart },
   data() {
@@ -121,10 +148,9 @@ export default {
   },
   methods: { fillData },
   created,
+  props: ['employees3'], // stats page (employees) --> tab (employees2) --> chart (employees3)
   watch: {
-    showCurrent() {
-      this.fillData(); // renders a different chart every time the radio button changes
-    }
+    showCurrent: watchShowCurrent
   }
 };
 </script>

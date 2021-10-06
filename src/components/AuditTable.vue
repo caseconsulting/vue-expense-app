@@ -34,6 +34,20 @@ const moment = require('moment-timezone');
 moment.tz.setDefault('America/New_York');
 const IsoFormat = 'MMMM Do YYYY, h:mm:ss a';
 
+// |--------------------------------------------------|
+// |                                                  |
+// |                     METHODS                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * variable sort for the date
+ *
+ * @param items - items to sort
+ * @param sortBy - the things to sort by
+ * @param sortDesc - whether or not to flip the sort
+ * @return array - the audits or sorted items
+ */
 function customDateSort(items, sortBy, sortDesc) {
   if (!sortDesc) {
     return this.audits;
@@ -52,7 +66,13 @@ function customDateSort(items, sortBy, sortDesc) {
   }
 
   return this.audits;
-}
+} // customDateSort
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      EXPORT                      |
+// |                                                  |
+// |--------------------------------------------------|
 
 export default {
   data() {

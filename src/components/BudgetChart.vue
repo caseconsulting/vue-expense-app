@@ -137,7 +137,7 @@ function budgets() {
  * @return Object - budget chart data
  */
 function drawGraph() {
-  let budgets = getFinalBudgetsData(this.budgets);
+  let budgets = this.getFinalBudgetsData(this.budgets);
   let data = {
     labels: budgets.names,
     datasets: [
@@ -256,7 +256,9 @@ function getCurrentBudgetYear() {
 
 /**
  * Checks if there are any negative values in each budget data to make sure the graph does not show negative values.
+ *
  * @param budgets - The user's budgets
+ * @return array - the budget data
  */
 function getFinalBudgetsData(budgets) {
   Object.keys(budgets).forEach((budget) => {
@@ -292,7 +294,7 @@ async function refreshBudget() {
 
   // prohibit overdraft if employee is not full time
   _.forEach(budgetsVar, async (budget) => {
-    if (!isFullTime(this.employee)) {
+    if (!this.isFullTime(this.employee)) {
       budget.odFlag = false;
     }
   });
@@ -305,6 +307,20 @@ async function refreshBudget() {
 
   this.loading = false; // set loading status to false
 } // refreshBudget
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                    WATCHERS                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * watcher for fiscalDateView - refresh budgets and draw graph
+ */
+async function watchFiscalDateView() {
+  await this.refreshBudget();
+  this.drawGraph();
+} // watchFiscalDateView
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -335,15 +351,13 @@ export default {
     drawGraph,
     getCurrentBudgetYear,
     getFinalBudgetsData,
+    isFullTime,
     refreshBudget
   },
   mounted,
   props: ['employee', 'fiscalDateView'],
   watch: {
-    fiscalDateView: async function () {
-      await this.refreshBudget();
-      this.drawGraph();
-    }
+    fiscalDateView: watchFiscalDateView
   }
 };
 </script>

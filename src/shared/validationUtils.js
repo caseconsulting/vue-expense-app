@@ -4,7 +4,7 @@ moment.tz.setDefault('America/New_York');
 
 /**
  * Gets the optional date rules in MM/DD/YYYY format.
- * @returns Array - The array of rule functions
+ * @return Array - The array of rule functions
  */
 export function getDateOptionalRules() {
   return [
@@ -19,7 +19,7 @@ export function getDateOptionalRules() {
 
 /**
  * Gets the optional date rules in MM/YYYY format.
- * @returns Array - The array of rule functions
+ * @return Array - The array of rule functions
  */
 export function getDateMonthYearOptionalRules() {
   return [
@@ -33,7 +33,7 @@ export function getDateMonthYearOptionalRules() {
 
 /**
  * Gets the date rules in MM/DD/YYYY format.
- * @returns Array - The array of rule functions
+ * @return Array - The array of rule functions
  */
 export function getDateRules() {
   return [
@@ -45,7 +45,7 @@ export function getDateRules() {
 
 /**
  * Gets the date rules in MM/YYYY format.
- * @returns Array - The array of rule functions
+ * @return Array - The array of rule functions
  */
 export function getDateMonthYearRules() {
   // rules for a required MM/YYYY date
@@ -58,7 +58,7 @@ export function getDateMonthYearRules() {
 
 /**
  * Gets the rules where a date must come before today's date.
- * @returns Array - The array of rule functions
+ * @return Array - The array of rule functions
  */
 export function getNonFutureDateRules() {
   return [(v) => moment(v, 'MM/DD/YYYY').isBefore(moment()) || 'Date must be before today'];
@@ -66,7 +66,7 @@ export function getNonFutureDateRules() {
 
 /**
  * Gets the rules where a whole number must be positive.
- * @returns Array - The array of rule functions
+ * @return Array - The array of rule functions
  */
 export function getNumberRules() {
   return [(v) => /^\d+$/.test(v) || 'Must be a positive number'];
@@ -74,7 +74,7 @@ export function getNumberRules() {
 
 /**
  * Gets the rules where a field is required and must not be empty.
- * @returns Array - The array of rule functions
+ * @return Array - The array of rule functions
  */
 export function getRequiredRules() {
   return [(v) => !isEmpty(v) || 'This field is required']; // rules for a required field
@@ -82,7 +82,7 @@ export function getRequiredRules() {
 
 /**
  * Gets the URL rules
- * @returns Array - The array of rule functions
+ * @return Array - The array of rule functions
  */
 export function getURLRules() {
   return [
@@ -92,3 +92,11 @@ export function getURLRules() {
       'URL must be valid. Only http(s) are accepted.'
   ]; // rules for training url
 } // getURLRules
+
+/**
+ * Gets the rules for validating employee hire/departure dates
+ * @returns Array - The array of rule functions
+ */
+export function getValidateFalse() {
+  return [(v) => isEmpty(v) || 'Departure date must be after hire date'];
+} // getValidateRules

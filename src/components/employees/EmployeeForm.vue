@@ -77,7 +77,7 @@
                     <v-list-item
                       @click="selectDropDown('technologies')"
                       v-bind:class="{ errorTab: tabErrors.technologies }"
-                      >Technologies</v-list-item
+                      >Tech and Skills</v-list-item
                     >
                     <v-list-item
                       @click="selectDropDown('customerOrgExp')"
@@ -219,11 +219,11 @@
             <v-tooltip top>
               <template v-slot:activator="{ on }">
                 <v-tab v-on="on" href="#technologies" v-bind:class="{ errorTab: tabErrors.technologies }"
-                  >Technologies</v-tab
+                  >Tech and Skills</v-tab
                 >
               </template>
               <span v-if="tabErrors.technologies">Submit to update tab validation</span>
-              <span v-else>Technologies Tab</span>
+              <span v-else>Tech and Skills Tab</span>
             </v-tooltip>
             <v-tooltip top>
               <template v-slot:activator="{ on }">
@@ -368,6 +368,7 @@ moment.tz.setDefault('America/New_York');
 import { getRole } from '@/utils/auth';
 import { v4 as uuid } from 'uuid';
 import _ from 'lodash';
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                     METHODS                      |
@@ -383,14 +384,17 @@ function resumeReceived(newEmployeeForm) {
   if (this.model) {
     this.model = newEmployeeForm;
   }
-}
+} // resumeReceived
 
 /**
  * Selects the currect form tab for the menu
+ *
+ * @param tab - current tab that is being selected
  */
 function selectDropDown(tab) {
   this.formTab = tab;
-}
+} // selectDropDown
+
 /**
  * Resets back to employee info. Also deletes resume when creating an employee if
  * you decide to cancel your submission
@@ -560,6 +564,7 @@ function cleanUpData() {
     this.model.clearances = null;
   }
 } // cleanUpData
+
 /**
  * Clear the action status that is displayed in the snackbar.
  */
@@ -593,6 +598,7 @@ async function confirm() {
     this.confirmingError = true;
   }
 } // confirm
+
 /**
  * Set and display an error action status in the snackbar.
  *
@@ -612,12 +618,13 @@ function displayError(err) {
  * @return boolean - user is an admin or manager
  */
 function hasAdminPermissions() {
-  return getRole() === 'admin' || getRole() === 'manager';
+  return this.getRole() === 'admin' || this.getRole() === 'manager';
 } // hasAdminPermissions
 
 /**
  * Checks to see if any of the form tabs has an error.
- * @returns boolean - true if any tab has an error false otherwise.
+ *
+ * @return boolean - true if any tab has an error false otherwise.
  */
 function hasTabError() {
   let hasErrors = false;
@@ -658,7 +665,7 @@ async function submit() {
       }
       // If mifiStatus on page load is different than the submitted mifiStatus value, create audit log
       if (this.mifiStatusOnLoad !== updatedEmployee.mifiStatus) {
-        api.createItem(api.AUDIT, {
+        await api.createItem(api.AUDIT, {
           id: uuid(),
           type: 'mifi',
           tags: ['submit', `mifi set to ${this.model.mifiStatus}`],
@@ -687,12 +694,21 @@ async function submit() {
   window.EventBus.$emit('badgeExp');
 } // submit
 
+/**
+ * add a tab to number of errors in the form
+ *
+ * @param name - the name of the tab
+ * @param errors - the number of errored out tabs
+ */
 function addErrorTab(name, errors) {
   if (errors !== 0) {
     this.errorTabNames[name] = errors;
   }
-}
+} // addErrorTab
 
+/**
+ * opens up the resume parser
+ */
 async function openUpload() {
   let employees = await api.getItems(api.EMPLOYEES);
   //check validation of employee number
@@ -707,12 +723,17 @@ async function openUpload() {
     this.toggleResumeParser = !this.toggleResumeParser;
     // open pop-up modal for resume parser
   }
-}
+} // openUpload
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                 LIFECYCLE HOOKS                  |
 // |                                                  |
 // |--------------------------------------------------|
+
+/**
+ * created lifecycle hook - create all the listeners and set up employee info
+ */
 async function created() {
   window.EventBus.$on('disableUpload', (result, employeeNumber) => {
     //disables upload resume button if invalid employee number
@@ -810,20 +831,36 @@ async function created() {
   );
   if (this.employee) {
     this.fullName = `${this.employee.firstName} ${this.employee.lastName}`;
+    this.mifiStatusOnLoad = this.employee.mifiStatus;
   }
   this.formTab = this.currentTab;
   this.afterCreate = true;
   this.hasResume = (await api.getResume(this.$route.params.id)) != null;
-  this.mifiStatusOnLoad = this.employee.mifiStatus;
 } // created
 
 /**
  * destroying all listeners
  */
 function beforeDestroy() {
+  window.EventBus.$off('disableUpload');
+  window.EventBus.$off('uploaded');
   window.EventBus.$off('confirmed');
   window.EventBus.$off('canceled');
+  window.EventBus.$off('confirmed-form');
   window.EventBus.$off('canceled-form');
+  window.EventBus.$off('created');
+  window.EventBus.$off('doneValidating');
+  window.EventBus.$off('awardStatus');
+  window.EventBus.$off('certificationsStatus');
+  window.EventBus.$off('clearanceStatus');
+  window.EventBus.$off('contractsStatus');
+  window.EventBus.$off('customerOrgExpStatus');
+  window.EventBus.$off('educationStatus');
+  window.EventBus.$off('employeeStatus');
+  window.EventBus.$off('jobExperienceStatus');
+  window.EventBus.$off('languagesStatus');
+  window.EventBus.$off('personalStatus');
+  window.EventBus.$off('technologiesStatus');
 } // beforeDestroy
 
 // |--------------------------------------------------|
@@ -834,6 +871,7 @@ function beforeDestroy() {
 
 /**
  * Sets the form data based on the given tab.
+ *
  * @param tab - the tab the data came from
  * @param data - the data to be saved
  */
@@ -892,18 +930,21 @@ function setFormData(tab, data) {
     this.$set(this.model, 'languages', data); //sets clearances to data returned from clearance tab
   }
 } //setFormData
+
 /**
  * Changes the format of the string to title case
+ *
  * @param str - the string to be converted
  * @return the title case formatted string
  */
 function titleCase(str) {
-  str = str.toLowerCase().split(' ');
+  str = str.split(' ');
   for (var i = 0; i < str.length; i++) {
     str[i] = str[i].charAt(0).toUpperCase() + str[i].slice(1);
   }
   return str.join(' ');
 } //titleCase
+
 /**
  * Converts all the autocomplete fields to title case capitalization
  */
@@ -911,19 +952,19 @@ async function convertAutocompleteToTitlecase() {
   //Convert autocomplete certification field to title case
   if (this.model.certifications !== null) {
     this.model.certifications.forEach((currCert) => {
-      currCert.name = titleCase(currCert.name);
+      currCert.name = this.titleCase(currCert.name);
     });
   }
   //Convert autocomplete award field to title case
   if (this.model.awards !== null) {
     this.model.awards.forEach((currAward) => {
-      currAward.name = titleCase(currAward.name);
+      currAward.name = this.titleCase(currAward.name);
     });
   }
   //Convert autocomplete language field to title case
   if (this.model.languages !== null) {
     this.model.languages.forEach((currLang) => {
-      currLang.name = titleCase(currLang.name);
+      currLang.name = this.titleCase(currLang.name);
     });
   }
   await this.confirm();
@@ -937,6 +978,8 @@ async function convertAutocompleteToTitlecase() {
 
 /**
  * choose whether to use the drop down or not with a boolean computed value
+ *
+ * @return boolean - returns true for small screens
  */
 function useDropDown() {
   switch (this.$vuetify.breakpoint.name) {
@@ -949,6 +992,8 @@ function useDropDown() {
 
 /**
  * computed value of which tab is selected
+ *
+ * @return string - selected tab capitalized
  */
 function parsedInfoTab() {
   let parseTab = !this.formTab ? 'Select Info' : this.formTab;
@@ -962,9 +1007,30 @@ function parsedInfoTab() {
 
 // |--------------------------------------------------|
 // |                                                  |
+// |                    WATCHERS                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * watcher for formTab - tracks current tab and emits if changed
+ *
+ * @param val - the value that represents current tab
+ */
+function watchFormTab(val) {
+  // track current tab when switching between form and info
+  if (this.afterCreate) {
+    if (!_.isEqual(val, this.currentTab)) {
+      window.EventBus.$emit('tabChange', val); // emit to parent tab was changed
+    }
+  }
+} // watchFormTab
+
+// |--------------------------------------------------|
+// |                                                  |
 // |                      EXPORT                      |
 // |                                                  |
 // |--------------------------------------------------|
+
 export default {
   beforeDestroy,
   components: {
@@ -1098,6 +1164,7 @@ export default {
     confirm,
     convertAutocompleteToTitlecase,
     displayError,
+    getRole,
     hasAdminPermissions,
     hasTabError,
     openUpload,
@@ -1109,14 +1176,7 @@ export default {
   },
   props: ['currentTab', 'employee'], // employee to be created/updated
   watch: {
-    formTab: function (val) {
-      // track current tab when switching between form and info
-      if (this.afterCreate) {
-        if (!_.isEqual(val, this.currentTab)) {
-          window.EventBus.$emit('tabChange', val); // emit to parent tab was changed
-        }
-      }
-    }
+    formTab: watchFormTab
   },
   computed: {
     useDropDown,

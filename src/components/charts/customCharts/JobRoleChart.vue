@@ -2,28 +2,37 @@
   <v-card v-if="dataReceived" class="pa-5">
     <bar-chart :options="options" :chartData="chartData" />
   </v-card>
-  <v-skeleton-loader v-else type="paragraph@5"></v-skeleton-loader>
 </template>
 
 <script>
 import BarChart from '../baseCharts/BarChart.vue';
-import api from '@/shared/api.js';
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                 LIFECYCLE HOOKS                  |
+// |                                                  |
+// |--------------------------------------------------|
 
 /**
  * created lifecycle hook
  */
-async function created() {
-  this.$forceUpdate();
-  this.employees = await api.getItems(api.EMPLOYEES);
+function created() {
   this.fillData();
 } // created
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      METHODS                     |
+// |                                                  |
+// |--------------------------------------------------|
+
 /**
  * Extracts the job role from each employee and tallies up each role for active
  * employees. Also sets the chart formatting and options data.
  */
 function fillData() {
   let roles = {};
-  this.employees.forEach((emp) => {
+  this.employees3.forEach((emp) => {
     if (emp.jobRole && emp.workStatus != 0) {
       if (roles[emp.jobRole]) {
         roles[emp.jobRole] += 1;
@@ -109,6 +118,12 @@ function fillData() {
   this.dataReceived = true;
 } // fillData
 
+// |--------------------------------------------------|
+// |                                                  |
+// |                      EXPORT                      |
+// |                                                  |
+// |--------------------------------------------------|
+
 export default {
   components: { BarChart },
   data() {
@@ -122,6 +137,7 @@ export default {
   methods: {
     fillData
   },
-  created
+  created,
+  props: ['employees3'] // stats page (employees) --> tab (employees2) --> chart (employees3)
 };
 </script>

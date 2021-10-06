@@ -2,13 +2,11 @@
   <v-container>
     <!-- Help Title -->
     <div>
-      <h1 style="text-align: center" id="help-title">HELP</h1>
+      <h1 id="help-title">Help</h1>
     </div>
     <br />
     <br />
 
-    <!-- FAQ Sub-Title -->
-    <h2>FAQ</h2>
     <div class="mb-5">
       <div class="text-xs-center mb-3"></div>
       <v-expansion-panels accordion v-model="panel">
@@ -23,11 +21,8 @@
             <v-card>
               <v-card-text class="grey lighten-3">
                 <li v-for="(ques, index) in section" :key="ques.title">
-                  <div
-                    v-if="ques.title && (!ques.employeeRole || canView(ques.employeeRole))"
-                    style="padding-bottom: 10px"
-                  >
-                    <body style="font-style: italic" :id="section[0] + '-' + index">
+                  <div v-if="ques.title && (!ques.employeeRole || canView(ques.employeeRole))" class="pb-1">
+                    <body class="italics" :id="section[0] + '-' + index">
                       <icon name="space-shuttle" /> {{ ques.title }}
                     </body>
                     {{ ques.body }}
@@ -55,7 +50,7 @@ import { getRole } from '@/utils/auth';
  * Gets the user's role.
  */
 function created() {
-  this.role = getRole();
+  this.role = this.getRole();
   let route = this.$route.name;
   if (route == 'help2') {
     this.panel = 0;
@@ -72,7 +67,10 @@ function created() {
 // |--------------------------------------------------|
 
 /**
- * Determine if userr can view.
+ * Determine if user can view.
+ *
+ * @param qRole - role of the question
+ * @return boolean - whether the user can view the component
  */
 function canView(qRole) {
   return qRole == this.role || this.role == 'admin' || qRole == 'user';
@@ -308,7 +306,8 @@ export default {
     };
   },
   methods: {
-    canView
+    canView,
+    getRole
   }
 };
 </script>

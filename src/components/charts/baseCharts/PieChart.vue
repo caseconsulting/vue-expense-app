@@ -1,6 +1,12 @@
 <script>
 import { Pie, mixins } from 'vue-chartjs';
 
+// |--------------------------------------------------|
+// |                                                  |
+// |                 LIFECYCLE HOOKS                  |
+// |                                                  |
+// |--------------------------------------------------|
+
 /**
  * mounted lifecycle hook
  */
@@ -8,8 +14,20 @@ function mounted() {
   setTimeout(() => {
     this.renderChart(this.chartData, this.options);
   }, 0);
-  //this.renderChart(this.chartData, this.options);
 } // mounted
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     WATCHERS                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * watcher for options - re-render chart
+ */
+function watchOptions() {
+  this.renderChart(this.chartData, this.options);
+} // watchOptions
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -27,9 +45,7 @@ export default {
   ],
   watch: {
     //used to update chart if any changes made to options
-    options() {
-      this.renderChart(this.chartData, this.options);
-    }
+    options: watchOptions
   }
 };
 </script>

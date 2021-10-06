@@ -32,7 +32,6 @@
     <!-- Rekognition and comprehend
     <v-row>
       <v-file-input
-        style="width: 50px"
         v-model="inputFile"
         label="Select image to rekognize"
         :accept="acceptedFileTypes"
@@ -55,21 +54,11 @@ import PostTable from '@/components/PostTable.vue';
 import _ from 'lodash';
 import { getRole } from '@/utils/auth';
 
-/**
- * returns the accepted file types for images
- */
-function acceptedFileTypes() {
-  return ['jpg', 'png'].join(',');
-} // acceptedFileTypes
-
-/**
- * Checks if the employee is an admin. Returns true if the employee is an admin, otherwise returns false.
- *
- * @return boolean - employee is an admin
- */
-function isAdmin() {
-  return this.employeeRole === 'admin';
-} // isAdmin
+// |--------------------------------------------------|
+// |                                                  |
+// |                 LIFECYCLE HOOKS                  |
+// |                                                  |
+// |--------------------------------------------------|
 
 /**
  * Initial Setup
@@ -77,8 +66,8 @@ function isAdmin() {
 async function created() {
   //get the blog info from aws
   this.posts = await api.getItems(api.BLOG);
-  this.employeeRole = getRole();
-  if (isAdmin) {
+  this.employeeRole = this.getRole();
+  if (this.isAdmin()) {
     //get all employee's data and match posts to it.
     this.employees = await api.getItems(api.EMPLOYEES);
     this.posts = _.map(this.posts, (post) => {
@@ -107,6 +96,30 @@ async function created() {
     this.posts = _.compact(this.posts);
   }
 } // created
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     METHODS                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * returns the accepted file types for images
+ *
+ * @return - the accepted file types
+ */
+function acceptedFileTypes() {
+  return ['jpg', 'png'].join(',');
+} // acceptedFileTypes
+
+/**
+ * Checks if the employee is an admin. Returns true if the employee is an admin, otherwise returns false.
+ *
+ * @return boolean - employee is an admin
+ */
+function isAdmin() {
+  return this.employeeRole === 'admin';
+} // isAdmin
 
 /**
  * Store the attributes of a selected blog post.
@@ -168,7 +181,7 @@ function onSelect(item) {
  */
 async function successfulDelete() {
   this.posts = await api.getItems(api.BLOG);
-  if (isAdmin) {
+  if (this.isAdmin()) {
     //get all employee's data and match posts to it.
     this.posts = _.map(this.posts, (post) => {
       let employee = _.find(this.employees, (employee) => {
@@ -225,7 +238,14 @@ function clearStatus() {
  */
 function failedDelete(message) {
   this.displayError(message);
-}
+} // failedDelete
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      EXPORT                      |
+// |                                                  |
+// |--------------------------------------------------|
+
 export default {
   components: {
     PostTable
@@ -254,6 +274,7 @@ export default {
     // rekognition,
     // splitInputText,
     // uploadToS3,
+    getRole,
     onSelect,
     isAdmin,
     successfulDelete,

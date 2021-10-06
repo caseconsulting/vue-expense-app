@@ -76,7 +76,7 @@ function emit(msg, data) {
           2
         )}. You will be reimbursed $${this.expense.remaining} of $${this.expense.cost}`;
       }
-      if (!isEmpty(this.expense.note)) {
+      if (!this.isEmpty(this.expense.note)) {
         // expense has a note
         this.expense.note += `\n\n${adjustNote}`;
       } else {
@@ -92,6 +92,19 @@ function emit(msg, data) {
   }
   this.activate = false;
 } // emit
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                    WATCHERS                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * watcher for toggleConfirmationBox
+ */
+function watchToggleConfirmationBox() {
+  this.activate = true;
+} // watchToggleConfirmationBox
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -117,9 +130,7 @@ export default {
     'isOverCovered'
   ],
   watch: {
-    toggleConfirmationBox: function () {
-      this.activate = true;
-    }
+    toggleConfirmationBox: watchToggleConfirmationBox
   }
 };
 </script>

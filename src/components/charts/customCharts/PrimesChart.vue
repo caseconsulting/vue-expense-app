@@ -2,23 +2,35 @@
   <v-card v-if="dataReceived" class="pa-5">
     <bar-chart :options="options" :chartData="chartData"></bar-chart>
   </v-card>
-  <v-skeleton-loader v-else type="paragraph@5"></v-skeleton-loader>
 </template>
 
 <script>
-import api from '@/shared/api.js';
 import BarChart from '../baseCharts/BarChart.vue';
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                 LIFECYCLE HOOKS                  |
+// |                                                  |
+// |--------------------------------------------------|
 
 /**
  * mounted lifecycle hook
  */
-async function mounted() {
-  await this.fillCertData();
-  this.$forceUpdate();
+function mounted() {
+  this.fillPrimeData();
 } // mounted
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      METHODS                     |
+// |                                                  |
+// |--------------------------------------------------|
 
 /**
  * Gets all of the current projects the user has
+ *
+ * @param employee - the employee that we are getting the current projects for
+ * @return array - the current contracts
  */
 function getCurrentProjects(employee) {
   let contracts = [];
@@ -44,19 +56,18 @@ function getCurrentProjects(employee) {
   }
 
   return contracts;
-}
+} // getCurrentProjects
 
 /**
  * Extracts and tallies up each employees primes, and sets the chart formatting and options data.
  */
-async function fillCertData() {
-  let employees = await api.getItems(api.EMPLOYEES);
+function fillPrimeData() {
   //Get data
   //Put into dictionary where key is prime and value is quantity
   let primes = {};
-  employees.forEach((employee) => {
+  this.employees3.forEach((employee) => {
     if (employee.workStatus != 0) {
-      let currContracts = getCurrentProjects(employee);
+      let currContracts = this.getCurrentProjects(employee);
       let currPrimes = {};
       currContracts.forEach((contract) => {
         let currPrime = contract.prime;
@@ -155,7 +166,14 @@ async function fillCertData() {
     maintainAspectRatio: false
   };
   this.dataReceived = true;
-}
+} // fillCertData
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      EXPORT                      |
+// |                                                  |
+// |--------------------------------------------------|
+
 export default {
   components: { BarChart },
   mounted,
@@ -168,7 +186,8 @@ export default {
   },
   methods: {
     getCurrentProjects,
-    fillCertData
-  }
+    fillPrimeData
+  },
+  props: ['employees3'] // stats page (employees) --> tab (employees2) --> chart (employees3)
 };
 </script>

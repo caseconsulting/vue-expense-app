@@ -8,18 +8,27 @@
 <script>
 import BarChart from '../baseCharts/BarChart.vue';
 import moment from 'moment-timezone';
-import api from '@/shared/api.js';
 moment.tz.setDefault('America/New_York');
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                 LIFECYCLE HOOKS                  |
+// |                                                  |
+// |--------------------------------------------------|
 
 /**
  * created lifecycle hook
  */
-async function created() {
-  this.$forceUpdate();
-  this.employees = await api.getItems(api.EMPLOYEES);
+function created() {
   this.caseYearsData();
   this.drawCaseYearsHistGraph();
 } // created
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      METHODS                     |
+// |                                                  |
+// |--------------------------------------------------|
 
 /**
  * Puts an employee in an array based on a time interval of 2 years for each index from their hire date.
@@ -30,10 +39,10 @@ function caseYearsData() {
   for (let i = 0; i < MAXIMUM_INDEX; i++) {
     this.caseYears.push(0);
   }
-  this.employees.forEach((employee) => {
+  this.employees3.forEach((employee) => {
     if (employee.hireDate !== undefined && employee.workStatus != 0) {
       // find time at case
-      var amOfYears = calculateTimeDifference(employee.hireDate);
+      var amOfYears = this.calculateTimeDifference(employee.hireDate);
       // push time to array
       if (amOfYears > 18) amOfYears = 18;
       else if (amOfYears < 0) amOfYears = 0;
@@ -44,9 +53,12 @@ function caseYearsData() {
 
 /**
  * Helper function to determine how long an employee has worked from their hire date.
+ *
+ * @param startDate - date to compare to now
+ * @return - the decimal value of the difference
  */
 function calculateTimeDifference(startDate) {
-  var start = stringToDate(startDate);
+  var start = this.stringToDate(startDate);
   var end = moment();
   return end.diff(start, 'years', true); //Provides decimal value
 } //calculateTimeDifference
@@ -115,6 +127,8 @@ function drawCaseYearsHistGraph() {
 
 /**
  * Finds the last index where the element is greater than 0 to ensure the chart does not show all of the labels are there is no data.
+ *
+ * @return - last index that is greater than 0
  */
 function findMaxIndex() {
   let max = 0;
@@ -128,11 +142,20 @@ function findMaxIndex() {
 
 /**
  * Converts a date as a string into a moment objects.
+ *
+ * @param dateAsString - date that is currently a string
+ * @return - the moment date object
  */
 function stringToDate(dateAsString) {
   var date = moment(dateAsString);
   return date;
 } //stringToDate
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      EXPORT                      |
+// |                                                  |
+// |--------------------------------------------------|
 
 export default {
   components: { BarChart },
@@ -152,6 +175,7 @@ export default {
     findMaxIndex,
     stringToDate
   },
-  created
+  created,
+  props: ['employees3'] // stats page (employees) --> tab (employees2) --> chart (employees3)
 };
 </script>

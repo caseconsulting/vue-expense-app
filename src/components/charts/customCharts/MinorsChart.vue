@@ -2,12 +2,17 @@
   <v-card v-if="dataReceived" class="pa-5">
     <pie-chart :options="options" :chartData="chartData"></pie-chart>
   </v-card>
-  <v-skeleton-loader v-else type="paragraph@5"></v-skeleton-loader>
 </template>
 
 <script>
 import PieChart from '../baseCharts/PieChart.vue';
 import _ from 'lodash';
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                 LIFECYCLE HOOKS                  |
+// |                                                  |
+// |--------------------------------------------------|
 
 /**
  * mounted lifecycle hook
@@ -25,12 +30,25 @@ function mounted() {
  * created lifecycle hook
  */
 function created() {
-  //this.$forceUpdate();
   this.fillData(null);
 } // created
 
+// |--------------------------------------------------|
+// |                                                  |
+// |                      METHODS                     |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * beforeDestroy lifecycle hook
+ */
+function beforeDestroy() {
+  window.EventBus.$off('minors-update');
+} //beforeDestroy
+
 /**
  * Sets the chart formatting and options data.
+ *
  * @param minors - The array of minors for a degree
  */
 function fillData(minors) {
@@ -105,6 +123,12 @@ function fillData(minors) {
   this.dataReceived = true;
 } // fillData
 
+// |--------------------------------------------------|
+// |                                                  |
+// |                      EXPORT                      |
+// |                                                  |
+// |--------------------------------------------------|
+
 export default {
   components: { PieChart },
   data() {
@@ -120,6 +144,7 @@ export default {
     fillData
   },
   mounted,
-  created
+  created,
+  beforeDestroy
 };
 </script>

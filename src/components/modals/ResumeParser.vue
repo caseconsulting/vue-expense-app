@@ -211,7 +211,7 @@
             </v-row>
             <div v-for="(tech, index) in newTechnology" :key="index">
               <v-form :ref="'tech' + index">
-                <div v-if="!tech.canceled" style="border: 1px solid grey" class="pt-3 pb-1 px-5 ma-1">
+                <div v-if="!tech.canceled" class="gray-border pt-3 pb-1 px-5 ma-1">
                   <!-- Loop Technologies -->
                   <!-- Name of Technology -->
                   <v-text-field class="pb-5" :value="tech.name" readonly label="Technology"></v-text-field>
@@ -367,10 +367,10 @@ import { v4 as uuid } from 'uuid';
 /**
  * Sets up event listeners for confirming and canceling resume parser
  */
-function created() {
-  window.EventBus.$on('confirmed-parser', () => {
+async function created() {
+  window.EventBus.$on('confirmed-parser', async () => {
     // Create an audit of the success
-    api.createItem(api.AUDIT, {
+    await api.createItem(api.AUDIT, {
       id: uuid(),
       type: 'resume',
       tags: ['submit'],
@@ -398,10 +398,13 @@ function created() {
 } // created
 
 /**
- * sestroyListener
+ * destroy listeners
  */
 function beforeDestroy() {
   window.EventBus.$off('confirmed-parser');
+  window.EventBus.$off('canceled-parser');
+  window.EventBus.$off('backout-canceled-parser');
+  window.EventBus.$off('backout-confirmed-parser');
 } // beforeDestroy
 
 // |--------------------------------------------------|
@@ -412,6 +415,8 @@ function beforeDestroy() {
 
 /**
  * Determines if any pending changes have been submitted
+ *
+ * @return boolean - if the changes have been submitted
  */
 function changesMade() {
   return !_.isEqual(this.editedEmployeeForm, this.employee);
@@ -420,6 +425,8 @@ function changesMade() {
 /**
  * Determines if the address should be shown, i.e. does one exist or has the pending
  * change been denied
+ *
+ * @return boolean - whether or not to show address
  */
 function showAddress() {
   return this.newAddress && !this.addressCanceled;
@@ -428,30 +435,40 @@ function showAddress() {
 /**
  * Determines if the github username should be shown, i.e. does one exist or has the pending
  * change been denied
+ *
+ * @return boolean - whether or not to show github
  */
 function showGitHub() {
   return this.newPersonal.github && !this.gitHubCanceled;
-}
+} // showGitHub
 
+/**
+ * Determines if the linkedIn should be shown, i.e. does one exist or has the pending
+ * change been denied
+ *
+ * @return boolean - if the linkedIn should be showed
+ */
 function showLinkedIn() {
   return this.newPersonal.linkedIn && !this.linkedInCanceled;
-}
+} // showLinkedIn
 
 /**
  * Formats the old employee address
+ *
+ * @return string - the formatted address
  */
 function address() {
   let currentAddress = '';
-  if (!isEmpty(this.employee.currentStreet)) {
+  if (!this.isEmpty(this.employee.currentStreet)) {
     currentAddress += `${this.employee.currentStreet}, `;
   }
-  if (!isEmpty(this.employee.currentCity)) {
+  if (!this.isEmpty(this.employee.currentCity)) {
     currentAddress += `${this.employee.currentCity}, `;
   }
-  if (!isEmpty(this.employee.currentState)) {
+  if (!this.isEmpty(this.employee.currentState)) {
     currentAddress += `${this.employee.currentState} `;
   }
-  if (!isEmpty(this.employee.currentZIP)) {
+  if (!this.isEmpty(this.employee.currentZIP)) {
     currentAddress += `${this.employee.currentZIP} `;
   }
   if (currentAddress.charAt(currentAddress.length - 2) === ',') {
@@ -464,6 +481,8 @@ function address() {
 
 /**
  * Formats the new employee address (if one exists)
+ *
+ * @return String - the formatted address
  */
 function newAddress() {
   if (
@@ -478,13 +497,19 @@ function newAddress() {
   }
 } // newAddress
 
-// Checks if a the phone number should be shown
+/**
+ * Checks if a the phone number should be shown
+ *
+ * @return boolean - whether to show number
+ */
 function showPhoneNumber() {
   return this.newPersonal.phoneNumber && !this.phoneCanceled;
 } // showPhoneNumber
 
 /**
  * Displays whether or not an old phone number existed
+ *
+ * @return boolean - whether or not employee old number existed
  */
 function phoneNumber() {
   return this.employee.phoneNumber ? this.employee.phoneNumber : 'No phone number on form';
@@ -492,6 +517,8 @@ function phoneNumber() {
 
 /**
  * Shows the newPhoneNumber if it exists
+ *
+ * @return boolean - whether new phone number exists
  */
 function newPhoneNumber() {
   return this.newPersonal.phoneNumber ? this.newPersonal.phoneNumber : null;
@@ -500,6 +527,8 @@ function newPhoneNumber() {
 /**
  * Determines if the tech should be show. Goes through all tech
  * and makes sure all of them have been canceled
+ *
+ * @return boolean - if there are any techs to show
  */
 function showTech() {
   return this.newTechnology.filter((tech) => !tech.canceled).length != 0;
@@ -508,6 +537,8 @@ function showTech() {
 /**
  * Determines if the education section should be shown. Goes through all education
  * and makes sure all of them have been canceled
+ *
+ * @return boolean - if the education section should be shown
  */
 function showEducation() {
   return this.newEducation.filter((education) => !education.canceled).length != 0;
@@ -608,7 +639,7 @@ async function submit() {
       this.loading = false;
 
       // Create an audit of the timeout
-      api.createItem(api.AUDIT, {
+      await api.createItem(api.AUDIT, {
         id: uuid(),
         type: 'resume',
         tags: ['upload', 'failure'],
@@ -621,7 +652,7 @@ async function submit() {
     }
 
     // Create an audit of the success
-    api.createItem(api.AUDIT, {
+    await api.createItem(api.AUDIT, {
       id: uuid(),
       type: 'resume',
       tags: ['upload', 'success'],
@@ -916,6 +947,35 @@ function clearForm() {
 
 // |--------------------------------------------------|
 // |                                                  |
+// |                    WATCHERS                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * watcher for toggleResumeParser
+ */
+function watchToggleResumeParser() {
+  this.activate = true;
+} // watchToggleResumeParser
+
+/**
+ * watcher for file
+ */
+function watchFile() {
+  this.validFile = this.$refs.submit.validate();
+} // watchFile
+
+/**
+ * watcher for watchActivate - set the editedEmployeeForm if activate is true
+ */
+function watchActivate() {
+  if (this.activate) {
+    this.editedEmployeeForm = _.cloneDeep(this.employee);
+  }
+} // watchActivate
+
+// |--------------------------------------------------|
+// |                                                  |
 // |                      EXPORT                      |
 // |                                                  |
 // |--------------------------------------------------|
@@ -959,21 +1019,21 @@ export default {
       newTechnology: [],
       fileRules: [
         (v) => {
-          return !isEmpty(v) || 'File required (.png, .pdf, or .jpeg)';
+          return !this.isEmpty(v) || 'File required (.png, .pdf, or .jpeg)';
         },
         (v) => {
           return (
-            (!isEmpty(v) &&
+            (!this.isEmpty(v) &&
               (v.type.includes('application/pdf') || v.type.includes('image/png') || v.type.includes('image/jpeg'))) ||
             'File unsupported, please submit a .png, .pdf, or a .jpeg file'
           );
         }
       ],
       requiredRules: [
-        (v) => !isEmpty(v) || 'This field is required. You must enter information or delete the field if possible'
+        (v) => !this.isEmpty(v) || 'This field is required. You must enter information or delete the field if possible'
       ],
       experienceRequired: [
-        (v) => !isEmpty(v) || 'This field is required',
+        (v) => !this.isEmpty(v) || 'This field is required',
         (v) => v > 0 || 'Value must be greater than 0',
         (v) => v < 100 || 'Value must be less than 100'
       ], // Used for technology years
@@ -1055,6 +1115,7 @@ export default {
   },
   methods: {
     clearForm,
+    isEmpty,
     submitForm,
     submitInfo,
     submit,
@@ -1062,17 +1123,9 @@ export default {
   },
   props: ['toggleResumeParser', 'employee'],
   watch: {
-    toggleResumeParser: function () {
-      this.activate = true;
-    },
-    file: function () {
-      this.validFile = this.$refs.submit.validate();
-    },
-    activate: function () {
-      if (this.activate) {
-        this.editedEmployeeForm = _.cloneDeep(this.employee);
-      }
-    }
+    toggleResumeParser: watchToggleResumeParser,
+    file: watchFile,
+    activate: watchActivate
   }
 };
 </script>

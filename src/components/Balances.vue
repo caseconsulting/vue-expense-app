@@ -89,6 +89,8 @@ function isInactive() {
 /**
  * Returns the balances that are currently shown on the screen.
  * Balances > 0 will always show.
+ *
+ * @return array - the balances that are shown
  */
 function availableBalances() {
   let avaibleBalances = [];
@@ -108,6 +110,9 @@ function availableBalances() {
 
 /**
  * changes hours from a decimal number to hours and minutes
+ *
+ * @param hours - the number of hours
+ * @return string - formatted number of hours
  */
 function formatHours(hours) {
   if (this.showMinutes) {
@@ -128,7 +133,7 @@ function formatHours(hours) {
  */
 async function setPTOBalances() {
   this.employee = this.isEmployeeView ? this.passedEmployee : await api.getUser();
-  if (!isEmpty(this.employee.id)) {
+  if (!this.isEmpty(this.employee.id)) {
     // employee exists
     let ptoBalances = await api.getPTOBalances(this.employee.employeeNumber); // call api
     if (_.isNil(ptoBalances.results)) {
@@ -156,6 +161,21 @@ async function setPTOBalances() {
     this.loading = false;
   }
 } // setPTOBalances
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                    WATCHERS                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * watcher for passedEmployee.id - if it is employee view it will set or reset PTOBalances
+ */
+async function watchPassedEmployeeID() {
+  if (this.isEmployeeView) {
+    await this.setPTOBalances();
+  }
+} // watchPassedEmployeeID
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -188,11 +208,7 @@ export default {
   },
   props: ['passedEmployee', 'showMinutes'],
   watch: {
-    'passedEmployee.id': async function () {
-      if (this.isEmployeeView) {
-        await this.setPTOBalances();
-      }
-    }
+    'passedEmployee.id': watchPassedEmployeeID
   }
 };
 </script>

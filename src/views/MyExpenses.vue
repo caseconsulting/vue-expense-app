@@ -190,7 +190,7 @@
                       "
                       v-on="on"
                     >
-                      <v-icon style="color: #606060">edit</v-icon>
+                      <v-icon class="case-gray">edit</v-icon>
                     </v-btn>
                   </template>
                   <span>Edit</span>
@@ -210,7 +210,7 @@
                       "
                       v-on="on"
                     >
-                      <v-icon style="color: #606060"> delete </v-icon>
+                      <v-icon class="case-gray"> delete </v-icon>
                     </v-btn>
                   </template>
                   <span>Delete</span>
@@ -231,7 +231,7 @@
                       "
                       v-on="on"
                     >
-                      <v-icon style="color: #606060"> money_off </v-icon>
+                      <v-icon class="case-gray"> money_off </v-icon>
                     </v-btn>
                   </template>
                   <span>Unreimburse</span>
@@ -364,9 +364,14 @@ function isIntern() {
   return this.userInfo ? this.userInfo.employeeRole === 'intern' : false;
 } // isIntern
 
+/**
+ * Checks if the user's role is an manager. Returns true if the user's role is an manager, otherwise returns false.
+ *
+ * @return boolean - user's role is an manager
+ */
 function isManager() {
   return this.userInfo ? this.userInfo.employeeRole === 'manager' : false;
-}
+} // isManager
 
 /**
  * Checks if the user's role is a user. Returns true if the user's role is a user, otherwise returns false.
@@ -512,10 +517,10 @@ function constructAutoComplete(aggregatedData) {
 
 /**
  * Custom filter for employee autocomplete options.
- *firstName: data.firstName
- * @param item -
- * @param queryText -
- * @return
+ *
+ * @param item - the employee
+ * @param queryText - the query for the employee
+ * @return boolean - whether the name or nickname contains the query
  */
 function customFilter(item, queryText) {
   const query = queryText ? queryText : '';
@@ -585,7 +590,8 @@ function displayError(err) {
  */
 function endAction() {
   this.midAction = false;
-}
+} // endAction
+
 /**
  * Filters expenses based on filter selections.
  */
@@ -604,10 +610,10 @@ function filterExpenses() {
     this.filteredExpenses = _.filter(this.filteredExpenses, (expense) => {
       if (this.filter.reimbursed == 'notReimbursed') {
         // filter for pending expenses
-        return !isReimbursed(expense);
+        return !this.isReimbursed(expense);
       } else {
         // filter for reimbursed expenses
-        return isReimbursed(expense);
+        return this.isReimbursed(expense);
       }
     });
   }
@@ -629,11 +635,14 @@ function filterExpenses() {
 
 /**
  * Checks if expense type has recipient.
+ *
+ * @param expense - the expense object
+ * @return boolean - whether the expense has a recipient
  */
 function hasRecipient(expense) {
   let expenseType = _.find(this.expenseTypes, (type) => expense.expenseTypeId === type.value);
-  return !isEmpty(expenseType.hasRecipient) && expenseType.hasRecipient;
-}
+  return !this.isEmpty(expenseType.hasRecipient) && expenseType.hasRecipient;
+} // hasRecipient
 
 /**
  * Checks if the expense is reimbursed. Returns true if the expense is reimbursed, otherwise returns false.
@@ -642,7 +651,7 @@ function hasRecipient(expense) {
  * @return boolean - expense is reimbursed
  */
 function isReimbursed(expense) {
-  return expense && !isEmpty(expense.reimbursedDate);
+  return expense && !this.isEmpty(expense.reimbursedDate);
 } // isReimbursed
 
 /**
@@ -693,7 +702,8 @@ async function refreshExpenses() {
  */
 function startAction() {
   this.midAction = true;
-}
+} // startAction
+
 /**
  * Scrolls window back to the top of the form.
  */
@@ -828,6 +838,19 @@ function beforeDestroy() {
   window.EventBus.$off('confirm-unreimburse-expense');
   window.EventBus.$off('canceled-unreimburse-expense');
 } // beforeDestroy
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     WATCHERS                     |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * watcher for employee, filter.active, filter.reimbursed - filters expenses
+ */
+function watchFilterExpenses() {
+  this.filterExpenses();
+} // watchFilterExpenses
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -975,15 +998,9 @@ export default {
     useInactiveStyle
   },
   watch: {
-    employee: function () {
-      this.filterExpenses();
-    },
-    'filter.active': function () {
-      this.filterExpenses();
-    },
-    'filter.reimbursed': function () {
-      this.filterExpenses();
-    }
+    employee: watchFilterExpenses,
+    'filter.active': watchFilterExpenses,
+    'filter.reimbursed': watchFilterExpenses
   }
 };
 </script>

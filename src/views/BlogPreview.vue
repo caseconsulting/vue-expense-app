@@ -9,13 +9,13 @@
       <img class="mainImage" :src="model.mainPicture" />
     </div>
     <div class="content">
-      <p class="meta" style="font-size: 15px; padding-top: 5px">
+      <p class="font-14 meta">
         <br />
         <!-- category -->
         <span>{{ this.model.category }}</span>
         <br />By
         <!-- author -->
-        <span style="color: tomato">{{ this.metaData.author }}</span>
+        <span class="red--text">{{ this.metaData.author }}</span>
         ◆
         <!-- date -->
         {{ this.metaData.date }}
@@ -35,6 +35,12 @@
 <script>
 import _ from 'lodash';
 import api from '@/shared/api.js';
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                 LIFECYCLE HOOKS                  |
+// |                                                  |
+// |--------------------------------------------------|
 
 /**
  * Inital setup
@@ -61,6 +67,12 @@ async function created() {
   }
   this.textContent = this.extractTextContent(fileContent);
 } // created
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     METHODS                      |
+// |                                                  |
+// |--------------------------------------------------|
 
 /**
  * Remove text content and return an array of metadata
@@ -95,6 +107,12 @@ function extractTextContent(fileContent) {
     return fileContent.substring(secondIndex + 3);
   }
 } // extractTextContent
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      EXPORT                      |
+// |                                                  |
+// |--------------------------------------------------|
 
 export default {
   data() {

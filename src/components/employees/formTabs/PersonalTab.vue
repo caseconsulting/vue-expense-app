@@ -1,24 +1,13 @@
 <template>
   <div>
     <!-- Github -->
-    <v-text-field
-      style="padding-right: 20px; padding-left: 10px"
-      v-model="editedPersonalInfo.github"
-      label="Github"
-      data-vv-name="Github"
-    ></v-text-field>
+    <v-text-field v-model="editedPersonalInfo.github" label="Github" data-vv-name="Github"></v-text-field>
 
     <!-- Twitter -->
-    <v-text-field
-      style="padding-right: 20px; padding-left: 10px"
-      v-model="editedPersonalInfo.twitter"
-      label="Twitter"
-      data-vv-name="Twitter"
-    ></v-text-field>
+    <v-text-field v-model="editedPersonalInfo.twitter" label="Twitter" data-vv-name="Twitter"></v-text-field>
 
     <!-- LinkedIn -->
     <v-text-field
-      style="padding-right: 20px; padding-left: 10px"
       v-model="editedPersonalInfo.linkedIn"
       label="LinkedIn"
       :rules="getURLRules()"
@@ -27,7 +16,6 @@
 
     <!-- Phone Number -->
     <v-text-field
-      style="padding-right: 20px; padding-left: 10px"
       v-model="editedPersonalInfo.phoneNumber"
       v-mask="'###-###-####'"
       hint="###-###-#### format"
@@ -37,7 +25,7 @@
     >
       <v-tooltip bottom slot="append">
         <template v-slot:activator="{ on }">
-          <v-btn class="pb-1" text icon v-on="on"><v-icon style="color: grey">shield</v-icon></v-btn>
+          <v-btn class="pb-1" text icon v-on="on"><v-icon class="case-gray">shield</v-icon></v-btn>
         </template>
         <span>Only Visible to You, Managers, and Admins</span>
       </v-tooltip>
@@ -53,7 +41,6 @@
       offset-y
       max-width="290px"
       min-width="290px"
-      style="padding-right: 20px; padding-bottom: 20px"
     >
       <template v-slot:activator="{ on }">
         <v-text-field
@@ -81,59 +68,50 @@
     ></v-switch>
 
     <!-- Place of Birth -->
-    <p style="font-size: 17px; padding-left: 10px; padding-top: 10px">
+    <p>
       Place of Birth
       <v-tooltip bottom slot="append-outer">
         <template v-slot:activator="{ on }">
-          <v-btn class="pb-1" text icon v-on="on"><v-icon style="color: grey">shield</v-icon></v-btn>
+          <v-btn class="pb-1" text icon v-on="on"><v-icon class="case-gray">shield</v-icon></v-btn>
         </template>
         <span>Only Visible to You, Managers, and Admins</span>
       </v-tooltip>
     </p>
-    <div style="padding-right: 20px; padding-left: 30px; padding-bottom: 10px">
-      <div style="border-left-style: groove; padding-right: 20px; padding-left: 10px">
-        <!-- Place of Birth: City text field -->
-        <v-text-field
-          v-model="editedPersonalInfo.city"
-          label="City"
-          data-vv-name="City"
-          style="padding-top: 0px"
-        ></v-text-field>
+    <div class="groove pr-5 pl-2">
+      <!-- Place of Birth: City text field -->
+      <v-text-field v-model="editedPersonalInfo.city" label="City" data-vv-name="City" class="pt-0"></v-text-field>
 
-        <!-- Place of Birth: Country autocomplete -->
-        <v-autocomplete
-          :items="countries"
-          v-model="editedPersonalInfo.country"
-          item-text="text"
-          label="Country"
-          style="padding-top: 0px; padding-bottom: 0px"
-        ></v-autocomplete>
+      <!-- Place of Birth: Country autocomplete -->
+      <v-autocomplete
+        :items="countries"
+        v-model="editedPersonalInfo.country"
+        item-text="text"
+        label="Country"
+      ></v-autocomplete>
 
-        <!-- Place of Birth: State autocomplete -->
-        <v-autocomplete
-          v-if="isUSA"
-          :items="Object.values(states)"
-          v-model="editedPersonalInfo.st"
-          item-text="text"
-          label="State"
-          style="padding-top: 0px"
-        ></v-autocomplete>
-      </div>
+      <!-- Place of Birth: State autocomplete -->
+      <v-autocomplete
+        v-if="isUSA"
+        :items="Object.values(states)"
+        v-model="editedPersonalInfo.st"
+        item-text="text"
+        label="State"
+        class="pt-0"
+      ></v-autocomplete>
     </div>
     <!-- Current Address -->
     <div v-if="userhasAdminPermissions() || userIsEmployee()">
-      <p style="font-size: 17px; padding-left: 10px; padding-top: 10px">
+      <p class="pt-4 mb-0 pb-0">
         Current Address
         <v-tooltip bottom slot="append-outer">
           <template v-slot:activator="{ on }">
-            <v-btn class="pb-1" text icon v-on="on"><v-icon style="color: grey">shield</v-icon></v-btn>
+            <v-btn class="pb-1" text icon v-on="on"><v-icon class="case-gray">shield</v-icon></v-btn>
           </template>
           <span>Only Visible to You, Managers, and Admins</span>
         </v-tooltip>
       </p>
       <v-combobox
-        class="pb-3"
-        style="padding-top: 0px"
+        class="pb-3 pt-0"
         @input.native="updateAddressDropDown"
         :items="Object.keys(this.placeIds)"
         v-model="searchString"
@@ -143,41 +121,39 @@
         hint="Search address and select option to auto-fill fields below."
         persistent-hint
       >
-        <v-list slot="append-item" name="joe" class="grey--text"> Powered By Google </v-list>
+        <v-list slot="append-item" name="joe" class="case-gray"> Powered By Google </v-list>
       </v-combobox>
-      <div style="padding-right: 20px; padding-left: 30px; padding-bottom: 10px">
-        <div style="border-left-style: groove; padding-right: 20px; padding-left: 10px">
-          <!-- Current Address: Street text field -->
-          <v-text-field
-            v-model="editedPersonalInfo.currentStreet"
-            label="Street"
-            data-vv-name="Street"
-            style="padding-top: 0px"
-          ></v-text-field>
-          <!-- Current Address: City text field -->
-          <v-text-field
-            v-model="editedPersonalInfo.currentCity"
-            label="City"
-            data-vv-name="Current City"
-            style="padding-top: 0px"
-          ></v-text-field>
-          <!-- Current Address: State autocomplete -->
-          <v-autocomplete
-            :items="Object.values(states)"
-            v-model="editedPersonalInfo.currentState"
-            item-text="text"
-            label="State"
-            style="padding-top: 0px"
-          ></v-autocomplete>
-          <!-- Current Address: ZIP text field -->
-          <v-text-field
-            v-model="editedPersonalInfo.currentZIP"
-            v-mask="'#####'"
-            label="ZIP"
-            data-vv-name="Current ZIP"
-            style="padding-top: 0px"
-          ></v-text-field>
-        </div>
+      <div class="groove pr-5 pl-2">
+        <!-- Current Address: Street text field -->
+        <v-text-field
+          v-model="editedPersonalInfo.currentStreet"
+          label="Street"
+          data-vv-name="Street"
+          class="pt-0"
+        ></v-text-field>
+        <!-- Current Address: City text field -->
+        <v-text-field
+          v-model="editedPersonalInfo.currentCity"
+          label="City"
+          data-vv-name="Current City"
+          class="pt-0"
+        ></v-text-field>
+        <!-- Current Address: State autocomplete -->
+        <v-autocomplete
+          :items="Object.values(states)"
+          v-model="editedPersonalInfo.currentState"
+          item-text="text"
+          label="State"
+          class="pt-0"
+        ></v-autocomplete>
+        <!-- Current Address: ZIP text field -->
+        <v-text-field
+          v-model="editedPersonalInfo.currentZIP"
+          v-mask="'#####'"
+          label="ZIP"
+          data-vv-name="Current ZIP"
+          class="pt-0"
+        ></v-text-field>
       </div>
     </div>
   </div>
@@ -208,9 +184,9 @@ async function created() {
   this.countries = _.map(await api.getCountries(), 'name');
   this.countries.unshift('United States of America');
   // set formatted birthday date
-  this.birthdayFormat = formatDate(this.editedPersonalInfo.birthday) || this.birthdayFormat;
+  this.birthdayFormat = this.formatDate(this.editedPersonalInfo.birthday) || this.birthdayFormat;
   // fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
-  if (this.editedPersonalInfo.birthday !== null && !formatDate(this.editedPersonalInfo.birthday)) {
+  if (this.editedPersonalInfo.birthday !== null && !this.formatDate(this.editedPersonalInfo.birthday)) {
     // clear birthday date if fails to format
     this.editedPersonalInfo.birthday = null;
   }
@@ -243,6 +219,7 @@ function disableBirthdayFeed() {
  * otherwise clears state field and returns false.
  *
  * @param boolan - USA is selected for countries
+ * @return boolean - is the USA
  */
 function isUSA() {
   if (this.editedPersonalInfo.country == 'United States of America') {
@@ -309,16 +286,17 @@ async function updateBoxes() {
 /**
  * Checks whether the current user role has admin permissions, used specifically
  * to prevent the manager from changing their own role on the Employee tab.
+ *
  * @return - boolean: true if the user role is admin
  */
 function userhasAdminPermissions() {
-  return getRole() === 'admin' || getRole() === 'manager';
+  return this.getRole() === 'admin' || this.getRole() === 'manager';
 } // userhasAdminPermissions
 
 /**
  * Checks if the profile accessed is the signed-in user's profile.
  *
- * @returns boolean - true if the profile is the user's profile
+ * @return boolean - true if the profile is the user's profile
  */
 function userIsEmployee() {
   if (this.$route.params.id == this.userId) {
@@ -341,6 +319,49 @@ function validateFields() {
   window.EventBus.$emit('doneValidating', 'personal', this.editedPersonalInfo); // emit done validating
 } // validateFields
 
+// |--------------------------------------------------|
+// |                                                  |
+// |                     WATCHERS                     |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * watcher for model.id - update edited personal info
+ */
+function watchModelID() {
+  //when select an employee with a different ID the personal info reflects the employee that was chosen
+  this.editedPersonalInfo = _.cloneDeep(this.model);
+} // watchModelID
+
+/**
+ * watcher for editedPersonalInfo.birthday
+ */
+function watchEditedPersonalInfoBirthday() {
+  this.birthdayFormat = this.formatDate(this.editedPersonalInfo.birthday) || this.birthdayFormat;
+  //fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
+  if (this.editedPersonalInfo.birthday !== null && !this.formatDate(this.editedPersonalInfo.birthday)) {
+    this.editedPersonalInfo.birthday = null;
+  }
+} // watchEditedPersonalInfoBirthday
+
+/**
+ * watcher for validating - validates fields
+ *
+ * @param val - val prop that needs to exist before validating
+ */
+function watchValidating(val) {
+  if (val) {
+    // parent component triggers validation
+    this.validateFields();
+  }
+} // watchValidating
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      EXPORT                      |
+// |                                                  |
+// |--------------------------------------------------|
+
 export default {
   created,
   computed: {
@@ -355,7 +376,9 @@ export default {
       countries: [], // list of countries
       phoneRules: [
         (v) =>
-          !isEmpty(v) ? v.length == 0 || v.length == 12 || 'Phone number must be valid. Format: ###-###-####' : true
+          !this.isEmpty(v)
+            ? v.length == 0 || v.length == 12 || 'Phone number must be valid. Format: ###-###-####'
+            : true
       ],
       searchString: '',
       placeIds: {},
@@ -430,6 +453,8 @@ export default {
     getDateOptionalRules,
     getNonFutureDateRules,
     getURLRules,
+    getRole,
+    isEmpty,
     parseDate,
     updateAddressDropDown,
     updateBoxes,
@@ -439,22 +464,9 @@ export default {
   },
   props: ['model', 'validating'],
   watch: {
-    'model.id': function () {
-      //when select an employee with a different ID the personal info reflects the employee that was chosen
-      this.editedPersonalInfo = _.cloneDeep(this.model);
-    },
-    'editedPersonalInfo.birthday': function () {
-      this.birthdayFormat = formatDate(this.editedPersonalInfo.birthday) || this.birthdayFormat;
-      //fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
-      if (this.editedPersonalInfo.birthday !== null && !formatDate(this.editedPersonalInfo.birthday)) {
-        this.editedPersonalInfo.birthday = null;
-      }
-    },
-    validating: function (val) {
-      if (val) {
-        this.validateFields();
-      }
-    }
+    'model.id': watchModelID,
+    'editedPersonalInfo.birthday': watchEditedPersonalInfoBirthday,
+    validating: watchValidating
   }
 };
 </script>

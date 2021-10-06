@@ -51,6 +51,15 @@ import ExpenseTypeTotals from '@/components/ExpenseTypeTotals.vue';
 import RollupExpenseTypeTable from '@/components/RollupExpenseTypeTable.vue';
 import { isMobile } from '@/utils/utils';
 
+// |--------------------------------------------------|
+// |                                                  |
+// |                 LIFECYCLE HOOKS                  |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * created lifecycle hook - get user and set isAdmin and listener
+ */
 async function created() {
   this.employee = await api.getUser();
   if (this.employee.employeeRole === 'admin') {
@@ -59,7 +68,14 @@ async function created() {
   window.EventBus.$on('reimburseAlert', (alerts) => {
     this.alerts = alerts;
   });
-}
+} // created
+
+/**
+ * beforeDestroy lifecycle hook
+ */
+function beforeDestroy() {
+  window.EventBus.$off('reimburseAlert');
+} //beforeDestroy
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -77,6 +93,7 @@ export default {
     isMobile
   },
   created,
+  beforeDestroy,
   data() {
     return {
       alerts: [], // status alerts

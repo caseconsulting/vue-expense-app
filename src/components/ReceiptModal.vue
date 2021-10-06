@@ -41,6 +41,19 @@ function emit(msg, data) {
 
 // |--------------------------------------------------|
 // |                                                  |
+// |                     WATCHERS                     |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * watcher for toggleReimburseModal
+ */
+function watchToggleReimburseModal() {
+  this.activate = true;
+} // watchToggleReimburseModal
+
+// |--------------------------------------------------|
+// |                                                  |
 // |                      EXPORT                      |
 // |                                                  |
 // |--------------------------------------------------|
@@ -51,9 +64,7 @@ export default {
   },
   props: ['toggleReimburseModal', 'type', 'deleteInfo'],
   watch: {
-    toggleReimburseModal: function () {
-      this.activate = true;
-    }
+    toggleReimburseModal: watchToggleReimburseModal
   }
 };
 </script>

@@ -81,16 +81,16 @@ function checkEmptyPersonalInfo() {
  */
 function getCurrentAddress() {
   let currentAddress = '';
-  if (!isEmpty(this.model.currentStreet)) {
+  if (!this.isEmpty(this.model.currentStreet)) {
     currentAddress += `${this.model.currentStreet}, `;
   }
-  if (!isEmpty(this.model.currentCity)) {
+  if (!this.isEmpty(this.model.currentCity)) {
     currentAddress += `${this.model.currentCity}, `;
   }
-  if (!isEmpty(this.model.currentState)) {
+  if (!this.isEmpty(this.model.currentState)) {
     currentAddress += `${this.model.currentState} `;
   }
-  if (!isEmpty(this.model.currentZIP)) {
+  if (!this.isEmpty(this.model.currentZIP)) {
     currentAddress += `${this.model.currentZIP} `;
   }
   if (currentAddress[currentAddress.length - 2] === ',') {
@@ -108,13 +108,13 @@ function getCurrentAddress() {
  */
 function getPlaceOfBirth() {
   let placeOfBirth = '';
-  if (!isEmpty(this.model.city)) {
+  if (!this.isEmpty(this.model.city)) {
     placeOfBirth += `${this.model.city}, `;
   }
-  if (!isEmpty(this.model.st)) {
+  if (!this.isEmpty(this.model.st)) {
     placeOfBirth += `${this.model.st}, `;
   }
-  if (!isEmpty(this.model.country)) {
+  if (!this.isEmpty(this.model.country)) {
     placeOfBirth += `${this.model.country}, `;
   }
 
@@ -125,16 +125,17 @@ function getPlaceOfBirth() {
 /**
  * Checks whether the current user role is admin, used specifically
  * to prevent the manager from changing their own role on the Employee tab
+ *
  * @return - boolean: true if the user role is admin
  */
 function userIsAdmin() {
-  return getRole() === 'admin';
+  return this.getRole() === 'admin';
 } //userIsAdmin
 
 /**
  * Checks if the profile accessed is the signed-in user's profile
  *
- * @returns boolean - true if the profile is the user's profile
+ * @return boolean - true if the profile is the user's profile
  */
 function userIsEmployee() {
   if (this.$route.params.id == this.userId) {
@@ -146,11 +147,33 @@ function userIsEmployee() {
 /**
  * Checks if the users role is manager.
  *
- * @returns boolean - true if the user is a manager
+ * @return boolean - true if the user is a manager
  */
 function userIsManager() {
-  return getRole() === 'manager';
-}
+  return this.getRole() === 'manager';
+} // userIsManager
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      EXPORT                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     FILTERS                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * filter to replace boolean with yes/no
+ *
+ * @param value - boolean value to check
+ * @return yes if value is true no otherwise
+ */
+function birthdayFeedResponse(value) {
+  return value ? 'Yes' : 'No';
+} // birthdayFeedResponse
 
 export default {
   computed: {
@@ -165,13 +188,12 @@ export default {
     };
   },
   filters: {
-    birthdayFeedResponse: (value) => {
-      return value ? 'Yes' : 'No';
-    }
+    birthdayFeedResponse
   },
   methods: {
     checkEmptyPersonalInfo,
     isEmpty,
+    getRole,
     monthDayYearFormat,
     userIsAdmin,
     userIsEmployee,

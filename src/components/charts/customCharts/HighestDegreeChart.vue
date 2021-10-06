@@ -5,42 +5,51 @@
       <p class="font-weight-normal">Total Degrees: {{ degreeCount }}</p>
     </div>
   </v-card>
-  <v-skeleton-loader v-else type="paragraph@5"></v-skeleton-loader>
 </template>
 
 <script>
 import PieChart from '../baseCharts/PieChart.vue';
-import api from '@/shared/api.js';
 import _ from 'lodash';
 const moment = require('moment-timezone');
 moment.tz.setDefault('America/New_York');
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                 LIFECYCLE HOOKS                  |
+// |                                                  |
+// |--------------------------------------------------|
 
 /**
  * created lifecycle hook
  */
 async function created() {
-  this.$forceUpdate();
-  this.employees = await api.getItems(api.EMPLOYEES);
   this.degrees = this.initDegrees();
   this.fillData();
 } // created
 
+// |--------------------------------------------------|
+// |                                                  |
+// |                     METHODS                      |
+// |                                                  |
+// |--------------------------------------------------|
+
 /**
  * Initializes the degrees data field, this function retrieves the highest
  * degree for each employee.
+ *
  * @return array of objects - key: employee name, value: another array
  * containing objects w/ degree names + majors
  */
 function initDegrees() {
   let degrees = {};
-  this.employees.forEach((emp) => {
+  this.employees3.forEach((emp) => {
     let highestDegrees = [];
     if (emp.schools && emp.workStatus != 0) {
       _.forEach(emp.schools, (school) => {
         _.forEach(school.degrees, (degree) => {
           if (moment(degree.completionDate).isBefore(moment(new Date()))) {
             if (highestDegrees.length != 0) {
-              let result = compareDegree(highestDegrees[0].name, degree.degreeType);
+              let result = this.compareDegree(highestDegrees[0].name, degree.degreeType);
               //if a degree of a higher prestige is found, remove all previous entries
               if (result === 1) {
                 highestDegrees.length = 0;
@@ -62,7 +71,7 @@ function initDegrees() {
           }
         });
       });
-      degrees = addToDegrees(degrees, highestDegrees);
+      degrees = this.addToDegrees(degrees, highestDegrees);
     }
   });
   return degrees;
@@ -71,9 +80,10 @@ function initDegrees() {
 /**
  * Helper function that parses through the existing data
  * in degrees and adds onto it.
+ *
  * @param degrees - The array of the highest degrees tallied up
  * @param highestDegrees - The array of all highest degrees
- * @returns Array - The finaly tally of each highest degrees
+ * @return Array - The finaly tally of each highest degrees
  */
 function addToDegrees(degrees, highestDegrees) {
   highestDegrees.forEach((highestDegree) => {
@@ -101,13 +111,16 @@ function addToDegrees(degrees, highestDegrees) {
 
 /**
  * Compares the relationship between two degrees,
+ *
+ * @param oldDegree - first degree to compare
+ * @param newDegree - second degree to compare
  * @return 1: newDegree is more prestigious
  * @return -1: oldDegree is more presitigious
  * @return 0: degrees have the same prestige
  */
 function compareDegree(oldDegree, newDegree) {
-  oldDegree = getDegreeValue(oldDegree);
-  newDegree = getDegreeValue(newDegree);
+  oldDegree = this.getDegreeValue(oldDegree);
+  newDegree = this.getDegreeValue(newDegree);
   if (oldDegree > newDegree) {
     return -1;
   }
@@ -121,18 +134,19 @@ function compareDegree(oldDegree, newDegree) {
 
 /**
  * Get the object of concentrations for a degree and the count of each concentration.
+ *
  * @param degreeName - The name of the degree
  * @return Object - An object of concentrations with the number of occurrences found
  */
 function getDegreeConcentrations(degreeName) {
   let concentrationsData = {};
   // loop through each employee
-  this.employees.forEach((employee) => {
+  this.employees3.forEach((employee) => {
     if (employee.degrees) {
       // loop through each employee's degree
       employee.degrees.forEach((degree) => {
         // generalize each degree name to match pie chart categories (Bachelors of Science = Bachelors)
-        if (getDegreeName(getDegreeValue(degree.name)) === degreeName) {
+        if (this.getDegreeName(this.getDegreeValue(degree.name)) === degreeName) {
           // loop through each concentration
           degree.concentrations.forEach((concentration) => {
             /// count up each occurrence of a concentration
@@ -151,18 +165,19 @@ function getDegreeConcentrations(degreeName) {
 
 /**
  * Get the object of minors for a degree and the count of each minor.
+ *
  * @param degreeName - The name of the degree
  * @return Object - An object of minors with the number of occurrences found
  */
 function getDegreeMinors(degreeName) {
   let minorsData = {};
   // loop through each employee
-  this.employees.forEach((employee) => {
+  this.employees3.forEach((employee) => {
     if (employee.degrees) {
       // loop through each employee's degree
       employee.degrees.forEach((degree) => {
         // generalize each degree name to match pie chart categories (Bachelors of Science = Bachelors)
-        if (getDegreeName(getDegreeValue(degree.name)) === degreeName) {
+        if (this.getDegreeName(this.getDegreeValue(degree.name)) === degreeName) {
           // loop through each minor
           degree.minors.forEach((minor) => {
             /// count up each occurrence of a minor
@@ -185,6 +200,9 @@ function getDegreeMinors(degreeName) {
  * that the employee attended a different institution by
  * returning 5.
  * (trade school, etc.)
+ *
+ * @param degree - degree
+ * @return int - number assigned to degree for ordering
  */
 function getDegreeValue(degree) {
   let degreeLower = degree.toLowerCase();
@@ -207,8 +225,9 @@ function getDegreeValue(degree) {
 /**
  * Used to standardize the names of degrees
  * for labels
+ *
  * @param value - The number that the degree is associated with
- * @returns String - The name of the degree
+ * @return String - The name of the degree
  */
 function getDegreeName(value) {
   switch (value) {
@@ -223,7 +242,7 @@ function getDegreeName(value) {
     default:
       return 'Other';
   }
-}
+} // getDegreeName
 
 /**
  * Populates the data to display
@@ -282,6 +301,7 @@ function fillData() {
 /**
  * Sends data to create the second pie chart that displays
  * info about degree majors
+ *
  * @param degree - object that holds the name of the degree as a key and holds
  * a nested object w/ key of the major and value of the quantity
  */
@@ -291,9 +311,11 @@ function majorsEmit(degree) {
   majorsData.degree = degree;
   this.showMajors = true;
   window.EventBus.$emit('majors-update', majorsData);
-}
+} // majorsEmit
+
 /**
  * Send data to create a pie chart to display the minors for a degree.
+ *
  * @param degree - The name of the degree
  */
 function minorsEmit(degree) {
@@ -301,10 +323,11 @@ function minorsEmit(degree) {
   minorsData.minors = this.getDegreeMinors(degree);
   minorsData.degree = degree;
   window.EventBus.$emit('minors-update', minorsData);
-}
+} // minorsEmit
 
 /**
  * Send data to create a pie chart to display the concentrations for a degree.
+ *
  * @param degree - The name of the degree
  */
 function concentrationsEmit(degree) {
@@ -312,7 +335,13 @@ function concentrationsEmit(degree) {
   concentrationsData.concentrations = this.getDegreeConcentrations(degree);
   concentrationsData.degree = degree;
   window.EventBus.$emit('concentrations-update', concentrationsData);
-}
+} // concentrationsEmit
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      EXPORT                      |
+// |                                                  |
+// |--------------------------------------------------|
 
 export default {
   components: { PieChart },
@@ -339,7 +368,8 @@ export default {
     minorsEmit,
     concentrationsEmit
   },
-  created
+  created,
+  props: ['employees3'] // stats page (employees) --> tab (employees2) --> chart (employees3)
 };
 </script>
 

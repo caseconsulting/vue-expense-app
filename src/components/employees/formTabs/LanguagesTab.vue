@@ -3,15 +3,13 @@
     <!-- Loop Languages -->
     <div
       v-for="(languages, index) in editedLanguages"
-      class="pt-3 pb-1 px-5"
+      class="gray-border ma-0 pt-3 pb-1 px-5"
       :key="'language: ' + index"
-      style="border: 1px solid grey"
     >
       <!-- Name of Language Field -->
 
       <v-combobox
         ref="formFields"
-        style="padding-right: 20px; padding-left: 10px"
         v-model="languages.name"
         :rules="getRequiredRules()"
         :items="languagesList"
@@ -25,7 +23,6 @@
       <!-- Language Proficiency -->
       <v-autocomplete
         ref="formFields"
-        style="padding-right: 20px; padding-left: 10px"
         :items="proficiencyTypes"
         v-model="languages.proficiency"
         :rules="getRequiredRules()"
@@ -40,7 +37,7 @@
           <v-tooltip bottom slot="append-outer">
             <template v-slot:activator="{ on }">
               <v-btn text icon v-on="on" @click="deleteLanguage(index)"
-                ><v-icon style="color: grey">delete</v-icon></v-btn
+                ><v-icon class="case-gray">delete</v-icon></v-btn
               >
             </template>
             <span>Delete Language</span>
@@ -105,7 +102,8 @@ function deleteLanguage(index) {
 
 /**
  * Creates an array of all languages that a user has entered multiple times (based on name).
- * @returns an array of language names that a user has entered multiple times
+ *
+ * @return array  - array of language names that a user has entered multiple times
  */
 function duplicateLangEntries() {
   //declares function to count unique name properties of js objects
@@ -123,8 +121,9 @@ function duplicateLangEntries() {
 
 /**
  * Checks to see if a language is a duplicate of one that is already entered by a user.
- * @param lang String - the name of the language
- * @returns boolean - true if the language was already entered by user (duplicate) false otherwise
+ *
+ * @param lang - the string name of the language
+ * @return boolean - true if the language was already entered by user (duplicate) false otherwise
  */
 function isDuplicate(lang) {
   let duplicates = this.duplicateLangEntries();
@@ -167,6 +166,30 @@ function validateFields() {
   window.EventBus.$emit('doneValidating', 'languages', this.editedLanguages); // emit done validating
 } // validateFields
 
+// |--------------------------------------------------|
+// |                                                  |
+// |                     WATCHERS                     |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * watcher for validating - validates fields
+ *
+ * @param val - val prop that needs to exist before validating
+ */
+function watchValidating(val) {
+  if (val) {
+    // parent component triggers validation
+    this.validateFields();
+  }
+} // watchValidating
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      EXPORT                      |
+// |                                                  |
+// |--------------------------------------------------|
+
 export default {
   created,
   methods: {
@@ -181,12 +204,7 @@ export default {
   },
   props: ['model', 'validating'],
   watch: {
-    validating: function (val) {
-      if (val) {
-        // parent component triggers validation
-        this.validateFields();
-      }
-    }
+    validating: watchValidating
   },
   data() {
     return {
@@ -278,7 +296,7 @@ export default {
         'Literacy - fluency and broad vocabulary associated with high levels of education'
       ], // job title options
       requiredRules: [
-        (v) => !isEmpty(v) || 'This field is required. You must enter information or delete the field if possible'
+        (v) => !this.isEmpty(v) || 'This field is required. You must enter information or delete the field if possible'
       ], // rules for a required field
       duplicateRules: [
         (lang) => {

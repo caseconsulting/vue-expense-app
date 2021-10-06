@@ -1,9 +1,9 @@
 <template>
   <div>
     <!-- Loop Awards -->
-    <div v-for="(award, index) in editedAwards" style="border: 1px solid grey" class="pt-3 pb-1 px-5" :key="index">
+    <div v-for="(award, index) in editedAwards" class="gray-border ma-0 pt-3 pb-1 px-5" :key="index">
       <!-- Name of Award -->
-      <v-combobox
+      <v-text-field
         ref="formFields"
         v-model="award.name"
         :rules="getRequiredRules()"
@@ -11,7 +11,7 @@
         data-vv-name="Award"
         clearable
       >
-      </v-combobox>
+      </v-text-field>
 
       <v-row class="py-3">
         <v-col cols="12" sm="6" md="12" lg="6" class="pt-0">
@@ -24,16 +24,16 @@
             max-width="290px"
             min-width="290px"
           >
-            <template v-slot:activator="{ on, attrs }">
+            <template v-slot:activator="{ on }">
               <v-text-field
                 ref="formFields"
-                :value="award.dateReceived | formatDate"
+                :value="award.dateReceived | formatDateMonthYear"
                 label="Date Received"
                 prepend-icon="event_available"
-                :rules="getDateRules()"
-                hint="MM/DD/YYYY format"
-                v-mask="'##/##/####'"
-                v-bind="attrs"
+                :rules="getDateMonthYearRules()"
+                hint="MM/YYYY format"
+                v-mask="'##/####'"
+                persistent-hint
                 v-on="on"
                 @blur="award.dateReceived = parseEventDate($event)"
                 clearable
@@ -44,6 +44,7 @@
               v-model="award.dateReceived"
               no-title
               @input="award.showReceivedMenu = false"
+              type="month"
             ></v-date-picker>
           </v-menu>
           <!-- End Received Date -->
@@ -52,7 +53,7 @@
           <v-tooltip bottom>
             <template v-slot:activator="{ on }">
               <v-btn v-on="on" @click="deleteAward(index)" icon text
-                ><v-icon style="color: grey" class="pr-1">delete</v-icon></v-btn
+                ><v-icon class="case-gray pr-1">delete</v-icon></v-btn
               >
             </template>
             <span>Delete Award</span>
@@ -72,8 +73,8 @@
 <script>
 import api from '@/shared/api.js';
 import _ from 'lodash';
-import { getDateRules, getRequiredRules } from '@/shared/validationUtils.js';
-import { formatDate, parseDate } from '@/utils/utils';
+import { getDateMonthYearRules, getRequiredRules } from '@/shared/validationUtils.js';
+import { formatDateMonthYear, parseDate } from '@/utils/utils';
 import { mask } from 'vue-the-mask';
 const moment = require('moment-timezone');
 moment.tz.setDefault('America/New_York');
@@ -121,10 +122,11 @@ function deleteAward(index) {
 
 /**
  * Parse the date after losing focus.
- * @returns String - The date in YYYY-MM-DD format
+ *
+ * @return String - The date in YYYY-MM format
  */
 function parseEventDate() {
-  return parseDate(event.target.value);
+  return this.parseDateMonthYear(event.target.value);
 } // parseEventDate
 
 /**
@@ -141,6 +143,30 @@ function validateFields() {
   window.EventBus.$emit('awardStatus', errorCount); // emit error status
 } // validateFields
 
+// |--------------------------------------------------|
+// |                                                  |
+// |                     WATCHERS                     |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * watcher for validating - checks val
+ *
+ * @param val - value that needs to exist
+ */
+function watchValidating(val) {
+  if (val) {
+    // parent component triggers validation
+    this.validateFields();
+  }
+} // watchValidating
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      EXPORT                      |
+// |                                                  |
+// |--------------------------------------------------|
+
 export default {
   created,
   data() {
@@ -150,24 +176,20 @@ export default {
   },
   directives: { mask },
   filters: {
-    formatDate
+    formatDateMonthYear
   },
   methods: {
     addAward,
     deleteAward,
-    getDateRules,
+    getDateMonthYearRules,
     getRequiredRules,
+    parseDate,
     parseEventDate,
     validateFields
   },
   props: ['model', 'validating'],
   watch: {
-    validating: function (val) {
-      if (val) {
-        // parent component triggers validation
-        this.validateFields();
-      }
-    }
+    validating: watchValidating
   }
 };
 </script>

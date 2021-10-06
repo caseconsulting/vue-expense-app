@@ -3,7 +3,7 @@
     <!-- Anniversary Date -->
     <v-col cols="12" lg="12">
       <v-card class="mt-3" @click="changingBudgetView = !changingBudgetView" hover>
-        <v-card-title>
+        <v-card-title class="mx-1">
           <!-- display the next anniversary date -->
           <div v-if="viewingCurrentBudgetYear">
             <h3 class="pt-4 font-16">Anniversary Date: {{ getAnniversary }}</h3>
@@ -18,7 +18,7 @@
             <div class="pt-4 font-14">[Inactive Budget]</div>
           </div>
           <v-spacer></v-spacer>
-          <v-icon style="margin-right: 10px">history</v-icon>
+          <v-icon>history</v-icon>
         </v-card-title>
       </v-card>
     </v-col>
@@ -92,6 +92,8 @@ function getAnniversary() {
 
 /**
  * Get the days until the employee's next anniversary date.
+ *
+ * @return number - returns the number of days until next anniversary
  */
 function getDaysUntil() {
   let now = moment();
@@ -115,6 +117,8 @@ function getDaysUntil() {
 
 /**
  * Get the seconds until the employee's next anniversary date.
+ *
+ * @return number - return number of seconds until next anniversary
  */
 function getSecondsUntil() {
   if (this.actualTime) {
@@ -181,12 +185,15 @@ function getCurrentBudgetYear() {
   return currentBudgetYear.format(IsoFormat);
 } // getCurrentBudgetYear
 
+/**
+ * load the data and api call to get budgets
+ */
 async function loadData() {
   this.hireDate = this.employee.hireDate;
   this.fiscalDateView = this.getCurrentBudgetYear();
   this.allUserBudgets = await api.getEmployeeBudgets(this.employee.id);
   this.refreshBudgetYears();
-}
+} // loadData
 
 /**
  * Refresh and sets the budget year view options for the employee.
@@ -208,11 +215,16 @@ function refreshBudgetYears() {
   });
   this.budgetYears = _.reverse(_.sortBy(budgetYears)); // sort budgets from current to past
 } // refreshBudgetYears
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                 LIFECYCLE HOOKS                  |
 // |                                                  |
 // |--------------------------------------------------|
+
+/**
+ * created lifecycle hook
+ */
 async function created() {
   this.addOneSecondToActualTimeEverySecond();
   await this.loadData();
@@ -222,7 +234,15 @@ async function created() {
       this.fiscalDateView = data.format(IsoFormat);
     }
   });
-}
+} // created
+
+/**
+ * beforeDestroy lifecycle hook
+ */
+function beforeDestroy() {
+  window.EventBus.$off('selected-budget-year');
+} //beforeDestroy
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                      EXPORT                      |
@@ -254,6 +274,7 @@ export default {
     };
   },
   created,
+  beforeDestroy,
   methods: {
     addOneSecondToActualTimeEverySecond,
     getCurrentBudgetYear,

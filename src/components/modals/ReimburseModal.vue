@@ -35,11 +35,23 @@
  * Emits a message and data if it exists.
  *
  * @param msg - Message to emit
- * @param data - Data to emit
  */
 function emit(msg) {
   window.EventBus.$emit(msg);
 } // emit
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                    WATCHERS                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * watcher for toggleReimburseModal
+ */
+function watchToggleReimburseModal() {
+  this.activate = true;
+} // watchToggleReimburseModal
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -58,9 +70,7 @@ export default {
   },
   props: ['toggleReimburseModal'], // dialog activator
   watch: {
-    toggleReimburseModal: function () {
-      this.activate = true;
-    }
+    toggleReimburseModal: watchToggleReimburseModal
   }
 };
 </script>

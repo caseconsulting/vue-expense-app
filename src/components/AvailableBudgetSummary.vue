@@ -4,7 +4,7 @@
       <v-toolbar-title v-if="selectedBudget">{{ selectedBudget.expenseTypeName }}</v-toolbar-title>
     </v-toolbar>
     <v-divider></v-divider>
-    <v-list v-if="selectedBudget" style="font-size: 13px" dense>
+    <v-list v-if="selectedBudget" class="font-13" dense>
       <!-- Display Start Date -->
       <v-list-item>
         <v-list-item-content>Start Date:</v-list-item-content>
@@ -145,6 +145,7 @@ function getPending(budget) {
  * Returns 'Allowed' or 'Not Allowed' depending on whether an expense type allows overdraft.
  *
  * @param expenseType - expense type to check
+ * @return string - converted boolean to human readable message
  */
 function odFlagMessage(expenseType) {
   return expenseType.odFlag ? 'Allowed' : 'Not Allowed';
@@ -162,7 +163,29 @@ function noRemaining(budget) {
 
 // |--------------------------------------------------|
 // |                                                  |
-// |                      EXPORT                      |
+// |                    WATCHERS                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * watcher for activator - activates dialog if activator changes
+ */
+function watchActivator() {
+  this.showDialog = this.activator;
+} // watchActivator
+
+/**
+ * watcher for showDialog - emits if false
+ */
+function watchShowDialog() {
+  if (!this.showDialog) {
+    this.emit('close-summary');
+  }
+} // watchShowDialog
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     EXPORT                       |
 // |                                                  |
 // |--------------------------------------------------|
 
@@ -188,14 +211,8 @@ export default {
     'selectedBudget' // selected budget
   ],
   watch: {
-    activator: function () {
-      this.showDialog = this.activator;
-    },
-    showDialog: function () {
-      if (!this.showDialog) {
-        this.emit('close-summary');
-      }
-    }
+    activator: watchActivator,
+    showDialog: watchShowDialog
   }
 };
 </script>

@@ -1,6 +1,6 @@
 {
   "name": "vue-expense-app",
-  "version": "3.4.1",
+  "version": "3.5.0",
   "private": true,
   "scripts": {
     "build": "vue-cli-service build",
@@ -8,9 +8,9 @@
     "predeploy:dev": "npm run download:dev:env",
     "deploy:dev": "vue-cli-service build && grunt deploy:dev",
     "postdeploy:dev": "npm run download:local:env",
-    "predeploy:prod": "npm run download:prod:env",
+    "predeploy:prod": "export AWS_PROFILE=prod && npm run download:prod:env",
     "deploy:prod": "vue-cli-service build && grunt deploy:prod",
-    "postdeploy:prod": "npm run download:local:env",
+    "postdeploy:prod": "export AWS_PROFILE=default && npm run download:local:env",
     "predeploy:test": "npm run download:test:env",
     "deploy:test": "vue-cli-service build && grunt deploy:test",
     "postdeploy:test": "npm run download:local:env",
@@ -52,7 +52,7 @@
     "@ckeditor/ckeditor5-upload": "27.0.0",
     "@ckeditor/ckeditor5-vue2": "1.0.5",
     "auth0-js": "9.15.0",
-    "axios": "0.21.1",
+    "axios": "0.21.2",
     "chart.js": "2.9.4",
     "crypto-js": "4.0.0",
     "jwt-decode": "3.1.2",

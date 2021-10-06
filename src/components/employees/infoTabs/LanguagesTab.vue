@@ -41,10 +41,10 @@ import { isEmpty } from '@/utils/utils';
  * Emits to parent the component was created and get data for the list.
  */
 function created() {
-  if (!isEmpty(this.model.languages)) {
+  if (!this.isEmpty(this.model.languages)) {
     this.filteredList = this.model.languages.slice(0, 5);
   }
-}
+} // created
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -60,7 +60,13 @@ function onPageChange() {
   var startIndex = 5 * (this.page - 1); //each page contains 5 Language entries
   var endIndex = startIndex + 5;
   this.filteredList = this.model.languages.slice(startIndex, endIndex);
-}
+} // onPageChange
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      EXPORT                      |
+// |                                                  |
+// |--------------------------------------------------|
 
 export default {
   created,

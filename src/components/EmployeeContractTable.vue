@@ -45,7 +45,7 @@
             @click:clear="prime = null"
           ></v-autocomplete>
         </v-col>
-        <v-col v-else>
+        <v-col v-else-if="dataType === 'Job Roles'">
           <v-autocomplete
             v-model="dataTypeSearch"
             :items="dataTypeDropDown"
@@ -68,15 +68,16 @@
         :items-per-page.sync="itemsPerPage"
         :search="search"
         class="elevation-1"
+        @click:row="handleClick"
       >
         <template v-slot:[`item.employeeNumber`]="{ item }">
-          <p :class="{ selectFocus: isFocus(item) }" style="margin-bottom: 0px">
+          <p :class="{ selectFocus: isFocus(item) } + ' mb-0'">
             {{ item.employeeNumber }}
           </p>
         </template>
         <!-- First Name Item Slot -->
         <template v-slot:[`item.fullName`]="{ item }">
-          <p :class="{ selectFocus: isFocus(item) }" style="margin-bottom: 0px">
+          <p :class="{ selectFocus: isFocus(item) } + ' mb-0'">
             {{ getFullName(item) }}
           </p>
         </template>
@@ -165,10 +166,10 @@ function constructAutoComplete(empData) {
 
 /**
  * Custom filter for employee autocomplete options.
- *firstName: data.firstName
- * @param item -
- * @param queryText -
- * @return
+ *
+ * @param item - employee object
+ * @param queryText - query to use to filter
+ * @return string - the filtered name
  */
 function customFilter(item, queryText) {
   const query = queryText ? queryText : '';
@@ -184,13 +185,34 @@ function customFilter(item, queryText) {
 } // customFilter
 
 /**
+ * sets midAction boolean to false
+ *
+ * @param item - the employee
+ * @return the path to the employees profile
+ */
+function employeePath(item) {
+  return `/employee/${item.employeeNumber}`;
+} // employeePath
+
+/**
  * Gets the full name of an employee.
- * @returns String - The employees first name
+ *
+ * @param item - the employee
+ * @return String - The employees first name
  */
 function getFullName(item) {
   item.fullName = item.firstName + ' ' + item.lastName;
   return item.fullName;
 } // getFullName
+
+/**
+ * handles click event of the employee table entry
+ *
+ * @param item - the employee
+ */
+function handleClick(item) {
+  this.$router.push(employeePath(item));
+} //handleClick
 
 /**
  * Checks to see if an employee is expanded in the datatable.
@@ -220,6 +242,8 @@ function populateDataTypeDropDowns() {
 
 /**
  * Populate drop downs with information that other employees have filled out.
+ *
+ * @param employees - array of employees for dropdown and to get contracts
  */
 function populateDropDowns(employees) {
   //resets dropdowns after each query
@@ -368,6 +392,39 @@ async function created() {
   this.loading = false;
 } //created
 
+// |--------------------------------------------------|
+// |                                                  |
+// |                     WATCHERS                     |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * watcher for dataType - decides which column to render
+ */
+function watchDataType() {
+  if (this.dataTypes.includes(this.dataType)) {
+    // builds the data for the third column based off the data type chosen by the user
+    switch (this.dataType) {
+      case 'Contracts':
+        this.buildContractsColumn();
+        break;
+      case 'Job Roles':
+        this.buildJobRolesColumn();
+        break;
+      default:
+        this.buildContractsColumn();
+    }
+  }
+  this.dataTypeSearch = null;
+  this.populateDataTypeDropDowns();
+} // watchDataType
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      EXPORT                      |
+// |                                                  |
+// |--------------------------------------------------|
+
 export default {
   created,
   data() {
@@ -415,7 +472,9 @@ export default {
     buildJobRolesColumn,
     constructAutoComplete,
     customFilter,
+    employeePath,
     getFullName,
+    handleClick,
     isFocus,
     populateDataTypeDropDowns,
     populateDropDowns,
@@ -426,29 +485,7 @@ export default {
     searchPrime
   },
   watch: {
-    dataType: function () {
-      if (this.dataTypes.includes(this.dataType)) {
-        // builds the data for the third column based off the data type chosen by the user
-        switch (this.dataType) {
-          case 'Contracts':
-            this.buildContractsColumn();
-            break;
-          case 'Job Roles':
-            this.buildJobRolesColumn();
-            break;
-          default:
-            this.buildContractsColumn();
-        }
-      }
-      this.dataTypeSearch = null;
-      this.populateDataTypeDropDowns();
-    }
+    dataType: watchDataType
   }
 };
 </script>
-
-<style>
-.notranslate {
-  transform: none !important;
-}
-</style>

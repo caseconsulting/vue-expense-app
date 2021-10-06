@@ -40,6 +40,19 @@ function emit(msg) {
 
 // |--------------------------------------------------|
 // |                                                  |
+// |                    WATCHERS                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * watcher for toggleDeleteErrorModal
+ */
+function watchToggleDeleteErrorModal() {
+  this.activate = true;
+} // watchToggleDeleteErrorModal
+
+// |--------------------------------------------------|
+// |                                                  |
 // |                      EXPORT                      |
 // |                                                  |
 // |--------------------------------------------------|
@@ -58,9 +71,7 @@ export default {
     'type' // type of object being deleted
   ],
   watch: {
-    toggleDeleteErrorModal: function () {
-      this.activate = true;
-    }
+    toggleDeleteErrorModal: watchToggleDeleteErrorModal
   }
 };
 </script>

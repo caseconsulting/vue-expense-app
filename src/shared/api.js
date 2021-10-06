@@ -27,38 +27,52 @@ const client = axios.create({
   json: true
 });
 
+/**
+ * executes the api method
+ *
+ * @param method - the type of the api method E.G. get, put, etc.
+ * @param resource - the URL for the api route to the specific function
+ * @param data - data to be passed to the api function
+ * @return * - the data from the response or an error
+ */
 async function execute(method, resource, data) {
   // inject the accessToken for each request
   let accessToken = getAccessToken();
-  return client({
-    method,
-    url: resource,
-    data,
-    headers: {
-      Authorization: `Bearer ${accessToken}`
-    }
-  })
-    .then((response) => {
-      return response.data;
-    })
-    .catch((err) => {
-      return err;
+
+  try {
+    let c = await client({
+      method,
+      url: resource,
+      data,
+      headers: {
+        Authorization: `Bearer ${accessToken}`
+      }
     });
+    return c.data;
+  } catch (err) {
+    return err;
+  }
 }
 
-function getCountries() {
-  return client({
+/**
+ * gets all the countries from the restcountries api
+ *
+ * @return - list of countries or an error
+ */
+async function getCountries() {
+  let countries = await client({
     method: 'get',
     url: 'https://restcountries.eu/rest/v2/all'
-  })
-    .then((response) => {
-      return response.data;
-    })
-    .catch((err) => {
-      return err;
-    });
-}
+  });
+  return countries.data;
+} // getCountries
 
+/**
+ * gets list of tech skills from emsi
+ *
+ * @param tech - query for the tech list
+ * @return - list of tech names or error
+ */
 async function getTechSkills(tech) {
   let techList = await execute('get', `/${EMSI}/getTechSkills/${tech}`);
   let techNames = [];
@@ -74,19 +88,25 @@ async function getTechSkills(tech) {
   }
 
   return techNames;
-}
+} // getTechSkills
 
-function getAllActiveEmployeeBudgets(id) {
-  return execute('get', `/${UTILITY}/getAllActiveEmployeeBudgets/${id}`);
-}
+/**
+ * gets all the active budgets for a specific employee
+ *
+ * @param id - the id of the employee
+ * @return - the budgets data
+ */
+async function getAllActiveEmployeeBudgets(id) {
+  return await execute('get', `/${UTILITY}/getAllActiveEmployeeBudgets/${id}`);
+} // getAllActiveEmployeeBudgets
 
 /**
  * Get basecamp avatars for all employees in the Case Consulting Basecamp.
  *
  * @return object - Employee Basecamp avatar data
  */
-function getBasecampAvatars() {
-  return execute('get', `/${BASECAMP}/getBasecampAvatars`);
+async function getBasecampAvatars() {
+  return await execute('get', `/${BASECAMP}/getBasecampAvatars`);
 } // getBasecampAvatars
 
 /**
@@ -94,25 +114,51 @@ function getBasecampAvatars() {
  *
  * @return object - Basecamp Campfire data
  */
-function getBasecampCampfires() {
-  return execute('get', `/${BASECAMP}/getBasecampCampfires`);
+async function getBasecampCampfires() {
+  return await execute('get', `/${BASECAMP}/getBasecampCampfires`);
 } // getBasecampCampfires
 
-function getEmployeeBudget(id, expenseTypeId, date) {
+/**
+ * gets specific budget for an employee
+ *
+ * @param id - the id of the employee
+ * @param expenseTypeId - the id of the expense type
+ * @param date - the date of the budget
+ * @return - the budget data
+ */
+async function getEmployeeBudget(id, expenseTypeId, date) {
   return execute('get', `/${UTILITY}/getEmployeeBudget/${id}/${expenseTypeId}/${date}`);
-}
+} // getEmployeeBudget
 
-function getFiscalDateViewBudgets(id, fiscalDateView) {
+/**
+ * gets the fiscal date view of the budgets
+ *
+ * @param id - the bidget id
+ * @param fiscalDateView - iso formatted date to choose budget year
+ * @return - the fiscal date view budget data
+ */
+async function getFiscalDateViewBudgets(id, fiscalDateView) {
   return execute('get', `/${UTILITY}/getFiscalDateViewBudgets/${id}/${fiscalDateView}`);
-}
+} // getFiscalDateViewBudgets
 
-function getEmployeeBudgets(id) {
+/**
+ * gets all the budgets for a specific employee
+ *
+ * @param id - the id of the employee
+ * @return - the budget data
+ */
+async function getEmployeeBudgets(id) {
   return execute('get', `/budgets/employee/${id}`);
-}
+} // getEmployeeBudgets
 
-function getAllEvents() {
+/**
+ * gets all the events
+ *
+ * @return - event data
+ */
+async function getAllEvents() {
   return execute('get', `/${UTILITY}/getAllEvents`);
-}
+} // getAllEvents
 
 // function getBudgetsByDate(id, date) {
 //   return execute('get', `/${UTILITY}/getEmployeeBudgets/${id}/${date}`);
@@ -122,323 +168,434 @@ function getAllEvents() {
 //   return execute('get', `/${UTILITY}/getEmployeeBudgets/${id}/${date}/${expenseTypeId}`);
 // }
 
-function getAudits(type, startDate, endDate) {
-  return execute('get', `/${AUDIT}/${type}/${startDate}/${endDate}`);
-}
+/**
+ * gets all the audits for a specific type in a specific range
+ *
+ * @param type - the type of the audit
+ * @param startDate - the start date of the wanted range
+ * @param endDate - the end date of the wanted range
+ * @return - the audit data
+ */
+async function getAudits(type, startDate, endDate) {
+  return await execute('get', `/${AUDIT}/${type}/${startDate}/${endDate}`);
+} // getAudits
 
-function getItems(type) {
-  return execute('get', `/${type}`);
-}
+/**
+ * gets all items from a specific route
+ *
+ * @param type - the route to access
+ * @return - the items
+ */
+async function getItems(type) {
+  return await execute('get', `/${type}`);
+} // getItems
 
-function getItem(type, id) {
-  return execute('get', `/${type}/${id}`);
-}
+/**
+ * gets a specific item from a specific route
+ *
+ * @param type - the route to access
+ * @param id - the id of the specific items
+ * @return - single item object
+ */
+async function getItem(type, id) {
+  return await execute('get', `/${type}/${id}`);
+} // getItem
 
-function getAllEmployeeExpenses(id) {
-  return execute('get', `/${UTILITY}/getAllEmployeeExpenses/${id}`);
-}
+/**
+ * get all the expenses for a specific employee
+ *
+ * @param id - the id of the employee
+ * @return - the expenses
+ */
+async function getAllEmployeeExpenses(id) {
+  return await execute('get', `/${UTILITY}/getAllEmployeeExpenses/${id}`);
+} // getAllEmployeeExpenses
 
-function getAllExpenseTypeExpenses(id) {
-  return execute('get', `/${UTILITY}/getAllExpenseTypeExpenses/${id}`);
-}
+/**
+ * gets all the expenses for an expenseType
+ *
+ * @param id - the id for the expenseType
+ * @return - the expense data for the expenseType
+ */
+async function getAllExpenseTypeExpenses(id) {
+  return await execute('get', `/${UTILITY}/getAllExpenseTypeExpenses/${id}`);
+} // getAllExpenseTypeExpenses
 
-function getURLInfo(id, category) {
-  return execute('get', `/${TRAINING_URLS}/'${id}'/${category}`);
-}
+/**
+ * get the training url info
+ *
+ * @param id - specific training id
+ * @param category - category of training info
+ * @return - training url data
+ */
+async function getURLInfo(id, category) {
+  return await execute('get', `/${TRAINING_URLS}/'${id}'/${category}`);
+} // getURLInfo
 
-function createItem(type, data) {
-  return execute('post', `/${type}`, data);
-}
+/**
+ * creates an item
+ *
+ * @param type - the route to denote the type of item to make
+ * @param data - the data object to be created
+ * @return - if it was a successful create
+ */
+async function createItem(type, data) {
+  return await execute('post', `/${type}`, data);
+} // createItem
 
-function updateItem(type, data) {
-  return execute('put', `/${type}`, data);
-}
+/**
+ * updates the item in the database based on the type
+ * @param type - the route denoting the dynamodb database to change
+ * @param data - the new data
+ * @return - if it was a successful update
+ */
+async function updateItem(type, data) {
+  return await execute('put', `/${type}`, data);
+} // updateItem
 
-function deleteItem(type, id) {
-  return execute('delete', `/${type}/${id}`);
-}
+/**
+ * deletes an item form a specific table
+ *
+ * @param type - the route denoting the dynamodb database to delete an item from
+ * @param id - the id of the item to be deleted
+ * @return - if it was a successful delete
+ */
+async function deleteItem(type, id) {
+  return await execute('delete', `/${type}/${id}`);
+} // deleteItem
 
-function getAllAggregateExpenses() {
-  return execute('get', `/${UTILITY}/getAllAggregateExpenses`);
-}
+/**
+ * gets all the expenses
+ *
+ * @return - the expense data
+ */
+async function getAllAggregateExpenses() {
+  return await execute('get', `/${UTILITY}/getAllAggregateExpenses`);
+} // getAllAggregateExpenses
 
-function getAllExpenses() {
-  return execute('get', `/${UTILITY}/getAllExpenses`);
-}
+/**
+ * gets all the expenses - TODO: delete? not in use?
+ *
+ * @return expenses
+ */
+async function getAllExpenses() {
+  return await execute('get', `/${UTILITY}/getAllExpenses`);
+} // getAllExpenses
 
-function getRole() {
-  return execute('get', 'info/role');
-}
-function getUser() {
-  return execute('get', 'info/me');
-}
+/**
+ * gets employee role
+ *
+ * @return - user role
+ */
+async function getRole() {
+  return await execute('get', 'info/role');
+} // getRole
 
-function getAttachment(employeeId, expenseId) {
-  return execute('get', `attachment/${employeeId}/${expenseId}`);
-}
+/**
+ * gets current user
+ *
+ * @return - get current signed in user
+ */
+async function getUser() {
+  return await execute('get', 'info/me');
+} // getUser
 
-function getBlogFile(authorId, blogId) {
-  return execute('get', `${BLOG_FILE}/${authorId}/${blogId}`);
-}
+/**
+ * gets attachement for an expense for a specific employee
+ *
+ * @param employeeId - the id of the employee
+ * @param expenseId - the id of the expense
+ * @return - the attachment
+ */
+async function getAttachment(employeeId, expenseId) {
+  return await execute('get', `attachment/${employeeId}/${expenseId}`);
+} // getAttachment
 
-function getPictureFile(authorId, blogId, mainPicture) {
-  return execute('get', `${BLOG_FILE}/${authorId}/${blogId}/${mainPicture}`);
-}
+/**
+ * gets the blog file
+ *
+ * @param authorId - the id of the employee who wrote the blog file
+ * @param blogId - the id of the blog post
+ * @return - the blog file
+ */
+async function getBlogFile(authorId, blogId) {
+  return await execute('get', `${BLOG_FILE}/${authorId}/${blogId}`);
+} // getBlogFile
 
-function getLocation(locationQuery) {
-  return execute('get', `${GOOGLE_MAPS}/getLocation/${locationQuery}`);
-}
+/**
+ * gets the picture file for a blog post
+ *
+ * @param authorId - the id of the employee who wrote the blog post
+ * @param blogId - the id of the blog post
+ * @param mainPicture - the name of the main picture of the blog post
+ * @return - the picture of the blog file
+ */
+async function getPictureFile(authorId, blogId, mainPicture) {
+  return await execute('get', `${BLOG_FILE}/${authorId}/${blogId}/${mainPicture}`);
+} // getPictureFile
 
-function getZipCode(addressId) {
-  return execute('get', `${GOOGLE_MAPS}/getZipCode/${addressId}`);
-}
+/**
+ * gets a google map location
+ *
+ * @param locationQuery - the query text used to find the location
+ * @return - the location data
+ */
+async function getLocation(locationQuery) {
+  return await execute('get', `${GOOGLE_MAPS}/getLocation/${locationQuery}`);
+} // getLocation
 
+/**
+ * gets the zip code for an address
+ *
+ * @param addressId - the id of the location that we are getting the zip code for
+ * @return - the zip code data
+ */
+async function getZipCode(addressId) {
+  return await execute('get', `${GOOGLE_MAPS}/getZipCode/${addressId}`);
+} // getZipCode
+
+/**
+ * deletes the resume
+ *
+ * @param employeeId - the id of the employee who we are deleting the resume for
+ * @return - the status code
+ */
 async function deleteResume(employeeId) {
-  // inject the accessToken for each request
-  let accessToken = getAccessToken();
-  return client({
-    method: 'delete',
-    url: `${RESUME}/${employeeId}`,
-    headers: {
-      Authorization: `Bearer ${accessToken}`
-    }
-  })
-    .then((response) => {
-      return response.data;
-    })
-    .catch(() => {
-      return null;
-    });
-}
+  return await execute('delete', `${RESUME}/${employeeId}`);
+} // deleteResume
 
+/**
+ * extracts the text with Amazon textract service of a reciept file for an employee
+ *
+ * @param employeeId - the id of the employee
+ * @param file - the file to extract text from
+ * @return - the extracted text
+ */
 async function extractText(employeeId, file) {
   let formData = new FormData();
   formData.append('receipt', file);
 
-  // inject the accessToken for each request
-  let accessToken = getAccessToken();
+  return await execute('put', `/attachment/${employeeId}/${file.name}`, formData);
+} // extractText
 
-  return client({
-    method: 'put',
-    url: `/attachment/${employeeId}/${file.name}`,
-    data: formData,
-    headers: {
-      Authorization: `Bearer ${accessToken}`
-    }
-  })
-    .then((response) => {
-      return response.data;
-    })
-    .catch((err) => {
-      return err;
-    });
-}
-
+/**
+ * extracts the text of a resume file for a specific employee
+ *
+ * @param employeeId - the id of the employee
+ * @param file - the file to extract text from
+ * @return - the extracted text
+ */
 async function extractResumeText(employeeId, file) {
   let formData = new FormData();
   formData.append('resume', file);
 
-  // inject the accessToken for each request
-  let accessToken = getAccessToken();
+  return await execute('put', `/${RESUME}/${employeeId}`, formData);
+} // extractResumeText
 
-  return client({
-    method: 'put',
-    url: `/${RESUME}/${employeeId}`,
-    data: formData,
-    headers: {
-      Authorization: `Bearer ${accessToken}`
-    }
-  })
-    .then((response) => {
-      return response.data;
-    })
-    .catch((err) => {
-      return err;
-    });
-}
-
+/**
+ * gets the resume for a specific employee
+ *
+ * @param employeeId - the id of the employee
+ * @return - the resume file of the employee
+ */
 async function getResume(employeeId) {
   // inject the accessToken for each request
   let accessToken = getAccessToken();
-  return client({
-    method: 'get',
-    url: `${RESUME}/${employeeId}`,
-    headers: {
-      Authorization: `Bearer ${accessToken}`
-    }
-  })
-    .then((response) => {
-      return response.data;
-    })
-    .catch(() => {
-      return null;
-    });
-}
 
+  try {
+    let c = await client({
+      method: 'get',
+      url: `${RESUME}/${employeeId}`,
+      headers: {
+        Authorization: `Bearer ${accessToken}`
+      }
+    });
+    return c.data;
+  } catch (err) {
+    return null;
+  }
+} // getResume
+
+/**
+ * creates a reciept attachment for an expense
+ *
+ * @param expense - the expense to create a receipt file for
+ * @param file - the file to create
+ * @return - success code
+ */
 async function createAttachment(expense, file) {
   let formData = new FormData();
   formData.append('receipt', file);
 
-  // inject the accessToken for each request
-  let accessToken = getAccessToken();
-  return client({
-    method: 'post',
-    url: `/attachment/${expense.employeeId}/${expense.id}`,
-    data: formData,
-    headers: {
-      Authorization: `Bearer ${accessToken}`
-    }
-  })
-    .then((response) => {
-      return response.data;
-    })
-    .catch((err) => {
-      return err;
-    });
-}
+  return await execute('post', `/attachment/${expense.employeeId}/${expense.id}`, formData);
+} // createAttachment
 
+/**
+ * creates the blog file for a blog post
+ *
+ * @param blogPost - the blog post object
+ * @param file - the blog file
+ * @param fileName - the name of the blog file
+ * @return - success code
+ */
 async function createBlogFile(blogPost, file, fileName) {
   let formData = new FormData();
   formData.append('blogFile', file, fileName);
 
-  // inject the accessToken for each request
-  let accessToken = getAccessToken();
-  return client({
-    method: 'post',
-    url: `/${BLOG_FILE}/${blogPost.authorId}/${blogPost.id}`,
-    data: formData,
-    headers: {
-      Authorization: `Bearer ${accessToken}`
-    }
-  })
-    .then((response) => {
-      return response.data;
-    })
-    .catch((err) => {
-      return err;
-    });
-}
+  return await execute('post', `/${BLOG_FILE}/${blogPost.authorId}/${blogPost.id}`, formData);
+} // createBlogFile
 
-function deleteAttachment(expense) {
-  return execute('delete', `attachment/${expense.employeeId}/${expense.id}/${expense.receipt}`);
-}
+/**
+ * deletes attachment from s3
+ *
+ * @param expense - the expense object to build url
+ * @return - success code
+ */
+async function deleteAttachment(expense) {
+  return await execute('delete', `attachment/${expense.employeeId}/${expense.id}/${expense.receipt}`);
+} // deleteAttachment
 
-function deleteBlogFile(blogPost) {
-  return execute(
+/**
+ * deletes blogFile from s3
+ *
+ * @param blogPost - the blogPost object to build url
+ * @return - success code
+ */
+async function deleteBlogFile(blogPost) {
+  return await execute(
     'delete',
     `${BLOG_FILE}/${blogPost.authorId}/${blogPost.id}/${blogPost.fileName}/${blogPost.mainPicture}`
   );
-}
+} // deleteBlogFile
 
-//functions for QuickBooks time
-function getPTOBalances(employeeNumber) {
-  return execute('get', `/${QUICK_BOOKS_TIME}/getPTOBalances/${employeeNumber}`);
-}
+/**
+ * gets the PTO balances for a specific employee
+ *
+ * @param employeeNumber - the number for the employee
+ * @return - the pto balance
+ */
+async function getPTOBalances(employeeNumber) {
+  return await execute('get', `/${QUICK_BOOKS_TIME}/getPTOBalances/${employeeNumber}`);
+} // getPTOBalances
 
-function getMonthlyHours(employeeNumber) {
-  return execute('get', `/${QUICK_BOOKS_TIME}/getMonthlyHours/${employeeNumber}`);
-}
-function getTwitterToken() {
-  return execute('get', `/${TWITTER}/getTwitterToken`);
-}
-function getCaseTimeline() {
-  return execute('get', `${TWITTER}/getCaseTimeline`);
-}
-function getFeedEvents() {
-  return execute('get', `/${BASECAMP}/getFeedEvents`);
-}
-function getModerationLabel(img) {
-  return execute('post', `${BLOG_ATTACHMENT}/getModerationLabel/${img}`);
-}
+/**
+ * gets the monthly hours for an employee
+ *
+ * @param employeeNumber - the number for the employee
+ * @return - the monthly hours
+ */
+async function getMonthlyHours(employeeNumber) {
+  return await execute('get', `/${QUICK_BOOKS_TIME}/getMonthlyHours/${employeeNumber}`);
+} // getMonthlyHours
 
-function getKeyPhrases(data) {
-  return execute('post', `${BLOG_ATTACHMENT}/getKeyPhrases`, data);
-}
+/**
+ * gets the twitter token for the case twitter
+ *
+ * @return - the twitter token
+ */
+async function getTwitterToken() {
+  return await execute('get', `/${TWITTER}/getTwitterToken`);
+} // getTwitterToken
 
-function uploadResume(employeeId, file) {
+/**
+ * gets the case twitter timeline
+ *
+ * @return - the case timeline tweet data
+ */
+async function getCaseTimeline() {
+  return await execute('get', `${TWITTER}/getCaseTimeline`);
+} // getCaseTimeline
+
+/**
+ * get the feed events for basecamp
+ *
+ * @return - the feed events
+ */
+async function getFeedEvents() {
+  return await execute('get', `/${BASECAMP}/getFeedEvents`);
+} // getFeedEvents
+
+/**
+ * gets the moderation label for blog files
+ *
+ * @param img - the image to check
+ * @return - the label
+ */
+async function getModerationLabel(img) {
+  return await execute('post', `${BLOG_ATTACHMENT}/getModerationLabel/${img}`);
+} // getModerationLabel
+
+/**
+ * gets the key phrases for an attachment
+ *
+ * @param data - the data of the blog attachment
+ * @return - the key phrases
+ */
+async function getKeyPhrases(data) {
+  return await execute('post', `${BLOG_ATTACHMENT}/getKeyPhrases`, data);
+} // getKeyPhrases
+
+/**
+ * uploads the resume file for an employee
+ *
+ * @param employeeId - the id of the employee
+ * @param file - the file of the blog
+ * @return - success code
+ */
+async function uploadResume(employeeId, file) {
   let formData = new FormData();
   formData.append('resume', file);
 
-  // inject the accessToken for each request
-  let accessToken = getAccessToken();
+  return await execute('post', `/${RESUME}/${employeeId}`, formData);
+} // uploadResume
 
-  return client({
-    method: 'post',
-    url: `/${RESUME}/${employeeId}`,
-    data: formData,
-    headers: {
-      Authorization: `Bearer ${accessToken}`
-    }
-  })
-    .then((response) => {
-      return response.data;
-    })
-    .catch((err) => {
-      return err;
-    });
-}
-
+/**
+ * upload blog attachment file
+ *
+ * @param file - the file to upload
+ * @return - success code
+ */
 async function uploadBlogAttachment(file) {
   let formData = new FormData();
   formData.append('image', file);
 
-  // inject the accessToken for each request
-  let accessToken = getAccessToken();
-  return client({
-    method: 'post',
-    url: `${BLOG_ATTACHMENT}/uploadBlogAttachmentToS3/${file.name}`,
-    data: formData,
-    headers: {
-      Authorization: `Bearer ${accessToken}`
-    }
-  })
-    .then((response) => {
-      return response.data;
-    })
-    .catch((err) => {
-      return err;
-    });
-}
+  return await execute('post', `${BLOG_ATTACHMENT}/uploadBlogAttachmentToS3/${file.name}`, formData);
+} // uploadBlogAttachment
 
 /**
+ * returns a list of colleges that matches the query provided
+ *
  * @param inputValue This is the query for the college
- * @returns a list of colleges that match that query
+ * @return a list of colleges that match that query
  */
 async function getColleges(inputValue) {
-  return execute('get', `/${HIPPO_LAB}/getColleges/${inputValue}`)
-    .then((response) => {
-      for (let i = 0; i < response.length; i++) {
-        if (response[i] === 'Virginia Polytechnic Institute and State University') {
-          response[i] = 'Virginia Polytechnic Institute and State University (Virginia Tech)';
-        } else if (response[i] === 'University of Mississippi') {
-          response[i] = 'University of Mississippi (Ole Miss)';
-        } else if (response[i] === 'United States Military Academy') {
-          response[i] = 'United States Military Academy (West Point)';
-        } else if (response[i] === 'Northern Virginia Community College') {
-          response[i] = 'Northern Virginia Community College (NoVa)';
-        } else if (response[i] === 'Georgia Institute of Technology') {
-          response[i] = 'Georgia Institute of Technology (Georgia Tech)';
-        } else if (response[i] === 'Florida Institute of Technology') {
-          response[i] = 'Florida Institute of Technology (Florida Tech)';
-        } else if (response[i] === 'City University of New York') {
-          response[i] = 'City University of New York (City Tech)';
-        } else if (response[i] === 'California Institute of Technology') {
-          response[i] = 'California Institute of Technology (Caltech)';
-        }
-      }
-      return response;
-    })
-    .catch(() => {
-      return [];
-    });
-  // let list = await execute('get', `http://universities.hipolabs.com/search?name=${inputValue}`);
+  try {
+    let response = await execute('get', `/${HIPPO_LAB}/getColleges/${inputValue}`);
 
-  // let finalColleges = [];
-  // for (let i = 0; i < list.length; i++) {
-  //   finalColleges.push(list[i].name);
-  // }
-  //return finalColleges;
-}
+    for (let i = 0; i < response.length; i++) {
+      if (response[i] === 'Virginia Polytechnic Institute and State University') {
+        response[i] = 'Virginia Polytechnic Institute and State University (Virginia Tech)';
+      } else if (response[i] === 'University of Mississippi') {
+        response[i] = 'University of Mississippi (Ole Miss)';
+      } else if (response[i] === 'United States Military Academy') {
+        response[i] = 'United States Military Academy (West Point)';
+      } else if (response[i] === 'Northern Virginia Community College') {
+        response[i] = 'Northern Virginia Community College (NoVa)';
+      } else if (response[i] === 'Georgia Institute of Technology') {
+        response[i] = 'Georgia Institute of Technology (Georgia Tech)';
+      } else if (response[i] === 'Florida Institute of Technology') {
+        response[i] = 'Florida Institute of Technology (Florida Tech)';
+      } else if (response[i] === 'City University of New York') {
+        response[i] = 'City University of New York (City Tech)';
+      } else if (response[i] === 'California Institute of Technology') {
+        response[i] = 'California Institute of Technology (Caltech)';
+      }
+    }
+    return response;
+  } catch (err) {
+    return [];
+  }
+} // getColleges
 
 export default {
   createAttachment,

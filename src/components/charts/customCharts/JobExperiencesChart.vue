@@ -2,29 +2,38 @@
   <v-card v-if="dataReceived" class="pa-5">
     <bar-chart :options="options" :chartData="chartData" />
   </v-card>
-  <v-skeleton-loader v-else type="paragraph@5"></v-skeleton-loader>
 </template>
 
 <script>
 import BarChart from '../baseCharts/BarChart.vue';
 import moment from 'moment-timezone';
-import api from '@/shared/api.js';
 moment.tz.setDefault('America/New_York');
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                 LIFECYCLE HOOKS                  |
+// |                                                  |
+// |--------------------------------------------------|
 
 /**
  * created lifecycle hook
  */
-async function created() {
+function created() {
   // eslint-disable-next-line no-undef
-  this.$forceUpdate();
-  this.employees = (await api.getItems(api.EMPLOYEES)).filter((employee) => employee.workStatus != 0);
   this.jobExperienceData();
   this.drawJobExpHistGraph();
 } // created
 
+// |--------------------------------------------------|
+// |                                                  |
+// |                      METHODS                     |
+// |                                                  |
+// |--------------------------------------------------|
+
 /**
  * Finds the last index that has an element greater than 0 to prevent too many labels showing up on the chart.
- * @returns Number - The index greater than 0
+ *
+ * @return Number - The index greater than 0
  */
 function findMaxIndex() {
   let max = 0;
@@ -41,17 +50,18 @@ function findMaxIndex() {
  * Each employees experience will be put in an array slot that is based on an increment of experience of 5 years.
  */
 function jobExperienceData() {
-  this.employees.forEach((employee) => {
-    if (employee.hireDate !== undefined) {
+  this.employees3.forEach((employee) => {
+    // only include active employees
+    if (employee.hireDate !== undefined && employee.workStatus != 0) {
       // find time at case
-      var amOfYears = calculateTimeDifference(employee.hireDate, undefined);
+      var amOfYears = this.calculateTimeDifference(employee.hireDate, undefined);
       if (employee.companies !== undefined) {
         //we do a for each on the jobs array
         //calculate the difference in the startDate and the endDate (today's date if endDate is undefined)
         employee.companies.forEach((company) => {
           if (company.positions !== undefined) {
             company.positions.forEach((position) => {
-              amOfYears += calculateTimeDifference(position.startDate, position.endDate);
+              amOfYears += this.calculateTimeDifference(position.startDate, position.endDate);
             });
           }
         });
@@ -72,16 +82,19 @@ function jobExperienceData() {
 
 /**
  * Gets the time difference in years between the job start and end date.
- * @returns Number - The amount of years difference
+ *
+ * @param startDate - the start of the difference
+ * @param endDate - the end of the difference
+ * @return Number - The amount of years difference
  */
 function calculateTimeDifference(startDate, endDate) {
-  var start = stringToDate(startDate);
+  var start = this.stringToDate(startDate);
   var end = endDate;
   //Checks if endDate is valid or not
   if (end === undefined || end === null) {
     end = moment(); //Provides today's date
   } else {
-    end = stringToDate(endDate);
+    end = this.stringToDate(endDate);
   }
   return end.diff(start, 'years', true); //Provides decimal value
 } //calculateTimeDifference
@@ -148,13 +161,20 @@ function drawJobExpHistGraph() {
 
 /**
  * Creates a moment object out of a String that is a date.
+ *
  * @param dateAsString - The date
- * @returns Object - The Moment date object
+ * @return Object - The Moment date object
  */
 function stringToDate(dateAsString) {
   var date = moment(dateAsString);
   return date;
 } //stringToDate
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      EXPORT                      |
+// |                                                  |
+// |--------------------------------------------------|
 
 export default {
   components: { BarChart },
@@ -174,6 +194,7 @@ export default {
     calculateTimeDifference,
     stringToDate
   },
-  created
+  created,
+  props: ['employees3'] // stats page (employees) --> tab (employees2) --> chart (employees3)
 };
 </script>

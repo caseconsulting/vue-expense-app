@@ -3,7 +3,7 @@
     <v-container class="my-3">
       <v-row class="py-3">
         <v-col cols="12" sm="4">
-          <h1 style="font-size: 35px">Trainings</h1>
+          <h1 class="pl-2">Trainings</h1>
         </v-col>
 
         <v-col class="mb-1" cols="12" sm="8">
@@ -230,7 +230,7 @@ function titleFormat(value) {
 async function created() {
   let allURLS = await api.getItems(api.TRAINING_URLS);
   this.urlsOriginal = _.forEach(allURLS, (urlObject) => {
-    urlObject.title = titleFormat(urlObject.title);
+    urlObject.title = this.titleFormat(urlObject.title);
     if (urlObject.logo != null) {
       urlObject.display = urlObject.logo;
     } else if (urlObject.image != null) {
@@ -240,7 +240,7 @@ async function created() {
       urlObject.isCaseLogo = true;
     }
   });
-}
+} // created
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -292,7 +292,8 @@ export default {
     changeDisplay,
     filterByCategory,
     isEmpty,
-    isFocus
+    isFocus,
+    titleFormat
   }
 };
 </script>

@@ -2,7 +2,7 @@
   <v-tooltip top>
     <template v-slot:activator="{ on }">
       <v-btn v-on="on" @click.stop="download" text icon>
-        <i class="material-icons pt-1" :style="iconColor()">file_download</i>
+        <icon class="mx-2 mt-1" scale="1.5" :color="iconColor()" name="cloud-download-alt"></icon>
       </v-btn>
     </template>
     <span>Download CSV</span>
@@ -11,6 +11,8 @@
 
 <script>
 import { isEmpty } from '@/utils/utils';
+import moment from 'moment-timezone';
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                     METHODS                      |
@@ -70,7 +72,7 @@ function download() {
  */
 function exportCSVFile(person, fileTitle) {
   let placeOfBirth = this.getPlaceOfBirth(person.city, person.st, person.country);
-  let education = this.getEducation(person.degrees);
+  let education = this.getEducation(person.schools);
   let jobExperience = this.getCompanies(person.companies);
   let certifications = this.getCertifications(person.certifications);
   let awards = this.getAwards(person.awards);
@@ -81,13 +83,13 @@ function exportCSVFile(person, fileTitle) {
   let languages = this.getLanguages(person.languages);
 
   let tempEmployee = [
+    [person.employeeNumber || ''],
     [person.firstName || ''], //Start of employee
     [person.middleName || ''],
     [person.lastName || ''],
-    [person.employeeNumber || ''],
+    [person.birthday || ''],
+    [placeOfBirth || ''],
     [person.email || ''],
-    [person.prime || ''],
-    [person.contract || ''],
     [person.jobRole || ''],
     [person.employeeRole || ''],
     [person.hireDate || ''],
@@ -96,8 +98,6 @@ function exportCSVFile(person, fileTitle) {
     [person.github || ''], //Start of personal
     [person.twitter || ''],
     [person.linkedIn || ''],
-    [person.birthday || ''],
-    [placeOfBirth || ''],
     education,
     jobExperience,
     certifications,
@@ -111,13 +111,13 @@ function exportCSVFile(person, fileTitle) {
   ];
 
   this.headers = [
+    ['Employee #'],
     ['First Name'],
     ['Middle Name'],
     ['Last Name'],
-    ['Employee #'],
+    ['Birthday (yyyy-mm-dd)'],
+    ['Place of Birth'],
     ['Email'],
-    ['Prime'],
-    ['Contract'],
     ['Job Role'],
     ['Expense App Role'],
     ['Hire Date (yyyy-mm-dd)'],
@@ -126,8 +126,6 @@ function exportCSVFile(person, fileTitle) {
     ['Github'],
     ['Twitter'],
     ['LinkedIn'],
-    ['Birthday (yyyy-mm-dd)'],
-    ['Place of Birth'],
     ['Education'],
     ['Job Experience'],
     ['Certifications'],
@@ -146,12 +144,12 @@ function exportCSVFile(person, fileTitle) {
 
   var csv = this.convertToCSV(tempEmployee);
 
-  var exportedFilenmae = fileTitle + '.csv' || 'export.csv';
+  var exportedFilename = fileTitle + '.csv' || 'export.csv';
 
   var blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
   if (navigator.msSaveBlob) {
     // IE 10+
-    navigator.msSaveBlob(blob, exportedFilenmae);
+    navigator.msSaveBlob(blob, exportedFilename);
   } else {
     var link = document.createElement('a');
     if (link.download !== undefined) {
@@ -159,7 +157,7 @@ function exportCSVFile(person, fileTitle) {
       // Browsers that support HTML5 download attribute
       var url = URL.createObjectURL(blob);
       link.setAttribute('href', url);
-      link.setAttribute('download', exportedFilenmae);
+      link.setAttribute('download', exportedFilename);
       link.style.visibility = 'hidden';
       document.body.appendChild(link);
       link.click();
@@ -188,17 +186,22 @@ function getWorkStatus(workStatus) {
 
 /**
  * Gets the icon color depending if the page is employees or an employee profile
+ *
+ * @return - the color hex
  */
 function iconColor() {
   if (this.color) {
-    return 'color: ' + this.color + ';';
+    return this.color;
   }
-}
+  return '#3f3f3c';
+} // iconColor
 
 /**
  * Returns formatted place of birth for employee
  *
- * @param city, state, country - strings
+ * @param city
+ * @param state
+ * @param country
  * @return result - string
  */
 function getPlaceOfBirth(city, state, country) {
@@ -289,26 +292,63 @@ function getClearances(clearance) {
 } // getClearances
 
 /**
+ * Converts the contracts' projects' dates to number of years on the contract
+ *
+ * @param contract the contract to get the info from
+ * @return number - number of years on the contract
+ */
+function getContractLengthInYears(contract) {
+  let total = moment.duration();
+  if (contract.projects) {
+    contract.projects.forEach((project) => {
+      total.add(moment.duration(this.getProjectLengthInYears(project)));
+    });
+  }
+  return total.asYears().toFixed(1);
+} // getContractLengthInYears
+
+/**
+ * Converts the intervals to length of time in years
+ *
+ * @param project the project to convert
+ * @return number - time in years
+ */
+function getProjectLengthInYears(project) {
+  let startMoment = moment(project.startDate);
+  let endMoment = moment(project.endDate);
+  let length;
+  if (project.endDate) {
+    length = moment.duration(endMoment.diff(startMoment));
+  } else {
+    length = moment.duration(moment().diff(startMoment));
+  }
+  return length.add(1, 'month'); // add one month to include end month in calculation.
+}
+
+/**
  * Returns contract data for employee
  *
  * @param contract - An array of objects.
  * @return String - contract
  */
-function getContracts(contract) {
+function getContracts(contracts) {
   let str = '';
   let result = [];
-  if (contract) {
-    for (let i = 0; i < contract.length; i++) {
-      str = contract[i].name + ' - ' + contract[i].prime;
-      if (contract[i].years) {
-        str += ' - ' + contract[i].years + ' years';
-      }
-      if (contract[i].current) {
-        str += ', Current';
+  if (contracts) {
+    contracts.forEach((contract) => {
+      str = contract.name + ' - ' + contract.prime + ' (Projects: ';
+      contract.projects.forEach((project, i) => {
+        if (i != 0) {
+          str += ', ';
+        }
+        str += project.name + ' - ' + this.getProjectLengthInYears(project).asYears().toFixed(1) + ' years';
+      });
+      str += ')';
+      if (contract.projects.length > 1) {
+        str += ' Total Time: ' + this.getContractLengthInYears(contract) + ' years';
       }
       result.push(str);
-    }
-    return result;
+    });
   }
   return result;
 } // getContracts
@@ -345,13 +385,46 @@ function getEducation(edu) {
   let str = '';
   let result = [];
   if (edu) {
+    // each school
     for (let i = 0; i < edu.length; i++) {
-      str = edu[i].school + ' - ' + edu[i].name;
-      for (let j = 0; j < edu[i].majors.length; j++) {
-        str += ' - ' + edu[i].majors[j];
-      }
-      str += ' - ' + edu[i].date;
-      result.push(str);
+      // each degree within school
+      edu[i].degrees.forEach((degree) => {
+        str = edu[i].name + ': ';
+
+        // each major within degree
+        str += degree.degreeType + ' in ';
+        degree.majors.forEach((major, i) => {
+          if (i != 0) {
+            str += ', ';
+          }
+          str += major;
+        });
+
+        if (degree.concentrations) {
+          str += ' (Concentrations: ';
+          degree.concentrations.forEach((concentration, i) => {
+            if (i != 0) {
+              str += ', ';
+            }
+            str += concentration;
+          });
+          str += ')';
+        }
+
+        if (degree.minors) {
+          str += ' (Minors: ';
+          degree.minors.forEach((minor, i) => {
+            if (i != 0) {
+              str += ', ';
+            }
+            str += minor;
+          });
+          str += ')';
+        }
+
+        str += ' - ' + degree.completionDate;
+        result.push(str); // push each degree individually
+      });
     }
     return result;
   }
@@ -366,18 +439,20 @@ function getEducation(edu) {
  */
 function getCompanies(companies) {
   let result = [];
-  for (let i = 0; i < companies.length; i++) {
-    result.push(`${companies[i].companyName}`);
-    let positions = companies[i].positions;
-    let pos;
-    for (let j = 0; j < positions.length; j++) {
-      pos = `    ${positions[j].title} - ${positions[j].startDate}`;
-      if (positions[j].endDate !== null) {
-        pos += ` to ${positions[j].endDate}`;
-      } else {
-        pos += ' to present';
+  if (companies) {
+    for (let i = 0; i < companies.length; i++) {
+      result.push(`${companies[i].companyName}`);
+      let positions = companies[i].positions;
+      let pos;
+      for (let j = 0; j < positions.length; j++) {
+        pos = `    ${positions[j].title} - ${positions[j].startDate}`;
+        if (positions[j].endDate !== null) {
+          pos += ` to ${positions[j].endDate}`;
+        } else {
+          pos += ' to present';
+        }
+        result.push(pos);
       }
-      result.push(pos);
     }
   }
   return result;
@@ -445,6 +520,8 @@ export default {
     getAwards,
     getCertifications,
     getClearances,
+    getContractLengthInYears,
+    getProjectLengthInYears,
     getContracts,
     getCustomerOrgExp,
     getEducation,

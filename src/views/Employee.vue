@@ -19,9 +19,7 @@
     </v-snackbar>
     <v-row class="pl-3">
       <v-col align="left" justify="left">
-        <v-btn id="backToEmployeesBtn" elevation="2" to="/employees"
-          ><v-icon class="pr-1">arrow_back</v-icon>Back to Employees Page</v-btn
-        >
+        <v-btn id="backBtn" elevation="2" @click="$router.back()"><v-icon class="pr-1">arrow_back</v-icon>Back</v-btn>
       </v-col>
       <v-col v-if="hasAdminPermissions() || userIsEmployee()" align="right" justify="right">
         <v-btn
@@ -71,7 +69,7 @@
                     :disabled="!hasResume"
                     class="pr-2"
                     @click="downloadResume()"
-                    style="color: white"
+                    color="white"
                     align="right"
                     v-on="on"
                     id="edit"
@@ -83,7 +81,7 @@
             </v-tooltip>
             <v-tooltip v-if="hasAdminPermissions() || userIsEmployee()" top>
               <template #activator="{ on }">
-                <v-icon class="pr-2" @click="editing = true" style="color: white" align="right" v-on="on" id="edit"
+                <v-icon class="pr-2" @click="editing = true" color="white" align="right" v-on="on" id="edit"
                   >edit</v-icon
                 >
               </template>
@@ -144,28 +142,35 @@ const IsoFormat = 'YYYY-MM-DD';
  * Event called when a resume is submitted
  *
  * @param newEmployeeForm is the new employee model after parsing the resume
+ * @param changes - number of changes that were made
  */
-function resumeReceived(newEmployeeForm, changes) {
+async function resumeReceived(newEmployeeForm, changes) {
   if (changes && changes > 0) {
     this.displayMessage('SUCCESS', `Added ${changes} change(s) to profile!`, 'green');
   }
 
   this.model = newEmployeeForm;
-  api.updateItem(api.EMPLOYEES, this.model);
-}
+  await api.updateItem(api.EMPLOYEES, this.model);
+} // resumeReceived
 
+/**
+ * clears the status message of the uploadStatus
+ */
 function clearStatus() {
   this.$set(this.uploadStatus, 'statusType', undefined);
   this.$set(this.uploadStatus, 'statusMessage', null);
   this.$set(this.uploadStatus, 'color', null);
 } // clearStatus
 
+/**
+ * downloads the resume of the employee
+ */
 async function downloadResume() {
   let signedURL = await api.getResume(this.$route.params.id);
   if (signedURL !== null) {
     window.open(signedURL, '_blank');
   }
-}
+} // downloadResume
 
 /**
  * Gets the current active anniversary budget year starting date in isoformat.
@@ -193,6 +198,11 @@ async function getEmployee() {
   });
 } // getEmployee
 
+/**
+ * checks window size and if it is xs or s minimize the window
+ *
+ * @return boolean - whether or not to minimize window
+ */
 function minimizeWindow() {
   switch (this.$vuetify.breakpoint.name) {
     case 'xs':
@@ -202,33 +212,51 @@ function minimizeWindow() {
     default:
       return false;
   }
-}
+} // minimizeWindow
 
 /**
  * Checks to see if the user is an admin. Returns true if the user's role is an admin, otherwise returns false.
+ *
+ * @return boolean - whether the user is an admin
  */
 function userIsAdmin() {
   return this.role === 'admin';
 } // userIsAdmin
 
+/**
+ * checks to see if the user has admin permissions
+ *
+ * @return boolean - whether the user is an admin or manager
+ */
 function hasAdminPermissions() {
   return this.role === 'admin' || this.role === 'manager';
 } // hasAdminPermissions
+
 /**
- * Check if the user the employee displayed. Returns true if the user is the employee displayed, otherwise returns false.
+ * Check if the user the employee that is displayed. Returns true if the user is the employee displayed, otherwise returns false.
  *
- * @return boolean - user is the employee displayed
+ * @return boolean - user is the employee that is displayed
  */
 function userIsEmployee() {
   return !_.isNil(this.model) && !_.isNil(this.user) ? this.user.employeeNumber === this.model.employeeNumber : false;
 } // userIsEmployee
 
+/**
+ * displays the message
+ *
+ * @param type - the type of message
+ * @param msg - the message to display
+ * @param color - the color of the banner
+ */
 function displayMessage(type, msg, color) {
   this.$set(this.uploadStatus, 'statusType', type);
   this.$set(this.uploadStatus, 'statusMessage', msg);
   this.$set(this.uploadStatus, 'color', color);
-}
+} // displayMessage
 
+/**
+ * deletes the resume
+ */
 async function deleteResume() {
   this.deleteLoading = true;
   let deleteResult = await api.deleteResume(this.$route.params.id);
@@ -285,7 +313,7 @@ async function created() {
   if (this.model) {
     this.user = await api.getUser();
     await this.checkForBudgetAccess();
-    this.role = getRole();
+    this.role = this.getRole();
     this.loading = false;
     this.displayQuickBooksTimeAndBalances = this.userIsAdmin() || this.userIsEmployee();
     this.fiscalDateView = this.getCurrentBudgetYear();
@@ -334,6 +362,11 @@ function beforeDestroy() {
   window.EventBus.$off('upload-resume-complete');
   window.EventBus.$off('confirm-delete-resume');
   window.EventBus.$off('canceled-delete-resume');
+  window.EventBus.$off('cancel-form');
+  window.EventBus.$off('update');
+  window.EventBus.$off('uploaded');
+  window.EventBus.$off('tabChange');
+  window.EventBus.$off('selected-budget-year');
 } // beforeDestroy
 
 // |--------------------------------------------------|
@@ -425,6 +458,7 @@ export default {
     deleteResume,
     displayMessage,
     downloadResume,
+    getRole,
     hasAdminPermissions,
     getEmployee,
     getCurrentBudgetYear,
