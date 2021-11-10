@@ -1,3 +1,9 @@
+<template>
+  <div>
+    <!-- Leave empty div/template so no "mounted" error is thrown in the console -->
+  </div>
+</template>
+
 <script>
 import { setIdToken, setAccessToken, setRole, setProfile } from '@/utils/auth';
 import api from '../shared/api';

@@ -625,11 +625,6 @@ async function submit() {
       }
     }, 15000);
 
-    //when creating an employee
-    if (this.$route.params.id === undefined) {
-      window.EventBus.$emit('disableEmpNum', true); // after uploading resume, you can't change employee num
-    }
-
     this.resumeObject = (await api.extractResumeText(employeeNumber, this.file)).comprehend;
 
     // If it takes too long it should timeout
@@ -663,8 +658,6 @@ async function submit() {
 
     // Notify employee component that resume has been uploaded and parsed
     window.EventBus.$emit('upload-resume-complete', true);
-    window.EventBus.$emit('updated-resume-parser', 'true');
-    window.EventBus.$emit('updated-resume-parser-form', 'true');
 
     // PERSONAL info
     let personalComprehend = this.resumeObject.filter((entity) => {

@@ -851,7 +851,6 @@ async function createNewEntry() {
 
         this.$set(this.editedExpense, 'id', updatedExpense.id);
         this.$emit('add', updatedExpense);
-        window.EventBus.$emit('showSnackbar', updatedExpense);
         window.EventBus.$emit('updateData', updatedExpense);
         this.clearForm();
       } else {
@@ -882,7 +881,6 @@ async function createNewEntry() {
 
       this.$set(this.editedExpense, 'id', updatedExpense.id);
       this.$emit('add', updatedExpense);
-      window.EventBus.$emit('showSnackbar', updatedExpense);
       window.EventBus.$emit('updateData', updatedExpense);
       this.clearForm();
     } else {

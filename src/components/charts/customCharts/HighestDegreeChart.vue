@@ -295,7 +295,6 @@ function fillData() {
     }
   };
   this.dataReceived = true;
-  window.EventBus.$emit('hello');
 } // fillData
 
 /**
