@@ -947,9 +947,7 @@ function filteredExpenseTypes() {
           // add expense type if no employees are selected
           expenseType.text = `${expenseType.budgetName} - $${Number(expenseType.budget).toLocaleString().toString()}`;
           filteredExpType.push(expenseType);
-        } else if (
-          this.hasAccess({ id: selectedEmployee.value, workStatus: selectedEmployee.workStatus }, expenseType)
-        ) {
+        } else if (this.hasAccess(selectedEmployee, expenseType)) {
           // add expense type if the employee is selected and has access
           let amount = this.calcAdjustedBudget(selectedEmployee, expenseType); // calculate budget
           expenseType.text = `${expenseType.budgetName} - $${Number(amount).toLocaleString().toString()}`;
@@ -1532,7 +1530,8 @@ async function created() {
       workStatus: employee.workStatus,
       firstName: employee.firstName,
       nickname: employee.nickname,
-      lastName: employee.lastName
+      lastName: employee.lastName,
+      employeeRole: employee.employeeRole
     };
   });
   //only active employees
