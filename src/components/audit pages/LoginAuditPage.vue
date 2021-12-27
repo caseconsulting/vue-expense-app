@@ -51,12 +51,18 @@ async function fillData() {
     let employee = _.find(this.employees, (emp) => {
       return emp.id === audit.employeeId;
     });
+    let employeeName = '';
+    let nickname = '';
+    if (employee) {
+      employeeName = `${employee.firstName} ${employee.lastName}`;
+      nickname = employee.nickname ? employee.nickname : '';
+    }
     //adds login audit object into array
     this.loginAudits.push({
       dateCreated: audit.dateCreated,
       description: audit.description,
-      employeeName: `${employee.firstName} ${employee.lastName}`,
-      nickname: employee.nickname ? employee.nickname : ''
+      employeeName: employeeName,
+      nickname: nickname
     });
   });
   let title;
