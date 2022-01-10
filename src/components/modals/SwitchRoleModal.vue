@@ -3,7 +3,7 @@
     <v-dialog v-model="activate" persistent max-width="310">
       <v-card>
         <v-card-title class="headline">Switch Role</v-card-title>
-        <v-card-subtitle class="mb-0 pb-0"
+        <v-card-subtitle v-if="roleOriginial" class="mb-0 pb-0"
           >Current Role: {{ roleOriginial.charAt(0).toUpperCase() + roleOriginial.slice(1) }}</v-card-subtitle
         >
         <v-card-actions class="my-0 py-0">

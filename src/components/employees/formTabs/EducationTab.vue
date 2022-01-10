@@ -252,6 +252,9 @@ async function created() {
   alias = this.schoolDropDown.indexOf('California Institute of Technology');
   this.schoolDropDown[alias] = 'California Institute of Technology (Caltech)';
 
+  // add schools not included in getColleges api call
+  this.schoolDropDown.push('Belmont Abbey College');
+
   //update drop downs with majors and minors not on the list
   this.updateDropdowns();
 } // created

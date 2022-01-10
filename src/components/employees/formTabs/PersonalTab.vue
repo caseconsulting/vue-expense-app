@@ -163,7 +163,7 @@
 import api from '@/shared/api.js';
 import _ from 'lodash';
 import { getDateOptionalRules, getNonFutureDateRules, getURLRules } from '@/shared/validationUtils.js';
-import { formatDate, isEmpty, parseDate } from '@/utils/utils';
+import { formatDate, isEmpty, parseDate, countryList } from '@/utils/utils';
 import { mask } from 'vue-the-mask';
 import { getRole } from '@/utils/auth';
 const moment = require('moment-timezone');
@@ -181,8 +181,7 @@ moment.tz.setDefault('America/New_York');
 async function created() {
   window.EventBus.$emit('created', 'personal'); // emit personal tab was created
   // get countries
-  this.countries = _.map(await api.getCountries(), 'name');
-  this.countries.unshift('United States of America');
+  this.countries = countryList;
   // set formatted birthday date
   this.birthdayFormat = this.formatDate(this.editedPersonalInfo.birthday) || this.birthdayFormat;
   // fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
