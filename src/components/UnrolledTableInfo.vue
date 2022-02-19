@@ -167,7 +167,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import 'src/assets/styles/styles.scss';
+@import 'src/assets/styles/styles';
 
 .failed {
   background-color: #ffbaba;

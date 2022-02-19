@@ -396,7 +396,7 @@ export default {
 
 <style lang="scss">
 @import '../node_modules/vuetify/dist/vuetify.min.css';
-@import 'src/assets/styles/styles.scss';
+@import 'src/assets/styles/styles';
 
 #app {
   font-family: 'Avenir', Helvetica, Arial, sans-serif;
