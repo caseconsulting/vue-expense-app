@@ -2,7 +2,11 @@
   <v-tooltip top>
     <template v-slot:activator="{ on }">
       <v-btn v-on="on" @click.stop="download" text icon>
-        <icon :class="{ 'white--text' : color == 'white', 'gray-icon' : color != 'white' }" scale="1.5" name="cloud-download-alt"></icon>
+        <icon
+          :class="{ 'white--text': color == 'white', 'gray-icon': color != 'white' }"
+          scale="1.5"
+          name="cloud-download-alt"
+        ></icon>
       </v-btn>
     </template>
     <span>Download CSV</span>
