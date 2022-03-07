@@ -2,7 +2,7 @@
   <v-tooltip top>
     <template v-slot:activator="{ on }">
       <v-btn v-on="on" @click.stop="download" text icon>
-        <icon class="mx-2 mt-1" scale="1.5" :color="iconColor()" name="cloud-download-alt"></icon>
+        <icon :class="{ 'white--text' : color == 'white', 'gray-icon' : color != 'white' }" scale="1.5" name="cloud-download-alt"></icon>
       </v-btn>
     </template>
     <span>Download CSV</span>
@@ -183,18 +183,6 @@ function getWorkStatus(workStatus) {
     return 'Invalid Status';
   }
 } // getWorkStatus
-
-/**
- * Gets the icon color depending if the page is employees or an employee profile
- *
- * @return - the color hex
- */
-function iconColor() {
-  if (this.color) {
-    return this.color;
-  }
-  return '#3f3f3c';
-} // iconColor
 
 /**
  * Returns formatted place of birth for employee
@@ -529,7 +517,6 @@ export default {
     getCompanies,
     getTechnologies,
     getLanguages,
-    iconColor,
     isEmpty
   },
   props: ['employee', 'midAction', 'color'] // employees to export
