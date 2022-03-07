@@ -140,6 +140,23 @@ To reset for local development, after a deployment:
 ```
 npm run download:local:env
 ```
+## Nightwatch tests
+**To run all nightwatch tests (Warning: this may take a while):**
+
+```
+npm run test
+```
+**To run a set of nightwatch tests:**
+
+```
+npm run test -- --tag {TAG NAME}
+```
+Note: any test with this tag will be run.
+
+Example:
+```
+npm run test -- --tag logout
+```
 
 ## Documentation
 
