@@ -279,7 +279,7 @@
         <!-- Buttons -->
         <!-- Cancel Button -->
         <v-btn color="white " @click="clearForm" class="ma-2" elevation="2">
-          <icon class="mr-1" name="ban"></icon>Cancel
+          <v-icon class="mr-1">cancel</v-icon>Cancel
         </v-btn>
         <!-- Submit Button -->
         <v-btn
@@ -291,7 +291,7 @@
           @click="submitForm = true"
           :disabled="!valid"
         >
-          <icon class="mr-1" name="save"></icon>Submit
+          <v-icon class="mr-1">save</v-icon>Submit
         </v-btn>
         <!-- End Buttons -->
       </v-form>

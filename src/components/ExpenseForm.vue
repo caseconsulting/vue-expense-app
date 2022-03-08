@@ -258,7 +258,7 @@
           :disabled="isInactive"
           id="cancelButton"
         >
-          <icon class="mr-1" name="ban"></icon>Cancel
+          <v-icon class="mr-1">cancel</v-icon>Cancel
         </v-btn>
 
         <!-- Submit Button -->
@@ -271,7 +271,7 @@
           :loading="loading"
           class="ma-2"
         >
-          <icon class="mr-1" name="save"></icon>Submit
+          <v-icon class="mr-1">save</v-icon>Submit
         </v-btn>
         <!-- End Buttons -->
       </v-form>

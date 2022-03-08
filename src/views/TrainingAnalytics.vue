@@ -305,6 +305,7 @@ export default {
 
 .hitIcon {
   color: white;
+  fill: white;
   margin-top: 3px;
   margin-right: 3px;
   float: right;

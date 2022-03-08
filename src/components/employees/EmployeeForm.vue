@@ -319,10 +319,10 @@
 
           <!-- Form action buttons -->
           <v-btn id="employeeCancelBtn" class="ma-2" color="white" @click="cancel" elevation="2"
-            ><icon class="mr-1" name="ban"></icon>Cancel</v-btn
+            ><v-icon class="mr-1">cancel</v-icon>Cancel</v-btn
           >
           <v-btn id="employeeSubmitBtn" outlined class="ma-2" color="success" @click="confirm">
-            <icon class="mr-1" name="save"></icon>Submit
+            <v-icon class="mr-1">save</v-icon>Submit
           </v-btn>
           <!-- End form action buttons -->
         </v-form>
