@@ -65,6 +65,7 @@
         id="employeeEmail"
         ref="formFields"
         v-model="editedEmployee.email"
+        suffix="@consultwithcase.com"
         :rules="emailRules"
         label="Email"
         data-vv-name="Email"
@@ -236,7 +237,7 @@ import { getRole } from '@/utils/auth';
 const moment = require('moment-timezone');
 moment.tz.setDefault('America/New_York');
 
-const regex = /^(([^<>()[\]\\.,;:\s@#"]+(\.[^<>()[\]\\.,;:\s@#"]+)*)|(".+"))@consultwithcase.com/;
+const regex = /^[a-zA-Z]+$/;
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -522,8 +523,8 @@ export default {
       departureMenu: false, // display depature menu
       editedEmployee: _.cloneDeep(this.model), //employee that can be edited
       emailRules: [
-        (v) => !this.isEmpty(v) || 'Email is required',
-        (v) => regex.test(v) || 'Not a valid @consultwithcase email address'
+        (v) => !this.isEmpty(v) || 'Email username is required',
+        (v) => regex.test(v) || 'Not a valid email username'
       ], // rules for an employee email
       employeeRoleFormatted: null,
       employees: [], // all employees
