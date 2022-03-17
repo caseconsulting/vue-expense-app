@@ -8,7 +8,7 @@ Education
         ref="formFields"
         v-model="school.name"
         :rules="[...getRequiredRules(), duplicateSchool(school.name)]"
-        :items="schoolDropDown"
+        :items="schoolNamePlaceholder(school.name)"
         label="School"
         data-vv-name="School"
         clearable
@@ -365,6 +365,15 @@ function deleteItem(array, index) {
 } // deleteItem
 
 /**
+ * Uses the last saved school as a placeholder for the dropdown until the API loads
+ * @param schoolName - value of the last saved school
+ * @returns one-item array or result of getColleges API call
+ */
+function schoolNamePlaceholder(schoolName) {
+  return _.isEmpty(this.schoolDropDown) ? [schoolName] : this.schoolDropDown;
+} // confirmEducation
+
+/**
  * Changes the format of the string to title case
  *
  * @param str - the string to be converted
@@ -493,6 +502,7 @@ export default {
     deleteSchool,
     deleteItem,
     parseDateMonthYear,
+    schoolNamePlaceholder,
     titleCase,
     updateDropdowns,
     validateFields
