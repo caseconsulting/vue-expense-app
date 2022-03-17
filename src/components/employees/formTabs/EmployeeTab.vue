@@ -64,12 +64,13 @@
       <v-text-field
         id="employeeEmail"
         ref="formFields"
-        v-model="editedEmployee.email"
+        v-model="emailUsername"
         suffix="@consultwithcase.com"
         :rules="emailRules"
         label="Email"
         data-vv-name="Email"
         :disabled="!admin"
+        @blur="combineEmailUsernameAndDomain"
       ></v-text-field>
 
       <!-- Job Role -->
@@ -237,6 +238,8 @@ import { getRole } from '@/utils/auth';
 const moment = require('moment-timezone');
 moment.tz.setDefault('America/New_York');
 
+const caseEmailDomain = '@consultwithcase.com';
+
 const regex = /^[a-zA-Z]+$/;
 
 // |--------------------------------------------------|
@@ -285,6 +288,10 @@ async function created() {
   if (this.editedEmployee.mifiStatus != null) {
     this.mifiStatus = this.editedEmployee.mifiStatus;
   }
+
+  // set email username for textfield population
+  this.emailUsername = this.editedEmployee.email.slice(0, this.editedEmployee.email.indexOf('@'));
+
   // set works status value to a string
   this.value = this.editedEmployee.workStatus.toString();
   this.userId = this.model.employeeNumber;
@@ -296,6 +303,13 @@ async function created() {
 // |                     METHODS                      |
 // |                                                  |
 // |--------------------------------------------------|
+
+/**
+ * Attaches email username to Case domain name
+ */
+function combineEmailUsernameAndDomain() {
+  this.editedEmployee.email = this.emailUsername + caseEmailDomain;
+} // combineEmailUsernameAndDomain
 
 /**
  * Converts a string to kebab case.
@@ -522,9 +536,10 @@ export default {
       deptDateFormatted: null, // formatted departure date
       departureMenu: false, // display depature menu
       editedEmployee: _.cloneDeep(this.model), //employee that can be edited
+      emailUsername: '',
       emailRules: [
-        (v) => !this.isEmpty(v) || 'Email username is required',
-        (v) => regex.test(v) || 'Not a valid email username'
+        (v) => !this.isEmpty(v) || 'Email is required',
+        (v) => regex.test(v) || 'Not a valid @consultwithcase email address'
       ], // rules for an employee email
       employeeRoleFormatted: null,
       employees: [], // all employees
@@ -580,6 +595,7 @@ export default {
   },
   directives: { mask },
   methods: {
+    combineEmailUsernameAndDomain,
     duplicateEmployeeNum,
     formatDate,
     formatKebabCase,
