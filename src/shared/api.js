@@ -271,15 +271,6 @@ async function getAllAggregateExpenses() {
 } // getAllAggregateExpenses
 
 /**
- * gets all the expenses - TODO: delete? not in use?
- *
- * @return expenses
- */
-async function getAllExpenses() {
-  return await execute('get', `/${UTILITY}/getAllExpenses`);
-} // getAllExpenses
-
-/**
  * gets employee role
  *
  * @return - user role
@@ -522,7 +513,6 @@ export default {
   getAllAggregateExpenses,
   getAllEmployeeExpenses,
   getAllEvents,
-  getAllExpenses,
   getAllExpenseTypeExpenses,
   getAttachment,
   getAudits,
