@@ -190,7 +190,7 @@ async function created() {
     this.editedPersonalInfo.birthday = null;
   }
 
-  let user = await api.getUser();
+  let user = this.$store.getters.user;
   this.userId = user.employeeNumber;
 } // created
 

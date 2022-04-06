@@ -254,7 +254,7 @@ const regex = /^[a-zA-Z]+$/;
 async function created() {
   window.EventBus.$emit('created', 'employee'); // emit employee tab was created
   // get all employees
-  this.employees = await api.getItems(api.EMPLOYEES);
+  this.employees = this.$store.getters.employees;
   // set formatted hire date
   this.hireDateFormatted = this.formatDate(this.editedEmployee.hireDate) || this.hireDateFormatted;
   // set formatted depature date

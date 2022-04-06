@@ -53,9 +53,7 @@ import _ from 'lodash';
 // import ReceiptModal from '../components/ReceiptModal.vue';
 import moment from 'moment-timezone';
 moment.tz.setDefault('America/New_York');
-import { convertToMoneyString } from '@/utils/utils';
-
-const IsoFormat = 'YYYY-MM-DD';
+import { convertToMoneyString, getCurrentBudgetYear } from '@/utils/utils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -70,7 +68,7 @@ async function created() {
   window.EventBus.$on('close-summary', () => {
     this.showDialog = false;
   });
-  this.currentUser = await api.getUser();
+  this.currentUser = this.$store.getters.user;
   await this.refreshEmployee();
   this.loading = false;
 } // created
@@ -106,28 +104,12 @@ function beforeDestroy() {
 } //beforeDestroy
 
 /**
- * Gets the current active anniversary budget year starting date in isoformat.
- *
- * @return String - current active anniversary budget date (YYYY-MM-DD)
- */
-function getCurrentBudgetYear() {
-  let currentBudgetYear = moment(this.hireDate, IsoFormat);
-  if (moment().isAfter(currentBudgetYear)) {
-    currentBudgetYear.year(moment().year());
-    if (moment().isBefore(currentBudgetYear)) {
-      currentBudgetYear = currentBudgetYear.subtract(1, 'years');
-    }
-  }
-  return currentBudgetYear.format(IsoFormat);
-} // getCurrentBudgetYear
-
-/**
  * Refresh and sets the aggregated budgets for the employee budget year view.
  */
 async function refreshBudget() {
   let budgetsVar;
 
-  if (this.date == this.getCurrentBudgetYear()) {
+  if (this.date == this.getCurrentBudgetYear(this.hireDate)) {
     // viewing active budget year
     budgetsVar = await api.getAllActiveEmployeeBudgets(this.employee.id);
   }
@@ -178,7 +160,7 @@ function refreshBudgetYears() {
   });
 
   // push active budget year
-  let [currYear] = this.getCurrentBudgetYear().split('-');
+  let [currYear] = this.getCurrentBudgetYear(this.hireDate).split('-');
   budgetYears.push(parseInt(currYear));
 
   // remove duplicate years and filter to include only active and previous years
@@ -196,7 +178,7 @@ async function refreshEmployee() {
   this.date = this.fiscalDateView;
   this.hireDate = this.employee.hireDate;
   if (!this.date) {
-    this.date = this.getCurrentBudgetYear();
+    this.date = this.getCurrentBudgetYear(this.hireDate);
   }
   await this.refreshBudget(); // refresh employee budgets
   this.allUserBudgets = await api.getEmployeeBudgets(this.employee.id); // set all employee budgets

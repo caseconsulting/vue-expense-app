@@ -2,7 +2,7 @@
   <v-container fluid>
     <v-row justify="center">
       <v-col xl="6" lg="8" sm="12" class="mt-4">
-        <certification-chart :employees3="employees2" />
+        <certification-chart />
       </v-col>
     </v-row>
   </v-container>
@@ -18,7 +18,6 @@ import CertificationChart from '../customCharts/CertificationChart.vue';
 // |--------------------------------------------------|
 
 export default {
-  components: { CertificationChart },
-  props: ['employees2'] // stats page (employees) --> tab (employees2) --> chart (employees3)
+  components: { CertificationChart }
 };
 </script>

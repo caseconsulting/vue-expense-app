@@ -40,31 +40,19 @@
           <v-tab href="#certifications" :disabled="!dataLoaded">Certifications</v-tab>
           <v-tab href="#customerOrg" :disabled="!dataLoaded">Customer Org</v-tab>
           <v-tab-item id="employees" class="mx-2 my-6">
-            <employees-chart-tab
-              v-if="currentTab === 'employees' && dataLoaded"
-              :employees2="employees"
-            ></employees-chart-tab>
+            <employees-chart-tab v-if="currentTab === 'employees' && dataLoaded"></employees-chart-tab>
           </v-tab-item>
           <v-tab-item id="education" class="mx-2 my-6">
-            <education-chart-tab
-              v-if="currentTab === 'education' && dataLoaded"
-              :employees2="employees"
-            ></education-chart-tab>
+            <education-chart-tab v-if="currentTab === 'education' && dataLoaded"></education-chart-tab>
           </v-tab-item>
           <v-tab-item id="technologies" class="mx-2 my-6">
-            <tech-chart-tab v-if="currentTab === 'technologies' && dataLoaded" :employees2="employees"></tech-chart-tab>
+            <tech-chart-tab v-if="currentTab === 'technologies' && dataLoaded"></tech-chart-tab>
           </v-tab-item>
           <v-tab-item id="certifications" class="mx-2 my-6">
-            <certifications-chart-tab
-              v-if="currentTab === 'certifications' && dataLoaded"
-              :employees2="employees"
-            ></certifications-chart-tab>
+            <certifications-chart-tab v-if="currentTab === 'certifications' && dataLoaded"></certifications-chart-tab>
           </v-tab-item>
           <v-tab-item id="customerOrg" class="mx-2 my-6">
-            <customer-org-chart-tab
-              v-if="currentTab === 'customerOrg' && dataLoaded"
-              :employees2="employees"
-            ></customer-org-chart-tab>
+            <customer-org-chart-tab v-if="currentTab === 'customerOrg' && dataLoaded"></customer-org-chart-tab>
           </v-tab-item>
         </v-tabs>
       </v-container>
@@ -78,8 +66,21 @@ import EmployeesChartTab from '../components/charts/chartTabs/EmployeesChartTab.
 import TechChartTab from '../components/charts/chartTabs/TechChartTab.vue';
 import EducationChartTab from '../components/charts/chartTabs/EducationChartTab.vue';
 import CustomerOrgChartTab from '../components/charts/chartTabs/CustomerOrgChartTab.vue';
-import { isMobile } from '@/utils/utils';
-import api from '@/shared/api.js';
+import { isMobile, storeIsPopulated } from '@/utils/utils';
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                   LIFECYCLE                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * mounted hook
+ *
+ */
+function mounted() {
+  if (this.storeIsPopulated) this.dataLoaded = true;
+} // mounted
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -104,11 +105,6 @@ function selectDropDown(tabName) {
   this.statsTab = tabName;
 } // selectDropDown
 
-async function created() {
-  this.employees = await api.getItems(api.EMPLOYEES); // stats page (employees) --> tab (employees2) --> chart (employees3)
-  this.dataLoaded = true;
-}
-
 // |--------------------------------------------------|
 // |                                                  |
 // |                      EXPORT                      |
@@ -124,20 +120,25 @@ export default {
     CustomerOrgChartTab
   },
   computed: {
-    isMobile
+    isMobile,
+    storeIsPopulated
   },
-  created,
+  mounted,
   data() {
     return {
       currentTab: '',
-      statsTab: 'employees',
-      employees: null,
-      dataLoaded: false
+      dataLoaded: false,
+      statsTab: 'employees'
     };
   },
   methods: {
     changeTab,
     selectDropDown
+  },
+  watch: {
+    storeIsPopulated: function () {
+      if (this.storeIsPopulated) this.dataLoaded = true;
+    }
   }
 };
 </script>

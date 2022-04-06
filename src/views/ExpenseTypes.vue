@@ -858,7 +858,7 @@ function onSelect(item) {
  */
 async function refreshExpenseTypes() {
   this.loading = true; // set loading status to true
-  this.expenseTypes = await api.getItems(api.EXPENSE_TYPES);
+  this.expenseTypes = this.$store.getters.expenseTypes;
 
   // filter expense types for the user
   if (!this.userIsAdmin()) {
@@ -989,13 +989,13 @@ async function created() {
     this.midAction = false;
   });
 
-  this.userInfo = await api.getUser();
-  this.employees = await api.getItems(api.EMPLOYEES);
+  this.userInfo = this.$store.getters.user;
+  this.employees = this.$store.getters.employees;
 
   await this.refreshExpenseTypes();
 
   // set employee avatar
-  let avatars = await api.getBasecampAvatars();
+  let avatars = this.$store.getters.basecampAvatars;
   _.map(this.employees, (employee) => {
     let avatar = _.find(avatars, ['email_address', employee.email]);
     let avatarUrl = avatar ? avatar.avatar_url : null;

@@ -30,7 +30,7 @@ function mounted() {
       let employeeRole = await this.setRole();
 
       // login
-      let employee = await api.getUser();
+      let employee = this.$store.getters.user;
       employee.lastLogin = moment(new Date()).format(login_format);
       await api.updateItem(api.EMPLOYEES, employee);
       // Create an audit of the success

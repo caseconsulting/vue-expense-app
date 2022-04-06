@@ -113,10 +113,8 @@ import moment from 'moment-timezone';
 moment.tz.setDefault('America/New_York');
 import TwitterFeed from '@/components/TwitterFeed';
 import _ from 'lodash';
-import { isEmpty } from '@/utils/utils';
+import { isEmpty, getCurrentBudgetYear } from '@/utils/utils';
 import QuickBooksTimeData from '../components/QuickBooksTimeData.vue';
-
-const IsoFormat = 'YYYY-MM-DD';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -439,26 +437,9 @@ async function getTweets() {
 /**
  * Routes user to their employee page
  */
-async function handleProfile() {
-  var user = await api.getUser();
-  this.$router.push(`/employee/${user.employeeNumber}`);
+function handleProfile() {
+  this.$router.push(`/employee/${this.$store.getters.employeeNumber}`);
 } // handleProfile
-
-/**
- * Gets the current active anniversary budget year starting date in isoformat.
- *
- * @return String - current active anniversary budget date (YYYY-MM-DD)
- */
-function getCurrentBudgetYear() {
-  let currentBudgetYear = moment(this.hireDate, IsoFormat);
-  if (moment().isAfter(currentBudgetYear)) {
-    currentBudgetYear.year(moment().year());
-    if (moment().isBefore(currentBudgetYear)) {
-      currentBudgetYear = currentBudgetYear.subtract(1, 'years');
-    }
-  }
-  return currentBudgetYear.format(IsoFormat);
-} // getCurrentBudgetYear
 
 /**
  * Refresh and sets employee information.
@@ -467,13 +448,13 @@ async function refreshEmployee() {
   this.loading = true; // set loading status to true
   if (this.employ == null) {
     // set the employee to the selected employee if viewing from an admin view
-    this.employee = await api.getUser();
+    this.employee = this.$store.getters.user;
   } else {
     // set the employee to the current user if viewing from a user view
     this.employee = this.employ;
   }
   this.hireDate = this.employee.hireDate;
-  this.fiscalDateView = this.getCurrentBudgetYear();
+  this.fiscalDateView = this.getCurrentBudgetYear(this.hireDate);
   this.allUserBudgets = await api.getEmployeeBudgets(this.employee.id); // set all employee budgets
   this.expenses = await api.getAllAggregateExpenses();
   this.expenseTypes = await api.getItems(api.EXPENSE_TYPES);

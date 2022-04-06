@@ -10,6 +10,7 @@
 <script>
 import PieChart from '../baseCharts/PieChart.vue';
 import _ from 'lodash';
+import { storeIsPopulated } from '@/utils/utils';
 const moment = require('moment-timezone');
 moment.tz.setDefault('America/New_York');
 
@@ -20,12 +21,14 @@ moment.tz.setDefault('America/New_York');
 // |--------------------------------------------------|
 
 /**
- * created lifecycle hook
+ * mounted lifecycle hook
  */
-async function created() {
-  this.degrees = this.initDegrees();
-  this.fillData();
-} // created
+function mounted() {
+  if (this.storeIsPopulated) {
+    this.degrees = this.initDegrees();
+    this.fillData();
+  }
+} // mounted
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -42,7 +45,8 @@ async function created() {
  */
 function initDegrees() {
   let degrees = {};
-  this.employees3.forEach((emp) => {
+  this.employees = this.$store.getters.employees;
+  this.employees.forEach((emp) => {
     let highestDegrees = [];
     if (emp.schools && emp.workStatus != 0) {
       _.forEach(emp.schools, (school) => {
@@ -141,7 +145,7 @@ function compareDegree(oldDegree, newDegree) {
 function getDegreeConcentrations(degreeName) {
   let concentrationsData = {};
   // loop through each employee
-  this.employees3.forEach((employee) => {
+  this.employees.forEach((employee) => {
     if (employee.degrees) {
       // loop through each employee's degree
       employee.degrees.forEach((degree) => {
@@ -172,7 +176,7 @@ function getDegreeConcentrations(degreeName) {
 function getDegreeMinors(degreeName) {
   let minorsData = {};
   // loop through each employee
-  this.employees3.forEach((employee) => {
+  this.employees.forEach((employee) => {
     if (employee.degrees) {
       // loop through each employee's degree
       employee.degrees.forEach((degree) => {
@@ -344,6 +348,9 @@ function concentrationsEmit(degree) {
 
 export default {
   components: { PieChart },
+  computed: {
+    storeIsPopulated
+  },
   data() {
     return {
       dataReceived: false,
@@ -367,8 +374,15 @@ export default {
     minorsEmit,
     concentrationsEmit
   },
-  created,
-  props: ['employees3'] // stats page (employees) --> tab (employees2) --> chart (employees3)
+  mounted,
+  watch: {
+    storeIsPopulated: function () {
+      if (this.storeIsPopulated) {
+        this.degrees = this.initDegrees();
+        this.fillData();
+      }
+    }
+  }
 };
 </script>
 

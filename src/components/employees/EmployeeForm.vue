@@ -401,7 +401,7 @@ function selectDropDown(tab) {
  */
 async function cancel() {
   //creating an employee
-  let employees = await api.getItems(api.EMPLOYEES);
+  let employees = this.$store.getters.employees;
   //if the user types an employee number that matches another employee's
   let existingResume = employees.some((emp) => emp.employeeNumber == this.employeeNumber);
   if (this.model.employeeNumber && this.$route.params.id === undefined && !existingResume) {
@@ -710,7 +710,7 @@ function addErrorTab(name, errors) {
  * opens up the resume parser
  */
 async function openUpload() {
-  let employees = await api.getItems(api.EMPLOYEES);
+  let employees = this.$store.getters.employees;
   //check validation of employee number
   if (employees.some((emp) => emp.employeeNumber == this.employeeNumber)) {
     //if error

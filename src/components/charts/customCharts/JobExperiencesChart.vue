@@ -6,6 +6,7 @@
 
 <script>
 import BarChart from '../baseCharts/BarChart.vue';
+import { storeIsPopulated } from '@/utils/utils';
 import moment from 'moment-timezone';
 moment.tz.setDefault('America/New_York');
 
@@ -16,13 +17,15 @@ moment.tz.setDefault('America/New_York');
 // |--------------------------------------------------|
 
 /**
- * created lifecycle hook
+ * mounted lifecycle hook
  */
-function created() {
-  // eslint-disable-next-line no-undef
-  this.jobExperienceData();
-  this.drawJobExpHistGraph();
-} // created
+function mounted() {
+  if (this.storeIsPopulated) {
+    // eslint-disable-next-line no-undef
+    this.jobExperienceData();
+    this.drawJobExpHistGraph();
+  }
+} // mounted
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -50,7 +53,8 @@ function findMaxIndex() {
  * Each employees experience will be put in an array slot that is based on an increment of experience of 5 years.
  */
 function jobExperienceData() {
-  this.employees3.forEach((employee) => {
+  this.employees = this.$store.getters.employees;
+  this.employees.forEach((employee) => {
     // only include active employees
     if (employee.hireDate !== undefined && employee.workStatus != 0) {
       // find time at case
@@ -178,6 +182,9 @@ function stringToDate(dateAsString) {
 
 export default {
   components: { BarChart },
+  computed: {
+    storeIsPopulated
+  },
   data() {
     return {
       options: null,
@@ -194,7 +201,15 @@ export default {
     calculateTimeDifference,
     stringToDate
   },
-  created,
-  props: ['employees3'] // stats page (employees) --> tab (employees2) --> chart (employees3)
+  mounted,
+  watch: {
+    storeIsPopulated: function () {
+      if (this.storeIsPopulated) {
+        // eslint-disable-next-line no-undef
+        this.jobExperienceData();
+        this.drawJobExpHistGraph();
+      }
+    }
+  }
 };
 </script>

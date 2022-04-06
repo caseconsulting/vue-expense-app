@@ -166,7 +166,7 @@ async function fillData() {
  * created lifecycle hook
  */
 async function created() {
-  this.employees = await api.getItems(api.EMPLOYEES); // get all employees
+  this.employees = this.$store.getters.employees; // get all employees
   await this.fillData();
 } //created
 

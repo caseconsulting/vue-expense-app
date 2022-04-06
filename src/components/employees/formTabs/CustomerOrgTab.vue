@@ -94,7 +94,7 @@ import { getRequiredRules } from '@/shared/validationUtils.js';
  */
 async function created() {
   window.EventBus.$emit('created', 'customerOrgExp'); // emit customer organization tab was created
-  this.employees = await api.getItems(api.EMPLOYEES); // get all employees
+  this.employees = this.$store.getters.employees; // get all employees
 } // created
 
 // |--------------------------------------------------|

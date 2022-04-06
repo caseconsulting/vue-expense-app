@@ -232,7 +232,7 @@ moment.tz.setDefault('America/New_York');
  */
 async function created() {
   window.EventBus.$emit('created', 'education'); // emit education tab was created
-  this.employees = await api.getItems(api.EMPLOYEES); // get all employees
+  this.employees = this.$store.getters.employees; // get all employees
   this.schoolDropDown = await api.getColleges('');
 
   let alias = this.schoolDropDown.indexOf('Virginia Polytechnic Institute and State University');

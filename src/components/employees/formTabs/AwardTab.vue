@@ -90,7 +90,7 @@ moment.tz.setDefault('America/New_York');
  */
 async function created() {
   window.EventBus.$emit('created', 'awards'); // emit awards tab was created
-  this.employees = await api.getItems(api.EMPLOYEES); // get all employees
+  this.employees = this.$store.getters.employees; // get all employees
 } // created
 
 // |--------------------------------------------------|

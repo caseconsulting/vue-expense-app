@@ -799,10 +799,10 @@ async function created() {
   });
 
   // get user info
-  this.userInfo = await api.getUser();
+  this.userInfo = this.$store.getters.user;
 
   // get expense types
-  let expenseTypes = await api.getItems(api.EXPENSE_TYPES);
+  let expenseTypes = this.$store.getters.expenseTypes;
   this.expenseTypes = _.map(expenseTypes, (expenseType) => {
     return {
       /* beautify preserve:start */

@@ -1,8 +1,9 @@
 import dateUtils from '@/shared/dateUtils';
 import MobileDetect from 'mobile-detect';
+import _ from 'lodash';
+const IsoFormat = 'YYYY-MM-DD';
 const moment = require('moment-timezone');
 moment.tz.setDefault('America/New_York');
-import _ from 'lodash';
 
 /**
  * Async function to loop an array.
@@ -61,8 +62,24 @@ export function formatDateSlashToDash(date) {
     return null;
   }
   const [month, day, year] = date.split('/');
-  return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`; // formatDateSlashToDash
+  return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
 } // formatDateSlashToDash
+
+/**
+ * Gets the current active anniversary budget year starting date in isoformat.
+ *
+ * @return String - current active anniversary budget date (YYYY-MM-DD)
+ */
+export function getCurrentBudgetYear(hireDate) {
+  let currentBudgetYear = moment(hireDate, IsoFormat);
+  if (moment().isAfter(currentBudgetYear)) {
+    currentBudgetYear.year(moment().year());
+    if (moment().isBefore(currentBudgetYear)) {
+      currentBudgetYear = currentBudgetYear.subtract(1, 'years');
+    }
+  }
+  return currentBudgetYear.format(IsoFormat);
+} // getCurrentBudgetYear
 
 /**
  * Checks if a value is empty. Returns true if the value is null or an empty/blank string.
@@ -180,6 +197,21 @@ export function parseDate(date) {
 export function parseDateMonthYear(date) {
   return dateUtils.parseDateMonthYear(date);
 } // parseDateMonthYear
+
+/**
+ * Checks if the state management store is populated or not.
+ * Register this as a computed property.
+ *
+ * If JS code needs to be run when the store is populated,
+ * set a watcher on this computed property.
+ *
+ * See Employees.vue for an example.
+ *
+ * @return boolean - if the store is populated
+ */
+export function storeIsPopulated() {
+  return this.$store.getters.storeIsPopulated;
+} // storeIsPopulated
 
 export const countryList = [
   'United States',

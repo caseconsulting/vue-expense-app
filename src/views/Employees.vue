@@ -256,7 +256,7 @@ import EmployeeForm from '@/components/employees/EmployeeForm.vue';
 import moment from 'moment-timezone';
 import _ from 'lodash';
 import { getRole } from '@/utils/auth';
-import { isEmpty, isFullTime, isInactive, isPartTime, monthDayYearFormat } from '@/utils/utils';
+import { isEmpty, isFullTime, isInactive, isPartTime, monthDayYearFormat, storeIsPopulated } from '@/utils/utils';
 import ConvertEmployeeToCsv from '../components/ConvertEmployeeToCsv.vue';
 
 // |--------------------------------------------------|
@@ -385,7 +385,7 @@ function isFocus(item) {
  */
 async function refreshEmployees() {
   this.loading = true; // set loading status to true
-  this.employees = await api.getItems(api.EMPLOYEES); // get all employees
+  this.employees = this.$store.getters.employees; // get all employees
   this.employees.forEach((currentEmp) => {
     if (currentEmp.lastLogin) {
       currentEmp.lastLogin = moment(currentEmp.lastLogin, ['MMM Do, YYYY HH:mm:ss', 'YYYY-MM-DD HH:mm:ss']);
@@ -395,7 +395,7 @@ async function refreshEmployees() {
   this.expanded = []; // collapse any expanded rows in the database
 
   // set employee avatar
-  let avatars = await api.getBasecampAvatars();
+  let avatars = this.$store.getters.basecampAvatars;
   _.map(this.employees, (employee) => {
     let avatar = _.find(avatars, ['email_address', employee.email]);
     let avatarUrl = avatar ? avatar.avatar_url : null;
@@ -483,7 +483,9 @@ async function created() {
   window.EventBus.$on('empNum', (empNum) => {
     this.employeeNumber = empNum;
   });
-  await this.refreshEmployees();
+
+  // only refresh employees if data is in store. Otherwise, set loading and wait in watcher
+  this.storeIsPopulated ? await this.refreshEmployees() : (this.loading = true);
 
   // remove employee action button header if user view
   if (!this.hasAdminPermissions()) {
@@ -536,6 +538,9 @@ export default {
     DeleteModal,
     EmployeeForm,
     ConvertEmployeeToCsv
+  },
+  computed: {
+    storeIsPopulated
   },
   created,
   data() {
@@ -657,7 +662,12 @@ export default {
     validateDelete
   },
   watch: {
-    'filter.active': watchFilterActive
+    'filter.active': watchFilterActive,
+    storeIsPopulated: async function () {
+      // in the case that the page has been force reloaded (and the store cleared)
+      // this watcher will be activated when the store is populated again.
+      if (this.storeIsPopulated) await this.refreshEmployees();
+    }
   }
 };
 </script>

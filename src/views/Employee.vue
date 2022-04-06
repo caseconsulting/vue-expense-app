@@ -1,6 +1,10 @@
 <template>
-  <div v-if="model == null && !loading">
-    <h1 class="text-center">Invalid Employee!</h1>
+  <div v-if="model == null && !loading" class="text-center">
+    <h1>Invalid Employee!</h1>
+    <img
+      src="https://media.giphy.com/media/fnuSiwXMTV3zmYDf6k/giphy.gif"
+      alt="GIF of Kazoo Kid saying 'Wait a minute, who are you?'"
+    />
   </div>
   <v-container v-else class="my-3" fluid>
     <v-snackbar
@@ -130,6 +134,7 @@ import EmployeeForm from '@/components/employees/EmployeeForm.vue';
 import EmployeeInfo from '@/components/employees/EmployeeInfo.vue';
 import QuickBooksTimeData from '@/components/QuickBooksTimeData.vue';
 import { getRole } from '@/utils/auth';
+import { getCurrentBudgetYear, storeIsPopulated } from '@/utils/utils.js';
 import _ from 'lodash';
 import ConvertEmployeeToCsv from '../components/ConvertEmployeeToCsv.vue';
 import AnniversaryCard from '@/components/AnniversaryCard.vue';
@@ -137,7 +142,6 @@ import BudgetChart from '@/components/BudgetChart.vue';
 import ResumeParser from '@/components/modals/ResumeParser';
 import DeleteModal from '@/components/modals/DeleteModal';
 
-const moment = require('moment');
 const IsoFormat = 'YYYY-MM-DD';
 
 // |--------------------------------------------------|
@@ -181,30 +185,27 @@ async function downloadResume() {
 } // downloadResume
 
 /**
- * Gets the current active anniversary budget year starting date in isoformat.
- *
- * @return String - current active anniversary budget date (YYYY-MM-DD)
- */
-function getCurrentBudgetYear() {
-  let currentBudgetYear = moment(this.model.hireDate, IsoFormat);
-  if (moment().isAfter(currentBudgetYear)) {
-    currentBudgetYear.year(moment().year());
-    if (moment().isBefore(currentBudgetYear)) {
-      currentBudgetYear = currentBudgetYear.subtract(1, 'years');
-    }
-  }
-  return currentBudgetYear.format(IsoFormat);
-} // getCurrentBudgetYear
-
-/**
  * Get employee data.
  */
-async function getEmployee() {
-  let employees = await api.getItems(api.EMPLOYEES);
+async function getProfileData() {
+  this.loading = true;
+  let employees = this.$store.getters.employees;
   this.model = _.find(employees, (employee) => {
     return employee.employeeNumber == this.$route.params.id;
   });
-} // getEmployee
+  if (this.model) {
+    this.user = this.$store.getters.user;
+    await this.checkForBudgetAccess();
+    this.role = this.getRole();
+    this.loading = false;
+    this.displayQuickBooksTimeAndBalances = this.userIsAdmin() || this.userIsEmployee();
+    this.fiscalDateView = this.getCurrentBudgetYear(this.model.hireDate);
+    this.hasResume = (await api.getResume(this.$route.params.id)) != null;
+    this.expenses = await api.getAllAggregateExpenses();
+    this.expenseTypes = this.$store.getters.expenseTypes;
+  }
+  this.loading = false;
+} // getProfileData
 
 /**
  * checks window size and if it is xs or s minimize the window
@@ -316,20 +317,7 @@ async function created() {
       this.hasResume = newResume;
     }
   });
-  this.loading = true;
-  await this.getEmployee();
-  if (this.model) {
-    this.user = await api.getUser();
-    await this.checkForBudgetAccess();
-    this.role = this.getRole();
-    this.loading = false;
-    this.displayQuickBooksTimeAndBalances = this.userIsAdmin() || this.userIsEmployee();
-    this.fiscalDateView = this.getCurrentBudgetYear();
-    this.hasResume = (await api.getResume(this.$route.params.id)) != null;
-    this.expenses = await api.getAllAggregateExpenses();
-    this.expenseTypes = await api.getItems(api.EXPENSE_TYPES);
-  }
-  this.loading = false;
+  this.storeIsPopulated ? await this.getProfileData() : (this.loading = true);
 } // created
 
 /**
@@ -472,7 +460,7 @@ export default {
     downloadResume,
     getRole,
     hasAdminPermissions,
-    getEmployee,
+    getProfileData,
     getCurrentBudgetYear,
     resumeReceived,
     userIsAdmin,
@@ -480,8 +468,14 @@ export default {
     checkForBudgetAccess
   },
   computed: {
-    minimizeWindow
+    minimizeWindow,
+    storeIsPopulated
   },
-  mounted
+  mounted,
+  watch: {
+    storeIsPopulated: async function () {
+      if (this.storeIsPopulated) await this.getProfileData();
+    }
+  }
 };
 </script>

@@ -606,7 +606,7 @@ async function created() {
     this.submitForm = false;
   });
   // get all employees
-  let employees = await api.getItems(api.EMPLOYEES);
+  let employees = this.$store.getters.employees;
   let activeEmployees = [];
 
   // populate list of active employees

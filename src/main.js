@@ -1,6 +1,6 @@
 import Vue from 'vue';
 import router from './router';
-import store from './store';
+import store from '../store';
 
 const moment = require('moment-timezone');
 moment.tz.setDefault('America/New_York');

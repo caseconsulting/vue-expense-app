@@ -14,6 +14,7 @@ import _ from 'lodash';
 import api from '@/shared/api';
 import BarChart from '../charts/baseCharts/BarChart.vue';
 import AuditTable from '@/components/AuditTable';
+import { storeIsPopulated } from '@/utils/utils.js';
 const moment = require('moment-timezone');
 moment.tz.setDefault('America/New_York');
 const IsoFormat = 'MMMM Do YYYY, h:mm:ss a';
@@ -28,8 +29,11 @@ const IsoFormat = 'MMMM Do YYYY, h:mm:ss a';
  * created lifecycle hook
  */
 async function created() {
-  this.employees = await api.getItems(api.EMPLOYEES); // get all employees
-  this.fillData();
+  if (this.storeIsPopulated) {
+    this.employees = this.$store.getters.employees; // get all employees
+    this.loginData = await api.getAudits('login', this.queryStartDate, this.queryEndDate);
+    await this.fillData();
+  }
 } // created
 
 // |--------------------------------------------------|
@@ -45,8 +49,7 @@ async function fillData() {
   //obtains all login related entries in dev-audits
   //set to null so its data is reset each time the chart renders (changing date ranges)
   this.loginAudits = [];
-  let loginData = await api.getAudits('login', this.queryStartDate, this.queryEndDate);
-  _.forEach(loginData, (audit) => {
+  _.forEach(this.loginData, (audit) => {
     audit.dateCreated = moment(audit.dateCreated).format(IsoFormat);
     let employee = _.find(this.employees, (emp) => {
       return emp.id === audit.employeeId;
@@ -211,8 +214,8 @@ function generateTimeLabels(queryStart, queryEnd) {
 /**
  * fills data when dateRange changes
  */
-function watchDateRange() {
-  this.fillData();
+async function watchDateRange() {
+  await this.fillData();
 } // watchDateRange
 
 // |--------------------------------------------------|
@@ -227,13 +230,15 @@ export default {
   data() {
     return {
       chartLoaded: false,
+      loginData: null,
       loginAudits: [],
       loginChartOptions: null,
       loginChartData: null
     };
   },
   computed: {
-    dateRange
+    dateRange,
+    storeIsPopulated
   },
   methods: {
     fillData,
@@ -241,7 +246,14 @@ export default {
   },
   props: ['queryStartDate', 'queryEndDate', 'show24HourTitle'],
   watch: {
-    dateRange: watchDateRange
+    dateRange: watchDateRange,
+    storeIsPopulated: async function () {
+      if (this.storeIsPopulated) {
+        this.employees = this.$store.getters.employees; // get all employees
+        this.loginData = await api.getAudits('login', this.queryStartDate, this.queryEndDate);
+        await this.fillData();
+      }
+    }
   }
 };
 </script>

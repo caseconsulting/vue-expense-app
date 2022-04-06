@@ -7,6 +7,7 @@
 
 <script>
 import BarChart from '../baseCharts/BarChart.vue';
+import { storeIsPopulated } from '@/utils/utils';
 import moment from 'moment-timezone';
 moment.tz.setDefault('America/New_York');
 
@@ -17,12 +18,14 @@ moment.tz.setDefault('America/New_York');
 // |--------------------------------------------------|
 
 /**
- * created lifecycle hook
+ * mounted lifecycle hook
  */
-function created() {
-  this.caseYearsData();
-  this.drawCaseYearsHistGraph();
-} // created
+function mounted() {
+  if (this.storeIsPopulated) {
+    this.drawCaseYearsHistGraph();
+    this.caseYearsData();
+  }
+} // mounted
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -39,7 +42,8 @@ function caseYearsData() {
   for (let i = 0; i < MAXIMUM_INDEX; i++) {
     this.caseYears.push(0);
   }
-  this.employees3.forEach((employee) => {
+  this.employees = this.$store.getters.employees;
+  this.employees.forEach((employee) => {
     if (employee.hireDate !== undefined && employee.workStatus != 0) {
       // find time at case
       var amOfYears = this.calculateTimeDifference(employee.hireDate);
@@ -159,6 +163,9 @@ function stringToDate(dateAsString) {
 
 export default {
   components: { BarChart },
+  computed: {
+    storeIsPopulated
+  },
   data() {
     return {
       options: null,
@@ -175,7 +182,14 @@ export default {
     findMaxIndex,
     stringToDate
   },
-  created,
-  props: ['employees3'] // stats page (employees) --> tab (employees2) --> chart (employees3)
+  mounted,
+  watch: {
+    storeIsPopulated: function () {
+      if (this.storeIsPopulated) {
+        this.drawCaseYearsHistGraph();
+        this.caseYearsData();
+      }
+    }
+  }
 };
 </script>

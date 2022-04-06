@@ -70,7 +70,7 @@ import { isEmpty } from '@/utils/utils';
  */
 async function created() {
   window.EventBus.$emit('created', 'languages');
-  this.employees = await api.getItems(api.EMPLOYEES); // get all employees
+  this.employees = this.$store.getters.employees; // get all employees
   this.populateDropDowns();
 } // created
 

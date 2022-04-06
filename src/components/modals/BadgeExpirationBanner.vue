@@ -16,7 +16,6 @@
 </template>
 
 <script>
-import api from '@/shared/api.js';
 import moment from 'moment-timezone';
 moment.tz.setDefault('America/New_York');
 
@@ -32,8 +31,8 @@ moment.tz.setDefault('America/New_York');
  * @return alert with message based on if badge has expired or not
  */
 function checkWarnings() {
-  if (this.employee.clearances) {
-    this.employee.clearances.forEach((clearance) => {
+  if (this.user.clearances != null) {
+    this.user.clearances.forEach((clearance) => {
       // determines if a user has a badge/badges expiring within 30 days
       if (clearance.badgeExpirationDate) {
         let daysUntilExpiration = moment(clearance.badgeExpirationDate).diff(moment(), 'days');
@@ -52,7 +51,7 @@ function checkWarnings() {
  * Takes users to their profile page
  */
 function handleProfile() {
-  this.$router.push({ name: 'employee', params: { id: `${this.employee.employeeNumber}` } });
+  this.$router.push({ name: 'employee', params: { id: `${this.user.employeeNumber}` } });
 } // handleProfile
 
 /**
@@ -77,7 +76,7 @@ function createAlert(msg) {
  * @return boolean - checks to see if the current banner is on user profile
  */
 function onUserProfile() {
-  return this.$route.params.id == this.employee.employeeNumber;
+  return this.$route.params.id == this.user.employeeNumber;
 } // onUserProfile
 
 // |--------------------------------------------------|
@@ -90,7 +89,7 @@ function onUserProfile() {
  * Checks if there are any expiring badges and sorts by days until expiration.
  */
 async function created() {
-  this.employee = await api.getUser();
+  this.user = this.$store.getters.user;
   this.checkWarnings();
 } // created
 
@@ -104,9 +103,9 @@ export default {
   created,
   data() {
     return {
-      badgeExpiring: false,
       alert: {},
-      employee: null
+      badgeExpiring: false,
+      user: null
     };
   },
   computed: {

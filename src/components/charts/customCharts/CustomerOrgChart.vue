@@ -16,6 +16,7 @@
 <script>
 import PieChart from '../baseCharts/PieChart.vue';
 import _ from 'lodash';
+import { storeIsPopulated } from '@/utils/utils.js';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -27,7 +28,7 @@ import _ from 'lodash';
  * created lifecycle hook
  */
 function created() {
-  this.fillData();
+  if (this.storeIsPopulated) this.fillData();
 } // created
 
 // |--------------------------------------------------|
@@ -41,8 +42,10 @@ function created() {
  */
 function fillData() {
   let allCompOrgExp = {};
+  // access store
+  this.employees = this.$store.getters.employees;
   // tally up customer org experience for active employees
-  this.employees3.forEach((emp) => {
+  this.employees.forEach((emp) => {
     if (emp.customerOrgExp && emp.workStatus != 0) {
       _.forEach(emp.customerOrgExp, (org) => {
         let orgName = org.name;
@@ -137,6 +140,9 @@ function watchShowCurrent() {
 
 export default {
   components: { PieChart },
+  computed: {
+    storeIsPopulated
+  },
   data() {
     return {
       dataReceived: false,
@@ -148,9 +154,11 @@ export default {
   },
   methods: { fillData },
   created,
-  props: ['employees3'], // stats page (employees) --> tab (employees2) --> chart (employees3)
   watch: {
-    showCurrent: watchShowCurrent
+    showCurrent: watchShowCurrent,
+    storeIsPopulated: function () {
+      if (this.storeIsPopulated) this.fillData();
+    }
   }
 };
 </script>

@@ -6,7 +6,6 @@
 </template>
 
 <script>
-import api from '@/shared/api.js';
 import _ from 'lodash';
 
 // |--------------------------------------------------|
@@ -50,8 +49,8 @@ async function download() {
  * Set data for employees and expense types.
  */
 async function getData() {
-  this.employees = await api.getItems(api.EMPLOYEES);
-  this.expenseTypes = await api.getItems(api.EXPENSE_TYPES);
+  this.employees = this.$store.getters.employees;
+  this.expenseTypes = this.$store.getters.expenseTypes;
 } // getData
 
 /**

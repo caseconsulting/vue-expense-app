@@ -45,7 +45,6 @@
 </template>
 
 <script>
-import api from '@/shared/api.js';
 import ExpenseInfo from '@/components/ExpenseInfo.vue';
 import ExpenseTypeTotals from '@/components/ExpenseTypeTotals.vue';
 import RollupExpenseTypeTable from '@/components/RollupExpenseTypeTable.vue';
@@ -61,7 +60,7 @@ import { isMobile } from '@/utils/utils';
  * created lifecycle hook - get user and set isAdmin and listener
  */
 async function created() {
-  this.employee = await api.getUser();
+  this.employee = this.$store.getters.user;
   if (this.employee.employeeRole === 'admin') {
     this.isAdmin = true;
   }

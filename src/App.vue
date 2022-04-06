@@ -108,7 +108,7 @@
       </v-app-bar>
 
       <v-main>
-        <badge-expiration-banner :key="badgeKey" />
+        <badge-expiration-banner v-if="isLoggedIn() && storeIsPopulated" :key="badgeKey" />
         <v-container fluid grid-list-lg>
           <router-view></router-view>
         </v-container>
@@ -143,7 +143,7 @@
 
 <script>
 import { isLoggedIn, logout, getProfile, getTokenExpirationDate, getAccessToken } from '@/utils/auth';
-import { isMobile } from '@/utils/utils';
+import { isMobile, storeIsPopulated } from '@/utils/utils';
 import SwitchRoleModal from '@/components/modals/SwitchRoleModal.vue';
 import MainNav from '@/components/MainNav.vue';
 import TimeOutModal from '@/components/modals/TimeOutModal.vue';
@@ -218,9 +218,7 @@ function handleLogout() {
  */
 async function handleProfile() {
   // We don't use this.userId becuase it may be null by the time we click the button
-  var user = await api.getUser();
-  let userId = user.employeeNumber;
-  this.$router.push({ name: 'employee', params: { id: `${userId}` } });
+  this.$router.push({ name: 'employee', params: { id: `${this.userId}` } });
 } // handleProfile
 
 /**
@@ -229,6 +227,29 @@ async function handleProfile() {
 function onResize() {
   this.isSmallScreen = window.innerWidth < 960;
 } // onResize
+
+/**
+ * resize the window for small screens
+ */
+async function populateStore() {
+  // getUser
+  let user = await api.getUser();
+  this.$store.dispatch('setUser', { user });
+
+  // getEmployees
+  let employees = await api.getItems(api.EMPLOYEES);
+  this.$store.dispatch('setEmployees', { employees });
+
+  // getBasecampAvatars
+  let avatars = await api.getBasecampAvatars();
+  this.$store.dispatch('setBasecampAvatars', { avatars });
+
+  // getExpenseTypes
+  let expenseTypes = await api.getItems(api.EXPENSE_TYPES);
+  this.$store.dispatch('setExpenseTypes', { expenseTypes });
+
+  this.$store.dispatch('setStoreIsPopulated', { populated: true });
+} // populateStore
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -265,8 +286,9 @@ async function created() {
       }, timeRemaining - 300000);
     }
     //stores the employee number
-    var user = await api.getUser();
-    this.userId = user.employeeNumber;
+    this.userId = this.$store.getters.employeeNumber;
+
+    await this.populateStore();
   }
 
   let pic = getProfile();
@@ -277,7 +299,7 @@ async function created() {
 
   //This has some security implications
   this.version = require('../package.json').version;
-}
+} // created
 
 /**
  * beforeDestroy lifecycle hook - close event listener
@@ -369,7 +391,8 @@ export default {
   },
   computed: {
     isMobile,
-    onUserProfile
+    onUserProfile,
+    storeIsPopulated
   },
   components: {
     MainNav,
@@ -383,7 +406,8 @@ export default {
     handleLogout,
     handleProfile,
     isLoggedIn,
-    onResize
+    onResize,
+    populateStore
   },
   watch: {
     $route

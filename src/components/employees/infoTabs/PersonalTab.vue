@@ -50,7 +50,7 @@ import api from '@/shared/api.js';
  * Emits to parent the component was created and get data.
  */
 async function created() {
-  let user = await api.getUser();
+  let user = this.$store.getters.user;
   this.userId = user.employeeNumber;
   this.checkEmptyPersonalInfo();
 } //created
