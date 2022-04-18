@@ -557,17 +557,18 @@ function showEducation() {
  * @param employeeNumber - the employee number
  */
 async function onlyUploadResume(employeeNumber) {
-  this.loading = true;
-  let uploadResult = await api.uploadResume(employeeNumber, this.file); //uploads resume to s3
-  this.loading = false;
-  if (uploadResult instanceof Error) {
-    this.timeoutError = true;
-  } else {
+  try {
+    this.loading = true;
+    await api.uploadResume(employeeNumber, this.file); //uploads resume to s3
+    this.loading = false;
+
     //confirmation upload pop-up in employee.vue
     window.EventBus.$emit('uploaded', true, true);
     this.clearForm();
     this.activate = false;
-    //disables employee number field in employeeTab.vue
+  } catch (err) {
+    this.loading = false;
+    this.timeoutError = true;
   }
 } //onlyUploadResume
 
