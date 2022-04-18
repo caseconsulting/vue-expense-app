@@ -47,12 +47,16 @@
           v-if="!loading"
           class="my-3"
           :employee="employee"
+          :expenses="expenses"
+          :expenseTypes="expenseTypes"
           :fiscalDateView="fiscalDateView"
           @rendered="displayChart = !displayChart"
         ></budget-table>
         <budget-chart
           v-if="!loading && !isMobile && !adminCall && displayChart && hasAccessToBudgets"
           :employee="employee"
+          :expenses="expenses"
+          :expenseTypes="expenseTypes"
           :fiscalDateView="fiscalDateView"
         ></budget-chart>
       </div>
@@ -157,6 +161,8 @@ async function refreshEmployee() {
   }
   this.hireDate = this.employee.hireDate;
   this.fiscalDateView = this.getCurrentBudgetYear();
+  this.expenseTypes = await api.getItems(api.EXPENSE_TYPES);
+  this.expenses = await api.getAllAggregateExpenses();
   this.loading = false; // set loading status to false
 } // refreshEmployee
 
@@ -261,6 +267,8 @@ export default {
         employeeName: null,
         budgetName: null
       }, // blank expense for the expense form
+      expenses: null,
+      expenseTypes: null,
       fiscalDateView: '', // current budget year view by anniversary day
       hasAccessToBudgets: true, // user has access to one or more budgets
       hireDate: '', // employee hire date

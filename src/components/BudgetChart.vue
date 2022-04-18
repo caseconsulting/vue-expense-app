@@ -288,6 +288,14 @@ async function refreshBudget() {
   let existingBudgets = await api.getFiscalDateViewBudgets(this.employee.id, this.fiscalDateView);
   budgetsVar = _.union(budgetsVar, existingBudgets); // combine existing and active budgets
   budgetsVar = _.uniqBy(budgetsVar, 'expenseTypeId'); // remove duplicate expense types
+  // remove inactive budgets (exception: there contains a pending expense under that budget)
+  budgetsVar = _.filter(budgetsVar, (b) => {
+    let budget = b.budgetObject;
+    return (
+      !_.some(this.expenseTypes, (e) => e.id == budget.expenseTypeId && e.isInactive) ||
+      _.some(this.expenses, (e) => e.expenseTypeId == budget.expenseTypeId && _.isEmpty(e.reimbursedDate))
+    );
+  });
 
   this.selectedBudgets = budgetsVar.map((a) => a.expenseTypeName);
   this.allBudgetNames = budgetsVar.map((a) => a.expenseTypeName);
@@ -355,7 +363,7 @@ export default {
     refreshBudget
   },
   mounted,
-  props: ['employee', 'fiscalDateView'],
+  props: ['employee', 'fiscalDateView', 'expenses', 'expenseTypes'],
   watch: {
     fiscalDateView: watchFiscalDateView
   }
