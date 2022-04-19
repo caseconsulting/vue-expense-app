@@ -78,6 +78,8 @@
                 <available-budgets
                   id="home-available-budgets"
                   :employee="this.employee"
+                  :expenses="this.expenses"
+                  :expenseTypes="this.expenseTypes"
                   :fiscalDateView="this.fiscalDateView"
                 ></available-budgets>
               </v-col>
@@ -473,6 +475,8 @@ async function refreshEmployee() {
   this.hireDate = this.employee.hireDate;
   this.fiscalDateView = this.getCurrentBudgetYear();
   this.allUserBudgets = await api.getEmployeeBudgets(this.employee.id); // set all employee budgets
+  this.expenses = await api.getAllAggregateExpenses();
+  this.expenseTypes = await api.getItems(api.EXPENSE_TYPES);
   this.loading = false; // set loading status to false
 } // refreshEmployee
 
@@ -523,7 +527,9 @@ export default {
       employee: {}, // employee
       employees: [],
       events: [],
+      expenses: null,
       expenseTypeData: [], // aggregated budgets for expense types
+      expenseTypes: null,
       fiscalDateView: '', // current budget year view by anniversary day
       hireDate: '', // employee hire date
       loading: false, // loading status

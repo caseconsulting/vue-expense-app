@@ -47,7 +47,13 @@
       <!-- QuickBooks Time and Budgets-->
       <v-col v-if="displayQuickBooksTimeAndBalances" cols="12" md="5" lg="4">
         <quick-books-time-data :employee="this.model" class="mb-6"></quick-books-time-data>
-        <available-budgets class="mb-4" v-if="this.model.id" :employee="this.model"></available-budgets>
+        <available-budgets
+          class="mb-4"
+          v-if="this.model.id"
+          :employee="this.model"
+          :expenses="expenses"
+          :expenseTypes="expenseTypes"
+        ></available-budgets>
         <anniversary-card
           v-if="!minimizeWindow"
           :employee="this.model"
@@ -101,6 +107,8 @@
           v-if="(userIsAdmin() || userIsEmployee()) && hasAccessToBudgets"
           class="pt-4"
           :employee="this.model"
+          :expenses="expenses"
+          :expenseTypes="expenseTypes"
           :fiscalDateView="fiscalDateView"
         ></budget-chart>
       </v-col>
@@ -318,6 +326,8 @@ async function created() {
     this.displayQuickBooksTimeAndBalances = this.userIsAdmin() || this.userIsEmployee();
     this.fiscalDateView = this.getCurrentBudgetYear();
     this.hasResume = (await api.getResume(this.$route.params.id)) != null;
+    this.expenses = await api.getAllAggregateExpenses();
+    this.expenseTypes = await api.getItems(api.EXPENSE_TYPES);
   }
   this.loading = false;
 } // created
@@ -395,6 +405,8 @@ export default {
       deleteLoading: false,
       displayQuickBooksTimeAndBalances: true,
       editing: false,
+      expenses: null,
+      expenseTypes: null,
       filter: {
         active: ['full', 'part'] // default only shows full and part time employees
       }, // datatable filter
