@@ -144,14 +144,13 @@
 <script>
 import { isLoggedIn, logout, getProfile, getTokenExpirationDate, getAccessToken } from '@/utils/auth';
 import { isMobile, storeIsPopulated } from '@/utils/utils';
+import { updateStoreUser, updateStoreEmployees, updateStoreAvatars, updateStoreExpenseTypes } from '@/utils/storeUtils';
 import SwitchRoleModal from '@/components/modals/SwitchRoleModal.vue';
 import MainNav from '@/components/MainNav.vue';
 import TimeOutModal from '@/components/modals/TimeOutModal.vue';
 import TimeOutWarningModal from '@/components/modals/TimeOutWarningModal.vue';
 import BadgeExpirationBanner from '@/components/modals/BadgeExpirationBanner.vue';
 import floorPlan from '@/assets/img/MakeOfficesfloorplan.jpg';
-import api from '@/shared/api.js';
-// import _ from 'lodash';
 import moment from 'moment-timezone';
 moment.tz.setDefault('America/New_York');
 
@@ -232,22 +231,13 @@ function onResize() {
  * resize the window for small screens
  */
 async function populateStore() {
-  // getUser
-  let user = await api.getUser();
-  this.$store.dispatch('setUser', { user });
+  await this.updateStoreUser();
+  await this.updateStoreEmployees();
+  await this.updateStoreAvatars();
+  await this.updateStoreExpenseTypes();
 
-  // getEmployees
-  let employees = await api.getItems(api.EMPLOYEES);
-  this.$store.dispatch('setEmployees', { employees });
-
-  // getBasecampAvatars
-  let avatars = await api.getBasecampAvatars();
-  this.$store.dispatch('setBasecampAvatars', { avatars });
-
-  // getExpenseTypes
-  let expenseTypes = await api.getItems(api.EXPENSE_TYPES);
-  this.$store.dispatch('setExpenseTypes', { expenseTypes });
-
+  // This is used to help pages know when data is loaded into the store.
+  // Otherwise, on reload, pages would try to access the store before it was populated.
   this.$store.dispatch('setStoreIsPopulated', { populated: true });
 } // populateStore
 
@@ -285,10 +275,11 @@ async function created() {
         this.session = true;
       }, timeRemaining - 300000);
     }
-    //stores the employee number
-    this.userId = this.$store.getters.employeeNumber;
 
     await this.populateStore();
+
+    //stores the employee number
+    this.userId = this.$store.getters.employeeNumber;
   }
 
   let pic = getProfile();
@@ -407,7 +398,11 @@ export default {
     handleProfile,
     isLoggedIn,
     onResize,
-    populateStore
+    populateStore,
+    updateStoreUser,
+    updateStoreEmployees,
+    updateStoreAvatars,
+    updateStoreExpenseTypes
   },
   watch: {
     $route

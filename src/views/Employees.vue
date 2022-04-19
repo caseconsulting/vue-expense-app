@@ -249,6 +249,7 @@
 
 <script>
 import api from '@/shared/api.js';
+import { updateStoreEmployees } from '@/utils/storeUtils';
 import ConvertEmployeesToCsv from '@/components/ConvertEmployeesToCsv.vue';
 import DeleteErrorModal from '@/components/modals/DeleteErrorModal.vue';
 import DeleteModal from '@/components/modals/DeleteModal.vue';
@@ -475,6 +476,8 @@ async function created() {
   });
   window.EventBus.$on('confirm-delete-employee', async () => {
     await this.deleteEmployee();
+    await this.updateStoreEmployees();
+    await this.refreshEmployees();
   });
   window.EventBus.$on('invalid-employee-delete', () => {
     this.midAction = false;
@@ -659,7 +662,8 @@ export default {
     refreshEmployees,
     renderCreateEmployee,
     userIsAdmin,
-    validateDelete
+    validateDelete,
+    updateStoreEmployees
   },
   watch: {
     'filter.active': watchFilterActive,

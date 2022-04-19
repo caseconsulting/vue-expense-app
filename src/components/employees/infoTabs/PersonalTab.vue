@@ -38,7 +38,6 @@
 <script>
 import { isEmpty, monthDayYearFormat } from '@/utils/utils';
 import { getRole } from '@/utils/auth';
-import api from '@/shared/api.js';
 
 // |--------------------------------------------------|
 // |                                                  |

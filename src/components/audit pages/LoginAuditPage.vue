@@ -31,7 +31,6 @@ const IsoFormat = 'MMMM Do YYYY, h:mm:ss a';
 async function created() {
   if (this.storeIsPopulated) {
     this.employees = this.$store.getters.employees; // get all employees
-    this.loginData = await api.getAudits('login', this.queryStartDate, this.queryEndDate);
     await this.fillData();
   }
 } // created
@@ -49,7 +48,9 @@ async function fillData() {
   //obtains all login related entries in dev-audits
   //set to null so its data is reset each time the chart renders (changing date ranges)
   this.loginAudits = [];
-  _.forEach(this.loginData, (audit) => {
+  let loginData = await api.getAudits('login', this.queryStartDate, this.queryEndDate);
+
+  _.forEach(loginData, (audit) => {
     audit.dateCreated = moment(audit.dateCreated).format(IsoFormat);
     let employee = _.find(this.employees, (emp) => {
       return emp.id === audit.employeeId;
@@ -230,7 +231,6 @@ export default {
   data() {
     return {
       chartLoaded: false,
-      loginData: null,
       loginAudits: [],
       loginChartOptions: null,
       loginChartData: null
@@ -250,7 +250,6 @@ export default {
     storeIsPopulated: async function () {
       if (this.storeIsPopulated) {
         this.employees = this.$store.getters.employees; // get all employees
-        this.loginData = await api.getAudits('login', this.queryStartDate, this.queryEndDate);
         await this.fillData();
       }
     }

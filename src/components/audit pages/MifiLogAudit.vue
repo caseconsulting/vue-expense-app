@@ -14,6 +14,7 @@ import _ from 'lodash';
 import api from '@/shared/api';
 import PieChart from '../charts/baseCharts/PieChart.vue';
 import AuditTable from '@/components/AuditTable';
+import { storeIsPopulated } from '@/utils/utils.js';
 const moment = require('moment-timezone');
 moment.tz.setDefault('America/New_York');
 const IsoFormat = 'MMMM Do YYYY, h:mm:ss a';
@@ -28,8 +29,10 @@ const IsoFormat = 'MMMM Do YYYY, h:mm:ss a';
  * created lifecycle hook
  */
 async function created() {
-  this.employees = this.$store.getters.employees; // get all employees
-  this.fillData();
+  if (this.storeIsPopulated) {
+    this.employees = this.$store.getters.employees; // get all employees
+    await this.fillData();
+  }
 } // created
 
 // |--------------------------------------------------|
@@ -46,6 +49,7 @@ async function fillData() {
   //set to null so its data is reset each time the chart renders (changing date ranges)
   this.mifiAudits = [];
   let mifiData = await api.getAudits('mifi', this.queryStartDate, this.queryEndDate);
+
   _.forEach(mifiData, (audit) => {
     audit.dateCreated = moment(audit.dateCreated).format(IsoFormat);
     let employee = _.find(this.employees, (emp) => {
@@ -155,7 +159,8 @@ function watchDateRange() {
 export default {
   components: { PieChart, AuditTable },
   computed: {
-    dateRange
+    dateRange,
+    storeIsPopulated
   },
   created,
   data() {
@@ -169,7 +174,13 @@ export default {
   methods: { fillData },
   props: ['queryStartDate', 'queryEndDate', 'show24HourTitle'],
   watch: {
-    dateRange: watchDateRange
+    dateRange: watchDateRange,
+    storeIsPopulated: async function () {
+      if (this.storeIsPopulated) {
+        this.employees = this.$store.getters.employees; // get all employees
+        await this.fillData();
+      }
+    }
   }
 };
 </script>

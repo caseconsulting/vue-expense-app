@@ -429,6 +429,7 @@ import ExpenseTypeForm from '@/components/ExpenseTypeForm.vue';
 import { getRole } from '@/utils/auth';
 import _ from 'lodash';
 import { convertToMoneyString } from '@/utils/utils';
+import { updateStoreExpenseTypes } from '@/utils/storeUtils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -468,6 +469,7 @@ function _headers() {
  * Refresh and updates expense type list and displays a successful create status in the snackbar.
  */
 async function addModelToTable() {
+  await this.updateStoreExpenseTypes();
   await this.refreshExpenseTypes();
 
   this.$set(this.status, 'statusType', 'SUCCESS');
@@ -619,6 +621,7 @@ async function deleteExpenseType() {
  * Refresh and updates expense type list and displays a successful delete status in the snackbar.
  */
 async function deleteModelFromTable() {
+  await this.updateStoreExpenseTypes();
   await this.refreshExpenseTypes();
 
   this.$set(this.status, 'statusType', 'SUCCESS');
@@ -909,6 +912,7 @@ function toTopOfForm() {
  * Refresh and updates expense type list and displays a successful update status in the snackbar.
  */
 async function updateModelInTable() {
+  await this.updateStoreExpenseTypes();
   await this.refreshExpenseTypes();
 
   this.$set(this.status, 'statusType', 'SUCCESS');
@@ -1166,7 +1170,8 @@ export default {
     twoDecimals,
     updateModelInTable,
     userIsAdmin,
-    validateDelete
+    validateDelete,
+    updateStoreExpenseTypes
   },
   watch: {
     'filter.active': watchFilterExpenseTypes,

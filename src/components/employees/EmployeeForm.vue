@@ -349,6 +349,7 @@
 
 <script>
 import api from '@/shared/api.js';
+import { updateStoreEmployees } from '@/utils/storeUtils';
 import AwardTab from '@/components/employees/formTabs/AwardTab';
 import CertificationTab from '@/components/employees/formTabs/CertificationTab';
 import ClearanceTab from '@/components/employees/formTabs/ClearanceTab';
@@ -656,6 +657,10 @@ async function submit() {
         // successfully updated employee
         this.fullName = `${updatedEmployee.firstName} ${updatedEmployee.lastName}`;
         window.EventBus.$emit('update', updatedEmployee);
+
+        // getEmployees and update store with latest data
+        await this.updateStoreEmployees();
+
         await this.cancel();
       } else {
         // failed to update employee
@@ -678,6 +683,8 @@ async function submit() {
       // creating employee
       this.model.id = uuid();
       let newEmployee = await api.createItem(api.EMPLOYEES, this.model);
+      // getEmployees and update store with latest data
+      await this.updateStoreEmployees();
       if (newEmployee.id) {
         // successfully created employee
         this.$router.push(`/employee/${newEmployee.employeeNumber}`);
@@ -1172,7 +1179,8 @@ export default {
     submit,
     titleCase,
     resumeReceived,
-    selectDropDown
+    selectDropDown,
+    updateStoreEmployees
   },
   props: ['currentTab', 'employee'], // employee to be created/updated
   watch: {

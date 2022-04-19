@@ -18,6 +18,7 @@ import api from '@/shared/api';
 import _ from 'lodash';
 import PieChart from '@/components/charts/baseCharts/PieChart.vue';
 import AuditTable from '@/components/AuditTable';
+import { storeIsPopulated } from '@/utils/utils.js';
 const moment = require('moment-timezone');
 moment.tz.setDefault('America/New_York');
 const IsoFormat = 'MMMM Do YYYY, h:mm:ss a';
@@ -33,9 +34,9 @@ const IsoFormat = 'MMMM Do YYYY, h:mm:ss a';
  */
 async function fillData() {
   this.resumeAudits = [];
-  let resumeAudits = await api.getAudits('resume', this.queryStartDate, this.queryEndDate);
+  let resumeData = await api.getAudits('resume', this.queryStartDate, this.queryEndDate);
 
-  _.forEach(resumeAudits, (audit) => {
+  _.forEach(resumeData, (audit) => {
     audit.dateCreated = moment(audit.dateCreated).format(IsoFormat);
     let employee = _.find(this.employees, (emp) => {
       return emp.id === audit.employeeId;
@@ -49,12 +50,12 @@ async function fillData() {
     });
   });
 
-  let resumeParseSuccesses = resumeAudits.filter((audit) => {
+  let resumeParseSuccesses = resumeData.filter((audit) => {
     if (audit.tags) {
       return audit.tags.includes('success') && audit.tags.includes('upload');
     }
   });
-  let resumeParseFailures = resumeAudits.filter((audit) => {
+  let resumeParseFailures = resumeData.filter((audit) => {
     if (audit.tags) {
       return audit.tags.includes('failure') && audit.tags.includes('upload');
     }
@@ -109,7 +110,7 @@ async function fillData() {
   };
 
   // For resume chart 2
-  let resumeParseSubmits = resumeAudits.filter((audit) => {
+  let resumeParseSubmits = resumeData.filter((audit) => {
     if (audit.tags) {
       return audit.tags.includes('submit');
     }
@@ -166,8 +167,10 @@ async function fillData() {
  * created lifecycle hook
  */
 async function created() {
-  this.employees = this.$store.getters.employees; // get all employees
-  await this.fillData();
+  if (this.storeIsPopulated) {
+    this.employees = this.$store.getters.employees; // get all employees
+    await this.fillData();
+  }
 } //created
 
 // |--------------------------------------------------|
@@ -198,6 +201,9 @@ async function watchQueryEndDate() {
 
 export default {
   components: { AuditTable, PieChart },
+  computed: {
+    storeIsPopulated
+  },
   created,
   data() {
     return {
@@ -236,7 +242,13 @@ export default {
   props: ['queryStartDate', 'queryEndDate', 'show24HourTitle'],
   watch: {
     queryStartDate: watchQueryStartDate,
-    queryEndDate: watchQueryEndDate
+    queryEndDate: watchQueryEndDate,
+    storeIsPopulated: async function () {
+      if (this.storeIsPopulated) {
+        this.employees = this.$store.getters.employees; // get all employees
+        await this.fillData();
+      }
+    }
   }
 };
 </script>
