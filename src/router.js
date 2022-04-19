@@ -14,9 +14,6 @@ import Reports from '@/views/Reports.vue';
 import Callback from '@/views/Callback';
 import EmployeeHome from '@/views/MyBudgets.vue';
 import Home from '@/views/Home.vue';
-import Blog from '@/views/Blog.vue';
-import BlogPreview from '@/views/BlogPreview.vue';
-import PostEditor from '@/views/PostEditor.vue';
 import TrainingAnalytics from '@/views/TrainingAnalytics';
 import PageNotFound from '@/views/PageNotFound';
 import { requireAuth, isAdmin, isAdminOrManager } from '@/utils/auth';
@@ -124,24 +121,6 @@ const router = new Router({
       path: '/employee/:id',
       name: 'employee',
       component: Employee,
-      beforeEnter: requireAuth
-    },
-    {
-      path: '/blog',
-      name: 'blog',
-      component: Blog,
-      beforeEnter: requireAuth
-    },
-    {
-      path: '/blogPreview/:id',
-      name: 'blogPreview',
-      component: BlogPreview,
-      beforeEnter: requireAuth
-    },
-    {
-      path: '/postEditor/:id',
-      name: 'postEditor',
-      component: PostEditor,
       beforeEnter: requireAuth
     },
     //Below catch-all code works for Vue 2

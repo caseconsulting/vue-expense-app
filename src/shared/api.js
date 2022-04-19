@@ -11,11 +11,8 @@ const BUDGETS = 'budgets';
 const QUICK_BOOKS_TIME = 'tSheets';
 const TWITTER = 'twitter';
 const BASECAMP = 'basecamp';
-const BLOG = 'blog';
-const BLOG_FILE = 'blogFile';
 const HIPPO_LAB = 'hippoLabs';
 const GOOGLE_MAPS = 'googleMaps';
-const BLOG_ATTACHMENT = 'blogAttachment';
 const AUDIT = 'audits';
 const RESUME = 'resume';
 const API_HOSTNAME = API_CONFIG.apiHostname;
@@ -312,29 +309,6 @@ async function getAttachment(employeeId, expenseId) {
 } // getAttachment
 
 /**
- * gets the blog file
- *
- * @param authorId - the id of the employee who wrote the blog file
- * @param blogId - the id of the blog post
- * @return - the blog file
- */
-async function getBlogFile(authorId, blogId) {
-  return await execute('get', `${BLOG_FILE}/${authorId}/${blogId}`);
-} // getBlogFile
-
-/**
- * gets the picture file for a blog post
- *
- * @param authorId - the id of the employee who wrote the blog post
- * @param blogId - the id of the blog post
- * @param mainPicture - the name of the main picture of the blog post
- * @return - the picture of the blog file
- */
-async function getPictureFile(authorId, blogId, mainPicture) {
-  return await execute('get', `${BLOG_FILE}/${authorId}/${blogId}/${mainPicture}`);
-} // getPictureFile
-
-/**
  * gets a google map location
  *
  * @param locationQuery - the query text used to find the location
@@ -431,21 +405,6 @@ async function createAttachment(expense, file) {
 } // createAttachment
 
 /**
- * creates the blog file for a blog post
- *
- * @param blogPost - the blog post object
- * @param file - the blog file
- * @param fileName - the name of the blog file
- * @return - success code
- */
-async function createBlogFile(blogPost, file, fileName) {
-  let formData = new FormData();
-  formData.append('blogFile', file, fileName);
-
-  return await execute('post', `/${BLOG_FILE}/${blogPost.authorId}/${blogPost.id}`, formData);
-} // createBlogFile
-
-/**
  * deletes attachment from s3
  *
  * @param expense - the expense object to build url
@@ -454,19 +413,6 @@ async function createBlogFile(blogPost, file, fileName) {
 async function deleteAttachment(expense) {
   return await execute('delete', `attachment/${expense.employeeId}/${expense.id}/${expense.receipt}`);
 } // deleteAttachment
-
-/**
- * deletes blogFile from s3
- *
- * @param blogPost - the blogPost object to build url
- * @return - success code
- */
-async function deleteBlogFile(blogPost) {
-  return await execute(
-    'delete',
-    `${BLOG_FILE}/${blogPost.authorId}/${blogPost.id}/${blogPost.fileName}/${blogPost.mainPicture}`
-  );
-} // deleteBlogFile
 
 /**
  * gets the PTO balances for a specific employee
@@ -516,30 +462,10 @@ async function getFeedEvents() {
 } // getFeedEvents
 
 /**
- * gets the moderation label for blog files
- *
- * @param img - the image to check
- * @return - the label
- */
-async function getModerationLabel(img) {
-  return await execute('post', `${BLOG_ATTACHMENT}/getModerationLabel/${img}`);
-} // getModerationLabel
-
-/**
- * gets the key phrases for an attachment
- *
- * @param data - the data of the blog attachment
- * @return - the key phrases
- */
-async function getKeyPhrases(data) {
-  return await execute('post', `${BLOG_ATTACHMENT}/getKeyPhrases`, data);
-} // getKeyPhrases
-
-/**
  * uploads the resume file for an employee
  *
  * @param employeeId - the id of the employee
- * @param file - the file of the blog
+ * @param file - the file of the resume
  * @return - success code
  */
 async function uploadResume(employeeId, file) {
@@ -548,19 +474,6 @@ async function uploadResume(employeeId, file) {
 
   return await execute('post', `/${RESUME}/${employeeId}`, formData);
 } // uploadResume
-
-/**
- * upload blog attachment file
- *
- * @param file - the file to upload
- * @return - success code
- */
-async function uploadBlogAttachment(file) {
-  let formData = new FormData();
-  formData.append('image', file);
-
-  return await execute('post', `${BLOG_ATTACHMENT}/uploadBlogAttachmentToS3/${file.name}`, formData);
-} // uploadBlogAttachment
 
 /**
  * returns a list of colleges that matches the query provided
@@ -599,10 +512,8 @@ async function getColleges(inputValue) {
 
 export default {
   createAttachment,
-  createBlogFile,
   createItem,
   deleteAttachment,
-  deleteBlogFile,
   deleteItem,
   deleteResume,
   extractText,
@@ -615,8 +526,6 @@ export default {
   getAllExpenseTypeExpenses,
   getAttachment,
   getAudits,
-  getBlogFile,
-  getPictureFile,
   getBasecampAvatars,
   getBasecampCampfires,
   getCaseTimeline,
@@ -628,9 +537,7 @@ export default {
   getFiscalDateViewBudgets,
   getItem,
   getItems,
-  getKeyPhrases,
   getLocation,
-  getModerationLabel,
   getPTOBalances,
   getResume,
   getRole,
@@ -641,7 +548,6 @@ export default {
   getZipCode,
   getUser,
   updateItem,
-  uploadBlogAttachment,
   uploadResume,
   EXPENSE_TYPES,
   EXPENSES,
@@ -651,8 +557,5 @@ export default {
   QUICK_BOOKS_TIME,
   TRAINING_URLS,
   TWITTER,
-  BLOG,
-  BLOG_ATTACHMENT,
-  BLOG_FILE,
   AUDIT
 };
