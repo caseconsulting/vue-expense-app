@@ -107,7 +107,7 @@
         <!-- End user image and logout -->
       </v-app-bar>
 
-      <v-main>
+      <v-main style="padding: 64px 0px 0px 56px">
         <badge-expiration-banner v-if="isLoggedIn() && storeIsPopulated" :key="badgeKey" />
         <v-container fluid grid-list-lg>
           <router-view></router-view>
