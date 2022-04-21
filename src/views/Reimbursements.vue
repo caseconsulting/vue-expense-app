@@ -57,13 +57,9 @@ import { isMobile } from '@/utils/utils';
 // |--------------------------------------------------|
 
 /**
- * created lifecycle hook - get user and set isAdmin and listener
+ * created
  */
 async function created() {
-  this.employee = this.$store.getters.user;
-  if (this.employee.employeeRole === 'admin') {
-    this.isAdmin = true;
-  }
   window.EventBus.$on('reimburseAlert', (alerts) => {
     this.alerts = alerts;
   });
@@ -96,8 +92,7 @@ export default {
   data() {
     return {
       alerts: [], // status alerts
-      employee: {},
-      isAdmin: false
+      employee: {}
     };
   }
 };
