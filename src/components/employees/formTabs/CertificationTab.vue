@@ -112,7 +112,6 @@
 </template>
 
 <script>
-import api from '@/shared/api.js';
 import _ from 'lodash';
 import { getDateRules, getDateOptionalRules, getRequiredRules } from '@/shared/validationUtils.js';
 import { formatDate, parseDate, isEmpty, isMobile } from '@/utils/utils';

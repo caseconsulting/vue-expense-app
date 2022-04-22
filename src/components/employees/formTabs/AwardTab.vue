@@ -71,10 +71,9 @@
 </template>
 
 <script>
-import api from '@/shared/api.js';
 import _ from 'lodash';
 import { getDateMonthYearRules, getRequiredRules } from '@/shared/validationUtils.js';
-import { formatDateMonthYear, parseDate } from '@/utils/utils';
+import { formatDateMonthYear, parseDate, parseDateMonthYear } from '@/utils/utils';
 import { mask } from 'vue-the-mask';
 const moment = require('moment-timezone');
 moment.tz.setDefault('America/New_York');
@@ -184,6 +183,7 @@ export default {
     getDateMonthYearRules,
     getRequiredRules,
     parseDate,
+    parseDateMonthYear,
     parseEventDate,
     validateFields
   },

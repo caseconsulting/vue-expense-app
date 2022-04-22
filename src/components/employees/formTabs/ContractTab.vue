@@ -167,7 +167,6 @@
 </template>
 
 <script>
-import api from '@/shared/api.js';
 import _ from 'lodash';
 import { mask } from 'vue-the-mask';
 import { getDateMonthYearRules, getDateMonthYearOptionalRules, getRequiredRules } from '@/shared/validationUtils.js';
