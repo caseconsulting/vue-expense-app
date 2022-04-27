@@ -71,7 +71,7 @@
     "eslint-plugin-vue": "8.6.0",
     "fibers": "5.0.1",
     "geckodriver": "3.0.1",
-    "grunt": "1.4.1",
+    "grunt": "1.5.2",
     "grunt-aws-s3": "2.0.2",
     "nightwatch": "1.7.13",
     "postcss": "8.4.12",
