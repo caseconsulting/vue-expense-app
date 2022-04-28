@@ -3,7 +3,7 @@ const fs = require('fs');
 
 // Returns bucket name for specified stage
 function _getBucketName(stage) {
-  return stage === 'prod' ? `case-consulting-expense-app-${stage}` : `case-consulting-expense-app-${stage}`;
+  return stage === 'prod' ? `case-consulting-expense-app-${stage}` : `case-expense-app-${stage}`;
 }
 
 // Returns true if path references a file
