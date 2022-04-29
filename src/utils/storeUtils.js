@@ -33,7 +33,7 @@ export async function updateStoreEmployees() {
 export async function updateStoreAvatars() {
   // getBasecampAvatars
   let avatars = await api.getBasecampAvatars();
-  this.$store.dispatch('setBasecampAvatars', { avatars });
+  this.$store.dispatch('setBasecampAvatars', { basecampAvatars: avatars });
 } // updateStoreAvatars
 
 /**
