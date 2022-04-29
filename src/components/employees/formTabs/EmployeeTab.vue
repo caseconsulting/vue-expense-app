@@ -225,6 +225,89 @@
         label="Use Mifi instead of increased technology budget ($150)"
         v-if="editedEmployee.employeeRole !== 'intern' && !isInactive()"
       ></v-switch>
+
+      <!-- START EEO Compliance Reporting Section -->
+      <v-divider class="my-2"></v-divider>
+      <p class="mb-0 mt-5">
+        EEO Compliance Reporting
+        <v-tooltip top max-width="500">
+          <template v-slot:activator="{ on }">
+            <v-icon v-on="on" class="case-gray">shield</v-icon>
+          </template>
+          <span
+            >Data in this section is only Visible to You, Managers, and Admins. Equal Employment Opportunity (EEO)
+            reporting is required for companies with more than 50 employees.</span
+          >
+        </v-tooltip>
+      </p>
+
+      <!-- Gender -->
+      <v-select
+        label="Gender"
+        v-model="editedEmployee.eeoGender"
+        :items="eeoGenderItems"
+        item-text="text"
+        item-value="value"
+        return-object
+        :disabled="editedEmployee.eeoDeclineSelfIdentify"
+      >
+      </v-select>
+      <!-- Hispanic or Latino -->
+      <v-select
+        label="Hispanic or Latino"
+        v-model="editedEmployee.eeoHispanicOrLatino"
+        :items="eeoHispanicOrLatinoItems"
+        item-text="text"
+        item-value="value"
+        return-object
+        @change="editedEmployee.eeoRaceOrEthnicity = null"
+        :disabled="editedEmployee.eeoDeclineSelfIdentify"
+      >
+      </v-select>
+      <!-- Race or Ethnicity -->
+      <v-select
+        label="Race or Ethnicity"
+        v-model="editedEmployee.eeoRaceOrEthnicity"
+        :items="eeoRaceOrEthnicityItems"
+        item-text="text"
+        item-value="value"
+        return-object
+        :disabled="editedEmployee.eeoDeclineSelfIdentify || disableRaceOrEthnicity"
+      >
+      </v-select>
+      <!-- Job Category -->
+      <v-tooltip top max-width="400"
+        ><template v-slot:activator="{ on }">
+          <div v-on="on">
+            <v-select
+              label="Job Category"
+              v-model="editedEmployee.eeoJobCategory"
+              :items="eeoJobCategoryItems"
+              item-text="text"
+              item-value="value"
+              return-object
+              :disabled="editedEmployee.eeoDeclineSelfIdentify"
+            >
+            </v-select>
+          </div>
+        </template>
+        <span
+          >Most Case employees are considered 'Professionals'. Please select 'Professional' unless you know you fall
+          into a different category.</span
+        ></v-tooltip
+      >
+      <!-- Decline Self-identify -->
+      <v-checkbox
+        class="mt-0"
+        label="Decline to self-identify."
+        v-model="editedEmployee.eeoDeclineSelfIdentify"
+      ></v-checkbox>
+
+      <!-- Confirm Decline Self-Identify Modal -->
+      <e-e-o-decline-self-identify
+        :toggleDeclineSelfIdentifyModal="toggleDeclineSelfIdentifyModal"
+      ></e-e-o-decline-self-identify>
+      <!-- END EEO Compliance Reporting Section -->
     </div>
   </div>
 </template>
@@ -235,6 +318,7 @@ import { getDateRules, getNumberRules, getRequiredRules, getValidateFalse } from
 import { formatDate, isEmpty, parseDate, isMobile } from '@/utils/utils';
 import { mask } from 'vue-the-mask';
 import { getRole } from '@/utils/auth';
+import EEODeclineSelfIdentify from '../../modals/EEODeclineSelfIdentify.vue';
 const moment = require('moment-timezone');
 moment.tz.setDefault('America/New_York');
 
@@ -249,10 +333,31 @@ const regex = /^[a-zA-Z]+$/;
 // |--------------------------------------------------|
 
 /**
+ * Turn off listeners
+ */
+function beforeDestroy() {
+  window.EventBus.$off('cancel-decline-self-identify');
+  window.EventBus.$off('confirm-decline-self-identify');
+} // beforeDestroy
+
+/**
  * Emits to parent the component was created and get data.
  */
 async function created() {
   window.EventBus.$emit('created', 'employee'); // emit employee tab was created
+  window.EventBus.$on('cancel-decline-self-identify', () => {
+    this.editedEmployee.eeoDeclineSelfIdentify = false;
+    this.toggleDeclineSelfIdentifyModal = false;
+  });
+  window.EventBus.$on('confirm-decline-self-identify', () => {
+    // clear fields
+    this.editedEmployee.eeoGender = null;
+    this.editedEmployee.eeoHispanicOrLatino = null;
+    this.editedEmployee.eeoRaceOrEthnicity = null;
+    this.editedEmployee.eeoJobCategory = null;
+    // close modal
+    this.toggleDeclineSelfIdentifyModal = false;
+  });
   // get all employees
   this.employees = this.$store.getters.employees;
   // set formatted hire date
@@ -523,6 +628,31 @@ function watchValidating(val) {
   }
 } // watchValidating
 
+/**
+ * watcher for activating confirmation modal
+ *
+ */
+function watchEeoDeclineSelfIdentify() {
+  if (this.editedEmployee.eeoDeclineSelfIdentify) {
+    // activate modal
+    this.toggleDeclineSelfIdentifyModal = true;
+  }
+} // watchEeoDeclineSelfIdentify
+
+/**
+ * watch for hispanic or latino selection and
+ * clear the v-model for race or ethnicity if "Hispanic or Latino" is selected
+ *
+ */
+function watchEeoHispanicOrLatino() {
+  if (this.editedEmployee.eeoHispanicOrLatino.value) {
+    this.editedEmployee.eeoRaceOrEthnicity = this.eeoRaceOrEthnicityItems[6];
+    this.disableRaceOrEthnicity = true;
+  } else {
+    this.disableRaceOrEthnicity = false;
+  }
+} // watchEeoHispanicOrLatino
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                      EXPORT                      |
@@ -530,6 +660,8 @@ function watchValidating(val) {
 // |--------------------------------------------------|
 
 export default {
+  beforeDestroy,
+  components: { EEODeclineSelfIdentify },
   created,
   data() {
     return {
@@ -590,7 +722,68 @@ export default {
         }
       },
       userId: null,
-      value: '' // used for removing non-number characters from the workstatus
+      value: '', // used for removing non-number characters from the workstatus
+      toggleDeclineSelfIdentifyModal: false,
+      disableRaceOrEthnicity: false,
+      eeoGenderItems: [
+        {
+          text: 'Male',
+          value: true
+        },
+        { text: 'Female', value: false }
+      ],
+      eeoHispanicOrLatinoItems: [
+        {
+          text: 'Hispanic or Latino',
+          value: true
+        },
+        { text: 'Not Hispanic or Latino', value: false }
+      ],
+      eeoRaceOrEthnicityItems: [
+        { text: 'White', value: 0 },
+        {
+          text: 'Black or African American',
+          value: 1
+        },
+        { text: 'Native Hawaiian or Other Pacific Islander', value: 2 },
+        {
+          text: 'Asian',
+          value: 3
+        },
+        { text: 'American Indian or Alaska Native', value: 4 },
+        {
+          text: 'Two or More Races',
+          value: 5
+        },
+        { text: 'Not Applicable', value: 6 }
+      ],
+      eeoJobCategoryItems: [
+        { text: 'Professional', value: 0 },
+        {
+          text: 'Executive/Senior Level Offcial and Manager',
+          value: 1
+        },
+        { text: 'First/Mid-Level Offcial and Manager', value: 2 },
+        {
+          text: 'Technician',
+          value: 3
+        },
+        { text: 'Sales Worker', value: 4 },
+        {
+          text: 'Administrative Support Worker',
+          value: 5
+        },
+        { text: 'Craft Worker', value: 6 },
+        {
+          text: 'Operative',
+          value: 7
+        },
+        { text: 'Laborer and Helper', value: 8 },
+        {
+          text: 'Service Worker',
+          value: 9
+        }
+      ]
     };
   },
   directives: { mask },
@@ -625,7 +818,9 @@ export default {
     statusRadio: watchStatusRadio,
     status: watchStatus,
     mifiStatus: watchMifiStatus,
-    validating: watchValidating
+    validating: watchValidating,
+    'editedEmployee.eeoDeclineSelfIdentify': watchEeoDeclineSelfIdentify,
+    'editedEmployee.eeoHispanicOrLatino': watchEeoHispanicOrLatino
   }
 };
 </script>

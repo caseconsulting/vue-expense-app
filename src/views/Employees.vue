@@ -233,6 +233,11 @@
             :midAction="midAction"
             :employees="filteredEmployees"
           ></convert-employees-to-csv>
+          <generate-csv-eeo-report
+            v-if="userIsAdmin()"
+            :midAction="midAction"
+            :employees="filteredEmployees"
+          ></generate-csv-eeo-report>
         </v-card-actions>
 
         <!-- Confirmation Modals -->
@@ -259,6 +264,7 @@ import _ from 'lodash';
 import { getRole } from '@/utils/auth';
 import { isEmpty, isFullTime, isInactive, isPartTime, monthDayYearFormat, storeIsPopulated } from '@/utils/utils';
 import ConvertEmployeeToCsv from '../components/ConvertEmployeeToCsv.vue';
+import GenerateCsvEeoReport from '@/components/GenerateCsvEeoReport.vue';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -540,7 +546,8 @@ export default {
     DeleteErrorModal,
     DeleteModal,
     EmployeeForm,
-    ConvertEmployeeToCsv
+    ConvertEmployeeToCsv,
+    GenerateCsvEeoReport
   },
   computed: {
     storeIsPopulated

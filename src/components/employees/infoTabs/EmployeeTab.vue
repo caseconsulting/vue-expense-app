@@ -40,6 +40,43 @@
     </p>
     <!-- Last Login -->
     <p v-if="admin && !isEmpty(this.model.lastLogin)"><b>Last Logged In:</b> {{ this.model.lastLogin }}</p>
+    <!-- EEO Compliance Reporting -->
+    <div v-if="admin || employee">
+      <v-divider></v-divider>
+      <p class="mt-4"><b>EEO Compliance Reporting:</b></p>
+      <div v-if="this.model.eeoDeclineSelfIdentify" class="ml-2">
+        <p><b>Status: </b>Declined to self-identify.</p>
+      </div>
+      <div
+        v-else-if="
+          !this.model.eeoDeclineSelfIdentify &&
+          !isEmpty(this.model.eeoGender) &&
+          !isEmpty(this.model.eeoHispanicOrLatino) &&
+          !isEmpty(this.model.eeoRaceOrEthnicity) &&
+          !isEmpty(this.model.eeoJobCategory)
+        "
+        class="ml-2"
+      >
+        <p><b>Gender: </b>{{ this.model.eeoGender.text }}</p>
+        <p><b>Hispanic or Latino: </b>{{ this.model.eeoHispanicOrLatino.value ? 'Yes' : 'No' }}</p>
+        <p><b>Race or Ethnicity: </b>{{ this.model.eeoRaceOrEthnicity.text }}</p>
+        <p><b>Job Category: </b>{{ this.model.eeoJobCategory.text }}</p>
+      </div>
+      <div
+        v-else-if="
+          !isEmpty(this.model.eeoGender) ||
+          !isEmpty(this.model.eeoHispanicOrLatino) ||
+          !isEmpty(this.model.eeoRaceOrEthnicity) ||
+          !isEmpty(this.model.eeoJobCategory)
+        "
+        class="ml-2"
+      >
+        <p><b>Status: </b>Form is partially complete.</p>
+      </div>
+      <div v-else class="ml-2">
+        <p><b>Status: </b>Form not yet completed.</p>
+      </div>
+    </div>
   </div>
 </template>
 
