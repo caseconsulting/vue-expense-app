@@ -260,7 +260,6 @@
         item-text="text"
         item-value="value"
         return-object
-        @change="editedEmployee.eeoRaceOrEthnicity = null"
         :disabled="editedEmployee.eeoDeclineSelfIdentify"
       >
       </v-select>
@@ -400,6 +399,12 @@ async function created() {
   // set works status value to a string
   this.value = this.editedEmployee.workStatus.toString();
   this.userId = this.model.employeeNumber;
+
+  // EEO reporting section
+  // disable race and ethnicity field if "Hispanic and Latino" is selected.
+  if (this.editedEmployee.eeoHispanicOrLatino.value && this.editedEmployee.eeoRaceOrEthnicity.value === 6) {
+    this.disableRaceOrEthnicity = true;
+  }
   this.loading = false;
 } // created
 
@@ -636,6 +641,8 @@ function watchEeoDeclineSelfIdentify() {
   if (this.editedEmployee.eeoDeclineSelfIdentify) {
     // activate modal
     this.toggleDeclineSelfIdentifyModal = true;
+  } else if (this.isEmpty(this.editedEmployee.eeoRaceOrEthnicity)) {
+    this.disableRaceOrEthnicity = false;
   }
 } // watchEeoDeclineSelfIdentify
 
@@ -645,11 +652,16 @@ function watchEeoDeclineSelfIdentify() {
  *
  */
 function watchEeoHispanicOrLatino() {
-  if (this.editedEmployee.eeoHispanicOrLatino.value) {
-    this.editedEmployee.eeoRaceOrEthnicity = this.eeoRaceOrEthnicityItems[6];
-    this.disableRaceOrEthnicity = true;
-  } else {
-    this.disableRaceOrEthnicity = false;
+  if (!this.isEmpty(this.editedEmployee.eeoHispanicOrLatino)) {
+    if (this.editedEmployee.eeoHispanicOrLatino.value) {
+      this.editedEmployee.eeoRaceOrEthnicity = this.eeoRaceOrEthnicityItems[6];
+      this.disableRaceOrEthnicity = true;
+    } else {
+      this.disableRaceOrEthnicity = false;
+      if (!this.isEmpty(this.editedEmployee.eeoRaceOrEthnicity) && this.editedEmployee.eeoRaceOrEthnicity.value === 6) {
+        this.editedEmployee.eeoRaceOrEthnicity = null;
+      }
+    }
   }
 } // watchEeoHispanicOrLatino
 

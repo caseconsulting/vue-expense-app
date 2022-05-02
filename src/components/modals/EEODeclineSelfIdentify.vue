@@ -14,8 +14,7 @@
             target="_blank"
             >EEOCData.org</a
           >
-          or send a message to
-          <a href="https://3.basecamp.com/3097063/circles/27319030" target="_blank">Jennifer Morrison.</a>
+          or send a message to Jennifer Morrison.
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
