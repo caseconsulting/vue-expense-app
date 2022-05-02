@@ -110,7 +110,7 @@
       <v-main style="padding: 64px 0px 0px 56px">
         <badge-expiration-banner v-if="isLoggedIn() && storeIsPopulated" :key="badgeKey" />
         <v-container fluid grid-list-lg>
-          <router-view></router-view>
+          <router-view v-if="!loadingCreated"></router-view>
         </v-container>
       </v-main>
       <v-footer padless>
@@ -251,6 +251,8 @@ async function populateStore() {
  * created lifecycle hook - set up listeners and getting access token and handle things for login
  */
 async function created() {
+  this.loadingCreated = true;
+
   this.environment = process.env.VUE_APP_AUTH0_CALLBACK;
 
   window.EventBus.$on('relog', handleLogout); // Session end - log out
@@ -290,6 +292,8 @@ async function created() {
 
   //This has some security implications
   this.version = require('../package.json').version;
+
+  this.loadingCreated = false;
 } // created
 
 /**
@@ -341,6 +345,7 @@ function $route(to, from) {
 
 export default {
   data: () => ({
+    loadingCreated: false,
     environment: '',
     switchRole: false,
     floorPlan: floorPlan,
