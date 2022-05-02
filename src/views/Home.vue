@@ -230,6 +230,11 @@ function addOneSecondToActualTimeEverySecond() {
  */
 async function createEvents() {
   this.loadingEvents = true;
+  if (this.$store.getters.events) {
+    this.events = this.$store.getters.events;
+    this.loadingEvents = false;
+    return; //exit function
+  }
   let eventData = await api.getAllEvents();
   this.employees = eventData.employees;
   this.aggregatedExpenses = eventData.expenses;
@@ -403,6 +408,7 @@ async function createEvents() {
 
   let mergedEventsList = [...anniversaries, ...birthdays, ...expenses, ...schedules]; // merges lists
   this.events = _.sortBy(_.compact(mergedEventsList), 'daysFromToday'); //sorts by days from today
+  this.$store.dispatch('setEvents', { events: this.events });
   this.loadingEvents = false;
 } //createEvents
 

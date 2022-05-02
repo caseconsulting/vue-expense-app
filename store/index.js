@@ -27,7 +27,8 @@ export default new Vuex.Store({
       fiscalDateView: null,
       storeIsPopulated: false,
       user: null,
-      userRole: null
+      userRole: null,
+      events: null
     };
   },
   mutations: {
@@ -47,6 +48,9 @@ export default new Vuex.Store({
       state.user = payload.user;
       state.userRole = payload.user.employeeRole;
       state.employeeNumber = payload.user.employeeNumber;
+    },
+    setEvents(state, payload) {
+      state.events = payload.events;
     }
   },
   actions: {
@@ -64,6 +68,9 @@ export default new Vuex.Store({
     },
     setUser(context, payload) {
       context.commit('setUser', payload);
+    },
+    setEvents(context, payload) {
+      context.commit('setEvents', payload);
     }
   },
   getters: {
@@ -87,6 +94,9 @@ export default new Vuex.Store({
     },
     userRole(state) {
       return state.userRole;
+    },
+    events(state) {
+      return state.events;
     }
   }
 });
