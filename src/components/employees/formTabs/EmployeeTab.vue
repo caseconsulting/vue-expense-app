@@ -402,8 +402,10 @@ async function created() {
 
   // EEO reporting section
   // disable race and ethnicity field if "Hispanic and Latino" is selected.
-  if (this.editedEmployee.eeoHispanicOrLatino.value && this.editedEmployee.eeoRaceOrEthnicity.value === 6) {
-    this.disableRaceOrEthnicity = true;
+  if (!this.isEmpty(this.editedEmployee.eeoHispanicOrLatino && this.editedEmployee.eeoRaceOrEthnicity)) {
+    if (this.editedEmployee.eeoHispanicOrLatino.value && this.editedEmployee.eeoRaceOrEthnicity.value === 6) {
+      this.disableRaceOrEthnicity = true;
+    }
   }
   this.loading = false;
 } // created
