@@ -42,6 +42,13 @@ export async function updateStoreAvatars() {
  */
 export async function updateStoreExpenseTypes() {
   // getExpenseTypes
-  let expenseTypes = await api.getItems(api.EXPENSE_TYPES);
-  this.$store.dispatch('setExpenseTypes', { expenseTypes });
+  let user = this.$store.getters.user;
+  let employeeRole = user.employeeRole;
+  if (employeeRole == 'admin' || employeeRole == 'manager') {
+    let expenseTypes = await api.getItems(api.EXPENSE_TYPES);
+    this.$store.dispatch('setExpenseTypes', { expenseTypes });
+  } else if (employeeRole == 'intern' || employeeRole == 'user') {
+    let expenseTypes = await api.getEmployeeExpenseTypes(user.id);
+    this.$store.dispatch('setExpenseTypes', { expenseTypes });
+  }
 } // updateStoreExpenseTypes

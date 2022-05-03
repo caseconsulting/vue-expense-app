@@ -7,7 +7,6 @@ const EMPLOYEES = 'employees';
 const EMSI = 'emsi';
 const TRAINING_URLS = 'training-urls';
 const UTILITY = 'utility';
-const BUDGETS = 'budgets';
 const QUICK_BOOKS_TIME = 'tSheets';
 const TWITTER = 'twitter';
 const BASECAMP = 'basecamp';
@@ -128,9 +127,19 @@ async function getEmployeeBudget(id, expenseTypeId, date) {
 } // getEmployeeBudget
 
 /**
+ * Gets expense types for an employee
+ *
+ * @param id - the id of the employee
+ * @return - expense types for employee
+ */
+async function getEmployeeExpenseTypes(id) {
+  return execute('get', `/${UTILITY}/getEmployeeExpenseTypes/${id}`);
+} // getEmployeeExpenseTypes
+
+/**
  * gets the fiscal date view of the budgets
  *
- * @param id - the bidget id
+ * @param id - the budget id
  * @param fiscalDateView - iso formatted date to choose budget year
  * @return - the fiscal date view budget data
  */
@@ -523,6 +532,7 @@ export default {
   getCountries,
   getEmployeeBudget,
   getEmployeeBudgets,
+  getEmployeeExpenseTypes,
   getFeedEvents,
   getFiscalDateViewBudgets,
   getItem,
@@ -543,7 +553,6 @@ export default {
   EXPENSES,
   EMPLOYEES,
   UTILITY,
-  BUDGETS,
   QUICK_BOOKS_TIME,
   TRAINING_URLS,
   TWITTER,
