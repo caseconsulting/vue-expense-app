@@ -259,27 +259,29 @@ async function updateAddressDropDown() {
  * to obtain the selected address's zip code.
  */
 async function updateBoxes() {
-  let fullAddress = this.searchString.split(', ');
-  //fills in the first three fields
-  this.editedPersonalInfo.currentCity = fullAddress[1];
-  this.editedPersonalInfo.currentStreet = fullAddress[0];
-  this.editedPersonalInfo.currentState = this.states[fullAddress[2].split(' ')[0]];
+  if (!this.isEmpty(this.searchString)) {
+    let fullAddress = this.searchString.split(', ');
+    //fills in the first three fields
+    this.editedPersonalInfo.currentCity = fullAddress[1];
+    this.editedPersonalInfo.currentStreet = fullAddress[0];
+    this.editedPersonalInfo.currentState = this.states[fullAddress[2].split(' ')[0]];
 
-  //obtains the selected address's ID needed for the zip code API call
-  let selectedAddress = this.placeIds[this.searchString];
-  let res = await api.getZipCode(selectedAddress);
-  //Response contains an array of objects, with each object containing
-  //a field title 'type'. 'Type' is another array and we want the one
-  //containing the postal_code string
-  this.editedPersonalInfo.currentZIP = '';
-  _.forEach(res.result.address_components, (field) => {
-    if (field.types.includes('postal_code')) {
-      this.editedPersonalInfo.currentZIP = field.short_name;
-    }
-  });
-  //resets addresses and ID's in dropdown
-  this.placeIds = {};
-  this.searchString = '';
+    //obtains the selected address's ID needed for the zip code API call
+    let selectedAddress = this.placeIds[this.searchString];
+    let res = await api.getZipCode(selectedAddress);
+    //Response contains an array of objects, with each object containing
+    //a field title 'type'. 'Type' is another array and we want the one
+    //containing the postal_code string
+    this.editedPersonalInfo.currentZIP = '';
+    _.forEach(res.result.address_components, (field) => {
+      if (field.types.includes('postal_code')) {
+        this.editedPersonalInfo.currentZIP = field.short_name;
+      }
+    });
+    //resets addresses and ID's in dropdown
+    this.placeIds = {};
+    this.searchString = '';
+  }
 } // updateBoxes
 
 /**
