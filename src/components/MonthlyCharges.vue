@@ -217,7 +217,7 @@ function formatHours(hours) {
  * Sets the monthly charges for the employee (or user if no employee is specified).
  */
 async function setMonthlyCharges() {
-  this.employee = this.isEmployeeView ? this.passedEmployee : await api.getUser();
+  this.employee = this.isEmployeeView ? this.passedEmployee : this.$store.getters.user;
   if (!this.isEmpty(this.employee.id)) {
     this.workDayHours *= this.employee.workStatus * 0.01;
     // make call to api to get data

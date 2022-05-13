@@ -38,7 +38,6 @@
 <script>
 import { isEmpty, monthDayYearFormat } from '@/utils/utils';
 import { getRole } from '@/utils/auth';
-import api from '@/shared/api.js';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -50,7 +49,7 @@ import api from '@/shared/api.js';
  * Emits to parent the component was created and get data.
  */
 async function created() {
-  let user = await api.getUser();
+  let user = this.$store.getters.user;
   this.userId = user.employeeNumber;
   this.checkEmptyPersonalInfo();
 } //created
@@ -65,13 +64,29 @@ async function created() {
  * Checks the body of the personal tab and if it does not contain any fields/info, text will be shown there is no info.
  */
 function checkEmptyPersonalInfo() {
-  let nodeArr = [];
-  // convert to array because childNodes is an object that cannot use .every()
-  document.querySelector('#personalTab').childNodes.forEach((node) => {
-    nodeArr.push(node);
-  });
-  // there are visible elements if not every child node is a comment
-  this.childrenVisible = !nodeArr.every((node) => node.nodeType === Node.COMMENT_NODE);
+  // this is crap code but I needed a quick-fix for the code that was here and causing an error. :W
+  if (
+    this.model.github ||
+    this.model.twitter ||
+    this.model.linkedIn ||
+    this.model.phoneNumber ||
+    this.model.birthday ||
+    this.model.birthdayFeed ||
+    this.getPlaceOfBirth ||
+    this.getCurrentAddress
+  ) {
+    this.childrenVisible = true;
+  } else {
+    this.childrenVisible = false;
+  }
+  // Previous Code:
+  // let nodeArr = [];
+  // // convert to array because childNodes is an object that cannot use .every()
+  // document.querySelector('#personalTab').childNodes.forEach((node) => {
+  //   nodeArr.push(node);
+  // });
+  // // there are visible elements if not every child node is a comment
+  // this.childrenVisible = !nodeArr.every((node) => node.nodeType === Node.COMMENT_NODE);
 } // checkEmptyPersonalInfo
 
 /**

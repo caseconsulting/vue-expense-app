@@ -6,6 +6,7 @@
 
 <script>
 import BarChart from '../baseCharts/BarChart.vue';
+import { storeIsPopulated } from '@/utils/utils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -17,7 +18,7 @@ import BarChart from '../baseCharts/BarChart.vue';
  * mounted lifecycle hook
  */
 function mounted() {
-  this.fillPrimeData();
+  if (this.storeIsPopulated) this.fillPrimeData();
 } // mounted
 
 // |--------------------------------------------------|
@@ -63,9 +64,10 @@ function getCurrentProjects(employee) {
  */
 function fillPrimeData() {
   //Get data
+  this.employees = this.$store.getters.employees;
   //Put into dictionary where key is prime and value is quantity
   let primes = {};
-  this.employees3.forEach((employee) => {
+  this.employees.forEach((employee) => {
     if (employee.workStatus != 0) {
       let currContracts = this.getCurrentProjects(employee);
       let currPrimes = {};
@@ -177,6 +179,9 @@ function fillPrimeData() {
 export default {
   components: { BarChart },
   mounted,
+  computed: {
+    storeIsPopulated
+  },
   data() {
     return {
       options: null,
@@ -188,6 +193,10 @@ export default {
     getCurrentProjects,
     fillPrimeData
   },
-  props: ['employees3'] // stats page (employees) --> tab (employees2) --> chart (employees3)
+  watch: {
+    storeIsPopulated: function () {
+      if (this.storeIsPopulated) this.fillPrimeData();
+    }
+  }
 };
 </script>

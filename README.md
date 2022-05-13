@@ -2,8 +2,8 @@
 
 The **Expense Application** is written in **Vue.js** and relies on **Node.js** v12.x+ and the **npm** package management system. UI is enhanced with **Vuetify.js** and **BootStrap-vue**.
 
-* Download and install Node.js v12.x from: https://nodejs.org/en/ or https://nodejs.org/dist/latest-v12.x/
-* Install required Node.js modules:
+- Download and install Node.js v12.x from: https://nodejs.org/en/ or https://nodejs.org/dist/latest-v12.x/
+- Install required Node.js modules:
 
 ```
 npm ci
@@ -13,18 +13,18 @@ npm ci
 
 In order to use **Auth0** authentication, you will need to define some environment variables:
 
-* **VUE_APP_AUTH0_API_ID**
-* **VUE_APP_AUTH0_CALLBACK**
-* **VUE_APP_AUTH0_CLIENT_ID**
-* **VUE_APP_AUTH0_DOMAIN**
+- **VUE_APP_AUTH0_API_ID**
+- **VUE_APP_AUTH0_CALLBACK**
+- **VUE_APP_AUTH0_CLIENT_ID**
+- **VUE_APP_AUTH0_DOMAIN**
 
 The following environment variables are required to support multiple environments:
 
-* **VUE_APP_API_HOSTNAME**
-* **VUE_APP_API_PORT**
-* **NODE_ENV**
+- **VUE_APP_API_HOSTNAME**
+- **VUE_APP_API_PORT**
+- **NODE_ENV**
 
-**vue-cli** automatically picks up environment variables in `.env` files. Any variables that begin with **VUE_APP_**
+**vue-cli** automatically picks up environment variables in `.env` files. Any variables that begin with **VUE*APP***
 will be included in the client bundle created by webpack. They will be accessible from your code using **process.env**.
 At build time, webpack will replace these references with their corresponding values. For more information, go to:
 https://cli.vuejs.org/guide/mode-and-env.html#using-env-variables-in-client-side-code.
@@ -92,19 +92,12 @@ To upgrade to the latest version of a specific Node.js module:
 ```
 npm update --save <module-name>@latest
 ```
+
 To upgrade to the latest version of a specific Node.js module, which is a development dependency only:
 
 ```
 npm update --save-dev <module-name>@latest
 ```
-
-## Blog Post Creator/Editor
-
-The Blog post creator/editor is currently a work in progress that will add functionality for employees to create blog posts within the Portal that will eventually be uploaded to the blog on the Case Consulting website.
-
-Functionality to create, edit and delete posts is currently available in the Portal. Future work will allow those posts to be uploaded directly to the Case Consulting Blog on the website.
-
-To access the blog in the Portal simply go to the URL {app-domain-name}/blog. For example if running app on localhost:8080 URL would be localhost:8080/blog.
 
 ## Deployment
 
@@ -124,7 +117,6 @@ npm run deploy:test
 
 **To download prod .env and then deploy to the prod environment:**
 
-
 make a pull request from master to release in git hub
 
 ```
@@ -139,6 +131,28 @@ To reset for local development, after a deployment:
 
 ```
 npm run download:local:env
+```
+
+## Nightwatch tests
+
+**To run all nightwatch tests (Warning: this may take a while):**
+
+```
+npm run test
+```
+
+**To run a set of nightwatch tests:**
+
+```
+npm run test -- --tag {TAG NAME}
+```
+
+Note: any test with this tag will be run.
+
+Example:
+
+```
+npm run test -- --tag logout
 ```
 
 ## Documentation
@@ -168,7 +182,3 @@ https://momentjs.com/docs/
 **Axios:**
 
 https://github.com/axios/axios
-
-**CKEditor:**
-
-https://ckeditor.com/docs/ckeditor5/latest/framework/guides/overview.html

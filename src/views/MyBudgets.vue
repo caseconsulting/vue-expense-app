@@ -47,12 +47,16 @@
           v-if="!loading"
           class="my-3"
           :employee="employee"
+          :expenses="expenses"
+          :expenseTypes="expenseTypes"
           :fiscalDateView="fiscalDateView"
           @rendered="displayChart = !displayChart"
         ></budget-table>
         <budget-chart
           v-if="!loading && !isMobile && !adminCall && displayChart && hasAccessToBudgets"
           :employee="employee"
+          :expenses="expenses"
+          :expenseTypes="expenseTypes"
           :fiscalDateView="fiscalDateView"
         ></budget-chart>
       </div>
@@ -75,7 +79,7 @@ import ExpenseForm from '@/components/ExpenseForm.vue';
 import AnniversaryCard from '@/components/AnniversaryCard.vue';
 const moment = require('moment-timezone');
 moment.tz.setDefault('America/New_York');
-import { isInactive, isMobile } from '@/utils/utils';
+import { isInactive, isMobile, getCurrentBudgetYear } from '@/utils/utils';
 
 const IsoFormat = 'YYYY-MM-DD';
 
@@ -91,7 +95,7 @@ const IsoFormat = 'YYYY-MM-DD';
  * @return boolean - viewing the current active year budget
  */
 function viewingCurrentBudgetYear() {
-  return this.fiscalDateView == this.getCurrentBudgetYear();
+  return this.fiscalDateView == this.getCurrentBudgetYear(this.hireDate);
 } // viewingCurrentBudgetYear
 
 // |--------------------------------------------------|
@@ -121,22 +125,6 @@ function displayError(err) {
 } // displayError
 
 /**
- * Gets the current active anniversary budget year starting date in isoformat.
- *
- * @return String - current active anniversary budget date (YYYY-MM-DD)
- */
-function getCurrentBudgetYear() {
-  let currentBudgetYear = moment(this.hireDate, IsoFormat);
-  if (moment().isAfter(currentBudgetYear)) {
-    currentBudgetYear.year(moment().year());
-    if (moment().isBefore(currentBudgetYear)) {
-      currentBudgetYear = currentBudgetYear.subtract(1, 'years');
-    }
-  }
-  return currentBudgetYear.format(IsoFormat);
-} // getCurrentBudgetYear
-
-/**
  * Refresh and sets employee information.
  */
 async function refreshEmployee() {
@@ -144,7 +132,7 @@ async function refreshEmployee() {
   this.displayChart = false;
   if (this.employ == null) {
     // set the employee to the selected employee if viewing from an admin view
-    this.employee = await api.getUser();
+    this.employee = this.$store.getters.user;
   } else {
     // set the employee to the current user if viewing from a user view
     this.employee = this.employ;
@@ -156,7 +144,9 @@ async function refreshEmployee() {
     this.hasAccessToBudgets = false; // disable budget chart
   }
   this.hireDate = this.employee.hireDate;
-  this.fiscalDateView = this.getCurrentBudgetYear();
+  this.fiscalDateView = this.getCurrentBudgetYear(this.hireDate);
+  this.expenseTypes = this.$store.getters.expenseTypes;
+  this.expenses = await api.getAllAggregateExpenses();
   this.loading = false; // set loading status to false
 } // refreshEmployee
 
@@ -261,6 +251,8 @@ export default {
         employeeName: null,
         budgetName: null
       }, // blank expense for the expense form
+      expenses: null,
+      expenseTypes: null,
       fiscalDateView: '', // current budget year view by anniversary day
       hasAccessToBudgets: true, // user has access to one or more budgets
       hireDate: '', // employee hire date

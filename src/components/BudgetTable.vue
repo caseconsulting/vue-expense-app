@@ -216,6 +216,15 @@ async function created() {
     let budget = data.budgetObject;
     return budget.amount != 0 || budget.reimbursedAmount != 0 || budget.pendingAmount != 0;
   });
+
+  // remove inactive budgets (exception: there contains a pending expense under that budget)
+  this.expenseTypeData = _.filter(this.expenseTypeData, (data) => {
+    let budget = data.budgetObject;
+    return (
+      !_.some(this.expenseTypes, (e) => e.id == budget.expenseTypeId && e.isInactive) ||
+      _.some(this.expenses, (e) => e.expenseTypeId == budget.expenseTypeId && _.isEmpty(e.reimbursedDate))
+    );
+  });
 }
 
 // |--------------------------------------------------|
@@ -243,7 +252,7 @@ export default {
     odFlagMessage
   },
   updated,
-  props: ['employee', 'fiscalDateView'] // employee of budgets
+  props: ['employee', 'fiscalDateView', 'expenses', 'expenseTypes'] // employee of budgets
 };
 </script>
 

@@ -107,10 +107,10 @@
         <!-- End user image and logout -->
       </v-app-bar>
 
-      <v-main>
-        <badge-expiration-banner :key="badgeKey" />
+      <v-main style="padding: 64px 0px 0px 56px">
+        <badge-expiration-banner v-if="isLoggedIn() && storeIsPopulated" :key="badgeKey" />
         <v-container fluid grid-list-lg>
-          <router-view></router-view>
+          <router-view v-if="!loadingCreated"></router-view>
         </v-container>
       </v-main>
       <v-footer padless>
@@ -122,7 +122,7 @@
                 id="P"
                 class="black--text"
                 target="_blank"
-                href="https://3.basecamp.com/3097063/buckets/4708396/documents/4457700177"
+                href="https://3.basecamp.com/3097063/buckets/4708396/documents/4907164939"
                 ><strong>Version</strong> {{ version }}</a
               >
             </template>
@@ -143,15 +143,14 @@
 
 <script>
 import { isLoggedIn, logout, getProfile, getTokenExpirationDate, getAccessToken } from '@/utils/auth';
-import { isMobile } from '@/utils/utils';
+import { isMobile, storeIsPopulated } from '@/utils/utils';
+import { updateStoreUser, updateStoreEmployees, updateStoreAvatars, updateStoreExpenseTypes } from '@/utils/storeUtils';
 import SwitchRoleModal from '@/components/modals/SwitchRoleModal.vue';
 import MainNav from '@/components/MainNav.vue';
 import TimeOutModal from '@/components/modals/TimeOutModal.vue';
 import TimeOutWarningModal from '@/components/modals/TimeOutWarningModal.vue';
 import BadgeExpirationBanner from '@/components/modals/BadgeExpirationBanner.vue';
 import floorPlan from '@/assets/img/MakeOfficesfloorplan.jpg';
-import api from '@/shared/api.js';
-// import _ from 'lodash';
 import moment from 'moment-timezone';
 moment.tz.setDefault('America/New_York');
 
@@ -218,9 +217,7 @@ function handleLogout() {
  */
 async function handleProfile() {
   // We don't use this.userId becuase it may be null by the time we click the button
-  var user = await api.getUser();
-  let userId = user.employeeNumber;
-  this.$router.push({ name: 'employee', params: { id: `${userId}` } });
+  this.$router.push({ name: 'employee', params: { id: `${this.userId}` } });
 } // handleProfile
 
 /**
@@ -229,6 +226,20 @@ async function handleProfile() {
 function onResize() {
   this.isSmallScreen = window.innerWidth < 960;
 } // onResize
+
+/**
+ * resize the window for small screens
+ */
+async function populateStore() {
+  await this.updateStoreUser();
+  await this.updateStoreEmployees();
+  await this.updateStoreAvatars();
+  await this.updateStoreExpenseTypes();
+
+  // This is used to help pages know when data is loaded into the store.
+  // Otherwise, on reload, pages would try to access the store before it was populated.
+  this.$store.dispatch('setStoreIsPopulated', { populated: true });
+} // populateStore
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -240,6 +251,8 @@ function onResize() {
  * created lifecycle hook - set up listeners and getting access token and handle things for login
  */
 async function created() {
+  this.loadingCreated = true;
+
   this.environment = process.env.VUE_APP_AUTH0_CALLBACK;
 
   window.EventBus.$on('relog', handleLogout); // Session end - log out
@@ -264,9 +277,11 @@ async function created() {
         this.session = true;
       }, timeRemaining - 300000);
     }
+
+    await this.populateStore();
+
     //stores the employee number
-    var user = await api.getUser();
-    this.userId = user.employeeNumber;
+    this.userId = this.$store.getters.employeeNumber;
   }
 
   let pic = getProfile();
@@ -277,7 +292,9 @@ async function created() {
 
   //This has some security implications
   this.version = require('../package.json').version;
-}
+
+  this.loadingCreated = false;
+} // created
 
 /**
  * beforeDestroy lifecycle hook - close event listener
@@ -328,6 +345,7 @@ function $route(to, from) {
 
 export default {
   data: () => ({
+    loadingCreated: false,
     environment: '',
     switchRole: false,
     floorPlan: floorPlan,
@@ -369,7 +387,8 @@ export default {
   },
   computed: {
     isMobile,
-    onUserProfile
+    onUserProfile,
+    storeIsPopulated
   },
   components: {
     MainNav,
@@ -383,7 +402,12 @@ export default {
     handleLogout,
     handleProfile,
     isLoggedIn,
-    onResize
+    onResize,
+    populateStore,
+    updateStoreUser,
+    updateStoreEmployees,
+    updateStoreAvatars,
+    updateStoreExpenseTypes
   },
   watch: {
     $route
@@ -396,7 +420,7 @@ export default {
 
 <style lang="scss">
 @import '../node_modules/vuetify/dist/vuetify.min.css';
-@import 'src/assets/styles/styles.scss';
+@import 'src/assets/styles/styles';
 
 #app {
   font-family: 'Avenir', Helvetica, Arial, sans-serif;

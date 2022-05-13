@@ -21,6 +21,7 @@
 import _ from 'lodash';
 const moment = require('moment-timezone');
 moment.tz.setDefault('America/New_York');
+import { storeIsPopulated } from '@/utils/utils.js';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -29,11 +30,11 @@ moment.tz.setDefault('America/New_York');
 // |--------------------------------------------------|
 
 /**
- * created lifecycle hook
+ * mounted lifecycle hook
  */
-function created() {
-  this.fillData();
-} // created
+function mounted() {
+  if (this.storeIsPopulated) this.fillData();
+} // mounted
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -48,6 +49,8 @@ function fillData() {
   let ICData = {};
   let totalYears = 0;
 
+  // access store
+  this.employees = this.$store.getters.employees;
   // filter out inactive employees (including info) and intern
   let interns = this.employees.filter((emp) => emp.employeeRole == 'intern');
 
@@ -107,10 +110,13 @@ function fillData() {
 // |--------------------------------------------------|
 
 export default {
+  computed: {
+    storeIsPopulated
+  },
   data() {
     return {
       dataReceived: false,
-      employees: this.employees3, // copied to fix issue with mutated prop
+      employees: null,
       tableContents: null,
       headers: null
     };
@@ -118,7 +124,11 @@ export default {
   methods: {
     fillData
   },
-  created,
-  props: ['employees3'] // stats page (employees) --> tab (employees2) --> chart (employees3)
+  mounted,
+  watch: {
+    storeIsPopulated: function () {
+      if (this.storeIsPopulated) this.fillData();
+    }
+  }
 };
 </script>

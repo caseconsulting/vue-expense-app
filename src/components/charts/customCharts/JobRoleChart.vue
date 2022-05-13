@@ -6,6 +6,7 @@
 
 <script>
 import BarChart from '../baseCharts/BarChart.vue';
+import { storeIsPopulated } from '@/utils/utils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -14,11 +15,11 @@ import BarChart from '../baseCharts/BarChart.vue';
 // |--------------------------------------------------|
 
 /**
- * created lifecycle hook
+ * mounted lifecycle hook
  */
-function created() {
-  this.fillData();
-} // created
+function mounted() {
+  if (this.storeIsPopulated) this.fillData();
+} // mounted
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -32,7 +33,8 @@ function created() {
  */
 function fillData() {
   let roles = {};
-  this.employees3.forEach((emp) => {
+  this.employees = this.$store.getters.employees;
+  this.employees.forEach((emp) => {
     if (emp.jobRole && emp.workStatus != 0) {
       if (roles[emp.jobRole]) {
         roles[emp.jobRole] += 1;
@@ -126,6 +128,9 @@ function fillData() {
 
 export default {
   components: { BarChart },
+  computed: {
+    storeIsPopulated
+  },
   data() {
     return {
       options: null,
@@ -137,7 +142,11 @@ export default {
   methods: {
     fillData
   },
-  created,
-  props: ['employees3'] // stats page (employees) --> tab (employees2) --> chart (employees3)
+  mounted,
+  watch: {
+    storeIsPopulated: function () {
+      if (this.storeIsPopulated) this.fillData();
+    }
+  }
 };
 </script>

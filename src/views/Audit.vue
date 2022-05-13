@@ -17,11 +17,11 @@
               </v-btn>
             </template>
             <v-list>
-              <v-list-item v-if="selectedDropdown !== 'Resume Parser'" @click="selectDropDown('Resume Parser')"
-                >Resume Parser</v-list-item
-              >
               <v-list-item v-if="selectedDropdown !== 'User Logins'" @click="selectDropDown('User Logins')"
                 >User Logins</v-list-item
+              >
+              <v-list-item v-if="selectedDropdown !== 'Resume Parser'" @click="selectDropDown('Resume Parser')"
+                >Resume Parser</v-list-item
               >
               <v-list-item
                 v-if="selectedDropdown !== 'Mifi Status Changes'"
@@ -66,12 +66,18 @@
         <v-col cols="1">
           <v-tooltip top>
             <template v-slot:activator="{ on, attrs }">
-              <v-btn class="mt-1 ml-2" @click="setDateRange" v-bind="attrs" v-on="on">Apply</v-btn>
+              <v-btn class="ml-2" @click="setDateRange" v-bind="attrs" v-on="on">Apply</v-btn>
             </template>
             <span>Show data from 12am on start date up to 12am on end date</span>
           </v-tooltip>
         </v-col>
       </v-row>
+      <login-audit-page
+        v-if="selectedDropdown === 'User Logins'"
+        :queryStartDate="auditsQueryFormatted.range[0]"
+        :queryEndDate="auditsQueryFormatted.range[1]"
+        :show24HourTitle="firstLoad"
+      ></login-audit-page>
       <!-- Displays of Audit Data -->
       <resume-parser-audit-page
         v-if="selectedDropdown === 'Resume Parser'"
@@ -79,12 +85,6 @@
         :queryEndDate="auditsQueryFormatted.range[1]"
         :show24HourTitle="firstLoad"
       ></resume-parser-audit-page>
-      <login-audit-page
-        v-if="selectedDropdown === 'User Logins'"
-        :queryStartDate="auditsQueryFormatted.range[0]"
-        :queryEndDate="auditsQueryFormatted.range[1]"
-        :show24HourTitle="firstLoad"
-      ></login-audit-page>
       <mifi-log-audit
         v-if="selectedDropdown === 'Mifi Status Changes'"
         :queryStartDate="auditsQueryFormatted.range[0]"
@@ -177,8 +177,8 @@ function selectDropDown(tab) {
 
 export default {
   components: {
-    ResumeParserAuditPage,
     LoginAuditPage,
+    ResumeParserAuditPage,
     MifiLogAudit
   },
   data() {
@@ -191,7 +191,7 @@ export default {
         range: [moment().subtract(1, 'd').format(), moment().format()]
       },
       firstLoad: true, // this is used to set chart titles to "last 24 hours" if a custom date range has not been set
-      selectedDropdown: 'Resume Parser',
+      selectedDropdown: 'User Logins',
       requiredRules: [(v) => !isEmpty(v) || 'This field is required'] // rules for a required field
     };
   },

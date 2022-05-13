@@ -7,6 +7,7 @@
 <script>
 import BarChart from '../baseCharts/BarChart.vue';
 import moment from 'moment-timezone';
+import { storeIsPopulated } from '@/utils/utils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -15,11 +16,11 @@ import moment from 'moment-timezone';
 // |--------------------------------------------------|
 
 /**
- * created lifecycle hook
+ * mounted lifecycle hook
  */
-function created() {
-  this.fillCertData();
-} // created
+function mounted() {
+  if (this.storeIsPopulated) this.fillCertData();
+} // mounted
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -33,8 +34,9 @@ function created() {
 function fillCertData() {
   //Put into dictionary where key is kinda tech and value is quantity
   let certifications = {};
+  this.employees = this.$store.getters.employees;
   // tally up each certification
-  this.employees3.forEach((employee) => {
+  this.employees.forEach((employee) => {
     if (employee.certifications && employee.workStatus != 0) {
       employee.certifications.forEach((currCert) => {
         if (moment().isBefore(moment(currCert.expirationDate))) {
@@ -180,7 +182,10 @@ function breakSentence(s) {
 
 export default {
   components: { BarChart },
-  created,
+  mounted,
+  computed: {
+    storeIsPopulated
+  },
   data() {
     return {
       options: null,
@@ -192,6 +197,10 @@ export default {
     fillCertData,
     breakSentence
   },
-  props: ['employees3'] // stats page (employees) --> tab (employees2) --> chart (employees3)
+  watch: {
+    storeIsPopulated: function () {
+      if (this.storeIsPopulated) this.fillCertData();
+    }
+  }
 };
 </script>

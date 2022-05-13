@@ -261,7 +261,6 @@
 </template>
 
 <script>
-import api from '@/shared/api.js';
 import _ from 'lodash';
 import { getDateMonthYearRules, getDateMonthYearOptionalRules, getRequiredRules } from '@/shared/validationUtils.js';
 import { isEmpty, formatDate, formatDateMonthYear, parseDateMonthYear, isMobile } from '@/utils/utils';
@@ -281,7 +280,7 @@ moment.tz.setDefault('America/New_York');
  */
 async function created() {
   window.EventBus.$emit('created', 'jobExperience'); // emit education tab was created
-  this.employees = await api.getItems(api.EMPLOYEES); // get all employees
+  this.employees = this.$store.getters.employees; // get all employees
   this.populateDropDowns(); // get autocomplete drop down data
 } // created
 

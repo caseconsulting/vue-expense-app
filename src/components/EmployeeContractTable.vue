@@ -91,7 +91,6 @@
 </template>
 
 <script>
-import api from '@/shared/api.js';
 import _ from 'lodash';
 
 // |--------------------------------------------------|
@@ -384,7 +383,7 @@ function searchPrime() {
  */
 async function created() {
   this.loading = true; // set loading status to true
-  this.employeesInfo = await api.getItems(api.EMPLOYEES); // get all employees
+  this.employeesInfo = this.$store.getters.employees; // get all employees
   this.populateDropDowns(this.employeesInfo);
   this.buildContractsColumn();
   this.filteredEmployees = this.employeesInfo;

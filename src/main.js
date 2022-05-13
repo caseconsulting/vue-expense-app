@@ -1,13 +1,12 @@
 import Vue from 'vue';
 import router from './router';
-import store from './store';
+import store from '../store';
 
 const moment = require('moment-timezone');
 moment.tz.setDefault('America/New_York');
 import vuetify from './vuetify';
 
 import(/* webpackMode: "eager" */ 'vuetify/dist/vuetify.min.css');
-import CKEditor from '@ckeditor/ckeditor5-vue2';
 
 // BEGIN VUE AWESOME
 import 'vue-awesome/icons/regular/times-circle';
@@ -63,7 +62,6 @@ import Vue2Filters from 'vue2-filters';
 
 Vue.use(Vue2Filters);
 
-Vue.use(CKEditor);
 Vue.prototype.moment = moment;
 Vue.component('icon', Icon);
 window.EventBus = new Vue();

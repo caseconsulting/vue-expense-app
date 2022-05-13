@@ -6,7 +6,7 @@
           <v-tooltip top>
             <template v-slot:activator="{ on }">
               <v-btn v-on="on" v-if="!isMobile" :disabled="reachedMin" @click="oneLessColumn" small class="mr-2"
-                >-</v-btn
+                ><v-icon>mdi-minus</v-icon></v-btn
               >
             </template>
             <span>Decrease Number of Columns Shown</span>
@@ -14,7 +14,7 @@
           <v-tooltip top>
             <template v-slot:activator="{ on }">
               <v-btn v-on="on" v-if="!isMobile" :disabled="reachedMax" @click="oneMoreColumn" small class="mr-2"
-                >+</v-btn
+                ><v-icon>mdi-plus</v-icon></v-btn
               >
             </template>
             <span>Increase Number of Columns Shown</span>
@@ -41,7 +41,7 @@
 
 <script>
 import HorizontalBar from '../baseCharts/HorizontalBarChart.vue';
-import { isMobile } from '@/utils/utils';
+import { isMobile, storeIsPopulated } from '@/utils/utils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -208,18 +208,14 @@ function sortTech(techArray) {
   this.setNumOfColumns(techArray);
 } //sortTech
 
-// |--------------------------------------------------|
-// |                                                  |
-// |                  LIFECYCLE HOOKS                 |
-// |                                                  |
-// |--------------------------------------------------|
-
 /**
- * mounted lifecycle hook - get items, organize them and fill data
+ * Parse through employee data to get technologies
+ *
  */
-function mounted() {
+function parseEmployeeData() {
+  this.employees = this.$store.getters.employees;
   //Put into dictionary where key is tech type and value is quantity
-  this.employees3.forEach((employee) => {
+  this.employees.forEach((employee) => {
     if (employee.technologies && employee.workStatus != 0) {
       employee.technologies.forEach((currTech) => {
         // **** ALL TECH ****
@@ -254,17 +250,26 @@ function mounted() {
   if (this.technologies.length >= 2) {
     this.enoughData = false;
   }
-  // Sort tech by number of occurances
-  this.sortTech(this.technologies);
+} // parseEmployeeData
 
-  this.fillData();
+// |--------------------------------------------------|
+// |                                                  |
+// |                  LIFECYCLE HOOKS                 |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * mounted lifecycle hook - get items, organize them and fill data
+ */
+function mounted() {
+  if (this.storeIsPopulated) {
+    this.parseEmployeeData();
+    // Sort tech by number of occurances
+    this.sortTech(this.technologies);
+
+    this.fillData();
+  }
 } // mounted
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                      EXPORT                      |
-// |                                                  |
-// |--------------------------------------------------|
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -286,18 +291,26 @@ function watchShowCurrent() {
   this.fillData();
 } // watchShowCurrent
 
+// |--------------------------------------------------|
+// |                                                  |
+// |                      EXPORT                      |
+// |                                                  |
+// |--------------------------------------------------|
+
 export default {
   components: {
     HorizontalBar
   },
   computed: {
-    isMobile
+    isMobile,
+    storeIsPopulated
   },
   data() {
     return {
       reachedMax: false,
       reachedMin: false,
       dataReceived: false,
+      employees: null,
       chartData: null,
       options: null,
       numOfColumns: 5,
@@ -315,12 +328,21 @@ export default {
     oneMoreColumn,
     oneLessColumn,
     sortTech,
+    parseEmployeeData,
     setNumOfColumns
   },
   mounted,
-  props: ['employees3'], // stats page (employees) --> tab (employees2) --> chart (employees3)
   watch: {
-    showCurrent: watchShowCurrent
+    showCurrent: watchShowCurrent,
+    storeIsPopulated: function () {
+      if (this.storeIsPopulated) {
+        this.parseEmployeeData();
+        // Sort tech by number of occurances
+        this.sortTech(this.technologies);
+
+        this.fillData();
+      }
+    }
   }
 };
 </script>

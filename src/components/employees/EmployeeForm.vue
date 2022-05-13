@@ -319,10 +319,10 @@
 
           <!-- Form action buttons -->
           <v-btn id="employeeCancelBtn" class="ma-2" color="white" @click="cancel" elevation="2"
-            ><icon class="mr-1" name="ban"></icon>Cancel</v-btn
+            ><v-icon class="mr-1">cancel</v-icon>Cancel</v-btn
           >
           <v-btn id="employeeSubmitBtn" outlined class="ma-2" color="success" @click="confirm">
-            <icon class="mr-1" name="save"></icon>Submit
+            <v-icon class="mr-1">save</v-icon>Submit
           </v-btn>
           <!-- End form action buttons -->
         </v-form>
@@ -349,6 +349,7 @@
 
 <script>
 import api from '@/shared/api.js';
+import { updateStoreEmployees } from '@/utils/storeUtils';
 import AwardTab from '@/components/employees/formTabs/AwardTab';
 import CertificationTab from '@/components/employees/formTabs/CertificationTab';
 import ClearanceTab from '@/components/employees/formTabs/ClearanceTab';
@@ -401,7 +402,7 @@ function selectDropDown(tab) {
  */
 async function cancel() {
   //creating an employee
-  let employees = await api.getItems(api.EMPLOYEES);
+  let employees = this.$store.getters.employees;
   //if the user types an employee number that matches another employee's
   let existingResume = employees.some((emp) => emp.employeeNumber == this.employeeNumber);
   if (this.model.employeeNumber && this.$route.params.id === undefined && !existingResume) {
@@ -656,6 +657,10 @@ async function submit() {
         // successfully updated employee
         this.fullName = `${updatedEmployee.firstName} ${updatedEmployee.lastName}`;
         window.EventBus.$emit('update', updatedEmployee);
+
+        // getEmployees and update store with latest data
+        await this.updateStoreEmployees();
+
         await this.cancel();
       } else {
         // failed to update employee
@@ -678,6 +683,8 @@ async function submit() {
       // creating employee
       this.model.id = uuid();
       let newEmployee = await api.createItem(api.EMPLOYEES, this.model);
+      // getEmployees and update store with latest data
+      await this.updateStoreEmployees();
       if (newEmployee.id) {
         // successfully created employee
         this.$router.push(`/employee/${newEmployee.employeeNumber}`);
@@ -710,7 +717,7 @@ function addErrorTab(name, errors) {
  * opens up the resume parser
  */
 async function openUpload() {
-  let employees = await api.getItems(api.EMPLOYEES);
+  let employees = this.$store.getters.employees;
   //check validation of employee number
   if (employees.some((emp) => emp.employeeNumber == this.employeeNumber)) {
     //if error
@@ -893,6 +900,11 @@ function setFormData(tab, data) {
     this.$set(this.model, 'workStatus', data.workStatus);
     this.$set(this.model, 'deptDate', data.deptDate);
     this.$set(this.model, 'mifiStatus', data.mifiStatus);
+    this.$set(this.model, 'eeoGender', data.eeoGender);
+    this.$set(this.model, 'eeoHispanicOrLatino', data.eeoHispanicOrLatino);
+    this.$set(this.model, 'eeoRaceOrEthnicity', data.eeoRaceOrEthnicity);
+    this.$set(this.model, 'eeoJobCategory', data.eeoJobCategory);
+    this.$set(this.model, 'eeoDeclineSelfIdentify', data.eeoDeclineSelfIdentify);
   } else if (tab == 'personal') {
     //sets all personal info to data returned from personal tab
     this.$set(this.model, 'github', data.github);
@@ -1172,7 +1184,8 @@ export default {
     submit,
     titleCase,
     resumeReceived,
-    selectDropDown
+    selectDropDown,
+    updateStoreEmployees
   },
   props: ['currentTab', 'employee'], // employee to be created/updated
   watch: {

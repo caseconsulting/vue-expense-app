@@ -57,7 +57,7 @@ async function switchRole() {
   this.$nextTick(async function () {
     if (this.roleSelected.toLowerCase() != this.roleOriginial) {
       try {
-        let user = await api.getUser();
+        let user = this.$store.getters.user;
         user.employeeRole = this.roleSelected.toLowerCase();
         await api.updateItem(api.EMPLOYEES, user); // update user employee role
 

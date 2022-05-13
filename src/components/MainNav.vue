@@ -287,7 +287,7 @@ export default {
 <style lang="scss" scoped>
 .navbar-icons {
   vertical-align: middle;
-  color: #646460;
+  fill: #646460;
   text-align: center;
   width: 100%;
   height: 100%;

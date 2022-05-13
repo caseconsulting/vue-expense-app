@@ -1,6 +1,6 @@
 <template>
   <v-container class="my-3">
-    <span v-if="loading">
+    <span v-if="loadingEmployee">
       <v-row>
         <v-col cols="12" md="6">
           <v-skeleton-loader class="my-3" type="list-item@2"></v-skeleton-loader>
@@ -61,7 +61,7 @@
         <v-col wrap cols="12" lg="6">
           <!-- QuickBooksTime -->
           <v-col class="pa-4">
-            <v-col v-if="loading" class="text-center">
+            <v-col v-if="loadingEmployee" class="text-center">
               <v-progress-circular indeterminate size="64" color="#bc3825"></v-progress-circular>
             </v-col>
             <v-col v-else class="pt-0 text-center">
@@ -71,13 +71,15 @@
           <!-- Available Budgets -->
           <div>
             <v-col class="pa-4">
-              <v-col v-if="loading" text-center>
+              <v-col v-if="loadingEmployee" text-center>
                 <v-progress-circular indeterminate size="64" color="#bc3825"></v-progress-circular>
               </v-col>
               <v-col v-else class="pt-0 text-center">
                 <available-budgets
                   id="home-available-budgets"
                   :employee="this.employee"
+                  :expenses="this.expenses"
+                  :expenseTypes="this.expenseTypes"
                   :fiscalDateView="this.fiscalDateView"
                 ></available-budgets>
               </v-col>
@@ -87,7 +89,7 @@
         <!-- Activity Feed -->
         <v-col cols="12" lg="6">
           <v-col mt-0 class="pt-4">
-            <activity-feed id="home-activity-feed" :events="events" :loading="loading"></activity-feed>
+            <activity-feed id="home-activity-feed" :events="events" :loading="loadingEvents"></activity-feed>
           </v-col>
         </v-col>
       </v-row>
@@ -95,7 +97,7 @@
         <!-- Twitter Feed -->
         <v-col>
           <v-col mt-0 class="pt-4">
-            <twitter-feed id="home-twitter-feed" :tweets="tweets" :loading="loading"></twitter-feed>
+            <twitter-feed id="home-twitter-feed" :tweets="tweets" :loading="loadingTweets"></twitter-feed>
           </v-col>
         </v-col>
       </v-row>
@@ -111,10 +113,8 @@ import moment from 'moment-timezone';
 moment.tz.setDefault('America/New_York');
 import TwitterFeed from '@/components/TwitterFeed';
 import _ from 'lodash';
-import { isEmpty } from '@/utils/utils';
+import { isEmpty, getCurrentBudgetYear } from '@/utils/utils';
 import QuickBooksTimeData from '../components/QuickBooksTimeData.vue';
-
-const IsoFormat = 'YYYY-MM-DD';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -229,6 +229,12 @@ function addOneSecondToActualTimeEverySecond() {
  * Create the events to populate the activity feed
  */
 async function createEvents() {
+  this.loadingEvents = true;
+  if (this.$store.getters.events) {
+    this.events = this.$store.getters.events;
+    this.loadingEvents = false;
+    return; //exit function
+  }
   let eventData = await api.getAllEvents();
   this.employees = eventData.employees;
   this.aggregatedExpenses = eventData.expenses;
@@ -399,8 +405,11 @@ async function createEvents() {
     }
     return event;
   });
+
   let mergedEventsList = [...anniversaries, ...birthdays, ...expenses, ...schedules]; // merges lists
   this.events = _.sortBy(_.compact(mergedEventsList), 'daysFromToday'); //sorts by days from today
+  this.$store.dispatch('setEvents', { events: this.events });
+  this.loadingEvents = false;
 } //createEvents
 
 /**
@@ -431,49 +440,30 @@ function getEventDateMessage(date) {
  * Calls the API to get tweets from the Twitter account.
  */
 async function getTweets() {
+  this.loadingTweets = true;
   this.tweets = await api.getCaseTimeline();
+  this.loadingTweets = false;
 } // getTweets
 
 /**
  * Routes user to their employee page
  */
-async function handleProfile() {
-  var user = await api.getUser();
-  this.$router.push(`/employee/${user.employeeNumber}`);
+function handleProfile() {
+  this.$router.push(`/employee/${this.$store.getters.employeeNumber}`);
 } // handleProfile
-
-/**
- * Gets the current active anniversary budget year starting date in isoformat.
- *
- * @return String - current active anniversary budget date (YYYY-MM-DD)
- */
-function getCurrentBudgetYear() {
-  let currentBudgetYear = moment(this.hireDate, IsoFormat);
-  if (moment().isAfter(currentBudgetYear)) {
-    currentBudgetYear.year(moment().year());
-    if (moment().isBefore(currentBudgetYear)) {
-      currentBudgetYear = currentBudgetYear.subtract(1, 'years');
-    }
-  }
-  return currentBudgetYear.format(IsoFormat);
-} // getCurrentBudgetYear
 
 /**
  * Refresh and sets employee information.
  */
 async function refreshEmployee() {
-  this.loading = true; // set loading status to true
-  if (this.employ == null) {
-    // set the employee to the selected employee if viewing from an admin view
-    this.employee = await api.getUser();
-  } else {
-    // set the employee to the current user if viewing from a user view
-    this.employee = this.employ;
-  }
+  this.loadingEmployee = true; // set loading status to true
+  this.employee = this.$store.getters.user;
   this.hireDate = this.employee.hireDate;
-  this.fiscalDateView = this.getCurrentBudgetYear();
+  this.fiscalDateView = this.getCurrentBudgetYear(this.hireDate);
   this.allUserBudgets = await api.getEmployeeBudgets(this.employee.id); // set all employee budgets
-  this.loading = false; // set loading status to false
+  this.expenses = await api.getAllAggregateExpenses();
+  this.expenseTypes = this.$store.getters.expenseTypes;
+  this.loadingEmployee = false; // set loading status to false
 } // refreshEmployee
 
 // |--------------------------------------------------|
@@ -486,10 +476,8 @@ async function refreshEmployee() {
  *  Set budget information for employee. Creates event listeners.
  */
 async function created() {
-  this.loading = true;
-  await this.createEvents();
-  this.loading = false;
   await this.refreshEmployee();
+  await this.createEvents();
   this.addOneSecondToActualTimeEverySecond();
   await this.getTweets();
 } // created
@@ -523,10 +511,14 @@ export default {
       employee: {}, // employee
       employees: [],
       events: [],
+      expenses: null,
       expenseTypeData: [], // aggregated budgets for expense types
+      expenseTypes: null,
       fiscalDateView: '', // current budget year view by anniversary day
       hireDate: '', // employee hire date
-      loading: false, // loading status
+      loadingEmployee: true,
+      loadingEvents: true,
+      loadingTweets: true,
       scheduleEntries: [],
       seconds: 0, // seconds until next anniversary date
       textMaxLength: 110,

@@ -279,7 +279,7 @@
         <!-- Buttons -->
         <!-- Cancel Button -->
         <v-btn color="white " @click="clearForm" class="ma-2" elevation="2">
-          <icon class="mr-1" name="ban"></icon>Cancel
+          <v-icon class="mr-1">cancel</v-icon>Cancel
         </v-btn>
         <!-- Submit Button -->
         <v-btn
@@ -291,7 +291,7 @@
           @click="submitForm = true"
           :disabled="!valid"
         >
-          <icon class="mr-1" name="save"></icon>Submit
+          <v-icon class="mr-1">save</v-icon>Submit
         </v-btn>
         <!-- End Buttons -->
       </v-form>
@@ -310,6 +310,7 @@ import _ from 'lodash';
 import { v4 as uuid } from 'uuid';
 import { getDateRules, getRequiredRules } from '@/shared/validationUtils.js';
 import { formatDate, isEmpty, parseDate } from '@/utils/utils';
+import { updateStoreExpenseTypes } from '@/utils/storeUtils';
 import { mask } from 'vue-the-mask';
 const moment = require('moment-timezone');
 moment.tz.setDefault('America/New_York');
@@ -600,13 +601,14 @@ async function created() {
   window.EventBus.$on('confirmed-type', async () => {
     this.submitForm = false;
     await this.submit();
+    await this.updateStoreExpenseTypes();
   });
   window.EventBus.$on('canceled-type', () => {
     this.submitting = false;
     this.submitForm = false;
   });
   // get all employees
-  let employees = await api.getItems(api.EMPLOYEES);
+  let employees = this.$store.getters.employees;
   let activeEmployees = [];
 
   // populate list of active employees
@@ -624,7 +626,7 @@ async function created() {
 
   activeEmployees = _.sortBy(activeEmployees, ['text']); // sort employees
   this.activeEmployees = activeEmployees;
-  this.campfires = await api.getBasecampCampfires();
+  this.campfires = this.$store.getters.basecampAvatars;
   this.editedExpenseType = _.cloneDeep(this.model);
   this.clearForm();
 } // created
@@ -823,7 +825,8 @@ export default {
     submit,
     toFAQ,
     toggleRequireURL,
-    toggleShowAllCategories
+    toggleShowAllCategories,
+    updateStoreExpenseTypes
   },
   props: ['model'], // expense type to be created/updated
   computed: {

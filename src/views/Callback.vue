@@ -6,6 +6,7 @@
 
 <script>
 import { setIdToken, setAccessToken, setRole, setProfile } from '@/utils/auth';
+import { updateStoreUser } from '@/utils/storeUtils';
 import api from '../shared/api';
 import { v4 as uuid } from 'uuid';
 const moment = require('moment-timezone');
@@ -30,9 +31,11 @@ function mounted() {
       let employeeRole = await this.setRole();
 
       // login
-      let employee = await api.getUser();
+      await this.updateStoreUser();
+      let employee = this.$store.getters.user;
       employee.lastLogin = moment(new Date()).format(login_format);
       await api.updateItem(api.EMPLOYEES, employee);
+
       // Create an audit of the success
       await api.createItem(api.AUDIT, {
         id: uuid(),
@@ -68,7 +71,8 @@ export default {
     setAccessToken,
     setIdToken,
     setProfile,
-    setRole
+    setRole,
+    updateStoreUser
   },
   name: 'callback'
 };

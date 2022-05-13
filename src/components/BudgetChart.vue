@@ -31,8 +31,7 @@ import _ from 'lodash';
 import BarChart from '@/components/charts/baseCharts/BarChart.vue';
 const moment = require('moment-timezone');
 moment.tz.setDefault('America/New_York');
-import { isFullTime } from '@/utils/utils';
-const IsoFormat = 'YYYY-MM-DD';
+import { isFullTime, getCurrentBudgetYear } from '@/utils/utils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -239,22 +238,6 @@ function drawGraph() {
 // |--------------------------------------------------|
 
 /**
- * Gets the current active anniversary budget year starting date in isoformat.
- *
- * @return String - current active anniversary budget date (YYYY-MM-DD)
- */
-function getCurrentBudgetYear() {
-  let currentBudgetYear = moment(this.employee.hireDate, IsoFormat);
-  if (moment().isAfter(currentBudgetYear)) {
-    currentBudgetYear.year(moment().year());
-    if (moment().isBefore(currentBudgetYear)) {
-      currentBudgetYear = currentBudgetYear.subtract(1, 'years');
-    }
-  }
-  return currentBudgetYear.format(IsoFormat);
-} // getCurrentBudgetYear
-
-/**
  * Checks if there are any negative values in each budget data to make sure the graph does not show negative values.
  *
  * @param budgets - The user's budgets
@@ -279,7 +262,7 @@ function getFinalBudgetsData(budgets) {
 async function refreshBudget() {
   this.loading = true; // set loading status to true
   let budgetsVar;
-  if (this.fiscalDateView == this.getCurrentBudgetYear()) {
+  if (this.fiscalDateView == this.getCurrentBudgetYear(this.employee.hireDate)) {
     // viewing active budget year
     budgetsVar = await api.getAllActiveEmployeeBudgets(this.employee.id);
   }
@@ -288,6 +271,14 @@ async function refreshBudget() {
   let existingBudgets = await api.getFiscalDateViewBudgets(this.employee.id, this.fiscalDateView);
   budgetsVar = _.union(budgetsVar, existingBudgets); // combine existing and active budgets
   budgetsVar = _.uniqBy(budgetsVar, 'expenseTypeId'); // remove duplicate expense types
+  // remove inactive budgets (exception: there contains a pending expense under that budget)
+  budgetsVar = _.filter(budgetsVar, (b) => {
+    let budget = b.budgetObject;
+    return (
+      !_.some(this.expenseTypes, (e) => e.id == budget.expenseTypeId && e.isInactive) ||
+      _.some(this.expenses, (e) => e.expenseTypeId == budget.expenseTypeId && _.isEmpty(e.reimbursedDate))
+    );
+  });
 
   this.selectedBudgets = budgetsVar.map((a) => a.expenseTypeName);
   this.allBudgetNames = budgetsVar.map((a) => a.expenseTypeName);
@@ -355,7 +346,7 @@ export default {
     refreshBudget
   },
   mounted,
-  props: ['employee', 'fiscalDateView'],
+  props: ['employee', 'fiscalDateView', 'expenses', 'expenseTypes'],
   watch: {
     fiscalDateView: watchFiscalDateView
   }

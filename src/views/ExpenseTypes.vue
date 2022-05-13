@@ -429,6 +429,7 @@ import ExpenseTypeForm from '@/components/ExpenseTypeForm.vue';
 import { getRole } from '@/utils/auth';
 import _ from 'lodash';
 import { convertToMoneyString } from '@/utils/utils';
+import { updateStoreExpenseTypes } from '@/utils/storeUtils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -468,6 +469,7 @@ function _headers() {
  * Refresh and updates expense type list and displays a successful create status in the snackbar.
  */
 async function addModelToTable() {
+  await this.updateStoreExpenseTypes();
   await this.refreshExpenseTypes();
 
   this.$set(this.status, 'statusType', 'SUCCESS');
@@ -619,6 +621,7 @@ async function deleteExpenseType() {
  * Refresh and updates expense type list and displays a successful delete status in the snackbar.
  */
 async function deleteModelFromTable() {
+  await this.updateStoreExpenseTypes();
   await this.refreshExpenseTypes();
 
   this.$set(this.status, 'statusType', 'SUCCESS');
@@ -858,7 +861,7 @@ function onSelect(item) {
  */
 async function refreshExpenseTypes() {
   this.loading = true; // set loading status to true
-  this.expenseTypes = await api.getItems(api.EXPENSE_TYPES);
+  this.expenseTypes = this.$store.getters.expenseTypes;
 
   // filter expense types for the user
   if (!this.userIsAdmin()) {
@@ -909,6 +912,7 @@ function toTopOfForm() {
  * Refresh and updates expense type list and displays a successful update status in the snackbar.
  */
 async function updateModelInTable() {
+  await this.updateStoreExpenseTypes();
   await this.refreshExpenseTypes();
 
   this.$set(this.status, 'statusType', 'SUCCESS');
@@ -989,13 +993,13 @@ async function created() {
     this.midAction = false;
   });
 
-  this.userInfo = await api.getUser();
-  this.employees = await api.getItems(api.EMPLOYEES);
+  this.userInfo = this.$store.getters.user;
+  this.employees = this.$store.getters.employees;
 
   await this.refreshExpenseTypes();
 
   // set employee avatar
-  let avatars = await api.getBasecampAvatars();
+  let avatars = this.$store.getters.basecampAvatars;
   _.map(this.employees, (employee) => {
     let avatar = _.find(avatars, ['email_address', employee.email]);
     let avatarUrl = avatar ? avatar.avatar_url : null;
@@ -1166,7 +1170,8 @@ export default {
     twoDecimals,
     updateModelInTable,
     userIsAdmin,
-    validateDelete
+    validateDelete,
+    updateStoreExpenseTypes
   },
   watch: {
     'filter.active': watchFilterExpenseTypes,

@@ -258,7 +258,7 @@
           :disabled="isInactive"
           id="cancelButton"
         >
-          <icon class="mr-1" name="ban"></icon>Cancel
+          <v-icon class="mr-1">cancel</v-icon>Cancel
         </v-btn>
 
         <!-- Submit Button -->
@@ -271,7 +271,7 @@
           :loading="loading"
           class="ma-2"
         >
-          <icon class="mr-1" name="save"></icon>Submit
+          <v-icon class="mr-1">save</v-icon>Submit
         </v-btn>
         <!-- End Buttons -->
       </v-form>
@@ -569,7 +569,7 @@ async function checkCoverage() {
       // get employee
       if (this.asUser) {
         // creating or updating an expense as a user
-        this.employee = await api.getUser();
+        this.employee = this.$store.getters.user;
       } else {
         // creating or updating an expense as an admin
         this.employee = await api.getItem(api.EMPLOYEES, this.editedExpense.employeeId);
@@ -1483,7 +1483,7 @@ async function updateExistingEntry() {
  */
 async function created() {
   this.employeeRole = this.getRole();
-  this.userInfo = await api.getUser();
+  this.userInfo = this.$store.getters.user;
 
   window.EventBus.$on('canceledSubmit', () => {
     this.loading = false; // set loading status to false
@@ -1521,7 +1521,7 @@ async function created() {
     this.$set(this.editedExpense, 'employeeId', this.userInfo.id);
   }
   // creating or updating an expense as an admin
-  let employees = await api.getItems(api.EMPLOYEES);
+  let employees = this.$store.getters.employees;
   this.employees = employees.map((employee) => {
     return {
       //text: employeeUtils.fullName(employee),
@@ -1547,7 +1547,7 @@ async function created() {
   this.setRecipientOptions();
 
   // set aggregate expense types
-  let expenseTypes = await api.getItems(api.EXPENSE_TYPES);
+  let expenseTypes = this.$store.getters.expenseTypes;
   this.expenseTypes = _.map(expenseTypes, (expenseType) => {
     return {
       /* beautify preserve:start */

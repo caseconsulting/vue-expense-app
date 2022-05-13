@@ -105,7 +105,6 @@
 </template>
 
 <script>
-import api from '@/shared/api';
 import { getRole } from '@/utils/auth';
 import _ from 'lodash';
 import AwardsTab from '@/components/employees/infoTabs/AwardsTab';
@@ -158,7 +157,7 @@ function selectDropDown(name) {
  * Get the user.
  */
 async function created() {
-  this.user = await api.getUser();
+  this.user = this.$store.getters.user;
   this.infoTab = this.currentTab;
   this.afterCreate = true;
 } // created

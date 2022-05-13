@@ -34,7 +34,7 @@
 
 <script>
 import BudgetSelectModal from '@/components/modals/BudgetSelectModal.vue';
-import { isMobile } from '@/utils/utils';
+import { isMobile, getCurrentBudgetYear } from '@/utils/utils';
 import _ from 'lodash';
 import api from '@/shared/api.js';
 const moment = require('moment-timezone');
@@ -53,7 +53,7 @@ const IsoFormat = 'YYYY-MM-DD';
  * @return boolean - viewing the current active year budget
  */
 function viewingCurrentBudgetYear() {
-  return this.fiscalDateView == this.getCurrentBudgetYear();
+  return this.fiscalDateView == this.getCurrentBudgetYear(this.hireDate);
 } // viewingCurrentBudgetYear
 
 /**
@@ -170,27 +170,11 @@ function addOneSecondToActualTimeEverySecond() {
 } // addOneSecondToActualTimeEverySecond
 
 /**
- * Gets the current active anniversary budget year starting date in isoformat.
- *
- * @return String - current active anniversary budget date (YYYY-MM-DD)
- */
-function getCurrentBudgetYear() {
-  let currentBudgetYear = moment(this.hireDate, IsoFormat);
-  if (moment().isAfter(currentBudgetYear)) {
-    currentBudgetYear.year(moment().year());
-    if (moment().isBefore(currentBudgetYear)) {
-      currentBudgetYear = currentBudgetYear.subtract(1, 'years');
-    }
-  }
-  return currentBudgetYear.format(IsoFormat);
-} // getCurrentBudgetYear
-
-/**
  * load the data and api call to get budgets
  */
 async function loadData() {
   this.hireDate = this.employee.hireDate;
-  this.fiscalDateView = this.getCurrentBudgetYear();
+  this.fiscalDateView = this.getCurrentBudgetYear(this.hireDate);
   this.allUserBudgets = await api.getEmployeeBudgets(this.employee.id);
   this.refreshBudgetYears();
 } // loadData
@@ -207,7 +191,7 @@ function refreshBudgetYears() {
     budgetYears.push(parseInt(year));
   });
   // push active budget year
-  let [currYear] = this.getCurrentBudgetYear().split('-');
+  let [currYear] = this.getCurrentBudgetYear(this.hireDate).split('-');
   budgetYears.push(parseInt(currYear));
   // remove duplicate years and filter to include only active and previous years
   budgetYears = _.filter(_.uniqBy(budgetYears), (year) => {
