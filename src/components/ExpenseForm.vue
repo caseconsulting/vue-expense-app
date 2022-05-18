@@ -323,12 +323,13 @@ const IsoFormat = 'YYYY-MM-DD';
  * @return array - categories
  */
 function getCategories() {
+  let categories = [];
   if (this.selectedExpenseType) {
-    return _.map(this.selectedExpenseType.categories, (category) => {
+    categories = _.map(this.selectedExpenseType.categories, (category) => {
       return category.name;
     });
   }
-  return [];
+  return categories;
 } // getCategories
 
 /**
@@ -343,7 +344,7 @@ function getRequireURL() {
   if (this.selectedExpenseType.requireURL) {
     return getRequiredRules();
   }
-  if (this.editedExpense.category) {
+  if (this.selectedExpenseType.categories.length != 0 && this.editedExpense.category) {
     let selectedCategory = _.find(this.selectedExpenseType.categories, (category) => {
       if (category.name === this.editedExpense.category) {
         return category;
