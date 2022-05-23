@@ -3,7 +3,7 @@
     <v-container class="my-3">
       <v-row class="py-3">
         <v-col cols="12" sm="4">
-          <h1 class="pl-2">Trainings</h1>
+          <h1 class="pl-2">Training</h1>
         </v-col>
 
         <v-col class="mb-1" cols="12" sm="8">
