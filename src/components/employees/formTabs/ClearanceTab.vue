@@ -128,37 +128,36 @@
         <!-- End Submission Date -->
       </v-row>
 
-      <!-- Poly Dates -->
+      <!-- Bi Dates -->
       <v-menu
-        ref="polyMenu"
-        v-model="clearance.showPolyMenu"
+        ref="biMenu"
+        v-model="clearance.showBIMenu"
         :close-on-content-click="false"
-        :return-value.sync="clearance.polyDates"
+        :return-value.sync="clearance.biDates"
         transition="scale-transition"
         offset-y
         min-width="290px"
       >
         <template v-slot:activator="{ on, attrs }">
           <v-combobox
-            :value="clearance.polyDates | formatDates"
+            :value="clearance.biDates | formatDates"
             multiple
-            label="Poly Dates"
+            label="BI Dates"
             prepend-icon="event"
             clearable
             readonly
             v-bind="attrs"
             v-on="on"
-            @click:clear="clearance.polyDates = []"
-            @input="clearance.showPolyMenu = false"
+            @click:clear="clearance.biDates = []"
           ></v-combobox>
         </template>
-        <v-date-picker v-model="clearance.polyDates" :min="clearance.submissionDate" multiple no-title scrollable>
+        <v-date-picker v-model="clearance.biDates" :min="clearance.submissionDate" multiple no-title scrollable>
           <v-spacer></v-spacer>
-          <v-btn text color="primary" @click="clearance.showPolyMenu = false">Cancel</v-btn>
-          <v-btn text color="primary" @click="$refs.polyMenu[cIndex].save(clearance.polyDates)">OK</v-btn>
+          <v-btn text color="primary" @click="clearance.showBIMenu = false">Cancel</v-btn>
+          <v-btn text color="primary" @click="$refs.biMenu[cIndex].save(clearance.biDates)">OK</v-btn>
         </v-date-picker>
       </v-menu>
-      <!-- End Poly Dates -->
+      <!-- End Bi Dates -->
 
       <!-- Adjudication Dates -->
       <v-menu
@@ -233,36 +232,37 @@
           @input="clearance.showBadgeMenu = false"
         ></v-date-picker>
       </v-menu>
-      <!-- BI Dates -->
+      <!-- Poly Dates -->
       <v-menu
-        ref="biMenu"
-        v-model="clearance.showBIMenu"
+        ref="polyMenu"
+        v-model="clearance.showPolyMenu"
         :close-on-content-click="false"
-        :return-value.sync="clearance.biDates"
+        :return-value.sync="clearance.polyDates"
         transition="scale-transition"
         offset-y
         min-width="290px"
       >
         <template v-slot:activator="{ on, attrs }">
           <v-combobox
-            :value="clearance.biDates | formatDates"
+            :value="clearance.polyDates | formatDates"
             multiple
-            label="BI Dates"
+            label="Poly Dates"
             prepend-icon="event"
             clearable
             readonly
             v-bind="attrs"
             v-on="on"
-            @click:clear="clearance.biDates = []"
+            @click:clear="clearance.polyDates = []"
+            @input="clearance.showPolyMenu = false"
           ></v-combobox>
         </template>
-        <v-date-picker v-model="clearance.biDates" :min="clearance.submissionDate" multiple no-title scrollable>
+        <v-date-picker v-model="clearance.polyDates" :min="clearance.submissionDate" multiple no-title scrollable>
           <v-spacer></v-spacer>
-          <v-btn text color="primary" @click="clearance.showBIMenu = false">Cancel</v-btn>
-          <v-btn text color="primary" @click="$refs.biMenu[cIndex].save(clearance.biDates)">OK</v-btn>
+          <v-btn text color="primary" @click="clearance.showPolyMenu = false">Cancel</v-btn>
+          <v-btn text color="primary" @click="$refs.polyMenu[cIndex].save(clearance.polyDates)">OK</v-btn>
         </v-date-picker>
       </v-menu>
-      <!-- End BI Dates -->
+      <!-- End Poly Dates -->
       <div align="center">
         <v-tooltip bottom slot="append-outer">
           <template v-slot:activator="{ on }">

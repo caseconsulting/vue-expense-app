@@ -16,14 +16,13 @@
           <b>Expiration Date: </b>{{ monthDayYearFormat(clearance.expirationDate) }}
         </p>
 
-        <!-- Poly Dates -->
-        <p v-if="clearance.polyDates.length == 1">
-          <b>Poly Date: </b> {{ monthDayYearFormat(clearance.polyDates[0]) }}
-        </p>
-        <p v-if="clearance.polyDates.length > 1" class="mb-2"><b>Poly Dates: </b></p>
-        <ul v-if="clearance.polyDates.length > 1" class="mb-4">
-          <li v-for="(polyDate, pIndex) in clearance.polyDates" :key="pIndex">{{ monthDayYearFormat(polyDate) }}</li>
+        <!-- BI Dates -->
+        <p v-if="clearance.biDates.length == 1"><b>Bi Date: </b> {{ monthDayYearFormat(clearance.biDates[0]) }}</p>
+        <p v-if="clearance.biDates.length > 1" class="mb-2"><b>Bi Dates: </b></p>
+        <ul v-if="clearance.biDates.length > 1" class="mb-4">
+          <li v-for="(biDate, pIndex) in clearance.biDates" :key="pIndex">{{ monthDayYearFormat(biDate) }}</li>
         </ul>
+
 
         <!-- Adjudication Dates -->
         <p v-if="clearance.adjudicationDates.length == 1" class="mb-2">
@@ -41,11 +40,13 @@
           <b>Badge Expiration Date: </b>{{ monthDayYearFormat(clearance.badgeExpirationDate) }}
         </p>
 
-        <!-- BI Dates -->
-        <p v-if="clearance.biDates.length == 1"><b>Bi Date: </b> {{ monthDayYearFormat(clearance.biDates[0]) }}</p>
-        <p v-if="clearance.biDates.length > 1" class="mb-2"><b>Bi Dates: </b></p>
-        <ul v-if="clearance.biDates.length > 1" class="mb-4">
-          <li v-for="(biDate, pIndex) in clearance.biDates" :key="pIndex">{{ monthDayYearFormat(biDate) }}</li>
+        <!-- Poly Dates -->
+        <p v-if="clearance.polyDates.length == 1">
+          <b>Poly Date: </b> {{ monthDayYearFormat(clearance.polyDates[0]) }}
+        </p>
+        <p v-if="clearance.polyDates.length > 1" class="mb-2"><b>Poly Dates: </b></p>
+        <ul v-if="clearance.polyDates.length > 1" class="mb-4">
+          <li v-for="(polyDate, pIndex) in clearance.polyDates" :key="pIndex">{{ monthDayYearFormat(polyDate) }}</li>
         </ul>
         <hr v-if="index < filteredList.length - 1" class="mb-3" />
       </div>
