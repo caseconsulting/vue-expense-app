@@ -2,7 +2,12 @@
   <div id="monthly-charges">
     <h3 align="center">
       Hours for {{ month }} {{ year }}
-      <v-btn @click="toFAQ()" class="mb-4" x-small icon><v-icon color="#3f51b5">info</v-icon></v-btn>
+      <v-tooltip top>
+        <template v-slot:activator="{ on }">
+          <v-btn @click="toFAQ()" class="mb-4" x-small icon v-on="on"><v-icon color="#3f51b5">info</v-icon></v-btn>
+        </template>
+        <span>Click for FAQ</span>
+      </v-tooltip>
     </h3>
     <!-- Error Getting Monthly Hours -->
     <div v-if="monthlyHourError" class="pt-2 pb-6" align="center">
