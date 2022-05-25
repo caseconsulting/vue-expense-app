@@ -102,7 +102,7 @@ export default {
       activate: false, // dialog activator
       roleOriginial: '',
       roleSelected: '',
-      roles: ['Admin', 'User', 'Manager']
+      roles: ['Admin', 'User', 'Manager', 'Intern']
     };
   },
   created,
