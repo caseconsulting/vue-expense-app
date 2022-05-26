@@ -15,7 +15,7 @@
     ></v-text-field>
 
     <!-- Phone Number -->
-    <v-text-field
+    <!-- <v-text-field
       v-model="editedPersonalInfo.phoneNumber"
       v-mask="'###-###-####'"
       hint="###-###-#### format"
@@ -29,7 +29,61 @@
         </template>
         <span>Only Visible to You, Managers, and Admins</span>
       </v-tooltip>
-    </v-text-field>
+    </v-text-field> -->
+
+    <p class="mt-5">
+      Phone Numbers
+      <v-tooltip bottom slot="append">
+        <template v-slot:activator="{ on }">
+          <v-btn class="pb-1" text icon v-on="on"><v-icon class="case-gray">shield</v-icon></v-btn>
+        </template>
+        <span>Based on user preference, this is only visible to You, Managers, and Admins</span>
+      </v-tooltip>
+    </p>
+    <div class="groove pr-5 pl-2 mb-4">
+      <v-row v-for="(phoneNumber, index) in phoneNumbers" :key="index">
+        <v-col cols="3">
+          <v-autocomplete
+            v-model="phoneNumber.type"
+            label="Type"
+            :items="phoneNumberTypes"
+            data-vv-name="Phone Type"
+            clearable
+          ></v-autocomplete>
+        </v-col>
+        <v-col cols="8">
+          <v-text-field
+            v-model="phoneNumber.number"
+            v-mask="'###-###-####'"
+            hint="###-###-#### format"
+            :rules="phoneRules"
+            label="Phone Number"
+            data-vv-name="Phone Number"
+          >
+          </v-text-field>
+        </v-col>
+        <v-col cols="1">
+          <v-tooltip bottom slot="append-outer">
+            <template v-slot:activator="{ on }">
+              <v-btn
+                :disabled="phoneNumbers.length === 1"
+                class="center"
+                v-on="on"
+                @click="deletePhoneInput(index)"
+                text
+                icon
+              >
+                <v-icon class="case-gray">delete</v-icon>
+              </v-btn>
+            </template>
+            <span>Delete Number</span>
+          </v-tooltip>
+        </v-col>
+      </v-row>
+      <div align="center" class="py-2">
+        <v-btn @click="addPhoneInput()">Add a Number</v-btn>
+      </div>
+    </div>
 
     <!-- Birthday Picker -->
     <v-menu
@@ -192,6 +246,11 @@ async function created() {
 
   let user = this.$store.getters.user;
   this.userId = user.employeeNumber;
+
+  this.phoneNumbers = this.editedPersonalInfo.privatePhoneNumbers.concat(this.editedPersonalInfo.publicPhoneNumbers);
+  if (this.phoneNumbers.length === 0) {
+    this.phoneNumbers = [{ type: '', number: '', private: true, valid: true }];
+  }
 } // created
 
 // |--------------------------------------------------|
@@ -310,6 +369,8 @@ function userIsEmployee() {
  * Validate all input fields are valid. Emit to parent the error status.
  */
 function validateFields() {
+  // in theory, filter based on public/private here
+  this.editedPersonalInfo.privatePhoneNumbers = this.phoneNumbers;
   let errorCount = 0;
   //ensures that refs are put in an array so we can reuse forEach loop
   let components = !_.isArray(this.$refs.formFields) ? [this.$refs.formFields] : this.$refs.formFields;
@@ -319,6 +380,18 @@ function validateFields() {
   window.EventBus.$emit('personalStatus', errorCount); // emit error status
   window.EventBus.$emit('doneValidating', 'personal', this.editedPersonalInfo); // emit done validating
 } // validateFields
+
+function addPhoneInput() {
+  this.phoneNumbers.push({
+    type: '',
+    number: '',
+    private: true,
+    valid: true
+  });
+}
+function deletePhoneInput(index) {
+  this.phoneNumbers.splice(index, 1);
+}
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -371,10 +444,13 @@ export default {
   },
   data() {
     return {
+      editedPersonalInfo: _.cloneDeep(this.model), //employee personal info that can be edited
       addressDropDown: [],
       birthdayFormat: null, // formatted birthday
       BirthdayMenu: false, // display birthday menu
       countries: [], // list of countries
+      phoneNumbers: [],
+      phoneNumberTypes: ['Home', 'Cell', 'Work'],
       phoneRules: [
         (v) =>
           !this.isEmpty(v)
@@ -383,7 +459,6 @@ export default {
       ],
       searchString: '',
       placeIds: {},
-      editedPersonalInfo: _.cloneDeep(this.model), //employee personal info that can be edited
       userId: null,
       states: {
         AL: 'Alabama',
@@ -461,7 +536,9 @@ export default {
     updateBoxes,
     userhasAdminPermissions,
     userIsEmployee,
-    validateFields
+    validateFields,
+    addPhoneInput,
+    deletePhoneInput
   },
   props: ['model', 'validating'],
   watch: {

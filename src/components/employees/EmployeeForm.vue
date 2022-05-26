@@ -910,7 +910,8 @@ function setFormData(tab, data) {
     this.$set(this.model, 'github', data.github);
     this.$set(this.model, 'twitter', data.twitter);
     this.$set(this.model, 'linkedIn', data.linkedIn);
-    this.$set(this.model, 'phoneNumber', data.phoneNumber);
+    this.$set(this.model, 'privatePhoneNumbers', data.privatePhoneNumbers);
+    this.$set(this.model, 'publicPhoneNumbers', data.publicPhoneNumbers);
     this.$set(this.model, 'birthday', data.birthday);
     this.$set(this.model, 'birthdayFeed', data.birthdayFeed);
     this.$set(this.model, 'city', data.city);
@@ -1113,7 +1114,8 @@ export default {
         mifiStatus: true,
         nickname: null,
         noMiddleName: false,
-        phoneNumber: null,
+        privatePhoneNumbers: [],
+        publicPhoneNumbers: [],
         prime: null,
         schools: [],
         st: null,
