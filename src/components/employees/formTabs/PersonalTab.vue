@@ -25,7 +25,7 @@
       </v-tooltip>
     </p>
     <div class="groove pr-5 pl-2 mb-4">
-      <v-row v-for="(phoneNumber, index) in phoneNumbers" :key="index" class="d-flex align-center">
+      <v-row v-for="(phoneNumber, index) in phoneNumbers" :key="index" class="d-flex align-center mt-0">
         <v-col class="pt-0" cols="3">
           <v-autocomplete
             v-model="phoneNumber.type"
