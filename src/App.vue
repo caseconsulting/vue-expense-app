@@ -110,7 +110,7 @@
       <v-main style="padding: 64px 0px 0px 56px">
         <badge-expiration-banner v-if="isLoggedIn() && storeIsPopulated" :key="badgeKey" />
         <v-container fluid grid-list-lg>
-          <router-view v-if="!loadingCreated"></router-view>
+          <router-view></router-view>
         </v-container>
       </v-main>
       <v-footer padless>
@@ -237,13 +237,13 @@ function onResize() {
  * resize the window for small screens
  */
 async function populateStore() {
-  await this.updateStoreUser();
+  await this.updateStoreUser(); // calling first since uodateStoreExpenseTypes relies on user data
   await Promise.all([
     this.updateStoreEmployees(),
     this.updateStoreAvatars(),
     this.updateStoreExpenseTypes(),
     this.updateAllAggregateExpenses()
-  ]);
+  ]); // runs these api calls in parallel/concurrently? since they are independent of each other
 
   // This is used to help pages know when data is loaded into the store.
   // Otherwise, on reload, pages would try to access the store before it was populated.

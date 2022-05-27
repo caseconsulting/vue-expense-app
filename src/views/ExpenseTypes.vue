@@ -446,6 +446,10 @@ function expenseTypeList() {
   return this.filteredExpenseTypes;
 } // expenseTypeList
 
+function storeIsPopulated() {
+  return this.$store.getters.storeIsPopulated;
+}
+
 /**
  * returns the headers to show
  *
@@ -817,6 +821,24 @@ function isInactive(expenseType) {
   return !expenseType.isInactive ? '' : 'Not Active';
 } // isInactive
 
+async function loadExpenseTypesData() {
+  this.userInfo = this.$store.getters.user;
+  this.employees = this.$store.getters.employees;
+
+  await this.refreshExpenseTypes();
+
+  // set employee avatar
+  let avatars = this.$store.getters.basecampAvatars;
+  _.map(this.employees, (employee) => {
+    let avatar = _.find(avatars, ['email_address', employee.email]);
+    let avatarUrl = avatar ? avatar.avatar_url : null;
+    employee.avatar = avatarUrl;
+    return employee;
+  });
+
+  this.campfires = await api.getBasecampCampfires();
+}
+
 /**
  * Returns a number with two decimal point precision as a string.
  *
@@ -993,21 +1015,9 @@ async function created() {
     this.midAction = false;
   });
 
-  this.userInfo = this.$store.getters.user;
-  this.employees = this.$store.getters.employees;
-
-  await this.refreshExpenseTypes();
-
-  // set employee avatar
-  let avatars = this.$store.getters.basecampAvatars;
-  _.map(this.employees, (employee) => {
-    let avatar = _.find(avatars, ['email_address', employee.email]);
-    let avatarUrl = avatar ? avatar.avatar_url : null;
-    employee.avatar = avatarUrl;
-    return employee;
-  });
-
-  this.campfires = await api.getBasecampCampfires();
+  if (this.$store.getters.storeIsPopulated) {
+    this.loadExpenseTypesData();
+  }
 } // created
 
 // |--------------------------------------------------|
@@ -1055,6 +1065,7 @@ export default {
   },
   computed: {
     expenseTypeList,
+    storeIsPopulated,
     _headers
   },
   created,
@@ -1107,7 +1118,7 @@ export default {
       invalidDelete: false, // invalid delete status
       midAction: false,
       itemsPerPage: -1, // items per datatable page
-      loading: false, // loading status
+      loading: true, // loading status
       model: {
         accessibleBy: ['FullTime'],
         alwaysOnFeed: false,
@@ -1163,6 +1174,7 @@ export default {
     getRole,
     hasAccess,
     isInactive,
+    loadExpenseTypesData,
     onSelect,
     refreshExpenseTypes,
     startAction,
@@ -1177,7 +1189,8 @@ export default {
     'filter.active': watchFilterExpenseTypes,
     'filter.receipt': watchFilterExpenseTypes,
     'filter.recurring': watchFilterExpenseTypes,
-    'filter.overdraft': watchFilterExpenseTypes
+    'filter.overdraft': watchFilterExpenseTypes,
+    storeIsPopulated: loadExpenseTypesData
   }
 };
 </script>

@@ -89,6 +89,10 @@ const IsoFormat = 'YYYY-MM-DD';
 // |                                                  |
 // |--------------------------------------------------|
 
+function storeIsPopulated() {
+  return this.$store.getters.storeIsPopulated;
+}
+
 /**
  * Viewing the current active budget year. Returns true if the budget year being viwed is todays budget.
  *
@@ -128,7 +132,7 @@ function displayError(err) {
  * Refresh and sets employee information.
  */
 async function refreshEmployee() {
-  this.loading = true; // set loading status to true
+  this.loading = true;
   this.displayChart = false;
   if (this.employ == null) {
     // set the employee to the selected employee if viewing from an admin view
@@ -147,7 +151,7 @@ async function refreshEmployee() {
   this.fiscalDateView = this.getCurrentBudgetYear(this.hireDate);
   this.expenseTypes = this.$store.getters.expenseTypes;
   this.expenses = this.$store.getters.allAggregateExpenses;
-  this.loading = false; // set loading status to false
+  this.loading = false;
 } // refreshEmployee
 
 /**
@@ -186,7 +190,9 @@ async function created() {
       this.fiscalDateView = data.format(IsoFormat);
     }
   });
-  await this.refreshEmployee();
+  if (this.$store.getters.storeIsPopulated) {
+    await this.refreshEmployee();
+  }
 } // created
 
 /**
@@ -226,6 +232,7 @@ export default {
   computed: {
     isInactive,
     isMobile,
+    storeIsPopulated,
     viewingCurrentBudgetYear
   },
   created,
@@ -256,7 +263,7 @@ export default {
       fiscalDateView: '', // current budget year view by anniversary day
       hasAccessToBudgets: true, // user has access to one or more budgets
       hireDate: '', // employee hire date
-      loading: false, // loading status
+      loading: true, // loading status
       status: {
         statusType: undefined,
         statusMessage: '',
@@ -281,7 +288,13 @@ export default {
     } // employee (admin employee view)
   },
   watch: {
-    employ: watchEmploy
+    employ: watchEmploy,
+    async storeIsPopulated() {
+      if (this.$store.getters.storeIsPopulated) {
+        await this.refreshEmployee();
+        this.loading = false;
+      }
+    }
   }
 };
 </script>

@@ -21,7 +21,7 @@
         <v-container fluid>
           <!-- Title -->
           <v-card-title>
-            <h2 v-if="isUser || isIntern || isManager">{{ getUserName }}'s Expenses</h2>
+            <h2 v-if="(isUser || isIntern || isManager) && !loading">{{ getUserName }}'s Expenses</h2>
             <h3 v-else>My Expenses</h3>
             <v-spacer></v-spacer>
 
@@ -304,6 +304,7 @@
     <!-- Expense Form -->
     <v-col v-if="isAdmin || !userIsInactive" cols="12" lg="4">
       <expense-form
+        v-if="!loading"
         ref="form"
         :isEdit="isEditing"
         :expense="expense"
@@ -397,6 +398,10 @@ function roleHeaders() {
         return localHeaders; // return the remaining headers
       })(this.headers);
 } // roleHeaders
+
+function storeIsPopulated() {
+  return this.$store.getters.storeIsPopulated;
+}
 
 /**
  * Checks if the user is inactive. Returns true if the user is inactive, otherwise returns false.
@@ -654,6 +659,35 @@ function isReimbursed(expense) {
   return expense && !this.isEmpty(expense.reimbursedDate);
 } // isReimbursed
 
+async function loadMyExpensesData() {
+  await this.refreshExpenses();
+  // get user info
+  this.userInfo = this.$store.getters.user;
+
+  // get expense types
+  let expenseTypes = this.$store.getters.expenseTypes;
+  this.expenseTypes = _.map(expenseTypes, (expenseType) => {
+    return {
+      /* beautify preserve:start */
+      text: `${expenseType.budgetName} - $${expenseType.budget}`,
+      startDate: expenseType.startDate,
+      endDate: expenseType.endDate,
+      /* beautify preserve:end */
+      budgetName: expenseType.budgetName,
+      value: expenseType.id,
+      budget: expenseType.budget,
+      odFlag: expenseType.odFlag,
+      requiredFlag: expenseType.requiredFlag,
+      recurringFlag: expenseType.recurringFlag,
+      isInactive: expenseType.isInactive,
+      categories: expenseType.categories,
+      accessibleBy: expenseType.accessibleBy,
+      hasRecipient: expenseType.hasRecipient,
+      alwaysOnFeed: expenseType.alwaysOnFeed
+    };
+  });
+}
+
 /**
  * Checks the canDelete optional boolean and if it exists and is true returns true
  *
@@ -798,33 +832,9 @@ async function created() {
     await this.deleteExpense();
   });
 
-  // get user info
-  this.userInfo = this.$store.getters.user;
-
-  // get expense types
-  let expenseTypes = this.$store.getters.expenseTypes;
-  this.expenseTypes = _.map(expenseTypes, (expenseType) => {
-    return {
-      /* beautify preserve:start */
-      text: `${expenseType.budgetName} - $${expenseType.budget}`,
-      startDate: expenseType.startDate,
-      endDate: expenseType.endDate,
-      /* beautify preserve:end */
-      budgetName: expenseType.budgetName,
-      value: expenseType.id,
-      budget: expenseType.budget,
-      odFlag: expenseType.odFlag,
-      requiredFlag: expenseType.requiredFlag,
-      recurringFlag: expenseType.recurringFlag,
-      isInactive: expenseType.isInactive,
-      categories: expenseType.categories,
-      accessibleBy: expenseType.accessibleBy,
-      hasRecipient: expenseType.hasRecipient,
-      alwaysOnFeed: expenseType.alwaysOnFeed
-    };
-  });
-
-  await this.refreshExpenses(); // refresh and update expenses
+  if (this.$store.getters.storeIsPopulated) {
+    this.loadMyExpensesData();
+  }
 } // created
 
 /**
@@ -852,6 +862,12 @@ function watchFilterExpenses() {
   this.filterExpenses();
 } // watchFilterExpenses
 
+async function watchStorePopulated() {
+  if (this.$store.getters.storeIsPopulated) {
+    this.loadMyExpensesData();
+  }
+}
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                      EXPORT                      |
@@ -873,7 +889,8 @@ export default {
     isIntern,
     isUser,
     roleHeaders,
-    userIsInactive
+    userIsInactive,
+    storeIsPopulated
   },
   created,
   data() {
@@ -988,6 +1005,7 @@ export default {
     isEmpty,
     isManager,
     isReimbursed,
+    loadMyExpensesData,
     monthDayYearFormat,
     onSelect,
     refreshExpenses,
@@ -1000,7 +1018,8 @@ export default {
   watch: {
     employee: watchFilterExpenses,
     'filter.active': watchFilterExpenses,
-    'filter.reimbursed': watchFilterExpenses
+    'filter.reimbursed': watchFilterExpenses,
+    storeIsPopulated: watchStorePopulated
   }
 };
 </script>

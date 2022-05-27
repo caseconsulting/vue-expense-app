@@ -1,6 +1,6 @@
 <template>
   <v-container class="my-3">
-    <span v-if="loadingEmployee">
+    <span v-if="loading">
       <v-row>
         <v-col cols="12" md="6" class="py-4 px-7">
           <v-skeleton-loader class="my-3" type="list-item@2"></v-skeleton-loader>
@@ -63,20 +63,14 @@
         <v-col wrap cols="12" lg="6">
           <!-- QuickBooksTime -->
           <v-col class="pa-4">
-            <v-col v-if="loadingEmployee" class="text-center">
-              <v-progress-circular indeterminate size="64" color="#bc3825"></v-progress-circular>
-            </v-col>
-            <v-col v-else class="pt-0 text-center">
+            <v-col class="pt-0 text-center">
               <quick-books-time-data cols="12" lg="6"></quick-books-time-data>
             </v-col>
           </v-col>
           <!-- Available Budgets -->
           <div>
             <v-col class="pa-4">
-              <v-col v-if="loadingEmployee" text-center>
-                <v-progress-circular indeterminate size="64" color="#bc3825"></v-progress-circular>
-              </v-col>
-              <v-col v-else class="pt-0 text-center">
+              <v-col class="pt-0 text-center">
                 <available-budgets
                   id="home-available-budgets"
                   :employee="this.employee"
@@ -209,6 +203,10 @@ function getSecondsUntil() {
     return anniversary.diff(now, 'seconds');
   }
 } // getSecondsUntil
+
+function storeIsPopulated() {
+  return this.$store.getters.storeIsPopulated;
+}
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -454,17 +452,20 @@ function handleProfile() {
   this.$router.push(`/employee/${this.$store.getters.employeeNumber}`);
 } // handleProfile
 
+async function loadHomePageData() {
+  await Promise.all([this.refreshEmployee(), this.createEvents(), this.getTweets()]);
+  this.loading = false;
+}
+
 /**
  * Refresh and sets employee information.
  */
-async function refreshEmployee() {
-  this.loadingEmployee = true; // set loading status to true
+function refreshEmployee() {
   this.employee = this.$store.getters.user;
   this.hireDate = this.employee.hireDate;
   this.fiscalDateView = this.getCurrentBudgetYear(this.hireDate);
   this.expenses = this.$store.getters.allAggregateExpenses;
   this.expenseTypes = this.$store.getters.expenseTypes;
-  this.loadingEmployee = false; // set loading status to false
 } // refreshEmployee
 
 // |--------------------------------------------------|
@@ -477,7 +478,9 @@ async function refreshEmployee() {
  *  Set budget information for employee. Creates event listeners.
  */
 async function created() {
-  await Promise.all([this.refreshEmployee(), this.createEvents(), this.getTweets()]);
+  if (this.$store.getters.storeIsPopulated) {
+    await this.loadHomePageData();
+  }
   this.addOneSecondToActualTimeEverySecond();
 } // created
 
@@ -497,7 +500,8 @@ export default {
   computed: {
     getAnniversary,
     getDaysUntil,
-    getSecondsUntil
+    getSecondsUntil,
+    storeIsPopulated
   },
   created,
   data() {
@@ -515,7 +519,7 @@ export default {
       expenseTypes: null,
       fiscalDateView: '', // current budget year view by anniversary day
       hireDate: '', // employee hire date
-      loadingEmployee: true,
+      loading: true,
       loadingEvents: true,
       loadingTweets: true,
       scheduleEntries: [],
@@ -536,8 +540,16 @@ export default {
     getEventDateMessage,
     getTweets,
     isEmpty,
+    loadHomePageData,
     refreshEmployee,
     handleProfile
+  },
+  watch: {
+    async storeIsPopulated() {
+      if (this.$store.getters.storeIsPopulated) {
+        this.loadHomePageData();
+      }
+    }
   }
 };
 </script>
