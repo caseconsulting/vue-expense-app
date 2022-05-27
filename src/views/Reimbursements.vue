@@ -3,7 +3,7 @@
     <v-row>
       <v-col cols="12" md="9">
         <!-- Expense Table -->
-        <rollup-expense-type-table v-if="!loading"></rollup-expense-type-table>
+        <rollup-expense-type-table></rollup-expense-type-table>
       </v-col>
       <v-col v-if="!isMobile" cols="3" class="followScroll">
         <!-- Expense Info -->
@@ -52,16 +52,6 @@ import { isMobile } from '@/utils/utils';
 
 // |--------------------------------------------------|
 // |                                                  |
-// |                     COMPUTED                     |
-// |                                                  |
-// |--------------------------------------------------|
-
-function storeIsPopulated() {
-  return this.$store.getters.storeIsPopulated;
-}
-
-// |--------------------------------------------------|
-// |                                                  |
 // |                 LIFECYCLE HOOKS                  |
 // |                                                  |
 // |--------------------------------------------------|
@@ -73,9 +63,6 @@ async function created() {
   window.EventBus.$on('reimburseAlert', (alerts) => {
     this.alerts = alerts;
   });
-  if (this.$store.getters.storeIsPopulated) {
-    this.loading = false;
-  }
 } // created
 
 /**
@@ -98,24 +85,15 @@ export default {
     RollupExpenseTypeTable
   },
   computed: {
-    isMobile,
-    storeIsPopulated
+    isMobile
   },
   created,
   beforeDestroy,
   data() {
     return {
       alerts: [], // status alerts
-      employee: {},
-      loading: true
+      employee: {}
     };
-  },
-  watch: {
-    storeIsPopulated() {
-      if (this.$store.getters.storeIsPopulated) {
-        this.loading = false;
-      }
-    }
   }
 };
 </script>

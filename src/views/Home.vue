@@ -460,11 +460,11 @@ async function loadHomePageData() {
 /**
  * Refresh and sets employee information.
  */
-function refreshEmployee() {
+async function refreshEmployee() {
   this.employee = this.$store.getters.user;
   this.hireDate = this.employee.hireDate;
   this.fiscalDateView = this.getCurrentBudgetYear(this.hireDate);
-  this.expenses = this.$store.getters.allAggregateExpenses;
+  this.expenses = await api.getAllAggregateExpenses();
   this.expenseTypes = this.$store.getters.expenseTypes;
 } // refreshEmployee
 

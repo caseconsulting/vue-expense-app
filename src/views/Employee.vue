@@ -201,7 +201,7 @@ async function getProfileData() {
     this.displayQuickBooksTimeAndBalances = this.userIsAdmin() || this.userIsEmployee();
     this.fiscalDateView = this.getCurrentBudgetYear(this.model.hireDate);
     this.hasResume = (await api.getResume(this.$route.params.id)) != null;
-    this.expenses = this.$store.getters.allAggregateExpenses;
+    this.expenses = await api.getAllAggregateExpenses();
     this.expenseTypes = this.$store.getters.expenseTypes;
   }
   this.loading = false;

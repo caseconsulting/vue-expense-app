@@ -144,13 +144,7 @@
 <script>
 import { isLoggedIn, logout, getProfile, getTokenExpirationDate, getAccessToken } from '@/utils/auth';
 import { isMobile, storeIsPopulated } from '@/utils/utils';
-import {
-  updateStoreUser,
-  updateStoreEmployees,
-  updateStoreAvatars,
-  updateStoreExpenseTypes,
-  updateAllAggregateExpenses
-} from '@/utils/storeUtils';
+import { updateStoreUser, updateStoreEmployees, updateStoreAvatars, updateStoreExpenseTypes } from '@/utils/storeUtils';
 import SwitchRoleModal from '@/components/modals/SwitchRoleModal.vue';
 import MainNav from '@/components/MainNav.vue';
 import TimeOutModal from '@/components/modals/TimeOutModal.vue';
@@ -238,12 +232,7 @@ function onResize() {
  */
 async function populateStore() {
   await this.updateStoreUser(); // calling first since uodateStoreExpenseTypes relies on user data
-  await Promise.all([
-    this.updateStoreEmployees(),
-    this.updateStoreAvatars(),
-    this.updateStoreExpenseTypes(),
-    this.updateAllAggregateExpenses()
-  ]); // runs these api calls in parallel/concurrently? since they are independent of each other
+  await Promise.all([this.updateStoreEmployees(), this.updateStoreAvatars(), this.updateStoreExpenseTypes()]); // runs these api calls in parallel/concurrently? since they are independent of each other
 
   // This is used to help pages know when data is loaded into the store.
   // Otherwise, on reload, pages would try to access the store before it was populated.
@@ -416,8 +405,7 @@ export default {
     updateStoreUser,
     updateStoreEmployees,
     updateStoreAvatars,
-    updateStoreExpenseTypes,
-    updateAllAggregateExpenses
+    updateStoreExpenseTypes
   },
   watch: {
     $route

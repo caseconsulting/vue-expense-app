@@ -150,7 +150,7 @@ async function refreshEmployee() {
   this.hireDate = this.employee.hireDate;
   this.fiscalDateView = this.getCurrentBudgetYear(this.hireDate);
   this.expenseTypes = this.$store.getters.expenseTypes;
-  this.expenses = this.$store.getters.allAggregateExpenses;
+  this.expenses = await api.getAllAggregateExpenses();
   this.loading = false;
 } // refreshEmployee
 

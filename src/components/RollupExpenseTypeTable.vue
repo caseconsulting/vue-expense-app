@@ -143,6 +143,7 @@ import ReimburseModal from '@/components/modals/ReimburseModal.vue';
 import UnrolledTableInfo from '@/components/UnrolledTableInfo.vue';
 import _ from 'lodash';
 import { asyncForEach, isEmpty, convertToMoneyString } from '@/utils/utils';
+import { storeIsPopulated } from '../utils/utils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -633,6 +634,17 @@ function determineShowOnFeed(expense) {
   });
 } // determineShowOnFeed
 
+async function loadExpensesData() {
+  let aggregatedData = await api.getAllAggregateExpenses();
+  let allExpenses = this.createExpenses(aggregatedData);
+  this.pendingExpenses = this.filterOutReimbursed(allExpenses);
+  this.constructAutoComplete(this.pendingExpenses);
+  this.empBudgets = this.groupEmployeeExpenses(this.pendingExpenses);
+  this.unCheckAllBoxes();
+  this.resetShowOnFeedToggles();
+  this.loading = false;
+}
+
 /**
  * Remove additional attributes from the aggregate expense.
  *
@@ -762,15 +774,9 @@ async function created() {
 
   //window.EventBus.$on('canceled-reimburse', () => (this.buttonClicked = false));
   window.EventBus.$on('confirm-reimburse', async () => await this.reimburseExpenses());
-  let aggregatedData = this.$store.getters.allAggregateExpenses;
-
-  let allExpenses = this.createExpenses(aggregatedData);
-  this.pendingExpenses = this.filterOutReimbursed(allExpenses);
-  this.constructAutoComplete(this.pendingExpenses);
-  this.empBudgets = this.groupEmployeeExpenses(this.pendingExpenses);
-  this.unCheckAllBoxes();
-  this.resetShowOnFeedToggles();
-  this.loading = false;
+  if (this.$store.getters.storeIsPopulated) {
+    this.loadExpensesData();
+  }
 } // created
 
 /**
@@ -804,6 +810,12 @@ function watchExpenseType() {
   this.unCheckAllBoxes();
 } // watchExpenseType
 
+function watchLoadExpensesData() {
+  if (this.$store.getters.storeIsPopulated) {
+    this.loadExpensesData();
+  }
+}
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                      EXPORT                      |
@@ -821,7 +833,8 @@ export default {
     filteredItems,
     mainCheckBox,
     showReimburseButton,
-    getSelectedExpensesToReimburse
+    getSelectedExpensesToReimburse,
+    storeIsPopulated
   },
   created,
   data: () => ({
@@ -885,6 +898,7 @@ export default {
     groupEmployeeExpenses,
     isEmpty,
     isReimbursed,
+    loadExpensesData,
     matchingEmployeeAndExpenseType,
     refreshExpenses,
     reimburseExpenses,
@@ -899,7 +913,8 @@ export default {
   },
   watch: {
     employee: watchEmployee,
-    expenseType: watchExpenseType
+    expenseType: watchExpenseType,
+    storeIsPopulated: watchLoadExpensesData
   }
 };
 </script>

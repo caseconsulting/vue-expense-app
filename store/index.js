@@ -24,7 +24,6 @@ export default new Vuex.Store({
       employees: null,
       employeeNumber: null,
       expenseTypes: null,
-      allAggregateExpenses: null,
       fiscalDateView: null,
       storeIsPopulated: false,
       user: null,
@@ -33,9 +32,6 @@ export default new Vuex.Store({
     };
   },
   mutations: {
-    setAllAggregateExpenses(state, payload) {
-      state.allAggregateExpenses = payload.allAggregateExpenses;
-    },
     setBasecampAvatars(state, payload) {
       state.basecampAvatars = payload.basecampAvatars;
     },
@@ -61,9 +57,6 @@ export default new Vuex.Store({
     setBasecampAvatars(context, payload) {
       context.commit('setBasecampAvatars', payload);
     },
-    setAllAggregateExpenses(context, payload) {
-      context.commit('setAllAggregateExpenses', payload);
-    },
     setEmployees(context, payload) {
       context.commit('setEmployees', payload);
     },
@@ -81,9 +74,6 @@ export default new Vuex.Store({
     }
   },
   getters: {
-    allAggregateExpenses(state) {
-      return state.allAggregateExpenses;
-    },
     basecampAvatars(state) {
       return state.basecampAvatars;
     },
