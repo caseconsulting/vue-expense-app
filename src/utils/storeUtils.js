@@ -7,6 +7,15 @@
 import api from '@/shared/api.js';
 
 /**
+ * Update store with latest aggregate expenses data data
+ *
+ */
+export async function updateAllAggregateExpenses() {
+  let allAggregateExpenses = await api.getAllAggregateExpenses();
+  this.$store.dispatch('setAllAggregateExpenses', { allAggregateExpenses });
+} // updateAllAggregateExpenses
+
+/**
  * Update store with latest user data
  *
  */

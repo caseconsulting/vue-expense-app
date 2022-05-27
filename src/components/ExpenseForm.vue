@@ -641,7 +641,7 @@ async function checkCoverage() {
         if (budgetExists) {
           // BRANCH 1.1 if the matching budget exists
           let committedAmount = budget.pendingAmount + budget.reimbursedAmount;
-          let allExpenses = await api.getAllAggregateExpenses();
+          let allExpenses = this.$store.getters.allAggregateExpenses;
           let match = _.find(allExpenses, (entry) => {
             return entry.id === this.editedExpense.id;
           });

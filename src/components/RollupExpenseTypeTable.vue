@@ -762,7 +762,7 @@ async function created() {
 
   //window.EventBus.$on('canceled-reimburse', () => (this.buttonClicked = false));
   window.EventBus.$on('confirm-reimburse', async () => await this.reimburseExpenses());
-  let aggregatedData = await api.getAllAggregateExpenses();
+  let aggregatedData = this.$store.getters.allAggregateExpenses;
 
   let allExpenses = this.createExpenses(aggregatedData);
   this.pendingExpenses = this.filterOutReimbursed(allExpenses);

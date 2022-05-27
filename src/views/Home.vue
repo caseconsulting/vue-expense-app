@@ -462,7 +462,7 @@ async function refreshEmployee() {
   this.employee = this.$store.getters.user;
   this.hireDate = this.employee.hireDate;
   this.fiscalDateView = this.getCurrentBudgetYear(this.hireDate);
-  await Promise.all([api.getEmployeeBudgets(this.employee.id), await api.getAllAggregateExpenses()]);
+  this.expenses = this.$store.getters.allAggregateExpenses;
   this.expenseTypes = this.$store.getters.expenseTypes;
   this.loadingEmployee = false; // set loading status to false
 } // refreshEmployee

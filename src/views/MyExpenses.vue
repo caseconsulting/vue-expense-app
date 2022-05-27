@@ -689,7 +689,7 @@ function onSelect(item) {
 async function refreshExpenses() {
   this.loading = true; // set loading status to true
   // load expenses if employee role is user or admin
-  this.expenses = await api.getAllAggregateExpenses();
+  this.expenses = this.$store.getters.allAggregateExpenses;
   this.constructAutoComplete(this.expenses); // set autocomplete options
 
   this.filterExpenses(); // filter expenses
