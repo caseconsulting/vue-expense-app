@@ -7,6 +7,12 @@
 <script>
 import EmployeeContractTable from '@/components/EmployeeContractTable.vue';
 
+// |--------------------------------------------------|
+// |                                                  |
+// |                     COMPUTED                     |
+// |                                                  |
+// |--------------------------------------------------|
+
 function storeIsPopulated() {
   return this.$store.getters.storeIsPopulated;
 }

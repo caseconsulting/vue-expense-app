@@ -1,9 +1,9 @@
 <template>
   <v-container fluid>
-    <v-row v-if="!loading">
+    <v-row>
       <v-col cols="12" md="9">
         <!-- Expense Table -->
-        <rollup-expense-type-table></rollup-expense-type-table>
+        <rollup-expense-type-table v-if="!loading"></rollup-expense-type-table>
       </v-col>
       <v-col v-if="!isMobile" cols="3" class="followScroll">
         <!-- Expense Info -->
