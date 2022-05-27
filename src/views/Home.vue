@@ -462,8 +462,7 @@ async function refreshEmployee() {
   this.employee = this.$store.getters.user;
   this.hireDate = this.employee.hireDate;
   this.fiscalDateView = this.getCurrentBudgetYear(this.hireDate);
-  this.allUserBudgets = await api.getEmployeeBudgets(this.employee.id); // set all employee budgets
-  this.expenses = await api.getAllAggregateExpenses();
+  await Promise.all([api.getEmployeeBudgets(this.employee.id), await api.getAllAggregateExpenses()]);
   this.expenseTypes = this.$store.getters.expenseTypes;
   this.loadingEmployee = false; // set loading status to false
 } // refreshEmployee
@@ -478,10 +477,8 @@ async function refreshEmployee() {
  *  Set budget information for employee. Creates event listeners.
  */
 async function created() {
-  await this.refreshEmployee();
-  await this.createEvents();
+  await Promise.all([this.refreshEmployee(), this.createEvents(), this.getTweets()]);
   this.addOneSecondToActualTimeEverySecond();
-  await this.getTweets();
 } // created
 
 // |--------------------------------------------------|

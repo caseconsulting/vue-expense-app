@@ -108,14 +108,19 @@ function beforeDestroy() {
  */
 async function refreshBudget() {
   let budgetsVar;
+  let existingBudgets;
 
   if (this.date == this.getCurrentBudgetYear(this.hireDate)) {
     // viewing active budget year
     budgetsVar = await api.getAllActiveEmployeeBudgets(this.employee.id);
+    [budgetsVar, existingBudgets] = await Promise.all([
+      api.getAllActiveEmployeeBudgets(this.employee.id),
+      api.getFiscalDateViewBudgets(this.employee.id, this.date)
+    ]);
+  } else {
+    // get existing budgets for the budget year being viewed
+    existingBudgets = await api.getFiscalDateViewBudgets(this.employee.id, this.date);
   }
-
-  // get existing budgets for the budget year being viewed
-  let existingBudgets = await api.getFiscalDateViewBudgets(this.employee.id, this.date);
 
   // append inactive tag to end of budget expense type name
   // the existing budget duplicates will later be removed (order in array comes after active budgets)
@@ -180,8 +185,9 @@ async function refreshEmployee() {
   if (!this.date) {
     this.date = this.getCurrentBudgetYear(this.hireDate);
   }
-  await this.refreshBudget(); // refresh employee budgets
-  this.allUserBudgets = await api.getEmployeeBudgets(this.employee.id); // set all employee budgets
+  let [tmp, allUserBudgets] = await Promise.all([this.refreshBudget(), api.getEmployeeBudgets(this.employee.id)]);
+  tmp; // unused so we can parallelize the two api calls
+  this.allUserBudgets = allUserBudgets;
 } // refreshEmployee
 
 /**

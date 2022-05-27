@@ -232,9 +232,7 @@ function onResize() {
  */
 async function populateStore() {
   await this.updateStoreUser();
-  await this.updateStoreEmployees();
-  await this.updateStoreAvatars();
-  await this.updateStoreExpenseTypes();
+  await Promise.all([this.updateStoreEmployees(), this.updateStoreAvatars(), this.updateStoreExpenseTypes()]);
 
   // This is used to help pages know when data is loaded into the store.
   // Otherwise, on reload, pages would try to access the store before it was populated.
