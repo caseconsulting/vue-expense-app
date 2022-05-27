@@ -46,7 +46,7 @@
         v-model="editedEmployee.nickname"
         label="Nickname (optional)"
         data-vv-name="Nickname"
-        :disabled="!userIsAdmin() && !userIsEmployee() && !userIsManager()"
+        :disabled="!userIsAdmin() && !thisIsMyProfile() && !userIsManager()"
       ></v-text-field>
 
       <!-- Employee # -->
@@ -94,7 +94,11 @@
 
       <!-- Employee Role -->
       <v-autocomplete
+<<<<<<< HEAD
         v-if="(!loading && userIsAdmin()) || (userIsManager() && !userIsEmployee())"
+=======
+        v-if="!loading && (userIsAdmin() || (userIsManager() && !thisIsMyProfile()))"
+>>>>>>> 5c8c2985 (3624-eeo-admin-only-fields: admins can edit other users profiles if they decline to self-identify)
         id="employeeRole"
         ref="formFields"
         :items="permissions"
@@ -259,7 +263,7 @@
         item-text="text"
         item-value="value"
         return-object
-        :disabled="editedEmployee.eeoDeclineSelfIdentify"
+        :disabled="(editedEmployee.eeoDeclineSelfIdentify && thisIsMyProfile()) || !adminCanEditEeo()"
       >
       </v-select>
       <!-- Hispanic or Latino -->
@@ -270,7 +274,7 @@
         item-text="text"
         item-value="value"
         return-object
-        :disabled="editedEmployee.eeoDeclineSelfIdentify"
+        :disabled="(editedEmployee.eeoDeclineSelfIdentify && thisIsMyProfile()) || !adminCanEditEeo()"
       >
       </v-select>
       <!-- Race or Ethnicity -->
@@ -281,7 +285,9 @@
         item-text="text"
         item-value="value"
         return-object
-        :disabled="editedEmployee.eeoDeclineSelfIdentify || disableRaceOrEthnicity"
+        :disabled="
+          (editedEmployee.eeoDeclineSelfIdentify && thisIsMyProfile()) || disableRaceOrEthnicity || !adminCanEditEeo()
+        "
       >
       </v-select>
       <!-- Job Category -->
@@ -295,7 +301,7 @@
               item-text="text"
               item-value="value"
               return-object
-              :disabled="editedEmployee.eeoDeclineSelfIdentify"
+              :disabled="(editedEmployee.eeoDeclineSelfIdentify && thisIsMyProfile()) || !adminCanEditEeo()"
             >
             </v-select>
           </div>
@@ -310,6 +316,7 @@
         class="mt-0"
         label="Decline to self-identify."
         v-model="editedEmployee.eeoDeclineSelfIdentify"
+        :disabled="!thisIsMyProfile()"
       ></v-checkbox>
 
       <!-- Confirm Decline Self-Identify Modal -->
@@ -427,6 +434,23 @@ async function created() {
 // |--------------------------------------------------|
 
 /**
+ * Determines of a user is an admin or manager and
+ * if they should be allowed to edit the eeo form.
+ *
+ */
+function adminCanEditEeo() {
+  if (this.thisIsMyProfile()) {
+    return true;
+  } else if (
+    (this.$store.getters.userRole === 'admin' || this.$store.getters.userRole === 'manager') &&
+    this.editedEmployee.eeoDeclineSelfIdentify
+  ) {
+    return true;
+  }
+  return false;
+} //adminCanEditEeo
+
+/**
  * Attaches email username to Case domain name
  */
 function combineEmailUsernameAndDomain() {
@@ -477,12 +501,12 @@ function userIsAdmin() {
  *
  * @return boolean - true if the profile is the user's profile
  */
-function userIsEmployee() {
-  if (this.$route.params.id == this.userId) {
+function thisIsMyProfile() {
+  if (this.$route.params.id === this.$store.getters.employeeNumber.toString()) {
     return true;
   }
   return false;
-} //userIsEmployee
+} //thisIsMyProfile
 
 /**
  * Checks whether the current user role is manager
@@ -813,6 +837,7 @@ export default {
   },
   directives: { mask },
   methods: {
+    adminCanEditEeo,
     combineEmailUsernameAndDomain,
     duplicateEmployeeNum,
     formatDate,
@@ -828,7 +853,7 @@ export default {
     isPartTime,
     parseDate,
     userIsAdmin,
-    userIsEmployee,
+    thisIsMyProfile,
     userIsManager,
     validateFields,
     viewStatus
