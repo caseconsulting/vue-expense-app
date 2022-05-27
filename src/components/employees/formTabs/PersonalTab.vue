@@ -14,23 +14,7 @@
       data-vv-name="LinkedIn"
     ></v-text-field>
 
-    <!-- Phone Number -->
-    <!-- <v-text-field
-      v-model="editedPersonalInfo.phoneNumber"
-      v-mask="'###-###-####'"
-      hint="###-###-#### format"
-      :rules="phoneRules"
-      label="Phone Number"
-      data-vv-name="Phone Number"
-    >
-      <v-tooltip bottom slot="append">
-        <template v-slot:activator="{ on }">
-          <v-btn class="pb-1" text icon v-on="on"><v-icon class="case-gray">shield</v-icon></v-btn>
-        </template>
-        <span>Only Visible to You, Managers, and Admins</span>
-      </v-tooltip>
-    </v-text-field> -->
-
+    <!-- Phone Numbers -->
     <p class="mt-5">
       Phone Numbers
       <v-tooltip bottom slot="append">
@@ -41,8 +25,8 @@
       </v-tooltip>
     </p>
     <div class="groove pr-5 pl-2 mb-4">
-      <v-row v-for="(phoneNumber, index) in phoneNumbers" :key="index">
-        <v-col cols="3">
+      <v-row v-for="(phoneNumber, index) in phoneNumbers" :key="index" class="d-flex align-center">
+        <v-col class="pt-0" cols="3">
           <v-autocomplete
             v-model="phoneNumber.type"
             label="Type"
@@ -51,7 +35,7 @@
             clearable
           ></v-autocomplete>
         </v-col>
-        <v-col cols="8">
+        <v-col class="pt-0" cols="8">
           <v-text-field
             v-model="phoneNumber.number"
             v-mask="'###-###-####'"
@@ -62,7 +46,7 @@
           >
           </v-text-field>
         </v-col>
-        <v-col cols="1">
+        <v-col class="pt-0 pb-2" cols="1">
           <v-tooltip bottom slot="append-outer">
             <template v-slot:activator="{ on }">
               <v-btn
@@ -381,6 +365,10 @@ function validateFields() {
   window.EventBus.$emit('doneValidating', 'personal', this.editedPersonalInfo); // emit done validating
 } // validateFields
 
+/**
+ * Adds a template data block for phone input
+ * field
+ */
 function addPhoneInput() {
   this.phoneNumbers.push({
     type: '',
@@ -388,10 +376,14 @@ function addPhoneInput() {
     private: true,
     valid: true
   });
-}
+} // addPhoneInput
+
+/**
+ * Removes a phone input at given index
+ */
 function deletePhoneInput(index) {
   this.phoneNumbers.splice(index, 1);
-}
+} // deletePhoneInput
 
 // |--------------------------------------------------|
 // |                                                  |
