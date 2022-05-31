@@ -204,9 +204,14 @@ function getSecondsUntil() {
   }
 } // getSecondsUntil
 
+/**
+ * Checks if the store is populated from initial page load.
+ *
+ * @returns boolean - True if the store is populated
+ */
 function storeIsPopulated() {
   return this.$store.getters.storeIsPopulated;
-}
+} // storeIsPopulated
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -452,10 +457,12 @@ function handleProfile() {
   this.$router.push(`/employee/${this.$store.getters.employeeNumber}`);
 } // handleProfile
 
+/**
+ * Loads all of the home page data concurrently upon entering the page.
+ */
 async function loadHomePageData() {
   await Promise.all([this.refreshEmployee(), this.createEvents(), this.getTweets()]);
-  this.loading = false;
-}
+} // loadHomePageData
 
 /**
  * Refresh and sets employee information.
@@ -479,6 +486,7 @@ async function refreshEmployee() {
  */
 async function created() {
   if (this.$store.getters.storeIsPopulated) {
+    this.loading = false;
     await this.loadHomePageData();
   }
   this.addOneSecondToActualTimeEverySecond();
@@ -547,6 +555,7 @@ export default {
   watch: {
     async storeIsPopulated() {
       if (this.$store.getters.storeIsPopulated) {
+        this.loading = false; // get rid of skeleton loaders (will still be loading for individual components)
         this.loadHomePageData();
       }
     }

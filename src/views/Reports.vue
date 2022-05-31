@@ -13,9 +13,14 @@ import EmployeeContractTable from '@/components/EmployeeContractTable.vue';
 // |                                                  |
 // |--------------------------------------------------|
 
+/**
+ * Checks if the store is populated from initial page load.
+ *
+ * @returns boolean - True if the store is populated
+ */
 function storeIsPopulated() {
   return this.$store.getters.storeIsPopulated;
-}
+} // storeIsPopulated
 
 // |--------------------------------------------------|
 // |                                                  |

@@ -862,11 +862,16 @@ function watchFilterExpenses() {
   this.filterExpenses();
 } // watchFilterExpenses
 
+/**
+ * Checks if the store is populated from initial page load.
+ *
+ * @returns boolean - True if the store is populated
+ */
 async function watchStorePopulated() {
   if (this.$store.getters.storeIsPopulated) {
     this.loadMyExpensesData();
   }
-}
+} // watchStorePopulated
 
 // |--------------------------------------------------|
 // |                                                  |

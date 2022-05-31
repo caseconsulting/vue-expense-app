@@ -446,9 +446,14 @@ function expenseTypeList() {
   return this.filteredExpenseTypes;
 } // expenseTypeList
 
+/**
+ * Checks if the store is populated from initial page load.
+ *
+ * @returns boolean - True if the store is populated
+ */
 function storeIsPopulated() {
   return this.$store.getters.storeIsPopulated;
-}
+} // storeIsPopulated
 
 /**
  * returns the headers to show

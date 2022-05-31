@@ -145,6 +145,8 @@
 import { isLoggedIn, logout, getProfile, getTokenExpirationDate, getAccessToken } from '@/utils/auth';
 import { isMobile, storeIsPopulated } from '@/utils/utils';
 import { updateStoreUser, updateStoreEmployees, updateStoreAvatars, updateStoreExpenseTypes } from '@/utils/storeUtils';
+import { v4 as uuid } from 'uuid';
+import api from '@/shared/api';
 import SwitchRoleModal from '@/components/modals/SwitchRoleModal.vue';
 import MainNav from '@/components/MainNav.vue';
 import TimeOutModal from '@/components/modals/TimeOutModal.vue';
@@ -152,6 +154,7 @@ import TimeOutWarningModal from '@/components/modals/TimeOutWarningModal.vue';
 import BadgeExpirationBanner from '@/components/modals/BadgeExpirationBanner.vue';
 import floorPlan from '@/assets/img/MakeOfficesfloorplan.jpg';
 import moment from 'moment-timezone';
+const login_format = 'MMM Do, YYYY HH:mm:ss';
 moment.tz.setDefault('America/New_York');
 
 // |--------------------------------------------------|
@@ -231,8 +234,24 @@ function onResize() {
  * resize the window for small screens
  */
 async function populateStore() {
+  // login
   await this.updateStoreUser(); // calling first since uodateStoreExpenseTypes relies on user data
-  await Promise.all([this.updateStoreEmployees(), this.updateStoreAvatars(), this.updateStoreExpenseTypes()]); // runs these api calls in parallel/concurrently? since they are independent of each other
+  let employee = this.$store.getters.user;
+  employee.lastLogin = moment(new Date()).format(login_format);
+  await Promise.all([
+    this.updateStoreEmployees(),
+    this.updateStoreAvatars(),
+    this.updateStoreExpenseTypes(),
+    await api.updateItem(api.EMPLOYEES, employee), // updates last logged in for employee
+    await api.createItem(api.AUDIT, {
+      id: uuid(),
+      type: 'login',
+      tags: ['account'],
+      employeeId: employee.id,
+      description: `${employee.firstName} ${employee.lastName} has logged in`,
+      timeToLive: 60
+    }) // Create an audit of the success
+  ]); // runs these api calls in parallel/concurrently? since they are independent of each other
 
   // This is used to help pages know when data is loaded into the store.
   // Otherwise, on reload, pages would try to access the store before it was populated.
