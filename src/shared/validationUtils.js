@@ -73,6 +73,22 @@ export function getNumberRules() {
 } // getNumberRules
 
 /**
+ * Gets rules for phone numbers.
+ * @return Array - The array of rule functions
+ */
+export function getPhoneNumberRules() {
+  return [(v) => (!this.isEmpty(v) && v.length === 12) || 'Phone number must be valid. Format: ###-###-####'];
+} // getPhoneNumberRules
+
+/**
+ * Gets the rules where a whole number must be positive.
+ * @return Array - The array of rule functions
+ */
+export function getPhoneNumberTypeRules() {
+  return [(v) => !isEmpty(v) || 'Must choose one selection'];
+} // getPhoneNumberTypeRules
+
+/**
  * Gets the rules where a field is required and must not be empty.
  * @return Array - The array of rule functions
  */

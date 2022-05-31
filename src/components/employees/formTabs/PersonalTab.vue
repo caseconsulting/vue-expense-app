@@ -32,6 +32,7 @@
             label="Type"
             :items="phoneNumberTypes"
             data-vv-name="Phone Type"
+            :rules="getPhoneNumberTypeRules()"
             clearable
           ></v-autocomplete>
         </v-col>
@@ -40,7 +41,7 @@
             v-model="phoneNumber.number"
             v-mask="'###-###-####'"
             hint="###-###-#### format"
-            :rules="phoneRules"
+            :rules="getPhoneNumberRules()"
             label="Phone Number"
             data-vv-name="Phone Number"
           >
@@ -200,7 +201,13 @@
 <script>
 import api from '@/shared/api.js';
 import _ from 'lodash';
-import { getDateOptionalRules, getNonFutureDateRules, getURLRules } from '@/shared/validationUtils.js';
+import {
+  getDateOptionalRules,
+  getNonFutureDateRules,
+  getURLRules,
+  getPhoneNumberRules,
+  getPhoneNumberTypeRules
+} from '@/shared/validationUtils.js';
 import { formatDate, isEmpty, parseDate, countryList } from '@/utils/utils';
 import { mask } from 'vue-the-mask';
 import { getRole } from '@/utils/auth';
@@ -443,12 +450,6 @@ export default {
       countries: [], // list of countries
       phoneNumbers: [],
       phoneNumberTypes: ['Home', 'Cell', 'Work'],
-      phoneRules: [
-        (v) =>
-          !this.isEmpty(v)
-            ? v.length == 0 || v.length == 12 || 'Phone number must be valid. Format: ###-###-####'
-            : true
-      ],
       searchString: '',
       placeIds: {},
       userId: null,
@@ -520,6 +521,8 @@ export default {
     formatDate,
     getDateOptionalRules,
     getNonFutureDateRules,
+    getPhoneNumberRules,
+    getPhoneNumberTypeRules,
     getURLRules,
     getRole,
     isEmpty,
