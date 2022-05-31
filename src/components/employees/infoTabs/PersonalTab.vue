@@ -20,9 +20,9 @@
         <v-list-item v-for="number in getPhoneNumbers" :key="number.number">
           <!-- Put pub/private in here -->
           <v-list-item-avatar class=""><v-icon>mdi-folder</v-icon></v-list-item-avatar>
-          <v-list-item-content class="align-start flex-nowrap">
-            <v-list-item-subtitle class="mx-0"> {{ number.type }}</v-list-item-subtitle>
-            <v-list-item-title v-text="number.number"></v-list-item-title>
+          <v-list-item-content>
+            <v-list-item-subtitle class="mb-1"> {{ number.type }}</v-list-item-subtitle>
+            <v-list-item-title>{{ number.number }}</v-list-item-title>
           </v-list-item-content>
         </v-list-item>
       </v-list>
