@@ -14,8 +14,16 @@
       <b>LinkedIn: </b><a :href="this.model.linkedIn" target="_blank"> {{ this.model.linkedIn }}</a>
     </p>
     <!-- Phone Number -->
-    <p v-if="!isEmpty(this.model.phoneNumber) && (userIsAdmin() || userIsEmployee() || userIsManager())">
-      <b>Phone Number:</b> {{ this.model.phoneNumber }}
+    <p v-if="!isEmpty(getPhoneNumbers) && (userIsAdmin() || userIsEmployee() || userIsManager())">
+      <b>Phone Numbers:</b>
+      <v-list>
+        <v-list-item v-for="number in getPhoneNumbers" :key="number.number">
+          <v-list-item-content class="flex-nowrap">
+            <v-list-item-title v-text="number.number"></v-list-item-title>
+            <v-list-item-subtitle> {{ number.type }}</v-list-item-subtitle>
+          </v-list-item-content>
+        </v-list-item>
+      </v-list>
     </p>
     <!-- Birthday -->
     <p v-if="!isEmpty(this.model.birthday) && (admin || employee)">
@@ -69,7 +77,7 @@ function checkEmptyPersonalInfo() {
     this.model.github ||
     this.model.twitter ||
     this.model.linkedIn ||
-    this.model.phoneNumber ||
+    this.model.privatePhoneNumbers ||
     this.model.birthday ||
     this.model.birthdayFeed ||
     this.getPlaceOfBirth ||
@@ -137,6 +145,16 @@ function getPlaceOfBirth() {
   return placeOfBirth;
 } // getPlaceOfBirth
 
+function getPhoneNumbers() {
+  let phoneNumbers = [];
+  console.log(this.model.privatePhoneNumbers[0]);
+  if (this.model.privatePhoneNumbers.length > 0) {
+    phoneNumbers = phoneNumbers.concat(this.model.privatePhoneNumbers);
+  }
+  console.log(phoneNumbers);
+  return phoneNumbers;
+} // getPhoneNumbers
+
 /**
  * Checks whether the current user role is admin, used specifically
  * to prevent the manager from changing their own role on the Employee tab
@@ -193,7 +211,8 @@ function birthdayFeedResponse(value) {
 export default {
   computed: {
     getCurrentAddress,
-    getPlaceOfBirth
+    getPlaceOfBirth,
+    getPhoneNumbers
   },
   created,
   data() {
