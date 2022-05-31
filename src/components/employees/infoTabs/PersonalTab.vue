@@ -154,11 +154,9 @@ function getPlaceOfBirth() {
  */
 function getPhoneNumbers() {
   let phoneNumbers = [];
-  console.log(this.model.privatePhoneNumbers[0]);
   if (this.model.privatePhoneNumbers.length > 0) {
     phoneNumbers = phoneNumbers.concat(this.model.privatePhoneNumbers);
   }
-  console.log(phoneNumbers);
   return phoneNumbers;
 } // getPhoneNumbers
 

@@ -366,8 +366,8 @@ function userIsEmployee() {
  * Validate all input fields are valid. Emit to parent the error status.
  */
 function validateFields() {
-  // in theory, filter based on public/private here
-  this.editedPersonalInfo.privatePhoneNumbers = this.phoneNumbers;
+  this.sortPhoneNumbers();
+
   let errorCount = 0;
   //ensures that refs are put in an array so we can reuse forEach loop
   let components = !_.isArray(this.$refs.formFields) ? [this.$refs.formFields] : this.$refs.formFields;
@@ -390,6 +390,14 @@ function addPhoneInput() {
     valid: true
   });
 } // addPhoneInput
+
+/**
+ * Sorts phone numbers into two lists based on private or public.
+ */
+function sortPhoneNumbers() {
+  this.editedPersonalInfo.privatePhoneNumbers = _.filter(this.phoneNumbers, (num) => num.private);
+  this.editedPersonalInfo.publicPhoneNumbers = _.filter(this.phoneNumbers, (num) => !num.private);
+} // sortPhoneNumbers
 
 /**
  * Removes a phone input at given index
@@ -554,7 +562,8 @@ export default {
     validateFields,
     addPhoneInput,
     deletePhoneInput,
-    changeNumberVisibility
+    changeNumberVisibility,
+    sortPhoneNumbers
   },
   props: ['model', 'validating'],
   watch: {
