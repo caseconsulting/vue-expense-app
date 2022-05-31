@@ -147,6 +147,11 @@ function getPlaceOfBirth() {
   return placeOfBirth;
 } // getPlaceOfBirth
 
+/**
+ * Gets phone numbers from the two lists (public and private) and merges them into one.
+ *
+ * @return - list: all phone numbers from the user
+ */
 function getPhoneNumbers() {
   let phoneNumbers = [];
   console.log(this.model.privatePhoneNumbers[0]);
