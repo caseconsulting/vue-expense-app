@@ -60,10 +60,14 @@
           <v-tooltip bottom slot="append-outer">
             <template v-slot:activator="{ on }">
               <v-btn class="center" v-on="on" @click="changeNumberVisibility(index)" text icon>
-                <v-icon :class="setNumberPrivacyColor(index)">shield</v-icon>
+                <v-icon v-if="phoneNumber.private">mdi-shield</v-icon>
+                <v-icon v-else>mdi-shield-outline</v-icon>
               </v-btn>
             </template>
-            <span>Based on user preference, this is only visible to You, Managers, and Admins</span>
+            <span v-if="phoneNumber.private"
+              >Based on user preference, this is only visible to You, Managers, and Admins</span
+            >
+            <span v-else>Based on user preference, this is visible to everyone</span>
           </v-tooltip>
         </v-col>
       </v-row>
@@ -400,17 +404,12 @@ function deletePhoneInput(index) {
  */
 function changeNumberVisibility(index) {
   this.phoneNumbers[index].private = !this.phoneNumbers[index].private;
+  if (this.phoneNumbers[index].private) {
+    this.phonePrivacyBadgeIcon = 'mdi-shield';
+  } else {
+    this.phonePrivacyBadgeIcon = 'mdi-shield-outline';
+  }
 } // changeNumberVisibility
-
-/**
- * Changes the color of the number shield based on privacy settings.
- *
- * @param index - index of the number
- * @return string - the color of the shield
- */
-function setNumberPrivacyColor(index) {
-  return this.phoneNumbers[index].private ? 'case-red' : 'case-gray';
-} // setNumberPrivacyColor
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -469,6 +468,7 @@ export default {
       BirthdayMenu: false, // display birthday menu
       countries: [], // list of countries
       phoneNumbers: [],
+      phonePrivacyBadgeIcon: 'mdi-shield-outline',
       phoneNumberTypes: ['Home', 'Cell', 'Work'],
       searchString: '',
       placeIds: {},
@@ -554,8 +554,7 @@ export default {
     validateFields,
     addPhoneInput,
     deletePhoneInput,
-    changeNumberVisibility,
-    setNumberPrivacyColor
+    changeNumberVisibility
   },
   props: ['model', 'validating'],
   watch: {
