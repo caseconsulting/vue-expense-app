@@ -15,15 +15,7 @@
     ></v-text-field>
 
     <!-- Phone Numbers -->
-    <p class="mt-5">
-      Phone Numbers
-      <v-tooltip bottom slot="append">
-        <template v-slot:activator="{ on }">
-          <v-btn class="pb-1" text icon v-on="on"><v-icon class="case-gray">shield</v-icon></v-btn>
-        </template>
-        <span>Based on user preference, this is only visible to You, Managers, and Admins</span>
-      </v-tooltip>
-    </p>
+    <p class="mt-5">Phone Numbers</p>
     <div class="groove pr-5 pl-2 mb-4">
       <v-row v-for="(phoneNumber, index) in phoneNumbers" :key="index" class="d-flex align-center mt-0">
         <v-col class="pt-0" cols="3">
@@ -36,7 +28,7 @@
             clearable
           ></v-autocomplete>
         </v-col>
-        <v-col class="pt-0" cols="8">
+        <v-col class="pt-0" cols="7">
           <v-text-field
             v-model="phoneNumber.number"
             v-mask="'###-###-####'"
@@ -62,6 +54,16 @@
               </v-btn>
             </template>
             <span>Delete Number</span>
+          </v-tooltip>
+        </v-col>
+        <v-col class="pt-0 pb-2" cols="1">
+          <v-tooltip bottom slot="append-outer">
+            <template v-slot:activator="{ on }">
+              <v-btn class="center" v-on="on" @click="changeNumberVisibility(index)" text icon>
+                <v-icon :class="setNumberPrivacyColor(index)">shield</v-icon>
+              </v-btn>
+            </template>
+            <span>Based on user preference, this is only visible to You, Managers, and Admins</span>
           </v-tooltip>
         </v-col>
       </v-row>
@@ -392,6 +394,24 @@ function deletePhoneInput(index) {
   this.phoneNumbers.splice(index, 1);
 } // deletePhoneInput
 
+/**
+ * Changes the visibility of the given number.
+ * @param index - the index of the number to change
+ */
+function changeNumberVisibility(index) {
+  this.phoneNumbers[index].private = !this.phoneNumbers[index].private;
+} // changeNumberVisibility
+
+/**
+ * Changes the color of the number shield based on privacy settings.
+ *
+ * @param index - index of the number
+ * @return string - the color of the shield
+ */
+function setNumberPrivacyColor(index) {
+  return this.phoneNumbers[index].private ? 'case-red' : 'case-gray';
+} // setNumberPrivacyColor
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                     WATCHERS                     |
@@ -533,7 +553,9 @@ export default {
     userIsEmployee,
     validateFields,
     addPhoneInput,
-    deletePhoneInput
+    deletePhoneInput,
+    changeNumberVisibility,
+    setNumberPrivacyColor
   },
   props: ['model', 'validating'],
   watch: {
