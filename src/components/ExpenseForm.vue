@@ -583,7 +583,11 @@ async function checkCoverage() {
       }
 
       // get budget
-      let budget = await api.getEmployeeBudget(this.employee.id, expenseType.value, this.editedExpense.purchaseDate);
+      let employeeBudgets = await api.getEmployeeBudgets(this.employee.id);
+      let budget = employeeBudgets.find((b) => {
+        return b.expenseTypeId == expenseType.value;
+      });
+      let budgetExists = budget ? true : false;
 
       if (this.employee.workStatus == 0) {
         // emit error if user is inactive
@@ -634,7 +638,7 @@ async function checkCoverage() {
          *      8.2: User in not full time or budget does not have overdraft
          *        See Branch 6.1
          */
-        if (budget) {
+        if (budgetExists) {
           // BRANCH 1.1 if the matching budget exists
           let committedAmount = budget.pendingAmount + budget.reimbursedAmount;
           let allExpenses = await api.getAllAggregateExpenses();
