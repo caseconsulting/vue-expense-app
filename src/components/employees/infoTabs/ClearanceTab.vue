@@ -16,6 +16,9 @@
           <b>Expiration Date: </b>{{ monthDayYearFormat(clearance.expirationDate) }}
         </p>
 
+        <!-- Badge Number -->
+        <p v-if="clearance.badgeNum"><b>Badge Number: </b>{{ clearance.badgeNum }}</p>
+
         <!-- Badge Expiration Date -->
         <p v-if="clearance.badgeExpirationDate">
           <b>Badge Expiration Date: </b>{{ monthDayYearFormat(clearance.badgeExpirationDate) }}
@@ -38,14 +41,6 @@
             {{ monthDayYearFormat(adjudicationDate) }}
           </li>
         </ul>
-
-        <!-- Badge Expiration Date -->
-        <p v-if="clearance.badgeNum"><b>Badge Number: </b>{{ clearance.badgeNum }}</p>
-
-        <!-- Badge Expiration Date -->
-        <p v-if="clearance.badgeExpirationDate">
-          <b>Badge Expiration Date: </b>{{ monthDayYearFormat(clearance.badgeExpirationDate) }}
-        </p>
 
         <!-- Poly Dates -->
         <p v-if="clearance.polyDates.length == 1">
