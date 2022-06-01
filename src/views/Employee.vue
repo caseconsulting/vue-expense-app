@@ -59,7 +59,7 @@
     </v-row>
     <v-row v-else class="pt-0">
       <!-- QuickBooks Time and Budgets-->
-      <v-col v-if="displayQuickBooksTimeAndBalances" cols="12" md="5" lg="4">
+      <v-col v-if="displayQuickBooksTimeAndBalances" cols="12" md="5" lg="4" class="pt-0">
         <quick-books-time-data :employee="this.model" class="mb-6"></quick-books-time-data>
         <available-budgets
           class="mb-4"
