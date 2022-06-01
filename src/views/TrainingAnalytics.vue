@@ -7,17 +7,7 @@
         </v-col>
 
         <v-col class="mb-1" cols="12" sm="8">
-          <v-toolbar color="white darken-3" class="my-1 py-1" dense elevation="2">
-            <v-text-field
-              v-model="search"
-              clearable
-              flat
-              hide-details
-              prepend-inner-icon="search"
-              label="Search"
-              dense
-            ></v-text-field>
-          </v-toolbar>
+          <v-text-field v-model="search" hide-details single-line append-icon="search" label="Search"></v-text-field>
         </v-col>
       </v-row>
 
