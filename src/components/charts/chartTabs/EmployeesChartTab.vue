@@ -16,6 +16,11 @@
         <job-role-chart></job-role-chart>
       </v-col>
     </v-row>
+    <v-row>
+      <v-col md="6" sm="12" class="my-4">
+        <languages-chart></languages-chart>
+      </v-col>
+    </v-row>
   </v-container>
 </template>
 
@@ -24,6 +29,7 @@ import CaseYearsChart from '../customCharts/CaseYearsChart.vue';
 import JobExperiencesChart from '../customCharts/JobExperiencesChart.vue';
 import JobRoleChart from '../customCharts/JobRoleChart.vue';
 import PrimesChart from '../customCharts/PrimesChart.vue';
+import LanguagesChart from '../customCharts/LanguagesChart.vue';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -36,7 +42,8 @@ export default {
     CaseYearsChart,
     JobExperiencesChart,
     JobRoleChart,
-    PrimesChart
+    PrimesChart,
+    LanguagesChart
   }
 };
 </script>
