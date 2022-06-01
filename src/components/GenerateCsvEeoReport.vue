@@ -398,7 +398,8 @@ function declinedToSelfIdentify() {
     formattedEmployees[index] = [
       emp.firstName + ' ' + emp.lastName,
       emp.employeeNumber,
-      emp.eeoDeclineSelfIdentify ? 'Declined' : 'Incomplete'
+      emp.eeoDeclineSelfIdentify ? 'Declined' : 'Incomplete',
+      emp.email
     ];
   });
 
@@ -412,7 +413,7 @@ function declinedToSelfIdentify() {
   formattedEmployees.unshift(
     [''],
     ['These employees have not completed the EEO form or declined to self-identify'],
-    ['Name', 'Employee ID', 'Status']
+    ['Name', 'Employee ID', 'Status', 'Email']
   );
   return formattedEmployees;
 } // declinedToSelfIdentify
