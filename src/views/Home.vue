@@ -94,7 +94,7 @@
               <v-progress-circular indeterminate size="64" color="#bc3825"></v-progress-circular>
 >>>>>>> 654ce6ad (3637-display-portal-properly-on-mobile: display portal pages properly on mobile devices)
             </v-col>
-            <v-col v-else class="pa-0 pt-lg-4 pt-md-2 mt-2 text-center">
+            <v-col v-else class="pa-0 pt-lg-2 pt-md-2 mt-2 text-center">
               <available-budgets
                 id="home-available-budgets"
                 :employee="this.employee"
@@ -106,13 +106,13 @@
           </v-col>
         </v-col>
         <!-- Activity Feed -->
-        <v-col cols="12" lg="6" class="pa-0">
+        <v-col cols="12" lg="6" class="pa-0 mt-3 mt-xl-0 mt-lg-0">
           <v-col class="pa-0 pt-0 px-xl-4 px-lg-2 px-md-0">
             <activity-feed
               id="home-activity-feed"
               :events="events"
               :loading="loadingEvents"
-              class="mt-3"
+              class="mt-xl-0 mt-lg-0"
             ></activity-feed>
           </v-col>
         </v-col>

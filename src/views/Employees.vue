@@ -95,6 +95,7 @@
           :loading="loading"
           :items-per-page.sync="itemsPerPage"
           :search="search"
+          mobile-breakpoint="800"
           item-key="employeeNumber"
           class="elevation-1"
           @click:row="handleClick"
