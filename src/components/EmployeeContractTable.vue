@@ -2,7 +2,7 @@
   <div>
     <v-container fluid>
       <v-row>
-        <v-col cols="2">
+        <v-col cols="6" xl="3" lg="3" md="6" class="my-0 pb-lg-2 pb-md-0">
           <v-autocomplete
             id="reportsDataType"
             v-model="dataType"
@@ -10,7 +10,7 @@
             label="Type of Data"
           ></v-autocomplete>
         </v-col>
-        <v-col>
+        <v-col cols="6" xl="3" lg="3" md="6" class="my-0 pb-0">
           <v-autocomplete
             id="employeesSearch"
             v-model="search"
@@ -24,7 +24,7 @@
             "
           ></v-autocomplete>
         </v-col>
-        <v-col v-if="dataType === 'Contracts'">
+        <v-col v-if="dataType === 'Contracts'" cols="6" xl="3" lg="3" md="6" class="my-0 pb-3 pt-xl-3 pt-lg-3 pt-md-0">
           <v-autocomplete
             v-model="contract"
             :items="contractsDropDown"
@@ -35,7 +35,7 @@
           >
           </v-autocomplete>
         </v-col>
-        <v-col v-if="dataType === 'Contracts'">
+        <v-col v-if="dataType === 'Contracts'" cols="6" xl="3" lg="3" md="6" class="my-0 pb-0 pt-xl-3 pt-lg-3 pt-md-0">
           <v-autocomplete
             v-model="prime"
             :items="primesDropDown"
@@ -45,7 +45,7 @@
             @click:clear="prime = null"
           ></v-autocomplete>
         </v-col>
-        <v-col v-else-if="dataType === 'Job Roles'">
+        <v-col v-else-if="dataType === 'Job Roles'" cols="6" xl="3" lg="3" md="6" class="my-0 pb-3">
           <v-autocomplete
             v-model="dataTypeSearch"
             :items="dataTypeDropDown"

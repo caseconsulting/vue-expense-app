@@ -20,8 +20,13 @@
       <v-card class="mt-3">
         <v-container fluid>
           <!-- Title -->
+<<<<<<< HEAD
           <v-card-title>
             <h2 v-if="(isUser || isIntern || isManager) && !loading">{{ getUserName }}'s Expenses</h2>
+=======
+          <v-card-title v-if="!isMobile()">
+            <h2 v-if="isUser || isIntern || isManager">{{ getUserName }}'s Expenses</h2>
+>>>>>>> 654ce6ad (3637-display-portal-properly-on-mobile: display portal pages properly on mobile devices)
             <h3 v-else>My Expenses</h3>
             <v-spacer></v-spacer>
 
@@ -38,7 +43,6 @@
               label="Filter by Employee"
               clearable
             ></v-autocomplete>
-            <p v-if="isAdmin">&nbsp;</p>
 
             <!-- Search Bar -->
             <v-text-field
@@ -50,6 +54,37 @@
               hide-details
             ></v-text-field>
           </v-card-title>
+
+          <div v-else>
+            <v-card-title>
+              <h2 v-if="isUser || isIntern || isManager">{{ getUserName }}'s Expenses</h2>
+              <h3 v-else>My Expenses</h3>
+            </v-card-title>
+            <!-- Employee Filter -->
+            <v-autocomplete
+              v-if="isAdmin"
+              hide-details
+              :items="employees"
+              :filter="customFilter"
+              v-model="employee"
+              item-text="text"
+              id="employeeIdFilter"
+              class="mb-1"
+              label="Filter by Employee"
+              clearable
+            ></v-autocomplete>
+
+            <!-- Search Bar -->
+            <v-text-field
+              v-model="search"
+              append-icon="search"
+              id="search"
+              label="Search"
+              single-line
+              hide-details
+              class="mt-0 mb-5"
+            ></v-text-field>
+          </div>
 
           <!-- Filters -->
           <fieldset class="filter_border">
@@ -328,7 +363,7 @@ import employeeUtils from '@/shared/employeeUtils';
 import ExpenseForm from '@/components/ExpenseForm.vue';
 import UnreimburseModal from '@/components/modals/UnreimburseModal.vue';
 import _ from 'lodash';
-import { isEmpty, monthDayYearFormat, convertToMoneyString } from '@/utils/utils';
+import { isEmpty, monthDayYearFormat, convertToMoneyString, isMobile } from '@/utils/utils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -1009,6 +1044,7 @@ export default {
     hasRecipient,
     isEmpty,
     isManager,
+    isMobile,
     isReimbursed,
     loadMyExpensesData,
     monthDayYearFormat,

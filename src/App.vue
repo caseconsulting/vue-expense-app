@@ -107,7 +107,13 @@
         <!-- End user image and logout -->
       </v-app-bar>
 
-      <v-main style="padding: 64px 0px 0px 56px">
+      <v-main v-if="!(isMobile || isSmallScreen)" style="padding: 64px 0px 0px 56px">
+        <badge-expiration-banner v-if="isLoggedIn() && storeIsPopulated" :key="badgeKey" />
+        <v-container fluid grid-list-lg>
+          <router-view v-if="!loadingCreated"></router-view>
+        </v-container>
+      </v-main>
+      <v-main v-else>
         <badge-expiration-banner v-if="isLoggedIn() && storeIsPopulated" :key="badgeKey" />
         <v-container fluid grid-list-lg>
           <router-view></router-view>

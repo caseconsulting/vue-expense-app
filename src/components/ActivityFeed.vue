@@ -1,7 +1,7 @@
 <template>
   <div>
     <!-- Title -->
-    <v-card class="mt-3 white--text" color="#bc3825">
+    <v-card class="white--text" color="#bc3825">
       <v-card-title class="header_style">
         <h3>Activity Feed</h3>
       </v-card-title>

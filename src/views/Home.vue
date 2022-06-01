@@ -31,20 +31,20 @@
       </v-row>
     </span>
     <span v-else>
-      <v-row class="pb-4">
+      <v-row class="pb-2 px-lg-2 px-md-0">
         <!-- Title -->
-        <v-col cols="12" md="6">
+        <v-col cols="12" md="6" class="pt-4 px-xl-2 px-lg-2 px-md-0">
           <v-row class="pt-5" align="center" justify="center">
             <h1 id="home-greeting">Hello, {{ employee.firstName }}!</h1>
           </v-row>
           <v-row class="pt-2" justify="center">
-            <v-btn class="mb-10" @click="handleProfile()" color="#bc3825" dark>View Profile</v-btn>
+            <v-btn class="mb-5" @click="handleProfile()" color="#bc3825" dark>View Profile</v-btn>
           </v-row>
         </v-col>
         <!-- Anniversary Date -->
 
-        <v-col cols="12" md="6" class="pa-4">
-          <v-card>
+        <v-col cols="12" md="6" class="pa-xl-4 pa-md-0">
+          <v-card class="">
             <v-card-title>
               <!-- display the next anniversary date -->
               <div id="home-anniversary">
@@ -59,15 +59,24 @@
           </v-card>
         </v-col>
       </v-row>
-      <v-row>
-        <v-col wrap cols="12" lg="6">
+      <v-row class="pa-0">
+        <v-col wrap cols="12" lg="6" class="pa-0 px-xl-4 px-lg-2 px-md-0">
           <!-- QuickBooksTime -->
+<<<<<<< HEAD
           <v-col class="pa-4">
             <v-col class="pt-0 text-center">
+=======
+          <v-col class="pa-0">
+            <v-col v-if="loadingEmployee" class="text-center px-0">
+              <v-progress-circular indeterminate size="64" color="#bc3825"></v-progress-circular>
+            </v-col>
+            <v-col v-else class="pt-0 px-0 text-center">
+>>>>>>> 654ce6ad (3637-display-portal-properly-on-mobile: display portal pages properly on mobile devices)
               <quick-books-time-data cols="12" lg="6"></quick-books-time-data>
             </v-col>
           </v-col>
           <!-- Available Budgets -->
+<<<<<<< HEAD
           <div>
             <v-col class="pa-4">
               <v-col class="pt-0 text-center">
@@ -79,20 +88,39 @@
                   :fiscalDateView="this.fiscalDateView"
                 ></available-budgets>
               </v-col>
+=======
+          <v-col class="pa-0 pb-2">
+            <v-col v-if="loadingEmployee" text-center>
+              <v-progress-circular indeterminate size="64" color="#bc3825"></v-progress-circular>
+>>>>>>> 654ce6ad (3637-display-portal-properly-on-mobile: display portal pages properly on mobile devices)
             </v-col>
-          </div>
+            <v-col v-else class="pa-0 pt-lg-4 pt-md-2 mt-2 text-center">
+              <available-budgets
+                id="home-available-budgets"
+                :employee="this.employee"
+                :expenses="this.expenses"
+                :expenseTypes="this.expenseTypes"
+                :fiscalDateView="this.fiscalDateView"
+              ></available-budgets>
+            </v-col>
+          </v-col>
         </v-col>
         <!-- Activity Feed -->
-        <v-col cols="12" lg="6">
-          <v-col mt-0 class="pt-4">
-            <activity-feed id="home-activity-feed" :events="events" :loading="loadingEvents"></activity-feed>
+        <v-col cols="12" lg="6" class="pa-0">
+          <v-col class="pa-0 pt-0 px-xl-4 px-lg-2 px-md-0">
+            <activity-feed
+              id="home-activity-feed"
+              :events="events"
+              :loading="loadingEvents"
+              class="mt-3"
+            ></activity-feed>
           </v-col>
         </v-col>
       </v-row>
       <v-row>
         <!-- Twitter Feed -->
-        <v-col>
-          <v-col mt-0 class="pt-4">
+        <v-col class="pa-0">
+          <v-col mt-0 class="pt-xl-4 pt-md-2 px-0">
             <twitter-feed id="home-twitter-feed" :tweets="tweets" :loading="loadingTweets"></twitter-feed>
           </v-col>
         </v-col>

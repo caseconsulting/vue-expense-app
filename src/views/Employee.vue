@@ -21,23 +21,33 @@
       </v-card-title>
       <v-btn color="white" text @click="clearStatus"> Close </v-btn>
     </v-snackbar>
-    <v-row class="pl-3">
-      <v-col align="left" justify="left">
-        <v-btn id="backBtn" elevation="2" @click="$router.back()"><v-icon class="pr-1">arrow_back</v-icon>Back</v-btn>
+    <v-row class="pa-0">
+      <v-col cols="3" align="left" justify="left">
+        <v-btn id="backBtn" elevation="2" @click="$router.back()" :x-small="isMobile()"
+          ><v-icon class="pr-1">arrow_back</v-icon>Back</v-btn
+        >
       </v-col>
-      <v-col v-if="hasAdminPermissions() || userIsEmployee()" align="right" justify="right">
+      <v-col
+        cols="9"
+        v-if="hasAdminPermissions() || userIsEmployee()"
+        align="right"
+        justify="right"
+        class="px-0 pr-3 ma-0"
+      >
         <v-btn
           @click="toggleResumeParser = !toggleResumeParser"
           v-if="!editing"
+          :x-small="isMobile()"
           color="#bc3825"
-          class="white--text ma-2"
+          class="white--text mr-1"
           ><b>Upload Resume</b></v-btn
         >
         <v-btn
-          class="white--text ma-2"
+          class="white--text"
           v-if="!editing"
           color="#bc3825"
           @click="toggleDeleteModal = !toggleDeleteModal"
+          :x-small="isMobile()"
           :disabled="!hasResume"
           :loading="deleteLoading"
           ><b>Delete Resume</b></v-btn
@@ -47,7 +57,7 @@
     <v-row v-if="loading" class="my-10" justify="center">
       <v-progress-circular :size="70" :width="7" color="#bc3825" indeterminate></v-progress-circular>
     </v-row>
-    <v-row v-else>
+    <v-row v-else class="pt-0">
       <!-- QuickBooks Time and Budgets-->
       <v-col v-if="displayQuickBooksTimeAndBalances" cols="12" md="5" lg="4">
         <quick-books-time-data :employee="this.model" class="mb-6"></quick-books-time-data>
@@ -66,8 +76,13 @@
       </v-col>
 
       <!-- Employee Form -->
-      <v-col cols="12" :md="displayQuickBooksTimeAndBalances ? 7 : 12" :lg="displayQuickBooksTimeAndBalances ? 8 : 12">
-        <v-card class="mt-3">
+      <v-col
+        cols="12"
+        :md="displayQuickBooksTimeAndBalances ? 7 : 12"
+        :lg="displayQuickBooksTimeAndBalances ? 8 : 12"
+        class="pt-0"
+      >
+        <v-card>
           <v-card-title class="header_style" v-if="!editing">
             <h3 id="employeeName">{{ this.model.firstName }} {{ this.model.lastName }}</h3>
             <v-spacer></v-spacer>
@@ -106,6 +121,7 @@
           v-if="minimizeWindow"
           :employee="this.model"
           :hasBudgets="this.hasAccessToBudgets"
+          class="mt-2"
         ></anniversary-card>
         <budget-chart
           v-if="(userIsAdmin() || userIsEmployee()) && hasAccessToBudgets"
@@ -134,7 +150,7 @@ import EmployeeForm from '@/components/employees/EmployeeForm.vue';
 import EmployeeInfo from '@/components/employees/EmployeeInfo.vue';
 import QuickBooksTimeData from '@/components/QuickBooksTimeData.vue';
 import { getRole } from '@/utils/auth';
-import { getCurrentBudgetYear, storeIsPopulated } from '@/utils/utils.js';
+import { getCurrentBudgetYear, isMobile, storeIsPopulated } from '@/utils/utils.js';
 import _ from 'lodash';
 import ConvertEmployeeToCsv from '../components/ConvertEmployeeToCsv.vue';
 import AnniversaryCard from '@/components/AnniversaryCard.vue';
@@ -462,6 +478,7 @@ export default {
     hasAdminPermissions,
     getProfileData,
     getCurrentBudgetYear,
+    isMobile,
     resumeReceived,
     userIsAdmin,
     userIsEmployee,

@@ -39,7 +39,6 @@
           <!-- Filters -->
           <fieldset>
             <legend class="legend_style">Filters</legend>
-
             <!-- Active Filter -->
             <div class="flagFilter">
               <h4>Active Expense Type:</h4>
