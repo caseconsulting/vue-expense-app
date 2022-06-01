@@ -1,6 +1,6 @@
 <template>
   <v-container class="my-3">
-    <span v-if="loadingEmployee || !loadingEmployee">
+    <span v-if="loadingEmployee">
       <v-row>
         <v-col cols="12" md="6" class="py-4 px-7">
           <v-skeleton-loader class="my-3" type="list-item@2"></v-skeleton-loader>
