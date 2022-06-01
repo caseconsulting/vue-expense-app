@@ -235,15 +235,14 @@
       <!-- End Adjudication Dates -->
 
       <!-- Badge Number -->
-
       <v-text-field
         v-model="clearance.badgeNum"
         prepend-icon="portrait"
         counter="5"
         label="Badge Number"
         clearable
+        @blur="capitalizeBadges(clearance)"
       ></v-text-field>
-
       <!-- End Badge Number -->
 
       <!-- Badge Expiration date -->
@@ -385,6 +384,13 @@ function addClearance() {
     type: null
   });
 } // addClearance
+
+/**
+ * Capitalize all badge numbers.
+ */
+function capitalizeBadges(clearance) {
+  clearance.badgeNum = clearance.badgeNum.toUpperCase();
+} // capitalizeBadges
 
 /**
  * Deletes a clearance.
@@ -630,6 +636,7 @@ export default {
   },
   methods: {
     addClearance,
+    capitalizeBadges,
     formatDate,
     deleteClearance,
     getDateOptionalRules,

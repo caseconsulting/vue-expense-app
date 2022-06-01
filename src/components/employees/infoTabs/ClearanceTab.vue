@@ -39,8 +39,6 @@
           </li>
         </ul>
 
-<<<<<<< HEAD
-=======
         <!-- Badge Expiration Date -->
         <p v-if="clearance.badgeNum"><b>Badge Number: </b>{{ clearance.badgeNum }}</p>
 
@@ -49,7 +47,6 @@
           <b>Badge Expiration Date: </b>{{ monthDayYearFormat(clearance.badgeExpirationDate) }}
         </p>
 
->>>>>>> 07f71578 (3655-add-badge-number-field: display on info page)
         <!-- Poly Dates -->
         <p v-if="clearance.polyDates.length == 1">
           <b>Poly Date: </b> {{ monthDayYearFormat(clearance.polyDates[0]) }}
