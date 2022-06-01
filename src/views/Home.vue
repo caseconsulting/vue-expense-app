@@ -1,29 +1,31 @@
 <template>
   <v-container class="my-3">
-    <span v-if="loadingEmployee">
+    <span v-if="loadingEmployee || !loadingEmployee">
       <v-row>
-        <v-col cols="12" md="6">
+        <v-col cols="12" md="6" class="py-4 px-7">
           <v-skeleton-loader class="my-3" type="list-item@2"></v-skeleton-loader>
         </v-col>
-        <v-col cols="12" md="6" class="pa-4">
+        <v-col cols="12" md="6" class="py-4 px-7">
           <v-skeleton-loader class="my-3" type="list-item@2"></v-skeleton-loader>
         </v-col>
       </v-row>
       <v-row>
-        <v-col wrap cols="12" lg="6">
-          <v-col class="pa-4">
+        <v-col cols="12" lg="6">
+          <v-col class="px-4 py-2">
             <v-skeleton-loader class="my-3" type="card-heading, list-item@6"></v-skeleton-loader>
           </v-col>
-          <v-col class="pa-4">
+          <v-col class="px-4 py-2">
             <v-skeleton-loader class="my-3" type="card-heading, list-item@6"></v-skeleton-loader>
           </v-col>
         </v-col>
         <v-col cols="12" lg="6">
-          <v-skeleton-loader class="my-3" type="card-heading, list-item@14"></v-skeleton-loader>
+          <v-col class="px-4 py-2">
+            <v-skeleton-loader class="my-3" type="card-heading, list-item@14"></v-skeleton-loader>
+          </v-col>
         </v-col>
       </v-row>
       <v-row>
-        <v-col mt-0 class="pt-4">
+        <v-col mt-0 class="py-4 px-7">
           <v-skeleton-loader class="my-3" type="card-heading, list-item@14"></v-skeleton-loader>
         </v-col>
       </v-row>
