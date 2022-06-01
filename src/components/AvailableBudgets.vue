@@ -259,7 +259,16 @@ export default {
 </script>
 
 <style scoped>
-#link:hover {
-  font-size: 20px;
+#link::after {
+  content: '';
+  display: block;
+  width: 0;
+  height: 1px;
+  background: #fff;
+  transition: width 0.3s ease-in;
+}
+
+#link:hover::after {
+  width: 100%;
 }
 </style>
