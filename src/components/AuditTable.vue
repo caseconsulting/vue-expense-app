@@ -2,7 +2,7 @@
   <span>
     <h1 class="mx-2 mt-2">Audits</h1>
     <v-row class="pa-0">
-      <v-col cols="4">
+      <v-col cols="12" xl="4" lg="4">
         <v-text-field
           id="employeesSearch"
           v-model="search"

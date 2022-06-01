@@ -34,7 +34,7 @@
       </v-row>
       <v-row>
         <!-- Data Picker for Query -->
-        <v-col cols="2">
+        <v-col cols="8" xl="2" lg="2">
           <v-form ref="dateRange">
             <v-menu
               v-model="auditsQuery.showRangeMenu"
