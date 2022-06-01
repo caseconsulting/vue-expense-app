@@ -475,6 +475,12 @@ async function getRemainingBudget() {
       } else {
         this.remainingBudget = '';
       }
+
+      // If user is editing the form, give them back the old value for accurate calculations
+      // rules for the if statement are the same as the title (around line 5 at time or writing)
+      if (this.expense.id && (this.isAdmin || !this.isReimbursed)) {
+        this.remainingBudget += budget.budgetObject.pendingAmount;
+      }
     }
   }
 } //getRemainingBudget
