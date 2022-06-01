@@ -68,7 +68,7 @@
       </div>
     </div>
     <!-- Employee does not have Technology Experience -->
-    <p v-else>No Technology Information</p>
+    <p v-else>No Technologies or Skills Information</p>
   </div>
 </template>
 
