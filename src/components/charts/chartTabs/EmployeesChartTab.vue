@@ -12,12 +12,12 @@
       <v-col md="6" sm="12" class="mt-4">
         <primes-chart></primes-chart>
       </v-col>
-      <v-col md="6" sm="12" class="my-4">
+      <v-col md="6" sm="12" class="mt-4">
         <job-role-chart></job-role-chart>
       </v-col>
     </v-row>
     <v-row>
-      <v-col md="6" sm="12" class="my-4">
+      <v-col md="6" sm="12" class="mt-4">
         <languages-chart></languages-chart>
       </v-col>
     </v-row>
