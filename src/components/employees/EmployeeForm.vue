@@ -828,7 +828,7 @@ async function created() {
   // Starts listener to check the Technologies tab has any errors
   window.EventBus.$on('technologiesStatus', (errorCount) => {
     this.tabErrors.technologies = errorCount > 0 ? true : false;
-    this.addErrorTab('Technologies', errorCount);
+    this.addErrorTab('Technologies and Skills', errorCount);
   });
   // fills model in with populated fields in employee prop
   this.model = _.cloneDeep(
