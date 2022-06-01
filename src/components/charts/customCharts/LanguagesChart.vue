@@ -6,7 +6,7 @@
 
 <script>
 import BarChart from '../baseCharts/BarChart.vue';
-import { storeIsPopulated } from '@/utils/utils';
+import { storeIsPopulated, isEmpty } from '@/utils/utils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -28,33 +28,38 @@ function mounted() {
 // |--------------------------------------------------|
 
 /**
- * Extracts the job role from each employee and tallies up each role for active
+ * Extracts the language array from each employee and tallies up each language for active
  * employees. Also sets the chart formatting and options data.
  */
 function fillData() {
-  let roles = {};
+  let languageOptions = {};
   this.employees = this.$store.getters.employees;
   this.employees.forEach((emp) => {
-    if (emp.jobRole && emp.workStatus != 0) {
-      if (roles[emp.jobRole]) {
-        roles[emp.jobRole] += 1;
-      } else {
-        roles[emp.jobRole] = 1;
-      }
+    if (!isEmpty(emp.languages) && emp.workStatus != 0) {
+      emp.languages.forEach((lang) => {
+        if (lang.name !== 'English') {
+          if (languageOptions[lang.name]) {
+            languageOptions[lang.name] += 1;
+          } else {
+            languageOptions[lang.name] = 1;
+          }
+        }
+      });
     }
   });
-  //sorts contents from most common roles to least
-  let sortedRoles = Object.entries(roles);
-  sortedRoles = sortedRoles.sort((a, b) => {
+
+  //sorts contents from most common languages to least
+  let sortedLangs = Object.entries(languageOptions);
+  sortedLangs = sortedLangs.sort((a, b) => {
     return b[1] - a[1];
   });
-  let jobTitles = [];
+  let languages = [];
   let jobQuantities = [];
   //10 is just a limit to prevent an extremely long and crammed graph
   for (let i = 0; i < 10; i++) {
-    if (sortedRoles.length > i) {
-      jobTitles.push(sortedRoles[i][0]);
-      jobQuantities.push(sortedRoles[i][1]);
+    if (sortedLangs.length > i) {
+      languages.push(sortedLangs[i][0]);
+      jobQuantities.push(sortedLangs[i][1]);
     }
   }
   let colors = [
@@ -70,7 +75,7 @@ function fillData() {
   ];
 
   this.chartData = {
-    labels: jobTitles,
+    labels: languages,
     datasets: [
       {
         data: jobQuantities,
@@ -88,7 +93,7 @@ function fillData() {
           },
           scaleLabel: {
             display: true,
-            labelString: 'Name of Position',
+            labelString: 'Language',
             fontStyle: 'bold'
           }
         }
@@ -112,7 +117,7 @@ function fillData() {
     },
     title: {
       display: true,
-      text: 'Top Job Roles at Case Consulting',
+      text: 'Top Languages at Case Consulting',
       fontSize: 15
     },
     maintainAspectRatio: false
