@@ -63,7 +63,7 @@
         <!-- User image and logout -->
         <v-menu bottom offset-y open-on-click v-if="isLoggedIn()">
           <template v-slot:activator="{ on }">
-            <v-avatar id="profile" class="profile-button" size="50" color="grey lighten-4">
+            <v-avatar id="profile" class="profile-button" size="40">
               <img :src="profilePic" alt="avatar" v-on="on" />
             </v-avatar>
           </template>
@@ -455,6 +455,7 @@ export default {
 
 .profile-button {
   cursor: pointer;
+  border: 1px solid $case-darkgray;
 }
 
 #P {
