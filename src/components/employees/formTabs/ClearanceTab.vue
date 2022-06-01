@@ -234,6 +234,46 @@
       </v-menu>
       <!-- End Adjudication Dates -->
 
+      <!-- Badge Number -->
+
+      <v-text-field prepend-icon="portrait" counter="5" label="Badge Number" clearable></v-text-field>
+
+      <!-- End Badge Number -->
+
+      <!-- Badge Expiration date -->
+      <v-menu
+        v-model="clearance.showBadgeMenu"
+        :close-on-content-click="false"
+        transition="scale-transition"
+        offset-y
+        max-width="290px"
+        min-width="290px"
+      >
+        <template v-slot:activator="{ on, attrs }">
+          <v-text-field
+            ref="formFields"
+            :value="clearance.badgeExpirationDate | formatDate"
+            label="Badge Expiration Date"
+            prepend-icon="event_busy"
+            clearable
+            :rules="[...getDateOptionalRules(), dateBadgeRules(cIndex)]"
+            hint="MM/DD/YYYY format"
+            v-mask="'##/##/####'"
+            v-bind="attrs"
+            v-on="on"
+            @click:clear="clearance.badgeExpirationDate = null"
+            @blur="clearance.badgeExpirationDate = parseEventDate($event)"
+            @input="clearance.showBadgeMenu = false"
+            @focus="clearanceElement = clearance"
+          ></v-text-field>
+        </template>
+        <v-date-picker
+          v-model="clearance.badgeExpirationDate"
+          :min="minExpiration(cIndex)"
+          no-title
+          @input="clearance.showBadgeMenu = false"
+        ></v-date-picker>
+      </v-menu>
       <!-- Poly Dates -->
       <v-menu
         ref="polyMenu"
