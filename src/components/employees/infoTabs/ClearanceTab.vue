@@ -16,13 +16,17 @@
           <b>Expiration Date: </b>{{ monthDayYearFormat(clearance.expirationDate) }}
         </p>
 
+        <!-- Badge Expiration Date -->
+        <p v-if="clearance.badgeExpirationDate">
+          <b>Badge Expiration Date: </b>{{ monthDayYearFormat(clearance.badgeExpirationDate) }}
+        </p>
+
         <!-- BI Dates -->
         <p v-if="clearance.biDates.length == 1"><b>Bi Date: </b> {{ monthDayYearFormat(clearance.biDates[0]) }}</p>
         <p v-if="clearance.biDates.length > 1" class="mb-2"><b>Bi Dates: </b></p>
         <ul v-if="clearance.biDates.length > 1" class="mb-4">
           <li v-for="(biDate, pIndex) in clearance.biDates" :key="pIndex">{{ monthDayYearFormat(biDate) }}</li>
         </ul>
-
 
         <!-- Adjudication Dates -->
         <p v-if="clearance.adjudicationDates.length == 1" class="mb-2">
@@ -34,11 +38,6 @@
             {{ monthDayYearFormat(adjudicationDate) }}
           </li>
         </ul>
-
-        <!-- Badge Expiration Date -->
-        <p v-if="clearance.badgeExpirationDate">
-          <b>Badge Expiration Date: </b>{{ monthDayYearFormat(clearance.badgeExpirationDate) }}
-        </p>
 
         <!-- Poly Dates -->
         <p v-if="clearance.polyDates.length == 1">
