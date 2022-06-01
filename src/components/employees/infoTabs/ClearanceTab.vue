@@ -29,7 +29,7 @@
         </ul>
 
         <!-- Adjudication Dates -->
-        <p v-if="clearance.adjudicationDates.length == 1" class="mb-2">
+        <p v-if="clearance.adjudicationDates.length == 1" class="mb-4">
           <b>Adjudication Date: </b>{{ monthDayYearFormat(clearance.adjudicationDates[0]) }}
         </p>
         <p v-if="clearance.adjudicationDates.length > 1" class="mb-2"><b>Adjudication Dates: </b></p>
@@ -39,6 +39,17 @@
           </li>
         </ul>
 
+<<<<<<< HEAD
+=======
+        <!-- Badge Expiration Date -->
+        <p v-if="clearance.badgeNum"><b>Badge Number: </b>{{ clearance.badgeNum }}</p>
+
+        <!-- Badge Expiration Date -->
+        <p v-if="clearance.badgeExpirationDate">
+          <b>Badge Expiration Date: </b>{{ monthDayYearFormat(clearance.badgeExpirationDate) }}
+        </p>
+
+>>>>>>> 07f71578 (3655-add-badge-number-field: display on info page)
         <!-- Poly Dates -->
         <p v-if="clearance.polyDates.length == 1">
           <b>Poly Date: </b> {{ monthDayYearFormat(clearance.polyDates[0]) }}
@@ -79,6 +90,7 @@ import { isEmpty, monthDayYearFormat } from '@/utils/utils';
  */
 function created() {
   if (!this.isEmpty(this.model.clearances)) {
+    console.log(this.model.clearances);
     this.filteredList = this.model.clearances.slice(0, 5);
   }
 } // created

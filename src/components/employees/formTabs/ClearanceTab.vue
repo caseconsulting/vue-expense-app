@@ -236,7 +236,13 @@
 
       <!-- Badge Number -->
 
-      <v-text-field prepend-icon="portrait" counter="5" label="Badge Number" clearable></v-text-field>
+      <v-text-field
+        v-model="clearance.badgeNum"
+        prepend-icon="portrait"
+        counter="5"
+        label="Badge Number"
+        clearable
+      ></v-text-field>
 
       <!-- End Badge Number -->
 
