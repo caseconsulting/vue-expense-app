@@ -91,8 +91,6 @@ function fillPrimeData() {
     return b[1] - a[1];
   });
 
-  primePairs = primePairs.slice(0, 5);
-
   let labels = [];
   let values = [];
 
@@ -115,8 +113,8 @@ function fillPrimeData() {
 
   //Set the background and border colors
   for (let i = 0; i < labels.length; i++) {
-    backgroundColors[i] = colors[i];
-    borderColors[i] = colors[i];
+    backgroundColors[i] = colors[i % 4];
+    borderColors[i] = colors[i % 4];
   }
 
   //Set the chart data
