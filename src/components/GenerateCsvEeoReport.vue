@@ -1,6 +1,6 @@
 <template>
   <!-- Download CSV Button -->
-  <v-btn :disabled="midAction" @click="populateArrays()" elevation="2"
+  <v-btn :disabled="midAction" @click="populateArrays()" elevation="2" :x-small="isMobile || isSmallScreen"
     ><i class="material-icons">file_download</i>Generate EEO Report</v-btn
   >
 </template>
@@ -8,6 +8,7 @@
 <script>
 import _ from 'lodash';
 import moment from 'moment-timezone';
+import { isMobile, isSmallScreen } from '@/utils/utils';
 
 // Keston wrote all this crap. Please don't ask me about it.
 // I don't know how it works either.
@@ -489,6 +490,10 @@ function convertToCSV(objArray) {
 // |--------------------------------------------------|
 
 export default {
+  computed: {
+    isMobile,
+    isSmallScreen
+  },
   data() {
     return {
       clonedEmployees: null,

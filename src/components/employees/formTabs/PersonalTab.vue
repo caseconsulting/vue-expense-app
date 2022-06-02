@@ -16,9 +16,9 @@
 
     <!-- Phone Numbers -->
     <p class="mt-5">Phone Numbers</p>
-    <div class="groove pr-5 pl-2 mb-4">
+    <div class="groove pr-0 pl-2 mb-4">
       <v-row v-for="(phoneNumber, index) in phoneNumbers" :key="index" class="d-flex align-center mt-0">
-        <v-col class="pt-0" cols="3">
+        <v-col class="pt-0" cols="7" xl="3" lg="3" md="3" sm="3" xs="7">
           <v-autocomplete
             v-model="phoneNumber.type"
             label="Type"
@@ -28,7 +28,7 @@
             clearable
           ></v-autocomplete>
         </v-col>
-        <v-col class="pt-0" cols="7">
+        <v-col class="pt-0" cols="6">
           <v-text-field
             v-model="phoneNumber.number"
             v-mask="'###-###-####'"
@@ -39,20 +39,25 @@
           >
           </v-text-field>
         </v-col>
-        <v-col class="pt-0 pb-2" cols="1">
+        <v-col class="py-0 pr-0" cols="4" xl="2" lg="2" md="3" sm="3" xs="4">
           <v-tooltip bottom slot="append-outer">
             <template v-slot:activator="{ on }">
-              <v-btn class="center" v-on="on" @click="deletePhoneInput(index)" text icon>
+              <v-btn
+                :disabled="phoneNumbers.length === 1"
+                class="justify-end mr-2"
+                v-on="on"
+                @click="deletePhoneInput(index)"
+                text
+                icon
+              >
                 <v-icon class="case-gray">delete</v-icon>
               </v-btn>
             </template>
             <span>Delete Number</span>
           </v-tooltip>
-        </v-col>
-        <v-col class="pt-0 pb-2" cols="1">
           <v-tooltip bottom slot="append-outer">
             <template v-slot:activator="{ on }">
-              <v-btn class="center" v-on="on" @click="changeNumberVisibility(index)" text icon>
+              <v-btn v-on="on" @click="changeNumberVisibility(index)" text icon>
                 <v-icon v-if="phoneNumber.private">mdi-shield</v-icon>
                 <v-icon v-else>mdi-shield-outline</v-icon>
               </v-btn>
@@ -62,6 +67,9 @@
             >
             <span v-else>Based on user preference, this is visible to everyone</span>
           </v-tooltip>
+        </v-col>
+        <v-col v-if="index != phoneNumbers.length - 1 && $vuetify.breakpoint.name === 'xs'" cols="12">
+          <v-divider class="mb-2"></v-divider>
         </v-col>
       </v-row>
       <div align="center" class="py-2">

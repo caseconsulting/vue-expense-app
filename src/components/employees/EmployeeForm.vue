@@ -25,7 +25,7 @@
             <h3 v-if="model.id">Editing {{ fullName }}</h3>
             <h3 v-else>New Employee</h3>
           </v-col>
-          <v-col col="6" class="text-right">
+          <v-col v-if="!model.id" col="6" class="text-right">
             <v-tooltip v-if="!model.id && uploadDisabled" right>
               <template v-slot:activator="{ on }">
                 <div v-on="on">
@@ -40,7 +40,7 @@
       </v-card-title>
 
       <v-container fluid>
-        <v-form ref="form" v-model="valid" lazy-validation class="my-1 mx-5">
+        <v-form ref="form" v-model="valid" lazy-validation class="my-1 mx-xl-5 mx-lg-5 mx-md-0">
           <div v-if="useDropDown">
             <!-- For smaller screens -->
             <v-row>

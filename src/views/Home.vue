@@ -31,9 +31,9 @@
       </v-row>
     </span>
     <span v-else>
-      <v-row class="pb-2 px-lg-2 px-md-0">
+      <v-row class="pb-3 px-lg-2 px-md-0">
         <!-- Title -->
-        <v-col cols="12" md="6" class="pt-4 px-xl-2 px-lg-2 px-md-0">
+        <v-col cols="12" md="6" class="pt-3 px-xl-2 px-lg-2 px-md-0">
           <v-row class="pt-5" align="center" justify="center">
             <h1 id="home-greeting">Hello, {{ employee.firstName }}!</h1>
           </v-row>

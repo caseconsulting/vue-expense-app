@@ -228,9 +228,17 @@
         <br />
 
         <!-- Download employee csv button -->
-        <v-card-actions>
-          <convert-employees-to-csv :midAction="midAction" :employees="filteredEmployees"></convert-employees-to-csv>
-          <generate-csv-eeo-report :midAction="midAction" :employees="filteredEmployees"></generate-csv-eeo-report>
+        <v-card-actions class="justify-end">
+          <convert-employees-to-csv
+            v-if="userIsAdmin()"
+            :midAction="midAction"
+            :employees="filteredEmployees"
+          ></convert-employees-to-csv>
+          <generate-csv-eeo-report
+            v-if="userIsAdmin()"
+            :midAction="midAction"
+            :employees="filteredEmployees"
+          ></generate-csv-eeo-report>
         </v-card-actions>
 
         <!-- Confirmation Modals -->

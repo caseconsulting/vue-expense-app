@@ -106,14 +106,7 @@
         </v-menu>
         <!-- End user image and logout -->
       </v-app-bar>
-
-      <v-main v-if="!(isMobile || isSmallScreen)" style="padding: 64px 0px 0px 56px">
-        <badge-expiration-banner v-if="isLoggedIn() && storeIsPopulated" :key="badgeKey" />
-        <v-container fluid grid-list-lg>
-          <router-view v-if="!loadingCreated"></router-view>
-        </v-container>
-      </v-main>
-      <v-main v-else>
+      <v-main :style="{ padding: getMainPadding() }">
         <badge-expiration-banner v-if="isLoggedIn() && storeIsPopulated" :key="badgeKey" />
         <v-container fluid grid-list-lg>
           <router-view></router-view>
@@ -149,7 +142,7 @@
 
 <script>
 import { isLoggedIn, logout, getProfile, getTokenExpirationDate, getAccessToken } from '@/utils/auth';
-import { isMobile, storeIsPopulated } from '@/utils/utils';
+import { isMobile, isSmallScreen, storeIsPopulated } from '@/utils/utils';
 import { updateStoreUser, updateStoreEmployees, updateStoreAvatars, updateStoreExpenseTypes } from '@/utils/storeUtils';
 import { v4 as uuid } from 'uuid';
 import api from '@/shared/api';
@@ -213,6 +206,19 @@ function badumbadumdodooodoo(index) {
   }
 } // badumbadumdodooodoo
 
+/**
+ * Determines if the screens padding based off if the user is mobile.
+ *
+ * @returns String - The padding value
+ */
+function getMainPadding() {
+  if (!(this.isMobile || this.isSmallScreen)) {
+    return '64px 0px 0px 56px';
+  } else {
+    return '56px 0px 0px 0px';
+  }
+}
+
 /*
  * Logout of expense app
  */
@@ -227,13 +233,6 @@ async function handleProfile() {
   // We don't use this.userId becuase it may be null by the time we click the button
   this.$router.push({ name: 'employee', params: { id: `${this.userId}` } });
 } // handleProfile
-
-/**
- * resize the window for small screens
- */
-function onResize() {
-  this.isSmallScreen = window.innerWidth < 960;
-} // onResize
 
 /**
  * resize the window for small screens
@@ -327,20 +326,9 @@ async function created() {
  * beforeDestroy lifecycle hook - close event listener
  */
 function beforeDestroy() {
-  if (typeof window !== 'undefined') {
-    window.removeEventListener('resize', this.onResize, { passive: true });
-  }
   window.EventBus.$off('relog');
   window.EventBus.$off('badgeExp');
 } //beforeDestroy
-
-/**
- * mounted lifecycle hook - resize window create event listener
- */
-async function mounted() {
-  this.onResize();
-  window.addEventListener('resize', this.onResize, { passive: true });
-} // mounted
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -406,7 +394,6 @@ export default {
       { name: 'Twitter', link: 'https://twitter.com/consultwithcase?lang=en', icon: 'brands/twitter' },
       { name: 'Facebook', link: 'https://www.facebook.com/ConsultwithCase/', icon: 'brands/facebook' }
     ],
-    isSmallScreen: false,
     version: null
   }),
   props: {
@@ -414,6 +401,7 @@ export default {
   },
   computed: {
     isMobile,
+    isSmallScreen,
     onUserProfile,
     storeIsPopulated
   },
@@ -426,10 +414,10 @@ export default {
   },
   methods: {
     badumbadumdodooodoo,
+    getMainPadding,
     handleLogout,
     handleProfile,
     isLoggedIn,
-    onResize,
     populateStore,
     updateStoreUser,
     updateStoreEmployees,
@@ -440,7 +428,6 @@ export default {
     $route
   },
   beforeDestroy,
-  mounted,
   created
 };
 </script>

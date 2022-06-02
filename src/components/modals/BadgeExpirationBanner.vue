@@ -1,5 +1,5 @@
 <template>
-  <v-col class="pb-0" cols="12" v-if="badgeExpiring">
+  <v-col class="pa-1 pb-0" cols="12" v-if="badgeExpiring">
     <v-alert v-if="alert" :type="alert.status" color="#f27311" dense id="alert" justify="center">
       {{ alert.message }}
       <v-btn

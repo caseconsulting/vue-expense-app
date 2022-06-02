@@ -134,6 +134,15 @@ export function isPartTime(employee) {
 } // isPartTime
 
 /**
+ * Checks if the window width is a small sie.
+ *
+ * @returns Boolean - True if the window is a smaller size.
+ */
+export function isSmallScreen() {
+  return window.innerWidth < 960;
+} // isSmallScreen
+
+/**
  * Convert a value to a 2 deciaml currency with prepended $.
  *
  * @param value - value to convert

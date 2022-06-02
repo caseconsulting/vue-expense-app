@@ -56,34 +56,37 @@
           </v-card-title>
 
           <div v-else>
-            <v-card-title>
-              <h2 v-if="isUser || isIntern || isManager">{{ getUserName }}'s Expenses</h2>
+            <v-card-title class="px-0">
+              <h3 v-if="isUser || isIntern || isManager">{{ getUserName }}'s Expenses</h3>
               <h3 v-else>My Expenses</h3>
             </v-card-title>
-            <!-- Employee Filter -->
-            <v-autocomplete
-              v-if="isAdmin"
-              hide-details
-              :items="employees"
-              :filter="customFilter"
-              v-model="employee"
-              item-text="text"
-              id="employeeIdFilter"
-              class="mb-1"
-              label="Filter by Employee"
-              clearable
-            ></v-autocomplete>
-
-            <!-- Search Bar -->
-            <v-text-field
-              v-model="search"
-              append-icon="search"
-              id="search"
-              label="Search"
-              single-line
-              hide-details
-              class="mt-0 mb-5"
-            ></v-text-field>
+            <v-row class="mb-5">
+              <v-col>
+                <!-- Employee Filter -->
+                <v-autocomplete
+                  v-if="isAdmin"
+                  hide-details
+                  :items="employees"
+                  :filter="customFilter"
+                  v-model="employee"
+                  item-text="text"
+                  id="employeeIdFilter"
+                  label="Filter by Employee"
+                  clearable
+                ></v-autocomplete>
+              </v-col>
+              <v-col>
+                <!-- Search Bar -->
+                <v-text-field
+                  v-model="search"
+                  append-icon="search"
+                  id="search"
+                  label="Search"
+                  single-line
+                  hide-details
+                ></v-text-field>
+              </v-col>
+            </v-row>
           </div>
 
           <!-- Filters -->

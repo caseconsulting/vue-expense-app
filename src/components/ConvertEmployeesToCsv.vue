@@ -1,6 +1,6 @@
 <template>
   <!-- Download CSV Button -->
-  <v-btn :disabled="midAction" @click="download()" elevation="2"
+  <v-btn :disabled="midAction" @click="download()" elevation="2" :x-small="isMobile || isSmallScreen"
     ><i class="material-icons">file_download</i>Download All</v-btn
   >
 </template>
@@ -8,6 +8,7 @@
 <script>
 import _ from 'lodash';
 import moment from 'moment-timezone';
+import { isMobile, isSmallScreen } from '@/utils/utils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -409,6 +410,10 @@ function getTechnologies(tech) {
 // |--------------------------------------------------|
 
 export default {
+  computed: {
+    isMobile,
+    isSmallScreen
+  },
   data() {
     return {
       headers: []
