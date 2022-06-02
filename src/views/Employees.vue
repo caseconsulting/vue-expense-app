@@ -228,16 +228,8 @@
 
         <!-- Download employee csv button -->
         <v-card-actions>
-          <convert-employees-to-csv
-            v-if="userIsAdmin()"
-            :midAction="midAction"
-            :employees="filteredEmployees"
-          ></convert-employees-to-csv>
-          <generate-csv-eeo-report
-            v-if="userIsAdmin()"
-            :midAction="midAction"
-            :employees="filteredEmployees"
-          ></generate-csv-eeo-report>
+          <convert-employees-to-csv :midAction="midAction" :employees="filteredEmployees"></convert-employees-to-csv>
+          <generate-csv-eeo-report :midAction="midAction" :employees="filteredEmployees"></generate-csv-eeo-report>
         </v-card-actions>
 
         <!-- Confirmation Modals -->
@@ -496,11 +488,17 @@ async function created() {
   // only refresh employees if data is in store. Otherwise, set loading and wait in watcher
   this.storeIsPopulated ? await this.refreshEmployees() : (this.loading = true);
 
-  // remove admin-only actions if user is not admin
-  const adminHeaders = ['lastLogin', 'actions', 'hireDate']; // stores the `value` attribute
+  // remove admin-only actions if user is not admin (by default everything is included)
+  const adminSpecific = ['lastLogin', 'hireDate']; // requires admin role, NOT manager
+  const adminPermissions = ['actions']; // requires admin level, including manager
   if (!this.hasAdminPermissions()) {
     this.headers = _.filter(this.headers, (header) => {
-      return !adminHeaders.includes(header.value);
+      return !adminPermissions.includes(header.value);
+    });
+  }
+  if (!this.userIsAdmin()) {
+    this.headers = _.filter(this.headers, (header) => {
+      return !adminSpecific.includes(header.value);
     });
   }
 } // created
