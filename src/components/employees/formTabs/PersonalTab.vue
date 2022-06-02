@@ -42,14 +42,7 @@
         <v-col class="pt-0 pb-2" cols="1">
           <v-tooltip bottom slot="append-outer">
             <template v-slot:activator="{ on }">
-              <v-btn
-                :disabled="phoneNumbers.length === 1"
-                class="center"
-                v-on="on"
-                @click="deletePhoneInput(index)"
-                text
-                icon
-              >
+              <v-btn class="center" v-on="on" @click="deletePhoneInput(index)" text icon>
                 <v-icon class="case-gray">delete</v-icon>
               </v-btn>
             </template>
