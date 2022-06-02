@@ -496,14 +496,11 @@ async function created() {
   // only refresh employees if data is in store. Otherwise, set loading and wait in watcher
   this.storeIsPopulated ? await this.refreshEmployees() : (this.loading = true);
 
-  // remove employee action button header if user view
+  // remove admin-only actions if user is not admin
+  const adminHeaders = ['lastLogin', 'actions', 'hireDate']; // stores the `value` attribute
   if (!this.hasAdminPermissions()) {
-    this.headers.pop();
-  }
-  if (this.userIsAdmin()) {
-    this.headers.splice(this.headers.length - 1, 0, {
-      text: 'Last Login',
-      value: 'lastLogin'
+    this.headers = _.filter(this.headers, (header) => {
+      return !adminHeaders.includes(header.value);
     });
   }
 } // created
@@ -600,6 +597,10 @@ export default {
         {
           text: 'Email',
           value: 'email'
+        },
+        {
+          text: 'Last Login',
+          value: 'lastLogin'
         },
         {
           value: 'actions',
