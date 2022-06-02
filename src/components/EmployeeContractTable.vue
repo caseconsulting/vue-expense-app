@@ -55,6 +55,9 @@
             @click:clear="dataTypeSearch = null"
           ></v-autocomplete>
         </v-col>
+        <v-col>
+          <v-checkbox v-model="showInactiveEmployees" label="Show Inactive Users"></v-checkbox>
+        </v-col>
       </v-row>
 
       <!-- NEW DATA TABLE -->
@@ -260,7 +263,8 @@ function populateDropDowns(employees) {
   _.forEach(employeesContracts, (contracts) => {
     // loop contracts
     _.forEach(contracts, (contract) => {
-      // loop through projects to test if contract is current (this was added to make sure only current contracts/primes were listed in Reports autocomplete dropdowns)
+      // loop through projects to test if contract is current
+      // (this was added to make sure only current contracts/primes were listed in Reports autocomplete dropdowns)
       _.forEach(contract, (projects) => {
         // loop project
         _.forEach(projects, (project) => {
@@ -332,7 +336,8 @@ function searchContract() {
 } // searchContract
 
 /**
- * Checks the filter query with the dropdown data to see if anything matches. Edits the data table based on the selected query.
+ * Checks the filter query with the dropdown data to see if anything matches.
+ * Edits the data table based on the selected query.
  */
 function searchDataType() {
   if (this.dataType === 'Job Roles') {
@@ -372,6 +377,30 @@ function searchPrime() {
   }
 } // searchPrime
 
+/**
+ * Returns a filtered list of the input with all inactive
+ * employees removed
+ */
+function getActive(employees) {
+  return _.filter(employees, (e) => {
+    return e.workStatus > 0;
+  });
+} // isActive
+
+/**
+ * Swap active/inactive employees and reload the page data
+ */
+function setActiveInactive() {
+  this.search = null;
+  this.employeesInfo = this.$store.getters.employees;
+  if (!this.showInactiveEmployees) this.employeesInfo = getActive(this.employeesInfo);
+  this.populateDropDowns(this.employeesInfo);
+  this.constructAutoComplete(this.employeesInfo);
+  this.buildContractsColumn();
+  this.refreshDataTypeList();
+  this.refreshList();
+} // setActiveInactive
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                 LIFECYCLE HOOKS                  |
@@ -383,11 +412,12 @@ function searchPrime() {
  */
 async function created() {
   this.loading = true; // set loading status to true
-  this.employeesInfo = this.$store.getters.employees; // get all employees
+  this.allEmployees = this.$store.getters.employees; // get all employees
+  this.employeesInfo = getActive(this.allEmployees); // default to filtered list
+  this.filteredEmployees = this.employeesInfo; // this one is shown
   this.populateDropDowns(this.employeesInfo);
   this.buildContractsColumn();
-  this.filteredEmployees = this.employeesInfo;
-  this.constructAutoComplete(this.filteredEmployees);
+  this.constructAutoComplete(this.employeesInfo);
   this.loading = false;
 } //created
 
@@ -417,6 +447,13 @@ function watchDataType() {
   this.dataTypeSearch = null;
   this.populateDataTypeDropDowns();
 } // watchDataType
+
+/**
+ * Watches the showInactiveUsers to refilter the table as needed
+ */
+function watchShowInactiveUsers() {
+  this.setActiveInactive();
+}
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -462,6 +499,7 @@ export default {
       prime: null,
       primesDropDown: [],
       search: null, // query text for datatable search field
+      showInactiveEmployees: false,
       sortBy: 'firstName', // sort datatable items
       sortDesc: false
     };
@@ -473,6 +511,7 @@ export default {
     customFilter,
     employeePath,
     getFullName,
+    getActive,
     handleClick,
     isFocus,
     populateDataTypeDropDowns,
@@ -481,10 +520,12 @@ export default {
     refreshList,
     searchContract,
     searchDataType,
-    searchPrime
+    searchPrime,
+    setActiveInactive
   },
   watch: {
-    dataType: watchDataType
+    dataType: watchDataType,
+    showInactiveEmployees: watchShowInactiveUsers
   }
 };
 </script>
