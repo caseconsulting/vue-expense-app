@@ -73,15 +73,28 @@
         class="elevation-1"
         @click:row="handleClick"
       >
+        <!-- Employee Number Slot -->
         <template v-slot:[`item.employeeNumber`]="{ item }">
-          <p :class="{ selectFocus: isFocus(item) } + ' mb-0'">
+          <p :class="{ selectFocus: isFocus(item), inactive: item.workStatus <= 0 }" class="mb-0">
             {{ item.employeeNumber }}
           </p>
         </template>
-        <!-- First Name Item Slot -->
+        <!-- Full Name Item Slot -->
         <template v-slot:[`item.fullName`]="{ item }">
-          <p :class="{ selectFocus: isFocus(item) } + ' mb-0'">
+          <p :class="{ selectFocus: isFocus(item), inactive: item.workStatus <= 0 }" class="mb-0">
             {{ getFullName(item) }}
+          </p>
+        </template>
+        <!-- Prime/Contracts Item Slot -->
+        <template v-slot:[`item.contractNames`]="{ item }">
+          <p :class="{ selectFocus: isFocus(item), inactive: item.workStatus <= 0 }" class="mb-0">
+            {{ item.contractNames }}
+          </p>
+        </template>
+        <!-- Email Name Item Slot -->
+        <template v-slot:[`item.email`]="{ item }">
+          <p :class="{ selectFocus: isFocus(item), inactive: item.workStatus <= 0 }" class="mb-0">
+            {{ item.email }}
           </p>
         </template>
         <!-- Alert for no search results -->
@@ -213,7 +226,8 @@ function getFullName(item) {
  * @param item - the employee
  */
 function handleClick(item) {
-  this.$router.push(employeePath(item));
+  console.log(item);
+  // this.$router.push(employeePath(item));
 } //handleClick
 
 /**
@@ -308,6 +322,7 @@ function refreshList() {
   if (this.search === null && this.contract === null && this.prime === null) {
     this.filteredEmployees = this.employeesInfo;
   }
+  console.log(this.filteredEmployees);
   this.populateDropDowns(this.filteredEmployees);
 } // refreshList
 
@@ -388,7 +403,7 @@ function getActive(employees) {
 } // isActive
 
 /**
- * Swap active/inactive employees and reload the page data
+ * Swap active/inactive employees and reload the page data (including dropdowns)
  */
 function setActiveInactive() {
   this.search = null;
@@ -529,3 +544,9 @@ export default {
   }
 };
 </script>
+<style lang="scss" scoped>
+@import 'src/assets/styles/styles';
+.inactive {
+  color: $case-red;
+}
+</style>
