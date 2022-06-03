@@ -22,8 +22,8 @@ moment.tz.setDefault('America/New_York');
  */
 function mounted() {
   if (this.storeIsPopulated) {
-    this.drawCaseYearsHistGraph();
     this.caseYearsData();
+    this.drawCaseYearsHistGraph();
   }
 } // mounted
 
@@ -47,6 +47,7 @@ function caseYearsData() {
     if (employee.hireDate !== undefined && employee.workStatus != 0) {
       // find time at case
       var amOfYears = this.calculateTimeDifference(employee.hireDate);
+
       // push time to array
       if (amOfYears > 18) amOfYears = 18;
       else if (amOfYears < 0) amOfYears = 0;
@@ -63,6 +64,7 @@ function caseYearsData() {
  */
 function calculateTimeDifference(startDate) {
   var start = this.stringToDate(startDate);
+
   var end = moment();
   return end.diff(start, 'years', true); //Provides decimal value
 } //calculateTimeDifference
