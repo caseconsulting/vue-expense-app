@@ -323,7 +323,7 @@
           </v-tabs>
 
           <!-- Form action buttons -->
-          <v-btn id="employeeCancelBtn" class="ma-2" color="white" @click="cancel" elevation="2"
+          <v-btn id="employeeCancelBtn" class="ma-2" color="white" @click="cancelA" elevation="2"
             ><v-icon class="mr-1">cancel</v-icon>Cancel</v-btn
           >
           <v-btn id="employeeSubmitBtn" outlined class="ma-2" color="success" @click="submit">
@@ -332,11 +332,11 @@
           <!-- End form action buttons -->
         </v-form>
         <!-- Confirmation Model -->
-        <form-submission-confirmation
-          :submitting="this.submitting"
+        <form-cancel-confirmation
+          :cancelling="this.cancelling"
           :toggleSubmissionConfirmation="this.confirmingValid"
-          type="form"
-        ></form-submission-confirmation>
+          type="cancel"
+        ></form-cancel-confirmation>
         <many-form-errors
           :toggleSubmissionConfirmation="this.confirmingError"
           :errorTabs="errorTabNames"
@@ -362,7 +362,7 @@ import ContractTab from '@/components/employees/formTabs/ContractTab';
 import CustomerOrgTab from '@/components/employees/formTabs/CustomerOrgTab';
 import EducationTab from '@/components/employees/formTabs/EducationTab';
 import EmployeeTab from '@/components/employees/formTabs/EmployeeTab';
-import FormSubmissionConfirmation from '@/components/modals/FormSubmissionConfirmation.vue';
+import FormCancelConfirmation from '@/components/modals/FormCancelConfirmation.vue';
 import JobExperienceTab from '@/components/employees/formTabs/JobExperienceTab';
 import LanguagesTab from '@/components/employees/formTabs/LanguagesTab';
 import ManyFormErrors from '@/components/modals/ManyFormErrors.vue';
@@ -405,8 +405,12 @@ function selectDropDown(tab) {
  * Resets back to employee info. Also deletes resume when creating an employee if
  * you decide to cancel your submission
  */
-async function cancel() {
+function cancelA() {
   //creating an employee
+  this.confirmingValid = true;
+} // cancelA
+
+async function cancelB() {
   let employees = this.$store.getters.employees;
   //if the user types an employee number that matches another employee's
   let existingResume = employees.some((emp) => emp.employeeNumber == this.employeeNumber);
@@ -414,7 +418,7 @@ async function cancel() {
     await api.deleteResume(this.model.employeeNumber);
   }
   window.EventBus.$emit('cancel-form');
-} // cancel
+} // cancelB
 
 /**
  * Removes unnecessary attributes from the employee data.
@@ -645,7 +649,7 @@ async function submit() {
         window.EventBus.$emit('update', updatedEmployee);
         // getEmployees and update store with latest data
         await this.updateStoreEmployees();
-        await this.cancel();
+        await this.cancelB();
       } else {
         // failed to update employee
         this.$emit('error', updatedEmployee.response.data.message);
@@ -741,15 +745,15 @@ async function created() {
   });
   // Starts listener to see if the user confirmed to submit the form
   window.EventBus.$on('confirmed-form', async () => {
-    await this.submit();
     this.confirmingValid = false;
+    cancelB();
   });
   // Starts listener to see if the user cancelled to submit the form
-  window.EventBus.$on('canceled-form', () => {
-    this.errorTabNames = {};
-    this.confirmingError = false;
-    this.confirmingValid = false;
-  });
+  // window.EventBus.$on('canceled-cancel', () => {
+  //   this.errorTabNames = {};
+  //   this.confirmingError = false;
+  //   this.confirmingValid = false;
+  // });
   // set tab mounted
   window.EventBus.$on('created', (tab) => {
     this.tabCreated[tab] = true;
@@ -837,8 +841,8 @@ function beforeDestroy() {
   window.EventBus.$off('uploaded');
   window.EventBus.$off('confirmed');
   window.EventBus.$off('canceled');
-  window.EventBus.$off('confirmed-form');
-  window.EventBus.$off('canceled-form');
+  window.EventBus.$off('canceled-cancel');
+  window.EventBus.$off('confirmed-cancel');
   window.EventBus.$off('created');
   window.EventBus.$off('doneValidating');
   window.EventBus.$off('awardStatus');
@@ -1037,7 +1041,7 @@ export default {
     CustomerOrgTab,
     EducationTab,
     EmployeeTab,
-    FormSubmissionConfirmation,
+    FormCancelConfirmation,
     JobExperienceTab,
     PersonalTab,
     ResumeParser,
@@ -1049,6 +1053,7 @@ export default {
   data() {
     return {
       afterCreate: false, // component has been created
+      cancelling: false, // cancelling form
       confirmingValid: false, // confirming form submission
       confirmingError: false,
       deleteLoading: false,
@@ -1155,7 +1160,8 @@ export default {
   },
   methods: {
     addErrorTab,
-    cancel,
+    cancelA,
+    cancelB,
     cleanUpData,
     clearStatus,
     confirm,
