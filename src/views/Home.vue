@@ -63,19 +63,13 @@
         <v-col wrap cols="12" lg="6" class="pa-0 px-xl-4 px-lg-2 px-md-0">
           <!-- QuickBooksTime -->
           <v-col class="pa-0">
-            <v-col v-if="loadingEmployee" class="text-center px-0">
-              <v-progress-circular indeterminate size="64" color="#bc3825"></v-progress-circular>
-            </v-col>
-            <v-col v-else class="pt-0 px-0 text-center">
+            <v-col class="pt-0 px-0 text-center">
               <quick-books-time-data cols="12" lg="6"></quick-books-time-data>
             </v-col>
           </v-col>
           <!-- Available Budgets -->
           <v-col class="pa-0 pb-2">
-            <v-col v-if="loadingEmployee" text-center>
-              <v-progress-circular indeterminate size="64" color="#bc3825"></v-progress-circular>
-            </v-col>
-            <v-col v-else class="pa-0 pt-lg-2 pt-md-2 mt-2 text-center">
+            <v-col class="pa-0 pt-lg-2 pt-md-2 mt-2 text-center">
               <available-budgets
                 id="home-available-budgets"
                 :employee="this.employee"
