@@ -754,6 +754,11 @@ async function created() {
   //   this.confirmingError = false;
   //   this.confirmingValid = false;
   // });
+  window.EventBus.$on('canceled-cancel', () => {});
+  window.EventBus.$on('confirmed-cancel', () => {
+    this.confirmingValid = true;
+    this.cancelB();
+  });
   // set tab mounted
   window.EventBus.$on('created', (tab) => {
     this.tabCreated[tab] = true;
