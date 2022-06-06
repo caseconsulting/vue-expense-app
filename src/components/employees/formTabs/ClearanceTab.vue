@@ -44,7 +44,6 @@
             </template>
             <v-date-picker
               v-model="clearance.grantedDate"
-              :max="clearance.expirationDate"
               :min="clearance.submissionDate"
               no-title
               @input="clearance.showGrantedMenu = false"
@@ -299,13 +298,11 @@ function addClearance() {
     adjudicationDates: [],
     biDates: [],
     badgeExpirationDate: null,
-    expirationDate: null,
     grantedDate: null,
     polyDates: [],
     showAdjudicationMenu: false,
     showBadgeMenu: false,
     showBIMenu: false,
-    showExpirationMenu: false,
     showGrantedMenu: false,
     showPolyMenu: false,
     showSubmissionMenu: false,
@@ -360,8 +357,7 @@ function isBefore(firstDate, secondDate, errMessage) {
 
 /**
  * Return the maximum available date to be selected for submission date. Returns the granted date if it exists.
- * Returns the expiration date if the expiration date exists and the granted date does not exists. Returns null if
- * neither the granted date or expiration date exist.
+ * Returns null if the granted date doesn't exist.
  *
  * @param cIndex - array index of clearance
  * @return string - maximum (latest possible) date
@@ -371,9 +367,6 @@ function maxSubmission(cIndex) {
   if (this.editedClearances[cIndex].grantedDate) {
     // submission date is before granted date
     max = moment(this.editedClearances[cIndex].grantedDate, ISOFORMAT);
-  } else if (this.editedClearances[cIndex].expirationDate) {
-    // submission date is before expiration date
-    max = moment(this.editedClearances[cIndex].expirationDate, ISOFORMAT);
   }
 
   // check submission date is before any poly dates
@@ -525,14 +518,6 @@ export default {
               'Badge expiration date must come after grant and submission date'
           : true;
       },
-      dateExpirationRules: (index) => {
-        let currClearance = this.editedClearances[index];
-        return currClearance.grantedDate && currClearance.expirationDate && currClearance.submissionDate
-          ? (moment(currClearance.expirationDate).isAfter(moment(currClearance.grantedDate)) &&
-              moment(currClearance.expirationDate).isAfter(moment(currClearance.submissionDate))) ||
-              'Expiration date must come after grant and submission date'
-          : true;
-      },
       dateSubmissionRules: (index) => {
         let currClearance = this.editedClearances[index];
         return currClearance.grantedDate && currClearance.submissionDate
@@ -543,10 +528,9 @@ export default {
       editedClearances: _.cloneDeep(this.model), // stores edited clearances info
       dateGrantedRules: (index) => {
         let currClearance = this.editedClearances[index];
-        return currClearance.grantedDate && currClearance.expirationDate && currClearance.submissionDate
-          ? (moment(currClearance.grantedDate).isAfter(moment(currClearance.submissionDate)) &&
-              moment(currClearance.grantedDate).isBefore(moment(currClearance.expirationDate))) ||
-              'Grant date must lie between submission and expiration date'
+        return currClearance.grantedDate && currClearance.submissionDate
+          ? moment(currClearance.grantedDate).isAfter(moment(currClearance.submissionDate)) ||
+              'Grant date must be after the submission date'
           : true;
       },
       duplicateClearanceTypes: (cIndex) => {
