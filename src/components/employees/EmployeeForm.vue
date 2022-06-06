@@ -326,7 +326,7 @@
           <v-btn id="employeeCancelBtn" class="ma-2" color="white" @click="cancel" elevation="2"
             ><v-icon class="mr-1">cancel</v-icon>Cancel</v-btn
           >
-          <v-btn id="employeeSubmitBtn" outlined class="ma-2" color="success" @click="confirm">
+          <v-btn id="employeeSubmitBtn" outlined class="ma-2" color="success" @click="submit">
             <v-icon class="mr-1">save</v-icon>Submit
           </v-btn>
           <!-- End form action buttons -->
@@ -581,31 +581,6 @@ function clearStatus() {
 } // clearStatus
 
 /**
- * Validate and confirm form submission.
- */
-async function confirm() {
-  this.tabErrorMessage = null; //resets tab error message each time validating
-  // validate tabs
-  await _.forEach(this.tabCreated, (value, key) => {
-    if (value) {
-      this.validating[key] = true;
-    }
-  });
-  //validates forms
-  if (this.$refs.form !== undefined && this.$refs.form.validate()) {
-    //checks to see if there are any tabs with errors
-    let hasErrors = await this.hasTabError();
-    if (!hasErrors) {
-      this.confirmingValid = true; // if no errors opens confirm submit popup
-    } else {
-      this.confirmingError = true;
-    }
-  } else {
-    this.confirmingError = true;
-  }
-} // confirm
-
-/**
  * Set and display an error action status in the snackbar.
  *
  * @param err - String error message
@@ -648,8 +623,14 @@ function hasTabError() {
  */
 async function submit() {
   this.submitting = true;
+  // validate chidren tabs
+  await _.forEach(this.tabCreated, (value, key) => {
+    if (value) {
+      this.validating[key] = true;
+    }
+  });
   // convert appropriate fields to title case
-  await this.convertAutocompleteToTitlecase();
+  await this.convertAutocompleteToTitlecase(); // recursion here lol confirm -> submit -> cATT -> confirm
   let hasErrors = await this.hasTabError();
   if (this.$refs.form !== undefined && this.$refs.form.validate() && !hasErrors) {
     // form validated
@@ -662,10 +643,8 @@ async function submit() {
         // successfully updated employee
         this.fullName = `${updatedEmployee.firstName} ${updatedEmployee.lastName}`;
         window.EventBus.$emit('update', updatedEmployee);
-
         // getEmployees and update store with latest data
         await this.updateStoreEmployees();
-
         await this.cancel();
       } else {
         // failed to update employee
@@ -985,7 +964,6 @@ async function convertAutocompleteToTitlecase() {
       currLang.name = this.titleCase(currLang.name);
     });
   }
-  await this.confirm();
 } //convertAutocompleteToTitlecase
 
 // |--------------------------------------------------|
