@@ -52,43 +52,6 @@
           </v-menu>
         </v-col>
         <!-- End Granted Date -->
-        <!-- Expiration Date -->
-        <v-col cols="12" sm="6" md="12" lg="6" class="pt-0">
-          <v-menu
-            v-model="clearance.showExpirationMenu"
-            :close-on-content-click="false"
-            transition="scale-transition"
-            offset-y
-            max-width="290px"
-            min-width="290px"
-          >
-            <template v-slot:activator="{ on, attrs }">
-              <v-text-field
-                ref="formFields"
-                :value="clearance.expirationDate | formatDate"
-                label="Expiration Date"
-                prepend-icon="event_busy"
-                clearable
-                :rules="[...getDateOptionalRules(), dateExpirationRules(cIndex)]"
-                hint="MM/DD/YYYY format"
-                v-mask="'##/##/####'"
-                v-bind="attrs"
-                v-on="on"
-                @click:clear="clearance.expirationDate = null"
-                @blur="clearance.expirationDate = parseEventDate($event)"
-                @input="clearance.showExpirationMenu = false"
-                @focus="clearanceElement = clearance"
-              ></v-text-field>
-            </template>
-            <v-date-picker
-              v-model="clearance.expirationDate"
-              :min="minExpiration(cIndex)"
-              no-title
-              @input="clearance.showExpirationMenu = false"
-            ></v-date-picker>
-          </v-menu>
-        </v-col>
-        <!-- End Expiration Date -->
         <!-- Submission Date -->
         <v-col cols="12" sm="6" md="12" lg="6" class="pt-0">
           <v-menu

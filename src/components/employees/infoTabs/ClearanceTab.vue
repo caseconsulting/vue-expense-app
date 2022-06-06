@@ -7,14 +7,11 @@
         <!-- Type -->
         <p><b>Type: </b>{{ clearance.type }}</p>
 
-        <!-- Submission, Granted, Expiration Date -->
+        <!-- Submission, Granted Date -->
         <p v-if="clearance.submissionDate">
           <b>Submission Date: </b>{{ monthDayYearFormat(clearance.submissionDate) }}
         </p>
         <p v-if="clearance.grantedDate"><b>Granted Date: </b>{{ monthDayYearFormat(clearance.grantedDate) }}</p>
-        <p v-if="clearance.expirationDate">
-          <b>Expiration Date: </b>{{ monthDayYearFormat(clearance.expirationDate) }}
-        </p>
 
         <!-- Badge Number -->
         <p v-if="clearance.badgeNum"><b>Badge Number: </b>{{ clearance.badgeNum }}</p>
