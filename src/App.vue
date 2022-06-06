@@ -154,7 +154,6 @@ import TimeOutWarningModal from '@/components/modals/TimeOutWarningModal.vue';
 import BadgeExpirationBanner from '@/components/modals/BadgeExpirationBanner.vue';
 import floorPlan from '@/assets/img/MakeOfficesfloorplan.jpg';
 import moment from 'moment-timezone';
-const login_format = 'MMM Do, YYYY HH:mm:ss';
 moment.tz.setDefault('America/New_York');
 
 // |--------------------------------------------------|
@@ -237,21 +236,26 @@ async function populateStore() {
   // login
   await this.updateStoreUser(); // calling first since uodateStoreExpenseTypes relies on user data
   let employee = this.$store.getters.user;
-  employee.lastLogin = moment(new Date()).format(login_format);
+  let lastLogin = localStorage.getItem('lastLogin');
+  lastLogin ? (employee.lastLogin = lastLogin) : null;
+  // runs these api calls in parallel/concurrently? since they are independent of each other
   await Promise.all([
     this.updateStoreEmployees(),
     this.updateStoreAvatars(),
     this.updateStoreExpenseTypes(),
     await api.updateItem(api.EMPLOYEES, employee), // updates last logged in for employee
-    await api.createItem(api.AUDIT, {
-      id: uuid(),
-      type: 'login',
-      tags: ['account'],
-      employeeId: employee.id,
-      description: `${employee.firstName} ${employee.lastName} has logged in`,
-      timeToLive: 60
-    }) // Create an audit of the success
-  ]); // runs these api calls in parallel/concurrently? since they are independent of each other
+    lastLogin // will be null if user refreshses, if user just logged in it will not be null
+      ? await api.createItem(api.AUDIT, {
+          id: uuid(),
+          type: 'login',
+          tags: ['account'],
+          employeeId: employee.id,
+          description: `${employee.firstName} ${employee.lastName} has logged in`,
+          timeToLive: 60
+        }) // Create an audit of the success
+      : '' // do nothing if log in date is null
+  ]);
+  localStorage.removeItem('lastLogin'); // remove from local storage to prevent login audit on refresh
 
   // This is used to help pages know when data is loaded into the store.
   // Otherwise, on reload, pages would try to access the store before it was populated.

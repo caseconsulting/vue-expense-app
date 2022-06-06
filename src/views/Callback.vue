@@ -6,6 +6,7 @@
 
 <script>
 import { setIdToken, setAccessToken, setRole, setProfile } from '@/utils/auth';
+const login_format = 'MMM Do, YYYY HH:mm:ss';
 const moment = require('moment-timezone');
 moment.tz.setDefault('America/New_York');
 // |--------------------------------------------------|
@@ -25,6 +26,7 @@ function mounted() {
       this.setIdToken();
       this.setProfile();
       let employeeRole = await this.setRole();
+      localStorage.setItem('lastLogin', moment(new Date()).format(login_format));
 
       if (employeeRole === 'admin') {
         // user's role is admin
