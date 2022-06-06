@@ -322,7 +322,6 @@ function refreshList() {
   if (this.search === null && this.contract === null && this.prime === null) {
     this.filteredEmployees = this.employeesInfo;
   }
-  console.log(this.filteredEmployees);
   this.populateDropDowns(this.filteredEmployees);
 } // refreshList
 

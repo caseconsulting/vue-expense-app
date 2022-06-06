@@ -82,7 +82,6 @@ import { isEmpty, monthDayYearFormat } from '@/utils/utils';
  */
 function created() {
   if (!this.isEmpty(this.model.clearances)) {
-    console.log(this.model.clearances);
     this.filteredList = this.model.clearances.slice(0, 5);
   }
 } // created

@@ -231,7 +231,6 @@ moment.tz.setDefault('America/New_York');
  * Emits to parent the component was created and get data.
  */
 async function created() {
-  console.log(this.allowAdditions);
   window.EventBus.$emit('created', 'education'); // emit education tab was created
   this.employees = this.$store.getters.employees; // get all employees
   this.schoolDropDown = await api.getColleges('');
