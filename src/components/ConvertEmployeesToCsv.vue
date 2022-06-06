@@ -351,6 +351,28 @@ function getEducation(edu) {
           str += major;
         });
 
+        if (!_.isEmpty(degree.concentrations)) {
+          str += ' (Concentrations: ';
+          degree.concentrations.forEach((concentration, i) => {
+            if (i != 0) {
+              str += ', ';
+            }
+            str += concentration;
+          });
+          str += ')';
+        }
+
+        if (!_.isEmpty(degree.minors)) {
+          str += ' (Minors: ';
+          degree.minors.forEach((minor, i) => {
+            if (i != 0) {
+              str += ', ';
+            }
+            str += minor;
+          });
+          str += ')';
+        }
+
         str += ' - ' + degree.completionDate;
         result.push(str); // push each degree individually
       });
