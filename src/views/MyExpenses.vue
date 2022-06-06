@@ -20,13 +20,8 @@
       <v-card class="mt-3">
         <v-container fluid>
           <!-- Title -->
-<<<<<<< HEAD
-          <v-card-title>
-            <h2 v-if="(isUser || isIntern || isManager) && !loading">{{ getUserName }}'s Expenses</h2>
-=======
           <v-card-title v-if="!isMobile()">
-            <h2 v-if="isUser || isIntern || isManager">{{ getUserName }}'s Expenses</h2>
->>>>>>> 654ce6ad (3637-display-portal-properly-on-mobile: display portal pages properly on mobile devices)
+            <h2 v-if="(isUser || isIntern || isManager) && !loading">{{ getUserName }}'s Expenses</h2>
             <h3 v-else>My Expenses</h3>
             <v-spacer></v-spacer>
 
@@ -57,14 +52,13 @@
 
           <div v-else>
             <v-card-title class="px-0">
-              <h3 v-if="isUser || isIntern || isManager">{{ getUserName }}'s Expenses</h3>
+              <h3 v-if="(isUser || isIntern || isManager) && !loading">{{ getUserName }}'s Expenses</h3>
               <h3 v-else>My Expenses</h3>
             </v-card-title>
             <v-row class="mb-5">
-              <v-col>
+              <v-col v-if="isAdmin">
                 <!-- Employee Filter -->
                 <v-autocomplete
-                  v-if="isAdmin"
                   hide-details
                   :items="employees"
                   :filter="customFilter"

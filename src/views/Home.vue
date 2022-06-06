@@ -62,37 +62,18 @@
       <v-row class="pa-0">
         <v-col wrap cols="12" lg="6" class="pa-0 px-xl-4 px-lg-2 px-md-0">
           <!-- QuickBooksTime -->
-<<<<<<< HEAD
-          <v-col class="pa-4">
-            <v-col class="pt-0 text-center">
-=======
           <v-col class="pa-0">
             <v-col v-if="loadingEmployee" class="text-center px-0">
               <v-progress-circular indeterminate size="64" color="#bc3825"></v-progress-circular>
             </v-col>
             <v-col v-else class="pt-0 px-0 text-center">
->>>>>>> 654ce6ad (3637-display-portal-properly-on-mobile: display portal pages properly on mobile devices)
               <quick-books-time-data cols="12" lg="6"></quick-books-time-data>
             </v-col>
           </v-col>
           <!-- Available Budgets -->
-<<<<<<< HEAD
-          <div>
-            <v-col class="pa-4">
-              <v-col class="pt-0 text-center">
-                <available-budgets
-                  id="home-available-budgets"
-                  :employee="this.employee"
-                  :expenses="this.expenses"
-                  :expenseTypes="this.expenseTypes"
-                  :fiscalDateView="this.fiscalDateView"
-                ></available-budgets>
-              </v-col>
-=======
           <v-col class="pa-0 pb-2">
             <v-col v-if="loadingEmployee" text-center>
               <v-progress-circular indeterminate size="64" color="#bc3825"></v-progress-circular>
->>>>>>> 654ce6ad (3637-display-portal-properly-on-mobile: display portal pages properly on mobile devices)
             </v-col>
             <v-col v-else class="pa-0 pt-lg-2 pt-md-2 mt-2 text-center">
               <available-budgets
