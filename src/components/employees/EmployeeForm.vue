@@ -754,7 +754,9 @@ async function created() {
   //   this.confirmingError = false;
   //   this.confirmingValid = false;
   // });
-  window.EventBus.$on('canceled-cancel', () => {});
+  window.EventBus.$on('canceled-cancel', () => {
+    this.confirmingValid = false;
+  });
   window.EventBus.$on('confirmed-cancel', () => {
     this.confirmingValid = true;
     this.cancelB();
