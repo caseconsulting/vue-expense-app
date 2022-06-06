@@ -278,7 +278,12 @@
                 <hr />
               </v-col>
             </v-row>
-            <v-form v-for="(education, index) in newEducation" :key="index" :ref="'education' + index" class="ma-5">
+            <v-form
+              v-for="(education, index) in newEducation"
+              :key="index"
+              :ref="'education' + index"
+              class="ma-xl-5 ma-lg-5 ma-md-0"
+            >
               <education-tab
                 v-if="!education.canceled"
                 :allowAdditions="false"
@@ -324,10 +329,14 @@
           "
         >
           <v-col class="text-right">
-            <v-btn color="red" class="mx-0 my-3" outlined @click="confirmBackingOut = true">Cancel Form Edits</v-btn>
+            <v-btn color="red" class="mx-0 my-3" outlined @click="confirmBackingOut = true" :x-small="isSmallScreen"
+              >Cancel Form Edits</v-btn
+            >
           </v-col>
           <v-col class="text-left">
-            <v-btn color="green" class="mx-0 my-3" outlined @click="submitForm">Submit Form</v-btn>
+            <v-btn color="green" class="mx-0 my-3" outlined @click="submitForm" :x-small="isSmallScreen"
+              >Submit Form</v-btn
+            >
           </v-col>
         </v-row>
       </v-card-text>
@@ -351,7 +360,7 @@
 
 <script>
 import api from '@/shared/api.js';
-import { isEmpty } from '@/utils/utils';
+import { isEmpty, isSmallScreen } from '@/utils/utils';
 import _ from 'lodash';
 import CancelConfirmation from '@/components/modals/CancelConfirmation.vue';
 import educationTab from '@/components/employees/formTabs/EducationTab';
@@ -984,6 +993,7 @@ export default {
   computed: {
     address,
     changesMade,
+    isSmallScreen,
     newAddress,
     newPhoneNumber,
     phoneNumber,

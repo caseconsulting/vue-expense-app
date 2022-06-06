@@ -108,7 +108,12 @@
                 <personal-tab v-if="formTab === 'personal'" :validating="validating.personal" :model="model">
                 </personal-tab>
                 <!-- Education Tab -->
-                <education-tab v-if="formTab === 'education'" :validating="validating.education" :model="model.schools">
+                <education-tab
+                  v-if="formTab === 'education'"
+                  :validating="validating.education"
+                  :model="model.schools"
+                  :allowAdditions="true"
+                >
                 </education-tab>
                 <!-- Job Experience Tab -->
                 <job-experience-tab
