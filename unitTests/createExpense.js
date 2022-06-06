@@ -10,10 +10,10 @@ describe('testing links', () => {
       .click('div.auth0-lock-social-button-text') // click the button
       .waitForElementVisible('input#identifierId') // wait for email box to be visible
       .setValue('input#identifierId', process.env.VUE_APP_AUTH0_EMAIL) // input your email
-      .click('button.VfPpkd-LgbsSe') // click continue button
+      .keys(browser.Keys.ENTER) // click continue button
       .waitForElementVisible('#password') // wait for password field to load
       .setValue('input[type="password"]', process.env.VUE_APP_AUTH0_PASSWORD) // input your password
-      .click('button.VfPpkd-LgbsSe') // click login button
+      .keys(browser.Keys.ENTER) // click login button
       .waitForElementVisible('h1.d-inline'); // wait for header text 'Case Portal'
   });
 
@@ -32,17 +32,20 @@ describe('testing links', () => {
   it('Test creating an expense', (browser) => {
     browser
       .waitForElementVisible('#employeeName') // selects the Employee input box
-      .setValue('#employeeName', 'Test Guy')
+      .setValue('#employeeName', 'Owl Tester')
+      .keys(browser.Keys.DOWN_ARROW)
       .keys(browser.Keys.ENTER) // enter to confirm the first auto-fill option
       .waitForElementVisible('#expenseType')
       .setValue('#expenseType', 'High Five - $100') // using High-Five as it does not require a receipt
+      .keys(browser.Keys.DOWN_ARROW)
       .keys(browser.Keys.ENTER)
       .waitForElementVisible('#notes')
       .setValue('#notes', 'test')
       .waitForElementVisible('#purchaseDate')
-      .setValue('#purchaseDate', '06/20/2021') //make cause error in future bc it may be invalid
+      .setValue('#purchaseDate', '06/05/2022') //make cause error in future bc it may be invalid
       .waitForElementVisible('#recipient')
-      .setValue('#recipient', 'George Doe') //George Doe will receive the High Five
+      .setValue('#recipient', 'Charles Bias') //George Doe will receive the High Five
+      .keys(browser.Keys.DOWN_ARROW)
       .keys(browser.Keys.ENTER)
       .waitForElementVisible('#submitButton')
       .click('#submitButton')
@@ -53,17 +56,18 @@ describe('testing links', () => {
   it('Test editing an expense', (browser) => {
     browser
       .waitForElementVisible('#employeeIdFilter')
-      .setValue('#employeeIdFilter', 'Test Guy') //Accessing Filter By Employee
+      .setValue('#employeeIdFilter', 'Owl Tester') //Accessing Filter By Employee
+      .keys(browser.Keys.DOWN_ARROW)
       .keys(browser.Keys.ENTER) //selects the first auto-fill option
       .waitForElementVisible('#edit') //waits for the edit icon
       .click('#edit') //clicks the edit icon
       .waitForElementVisible('#employeeName')
       .assert.attributeEquals('#employeeName', 'disabled', 'true') // ensure that the employee name field is disabled
-      .assert.value('#employeeName', 'Test Guy') // check all fields in form are exactly the same
+      .assert.value('#employeeName', 'Owl Tester') // check all fields in form are exactly the same
       .assert.value('#expenseType', 'High Five - $100')
       .assert.value('#notes', 'test')
-      .assert.value('#purchaseDate', '06/20/2021')
-      .assert.value('#recipient', 'George Doe')
+      .assert.value('#purchaseDate', '06/05/2022')
+      .assert.value('#recipient', 'Charles Bias')
       .waitForElementVisible('#cancelButton')
       .click('#cancelButton'); // close out of form to continue tests
   });
