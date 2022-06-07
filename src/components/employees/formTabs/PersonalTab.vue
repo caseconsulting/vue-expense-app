@@ -271,7 +271,7 @@ function disableBirthdayFeed() {
  * @return boolean - is the USA
  */
 function isUSA() {
-  if (this.editedPersonalInfo.country == 'United States of America') {
+  if (this.editedPersonalInfo.country == 'United States') {
     return true;
   } else {
     this.editedPersonalInfo.st = null;
