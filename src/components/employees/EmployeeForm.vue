@@ -623,11 +623,10 @@ function hasTabError() {
 } // hasTabError
 
 /**
- * Submits the employee form.
+ * When submitting, this looks at all tabs and if any are invalid, the submission process is halted.
  */
-async function submit() {
-  this.submitting = true;
-  // validate chidren tabs
+async function confirm() {
+  this.tabErrorMessage = null;
   await _.forEach(this.tabCreated, (value, key) => {
     if (value) {
       this.validating[key] = true;
@@ -638,62 +637,75 @@ async function submit() {
     //checks to see if there are any tabs with errors
     let hasErrors = await this.hasTabError();
     if (!hasErrors) {
-      this.confirmingValid = true; // if no errors opens confirm submit popup
+      return false;
     } else {
       this.confirmingError = true;
     }
   } else {
     this.confirmingError = true;
   }
-  // convert appropriate fields to title case
-  await this.convertAutocompleteToTitlecase(); // recursion here lol confirm -> submit -> cATT -> confirm
-  let hasErrors = await this.hasTabError();
-  if (this.$refs.form !== undefined && this.$refs.form.validate() && !hasErrors) {
-    // form validated
-    this.$emit('startAction');
-    this.cleanUpData();
-    if (this.model.id) {
-      // updating employee
-      let updatedEmployee = await api.updateItem(api.EMPLOYEES, this.model);
-      if (updatedEmployee.id) {
-        // successfully updated employee
-        this.fullName = `${updatedEmployee.firstName} ${updatedEmployee.lastName}`;
-        window.EventBus.$emit('update', updatedEmployee);
+  return true; //all but !hasErrors
+} //confirm
+
+/**
+ * Submits the employee form.
+ */
+async function submit() {
+  this.submitting = true;
+
+  let anyErrors = await this.confirm();
+
+  if (!anyErrors) {
+    // convert appropriate fields to title case
+    await this.convertAutocompleteToTitlecase(); // recursion here lol confirm -> submit -> cATT -> confirm
+    let hasErrors = await this.hasTabError();
+    if (this.$refs.form !== undefined && this.$refs.form.validate() && !hasErrors) {
+      // form validated
+      this.$emit('startAction');
+      this.cleanUpData();
+      if (this.model.id) {
+        // updating employee
+        let updatedEmployee = await api.updateItem(api.EMPLOYEES, this.model);
+        if (updatedEmployee.id) {
+          // successfully updated employee
+          this.fullName = `${updatedEmployee.firstName} ${updatedEmployee.lastName}`;
+          window.EventBus.$emit('update', updatedEmployee);
+          // getEmployees and update store with latest data
+          await this.updateStoreEmployees();
+          await this.cancelB();
+        } else {
+          // failed to update employee
+          this.$emit('error', updatedEmployee.response.data.message);
+          this.displayError(updatedEmployee.response.data.message);
+          // this.$emit('cancel-form');
+        }
+        // If mifiStatus on page load is different than the submitted mifiStatus value, create audit log
+        if (this.mifiStatusOnLoad !== updatedEmployee.mifiStatus) {
+          await api.createItem(api.AUDIT, {
+            id: uuid(),
+            type: 'mifi',
+            tags: ['submit', `mifi set to ${this.model.mifiStatus}`],
+            employeeId: this.employee.id,
+            description: `${this.model.firstName} ${this.model.lastName} changed their mifi status to ${this.model.mifiStatus}.`,
+            timeToLive: 60
+          });
+        }
+      } else {
+        // creating employee
+        this.model.id = uuid();
+        let newEmployee = await api.createItem(api.EMPLOYEES, this.model);
         // getEmployees and update store with latest data
         await this.updateStoreEmployees();
-        await this.cancelB();
-      } else {
-        // failed to update employee
-        this.$emit('error', updatedEmployee.response.data.message);
-        this.displayError(updatedEmployee.response.data.message);
-        // this.$emit('cancel-form');
-      }
-      // If mifiStatus on page load is different than the submitted mifiStatus value, create audit log
-      if (this.mifiStatusOnLoad !== updatedEmployee.mifiStatus) {
-        await api.createItem(api.AUDIT, {
-          id: uuid(),
-          type: 'mifi',
-          tags: ['submit', `mifi set to ${this.model.mifiStatus}`],
-          employeeId: this.employee.id,
-          description: `${this.model.firstName} ${this.model.lastName} changed their mifi status to ${this.model.mifiStatus}.`,
-          timeToLive: 60
-        });
-      }
-    } else {
-      // creating employee
-      this.model.id = uuid();
-      let newEmployee = await api.createItem(api.EMPLOYEES, this.model);
-      // getEmployees and update store with latest data
-      await this.updateStoreEmployees();
-      if (newEmployee.id) {
-        // successfully created employee
-        this.$router.push(`/employee/${newEmployee.employeeNumber}`);
-      } else {
-        // failed to create employee
-        this.$emit('error', newEmployee.response.data.message);
-        this.displayError(newEmployee.response.data.message);
-        this.$set(this.model, 'id', null); // reset id
-        // this.$emit('endAction');
+        if (newEmployee.id) {
+          // successfully created employee
+          this.$router.push(`/employee/${newEmployee.employeeNumber}`);
+        } else {
+          // failed to create employee
+          this.$emit('error', newEmployee.response.data.message);
+          this.displayError(newEmployee.response.data.message);
+          this.$set(this.model, 'id', null); // reset id
+          // this.$emit('endAction');
+        }
       }
     }
   }
