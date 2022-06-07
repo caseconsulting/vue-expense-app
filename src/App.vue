@@ -107,6 +107,7 @@
         <!-- End user image and logout -->
       </v-app-bar>
       <v-main :style="{ padding: getMainPadding() }">
+        <reimbursement-notification-banner v-if="isLoggedIn() && storeIsPopulated"></reimbursement-notification-banner>
         <badge-expiration-banner v-if="isLoggedIn() && storeIsPopulated" :key="badgeKey" />
         <v-container fluid grid-list-lg>
           <router-view></router-view>
@@ -153,6 +154,7 @@ import TimeOutWarningModal from '@/components/modals/TimeOutWarningModal.vue';
 import BadgeExpirationBanner from '@/components/modals/BadgeExpirationBanner.vue';
 import floorPlan from '@/assets/img/MakeOfficesfloorplan.jpg';
 import moment from 'moment-timezone';
+import ReimbursementNotificationBanner from './components/modals/ReimbursementNotificationBanner.vue';
 moment.tz.setDefault('America/New_York');
 
 // |--------------------------------------------------|
@@ -410,7 +412,8 @@ export default {
     TimeOutModal,
     TimeOutWarningModal,
     BadgeExpirationBanner,
-    SwitchRoleModal
+    SwitchRoleModal,
+    ReimbursementNotificationBanner
   },
   methods: {
     badumbadumdodooodoo,
