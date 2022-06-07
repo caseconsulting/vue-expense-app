@@ -3,8 +3,8 @@
     <!-- <v-alert v-if="alert" :type="alert.status" color="#f27311" dense id="alert" justify="center" dismissible>
       {{ alert.message }}
     </v-alert> -->
-    <v-alert v-model="alert" color="light-green lighten-1" class="mb-0" dense dark dismissible>
-      Aenean imperdiet. Quisque id odio. Cras dapibus. Pellentesque ut neque.
+    <v-alert v-if="alert" color="light-green lighten-1" class="mb-0" dense dark dismissible>
+      {{ alert.message }}
     </v-alert>
   </v-col>
 </template>
@@ -20,11 +20,14 @@ moment.tz.setDefault('America/New_York');
 // |--------------------------------------------------|
 
 /**
- * Checks to see if the user has any badges expiring.
+ * Checks to see if the user has any expenses that have been reimbursed.
  *
- * @return alert with message based on if badge has expired or not
+ * @return alert with message if any expenses have been reimbursed
  */
 function checkWarnings() {
+  // api to get all expenses for user
+
+  //if reimbursement dates are after last login... be careful that the new last login isn't the one being referenced (see App.vue populateStore)
   if (this.user.clearances != null) {
     this.user.clearances.forEach((clearance) => {
       // determines if a user has a badge/badges expiring within 30 days
