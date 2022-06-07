@@ -251,22 +251,15 @@ async function populateStore() {
   let employee = this.$store.getters.user;
   let lastLogin = localStorage.getItem('lastLogin'); // item is set in Callback.vue
   lastLogin ? (employee.lastLogin = lastLogin) : null;
+  console.log(employee.lastLogin);
   // runs these api calls in parallel/concurrently? since they are independent of each other
   await Promise.all([
     this.updateStoreEmployees(),
     this.updateStoreAvatars(),
     this.updateStoreExpenseTypes(),
     this.updateStoreBudgets(),
-    api.updateItem(api.EMPLOYEES, employee), // updates last logged in for employee
     lastLogin // will be null if user refreshses, if user just logged in it will not be null
-      ? api.createItem(api.AUDIT, {
-          id: uuid(),
-          type: 'login',
-          tags: ['account'],
-          employeeId: employee.id,
-          description: `${employee.firstName} ${employee.lastName} has logged in`,
-          timeToLive: 60
-        }) // Create an audit of the success
+      ? updateEmployee(employee)
       : '' // do nothing if log in date is null
   ]);
   localStorage.removeItem('lastLogin'); // remove from local storage to prevent login audit on refresh
@@ -275,6 +268,22 @@ async function populateStore() {
   // Otherwise, on reload, pages would try to access the store before it was populated.
   this.$store.dispatch('setStoreIsPopulated', { populated: true });
 } // populateStore
+
+/**
+ * Updates the login date and creates audit for the employee.
+ * @param {employee} employee the employee to update
+ */
+async function updateEmployee(employee) {
+  await api.updateItem(api.EMPLOYEES, employee); // updates last logged in for employee
+  await api.createItem(api.AUDIT, {
+    id: uuid(),
+    type: 'login',
+    tags: ['account'],
+    employeeId: employee.id,
+    description: `${employee.firstName} ${employee.lastName} has logged in`,
+    timeToLive: 60
+  }); // Create an audit of the success
+} // updateEmployee
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -429,6 +438,7 @@ export default {
     handleProfile,
     isLoggedIn,
     populateStore,
+    updateEmployee,
     updateStoreUser,
     updateStoreEmployees,
     updateStoreAvatars,

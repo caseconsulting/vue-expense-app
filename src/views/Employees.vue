@@ -180,11 +180,11 @@
           <!-- Last Login Item Slot -->
           <template v-slot:[`item.lastLogin`]="{ item }">
             <p
-              v-if="userIsAdmin() && item.lastLogin !== undefined"
+              v-if="userIsAdmin()"
               :class="{ inactiveStyle: isInactive(item), selectFocus: isFocus(item) }"
               class="mb-0"
             >
-              {{ moment(item.lastLogin).format('MMM Do, YYYY HH:mm') }}
+              {{ item.lastLogin }}
             </p>
           </template>
 
@@ -244,7 +244,6 @@ import ConvertEmployeesToCsv from '@/components/ConvertEmployeesToCsv.vue';
 import DeleteErrorModal from '@/components/modals/DeleteErrorModal.vue';
 import DeleteModal from '@/components/modals/DeleteModal.vue';
 import EmployeeForm from '@/components/employees/EmployeeForm.vue';
-import moment from 'moment-timezone';
 import _ from 'lodash';
 import { getRole } from '@/utils/auth';
 import { isEmpty, isFullTime, isInactive, isPartTime, monthDayYearFormat, storeIsPopulated } from '@/utils/utils';
@@ -378,11 +377,6 @@ function isFocus(item) {
 async function refreshEmployees() {
   this.loading = true; // set loading status to true
   this.employees = this.$store.getters.employees; // get all employees
-  this.employees.forEach((currentEmp) => {
-    if (currentEmp.lastLogin) {
-      currentEmp.lastLogin = moment(currentEmp.lastLogin, ['MMM Do, YYYY HH:mm:ss', 'YYYY-MM-DD HH:mm:ss']);
-    }
-  });
   this.filterEmployees(); // filter employees
   this.expanded = []; // collapse any expanded rows in the database
 

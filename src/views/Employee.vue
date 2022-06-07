@@ -209,8 +209,10 @@ async function getProfileData() {
   this.loading = true;
   let employees = this.$store.getters.employees;
   this.model = _.find(employees, (employee) => {
+    console.log(employee);
     return employee.employeeNumber == this.$route.params.id;
   });
+  console.log(this.model.lastLogin);
   if (this.model) {
     this.user = this.$store.getters.user;
     await this.checkForBudgetAccess();
