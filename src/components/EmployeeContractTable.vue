@@ -263,7 +263,7 @@ function populateDataTypeDropDowns() {
  */
 function populateDropDowns(employees) {
   //resets dropdowns after each query
-  this.contractsDropDown = [];
+  this.contractsDropDown = [this.noContractPlaceholder];
   this.primesDropDown = [];
   this.employeeNames = [];
   //creates list of employee names for dropdown
@@ -338,6 +338,10 @@ function searchContract() {
             employee.contractNames.split(' & ').findIndex((element) => element.includes(this.prime)) > -1
           );
         } else return false;
+      });
+    } else if (this.contract === this.noContractPlaceholder) {
+      this.filteredEmployees = _.filter(this.employeesInfo, (employee) => {
+        return !employee.contractNames;
       });
     } else {
       this.filteredEmployees = _.filter(this.employeesInfo, (employee) => {
@@ -510,6 +514,7 @@ export default {
       ], // datatable headers
       itemsPerPage: -1,
       loading: false,
+      noContractPlaceholder: ' — No Contract — ',
       prime: null,
       primesDropDown: [],
       search: null, // query text for datatable search field
