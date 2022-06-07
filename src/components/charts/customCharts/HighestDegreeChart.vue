@@ -146,21 +146,24 @@ function getDegreeConcentrations(degreeName) {
   let concentrationsData = {};
   // loop through each employee
   this.employees.forEach((employee) => {
-    if (employee.degrees) {
+    if (employee.schools) {
       // loop through each employee's degree
-      employee.degrees.forEach((degree) => {
-        // generalize each degree name to match pie chart categories (Bachelors of Science = Bachelors)
-        if (this.getDegreeName(this.getDegreeValue(degree.name)) === degreeName) {
-          // loop through each concentration
-          degree.concentrations.forEach((concentration) => {
-            /// count up each occurrence of a concentration
-            if (concentrationsData[concentration]) {
-              concentrationsData[concentration] += 1;
-            } else {
-              concentrationsData[concentration] = 1;
-            }
-          });
-        }
+      employee.schools.forEach((school) => {
+        //loop through each degree for the school
+        school.degrees.forEach((degree) => {
+          // generalize each degree name to match pie chart categories (Bachelors of Science = Bachelors)
+          if (this.getDegreeName(this.getDegreeValue(degree.degreeType)) === degreeName) {
+            // loop through each concentration
+            degree.concentrations.forEach((concentration) => {
+              /// count up each occurrence of a concentration
+              if (concentrationsData[concentration]) {
+                concentrationsData[concentration] += 1;
+              } else {
+                concentrationsData[concentration] = 1;
+              }
+            });
+          }
+        });
       });
     }
   });
@@ -177,21 +180,23 @@ function getDegreeMinors(degreeName) {
   let minorsData = {};
   // loop through each employee
   this.employees.forEach((employee) => {
-    if (employee.degrees) {
+    if (employee.schools) {
       // loop through each employee's degree
-      employee.degrees.forEach((degree) => {
-        // generalize each degree name to match pie chart categories (Bachelors of Science = Bachelors)
-        if (this.getDegreeName(this.getDegreeValue(degree.name)) === degreeName) {
-          // loop through each minor
-          degree.minors.forEach((minor) => {
-            /// count up each occurrence of a minor
-            if (minorsData[minor]) {
-              minorsData[minor] += 1;
-            } else {
-              minorsData[minor] = 1;
-            }
-          });
-        }
+      employee.schools.forEach((school) => {
+        school.degrees.forEach((degree) => {
+          // generalize each degree name to match pie chart categories (Bachelors of Science = Bachelors)
+          if (this.getDegreeName(this.getDegreeValue(degree.degreeType)) === degreeName) {
+            // loop through each minor
+            degree.minors.forEach((minor) => {
+              /// count up each occurrence of a minor
+              if (minorsData[minor]) {
+                minorsData[minor] += 1;
+              } else {
+                minorsData[minor] = 1;
+              }
+            });
+          }
+        });
       });
     }
   });
