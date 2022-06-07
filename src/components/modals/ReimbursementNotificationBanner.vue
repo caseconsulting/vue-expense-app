@@ -11,6 +11,7 @@
 
 <script>
 import moment from 'moment-timezone';
+import api from '@/shared/api.js';
 moment.tz.setDefault('America/New_York');
 
 // |--------------------------------------------------|
@@ -24,8 +25,10 @@ moment.tz.setDefault('America/New_York');
  *
  * @return alert with message if any expenses have been reimbursed
  */
-function checkWarnings() {
+async function checkWarnings() {
   // api to get all expenses for user
+  let expenses = await api.getAllEmployeeExpenses(this.user.id);
+  console.log(expenses);
 
   //if reimbursement dates are after last login... be careful that the new last login isn't the one being referenced (see App.vue populateStore)
   if (this.user.clearances != null) {
