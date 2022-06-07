@@ -359,7 +359,12 @@ async function createEvents() {
       }
       event.text = `${a.firstName} ${a.lastName} used their ${a.budgetName} budget on ${a.description}`;
       event.daysFromToday = now.startOf('day').diff(reimbursedDate.startOf('day'), 'days');
-      if (a.recipient) {
+      if (a.budgetName === 'High Five') {
+        event.congratulateCampfile = a.campfire;
+        event.icon = 'thumbs-up';
+        event.type = 'High Five';
+        event.color = '#167c80'; // like a dark teal kinda color
+      } else if (a.recipient) {
         event.congratulateCampfire = a.campfire;
         event.icon = 'thumbs-up';
         event.type = 'Congratulate';
