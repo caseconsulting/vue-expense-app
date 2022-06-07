@@ -361,7 +361,7 @@ async function createEvents() {
       event.daysFromToday = now.startOf('day').diff(reimbursedDate.startOf('day'), 'days');
       if (a.budgetName === 'High Five') {
         event.congratulateCampfile = a.campfire;
-        event.icon = 'thumbs-up';
+        event.icon = 'hand-holding-usd';
         event.type = 'High Five';
         event.color = '#167c80'; // like a dark teal kinda color
       } else if (a.recipient) {
