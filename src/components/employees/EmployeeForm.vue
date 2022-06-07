@@ -261,7 +261,7 @@
               <span v-else>Languages Tab</span>
             </v-tooltip>
             <!-- Employee -->
-            <v-tab-item id="employee" class="mt-6 mb-4">
+            <v-tab-item id="employee" class="mt-6 mb-4 px-3">
               <employee-tab
                 :disableEmpNum="disableEmpNum"
                 :admin="hasAdminPermissions()"
@@ -271,11 +271,11 @@
               ></employee-tab>
             </v-tab-item>
             <!-- Personal Info -->
-            <v-tab-item id="personal" class="mt-6 mb-4">
+            <v-tab-item id="personal" class="mt-6 mb-4 px-3">
               <personal-tab :model="model" :validating="validating.personal"></personal-tab>
             </v-tab-item>
             <!-- Education -->
-            <v-tab-item id="education" class="mt-6 mb-4">
+            <v-tab-item id="education" class="mt-6 mb-4 px-3">
               <education-tab
                 :model="model.schools"
                 :validating="validating.education"
@@ -283,41 +283,41 @@
               ></education-tab>
             </v-tab-item>
             <!-- Experience -->
-            <v-tab-item id="jobExperience" class="mt-6 mb-4">
+            <v-tab-item id="jobExperience" class="mt-6 mb-4 px-3">
               <job-experience-tab :model="model" :validating="validating.jobExperience"></job-experience-tab>
             </v-tab-item>
             <!-- Certifications -->
-            <v-tab-item id="certifications" class="mt-6 mb-4">
+            <v-tab-item id="certifications" class="mt-6 mb-4 px-3">
               <certification-tab
                 :model="model.certifications"
                 :validating="validating.certifications"
               ></certification-tab>
             </v-tab-item>
             <!-- Awards -->
-            <v-tab-item id="awards" class="mt-6 mb-4">
+            <v-tab-item id="awards" class="mt-6 mb-4 px-3">
               <award-tab :model="model.awards" :validating="validating.awards"></award-tab>
             </v-tab-item>
             <!-- Technologies -->
-            <v-tab-item id="technologies" class="mt-6 mb-4">
+            <v-tab-item id="technologies" class="mt-6 mb-4 px-3">
               <technology-tab :model="model.technologies" :validating="validating.technologies"></technology-tab>
             </v-tab-item>
             <!-- Customer Org Experience -->
-            <v-tab-item id="customerOrgExp" class="mt-6 mb-4">
+            <v-tab-item id="customerOrgExp" class="mt-6 mb-4 px-3">
               <customer-org-tab
                 :model="model.customerOrgExp"
                 :validating="validating.customerOrgExp"
               ></customer-org-tab>
             </v-tab-item>
             <!-- Contracts -->
-            <v-tab-item id="contracts" class="mt-6 mb-4">
+            <v-tab-item id="contracts" class="mt-6 mb-4 px-3">
               <contract-tab :model="model.contracts" :validating="validating.contracts"></contract-tab>
             </v-tab-item>
             <!-- Clearance -->
-            <v-tab-item id="clearance" class="mt-6 mb-4">
+            <v-tab-item id="clearance" class="mt-6 mb-4 px-3">
               <clearance-tab :model="model.clearances" :validating="validating.clearance"></clearance-tab>
             </v-tab-item>
             <!-- Languages -->
-            <v-tab-item id="languages" class="mt-6 mb-4">
+            <v-tab-item id="languages" class="mt-6 mb-4 px-3">
               <languages-tab :model="model.languages" :validating="validating.languages"></languages-tab>
             </v-tab-item>
           </v-tabs>
