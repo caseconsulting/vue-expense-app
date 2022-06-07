@@ -64,16 +64,14 @@
               <v-text-field
                 ref="formFields"
                 :value="certification.expirationDate | formatDate"
-                :disabled="certification.noExpiry"
-                label="Expiration Date"
+                label="Expiration Date (optional)"
                 prepend-icon="event_busy"
-                :rules="[...getDateOptionalRules(), dateOrderRules(index), expDateRule(index)]"
+                :rules="[...getDateOptionalRules(), dateOrderRules(index)]"
                 hint="MM/DD/YYYY format"
                 v-mask="'##/##/####'"
                 v-bind="attrs"
                 v-on="on"
                 clearable
-                @click:clear="certification.expirationDate = null"
                 @blur="certification.expirationDate = parseEventDate($event)"
                 @input="certification.showExpirationMenu = false"
                 @focus="certificationIndex = index"
@@ -149,7 +147,6 @@ function addCertification() {
     name: null,
     dateReceived: null,
     expirationDate: null,
-    noExpiry: false,
     showReceivedMenu: false,
     showExpirationMenu: false
   });
@@ -238,27 +235,20 @@ export default {
       dateOrderRules: (certIndex) => {
         if (this.editedCertifications) {
           let position = this.editedCertifications[certIndex];
-          return !this.isEmpty(position.expirationDate) && moment(position.expirationDate) && position.dateReceived
-            ? moment(position.expirationDate).add(1, 'd').isAfter(moment(position.dateReceived)) ||
-                'End date must be at or after start date'
-            : true;
-        } else {
-          return true;
-        }
-      },
-      editedCertifications: _.cloneDeep(this.model), // stores edited certifications info
-      expDateRule: (compIndex) => {
-        if (this.editedCertifications !== undefined) {
-          let position = this.editedCertifications[compIndex];
-          if (position.noExpiry == false && this.isEmpty(position.expirationDate)) {
-            return 'Expiration Date is required';
+          if (!this.isEmpty(position.expirationDate) && moment(position.expirationDate) && position.dateReceived) {
+            console.log(moment(position.expirationDate).add(1, 'd').isAfter(moment(position.dateReceived)));
+            return (
+              moment(position.expirationDate).add(1, 'd').isAfter(moment(position.dateReceived)) ||
+              'Expiration date must be at or after date received'
+            );
           } else {
             return true;
           }
         } else {
-          return false;
+          return true;
         }
-      }
+      },
+      editedCertifications: _.cloneDeep(this.model) // stores edited certifications info
     };
   },
   directives: { mask },

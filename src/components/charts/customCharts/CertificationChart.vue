@@ -39,7 +39,7 @@ function fillCertData() {
   this.employees.forEach((employee) => {
     if (employee.certifications && employee.workStatus != 0) {
       employee.certifications.forEach((currCert) => {
-        if (moment().isBefore(moment(currCert.expirationDate))) {
+        if (!currCert.expirationDate || moment().isBefore(moment(currCert.expirationDate))) {
           if (!certifications[currCert.name]) {
             certifications[currCert.name] = 1;
           } else {
