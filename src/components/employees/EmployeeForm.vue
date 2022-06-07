@@ -633,6 +633,18 @@ async function submit() {
       this.validating[key] = true;
     }
   });
+  //validates forms
+  if (this.$refs.form !== undefined && this.$refs.form.validate()) {
+    //checks to see if there are any tabs with errors
+    let hasErrors = await this.hasTabError();
+    if (!hasErrors) {
+      this.confirmingValid = true; // if no errors opens confirm submit popup
+    } else {
+      this.confirmingError = true;
+    }
+  } else {
+    this.confirmingError = true;
+  }
   // convert appropriate fields to title case
   await this.convertAutocompleteToTitlecase(); // recursion here lol confirm -> submit -> cATT -> confirm
   let hasErrors = await this.hasTabError();

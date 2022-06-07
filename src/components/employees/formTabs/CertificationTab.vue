@@ -13,7 +13,7 @@
         clearable
       >
       </v-combobox>
-      <v-row class="pt-1">
+      <v-row class="pt-3">
         <v-col cols="12" sm="6" md="12" lg="6" class="pt-0">
           <!-- Received Date -->
           <v-menu
@@ -236,7 +236,6 @@ export default {
         if (this.editedCertifications) {
           let position = this.editedCertifications[certIndex];
           if (!this.isEmpty(position.expirationDate) && moment(position.expirationDate) && position.dateReceived) {
-            console.log(moment(position.expirationDate).add(1, 'd').isAfter(moment(position.dateReceived)));
             return (
               moment(position.expirationDate).add(1, 'd').isAfter(moment(position.dateReceived)) ||
               'Expiration date must be at or after date received'
