@@ -94,7 +94,7 @@
                       >Clearance</v-list-item
                     >
                     <v-list-item @click="selectDropDown('languages')" v-bind:class="{ errorTab: tabErrors.languages }"
-                      >Languages</v-list-item
+                      >Foreign Languages</v-list-item
                     >
                   </v-list>
                 </v-menu>
@@ -258,10 +258,12 @@
             </v-tooltip>
             <v-tooltip top>
               <template v-slot:activator="{ on }">
-                <v-tab v-on="on" href="#languages" v-bind:class="{ errorTab: tabErrors.languages }">Languages</v-tab>
+                <v-tab v-on="on" href="#languages" v-bind:class="{ errorTab: tabErrors.languages }"
+                  >Foreign Languages</v-tab
+                >
               </template>
               <span v-if="tabErrors.languages">Submit to update tab validation</span>
-              <span v-else>Languages Tab</span>
+              <span v-else>Foreign Languages Tab</span>
             </v-tooltip>
             <!-- Employee -->
             <v-tab-item id="employee" class="mt-6 mb-4 px-3">

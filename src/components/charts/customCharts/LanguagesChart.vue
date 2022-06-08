@@ -117,7 +117,7 @@ function fillData() {
     },
     title: {
       display: true,
-      text: 'Top Languages at Case Consulting',
+      text: 'Top Foreign Languages Case Consulting',
       fontSize: 15
     },
     maintainAspectRatio: false

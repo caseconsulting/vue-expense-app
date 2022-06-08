@@ -22,7 +22,7 @@
                 <v-list-item @click="selectDropDown('customerOrgExp')">Customer Org</v-list-item>
                 <v-list-item @click="selectDropDown('contracts')">Contracts</v-list-item>
                 <v-list-item @click="selectDropDown('clearance')">Clearance</v-list-item>
-                <v-list-item @click="selectDropDown('languages')">Languages</v-list-item>
+                <v-list-item @click="selectDropDown('languages')">Foreign Languages</v-list-item>
               </v-list>
             </v-menu>
           </v-col>
@@ -65,7 +65,7 @@
         <v-tab href="#customerOrgExp">Customer Org</v-tab>
         <v-tab href="#contracts">Contracts</v-tab>
         <v-tab href="#clearance" v-if="hasAdminPermissions() || userIsEmployee()">Clearance</v-tab>
-        <v-tab href="#languages">Languages</v-tab>
+        <v-tab href="#languages">Foreign Languages</v-tab>
         <v-tab-item id="employee" class="ma-6">
           <employee-tab :admin="hasAdminPermissions()" :employee="userIsEmployee()" :model="model"></employee-tab>
         </v-tab-item>
@@ -191,6 +191,8 @@ function parsedInfoTab() {
     parseTab = 'Customer Org';
   } else if (this.infoTab === 'jobExperience') {
     parseTab = 'Job Experience';
+  } else if (this.infoTab === 'languages') {
+    parseTab = 'Foreign Languages';
   }
   return parseTab.toUpperCase();
 } // parsedInfoTab

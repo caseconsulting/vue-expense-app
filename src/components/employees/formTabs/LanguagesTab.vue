@@ -48,7 +48,7 @@
     </div>
     <!-- Button to Add A Language -->
     <div class="pt-4" align="center">
-      <v-btn @click="addLanguage()" elevation="2"><v-icon class="pr-1">add</v-icon>Language</v-btn>
+      <v-btn @click="addLanguage()" elevation="2"><v-icon class="pr-1">add</v-icon>Foreign Language</v-btn>
     </div>
   </div>
 </template>
@@ -225,7 +225,6 @@ export default {
         'Malayalam',
         'Panjabi',
         'Tamil',
-        'English',
         'Finnish',
         'French',
         'German',
