@@ -499,7 +499,7 @@ async function created() {
 
   // remove admin-only actions if user is not admin (by default everything is included)
   const adminSpecific = ['lastLogin']; // requires admin role, NOT manager
-  const adminPermissions = ['actions', 'hireDate']; // requires admin level, including manager
+  const adminPermissions = ['actions']; // requires admin level, including manager
   if (!this.hasAdminPermissions()) {
     this.headers = _.filter(this.headers, (header) => {
       return !adminPermissions.includes(header.value);
