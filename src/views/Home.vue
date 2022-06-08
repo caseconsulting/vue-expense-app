@@ -428,15 +428,14 @@ async function createEvents() {
       icon: 'fire',
       color: '#f9c64e',
       type: 'Award',
-      date: dateSubmitted.format('MMM YYYY'),
       daysFromToday: moment().startOf('day').diff(dateSubmitted.startOf('day'), 'days'),
       text: `${a.employee} was awarded "${a.name}" in ${moment(a.dateReceived).format('MMMM')}`,
       congratulateCampfire: 'https://3.basecamp.com/3097063/buckets/171415/chats/29039726'
     };
     // date formatting
-    let diff = moment().startOf('day').diff(dateSubmitted.startOf('day'), 'day');
-    award.date = this.getEventDateMessage(dateSubmitted);
-    if (diff < -6) award.date = dateSubmitted.format('ll');
+    award.date = dateSubmitted.format('MMM YYYY'); // default
+    const withinSixDays = dateSubmitted.isAfter(moment().subtract(6, 'days')) && dateSubmitted.isBefore(moment());
+    if (withinSixDays) award.date = getEventDateMessage(dateSubmitted);
     // return award only if we want to display it (ie, if awarded <6 months ago)
     const wantToDisplay = moment(a.dateReceived).isAfter(moment().subtract(6, 'months'));
     return wantToDisplay ? award : null;
