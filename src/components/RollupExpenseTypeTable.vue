@@ -634,6 +634,9 @@ function determineShowOnFeed(expense) {
   });
 } // determineShowOnFeed
 
+/**
+ * Loads and organizes all data relevant to the data table.
+ */
 async function loadExpensesData() {
   let aggregatedData = await api.getAllAggregateExpenses();
   let allExpenses = this.createExpenses(aggregatedData);

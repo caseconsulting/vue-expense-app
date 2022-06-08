@@ -241,16 +241,16 @@ async function populateStore() {
   // login
   await this.updateStoreUser(); // calling first since uodateStoreExpenseTypes relies on user data
   let employee = this.$store.getters.user;
-  let lastLogin = localStorage.getItem('lastLogin');
+  let lastLogin = localStorage.getItem('lastLogin'); // item is set in Callback.vue
   lastLogin ? (employee.lastLogin = lastLogin) : null;
   // runs these api calls in parallel/concurrently? since they are independent of each other
   await Promise.all([
     this.updateStoreEmployees(),
     this.updateStoreAvatars(),
     this.updateStoreExpenseTypes(),
-    await api.updateItem(api.EMPLOYEES, employee), // updates last logged in for employee
+    api.updateItem(api.EMPLOYEES, employee), // updates last logged in for employee
     lastLogin // will be null if user refreshses, if user just logged in it will not be null
-      ? await api.createItem(api.AUDIT, {
+      ? api.createItem(api.AUDIT, {
           id: uuid(),
           type: 'login',
           tags: ['account'],
