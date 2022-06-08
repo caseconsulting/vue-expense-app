@@ -245,15 +245,16 @@ async function createEvents() {
   }
   let eventData = await api.getAllEvents();
   this.employees = eventData.employees;
-  this.aggregatedExpenses = eventData.expenses;
   this.scheduleEntries = _.flatten(eventData.schedules);
+  this.aggregatedExpenses = eventData.expenses;
+  this.aggregatedAwards = this.getEmployeeAwards();
 
   //we want to use their nicknames if they have one
   this.employees.forEach((employee) => {
     employee.firstName = employee.nickname ? employee.nickname : employee.firstName;
   });
 
-  //generate anniversaries
+  // generate anniversaries
   let anniversaries = _.map(this.employees, (a) => {
     let hireDate = moment(a.hireDate, 'YYYY-MM-DD');
     let event = {};
@@ -388,7 +389,7 @@ async function createEvents() {
     }
   });
 
-  //generate schedules
+  // generate schedules
   let schedules = _.map(this.scheduleEntries, (a) => {
     let now = moment();
     let cutOff = moment().subtract(6, 'months').startOf('day');
@@ -419,7 +420,29 @@ async function createEvents() {
     return event;
   });
 
-  let mergedEventsList = [...anniversaries, ...birthdays, ...expenses, ...schedules]; // merges lists
+  // generate awards
+  let awards = _.map(this.aggregatedAwards, (a) => {
+    // get award information
+    const dateSubmitted = moment(a.dateSubmitted || a.dateReceived);
+    let award = {
+      icon: 'fire',
+      color: '#f9c64e',
+      type: 'Award',
+      date: dateSubmitted.format('MMM YYYY'),
+      daysFromToday: moment().startOf('day').diff(dateSubmitted.startOf('day'), 'days'),
+      text: `${a.employee} was awarded "${a.name}" in ${moment(a.dateReceived).format('MMMM')}`,
+      congratulateCampfire: 'https://3.basecamp.com/3097063/buckets/171415/chats/29039726'
+    };
+    // date formatting
+    let diff = moment().startOf('day').diff(dateSubmitted.startOf('day'), 'day');
+    award.date = this.getEventDateMessage(dateSubmitted);
+    if (diff < -6) award.date = dateSubmitted.format('ll');
+    // return award only if we want to display it (ie, if awarded <6 months ago)
+    const wantToDisplay = moment(a.dateReceived).isAfter(moment().subtract(6, 'months'));
+    return wantToDisplay ? award : null;
+  });
+
+  let mergedEventsList = [...anniversaries, ...birthdays, ...expenses, ...schedules, ...awards]; // merges lists
   this.events = _.sortBy(_.compact(mergedEventsList), 'daysFromToday'); //sorts by days from today
   this.$store.dispatch('setEvents', { events: this.events });
   this.loadingEvents = false;
@@ -448,6 +471,35 @@ function getEventDateMessage(date) {
     return date.format('ll');
   }
 } // getEventDateMessage
+
+/**
+ * Gets all awards across all Employees, adding the employee name
+ * to the object for later use
+ *
+ * @return all awards
+ */
+function getEmployeeAwards() {
+  let awards = []; // will be returned
+  let namedAwards = []; // temp variable for adding employee name
+
+  // for each employee, get their awards
+  this.employees.forEach((e) => {
+    if (e.awards) {
+      // add their name to the award
+      namedAwards = [];
+      e.awards.forEach((a) => {
+        a.employee = e.firstName = e.nickname ? e.nickname : e.firstName;
+        namedAwards.push(a);
+      });
+
+      // add the named awards to the return list
+      awards = [...awards, ...e.awards];
+    }
+  });
+
+  // :)
+  return awards;
+}
 
 /**
  * Calls the API to get tweets from the Twitter account.
@@ -523,6 +575,7 @@ export default {
   data() {
     return {
       actualTime: moment().format('X'),
+      aggregatedAwards: [],
       aggregatedExpenses: [],
       allUserBudgets: null, // all user budgets
       budgetYears: [], // list of options for chaning budget year view
@@ -553,6 +606,7 @@ export default {
     addOneSecondToActualTimeEverySecond,
     createEvents,
     getCurrentBudgetYear,
+    getEmployeeAwards,
     getEventDateMessage,
     getTweets,
     isEmpty,
