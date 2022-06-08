@@ -179,29 +179,13 @@
 
           <!-- Last Login Item Slot -->
           <template v-slot:[`item.lastLogin`]="{ item }">
-            <v-hover v-slot="{ hover }">
-              <p
-                v-if="userIsAdmin() && hover && item.lastLogin !== undefined"
-                :class="{ inactiveStyle: isInactive(item), selectFocus: isFocus(item) }"
-                class="mb-0"
-              >
-                {{ moment(item.lastLogin).format('MMM Do, YYYY HH:mm:ss') }}
-              </p>
-              <p
-                v-else-if="userIsAdmin() && item.lastLogin !== undefined"
-                :class="{ inactiveStyle: isInactive(item), selectFocus: isFocus(item) }"
-                class="mb-0"
-              >
-                {{ moment(item.lastLogin).format('MMM Do, YYYY') }}
-              </p>
-              <p
-                v-else-if="userIsAdmin()"
-                :class="{ inactiveStyle: isInactive(item), selectFocus: isFocus(item) }"
-                class="mb-0"
-              >
-                {{ item.lastLogin }}
-              </p>
-            </v-hover>
+            <p
+              v-if="userIsAdmin() && item.lastLogin !== undefined"
+              :class="{ inactiveStyle: isInactive(item), selectFocus: isFocus(item) }"
+              class="mb-0"
+            >
+              {{ moment(item.lastLogin).format('MMM Do, YYYY HH:mm') }}
+            </p>
           </template>
 
           <!-- Date Item Slot -->
