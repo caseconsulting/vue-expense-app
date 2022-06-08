@@ -18,7 +18,7 @@
     <p class="mt-5">Phone Numbers</p>
     <div class="groove pr-0 pl-2 mb-4">
       <v-row v-for="(phoneNumber, index) in phoneNumbers" :key="index" class="d-flex align-center mt-0">
-        <v-col class="pt-0" cols="7" xl="3" lg="3" md="3" sm="3" xs="7">
+        <v-col class="pt-0" cols="2" xl="2" lg="3" md="3" sm="3" xs="12">
           <v-autocomplete
             v-model="phoneNumber.type"
             label="Type"
@@ -28,7 +28,7 @@
             clearable
           ></v-autocomplete>
         </v-col>
-        <v-col class="pt-0" cols="6">
+        <v-col class="pt-0" cols="6" xl="6" lg="4" md="3" sm="3" xs="12">
           <v-text-field
             v-model="phoneNumber.number"
             v-mask="'###-###-####'"
@@ -39,7 +39,10 @@
           >
           </v-text-field>
         </v-col>
-        <v-col class="py-0 pr-0" cols="4" xl="2" lg="2" md="3" sm="3" xs="4">
+        <v-col class="pt-0" cols="2" xl="2" lg="3" md="3" sm="3" xs="12">
+          <v-text-field v-model="phoneNumber.ext" v-mask="'####'" label="Ext" data-vv-name="Ext"> </v-text-field>
+        </v-col>
+        <v-col class="py-0 pr-0" cols="2" xl="2" lg="2" md="3" sm="3" xs="12">
           <v-tooltip bottom slot="append-outer">
             <template v-slot:activator="{ on }">
               <v-btn class="justify-end mr-2" v-on="on" @click="deletePhoneInput(index)" text icon>

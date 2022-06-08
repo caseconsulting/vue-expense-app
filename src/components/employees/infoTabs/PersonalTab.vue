@@ -32,7 +32,9 @@
           </v-tooltip>
           <v-list-item-content>
             <v-list-item-subtitle class="mb-1"> {{ number.type }}</v-list-item-subtitle>
-            <v-list-item-title>{{ number.number }}</v-list-item-title>
+            <v-list-item-title
+              >{{ number.number }}<span v-if="number.ext"> (Ext. {{ number.ext }})</span></v-list-item-title
+            >
           </v-list-item-content>
         </v-list-item>
       </v-list>
@@ -43,7 +45,9 @@
         <v-list-item v-for="number in getPhoneNumbers()" :key="number.number">
           <v-list-item-content>
             <v-list-item-subtitle class="mb-1"> {{ number.type }}</v-list-item-subtitle>
-            <v-list-item-title>{{ number.number }}</v-list-item-title>
+            <v-list-item-title
+              >{{ number.number }}<span v-if="number.ext"> (Ext. {{ number.ext }})</span></v-list-item-title
+            >
           </v-list-item-content>
         </v-list-item>
       </v-list>
