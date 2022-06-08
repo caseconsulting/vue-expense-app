@@ -36,7 +36,7 @@ async function checkWarnings() {
     expenses.forEach(async (expense) => {
       // determines if a user has a badge/badges expiring within 30 days
       if (expense.reimbursedDate) {
-        if (expense.wasSeen !== null && !expense.wasSeen) {
+        if (expense.wasSeen !== undefined && !expense.wasSeen) {
           this.show = true;
           this.errorCount++;
           expense.wasSeen = true;
