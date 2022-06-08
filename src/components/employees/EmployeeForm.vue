@@ -624,9 +624,6 @@ function hasTabError() {
       hasErrors = true;
     }
   }
-
-  console.log('-----HasErrors-------');
-  console.log(hasErrors);
   return hasErrors;
 } // hasTabError
 
@@ -635,32 +632,25 @@ function hasTabError() {
  */
 async function confirm() {
   this.tabErrorMessage = null;
+  this.confirmingError = false;
   await _.forEach(this.tabCreated, (value, key) => {
     if (value) {
       this.validating[key] = true;
     }
   });
 
-  console.log('-----BeginConfirm-------');
-  console.log(this.tabErrors);
-
   //validates forms
   if (this.$refs.form !== undefined && this.$refs.form.validate()) {
     //checks to see if there are any tabs with errors
     let hasErrors = await this.hasTabError();
-    console.log('-----Confirm-------');
-    console.log(hasErrors);
     if (!hasErrors) {
       return false;
     } else {
       this.confirmingError = true;
     }
   } else {
-    console.log('here');
     this.confirmingError = true;
   }
-  console.log('-----EndConfirm-------');
-  console.log(this.tabErrors);
   return true; //all but !hasErrors
 } //confirm
 
@@ -668,17 +658,11 @@ async function confirm() {
  * Submits the employee form.
  */
 async function submit() {
-  console.log('------Start Sumbitting------');
-  console.log(this.tabErrors);
-
   this.submitting = true;
   console.log(this.submitting);
   window.scrollTo(0, 0);
 
   let anyErrors = await this.confirm();
-
-  console.log('------After Confirm------');
-  console.log(this.tabErrors);
 
   if (!anyErrors) {
     // convert appropriate fields to title case
@@ -716,8 +700,6 @@ async function submit() {
           });
         }
       } else {
-        console.log('------In Else------');
-        console.log(this.tabErrors);
         // creating employee
         this.model.id = uuid();
         let newEmployee = await api.createItem(api.EMPLOYEES, this.model);
@@ -736,10 +718,6 @@ async function submit() {
       }
     }
   }
-  console.log('------Done Sumbitting------');
-  console.log('Tabs: ' + this.tabErrors);
-  console.log('Boolean: ' + this.confirmingError);
-
   this.submitting = false;
   window.EventBus.$emit('badgeExp');
 } // submit

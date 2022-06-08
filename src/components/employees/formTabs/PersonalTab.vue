@@ -4,7 +4,7 @@
     <v-text-field
       v-model="editedPersonalInfo.github"
       :rules="getURLRules()"
-      ref="formFields"
+      ref="github"
       label="Github"
       data-vv-name="Github"
     ></v-text-field>
@@ -13,7 +13,7 @@
     <v-text-field
       v-model="editedPersonalInfo.twitter"
       :rules="getURLRules()"
-      ref="formFields"
+      ref="twitter"
       label="Twitter"
       data-vv-name="Twitter"
     ></v-text-field>
@@ -23,7 +23,7 @@
       v-model="editedPersonalInfo.linkedIn"
       label="LinkedIn"
       :rules="getURLRules()"
-      ref="formFields"
+      ref="linkedin"
       data-vv-name="LinkedIn"
     ></v-text-field>
 
@@ -38,6 +38,7 @@
             :items="phoneNumberTypes"
             data-vv-name="Phone Type"
             :rules="getPhoneNumberTypeRules()"
+            ref="phoneType"
             clearable
           ></v-autocomplete>
         </v-col>
@@ -47,6 +48,7 @@
             v-mask="'###-###-####'"
             hint="###-###-#### format"
             :rules="getPhoneNumberRules()"
+            ref="phoneNum"
             label="Phone Number"
             data-vv-name="Phone Number"
           >
@@ -381,13 +383,20 @@ function validateFields() {
   let errorCount = 0;
   //ensures that refs are put in an array so we can reuse forEach loop
   let components = !_.isArray(this.$refs.formFields) ? [this.$refs.formFields] : this.$refs.formFields;
+
+  // for some reason, this page didn't overwrote the elements as formFields like the other pages did so
+  // we added individual refs and put them into the components list manually
+  components = [
+    ...components,
+    this.$refs.twitter,
+    this.$refs.github,
+    this.$refs.linkedin,
+    ...this.$refs.phoneType,
+    ...this.$refs.phoneNum
+  ];
   _.forEach(components, (field) => {
-    console.log(field);
     if (field && !field.validate()) errorCount++;
   });
-
-  console.log('-----ValidatingPersonal----');
-  console.log(errorCount);
 
   window.EventBus.$emit('personalStatus', errorCount); // emit error status
   window.EventBus.$emit('doneValidating', 'personal', this.editedPersonalInfo); // emit done validating
