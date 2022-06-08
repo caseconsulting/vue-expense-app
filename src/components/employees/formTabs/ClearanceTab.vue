@@ -474,8 +474,14 @@ function validateFields() {
   //ensures that refs are put in an array so we can reuse forEach loop
   let components = !_.isArray(this.$refs.formFields) ? [this.$refs.formFields] : this.$refs.formFields;
   _.forEach(components, (field) => {
+    console.log(field);
+
     if (field && !field.validate()) errorCount++;
   });
+
+  console.log('-----ValidatingClearance----');
+  console.log(errorCount);
+
   window.EventBus.$emit('doneValidating', 'clearance', this.editedClearances); // emit done validating and sends edited data back to parent
   window.EventBus.$emit('clearanceStatus', errorCount); // emit error status
 } // validateFields

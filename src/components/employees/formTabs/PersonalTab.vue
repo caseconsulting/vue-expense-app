@@ -1,16 +1,29 @@
 <template>
   <div>
     <!-- Github -->
-    <v-text-field v-model="editedPersonalInfo.github" label="Github" data-vv-name="Github"></v-text-field>
+    <v-text-field
+      v-model="editedPersonalInfo.github"
+      :rules="getURLRules()"
+      ref="formFields"
+      label="Github"
+      data-vv-name="Github"
+    ></v-text-field>
 
     <!-- Twitter -->
-    <v-text-field v-model="editedPersonalInfo.twitter" label="Twitter" data-vv-name="Twitter"></v-text-field>
+    <v-text-field
+      v-model="editedPersonalInfo.twitter"
+      :rules="getURLRules()"
+      ref="formFields"
+      label="Twitter"
+      data-vv-name="Twitter"
+    ></v-text-field>
 
     <!-- LinkedIn -->
     <v-text-field
       v-model="editedPersonalInfo.linkedIn"
       label="LinkedIn"
       :rules="getURLRules()"
+      ref="formFields"
       data-vv-name="LinkedIn"
     ></v-text-field>
 
@@ -369,8 +382,13 @@ function validateFields() {
   //ensures that refs are put in an array so we can reuse forEach loop
   let components = !_.isArray(this.$refs.formFields) ? [this.$refs.formFields] : this.$refs.formFields;
   _.forEach(components, (field) => {
+    console.log(field);
     if (field && !field.validate()) errorCount++;
   });
+
+  console.log('-----ValidatingPersonal----');
+  console.log(errorCount);
+
   window.EventBus.$emit('personalStatus', errorCount); // emit error status
   window.EventBus.$emit('doneValidating', 'personal', this.editedPersonalInfo); // emit done validating
 } // validateFields
