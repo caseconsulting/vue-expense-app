@@ -111,6 +111,16 @@ function updated() {
  */
 function calcRemaining(budget) {
   if (budget.budgetObject) {
+    // checks to see if the remaining is 0... there's a wierd float rounding issue with the subtraction
+    if (
+      Number(
+        (budget.budgetObject.amount - budget.budgetObject.pendingAmount - budget.budgetObject.reimbursedAmount).toFixed(
+          9
+        )
+      ) === 0
+    ) {
+      return 0;
+    }
     return budget.budgetObject.amount - budget.budgetObject.pendingAmount - budget.budgetObject.reimbursedAmount;
   }
   return 0;
