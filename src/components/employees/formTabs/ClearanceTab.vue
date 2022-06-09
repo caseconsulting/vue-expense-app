@@ -153,15 +153,14 @@
             multiple
             label="BI Dates"
             prepend-icon="event"
-            small-chips
-            deletable-chips
             readonly
+            clearable
             v-bind="attrs"
             v-on="on"
             @click:clear="clearance.biDates = []"
           >
             <template #selection="{ item }">
-              <v-chip close @click:close="remove(item, clearance)">{{ item }}</v-chip>
+              <v-chip outlined close @click:close="removeBiDate(item, cIndex)">{{ item }}</v-chip>
             </template>
           </v-combobox>
         </template>
@@ -293,15 +292,6 @@ async function created() {
 // |                     METHODS                      |
 // |                                                  |
 // |--------------------------------------------------|
-
-function remove(item, clearance) {
-  console.log(item);
-  console.log(this.editedClearances[clearance]);
-  this.editedClearances[clearance] = clearance.biDates.filter((date) => {
-    return date !== item;
-  });
-  console.log(this.editedClearances[clearance]);
-}
 
 /**
  * Adds a clearance.
@@ -463,6 +453,20 @@ function populateDropDowns() {
 } // populateDropDowns
 
 /**
+ * Removes the desired date from the right clearance.
+ *
+ * @param item - the date to remove
+ * @param index - the clearance index
+ */
+function removeBiDate(item, index) {
+  const itemDate = moment(item);
+  this.editedClearances[index].biDates = this.editedClearances[index].biDates.filter((date) => {
+    let dateConvert = moment(date);
+    return !dateConvert.isSame(itemDate);
+  });
+} // removeBiDate
+
+/**
  * Validate all input fields are valid. Emit to parent the error status.
  */
 function validateFields() {
@@ -562,7 +566,6 @@ export default {
     formatDates
   },
   methods: {
-    remove,
     addClearance,
     capitalizeBadges,
     formatDate,
@@ -577,6 +580,7 @@ export default {
     parseDate,
     parseEventDate,
     populateDropDowns,
+    removeBiDate,
     validateFields
   },
   props: ['model', 'validating'],
