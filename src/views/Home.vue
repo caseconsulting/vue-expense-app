@@ -35,7 +35,7 @@
         <!-- Title -->
         <v-col cols="12" md="6" class="pt-3 px-xl-2 px-lg-2 px-md-0">
           <v-row class="pt-5" align="center" justify="center">
-            <h1 id="home-greeting">Hello, {{ employee.firstName }}!</h1>
+            <h1 id="home-greeting">Hello, {{ getEmployeePreferredName(employee) }}!</h1>
           </v-row>
           <v-row class="pt-2" justify="center">
             <v-btn class="mb-5" @click="handleProfile()" color="#bc3825" dark>View Profile</v-btn>
@@ -251,7 +251,7 @@ async function createEvents() {
 
   //we want to use their nicknames if they have one
   this.employees.forEach((employee) => {
-    employee.firstName = employee.nickname ? employee.nickname : employee.firstName;
+    employee.firstName = getEmployeePreferredName(employee);
   });
 
   // generate anniversaries
@@ -487,7 +487,7 @@ function getEmployeeAwards() {
       // add their name to the award
       namedAwards = [];
       e.awards.forEach((a) => {
-        a.employee = e.firstName = e.nickname ? e.nickname : e.firstName;
+        a.employee = getEmployeePreferredName(e);
         namedAwards.push(a);
       });
 
@@ -498,6 +498,16 @@ function getEmployeeAwards() {
 
   // :)
   return awards;
+}
+
+/**
+ * Returns the name of an employee based on their preference
+ *
+ * @input e employee object
+ * @return e's preferred name
+ */
+function getEmployeePreferredName(e) {
+  return e.nickname || e.firstName;
 }
 
 /**
@@ -606,6 +616,7 @@ export default {
     createEvents,
     getCurrentBudgetYear,
     getEmployeeAwards,
+    getEmployeePreferredName,
     getEventDateMessage,
     getTweets,
     isEmpty,
