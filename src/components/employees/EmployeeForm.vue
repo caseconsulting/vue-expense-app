@@ -729,8 +729,13 @@ async function submit() {
  * @param errors - the number of errored out tabs
  */
 function addErrorTab(name, errors) {
-  if (errors !== 0) {
-    this.errorTabNames[name] = errors;
+  this.errorTabNames[name] = errors;
+
+  //see if a tab is 0 after fixing validations and remove it
+  if (this.errorTabNames[name] === 0) {
+    this.errorTabNames = _.filter(this.errorTabNames.keys, (tab) => {
+      return tab !== name;
+    });
   }
 } // addErrorTab
 
