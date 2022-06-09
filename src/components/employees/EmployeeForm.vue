@@ -39,7 +39,10 @@
         </v-row>
       </v-card-title>
 
-      <v-container fluid>
+      <div v-if="submitting" class="py-4">
+        <v-progress-linear :active="loading" indeterminate="true"></v-progress-linear>
+      </div>
+      <v-container v-else fluid>
         <v-form ref="form" v-model="valid" lazy-validation class="my-1 mx-xl-5 mx-lg-5 mx-md-0">
           <div v-if="useDropDown">
             <!-- For smaller screens -->
@@ -369,11 +372,11 @@ import ManyFormErrors from '@/components/modals/ManyFormErrors.vue';
 import PersonalTab from '@/components/employees/formTabs/PersonalTab';
 import ResumeParser from '@/components/modals/ResumeParser';
 import TechnologyTab from '@/components/employees/formTabs/TechnologyTab';
-const moment = require('moment-timezone');
-moment.tz.setDefault('America/New_York');
 import { getRole } from '@/utils/auth';
 import { v4 as uuid } from 'uuid';
 import _ from 'lodash';
+const moment = require('moment-timezone');
+moment.tz.setDefault('America/New_York');
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -652,6 +655,8 @@ async function confirm() {
  */
 async function submit() {
   this.submitting = true;
+  console.log(this.submitting);
+  window.scrollTo(0, 0);
 
   let anyErrors = await this.confirm();
 
