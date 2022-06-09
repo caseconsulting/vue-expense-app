@@ -153,12 +153,17 @@
             multiple
             label="BI Dates"
             prepend-icon="event"
-            clearable
+            small-chips
+            deletable-chips
             readonly
             v-bind="attrs"
             v-on="on"
             @click:clear="clearance.biDates = []"
-          ></v-combobox>
+          >
+            <template #selection="{ item }">
+              <v-chip close @click:close="remove(item, clearance)">{{ item }}</v-chip>
+            </template>
+          </v-combobox>
         </template>
         <v-date-picker v-model="clearance.biDates" :min="clearance.submissionDate" multiple no-title scrollable>
           <v-spacer></v-spacer>
@@ -288,6 +293,15 @@ async function created() {
 // |                     METHODS                      |
 // |                                                  |
 // |--------------------------------------------------|
+
+function remove(item, clearance) {
+  console.log(item);
+  console.log(this.editedClearances[clearance]);
+  this.editedClearances[clearance] = clearance.biDates.filter((date) => {
+    return date !== item;
+  });
+  console.log(this.editedClearances[clearance]);
+}
 
 /**
  * Adds a clearance.
@@ -548,6 +562,7 @@ export default {
     formatDates
   },
   methods: {
+    remove,
     addClearance,
     capitalizeBadges,
     formatDate,
