@@ -28,7 +28,8 @@ export default new Vuex.Store({
       storeIsPopulated: false,
       user: null,
       userRole: null,
-      events: null
+      events: null,
+      budgets: null
     };
   },
   mutations: {
@@ -51,6 +52,9 @@ export default new Vuex.Store({
     },
     setEvents(state, payload) {
       state.events = payload.events;
+    },
+    setBudgets(state, payload) {
+      state.budgets = payload.budgets;
     }
   },
   actions: {
@@ -71,6 +75,9 @@ export default new Vuex.Store({
     },
     setEvents(context, payload) {
       context.commit('setEvents', payload);
+    },
+    setBudgets(context, payload) {
+      context.commit('setBudgets', payload);
     }
   },
   getters: {
@@ -97,6 +104,9 @@ export default new Vuex.Store({
     },
     events(state) {
       return state.events;
+    },
+    budgets(state) {
+      return state.budgets;
     }
   }
 });

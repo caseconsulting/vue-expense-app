@@ -144,7 +144,13 @@
 <script>
 import { isLoggedIn, logout, getProfile, getTokenExpirationDate, getAccessToken } from '@/utils/auth';
 import { isMobile, isSmallScreen, storeIsPopulated } from '@/utils/utils';
-import { updateStoreUser, updateStoreEmployees, updateStoreAvatars, updateStoreExpenseTypes } from '@/utils/storeUtils';
+import {
+  updateStoreUser,
+  updateStoreEmployees,
+  updateStoreAvatars,
+  updateStoreBudgets,
+  updateStoreExpenseTypes
+} from '@/utils/storeUtils';
 import { v4 as uuid } from 'uuid';
 import api from '@/shared/api';
 import SwitchRoleModal from '@/components/modals/SwitchRoleModal.vue';
@@ -250,6 +256,7 @@ async function populateStore() {
     this.updateStoreEmployees(),
     this.updateStoreAvatars(),
     this.updateStoreExpenseTypes(),
+    this.updateStoreBudgets(),
     api.updateItem(api.EMPLOYEES, employee), // updates last logged in for employee
     lastLogin // will be null if user refreshses, if user just logged in it will not be null
       ? api.createItem(api.AUDIT, {
@@ -425,6 +432,7 @@ export default {
     updateStoreUser,
     updateStoreEmployees,
     updateStoreAvatars,
+    updateStoreBudgets,
     updateStoreExpenseTypes
   },
   watch: {

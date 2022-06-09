@@ -17,12 +17,12 @@
     </v-snackbar>
 
     <!-- Title -->
-    <v-col v-if="!isMobile" cols="12" lg="8">
+    <v-col v-if="!loading && !isMobile" cols="12" lg="8">
       <v-row class="mt-3" align="center" justify="center" v-if="hasAccessToBudgets">
-        <h1 v-if="!loading">Budget Statistics for {{ employee.firstName }} {{ employee.lastName }}</h1>
+        <h1>Budget Statistics for {{ employee.firstName }} {{ employee.lastName }}</h1>
       </v-row>
       <v-row class="mt-3" align="center" justify="center" v-else>
-        <h1 v-if="!loading">No Budgets Available for {{ employee.firstName }} {{ employee.lastName }}</h1>
+        <h1>No Budgets Available for {{ employee.firstName }} {{ employee.lastName }}</h1>
       </v-row>
     </v-col>
 
@@ -44,16 +44,17 @@
       <div v-if="!loading" text-center class="pt-0 font-13">
         <!-- The @rendered event is to ensure that budget chart renders after the table -->
         <budget-table
-          v-if="!loading"
           class="my-3"
           :employee="employee"
+          :accessibleBudgets="accessibleBudgets"
           :expenses="expenses"
           :expenseTypes="expenseTypes"
           :fiscalDateView="fiscalDateView"
           @rendered="displayChart = !displayChart"
         ></budget-table>
         <budget-chart
-          v-if="!loading && !isMobile && !adminCall && displayChart && hasAccessToBudgets"
+          v-if="!isMobile && displayChart && hasAccessToBudgets"
+          :accessibleBudgets="accessibleBudgets"
           :employee="employee"
           :expenses="expenses"
           :expenseTypes="expenseTypes"
@@ -63,7 +64,7 @@
     </v-col>
 
     <!-- Expense Form-->
-    <v-col v-if="employ == null && !isInactive && viewingCurrentBudgetYear" cols="12" lg="4">
+    <v-col v-if="viewingCurrentBudgetYear" cols="12" lg="4">
       <div text-center>
         <expense-form :expense="expense" v-on:error="displayError"></expense-form>
       </div>
@@ -79,7 +80,7 @@ import ExpenseForm from '@/components/ExpenseForm.vue';
 import AnniversaryCard from '@/components/AnniversaryCard.vue';
 const moment = require('moment-timezone');
 moment.tz.setDefault('America/New_York');
-import { isInactive, isMobile, getCurrentBudgetYear } from '@/utils/utils';
+import { isMobile, getCurrentBudgetYear } from '@/utils/utils';
 
 const IsoFormat = 'YYYY-MM-DD';
 
@@ -137,25 +138,16 @@ function displayError(err) {
  * Refresh and sets employee information.
  */
 async function refreshEmployee() {
-  this.loading = true;
-  this.displayChart = false;
-  if (this.employ == null) {
-    // set the employee to the selected employee if viewing from an admin view
-    this.employee = this.$store.getters.user;
-  } else {
-    // set the employee to the current user if viewing from a user view
-    this.employee = this.employ;
-  }
+  this.employee = this.$store.getters.user;
+  this.accessibleBudgets = this.$store.getters.budgets;
+  this.expenses = await api.getAllEmployeeExpenses(this.employee.id);
 
-  let accessibleBudgets = await api.getAllActiveEmployeeBudgets(this.employee.id);
-  if (accessibleBudgets.length == 0) {
-    // does not have access to any budgets
-    this.hasAccessToBudgets = false; // disable budget chart
-  }
   this.hireDate = this.employee.hireDate;
   this.fiscalDateView = this.getCurrentBudgetYear(this.hireDate);
   this.expenseTypes = this.$store.getters.expenseTypes;
-  this.expenses = await api.getAllAggregateExpenses();
+
+  // does not have access to any budgets disable budget chart
+  this.accessibleBudgets.length > 0 ? (this.hasAccessToBudgets = true) : '';
   this.loading = false;
 } // refreshEmployee
 
@@ -186,6 +178,10 @@ async function updateData() {
  *  Set budget charts and information for employee. Creates event listeners.
  */
 async function created() {
+  if (this.$store.getters.storeIsPopulated) {
+    await this.refreshEmployee();
+  }
+
   window.EventBus.$on('updateData', async () => {
     await this.updateData();
   });
@@ -195,9 +191,6 @@ async function created() {
       this.fiscalDateView = data.format(IsoFormat);
     }
   });
-  if (this.$store.getters.storeIsPopulated) {
-    await this.refreshEmployee();
-  }
 } // created
 
 /**
@@ -235,7 +228,6 @@ export default {
     AnniversaryCard
   },
   computed: {
-    isInactive,
     isMobile,
     storeIsPopulated,
     viewingCurrentBudgetYear
@@ -246,6 +238,7 @@ export default {
     return {
       displayChart: false,
       employee: null, // employee
+      accessibleBudgets: null,
       expense: {
         id: '',
         purchaseDate: null,
@@ -266,7 +259,7 @@ export default {
       expenses: null,
       expenseTypes: null,
       fiscalDateView: '', // current budget year view by anniversary day
-      hasAccessToBudgets: true, // user has access to one or more budgets
+      hasAccessToBudgets: false, // user has access to one or more budgets
       hireDate: '', // employee hire date
       loading: true, // loading status
       status: {
@@ -285,9 +278,6 @@ export default {
     updateData
   },
   props: {
-    adminCall: {
-      default: null
-    }, // admin employee view
     employ: {
       default: null
     } // employee (admin employee view)
@@ -297,7 +287,6 @@ export default {
     async storeIsPopulated() {
       if (this.$store.getters.storeIsPopulated) {
         await this.refreshEmployee();
-        this.loading = false;
       }
     }
   }

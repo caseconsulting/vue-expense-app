@@ -67,6 +67,7 @@
           :employee="this.model"
           :expenses="expenses"
           :expenseTypes="expenseTypes"
+          :accessibleBudgets="accessibleBudgets"
         ></available-budgets>
         <anniversary-card
           v-if="!minimizeWindow"
@@ -127,6 +128,7 @@
           v-if="(userIsAdmin() || userIsEmployee()) && hasAccessToBudgets"
           class="pt-4"
           :employee="this.model"
+          :accessibleBudgets="accessibleBudgets"
           :expenses="expenses"
           :expenseTypes="expenseTypes"
           :fiscalDateView="fiscalDateView"
@@ -298,8 +300,13 @@ async function deleteResume() {
  * Checks if the user has access to any budgets
  */
 async function checkForBudgetAccess() {
-  let accessibleBudgets = await api.getAllActiveEmployeeBudgets(this.model.id);
-  if (accessibleBudgets.length == 0) {
+  if (this.userIsEmployee()) {
+    this.accessibleBudgets = this.$store.getters.budgets;
+  } else {
+    this.accessibleBudgets = await api.getAllActiveEmployeeBudgets(this.model.id);
+  }
+
+  if (this.accessibleBudgets.length == 0) {
     // does not have access to any budgets
     this.hasAccessToBudgets = false; // disable budget chart
   }
@@ -411,6 +418,7 @@ export default {
       editing: false,
       expenses: null,
       expenseTypes: null,
+      accessibleBudgets: null,
       filter: {
         active: ['full', 'part'] // default only shows full and part time employees
       }, // datatable filter

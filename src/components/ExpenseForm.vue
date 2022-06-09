@@ -460,7 +460,15 @@ function urlLabel() {
  */
 async function getRemainingBudget() {
   if (this.editedExpense.expenseTypeId && this.editedExpense.employeeId) {
-    let budgets = await api.getAllActiveEmployeeBudgets(this.editedExpense.employeeId);
+    let budgets;
+
+    // get budgets for employee, use budgets store if it is for yourself.
+    if (this.editedExpense.employeeId == this.$store.getters.user.id) {
+      budgets = this.$store.getters.budgets;
+    } else {
+      budgets = await api.getAllActiveEmployeeBudgets(this.editedExpense.employeeId);
+    }
+
     if (budgets) {
       let budget = budgets.find((currBudget) => currBudget.expenseTypeId === this.editedExpense.expenseTypeId);
 

@@ -197,8 +197,7 @@ function noRemaining(budget) {
  * Sets the data for the budgets given an employee id
  */
 async function created() {
-  let budgetsVar;
-  budgetsVar = await api.getAllActiveEmployeeBudgets(this.employee.id);
+  let budgetsVar = this.accessibleBudgets;
 
   // get existing budgets for the budget year being viewed
   let existingBudgets = await api.getFiscalDateViewBudgets(this.employee.id, this.fiscalDateView);
@@ -262,7 +261,7 @@ export default {
     odFlagMessage
   },
   updated,
-  props: ['employee', 'fiscalDateView', 'expenses', 'expenseTypes'] // employee of budgets
+  props: ['employee', 'accessibleBudgets', 'fiscalDateView', 'expenses', 'expenseTypes'] // employee of budgets
 };
 </script>
 

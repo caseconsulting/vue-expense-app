@@ -37,6 +37,16 @@ export async function updateStoreAvatars() {
 } // updateStoreAvatars
 
 /**
+ * Update store with users budgets
+ *
+ */
+export async function updateStoreBudgets() {
+  let user = this.$store.getters.user;
+  let budgets = await api.getAllActiveEmployeeBudgets(user.id);
+  this.$store.dispatch('setBudgets', { budgets: budgets });
+} // updateStoreBudgets
+
+/**
  * Update store with latest expense type data
  *
  */

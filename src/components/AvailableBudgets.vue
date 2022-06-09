@@ -112,11 +112,14 @@ async function refreshBudget() {
 
   if (this.date == this.getCurrentBudgetYear(this.hireDate)) {
     // viewing active budget year
-    budgetsVar = await api.getAllActiveEmployeeBudgets(this.employee.id);
-    [budgetsVar, existingBudgets] = await Promise.all([
-      api.getAllActiveEmployeeBudgets(this.employee.id),
-      api.getFiscalDateViewBudgets(this.employee.id, this.date)
-    ]);
+    if (this.isUser) {
+      budgetsVar = this.$store.getters.budgets;
+    } else if (this.accessibleBudgets) {
+      budgetsVar = this.accessibleBudgets;
+    } else {
+      budgetsVar = await api.getAllActiveEmployeeBudgets(this.employee.id);
+    }
+    existingBudgets = await api.getFiscalDateViewBudgets(this.employee.id, this.date);
   } else {
     // get existing budgets for the budget year being viewed
     existingBudgets = await api.getFiscalDateViewBudgets(this.employee.id, this.date);
@@ -260,7 +263,7 @@ export default {
     refreshEmployee,
     selectBudget
   },
-  props: ['employee', 'expenses', 'expenseTypes', 'fiscalDateView']
+  props: ['employee', 'expenses', 'expenseTypes', 'accessibleBudgets', 'fiscalDateView']
 };
 </script>
 

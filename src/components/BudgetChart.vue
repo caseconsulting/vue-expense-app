@@ -264,7 +264,7 @@ async function refreshBudget() {
   let budgetsVar;
   if (this.fiscalDateView == this.getCurrentBudgetYear(this.employee.hireDate)) {
     // viewing active budget year
-    budgetsVar = await api.getAllActiveEmployeeBudgets(this.employee.id);
+    budgetsVar = this.accessibleBudgets;
   }
 
   // get existing budgets for the budget year being viewed
@@ -346,7 +346,7 @@ export default {
     refreshBudget
   },
   mounted,
-  props: ['employee', 'fiscalDateView', 'expenses', 'expenseTypes'],
+  props: ['employee', 'accessibleBudgets', 'fiscalDateView', 'expenses', 'expenseTypes'],
   watch: {
     fiscalDateView: watchFiscalDateView
   }

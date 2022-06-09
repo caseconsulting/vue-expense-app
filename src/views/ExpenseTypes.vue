@@ -896,7 +896,7 @@ async function refreshExpenseTypes() {
     // get the employees budgets that have expenses
     let budgetsWithExpenses = await api.getEmployeeBudgets(this.userInfo.id);
     // get the active budgets for the employee
-    let activeBudgets = await api.getAllActiveEmployeeBudgets(this.userInfo.id);
+    let activeBudgets = this.$store.getters.budgets;
     // map the active budgets
     let activeExpTypes = _.map(activeBudgets, (budget) => {
       return budget.expenseTypeId;
