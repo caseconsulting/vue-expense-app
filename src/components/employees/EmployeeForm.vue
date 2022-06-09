@@ -844,7 +844,7 @@ async function created() {
   // Starts listener to check the Languages tab has any errors
   window.EventBus.$on('languagesStatus', (errorCount) => {
     this.tabErrors.languages = errorCount > 0 ? true : false;
-    this.addErrorTab('Languages', errorCount);
+    this.addErrorTab('Foreign Languages', errorCount);
   });
   // Starts listener to check the Personal tab has any errors
   window.EventBus.$on('personalStatus', (errorCount) => {

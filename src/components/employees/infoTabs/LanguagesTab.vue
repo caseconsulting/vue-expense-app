@@ -15,7 +15,7 @@
       <!-- End Loop Languages -->
     </div>
     <!-- Employee does not have Language Experience -->
-    <p v-else>No Language Information</p>
+    <p v-else>No Foreign Language Information</p>
     <!-- Pagination -->
     <div v-if="!isEmpty(this.model.languages) && Math.ceil(model.languages.length / 5) != 1" class="text-center">
       <v-pagination
