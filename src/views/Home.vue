@@ -284,7 +284,7 @@ async function createEvents() {
             event.text = a.firstName + ' ' + a.lastName + ' is celebrating 1 year at Case Consulting!';
           } else {
             event.text =
-              a.firstName +
+              getEmployeePreferredName(a) +
               ' ' +
               a.lastName +
               ' is celebrating ' +
@@ -330,9 +330,9 @@ async function createEvents() {
       }
       // Sets event text
       if (diff == 0) {
-        event.text = 'Happy Birthday ' + b.firstName + ' ' + b.lastName + '!';
+        event.text = 'Happy Birthday ' + getEmployeePreferredName(b) + ' ' + b.lastName + '!';
       } else {
-        event.text = b.firstName + ' ' + b.lastName + "'s" + ' birthday!';
+        event.text = getEmployeePreferredName(b) + ' ' + b.lastName + "'s" + ' birthday!';
       }
       event.icon = 'birthday-cake';
       event.type = 'Birthday';
@@ -358,7 +358,7 @@ async function createEvents() {
       if (!this.isEmpty(a.url)) {
         event.link = a.url;
       }
-      event.text = `${a.firstName} ${a.lastName} used their ${a.budgetName} budget on ${a.description}`;
+      event.text = `${getEmployeePreferredName(a)} ${a.lastName} used their ${a.budgetName} budget on ${a.description}`;
       event.daysFromToday = now.startOf('day').diff(reimbursedDate.startOf('day'), 'days');
       if (a.budgetName === 'High Five') {
         event.congratulateCampfile = a.campfire;
