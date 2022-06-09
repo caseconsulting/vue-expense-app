@@ -928,6 +928,7 @@ function setFormData(tab, data) {
     this.$set(this.model, 'prime', data.prime);
     this.$set(this.model, 'contract', data.contract);
     this.$set(this.model, 'jobRole', data.jobRole);
+    this.$set(this.model, 'agencyIdentificationNumber', data.agencyIdentificationNumber);
     this.$set(this.model, 'employeeRole', data.employeeRole);
     this.$set(this.model, 'hireDate', data.hireDate);
     this.$set(this.model, 'workStatus', data.workStatus);
@@ -1114,6 +1115,7 @@ export default {
       hasResume: false,
       mifiStatusOnLoad: null, // used as a way to see if mifi status was changed (to updated audit log)
       model: {
+        agencyIdentificationNumber: null,
         awards: [],
         birthday: null,
         birthdayFeed: false,

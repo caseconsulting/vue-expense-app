@@ -82,6 +82,15 @@
         label="Job Role (optional)"
       ></v-combobox>
 
+      <!-- AIN -->
+      <v-text-field
+        id="agencyIdentificationNumber"
+        ref="formFields"
+        v-model="editedEmployee.agencyIdentificationNumber"
+        label="Agency Identification Number"
+        data-vv-name="Agency Identification Number"
+      ></v-text-field>
+
       <!-- Employee Role -->
       <v-autocomplete
         v-if="!loading && (userIsAdmin() || (userIsManager() && !userIsEmployee()))"
@@ -502,6 +511,7 @@ function validateFields() {
     this.editedEmployee.employeeRole = this.model.employeeRole;
     this.editedEmployee.hireDate = this.model.hireDate;
     this.editedEmployee.workStatus = this.model.workStatus;
+    this.editedEmployee.agencyIdentificationNumber = this.model.agencyIdentificationNumber;
   }
 
   window.EventBus.$emit('doneValidating', 'employee', this.editedEmployee); // emit done validating
@@ -679,6 +689,7 @@ export default {
   created,
   data() {
     return {
+      agencyIdentificationNumber: '',
       deptDateFormatted: null, // formatted departure date
       departureMenu: false, // display depature menu
       editedEmployee: _.cloneDeep(this.model), //employee that can be edited
