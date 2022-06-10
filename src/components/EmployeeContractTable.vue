@@ -167,6 +167,16 @@ function buildJobRolesColumn() {
 } // buildJobRolesColumn
 
 /**
+ * Replaces the third column with security information.
+ */
+function buildSecurityColumn() {
+  this.headers.splice(2, 1, {
+    text: 'Badge Expiration Date',
+    value: 'badgeExpiration'
+  });
+} // buildSecurityColumn
+
+/**
  * Sets a mapping of employee name to employee id of an expense for the autocomplete options.
  *
  * @param empData - The list of employees
@@ -498,6 +508,9 @@ function watchDataType() {
       case 'Job Roles':
         this.buildJobRolesColumn();
         break;
+      case 'Security Info':
+        this.buildSecurityColumn();
+        break;
       default:
         this.buildContractsColumn();
     }
@@ -526,7 +539,7 @@ export default {
       contractsDropDown: [],
       contract: null,
       dataType: 'Contracts',
-      dataTypes: ['Contracts', 'Job Roles'],
+      dataTypes: ['Contracts', 'Job Roles', 'Security Info'],
       dataTypeDropDown: [],
       dataTypeSearch: null,
       employees: [],
@@ -548,11 +561,6 @@ export default {
           value: 'contractNames'
         },
         {
-          text: 'Badge Expiration Date',
-          value: 'badgeExpiration',
-          sortable: false
-        },
-        {
           text: 'Email',
           value: 'email'
         }
@@ -571,6 +579,7 @@ export default {
   methods: {
     buildContractsColumn,
     buildJobRolesColumn,
+    buildSecurityColumn,
     constructAutoComplete,
     customEmployeeFilter,
     customFilter,
