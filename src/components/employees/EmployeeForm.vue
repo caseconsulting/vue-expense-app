@@ -40,7 +40,7 @@
       </v-card-title>
 
       <div v-if="submitting" class="py-10 px-6">
-        <v-progress-linear :active="loading" indeterminate="true"></v-progress-linear>
+        <v-progress-linear :indeterminate="true"></v-progress-linear>
       </div>
       <v-container v-show="!submitting" fluid>
         <v-form ref="form" v-model="valid" lazy-validation class="my-1 mx-xl-5 mx-lg-5 mx-md-0">

@@ -93,7 +93,7 @@
 
       <!-- Employee Role -->
       <v-autocomplete
-        v-if="!loading && (userIsAdmin() || (userIsManager() && !userIsEmployee()))"
+        v-if="(!loading && userIsAdmin()) || (userIsManager() && !userIsEmployee())"
         id="employeeRole"
         ref="formFields"
         :items="permissions"
