@@ -306,6 +306,7 @@ import { getDateRules, getDateOptionalRules, getRequiredRules, getURLRules } fro
 import { isEmpty, isFullTime, convertToMoneyString } from '@/utils/utils';
 import { mask } from 'vue-the-mask';
 import _ from 'lodash';
+import { updateStoreBudgets } from '@/utils/storeUtils';
 const moment = require('moment-timezone');
 moment.tz.setDefault('America/New_York');
 
@@ -1417,6 +1418,11 @@ async function submit() {
     this.isHighFive = false; // set high five back to false
     this.reqRecipient = false;
     this.clearForm();
+
+    // update budgets in vuex store if needed
+    if (this.editedExpense.employeeId == this.$store.getters.user.id) {
+      this.updateStoreBudgets();
+    }
   }
 } // submit
 
@@ -1964,7 +1970,8 @@ export default {
     setRecipientOptions,
     submit,
     updateExistingEntry,
-    uuid
+    uuid,
+    updateStoreBudgets
   },
   props: [
     'expense', // expense to be created/updated
