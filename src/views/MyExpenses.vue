@@ -343,7 +343,6 @@
         v-on:add="addModelToTable"
         v-on:delete="deleteModelFromTable"
         v-on:startAction="startAction"
-        v-on:endAction="endAction"
         v-on:update="updateModelInTable"
         v-on:error="displayError"
       ></expense-form>
@@ -623,13 +622,6 @@ function displayError(err) {
 } // displayError
 
 /**
- * set midAction to false
- */
-function endAction() {
-  this.midAction = false;
-} // endAction
-
-/**
  * Filters expenses based on filter selections.
  */
 function filterExpenses() {
@@ -845,6 +837,10 @@ async function created() {
     this.isEditing = false;
   });
 
+  window.EventBus.$on('endAction', () => {
+    this.midAction = false;
+  });
+
   //when expense type is being edited buttons should be disabled
   window.EventBus.$on('editing-expense', () => {
     this.isEditing = true;
@@ -1036,7 +1032,6 @@ export default {
     deleteExpense,
     deleteModelFromTable,
     displayError,
-    endAction,
     filterExpenses,
     hasRecipient,
     isEmpty,

@@ -1412,7 +1412,8 @@ async function submit() {
       }
     }
     this.loading = false; // set loading status to false
-    this.$emit('endAction');
+
+    window.EventBus.$emit('endAction');
     this.isHighFive = false; // set high five back to false
     this.reqRecipient = false;
     this.clearForm();
