@@ -101,6 +101,12 @@
             {{ item.email }}
           </p>
         </template>
+        <!-- Badge Expiration Slot -->
+        <template v-slot:[`item.badgeExpiration`]="{ item }">
+          <p :class="{ selectFocus: isFocus(item), inactive: item.badgeExpiration <= 0 }" class="mb-0">
+            {{ getBadgeExpiration(item.clearances) }}
+          </p>
+        </template>
         <!-- Alert for no search results -->
         <v-alert slot="no-results" :value="true" color="error" icon="warning">
           Your search for "{{ search }}" found no results.
@@ -112,6 +118,7 @@
 
 <script>
 import _ from 'lodash';
+import moment from 'moment-timezone';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -226,6 +233,22 @@ function customEmployeeFilter(item, queryText) {
 function employeePath(item) {
   return `/employee/${item.employeeNumber}`;
 } // employeePath
+
+/**
+ * Returns the expiration dates for all clearances.
+ *
+ * @param clearances - the list of employee clearances
+ */
+function getBadgeExpiration(clearances) {
+  let dates = [];
+  _.forEach(clearances, (clearance) => {
+    if (clearance.badgeExpirationDate) {
+      dates.push(moment(clearance.badgeExpirationDate).format('MMM Do, YYYY'));
+    }
+  });
+  dates = _.sortBy(dates);
+  return _.join(dates, ' | ');
+}
 
 /**
  * Gets the full name of an employee.
@@ -525,6 +548,11 @@ export default {
           value: 'contractNames'
         },
         {
+          text: 'Badge Expiration Date',
+          value: 'badgeExpiration',
+          sortable: false
+        },
+        {
           text: 'Email',
           value: 'email'
         }
@@ -547,6 +575,7 @@ export default {
     customEmployeeFilter,
     customFilter,
     employeePath,
+    getBadgeExpiration,
     getFullName,
     getActive,
     handleClick,
