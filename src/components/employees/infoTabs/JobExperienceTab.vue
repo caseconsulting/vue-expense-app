@@ -94,19 +94,37 @@ function created() {
  * @return String - Experience in IC duration
  */
 function icExperience() {
-  let ranges = _.mapValues(this.model.icTimeFrames, 'range');
+  // get values from input, convert to array, and then sort them
+  let given_ranges = _.mapValues(this.model.icTimeFrames, 'range');
+  given_ranges = Object.values(given_ranges);
+  const durations = given_ranges
+    .sort((a, b) => {
+      // array has text in format YYYY-MM, so convert that to a moment and reformat to YYYYMM
+      // so that it can be sorted as a regular int
+      moment(a[0], 'YYYY-MM').format('YYYYMM') - moment(b[0], 'YYYY-MM').format('YYYYMM');
+    })
+    .reverse();
+  let ranges = [];
+  let previousVal, firstStart, lastEnd;
+  // combine any dates that overlap, keep separate ones that don't
+  durations.forEach((d) => {
+    previousVal = ranges[ranges.length - 1];
+    if (ranges.length != 0 && moment(d[0]).isBefore(moment(previousVal[1]))) {
+      // overlap combination
+      firstStart = moment.min(moment(previousVal[0]), moment(d[0]));
+      lastEnd = moment.max(moment(previousVal[1]), moment(d[1]));
+      ranges[ranges.length - 1] = [firstStart, lastEnd];
+    } else {
+      // no overlap
+      ranges.push(d);
+    }
+  });
+
   let totalDurationMonths = 0; // total months
   // loop each reach to get total duration in months
   _.forEach(ranges, (range) => {
     let start = moment(range[0], 'YYYY-MM');
-    let end;
-    if (range.length > 1) {
-      // end date
-      end = moment(range[1], 'YYYY-MM');
-    } else {
-      // present
-      end = moment();
-    }
+    let end = range.length > 1 ? moment(range[1], 'YYYY-MM') : moment();
     let duration = end.diff(start, 'months') + 1; // calculate range duration
     totalDurationMonths += Math.max(duration, 0); // remove negative values
   });
