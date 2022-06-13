@@ -160,6 +160,10 @@ function buildContractsColumn() {
     text: 'Current Contract - Prime',
     value: 'contractNames'
   });
+
+  if (this.headers[3].value === 'badgeExpiration') {
+    this.headers.splice(3, 1); //remove badge exp column
+  }
 } // buildContractsColumn
 
 /**
@@ -170,10 +174,14 @@ function buildJobRolesColumn() {
     text: 'Job Role',
     value: 'jobRole'
   });
+
+  if (this.headers[3].value === 'badgeExpiration') {
+    this.headers.splice(3, 1); //remove badge exp column
+  }
 } // buildJobRolesColumn
 
 /**
- * Replaces the third column with clearance type and fourth column with security information.
+ * Replaces the third column with clearance type and adds fourth column with security information.
  */
 function buildSecurityColumn() {
   this.headers.splice(2, 1, {
