@@ -432,7 +432,9 @@ async function createEvents() {
       color: '#f9c64e',
       type: 'Award',
       daysFromToday: moment().startOf('day').diff(dateSubmitted.startOf('day'), 'days'),
-      text: `${a.employee} was awarded "${a.name}" in ${moment(a.dateReceived).format('MMMM')}`,
+      text: `${getEmployeePreferredName(a.employee)} ${a.employee.lastName} was awarded "${a.name}" in ${moment(
+        a.dateReceived
+      ).format('MMMM')}`,
       congratulateCampfire: 'https://3.basecamp.com/3097063/buckets/171415/chats/29039726'
     };
     // date formatting
@@ -490,7 +492,7 @@ function getEmployeeAwards() {
       // add their name to the award
       namedAwards = [];
       e.awards.forEach((a) => {
-        a.employee = getEmployeePreferredName(e);
+        a.employee = e;
         namedAwards.push(a);
       });
 
