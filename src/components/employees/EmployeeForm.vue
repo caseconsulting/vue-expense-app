@@ -359,7 +359,7 @@
 
 <script>
 import api from '@/shared/api.js';
-import { updateStoreEmployees } from '@/utils/storeUtils';
+import { updateStoreEmployees, updateStoreUser } from '@/utils/storeUtils';
 import AwardTab from '@/components/employees/formTabs/AwardTab';
 import CertificationTab from '@/components/employees/formTabs/CertificationTab';
 import ClearanceTab from '@/components/employees/formTabs/ClearanceTab';
@@ -679,6 +679,7 @@ async function submit() {
           this.fullName = `${updatedEmployee.firstName} ${updatedEmployee.lastName}`;
           window.EventBus.$emit('update', updatedEmployee);
           // getEmployees and update store with latest data
+          if (this.model.id === this.$store.getters.user.id) await this.updateStoreUser();
           await this.updateStoreEmployees();
           await this.cancelB();
         } else {
@@ -1220,7 +1221,8 @@ export default {
     titleCase,
     resumeReceived,
     selectDropDown,
-    updateStoreEmployees
+    updateStoreEmployees,
+    updateStoreUser
   },
   props: ['currentTab', 'employee'], // employee to be created/updated
   watch: {
