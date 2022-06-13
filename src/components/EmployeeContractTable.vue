@@ -103,14 +103,14 @@
         </template>
         <!-- Clearance Types Slot -->
         <template v-slot:[`item.clearanceType`]="{ item }">
-          <p :class="{ selectFocus: isFocus(item), inactive: item.clearanceType <= 0 }" class="mb-0">
-            {{ getClearanceType(item.clearances) }}
+          <p :class="{ selectFocus: isFocus(item), inactive: item.workStatus <= 0 }" class="mb-0">
+            {{ getClearanceType(item.clearances, item) }}
           </p>
         </template>
         <!-- Badge Expiration Slot -->
         <template v-slot:[`item.badgeExpiration`]="{ item }">
-          <p :class="{ selectFocus: isFocus(item), inactive: item.badgeExpiration <= 0 }" class="mb-0">
-            {{ getBadgeExpiration(item.clearances) }}
+          <p :class="{ selectFocus: isFocus(item), inactive: item.workStatus <= 0 }" class="mb-0">
+            {{ getBadgeExpiration(item.clearances, item) }}
           </p>
         </template>
         <!-- Alert for no search results -->
@@ -263,18 +263,34 @@ function employeePath(item) {
 } // employeePath
 
 /**
- * Returns the expiration dates for all clearances.
+ * Returns the expiration dates for all clearances in natural readable format. The sorting key of item.badgeExpiration
+ * is stored just as the int form of the moment to get accurate sorting.
  *
  * @param clearances - the list of employee clearances
+ * @param item - the employee
  * @return String - all badge expiration dates
  */
-function getBadgeExpiration(clearances) {
+function getBadgeExpiration(clearances, item) {
   let dates = [];
+  let fDate = 100000000000000000;
+
+  // used for sorting... only store the lowest date (closest to expire)
+  _.forEach(clearances, (clearance) => {
+    if (clearance.badgeExpirationDate) {
+      let newDate = parseInt(moment(clearance.badgeExpirationDate).format('X')); // seconds timestamp -> int
+      if (newDate < fDate) fDate = newDate;
+    }
+  });
+
+  // used for displaying
   _.forEach(clearances, (clearance) => {
     if (clearance.badgeExpirationDate) {
       dates.push(moment(clearance.badgeExpirationDate).format('MMM Do, YYYY'));
     }
   });
+
+  item.badgeExpiration = fDate;
+
   return _.join(dates, ' | ');
 }
 
@@ -282,16 +298,18 @@ function getBadgeExpiration(clearances) {
  * Returns the expiration dates for all clearances.
  *
  * @param clearances - the list of employee clearances
+ * @param item - the employee
  * @return String - all clearance types
  */
-function getClearanceType(clearances) {
+function getClearanceType(clearances, item) {
   let types = [];
   _.forEach(clearances, (clearance) => {
     if (clearance.type) {
       types.push(clearance.type);
     }
   });
-  return _.join(types, ' | ');
+  item.clearanceType = _.join(types, ' | ');
+  return item.clearanceType;
 }
 
 /**
