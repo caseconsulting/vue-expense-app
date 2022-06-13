@@ -365,6 +365,12 @@ async function createEvents() {
         event.icon = 'hand-holding-usd';
         event.type = 'High Five';
         event.color = '#167c80'; // like a dark teal kinda color
+        const recipient = _.find(this.employees, (e) => {
+          return e.id === a.recipient;
+        });
+        event.text = `${getEmployeePreferredName(a)} ${a.lastName} gave ${getEmployeePreferredName(recipient)} ${
+          recipient.lastName
+        } a High Five: ${a.note}`;
       } else if (a.recipient) {
         event.congratulateCampfire = a.campfire;
         event.icon = 'thumbs-up';
@@ -375,9 +381,6 @@ async function createEvents() {
         event.icon = 'dollar-sign';
         event.type = 'Expense';
         event.color = 'green';
-      }
-      if (!this.isEmpty(a.recipient)) {
-        event.text = `${a.description}: ${a.note}`;
       }
       if (this.textMaxLength < event.text.length) {
         event.truncatedText = _.truncate(event.text, { length: this.textMaxLength });

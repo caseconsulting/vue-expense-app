@@ -1391,15 +1391,7 @@ async function submit() {
       // NOTE: this second validate may be unnecessary. included in checkCoverage()
       // set the description if a recipient is required
 
-      if (this.reqRecipient) {
-        let giver = _.find(this.employees, (employee) => employee.value == this.editedExpense.employeeId);
-        let receiver = _.find(this.employees, (employee) => employee.value == this.editedExpense.recipient);
-        let expenseType = _.find(this.expenseTypes, (type) => this.editedExpense.expenseTypeId === type.value);
-
-        if (giver && receiver && expenseType) {
-          this.editedExpense.description = `${giver.text} gave ${receiver.text} a ${expenseType.budgetName}`;
-        }
-      } else {
+      if (!this.reqRecipient) {
         this.editedExpense.recipient = null;
       }
 
