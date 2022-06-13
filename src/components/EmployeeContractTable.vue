@@ -226,8 +226,7 @@ function getFullName(item) {
  * @param item - the employee
  */
 function handleClick(item) {
-  console.log(item);
-  // this.$router.push(employeePath(item));
+  this.$router.push(employeePath(item));
 } //handleClick
 
 /**

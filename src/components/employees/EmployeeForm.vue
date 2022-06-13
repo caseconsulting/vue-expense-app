@@ -659,7 +659,6 @@ async function confirm() {
  */
 async function submit() {
   this.submitting = true;
-  console.log(this.submitting);
   window.scrollTo(0, 0);
 
   let anyErrors = await this.confirm();
