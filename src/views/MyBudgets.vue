@@ -164,6 +164,7 @@ function showSuccessfulSubmit() {
  * Updates the budget data and display a successful submit.
  */
 async function updateData() {
+  this.displayChart = false;
   await this.refreshEmployee();
   this.showSuccessfulSubmit();
 } // updateData
@@ -190,6 +191,10 @@ async function created() {
     if (data.format(IsoFormat) != this.fiscalDateView) {
       this.fiscalDateView = data.format(IsoFormat);
     }
+  });
+
+  window.EventBus.$on('confirmSubmit', async () => {
+    // expense submitted, refresh budgets for page
   });
 } // created
 

@@ -197,6 +197,10 @@ function noRemaining(budget) {
  * Sets the data for the budgets given an employee id
  */
 async function created() {
+  await this.calcBudgets();
+}
+
+async function calcBudgets() {
   let budgetsVar = this.accessibleBudgets;
 
   // get existing budgets for the budget year being viewed
@@ -238,6 +242,19 @@ async function created() {
 
 // |--------------------------------------------------|
 // |                                                  |
+// |                     WATCHERS                     |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * watcher of accessibleBudgets - reclaculates budgets to display based on new input
+ */
+async function watchBudgets() {
+  await this.calcBudgets();
+} // watchBudgets
+
+// |--------------------------------------------------|
+// |                                                  |
 // |                      EXPORT                      |
 // |                                                  |
 // |--------------------------------------------------|
@@ -250,6 +267,7 @@ export default {
     };
   },
   methods: {
+    calcBudgets,
     calcRemaining,
     convertToMoneyString,
     formatDateDashToSlash,
@@ -261,7 +279,10 @@ export default {
     odFlagMessage
   },
   updated,
-  props: ['employee', 'accessibleBudgets', 'fiscalDateView', 'expenses', 'expenseTypes'] // employee of budgets
+  props: ['employee', 'accessibleBudgets', 'fiscalDateView', 'expenses', 'expenseTypes'], // employee of budgets
+  watch: {
+    accessibleBudgets: watchBudgets
+  }
 };
 </script>
 
