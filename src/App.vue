@@ -251,7 +251,6 @@ async function populateStore() {
   let employee = this.$store.getters.user;
   let lastLogin = localStorage.getItem('lastLogin'); // item is set in Callback.vue
   lastLogin ? (employee.lastLogin = lastLogin) : null;
-  console.log(employee.lastLogin);
   // runs these api calls in parallel/concurrently? since they are independent of each other
   await Promise.all([
     this.updateStoreEmployees(),
