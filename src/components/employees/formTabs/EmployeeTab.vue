@@ -511,7 +511,6 @@ function validateFields() {
     this.editedEmployee.employeeRole = this.model.employeeRole;
     this.editedEmployee.hireDate = this.model.hireDate;
     this.editedEmployee.workStatus = this.model.workStatus;
-    this.editedEmployee.agencyIdentificationNumber = this.model.agencyIdentificationNumber;
   }
 
   window.EventBus.$emit('doneValidating', 'employee', this.editedEmployee); // emit done validating
