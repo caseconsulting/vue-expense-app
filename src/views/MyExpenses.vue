@@ -360,6 +360,7 @@ import ExpenseForm from '@/components/ExpenseForm.vue';
 import UnreimburseModal from '@/components/modals/UnreimburseModal.vue';
 import _ from 'lodash';
 import { isEmpty, monthDayYearFormat, convertToMoneyString, isMobile } from '@/utils/utils';
+import { updateStoreBudgets } from '@/utils/storeUtils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -594,6 +595,9 @@ async function deleteExpense() {
       // fails to delete expense
       this.displayError('Error Deleting Expense');
     }
+    // update budgets in store
+    await this.updateStoreBudgets();
+
     this.midAction = false;
   }
   this.loading = false; // set loading status to false
@@ -1046,6 +1050,7 @@ export default {
     toTopOfForm,
     unreimburseExpense,
     updateModelInTable,
+    updateStoreBudgets,
     useInactiveStyle
   },
   watch: {
