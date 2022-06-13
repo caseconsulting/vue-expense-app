@@ -101,6 +101,12 @@
             {{ item.email }}
           </p>
         </template>
+        <!-- Clearance Types Slot -->
+        <template v-slot:[`item.clearanceType`]="{ item }">
+          <p :class="{ selectFocus: isFocus(item), inactive: item.clearanceType <= 0 }" class="mb-0">
+            {{ getClearanceType(item.clearances) }}
+          </p>
+        </template>
         <!-- Badge Expiration Slot -->
         <template v-slot:[`item.badgeExpiration`]="{ item }">
           <p :class="{ selectFocus: isFocus(item), inactive: item.badgeExpiration <= 0 }" class="mb-0">
@@ -167,10 +173,14 @@ function buildJobRolesColumn() {
 } // buildJobRolesColumn
 
 /**
- * Replaces the third column with security information.
+ * Replaces the third column with clearance type and fourth column with security information.
  */
 function buildSecurityColumn() {
   this.headers.splice(2, 1, {
+    text: 'Clearance Type',
+    value: 'clearanceType'
+  });
+  this.headers.splice(3, 0, {
     text: 'Badge Expiration Date',
     value: 'badgeExpiration'
   });
@@ -248,6 +258,7 @@ function employeePath(item) {
  * Returns the expiration dates for all clearances.
  *
  * @param clearances - the list of employee clearances
+ * @return String - all badge expiration dates
  */
 function getBadgeExpiration(clearances) {
   let dates = [];
@@ -256,8 +267,23 @@ function getBadgeExpiration(clearances) {
       dates.push(moment(clearance.badgeExpirationDate).format('MMM Do, YYYY'));
     }
   });
-  dates = _.sortBy(dates);
   return _.join(dates, ' | ');
+}
+
+/**
+ * Returns the expiration dates for all clearances.
+ *
+ * @param clearances - the list of employee clearances
+ * @return String - all clearance types
+ */
+function getClearanceType(clearances) {
+  let types = [];
+  _.forEach(clearances, (clearance) => {
+    if (clearance.type) {
+      types.push(clearance.type);
+    }
+  });
+  return _.join(types, ' | ');
 }
 
 /**
@@ -585,6 +611,7 @@ export default {
     customFilter,
     employeePath,
     getBadgeExpiration,
+    getClearanceType,
     getFullName,
     getActive,
     handleClick,
