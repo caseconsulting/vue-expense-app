@@ -93,7 +93,7 @@
       <!-- Badge Number -->
       <v-text-field
         v-model="clearance.badgeNum"
-        prepend-icon="portrait"
+        prepend-icon="mdi-badge-account-outline"
         counter="5"
         label="Badge Number"
         clearable
