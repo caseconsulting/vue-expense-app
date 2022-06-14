@@ -52,7 +52,9 @@ function fillData() {
   // access store
   this.employees = this.$store.getters.employees;
   // filter out inactive employees (including info) and intern
-  let interns = this.employees.filter((emp) => (emp.jobRole ? emp.jobRole.toLowerCase() == 'intern' : false));
+  let interns = this.employees.filter(
+    (emp) => emp.workStatus != 0 && (emp.jobRole ? emp.jobRole.toLowerCase() == 'intern' : false)
+  );
 
   this.employees = this.employees.filter(
     (emp) => emp.workStatus != 0 && (emp.jobRole ? emp.jobRole.toLowerCase() != 'intern' : true)
