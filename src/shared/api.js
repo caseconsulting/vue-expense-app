@@ -377,12 +377,12 @@ async function getResume(employeeId) {
   let accessToken = getAccessToken();
 
   try {
-    let c = await client({
-      method: 'get',
+    let c = await client.get({
       url: `${RESUME}/${employeeId}`,
       headers: {
         Authorization: `Bearer ${accessToken}`
-      }
+      },
+      validateStatus: () => true
     });
     return c.data;
   } catch (err) {
