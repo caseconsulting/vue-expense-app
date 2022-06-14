@@ -5,7 +5,7 @@
       <v-divider></v-divider>
       <div v-for="(item, i) in visibleTiles" :key="i">
         <!-- Grouped Navigation Links -->
-        <v-list-group v-if="item.subItems" :key="item.title" no-action active-class="red--text">
+        <v-list-group v-if="item.subItems" :key="item.title" no-action active-class="red--text v-list__tile--active">
           <template v-slot:activator>
             <!-- Parent Item Icon -->
             <v-list-item-icon class="list-icons">
@@ -23,7 +23,7 @@
           <v-list-item
             v-for="subItem in item.subItems"
             :key="subItem.title"
-            active-class="red--text"
+            active-class="red--text v-list__tile--active"
             :to="{ name: subItem.route }"
             @click="scrollUp"
           >
@@ -40,7 +40,7 @@
           v-else
           :id="item.icon"
           :key="item.title"
-          active-class="red--text"
+          active-class="red--text v-list__tile--active"
           :to="{ name: item.route }"
           @click="scrollUp"
         >
@@ -284,7 +284,8 @@ export default {
 <style lang="scss" scoped>
 .navbar-icons {
   vertical-align: middle;
-  fill: #646460;
+  fill: #646460 !important;
+  color: #646460 !important;
   text-align: center;
   width: 100%;
   height: 100%;
