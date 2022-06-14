@@ -31,7 +31,7 @@ import _ from 'lodash';
 import BarChart from '@/components/charts/baseCharts/BarChart.vue';
 const moment = require('moment-timezone');
 moment.tz.setDefault('America/New_York');
-import { isFullTime, getCurrentBudgetYear } from '@/utils/utils';
+import { isBetweenDates, isFullTime, getCurrentBudgetYear } from '@/utils/utils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -265,18 +265,24 @@ async function refreshBudget() {
   if (this.fiscalDateView == this.getCurrentBudgetYear(this.employee.hireDate)) {
     // viewing active budget year
     budgetsVar = this.accessibleBudgets;
-  }
+  } else {
+    // get existing budgets for the budget year being viewed
+    let existingBudgets = await api.getFiscalDateViewBudgets(this.employee.id, this.fiscalDateView);
 
-  // get existing budgets for the budget year being viewed
-  let existingBudgets = await api.getFiscalDateViewBudgets(this.employee.id, this.fiscalDateView);
-  budgetsVar = _.union(budgetsVar, existingBudgets); // combine existing and active budgets
-  budgetsVar = _.uniqBy(budgetsVar, 'expenseTypeId'); // remove duplicate expense types
+    budgetsVar = existingBudgets;
+    // budgetsVar = _.union(budgetsVar, existingBudgets); // combine existing and active budgets
+    // budgetsVar = _.uniqBy(budgetsVar, 'expenseTypeId'); // remove duplicate expense types
+  }
   // remove inactive budgets (exception: there contains a pending expense under that budget)
   budgetsVar = _.filter(budgetsVar, (b) => {
     let budget = b.budgetObject;
     return (
-      !_.some(this.expenseTypes, (e) => e.id == budget.expenseTypeId && e.isInactive) ||
-      _.some(this.expenses, (e) => e.expenseTypeId == budget.expenseTypeId && _.isEmpty(e.reimbursedDate))
+      !_.some(
+        this.expenseTypes,
+        (e) =>
+          e.id == budget.expenseTypeId &&
+          (e.isInactive || !isBetweenDates(moment().toISOString(), budget.fiscalStartDate, budget.fiscalEndDate))
+      ) || _.some(this.expenses, (e) => e.expenseTypeId == budget.expenseTypeId && _.isEmpty(e.reimbursedDate))
     );
   });
 

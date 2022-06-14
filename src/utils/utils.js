@@ -82,6 +82,20 @@ export function getCurrentBudgetYear(hireDate) {
 } // getCurrentBudgetYear
 
 /**
+ * Check if today is between a set of given dates in isoformat. Returns true if today is between the two dates,
+ * otherwise returns false.
+ *
+ * @param start - start date
+ * @param end - end date
+ * @return boolean - today is in set of dates
+ */
+export function isBetweenDates(date, start, end) {
+  let startDate = moment(start, IsoFormat);
+  let endDate = moment(end, IsoFormat);
+  return moment(date).isBetween(startDate, endDate, 'day', '[]');
+} // betweenDates
+
+/**
  * Checks if a value is empty. Returns true if the value is null or an empty/blank string.
  *
  * @param value - value to check

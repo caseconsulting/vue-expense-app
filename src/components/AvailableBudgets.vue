@@ -53,7 +53,7 @@ import _ from 'lodash';
 // import ReceiptModal from '../components/ReceiptModal.vue';
 import moment from 'moment-timezone';
 moment.tz.setDefault('America/New_York');
-import { convertToMoneyString, getCurrentBudgetYear } from '@/utils/utils';
+import { isBetweenDates, convertToMoneyString, getCurrentBudgetYear } from '@/utils/utils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -112,14 +112,9 @@ async function refreshBudget() {
 
   if (this.date == this.getCurrentBudgetYear(this.hireDate)) {
     // viewing active budget year
-    if (this.isUser) {
-      budgetsVar = this.$store.getters.budgets;
-    } else if (this.accessibleBudgets) {
-      budgetsVar = this.accessibleBudgets;
-    } else {
-      budgetsVar = await api.getAllActiveEmployeeBudgets(this.employee.id);
-    }
-    existingBudgets = await api.getFiscalDateViewBudgets(this.employee.id, this.date);
+    budgetsVar = this.accessibleBudgets;
+    // budgetsVar = await api.getAllActiveEmployeeBudgets(this.employee.id);
+    // existingBudgets = await api.getFiscalDateViewBudgets(this.employee.id, this.date);
   } else {
     // get existing budgets for the budget year being viewed
     existingBudgets = await api.getFiscalDateViewBudgets(this.employee.id, this.date);
@@ -137,8 +132,12 @@ async function refreshBudget() {
   budgetsVar = _.filter(budgetsVar, (b) => {
     let budget = b.budgetObject;
     return (
-      !_.some(this.expenseTypes, (e) => e.id == budget.expenseTypeId && e.isInactive) ||
-      _.some(this.expenses, (e) => e.expenseTypeId == budget.expenseTypeId && _.isEmpty(e.reimbursedDate))
+      !_.some(
+        this.expenseTypes,
+        (e) =>
+          e.id == budget.expenseTypeId &&
+          (e.isInactive || !isBetweenDates(moment().toISOString(), budget.fiscalStartDate, budget.fiscalEndDate))
+      ) || _.some(this.expenses, (e) => e.expenseTypeId == budget.expenseTypeId && _.isEmpty(e.reimbursedDate))
     );
   });
   budgetsVar = _.sortBy(budgetsVar, (budget) => {

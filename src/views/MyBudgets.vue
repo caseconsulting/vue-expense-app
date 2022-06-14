@@ -33,7 +33,7 @@
 
     <!-- Expense Data -->
     <v-col cols="12" lg="8">
-      <v-container v-if="!displayChart">
+      <v-container v-if="loading">
         <v-row>
           <v-col v-for="index in 4" :key="index" cols="12" sm="6" lg="6">
             <v-skeleton-loader class="my-3" type="card-heading, list-item@6"></v-skeleton-loader>
@@ -50,10 +50,9 @@
           :expenses="expenses"
           :expenseTypes="expenseTypes"
           :fiscalDateView="fiscalDateView"
-          @rendered="displayChart = !displayChart"
         ></budget-table>
         <budget-chart
-          v-if="!isMobile && displayChart && hasAccessToBudgets"
+          v-if="!isMobile && hasAccessToBudgets"
           :accessibleBudgets="accessibleBudgets"
           :employee="employee"
           :expenses="expenses"

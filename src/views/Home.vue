@@ -71,11 +71,13 @@
           <v-col class="pa-0 pb-2">
             <v-col class="pa-0 pt-lg-2 pt-md-2 mt-2 text-center">
               <available-budgets
+                v-if="accessibleBudgets"
                 id="home-available-budgets"
                 :employee="this.employee"
                 :expenses="this.expenses"
                 :expenseTypes="this.expenseTypes"
                 :fiscalDateView="this.fiscalDateView"
+                :accessibleBudgets="this.accessibleBudgets"
               ></available-budgets>
             </v-col>
           </v-col>
@@ -593,6 +595,7 @@ async function refreshEmployee() {
   this.fiscalDateView = this.getCurrentBudgetYear(this.hireDate);
   this.expenses = await api.getAllAggregateExpenses();
   this.expenseTypes = this.$store.getters.expenseTypes;
+  this.accessibleBudgets = this.$store.getters.budgets;
 } // refreshEmployee
 
 // |--------------------------------------------------|
@@ -634,6 +637,7 @@ export default {
   created,
   data() {
     return {
+      accessibleBudgets: null,
       actualTime: moment().format('X'),
       aggregatedAwards: [],
       aggregatedExpenses: [],

@@ -58,7 +58,7 @@ export async function updateStoreExpenseTypes() {
     let expenseTypes = await api.getItems(api.EXPENSE_TYPES);
     this.$store.dispatch('setExpenseTypes', { expenseTypes });
   } else if (employeeRole == 'intern' || employeeRole == 'user') {
-    let expenseTypes = await api.getEmployeeExpenseTypes(user.id);
+    let expenseTypes = await api.getEmployeeExpenseTypes();
     this.$store.dispatch('setExpenseTypes', { expenseTypes });
   }
 } // updateStoreExpenseTypes

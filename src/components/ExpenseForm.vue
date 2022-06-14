@@ -966,6 +966,7 @@ function filteredExpenseTypes() {
           expenseType.text = `${expenseType.budgetName} - $${Number(expenseType.budget).toLocaleString().toString()}`;
           filteredExpType.push(expenseType);
         } else if (this.hasAccess(selectedEmployee, expenseType)) {
+          console.log('hello');
           // add expense type if the employee is selected and has access
           let amount = this.calcAdjustedBudget(selectedEmployee, expenseType); // calculate budget
           expenseType.text = `${expenseType.budgetName} - $${Number(amount).toLocaleString().toString()}`;
