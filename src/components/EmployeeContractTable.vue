@@ -7,6 +7,7 @@
             id="reportsDataType"
             v-model="dataType"
             :items="dataTypes"
+            :filter="customFilter"
             label="Type of Data"
           ></v-autocomplete>
         </v-col>
