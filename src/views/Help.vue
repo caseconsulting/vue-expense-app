@@ -23,7 +23,7 @@
                 <li v-for="(ques, index) in section" :key="ques.title">
                   <div v-if="ques.title && (!ques.employeeRole || canView(ques.employeeRole))" class="pb-1">
                     <body class="italics" :id="section[0] + '-' + index">
-                      <icon name="space-shuttle" /> {{ ques.title }}
+                      <v-icon>mdi-motion</v-icon> {{ ques.title }}
                     </body>
                     {{ ques.body }}
                   </div>

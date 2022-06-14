@@ -5,13 +5,13 @@
       <v-divider></v-divider>
       <div v-for="(item, i) in visibleTiles" :key="i">
         <!-- Grouped Navigation Links -->
-        <v-list-group v-if="item.subItems" :key="item.title" no-action active-class="red--text v-list__tile--active">
+        <v-list-group v-if="item.subItems" :key="item.title" no-action active-class="red--text">
           <template v-slot:activator>
             <!-- Parent Item Icon -->
             <v-list-item-icon class="list-icons">
-              <v-icon :id="item.icon" v-bind:class="{ iconSelected: item.active }" class="navbar-icons">{{
-                item.icon
-              }}</v-icon>
+              <v-icon :id="item.icon" v-bind:class="{ iconSelected: item.active }" class="navbar-icons">
+                {{ item.icon }}
+              </v-icon>
             </v-list-item-icon>
 
             <!-- Parent Item Title -->
@@ -23,7 +23,7 @@
           <v-list-item
             v-for="subItem in item.subItems"
             :key="subItem.title"
-            active-class="red--text v-list__tile--active"
+            active-class="red--text"
             :to="{ name: subItem.route }"
             @click="scrollUp"
           >
@@ -40,7 +40,7 @@
           v-else
           :id="item.icon"
           :key="item.title"
-          active-class="red--text v-list__tile--active"
+          active-class="red--text"
           :to="{ name: item.route }"
           @click="scrollUp"
         >
