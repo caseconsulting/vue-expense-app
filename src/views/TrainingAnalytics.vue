@@ -44,8 +44,8 @@
             <v-col cols="12">
               <v-card color="#565651" dark :href="url.id" target="_blank">
                 <v-row class="ma-1" dense>
-                  <v-col cols="12" sm="3" md="2" xl="1" class="text-center">
-                    <v-avatar class="ma-1" size="100" tile>
+                  <v-col cols="12" sm="3" md="2" xl="1" class="d-flex align-center justify-center">
+                    <v-avatar class="ma-1 iconImage" size="80">
                       <img :src="url.display" :class="{ caseImage: url.isCaseLogo }" @error="changeDisplay(url)" />
                     </v-avatar>
                     <h3 v-if="url.publisher">{{ url.publisher }}</h3>
@@ -289,6 +289,10 @@ export default {
 </script>
 
 <style scoped>
+.iconImage {
+  border-radius: 0.3em;
+}
+
 .caseImage {
   background-color: white;
 }
