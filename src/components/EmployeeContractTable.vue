@@ -14,7 +14,7 @@
           <v-autocomplete
             id="employeesSearch"
             v-model="search"
-            :filter="customFilter"
+            :filter="customEmployeeFilter"
             :items="employees"
             label="Search By Employee Name"
             clearable
@@ -28,6 +28,7 @@
           <v-autocomplete
             v-model="contract"
             :items="contractsDropDown"
+            :filter="customFilter"
             label="Search By Contract"
             clearable
             @change="refreshList()"
@@ -39,6 +40,7 @@
           <v-autocomplete
             v-model="prime"
             :items="primesDropDown"
+            :filter="customFilter"
             label="Search By Prime"
             clearable
             @change="refreshList()"
@@ -50,6 +52,7 @@
             v-model="dataTypeSearch"
             :items="dataTypeDropDown"
             :label="`Search By ${dataType}`"
+            :filter="customFilter"
             clearable
             @change="refreshDataTypeList()"
             @click:clear="dataTypeSearch = null"
@@ -180,14 +183,28 @@ function constructAutoComplete(empData) {
 } // constructAutoComplete
 
 /**
+ * Custom filter for contract autocomplete options.
+ *
+ * @param item - contract object
+ * @param queryText - query to use to filter
+ * @return string - the filtered contract
+ */
+function customFilter(item, queryText) {
+  const query = queryText ? queryText.trim() : '';
+  const contract = item ? item.toLowerCase() : '';
+  const queryContainsContract = contract.indexOf(query.toString().toLowerCase()) >= 0;
+  return queryContainsContract;
+} // customFilter
+
+/**
  * Custom filter for employee autocomplete options.
  *
  * @param item - employee object
  * @param queryText - query to use to filter
  * @return string - the filtered name
  */
-function customFilter(item, queryText) {
-  const query = queryText ? queryText : '';
+function customEmployeeFilter(item, queryText) {
+  const query = queryText ? queryText.trim() : '';
   const nickNameFullName = item.nickname ? `${item.nickname} ${item.lastName}` : '';
   const firstNameFullName = `${item.firstName} ${item.lastName}`;
 
@@ -197,7 +214,7 @@ function customFilter(item, queryText) {
   const queryContainsEmployeeNumber = item.value.toString().indexOf(query.toString()) >= 0;
 
   return queryContainsNickName || queryContainsFirstName || queryContainsEmployeeNumber;
-} // customFilter
+} // customEmployeeFilter
 
 /**
  * sets midAction boolean to false
@@ -526,6 +543,7 @@ export default {
     buildContractsColumn,
     buildJobRolesColumn,
     constructAutoComplete,
+    customEmployeeFilter,
     customFilter,
     employeePath,
     getFullName,
