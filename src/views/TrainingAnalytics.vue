@@ -68,7 +68,7 @@
                         <v-spacer></v-spacer>
                         <div class="mr-2">
                           <span class="subheading hitText">{{ url.hits }}</span>
-                          <icon name="crosshairs" class="hitIcon" scale="1"></icon>
+                          <v-icon class="hitIcon" scale="1">mdi-target</v-icon>
                         </div>
                       </v-col>
                     </v-row>
@@ -300,7 +300,7 @@ export default {
 .hitIcon {
   color: white;
   fill: white;
-  margin-top: 3px;
+  margin-bottom: 3px;
   margin-right: 3px;
   float: right;
 }

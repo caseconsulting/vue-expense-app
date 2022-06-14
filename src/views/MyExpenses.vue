@@ -95,7 +95,7 @@
                 <v-tooltip top>
                   <template v-slot:activator="{ on }">
                     <v-btn value="active" v-on="on" text>
-                      <icon class="mr-1" name="regular/check-circle"></icon>
+                      <v-icon class="mr-1">mdi-check-circle-outline</v-icon>
                     </v-btn>
                   </template>
                   <span>Show Active</span>
@@ -105,7 +105,7 @@
                 <v-tooltip top>
                   <template v-slot:activator="{ on }">
                     <v-btn value="notActive" v-on="on" text>
-                      <icon name="regular/times-circle"></icon>
+                      <v-icon>mdi-close-circle-outline</v-icon>
                     </v-btn>
                   </template>
                   <span>Show Inactive</span>
@@ -130,7 +130,7 @@
                 <v-tooltip top>
                   <template v-slot:activator="{ on }">
                     <v-btn value="reimbursed" v-on="on" text>
-                      <icon class="mr-1" name="regular/check-circle"></icon>
+                      <v-icon class="mr-1">mdi-check-circle-outline</v-icon>
                     </v-btn>
                   </template>
                   <span>Show Reimbursed</span>
@@ -140,7 +140,7 @@
                 <v-tooltip top>
                   <template v-slot:activator="{ on }">
                     <v-btn value="notReimbursed" v-on="on" text>
-                      <icon name="regular/times-circle"></icon>
+                      <v-icon>mdi-close-circle-outline</v-icon>
                     </v-btn>
                   </template>
                   <span>Show Pending</span>
@@ -289,17 +289,14 @@
                       <p v-if="!isEmpty(item.category)"><b>Category: </b>{{ item.category }}</p>
                       <div v-if="isAdmin" class="flagExp">
                         <p>Inactive:</p>
-                        <icon
-                          v-if="useInactiveStyle(item)"
-                          id="marks"
-                          class="mr-1 mx-3"
-                          name="regular/check-circle"
-                        ></icon>
-                        <icon v-else class="mr-1 mx-3" id="marks" name="regular/times-circle"></icon>
+                        <v-icon v-if="useInactiveStyle(item)" id="marks" class="mr-1 mx-3"
+                          >mdi-check-circle-outline</v-icon
+                        >
+                        <v-icon v-else class="mr-1 mx-3" id="marks">mdi-close-circle-outline</v-icon>
                         <br />
                         <p>Show On Feed:</p>
-                        <icon v-if="item.showOnFeed" id="marks" class="mr-1 mx-3" name="regular/check-circle"></icon>
-                        <icon v-else class="mr-1 mx-3" id="marks" name="regular/times-circle"></icon>
+                        <v-icon v-if="item.showOnFeed" id="marks" class="mr-1 mx-3">mdi-check-circle-outline</v-icon>
+                        <v-icon v-else class="mr-1 mx-3" id="marks">close-mdi-circle-outline</v-icon>
                       </div>
                     </div>
                   </v-card-text>

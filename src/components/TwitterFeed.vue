@@ -25,12 +25,9 @@
               class="px-4"
             >
               <v-card flat class="transparent"
-                >{{ tweet.full_text | fixHTMLencoding | removeLink }}&nbsp;<icon
-                  height="12"
-                  width="12"
-                  name="external-link-alt"
-                  color="blue"
-                ></icon>
+                >{{ tweet.full_text | fixHTMLencoding | removeLink }}&nbsp;<v-icon height="12" width="12" color="blue"
+                  >mdi-open-in-new</v-icon
+                >
               </v-card>
             </v-list-item>
           </v-timeline-item>

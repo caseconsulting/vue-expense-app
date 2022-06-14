@@ -9,12 +9,9 @@
           <template v-slot:activator>
             <!-- Parent Item Icon -->
             <v-list-item-icon class="list-icons">
-              <icon
-                :id="item.icon"
-                :name="item.icon"
-                v-bind:class="{ iconSelected: item.active }"
-                class="navbar-icons"
-              ></icon>
+              <v-icon :id="item.icon" v-bind:class="{ iconSelected: item.active }" class="navbar-icons">{{
+                item.icon
+              }}</v-icon>
             </v-list-item-icon>
 
             <!-- Parent Item Title -->
@@ -51,7 +48,7 @@
           <!-- Item Icon -->
 
           <v-list-item-icon class="list-icons">
-            <icon :name="item.icon" v-bind:class="{ iconSelected: item.active }" class="navbar-icons"></icon>
+            <v-icon v-bind:class="{ iconSelected: item.active }" class="navbar-icons">{{ item.icon }}</v-icon>
           </v-list-item-icon>
 
           <!-- Item mTitle -->
@@ -189,29 +186,29 @@ export default {
         },
         {
           title: 'Expenses',
-          icon: 'dollar-sign',
+          icon: 'mdi-currency-usd',
           subItems: [
             {
               title: 'My Budgets',
-              icon: 'hand-holding-usd',
+              icon: 'mdi-hand-coin',
               route: 'myBudgets',
               permission: ['user', 'admin', 'intern', 'manager']
             },
             {
               title: 'My Expenses',
-              icon: 'dollar-sign',
+              icon: 'mdi-currency-usd',
               route: 'expenses',
               permission: ['admin', 'user', 'intern', 'manager']
             },
             {
               title: 'Expense Types',
-              icon: 'book',
+              icon: 'mdi-book',
               route: 'expenseTypes',
               permission: ['admin', 'user', 'manager']
             },
             {
               title: 'Reimbursements',
-              icon: 'desktop',
+              icon: 'mdi-monitor',
               route: 'reimbursements',
               permission: ['admin']
             }
@@ -222,7 +219,7 @@ export default {
         {
           title: 'Employees',
           alias: ['employee'],
-          icon: 'users',
+          icon: 'mdi-account-group',
           route: 'employees',
           permission: ['admin', 'user', 'intern', 'manager'],
           active: false
@@ -230,7 +227,7 @@ export default {
         {
           title: 'Statistics Dashboard',
           alias: ['stats'],
-          icon: 'chart-bar',
+          icon: 'mdi-chart-bar',
           route: 'stats',
           permission: ['admin', 'user', 'intern', 'manager'],
           active: false
@@ -238,28 +235,28 @@ export default {
         {
           title: 'Audits',
           alias: ['audit'],
-          icon: 'clipboard-check',
+          icon: 'mdi-clipboard-check',
           route: 'audits',
           permission: ['admin', 'manager']
         },
         {
           title: 'Reports',
           alias: ['reports'],
-          icon: 'clipboard-list',
+          icon: 'mdi-clipboard-list',
           route: 'reports',
           permission: ['admin', 'user', 'intern', 'manager'],
           active: false
         },
         {
           title: 'Training',
-          icon: 'fire',
+          icon: 'mdi-fire',
           route: 'training',
           permission: ['admin', 'user', 'intern', 'manager'],
           active: false
         },
         {
           title: 'Help',
-          icon: 'life-ring',
+          icon: 'mdi-lifebuoy',
           route: 'help',
           permission: ['admin', 'user', 'intern', 'manager'],
           active: false

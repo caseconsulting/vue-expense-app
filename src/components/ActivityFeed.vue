@@ -54,7 +54,7 @@
                       >
                         <template v-slot:activator="{ on }">
                           <v-btn v-on="on" text icon :href="getURL(item)" target="blank">
-                            <icon class="white--text" :name="item.icon"></icon>
+                            <v-icon class="white--text">{{ item.icon }}</v-icon>
                           </v-btn>
                         </template>
                         <!-- Icon Hover Text -->
@@ -65,7 +65,7 @@
                         <span v-else-if="item.eventScheduled">see event</span>
                       </v-tooltip>
 
-                      <icon class="white--text" :name="item.icon" v-else></icon>
+                      <v-icon class="white--text" v-else>{{ item.icon }}</v-icon>
                     </template>
                     <!-- End Icon -->
 
@@ -81,7 +81,7 @@
                       <v-row dense>
                         <v-col cols="11">{{ item.truncatedText ? item.truncatedText : item.text }}&nbsp;</v-col>
                         <v-col cols="1">
-                          <icon height="12" width="12" name="external-link-alt" color="blue"></icon>
+                          <v-icon height="12" width="12" color="blue">open-in-new</v-icon>
                         </v-col>
                       </v-row>
                     </v-list-item>

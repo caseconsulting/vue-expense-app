@@ -47,7 +47,7 @@
                 <v-tooltip top>
                   <template v-slot:activator="{ on }">
                     <v-btn value="active" v-on="on" text>
-                      <icon class="mr-1" name="regular/check-circle"></icon>
+                      <v-icon class="mr-1">mdi-check-circle-outline</v-icon>
                     </v-btn>
                   </template>
                   <span>Show Active</span>
@@ -57,7 +57,7 @@
                 <v-tooltip top>
                   <template v-slot:activator="{ on }">
                     <v-btn value="notActive" v-on="on" text>
-                      <icon name="regular/times-circle"></icon>
+                      <v-icon>mdi-close-circle-outline</v-icon>
                     </v-btn>
                   </template>
                   <span>Hide Active</span>
@@ -82,7 +82,7 @@
                 <v-tooltip top>
                   <template v-slot:activator="{ on }">
                     <v-btn value="overdraft" v-on="on" text>
-                      <icon class="mr-1" name="regular/check-circle"></icon>
+                      <v-icon class="mr-1">mdi-check-circle-outline</v-icon>
                     </v-btn>
                   </template>
                   <span>Show Overdraft</span>
@@ -92,7 +92,7 @@
                 <v-tooltip top>
                   <template v-slot:activator="{ on }">
                     <v-btn value="noOverdraft" v-on="on" text>
-                      <icon name="regular/times-circle"></icon>
+                      <v-icon>mdi-close-circle-outline</v-icon>
                     </v-btn>
                   </template>
                   <span>Hide Overdraft</span>
@@ -117,7 +117,7 @@
                 <v-tooltip top>
                   <template v-slot:activator="{ on }">
                     <v-btn value="recurring" v-on="on" text>
-                      <icon class="mr-1" name="regular/check-circle"></icon>
+                      <v-icon class="mr-1">mdi-check-circle-outline</v-icon>
                     </v-btn>
                   </template>
                   <span>Show Recurring</span>
@@ -127,7 +127,7 @@
                 <v-tooltip top>
                   <template v-slot:activator="{ on }">
                     <v-btn value="notRecurring" v-on="on" text>
-                      <icon name="regular/times-circle"></icon>
+                      <v-icon>mdi-close-circle-outline</v-icon>
                     </v-btn>
                   </template>
                   <span>Hide Recurring</span>
@@ -152,7 +152,7 @@
                 <v-tooltip top>
                   <template v-slot:activator="{ on }">
                     <v-btn value="receipt" v-on="on" text>
-                      <icon class="mr-1" name="regular/check-circle"></icon>
+                      <v-icon class="mr-1">mdi-check-circle-outline</v-icon>
                     </v-btn>
                   </template>
                   <span>Show Required Receipt</span>
@@ -162,7 +162,7 @@
                 <v-tooltip top>
                   <template v-slot:activator="{ on }">
                     <v-btn value="noReceipt" v-on="on" text>
-                      <icon name="regular/times-circle"></icon>
+                      <v-icon>mdi-close-circle-outline</v-icon>
                     </v-btn>
                   </template>
                   <span>Hide Required Receipt</span>
@@ -284,28 +284,28 @@
                       <v-row>
                         <v-col cols="12" sm="6" class="flag py-0">
                           <p>Pro-rated:</p>
-                          <icon v-if="item.proRated" id="marks" class="mr-1" name="regular/check-circle"></icon>
-                          <icon v-else class="mr-1" id="marks" name="regular/times-circle"></icon>
+                          <v-icon v-if="item.proRated" id="marks" class="mr-1">mdi-check-circle-outline</v-icon>
+                          <v-icon v-else class="mr-1" id="marks">mdi-close-circle-outline</v-icon>
                         </v-col>
                         <v-col cols="12" sm="6" class="flag py-0">
                           <p>Overdraft Allowed:</p>
-                          <icon v-if="item.odFlag" id="marks" class="mr-1" name="regular/check-circle"></icon>
-                          <icon v-else class="mr-1" id="marks" name="regular/times-circle"></icon>
+                          <v-icon v-if="item.odFlag" id="marks" class="mr-1">mdi-check-circle-outline</v-icon>
+                          <v-icon v-else class="mr-1" id="marks">mdi-close-circle-outline</v-icon>
                         </v-col>
                         <v-col cols="12" sm="6" class="flag py-0">
                           <p>Recurring:</p>
-                          <icon v-if="item.recurringFlag" id="marks" class="mr-1" name="regular/check-circle"></icon>
-                          <icon v-else class="mr-1" id="marks" name="regular/times-circle"></icon>
+                          <v-icon v-if="item.recurringFlag" id="marks" class="mr-1">mdi-check-circle-outline</v-icon>
+                          <v-icon v-else class="mr-1" id="marks">mdi-close-circle-outline</v-icon>
                         </v-col>
                         <v-col cols="12" sm="6" class="flag py-0">
                           <p>Receipt Required:</p>
-                          <icon v-if="item.requiredFlag" id="marks" class="mr-1" name="regular/check-circle"></icon>
-                          <icon v-else class="mr-1" id="marks" name="regular/times-circle"></icon>
+                          <v-icon v-if="item.requiredFlag" id="marks" class="mr-1">mdi-check-circle-outline</v-icon>
+                          <v-icon v-else class="mr-1" id="marks">mdi-close-circle-outline</v-icon>
                         </v-col>
                         <v-col cols="12" sm="6" class="flag py-0">
                           <p>Inactive:</p>
-                          <icon v-if="item.isInactive" id="marks" class="mr-1" name="regular/check-circle"></icon>
-                          <icon v-else class="mr-1" id="marks" name="regular/times-circle"></icon>
+                          <v-icon v-if="item.isInactive" id="marks" class="mr-1">mdi-check-circle-outline</v-icon>
+                          <v-icon v-else class="mr-1" id="marks">mdi-close-circle-outline</v-icon>
                         </v-col>
                       </v-row>
                       <!-- End Flags -->
@@ -343,7 +343,7 @@
                                           :src="employee.avatar"
                                           @error="changeAvatar(employee)"
                                         />
-                                        <icon class="user-circle" name="user-circle" v-else></icon>
+                                        <v-icon class="user-circle" name="user-circle" v-else></v-icon>
                                       </v-list-item-avatar>
 
                                       <!-- Employee Name -->

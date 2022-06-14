@@ -276,7 +276,7 @@ async function createEvents() {
         }
         if (anniversary.isSame(hireDate, 'day')) {
           event.text = a.firstName + ' ' + a.lastName + ' has joined the Case Consulting team!'; //new hire message
-          event.icon = 'user-plus';
+          event.icon = 'mdi-account-plus';
           event.type = 'New Hire';
           event.newCampfire = 'https://3.basecamp.com/3097063/buckets/171415/chats/29039726';
         } else {
@@ -291,7 +291,7 @@ async function createEvents() {
               anniversary.diff(hireDate, 'year') +
               ' years at Case Consulting!';
           }
-          event.icon = 'glass-cheers';
+          event.icon = 'mdi-party-popper';
           event.type = 'Anniversary';
           event.congratulateCampfire = 'https://3.basecamp.com/3097063/buckets/171415/chats/29039726';
         }
@@ -334,7 +334,7 @@ async function createEvents() {
       } else {
         event.text = getEmployeePreferredName(b) + ' ' + b.lastName + "'s" + ' birthday!';
       }
-      event.icon = 'birthday-cake';
+      event.icon = 'mdi-cake-variant';
       event.type = 'Birthday';
       event.color = 'orange';
       event.daysFromToday = now.startOf('day').diff(birthday.startOf('day'), 'days');
@@ -362,7 +362,7 @@ async function createEvents() {
       event.daysFromToday = now.startOf('day').diff(reimbursedDate.startOf('day'), 'days');
       if (a.budgetName === 'High Five') {
         event.congratulateCampfile = a.campfire;
-        event.icon = 'hand-holding-usd';
+        event.icon = 'mdi-hands-pray';
         event.type = 'High Five';
         event.color = '#167c80'; // like a dark teal kinda color
         const recipient = _.find(this.employees, (e) => {
@@ -373,12 +373,12 @@ async function createEvents() {
         } a High Five: ${a.note}`;
       } else if (a.recipient) {
         event.congratulateCampfire = a.campfire;
-        event.icon = 'thumbs-up';
+        event.icon = 'mdi-thumbs-up';
         event.type = 'Congratulate';
         event.color = 'purple';
       } else {
         event.campfire = a.campfire;
-        event.icon = 'dollar-sign';
+        event.icon = 'mdi-currency-usd';
         event.type = 'Expense';
         event.color = 'green';
       }
@@ -408,7 +408,7 @@ async function createEvents() {
     } else {
       event.text = `${a.title} starts today until ${endDate.format('LL')}!`;
     }
-    event.icon = 'calendar-alt';
+    event.icon = 'mdi-calendar';
     event.type = 'Event';
     event.daysFromToday = now.startOf('day').diff(startDate.startOf('day'), 'days');
     if (event.daysFromToday < -6) {
@@ -428,7 +428,7 @@ async function createEvents() {
     // get award information
     const dateSubmitted = moment(a.dateSubmitted || a.dateReceived);
     let award = {
-      icon: 'fire',
+      icon: 'mdi-fire',
       color: '#f9c64e',
       type: 'Award',
       daysFromToday: moment().startOf('day').diff(dateSubmitted.startOf('day'), 'days'),

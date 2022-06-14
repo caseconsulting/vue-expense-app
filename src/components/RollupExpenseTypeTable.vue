@@ -121,7 +121,7 @@
             fixed
             class="reimburse_button"
           >
-            <icon name="dollar-sign"></icon>
+            <v-icon>mdi-currency-usd</v-icon>
           </v-btn>
         </v-fab-transition>
       </v-container>

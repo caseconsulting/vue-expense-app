@@ -43,7 +43,7 @@
               <v-tooltip top>
                 <template v-slot:activator="{ on }">
                   <v-btn value="full" id="full" v-on="on" text>
-                    <icon class="mr-1" name="clock" color="black"></icon>
+                    <v-icon class="mr-1" color="black">mdi-clock-outline</v-icon>
                   </v-btn>
                 </template>
                 <span>Full Time</span>
@@ -53,7 +53,7 @@
               <v-tooltip top>
                 <template v-slot:activator="{ on }">
                   <v-btn value="part" id="part" v-on="on" text>
-                    <icon name="regular/clock" color="black"></icon>
+                    <v-icon color="black">mdi-progress-clock</v-icon>
                   </v-btn>
                 </template>
                 <span>Part Time</span>
@@ -63,7 +63,7 @@
               <v-tooltip top>
                 <template v-slot:activator="{ on }">
                   <v-btn value="inactive" id="inactive" v-on="on" text>
-                    <icon name="regular/stop-circle" color="black"></icon>
+                    <v-icon color="black">mdi-stop-circle-outline</v-icon>
                   </v-btn>
                 </template>
                 <span>Inactive</span>

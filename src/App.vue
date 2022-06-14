@@ -56,7 +56,7 @@
             icon
             target="_blank"
           >
-            <icon :name="link.icon"></icon>
+            <v-icon>{{ link.icon }}</v-icon>
           </v-btn>
         </v-item-group>
 
@@ -98,7 +98,7 @@
             <hr role="separator" aria-orientation="horizontal" class="v-divider theme--light" :inset="inset" vertical />
             <div class="v-subheader theme--light">Social</div>
             <v-list-item v-for="link in mediaLinks" :key="link.name" :href="link.link" icon target="_blank">
-              <icon :name="link.icon"></icon>
+              <v-icon large>{{ link.icon }}</v-icon>
               <span class="mr-2"> </span>
               <v-list-item-title> {{ link.name }}</v-list-item-title>
             </v-list-item>
@@ -408,11 +408,11 @@ export default {
       }
     ],
     mediaLinks: [
-      { name: 'Github', link: 'https://github.com/caseconsulting', icon: 'brands/github' },
-      { name: 'LinkedIn', link: 'https://linkedin.com/company/case-consulting-inc', icon: 'brands/linkedin' },
-      { name: 'Youtube', link: 'https://www.youtube.com/channel/UC_oJY4OrOpLNrIBAN7Y-9fA', icon: 'brands/youtube' },
-      { name: 'Twitter', link: 'https://twitter.com/consultwithcase?lang=en', icon: 'brands/twitter' },
-      { name: 'Facebook', link: 'https://www.facebook.com/ConsultwithCase/', icon: 'brands/facebook' }
+      { name: 'Github', link: 'https://github.com/caseconsulting', icon: 'mdi-github' },
+      { name: 'LinkedIn', link: 'https://linkedin.com/company/case-consulting-inc', icon: 'mdi-linkedin' },
+      { name: 'Youtube', link: 'https://www.youtube.com/channel/UC_oJY4OrOpLNrIBAN7Y-9fA', icon: 'mdi-youtube' },
+      { name: 'Twitter', link: 'https://twitter.com/consultwithcase?lang=en', icon: 'mdi-twitter' },
+      { name: 'Facebook', link: 'https://www.facebook.com/ConsultwithCase/', icon: 'mdi-facebook' }
     ],
     version: null
   }),
