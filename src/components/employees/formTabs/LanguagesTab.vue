@@ -288,7 +288,7 @@ export default {
         'Wu'
       ],
       proficiencyTypes: [
-        'Basic - Most basic words that everyone uses',
+        'Basic - most basic words that everyone uses',
         'Personal - words you know depending on your day-to-day activities (experiences, work, country, friends)',
         'Native-like - ability to use the language like a native speaker',
         'Literacy - fluency and broad vocabulary associated with high levels of education'
