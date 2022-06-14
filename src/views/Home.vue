@@ -248,6 +248,7 @@ async function createEvents() {
   this.scheduleEntries = _.flatten(eventData.schedules);
   this.aggregatedExpenses = eventData.expenses;
   this.aggregatedAwards = this.getEmployeeAwards();
+  this.aggregatedCerts = this.getEmployeeCerts();
 
   //we want to use their nicknames if they have one
   this.employees.forEach((employee) => {
@@ -446,7 +447,28 @@ async function createEvents() {
     return wantToDisplay ? award : null;
   });
 
-  let mergedEventsList = [...anniversaries, ...birthdays, ...expenses, ...schedules, ...awards]; // merges lists
+  // generate certs
+  let certs = _.map(this.aggregatedCerts, (c) => {
+    // get cert information
+    const dateSubmitted = moment(c.dateSubmitted || c.dateReceived);
+    let cert = {
+      icon: 'clipboard-check',
+      color: '#3C7DD0',
+      type: 'Certification',
+      daysFromToday: moment().startOf('day').diff(dateSubmitted.startOf('day'), 'days'),
+      text: `${getEmployeePreferredName(c.employee)} ${c.employee.lastName} was certified "${c.name}"`,
+      congratulateCampfire: 'https://3.basecamp.com/3097063/buckets/171415/chats/29039726'
+    };
+    // date formatting
+    cert.date = dateSubmitted.format('MMM YYYY'); // default
+    const withinSixDays = dateSubmitted.isAfter(moment().subtract(6, 'days')) && dateSubmitted.isBefore(moment());
+    if (withinSixDays) cert.date = getEventDateMessage(dateSubmitted);
+    // return cert only if we want to display it (ie, if received <6 months ago)
+    const wantToDisplay = moment(c.dateReceived).isAfter(moment().subtract(6, 'months'));
+    return wantToDisplay ? cert : null;
+  });
+
+  let mergedEventsList = [...anniversaries, ...birthdays, ...expenses, ...schedules, ...awards, ...certs]; // merges lists
   this.events = _.sortBy(_.compact(mergedEventsList), 'daysFromToday'); //sorts by days from today
   this.$store.dispatch('setEvents', { events: this.events });
   this.loadingEvents = false;
@@ -503,6 +525,30 @@ function getEmployeeAwards() {
 
   // :)
   return awards;
+}
+
+/**
+ * Get certs across all employees. This really could be added to awards
+ * for efficiency if we are looking to speed things up.
+ */
+function getEmployeeCerts() {
+  let certs = []; // will be returned
+
+  // for each employee, get their certs
+  this.employees.forEach((e) => {
+    if (e.certifications) {
+      // add their name to the cert
+      e.certifications.forEach((c) => {
+        c.employee = e;
+      });
+
+      // add the named awards to the return list
+      certs = [...certs, ...e.certifications];
+    }
+  });
+
+  // :)
+  return certs;
 }
 
 /**
@@ -621,6 +667,7 @@ export default {
     createEvents,
     getCurrentBudgetYear,
     getEmployeeAwards,
+    getEmployeeCerts,
     getEmployeePreferredName,
     getEventDateMessage,
     getTweets,

@@ -86,6 +86,13 @@
           </v-menu>
           <!-- End Expiration Date -->
         </v-col>
+        <!-- Hidden field to record the date the user submitted -->
+        <v-date-picker
+          v-show="false"
+          v-model="certification.dateInpoot"
+          no-title
+          @input="award.showReceivedMenu = false"
+        ></v-date-picker>
       </v-row>
       <v-row>
         <v-col cols="12" align="center" justify="center" class="pb-4 mb-2">
@@ -146,6 +153,7 @@ function addCertification() {
   this.editedCertifications.push({
     name: null,
     dateReceived: null,
+    dateSubmitted: moment().startOf('day'),
     expirationDate: null,
     showReceivedMenu: false,
     showExpirationMenu: false
@@ -247,6 +255,7 @@ export default {
           return true;
         }
       },
+      dateSubmitted: moment().startOf('day'),
       editedCertifications: _.cloneDeep(this.model) // stores edited certifications info
     };
   },
