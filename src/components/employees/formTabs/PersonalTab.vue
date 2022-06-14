@@ -60,7 +60,7 @@
         <v-col class="py-0 pr-0" cols="2" xl="2" lg="2" md="3" sm="3" xs="12">
           <v-tooltip bottom slot="append-outer">
             <template v-slot:activator="{ on }">
-              <v-btn class="justify-end mr-2" v-on="on" @click="deletePhoneInput(index)" text icon>
+              <v-btn class="mr-2" v-on="on" @click="deletePhoneInput(index)" text icon>
                 <v-icon class="case-gray">delete</v-icon>
               </v-btn>
             </template>
