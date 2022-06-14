@@ -291,6 +291,8 @@ function getBadgeExpiration(clearances, item) {
 
   item.badgeExpiration = fDate;
 
+  dates = _.orderBy(dates);
+
   return _.join(dates, ' | ');
 }
 
@@ -303,7 +305,8 @@ function getBadgeExpiration(clearances, item) {
  */
 function getClearanceType(clearances, item) {
   let types = [];
-  _.forEach(clearances, (clearance) => {
+  let clearanceList = _.sortBy(clearances, (c) => c.badgeExpirationDate);
+  _.forEach(clearanceList, (clearance) => {
     if (clearance.type) {
       types.push(clearance.type);
     }
