@@ -178,13 +178,13 @@
           </template>
 
           <!-- Last Login Item Slot -->
-          <template v-slot:[`item.lastLogin`]="{ item }">
+          <template v-slot:[`item.lastLoginSeconds`]="{ item }">
             <p
               v-if="userIsAdmin()"
               :class="{ inactiveStyle: isInactive(item), selectFocus: isFocus(item) }"
               class="mb-0"
             >
-              {{ item.lastLogin }}
+              {{ getLoginDate(item) }}
             </p>
           </template>
 
@@ -244,6 +244,7 @@ import ConvertEmployeesToCsv from '@/components/ConvertEmployeesToCsv.vue';
 import DeleteErrorModal from '@/components/modals/DeleteErrorModal.vue';
 import DeleteModal from '@/components/modals/DeleteModal.vue';
 import EmployeeForm from '@/components/employees/EmployeeForm.vue';
+import moment from 'moment-timezone';
 import _ from 'lodash';
 import { getRole } from '@/utils/auth';
 import { isEmpty, isFullTime, isInactive, isPartTime, monthDayYearFormat, storeIsPopulated } from '@/utils/utils';
@@ -341,6 +342,22 @@ function filterEmployees() {
     return fullCheck || partCheck || inactiveCheck;
   });
 } // filterEmployees
+
+/**
+ * Returns a human readable date from item.lastLogin. Stores a sortable int as item.lastLoginSeconds for sorting purposes.
+ * @param {item} item - the employee
+ */
+function getLoginDate(item) {
+  let date = item.lastLogin;
+
+  if (date) {
+    let momentDate = moment(date, 'MMM Do, YYYY HH:mm:ss'); //formatting taken from Callback.vue
+    item.lastLoginSeconds = parseInt(momentDate.format('X')); //seconds
+    date = momentDate.format('MMM Do, YYYY HH:mm'); //what's displayed
+  }
+
+  return date;
+} // getLoginDate
 
 /**
  * handles click event of the employee table entry
@@ -476,7 +493,7 @@ async function created() {
   this.storeIsPopulated ? await this.refreshEmployees() : (this.loading = true);
 
   // remove admin-only actions if user is not admin (by default everything is included)
-  const adminSpecific = ['lastLogin']; // requires admin role, NOT manager
+  const adminSpecific = ['lastLoginSeconds']; // requires admin role, NOT manager
   const adminPermissions = ['actions']; // requires admin level, including manager
   if (!this.hasAdminPermissions()) {
     this.headers = _.filter(this.headers, (header) => {
@@ -585,7 +602,7 @@ export default {
         },
         {
           text: 'Last Login',
-          value: 'lastLogin'
+          value: 'lastLoginSeconds'
         },
         {
           value: 'actions',
@@ -643,6 +660,7 @@ export default {
     displayError,
     employeePath,
     filterEmployees,
+    getLoginDate,
     getRole,
     handleClick,
     hasAdminPermissions,
