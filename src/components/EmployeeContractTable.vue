@@ -64,6 +64,18 @@
             @click:clear="dataTypeSearch = null"
           ></v-autocomplete>
         </v-col>
+        <v-col v-else-if="dataType === 'Security Info'" cols="6" xl="3" lg="3" md="6" class="my-0 pb-3">
+          <v-autocomplete
+            v-model="expDate"
+            :items="dataTypeDropDown"
+            :label="`Search By Badge Expiration`"
+            :filter="customFilter"
+            clearable
+            auto-select-first
+            @change="refreshDataTypeList()"
+            @click:clear="dataTypeSearch = null"
+          ></v-autocomplete>
+        </v-col>
         <v-col>
           <v-checkbox v-model="showInactiveEmployees" label="Show Inactive Users"></v-checkbox>
         </v-col>
@@ -356,7 +368,9 @@ function isFocus(item) {
 function populateDataTypeDropDowns() {
   // reset dropdowwn after each query
   this.dataTypeDropDown = [];
-  if (this.dataType === 'Job Roles') {
+  if (this.dataType === 'Security Info') {
+    this.dataTypeDropDown = ['30 Days', '60 Days', '90 Days'];
+  } else if (this.dataType === 'Job Roles') {
     let employeeJobRoles = _.map(this.employeesInfo, (employee) => employee.jobRole);
     employeeJobRoles = _.compact(employeeJobRoles);
     _.forEach(employeeJobRoles, (jobRole) => this.dataTypeDropDown.push(jobRole));
@@ -405,7 +419,7 @@ function populateDropDowns(employees) {
  * Refresh the filter dropdown to display matched data to the search.
  */
 function refreshDataTypeList() {
-  if (this.dataTypeSearch) {
+  if (this.dataTypeSearch || this.expDate) {
     this.searchDataType();
   } else {
     this.filteredEmployees = this.employeesInfo;
@@ -474,6 +488,20 @@ function searchDataType() {
           return employee.jobRole.includes(this.dataTypeSearch);
         } else {
           return false;
+        }
+      });
+    }
+  } else if (this.dataType === 'Security Info') {
+    if (this.expDate) {
+      let search = this.expDate.split(' ');
+      let num = parseInt(search[0]);
+      let dateType = search[1].toLowerCase();
+      let upperBound = parseInt(moment().add(num, dateType).format('X'));
+      this.filteredEmployees = _.filter(this.employeesInfo, (employee) => {
+        if (employee.badgeExpiration < 100000000000000000) {
+          if (employee.badgeExpiration <= upperBound) {
+            return true;
+          }
         }
       });
     }
@@ -605,6 +633,7 @@ export default {
       employeesInfo: [],
       employeeNames: [],
       expanded: [],
+      expDate: null,
       filteredEmployees: [],
       headers: [
         {
