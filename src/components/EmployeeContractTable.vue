@@ -369,7 +369,7 @@ function populateDataTypeDropDowns() {
   // reset dropdowwn after each query
   this.dataTypeDropDown = [];
   if (this.dataType === 'Security Info') {
-    this.dataTypeDropDown = ['30 Days', '60 Days', '90 Days'];
+    this.dataTypeDropDown = ['30 Days', '60 Days', '90 Days', '180 Days', '365 Days'];
   } else if (this.dataType === 'Job Roles') {
     let employeeJobRoles = _.map(this.employeesInfo, (employee) => employee.jobRole);
     employeeJobRoles = _.compact(employeeJobRoles);
