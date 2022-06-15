@@ -9,6 +9,7 @@
             :items="dataTypes"
             :filter="customFilter"
             label="Type of Data"
+            auto-select-first
           ></v-autocomplete>
         </v-col>
         <v-col cols="6" xl="3" lg="3" md="6" class="my-0 pb-0">
@@ -18,6 +19,7 @@
             :filter="customEmployeeFilter"
             :items="employees"
             label="Search By Employee Name"
+            auto-select-first
             clearable
             @click:clear="
               search = null;
@@ -32,6 +34,7 @@
             :filter="customFilter"
             label="Search By Contract"
             clearable
+            auto-select-first
             @change="refreshList()"
             @click:clear="contract = null"
           >
@@ -44,6 +47,7 @@
             :filter="customFilter"
             label="Search By Prime"
             clearable
+            auto-select-first
             @change="refreshList()"
             @click:clear="prime = null"
           ></v-autocomplete>
@@ -55,6 +59,7 @@
             :label="`Search By ${dataType}`"
             :filter="customFilter"
             clearable
+            auto-select-first
             @change="refreshDataTypeList()"
             @click:clear="dataTypeSearch = null"
           ></v-autocomplete>
