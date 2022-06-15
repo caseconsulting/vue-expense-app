@@ -107,8 +107,9 @@
         <!-- End user image and logout -->
       </v-app-bar>
       <v-main :style="{ padding: getMainPadding() }">
-        <reimbursement-notification-banner v-if="isLoggedIn() && storeIsPopulated"></reimbursement-notification-banner>
         <badge-expiration-banner v-if="isLoggedIn() && storeIsPopulated" :key="badgeKey" />
+        <reimbursement-notification-banner v-if="isLoggedIn() && storeIsPopulated"></reimbursement-notification-banner>
+        <cert-expiration-banner v-if="isLoggedIn() && storeIsPopulated"></cert-expiration-banner>
         <v-container fluid grid-list-lg>
           <router-view></router-view>
         </v-container>
@@ -158,6 +159,7 @@ import MainNav from '@/components/MainNav.vue';
 import TimeOutModal from '@/components/modals/TimeOutModal.vue';
 import TimeOutWarningModal from '@/components/modals/TimeOutWarningModal.vue';
 import BadgeExpirationBanner from '@/components/modals/BadgeExpirationBanner.vue';
+import CertExpirationBanner from '@/components/modals/CertExpirationBanner.vue';
 import floorPlan from '@/assets/img/MakeOfficesfloorplan.jpg';
 import moment from 'moment-timezone';
 import ReimbursementNotificationBanner from './components/modals/ReimbursementNotificationBanner.vue';
@@ -430,6 +432,7 @@ export default {
     TimeOutModal,
     TimeOutWarningModal,
     BadgeExpirationBanner,
+    CertExpirationBanner,
     SwitchRoleModal,
     ReimbursementNotificationBanner
   },
