@@ -283,20 +283,19 @@ function getBadgeExpiration(clearances, item) {
   _.forEach(clearances, (clearance) => {
     if (clearance.badgeExpirationDate) {
       let newDate = parseInt(moment(clearance.badgeExpirationDate).format('X')); // seconds timestamp -> int
+      dates.push(newDate);
       if (newDate < fDate) fDate = newDate;
     }
   });
 
+  dates = _.orderBy(dates);
+
   // used for displaying
-  _.forEach(clearances, (clearance) => {
-    if (clearance.badgeExpirationDate) {
-      dates.push(moment(clearance.badgeExpirationDate).format('MMM Do, YYYY'));
-    }
+  dates = _.map(dates, (date) => {
+    return moment(date, 'X').format('MMM Do, YYYY');
   });
 
   item.badgeExpiration = fDate;
-
-  dates = _.orderBy(dates);
 
   return _.join(dates, ' | ');
 }
