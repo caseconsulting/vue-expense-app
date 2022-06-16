@@ -257,9 +257,6 @@ async function created() {
   this.userId = user.employeeNumber;
 
   this.phoneNumbers = this.editedPersonalInfo.privatePhoneNumbers.concat(this.editedPersonalInfo.publicPhoneNumbers);
-  if (this.phoneNumbers.length === 0) {
-    this.phoneNumbers = [{ type: '', number: '', private: true, valid: true }];
-  }
 } // created
 
 // |--------------------------------------------------|
