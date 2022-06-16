@@ -505,13 +505,18 @@ function searchDataType() {
       let dateType = search[1].toLowerCase();
       let now = parseInt(moment().format('X'));
       let upperBound = parseInt(moment().add(num, dateType).format('X'));
+      let foundEmployees = [];
       this.filteredEmployees = _.filter(this.employeesInfo, (employee) => {
+        // if they have no badge expirations, then badgeExpiration will be the big number
         if (employee.badgeExpiration < 100000000000000000) {
-          if (employee.badgeExpiration > now && employee.badgeExpiration <= upperBound) {
-            return true;
-          }
+          // loop through every employee's clearances and see if any of them are in the selected range
+          _.forEach(employee.clearances, (clearance) => {
+            let clearanceDate = parseInt(moment(clearance.badgeExpirationDate).format('X')); // seconds timestamp -> int
+            if (clearanceDate > now && clearanceDate <= upperBound) foundEmployees.push(employee);
+          });
         }
       });
+      this.filteredEmployees = foundEmployees;
     }
   }
 } // searchDataType
