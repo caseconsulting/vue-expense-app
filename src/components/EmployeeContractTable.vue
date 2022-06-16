@@ -369,7 +369,14 @@ function populateDataTypeDropDowns() {
   // reset dropdowwn after each query
   this.dataTypeDropDown = [];
   if (this.dataType === 'Security Info') {
-    this.dataTypeDropDown = ['30 Days', '60 Days', '90 Days', '180 Days', '365 Days'];
+    let dateRanges = ['30 Days', '60 Days', '90 Days', '180 Days', '365 Days'];
+    _.forEach(dateRanges, (date) => {
+      let search = date.split(' ');
+      let num = parseInt(search[0]);
+      let dateType = search[1].toLowerCase();
+      let futureDate = moment().add(num, dateType).format('MMM Do, YYYY');
+      this.dataTypeDropDown.push(date + ' (' + futureDate + ')');
+    });
   } else if (this.dataType === 'Job Roles') {
     let employeeJobRoles = _.map(this.employeesInfo, (employee) => employee.jobRole);
     employeeJobRoles = _.compact(employeeJobRoles);
@@ -496,10 +503,11 @@ function searchDataType() {
       let search = this.expDate.split(' ');
       let num = parseInt(search[0]);
       let dateType = search[1].toLowerCase();
+      let now = parseInt(moment().format('X'));
       let upperBound = parseInt(moment().add(num, dateType).format('X'));
       this.filteredEmployees = _.filter(this.employeesInfo, (employee) => {
         if (employee.badgeExpiration < 100000000000000000) {
-          if (employee.badgeExpiration <= upperBound) {
+          if (employee.badgeExpiration > now && employee.badgeExpiration <= upperBound) {
             return true;
           }
         }
