@@ -499,6 +499,7 @@ function searchDataType() {
       });
     }
   } else if (this.dataType === 'Security Info') {
+    this.filteredEmployees = [];
     if (this.expDate) {
       let search = this.expDate.split(' ');
       let num = parseInt(search[0]);
@@ -512,7 +513,8 @@ function searchDataType() {
           // loop through every employee's clearances and see if any of them are in the selected range
           _.forEach(employee.clearances, (clearance) => {
             let clearanceDate = parseInt(moment(clearance.badgeExpirationDate).format('X')); // seconds timestamp -> int
-            if (clearanceDate > now && clearanceDate <= upperBound) foundEmployees.push(employee);
+            if (clearanceDate > now && clearanceDate <= upperBound && !foundEmployees.includes(employee))
+              foundEmployees.push(employee);
           });
         }
       });
