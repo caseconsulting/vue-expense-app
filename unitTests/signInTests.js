@@ -17,7 +17,7 @@ describe('testing sign-in', () => {
 
   it('Test redirect to Oauth Signin and then app', (browser) => {
     browser
-      .waitForElementVisible('#custom-button-color') // wait for login button to load
+      .waitForElementVisible('#custom-button-color', 40000) // wait for login button to load
       .click('#custom-button-color') // click that button
       .assert.visible('img.auth0-lock-header-logo') // check that the case logo is there in auth0
       .assert.visible('div.auth0-lock-content') // check that the auth0 login button is visible
@@ -33,7 +33,7 @@ describe('testing sign-in', () => {
 
   it('Test home page loaded after sign-in for users', (browser) => {
     browser
-      .waitForElementVisible('#home-greeting')
+      .waitForElementVisible('#home-greeting', 40000)
       .assert.urlEquals('http://localhost:8080/home')
       .assert.visible('#home-greeting')
       .assert.visible('#t-sheets-data')

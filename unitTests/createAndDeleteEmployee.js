@@ -10,10 +10,10 @@ describe('testing links', () => {
       .click('div.auth0-lock-social-button-text') // click the button
       .waitForElementVisible('input#identifierId') // wait for email box to be visible
       .setValue('input#identifierId', process.env.VUE_APP_AUTH0_EMAIL) // input your email
-      .click('button.VfPpkd-LgbsSe') // click continue button
+      .keys(browser.Keys.ENTER) // click continue button
       .waitForElementVisible('#password') // wait for password field to load
       .setValue('input[type="password"]', process.env.VUE_APP_AUTH0_PASSWORD) // input your password
-      .click('button.VfPpkd-LgbsSe') // click login button
+      .keys(browser.Keys.ENTER) // click continue button
       .waitForElementVisible('h1.d-inline'); // wait for header text 'Case Portal'
   });
 
