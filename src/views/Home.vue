@@ -452,7 +452,7 @@ async function createEvents() {
     // get cert information
     const dateSubmitted = moment(c.dateSubmitted || c.dateReceived);
     let cert = {
-      icon: 'clipboard-check',
+      icon: 'mdi-certificate',
       color: '#3C7DD0',
       type: 'Certification',
       daysFromToday: moment().startOf('day').diff(dateSubmitted.startOf('day'), 'days'),
