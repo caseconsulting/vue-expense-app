@@ -107,9 +107,7 @@
         <!-- End user image and logout -->
       </v-app-bar>
       <v-main :style="{ padding: getMainPadding() }">
-        <badge-expiration-banner v-if="isLoggedIn() && storeIsPopulated" :key="badgeKey" />
-        <reimbursement-notification-banner v-if="isLoggedIn() && storeIsPopulated"></reimbursement-notification-banner>
-        <cert-expiration-banner v-if="isLoggedIn() && storeIsPopulated"></cert-expiration-banner>
+        <notification-banners v-if="isLoggedIn() && storeIsPopulated" />
         <v-container fluid grid-list-lg>
           <router-view></router-view>
         </v-container>
@@ -154,15 +152,13 @@ import {
 } from '@/utils/storeUtils';
 import { v4 as uuid } from 'uuid';
 import api from '@/shared/api';
-import SwitchRoleModal from '@/components/modals/SwitchRoleModal.vue';
-import MainNav from '@/components/MainNav.vue';
-import TimeOutModal from '@/components/modals/TimeOutModal.vue';
-import TimeOutWarningModal from '@/components/modals/TimeOutWarningModal.vue';
-import BadgeExpirationBanner from '@/components/modals/BadgeExpirationBanner.vue';
-import CertExpirationBanner from '@/components/modals/CertExpirationBanner.vue';
 import floorPlan from '@/assets/img/MakeOfficesfloorplan.jpg';
 import moment from 'moment-timezone';
-import ReimbursementNotificationBanner from './components/modals/ReimbursementNotificationBanner.vue';
+import MainNav from '@/components/MainNav.vue';
+import NotificationBanners from './components/modals/NotificationBanners.vue';
+import SwitchRoleModal from '@/components/modals/SwitchRoleModal.vue';
+import TimeOutModal from '@/components/modals/TimeOutModal.vue';
+import TimeOutWarningModal from '@/components/modals/TimeOutWarningModal.vue';
 moment.tz.setDefault('America/New_York');
 
 // |--------------------------------------------------|
@@ -429,12 +425,10 @@ export default {
   },
   components: {
     MainNav,
+    NotificationBanners,
     TimeOutModal,
     TimeOutWarningModal,
-    BadgeExpirationBanner,
-    CertExpirationBanner,
-    SwitchRoleModal,
-    ReimbursementNotificationBanner
+    SwitchRoleModal
   },
   methods: {
     badumbadumdodooodoo,
