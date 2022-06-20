@@ -5,8 +5,8 @@ describe('testing logout from home page', () => {
       .windowMaximize('current') // maximize window
       .waitForElementVisible('#custom-button-color', 30000) // wait for login button to load
       .click('#custom-button-color') // click that button
-      .assert.visible('img.auth0-lock-header-logo') // check that the case logo is there in auth0
-      .assert.visible('div.auth0-lock-content') // check that the auth0 login button is visible
+      .waitForElementVisible('img.auth0-lock-header-logo') // check that the case logo is there in auth0
+      .waitForElementVisible('div.auth0-lock-content') // check that the auth0 login button is visible
       .click('div.auth0-lock-social-button-text') // click the button
       .waitForElementVisible('input#identifierId', 30000) // wait for email box to be visible
       .setValue('input#identifierId', process.env.VUE_APP_AUTH0_EMAIL) // input your email
