@@ -130,7 +130,7 @@
                 <v-tooltip top>
                   <template v-slot:activator="{ on }">
                     <v-btn value="reimbursed" v-on="on" text>
-                      <v-icon class="mr-1">mdi-check-circle-outline</v-icon>
+                      <v-icon id="showReimbursed" class="mr-1">mdi-check-circle-outline</v-icon>
                     </v-btn>
                   </template>
                   <span>Show Reimbursed</span>
@@ -140,7 +140,7 @@
                 <v-tooltip top>
                   <template v-slot:activator="{ on }">
                     <v-btn value="notReimbursed" v-on="on" text>
-                      <v-icon>mdi-close-circle-outline</v-icon>
+                      <v-icon id="showPending">mdi-close-circle-outline</v-icon>
                     </v-btn>
                   </template>
                   <span>Show Pending</span>
