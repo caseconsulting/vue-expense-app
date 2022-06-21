@@ -3,14 +3,18 @@ describe('testing links', () => {
     browser
       .url('http://localhost:8080')
       .waitForElementVisible('#custom-button-color', 30000) // wait for login button to load
+      .pause(500)
       .click('#custom-button-color') // click that button
       .waitForElementVisible('img.auth0-lock-header-logo', 30000) // check that the case logo is there in auth0
       .waitForElementVisible('div.auth0-lock-content', 30000) // check that the auth0 login button is visible
+      .pause(500)
       .click('div.auth0-lock-social-button-text') // click the button
       .waitForElementVisible('input#identifierId', 30000) // wait for email box to be visible
+      .pause(500)
       .setValue('input#identifierId', process.env.VUE_APP_AUTH0_EMAIL) // input your email
       .keys(browser.Keys.ENTER) // click continue button
       .waitForElementVisible('#password', 30000) // wait for password field to load
+      .pause(500)
       .setValue('input[type="password"]', process.env.VUE_APP_AUTH0_PASSWORD) // input your password
       .keys(browser.Keys.ENTER) // click continue button
       .waitForElementVisible('h1.d-inline', 30000); // wait for header text 'Case Portal'
@@ -24,7 +28,7 @@ describe('testing links', () => {
 
   it('Test creating an employee', (browser) => {
     browser
-      .waitForElementVisible('#employeesSearch', 30000) // ----- PERSONAL SECTION ----- //
+      .waitForElementVisible('#employeesSearch', 30000)
       .click('#employeesSearch') // clicks search bar to get rid of full nav bar view
       .waitForElementVisible('#createEmployeeBtn', 30000)
       .click('#createEmployeeBtn')
@@ -32,6 +36,7 @@ describe('testing links', () => {
       .setValue('#employeeFirstName', 'Nightwatch1')
       .waitForElementVisible('#employeeLastName', 30000)
       .setValue('#employeeLastName', 'Tester')
+      .execute('document.getElementById("employeeMiddleBox").click()') // select no middle name
       .waitForElementVisible('#employeeNickname', 30000)
       .setValue('#employeeNickname', 'Jeff')
       .waitForElementVisible('#employeeNumber', 30000)
@@ -47,21 +52,9 @@ describe('testing links', () => {
       .setValue('#agencyIdentificationNumber', 'A45T98')
       .waitForElementVisible('#employeeHireDateField', 30000)
       .setValue('#employeeHireDateField', '06/22/2021')
-      .waitForElementVisible('#contractsTab', 30000) // ----- CONTRACTS SECTION ----- //
-      .click('#contractsTab')
-      .waitForElementVisible('#addContractButton', 30000)
-      .click('#addContractButton')
-      .waitForElementVisible('#employeePrime', 30000)
-      .setValue('#employeePrime', "'Murica")
-      .click('#employeeEmail') // click email to get rid of prime dropdown
-      .waitForElementVisible('#employeeContract', 30000)
-      .setValue('#employeeContract', 'Something Classified')
-      .click('#employeeEmail') // click email to get rid of contract dropdown
-
+      .getLocationInView('#employeeSubmitBtn')
       .waitForElementVisible('#employeeSubmitBtn', 30000)
       .click('#employeeSubmitBtn') // submit employee
-      .waitForElementVisible('#submitYesBtn', 30000)
-      .click('#submitYesBtn') // click yes to confirm
       .waitForElementVisible('#employeeName', 30000)
       .assert.containsText('#employeeName', 'Nightwatch1 Tester'); // name in the employee profile
   });
@@ -72,8 +65,8 @@ describe('testing links', () => {
 
   it('Test deleting an employee', (browser) => {
     browser
-      .waitForElementVisible('#backToEmployeesBtn', 30000)
-      .click('#backToEmployeesBtn')
+      .waitForElementVisible('#backBtn', 30000)
+      .click('#backBtn')
       .waitForElementVisible('#employeesSearch', 30000)
       .click('#employeesSearch')
       .setValue('#employeesSearch', 'Nightwatch1') // filter out all other employees

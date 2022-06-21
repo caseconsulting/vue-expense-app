@@ -25,6 +25,7 @@
       ></v-text-field>
       <v-checkbox
         class="mt-0"
+        id="employeeMiddleBox"
         label="Do not have a middle name"
         v-model="editedEmployee.noMiddleName"
         @click="editedEmployee.middleName = null"
