@@ -3,11 +3,12 @@
     <v-row justify="center" class="pt-2">
       <v-col xl="6" lg="8" sm="12">
         <vue-word-cloud
-          style="height: 30vh; width: inherit"
+          style="height: 25vh; width: inherit"
           :words="words"
           :color="([, weight]) => (weight > 20 ? colors[0] : weight > 10 ? colors[1] : colors[2])"
           font-family="Avenir"
           :spacing="0.7"
+          font-size-ratio="0.2"
         >
           <template v-slot="props">
             <v-tooltip top>
