@@ -4,13 +4,14 @@
       <v-btn
         v-if="!isPrevMonth"
         x-small
+        outlined
         :disabled="loading"
         @click="changeMonthData"
         color="#bc3825"
-        class="white--text pa-3"
+        class="pa-3"
         ><v-icon left dark> mdi-arrow-left-top </v-icon>Hours for {{ prevMonth }} {{ prevYear }}
       </v-btn>
-      <v-btn v-else x-small :disabled="loading" @click="changeMonthData" color="#bc3825" class="white--text pa-3"
+      <v-btn v-else x-small outlined :disabled="loading" @click="changeMonthData" color="#bc3825" class="pa-3"
         >Hours for {{ month }} {{ year }} <v-icon right dark> mdi-arrow-right-top </v-icon>
       </v-btn>
     </div>
