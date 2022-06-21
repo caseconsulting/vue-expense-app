@@ -2,6 +2,7 @@ describe('testing links', () => {
   before((browser) => {
     browser
       .url('http://localhost:8080')
+      .windowMaximize('current') // maximize window
       .waitForElementVisible('#custom-button-color', 30000) // wait for login button to load
       .pause(500)
       .click('#custom-button-color') // click that button
