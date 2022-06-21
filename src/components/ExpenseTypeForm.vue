@@ -64,7 +64,11 @@
             </v-col>
 
             <v-col cols="6">
-              <v-checkbox label="Receipt Required" v-model="editedExpenseType.requiredFlag"></v-checkbox>
+              <v-checkbox
+                label="Receipt Required"
+                id="receiptRequired"
+                v-model="editedExpenseType.requiredFlag"
+              ></v-checkbox>
 
               <v-checkbox label="Mark as Inactive" v-model="editedExpenseType.isInactive"></v-checkbox>
             </v-col>
