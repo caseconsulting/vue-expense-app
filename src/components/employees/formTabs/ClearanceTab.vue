@@ -193,7 +193,11 @@
             v-bind="attrs"
             v-on="on"
             @click:clear="clearance.adjudicationDates = []"
-          ></v-combobox>
+          >
+            <template #selection="{ item }">
+              <v-chip outlined close @click:close="removeAdjDate(item, cIndex)">{{ item }}</v-chip>
+            </template>
+          </v-combobox>
         </template>
         <v-date-picker
           v-model="clearance.adjudicationDates"
@@ -233,7 +237,11 @@
             v-on="on"
             @click:clear="clearance.polyDates = []"
             @input="clearance.showPolyMenu = false"
-          ></v-combobox>
+          >
+            <template #selection="{ item }">
+              <v-chip outlined close @click:close="removePolyDate(item, cIndex)">{{ item }}</v-chip>
+            </template>
+          </v-combobox>
         </template>
         <v-date-picker v-model="clearance.polyDates" :min="clearance.submissionDate" multiple no-title scrollable>
           <v-spacer></v-spacer>
@@ -458,6 +466,20 @@ function populateDropDowns() {
  * @param item - the date to remove
  * @param index - the clearance index
  */
+function removeAdjDate(item, index) {
+  const itemDate = moment(item);
+  this.editedClearances[index].adjudicationDates = this.editedClearances[index].adjudicationDates.filter((date) => {
+    let dateConvert = moment(date);
+    return !dateConvert.isSame(itemDate);
+  });
+} // removeAdjDate
+
+/**
+ * Removes the desired date from the right clearance.
+ *
+ * @param item - the date to remove
+ * @param index - the clearance index
+ */
 function removeBiDate(item, index) {
   const itemDate = moment(item);
   this.editedClearances[index].biDates = this.editedClearances[index].biDates.filter((date) => {
@@ -465,6 +487,20 @@ function removeBiDate(item, index) {
     return !dateConvert.isSame(itemDate);
   });
 } // removeBiDate
+
+/**
+ * Removes the desired date from the right clearance.
+ *
+ * @param item - the date to remove
+ * @param index - the clearance index
+ */
+function removePolyDate(item, index) {
+  const itemDate = moment(item);
+  this.editedClearances[index].polyDates = this.editedClearances[index].polyDates.filter((date) => {
+    let dateConvert = moment(date);
+    return !dateConvert.isSame(itemDate);
+  });
+} // removePolyDate
 
 /**
  * Validate all input fields are valid. Emit to parent the error status.
@@ -586,7 +622,9 @@ export default {
     parseDate,
     parseEventDate,
     populateDropDowns,
+    removeAdjDate,
     removeBiDate,
+    removePolyDate,
     validateFields
   },
   props: ['model', 'validating'],
