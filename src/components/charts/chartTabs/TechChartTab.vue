@@ -6,7 +6,7 @@
           style="height: 25vh; width: inherit"
           :words="words"
           :color="([, weight]) => (weight > 20 ? colors[0] : weight > 10 ? colors[1] : colors[2])"
-          font-family="Avenir"
+          font-family="Avenir, Helvetica, Ariel, sans-serif"
           :spacing="0.7"
           font-size-ratio="0.2"
         >
