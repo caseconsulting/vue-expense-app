@@ -48,7 +48,7 @@ describe('testing links', () => {
       .setValue('#employeeEmail', 'nightwatch')
       .waitForElementVisible('#employeeJobRole', 30000)
       .setValue('#employeeJobRole', 'Software Developer')
-      .click('#employeeEmail') // click email to get rid of job role dropdown
+      // .click('#employeeEmail') // click email to get rid of job role dropdown
       .waitForElementVisible('#agencyIdentificationNumber', 30000)
       .setValue('#agencyIdentificationNumber', 'A45T98')
       .waitForElementVisible('#employeeHireDateField', 30000)
