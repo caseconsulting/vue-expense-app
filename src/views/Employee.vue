@@ -98,7 +98,7 @@
                     color="white"
                     align="right"
                     v-on="on"
-                    id="edit"
+                    id="resume-download"
                     >sim_card_download</v-icon
                   >
                 </div>
