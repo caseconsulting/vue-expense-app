@@ -9,6 +9,7 @@
         :items-per-page="-1"
         class="text-center"
         item-key="id"
+        id="subInfo"
         show-select
         hide-default-footer
         @click:row="expenseClicked"
