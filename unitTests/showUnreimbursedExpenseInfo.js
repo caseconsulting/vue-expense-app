@@ -1,4 +1,5 @@
-// import monthDayYearFormat from '../utils/utils';
+const moment = require('moment-timezone');
+moment.tz.setDefault('America/New_York');
 
 describe('testing links', () => {
   const today = new Date();
@@ -7,8 +8,8 @@ describe('testing links', () => {
   const y = today.getFullYear();
   const data = {
     expenseDesc: 'test desc...',
-    expenseDate: `${m}/${d}/${y}`
-    // realDate: monthDayYearFormat(today)
+    expenseDate: `${m}/${d}/${y}`,
+    realDate: moment(today).format('MMM Do, YYYY')
   };
 
   before((browser) => {
@@ -76,7 +77,11 @@ describe('testing links', () => {
       .useCss()
       .pause(2000) // needed to enter value
       .waitForElementVisible('#filterEmployee', 30000)
-      .setValue('#filterEmployee', 'owl')
+      .setValue('#filterEmployee', 'owl') // filter user
+      .keys(browser.Keys.DOWN_ARROW)
+      .keys(browser.Keys.ENTER)
+      .waitForElementVisible('#filterExpense', 30000)
+      .setValue('#filterExpense', 'activity') // filter expense type
       .keys(browser.Keys.DOWN_ARROW)
       .keys(browser.Keys.ENTER)
       .waitForElementVisible('tbody')
@@ -84,13 +89,21 @@ describe('testing links', () => {
       .click('tbody > tr') //selects expense
       .waitForElementVisible('#money-team', 30000)
       .assert.containsText('#money-team', '$11.00') // check cost
-      .assert.containsText('#purchaseDate-team', data.realDate); // check purchase date
+      .assert.containsText('#purchaseDate-team', data.realDate) // check purchase date
+      .click('#subInfo tbody > tr') //clicks expense info row
+      .waitForElementVisible('#expense-info', 30000) // waits for side info panel
+      .assert.containsText('#expense-info', data.expenseDesc) // check description
+      .assert.containsText('#expense-info', 'Nightwatch Tester') // check employee
+      .assert.containsText('#expense-info', 'Activity Feed Show') // check expense type
+      .assert.containsText('#expense-info', '$11.00') // check cost
+      .assert.containsText('#expense-info', data.realDate); // check date
   });
 
-  it('Test deleting an expense', (browser) => {
+  it('Deleting the expense', (browser) => {
     browser
       .waitForElementVisible('#mdi-currency-usd', 30000)
       .click('#mdi-currency-usd')
+      .click('#mdi-currency-usd') // needed to click correctly
       .useXpath()
       .waitForElementVisible("//*[contains(text(),'My Expenses')]", 30000)
       .click("//*[contains(text(),'My Expenses')]")

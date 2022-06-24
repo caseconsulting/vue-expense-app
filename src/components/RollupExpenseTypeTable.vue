@@ -24,6 +24,7 @@
             v-model="expenseType"
             id="filterExpense"
             item-text="text"
+            id="filterExpense"
             label="Filter by Expense Type"
             clearable
           ></v-autocomplete>
