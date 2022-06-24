@@ -22,6 +22,7 @@
           <v-autocomplete
             :items="expenseTypes"
             v-model="expenseType"
+            id="filterExpense"
             item-text="text"
             label="Filter by Expense Type"
             clearable
@@ -44,7 +45,6 @@
           <!-- Select item slot in data table -->
           <template v-slot:[`item.data-table-select`]="{ item }">
             <v-checkbox
-              id="itemCheckbox"
               :input-value="item.checkBox.all"
               :indeterminate="item.checkBox.indeterminate"
               primary
@@ -53,7 +53,7 @@
                 toggleGroup(item);
                 determineShowOnFeed(item);
               "
-              class="ma-0"
+              class="itemCheckbox ma-0"
             >
             </v-checkbox>
           </template>
@@ -85,12 +85,12 @@
           <!-- Header select slot in data table -->
           <template v-slot:[`header.data-table-select`]>
             <v-checkbox
+              class="ma-0"
               :input-value="mainCheckBox.all"
               :indeterminate="mainCheckBox.indeterminate"
               primary
               hide-details
               @click.stop="toggleAll"
-              class="ma-0"
             >
             </v-checkbox>
           </template>
