@@ -1,3 +1,5 @@
+// import monthDayYearFormat from '../utils/utils';
+
 describe('testing links', () => {
   const today = new Date();
   const m = String(today.getMonth() + 1).padStart(2, '0');
@@ -6,6 +8,7 @@ describe('testing links', () => {
   const data = {
     expenseDesc: 'test desc...',
     expenseDate: `${m}/${d}/${y}`
+    // realDate: monthDayYearFormat(today)
   };
 
   before((browser) => {
@@ -78,7 +81,10 @@ describe('testing links', () => {
       .keys(browser.Keys.ENTER)
       .waitForElementVisible('tbody')
       .pause(3000)
-      .click('tbody > tr'); //selects expense
+      .click('tbody > tr') //selects expense
+      .waitForElementVisible('#money-team', 30000)
+      .assert.containsText('#money-team', '$11.00') // check cost
+      .assert.containsText('#purchaseDate-team', data.realDate); // check purchase date
   });
 
   it('Test deleting an expense', (browser) => {

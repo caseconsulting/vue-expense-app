@@ -40,14 +40,16 @@
 
         <!-- Purchase Date -->
         <template v-slot:[`item.purchaseDate`]="{ item }">
-          <p :class="{ failed: item.failed }" class="mb-0">
+          <p id="purchaseDate-team" :class="{ failed: item.failed }" class="mb-0">
             {{ monthDayYearFormat(item.purchaseDate) }}
           </p>
         </template>
 
         <!-- Description -->
         <template v-slot:[`item.description`]="{ item }">
-          <p :class="{ failed: item.failed }" class="mb-0">{{ item.description | descripFormat }}</p>
+          <p id="description-team" :class="{ failed: item.failed }" class="mb-0">
+            {{ item.description | descripFormat }}
+          </p>
         </template>
 
         <!-- Show on Feed -->
