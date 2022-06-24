@@ -113,8 +113,6 @@ async function refreshBudget() {
   if (this.date == this.getCurrentBudgetYear(this.hireDate)) {
     // viewing active budget year
     budgetsVar = this.accessibleBudgets;
-    // budgetsVar = await api.getAllActiveEmployeeBudgets(this.employee.id);
-    // existingBudgets = await api.getFiscalDateViewBudgets(this.employee.id, this.date);
   } else {
     // get existing budgets for the budget year being viewed
     existingBudgets = await api.getFiscalDateViewBudgets(this.employee.id, this.date);

@@ -195,21 +195,6 @@ function noRemaining(budget) {
 function calcBudgets() {
   let budgetsVar = this.accessibleBudgets;
 
-  // get existing budgets for the budget year being viewed
-  // let existingBudgets = await api.getFiscalDateViewBudgets(this.employee.id, this.fiscalDateView);
-  // // append inactive tag to end of budget expense type name
-  // // the existing budget duplicates will later be removed (order in array comes after active budgets)
-  // console.log(existingBudgets);
-  // _.forEach(existingBudgets, (budget) => {
-  //   budget.expenseTypeName += ' (Inactive)';
-  // });
-
-  // budgetsVar = _.union(budgetsVar, existingBudgets); // combine existing and active budgets
-  // budgetsVar = _.uniqBy(budgetsVar, 'expenseTypeId'); // remove duplicate expense types
-  // budgetsVar = _.sortBy(budgetsVar, (budget) => {
-  //   return budget.expenseTypeName;
-  // }); // sort by expense type name
-
   // prohibit overdraft if employee is not full time
   _.forEach(budgetsVar, (budget) => {
     if (!isFullTime(this.employee)) {
@@ -236,10 +221,6 @@ function calcBudgets() {
       ) || _.some(this.expenses, (e) => e.expenseTypeId == budget.expenseTypeId && _.isEmpty(e.reimbursedDate))
     );
   });
-
-  // console.log(this.expenseTypeData);
-  // console.log(this.expenseTypes);
-  // console.log(this.expenses);
 }
 
 // |--------------------------------------------------|

@@ -270,8 +270,6 @@ async function refreshBudget() {
     let existingBudgets = await api.getFiscalDateViewBudgets(this.employee.id, this.fiscalDateView);
 
     budgetsVar = existingBudgets;
-    // budgetsVar = _.union(budgetsVar, existingBudgets); // combine existing and active budgets
-    // budgetsVar = _.uniqBy(budgetsVar, 'expenseTypeId'); // remove duplicate expense types
   }
   // remove inactive budgets (exception: there contains a pending expense under that budget)
   budgetsVar = _.filter(budgetsVar, (b) => {
