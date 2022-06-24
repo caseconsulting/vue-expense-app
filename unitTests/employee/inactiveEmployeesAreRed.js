@@ -22,7 +22,7 @@ describe('testing sign-in', () => {
     });
   });
 
-  this.tags = ['inactive'];
+  this.tags = ['inactiveAreRed'];
 
   it('Test clicking the inactive button and verifying the employees are red text', (browser) => {
     browser

@@ -21,7 +21,7 @@ describe('testing sign-in', () => {
       .waitForElementVisible('h1.d-inline', 30000); // wait for header text 'Case Portal'
   });
 
-  this.tags = ['job'];
+  this.tags = ['jobExperienceTab'];
 
   it('Test navigating to editing the job experience tab', (browser) => {
     browser

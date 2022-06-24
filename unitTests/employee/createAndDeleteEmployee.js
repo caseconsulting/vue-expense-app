@@ -21,7 +21,7 @@ describe('testing links', () => {
       .waitForElementVisible('h1.d-inline', 30000); // wait for header text 'Case Portal'
   });
 
-  this.tags = ['users'];
+  this.tags = ['createDeleteEmployee'];
 
   it('Test clicking on Employee in nav bar', (browser) => {
     browser.waitForElementVisible('#mdi-account-group', 30000).click('#mdi-account-group'); // clicks the Employees button in nav bar

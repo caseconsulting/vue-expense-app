@@ -34,7 +34,7 @@ describe('testing expense type to show on feed', () => {
     });
   });
 
-  this.tags = ['expenseTypeFeed'];
+  this.tags = ['expenseOnFeed'];
 
   it('Test creating an expenseType', (browser) => {
     browser
