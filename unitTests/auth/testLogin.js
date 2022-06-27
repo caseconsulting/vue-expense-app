@@ -1,19 +1,17 @@
-const auth = require('./utils/login.js');
-const vars = require('./utils/constants.js');
+const utils = require('../utils/utils.js');
+const vars = require('../utils/constants.js');
 
 describe('testing sign-in', () => {
   before((browser) => {
-    browser.windowMaximize('current');
-    browser.url(vars.URL);
-    auth.login(browser);
+    utils.commonBefore(browser);
   });
 
   this.tags = ['login'];
 
   it('Test home page loaded after sign-in for users', (browser) => {
     browser
-      .waitForElementVisible('#home-greeting', 30000)
-      .assert.urlEquals('http://localhost:8080/home')
+      .waitForElementVisible('#home-greeting', vars.WAIT_TIME)
+      .assert.urlEquals(`${vars.URL}/${vars.nav.home.route}`)
       .assert.visible('#home-greeting')
       .assert.visible('#t-sheets-data')
       .assert.visible('#home-available-budgets')

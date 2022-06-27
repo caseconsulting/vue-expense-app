@@ -1,20 +1,18 @@
-const auth = require('./utils/login.js');
-const vars = require('./utils/constants.js');
+const utils = require('../utils/utils.js');
+const vars = require('../utils/constants.js');
 
 describe('testing links', () => {
   before((browser) => {
-    browser.windowMaximize('current');
-    browser.url(vars.URL);
-    auth.login(browser);
+    utils.commonBefore(browser);
   });
 
   this.tags = ['links'];
 
   it('Test Link for basecamp in dropdown menu', (browser) => {
     browser
-      .waitForElementVisible('#links-btn', 30000) //waiting for Link dropdown button to render
+      .waitForElementVisible('#links-btn', vars.WAIT_TIME) //waiting for Link dropdown button to render
       .click('#links-btn')
-      .waitForElementVisible('a[id="https://3.basecamp.com/3097063"]', 30000)
+      .waitForElementVisible('a[id="https://3.basecamp.com/3097063"]', vars.WAIT_TIME)
       .click('a[id="https://3.basecamp.com/3097063"]') //clicks Basecamp link
       .windowHandles(function (result) {
         //switches window
@@ -22,61 +20,64 @@ describe('testing links', () => {
         browser.assert.urlEquals('https://launchpad.37signals.com/bc3/3078589/signin');
         browser.closeWindow();
         browser.switchWindow(result.value[0]);
-        browser.assert.urlEquals('http://localhost:8080/home');
+        utils.navigate(browser, vars.nav.home, false);
       });
   });
 
   it('Test Link for Fidelity in dropdown menu', (browser) => {
     browser
-      .waitForElementVisible('#links-btn', 30000)
+      .waitForElementVisible('#links-btn', vars.WAIT_TIME)
       .click('#links-btn')
-      .waitForElementVisible('a[id="https://nb.fidelity.com/public/nb/default/home"]', 30000)
+      .waitForElementVisible('a[id="https://nb.fidelity.com/public/nb/default/home"]', vars.WAIT_TIME)
       .click('a[id="https://nb.fidelity.com/public/nb/default/home"]')
       .windowHandles(function (result) {
         browser.switchWindow(result.value[1]);
         browser.assert.urlEquals('https://nb.fidelity.com/public/nb/default/home');
         browser.closeWindow();
         browser.switchWindow(result.value[0]);
-        browser.assert.urlEquals('http://localhost:8080/home');
+        utils.navigate(browser, vars.nav.home, false);
       });
   });
 
   it('Test Link for health insurance dropdown menu', (browser) => {
     browser
-      .waitForElementVisible('#links-btn', 30000)
+      .waitForElementVisible('#links-btn', vars.WAIT_TIME)
       .click('#links-btn')
-      .waitForElementVisible('a[id="https://3.basecamp.com/3097063/buckets/179119/messages/4799723388"]', 30000)
+      .waitForElementVisible(
+        'a[id="https://3.basecamp.com/3097063/buckets/179119/messages/4799723388"]',
+        vars.WAIT_TIME
+      )
       .click('a[id="https://3.basecamp.com/3097063/buckets/179119/messages/4799723388"]')
       .windowHandles(function (result) {
         browser.switchWindow(result.value[1]);
         browser.assert.urlEquals('https://launchpad.37signals.com/bc3/3078589/signin');
         browser.closeWindow();
         browser.switchWindow(result.value[0]);
-        browser.assert.urlEquals('http://localhost:8080/home');
+        utils.navigate(browser, vars.nav.home, false);
       });
   });
 
   it('Test Link for QuickBooks Time dropdown menu', (browser) => {
     browser
-      .waitForElementVisible('#links-btn', 30000)
+      .waitForElementVisible('#links-btn', vars.WAIT_TIME)
       .click('#links-btn')
-      .waitForElementVisible('a[id="https://tsheets.intuit.com/page/login_oii"]', 30000)
+      .waitForElementVisible('a[id="https://tsheets.intuit.com/page/login_oii"]', vars.WAIT_TIME)
       .click('a[id="https://tsheets.intuit.com/page/login_oii"]')
       .windowHandles(function (result) {
         browser.switchWindow(result.value[1]);
         browser.assert.urlEquals('https://tsheets.intuit.com/page/login_oii');
         browser.closeWindow();
         browser.switchWindow(result.value[0]);
-        browser.assert.urlEquals('http://localhost:8080/home');
+        utils.navigate(browser, vars.nav.home, false);
       })
       .pause(400);
   });
 
   it('Test Link for ADP dropdown menu', (browser) => {
     browser
-      .waitForElementVisible('#links-btn', 30000)
+      .waitForElementVisible('#links-btn', vars.WAIT_TIME)
       .click('#links-btn')
-      .waitForElementVisible('a[id="https://my.adp.com/"]', 30000)
+      .waitForElementVisible('a[id="https://my.adp.com/"]', vars.WAIT_TIME)
       .click('a[id="https://my.adp.com/"]')
       .windowHandles(function (result) {
         browser.switchWindow(result.value[1]);
@@ -85,31 +86,31 @@ describe('testing links', () => {
         );
         browser.closeWindow();
         browser.switchWindow(result.value[0]);
-        browser.assert.urlEquals('http://localhost:8080/home');
+        utils.navigate(browser, vars.nav.home, false);
       })
       .pause(400);
   });
 
   it('Test Link for Life Insurance dropdown menu', (browser) => {
     browser
-      .waitForElementVisible('#links-btn', 30000)
+      .waitForElementVisible('#links-btn', vars.WAIT_TIME)
       .click('#links-btn')
-      .waitForElementVisible('a[id="https://www.reliancestandard.com/home/"]', 30000)
+      .waitForElementVisible('a[id="https://www.reliancestandard.com/home/"]', vars.WAIT_TIME)
       .click('a[id="https://www.reliancestandard.com/home/"]')
       .windowHandles(function (result) {
         browser.switchWindow(result.value[1]);
         browser.assert.urlEquals('https://www.reliancestandard.com/home/');
         browser.closeWindow();
         browser.switchWindow(result.value[0]);
-        browser.assert.urlEquals('http://localhost:8080/home');
+        utils.navigate(browser, vars.nav.home, false);
       });
   });
 
   it('Test Link for Red Mine dropdown menu', (browser) => {
     browser
-      .waitForElementVisible('#links-btn', 30000)
+      .waitForElementVisible('#links-btn', vars.WAIT_TIME)
       .click('#links-btn')
-      .waitForElementVisible('a[id="https://redmine.consultwithcase.com"]', 30000)
+      .waitForElementVisible('a[id="https://redmine.consultwithcase.com"]', vars.WAIT_TIME)
       .click('a[id="https://redmine.consultwithcase.com"]')
       .windowHandles(function (result) {
         browser.switchWindow(result.value[1]);
@@ -118,87 +119,87 @@ describe('testing links', () => {
         );
         browser.closeWindow();
         browser.switchWindow(result.value[0]);
-        browser.assert.urlEquals('http://localhost:8080/home');
+        utils.navigate(browser, vars.nav.home, false);
       });
   });
 
   it('Test Link for Workspaces at Reston Town Center dropdown menu', (browser) => {
     browser
-      .waitForElementVisible('#links-btn', 30000)
+      .waitForElementVisible('#links-btn', vars.WAIT_TIME)
       .click('#links-btn')
-      .waitForElementVisible('#floorPlan', 30000)
+      .waitForElementVisible('#floorPlan', vars.WAIT_TIME)
       .click('#floorPlan')
       .windowHandles(function (result) {
         browser.switchWindow(result.value[1]);
-        browser.assert.urlEquals('http://localhost:8080/img/MakeOfficesfloorplan.0d9c2602.jpg');
+        browser.assert.urlEquals('http://localhost:8080/img/MakeOfficesfloorplan.14b8e1a3.jpg');
         browser.closeWindow();
         browser.switchWindow(result.value[0]);
-        browser.assert.urlEquals('http://localhost:8080/home');
+        utils.navigate(browser, vars.nav.home, false);
       });
   });
 
   it('Test Link for GitHub', (browser) => {
     browser
-      .waitForElementVisible('#links-btn', 30000)
+      .waitForElementVisible('#links-btn', vars.WAIT_TIME)
       .click('#Github')
       .windowHandles(function (result) {
         browser.switchWindow(result.value[1]);
         browser.assert.urlEquals('https://github.com/caseconsulting');
         browser.closeWindow();
         browser.switchWindow(result.value[0]);
-        browser.assert.urlEquals('http://localhost:8080/home');
+        utils.navigate(browser, vars.nav.home, false);
       });
   });
 
   it('Test Link for LinkedIn', (browser) => {
     browser
-      .waitForElementVisible('#links-btn', 30000)
+      .waitForElementVisible('#links-btn', vars.WAIT_TIME)
       .click('#LinkedIn')
       .windowHandles(function (result) {
         browser.switchWindow(result.value[1]);
         browser.assert.urlContains('case-consulting-inc');
         browser.closeWindow();
         browser.switchWindow(result.value[0]);
-        browser.assert.urlEquals('http://localhost:8080/home');
+        utils.navigate(browser, vars.nav.home, false);
       });
   });
 
   it('Test Link for Youtube', (browser) => {
     browser
-      .waitForElementVisible('#links-btn', 30000)
+      .waitForElementVisible('#links-btn', vars.WAIT_TIME)
       .click('#Youtube')
       .windowHandles(function (result) {
         browser.switchWindow(result.value[1]);
         browser.assert.urlContains('https://www.youtube.com/channel/UC_oJY4OrOpLNrIBAN7Y-9fA');
         browser.closeWindow();
         browser.switchWindow(result.value[0]);
-        browser.assert.urlEquals('http://localhost:8080/home');
+        utils.navigate(browser, vars.nav.home, false);
       });
   });
 
   it('Test Link for Twitter', (browser) => {
     browser
-      .waitForElementVisible('#links-btn', 30000)
+      .waitForElementVisible('#links-btn', vars.WAIT_TIME)
       .click('#Twitter')
       .windowHandles(function (result) {
         browser.switchWindow(result.value[1]);
         browser.assert.urlEquals('https://twitter.com/consultwithcase?lang=en');
         browser.closeWindow();
         browser.switchWindow(result.value[0]);
-        browser.assert.urlEquals('http://localhost:8080/home');
+        utils.navigate(browser, vars.nav.home, false);
       });
   });
 
   it('Test Link for Facebook', (browser) => {
     browser
-      .waitForElementVisible('#links-btn', 30000)
+      .waitForElementVisible('#links-btn', vars.WAIT_TIME)
       .click('#Facebook')
       .windowHandles(function (result) {
         browser.switchWindow(result.value[1]);
         browser.assert.urlEquals('https://www.facebook.com/ConsultwithCase/');
         browser.closeWindow();
         browser.switchWindow(result.value[0]);
-        browser.assert.urlEquals('http://localhost:8080/home');
+        utils.navigate(browser, vars.nav.home, false);
       });
   });
 });

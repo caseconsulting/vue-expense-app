@@ -1,20 +1,14 @@
-const auth = require('./utils/login.js');
-const vars = require('./utils/constants.js');
+const utils = require('../utils/utils.js');
+const vars = require('../utils/constants.js');
 
 describe('testing sign-in', () => {
   before((browser) => {
-    browser.windowMaximize('current');
-    browser.url(vars.URL);
-    auth.login(browser);
+    utils.commonBefore(browser);
   });
 
   this.tags = ['trainingPage'];
 
   it('Test navigate to Training', (browser) => {
-    browser
-      .waitForElementVisible('#mdi-fire')
-      .click('#mdi-fire')
-      .useXpath()
-      .waitForElementVisible("//*[contains(text(),'https://vt.edu')]");
+    utils.navigate(browser, vars.nav.training);
   });
 });

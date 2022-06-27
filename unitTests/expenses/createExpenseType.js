@@ -1,23 +1,15 @@
-const auth = require('./utils/login.js');
-const vars = require('./utils/constants.js');
+const utils = require('../utils/utils.js');
+const vars = require('../utils/constants.js');
 
 describe('testing expense types', () => {
   before((browser) => {
-    browser.windowMaximize('current');
-    browser.url(vars.URL);
-    auth.login(browser);
+    utils.commonBefore(browser);
   });
 
   this.tags = ['createExpenseType'];
 
   it('Test clicking on Expense Types in nav bar', (browser) => {
-    browser
-      .waitForElementVisible('#mdi-currency-usd')
-      .click('#mdi-currency-usd') //expands the expenses menu
-      .useXpath()
-      .waitForElementVisible("//*[contains(text(),'Expense Types')]")
-      .click("//*[contains(text(),'Expense Types')]") //clicks on the expense type button
-      .useCss();
+    utils.navigate(browser, vars.nav.expenses.types);
   });
 
   it('Test creating an expenseType', (browser) => {
@@ -29,34 +21,27 @@ describe('testing expense types', () => {
       .execute('document.getElementById("receiptRequired").click()') // makes receipt not required
       .setValue('#budgetAmount', '99') //inputs value for the budget amount
       .waitForElementVisible('#startDate')
-      .setValue('#startDate', '06/02/2021') //inputs the start date
+      .setValue('#startDate', utils.date.lastYear()) //inputs the start date
       .waitForElementVisible('#endDate')
-      .setValue('#endDate', '06/15/2021') //inputs the end date
+      .setValue('#endDate', utils.date.tomorrow()) //inputs the end date
       .waitForElementVisible('#description')
       .setValue('#description', 'pls pls y u do dis') //inputs the description
       .waitForElementVisible('#submitButton')
       .click('#submitButton') //submits the expense type
       .waitForElementVisible('#submitYesBtn')
       .click('#submitYesBtn') //confirms the submission
-      .waitForElementVisible('span.headline', 30000) //validates the confirmation pop-up after submitting
+      .waitForElementVisible('span.headline', vars.WAIT_TIME) //validates the confirmation pop-up after submitting
       .assert.containsText('span.headline', 'Item was successfully submitted!');
   });
 
   it('Test clicking on My Expenses in nav bar', (browser) => {
-    browser
-      .waitForElementVisible('#mdi-currency-usd')
-      .click('#mdi-currency-usd')
-      .click('#mdi-currency-usd') //expands the expenses menu
-      .useXpath()
-      .waitForElementVisible("//*[contains(text(),'My Expenses')]")
-      .click("//*[contains(text(),'My Expenses')]") //goes to the my expenses page
-      .useCss();
+    utils.navigate(browser, vars.nav.expenses.expenses);
   });
 
   it('Test creating an expense', (browser) => {
     browser
       .waitForElementVisible('#employeeName') // selects the Employee input box
-      .setValue('#employeeName', 'Owl Tester')
+      .setValue('#employeeName', utils.getName('nick'))
       .keys(browser.Keys.DOWN_ARROW) // select first dropdown option
       .keys(browser.Keys.ENTER) // enter to confirm the first auto-fill option
       .waitForElementVisible('#expenseType')
@@ -68,48 +53,44 @@ describe('testing expense types', () => {
       .waitForElementVisible('#description')
       .setValue('#description', '25 buckaroos') //inputs the description
       .waitForElementVisible('#purchaseDate')
-      .setValue('#purchaseDate', '06/10/2021') //make cause error in future bc it may be invalid
+      .setValue('#purchaseDate', utils.date.today()) //make cause error in future bc it may be invalid
       .waitForElementVisible('#notes')
       .setValue('#notes', 'test') //inputs a value to the notes field
       .waitForElementVisible('#submitButton')
       .click('#submitButton') //clicks on the submit button
       .waitForElementVisible('#submitYesBtn')
       .click('#submitYesBtn') //confirms the submission
-      .waitForElementVisible('span.headline', 30000) //validates the confirmation pop-up after submitting
-      .assert.containsText('span.headline', 'Item was successfully submitted!');
+      .waitForElementVisible('span.headline', vars.WAIT_TIME) //validates the confirmation pop-up after submitting
+      .assert.containsText('span.headline', 'Item was successfully submitted!')
+      .pause(5500);
   });
 
   it('Test deleting an expense', (browser) => {
     browser
-      .waitForElementVisible('#employeeIdFilter', 30000)
-      .setValue('#employeeIdFilter', 'Owl Tester')
+      .waitForElementVisible('#employeeIdFilter', vars.WAIT_TIME)
+      .setValue('#employeeIdFilter', utils.getName('nick'))
       .keys(browser.Keys.DOWN_ARROW) // select first dropdown option
       .keys(browser.Keys.ENTER) // enter to confirm the first auto-fill option
-      .waitForElementVisible('#delete', 30000) //waits for the delete icon
+      .waitForElementVisible('#delete', vars.WAIT_TIME) //waits for the delete icon
       .click('#delete') //clicks the delete icon
-      .waitForElementVisible('#confirmDelete', 30000) //waits for delete modal to appear
+      .waitForElementVisible('#confirmDelete', vars.WAIT_TIME) //waits for delete modal to appear
       .click('#confirmDelete')
-      .pause(3000); // give app time to delete expense so you can delete expense type
+      .waitForElementVisible('span.headline', vars.WAIT_TIME) //validates the confirmation pop-up after submitting
+      .assert.containsText('span.headline', 'Item was successfully deleted!')
+      .pause(5500); // give app time to delete expense so you can delete expense type
   });
 
   it('Test clicking on Expense Types in nav bar again', (browser) => {
-    browser
-      .waitForElementVisible('#mdi-currency-usd', 30000)
-      .click('#mdi-currency-usd')
-      .click('#mdi-currency-usd') //expands the expenses menu
-      .useXpath()
-      .waitForElementVisible("//*[contains(text(),'Expense Types')]", 30000) //Clicks on the Expense Types button
-      .click("//*[contains(text(),'Expense Types')]")
-      .useCss();
+    utils.navigate(browser, vars.nav.expenses.types);
   });
 
   it('Test deleting an expense type', (browser) => {
     browser
-      .waitForElementVisible('#search', 30000)
+      .waitForElementVisible('#search', vars.WAIT_TIME)
       .setValue('#search', 'Testing createExpenseType') //Accessing Filter By Name
-      .waitForElementVisible('#delete', 30000) //waits for the delete icon
+      .waitForElementVisible('#delete', vars.WAIT_TIME) //waits for the delete icon
       .click('#delete') //clicks the delete icon
-      .waitForElementVisible('#confirmDelete', 30000) //waits for delete modal to appear
+      .waitForElementVisible('#confirmDelete', vars.WAIT_TIME) //waits for delete modal to appear
       .click('#confirmDelete'); //selects the delete button in the pop-up
   });
 });

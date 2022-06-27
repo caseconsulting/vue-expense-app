@@ -1,61 +1,60 @@
-const auth = require('./utils/login.js');
-const vars = require('./utils/constants.js');
+const utils = require('../utils/utils.js');
+const vars = require('../utils/constants.js');
 
 describe('testing sign-in', () => {
   before((browser) => {
     browser.windowMaximize('current');
     browser.url(vars.URL);
-    auth.login(browser);
+    utils.login(browser);
   });
 
   this.tags = ['job'];
 
   it('Test navigating to editing the job experience tab', (browser) => {
+    utils.navigate(browser, vars.nav.employees);
     browser
-      .waitForElementVisible('#mdi-account-group')
-      .click('#mdi-account-group') //goes to employees page
       .waitForElementVisible('#employeesSearch')
       .click('#employeesSearch')
-      .setValue('#employeesSearch', 'owl')
-      .waitForElementVisible('tbody')
-      .pause(3000)
+      .setValue('#employeesSearch', vars.tester.nickName)
+      .waitForElementVisible('tbody > tr', vars.WAIT_TIME)
+      .pause(vars.LONG_PAUSE)
       .click('tbody > tr') //selects user test new person
       .useXpath()
-      .waitForElementVisible("//a[text()='Job Experience']", 30000)
+      .waitForElementVisible("//a[text()='Job Experience']", vars.WAIT_TIME)
       .click("//a[text()='Job Experience']")
       .useCss()
-      .waitForElementVisible('#edit', 30000)
+      .waitForElementVisible('#edit', vars.WAIT_TIME)
       .click('#edit'); //ends at the job form
   });
 
   it('Test adding jobs and positions', (browser) => {
     browser
-      .waitForElementVisible('#add-job', 30000)
+      .waitForElementVisible('#add-job', vars.WAIT_TIME)
       .click('#add-job')
       .click('#add-job')
-      .waitForElementVisible('#add-pos-0', 30000)
+      .waitForElementVisible('#add-pos-0', vars.WAIT_TIME)
       .click('#add-pos-0')
-      .waitForElementVisible('#comp-0', 30000) //first job, first position
+      .waitForElementVisible('#comp-0', vars.WAIT_TIME) //first job, first position
       .click('#comp-0')
       .setValue('#comp-0', 'test inc')
-      .waitForElementVisible('#pos-field-0-0', 30000)
+      .waitForElementVisible('#pos-field-0-0', vars.WAIT_TIME)
       .click('#pos-field-0-0')
       .setValue('#pos-field-0-0', 'test1')
       .waitForElementVisible('#start-field-0-0')
       .click('#start-field-0-0')
-      .setValue('#start-field-0-0', '12/2019')
+      .setValue('#start-field-0-0', utils.date.yearsDiff(-3))
       .waitForElementVisible('#end-field-0-0')
       .click('#end-field-0-0')
-      .setValue('#end-field-0-0', '12/2020')
+      .setValue('#end-field-0-0', utils.date.yearsDiff(-2))
       .waitForElementVisible('#pos-field-0-1') //first job, second position
       .click('#pos-field-0-1')
       .setValue('#pos-field-0-1', 'test2')
       .waitForElementVisible('#start-field-0-1')
       .click('#start-field-0-1')
-      .setValue('#start-field-0-1', '12/2018')
+      .setValue('#start-field-0-1', utils.date.yearsDiff(-4))
       .waitForElementVisible('#end-field-0-1')
       .click('#end-field-0-1')
-      .setValue('#end-field-0-1', '12/2019')
+      .setValue('#end-field-0-1', utils.date.yearsDiff(-3))
       .waitForElementVisible('#comp-1') //second job, first position
       .click('#comp-1')
       .setValue('#comp-1', 'test co')
@@ -64,10 +63,10 @@ describe('testing sign-in', () => {
       .setValue('#pos-field-1-0', 'test1')
       .waitForElementVisible('#start-field-1-0')
       .click('#start-field-1-0')
-      .setValue('#start-field-1-0', '12/2016')
+      .setValue('#start-field-1-0', utils.date.yearsDiff(-6))
       .waitForElementVisible('#end-field-1-0')
       .click('#end-field-1-0')
-      .setValue('#end-field-1-0', '12/2017')
+      .setValue('#end-field-1-0', utils.date.yearsDiff(-5))
       .click('#employeeSubmitBtn')
       .useXpath()
       .assert.visible("//*[contains(text(),'test1')]")

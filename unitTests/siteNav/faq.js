@@ -1,20 +1,21 @@
-const auth = require('./utils/login.js');
-const vars = require('./utils/constants.js');
+const utils = require('../utils/utils.js');
+const vars = require('../utils/constants.js');
 
 describe('testing links', () => {
   before((browser) => {
-    browser.windowMaximize('current');
-    browser.url(vars.URL);
-    auth.login(browser);
+    utils.commonBefore(browser);
   });
 
   this.tags = ['faqPage'];
 
   it('Test clicking on Employee in nav bar', (browser) => {
-    browser.waitForElementVisible('#mdi-account-group').click('#mdi-lifebuoy'); // clicks the Employees button in nav bar
+    utils.navigate(browser, vars.nav.help);
   });
 
   it('Test clicking on Hours expansion panel', (browser) => {
-    browser.waitForElementVisible('#help-title').click('#Hours').waitForElementVisible('#Hours-2');
+    browser
+      .waitForElementVisible('#help-title', vars.WAIT_TIME)
+      .click('#Hours')
+      .waitForElementVisible('#Hours-2', vars.WAIT_TIME);
   });
 });
