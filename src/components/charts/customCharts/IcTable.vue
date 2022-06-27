@@ -14,6 +14,10 @@
         </v-toolbar>
       </template>
     </v-data-table>
+    <v-radio-group row id="radioGroup" v-model="filterSelection" class="ma-0 text-center">
+      <v-radio v-for="item in filterItems" :key="item" :label="item" :value="item"></v-radio>
+      <v-checkbox v-model="showInterns" :label="`Show Interns`"></v-checkbox>
+    </v-radio-group>
   </div>
 </template>
 
@@ -51,14 +55,32 @@ function fillData() {
 
   // access store
   this.employees = this.$store.getters.employees;
-  // filter out inactive employees (including info) and intern
+
+  // filter out interns for Total Employees
+  this.employeesOnly = this.employees.filter(
+    (emp) => emp.workStatus != 0 && (emp.jobRole ? emp.jobRole.toLowerCase() != 'intern' : true)
+  );
+
+  // find inactive employees (including info) and intern
   let interns = this.employees.filter(
     (emp) => emp.workStatus != 0 && (emp.jobRole ? emp.jobRole.toLowerCase() == 'intern' : false)
   );
 
-  this.employees = this.employees.filter(
-    (emp) => emp.workStatus != 0 && (emp.jobRole ? emp.jobRole.toLowerCase() != 'intern' : true)
-  );
+  // filter out inactive and interns if selected
+  if (!this.showInterns) {
+    this.employees = this.employees.filter(
+      (emp) => emp.workStatus != 0 && (emp.jobRole ? emp.jobRole.toLowerCase() != 'intern' : true)
+    );
+  }
+
+  // filter out employees based on radio selection
+  if (this.filterSelection === 'Full Time') {
+    this.employees = this.employees.filter((emp) => emp.workStatus === 100);
+  } else if (this.filterSelection === 'Part Time') {
+    this.employees = this.employees.filter((emp) => emp.workStatus > 0 && emp.workStatus < 100);
+  } else {
+    this.employees = this.employees.filter((emp) => emp.workStatus != 0);
+  }
 
   this.employees.forEach((emp) => {
     if (emp.icTimeFrames) {
@@ -103,10 +125,11 @@ function fillData() {
     }
   });
 
+  console.log(totalYears + '/' + this.employees.length);
   let averageYoE = totalYears / this.employees.length;
 
   this.tableContents = [
-    { title: 'Total Employees', value: this.employees.length },
+    { title: 'Total Employees', value: this.employeesOnly.length },
     { title: 'Total Interns', value: interns.length },
     { title: 'Company Wide IC Experience', value: totalYears.toFixed(2) + ' Years' },
     { title: 'Average IC Experience per Employee', value: averageYoE.toFixed(2) + ' Years' }
@@ -137,8 +160,12 @@ export default {
     return {
       dataReceived: false,
       employees: null,
+      employeesOnly: null,
       tableContents: null,
-      headers: null
+      headers: null,
+      filterItems: ['All', 'Full Time', 'Part Time'],
+      filterSelection: 'All',
+      showInterns: true
     };
   },
   methods: {
@@ -148,7 +175,19 @@ export default {
   watch: {
     storeIsPopulated: function () {
       if (this.storeIsPopulated) this.fillData();
+    },
+    showInterns: function () {
+      if (this.storeIsPopulated) this.fillData();
+    },
+    filterSelection: function () {
+      if (this.storeIsPopulated) this.fillData();
     }
   }
 };
 </script>
+
+<style>
+#radioGroup {
+  justify-content: center;
+}
+</style>
