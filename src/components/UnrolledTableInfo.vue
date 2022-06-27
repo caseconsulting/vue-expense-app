@@ -112,7 +112,7 @@ function expenseToggle(toggledExpense) {
  */
 function descripFormat(val) {
   // split strings that exceed 250 characters with eclipses
-  return val.length > 250 ? val.substring(0, 250) + '...' : val;
+  return val && val.length > 250 ? val.substring(0, 250) + '...' : val;
 } // descripFormat
 
 // |--------------------------------------------------|
