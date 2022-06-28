@@ -75,7 +75,7 @@
               <v-btn id="logoutBtn" text @click="handleLogout()">Logout</v-btn>
             </v-list-item>
             <v-list-item v-if="environment != 'https://app.consultwithcase.com'">
-              <v-btn text @click="switchRole = true">Switch Role</v-btn>
+              <v-btn text id="switchRoleBtn" @click="switchRole = true">Switch Role</v-btn>
             </v-list-item>
           </v-list>
           <!--In MOBILE VIEW/Smaller Screen sizes display all links under the user image dropdown-->
@@ -87,7 +87,7 @@
               <v-btn text @click="handleLogout()">Logout</v-btn>
             </v-list-item>
             <v-list-item v-if="environment != 'https://app.consultwithcase.com'">
-              <v-btn text @click="switchRole = true">Switch Role</v-btn>
+              <v-btn text id="switchRoleBtn" @click="switchRole = true">Switch Role</v-btn>
             </v-list-item>
             <hr role="separator" aria-orientation="horizontal" class="v-divider theme--light" :inset="inset" vertical />
             <div class="v-subheader theme--light">Company Links</div>
