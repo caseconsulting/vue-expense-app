@@ -1,33 +1,31 @@
 <template>
-  <div class="mx-10 my-5">
-    <v-col v-for="alert in alerts" :key="alert.itemID" id="alert.itemID" class="pa-1" cols="12">
+  <div class="my-5 px-10 justify-center">
+    <v-col v-for="alert in alerts" :key="alert.id" id="alert.id" class="my-1" cols="12">
       <v-alert
-        v-if="alert"
         :type="alert.status"
         :color="alert.color"
-        dense
-        id="alert"
-        justify="center"
-        class="my-1"
+        :id="alert.id"
         :dismissible="alert.closeable"
+        class="my-1"
+        dense
       >
         {{ alert.message }}
         <v-btn
+          :disabled="onPage(alert.handler.page)"
+          @click="handleClick(alert.handler.page, alert.handler.extras)"
           class="right-shift black--text"
           elevation="0"
           color="#f5f5f5"
-          @click="handleClick(alert.handler.page, alert.handler.extras)"
-          :disabled="onPage(alert.handler.page)"
           small
         >
           Go To {{ alert.handler.name }}
         </v-btn>
         <v-btn
+          @click="handleMarkSeen(alert.type, alert.item, alert.id)"
           v-if="!!alert.seenButton"
           class="right-shift black--text mr-2"
           elevation="0"
           color="#f5f5f5"
-          @click="handleMarkSeen(alert.type, alert.itemID)"
           small
         >
           Mark seen
@@ -41,6 +39,7 @@
 import moment from 'moment-timezone';
 import api from '@/shared/api.js';
 import _ from 'lodash';
+import { asyncForEach } from '@/utils/utils.js';
 moment.tz.setDefault('America/New_York');
 
 // |--------------------------------------------------|
@@ -49,12 +48,12 @@ moment.tz.setDefault('America/New_York');
 // |                                                  |
 // |--------------------------------------------------|
 
-async function checkBadges() {
+function checkBadges() {
   if (this.user.clearances != null) {
-    this.user.clearances.forEach(async (clearance) => {
+    this.user.clearances.forEach((clearance) => {
       // determines if a user has a badge expiring within 30 days
       if (clearance.badgeExpirationDate) {
-        const needToShow = moment(clearance.badgeExpirationDate).isBefore(moment().add(30, 'days'));
+        const needToShow = moment(clearance.badgeExpirationDate).isBefore(moment().add(31, 'days'));
         if (needToShow) {
           const expire = moment(clearance.badgeExpirationDate).isBefore(moment()) ? 'expired' : 'is expiring';
           let momentDate = moment(clearance.badgeExpirationDate).format('MMMM Do, YYYY');
@@ -64,11 +63,12 @@ async function checkBadges() {
               page: `employee`,
               extras: { id: `${this.user.employeeNumber}` }
             },
-            closeable: true,
+            closeable: false,
             status: 'error',
             color: '#f27311',
             message: `Badge ${expire} on ${momentDate} for clearance: ${clearance.type}`,
-            itemID: clearance.id
+            id: this.randId(),
+            item: clearance
           });
         }
       }
@@ -76,14 +76,14 @@ async function checkBadges() {
   }
 } // checkBadges
 
-async function checkCertifications() {
+function checkCertifications() {
   if (this.user.certifications != null) {
-    this.user.certifications.forEach(async (cert) => {
+    this.user.certifications.forEach((cert) => {
       // determines if a user has a cert expiring within 30 days
       const needToShow =
         (cert.expirationWasSeen == undefined || !cert.expirationWasSeen) &&
         cert.expirationDate &&
-        moment(cert.expirationDate).isBefore(moment().add(30, 'days'));
+        moment(cert.expirationDate).isBefore(moment().add(31, 'days'));
       if (needToShow) {
         const expire = moment(cert.expirationDate).isBefore(moment()) ? 'expired' : 'is expiring';
         let momentDate = moment(cert.expirationDate).format('MMMM Do, YYYY');
@@ -93,14 +93,15 @@ async function checkCertifications() {
             page: `employee`,
             extras: { id: `${this.user.employeeNumber}` }
           },
-          closeable: true,
+          closeable: false,
           status: 'error',
           color: '#2a49a8',
           message: `Certification ${expire} on ${momentDate} for certification: ${cert.name}`,
           // below only needed for mark seen button
           seenButton: true,
           type: 'certification',
-          itemID: cert.id
+          id: this.randId(),
+          item: cert
         });
       }
     });
@@ -111,15 +112,17 @@ async function checkReimbursements() {
   // api to get all expenses for user
   let expenses = await api.getAllEmployeeExpenses(this.user.id);
   let reimbusementsCount = 0;
+  let promises = [];
 
-  // check all expenses to decide if we should include them in the banner
+  // check all expenses to decide if we should include them in the banner, adding them
+  // to the "mark read" list for later
   if (expenses != null) {
-    expenses.forEach(async (expense) => {
+    await asyncForEach(expenses, async (expense) => {
       // determines if a user has an unseen reimbursement
       if ((expense.reimbursementWasSeen == undefined || !expense.reimbursementWasSeen) && expense.reimbursedDate) {
         reimbusementsCount++;
         expense.reimbursementWasSeen = true;
-        await api.updateItem(api.EXPENSES, expense);
+        promises.push(api.updateItem(api.EXPENSES, expense));
       }
     });
   }
@@ -137,8 +140,11 @@ async function checkReimbursements() {
       status: 'info',
       color: 'teal',
       message: `You have ${reimbusementsCount} new reimbursed expense${s}`,
-      id: String(Math.random())
+      id: this.randId()
     });
+
+    // resolve promises to mark read
+    await Promise.all(promises);
   }
 } // checkReimbursements
 
@@ -153,14 +159,19 @@ function handleClick(pageName, extras = {}) {
 /**
  * Marks item as seen in whatever way is necessary. So far there
  * is only one type (certifications) that uses this.
+ * @param type - the type of item, ie certification
+ * @param item - the actual object that caused the notif
+ * @param id - the DOM id to use for CSS selction
  */
-async function handleMarkSeen(type, id) {
-  let cert;
+async function handleMarkSeen(type, item, id) {
+  // update UI first
+  document.getElementById(id).style.display = 'none';
   // update in api
+  let cert;
   switch (type) {
     case 'certification':
       cert = _.find(this.user.certifications, (c) => {
-        return c.id === id;
+        return c === item;
       });
       cert.expirationWasSeen = true;
       await api.updateItem(api.EMPLOYEES, this.user);
@@ -168,9 +179,16 @@ async function handleMarkSeen(type, id) {
     default:
       break;
   }
-  // hide in ui
-  document.getElementById(id).display = 'none';
 } // handleMarkSeen
+
+/**
+ * Helper function to return a random id, odds are astronomically
+ * low that one will be duplicated
+ * @return - random 8 character hex string
+ */
+function randId() {
+  return Math.floor(Math.random() * 0xffffffff).toString(16);
+} // randId
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -198,8 +216,8 @@ function onPage(pageName) {
  */
 async function created() {
   this.user = this.$store.getters.user;
-  await this.checkBadges();
-  await this.checkCertifications();
+  this.checkBadges();
+  this.checkCertifications();
   await this.checkReimbursements();
 } // created
 
@@ -218,11 +236,13 @@ export default {
     };
   },
   methods: {
+    asyncForEach,
     checkBadges,
     checkCertifications,
     checkReimbursements,
     handleClick,
     handleMarkSeen,
+    randId,
     onPage
   }
 };

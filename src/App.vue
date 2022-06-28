@@ -107,8 +107,8 @@
         <!-- End user image and logout -->
       </v-app-bar>
       <v-main :style="{ padding: getMainPadding() }">
-        <notification-banners v-if="isLoggedIn() && storeIsPopulated" />
         <v-container fluid grid-list-lg>
+          <notification-banners v-if="isLoggedIn() && storeIsPopulated" />
           <router-view></router-view>
         </v-container>
       </v-main>
