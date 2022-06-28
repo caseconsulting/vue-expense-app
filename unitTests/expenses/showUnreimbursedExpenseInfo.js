@@ -19,7 +19,7 @@ describe('testing links', () => {
     browser.waitForElementVisible('#filterEmployee', vars.WAIT_TIME); // look for unreimbursed filters
   });
 
-  this.tags = ['reimbursementFilter'];
+  this.tags = ['expenseInfo'];
 
   it('Creating an expense', (browser) => {
     utils.navigate(browser, vars.nav.expenses.expenses);
@@ -46,23 +46,35 @@ describe('testing links', () => {
       .assert.containsText('span.headline', 'Item was successfully submitted!');
   });
 
-  it('Test filter right employee', (browser) => {
+  it('Test showing info', (browser) => {
     utils.navigate(browser, vars.nav.expenses.reimbursements);
-
     browser
       .pause(2000) // needed to enter value
       .waitForElementVisible('#filterEmployee', vars.WAIT_TIME)
       .setValue('#filterEmployee', 'owl') // filter user
       .keys(browser.Keys.DOWN_ARROW)
       .keys(browser.Keys.ENTER)
+      .waitForElementVisible('#filterExpense', vars.WAIT_TIME)
+      .setValue('#filterExpense', 'activity') // filter expense type
+      .keys(browser.Keys.DOWN_ARROW)
+      .keys(browser.Keys.ENTER)
       .waitForElementVisible('tbody')
       .pause(3000)
-      .assert.containsText('tbody', 'Nightwatch Tester'); // check employee name
+      .click('tbody > tr') //selects expense
+      .waitForElementVisible('#money-team', vars.WAIT_TIME)
+      .assert.containsText('#money-team', '$11.00') // check cost
+      .assert.containsText('#purchaseDate-team', data.realDate) // check purchase date
+      .click('#subInfo tbody > tr') //clicks expense info row
+      .waitForElementVisible('#expense-info', vars.WAIT_TIME) // waits for side info panel
+      .assert.containsText('#expense-info', data.expenseDesc) // check description
+      .assert.containsText('#expense-info', 'Nightwatch Tester') // check employee
+      .assert.containsText('#expense-info', 'Activity Feed Show') // check expense type
+      .assert.containsText('#expense-info', '$11.00') // check cost
+      .assert.containsText('#expense-info', data.realDate); // check date
   });
 
   it('Deleting the expense', (browser) => {
     utils.navigate(browser, vars.nav.expenses.expenses);
-
     browser
       .waitForElementVisible('#employeeIdFilter', vars.WAIT_TIME)
       .setValue('#employeeIdFilter', 'owl')
