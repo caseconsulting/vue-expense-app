@@ -109,8 +109,13 @@ function checkCertifications() {
 } // checkExpirations
 
 async function checkReimbursements() {
-  // api to get all expenses for user
+  // api to get all expenses for user, filtering out old expense types
   let expenses = await api.getAllEmployeeExpenses(this.user.id);
+  let expenseTypes = await api.getEmployeeExpenseTypes();
+  expenseTypes = _.map(expenseTypes, 'id');
+  expenses = _.filter(expenses, (e) => {
+    return expenseTypes.includes(e.id);
+  });
   let reimbusementsCount = 0;
   let promises = [];
 
