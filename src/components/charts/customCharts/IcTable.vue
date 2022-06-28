@@ -121,11 +121,9 @@ function fillData() {
       const name = `${emp.nickname || emp.firstName} ${emp.lastName}`;
       ICData[name] = totalDurationYears.toFixed(2);
       totalYears += totalDurationYears;
-      console.log(ICData);
     }
   });
 
-  console.log(totalYears + '/' + this.employees.length);
   let averageYoE = totalYears / this.employees.length;
 
   this.tableContents = [
