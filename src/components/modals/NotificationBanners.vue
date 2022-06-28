@@ -1,12 +1,12 @@
 <template>
-  <div class="my-5 px-10 justify-center">
-    <v-col v-for="alert in alerts" :key="alert.id" id="alert.id" class="my-1" cols="12">
+  <div v-if="alerts" class="py-2 px-10 justify-center">
+    <v-col v-for="alert in alerts" :key="alert.id" id="alert.id" class="mb-4 py-0" cols="12">
       <v-alert
         :type="alert.status"
         :color="alert.color"
         :id="alert.id"
         :dismissible="alert.closeable"
-        class="my-1"
+        class="my-0"
         dense
       >
         {{ alert.message }}
