@@ -4,7 +4,12 @@
       v-if="dataReceived"
       :headers="headers"
       :items="tableContents"
+      :expanded.sync="expanded"
+      item-key="title"
+      :single-expand="true"
+      @click:row="clickedRow"
       class="elevation-1"
+      id="icTable"
       hide-default-footer
       hide-default-header
     >
@@ -12,6 +17,15 @@
         <v-toolbar flat>
           <v-toolbar-title>Community Statistics</v-toolbar-title>
         </v-toolbar>
+      </template>
+      <!-- Expanded slot in datatable -->
+      <template v-slot:expanded-item="{ headers }">
+        <td :colspan="headers.length" class="pa-2 pb-0">
+          <div class="roleRow px-16 pt-1" v-for="role in getRoleCounts()" :key="role.role">
+            <p>{{ role[0] }}</p>
+            <p>{{ role[1] }}</p>
+          </div>
+        </td>
       </template>
     </v-data-table>
     <v-radio-group row id="radioGroup" v-model="filterSelection" class="ma-0 text-center">
@@ -47,6 +61,20 @@ function mounted() {
 // |--------------------------------------------------|
 
 /**
+ * Expands only the total employees row. Adds the row to expanded row when clicked.
+ *
+ * @param value - row to expand
+ */
+function clickedRow(value) {
+  if (_.isEmpty(this.expanded) && value.title === 'Total Employees') {
+    this.expanded = [];
+    this.expanded.push(value);
+  } else {
+    this.expanded = [];
+  }
+} // clickedRow
+
+/**
  * Gets the IC data, and sets the chart formatting and data options
  */
 function fillData() {
@@ -55,16 +83,6 @@ function fillData() {
 
   // access store
   this.employees = this.$store.getters.employees;
-
-  // filter out interns for Total Employees
-  this.employeesOnly = this.employees.filter(
-    (emp) => emp.workStatus != 0 && (emp.jobRole ? emp.jobRole.toLowerCase() != 'intern' : true)
-  );
-
-  // find inactive employees (including info) and intern
-  let interns = this.employees.filter(
-    (emp) => emp.workStatus != 0 && (emp.jobRole ? emp.jobRole.toLowerCase() == 'intern' : false)
-  );
 
   // filter out inactive and interns if selected
   if (!this.showInterns) {
@@ -127,8 +145,7 @@ function fillData() {
   let averageYoE = totalYears / this.employees.length;
 
   this.tableContents = [
-    { title: 'Total Employees', value: this.employeesOnly.length },
-    { title: 'Total Interns', value: interns.length },
+    { title: 'Total Employees', value: this.employees.length },
     { title: 'Company Wide IC Experience', value: totalYears.toFixed(2) + ' Years' },
     { title: 'Average IC Experience per Employee', value: averageYoE.toFixed(2) + ' Years' }
   ];
@@ -144,6 +161,31 @@ function fillData() {
   this.dataReceived = true;
 } // fillData
 
+/**
+ * Gets the total number of employees for each role.
+ */
+function getRoleCounts() {
+  let roles = [];
+
+  this.employees.forEach((emp) => {
+    if (emp.jobRole && emp.workStatus != 0) {
+      if (roles[emp.jobRole]) {
+        roles[emp.jobRole] += 1;
+      } else {
+        roles[emp.jobRole] = 1;
+      }
+    }
+  });
+  //sorts contents from most common roles to least
+  let sortedRoles = Object.entries(roles);
+  sortedRoles = sortedRoles.sort((a, b) => {
+    return b[1] - a[1];
+  });
+
+  console.log(sortedRoles);
+  return sortedRoles;
+} // getRoleCounts
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                      EXPORT                      |
@@ -158,7 +200,7 @@ export default {
     return {
       dataReceived: false,
       employees: null,
-      employeesOnly: null,
+      expanded: [],
       tableContents: null,
       headers: null,
       filterItems: ['All', 'Full Time', 'Part Time'],
@@ -167,7 +209,9 @@ export default {
     };
   },
   methods: {
-    fillData
+    clickedRow,
+    fillData,
+    getRoleCounts
   },
   mounted,
   watch: {
@@ -187,5 +231,20 @@ export default {
 <style>
 #radioGroup {
   justify-content: center;
+}
+
+#icTable tr:hover {
+  background-color: transparent;
+}
+
+#icTable tr:first-child:hover {
+  cursor: pointer;
+  background-color: #e8e8e8;
+}
+
+.roleRow {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
 }
 </style>
