@@ -7,7 +7,7 @@ The `utils.js` functions will be referred to as `utils` and the `constants.js` v
 
 ## Usage
 
-Add the below to the beginning of your Nightwatch test and you should be good to use the utils and constants as per the examples:
+Add the below to the beginning of your Nightwatch test and you should be good to use the utils and vars as per the examples:
 
 ```
 const utils = require('../utils/utils.js');
@@ -42,7 +42,7 @@ utils.login(browser, "user@consultwithcase.com", "userpassword123")
 
 ### Site navigation
 
-Utils provides a `navigate` function. It is required that you use a `nav` object from vars to specify the page (see information about constants below). Note that expenses as a more complicated structure than other pages, since it is nested. The below navigates to the home page:
+Utils provides a `navigate` function. It is required that you use a `nav` object from vars to specify the page (see information about vars below). Note that expenses as a more complicated structure than other pages, since it is nested. The below navigates to the home page:
 
 ```
 utils.navigate(browser, vars.nav.home)
@@ -113,6 +113,8 @@ The following are the definitions of the first set of constants:
 | `LONG_PAUSE`  | `3000`                    |
 | `DATE_FORMAT` | `'MM/DD/YYYY'`            |
 
+### Test user constants
+
 You may also access variables from the test user's information:
 
 | var                 | value                                |
@@ -123,6 +125,8 @@ You may also access variables from the test user's information:
 | `tester.middleName` | `null`                               |
 | `tester.lastName`   | `'Tester'`                           |
 | `tester.nickName`   | `'Owl'`                              |
+
+### Site navigation constants
 
 For page navigation and info, the following objects all have the properties `title`, `icon`, and `route`. (Expenses is described below)
 `nav.home`, `nav.employees`, `nav.statistics`, `nav.audits`, `nav.reports`, `nav.training`, `nav.help`
