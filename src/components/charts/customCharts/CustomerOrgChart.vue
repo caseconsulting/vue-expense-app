@@ -56,9 +56,9 @@ function fillData() {
         //error checks if orgYears is undefined
         if (orgYears && (orgCurrent || this.showCurrent === 'All')) {
           if (allCompOrgExp[orgName]) {
-            allCompOrgExp[orgName] += Number(orgYears);
+            allCompOrgExp[orgName] += Math.round(Number(orgYears) * 100) / 100;
           } else {
-            allCompOrgExp[orgName] = Number(orgYears);
+            allCompOrgExp[orgName] = Math.round(Number(orgYears) * 100) / 100;
           }
         }
       });
