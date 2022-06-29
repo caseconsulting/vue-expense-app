@@ -1,6 +1,7 @@
 # Nightwatch Utils
 
-You can open this readme in Github for nice formatting:
+You can open this readme in Github for nice formatting: https://github.com/caseconsulting/vue-expense-app/blob/master/unitTests/utils/README.md
+
 This is a user's guide to the Nightwatch utilities. Start here, but if you are wondering about a specific aspect of a function, feel free to dive into the code yourself.
 The `utils.js` functions will be referred to as `utils` and the `constants.js` variables will be referred to as `vars`, as these are the reccomended variable names to use in your code.
 
@@ -57,12 +58,14 @@ utils.navigate(browser, vars.nav.home, false)
 
 You can get the name of Nightwatch Tester through the `getName` function. This requires a type to be one of the following:
 
-- 'real': firstname + lastname
-- 'nick': nickname + lastname
-  - If tester has no nickname, firstname will be used as a fallback
-- 'full': nickname + middlename + lastname
-  - If the tester does not have a middlename, an extra space will be between nickname and lastname
-  - If the tester does not have a nickname, firstname will be used as a fallback
+| type     | return structure                                                                                 |
+| -------- | ------------------------------------------------------------------------------------------------ |
+| `'real'` | firstname + lastname                                                                             |
+| `'nick'` | nickname + lastname                                                                              |
+|          | - If tester has no nickname, firstname will be used as a fallback                                |
+| `'full'` | nickname + middlename + lastname                                                                 |
+|          | - If the tester does not have a middlename, an extra space will be between nickname and lastname |
+|          | - If the tester does not have a nickname, firstname will be used as a fallback                   |
 
 Example:
 
@@ -102,20 +105,24 @@ You will have to update these as the Nightwatch Tester user updates.
 
 The following are the definitions of the first set of constants:
 
-- `URL`: `'http://localhost:8080'`
-- `WAIT_TIME`: `30000`
-- `SMALL_PAUSE`: `500`
-- `LONG_PAUSE`: `3000`
-- `DATE_FORMAT`: `'MM/DD/YYYY'`
+| var           | value                     |
+| ------------- | ------------------------- |
+| `URL`         | `'http://localhost:8080'` |
+| `WAIT_TIME`   | `30000`                   |
+| `SMALL_PAUSE` | `500`                     |
+| `LONG_PAUSE`  | `3000`                    |
+| `DATE_FORMAT` | `'MM/DD/YYYY'`            |
 
 You may also access variables from the test user's information:
 
-- `tester.username`: `process.env.VUE_APP_AUTH0_EMAIL`
-- `tester.password`: `process.env.VUE_APP_AUTH0_PASSWORD`
-- `tester.firstName`: `'Nightwatch'`
-- `tester.middleName`: `null`
-- `tester.lastName`: `'Tester'`
-- `tester.nickName`: `'Owl'`
+| var                 | value                                |
+| ------------------- | ------------------------------------ |
+| `tester.username`   | `process.env.VUE_APP_AUTH0_EMAIL`    |
+| `tester.password`   | `process.env.VUE_APP_AUTH0_PASSWORD` |
+| `tester.firstName`  | `'Nightwatch'`                       |
+| `tester.middleName` | `null`                               |
+| `tester.lastName`   | `'Tester'`                           |
+| `tester.nickName`   | `'Owl'`                              |
 
 For page navigation and info, the following objects all have the properties `title`, `icon`, and `route`. (Expenses is described below)
 `nav.home`, `nav.employees`, `nav.statistics`, `nav.audits`, `nav.reports`, `nav.training`, `nav.help`
