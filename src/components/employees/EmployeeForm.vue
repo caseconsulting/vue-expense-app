@@ -990,6 +990,19 @@ function setFormData(tab, data) {
     this.$set(this.model, 'icTimeFrames', data.icTimeFrames);
     this.$set(this.model, 'companies', data.companies);
   } else if (tab == 'certifications') {
+    // update cert expirationWasSeen if needed
+    // this presumes that they cannot be rearranged
+    for (let i = 0; i < data.length; i++) {
+      for (let j = 0; j < this.model.certifications.length; j++) {
+        if (
+          data[i].name === this.model.certifications[j].name &&
+          data[i].dateSubmitted === this.model.certifications[j].dateSubmitted &&
+          data[i].expirationDate !== this.model.certifications[j].expirationDate
+        ) {
+          data[i].expirationWasSeen = false;
+        }
+      }
+    }
     this.$set(this.model, 'certifications', data); //sets certifications to data returned from certifications tab
   } else if (tab == 'awards') {
     this.$set(this.model, 'awards', data); //sets awards to data returned from awards tab

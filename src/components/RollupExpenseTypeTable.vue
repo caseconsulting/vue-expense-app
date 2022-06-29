@@ -526,6 +526,7 @@ async function reimburseExpenses() {
         window.EventBus.$emit('expenseChange', expense);
         window.EventBus.$emit('expenseClicked', undefined);
         expense.reimbursedDate = moment().format('YYYY-MM-DD');
+        expense.reimbursementWasSeen = false;
         expensesToReimburse.push(removeAggregateExpenseData(expense));
       }
     });
