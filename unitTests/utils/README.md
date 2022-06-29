@@ -3,7 +3,7 @@
 You can open this readme in Github for nice formatting: https://github.com/caseconsulting/vue-expense-app/blob/master/unitTests/utils/README.md
 
 This is a user's guide to the Nightwatch utilities. Start here, but if you are wondering about a specific aspect of a function, feel free to dive into the code yourself.
-The `utils.js` functions will be referred to as `utils` and the `constants.js` variables will be referred to as `vars`, as these are the reccomended variable names to use in your code.
+The `utils.js` functions will be referred to as `utils` and the `constants.js` variables will be referred to as vars, as these are the recomended variable names to use in your code.
 
 ## Usage
 
@@ -14,7 +14,7 @@ const utils = require('../utils/utils.js');
 const vars = require('../utils/constants.js');
 ```
 
-Change the path if your Nightwatch test is not in a subfolder of `unitTests`.
+Change the relative path if your Nightwatch test is not in a subfolder of `unitTests`.
 
 ## Utilities
 
@@ -34,7 +34,7 @@ However, you can use the login function by itself if you so choose:
 utils.login(browser)
 ```
 
-`login` has two optional parameters: `username` and `password`. If unset, they will default to the data in `vars`, which in turn pulls its data from the `.env` file. To use these optional parameters would look like this:
+`login` has two optional parameters: `username` and `password`. If unset, they will default to the data in vars, which in turn pulls its data from the `.env` file. To use these optional parameters would look like this:
 
 ```
 utils.login(browser, "user@consultwithcase.com", "userpassword123")
@@ -42,7 +42,7 @@ utils.login(browser, "user@consultwithcase.com", "userpassword123")
 
 ### Site navigation
 
-Utils provides a `navigate` function. It is required that you use a `nav` object from `vars` to specify the page (see information about constants below). Note that expenses as a more complicated structure than other pages, since it is nested. The below navigates to the home page:
+Utils provides a `navigate` function. It is required that you use a `nav` object from vars to specify the page (see information about constants below). Note that expenses as a more complicated structure than other pages, since it is nested. The below navigates to the home page:
 
 ```
 utils.navigate(browser, vars.nav.home)
@@ -58,14 +58,14 @@ utils.navigate(browser, vars.nav.home, false)
 
 You can get the name of Nightwatch Tester through the `getName` function. This requires a type to be one of the following:
 
-| type     | return structure                                                                                 |
-| -------- | ------------------------------------------------------------------------------------------------ |
-| `'real'` | firstname + lastname                                                                             |
-| `'nick'` | nickname + lastname                                                                              |
-|          | - If tester has no nickname, firstname will be used as a fallback                                |
-| `'full'` | nickname + middlename + lastname                                                                 |
-|          | - If the tester does not have a middlename, an extra space will be between nickname and lastname |
-|          | - If the tester does not have a nickname, firstname will be used as a fallback                   |
+| type                                                              | return structure                                                                                 |
+| ----------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| `'real'`                                                          | firstname + lastname                                                                             |
+| `'nick'`                                                          | nickname + lastname \n                                                                           |
+| - If tester has no nickname, firstname will be used as a fallback |
+| `'full'`                                                          | nickname + middlename + lastname                                                                 |
+|                                                                   | - If the tester does not have a middlename, an extra space will be between nickname and lastname |
+|                                                                   | - If the tester does not have a nickname, firstname will be used as a fallback                   |
 
 Example:
 
@@ -75,7 +75,7 @@ utils.getName('nick')
 
 ### Date utilities
 
-The `utils.date` object has functions that can provide different date formats. All functions can optionally take in a format string, which will be passed to `moment` for formatting (thus you may use any `moment` formatting). The default format is `MM/DD/YYYY` as defined in `vars`. The functions are aptly named:
+The `utils.date` object has functions that can provide different date formats. All functions can optionally take in a format string, which will be passed to `moment` for formatting (thus you may use any `moment` formatting). The default format is `MM/DD/YYYY` as defined in vars. The functions are aptly named:
 `today`, `yesterday`, `tomorrow`, `lastMonth`, `nextMonth`, `lastYear`, `nextYear`
 For example:
 
