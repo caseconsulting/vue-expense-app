@@ -311,17 +311,27 @@ export default {
           },
           {
             headersMobile: [
-              { text: 'Ability', sortable: false, divider: true, value: 'ability', width: '60%' },
-              { text: 'Admin', sortable: false, value: 'admin', width: '10%', align: 'center' },
-              { text: 'Manager', sortable: false, value: 'manager', width: '10%', align: 'center' },
-              { text: 'User', sortable: false, value: 'user', width: '10%', align: 'center' },
-              { text: 'Intern', sortable: false, value: 'intern', width: '10%', align: 'center' }
+              { text: 'Ability', sortable: false, value: 'ability', width: '32%' },
+              { text: 'Admin', sortable: false, value: 'admin', width: '17%', align: 'right' },
+              { text: 'Manager', sortable: false, value: 'manager', width: '20%', align: 'right' },
+              { text: 'User', sortable: false, value: 'user', width: '14%', align: 'right' },
+              { text: 'Intern', sortable: false, value: 'intern', width: '17%', align: 'right' }
             ]
           },
           {
             abilities: [
               { ability: 'View/update personal profile data', admin: 'X', manager: 'X', user: 'X', intern: 'X' },
-              { ability: 'Add/Edit personal expenses', admin: 'X', manager: 'X', user: 'X', intern: 'X' }
+              { ability: 'Add/edit personal expenses', admin: 'X', manager: 'X', user: 'X', intern: 'X' },
+              { ability: 'View other’s profile data', admin: 'X', manager: 'X', user: 'X', intern: '' },
+              { ability: 'Create employees', admin: 'X', manager: 'X', user: '', intern: '' },
+              { ability: 'Edit other’s profile data', admin: 'X', manager: 'X', user: '', intern: '' },
+              { ability: 'View audits', admin: 'X', manager: 'X', user: '', intern: '' },
+              { ability: 'Create/update expense types', admin: 'X', manager: '', user: '', intern: '' },
+              { ability: "View other's expenses", admin: 'X', manager: '', user: '', intern: '' },
+              { ability: 'Create/update other’s expenses', admin: 'X', manager: '', user: '', intern: '' },
+              { ability: 'Reimburse expenses', admin: 'X', manager: '', user: '', intern: '' },
+              { ability: 'Download employee CSV’s', admin: 'X', manager: '', user: '', intern: '' },
+              { ability: 'View login dates', admin: 'X', manager: '', user: '', intern: '' }
             ]
           }
         ]
