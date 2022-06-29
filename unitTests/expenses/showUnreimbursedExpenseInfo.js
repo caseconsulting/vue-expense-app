@@ -1,17 +1,11 @@
 const utils = require('../utils/utils.js');
 const vars = require('../utils/constants.js');
-const moment = require('moment-timezone');
-moment.tz.setDefault('America/New_York');
 
 describe('testing links', () => {
-  const today = new Date();
-  const m = String(today.getMonth() + 1).padStart(2, '0');
-  const d = String(today.getDate()).padStart(2, '0');
-  const y = today.getFullYear();
   const data = {
     expenseDesc: 'test desc...',
-    expenseDate: `${m}/${d}/${y}`,
-    realDate: moment(today).format('MMM Do, YYYY')
+    expenseDate: utils.date.nextMonth(),
+    realDate: utils.date.nextMonth('MMM Do, YYYY')
   };
 
   before((browser) => {
