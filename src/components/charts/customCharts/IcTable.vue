@@ -182,7 +182,6 @@ function getRoleCounts() {
     return b[1] - a[1];
   });
 
-  console.log(sortedRoles);
   return sortedRoles;
 } // getRoleCounts
 
