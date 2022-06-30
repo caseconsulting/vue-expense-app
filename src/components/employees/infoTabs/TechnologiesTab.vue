@@ -20,7 +20,7 @@
               <v-tooltip top>
                 <template v-slot:activator="{ on }">
                   <v-btn v-on="on" @click="sortByDate">
-                    <icon name="calendar-day"></icon>
+                    <v-icon>mdi-calendar-multiple</v-icon>
                   </v-btn>
                 </template>
                 <span>Years of Experience</span>
@@ -29,7 +29,7 @@
               <v-tooltip top>
                 <template v-slot:activator="{ on }">
                   <v-btn v-on="on" @click="sortByName">
-                    <icon name="sort-alpha-down"></icon>
+                    <v-icon>mdi-sort-alphabetical-descending-variant </v-icon>
                   </v-btn>
                 </template>
                 <span>Alphabetical</span>
