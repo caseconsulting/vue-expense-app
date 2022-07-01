@@ -115,7 +115,14 @@ function fillData() {
       text: 'Top Job Roles at Case Consulting',
       fontSize: 15
     },
-    maintainAspectRatio: false
+    maintainAspectRatio: false,
+    onClick: (_, item) => {
+      this.$router.push({
+        path: '/reports',
+        name: 'reports',
+        params: { requestedDataType: 'Job Roles', requestedFilter: item[0]._model.label }
+      });
+    }
   };
   this.dataReceived = true;
 } // fillData

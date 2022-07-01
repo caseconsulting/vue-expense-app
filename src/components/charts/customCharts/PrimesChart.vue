@@ -163,7 +163,14 @@ function fillPrimeData() {
       text: 'Top ' + values.length + ' Primes That We Currently Subcontract',
       fontSize: 15
     },
-    maintainAspectRatio: false
+    maintainAspectRatio: false,
+    onClick: (_, item) => {
+      this.$router.push({
+        path: '/reports',
+        name: 'reports',
+        params: { requestedDataType: 'Contracts', requestedFilter: item[0]._model.label }
+      });
+    }
   };
   this.dataReceived = true;
 } // fillCertData

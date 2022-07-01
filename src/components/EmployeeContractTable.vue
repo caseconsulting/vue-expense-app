@@ -685,9 +685,25 @@ async function created() {
   this.allEmployees = this.$store.getters.employees; // get all employees
   this.employeesInfo = getActive(this.allEmployees); // default to filtered list
   this.filteredEmployees = this.employeesInfo; // this one is shown
+
+  // if the user is coming from stats page...
+  if (this.$route.params.requestedDataType) {
+    this.dataType = this.$route.params.requestedDataType; // set data type
+    if (this.$route.params.requestedDataType === 'Contracts') {
+      this.prime = this.$route.params.requestedFilter;
+    } else if (this.$route.params.requestedDataType === 'Job Roles') {
+      this.dataTypeSearch = this.$route.params.requestedFilter;
+    }
+  }
+
   this.populateDropDowns(this.employeesInfo);
   this.buildContractsColumn();
   this.constructAutoComplete(this.employeesInfo);
+
+  if (this.$route.params.requestedDataType === 'Contracts') {
+    this.refreshList(); // refresh employees
+  }
+
   this.loading = false;
 } //created
 
@@ -718,13 +734,26 @@ function watchDataType() {
     }
   }
 
-  // resets the dropdowns and employees list
-  this.dataTypeSearch = null;
-  this.search = null;
-  this.contract = null;
-  this.prime = null;
-  this.requestedDate = null;
-  this.filteredEmployees = this.employeesInfo;
+  // if the user is coming from stats, then reset the requested filter to
+  // null so the value is retained in the autocomplete. The else block is what
+  // resets all the autocompletes if you navigate to another data type.
+  if (this.$route.params.requestedFilter) {
+    this.$route.params.requestedFilter = null;
+  } else {
+    this.dataTypeSearch = null;
+    this.search = null;
+    this.contract = null;
+    this.prime = null;
+    this.requestedDate = null;
+    this.filteredEmployees = this.employeesInfo;
+  }
+
+  // refresh employees based on the type of data
+  if (this.dataType === 'Contracts') {
+    this.refreshList();
+  } else {
+    this.refreshDataTypeList();
+  }
 
   this.populateDataTypeDropDowns();
 } // watchDataType
