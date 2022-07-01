@@ -1,6 +1,13 @@
 <template>
   <div>
-    <h1>Reports</h1>
+    <div class="d-flex align-center">
+      <h1>Reports</h1>
+      <router-link class="no-decoration" to="/stats">
+        <v-btn v-if="wasRedirected" elevation="2" color="#bc3825" small outlined class="ml-6">
+          <v-icon left dark> mdi-arrow-left-top </v-icon>Back to Statistics</v-btn
+        >
+      </router-link>
+    </div>
     <employee-contract-table v-if="!loading"></employee-contract-table>
   </div>
 </template>
@@ -43,10 +50,15 @@ export default {
       }
       this.loading = false;
     }
+    if (this.$route.params.requestedFilter) {
+      this.wasRedirected = true;
+      window.scrollTo(0, 0);
+    }
   },
   data() {
     return {
-      loading: true
+      loading: true,
+      wasRedirected: false
     };
   },
   methods: {

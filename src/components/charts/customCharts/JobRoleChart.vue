@@ -117,11 +117,13 @@ function fillData() {
     },
     maintainAspectRatio: false,
     onClick: (_, item) => {
-      this.$router.push({
-        path: '/reports',
-        name: 'reports',
-        params: { requestedDataType: 'Job Roles', requestedFilter: item[0]._model.label }
-      });
+      if (item.length > 0) {
+        this.$router.push({
+          path: '/reports',
+          name: 'reports',
+          params: { requestedDataType: 'Job Roles', requestedFilter: item[0]._model.label }
+        });
+      }
     }
   };
   this.dataReceived = true;
