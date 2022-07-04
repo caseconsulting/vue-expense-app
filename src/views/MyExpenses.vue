@@ -701,8 +701,8 @@ function isReimbursed(expense) {
 
 async function loadMyExpensesData() {
   await this.refreshExpenses();
-  // get user info
-  this.userInfo = this.$store.getters.user;
+  // get user info, defaulting to params if exists
+  this.userInfo = this.$route.params.defaultEmployee || this.$store.getters.user;
 
   // get expense types
   let expenseTypes = this.$store.getters.expenseTypes;
@@ -893,6 +893,12 @@ function beforeDestroy() {
   window.EventBus.$off('canceled-unreimburse-expense');
 } // beforeDestroy
 
+function mounted() {
+  if (this.employee == null && this.$route.params.defaultEmployee != null) {
+    this.employee = this.$route.params.defaultEmployee.id;
+  }
+}
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                     WATCHERS                     |
@@ -942,6 +948,7 @@ export default {
     storeIsPopulated
   },
   created,
+  mounted,
   data() {
     return {
       deleting: false, // activate delete model
@@ -970,7 +977,7 @@ export default {
       expenseTypes: [], // expense types
       filter: {
         active: 'both',
-        reimbursed: 'notReimbursed' //default only shows expenses that are not reimbursed
+        reimbursed: this.$route.params.defaultFilterReimbursed || 'notReimbursed' //default only shows expenses that are not reimbursed
       }, // datatable filters
       filteredExpenses: [], // filtered expenses
       headers: [
@@ -1024,7 +1031,7 @@ export default {
         url: null,
         showOnFeed: null
       }, // expense to edit
-      search: '', // query text for datatable search field
+      search: this.$route.params.defaultSearch || '', // query text for datatable search field
       sortBy: 'createdAt', // sort datatable items
       sortDesc: true, // sort datatable items
       status: {
@@ -1057,6 +1064,7 @@ export default {
     isReimbursed,
     loadMyExpensesData,
     monthDayYearFormat,
+    mounted,
     onSelect,
     refreshExpenses,
     startAction,

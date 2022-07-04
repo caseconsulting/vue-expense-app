@@ -137,45 +137,61 @@ function budgets() {
  */
 function drawGraph() {
   let budgets = this.getFinalBudgetsData(this.budgets);
+  let bars = [
+    {
+      type: 'bar',
+      label: 'Reimbursed',
+      backgroundColor: '#2195f3',
+      data: budgets.reimbursed
+    },
+    {
+      type: 'bar',
+      label: 'Pending',
+      backgroundColor: '#ff6666',
+      data: budgets.unreimbursed
+    },
+    {
+      type: 'bar',
+      label: 'Remaining Budget',
+      backgroundColor: '#e1e7f2',
+      fill: false,
+      data: budgets.difference
+    },
+    {
+      type: 'bar',
+      label: 'Overdraft Reimbursed',
+      backgroundColor: pattern.draw('diagonal', '#88beef'),
+      data: budgets.odReimbursed
+    },
+    {
+      type: 'bar',
+      label: 'Overdraft Pending',
+      backgroundColor: pattern.draw('diagonal', 'pink'),
+      data: budgets.odUnreimbursed
+    }
+  ];
   let data = {
     labels: budgets.names,
-    datasets: [
-      {
-        type: 'bar',
-        label: 'Reimbursed',
-        backgroundColor: '#2195f3',
-        data: budgets.reimbursed
-      },
-      {
-        type: 'bar',
-        label: 'Pending',
-        backgroundColor: '#ff6666',
-        data: budgets.unreimbursed
-      },
-      {
-        type: 'bar',
-        label: 'Remaining Budget',
-        backgroundColor: '#e1e7f2',
-        fill: false,
-        data: budgets.difference
-      },
-      {
-        type: 'bar',
-        label: 'Overdraft Reimbursed',
-        backgroundColor: pattern.draw('diagonal', '#88beef'),
-        data: budgets.odReimbursed
-      },
-      {
-        type: 'bar',
-        label: 'Overdraft Pending',
-        backgroundColor: pattern.draw('diagonal', 'pink'),
-        data: budgets.odUnreimbursed
-      }
-    ]
+    datasets: bars
   };
 
   let [year] = this.fiscalDateView.split('-');
+  const employee = this.employee;
+  const router = this.$router;
   let options = {
+    onClick(_, item) {
+      // build data
+      let routeData = {
+        defaultEmployee: employee,
+        defaultFilterReimbursed: 'both',
+        defaultSearch: item[0] ? budgets.names[item[0]._index] : null
+      };
+      // redirect to expenses page
+      router.push({
+        name: 'expenses',
+        params: routeData
+      });
+    },
     title: {
       display: true,
       text: 'Budget Overview For Fiscal Year ' + year + '-' + (Number(year) + 1),
@@ -356,3 +372,9 @@ export default {
   }
 };
 </script>
+
+<style scoped>
+div {
+  cursor: pointer;
+}
+</style>

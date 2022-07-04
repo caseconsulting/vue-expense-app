@@ -82,7 +82,7 @@
             </v-col>
           </v-col>
         </v-col>
-        <!-- Activity Feed --->
+        <!-- Activity Feed -->
         <v-col cols="12" lg="6" class="pa-0 mt-3 mt-xl-0 mt-lg-0">
           <v-col class="pa-0 pt-0 px-xl-4 px-lg-2 px-md-0">
             <activity-feed
