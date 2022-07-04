@@ -3,11 +3,11 @@
 You can open this readme in Github for nice formatting: https://github.com/caseconsulting/vue-expense-app/blob/master/unitTests/utils/README.md
 
 This is a user's guide to the Nightwatch utilities. Start here, but if you are wondering about a specific aspect of a function, feel free to dive into the code yourself.
-The `utils.js` functions will be referred to as `utils` and the `constants.js` variables will be referred to as vars, as these are the recomended variable names to use in your code.
+The `utils.js` functions will be referred to as "utils" and the `constants.js` variables will be referred to as "vars", as these are the recomended variable names to use in your code.
 
 ## Usage
 
-Add the below to the beginning of your Nightwatch test and you should be good to use the utils and vars as per the examples:
+Add the below to the beginning of your Nightwatch test and you should be all set to use the utils and vars as per the examples:
 
 ```
 const utils = require('../utils/utils.js');
@@ -24,7 +24,7 @@ While utils does provide a `login` function, it is recomended to replace the ent
 
 ```
 before((browser) => {
-  utils.commonBefore(browser);
+  utils.commonBefore(browser)
 });
 ```
 
@@ -97,7 +97,7 @@ You may also wish to specify your own date offsets from the current date. To do 
 For example:
 
 ```
-utils.daysDiff(-30)
+utils.daysDiff(-7)
 ```
 
 ## Constants
