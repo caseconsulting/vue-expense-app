@@ -381,6 +381,8 @@ function populateDataTypeDropDowns() {
     let employeeJobRoles = _.map(this.filteredEmployees, (employee) => employee.jobRole);
     employeeJobRoles = _.compact(employeeJobRoles);
     _.forEach(employeeJobRoles, (jobRole) => this.dataTypeDropDown.push(jobRole));
+    // refresh the employees autocomplete list to be those that match the query
+    this.constructAutoComplete(this.filteredEmployees);
   } else {
     this.filteredEmployees = this.employeesInfo;
   }
@@ -447,7 +449,8 @@ function populateDropDowns(employees) {
 function refreshDataTypeList() {
   if (this.dataTypeSearch || this.expDate) {
     this.searchDataType();
-  } else {
+  } else if (!this.search) {
+    // if you aren't filtering for one person in particular
     this.filteredEmployees = this.employeesInfo;
   }
   this.populateDataTypeDropDowns();
@@ -468,7 +471,7 @@ function refreshList() {
       return employee.employeeNumber == this.search;
     });
   }
-  if (this.search === null && this.contract === null && this.prime === null) {
+  if (this.search === null && this.contract === null && this.prime === null && this.dataTypeSearch === null) {
     this.filteredEmployees = this.employeesInfo;
   }
 
@@ -476,7 +479,11 @@ function refreshList() {
 
   // updates the job roles dropdown
   if (this.dataType === 'Job Roles') {
-    this.populateDataTypeDropDowns();
+    if (this.dataTypeSearch) {
+      this.searchDataType(); // refilter employees based on the specified job role
+    } else {
+      this.populateDataTypeDropDowns(); // otherwise populate the dropdown with info
+    }
   }
 } // refreshList
 
@@ -522,6 +529,12 @@ function searchDataType() {
           return false;
         }
       });
+      if (this.search) {
+        // if there is a desired employee search then only show that employee
+        this.filteredEmployees = _.filter(this.employeesInfo, (employee) => {
+          return employee.employeeNumber == this.search;
+        });
+      }
     }
   } else if (this.dataType === 'Security Info') {
     this.filteredEmployees = [];
