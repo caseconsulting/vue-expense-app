@@ -58,7 +58,7 @@
                   :rules="requiredRules"
                 ></v-text-field>
               </template>
-              <v-date-picker v-model="auditsQuery.range" no-title type="date" range></v-date-picker>
+              <v-date-picker v-model="auditsQuery.range" no-title type="date" range :max="today"></v-date-picker>
             </v-menu>
           </v-form>
         </v-col>
@@ -192,7 +192,8 @@ export default {
       },
       firstLoad: true, // this is used to set chart titles to "last 24 hours" if a custom date range has not been set
       selectedDropdown: 'User Logins',
-      requiredRules: [(v) => !isEmpty(v) || 'This field is required'] // rules for a required field
+      requiredRules: [(v) => !isEmpty(v) || 'This field is required'], // rules for a required field
+      today: moment().format('YYYY-MM-DD')
     };
   },
   methods: {
