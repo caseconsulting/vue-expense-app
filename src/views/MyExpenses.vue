@@ -281,6 +281,10 @@
                         <b>Description: </b>
                         {{ item.description }}
                       </p>
+                      <p v-if="item.recipient">
+                        <b>Recipient: </b>
+                        {{ getEmployee(item.recipient) }}
+                      </p>
                       <p v-if="!isEmpty(item.note)"><b>Notes: </b>{{ item.note }}</p>
                       <p v-if="!isEmpty(item.receipt)"><b>Receipt: </b>{{ item.receipt }}</p>
                       <p v-if="!isEmpty(item.url)">
@@ -664,6 +668,17 @@ function filterExpenses() {
 } // filterExpenses
 
 /**
+ * Converts an employee ID into their full name.
+ *
+ * @param  eId - the employee id to find
+ * @return string - the name of the high five recipient
+ */
+function getEmployee(eId) {
+  let employee = _.find(this.$store.getters.employees, ['id', eId]);
+  return employeeUtils.nicknameAndLastName(employee);
+} // getEmployee
+
+/**
  * Checks if expense type has recipient.
  *
  * @param expense - the expense object
@@ -1034,6 +1049,7 @@ export default {
     deleteModelFromTable,
     displayError,
     filterExpenses,
+    getEmployee,
     hasRecipient,
     isEmpty,
     isManager,
