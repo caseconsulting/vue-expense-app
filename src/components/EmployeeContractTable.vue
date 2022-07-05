@@ -21,6 +21,7 @@
             label="Search By Employee Name"
             auto-select-first
             clearable
+            @change="refreshList()"
             @click:clear="
               search = null;
               refreshList();
@@ -90,7 +91,6 @@
         :expanded.sync="expanded"
         :loading="loading"
         :items-per-page.sync="itemsPerPage"
-        :search="search"
         class="elevation-1"
         @click:row="handleClick"
       >
@@ -480,13 +480,14 @@ function refreshList() {
     this.searchPrime();
   }
   if (this.search) {
-    this.filteredEmployees = _.filter(this.filteredEmployees, (employee) => {
-      return employee.fullName.includes(this.search);
+    this.filteredEmployees = _.filter(this.employeesInfo, (employee) => {
+      return employee.employeeNumber == this.search;
     });
   }
   if (this.search === null && this.contract === null && this.prime === null && this.dataTypeSearch === null) {
     this.filteredEmployees = this.employeesInfo;
   }
+
   this.populateDropDowns(this.filteredEmployees);
 
   // updates the job roles dropdown
