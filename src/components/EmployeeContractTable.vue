@@ -418,8 +418,22 @@ function populateDropDowns(employees) {
         // loop project
         _.forEach(projects, (project) => {
           if (project.presentDate) {
-            this.contractsDropDown.push(contract.name); // add contract name
-            this.primesDropDown.push(contract.prime); // add contract prime
+            if (this.contract) {
+              // limit the prime dropdown to only those that belong to the contract
+              if (contract.name === this.contract) {
+                this.contractsDropDown.push(contract.name);
+                this.primesDropDown.push(contract.prime);
+              }
+            } else if (this.prime) {
+              // limit the contract dropdown to only those that belong to the prime
+              if (contract.prime === this.prime) {
+                this.contractsDropDown.push(contract.name);
+                this.primesDropDown.push(contract.prime);
+              }
+            } else {
+              this.contractsDropDown.push(contract.name); // add contract name
+              this.primesDropDown.push(contract.prime); // add contract prime
+            }
           }
         });
       });
