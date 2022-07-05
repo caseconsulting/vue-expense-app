@@ -395,12 +395,10 @@ function populateDropDowns(employees) {
   //resets dropdowns after each query
   this.contractsDropDown = [this.noContractPlaceholder];
   this.primesDropDown = [];
-  this.employeeNames = [];
-  //creates list of employee names for dropdown
-  _.forEach(employees, (emp) => {
-    this.employeeNames.push(`${emp.firstName} ${emp.lastName}`);
-    emp.fullName = `${emp.firstName} ${emp.lastName}`;
-  });
+
+  // refresh the employees autocomplete list to be those that match the query
+  this.constructAutoComplete(employees);
+
   let employeesContracts = _.map(employees, (employee) => employee.contracts); // extract contracts
   employeesContracts = _.compact(employeesContracts); // remove falsey values
   // loop employees
