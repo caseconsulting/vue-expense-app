@@ -393,14 +393,21 @@ function populateDataTypeDropDowns() {
  */
 function populateDropDowns(employees) {
   //resets dropdowns after each query
-  this.contractsDropDown = [this.noContractPlaceholder];
+  this.contractsDropDown = [];
   this.primesDropDown = [];
 
   // refresh the employees autocomplete list to be those that match the query
   this.constructAutoComplete(employees);
 
-  let employeesContracts = _.map(employees, (employee) => employee.contracts); // extract contracts
-  employeesContracts = _.compact(employeesContracts); // remove falsey values
+  let origContracts = _.map(employees, (employee) => employee.contracts); // extract contracts
+  let employeesContracts = _.compact(origContracts); // remove falsey values
+
+  // if there were any employees without a contract they would have been filtered out
+  // and we want to show No Contract as an option in the dropdown
+  if (origContracts.length !== employeesContracts.length) {
+    this.contractsDropDown.push(this.noContractPlaceholder);
+  }
+
   // loop employees
   _.forEach(employeesContracts, (contracts) => {
     // loop contracts
