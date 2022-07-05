@@ -230,7 +230,7 @@ function showReimburseButton() {
  * Check all expenses and boxes.
  */
 function checkAllBoxes() {
-  this.empBudgets = _.forEach(this.empBudgets, (budget) => {
+  _.forEach(this.filteredItems, (budget) => {
     budget.checkBox.all = true;
     budget.checkBox.indeterminate = false;
     return _.forEach(budget.expenses, (expense) => {
