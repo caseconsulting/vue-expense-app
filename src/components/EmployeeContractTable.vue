@@ -366,7 +366,7 @@ function isFocus(item) {
  * Populates the drop down for the filter based on the data type that is chosen.
  */
 function populateDataTypeDropDowns() {
-  // reset dropdowwn after each query
+  // reset dropdown after each query
   this.dataTypeDropDown = [];
   if (this.dataType === 'Security Info') {
     let dateRanges = ['30 Days', '60 Days', '90 Days', '180 Days', '365 Days'];
@@ -378,7 +378,7 @@ function populateDataTypeDropDowns() {
       this.dataTypeDropDown.push(date + ' (' + futureDate + ')');
     });
   } else if (this.dataType === 'Job Roles') {
-    let employeeJobRoles = _.map(this.employeesInfo, (employee) => employee.jobRole);
+    let employeeJobRoles = _.map(this.filteredEmployees, (employee) => employee.jobRole);
     employeeJobRoles = _.compact(employeeJobRoles);
     _.forEach(employeeJobRoles, (jobRole) => this.dataTypeDropDown.push(jobRole));
   } else {
@@ -473,6 +473,11 @@ function refreshList() {
   }
 
   this.populateDropDowns(this.filteredEmployees);
+
+  // updates the job roles dropdown
+  if (this.dataType === 'Job Roles') {
+    this.populateDataTypeDropDowns();
+  }
 } // refreshList
 
 /**
@@ -666,7 +671,6 @@ export default {
       dataTypeSearch: null,
       employees: [],
       employeesInfo: [],
-      employeeNames: [],
       expanded: [],
       expDate: null,
       filteredEmployees: [],
