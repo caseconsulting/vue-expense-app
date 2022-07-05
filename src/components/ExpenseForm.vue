@@ -1023,6 +1023,7 @@ function formatDate(date) {
  * @return Object - expense type selected
  */
 function getExpenseTypeSelected(expenseTypeId) {
+  this.editedExpense.category = null; // clear expense type to prevent it persisting
   if (this.editedExpense.expenseTypeId != expenseTypeId) {
     this.editedExpense.category = '';
   }
