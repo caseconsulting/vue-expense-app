@@ -366,7 +366,7 @@ function isFocus(item) {
  * Populates the drop down for the filter based on the data type that is chosen.
  */
 function populateDataTypeDropDowns() {
-  // reset dropdowwn after each query
+  // reset dropdown after each query
   this.dataTypeDropDown = [];
   if (this.dataType === 'Security Info') {
     // formats the badge exp dropdowns to include the date in the future
@@ -391,7 +391,7 @@ function populateDataTypeDropDowns() {
     // refresh the employees autocomplete list to be those that match the query
     this.constructAutoComplete(this.filteredEmployees);
   } else if (this.dataType === 'Job Roles') {
-    let employeeJobRoles = _.map(this.employeesInfo, (employee) => employee.jobRole);
+    let employeeJobRoles = _.map(this.filteredEmployees, (employee) => employee.jobRole);
     employeeJobRoles = _.compact(employeeJobRoles);
     _.forEach(employeeJobRoles, (jobRole) => this.dataTypeDropDown.push(jobRole));
     // refresh the employees autocomplete list to be those that match the query
@@ -734,7 +734,6 @@ export default {
       dataTypeSearch: null,
       employees: [],
       employeesInfo: [],
-      employeeNames: [],
       expanded: [],
       requestedDate: null,
       filteredEmployees: [],
