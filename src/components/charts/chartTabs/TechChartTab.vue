@@ -8,7 +8,7 @@
           :color="([, weight]) => (weight > 20 ? colors[0] : weight > 10 ? colors[1] : colors[2])"
           font-family="Avenir, Helvetica, Ariel, sans-serif"
           :spacing="0.7"
-          font-size-ratio="0.2"
+          :font-size-ratio="0.2"
         >
           <template v-slot="props">
             <v-tooltip top>
@@ -57,7 +57,11 @@ function parseEmployeeData() {
     }
   });
 
-  this.words = Object.entries(this.technologies);
+  this.technologies = _.forEach(this.technologies, (value, key) => {
+    if (value > 1) {
+      this.words.push([key, value]);
+    }
+  });
 } // parseEmployeeData
 
 // |--------------------------------------------------|
