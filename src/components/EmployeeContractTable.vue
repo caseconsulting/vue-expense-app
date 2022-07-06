@@ -66,14 +66,14 @@
         </v-col>
         <v-col v-else-if="dataType === 'Security Info'" cols="6" xl="3" lg="3" md="6" class="my-0 pb-3">
           <v-autocomplete
-            v-model="expDate"
+            v-model="requestedDate"
             :items="dataTypeDropDown"
             :label="`Search By Badge Expiration`"
             :filter="customFilter"
             clearable
             auto-select-first
             @change="refreshDataTypeList()"
-            @click:clear="dataTypeSearch = null"
+            @click:clear="requestedDate = null"
           ></v-autocomplete>
         </v-col>
         <v-col>
@@ -369,6 +369,7 @@ function populateDataTypeDropDowns() {
   // reset dropdowwn after each query
   this.dataTypeDropDown = [];
   if (this.dataType === 'Security Info') {
+    // formats the badge exp dropdowns to include the date in the future
     let dateRanges = ['30 Days', '60 Days', '90 Days', '180 Days', '365 Days'];
     _.forEach(dateRanges, (date) => {
       let search = date.split(' ');
@@ -377,6 +378,18 @@ function populateDataTypeDropDowns() {
       let futureDate = moment().add(num, dateType).format('MMM Do, YYYY');
       this.dataTypeDropDown.push(date + ' (' + futureDate + ')');
     });
+
+    if (this.search) {
+      // once the dropdown is in place, we want to only show options that match
+      // dates found in filteredEmployees
+      this.dataTypeDropDown = _.filter(this.dataTypeDropDown, (date) => {
+        let result = this.searchBadgeExpirationDates(date, true);
+        return result;
+      });
+    }
+
+    // refresh the employees autocomplete list to be those that match the query
+    this.constructAutoComplete(this.filteredEmployees);
   } else if (this.dataType === 'Job Roles') {
     let employeeJobRoles = _.map(this.employeesInfo, (employee) => employee.jobRole);
     employeeJobRoles = _.compact(employeeJobRoles);
@@ -426,7 +439,7 @@ function populateDropDowns(employees) {
  * Refresh the filter dropdown to display matched data to the search.
  */
 function refreshDataTypeList() {
-  if (this.dataTypeSearch || this.expDate) {
+  if (this.dataTypeSearch || this.requestedDate) {
     this.searchDataType();
   } else {
     this.filteredEmployees = this.employeesInfo;
@@ -453,6 +466,21 @@ function refreshList() {
     this.filteredEmployees = this.employeesInfo;
   }
   this.populateDropDowns(this.filteredEmployees);
+
+  // updates the job roles dropdown
+  if (this.dataType === 'Job Roles') {
+    if (this.dataTypeSearch) {
+      this.searchDataType(); // refilter employees based on the specified job role
+    } else {
+      this.populateDataTypeDropDowns(); // otherwise populate the dropdown with info
+    }
+  } else if (this.dataType === 'Security Info') {
+    if (this.requestedDate) {
+      this.searchDataType(); // refilter employees based on the specified badge exp date
+    } else {
+      this.populateDataTypeDropDowns(); // otherwise populate the dropdown with info
+    }
+  }
 } // refreshList
 
 /**
@@ -500,28 +528,71 @@ function searchDataType() {
     }
   } else if (this.dataType === 'Security Info') {
     this.filteredEmployees = [];
-    if (this.expDate) {
-      let search = this.expDate.split(' ');
-      let num = parseInt(search[0]);
-      let dateType = search[1].toLowerCase();
-      let now = parseInt(moment().format('X'));
-      let upperBound = parseInt(moment().add(num, dateType).format('X'));
-      let foundEmployees = [];
-      this.filteredEmployees = _.filter(this.employeesInfo, (employee) => {
-        // if they have no badge expirations, then badgeExpiration will be the big number
-        if (employee.badgeExpiration < 100000000000000000) {
-          // loop through every employee's clearances and see if any of them are in the selected range
-          _.forEach(employee.clearances, (clearance) => {
-            let clearanceDate = parseInt(moment(clearance.badgeExpirationDate).format('X')); // seconds timestamp -> int
-            if (clearanceDate > now && clearanceDate <= upperBound && !foundEmployees.includes(employee))
-              foundEmployees.push(employee);
-          });
-        }
-      });
-      this.filteredEmployees = foundEmployees;
+    if (this.requestedDate) {
+      this.searchBadgeExpirationDates(this.requestedDate);
+      if (this.search) {
+        // if there is a desired employee search then only show that employee
+        this.filteredEmployees = _.filter(this.employeesInfo, (employee) => {
+          return employee.employeeNumber == this.search;
+        });
+        return; // don't do the rest of the moment calculations below
+      }
     }
   }
 } // searchDataType
+
+/**
+ * If there is a desired badge expiration date, this will calculate what dates fall within the range.
+ *
+ * @param requestedDate - the requested search for the badge expiration date
+ * @param forDropdown - used to limit the badge expiration dropdown options based on if there were dates found in that range
+ * @return boolean - if we are trying to filter the badge dropdowns, return true if the requestedDate was found
+ */
+function searchBadgeExpirationDates(requestedDate, forDropdown) {
+  let search = requestedDate.split(' ');
+  let num = parseInt(search[0]);
+  let dateType = search[1].toLowerCase();
+  let now = parseInt(moment().format('X'));
+  let upperBound = parseInt(moment().add(num, dateType).format('X'));
+  let foundEmployees = [];
+
+  if (this.filteredEmployees.length > 0) {
+    // this means we already filtered by something so we want to restrict the dropdown
+    this.foundEmployees = _.filter(this.filteredEmployees, (employee) => {
+      let found = [];
+      // if they have no badge expirations, then badgeExpiration will be the big number
+      if (employee.badgeExpiration < 100000000000000000) {
+        // loop through every employee's clearances and see if any of them are in the selected range
+        _.forEach(employee.clearances, (clearance) => {
+          let clearanceDate = parseInt(moment(clearance.badgeExpirationDate).format('X')); // seconds timestamp -> int
+          if (clearanceDate > now && clearanceDate <= upperBound && !foundEmployees.includes(employee)) {
+            found.push(employee);
+          }
+        });
+      }
+      return found.length > 0; // used for the filter function. only keeps employees that met the date criteria
+    });
+  } else {
+    // this means we havent already filtered so we only want to filter the employees
+    this.foundEmployees = _.filter(this.employeesInfo, (employee) => {
+      // if they have no badge expirations, then badgeExpiration will be the big number
+      if (employee.badgeExpiration < 100000000000000000) {
+        // loop through every employee's clearances and see if any of them are in the selected range
+        _.forEach(employee.clearances, (clearance) => {
+          let clearanceDate = parseInt(moment(clearance.badgeExpirationDate).format('X')); // seconds timestamp -> int
+          if (clearanceDate > now && clearanceDate <= upperBound && !foundEmployees.includes(employee))
+            foundEmployees.push(employee);
+        });
+      }
+    });
+  }
+  if (!forDropdown) {
+    this.filteredEmployees = foundEmployees;
+    return;
+  } else {
+    return this.foundEmployees.length > 0; // used to filter the dropdowns in populateDataTypeDropDowns
+  }
+} // searchBadgeExpirationDates
 
 /**
  * Clears the other search forms and searches the table by prime
@@ -656,7 +727,7 @@ export default {
       employeesInfo: [],
       employeeNames: [],
       expanded: [],
-      expDate: null,
+      requestedDate: null,
       filteredEmployees: [],
       headers: [
         {
@@ -705,6 +776,7 @@ export default {
     populateDropDowns,
     refreshDataTypeList,
     refreshList,
+    searchBadgeExpirationDates,
     searchContract,
     searchDataType,
     searchPrime,
