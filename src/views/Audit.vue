@@ -124,7 +124,6 @@ function setDateRange() {
     // Display chart titles with date ranges rather than 'last 24 hours'
     this.firstLoad = false;
     this.reloader++; // refreshes the charts
-    console.log(this.reloader);
   }
 } // setDateRange
 
