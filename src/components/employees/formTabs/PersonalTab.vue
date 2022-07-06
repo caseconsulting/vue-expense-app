@@ -6,7 +6,6 @@
     <!-- Twitter -->
     <v-text-field
       v-model="editedPersonalInfo.twitter"
-      :rules="getURLRules()"
       ref="twitter"
       label="Twitter"
       data-vv-name="Twitter"
