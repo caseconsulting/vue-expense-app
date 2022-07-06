@@ -617,7 +617,15 @@ function watchDataType() {
         this.buildContractsColumn();
     }
   }
+
+  // resets the dropdowns and employees list
   this.dataTypeSearch = null;
+  this.search = null;
+  this.contract = null;
+  this.prime = null;
+  this.requestedDate = null;
+  this.filteredEmployees = this.employeesInfo;
+
   this.populateDataTypeDropDowns();
 } // watchDataType
 
