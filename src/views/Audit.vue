@@ -74,22 +74,24 @@
       </v-row>
       <login-audit-page
         v-if="selectedDropdown === 'User Logins'"
-        :queryStartDate="auditsQueryFormatted.range[0]"
-        :queryEndDate="auditsQueryFormatted.range[1]"
+        :queryStartDate="queryA"
+        :queryEndDate="queryB"
         :show24HourTitle="firstLoad"
       ></login-audit-page>
       <!-- Displays of Audit Data -->
       <resume-parser-audit-page
         v-if="selectedDropdown === 'Resume Parser'"
-        :queryStartDate="auditsQueryFormatted.range[0]"
-        :queryEndDate="auditsQueryFormatted.range[1]"
+        :queryStartDate="queryA"
+        :queryEndDate="queryB"
         :show24HourTitle="firstLoad"
+        :key="reloader"
       ></resume-parser-audit-page>
       <mifi-log-audit
         v-if="selectedDropdown === 'Mifi Status Changes'"
-        :queryStartDate="auditsQueryFormatted.range[0]"
-        :queryEndDate="auditsQueryFormatted.range[1]"
+        :queryStartDate="queryA"
+        :queryEndDate="queryB"
         :show24HourTitle="firstLoad"
+        :key="reloader"
       ></mifi-log-audit>
     </v-container>
   </v-card>
@@ -117,10 +119,12 @@ function setDateRange() {
     let end = moment(this.auditsQuery.range[1]);
     // Flips date values if user selected end date and THEN selected start date
     // Then sets values to a date array which is passed to the parser audit page
-    this.auditsQueryFormatted.range[1] = start.isAfter(end) ? start.format() : end.format();
-    this.auditsQueryFormatted.range[0] = start.isAfter(end) ? end.format() : start.format();
+    this.queryB = start.isAfter(end) ? start.format() : end.format();
+    this.queryA = start.isAfter(end) ? end.format() : start.format();
     // Display chart titles with date ranges rather than 'last 24 hours'
     this.firstLoad = false;
+    this.reloader++; // refreshes the charts
+    console.log(this.reloader);
   }
 } // setDateRange
 
@@ -187,12 +191,12 @@ export default {
         range: [],
         showRangeMenu: false
       },
-      auditsQueryFormatted: {
-        range: [moment().subtract(1, 'd').format(), moment().format()]
-      },
       firstLoad: true, // this is used to set chart titles to "last 24 hours" if a custom date range has not been set
-      selectedDropdown: 'User Logins',
+      queryA: moment().subtract(1, 'd').format(),
+      queryB: moment().format(),
+      reloader: 0,
       requiredRules: [(v) => !isEmpty(v) || 'This field is required'], // rules for a required field
+      selectedDropdown: 'User Logins',
       today: moment().format('YYYY-MM-DD')
     };
   },
