@@ -1,18 +1,11 @@
 <template>
   <div>
     <!-- Github -->
-    <v-text-field
-      v-model="editedPersonalInfo.github"
-      :rules="getURLRules()"
-      ref="github"
-      label="Github"
-      data-vv-name="Github"
-    ></v-text-field>
+    <v-text-field v-model="editedPersonalInfo.github" ref="github" label="Github" data-vv-name="Github"></v-text-field>
 
     <!-- Twitter -->
     <v-text-field
       v-model="editedPersonalInfo.twitter"
-      :rules="getURLRules()"
       ref="twitter"
       label="Twitter"
       data-vv-name="Twitter"
