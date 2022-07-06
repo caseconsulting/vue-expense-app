@@ -56,9 +56,9 @@ function fillData() {
         //error checks if orgYears is undefined
         if (orgYears && (orgCurrent || this.showCurrent === 'All')) {
           if (allCompOrgExp[orgName]) {
-            allCompOrgExp[orgName] += Number(orgYears);
+            allCompOrgExp[orgName] += Math.round(Number(orgYears) * 100) / 100;
           } else {
-            allCompOrgExp[orgName] = Number(orgYears);
+            allCompOrgExp[orgName] = Math.round(Number(orgYears) * 100) / 100;
           }
         }
       });
@@ -91,7 +91,7 @@ function fillData() {
       'rgba(156, 175, 183, 1)',
       'rgba(66, 129, 164, 1)'
     ];
-    text = `${this.showCurrent} Employee Customer Org Experience (Years)`;
+    text = `${this.showCurrent} Customer Org Experience (Years)`;
   }
   this.chartData = {
     labels: labels,

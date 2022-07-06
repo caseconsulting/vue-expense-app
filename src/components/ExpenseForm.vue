@@ -306,6 +306,7 @@ import { getDateRules, getDateOptionalRules, getRequiredRules, getURLRules } fro
 import { isEmpty, isFullTime, convertToMoneyString } from '@/utils/utils';
 import { mask } from 'vue-the-mask';
 import _ from 'lodash';
+import { updateStoreBudgets } from '@/utils/storeUtils';
 const moment = require('moment-timezone');
 moment.tz.setDefault('America/New_York');
 
@@ -323,12 +324,13 @@ const IsoFormat = 'YYYY-MM-DD';
  * @return array - categories
  */
 function getCategories() {
+  let categories = [];
   if (this.selectedExpenseType) {
-    return _.map(this.selectedExpenseType.categories, (category) => {
+    categories = _.map(this.selectedExpenseType.categories, (category) => {
       return category.name;
     });
   }
-  return [];
+  return categories;
 } // getCategories
 
 /**
@@ -343,7 +345,7 @@ function getRequireURL() {
   if (this.selectedExpenseType.requireURL) {
     return getRequiredRules();
   }
-  if (this.editedExpense.category) {
+  if (this.selectedExpenseType.categories.length != 0 && this.editedExpense.category) {
     let selectedCategory = _.find(this.selectedExpenseType.categories, (category) => {
       if (category.name === this.editedExpense.category) {
         return category;
@@ -459,7 +461,15 @@ function urlLabel() {
  */
 async function getRemainingBudget() {
   if (this.editedExpense.expenseTypeId && this.editedExpense.employeeId) {
-    let budgets = await api.getAllActiveEmployeeBudgets(this.editedExpense.employeeId);
+    let budgets;
+
+    // get budgets for employee, use budgets store if it is for yourself.
+    if (this.editedExpense.employeeId == this.$store.getters.user.id) {
+      budgets = this.$store.getters.budgets;
+    } else {
+      budgets = await api.getAllActiveEmployeeBudgets(this.editedExpense.employeeId);
+    }
+
     if (budgets) {
       let budget = budgets.find((currBudget) => currBudget.expenseTypeId === this.editedExpense.expenseTypeId);
 
@@ -473,6 +483,12 @@ async function getRemainingBudget() {
         this.overdraftBudget = budget.budgetObject.amount;
       } else {
         this.remainingBudget = '';
+      }
+
+      // If user is editing the form, give them back the old value for accurate calculations
+      // rules for the if statement are the same as the title (around line 5 at time or writing)
+      if (this.expense.id && (this.isAdmin || !this.isReimbursed)) {
+        this.remainingBudget += budget.budgetObject.pendingAmount;
       }
     }
   }
@@ -576,7 +592,11 @@ async function checkCoverage() {
       }
 
       // get budget
-      let budget = await api.getEmployeeBudget(this.employee.id, expenseType.value, this.editedExpense.purchaseDate);
+      let employeeBudgets = await api.getEmployeeBudgets(this.employee.id);
+      let budget = employeeBudgets.find((b) => {
+        return b.expenseTypeId == expenseType.value;
+      });
+      let budgetExists = budget ? true : false;
 
       if (this.employee.workStatus == 0) {
         // emit error if user is inactive
@@ -627,7 +647,7 @@ async function checkCoverage() {
          *      8.2: User in not full time or budget does not have overdraft
          *        See Branch 6.1
          */
-        if (budget) {
+        if (budgetExists) {
           // BRANCH 1.1 if the matching budget exists
           let committedAmount = budget.pendingAmount + budget.reimbursedAmount;
           let allExpenses = await api.getAllAggregateExpenses();
@@ -851,7 +871,6 @@ async function createNewEntry() {
 
         this.$set(this.editedExpense, 'id', updatedExpense.id);
         this.$emit('add', updatedExpense);
-        window.EventBus.$emit('updateData', updatedExpense);
         this.clearForm();
       } else {
         // emit error if fails to update expense
@@ -881,7 +900,6 @@ async function createNewEntry() {
 
       this.$set(this.editedExpense, 'id', updatedExpense.id);
       this.$emit('add', updatedExpense);
-      window.EventBus.$emit('updateData', updatedExpense);
       this.clearForm();
     } else {
       // emit error if fails to update expense
@@ -1005,9 +1023,8 @@ function formatDate(date) {
  * @return Object - expense type selected
  */
 function getExpenseTypeSelected(expenseTypeId) {
-  if (this.editedExpense.expenseTypeId != expenseTypeId) {
-    this.editedExpense.category = '';
-  }
+  this.editedExpense.category = ''; // clear expense category (not type) to prevent it persisting
+  this.$refs.form.resetValidation(); // avoid validation errors after changing category
   return (this.selectedExpenseType = _.find(this.expenseTypes, (expenseType) => {
     if (expenseType.value === expenseTypeId) {
       return expenseType;
@@ -1380,15 +1397,7 @@ async function submit() {
       // NOTE: this second validate may be unnecessary. included in checkCoverage()
       // set the description if a recipient is required
 
-      if (this.reqRecipient) {
-        let giver = _.find(this.employees, (employee) => employee.value == this.editedExpense.employeeId);
-        let receiver = _.find(this.employees, (employee) => employee.value == this.editedExpense.recipient);
-        let expenseType = _.find(this.expenseTypes, (type) => this.editedExpense.expenseTypeId === type.value);
-
-        if (giver && receiver && expenseType) {
-          this.editedExpense.description = `${giver.text} gave ${receiver.text} a ${expenseType.budgetName}`;
-        }
-      } else {
+      if (!this.reqRecipient) {
         this.editedExpense.recipient = null;
       }
 
@@ -1401,10 +1410,17 @@ async function submit() {
       }
     }
     this.loading = false; // set loading status to false
-    this.$emit('endAction');
+
+    window.EventBus.$emit('endAction');
     this.isHighFive = false; // set high five back to false
     this.reqRecipient = false;
     this.clearForm();
+
+    // update budgets in vuex store if needed
+    if (this.editedExpense.employeeId == this.$store.getters.user.id) {
+      await this.updateStoreBudgets();
+      window.EventBus.$emit('updateData');
+    }
   }
 } // submit
 
@@ -1952,7 +1968,8 @@ export default {
     setRecipientOptions,
     submit,
     updateExistingEntry,
-    uuid
+    uuid,
+    updateStoreBudgets
   },
   props: [
     'expense', // expense to be created/updated

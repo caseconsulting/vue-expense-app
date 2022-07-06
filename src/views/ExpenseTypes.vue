@@ -39,7 +39,6 @@
           <!-- Filters -->
           <fieldset>
             <legend class="legend_style">Filters</legend>
-
             <!-- Active Filter -->
             <div class="flagFilter">
               <h4>Active Expense Type:</h4>
@@ -48,7 +47,7 @@
                 <v-tooltip top>
                   <template v-slot:activator="{ on }">
                     <v-btn value="active" v-on="on" text>
-                      <icon class="mr-1" name="regular/check-circle"></icon>
+                      <v-icon class="mr-1">mdi-check-circle-outline</v-icon>
                     </v-btn>
                   </template>
                   <span>Show Active</span>
@@ -58,7 +57,7 @@
                 <v-tooltip top>
                   <template v-slot:activator="{ on }">
                     <v-btn value="notActive" v-on="on" text>
-                      <icon name="regular/times-circle"></icon>
+                      <v-icon>mdi-close-circle-outline</v-icon>
                     </v-btn>
                   </template>
                   <span>Hide Active</span>
@@ -83,7 +82,7 @@
                 <v-tooltip top>
                   <template v-slot:activator="{ on }">
                     <v-btn value="overdraft" v-on="on" text>
-                      <icon class="mr-1" name="regular/check-circle"></icon>
+                      <v-icon class="mr-1">mdi-check-circle-outline</v-icon>
                     </v-btn>
                   </template>
                   <span>Show Overdraft</span>
@@ -93,7 +92,7 @@
                 <v-tooltip top>
                   <template v-slot:activator="{ on }">
                     <v-btn value="noOverdraft" v-on="on" text>
-                      <icon name="regular/times-circle"></icon>
+                      <v-icon>mdi-close-circle-outline</v-icon>
                     </v-btn>
                   </template>
                   <span>Hide Overdraft</span>
@@ -118,7 +117,7 @@
                 <v-tooltip top>
                   <template v-slot:activator="{ on }">
                     <v-btn value="recurring" v-on="on" text>
-                      <icon class="mr-1" name="regular/check-circle"></icon>
+                      <v-icon class="mr-1">mdi-check-circle-outline</v-icon>
                     </v-btn>
                   </template>
                   <span>Show Recurring</span>
@@ -128,7 +127,7 @@
                 <v-tooltip top>
                   <template v-slot:activator="{ on }">
                     <v-btn value="notRecurring" v-on="on" text>
-                      <icon name="regular/times-circle"></icon>
+                      <v-icon>mdi-close-circle-outline</v-icon>
                     </v-btn>
                   </template>
                   <span>Hide Recurring</span>
@@ -153,7 +152,7 @@
                 <v-tooltip top>
                   <template v-slot:activator="{ on }">
                     <v-btn value="receipt" v-on="on" text>
-                      <icon class="mr-1" name="regular/check-circle"></icon>
+                      <v-icon class="mr-1">mdi-check-circle-outline</v-icon>
                     </v-btn>
                   </template>
                   <span>Show Required Receipt</span>
@@ -163,7 +162,7 @@
                 <v-tooltip top>
                   <template v-slot:activator="{ on }">
                     <v-btn value="noReceipt" v-on="on" text>
-                      <icon name="regular/times-circle"></icon>
+                      <v-icon>mdi-close-circle-outline</v-icon>
                     </v-btn>
                   </template>
                   <span>Hide Required Receipt</span>
@@ -285,28 +284,28 @@
                       <v-row>
                         <v-col cols="12" sm="6" class="flag py-0">
                           <p>Pro-rated:</p>
-                          <icon v-if="item.proRated" id="marks" class="mr-1" name="regular/check-circle"></icon>
-                          <icon v-else class="mr-1" id="marks" name="regular/times-circle"></icon>
+                          <v-icon v-if="item.proRated" id="marks" class="mr-1">mdi-check-circle-outline</v-icon>
+                          <v-icon v-else class="mr-1" id="marks">mdi-close-circle-outline</v-icon>
                         </v-col>
                         <v-col cols="12" sm="6" class="flag py-0">
                           <p>Overdraft Allowed:</p>
-                          <icon v-if="item.odFlag" id="marks" class="mr-1" name="regular/check-circle"></icon>
-                          <icon v-else class="mr-1" id="marks" name="regular/times-circle"></icon>
+                          <v-icon v-if="item.odFlag" id="marks" class="mr-1">mdi-check-circle-outline</v-icon>
+                          <v-icon v-else class="mr-1" id="marks">mdi-close-circle-outline</v-icon>
                         </v-col>
                         <v-col cols="12" sm="6" class="flag py-0">
                           <p>Recurring:</p>
-                          <icon v-if="item.recurringFlag" id="marks" class="mr-1" name="regular/check-circle"></icon>
-                          <icon v-else class="mr-1" id="marks" name="regular/times-circle"></icon>
+                          <v-icon v-if="item.recurringFlag" id="marks" class="mr-1">mdi-check-circle-outline</v-icon>
+                          <v-icon v-else class="mr-1" id="marks">mdi-close-circle-outline</v-icon>
                         </v-col>
                         <v-col cols="12" sm="6" class="flag py-0">
                           <p>Receipt Required:</p>
-                          <icon v-if="item.requiredFlag" id="marks" class="mr-1" name="regular/check-circle"></icon>
-                          <icon v-else class="mr-1" id="marks" name="regular/times-circle"></icon>
+                          <v-icon v-if="item.requiredFlag" id="marks" class="mr-1">mdi-check-circle-outline</v-icon>
+                          <v-icon v-else class="mr-1" id="marks">mdi-close-circle-outline</v-icon>
                         </v-col>
                         <v-col cols="12" sm="6" class="flag py-0">
                           <p>Inactive:</p>
-                          <icon v-if="item.isInactive" id="marks" class="mr-1" name="regular/check-circle"></icon>
-                          <icon v-else class="mr-1" id="marks" name="regular/times-circle"></icon>
+                          <v-icon v-if="item.isInactive" id="marks" class="mr-1">mdi-check-circle-outline</v-icon>
+                          <v-icon v-else class="mr-1" id="marks">mdi-close-circle-outline</v-icon>
                         </v-col>
                       </v-row>
                       <!-- End Flags -->
@@ -344,7 +343,7 @@
                                           :src="employee.avatar"
                                           @error="changeAvatar(employee)"
                                         />
-                                        <icon class="user-circle" name="user-circle" v-else></icon>
+                                        <v-icon class="user-circle" name="user-circle" v-else></v-icon>
                                       </v-list-item-avatar>
 
                                       <!-- Employee Name -->
@@ -445,6 +444,15 @@ import { updateStoreExpenseTypes } from '@/utils/storeUtils';
 function expenseTypeList() {
   return this.filteredExpenseTypes;
 } // expenseTypeList
+
+/**
+ * Checks if the store is populated from initial page load.
+ *
+ * @returns boolean - True if the store is populated
+ */
+function storeIsPopulated() {
+  return this.$store.getters.storeIsPopulated;
+} // storeIsPopulated
 
 /**
  * returns the headers to show
@@ -817,6 +825,24 @@ function isInactive(expenseType) {
   return !expenseType.isInactive ? '' : 'Not Active';
 } // isInactive
 
+async function loadExpenseTypesData() {
+  this.userInfo = this.$store.getters.user;
+  this.employees = this.$store.getters.employees;
+
+  await this.refreshExpenseTypes();
+
+  // set employee avatar
+  let avatars = this.$store.getters.basecampAvatars;
+  _.map(this.employees, (employee) => {
+    let avatar = _.find(avatars, ['email_address', employee.email]);
+    let avatarUrl = avatar ? avatar.avatar_url : null;
+    employee.avatar = avatarUrl;
+    return employee;
+  });
+
+  this.campfires = await api.getBasecampCampfires();
+}
+
 /**
  * Returns a number with two decimal point precision as a string.
  *
@@ -870,7 +896,7 @@ async function refreshExpenseTypes() {
     // get the employees budgets that have expenses
     let budgetsWithExpenses = await api.getEmployeeBudgets(this.userInfo.id);
     // get the active budgets for the employee
-    let activeBudgets = await api.getAllActiveEmployeeBudgets(this.userInfo.id);
+    let activeBudgets = this.$store.getters.budgets;
     // map the active budgets
     let activeExpTypes = _.map(activeBudgets, (budget) => {
       return budget.expenseTypeId;
@@ -993,21 +1019,9 @@ async function created() {
     this.midAction = false;
   });
 
-  this.userInfo = this.$store.getters.user;
-  this.employees = this.$store.getters.employees;
-
-  await this.refreshExpenseTypes();
-
-  // set employee avatar
-  let avatars = this.$store.getters.basecampAvatars;
-  _.map(this.employees, (employee) => {
-    let avatar = _.find(avatars, ['email_address', employee.email]);
-    let avatarUrl = avatar ? avatar.avatar_url : null;
-    employee.avatar = avatarUrl;
-    return employee;
-  });
-
-  this.campfires = await api.getBasecampCampfires();
+  if (this.$store.getters.storeIsPopulated) {
+    this.loadExpenseTypesData();
+  }
 } // created
 
 // |--------------------------------------------------|
@@ -1055,6 +1069,7 @@ export default {
   },
   computed: {
     expenseTypeList,
+    storeIsPopulated,
     _headers
   },
   created,
@@ -1107,7 +1122,7 @@ export default {
       invalidDelete: false, // invalid delete status
       midAction: false,
       itemsPerPage: -1, // items per datatable page
-      loading: false, // loading status
+      loading: true, // loading status
       model: {
         accessibleBy: ['FullTime'],
         alwaysOnFeed: false,
@@ -1163,6 +1178,7 @@ export default {
     getRole,
     hasAccess,
     isInactive,
+    loadExpenseTypesData,
     onSelect,
     refreshExpenseTypes,
     startAction,
@@ -1177,7 +1193,8 @@ export default {
     'filter.active': watchFilterExpenseTypes,
     'filter.receipt': watchFilterExpenseTypes,
     'filter.recurring': watchFilterExpenseTypes,
-    'filter.overdraft': watchFilterExpenseTypes
+    'filter.overdraft': watchFilterExpenseTypes,
+    storeIsPopulated: loadExpenseTypesData
   }
 };
 </script>

@@ -66,6 +66,7 @@
 <script>
 import { isEmpty, monthYearFormat } from '@/utils/utils';
 import moment from 'moment-timezone';
+import _ from 'lodash';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -80,6 +81,8 @@ function created() {
   if (!this.isEmpty(this.model.contracts)) {
     this.filteredList = this.model.contracts.slice(0, 5);
   }
+  // sort the filtered list by start date, ascending
+  this.filteredList = _.sortBy(this.filteredList, (o) => this.getContractEarliestDate(o));
 } // created
 
 // |--------------------------------------------------|
@@ -113,6 +116,15 @@ function getContractLengthInYears(contract) {
   }
   return dateReadable(total);
 } // getContractLengthInYears
+
+/**
+ * Gets the earliest date of a contract by looking at its projects
+ *
+ * @return the earliest date
+ */
+function getContractEarliestDate(contract) {
+  return _.orderBy(contract.projects, ['startDate'])[0].startDate;
+}
 
 /**
  * returns a readable format of the date/time
@@ -211,6 +223,7 @@ export default {
     monthYearFormat
   },
   methods: {
+    getContractEarliestDate,
     getContractLengthInYears,
     getProjectLengthInYears,
     getProjectLengthInYearsReadable,

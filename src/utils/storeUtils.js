@@ -37,6 +37,16 @@ export async function updateStoreAvatars() {
 } // updateStoreAvatars
 
 /**
+ * Update store with users budgets
+ *
+ */
+export async function updateStoreBudgets() {
+  let user = this.$store.getters.user;
+  let budgets = await api.getAllActiveEmployeeBudgets(user.id);
+  this.$store.dispatch('setBudgets', { budgets: budgets });
+} // updateStoreBudgets
+
+/**
  * Update store with latest expense type data
  *
  */
@@ -48,7 +58,7 @@ export async function updateStoreExpenseTypes() {
     let expenseTypes = await api.getItems(api.EXPENSE_TYPES);
     this.$store.dispatch('setExpenseTypes', { expenseTypes });
   } else if (employeeRole == 'intern' || employeeRole == 'user') {
-    let expenseTypes = await api.getEmployeeExpenseTypes(user.id);
+    let expenseTypes = await api.getEmployeeExpenseTypes();
     this.$store.dispatch('setExpenseTypes', { expenseTypes });
   }
 } // updateStoreExpenseTypes

@@ -1,11 +1,26 @@
 <template>
   <div>
     <h1>Reports</h1>
-    <employee-contract-table></employee-contract-table>
+    <employee-contract-table v-if="!loading"></employee-contract-table>
   </div>
 </template>
 <script>
 import EmployeeContractTable from '@/components/EmployeeContractTable.vue';
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     COMPUTED                     |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * Checks if the store is populated from initial page load.
+ *
+ * @returns boolean - True if the store is populated
+ */
+function storeIsPopulated() {
+  return this.$store.getters.storeIsPopulated;
+} // storeIsPopulated
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -16,6 +31,26 @@ import EmployeeContractTable from '@/components/EmployeeContractTable.vue';
 export default {
   components: {
     EmployeeContractTable
+  },
+  computed: {
+    storeIsPopulated
+  },
+  created() {
+    if (this.$store.getters.storeIsPopulated) {
+      this.loading = false;
+    }
+  },
+  data() {
+    return {
+      loading: true
+    };
+  },
+  watch: {
+    storeIsPopulated() {
+      if (this.$store.getters.storeIsPopulated) {
+        this.loading = false;
+      }
+    }
   }
 };
 </script>

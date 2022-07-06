@@ -46,6 +46,13 @@
               @input="award.showReceivedMenu = false"
               type="month"
             ></v-date-picker>
+            <!-- Hidden field to record the date the user submitted -->
+            <v-date-picker
+              v-show="false"
+              v-model="award.dateInpoot"
+              no-title
+              @input="award.showReceivedMenu = false"
+            ></v-date-picker>
           </v-menu>
           <!-- End Received Date -->
         </v-col>
@@ -107,6 +114,7 @@ function addAward() {
     name: null,
     dateReceived: null,
     expirationDate: null,
+    dateSubmitted: moment().startOf('day'),
     showReceivedMenu: false,
     showExpirationMenu: false
   });

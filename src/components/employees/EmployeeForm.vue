@@ -25,7 +25,7 @@
             <h3 v-if="model.id">Editing {{ fullName }}</h3>
             <h3 v-else>New Employee</h3>
           </v-col>
-          <v-col col="6" class="text-right">
+          <v-col v-if="!model.id" col="6" class="text-right">
             <v-tooltip v-if="!model.id && uploadDisabled" right>
               <template v-slot:activator="{ on }">
                 <div v-on="on">
@@ -39,8 +39,11 @@
         </v-row>
       </v-card-title>
 
-      <v-container fluid>
-        <v-form ref="form" v-model="valid" lazy-validation class="my-1 mx-5">
+      <div v-if="submitting" class="py-10 px-6">
+        <v-progress-linear :indeterminate="true"></v-progress-linear>
+      </div>
+      <v-container v-show="!submitting" fluid>
+        <v-form ref="form" v-model="valid" lazy-validation class="my-1 mx-xl-5 mx-lg-5 mx-md-0">
           <div v-if="useDropDown">
             <!-- For smaller screens -->
             <v-row>
@@ -91,7 +94,7 @@
                       >Clearance</v-list-item
                     >
                     <v-list-item @click="selectDropDown('languages')" v-bind:class="{ errorTab: tabErrors.languages }"
-                      >Languages</v-list-item
+                      >Foreign Languages</v-list-item
                     >
                   </v-list>
                 </v-menu>
@@ -108,7 +111,12 @@
                 <personal-tab v-if="formTab === 'personal'" :validating="validating.personal" :model="model">
                 </personal-tab>
                 <!-- Education Tab -->
-                <education-tab v-if="formTab === 'education'" :validating="validating.education" :model="model.schools">
+                <education-tab
+                  v-if="formTab === 'education'"
+                  :validating="validating.education"
+                  :model="model.schools"
+                  :allowAdditions="true"
+                >
                 </education-tab>
                 <!-- Job Experience Tab -->
                 <job-experience-tab
@@ -172,28 +180,38 @@
           <v-tabs v-if="!useDropDown" v-model="formTab" center-active show-arrows class="pb-0">
             <v-tooltip top>
               <template v-slot:activator="{ on }">
-                <v-tab v-on="on" href="#employee" v-bind:class="{ errorTab: tabErrors.employee }">Employee</v-tab>
+                <v-tab v-on="on" href="#employee" id="employeeTab" v-bind:class="{ errorTab: tabErrors.employee }"
+                  >Employee</v-tab
+                >
               </template>
               <span v-if="tabErrors.employee">Submit to update tab validation</span>
               <span v-else>Employee Tab</span>
             </v-tooltip>
             <v-tooltip top>
               <template v-slot:activator="{ on }">
-                <v-tab v-on="on" href="#personal" v-bind:class="{ errorTab: tabErrors.personal }">Personal</v-tab>
+                <v-tab v-on="on" href="#personal" id="personalTab" v-bind:class="{ errorTab: tabErrors.personal }"
+                  >Personal</v-tab
+                >
               </template>
               <span v-if="tabErrors.personal">Submit to update tab validation</span>
               <span v-else>Personal Tab</span>
             </v-tooltip>
             <v-tooltip top>
               <template v-slot:activator="{ on }">
-                <v-tab v-on="on" href="#education" v-bind:class="{ errorTab: tabErrors.education }">Education</v-tab>
+                <v-tab v-on="on" href="#education" id="educationTab" v-bind:class="{ errorTab: tabErrors.education }"
+                  >Education</v-tab
+                >
               </template>
               <span v-if="tabErrors.education">Submit to update tab validation</span>
               <span v-else>Education Tab</span>
             </v-tooltip>
             <v-tooltip top>
               <template v-slot:activator="{ on }">
-                <v-tab v-on="on" href="#jobExperience" v-bind:class="{ errorTab: tabErrors.jobExperience }"
+                <v-tab
+                  v-on="on"
+                  href="#jobExperience"
+                  id="jobExperienceTab"
+                  v-bind:class="{ errorTab: tabErrors.jobExperience }"
                   >Job Experience</v-tab
                 >
               </template>
@@ -202,7 +220,11 @@
             </v-tooltip>
             <v-tooltip top>
               <template v-slot:activator="{ on }">
-                <v-tab v-on="on" href="#certifications" v-bind:class="{ errorTab: tabErrors.certifications }"
+                <v-tab
+                  v-on="on"
+                  href="#certifications"
+                  id="certificationsTab"
+                  v-bind:class="{ errorTab: tabErrors.certifications }"
                   >Certifications</v-tab
                 >
               </template>
@@ -211,14 +233,20 @@
             </v-tooltip>
             <v-tooltip top>
               <template v-slot:activator="{ on }">
-                <v-tab v-on="on" href="#awards" v-bind:class="{ errorTab: tabErrors.awards }">Awards</v-tab>
+                <v-tab v-on="on" href="#awards" id="awardsTab" v-bind:class="{ errorTab: tabErrors.awards }"
+                  >Awards</v-tab
+                >
               </template>
               <span v-if="tabErrors.awards">Submit to update tab validation</span>
               <span v-else>Awards Tab</span>
             </v-tooltip>
             <v-tooltip top>
               <template v-slot:activator="{ on }">
-                <v-tab v-on="on" href="#technologies" v-bind:class="{ errorTab: tabErrors.technologies }"
+                <v-tab
+                  v-on="on"
+                  href="#technologies"
+                  id="technologiesTab"
+                  v-bind:class="{ errorTab: tabErrors.technologies }"
                   >Tech and Skills</v-tab
                 >
               </template>
@@ -227,7 +255,11 @@
             </v-tooltip>
             <v-tooltip top>
               <template v-slot:activator="{ on }">
-                <v-tab v-on="on" href="#customerOrgExp" v-bind:class="{ errorTab: tabErrors.customerOrgExp }"
+                <v-tab
+                  v-on="on"
+                  href="#customerOrgExp"
+                  id="customerOrgTab"
+                  v-bind:class="{ errorTab: tabErrors.customerOrgExp }"
                   >Customer Org</v-tab
                 >
               </template>
@@ -236,27 +268,33 @@
             </v-tooltip>
             <v-tooltip top>
               <template v-slot:activator="{ on }">
-                <v-tab v-on="on" href="#contracts" v-bind:class="{ errorTab: tabErrors.contracts }">Contracts</v-tab>
+                <v-tab v-on="on" href="#contracts" id="contractsTab" v-bind:class="{ errorTab: tabErrors.contracts }"
+                  >Contracts</v-tab
+                >
               </template>
               <span v-if="tabErrors.contracts">Submit to update tab validation</span>
               <span v-else>Contracts Tab</span>
             </v-tooltip>
             <v-tooltip top>
               <template v-slot:activator="{ on }">
-                <v-tab v-on="on" href="#clearance" v-bind:class="{ errorTab: tabErrors.clearance }">Clearance</v-tab>
+                <v-tab v-on="on" href="#clearance" id="clearanceTab" v-bind:class="{ errorTab: tabErrors.clearance }"
+                  >Clearance</v-tab
+                >
               </template>
               <span v-if="tabErrors.clearance">Submit to update tab validation</span>
               <span v-else>Clearance Tab</span>
             </v-tooltip>
             <v-tooltip top>
               <template v-slot:activator="{ on }">
-                <v-tab v-on="on" href="#languages" v-bind:class="{ errorTab: tabErrors.languages }">Languages</v-tab>
+                <v-tab v-on="on" href="#languages" id="languagesTab" v-bind:class="{ errorTab: tabErrors.languages }"
+                  >Foreign Languages</v-tab
+                >
               </template>
               <span v-if="tabErrors.languages">Submit to update tab validation</span>
-              <span v-else>Languages Tab</span>
+              <span v-else>Foreign Languages Tab</span>
             </v-tooltip>
             <!-- Employee -->
-            <v-tab-item id="employee" class="mt-6 mb-4">
+            <v-tab-item id="employee" class="mt-6 mb-4 px-3">
               <employee-tab
                 :disableEmpNum="disableEmpNum"
                 :admin="hasAdminPermissions()"
@@ -266,11 +304,11 @@
               ></employee-tab>
             </v-tab-item>
             <!-- Personal Info -->
-            <v-tab-item id="personal" class="mt-6 mb-4">
+            <v-tab-item id="personal" class="mt-6 mb-4 px-3">
               <personal-tab :model="model" :validating="validating.personal"></personal-tab>
             </v-tab-item>
             <!-- Education -->
-            <v-tab-item id="education" class="mt-6 mb-4">
+            <v-tab-item id="education" class="mt-6 mb-4 px-3">
               <education-tab
                 :model="model.schools"
                 :validating="validating.education"
@@ -278,60 +316,60 @@
               ></education-tab>
             </v-tab-item>
             <!-- Experience -->
-            <v-tab-item id="jobExperience" class="mt-6 mb-4">
+            <v-tab-item id="jobExperience" class="mt-6 mb-4 px-3">
               <job-experience-tab :model="model" :validating="validating.jobExperience"></job-experience-tab>
             </v-tab-item>
             <!-- Certifications -->
-            <v-tab-item id="certifications" class="mt-6 mb-4">
+            <v-tab-item id="certifications" class="mt-6 mb-4 px-3">
               <certification-tab
                 :model="model.certifications"
                 :validating="validating.certifications"
               ></certification-tab>
             </v-tab-item>
             <!-- Awards -->
-            <v-tab-item id="awards" class="mt-6 mb-4">
+            <v-tab-item id="awards" class="mt-6 mb-4 px-3">
               <award-tab :model="model.awards" :validating="validating.awards"></award-tab>
             </v-tab-item>
             <!-- Technologies -->
-            <v-tab-item id="technologies" class="mt-6 mb-4">
+            <v-tab-item id="technologies" class="mt-6 mb-4 px-3">
               <technology-tab :model="model.technologies" :validating="validating.technologies"></technology-tab>
             </v-tab-item>
             <!-- Customer Org Experience -->
-            <v-tab-item id="customerOrgExp" class="mt-6 mb-4">
+            <v-tab-item id="customerOrgExp" class="mt-6 mb-4 px-3">
               <customer-org-tab
                 :model="model.customerOrgExp"
                 :validating="validating.customerOrgExp"
               ></customer-org-tab>
             </v-tab-item>
             <!-- Contracts -->
-            <v-tab-item id="contracts" class="mt-6 mb-4">
+            <v-tab-item id="contracts" class="mt-6 mb-4 px-3">
               <contract-tab :model="model.contracts" :validating="validating.contracts"></contract-tab>
             </v-tab-item>
             <!-- Clearance -->
-            <v-tab-item id="clearance" class="mt-6 mb-4">
+            <v-tab-item id="clearance" class="mt-6 mb-4 px-3">
               <clearance-tab :model="model.clearances" :validating="validating.clearance"></clearance-tab>
             </v-tab-item>
             <!-- Languages -->
-            <v-tab-item id="languages" class="mt-6 mb-4">
+            <v-tab-item id="languages" class="mt-6 mb-4 px-3">
               <languages-tab :model="model.languages" :validating="validating.languages"></languages-tab>
             </v-tab-item>
           </v-tabs>
 
           <!-- Form action buttons -->
-          <v-btn id="employeeCancelBtn" class="ma-2" color="white" @click="cancel" elevation="2"
+          <v-btn id="employeeCancelBtn" class="ma-2" color="white" @click="cancelA" elevation="2"
             ><v-icon class="mr-1">cancel</v-icon>Cancel</v-btn
           >
-          <v-btn id="employeeSubmitBtn" outlined class="ma-2" color="success" @click="confirm">
+          <v-btn id="employeeSubmitBtn" outlined class="ma-2" color="success" @click="submit">
             <v-icon class="mr-1">save</v-icon>Submit
           </v-btn>
           <!-- End form action buttons -->
         </v-form>
         <!-- Confirmation Model -->
-        <form-submission-confirmation
-          :submitting="this.submitting"
+        <form-cancel-confirmation
+          :cancelling="this.cancelling"
           :toggleSubmissionConfirmation="this.confirmingValid"
-          type="form"
-        ></form-submission-confirmation>
+          type="cancel"
+        ></form-cancel-confirmation>
         <many-form-errors
           :toggleSubmissionConfirmation="this.confirmingError"
           :errorTabs="errorTabNames"
@@ -349,7 +387,7 @@
 
 <script>
 import api from '@/shared/api.js';
-import { updateStoreEmployees } from '@/utils/storeUtils';
+import { updateStoreEmployees, updateStoreUser } from '@/utils/storeUtils';
 import AwardTab from '@/components/employees/formTabs/AwardTab';
 import CertificationTab from '@/components/employees/formTabs/CertificationTab';
 import ClearanceTab from '@/components/employees/formTabs/ClearanceTab';
@@ -357,18 +395,18 @@ import ContractTab from '@/components/employees/formTabs/ContractTab';
 import CustomerOrgTab from '@/components/employees/formTabs/CustomerOrgTab';
 import EducationTab from '@/components/employees/formTabs/EducationTab';
 import EmployeeTab from '@/components/employees/formTabs/EmployeeTab';
-import FormSubmissionConfirmation from '@/components/modals/FormSubmissionConfirmation.vue';
+import FormCancelConfirmation from '@/components/modals/FormCancelConfirmation.vue';
 import JobExperienceTab from '@/components/employees/formTabs/JobExperienceTab';
 import LanguagesTab from '@/components/employees/formTabs/LanguagesTab';
 import ManyFormErrors from '@/components/modals/ManyFormErrors.vue';
 import PersonalTab from '@/components/employees/formTabs/PersonalTab';
 import ResumeParser from '@/components/modals/ResumeParser';
 import TechnologyTab from '@/components/employees/formTabs/TechnologyTab';
-const moment = require('moment-timezone');
-moment.tz.setDefault('America/New_York');
 import { getRole } from '@/utils/auth';
 import { v4 as uuid } from 'uuid';
 import _ from 'lodash';
+const moment = require('moment-timezone');
+moment.tz.setDefault('America/New_York');
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -400,8 +438,12 @@ function selectDropDown(tab) {
  * Resets back to employee info. Also deletes resume when creating an employee if
  * you decide to cancel your submission
  */
-async function cancel() {
+function cancelA() {
   //creating an employee
+  this.confirmingValid = true;
+} // cancelA
+
+async function cancelB() {
   let employees = this.$store.getters.employees;
   //if the user types an employee number that matches another employee's
   let existingResume = employees.some((emp) => emp.employeeNumber == this.employeeNumber);
@@ -409,7 +451,7 @@ async function cancel() {
     await api.deleteResume(this.model.employeeNumber);
   }
   window.EventBus.$emit('cancel-form');
-} // cancel
+} // cancelB
 
 /**
  * Removes unnecessary attributes from the employee data.
@@ -576,31 +618,6 @@ function clearStatus() {
 } // clearStatus
 
 /**
- * Validate and confirm form submission.
- */
-async function confirm() {
-  this.tabErrorMessage = null; //resets tab error message each time validating
-  // validate tabs
-  await _.forEach(this.tabCreated, (value, key) => {
-    if (value) {
-      this.validating[key] = true;
-    }
-  });
-  //validates forms
-  if (this.$refs.form !== undefined && this.$refs.form.validate()) {
-    //checks to see if there are any tabs with errors
-    let hasErrors = await this.hasTabError();
-    if (!hasErrors) {
-      this.confirmingValid = true; // if no errors opens confirm submit popup
-    } else {
-      this.confirmingError = true;
-    }
-  } else {
-    this.confirmingError = true;
-  }
-} // confirm
-
-/**
  * Set and display an error action status in the snackbar.
  *
  * @param err - String error message
@@ -639,61 +656,93 @@ function hasTabError() {
 } // hasTabError
 
 /**
+ * When submitting, this looks at all tabs and if any are invalid, the submission process is halted.
+ */
+async function confirm() {
+  this.tabErrorMessage = null;
+  this.confirmingError = false;
+  await _.forEach(this.tabCreated, (value, key) => {
+    if (value) {
+      this.validating[key] = true;
+    }
+  });
+
+  //validates forms
+  if (this.$refs.form !== undefined && this.$refs.form.validate()) {
+    //checks to see if there are any tabs with errors
+    let hasErrors = await this.hasTabError();
+    if (!hasErrors) {
+      return false;
+    } else {
+      this.confirmingError = true;
+    }
+  } else {
+    this.confirmingError = true;
+  }
+  return true; //all but !hasErrors
+} //confirm
+
+/**
  * Submits the employee form.
  */
 async function submit() {
   this.submitting = true;
-  // convert appropriate fields to title case
-  await this.convertAutocompleteToTitlecase();
-  let hasErrors = await this.hasTabError();
-  if (this.$refs.form !== undefined && this.$refs.form.validate() && !hasErrors) {
-    // form validated
-    this.$emit('startAction');
-    this.cleanUpData();
-    if (this.model.id) {
-      // updating employee
-      let updatedEmployee = await api.updateItem(api.EMPLOYEES, this.model);
-      if (updatedEmployee.id) {
-        // successfully updated employee
-        this.fullName = `${updatedEmployee.firstName} ${updatedEmployee.lastName}`;
-        window.EventBus.$emit('update', updatedEmployee);
+  window.scrollTo(0, 0);
 
+  let anyErrors = await this.confirm();
+
+  if (!anyErrors) {
+    // convert appropriate fields to title case
+    await this.convertAutocompleteToTitlecase(); // recursion here lol confirm -> submit -> cATT -> confirm
+    let hasErrors = await this.hasTabError();
+    if (this.$refs.form !== undefined && this.$refs.form.validate() && !hasErrors) {
+      // form validated
+      this.$emit('startAction');
+      this.cleanUpData();
+      if (this.model.id) {
+        // updating employee
+        let updatedEmployee = await api.updateItem(api.EMPLOYEES, this.model);
+        if (updatedEmployee.id) {
+          // successfully updated employee
+          this.fullName = `${updatedEmployee.firstName} ${updatedEmployee.lastName}`;
+          window.EventBus.$emit('update', updatedEmployee);
+          // getEmployees and update store with latest data
+          if (this.model.id === this.$store.getters.user.id) await this.updateStoreUser();
+          await this.updateStoreEmployees();
+          await this.cancelB();
+        } else {
+          // failed to update employee
+          this.$emit('error', updatedEmployee.response.data.message);
+          this.displayError(updatedEmployee.response.data.message);
+          // this.$emit('cancel-form');
+        }
+        // If mifiStatus on page load is different than the submitted mifiStatus value, create audit log
+        if (this.mifiStatusOnLoad !== updatedEmployee.mifiStatus) {
+          await api.createItem(api.AUDIT, {
+            id: uuid(),
+            type: 'mifi',
+            tags: ['submit', `mifi set to ${this.model.mifiStatus}`],
+            employeeId: this.employee.id,
+            description: `${this.model.firstName} ${this.model.lastName} changed their mifi status to ${this.model.mifiStatus}.`,
+            timeToLive: 60
+          });
+        }
+      } else {
+        // creating employee
+        this.model.id = uuid();
+        let newEmployee = await api.createItem(api.EMPLOYEES, this.model);
         // getEmployees and update store with latest data
         await this.updateStoreEmployees();
-
-        await this.cancel();
-      } else {
-        // failed to update employee
-        this.$emit('error', updatedEmployee.response.data.message);
-        this.displayError(updatedEmployee.response.data.message);
-        // this.$emit('cancel-form');
-      }
-      // If mifiStatus on page load is different than the submitted mifiStatus value, create audit log
-      if (this.mifiStatusOnLoad !== updatedEmployee.mifiStatus) {
-        await api.createItem(api.AUDIT, {
-          id: uuid(),
-          type: 'mifi',
-          tags: ['submit', `mifi set to ${this.model.mifiStatus}`],
-          employeeId: this.employee.id,
-          description: `${this.model.firstName} ${this.model.lastName} changed their mifi status to ${this.model.mifiStatus}.`,
-          timeToLive: 60
-        });
-      }
-    } else {
-      // creating employee
-      this.model.id = uuid();
-      let newEmployee = await api.createItem(api.EMPLOYEES, this.model);
-      // getEmployees and update store with latest data
-      await this.updateStoreEmployees();
-      if (newEmployee.id) {
-        // successfully created employee
-        this.$router.push(`/employee/${newEmployee.employeeNumber}`);
-      } else {
-        // failed to create employee
-        this.$emit('error', newEmployee.response.data.message);
-        this.displayError(newEmployee.response.data.message);
-        this.$set(this.model, 'id', null); // reset id
-        // this.$emit('endAction');
+        if (newEmployee.id) {
+          // successfully created employee
+          this.$router.push(`/employee/${newEmployee.employeeNumber}`);
+        } else {
+          // failed to create employee
+          this.$emit('error', newEmployee.response.data.message);
+          this.displayError(newEmployee.response.data.message);
+          this.$set(this.model, 'id', null); // reset id
+          // this.$emit('endAction');
+        }
       }
     }
   }
@@ -708,8 +757,13 @@ async function submit() {
  * @param errors - the number of errored out tabs
  */
 function addErrorTab(name, errors) {
-  if (errors !== 0) {
-    this.errorTabNames[name] = errors;
+  this.errorTabNames[name] = errors;
+
+  //see if a tab is 0 after fixing validations and remove it
+  if (this.errorTabNames[name] === 0) {
+    this.errorTabNames = _.filter(this.errorTabNames.keys, (tab) => {
+      return tab !== name;
+    });
   }
 } // addErrorTab
 
@@ -757,14 +811,21 @@ async function created() {
   });
   // Starts listener to see if the user confirmed to submit the form
   window.EventBus.$on('confirmed-form', async () => {
-    await this.submit();
     this.confirmingValid = false;
+    cancelB();
   });
   // Starts listener to see if the user cancelled to submit the form
-  window.EventBus.$on('canceled-form', () => {
-    this.errorTabNames = {};
-    this.confirmingError = false;
+  // window.EventBus.$on('canceled-cancel', () => {
+  //   this.errorTabNames = {};
+  //   this.confirmingError = false;
+  //   this.confirmingValid = false;
+  // });
+  window.EventBus.$on('canceled-cancel', () => {
     this.confirmingValid = false;
+  });
+  window.EventBus.$on('confirmed-cancel', () => {
+    this.confirmingValid = true;
+    this.cancelB();
   });
   // set tab mounted
   window.EventBus.$on('created', (tab) => {
@@ -818,7 +879,7 @@ async function created() {
   // Starts listener to check the Languages tab has any errors
   window.EventBus.$on('languagesStatus', (errorCount) => {
     this.tabErrors.languages = errorCount > 0 ? true : false;
-    this.addErrorTab('Languages', errorCount);
+    this.addErrorTab('Foreign Languages', errorCount);
   });
   // Starts listener to check the Personal tab has any errors
   window.EventBus.$on('personalStatus', (errorCount) => {
@@ -828,7 +889,7 @@ async function created() {
   // Starts listener to check the Technologies tab has any errors
   window.EventBus.$on('technologiesStatus', (errorCount) => {
     this.tabErrors.technologies = errorCount > 0 ? true : false;
-    this.addErrorTab('Technologies', errorCount);
+    this.addErrorTab('Technologies and Skills', errorCount);
   });
   // fills model in with populated fields in employee prop
   this.model = _.cloneDeep(
@@ -853,8 +914,8 @@ function beforeDestroy() {
   window.EventBus.$off('uploaded');
   window.EventBus.$off('confirmed');
   window.EventBus.$off('canceled');
-  window.EventBus.$off('confirmed-form');
-  window.EventBus.$off('canceled-form');
+  window.EventBus.$off('canceled-cancel');
+  window.EventBus.$off('confirmed-cancel');
   window.EventBus.$off('created');
   window.EventBus.$off('doneValidating');
   window.EventBus.$off('awardStatus');
@@ -895,6 +956,7 @@ function setFormData(tab, data) {
     this.$set(this.model, 'prime', data.prime);
     this.$set(this.model, 'contract', data.contract);
     this.$set(this.model, 'jobRole', data.jobRole);
+    this.$set(this.model, 'agencyIdentificationNumber', data.agencyIdentificationNumber);
     this.$set(this.model, 'employeeRole', data.employeeRole);
     this.$set(this.model, 'hireDate', data.hireDate);
     this.$set(this.model, 'workStatus', data.workStatus);
@@ -910,7 +972,8 @@ function setFormData(tab, data) {
     this.$set(this.model, 'github', data.github);
     this.$set(this.model, 'twitter', data.twitter);
     this.$set(this.model, 'linkedIn', data.linkedIn);
-    this.$set(this.model, 'phoneNumber', data.phoneNumber);
+    this.$set(this.model, 'privatePhoneNumbers', data.privatePhoneNumbers);
+    this.$set(this.model, 'publicPhoneNumbers', data.publicPhoneNumbers);
     this.$set(this.model, 'birthday', data.birthday);
     this.$set(this.model, 'birthdayFeed', data.birthdayFeed);
     this.$set(this.model, 'city', data.city);
@@ -927,6 +990,19 @@ function setFormData(tab, data) {
     this.$set(this.model, 'icTimeFrames', data.icTimeFrames);
     this.$set(this.model, 'companies', data.companies);
   } else if (tab == 'certifications') {
+    // update cert expirationWasSeen if needed
+    // this presumes that they cannot be rearranged
+    for (let i = 0; i < data.length; i++) {
+      for (let j = 0; j < this.model.certifications.length; j++) {
+        if (
+          data[i].name === this.model.certifications[j].name &&
+          data[i].dateSubmitted === this.model.certifications[j].dateSubmitted &&
+          data[i].expirationDate !== this.model.certifications[j].expirationDate
+        ) {
+          data[i].expirationWasSeen = false;
+        }
+      }
+    }
     this.$set(this.model, 'certifications', data); //sets certifications to data returned from certifications tab
   } else if (tab == 'awards') {
     this.$set(this.model, 'awards', data); //sets awards to data returned from awards tab
@@ -979,7 +1055,6 @@ async function convertAutocompleteToTitlecase() {
       currLang.name = this.titleCase(currLang.name);
     });
   }
-  await this.confirm();
 } //convertAutocompleteToTitlecase
 
 // |--------------------------------------------------|
@@ -1053,7 +1128,7 @@ export default {
     CustomerOrgTab,
     EducationTab,
     EmployeeTab,
-    FormSubmissionConfirmation,
+    FormCancelConfirmation,
     JobExperienceTab,
     PersonalTab,
     ResumeParser,
@@ -1065,6 +1140,7 @@ export default {
   data() {
     return {
       afterCreate: false, // component has been created
+      cancelling: false, // cancelling form
       confirmingValid: false, // confirming form submission
       confirmingError: false,
       deleteLoading: false,
@@ -1080,6 +1156,7 @@ export default {
       hasResume: false,
       mifiStatusOnLoad: null, // used as a way to see if mifi status was changed (to updated audit log)
       model: {
+        agencyIdentificationNumber: null,
         awards: [],
         birthday: null,
         birthdayFeed: false,
@@ -1113,7 +1190,8 @@ export default {
         mifiStatus: true,
         nickname: null,
         noMiddleName: false,
-        phoneNumber: null,
+        privatePhoneNumbers: [],
+        publicPhoneNumbers: [],
         prime: null,
         schools: [],
         st: null,
@@ -1170,7 +1248,8 @@ export default {
   },
   methods: {
     addErrorTab,
-    cancel,
+    cancelA,
+    cancelB,
     cleanUpData,
     clearStatus,
     confirm,
@@ -1185,7 +1264,8 @@ export default {
     titleCase,
     resumeReceived,
     selectDropDown,
-    updateStoreEmployees
+    updateStoreEmployees,
+    updateStoreUser
   },
   props: ['currentTab', 'employee'], // employee to be created/updated
   watch: {

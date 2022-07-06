@@ -1,8 +1,29 @@
 <template>
   <div id="monthly-charges">
+    <div class="d-flex justify-center justify-sm-start mb-2 mt-0 ml-0 ml-md-1">
+      <v-btn
+        v-if="!isPrevMonth"
+        x-small
+        outlined
+        :disabled="loading"
+        @click="changeMonthData"
+        color="#bc3825"
+        class="pa-3"
+        ><v-icon left dark> mdi-arrow-left-top </v-icon>Hours for {{ prevMonth }} {{ prevYear }}
+      </v-btn>
+      <v-btn v-else x-small outlined :disabled="loading" @click="changeMonthData" color="#bc3825" class="pa-3"
+        >Hours for {{ month }} {{ year }} <v-icon right dark> mdi-arrow-right-top </v-icon>
+      </v-btn>
+    </div>
     <h3 align="center">
-      Hours for {{ month }} {{ year }}
-      <v-btn @click="toFAQ()" class="mb-4" x-small icon><v-icon color="#3f51b5">info</v-icon></v-btn>
+      <span v-if="!isPrevMonth">Hours for {{ month }} {{ year }}</span>
+      <span v-else>Hours for {{ prevMonth }} {{ prevYear }}</span>
+      <v-tooltip top>
+        <template v-slot:activator="{ on }">
+          <v-btn @click="toFAQ()" class="mb-4" x-small icon v-on="on"><v-icon color="#3f51b5">info</v-icon></v-btn>
+        </template>
+        <span>Click for FAQ</span>
+      </v-tooltip>
     </h3>
     <!-- Error Getting Monthly Hours -->
     <div v-if="monthlyHourError" class="pt-2 pb-6" align="center">
@@ -22,11 +43,20 @@
         <div v-else>
           <!-- Display Charge Code Hours -->
           <div class="pt-3 gray-border">
-            <v-row v-for="job in quickBooksTimeData.jobcodeHours" :key="job.name">
-              {{ job.name }}:
-              <v-spacer></v-spacer>
-              <p>{{ formatHours(job.hours) }}</p>
-            </v-row>
+            <div v-if="!isPrevMonth">
+              <v-row v-for="job in quickBooksTimeData.jobcodeHours" :key="job.name">
+                {{ job.name }}:
+                <v-spacer></v-spacer>
+                <p>{{ formatHours(job.hours) }}</p>
+              </v-row>
+            </div>
+            <div v-else>
+              <v-row v-for="job in quickBooksTimeData.previousMonthJobcodeHours" :key="job.name">
+                {{ job.name }}:
+                <v-spacer></v-spacer>
+                <p>{{ formatHours(job.hours) }}</p>
+              </v-row>
+            </div>
             <v-row class="bold">
               Total:
               <v-spacer></v-spacer>
@@ -37,7 +67,7 @@
             </v-row>
           </div>
           <!-- Average Hours per Day -->
-          <v-row class="pt-3">
+          <v-row v-if="!isPrevMonth" class="pt-3">
             Remaining Avg Hours/Day:
             <v-spacer></v-spacer>
             <p v-if="this.estimatedDailyHours < 24">{{ formatHours(this.estimatedDailyHours) }}</p>
@@ -49,7 +79,7 @@
           </div>
           <div v-if="showMore" max-width="400">
             <!-- Hours left this month -->
-            <v-row>
+            <v-row :class="isPrevMonth ? 'pt-3' : ''">
               Remaining:
               <v-spacer></v-spacer>
               <p>{{ formatHours(this.remainingHours) }}</p>
@@ -64,7 +94,7 @@
               <p v-else class="green--text">{{ formatHours(this.workedHours) }}</p>
             </v-row>
             <!-- Hours worked today -->
-            <v-row>
+            <v-row v-if="!isPrevMonth">
               Today:
               <v-spacer></v-spacer>
               <p v-if="this.todaysHours < this.workDayHours">
@@ -73,7 +103,7 @@
               <p v-else class="green--text">{{ formatHours(this.todaysHours) }}</p>
             </v-row>
             <!-- Future hours for this month -->
-            <v-row>
+            <v-row v-if="!isPrevMonth">
               Future:
               <v-spacer></v-spacer>
               <p v-if="this.futureHours < this.workDayHours * (this.remainingWorkDays - 1)">
@@ -82,13 +112,20 @@
               <p v-else class="green--text">{{ formatHours(this.futureHours) }}</p>
             </v-row>
             <!-- Work days left -->
-            <v-row>
+            <v-row v-if="!isPrevMonth">
               Days Remaining:
               <v-spacer></v-spacer>
               <div>
                 <div>
                   <p>
-                    <input type="text" class="text-right mw-50" :value="this.userWorkDays" @input="updateEstimate" />
+                    <input
+                      v-if="!isPrevMonth"
+                      type="text"
+                      class="text-right mw-50"
+                      :value="this.userWorkDays"
+                      @input="updateEstimate"
+                    />
+                    <input v-else type="text" class="text-right mw-50" :value="0" @input="updateEstimate" />
                   </p>
                 </div>
               </div>
@@ -148,12 +185,15 @@ function remainingWorkDays() {
  */
 async function created() {
   this.isEmployeeView = this.$route.name === 'employee';
-
   this.loading = true;
   // set the current month
   this.month = moment().format('MMMM');
+  // set the previous month
+  this.prevMonth = moment().subtract(1, 'months').format('MMM');
   // set the current year
   this.year = moment().format('YYYY');
+  // set the previous year
+  this.prevYear = moment().subtract(1, 'months').format('YYYY');
 
   await this.setMonthlyCharges();
 } // created
@@ -169,7 +209,7 @@ async function created() {
  */
 function calcWorkHours() {
   let workHours = 0;
-  let day = moment().set('date', 1);
+  let day = this.isPrevMonth ? moment().set('date', 1).subtract(1, 'months') : moment().set('date', 1);
   let currMonth = day.month();
   while (day.month() === currMonth) {
     // if day.isoWeekday() >= 1 && <=6 then add user hours to workHours
@@ -181,6 +221,33 @@ function calcWorkHours() {
   }
   this.workHours = workHours;
 } // calcWorkHours
+
+/**
+ * Changes all data for hours for the month chosen by the user, which is either this month's hours or last month's hours.
+ */
+function changeMonthData() {
+  this.isPrevMonth = !this.isPrevMonth;
+  if (this.isPrevMonth) {
+    if (_.isNil(this.quickBooksTimeData.previousMonthHours)) {
+      this.monthlyHourError = true;
+    } else {
+      this.workedHours = this.quickBooksTimeData.previousMonthHours;
+      this.totalHours = this.workedHours;
+      this.calcWorkHours();
+      this.remainingHours = this.workHours - this.totalHours;
+    }
+  } else {
+    // if the user switches back to this month's hours after seeing the previos month's hours
+    if (_.isNil(this.quickBooksTimeData.previousHours)) {
+      this.monthlyHourError = true;
+    } else {
+      this.workedHours = this.quickBooksTimeData.previousHours;
+      this.totalHours = this.workedHours + this.todaysHours + this.futureHours;
+      this.calcWorkHours();
+      this.remainingHours = this.workHours - this.totalHours;
+    }
+  }
+} // changeToPrevMonthHours
 
 /**
  * Rounds hours to 2 decimal places.
@@ -295,9 +362,12 @@ export default {
       estimatedDailyHours: 0, // estimated hours each day
       futureHours: 0, // hours recorded for the future
       isEmployeeView: false, // viewing component on the employee page
+      isPrevMonth: false, // viewing previous month hours
       loading: false, // loading
       month: '', // current month
       monthlyHourError: false, // error getting monthly hours
+      prevMonth: '', // previous month
+      prevYear: '', // previous year
       remainingHours: 0, // remaining hours this month
       showMore: false, // show more time details
       todaysHours: 0, // hours completed today
@@ -311,6 +381,7 @@ export default {
   },
   methods: {
     calcWorkHours,
+    changeMonthData,
     formatHours,
     isEmpty,
     roundHours,

@@ -7,34 +7,14 @@
         <!-- Type -->
         <p><b>Type: </b>{{ clearance.type }}</p>
 
-        <!-- Submission, Granted, Expiration Date -->
+        <!-- Submission, Granted Date -->
         <p v-if="clearance.submissionDate">
           <b>Submission Date: </b>{{ monthDayYearFormat(clearance.submissionDate) }}
         </p>
         <p v-if="clearance.grantedDate"><b>Granted Date: </b>{{ monthDayYearFormat(clearance.grantedDate) }}</p>
-        <p v-if="clearance.expirationDate">
-          <b>Expiration Date: </b>{{ monthDayYearFormat(clearance.expirationDate) }}
-        </p>
 
-        <!-- Poly Dates -->
-        <p v-if="clearance.polyDates.length == 1">
-          <b>Poly Date: </b> {{ monthDayYearFormat(clearance.polyDates[0]) }}
-        </p>
-        <p v-if="clearance.polyDates.length > 1" class="mb-2"><b>Poly Dates: </b></p>
-        <ul v-if="clearance.polyDates.length > 1" class="mb-4">
-          <li v-for="(polyDate, pIndex) in clearance.polyDates" :key="pIndex">{{ monthDayYearFormat(polyDate) }}</li>
-        </ul>
-
-        <!-- Adjudication Dates -->
-        <p v-if="clearance.adjudicationDates.length == 1" class="mb-2">
-          <b>Adjudication Date: </b>{{ monthDayYearFormat(clearance.adjudicationDates[0]) }}
-        </p>
-        <p v-if="clearance.adjudicationDates.length > 1" class="mb-2"><b>Adjudication Dates: </b></p>
-        <ul v-if="clearance.adjudicationDates.length > 1" class="mb-4">
-          <li v-for="(adjudicationDate, aIndex) in clearance.adjudicationDates" :key="aIndex">
-            {{ monthDayYearFormat(adjudicationDate) }}
-          </li>
-        </ul>
+        <!-- Badge Number -->
+        <p v-if="clearance.badgeNum"><b>Badge Number: </b>{{ clearance.badgeNum }}</p>
 
         <!-- Badge Expiration Date -->
         <p v-if="clearance.badgeExpirationDate">
@@ -46,6 +26,26 @@
         <p v-if="clearance.biDates.length > 1" class="mb-2"><b>Bi Dates: </b></p>
         <ul v-if="clearance.biDates.length > 1" class="mb-4">
           <li v-for="(biDate, pIndex) in clearance.biDates" :key="pIndex">{{ monthDayYearFormat(biDate) }}</li>
+        </ul>
+
+        <!-- Adjudication Dates -->
+        <p v-if="clearance.adjudicationDates.length == 1" class="mb-4">
+          <b>Adjudication Date: </b>{{ monthDayYearFormat(clearance.adjudicationDates[0]) }}
+        </p>
+        <p v-if="clearance.adjudicationDates.length > 1" class="mb-2"><b>Adjudication Dates: </b></p>
+        <ul v-if="clearance.adjudicationDates.length > 1" class="mb-4">
+          <li v-for="(adjudicationDate, aIndex) in clearance.adjudicationDates" :key="aIndex">
+            {{ monthDayYearFormat(adjudicationDate) }}
+          </li>
+        </ul>
+
+        <!-- Poly Dates -->
+        <p v-if="clearance.polyDates.length == 1">
+          <b>Poly Date: </b> {{ monthDayYearFormat(clearance.polyDates[0]) }}
+        </p>
+        <p v-if="clearance.polyDates.length > 1" class="mb-2"><b>Poly Dates: </b></p>
+        <ul v-if="clearance.polyDates.length > 1" class="mb-4">
+          <li v-for="(polyDate, pIndex) in clearance.polyDates" :key="pIndex">{{ monthDayYearFormat(polyDate) }}</li>
         </ul>
         <hr v-if="index < filteredList.length - 1" class="mb-3" />
       </div>

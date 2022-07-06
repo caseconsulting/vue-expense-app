@@ -1,48 +1,50 @@
 <template>
   <v-container class="my-3">
-    <span v-if="loadingEmployee">
+    <span v-if="loading">
       <v-row>
-        <v-col cols="12" md="6">
+        <v-col cols="12" md="6" class="py-4 px-7">
           <v-skeleton-loader class="my-3" type="list-item@2"></v-skeleton-loader>
         </v-col>
-        <v-col cols="12" md="6" class="pa-4">
+        <v-col cols="12" md="6" class="py-4 px-7">
           <v-skeleton-loader class="my-3" type="list-item@2"></v-skeleton-loader>
         </v-col>
       </v-row>
       <v-row>
-        <v-col wrap cols="12" lg="6">
-          <v-col class="pa-4">
+        <v-col cols="12" lg="6">
+          <v-col class="px-4 py-2">
             <v-skeleton-loader class="my-3" type="card-heading, list-item@6"></v-skeleton-loader>
           </v-col>
-          <v-col class="pa-4">
+          <v-col class="px-4 py-2">
             <v-skeleton-loader class="my-3" type="card-heading, list-item@6"></v-skeleton-loader>
           </v-col>
         </v-col>
         <v-col cols="12" lg="6">
-          <v-skeleton-loader class="my-3" type="card-heading, list-item@14"></v-skeleton-loader>
+          <v-col class="px-4 py-2">
+            <v-skeleton-loader class="my-3" type="card-heading, list-item@14"></v-skeleton-loader>
+          </v-col>
         </v-col>
       </v-row>
       <v-row>
-        <v-col mt-0 class="pt-4">
+        <v-col mt-0 class="py-4 px-7">
           <v-skeleton-loader class="my-3" type="card-heading, list-item@14"></v-skeleton-loader>
         </v-col>
       </v-row>
     </span>
     <span v-else>
-      <v-row class="pb-4">
+      <v-row class="pb-3 px-lg-2 px-md-0">
         <!-- Title -->
-        <v-col cols="12" md="6">
+        <v-col cols="12" md="6" class="pt-3 px-xl-2 px-lg-2 px-md-0">
           <v-row class="pt-5" align="center" justify="center">
-            <h1 id="home-greeting">Hello, {{ employee.firstName }}!</h1>
+            <h1 id="home-greeting">Hello, {{ getEmployeePreferredName(employee) }}!</h1>
           </v-row>
           <v-row class="pt-2" justify="center">
-            <v-btn class="mb-10" @click="handleProfile()" color="#bc3825" dark>View Profile</v-btn>
+            <v-btn class="mb-5" @click="handleProfile()" color="#bc3825" dark>View Profile</v-btn>
           </v-row>
         </v-col>
         <!-- Anniversary Date -->
 
-        <v-col cols="12" md="6" class="pa-4">
-          <v-card>
+        <v-col cols="12" md="6" class="pa-xl-4 pa-md-0">
+          <v-card class="">
             <v-card-title>
               <!-- display the next anniversary date -->
               <div id="home-anniversary">
@@ -57,46 +59,45 @@
           </v-card>
         </v-col>
       </v-row>
-      <v-row>
-        <v-col wrap cols="12" lg="6">
+      <v-row class="pa-0">
+        <v-col wrap cols="12" lg="6" class="pa-0 px-xl-4 px-lg-2 px-md-0">
           <!-- QuickBooksTime -->
-          <v-col class="pa-4">
-            <v-col v-if="loadingEmployee" class="text-center">
-              <v-progress-circular indeterminate size="64" color="#bc3825"></v-progress-circular>
-            </v-col>
-            <v-col v-else class="pt-0 text-center">
+          <v-col class="pa-0">
+            <v-col class="pt-0 px-0 text-center">
               <quick-books-time-data cols="12" lg="6"></quick-books-time-data>
             </v-col>
           </v-col>
           <!-- Available Budgets -->
-          <div>
-            <v-col class="pa-4">
-              <v-col v-if="loadingEmployee" text-center>
-                <v-progress-circular indeterminate size="64" color="#bc3825"></v-progress-circular>
-              </v-col>
-              <v-col v-else class="pt-0 text-center">
-                <available-budgets
-                  id="home-available-budgets"
-                  :employee="this.employee"
-                  :expenses="this.expenses"
-                  :expenseTypes="this.expenseTypes"
-                  :fiscalDateView="this.fiscalDateView"
-                ></available-budgets>
-              </v-col>
+          <v-col class="pa-0 pb-2">
+            <v-col class="pa-0 pt-lg-2 pt-md-2 mt-2 text-center">
+              <available-budgets
+                v-if="accessibleBudgets"
+                id="home-available-budgets"
+                :employee="this.employee"
+                :expenses="this.expenses"
+                :expenseTypes="this.expenseTypes"
+                :fiscalDateView="this.fiscalDateView"
+                :accessibleBudgets="this.accessibleBudgets"
+              ></available-budgets>
             </v-col>
-          </div>
+          </v-col>
         </v-col>
         <!-- Activity Feed -->
-        <v-col cols="12" lg="6">
-          <v-col mt-0 class="pt-4">
-            <activity-feed id="home-activity-feed" :events="events" :loading="loadingEvents"></activity-feed>
+        <v-col cols="12" lg="6" class="pa-0 mt-3 mt-xl-0 mt-lg-0">
+          <v-col class="pa-0 pt-0 px-xl-4 px-lg-2 px-md-0">
+            <activity-feed
+              id="home-activity-feed"
+              :events="events"
+              :loading="loadingEvents"
+              class="mt-xl-0 mt-lg-0"
+            ></activity-feed>
           </v-col>
         </v-col>
       </v-row>
       <v-row>
         <!-- Twitter Feed -->
-        <v-col>
-          <v-col mt-0 class="pt-4">
+        <v-col class="pa-0">
+          <v-col mt-0 class="pt-xl-4 pt-md-2 px-0">
             <twitter-feed id="home-twitter-feed" :tweets="tweets" :loading="loadingTweets"></twitter-feed>
           </v-col>
         </v-col>
@@ -208,6 +209,15 @@ function getSecondsUntil() {
   }
 } // getSecondsUntil
 
+/**
+ * Checks if the store is populated from initial page load.
+ *
+ * @returns boolean - True if the store is populated
+ */
+function storeIsPopulated() {
+  return this.$store.getters.storeIsPopulated;
+} // storeIsPopulated
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                     METHODS                      |
@@ -237,15 +247,17 @@ async function createEvents() {
   }
   let eventData = await api.getAllEvents();
   this.employees = eventData.employees;
-  this.aggregatedExpenses = eventData.expenses;
   this.scheduleEntries = _.flatten(eventData.schedules);
+  this.aggregatedExpenses = eventData.expenses;
+  this.aggregatedAwards = this.getEmployeeAwards();
+  this.aggregatedCerts = this.getEmployeeCerts();
 
   //we want to use their nicknames if they have one
   this.employees.forEach((employee) => {
-    employee.firstName = employee.nickname ? employee.nickname : employee.firstName;
+    employee.firstName = getEmployeePreferredName(employee);
   });
 
-  //generate anniversaries
+  // generate anniversaries
   let anniversaries = _.map(this.employees, (a) => {
     let hireDate = moment(a.hireDate, 'YYYY-MM-DD');
     let event = {};
@@ -267,7 +279,7 @@ async function createEvents() {
         }
         if (anniversary.isSame(hireDate, 'day')) {
           event.text = a.firstName + ' ' + a.lastName + ' has joined the Case Consulting team!'; //new hire message
-          event.icon = 'user-plus';
+          event.icon = 'mdi-account-plus';
           event.type = 'New Hire';
           event.newCampfire = 'https://3.basecamp.com/3097063/buckets/171415/chats/29039726';
         } else {
@@ -275,14 +287,14 @@ async function createEvents() {
             event.text = a.firstName + ' ' + a.lastName + ' is celebrating 1 year at Case Consulting!';
           } else {
             event.text =
-              a.firstName +
+              getEmployeePreferredName(a) +
               ' ' +
               a.lastName +
               ' is celebrating ' +
               anniversary.diff(hireDate, 'year') +
               ' years at Case Consulting!';
           }
-          event.icon = 'glass-cheers';
+          event.icon = 'mdi-party-popper';
           event.type = 'Anniversary';
           event.congratulateCampfire = 'https://3.basecamp.com/3097063/buckets/171415/chats/29039726';
         }
@@ -321,11 +333,11 @@ async function createEvents() {
       }
       // Sets event text
       if (diff == 0) {
-        event.text = 'Happy Birthday ' + b.firstName + ' ' + b.lastName + '!';
+        event.text = 'Happy Birthday ' + getEmployeePreferredName(b) + ' ' + b.lastName + '!';
       } else {
-        event.text = b.firstName + ' ' + b.lastName + "'s" + ' birthday!';
+        event.text = getEmployeePreferredName(b) + ' ' + b.lastName + "'s" + ' birthday!';
       }
-      event.icon = 'birthday-cake';
+      event.icon = 'mdi-cake-variant';
       event.type = 'Birthday';
       event.color = 'orange';
       event.daysFromToday = now.startOf('day').diff(birthday.startOf('day'), 'days');
@@ -349,21 +361,29 @@ async function createEvents() {
       if (!this.isEmpty(a.url)) {
         event.link = a.url;
       }
-      event.text = `${a.firstName} ${a.lastName} used their ${a.budgetName} budget on ${a.description}`;
+      event.text = `${getEmployeePreferredName(a)} ${a.lastName} used their ${a.budgetName} budget on ${a.description}`;
       event.daysFromToday = now.startOf('day').diff(reimbursedDate.startOf('day'), 'days');
-      if (a.recipient) {
+      if (a.budgetName === 'High Five') {
+        event.congratulateCampfile = a.campfire;
+        event.icon = 'mdi-hands-pray';
+        event.type = 'High Five';
+        event.color = '#167c80'; // like a dark teal kinda color
+        const recipient = _.find(this.employees, (e) => {
+          return e.id === a.recipient;
+        });
+        event.text = `${getEmployeePreferredName(a)} ${a.lastName} gave ${getEmployeePreferredName(recipient)} ${
+          recipient.lastName
+        } a High Five: ${a.note}`;
+      } else if (a.recipient) {
         event.congratulateCampfire = a.campfire;
-        event.icon = 'thumbs-up';
+        event.icon = 'mdi-thumbs-up';
         event.type = 'Congratulate';
         event.color = 'purple';
       } else {
         event.campfire = a.campfire;
-        event.icon = 'dollar-sign';
+        event.icon = 'mdi-currency-usd';
         event.type = 'Expense';
         event.color = 'green';
-      }
-      if (!this.isEmpty(a.recipient)) {
-        event.text = `${a.description}: ${a.note}`;
       }
       if (this.textMaxLength < event.text.length) {
         event.truncatedText = _.truncate(event.text, { length: this.textMaxLength });
@@ -375,7 +395,7 @@ async function createEvents() {
     }
   });
 
-  //generate schedules
+  // generate schedules
   let schedules = _.map(this.scheduleEntries, (a) => {
     let now = moment();
     let cutOff = moment().subtract(6, 'months').startOf('day');
@@ -391,7 +411,7 @@ async function createEvents() {
     } else {
       event.text = `${a.title} starts today until ${endDate.format('LL')}!`;
     }
-    event.icon = 'calendar-alt';
+    event.icon = 'mdi-calendar';
     event.type = 'Event';
     event.daysFromToday = now.startOf('day').diff(startDate.startOf('day'), 'days');
     if (event.daysFromToday < -6) {
@@ -406,7 +426,51 @@ async function createEvents() {
     return event;
   });
 
-  let mergedEventsList = [...anniversaries, ...birthdays, ...expenses, ...schedules]; // merges lists
+  // generate awards
+  let awards = _.map(this.aggregatedAwards, (a) => {
+    // get award information
+    const dateSubmitted = moment(a.dateSubmitted || a.dateReceived);
+    let award = {
+      icon: 'mdi-fire',
+      color: '#f9c64e',
+      type: 'Award',
+      daysFromToday: moment().startOf('day').diff(dateSubmitted.startOf('day'), 'days'),
+      text: `${getEmployeePreferredName(a.employee)} ${a.employee.lastName} was awarded "${a.name}" in ${moment(
+        a.dateReceived
+      ).format('MMMM')}`,
+      congratulateCampfire: 'https://3.basecamp.com/3097063/buckets/171415/chats/29039726'
+    };
+    // date formatting
+    award.date = dateSubmitted.format('MMM YYYY'); // default
+    const withinSixDays = dateSubmitted.isAfter(moment().subtract(6, 'days')) && dateSubmitted.isBefore(moment());
+    if (withinSixDays) award.date = getEventDateMessage(dateSubmitted);
+    // return award only if we want to display it (ie, if awarded <6 months ago)
+    const wantToDisplay = moment(a.dateReceived).isAfter(moment().subtract(6, 'months'));
+    return wantToDisplay ? award : null;
+  });
+
+  // generate certs
+  let certs = _.map(this.aggregatedCerts, (c) => {
+    // get cert information
+    const dateSubmitted = moment(c.dateSubmitted || c.dateReceived);
+    let cert = {
+      icon: 'mdi-certificate',
+      color: '#3C7DD0',
+      type: 'Certification',
+      daysFromToday: moment().startOf('day').diff(dateSubmitted.startOf('day'), 'days'),
+      text: `${getEmployeePreferredName(c.employee)} ${c.employee.lastName} was certified "${c.name}"`,
+      congratulateCampfire: 'https://3.basecamp.com/3097063/buckets/171415/chats/29039726'
+    };
+    // date formatting
+    cert.date = dateSubmitted.format('MMM YYYY'); // default
+    const withinSixDays = dateSubmitted.isAfter(moment().subtract(6, 'days')) && dateSubmitted.isBefore(moment());
+    if (withinSixDays) cert.date = getEventDateMessage(dateSubmitted);
+    // return cert only if we want to display it (ie, if received <6 months ago)
+    const wantToDisplay = moment(c.dateReceived).isAfter(moment().subtract(6, 'months'));
+    return wantToDisplay ? cert : null;
+  });
+
+  let mergedEventsList = [...anniversaries, ...birthdays, ...expenses, ...schedules, ...awards, ...certs]; // merges lists
   this.events = _.sortBy(_.compact(mergedEventsList), 'daysFromToday'); //sorts by days from today
   this.$store.dispatch('setEvents', { events: this.events });
   this.loadingEvents = false;
@@ -437,6 +501,69 @@ function getEventDateMessage(date) {
 } // getEventDateMessage
 
 /**
+ * Gets all awards across all Employees, adding the employee name
+ * to the object for later use
+ *
+ * @return all awards
+ */
+function getEmployeeAwards() {
+  let awards = []; // will be returned
+  let namedAwards = []; // temp variable for adding employee name
+
+  // for each employee, get their awards
+  this.employees.forEach((e) => {
+    if (e.awards) {
+      // add their name to the award
+      namedAwards = [];
+      e.awards.forEach((a) => {
+        a.employee = e;
+        namedAwards.push(a);
+      });
+
+      // add the named awards to the return list
+      awards = [...awards, ...e.awards];
+    }
+  });
+
+  // :)
+  return awards;
+}
+
+/**
+ * Get certs across all employees. This really could be added to awards
+ * for efficiency if we are looking to speed things up.
+ */
+function getEmployeeCerts() {
+  let certs = []; // will be returned
+
+  // for each employee, get their certs
+  this.employees.forEach((e) => {
+    if (e.certifications) {
+      // add their name to the cert
+      e.certifications.forEach((c) => {
+        c.employee = e;
+      });
+
+      // add the named awards to the return list
+      certs = [...certs, ...e.certifications];
+    }
+  });
+
+  // :)
+  return certs;
+}
+
+/**
+ * Returns the name of an employee based on their preference
+ *
+ * @input e employee object
+ * @return e's preferred name
+ */
+function getEmployeePreferredName(e) {
+  return e.nickname || e.firstName;
+}
+
+/**
  * Calls the API to get tweets from the Twitter account.
  */
 async function getTweets() {
@@ -453,17 +580,22 @@ function handleProfile() {
 } // handleProfile
 
 /**
+ * Loads all of the home page data concurrently upon entering the page.
+ */
+async function loadHomePageData() {
+  await Promise.all([this.refreshEmployee(), this.createEvents(), this.getTweets()]);
+} // loadHomePageData
+
+/**
  * Refresh and sets employee information.
  */
 async function refreshEmployee() {
-  this.loadingEmployee = true; // set loading status to true
   this.employee = this.$store.getters.user;
   this.hireDate = this.employee.hireDate;
   this.fiscalDateView = this.getCurrentBudgetYear(this.hireDate);
-  this.allUserBudgets = await api.getEmployeeBudgets(this.employee.id); // set all employee budgets
   this.expenses = await api.getAllAggregateExpenses();
   this.expenseTypes = this.$store.getters.expenseTypes;
-  this.loadingEmployee = false; // set loading status to false
+  this.accessibleBudgets = this.$store.getters.budgets;
 } // refreshEmployee
 
 // |--------------------------------------------------|
@@ -476,10 +608,11 @@ async function refreshEmployee() {
  *  Set budget information for employee. Creates event listeners.
  */
 async function created() {
-  await this.refreshEmployee();
-  await this.createEvents();
+  if (this.$store.getters.storeIsPopulated) {
+    this.loading = false;
+    await this.loadHomePageData();
+  }
   this.addOneSecondToActualTimeEverySecond();
-  await this.getTweets();
 } // created
 
 // |--------------------------------------------------|
@@ -498,12 +631,15 @@ export default {
   computed: {
     getAnniversary,
     getDaysUntil,
-    getSecondsUntil
+    getSecondsUntil,
+    storeIsPopulated
   },
   created,
   data() {
     return {
+      accessibleBudgets: null,
       actualTime: moment().format('X'),
+      aggregatedAwards: [],
       aggregatedExpenses: [],
       allUserBudgets: null, // all user budgets
       budgetYears: [], // list of options for chaning budget year view
@@ -516,7 +652,7 @@ export default {
       expenseTypes: null,
       fiscalDateView: '', // current budget year view by anniversary day
       hireDate: '', // employee hire date
-      loadingEmployee: true,
+      loading: true,
       loadingEvents: true,
       loadingTweets: true,
       scheduleEntries: [],
@@ -534,11 +670,23 @@ export default {
     addOneSecondToActualTimeEverySecond,
     createEvents,
     getCurrentBudgetYear,
+    getEmployeeAwards,
+    getEmployeeCerts,
+    getEmployeePreferredName,
     getEventDateMessage,
     getTweets,
     isEmpty,
+    loadHomePageData,
     refreshEmployee,
     handleProfile
+  },
+  watch: {
+    async storeIsPopulated() {
+      if (this.$store.getters.storeIsPopulated) {
+        this.loading = false; // get rid of skeleton loaders (will still be loading for individual components)
+        this.loadHomePageData();
+      }
+    }
   }
 };
 </script>

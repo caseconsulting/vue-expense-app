@@ -46,7 +46,7 @@
               </v-tooltip>
             </v-text-field>
           </template>
-          <v-date-picker v-model="timeFrame.range" no-title type="month" range></v-date-picker>
+          <v-date-picker v-model="timeFrame.range" no-title type="month" range :max="today"></v-date-picker>
         </v-menu>
         <!-- End Range -->
       </div>
@@ -243,7 +243,7 @@
       <div class="pb-4" align="center">
         <v-tooltip bottom>
           <template v-slot:activator="{ on }">
-            <v-btn text icon v-on="on" @click="deleteCompany(compIndex)"
+            <v-btn text icon v-on="on" id="delete-company" @click="deleteCompany(compIndex)"
               ><v-icon class="case-gray">delete</v-icon></v-btn
             >
           </template>
@@ -540,7 +540,8 @@ export default {
           return false;
         }
       },
-      editedJobExperienceInfo: _.cloneDeep(this.model) //edited job experience info
+      editedJobExperienceInfo: _.cloneDeep(this.model), //edited job experience info
+      today: moment().format('YYYY-MM')
     };
   },
   directives: { mask },

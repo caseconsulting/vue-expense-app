@@ -43,7 +43,7 @@
               <v-tooltip top>
                 <template v-slot:activator="{ on }">
                   <v-btn value="full" id="full" v-on="on" text>
-                    <icon class="mr-1" name="clock" color="black"></icon>
+                    <v-icon class="mr-1" color="black">mdi-clock-outline</v-icon>
                   </v-btn>
                 </template>
                 <span>Full Time</span>
@@ -53,7 +53,7 @@
               <v-tooltip top>
                 <template v-slot:activator="{ on }">
                   <v-btn value="part" id="part" v-on="on" text>
-                    <icon name="regular/clock" color="black"></icon>
+                    <v-icon color="black">mdi-progress-clock</v-icon>
                   </v-btn>
                 </template>
                 <span>Part Time</span>
@@ -63,7 +63,7 @@
               <v-tooltip top>
                 <template v-slot:activator="{ on }">
                   <v-btn value="inactive" id="inactive" v-on="on" text>
-                    <icon name="regular/stop-circle" color="black"></icon>
+                    <v-icon color="black">mdi-stop-circle-outline</v-icon>
                   </v-btn>
                 </template>
                 <span>Inactive</span>
@@ -95,6 +95,7 @@
           :loading="loading"
           :items-per-page.sync="itemsPerPage"
           :search="search"
+          mobile-breakpoint="800"
           item-key="employeeNumber"
           class="elevation-1"
           @click:row="handleClick"
@@ -177,30 +178,14 @@
           </template>
 
           <!-- Last Login Item Slot -->
-          <template v-slot:[`item.lastLogin`]="{ item }">
-            <v-hover v-slot="{ hover }">
-              <p
-                v-if="userIsAdmin() && hover && item.lastLogin !== undefined"
-                :class="{ inactiveStyle: isInactive(item), selectFocus: isFocus(item) }"
-                class="mb-0"
-              >
-                {{ moment(item.lastLogin).format('MMM Do, YYYY HH:mm:ss') }}
-              </p>
-              <p
-                v-else-if="userIsAdmin() && item.lastLogin !== undefined"
-                :class="{ inactiveStyle: isInactive(item), selectFocus: isFocus(item) }"
-                class="mb-0"
-              >
-                {{ moment(item.lastLogin).format('MMM Do, YYYY') }}
-              </p>
-              <p
-                v-else-if="userIsAdmin()"
-                :class="{ inactiveStyle: isInactive(item), selectFocus: isFocus(item) }"
-                class="mb-0"
-              >
-                {{ item.lastLogin }}
-              </p>
-            </v-hover>
+          <template v-slot:[`item.lastLoginSeconds`]="{ item }">
+            <p
+              v-if="userIsAdmin()"
+              :class="{ inactiveStyle: isInactive(item), selectFocus: isFocus(item) }"
+              class="mb-0"
+            >
+              {{ getLoginDate(item) }}
+            </p>
           </template>
 
           <!-- Date Item Slot -->
@@ -227,7 +212,7 @@
         <br />
 
         <!-- Download employee csv button -->
-        <v-card-actions>
+        <v-card-actions class="justify-end">
           <convert-employees-to-csv
             v-if="userIsAdmin()"
             :midAction="midAction"
@@ -359,6 +344,22 @@ function filterEmployees() {
 } // filterEmployees
 
 /**
+ * Returns a human readable date from item.lastLogin. Stores a sortable int as item.lastLoginSeconds for sorting purposes.
+ * @param {item} item - the employee
+ */
+function getLoginDate(item) {
+  let date = item.lastLogin;
+
+  if (date) {
+    let momentDate = moment(date, 'MMM Do, YYYY HH:mm:ss'); //formatting taken from Callback.vue
+    item.lastLoginSeconds = parseInt(momentDate.format('X')); //seconds
+    date = momentDate.format('MMM Do, YYYY HH:mm'); //what's displayed
+  }
+
+  return date;
+} // getLoginDate
+
+/**
  * handles click event of the employee table entry
  *
  * @param item - the employee
@@ -393,11 +394,6 @@ function isFocus(item) {
 async function refreshEmployees() {
   this.loading = true; // set loading status to true
   this.employees = this.$store.getters.employees; // get all employees
-  this.employees.forEach((currentEmp) => {
-    if (currentEmp.lastLogin) {
-      currentEmp.lastLogin = moment(currentEmp.lastLogin, ['MMM Do, YYYY HH:mm:ss', 'YYYY-MM-DD HH:mm:ss']);
-    }
-  });
   this.filterEmployees(); // filter employees
   this.expanded = []; // collapse any expanded rows in the database
 
@@ -496,14 +492,17 @@ async function created() {
   // only refresh employees if data is in store. Otherwise, set loading and wait in watcher
   this.storeIsPopulated ? await this.refreshEmployees() : (this.loading = true);
 
-  // remove employee action button header if user view
+  // remove admin-only actions if user is not admin (by default everything is included)
+  const adminSpecific = ['lastLoginSeconds']; // requires admin role, NOT manager
+  const adminPermissions = ['actions']; // requires admin level, including manager
   if (!this.hasAdminPermissions()) {
-    this.headers.pop();
+    this.headers = _.filter(this.headers, (header) => {
+      return !adminPermissions.includes(header.value);
+    });
   }
-  if (this.userIsAdmin()) {
-    this.headers.splice(this.headers.length - 1, 0, {
-      text: 'Last Login',
-      value: 'lastLogin'
+  if (!this.userIsAdmin()) {
+    this.headers = _.filter(this.headers, (header) => {
+      return !adminSpecific.includes(header.value);
     });
   }
 } // created
@@ -602,6 +601,10 @@ export default {
           value: 'email'
         },
         {
+          text: 'Last Login',
+          value: 'lastLoginSeconds'
+        },
+        {
           value: 'actions',
           sortable: false
         }
@@ -657,6 +660,7 @@ export default {
     displayError,
     employeePath,
     filterEmployees,
+    getLoginDate,
     getRole,
     handleClick,
     hasAdminPermissions,

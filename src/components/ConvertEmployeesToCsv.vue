@@ -1,6 +1,6 @@
 <template>
   <!-- Download CSV Button -->
-  <v-btn :disabled="midAction" @click="download()" elevation="2"
+  <v-btn :disabled="midAction" @click="download()" elevation="2" :x-small="isMobile || isSmallScreen"
     ><i class="material-icons">file_download</i>Download All</v-btn
   >
 </template>
@@ -8,6 +8,7 @@
 <script>
 import _ from 'lodash';
 import moment from 'moment-timezone';
+import { isMobile, isSmallScreen } from '@/utils/utils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -350,6 +351,28 @@ function getEducation(edu) {
           str += major;
         });
 
+        if (!_.isEmpty(degree.concentrations)) {
+          str += ' (Concentrations: ';
+          degree.concentrations.forEach((concentration, i) => {
+            if (i != 0) {
+              str += ', ';
+            }
+            str += concentration;
+          });
+          str += ')';
+        }
+
+        if (!_.isEmpty(degree.minors)) {
+          str += ' (Minors: ';
+          degree.minors.forEach((minor, i) => {
+            if (i != 0) {
+              str += ', ';
+            }
+            str += minor;
+          });
+          str += ')';
+        }
+
         str += ' - ' + degree.completionDate;
         result.push(str); // push each degree individually
       });
@@ -409,6 +432,10 @@ function getTechnologies(tech) {
 // |--------------------------------------------------|
 
 export default {
+  computed: {
+    isMobile,
+    isSmallScreen
+  },
   data() {
     return {
       headers: []

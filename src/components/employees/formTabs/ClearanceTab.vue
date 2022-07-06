@@ -44,7 +44,6 @@
             </template>
             <v-date-picker
               v-model="clearance.grantedDate"
-              :max="clearance.expirationDate"
               :min="clearance.submissionDate"
               no-title
               @input="clearance.showGrantedMenu = false"
@@ -52,43 +51,6 @@
           </v-menu>
         </v-col>
         <!-- End Granted Date -->
-        <!-- Expiration Date -->
-        <v-col cols="12" sm="6" md="12" lg="6" class="pt-0">
-          <v-menu
-            v-model="clearance.showExpirationMenu"
-            :close-on-content-click="false"
-            transition="scale-transition"
-            offset-y
-            max-width="290px"
-            min-width="290px"
-          >
-            <template v-slot:activator="{ on, attrs }">
-              <v-text-field
-                ref="formFields"
-                :value="clearance.expirationDate | formatDate"
-                label="Expiration Date"
-                prepend-icon="event_busy"
-                clearable
-                :rules="[...getDateOptionalRules(), dateExpirationRules(cIndex)]"
-                hint="MM/DD/YYYY format"
-                v-mask="'##/##/####'"
-                v-bind="attrs"
-                v-on="on"
-                @click:clear="clearance.expirationDate = null"
-                @blur="clearance.expirationDate = parseEventDate($event)"
-                @input="clearance.showExpirationMenu = false"
-                @focus="clearanceElement = clearance"
-              ></v-text-field>
-            </template>
-            <v-date-picker
-              v-model="clearance.expirationDate"
-              :min="minExpiration(cIndex)"
-              no-title
-              @input="clearance.showExpirationMenu = false"
-            ></v-date-picker>
-          </v-menu>
-        </v-col>
-        <!-- End Expiration Date -->
         <!-- Submission Date -->
         <v-col cols="12" sm="6" md="12" lg="6" class="pt-0">
           <v-menu
@@ -128,78 +90,18 @@
         <!-- End Submission Date -->
       </v-row>
 
-      <!-- Poly Dates -->
-      <v-menu
-        ref="polyMenu"
-        v-model="clearance.showPolyMenu"
-        :close-on-content-click="false"
-        :return-value.sync="clearance.polyDates"
-        transition="scale-transition"
-        offset-y
-        min-width="290px"
-      >
-        <template v-slot:activator="{ on, attrs }">
-          <v-combobox
-            :value="clearance.polyDates | formatDates"
-            multiple
-            label="Poly Dates"
-            prepend-icon="event"
-            clearable
-            readonly
-            v-bind="attrs"
-            v-on="on"
-            @click:clear="clearance.polyDates = []"
-            @input="clearance.showPolyMenu = false"
-          ></v-combobox>
-        </template>
-        <v-date-picker v-model="clearance.polyDates" :min="clearance.submissionDate" multiple no-title scrollable>
-          <v-spacer></v-spacer>
-          <v-btn text color="primary" @click="clearance.showPolyMenu = false">Cancel</v-btn>
-          <v-btn text color="primary" @click="$refs.polyMenu[cIndex].save(clearance.polyDates)">OK</v-btn>
-        </v-date-picker>
-      </v-menu>
-      <!-- End Poly Dates -->
+      <!-- Badge Number -->
+      <v-text-field
+        v-model="clearance.badgeNum"
+        prepend-icon="mdi-badge-account-outline"
+        counter="5"
+        label="Badge Number"
+        clearable
+        @blur="capitalizeBadges(clearance)"
+      ></v-text-field>
+      <!-- End Badge Number -->
 
-      <!-- Adjudication Dates -->
-      <v-menu
-        ref="adjudicationMenu"
-        v-model="clearance.showAdjudicationMenu"
-        :close-on-content-click="false"
-        :return-value.sync="clearance.adjudicationDates"
-        transition="scale-transition"
-        offset-y
-        min-width="290px"
-      >
-        <template v-slot:activator="{ on, attrs }">
-          <v-combobox
-            :value="clearance.adjudicationDates | formatDates"
-            multiple
-            label="Adjudication Dates"
-            prepend-icon="event"
-            clearable
-            readonly
-            v-bind="attrs"
-            v-on="on"
-            @click:clear="clearance.adjudicationDates = []"
-          ></v-combobox>
-        </template>
-        <v-date-picker
-          v-model="clearance.adjudicationDates"
-          :min="clearance.submissionDate"
-          multiple
-          no-title
-          scrollable
-        >
-          <v-spacer></v-spacer>
-          <v-btn text color="primary" @click="clearance.showAdjudicationMenu = false">Cancel</v-btn>
-          <v-btn text color="primary" @click="$refs.adjudicationMenu[cIndex].save(clearance.adjudicationDates)"
-            >OK</v-btn
-          >
-        </v-date-picker>
-      </v-menu>
-      <!-- End Adjudication Dates -->
-
-      <!-- Badge Expiration date -->
+      <!-- Badge Expiration Date -->
       <v-menu
         v-model="clearance.showBadgeMenu"
         :close-on-content-click="false"
@@ -233,7 +135,9 @@
           @input="clearance.showBadgeMenu = false"
         ></v-date-picker>
       </v-menu>
-      <!-- BI Dates -->
+      <!-- End Badge Expiration Dxate -->
+
+      <!-- Bi Dates -->
       <v-menu
         ref="biMenu"
         v-model="clearance.showBIMenu"
@@ -249,12 +153,16 @@
             multiple
             label="BI Dates"
             prepend-icon="event"
-            clearable
             readonly
+            clearable
             v-bind="attrs"
             v-on="on"
             @click:clear="clearance.biDates = []"
-          ></v-combobox>
+          >
+            <template #selection="{ item }">
+              <v-chip outlined close @click:close="removeBiDate(item, cIndex)">{{ item }}</v-chip>
+            </template>
+          </v-combobox>
         </template>
         <v-date-picker v-model="clearance.biDates" :min="clearance.submissionDate" multiple no-title scrollable>
           <v-spacer></v-spacer>
@@ -262,7 +170,86 @@
           <v-btn text color="primary" @click="$refs.biMenu[cIndex].save(clearance.biDates)">OK</v-btn>
         </v-date-picker>
       </v-menu>
-      <!-- End BI Dates -->
+      <!-- End Bi Dates -->
+
+      <!-- Adjudication Dates -->
+      <v-menu
+        ref="adjudicationMenu"
+        v-model="clearance.showAdjudicationMenu"
+        :close-on-content-click="false"
+        :return-value.sync="clearance.adjudicationDates"
+        transition="scale-transition"
+        offset-y
+        min-width="290px"
+      >
+        <template v-slot:activator="{ on, attrs }">
+          <v-combobox
+            :value="clearance.adjudicationDates | formatDates"
+            multiple
+            label="Adjudication Dates"
+            prepend-icon="event"
+            clearable
+            readonly
+            v-bind="attrs"
+            v-on="on"
+            @click:clear="clearance.adjudicationDates = []"
+          >
+            <template #selection="{ item }">
+              <v-chip outlined close @click:close="removeAdjDate(item, cIndex)">{{ item }}</v-chip>
+            </template>
+          </v-combobox>
+        </template>
+        <v-date-picker
+          v-model="clearance.adjudicationDates"
+          :min="clearance.submissionDate"
+          multiple
+          no-title
+          scrollable
+        >
+          <v-spacer></v-spacer>
+          <v-btn text color="primary" @click="clearance.showAdjudicationMenu = false">Cancel</v-btn>
+          <v-btn text color="primary" @click="$refs.adjudicationMenu[cIndex].save(clearance.adjudicationDates)"
+            >OK</v-btn
+          >
+        </v-date-picker>
+      </v-menu>
+      <!-- End Adjudication Dates -->
+
+      <!-- Poly Dates -->
+      <v-menu
+        ref="polyMenu"
+        v-model="clearance.showPolyMenu"
+        :close-on-content-click="false"
+        :return-value.sync="clearance.polyDates"
+        transition="scale-transition"
+        offset-y
+        min-width="290px"
+      >
+        <template v-slot:activator="{ on, attrs }">
+          <v-combobox
+            :value="clearance.polyDates | formatDates"
+            multiple
+            label="Poly Dates"
+            prepend-icon="event"
+            clearable
+            readonly
+            v-bind="attrs"
+            v-on="on"
+            @click:clear="clearance.polyDates = []"
+            @input="clearance.showPolyMenu = false"
+          >
+            <template #selection="{ item }">
+              <v-chip outlined close @click:close="removePolyDate(item, cIndex)">{{ item }}</v-chip>
+            </template>
+          </v-combobox>
+        </template>
+        <v-date-picker v-model="clearance.polyDates" :min="clearance.submissionDate" multiple no-title scrollable>
+          <v-spacer></v-spacer>
+          <v-btn text color="primary" @click="clearance.showPolyMenu = false">Cancel</v-btn>
+          <v-btn text color="primary" @click="$refs.polyMenu[cIndex].save(clearance.polyDates)">OK</v-btn>
+        </v-date-picker>
+      </v-menu>
+      <!-- End Poly Dates -->
       <div align="center">
         <v-tooltip bottom slot="append-outer">
           <template v-slot:activator="{ on }">
@@ -323,13 +310,11 @@ function addClearance() {
     adjudicationDates: [],
     biDates: [],
     badgeExpirationDate: null,
-    expirationDate: null,
     grantedDate: null,
     polyDates: [],
     showAdjudicationMenu: false,
     showBadgeMenu: false,
     showBIMenu: false,
-    showExpirationMenu: false,
     showGrantedMenu: false,
     showPolyMenu: false,
     showSubmissionMenu: false,
@@ -337,6 +322,13 @@ function addClearance() {
     type: null
   });
 } // addClearance
+
+/**
+ * Capitalize all badge numbers.
+ */
+function capitalizeBadges(clearance) {
+  clearance.badgeNum = clearance.badgeNum.toUpperCase();
+} // capitalizeBadges
 
 /**
  * Deletes a clearance.
@@ -377,8 +369,7 @@ function isBefore(firstDate, secondDate, errMessage) {
 
 /**
  * Return the maximum available date to be selected for submission date. Returns the granted date if it exists.
- * Returns the expiration date if the expiration date exists and the granted date does not exists. Returns null if
- * neither the granted date or expiration date exist.
+ * Returns null if the granted date doesn't exist.
  *
  * @param cIndex - array index of clearance
  * @return string - maximum (latest possible) date
@@ -388,9 +379,6 @@ function maxSubmission(cIndex) {
   if (this.editedClearances[cIndex].grantedDate) {
     // submission date is before granted date
     max = moment(this.editedClearances[cIndex].grantedDate, ISOFORMAT);
-  } else if (this.editedClearances[cIndex].expirationDate) {
-    // submission date is before expiration date
-    max = moment(this.editedClearances[cIndex].expirationDate, ISOFORMAT);
   }
 
   // check submission date is before any poly dates
@@ -473,6 +461,48 @@ function populateDropDowns() {
 } // populateDropDowns
 
 /**
+ * Removes the desired date from the right clearance.
+ *
+ * @param item - the date to remove
+ * @param index - the clearance index
+ */
+function removeAdjDate(item, index) {
+  const itemDate = moment(item);
+  this.editedClearances[index].adjudicationDates = this.editedClearances[index].adjudicationDates.filter((date) => {
+    let dateConvert = moment(date);
+    return !dateConvert.isSame(itemDate);
+  });
+} // removeAdjDate
+
+/**
+ * Removes the desired date from the right clearance.
+ *
+ * @param item - the date to remove
+ * @param index - the clearance index
+ */
+function removeBiDate(item, index) {
+  const itemDate = moment(item);
+  this.editedClearances[index].biDates = this.editedClearances[index].biDates.filter((date) => {
+    let dateConvert = moment(date);
+    return !dateConvert.isSame(itemDate);
+  });
+} // removeBiDate
+
+/**
+ * Removes the desired date from the right clearance.
+ *
+ * @param item - the date to remove
+ * @param index - the clearance index
+ */
+function removePolyDate(item, index) {
+  const itemDate = moment(item);
+  this.editedClearances[index].polyDates = this.editedClearances[index].polyDates.filter((date) => {
+    let dateConvert = moment(date);
+    return !dateConvert.isSame(itemDate);
+  });
+} // removePolyDate
+
+/**
  * Validate all input fields are valid. Emit to parent the error status.
  */
 function validateFields() {
@@ -542,14 +572,6 @@ export default {
               'Badge expiration date must come after grant and submission date'
           : true;
       },
-      dateExpirationRules: (index) => {
-        let currClearance = this.editedClearances[index];
-        return currClearance.grantedDate && currClearance.expirationDate && currClearance.submissionDate
-          ? (moment(currClearance.expirationDate).isAfter(moment(currClearance.grantedDate)) &&
-              moment(currClearance.expirationDate).isAfter(moment(currClearance.submissionDate))) ||
-              'Expiration date must come after grant and submission date'
-          : true;
-      },
       dateSubmissionRules: (index) => {
         let currClearance = this.editedClearances[index];
         return currClearance.grantedDate && currClearance.submissionDate
@@ -560,10 +582,9 @@ export default {
       editedClearances: _.cloneDeep(this.model), // stores edited clearances info
       dateGrantedRules: (index) => {
         let currClearance = this.editedClearances[index];
-        return currClearance.grantedDate && currClearance.expirationDate && currClearance.submissionDate
-          ? (moment(currClearance.grantedDate).isAfter(moment(currClearance.submissionDate)) &&
-              moment(currClearance.grantedDate).isBefore(moment(currClearance.expirationDate))) ||
-              'Grant date must lie between submission and expiration date'
+        return currClearance.grantedDate && currClearance.submissionDate
+          ? moment(currClearance.grantedDate).isAfter(moment(currClearance.submissionDate)) ||
+              'Grant date must be after the submission date'
           : true;
       },
       duplicateClearanceTypes: (cIndex) => {
@@ -582,6 +603,7 @@ export default {
   },
   methods: {
     addClearance,
+    capitalizeBadges,
     formatDate,
     deleteClearance,
     getDateOptionalRules,
@@ -594,6 +616,9 @@ export default {
     parseDate,
     parseEventDate,
     populateDropDowns,
+    removeAdjDate,
+    removeBiDate,
+    removePolyDate,
     validateFields
   },
   props: ['model', 'validating'],

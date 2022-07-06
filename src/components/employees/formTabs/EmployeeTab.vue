@@ -25,6 +25,7 @@
       ></v-text-field>
       <v-checkbox
         class="mt-0"
+        id="employeeMiddleBox"
         label="Do not have a middle name"
         v-model="editedEmployee.noMiddleName"
         @click="editedEmployee.middleName = null"
@@ -82,9 +83,18 @@
         label="Job Role (optional)"
       ></v-combobox>
 
+      <!-- AIN -->
+      <v-text-field
+        id="agencyIdentificationNumber"
+        ref="formFields"
+        v-model="editedEmployee.agencyIdentificationNumber"
+        label="Agency Identification Number"
+        data-vv-name="Agency Identification Number"
+      ></v-text-field>
+
       <!-- Employee Role -->
       <v-autocomplete
-        v-if="!loading && (userIsAdmin() || (userIsManager() && !userIsEmployee()))"
+        v-if="(!loading && userIsAdmin()) || (userIsManager() && !userIsEmployee())"
         id="employeeRole"
         ref="formFields"
         :items="permissions"
@@ -679,6 +689,7 @@ export default {
   created,
   data() {
     return {
+      agencyIdentificationNumber: '',
       deptDateFormatted: null, // formatted departure date
       departureMenu: false, // display depature menu
       editedEmployee: _.cloneDeep(this.model), //employee that can be edited

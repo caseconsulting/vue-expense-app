@@ -2,58 +2,83 @@
   <div>
     <v-container fluid>
       <v-row>
-        <v-col cols="2">
+        <v-col cols="6" xl="3" lg="3" md="6" class="my-0 pb-lg-2 pb-md-0">
           <v-autocomplete
             id="reportsDataType"
             v-model="dataType"
             :items="dataTypes"
+            :filter="customFilter"
             label="Type of Data"
+            auto-select-first
           ></v-autocomplete>
         </v-col>
-        <v-col>
+        <v-col cols="6" xl="3" lg="3" md="6" class="my-0 pb-0">
           <v-autocomplete
             id="employeesSearch"
             v-model="search"
-            :filter="customFilter"
+            :filter="customEmployeeFilter"
             :items="employees"
             label="Search By Employee Name"
+            auto-select-first
             clearable
+            @change="refreshList()"
             @click:clear="
               search = null;
               refreshList();
             "
           ></v-autocomplete>
         </v-col>
-        <v-col v-if="dataType === 'Contracts'">
+        <v-col v-if="dataType === 'Contracts'" cols="6" xl="3" lg="3" md="6" class="my-0 pb-3 pt-xl-3 pt-lg-3 pt-md-0">
           <v-autocomplete
             v-model="contract"
             :items="contractsDropDown"
+            :filter="customFilter"
             label="Search By Contract"
             clearable
+            auto-select-first
             @change="refreshList()"
             @click:clear="contract = null"
           >
           </v-autocomplete>
         </v-col>
-        <v-col v-if="dataType === 'Contracts'">
+        <v-col v-if="dataType === 'Contracts'" cols="6" xl="3" lg="3" md="6" class="my-0 pb-0 pt-xl-3 pt-lg-3 pt-md-0">
           <v-autocomplete
             v-model="prime"
             :items="primesDropDown"
+            :filter="customFilter"
             label="Search By Prime"
             clearable
+            auto-select-first
             @change="refreshList()"
             @click:clear="prime = null"
           ></v-autocomplete>
         </v-col>
-        <v-col v-else-if="dataType === 'Job Roles'">
+        <v-col v-else-if="dataType === 'Job Roles'" cols="6" xl="3" lg="3" md="6" class="my-0 pb-3">
           <v-autocomplete
             v-model="dataTypeSearch"
             :items="dataTypeDropDown"
             :label="`Search By ${dataType}`"
+            :filter="customFilter"
             clearable
+            auto-select-first
             @change="refreshDataTypeList()"
             @click:clear="dataTypeSearch = null"
           ></v-autocomplete>
+        </v-col>
+        <v-col v-else-if="dataType === 'Security Info'" cols="6" xl="3" lg="3" md="6" class="my-0 pb-3">
+          <v-autocomplete
+            v-model="requestedDate"
+            :items="dataTypeDropDown"
+            :label="`Search By Badge Expiration`"
+            :filter="customFilter"
+            clearable
+            auto-select-first
+            @change="refreshDataTypeList()"
+            @click:clear="requestedDate = null"
+          ></v-autocomplete>
+        </v-col>
+        <v-col>
+          <v-checkbox v-model="showInactiveEmployees" label="Show Inactive Users"></v-checkbox>
         </v-col>
       </v-row>
 
@@ -66,19 +91,43 @@
         :expanded.sync="expanded"
         :loading="loading"
         :items-per-page.sync="itemsPerPage"
-        :search="search"
         class="elevation-1"
         @click:row="handleClick"
       >
+        <!-- Employee Number Slot -->
         <template v-slot:[`item.employeeNumber`]="{ item }">
-          <p :class="{ selectFocus: isFocus(item) } + ' mb-0'">
+          <p :class="{ selectFocus: isFocus(item), inactive: item.workStatus <= 0 }" class="mb-0">
             {{ item.employeeNumber }}
           </p>
         </template>
-        <!-- First Name Item Slot -->
+        <!-- Full Name Item Slot -->
         <template v-slot:[`item.fullName`]="{ item }">
-          <p :class="{ selectFocus: isFocus(item) } + ' mb-0'">
+          <p :class="{ selectFocus: isFocus(item), inactive: item.workStatus <= 0 }" class="mb-0">
             {{ getFullName(item) }}
+          </p>
+        </template>
+        <!-- Prime/Contracts Item Slot -->
+        <template v-slot:[`item.contractNames`]="{ item }">
+          <p :class="{ selectFocus: isFocus(item), inactive: item.workStatus <= 0 }" class="mb-0">
+            {{ item.contractNames }}
+          </p>
+        </template>
+        <!-- Email Name Item Slot -->
+        <template v-slot:[`item.email`]="{ item }">
+          <p :class="{ selectFocus: isFocus(item), inactive: item.workStatus <= 0 }" class="mb-0">
+            {{ item.email }}
+          </p>
+        </template>
+        <!-- Clearance Types Slot -->
+        <template v-slot:[`item.clearanceType`]="{ item }">
+          <p :class="{ selectFocus: isFocus(item), inactive: item.workStatus <= 0 }" class="mb-0">
+            {{ getClearanceType(item.clearances, item) }}
+          </p>
+        </template>
+        <!-- Badge Expiration Slot -->
+        <template v-slot:[`item.badgeExpiration`]="{ item }">
+          <p :class="{ selectFocus: isFocus(item), inactive: item.workStatus <= 0 }" class="mb-0">
+            {{ getBadgeExpiration(item.clearances, item) }}
           </p>
         </template>
         <!-- Alert for no search results -->
@@ -92,6 +141,7 @@
 
 <script>
 import _ from 'lodash';
+import moment from 'moment-timezone';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -127,6 +177,10 @@ function buildContractsColumn() {
     text: 'Current Contract - Prime',
     value: 'contractNames'
   });
+
+  if (this.headers[3].value === 'badgeExpiration') {
+    this.headers.splice(3, 1); //remove badge exp column
+  }
 } // buildContractsColumn
 
 /**
@@ -137,7 +191,25 @@ function buildJobRolesColumn() {
     text: 'Job Role',
     value: 'jobRole'
   });
+
+  if (this.headers[3].value === 'badgeExpiration') {
+    this.headers.splice(3, 1); //remove badge exp column
+  }
 } // buildJobRolesColumn
+
+/**
+ * Replaces the third column with clearance type and adds fourth column with security information.
+ */
+function buildSecurityColumn() {
+  this.headers.splice(2, 1, {
+    text: 'Clearance Type',
+    value: 'clearanceType'
+  });
+  this.headers.splice(3, 0, {
+    text: 'Badge Expiration Date',
+    value: 'badgeExpiration'
+  });
+} // buildSecurityColumn
 
 /**
  * Sets a mapping of employee name to employee id of an expense for the autocomplete options.
@@ -164,14 +236,28 @@ function constructAutoComplete(empData) {
 } // constructAutoComplete
 
 /**
+ * Custom filter for contract autocomplete options.
+ *
+ * @param item - contract object
+ * @param queryText - query to use to filter
+ * @return string - the filtered contract
+ */
+function customFilter(item, queryText) {
+  const query = queryText ? queryText.trim() : '';
+  const contract = item ? item.toLowerCase() : '';
+  const queryContainsContract = contract.indexOf(query.toString().toLowerCase()) >= 0;
+  return queryContainsContract;
+} // customFilter
+
+/**
  * Custom filter for employee autocomplete options.
  *
  * @param item - employee object
  * @param queryText - query to use to filter
  * @return string - the filtered name
  */
-function customFilter(item, queryText) {
-  const query = queryText ? queryText : '';
+function customEmployeeFilter(item, queryText) {
+  const query = queryText ? queryText.trim() : '';
   const nickNameFullName = item.nickname ? `${item.nickname} ${item.lastName}` : '';
   const firstNameFullName = `${item.firstName} ${item.lastName}`;
 
@@ -181,7 +267,7 @@ function customFilter(item, queryText) {
   const queryContainsEmployeeNumber = item.value.toString().indexOf(query.toString()) >= 0;
 
   return queryContainsNickName || queryContainsFirstName || queryContainsEmployeeNumber;
-} // customFilter
+} // customEmployeeFilter
 
 /**
  * sets midAction boolean to false
@@ -192,6 +278,58 @@ function customFilter(item, queryText) {
 function employeePath(item) {
   return `/employee/${item.employeeNumber}`;
 } // employeePath
+
+/**
+ * Returns the expiration dates for all clearances in natural readable format. The sorting key of item.badgeExpiration
+ * is stored just as the int form of the moment to get accurate sorting.
+ *
+ * @param clearances - the list of employee clearances
+ * @param item - the employee
+ * @return String - all badge expiration dates
+ */
+function getBadgeExpiration(clearances, item) {
+  let dates = [];
+  let fDate = 100000000000000000;
+
+  // used for sorting... only store the lowest date (closest to expire)
+  _.forEach(clearances, (clearance) => {
+    if (clearance.badgeExpirationDate) {
+      let newDate = parseInt(moment(clearance.badgeExpirationDate).format('X')); // seconds timestamp -> int
+      dates.push(newDate);
+      if (newDate < fDate) fDate = newDate;
+    }
+  });
+
+  dates = _.orderBy(dates);
+
+  // used for displaying
+  dates = _.map(dates, (date) => {
+    return moment(date, 'X').format('MMM Do, YYYY');
+  });
+
+  item.badgeExpiration = fDate;
+
+  return _.join(dates, ' | ');
+}
+
+/**
+ * Returns the expiration dates for all clearances.
+ *
+ * @param clearances - the list of employee clearances
+ * @param item - the employee
+ * @return String - all clearance types
+ */
+function getClearanceType(clearances, item) {
+  let types = [];
+  let clearanceList = _.sortBy(clearances, (c) => c.badgeExpirationDate);
+  _.forEach(clearanceList, (clearance) => {
+    if (clearance.type) {
+      types.push(clearance.type);
+    }
+  });
+  item.clearanceType = _.join(types, ' | ');
+  return item.clearanceType;
+}
 
 /**
  * Gets the full name of an employee.
@@ -228,12 +366,36 @@ function isFocus(item) {
  * Populates the drop down for the filter based on the data type that is chosen.
  */
 function populateDataTypeDropDowns() {
-  // reset dropdowwn after each query
+  // reset dropdown after each query
   this.dataTypeDropDown = [];
-  if (this.dataType === 'Job Roles') {
-    let employeeJobRoles = _.map(this.employeesInfo, (employee) => employee.jobRole);
+  if (this.dataType === 'Security Info') {
+    // formats the badge exp dropdowns to include the date in the future
+    let dateRanges = ['30 Days', '60 Days', '90 Days', '180 Days', '365 Days'];
+    _.forEach(dateRanges, (date) => {
+      let search = date.split(' ');
+      let num = parseInt(search[0]);
+      let dateType = search[1].toLowerCase();
+      let futureDate = moment().add(num, dateType).format('MMM Do, YYYY');
+      this.dataTypeDropDown.push(date + ' (' + futureDate + ')');
+    });
+
+    if (this.search) {
+      // once the dropdown is in place, we want to only show options that match
+      // dates found in filteredEmployees
+      this.dataTypeDropDown = _.filter(this.dataTypeDropDown, (date) => {
+        let result = this.searchBadgeExpirationDates(date, true);
+        return result;
+      });
+    }
+
+    // refresh the employees autocomplete list to be those that match the query
+    this.constructAutoComplete(this.filteredEmployees);
+  } else if (this.dataType === 'Job Roles') {
+    let employeeJobRoles = _.map(this.filteredEmployees, (employee) => employee.jobRole);
     employeeJobRoles = _.compact(employeeJobRoles);
     _.forEach(employeeJobRoles, (jobRole) => this.dataTypeDropDown.push(jobRole));
+    // refresh the employees autocomplete list to be those that match the query
+    this.constructAutoComplete(this.filteredEmployees);
   } else {
     this.filteredEmployees = this.employeesInfo;
   }
@@ -248,25 +410,45 @@ function populateDropDowns(employees) {
   //resets dropdowns after each query
   this.contractsDropDown = [];
   this.primesDropDown = [];
-  this.employeeNames = [];
-  //creates list of employee names for dropdown
-  _.forEach(employees, (emp) => {
-    this.employeeNames.push(`${emp.firstName} ${emp.lastName}`);
-    emp.fullName = `${emp.firstName} ${emp.lastName}`;
-  });
-  let employeesContracts = _.map(employees, (employee) => employee.contracts); // extract contracts
-  employeesContracts = _.compact(employeesContracts); // remove falsey values
+
+  // refresh the employees autocomplete list to be those that match the query
+  this.constructAutoComplete(employees);
+
+  let origContracts = _.map(employees, (employee) => employee.contracts); // extract contracts
+  let employeesContracts = _.compact(origContracts); // remove falsey values
+
+  // if there were any employees without a contract they would have been filtered out
+  // and we want to show No Contract as an option in the dropdown
+  if (origContracts.length !== employeesContracts.length) {
+    this.contractsDropDown.push(this.noContractPlaceholder);
+  }
+
   // loop employees
   _.forEach(employeesContracts, (contracts) => {
     // loop contracts
     _.forEach(contracts, (contract) => {
-      // loop through projects to test if contract is current (this was added to make sure only current contracts/primes were listed in Reports autocomplete dropdowns)
+      // loop through projects to test if contract is current
+      // (this was added to make sure only current contracts/primes were listed in Reports autocomplete dropdowns)
       _.forEach(contract, (projects) => {
         // loop project
         _.forEach(projects, (project) => {
           if (project.presentDate) {
-            this.contractsDropDown.push(contract.name); // add contract name
-            this.primesDropDown.push(contract.prime); // add contract prime
+            if (this.contract) {
+              // limit the prime dropdown to only those that belong to the contract
+              if (contract.name === this.contract) {
+                this.contractsDropDown.push(contract.name);
+                this.primesDropDown.push(contract.prime);
+              }
+            } else if (this.prime) {
+              // limit the contract dropdown to only those that belong to the prime
+              if (contract.prime === this.prime) {
+                this.contractsDropDown.push(contract.name);
+                this.primesDropDown.push(contract.prime);
+              }
+            } else {
+              this.contractsDropDown.push(contract.name); // add contract name
+              this.primesDropDown.push(contract.prime); // add contract prime
+            }
           }
         });
       });
@@ -278,9 +460,10 @@ function populateDropDowns(employees) {
  * Refresh the filter dropdown to display matched data to the search.
  */
 function refreshDataTypeList() {
-  if (this.dataTypeSearch) {
+  if (this.dataTypeSearch || this.requestedDate) {
     this.searchDataType();
-  } else {
+  } else if (!this.search) {
+    // if you aren't filtering for one person in particular
     this.filteredEmployees = this.employeesInfo;
   }
   this.populateDataTypeDropDowns();
@@ -297,14 +480,30 @@ function refreshList() {
     this.searchPrime();
   }
   if (this.search) {
-    this.filteredEmployees = _.filter(this.filteredEmployees, (employee) => {
-      return employee.fullName.includes(this.search);
+    this.filteredEmployees = _.filter(this.employeesInfo, (employee) => {
+      return employee.employeeNumber == this.search;
     });
   }
-  if (this.search === null && this.contract === null && this.prime === null) {
+  if (this.search === null && this.contract === null && this.prime === null && this.dataTypeSearch === null) {
     this.filteredEmployees = this.employeesInfo;
   }
+
   this.populateDropDowns(this.filteredEmployees);
+
+  // updates the job roles dropdown
+  if (this.dataType === 'Job Roles') {
+    if (this.dataTypeSearch) {
+      this.searchDataType(); // refilter employees based on the specified job role
+    } else {
+      this.populateDataTypeDropDowns(); // otherwise populate the dropdown with info
+    }
+  } else if (this.dataType === 'Security Info') {
+    if (this.requestedDate) {
+      this.searchDataType(); // refilter employees based on the specified badge exp date
+    } else {
+      this.populateDataTypeDropDowns(); // otherwise populate the dropdown with info
+    }
+  }
 } // refreshList
 
 /**
@@ -321,6 +520,10 @@ function searchContract() {
           );
         } else return false;
       });
+    } else if (this.contract === this.noContractPlaceholder) {
+      this.filteredEmployees = _.filter(this.employeesInfo, (employee) => {
+        return !employee.contractNames;
+      });
     } else {
       this.filteredEmployees = _.filter(this.employeesInfo, (employee) => {
         if (employee.contractNames) {
@@ -332,7 +535,8 @@ function searchContract() {
 } // searchContract
 
 /**
- * Checks the filter query with the dropdown data to see if anything matches. Edits the data table based on the selected query.
+ * Checks the filter query with the dropdown data to see if anything matches.
+ * Edits the data table based on the selected query.
  */
 function searchDataType() {
   if (this.dataType === 'Job Roles') {
@@ -344,9 +548,80 @@ function searchDataType() {
           return false;
         }
       });
+      if (this.search) {
+        // if there is a desired employee search then only show that employee
+        this.filteredEmployees = _.filter(this.employeesInfo, (employee) => {
+          return employee.employeeNumber == this.search;
+        });
+      }
+    }
+  } else if (this.dataType === 'Security Info') {
+    this.filteredEmployees = [];
+    if (this.requestedDate) {
+      this.searchBadgeExpirationDates(this.requestedDate);
+      if (this.search) {
+        // if there is a desired employee search then only show that employee
+        this.filteredEmployees = _.filter(this.employeesInfo, (employee) => {
+          return employee.employeeNumber == this.search;
+        });
+        return; // don't do the rest of the moment calculations below
+      }
     }
   }
 } // searchDataType
+
+/**
+ * If there is a desired badge expiration date, this will calculate what dates fall within the range.
+ *
+ * @param requestedDate - the requested search for the badge expiration date
+ * @param forDropdown - used to limit the badge expiration dropdown options based on if there were dates found in that range
+ * @return boolean - if we are trying to filter the badge dropdowns, return true if the requestedDate was found
+ */
+function searchBadgeExpirationDates(requestedDate, forDropdown) {
+  let search = requestedDate.split(' ');
+  let num = parseInt(search[0]);
+  let dateType = search[1].toLowerCase();
+  let now = parseInt(moment().format('X'));
+  let upperBound = parseInt(moment().add(num, dateType).format('X'));
+  let foundEmployees = [];
+
+  if (this.filteredEmployees.length > 0) {
+    // this means we already filtered by something so we want to restrict the dropdown
+    this.foundEmployees = _.filter(this.filteredEmployees, (employee) => {
+      let found = [];
+      // if they have no badge expirations, then badgeExpiration will be the big number
+      if (employee.badgeExpiration < 100000000000000000) {
+        // loop through every employee's clearances and see if any of them are in the selected range
+        _.forEach(employee.clearances, (clearance) => {
+          let clearanceDate = parseInt(moment(clearance.badgeExpirationDate).format('X')); // seconds timestamp -> int
+          if (clearanceDate > now && clearanceDate <= upperBound && !foundEmployees.includes(employee)) {
+            found.push(employee);
+          }
+        });
+      }
+      return found.length > 0; // used for the filter function. only keeps employees that met the date criteria
+    });
+  } else {
+    // this means we havent already filtered so we only want to filter the employees
+    this.foundEmployees = _.filter(this.employeesInfo, (employee) => {
+      // if they have no badge expirations, then badgeExpiration will be the big number
+      if (employee.badgeExpiration < 100000000000000000) {
+        // loop through every employee's clearances and see if any of them are in the selected range
+        _.forEach(employee.clearances, (clearance) => {
+          let clearanceDate = parseInt(moment(clearance.badgeExpirationDate).format('X')); // seconds timestamp -> int
+          if (clearanceDate > now && clearanceDate <= upperBound && !foundEmployees.includes(employee))
+            foundEmployees.push(employee);
+        });
+      }
+    });
+  }
+  if (!forDropdown) {
+    this.filteredEmployees = foundEmployees;
+    return;
+  } else {
+    return this.foundEmployees.length > 0; // used to filter the dropdowns in populateDataTypeDropDowns
+  }
+} // searchBadgeExpirationDates
 
 /**
  * Clears the other search forms and searches the table by prime
@@ -372,6 +647,30 @@ function searchPrime() {
   }
 } // searchPrime
 
+/**
+ * Returns a filtered list of the input with all inactive
+ * employees removed
+ */
+function getActive(employees) {
+  return _.filter(employees, (e) => {
+    return e.workStatus > 0;
+  });
+} // isActive
+
+/**
+ * Swap active/inactive employees and reload the page data (including dropdowns)
+ */
+function setActiveInactive() {
+  this.search = null;
+  this.employeesInfo = this.$store.getters.employees;
+  if (!this.showInactiveEmployees) this.employeesInfo = getActive(this.employeesInfo);
+  this.populateDropDowns(this.employeesInfo);
+  this.constructAutoComplete(this.employeesInfo);
+  this.buildContractsColumn();
+  this.refreshDataTypeList();
+  this.refreshList();
+} // setActiveInactive
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                 LIFECYCLE HOOKS                  |
@@ -383,11 +682,12 @@ function searchPrime() {
  */
 async function created() {
   this.loading = true; // set loading status to true
-  this.employeesInfo = this.$store.getters.employees; // get all employees
+  this.allEmployees = this.$store.getters.employees; // get all employees
+  this.employeesInfo = getActive(this.allEmployees); // default to filtered list
+  this.filteredEmployees = this.employeesInfo; // this one is shown
   this.populateDropDowns(this.employeesInfo);
   this.buildContractsColumn();
-  this.filteredEmployees = this.employeesInfo;
-  this.constructAutoComplete(this.filteredEmployees);
+  this.constructAutoComplete(this.employeesInfo);
   this.loading = false;
 } //created
 
@@ -410,13 +710,31 @@ function watchDataType() {
       case 'Job Roles':
         this.buildJobRolesColumn();
         break;
+      case 'Security Info':
+        this.buildSecurityColumn();
+        break;
       default:
         this.buildContractsColumn();
     }
   }
+
+  // resets the dropdowns and employees list
   this.dataTypeSearch = null;
+  this.search = null;
+  this.contract = null;
+  this.prime = null;
+  this.requestedDate = null;
+  this.filteredEmployees = this.employeesInfo;
+
   this.populateDataTypeDropDowns();
 } // watchDataType
+
+/**
+ * Watches the showInactiveUsers to refilter the table as needed
+ */
+function watchShowInactiveUsers() {
+  this.setActiveInactive();
+}
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -431,13 +749,13 @@ export default {
       contractsDropDown: [],
       contract: null,
       dataType: 'Contracts',
-      dataTypes: ['Contracts', 'Job Roles'],
+      dataTypes: ['Contracts', 'Job Roles', 'Security Info'],
       dataTypeDropDown: [],
       dataTypeSearch: null,
       employees: [],
       employeesInfo: [],
-      employeeNames: [],
       expanded: [],
+      requestedDate: null,
       filteredEmployees: [],
       headers: [
         {
@@ -459,9 +777,11 @@ export default {
       ], // datatable headers
       itemsPerPage: -1,
       loading: false,
+      noContractPlaceholder: ' — No Contract — ',
       prime: null,
       primesDropDown: [],
       search: null, // query text for datatable search field
+      showInactiveEmployees: false,
       sortBy: 'firstName', // sort datatable items
       sortDesc: false
     };
@@ -469,22 +789,36 @@ export default {
   methods: {
     buildContractsColumn,
     buildJobRolesColumn,
+    buildSecurityColumn,
     constructAutoComplete,
+    customEmployeeFilter,
     customFilter,
     employeePath,
+    getBadgeExpiration,
+    getClearanceType,
     getFullName,
+    getActive,
     handleClick,
     isFocus,
     populateDataTypeDropDowns,
     populateDropDowns,
     refreshDataTypeList,
     refreshList,
+    searchBadgeExpirationDates,
     searchContract,
     searchDataType,
-    searchPrime
+    searchPrime,
+    setActiveInactive
   },
   watch: {
-    dataType: watchDataType
+    dataType: watchDataType,
+    showInactiveEmployees: watchShowInactiveUsers
   }
 };
 </script>
+<style lang="scss" scoped>
+@import 'src/assets/styles/styles';
+.inactive {
+  color: $case-red;
+}
+</style>

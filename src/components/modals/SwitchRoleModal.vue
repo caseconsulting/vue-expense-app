@@ -8,13 +8,19 @@
         >
         <v-card-actions class="my-0 py-0">
           <v-radio-group v-model="roleSelected" mandatory>
-            <v-radio v-for="role in roles" :key="role" :label="`${role}`" :value="`${role}`"></v-radio>
+            <v-radio
+              v-for="role in roles"
+              :key="role"
+              :id="role.toLowerCase() + 'Selector'"
+              :label="`${role}`"
+              :value="`${role}`"
+            ></v-radio>
           </v-radio-group>
         </v-card-actions>
         <v-card-actions>
           <v-tooltip top>
             <template v-slot:activator="{ on }">
-              <v-btn v-on="on" class="ma-2" @click="switchRole(false)">Switch</v-btn>
+              <v-btn v-on="on" class="ma-2" id="confirmSwitch" @click="switchRole(false)">Switch</v-btn>
             </template>
             <span>Switch role and redirect to default page</span>
           </v-tooltip>
@@ -102,7 +108,7 @@ export default {
       activate: false, // dialog activator
       roleOriginial: '',
       roleSelected: '',
-      roles: ['Admin', 'User', 'Manager']
+      roles: ['Admin', 'User', 'Manager', 'Intern']
     };
   },
   created,

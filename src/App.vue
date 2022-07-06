@@ -56,14 +56,14 @@
             icon
             target="_blank"
           >
-            <icon :name="link.icon"></icon>
+            <v-icon>{{ link.icon }}</v-icon>
           </v-btn>
         </v-item-group>
 
         <!-- User image and logout -->
         <v-menu bottom offset-y open-on-click v-if="isLoggedIn()">
           <template v-slot:activator="{ on }">
-            <v-avatar id="profile" class="profile-button" size="50" color="grey lighten-4">
+            <v-avatar id="profile" class="profile-button" size="40">
               <img :src="profilePic" alt="avatar" v-on="on" />
             </v-avatar>
           </template>
@@ -75,7 +75,7 @@
               <v-btn id="logoutBtn" text @click="handleLogout()">Logout</v-btn>
             </v-list-item>
             <v-list-item v-if="environment != 'https://app.consultwithcase.com'">
-              <v-btn text @click="switchRole = true">Switch Role</v-btn>
+              <v-btn text id="switchRoleBtn" @click="switchRole = true">Switch Role</v-btn>
             </v-list-item>
           </v-list>
           <!--In MOBILE VIEW/Smaller Screen sizes display all links under the user image dropdown-->
@@ -87,7 +87,7 @@
               <v-btn text @click="handleLogout()">Logout</v-btn>
             </v-list-item>
             <v-list-item v-if="environment != 'https://app.consultwithcase.com'">
-              <v-btn text @click="switchRole = true">Switch Role</v-btn>
+              <v-btn text id="switchRoleBtn" @click="switchRole = true">Switch Role</v-btn>
             </v-list-item>
             <hr role="separator" aria-orientation="horizontal" class="v-divider theme--light" :inset="inset" vertical />
             <div class="v-subheader theme--light">Company Links</div>
@@ -98,7 +98,7 @@
             <hr role="separator" aria-orientation="horizontal" class="v-divider theme--light" :inset="inset" vertical />
             <div class="v-subheader theme--light">Social</div>
             <v-list-item v-for="link in mediaLinks" :key="link.name" :href="link.link" icon target="_blank">
-              <icon :name="link.icon"></icon>
+              <v-icon large>{{ link.icon }}</v-icon>
               <span class="mr-2"> </span>
               <v-list-item-title> {{ link.name }}</v-list-item-title>
             </v-list-item>
@@ -106,11 +106,10 @@
         </v-menu>
         <!-- End user image and logout -->
       </v-app-bar>
-
-      <v-main style="padding: 64px 0px 0px 56px">
-        <badge-expiration-banner v-if="isLoggedIn() && storeIsPopulated" :key="badgeKey" />
+      <v-main class="app-screen">
         <v-container fluid grid-list-lg>
-          <router-view v-if="!loadingCreated"></router-view>
+          <notification-banners v-if="isLoggedIn() && storeIsPopulated" />
+          <router-view></router-view>
         </v-container>
       </v-main>
       <v-footer padless>
@@ -122,7 +121,7 @@
                 id="P"
                 class="black--text"
                 target="_blank"
-                href="https://3.basecamp.com/3097063/buckets/4708396/documents/4907164939"
+                href="https://3.basecamp.com/3097063/buckets/4708396/documents/5099721598"
                 ><strong>Version</strong> {{ version }}</a
               >
             </template>
@@ -143,15 +142,23 @@
 
 <script>
 import { isLoggedIn, logout, getProfile, getTokenExpirationDate, getAccessToken } from '@/utils/auth';
-import { isMobile, storeIsPopulated } from '@/utils/utils';
-import { updateStoreUser, updateStoreEmployees, updateStoreAvatars, updateStoreExpenseTypes } from '@/utils/storeUtils';
-import SwitchRoleModal from '@/components/modals/SwitchRoleModal.vue';
-import MainNav from '@/components/MainNav.vue';
-import TimeOutModal from '@/components/modals/TimeOutModal.vue';
-import TimeOutWarningModal from '@/components/modals/TimeOutWarningModal.vue';
-import BadgeExpirationBanner from '@/components/modals/BadgeExpirationBanner.vue';
+import { isMobile, isSmallScreen, storeIsPopulated } from '@/utils/utils';
+import {
+  updateStoreUser,
+  updateStoreEmployees,
+  updateStoreAvatars,
+  updateStoreBudgets,
+  updateStoreExpenseTypes
+} from '@/utils/storeUtils';
+import { v4 as uuid } from 'uuid';
+import api from '@/shared/api';
 import floorPlan from '@/assets/img/MakeOfficesfloorplan.jpg';
 import moment from 'moment-timezone';
+import MainNav from '@/components/MainNav.vue';
+import NotificationBanners from './components/modals/NotificationBanners.vue';
+import SwitchRoleModal from '@/components/modals/SwitchRoleModal.vue';
+import TimeOutModal from '@/components/modals/TimeOutModal.vue';
+import TimeOutWarningModal from '@/components/modals/TimeOutWarningModal.vue';
 moment.tz.setDefault('America/New_York');
 
 // |--------------------------------------------------|
@@ -223,23 +230,47 @@ async function handleProfile() {
 /**
  * resize the window for small screens
  */
-function onResize() {
-  this.isSmallScreen = window.innerWidth < 960;
-} // onResize
-
-/**
- * resize the window for small screens
- */
 async function populateStore() {
-  await this.updateStoreUser();
-  await this.updateStoreEmployees();
-  await this.updateStoreAvatars();
-  await this.updateStoreExpenseTypes();
+  // login
+  await this.updateStoreUser(); // calling first since uodateStoreExpenseTypes relies on user data
+  let employee = this.$store.getters.user;
+  let lastLogin = localStorage.getItem('lastLogin'); // item is set in Callback.vue
+  if (lastLogin) {
+    employee.lastLogin = lastLogin;
+    await updateEmployee(employee);
+  }
+
+  // runs these api calls in parallel/concurrently? since they are independent of each other
+  await Promise.all([
+    this.updateStoreEmployees(),
+    this.updateStoreAvatars(),
+    this.updateStoreExpenseTypes(),
+    this.updateStoreBudgets()
+  ]);
+  localStorage.removeItem('lastLogin'); // remove from local storage to prevent login audit on refresh
 
   // This is used to help pages know when data is loaded into the store.
   // Otherwise, on reload, pages would try to access the store before it was populated.
   this.$store.dispatch('setStoreIsPopulated', { populated: true });
 } // populateStore
+
+/**
+ * Updates the login date and creates audit for the employee.
+ * @param {employee} employee the employee to update
+ */
+async function updateEmployee(employee) {
+  await Promise.all([
+    api.updateItem(api.EMPLOYEES, employee), // updates last logged in for employee
+    api.createItem(api.AUDIT, {
+      id: uuid(),
+      type: 'login',
+      tags: ['account'],
+      employeeId: employee.id,
+      description: `${employee.firstName} ${employee.lastName} has logged in`,
+      timeToLive: 60
+    })
+  ]); // Create an audit of the success
+} // updateEmployee
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -300,20 +331,9 @@ async function created() {
  * beforeDestroy lifecycle hook - close event listener
  */
 function beforeDestroy() {
-  if (typeof window !== 'undefined') {
-    window.removeEventListener('resize', this.onResize, { passive: true });
-  }
   window.EventBus.$off('relog');
   window.EventBus.$off('badgeExp');
 } //beforeDestroy
-
-/**
- * mounted lifecycle hook - resize window create event listener
- */
-async function mounted() {
-  this.onResize();
-  window.addEventListener('resize', this.onResize, { passive: true });
-} // mounted
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -363,7 +383,7 @@ export default {
       { name: 'Case Information', link: 'https://3.basecamp.com/3097063/buckets/4708396/messages/650777910' },
       { name: 'Basecamp', link: 'https://3.basecamp.com/3097063' },
       { name: 'Net Benefits/Fidelity', link: 'https://nb.fidelity.com/public/nb/default/home' },
-      { name: 'Health Insurance', link: 'https://3.basecamp.com/3097063/buckets/179119/messages/2306027830' },
+      { name: 'Health Insurance', link: 'https://3.basecamp.com/3097063/buckets/179119/messages/4799723388' },
       { name: 'QuickBooks Time', link: 'https://tsheets.intuit.com/page/login_oii' },
       { name: 'ADP', link: 'https://my.adp.com/' },
       { name: 'Life Insurance', link: 'https://www.reliancestandard.com/home/' },
@@ -373,13 +393,12 @@ export default {
       }
     ],
     mediaLinks: [
-      { name: 'Github', link: 'https://github.com/caseconsulting', icon: 'brands/github' },
-      { name: 'LinkedIn', link: 'https://linkedin.com/company/case-consulting-inc', icon: 'brands/linkedin' },
-      { name: 'Youtube', link: 'https://www.youtube.com/channel/UC_oJY4OrOpLNrIBAN7Y-9fA', icon: 'brands/youtube' },
-      { name: 'Twitter', link: 'https://twitter.com/consultwithcase?lang=en', icon: 'brands/twitter' },
-      { name: 'Facebook', link: 'https://www.facebook.com/ConsultwithCase/', icon: 'brands/facebook' }
+      { name: 'Github', link: 'https://github.com/caseconsulting', icon: 'mdi-github' },
+      { name: 'LinkedIn', link: 'https://linkedin.com/company/case-consulting-inc', icon: 'mdi-linkedin' },
+      { name: 'Youtube', link: 'https://www.youtube.com/channel/UC_oJY4OrOpLNrIBAN7Y-9fA', icon: 'mdi-youtube' },
+      { name: 'Twitter', link: 'https://twitter.com/consultwithcase?lang=en', icon: 'mdi-twitter' },
+      { name: 'Facebook', link: 'https://www.facebook.com/ConsultwithCase/', icon: 'mdi-facebook' }
     ],
-    isSmallScreen: false,
     version: null
   }),
   props: {
@@ -387,14 +406,15 @@ export default {
   },
   computed: {
     isMobile,
+    isSmallScreen,
     onUserProfile,
     storeIsPopulated
   },
   components: {
     MainNav,
+    NotificationBanners,
     TimeOutModal,
     TimeOutWarningModal,
-    BadgeExpirationBanner,
     SwitchRoleModal
   },
   methods: {
@@ -402,18 +422,18 @@ export default {
     handleLogout,
     handleProfile,
     isLoggedIn,
-    onResize,
     populateStore,
+    updateEmployee,
     updateStoreUser,
     updateStoreEmployees,
     updateStoreAvatars,
+    updateStoreBudgets,
     updateStoreExpenseTypes
   },
   watch: {
     $route
   },
   beforeDestroy,
-  mounted,
   created
 };
 </script>
@@ -455,9 +475,24 @@ export default {
 
 .profile-button {
   cursor: pointer;
+  border: 1px solid $case-darkgray;
 }
 
 #P {
   text-decoration: none;
+}
+
+// for mobile screen sizes
+@media screen and (max-width: 960px) {
+  .app-screen {
+    padding: 56px 0px 0px 0px;
+  }
+}
+
+// for non-mobile screen sizes
+@media screen and (max-width: 2000px) {
+  .app-screen {
+    padding: 64px 0px 0px 56px !important;
+  }
 }
 </style>

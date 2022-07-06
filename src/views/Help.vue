@@ -17,13 +17,31 @@
           </v-expansion-panel-header>
 
           <!-- Content -->
-          <v-expansion-panel-content v-if="canView(section[1])">
+          <v-expansion-panel-content v-if="section[0] === 'Role Abilities'">
+            <v-data-table
+              v-if="!isMobile"
+              :headers="section[2].headers"
+              :items="section[4].abilities"
+              :items-per-page="-1"
+              class="elevation-1 grey lighten-3"
+              mobile-breakpoint="0"
+            ></v-data-table>
+            <v-data-table
+              v-else
+              :headers="section[3].headersMobile"
+              :items="section[4].abilities"
+              :items-per-page="-1"
+              class="elevation-1 grey lighten-3 dataTable"
+              mobile-breakpoint="0"
+            ></v-data-table>
+          </v-expansion-panel-content>
+          <v-expansion-panel-content v-else-if="canView(section[1])">
             <v-card>
               <v-card-text class="grey lighten-3">
                 <li v-for="(ques, index) in section" :key="ques.title">
                   <div v-if="ques.title && (!ques.employeeRole || canView(ques.employeeRole))" class="pb-1">
                     <body class="italics" :id="section[0] + '-' + index">
-                      <icon name="space-shuttle" /> {{ ques.title }}
+                      <v-icon>mdi-motion</v-icon> {{ ques.title }}
                     </body>
                     {{ ques.body }}
                   </div>
@@ -39,6 +57,7 @@
 
 <script>
 import { getRole } from '@/utils/auth';
+import { isMobile } from '@/utils/utils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -276,9 +295,51 @@ export default {
             title:
               'Google Chrome has an issue displaying (some) attachments that are PDFs. Work-around is to tell Chrome to download PDFs. Or, use a different a browser.'
           }
+        ],
+        roleAbilities: [
+          // different structure here
+          'Role Abilities',
+          'user',
+          {
+            headers: [
+              { text: 'Ability', sortable: false, divider: true, value: 'ability' },
+              { text: 'Admin', sortable: false, value: 'admin', align: 'center' },
+              { text: 'Manager', sortable: false, value: 'manager', align: 'center' },
+              { text: 'User', sortable: false, value: 'user', align: 'center' },
+              { text: 'Intern', sortable: false, value: 'intern', align: 'center' }
+            ]
+          },
+          {
+            headersMobile: [
+              { text: 'Ability', sortable: false, value: 'ability', width: '32%' },
+              { text: 'Admin', sortable: false, value: 'admin', width: '17%', align: 'right' },
+              { text: 'Manager', sortable: false, value: 'manager', width: '20%', align: 'right' },
+              { text: 'User', sortable: false, value: 'user', width: '14%', align: 'right' },
+              { text: 'Intern', sortable: false, value: 'intern', width: '17%', align: 'right' }
+            ]
+          },
+          {
+            abilities: [
+              { ability: 'View/update personal profile data', admin: 'X', manager: 'X', user: 'X', intern: 'X' },
+              { ability: 'Add/edit personal expenses', admin: 'X', manager: 'X', user: 'X', intern: 'X' },
+              { ability: 'View other’s profile data', admin: 'X', manager: 'X', user: 'X', intern: '' },
+              { ability: 'Create employees', admin: 'X', manager: 'X', user: '', intern: '' },
+              { ability: 'Edit other’s profile data', admin: 'X', manager: 'X', user: '', intern: '' },
+              { ability: 'View audits', admin: 'X', manager: 'X', user: '', intern: '' },
+              { ability: 'Create/update expense types', admin: 'X', manager: '', user: '', intern: '' },
+              { ability: "View other's expenses", admin: 'X', manager: '', user: '', intern: '' },
+              { ability: 'Create/update other’s expenses', admin: 'X', manager: '', user: '', intern: '' },
+              { ability: 'Reimburse expenses', admin: 'X', manager: '', user: '', intern: '' },
+              { ability: 'Download employee CSV’s', admin: 'X', manager: '', user: '', intern: '' },
+              { ability: 'View login dates', admin: 'X', manager: '', user: '', intern: '' }
+            ]
+          }
         ]
       } // faq sections
     };
+  },
+  computed: {
+    isMobile
   },
   methods: {
     canView,
@@ -286,3 +347,9 @@ export default {
   }
 };
 </script>
+
+<style>
+.dataTable table {
+  table-layout: fixed;
+}
+</style>

@@ -161,7 +161,9 @@
 
     <!-- Button to Add Contracts -->
     <div class="pt-4" align="center">
-      <v-btn @click="addContract()" elevation="2"><v-icon class="pr-1">add</v-icon>Contract</v-btn>
+      <v-btn @click="addContract()" elevation="2" id="addContractButton"
+        ><v-icon class="pr-1">add</v-icon>Contract</v-btn
+      >
     </div>
   </div>
 </template>

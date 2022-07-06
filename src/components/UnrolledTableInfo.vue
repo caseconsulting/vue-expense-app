@@ -9,6 +9,7 @@
         :items-per-page="-1"
         class="text-center"
         item-key="id"
+        id="subInfo"
         show-select
         hide-default-footer
         @click:row="expenseClicked"
@@ -39,14 +40,16 @@
 
         <!-- Purchase Date -->
         <template v-slot:[`item.purchaseDate`]="{ item }">
-          <p :class="{ failed: item.failed }" class="mb-0">
+          <p id="purchaseDate-team" :class="{ failed: item.failed }" class="mb-0">
             {{ monthDayYearFormat(item.purchaseDate) }}
           </p>
         </template>
 
         <!-- Description -->
         <template v-slot:[`item.description`]="{ item }">
-          <p :class="{ failed: item.failed }" class="mb-0">{{ item.description | descripFormat }}</p>
+          <p id="description-team" :class="{ failed: item.failed }" class="mb-0">
+            {{ item.description | descripFormat }}
+          </p>
         </template>
 
         <!-- Show on Feed -->
@@ -112,7 +115,7 @@ function expenseToggle(toggledExpense) {
  */
 function descripFormat(val) {
   // split strings that exceed 250 characters with eclipses
-  return val.length > 250 ? val.substring(0, 250) + '...' : val;
+  return val && val.length > 250 ? val.substring(0, 250) + '...' : val;
 } // descripFormat
 
 // |--------------------------------------------------|

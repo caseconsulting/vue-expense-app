@@ -20,8 +20,8 @@
       <v-card class="mt-3">
         <v-container fluid>
           <!-- Title -->
-          <v-card-title>
-            <h2 v-if="isUser || isIntern || isManager">{{ getUserName }}'s Expenses</h2>
+          <v-card-title v-if="!isMobile()">
+            <h2 v-if="(isUser || isIntern || isManager) && !loading">{{ getUserName }}'s Expenses</h2>
             <h3 v-else>My Expenses</h3>
             <v-spacer></v-spacer>
 
@@ -38,7 +38,6 @@
               label="Filter by Employee"
               clearable
             ></v-autocomplete>
-            <p v-if="isAdmin">&nbsp;</p>
 
             <!-- Search Bar -->
             <v-text-field
@@ -50,6 +49,39 @@
               hide-details
             ></v-text-field>
           </v-card-title>
+
+          <div v-else>
+            <v-card-title class="px-0">
+              <h3 v-if="(isUser || isIntern || isManager) && !loading">{{ getUserName }}'s Expenses</h3>
+              <h3 v-else>My Expenses</h3>
+            </v-card-title>
+            <v-row class="mb-5">
+              <v-col v-if="isAdmin">
+                <!-- Employee Filter -->
+                <v-autocomplete
+                  hide-details
+                  :items="employees"
+                  :filter="customFilter"
+                  v-model="employee"
+                  item-text="text"
+                  id="employeeIdFilter"
+                  label="Filter by Employee"
+                  clearable
+                ></v-autocomplete>
+              </v-col>
+              <v-col>
+                <!-- Search Bar -->
+                <v-text-field
+                  v-model="search"
+                  append-icon="search"
+                  id="search"
+                  label="Search"
+                  single-line
+                  hide-details
+                ></v-text-field>
+              </v-col>
+            </v-row>
+          </div>
 
           <!-- Filters -->
           <fieldset class="filter_border">
@@ -63,7 +95,7 @@
                 <v-tooltip top>
                   <template v-slot:activator="{ on }">
                     <v-btn value="active" v-on="on" text>
-                      <icon class="mr-1" name="regular/check-circle"></icon>
+                      <v-icon class="mr-1">mdi-check-circle-outline</v-icon>
                     </v-btn>
                   </template>
                   <span>Show Active</span>
@@ -73,7 +105,7 @@
                 <v-tooltip top>
                   <template v-slot:activator="{ on }">
                     <v-btn value="notActive" v-on="on" text>
-                      <icon name="regular/times-circle"></icon>
+                      <v-icon>mdi-close-circle-outline</v-icon>
                     </v-btn>
                   </template>
                   <span>Show Inactive</span>
@@ -98,7 +130,7 @@
                 <v-tooltip top>
                   <template v-slot:activator="{ on }">
                     <v-btn value="reimbursed" v-on="on" text>
-                      <icon class="mr-1" name="regular/check-circle"></icon>
+                      <v-icon id="showReimbursed" class="mr-1">mdi-check-circle-outline</v-icon>
                     </v-btn>
                   </template>
                   <span>Show Reimbursed</span>
@@ -108,7 +140,7 @@
                 <v-tooltip top>
                   <template v-slot:activator="{ on }">
                     <v-btn value="notReimbursed" v-on="on" text>
-                      <icon name="regular/times-circle"></icon>
+                      <v-icon id="showPending">mdi-close-circle-outline</v-icon>
                     </v-btn>
                   </template>
                   <span>Show Pending</span>
@@ -249,6 +281,10 @@
                         <b>Description: </b>
                         {{ item.description }}
                       </p>
+                      <p v-if="item.recipient">
+                        <b>Recipient: </b>
+                        {{ getEmployee(item.recipient) }}
+                      </p>
                       <p v-if="!isEmpty(item.note)"><b>Notes: </b>{{ item.note }}</p>
                       <p v-if="!isEmpty(item.receipt)"><b>Receipt: </b>{{ item.receipt }}</p>
                       <p v-if="!isEmpty(item.url)">
@@ -257,17 +293,14 @@
                       <p v-if="!isEmpty(item.category)"><b>Category: </b>{{ item.category }}</p>
                       <div v-if="isAdmin" class="flagExp">
                         <p>Inactive:</p>
-                        <icon
-                          v-if="useInactiveStyle(item)"
-                          id="marks"
-                          class="mr-1 mx-3"
-                          name="regular/check-circle"
-                        ></icon>
-                        <icon v-else class="mr-1 mx-3" id="marks" name="regular/times-circle"></icon>
+                        <v-icon v-if="useInactiveStyle(item)" id="marks" class="mr-1 mx-3"
+                          >mdi-check-circle-outline</v-icon
+                        >
+                        <v-icon v-else class="mr-1 mx-3" id="marks">mdi-close-circle-outline</v-icon>
                         <br />
                         <p>Show On Feed:</p>
-                        <icon v-if="item.showOnFeed" id="marks" class="mr-1 mx-3" name="regular/check-circle"></icon>
-                        <icon v-else class="mr-1 mx-3" id="marks" name="regular/times-circle"></icon>
+                        <v-icon v-if="item.showOnFeed" id="marks" class="mr-1 mx-3">mdi-check-circle-outline</v-icon>
+                        <v-icon v-else class="mr-1 mx-3" id="marks">close-mdi-circle-outline</v-icon>
                       </div>
                     </div>
                   </v-card-text>
@@ -304,13 +337,13 @@
     <!-- Expense Form -->
     <v-col v-if="isAdmin || !userIsInactive" cols="12" lg="4">
       <expense-form
+        v-if="!loading"
         ref="form"
         :isEdit="isEditing"
         :expense="expense"
         v-on:add="addModelToTable"
         v-on:delete="deleteModelFromTable"
         v-on:startAction="startAction"
-        v-on:endAction="endAction"
         v-on:update="updateModelInTable"
         v-on:error="displayError"
       ></expense-form>
@@ -327,7 +360,8 @@ import employeeUtils from '@/shared/employeeUtils';
 import ExpenseForm from '@/components/ExpenseForm.vue';
 import UnreimburseModal from '@/components/modals/UnreimburseModal.vue';
 import _ from 'lodash';
-import { isEmpty, monthDayYearFormat, convertToMoneyString } from '@/utils/utils';
+import { isEmpty, monthDayYearFormat, convertToMoneyString, isMobile } from '@/utils/utils';
+import { updateStoreBudgets } from '@/utils/storeUtils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -397,6 +431,10 @@ function roleHeaders() {
         return localHeaders; // return the remaining headers
       })(this.headers);
 } // roleHeaders
+
+function storeIsPopulated() {
+  return this.$store.getters.storeIsPopulated;
+}
 
 /**
  * Checks if the user is inactive. Returns true if the user is inactive, otherwise returns false.
@@ -558,6 +596,9 @@ async function deleteExpense() {
       // fails to delete expense
       this.displayError('Error Deleting Expense');
     }
+    // update budgets in store
+    await this.updateStoreBudgets();
+
     this.midAction = false;
   }
   this.loading = false; // set loading status to false
@@ -584,13 +625,6 @@ function displayError(err) {
   this.$set(this.status, 'statusMessage', err);
   this.$set(this.status, 'color', 'red');
 } // displayError
-
-/**
- * set midAction to false
- */
-function endAction() {
-  this.midAction = false;
-} // endAction
 
 /**
  * Filters expenses based on filter selections.
@@ -634,6 +668,17 @@ function filterExpenses() {
 } // filterExpenses
 
 /**
+ * Converts an employee ID into their full name.
+ *
+ * @param  eId - the employee id to find
+ * @return string - the name of the high five recipient
+ */
+function getEmployee(eId) {
+  let employee = _.find(this.$store.getters.employees, ['id', eId]);
+  return employeeUtils.nicknameAndLastName(employee);
+} // getEmployee
+
+/**
  * Checks if expense type has recipient.
  *
  * @param expense - the expense object
@@ -653,6 +698,35 @@ function hasRecipient(expense) {
 function isReimbursed(expense) {
   return expense && !this.isEmpty(expense.reimbursedDate);
 } // isReimbursed
+
+async function loadMyExpensesData() {
+  await this.refreshExpenses();
+  // get user info
+  this.userInfo = this.$store.getters.user;
+
+  // get expense types
+  let expenseTypes = this.$store.getters.expenseTypes;
+  this.expenseTypes = _.map(expenseTypes, (expenseType) => {
+    return {
+      /* beautify preserve:start */
+      text: `${expenseType.budgetName} - $${expenseType.budget}`,
+      startDate: expenseType.startDate,
+      endDate: expenseType.endDate,
+      /* beautify preserve:end */
+      budgetName: expenseType.budgetName,
+      value: expenseType.id,
+      budget: expenseType.budget,
+      odFlag: expenseType.odFlag,
+      requiredFlag: expenseType.requiredFlag,
+      recurringFlag: expenseType.recurringFlag,
+      isInactive: expenseType.isInactive,
+      categories: expenseType.categories,
+      accessibleBy: expenseType.accessibleBy,
+      hasRecipient: expenseType.hasRecipient,
+      alwaysOnFeed: expenseType.alwaysOnFeed
+    };
+  });
+}
 
 /**
  * Checks the canDelete optional boolean and if it exists and is true returns true
@@ -779,6 +853,10 @@ async function created() {
     this.isEditing = false;
   });
 
+  window.EventBus.$on('endAction', () => {
+    this.midAction = false;
+  });
+
   //when expense type is being edited buttons should be disabled
   window.EventBus.$on('editing-expense', () => {
     this.isEditing = true;
@@ -798,33 +876,9 @@ async function created() {
     await this.deleteExpense();
   });
 
-  // get user info
-  this.userInfo = this.$store.getters.user;
-
-  // get expense types
-  let expenseTypes = this.$store.getters.expenseTypes;
-  this.expenseTypes = _.map(expenseTypes, (expenseType) => {
-    return {
-      /* beautify preserve:start */
-      text: `${expenseType.budgetName} - $${expenseType.budget}`,
-      startDate: expenseType.startDate,
-      endDate: expenseType.endDate,
-      /* beautify preserve:end */
-      budgetName: expenseType.budgetName,
-      value: expenseType.id,
-      budget: expenseType.budget,
-      odFlag: expenseType.odFlag,
-      requiredFlag: expenseType.requiredFlag,
-      recurringFlag: expenseType.recurringFlag,
-      isInactive: expenseType.isInactive,
-      categories: expenseType.categories,
-      accessibleBy: expenseType.accessibleBy,
-      hasRecipient: expenseType.hasRecipient,
-      alwaysOnFeed: expenseType.alwaysOnFeed
-    };
-  });
-
-  await this.refreshExpenses(); // refresh and update expenses
+  if (this.$store.getters.storeIsPopulated) {
+    this.loadMyExpensesData();
+  }
 } // created
 
 /**
@@ -852,6 +906,17 @@ function watchFilterExpenses() {
   this.filterExpenses();
 } // watchFilterExpenses
 
+/**
+ * Checks if the store is populated from initial page load.
+ *
+ * @returns boolean - True if the store is populated
+ */
+async function watchStorePopulated() {
+  if (this.$store.getters.storeIsPopulated) {
+    this.loadMyExpensesData();
+  }
+} // watchStorePopulated
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                      EXPORT                      |
@@ -873,7 +938,8 @@ export default {
     isIntern,
     isUser,
     roleHeaders,
-    userIsInactive
+    userIsInactive,
+    storeIsPopulated
   },
   created,
   data() {
@@ -982,12 +1048,14 @@ export default {
     deleteExpense,
     deleteModelFromTable,
     displayError,
-    endAction,
     filterExpenses,
+    getEmployee,
     hasRecipient,
     isEmpty,
     isManager,
+    isMobile,
     isReimbursed,
+    loadMyExpensesData,
     monthDayYearFormat,
     onSelect,
     refreshExpenses,
@@ -995,12 +1063,14 @@ export default {
     toTopOfForm,
     unreimburseExpense,
     updateModelInTable,
+    updateStoreBudgets,
     useInactiveStyle
   },
   watch: {
     employee: watchFilterExpenses,
     'filter.active': watchFilterExpenses,
-    'filter.reimbursed': watchFilterExpenses
+    'filter.reimbursed': watchFilterExpenses,
+    storeIsPopulated: watchStorePopulated
   }
 };
 </script>

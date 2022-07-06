@@ -14,8 +14,43 @@
       <b>LinkedIn: </b><a :href="this.model.linkedIn" target="_blank"> {{ this.model.linkedIn }}</a>
     </p>
     <!-- Phone Number -->
-    <p v-if="!isEmpty(this.model.phoneNumber) && (userIsAdmin() || userIsEmployee() || userIsManager())">
-      <b>Phone Number:</b> {{ this.model.phoneNumber }}
+    <p v-if="!isEmpty(getPhoneNumbers()) && (userIsAdmin() || userIsEmployee() || userIsManager())">
+      <b>Phone Numbers:</b>
+      <v-list>
+        <v-list-item v-for="number in getPhoneNumbers()" :key="number.number">
+          <v-tooltip bottom>
+            <template v-slot:activator="{ on, attrs }">
+              <v-btn text icon v-bind="attrs" v-on="on" class="mr-2">
+                <v-icon v-if="number.private">mdi-shield</v-icon>
+                <v-icon v-else>mdi-shield-outline</v-icon>
+              </v-btn>
+            </template>
+            <span v-if="number.private"
+              >Based on user preference, this is only visible to You, Managers, and Admins</span
+            >
+            <span v-else>Based on user preference, this is visible to everyone</span>
+          </v-tooltip>
+          <v-list-item-content>
+            <v-list-item-subtitle class="mb-1"> {{ number.type }}</v-list-item-subtitle>
+            <v-list-item-title
+              >{{ number.number }}<span v-if="number.ext"> (Ext. {{ number.ext }})</span></v-list-item-title
+            >
+          </v-list-item-content>
+        </v-list-item>
+      </v-list>
+    </p>
+    <p v-else-if="!isEmpty(getPhoneNumbers())">
+      <b>Phone Numbers:</b>
+      <v-list>
+        <v-list-item v-for="number in getPhoneNumbers()" :key="number.number">
+          <v-list-item-content>
+            <v-list-item-subtitle class="mb-1"> {{ number.type }}</v-list-item-subtitle>
+            <v-list-item-title
+              >{{ number.number }}<span v-if="number.ext"> (Ext. {{ number.ext }})</span></v-list-item-title
+            >
+          </v-list-item-content>
+        </v-list-item>
+      </v-list>
     </p>
     <!-- Birthday -->
     <p v-if="!isEmpty(this.model.birthday) && (admin || employee)">
@@ -69,7 +104,8 @@ function checkEmptyPersonalInfo() {
     this.model.github ||
     this.model.twitter ||
     this.model.linkedIn ||
-    this.model.phoneNumber ||
+    !isEmpty(this.model.privatePhoneNumbers) ||
+    !isEmpty(this.model.publicPhoneNumbers) ||
     this.model.birthday ||
     this.model.birthdayFeed ||
     this.getPlaceOfBirth ||
@@ -170,6 +206,28 @@ function userIsManager() {
 
 // |--------------------------------------------------|
 // |                                                  |
+// |                      METHODS                     |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * Gets phone numbers from the two lists (public and private) and merges them into one.
+ *
+ * @return - list: all phone numbers from the user
+ */
+function getPhoneNumbers() {
+  let phoneNumbers = [];
+  if (this.model.privatePhoneNumbers) {
+    phoneNumbers = phoneNumbers.concat(this.model.privatePhoneNumbers);
+  }
+  if (this.model.publicPhoneNumbers) {
+    phoneNumbers = phoneNumbers.concat(this.model.publicPhoneNumbers);
+  }
+  return phoneNumbers;
+} // getPhoneNumbers
+
+// |--------------------------------------------------|
+// |                                                  |
 // |                      EXPORT                      |
 // |                                                  |
 // |--------------------------------------------------|
@@ -212,7 +270,8 @@ export default {
     monthDayYearFormat,
     userIsAdmin,
     userIsEmployee,
-    userIsManager
+    userIsManager,
+    getPhoneNumbers
   },
   props: ['admin', 'employee', 'model']
 };

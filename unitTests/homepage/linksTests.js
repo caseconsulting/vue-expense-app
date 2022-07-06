@@ -1,29 +1,18 @@
+const utils = require('../utils/utils.js');
+const vars = require('../utils/constants.js');
+
 describe('testing links', () => {
   before((browser) => {
-    browser
-      .url('http://localhost:8080')
-      .windowMaximize('current') // maximize window
-      .waitForElementVisible('#custom-button-color') // wait for login button to load
-      .click('#custom-button-color') // click that button
-      .assert.visible('img.auth0-lock-header-logo') // check that the case logo is there in auth0
-      .assert.visible('div.auth0-lock-content') // check that the auth0 login button is visible
-      .click('div.auth0-lock-social-button-text') // click the button
-      .waitForElementVisible('input#identifierId') // wait for email box to be visible
-      .setValue('input#identifierId', process.env.VUE_APP_AUTH0_EMAIL) // input your email
-      .click('button.VfPpkd-LgbsSe') // click continue button
-      .waitForElementVisible('#password') // wait for password field to load
-      .setValue('input[type="password"]', process.env.VUE_APP_AUTH0_PASSWORD) // input your password
-      .click('button.VfPpkd-LgbsSe') // click login button
-      .waitForElementVisible('h1.d-inline'); // wait for header text 'Case Portal'
+    utils.commonBefore(browser);
   });
 
   this.tags = ['links'];
 
   it('Test Link for basecamp in dropdown menu', (browser) => {
     browser
-      .waitForElementVisible('#links-btn') //waiting for Link dropdown button to render
+      .waitForElementVisible('#links-btn', vars.WAIT_TIME) //waiting for Link dropdown button to render
       .click('#links-btn')
-      .waitForElementVisible('a[id="https://3.basecamp.com/3097063"]')
+      .waitForElementVisible('a[id="https://3.basecamp.com/3097063"]', vars.WAIT_TIME)
       .click('a[id="https://3.basecamp.com/3097063"]') //clicks Basecamp link
       .windowHandles(function (result) {
         //switches window
@@ -31,61 +20,64 @@ describe('testing links', () => {
         browser.assert.urlEquals('https://launchpad.37signals.com/bc3/3078589/signin');
         browser.closeWindow();
         browser.switchWindow(result.value[0]);
-        browser.assert.urlEquals('http://localhost:8080/reimbursements');
+        utils.navigate(browser, vars.nav.home, false);
       });
   });
 
   it('Test Link for Fidelity in dropdown menu', (browser) => {
     browser
-      .waitForElementVisible('#links-btn')
+      .waitForElementVisible('#links-btn', vars.WAIT_TIME)
       .click('#links-btn')
-      .waitForElementVisible('a[id="https://nb.fidelity.com/public/nb/default/home"]')
+      .waitForElementVisible('a[id="https://nb.fidelity.com/public/nb/default/home"]', vars.WAIT_TIME)
       .click('a[id="https://nb.fidelity.com/public/nb/default/home"]')
       .windowHandles(function (result) {
         browser.switchWindow(result.value[1]);
         browser.assert.urlEquals('https://nb.fidelity.com/public/nb/default/home');
         browser.closeWindow();
         browser.switchWindow(result.value[0]);
-        browser.assert.urlEquals('http://localhost:8080/reimbursements');
+        utils.navigate(browser, vars.nav.home, false);
       });
   });
 
   it('Test Link for health insurance dropdown menu', (browser) => {
     browser
-      .waitForElementVisible('#links-btn')
+      .waitForElementVisible('#links-btn', vars.WAIT_TIME)
       .click('#links-btn')
-      .waitForElementVisible('a[id="https://3.basecamp.com/3097063/buckets/179119/messages/2306027830"]')
-      .click('a[id="https://3.basecamp.com/3097063/buckets/179119/messages/2306027830"]')
+      .waitForElementVisible(
+        'a[id="https://3.basecamp.com/3097063/buckets/179119/messages/4799723388"]',
+        vars.WAIT_TIME
+      )
+      .click('a[id="https://3.basecamp.com/3097063/buckets/179119/messages/4799723388"]')
       .windowHandles(function (result) {
         browser.switchWindow(result.value[1]);
         browser.assert.urlEquals('https://launchpad.37signals.com/bc3/3078589/signin');
         browser.closeWindow();
         browser.switchWindow(result.value[0]);
-        browser.assert.urlEquals('http://localhost:8080/reimbursements');
+        utils.navigate(browser, vars.nav.home, false);
       });
   });
 
   it('Test Link for QuickBooks Time dropdown menu', (browser) => {
     browser
-      .waitForElementVisible('#links-btn')
+      .waitForElementVisible('#links-btn', vars.WAIT_TIME)
       .click('#links-btn')
-      .waitForElementVisible('a[id="https://tsheets.intuit.com/page/login_oii"]')
+      .waitForElementVisible('a[id="https://tsheets.intuit.com/page/login_oii"]', vars.WAIT_TIME)
       .click('a[id="https://tsheets.intuit.com/page/login_oii"]')
       .windowHandles(function (result) {
         browser.switchWindow(result.value[1]);
         browser.assert.urlEquals('https://tsheets.intuit.com/page/login_oii');
         browser.closeWindow();
         browser.switchWindow(result.value[0]);
-        browser.assert.urlEquals('http://localhost:8080/reimbursements');
+        utils.navigate(browser, vars.nav.home, false);
       })
       .pause(400);
   });
 
   it('Test Link for ADP dropdown menu', (browser) => {
     browser
-      .waitForElementVisible('#links-btn')
+      .waitForElementVisible('#links-btn', vars.WAIT_TIME)
       .click('#links-btn')
-      .waitForElementVisible('a[id="https://my.adp.com/"]')
+      .waitForElementVisible('a[id="https://my.adp.com/"]', vars.WAIT_TIME)
       .click('a[id="https://my.adp.com/"]')
       .windowHandles(function (result) {
         browser.switchWindow(result.value[1]);
@@ -94,31 +86,31 @@ describe('testing links', () => {
         );
         browser.closeWindow();
         browser.switchWindow(result.value[0]);
-        browser.assert.urlEquals('http://localhost:8080/reimbursements');
+        utils.navigate(browser, vars.nav.home, false);
       })
       .pause(400);
   });
 
   it('Test Link for Life Insurance dropdown menu', (browser) => {
     browser
-      .waitForElementVisible('#links-btn')
+      .waitForElementVisible('#links-btn', vars.WAIT_TIME)
       .click('#links-btn')
-      .waitForElementVisible('a[id="https://www.reliancestandard.com/home/"]')
+      .waitForElementVisible('a[id="https://www.reliancestandard.com/home/"]', vars.WAIT_TIME)
       .click('a[id="https://www.reliancestandard.com/home/"]')
       .windowHandles(function (result) {
         browser.switchWindow(result.value[1]);
         browser.assert.urlEquals('https://www.reliancestandard.com/home/');
         browser.closeWindow();
         browser.switchWindow(result.value[0]);
-        browser.assert.urlEquals('http://localhost:8080/reimbursements');
+        utils.navigate(browser, vars.nav.home, false);
       });
   });
 
   it('Test Link for Red Mine dropdown menu', (browser) => {
     browser
-      .waitForElementVisible('#links-btn')
+      .waitForElementVisible('#links-btn', vars.WAIT_TIME)
       .click('#links-btn')
-      .waitForElementVisible('a[id="https://redmine.consultwithcase.com"]')
+      .waitForElementVisible('a[id="https://redmine.consultwithcase.com"]', vars.WAIT_TIME)
       .click('a[id="https://redmine.consultwithcase.com"]')
       .windowHandles(function (result) {
         browser.switchWindow(result.value[1]);
@@ -127,87 +119,87 @@ describe('testing links', () => {
         );
         browser.closeWindow();
         browser.switchWindow(result.value[0]);
-        browser.assert.urlEquals('http://localhost:8080/reimbursements');
+        utils.navigate(browser, vars.nav.home, false);
       });
   });
 
   it('Test Link for Workspaces at Reston Town Center dropdown menu', (browser) => {
     browser
-      .waitForElementVisible('#links-btn')
+      .waitForElementVisible('#links-btn', vars.WAIT_TIME)
       .click('#links-btn')
-      .waitForElementVisible('#floorPlan')
+      .waitForElementVisible('#floorPlan', vars.WAIT_TIME)
       .click('#floorPlan')
       .windowHandles(function (result) {
         browser.switchWindow(result.value[1]);
-        browser.assert.urlEquals('http://localhost:8080/img/MakeOfficesfloorplan.0d9c2602.jpg');
+        browser.assert.urlEquals('http://localhost:8080/img/MakeOfficesfloorplan.14b8e1a3.jpg');
         browser.closeWindow();
         browser.switchWindow(result.value[0]);
-        browser.assert.urlEquals('http://localhost:8080/reimbursements');
+        utils.navigate(browser, vars.nav.home, false);
       });
   });
 
   it('Test Link for GitHub', (browser) => {
     browser
-      .waitForElementVisible('#links-btn')
+      .waitForElementVisible('#links-btn', vars.WAIT_TIME)
       .click('#Github')
       .windowHandles(function (result) {
         browser.switchWindow(result.value[1]);
         browser.assert.urlEquals('https://github.com/caseconsulting');
         browser.closeWindow();
         browser.switchWindow(result.value[0]);
-        browser.assert.urlEquals('http://localhost:8080/reimbursements');
+        utils.navigate(browser, vars.nav.home, false);
       });
   });
 
   it('Test Link for LinkedIn', (browser) => {
     browser
-      .waitForElementVisible('#links-btn')
+      .waitForElementVisible('#links-btn', vars.WAIT_TIME)
       .click('#LinkedIn')
       .windowHandles(function (result) {
         browser.switchWindow(result.value[1]);
         browser.assert.urlContains('case-consulting-inc');
         browser.closeWindow();
         browser.switchWindow(result.value[0]);
-        browser.assert.urlEquals('http://localhost:8080/reimbursements');
+        utils.navigate(browser, vars.nav.home, false);
       });
   });
 
   it('Test Link for Youtube', (browser) => {
     browser
-      .waitForElementVisible('#links-btn')
+      .waitForElementVisible('#links-btn', vars.WAIT_TIME)
       .click('#Youtube')
       .windowHandles(function (result) {
         browser.switchWindow(result.value[1]);
-        browser.assert.urlEquals('https://www.youtube.com/channel/UC_oJY4OrOpLNrIBAN7Y-9fA');
+        browser.assert.urlContains('https://www.youtube.com/channel/UC_oJY4OrOpLNrIBAN7Y-9fA');
         browser.closeWindow();
         browser.switchWindow(result.value[0]);
-        browser.assert.urlEquals('http://localhost:8080/reimbursements');
+        utils.navigate(browser, vars.nav.home, false);
       });
   });
 
   it('Test Link for Twitter', (browser) => {
     browser
-      .waitForElementVisible('#links-btn')
+      .waitForElementVisible('#links-btn', vars.WAIT_TIME)
       .click('#Twitter')
       .windowHandles(function (result) {
         browser.switchWindow(result.value[1]);
         browser.assert.urlEquals('https://twitter.com/consultwithcase?lang=en');
         browser.closeWindow();
         browser.switchWindow(result.value[0]);
-        browser.assert.urlEquals('http://localhost:8080/reimbursements');
+        utils.navigate(browser, vars.nav.home, false);
       });
   });
 
   it('Test Link for Facebook', (browser) => {
     browser
-      .waitForElementVisible('#links-btn')
+      .waitForElementVisible('#links-btn', vars.WAIT_TIME)
       .click('#Facebook')
       .windowHandles(function (result) {
         browser.switchWindow(result.value[1]);
-        browser.assert.urlEquals('https://www.facebook.com/login/?next=https%3A%2F%2Fwww.facebook.com%2FConsultwithCase%2F');
+        browser.assert.urlEquals('https://www.facebook.com/ConsultwithCase/');
         browser.closeWindow();
         browser.switchWindow(result.value[0]);
-        browser.assert.urlEquals('http://localhost:8080/reimbursements');
+        utils.navigate(browser, vars.nav.home, false);
       });
   });
 });

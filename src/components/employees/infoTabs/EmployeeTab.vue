@@ -23,6 +23,10 @@
     </div>
     <!-- Job Role -->
     <p v-if="!isEmpty(this.model.jobRole)"><b>Job Role:</b> {{ this.model.jobRole }}</p>
+    <!-- Job Role -->
+    <p v-if="!isEmpty(this.model.agencyIdentificationNumber)">
+      <b>Agency Identification Number:</b> {{ this.model.agencyIdentificationNumber }}
+    </p>
     <!-- Employee Role -->
     <p v-if="admin"><b>Employee Role:</b> {{ this.model.employeeRole | startCase }}</p>
     <!-- Hire Date -->

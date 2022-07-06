@@ -3,21 +3,11 @@
     <v-container class="my-3">
       <v-row class="py-3">
         <v-col cols="12" sm="4">
-          <h1 class="pl-2">Trainings</h1>
+          <h1 class="pl-2">Training</h1>
         </v-col>
 
         <v-col class="mb-1" cols="12" sm="8">
-          <v-toolbar color="white darken-3" class="my-1 py-1" dense elevation="2">
-            <v-text-field
-              v-model="search"
-              clearable
-              flat
-              hide-details
-              prepend-inner-icon="search"
-              label="Search"
-              dense
-            ></v-text-field>
-          </v-toolbar>
+          <v-text-field v-model="search" hide-details single-line append-icon="search" label="Search"></v-text-field>
         </v-col>
       </v-row>
 
@@ -54,8 +44,8 @@
             <v-col cols="12">
               <v-card color="#565651" dark :href="url.id" target="_blank">
                 <v-row class="ma-1" dense>
-                  <v-col cols="12" sm="3" md="2" xl="1" class="text-center">
-                    <v-avatar class="ma-1" size="100" tile>
+                  <v-col cols="12" sm="3" md="2" xl="1" class="d-flex align-center justify-center">
+                    <v-avatar class="ma-1 iconImage" size="80">
                       <img :src="url.display" :class="{ caseImage: url.isCaseLogo }" @error="changeDisplay(url)" />
                     </v-avatar>
                     <h3 v-if="url.publisher">{{ url.publisher }}</h3>
@@ -78,7 +68,7 @@
                         <v-spacer></v-spacer>
                         <div class="mr-2">
                           <span class="subheading hitText">{{ url.hits }}</span>
-                          <icon name="crosshairs" class="hitIcon" scale="1"></icon>
+                          <v-icon class="hitIcon" scale="1">mdi-target</v-icon>
                         </div>
                       </v-col>
                     </v-row>
@@ -299,6 +289,10 @@ export default {
 </script>
 
 <style scoped>
+.iconImage {
+  border-radius: 0.3em;
+}
+
 .caseImage {
   background-color: white;
 }
@@ -306,7 +300,7 @@ export default {
 .hitIcon {
   color: white;
   fill: white;
-  margin-top: 3px;
+  margin-bottom: 3px;
   margin-right: 3px;
   float: right;
 }

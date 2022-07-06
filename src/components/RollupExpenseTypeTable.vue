@@ -22,6 +22,7 @@
           <v-autocomplete
             :items="expenseTypes"
             v-model="expenseType"
+            id="filterExpense"
             item-text="text"
             label="Filter by Expense Type"
             clearable
@@ -44,7 +45,6 @@
           <!-- Select item slot in data table -->
           <template v-slot:[`item.data-table-select`]="{ item }">
             <v-checkbox
-              id="itemCheckbox"
               :input-value="item.checkBox.all"
               :indeterminate="item.checkBox.indeterminate"
               primary
@@ -53,7 +53,7 @@
                 toggleGroup(item);
                 determineShowOnFeed(item);
               "
-              class="ma-0"
+              class="itemCheckbox ma-0"
             >
             </v-checkbox>
           </template>
@@ -85,12 +85,12 @@
           <!-- Header select slot in data table -->
           <template v-slot:[`header.data-table-select`]>
             <v-checkbox
+              class="ma-0"
               :input-value="mainCheckBox.all"
               :indeterminate="mainCheckBox.indeterminate"
               primary
               hide-details
               @click.stop="toggleAll"
-              class="ma-0"
             >
             </v-checkbox>
           </template>
@@ -121,7 +121,7 @@
             fixed
             class="reimburse_button"
           >
-            <icon name="dollar-sign"></icon>
+            <v-icon>mdi-currency-usd</v-icon>
           </v-btn>
         </v-fab-transition>
       </v-container>
@@ -143,6 +143,7 @@ import ReimburseModal from '@/components/modals/ReimburseModal.vue';
 import UnrolledTableInfo from '@/components/UnrolledTableInfo.vue';
 import _ from 'lodash';
 import { asyncForEach, isEmpty, convertToMoneyString } from '@/utils/utils';
+import { storeIsPopulated } from '../utils/utils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -229,7 +230,7 @@ function showReimburseButton() {
  * Check all expenses and boxes.
  */
 function checkAllBoxes() {
-  this.empBudgets = _.forEach(this.empBudgets, (budget) => {
+  _.forEach(this.filteredItems, (budget) => {
     budget.checkBox.all = true;
     budget.checkBox.indeterminate = false;
     return _.forEach(budget.expenses, (expense) => {
@@ -525,6 +526,7 @@ async function reimburseExpenses() {
         window.EventBus.$emit('expenseChange', expense);
         window.EventBus.$emit('expenseClicked', undefined);
         expense.reimbursedDate = moment().format('YYYY-MM-DD');
+        expense.reimbursementWasSeen = false;
         expensesToReimburse.push(removeAggregateExpenseData(expense));
       }
     });
@@ -632,6 +634,20 @@ function determineShowOnFeed(expense) {
     }
   });
 } // determineShowOnFeed
+
+/**
+ * Loads and organizes all data relevant to the data table.
+ */
+async function loadExpensesData() {
+  let aggregatedData = await api.getAllAggregateExpenses();
+  let allExpenses = this.createExpenses(aggregatedData);
+  this.pendingExpenses = this.filterOutReimbursed(allExpenses);
+  this.constructAutoComplete(this.pendingExpenses);
+  this.empBudgets = this.groupEmployeeExpenses(this.pendingExpenses);
+  this.unCheckAllBoxes();
+  this.resetShowOnFeedToggles();
+  this.loading = false;
+}
 
 /**
  * Remove additional attributes from the aggregate expense.
@@ -762,15 +778,9 @@ async function created() {
 
   //window.EventBus.$on('canceled-reimburse', () => (this.buttonClicked = false));
   window.EventBus.$on('confirm-reimburse', async () => await this.reimburseExpenses());
-  let aggregatedData = await api.getAllAggregateExpenses();
-
-  let allExpenses = this.createExpenses(aggregatedData);
-  this.pendingExpenses = this.filterOutReimbursed(allExpenses);
-  this.constructAutoComplete(this.pendingExpenses);
-  this.empBudgets = this.groupEmployeeExpenses(this.pendingExpenses);
-  this.unCheckAllBoxes();
-  this.resetShowOnFeedToggles();
-  this.loading = false;
+  if (this.$store.getters.storeIsPopulated) {
+    this.loadExpensesData();
+  }
 } // created
 
 /**
@@ -804,6 +814,12 @@ function watchExpenseType() {
   this.unCheckAllBoxes();
 } // watchExpenseType
 
+function watchLoadExpensesData() {
+  if (this.$store.getters.storeIsPopulated) {
+    this.loadExpensesData();
+  }
+}
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                      EXPORT                      |
@@ -821,7 +837,8 @@ export default {
     filteredItems,
     mainCheckBox,
     showReimburseButton,
-    getSelectedExpensesToReimburse
+    getSelectedExpensesToReimburse,
+    storeIsPopulated
   },
   created,
   data: () => ({
@@ -885,6 +902,7 @@ export default {
     groupEmployeeExpenses,
     isEmpty,
     isReimbursed,
+    loadExpensesData,
     matchingEmployeeAndExpenseType,
     refreshExpenses,
     reimburseExpenses,
@@ -899,7 +917,8 @@ export default {
   },
   watch: {
     employee: watchEmployee,
-    expenseType: watchExpenseType
+    expenseType: watchExpenseType,
+    storeIsPopulated: watchLoadExpensesData
   }
 };
 </script>

@@ -13,7 +13,7 @@
         clearable
       >
       </v-combobox>
-      <v-row class="pt-1">
+      <v-row class="pt-3">
         <v-col cols="12" sm="6" md="12" lg="6" class="pt-0">
           <!-- Received Date -->
           <v-menu
@@ -64,16 +64,14 @@
               <v-text-field
                 ref="formFields"
                 :value="certification.expirationDate | formatDate"
-                :disabled="certification.noExpiry"
-                label="Expiration Date"
+                label="Expiration Date (optional)"
                 prepend-icon="event_busy"
-                :rules="[...getDateOptionalRules(), dateOrderRules(index), expDateRule(index)]"
+                :rules="[...getDateOptionalRules(), dateOrderRules(index)]"
                 hint="MM/DD/YYYY format"
                 v-mask="'##/##/####'"
                 v-bind="attrs"
                 v-on="on"
                 clearable
-                @click:clear="certification.expirationDate = null"
                 @blur="certification.expirationDate = parseEventDate($event)"
                 @input="certification.showExpirationMenu = false"
                 @focus="certificationIndex = index"
@@ -88,6 +86,13 @@
           </v-menu>
           <!-- End Expiration Date -->
         </v-col>
+        <!-- Hidden field to record the date the user submitted -->
+        <v-date-picker
+          v-show="false"
+          v-model="certification.dateInpoot"
+          no-title
+          @input="award.showReceivedMenu = false"
+        ></v-date-picker>
       </v-row>
       <v-row>
         <v-col cols="12" align="center" justify="center" class="pb-4 mb-2">
@@ -148,8 +153,8 @@ function addCertification() {
   this.editedCertifications.push({
     name: null,
     dateReceived: null,
+    dateSubmitted: moment().startOf('day'),
     expirationDate: null,
-    noExpiry: false,
     showReceivedMenu: false,
     showExpirationMenu: false
   });
@@ -238,27 +243,20 @@ export default {
       dateOrderRules: (certIndex) => {
         if (this.editedCertifications) {
           let position = this.editedCertifications[certIndex];
-          return !this.isEmpty(position.expirationDate) && moment(position.expirationDate) && position.dateReceived
-            ? moment(position.expirationDate).add(1, 'd').isAfter(moment(position.dateReceived)) ||
-                'End date must be at or after start date'
-            : true;
-        } else {
-          return true;
-        }
-      },
-      editedCertifications: _.cloneDeep(this.model), // stores edited certifications info
-      expDateRule: (compIndex) => {
-        if (this.editedCertifications !== undefined) {
-          let position = this.editedCertifications[compIndex];
-          if (position.noExpiry == false && this.isEmpty(position.expirationDate)) {
-            return 'Expiration Date is required';
+          if (!this.isEmpty(position.expirationDate) && moment(position.expirationDate) && position.dateReceived) {
+            return (
+              moment(position.expirationDate).add(1, 'd').isAfter(moment(position.dateReceived)) ||
+              'Expiration date must be at or after date received'
+            );
           } else {
             return true;
           }
         } else {
-          return false;
+          return true;
         }
-      }
+      },
+      dateSubmitted: moment().startOf('day'),
+      editedCertifications: _.cloneDeep(this.model) // stores edited certifications info
     };
   },
   directives: { mask },

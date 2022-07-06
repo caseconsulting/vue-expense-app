@@ -53,7 +53,7 @@ import _ from 'lodash';
 // import ReceiptModal from '../components/ReceiptModal.vue';
 import moment from 'moment-timezone';
 moment.tz.setDefault('America/New_York');
-import { convertToMoneyString, getCurrentBudgetYear } from '@/utils/utils';
+import { isBetweenDates, convertToMoneyString, getCurrentBudgetYear } from '@/utils/utils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -108,14 +108,15 @@ function beforeDestroy() {
  */
 async function refreshBudget() {
   let budgetsVar;
+  let existingBudgets;
 
   if (this.date == this.getCurrentBudgetYear(this.hireDate)) {
     // viewing active budget year
-    budgetsVar = await api.getAllActiveEmployeeBudgets(this.employee.id);
+    budgetsVar = this.accessibleBudgets;
+  } else {
+    // get existing budgets for the budget year being viewed
+    existingBudgets = await api.getFiscalDateViewBudgets(this.employee.id, this.date);
   }
-
-  // get existing budgets for the budget year being viewed
-  let existingBudgets = await api.getFiscalDateViewBudgets(this.employee.id, this.date);
 
   // append inactive tag to end of budget expense type name
   // the existing budget duplicates will later be removed (order in array comes after active budgets)
@@ -129,8 +130,12 @@ async function refreshBudget() {
   budgetsVar = _.filter(budgetsVar, (b) => {
     let budget = b.budgetObject;
     return (
-      !_.some(this.expenseTypes, (e) => e.id == budget.expenseTypeId && e.isInactive) ||
-      _.some(this.expenses, (e) => e.expenseTypeId == budget.expenseTypeId && _.isEmpty(e.reimbursedDate))
+      !_.some(
+        this.expenseTypes,
+        (e) =>
+          e.id == budget.expenseTypeId &&
+          (e.isInactive || !isBetweenDates(moment().toISOString(), budget.fiscalStartDate, budget.fiscalEndDate))
+      ) || _.some(this.expenses, (e) => e.expenseTypeId == budget.expenseTypeId && _.isEmpty(e.reimbursedDate))
     );
   });
   budgetsVar = _.sortBy(budgetsVar, (budget) => {
@@ -180,8 +185,9 @@ async function refreshEmployee() {
   if (!this.date) {
     this.date = this.getCurrentBudgetYear(this.hireDate);
   }
-  await this.refreshBudget(); // refresh employee budgets
-  this.allUserBudgets = await api.getEmployeeBudgets(this.employee.id); // set all employee budgets
+  let [tmp, allUserBudgets] = await Promise.all([this.refreshBudget(), api.getEmployeeBudgets(this.employee.id)]);
+  tmp; // unused so we can parallelize the two api calls
+  this.allUserBudgets = allUserBudgets;
 } // refreshEmployee
 
 /**
@@ -254,12 +260,21 @@ export default {
     refreshEmployee,
     selectBudget
   },
-  props: ['employee', 'expenses', 'expenseTypes', 'fiscalDateView']
+  props: ['employee', 'expenses', 'expenseTypes', 'accessibleBudgets', 'fiscalDateView']
 };
 </script>
 
 <style scoped>
-#link:hover {
-  font-size: 20px;
+#link::after {
+  content: '';
+  display: block;
+  width: 0;
+  height: 1px;
+  background: #fff;
+  transition: width 0.3s ease-in;
+}
+
+#link:hover::after {
+  width: 100%;
 }
 </style>

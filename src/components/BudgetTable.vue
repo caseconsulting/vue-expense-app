@@ -78,9 +78,9 @@
 </template>
 
 <script>
-import { convertToMoneyString, isFullTime, formatDateDashToSlash } from '@/utils/utils';
-import api from '@/shared/api';
+import { convertToMoneyString, isBetweenDates, isFullTime, formatDateDashToSlash } from '@/utils/utils';
 import _ from 'lodash';
+const moment = require('moment-timezone');
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -89,12 +89,11 @@ import _ from 'lodash';
 // |--------------------------------------------------|
 
 /**
- * updated lifecycle hook
+ * Sets the data for the budgets given an employee id
  */
-function updated() {
-  this.$emit('rendered'); //This is to ensure that the
-  //chart renders after the table
-} // updated
+function created() {
+  this.calcBudgets();
+}
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -111,6 +110,16 @@ function updated() {
  */
 function calcRemaining(budget) {
   if (budget.budgetObject) {
+    // checks to see if the remaining is 0... there's a wierd float rounding issue with the subtraction
+    if (
+      Number(
+        (budget.budgetObject.amount - budget.budgetObject.pendingAmount - budget.budgetObject.reimbursedAmount).toFixed(
+          9
+        )
+      ) === 0
+    ) {
+      return 0;
+    }
     return budget.budgetObject.amount - budget.budgetObject.pendingAmount - budget.budgetObject.reimbursedAmount;
   }
   return 0;
@@ -183,26 +192,8 @@ function noRemaining(budget) {
   return this.calcRemaining(budget) <= 0;
 } // noRemaining
 
-/**
- * Sets the data for the budgets given an employee id
- */
-async function created() {
-  let budgetsVar;
-  budgetsVar = await api.getAllActiveEmployeeBudgets(this.employee.id);
-
-  // get existing budgets for the budget year being viewed
-  let existingBudgets = await api.getFiscalDateViewBudgets(this.employee.id, this.fiscalDateView);
-  // append inactive tag to end of budget expense type name
-  // the existing budget duplicates will later be removed (order in array comes after active budgets)
-  _.forEach(existingBudgets, (budget) => {
-    budget.expenseTypeName += ' (Inactive)';
-  });
-
-  budgetsVar = _.union(budgetsVar, existingBudgets); // combine existing and active budgets
-  budgetsVar = _.uniqBy(budgetsVar, 'expenseTypeId'); // remove duplicate expense types
-  budgetsVar = _.sortBy(budgetsVar, (budget) => {
-    return budget.expenseTypeName;
-  }); // sort by expense type name
+function calcBudgets() {
+  let budgetsVar = this.accessibleBudgets;
 
   // prohibit overdraft if employee is not full time
   _.forEach(budgetsVar, (budget) => {
@@ -220,12 +211,30 @@ async function created() {
   // remove inactive budgets (exception: there contains a pending expense under that budget)
   this.expenseTypeData = _.filter(this.expenseTypeData, (data) => {
     let budget = data.budgetObject;
+
     return (
-      !_.some(this.expenseTypes, (e) => e.id == budget.expenseTypeId && e.isInactive) ||
-      _.some(this.expenses, (e) => e.expenseTypeId == budget.expenseTypeId && _.isEmpty(e.reimbursedDate))
+      !_.some(
+        this.expenseTypes,
+        (e) =>
+          e.id == budget.expenseTypeId &&
+          (e.isInactive || !isBetweenDates(moment().toISOString(), budget.fiscalStartDate, budget.fiscalEndDate))
+      ) || _.some(this.expenses, (e) => e.expenseTypeId == budget.expenseTypeId && _.isEmpty(e.reimbursedDate))
     );
   });
 }
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     WATCHERS                     |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * watcher of accessibleBudgets - reclaculates budgets to display based on new input
+ */
+async function watchBudgets() {
+  await this.calcBudgets();
+} // watchBudgets
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -241,6 +250,7 @@ export default {
     };
   },
   methods: {
+    calcBudgets,
     calcRemaining,
     convertToMoneyString,
     formatDateDashToSlash,
@@ -251,8 +261,10 @@ export default {
     noRemaining,
     odFlagMessage
   },
-  updated,
-  props: ['employee', 'fiscalDateView', 'expenses', 'expenseTypes'] // employee of budgets
+  props: ['employee', 'accessibleBudgets', 'fiscalDateView', 'expenses', 'expenseTypes'], // employee of budgets
+  watch: {
+    accessibleBudgets: watchBudgets
+  }
 };
 </script>
 

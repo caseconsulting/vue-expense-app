@@ -132,8 +132,8 @@ async function getEmployeeBudget(id, expenseTypeId, date) {
  * @param id - the id of the employee
  * @return - expense types for employee
  */
-async function getEmployeeExpenseTypes(id) {
-  return execute('get', `/${UTILITY}/getEmployeeExpenseTypes/${id}`);
+async function getEmployeeExpenseTypes() {
+  return execute('get', `/${UTILITY}/getEmployeeExpenseTypes`);
 } // getEmployeeExpenseTypes
 
 /**
@@ -377,12 +377,12 @@ async function getResume(employeeId) {
   let accessToken = getAccessToken();
 
   try {
-    let c = await client({
-      method: 'get',
+    let c = await client.get({
       url: `${RESUME}/${employeeId}`,
       headers: {
         Authorization: `Bearer ${accessToken}`
-      }
+      },
+      validateStatus: () => true
     });
     return c.data;
   } catch (err) {

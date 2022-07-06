@@ -1,35 +1,92 @@
 <template>
   <div>
     <!-- Github -->
-    <v-text-field v-model="editedPersonalInfo.github" label="Github" data-vv-name="Github"></v-text-field>
+    <v-text-field
+      v-model="editedPersonalInfo.github"
+      :rules="getURLRules()"
+      ref="github"
+      label="Github"
+      data-vv-name="Github"
+    ></v-text-field>
 
     <!-- Twitter -->
-    <v-text-field v-model="editedPersonalInfo.twitter" label="Twitter" data-vv-name="Twitter"></v-text-field>
+    <v-text-field
+      v-model="editedPersonalInfo.twitter"
+      :rules="getURLRules()"
+      ref="twitter"
+      label="Twitter"
+      data-vv-name="Twitter"
+    ></v-text-field>
 
     <!-- LinkedIn -->
     <v-text-field
       v-model="editedPersonalInfo.linkedIn"
       label="LinkedIn"
       :rules="getURLRules()"
+      ref="linkedin"
       data-vv-name="LinkedIn"
     ></v-text-field>
 
-    <!-- Phone Number -->
-    <v-text-field
-      v-model="editedPersonalInfo.phoneNumber"
-      v-mask="'###-###-####'"
-      hint="###-###-#### format"
-      :rules="phoneRules"
-      label="Phone Number"
-      data-vv-name="Phone Number"
-    >
-      <v-tooltip bottom slot="append">
-        <template v-slot:activator="{ on }">
-          <v-btn class="pb-1" text icon v-on="on"><v-icon class="case-gray">shield</v-icon></v-btn>
-        </template>
-        <span>Only Visible to You, Managers, and Admins</span>
-      </v-tooltip>
-    </v-text-field>
+    <!-- Phone Numbers -->
+    <p class="mt-5">Phone Numbers</p>
+    <div class="groove pr-0 pl-2 mb-4">
+      <v-row v-for="(phoneNumber, index) in phoneNumbers" :key="index" class="d-flex align-center mt-0">
+        <v-col class="pt-0" cols="2" xl="2" lg="3" md="3" sm="3" xs="12">
+          <v-autocomplete
+            v-model="phoneNumber.type"
+            label="Type"
+            :items="phoneNumberTypes"
+            data-vv-name="Phone Type"
+            :rules="getPhoneNumberTypeRules()"
+            ref="phoneType"
+            clearable
+          ></v-autocomplete>
+        </v-col>
+        <v-col class="pt-0" cols="6" xl="6" lg="4" md="3" sm="3" xs="12">
+          <v-text-field
+            v-model="phoneNumber.number"
+            v-mask="'###-###-####'"
+            hint="###-###-#### format"
+            :rules="getPhoneNumberRules()"
+            ref="phoneNum"
+            label="Phone Number"
+            data-vv-name="Phone Number"
+          >
+          </v-text-field>
+        </v-col>
+        <v-col class="pt-0" cols="2" xl="2" lg="3" md="3" sm="3" xs="12">
+          <v-text-field v-model="phoneNumber.ext" v-mask="'####'" label="Ext" data-vv-name="Ext"> </v-text-field>
+        </v-col>
+        <v-col class="py-0 pr-0" cols="2" xl="2" lg="2" md="3" sm="3" xs="12">
+          <v-tooltip bottom slot="append-outer">
+            <template v-slot:activator="{ on }">
+              <v-btn class="mr-2" v-on="on" @click="deletePhoneInput(index)" text icon>
+                <v-icon class="case-gray">delete</v-icon>
+              </v-btn>
+            </template>
+            <span>Delete Number</span>
+          </v-tooltip>
+          <v-tooltip bottom slot="append-outer">
+            <template v-slot:activator="{ on }">
+              <v-btn v-on="on" @click="changeNumberVisibility(index)" text icon>
+                <v-icon v-if="phoneNumber.private">mdi-shield</v-icon>
+                <v-icon v-else>mdi-shield-outline</v-icon>
+              </v-btn>
+            </template>
+            <span v-if="phoneNumber.private"
+              >Based on user preference, this is only visible to You, Managers, and Admins</span
+            >
+            <span v-else>Based on user preference, this is visible to everyone</span>
+          </v-tooltip>
+        </v-col>
+        <v-col v-if="index != phoneNumbers.length - 1 && $vuetify.breakpoint.name === 'xs'" cols="12">
+          <v-divider class="mb-2"></v-divider>
+        </v-col>
+      </v-row>
+      <div align="center" class="py-2">
+        <v-btn @click="addPhoneInput()">Add a Number</v-btn>
+      </div>
+    </div>
 
     <!-- Birthday Picker -->
     <v-menu
@@ -162,7 +219,13 @@
 <script>
 import api from '@/shared/api.js';
 import _ from 'lodash';
-import { getDateOptionalRules, getNonFutureDateRules, getURLRules } from '@/shared/validationUtils.js';
+import {
+  getDateOptionalRules,
+  getNonFutureDateRules,
+  getURLRules,
+  getPhoneNumberRules,
+  getPhoneNumberTypeRules
+} from '@/shared/validationUtils.js';
 import { formatDate, isEmpty, parseDate, countryList } from '@/utils/utils';
 import { mask } from 'vue-the-mask';
 import { getRole } from '@/utils/auth';
@@ -192,6 +255,8 @@ async function created() {
 
   let user = this.$store.getters.user;
   this.userId = user.employeeNumber;
+
+  this.phoneNumbers = this.editedPersonalInfo.privatePhoneNumbers.concat(this.editedPersonalInfo.publicPhoneNumbers);
 } // created
 
 // |--------------------------------------------------|
@@ -221,7 +286,7 @@ function disableBirthdayFeed() {
  * @return boolean - is the USA
  */
 function isUSA() {
-  if (this.editedPersonalInfo.country == 'United States of America') {
+  if (this.editedPersonalInfo.country == 'United States') {
     return true;
   } else {
     this.editedPersonalInfo.st = null;
@@ -310,15 +375,70 @@ function userIsEmployee() {
  * Validate all input fields are valid. Emit to parent the error status.
  */
 function validateFields() {
+  this.sortPhoneNumbers();
+
   let errorCount = 0;
   //ensures that refs are put in an array so we can reuse forEach loop
   let components = !_.isArray(this.$refs.formFields) ? [this.$refs.formFields] : this.$refs.formFields;
+
+  // for some reason, this page didn't overwrote the elements as formFields like the other pages did so
+  // we added individual refs and put them into the components list manually
+  components = [
+    ...components,
+    this.$refs.twitter,
+    this.$refs.github,
+    this.$refs.linkedin,
+    ...this.$refs.phoneType,
+    ...this.$refs.phoneNum
+  ];
   _.forEach(components, (field) => {
     if (field && !field.validate()) errorCount++;
   });
+
   window.EventBus.$emit('personalStatus', errorCount); // emit error status
   window.EventBus.$emit('doneValidating', 'personal', this.editedPersonalInfo); // emit done validating
 } // validateFields
+
+/**
+ * Adds a template data block for phone input
+ * field
+ */
+function addPhoneInput() {
+  this.phoneNumbers.push({
+    type: '',
+    number: '',
+    private: true,
+    valid: true
+  });
+} // addPhoneInput
+
+/**
+ * Sorts phone numbers into two lists based on private or public.
+ */
+function sortPhoneNumbers() {
+  this.editedPersonalInfo.privatePhoneNumbers = _.filter(this.phoneNumbers, (num) => num.private);
+  this.editedPersonalInfo.publicPhoneNumbers = _.filter(this.phoneNumbers, (num) => !num.private);
+} // sortPhoneNumbers
+
+/**
+ * Removes a phone input at given index
+ */
+function deletePhoneInput(index) {
+  this.phoneNumbers.splice(index, 1);
+} // deletePhoneInput
+
+/**
+ * Changes the visibility of the given number.
+ * @param index - the index of the number to change
+ */
+function changeNumberVisibility(index) {
+  this.phoneNumbers[index].private = !this.phoneNumbers[index].private;
+  if (this.phoneNumbers[index].private) {
+    this.phonePrivacyBadgeIcon = 'mdi-shield';
+  } else {
+    this.phonePrivacyBadgeIcon = 'mdi-shield-outline';
+  }
+} // changeNumberVisibility
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -371,19 +491,16 @@ export default {
   },
   data() {
     return {
+      editedPersonalInfo: _.cloneDeep(this.model), //employee personal info that can be edited
       addressDropDown: [],
       birthdayFormat: null, // formatted birthday
       BirthdayMenu: false, // display birthday menu
       countries: [], // list of countries
-      phoneRules: [
-        (v) =>
-          !this.isEmpty(v)
-            ? v.length == 0 || v.length == 12 || 'Phone number must be valid. Format: ###-###-####'
-            : true
-      ],
+      phoneNumbers: [],
+      phonePrivacyBadgeIcon: 'mdi-shield-outline',
+      phoneNumberTypes: ['Home', 'Cell', 'Work'],
       searchString: '',
       placeIds: {},
-      editedPersonalInfo: _.cloneDeep(this.model), //employee personal info that can be edited
       userId: null,
       states: {
         AL: 'Alabama',
@@ -453,6 +570,8 @@ export default {
     formatDate,
     getDateOptionalRules,
     getNonFutureDateRules,
+    getPhoneNumberRules,
+    getPhoneNumberTypeRules,
     getURLRules,
     getRole,
     isEmpty,
@@ -461,7 +580,11 @@ export default {
     updateBoxes,
     userhasAdminPermissions,
     userIsEmployee,
-    validateFields
+    validateFields,
+    addPhoneInput,
+    deletePhoneInput,
+    changeNumberVisibility,
+    sortPhoneNumbers
   },
   props: ['model', 'validating'],
   watch: {
