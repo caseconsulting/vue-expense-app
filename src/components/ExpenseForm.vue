@@ -1023,10 +1023,8 @@ function formatDate(date) {
  * @return Object - expense type selected
  */
 function getExpenseTypeSelected(expenseTypeId) {
-  this.editedExpense.category = null; // clear expense type to prevent it persisting
-  if (this.editedExpense.expenseTypeId != expenseTypeId) {
-    this.editedExpense.category = '';
-  }
+  this.editedExpense.category = ''; // clear expense category (not type) to prevent it persisting
+  this.$refs.form.resetValidation(); // avoid validation errors after changing category
   return (this.selectedExpenseType = _.find(this.expenseTypes, (expenseType) => {
     if (expenseType.value === expenseTypeId) {
       return expenseType;
