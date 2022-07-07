@@ -370,13 +370,13 @@ import { updateStoreBudgets } from '@/utils/storeUtils';
 // |--------------------------------------------------|
 
 /**
- * Gets the full name of the user.
+ * Gets the nickname and last name of the user.
  *
- * @return String - user's full name
+ * @return String - user's nickname and last name
  */
 function getUserName() {
   if (this.userInfo) {
-    return employeeUtils.fullName(this.userInfo);
+    return employeeUtils.nicknameAndLastName(this.userInfo);
   }
 } // getUserName
 
