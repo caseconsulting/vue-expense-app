@@ -115,44 +115,46 @@ async function fillData() {
 
   this.loginChartOptions = {
     scales: {
-      xAxes: [
-        {
-          ticks: {
-            beginAtZero: true
-          },
-          scaleLabel: {
-            display: true,
-            labelString: 'Time of Login',
-            fontStyle: 'bold'
+      x: {
+        beginAtZero: true,
+        title: {
+          display: true,
+          text: 'Time of Login',
+          font: {
+            weight: 'bold'
           }
         }
-      ],
-      yAxes: [
-        {
-          ticks: {
-            beginAtZero: true,
-            stepSize: 1
-          },
-          scaleLabel: {
-            display: true,
-            labelString: 'Number of Logins',
-            fontStyle: 'bold'
+      },
+      y: {
+        beginAtZero: true,
+        ticks: {
+          stepSize: 1
+        },
+        title: {
+          display: true,
+          text: 'Number of Logins',
+          font: {
+            weight: 'bold'
           }
         }
-      ]
+      }
     },
-    title: {
-      display: true,
-      text: title,
-      fontSize: 15
+    plugins: {
+      title: {
+        display: true,
+        text: title,
+        font: {
+          size: 15
+        }
+      },
+      legend: {
+        display: false
+      },
+      tooltip: {
+        enabled: showTooltips
+      }
     },
-    legend: {
-      display: false
-    },
-    maintainAspectRatio: false,
-    tooltips: {
-      enabled: showTooltips
-    }
+    maintainAspectRatio: false
   };
   this.chartLoaded = true;
 } // fillData

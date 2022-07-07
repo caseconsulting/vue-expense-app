@@ -86,39 +86,41 @@ function fillData() {
 
   this.options = {
     scales: {
-      xAxes: [
-        {
-          ticks: {
-            beginAtZero: true
-          },
-          scaleLabel: {
-            display: true,
-            labelString: 'Language',
-            fontStyle: 'bold'
+      x: {
+        beginAtZero: true,
+        title: {
+          display: true,
+          text: 'Language',
+          font: {
+            weight: 'bold'
           }
         }
-      ],
-      yAxes: [
-        {
-          ticks: {
-            beginAtZero: true,
-            stepSize: 1
-          },
-          scaleLabel: {
-            display: true,
-            labelString: 'Number of Employees',
-            fontStyle: 'bold'
+      },
+      y: {
+        beginAtZero: true,
+        ticks: {
+          stepSize: 1
+        },
+        title: {
+          display: true,
+          text: 'Number of Employees',
+          font: {
+            weight: 'bold'
           }
         }
-      ]
+      }
     },
-    legend: {
-      display: false
-    },
-    title: {
-      display: true,
-      text: 'Top Foreign Languages Case Consulting',
-      fontSize: 15
+    plugins: {
+      legend: {
+        display: false
+      },
+      title: {
+        display: true,
+        text: 'Top Foreign Languages Case Consulting',
+        font: {
+          size: 15
+        }
+      }
     },
     maintainAspectRatio: false
   };

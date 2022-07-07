@@ -108,16 +108,20 @@ async function fillData() {
   };
 
   this.mifiChartOptions = {
-    title: {
-      display: true,
-      text: title,
-      fontSize: 15
+    plugins: {
+      title: {
+        display: true,
+        text: title,
+        font: {
+          size: 15
+        }
+      },
+      tooltip: {
+        enabled: showToolTips
+      }
     },
 
-    maintainAspectRatio: false,
-    tooltips: {
-      enabled: showToolTips
-    }
+    maintainAspectRatio: false
   };
   this.chartLoaded = true;
 } // fillData

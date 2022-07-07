@@ -2,10 +2,10 @@
   <v-container fluid>
     <v-row>
       <v-col cols="6">
-        <pie-chart :options="resumeChartOptions" :chartData="resumeChartData"></pie-chart>
+        <pie-chart v-if="chartLoaded" :options="resumeChartOptions" :chartData="resumeChartData"></pie-chart>
       </v-col>
       <v-col cols="6">
-        <pie-chart :options="resumeChart2Options" :chartData="resumeChart2Data"></pie-chart>
+        <pie-chart v-if="chart2Loaded" :options="resumeChart2Options" :chartData="resumeChart2Data"></pie-chart>
       </v-col>
     </v-row>
     <v-divider class="mt-5"></v-divider>
@@ -97,16 +97,19 @@ async function fillData() {
   };
 
   this.resumeChartOptions = {
-    title: {
-      display: true,
-      text: text,
-      fontSize: 15
+    plugins: {
+      title: {
+        display: true,
+        text: text,
+        font: {
+          size: 15
+        }
+      },
+      tooltip: {
+        enabled: false
+      }
     },
-
-    maintainAspectRatio: false,
-    tooltips: {
-      enabled: showToolTips
-    }
+    maintainAspectRatio: false
   };
 
   // For resume chart 2
@@ -144,17 +147,22 @@ async function fillData() {
   };
 
   this.resumeChart2Options = {
-    title: {
-      display: true,
-      text: text,
-      fontSize: 15
+    plugins: {
+      title: {
+        display: true,
+        text: text,
+        font: {
+          size: 15
+        }
+      },
+      tooltip: {
+        enabled: showToolTips
+      }
     },
-
-    maintainAspectRatio: false,
-    tooltips: {
-      enabled: showToolTips
-    }
+    maintainAspectRatio: false
   };
+  this.chartLoaded = true;
+  this.chart2Loaded = true;
 } // fillData
 
 // |--------------------------------------------------|
@@ -207,6 +215,8 @@ export default {
   created,
   data() {
     return {
+      chartLoaded: false,
+      chart2Loaded: false,
       employees: [],
       headers: [
         {

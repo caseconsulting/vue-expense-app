@@ -285,10 +285,14 @@ function fillData() {
     ]
   };
   this.options = {
-    title: {
-      display: true,
-      text: 'Highest Degrees Obtained by Employees',
-      fontSize: 15
+    plugins: {
+      title: {
+        display: true,
+        text: 'Highest Degrees Obtained by Employees',
+        font: {
+          size: 15
+        }
+      }
     },
     maintainAspectRatio: false,
     responsive: true,

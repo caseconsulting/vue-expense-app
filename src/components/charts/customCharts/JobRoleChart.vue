@@ -81,40 +81,50 @@ function fillData() {
 
   this.options = {
     scales: {
-      xAxes: [
-        {
-          ticks: {
-            beginAtZero: true
-          },
-          scaleLabel: {
-            display: true,
-            labelString: 'Name of Position',
-            fontStyle: 'bold'
+      x: {
+        beginAtZero: true,
+        title: {
+          display: true,
+          text: 'Name of Position',
+          font: {
+            weight: 'bold'
           }
         }
-      ],
-      yAxes: [
-        {
-          ticks: {
-            beginAtZero: true,
-            stepSize: 1
-          },
-          scaleLabel: {
-            display: true,
-            labelString: 'Number of Employees',
-            fontStyle: 'bold'
+      },
+      y: {
+        beginAtZero: true,
+        ticks: {
+          stepSize: 1
+        },
+        title: {
+          display: true,
+          text: 'Number of Employees',
+          font: {
+            weight: 'bold'
           }
         }
-      ]
+      }
     },
-    legend: {
-      display: false
+    plugins: {
+      legend: {
+        display: false
+      },
+      title: {
+        display: true,
+        text: 'Top Job Roles at Case Consulting',
+        font: {
+          size: 15
+        }
+      },
+      subtitle: {
+        display: true,
+        text: '*Click on a bar to see employees',
+        font: {
+          style: 'italic'
+        }
+      }
     },
-    title: {
-      display: true,
-      text: 'Top Job Roles at Case Consulting',
-      fontSize: 15
-    },
+
     maintainAspectRatio: false,
     onClick: (_, item) => {
       if (item.length > 0) {

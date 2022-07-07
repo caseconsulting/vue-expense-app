@@ -103,52 +103,55 @@ function fillCertData() {
   };
   this.options = {
     scales: {
-      xAxes: [
-        {
-          ticks: {
-            beginAtZero: true
-          },
-          scaleLabel: {
-            display: true,
-            labelString: 'Name of Certification',
-            fontStyle: 'bold'
+      x: {
+        beginAtZero: true,
+        title: {
+          display: true,
+          text: 'Name of Certification',
+          font: {
+            weight: 'bold'
           }
         }
-      ],
-      yAxes: [
-        {
-          ticks: {
-            beginAtZero: true,
-            stepSize: 1
-          },
-          scaleLabel: {
-            display: true,
-            labelString: 'Number of Employees',
-            fontStyle: 'bold'
-          }
-        }
-      ]
-    },
-    tooltips: {
-      callbacks: {
-        title: (tooltipItem) => {
-          if (Array.isArray(tooltipItem[0].xLabel)) {
-            let label = '';
-            tooltipItem[0].xLabel.forEach((item) => (label += item + ' '));
-            return label.trim();
-          } else {
-            return tooltipItem[0].label;
+      },
+      y: {
+        beginAtZero: true,
+        ticks: {
+          stepSize: 1
+        },
+        title: {
+          display: true,
+          text: 'Number of Employees',
+          font: {
+            weight: 'bold'
           }
         }
       }
     },
-    legend: {
-      display: false
-    },
-    title: {
-      display: true,
-      text: 'Top ' + values.length + ' Certifications Used by Employees',
-      fontSize: 15
+    plugins: {
+      legend: {
+        display: false
+      },
+      title: {
+        display: true,
+        text: 'Top ' + values.length + ' Certifications Used by Employees',
+        font: {
+          size: 15
+        }
+      },
+      tooltip: {
+        callbacks: {
+          title: (tooltipItem) => {
+            console.log(tooltipItem[0]);
+            if (Array.isArray(labels[tooltipItem[0].dataIndex])) {
+              let label = '';
+              labels[tooltipItem[0].dataIndex].forEach((item) => (label += item + ' '));
+              return label.trim();
+            } else {
+              return tooltipItem[0].label;
+            }
+          }
+        }
+      }
     },
     maintainAspectRatio: false
   };

@@ -121,39 +121,41 @@ function drawJobExpHistGraph() {
   };
 
   let options = {
-    title: {
-      display: true,
-      text: 'Number of Years of Job Experience for Employees',
-      fontSize: 15
-    },
     scales: {
-      yAxes: [
-        {
-          ticks: {
-            beginAtZero: true
-          },
-          scaleLabel: {
-            display: true,
-            labelString: 'Number of Employees',
-            fontStyle: 'bold'
+      y: {
+        beginAtZero: true,
+        title: {
+          display: true,
+          text: 'Number of Employees',
+          font: {
+            weight: 'bold'
           }
         }
-      ],
-      xAxes: [
-        {
-          ticks: {
-            autoSkip: false
-          },
-          scaleLabel: {
-            display: true,
-            labelString: 'Years of Job Experience',
-            fontStyle: 'bold'
+      },
+      x: {
+        ticks: {
+          autoSkip: false
+        },
+        title: {
+          display: true,
+          text: 'Years of Job Experience',
+          font: {
+            weight: 'bold'
           }
         }
-      ]
+      }
     },
-    legend: {
-      display: false
+    plugins: {
+      legend: {
+        display: false
+      },
+      title: {
+        display: true,
+        text: 'Number of Years of Job Experience for Employees',
+        font: {
+          size: 15
+        }
+      }
     },
     responsive: true,
     maintainAspectRatio: false

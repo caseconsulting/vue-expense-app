@@ -1,5 +1,5 @@
 <script>
-import { HorizontalBar, mixins } from 'vue-chartjs';
+import { HorizontalBar, mixins } from 'vue-chartjs/legacy';
 
 // |--------------------------------------------------|
 // |                                                  |

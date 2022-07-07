@@ -110,15 +110,19 @@ function fillData(minors) {
     ]
   };
   this.options = {
-    title: {
-      display: true,
-      text: text,
-      fontSize: 15
+    plugins: {
+      title: {
+        display: true,
+        text: text,
+        font: {
+          size: 15
+        }
+      },
+      tooltip: {
+        enabled: enabled
+      }
     },
-    maintainAspectRatio: false,
-    tooltips: {
-      enabled: enabled
-    }
+    maintainAspectRatio: false
   };
   this.dataReceived = true;
 } // fillData

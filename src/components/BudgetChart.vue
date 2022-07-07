@@ -191,52 +191,50 @@ function drawGraph() {
         params: routeData
       });
     },
-    title: {
-      display: true,
-      text: 'Budget Overview For Fiscal Year ' + year + '-' + (Number(year) + 1),
-      fontSize: 20
-    },
     scales: {
-      yAxes: [
-        {
-          stacked: true,
-          ticks: {
-            beginAtZero: true,
-            callback: function (value) {
-              return value.toLocaleString('en-US', {
-                style: 'currency',
-                currency: 'USD'
-              });
-            }
+      y: {
+        stacked: true,
+        beginAtZero: true,
+        ticks: {
+          callback: function (value) {
+            return value.toLocaleString('en-US', {
+              style: 'currency',
+              currency: 'USD'
+            });
           }
         }
-      ],
-      xAxes: [
-        {
-          stacked: true,
-          ticks: {
-            autoSkip: false
-          }
-        }
-      ]
-    },
-    tooltips: {
-      callbacks: {
-        label: function (tooltipItem) {
-          return (
-            '$' +
-            Number(tooltipItem.yLabel)
-              // toFixed sets the number of decimal points to show
-              .toFixed(2)
-              .replace(/./g, function (c, i, a) {
-                return i > 0 && c !== '.' && (a.length - i) % 3 === 0 ? ',' + c : c;
-              })
-          );
+      },
+      x: {
+        stacked: true,
+        ticks: {
+          autoSkip: false
         }
       }
     },
-    legend: {
-      display: true
+    plugins: {
+      legend: {
+        display: false
+      },
+      title: {
+        display: true,
+        text: 'Budget Overview For Fiscal Year ' + year + '-' + (Number(year) + 1),
+        fontSize: 20
+      },
+      tooltip: {
+        callbacks: {
+          label: function (tooltipItem) {
+            return (
+              '$' +
+              Number(tooltipItem.raw)
+                // toFixed sets the number of decimal points to show
+                .toFixed(2)
+                .replace(/./g, function (c, i, a) {
+                  return i > 0 && c !== '.' && (a.length - i) % 3 === 0 ? ',' + c : c;
+                })
+            );
+          }
+        }
+      }
     },
     responsive: true,
     maintainAspectRatio: false

@@ -132,36 +132,47 @@ function fillPrimeData() {
   };
   this.options = {
     scales: {
-      xAxes: [
-        {
-          scaleLabel: {
-            display: true,
-            labelString: 'Prime',
-            fontStyle: 'bold'
+      x: {
+        title: {
+          display: true,
+          text: 'Prime',
+          font: {
+            weight: 'bold'
           }
         }
-      ],
-      yAxes: [
-        {
-          ticks: {
-            beginAtZero: true,
-            stepSize: 1
-          },
-          scaleLabel: {
-            display: true,
-            labelString: 'Number of Employees',
-            fontStyle: 'bold'
+      },
+      y: {
+        beginAtZero: true,
+        ticks: {
+          stepSize: 1
+        },
+        title: {
+          display: true,
+          text: 'Number of Employees',
+          font: {
+            weight: 'bold'
           }
         }
-      ]
+      }
     },
-    legend: {
-      display: false
-    },
-    title: {
-      display: true,
-      text: 'Top ' + values.length + ' Primes That We Currently Subcontract',
-      fontSize: 15
+    plugins: {
+      legend: {
+        display: false
+      },
+      title: {
+        display: true,
+        text: 'Top ' + values.length + ' Primes That We Currently Subcontract',
+        font: {
+          size: 15
+        }
+      },
+      subtitle: {
+        display: true,
+        text: '*Click on a bar to see employees',
+        font: {
+          style: 'italic'
+        }
+      }
     },
     maintainAspectRatio: false,
     onClick: (_, item) => {
@@ -169,7 +180,7 @@ function fillPrimeData() {
         this.$router.push({
           path: '/reports',
           name: 'reports',
-          params: { requestedDataType: 'Contracts', requestedFilter: item[0]._model.label }
+          params: { requestedDataType: 'Contracts', requestedFilter: item[0]._model }
         });
       }
     }
