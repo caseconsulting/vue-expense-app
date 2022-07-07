@@ -236,6 +236,7 @@ function checkAllBoxes() {
     return _.forEach(budget.expenses, (expense) => {
       this.emitSelectionChange(expense, true);
       expense.selected = true;
+      this.determineShowOnFeed(expense);
     });
   });
 } // checkAllBoxes
