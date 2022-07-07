@@ -1702,15 +1702,12 @@ async function watchEditedExpenseExpenseTypeID() {
       _.isEmpty(this.editedExpense.id)
     ) {
       // changing the expense type
-      if (this.selectedExpenseType.alwaysOnFeed) {
+      if (!this.isEdit && this.selectedExpenseType.alwaysOnFeed) {
         // if expense type is always on feed
         this.editedExpense.showOnFeed = true;
       } else {
         // if expense type is not always on feed
-        if (_.isEmpty(this.selectedExpenseType.categories)) {
-          // expense type does not have categories
-          this.editedExpense.showOnFeed = false;
-        } else {
+        if (!_.isEmpty(this.selectedExpenseType.categories)) {
           // expense type has categories
           let category = _.find(this.selectedExpenseType.categories, (category) => {
             return category == this.editedExpense.category;

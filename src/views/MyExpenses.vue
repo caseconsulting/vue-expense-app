@@ -300,7 +300,7 @@
                         <br />
                         <p>Show On Feed:</p>
                         <v-icon v-if="item.showOnFeed" id="marks" class="mr-1 mx-3">mdi-check-circle-outline</v-icon>
-                        <v-icon v-else class="mr-1 mx-3" id="marks">close-mdi-circle-outline</v-icon>
+                        <v-icon v-else class="mr-1 mx-3" id="marks">mdi-close-circle-outline</v-icon>
                       </div>
                     </div>
                   </v-card-text>
