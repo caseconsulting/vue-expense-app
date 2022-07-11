@@ -1,6 +1,6 @@
 <template>
   <v-card v-if="dataReceived" class="pa-5">
-    <pie-chart :options="options" :chartData="chartData"></pie-chart>
+    <pie-chart chartId="concentrations-chart" :key="chartKey" :options="options" :chartData="chartData"></pie-chart>
   </v-card>
 </template>
 
@@ -124,6 +124,7 @@ function fillData(concentrations) {
     },
     maintainAspectRatio: false
   };
+  this.chartKey++; // rerenders the chart
   this.dataReceived = true;
 } // fillData
 
@@ -141,7 +142,8 @@ export default {
       chartData: null,
       concentrations: null,
       dataReceived: false,
-      degree: null
+      degree: null,
+      chartKey: 0
     };
   },
   methods: {

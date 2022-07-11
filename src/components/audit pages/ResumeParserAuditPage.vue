@@ -2,10 +2,20 @@
   <v-container fluid>
     <v-row>
       <v-col cols="6">
-        <pie-chart v-if="chartLoaded" :options="resumeChartOptions" :chartData="resumeChartData"></pie-chart>
+        <pie-chart
+          v-if="chartLoaded"
+          chartId="resume-1"
+          :options="resumeChartOptions"
+          :chartData="resumeChartData"
+        ></pie-chart>
       </v-col>
       <v-col cols="6">
-        <pie-chart v-if="chart2Loaded" :options="resumeChart2Options" :chartData="resumeChart2Data"></pie-chart>
+        <pie-chart
+          v-if="chart2Loaded"
+          chartId="resume-2"
+          :options="resumeChart2Options"
+          :chartData="resumeChart2Data"
+        ></pie-chart>
       </v-col>
     </v-row>
     <v-divider class="mt-5"></v-divider>

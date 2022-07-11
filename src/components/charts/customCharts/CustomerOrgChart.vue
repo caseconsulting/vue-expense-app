@@ -1,6 +1,6 @@
 <template>
   <v-card v-if="dataReceived" class="pa-5">
-    <pie-chart :options="options" :chartData="chartData"></pie-chart>
+    <pie-chart :key="chartKey" chartId="cust-org" :options="options" :chartData="chartData"></pie-chart>
     <v-container class="ma-0">
       <v-row justify="center" no-gutters>
         <v-radio-group row v-model="showCurrent">
@@ -116,7 +116,6 @@ function fillData() {
         enabled: enabled
       }
     },
-
     maintainAspectRatio: false
   };
 
@@ -134,6 +133,7 @@ function fillData() {
  */
 function watchShowCurrent() {
   this.fillData(); // renders a different chart every time the radio button changes
+  this.chartKey++; // rerenders the chart
 } // watchShowCurrent
 
 // |--------------------------------------------------|
@@ -153,7 +153,8 @@ export default {
       chartData: null,
       options: null,
       employees: null,
-      showCurrent: 'All'
+      showCurrent: 'All',
+      chartKey: 0
     };
   },
   methods: { fillData },

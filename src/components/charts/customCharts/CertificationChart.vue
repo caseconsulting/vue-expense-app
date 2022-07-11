@@ -141,7 +141,6 @@ function fillCertData() {
       tooltip: {
         callbacks: {
           title: (tooltipItem) => {
-            console.log(tooltipItem[0]);
             if (Array.isArray(labels[tooltipItem[0].dataIndex])) {
               let label = '';
               labels[tooltipItem[0].dataIndex].forEach((item) => (label += item + ' '));

@@ -1,9 +1,7 @@
 <template>
-  <v-card v-if="dataReceived">
-    <pie-chart :options="options" :chartData="chartData" />
-    <div class="center">
-      <p class="font-weight-normal">Total Degrees: {{ degreeCount }}</p>
-    </div>
+  <v-card v-if="dataReceived" class="pa-5 pb-0">
+    <pie-chart chartId="highest-degree" :options="options" :chartData="chartData" />
+    <p class="text-center">Total Degrees: {{ degreeCount }}</p>
   </v-card>
 </template>
 
@@ -257,15 +255,24 @@ function getDegreeName(value) {
  * Populates the data to display
  */
 function fillData() {
-  let labels = Object.keys(this.degrees);
   let quantities = [];
-  _.forEach(this.degrees, (degree) => {
-    let quantity = 0;
-    _.forEach(Object.keys(degree), (major) => {
-      quantity += degree[major];
-      this.degreeCount += degree[major];
+  let ourFunctions = [];
+  let labels = Object.keys(this.degrees);
+  _.forEach(labels, (degree) => {
+    let counts = 0;
+    _.forEach(this.degrees[degree], (count) => {
+      counts += count;
+      this.degreeCount += count;
     });
-    quantities.push(quantity);
+    quantities.push(counts);
+    ourFunctions.push(() => {
+      // emits to MajorsChart.vue when pie slice is clicked
+      this.majorsEmit(degree);
+      // emits to MinorsChart.vue when pie slice is clicked
+      this.minorsEmit(degree);
+      // emits to ConcentrationsChart.vue when pie slice is clicked
+      this.concentrationsEmit(degree);
+    });
   });
 
   let colors = [
@@ -284,7 +291,9 @@ function fillData() {
       }
     ]
   };
+
   this.options = {
+    myFunctions: ourFunctions,
     plugins: {
       title: {
         display: true,
@@ -294,18 +303,7 @@ function fillData() {
         }
       }
     },
-    maintainAspectRatio: false,
-    responsive: true,
-    onClick: (_, item) => {
-      if (item[0]) {
-        // emits to MajorsChart.vue when pie slice is clicked
-        this.majorsEmit(labels[item[0]._index]);
-        // emits to MinorsChart.vue when pie slice is clicked
-        this.minorsEmit(labels[item[0]._index]);
-        // emits to ConcentrationsChart.vue when pie slice is clicked
-        this.concentrationsEmit(labels[item[0]._index]);
-      }
-    }
+    maintainAspectRatio: false
   };
   this.dataReceived = true;
 } // fillData

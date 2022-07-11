@@ -1,6 +1,9 @@
+<template>
+  <canvas :id="chartId" width="400" height="400"></canvas>
+</template>
+
 <script>
-import { Pie } from 'vue-chartjs/legacy';
-import 'chart.js/auto';
+import Chart from 'chart.js/auto';
 // |--------------------------------------------------|
 // |                                                  |
 // |                 LIFECYCLE HOOKS                  |
@@ -11,9 +14,23 @@ import 'chart.js/auto';
  * mounted lifecycle hook
  */
 function mounted() {
-  setTimeout(() => {
-    this.renderChart(this.chartData, this.options);
-  }, 0);
+  const canvas = document.getElementById(this.chartId);
+  const ctx = canvas.getContext('2d');
+  const myChart = new Chart(ctx, {
+    type: 'pie',
+    data: this.chartData,
+    options: { ...this.options, responsive: false }
+  });
+
+  if (this.options.myFunctions) {
+    canvas.onclick = (e) => {
+      let points = myChart.getElementsAtEventForMode(e, 'nearest', { intersect: true }, true);
+      if (points.length) {
+        let firstPoint = points[0];
+        this.options.myFunctions[firstPoint.index]();
+      }
+    };
+  }
 } // mounted
 
 // |--------------------------------------------------|
@@ -23,11 +40,19 @@ function mounted() {
 // |--------------------------------------------------|
 
 export default {
-  extends: Pie,
   mounted,
   props: [
     'chartData', // chart data to render
-    'options' // chart options
+    'options', // chart options
+    'chartId' // id for the canvas
   ]
 };
 </script>
+
+<style>
+canvas {
+  margin: 0 auto;
+  width: 70%;
+  height: 70%;
+}
+</style>

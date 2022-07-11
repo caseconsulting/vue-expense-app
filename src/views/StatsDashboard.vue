@@ -152,10 +152,3 @@ export default {
   }
 };
 </script>
-
-<style>
-.chart {
-  height: 60%;
-  width: 70%;
-}
-</style>

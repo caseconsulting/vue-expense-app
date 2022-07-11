@@ -1,6 +1,6 @@
 <template>
   <v-card v-if="dataReceived" class="pa-5">
-    <pie-chart ref="chart" :options="options" :chartData="chartData"></pie-chart>
+    <pie-chart ref="chart" :key="chartKey" chartId="majors-chart" :options="options" :chartData="chartData"></pie-chart>
   </v-card>
 </template>
 
@@ -112,6 +112,7 @@ function fillData(majors) {
     },
     maintainAspectRatio: false
   };
+  this.chartKey++; // rerenders the chart
   this.dataReceived = true;
 } // fillData
 
@@ -129,7 +130,8 @@ export default {
       chartData: null,
       majors: null,
       dataReceived: false,
-      degree: null
+      degree: null,
+      chartKey: 0
     };
   },
   methods: {
