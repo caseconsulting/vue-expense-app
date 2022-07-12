@@ -1,6 +1,6 @@
 <template>
   <v-card v-if="dataReceived" class="pa-5">
-    <bar-chart :options="options" :chartData="chartData"></bar-chart>
+    <bar-chart chartId="certifications-chart" :options="options" :chartData="chartData"></bar-chart>
   </v-card>
 </template>
 

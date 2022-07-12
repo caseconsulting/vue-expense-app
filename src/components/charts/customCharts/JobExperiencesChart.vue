@@ -1,6 +1,6 @@
 <template>
   <v-card v-if="dataReceived" class="pa-5">
-    <bar-chart :options="options" :chartData="chartData" />
+    <bar-chart chartId="job-experience" :options="options" :chartData="chartData" />
   </v-card>
 </template>
 
@@ -157,7 +157,6 @@ function drawJobExpHistGraph() {
         }
       }
     },
-    responsive: true,
     maintainAspectRatio: false
   };
   this.chartData = data;

@@ -2,7 +2,12 @@
   <v-container fluid>
     <v-row>
       <v-col>
-        <bar-chart v-if="chartLoaded" :options="loginChartOptions" :chartData="loginChartData"></bar-chart>
+        <bar-chart
+          v-if="chartLoaded"
+          chartId="login-audits"
+          :options="loginChartOptions"
+          :chartData="loginChartData"
+        ></bar-chart>
       </v-col>
     </v-row>
     <audit-table :audits="loginAudits"></audit-table>

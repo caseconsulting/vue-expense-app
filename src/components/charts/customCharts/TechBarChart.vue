@@ -21,7 +21,7 @@
           </v-tooltip>
         </v-col>
       </v-row>
-      <bar-chart :options="options" :chartData="chartData"></bar-chart>
+      <bar-chart :key="chartKey" chartId="tech" :options="options" :chartData="chartData"></bar-chart>
       <v-row justify="center" no-gutters>
         <v-radio-group row v-model="showCurrent" class="mt-8 mb-0 mx-0">
           <v-radio label="All" value="All"></v-radio>
@@ -142,6 +142,7 @@ function fillData() {
     },
     maintainAspectRatio: false
   };
+  this.chartKey++; // rerenders the chart
   this.dataReceived = true;
 } //fillData
 
@@ -325,7 +326,8 @@ export default {
       currentTechnologies: {},
       nonCurrentTechnologies: {},
       showCurrent: 'All',
-      enoughData: true
+      enoughData: true,
+      chartKey: 0
     };
   },
   methods: {
@@ -347,6 +349,9 @@ export default {
 
         this.fillData();
       }
+    },
+    chartKey: function () {
+      console.log(this.chartKey);
     }
   }
 };

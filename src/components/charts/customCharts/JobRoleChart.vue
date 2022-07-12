@@ -1,6 +1,6 @@
 <template>
   <v-card v-if="dataReceived" class="pa-5">
-    <bar-chart :options="options" :chartData="chartData" />
+    <bar-chart chartId="job-roles-chart" :options="options" :chartData="chartData" />
   </v-card>
 </template>
 
@@ -33,6 +33,8 @@ function mounted() {
  */
 function fillData() {
   let roles = {};
+  let ourFunctions = [];
+
   this.employees = this.$store.getters.employees;
   this.employees.forEach((emp) => {
     if (emp.jobRole && emp.workStatus != 0) {
@@ -53,6 +55,13 @@ function fillData() {
   //10 is just a limit to prevent an extremely long and crammed graph
   for (let i = 0; i < 10; i++) {
     if (sortedRoles.length > i) {
+      ourFunctions.push(() => {
+        this.$router.push({
+          path: '/reports',
+          name: 'reports',
+          params: { requestedDataType: 'Job Roles', requestedFilter: sortedRoles[i][0] }
+        });
+      });
       jobTitles.push(sortedRoles[i][0]);
       jobQuantities.push(sortedRoles[i][1]);
     }
@@ -80,6 +89,7 @@ function fillData() {
   };
 
   this.options = {
+    aspectRatio: 2,
     scales: {
       x: {
         beginAtZero: true,
@@ -124,17 +134,8 @@ function fillData() {
         }
       }
     },
-
     maintainAspectRatio: false,
-    onClick: (_, item) => {
-      if (item.length > 0) {
-        this.$router.push({
-          path: '/reports',
-          name: 'reports',
-          params: { requestedDataType: 'Job Roles', requestedFilter: item[0]._model.label }
-        });
-      }
-    }
+    myFunctions: ourFunctions
   };
   this.dataReceived = true;
 } // fillData

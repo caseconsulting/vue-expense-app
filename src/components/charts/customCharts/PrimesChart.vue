@@ -1,6 +1,6 @@
 <template>
   <v-card v-if="dataReceived" class="pa-5">
-    <bar-chart :options="options" :chartData="chartData"></bar-chart>
+    <bar-chart chartId="primes-chart" :options="options" :chartData="chartData"></bar-chart>
   </v-card>
 </template>
 
@@ -63,6 +63,7 @@ function getCurrentProjects(employee) {
  * Extracts and tallies up each employees primes, and sets the chart formatting and options data.
  */
 function fillPrimeData() {
+  let ourFunctions = [];
   //Get data
   this.employees = this.$store.getters.employees;
   //Put into dictionary where key is prime and value is quantity
@@ -95,6 +96,13 @@ function fillPrimeData() {
   let values = [];
 
   for (let i = 0; i < primePairs.length; i++) {
+    ourFunctions.push(() => {
+      this.$router.push({
+        path: '/reports',
+        name: 'reports',
+        params: { requestedDataType: 'Contracts', requestedFilter: primePairs[i][0] }
+      });
+    });
     labels.push(primePairs[i][0]);
     values.push(primePairs[i][1]);
   }
@@ -175,15 +183,7 @@ function fillPrimeData() {
       }
     },
     maintainAspectRatio: false,
-    onClick: (_, item) => {
-      if (item.length > 0) {
-        this.$router.push({
-          path: '/reports',
-          name: 'reports',
-          params: { requestedDataType: 'Contracts', requestedFilter: item[0]._model }
-        });
-      }
-    }
+    myFunctions: ourFunctions
   };
   this.dataReceived = true;
 } // fillCertData

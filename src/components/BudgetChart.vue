@@ -1,7 +1,7 @@
 <template>
   <v-card>
-    <div v-if="dataReceived" class="pa-2">
-      <bar-chart :options="options" :chart-data="chartData"></bar-chart>
+    <div v-if="dataReceived">
+      <bar-chart :key="chartKey" chartId="budget-chart" :options="options" :chart-data="chartData"></bar-chart>
       <v-autocomplete
         :items="allBudgetNames"
         multiple
@@ -135,6 +135,7 @@ function budgets() {
  * @return Object - budget chart data
  */
 function drawGraph() {
+  let ourFunctions = [];
   let budgets = this.getFinalBudgetsData(this.budgets);
   let bars = [
     {
@@ -174,23 +175,34 @@ function drawGraph() {
     datasets: bars
   };
 
-  let [year] = this.fiscalDateView.split('-');
-  const employee = this.employee;
-  const router = this.$router;
-  let options = {
-    onClick(_, item) {
-      // build data
+  //create onClick functions
+  _.forEach(budgets.names, (budget) => {
+    ourFunctions.push(() => {
       let routeData = {
         defaultEmployee: employee,
         defaultFilterReimbursed: 'both',
-        defaultSearch: item[0] ? budgets.names[item[0]._index] : null
+        defaultSearch: budget
       };
       // redirect to expenses page
       router.push({
         name: 'expenses',
         params: routeData
       });
-    },
+    });
+  });
+  ourFunctions.push(() => {
+    router.push({
+      name: 'expenses',
+      params: {
+        defaultEmployee: employee
+      }
+    });
+  });
+
+  let [year] = this.fiscalDateView.split('-');
+  const employee = this.employee;
+  const router = this.$router;
+  let options = {
     scales: {
       y: {
         stacked: true,
@@ -220,6 +232,13 @@ function drawGraph() {
         text: 'Budget Overview For Fiscal Year ' + year + '-' + (Number(year) + 1),
         fontSize: 20
       },
+      subtitle: {
+        display: true,
+        text: '*Click on a bar to see expenses',
+        font: {
+          style: 'italic'
+        }
+      },
       tooltip: {
         callbacks: {
           label: function (tooltipItem) {
@@ -236,11 +255,12 @@ function drawGraph() {
         }
       }
     },
-    responsive: true,
+    myFunctions: ourFunctions,
     maintainAspectRatio: false
   };
   this.chartData = data;
   this.options = options;
+  this.chartKey++; // rerenders the chart
   this.dataReceived = true;
 } // drawGraph
 
@@ -346,6 +366,7 @@ export default {
   data() {
     return {
       allBudgetNames: [],
+      chartKey: 0,
       chartData: null,
       dataReceived: false,
       options: null,

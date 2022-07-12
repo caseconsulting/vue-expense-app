@@ -1,6 +1,6 @@
 <template>
   <v-card v-if="dataReceived" class="pa-5">
-    <bar-chart :options="options" :chartData="chartData" />
+    <bar-chart chartId="case-years" :options="options" :chartData="chartData" />
   </v-card>
   <v-skeleton-loader v-else type="paragraph@5"></v-skeleton-loader>
 </template>
@@ -125,8 +125,7 @@ function drawCaseYearsHistGraph() {
         }
       }
     },
-    responsive: true,
-    maintainAspectRatio: false
+    maintainAspectRatio: true
   };
   this.chartData = data;
   this.options = options;
