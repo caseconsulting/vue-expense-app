@@ -125,7 +125,7 @@ function drawCaseYearsHistGraph() {
         }
       }
     },
-    maintainAspectRatio: true
+    maintainAspectRatio: false
   };
   this.chartData = data;
   this.options = options;

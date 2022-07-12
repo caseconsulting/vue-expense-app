@@ -1,5 +1,7 @@
 <template>
-  <canvas :id="chartId" width="400" height="400"></canvas>
+  <div class="chart-wrapper">
+    <canvas :id="chartId"></canvas>
+  </div>
 </template>
 
 <script>
@@ -19,7 +21,7 @@ function mounted() {
   const myChart = new Chart(ctx, {
     type: 'pie',
     data: this.chartData,
-    options: { ...this.options, responsive: false }
+    options: { ...this.options, responsive: true }
   });
 
   if (this.options.myFunctions) {
@@ -50,9 +52,9 @@ export default {
 </script>
 
 <style>
-canvas {
+.chart-wrapper {
+  width: 80%;
+  height: 400px;
   margin: 0 auto;
-  width: 70%;
-  height: 70%;
 }
 </style>

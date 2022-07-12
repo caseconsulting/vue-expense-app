@@ -1,5 +1,7 @@
 <template>
-  <canvas :id="chartId" width="400" height="300"></canvas>
+  <div class="chart-wrapper">
+    <canvas :id="chartId"></canvas>
+  </div>
 </template>
 
 <script>
@@ -19,7 +21,7 @@ function mounted() {
   const myChart = new Chart(ctx, {
     type: 'bar',
     data: this.chartData,
-    options: { ...this.options, responsive: false }
+    options: { ...this.options, responsive: true }
   });
 
   if (this.options.myFunctions) {

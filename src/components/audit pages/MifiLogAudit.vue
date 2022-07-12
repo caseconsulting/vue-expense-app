@@ -2,7 +2,12 @@
   <v-container fluid>
     <v-row>
       <v-col>
-        <pie-chart v-if="chartLoaded" :options="mifiChartOptions" :chartData="mifiChartData"></pie-chart>
+        <pie-chart
+          v-if="chartLoaded"
+          chartId="mifi-audit"
+          :options="mifiChartOptions"
+          :chartData="mifiChartData"
+        ></pie-chart>
       </v-col>
     </v-row>
     <audit-table :audits="mifiAudits"></audit-table>

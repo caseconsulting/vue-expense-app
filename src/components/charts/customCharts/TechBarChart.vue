@@ -101,9 +101,8 @@ function fillData() {
     ]
   };
   this.options = {
-    indexAxis: 'y',
     scales: {
-      x: {
+      y: {
         beginAtZero: true,
         ticks: {
           stepSize: 1
@@ -116,7 +115,7 @@ function fillData() {
           }
         }
       },
-      y: {
+      x: {
         title: {
           display: true,
           text: 'Name of Technology',
