@@ -53,8 +53,10 @@ export default {
 
 <style>
 .chart-wrapper {
-  width: 80%;
+  width: 100%;
   height: 400px;
-  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 </style>

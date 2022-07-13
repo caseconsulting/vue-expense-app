@@ -1,7 +1,7 @@
 <template>
   <v-container fluid>
     <v-row>
-      <v-col cols="6">
+      <v-col sm="12" md="6">
         <pie-chart
           v-if="chartLoaded"
           chartId="resume-1"
@@ -9,7 +9,7 @@
           :chartData="resumeChartData"
         ></pie-chart>
       </v-col>
-      <v-col cols="6">
+      <v-col sm="12" md="6">
         <pie-chart
           v-if="chart2Loaded"
           chartId="resume-2"
