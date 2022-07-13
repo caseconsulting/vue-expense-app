@@ -5,6 +5,7 @@
         <bar-chart
           v-if="chartLoaded"
           chartId="login-audits"
+          :key="chartKey"
           :options="loginChartOptions"
           :chartData="loginChartData"
         ></bar-chart>
@@ -161,6 +162,7 @@ async function fillData() {
     },
     maintainAspectRatio: false
   };
+  this.chartKey++; // rerenders the chart
   this.chartLoaded = true;
 } // fillData
 
@@ -237,6 +239,7 @@ export default {
   created,
   data() {
     return {
+      chartKey: 0,
       chartLoaded: false,
       loginAudits: [],
       loginChartOptions: null,
