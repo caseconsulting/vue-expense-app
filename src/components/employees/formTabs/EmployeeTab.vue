@@ -246,8 +246,9 @@
           </template>
           <span
             >Data in this section is only Visible to You, Managers, and Admins. Equal Employment Opportunity (EEO)
-            reporting is required for companies with more than 50 employees.</span
-          >
+            reporting is required for companies with more than 50 employees. <b>Note:</b> options for the fields below
+            are the same as the options listed in the paper format.
+          </span>
         </v-tooltip>
       </p>
 
