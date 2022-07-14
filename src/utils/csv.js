@@ -1,0 +1,130 @@
+// Imports and constants for all functions
+import _ from 'lodash';
+const NEW_LINE = '\n';
+
+/**
+ * Downloads a given CSV string as a .csv file
+ *
+ * @param csv - csv text to create as file, eg output of generate
+ * @param filename (optional) - file name with which to download file
+ */
+export function download(csv, filename = null) {
+  // build filename
+  if (filename == undefined || filename == null) filename = 'export.csv';
+  filename = filename.toLowerCase();
+  if (filename.substring(filename.length - 4) != '.csv') filename += '.csv';
+
+  // build file contents
+  let blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  // build link to "click"
+  var link = document.createElement('a');
+  var url = URL.createObjectURL(blob);
+  link.setAttribute('href', url);
+  link.setAttribute('download', filename);
+  link.style.visibility = 'hidden';
+  // put link in document, click it, and remove it
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
+/**
+ * Escapes invalid characters in CSV.
+ * @param item - array or string to escape
+ * @param quotify (optional) - whether or not to surround result in quotes
+ */
+export function escape(item, quotify = false) {
+  let to_return;
+  if (Array.isArray(item)) {
+    to_return = _.map(item, (s) => {
+      if (quotify) return `"${s.replace('"', '""')}"`;
+      else return s.replace('"', '""');
+    });
+  } else {
+    item = `${item}`;
+    to_return = item.replace('"', '""');
+    if (quotify) to_return = `"${to_return}"`;
+  }
+  return to_return;
+}
+
+/**
+ * Non-destructively removes undesired headers (keys)
+ * @param objects - old array of objects to filter
+ * @param desired_headers - which headers (aka keys of objects[x]) to keep
+ * @return new array of objects with only and all desired_headers keys
+ */
+export function filterHeaders(objects, desired_headers) {
+  let new_objects = [];
+  // go through each object...
+  _.forEach(objects, (object) => {
+    // extract headers we want
+    let new_object = {};
+    _.forEach(desired_headers, (h) => {
+      if (object[h] != undefined) new_object[h] = object[h];
+      else new_object[h] = '';
+    });
+    new_objects.push(new_object);
+  });
+  return new_objects;
+}
+
+/**
+ * Generates a valid CSV "file" string from an object. Object values may
+ * be arrays. Object keys will be used as headers.
+ * @param json_object - object to make CSV
+ * @param delimiter (optional) - string to separate array items by
+ * @return file-ready CSV string
+ */
+export function generate(object_array, delimiter = ', ') {
+  let final_csv = '';
+
+  // construct headers, preserving order
+  let headers = [];
+  let seent = new Set();
+  _.forEach(object_array, (object) => {
+    _.forEach(Object.keys(object), (key, index) => {
+      if (!seent.has(key)) {
+        seent.add(key);
+        headers.splice(index + 1, 0, key);
+      }
+    });
+  });
+
+  // add headers to CSV
+  final_csv += `${this.escape(headers, true).join(',')}${NEW_LINE}`;
+
+  // foreach line of file...
+  _.forEach(object_array, (object) => {
+    let current;
+    let line = [];
+    // foreach item (box) in line...
+    _.forEach(headers, (header) => {
+      // iteration vars
+      current = object[header];
+      // add line, supporting arrays and escaping characters
+      if (current == undefined) {
+        line.push('""');
+      } else if (Array.isArray(current)) {
+        line.push(`"${this.escape(current).join(delimiter)}"`);
+      } else {
+        line.push(`"${this.escape(current)}"`);
+      }
+    });
+    final_csv += `${line.join(',')}${NEW_LINE}`;
+  });
+
+  return final_csv;
+}
+
+/**
+ * Non-destructively =sorts an array of objects by a given key. Wrapper
+ * for lodash's sort export function.
+ * @param objects - array of objects to sort
+ * @param key - key by which to sort the `objects`, supports arrays for prioritizing
+ * @return a new array of sorted `objects`
+ */
+export function sort(objects, key) {
+  if (!Array.isArray(key)) key = [key];
+  return _.sortBy(objects, key);
+}
