@@ -60,11 +60,14 @@ async function getData() {
  * @param fileTitle - title of csv file
  */
 async function exportCSVFile(items, fileTitle) {
+  // get employees and expense types from store
   await this.getData();
 
+  // go through expenses to download
   for (var i = 0; i < items.length; i++) {
     let person = items[i];
 
+    // add first/last name and employee # keys to object
     for (let employee of this.employees) {
       if (employee.id === person.employeeId) {
         person.employeeNumber = employee.employeeNumber;
@@ -74,6 +77,7 @@ async function exportCSVFile(items, fileTitle) {
       }
     }
 
+    // add expenseType to person, extracting from budgetName
     for (let expT of this.expenseTypes) {
       if (expT.id === person.expenseTypeId) {
         person.expenseType = expT.budgetName;
@@ -81,6 +85,7 @@ async function exportCSVFile(items, fileTitle) {
       }
     }
 
+    // put all above together into one object
     items[i] = [
       person.firstName || '',
       person.lastName || '',
@@ -93,6 +98,7 @@ async function exportCSVFile(items, fileTitle) {
     ];
   }
 
+  // create headers for csv
   this.headers = [
     'First Name',
     'Last Name',

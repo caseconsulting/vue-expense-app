@@ -4,7 +4,7 @@
  */
 import _ from 'lodash';
 import moment from 'moment-timezone';
-const csvUtils = require('@/utils/csv.js');
+const csvUtils = require('./baseCsv.js');
 
 /**
  * Downloads array of employees as csv file.
