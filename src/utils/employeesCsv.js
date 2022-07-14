@@ -18,11 +18,13 @@ export function download(employees) {
 } // download
 
 /**
- * Converts a single employee to a csv.js object
+ * Converts employees to an array of objects to pass in to csvUtils.generate(). Expects
+ * an array of employees but supports having a single employee object.
  * @param employee - employee object to convert
  * @return a new object passable to csv.js
  */
 export function convertEmployees(employees) {
+  if (!Array.isArray(employees)) employees = [employees];
   let tempEmployees = [];
   _.forEach(employees, (employee) => {
     let placeOfBirth = [employee.city, employee.st, employee.country].join(' ');
