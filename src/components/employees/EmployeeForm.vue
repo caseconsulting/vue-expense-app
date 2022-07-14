@@ -963,31 +963,10 @@ function setFormData(tab, data) {
     this.$set(this.model, 'deptDate', data.deptDate);
     this.$set(this.model, 'mifiStatus', data.mifiStatus);
     this.$set(this.model, 'eeoDeclineSelfIdentify', data.eeoDeclineSelfIdentify);
-
-    // determine that an admin (or manager) has edited the EEO data on behalf of someone else if:
-    // - they have admin permissions
-    // - its not my profile
-    // - the user has declined to self identify (only the profile owner can set this value)
-    // - at least one of the eeo form fields has been filled out
-    if (
-      this.hasAdminPermissions() &&
-      !this.thisIsMyProfile() &&
-      data.eeoDeclineSelfIdentify &&
-      (data.eeoGender || data.eeoHispanicOrLatino || data.eeoRaceOrEthnicity || data.eeoJobCategory)
-    ) {
-      this.$set(this.model, 'eeoGender', data.eeoGender);
-      this.$set(this.model, 'eeoHispanicOrLatino', data.eeoHispanicOrLatino);
-      this.$set(this.model, 'eeoRaceOrEthnicity', data.eeoRaceOrEthnicity);
-      this.$set(this.model, 'eeoJobCategory', data.eeoJobCategory);
-      this.$set(this.model, 'eeoAdminHasFilledOutEeoForm', true);
-      // only set eeo data if the above check is false and the 'decline' checkbox is unticked.
-    } else if (!data.eeoDeclineSelfIdentify) {
-      this.$set(this.model, 'eeoGender', data.eeoGender);
-      this.$set(this.model, 'eeoHispanicOrLatino', data.eeoHispanicOrLatino);
-      this.$set(this.model, 'eeoRaceOrEthnicity', data.eeoRaceOrEthnicity);
-      this.$set(this.model, 'eeoJobCategory', data.eeoJobCategory);
-      this.$set(this.model, 'eeoAdminHasFilledOutEeoForm', false);
-    }
+    this.$set(this.model, 'eeoGender', data.eeoGender);
+    this.$set(this.model, 'eeoHispanicOrLatino', data.eeoHispanicOrLatino);
+    this.$set(this.model, 'eeoRaceOrEthnicity', data.eeoRaceOrEthnicity);
+    this.$set(this.model, 'eeoJobCategory', data.eeoJobCategory);
   } else if (tab == 'personal') {
     //sets all personal info to data returned from personal tab
     this.$set(this.model, 'github', data.github);

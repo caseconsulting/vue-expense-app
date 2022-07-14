@@ -94,11 +94,7 @@
 
       <!-- Employee Role -->
       <v-autocomplete
-<<<<<<< HEAD
-        v-if="(!loading && userIsAdmin()) || (userIsManager() && !userIsEmployee())"
-=======
         v-if="!loading && (userIsAdmin() || (userIsManager() && !thisIsMyProfile()))"
->>>>>>> 5c8c2985 (3624-eeo-admin-only-fields: admins can edit other users profiles if they decline to self-identify)
         id="employeeRole"
         ref="formFields"
         :items="permissions"
