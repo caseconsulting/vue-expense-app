@@ -310,7 +310,7 @@
       <!-- Decline Self-identify -->
       <v-checkbox
         class="mt-0"
-        label="Decline to self-identify."
+        label="Decline to self-identify"
         v-model="editedEmployee.eeoDeclineSelfIdentify"
         :disabled="!thisIsMyProfile()"
       ></v-checkbox>
