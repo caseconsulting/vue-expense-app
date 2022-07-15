@@ -3,6 +3,18 @@ import _ from 'lodash';
 const NEW_LINE = '\n';
 
 /**
+ * TODO (check)
+ * Combines two CSV strings into one (A on top of B)
+ * @param csvA - CSV string to place first
+ * @param csvB - CSV string to place second
+ * @param spaceBetween (optional) - number of spaces to place between CSVs
+ * @return a combined CSV string
+ */
+export function combine(csvA, csvB, spaceBetween = 0) {
+  return `${csvA}\n${'""\n'.repeat(spaceBetween)}${csvB}`;
+}
+
+/**
  * Downloads a given CSV string as a .csv file
  *
  * @param csv - csv text to create as file, eg output of generate
@@ -11,7 +23,6 @@ const NEW_LINE = '\n';
 export function download(csv, filename = null) {
   // build filename
   if (filename == undefined || filename == null) filename = 'export.csv';
-  filename = filename.toLowerCase();
   if (filename.substring(filename.length - 4) != '.csv') filename += '.csv';
 
   // build file contents
@@ -72,8 +83,8 @@ export function filterHeaders(objects, desired_headers) {
 /**
  * Generates a valid CSV "file" string from an object. Object values may
  * be arrays. Object keys will be used as headers.
- * @param json_object - object to make CSV
- * @param delimiter (optional) - string to separate array items by
+ * @param object_array - array of objects to make CSV
+ * @param delimiter (optional) - string by which arrays will be separated
  * @return file-ready CSV string
  */
 export function generate(object_array, delimiter = ', ') {
@@ -118,8 +129,26 @@ export function generate(object_array, delimiter = ', ') {
 }
 
 /**
- * Non-destructively =sorts an array of objects by a given key. Wrapper
- * for lodash's sort export function.
+ * Generates a valid CSV "file" from a 2D array object. All values
+ * will be stringified and the first row will be the headers.
+ * @param array - 2D array to make CSV
+ * @return file-ready CSV string
+ */
+export function generateFrom2dArray(arrays) {
+  let linesArray = [];
+  for (let i = 0; i < arrays.length; i++) {
+    let line = [];
+    for (let ii = 0; ii < arrays[i].length; ii++) {
+      line.push(escape(arrays[i][ii], true));
+    }
+    linesArray.push(line.join(','));
+  }
+  return linesArray.join('\n');
+}
+
+/**
+ * Non-destructively sorts an array of objects by a given key. Wrapper
+ * for lodash's sort function.
  * @param objects - array of objects to sort
  * @param key - key by which to sort the `objects`, supports arrays for prioritizing
  * @return a new array of sorted `objects`

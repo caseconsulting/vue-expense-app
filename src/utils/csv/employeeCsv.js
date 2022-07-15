@@ -11,16 +11,17 @@ const csvUtils = require('./baseCsv.js');
  * @param employees - array of employee objects
  */
 export function download(employees) {
+  let filename = Array.isArray(employees) ? 'employees.csv' : 'employee.csv';
   let convertedEmployees = convertEmployees(employees); // convert employees into csv object
   let csvEmployees = csvUtils.sort(convertedEmployees, 'Employee #'); // sort by employee #
   let csvFileString = csvUtils.generate(csvEmployees); // convert to csv file string
-  csvUtils.download(csvFileString); // download csv file string as .csv
+  csvUtils.download(csvFileString, filename); // download csv file string as .csv
 } // download
 
 /**
  * Converts employees to an array of objects to pass in to csvUtils.generate(). Expects
  * an array of employees but supports having a single employee object.
- * @param employee - employee object to convert
+ * @param employees - employee object to convert
  * @return a new object passable to csv.js
  */
 export function convertEmployees(employees) {

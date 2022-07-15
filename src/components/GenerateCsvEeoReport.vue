@@ -1,14 +1,25 @@
 <template>
   <!-- Download CSV Button -->
-  <v-btn :disabled="midAction" @click="populateArrays()" elevation="2" :x-small="isMobile || isSmallScreen"
-    ><i class="material-icons">file_download</i>Generate EEO Report</v-btn
-  >
+  <div>
+    <v-btn
+      class="mx-3"
+      :disabled="midAction"
+      @click="populateArrays()"
+      elevation="2"
+      :x-small="isMobile || isSmallScreen"
+      ><i class="material-icons">file_download</i>Old EEO Report</v-btn
+    >
+    <v-btn :disabled="midAction" @click="download()" elevation="2" :x-small="isMobile || isSmallScreen"
+      ><i class="material-icons">file_download</i>New EEO Report</v-btn
+    >
+  </div>
 </template>
 
 <script>
 import _ from 'lodash';
 import moment from 'moment-timezone';
 import { isMobile, isSmallScreen } from '@/utils/utils';
+const eeoCsv = require('@/utils/csv/eeoCsv.js');
 
 // Keston wrote all this crap. Please don't ask me about it.
 // I don't know how it works either.
@@ -20,6 +31,10 @@ import { isMobile, isSmallScreen } from '@/utils/utils';
 // |                     METHODS                      |
 // |                                                  |
 // |--------------------------------------------------|
+
+function download() {
+  eeoCsv.download(_.cloneDeep(this.employees));
+}
 
 /**
  * Initiates processing of data and formatting of file.
@@ -465,6 +480,7 @@ function exportCSVFile(fileContent) {
  * @return String - csv of object
  */
 function convertToCSV(objArray) {
+  eeoCsv.convertEmployees();
   var array = typeof objArray != 'object' ? JSON.parse(objArray) : objArray;
   var str = '';
   for (var i = 0; i < array.length; i++) {
@@ -593,6 +609,7 @@ export default {
     };
   },
   methods: {
+    download,
     convertToCSV,
     populateArrays,
     exportCSVFile,
