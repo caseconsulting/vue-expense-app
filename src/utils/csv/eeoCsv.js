@@ -3,6 +3,7 @@
  */
 import _ from 'lodash';
 const csvUtils = require('./baseCsv.js');
+import moment from 'moment-timezone';
 
 /**
  * Downloads array of employees EEO information as csv file.
@@ -13,7 +14,8 @@ export function download(employees) {
   let csvFileStringA = csvUtils.generateFrom2dArray(convertedEmployees[0]); // convert to csv file string
   let csvFileStringB = csvUtils.generateFrom2dArray(convertedEmployees[1]); // convert to csv file string
   let csvFileStringFinal = csvUtils.combine(csvFileStringA, csvFileStringB, 1);
-  csvUtils.download(csvFileStringFinal, 'EEO Compliance Report.csv'); // download csv file string as .csv
+  let year = moment().format('YYYY');
+  csvUtils.download(csvFileStringFinal, `EEO Compliance Report - ${year}.csv`); // download csv file string as .csv
 } // download
 
 /**
@@ -160,6 +162,7 @@ export function convertEmployees(employees) {
       // extract value of race/ethnicity
       let raceEthnicity = 'Hispanic or Latino';
       if (employee.eeoHispanicOrLatino.text != 'Hispanic or Latino') raceEthnicity = employee.eeoRaceOrEthnicity.text;
+      console.log(`${employee.firstName} (${raceEthnicity})`);
 
       // add employee to tally field
       let a = jobCategoriesPos[employee.eeoJobCategory.text];

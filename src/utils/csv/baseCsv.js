@@ -1,3 +1,11 @@
+/**
+ * This CSV utils is designed to make CSV file creating and downloading easier. It is based
+ * around the concept of passing through an object, where the keys are the headers and the
+ * values are the data. This should work well. There is also minimal support for 2D arrays,
+ * though some functionality (such as sorting) will not work. Future work could include
+ * parsing a CSV file/string back into an object or working on sorting for 2D array types.
+ */
+
 // Imports and constants for all functions
 import _ from 'lodash';
 const NEW_LINE = '\n';
