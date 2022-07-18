@@ -376,14 +376,7 @@ function validateFields() {
 
   // for some reason, this page didn't overwrote the elements as formFields like the other pages did so
   // we added individual refs and put them into the components list manually
-  components = [
-    ...components,
-    this.$refs.twitter,
-    this.$refs.github,
-    this.$refs.linkedin,
-    ...this.$refs.phoneType,
-    ...this.$refs.phoneNum
-  ];
+  components = [...components, this.$refs.twitter, this.$refs.github, this.$refs.linkedin, this.$refs.phoneNumbers];
   _.forEach(components, (field) => {
     if (field && !field.validate()) errorCount++;
   });
