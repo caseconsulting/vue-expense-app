@@ -9,9 +9,11 @@ const csvUtils = require('./baseCsv.js');
  * @param employees - array of employees objects
  */
 export function download(employees) {
-  let convertedEmployees = convertEmployees(employees); // convert employees into csv object
-  let csvFileString = csvUtils.generateFrom2dArray(convertedEmployees); // convert to csv file string
-  csvUtils.download(csvFileString, 'EEO Compliance Report.csv'); // download csv file string as .csv
+  let convertedEmployees = convertEmployees(employees); // convert employees into csv object (returns two arrays)
+  let csvFileStringA = csvUtils.generateFrom2dArray(convertedEmployees[0]); // convert to csv file string
+  let csvFileStringB = csvUtils.generateFrom2dArray(convertedEmployees[1]); // convert to csv file string
+  let csvFileStringFinal = csvUtils.combine(csvFileStringA, csvFileStringB, 1);
+  csvUtils.download(csvFileStringFinal, 'EEO Compliance Report.csv'); // download csv file string as .csv
 } // download
 
 /**
@@ -20,23 +22,38 @@ export function download(employees) {
  * @param employees - expense object to convert
  * @return a new object passable to csv.js
  */
+// ¿TODO?: make `declinedInformation`, `jobCategories`, `racesEthnicities`, and `genders`
+//         dynamic (probably api calls) to update alongside the database if it ever changes
 export function convertEmployees(employees) {
   // data types
-  // TODO: make these api calls to update with the database if that ever changes?
-  const declinedInformation = {
-    Name: (e) => {
-      return `${e.nickname || e.firstName} ${e.lastName}`;
+  const declinedInformation = [
+    {
+      name: 'Name',
+      func: (e) => {
+        return `${e.firstName}${e.middleName ? ` ${e.middleName} ` : ' '}${e.lastName}${
+          e.nickname ? ` (${e.nickname})` : ''
+        }`;
+      }
     },
-    'Employee ID': (e) => {
-      return e.employeeNumber;
+    {
+      name: 'Employee ID',
+      func: (e) => {
+        return e.employeeNumber;
+      }
     },
-    Status: (e) => {
-      return e.eeoDeclineSelfIdentify ? 'Declined' : 'Incomplete';
+    {
+      name: 'Status',
+      func: (e) => {
+        return e.eeoDeclineSelfIdentify ? 'Declined' : 'Incomplete';
+      }
     },
-    Email: (e) => {
-      return e.email;
+    {
+      name: 'Email',
+      func: (e) => {
+        return e.email;
+      }
     }
-  };
+  ];
   const jobCategories = [
     'Professional',
     'Executive/Senior Level Official and Manager',
@@ -70,8 +87,11 @@ export function convertEmployees(employees) {
   // initialize declined data with a title and header
   let eeoDeclinedData = [new Array(declinedInformation.length), new Array(declinedInformation.length)];
   eeoDeclinedData[0][0] = 'These employees have not completed the EEO form or declined to self-identify';
-  for (var i = 0; i < declinedInformation.length; i++) {
-    eeoDeclinedData[1][i] = declinedInformation[i];
+  for (let i = 1; i < declinedInformation.length; i++) {
+    eeoDeclinedData[0][i] = '';
+  }
+  for (let i = 0; i < declinedInformation.length; i++) {
+    eeoDeclinedData[1][i] = declinedInformation[i].name;
   }
 
   // quicker referencing for position of items in array (O(1) vs O(n))
@@ -127,6 +147,7 @@ export function convertEmployees(employees) {
     function nullOrUndefined(item) {
       return item == undefined || item == null;
     }
+
     // make sure we have all fields first
     let declined = employee.eeoDeclineSelfIdentify && !employee.eeoAdminHasFilledOutEeoForm;
     let formCompleted =
@@ -140,12 +161,12 @@ export function convertEmployees(employees) {
       let raceEthnicity = 'Hispanic or Latino';
       if (employee.eeoHispanicOrLatino.text != 'Hispanic or Latino') raceEthnicity = employee.eeoRaceOrEthnicity.text;
 
-      // add to tally field
+      // add employee to tally field
       let a = jobCategoriesPos[employee.eeoJobCategory.text];
       let b = racesEthnicitiesPos[raceEthnicity] + gendersPos[employee.eeoGender.text];
       eeoData[a][b] += 1;
 
-      // add to total fields
+      // add employee to total fields
       eeoData[numRows - 1][b] += 1;
       eeoData[a][numCols - 1] += 1;
       eeoData[numRows - 1][numCols - 1] += 1;
@@ -153,11 +174,11 @@ export function convertEmployees(employees) {
       // eeoDeclineSelfIdentify or form not filled
       let toPush = new Array(declinedInformation.length);
       for (let i = 0; i < declinedInformation.length; i++) {
-        toPush[i] = declinedInformation[i](employee); // lol this probably doesn't work
+        toPush[i] = declinedInformation[i].func(employee);
       }
       eeoDeclinedData.push(toPush);
     }
   });
 
-  return eeoDeclinedData;
-}
+  return [eeoData, eeoDeclinedData];
+} // convertEmployees
