@@ -377,8 +377,7 @@ async function getResume(employeeId) {
   let accessToken = getAccessToken();
 
   try {
-    let c = await client.get({
-      url: `${RESUME}/${employeeId}`,
+    let c = await client.get(`${RESUME}/${employeeId}`, {
       headers: {
         Authorization: `Bearer ${accessToken}`
       },
@@ -386,6 +385,7 @@ async function getResume(employeeId) {
     });
     return c.data;
   } catch (err) {
+    console.log(err);
     return null;
   }
 } // getResume
