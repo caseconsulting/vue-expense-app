@@ -153,6 +153,7 @@ export function isPartTime(employee) {
  * @returns Boolean - True if the window is a smaller size.
  */
 export function isSmallScreen() {
+  console.log(window.innerWidth);
   return window.innerWidth < 960;
 } // isSmallScreen
 
