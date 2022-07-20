@@ -106,7 +106,7 @@
         </v-menu>
         <!-- End user image and logout -->
       </v-app-bar>
-      <v-main class="app-screen">
+      <v-main :style="{ padding: getMainPadding() }">
         <v-container fluid grid-list-lg>
           <notification-banners v-if="isLoggedIn() && storeIsPopulated" />
           <router-view></router-view>
@@ -211,6 +211,19 @@ function badumbadumdodooodoo(index) {
     }, 2000);
   }
 } // badumbadumdodooodoo
+
+/**
+ * Determines if the screens padding based off if the user is mobile.
+ *
+ * @returns String - The padding value
+ */
+function getMainPadding() {
+  if (!(this.isMobile || this.isSmallScreen)) {
+    return '64px 0px 0px 56px';
+  } else {
+    return '56px 0px 0px 0px';
+  }
+}
 
 /*
  * Logout of expense app
@@ -419,6 +432,7 @@ export default {
   },
   methods: {
     badumbadumdodooodoo,
+    getMainPadding,
     handleLogout,
     handleProfile,
     isLoggedIn,
@@ -480,19 +494,5 @@ export default {
 
 #P {
   text-decoration: none;
-}
-
-// for mobile screen sizes
-@media screen and (max-width: 960px) {
-  .app-screen {
-    padding: 56px 0px 0px 0px;
-  }
-}
-
-// for non-mobile screen sizes
-@media screen and (max-width: 2000px) {
-  .app-screen {
-    padding: 64px 0px 0px 56px !important;
-  }
 }
 </style>
