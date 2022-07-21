@@ -2,7 +2,6 @@ import decode from 'jwt-decode';
 import auth0 from 'auth0-js';
 import { AUTH_CONFIG } from './auth0-variables';
 import Router from 'vue-router';
-import api from '../shared/api';
 let CryptoJS = require('crypto-js');
 
 const AUDIENCE = AUTH_CONFIG.audience;
@@ -269,8 +268,8 @@ export function setProfile() {
 /**
  * sets the role in cookies
  */
-export async function setRole() {
-  const employeeRole = await api.getRole();
+export async function setRole(role) {
+  const employeeRole = role;
   if (employeeRole) {
     const encryptedRole = CryptoJS.AES.encrypt(employeeRole, process.env.VUE_APP_AES_KEY);
     setCookie(ROLE, encryptedRole);

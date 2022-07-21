@@ -212,19 +212,6 @@ function badumbadumdodooodoo(index) {
   }
 } // badumbadumdodooodoo
 
-/**
- * Determines if the screens padding based off if the user is mobile.
- *
- * @returns String - The padding value
- */
-function getMainPadding() {
-  if (!this.isMobile) {
-    return '64px 0px 0px 56px';
-  } else {
-    return '56px 0px 0px 0px';
-  }
-}
-
 /*
  * Logout of expense app
  */
@@ -245,21 +232,26 @@ async function handleProfile() {
  */
 async function populateStore() {
   // login
-  await this.updateStoreUser(); // calling first since uodateStoreExpenseTypes relies on user data
-  let employee = this.$store.getters.user;
   let lastLogin = localStorage.getItem('lastLogin'); // item is set in Callback.vue
+  let employee;
   if (lastLogin) {
+    employee = JSON.parse(localStorage.getItem('user')); // gets data from Callback.vue after login
+    this.$store.dispatch('setUser', { user: employee }); // dispatch data to the vuex store
     employee.lastLogin = lastLogin;
-    await updateEmployee(employee);
+  } else {
+    await this.updateStoreUser(); // calling first since uodateStoreExpenseTypes relies on user data
+    employee = this.$store.getters.user;
   }
 
   // runs these api calls in parallel/concurrently? since they are independent of each other
   await Promise.all([
-    this.updateStoreEmployees(),
-    this.updateStoreAvatars(),
-    this.updateStoreExpenseTypes(),
-    this.updateStoreBudgets()
+    lastLogin ? updateEmployee(employee) : '' //,
+    // this.updateStoreEmployees(),
+    // this.updateStoreAvatars(),
+    // this.updateStoreExpenseTypes(),
+    // this.updateStoreBudgets()
   ]);
+  localStorage.removeItem('user');
   localStorage.removeItem('lastLogin'); // remove from local storage to prevent login audit on refresh
 
   // This is used to help pages know when data is loaded into the store.
