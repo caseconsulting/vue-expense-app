@@ -106,7 +106,7 @@
         </v-menu>
         <!-- End user image and logout -->
       </v-app-bar>
-      <v-main :style="{ padding: getMainPadding() }">
+      <v-main class="app-screen">
         <v-container fluid grid-list-lg>
           <notification-banners v-if="isLoggedIn() && storeIsPopulated" />
           <router-view></router-view>
@@ -432,7 +432,6 @@ export default {
   },
   methods: {
     badumbadumdodooodoo,
-    getMainPadding,
     handleLogout,
     handleProfile,
     isLoggedIn,
@@ -494,5 +493,19 @@ export default {
 
 #P {
   text-decoration: none;
+}
+
+// for mobile screen sizes
+@media screen and (max-width: 960px) {
+  .app-screen {
+    padding: 56px 0px 0px 0px;
+  }
+}
+
+// for non-mobile screen sizes
+@media screen and (max-width: 2000px) {
+  .app-screen {
+    padding: 64px 0px 0px 56px !important;
+  }
 }
 </style>
