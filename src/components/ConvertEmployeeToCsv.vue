@@ -3,7 +3,7 @@
     <template v-slot:activator="{ on }">
       <v-btn v-on="on" @click.stop="download" text icon>
         <v-icon :class="{ 'white--text': color == 'white', 'gray-icon': color != 'white' }" scale="1.5"
-          >cloud-download</v-icon
+          >download</v-icon
         >
       </v-btn>
     </template>

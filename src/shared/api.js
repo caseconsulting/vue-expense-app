@@ -375,19 +375,14 @@ async function extractResumeText(employeeId, file) {
 async function getResume(employeeId) {
   // inject the accessToken for each request
   let accessToken = getAccessToken();
-
-  try {
-    let c = await client.get({
-      url: `${RESUME}/${employeeId}`,
-      headers: {
-        Authorization: `Bearer ${accessToken}`
-      },
-      validateStatus: () => true
-    });
-    return c.data;
-  } catch (err) {
-    return null;
-  }
+  const resp = await client.get(`${RESUME}/${employeeId}`, {
+    headers: {
+      Authorization: `Bearer ${accessToken}`
+    },
+    validateStatus: () => true
+  });
+  if (resp.data.code && resp.data.code >= 300) return null;
+  else return resp.data;
 } // getResume
 
 /**

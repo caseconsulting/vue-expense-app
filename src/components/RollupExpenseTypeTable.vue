@@ -80,7 +80,7 @@
           </template>
           <!-- Item cost in data table slot -->
           <template v-slot:[`item.cost`]="{ item }">
-            <p id="money-team" class="mb-0">{{ convertToMoneyString(getBudgetTotal(item.expenses)) }}</p>
+            <p id="totalMoney-team" class="mb-0">{{ convertToMoneyString(getBudgetTotal(item.expenses)) }}</p>
           </template>
           <!-- Header select slot in data table -->
           <template v-slot:[`header.data-table-select`]>
@@ -144,6 +144,7 @@ import UnrolledTableInfo from '@/components/UnrolledTableInfo.vue';
 import _ from 'lodash';
 import { asyncForEach, isEmpty, convertToMoneyString } from '@/utils/utils';
 import { storeIsPopulated } from '../utils/utils';
+import employeeUtils from '@/shared/employeeUtils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -236,6 +237,7 @@ function checkAllBoxes() {
     return _.forEach(budget.expenses, (expense) => {
       this.emitSelectionChange(expense, true);
       expense.selected = true;
+      this.determineShowOnFeed(expense);
     });
   });
 } // checkAllBoxes
@@ -304,6 +306,21 @@ function createExpenses(aggregatedData) {
       showSwitch: false,
       failed: false
     };
+    // high fives should have a dynamic description
+    if (expense.expenseTypeId == 'a7dfcbe0-3c85-4891-86af-961cb4df27f8') {
+      const employees = this.$store.getters.employees;
+      // get high fiver
+      const giver = _.find(employees, (e) => {
+        return e.id === expense.employeeId;
+      });
+      // get the high fivee
+      const recipient = _.find(employees, (e) => {
+        return e.id === expense.recipient;
+      });
+      expense.description = `
+      ${employeeUtils.nicknameAndLastName(giver)} gave
+      ${employeeUtils.nicknameAndLastName(recipient)} a High Five: ${expense.note}`;
+    }
     return _.merge(expense, additionalAttributes);
   });
 } // createExpenses

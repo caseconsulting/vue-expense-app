@@ -1,5 +1,5 @@
 <template>
-  <div v-if="alerts" class="py-2 px-10 justify-center">
+  <div v-if="alerts" class="py-2 justify-center">
     <v-col v-for="alert in alerts" :key="alert.id" id="alert.id" class="mb-4 py-0" cols="12">
       <v-alert
         :type="alert.status"
@@ -9,27 +9,29 @@
         class="my-0"
         dense
       >
-        {{ alert.message }}
-        <v-btn
-          :disabled="onPage(alert.handler.page)"
-          @click="handleClick(alert.handler.page, alert.handler.extras)"
-          class="right-shift black--text"
-          elevation="0"
-          color="#f5f5f5"
-          small
-        >
-          Go To {{ alert.handler.name }}
-        </v-btn>
-        <v-btn
-          @click="handleMarkSeen(alert.type, alert.item, alert.id)"
-          v-if="!!alert.seenButton"
-          class="right-shift black--text mr-2"
-          elevation="0"
-          color="#f5f5f5"
-          small
-        >
-          Mark seen
-        </v-btn>
+        <p class="ma-0" style="display: inline-block">{{ alert.message }}</p>
+        <div :class="getButtonStyling()">
+          <v-btn
+            :disabled="onPage(alert.handler.page)"
+            @click="handleClick(alert.handler.page, alert.handler.extras)"
+            class="justify-center black--text notif-action-btn"
+            elevation="0"
+            color="#f5f5f5"
+            small
+          >
+            Go To {{ alert.handler.name }}
+          </v-btn>
+          <v-btn
+            @click="handleMarkSeen(alert.type, alert.item, alert.id)"
+            v-if="!!alert.seenButton"
+            class="right-shift black--text notif-action-btn"
+            elevation="0"
+            color="#f5f5f5"
+            small
+          >
+            Mark seen
+          </v-btn>
+        </div>
       </v-alert>
     </v-col>
   </div>
@@ -39,7 +41,7 @@
 import moment from 'moment-timezone';
 import api from '@/shared/api.js';
 import _ from 'lodash';
-import { asyncForEach } from '@/utils/utils.js';
+import { asyncForEach, isMobile, isSmallScreen } from '@/utils/utils.js';
 moment.tz.setDefault('America/New_York');
 
 // |--------------------------------------------------|
@@ -156,6 +158,17 @@ async function checkReimbursements() {
 } // checkReimbursements
 
 /**
+ * Determines what styles to put on the buttons.
+ */
+function getButtonStyling() {
+  if (this.isMobile() && this.isSmallScreen()) {
+    return 'notif-btn-mobile';
+  } else {
+    return 'notif-btn-normal';
+  }
+} // getButtonStyling
+
+/**
  * Redirect to the given page. There might be a more elegant way to
  * accomplish this but I've been on this story for too long so
  */
@@ -247,8 +260,11 @@ export default {
     checkBadges,
     checkCertifications,
     checkReimbursements,
+    getButtonStyling,
     handleClick,
     handleMarkSeen,
+    isMobile,
+    isSmallScreen,
     randId,
     onPage
   }
@@ -258,5 +274,16 @@ export default {
 <style scoped>
 .right-shift {
   float: right;
+}
+.notif-btn-mobile {
+  display: flex;
+  justify-content: center;
+  margin-top: 10px;
+}
+.notif-btn-normal {
+  float: right;
+}
+.notif-action-btn:not(:first-of-type) {
+  margin-left: 1em;
 }
 </style>
