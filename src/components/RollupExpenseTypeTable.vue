@@ -144,6 +144,7 @@ import UnrolledTableInfo from '@/components/UnrolledTableInfo.vue';
 import _ from 'lodash';
 import { asyncForEach, isEmpty, convertToMoneyString } from '@/utils/utils';
 import { storeIsPopulated } from '../utils/utils';
+import { updateStoreEmployees } from '@/utils/storeUtils';
 import employeeUtils from '@/shared/employeeUtils';
 
 // |--------------------------------------------------|
@@ -655,9 +656,8 @@ function determineShowOnFeed(expense) {
 /**
  * Loads and organizes all data relevant to the data table.
  */
-async function loadExpensesData() {
-  let aggregatedData = await api.getAllAggregateExpenses();
-  let allExpenses = this.createExpenses(aggregatedData);
+function loadExpensesData() {
+  let allExpenses = this.createExpenses(this.aggregatedData);
   this.pendingExpenses = this.filterOutReimbursed(allExpenses);
   this.constructAutoComplete(this.pendingExpenses);
   this.empBudgets = this.groupEmployeeExpenses(this.pendingExpenses);
@@ -795,9 +795,12 @@ async function created() {
 
   //window.EventBus.$on('canceled-reimburse', () => (this.buttonClicked = false));
   window.EventBus.$on('confirm-reimburse', async () => await this.reimburseExpenses());
-  if (this.$store.getters.storeIsPopulated) {
-    this.loadExpensesData();
+  if (this.$store.getters.employees) {
+    this.aggregatedData = await api.getAllAggregateExpenses();
+  } else {
+    [this.aggregatedData] = await Promise.all([api.getAllAggregateExpenses(), this.updateStoreEmployees()]);
   }
+  this.loadExpensesData();
 } // created
 
 /**
@@ -831,12 +834,6 @@ function watchExpenseType() {
   this.unCheckAllBoxes();
 } // watchExpenseType
 
-function watchLoadExpensesData() {
-  if (this.$store.getters.storeIsPopulated) {
-    this.loadExpensesData();
-  }
-}
-
 // |--------------------------------------------------|
 // |                                                  |
 // |                      EXPORT                      |
@@ -859,6 +856,7 @@ export default {
   },
   created,
   data: () => ({
+    aggregatedData: [],
     alerts: [], // status alerts
     buttonClicked: false, // reimburse button clicked
     empBudgets: [], // grouped employee and expense types
@@ -930,12 +928,12 @@ export default {
     toggleGroup,
     toggleShowOnFeedGroup,
     toggleShowOnFeed,
-    unCheckAllBoxes
+    unCheckAllBoxes,
+    updateStoreEmployees
   },
   watch: {
     employee: watchEmployee,
-    expenseType: watchExpenseType,
-    storeIsPopulated: watchLoadExpensesData
+    expenseType: watchExpenseType
   }
 };
 </script>
