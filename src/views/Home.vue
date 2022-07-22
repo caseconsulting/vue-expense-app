@@ -115,6 +115,7 @@ moment.tz.setDefault('America/New_York');
 import TwitterFeed from '@/components/TwitterFeed';
 import _ from 'lodash';
 import { isEmpty, getCurrentBudgetYear } from '@/utils/utils';
+import { updateStoreExpenseTypes, updateStoreBudgets } from '@/utils/storeUtils';
 import QuickBooksTimeData from '../components/QuickBooksTimeData.vue';
 
 // |--------------------------------------------------|
@@ -686,7 +687,9 @@ export default {
     isEmpty,
     loadHomePageData,
     refreshEmployee,
-    handleProfile
+    handleProfile,
+    updateStoreExpenseTypes,
+    updateStoreBudgets
   },
   watch: {
     async storeIsPopulated() {
