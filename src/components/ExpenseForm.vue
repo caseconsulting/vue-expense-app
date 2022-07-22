@@ -594,7 +594,9 @@ async function checkCoverage() {
       // get budget
       let employeeBudgets = await api.getEmployeeBudgets(this.employee.id);
       let budget = employeeBudgets.find((b) => {
-        return b.expenseTypeId == expenseType.value;
+        // make sure if the budget is recurring to get the budget for this year
+        let isActiveBudget = this.betweenDates(b.fiscalStartDate, b.fiscalEndDate);
+        return b.expenseTypeId == expenseType.value && isActiveBudget;
       });
       let budgetExists = budget ? true : false;
 
