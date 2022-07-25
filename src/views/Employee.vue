@@ -54,7 +54,7 @@
         >
       </v-col>
     </v-row>
-    <v-row v-if="loading" class="my-10" justify="center">
+    <v-row v-if="basicEmployeeDataLoading" class="my-10" justify="center">
       <v-progress-circular :size="70" :width="7" color="#bc3825" indeterminate></v-progress-circular>
     </v-row>
     <v-row v-else class="pt-0">
@@ -68,9 +68,10 @@
           :expenses="expenses"
           :expenseTypes="expenseTypes"
           :accessibleBudgets="accessibleBudgets"
+          :employeeDataLoading="loading"
         ></available-budgets>
         <anniversary-card
-          v-if="!minimizeWindow"
+          v-if="!minimizeWindow && !loading"
           :employee="this.model"
           :hasBudgets="this.hasAccessToBudgets"
         ></anniversary-card>
@@ -152,7 +153,8 @@ import EmployeeForm from '@/components/employees/EmployeeForm.vue';
 import EmployeeInfo from '@/components/employees/EmployeeInfo.vue';
 import QuickBooksTimeData from '@/components/QuickBooksTimeData.vue';
 import { getRole } from '@/utils/auth';
-import { getCurrentBudgetYear, isMobile, storeIsPopulated } from '@/utils/utils.js';
+import { getCurrentBudgetYear, isEmpty, isMobile, storeIsPopulated } from '@/utils/utils.js';
+import { updateStoreBudgets, updateStoreEmployees, updateStoreExpenseTypes, updateStoreUser } from '@/utils/storeUtils';
 import _ from 'lodash';
 import ConvertEmployeeToCsv from '../components/ConvertEmployeeToCsv.vue';
 import AnniversaryCard from '@/components/AnniversaryCard.vue';
@@ -207,20 +209,33 @@ async function downloadResume() {
  */
 async function getProfileData() {
   this.loading = true;
-  let employees = this.$store.getters.employees;
-  this.model = _.find(employees, (employee) => {
-    return employee.employeeNumber == this.$route.params.id;
-  });
-  if (this.model) {
-    this.user = this.$store.getters.user;
-    await this.checkForBudgetAccess();
+  if (this.$store.getters.user && this.$store.getters.user.employeeNumber == this.$route.params.id) {
+    this.model = this.$store.getters.user;
     this.role = this.getRole();
-    this.loading = false;
+  } else {
+    if (!this.$store.getters.employees || !this.$store.getters.user) {
+      await Promise.all([this.updateStoreEmployees(), this.updateStoreUser()]);
+    }
+    let employees = this.$store.getters.employees;
+    this.model = _.find(employees, (employee) => {
+      return employee.employeeNumber == this.$route.params.id;
+    });
+  }
+  this.user = this.$store.getters.user;
+  this.role = this.getRole();
+  this.basicEmployeeDataLoading = false;
+  if (this.model) {
+    [this.hasResume, this.expenses] = await Promise.all([
+      api.getResume(this.$route.params.id) != null,
+      api.getAllAggregateExpenses(),
+      !this.$store.getters.expenseTypes ? this.updateStoreExpenseTypes() : '',
+      this.checkForBudgetAccess()
+    ]);
+    this.expenseTypes = this.$store.getters.expenseTypes;
     this.displayQuickBooksTimeAndBalances = this.userIsAdmin() || this.userIsEmployee();
     this.fiscalDateView = this.getCurrentBudgetYear(this.model.hireDate);
-    this.hasResume = (await api.getResume(this.$route.params.id)) != null;
-    this.expenses = await api.getAllAggregateExpenses();
-    this.expenseTypes = this.$store.getters.expenseTypes;
+    this.hasAccessToBudgets = this.accessibleBudgets.length !== 0; // enable budget chart
+    this.loading = false;
   }
   this.loading = false;
 } // getProfileData
@@ -301,14 +316,12 @@ async function deleteResume() {
  */
 async function checkForBudgetAccess() {
   if (this.userIsEmployee()) {
+    if (!this.$store.getters.budgets) {
+      await this.updateStoreBudgets();
+    }
     this.accessibleBudgets = this.$store.getters.budgets;
   } else {
     this.accessibleBudgets = await api.getAllActiveEmployeeBudgets(this.model.id);
-  }
-
-  if (this.accessibleBudgets.length == 0) {
-    // does not have access to any budgets
-    this.hasAccessToBudgets = false; // disable budget chart
   }
 } // checkForBudgetAccess
 
@@ -340,6 +353,7 @@ async function created() {
       this.hasResume = newResume;
     }
   });
+  this.basicEmployeeDataLoading = true;
   this.storeIsPopulated ? await this.getProfileData() : (this.loading = true);
 } // created
 
@@ -427,6 +441,7 @@ export default {
       loading: false, // loading status
       model: {
         awards: [],
+        basicEmployeeDataLoading: false,
         birthday: '',
         birthdayFeed: false,
         certifications: [],
@@ -474,7 +489,7 @@ export default {
         color: null
       },
       user: null,
-      hasAccessToBudgets: true
+      hasAccessToBudgets: false
     };
   },
   methods: {
@@ -486,8 +501,13 @@ export default {
     hasAdminPermissions,
     getProfileData,
     getCurrentBudgetYear,
+    isEmpty,
     isMobile,
     resumeReceived,
+    updateStoreBudgets,
+    updateStoreEmployees,
+    updateStoreExpenseTypes,
+    updateStoreUser,
     userIsAdmin,
     userIsEmployee,
     checkForBudgetAccess
