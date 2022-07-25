@@ -428,7 +428,12 @@ import ExpenseTypeForm from '@/components/ExpenseTypeForm.vue';
 import { getRole } from '@/utils/auth';
 import _ from 'lodash';
 import { convertToMoneyString } from '@/utils/utils';
-import { updateStoreExpenseTypes } from '@/utils/storeUtils';
+import {
+  updateStoreExpenseTypes,
+  updateStoreEmployees,
+  updateStoreAvatars,
+  updateStoreBudgets
+} from '@/utils/storeUtils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -827,9 +832,13 @@ function isInactive(expenseType) {
 
 async function loadExpenseTypesData() {
   this.userInfo = this.$store.getters.user;
+  [this.campfires] = await Promise.all([
+    api.getBasecampCampfires(),
+    this.userInfo.employeeRole === 'admin' && !this.$store.getters.employees ? this.updateStoreEmployees() : '',
+    this.updateStoreAvatars(),
+    this.refreshExpenseTypes()
+  ]);
   this.employees = this.$store.getters.employees;
-
-  await this.refreshExpenseTypes();
 
   // set employee avatar
   let avatars = this.$store.getters.basecampAvatars;
@@ -839,8 +848,6 @@ async function loadExpenseTypesData() {
     employee.avatar = avatarUrl;
     return employee;
   });
-
-  this.campfires = await api.getBasecampCampfires();
 }
 
 /**
@@ -887,14 +894,18 @@ function onSelect(item) {
  */
 async function refreshExpenseTypes() {
   this.loading = true; // set loading status to true
+  let budgetsWithExpenses;
+  [budgetsWithExpenses] = await Promise.all([
+    !this.userIsAdmin() ? api.getEmployeeBudgets(this.userInfo.id) : '',
+    !this.userIsAdmin() && !this.$store.getters.budgets ? this.updateStoreBudgets() : '',
+    !this.$store.getters.expenseTypes ? this.updateStoreExpenseTypes() : ''
+  ]);
   this.expenseTypes = this.$store.getters.expenseTypes;
 
   // filter expense types for the user
   if (!this.userIsAdmin()) {
     // create an array for the user expense types
     let expenseTypesFiltered = [];
-    // get the employees budgets that have expenses
-    let budgetsWithExpenses = await api.getEmployeeBudgets(this.userInfo.id);
     // get the active budgets for the employee
     let activeBudgets = this.$store.getters.budgets;
     // map the active budgets
@@ -1187,6 +1198,9 @@ export default {
     updateModelInTable,
     userIsAdmin,
     validateDelete,
+    updateStoreAvatars,
+    updateStoreBudgets,
+    updateStoreEmployees,
     updateStoreExpenseTypes
   },
   watch: {

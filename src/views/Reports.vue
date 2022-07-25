@@ -6,6 +6,7 @@
 </template>
 <script>
 import EmployeeContractTable from '@/components/EmployeeContractTable.vue';
+import { updateStoreEmployees } from '@/utils/storeUtils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -35,8 +36,11 @@ export default {
   computed: {
     storeIsPopulated
   },
-  created() {
+  async created() {
     if (this.$store.getters.storeIsPopulated) {
+      if (!this.$store.getters.employees) {
+        await this.updateStoreEmployees();
+      }
       this.loading = false;
     }
   },
@@ -45,9 +49,15 @@ export default {
       loading: true
     };
   },
+  methods: {
+    updateStoreEmployees
+  },
   watch: {
-    storeIsPopulated() {
+    async storeIsPopulated() {
       if (this.$store.getters.storeIsPopulated) {
+        if (!this.$store.getters.employees) {
+          await this.updateStoreEmployees();
+        }
         this.loading = false;
       }
     }

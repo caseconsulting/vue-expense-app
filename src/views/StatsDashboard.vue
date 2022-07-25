@@ -67,6 +67,7 @@ import TechChartTab from '../components/charts/chartTabs/TechChartTab.vue';
 import EducationChartTab from '../components/charts/chartTabs/EducationChartTab.vue';
 import CustomerOrgChartTab from '../components/charts/chartTabs/CustomerOrgChartTab.vue';
 import { isMobile, storeIsPopulated } from '@/utils/utils';
+import { updateStoreEmployees } from '@/utils/storeUtils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -78,8 +79,13 @@ import { isMobile, storeIsPopulated } from '@/utils/utils';
  * mounted hook
  *
  */
-function mounted() {
-  if (this.storeIsPopulated) this.dataLoaded = true;
+async function mounted() {
+  if (this.storeIsPopulated) {
+    if (!this.$store.getters.employees) {
+      await this.updateStoreEmployees();
+    }
+    this.dataLoaded = true;
+  }
 } // mounted
 
 // |--------------------------------------------------|
@@ -133,10 +139,14 @@ export default {
   },
   methods: {
     changeTab,
-    selectDropDown
+    selectDropDown,
+    updateStoreEmployees
   },
   watch: {
-    storeIsPopulated: function () {
+    storeIsPopulated: async function () {
+      if (!this.$store.getters.employees) {
+        await this.updateStoreEmployees();
+      }
       if (this.storeIsPopulated) this.dataLoaded = true;
     }
   }

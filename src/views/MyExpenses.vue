@@ -361,7 +361,7 @@ import ExpenseForm from '@/components/ExpenseForm.vue';
 import UnreimburseModal from '@/components/modals/UnreimburseModal.vue';
 import _ from 'lodash';
 import { isEmpty, monthDayYearFormat, convertToMoneyString, isMobile } from '@/utils/utils';
-import { updateStoreBudgets } from '@/utils/storeUtils';
+import { updateStoreBudgets, updateStoreExpenseTypes, updateStoreEmployees } from '@/utils/storeUtils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -700,9 +700,13 @@ function isReimbursed(expense) {
 } // isReimbursed
 
 async function loadMyExpensesData() {
-  await this.refreshExpenses();
   // get user info, defaulting to params if exists
   this.userInfo = this.$route.params.defaultEmployee || this.$store.getters.user;
+  await Promise.all([
+    !this.$store.getters.expenseTypes ? this.updateStoreExpenseTypes() : '',
+    this.userInfo.employeeRole === 'admin' && !this.$store.getters.employees ? this.updateStoreEmployees() : '',
+    this.refreshExpenses()
+  ]);
 
   // get expense types
   let expenseTypes = this.$store.getters.expenseTypes;
@@ -726,6 +730,7 @@ async function loadMyExpensesData() {
       alwaysOnFeed: expenseType.alwaysOnFeed
     };
   });
+  this.loading = false;
 }
 
 /**
@@ -1071,7 +1076,9 @@ export default {
     toTopOfForm,
     unreimburseExpense,
     updateModelInTable,
+    updateStoreEmployees,
     updateStoreBudgets,
+    updateStoreExpenseTypes,
     useInactiveStyle
   },
   watch: {

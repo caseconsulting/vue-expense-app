@@ -656,8 +656,8 @@ function determineShowOnFeed(expense) {
 /**
  * Loads and organizes all data relevant to the data table.
  */
-function loadExpensesData() {
-  let allExpenses = this.createExpenses(this.aggregatedData);
+async function loadExpensesData(aggData) {
+  let allExpenses = this.createExpenses(aggData);
   this.pendingExpenses = this.filterOutReimbursed(allExpenses);
   this.constructAutoComplete(this.pendingExpenses);
   this.empBudgets = this.groupEmployeeExpenses(this.pendingExpenses);
@@ -795,12 +795,12 @@ async function created() {
 
   //window.EventBus.$on('canceled-reimburse', () => (this.buttonClicked = false));
   window.EventBus.$on('confirm-reimburse', async () => await this.reimburseExpenses());
-  if (this.$store.getters.employees) {
-    this.aggregatedData = await api.getAllAggregateExpenses();
-  } else {
-    [this.aggregatedData] = await Promise.all([api.getAllAggregateExpenses(), this.updateStoreEmployees()]);
-  }
-  this.loadExpensesData();
+  let aggData;
+  [aggData] = await Promise.all([
+    api.getAllAggregateExpenses(),
+    !this.$store.getters.employees ? this.updateStoreEmployees() : ''
+  ]);
+  this.loadExpensesData(aggData);
 } // created
 
 /**
