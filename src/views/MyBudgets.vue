@@ -80,6 +80,7 @@ import AnniversaryCard from '@/components/AnniversaryCard.vue';
 const moment = require('moment-timezone');
 moment.tz.setDefault('America/New_York');
 import { isMobile, getCurrentBudgetYear } from '@/utils/utils';
+import { updateStoreBudgets, updateStoreEmployees, updateStoreExpenseTypes, updateStoreUser } from '@/utils/storeUtils';
 
 const IsoFormat = 'YYYY-MM-DD';
 
@@ -138,12 +139,17 @@ function displayError(err) {
  */
 async function refreshEmployee() {
   this.employee = this.$store.getters.user;
+  [this.expenses] = await Promise.all([
+    api.getAllEmployeeExpenses(this.employee.id),
+    !this.$store.getters.budgets ? this.updateStoreBudgets() : '',
+    !this.$store.getters.expenseTypes ? this.updateStoreExpenseTypes() : '',
+    this.employee.employeeRole === 'admin' && !this.$store.getters.employees ? this.updateStoreEmployees() : ''
+  ]);
   this.accessibleBudgets = this.$store.getters.budgets;
-  this.expenses = await api.getAllEmployeeExpenses(this.employee.id);
+  this.expenseTypes = this.$store.getters.expenseTypes;
 
   this.hireDate = this.employee.hireDate;
   this.fiscalDateView = this.getCurrentBudgetYear(this.hireDate);
-  this.expenseTypes = this.$store.getters.expenseTypes;
 
   // does not have access to any budgets disable budget chart
   this.accessibleBudgets.length > 0 ? (this.hasAccessToBudgets = true) : '';
@@ -279,7 +285,11 @@ export default {
     getCurrentBudgetYear,
     refreshEmployee,
     showSuccessfulSubmit,
-    updateData
+    updateData,
+    updateStoreBudgets,
+    updateStoreEmployees,
+    updateStoreExpenseTypes,
+    updateStoreUser
   },
   props: {
     employ: {

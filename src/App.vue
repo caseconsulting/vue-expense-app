@@ -238,19 +238,11 @@ async function populateStore() {
     employee = JSON.parse(localStorage.getItem('user')); // gets data from Callback.vue after login
     this.$store.dispatch('setUser', { user: employee }); // dispatch data to the vuex store
     employee.lastLogin = lastLogin;
+    await updateEmployee(employee);
   } else {
     await this.updateStoreUser(); // calling first since uodateStoreExpenseTypes relies on user data
     employee = this.$store.getters.user;
   }
-
-  // runs these api calls in parallel/concurrently? since they are independent of each other
-  await Promise.all([
-    lastLogin ? updateEmployee(employee) : '' //,
-    // this.updateStoreEmployees(),
-    // this.updateStoreAvatars(),
-    // this.updateStoreExpenseTypes(),
-    // this.updateStoreBudgets()
-  ]);
   localStorage.removeItem('user');
   localStorage.removeItem('lastLogin'); // remove from local storage to prevent login audit on refresh
 
