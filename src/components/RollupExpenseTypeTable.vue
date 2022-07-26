@@ -798,10 +798,13 @@ async function created() {
   let aggData;
   [aggData] = await Promise.all([
     api.getAllAggregateExpenses(),
-    !this.$store.getters.employees ? this.updateStoreEmployees() : '',
-    this.$store.getters.loginTime ? this.updateEmployeeLogin(this.$store.getters.user) : ''
+    !this.$store.getters.employees ? this.updateStoreEmployees() : ''
   ]);
   this.loadExpensesData(aggData);
+  if (this.$store.getters.loginTime) {
+    // updates and audits employee login for admins
+    await this.updateEmployeeLogin(this.$store.getters.user);
+  }
 } // created
 
 /**
