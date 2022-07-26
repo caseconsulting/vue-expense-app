@@ -239,10 +239,12 @@ export async function updateEmployeeLogin(employee) {
       timeToLive: 60
     })
   ]); // Create an audit of the success
-  let employees = this.$store.getters.employees;
-  let i = employees.findIndex((emp) => emp.id === employee.id);
-  employees[i] = employee;
-  this.$store.dispatch('setLoginTime', { employees });
+  if (this.$store.getters.employees) {
+    let employees = this.$store.getters.employees;
+    let i = employees.findIndex((emp) => emp.id === employee.id);
+    employees[i] = employee;
+    this.$store.dispatch('setLoginTime', { employees });
+  }
 } // updateEmployee
 
 /**
