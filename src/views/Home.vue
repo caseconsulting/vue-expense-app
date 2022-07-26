@@ -114,7 +114,7 @@ import moment from 'moment-timezone';
 moment.tz.setDefault('America/New_York');
 import TwitterFeed from '@/components/TwitterFeed';
 import _ from 'lodash';
-import { isEmpty, getCurrentBudgetYear } from '@/utils/utils';
+import { isEmpty, getCurrentBudgetYear, updateEmployeeLogin } from '@/utils/utils';
 import { updateStoreExpenseTypes, updateStoreBudgets } from '@/utils/storeUtils';
 import QuickBooksTimeData from '../components/QuickBooksTimeData.vue';
 
@@ -584,7 +584,12 @@ function handleProfile() {
  * Loads all of the home page data concurrently upon entering the page.
  */
 async function loadHomePageData() {
-  await Promise.all([this.refreshEmployee(), this.createEvents(), this.getTweets()]);
+  await Promise.all([
+    this.refreshEmployee(),
+    this.createEvents(),
+    this.getTweets(),
+    this.$store.getters.loginTime ? this.updateEmployeeLogin(this.$store.getters.user) : ''
+  ]);
 } // loadHomePageData
 
 /**
@@ -684,6 +689,7 @@ export default {
     loadHomePageData,
     refreshEmployee,
     handleProfile,
+    updateEmployeeLogin,
     updateStoreExpenseTypes,
     updateStoreBudgets
   },

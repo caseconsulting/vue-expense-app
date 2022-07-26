@@ -150,8 +150,6 @@ import {
   updateStoreBudgets,
   updateStoreExpenseTypes
 } from '@/utils/storeUtils';
-import { v4 as uuid } from 'uuid';
-import api from '@/shared/api';
 import floorPlan from '@/assets/img/MakeOfficesfloorplan.jpg';
 import moment from 'moment-timezone';
 import MainNav from '@/components/MainNav.vue';
@@ -236,9 +234,10 @@ async function populateStore() {
   let employee;
   if (lastLogin) {
     employee = JSON.parse(localStorage.getItem('user')); // gets data from Callback.vue after login
-    this.$store.dispatch('setUser', { user: employee }); // dispatch data to the vuex store
     employee.lastLogin = lastLogin;
-    await updateEmployee(employee);
+    this.$store.dispatch('setUser', { user: employee }); // dispatch data to the vuex store
+    this.$store.dispatch('setLoginTime', { loginTime: lastLogin });
+    //await updateEmployee(employee);
   } else {
     await this.updateStoreUser(); // calling first since uodateStoreExpenseTypes relies on user data
     employee = this.$store.getters.user;
@@ -250,24 +249,6 @@ async function populateStore() {
   // Otherwise, on reload, pages would try to access the store before it was populated.
   this.$store.dispatch('setStoreIsPopulated', { populated: true });
 } // populateStore
-
-/**
- * Updates the login date and creates audit for the employee.
- * @param {employee} employee the employee to update
- */
-async function updateEmployee(employee) {
-  await Promise.all([
-    api.updateItem(api.EMPLOYEES, employee), // updates last logged in for employee
-    api.createItem(api.AUDIT, {
-      id: uuid(),
-      type: 'login',
-      tags: ['account'],
-      employeeId: employee.id,
-      description: `${employee.firstName} ${employee.lastName} has logged in`,
-      timeToLive: 60
-    })
-  ]); // Create an audit of the success
-} // updateEmployee
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -420,7 +401,6 @@ export default {
     handleProfile,
     isLoggedIn,
     populateStore,
-    updateEmployee,
     updateStoreUser,
     updateStoreEmployees,
     updateStoreAvatars,

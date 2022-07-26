@@ -29,7 +29,8 @@ export default new Vuex.Store({
       user: null,
       userRole: null,
       events: null,
-      budgets: null
+      budgets: null,
+      loginTime: null
     };
   },
   mutations: {
@@ -55,6 +56,9 @@ export default new Vuex.Store({
     },
     setBudgets(state, payload) {
       state.budgets = payload.budgets;
+    },
+    setLoginTime(state, payload) {
+      state.loginTime = payload.loginTime;
     }
   },
   actions: {
@@ -78,6 +82,9 @@ export default new Vuex.Store({
     },
     setBudgets(context, payload) {
       context.commit('setBudgets', payload);
+    },
+    setLoginTime(context, payload) {
+      context.commit('setLoginTime', payload);
     }
   },
   getters: {
@@ -107,6 +114,9 @@ export default new Vuex.Store({
     },
     budgets(state) {
       return state.budgets;
+    },
+    loginTime(state) {
+      return state.loginTime;
     }
   }
 });

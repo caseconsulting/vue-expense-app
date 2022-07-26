@@ -142,7 +142,7 @@ moment.tz.setDefault('America/New_York');
 import ReimburseModal from '@/components/modals/ReimburseModal.vue';
 import UnrolledTableInfo from '@/components/UnrolledTableInfo.vue';
 import _ from 'lodash';
-import { asyncForEach, isEmpty, convertToMoneyString } from '@/utils/utils';
+import { asyncForEach, isEmpty, convertToMoneyString, updateEmployeeLogin } from '@/utils/utils';
 import { storeIsPopulated } from '../utils/utils';
 import { updateStoreEmployees } from '@/utils/storeUtils';
 import employeeUtils from '@/shared/employeeUtils';
@@ -798,7 +798,8 @@ async function created() {
   let aggData;
   [aggData] = await Promise.all([
     api.getAllAggregateExpenses(),
-    !this.$store.getters.employees ? this.updateStoreEmployees() : ''
+    !this.$store.getters.employees ? this.updateStoreEmployees() : '',
+    this.$store.getters.loginTime ? this.updateEmployeeLogin(this.$store.getters.user) : ''
   ]);
   this.loadExpensesData(aggData);
 } // created
@@ -929,6 +930,7 @@ export default {
     toggleShowOnFeedGroup,
     toggleShowOnFeed,
     unCheckAllBoxes,
+    updateEmployeeLogin,
     updateStoreEmployees
   },
   watch: {
