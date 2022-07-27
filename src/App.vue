@@ -233,9 +233,9 @@ function handleLogout() {
 /**
  * redirects to user's employee page
  */
-async function handleProfile() {
+function handleProfile() {
   // We don't use this.userId becuase it may be null by the time we click the button
-  this.$router.push({ name: 'employee', params: { id: `${this.userId}` } });
+  this.$router.push({ name: 'employee', params: { id: `${this.userId}`, replace: true } });
 } // handleProfile
 
 /**
@@ -252,7 +252,7 @@ async function populateStore() {
     this.$store.dispatch('setLoginTime', { loginTime: lastLogin });
     //await updateEmployee(employee);
   } else {
-    await this.updateStoreUser(); // calling first since uodateStoreExpenseTypes relies on user data
+    await this.updateStoreUser(); // calling first since updateStoreExpenseTypes relies on user data
     employee = this.$store.getters.user;
   }
   localStorage.removeItem('user');

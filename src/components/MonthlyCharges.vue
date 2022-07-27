@@ -288,7 +288,15 @@ async function setMonthlyCharges() {
   if (!this.isEmpty(this.employee.id)) {
     this.workDayHours *= this.employee.workStatus * 0.01;
     // make call to api to get data
-    this.quickBooksTimeData = await api.getMonthlyHours(this.employee.employeeNumber);
+    if (!this.$store.getters.quickbooksMonthlyHours || this.$store.getters.user.id != this.employee.id) {
+      this.quickBooksTimeData = await api.getMonthlyHours(this.employee.employeeNumber);
+      if (this.$store.getters.user.id == this.employee.id) {
+        // only set vuex store if the user is looking at their own quickbooks data
+        this.$store.dispatch('setQuickbooksMonthlyHours', { quickbooksMonthlyHours: this.quickBooksTimeData });
+      }
+    } else {
+      this.quickBooksTimeData = this.$store.getters.quickbooksMonthlyHours;
+    }
 
     if (
       _.isNil(this.quickBooksTimeData.previousHours) ||

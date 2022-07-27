@@ -30,7 +30,9 @@ export default new Vuex.Store({
       userRole: null,
       events: null,
       budgets: null,
-      loginTime: null
+      loginTime: null,
+      quickbooksPTO: null,
+      quickbooksMonthlyHours: null
     };
   },
   mutations: {
@@ -59,6 +61,12 @@ export default new Vuex.Store({
     },
     setLoginTime(state, payload) {
       state.loginTime = payload.loginTime;
+    },
+    setQuickbooksPTO(state, payload) {
+      state.quickbooksPTO = payload.quickbooksPTO;
+    },
+    setQuickbooksMonthlyHours(state, payload) {
+      state.quickbooksMonthlyHours = payload.quickbooksMonthlyHours;
     }
   },
   actions: {
@@ -85,6 +93,12 @@ export default new Vuex.Store({
     },
     setLoginTime(context, payload) {
       context.commit('setLoginTime', payload);
+    },
+    setQuickbooksPTO(context, payload) {
+      context.commit('setQuickbooksPTO', payload);
+    },
+    setQuickbooksMonthlyHours(context, payload) {
+      context.commit('setQuickbooksMonthlyHours', payload);
     }
   },
   getters: {
@@ -117,6 +131,12 @@ export default new Vuex.Store({
     },
     loginTime(state) {
       return state.loginTime;
+    },
+    quickbooksPTO(state) {
+      return state.quickbooksPTO;
+    },
+    quickbooksMonthlyHours(state) {
+      return state.quickbooksMonthlyHours;
     }
   }
 });
