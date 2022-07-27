@@ -428,7 +428,7 @@ export default {
     return {
       currentTab: null,
       deleteLoading: false,
-      displayQuickBooksTimeAndBalances: true,
+      displayQuickBooksTimeAndBalances: false,
       editing: false,
       expenses: null,
       expenseTypes: null,
