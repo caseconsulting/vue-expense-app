@@ -807,7 +807,7 @@ function clearForm() {
 
   if (this.asUser) {
     // creating or updating an expense as a user
-    this.$set(this.editedExpense, 'employeeName', this.userInfo.id);
+    this.$set(this.editedExpense, 'employeeName', `${this.userInfo.firstName} ${this.userInfo.lastName}`);
     this.$set(this.editedExpense, 'employeeId', this.userInfo.id);
   }
 } // clearForm
@@ -1535,7 +1535,7 @@ async function created() {
 
   if (this.asUser) {
     // creating or updating an expense as a user
-    this.$set(this.editedExpense, 'employeeName', this.userInfo.id);
+    this.$set(this.editedExpense, 'employeeName', `${this.userInfo.firstName} ${this.userInfo.lastName}`);
     this.$set(this.editedExpense, 'employeeId', this.userInfo.id);
   }
   if (this.getRole() === 'admin') {
@@ -1654,6 +1654,12 @@ function watchExpenseID() {
       return expenseType;
     }
   });
+
+  if (this.asUser) {
+    // creating or updating an expense as a user
+    this.$set(this.editedExpense, 'employeeName', `${this.userInfo.firstName} ${this.userInfo.lastName}`);
+    this.$set(this.editedExpense, 'employeeId', this.userInfo.id);
+  }
 } // watchExpenseID
 
 /**
