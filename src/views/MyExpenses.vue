@@ -168,7 +168,7 @@
             :sort-by.sync="sortBy"
             :sort-desc.sync="sortDesc"
             :expanded.sync="expanded"
-            :loading="loading"
+            :loading="loading || initialPageLoading"
             :items-per-page="15"
             :search="search"
             item-key="id"
@@ -337,7 +337,7 @@
     <!-- Expense Form -->
     <v-col v-if="isAdmin || !userIsInactive" cols="12" lg="4">
       <expense-form
-        v-if="!loading"
+        v-if="!initialPageLoading"
         ref="form"
         :isEdit="isEditing"
         :expense="expense"
@@ -700,6 +700,8 @@ function isReimbursed(expense) {
 } // isReimbursed
 
 async function loadMyExpensesData() {
+  this.initialPageLoading = true;
+  this.loading = true;
   // get user info, defaulting to params if exists
   this.userInfo = this.$route.params.defaultEmployee || this.$store.getters.user;
   await Promise.all([
@@ -731,6 +733,7 @@ async function loadMyExpensesData() {
     };
   });
   this.loading = false;
+  this.initialPageLoading = false;
 }
 
 /**
@@ -1017,6 +1020,7 @@ export default {
       ], // datatable headers
       isEditing: false, //whether or not an expense is being edited
       loading: true, // loading status
+      initialPageLoading: true, // loading the page on startup
       midAction: false,
       propExpense: {
         id: null,
