@@ -223,6 +223,7 @@ async function getProfileData() {
   }
   this.user = this.$store.getters.user;
   this.role = this.getRole();
+  this.displayQuickBooksTimeAndBalances = this.userIsAdmin() || this.userIsEmployee();
   this.basicEmployeeDataLoading = false;
   if (this.model) {
     [this.hasResume, this.expenses] = await Promise.all([
@@ -232,7 +233,6 @@ async function getProfileData() {
       this.checkForBudgetAccess()
     ]);
     this.expenseTypes = this.$store.getters.expenseTypes;
-    this.displayQuickBooksTimeAndBalances = this.userIsAdmin() || this.userIsEmployee();
     this.fiscalDateView = this.getCurrentBudgetYear(this.model.hireDate);
     this.hasAccessToBudgets = this.accessibleBudgets.length !== 0; // enable budget chart
     this.loading = false;
