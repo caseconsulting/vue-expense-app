@@ -1697,19 +1697,19 @@ async function watchEditedExpenseExpenseTypeID() {
 
     let localRecipient = _.find(this.employees, (employee) => employee.value == this.editedExpense.recipient);
     this.recipientPlaceholder = localRecipient ? localRecipient.text : '';
-
     // set show on company feed and require url
-    if (!_.isEqual(this.originalExpense, this.editedExpense) || _.isNil(this.editedExpense.id)) {
+    if (
+      !_.isEqual(this.originalExpense, this.editedExpense) ||
+      _.isNil(this.editedExpense.id) ||
+      _.isEmpty(this.editedExpense.id)
+    ) {
       // changing the expense type
-      if (this.selectedExpenseType.alwaysOnFeed) {
+      if (!this.isEdit && this.selectedExpenseType.alwaysOnFeed) {
         // if expense type is always on feed
         this.editedExpense.showOnFeed = true;
       } else {
         // if expense type is not always on feed
-        if (_.isEmpty(this.selectedExpenseType.categories)) {
-          // expense type does not have categories
-          this.editedExpense.showOnFeed = false;
-        } else {
+        if (!_.isEmpty(this.selectedExpenseType.categories)) {
           // expense type has categories
           let category = _.find(this.selectedExpenseType.categories, (category) => {
             return category == this.editedExpense.category;

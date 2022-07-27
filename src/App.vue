@@ -63,7 +63,7 @@
         <!-- User image and logout -->
         <v-menu bottom offset-y open-on-click v-if="isLoggedIn()">
           <template v-slot:activator="{ on }">
-            <v-avatar id="profile" class="profile-button" size="40">
+            <v-avatar id="profile" class="profile-button ml-3" size="40">
               <img :src="profilePic" alt="avatar" v-on="on" />
             </v-avatar>
           </template>
@@ -106,7 +106,7 @@
         </v-menu>
         <!-- End user image and logout -->
       </v-app-bar>
-      <v-main class="app-screen">
+      <v-main :style="{ padding: getMainPadding() }">
         <v-container fluid grid-list-lg>
           <notification-banners v-if="isLoggedIn() && storeIsPopulated" />
           <router-view></router-view>
@@ -121,7 +121,7 @@
                 id="P"
                 class="black--text"
                 target="_blank"
-                href="https://3.basecamp.com/3097063/buckets/4708396/documents/5099721598"
+                href="https://3.basecamp.com/3097063/buckets/4708396/documents/5153019289"
                 ><strong>Version</strong> {{ version }}</a
               >
             </template>
@@ -211,6 +211,19 @@ function badumbadumdodooodoo(index) {
     }, 2000);
   }
 } // badumbadumdodooodoo
+
+/**
+ * Determines if the screens padding based off if the user is mobile.
+ *
+ * @returns String - The padding value
+ */
+function getMainPadding() {
+  if (!this.isMobile) {
+    return '64px 0px 0px 56px';
+  } else {
+    return '56px 0px 0px 0px';
+  }
+}
 
 /*
  * Logout of expense app
@@ -419,6 +432,7 @@ export default {
   },
   methods: {
     badumbadumdodooodoo,
+    getMainPadding,
     handleLogout,
     handleProfile,
     isLoggedIn,
@@ -480,19 +494,5 @@ export default {
 
 #P {
   text-decoration: none;
-}
-
-// for mobile screen sizes
-@media screen and (max-width: 960px) {
-  .app-screen {
-    padding: 56px 0px 0px 0px;
-  }
-}
-
-// for non-mobile screen sizes
-@media screen and (max-width: 2000px) {
-  .app-screen {
-    padding: 64px 0px 0px 56px !important;
-  }
 }
 </style>

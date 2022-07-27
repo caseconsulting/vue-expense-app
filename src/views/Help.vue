@@ -25,6 +25,7 @@
               :items-per-page="-1"
               class="elevation-1 grey lighten-3"
               mobile-breakpoint="0"
+              hide-default-footer
             ></v-data-table>
             <v-data-table
               v-else
@@ -33,6 +34,7 @@
               :items-per-page="-1"
               class="elevation-1 grey lighten-3 dataTable"
               mobile-breakpoint="0"
+              hide-default-footer
             ></v-data-table>
           </v-expansion-panel-content>
           <v-expansion-panel-content v-else-if="canView(section[1])">

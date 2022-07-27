@@ -14,7 +14,7 @@
             target="_blank"
             >EEOCData.org</a
           >
-          or send a message to Jennifer Morrison.
+          or send a message to Paul Farmer.
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
