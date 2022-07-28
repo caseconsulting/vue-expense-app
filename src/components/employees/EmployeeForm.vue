@@ -967,6 +967,11 @@ function setFormData(tab, data) {
     this.$set(this.model, 'eeoHispanicOrLatino', data.eeoHispanicOrLatino);
     this.$set(this.model, 'eeoRaceOrEthnicity', data.eeoRaceOrEthnicity);
     this.$set(this.model, 'eeoJobCategory', data.eeoJobCategory);
+      if (this.hasAdminPermissions()) {
+      this.$set(this.model, 'eeoAdminHasFilledOutEeoForm', true);
+    } else {
+      this.$set(this.model, 'eeoAdminHasFilledOutEeoForm', false);
+    }
   } else if (tab == 'personal') {
     // filter github and twitter links
     if (data.github && data.github.indexOf('/') != -1) {
