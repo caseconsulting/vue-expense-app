@@ -1,12 +1,11 @@
 <template>
   <div>
-    <!-- Title -->
-    <v-card class="white--text" color="#bc3825">
+    <v-card class="overflow-y-hidden" max-height="850px">
+      <!-- Title -->
       <v-card-title class="header_style">
         <h3>Activity Feed</h3>
       </v-card-title>
-    </v-card>
-    <v-card class="overflow-y-hidden" max-height="850px">
+      <v-spacer></v-spacer>
       <v-card-text class="pb-0">
         <v-autocomplete
           :items="filters"
@@ -132,9 +131,9 @@ function created() {
 function itemHeight() {
   switch (this.$vuetify.breakpoint.name) {
     case 'xs':
-      return 200;
+      return 115;
     case 'sm':
-      return 200;
+      return 115;
     case 'md':
       return 100;
     case 'lg':

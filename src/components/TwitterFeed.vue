@@ -1,40 +1,37 @@
-<template class="twitter-feed">
-  <div>
-    <!-- title -->
-    <v-card class="mt-3 white--text" color="#bc3825">
-      <v-card-title class="header_style">
-        <h3>Twitter Feed</h3>
-      </v-card-title>
-    </v-card>
-    <!-- loading bar -->
-    <v-card class="overflow-y-auto" max-height="676px">
-      <div v-if="this.loading" class="py-4">
-        <v-progress-linear :indeterminate="true"></v-progress-linear>
-      </div>
-      <!-- timeline -->
-      <div v-else>
-        <v-timeline dense>
-          <v-timeline-item color="#bc3825" v-for="tweet in tweets" :key="tweet.name">
-            <template v-slot:icon>
-              <img src="../assets/img/case-logo-circle.png" class="twitter-icon" />
-            </template>
-            <h3>{{ tweet.created_at | formatDate }}</h3>
-            <v-list-item
-              :href="'https://twitter.com/ConsultwithCase/status/' + tweet.id_str"
-              target="_blank"
-              class="px-4"
-            >
-              <v-card flat class="transparent"
-                >{{ tweet.full_text | fixHTMLencoding | removeLink }}&nbsp;<v-icon height="12" width="12" color="blue"
-                  >mdi-open-in-new</v-icon
-                >
-              </v-card>
-            </v-list-item>
-          </v-timeline-item>
-        </v-timeline>
-      </div>
-    </v-card>
-  </div>
+<template>
+  <v-card class="overflow-y-auto" max-height="676px">
+    <!-- Title -->
+    <v-card-title class="header_style">
+      <h3>Twitter Feed</h3>
+    </v-card-title>
+    <v-spacer></v-spacer>
+    <!-- Loading Bar -->
+    <div v-if="this.loading" class="py-4">
+      <v-progress-linear :indeterminate="true"></v-progress-linear>
+    </div>
+    <!-- Timeline -->
+    <div v-else>
+      <v-timeline dense>
+        <v-timeline-item color="#bc3825" v-for="tweet in tweets" :key="tweet.name">
+          <template v-slot:icon>
+            <img src="../assets/img/case-logo-circle.png" class="twitter-icon" />
+          </template>
+          <h3>{{ tweet.created_at | formatDate }}</h3>
+          <v-list-item
+            :href="'https://twitter.com/ConsultwithCase/status/' + tweet.id_str"
+            target="_blank"
+            class="px-4"
+          >
+            <v-card flat class="transparent"
+              >{{ tweet.full_text | fixHTMLencoding | removeLink }}&nbsp;<v-icon height="12" width="12" color="blue"
+                >mdi-open-in-new</v-icon
+              >
+            </v-card>
+          </v-list-item>
+        </v-timeline-item>
+      </v-timeline>
+    </div>
+  </v-card>
 </template>
 
 <script>

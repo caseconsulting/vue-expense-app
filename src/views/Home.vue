@@ -31,75 +31,48 @@
       </v-row>
     </span>
     <span v-else>
-      <v-row class="pb-3 px-lg-2 px-md-0">
+      <v-row class="pb-3">
         <!-- Title -->
-        <v-col cols="12" md="6" class="pt-3 px-xl-2 px-lg-2 px-md-0">
-          <v-row class="pt-5" align="center" justify="center">
-            <h1 id="home-greeting">Hello, {{ getEmployeePreferredName(employee) }}!</h1>
-          </v-row>
-          <v-row class="pt-2" justify="center">
-            <v-btn class="mb-5" @click="handleProfile()" color="#bc3825" dark>View Profile</v-btn>
-          </v-row>
+        <v-col cols="12" md="6">
+          <h1 align="center" justify="center" id="home-greeting">Hello, {{ getEmployeePreferredName(employee) }}!</h1>
+          <div class="text-center">
+            <v-btn @click="handleProfile()" color="#bc3825" dark>View Profile</v-btn>
+          </div>
         </v-col>
-        <!-- Anniversary Date -->
 
-        <v-col cols="12" md="6" class="pa-xl-4 pa-md-0">
-          <v-card class="">
-            <v-card-title>
-              <!-- display the next anniversary date -->
-              <div id="home-anniversary">
-                <h3 class="pt-4 font-16">Anniversary Date: {{ getAnniversary }}</h3>
-                <div @mouseover="display = !display" @mouseleave="display = !display" class="pt-4 font-14">
-                  <div v-if="display">Days Until: {{ getDaysUntil }}</div>
-                  <div v-else>Seconds Until: {{ getSecondsUntil }}</div>
-                </div>
-              </div>
-              <v-spacer></v-spacer>
-            </v-card-title>
-          </v-card>
+        <!-- Anniversary Date -->
+        <v-col cols="12" md="6" class="px-xl-4 px-lg-2 px-md-0">
+          <anniversary-card v-if="!loading" :employee="employee" :hasBudgets="true" location="home"></anniversary-card>
         </v-col>
       </v-row>
-      <v-row class="pa-0">
+      <v-row class="pb-3">
         <v-col wrap cols="12" lg="6" class="pa-0 px-xl-4 px-lg-2 px-md-0">
           <!-- QuickBooksTime -->
-          <v-col class="pa-0">
-            <v-col class="pt-0 px-0 text-center">
-              <quick-books-time-data cols="12" lg="6"></quick-books-time-data>
-            </v-col>
-          </v-col>
+          <div class="pb-3 text-center">
+            <quick-books-time-data cols="12" lg="6"></quick-books-time-data>
+          </div>
           <!-- Available Budgets -->
-          <v-col class="pa-0 pb-2">
-            <v-col class="pa-0 pt-lg-2 pt-md-2 mt-2 text-center">
-              <available-budgets
-                v-if="accessibleBudgets"
-                id="home-available-budgets"
-                :employee="this.employee"
-                :expenses="this.expenses"
-                :expenseTypes="this.expenseTypes"
-                :fiscalDateView="this.fiscalDateView"
-                :accessibleBudgets="this.accessibleBudgets"
-              ></available-budgets>
-            </v-col>
-          </v-col>
+          <div class="text-center">
+            <available-budgets
+              v-if="accessibleBudgets"
+              id="home-available-budgets"
+              :employee="employee"
+              :expenses="expenses"
+              :expenseTypes="expenseTypes"
+              :fiscalDateView="fiscalDateView"
+              :accessibleBudgets="accessibleBudgets"
+            ></available-budgets>
+          </div>
         </v-col>
         <!-- Activity Feed -->
-        <v-col cols="12" lg="6" class="pa-0 mt-3 mt-xl-0 mt-lg-0">
-          <v-col class="pa-0 pt-0 px-xl-4 px-lg-2 px-md-0">
-            <activity-feed
-              id="home-activity-feed"
-              :events="events"
-              :loading="loadingEvents"
-              class="mt-xl-0 mt-lg-0"
-            ></activity-feed>
-          </v-col>
+        <v-col cols="12" lg="6" class="px-xl-4 px-lg-2 px-md-0 pa-0">
+          <activity-feed id="home-activity-feed" :events="events" :loading="loadingEvents"></activity-feed>
         </v-col>
       </v-row>
       <v-row>
         <!-- Twitter Feed -->
-        <v-col class="pa-0">
-          <v-col mt-0 class="pt-xl-4 pt-md-2 px-0">
-            <twitter-feed id="home-twitter-feed" :tweets="tweets" :loading="loadingTweets"></twitter-feed>
-          </v-col>
+        <v-col mt-0 class="pa-0 px-xl-4 px-lg-2 px-md-0">
+          <twitter-feed id="home-twitter-feed" :tweets="tweets" :loading="loadingTweets"></twitter-feed>
         </v-col>
       </v-row>
     </span>
@@ -114,101 +87,16 @@ import moment from 'moment-timezone';
 moment.tz.setDefault('America/New_York');
 import TwitterFeed from '@/components/TwitterFeed';
 import _ from 'lodash';
-import { isEmpty, getCurrentBudgetYear, updateEmployeeLogin } from '@/utils/utils';
+import { isEmpty, isMobile, getCurrentBudgetYear, updateEmployeeLogin } from '@/utils/utils';
 import { updateStoreExpenseTypes, updateStoreBudgets } from '@/utils/storeUtils';
-import QuickBooksTimeData from '../components/QuickBooksTimeData.vue';
+import QuickBooksTimeData from '@/components/QuickBooksTimeData';
+import AnniversaryCard from '@/components/AnniversaryCard';
 
 // |--------------------------------------------------|
 // |                                                  |
 // |                     COMPUTED                     |
 // |                                                  |
 // |--------------------------------------------------|
-
-/**
- * Get the next anniversary date for the employee based on their hire date.
- *
- * @return String - next employee anniversary date (day of year, month, day, year)
- */
-function getAnniversary() {
-  const [year, month, day] = this.hireDate.split('-'); // split anniversary year, month, and day
-  if (moment(`${month}/${day}/${year}`, 'MM/DD/YYYY', true).isValid()) {
-    // if valid date
-    let now = moment();
-    let hireDate = moment(this.hireDate, 'YYYY-MM-DD');
-
-    if (now.isAfter(hireDate)) {
-      // employee's hire date is before today
-      let anniversary = moment([now.year(), hireDate.month(), hireDate.date()]);
-      // employee's hire date is before today
-      if (now.isSameOrAfter(anniversary)) {
-        // employee's anniversary date has already occured this year
-        anniversary.add(1, 'years');
-        return anniversary.format('ddd. MMM D, YYYY');
-      } else {
-        // employee's anniversary date still has to happen between now and the end of year
-        return anniversary.format('ddd. MMM D, YYYY');
-      }
-    } else {
-      // employee's hire date is in the future
-      return hireDate.add(1, 'years').format('ddd. MMM D, YYYY');
-    }
-  } else {
-    // TODO: Return something for invalid date
-    return 'Ooops no anniversary, when did you start working here again? ';
-  }
-} // getAnniversary
-
-/**
- * Get the days until the employee's next anniversary date.
- *
- * @return int - returns the difference between now and the anniversary in days
- */
-function getDaysUntil() {
-  let now = moment();
-
-  let hireDate = moment(this.hireDate, 'YYYY-MM-DD');
-  let anniversary = moment([now.year(), hireDate.month(), hireDate.date()]);
-
-  if (now.isAfter(hireDate)) {
-    // employee's hire date is before today
-    if (now.isSameOrAfter(anniversary)) {
-      // employee's anniversary date has already occured this year
-      anniversary.add(1, 'years');
-    }
-  } else {
-    // employee's hire date is in the future
-    anniversary = hireDate.add(1, 'years');
-  }
-
-  return anniversary.diff(now, 'days') + 1;
-} // getDaysUntil
-
-/**
- * Get the seconds until the employee's next anniversary date.
- *
- * @return int - returns the difference between now and the anniversary in seconds
- */
-function getSecondsUntil() {
-  if (this.actualTime) {
-    // the actual time exists
-    let now = moment();
-    let year = now.year();
-    let hireDate = moment(this.hireDate, 'YYYY-MM-DD');
-    let anniversary = moment([year, hireDate.month(), hireDate.date()]);
-
-    if (now.isAfter(hireDate)) {
-      // employee's hire date is before today
-      if (now.isSameOrAfter(anniversary)) {
-        // employee's anniversary date has already occured this year
-        anniversary.add(1, 'years');
-      }
-    } else {
-      // employee's hire date is in the future
-      anniversary = hireDate.add(1, 'years');
-    }
-    return anniversary.diff(now, 'seconds');
-  }
-} // getSecondsUntil
 
 /**
  * Checks if the store is populated from initial page load.
@@ -636,12 +524,10 @@ export default {
     ActivityFeed,
     AvailableBudgets,
     TwitterFeed,
-    QuickBooksTimeData
+    QuickBooksTimeData,
+    AnniversaryCard
   },
   computed: {
-    getAnniversary,
-    getDaysUntil,
-    getSecondsUntil,
     storeIsPopulated
   },
   created,
@@ -686,6 +572,7 @@ export default {
     getEventDateMessage,
     getTweets,
     isEmpty,
+    isMobile,
     loadHomePageData,
     refreshEmployee,
     handleProfile,
