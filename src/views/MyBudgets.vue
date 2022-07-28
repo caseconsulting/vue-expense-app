@@ -27,14 +27,14 @@
       </v-col>
 
       <!-- Anniversary Date -->
-      <v-col cols="12" lg="4" class="pa-0">
+      <v-col cols="12" lg="4">
         <div v-if="!loading && !isMobile">
           <anniversary-card :employee="employee" :hasBudgets="hasAccessToBudgets"></anniversary-card>
         </div>
-        <v-col cols="12" v-else-if="loading && !isMobile">
+        <div v-else-if="loading && !isMobile">
           <!-- This has to be in a v-col because of padding that comes from the anniversary card v-col. Without the v-col, the loader is off-->
           <v-skeleton-loader type="card-heading, list-item"></v-skeleton-loader>
-        </v-col>
+        </div>
       </v-col>
     </v-row>
 

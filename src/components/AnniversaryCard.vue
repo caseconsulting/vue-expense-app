@@ -1,16 +1,15 @@
 <template>
-  <span>
+  <div>
     <!-- Anniversary Date -->
     <v-card>
-      <v-row>
+      <v-row no-gutters class="pa-4">
         <v-col class="col-10">
-          <v-card-title class="pt-0">
+          <v-card-title class="pa-0">
             <!-- display the next anniversary date -->
             <div v-if="viewingCurrentBudgetYear || location == 'home'">
               <p class="font-16 font-weight-bold">Anniversary Date: {{ getAnniversary }}</p>
-              <div @mouseover="display = !display" @mouseleave="display = !display" class="font-14">
-                <div v-if="display">Days Until: {{ getDaysUntil }}</div>
-                <div v-else>Seconds Until: {{ getSecondsUntil }}</div>
+              <div class="font-14">
+                <div>Days Until: {{ getDaysUntil }}</div>
               </div>
             </div>
             <!-- Display the budget history year -->
@@ -21,8 +20,8 @@
             </div>
           </v-card-title>
         </v-col>
-        <v-col class="col-2" v-if="location != 'home'">
-          <v-icon @click="changingBudgetView = !changingBudgetView" class="ml-5">history</v-icon>
+        <v-col class="col-2 text-right" v-if="location != 'home'">
+          <v-icon @click="changingBudgetView = !changingBudgetView">history</v-icon>
         </v-col>
       </v-row>
     </v-card>
@@ -34,7 +33,7 @@
       :hireDate="hireDate"
       :hasBudgets="hasBudgets"
     ></budget-select-modal>
-  </span>
+  </div>
 </template>
 
 <script>
@@ -119,33 +118,6 @@ function getDaysUntil() {
 
   return anniversary.diff(now, 'days') + 1;
 } // getDaysUntil
-
-/**
- * Get the seconds until the employee's next anniversary date.
- *
- * @return number - return number of seconds until next anniversary
- */
-function getSecondsUntil() {
-  if (this.actualTime) {
-    // the actual time exists
-    let now = moment();
-    let year = now.year();
-    let hireDate = moment(this.hireDate, 'YYYY-MM-DD');
-    let anniversary = moment([year, hireDate.month(), hireDate.date()]);
-
-    if (now.isAfter(hireDate)) {
-      // employee's hire date is before today
-      if (now.isSameOrAfter(anniversary)) {
-        // employee's anniversary date has already occured this year
-        anniversary.add(1, 'years');
-      }
-    } else {
-      // employee's hire date is in the future
-      anniversary = hireDate.add(1, 'years');
-    }
-    return anniversary.diff(now, 'seconds');
-  }
-} // getSecondsUntil
 
 /**
  * Get the year for the employee budget year view.
@@ -247,7 +219,6 @@ export default {
     viewingCurrentBudgetYear,
     getAnniversary,
     getDaysUntil,
-    getSecondsUntil,
     getFiscalYearView
   },
   data() {
@@ -256,9 +227,7 @@ export default {
       allUserBudgets: null, // all user budgets
       budgetYears: [], // list of options for chaning budget year view
       changingBudgetView: false, // change budget year view activator
-      display: true, // show seconds till anniversary activator
       hireDate: '', // employee hire date
-      seconds: 0, // seconds until next anniversary date
       fiscalDateView: '' // current budget year view by anniversary day
     };
   },
