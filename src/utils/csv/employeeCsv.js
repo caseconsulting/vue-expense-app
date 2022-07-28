@@ -192,22 +192,30 @@ export function getProjectLengthInYears(project) {
  * @return String - contract
  */
 export function getContracts(contracts) {
-  let str = '';
   let result = [];
   if (contracts) {
-    contracts.forEach((contract) => {
-      str = contract.name + ' - ' + contract.prime + ' (Projects: ';
-      contract.projects.forEach((project, i) => {
-        if (i != 0) {
-          str += ', ';
-        }
-        str += project.name + ' - ' + getProjectLengthInYears(project).asYears().toFixed(1) + ' years';
+    _.forEach(contracts, (contract) => {
+      let earliestDate = moment(); // keep track of earliest start date
+      // create array of project strings
+      let projects = [];
+      _.forEach(contract.projects, (project) => {
+        projects.push(`${project.name} - ${getProjectLengthInYears(project).asYears().toFixed(1)} years`);
+        let endDate = moment(project.endDate || moment(), 'YYYY-MM-DD');
+        earliestDate = moment.min([earliestDate, endDate]);
       });
-      str += ')';
+      // create string for contract and add years if necessary
+      let str = `${contract.name} - ${contract.prime} (Projects: ${projects.join(', ')})`;
       if (contract.projects.length > 1) {
-        str += ' Total Time: ' + getContractLengthInYears(contract) + ' years';
+        str += ` Total Time: ${getContractLengthInYears(contract)} years`;
       }
-      result.push(str);
+      // add current contract, attaching earliestDate for sorting
+      result.push({ s: str, d: earliestDate.format('YYYYMMDD') });
+    });
+    // sort contracts by their earliest project start date
+    result = _.orderBy(result, 'd', 'desc');
+    // only return the string value after sorting
+    result = _.map(result, (r) => {
+      return r.s;
     });
   }
   return result;
@@ -296,20 +304,18 @@ export function getEducation(edu) {
  */
 export function getCompanies(companies) {
   let result = [];
+  let toPush;
   if (companies) {
     for (let i = 0; i < companies.length; i++) {
-      result.push(`${companies[i].companyName}`);
+      toPush = `${companies[i].companyName} - `;
       let positions = companies[i].positions;
-      let pos;
+      let formattedPositions = [];
       for (let j = 0; j < positions.length; j++) {
-        pos = `    ${positions[j].title} - ${positions[j].startDate}`;
-        if (positions[j].endDate !== null) {
-          pos += ` to ${positions[j].endDate}`;
-        } else {
-          pos += ' to present';
-        }
-        result.push(pos);
+        let endDate = positions[j].endDate === null ? 'present' : positions[j].endDate;
+        formattedPositions.push(`${positions[j].title} (${positions[j].startDate} to ${endDate})`);
       }
+      toPush += formattedPositions.join(', ');
+      result.push(toPush);
     }
   }
   return result;
