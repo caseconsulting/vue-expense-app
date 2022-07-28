@@ -1,8 +1,7 @@
 <template>
-  <v-card class="px-10 my-7">
-    <div v-if="dataReceived">
+  <v-card>
+    <div v-if="dataReceived" class="pa-2">
       <bar-chart :options="options" :chart-data="chartData"></bar-chart>
-
       <v-autocomplete
         :items="allBudgetNames"
         multiple

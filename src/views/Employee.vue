@@ -123,17 +123,18 @@
           v-if="minimizeWindow"
           :employee="this.model"
           :hasBudgets="this.hasAccessToBudgets"
-          class="mt-2"
         ></anniversary-card>
-        <budget-chart
-          v-if="(userIsAdmin() || userIsEmployee()) && hasAccessToBudgets"
-          class="pt-4"
-          :employee="this.model"
-          :accessibleBudgets="accessibleBudgets"
-          :expenses="expenses"
-          :expenseTypes="expenseTypes"
-          :fiscalDateView="fiscalDateView"
-        ></budget-chart>
+        <div class="mt-md-4">
+          <budget-chart
+            v-if="(userIsAdmin() || userIsEmployee()) && hasAccessToBudgets"
+            class="pt-4"
+            :employee="this.model"
+            :accessibleBudgets="accessibleBudgets"
+            :expenses="expenses"
+            :expenseTypes="expenseTypes"
+            :fiscalDateView="fiscalDateView"
+          ></budget-chart>
+        </div>
       </v-col>
     </v-row>
     <resume-parser

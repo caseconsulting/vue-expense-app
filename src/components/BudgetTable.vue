@@ -1,6 +1,6 @@
 <template>
   <div id="budget-table">
-    <v-container fluid class="pt-0" v-if="expenseTypeData">
+    <div v-if="expenseTypeData">
       <v-data-iterator :items="expenseTypeData" hide-default-footer>
         <template v-slot:default="props">
           <v-row>
@@ -73,7 +73,7 @@
           <div></div>
         </template>
       </v-data-iterator>
-    </v-container>
+    </div>
   </div>
 </template>
 

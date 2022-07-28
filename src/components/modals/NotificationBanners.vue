@@ -1,5 +1,5 @@
 <template>
-  <div v-if="alerts" class="py-2 justify-center">
+  <div v-if="alerts" class="justify-center">
     <v-col v-for="alert in alerts" :key="alert.id" id="alert.id" class="mb-4 py-0" cols="12">
       <v-alert
         :type="alert.status"

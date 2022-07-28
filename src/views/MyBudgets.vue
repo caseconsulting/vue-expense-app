@@ -1,79 +1,90 @@
 <template>
-  <v-row>
-    <!-- Status Alert -->
-    <v-snackbar
-      v-model="status.statusType"
-      :color="status.color"
-      :multi-line="true"
-      :right="true"
-      :timeout="5000"
-      :top="true"
-      :vertical="true"
-    >
-      <v-card-title headline color="white">
-        <span class="headline">{{ status.statusMessage }}</span>
-      </v-card-title>
-      <v-btn color="white" text @click="clearStatus">Close</v-btn>
-    </v-snackbar>
+  <v-container fluid>
+    <v-row>
+      <!-- Status Alert -->
+      <v-snackbar
+        v-model="status.statusType"
+        :color="status.color"
+        :multi-line="true"
+        :right="true"
+        :timeout="5000"
+        :top="true"
+        :vertical="true"
+      >
+        <v-card-title headline color="white">
+          <span class="headline">{{ status.statusMessage }}</span>
+        </v-card-title>
+        <v-btn color="white" text @click="clearStatus">Close</v-btn>
+      </v-snackbar>
 
-    <!-- Title -->
-    <v-col v-if="!loading && !isMobile" cols="12" lg="8">
-      <v-row class="mt-3" align="center" justify="center" v-if="hasAccessToBudgets">
-        <h1>Budget Statistics for {{ employee.firstName }} {{ employee.lastName }}</h1>
-      </v-row>
-      <v-row class="mt-3" align="center" justify="center" v-else>
-        <h1>No Budgets Available for {{ employee.firstName }} {{ employee.lastName }}</h1>
-      </v-row>
-    </v-col>
+      <!-- Title -->
+      <v-col cols="12" lg="8" class="d-flex justify-center align-center">
+        <div v-if="!loading && !isMobile">
+          <h1 v-if="hasAccessToBudgets">Budget Statistics for {{ employee.firstName }} {{ employee.lastName }}</h1>
+          <h1 v-else>No Budgets Available for {{ employee.firstName }} {{ employee.lastName }}</h1>
+        </div>
+        <v-skeleton-loader v-else-if="loading && !isMobile" type="text" width="90%"></v-skeleton-loader>
+      </v-col>
 
-    <!-- Anniversary Date -->
-    <v-col cols="12" lg="4" v-if="!isMobile">
-      <anniversary-card
-        v-if="!loading"
-        :employee="employee"
-        :hasBudgets="hasAccessToBudgets"
-        location="budgets"
-      ></anniversary-card>
-    </v-col>
+      <!-- Anniversary Date -->
+      <v-col cols="12" lg="4" class="pa-0">
+        <div v-if="!loading && !isMobile">
+          <anniversary-card :employee="employee" :hasBudgets="hasAccessToBudgets"></anniversary-card>
+        </div>
+        <v-col cols="12" v-else-if="loading && !isMobile">
+          <!-- This has to be in a v-col because of padding that comes from the anniversary card v-col. Without the v-col, the loader is off-->
+          <v-skeleton-loader type="card-heading, list-item"></v-skeleton-loader>
+        </v-col>
+      </v-col>
+    </v-row>
 
-    <!-- Expense Data -->
-    <v-col cols="12" lg="8">
-      <v-container v-if="loading">
-        <v-row>
-          <v-col v-for="index in 4" :key="index" cols="12" sm="6" lg="6">
-            <v-skeleton-loader class="my-3" type="card-heading, list-item@6"></v-skeleton-loader>
-          </v-col>
-        </v-row>
-        <v-skeleton-loader class="my-3" type="card-heading, list-item@6"></v-skeleton-loader>
-      </v-container>
-      <div v-if="!loading" text-center class="pt-0 font-13">
-        <!-- The @rendered event is to ensure that budget chart renders after the table -->
-        <budget-table
-          class="my-3"
-          :employee="employee"
-          :accessibleBudgets="accessibleBudgets"
-          :expenses="expenses"
-          :expenseTypes="expenseTypes"
-          :fiscalDateView="fiscalDateView"
-        ></budget-table>
-        <budget-chart
-          v-if="!isMobile && hasAccessToBudgets"
-          :accessibleBudgets="accessibleBudgets"
-          :employee="employee"
-          :expenses="expenses"
-          :expenseTypes="expenseTypes"
-          :fiscalDateView="fiscalDateView"
-        ></budget-chart>
-      </div>
-    </v-col>
-
-    <!-- Expense Form-->
-    <v-col v-if="viewingCurrentBudgetYear" cols="12" lg="4">
-      <div text-center>
-        <expense-form :expense="expense" v-on:error="displayError"></expense-form>
-      </div>
-    </v-col>
-  </v-row>
+    <v-row>
+      <!-- Budget Cards -->
+      <v-col cols="12" lg="8">
+        <div v-if="loading">
+          <v-row>
+            <v-col v-for="index in 4" :key="index" cols="6">
+              <v-skeleton-loader type="card-heading, list-item@6"></v-skeleton-loader>
+            </v-col>
+          </v-row>
+        </div>
+        <div v-if="!loading" text-center class="pt-0 font-13">
+          <budget-table
+            :employee="employee"
+            :accessibleBudgets="accessibleBudgets"
+            :expenses="expenses"
+            :expenseTypes="expenseTypes"
+            :fiscalDateView="fiscalDateView"
+          ></budget-table>
+        </div>
+      </v-col>
+      <!-- Expense Form-->
+      <v-col cols="12" lg="4">
+        <div v-if="loading">
+          <v-skeleton-loader type="card-heading, list-item@12"></v-skeleton-loader>
+        </div>
+        <div v-else-if="!loading && viewingCurrentBudgetYear">
+          <expense-form :expense="expense" v-on:error="displayError"></expense-form>
+        </div>
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-col cols="12">
+        <div v-if="loading">
+          <v-skeleton-loader type="card-heading, list-item@3"></v-skeleton-loader>
+        </div>
+        <div v-if="!isMobile && hasAccessToBudgets">
+          <budget-chart
+            :accessibleBudgets="accessibleBudgets"
+            :employee="employee"
+            :expenses="expenses"
+            :expenseTypes="expenseTypes"
+            :fiscalDateView="fiscalDateView"
+          ></budget-chart>
+        </div>
+      </v-col>
+    </v-row>
+  </v-container>
 </template>
 
 <script>

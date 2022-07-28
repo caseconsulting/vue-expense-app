@@ -1,5 +1,5 @@
 <template>
-  <v-card class="mt-3" hover>
+  <v-card hover>
     <v-card-title class="header_style">
       <!-- Editing an Expense -->
       <h3 v-if="expense.id && (isAdmin || !isReimbursed)">Edit Expense</h3>
