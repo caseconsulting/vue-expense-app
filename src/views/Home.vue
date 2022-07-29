@@ -1,32 +1,28 @@
 <template>
-  <v-container fluid class="my-3">
+  <v-container fluid>
     <span v-if="loading">
       <v-row>
-        <v-col cols="12" md="6" class="py-4 px-7">
-          <v-skeleton-loader class="my-3" type="list-item@2"></v-skeleton-loader>
+        <v-col cols="12" md="6" class="pa-0 px-xl-4 px-lg-2 px-md-0">
+          <v-skeleton-loader type="list-item@2"></v-skeleton-loader>
         </v-col>
-        <v-col cols="12" md="6" class="py-4 px-7">
-          <v-skeleton-loader class="my-3" type="list-item@2"></v-skeleton-loader>
-        </v-col>
-      </v-row>
-      <v-row>
-        <v-col cols="12" lg="6">
-          <v-col class="px-4 py-2">
-            <v-skeleton-loader class="my-3" type="card-heading, list-item@6"></v-skeleton-loader>
-          </v-col>
-          <v-col class="px-4 py-2">
-            <v-skeleton-loader class="my-3" type="card-heading, list-item@6"></v-skeleton-loader>
-          </v-col>
-        </v-col>
-        <v-col cols="12" lg="6">
-          <v-col class="px-4 py-2">
-            <v-skeleton-loader class="my-3" type="card-heading, list-item@14"></v-skeleton-loader>
-          </v-col>
+        <v-col cols="12" md="6" class="pa-0 px-xl-4 px-lg-2 px-md-0">
+          <v-skeleton-loader type="list-item@2"></v-skeleton-loader>
         </v-col>
       </v-row>
       <v-row>
-        <v-col mt-0 class="py-4 px-7">
-          <v-skeleton-loader class="my-3" type="card-heading, list-item@14"></v-skeleton-loader>
+        <v-col cols="6" class="px-xl-4 px-lg-2 px-md-0">
+          <v-skeleton-loader type="card-heading, list-item@6"></v-skeleton-loader>
+        </v-col>
+        <v-col cols="6" class="px-xl-4 px-lg-2 px-md-0">
+          <v-skeleton-loader type="card-heading, list-item@6"></v-skeleton-loader>
+        </v-col>
+        <v-col cols="12" class="pb-3 px-xl-4 px-lg-2 px-md-0">
+          <v-skeleton-loader type="card-heading, list-item@14"></v-skeleton-loader>
+        </v-col>
+      </v-row>
+      <v-row>
+        <v-col mt-0 class="pa-0 px-xl-4 px-lg-2 px-md-0">
+          <v-skeleton-loader type="card-heading, list-item@14"></v-skeleton-loader>
         </v-col>
       </v-row>
     </span>
@@ -65,7 +61,7 @@
           </div>
         </v-col>
         <!-- Activity Feed -->
-        <v-col cols="12" lg="6" class="px-xl-4 px-lg-2 px-md-0 pa-0">
+        <v-col cols="12" lg="6" class="pa-0 px-xl-4 px-lg-2 px-md-0">
           <activity-feed id="home-activity-feed" :events="events" :loading="loadingEvents"></activity-feed>
         </v-col>
       </v-row>
