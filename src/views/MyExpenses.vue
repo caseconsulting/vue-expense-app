@@ -707,6 +707,7 @@ async function loadMyExpensesData() {
   await Promise.all([
     !this.$store.getters.expenseTypes ? this.updateStoreExpenseTypes() : '',
     !this.$store.getters.employees ? this.updateStoreEmployees() : '',
+    this.updateStoreBudgets(),
     this.refreshExpenses()
   ]);
 

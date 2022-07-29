@@ -1532,7 +1532,6 @@ async function created() {
     this.employeeRole === 'user' ||
     this.employeeRole === 'intern' ||
     this.employeeRole === 'manager';
-
   if (this.asUser) {
     // creating or updating an expense as a user
     this.$set(this.editedExpense, 'employeeName', `${this.userInfo.firstName} ${this.userInfo.lastName}`);
@@ -1645,6 +1644,8 @@ function watchExpenseID() {
     this.emit('editing-expense'); //notify parent that expense is being edited
     this.costFormatted = Number(this.editedExpense.cost).toLocaleString();
     this.submittedReceipt = this.editedExpense.receipt;
+  } else {
+    this.clearForm();
   }
 
   this.selectedExpenseType = _.find(this.expenseTypes, (expenseType) => {
