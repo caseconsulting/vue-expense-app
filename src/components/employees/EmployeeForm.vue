@@ -970,9 +970,15 @@ function setFormData(tab, data) {
   } else if (tab == 'personal') {
     // filter github and twitter links
     if (data.github && data.github.indexOf('/') != -1) {
+      // remove trailing slash
+      if (data.github.slice(-1) === '/') data.github = data.github.slice(0, -1);
+      // extract username
       data.github = data.github.substring(data.github.lastIndexOf('/') + 1, data.github.length);
     }
     if (data.twitter && data.twitter.indexOf('/') != -1) {
+      // remove trailing slash
+      if (data.twitter.slice(-1) === '/') data.twitter = data.twitter.slice(0, -1);
+      // extract username
       data.twitter = data.twitter.substring(data.twitter.lastIndexOf('/') + 1, data.twitter.length);
     }
 
