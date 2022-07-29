@@ -60,7 +60,7 @@
     <v-row v-else class="pt-0">
       <!-- QuickBooks Time and Budgets-->
       <v-col v-if="displayQuickBooksTimeAndBalances" cols="12" md="5" lg="4" class="pt-0">
-        <quick-books-time-data :employee="this.model" class="mb-6"></quick-books-time-data>
+        <quick-books-time-data :employee="this.model" class="mb-4"></quick-books-time-data>
         <available-budgets
           class="mb-4"
           v-if="this.model.id"
@@ -71,9 +71,10 @@
           :employeeDataLoading="loading"
         ></available-budgets>
         <anniversary-card
-          v-if="!minimizeWindow && !loading"
+          v-if="!loading"
           :employee="this.model"
           :hasBudgets="this.hasAccessToBudgets"
+          location="profile"
         ></anniversary-card>
       </v-col>
 
@@ -119,15 +120,9 @@
         </v-card>
         <!-- Edit Info (Form) -->
         <employee-form :employee="this.model" :currentTab="this.currentTab" v-if="editing"></employee-form>
-        <anniversary-card
-          v-if="minimizeWindow"
-          :employee="this.model"
-          :hasBudgets="this.hasAccessToBudgets"
-        ></anniversary-card>
-        <div class="mt-md-4">
+        <div class="mt-4">
           <budget-chart
             v-if="(userIsAdmin() || userIsEmployee()) && hasAccessToBudgets"
-            class="pt-4"
             :employee="this.model"
             :accessibleBudgets="accessibleBudgets"
             :expenses="expenses"
@@ -136,6 +131,9 @@
           ></budget-chart>
         </div>
       </v-col>
+    </v-row>
+    <v-row>
+      <v-col cols="12"> </v-col>
     </v-row>
     <resume-parser
       v-if="!loading && !editing"

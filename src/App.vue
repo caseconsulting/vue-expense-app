@@ -216,7 +216,7 @@ function badumbadumdodooodoo(index) {
  * @returns String - The padding value
  */
 function getMainPadding() {
-  if (!(this.isMobile || this.isSmallScreen)) {
+  if (!this.isMobile) {
     return '64px 0px 0px 56px';
   } else {
     return '56px 0px 0px 0px';

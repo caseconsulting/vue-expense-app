@@ -1,5 +1,5 @@
 <template>
-  <v-container class="my-3">
+  <v-container fluid class="my-3">
     <span v-if="loading">
       <v-row>
         <v-col cols="12" md="6" class="py-4 px-7">
