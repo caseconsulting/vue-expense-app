@@ -2,16 +2,18 @@
   <div v-if="childrenVisible" class="infoTab" id="personalTab">
     <!-- GitHub -->
     <p v-if="!isEmpty(this.model.github)">
-      <b>Github: </b><a :href="'https://github.com/' + this.model.github" target="_blank"> {{ this.model.github }}</a>
+      <v-icon class="mr-1">mdi-github</v-icon>
+      <a :href="'https://github.com/' + this.model.github" target="_blank">{{ this.model.github }}</a>
     </p>
     <!-- Twitter -->
     <p v-if="!isEmpty(this.model.twitter)">
-      <b>Twitter: </b
-      ><a :href="'https://twitter.com/' + this.model.twitter" target="_blank"> {{ this.model.twitter }}</a>
+      <v-icon class="mr-1">mdi-twitter</v-icon>
+      <a :href="'https://twitter.com/' + this.model.twitter" target="_blank">{{ this.model.twitter }}</a>
     </p>
     <!-- LinkedIn -->
     <p v-if="!isEmpty(this.model.linkedIn)">
-      <b>LinkedIn: </b><a :href="this.model.linkedIn" target="_blank"> {{ this.model.linkedIn }}</a>
+      <v-icon class="mr-1">mdi-linkedin</v-icon>
+      <a :href="this.model.linkedIn" target="_blank">{{ this.model.linkedIn }}</a>
     </p>
     <!-- Phone Number -->
     <p v-if="!isEmpty(getPhoneNumbers()) && (userIsAdmin() || userIsEmployee() || userIsManager())">

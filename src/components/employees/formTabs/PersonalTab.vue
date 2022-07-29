@@ -1,20 +1,28 @@
 <template>
   <div>
     <!-- Github -->
-    <v-text-field v-model="editedPersonalInfo.github" ref="github" label="Github" data-vv-name="Github"></v-text-field>
+    <v-text-field
+      prepend-icon="mdi-github"
+      v-model="editedPersonalInfo.github"
+      ref="github"
+      label="Github (username)"
+      data-vv-name="Github"
+    ></v-text-field>
 
     <!-- Twitter -->
     <v-text-field
+      prepend-icon="mdi-twitter"
       v-model="editedPersonalInfo.twitter"
       ref="twitter"
-      label="Twitter"
+      label="Twitter (username)"
       data-vv-name="Twitter"
     ></v-text-field>
 
     <!-- LinkedIn -->
     <v-text-field
+      prepend-icon="mdi-linkedin"
       v-model="editedPersonalInfo.linkedIn"
-      label="LinkedIn"
+      label="LinkedIn (profile url)"
       :rules="getURLRules()"
       ref="linkedin"
       data-vv-name="LinkedIn"
