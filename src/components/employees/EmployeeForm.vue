@@ -969,10 +969,10 @@ function setFormData(tab, data) {
     this.$set(this.model, 'eeoJobCategory', data.eeoJobCategory);
   } else if (tab == 'personal') {
     // filter github and twitter links
-    if (data.github.indexOf('/') != -1) {
+    if (data.github && data.github.indexOf('/') != -1) {
       data.github = data.github.substring(data.github.lastIndexOf('/') + 1, data.github.length);
     }
-    if (data.twitter.indexOf('/') != -1) {
+    if (data.twitter && data.twitter.indexOf('/') != -1) {
       data.twitter = data.twitter.substring(data.twitter.lastIndexOf('/') + 1, data.twitter.length);
     }
 
