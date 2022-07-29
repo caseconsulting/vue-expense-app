@@ -6,6 +6,7 @@
 
 <script>
 import BarChart from '../baseCharts/BarChart.vue';
+import _ from 'lodash';
 import { storeIsPopulated } from '@/utils/utils';
 
 // |--------------------------------------------------|
@@ -63,7 +64,6 @@ function getCurrentProjects(employee) {
  * Extracts and tallies up each employees primes, and sets the chart formatting and options data.
  */
 function fillPrimeData() {
-  let ourFunctions = [];
   //Get data
   this.employees = this.$store.getters.employees;
   //Put into dictionary where key is prime and value is quantity
@@ -96,13 +96,6 @@ function fillPrimeData() {
   let values = [];
 
   for (let i = 0; i < primePairs.length; i++) {
-    ourFunctions.push(() => {
-      this.$router.push({
-        path: '/reports',
-        name: 'reports',
-        params: { requestedDataType: 'Contracts', requestedFilter: primePairs[i][0] }
-      });
-    });
     labels.push(primePairs[i][0]);
     values.push(primePairs[i][1]);
   }
@@ -163,6 +156,16 @@ function fillPrimeData() {
         }
       }
     },
+    onClick: (x, y) => {
+      if (_.first(y)) {
+        let index = _.first(y).index;
+        this.$router.push({
+          path: '/reports',
+          name: 'reports',
+          params: { requestedDataType: 'Contracts', requestedFilter: this.chartData.labels[index] }
+        });
+      }
+    },
     plugins: {
       legend: {
         display: false
@@ -182,8 +185,7 @@ function fillPrimeData() {
         }
       }
     },
-    maintainAspectRatio: false,
-    myFunctions: ourFunctions
+    maintainAspectRatio: false
   };
   this.dataReceived = true;
 } // fillCertData

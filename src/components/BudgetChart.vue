@@ -43,7 +43,7 @@ import { isBetweenDates, isFullTime, getCurrentBudgetYear } from '@/utils/utils'
  */
 async function mounted() {
   await this.refreshBudget();
-  this.drawGraph();
+  await this.drawGraph();
 } // mounted
 
 // |--------------------------------------------------|
@@ -135,7 +135,6 @@ function budgets() {
  * @return Object - budget chart data
  */
 function drawGraph() {
-  let ourFunctions = [];
   let budgets = this.getFinalBudgetsData(this.budgets);
   let bars = [
     {
@@ -175,30 +174,6 @@ function drawGraph() {
     datasets: bars
   };
 
-  //create onClick functions
-  _.forEach(budgets.names, (budget) => {
-    ourFunctions.push(() => {
-      let routeData = {
-        defaultEmployee: employee,
-        defaultFilterReimbursed: 'both',
-        defaultSearch: budget
-      };
-      // redirect to expenses page
-      router.push({
-        name: 'expenses',
-        params: routeData
-      });
-    });
-  });
-  ourFunctions.push(() => {
-    router.push({
-      name: 'expenses',
-      params: {
-        defaultEmployee: employee
-      }
-    });
-  });
-
   let [year] = this.fiscalDateView.split('-');
   const employee = this.employee;
   const router = this.$router;
@@ -221,6 +196,29 @@ function drawGraph() {
         ticks: {
           autoSkip: false
         }
+      }
+    },
+    onClick: (x, y) => {
+      if (_.first(y)) {
+        let index = _.first(y).index;
+        let routeData = {
+          defaultEmployee: employee,
+          defaultFilterReimbursed: 'both',
+          defaultSearch: this.chartData.labels[index]
+        };
+        // redirect to expenses page
+        router.push({
+          name: 'expenses',
+          params: routeData
+        });
+      } else {
+        router.push({
+          name: 'expenses',
+          params: {
+            defaultEmployee: employee,
+            defaultFilterReimbursed: 'both'
+          }
+        });
       }
     },
     plugins: {
@@ -255,7 +253,6 @@ function drawGraph() {
         }
       }
     },
-    myFunctions: ourFunctions,
     maintainAspectRatio: false
   };
   this.chartData = data;

@@ -6,6 +6,7 @@
 
 <script>
 import BarChart from '../baseCharts/BarChart.vue';
+import _ from 'lodash';
 import { storeIsPopulated } from '@/utils/utils';
 
 // |--------------------------------------------------|
@@ -33,8 +34,6 @@ async function mounted() {
  */
 function fillData() {
   let roles = {};
-  let ourFunctions = [];
-
   this.employees = this.$store.getters.employees;
   this.employees.forEach((emp) => {
     if (emp.jobRole && emp.workStatus != 0) {
@@ -55,13 +54,6 @@ function fillData() {
   //10 is just a limit to prevent an extremely long and crammed graph
   for (let i = 0; i < 10; i++) {
     if (sortedRoles.length > i) {
-      ourFunctions.push(() => {
-        this.$router.push({
-          path: '/reports',
-          name: 'reports',
-          params: { requestedDataType: 'Job Roles', requestedFilter: sortedRoles[i][0] }
-        });
-      });
       jobTitles.push(sortedRoles[i][0]);
       jobQuantities.push(sortedRoles[i][1]);
     }
@@ -115,6 +107,16 @@ function fillData() {
         }
       }
     },
+    onClick: (x, y) => {
+      if (_.first(y)) {
+        let index = _.first(y).index;
+        this.$router.push({
+          path: '/reports',
+          name: 'reports',
+          params: { requestedDataType: 'Job Roles', requestedFilter: this.chartData.labels[index] }
+        });
+      }
+    },
     plugins: {
       legend: {
         display: false
@@ -134,8 +136,7 @@ function fillData() {
         }
       }
     },
-    maintainAspectRatio: false,
-    myFunctions: ourFunctions
+    maintainAspectRatio: false
   };
   this.dataReceived = true;
 } // fillData

@@ -256,7 +256,6 @@ function getDegreeName(value) {
  */
 function fillData() {
   let quantities = [];
-  let ourFunctions = [];
   let labels = Object.keys(this.degrees);
   _.forEach(labels, (degree) => {
     let counts = 0;
@@ -265,14 +264,6 @@ function fillData() {
       this.degreeCount += count;
     });
     quantities.push(counts);
-    ourFunctions.push(() => {
-      // emits to MajorsChart.vue when pie slice is clicked
-      this.majorsEmit(degree);
-      // emits to MinorsChart.vue when pie slice is clicked
-      this.minorsEmit(degree);
-      // emits to ConcentrationsChart.vue when pie slice is clicked
-      this.concentrationsEmit(degree);
-    });
   });
 
   let colors = [
@@ -293,7 +284,17 @@ function fillData() {
   };
 
   this.options = {
-    myFunctions: ourFunctions,
+    onClick: (x, y) => {
+      if (_.first(y)) {
+        let index = _.first(y).index;
+        // emits to MajorsChart.vue when pie slice is clicked
+        this.majorsEmit(this.chartData.labels[index]);
+        // emits to MinorsChart.vue when pie slice is clicked
+        this.minorsEmit(this.chartData.labels[index]);
+        // emits to ConcentrationsChart.vue when pie slice is clicked
+        this.concentrationsEmit(this.chartData.labels[index]);
+      }
+    },
     plugins: {
       title: {
         display: true,
