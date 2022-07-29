@@ -43,7 +43,7 @@
       <v-col cols="12" lg="8">
         <div v-if="loading">
           <v-row>
-            <v-col v-for="index in 4" :key="index" cols="6">
+            <v-col v-for="index in 4" :key="index" cols="12" sm="6" lg="6">
               <v-skeleton-loader type="card-heading, list-item@6"></v-skeleton-loader>
             </v-col>
           </v-row>
