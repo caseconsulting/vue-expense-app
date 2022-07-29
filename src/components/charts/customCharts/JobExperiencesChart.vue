@@ -19,11 +19,11 @@ moment.tz.setDefault('America/New_York');
 /**
  * mounted lifecycle hook
  */
-function mounted() {
+async function mounted() {
   if (this.storeIsPopulated) {
     // eslint-disable-next-line no-undef
-    this.jobExperienceData();
-    this.drawJobExpHistGraph();
+    await this.jobExperienceData();
+    await this.drawJobExpHistGraph();
   }
 } // mounted
 

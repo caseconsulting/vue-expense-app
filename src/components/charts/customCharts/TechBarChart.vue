@@ -266,13 +266,13 @@ function parseEmployeeData() {
 /**
  * mounted lifecycle hook - get items, organize them and fill data
  */
-function mounted() {
+async function mounted() {
   if (this.storeIsPopulated) {
-    this.parseEmployeeData();
+    await this.parseEmployeeData();
     // Sort tech by number of occurances
-    this.sortTech(this.technologies);
+    await this.sortTech(this.technologies);
 
-    this.fillData();
+    await this.fillData();
   }
 } // mounted
 

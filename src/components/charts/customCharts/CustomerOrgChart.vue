@@ -27,8 +27,8 @@ import { storeIsPopulated } from '@/utils/utils.js';
 /**
  * created lifecycle hook
  */
-function created() {
-  if (this.storeIsPopulated) this.fillData();
+async function created() {
+  if (this.storeIsPopulated) await this.fillData();
 } // created
 
 // |--------------------------------------------------|

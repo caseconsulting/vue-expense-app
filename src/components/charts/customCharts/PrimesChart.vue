@@ -17,8 +17,8 @@ import { storeIsPopulated } from '@/utils/utils';
 /**
  * mounted lifecycle hook
  */
-function mounted() {
-  if (this.storeIsPopulated) this.fillPrimeData();
+async function mounted() {
+  if (this.storeIsPopulated) await this.fillPrimeData();
 } // mounted
 
 // |--------------------------------------------------|

@@ -17,12 +17,12 @@ import _ from 'lodash';
 /**
  * mounted lifecycle hook
  */
-function mounted() {
+async function mounted() {
   // emit comes from HighestDegreeChart.vue when a pie slice is clicked
-  window.EventBus.$on('concentrations-update', (receiveConcentrations) => {
+  await window.EventBus.$on('concentrations-update', async (receiveConcentrations) => {
     this.degree = receiveConcentrations.degree;
     this.concentrations = receiveConcentrations.concentrations;
-    this.fillData(this.concentrations);
+    await this.fillData(this.concentrations);
   });
 } // mounted
 

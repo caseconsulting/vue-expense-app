@@ -16,12 +16,12 @@ import PieChart from '../baseCharts/PieChart.vue';
 /**
  * mounted lifecycle hook
  */
-function mounted() {
+async function mounted() {
   // emit comes from HighestDegreeChart when a pie slice is clicked
-  window.EventBus.$on('majors-update', (receiveMajors) => {
+  await window.EventBus.$on('majors-update', async (receiveMajors) => {
     let majors = receiveMajors.majors;
     this.degree = receiveMajors.degree;
-    this.fillData(majors);
+    await this.fillData(majors);
   });
 } // mounted
 

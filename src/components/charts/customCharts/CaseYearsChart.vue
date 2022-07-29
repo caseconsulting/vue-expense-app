@@ -20,10 +20,10 @@ moment.tz.setDefault('America/New_York');
 /**
  * mounted lifecycle hook
  */
-function mounted() {
+async function mounted() {
   if (this.storeIsPopulated) {
-    this.caseYearsData();
-    this.drawCaseYearsHistGraph();
+    await this.caseYearsData();
+    await this.drawCaseYearsHistGraph();
   }
 } // mounted
 
