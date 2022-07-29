@@ -379,8 +379,8 @@ export default {
       { name: 'ADP', link: 'https://my.adp.com/' },
       { name: 'Life Insurance', link: 'https://www.reliancestandard.com/home/' },
       {
-        name: 'Redmine',
-        link: 'https://redmine.consultwithcase.com'
+        name: 'Jira',
+        link: 'https://consultwithcase.atlassian.net/jira/your-work'
       }
     ],
     mediaLinks: [
