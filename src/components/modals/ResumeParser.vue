@@ -103,10 +103,34 @@
               <!-- Phone Number -->
               <v-row v-if="showPhoneNumber" class="text-center">
                 <v-col xl="5" lg="5" md="5" sm="6" cols="6">
-                  <v-text-field v-model="phoneNumber" disabled label="Old Phone Number"> </v-text-field>
+                  <v-row>
+                    <v-col sm="6" cols="12">
+                      <v-autocomplete
+                        label="Actions"
+                        v-model="phoneNumAction"
+                        :items="getPhoneNumActionDropdowns()"
+                        @change="toggleOldNumsDropdown()"
+                      ></v-autocomplete>
+                    </v-col>
+                    <v-col sm="6" cols="12">
+                      <v-autocomplete
+                        :disabled="disableOldPhoneNums"
+                        label="Number"
+                        v-model="oldPhoneNumToReplace"
+                        :items="getOldPhoneNums()"
+                      ></v-autocomplete>
+                    </v-col>
+                  </v-row>
                 </v-col>
                 <v-col xl="5" lg="5" md="5" sm="6" cols="6">
-                  <v-text-field v-model="newPhoneNumber" readonly label="New Phone Number"> </v-text-field>
+                  <v-row>
+                    <v-col sm="6" cols="12">
+                      <v-text-field v-model="newPhoneNumber" readonly label="New Phone Number"> </v-text-field>
+                    </v-col>
+                    <v-col sm="6" cols="12">
+                      <v-text-field v-model="newPhoneExtension" readonly label="New Phone Extension"> </v-text-field>
+                    </v-col>
+                  </v-row>
                 </v-col>
                 <v-col xl="2" lg="2" md="2" sm="12" cols="12" class="pt-md-6 pt-0 text-center">
                   <v-tooltip top>
@@ -534,6 +558,15 @@ function newPhoneNumber() {
 } // newPhoneNumber
 
 /**
+ * Shows the newPhoneExtension if it exists
+ *
+ * @return string - the new phone extension if it exists
+ */
+function newPhoneExtension() {
+  return this.newPersonal.phoneExtension ? this.newPersonal.phoneExtension : null;
+} // newPhoneExtension
+
+/**
  * Determines if the tech should be show. Goes through all tech
  * and makes sure all of them have been canceled
  *
@@ -558,6 +591,44 @@ function showEducation() {
 // |                     METHODS                      |
 // |                                                  |
 // |--------------------------------------------------|
+
+/**
+ * Shows the right list of numbers based on the phone number action selection.
+ * @return a list of phone numbers if replacing
+ */
+function getOldPhoneNums() {
+  let nums = [];
+  switch (this.phoneNumAction) {
+    case 'Replace from Public':
+      _.forEach(this.employee.publicPhoneNumbers, (number) => {
+        nums.push(number.number);
+      });
+      break;
+    case 'Replace from Private':
+      _.forEach(this.employee.privatePhoneNumbers, (number) => {
+        nums.push(number.number);
+      });
+      break;
+    default:
+      break;
+  }
+  return nums;
+} //getOldPhoneNums
+
+/**
+ * Populates phone number dropdows based on if the user has public/private nums.
+ * @return a list of action options
+ */
+function getPhoneNumActionDropdowns() {
+  let options = ['Add to Private', 'Add to Public'];
+  if (!_.isEmpty(this.employee.publicPhoneNumbers)) {
+    options.unshift('Replace from Public');
+  }
+  if (!_.isEmpty(this.employee.privatePhoneNumbers)) {
+    options.unshift('Replace from Private');
+  }
+  return options;
+} // getPhoneNumActionDropdowns
 
 /**
  * When the checkbox is not selected on the resume modal, it uploads the resume and closes the window upon
@@ -859,7 +930,42 @@ function submitInfo(field, value, newValue) {
     this.editedEmployeeForm.currentState = this.newPersonal.currentState;
     this.editedEmployeeForm.currentZIP = this.newPersonal.currentZIP;
   } else if (field === 'phoneNumber') {
-    // Create fields in editedEmployeeForm if they don't exist
+    switch (this.phoneNumAction) {
+      case 'Add to Private':
+        this.editedEmployeeForm.privatePhoneNumbers.push({
+          type: 'Cell',
+          number: this.newPersonal.phoneNumber,
+          private: true,
+          valid: true
+        });
+        break;
+      case 'Add to Public':
+        this.editedEmployeeForm.publicPhoneNumbers.push({
+          type: 'Cell',
+          number: this.newPersonal.phoneNumber,
+          private: false,
+          valid: true
+        });
+        break;
+      case 'Replace from Public':
+        // find num object that matches num to replace
+        this.editedEmployeeForm.publicPhoneNumbers.forEach((num) => {
+          if (num.number === this.oldPhoneNumToReplace) {
+            num.number = this.newPhoneNumber;
+          }
+        });
+        break;
+      case 'Replace from Private':
+        // find num object that matches num to replace
+        this.editedEmployeeForm.privatePhoneNumbers.forEach((num) => {
+          if (num.number === this.oldPhoneNumToReplace) {
+            num.number = this.newPhoneNumber;
+          }
+        });
+        break;
+      default:
+        break;
+    }
     if (!this.editedEmployeeForm.phoneNumber) {
       this.$set(this.editedEmployeeForm, 'phoneNumber', '');
     }
@@ -913,6 +1019,17 @@ function submitForm() {
     this.confirmingValid = true;
   }
 } // submitForm
+
+/**
+ * Determine whether to enable the dropdown for replacing numbers.
+ */
+function toggleOldNumsDropdown() {
+  if (this.phoneNumAction === 'Replace from Private' || this.phoneNumAction === 'Replace from Public') {
+    this.disableOldPhoneNums = false;
+  } else {
+    this.disableOldPhoneNums = true;
+  }
+} // toggleOldNumsDropdown
 
 /**
  * Clears the form
@@ -995,6 +1112,7 @@ export default {
     changesMade,
     isSmallScreen,
     newAddress,
+    newPhoneExtension,
     newPhoneNumber,
     phoneNumber,
     showAddress,
@@ -1042,12 +1160,16 @@ export default {
         (v) => v < 100 || 'Value must be less than 100'
       ], // Used for technology years
       newPersonal: {
+        phoneExtension: null,
         phoneNumber: null,
         currentCity: null,
         currentState: null,
         currentStreet: null,
         currentZIP: null
       },
+      disableOldPhoneNums: true,
+      oldPhoneNumToReplace: '',
+      phoneNumAction: '',
       toggleResumeFormErrorModal: false,
       totalChanges: 0,
       timeoutError: false,
@@ -1119,10 +1241,13 @@ export default {
   },
   methods: {
     clearForm,
+    getOldPhoneNums,
+    getPhoneNumActionDropdowns,
     isEmpty,
     submitForm,
     submitInfo,
     submit,
+    toggleOldNumsDropdown,
     onlyUploadResume
   },
   props: ['toggleResumeParser', 'employee'],
