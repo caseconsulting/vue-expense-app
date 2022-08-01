@@ -154,12 +154,13 @@ function displayError(err) {
  * Refresh and sets employee information.
  */
 async function refreshEmployee() {
+  this.loading = true;
   this.employee = this.$store.getters.user;
   [this.expenses] = await Promise.all([
     api.getAllEmployeeExpenses(this.employee.id),
     !this.$store.getters.budgets ? this.updateStoreBudgets() : '',
     !this.$store.getters.expenseTypes ? this.updateStoreExpenseTypes() : '',
-    this.employee.employeeRole === 'admin' && !this.$store.getters.employees ? this.updateStoreEmployees() : ''
+    !this.$store.getters.employees ? this.updateStoreEmployees() : ''
   ]);
   this.accessibleBudgets = this.$store.getters.budgets;
   this.expenseTypes = this.$store.getters.expenseTypes;
