@@ -312,7 +312,7 @@ async function setMonthlyCharges() {
       this.calcWorkHours();
       this.remainingHours = this.workHours - this.totalHours;
       this.userWorkDays = this.remainingWorkDays;
-      this.estimatedDailyHours = this.remainingHours / this.userWorkDays;
+      this.estimatedDailyHours = this.userWorkDays === 0 ? 0 : this.remainingHours / this.userWorkDays;
     }
     this.loading = false;
   }
