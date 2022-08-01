@@ -22,15 +22,17 @@ async function mounted() {
   window.EventBus.$on('minors-update', async (receiveMinors) => {
     this.degree = receiveMinors.degree;
     this.minors = receiveMinors.minors;
-    await this.fillData(this.minors);
+    await this.fetchData(this.minors);
+    await this.fillData();
   });
 } // mounted
 
 /**
  * created lifecycle hook
  */
-function created() {
-  this.fillData(null);
+async function created() {
+  await this.fetchData(null);
+  await this.fillData();
 } // created
 
 // |--------------------------------------------------|
@@ -47,24 +49,18 @@ function beforeDestroy() {
 } //beforeDestroy
 
 /**
- * Sets the chart formatting and options data.
- *
- * @param minors - The array of minors for a degree
+ * Gets all the minor data.
+ * @param majors The array of minors for a degree
  */
-function fillData(minors) {
-  let text;
-  let colors;
-  let enabled;
-  let labels = [];
-  let quantities = [];
+function fetchData(minors) {
   if (minors) {
     if (_.isEmpty(minors)) {
-      text = `There are no minors for a degree of ${this.degree}`;
-      quantities.push(1);
-      enabled = false;
-      colors = ['grey'];
+      this.text = `There are no minors for a degree of ${this.degree}`;
+      this.quantities.push(1);
+      this.enabled = false;
+      this.colors = ['grey'];
     } else {
-      enabled = true;
+      this.enabled = true;
       const sortable = Object.entries(minors)
         .sort(([, a], [, b]) => b - a)
         .reduce((r, [k, v]) => ({ ...r, [k]: v }), {});
@@ -72,12 +68,12 @@ function fillData(minors) {
       for (let i = 0; i < 10; i++) {
         let minor = Object.keys(sortable)[i];
         if (minor) {
-          quantities.push(sortable[minor]);
-          labels.push(minor);
+          this.quantities.push(sortable[minor]);
+          this.labels.push(minor);
         }
       }
-      text = `Top ${this.degree} Degree Minors`;
-      colors = [
+      this.text = `Top ${this.degree} Degree Minors`;
+      this.colors = [
         'rgba(54, 162, 235, 1)',
         'rgba(255, 206, 86, 1)',
         'rgba(75, 192, 192, 1)',
@@ -92,20 +88,26 @@ function fillData(minors) {
   } else {
     //these presets are when a degree has not been selected OR if there are no minors
     if (!_.isEmpty(minors)) {
-      text = 'There are no minors for this type of degree';
+      this.text = 'There are no minors for this type of degree';
     } else {
-      text = 'Click on a Degree To See Minors';
+      this.text = 'Click on a Degree To See Minors';
     }
-    quantities.push(1);
-    enabled = false;
-    colors = ['grey'];
+    this.quantities.push(1);
+    this.enabled = false;
+    this.colors = ['grey'];
   }
+} //fetchData
+
+/**
+ * Sets the chart formatting and options data.
+ */
+function fillData() {
   this.chartData = {
-    labels: labels,
+    labels: this.labels,
     datasets: [
       {
-        data: quantities,
-        backgroundColor: colors
+        data: this.quantities,
+        backgroundColor: this.colors
       }
     ]
   };
@@ -113,13 +115,13 @@ function fillData(minors) {
     plugins: {
       title: {
         display: true,
-        text: text,
+        text: this.text,
         font: {
           size: 15
         }
       },
       tooltip: {
-        enabled: enabled
+        enabled: this.enabled
       }
     },
     maintainAspectRatio: false
@@ -143,12 +145,15 @@ export default {
       minors: null,
       dataReceived: false,
       degree: null,
-      chartKey: 0
+      chartKey: 0,
+      text: '',
+      colors: [],
+      enabled: false,
+      labels: [],
+      quantities: []
     };
   },
-  methods: {
-    fillData
-  },
+  methods: { fetchData, fillData },
   mounted,
   created,
   beforeDestroy

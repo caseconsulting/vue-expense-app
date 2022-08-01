@@ -21,15 +21,17 @@ async function mounted() {
   await window.EventBus.$on('majors-update', async (receiveMajors) => {
     let majors = receiveMajors.majors;
     this.degree = receiveMajors.degree;
-    await this.fillData(majors);
+    await this.fetchData(majors);
+    await this.fillData();
   });
 } // mounted
 
 /**
  * created lifecycle hook
  */
-function created() {
-  this.fillData(null);
+async function created() {
+  await this.fetchData(null);
+  await this.fillData();
 } // created
 
 // |--------------------------------------------------|
@@ -46,18 +48,12 @@ function beforeDestroy() {
 } //beforeDestroy
 
 /**
- * Sets the chart formatting and options data.
- *
- * @param majors - The array of majors for a degree
+ * Gets all the major data.
+ * @param majors The array of majors for a degree
  */
-function fillData(majors) {
-  let text;
-  let colors;
-  let enabled;
-  let labels = [];
-  let quantities = [];
+function fetchData(majors) {
   if (majors) {
-    enabled = true;
+    this.enabled = true;
     const sortable = Object.entries(majors)
       .sort(([, a], [, b]) => b - a)
       .reduce((r, [k, v]) => ({ ...r, [k]: v }), {});
@@ -65,12 +61,12 @@ function fillData(majors) {
     for (let i = 0; i < 10; i++) {
       let major = Object.keys(sortable)[i];
       if (major) {
-        quantities.push(sortable[major]);
-        labels.push(major);
+        this.quantities.push(sortable[major]);
+        this.labels.push(major);
       }
     }
-    text = `Top ${this.degree} Degree Majors`;
-    colors = [
+    this.text = `Top ${this.degree} Degree Majors`;
+    this.colors = [
       'rgba(54, 162, 235, 1)',
       'rgba(255, 206, 86, 1)',
       'rgba(75, 192, 192, 1)',
@@ -83,17 +79,23 @@ function fillData(majors) {
     ];
   } else {
     //these presets are when a degree has not been selected
-    quantities.push(1);
-    enabled = false;
-    text = `Click on a Degree To See the Top Majors`;
-    colors = ['grey'];
+    this.quantities.push(1);
+    this.enabled = false;
+    this.text = `Click on a Degree To See the Top Majors`;
+    this.colors = ['grey'];
   }
+} //fetchData
+
+/**
+ * Sets the chart formatting and options data.
+ */
+function fillData() {
   this.chartData = {
-    labels: labels,
+    labels: this.labels,
     datasets: [
       {
-        data: quantities,
-        backgroundColor: colors
+        data: this.quantities,
+        backgroundColor: this.colors
       }
     ]
   };
@@ -101,13 +103,13 @@ function fillData(majors) {
     plugins: {
       title: {
         display: true,
-        text: text,
+        text: this.text,
         font: {
           size: 15
         }
       },
       tooltip: {
-        enabled: enabled
+        enabled: this.enabled
       }
     },
     maintainAspectRatio: false
@@ -131,10 +133,16 @@ export default {
       majors: null,
       dataReceived: false,
       degree: null,
-      chartKey: 0
+      chartKey: 0,
+      text: '',
+      colors: [],
+      enabled: false,
+      labels: [],
+      quantities: []
     };
   },
   methods: {
+    fetchData,
     fillData
   },
   mounted,

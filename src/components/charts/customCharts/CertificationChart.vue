@@ -19,7 +19,10 @@ import { storeIsPopulated } from '@/utils/utils';
  * mounted lifecycle hook
  */
 async function mounted() {
-  if (this.storeIsPopulated) await this.fillCertData();
+  if (this.storeIsPopulated) {
+    await this.fetchCertData();
+    await this.fillCertData();
+  }
 } // mounted
 
 // |--------------------------------------------------|
@@ -29,9 +32,9 @@ async function mounted() {
 // |--------------------------------------------------|
 
 /**
- * Extract each employees certifications and tally up each one. Also formats and sets data options for the chart.
+ * Extract each employees certifications and tally up each one.
  */
-function fillCertData() {
+async function fetchCertData() {
   //Put into dictionary where key is kinda tech and value is quantity
   let certifications = {};
   this.employees = this.$store.getters.employees;
@@ -58,19 +61,22 @@ function fillCertData() {
   // take the top 5 obtained certifications
   certificationPairs = certificationPairs.slice(0, 5);
 
-  let labels = [];
-  let values = [];
   // if a certification text becomes too long for the chart, break the cert up into two lines
   // could be problematic for really long certifications
   for (let i = 0; i < certificationPairs.length; i++) {
     if (certificationPairs[i][0].length > 30) {
-      labels.push(this.breakSentence(certificationPairs[i][0]));
+      this.labels.push(this.breakSentence(certificationPairs[i][0]));
     } else {
-      labels.push(certificationPairs[i][0]);
+      this.labels.push(certificationPairs[i][0]);
     }
-    values.push(certificationPairs[i][1]);
+    this.values.push(certificationPairs[i][1]);
   }
+} // fetchCertData
 
+/**
+ * Extract each employees certifications and tally up each one. Also formats and sets data options for the chart.
+ */
+function fillCertData() {
   //We cycle through these colors to get the bar colors
   let colors = [
     'rgba(254, 147, 140, 1)',
@@ -84,17 +90,17 @@ function fillCertData() {
   let borderColors = [];
 
   //Set the background and border colors
-  for (let i = 0; i < labels.length; i++) {
+  for (let i = 0; i < this.labels.length; i++) {
     backgroundColors[i] = colors[i];
     borderColors[i] = colors[i];
   }
   //Set the chart data
   this.chartData = {
-    labels: labels,
+    labels: this.labels,
     datasets: [
       {
         label: null,
-        data: values,
+        data: this.values,
         backgroundColor: backgroundColors,
         borderColor: borderColors,
         borderWidth: 1
@@ -133,7 +139,7 @@ function fillCertData() {
       },
       title: {
         display: true,
-        text: 'Top ' + values.length + ' Certifications Used by Employees',
+        text: 'Top ' + this.values.length + ' Certifications Used by Employees',
         font: {
           size: 15
         }
@@ -141,9 +147,9 @@ function fillCertData() {
       tooltip: {
         callbacks: {
           title: (tooltipItem) => {
-            if (Array.isArray(labels[tooltipItem[0].dataIndex])) {
+            if (Array.isArray(this.labels[tooltipItem[0].dataIndex])) {
               let label = '';
-              labels[tooltipItem[0].dataIndex].forEach((item) => (label += item + ' '));
+              this.labels[tooltipItem[0].dataIndex].forEach((item) => (label += item + ' '));
               return label.trim();
             } else {
               return tooltipItem[0].label;
@@ -192,16 +198,22 @@ export default {
     return {
       options: null,
       chartData: null,
-      dataReceived: false
+      dataReceived: false,
+      values: [],
+      labels: []
     };
   },
   methods: {
+    fetchCertData,
     fillCertData,
     breakSentence
   },
   watch: {
     storeIsPopulated: function () {
-      if (this.storeIsPopulated) this.fillCertData();
+      if (this.storeIsPopulated) {
+        this.fetchCertData();
+        this.fillCertData();
+      }
     }
   }
 };

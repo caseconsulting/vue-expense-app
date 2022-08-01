@@ -22,15 +22,17 @@ async function mounted() {
   await window.EventBus.$on('concentrations-update', async (receiveConcentrations) => {
     this.degree = receiveConcentrations.degree;
     this.concentrations = receiveConcentrations.concentrations;
-    await this.fillData(this.concentrations);
+    await this.fetchData(this.concentrations);
+    await this.fillData();
   });
 } // mounted
 
 /**
  * created lifecycle hook
  */
-function created() {
-  this.fillData(null);
+async function created() {
+  await this.fetchData(null);
+  await this.fillData();
 } // created
 
 // |--------------------------------------------------|
@@ -47,24 +49,19 @@ function beforeDestroy() {
 } //beforeDestroy
 
 /**
- * Sets up the formatting and data options for the chart.
+ * Gets all the major data.
  * @param concentations - An array of the highest degree concentrations
  */
-function fillData(concentrations) {
-  let text;
-  let colors;
-  let enabled;
-  let labels = [];
-  let quantities = [];
+function fetchData(concentrations) {
   if (concentrations) {
     if (_.isEmpty(concentrations)) {
-      text = `There are no concentrations for a degree of ${this.degree}`;
-      quantities.push(1);
-      enabled = false;
-      colors = ['grey'];
+      this.text = `There are no concentrations for a degree of ${this.degree}`;
+      this.quantities.push(1);
+      this.enabled = false;
+      this.colors = ['grey'];
     } else {
-      text = `${this.degree} Degree Concentrations`;
-      enabled = true;
+      this.text = `${this.degree} Degree Concentrations`;
+      this.enabled = true;
       const sortable = Object.entries(concentrations)
         .sort(([, a], [, b]) => b - a)
         .reduce((r, [k, v]) => ({ ...r, [k]: v }), {});
@@ -72,12 +69,12 @@ function fillData(concentrations) {
       for (let i = 0; i < 10; i++) {
         let con = Object.keys(sortable)[i];
         if (con) {
-          quantities.push(sortable[con]);
-          labels.push(con);
+          this.quantities.push(sortable[con]);
+          this.labels.push(con);
         }
       }
-      text = `Top ${this.degree} Degree Concentrations`;
-      colors = [
+      this.text = `Top ${this.degree} Degree Concentrations`;
+      this.colors = [
         'rgba(54, 162, 235, 1)',
         'rgba(255, 206, 86, 1)',
         'rgba(75, 192, 192, 1)',
@@ -92,20 +89,26 @@ function fillData(concentrations) {
   } else {
     //these presets are when a degree has not been selected OR if there are no concentrations
     if (!_.isEmpty(concentrations)) {
-      text = 'There are no concentrations for this type of degree';
+      this.text = 'There are no concentrations for this type of degree';
     } else {
-      text = 'Click on a Degree To See Concentrations';
+      this.text = 'Click on a Degree To See Concentrations';
     }
-    quantities.push(1);
-    enabled = false;
-    colors = ['grey'];
+    this.quantities.push(1);
+    this.enabled = false;
+    this.colors = ['grey'];
   }
+} //fetchData
+
+/**
+ * Sets up the formatting and data options for the chart.
+ */
+function fillData() {
   this.chartData = {
-    labels: labels,
+    labels: this.labels,
     datasets: [
       {
-        data: quantities,
-        backgroundColor: colors
+        data: this.quantities,
+        backgroundColor: this.colors
       }
     ]
   };
@@ -113,13 +116,13 @@ function fillData(concentrations) {
     plugins: {
       title: {
         display: true,
-        text: text,
+        text: this.text,
         font: {
           size: 15
         }
       },
       tooltip: {
-        enabled: enabled
+        enabled: this.enabled
       }
     },
     maintainAspectRatio: false
@@ -143,12 +146,15 @@ export default {
       concentrations: null,
       dataReceived: false,
       degree: null,
-      chartKey: 0
+      chartKey: 0,
+      text: '',
+      colors: [],
+      enabled: false,
+      labels: [],
+      quantities: []
     };
   },
-  methods: {
-    fillData
-  },
+  methods: { fetchData, fillData },
   mounted,
   created,
   beforeDestroy

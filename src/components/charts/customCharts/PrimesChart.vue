@@ -19,7 +19,10 @@ import { storeIsPopulated } from '@/utils/utils';
  * mounted lifecycle hook
  */
 async function mounted() {
-  if (this.storeIsPopulated) await this.fillPrimeData();
+  if (this.storeIsPopulated) {
+    await this.fetchData();
+    await this.fillData();
+  }
 } // mounted
 
 // |--------------------------------------------------|
@@ -61,13 +64,11 @@ function getCurrentProjects(employee) {
 } // getCurrentProjects
 
 /**
- * Extracts and tallies up each employees primes, and sets the chart formatting and options data.
+ * Extracts and tallies up each employees primes.
  */
-function fillPrimeData() {
-  //Get data
+function fetchData() {
   this.employees = this.$store.getters.employees;
   //Put into dictionary where key is prime and value is quantity
-  let primes = {};
   this.employees.forEach((employee) => {
     if (employee.workStatus != 0) {
       let currContracts = this.getCurrentProjects(employee);
@@ -76,10 +77,10 @@ function fillPrimeData() {
         let currPrime = contract.prime;
         //This if statement is to consider if different current contracts have the same prime
         if (!currPrimes[currPrime]) {
-          if (!primes[currPrime]) {
-            primes[currPrime] = 1;
+          if (!this.primes[currPrime]) {
+            this.primes[currPrime] = 1;
           } else {
-            primes[currPrime] += 1;
+            this.primes[currPrime] += 1;
           }
         }
       });
@@ -87,19 +88,21 @@ function fillPrimeData() {
   });
 
   //We now sort the entries
-  let primePairs = Object.entries(primes);
+  let primePairs = Object.entries(this.primes);
   primePairs = primePairs.sort((a, b) => {
     return b[1] - a[1];
   });
 
-  let labels = [];
-  let values = [];
-
   for (let i = 0; i < primePairs.length; i++) {
-    labels.push(primePairs[i][0]);
-    values.push(primePairs[i][1]);
+    this.labels.push(primePairs[i][0]);
+    this.values.push(primePairs[i][1]);
   }
+} //fetchData
 
+/**
+ * Sets the chart formatting and options data.
+ */
+function fillData() {
   //We cycle through these colors to get the bar colors
   let colors = [
     'rgba(254, 147, 140, 1)',
@@ -113,18 +116,18 @@ function fillPrimeData() {
   let borderColors = [];
 
   //Set the background and border colors
-  for (let i = 0; i < labels.length; i++) {
+  for (let i = 0; i < this.labels.length; i++) {
     backgroundColors[i] = colors[i % 4];
     borderColors[i] = colors[i % 4];
   }
 
   //Set the chart data
   this.chartData = {
-    labels: labels,
+    labels: this.labels,
     datasets: [
       {
         label: null,
-        data: values,
+        data: this.values,
         backgroundColor: backgroundColors,
         borderColor: borderColors,
         borderWidth: 1
@@ -172,7 +175,7 @@ function fillPrimeData() {
       },
       title: {
         display: true,
-        text: 'Top ' + values.length + ' Primes That We Currently Subcontract',
+        text: 'Top ' + this.values.length + ' Primes That We Currently Subcontract',
         font: {
           size: 15
         }
@@ -188,7 +191,7 @@ function fillPrimeData() {
     maintainAspectRatio: false
   };
   this.dataReceived = true;
-} // fillCertData
+} // fillData
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -206,16 +209,23 @@ export default {
     return {
       options: null,
       chartData: null,
-      dataReceived: false
+      dataReceived: false,
+      primes: {},
+      labels: [],
+      values: []
     };
   },
   methods: {
     getCurrentProjects,
-    fillPrimeData
+    fetchData,
+    fillData
   },
   watch: {
     storeIsPopulated: function () {
-      if (this.storeIsPopulated) this.fillPrimeData();
+      if (this.storeIsPopulated) {
+        this.fetchData();
+        this.fillData();
+      }
     }
   }
 };
