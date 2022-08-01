@@ -29,6 +29,7 @@ export function convertEmployees(employees) {
   let tempEmployees = [];
   _.forEach(employees, (employee) => {
     let placeOfBirth = [employee.city, employee.st, employee.country].join(' ');
+    let contractsPrimesProjects = getContractPrimeProject(employee.contracts);
     tempEmployees.push({
       'Employee #': employee.employeeNumber || '',
       'First Name': employee.firstName || '',
@@ -48,7 +49,9 @@ export function convertEmployees(employees) {
       Awards: filterUndefined(employee.awards, getAwards) || '',
       Certifications: filterUndefined(employee.certifications, getCertifications) || '',
       Clearance: filterUndefined(employee.clearances, getClearances) || '',
-      Contracts: filterUndefined(employee.contracts, getContracts) || '',
+      Contracts: contractsPrimesProjects.contracts,
+      Primes: contractsPrimesProjects.primes,
+      Projects: contractsPrimesProjects.projects,
       'Customer Org': filterUndefined(employee.customerOrgExp, getCustomerOrgExp) || '',
       Education: filterUndefined(employee.schools, getEducation) || '',
       'Job Experience': filterUndefined(employee.companies, getCompanies) || '',
@@ -186,12 +189,16 @@ export function getProjectLengthInYears(project) {
 } // getProjectLengthInYears
 
 /**
- * Returns contract data for employee
+ * This is the old `getContracts` which puts everything in one string. I get the feeling
+ * that we will want the functionality for something in the future because the new method
+ * that was requested seems significantly less convenient. This comment is being made on 
+ * Aug 1, 2022; if it's wayyy into the future as you're reading this and nothing has been
+ * brought up, you can probably delete this chunk of commented code.
  *
  * @param contract - An array of objects.
  * @return String - contract
- */
-export function getContracts(contracts) {
+ * / <-- remove space to fix comment
+ export function getContracts(contracts) {
   let result = [];
   if (contracts) {
     _.forEach(contracts, (contract) => {
@@ -219,6 +226,51 @@ export function getContracts(contracts) {
     });
   }
   return result;
+} // getContracts
+*/
+
+/**
+ * Returns contract data for employee
+ *
+ * @param contracts - An array of objects.
+ * @return String - contract
+ */
+export function getContractPrimeProject(contracts) {
+  let result = [];
+  let toReturn = {};
+  if (contracts) {
+    _.forEach(contracts, (contract) => {
+      let earliestDate = moment(); // keep track of earliest start date
+      // create array of project strings
+      let projects = [];
+      _.forEach(contract.projects, (project) => {
+        projects.push(`${project.name} - ${getProjectLengthInYears(project).asYears().toFixed(1)} years`);
+        let endDate = moment(project.endDate || moment(), 'YYYY-MM-DD');
+        earliestDate = moment.min([earliestDate, endDate]);
+      });
+      // add current contract, attaching earliestDate for sorting
+      result.push({
+        contract: { name: contract.name, prime: contract.prime },
+        projects: projects,
+        d: earliestDate.format('YYYYMMDD')
+      });
+    });
+    // sort contracts by their earliest project start date
+    result = _.orderBy(result, 'd', 'desc');
+    // extract contracts, primes, and projects into separate strings
+    toReturn = {
+      contracts: _.map(result, (r) => {
+        return r.contract.name;
+      }).join(', '),
+      primes: _.map(result, (r) => {
+        return r.contract.prime;
+      }).join(', '),
+      projects: _.map(result, (r) => {
+        return r.projects;
+      }).join(', ')
+    };
+  }
+  return toReturn;
 } // getContracts
 
 /**
