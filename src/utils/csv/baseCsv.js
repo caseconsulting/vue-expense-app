@@ -11,7 +11,6 @@ import _ from 'lodash';
 const NEW_LINE = '\n';
 
 /**
- * TODO (check)
  * Combines two CSV strings into one (A on top of B)
  * @param csvA - CSV string to place first
  * @param csvB - CSV string to place second
