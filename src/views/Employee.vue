@@ -208,13 +208,14 @@ async function downloadResume() {
  */
 async function getProfileData() {
   this.loading = true;
-  if (this.$store.getters.user && this.$store.getters.user.employeeNumber == this.$route.params.id) {
+  await Promise.all([
+    !this.$store.getters.employees ? this.updateStoreEmployees() : '',
+    !this.$store.getters.user ? this.updateStoreUser() : ''
+  ]);
+  if (this.$store.getters.user.employeeNumber == this.$route.params.id) {
     this.model = this.$store.getters.user;
     this.role = this.getRole();
   } else {
-    if (!this.$store.getters.employees || !this.$store.getters.user) {
-      await Promise.all([this.updateStoreEmployees(), this.updateStoreUser()]);
-    }
     let employees = this.$store.getters.employees;
     this.model = _.find(employees, (employee) => {
       return employee.employeeNumber == this.$route.params.id;

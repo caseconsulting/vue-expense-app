@@ -1538,31 +1538,29 @@ async function created() {
     this.$set(this.editedExpense, 'employeeName', `${this.userInfo.firstName} ${this.userInfo.lastName}`);
     this.$set(this.editedExpense, 'employeeId', this.userInfo.id);
   }
-  if (this.getRole() === 'admin') {
-    // creating or updating an expense as an admin
-    let employees = this.$store.getters.employees;
-    this.employees = employees.map((employee) => {
-      return {
-        //text: employeeUtils.fullName(employee),
-        text: employeeUtils.nicknameAndLastName(employee),
-        value: employee.id,
-        workStatus: employee.workStatus,
-        firstName: employee.firstName,
-        nickname: employee.nickname,
-        lastName: employee.lastName,
-        employeeRole: employee.employeeRole
-      };
-    });
-    //only active employees
-    this.activeEmployees = this.employees.map((employee) => {
-      if (employee.workStatus == 0) {
-        return;
-      } else {
-        return employee;
-      }
-    });
-    this.activeEmployees = _.compact(this.activeEmployees);
-  }
+  // creating or updating an expense as an admin
+  let employees = this.$store.getters.employees;
+  this.employees = employees.map((employee) => {
+    return {
+      //text: employeeUtils.fullName(employee),
+      text: employeeUtils.nicknameAndLastName(employee),
+      value: employee.id,
+      workStatus: employee.workStatus,
+      firstName: employee.firstName,
+      nickname: employee.nickname,
+      lastName: employee.lastName,
+      employeeRole: employee.employeeRole
+    };
+  });
+  //only active employees
+  this.activeEmployees = this.employees.map((employee) => {
+    if (employee.workStatus == 0) {
+      return;
+    } else {
+      return employee;
+    }
+  });
+  this.activeEmployees = _.compact(this.activeEmployees);
 
   this.setRecipientOptions();
 

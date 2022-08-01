@@ -281,7 +281,7 @@
                         <b>Description: </b>
                         {{ item.description }}
                       </p>
-                      <p v-if="item.recipient">
+                      <p v-if="item.recipient && !initialPageLoading">
                         <b>Recipient: </b>
                         {{ getEmployee(item.recipient) }}
                       </p>
@@ -706,7 +706,7 @@ async function loadMyExpensesData() {
   this.userInfo = this.$route.params.defaultEmployee || this.$store.getters.user;
   await Promise.all([
     !this.$store.getters.expenseTypes ? this.updateStoreExpenseTypes() : '',
-    this.userInfo.employeeRole === 'admin' && !this.$store.getters.employees ? this.updateStoreEmployees() : '',
+    !this.$store.getters.employees ? this.updateStoreEmployees() : '',
     this.refreshExpenses()
   ]);
 

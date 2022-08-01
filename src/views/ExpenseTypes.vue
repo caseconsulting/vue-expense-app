@@ -1,6 +1,6 @@
 /* eslint-disable prettier/prettier */
 <template>
-  <v-row>
+  <v-row v-if="!initialPageLoading">
     <!-- Status Alert -->
     <v-snackbar
       v-model="status.statusType"
@@ -831,6 +831,7 @@ function isInactive(expenseType) {
 } // isInactive
 
 async function loadExpenseTypesData() {
+  this.initialPageLoading = true;
   this.userInfo = this.$store.getters.user;
   [this.campfires] = await Promise.all([
     api.getBasecampCampfires(),
@@ -848,6 +849,7 @@ async function loadExpenseTypesData() {
     employee.avatar = avatarUrl;
     return employee;
   });
+  this.initialPageLoading = false;
 }
 
 /**
@@ -1130,6 +1132,7 @@ export default {
           show: false
         }
       ], // datatable headers
+      initialPageLoading: true,
       invalidDelete: false, // invalid delete status
       midAction: false,
       itemsPerPage: -1, // items per datatable page
