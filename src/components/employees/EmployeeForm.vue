@@ -967,7 +967,7 @@ function setFormData(tab, data) {
     this.$set(this.model, 'eeoHispanicOrLatino', data.eeoHispanicOrLatino);
     this.$set(this.model, 'eeoRaceOrEthnicity', data.eeoRaceOrEthnicity);
     this.$set(this.model, 'eeoJobCategory', data.eeoJobCategory);
-      if (this.hasAdminPermissions()) {
+    if (this.hasAdminPermissions()) {
       this.$set(this.model, 'eeoAdminHasFilledOutEeoForm', true);
     } else {
       this.$set(this.model, 'eeoAdminHasFilledOutEeoForm', false);

@@ -60,10 +60,10 @@
                 </v-col>
               </v-row>
               <v-row class="text-center">
-                <v-col xl="5" lg="5" md="5" sm="6" xs="6">
+                <v-col cols="6">
                   <h3>Personal Info Currently on Form</h3>
                 </v-col>
-                <v-col xl="5" lg="5" md="5" sm="6" xs="6">
+                <v-col cols="6">
                   <h3>New Personal Info</h3>
                 </v-col>
               </v-row>
@@ -102,12 +102,13 @@
               </v-row>
               <!-- Phone Number -->
               <v-row v-if="showPhoneNumber" class="text-center">
-                <v-col xl="5" lg="5" md="5" sm="6" cols="6">
+                <v-col xl="7" lg="7" md="7" sm="8" cols="6">
                   <v-row>
                     <v-col sm="6" cols="12">
                       <v-autocomplete
-                        label="Actions"
+                        label="Actions *"
                         v-model="phoneNumAction"
+                        attach
                         :items="getPhoneNumActionDropdowns()"
                         @change="toggleOldNumsDropdown()"
                       ></v-autocomplete>
@@ -116,21 +117,15 @@
                       <v-autocomplete
                         :disabled="disableOldPhoneNums"
                         label="Number"
+                        attach
                         v-model="oldPhoneNumToReplace"
                         :items="getOldPhoneNums()"
                       ></v-autocomplete>
                     </v-col>
                   </v-row>
                 </v-col>
-                <v-col xl="5" lg="5" md="5" sm="6" cols="6">
-                  <v-row>
-                    <v-col sm="6" cols="12">
-                      <v-text-field v-model="newPhoneNumber" readonly label="New Phone Number"> </v-text-field>
-                    </v-col>
-                    <v-col sm="6" cols="12">
-                      <v-text-field v-model="newPhoneExtension" readonly label="New Phone Extension"> </v-text-field>
-                    </v-col>
-                  </v-row>
+                <v-col xl="3" lg="3" md="3" sm="4" cols="6">
+                  <v-text-field v-model="newPhoneNumber" readonly label="New Phone Number"> </v-text-field>
                 </v-col>
                 <v-col xl="2" lg="2" md="2" sm="12" cols="12" class="pt-md-6 pt-0 text-center">
                   <v-tooltip top>
@@ -146,6 +141,7 @@
                         large
                         left
                         color="green"
+                        :disabled="phoneNumAction === ''"
                         @click="
                           submitInfo('phoneNumber', newPhoneNumber);
                           phoneCanceled = true;
@@ -558,15 +554,6 @@ function newPhoneNumber() {
 } // newPhoneNumber
 
 /**
- * Shows the newPhoneExtension if it exists
- *
- * @return string - the new phone extension if it exists
- */
-function newPhoneExtension() {
-  return this.newPersonal.phoneExtension ? this.newPersonal.phoneExtension : null;
-} // newPhoneExtension
-
-/**
  * Determines if the tech should be show. Goes through all tech
  * and makes sure all of them have been canceled
  *
@@ -930,22 +917,15 @@ function submitInfo(field, value, newValue) {
     this.editedEmployeeForm.currentState = this.newPersonal.currentState;
     this.editedEmployeeForm.currentZIP = this.newPersonal.currentZIP;
   } else if (field === 'phoneNumber') {
+    let phoneObj = { type: 'Cell', number: this.newPersonal.phoneNumber, valid: true };
     switch (this.phoneNumAction) {
       case 'Add to Private':
-        this.editedEmployeeForm.privatePhoneNumbers.push({
-          type: 'Cell',
-          number: this.newPersonal.phoneNumber,
-          private: true,
-          valid: true
-        });
+        phoneObj.private = true;
+        this.editedEmployeeForm.privatePhoneNumbers.push(phoneObj);
         break;
       case 'Add to Public':
-        this.editedEmployeeForm.publicPhoneNumbers.push({
-          type: 'Cell',
-          number: this.newPersonal.phoneNumber,
-          private: false,
-          valid: true
-        });
+        phoneObj.private = false;
+        this.editedEmployeeForm.publicPhoneNumbers.push(phoneObj);
         break;
       case 'Replace from Public':
         // find num object that matches num to replace
@@ -1112,7 +1092,6 @@ export default {
     changesMade,
     isSmallScreen,
     newAddress,
-    newPhoneExtension,
     newPhoneNumber,
     phoneNumber,
     showAddress,
@@ -1160,7 +1139,6 @@ export default {
         (v) => v < 100 || 'Value must be less than 100'
       ], // Used for technology years
       newPersonal: {
-        phoneExtension: null,
         phoneNumber: null,
         currentCity: null,
         currentState: null,
