@@ -114,7 +114,7 @@
                 <education-tab
                   v-if="formTab === 'education'"
                   :validating="validating.education"
-                  :model="model.schools"
+                  :model="model.education"
                   :allowAdditions="true"
                 >
                 </education-tab>
@@ -310,7 +310,7 @@
             <!-- Education -->
             <v-tab-item id="education" class="mt-6 mb-4 px-3">
               <education-tab
-                :model="model.schools"
+                :model="model.education"
                 :validating="validating.education"
                 :allowAdditions="true"
               ></education-tab>

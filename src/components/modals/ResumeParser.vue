@@ -309,13 +309,13 @@
               :ref="'education' + index"
               class="ma-xl-5 ma-lg-5 ma-md-0"
             >
-              <education-tab
+              <university-form
                 v-if="!education.canceled"
                 :allowAdditions="false"
                 :model="[education]"
                 @deny="education.canceled = true"
                 @confirm="submitInfo('education', index, $event)"
-              ></education-tab>
+              ></university-form>
             </v-form>
           </div>
         </span>
@@ -388,7 +388,7 @@ import api from '@/shared/api.js';
 import { isEmpty, isSmallScreen } from '@/utils/utils';
 import _ from 'lodash';
 import CancelConfirmation from '@/components/modals/CancelConfirmation.vue';
-import educationTab from '@/components/employees/formTabs/EducationTab';
+import UniversityForm from '@/components/employees/formTabs/education components/UniversityForm.vue';
 import FormSubmissionConfirmation from '@/components/modals/FormSubmissionConfirmation.vue';
 import { v4 as uuid } from 'uuid';
 
@@ -1089,7 +1089,7 @@ export default {
   beforeDestroy,
   components: {
     CancelConfirmation,
-    educationTab,
+    UniversityForm,
     FormSubmissionConfirmation
   },
   computed: {
