@@ -3,9 +3,9 @@
   <div>
     <v-row v-if="initialPageLoading">
       <v-col cols="12" :lg="userIsAdmin() ? 8 : 12">
-        <v-card class="mt-3">
+        <div class="mt-3">
           <v-skeleton-loader type="table-heading, list-item@6"></v-skeleton-loader>
-        </v-card>
+        </div>
       </v-col>
       <v-col v-if="userIsAdmin()" cols="12" lg="4">
         <v-skeleton-loader class="mt-3" type="card-heading, list-item@12"></v-skeleton-loader>
