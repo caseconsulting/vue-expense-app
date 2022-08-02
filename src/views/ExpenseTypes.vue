@@ -834,21 +834,23 @@ async function loadExpenseTypesData() {
   this.initialPageLoading = true;
   this.userInfo = this.$store.getters.user;
   [this.campfires] = await Promise.all([
-    api.getBasecampCampfires(),
+    this.userInfo.employeeRole === 'admin' ? api.getBasecampCampfires() : '',
     this.userInfo.employeeRole === 'admin' && !this.$store.getters.employees ? this.updateStoreEmployees() : '',
-    this.updateStoreAvatars(),
+    this.userInfo.employeeRole === 'admin' && !this.$store.getters.avatars ? this.updateStoreAvatars() : '',
     this.refreshExpenseTypes()
   ]);
-  this.employees = this.$store.getters.employees;
 
-  // set employee avatar
-  let avatars = this.$store.getters.basecampAvatars;
-  _.map(this.employees, (employee) => {
-    let avatar = _.find(avatars, ['email_address', employee.email]);
-    let avatarUrl = avatar ? avatar.avatar_url : null;
-    employee.avatar = avatarUrl;
-    return employee;
-  });
+  if (this.userInfo.employeeRole === 'admin') {
+    this.employees = this.$store.getters.employees;
+    // set employee avatar
+    let avatars = this.$store.getters.basecampAvatars;
+    _.map(this.employees, (employee) => {
+      let avatar = _.find(avatars, ['email_address', employee.email]);
+      let avatarUrl = avatar ? avatar.avatar_url : null;
+      employee.avatar = avatarUrl;
+      return employee;
+    });
+  }
   this.initialPageLoading = false;
 }
 
