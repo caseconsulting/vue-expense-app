@@ -1,6 +1,12 @@
 <template>
   <v-card v-if="dataReceived" class="pa-5">
-    <pie-chart chartId="concentrations-chart" :key="chartKey" :options="options" :chartData="chartData"></pie-chart>
+    <pie-chart
+      ref="pieChart"
+      chartId="concentrations-chart"
+      :key="chartKey"
+      :options="options"
+      :chartData="chartData"
+    ></pie-chart>
   </v-card>
 </template>
 
@@ -35,18 +41,19 @@ async function created() {
   await this.fillData();
 } // created
 
-// |--------------------------------------------------|
-// |                                                  |
-// |                      METHODS                     |
-// |                                                  |
-// |--------------------------------------------------|
-
 /**
  * beforeDestroy lifecycle hook
  */
 function beforeDestroy() {
   window.EventBus.$off('concentrations-update');
+  this.$refs.pieChart.destroyChart();
 } //beforeDestroy
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      METHODS                     |
+// |                                                  |
+// |--------------------------------------------------|
 
 /**
  * Gets all the major data.

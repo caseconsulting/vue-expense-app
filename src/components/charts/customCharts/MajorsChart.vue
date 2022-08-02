@@ -34,18 +34,19 @@ async function created() {
   await this.fillData();
 } // created
 
-// |--------------------------------------------------|
-// |                                                  |
-// |                      METHODS                     |
-// |                                                  |
-// |--------------------------------------------------|
-
 /**
  * beforeDestroy lifecycle hook
  */
 function beforeDestroy() {
   window.EventBus.$off('majors-update');
+  this.$refs.chart.destroyChart();
 } //beforeDestroy
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      METHODS                     |
+// |                                                  |
+// |--------------------------------------------------|
 
 /**
  * Gets all the major data.

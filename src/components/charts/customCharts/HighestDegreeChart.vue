@@ -1,6 +1,6 @@
 <template>
   <v-card v-if="dataReceived" class="pa-5 pb-0">
-    <pie-chart chartId="highest-degree" :options="options" :chartData="chartData" />
+    <pie-chart ref="pieChart" chartId="highest-degree" :options="options" :chartData="chartData" />
     <p class="text-center">Total Degrees: {{ degreeCount }}</p>
   </v-card>
 </template>
@@ -27,6 +27,13 @@ async function mounted() {
     await this.fillData();
   }
 } // mounted
+
+/**
+ * Calls the destroy chart function in the base chart.
+ */
+function beforeDestroy() {
+  this.$refs.pieChart.destroyChart();
+} // beforeDestroy
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -382,6 +389,7 @@ export default {
     minorsEmit,
     concentrationsEmit
   },
+  beforeDestroy,
   mounted,
   watch: {
     storeIsPopulated: function () {

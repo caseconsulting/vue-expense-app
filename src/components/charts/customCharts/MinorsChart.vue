@@ -1,6 +1,12 @@
 <template>
   <v-card v-if="dataReceived" class="pa-5">
-    <pie-chart chartId="minors-chart" :key="chartKey" :options="options" :chartData="chartData"></pie-chart>
+    <pie-chart
+      ref="pieChart"
+      chartId="minors-chart"
+      :key="chartKey"
+      :options="options"
+      :chartData="chartData"
+    ></pie-chart>
   </v-card>
 </template>
 
@@ -13,6 +19,14 @@ import _ from 'lodash';
 // |                 LIFECYCLE HOOKS                  |
 // |                                                  |
 // |--------------------------------------------------|
+
+/**
+ * beforeDestroy lifecycle hook
+ */
+function beforeDestroy() {
+  window.EventBus.$off('minors-update');
+  this.$refs.pieChart.destroyChart();
+} //beforeDestroy
 
 /**
  * mounted lifecycle hook
@@ -40,13 +54,6 @@ async function created() {
 // |                      METHODS                     |
 // |                                                  |
 // |--------------------------------------------------|
-
-/**
- * beforeDestroy lifecycle hook
- */
-function beforeDestroy() {
-  window.EventBus.$off('minors-update');
-} //beforeDestroy
 
 /**
  * Gets all the minor data.

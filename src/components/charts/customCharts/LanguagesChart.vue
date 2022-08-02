@@ -1,6 +1,6 @@
 <template>
   <v-card v-if="dataReceived" class="pa-5">
-    <bar-chart chartId="foreign-languages" :options="options" :chartData="chartData" />
+    <bar-chart ref="barChart" chartId="foreign-languages" :options="options" :chartData="chartData" />
   </v-card>
 </template>
 
@@ -13,6 +13,13 @@ import { storeIsPopulated, isEmpty } from '@/utils/utils';
 // |                 LIFECYCLE HOOKS                  |
 // |                                                  |
 // |--------------------------------------------------|
+
+/**
+ * Calls the destroy chart function in the base chart.
+ */
+function beforeDestroy() {
+  this.$refs.barChart.destroyChart();
+} // beforeDestroy
 
 /**
  * mounted lifecycle hook
@@ -156,6 +163,7 @@ export default {
     };
   },
   methods: { fetchData, fillData },
+  beforeDestroy,
   mounted,
   watch: {
     storeIsPopulated: function () {

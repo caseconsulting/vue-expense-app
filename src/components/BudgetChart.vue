@@ -1,7 +1,14 @@
 <template>
   <v-card>
     <div v-if="dataReceived">
-      <bar-chart :key="chartKey" chartId="budget-chart" :options="options" :chart-data="chartData"></bar-chart>
+      <bar-chart
+        ref="barChart"
+        :key="chartKey"
+        chartId="budget-chart"
+        :options="options"
+        :chart-data="chartData"
+      ></bar-chart>
+
       <v-autocomplete
         :items="allBudgetNames"
         multiple
@@ -37,6 +44,13 @@ import { isBetweenDates, isFullTime, getCurrentBudgetYear } from '@/utils/utils'
 // |               LIFECYCLE HOOKS                    |
 // |                                                  |
 // |--------------------------------------------------|
+
+/**
+ * Calls the destroy chart function in the base chart.
+ */
+function beforeDestroy() {
+  this.$refs.barChart.destroyChart();
+} // beforeDestroy
 
 /**
  * mounted lifecycle hook
@@ -380,6 +394,7 @@ export default {
     isFullTime,
     refreshBudget
   },
+  beforeDestroy,
   mounted,
   props: ['employee', 'accessibleBudgets', 'fiscalDateView', 'expenses', 'expenseTypes'],
   watch: {

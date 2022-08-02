@@ -1,6 +1,6 @@
 <template>
   <v-card v-if="dataReceived" class="pa-5">
-    <bar-chart chartId="case-years" :options="options" :chartData="chartData" />
+    <bar-chart ref="barChart" chartId="case-years" :options="options" :chartData="chartData" />
   </v-card>
   <v-skeleton-loader v-else type="paragraph@5"></v-skeleton-loader>
 </template>
@@ -26,6 +26,13 @@ async function mounted() {
     await this.drawCaseYearsHistGraph();
   }
 } // mounted
+
+/**
+ * Calls the destroy chart function in the base chart.
+ */
+function beforeDestroy() {
+  this.$refs.barChart.destroyChart();
+} // beforeDestroy
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -186,6 +193,7 @@ export default {
     stringToDate
   },
   mounted,
+  beforeDestroy,
   watch: {
     storeIsPopulated: function () {
       if (this.storeIsPopulated) {

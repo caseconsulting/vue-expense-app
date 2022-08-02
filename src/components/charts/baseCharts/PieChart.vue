@@ -18,12 +18,25 @@ import Chart from 'chart.js/auto';
 function mounted() {
   const canvas = document.getElementById(this.chartId);
   const ctx = canvas.getContext('2d');
-  new Chart(ctx, {
+  this.chart = new Chart(ctx, {
     type: 'pie',
     data: this.chartData,
     options: { ...this.options, responsive: true }
   });
 } // mounted
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      METHODS                     |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * Destroys the instance of the current chart.
+ */
+function destroyChart() {
+  this.chart.destroy();
+} //destroyChart
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -37,7 +50,15 @@ export default {
     'chartData', // chart data to render
     'options', // chart options
     'chartId' // id for the canvas
-  ]
+  ],
+  methods: {
+    destroyChart
+  },
+  data() {
+    return {
+      chart: null
+    };
+  }
 };
 </script>
 

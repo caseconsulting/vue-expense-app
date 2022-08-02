@@ -1,6 +1,6 @@
 <template>
   <v-card v-if="dataReceived" class="pa-5">
-    <bar-chart chartId="job-roles-chart" :options="options" :chartData="chartData" />
+    <bar-chart ref="barChart" chartId="job-roles-chart" :options="options" :chartData="chartData" />
   </v-card>
 </template>
 
@@ -24,6 +24,13 @@ async function mounted() {
     await this.fillData();
   }
 } // mounted
+
+/**
+ * Calls the destroy chart function in the base chart.
+ */
+function beforeDestroy() {
+  this.$refs.barChart.destroyChart();
+} // beforeDestroy
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -169,6 +176,7 @@ export default {
     };
   },
   methods: { fetchData, fillData },
+  beforeDestroy,
   mounted,
   watch: {
     storeIsPopulated: function () {

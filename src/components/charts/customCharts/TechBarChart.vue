@@ -21,7 +21,7 @@
           </v-tooltip>
         </v-col>
       </v-row>
-      <bar-chart :key="chartKey" chartId="tech" :options="options" :chartData="chartData"></bar-chart>
+      <bar-chart ref="barChart" :key="chartKey" chartId="tech" :options="options" :chartData="chartData"></bar-chart>
       <v-row justify="center" no-gutters>
         <v-radio-group row v-model="showCurrent" class="mt-8 mb-0 mx-0">
           <v-radio label="All" value="All"></v-radio>
@@ -264,6 +264,13 @@ function parseEmployeeData() {
 // |--------------------------------------------------|
 
 /**
+ * Calls the destroy chart function in the base chart.
+ */
+function beforeDestroy() {
+  this.$refs.barChart.destroyChart();
+} // beforeDestroy
+
+/**
  * mounted lifecycle hook - get items, organize them and fill data
  */
 async function mounted() {
@@ -337,6 +344,7 @@ export default {
     parseEmployeeData,
     setNumOfColumns
   },
+  beforeDestroy,
   mounted,
   watch: {
     showCurrent: watchShowCurrent,
@@ -348,9 +356,6 @@ export default {
 
         this.fillData();
       }
-    },
-    chartKey: function () {
-      console.log(this.chartKey);
     }
   }
 };

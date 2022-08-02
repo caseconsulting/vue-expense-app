@@ -1,6 +1,6 @@
 <template>
   <v-card v-if="dataReceived" class="pa-5">
-    <bar-chart chartId="certifications-chart" :options="options" :chartData="chartData"></bar-chart>
+    <bar-chart ref="barChart" chartId="certifications-chart" :options="options" :chartData="chartData"></bar-chart>
   </v-card>
 </template>
 
@@ -24,6 +24,13 @@ async function mounted() {
     await this.fillCertData();
   }
 } // mounted
+
+/**
+ * Calls the destroy chart function in the base chart.
+ */
+function beforeDestroy() {
+  this.$refs.barChart.destroyChart();
+} // beforeDestroy
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -190,6 +197,7 @@ function breakSentence(s) {
 
 export default {
   components: { BarChart },
+  beforeDestroy,
   mounted,
   computed: {
     storeIsPopulated

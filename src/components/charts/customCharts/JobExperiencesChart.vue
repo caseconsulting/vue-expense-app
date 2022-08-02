@@ -1,6 +1,6 @@
 <template>
   <v-card v-if="dataReceived" class="pa-5">
-    <bar-chart chartId="job-experience" :options="options" :chartData="chartData" />
+    <bar-chart ref="barChart" chartId="job-experience" :options="options" :chartData="chartData" />
   </v-card>
 </template>
 
@@ -26,6 +26,13 @@ async function mounted() {
     await this.drawJobExpHistGraph();
   }
 } // mounted
+
+/**
+ * Calls the destroy chart function in the base chart.
+ */
+function beforeDestroy() {
+  this.$refs.barChart.destroyChart();
+} // beforeDestroy
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -202,6 +209,7 @@ export default {
     calculateTimeDifference,
     stringToDate
   },
+  beforeDestroy,
   mounted,
   watch: {
     storeIsPopulated: function () {

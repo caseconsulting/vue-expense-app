@@ -1,6 +1,6 @@
 <template>
   <v-card v-if="dataReceived" class="pa-5">
-    <bar-chart chartId="primes-chart" :options="options" :chartData="chartData"></bar-chart>
+    <bar-chart ref="barChart" chartId="primes-chart" :options="options" :chartData="chartData"></bar-chart>
   </v-card>
 </template>
 
@@ -30,6 +30,13 @@ async function mounted() {
 // |                      METHODS                     |
 // |                                                  |
 // |--------------------------------------------------|
+
+/**
+ * Calls the destroy chart function in the base chart.
+ */
+function beforeDestroy() {
+  this.$refs.barChart.destroyChart();
+} // beforeDestroy
 
 /**
  * Gets all of the current projects the user has
@@ -201,6 +208,7 @@ function fillData() {
 
 export default {
   components: { BarChart },
+  beforeDestroy,
   mounted,
   computed: {
     storeIsPopulated

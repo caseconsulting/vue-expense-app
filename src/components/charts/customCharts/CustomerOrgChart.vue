@@ -1,6 +1,6 @@
 <template>
   <v-card v-if="dataReceived" class="pa-5">
-    <pie-chart :key="chartKey" chartId="cust-org" :options="options" :chartData="chartData"></pie-chart>
+    <pie-chart ref="pieChart" :key="chartKey" chartId="cust-org" :options="options" :chartData="chartData"></pie-chart>
     <v-container class="ma-0">
       <v-row justify="center" no-gutters>
         <v-radio-group row v-model="showCurrent">
@@ -33,6 +33,19 @@ async function created() {
     await this.fillData();
   }
 } // created
+
+/**
+ * Calls the destroy chart function in the base chart.
+ */
+function beforeDestroy() {
+  this.$refs.pieChart.destroyChart();
+} // beforeDestroy
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     METHODS                      |
+// |                                                  |
+// |--------------------------------------------------|
 
 /**
  * Get all cust org data.
@@ -69,12 +82,6 @@ function fetchData() {
   });
   this.labels = labels;
 }
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                      METHODS                     |
-// |                                                  |
-// |--------------------------------------------------|
 
 /**
  * Sets up the chart formatting and data options.
@@ -170,6 +177,7 @@ export default {
     };
   },
   methods: { fetchData, fillData },
+  beforeDestroy,
   created,
   watch: {
     showCurrent: watchShowCurrent,
