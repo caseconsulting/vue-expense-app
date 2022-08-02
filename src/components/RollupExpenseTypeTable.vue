@@ -686,11 +686,13 @@ function removeAggregateExpenseData(expense) {
  * Toggle all expenses selected.
  */
 function toggleAll() {
-  if (!this.mainCheckBox.all) {
+  if (!this.mainCheckBox.all && !this.mainCheckBox.indeterminate) {
     // check all boxes
     this.checkAllBoxes();
-  } else {
+  } else if (this.mainCheckBox.all && !this.mainCheckBox.indeterminate) {
     // clear all checkboxes
+    this.unCheckAllBoxes();
+  } else if (!this.mainCheckBox.all && this.mainCheckBox.indeterminate) {
     this.unCheckAllBoxes();
   }
 } // toggleAll
@@ -761,7 +763,7 @@ function toggleShowOnFeedGroup(value) {
  * Uncheck all expenses and boxes
  */
 function unCheckAllBoxes() {
-  this.empBudgets = _.forEach(this.empBudgets, (budget) => {
+  _.forEach(this.filteredItems, (budget) => {
     budget.checkBox.all = false;
     budget.checkBox.indeterminate = false;
     return _.forEach(budget.expenses, (expense) => {
