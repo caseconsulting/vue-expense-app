@@ -2,19 +2,19 @@
   <v-container fluid>
     <span v-if="loading">
       <v-row>
-        <v-col cols="12" md="6" class="pa-0 px-xl-4 px-lg-2 px-md-0">
+        <v-col cols="12" md="6" class="px-xl-4 px-lg-2 px-md-0">
           <v-skeleton-loader type="list-item@2"></v-skeleton-loader>
         </v-col>
-        <v-col cols="12" md="6" class="pa-0 px-xl-4 px-lg-2 px-md-0">
+        <v-col cols="12" md="6" class="px-xl-4 px-lg-2 px-md-0">
           <v-skeleton-loader type="list-item@2"></v-skeleton-loader>
         </v-col>
       </v-row>
       <v-row>
         <v-col cols="6" class="px-xl-4 px-lg-2 px-md-0">
-          <v-skeleton-loader type="card-heading, list-item@6"></v-skeleton-loader>
+          <v-skeleton-loader type="card-heading, list-item@5"></v-skeleton-loader>
         </v-col>
         <v-col cols="6" class="px-xl-4 px-lg-2 px-md-0">
-          <v-skeleton-loader type="card-heading, list-item@6"></v-skeleton-loader>
+          <v-skeleton-loader type="card-heading, list-item@5"></v-skeleton-loader>
         </v-col>
         <v-col cols="12" class="pb-3 px-xl-4 px-lg-2 px-md-0">
           <v-skeleton-loader type="card-heading, list-item@14"></v-skeleton-loader>
