@@ -9,6 +9,7 @@ Education
         :allowAdditions="allowAdditions"
         :validating="validating"
       ></university-form>
+      <high-school-form v-else-if="edu.type === 'highSchool'" :school="edu"></high-school-form>
     </div>
     <!-- End Loop Education -->
 
@@ -21,20 +22,16 @@ Education
 
 <script>
 import UniversityForm from './education components/UniversityForm.vue';
+import HighSchoolForm from './education components/HighSchoolForm.vue';
 import _ from 'lodash';
 
-function mounted() {
-  console.log(this.editedEducation);
-}
-
 export default {
-  components: { UniversityForm },
+  components: { UniversityForm, HighSchoolForm },
   props: ['model', 'allowAdditions', 'validating'],
   data() {
     return {
       editedEducation: _.cloneDeep(this.$props.model) // stores edited education info
     };
-  },
-  mounted
+  }
 };
 </script>
