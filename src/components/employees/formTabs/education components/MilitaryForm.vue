@@ -79,6 +79,12 @@ import _ from 'lodash';
 import { mask } from 'vue-the-mask';
 import { formatDateMonthYear, parseDateMonthYear } from '@/utils/utils';
 
+// |--------------------------------------------------|
+// |                                                  |
+// |                     METHODS                      |
+// |                                                  |
+// |--------------------------------------------------|
+
 /**
  * Parse the date after losing focus.
  *
@@ -87,6 +93,12 @@ import { formatDateMonthYear, parseDateMonthYear } from '@/utils/utils';
 function parseEventDate() {
   return this.parseDateMonthYear(event.target.value);
 } // parseEventDate
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     EXPORT                       |
+// |                                                  |
+// |--------------------------------------------------|
 
 export default {
   props: ['service'],
