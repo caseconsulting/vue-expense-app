@@ -284,26 +284,6 @@ function parseEventDate() {
 } //parseEventDate
 
 /**
- * Adds a school.
- */
-function addSchool() {
-  if (!this.editedDegrees) this.editedDegrees = [];
-  this.editedDegrees.push({
-    name: '',
-    degrees: [
-      {
-        completionDate: null,
-        concentrations: [],
-        degreeType: '',
-        majors: [''],
-        minors: [],
-        showEducationMenu: false
-      }
-    ]
-  });
-} // addSchool
-
-/**
  * Add an empty minor/major/concentration.
  *
  * @param array - array to add item to.
@@ -449,10 +429,6 @@ function watchValidating(val) {
   }
 } // watchValidating
 
-function mounted() {
-  console.log(this.uni);
-}
-
 // |--------------------------------------------------|
 // |                                                  |
 // |                      EXPORT                      |
@@ -461,8 +437,6 @@ function mounted() {
 
 export default {
   created,
-  mounted,
-
   data() {
     return {
       concentrationDropDown: _.map(majorsAndMinors, (elem) => titleCase(elem)), // autocomplete concentration options
@@ -496,7 +470,6 @@ export default {
     getDateMonthYearRules,
     getRequiredRules,
     parseEventDate,
-    addSchool,
     addItem,
     addDegree,
     deleteDegree,

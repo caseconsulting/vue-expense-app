@@ -13,20 +13,20 @@
     >
       <template v-slot:activator="{ on }">
         <v-text-field
-          :value="highSchool.gradYear | formatDateMonthYear"
-          label="Graduation Year"
+          :value="highSchool.gradDate | formatDateMonthYear"
+          label="Graduation Date"
           prepend-icon="event_available"
           hint="MM/YYYY format"
           v-mask="'##/####'"
           persistent-hint
           v-on="on"
-          @blur="highSchool.gradYear = parseEventDate($event)"
+          @blur="highSchool.gradDate = parseEventDate($event)"
           clearable
           @input="highSchool.showReceivedMenu = false"
         ></v-text-field>
       </template>
       <v-date-picker
-        v-model="highSchool.gradYear"
+        v-model="highSchool.gradDate"
         no-title
         @input="highSchool.showReceivedMenu = false"
         type="month"
