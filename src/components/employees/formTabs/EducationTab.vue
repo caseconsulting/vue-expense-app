@@ -104,6 +104,7 @@ function addSchool(type) {
     case 'university':
       this.editedEducation.push({
         type: type,
+        id: this.getRandId(),
         name: '',
         degrees: [
           {
@@ -120,6 +121,7 @@ function addSchool(type) {
     case 'military':
       this.editedEducation.push({
         type: type,
+        id: this.getRandId(),
         branch: '',
         startDate: null,
         completionDate: null
@@ -128,6 +130,7 @@ function addSchool(type) {
     case 'highSchool':
       this.editedEducation.push({
         type: type,
+        id: this.getRandId(),
         name: '',
         gradDate: null
       });
