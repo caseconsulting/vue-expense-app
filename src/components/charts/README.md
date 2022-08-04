@@ -41,7 +41,7 @@ Now you're ready to create a chart.
     - plugins _object_ with objects like legend or title (see examples from customCharts)
     - (if the chart is clickable) onClick _function_ example:
       - ```javascript
-         onClick: (x, y) => {
+        onClick: (x, y) => {
           if (_.first(y)) {
             let index = _.first(y).index;
             this.$router.push({
@@ -50,6 +50,6 @@ Now you're ready to create a chart.
               params: { requestedDataType: 'Job Roles', requestedFilter: this.chartData.labels[index] }
             });
           }
-        },
+        };
         ```
   - maintainAspectRatio: false to use a different aspect ratio when resizing
