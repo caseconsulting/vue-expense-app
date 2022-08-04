@@ -74,10 +74,10 @@
       </div>
       <!-- End Loop Schools -->
       <!-- Pagination -->
-      <div v-if="!isEmpty(this.model.schools) && Math.ceil(model.schools.length / 4) != 1" class="text-center">
+      <div v-if="!isEmpty(this.model.education) && Math.ceil(model.education.length / 4) != 1" class="text-center">
         <v-pagination
           v-model="page"
-          :length="Math.ceil(model.schools.length / 4)"
+          :length="Math.ceil(model.education.length / 4)"
           :total-visible="8"
           @input="onPageChange"
         ></v-pagination>
