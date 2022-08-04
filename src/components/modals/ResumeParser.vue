@@ -1,7 +1,12 @@
 <template>
   <v-dialog v-model="activate" persistent max-width="1000" @click:outside="confirmBackingOut = !loading">
     <v-card>
-      <v-card-title class="header_style"><strong>Upload Resume</strong></v-card-title>
+      <v-card-title class="header_style d-flex justify-space-between align-center">
+        <p style="margin: 0"><strong>Upload Resume</strong></p>
+        <v-btn icon dark @click="confirmBackingOut = !loading">
+          <v-icon>mdi-close</v-icon>
+        </v-btn>
+      </v-card-title>
       <v-card-text class="pa-5">
         <!-- File upload -->
         <v-form ref="submit" class="ma-3">
