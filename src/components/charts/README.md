@@ -53,3 +53,11 @@ Now you're ready to create a chart.
         };
         ```
   - maintainAspectRatio: false to use a different aspect ratio when resizing
+- Once you have both these methods fleshed out, create the base chart child component in the template. Also import and include it in the export.
+- Pass the chartId prop, options, and chartData variables. **IMPORTANT** You also need to create a ref attribute in the tag. This will be used to destroy the chart like so...
+  ```javascript
+  function beforeDestroy() {
+    this.$refs.barChart.destroyChart();
+  }
+  ```
+  This calls the destroyChart function found in the base chart which deletes the chart instance and prevents errors in the console.
