@@ -98,7 +98,6 @@ function parseEventDate() {
  * Validate all input fields are valid.
  */
 function validateFields() {
-  console.log('in military validate fields');
   window.EventBus.$emit('doneValidatingEducation', this.military, this.militaryIndex); // emit done validating
 } // validateFields
 

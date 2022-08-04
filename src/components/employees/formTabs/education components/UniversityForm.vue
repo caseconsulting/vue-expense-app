@@ -365,8 +365,6 @@ function updateDropdowns() {
  * Validate all input fields are valid.
  */
 function validateFields() {
-  console.log('in uni validate fields');
-
   window.EventBus.$emit('doneValidatingEducation', this.uni, this.schoolIndex); // emit done validating
 } // validateFields
 

@@ -2,7 +2,7 @@ Education
 <template>
   <div>
     <!-- Loop Education -->
-    <div class="gray-border ma-0 py-3 px-5" v-for="(edu, index) in editedEducation" :key="index">
+    <div class="gray-border ma-0 py-3 px-5" v-for="(edu, index) in editedEducation" :key="edu.id">
       <university-form
         v-if="edu.type === 'university'"
         :school="edu"
@@ -76,14 +76,14 @@ import _ from 'lodash';
 async function created() {
   window.EventBus.$emit('created', 'education');
 
-  window.EventBus.$on('doneValidatingEducation', (content, index) => {
+  window.EventBus.$on('doneValidatingEducation', async (content, index) => {
     this.editedEducation[index] = content;
     this.eduCount++;
 
-    if (this.eduCount % this.editedEducation.length === 0) {
-      console.log(this.editedEducation);
+    if (this.eduCount === this.editedEducation.length) {
       window.EventBus.$emit('doneValidating', 'education', this.editedEducation); // emit done validating
       window.EventBus.$emit('educationStatus', 0); // emit error status
+      window.EventBus.$off('doneValidatingEducation'); // emit done validating
     }
   });
 } // created
@@ -144,8 +144,35 @@ function addSchool(type) {
  */
 function deleteEducation(index) {
   this.editedEducation.splice(index, 1);
-  console.log(this.editedEducation);
 } // deleteSchool
+
+/**
+ * Generate a random hex value as the ID for the education.
+ */
+function getRandId() {
+  return ((Math.random() * 0xffffff) << 0).toString(16).padStart(6, '0');
+} //getRandId
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     WATCHERS                     |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * watcher for validating - validates fields
+ *
+ * @param val - val prop that needs to exist before validating
+ */
+function watchValidating(val) {
+  if (val) {
+    if (this.editedEducation.length === 0) {
+      window.EventBus.$emit('doneValidating', 'education', this.editedEducation); // emit done validating
+      window.EventBus.$emit('educationStatus', 0); // emit error status
+      window.EventBus.$off('doneValidatingEducation'); // emit done validating
+    }
+  }
+} // watchValidating
 
 export default {
   created,
@@ -159,12 +186,21 @@ export default {
         { display: 'High School', value: 'highSchool' }
       ],
       eduCount: 0,
-      editedEducation: _.cloneDeep(this.$props.model) // stores edited education info
+      editedEducation: _.map(this.$props.model, (item) => {
+        return {
+          ...item,
+          id: this.getRandId()
+        };
+      }) // stores edited education info
     };
   },
   methods: {
     addSchool,
-    deleteEducation
+    deleteEducation,
+    getRandId
+  },
+  watch: {
+    validating: watchValidating
   }
 };
 </script>

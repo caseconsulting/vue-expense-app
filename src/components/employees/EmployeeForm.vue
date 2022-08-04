@@ -699,10 +699,7 @@ async function submit() {
     this.cleanUpData();
     if (this.model.id) {
       // updating employee
-      // console.log(`~~~~~~`);
-      // console.log(this.model);
       let updatedEmployee = await api.updateItem(api.EMPLOYEES, this.model);
-      // console.log(updatedEmployee);
       if (updatedEmployee.id) {
         // successfully updated employee
         this.fullName = `${updatedEmployee.firstName} ${updatedEmployee.lastName}`;
@@ -1003,7 +1000,6 @@ function setFormData(tab, data) {
     this.$set(this.model, 'currentStreet', data.currentStreet);
     this.$set(this.model, 'currentZIP', data.currentZIP);
   } else if (tab == 'education') {
-    console.log(data);
     this.$set(this.model, 'education', data); //sets education to data returned from education tab
   } else if (tab == 'jobExperience') {
     //sets all jobExperience info to data returned from job experience tab

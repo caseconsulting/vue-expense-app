@@ -60,7 +60,6 @@ function parseEventDate() {
  * Validate all input fields are valid.
  */
 function validateFields() {
-  console.log('in high validate fields');
   window.EventBus.$emit('doneValidatingEducation', this.highSchool, this.schoolIndex); // emit done validating
 } // validateFields
 
