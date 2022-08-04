@@ -5,7 +5,6 @@ Education
     <v-autocomplete
       ref="formFields"
       v-model="uni.name"
-      :rules="[...getRequiredRules(), duplicateSchool(uni.name)]"
       :items="schoolNamePlaceholder(uni.name)"
       label="School"
       data-vv-name="School"
@@ -174,7 +173,8 @@ Education
     <div class="pt-4" align="center">
       <v-btn @click="addDegree()" elevation="2"><v-icon class="pr-1">add</v-icon>Degree</v-btn>
     </div>
-    <div v-if="!allowAdditions" align="center" class="pb-4">
+    <!--  BELOW IS RESUME PARSER STUFF -->
+    <!-- <div v-if="!allowAdditions" align="center" class="pb-4">
       <v-tooltip top>
         <template v-slot:activator="{ on }">
           <v-icon v-on="on" large right color="red" @click="denyEducation">close</v-icon>
@@ -187,23 +187,9 @@ Education
         </template>
         <span>Add Pending Change</span>
       </v-tooltip>
-    </div>
-    <!-- Button to Delete School -->
-    <div class="pb-4" align="center" v-if="allowAdditions">
-      <v-tooltip bottom>
-        <template v-slot:activator="{ on }">
-          <v-btn v-on="on" @click="deleteSchool(index)" text icon><v-icon class="case-gray pr-1">delete</v-icon></v-btn>
-        </template>
-        <span>Delete School</span>
-      </v-tooltip>
-    </div>
+    </div> -->
   </div>
   <!-- End Loop Education -->
-
-  <!-- Button to Add Degress -->
-  <!-- <div v-if="allowAdditions" class="pt-4" align="center">
-    <v-btn @click="addSchool()" elevation="2"><v-icon class="pr-1">add</v-icon>School</v-btn>
-  </div> -->
 </template>
 
 <script>
@@ -226,8 +212,6 @@ moment.tz.setDefault('America/New_York');
  * Emits to parent the component was created and get data.
  */
 async function created() {
-  window.EventBus.$emit('created', 'education'); // emit education tab was created
-  this.employees = this.$store.getters.employees; // get all employees
   this.schoolDropDown = await api.getColleges('');
 
   let alias = this.schoolDropDown.indexOf('Virginia Polytechnic Institute and State University');
@@ -259,13 +243,6 @@ async function created() {
 // |                     METHODS                      |
 // |                                                  |
 // |--------------------------------------------------|
-
-/**
- * Emits the degrees.
- */
-function confirmEducation() {
-  this.$emit('confirm', this.editedDegrees);
-} // confirmEducation
 
 /**
  * Emits a message if the education is denied by user.
@@ -314,17 +291,6 @@ function addDegree() {
 function deleteDegree(dIndex) {
   this.uni.degrees.splice(dIndex, 1);
 } // deleteDegree
-
-/**
- * Deletes a School
- *
- * TODO move this
- *
- * @param index - array index of school
- */
-function deleteSchool(index) {
-  this.editedDegrees.splice(index, 1);
-} // deleteSchool
 
 /**
  * Deletes a minor/major/concentration.
@@ -396,19 +362,12 @@ function updateDropdowns() {
 } // updateDropdowns
 
 /**
- * Validate all input fields are valid. Emit to parent the error status.
- * TODO work on this.editedDegrees
+ * Validate all input fields are valid.
  */
 function validateFields() {
-  let errorCount = 0;
-  //ensures that refs are put in an array so we can reuse forEach loop
-  let components = !_.isArray(this.$refs.formFields) ? [this.$refs.formFields] : this.$refs.formFields;
+  console.log('in uni validate fields');
 
-  _.forEach(components, (field) => {
-    if (field && !field.validate()) errorCount++;
-  });
-  window.EventBus.$emit('educationStatus', errorCount); // emit error status
-  window.EventBus.$emit('doneValidating', 'education', this.editedDegrees); // emit done validating
+  window.EventBus.$emit('doneValidatingEducation', this.uni, this.schoolIndex); // emit done validating
 } // validateFields
 
 // |--------------------------------------------------|
@@ -447,12 +406,6 @@ export default {
         });
         return count.true === 1 || 'Duplicate field found, please remove duplicate entries';
       },
-      duplicateSchool: (name) => {
-        let count = _.countBy(this.editedDegrees, (sch) => {
-          return sch.name === name;
-        });
-        return count.true === 1 || 'Duplicate school found, please remove duplicate entries';
-      },
       uni: _.cloneDeep(this.$props.school),
       degreeDropDown: ['Associates', 'Bachelors', 'Masters', 'PhD/Doctorate', 'Other (trade school, etc)'], // autocomplete degree name options
       majorDropDown: _.map(majorsAndMinors, (elem) => titleCase(elem)), // autocomplete major options
@@ -465,7 +418,6 @@ export default {
     formatDateMonthYear
   },
   methods: {
-    confirmEducation,
     denyEducation,
     getDateMonthYearRules,
     getRequiredRules,
@@ -473,7 +425,6 @@ export default {
     addItem,
     addDegree,
     deleteDegree,
-    deleteSchool,
     deleteItem,
     parseDateMonthYear,
     schoolNamePlaceholder,
@@ -482,7 +433,7 @@ export default {
     validateFields
   },
   //Education index is only used in the resume parser
-  props: ['validating', 'allowAdditions', 'school'],
+  props: ['validating', 'allowAdditions', 'school', 'schoolIndex'],
   watch: {
     validating: watchValidating
   }

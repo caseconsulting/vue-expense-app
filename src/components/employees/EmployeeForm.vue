@@ -17,7 +17,7 @@
     </v-snackbar>
     <!-- End Status Alert -->
 
-    <v-card hover>
+    <v-card>
       <!-- Form Header -->
       <v-card-title class="header_style">
         <v-row>
@@ -457,23 +457,23 @@ async function cancelB() {
  * Removes unnecessary attributes from the employee data.
  */
 function cleanUpData() {
-  // schools
-  if (!_.isEmpty(this.model.schools)) {
-    this.model.schools = _.map(this.model.schools, (school) => {
-      // remove date picker menu booleans
-      delete school.showEducationMenu;
-      // delete null attributes
-      _.forEach(school, (value, key) => {
-        if (_.isNil(value)) {
-          delete school[key];
-        }
-      });
-      // return updated school
-      return school;
-    });
-  } else {
-    this.model.schools = null;
-  }
+  // education
+  // if (!_.isEmpty(this.model.education)) {
+  //   this.model.education = _.map(this.model.education, (edu) => {
+  //     // remove date picker menu booleans
+  //     delete edu.showEducationMenu;
+  //     // delete null attributes
+  //     _.forEach(edu, (value, key) => {
+  //       if (_.isNil(value)) {
+  //         delete edu[key];
+  //       }
+  //     });
+  //     // return updated edu
+  //     return edu;
+  //   });
+  // } else {
+  //   this.model.education = null;
+  // }
   // certifications
   if (!_.isEmpty(this.model.certifications)) {
     this.model.certifications = _.map(this.model.certifications, (certification) => {
@@ -694,55 +694,55 @@ async function submit() {
   if (!anyErrors) {
     // convert appropriate fields to title case
     await this.convertAutocompleteToTitlecase(); // recursion here lol confirm -> submit -> cATT -> confirm
-    let hasErrors = await this.hasTabError();
-    if (this.$refs.form !== undefined && this.$refs.form.validate() && !hasErrors) {
-      // form validated
-      this.$emit('startAction');
-      this.cleanUpData();
-      if (this.model.id) {
-        // updating employee
-        let updatedEmployee = await api.updateItem(api.EMPLOYEES, this.model);
-        if (updatedEmployee.id) {
-          // successfully updated employee
-          this.fullName = `${updatedEmployee.firstName} ${updatedEmployee.lastName}`;
-          window.EventBus.$emit('update', updatedEmployee);
-          // getEmployees and update store with latest data
-          if (this.model.id === this.$store.getters.user.id) await this.updateStoreUser();
-          await this.updateStoreEmployees();
-          await this.cancelB();
-        } else {
-          // failed to update employee
-          this.$emit('error', updatedEmployee.response.data.message);
-          this.displayError(updatedEmployee.response.data.message);
-          // this.$emit('cancel-form');
-        }
-        // If mifiStatus on page load is different than the submitted mifiStatus value, create audit log
-        if (this.mifiStatusOnLoad !== updatedEmployee.mifiStatus) {
-          await api.createItem(api.AUDIT, {
-            id: uuid(),
-            type: 'mifi',
-            tags: ['submit', `mifi set to ${this.model.mifiStatus}`],
-            employeeId: this.employee.id,
-            description: `${this.model.firstName} ${this.model.lastName} changed their mifi status to ${this.model.mifiStatus}.`,
-            timeToLive: 60
-          });
-        }
-      } else {
-        // creating employee
-        this.model.id = uuid();
-        let newEmployee = await api.createItem(api.EMPLOYEES, this.model);
+    // form validated
+    this.$emit('startAction');
+    this.cleanUpData();
+    if (this.model.id) {
+      // updating employee
+      // console.log(`~~~~~~`);
+      // console.log(this.model);
+      let updatedEmployee = await api.updateItem(api.EMPLOYEES, this.model);
+      // console.log(updatedEmployee);
+      if (updatedEmployee.id) {
+        // successfully updated employee
+        this.fullName = `${updatedEmployee.firstName} ${updatedEmployee.lastName}`;
+        window.EventBus.$emit('update', updatedEmployee);
         // getEmployees and update store with latest data
+        if (this.model.id === this.$store.getters.user.id) await this.updateStoreUser();
         await this.updateStoreEmployees();
-        if (newEmployee.id) {
-          // successfully created employee
-          this.$router.push(`/employee/${newEmployee.employeeNumber}`);
-        } else {
-          // failed to create employee
-          this.$emit('error', newEmployee.response.data.message);
-          this.displayError(newEmployee.response.data.message);
-          this.$set(this.model, 'id', null); // reset id
-          // this.$emit('endAction');
-        }
+        await this.cancelB();
+      } else {
+        // failed to update employee
+        this.$emit('error', updatedEmployee.response.data.message);
+        this.displayError(updatedEmployee.response.data.message);
+        // this.$emit('cancel-form');
+      }
+      // If mifiStatus on page load is different than the submitted mifiStatus value, create audit log
+      if (this.mifiStatusOnLoad !== updatedEmployee.mifiStatus) {
+        await api.createItem(api.AUDIT, {
+          id: uuid(),
+          type: 'mifi',
+          tags: ['submit', `mifi set to ${this.model.mifiStatus}`],
+          employeeId: this.employee.id,
+          description: `${this.model.firstName} ${this.model.lastName} changed their mifi status to ${this.model.mifiStatus}.`,
+          timeToLive: 60
+        });
+      }
+    } else {
+      // creating employee
+      this.model.id = uuid();
+      let newEmployee = await api.createItem(api.EMPLOYEES, this.model);
+      // getEmployees and update store with latest data
+      await this.updateStoreEmployees();
+      if (newEmployee.id) {
+        // successfully created employee
+        this.$router.push(`/employee/${newEmployee.employeeNumber}`);
+      } else {
+        // failed to create employee
+        this.$emit('error', newEmployee.response.data.message);
+        this.displayError(newEmployee.response.data.message);
+        this.$set(this.model, 'id', null); // reset id
+        // this.$emit('endAction');
       }
     }
   }
@@ -1003,7 +1003,8 @@ function setFormData(tab, data) {
     this.$set(this.model, 'currentStreet', data.currentStreet);
     this.$set(this.model, 'currentZIP', data.currentZIP);
   } else if (tab == 'education') {
-    this.$set(this.model, 'schools', data); //sets schools to data returned from education tab
+    console.log(data);
+    this.$set(this.model, 'education', data); //sets education to data returned from education tab
   } else if (tab == 'jobExperience') {
     //sets all jobExperience info to data returned from job experience tab
     this.$set(this.model, 'icTimeFrames', data.icTimeFrames);
@@ -1225,7 +1226,7 @@ export default {
         privatePhoneNumbers: [],
         publicPhoneNumbers: [],
         prime: null,
-        schools: [],
+        education: [],
         st: null,
         technologies: [],
         twitter: null,

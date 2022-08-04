@@ -56,6 +56,32 @@ function parseEventDate() {
   return this.parseDateMonthYear(event.target.value);
 } // parseEventDate
 
+/**
+ * Validate all input fields are valid.
+ */
+function validateFields() {
+  console.log('in high validate fields');
+  window.EventBus.$emit('doneValidatingEducation', this.highSchool, this.schoolIndex); // emit done validating
+} // validateFields
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     WATCHERS                     |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * watcher for validating - validates fields
+ *
+ * @param val - val prop that needs to exist before validating
+ */
+function watchValidating(val) {
+  if (val) {
+    // parent component triggers validation
+    this.validateFields();
+  }
+} // watchValidating
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                     EXPORT                       |
@@ -63,19 +89,23 @@ function parseEventDate() {
 // |--------------------------------------------------|
 
 export default {
-  props: ['school'],
+  props: ['school', 'schoolIndex', 'validating'],
   directives: { mask },
   filters: {
     formatDateMonthYear
   },
   methods: {
     parseDateMonthYear,
-    parseEventDate
+    parseEventDate,
+    validateFields
   },
   data() {
     return {
       highSchool: { ..._.cloneDeep(this.$props.school), showReceivedMenu: false }
     };
+  },
+  watch: {
+    validating: watchValidating
   }
 };
 </script>

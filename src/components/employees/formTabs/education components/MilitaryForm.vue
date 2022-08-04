@@ -6,7 +6,7 @@
       <v-col cols="12" sm="6">
         <!-- Starting Date -->
         <v-menu
-          v-model="military.showReceivedMenu"
+          v-model="military.showStartMenu"
           :close-on-content-click="false"
           transition="scale-transition"
           offset-y
@@ -24,13 +24,13 @@
               v-on="on"
               @blur="military.startDate = parseEventDate($event)"
               clearable
-              @input="military.showReceivedMenu = false"
+              @input="military.showStartMenu = false"
             ></v-text-field>
           </template>
           <v-date-picker
             v-model="military.startDate"
             no-title
-            @input="military.showReceivedMenu = false"
+            @input="military.showStartMenu = false"
             type="month"
           ></v-date-picker>
         </v-menu>
@@ -40,7 +40,7 @@
       <!-- Completed Date -->
       <v-col cols="12" sm="6">
         <v-menu
-          v-model="military.showReceivedMenu"
+          v-model="military.showCompleteMenu"
           :close-on-content-click="false"
           transition="scale-transition"
           offset-y
@@ -58,13 +58,13 @@
               v-on="on"
               @blur="military.completeDate = parseEventDate($event)"
               clearable
-              @input="military.showReceivedMenu = false"
+              @input="military.showCompleteMenu = false"
             ></v-text-field>
           </template>
           <v-date-picker
             v-model="military.completeDate"
             no-title
-            @input="military.showReceivedMenu = false"
+            @input="military.showCompleteMenu = false"
             type="month"
           ></v-date-picker>
         </v-menu>
@@ -94,6 +94,32 @@ function parseEventDate() {
   return this.parseDateMonthYear(event.target.value);
 } // parseEventDate
 
+/**
+ * Validate all input fields are valid.
+ */
+function validateFields() {
+  console.log('in military validate fields');
+  window.EventBus.$emit('doneValidatingEducation', this.military, this.militaryIndex); // emit done validating
+} // validateFields
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     WATCHERS                     |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * watcher for validating - validates fields
+ *
+ * @param val - val prop that needs to exist before validating
+ */
+function watchValidating(val) {
+  if (val) {
+    // parent component triggers validation
+    this.validateFields();
+  }
+} // watchValidating
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                     EXPORT                       |
@@ -101,19 +127,23 @@ function parseEventDate() {
 // |--------------------------------------------------|
 
 export default {
-  props: ['service'],
+  props: ['service', 'militaryIndex', 'validating'],
   directives: { mask },
   filters: {
     formatDateMonthYear
   },
   methods: {
     parseDateMonthYear,
-    parseEventDate
+    parseEventDate,
+    validateFields
   },
   data() {
     return {
-      military: { ..._.cloneDeep(this.$props.service), showReceivedMenu: false }
+      military: { ..._.cloneDeep(this.$props.service), showStartMenu: false, showCompleteMenu: false }
     };
+  },
+  watch: {
+    validating: watchValidating
   }
 };
 </script>
