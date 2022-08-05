@@ -1,5 +1,5 @@
 <template>
-  <v-card>
+  <v-card class="px-10 pt-5 my-7">
     <div v-if="dataReceived">
       <bar-chart
         ref="barChart"
