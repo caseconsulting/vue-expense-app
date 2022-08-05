@@ -632,7 +632,6 @@ async function created() {
   this.activeEmployees = activeEmployees;
   await this.updateStoreCampfires();
   this.campfires = this.$store.getters.basecampCampfires;
-  console.log(this.campfires);
   this.editedExpenseType = _.cloneDeep(this.model);
   this.clearForm();
 } // created
