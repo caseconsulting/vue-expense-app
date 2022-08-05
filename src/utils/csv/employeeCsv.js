@@ -53,7 +53,7 @@ export function convertEmployees(employees) {
       Primes: contractsPrimesProjects.primes,
       Projects: contractsPrimesProjects.projects,
       'Customer Org': filterUndefined(employee.customerOrgExp, getCustomerOrgExp) || '',
-      Education: filterUndefined(employee.schools, getEducation) || '',
+      Education: filterUndefined(employee.education, getEducation) || '',
       'Job Experience': filterUndefined(employee.companies, getCompanies) || '',
       Technology: filterUndefined(employee.technologies, getTechnologies) || '',
       id: employee.id || ''
@@ -189,45 +189,45 @@ export function getProjectLengthInYears(project) {
 } // getProjectLengthInYears
 
 /**
- * This is the old `getContracts` which puts everything in one string. I get the feeling
- * that we will want the functionality for something in the future because the new method
- * that was requested seems significantly less convenient. This comment is being made on 
- * Aug 1, 2022; if it's wayyy into the future as you're reading this and nothing has been
- * brought up, you can probably delete this chunk of commented code.
- *
- * @param contract - An array of objects.
- * @return String - contract
- * / <-- remove space to fix comment
- export function getContracts(contracts) {
-  let result = [];
-  if (contracts) {
-    _.forEach(contracts, (contract) => {
-      let earliestDate = moment(); // keep track of earliest start date
-      // create array of project strings
-      let projects = [];
-      _.forEach(contract.projects, (project) => {
-        projects.push(`${project.name} - ${getProjectLengthInYears(project).asYears().toFixed(1)} years`);
-        let endDate = moment(project.endDate || moment(), 'YYYY-MM-DD');
-        earliestDate = moment.min([earliestDate, endDate]);
-      });
-      // create string for contract and add years if necessary
-      let str = `${contract.name} - ${contract.prime} (Projects: ${projects.join(', ')})`;
-      if (contract.projects.length > 1) {
-        str += ` Total Time: ${getContractLengthInYears(contract)} years`;
-      }
-      // add current contract, attaching earliestDate for sorting
-      result.push({ s: str, d: earliestDate.format('YYYYMMDD') });
-    });
-    // sort contracts by their earliest project start date
-    result = _.orderBy(result, 'd', 'desc');
-    // only return the string value after sorting
-    result = _.map(result, (r) => {
-      return r.s;
-    });
-  }
-  return result;
-} // getContracts
-*/
+  * This is the old `getContracts` which puts everything in one string. I get the feeling
+  * that we will want the functionality for something in the future because the new method
+  * that was requested seems significantly less convenient. This comment is being made on 
+  * Aug 1, 2022; if it's wayyy into the future as you're reading this and nothing has been
+  * brought up, you can probably delete this chunk of commented code.
+  *
+  * @param contract - An array of objects.
+  * @return String - contract
+  * / <-- remove space to fix comment
+  export function getContracts(contracts) {
+   let result = [];
+   if (contracts) {
+     _.forEach(contracts, (contract) => {
+       let earliestDate = moment(); // keep track of earliest start date
+       // create array of project strings
+       let projects = [];
+       _.forEach(contract.projects, (project) => {
+         projects.push(`${project.name} - ${getProjectLengthInYears(project).asYears().toFixed(1)} years`);
+         let endDate = moment(project.endDate || moment(), 'YYYY-MM-DD');
+         earliestDate = moment.min([earliestDate, endDate]);
+       });
+       // create string for contract and add years if necessary
+       let str = `${contract.name} - ${contract.prime} (Projects: ${projects.join(', ')})`;
+       if (contract.projects.length > 1) {
+         str += ` Total Time: ${getContractLengthInYears(contract)} years`;
+       }
+       // add current contract, attaching earliestDate for sorting
+       result.push({ s: str, d: earliestDate.format('YYYYMMDD') });
+     });
+     // sort contracts by their earliest project start date
+     result = _.orderBy(result, 'd', 'desc');
+     // only return the string value after sorting
+     result = _.map(result, (r) => {
+       return r.s;
+     });
+   }
+   return result;
+ } // getContracts
+ */
 
 /**
  * Returns contract data for employee
@@ -299,51 +299,69 @@ export function getCustomerOrgExp(exp) {
  * @param edu - An array of objects.
  * @return String - education
  */
-export function getEducation(edu) {
+export function getEducation(education) {
   let str = '';
   let result = [];
-  if (edu) {
-    // each school
-    for (let i = 0; i < edu.length; i++) {
-      // each degree within school
-      edu[i].degrees.forEach((degree) => {
-        str = edu[i].name + ': ';
+  if (education) {
+    _.forEach(education, (edu) => {
+      // university type
+      if (edu.type === 'university') {
+        edu.degrees.forEach((degree) => {
+          str = edu.name + ': ';
 
-        // each major within degree
-        str += degree.degreeType + ' in ';
-        degree.majors.forEach((major, i) => {
-          if (i != 0) {
-            str += ', ';
+          // each major within degree
+          str += degree.degreeType + ' in ';
+          degree.majors.forEach((major, i) => {
+            if (i != 0) {
+              str += ', ';
+            }
+            str += major;
+          });
+
+          // add concentrations
+          if (!_.isEmpty(degree.concentrations)) {
+            str += ' (Concentrations: ';
+            degree.concentrations.forEach((concentration, i) => {
+              if (i != 0) {
+                str += ', ';
+              }
+              str += concentration;
+            });
+            str += ')';
           }
-          str += major;
+
+          // add minors
+          if (!_.isEmpty(degree.minors)) {
+            str += ' (Minors: ';
+            degree.minors.forEach((minor, i) => {
+              if (i != 0) {
+                str += ', ';
+              }
+              str += minor;
+            });
+            str += ')';
+          }
+
+          str += ' - ' + degree.completionDate;
+          result.push(str); // push each degree individually
         });
+      }
 
-        if (!_.isEmpty(degree.concentrations)) {
-          str += ' (Concentrations: ';
-          degree.concentrations.forEach((concentration, i) => {
-            if (i != 0) {
-              str += ', ';
-            }
-            str += concentration;
-          });
-          str += ')';
-        }
+      // high school type
+      if (edu.type === 'highSchool') {
+        str = `${edu.name}: ${moment(edu.year, 'YYYY-MM').format('MMM YYYY')}`;
+        result.push(str);
+      }
 
-        if (!_.isEmpty(degree.minors)) {
-          str += ' (Minors: ';
-          degree.minors.forEach((minor, i) => {
-            if (i != 0) {
-              str += ', ';
-            }
-            str += minor;
-          });
-          str += ')';
-        }
-
-        str += ' - ' + degree.completionDate;
-        result.push(str); // push each degree individually
-      });
-    }
+      // military type
+      if (edu.type === 'military') {
+        str = `${edu.branch}: ${moment(edu.startDate, 'YYYY-MM').format('MMM YYYY')} - ${moment(
+          edu.completionDate,
+          'YYYY-MM'
+        ).format('MMM YYYY')}`;
+        result.push(str);
+      }
+    });
   }
   return result;
 } // getEducation
