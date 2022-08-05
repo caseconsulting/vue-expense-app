@@ -1,6 +1,6 @@
 # Making and Using Charts after July 2022
 
-You can open this readme in Github for nice formatting: https://github.com/caseconsulting/vue-expense-app/blob/master/src/utils/csv/README.md
+You can open this readme in Github for nice formatting: https://github.com/caseconsulting/vue-expense-app/blob/master/src/components/charts/README.md
 (the charts get ugly so I would reccomend this)
 
 This is a user's guide to making and using charts.
