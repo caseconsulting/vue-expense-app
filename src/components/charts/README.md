@@ -30,28 +30,16 @@ Now you're ready to create a chart.
     }
   }
   ```
-  This will first get all the data from the store needed to use the chart and store it in a data variable. Then you separately draw the chart which you can see next...
+  This will first get all the data from the store needed to use the chart and store it in a `data` variable. Then you separately draw the chart which you can see next...
 - Now we draw. The things you'll need to define are...
   - labels _array_
-  - data _object_ which includes
+  - data _object_ (see https://www.chartjs.org/docs/latest/getting-started/usage.html) which includes
     - labels: the labels from above
     - datasets _array_ with object containing the data from the fetchData variable and any colors or border styles
-  - options _object_ which includes
+  - `options` _object_ which includes
     - scales _object_ defining what the x and y axis look like (see https://www.chartjs.org/docs/latest/axes/labelling.html for more)
-    - plugins _object_ with objects like legend or title (see examples from customCharts)
-    - (if the chart is clickable) onClick _function_ example:
-      - ```javascript
-        onClick: (x, y) => {
-          if (_.first(y)) {
-            let index = _.first(y).index;
-            this.$router.push({
-              path: '/reports',
-              name: 'reports',
-              params: { requestedDataType: 'Job Roles', requestedFilter: this.chartData.labels[index] }
-            });
-          }
-        };
-        ```
+    - plugins _object_ with objects like legend or title (see examples from files in customCharts)
+    - (if the chart is clickable) onClick _function_ (see below section on making chart clickable
   - maintainAspectRatio: false to use a different aspect ratio when resizing
 - Once you have both these methods fleshed out, create the base chart child component in the template. Also import and include it in the export.
 - Pass the chartId prop, options, and chartData variables. **IMPORTANT** You also need to create a ref attribute in the tag. This will be used to destroy the chart like so...
@@ -61,3 +49,28 @@ Now you're ready to create a chart.
   }
   ```
   This calls the destroyChart function found in the base chart which deletes the chart instance and prevents errors in the console.
+
+## Click me Baby One More Time
+
+### aka Making the Chart Clickable
+
+Here is what goes into the chart's options object:
+
+- ```javascript
+  onClick: (x, y) => {
+    if (_.first(y)) {
+      let index = _.first(y).index;
+      this.$router.push({
+        path: '/reports',
+        name: 'reports',
+        params: { requestedDataType: 'Job Roles', requestedFilter: this.chartData.labels[index] }
+      });
+    }
+  };
+  ```
+
+  Here, most of the clickable charts will route to another page on the portal. This makes use of a router function that goes to the desired path and passes along any paramaters the page needs to load as desired. Here, the jobRoles chart sends the dataType to filter the reports page by and the value to put in that autocomplete. Other pages may send employee info, lists, etc.
+
+You also need to include some things in the destination file. See the Reports.vue file and EmployeeContractTable.vue for an example. In the created hook, see if `this$route.params` has any values you want. I created a wasRedirected variable to true and scrolled to the top but that's not required. This boolean was used to show a back button for better usability.
+
+The real routing happens in the child, EmployeeContractTable, though it isn't required to have a child. In the created hook I again checked if the `this$route.params` had anything in it. If so, I assigned the appropriate variables the value of the `this$route.params`. There may be more things you have to handle but this is the basics.
