@@ -1,4 +1,4 @@
-/*
+/**
  * Helpful references
  * https://vuejs-tips.github.io/vuex-cheatsheet/
  * https://vuex.vuejs.org/
@@ -21,6 +21,7 @@ export default new Vuex.Store({
   state() {
     return {
       basecampAvatars: null,
+      basecampCampfires: null,
       employees: null,
       employeeNumber: null,
       expenseTypes: null,
@@ -38,6 +39,9 @@ export default new Vuex.Store({
   mutations: {
     setBasecampAvatars(state, payload) {
       state.basecampAvatars = payload.basecampAvatars;
+    },
+    setBasecampCampfires(state, payload) {
+      state.basecampCampfires = payload.basecampCampfires;
     },
     setEmployees(state, payload) {
       state.employees = payload.employees;
@@ -73,6 +77,9 @@ export default new Vuex.Store({
     setBasecampAvatars(context, payload) {
       context.commit('setBasecampAvatars', payload);
     },
+    setBasecampCampfires(context, payload) {
+      context.commit('setBasecampCampfires', payload);
+    },
     setEmployees(context, payload) {
       context.commit('setEmployees', payload);
     },
@@ -104,6 +111,9 @@ export default new Vuex.Store({
   getters: {
     basecampAvatars(state) {
       return state.basecampAvatars;
+    },
+    basecampCampfires(state) {
+      return state.basecampCampfires;
     },
     employees(state) {
       return state.employees;

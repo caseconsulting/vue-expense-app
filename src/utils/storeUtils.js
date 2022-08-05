@@ -31,10 +31,18 @@ export async function updateStoreEmployees() {
  *
  */
 export async function updateStoreAvatars() {
-  // getBasecampAvatars
   let avatars = await api.getBasecampAvatars();
   this.$store.dispatch('setBasecampAvatars', { basecampAvatars: avatars });
 } // updateStoreAvatars
+
+/**
+ * Update store with latest Basecamp campfires
+ *
+ */
+export async function updateStoreCampfires() {
+  let campfires = await api.getBasecampCampfires();
+  this.$store.dispatch('setBasecampCampfires', { basecampCampfires: campfires });
+} // updateStoreCampfires
 
 /**
  * Update store with users budgets
