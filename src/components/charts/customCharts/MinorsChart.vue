@@ -34,6 +34,9 @@ function beforeDestroy() {
 async function mounted() {
   // emit comes from HighestDegreeChart.vue when a pie slice is clicked
   window.EventBus.$on('minors-update', async (receiveMinors) => {
+    this.quantities = [];
+    this.labels = [];
+    this.dataReceived = false;
     this.degree = receiveMinors.degree;
     this.minors = receiveMinors.minors;
     await this.fetchData(this.minors);

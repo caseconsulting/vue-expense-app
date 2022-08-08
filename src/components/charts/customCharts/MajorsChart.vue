@@ -19,6 +19,9 @@ import PieChart from '../baseCharts/PieChart.vue';
 async function mounted() {
   // emit comes from HighestDegreeChart when a pie slice is clicked
   await window.EventBus.$on('majors-update', async (receiveMajors) => {
+    this.quantities = [];
+    this.labels = [];
+    this.dataReceived = false;
     let majors = receiveMajors.majors;
     this.degree = receiveMajors.degree;
     await this.fetchData(majors);

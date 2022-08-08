@@ -49,74 +49,91 @@ function beforeDestroy() {
  * containing objects w/ degree names + majors
  */
 function initDegrees() {
-  let degrees = {};
+  let education = {};
   this.employees = this.$store.getters.employees;
   this.employees.forEach((emp) => {
     let highestDegrees = [];
-    if (emp.schools && emp.workStatus != 0) {
-      _.forEach(emp.schools, (school) => {
-        _.forEach(school.degrees, (degree) => {
-          if (moment(degree.completionDate).isBefore(moment(new Date()))) {
-            if (highestDegrees.length != 0) {
-              let result = this.compareDegree(highestDegrees[0].name, degree.degreeType);
-              //if a degree of a higher prestige is found, remove all previous entries
-              if (result === 1) {
-                highestDegrees.length = 0;
-              }
-              //Adds to highestDegrees, excluding degrees with a lower prestige
-              if (result > -1) {
+    if (emp.education && emp.workStatus != 0) {
+      _.forEach(emp.education, (edu) => {
+        // handle universities
+        if (edu.type === 'university') {
+          _.forEach(edu.degrees, (degree) => {
+            if (moment(degree.completionDate).isBefore(moment(new Date()))) {
+              if (highestDegrees.length != 0) {
+                let result = this.compareDegree(highestDegrees[0].name, degree.degreeType);
+                //if a degree of a higher prestige is found, remove all previous entries
+                if (result === 1) {
+                  highestDegrees.length = 0;
+                }
+                //Adds to highestDegrees, excluding degrees with a lower prestige
+                if (result > -1) {
+                  highestDegrees.push({
+                    name: this.getDegreeName(this.getDegreeValue(degree.degreeType)),
+                    majors: degree.majors
+                  });
+                }
+              } else {
+                //Adds the first degree found to the array
                 highestDegrees.push({
                   name: this.getDegreeName(this.getDegreeValue(degree.degreeType)),
-                  majors: degree.majors
+                  majors: degree.majors,
+                  type: edu.type
                 });
               }
-            } else {
-              //Adds the first degree found to the array
-              highestDegrees.push({
-                name: this.getDegreeName(this.getDegreeValue(degree.degreeType)),
-                majors: degree.majors
-              });
             }
-          }
-        });
+          });
+        } else if (edu.type === 'highSchool') {
+          highestDegrees.push({
+            type: edu.type
+          });
+        }
       });
-      degrees = this.addToDegrees(degrees, highestDegrees);
+      education = this.addToEducation(education, highestDegrees);
     }
   });
-  return degrees;
+  return education;
 } // initDegrees
 
 /**
  * Helper function that parses through the existing data
- * in degrees and adds onto it.
+ * in education and adds onto it.
  *
- * @param degrees - The array of the highest degrees tallied up
- * @param highestDegrees - The array of all highest degrees
- * @return Array - The finaly tally of each highest degrees
+ * @param education - The array of the highest education tallied up
+ * @param highestEdus - The array of all highest educations
+ * @return Array - The final tally of each highest educations
  */
-function addToDegrees(degrees, highestDegrees) {
-  highestDegrees.forEach((highestDegree) => {
-    if (!degrees[highestDegree.name]) {
-      //if the name of the degree isnt in collection
-      let majors = {};
-      highestDegree.majors.forEach((major) => {
-        majors[major] = 1;
-      });
-      degrees[highestDegree.name] = majors;
+function addToEducation(education, highestEdus) {
+  highestEdus.forEach((highestEdu) => {
+    if (highestEdu.type === 'university') {
+      if (!education[highestEdu.name]) {
+        //if the name of the degree isnt in collection
+        let majors = {};
+        highestEdu.majors.forEach((major) => {
+          majors[major] = 1;
+        });
+        education[highestEdu.name] = majors;
+      } else {
+        //if the name of the degree is in the collection
+        highestEdu.majors.forEach((major) => {
+          if (!education[highestEdu.name][major]) {
+            //used to update the count of each major
+            education[highestEdu.name][major] = 1;
+          } else {
+            education[highestEdu.name][major] += 1;
+          }
+        });
+      }
     } else {
-      //if the name of the degree is in the collection
-      highestDegree.majors.forEach((major) => {
-        if (!degrees[highestDegree.name][major]) {
-          //used to update the count of each major
-          degrees[highestDegree.name][major] = 1;
-        } else {
-          degrees[highestDegree.name][major] += 1;
-        }
-      });
+      if (!education[highestEdu.type]) {
+        //if the name of the degree isnt in collection
+        education[highestEdu.type] = 1;
+      } else {
+        education[highestEdu.type] += 1;
+      }
     }
   });
-  return degrees;
-} // addToDegrees
+  return education;
+} // addToEducation
 
 /**
  * Compares the relationship between two degrees,
@@ -151,24 +168,26 @@ function getDegreeConcentrations(degreeName) {
   let concentrationsData = {};
   // loop through each employee
   this.employees.forEach((employee) => {
-    if (employee.schools) {
-      // loop through each employee's degree
-      employee.schools.forEach((school) => {
-        //loop through each degree for the school
-        school.degrees.forEach((degree) => {
-          // generalize each degree name to match pie chart categories (Bachelors of Science = Bachelors)
-          if (this.getDegreeName(this.getDegreeValue(degree.degreeType)) === degreeName) {
-            // loop through each concentration
-            degree.concentrations.forEach((concentration) => {
-              /// count up each occurrence of a concentration
-              if (concentrationsData[concentration]) {
-                concentrationsData[concentration] += 1;
-              } else {
-                concentrationsData[concentration] = 1;
-              }
-            });
-          }
-        });
+    if (employee.education) {
+      // loop through each employee's educations
+      employee.education.forEach((edu) => {
+        if (edu.type === 'university') {
+          //loop through each degree for the school
+          edu.degrees.forEach((degree) => {
+            // generalize each degree name to match pie chart categories (Bachelors of Science = Bachelors)
+            if (this.getDegreeName(this.getDegreeValue(degree.degreeType)) === degreeName) {
+              // loop through each concentration
+              degree.concentrations.forEach((concentration) => {
+                /// count up each occurrence of a concentration
+                if (concentrationsData[concentration]) {
+                  concentrationsData[concentration] += 1;
+                } else {
+                  concentrationsData[concentration] = 1;
+                }
+              });
+            }
+          });
+        }
       });
     }
   });
@@ -185,23 +204,25 @@ function getDegreeMinors(degreeName) {
   let minorsData = {};
   // loop through each employee
   this.employees.forEach((employee) => {
-    if (employee.schools) {
-      // loop through each employee's degree
-      employee.schools.forEach((school) => {
-        school.degrees.forEach((degree) => {
-          // generalize each degree name to match pie chart categories (Bachelors of Science = Bachelors)
-          if (this.getDegreeName(this.getDegreeValue(degree.degreeType)) === degreeName) {
-            // loop through each minor
-            degree.minors.forEach((minor) => {
-              /// count up each occurrence of a minor
-              if (minorsData[minor]) {
-                minorsData[minor] += 1;
-              } else {
-                minorsData[minor] = 1;
-              }
-            });
-          }
-        });
+    if (employee.education) {
+      // loop through each employee's educations
+      employee.education.forEach((edu) => {
+        if (edu.type === 'university') {
+          edu.degrees.forEach((degree) => {
+            // generalize each degree name to match pie chart categories (Bachelors of Science = Bachelors)
+            if (this.getDegreeName(this.getDegreeValue(degree.degreeType)) === degreeName) {
+              // loop through each minor
+              degree.minors.forEach((minor) => {
+                /// count up each occurrence of a minor
+                if (minorsData[minor]) {
+                  minorsData[minor] += 1;
+                } else {
+                  minorsData[minor] = 1;
+                }
+              });
+            }
+          });
+        }
       });
     }
   });
@@ -377,7 +398,7 @@ export default {
     };
   },
   methods: {
-    addToDegrees,
+    addToEducation,
     fillData,
     compareDegree,
     initDegrees,

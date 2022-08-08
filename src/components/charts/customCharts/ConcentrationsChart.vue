@@ -26,6 +26,9 @@ import _ from 'lodash';
 async function mounted() {
   // emit comes from HighestDegreeChart.vue when a pie slice is clicked
   await window.EventBus.$on('concentrations-update', async (receiveConcentrations) => {
+    this.quantities = [];
+    this.labels = [];
+    this.dataReceived = false;
     this.degree = receiveConcentrations.degree;
     this.concentrations = receiveConcentrations.concentrations;
     await this.fetchData(this.concentrations);
@@ -80,6 +83,8 @@ function fetchData(concentrations) {
           this.labels.push(con);
         }
       }
+      console.log(this.quantities);
+      console.log(this.labels);
       this.text = `Top ${this.degree} Degree Concentrations`;
       this.colors = [
         'rgba(54, 162, 235, 1)',
