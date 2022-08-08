@@ -344,23 +344,20 @@ export function getEducation(education) {
             str += ')';
           }
 
-          str += ' - ' + degree.completionDate;
+          str += ' - Graduated ' + degree.completionDate;
           university.push({ str, date: degree.completeDate }); // push each degree individually
         });
       }
 
       // military type
       if (edu.type === 'military') {
-        str = `${edu.branch}: ${moment(edu.startDate, 'YYYY-MM').format('MMM YYYY')} - ${moment(
-          edu.completeDate,
-          'YYYY-MM'
-        ).format('MMM YYYY')}`;
+        str = `${edu.branch}: ${edu.startDate} - ${edu.completeDate}`;
         military.push({ str, date: edu.completeDate });
       }
 
       // high school type
       if (edu.type === 'highSchool') {
-        str = `${edu.name}: graduated ${moment(edu.gradDate, 'YYYY-MM').format('MMM YYYY')}`;
+        str = `${edu.name}: Graduated ${edu.gradDate}`;
         highSchool.push({ str, date: edu.gradDate });
       }
     });
