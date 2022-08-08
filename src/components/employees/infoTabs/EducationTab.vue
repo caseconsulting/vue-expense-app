@@ -16,7 +16,7 @@
             <li v-for="(degree, index) in edu.degrees" :key="degree + index" class="mb-2">
               <b>{{ degree.degreeType }}</b>
               <ul>
-                <li><b>Completion Date: </b>{{ degree.completionDate | monthYearFormat }}</li>
+                <li><b>Completion Date: </b>{{ monthYearFormat(degree.completionDate) }}</li>
                 <li v-if="degree.majors.length > 1">
                   <p class="mb-0"><b>Majors:</b></p>
                   <ul class="mb-0">
@@ -59,7 +59,7 @@
         <div class="ml-4" v-if="edu.type === 'military'">
           <p class="mb-0"><b>Type: </b>Military</p>
           <p class="my-0"><b>Branch: </b>{{ edu.branch }}</p>
-          <p class="my-0"><b>Start Date: </b>{{ edu.startDate }}</p>
+          <p class="my-0"><b>Start Date: </b>{{ monthYearFormat(edu.startDate) }}</p>
           <p class="my-0" v-if="edu.completeDate"><b>Completion Date: </b>{{ edu.completeDate }}</p>
         </div>
         <!-- End Military Services Loop -->
@@ -68,7 +68,7 @@
         <div class="ml-4" v-if="edu.type === 'highSchool'">
           <p class="mb-0"><b>Type: </b>High School</p>
           <p class="my-0"><b>School: </b>{{ edu.name }}</p>
-          <p class="my-0" v-if="edu.gradDate"><b>Graduation Date: </b>{{ edu.gradDate }}</p>
+          <p class="my-0" v-if="edu.gradDate"><b>Graduation Date: </b>{{ monthYearFormat(edu.gradDate) }}</p>
         </div>
         <!-- End High Schools Loop -->
       </div>
@@ -153,11 +153,9 @@ export default {
       page: 1
     };
   },
-  filters: {
-    monthYearFormat
-  },
   methods: {
     isEmpty,
+    monthYearFormat,
     onPageChange
   },
   props: ['model'],

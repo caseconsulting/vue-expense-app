@@ -2,14 +2,15 @@
   <div>
     <div v-for="i in [0]" :key="i">
       <!-- Name of Branch -->
-      <v-text-field
+      <v-autocomplete
         ref="formFields"
-        :refInFor="true"
+        :items="dodForces"
         v-model="military.branch"
         :rules="getRequiredRules()"
         label="Military Branch"
+        auto-select-first
         clearable
-      ></v-text-field>
+      ></v-autocomplete>
       <v-row>
         <v-col cols="12" sm="6">
           <!-- Starting Date -->
@@ -17,9 +18,9 @@
             v-model="military.showStartMenu"
             :close-on-content-click="false"
             transition="scale-transition"
-            offset-y
             max-width="290px"
             min-width="290px"
+            offset-y
           >
             <template v-slot:activator="{ on }">
               <v-text-field
@@ -30,18 +31,18 @@
                 prepend-icon="event_available"
                 hint="MM/YYYY format"
                 v-mask="'##/####'"
-                persistent-hint
                 v-on="on"
                 @blur="military.startDate = parseEventDate($event)"
-                clearable
                 @input="military.showStartMenu = false"
+                clearable
+                persistent-hint
               ></v-text-field>
             </template>
             <v-date-picker
               v-model="military.startDate"
-              no-title
               @input="military.showStartMenu = false"
               type="month"
+              no-title
             ></v-date-picker>
           </v-menu>
           <!-- End Starting Date -->
@@ -53,31 +54,31 @@
             v-model="military.showCompleteMenu"
             :close-on-content-click="false"
             transition="scale-transition"
-            offset-y
             max-width="290px"
             min-width="290px"
+            offset-y
           >
             <template v-slot:activator="{ on }">
               <v-text-field
                 ref="formFields"
                 :value="military.completeDate | formatDateMonthYear"
-                :rules="[...getDateMonthYearRules(), ...dateSubmissionRules()]"
+                :rules="[...dateSubmissionRules()]"
                 label="Completion Date"
                 prepend-icon="event_available"
                 hint="MM/YYYY format"
                 v-mask="'##/####'"
-                persistent-hint
                 v-on="on"
                 @blur="military.completeDate = parseEventDate($event)"
-                clearable
                 @input="military.showCompleteMenu = false"
+                clearable
+                persistent-hint
               ></v-text-field>
             </template>
             <v-date-picker
               v-model="military.completeDate"
-              no-title
               @input="military.showCompleteMenu = false"
               type="month"
+              no-title
             ></v-date-picker>
           </v-menu>
         </v-col>
@@ -154,7 +155,7 @@ export default {
     dateSubmissionRules: function () {
       return this.military.startDate && this.military.completeDate
         ? moment(this.military.startDate).isBefore(moment(this.military.completeDate)) ||
-            'Complete date must be before start date'
+            'Completion date must be after start date'
         : true;
     },
     parseDateMonthYear,
@@ -165,6 +166,7 @@ export default {
   },
   data() {
     return {
+      dodForces: ['Army', 'Marine Corps', 'Navy', 'Air Force', 'Space Force', 'Coast Guard', 'National Guard'], // subject to change per Paul
       military: { ..._.cloneDeep(this.$props.service), showStartMenu: false, showCompleteMenu: false }
     };
   },
