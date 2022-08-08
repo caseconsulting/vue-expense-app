@@ -23,7 +23,7 @@ moment.tz.setDefault('America/New_York');
  */
 async function mounted() {
   if (this.storeIsPopulated) {
-    this.degrees = await this.initDegrees();
+    this.educations = await this.initDegrees();
     await this.fillData();
   }
 } // mounted
@@ -42,7 +42,7 @@ function beforeDestroy() {
 // |--------------------------------------------------|
 
 /**
- * Initializes the degrees data field, this function retrieves the highest
+ * Initializes the educations data field, this function retrieves the highest
  * degree for each employee.
  *
  * @return array of objects - key: employee name, value: another array
@@ -87,6 +87,11 @@ function initDegrees() {
             type: 'High School',
             name: edu.name
           });
+        } else if (edu.type === 'military') {
+          highestDegrees.push({
+            type: 'Military',
+            name: edu.branch
+          });
         }
       });
       education = this.addToEducation(education, highestDegrees);
@@ -126,15 +131,15 @@ function addToEducation(education, highestEdus) {
       }
     } else {
       if (!education[highestEdu.type]) {
-        let schools = { [highestEdu.name]: 1 };
+        let schools = { [highestEdu.name || highestEdu.branch]: 1 };
         //if the name of the degree isnt in collection
         education[highestEdu.type] = schools;
       } else {
-        if (!education[highestEdu.type][highestEdu.name]) {
+        if (!education[highestEdu.type][highestEdu.name || highestEdu.branch]) {
           //used to update the count of each major
-          education[highestEdu.type][highestEdu.name] = 1;
+          education[highestEdu.type][highestEdu.name || highestEdu.branch] = 1;
         } else {
-          education[highestEdu.name][highestEdu.name] += 1;
+          education[highestEdu.name][highestEdu.name || highestEdu.branch] += 1;
         }
       }
     }
@@ -292,11 +297,11 @@ function getDegreeName(value) {
  */
 function fillData() {
   let quantities = [];
-  let labels = Object.keys(this.degrees);
-  console.log(this.degrees);
+  let labels = Object.keys(this.educations);
+  console.log(this.educations);
   _.forEach(labels, (education) => {
     let counts = 0;
-    _.forEach(this.degrees[education], (count) => {
+    _.forEach(this.educations[education], (count) => {
       console.log(education + ' ' + count);
       counts += count;
       this.degreeCount += count;
@@ -356,10 +361,10 @@ function fillData() {
  */
 function majorsEmit(edu) {
   let majorsOrSchoolsData = {};
-  majorsOrSchoolsData.majorsOrSchools = this.degrees[edu];
+  majorsOrSchoolsData.majorsOrSchools = this.educations[edu];
   majorsOrSchoolsData.eduKind = edu;
   this.showMajors = true;
-  let title = edu === 'High School' ? 'Top High Schools' : '';
+  let title = edu === 'High School' ? 'Top High Schools' : edu === 'Military' ? 'Top Military Branches' : '';
 
   window.EventBus.$emit('majors-update', majorsOrSchoolsData, title);
 } // majorsEmit
@@ -404,7 +409,7 @@ export default {
       dataReceived: false,
       options: null,
       chartData: null,
-      degrees: null,
+      educations: null,
       showMajors: false,
       degreeCount: 0
     };
@@ -427,7 +432,7 @@ export default {
   watch: {
     storeIsPopulated: function () {
       if (this.storeIsPopulated) {
-        this.degrees = this.initDegrees();
+        this.educations = this.initDegrees();
         this.fillData();
       }
     }
