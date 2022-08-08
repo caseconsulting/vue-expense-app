@@ -301,7 +301,9 @@ export function getCustomerOrgExp(exp) {
  */
 export function getEducation(education) {
   let str = '';
-  let result = [];
+  let university = [];
+  let military = [];
+  let highSchool = [];
   if (education) {
     _.forEach(education, (edu) => {
       // university type
@@ -343,26 +345,42 @@ export function getEducation(education) {
           }
 
           str += ' - ' + degree.completionDate;
-          result.push(str); // push each degree individually
+          university.push({ str, date: degree.completeDate }); // push each degree individually
         });
-      }
-
-      // high school type
-      if (edu.type === 'highSchool') {
-        str = `${edu.name}: ${moment(edu.year, 'YYYY-MM').format('MMM YYYY')}`;
-        result.push(str);
       }
 
       // military type
       if (edu.type === 'military') {
         str = `${edu.branch}: ${moment(edu.startDate, 'YYYY-MM').format('MMM YYYY')} - ${moment(
-          edu.completionDate,
+          edu.completeDate,
           'YYYY-MM'
         ).format('MMM YYYY')}`;
-        result.push(str);
+        military.push({ str, date: edu.completeDate });
+      }
+
+      // high school type
+      if (edu.type === 'highSchool') {
+        str = `${edu.name}: graduated ${moment(edu.gradDate, 'YYYY-MM').format('MMM YYYY')}`;
+        highSchool.push({ str, date: edu.gradDate });
       }
     });
   }
+  // sort entries, filter out string, and combine
+  university = _.sortBy(university, ['date']);
+  military = _.sortBy(military, ['date']);
+  highSchool = _.sortBy(highSchool, ['date']);
+  let result = [
+    ..._.map(university, (item) => {
+      return item.str;
+    }),
+    ..._.map(military, (item) => {
+      return item.str;
+    }),
+    ..._.map(highSchool, (item) => {
+      return item.str;
+    })
+  ];
+
   return result;
 } // getEducation
 
