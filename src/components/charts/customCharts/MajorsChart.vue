@@ -18,14 +18,15 @@ import PieChart from '../baseCharts/PieChart.vue';
  */
 async function mounted() {
   // emit comes from HighestDegreeChart when a pie slice is clicked
-  await window.EventBus.$on('majors-update', async (receiveMajors) => {
+  await window.EventBus.$on('majors-update', async (receiveData, title) => {
     this.quantities = [];
     this.labels = [];
     this.dataReceived = false;
-    let majors = receiveMajors.majors;
-    this.degree = receiveMajors.degree;
-    await this.fetchData(majors);
-    await this.fillData();
+    let majorsOrSchools = receiveData.majorsOrSchools;
+    this.eduKind = receiveData.eduKind;
+
+    await this.fetchData(majorsOrSchools);
+    await this.fillData(title);
   });
 } // mounted
 
@@ -52,24 +53,24 @@ function beforeDestroy() {
 // |--------------------------------------------------|
 
 /**
- * Gets all the major data.
- * @param majors The array of majors for a degree
+ * Gets all the major/school data.
+ * @param majorsOrSchools The array of majors/schools for an education kind
  */
-function fetchData(majors) {
-  if (majors) {
+function fetchData(majorsOrSchools) {
+  if (majorsOrSchools) {
     this.enabled = true;
-    const sortable = Object.entries(majors)
+    const sortable = Object.entries(majorsOrSchools)
       .sort(([, a], [, b]) => b - a)
       .reduce((r, [k, v]) => ({ ...r, [k]: v }), {});
 
     for (let i = 0; i < 10; i++) {
-      let major = Object.keys(sortable)[i];
-      if (major) {
-        this.quantities.push(sortable[major]);
-        this.labels.push(major);
+      let majorOrSchool = Object.keys(sortable)[i];
+      if (majorOrSchool) {
+        this.quantities.push(sortable[majorOrSchool]);
+        this.labels.push(majorOrSchool);
       }
     }
-    this.text = `Top ${this.degree} Degree Majors`;
+    this.text = `Top ${this.eduKind} Degree Majors`;
     this.colors = [
       'rgba(54, 162, 235, 1)',
       'rgba(255, 206, 86, 1)',
@@ -82,18 +83,20 @@ function fetchData(majors) {
       'rgba(66, 129, 164, 1)'
     ];
   } else {
-    //these presets are when a degree has not been selected
+    //these presets are when an education has not been selected
     this.quantities.push(1);
     this.enabled = false;
-    this.text = `Click on a Degree To See the Top Majors`;
+    this.text = `Click on an Education To See the Top Majors/Schools`;
     this.colors = ['grey'];
   }
 } //fetchData
 
 /**
  * Sets the chart formatting and options data.
+ *
+ * @param title the title to display if there is one
  */
-function fillData() {
+function fillData(title) {
   this.chartData = {
     labels: this.labels,
     datasets: [
@@ -107,7 +110,7 @@ function fillData() {
     plugins: {
       title: {
         display: true,
-        text: this.text,
+        text: title ? title : this.text,
         font: {
           size: 15
         }
@@ -134,9 +137,9 @@ export default {
     return {
       options: null,
       chartData: null,
-      majors: null,
+      majorsOrSchools: null,
       dataReceived: false,
-      degree: null,
+      kind: null,
       chartKey: 0,
       text: '',
       colors: [],
