@@ -65,7 +65,7 @@ async function created() {
 function fetchData(minors) {
   if (minors) {
     if (_.isEmpty(minors)) {
-      this.text = `There are no minors for a degree of ${this.degree}`;
+      this.text = `There are no minors for an education of ${this.degree}`;
       this.quantities.push(1);
       this.enabled = false;
       this.colors = ['grey'];
@@ -98,9 +98,9 @@ function fetchData(minors) {
   } else {
     //these presets are when a degree has not been selected OR if there are no minors
     if (!_.isEmpty(minors)) {
-      this.text = 'There are no minors for this type of degree';
+      this.text = 'There are no minors for this type of education';
     } else {
-      this.text = 'Click on a Degree To See Minors';
+      this.text = 'Click on an Education To See Minors';
     }
     this.quantities.push(1);
     this.enabled = false;

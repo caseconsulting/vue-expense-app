@@ -65,7 +65,7 @@ function beforeDestroy() {
 function fetchData(concentrations) {
   if (concentrations) {
     if (_.isEmpty(concentrations)) {
-      this.text = `There are no concentrations for a degree of ${this.degree}`;
+      this.text = `There are no concentrations for an education of ${this.degree}`;
       this.quantities.push(1);
       this.enabled = false;
       this.colors = ['grey'];
@@ -83,8 +83,6 @@ function fetchData(concentrations) {
           this.labels.push(con);
         }
       }
-      console.log(this.quantities);
-      console.log(this.labels);
       this.text = `Top ${this.degree} Degree Concentrations`;
       this.colors = [
         'rgba(54, 162, 235, 1)',
@@ -103,7 +101,7 @@ function fetchData(concentrations) {
     if (!_.isEmpty(concentrations)) {
       this.text = 'There are no concentrations for this type of degree';
     } else {
-      this.text = 'Click on a Degree To See Concentrations';
+      this.text = 'Click on an Education To See Concentrations';
     }
     this.quantities.push(1);
     this.enabled = false;

@@ -84,7 +84,8 @@ function initDegrees() {
           });
         } else if (edu.type === 'highSchool') {
           highestDegrees.push({
-            type: edu.type
+            type: 'High School',
+            name: edu.name
           });
         }
       });
@@ -125,13 +126,20 @@ function addToEducation(education, highestEdus) {
       }
     } else {
       if (!education[highestEdu.type]) {
+        let schools = { [highestEdu.name]: 1 };
         //if the name of the degree isnt in collection
-        education[highestEdu.type] = 1;
+        education[highestEdu.type] = schools;
       } else {
-        education[highestEdu.type] += 1;
+        if (!education[highestEdu.type][highestEdu.name]) {
+          //used to update the count of each major
+          education[highestEdu.type][highestEdu.name] = 1;
+        } else {
+          education[highestEdu.name][highestEdu.name] += 1;
+        }
       }
     }
   });
+
   return education;
 } // addToEducation
 
@@ -285,9 +293,11 @@ function getDegreeName(value) {
 function fillData() {
   let quantities = [];
   let labels = Object.keys(this.degrees);
-  _.forEach(labels, (degree) => {
+  console.log(this.degrees);
+  _.forEach(labels, (education) => {
     let counts = 0;
-    _.forEach(this.degrees[degree], (count) => {
+    _.forEach(this.degrees[education], (count) => {
+      console.log(education + ' ' + count);
       counts += count;
       this.degreeCount += count;
     });
@@ -326,7 +336,7 @@ function fillData() {
     plugins: {
       title: {
         display: true,
-        text: 'Highest Degrees Obtained by Employees',
+        text: 'Highest Educations Obtained by Employees',
         font: {
           size: 15
         }
@@ -339,17 +349,19 @@ function fillData() {
 
 /**
  * Sends data to create the second pie chart that displays
- * info about degree majors
+ * info about education majors/schools.
  *
- * @param degree - object that holds the name of the degree as a key and holds
- * a nested object w/ key of the major and value of the quantity
+ * @param edu - object that holds the name of the education as a key and holds
+ * a nested object w/ key of the major/school and value of the quantity
  */
-function majorsEmit(degree) {
-  let majorsData = {};
-  majorsData.majors = this.degrees[degree];
-  majorsData.degree = degree;
+function majorsEmit(edu) {
+  let majorsOrSchoolsData = {};
+  majorsOrSchoolsData.majorsOrSchools = this.degrees[edu];
+  majorsOrSchoolsData.eduKind = edu;
   this.showMajors = true;
-  window.EventBus.$emit('majors-update', majorsData);
+  let title = edu === 'High School' ? 'Top High Schools' : '';
+
+  window.EventBus.$emit('majors-update', majorsOrSchoolsData, title);
 } // majorsEmit
 
 /**
