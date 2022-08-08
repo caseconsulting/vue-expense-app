@@ -60,7 +60,7 @@ function initDegrees() {
           _.forEach(edu.degrees, (degree) => {
             if (moment(degree.completionDate).isBefore(moment(new Date()))) {
               if (highestDegrees.length != 0) {
-                let result = this.compareDegree(highestDegrees[0].name, degree.degreeType);
+                let result = this.compareDegree(highestDegrees[0].value, this.getDegreeValue(degree.degreeType));
                 //if a degree of a higher prestige is found, remove all previous entries
                 if (result === 1) {
                   highestDegrees.length = 0;
@@ -69,7 +69,9 @@ function initDegrees() {
                 if (result > -1) {
                   highestDegrees.push({
                     name: this.getDegreeName(this.getDegreeValue(degree.degreeType)),
-                    majors: degree.majors
+                    majors: degree.majors,
+                    type: edu.type,
+                    value: this.getDegreeValue(degree.degreeType)
                   });
                 }
               } else {
@@ -77,16 +79,35 @@ function initDegrees() {
                 highestDegrees.push({
                   name: this.getDegreeName(this.getDegreeValue(degree.degreeType)),
                   majors: degree.majors,
-                  type: edu.type
+                  type: edu.type,
+                  value: this.getDegreeValue(degree.degreeType)
                 });
               }
             }
           });
         } else if (edu.type === 'highSchool') {
-          highestDegrees.push({
-            type: 'High School',
-            name: edu.name
-          });
+          if (highestDegrees.length != 0) {
+            let result = this.compareDegree(highestDegrees[0].value, this.getDegreeValue(edu.type));
+            //if a degree of a higher prestige is found, remove all previous entries
+            if (result === 1) {
+              highestDegrees.length = 0;
+            }
+            //Adds to highestDegrees, excluding degrees with a lower prestige
+            if (result > -1) {
+              highestDegrees.push({
+                type: 'High School',
+                name: edu.name,
+                value: this.getDegreeValue(edu.type)
+              });
+            }
+          } else {
+            //Adds the first degree found to the array
+            highestDegrees.push({
+              type: 'High School',
+              name: edu.name,
+              value: this.getDegreeValue(edu.type)
+            });
+          }
         } else if (edu.type === 'military') {
           highestDegrees.push({
             type: 'Military',
@@ -158,8 +179,6 @@ function addToEducation(education, highestEdus) {
  * @return 0: degrees have the same prestige
  */
 function compareDegree(oldDegree, newDegree) {
-  oldDegree = this.getDegreeValue(oldDegree);
-  newDegree = this.getDegreeValue(newDegree);
   if (oldDegree > newDegree) {
     return -1;
   }
@@ -254,19 +273,22 @@ function getDegreeMinors(degreeName) {
  */
 function getDegreeValue(degree) {
   let degreeLower = degree.toLowerCase();
-  if (degreeLower.includes('associate')) {
+  if (degreeLower.includes('high')) {
     return 0;
   }
-  if (degreeLower.includes('bachelor')) {
+  if (degreeLower.includes('associate')) {
     return 1;
   }
-  if (degreeLower.includes('master')) {
+  if (degreeLower.includes('bachelor')) {
     return 2;
   }
-  if (degreeLower.includes('doctor') || degreeLower.includes('phd')) {
+  if (degreeLower.includes('master')) {
     return 3;
-  } else {
+  }
+  if (degreeLower.includes('doctor') || degreeLower.includes('phd')) {
     return 4;
+  } else {
+    return 5;
   }
 } // getDegreeValue
 
@@ -280,12 +302,14 @@ function getDegreeValue(degree) {
 function getDegreeName(value) {
   switch (value) {
     case 0:
-      return 'Associate';
+      return 'High School';
     case 1:
-      return 'Bachelor';
+      return 'Associate';
     case 2:
-      return 'Master';
+      return 'Bachelor';
     case 3:
+      return 'Master';
+    case 4:
       return 'PhD/Doctorate';
     default:
       return 'Other';
@@ -298,11 +322,9 @@ function getDegreeName(value) {
 function fillData() {
   let quantities = [];
   let labels = Object.keys(this.educations);
-  console.log(this.educations);
   _.forEach(labels, (education) => {
     let counts = 0;
     _.forEach(this.educations[education], (count) => {
-      console.log(education + ' ' + count);
       counts += count;
       this.degreeCount += count;
     });
