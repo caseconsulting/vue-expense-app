@@ -160,12 +160,15 @@ npm run test -- --tag logout
 ### Internal documentation
 
 **CSV utils**
+
 https://github.com/caseconsulting/vue-expense-app/blob/master/src/utils/csv/README.md
 
 **Charts and ChartJS**
+
 https://github.com/caseconsulting/vue-expense-app/blob/master/src/components/charts/README.md
 
 **Nightwatch utils**
+
 https://github.com/caseconsulting/vue-expense-app/blob/master/unitTests/utils/README.md
 
 ### External documentation
