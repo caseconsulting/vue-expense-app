@@ -835,57 +835,57 @@ async function created() {
   });
   // set tab error status
   window.EventBus.$on('awardStatus', (errorCount) => {
-    this.tabErrors.awards = errorCount > 0 ? true : false; //boolean if there are errors
+    this.tabErrors.awards = errorCount > 0; //boolean if there are errors
     this.addErrorTab('Awards', errorCount); //error count
   });
   // Starts listener to check the Certifications tab has any errors
   window.EventBus.$on('certificationsStatus', (errorCount) => {
-    this.tabErrors.certifications = errorCount > 0 ? true : false;
+    this.tabErrors.certifications = errorCount > 0;
     this.addErrorTab('Certifications', errorCount);
   });
   // Starts listener to check the Clearance tab has any errors
   window.EventBus.$on('clearanceStatus', (errorCount) => {
-    this.tabErrors.clearance = errorCount > 0 ? true : false;
+    this.tabErrors.clearance = errorCount > 0;
     this.addErrorTab('Clearance', errorCount);
   });
   // Starts listener to check the Contracts tab has any errors
   window.EventBus.$on('contractsStatus', (errorCount) => {
-    this.tabErrors.contracts = errorCount > 0 ? true : false;
+    this.tabErrors.contracts = errorCount > 0;
     this.addErrorTab('Contracts', errorCount);
   });
   // Starts listener to check the Customer Org tab has any errors
   window.EventBus.$on('customerOrgExpStatus', (errorCount) => {
-    this.tabErrors.customerOrgExp = errorCount > 0 ? true : false;
+    this.tabErrors.customerOrgExp = errorCount > 0;
     this.addErrorTab('Customer Org', errorCount);
   });
   // Starts listener to check the Education tab has any errors
   window.EventBus.$on('educationStatus', (errorCount) => {
-    this.tabErrors.education = errorCount > 0 ? true : false;
+    this.tabErrors.education = errorCount > 0;
     this.addErrorTab('Education', errorCount);
   });
   // Starts listener to check the Employee tab has any errors
   window.EventBus.$on('employeeStatus', (errorCount) => {
-    this.tabErrors.employee = errorCount > 0 ? true : false;
+    this.tabErrors.employee = errorCount > 0;
     this.addErrorTab('Employee', errorCount);
   });
   // Starts listener to check the Job Experience tab has any errors
   window.EventBus.$on('jobExperienceStatus', (errorCount) => {
-    this.tabErrors.jobExperience = errorCount > 0 ? true : false;
+    this.tabErrors.jobExperience = errorCount > 0;
     this.addErrorTab('Job Experience', errorCount);
   });
   // Starts listener to check the Languages tab has any errors
   window.EventBus.$on('languagesStatus', (errorCount) => {
-    this.tabErrors.languages = errorCount > 0 ? true : false;
+    this.tabErrors.languages = errorCount > 0;
     this.addErrorTab('Foreign Languages', errorCount);
   });
   // Starts listener to check the Personal tab has any errors
   window.EventBus.$on('personalStatus', (errorCount) => {
-    this.tabErrors.personal = errorCount > 0 ? true : false;
+    this.tabErrors.personal = errorCount > 0;
     this.addErrorTab('Personal', errorCount);
   });
   // Starts listener to check the Technologies tab has any errors
   window.EventBus.$on('technologiesStatus', (errorCount) => {
-    this.tabErrors.technologies = errorCount > 0 ? true : false;
+    this.tabErrors.technologies = errorCount > 0;
     this.addErrorTab('Technologies and Skills', errorCount);
   });
   // fills model in with populated fields in employee prop

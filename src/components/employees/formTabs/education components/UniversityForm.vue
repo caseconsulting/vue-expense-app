@@ -1,180 +1,182 @@
 Education
 <template>
   <div>
-    <!-- Name of School -->
-    <v-autocomplete
-      ref="formFields"
-      v-model="uni.name"
-      :items="schoolNamePlaceholder(uni.name)"
-      label="School"
-      data-vv-name="School"
-      clearable
-    ></v-autocomplete>
+    <div v-for="i in [0]" :key="i">
+      <!-- Name of School -->
+      <v-autocomplete
+        ref="formFields"
+        v-model="uni.name"
+        :rules="getRequiredRules()"
+        :items="schoolNamePlaceholder(uni.name)"
+        label="School"
+        data-vv-name="School"
+        clearable
+      ></v-autocomplete>
 
-    <div v-for="(degree, dIndex) in uni.degrees" :key="`${dIndex}`">
-      <!-- Name of Degree -->
-      <div v-if="uni.degrees.length === 1">
-        <v-select
-          ref="formFields"
-          v-model="degree.degreeType"
-          :rules="getRequiredRules()"
-          :items="degreeDropDown"
-          label="Degree"
-          data-vv-name="Degree"
-          clearable
-        >
-        </v-select>
-      </div>
-      <div v-else>
-        <v-select
-          ref="formFields"
-          v-model="degree.degreeType"
-          :rules="getRequiredRules()"
-          :items="degreeDropDown"
-          label="Degree"
-          data-vv-name="Degree"
-          clearable
-          append-outer-icon="delete"
-        >
-          <v-tooltip bottom slot="append-outer">
-            <template v-slot:activator="{ on }">
-              <v-btn v-on="on" @click="deleteDegree(dIndex)" text icon
-                ><v-icon class="case-gray pr-1">delete</v-icon></v-btn
-              >
-            </template>
-            <span>Delete Degree</span>
-          </v-tooltip>
-        </v-select>
-      </div>
-
-      <!-- Month and Year of Completion -->
-      <v-menu
-        v-model="degree.showEducationMenu"
-        :close-on-content-click="false"
-        transition="scale-transition"
-        offset-y
-        max-width="290px"
-        min-width="290px"
-      >
-        <template v-slot:activator="{ on }">
-          <v-text-field
+      <div v-for="(degree, dIndex) in uni.degrees" :key="`${dIndex}`">
+        <!-- Name of Degree -->
+        <div v-if="uni.degrees.length === 1">
+          <v-select
             ref="formFields"
-            :value="degree.completionDate | formatDateMonthYear"
-            label="Completion Date"
-            prepend-icon="event"
-            :rules="getDateMonthYearRules()"
-            hint="MM/YYYY format"
-            v-mask="'##/####'"
-            persistent-hint
-            v-on="on"
-            @blur="degree.completionDate = parseEventDate($event)"
+            v-model="degree.degreeType"
+            :rules="getRequiredRules()"
+            :items="degreeDropDown"
+            label="Degree"
+            data-vv-name="Degree"
             clearable
+          >
+          </v-select>
+        </div>
+        <div v-else>
+          <v-select
+            ref="formFields"
+            v-model="degree.degreeType"
+            :rules="getRequiredRules()"
+            :items="degreeDropDown"
+            label="Degree"
+            data-vv-name="Degree"
+            clearable
+            append-outer-icon="delete"
+          >
+            <v-tooltip bottom slot="append-outer">
+              <template v-slot:activator="{ on }">
+                <v-btn v-on="on" @click="deleteDegree(dIndex)" text icon
+                  ><v-icon class="case-gray pr-1">delete</v-icon></v-btn
+                >
+              </template>
+              <span>Delete Degree</span>
+            </v-tooltip>
+          </v-select>
+        </div>
+
+        <!-- Month and Year of Completion -->
+        <v-menu
+          v-model="degree.showEducationMenu"
+          :close-on-content-click="false"
+          transition="scale-transition"
+          offset-y
+          max-width="290px"
+          min-width="290px"
+        >
+          <template v-slot:activator="{ on }">
+            <v-text-field
+              ref="formFields"
+              :value="degree.completionDate | formatDateMonthYear"
+              label="Completion Date"
+              prepend-icon="event"
+              :rules="getDateMonthYearRules()"
+              hint="MM/YYYY format"
+              v-mask="'##/####'"
+              persistent-hint
+              v-on="on"
+              @blur="degree.completionDate = parseEventDate($event)"
+              clearable
+              @input="degree.showEducationMenu = false"
+            ></v-text-field>
+          </template>
+          <v-date-picker
+            v-model="degree.completionDate"
+            no-title
             @input="degree.showEducationMenu = false"
-          ></v-text-field>
-        </template>
-        <v-date-picker
-          v-model="degree.completionDate"
-          no-title
-          @input="degree.showEducationMenu = false"
-          type="month"
-        ></v-date-picker>
-      </v-menu>
-      <!-- End Month and Year of Completion -->
+            type="month"
+          ></v-date-picker>
+        </v-menu>
+        <!-- End Month and Year of Completion -->
 
-      <!-- Majors -->
-      <!-- Loop Majors -->
-      <div v-for="(major, mIndex) in degree.majors" :key="'major: ' + major + mIndex">
         <!-- Majors -->
-        <v-combobox
-          ref="formFields"
-          v-model="degree.majors[mIndex]"
-          :rules="[...getRequiredRules(), duplicateDiscipline('majors', major, dIndex)]"
-          :items="majorDropDown"
-          label="Major"
-          data-vv-name="Major"
-          clearable
-        >
-          <v-tooltip v-if="degree.majors.length > 1" bottom slot="append-outer">
-            <template v-slot:activator="{ on }">
-              <v-btn text icon v-on="on" @click="deleteItem(degree.majors, mIndex)"
-                ><v-icon class="case-gray">delete</v-icon></v-btn
-              >
-            </template>
-            <span>Delete Major</span>
-          </v-tooltip>
-        </v-combobox>
-      </div>
-      <!-- End Loop Majors -->
-      <!-- Button to Add Major -->
-      <div align="center" class="py-2">
-        <v-btn @click="addItem(degree.majors)" depressed outlined small>Add a Major</v-btn>
-      </div>
-      <!-- End Majors -->
+        <!-- Loop Majors -->
+        <div v-for="(major, mIndex) in degree.majors" :key="'major: ' + major + mIndex">
+          <!-- Majors -->
+          <v-combobox
+            ref="formFields"
+            v-model="degree.majors[mIndex]"
+            :rules="[...getRequiredRules(), duplicateDiscipline('majors', major, dIndex)]"
+            :items="majorDropDown"
+            label="Major"
+            data-vv-name="Major"
+            clearable
+          >
+            <v-tooltip v-if="degree.majors.length > 1" bottom slot="append-outer">
+              <template v-slot:activator="{ on }">
+                <v-btn text icon v-on="on" @click="deleteItem(degree.majors, mIndex)"
+                  ><v-icon class="case-gray">delete</v-icon></v-btn
+                >
+              </template>
+              <span>Delete Major</span>
+            </v-tooltip>
+          </v-combobox>
+        </div>
+        <!-- End Loop Majors -->
+        <!-- Button to Add Major -->
+        <div align="center" class="py-2">
+          <v-btn @click="addItem(degree.majors)" depressed outlined small>Add a Major</v-btn>
+        </div>
+        <!-- End Majors -->
 
-      <!-- Minors -->
-      <!-- Loops Minors -->
-      <div v-for="(minor, mIndex) in degree.minors" :key="'minor: ' + minor + mIndex">
-        <v-autocomplete
-          ref="formFields"
-          v-model="degree.minors[mIndex]"
-          :rules="[...getRequiredRules(), duplicateDiscipline('minors', minor, dIndex)]"
-          :items="minorDropDown"
-          label="Minor"
-          data-vv-name="Minor"
-          clearable
-        >
-          <v-tooltip bottom slot="append-outer">
-            <template v-slot:activator="{ on }">
-              <v-btn text icon v-on="on" @click="deleteItem(degree.minors, mIndex)">
-                <v-icon class="case-gray">delete</v-icon>
-              </v-btn>
-            </template>
-            <span>Delete Minor</span>
-          </v-tooltip>
-        </v-autocomplete>
-      </div>
-      <!-- End Loops Minors -->
-      <!-- Button to Add Minor -->
-      <div align="center" class="py-2">
-        <v-btn @click="addItem(degree.minors)" depressed outlined small>Add a Minor</v-btn>
-      </div>
-      <!-- End Minors -->
+        <!-- Minors -->
+        <!-- Loops Minors -->
+        <div v-for="(minor, mIndex) in degree.minors" :key="'minor: ' + minor + mIndex">
+          <v-autocomplete
+            ref="formFields"
+            v-model="degree.minors[mIndex]"
+            :rules="[...getRequiredRules(), duplicateDiscipline('minors', minor, dIndex)]"
+            :items="minorDropDown"
+            label="Minor"
+            data-vv-name="Minor"
+            clearable
+          >
+            <v-tooltip bottom slot="append-outer">
+              <template v-slot:activator="{ on }">
+                <v-btn text icon v-on="on" @click="deleteItem(degree.minors, mIndex)">
+                  <v-icon class="case-gray">delete</v-icon>
+                </v-btn>
+              </template>
+              <span>Delete Minor</span>
+            </v-tooltip>
+          </v-autocomplete>
+        </div>
+        <!-- End Loops Minors -->
+        <!-- Button to Add Minor -->
+        <div align="center" class="py-2">
+          <v-btn @click="addItem(degree.minors)" depressed outlined small>Add a Minor</v-btn>
+        </div>
+        <!-- End Minors -->
 
-      <!-- Concentrations -->
-      <!-- Loop Concentrations -->
-      <div v-for="(concentration, cIndex) in degree.concentrations" :key="'conc: ' + concentration + cIndex">
-        <v-autocomplete
-          ref="formFields"
-          v-model="degree.concentrations[cIndex]"
-          :rules="[...getRequiredRules(), duplicateDiscipline('concentrations', concentration, dIndex)]"
-          :items="concentrationDropDown"
-          data-vv-name="Concentration"
-          clearable
-          label="Concentration"
-        >
-          <v-tooltip bottom slot="append-outer">
-            <template v-slot:activator="{ on }">
-              <v-btn text icon v-on="on" @click="deleteItem(degree.concentrations, cIndex)">
-                <v-icon class="case-gray">delete</v-icon>
-              </v-btn>
-            </template>
-            <span>Delete Concentration</span>
-          </v-tooltip>
-        </v-autocomplete>
+        <!-- Concentrations -->
+        <!-- Loop Concentrations -->
+        <div v-for="(concentration, cIndex) in degree.concentrations" :key="'conc: ' + concentration + cIndex">
+          <v-autocomplete
+            ref="formFields"
+            v-model="degree.concentrations[cIndex]"
+            :rules="[...getRequiredRules(), duplicateDiscipline('concentrations', concentration, dIndex)]"
+            :items="concentrationDropDown"
+            data-vv-name="Concentration"
+            clearable
+            label="Concentration"
+          >
+            <v-tooltip bottom slot="append-outer">
+              <template v-slot:activator="{ on }">
+                <v-btn text icon v-on="on" @click="deleteItem(degree.concentrations, cIndex)">
+                  <v-icon class="case-gray">delete</v-icon>
+                </v-btn>
+              </template>
+              <span>Delete Concentration</span>
+            </v-tooltip>
+          </v-autocomplete>
+        </div>
+        <!-- End Loop Concentrations -->
+        <!-- Button to Add Concentration -->
+        <div align="center" class="py-2">
+          <v-btn @click="addItem(degree.concentrations)" depressed outlined small>Add a Concentration</v-btn>
+        </div>
+        <!-- End Concentrations -->
       </div>
-      <!-- End Loop Concentrations -->
-      <!-- Button to Add Concentration -->
-      <div align="center" class="py-2">
-        <v-btn @click="addItem(degree.concentrations)" depressed outlined small>Add a Concentration</v-btn>
+      <!-- Button to Add Degrees -->
+      <div class="pt-4" align="center">
+        <v-btn @click="addDegree()" elevation="2"><v-icon class="pr-1">add</v-icon>Degree</v-btn>
       </div>
-      <!-- End Concentrations -->
-    </div>
-    <!-- Button to Add Degrees -->
-    <div class="pt-4" align="center">
-      <v-btn @click="addDegree()" elevation="2"><v-icon class="pr-1">add</v-icon>Degree</v-btn>
-    </div>
-    <!--  BELOW IS RESUME PARSER STUFF -->
-    <!-- <div v-if="!allowAdditions" align="center" class="pb-4">
+      <!--  BELOW IS RESUME PARSER STUFF -->
+      <!-- <div v-if="!allowAdditions" align="center" class="pb-4">
       <v-tooltip top>
         <template v-slot:activator="{ on }">
           <v-icon v-on="on" large right color="red" @click="denyEducation">close</v-icon>
@@ -188,6 +190,7 @@ Education
         <span>Add Pending Change</span>
       </v-tooltip>
     </div> -->
+    </div>
   </div>
   <!-- End Loop Education -->
 </template>
@@ -365,7 +368,13 @@ function updateDropdowns() {
  * Validate all input fields are valid.
  */
 function validateFields() {
-  window.EventBus.$emit('doneValidatingEducation', this.uni, this.schoolIndex); // emit done validating
+  let errorCount = 0;
+  //ensures that refs are put in an array so we can reuse forEach loop
+  let components = !_.isArray(this.$refs.formFields) ? [this.$refs.formFields] : this.$refs.formFields;
+  _.forEach(components, (field) => {
+    if (field && !field.validate()) errorCount++;
+  });
+  window.EventBus.$emit('doneValidatingEducation', this.uni, this.schoolIndex, errorCount); // emit done validating
 } // validateFields
 
 // |--------------------------------------------------|
@@ -379,11 +388,8 @@ function validateFields() {
  *
  * @param val - val prop that needs to exist before validating
  */
-function watchValidating(val) {
-  if (val) {
-    // parent component triggers validation
-    this.validateFields();
-  }
+function watchValidating() {
+  if (this.validating) this.validateFields();
 } // watchValidating
 
 // |--------------------------------------------------|

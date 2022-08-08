@@ -76,14 +76,17 @@ import _ from 'lodash';
 async function created() {
   window.EventBus.$emit('created', 'education');
 
-  window.EventBus.$on('doneValidatingEducation', async (content, index) => {
+  window.EventBus.$on('doneValidatingEducation', async (content, index, errorCount) => {
     this.editedEducation[index] = content;
     this.eduCount++;
+    this.numErrors += errorCount;
 
     if (this.eduCount === this.editedEducation.length) {
+      window.EventBus.$emit('educationStatus', this.numErrors); // emit error status
       window.EventBus.$emit('doneValidating', 'education', this.editedEducation); // emit done validating
-      window.EventBus.$emit('educationStatus', 0); // emit error status
-      window.EventBus.$off('doneValidatingEducation'); // emit done validating
+      if (this.numErrors === 0) window.EventBus.$off('doneValidatingEducation');
+      this.numErrors = 0; // just in case
+      this.eduCount = 0; // just in case
     }
   });
 } // created
@@ -167,13 +170,11 @@ function getRandId() {
  *
  * @param val - val prop that needs to exist before validating
  */
-function watchValidating(val) {
-  if (val) {
-    if (this.editedEducation.length === 0) {
-      window.EventBus.$emit('doneValidating', 'education', this.editedEducation); // emit done validating
-      window.EventBus.$emit('educationStatus', 0); // emit error status
-      window.EventBus.$off('doneValidatingEducation'); // emit done validating
-    }
+function watchValidating() {
+  if (this.editedEducation.length === 0) {
+    window.EventBus.$emit('doneValidating', 'education', this.editedEducation); // emit done validating
+    window.EventBus.$emit('educationStatus', 0); // emit error status
+    window.EventBus.$off('doneValidatingEducation'); // emit done validating
   }
 } // watchValidating
 
@@ -194,7 +195,8 @@ export default {
           ...item,
           id: this.getRandId()
         };
-      }) // stores edited education info
+      }), // stores edited education info
+      numErrors: 0
     };
   },
   methods: {
