@@ -164,7 +164,7 @@ function addToEducation(education, highestEdus) {
           //used to update the count of each major
           education[highestEdu.type][highestEdu.name || highestEdu.branch] = 1;
         } else {
-          education[highestEdu.name][highestEdu.name || highestEdu.branch] += 1;
+          education[highestEdu.type][highestEdu.name || highestEdu.branch] += 1;
         }
       }
     }
