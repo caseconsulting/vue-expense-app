@@ -119,6 +119,17 @@ moment.tz.setDefault('America/New_York');
 // |--------------------------------------------------|
 
 /**
+ * Rules for submitting dates relative to each other, for
+ * start and end dates of service
+ */
+function dateSubmissionRules() {
+  return this.military.startDate && this.military.completeDate
+    ? moment(this.military.startDate).isBefore(moment(this.military.completeDate)) ||
+        'Completion date must be after start date'
+    : true;
+}
+
+/**
  * Emits confirmation to resume parser
  *
  * @input include - whether or not to include this education
@@ -177,16 +188,8 @@ export default {
     formatDateMonthYear
   },
   methods: {
-<<<<<<< HEAD
-    dateSubmissionRules: function () {
-      return this.military.startDate && this.military.completeDate
-        ? moment(this.military.startDate).isBefore(moment(this.military.completeDate)) ||
-            'Completion date must be after start date'
-        : true;
-    },
-=======
+    dateSubmissionRules,
     emitToParser,
->>>>>>> 2ba8408d (POR-1881-fix-education-in-resume-parser: finished)
     parseDateMonthYear,
     parseEventDate,
     validateFields,
