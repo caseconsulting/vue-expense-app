@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div :class="parser ? 'gray-border py-3' : ''">
     <div v-for="i in [0]" :key="i">
       <!-- Name of Branch -->
       <v-autocomplete
@@ -85,6 +85,22 @@
         <!-- End Completed Date -->
       </v-row>
     </div>
+    <!-- Resume Parser Buttons -->
+    <div v-if="parser" class="center">
+      <v-tooltip top>
+        <template v-slot:activator="{ on }">
+          <v-icon v-on="on" large right color="red" @click="emitToParser(false)">close</v-icon>
+        </template>
+        <span>Ignore Pending Change</span>
+      </v-tooltip>
+      <v-tooltip top>
+        <template v-slot:activator="{ on }">
+          <v-icon v-on="on" large left color="green" @click="emitToParser(true)">done</v-icon>
+        </template>
+        <span>Add Pending Change</span>
+      </v-tooltip>
+    </div>
+    <!-- End Resume Parser Buttons -->
   </div>
 </template>
 
@@ -101,6 +117,15 @@ moment.tz.setDefault('America/New_York');
 // |                     METHODS                      |
 // |                                                  |
 // |--------------------------------------------------|
+
+/**
+ * Emits confirmation to resume parser
+ *
+ * @input include - whether or not to include this education
+ */
+function emitToParser(include) {
+  this.$emit(include ? 'confirm' : 'deny', include ? this.military : undefined);
+} // emitToParser
 
 /**
  * Parse the date after losing focus.
@@ -146,18 +171,22 @@ function watchValidating() {
 // |--------------------------------------------------|
 
 export default {
-  props: ['service', 'militaryIndex', 'validating'],
+  props: ['parser', 'service', 'militaryIndex', 'validating'],
   directives: { mask },
   filters: {
     formatDateMonthYear
   },
   methods: {
+<<<<<<< HEAD
     dateSubmissionRules: function () {
       return this.military.startDate && this.military.completeDate
         ? moment(this.military.startDate).isBefore(moment(this.military.completeDate)) ||
             'Completion date must be after start date'
         : true;
     },
+=======
+    emitToParser,
+>>>>>>> 2ba8408d (POR-1881-fix-education-in-resume-parser: finished)
     parseDateMonthYear,
     parseEventDate,
     validateFields,

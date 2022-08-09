@@ -1,6 +1,5 @@
-Education
 <template>
-  <div>
+  <div :class="parser ? 'gray-border py-3' : ''">
     <div v-for="i in [0]" :key="i">
       <!-- Name of School -->
       <v-autocomplete
@@ -12,7 +11,6 @@ Education
         data-vv-name="School"
         clearable
       ></v-autocomplete>
-
       <div v-for="(degree, dIndex) in uni.degrees" :key="`${dIndex}`">
         <!-- Name of Degree -->
         <div v-if="uni.degrees.length === 1">
@@ -175,21 +173,21 @@ Education
       <div class="pt-4" align="center">
         <v-btn @click="addDegree()" elevation="2"><v-icon class="pr-1">add</v-icon>Degree</v-btn>
       </div>
-      <!--  BELOW IS RESUME PARSER STUFF -->
-      <!-- <div v-if="!allowAdditions" align="center" class="pb-4">
+    </div>
+    <!-- Resume Parser Buttons -->
+    <div v-if="parser" class="center">
       <v-tooltip top>
         <template v-slot:activator="{ on }">
-          <v-icon v-on="on" large right color="red" @click="denyEducation">close</v-icon>
+          <v-icon v-on="on" large right color="red" @click="emitToParser(false)">close</v-icon>
         </template>
         <span>Ignore Pending Change</span>
       </v-tooltip>
       <v-tooltip top>
         <template v-slot:activator="{ on }">
-          <v-icon v-on="on" large left color="green" @click="confirmEducation">done</v-icon>
+          <v-icon v-on="on" large left color="green" @click="emitToParser(true)">done</v-icon>
         </template>
         <span>Add Pending Change</span>
       </v-tooltip>
-    </div> -->
     </div>
   </div>
   <!-- End Loop Education -->
@@ -248,11 +246,13 @@ async function created() {
 // |--------------------------------------------------|
 
 /**
- * Emits a message if the education is denied by user.
+ * Emits confirmation to resume parser
+ *
+ * @input include - whether or not to include this education
  */
-function denyEducation() {
-  this.$emit('deny');
-} // denyEducation
+function emitToParser(include) {
+  this.$emit(include ? 'confirm' : 'deny', include ? this.uni : undefined);
+} // emitToParser
 
 /**
  * Parse the date after losing focus.
@@ -422,7 +422,7 @@ export default {
     formatDateMonthYear
   },
   methods: {
-    denyEducation,
+    emitToParser,
     getDateMonthYearRules,
     getRequiredRules,
     parseEventDate,
@@ -437,7 +437,7 @@ export default {
     validateFields
   },
   //Education index is only used in the resume parser
-  props: ['validating', 'allowAdditions', 'school', 'schoolIndex'],
+  props: ['parser', 'validating', 'allowAdditions', 'school', 'schoolIndex'],
   watch: {
     validating: watchValidating
   }
