@@ -39,6 +39,7 @@ export function convertEmployees(employees) {
       'Place of Birth': placeOfBirth || '',
       'Hire Date': employee.hireDate || '',
       'Job Role': employee.jobRole || '',
+      AIN: employee.agencyIdentificationNumber || '',
       Email: employee.email || '',
       'Mifi Status': employee.mifiStatus != undefined && employee.mifiStatus != null ? employee.mifiStatus : 'true',
       Twitter: employee.twitter || '',
@@ -191,7 +192,7 @@ export function getProjectLengthInYears(project) {
 /**
   * This is the old `getContracts` which puts everything in one string. I get the feeling
   * that we will want the functionality for something in the future because the new method
-  * that was requested seems significantly less convenient. This comment is being made on 
+  * that was requested seems significantly less convenient. This comment is being made on
   * Aug 1, 2022; if it's wayyy into the future as you're reading this and nothing has been
   * brought up, you can probably delete this chunk of commented code.
   *

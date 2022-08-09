@@ -97,7 +97,7 @@
           :search="search"
           mobile-breakpoint="800"
           item-key="employeeNumber"
-          class="elevation-1"
+          class="elevation-1 employees-table"
           @click:row="handleClick"
         >
           <!-- Delete Action Item Slot -->
@@ -693,3 +693,9 @@ export default {
   }
 };
 </script>
+
+<style>
+.employees-table > div > table > tbody {
+  cursor: pointer;
+}
+</style>

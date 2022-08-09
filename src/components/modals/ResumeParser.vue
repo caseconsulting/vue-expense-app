@@ -304,18 +304,35 @@
               </v-col>
             </v-row>
             <v-form
-              v-for="(education, index) in newEducation"
+              v-for="(edu, index) in newEducation"
               :key="index"
               :ref="'education' + index"
               class="ma-xl-5 ma-lg-5 ma-md-0"
             >
               <university-form
-                v-if="!education.canceled"
-                :allowAdditions="false"
-                :model="[education]"
-                @deny="education.canceled = true"
+                v-if="!edu.canceled && edu.type === 'university'"
+                :parser="true"
+                :school="edu"
+                :schoolIndex="index"
+                @deny="edu.canceled = true"
                 @confirm="submitInfo('education', index, $event)"
               ></university-form>
+              <high-school-form
+                v-else-if="!edu.canceled && edu.type === 'highSchool'"
+                :parser="true"
+                :school="edu"
+                :schoolIndex="index"
+                @deny="edu.canceled = true"
+                @confirm="submitInfo('education', index, $event)"
+              ></high-school-form>
+              <military-form
+                v-else-if="!edu.canceled && edu.type === 'military'"
+                :parser="true"
+                :service="edu"
+                :militaryIndex="index"
+                @deny="edu.canceled = true"
+                @confirm="submitInfo('education', index, $event)"
+              ></military-form>
             </v-form>
           </div>
         </span>
@@ -389,6 +406,8 @@ import { isEmpty, isSmallScreen } from '@/utils/utils';
 import _ from 'lodash';
 import CancelConfirmation from '@/components/modals/CancelConfirmation.vue';
 import UniversityForm from '@/components/employees/formTabs/education components/UniversityForm.vue';
+import MilitaryForm from '@/components/employees/formTabs/education components/MilitaryForm.vue';
+import HighSchoolForm from '@/components/employees/formTabs/education components/HighSchoolForm.vue';
 import FormSubmissionConfirmation from '@/components/modals/FormSubmissionConfirmation.vue';
 import { v4 as uuid } from 'uuid';
 
@@ -828,7 +847,8 @@ async function submit() {
       return entity.Type === 'ORGANIZATION';
     });
 
-    // Go through organization an see if they are a school
+    // Go through organization an see if they are a university, high school, or military
+    let dodForces = ['Army', 'Marine Corps', 'Navy', 'Air Force', 'Space Force', 'Coast Guard', 'National Guard'];
     for (let i = 0; i < educationComprehend.length; i++) {
       let educationEntity = educationComprehend[i];
       let collegeList = await api.getColleges(educationEntity.Text);
@@ -836,14 +856,13 @@ async function submit() {
       if (collegeList.length == 1) {
         // Remove duplicate
         if (
-          (!this.employee.schools ||
-            (this.employee.schools &&
-              this.employee.schools.length > 0 &&
-              this.employee.schools.filter((e) => e.name === collegeList[0]).length == 0)) &&
-          this.newEducation.filter((e) => e.name === collegeList[0]).length == 0
+          (!this.employee.education ||
+            this.employee.education.filter((e) => e.name && e.name === collegeList[0]).length == 0) &&
+          this.newEducation.filter((e) => e.name && e.name === collegeList[0]).length == 0
         ) {
           this.newEducation.push({
             name: collegeList[0],
+            type: 'university',
             degrees: [
               {
                 completionDate: null,
@@ -854,6 +873,39 @@ async function submit() {
                 showEducationMenu: false
               }
             ],
+            canceled: false
+          });
+        }
+      } else if (
+        educationEntity.Text.toLowerCase().includes('high school') &&
+        (!this.employee.education ||
+          this.employee.education.filter((e) => e.name && e.name.toLowerCase() == educationEntity.Text.toLowerCase())
+            .length == 0) &&
+        this.newEducation.filter((e) => e.name && e.name.toLowerCase() == educationEntity.Text.toLowerCase()).length ==
+          0
+      ) {
+        this.newEducation.push({
+          name: educationEntity.Text,
+          type: 'highSchool',
+          gradDate: null,
+          canceled: false
+        });
+      } else {
+        // check all military
+        let mil = _.filter(dodForces, (f) => {
+          return educationEntity.Text.toLowerCase().includes(f.toLowerCase());
+        });
+        if (
+          mil.length == 1 &&
+          (!this.employee.education ||
+            this.employee.education.filter((e) => e.branch && e.branch === mil[0]).length == 0) &&
+          this.newEducation.filter((e) => e.branch && e.branch === mil[0]).length == 0
+        ) {
+          this.newEducation.push({
+            branch: mil[0],
+            type: 'military',
+            startDate: null,
+            completeDate: null,
             canceled: false
           });
         }
@@ -979,17 +1031,36 @@ function submitInfo(field, value, newValue) {
     });
   } else if (field === 'education' && this.$refs['education' + value][0].validate()) {
     this.newEducation[value].canceled = true;
-    this.newEducation[value].name = newValue[0].name;
-    this.newEducation[value].degrees = newValue[0].degrees;
+    this.newEducation[value].name = newValue.name;
+    this.newEducation[value].degrees = newValue.degrees;
     // Create fields in editedEmployeeForm if they don't exist
-    if (!this.editedEmployeeForm.schools) {
-      this.$set(this.editedEmployeeForm, 'schools', []);
+    if (!this.editedEmployeeForm.education) {
+      this.$set(this.editedEmployeeForm, 'education', []);
     }
-    // Add new education
-    this.editedEmployeeForm.schools.push({
-      name: this.newEducation[value].name,
-      degrees: this.newEducation[value].degrees
-    });
+    // Build correct structure, filters out fields we don't care about
+    let toAdd = {};
+    if (this.newEducation[value].type === 'university') {
+      toAdd = {
+        type: newValue.type,
+        degrees: newValue.degrees,
+        name: newValue.name
+      };
+    } else if (this.newEducation[value].type === 'military') {
+      toAdd = {
+        type: newValue.type,
+        branch: newValue.branch,
+        startDate: newValue.startDate,
+        completeDate: newValue.completeDate
+      };
+    } else if (this.newEducation[value].type === 'highSchool') {
+      toAdd = {
+        type: newValue.type,
+        gradDate: newValue.gradDate,
+        name: newValue.name
+      };
+    }
+    // Add education
+    this.editedEmployeeForm.education.push(toAdd);
   }
 } // submitInfo
 
@@ -1090,6 +1161,8 @@ export default {
   components: {
     CancelConfirmation,
     UniversityForm,
+    MilitaryForm,
+    HighSchoolForm,
     FormSubmissionConfirmation
   },
   computed: {

@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div :class="parser ? 'gray-border py-3' : ''">
     <div v-for="i in [0]" :key="i">
       <!-- Name of School -->
       <v-text-field
@@ -42,6 +42,22 @@
         ></v-date-picker>
       </v-menu>
       <!-- End Received Date -->
+      <!-- Resume Parser Buttons -->
+      <div v-if="parser" class="center">
+        <v-tooltip top>
+          <template v-slot:activator="{ on }">
+            <v-icon v-on="on" large right color="red" @click="emitToParser(false)">close</v-icon>
+          </template>
+          <span>Ignore Pending Change</span>
+        </v-tooltip>
+        <v-tooltip top>
+          <template v-slot:activator="{ on }">
+            <v-icon v-on="on" large left color="green" @click="emitToParser(true)">done</v-icon>
+          </template>
+          <span>Add Pending Change</span>
+        </v-tooltip>
+      </div>
+      <!-- End Resume Parser Buttons -->
     </div>
   </div>
 </template>
@@ -57,6 +73,15 @@ import { formatDateMonthYear, parseDateMonthYear } from '@/utils/utils';
 // |                     METHODS                      |
 // |                                                  |
 // |--------------------------------------------------|
+
+/**
+ * Emits confirmation to resume parser
+ *
+ * @input include - whether or not to include this education
+ */
+function emitToParser(include) {
+  this.$emit(include ? 'confirm' : 'deny', include ? this.highSchool : undefined);
+} // emitToParser
 
 /**
  * Parse the date after losing focus.
@@ -102,12 +127,13 @@ function watchValidating() {
 // |--------------------------------------------------|
 
 export default {
-  props: ['school', 'schoolIndex', 'validating'],
+  props: ['parser', 'school', 'schoolIndex', 'validating'],
   directives: { mask },
   filters: {
     formatDateMonthYear
   },
   methods: {
+    emitToParser,
     parseDateMonthYear,
     parseEventDate,
     validateFields,
