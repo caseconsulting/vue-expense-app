@@ -86,33 +86,37 @@ function initDegrees() {
             }
           });
         } else if (edu.type === 'highSchool') {
-          if (highestDegrees.length != 0) {
-            let result = this.compareDegree(highestDegrees[0].value, this.getDegreeValue(edu.type));
-            //if a degree of a higher prestige is found, remove all previous entries
-            if (result === 1) {
-              highestDegrees.length = 0;
-            }
-            //Adds to highestDegrees, excluding degrees with a lower prestige
-            if (result > -1) {
+          if (moment(edu.gradDate).isBefore(moment(new Date()))) {
+            if (highestDegrees.length != 0) {
+              let result = this.compareDegree(highestDegrees[0].value, this.getDegreeValue(edu.type));
+              //if a degree of a higher prestige is found, remove all previous entries
+              if (result === 1) {
+                highestDegrees.length = 0;
+              }
+              //Adds to highestDegrees, excluding degrees with a lower prestige
+              if (result > -1) {
+                highestDegrees.push({
+                  type: 'High School',
+                  name: edu.name,
+                  value: this.getDegreeValue(edu.type)
+                });
+              }
+            } else {
+              //Adds the first degree found to the array
               highestDegrees.push({
                 type: 'High School',
                 name: edu.name,
                 value: this.getDegreeValue(edu.type)
               });
             }
-          } else {
-            //Adds the first degree found to the array
-            highestDegrees.push({
-              type: 'High School',
-              name: edu.name,
-              value: this.getDegreeValue(edu.type)
-            });
           }
         } else if (edu.type === 'military') {
-          highestDegrees.push({
-            type: 'Military',
-            name: edu.branch
-          });
+          if (moment(edu.startDate).isBefore(moment(new Date()))) {
+            highestDegrees.push({
+              type: 'Military',
+              name: edu.branch
+            });
+          }
         }
       });
       education = this.addToEducation(education, highestDegrees);
