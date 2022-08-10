@@ -42,6 +42,7 @@ import moment from 'moment-timezone';
 import api from '@/shared/api.js';
 import _ from 'lodash';
 import { asyncForEach, isMobile, isSmallScreen } from '@/utils/utils.js';
+import { updateStoreExpenseTypes } from '@/utils/storeUtils';
 moment.tz.setDefault('America/New_York');
 
 // |--------------------------------------------------|
@@ -112,7 +113,12 @@ function checkCertifications() {
 
 async function checkReimbursements() {
   // api to get all expenses for user, filtering out inactive expense types
-  let expenses = await api.getAllEmployeeExpenses(this.user.id);
+  let expenses;
+  [expenses] = await Promise.all([
+    api.getAllEmployeeExpenses(this.user.id),
+    !this.$store.getters.expenseTypes ? this.updateStoreExpenseTypes() : ''
+  ]);
+
   let expenseTypes = _.filter(this.$store.getters.expenseTypes, (t) => {
     return !t.isInactive;
   });
@@ -266,7 +272,8 @@ export default {
     isMobile,
     isSmallScreen,
     randId,
-    onProfile
+    onProfile,
+    updateStoreExpenseTypes
   }
 };
 </script>
