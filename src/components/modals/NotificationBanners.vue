@@ -12,7 +12,7 @@
         <p class="ma-0" style="display: inline-block">{{ alert.message }}</p>
         <div :class="getButtonStyling()">
           <v-btn
-            :disabled="onPage(alert.handler.page)"
+            :disabled="onProfile()"
             @click="handleClick(alert.handler.page, alert.handler.extras)"
             class="justify-center black--text notif-action-btn"
             elevation="0"
@@ -221,9 +221,9 @@ function randId() {
  *
  * @return boolean - checks to see if the current banner is on user profile
  */
-function onPage(pageName) {
-  return this.$route.params.name == pageName;
-} // onPage
+function onProfile() {
+  return this.$route.params.id == this.user.employeeNumber;
+} // onProfile
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -266,7 +266,7 @@ export default {
     isMobile,
     isSmallScreen,
     randId,
-    onPage
+    onProfile
   }
 };
 </script>
