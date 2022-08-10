@@ -139,7 +139,7 @@
           v-if="this.reqRecipient"
           :items="this.recipientOptions"
           :rules="getRequiredRules()"
-          :disabled="isReimbursed"
+          :disabled="isInactive || isReimbursed"
           v-model="editedExpense.recipient"
           label="Recipient"
           id="recipient"
