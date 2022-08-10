@@ -26,11 +26,11 @@
             </v-list>
           </v-menu>
           <hr class="my-1" />
-          <employees-chart-tab v-if="statsTab === 'employees'"></employees-chart-tab>
-          <education-chart-tab v-if="statsTab === 'education'"></education-chart-tab>
-          <tech-chart-tab v-if="statsTab === 'technology'"></tech-chart-tab>
-          <certifications-chart-tab v-if="statsTab === 'certifications'"></certifications-chart-tab>
-          <customer-org-chart-tab v-if="statsTab === 'customer Org'"></customer-org-chart-tab>
+          <employees-chart-tab v-if="statsTab === 'employees' && dataLoaded"></employees-chart-tab>
+          <education-chart-tab v-if="statsTab === 'education' && dataLoaded"></education-chart-tab>
+          <tech-chart-tab v-if="statsTab === 'technology' && dataLoaded"></tech-chart-tab>
+          <certifications-chart-tab v-if="statsTab === 'certifications' && dataLoaded"></certifications-chart-tab>
+          <customer-org-chart-tab v-if="statsTab === 'customer Org' && dataLoaded"></customer-org-chart-tab>
         </div>
         <!-- user is not mobile -->
         <v-tabs v-else color="basil" center-active grow show-arrows class="" @change="changeTab">
