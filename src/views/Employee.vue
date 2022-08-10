@@ -227,11 +227,12 @@ async function getProfileData() {
   this.basicEmployeeDataLoading = false;
   if (this.model) {
     [this.hasResume, this.expenses] = await Promise.all([
-      api.getResume(this.$route.params.id) != null,
+      api.getResume(this.$route.params.id),
       api.getAllAggregateExpenses(),
       !this.$store.getters.expenseTypes ? this.updateStoreExpenseTypes() : '',
       this.checkForBudgetAccess()
     ]);
+    this.hasResume = this.hasResume != null; // update this.hasResume to be boolean
     this.expenseTypes = this.$store.getters.expenseTypes;
     this.fiscalDateView = this.getCurrentBudgetYear(this.model.hireDate);
     this.hasAccessToBudgets = this.accessibleBudgets.length !== 0; // enable budget chart
