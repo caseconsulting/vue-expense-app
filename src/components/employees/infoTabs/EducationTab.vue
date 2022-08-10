@@ -60,7 +60,7 @@
           <p class="mb-0"><b>Type: </b>Military</p>
           <p class="my-0"><b>Branch: </b>{{ edu.branch }}</p>
           <p class="my-0"><b>Start Date: </b>{{ monthYearFormat(edu.startDate) }}</p>
-          <p class="my-0" v-if="edu.completeDate"><b>Completion Date: </b>{{ edu.completeDate }}</p>
+          <p class="my-0" v-if="edu.completeDate"><b>Completion Date: </b>{{ monthYearFormat(edu.completeDate) }}</p>
         </div>
         <!-- End Military Services Loop -->
 
