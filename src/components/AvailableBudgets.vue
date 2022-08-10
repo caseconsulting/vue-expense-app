@@ -8,7 +8,7 @@
         <h3 v-else class="white--text px-2">Available Budgets</h3>
       </v-card-title>
       <v-card-text class="px-7 pt-5 pb-1 black--text">
-        <div v-if="this.loading" class="pb-4">
+        <div v-if="this.loading || employeeDataLoading" class="pb-4">
           <v-progress-linear :indeterminate="true"></v-progress-linear>
         </div>
         <div v-else>
@@ -69,7 +69,9 @@ async function created() {
     this.showDialog = false;
   });
   this.currentUser = this.$store.getters.user;
-  await this.refreshEmployee();
+  if (this.accessibleBudgets) {
+    await this.refreshEmployee();
+  }
   this.loading = false;
 } // created
 
@@ -185,8 +187,7 @@ async function refreshEmployee() {
   if (!this.date) {
     this.date = this.getCurrentBudgetYear(this.hireDate);
   }
-  let [tmp, allUserBudgets] = await Promise.all([this.refreshBudget(), api.getEmployeeBudgets(this.employee.id)]);
-  tmp; // unused so we can parallelize the two api calls
+  let [allUserBudgets] = await Promise.all([api.getEmployeeBudgets(this.employee.id), this.refreshBudget()]);
   this.allUserBudgets = allUserBudgets;
 } // refreshEmployee
 
@@ -260,7 +261,12 @@ export default {
     refreshEmployee,
     selectBudget
   },
-  props: ['employee', 'expenses', 'expenseTypes', 'accessibleBudgets', 'fiscalDateView']
+  props: ['employee', 'expenses', 'expenseTypes', 'accessibleBudgets', 'fiscalDateView', 'employeeDataLoading'],
+  watch: {
+    accessibleBudgets: async function () {
+      await this.refreshEmployee();
+    }
+  }
 };
 </script>
 

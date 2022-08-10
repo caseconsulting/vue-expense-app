@@ -135,7 +135,16 @@ async function setPTOBalances() {
   this.employee = this.isEmployeeView ? this.passedEmployee : this.$store.getters.user;
   if (!this.isEmpty(this.employee.id)) {
     // employee exists
-    let ptoBalances = await api.getPTOBalances(this.employee.employeeNumber); // call api
+    let ptoBalances;
+    if (!this.$store.getters.quickbooksPTO || this.$store.getters.user.id != this.employee.id) {
+      ptoBalances = await api.getPTOBalances(this.employee.employeeNumber); // call api
+      if (this.$store.getters.user.id == this.employee.id) {
+        // only set vuex store if the user is looking at their own quickbooks data
+        this.$store.dispatch('setQuickbooksPTO', { quickbooksPTO: ptoBalances });
+      }
+    } else {
+      ptoBalances = this.$store.getters.quickbooksPTO;
+    }
     if (_.isNil(ptoBalances.results)) {
       // error getting pto balances
       this.balancesError = true;

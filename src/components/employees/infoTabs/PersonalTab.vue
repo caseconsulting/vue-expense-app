@@ -1,17 +1,19 @@
 <template>
-  <div v-if="childrenVisible" class="infoTab" id="personalTab">
+  <div v-if="childrenVisible" class="infoTab wrapper" id="personalTab">
     <!-- GitHub -->
     <p v-if="!isEmpty(this.model.github)">
-      <b>Github: </b><a :href="'https://github.com/' + this.model.github" target="_blank"> {{ this.model.github }}</a>
+      <v-icon class="mr-1">mdi-github</v-icon>
+      <a :href="'https://github.com/' + this.model.github" target="_blank">{{ this.model.github }}</a>
     </p>
     <!-- Twitter -->
     <p v-if="!isEmpty(this.model.twitter)">
-      <b>Twitter: </b
-      ><a :href="'https://twitter.com/' + this.model.twitter" target="_blank"> {{ this.model.twitter }}</a>
+      <v-icon class="mr-1">mdi-twitter</v-icon>
+      <a :href="'https://twitter.com/' + this.model.twitter" target="_blank">{{ this.model.twitter }}</a>
     </p>
     <!-- LinkedIn -->
     <p v-if="!isEmpty(this.model.linkedIn)">
-      <b>LinkedIn: </b><a :href="this.model.linkedIn" target="_blank"> {{ this.model.linkedIn }}</a>
+      <v-icon class="mr-1">mdi-linkedin</v-icon>
+      <a :href="this.model.linkedIn" target="_blank">{{ this.model.linkedIn }}</a>
     </p>
     <!-- Phone Number -->
     <p v-if="!isEmpty(getPhoneNumbers()) && (userIsAdmin() || userIsEmployee() || userIsManager())">
@@ -45,15 +47,15 @@
         <v-list-item v-for="number in getPhoneNumbers()" :key="number.number">
           <v-list-item-content>
             <v-list-item-subtitle class="mb-1"> {{ number.type }}</v-list-item-subtitle>
-            <v-list-item-title
-              >{{ number.number }}<span v-if="number.ext"> (Ext. {{ number.ext }})</span></v-list-item-title
-            >
+            <v-list-item-title>
+              {{ number.number }}<span v-if="number.ext"> (Ext. {{ number.ext }})</span>
+            </v-list-item-title>
           </v-list-item-content>
         </v-list-item>
       </v-list>
     </p>
     <!-- Birthday -->
-    <p v-if="!isEmpty(this.model.birthday) && (admin || employee)">
+    <p v-if="!isEmpty(this.model.birthday) && (admin || employee)" :class="isBday ? 'clickable' : ''" @click="confetti">
       <b>Birthday:</b> {{ monthDayYearFormat(this.model.birthday) }}
     </p>
     <!-- Birthday Feed -->
@@ -73,6 +75,8 @@
 <script>
 import { isEmpty, monthDayYearFormat } from '@/utils/utils';
 import { getRole } from '@/utils/auth';
+const moment = require('moment-timezone');
+moment.tz.setDefault('America/New_York');
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -226,6 +230,34 @@ function getPhoneNumbers() {
   return phoneNumbers;
 } // getPhoneNumbers
 
+/**
+ * Allows the user to utilize their cursor and clicking functionality
+ * as a method of element generation that uses the CSS visual effects
+ */
+function confetti() {
+  if (this.isBday()) {
+    console.log('It is not your birthday!');
+    return;
+  }
+  let wrapper = document.getElementsByClassName('wrapper')[0];
+  let numConfetti = 150;
+  for (let i = 0; i < numConfetti; i++) {
+    let newDiv = document.createElement('div');
+    newDiv.classList.add(`confetti-${i}`);
+    var delay = Math.floor(Math.random() * 7);
+    setTimeout(function () {
+      wrapper.prepend(newDiv);
+    }, delay * 1000);
+  }
+} // confetti
+
+/**
+ * Returns true if it is the user's birthday today
+ */
+function isBday() {
+  return moment().format('MM-DD') != moment(this.model.birthday).format('MM-DD');
+} // isBday
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                      EXPORT                      |
@@ -265,6 +297,8 @@ export default {
   },
   methods: {
     checkEmptyPersonalInfo,
+    confetti,
+    isBday,
     isEmpty,
     getRole,
     monthDayYearFormat,
@@ -276,3 +310,41 @@ export default {
   props: ['admin', 'employee', 'model']
 };
 </script>
+
+<style lang="scss">
+.clickable {
+  cursor: pointer;
+}
+
+.wrapper {
+  position: relative;
+}
+
+[class|='confetti'] {
+  position: absolute;
+}
+
+$colors: (#d13447, #ffbf00, #263672);
+
+@for $i from 0 through 150 {
+  $w: random(8);
+  $l: random(98);
+  .confetti-#{$i} {
+    width: #{$w}px;
+    height: #{$w * 0.4}px;
+    background-color: nth($colors, random(3));
+    top: -10%;
+    left: unquote($l + '%');
+    opacity: random() + 0.5;
+    transform: rotate(#{random() * 360}deg);
+    animation: drop-#{$i} unquote(4 + random() + 's') unquote(random() + 's') infinite;
+  }
+
+  @keyframes drop-#{$i} {
+    100% {
+      top: 110%;
+      left: unquote($l + random(15) + '%');
+    }
+  }
+}
+</style>

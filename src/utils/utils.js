@@ -1,6 +1,8 @@
+import api from '@/shared/api.js';
 import dateUtils from '@/shared/dateUtils';
 import MobileDetect from 'mobile-detect';
 import _ from 'lodash';
+import { v4 as uuid } from 'uuid';
 const IsoFormat = 'YYYY-MM-DD';
 const moment = require('moment-timezone');
 moment.tz.setDefault('America/New_York');
@@ -220,6 +222,30 @@ export function parseDate(date) {
 export function parseDateMonthYear(date) {
   return dateUtils.parseDateMonthYear(date);
 } // parseDateMonthYear
+
+/**
+ * Updates the login date and creates audit for the employee.
+ * @param {employee} employee the employee to update
+ */
+export async function updateEmployeeLogin(employee) {
+  await Promise.all([
+    api.updateItem(api.EMPLOYEES, employee), // updates last logged in for employee
+    api.createItem(api.AUDIT, {
+      id: uuid(),
+      type: 'login',
+      tags: ['account'],
+      employeeId: employee.id,
+      description: `${employee.firstName} ${employee.lastName} has logged in`,
+      timeToLive: 60
+    })
+  ]); // Create an audit of the success
+  if (this.$store.getters.employees) {
+    let employees = this.$store.getters.employees;
+    let i = employees.findIndex((emp) => emp.id === employee.id);
+    employees[i] = employee;
+    this.$store.dispatch('setLoginTime', { employees });
+  }
+} // updateEmployee
 
 /**
  * Checks if the state management store is populated or not.

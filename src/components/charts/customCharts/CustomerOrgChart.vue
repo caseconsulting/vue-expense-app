@@ -1,6 +1,6 @@
 <template>
   <v-card v-if="dataReceived" class="pa-5">
-    <pie-chart :options="options" :chartData="chartData"></pie-chart>
+    <pie-chart ref="pieChart" :key="chartKey" chartId="cust-org" :options="options" :chartData="chartData"></pie-chart>
     <v-container class="ma-0">
       <v-row justify="center" no-gutters>
         <v-radio-group row v-model="showCurrent">
@@ -27,20 +27,30 @@ import { storeIsPopulated } from '@/utils/utils.js';
 /**
  * created lifecycle hook
  */
-function created() {
-  if (this.storeIsPopulated) this.fillData();
+async function created() {
+  if (this.storeIsPopulated) {
+    await this.fetchData();
+    await this.fillData();
+  }
 } // created
+
+/**
+ * Calls the destroy chart function in the base chart.
+ */
+function beforeDestroy() {
+  this.$refs.pieChart.destroyChart();
+} // beforeDestroy
 
 // |--------------------------------------------------|
 // |                                                  |
-// |                      METHODS                     |
+// |                     METHODS                      |
 // |                                                  |
 // |--------------------------------------------------|
 
 /**
- * Sets up the chart formatting and data options.
+ * Get all cust org data.
  */
-function fillData() {
+function fetchData() {
   let allCompOrgExp = {};
   // access store
   this.employees = this.$store.getters.employees;
@@ -64,19 +74,25 @@ function fillData() {
       });
     }
   });
+  let labels = Object.keys(allCompOrgExp);
+  this.quantities = [];
+
+  _.forEach(labels, (label) => {
+    this.quantities.push(allCompOrgExp[label]);
+  });
+  this.labels = labels;
+}
+
+/**
+ * Sets up the chart formatting and data options.
+ */
+function fillData() {
   let text = '';
   let colors = [];
   let enabled = true;
-  let labels = Object.keys(allCompOrgExp);
-  let quantities = [];
-
-  _.forEach(labels, (label) => {
-    quantities.push(allCompOrgExp[label]);
-  });
-
-  if (_.isEmpty(quantities)) {
+  if (_.isEmpty(this.quantities)) {
     text = 'No Customer Org Data Found';
-    quantities.push(1);
+    this.quantities.push(1);
     enabled = false;
     colors = ['grey'];
   } else {
@@ -88,32 +104,35 @@ function fillData() {
       'rgba(255, 99, 132, 1)',
       'rgba(230, 184, 156, 1)',
       'rgba(234, 210, 172, 1)',
-      'rgba(156, 175, 183, 1)',
+      'rgba(156, 175,this. 183, 1)',
       'rgba(66, 129, 164, 1)'
     ];
     text = `${this.showCurrent} Customer Org Experience (Years)`;
   }
   this.chartData = {
-    labels: labels,
+    labels: this.labels,
     datasets: [
       {
-        data: quantities,
+        data: this.quantities,
         backgroundColor: colors
       }
     ]
   };
 
   this.options = {
-    title: {
-      display: true,
-      text: text,
-      fontSize: 15
+    plugins: {
+      title: {
+        display: true,
+        text: text,
+        font: {
+          size: 15
+        }
+      },
+      tooltip: {
+        enabled: enabled
+      }
     },
-
-    maintainAspectRatio: false,
-    tooltips: {
-      enabled: enabled
-    }
+    maintainAspectRatio: false
   };
 
   this.dataReceived = true;
@@ -129,7 +148,9 @@ function fillData() {
  * watcher for showCurrent - fills data
  */
 function watchShowCurrent() {
+  this.fetchData();
   this.fillData(); // renders a different chart every time the radio button changes
+  this.chartKey++; // rerenders the chart
 } // watchShowCurrent
 
 // |--------------------------------------------------|
@@ -149,15 +170,22 @@ export default {
       chartData: null,
       options: null,
       employees: null,
-      showCurrent: 'All'
+      showCurrent: 'All',
+      chartKey: 0,
+      labels: [],
+      quantities: []
     };
   },
-  methods: { fillData },
+  methods: { fetchData, fillData },
+  beforeDestroy,
   created,
   watch: {
     showCurrent: watchShowCurrent,
     storeIsPopulated: function () {
-      if (this.storeIsPopulated) this.fillData();
+      if (this.storeIsPopulated) {
+        this.fetchData();
+        this.fillData();
+      }
     }
   }
 };

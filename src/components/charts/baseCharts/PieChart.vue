@@ -1,6 +1,11 @@
-<script>
-import { Pie, mixins } from 'vue-chartjs';
+<template>
+  <div class="chart-wrapper">
+    <canvas :id="chartId"></canvas>
+  </div>
+</template>
 
+<script>
+import Chart from 'chart.js/auto';
 // |--------------------------------------------------|
 // |                                                  |
 // |                 LIFECYCLE HOOKS                  |
@@ -11,23 +16,27 @@ import { Pie, mixins } from 'vue-chartjs';
  * mounted lifecycle hook
  */
 function mounted() {
-  setTimeout(() => {
-    this.renderChart(this.chartData, this.options);
-  }, 0);
+  const canvas = document.getElementById(this.chartId);
+  const ctx = canvas.getContext('2d');
+  this.chart = new Chart(ctx, {
+    type: 'pie',
+    data: this.chartData,
+    options: { ...this.options, responsive: true }
+  });
 } // mounted
 
 // |--------------------------------------------------|
 // |                                                  |
-// |                     WATCHERS                      |
+// |                      METHODS                     |
 // |                                                  |
 // |--------------------------------------------------|
 
 /**
- * watcher for options - re-render chart
+ * Destroys the instance of the current chart.
  */
-function watchOptions() {
-  this.renderChart(this.chartData, this.options);
-} // watchOptions
+function destroyChart() {
+  this.chart.destroy();
+} //destroyChart
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -36,16 +45,29 @@ function watchOptions() {
 // |--------------------------------------------------|
 
 export default {
-  extends: Pie,
-  mixins: [mixins.reactiveProp],
   mounted,
   props: [
     'chartData', // chart data to render
-    'options' // chart options
+    'options', // chart options
+    'chartId' // id for the canvas
   ],
-  watch: {
-    //used to update chart if any changes made to options
-    options: watchOptions
+  methods: {
+    destroyChart
+  },
+  data() {
+    return {
+      chart: null
+    };
   }
 };
 </script>
+
+<style>
+.chart-wrapper {
+  width: 100%;
+  height: 400px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+</style>

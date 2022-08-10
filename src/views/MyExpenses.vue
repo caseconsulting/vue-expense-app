@@ -168,7 +168,7 @@
             :sort-by.sync="sortBy"
             :sort-desc.sync="sortDesc"
             :expanded.sync="expanded"
-            :loading="loading"
+            :loading="loading || initialPageLoading"
             :items-per-page="15"
             :search="search"
             item-key="id"
@@ -281,7 +281,7 @@
                         <b>Description: </b>
                         {{ item.description }}
                       </p>
-                      <p v-if="item.recipient">
+                      <p v-if="item.recipient && !initialPageLoading">
                         <b>Recipient: </b>
                         {{ getEmployee(item.recipient) }}
                       </p>
@@ -337,7 +337,7 @@
     <!-- Expense Form -->
     <v-col v-if="isAdmin || !userIsInactive" cols="12" lg="4">
       <expense-form
-        v-if="!loading"
+        v-if="!initialPageLoading"
         ref="form"
         :isEdit="isEditing"
         :expense="expense"
@@ -361,7 +361,7 @@ import ExpenseForm from '@/components/ExpenseForm.vue';
 import UnreimburseModal from '@/components/modals/UnreimburseModal.vue';
 import _ from 'lodash';
 import { isEmpty, monthDayYearFormat, convertToMoneyString, isMobile } from '@/utils/utils';
-import { updateStoreBudgets } from '@/utils/storeUtils';
+import { updateStoreBudgets, updateStoreExpenseTypes, updateStoreEmployees } from '@/utils/storeUtils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -700,9 +700,16 @@ function isReimbursed(expense) {
 } // isReimbursed
 
 async function loadMyExpensesData() {
-  await this.refreshExpenses();
+  this.initialPageLoading = true;
+  this.loading = true;
   // get user info, defaulting to params if exists
   this.userInfo = this.$route.params.defaultEmployee || this.$store.getters.user;
+  await Promise.all([
+    !this.$store.getters.expenseTypes ? this.updateStoreExpenseTypes() : '',
+    !this.$store.getters.employees ? this.updateStoreEmployees() : '',
+    this.updateStoreBudgets(),
+    this.refreshExpenses()
+  ]);
 
   // get expense types
   let expenseTypes = this.$store.getters.expenseTypes;
@@ -726,6 +733,8 @@ async function loadMyExpensesData() {
       alwaysOnFeed: expenseType.alwaysOnFeed
     };
   });
+  this.loading = false;
+  this.initialPageLoading = false;
 }
 
 /**
@@ -1012,6 +1021,7 @@ export default {
       ], // datatable headers
       isEditing: false, //whether or not an expense is being edited
       loading: true, // loading status
+      initialPageLoading: true, // loading the page on startup
       midAction: false,
       propExpense: {
         id: null,
@@ -1071,7 +1081,9 @@ export default {
     toTopOfForm,
     unreimburseExpense,
     updateModelInTable,
+    updateStoreEmployees,
     updateStoreBudgets,
+    updateStoreExpenseTypes,
     useInactiveStyle
   },
   watch: {

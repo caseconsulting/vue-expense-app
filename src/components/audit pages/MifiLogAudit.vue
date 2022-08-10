@@ -2,7 +2,12 @@
   <v-container fluid>
     <v-row>
       <v-col>
-        <pie-chart v-if="chartLoaded" :options="mifiChartOptions" :chartData="mifiChartData"></pie-chart>
+        <pie-chart
+          v-if="chartLoaded"
+          chartId="mifi-audit"
+          :options="mifiChartOptions"
+          :chartData="mifiChartData"
+        ></pie-chart>
       </v-col>
     </v-row>
     <audit-table :audits="mifiAudits"></audit-table>
@@ -108,16 +113,20 @@ async function fillData() {
   };
 
   this.mifiChartOptions = {
-    title: {
-      display: true,
-      text: title,
-      fontSize: 15
+    plugins: {
+      title: {
+        display: true,
+        text: title,
+        font: {
+          size: 15
+        }
+      },
+      tooltip: {
+        enabled: showToolTips
+      }
     },
 
-    maintainAspectRatio: false,
-    tooltips: {
-      enabled: showToolTips
-    }
+    maintainAspectRatio: false
   };
   this.chartLoaded = true;
 } // fillData

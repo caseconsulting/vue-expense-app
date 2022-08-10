@@ -1,4 +1,4 @@
-/*
+/**
  * Helpful references
  * https://vuejs-tips.github.io/vuex-cheatsheet/
  * https://vuex.vuejs.org/
@@ -21,6 +21,7 @@ export default new Vuex.Store({
   state() {
     return {
       basecampAvatars: null,
+      basecampCampfires: null,
       employees: null,
       employeeNumber: null,
       expenseTypes: null,
@@ -29,12 +30,18 @@ export default new Vuex.Store({
       user: null,
       userRole: null,
       events: null,
-      budgets: null
+      budgets: null,
+      loginTime: null,
+      quickbooksPTO: null,
+      quickbooksMonthlyHours: null
     };
   },
   mutations: {
     setBasecampAvatars(state, payload) {
       state.basecampAvatars = payload.basecampAvatars;
+    },
+    setBasecampCampfires(state, payload) {
+      state.basecampCampfires = payload.basecampCampfires;
     },
     setEmployees(state, payload) {
       state.employees = payload.employees;
@@ -55,11 +62,23 @@ export default new Vuex.Store({
     },
     setBudgets(state, payload) {
       state.budgets = payload.budgets;
+    },
+    setLoginTime(state, payload) {
+      state.loginTime = payload.loginTime;
+    },
+    setQuickbooksPTO(state, payload) {
+      state.quickbooksPTO = payload.quickbooksPTO;
+    },
+    setQuickbooksMonthlyHours(state, payload) {
+      state.quickbooksMonthlyHours = payload.quickbooksMonthlyHours;
     }
   },
   actions: {
     setBasecampAvatars(context, payload) {
       context.commit('setBasecampAvatars', payload);
+    },
+    setBasecampCampfires(context, payload) {
+      context.commit('setBasecampCampfires', payload);
     },
     setEmployees(context, payload) {
       context.commit('setEmployees', payload);
@@ -78,11 +97,23 @@ export default new Vuex.Store({
     },
     setBudgets(context, payload) {
       context.commit('setBudgets', payload);
+    },
+    setLoginTime(context, payload) {
+      context.commit('setLoginTime', payload);
+    },
+    setQuickbooksPTO(context, payload) {
+      context.commit('setQuickbooksPTO', payload);
+    },
+    setQuickbooksMonthlyHours(context, payload) {
+      context.commit('setQuickbooksMonthlyHours', payload);
     }
   },
   getters: {
     basecampAvatars(state) {
       return state.basecampAvatars;
+    },
+    basecampCampfires(state) {
+      return state.basecampCampfires;
     },
     employees(state) {
       return state.employees;
@@ -107,6 +138,15 @@ export default new Vuex.Store({
     },
     budgets(state) {
       return state.budgets;
+    },
+    loginTime(state) {
+      return state.loginTime;
+    },
+    quickbooksPTO(state) {
+      return state.quickbooksPTO;
+    },
+    quickbooksMonthlyHours(state) {
+      return state.quickbooksMonthlyHours;
     }
   }
 });

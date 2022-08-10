@@ -54,13 +54,13 @@
         >
       </v-col>
     </v-row>
-    <v-row v-if="loading" class="my-10" justify="center">
+    <v-row v-if="basicEmployeeDataLoading" class="my-10" justify="center">
       <v-progress-circular :size="70" :width="7" color="#bc3825" indeterminate></v-progress-circular>
     </v-row>
     <v-row v-else class="pt-0">
       <!-- QuickBooks Time and Budgets-->
       <v-col v-if="displayQuickBooksTimeAndBalances" cols="12" md="5" lg="4" class="pt-0">
-        <quick-books-time-data :employee="this.model" class="mb-6"></quick-books-time-data>
+        <quick-books-time-data :employee="this.model" class="mb-4"></quick-books-time-data>
         <available-budgets
           class="mb-4"
           v-if="this.model.id"
@@ -68,11 +68,13 @@
           :expenses="expenses"
           :expenseTypes="expenseTypes"
           :accessibleBudgets="accessibleBudgets"
+          :employeeDataLoading="loading"
         ></available-budgets>
         <anniversary-card
-          v-if="!minimizeWindow"
+          v-if="!loading"
           :employee="this.model"
           :hasBudgets="this.hasAccessToBudgets"
+          location="profile"
         ></anniversary-card>
       </v-col>
 
@@ -118,22 +120,20 @@
         </v-card>
         <!-- Edit Info (Form) -->
         <employee-form :employee="this.model" :currentTab="this.currentTab" v-if="editing"></employee-form>
-        <anniversary-card
-          v-if="minimizeWindow"
-          :employee="this.model"
-          :hasBudgets="this.hasAccessToBudgets"
-          class="mt-2"
-        ></anniversary-card>
-        <budget-chart
-          v-if="(userIsAdmin() || userIsEmployee()) && hasAccessToBudgets"
-          class="pt-4"
-          :employee="this.model"
-          :accessibleBudgets="accessibleBudgets"
-          :expenses="expenses"
-          :expenseTypes="expenseTypes"
-          :fiscalDateView="fiscalDateView"
-        ></budget-chart>
+        <div class="mt-4">
+          <budget-chart
+            v-if="(userIsAdmin() || userIsEmployee()) && hasAccessToBudgets"
+            :employee="this.model"
+            :accessibleBudgets="accessibleBudgets"
+            :expenses="expenses"
+            :expenseTypes="expenseTypes"
+            :fiscalDateView="fiscalDateView"
+          ></budget-chart>
+        </div>
       </v-col>
+    </v-row>
+    <v-row>
+      <v-col cols="12"> </v-col>
     </v-row>
     <resume-parser
       v-if="!loading && !editing"
@@ -152,7 +152,8 @@ import EmployeeForm from '@/components/employees/EmployeeForm.vue';
 import EmployeeInfo from '@/components/employees/EmployeeInfo.vue';
 import QuickBooksTimeData from '@/components/QuickBooksTimeData.vue';
 import { getRole } from '@/utils/auth';
-import { getCurrentBudgetYear, isMobile, storeIsPopulated } from '@/utils/utils.js';
+import { getCurrentBudgetYear, isEmpty, isMobile, storeIsPopulated } from '@/utils/utils.js';
+import { updateStoreBudgets, updateStoreEmployees, updateStoreExpenseTypes, updateStoreUser } from '@/utils/storeUtils';
 import _ from 'lodash';
 import ConvertEmployeeToCsv from '../components/ConvertEmployeeToCsv.vue';
 import AnniversaryCard from '@/components/AnniversaryCard.vue';
@@ -207,20 +208,34 @@ async function downloadResume() {
  */
 async function getProfileData() {
   this.loading = true;
-  let employees = this.$store.getters.employees;
-  this.model = _.find(employees, (employee) => {
-    return employee.employeeNumber == this.$route.params.id;
-  });
-  if (this.model) {
-    this.user = this.$store.getters.user;
-    await this.checkForBudgetAccess();
+  await Promise.all([
+    !this.$store.getters.employees ? this.updateStoreEmployees() : '',
+    !this.$store.getters.user ? this.updateStoreUser() : ''
+  ]);
+  if (this.$store.getters.user.employeeNumber == this.$route.params.id) {
+    this.model = this.$store.getters.user;
     this.role = this.getRole();
-    this.loading = false;
-    this.displayQuickBooksTimeAndBalances = this.userIsAdmin() || this.userIsEmployee();
-    this.fiscalDateView = this.getCurrentBudgetYear(this.model.hireDate);
-    this.hasResume = (await api.getResume(this.$route.params.id)) != null;
-    this.expenses = await api.getAllAggregateExpenses();
+  } else {
+    let employees = this.$store.getters.employees;
+    this.model = _.find(employees, (employee) => {
+      return employee.employeeNumber == this.$route.params.id;
+    });
+  }
+  this.user = this.$store.getters.user;
+  this.role = this.getRole();
+  this.displayQuickBooksTimeAndBalances = this.userIsAdmin() || this.userIsEmployee();
+  this.basicEmployeeDataLoading = false;
+  if (this.model) {
+    [this.hasResume, this.expenses] = await Promise.all([
+      api.getResume(this.$route.params.id) != null,
+      api.getAllAggregateExpenses(),
+      !this.$store.getters.expenseTypes ? this.updateStoreExpenseTypes() : '',
+      this.checkForBudgetAccess()
+    ]);
     this.expenseTypes = this.$store.getters.expenseTypes;
+    this.fiscalDateView = this.getCurrentBudgetYear(this.model.hireDate);
+    this.hasAccessToBudgets = this.accessibleBudgets.length !== 0; // enable budget chart
+    this.loading = false;
   }
   this.loading = false;
 } // getProfileData
@@ -301,14 +316,12 @@ async function deleteResume() {
  */
 async function checkForBudgetAccess() {
   if (this.userIsEmployee()) {
+    if (!this.$store.getters.budgets) {
+      await this.updateStoreBudgets();
+    }
     this.accessibleBudgets = this.$store.getters.budgets;
   } else {
     this.accessibleBudgets = await api.getAllActiveEmployeeBudgets(this.model.id);
-  }
-
-  if (this.accessibleBudgets.length == 0) {
-    // does not have access to any budgets
-    this.hasAccessToBudgets = false; // disable budget chart
   }
 } // checkForBudgetAccess
 
@@ -340,6 +353,7 @@ async function created() {
       this.hasResume = newResume;
     }
   });
+  this.basicEmployeeDataLoading = true;
   this.storeIsPopulated ? await this.getProfileData() : (this.loading = true);
 } // created
 
@@ -414,7 +428,7 @@ export default {
     return {
       currentTab: null,
       deleteLoading: false,
-      displayQuickBooksTimeAndBalances: true,
+      displayQuickBooksTimeAndBalances: false,
       editing: false,
       expenses: null,
       expenseTypes: null,
@@ -427,6 +441,7 @@ export default {
       loading: false, // loading status
       model: {
         awards: [],
+        basicEmployeeDataLoading: false,
         birthday: '',
         birthdayFeed: false,
         certifications: [],
@@ -474,7 +489,7 @@ export default {
         color: null
       },
       user: null,
-      hasAccessToBudgets: true
+      hasAccessToBudgets: false
     };
   },
   methods: {
@@ -486,8 +501,13 @@ export default {
     hasAdminPermissions,
     getProfileData,
     getCurrentBudgetYear,
+    isEmpty,
     isMobile,
     resumeReceived,
+    updateStoreBudgets,
+    updateStoreEmployees,
+    updateStoreExpenseTypes,
+    updateStoreUser,
     userIsAdmin,
     userIsEmployee,
     checkForBudgetAccess

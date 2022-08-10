@@ -1,6 +1,6 @@
 <template>
   <v-card v-if="dataReceived" class="pa-5">
-    <bar-chart :options="options" :chartData="chartData" />
+    <bar-chart ref="barChart" chartId="foreign-languages" :options="options" :chartData="chartData" />
   </v-card>
 </template>
 
@@ -15,10 +15,20 @@ import { storeIsPopulated, isEmpty } from '@/utils/utils';
 // |--------------------------------------------------|
 
 /**
+ * Calls the destroy chart function in the base chart.
+ */
+function beforeDestroy() {
+  this.$refs.barChart.destroyChart();
+} // beforeDestroy
+
+/**
  * mounted lifecycle hook
  */
-function mounted() {
-  if (this.storeIsPopulated) this.fillData();
+async function mounted() {
+  if (this.storeIsPopulated) {
+    await this.fetchData();
+    await this.fillData();
+  }
 } // mounted
 
 // |--------------------------------------------------|
@@ -28,20 +38,18 @@ function mounted() {
 // |--------------------------------------------------|
 
 /**
- * Extracts the language array from each employee and tallies up each language for active
- * employees. Also sets the chart formatting and options data.
+ * Extracts the language array from each employee and tallies up each language for active employees.
  */
-function fillData() {
-  let languageOptions = {};
+function fetchData() {
   this.employees = this.$store.getters.employees;
   this.employees.forEach((emp) => {
     if (!isEmpty(emp.languages) && emp.workStatus != 0) {
       emp.languages.forEach((lang) => {
         if (lang.name !== 'English') {
-          if (languageOptions[lang.name]) {
-            languageOptions[lang.name] += 1;
+          if (this.languageOptions[lang.name]) {
+            this.languageOptions[lang.name] += 1;
           } else {
-            languageOptions[lang.name] = 1;
+            this.languageOptions[lang.name] = 1;
           }
         }
       });
@@ -49,19 +57,24 @@ function fillData() {
   });
 
   //sorts contents from most common languages to least
-  let sortedLangs = Object.entries(languageOptions);
+  let sortedLangs = Object.entries(this.languageOptions);
   sortedLangs = sortedLangs.sort((a, b) => {
     return b[1] - a[1];
   });
-  let languages = [];
-  let jobQuantities = [];
+
   //10 is just a limit to prevent an extremely long and crammed graph
   for (let i = 0; i < 10; i++) {
     if (sortedLangs.length > i) {
-      languages.push(sortedLangs[i][0]);
-      jobQuantities.push(sortedLangs[i][1]);
+      this.languages.push(sortedLangs[i][0]);
+      this.jobQuantities.push(sortedLangs[i][1]);
     }
   }
+} //fetchData
+
+/**
+ * Sets the chart formatting and options data.
+ */
+function fillData() {
   let colors = [
     'rgba(255, 99, 132, 1)',
     'rgba(54, 162, 235, 1)',
@@ -75,10 +88,10 @@ function fillData() {
   ];
 
   this.chartData = {
-    labels: languages,
+    labels: this.languages,
     datasets: [
       {
-        data: jobQuantities,
+        data: this.jobQuantities,
         backgroundColor: colors
       }
     ]
@@ -86,39 +99,41 @@ function fillData() {
 
   this.options = {
     scales: {
-      xAxes: [
-        {
-          ticks: {
-            beginAtZero: true
-          },
-          scaleLabel: {
-            display: true,
-            labelString: 'Language',
-            fontStyle: 'bold'
+      x: {
+        beginAtZero: true,
+        title: {
+          display: true,
+          text: 'Language',
+          font: {
+            weight: 'bold'
           }
         }
-      ],
-      yAxes: [
-        {
-          ticks: {
-            beginAtZero: true,
-            stepSize: 1
-          },
-          scaleLabel: {
-            display: true,
-            labelString: 'Number of Employees',
-            fontStyle: 'bold'
+      },
+      y: {
+        beginAtZero: true,
+        ticks: {
+          stepSize: 1
+        },
+        title: {
+          display: true,
+          text: 'Number of Employees',
+          font: {
+            weight: 'bold'
           }
         }
-      ]
+      }
     },
-    legend: {
-      display: false
-    },
-    title: {
-      display: true,
-      text: 'Top Foreign Languages Case Consulting',
-      fontSize: 15
+    plugins: {
+      legend: {
+        display: false
+      },
+      title: {
+        display: true,
+        text: 'Top Foreign Languages Case Consulting',
+        font: {
+          size: 15
+        }
+      }
     },
     maintainAspectRatio: false
   };
@@ -141,16 +156,21 @@ export default {
       options: null,
       chartData: null,
       dataReceived: false,
-      employees: null
+      employees: null,
+      languageOptions: {},
+      languages: [],
+      jobQuantities: []
     };
   },
-  methods: {
-    fillData
-  },
+  methods: { fetchData, fillData },
+  beforeDestroy,
   mounted,
   watch: {
     storeIsPopulated: function () {
-      if (this.storeIsPopulated) this.fillData();
+      if (this.storeIsPopulated) {
+        this.fetchData();
+        this.fillData();
+      }
     }
   }
 };

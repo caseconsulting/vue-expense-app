@@ -1,6 +1,6 @@
 <template>
   <v-card v-if="dataReceived" class="pa-5">
-    <bar-chart :options="options" :chartData="chartData" />
+    <bar-chart ref="barChart" chartId="job-experience" :options="options" :chartData="chartData" />
   </v-card>
 </template>
 
@@ -19,13 +19,20 @@ moment.tz.setDefault('America/New_York');
 /**
  * mounted lifecycle hook
  */
-function mounted() {
+async function mounted() {
   if (this.storeIsPopulated) {
     // eslint-disable-next-line no-undef
-    this.jobExperienceData();
-    this.drawJobExpHistGraph();
+    await this.jobExperienceData();
+    await this.drawJobExpHistGraph();
   }
 } // mounted
+
+/**
+ * Calls the destroy chart function in the base chart.
+ */
+function beforeDestroy() {
+  this.$refs.barChart.destroyChart();
+} // beforeDestroy
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -121,41 +128,42 @@ function drawJobExpHistGraph() {
   };
 
   let options = {
-    title: {
-      display: true,
-      text: 'Number of Years of Job Experience for Employees',
-      fontSize: 15
-    },
     scales: {
-      yAxes: [
-        {
-          ticks: {
-            beginAtZero: true
-          },
-          scaleLabel: {
-            display: true,
-            labelString: 'Number of Employees',
-            fontStyle: 'bold'
+      y: {
+        beginAtZero: true,
+        title: {
+          display: true,
+          text: 'Number of Employees',
+          font: {
+            weight: 'bold'
           }
         }
-      ],
-      xAxes: [
-        {
-          ticks: {
-            autoSkip: false
-          },
-          scaleLabel: {
-            display: true,
-            labelString: 'Years of Job Experience',
-            fontStyle: 'bold'
+      },
+      x: {
+        ticks: {
+          autoSkip: false
+        },
+        title: {
+          display: true,
+          text: 'Years of Job Experience',
+          font: {
+            weight: 'bold'
           }
         }
-      ]
+      }
     },
-    legend: {
-      display: false
+    plugins: {
+      legend: {
+        display: false
+      },
+      title: {
+        display: true,
+        text: 'Number of Years of Job Experience for Employees',
+        font: {
+          size: 15
+        }
+      }
     },
-    responsive: true,
     maintainAspectRatio: false
   };
   this.chartData = data;
@@ -201,6 +209,7 @@ export default {
     calculateTimeDifference,
     stringToDate
   },
+  beforeDestroy,
   mounted,
   watch: {
     storeIsPopulated: function () {

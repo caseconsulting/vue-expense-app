@@ -67,7 +67,7 @@ async function switchRole() {
         user.employeeRole = this.roleSelected.toLowerCase();
         await api.updateItem(api.EMPLOYEES, user); // update user employee role
 
-        let employeeRole = await this.setRole();
+        let employeeRole = await this.setRole(user.employeeRole);
         if (employeeRole === 'admin') {
           // user's role is admin
           window.location.href = '/reimbursements';

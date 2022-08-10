@@ -1,7 +1,12 @@
 <template>
   <v-dialog v-model="activate" persistent max-width="1000" @click:outside="confirmBackingOut = !loading">
     <v-card>
-      <v-card-title class="header_style"><strong>Upload Resume</strong></v-card-title>
+      <v-card-title class="header_style d-flex justify-space-between align-center">
+        <p style="margin: 0"><strong>Upload Resume</strong></p>
+        <v-btn icon dark @click="confirmBackingOut = !loading">
+          <v-icon>mdi-close</v-icon>
+        </v-btn>
+      </v-card-title>
       <v-card-text class="pa-5">
         <!-- File upload -->
         <v-form ref="submit" class="ma-3">
@@ -60,10 +65,10 @@
                 </v-col>
               </v-row>
               <v-row class="text-center">
-                <v-col xl="5" lg="5" md="5" sm="6" xs="6">
+                <v-col cols="6">
                   <h3>Personal Info Currently on Form</h3>
                 </v-col>
-                <v-col xl="5" lg="5" md="5" sm="6" xs="6">
+                <v-col cols="6">
                   <h3>New Personal Info</h3>
                 </v-col>
               </v-row>
@@ -102,10 +107,29 @@
               </v-row>
               <!-- Phone Number -->
               <v-row v-if="showPhoneNumber" class="text-center">
-                <v-col xl="5" lg="5" md="5" sm="6" cols="6">
-                  <v-text-field v-model="phoneNumber" disabled label="Old Phone Number"> </v-text-field>
+                <v-col xl="7" lg="7" md="7" sm="8" cols="6">
+                  <v-row>
+                    <v-col sm="6" cols="12">
+                      <v-autocomplete
+                        label="Actions *"
+                        v-model="phoneNumAction"
+                        attach
+                        :items="getPhoneNumActionDropdowns()"
+                        @change="toggleOldNumsDropdown()"
+                      ></v-autocomplete>
+                    </v-col>
+                    <v-col sm="6" cols="12">
+                      <v-autocomplete
+                        :disabled="disableOldPhoneNums"
+                        label="Number"
+                        attach
+                        v-model="oldPhoneNumToReplace"
+                        :items="getOldPhoneNums()"
+                      ></v-autocomplete>
+                    </v-col>
+                  </v-row>
                 </v-col>
-                <v-col xl="5" lg="5" md="5" sm="6" cols="6">
+                <v-col xl="3" lg="3" md="3" sm="4" cols="6">
                   <v-text-field v-model="newPhoneNumber" readonly label="New Phone Number"> </v-text-field>
                 </v-col>
                 <v-col xl="2" lg="2" md="2" sm="12" cols="12" class="pt-md-6 pt-0 text-center">
@@ -122,6 +146,7 @@
                         large
                         left
                         color="green"
+                        :disabled="phoneNumAction === ''"
                         @click="
                           submitInfo('phoneNumber', newPhoneNumber);
                           phoneCanceled = true;
@@ -279,18 +304,35 @@
               </v-col>
             </v-row>
             <v-form
-              v-for="(education, index) in newEducation"
+              v-for="(edu, index) in newEducation"
               :key="index"
               :ref="'education' + index"
               class="ma-xl-5 ma-lg-5 ma-md-0"
             >
-              <education-tab
-                v-if="!education.canceled"
-                :allowAdditions="false"
-                :model="[education]"
-                @deny="education.canceled = true"
+              <university-form
+                v-if="!edu.canceled && edu.type === 'university'"
+                :parser="true"
+                :school="edu"
+                :schoolIndex="index"
+                @deny="edu.canceled = true"
                 @confirm="submitInfo('education', index, $event)"
-              ></education-tab>
+              ></university-form>
+              <high-school-form
+                v-else-if="!edu.canceled && edu.type === 'highSchool'"
+                :parser="true"
+                :school="edu"
+                :schoolIndex="index"
+                @deny="edu.canceled = true"
+                @confirm="submitInfo('education', index, $event)"
+              ></high-school-form>
+              <military-form
+                v-else-if="!edu.canceled && edu.type === 'military'"
+                :parser="true"
+                :service="edu"
+                :militaryIndex="index"
+                @deny="edu.canceled = true"
+                @confirm="submitInfo('education', index, $event)"
+              ></military-form>
             </v-form>
           </div>
         </span>
@@ -363,7 +405,9 @@ import api from '@/shared/api.js';
 import { isEmpty, isSmallScreen } from '@/utils/utils';
 import _ from 'lodash';
 import CancelConfirmation from '@/components/modals/CancelConfirmation.vue';
-import educationTab from '@/components/employees/formTabs/EducationTab';
+import UniversityForm from '@/components/employees/formTabs/education components/UniversityForm.vue';
+import MilitaryForm from '@/components/employees/formTabs/education components/MilitaryForm.vue';
+import HighSchoolForm from '@/components/employees/formTabs/education components/HighSchoolForm.vue';
 import FormSubmissionConfirmation from '@/components/modals/FormSubmissionConfirmation.vue';
 import { v4 as uuid } from 'uuid';
 
@@ -558,6 +602,44 @@ function showEducation() {
 // |                     METHODS                      |
 // |                                                  |
 // |--------------------------------------------------|
+
+/**
+ * Shows the right list of numbers based on the phone number action selection.
+ * @return a list of phone numbers if replacing
+ */
+function getOldPhoneNums() {
+  let nums = [];
+  switch (this.phoneNumAction) {
+    case 'Replace from Public':
+      _.forEach(this.employee.publicPhoneNumbers, (number) => {
+        nums.push(number.number);
+      });
+      break;
+    case 'Replace from Private':
+      _.forEach(this.employee.privatePhoneNumbers, (number) => {
+        nums.push(number.number);
+      });
+      break;
+    default:
+      break;
+  }
+  return nums;
+} //getOldPhoneNums
+
+/**
+ * Populates phone number dropdows based on if the user has public/private nums.
+ * @return a list of action options
+ */
+function getPhoneNumActionDropdowns() {
+  let options = ['Add to Private', 'Add to Public'];
+  if (!_.isEmpty(this.employee.publicPhoneNumbers)) {
+    options.unshift('Replace from Public');
+  }
+  if (!_.isEmpty(this.employee.privatePhoneNumbers)) {
+    options.unshift('Replace from Private');
+  }
+  return options;
+} // getPhoneNumActionDropdowns
 
 /**
  * When the checkbox is not selected on the resume modal, it uploads the resume and closes the window upon
@@ -765,7 +847,8 @@ async function submit() {
       return entity.Type === 'ORGANIZATION';
     });
 
-    // Go through organization an see if they are a school
+    // Go through organization an see if they are a university, high school, or military
+    let dodForces = ['Army', 'Marine Corps', 'Navy', 'Air Force', 'Space Force', 'Coast Guard', 'National Guard'];
     for (let i = 0; i < educationComprehend.length; i++) {
       let educationEntity = educationComprehend[i];
       let collegeList = await api.getColleges(educationEntity.Text);
@@ -773,14 +856,13 @@ async function submit() {
       if (collegeList.length == 1) {
         // Remove duplicate
         if (
-          (!this.employee.schools ||
-            (this.employee.schools &&
-              this.employee.schools.length > 0 &&
-              this.employee.schools.filter((e) => e.name === collegeList[0]).length == 0)) &&
-          this.newEducation.filter((e) => e.name === collegeList[0]).length == 0
+          (!this.employee.education ||
+            this.employee.education.filter((e) => e.name && e.name === collegeList[0]).length == 0) &&
+          this.newEducation.filter((e) => e.name && e.name === collegeList[0]).length == 0
         ) {
           this.newEducation.push({
             name: collegeList[0],
+            type: 'university',
             degrees: [
               {
                 completionDate: null,
@@ -791,6 +873,39 @@ async function submit() {
                 showEducationMenu: false
               }
             ],
+            canceled: false
+          });
+        }
+      } else if (
+        educationEntity.Text.toLowerCase().includes('high school') &&
+        (!this.employee.education ||
+          this.employee.education.filter((e) => e.name && e.name.toLowerCase() == educationEntity.Text.toLowerCase())
+            .length == 0) &&
+        this.newEducation.filter((e) => e.name && e.name.toLowerCase() == educationEntity.Text.toLowerCase()).length ==
+          0
+      ) {
+        this.newEducation.push({
+          name: educationEntity.Text,
+          type: 'highSchool',
+          gradDate: null,
+          canceled: false
+        });
+      } else {
+        // check all military
+        let mil = _.filter(dodForces, (f) => {
+          return educationEntity.Text.toLowerCase().includes(f.toLowerCase());
+        });
+        if (
+          mil.length == 1 &&
+          (!this.employee.education ||
+            this.employee.education.filter((e) => e.branch && e.branch === mil[0]).length == 0) &&
+          this.newEducation.filter((e) => e.branch && e.branch === mil[0]).length == 0
+        ) {
+          this.newEducation.push({
+            branch: mil[0],
+            type: 'military',
+            startDate: null,
+            completeDate: null,
             canceled: false
           });
         }
@@ -859,7 +974,35 @@ function submitInfo(field, value, newValue) {
     this.editedEmployeeForm.currentState = this.newPersonal.currentState;
     this.editedEmployeeForm.currentZIP = this.newPersonal.currentZIP;
   } else if (field === 'phoneNumber') {
-    // Create fields in editedEmployeeForm if they don't exist
+    let phoneObj = { type: 'Cell', number: this.newPersonal.phoneNumber, valid: true };
+    switch (this.phoneNumAction) {
+      case 'Add to Private':
+        phoneObj.private = true;
+        this.editedEmployeeForm.privatePhoneNumbers.push(phoneObj);
+        break;
+      case 'Add to Public':
+        phoneObj.private = false;
+        this.editedEmployeeForm.publicPhoneNumbers.push(phoneObj);
+        break;
+      case 'Replace from Public':
+        // find num object that matches num to replace
+        this.editedEmployeeForm.publicPhoneNumbers.forEach((num) => {
+          if (num.number === this.oldPhoneNumToReplace) {
+            num.number = this.newPhoneNumber;
+          }
+        });
+        break;
+      case 'Replace from Private':
+        // find num object that matches num to replace
+        this.editedEmployeeForm.privatePhoneNumbers.forEach((num) => {
+          if (num.number === this.oldPhoneNumToReplace) {
+            num.number = this.newPhoneNumber;
+          }
+        });
+        break;
+      default:
+        break;
+    }
     if (!this.editedEmployeeForm.phoneNumber) {
       this.$set(this.editedEmployeeForm, 'phoneNumber', '');
     }
@@ -888,17 +1031,36 @@ function submitInfo(field, value, newValue) {
     });
   } else if (field === 'education' && this.$refs['education' + value][0].validate()) {
     this.newEducation[value].canceled = true;
-    this.newEducation[value].name = newValue[0].name;
-    this.newEducation[value].degrees = newValue[0].degrees;
+    this.newEducation[value].name = newValue.name;
+    this.newEducation[value].degrees = newValue.degrees;
     // Create fields in editedEmployeeForm if they don't exist
-    if (!this.editedEmployeeForm.schools) {
-      this.$set(this.editedEmployeeForm, 'schools', []);
+    if (!this.editedEmployeeForm.education) {
+      this.$set(this.editedEmployeeForm, 'education', []);
     }
-    // Add new education
-    this.editedEmployeeForm.schools.push({
-      name: this.newEducation[value].name,
-      degrees: this.newEducation[value].degrees
-    });
+    // Build correct structure, filters out fields we don't care about
+    let toAdd = {};
+    if (this.newEducation[value].type === 'university') {
+      toAdd = {
+        type: newValue.type,
+        degrees: newValue.degrees,
+        name: newValue.name
+      };
+    } else if (this.newEducation[value].type === 'military') {
+      toAdd = {
+        type: newValue.type,
+        branch: newValue.branch,
+        startDate: newValue.startDate,
+        completeDate: newValue.completeDate
+      };
+    } else if (this.newEducation[value].type === 'highSchool') {
+      toAdd = {
+        type: newValue.type,
+        gradDate: newValue.gradDate,
+        name: newValue.name
+      };
+    }
+    // Add education
+    this.editedEmployeeForm.education.push(toAdd);
   }
 } // submitInfo
 
@@ -913,6 +1075,17 @@ function submitForm() {
     this.confirmingValid = true;
   }
 } // submitForm
+
+/**
+ * Determine whether to enable the dropdown for replacing numbers.
+ */
+function toggleOldNumsDropdown() {
+  if (this.phoneNumAction === 'Replace from Private' || this.phoneNumAction === 'Replace from Public') {
+    this.disableOldPhoneNums = false;
+  } else {
+    this.disableOldPhoneNums = true;
+  }
+} // toggleOldNumsDropdown
 
 /**
  * Clears the form
@@ -987,7 +1160,9 @@ export default {
   beforeDestroy,
   components: {
     CancelConfirmation,
-    educationTab,
+    UniversityForm,
+    MilitaryForm,
+    HighSchoolForm,
     FormSubmissionConfirmation
   },
   computed: {
@@ -1048,6 +1223,9 @@ export default {
         currentStreet: null,
         currentZIP: null
       },
+      disableOldPhoneNums: true,
+      oldPhoneNumToReplace: '',
+      phoneNumAction: '',
       toggleResumeFormErrorModal: false,
       totalChanges: 0,
       timeoutError: false,
@@ -1119,10 +1297,13 @@ export default {
   },
   methods: {
     clearForm,
+    getOldPhoneNums,
+    getPhoneNumActionDropdowns,
     isEmpty,
     submitForm,
     submitInfo,
     submit,
+    toggleOldNumsDropdown,
     onlyUploadResume
   },
   props: ['toggleResumeParser', 'employee'],

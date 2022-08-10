@@ -17,7 +17,7 @@
     </v-snackbar>
     <!-- End Status Alert -->
 
-    <v-card hover>
+    <v-card>
       <!-- Form Header -->
       <v-card-title class="header_style">
         <v-row>
@@ -114,7 +114,7 @@
                 <education-tab
                   v-if="formTab === 'education'"
                   :validating="validating.education"
-                  :model="model.schools"
+                  :model="model.education"
                   :allowAdditions="true"
                 >
                 </education-tab>
@@ -310,7 +310,7 @@
             <!-- Education -->
             <v-tab-item id="education" class="mt-6 mb-4 px-3">
               <education-tab
-                :model="model.schools"
+                :model="model.education"
                 :validating="validating.education"
                 :allowAdditions="true"
               ></education-tab>
@@ -457,23 +457,23 @@ async function cancelB() {
  * Removes unnecessary attributes from the employee data.
  */
 function cleanUpData() {
-  // schools
-  if (!_.isEmpty(this.model.schools)) {
-    this.model.schools = _.map(this.model.schools, (school) => {
-      // remove date picker menu booleans
-      delete school.showEducationMenu;
-      // delete null attributes
-      _.forEach(school, (value, key) => {
-        if (_.isNil(value)) {
-          delete school[key];
-        }
-      });
-      // return updated school
-      return school;
-    });
-  } else {
-    this.model.schools = null;
-  }
+  // education
+  // if (!_.isEmpty(this.model.education)) {
+  //   this.model.education = _.map(this.model.education, (edu) => {
+  //     // remove date picker menu booleans
+  //     delete edu.showEducationMenu;
+  //     // delete null attributes
+  //     _.forEach(edu, (value, key) => {
+  //       if (_.isNil(value)) {
+  //         delete edu[key];
+  //       }
+  //     });
+  //     // return updated edu
+  //     return edu;
+  //   });
+  // } else {
+  //   this.model.education = null;
+  // }
   // certifications
   if (!_.isEmpty(this.model.certifications)) {
     this.model.certifications = _.map(this.model.certifications, (certification) => {
@@ -694,55 +694,52 @@ async function submit() {
   if (!anyErrors) {
     // convert appropriate fields to title case
     await this.convertAutocompleteToTitlecase(); // recursion here lol confirm -> submit -> cATT -> confirm
-    let hasErrors = await this.hasTabError();
-    if (this.$refs.form !== undefined && this.$refs.form.validate() && !hasErrors) {
-      // form validated
-      this.$emit('startAction');
-      this.cleanUpData();
-      if (this.model.id) {
-        // updating employee
-        let updatedEmployee = await api.updateItem(api.EMPLOYEES, this.model);
-        if (updatedEmployee.id) {
-          // successfully updated employee
-          this.fullName = `${updatedEmployee.firstName} ${updatedEmployee.lastName}`;
-          window.EventBus.$emit('update', updatedEmployee);
-          // getEmployees and update store with latest data
-          if (this.model.id === this.$store.getters.user.id) await this.updateStoreUser();
-          await this.updateStoreEmployees();
-          await this.cancelB();
-        } else {
-          // failed to update employee
-          this.$emit('error', updatedEmployee.response.data.message);
-          this.displayError(updatedEmployee.response.data.message);
-          // this.$emit('cancel-form');
-        }
-        // If mifiStatus on page load is different than the submitted mifiStatus value, create audit log
-        if (this.mifiStatusOnLoad !== updatedEmployee.mifiStatus) {
-          await api.createItem(api.AUDIT, {
-            id: uuid(),
-            type: 'mifi',
-            tags: ['submit', `mifi set to ${this.model.mifiStatus}`],
-            employeeId: this.employee.id,
-            description: `${this.model.firstName} ${this.model.lastName} changed their mifi status to ${this.model.mifiStatus}.`,
-            timeToLive: 60
-          });
-        }
-      } else {
-        // creating employee
-        this.model.id = uuid();
-        let newEmployee = await api.createItem(api.EMPLOYEES, this.model);
+    // form validated
+    this.$emit('startAction');
+    this.cleanUpData();
+    if (this.model.id) {
+      // updating employee
+      let updatedEmployee = await api.updateItem(api.EMPLOYEES, this.model);
+      if (updatedEmployee.id) {
+        // successfully updated employee
+        this.fullName = `${updatedEmployee.firstName} ${updatedEmployee.lastName}`;
+        window.EventBus.$emit('update', updatedEmployee);
         // getEmployees and update store with latest data
+        if (this.model.id === this.$store.getters.user.id) await this.updateStoreUser();
         await this.updateStoreEmployees();
-        if (newEmployee.id) {
-          // successfully created employee
-          this.$router.push(`/employee/${newEmployee.employeeNumber}`);
-        } else {
-          // failed to create employee
-          this.$emit('error', newEmployee.response.data.message);
-          this.displayError(newEmployee.response.data.message);
-          this.$set(this.model, 'id', null); // reset id
-          // this.$emit('endAction');
-        }
+        await this.cancelB();
+      } else {
+        // failed to update employee
+        this.$emit('error', updatedEmployee.response.data.message);
+        this.displayError(updatedEmployee.response.data.message);
+        // this.$emit('cancel-form');
+      }
+      // If mifiStatus on page load is different than the submitted mifiStatus value, create audit log
+      if (this.mifiStatusOnLoad !== updatedEmployee.mifiStatus) {
+        await api.createItem(api.AUDIT, {
+          id: uuid(),
+          type: 'mifi',
+          tags: ['submit', `mifi set to ${this.model.mifiStatus}`],
+          employeeId: this.employee.id,
+          description: `${this.model.firstName} ${this.model.lastName} changed their mifi status to ${this.model.mifiStatus}.`,
+          timeToLive: 60
+        });
+      }
+    } else {
+      // creating employee
+      this.model.id = uuid();
+      let newEmployee = await api.createItem(api.EMPLOYEES, this.model);
+      // getEmployees and update store with latest data
+      await this.updateStoreEmployees();
+      if (newEmployee.id) {
+        // successfully created employee
+        this.$router.push(`/employee/${newEmployee.employeeNumber}`);
+      } else {
+        // failed to create employee
+        this.$emit('error', newEmployee.response.data.message);
+        this.displayError(newEmployee.response.data.message);
+        this.$set(this.model, 'id', null); // reset id
+        // this.$emit('endAction');
       }
     }
   }
@@ -838,57 +835,57 @@ async function created() {
   });
   // set tab error status
   window.EventBus.$on('awardStatus', (errorCount) => {
-    this.tabErrors.awards = errorCount > 0 ? true : false; //boolean if there are errors
+    this.tabErrors.awards = errorCount > 0; //boolean if there are errors
     this.addErrorTab('Awards', errorCount); //error count
   });
   // Starts listener to check the Certifications tab has any errors
   window.EventBus.$on('certificationsStatus', (errorCount) => {
-    this.tabErrors.certifications = errorCount > 0 ? true : false;
+    this.tabErrors.certifications = errorCount > 0;
     this.addErrorTab('Certifications', errorCount);
   });
   // Starts listener to check the Clearance tab has any errors
   window.EventBus.$on('clearanceStatus', (errorCount) => {
-    this.tabErrors.clearance = errorCount > 0 ? true : false;
+    this.tabErrors.clearance = errorCount > 0;
     this.addErrorTab('Clearance', errorCount);
   });
   // Starts listener to check the Contracts tab has any errors
   window.EventBus.$on('contractsStatus', (errorCount) => {
-    this.tabErrors.contracts = errorCount > 0 ? true : false;
+    this.tabErrors.contracts = errorCount > 0;
     this.addErrorTab('Contracts', errorCount);
   });
   // Starts listener to check the Customer Org tab has any errors
   window.EventBus.$on('customerOrgExpStatus', (errorCount) => {
-    this.tabErrors.customerOrgExp = errorCount > 0 ? true : false;
+    this.tabErrors.customerOrgExp = errorCount > 0;
     this.addErrorTab('Customer Org', errorCount);
   });
   // Starts listener to check the Education tab has any errors
   window.EventBus.$on('educationStatus', (errorCount) => {
-    this.tabErrors.education = errorCount > 0 ? true : false;
+    this.tabErrors.education = errorCount > 0;
     this.addErrorTab('Education', errorCount);
   });
   // Starts listener to check the Employee tab has any errors
   window.EventBus.$on('employeeStatus', (errorCount) => {
-    this.tabErrors.employee = errorCount > 0 ? true : false;
+    this.tabErrors.employee = errorCount > 0;
     this.addErrorTab('Employee', errorCount);
   });
   // Starts listener to check the Job Experience tab has any errors
   window.EventBus.$on('jobExperienceStatus', (errorCount) => {
-    this.tabErrors.jobExperience = errorCount > 0 ? true : false;
+    this.tabErrors.jobExperience = errorCount > 0;
     this.addErrorTab('Job Experience', errorCount);
   });
   // Starts listener to check the Languages tab has any errors
   window.EventBus.$on('languagesStatus', (errorCount) => {
-    this.tabErrors.languages = errorCount > 0 ? true : false;
+    this.tabErrors.languages = errorCount > 0;
     this.addErrorTab('Foreign Languages', errorCount);
   });
   // Starts listener to check the Personal tab has any errors
   window.EventBus.$on('personalStatus', (errorCount) => {
-    this.tabErrors.personal = errorCount > 0 ? true : false;
+    this.tabErrors.personal = errorCount > 0;
     this.addErrorTab('Personal', errorCount);
   });
   // Starts listener to check the Technologies tab has any errors
   window.EventBus.$on('technologiesStatus', (errorCount) => {
-    this.tabErrors.technologies = errorCount > 0 ? true : false;
+    this.tabErrors.technologies = errorCount > 0;
     this.addErrorTab('Technologies and Skills', errorCount);
   });
   // fills model in with populated fields in employee prop
@@ -967,7 +964,26 @@ function setFormData(tab, data) {
     this.$set(this.model, 'eeoHispanicOrLatino', data.eeoHispanicOrLatino);
     this.$set(this.model, 'eeoRaceOrEthnicity', data.eeoRaceOrEthnicity);
     this.$set(this.model, 'eeoJobCategory', data.eeoJobCategory);
+    if (this.hasAdminPermissions()) {
+      this.$set(this.model, 'eeoAdminHasFilledOutEeoForm', true);
+    } else {
+      this.$set(this.model, 'eeoAdminHasFilledOutEeoForm', false);
+    }
   } else if (tab == 'personal') {
+    // filter github and twitter links
+    if (data.github && data.github.indexOf('/') != -1) {
+      // remove trailing slash
+      if (data.github.slice(-1) === '/') data.github = data.github.slice(0, -1);
+      // extract username
+      data.github = data.github.substring(data.github.lastIndexOf('/') + 1, data.github.length);
+    }
+    if (data.twitter && data.twitter.indexOf('/') != -1) {
+      // remove trailing slash
+      if (data.twitter.slice(-1) === '/') data.twitter = data.twitter.slice(0, -1);
+      // extract username
+      data.twitter = data.twitter.substring(data.twitter.lastIndexOf('/') + 1, data.twitter.length);
+    }
+
     //sets all personal info to data returned from personal tab
     this.$set(this.model, 'github', data.github);
     this.$set(this.model, 'twitter', data.twitter);
@@ -984,7 +1000,7 @@ function setFormData(tab, data) {
     this.$set(this.model, 'currentStreet', data.currentStreet);
     this.$set(this.model, 'currentZIP', data.currentZIP);
   } else if (tab == 'education') {
-    this.$set(this.model, 'schools', data); //sets schools to data returned from education tab
+    this.$set(this.model, 'education', data); //sets education to data returned from education tab
   } else if (tab == 'jobExperience') {
     //sets all jobExperience info to data returned from job experience tab
     this.$set(this.model, 'icTimeFrames', data.icTimeFrames);
@@ -1206,7 +1222,7 @@ export default {
         privatePhoneNumbers: [],
         publicPhoneNumbers: [],
         prime: null,
-        schools: [],
+        education: [],
         st: null,
         technologies: [],
         twitter: null,

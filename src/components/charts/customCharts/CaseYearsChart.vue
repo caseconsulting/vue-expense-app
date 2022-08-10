@@ -1,6 +1,6 @@
 <template>
   <v-card v-if="dataReceived" class="pa-5">
-    <bar-chart :options="options" :chartData="chartData" />
+    <bar-chart ref="barChart" chartId="case-years" :options="options" :chartData="chartData" />
   </v-card>
   <v-skeleton-loader v-else type="paragraph@5"></v-skeleton-loader>
 </template>
@@ -20,12 +20,19 @@ moment.tz.setDefault('America/New_York');
 /**
  * mounted lifecycle hook
  */
-function mounted() {
+async function mounted() {
   if (this.storeIsPopulated) {
-    this.caseYearsData();
-    this.drawCaseYearsHistGraph();
+    await this.caseYearsData();
+    await this.drawCaseYearsHistGraph();
   }
 } // mounted
+
+/**
+ * Calls the destroy chart function in the base chart.
+ */
+function beforeDestroy() {
+  this.$refs.barChart.destroyChart();
+} // beforeDestroy
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -89,41 +96,42 @@ function drawCaseYearsHistGraph() {
   };
 
   let options = {
-    title: {
-      display: true,
-      text: 'Number of Years at Case Consulting for Employees',
-      fontSize: 15
-    },
     scales: {
-      yAxes: [
-        {
-          ticks: {
-            beginAtZero: true
-          },
-          scaleLabel: {
-            display: true,
-            labelString: 'Number of Employees',
-            fontStyle: 'bold'
+      y: {
+        beginAtZero: true,
+        title: {
+          display: true,
+          text: 'Number of Employees',
+          font: {
+            weight: 'bold'
           }
         }
-      ],
-      xAxes: [
-        {
-          ticks: {
-            autoSkip: false
-          },
-          scaleLabel: {
-            display: true,
-            labelString: 'Years at Case Consulting',
-            fontStyle: 'bold'
+      },
+      x: {
+        ticks: {
+          autoSkip: false
+        },
+        title: {
+          display: true,
+          text: 'Years at Case Consulting',
+          font: {
+            weight: 'bold'
           }
         }
-      ]
+      }
     },
-    legend: {
-      display: false
+    plugins: {
+      legend: {
+        display: false
+      },
+      title: {
+        display: true,
+        text: 'Number of Years at Case Consulting for Employees',
+        font: {
+          size: 15
+        }
+      }
     },
-    responsive: true,
     maintainAspectRatio: false
   };
   this.chartData = data;
@@ -185,6 +193,7 @@ export default {
     stringToDate
   },
   mounted,
+  beforeDestroy,
   watch: {
     storeIsPopulated: function () {
       if (this.storeIsPopulated) {

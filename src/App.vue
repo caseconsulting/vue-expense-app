@@ -121,7 +121,7 @@
                 id="P"
                 class="black--text"
                 target="_blank"
-                href="https://3.basecamp.com/3097063/buckets/4708396/documents/5153019289"
+                href="https://public.3.basecamp.com/p/ZgFBhSdP2gxUj1Lr5536xZtq"
                 ><strong>Version</strong> {{ version }}</a
               >
             </template>
@@ -150,8 +150,6 @@ import {
   updateStoreBudgets,
   updateStoreExpenseTypes
 } from '@/utils/storeUtils';
-import { v4 as uuid } from 'uuid';
-import api from '@/shared/api';
 import floorPlan from '@/assets/img/MakeOfficesfloorplan.jpg';
 import moment from 'moment-timezone';
 import MainNav from '@/components/MainNav.vue';
@@ -235,9 +233,9 @@ function handleLogout() {
 /**
  * redirects to user's employee page
  */
-async function handleProfile() {
+function handleProfile() {
   // We don't use this.userId becuase it may be null by the time we click the button
-  this.$router.push({ name: 'employee', params: { id: `${this.userId}` } });
+  this.$router.push({ name: 'employee', params: { id: `${this.userId}`, replace: true } });
 } // handleProfile
 
 /**
@@ -245,45 +243,25 @@ async function handleProfile() {
  */
 async function populateStore() {
   // login
-  await this.updateStoreUser(); // calling first since uodateStoreExpenseTypes relies on user data
-  let employee = this.$store.getters.user;
   let lastLogin = localStorage.getItem('lastLogin'); // item is set in Callback.vue
+  let employee;
   if (lastLogin) {
+    employee = JSON.parse(localStorage.getItem('user')); // gets data from Callback.vue after login
     employee.lastLogin = lastLogin;
-    await updateEmployee(employee);
+    this.$store.dispatch('setUser', { user: employee }); // dispatch data to the vuex store
+    this.$store.dispatch('setLoginTime', { loginTime: lastLogin });
+    //await updateEmployee(employee);
+  } else {
+    await this.updateStoreUser(); // calling first since updateStoreExpenseTypes relies on user data
+    employee = this.$store.getters.user;
   }
-
-  // runs these api calls in parallel/concurrently? since they are independent of each other
-  await Promise.all([
-    this.updateStoreEmployees(),
-    this.updateStoreAvatars(),
-    this.updateStoreExpenseTypes(),
-    this.updateStoreBudgets()
-  ]);
+  localStorage.removeItem('user');
   localStorage.removeItem('lastLogin'); // remove from local storage to prevent login audit on refresh
 
   // This is used to help pages know when data is loaded into the store.
   // Otherwise, on reload, pages would try to access the store before it was populated.
   this.$store.dispatch('setStoreIsPopulated', { populated: true });
 } // populateStore
-
-/**
- * Updates the login date and creates audit for the employee.
- * @param {employee} employee the employee to update
- */
-async function updateEmployee(employee) {
-  await Promise.all([
-    api.updateItem(api.EMPLOYEES, employee), // updates last logged in for employee
-    api.createItem(api.AUDIT, {
-      id: uuid(),
-      type: 'login',
-      tags: ['account'],
-      employeeId: employee.id,
-      description: `${employee.firstName} ${employee.lastName} has logged in`,
-      timeToLive: 60
-    })
-  ]); // Create an audit of the success
-} // updateEmployee
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -401,8 +379,8 @@ export default {
       { name: 'ADP', link: 'https://my.adp.com/' },
       { name: 'Life Insurance', link: 'https://www.reliancestandard.com/home/' },
       {
-        name: 'Redmine',
-        link: 'https://redmine.consultwithcase.com'
+        name: 'Jira',
+        link: 'https://consultwithcase.atlassian.net/jira/your-work'
       }
     ],
     mediaLinks: [
@@ -437,7 +415,6 @@ export default {
     handleProfile,
     isLoggedIn,
     populateStore,
-    updateEmployee,
     updateStoreUser,
     updateStoreEmployees,
     updateStoreAvatars,
