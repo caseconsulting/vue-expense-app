@@ -70,9 +70,11 @@ function initDegrees() {
                     value: this.getDegreeValue(degree.degreeType)
                   });
                 }
-                //if a degree of a higher prestige is found, remove all previous entries
+                //if a degree of a higher prestige is found, remove all previous entries except militaries
                 if (result === 1) {
-                  highestDegrees.length = 0;
+                  highestDegrees = _.map(highestDegrees, (education) => {
+                    return education.type === 'Military';
+                  });
                 }
                 //Adds to highestDegrees, excluding degrees with a lower prestige
                 if (result > -1) {
@@ -106,9 +108,11 @@ function initDegrees() {
                   value: this.getDegreeValue(edu.type)
                 });
               }
-              //if a degree of a higher prestige is found, remove all previous entries
+              //if a degree of a higher prestige is found, remove all previous entries except militaries
               if (result === 1) {
-                highestDegrees.length = 0;
+                highestDegrees = _.map(highestDegrees, (education) => {
+                  return education.type === 'Military';
+                });
               }
               //Adds to highestDegrees, excluding degrees with a lower prestige
               if (result > -1) {
