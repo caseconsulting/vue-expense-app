@@ -164,7 +164,14 @@
             </template>
           </v-combobox>
         </template>
-        <v-date-picker v-model="clearance.biDates" :min="clearance.submissionDate" :max="clearance.grantedDate" multiple no-title scrollable>
+        <v-date-picker
+          v-model="clearance.biDates"
+          :min="clearance.submissionDate"
+          :max="clearance.grantedDate"
+          multiple
+          no-title
+          scrollable
+        >
           <v-spacer></v-spacer>
           <v-btn text color="primary" @click="clearance.showBIMenu = false">Cancel</v-btn>
           <v-btn text color="primary" @click="$refs.biMenu[cIndex].save(clearance.biDates)">OK</v-btn>
