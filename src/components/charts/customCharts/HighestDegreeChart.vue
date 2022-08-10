@@ -61,6 +61,15 @@ function initDegrees() {
             if (moment(degree.completionDate).isBefore(moment(new Date()))) {
               if (highestDegrees.length != 0) {
                 let result = this.compareDegree(highestDegrees[0].value, this.getDegreeValue(degree.degreeType));
+                //if military is first, adds University to the front of the array
+                if (result === -10) {
+                  highestDegrees.unshift({
+                    name: this.getDegreeName(this.getDegreeValue(degree.degreeType)),
+                    majors: degree.majors,
+                    type: edu.type,
+                    value: this.getDegreeValue(degree.degreeType)
+                  });
+                }
                 //if a degree of a higher prestige is found, remove all previous entries
                 if (result === 1) {
                   highestDegrees.length = 0;
@@ -89,6 +98,14 @@ function initDegrees() {
           if (moment(edu.gradDate).isBefore(moment(new Date()))) {
             if (highestDegrees.length != 0) {
               let result = this.compareDegree(highestDegrees[0].value, this.getDegreeValue(edu.type));
+              //if military is first, adds High School to the front of the array
+              if (result === -10) {
+                highestDegrees.unshift({
+                  type: 'High School',
+                  name: edu.name,
+                  value: this.getDegreeValue(edu.type)
+                });
+              }
               //if a degree of a higher prestige is found, remove all previous entries
               if (result === 1) {
                 highestDegrees.length = 0;
@@ -114,7 +131,8 @@ function initDegrees() {
           if (moment(edu.startDate).isBefore(moment(new Date()))) {
             highestDegrees.push({
               type: 'Military',
-              name: edu.branch
+              name: edu.branch,
+              value: this.getDegreeValue(edu.type)
             });
           }
         }
@@ -176,6 +194,8 @@ function addToEducation(education, highestEdus) {
 /**
  * Compares the relationship between two degrees,
  *
+ * 25 = military, we want to keep military no matter what else we are comparing
+ *
  * @param oldDegree - first degree to compare
  * @param newDegree - second degree to compare
  * @return 1: newDegree is more prestigious
@@ -183,6 +203,9 @@ function addToEducation(education, highestEdus) {
  * @return 0: degrees have the same prestige
  */
 function compareDegree(oldDegree, newDegree) {
+  if (oldDegree === 25) {
+    return -10;
+  }
   if (oldDegree > newDegree) {
     return -1;
   }
@@ -291,6 +314,9 @@ function getDegreeValue(degree) {
   }
   if (degreeLower.includes('doctor') || degreeLower.includes('phd')) {
     return 4;
+  }
+  if (degreeLower.includes('military')) {
+    return 25;
   } else {
     return 5;
   }
@@ -315,6 +341,8 @@ function getDegreeName(value) {
       return 'Master';
     case 4:
       return 'PhD/Doctorate';
+    case 25:
+      return 'Military';
     default:
       return 'Other';
   }
