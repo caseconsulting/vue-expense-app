@@ -5,7 +5,7 @@
       <!-- Loop Contracts -->
       <div v-for="(contract, index) in this.filteredList" :key="contract.name + index">
         <p><b>Contract: </b>{{ contract.name }}</p>
-        <p><b>Prime: </b>{{ contract.prime }}</p>
+        <p><b>Primes: </b>{{ getPrimes(contract) }}</p>
         <p><b>Time on Contract: </b>{{ getContractLengthInYears(contract) }}</p>
         <div v-if="!isEmpty(contract.projects)">
           <div v-for="(project, projIndex) in contract.projects" :key="index + ' ' + projIndex" class="pb-1 px-4">
@@ -127,6 +127,20 @@ function getContractEarliestDate(contract) {
 }
 
 /**
+ * Turns the list of primes into a string. Removes the final ,
+ *
+ * @param contract the contract
+ * @return the primes as a comma separated string
+ */
+function getPrimes(contract) {
+  let val = '';
+  _.forEach(contract.primes, (prime) => {
+    val += prime + ', ';
+  });
+  return val.substring(0, val.length - 2);
+}
+
+/**
  * returns a readable format of the date/time
  *
  * @param time - the date/time
@@ -225,6 +239,7 @@ export default {
   methods: {
     getContractEarliestDate,
     getContractLengthInYears,
+    getPrimes,
     getProjectLengthInYears,
     getProjectLengthInYearsReadable,
     dateReadable,

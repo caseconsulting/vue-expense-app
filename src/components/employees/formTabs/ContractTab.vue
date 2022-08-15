@@ -17,12 +17,13 @@
       <!-- Name of Prime -->
       <v-combobox
         ref="formFields"
-        v-model="contract.prime"
+        v-model="contract.primes"
         :rules="getRequiredRules()"
         :items="primesDropDown"
-        label="Prime"
-        data-vv-name="Prime"
+        label="Primes"
+        data-vv-name="Primes"
         clearable
+        multiple
       >
       </v-combobox>
       <!-- Start of project loop -->
@@ -217,7 +218,7 @@ function addContract() {
   if (!this.editedContracts) this.editedContracts = [];
   this.editedContracts.push({
     name: '',
-    prime: '',
+    primes: [],
     years: 0,
     current: false,
     projects: [
@@ -301,7 +302,7 @@ function populateDropDowns() {
     // loop contracts
     _.forEach(contracts, (contract) => {
       this.contractsDropDown.push(contract.name); // add contract name
-      this.primesDropDown.push(contract.prime); // add contract prime
+      this.primesDropDown.push(...contract.primes); // add contract primes
     });
   });
 } // populateDropDowns
@@ -375,7 +376,7 @@ export default {
       },
       duplicateContractName: (conIndex) => {
         let contractNames = _.map(this.editedContracts, (contract) => contract.name);
-        let primeNames = _.map(this.editedContracts, (contract) => contract.prime);
+        let primeNames = _.map(this.editedContracts, (contract) => contract.primes);
         let contractName = contractNames[conIndex];
         let primeName = primeNames[conIndex];
         contractNames.splice(conIndex, 1);

@@ -54,7 +54,7 @@ function getCurrentProjects(employee) {
         contract.projects.forEach((project) => {
           if (currContract.projects.length === 0) {
             currContract.name = contract.name;
-            currContract.prime = contract.prime;
+            currContract.primes = contract.primes;
           }
           if (!project.endDate) {
             currContract.projects.push(project);
@@ -81,15 +81,17 @@ function fetchData() {
       let currContracts = this.getCurrentProjects(employee);
       let currPrimes = {};
       currContracts.forEach((contract) => {
-        let currPrime = contract.prime;
-        //This if statement is to consider if different current contracts have the same prime
-        if (!currPrimes[currPrime]) {
-          if (!this.primes[currPrime]) {
-            this.primes[currPrime] = 1;
-          } else {
-            this.primes[currPrime] += 1;
+        _.forEach(contract.primes, (prime) => {
+          let currPrime = prime;
+          //This if statement is to consider if different current contracts have the same prime
+          if (!currPrimes[currPrime]) {
+            if (!this.primes[currPrime]) {
+              this.primes[currPrime] = 1;
+            } else {
+              this.primes[currPrime] += 1;
+            }
           }
-        }
+        });
       });
     }
   });

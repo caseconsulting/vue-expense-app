@@ -166,7 +166,7 @@ function buildContractsColumn() {
           });
         }
         if (current == true) {
-          contractNames += `${currentCon.name} - ${currentCon.prime} & `;
+          contractNames += `${currentCon.name} - ${getPrimes(currentCon)} & `;
         }
       });
       contractNames = contractNames.slice(0, -2);
@@ -182,6 +182,20 @@ function buildContractsColumn() {
     this.headers.splice(3, 1); //remove badge exp column
   }
 } // buildContractsColumn
+
+/**
+ * Turns the list of primes into a string. Removes the final ,
+ *
+ * @param contract the contract
+ * @return the primes as a comma separated string
+ */
+function getPrimes(contract) {
+  let val = '';
+  _.forEach(contract.primes, (prime) => {
+    val += prime + ', ';
+  });
+  return val.substring(0, val.length - 2);
+}
 
 /**
  * Replaces the third column with job role information.
@@ -437,17 +451,17 @@ function populateDropDowns(employees) {
               // limit the prime dropdown to only those that belong to the contract
               if (contract.name === this.contract) {
                 this.contractsDropDown.push(contract.name);
-                this.primesDropDown.push(contract.prime);
+                this.primesDropDown.push(...contract.primes);
               }
-            } else if (this.prime) {
+            } else if (this.primes) {
               // limit the contract dropdown to only those that belong to the prime
-              if (contract.prime === this.prime) {
+              if (contract.primes.includes(this.prime)) {
                 this.contractsDropDown.push(contract.name);
-                this.primesDropDown.push(contract.prime);
+                this.primesDropDown.push(this.prime);
               }
             } else {
               this.contractsDropDown.push(contract.name); // add contract name
-              this.primesDropDown.push(contract.prime); // add contract prime
+              this.primesDropDown.push(...contract.primes); // add contract prime
             }
           }
         });
@@ -477,7 +491,7 @@ function refreshList() {
     this.searchContract();
   }
   if (this.prime) {
-    this.searchPrime();
+    this.searchPrimes();
   }
   if (this.search) {
     this.filteredEmployees = _.filter(this.employeesInfo, (employee) => {
@@ -626,7 +640,7 @@ function searchBadgeExpirationDates(requestedDate, forDropdown) {
 /**
  * Clears the other search forms and searches the table by prime
  */
-function searchPrime() {
+function searchPrimes() {
   if (this.prime) {
     if (this.contract) {
       this.filteredEmployees = _.filter(this.employeesInfo, (employee) => {
@@ -645,7 +659,7 @@ function searchPrime() {
       });
     }
   }
-} // searchPrime
+} // searchPrimes
 
 /**
  * Returns a filtered list of the input with all inactive
@@ -827,6 +841,7 @@ export default {
     getClearanceType,
     getFullName,
     getActive,
+    getPrimes,
     handleClick,
     isFocus,
     populateDataTypeDropDowns,
@@ -836,7 +851,7 @@ export default {
     searchBadgeExpirationDates,
     searchContract,
     searchDataType,
-    searchPrime,
+    searchPrimes,
     setActiveInactive
   },
   watch: {
