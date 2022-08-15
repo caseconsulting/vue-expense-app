@@ -1,6 +1,12 @@
 <template>
   <v-card v-if="dataReceived" class="pa-5">
-    <pie-chart :options="options" :chartData="chartData"></pie-chart>
+    <pie-chart
+      ref="pieChart"
+      chartId="concentrations-chart"
+      :key="chartKey"
+      :options="options"
+      :chartData="chartData"
+    ></pie-chart>
   </v-card>
 </template>
 
@@ -17,21 +23,34 @@ import _ from 'lodash';
 /**
  * mounted lifecycle hook
  */
-function mounted() {
+async function mounted() {
   // emit comes from HighestDegreeChart.vue when a pie slice is clicked
-  window.EventBus.$on('concentrations-update', (receiveConcentrations) => {
+  await window.EventBus.$on('concentrations-update', async (receiveConcentrations) => {
+    this.quantities = [];
+    this.labels = [];
+    this.dataReceived = false;
     this.degree = receiveConcentrations.degree;
     this.concentrations = receiveConcentrations.concentrations;
-    this.fillData(this.concentrations);
+    await this.fetchData(this.concentrations);
+    await this.fillData();
   });
 } // mounted
 
 /**
  * created lifecycle hook
  */
-function created() {
-  this.fillData(null);
+async function created() {
+  await this.fetchData(null);
+  await this.fillData();
 } // created
+
+/**
+ * beforeDestroy lifecycle hook
+ */
+function beforeDestroy() {
+  window.EventBus.$off('concentrations-update');
+  this.$refs.pieChart.destroyChart();
+} //beforeDestroy
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -40,31 +59,19 @@ function created() {
 // |--------------------------------------------------|
 
 /**
- * beforeDestroy lifecycle hook
- */
-function beforeDestroy() {
-  window.EventBus.$off('concentrations-update');
-} //beforeDestroy
-
-/**
- * Sets up the formatting and data options for the chart.
+ * Gets all the major data.
  * @param concentations - An array of the highest degree concentrations
  */
-function fillData(concentrations) {
-  let text;
-  let colors;
-  let enabled;
-  let labels = [];
-  let quantities = [];
+function fetchData(concentrations) {
   if (concentrations) {
     if (_.isEmpty(concentrations)) {
-      text = `There are no concentrations for a degree of ${this.degree}`;
-      quantities.push(1);
-      enabled = false;
-      colors = ['grey'];
+      this.text = `There are no concentrations for an education of ${this.degree}`;
+      this.quantities.push(1);
+      this.enabled = false;
+      this.colors = ['grey'];
     } else {
-      text = `${this.degree} Degree Concentrations`;
-      enabled = true;
+      this.text = `${this.degree} Degree Concentrations`;
+      this.enabled = true;
       const sortable = Object.entries(concentrations)
         .sort(([, a], [, b]) => b - a)
         .reduce((r, [k, v]) => ({ ...r, [k]: v }), {});
@@ -72,12 +79,12 @@ function fillData(concentrations) {
       for (let i = 0; i < 10; i++) {
         let con = Object.keys(sortable)[i];
         if (con) {
-          quantities.push(sortable[con]);
-          labels.push(con);
+          this.quantities.push(sortable[con]);
+          this.labels.push(con);
         }
       }
-      text = `Top ${this.degree} Degree Concentrations`;
-      colors = [
+      this.text = `Top ${this.degree} Degree Concentrations`;
+      this.colors = [
         'rgba(54, 162, 235, 1)',
         'rgba(255, 206, 86, 1)',
         'rgba(75, 192, 192, 1)',
@@ -92,34 +99,45 @@ function fillData(concentrations) {
   } else {
     //these presets are when a degree has not been selected OR if there are no concentrations
     if (!_.isEmpty(concentrations)) {
-      text = 'There are no concentrations for this type of degree';
+      this.text = 'There are no concentrations for this type of degree';
     } else {
-      text = 'Click on a Degree To See Concentrations';
+      this.text = 'Click on an Education To See Concentrations';
     }
-    quantities.push(1);
-    enabled = false;
-    colors = ['grey'];
+    this.quantities.push(1);
+    this.enabled = false;
+    this.colors = ['grey'];
   }
+} //fetchData
+
+/**
+ * Sets up the formatting and data options for the chart.
+ */
+function fillData() {
   this.chartData = {
-    labels: labels,
+    labels: this.labels,
     datasets: [
       {
-        data: quantities,
-        backgroundColor: colors
+        data: this.quantities,
+        backgroundColor: this.colors
       }
     ]
   };
   this.options = {
-    title: {
-      display: true,
-      text: text,
-      fontSize: 15
+    plugins: {
+      title: {
+        display: true,
+        text: this.text,
+        font: {
+          size: 15
+        }
+      },
+      tooltip: {
+        enabled: this.enabled
+      }
     },
-    maintainAspectRatio: false,
-    tooltips: {
-      enabled: enabled
-    }
+    maintainAspectRatio: false
   };
+  this.chartKey++; // rerenders the chart
   this.dataReceived = true;
 } // fillData
 
@@ -137,12 +155,16 @@ export default {
       chartData: null,
       concentrations: null,
       dataReceived: false,
-      degree: null
+      degree: null,
+      chartKey: 0,
+      text: '',
+      colors: [],
+      enabled: false,
+      labels: [],
+      quantities: []
     };
   },
-  methods: {
-    fillData
-  },
+  methods: { fetchData, fillData },
   mounted,
   created,
   beforeDestroy

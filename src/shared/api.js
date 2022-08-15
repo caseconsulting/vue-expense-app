@@ -381,7 +381,7 @@ async function getResume(employeeId) {
     },
     validateStatus: () => true
   });
-  if (resp.data.code && resp.data.code >= 300) return null;
+  if (!resp.status || resp.status >= 300) return null;
   else return resp.data;
 } // getResume
 

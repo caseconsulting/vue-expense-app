@@ -1,423 +1,435 @@
 /* eslint-disable prettier/prettier */
 <template>
-  <v-row>
-    <!-- Status Alert -->
-    <v-snackbar
-      v-model="status.statusType"
-      :color="status.color"
-      :multi-line="true"
-      :right="true"
-      :timeout="5000"
-      :top="true"
-      :vertical="true"
-    >
-      <v-card-title headline color="white">
-        <span class="headline">{{ status.statusMessage }}</span>
-      </v-card-title>
-      <v-btn color="white" text @click="clearStatus">Close</v-btn>
-    </v-snackbar>
+  <div>
+    <v-row v-if="initialPageLoading">
+      <v-col cols="12" :lg="userIsAdmin() ? 8 : 12">
+        <div class="mt-3">
+          <v-skeleton-loader type="table-heading, list-item@6"></v-skeleton-loader>
+        </div>
+      </v-col>
+      <v-col v-if="userIsAdmin()" cols="12" lg="4">
+        <v-skeleton-loader class="mt-3" type="card-heading, list-item@12"></v-skeleton-loader>
+      </v-col>
+    </v-row>
+    <v-row v-else>
+      <!-- Status Alert -->
+      <v-snackbar
+        v-model="status.statusType"
+        :color="status.color"
+        :multi-line="true"
+        :right="true"
+        :timeout="5000"
+        :top="true"
+        :vertical="true"
+      >
+        <v-card-title headline color="white">
+          <span class="headline">{{ status.statusMessage }}</span>
+        </v-card-title>
+        <v-btn color="white" text @click="clearStatus">Close</v-btn>
+      </v-snackbar>
 
-    <v-col cols="12" :lg="userIsAdmin() ? 8 : 12">
-      <v-card class="mt-3">
-        <v-container fluid>
-          <!-- Title -->
-          <v-card-title>
-            <h2>Expense Types</h2>
-            <v-spacer></v-spacer>
+      <v-col cols="12" :lg="userIsAdmin() ? 8 : 12">
+        <v-card class="mt-3">
+          <v-container fluid>
+            <!-- Title -->
+            <v-card-title>
+              <h2>Expense Types</h2>
+              <v-spacer></v-spacer>
 
-            <!-- Search Bar -->
-            <v-text-field
-              v-model="search"
-              id="search"
-              append-icon="search"
-              label="Search"
-              single-line
-              hide-details
-            ></v-text-field>
-          </v-card-title>
+              <!-- Search Bar -->
+              <v-text-field
+                v-model="search"
+                id="search"
+                append-icon="search"
+                label="Search"
+                single-line
+                hide-details
+              ></v-text-field>
+            </v-card-title>
 
-          <!-- Filters -->
-          <fieldset>
-            <legend class="legend_style">Filters</legend>
-            <!-- Active Filter -->
-            <div class="flagFilter">
-              <h4>Active Expense Type:</h4>
-              <v-btn-toggle class="filter_color" v-model="filter.active" text mandatory>
-                <!-- Show Active -->
+            <!-- Filters -->
+            <fieldset>
+              <legend class="legend_style">Filters</legend>
+              <!-- Active Filter -->
+              <div class="flagFilter">
+                <h4>Active Expense Type:</h4>
+                <v-btn-toggle class="filter_color" v-model="filter.active" text mandatory>
+                  <!-- Show Active -->
+                  <v-tooltip top>
+                    <template v-slot:activator="{ on }">
+                      <v-btn value="active" v-on="on" text>
+                        <v-icon class="mr-1">mdi-check-circle-outline</v-icon>
+                      </v-btn>
+                    </template>
+                    <span>Show Active</span>
+                  </v-tooltip>
+
+                  <!-- Show Inactive -->
+                  <v-tooltip top>
+                    <template v-slot:activator="{ on }">
+                      <v-btn value="notActive" v-on="on" text>
+                        <v-icon>mdi-close-circle-outline</v-icon>
+                      </v-btn>
+                    </template>
+                    <span>Hide Active</span>
+                  </v-tooltip>
+
+                  <!-- Show Active and Inactive -->
+                  <v-tooltip top>
+                    <template v-slot:activator="{ on }">
+                      <v-btn value="both" v-on="on" text>BOTH</v-btn>
+                    </template>
+                    <span>Show All</span>
+                  </v-tooltip>
+                </v-btn-toggle>
+              </div>
+              <!-- End Active Filter -->
+
+              <!-- Overdraft Filter -->
+              <div class="flagFilter">
+                <h4>Overdraft:</h4>
+                <v-btn-toggle class="filter_color" v-model="filter.overdraft" text mandatory>
+                  <!-- Show Overdraft -->
+                  <v-tooltip top>
+                    <template v-slot:activator="{ on }">
+                      <v-btn value="overdraft" v-on="on" text>
+                        <v-icon class="mr-1">mdi-check-circle-outline</v-icon>
+                      </v-btn>
+                    </template>
+                    <span>Show Overdraft</span>
+                  </v-tooltip>
+
+                  <!-- Show No Overdraft -->
+                  <v-tooltip top>
+                    <template v-slot:activator="{ on }">
+                      <v-btn value="noOverdraft" v-on="on" text>
+                        <v-icon>mdi-close-circle-outline</v-icon>
+                      </v-btn>
+                    </template>
+                    <span>Hide Overdraft</span>
+                  </v-tooltip>
+
+                  <!-- Show Overdraft and No Overdraft -->
+                  <v-tooltip top>
+                    <template v-slot:activator="{ on }">
+                      <v-btn value="both" v-on="on" text>BOTH</v-btn>
+                    </template>
+                    <span>Show All</span>
+                  </v-tooltip>
+                </v-btn-toggle>
+              </div>
+              <!-- End Overdraft Filter -->
+
+              <!-- Recurring Filter -->
+              <div class="flagFilter">
+                <h4>Recurring:</h4>
+                <v-btn-toggle class="filter_color" v-model="filter.recurring" text mandatory>
+                  <!-- Show Recurring -->
+                  <v-tooltip top>
+                    <template v-slot:activator="{ on }">
+                      <v-btn value="recurring" v-on="on" text>
+                        <v-icon class="mr-1">mdi-check-circle-outline</v-icon>
+                      </v-btn>
+                    </template>
+                    <span>Show Recurring</span>
+                  </v-tooltip>
+
+                  <!-- Show Non-Recurring -->
+                  <v-tooltip top>
+                    <template v-slot:activator="{ on }">
+                      <v-btn value="notRecurring" v-on="on" text>
+                        <v-icon>mdi-close-circle-outline</v-icon>
+                      </v-btn>
+                    </template>
+                    <span>Hide Recurring</span>
+                  </v-tooltip>
+
+                  <!-- Show Recurring and Non-Recurring -->
+                  <v-tooltip top>
+                    <template v-slot:activator="{ on }">
+                      <v-btn value="both" v-on="on" text>BOTH</v-btn>
+                    </template>
+                    <span>Show All</span>
+                  </v-tooltip>
+                </v-btn-toggle>
+              </div>
+              <!-- End Recurring Filter -->
+
+              <!-- Receipt Fitler -->
+              <div class="flagFilter">
+                <h4>Receipt Required:</h4>
+                <v-btn-toggle class="filter_color" v-model="filter.receipt" text mandatory>
+                  <!-- Show Receipt Required -->
+                  <v-tooltip top>
+                    <template v-slot:activator="{ on }">
+                      <v-btn value="receipt" v-on="on" text>
+                        <v-icon class="mr-1">mdi-check-circle-outline</v-icon>
+                      </v-btn>
+                    </template>
+                    <span>Show Required Receipt</span>
+                  </v-tooltip>
+
+                  <!-- Show Receipt Not Required -->
+                  <v-tooltip top>
+                    <template v-slot:activator="{ on }">
+                      <v-btn value="noReceipt" v-on="on" text>
+                        <v-icon>mdi-close-circle-outline</v-icon>
+                      </v-btn>
+                    </template>
+                    <span>Hide Required Receipt</span>
+                  </v-tooltip>
+
+                  <!-- Show Receipt Required and Not Required-->
+                  <v-tooltip top>
+                    <template v-slot:activator="{ on }">
+                      <v-btn value="both" v-on="on" text>BOTH</v-btn>
+                    </template>
+                    <span>Show All</span>
+                  </v-tooltip>
+                </v-btn-toggle>
+              </div>
+              <!-- End Receipt Fitler -->
+            </fieldset>
+            <br />
+            <!-- End Filters -->
+
+            <!--EXPENSE TYPE DATA TABLE -->
+            <v-data-table
+              :headers="_headers"
+              :items="expenseTypeList"
+              :sort-by.sync="sortBy"
+              :sort-desc.sync="sortDesc"
+              :expanded.sync="expanded"
+              :loading="loading"
+              :items-per-page.sync="itemsPerPage"
+              :search="search"
+              item-key="id"
+              class="elevation-4"
+              @click:row="clickedRow"
+            >
+              <!-- Budget Name slot -->
+              <template v-slot:[`item.budgetName`]="{ item }">
+                <td>{{ item.budgetName | limitedText }}</td>
+              </template>
+              <!-- Budget slot -->
+              <template v-slot:[`item.budget`]="{ item }">
+                <p class="mb-0">{{ convertToMoneyString(item.budget) }}</p>
+              </template>
+              <!-- Actions -->
+              <template v-if="userIsAdmin()" v-slot:[`item.actions`]="{ item }">
                 <v-tooltip top>
                   <template v-slot:activator="{ on }">
-                    <v-btn value="active" v-on="on" text>
-                      <v-icon class="mr-1">mdi-check-circle-outline</v-icon>
+                    <v-btn
+                      v-if="userIsAdmin()"
+                      :disabled="midAction"
+                      text
+                      icon
+                      @click="
+                        toTopOfForm();
+                        onSelect(item);
+                      "
+                      v-on="on"
+                    >
+                      <v-icon class="case-gray">edit</v-icon>
                     </v-btn>
                   </template>
-                  <span>Show Active</span>
+                  <span>Edit</span>
                 </v-tooltip>
-
-                <!-- Show Inactive -->
                 <v-tooltip top>
                   <template v-slot:activator="{ on }">
-                    <v-btn value="notActive" v-on="on" text>
-                      <v-icon>mdi-close-circle-outline</v-icon>
+                    <v-btn
+                      v-if="userIsAdmin()"
+                      id="delete"
+                      :disabled="midAction"
+                      text
+                      icon
+                      @click="validateDelete(item)"
+                      v-on="on"
+                    >
+                      <v-icon class="case-gray">delete</v-icon>
                     </v-btn>
                   </template>
-                  <span>Hide Active</span>
+                  <slot>Delete</slot>
                 </v-tooltip>
+              </template>
 
-                <!-- Show Active and Inactive -->
-                <v-tooltip top>
-                  <template v-slot:activator="{ on }">
-                    <v-btn value="both" v-on="on" text>BOTH</v-btn>
-                  </template>
-                  <span>Show All</span>
-                </v-tooltip>
-              </v-btn-toggle>
-            </div>
-            <!-- End Active Filter -->
+              <!-- Expanded slot item -->
+              <template v-slot:expanded-item="{ headers, item }">
+                <td :colspan="headers.length" class="pa-0">
+                  <v-card text>
+                    <v-card-text>
+                      <div class="expandedInfo">
+                        <!-- Description -->
+                        <p v-if="item.description">
+                          <b>Description:</b>
+                          {{ item.description }}
+                        </p>
 
-            <!-- Overdraft Filter -->
-            <div class="flagFilter">
-              <h4>Overdraft:</h4>
-              <v-btn-toggle class="filter_color" v-model="filter.overdraft" text mandatory>
-                <!-- Show Overdraft -->
-                <v-tooltip top>
-                  <template v-slot:activator="{ on }">
-                    <v-btn value="overdraft" v-on="on" text>
-                      <v-icon class="mr-1">mdi-check-circle-outline</v-icon>
-                    </v-btn>
-                  </template>
-                  <span>Show Overdraft</span>
-                </v-tooltip>
+                        <!-- Category -->
+                        <p v-if="item.categories && item.categories.length > 0">
+                          <b>Categories:</b>
+                          {{ categoriesToString(item.categories) }}
+                        </p>
 
-                <!-- Show No Overdraft -->
-                <v-tooltip top>
-                  <template v-slot:activator="{ on }">
-                    <v-btn value="noOverdraft" v-on="on" text>
-                      <v-icon>mdi-close-circle-outline</v-icon>
-                    </v-btn>
-                  </template>
-                  <span>Hide Overdraft</span>
-                </v-tooltip>
-
-                <!-- Show Overdraft and No Overdraft -->
-                <v-tooltip top>
-                  <template v-slot:activator="{ on }">
-                    <v-btn value="both" v-on="on" text>BOTH</v-btn>
-                  </template>
-                  <span>Show All</span>
-                </v-tooltip>
-              </v-btn-toggle>
-            </div>
-            <!-- End Overdraft Filter -->
-
-            <!-- Recurring Filter -->
-            <div class="flagFilter">
-              <h4>Recurring:</h4>
-              <v-btn-toggle class="filter_color" v-model="filter.recurring" text mandatory>
-                <!-- Show Recurring -->
-                <v-tooltip top>
-                  <template v-slot:activator="{ on }">
-                    <v-btn value="recurring" v-on="on" text>
-                      <v-icon class="mr-1">mdi-check-circle-outline</v-icon>
-                    </v-btn>
-                  </template>
-                  <span>Show Recurring</span>
-                </v-tooltip>
-
-                <!-- Show Non-Recurring -->
-                <v-tooltip top>
-                  <template v-slot:activator="{ on }">
-                    <v-btn value="notRecurring" v-on="on" text>
-                      <v-icon>mdi-close-circle-outline</v-icon>
-                    </v-btn>
-                  </template>
-                  <span>Hide Recurring</span>
-                </v-tooltip>
-
-                <!-- Show Recurring and Non-Recurring -->
-                <v-tooltip top>
-                  <template v-slot:activator="{ on }">
-                    <v-btn value="both" v-on="on" text>BOTH</v-btn>
-                  </template>
-                  <span>Show All</span>
-                </v-tooltip>
-              </v-btn-toggle>
-            </div>
-            <!-- End Recurring Filter -->
-
-            <!-- Receipt Fitler -->
-            <div class="flagFilter">
-              <h4>Receipt Required:</h4>
-              <v-btn-toggle class="filter_color" v-model="filter.receipt" text mandatory>
-                <!-- Show Receipt Required -->
-                <v-tooltip top>
-                  <template v-slot:activator="{ on }">
-                    <v-btn value="receipt" v-on="on" text>
-                      <v-icon class="mr-1">mdi-check-circle-outline</v-icon>
-                    </v-btn>
-                  </template>
-                  <span>Show Required Receipt</span>
-                </v-tooltip>
-
-                <!-- Show Receipt Not Required -->
-                <v-tooltip top>
-                  <template v-slot:activator="{ on }">
-                    <v-btn value="noReceipt" v-on="on" text>
-                      <v-icon>mdi-close-circle-outline</v-icon>
-                    </v-btn>
-                  </template>
-                  <span>Hide Required Receipt</span>
-                </v-tooltip>
-
-                <!-- Show Receipt Required and Not Required-->
-                <v-tooltip top>
-                  <template v-slot:activator="{ on }">
-                    <v-btn value="both" v-on="on" text>BOTH</v-btn>
-                  </template>
-                  <span>Show All</span>
-                </v-tooltip>
-              </v-btn-toggle>
-            </div>
-            <!-- End Receipt Fitler -->
-          </fieldset>
-          <br />
-          <!-- End Filters -->
-
-          <!--EXPENSE TYPE DATA TABLE -->
-          <v-data-table
-            :headers="_headers"
-            :items="expenseTypeList"
-            :sort-by.sync="sortBy"
-            :sort-desc.sync="sortDesc"
-            :expanded.sync="expanded"
-            :loading="loading"
-            :items-per-page.sync="itemsPerPage"
-            :search="search"
-            item-key="id"
-            class="elevation-4"
-            @click:row="clickedRow"
-          >
-            <!-- Budget Name slot -->
-            <template v-slot:[`item.budgetName`]="{ item }">
-              <td>{{ item.budgetName | limitedText }}</td>
-            </template>
-            <!-- Budget slot -->
-            <template v-slot:[`item.budget`]="{ item }">
-              <p class="mb-0">{{ convertToMoneyString(item.budget) }}</p>
-            </template>
-            <!-- Actions -->
-            <template v-if="userIsAdmin()" v-slot:[`item.actions`]="{ item }">
-              <v-tooltip top>
-                <template v-slot:activator="{ on }">
-                  <v-btn
-                    v-if="userIsAdmin()"
-                    :disabled="midAction"
-                    text
-                    icon
-                    @click="
-                      toTopOfForm();
-                      onSelect(item);
-                    "
-                    v-on="on"
-                  >
-                    <v-icon class="case-gray">edit</v-icon>
-                  </v-btn>
-                </template>
-                <span>Edit</span>
-              </v-tooltip>
-              <v-tooltip top>
-                <template v-slot:activator="{ on }">
-                  <v-btn
-                    v-if="userIsAdmin()"
-                    id="delete"
-                    :disabled="midAction"
-                    text
-                    icon
-                    @click="validateDelete(item)"
-                    v-on="on"
-                  >
-                    <v-icon class="case-gray">delete</v-icon>
-                  </v-btn>
-                </template>
-                <slot>Delete</slot>
-              </v-tooltip>
-            </template>
-
-            <!-- Expanded slot item -->
-            <template v-slot:expanded-item="{ headers, item }">
-              <td :colspan="headers.length" class="pa-0">
-                <v-card text>
-                  <v-card-text>
-                    <div class="expandedInfo">
-                      <!-- Description -->
-                      <p v-if="item.description">
-                        <b>Description:</b>
-                        {{ item.description }}
-                      </p>
-
-                      <!-- Category -->
-                      <p v-if="item.categories && item.categories.length > 0">
-                        <b>Categories:</b>
-                        {{ categoriesToString(item.categories) }}
-                      </p>
-
-                      <!-- Show on Feed -->
-                      <div v-if="item.alwaysOnFeed">
-                        <p><b>Show On Feed:</b> All Expenses</p>
-                      </div>
-                      <div v-else>
-                        <p><b>Show On Feed:</b> {{ categoriesOnFeed(item.categories) }}</p>
-                      </div>
-
-                      <!-- Show Require URL -->
-                      <div v-if="item.requireURL">
-                        <p><b>Require URL:</b> All Expenses</p>
-                      </div>
-                      <div v-else>
-                        <p><b>Require URL:</b> {{ categoriesReqUrl(item.categories) }}</p>
-                      </div>
-
-                      <!-- Requires Recipient -->
-                      <p v-if="item.hasRecipient"><b>Requires Recipient:</b> Yes</p>
-                      <p v-else><b>Requires Recipient:</b> No</p>
-
-                      <!-- Flags -->
-                      <v-row>
-                        <v-col cols="12" sm="6" class="flag py-0">
-                          <p>Pro-rated:</p>
-                          <v-icon v-if="item.proRated" id="marks" class="mr-1">mdi-check-circle-outline</v-icon>
-                          <v-icon v-else class="mr-1" id="marks">mdi-close-circle-outline</v-icon>
-                        </v-col>
-                        <v-col cols="12" sm="6" class="flag py-0">
-                          <p>Overdraft Allowed:</p>
-                          <v-icon v-if="item.odFlag" id="marks" class="mr-1">mdi-check-circle-outline</v-icon>
-                          <v-icon v-else class="mr-1" id="marks">mdi-close-circle-outline</v-icon>
-                        </v-col>
-                        <v-col cols="12" sm="6" class="flag py-0">
-                          <p>Recurring:</p>
-                          <v-icon v-if="item.recurringFlag" id="marks" class="mr-1">mdi-check-circle-outline</v-icon>
-                          <v-icon v-else class="mr-1" id="marks">mdi-close-circle-outline</v-icon>
-                        </v-col>
-                        <v-col cols="12" sm="6" class="flag py-0">
-                          <p>Receipt Required:</p>
-                          <v-icon v-if="item.requiredFlag" id="marks" class="mr-1">mdi-check-circle-outline</v-icon>
-                          <v-icon v-else class="mr-1" id="marks">mdi-close-circle-outline</v-icon>
-                        </v-col>
-                        <v-col cols="12" sm="6" class="flag py-0">
-                          <p>Inactive:</p>
-                          <v-icon v-if="item.isInactive" id="marks" class="mr-1">mdi-check-circle-outline</v-icon>
-                          <v-icon v-else class="mr-1" id="marks">mdi-close-circle-outline</v-icon>
-                        </v-col>
-                      </v-row>
-                      <!-- End Flags -->
-
-                      <!-- Accessible By -->
-                      <v-row v-if="userIsAdmin()">
-                        <!-- Display number of employees accessed by -->
-                        <div class="pt-2 px-3">
-                          <p>
-                            <b>Access:</b>
-                            {{ getAccess(item) }}
-                          </p>
+                        <!-- Show on Feed -->
+                        <div v-if="item.alwaysOnFeed">
+                          <p><b>Show On Feed:</b> All Expenses</p>
                         </div>
-                        <!-- Button to view names of employees with access -->
-                        <v-dialog v-model="showAccess" max-width="400px" scrollable>
-                          <template v-slot:activator="{ on }">
-                            <v-btn class="px-1 mt-2" x-small outlined v-on="on">view</v-btn>
-                          </template>
-                          <v-card color="#bc3825">
-                            <!-- Dialog Title -->
-                            <v-card-title>
-                              <span class="headline white--text">Accessible By</span>
-                            </v-card-title>
-                            <v-divider color="black"></v-divider>
-                            <!-- List of employee names/ISSUES -->
-                            <v-card-text class="pb-0">
-                              <v-row>
-                                <v-list color="#f0f0f0" width="376">
-                                  <template v-for="employee in getEmployeeList(item.accessibleBy)">
-                                    <v-list-item :key="employee.id">
-                                      <!-- Employee Image -->
-                                      <v-list-item-avatar>
-                                        <img
-                                          v-if="employee.avatar"
-                                          :src="employee.avatar"
-                                          @error="changeAvatar(employee)"
-                                        />
-                                        <v-icon class="user-circle" name="user-circle" v-else></v-icon>
-                                      </v-list-item-avatar>
+                        <div v-else>
+                          <p><b>Show On Feed:</b> {{ categoriesOnFeed(item.categories) }}</p>
+                        </div>
 
-                                      <!-- Employee Name -->
-                                      <v-list-item-content>
-                                        <v-list-item-title>{{ getEmployeeName(employee.id) }}</v-list-item-title>
-                                      </v-list-item-content>
-                                    </v-list-item>
-                                    <!-- <v-divider v-if="index != showAccessLength - 1" :key="index" inset></v-divider> -->
-                                  </template>
-                                  <!-- <div v-if="showAccessLength == 0" class="noEmployees">No Employees</div> -->
-                                </v-list>
-                              </v-row>
-                            </v-card-text>
+                        <!-- Show Require URL -->
+                        <div v-if="item.requireURL">
+                          <p><b>Require URL:</b> All Expenses</p>
+                        </div>
+                        <div v-else>
+                          <p><b>Require URL:</b> {{ categoriesReqUrl(item.categories) }}</p>
+                        </div>
 
-                            <v-divider color="black"></v-divider>
-                            <!-- Close dialog button -->
-                            <v-card-actions>
-                              <v-spacer></v-spacer>
-                              <v-btn dark text @click="showAccess = false">Close</v-btn>
-                            </v-card-actions>
-                          </v-card>
-                        </v-dialog>
-                      </v-row>
-                      <!-- End Accessible By -->
+                        <!-- Requires Recipient -->
+                        <p v-if="item.hasRecipient"><b>Requires Recipient:</b> Yes</p>
+                        <p v-else><b>Requires Recipient:</b> No</p>
 
-                      <!-- Basecamp Campfire -->
-                      <p v-if="getCampfire(item.campfire)">
-                        <b>Basecamp Campfire:</b>
-                        <a :href="getCampfire(item.campfire).url" target="blank">
-                          {{ getCampfire(item.campfire).name }}
-                        </a>
-                      </p>
-                      <!-- End Basecamp Campfire -->
-                    </div>
-                  </v-card-text>
-                </v-card>
-              </td>
-            </template>
+                        <!-- Flags -->
+                        <v-row>
+                          <v-col cols="12" sm="6" class="flag py-0">
+                            <p>Pro-rated:</p>
+                            <v-icon v-if="item.proRated" id="marks" class="mr-1">mdi-check-circle-outline</v-icon>
+                            <v-icon v-else class="mr-1" id="marks">mdi-close-circle-outline</v-icon>
+                          </v-col>
+                          <v-col cols="12" sm="6" class="flag py-0">
+                            <p>Overdraft Allowed:</p>
+                            <v-icon v-if="item.odFlag" id="marks" class="mr-1">mdi-check-circle-outline</v-icon>
+                            <v-icon v-else class="mr-1" id="marks">mdi-close-circle-outline</v-icon>
+                          </v-col>
+                          <v-col cols="12" sm="6" class="flag py-0">
+                            <p>Recurring:</p>
+                            <v-icon v-if="item.recurringFlag" id="marks" class="mr-1">mdi-check-circle-outline</v-icon>
+                            <v-icon v-else class="mr-1" id="marks">mdi-close-circle-outline</v-icon>
+                          </v-col>
+                          <v-col cols="12" sm="6" class="flag py-0">
+                            <p>Receipt Required:</p>
+                            <v-icon v-if="item.requiredFlag" id="marks" class="mr-1">mdi-check-circle-outline</v-icon>
+                            <v-icon v-else class="mr-1" id="marks">mdi-close-circle-outline</v-icon>
+                          </v-col>
+                          <v-col cols="12" sm="6" class="flag py-0">
+                            <p>Inactive:</p>
+                            <v-icon v-if="item.isInactive" id="marks" class="mr-1">mdi-check-circle-outline</v-icon>
+                            <v-icon v-else class="mr-1" id="marks">mdi-close-circle-outline</v-icon>
+                          </v-col>
+                        </v-row>
+                        <!-- End Flags -->
 
-            <!-- Alert slot for no search results -->
-            <template v-slot:no-results>
-              <v-alert :value="true" color="error" icon="warning">
-                Your search for "{{ search }}" found no results
-              </v-alert>
-            </template>
-            <!-- End alert for no search results -->
-          </v-data-table>
-          <!-- END EXPENSE TYPE Datatable -->
+                        <!-- Accessible By -->
+                        <v-row v-if="userIsAdmin()">
+                          <!-- Display number of employees accessed by -->
+                          <div class="pt-2 px-3">
+                            <p>
+                              <b>Access:</b>
+                              {{ getAccess(item) }}
+                            </p>
+                          </div>
+                          <!-- Button to view names of employees with access -->
+                          <v-dialog v-model="showAccess" max-width="400px" scrollable>
+                            <template v-slot:activator="{ on }">
+                              <v-btn class="px-1 mt-2" x-small outlined v-on="on">view</v-btn>
+                            </template>
+                            <v-card color="#bc3825">
+                              <!-- Dialog Title -->
+                              <v-card-title>
+                                <span class="headline white--text">Accessible By</span>
+                              </v-card-title>
+                              <v-divider color="black"></v-divider>
+                              <!-- List of employee names/ISSUES -->
+                              <v-card-text class="pb-0">
+                                <v-row>
+                                  <v-list color="#f0f0f0" width="376">
+                                    <template v-for="employee in getEmployeeList(item.accessibleBy)">
+                                      <v-list-item :key="employee.id">
+                                        <!-- Employee Image -->
+                                        <v-list-item-avatar>
+                                          <img
+                                            v-if="employee.avatar"
+                                            :src="employee.avatar"
+                                            @error="changeAvatar(employee)"
+                                          />
+                                          <v-icon class="user-circle" name="user-circle" v-else></v-icon>
+                                        </v-list-item-avatar>
 
-          <!-- Confirmation Modals -->
-          <delete-modal
-            :toggleDeleteModal="deleting"
-            :deleteInfo="'(' + deleteType + ')'"
-            :type="'expense-type'"
-          ></delete-modal>
-          <delete-error-modal :toggleDeleteErrorModal="invalidDelete" type="expense type"></delete-error-modal>
-          <!-- End Confirmation Modals -->
-        </v-container>
-      </v-card>
-    </v-col>
+                                        <!-- Employee Name -->
+                                        <v-list-item-content>
+                                          <v-list-item-title>{{ getEmployeeName(employee.id) }}</v-list-item-title>
+                                        </v-list-item-content>
+                                      </v-list-item>
+                                      <!-- <v-divider v-if="index != showAccessLength - 1" :key="index" inset></v-divider> -->
+                                    </template>
+                                    <!-- <div v-if="showAccessLength == 0" class="noEmployees">No Employees</div> -->
+                                  </v-list>
+                                </v-row>
+                              </v-card-text>
 
-    <!-- Expense Type Form -->
-    <v-col v-if="userIsAdmin()" cols="12" lg="4">
-      <expense-type-form
-        ref="form"
-        :model="model"
-        v-on:add="addModelToTable"
-        v-on:startAction="startAction"
-        v-on:endAction="endAction"
-        v-on:update="updateModelInTable"
-        v-on:error="displayError"
-      ></expense-type-form>
-    </v-col>
-  </v-row>
+                              <v-divider color="black"></v-divider>
+                              <!-- Close dialog button -->
+                              <v-card-actions>
+                                <v-spacer></v-spacer>
+                                <v-btn dark text @click="showAccess = false">Close</v-btn>
+                              </v-card-actions>
+                            </v-card>
+                          </v-dialog>
+                        </v-row>
+                        <!-- End Accessible By -->
+
+                        <!-- Basecamp Campfire -->
+                        <p v-if="getCampfire(item.campfire)">
+                          <b>Basecamp Campfire:</b>
+                          <a :href="getCampfire(item.campfire).url" target="blank">
+                            {{ getCampfire(item.campfire).name }}
+                          </a>
+                        </p>
+                        <!-- End Basecamp Campfire -->
+                      </div>
+                    </v-card-text>
+                  </v-card>
+                </td>
+              </template>
+
+              <!-- Alert slot for no search results -->
+              <template v-slot:no-results>
+                <v-alert :value="true" color="error" icon="warning">
+                  Your search for "{{ search }}" found no results
+                </v-alert>
+              </template>
+              <!-- End alert for no search results -->
+            </v-data-table>
+            <!-- END EXPENSE TYPE Datatable -->
+
+            <!-- Confirmation Modals -->
+            <delete-modal
+              :toggleDeleteModal="deleting"
+              :deleteInfo="'(' + deleteType + ')'"
+              :type="'expense-type'"
+            ></delete-modal>
+            <delete-error-modal :toggleDeleteErrorModal="invalidDelete" type="expense type"></delete-error-modal>
+            <!-- End Confirmation Modals -->
+          </v-container>
+        </v-card>
+      </v-col>
+
+      <!-- Expense Type Form -->
+      <v-col v-if="userIsAdmin()" cols="12" lg="4">
+        <expense-type-form
+          ref="form"
+          :model="model"
+          v-on:add="addModelToTable"
+          v-on:startAction="startAction"
+          v-on:endAction="endAction"
+          v-on:update="updateModelInTable"
+          v-on:error="displayError"
+        ></expense-type-form>
+      </v-col>
+    </v-row>
+  </div>
 </template>
 
 <script>
@@ -428,7 +440,12 @@ import ExpenseTypeForm from '@/components/ExpenseTypeForm.vue';
 import { getRole } from '@/utils/auth';
 import _ from 'lodash';
 import { convertToMoneyString } from '@/utils/utils';
-import { updateStoreExpenseTypes } from '@/utils/storeUtils';
+import {
+  updateStoreExpenseTypes,
+  updateStoreEmployees,
+  updateStoreAvatars,
+  updateStoreBudgets
+} from '@/utils/storeUtils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -826,21 +843,27 @@ function isInactive(expenseType) {
 } // isInactive
 
 async function loadExpenseTypesData() {
+  this.initialPageLoading = true;
   this.userInfo = this.$store.getters.user;
-  this.employees = this.$store.getters.employees;
+  [this.campfires] = await Promise.all([
+    this.userInfo.employeeRole === 'admin' ? api.getBasecampCampfires() : '',
+    this.userInfo.employeeRole === 'admin' && !this.$store.getters.employees ? this.updateStoreEmployees() : '',
+    this.userInfo.employeeRole === 'admin' && !this.$store.getters.avatars ? this.updateStoreAvatars() : '',
+    this.refreshExpenseTypes()
+  ]);
 
-  await this.refreshExpenseTypes();
-
-  // set employee avatar
-  let avatars = this.$store.getters.basecampAvatars;
-  _.map(this.employees, (employee) => {
-    let avatar = _.find(avatars, ['email_address', employee.email]);
-    let avatarUrl = avatar ? avatar.avatar_url : null;
-    employee.avatar = avatarUrl;
-    return employee;
-  });
-
-  this.campfires = await api.getBasecampCampfires();
+  if (this.userInfo.employeeRole === 'admin') {
+    this.employees = this.$store.getters.employees;
+    // set employee avatar
+    let avatars = this.$store.getters.basecampAvatars;
+    _.map(this.employees, (employee) => {
+      let avatar = _.find(avatars, ['email_address', employee.email]);
+      let avatarUrl = avatar ? avatar.avatar_url : null;
+      employee.avatar = avatarUrl;
+      return employee;
+    });
+  }
+  this.initialPageLoading = false;
 }
 
 /**
@@ -887,14 +910,18 @@ function onSelect(item) {
  */
 async function refreshExpenseTypes() {
   this.loading = true; // set loading status to true
+  let budgetsWithExpenses;
+  [budgetsWithExpenses] = await Promise.all([
+    !this.userIsAdmin() ? api.getEmployeeBudgets(this.userInfo.id) : '',
+    !this.userIsAdmin() && !this.$store.getters.budgets ? this.updateStoreBudgets() : '',
+    !this.$store.getters.expenseTypes ? this.updateStoreExpenseTypes() : ''
+  ]);
   this.expenseTypes = this.$store.getters.expenseTypes;
 
   // filter expense types for the user
   if (!this.userIsAdmin()) {
     // create an array for the user expense types
     let expenseTypesFiltered = [];
-    // get the employees budgets that have expenses
-    let budgetsWithExpenses = await api.getEmployeeBudgets(this.userInfo.id);
     // get the active budgets for the employee
     let activeBudgets = this.$store.getters.budgets;
     // map the active budgets
@@ -1119,6 +1146,7 @@ export default {
           show: false
         }
       ], // datatable headers
+      initialPageLoading: true,
       invalidDelete: false, // invalid delete status
       midAction: false,
       itemsPerPage: -1, // items per datatable page
@@ -1187,6 +1215,9 @@ export default {
     updateModelInTable,
     userIsAdmin,
     validateDelete,
+    updateStoreAvatars,
+    updateStoreBudgets,
+    updateStoreEmployees,
     updateStoreExpenseTypes
   },
   watch: {

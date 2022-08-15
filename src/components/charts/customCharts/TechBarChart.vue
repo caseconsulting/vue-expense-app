@@ -21,7 +21,7 @@
           </v-tooltip>
         </v-col>
       </v-row>
-      <horizontal-bar :options="options" :chartData="chartData"></horizontal-bar>
+      <bar-chart ref="barChart" :key="chartKey" chartId="tech" :options="options" :chartData="chartData"></bar-chart>
       <v-row justify="center" no-gutters>
         <v-radio-group row v-model="showCurrent" class="mt-8 mb-0 mx-0">
           <v-radio label="All" value="All"></v-radio>
@@ -40,7 +40,7 @@
 </template>
 
 <script>
-import HorizontalBar from '../baseCharts/HorizontalBarChart.vue';
+import BarChart from '../baseCharts/BarChart.vue';
 import { isMobile, storeIsPopulated } from '@/utils/utils';
 
 // |--------------------------------------------------|
@@ -102,41 +102,46 @@ function fillData() {
   };
   this.options = {
     scales: {
-      xAxes: [
-        {
-          ticks: {
-            beginAtZero: true,
-            stepSize: 1
-          },
-          scaleLabel: {
-            display: true,
-            labelString: 'Number of Employees',
-            fontStyle: 'bold'
+      y: {
+        beginAtZero: true,
+        ticks: {
+          stepSize: 1
+        },
+        title: {
+          display: true,
+          text: 'Number of Employees',
+          font: {
+            weight: 'bold'
           }
         }
-      ],
-      yAxes: [
-        {
-          scaleLabel: {
-            display: true,
-            labelString: 'Name of Technology',
-            fontStyle: 'bold'
+      },
+      x: {
+        title: {
+          display: true,
+          text: 'Name of Technology',
+          font: {
+            weight: 'bold'
           }
         }
-      ]
+      }
     },
-    legend: {
-      display: false
-    },
-    title: {
-      display: true,
-      text: `Top ${pairs.length} ${
-        this.showCurrent === 'All' ? '' : this.showCurrent + ' '
-      }Technologies Used by Employees`,
-      fontSize: 15
+    plugins: {
+      legend: {
+        display: false
+      },
+      title: {
+        display: true,
+        text: `Top ${pairs.length} ${
+          this.showCurrent === 'All' ? '' : this.showCurrent + ' '
+        }Technologies Used by Employees`,
+        font: {
+          size: 15
+        }
+      }
     },
     maintainAspectRatio: false
   };
+  this.chartKey++; // rerenders the chart
   this.dataReceived = true;
 } //fillData
 
@@ -259,15 +264,22 @@ function parseEmployeeData() {
 // |--------------------------------------------------|
 
 /**
+ * Calls the destroy chart function in the base chart.
+ */
+function beforeDestroy() {
+  this.$refs.barChart.destroyChart();
+} // beforeDestroy
+
+/**
  * mounted lifecycle hook - get items, organize them and fill data
  */
-function mounted() {
+async function mounted() {
   if (this.storeIsPopulated) {
-    this.parseEmployeeData();
+    await this.parseEmployeeData();
     // Sort tech by number of occurances
-    this.sortTech(this.technologies);
+    await this.sortTech(this.technologies);
 
-    this.fillData();
+    await this.fillData();
   }
 } // mounted
 
@@ -299,7 +311,7 @@ function watchShowCurrent() {
 
 export default {
   components: {
-    HorizontalBar
+    BarChart
   },
   computed: {
     isMobile,
@@ -320,7 +332,8 @@ export default {
       currentTechnologies: {},
       nonCurrentTechnologies: {},
       showCurrent: 'All',
-      enoughData: true
+      enoughData: true,
+      chartKey: 0
     };
   },
   methods: {
@@ -331,6 +344,7 @@ export default {
     parseEmployeeData,
     setNumOfColumns
   },
+  beforeDestroy,
   mounted,
   watch: {
     showCurrent: watchShowCurrent,

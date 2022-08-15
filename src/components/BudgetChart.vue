@@ -1,7 +1,13 @@
 <template>
-  <v-card class="px-10 my-7">
+  <v-card class="px-10 pt-5 my-7">
     <div v-if="dataReceived">
-      <bar-chart :options="options" :chart-data="chartData"></bar-chart>
+      <bar-chart
+        ref="barChart"
+        :key="chartKey"
+        chartId="budget-chart"
+        :options="options"
+        :chart-data="chartData"
+      ></bar-chart>
 
       <v-autocomplete
         :items="allBudgetNames"
@@ -40,11 +46,18 @@ import { isBetweenDates, isFullTime, getCurrentBudgetYear } from '@/utils/utils'
 // |--------------------------------------------------|
 
 /**
+ * Calls the destroy chart function in the base chart.
+ */
+function beforeDestroy() {
+  this.$refs.barChart.destroyChart();
+} // beforeDestroy
+
+/**
  * mounted lifecycle hook
  */
 async function mounted() {
   await this.refreshBudget();
-  this.drawGraph();
+  await this.drawGraph();
 } // mounted
 
 // |--------------------------------------------------|
@@ -179,71 +192,86 @@ function drawGraph() {
   const employee = this.employee;
   const router = this.$router;
   let options = {
-    onClick(_, item) {
-      // build data
-      let routeData = {
-        defaultEmployee: employee,
-        defaultFilterReimbursed: 'both',
-        defaultSearch: item[0] ? budgets.names[item[0]._index] : null
-      };
-      // redirect to expenses page
-      router.push({
-        name: 'expenses',
-        params: routeData
-      });
-    },
-    title: {
-      display: true,
-      text: 'Budget Overview For Fiscal Year ' + year + '-' + (Number(year) + 1),
-      fontSize: 20
-    },
     scales: {
-      yAxes: [
-        {
-          stacked: true,
-          ticks: {
-            beginAtZero: true,
-            callback: function (value) {
-              return value.toLocaleString('en-US', {
-                style: 'currency',
-                currency: 'USD'
-              });
-            }
+      y: {
+        stacked: true,
+        beginAtZero: true,
+        ticks: {
+          callback: function (value) {
+            return value.toLocaleString('en-US', {
+              style: 'currency',
+              currency: 'USD'
+            });
           }
         }
-      ],
-      xAxes: [
-        {
-          stacked: true,
-          ticks: {
-            autoSkip: false
-          }
-        }
-      ]
-    },
-    tooltips: {
-      callbacks: {
-        label: function (tooltipItem) {
-          return (
-            '$' +
-            Number(tooltipItem.yLabel)
-              // toFixed sets the number of decimal points to show
-              .toFixed(2)
-              .replace(/./g, function (c, i, a) {
-                return i > 0 && c !== '.' && (a.length - i) % 3 === 0 ? ',' + c : c;
-              })
-          );
+      },
+      x: {
+        stacked: true,
+        ticks: {
+          autoSkip: false
         }
       }
     },
-    legend: {
-      display: true
+    onClick: (x, y) => {
+      if (_.first(y)) {
+        let index = _.first(y).index;
+        let routeData = {
+          defaultEmployee: employee,
+          defaultFilterReimbursed: 'both',
+          defaultSearch: this.chartData.labels[index]
+        };
+        // redirect to expenses page
+        router.push({
+          name: 'expenses',
+          params: routeData
+        });
+      } else {
+        router.push({
+          name: 'expenses',
+          params: {
+            defaultEmployee: employee,
+            defaultFilterReimbursed: 'both'
+          }
+        });
+      }
     },
-    responsive: true,
+    plugins: {
+      legend: {
+        display: false
+      },
+      title: {
+        display: true,
+        text: 'Budget Overview For Fiscal Year ' + year + '-' + (Number(year) + 1),
+        fontSize: 20
+      },
+      subtitle: {
+        display: true,
+        text: '*Click on a bar to see expenses',
+        font: {
+          style: 'italic'
+        }
+      },
+      tooltip: {
+        callbacks: {
+          label: function (tooltipItem) {
+            return (
+              '$' +
+              Number(tooltipItem.raw)
+                // toFixed sets the number of decimal points to show
+                .toFixed(2)
+                .replace(/./g, function (c, i, a) {
+                  return i > 0 && c !== '.' && (a.length - i) % 3 === 0 ? ',' + c : c;
+                })
+            );
+          }
+        }
+      }
+    },
     maintainAspectRatio: false
   };
   this.chartData = data;
   this.options = options;
+  this.chartKey++; // rerenders the chart
   this.dataReceived = true;
 } // drawGraph
 
@@ -349,6 +377,7 @@ export default {
   data() {
     return {
       allBudgetNames: [],
+      chartKey: 0,
       chartData: null,
       dataReceived: false,
       options: null,
@@ -365,6 +394,7 @@ export default {
     isFullTime,
     refreshBudget
   },
+  beforeDestroy,
   mounted,
   props: ['employee', 'accessibleBudgets', 'fiscalDateView', 'expenses', 'expenseTypes'],
   watch: {

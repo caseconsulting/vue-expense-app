@@ -142,8 +142,9 @@ moment.tz.setDefault('America/New_York');
 import ReimburseModal from '@/components/modals/ReimburseModal.vue';
 import UnrolledTableInfo from '@/components/UnrolledTableInfo.vue';
 import _ from 'lodash';
-import { asyncForEach, isEmpty, convertToMoneyString } from '@/utils/utils';
+import { asyncForEach, isEmpty, convertToMoneyString, updateEmployeeLogin } from '@/utils/utils';
 import { storeIsPopulated } from '../utils/utils';
+import { updateStoreEmployees } from '@/utils/storeUtils';
 import employeeUtils from '@/shared/employeeUtils';
 
 // |--------------------------------------------------|
@@ -655,9 +656,8 @@ function determineShowOnFeed(expense) {
 /**
  * Loads and organizes all data relevant to the data table.
  */
-async function loadExpensesData() {
-  let aggregatedData = await api.getAllAggregateExpenses();
-  let allExpenses = this.createExpenses(aggregatedData);
+async function loadExpensesData(aggData) {
+  let allExpenses = this.createExpenses(aggData);
   this.pendingExpenses = this.filterOutReimbursed(allExpenses);
   this.constructAutoComplete(this.pendingExpenses);
   this.empBudgets = this.groupEmployeeExpenses(this.pendingExpenses);
@@ -686,11 +686,13 @@ function removeAggregateExpenseData(expense) {
  * Toggle all expenses selected.
  */
 function toggleAll() {
-  if (!this.mainCheckBox.all) {
+  if (!this.mainCheckBox.all && !this.mainCheckBox.indeterminate) {
     // check all boxes
     this.checkAllBoxes();
-  } else {
+  } else if (this.mainCheckBox.all && !this.mainCheckBox.indeterminate) {
     // clear all checkboxes
+    this.unCheckAllBoxes();
+  } else if (!this.mainCheckBox.all && this.mainCheckBox.indeterminate) {
     this.unCheckAllBoxes();
   }
 } // toggleAll
@@ -761,7 +763,7 @@ function toggleShowOnFeedGroup(value) {
  * Uncheck all expenses and boxes
  */
 function unCheckAllBoxes() {
-  this.empBudgets = _.forEach(this.empBudgets, (budget) => {
+  _.forEach(this.filteredItems, (budget) => {
     budget.checkBox.all = false;
     budget.checkBox.indeterminate = false;
     return _.forEach(budget.expenses, (expense) => {
@@ -795,8 +797,15 @@ async function created() {
 
   //window.EventBus.$on('canceled-reimburse', () => (this.buttonClicked = false));
   window.EventBus.$on('confirm-reimburse', async () => await this.reimburseExpenses());
-  if (this.$store.getters.storeIsPopulated) {
-    this.loadExpensesData();
+  let aggData;
+  [aggData] = await Promise.all([
+    api.getAllAggregateExpenses(),
+    !this.$store.getters.employees ? this.updateStoreEmployees() : ''
+  ]);
+  this.loadExpensesData(aggData);
+  if (this.$store.getters.loginTime) {
+    // updates and audits employee login for admins
+    await this.updateEmployeeLogin(this.$store.getters.user);
   }
 } // created
 
@@ -831,12 +840,6 @@ function watchExpenseType() {
   this.unCheckAllBoxes();
 } // watchExpenseType
 
-function watchLoadExpensesData() {
-  if (this.$store.getters.storeIsPopulated) {
-    this.loadExpensesData();
-  }
-}
-
 // |--------------------------------------------------|
 // |                                                  |
 // |                      EXPORT                      |
@@ -859,6 +862,7 @@ export default {
   },
   created,
   data: () => ({
+    aggregatedData: [],
     alerts: [], // status alerts
     buttonClicked: false, // reimburse button clicked
     empBudgets: [], // grouped employee and expense types
@@ -930,12 +934,13 @@ export default {
     toggleGroup,
     toggleShowOnFeedGroup,
     toggleShowOnFeed,
-    unCheckAllBoxes
+    unCheckAllBoxes,
+    updateEmployeeLogin,
+    updateStoreEmployees
   },
   watch: {
     employee: watchEmployee,
-    expenseType: watchExpenseType,
-    storeIsPopulated: watchLoadExpensesData
+    expenseType: watchExpenseType
   }
 };
 </script>

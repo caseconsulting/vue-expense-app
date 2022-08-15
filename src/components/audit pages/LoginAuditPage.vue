@@ -2,7 +2,13 @@
   <v-container fluid>
     <v-row>
       <v-col>
-        <bar-chart v-if="chartLoaded" :options="loginChartOptions" :chartData="loginChartData"></bar-chart>
+        <bar-chart
+          v-if="chartLoaded"
+          chartId="login-audits"
+          :key="chartKey"
+          :options="loginChartOptions"
+          :chartData="loginChartData"
+        ></bar-chart>
       </v-col>
     </v-row>
     <audit-table :audits="loginAudits"></audit-table>
@@ -115,45 +121,48 @@ async function fillData() {
 
   this.loginChartOptions = {
     scales: {
-      xAxes: [
-        {
-          ticks: {
-            beginAtZero: true
-          },
-          scaleLabel: {
-            display: true,
-            labelString: 'Time of Login',
-            fontStyle: 'bold'
+      x: {
+        beginAtZero: true,
+        title: {
+          display: true,
+          text: 'Time of Login',
+          font: {
+            weight: 'bold'
           }
         }
-      ],
-      yAxes: [
-        {
-          ticks: {
-            beginAtZero: true,
-            stepSize: 1
-          },
-          scaleLabel: {
-            display: true,
-            labelString: 'Number of Logins',
-            fontStyle: 'bold'
+      },
+      y: {
+        beginAtZero: true,
+        ticks: {
+          stepSize: 1
+        },
+        title: {
+          display: true,
+          text: 'Number of Logins',
+          font: {
+            weight: 'bold'
           }
         }
-      ]
+      }
     },
-    title: {
-      display: true,
-      text: title,
-      fontSize: 15
+    plugins: {
+      title: {
+        display: true,
+        text: title,
+        font: {
+          size: 15
+        }
+      },
+      legend: {
+        display: false
+      },
+      tooltip: {
+        enabled: showTooltips
+      }
     },
-    legend: {
-      display: false
-    },
-    maintainAspectRatio: false,
-    tooltips: {
-      enabled: showTooltips
-    }
+    maintainAspectRatio: false
   };
+  this.chartKey++; // rerenders the chart
   this.chartLoaded = true;
 } // fillData
 
@@ -230,6 +239,7 @@ export default {
   created,
   data() {
     return {
+      chartKey: 0,
       chartLoaded: false,
       loginAudits: [],
       loginChartOptions: null,

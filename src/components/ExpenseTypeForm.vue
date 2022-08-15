@@ -314,7 +314,7 @@ import _ from 'lodash';
 import { v4 as uuid } from 'uuid';
 import { getDateRules, getRequiredRules } from '@/shared/validationUtils.js';
 import { formatDate, isEmpty, parseDate } from '@/utils/utils';
-import { updateStoreExpenseTypes } from '@/utils/storeUtils';
+import { updateStoreExpenseTypes, updateStoreCampfires } from '@/utils/storeUtils';
 import { mask } from 'vue-the-mask';
 const moment = require('moment-timezone');
 moment.tz.setDefault('America/New_York');
@@ -630,7 +630,8 @@ async function created() {
 
   activeEmployees = _.sortBy(activeEmployees, ['text']); // sort employees
   this.activeEmployees = activeEmployees;
-  this.campfires = this.$store.getters.basecampAvatars;
+  await this.updateStoreCampfires();
+  this.campfires = this.$store.getters.basecampCampfires;
   this.editedExpenseType = _.cloneDeep(this.model);
   this.clearForm();
 } // created
@@ -830,7 +831,8 @@ export default {
     toFAQ,
     toggleRequireURL,
     toggleShowAllCategories,
-    updateStoreExpenseTypes
+    updateStoreExpenseTypes,
+    updateStoreCampfires
   },
   props: ['model'], // expense type to be created/updated
   computed: {

@@ -1,5 +1,5 @@
 <template>
-  <v-card class="mt-3" hover>
+  <v-card hover>
     <v-card-title class="header_style">
       <!-- Editing an Expense -->
       <h3 v-if="expense.id && (isAdmin || !isReimbursed)">Edit Expense</h3>
@@ -139,7 +139,7 @@
           v-if="this.reqRecipient"
           :items="this.recipientOptions"
           :rules="getRequiredRules()"
-          :disabled="isReimbursed"
+          :disabled="isInactive || isReimbursed"
           v-model="editedExpense.recipient"
           label="Recipient"
           id="recipient"
@@ -807,7 +807,7 @@ function clearForm() {
 
   if (this.asUser) {
     // creating or updating an expense as a user
-    this.$set(this.editedExpense, 'employeeName', this.userInfo.id);
+    this.$set(this.editedExpense, 'employeeName', `${this.userInfo.firstName} ${this.userInfo.lastName}`);
     this.$set(this.editedExpense, 'employeeId', this.userInfo.id);
   }
 } // clearForm
@@ -1532,10 +1532,9 @@ async function created() {
     this.employeeRole === 'user' ||
     this.employeeRole === 'intern' ||
     this.employeeRole === 'manager';
-
   if (this.asUser) {
     // creating or updating an expense as a user
-    this.$set(this.editedExpense, 'employeeName', this.userInfo.id);
+    this.$set(this.editedExpense, 'employeeName', `${this.userInfo.firstName} ${this.userInfo.lastName}`);
     this.$set(this.editedExpense, 'employeeId', this.userInfo.id);
   }
   // creating or updating an expense as an admin
@@ -1645,6 +1644,8 @@ function watchExpenseID() {
     this.emit('editing-expense'); //notify parent that expense is being edited
     this.costFormatted = Number(this.editedExpense.cost).toLocaleString();
     this.submittedReceipt = this.editedExpense.receipt;
+  } else {
+    this.clearForm();
   }
 
   this.selectedExpenseType = _.find(this.expenseTypes, (expenseType) => {
@@ -1652,6 +1653,12 @@ function watchExpenseID() {
       return expenseType;
     }
   });
+
+  if (this.asUser) {
+    // creating or updating an expense as a user
+    this.$set(this.editedExpense, 'employeeName', `${this.userInfo.firstName} ${this.userInfo.lastName}`);
+    this.$set(this.editedExpense, 'employeeId', this.userInfo.id);
+  }
 } // watchExpenseID
 
 /**

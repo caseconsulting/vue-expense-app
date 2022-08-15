@@ -1,5 +1,5 @@
 <template>
-  <div v-if="alerts" class="py-2 justify-center">
+  <div v-if="alerts" class="justify-center">
     <v-col v-for="alert in alerts" :key="alert.id" id="alert.id" class="mb-4 py-0" cols="12">
       <v-alert
         :type="alert.status"
@@ -12,7 +12,7 @@
         <p class="ma-0" style="display: inline-block">{{ alert.message }}</p>
         <div :class="getButtonStyling()">
           <v-btn
-            :disabled="onPage(alert.handler.page)"
+            :disabled="onProfile()"
             @click="handleClick(alert.handler.page, alert.handler.extras)"
             class="justify-center black--text notif-action-btn"
             elevation="0"
@@ -42,6 +42,7 @@ import moment from 'moment-timezone';
 import api from '@/shared/api.js';
 import _ from 'lodash';
 import { asyncForEach, isMobile, isSmallScreen } from '@/utils/utils.js';
+import { updateStoreExpenseTypes } from '@/utils/storeUtils';
 moment.tz.setDefault('America/New_York');
 
 // |--------------------------------------------------|
@@ -112,7 +113,12 @@ function checkCertifications() {
 
 async function checkReimbursements() {
   // api to get all expenses for user, filtering out inactive expense types
-  let expenses = await api.getAllEmployeeExpenses(this.user.id);
+  let expenses;
+  [expenses] = await Promise.all([
+    api.getAllEmployeeExpenses(this.user.id),
+    !this.$store.getters.expenseTypes ? this.updateStoreExpenseTypes() : ''
+  ]);
+
   let expenseTypes = _.filter(this.$store.getters.expenseTypes, (t) => {
     return !t.isInactive;
   });
@@ -221,9 +227,9 @@ function randId() {
  *
  * @return boolean - checks to see if the current banner is on user profile
  */
-function onPage(pageName) {
-  return this.$route.params.name == pageName;
-} // onPage
+function onProfile() {
+  return this.$route.params.id == this.user.employeeNumber;
+} // onProfile
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -266,7 +272,8 @@ export default {
     isMobile,
     isSmallScreen,
     randId,
-    onPage
+    onProfile,
+    updateStoreExpenseTypes
   }
 };
 </script>

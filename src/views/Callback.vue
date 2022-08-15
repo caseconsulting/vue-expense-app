@@ -6,6 +6,7 @@
 
 <script>
 import { setIdToken, setAccessToken, setRole, setProfile } from '@/utils/auth';
+import api from '@/shared/api';
 const login_format = 'MMM Do, YYYY HH:mm:ss';
 const moment = require('moment-timezone');
 moment.tz.setDefault('America/New_York');
@@ -25,7 +26,10 @@ function mounted() {
       this.setAccessToken();
       this.setIdToken();
       this.setProfile();
-      let employeeRole = await this.setRole();
+      let user = await api.getUser();
+      let employeeRole = user.employeeRole;
+      this.setRole(employeeRole);
+      localStorage.setItem('user', JSON.stringify(user));
       localStorage.setItem('lastLogin', moment(new Date()).format(login_format));
 
       if (employeeRole === 'admin') {

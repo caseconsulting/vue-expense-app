@@ -1,6 +1,6 @@
 <template>
   <v-card v-if="dataReceived" class="pa-5">
-    <pie-chart ref="chart" :options="options" :chartData="chartData"></pie-chart>
+    <pie-chart ref="chart" :key="chartKey" chartId="majors-chart" :options="options" :chartData="chartData"></pie-chart>
   </v-card>
 </template>
 
@@ -16,21 +16,35 @@ import PieChart from '../baseCharts/PieChart.vue';
 /**
  * mounted lifecycle hook
  */
-function mounted() {
+async function mounted() {
   // emit comes from HighestDegreeChart when a pie slice is clicked
-  window.EventBus.$on('majors-update', (receiveMajors) => {
-    let majors = receiveMajors.majors;
-    this.degree = receiveMajors.degree;
-    this.fillData(majors);
+  await window.EventBus.$on('majors-update', async (receiveData, title) => {
+    this.quantities = [];
+    this.labels = [];
+    this.dataReceived = false;
+    let majorsOrSchools = receiveData.majorsOrSchools;
+    this.eduKind = receiveData.eduKind;
+
+    await this.fetchData(majorsOrSchools);
+    await this.fillData(title);
   });
 } // mounted
 
 /**
  * created lifecycle hook
  */
-function created() {
-  this.fillData(null);
+async function created() {
+  await this.fetchData(null);
+  await this.fillData();
 } // created
+
+/**
+ * beforeDestroy lifecycle hook
+ */
+function beforeDestroy() {
+  window.EventBus.$off('majors-update');
+  this.$refs.chart.destroyChart();
+} //beforeDestroy
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -39,38 +53,25 @@ function created() {
 // |--------------------------------------------------|
 
 /**
- * beforeDestroy lifecycle hook
+ * Gets all the major/school data.
+ * @param majorsOrSchools The array of majors/schools for an education kind
  */
-function beforeDestroy() {
-  window.EventBus.$off('majors-update');
-} //beforeDestroy
-
-/**
- * Sets the chart formatting and options data.
- *
- * @param majors - The array of majors for a degree
- */
-function fillData(majors) {
-  let text;
-  let colors;
-  let enabled;
-  let labels = [];
-  let quantities = [];
-  if (majors) {
-    enabled = true;
-    const sortable = Object.entries(majors)
+function fetchData(majorsOrSchools) {
+  if (majorsOrSchools) {
+    this.enabled = true;
+    const sortable = Object.entries(majorsOrSchools)
       .sort(([, a], [, b]) => b - a)
       .reduce((r, [k, v]) => ({ ...r, [k]: v }), {});
 
     for (let i = 0; i < 10; i++) {
-      let major = Object.keys(sortable)[i];
-      if (major) {
-        quantities.push(sortable[major]);
-        labels.push(major);
+      let majorOrSchool = Object.keys(sortable)[i];
+      if (majorOrSchool) {
+        this.quantities.push(sortable[majorOrSchool]);
+        this.labels.push(majorOrSchool);
       }
     }
-    text = `Top ${this.degree} Degree Majors`;
-    colors = [
+    this.text = `Top ${this.eduKind} Degree Majors`;
+    this.colors = [
       'rgba(54, 162, 235, 1)',
       'rgba(255, 206, 86, 1)',
       'rgba(75, 192, 192, 1)',
@@ -82,32 +83,45 @@ function fillData(majors) {
       'rgba(66, 129, 164, 1)'
     ];
   } else {
-    //these presets are when a degree has not been selected
-    quantities.push(1);
-    enabled = false;
-    text = `Click on a Degree To See the Top Majors`;
-    colors = ['grey'];
+    //these presets are when an education has not been selected
+    this.quantities.push(1);
+    this.enabled = false;
+    this.text = `Click on an Education To See the Top Majors/Schools`;
+    this.colors = ['grey'];
   }
+} //fetchData
+
+/**
+ * Sets the chart formatting and options data.
+ *
+ * @param title the title to display if there is one
+ */
+function fillData(title) {
   this.chartData = {
-    labels: labels,
+    labels: this.labels,
     datasets: [
       {
-        data: quantities,
-        backgroundColor: colors
+        data: this.quantities,
+        backgroundColor: this.colors
       }
     ]
   };
   this.options = {
-    title: {
-      display: true,
-      text: text,
-      fontSize: 15
+    plugins: {
+      title: {
+        display: true,
+        text: title ? title : this.text,
+        font: {
+          size: 15
+        }
+      },
+      tooltip: {
+        enabled: this.enabled
+      }
     },
-    maintainAspectRatio: false,
-    tooltips: {
-      enabled: enabled
-    }
+    maintainAspectRatio: false
   };
+  this.chartKey++; // rerenders the chart
   this.dataReceived = true;
 } // fillData
 
@@ -123,12 +137,19 @@ export default {
     return {
       options: null,
       chartData: null,
-      majors: null,
+      majorsOrSchools: null,
       dataReceived: false,
-      degree: null
+      kind: null,
+      chartKey: 0,
+      text: '',
+      colors: [],
+      enabled: false,
+      labels: [],
+      quantities: []
     };
   },
   methods: {
+    fetchData,
     fillData
   },
   mounted,

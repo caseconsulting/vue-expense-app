@@ -104,7 +104,14 @@ import MifiLogAudit from '@/components/audit pages/MifiLogAudit.vue';
 const moment = require('moment-timezone');
 moment.tz.setDefault('America/New_York');
 import _ from 'lodash';
-import { isEmpty } from '@/utils/utils';
+import { isEmpty, storeIsPopulated } from '@/utils/utils';
+import { updateStoreEmployees } from '@/utils/storeUtils';
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      METHODS                     |
+// |                                                  |
+// |--------------------------------------------------|
 
 /**
  * sets the dateRange of the audits to get
@@ -174,6 +181,20 @@ function selectDropDown(tab) {
 
 // |--------------------------------------------------|
 // |                                                  |
+// |                LIFECYLCLE HOOKS                  |
+// |                                                  |
+// |--------------------------------------------------|
+
+async function created() {
+  if (this.storeIsPopulated) {
+    if (!this.$store.getters.employees) {
+      await this.updateStoreEmployees();
+    }
+  }
+}
+
+// |--------------------------------------------------|
+// |                                                  |
 // |                      EXPORT                      |
 // |                                                  |
 // |--------------------------------------------------|
@@ -184,6 +205,10 @@ export default {
     ResumeParserAuditPage,
     MifiLogAudit
   },
+  computed: {
+    storeIsPopulated
+  },
+  created,
   data() {
     return {
       auditsQuery: {
@@ -203,7 +228,15 @@ export default {
     isEmpty,
     setDateRange,
     formatRange,
-    selectDropDown
+    selectDropDown,
+    updateStoreEmployees
+  },
+  watch: {
+    storeIsPopulated: async function () {
+      if (!this.$store.getters.employees) {
+        await this.updateStoreEmployees();
+      }
+    }
   }
 };
 </script>

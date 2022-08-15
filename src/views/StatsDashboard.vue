@@ -26,11 +26,11 @@
             </v-list>
           </v-menu>
           <hr class="my-1" />
-          <employees-chart-tab v-if="statsTab === 'employees'"></employees-chart-tab>
-          <education-chart-tab v-if="statsTab === 'education'"></education-chart-tab>
-          <tech-chart-tab v-if="statsTab === 'technology'"></tech-chart-tab>
-          <certifications-chart-tab v-if="statsTab === 'certifications'"></certifications-chart-tab>
-          <customer-org-chart-tab v-if="statsTab === 'customer Org'"></customer-org-chart-tab>
+          <employees-chart-tab v-if="statsTab === 'employees' && dataLoaded"></employees-chart-tab>
+          <education-chart-tab v-if="statsTab === 'education' && dataLoaded"></education-chart-tab>
+          <tech-chart-tab v-if="statsTab === 'technology' && dataLoaded"></tech-chart-tab>
+          <certifications-chart-tab v-if="statsTab === 'certifications' && dataLoaded"></certifications-chart-tab>
+          <customer-org-chart-tab v-if="statsTab === 'customer Org' && dataLoaded"></customer-org-chart-tab>
         </div>
         <!-- user is not mobile -->
         <v-tabs v-else color="basil" center-active grow show-arrows class="" @change="changeTab">
@@ -67,6 +67,7 @@ import TechChartTab from '../components/charts/chartTabs/TechChartTab.vue';
 import EducationChartTab from '../components/charts/chartTabs/EducationChartTab.vue';
 import CustomerOrgChartTab from '../components/charts/chartTabs/CustomerOrgChartTab.vue';
 import { isMobile, storeIsPopulated } from '@/utils/utils';
+import { updateStoreEmployees } from '@/utils/storeUtils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -78,8 +79,13 @@ import { isMobile, storeIsPopulated } from '@/utils/utils';
  * mounted hook
  *
  */
-function mounted() {
-  if (this.storeIsPopulated) this.dataLoaded = true;
+async function mounted() {
+  if (this.storeIsPopulated) {
+    if (!this.$store.getters.employees) {
+      await this.updateStoreEmployees();
+    }
+    this.dataLoaded = true;
+  }
 } // mounted
 
 // |--------------------------------------------------|
@@ -133,19 +139,16 @@ export default {
   },
   methods: {
     changeTab,
-    selectDropDown
+    selectDropDown,
+    updateStoreEmployees
   },
   watch: {
-    storeIsPopulated: function () {
+    storeIsPopulated: async function () {
+      if (!this.$store.getters.employees) {
+        await this.updateStoreEmployees();
+      }
       if (this.storeIsPopulated) this.dataLoaded = true;
     }
   }
 };
 </script>
-
-<style>
-.chart {
-  height: 60%;
-  width: 70%;
-}
-</style>
