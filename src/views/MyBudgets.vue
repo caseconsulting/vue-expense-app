@@ -20,9 +20,7 @@
       <!-- Title -->
       <v-col cols="12" lg="8" class="d-flex justify-center align-center">
         <div v-if="!loading" :class="isMobile ? 'center' : ''">
-          <h1 v-if="hasAccessToBudgets">
-            Budget Statistics for {{ employee.nickname || employee.firstName }} {{ employee.lastName }}
-          </h1>
+          <h1 v-if="hasAccessToBudgets">My Budgets</h1>
           <h1 v-else>No Budgets Available for {{ employee.nickname || employee.firstName }} {{ employee.lastName }}</h1>
         </div>
         <v-skeleton-loader v-else-if="loading && !isMobile" type="text" width="90%"></v-skeleton-loader>

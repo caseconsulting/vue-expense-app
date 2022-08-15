@@ -21,8 +21,10 @@
         <v-container fluid>
           <!-- Title -->
           <v-card-title v-if="!isMobile()">
-            <h2 v-if="(isUser || isIntern || isManager) && !loading">{{ getUserName }}'s Expenses</h2>
-            <h3 v-else>My Expenses</h3>
+            <!-- <h2 v-if="(isUser || isIntern || isManager) && !loading">{{ getUserName }}'s Expenses</h2> -->
+            <h3 v-if="isAdmin && !loading">All Expenses</h3>
+            <h3 v-else-if="!loading">My Expenses</h3>
+            <h3 v-else>Loading...</h3>
             <v-spacer></v-spacer>
 
             <!-- Employee Filter -->
@@ -52,8 +54,9 @@
 
           <div v-else>
             <v-card-title class="px-0">
-              <h3 v-if="(isUser || isIntern || isManager) && !loading">{{ getUserName }}'s Expenses</h3>
-              <h3 v-else>My Expenses</h3>
+              <h3 v-if="isAdmin && !loading">All Expenses</h3>
+              <h3 v-else-if="!loading">My Expenses</h3>
+              <h3 v-else>Loading...</h3>
             </v-card-title>
             <v-row class="mb-5">
               <v-col v-if="isAdmin">
@@ -887,6 +890,11 @@ async function created() {
 
   if (this.$store.getters.storeIsPopulated) {
     this.loadMyExpensesData();
+  }
+
+  // if coming from budgets chart scroll to top
+  if (this.$route.params.defaultEmployee) {
+    window.scrollTo(0, 0);
   }
 } // created
 
