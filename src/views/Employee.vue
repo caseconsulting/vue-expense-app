@@ -87,7 +87,10 @@
       >
         <v-card>
           <v-card-title class="header_style" v-if="!editing">
-            <h3 id="employeeName">{{ this.model.firstName }} {{ this.model.lastName }}</h3>
+            <h3 id="employeeName" v-if="userIsEmployee()">My Profile</h3>
+            <h3 id="employeeName" v-else>
+              {{ this.model.nickname || this.model.firstName }} {{ this.model.lastName }}
+            </h3>
             <v-spacer></v-spacer>
             <convert-employee-to-csv v-if="userIsAdmin()" :employee="this.model" color="white" />
             <v-tooltip v-if="hasAdminPermissions() || userIsEmployee()" top>
