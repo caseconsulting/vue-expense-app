@@ -15,12 +15,14 @@
       </v-navigation-drawer>
       <v-app-bar class="nav-color" dark fixed app clipped-left>
         <v-app-bar-nav-icon v-show="isLoggedIn() && isMobile" @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
-        <v-avatar size="40" color="grey lighten-4" class="mr-2">
-          <img src="@/assets/img/case-logo-circle.png" class="logo-bar" />
-        </v-avatar>
-        <v-toolbar-title v-show="!isMobile">
-          <h1 class="d-inline">Case Portal</h1>
-        </v-toolbar-title>
+        <div class="d-flex align-center siteId" @click="goToHome">
+          <v-avatar size="40" color="grey lighten-4" class="mr-2">
+            <img src="@/assets/img/case-logo-circle.png" class="logo-bar" />
+          </v-avatar>
+          <v-toolbar-title v-show="!isMobile">
+            <h1>Case Portal</h1>
+          </v-toolbar-title>
+        </div>
         <!-- In Mobile View decrease title size-->
         <h1 v-show="isMobile" class="font-25">Case Portal</h1>
         <v-spacer></v-spacer>
@@ -263,6 +265,14 @@ async function populateStore() {
   this.$store.dispatch('setStoreIsPopulated', { populated: true });
 } // populateStore
 
+/**
+ * Scrolls up to the home page
+ */
+function goToHome() {
+  this.$router.push({ path: '/' });
+  this.$vuetify.goTo(0);
+} // goToHome
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                 LIFECYCLE HOOKS                  |
@@ -415,6 +425,7 @@ export default {
     handleProfile,
     isLoggedIn,
     populateStore,
+    goToHome,
     updateStoreUser,
     updateStoreEmployees,
     updateStoreAvatars,
@@ -471,5 +482,11 @@ export default {
 
 #P {
   text-decoration: none;
+}
+</style>
+
+<style>
+.siteId {
+  cursor: pointer;
 }
 </style>
