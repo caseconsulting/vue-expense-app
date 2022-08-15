@@ -22,9 +22,9 @@
           <v-toolbar-title v-show="!isMobile">
             <h1>Case Portal</h1>
           </v-toolbar-title>
+          <!-- In Mobile View decrease title size-->
+          <h1 v-show="isMobile" class="font-25">Case Portal</h1>
         </div>
-        <!-- In Mobile View decrease title size-->
-        <h1 v-show="isMobile" class="font-25">Case Portal</h1>
         <v-spacer></v-spacer>
         <!-- Display social media icons and links dropdown menu -->
         <v-item-group class="hidden-sm-and-down" v-show="isLoggedIn() && !isMobile">
