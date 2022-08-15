@@ -166,7 +166,7 @@ function buildContractsColumn() {
           });
         }
         if (current == true) {
-          contractNames += `${currentCon.name} - ${getPrimes(currentCon)} & `;
+          contractNames += `${currentCon.name} - ${currentCon.primes.join(', ')} & `;
         }
       });
       contractNames = contractNames.slice(0, -2);
@@ -182,20 +182,6 @@ function buildContractsColumn() {
     this.headers.splice(3, 1); //remove badge exp column
   }
 } // buildContractsColumn
-
-/**
- * Turns the list of primes into a string. Removes the final ,
- *
- * @param contract the contract
- * @return the primes as a comma separated string
- */
-function getPrimes(contract) {
-  let val = '';
-  _.forEach(contract.primes, (prime) => {
-    val += prime + ', ';
-  });
-  return val.substring(0, val.length - 2);
-}
 
 /**
  * Replaces the third column with job role information.
@@ -841,7 +827,6 @@ export default {
     getClearanceType,
     getFullName,
     getActive,
-    getPrimes,
     handleClick,
     isFocus,
     populateDataTypeDropDowns,

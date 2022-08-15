@@ -13,7 +13,7 @@
     <!-- Loop for Current Projects -->
     <div v-for="(contract, contractIndex) in getCurrentProjects" :key="contractIndex" class="pb-1 px-4">
       <p><b>Contract: </b>{{ contract.name }}</p>
-      <p><b>Prime: </b>{{ contract.prime }}</p>
+      <p><b>Primes: </b>{{ contract.primes.join(', ') }}</p>
       <div v-for="(project, projIndex) in contract.projects" :key="projIndex" class="px-4">
         <p v-if="contract.projects.length > 1">
           <b>Project {{ projIndex + 1 }}: </b>{{ project.name }}
@@ -119,7 +119,7 @@ function getCurrentProjects() {
         contract.projects.forEach((project) => {
           if (currContract.projects.length === 0) {
             currContract.name = contract.name;
-            currContract.prime = contract.prime;
+            currContract.primes = contract.primes;
           }
           if (!project.endDate) {
             currContract.projects.push(project);
