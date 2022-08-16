@@ -31,7 +31,10 @@
           <v-tooltip top nudge-left="75" nudge-bottom="10" max-width="300">
             <template v-slot:activator="{ on }">
               <div v-on="on">
-                <v-switch v-model="technology.current" label="Currently know this technology / skill"></v-switch>
+                <v-switch
+                  v-model="technology.current"
+                  label="Currently working with this technology / skill"
+                ></v-switch>
               </div>
             </template>
             <span>Enabling this will auto-increment the years of experience every month</span>
