@@ -260,60 +260,87 @@
                     <v-card-text>
                       <div class="expandedInfo">
                         <!-- Description -->
-                        <p v-if="item.description">
-                          <b>Description:</b>
-                          {{ item.description }}
-                        </p>
+                        <v-row no-gutters>
+                          <v-col cols="12">
+                            <p v-if="item.description">
+                              <b>Description:</b>
+                              {{ item.description }}
+                            </p>
+                          </v-col>
+                        </v-row>
 
                         <!-- Category -->
-                        <p v-if="item.categories && item.categories.length > 0">
-                          <b>Categories:</b>
-                          {{ categoriesToString(item.categories) }}
-                        </p>
+                        <v-row no-gutters>
+                          <v-col cols="12">
+                            <p>
+                              <b>Categories:</b>
+                              {{ categoriesToString(item.categories) }}
+                            </p>
+                          </v-col>
+                        </v-row>
 
-                        <!-- Show on Feed -->
-                        <div v-if="item.alwaysOnFeed">
-                          <p><b>Show On Feed:</b> All Expenses</p>
-                        </div>
-                        <div v-else>
-                          <p><b>Show On Feed:</b> {{ categoriesOnFeed(item.categories) }}</p>
-                        </div>
+                        <v-row no-gutters>
+                          <!-- Show on Feed -->
+                          <v-col>
+                            <div v-if="item.alwaysOnFeed">
+                              <p><b>Show On Feed:</b> All Expenses</p>
+                            </div>
+                            <div v-else>
+                              <p><b>Show On Feed:</b> {{ categoriesOnFeed(item.categories) }}</p>
+                            </div>
+                          </v-col>
+                        </v-row>
 
                         <!-- Show Require URL -->
-                        <div v-if="item.requireURL">
-                          <p><b>Require URL:</b> All Expenses</p>
-                        </div>
-                        <div v-else>
-                          <p><b>Require URL:</b> {{ categoriesReqUrl(item.categories) }}</p>
-                        </div>
+                        <v-row no-gutters>
+                          <v-col>
+                            <div v-if="item.requireURL">
+                              <p><b>Require URL:</b> All Expenses</p>
+                            </div>
+                            <div v-else>
+                              <p><b>Require URL:</b> {{ categoriesReqUrl(item.categories) }}</p>
+                            </div>
+                          </v-col>
+                        </v-row>
+
+                        <!-- Show Require Receipt -->
+                        <v-row no-gutters>
+                          <v-col>
+                            <div v-if="item.requiredFlag">
+                              <p><b>Require Receipt:</b> All Expenses</p>
+                            </div>
+                            <div v-else>
+                              <p><b>Require Receipt:</b> {{ categoriesReqReceipt(item.categories) }}</p>
+                            </div>
+                          </v-col>
+                        </v-row>
 
                         <!-- Requires Recipient -->
-                        <p v-if="item.hasRecipient"><b>Requires Recipient:</b> Yes</p>
-                        <p v-else><b>Requires Recipient:</b> No</p>
+                        <v-row no-gutters>
+                          <v-col>
+                            <p v-if="item.hasRecipient"><b>Requires Recipient:</b> Yes</p>
+                            <p v-else><b>Requires Recipient:</b> No</p>
+                          </v-col>
+                        </v-row>
 
                         <!-- Flags -->
-                        <v-row>
-                          <v-col cols="12" sm="6" class="flag py-0">
+                        <v-row no-gutters>
+                          <v-col cols="12" sm="6" md="3" class="flag">
                             <p>Pro-rated:</p>
                             <v-icon v-if="item.proRated" id="marks" class="mr-1">mdi-check-circle-outline</v-icon>
                             <v-icon v-else class="mr-1" id="marks">mdi-close-circle-outline</v-icon>
                           </v-col>
-                          <v-col cols="12" sm="6" class="flag py-0">
+                          <v-col cols="12" sm="6" md="3" class="flag">
                             <p>Overdraft Allowed:</p>
                             <v-icon v-if="item.odFlag" id="marks" class="mr-1">mdi-check-circle-outline</v-icon>
                             <v-icon v-else class="mr-1" id="marks">mdi-close-circle-outline</v-icon>
                           </v-col>
-                          <v-col cols="12" sm="6" class="flag py-0">
+                          <v-col cols="12" sm="6" md="3" class="flag">
                             <p>Recurring:</p>
                             <v-icon v-if="item.recurringFlag" id="marks" class="mr-1">mdi-check-circle-outline</v-icon>
                             <v-icon v-else class="mr-1" id="marks">mdi-close-circle-outline</v-icon>
                           </v-col>
-                          <v-col cols="12" sm="6" class="flag py-0">
-                            <p>Receipt Required:</p>
-                            <v-icon v-if="item.requiredFlag" id="marks" class="mr-1">mdi-check-circle-outline</v-icon>
-                            <v-icon v-else class="mr-1" id="marks">mdi-close-circle-outline</v-icon>
-                          </v-col>
-                          <v-col cols="12" sm="6" class="flag py-0">
+                          <v-col cols="12" sm="6" md="3" class="flag">
                             <p>Inactive:</p>
                             <v-icon v-if="item.isInactive" id="marks" class="mr-1">mdi-check-circle-outline</v-icon>
                             <v-icon v-else class="mr-1" id="marks">mdi-close-circle-outline</v-icon>
@@ -322,9 +349,9 @@
                         <!-- End Flags -->
 
                         <!-- Accessible By -->
-                        <v-row v-if="userIsAdmin()">
+                        <v-row no-gutters v-if="userIsAdmin()">
                           <!-- Display number of employees accessed by -->
-                          <div class="pt-2 px-3">
+                          <div>
                             <p>
                               <b>Access:</b>
                               {{ getAccess(item) }}
@@ -333,7 +360,7 @@
                           <!-- Button to view names of employees with access -->
                           <v-dialog v-model="showAccess" max-width="400px" scrollable>
                             <template v-slot:activator="{ on }">
-                              <v-btn class="px-1 mt-2" x-small outlined v-on="on">view</v-btn>
+                              <v-btn class="px-1 ml-3" x-small outlined v-on="on">view</v-btn>
                             </template>
                             <v-card color="#bc3825">
                               <!-- Dialog Title -->
@@ -516,6 +543,9 @@ function categoriesToString(categories) {
       string += ', ';
     }
   }
+  if (string.length === 0) {
+    return 'None';
+  }
   return string;
 } // categoriesToString
 
@@ -562,6 +592,31 @@ function categoriesReqUrl(categories) {
   }
   return string;
 } // categoriesReqUrl
+
+/**
+ * Returns a string of category names that require a receipt.
+ *
+ * @param categories - the categories to stringify
+ * @return string - the string of categories that require a receipt
+ */
+function categoriesReqReceipt(categories) {
+  let string = '';
+  //first filter out those that have a receipt required. then map each match to just it's name (now it's a list).
+  //finally join the array items with a comma.
+  string = _.map(
+    _.filter(categories, (cat) => {
+      return cat.requireReceipt;
+    }),
+    (match) => {
+      return match.name;
+    }
+  ).join(', ');
+
+  if (string.length == 0) {
+    string = 'None';
+  }
+  return string;
+} // categoriesReqReceipt
 
 /**
  * Changes the employee avatar to default if it fails to display original.
@@ -1189,6 +1244,7 @@ export default {
     categoriesToString,
     categoriesOnFeed,
     categoriesReqUrl,
+    categoriesReqReceipt,
     changeAvatar,
     clearModel, // NOTE: Unused?
     clearStatus,
