@@ -50,30 +50,29 @@
         ></v-text-field>
 
         <!-- Flags -->
-        <v-container class="my-3 pb-4" grid-list-md text-xs-center>
-          <v-row>
-            <v-col cols="6">
-              <v-checkbox
-                label="Overdraft Flag"
-                :disabled="!!model.id && model.odFlag"
-                v-model="editedExpenseType.odFlag"
-                persistent-hint
-                :hint="odFlagHint()"
-              ></v-checkbox>
-              <v-checkbox label="Recurring Flag" v-model="editedExpenseType.recurringFlag"></v-checkbox>
-            </v-col>
+        <v-row>
+          <v-col cols="6">
+            <v-checkbox
+              label="Overdraft Flag"
+              :disabled="!!model.id && model.odFlag"
+              v-model="editedExpenseType.odFlag"
+              persistent-hint
+              :hint="odFlagHint()"
+            ></v-checkbox>
+            <v-checkbox label="Recurring Flag" v-model="editedExpenseType.recurringFlag"></v-checkbox>
+          </v-col>
 
-            <v-col cols="6">
-              <v-checkbox
-                label="Receipt Required"
-                id="receiptRequired"
-                v-model="editedExpenseType.requiredFlag"
-              ></v-checkbox>
+          <v-col cols="6">
+            <v-checkbox
+              label="Receipt Required"
+              id="receiptRequired"
+              v-model="editedExpenseType.requiredFlag"
+              @change="toggleRequireReceipt()"
+            ></v-checkbox>
 
-              <v-checkbox label="Mark as Inactive" v-model="editedExpenseType.isInactive"></v-checkbox>
-            </v-col>
-          </v-row>
-        </v-container>
+            <v-checkbox label="Mark as Inactive" v-model="editedExpenseType.isInactive"></v-checkbox>
+          </v-col>
+        </v-row>
 
         <!-- Start Date -->
         <v-menu
@@ -173,35 +172,39 @@
           Employee Access
           <v-btn @click="toFAQ()" class="mb-4" x-small icon><v-icon color="#3f51b5">info</v-icon></v-btn>
         </div>
-        <v-row>
-          <v-checkbox
-            label="Full-time"
-            value="FullTime"
-            v-model="editedExpenseType.accessibleBy"
-            :rules="checkBoxValid"
-            class="shrink ml-3"
-          ></v-checkbox>
-          <v-checkbox
-            label="Part-time"
-            value="PartTime"
-            v-model="editedExpenseType.accessibleBy"
-            :rules="checkBoxValid"
-            class="shrink ml-6"
-          ></v-checkbox>
-          <v-checkbox
-            label="Intern"
-            value="Intern"
-            v-model="editedExpenseType.accessibleBy"
-            :rules="checkBoxValid"
-            class="shrink ml-6"
-          ></v-checkbox>
-          <v-checkbox
-            label="Custom"
-            value="Custom"
-            v-model="editedExpenseType.accessibleBy"
-            :rules="checkBoxValid"
-            class="shrink ml-6"
-          ></v-checkbox>
+        <v-row no-gutters>
+          <v-col cols="6" lg="3">
+            <v-checkbox
+              label="Full-time"
+              value="FullTime"
+              v-model="editedExpenseType.accessibleBy"
+              :rules="checkBoxValid"
+            ></v-checkbox>
+          </v-col>
+          <v-col cols="6" lg="3">
+            <v-checkbox
+              label="Part-time"
+              value="PartTime"
+              v-model="editedExpenseType.accessibleBy"
+              :rules="checkBoxValid"
+            ></v-checkbox>
+          </v-col>
+          <v-col cols="6" lg="3">
+            <v-checkbox
+              label="Intern"
+              value="Intern"
+              v-model="editedExpenseType.accessibleBy"
+              :rules="checkBoxValid"
+            ></v-checkbox>
+          </v-col>
+          <v-col cols="6" lg="3">
+            <v-checkbox
+              label="Custom"
+              value="Custom"
+              v-model="editedExpenseType.accessibleBy"
+              :rules="checkBoxValid"
+            ></v-checkbox>
+          </v-col>
         </v-row>
         <p id="error" v-if="checkBoxRule">At least one checkbox must be checked</p>
         <!-- Employee Access List -->
@@ -251,31 +254,35 @@
 
         <v-container class="pb-0 mb-0">
           <v-row v-if="editedExpenseType.categories && editedExpenseType.categories.length > 0">
-            <v-col>Category</v-col>
-            <v-col>Show on Feed?</v-col>
-            <v-col>Require Url?</v-col>
+            <v-col cols="3">Category</v-col>
+            <v-col cols="3">Show on Feed?</v-col>
+            <v-col cols="3">Require Url?</v-col>
+            <v-col cols="3">Require Receipt?</v-col>
           </v-row>
-          <v-row v-for="(category, index) in editedExpenseType.categories" :key="index">
-            <v-col>{{ category.name }}</v-col>
-            <v-col>
-              <div>
-                <v-checkbox
-                  class="my-0"
-                  v-if="!submitting"
-                  light
-                  v-model="category.showOnFeed"
-                  @click.stop="checkSelection()"
-                ></v-checkbox>
-              </div>
-            </v-col>
-            <v-col>
+          <v-row v-for="(category, index) in editedExpenseType.categories" :key="index" class="d-flex align-center">
+            <v-col cols="3">{{ category.name }}</v-col>
+            <v-col cols="3">
               <v-checkbox
-                class="my-0"
                 v-if="!submitting"
                 light
-                justify="center"
+                v-model="category.showOnFeed"
+                @click.stop="checkSelection()"
+              ></v-checkbox>
+            </v-col>
+            <v-col cols="3">
+              <v-checkbox
+                v-if="!submitting"
+                light
                 v-model="category.requireURL"
                 @click.stop="checkRequireURL()"
+              ></v-checkbox>
+            </v-col>
+            <v-col cols="3">
+              <v-checkbox
+                v-if="!submitting"
+                light
+                v-model="category.requireReceipt"
+                @click.stop="checkRequireReceipt()"
               ></v-checkbox>
             </v-col>
           </v-row>
@@ -324,6 +331,23 @@ moment.tz.setDefault('America/New_York');
 // |                     METHODS                      |
 // |                                                  |
 // |--------------------------------------------------|
+
+/**
+ * Set required receipt for expense type if all category required receipt checkboxes are enabled.
+ */
+function checkRequireReceipt() {
+  // check if any categories do not require a receipt
+  let somethingIsFalse = _.find(this.editedExpenseType.categories, (category) => {
+    return !category.requireReceipt;
+  });
+
+  // update require receipt for expense type
+  if (somethingIsFalse) {
+    this.editedExpenseType.requiredFlag = false;
+  } else {
+    this.editedExpenseType.requiredFlag = true;
+  }
+} // checkRequireReceipt
 
 /**
  * Set required url for expense type if all category required url checkboxes are enabled.
@@ -465,10 +489,18 @@ function toFAQ() {
  * @param category - category to remove
  */
 function removeCategory(category) {
-  this.editedExpenseType.categories.splice(this.editedExpenseType.categories.indexOf(category), 1);
+  this.editedExpenseType.categories.splice(
+    this.editedExpenseType.categories.map((cat) => cat.name).indexOf(category),
+    1
+  );
   this.editedExpenseType.categories = [...this.editedExpenseType.categories];
   this.categories.splice(this.categories.indexOf(category), 1);
   this.categories = [...this.categories];
+
+  //recompute the receipt, show on feed, and url select all buttons
+  this.checkRequireURL();
+  this.checkRequireReceipt();
+  this.checkSelection();
 } // removeCategory
 
 /**
@@ -582,6 +614,19 @@ function toggleRequireURL() {
     });
   }
 } // toggleRequireURL
+
+/**
+ * Sets all category require url to true if expense type require url is enabled. Sets all to false otherwise.
+ */
+function toggleRequireReceipt() {
+  if (!this.submitting) {
+    let requireReceipt = this.editedExpenseType.requiredFlag;
+
+    _.forEach(this.editedExpenseType.categories, (category) => {
+      category.requireReceipt = requireReceipt;
+    });
+  }
+} // toggleRequireReceipt
 
 /**
  * boolean for checkBox appearance
@@ -714,7 +759,8 @@ function watchCategories(val) {
     this.editedExpenseType.categories.push({
       name: val[index],
       showOnFeed: this.editedExpenseType.alwaysOnFeed,
-      requireURL: this.editedExpenseType.requireURL
+      requireURL: this.editedExpenseType.requireURL,
+      requireReceipt: this.editedExpenseType.requiredFlag
     });
   } else if (val.length < this.editedExpenseType.categories.length) {
     // category was removed
@@ -812,6 +858,7 @@ export default {
   },
   directives: { mask },
   methods: {
+    checkRequireReceipt,
     checkRequireURL,
     checkSelection,
     clearForm,
@@ -827,9 +874,11 @@ export default {
     parseBudget,
     parseDate,
     removeCategory,
+
     submit,
     toFAQ,
     toggleRequireURL,
+    toggleRequireReceipt,
     toggleShowAllCategories,
     updateStoreExpenseTypes,
     updateStoreCampfires
