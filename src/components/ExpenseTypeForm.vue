@@ -333,53 +333,65 @@ moment.tz.setDefault('America/New_York');
 // |--------------------------------------------------|
 
 /**
- * Set required receipt for expense type if all category required receipt checkboxes are enabled.
+ * Set required receipt for expense type if all category required receipt checkboxes are enabled. If there are no categories, make sure the main toggle is false.
  */
 function checkRequireReceipt() {
-  // check if any categories do not require a receipt
-  let somethingIsFalse = _.find(this.editedExpenseType.categories, (category) => {
-    return !category.requireReceipt;
-  });
-
-  // update require receipt for expense type
-  if (somethingIsFalse) {
-    this.editedExpenseType.requiredFlag = false;
+  if (_.isEmpty(this.editedExpenseType.categories)) {
+    this.editedExpenseType.requireURL = false;
   } else {
-    this.editedExpenseType.requiredFlag = true;
+    // check if any categories do not require a receipt
+    let somethingIsFalse = _.find(this.editedExpenseType.categories, (category) => {
+      return !category.requireReceipt;
+    });
+
+    // update require receipt for expense type
+    if (somethingIsFalse) {
+      this.editedExpenseType.requiredFlag = false;
+    } else {
+      this.editedExpenseType.requiredFlag = true;
+    }
   }
 } // checkRequireReceipt
 
 /**
- * Set required url for expense type if all category required url checkboxes are enabled.
+ * Set required url for expense type if all category required url checkboxes are enabled. If there are no categories, make sure the main toggle is false.
  */
 function checkRequireURL() {
-  // check if any categories do not require a url
-  let somethingIsFalse = _.find(this.editedExpenseType.categories, (category) => {
-    return !category.requireURL;
-  });
-
-  // update require url for expense type
-  if (somethingIsFalse) {
+  if (_.isEmpty(this.editedExpenseType.categories)) {
     this.editedExpenseType.requireURL = false;
   } else {
-    this.editedExpenseType.requireURL = true;
+    // check if any categories do not require a url
+    let somethingIsFalse = _.find(this.editedExpenseType.categories, (category) => {
+      return !category.requireURL;
+    });
+
+    // update require url for expense type
+    if (somethingIsFalse) {
+      this.editedExpenseType.requireURL = false;
+    } else {
+      this.editedExpenseType.requireURL = true;
+    }
   }
 } // checkRequireURL
 
 /**
- * Set always on feed for expense type if all category show on feed checkboxes are enabled.
+ * Set always on feed for expense type if all category show on feed checkboxes are enabled. If there are no categories, make sure the main toggle is false.
  */
 function checkSelection() {
-  // check if any categories are hidden on feed
-  let somethingIsFalse = _.find(this.editedExpenseType.categories, (category) => {
-    return !category.showOnFeed;
-  });
-
-  // update always on feed for expense type
-  if (somethingIsFalse) {
-    this.editedExpenseType.alwaysOnFeed = false;
+  if (_.isEmpty(this.editedExpenseType.categories)) {
+    this.editedExpenseType.requireURL = false;
   } else {
-    this.editedExpenseType.alwaysOnFeed = true;
+    // check if any categories are hidden on feed
+    let somethingIsFalse = _.find(this.editedExpenseType.categories, (category) => {
+      return !category.showOnFeed;
+    });
+
+    // update always on feed for expense type
+    if (somethingIsFalse) {
+      this.editedExpenseType.alwaysOnFeed = false;
+    } else {
+      this.editedExpenseType.alwaysOnFeed = true;
+    }
   }
 } // checkSelection
 
