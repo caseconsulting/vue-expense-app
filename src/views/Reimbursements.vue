@@ -99,8 +99,8 @@ export default {
 </script>
 
 <style>
-/* .followScroll {
+.followScroll {
   position: fixed;
   left: 75%;
-} */
+}
 </style>
