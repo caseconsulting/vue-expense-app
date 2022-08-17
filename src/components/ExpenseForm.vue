@@ -53,6 +53,18 @@
           class="form_padding"
         ></v-autocomplete>
 
+        <!-- Category -->
+        <v-select
+          v-if="getCategories() != null && getCategories().length >= 1"
+          :rules="getRequiredRules()"
+          :disabled="isInactive"
+          v-model="editedExpense.category"
+          :items="getCategories()"
+          label="Select Category"
+          clearable
+          chips
+        ></v-select>
+
         <!-- Receipt Uploading -->
         <v-checkbox
           v-if="receiptRequired && isEdit && !isEmpty(expense.receipt)"
@@ -99,18 +111,6 @@
             <span v-else>Scanning your receipt, this may take up to 15 seconds</span>
           </v-tooltip>
         </v-row>
-
-        <!-- Category -->
-        <v-select
-          v-if="getCategories() != null && getCategories().length >= 1"
-          :rules="getRequiredRules()"
-          :disabled="isInactive"
-          v-model="editedExpense.category"
-          :items="getCategories()"
-          label="Select Category"
-          clearable
-          chips
-        ></v-select>
 
         <!-- Cost -->
         <v-text-field
@@ -387,10 +387,20 @@ function receiptRequired() {
       return expenseType;
     }
   });
-  if (this.selectedExpenseType) {
+
+  // if the whole expense requires receipt
+  if (this.selectedExpenseType && this.selectedExpenseType.requiredFlag) {
     return this.selectedExpenseType.requiredFlag;
   }
-  return true;
+  // otherwise, does one of it's categories require a receipt
+  if (this.editedExpense.category) {
+    let category = _.find(this.selectedExpenseType.categories, (cat) => {
+      return cat.name === this.editedExpense.category;
+    });
+    return category.requireReceipt;
+  }
+
+  return false;
 } // receiptRequired
 
 /**
@@ -1088,9 +1098,9 @@ function isDifferentExpenseType() {
 } // isDifferentExpenseType
 
 /**
- * Checks if the selected expense type requires a receipt. Returns true if a receipt is required, otherwise returns false.
+ * Checks if a receipt is required. Returns true if the receipt is required, otherwise returns false.
  *
- * @return boolean - receipt is required for expense type.
+ * @return boolean - receipt is required
  */
 function isReceiptRequired() {
   this.selectedExpenseType = _.find(this.expenseTypes, (expenseType) => {
@@ -1098,11 +1108,21 @@ function isReceiptRequired() {
       return expenseType;
     }
   });
-  if (this.selectedExpenseType) {
+
+  // if the whole expense requires receipt
+  if (this.selectedExpenseType && this.selectedExpenseType.requiredFlag) {
     return this.selectedExpenseType.requiredFlag;
   }
-  return true;
-} // isReceiptRequired
+  // otherwise, does one of it's categories require a receipt
+  if (this.editedExpense.category) {
+    let category = _.find(this.selectedExpenseType.categories, (cat) => {
+      return cat.name === this.editedExpense.category;
+    });
+    return category.requireReceipt;
+  }
+
+  return false;
+} // receiptRequired
 
 /**
  * Returns a number with two decimal point precision as a string.
