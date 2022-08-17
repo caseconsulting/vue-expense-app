@@ -114,7 +114,7 @@
           <router-view></router-view>
         </v-container>
       </v-main>
-      <v-footer padless>
+      <v-footer padless v-if="isLoggedIn()">
         <v-col class="text-right text-caption" cols="12">
           <v-tooltip top>
             <template v-slot:activator="{ on }">
