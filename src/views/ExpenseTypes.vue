@@ -154,41 +154,6 @@
                 </v-btn-toggle>
               </div>
               <!-- End Recurring Filter -->
-
-              <!-- Receipt Fitler -->
-              <div class="flagFilter">
-                <h4>Receipt Required:</h4>
-                <v-btn-toggle class="filter_color" v-model="filter.receipt" text mandatory>
-                  <!-- Show Receipt Required -->
-                  <v-tooltip top>
-                    <template v-slot:activator="{ on }">
-                      <v-btn value="receipt" v-on="on" text>
-                        <v-icon class="mr-1">mdi-check-circle-outline</v-icon>
-                      </v-btn>
-                    </template>
-                    <span>Show Required Receipt</span>
-                  </v-tooltip>
-
-                  <!-- Show Receipt Not Required -->
-                  <v-tooltip top>
-                    <template v-slot:activator="{ on }">
-                      <v-btn value="noReceipt" v-on="on" text>
-                        <v-icon>mdi-close-circle-outline</v-icon>
-                      </v-btn>
-                    </template>
-                    <span>Hide Required Receipt</span>
-                  </v-tooltip>
-
-                  <!-- Show Receipt Required and Not Required-->
-                  <v-tooltip top>
-                    <template v-slot:activator="{ on }">
-                      <v-btn value="both" v-on="on" text>BOTH</v-btn>
-                    </template>
-                    <span>Show All</span>
-                  </v-tooltip>
-                </v-btn-toggle>
-              </div>
-              <!-- End Receipt Fitler -->
             </fieldset>
             <br />
             <!-- End Filters -->
@@ -759,15 +724,6 @@ function filterExpenseTypes() {
       ? !expenseType.recurringFlag
       : this.filteredExpenseTypes;
   });
-
-  // filter expense types by receipt required
-  this.filteredExpenseTypes = _.filter(this.filteredExpenseTypes, (expenseType) => {
-    return this.filter.receipt == 'receipt'
-      ? expenseType.requiredFlag
-      : this.filter.receipt == 'noReceipt'
-      ? !expenseType.requiredFlag
-      : this.filteredExpenseTypes;
-  });
 } // filterExpenseTypes
 
 /**
@@ -1113,7 +1069,7 @@ async function created() {
 // |--------------------------------------------------|
 
 /**
- * watcher for filter.active, filter.receipt, filter.recurring, filter.overdraft
+ * watcher for filter.active, filter.recurring, filter.overdraft
  */
 function watchFilterExpenseTypes() {
   this.filterExpenseTypes();
@@ -1170,8 +1126,7 @@ export default {
       filter: {
         active: 'active',
         overdraft: 'both',
-        recurring: 'both',
-        receipt: 'both'
+        recurring: 'both'
       }, // databale filters
       filteredExpenseTypes: [], // filtered expense types
       headers: [
@@ -1278,7 +1233,6 @@ export default {
   },
   watch: {
     'filter.active': watchFilterExpenseTypes,
-    'filter.receipt': watchFilterExpenseTypes,
     'filter.recurring': watchFilterExpenseTypes,
     'filter.overdraft': watchFilterExpenseTypes,
     storeIsPopulated: loadExpenseTypesData
