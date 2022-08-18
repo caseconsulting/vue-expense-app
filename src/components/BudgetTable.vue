@@ -78,7 +78,14 @@
 </template>
 
 <script>
-import { convertToMoneyString, isBetweenDates, isFullTime, formatDateDashToSlash } from '@/utils/utils';
+import {
+  convertToMoneyString,
+  isBetweenDates,
+  formatDateDashToSlash,
+  getCurrentBudgetYear,
+  isFullTime
+} from '@/utils/utils';
+import api from '@/shared/api';
 import _ from 'lodash';
 const moment = require('moment-timezone');
 
@@ -92,7 +99,7 @@ const moment = require('moment-timezone');
  * Sets the data for the budgets given an employee id
  */
 function created() {
-  this.calcBudgets();
+  this.refreshBudgets();
 }
 
 // |--------------------------------------------------|
@@ -192,26 +199,23 @@ function noRemaining(budget) {
   return this.calcRemaining(budget) <= 0;
 } // noRemaining
 
-function calcBudgets() {
-  let budgetsVar = this.accessibleBudgets;
+/**
+ * Refresh and sets the aggregated budgets to draw the graph
+ */
+async function refreshBudgets() {
+  let budgetsVar;
+  if (this.fiscalDateView == this.getCurrentBudgetYear(this.employee.hireDate)) {
+    // viewing active budget year
+    budgetsVar = this.accessibleBudgets;
+  } else {
+    // get existing budgets for the budget year being viewed
+    let existingBudgets = await api.getFiscalDateViewBudgets(this.employee.id, this.fiscalDateView);
 
-  // prohibit overdraft if employee is not full time
-  _.forEach(budgetsVar, (budget) => {
-    if (!isFullTime(this.employee)) {
-      budget.odFlag = false;
-    }
-  });
-
-  // remove any budgets where budget amount is 0 and 0 total expenses
-  this.expenseTypeData = _.filter(budgetsVar, (data) => {
-    let budget = data.budgetObject;
-    return budget.amount != 0 || budget.reimbursedAmount != 0 || budget.pendingAmount != 0;
-  });
-
+    budgetsVar = existingBudgets;
+  }
   // remove inactive budgets (exception: there contains a pending expense under that budget)
-  this.expenseTypeData = _.filter(this.expenseTypeData, (data) => {
-    let budget = data.budgetObject;
-
+  budgetsVar = _.filter(budgetsVar, (b) => {
+    let budget = b.budgetObject;
     return (
       !_.some(
         this.expenseTypes,
@@ -221,7 +225,20 @@ function calcBudgets() {
       ) || _.some(this.expenses, (e) => e.expenseTypeId == budget.expenseTypeId && _.isEmpty(e.reimbursedDate))
     );
   });
-}
+
+  // prohibit overdraft if employee is not full time
+  _.forEach(budgetsVar, async (budget) => {
+    if (!this.isFullTime(this.employee)) {
+      budget.odFlag = false;
+    }
+  });
+
+  // remove any budgets where budget amount is 0 and 0 total expenses
+  this.expenseTypeData = _.filter(budgetsVar, (data) => {
+    let budget = data.budgetObject;
+    return budget.amount != 0 || budget.reimbursedAmount != 0 || budget.pendingAmount != 0;
+  });
+} // refreshBudgets
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -230,11 +247,11 @@ function calcBudgets() {
 // |--------------------------------------------------|
 
 /**
- * watcher of accessibleBudgets - reclaculates budgets to display based on new input
+ * watcher for fiscalDateView - refresh budgets and draw graph
  */
-async function watchBudgets() {
-  await this.calcBudgets();
-} // watchBudgets
+async function watchFiscalDateView() {
+  await this.refreshBudgets();
+} // watchFiscalDateView
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -250,10 +267,12 @@ export default {
     };
   },
   methods: {
-    calcBudgets,
+    refreshBudgets,
     calcRemaining,
     convertToMoneyString,
     formatDateDashToSlash,
+    getCurrentBudgetYear,
+    isFullTime,
     getAmount,
     getDate,
     getReimbursed,
@@ -263,7 +282,7 @@ export default {
   },
   props: ['employee', 'accessibleBudgets', 'fiscalDateView', 'expenses', 'expenseTypes'], // employee of budgets
   watch: {
-    accessibleBudgets: watchBudgets
+    fiscalDateView: watchFiscalDateView
   }
 };
 </script>

@@ -56,8 +56,8 @@ function beforeDestroy() {
  * mounted lifecycle hook
  */
 async function mounted() {
-  await this.refreshBudget();
-  await this.drawGraph();
+  await this.refreshBudgets();
+  this.drawGraph();
 } // mounted
 
 // |--------------------------------------------------|
@@ -149,6 +149,10 @@ function budgets() {
  * @return Object - budget chart data
  */
 function drawGraph() {
+  console.log(this.expenseTypeData);
+  this.selectedBudgets = this.expenseTypeData.map((a) => a.expenseTypeName);
+  this.allBudgetNames = _.cloneDeep(this.selectedBudgets);
+
   let budgets = this.getFinalBudgetsData(this.budgets);
   let bars = [
     {
@@ -303,7 +307,7 @@ function getFinalBudgetsData(budgets) {
 /**
  * Refresh and sets the aggregated budgets to draw the graph
  */
-async function refreshBudget() {
+async function refreshBudgets() {
   this.loading = true; // set loading status to true
   let budgetsVar;
   if (this.fiscalDateView == this.getCurrentBudgetYear(this.employee.hireDate)) {
@@ -328,9 +332,6 @@ async function refreshBudget() {
     );
   });
 
-  this.selectedBudgets = budgetsVar.map((a) => a.expenseTypeName);
-  this.allBudgetNames = budgetsVar.map((a) => a.expenseTypeName);
-
   // prohibit overdraft if employee is not full time
   _.forEach(budgetsVar, async (budget) => {
     if (!this.isFullTime(this.employee)) {
@@ -345,7 +346,7 @@ async function refreshBudget() {
   });
 
   this.loading = false; // set loading status to false
-} // refreshBudget
+} // refreshBudgets
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -357,7 +358,7 @@ async function refreshBudget() {
  * watcher for fiscalDateView - refresh budgets and draw graph
  */
 async function watchFiscalDateView() {
-  await this.refreshBudget();
+  await this.refreshBudgets();
   this.drawGraph();
 } // watchFiscalDateView
 
@@ -392,7 +393,7 @@ export default {
     getCurrentBudgetYear,
     getFinalBudgetsData,
     isFullTime,
-    refreshBudget
+    refreshBudgets
   },
   beforeDestroy,
   mounted,
