@@ -269,8 +269,10 @@ async function populateStore() {
  * Scrolls up to the home page
  */
 function goToHome() {
-  this.$router.push({ path: '/' });
-  this.$vuetify.goTo(0);
+  if (this.isLoggedIn()) {
+    this.$router.push({ path: '/' });
+    this.$vuetify.goTo(0);
+  }
 } // goToHome
 
 // |--------------------------------------------------|
