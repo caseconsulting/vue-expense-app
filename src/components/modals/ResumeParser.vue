@@ -314,6 +314,7 @@
                 :parser="true"
                 :school="edu"
                 :schoolIndex="index"
+                :attach="true"
                 @deny="edu.canceled = true"
                 @confirm="submitInfo('education', index, $event)"
               ></university-form>
@@ -322,6 +323,7 @@
                 :parser="true"
                 :school="edu"
                 :schoolIndex="index"
+                :attach="true"
                 @deny="edu.canceled = true"
                 @confirm="submitInfo('education', index, $event)"
               ></high-school-form>
@@ -330,6 +332,7 @@
                 :parser="true"
                 :service="edu"
                 :militaryIndex="index"
+                :attach="true"
                 @deny="edu.canceled = true"
                 @confirm="submitInfo('education', index, $event)"
               ></military-form>

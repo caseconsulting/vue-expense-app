@@ -7,6 +7,7 @@
         :items="dodForces"
         v-model="military.branch"
         :rules="getRequiredRules()"
+        :attach="isAttached"
         label="Military Branch"
         auto-select-first
         clearable
@@ -17,6 +18,7 @@
           <v-menu
             v-model="military.showStartMenu"
             :close-on-content-click="false"
+            :attach="isAttached"
             transition="scale-transition"
             max-width="290px"
             min-width="290px"
@@ -53,6 +55,7 @@
           <v-menu
             v-model="military.showCompleteMenu"
             :close-on-content-click="false"
+            :attach="isAttached"
             transition="scale-transition"
             max-width="290px"
             min-width="290px"
@@ -162,6 +165,19 @@ function validateFields() {
 
 // |--------------------------------------------------|
 // |                                                  |
+// |                     COMPUTED                     |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * Determines if the fields are in modals and should be assign the attached prop.
+ */
+function isAttached() {
+  return this.attach;
+} // isAttached
+
+// |--------------------------------------------------|
+// |                                                  |
 // |                     WATCHERS                     |
 // |                                                  |
 // |--------------------------------------------------|
@@ -182,10 +198,13 @@ function watchValidating() {
 // |--------------------------------------------------|
 
 export default {
-  props: ['parser', 'service', 'militaryIndex', 'validating'],
+  props: ['parser', 'service', 'militaryIndex', 'validating', 'attach'],
   directives: { mask },
   filters: {
     formatDateMonthYear
+  },
+  computed: {
+    isAttached
   },
   methods: {
     dateSubmissionRules,

@@ -13,6 +13,7 @@
       <v-menu
         v-model="highSchool.showReceivedMenu"
         :close-on-content-click="false"
+        :attach="isAttached"
         transition="scale-transition"
         offset-y
         max-width="290px"
@@ -107,6 +108,19 @@ function validateFields() {
 
 // |--------------------------------------------------|
 // |                                                  |
+// |                     COMPUTED                     |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * Determines if the fields are in modals and should be assign the attached prop.
+ */
+function isAttached() {
+  return this.attach;
+} // isAttached
+
+// |--------------------------------------------------|
+// |                                                  |
 // |                     WATCHERS                     |
 // |                                                  |
 // |--------------------------------------------------|
@@ -127,10 +141,13 @@ function watchValidating() {
 // |--------------------------------------------------|
 
 export default {
-  props: ['parser', 'school', 'schoolIndex', 'validating'],
+  props: ['parser', 'school', 'schoolIndex', 'validating', 'attach'],
   directives: { mask },
   filters: {
     formatDateMonthYear
+  },
+  computed: {
+    isAttached
   },
   methods: {
     emitToParser,

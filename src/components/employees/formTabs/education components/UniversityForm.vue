@@ -7,6 +7,7 @@
         v-model="uni.name"
         :rules="getRequiredRules()"
         :items="schoolNamePlaceholder(uni.name)"
+        :attach="isAttached"
         label="School"
         data-vv-name="School"
         clearable
@@ -19,6 +20,7 @@
             v-model="degree.degreeType"
             :rules="getRequiredRules()"
             :items="degreeDropDown"
+            :attach="isAttached"
             label="Degree"
             data-vv-name="Degree"
             clearable
@@ -31,6 +33,7 @@
             v-model="degree.degreeType"
             :rules="getRequiredRules()"
             :items="degreeDropDown"
+            :attach="isAttached"
             label="Degree"
             data-vv-name="Degree"
             clearable
@@ -51,6 +54,7 @@
         <v-menu
           v-model="degree.showEducationMenu"
           :close-on-content-click="false"
+          :attach="isAttached"
           transition="scale-transition"
           offset-y
           max-width="290px"
@@ -90,6 +94,7 @@
             v-model="degree.majors[mIndex]"
             :rules="[...getRequiredRules(), duplicateDiscipline('majors', major, dIndex)]"
             :items="majorDropDown"
+            :attach="isAttached"
             label="Major"
             data-vv-name="Major"
             clearable
@@ -119,6 +124,7 @@
             v-model="degree.minors[mIndex]"
             :rules="[...getRequiredRules(), duplicateDiscipline('minors', minor, dIndex)]"
             :items="minorDropDown"
+            :attach="isAttached"
             label="Minor"
             data-vv-name="Minor"
             clearable
@@ -148,6 +154,7 @@
             v-model="degree.concentrations[cIndex]"
             :rules="[...getRequiredRules(), duplicateDiscipline('concentrations', concentration, dIndex)]"
             :items="concentrationDropDown"
+            :attach="isAttached"
             data-vv-name="Concentration"
             clearable
             label="Concentration"
@@ -379,6 +386,19 @@ function validateFields() {
 
 // |--------------------------------------------------|
 // |                                                  |
+// |                     COMPUTED                     |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * Determines if the fields are in modals and should be assign the attached prop.
+ */
+function isAttached() {
+  return this.attach;
+} // isAttached
+
+// |--------------------------------------------------|
+// |                                                  |
 // |                     WATCHERS                     |
 // |                                                  |
 // |--------------------------------------------------|
@@ -421,6 +441,9 @@ export default {
   filters: {
     formatDateMonthYear
   },
+  computed: {
+    isAttached
+  },
   methods: {
     emitToParser,
     getDateMonthYearRules,
@@ -437,7 +460,7 @@ export default {
     validateFields
   },
   //Education index is only used in the resume parser
-  props: ['parser', 'validating', 'allowAdditions', 'school', 'schoolIndex'],
+  props: ['parser', 'validating', 'allowAdditions', 'school', 'schoolIndex', 'attach'],
   watch: {
     validating: watchValidating
   }
