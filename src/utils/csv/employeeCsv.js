@@ -258,7 +258,6 @@ export function getContractPrimeProject(contracts) {
     });
     // sort contracts by their earliest project start date
     result = _.orderBy(result, 'd', 'desc');
-    console.log(result);
     // extract contracts, primes, and projects into separate strings
     toReturn = {
       contracts: _.map(result, (r) => {

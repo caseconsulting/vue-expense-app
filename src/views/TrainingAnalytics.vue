@@ -205,9 +205,7 @@ function titleFormat(value) {
   if (value == null || (value.length >= 2 && value[0] === '{' && value[1] === '{')) {
     return undefined;
   }
-  console.log(value.length);
   let title = value.length > 130 ? value.substring(0, 130) + '...' : value;
-  console.log(title);
   return title;
 } // titleFormat
 

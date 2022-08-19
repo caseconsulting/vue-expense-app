@@ -149,7 +149,6 @@ function budgets() {
  * @return Object - budget chart data
  */
 function drawGraph() {
-  console.log(this.expenseTypeData);
   this.selectedBudgets = this.expenseTypeData.map((a) => a.expenseTypeName);
   this.allBudgetNames = _.cloneDeep(this.selectedBudgets);
 
