@@ -46,7 +46,7 @@
         v-model="editedEmployee.nickname"
         label="Nickname (optional)"
         data-vv-name="Nickname"
-        :disabled="!userIsAdmin() && !thisIsMyProfile() && !userIsManager()"
+        :disabled="!userRoleIsAdmin() && !thisIsMyProfile() && !userRoleIsAdmin()"
       ></v-text-field>
 
       <!-- Employee # -->
@@ -94,7 +94,7 @@
 
       <!-- Employee Role -->
       <v-autocomplete
-        v-if="!loading && (userIsAdmin() || (userIsManager() && !thisIsMyProfile()))"
+        v-if="!loading && (userRoleIsAdmin() || (userRoleIsManager() && !thisIsMyProfile()))"
         id="employeeRole"
         ref="formFields"
         :items="permissions"
@@ -233,7 +233,7 @@
       <v-switch
         v-model="mifiStatus"
         label="Use Mifi instead of increased technology budget ($150)"
-        v-if="editedEmployee.employeeRole !== 'intern' && !isInactive()"
+        v-if="userRoleIsIntern() && !isInactive()"
       ></v-switch>
 
       <!-- START EEO Compliance Reporting Section -->
@@ -328,9 +328,17 @@
 import api from '@/shared/api.js';
 import _ from 'lodash';
 import { getDateRules, getNumberRules, getRequiredRules, getValidateFalse } from '@/shared/validationUtils.js';
-import { formatDate, isEmpty, parseDate, isMobile } from '@/utils/utils';
+import {
+  formatDate,
+  isEmpty,
+  parseDate,
+  isMobile,
+  userRoleIsAdmin,
+  userRoleIsManager,
+  userRoleIsUser,
+  userRoleIsIntern
+} from '@/utils/utils';
 import { mask } from 'vue-the-mask';
-import { getRole } from '@/utils/auth';
 import EEODeclineSelfIdentify from '../../modals/EEODeclineSelfIdentify.vue';
 const moment = require('moment-timezone');
 moment.tz.setDefault('America/New_York');
@@ -439,10 +447,7 @@ async function created() {
 function adminCanEditEeo() {
   if (this.thisIsMyProfile()) {
     return true;
-  } else if (
-    (this.$store.getters.userRole === 'admin' || this.$store.getters.userRole === 'manager') &&
-    this.editedEmployee.eeoDeclineSelfIdentify
-  ) {
+  } else if ((this.userRoleIsAdmin() || this.userRoleIsManager()) && this.editedEmployee.eeoDeclineSelfIdentify) {
     return true;
   }
   return false;
@@ -484,16 +489,6 @@ function isPartTime() {
 } // isPartTime
 
 /**
- * Checks whether the current user role is admin, used specifically
- * to prevent the manager from changing their own role on the Employee tab
- *
- * @return - boolean: true if the user role is admin
- */
-function userIsAdmin() {
-  return this.getRole() === 'admin';
-} //userIsAdmin
-
-/**
  * Checks if the profile accessed is the signed-in user's profile,
  * specifically used to prevent a manager from editing their own role
  *
@@ -507,15 +502,6 @@ function thisIsMyProfile() {
 } //thisIsMyProfile
 
 /**
- * Checks whether the current user role is manager.
- *
- * @return boolean - true if the user role is a manager
- */
-function userIsManager() {
-  return this.getRole() === 'manager';
-} //userIsManager
-
-/**
  * Validate all input fields are valid. Emit to parent the error status.
  */
 function validateFields() {
@@ -526,9 +512,9 @@ function validateFields() {
     if (field && !field.validate()) errorCount++;
   });
 
-  // Fail safe in case users or inters somehow change their disabled info
+  // Fail safe in case users or interns somehow change their disabled info
   // Without this, they could change the html to change their data
-  if (this.getRole() === 'user' || this.getRole() === 'intern') {
+  if (this.userRoleIsUser() || this.userRoleIsIntern()) {
     this.editedEmployee.employeeNumber = this.model.employeeNumber;
     this.editedEmployee.email = this.model.email;
     this.editedEmployee.employeeRole = this.model.employeeRole;
@@ -841,16 +827,17 @@ export default {
     getDateRules,
     getNumberRules,
     getRequiredRules,
-    getRole,
     getValidateFalse,
     isEmpty,
     isInactive,
     isMobile,
     isPartTime,
     parseDate,
-    userIsAdmin,
     thisIsMyProfile,
-    userIsManager,
+    userRoleIsAdmin,
+    userRoleIsManager,
+    userRoleIsUser,
+    userRoleIsIntern,
     validateFields,
     viewStatus
   },

@@ -16,7 +16,7 @@
       <a :href="this.model.linkedIn" target="_blank">{{ this.model.linkedIn }}</a>
     </p>
     <!-- Phone Number -->
-    <p v-if="!isEmpty(getPhoneNumbers()) && (userIsAdmin() || userIsEmployee() || userIsManager())">
+    <p v-if="!isEmpty(getPhoneNumbers()) && (employee || !userRoleIsIntern())">
       <b>Phone Numbers:</b>
       <v-list>
         <v-list-item v-for="number in getPhoneNumbers()" :key="number.number">
@@ -41,19 +41,6 @@
         </v-list-item>
       </v-list>
     </p>
-    <p v-else-if="!isEmpty(getPhoneNumbers())">
-      <b>Phone Numbers:</b>
-      <v-list>
-        <v-list-item v-for="number in getPhoneNumbers()" :key="number.number">
-          <v-list-item-content>
-            <v-list-item-subtitle class="mb-1"> {{ number.type }}</v-list-item-subtitle>
-            <v-list-item-title>
-              {{ number.number }}<span v-if="number.ext"> (Ext. {{ number.ext }})</span>
-            </v-list-item-title>
-          </v-list-item-content>
-        </v-list-item>
-      </v-list>
-    </p>
     <!-- Birthday -->
     <p v-if="!isEmpty(this.model.birthday) && (admin || employee)" :class="isBday ? 'clickable' : ''" @click="confetti">
       <b>Birthday:</b> {{ monthDayYearFormat(this.model.birthday) }}
@@ -65,7 +52,7 @@
     <!-- Place of Birth -->
     <p v-if="!isEmpty(getPlaceOfBirth) && (admin || employee)"><b>Place of Birth:</b> {{ getPlaceOfBirth }}</p>
     <!-- Current Address -->
-    <p v-if="!isEmpty(getCurrentAddress) && (userIsAdmin() || userIsManager() || userIsEmployee())">
+    <p v-if="!isEmpty(getCurrentAddress) && (employee || !userRoleIsIntern())">
       <b>Current Address:</b> {{ getCurrentAddress }}
     </p>
   </div>
@@ -73,8 +60,7 @@
 </template>
 
 <script>
-import { isEmpty, monthDayYearFormat } from '@/utils/utils';
-import { getRole } from '@/utils/auth';
+import { isEmpty, monthDayYearFormat, userRoleIsIntern } from '@/utils/utils';
 const moment = require('moment-timezone');
 moment.tz.setDefault('America/New_York');
 
@@ -168,37 +154,6 @@ function getPlaceOfBirth() {
   placeOfBirth = placeOfBirth.slice(0, -2);
   return placeOfBirth;
 } // getPlaceOfBirth
-
-/**
- * Checks whether the current user role is admin, used specifically
- * to prevent the manager from changing their own role on the Employee tab.
- *
- * @return boolean - true if the user role is admin
- */
-function userIsAdmin() {
-  return this.getRole() === 'admin';
-} //userIsAdmin
-
-/**
- * Checks if the profile accessed is the signed-in user's profile.
- *
- * @return boolean - true if the profile is the user's profile
- */
-function userIsEmployee() {
-  if (this.$route.params.id == this.userId) {
-    return true;
-  }
-  return false;
-} //userIsEmployee
-
-/**
- * Checks if the users role is manager.
- *
- * @return boolean - true if the user is a manager
- */
-function userIsManager() {
-  return this.getRole() === 'manager';
-} // userIsManager
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -294,11 +249,8 @@ export default {
     confetti,
     isBday,
     isEmpty,
-    getRole,
     monthDayYearFormat,
-    userIsAdmin,
-    userIsEmployee,
-    userIsManager,
+    userRoleIsIntern,
     getPhoneNumbers
   },
   props: ['admin', 'employee', 'model']

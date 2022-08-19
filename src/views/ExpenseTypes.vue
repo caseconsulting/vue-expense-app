@@ -2,12 +2,12 @@
 <template>
   <div>
     <v-row v-if="initialPageLoading">
-      <v-col cols="12" :lg="userIsAdmin() ? 8 : 12">
+      <v-col cols="12" :lg="userRoleIsAdmin() ? 8 : 12">
         <div class="mt-3">
           <v-skeleton-loader type="table-heading, list-item@6"></v-skeleton-loader>
         </div>
       </v-col>
-      <v-col v-if="userIsAdmin()" cols="12" lg="4">
+      <v-col v-if="userRoleIsAdmin()" cols="12" lg="4">
         <v-skeleton-loader class="mt-3" type="card-heading, list-item@12"></v-skeleton-loader>
       </v-col>
     </v-row>
@@ -28,7 +28,7 @@
         <v-btn color="white" text @click="clearStatus">Close</v-btn>
       </v-snackbar>
 
-      <v-col cols="12" :lg="userIsAdmin() ? 8 : 12">
+      <v-col cols="12" :lg="userRoleIsAdmin() ? 8 : 12">
         <v-card class="mt-3">
           <v-container fluid>
             <!-- Title -->
@@ -181,11 +181,11 @@
                 <p class="mb-0">{{ convertToMoneyString(item.budget) }}</p>
               </template>
               <!-- Actions -->
-              <template v-if="userIsAdmin()" v-slot:[`item.actions`]="{ item }">
+              <template v-if="userRoleIsAdmin()" v-slot:[`item.actions`]="{ item }">
                 <v-tooltip top>
                   <template v-slot:activator="{ on }">
                     <v-btn
-                      v-if="userIsAdmin()"
+                      v-if="userRoleIsAdmin()"
                       :disabled="midAction"
                       text
                       icon
@@ -203,7 +203,7 @@
                 <v-tooltip top>
                   <template v-slot:activator="{ on }">
                     <v-btn
-                      v-if="userIsAdmin()"
+                      v-if="userRoleIsAdmin()"
                       id="delete"
                       :disabled="midAction"
                       text
@@ -314,7 +314,7 @@
                         <!-- End Flags -->
 
                         <!-- Accessible By -->
-                        <v-row no-gutters v-if="userIsAdmin()">
+                        <v-row no-gutters v-if="userRoleIsAdmin()">
                           <!-- Display number of employees accessed by -->
                           <div>
                             <p>
@@ -409,7 +409,7 @@
       </v-col>
 
       <!-- Expense Type Form -->
-      <v-col v-if="userIsAdmin()" cols="12" lg="4">
+      <v-col v-if="userRoleIsAdmin()" cols="12" lg="4">
         <expense-type-form
           ref="form"
           :model="model"
@@ -429,9 +429,8 @@ import api from '@/shared/api.js';
 import DeleteErrorModal from '@/components/modals/DeleteErrorModal.vue';
 import DeleteModal from '@/components/modals/DeleteModal.vue';
 import ExpenseTypeForm from '@/components/expense-types/ExpenseTypeForm.vue';
-import { getRole } from '@/utils/auth';
 import _ from 'lodash';
-import { convertToMoneyString } from '@/utils/utils';
+import { convertToMoneyString, userRoleIsAdmin } from '@/utils/utils';
 import {
   updateStoreExpenseTypes,
   updateStoreEmployees,
@@ -469,7 +468,7 @@ function storeIsPopulated() {
  * @return - headers to show
  */
 function _headers() {
-  if (this.userIsAdmin()) {
+  if (this.userRoleIsAdmin()) {
     return this.headers;
   } else {
     return this.headers.filter((x) => x.show);
@@ -857,13 +856,13 @@ async function loadExpenseTypesData() {
   this.initialPageLoading = true;
   this.userInfo = this.$store.getters.user;
   [this.campfires] = await Promise.all([
-    this.userInfo.employeeRole === 'admin' ? api.getBasecampCampfires() : '',
-    this.userInfo.employeeRole === 'admin' && !this.$store.getters.employees ? this.updateStoreEmployees() : '',
-    this.userInfo.employeeRole === 'admin' && !this.$store.getters.avatars ? this.updateStoreAvatars() : '',
+    this.userRoleIsAdmin() ? api.getBasecampCampfires() : '',
+    this.userRoleIsAdmin() && !this.$store.getters.employees ? this.updateStoreEmployees() : '',
+    this.userRoleIsAdmin() && !this.$store.getters.avatars ? this.updateStoreAvatars() : '',
     this.refreshExpenseTypes()
   ]);
 
-  if (this.userInfo.employeeRole === 'admin') {
+  if (this.userRoleIsAdmin()) {
     this.employees = this.$store.getters.employees;
     // set employee avatar
     let avatars = this.$store.getters.basecampAvatars;
@@ -923,14 +922,14 @@ async function refreshExpenseTypes() {
   this.loading = true; // set loading status to true
   let budgetsWithExpenses;
   [budgetsWithExpenses] = await Promise.all([
-    !this.userIsAdmin() ? api.getEmployeeBudgets(this.userInfo.id) : '',
-    !this.userIsAdmin() && !this.$store.getters.budgets ? this.updateStoreBudgets() : '',
+    !this.userRoleIsAdmin() ? api.getEmployeeBudgets(this.userInfo.id) : '',
+    !this.userRoleIsAdmin() && !this.$store.getters.budgets ? this.updateStoreBudgets() : '',
     !this.$store.getters.expenseTypes ? this.updateStoreExpenseTypes() : ''
   ]);
   this.expenseTypes = this.$store.getters.expenseTypes;
 
   // filter expense types for the user
-  if (!this.userIsAdmin()) {
+  if (!this.userRoleIsAdmin()) {
     // create an array for the user expense types
     let expenseTypesFiltered = [];
     // get the active budgets for the employee
@@ -983,15 +982,6 @@ async function updateModelInTable() {
   this.$set(this.status, 'statusMessage', 'Item was successfully updated!');
   this.$set(this.status, 'color', 'green');
 } // updateModelInTable
-
-/**
- * Checks if the user is an admin. Returns true if the role is 'admin', otherwise returns false.
- *
- * @return boolean - whether the user is an admin
- */
-function userIsAdmin() {
-  return this.getRole() === 'admin';
-} // userIsAdmin
 
 /**
  * Validates if an expense type can be deleted. Returns true if the expense type has no expenses, otherwise returns
@@ -1214,7 +1204,6 @@ export default {
     getCampfire,
     getEmployeeList,
     getEmployeeName,
-    getRole,
     hasAccess,
     isInactive,
     loadExpenseTypesData,
@@ -1224,7 +1213,7 @@ export default {
     toTopOfForm,
     twoDecimals,
     updateModelInTable,
-    userIsAdmin,
+    userRoleIsAdmin,
     validateDelete,
     updateStoreAvatars,
     updateStoreBudgets,

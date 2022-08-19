@@ -92,7 +92,7 @@
               {{ this.model.nickname || this.model.firstName }} {{ this.model.lastName }}
             </h3>
             <v-spacer></v-spacer>
-            <convert-employee-to-csv v-if="userIsAdmin()" :employee="this.model" color="white" />
+            <convert-employee-to-csv v-if="userRoleIsAdmin()" :employee="this.model" color="white" />
             <v-tooltip v-if="hasAdminPermissions() || userIsEmployee()" top>
               <template #activator="{ on }">
                 <div v-on="on">
@@ -125,7 +125,7 @@
         <employee-form :employee="this.model" :currentTab="this.currentTab" v-if="editing"></employee-form>
         <div class="mt-4">
           <budget-chart
-            v-if="(userIsAdmin() || userIsEmployee()) && hasAccessToBudgets"
+            v-if="(userRoleIsAdmin() || userIsEmployee()) && hasAccessToBudgets"
             :employee="this.model"
             :accessibleBudgets="accessibleBudgets"
             :expenses="expenses"
@@ -154,8 +154,14 @@ import AvailableBudgets from '@/components/shared/AvailableBudgets.vue';
 import EmployeeForm from '@/components/employees/EmployeeForm.vue';
 import EmployeeInfo from '@/components/employees/EmployeeInfo.vue';
 import QuickBooksTimeData from '@/components/shared/quickbooks/QuickBooksTimeData.vue';
-import { getRole } from '@/utils/auth';
-import { getCurrentBudgetYear, isEmpty, isMobile, storeIsPopulated } from '@/utils/utils.js';
+import {
+  getCurrentBudgetYear,
+  isEmpty,
+  isMobile,
+  storeIsPopulated,
+  userRoleIsAdmin,
+  userRoleIsManager
+} from '@/utils/utils.js';
 import { updateStoreBudgets, updateStoreEmployees, updateStoreExpenseTypes, updateStoreUser } from '@/utils/storeUtils';
 import _ from 'lodash';
 import ConvertEmployeeToCsv from '@/components/employees/csv/ConvertEmployeeToCsv.vue';
@@ -217,7 +223,6 @@ async function getProfileData() {
   ]);
   if (this.$store.getters.user.employeeNumber == this.$route.params.id) {
     this.model = this.$store.getters.user;
-    this.role = this.getRole();
   } else {
     let employees = this.$store.getters.employees;
     this.model = _.find(employees, (employee) => {
@@ -225,8 +230,7 @@ async function getProfileData() {
     });
   }
   this.user = this.$store.getters.user;
-  this.role = this.getRole();
-  this.displayQuickBooksTimeAndBalances = this.userIsAdmin() || this.userIsEmployee();
+  this.displayQuickBooksTimeAndBalances = this.userRoleIsAdmin() || this.userIsEmployee();
   this.basicEmployeeDataLoading = false;
   if (this.model) {
     [this.hasResume, this.expenses] = await Promise.all([
@@ -261,21 +265,12 @@ function minimizeWindow() {
 } // minimizeWindow
 
 /**
- * Checks to see if the user is an admin. Returns true if the user's role is an admin, otherwise returns false.
- *
- * @return boolean - whether the user is an admin
- */
-function userIsAdmin() {
-  return this.role === 'admin';
-} // userIsAdmin
-
-/**
  * checks to see if the user has admin permissions
  *
  * @return boolean - whether the user is an admin or manager
  */
 function hasAdminPermissions() {
-  return this.role === 'admin' || this.role === 'manager';
+  return this.userRoleIsAdmin() || this.userRoleIsManager();
 } // hasAdminPermissions
 
 /**
@@ -478,7 +473,6 @@ export default {
         twitter: '',
         workStatus: 100
       }, // selected employee
-      role: null, // user role
       search: '', // query text for datatable search field
       status: {
         statusType: undefined,
@@ -501,7 +495,6 @@ export default {
     deleteResume,
     displayMessage,
     downloadResume,
-    getRole,
     hasAdminPermissions,
     getProfileData,
     getCurrentBudgetYear,
@@ -512,7 +505,8 @@ export default {
     updateStoreEmployees,
     updateStoreExpenseTypes,
     updateStoreUser,
-    userIsAdmin,
+    userRoleIsAdmin,
+    userRoleIsManager,
     userIsEmployee,
     checkForBudgetAccess
   },

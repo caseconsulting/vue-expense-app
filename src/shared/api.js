@@ -280,15 +280,6 @@ async function getAllAggregateExpenses() {
 } // getAllAggregateExpenses
 
 /**
- * gets employee role
- *
- * @return - user role
- */
-async function getRole() {
-  return await execute('get', 'info/role');
-} // getRole
-
-/**
  * gets current user
  *
  * @return - get current signed in user
@@ -535,7 +526,6 @@ export default {
   getLocation,
   getPTOBalances,
   getResume,
-  getRole,
   getMonthlyHours,
   getTechSkills,
   getTwitterToken,

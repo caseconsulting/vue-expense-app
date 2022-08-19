@@ -3,6 +3,7 @@ import dateUtils from '@/shared/dateUtils';
 import MobileDetect from 'mobile-detect';
 import _ from 'lodash';
 import { v4 as uuid } from 'uuid';
+import { getRole } from '@/utils/auth';
 const IsoFormat = 'YYYY-MM-DD';
 const moment = require('moment-timezone');
 moment.tz.setDefault('America/New_York');
@@ -261,6 +262,42 @@ export async function updateEmployeeLogin(employee) {
 export function storeIsPopulated() {
   return this.$store.getters.storeIsPopulated;
 } // storeIsPopulated
+
+/**
+ * Checks whether the current user role is admin
+ *
+ * @return - boolean: true if the user role is admin
+ */
+export function userRoleIsAdmin() {
+  return getRole() === 'admin';
+} //userRoleIsAdmin
+
+/**
+ * Checks whether the current user role is manager
+ *
+ * @return - boolean: true if the user role is manager
+ */
+export function userRoleIsManager() {
+  return getRole() === 'manager';
+} //userRoleIsManager
+
+/**
+ * Checks whether the current user role is user
+ *
+ * @return - boolean: true if the user role is a user
+ */
+export function userRoleIsUser() {
+  return getRole() === 'user';
+} //userRoleIsUser
+
+/**
+ * Checks whether the current user role is intern
+ *
+ * @return - boolean: true if the user role is intern
+ */
+export function userRoleIsIntern() {
+  return getRole() === 'intern';
+} //userRoleIsIntern
 
 export const countryList = [
   'United States',

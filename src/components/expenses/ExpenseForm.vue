@@ -2,7 +2,7 @@
   <v-card hover>
     <v-card-title class="header_style">
       <!-- Editing an Expense -->
-      <h3 v-if="expense.id && (isAdmin || !isReimbursed)">Edit Expense</h3>
+      <h3 v-if="expense.id && (userRoleIsAdmin() || !isReimbursed)">Edit Expense</h3>
       <!-- Creating an Expense -->
       <!-- <h3 v-else-if="!isInactive">Create New Expense</h3> -->
       <h3 v-else>Create New Expense</h3>
@@ -192,7 +192,7 @@
 
         <!-- Reimbursed Date -->
         <v-menu
-          v-if="isAdmin"
+          v-if="userRoleIsAdmin()"
           ref="reimburseMenu"
           :close-on-content-click="false"
           v-model="reimburseMenu"
@@ -242,7 +242,7 @@
 
         <!-- Show On Feed -->
         <v-switch
-          v-if="isAdmin"
+          v-if="userRoleIsAdmin()"
           :disabled="isInactive"
           v-model="editedExpense.showOnFeed"
           label="Have expense show on company feed?"
@@ -266,7 +266,7 @@
           outlined
           color="success"
           @click="confirmingValid = true"
-          :disabled="(!isAdmin && isReimbursed) || isInactive"
+          :disabled="(!userRoleIsAdmin() && isReimbursed) || isInactive"
           id="submitButton"
           :loading="loading"
           class="ma-2"
@@ -303,7 +303,7 @@ import FormSubmissionConfirmation from '@/components/modals/FormSubmissionConfir
 import { getRole } from '@/utils/auth';
 import { v4 as uuid } from 'uuid';
 import { getDateRules, getDateOptionalRules, getRequiredRules, getURLRules } from '@/shared/validationUtils.js';
-import { isEmpty, isFullTime, convertToMoneyString } from '@/utils/utils';
+import { isEmpty, isFullTime, convertToMoneyString, userRoleIsAdmin } from '@/utils/utils';
 import { mask } from 'vue-the-mask';
 import _ from 'lodash';
 import { updateStoreBudgets } from '@/utils/storeUtils';
@@ -357,24 +357,6 @@ function getRequireURL() {
   }
   return true;
 } // getRequireURL
-
-/**
- * Checks if the employee is an admin. Returns true if the employee is an admin, otherwise returns false.
- *
- * @return boolean - employee is an admin
- */
-function isAdmin() {
-  return this.employeeRole === 'admin';
-} // isAdmin
-
-/**
- * Checks if the employee is an intern. Returns true if the employee is an intern, otherwise returns false.
- *
- * @return boolean - employee is an intern
- */
-function isIntern() {
-  return this.employeeRole === 'intern';
-} // isIntern
 
 /**
  * Checks if a receipt is required. Returns true if the receipt is required, otherwise returns false.
@@ -497,7 +479,7 @@ async function getRemainingBudget() {
 
       // If user is editing the form, give them back the old value for accurate calculations
       // rules for the if statement are the same as the title (around line 5 at time or writing)
-      if (this.expense.id && (this.isAdmin || !this.isReimbursed)) {
+      if (this.expense.id && (this.userRoleIsAdmin() || !this.isReimbursed)) {
         this.remainingBudget += budget.budgetObject.pendingAmount;
       }
     }
@@ -1885,9 +1867,7 @@ export default {
     FormSubmissionConfirmation
   },
   computed: {
-    isAdmin,
     isDifferentExpenseType,
-    isIntern,
     isReimbursed,
     isUser,
     receiptRequired,
@@ -1960,7 +1940,6 @@ export default {
   },
   directives: { mask },
   methods: {
-    getRequireURL,
     addURLInfo,
     betweenDates,
     calcAdjustedBudget,
@@ -1982,6 +1961,7 @@ export default {
     getRole,
     getRemainingBudget,
     getRequiredRules,
+    getRequireURL,
     getURLRules,
     hasAccess,
     incrementURLHits,
@@ -1997,6 +1977,7 @@ export default {
     setRecipientOptions,
     submit,
     updateExistingEntry,
+    userRoleIsAdmin,
     uuid,
     updateStoreBudgets
   },

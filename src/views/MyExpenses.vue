@@ -21,15 +21,14 @@
         <v-container fluid>
           <!-- Title -->
           <v-card-title v-if="!isMobile()">
-            <!-- <h2 v-if="(isUser || isIntern || isManager) && !loading">{{ getUserName }}'s Expenses</h2> -->
-            <h3 v-if="isAdmin && !loading">All Expenses</h3>
+            <h3 v-if="userRoleIsAdmin() && !loading">All Expenses</h3>
             <h3 v-else-if="!loading">My Expenses</h3>
             <h3 v-else>Loading...</h3>
             <v-spacer></v-spacer>
 
             <!-- Employee Filter -->
             <v-autocomplete
-              v-if="isAdmin"
+              v-if="userRoleIsAdmin()"
               hide-details
               :items="employees"
               :filter="customFilter"
@@ -54,12 +53,12 @@
 
           <div v-else>
             <v-card-title class="px-0">
-              <h3 v-if="isAdmin && !loading">All Expenses</h3>
+              <h3 v-if="userRoleIsAdmin() && !loading">All Expenses</h3>
               <h3 v-else-if="!loading">My Expenses</h3>
               <h3 v-else>Loading...</h3>
             </v-card-title>
             <v-row class="mb-5">
-              <v-col v-if="isAdmin">
+              <v-col v-if="userRoleIsAdmin()">
                 <!-- Employee Filter -->
                 <v-autocomplete
                   hide-details
@@ -91,7 +90,7 @@
             <legend class="legend_style">Filters</legend>
 
             <!-- Active Filter -->
-            <div v-if="isAdmin" class="flagFilter">
+            <div v-if="userRoleIsAdmin()" class="flagFilter">
               <h4>Active Expense Type:</h4>
               <v-btn-toggle class="filter_color" v-model="filter.active" text mandatory>
                 <!-- Show Active -->
@@ -196,7 +195,7 @@
             </template>
             <!-- Employee name slot-->
             <template v-slot:[`item.employeeName`]="{ item }">
-              <td v-if="isAdmin">{{ item.employeeName }}</td>
+              <td v-if="userRoleIsAdmin()">{{ item.employeeName }}</td>
             </template>
             <!-- Budget Name Slot -->
             <template v-slot:[`item.budgetName`]="{ item }">
@@ -214,7 +213,10 @@
                   <template v-slot:activator="{ on }">
                     <v-btn
                       :disabled="
-                        isEditing || (!isAdmin && isReimbursed(item)) || midAction || (!isAdmin && !canDelete(item))
+                        isEditing ||
+                        (!userRoleIsAdmin() && isReimbursed(item)) ||
+                        midAction ||
+                        (!userRoleIsAdmin() && !canDelete(item))
                       "
                       text
                       icon
@@ -234,7 +236,9 @@
                 <v-tooltip top>
                   <template v-slot:activator="{ on }">
                     <v-btn
-                      :disabled="isReimbursed(item) || isEditing || midAction || (!isAdmin && !canDelete(item))"
+                      :disabled="
+                        isReimbursed(item) || isEditing || midAction || (!userRoleIsAdmin() && !canDelete(item))
+                      "
                       text
                       icon
                       id="delete"
@@ -254,7 +258,7 @@
                 <v-tooltip top>
                   <template v-slot:activator="{ on }">
                     <v-btn
-                      v-if="isAdmin"
+                      v-if="userRoleIsAdmin()"
                       :disabled="!isReimbursed(item) || isEditing || midAction"
                       text
                       icon
@@ -294,7 +298,7 @@
                         <b>Url: </b> <a v-if="item.url" :href="item.url" target="_blank">{{ item.url }}</a>
                       </p>
                       <p v-if="!isEmpty(item.category)"><b>Category: </b>{{ item.category }}</p>
-                      <div v-if="isAdmin" class="flagExp">
+                      <div v-if="userRoleIsAdmin()" class="flagExp">
                         <p>Inactive:</p>
                         <v-icon v-if="useInactiveStyle(item)" id="marks" class="mr-1 mx-3"
                           >mdi-check-circle-outline</v-icon
@@ -323,7 +327,7 @@
           <!-- Download expense csv button -->
           <v-card-actions>
             <convert-expenses-to-csv
-              v-if="isAdmin"
+              v-if="userRoleIsAdmin()"
               :midAction="midAction"
               :expenses="filteredExpenses"
             ></convert-expenses-to-csv>
@@ -338,7 +342,7 @@
     </v-col>
 
     <!-- Expense Form -->
-    <v-col v-if="isAdmin || !userIsInactive" cols="12" lg="4">
+    <v-col v-if="userRoleIsAdmin() || !userIsInactive" cols="12" lg="4">
       <expense-form
         v-if="!initialPageLoading"
         ref="form"
@@ -363,7 +367,7 @@ import employeeUtils from '@/shared/employeeUtils';
 import ExpenseForm from '@/components/expenses/ExpenseForm.vue';
 import UnreimburseModal from '@/components/modals/UnreimburseModal.vue';
 import _ from 'lodash';
-import { isEmpty, monthDayYearFormat, convertToMoneyString, isMobile } from '@/utils/utils';
+import { isEmpty, monthDayYearFormat, convertToMoneyString, isMobile, userRoleIsAdmin } from '@/utils/utils';
 import { updateStoreBudgets, updateStoreExpenseTypes, updateStoreEmployees } from '@/utils/storeUtils';
 
 // |--------------------------------------------------|
@@ -373,60 +377,13 @@ import { updateStoreBudgets, updateStoreExpenseTypes, updateStoreEmployees } fro
 // |--------------------------------------------------|
 
 /**
- * Gets the nickname and last name of the user.
- *
- * @return String - user's nickname and last name
- */
-function getUserName() {
-  if (this.userInfo) {
-    return employeeUtils.nicknameAndLastName(this.userInfo);
-  }
-} // getUserName
-
-/**
- * Checks if the user's role is an admin. Returns true if the user's role is an admin, otherwise returns false.
- *
- * @return boolean - user's role is an admin
- */
-function isAdmin() {
-  return this.userInfo ? this.userInfo.employeeRole === 'admin' : false;
-} // isAdmin
-
-/**
- * Checks if the user's role is an intern. Returns true if the user's role is an intern, otherwise returns false.
- *
- * @return boolean - user's role is an intern
- */
-function isIntern() {
-  return this.userInfo ? this.userInfo.employeeRole === 'intern' : false;
-} // isIntern
-
-/**
- * Checks if the user's role is an manager. Returns true if the user's role is an manager, otherwise returns false.
- *
- * @return boolean - user's role is an manager
- */
-function isManager() {
-  return this.userInfo ? this.userInfo.employeeRole === 'manager' : false;
-} // isManager
-
-/**
- * Checks if the user's role is a user. Returns true if the user's role is a user, otherwise returns false.
- *
- * @return boolean - user's role is a user
- */
-function isUser() {
-  return this.userInfo ? this.userInfo.employeeRole === 'user' : false;
-} // isUser
-
-/**
  * Gets the datatable headers based on user's role. Returns all the headers if the user's role is an admin, otherwise
  * returns all the headers except the 'Employee' header.
  *
  * @return Array - datatable headers
  */
 function roleHeaders() {
-  return this.isAdmin
+  return this.userRoleIsAdmin()
     ? this.headers
     : (function getUserHeaders(headers) {
         let localHeaders = _.cloneDeep(headers); // create a local copy of all headers
@@ -840,7 +797,7 @@ async function updateModelInTable() {
  * @return boolean - user inactive styling
  */
 function useInactiveStyle(expense) {
-  if (this.isAdmin) {
+  if (this.userRoleIsAdmin()) {
     // admin view
     let expenseType = _.find(this.expenseTypes, (type) => expense.expenseTypeId === type.value);
     return expenseType && expenseType.isInactive;
@@ -956,10 +913,6 @@ export default {
     UnreimburseModal
   },
   computed: {
-    getUserName,
-    isAdmin,
-    isIntern,
-    isUser,
     roleHeaders,
     userIsInactive,
     storeIsPopulated
@@ -1077,12 +1030,11 @@ export default {
     getEmployee,
     hasRecipient,
     isEmpty,
-    isManager,
+    userRoleIsAdmin,
     isMobile,
     isReimbursed,
     loadMyExpensesData,
     monthDayYearFormat,
-    mounted,
     onSelect,
     refreshExpenses,
     startAction,
