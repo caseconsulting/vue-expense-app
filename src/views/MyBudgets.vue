@@ -89,10 +89,10 @@
 
 <script>
 import api from '@/shared/api.js';
-import BudgetChart from '@/components/BudgetChart.vue';
-import BudgetTable from '@/components/BudgetTable.vue';
-import ExpenseForm from '@/components/ExpenseForm.vue';
-import AnniversaryCard from '@/components/AnniversaryCard.vue';
+import BudgetChart from '@/components/charts/custom-charts/BudgetChart.vue';
+import BudgetTable from '@/components/budgets/BudgetTable.vue';
+import ExpenseForm from '@/components/expenses/ExpenseForm.vue';
+import AnniversaryCard from '@/components/shared/AnniversaryCard.vue';
 const moment = require('moment-timezone');
 moment.tz.setDefault('America/New_York');
 import { isMobile, getCurrentBudgetYear } from '@/utils/utils';

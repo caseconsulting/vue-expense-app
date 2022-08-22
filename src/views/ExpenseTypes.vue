@@ -428,7 +428,7 @@
 import api from '@/shared/api.js';
 import DeleteErrorModal from '@/components/modals/DeleteErrorModal.vue';
 import DeleteModal from '@/components/modals/DeleteModal.vue';
-import ExpenseTypeForm from '@/components/ExpenseTypeForm.vue';
+import ExpenseTypeForm from '@/components/expense-types/ExpenseTypeForm.vue';
 import { getRole } from '@/utils/auth';
 import _ from 'lodash';
 import { convertToMoneyString } from '@/utils/utils';

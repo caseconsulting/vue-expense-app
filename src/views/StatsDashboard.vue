@@ -61,11 +61,11 @@
 </template>
 
 <script>
-import CertificationsChartTab from '../components/charts/chartTabs/CertificationsChartTab.vue';
-import EmployeesChartTab from '../components/charts/chartTabs/EmployeesChartTab.vue';
-import TechChartTab from '../components/charts/chartTabs/TechChartTab.vue';
-import EducationChartTab from '../components/charts/chartTabs/EducationChartTab.vue';
-import CustomerOrgChartTab from '../components/charts/chartTabs/CustomerOrgChartTab.vue';
+import CertificationsChartTab from '../components/charts/chart-tabs/CertificationsChartTab.vue';
+import EmployeesChartTab from '../components/charts/chart-tabs/EmployeesChartTab.vue';
+import TechChartTab from '../components/charts/chart-tabs/TechChartTab.vue';
+import EducationChartTab from '../components/charts/chart-tabs/EducationChartTab.vue';
+import CustomerOrgChartTab from '../components/charts/chart-tabs/CustomerOrgChartTab.vue';
 import { isMobile, storeIsPopulated } from '@/utils/utils';
 import { updateStoreEmployees } from '@/utils/storeUtils';
 

@@ -12,7 +12,7 @@
   </div>
 </template>
 <script>
-import EmployeeContractTable from '@/components/EmployeeContractTable.vue';
+import EmployeeContractTable from '@/components/reports/EmployeeContractTable.vue';
 import { updateStoreEmployees } from '@/utils/storeUtils';
 
 // |--------------------------------------------------|

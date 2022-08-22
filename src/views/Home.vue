@@ -77,16 +77,16 @@
 
 <script>
 import api from '@/shared/api.js';
-import ActivityFeed from '@/components/ActivityFeed';
-import AvailableBudgets from '@/components/AvailableBudgets.vue';
+import ActivityFeed from '@/components/home/ActivityFeed.vue';
+import AvailableBudgets from '@/components/shared/AvailableBudgets.vue';
 import moment from 'moment-timezone';
 moment.tz.setDefault('America/New_York');
-import TwitterFeed from '@/components/TwitterFeed';
+import TwitterFeed from '@/components/home/TwitterFeed.vue';
 import _ from 'lodash';
 import { isEmpty, isMobile, getCurrentBudgetYear, updateEmployeeLogin } from '@/utils/utils';
 import { updateStoreExpenseTypes, updateStoreBudgets } from '@/utils/storeUtils';
-import QuickBooksTimeData from '@/components/QuickBooksTimeData';
-import AnniversaryCard from '@/components/AnniversaryCard';
+import QuickBooksTimeData from '@/components/shared/quickbooks/QuickBooksTimeData';
+import AnniversaryCard from '@/components/shared/AnniversaryCard';
 
 // |--------------------------------------------------|
 // |                                                  |

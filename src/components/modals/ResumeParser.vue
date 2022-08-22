@@ -408,9 +408,9 @@ import api from '@/shared/api.js';
 import { isEmpty, isSmallScreen } from '@/utils/utils';
 import _ from 'lodash';
 import CancelConfirmation from '@/components/modals/CancelConfirmation.vue';
-import UniversityForm from '@/components/employees/formTabs/education components/UniversityForm.vue';
-import MilitaryForm from '@/components/employees/formTabs/education components/MilitaryForm.vue';
-import HighSchoolForm from '@/components/employees/formTabs/education components/HighSchoolForm.vue';
+import UniversityForm from '@/components/employees/form-tabs/education-types/UniversityForm.vue';
+import MilitaryForm from '@/components/employees/form-tabs/education-types/MilitaryForm.vue';
+import HighSchoolForm from '@/components/employees/form-tabs/education-types/HighSchoolForm.vue';
 import FormSubmissionConfirmation from '@/components/modals/FormSubmissionConfirmation.vue';
 import { v4 as uuid } from 'uuid';
 

@@ -27,7 +27,7 @@
     "serve": "vue-cli-service serve",
     "start": "npm run serve",
     "stylelint": "stylelint src/**/*.{css,scss,vue}",
-    "test": "node ./node_modules/nightwatch/bin/nightwatch -e default unitTests --suiteRetries 2",
+    "test": "node ./node_modules/nightwatch/bin/nightwatch -e default unit-tests --suiteRetries 2",
     "test:e2e": "vue-cli-service test:e2e",
     "test:unit": "vue-cli-service test:unit",
     "unit": "npm run test:unit",

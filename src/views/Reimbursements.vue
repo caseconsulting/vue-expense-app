@@ -45,9 +45,9 @@
 </template>
 
 <script>
-import ExpenseInfo from '@/components/ExpenseInfo.vue';
-import ExpenseTypeTotals from '@/components/ExpenseTypeTotals.vue';
-import RollupExpenseTypeTable from '@/components/RollupExpenseTypeTable.vue';
+import ExpenseInfo from '@/components/reimbursements/ExpenseInfo.vue';
+import ExpenseTypeTotals from '@/components/reimbursements/ExpenseTypeTotals.vue';
+import RollupExpenseTypeTable from '@/components/reimbursements/RollupExpenseTypeTable.vue';
 import { isMobile } from '@/utils/utils';
 
 // |--------------------------------------------------|

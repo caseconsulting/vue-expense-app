@@ -19,7 +19,7 @@ In the charts folder, you'll find a baseChart folder. This contains all the simp
 
 Now you're ready to create a chart.
 
-- Start by creating a component in customCharts to serve as the main chart component. Set this up as normal with template and scripts.
+- Start by creating a component in custom-charts to serve as the main chart component. Set this up as normal with template and scripts.
 - You'll probably need `import { storeIsPopulated } from '@/utils/utils';` to wait until loading the data.
 - In a `mounted` hook, use a structure like:
   ```javascript
@@ -38,7 +38,7 @@ Now you're ready to create a chart.
     - datasets _array_ with object containing the data from the fetchData variable and any colors or border styles
   - `options` _object_ which includes
     - scales _object_ defining what the x and y axis look like (see https://www.chartjs.org/docs/latest/axes/labelling.html for more)
-    - plugins _object_ with objects like legend or title (see examples from files in customCharts)
+    - plugins _object_ with objects like legend or title (see examples from files in custom-charts)
     - (if the chart is clickable) onClick _function_ (see below section on making chart clickable)
   - maintainAspectRatio: false to use a different aspect ratio when resizing
 - Once you have both these methods fleshed out, create the base chart child component in the template. Also import and include it in the export.

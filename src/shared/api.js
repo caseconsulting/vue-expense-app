@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { API_CONFIG } from './api-variables';
+import { API_CONFIG } from './apiVariables';
 import { getAccessToken } from '@/utils/auth';
 const EXPENSE_TYPES = 'expense-types';
 const EXPENSES = 'expenses';

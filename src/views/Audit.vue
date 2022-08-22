@@ -98,9 +98,9 @@
 </template>
 
 <script>
-import ResumeParserAuditPage from '@/components/audit pages/ResumeParserAuditPage.vue';
-import LoginAuditPage from '@/components/audit pages/LoginAuditPage.vue';
-import MifiLogAudit from '@/components/audit pages/MifiLogAudit.vue';
+import ResumeParserAuditPage from '@/components/audits/ResumeParserAuditPage.vue';
+import LoginAuditPage from '@/components/audits/LoginAuditPage.vue';
+import MifiLogAudit from '@/components/audits/MifiLogAudit.vue';
 const moment = require('moment-timezone');
 moment.tz.setDefault('America/New_York');
 import _ from 'lodash';

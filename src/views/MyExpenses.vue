@@ -356,11 +356,11 @@
 
 <script>
 import api from '@/shared/api.js';
-import Attachment from '@/components/Attachment.vue';
-import ConvertExpensesToCsv from '@/components/ConvertExpensesToCsv.vue';
+import Attachment from '@/components/utils/Attachment.vue';
+import ConvertExpensesToCsv from '@/components/expenses/ConvertExpensesToCsv.vue';
 import DeleteModal from '@/components/modals/DeleteModal.vue';
 import employeeUtils from '@/shared/employeeUtils';
-import ExpenseForm from '@/components/ExpenseForm.vue';
+import ExpenseForm from '@/components/expenses/ExpenseForm.vue';
 import UnreimburseModal from '@/components/modals/UnreimburseModal.vue';
 import _ from 'lodash';
 import { isEmpty, monthDayYearFormat, convertToMoneyString, isMobile } from '@/utils/utils';

@@ -240,7 +240,7 @@
 <script>
 import api from '@/shared/api.js';
 import { updateStoreEmployees, updateStoreAvatars } from '@/utils/storeUtils';
-import ConvertEmployeesToCsv from '@/components/ConvertEmployeesToCsv.vue';
+import ConvertEmployeesToCsv from '@/components/employees/csv/ConvertEmployeesToCsv.vue';
 import DeleteErrorModal from '@/components/modals/DeleteErrorModal.vue';
 import DeleteModal from '@/components/modals/DeleteModal.vue';
 import EmployeeForm from '@/components/employees/EmployeeForm.vue';
@@ -248,8 +248,8 @@ import moment from 'moment-timezone';
 import _ from 'lodash';
 import { getRole } from '@/utils/auth';
 import { isEmpty, isFullTime, isInactive, isPartTime, monthDayYearFormat, storeIsPopulated } from '@/utils/utils';
-import ConvertEmployeeToCsv from '../components/ConvertEmployeeToCsv.vue';
-import GenerateCsvEeoReport from '@/components/GenerateCsvEeoReport.vue';
+import ConvertEmployeeToCsv from '@/components/employees/csv/ConvertEmployeeToCsv.vue';
+import GenerateCsvEeoReport from '@/components/employees/csv/GenerateCsvEeoReport.vue';
 
 // |--------------------------------------------------|
 // |                                                  |

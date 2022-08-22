@@ -150,17 +150,17 @@
 
 <script>
 import api from '@/shared/api.js';
-import AvailableBudgets from '@/components/AvailableBudgets.vue';
+import AvailableBudgets from '@/components/shared/AvailableBudgets.vue';
 import EmployeeForm from '@/components/employees/EmployeeForm.vue';
 import EmployeeInfo from '@/components/employees/EmployeeInfo.vue';
-import QuickBooksTimeData from '@/components/QuickBooksTimeData.vue';
+import QuickBooksTimeData from '@/components/shared/quickbooks/QuickBooksTimeData.vue';
 import { getRole } from '@/utils/auth';
 import { getCurrentBudgetYear, isEmpty, isMobile, storeIsPopulated } from '@/utils/utils.js';
 import { updateStoreBudgets, updateStoreEmployees, updateStoreExpenseTypes, updateStoreUser } from '@/utils/storeUtils';
 import _ from 'lodash';
-import ConvertEmployeeToCsv from '../components/ConvertEmployeeToCsv.vue';
-import AnniversaryCard from '@/components/AnniversaryCard.vue';
-import BudgetChart from '@/components/BudgetChart.vue';
+import ConvertEmployeeToCsv from '@/components/employees/csv/ConvertEmployeeToCsv.vue';
+import AnniversaryCard from '@/components/shared/AnniversaryCard.vue';
+import BudgetChart from '@/components/charts/custom-charts/BudgetChart.vue';
 import ResumeParser from '@/components/modals/ResumeParser';
 import DeleteModal from '@/components/modals/DeleteModal';
 

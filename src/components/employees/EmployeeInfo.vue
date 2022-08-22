@@ -107,17 +107,17 @@
 <script>
 import { getRole } from '@/utils/auth';
 import _ from 'lodash';
-import AwardsTab from '@/components/employees/infoTabs/AwardsTab';
-import CertificationsTab from '@/components/employees/infoTabs/CertificationsTab';
-import ClearanceTab from '@/components/employees/infoTabs/ClearanceTab';
-import ContractsTab from '@/components/employees/infoTabs/ContractsTab';
-import CustomerOrgTab from '@/components/employees/infoTabs/CustomerOrgTab';
-import EducationTab from '@/components/employees/infoTabs/EducationTab';
-import EmployeeTab from '@/components/employees/infoTabs/EmployeeTab';
-import JobExperienceTab from '@/components/employees/infoTabs/JobExperienceTab';
-import LanguagesTab from '@/components/employees/infoTabs/LanguagesTab';
-import PersonalTab from '@/components/employees/infoTabs/PersonalTab';
-import TechnologiesTab from '@/components/employees/infoTabs/TechnologiesTab';
+import AwardsTab from '@/components/employees/info-tabs/AwardsTab';
+import CertificationsTab from '@/components/employees/info-tabs/CertificationsTab';
+import ClearanceTab from '@/components/employees/info-tabs/ClearanceTab';
+import ContractsTab from '@/components/employees/info-tabs/ContractsTab';
+import CustomerOrgTab from '@/components/employees/info-tabs/CustomerOrgTab';
+import EducationTab from '@/components/employees/info-tabs/EducationTab';
+import EmployeeTab from '@/components/employees/info-tabs/EmployeeTab';
+import JobExperienceTab from '@/components/employees/info-tabs/JobExperienceTab';
+import LanguagesTab from '@/components/employees/info-tabs/LanguagesTab';
+import PersonalTab from '@/components/employees/info-tabs/PersonalTab';
+import TechnologiesTab from '@/components/employees/info-tabs/TechnologiesTab';
 const moment = require('moment-timezone');
 moment.tz.setDefault('America/New_York');
 
