@@ -11,7 +11,7 @@
         ></bar-chart>
       </v-col>
     </v-row>
-    <audit-table :audits="loginAudits"></audit-table>
+    <audits-table :audits="loginAudits"></audits-table>
   </v-container>
 </template>
 
@@ -19,7 +19,7 @@
 import _ from 'lodash';
 import api from '@/shared/api';
 import BarChart from '../charts/base-charts/BarChart.vue';
-import AuditTable from '@/components/audits/AuditTable.vue';
+import AuditsTable from '@/components/audits/AuditsTable.vue';
 import { storeIsPopulated } from '@/utils/utils.js';
 const moment = require('moment-timezone');
 moment.tz.setDefault('America/New_York');
@@ -228,6 +228,16 @@ async function watchDateRange() {
   await this.fillData();
 } // watchDateRange
 
+/**
+ * fills data when store is populated since employees are needed to fill data
+ */
+async function watchStoreIsPopulated() {
+  if (this.storeIsPopulated) {
+    this.employees = this.$store.getters.employees; // get all employees
+    await this.fillData();
+  }
+}
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                      EXPORT                      |
@@ -235,7 +245,7 @@ async function watchDateRange() {
 // |--------------------------------------------------|
 
 export default {
-  components: { BarChart, AuditTable },
+  components: { BarChart, AuditsTable },
   created,
   data() {
     return {
@@ -257,14 +267,7 @@ export default {
   props: ['queryStartDate', 'queryEndDate', 'show24HourTitle'],
   watch: {
     dateRange: watchDateRange,
-    storeIsPopulated: async function () {
-      if (this.storeIsPopulated) {
-        this.employees = this.$store.getters.employees; // get all employees
-        await this.fillData();
-      }
-    }
+    storeIsPopulated: watchStoreIsPopulated
   }
 };
 </script>
-
-<style></style>

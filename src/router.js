@@ -7,7 +7,7 @@ import ExpenseTypes from '@/views/ExpenseTypes.vue';
 import Employees from '@/views/Employees.vue';
 import Employee from '@/views/Employee.vue';
 import StatsDashboard from '@/views/StatsDashboard.vue';
-import Audit from '@/views/Audit.vue';
+import Audits from '@/views/Audits.vue';
 import Expenses from '@/views/MyExpenses.vue';
 import Help from '@/views/Help.vue';
 import Reports from '@/views/Reports.vue';
@@ -55,7 +55,7 @@ const router = new Router({
     {
       path: '/audits',
       name: 'audits',
-      component: Audit,
+      component: Audits,
       beforeEnter: multiguard([requireAuth, isAdminOrManager])
     },
     {

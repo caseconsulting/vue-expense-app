@@ -1,25 +1,15 @@
 <template>
   <v-container fluid>
-    <v-row>
+    <v-row v-if="chartsLoaded">
       <v-col sm="12" md="6">
-        <pie-chart
-          v-if="chartLoaded"
-          chartId="resume-1"
-          :options="resumeChartOptions"
-          :chartData="resumeChartData"
-        ></pie-chart>
+        <pie-chart chartId="resume-1" :options="resumeChartOptions" :chartData="resumeChartData"></pie-chart>
       </v-col>
       <v-col sm="12" md="6">
-        <pie-chart
-          v-if="chart2Loaded"
-          chartId="resume-2"
-          :options="resumeChart2Options"
-          :chartData="resumeChart2Data"
-        ></pie-chart>
+        <pie-chart chartId="resume-2" :options="resumeChart2Options" :chartData="resumeChart2Data"></pie-chart>
       </v-col>
     </v-row>
     <v-divider class="mt-5"></v-divider>
-    <audit-table :audits="resumeAudits"></audit-table>
+    <audits-table :audits="resumeAudits"></audits-table>
   </v-container>
 </template>
 
@@ -27,7 +17,7 @@
 import api from '@/shared/api';
 import _ from 'lodash';
 import PieChart from '@/components/charts/base-charts/PieChart.vue';
-import AuditTable from '@/components/audits/AuditTable.vue';
+import AuditsTable from '@/components/audits/AuditsTable.vue';
 import { storeIsPopulated } from '@/utils/utils.js';
 const moment = require('moment-timezone');
 moment.tz.setDefault('America/New_York');
@@ -43,7 +33,6 @@ const IsoFormat = 'MMMM Do YYYY, h:mm:ss a';
  * Generates chart data and table
  */
 async function fillData() {
-  this.resumeAudits = [];
   let resumeData = await api.getAudits('resume', this.queryStartDate, this.queryEndDate);
 
   _.forEach(resumeData, (audit) => {
@@ -171,8 +160,7 @@ async function fillData() {
     },
     maintainAspectRatio: false
   };
-  this.chartLoaded = true;
-  this.chart2Loaded = true;
+  this.chartsLoaded = true;
 } // fillData
 
 // |--------------------------------------------------|
@@ -193,23 +181,41 @@ async function created() {
 
 // |--------------------------------------------------|
 // |                                                  |
+// |                     COMPUTED                     |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * returns the combined date range computed value
+ *
+ * @return - full date range
+ */
+function dateRange() {
+  return `${this.queryStartDate} ${this.queryEndDate}`;
+} // dateRange
+
+// |--------------------------------------------------|
+// |                                                  |
 // |                     WATCHERS                     |
 // |                                                  |
 // |--------------------------------------------------|
 
 /**
- * watcher for queryStartDate - fillData
+ * fills data when dateRange changes
  */
-async function watchQueryStartDate() {
+async function watchDateRange() {
   await this.fillData();
-} // watchQueryStartDate
+} // watchDateRange
 
 /**
- * watcher for queryEndDate - fillData
+ * fills data when store is populated since employees are needed to fill data
  */
-async function watchQueryEndDate() {
-  await this.fillData();
-} // watchQueryEndDate
+async function watchStoreIsPopulated() {
+  if (this.storeIsPopulated) {
+    this.employees = this.$store.getters.employees; // get all employees
+    await this.fillData();
+  }
+}
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -218,15 +224,15 @@ async function watchQueryEndDate() {
 // |--------------------------------------------------|
 
 export default {
-  components: { AuditTable, PieChart },
+  components: { AuditsTable, PieChart },
   computed: {
-    storeIsPopulated
+    storeIsPopulated,
+    dateRange
   },
   created,
   data() {
     return {
-      chartLoaded: false,
-      chart2Loaded: false,
+      chartsLoaded: false,
       employees: [],
       headers: [
         {
@@ -252,8 +258,7 @@ export default {
       resumeChartOptions: null,
       resumeChartData: null,
       resumeChart2Options: null,
-      resumeChart2Data: null,
-      search: null
+      resumeChart2Data: null
     };
   },
   methods: {
@@ -261,14 +266,8 @@ export default {
   },
   props: ['queryStartDate', 'queryEndDate', 'show24HourTitle'],
   watch: {
-    queryStartDate: watchQueryStartDate,
-    queryEndDate: watchQueryEndDate,
-    storeIsPopulated: async function () {
-      if (this.storeIsPopulated) {
-        this.employees = this.$store.getters.employees; // get all employees
-        await this.fillData();
-      }
-    }
+    dateRange: watchDateRange,
+    storeIsPopulated: watchStoreIsPopulated
   }
 };
 </script>

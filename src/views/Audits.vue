@@ -68,43 +68,43 @@
             <template v-slot:activator="{ on, attrs }">
               <v-btn class="ml-2" @click="setDateRange" v-bind="attrs" v-on="on">Apply</v-btn>
             </template>
-            <span>Show data from 12am on start date up to 12am on end date</span>
+            <span>Show data from 12am on start date up to 12am on end date.</span>
           </v-tooltip>
         </v-col>
       </v-row>
-      <login-audit-page
+      <login-audits
         v-if="selectedDropdown === 'User Logins'"
         :queryStartDate="queryA"
         :queryEndDate="queryB"
         :show24HourTitle="firstLoad"
-      ></login-audit-page>
+      ></login-audits>
       <!-- Displays of Audit Data -->
-      <resume-parser-audit-page
+      <resume-parser-audits
         v-if="selectedDropdown === 'Resume Parser'"
         :queryStartDate="queryA"
         :queryEndDate="queryB"
         :show24HourTitle="firstLoad"
         :key="reloader"
-      ></resume-parser-audit-page>
-      <mifi-log-audit
+      ></resume-parser-audits>
+      <mifi-log-audits
         v-if="selectedDropdown === 'Mifi Status Changes'"
         :queryStartDate="queryA"
         :queryEndDate="queryB"
         :show24HourTitle="firstLoad"
         :key="reloader"
-      ></mifi-log-audit>
+      ></mifi-log-audits>
     </v-container>
   </v-card>
 </template>
 
 <script>
-import ResumeParserAuditPage from '@/components/audits/ResumeParserAuditPage.vue';
-import LoginAuditPage from '@/components/audits/LoginAuditPage.vue';
-import MifiLogAudit from '@/components/audits/MifiLogAudit.vue';
+import ResumeParserAudits from '@/components/audits/ResumeParserAudits.vue';
+import LoginAudits from '@/components/audits/LoginAudits.vue';
+import MifiLogAudits from '@/components/audits/MifiLogAudits.vue';
 const moment = require('moment-timezone');
 moment.tz.setDefault('America/New_York');
 import _ from 'lodash';
-import { isEmpty, storeIsPopulated } from '@/utils/utils';
+import { storeIsPopulated } from '@/utils/utils';
 import { updateStoreEmployees } from '@/utils/storeUtils';
 
 // |--------------------------------------------------|
@@ -162,7 +162,7 @@ function formatRange(range) {
 } // formatRange
 
 /**
- * selects view to change to
+ * selects which audit view to change to (Login, Mifi, Resume Parser)
  *
  * @param tab - the dropdown to select
  */
@@ -185,11 +185,29 @@ function selectDropDown(tab) {
 // |                                                  |
 // |--------------------------------------------------|
 
+/**
+ * created lifecycle hook
+ */
 async function created() {
   if (this.storeIsPopulated) {
     if (!this.$store.getters.employees) {
       await this.updateStoreEmployees();
     }
+  }
+}
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     WATCHERS                     |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * updates employees if they are not already populated, this happens if the user directly navigates to the audits page
+ */
+async function watchStoreIsPopulated() {
+  if (!this.$store.getters.employees) {
+    await this.updateStoreEmployees();
   }
 }
 
@@ -201,9 +219,9 @@ async function created() {
 
 export default {
   components: {
-    LoginAuditPage,
-    ResumeParserAuditPage,
-    MifiLogAudit
+    LoginAudits,
+    ResumeParserAudits,
+    MifiLogAudits
   },
   computed: {
     storeIsPopulated
@@ -219,30 +237,19 @@ export default {
       queryA: moment().subtract(1, 'd').format(),
       queryB: moment().format(),
       reloader: 0,
-      requiredRules: [(v) => !isEmpty(v) || 'This field is required'], // rules for a required field
+      requiredRules: [(v) => !_.isEmpty(v) || 'This field is required'], // rules for a required field
       selectedDropdown: 'User Logins',
       today: moment().format('YYYY-MM-DD')
     };
   },
   methods: {
-    isEmpty,
     setDateRange,
     formatRange,
     selectDropDown,
     updateStoreEmployees
   },
   watch: {
-    storeIsPopulated: async function () {
-      if (!this.$store.getters.employees) {
-        await this.updateStoreEmployees();
-      }
-    }
+    storeIsPopulated: watchStoreIsPopulated
   }
 };
 </script>
-
-<style>
-.clear {
-  color: rgba(0, 0, 0, 0);
-}
-</style>

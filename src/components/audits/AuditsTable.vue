@@ -106,5 +106,3 @@ export default {
   methods: { customDateSort }
 };
 </script>
-
-<style></style>

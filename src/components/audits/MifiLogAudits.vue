@@ -10,7 +10,7 @@
         ></pie-chart>
       </v-col>
     </v-row>
-    <audit-table :audits="mifiAudits"></audit-table>
+    <audits-table :audits="mifiAudits"></audits-table>
   </v-container>
 </template>
 
@@ -18,7 +18,7 @@
 import _ from 'lodash';
 import api from '@/shared/api';
 import PieChart from '../charts/base-charts/PieChart.vue';
-import AuditTable from '@/components/audits/AuditTable.vue';
+import AuditsTable from '@/components/audits/AuditsTable.vue';
 import { storeIsPopulated } from '@/utils/utils.js';
 const moment = require('moment-timezone');
 moment.tz.setDefault('America/New_York');
@@ -52,7 +52,6 @@ async function created() {
 async function fillData() {
   //obtains all mifi related entries in the audits DB
   //set to null so its data is reset each time the chart renders (changing date ranges)
-  this.mifiAudits = [];
   let mifiData = await api.getAudits('mifi', this.queryStartDate, this.queryEndDate);
 
   _.forEach(mifiData, (audit) => {
@@ -155,9 +154,19 @@ function dateRange() {
 /**
  * fills data when dateRange changes
  */
-function watchDateRange() {
-  this.fillData();
+async function watchDateRange() {
+  await this.fillData();
 } // watchDateRange
+
+/**
+ * fills data when store is populated since employees are needed to fill data
+ */
+async function watchStoreIsPopulated() {
+  if (this.storeIsPopulated) {
+    this.employees = this.$store.getters.employees; // get all employees
+    await this.fillData();
+  }
+}
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -166,7 +175,7 @@ function watchDateRange() {
 // |--------------------------------------------------|
 
 export default {
-  components: { PieChart, AuditTable },
+  components: { PieChart, AuditsTable },
   computed: {
     dateRange,
     storeIsPopulated
@@ -184,12 +193,7 @@ export default {
   props: ['queryStartDate', 'queryEndDate', 'show24HourTitle'],
   watch: {
     dateRange: watchDateRange,
-    storeIsPopulated: async function () {
-      if (this.storeIsPopulated) {
-        this.employees = this.$store.getters.employees; // get all employees
-        await this.fillData();
-      }
-    }
+    storeIsPopulated: watchStoreIsPopulated
   }
 };
 </script>
