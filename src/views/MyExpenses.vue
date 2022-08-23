@@ -330,7 +330,7 @@
           </v-card-actions>
 
           <!-- Confirmation Modals -->
-          <unreimburse-modal :toggleUnreimburseModal="unreimbursing" :expense="propExpense"></unreimburse-modal>
+          <unreimburse-modal :toggleUnreimburseModal="unreimbursing"></unreimburse-modal>
           <delete-modal :toggleDeleteModal="deleting" :type="'expense'"></delete-modal>
           <!-- End Confirmation Modals -->
         </v-container>

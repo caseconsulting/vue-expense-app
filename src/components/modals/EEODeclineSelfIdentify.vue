@@ -12,8 +12,9 @@
           <a
             href="https://eeocdata.org/?ReturnUrl=%2FEEO1%2F3c2e79be-28c1-446b-8d15-bb82a6ccde76%2FEligible"
             target="_blank"
-            >EEOCData.org</a
           >
+            EEOCData.org
+          </a>
           or send a message to Paul Farmer.
         </v-card-text>
         <v-card-actions>
@@ -36,8 +37,9 @@
               emit(`confirm-decline-self-identify`);
               activate = false;
             "
-            >Yes, decline self-identify.</v-btn
           >
+            Yes, decline self-identify.
+          </v-btn>
           <v-spacer></v-spacer>
         </v-card-actions>
       </v-card>

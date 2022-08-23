@@ -6,7 +6,6 @@
         <v-card-actions>
           <v-spacer></v-spacer>
           <v-btn
-            id="submitNoBtn"
             color="red"
             text
             @click.native="
@@ -20,7 +19,6 @@
           >
           <v-spacer></v-spacer>
           <v-btn
-            id="submitYesBtn"
             color="green darken-1"
             text
             @click.native="

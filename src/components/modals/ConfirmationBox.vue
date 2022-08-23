@@ -4,8 +4,8 @@
     <v-dialog v-model="activate" persistent max-width="330">
       <v-card>
         <v-card-title v-if="isCovered" class="headline"
-          >You've reached the budget limit for this expense type</v-card-title
-        >
+          >You've reached the budget limit for this expense type
+        </v-card-title>
         <v-card-title v-else class="headline">You've reached the overdraft limit for this expense type</v-card-title>
         <v-card-text>
           <!-- Overdraft Allowed start above overdraft and not going over overdraft limit -->

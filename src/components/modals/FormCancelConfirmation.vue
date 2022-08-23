@@ -15,8 +15,9 @@
             "
             :loading="!activate || submitting"
             :disabled="!activate || submitting"
-            >No</v-btn
           >
+            No
+          </v-btn>
           <v-spacer></v-spacer>
           <v-btn
             id="submitYesBtn"
@@ -28,8 +29,9 @@
             "
             :loading="!activate || submitting"
             :disabled="!activate || submitting"
-            >Yes</v-btn
           >
+            Yes
+          </v-btn>
           <v-spacer></v-spacer>
         </v-card-actions>
       </v-card>
