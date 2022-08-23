@@ -4,10 +4,8 @@
       <!-- Editing an Expense -->
       <h3 v-if="expense.id && (userRoleIsAdmin() || !isReimbursed)">Edit Expense</h3>
       <!-- Creating an Expense -->
-      <!-- <h3 v-else-if="!isInactive">Create New Expense</h3> -->
       <h3 v-else>Create New Expense</h3>
       <!-- Inactive Employee -->
-      <!-- <h3 v-else>Inactive Employee</h3> -->
     </v-card-title>
     <v-container fluid>
       <v-form ref="form" v-model="valid" lazy-validation>

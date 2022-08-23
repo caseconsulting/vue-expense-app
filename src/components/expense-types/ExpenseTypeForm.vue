@@ -3,7 +3,6 @@
     <!-- Form Header -->
     <v-card-title class="header_style">
       <h3 v-if="model.id">Edit Expense Type</h3>
-
       <h3 v-else>Create New Expense Type</h3>
     </v-card-title>
 
@@ -52,6 +51,7 @@
         <!-- Flags -->
         <v-row>
           <v-col cols="6">
+            <!-- Overdraft Flag -->
             <v-checkbox
               label="Overdraft Flag"
               :disabled="!!model.id && model.odFlag"
@@ -59,17 +59,18 @@
               persistent-hint
               :hint="odFlagHint()"
             ></v-checkbox>
+            <!-- Recurring Flag -->
             <v-checkbox label="Recurring Flag" v-model="editedExpenseType.recurringFlag"></v-checkbox>
           </v-col>
-
           <v-col cols="6">
+            <!-- Receipt Required Flag -->
             <v-checkbox
               label="Receipt Required"
               id="receiptRequired"
               v-model="editedExpenseType.requiredFlag"
               @change="toggleRequireReceipt()"
             ></v-checkbox>
-
+            <!-- Inactive Flag -->
             <v-checkbox label="Mark as Inactive" v-model="editedExpenseType.isInactive"></v-checkbox>
           </v-col>
         </v-row>
@@ -111,7 +112,6 @@
         </v-menu>
 
         <!-- End Date -->
-
         <v-menu
           v-model="showEndMenu"
           v-if="!editedExpenseType.recurringFlag"
@@ -157,7 +157,7 @@
           rows="3"
         ></v-textarea>
 
-        <!-- Campfires autocomplete -->
+        <!-- Campfires Autocomplete -->
         <v-autocomplete
           :items="campfires"
           v-model="editedExpenseType.campfire"
@@ -167,7 +167,7 @@
           clearable
         ></v-autocomplete>
 
-        <!-- Accessibility -->
+        <!-- Employee Access -->
         <div class="form-text">
           Employee Access
           <v-btn @click="toFAQ()" class="mb-4" x-small icon><v-icon color="#3f51b5">info</v-icon></v-btn>
@@ -207,7 +207,8 @@
           </v-col>
         </v-row>
         <p id="error" v-if="checkBoxRule">At least one checkbox must be checked</p>
-        <!-- Employee Access List -->
+
+        <!-- Custom Access: Employee List -->
         <v-autocomplete
           v-if="editedExpenseType.accessibleBy && editedExpenseType.accessibleBy.includes('Custom')"
           v-model="customAccess"
@@ -233,25 +234,25 @@
           </template>
         </v-autocomplete>
 
+        <!-- Switches -->
+        <!-- Pro-rated expense -->
         <v-switch v-model="editedExpenseType.proRated" label="Should this expense be pro-rated?"></v-switch>
-
         <!-- Require Recipient -->
         <v-switch v-model="editedExpenseType.hasRecipient" label="Does this expense type have a recipient?"></v-switch>
-
-        <!-- always show on feed -->
+        <!-- Always Show on Feed -->
         <v-switch
           v-model="editedExpenseType.alwaysOnFeed"
           @change="toggleShowAllCategories()"
           label="Have this expense type show on the company feed?"
         ></v-switch>
-
-        <!-- require url for expense type -->
+        <!-- Require URL -->
         <v-switch
           v-model="editedExpenseType.requireURL"
           @change="toggleRequireURL()"
           label="Require a url for this expense?"
         ></v-switch>
 
+        <!-- Categrories Specific Questions -->
         <v-container class="pb-0 mb-0">
           <v-row v-if="editedExpenseType.categories && editedExpenseType.categories.length > 0">
             <v-col cols="3">Category</v-col>
@@ -287,6 +288,7 @@
             </v-col>
           </v-row>
         </v-container>
+
         <!-- Buttons -->
         <!-- Cancel Button -->
         <v-btn color="white " @click="clearForm" class="ma-2" elevation="2">
@@ -402,7 +404,7 @@ function clearForm() {
   if (this.$refs.expenseTypeForm) {
     this.$refs.expenseTypeForm.reset();
   }
-  this.emit('finished-editing-expense-type'); //notify parent no longer editing an expense type
+  this.$emit('finished-editing-expense-type'); //notify parent no longer editing an expense type
   this.startDateFormatted = null;
   this.endDateFormatted = null;
   this.customAccess = [];
@@ -428,15 +430,6 @@ function customFilter(item, queryText) {
 
   return queryContainsNickName || queryContainsFirstName;
 } // customFilter
-
-/**
- * Emits a message and data if it exists.
- *
- * @param msg - Message to emit
- */
-function emit(msg) {
-  window.EventBus.$emit(msg);
-} // emit
 
 /**
  * Formats the budget on the form for a nicer display.
@@ -640,6 +633,12 @@ function toggleRequireReceipt() {
   }
 } // toggleRequireReceipt
 
+// |--------------------------------------------------|
+// |                                                  |
+// |                    COMPUTED                      |
+// |                                                  |
+// |--------------------------------------------------|
+
 /**
  * boolean for checkBox appearance
  *
@@ -732,7 +731,7 @@ function watchModelID() {
 
   //when model id is not empty then must be editing an expense
   if (!this.isEmpty(this.model.id)) {
-    this.emit('editing-expense-type'); //notify parent that expense is being edited
+    this.$emit('editing-expense-type'); //notify parent that expense is being edited
   }
   if (this.editedExpenseType.id != null) {
     //map categories
@@ -875,7 +874,6 @@ export default {
     checkSelection,
     clearForm,
     customFilter,
-    emit,
     formatBudget,
     formatDate,
     getDateRules,
@@ -886,7 +884,6 @@ export default {
     parseBudget,
     parseDate,
     removeCategory,
-
     submit,
     toFAQ,
     toggleRequireURL,
@@ -912,19 +909,5 @@ export default {
 #error {
   color: #ff5252;
   font-size: 12px;
-}
-
-.smallRadio {
-  margin: 0 !important;
-}
-
-.smallRadio label {
-  margin-left: -6px;
-}
-
-.smallRadio [class*='__ripple'] {
-  height: 20px;
-  width: 20px;
-  margin: 14px;
 }
 </style>

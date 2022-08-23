@@ -34,10 +34,3 @@ export default {
   props: ['expenses', 'midAction'] // expenses to export
 };
 </script>
-
-<style scoped>
-.download {
-  font-size: 20px;
-  cursor: pointer;
-}
-</style>

@@ -38,12 +38,12 @@
                   </v-list-item>
 
                   <!-- Display Remaining Amount -->
-                  <v-list-item>
-                    <v-list-item-content class="bold">Remaining:</v-list-item-content>
-                    <v-list-item-content v-if="noRemaining(item)" class="text-right bold red--text">
+                  <v-list-item class="font-weight-bold">
+                    <v-list-item-content>Remaining:</v-list-item-content>
+                    <v-list-item-content v-if="noRemaining(item)" class="text-right red--text">
                       <div>{{ convertToMoneyString(calcRemaining(item)) }}</div>
                     </v-list-item-content>
-                    <v-list-item-content v-else class="text-right bold black--text">
+                    <v-list-item-content v-else class="text-right black--text">
                       <div>{{ convertToMoneyString(calcRemaining(item)) }}</div>
                     </v-list-item-content>
                   </v-list-item>
@@ -280,15 +280,9 @@ export default {
     noRemaining,
     odFlagMessage
   },
-  props: ['employee', 'accessibleBudgets', 'fiscalDateView', 'expenses', 'expenseTypes'], // employee of budgets
+  props: ['employee', 'accessibleBudgets', 'fiscalDateView', 'expenses', 'expenseTypes'],
   watch: {
     fiscalDateView: watchFiscalDateView
   }
 };
 </script>
-
-<style scoped>
-.bold {
-  font-weight: 900;
-}
-</style>
