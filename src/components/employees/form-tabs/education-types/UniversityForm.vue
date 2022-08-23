@@ -253,9 +253,9 @@ async function created() {
 // |--------------------------------------------------|
 
 /**
- * Emits confirmation to resume parser
+ * Emits confirmation to resume parser.
  *
- * @input include - whether or not to include this education
+ * @param include - whether or not to include this education
  */
 function emitToParser(include) {
   this.$emit(include ? 'confirm' : 'deny', include ? this.uni : undefined);
@@ -313,7 +313,8 @@ function deleteItem(array, index) {
 } // deleteItem
 
 /**
- * Uses the last saved school as a placeholder for the dropdown until the API loads
+ * Uses the last saved school as a placeholder for the dropdown until the API loads.
+ *
  * @param schoolName - value of the last saved school
  * @returns one-item array or result of getColleges API call
  */
@@ -322,7 +323,7 @@ function schoolNamePlaceholder(schoolName) {
 } // confirmEducation
 
 /**
- * Changes the format of the string to title case
+ * Changes the format of the string to title case.
  *
  * @param str - the string to be converted
  * @return string - the title case formatted string
@@ -336,7 +337,7 @@ function titleCase(str) {
 } // titleCase
 
 /**
- * updates the dropdowns with employee data
+ * updates the dropdowns with employee data.
  */
 function updateDropdowns() {
   let employeesMajorsAndMinors = _.map(this.employees, (employee) => {
@@ -405,8 +406,6 @@ function isAttached() {
 
 /**
  * watcher for validating - validates fields
- *
- * @param val - val prop that needs to exist before validating
  */
 function watchValidating() {
   if (this.validating) this.validateFields();

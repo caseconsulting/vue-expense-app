@@ -181,7 +181,7 @@ import { isEmpty, parseDateMonthYear, formatDateMonthYear } from '@/utils/utils'
 // |--------------------------------------------------|
 
 /**
- * mounted lifecycle hook
+ * mounted lifecycle hook.
  */
 function mounted() {
   this.$emit('validated', this.technologyIndex, this.intervalIndex, 1);
@@ -255,7 +255,7 @@ async function deleteInterval() {
 // |--------------------------------------------------|
 
 /**
- * watcher for formatToggle - change intervals and validate
+ * watcher for formatToggle - change intervals and validate.
  */
 function watchFormatToggle() {
   // change to YYYY format
@@ -280,7 +280,7 @@ function watchFormatToggle() {
 } // watchFormatToggle
 
 /**
- * watcher for startIntervalDate - format start interval
+ * watcher for startIntervalDate - format start interval.
  */
 function watchStartIntervalDate() {
   if (this.formatToggle === 0) {
@@ -291,7 +291,7 @@ function watchStartIntervalDate() {
 } // watchStartIntervalDate
 
 /**
- * watcher for endIntervalDate - format end interval
+ * watcher for endIntervalDate - format end interval.
  */
 function watchEndIntervalDate() {
   if (this.formatToggle === 0) {
@@ -302,7 +302,7 @@ function watchEndIntervalDate() {
 } // watchEndIntervalDate
 
 /**
- * watcher for startIntervalDateEdited - check if date is in right format and send back if it is
+ * watcher for startIntervalDateEdited - check if date is in right format and send back if it is.
  */
 function watchStartIntervalDateEdited() {
   //temp variable for checking equality
@@ -318,7 +318,7 @@ function watchStartIntervalDateEdited() {
 } // watchStartIntervalDateEdited
 
 /**
- * watcher for endIntervalDateEdited - check if date is in right format and send back if it is
+ * watcher for endIntervalDateEdited - check if date is in right format and send back if it is.
  */
 function watchEndIntervalDateEdited() {
   //temp variable for checking equality
@@ -341,7 +341,7 @@ function watchEndIntervalDateEdited() {
 // |--------------------------------------------------|
 
 /**
- * filter the year out of the date
+ * filter the year out of the date.
  *
  * @param date - the date to filter
  * @return string - the year of that date

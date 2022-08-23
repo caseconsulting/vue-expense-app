@@ -76,9 +76,9 @@ import { formatDateMonthYear, parseDateMonthYear } from '@/utils/utils';
 // |--------------------------------------------------|
 
 /**
- * Emits confirmation to resume parser
+ * Emits confirmation to resume parser.
  *
- * @input include - whether or not to include this education
+ * @param include - whether or not to include this education
  */
 function emitToParser(include) {
   this.$emit(include ? 'confirm' : 'deny', include ? this.highSchool : undefined);
@@ -126,9 +126,7 @@ function isAttached() {
 // |--------------------------------------------------|
 
 /**
- * watcher for validating - validates fields
- *
- * @param val - val prop that needs to exist before validating
+ * watcher for validating - validates fields.
  */
 function watchValidating() {
   if (this.validating) this.validateFields();

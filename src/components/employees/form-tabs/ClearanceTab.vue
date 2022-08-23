@@ -325,6 +325,8 @@ function addClearance() {
 
 /**
  * Capitalize all badge numbers.
+ *
+ * @param clearance - The clearance object of the badge to capitalize
  */
 function capitalizeBadges(clearance) {
   clearance.badgeNum = clearance.badgeNum.toUpperCase();
@@ -338,34 +340,6 @@ function capitalizeBadges(clearance) {
 function deleteClearance(cIndex) {
   this.editedClearances.splice(cIndex, 1);
 } // deleteClearance
-
-/**
- * Checks to see if the first date is at or after the second date, if not, it uses an error message.
- *
- * @param firstDate - The date that should come first
- * @param secondDate - The date that should come second
- * @param errMessage - The message to display if the dates are incorrectly ordered
- * @return Boolean - True if the first date is at or after the second date
- */
-function isAfter(firstDate, secondDate, errMessage) {
-  return !this.isEmpty(firstDate) && secondDate
-    ? moment(firstDate).add(1, 'd').isAfter(moment(secondDate)) || errMessage
-    : true;
-} // isAfter
-
-/**
- * Checks to see if the first date is at or before the second date, if not, it uses an error message.
- *
- * @param firstDate - The date that should come first
- * @param secondDate - The date that should come second
- * @param errMessage - The message to display if the dates are incorrectly ordered
- * @return boolean - True if the first date is at or before the second date
- */
-function isBefore(firstDate, secondDate, errMessage) {
-  return !this.isEmpty(firstDate) && secondDate
-    ? moment(firstDate).isBefore(moment(secondDate).add(1, 'd')) || errMessage
-    : true;
-} // isBefore
 
 /**
  * Return the maximum available date to be selected for submission date. Returns the granted date if it exists.
@@ -608,8 +582,6 @@ export default {
     deleteClearance,
     getDateOptionalRules,
     getRequiredRules,
-    isAfter,
-    isBefore,
     isEmpty,
     maxSubmission,
     minExpiration,

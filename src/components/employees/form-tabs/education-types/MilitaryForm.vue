@@ -123,7 +123,9 @@ moment.tz.setDefault('America/New_York');
 
 /**
  * Rules for submitting dates relative to each other, for
- * start and end dates of service
+ * start and end dates of service.
+ *
+ * @return String if the completion date is before the start date
  */
 function dateSubmissionRules() {
   return this.military.startDate && this.military.completeDate
@@ -133,9 +135,9 @@ function dateSubmissionRules() {
 }
 
 /**
- * Emits confirmation to resume parser
+ * Emits confirmation to resume parser.
  *
- * @input include - whether or not to include this education
+ * @param include - whether or not to include this education
  */
 function emitToParser(include) {
   this.$emit(include ? 'confirm' : 'deny', include ? this.military : undefined);
@@ -183,9 +185,7 @@ function isAttached() {
 // |--------------------------------------------------|
 
 /**
- * watcher for validating - validates fields
- *
- * @param val - val prop that needs to exist before validating
+ * watcher for validating - validates fields.
  */
 function watchValidating() {
   if (this.validating) this.validateFields();

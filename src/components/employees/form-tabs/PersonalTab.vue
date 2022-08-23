@@ -283,7 +283,6 @@ function disableBirthdayFeed() {
  * Checks to see if the country is the United States. if it is: returns true
  * otherwise clears state field and returns false.
  *
- * @param boolan - USA is selected for countries
  * @return boolean - is the USA
  */
 function isUSA() {
@@ -354,7 +353,7 @@ async function updateBoxes() {
  * Checks whether the current user role has admin permissions, used specifically
  * to prevent the manager from changing their own role on the Employee tab.
  *
- * @return - boolean: true if the user role is admin
+ * @return boolean - true if the user role is admin
  */
 function userhasAdminPermissions() {
   return this.getRole() === 'admin' || this.getRole() === 'manager';
@@ -394,8 +393,7 @@ function validateFields() {
 } // validateFields
 
 /**
- * Adds a template data block for phone input
- * field
+ * Adds a template data block for phone input field.
  */
 function addPhoneInput() {
   this.phoneNumbers.push({
@@ -415,7 +413,9 @@ function sortPhoneNumbers() {
 } // sortPhoneNumbers
 
 /**
- * Removes a phone input at given index
+ * Removes a phone input at given index.
+ *
+ * @param index - the array index of the phone number to delete
  */
 function deletePhoneInput(index) {
   this.phoneNumbers.splice(index, 1);
@@ -423,6 +423,7 @@ function deletePhoneInput(index) {
 
 /**
  * Changes the visibility of the given number.
+ *
  * @param index - the index of the number to change
  */
 function changeNumberVisibility(index) {

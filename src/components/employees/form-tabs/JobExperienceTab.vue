@@ -356,7 +356,7 @@ function deleteCompany(index) {
 
 /**
  * Deletes a single position. Will delete the entire company entry if there are no positions
- * remaining
+ * remaining.
  *
  * @param compIndex - index of the company form
  * @param posIndex - index of the position form
@@ -399,7 +399,7 @@ function formatRange(range) {
 } // formatRange
 
 /**
- * Checks if the current company has any positions without an end date
+ * Checks if the current company has any positions without an end date.
  *
  * @param index The index of the company in the editedJobExperienceInfo.companies
  * @return boolean - whether or not the positions for that company have all their end dates filled

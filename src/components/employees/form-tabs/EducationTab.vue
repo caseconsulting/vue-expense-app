@@ -1,4 +1,3 @@
-Education
 <template>
   <div>
     <!-- Loop Education -->
@@ -144,7 +143,7 @@ function addSchool(type) {
 } // addSchool
 
 /**
- * Deletes a School
+ * Deletes a School.
  *
  * @param index - array index of education to delete
  */
@@ -154,6 +153,8 @@ function deleteEducation(index) {
 
 /**
  * Generate a random hex value as the ID for the education.
+ *
+ * @return string - A random ID for educations
  */
 function getRandId() {
   return ((Math.random() * 0xffffff) << 0).toString(16).padStart(6, '0');
@@ -166,7 +167,7 @@ function getRandId() {
 // |--------------------------------------------------|
 
 /**
- * watcher for validating - validates fields
+ * watcher for validating - validates fields.
  *
  * @param val - val prop that needs to exist before validating
  */

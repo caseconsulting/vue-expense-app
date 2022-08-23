@@ -189,7 +189,7 @@ function populateDropDowns() {
 
 /**
  * Retrieves list of skills to display a dropdown
- * related to what the user just typed in
+ * related to what the user just typed in.
  */
 async function updateTechDropDown() {
   let query = event.target.value;
@@ -227,7 +227,7 @@ function validateFields() {
 // |--------------------------------------------------|
 
 /**
- * watcher for validating - validates fields
+ * watcher for validating - validates fields.
  *
  * @param val - val prop that needs to exist before validating
  */
@@ -276,11 +276,6 @@ export default {
 };
 </script>
 <style>
-.errorBox {
-  color: red !important;
-  border: 2px solid red !important;
-}
-
 .emsi {
   font-size: small;
 }

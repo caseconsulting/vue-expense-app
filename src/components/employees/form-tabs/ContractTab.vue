@@ -269,7 +269,7 @@ function deleteProject(contractIndex, projectIndex) {
 } // deleteProject
 
 /**
- * Checks if the current contract has any projects without an end date
+ * Checks if the current contract has any projects without an end date.
  *
  * @param index The index of the contract in this.editedContracts
  * @return boolean - whether or not the projects for that contract have all their end dates filled
@@ -285,6 +285,7 @@ function hasEndDatesFilled(index) {
 
 /**
  * Parse the date after losing focus.
+ *
  * @return String - The date in YYYY-MM-DD format
  */
 function parseEventDate() {
@@ -338,7 +339,7 @@ function validateFields() {
 // |--------------------------------------------------|
 
 /**
- * watcher for validating - validates fields
+ * watcher for validating - validates fields.
  *
  * @param val - val prop that needs to exist before validating
  */

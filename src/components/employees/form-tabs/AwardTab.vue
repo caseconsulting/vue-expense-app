@@ -122,6 +122,8 @@ function addAward() {
 
 /**
  * Delete an award.
+ *
+ * @param index - The index of the award to delete
  */
 function deleteAward(index) {
   this.editedAwards.splice(index, 1);
@@ -157,7 +159,7 @@ function validateFields() {
 // |--------------------------------------------------|
 
 /**
- * watcher for validating - checks val
+ * watcher for validating - checks val.
  *
  * @param val - value that needs to exist
  */

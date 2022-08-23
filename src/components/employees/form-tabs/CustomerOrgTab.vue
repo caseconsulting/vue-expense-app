@@ -144,7 +144,7 @@ function validateFields() {
 // |--------------------------------------------------|
 
 /**
- * watcher for validating - validates fields
+ * watcher for validating - validates fields.
  *
  * @param val - val prop that needs to exist before validating
  */

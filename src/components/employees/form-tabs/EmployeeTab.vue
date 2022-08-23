@@ -346,7 +346,7 @@ const regex = /^[a-zA-Z]+$/;
 // |--------------------------------------------------|
 
 /**
- * Turn off listeners
+ * Turn off listeners.
  */
 function beforeDestroy() {
   window.EventBus.$off('cancel-decline-self-identify');
@@ -434,6 +434,7 @@ async function created() {
  * Determines of a user is an admin or manager and
  * if they should be allowed to edit the eeo form.
  *
+ * @return boolean - True if an admin/manager can edit an EEO
  */
 function adminCanEditEeo() {
   if (this.thisIsMyProfile()) {
@@ -448,7 +449,7 @@ function adminCanEditEeo() {
 } //adminCanEditEeo
 
 /**
- * Attaches email username to Case domain name
+ * Attaches email username to Case domain name.
  */
 function combineEmailUsernameAndDomain() {
   this.editedEmployee.email = this.emailUsername + caseEmailDomain;
@@ -506,9 +507,9 @@ function thisIsMyProfile() {
 } //thisIsMyProfile
 
 /**
- * Checks whether the current user role is manager
+ * Checks whether the current user role is manager.
  *
- * @return - boolean: true if the user role is a manager
+ * @return boolean - true if the user role is a manager
  */
 function userIsManager() {
   return this.getRole() === 'manager';
@@ -564,14 +565,14 @@ function duplicateEmployeeNum() {
 // |--------------------------------------------------|
 
 /**
- * watcher for model.id - update the edited employee with the new model
+ * watcher for model.id - update the edited employee with the new model.
  */
 function watchModelID() {
   this.editedEmployee = _.cloneDeep(this.model);
 } // watchModelID
 
 /**
- * watcher for editedEmployee.employeeRole - format role
+ * watcher for editedEmployee.employeeRole - format role.
  */
 function watchEditedEmployeeEmployeeRole() {
   if (this.editedEmployee.employeeRole != 'User') {
@@ -580,7 +581,7 @@ function watchEditedEmployeeEmployeeRole() {
 } // watchEditedEmployeeEmployeeRole
 
 /**
- * watcher for editedEmployee.deptDate - format date on change
+ * watcher for editedEmployee.deptDate - format date on change.
  */
 function watchEditedEmployeeDeptDate() {
   this.deptDateFormatted = formatDate(this.editedEmployee.deptDate) || this.deptDateFormatted;
@@ -591,7 +592,7 @@ function watchEditedEmployeeDeptDate() {
 } // watchEditedEmployeeDeptDate
 
 /**
- * watcher for editedEmployee.hireDate - format date on change
+ * watcher for editedEmployee.hireDate - format date on change.
  */
 async function watchEditedEmployeeHireDate() {
   this.hasExpenses = this.editedEmployee.id
@@ -605,7 +606,7 @@ async function watchEditedEmployeeHireDate() {
 } // watchEditedEmployeeHireDate
 
 /**
- * watcher for editedEmployee.employeeNumber - determines disable on resume button
+ * watcher for editedEmployee.employeeNumber - determines disable on resume button.
  */
 function watchEditedEmployeeEmployeeNumber() {
   let empNum = this.editedEmployee.employeeNumber;
@@ -618,7 +619,7 @@ function watchEditedEmployeeEmployeeNumber() {
 } // watchEditedEmployeeEmployeeNumber
 
 /**
- * watcher for statusRadio - sets the status and edited employee work status
+ * watcher for statusRadio - sets the status and edited employee work status.
  */
 function watchStatusRadio() {
   if (this.statusRadio == 'full') {
@@ -637,7 +638,7 @@ function watchStatusRadio() {
 } // watchStatusRadio
 
 /**
- * watcher for status - sets workStatus for the edited employee
+ * watcher for status - sets workStatus for the edited employee.
  */
 function watchStatus() {
   if (this.status) {
@@ -648,14 +649,14 @@ function watchStatus() {
 } // watchStatus
 
 /**
- * watcher for mifiStatus sets the editedEmployee when mifiStatus changes
+ * watcher for mifiStatus sets the editedEmployee when mifiStatus changes.
  */
 function watchMifiStatus() {
   this.editedEmployee.mifiStatus = this.mifiStatus;
 } // watchMifiStatus
 
 /**
- * watcher for validating - validates fields
+ * watcher for validating - validates fields.
  *
  * @param val - val prop that needs to exist before validating
  */
@@ -667,8 +668,7 @@ function watchValidating(val) {
 } // watchValidating
 
 /**
- * watcher for activating confirmation modal
- *
+ * watcher for activating confirmation modal.
  */
 function watchEeoDeclineSelfIdentify() {
   if (this.editedEmployee.eeoDeclineSelfIdentify) {
@@ -681,8 +681,7 @@ function watchEeoDeclineSelfIdentify() {
 
 /**
  * watch for hispanic or latino selection and
- * clear the v-model for race or ethnicity if "Hispanic or Latino" is selected
- *
+ * clear the v-model for race or ethnicity if "Hispanic or Latino" is selected.
  */
 function watchEeoHispanicOrLatino() {
   if (!this.isEmpty(this.editedEmployee.eeoHispanicOrLatino)) {
