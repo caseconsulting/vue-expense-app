@@ -106,7 +106,7 @@ function onPageChange() {
 } //onPageChange
 
 /**
- * Sorts technology entries alphabetically by name
+ * Sorts technology entries alphabetically by name.
  */
 function sortByName() {
   const iteratees = (obj) => obj.name;
@@ -116,7 +116,7 @@ function sortByName() {
 } //sortByName
 
 /**
- * Sorts technology so that the current entries are on top
+ * Sorts technology so that the current entries are on top.
  */
 function sortByCurrent() {
   this.sortedTech.sort((a, b) => {
@@ -137,7 +137,7 @@ function sortByCurrent() {
 } //sortByCurrent
 
 /**
- * Sorts technology by years of experience in descending order
+ * Sorts technology by years of experience in descending order.
  */
 function sortByDate() {
   const iteratees = (obj) => -obj.years;
@@ -154,7 +154,7 @@ function sortByDate() {
 // |--------------------------------------------------|
 
 /**
- * watcher for model - chooses what to sort by
+ * watcher for model - chooses what to sort by.
  *
  * @param val - model
  */
@@ -179,7 +179,7 @@ function watchModel(val) {
 // |--------------------------------------------------|
 
 /**
- * filter that checks if value exists for current
+ * filter that checks if value exists for current.
  *
  * @param value - value to check
  * @return - either 'yes' if it exists or 'no' otherwise

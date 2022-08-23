@@ -166,7 +166,7 @@ function onPageChange() {
 } //onPageChange
 
 /**
- * The function updates the company that is shown to the user based on filters
+ * The function updates the company that is shown to the user based on filters.
  *
  * @param query - the query used to decide which companies to show
  */

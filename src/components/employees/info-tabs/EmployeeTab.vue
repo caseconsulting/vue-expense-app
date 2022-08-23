@@ -105,7 +105,7 @@ function fullName() {
 } // fullName
 
 /**
- * Gets all of the current projects the user has
+ * Gets all of the current projects the user has.
  *
  * @return array - the contracts
  */
@@ -142,7 +142,7 @@ function getCurrentProjects() {
 // |--------------------------------------------------|
 
 /**
- * Returns Full Time, Part Time, or Inactive based on the work status
+ * Returns Full Time, Part Time, or Inactive based on the work status.
  *
  * @param workStatus - the workstatus number
  * @return string - readable work status of employee
@@ -166,7 +166,7 @@ function getWorkStatus(workStatus) {
 // |--------------------------------------------------|
 
 /**
- * startCase filter - uses lodash startCase as filter - capitalizes every word
+ * startCase filter - uses lodash startCase as filter - capitalizes every word.
  *
  * @param value - value to capitalize
  * @return string - capitalized string

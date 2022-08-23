@@ -119,14 +119,6 @@ function checkEmptyPersonalInfo() {
   } else {
     this.childrenVisible = false;
   }
-  // Previous Code:
-  // let nodeArr = [];
-  // // convert to array because childNodes is an object that cannot use .every()
-  // document.querySelector('#personalTab').childNodes.forEach((node) => {
-  //   nodeArr.push(node);
-  // });
-  // // there are visible elements if not every child node is a comment
-  // this.childrenVisible = !nodeArr.every((node) => node.nodeType === Node.COMMENT_NODE);
 } // checkEmptyPersonalInfo
 
 /**
@@ -179,16 +171,16 @@ function getPlaceOfBirth() {
 
 /**
  * Checks whether the current user role is admin, used specifically
- * to prevent the manager from changing their own role on the Employee tab
+ * to prevent the manager from changing their own role on the Employee tab.
  *
- * @return - boolean: true if the user role is admin
+ * @return boolean - true if the user role is admin
  */
 function userIsAdmin() {
   return this.getRole() === 'admin';
 } //userIsAdmin
 
 /**
- * Checks if the profile accessed is the signed-in user's profile
+ * Checks if the profile accessed is the signed-in user's profile.
  *
  * @return boolean - true if the profile is the user's profile
  */
@@ -252,17 +244,13 @@ function confetti() {
 } // confetti
 
 /**
- * Returns true if it is the user's birthday today
+ * Returns true if it is the user's birthday today.
+ *
+ * @return boolean - true if it is a user's birthday
  */
 function isBday() {
   return moment().format('MM-DD') != moment(this.model.birthday).format('MM-DD');
 } // isBday
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                      EXPORT                      |
-// |                                                  |
-// |--------------------------------------------------|
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -279,6 +267,12 @@ function isBday() {
 function birthdayFeedResponse(value) {
   return value ? 'Yes' : 'No';
 } // birthdayFeedResponse
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      EXPORT                      |
+// |                                                  |
+// |--------------------------------------------------|
 
 export default {
   computed: {

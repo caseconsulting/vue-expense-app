@@ -102,7 +102,7 @@ function onPageChange() {
 } // onPageChange
 
 /**
- * Converts the contracts' projects' dates to number of years on the contract
+ * Converts the contracts' projects' dates to number of years on the contract.
  *
  * @param contract the contract to get the info from
  * @return number - number of years on the contract
@@ -118,18 +118,20 @@ function getContractLengthInYears(contract) {
 } // getContractLengthInYears
 
 /**
- * Gets the earliest date of a contract by looking at its projects
+ * Gets the earliest date of a contract by looking at its projects.
  *
+ * @param contract - The contract's earliest project date
  * @return the earliest date
  */
 function getContractEarliestDate(contract) {
   return _.orderBy(contract.projects, ['startDate'])[0].startDate;
-}
+} // getContractEarliestDate
 
 /**
- * returns a readable format of the date/time
+ * returns a readable format of the date/time.
  *
  * @param time - the date/time
+ * @return string - A readable format of the time
  */
 function dateReadable(time) {
   let read = '';
@@ -161,9 +163,10 @@ function dateReadable(time) {
 } // dateReadable
 
 /**
- * return a readable project length instead of some other format
+ * return a readable project length instead of some other format.
  *
  * @param project - the project
+ * @return string - a readable format of the project length
  */
 function getProjectLengthInYearsReadable(project) {
   let length = getProjectLengthInYears(project);
@@ -171,7 +174,7 @@ function getProjectLengthInYearsReadable(project) {
 } // getProjectLengthInYearsReadable
 
 /**
- * Converts the intervals to length of time in years
+ * Converts the intervals to length of time in years.
  *
  * @param project the project to convert
  * @return number - time in years
