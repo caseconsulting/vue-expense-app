@@ -141,7 +141,7 @@ function userIsEmployee() {
 } // userIsEmployee
 
 /**
- * This is used to select the correct tab on mobile devices
+ * This is used to select the correct tab on mobile devices.
  */
 function selectDropDown(name) {
   this.infoTab = name;
@@ -169,7 +169,7 @@ async function created() {
 // |--------------------------------------------------|
 
 /**
- * computed boolean to decide whether or not to use dropdown
+ * computed boolean to decide whether or not to use dropdown.
  *
  * @return boolean - returns true for small screens
  */
@@ -183,7 +183,7 @@ function useDropDown() {
 } // useDropDown
 
 /**
- * computed value for selected info tab
+ * computed value for selected info tab.
  */
 function parsedInfoTab() {
   let parseTab = !this.infoTab ? 'Select Info' : this.infoTab;
@@ -204,7 +204,7 @@ function parsedInfoTab() {
 // |--------------------------------------------------|
 
 /**
- * watcher for infoTab - track and emit tab when switching
+ * watcher for infoTab - track and emit tab when switching.
  *
  * @param val - tab being tracked
  */

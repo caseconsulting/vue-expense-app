@@ -457,23 +457,6 @@ async function cancelB() {
  * Removes unnecessary attributes from the employee data.
  */
 function cleanUpData() {
-  // education
-  // if (!_.isEmpty(this.model.education)) {
-  //   this.model.education = _.map(this.model.education, (edu) => {
-  //     // remove date picker menu booleans
-  //     delete edu.showEducationMenu;
-  //     // delete null attributes
-  //     _.forEach(edu, (value, key) => {
-  //       if (_.isNil(value)) {
-  //         delete edu[key];
-  //       }
-  //     });
-  //     // return updated edu
-  //     return edu;
-  //   });
-  // } else {
-  //   this.model.education = null;
-  // }
   // certifications
   if (!_.isEmpty(this.model.certifications)) {
     this.model.certifications = _.map(this.model.certifications, (certification) => {
@@ -670,7 +653,7 @@ async function confirm() {
   //validates forms
   if (this.$refs.form !== undefined && this.$refs.form.validate()) {
     //checks to see if there are any tabs with errors
-    let hasErrors = await this.hasTabError();
+    let hasErrors = this.hasTabError();
     if (!hasErrors) {
       return false;
     } else {
@@ -765,7 +748,146 @@ function addErrorTab(name, errors) {
 } // addErrorTab
 
 /**
- * opens up the resume parser
+ * Changes the format of the string to title case
+ *
+ * @param str - the string to be converted
+ * @return the title case formatted string
+ */
+function titleCase(str) {
+  str = str.split(' ');
+  for (var i = 0; i < str.length; i++) {
+    str[i] = str[i].charAt(0).toUpperCase() + str[i].slice(1);
+  }
+  return str.join(' ');
+} //titleCase
+
+/**
+ * Converts all the autocomplete fields to title case capitalization
+ */
+async function convertAutocompleteToTitlecase() {
+  //Convert autocomplete certification field to title case
+  if (this.model.certifications !== null) {
+    this.model.certifications.forEach((currCert) => {
+      currCert.name = this.titleCase(currCert.name);
+    });
+  }
+  //Convert autocomplete award field to title case
+  if (this.model.awards !== null) {
+    this.model.awards.forEach((currAward) => {
+      currAward.name = this.titleCase(currAward.name);
+    });
+  }
+  //Convert autocomplete language field to title case
+  if (this.model.languages !== null) {
+    this.model.languages.forEach((currLang) => {
+      currLang.name = this.titleCase(currLang.name);
+    });
+  }
+} //convertAutocompleteToTitlecase
+
+/**
+ * Sets the form data based on the given tab.
+ *
+ * @param tab - the tab the data came from
+ * @param data - the data to be saved
+ */
+function setFormData(tab, data) {
+  if (tab == 'employee') {
+    //sets all employee info to data returned from employee tab
+    this.$set(this.model, 'firstName', data.firstName);
+    this.$set(this.model, 'middleName', data.middleName);
+    this.$set(this.model, 'noMiddleName', data.noMiddleName);
+    this.$set(this.model, 'lastName', data.lastName);
+    this.$set(this.model, 'nickname', data.nickname);
+    this.$set(this.model, 'employeeNumber', data.employeeNumber);
+    this.$set(this.model, 'email', data.email);
+    this.$set(this.model, 'prime', data.prime);
+    this.$set(this.model, 'contract', data.contract);
+    this.$set(this.model, 'jobRole', data.jobRole);
+    this.$set(this.model, 'agencyIdentificationNumber', data.agencyIdentificationNumber);
+    this.$set(this.model, 'employeeRole', data.employeeRole);
+    this.$set(this.model, 'hireDate', data.hireDate);
+    this.$set(this.model, 'workStatus', data.workStatus);
+    this.$set(this.model, 'deptDate', data.deptDate);
+    this.$set(this.model, 'mifiStatus', data.mifiStatus);
+    this.$set(this.model, 'eeoDeclineSelfIdentify', data.eeoDeclineSelfIdentify);
+    this.$set(this.model, 'eeoGender', data.eeoGender);
+    this.$set(this.model, 'eeoHispanicOrLatino', data.eeoHispanicOrLatino);
+    this.$set(this.model, 'eeoRaceOrEthnicity', data.eeoRaceOrEthnicity);
+    this.$set(this.model, 'eeoJobCategory', data.eeoJobCategory);
+    if (this.hasAdminPermissions()) {
+      this.$set(this.model, 'eeoAdminHasFilledOutEeoForm', true);
+    } else {
+      this.$set(this.model, 'eeoAdminHasFilledOutEeoForm', false);
+    }
+  } else if (tab == 'personal') {
+    // filter github and twitter links
+    if (data.github && data.github.indexOf('/') != -1) {
+      // remove trailing slash
+      if (data.github.slice(-1) === '/') data.github = data.github.slice(0, -1);
+      // extract username
+      data.github = data.github.substring(data.github.lastIndexOf('/') + 1, data.github.length);
+    }
+    if (data.twitter && data.twitter.indexOf('/') != -1) {
+      // remove trailing slash
+      if (data.twitter.slice(-1) === '/') data.twitter = data.twitter.slice(0, -1);
+      // extract username
+      data.twitter = data.twitter.substring(data.twitter.lastIndexOf('/') + 1, data.twitter.length);
+    }
+
+    //sets all personal info to data returned from personal tab
+    this.$set(this.model, 'github', data.github);
+    this.$set(this.model, 'twitter', data.twitter);
+    this.$set(this.model, 'linkedIn', data.linkedIn);
+    this.$set(this.model, 'privatePhoneNumbers', data.privatePhoneNumbers);
+    this.$set(this.model, 'publicPhoneNumbers', data.publicPhoneNumbers);
+    this.$set(this.model, 'birthday', data.birthday);
+    this.$set(this.model, 'birthdayFeed', data.birthdayFeed);
+    this.$set(this.model, 'city', data.city);
+    this.$set(this.model, 'country', data.country);
+    this.$set(this.model, 'st', data.st);
+    this.$set(this.model, 'currentCity', data.currentCity);
+    this.$set(this.model, 'currentState', data.currentState);
+    this.$set(this.model, 'currentStreet', data.currentStreet);
+    this.$set(this.model, 'currentZIP', data.currentZIP);
+  } else if (tab == 'education') {
+    this.$set(this.model, 'education', data); //sets education to data returned from education tab
+  } else if (tab == 'jobExperience') {
+    //sets all jobExperience info to data returned from job experience tab
+    this.$set(this.model, 'icTimeFrames', data.icTimeFrames);
+    this.$set(this.model, 'companies', data.companies);
+  } else if (tab == 'certifications') {
+    // update cert expirationWasSeen if needed
+    // this presumes that they cannot be rearranged
+    for (let i = 0; i < data.length; i++) {
+      for (let j = 0; j < this.model.certifications.length; j++) {
+        if (
+          data[i].name === this.model.certifications[j].name &&
+          data[i].dateSubmitted === this.model.certifications[j].dateSubmitted &&
+          data[i].expirationDate !== this.model.certifications[j].expirationDate
+        ) {
+          data[i].expirationWasSeen = false;
+        }
+      }
+    }
+    this.$set(this.model, 'certifications', data); //sets certifications to data returned from certifications tab
+  } else if (tab == 'awards') {
+    this.$set(this.model, 'awards', data); //sets awards to data returned from awards tab
+  } else if (tab == 'technologies') {
+    this.$set(this.model, 'technologies', data); //sets technologies to data returned from technologies tab
+  } else if (tab == 'customerOrgExp') {
+    this.$set(this.model, 'customerOrgExp', data); //sets degrees to data returned from education tab
+  } else if (tab == 'contracts') {
+    this.$set(this.model, 'contracts', data); //sets contracts to data returned from contracts tab
+  } else if (tab == 'clearance') {
+    this.$set(this.model, 'clearances', data); //sets clearances to data returned from clearance tab
+  } else if (tab == 'languages') {
+    this.$set(this.model, 'languages', data); //sets clearances to data returned from clearance tab
+  }
+} //setFormData
+
+/**
+ * opens up the resume parser.
  */
 async function openUpload() {
   let employees = this.$store.getters.employees;
@@ -790,7 +912,7 @@ async function openUpload() {
 // |--------------------------------------------------|
 
 /**
- * created lifecycle hook - create all the listeners and set up employee info
+ * created lifecycle hook - create all the listeners and set up employee info.
  */
 async function created() {
   window.EventBus.$on('disableUpload', (result, employeeNumber) => {
@@ -812,11 +934,6 @@ async function created() {
     cancelB();
   });
   // Starts listener to see if the user cancelled to submit the form
-  // window.EventBus.$on('canceled-cancel', () => {
-  //   this.errorTabNames = {};
-  //   this.confirmingError = false;
-  //   this.confirmingValid = false;
-  // });
   window.EventBus.$on('canceled-cancel', () => {
     this.confirmingValid = false;
   });
@@ -927,164 +1044,6 @@ function beforeDestroy() {
   window.EventBus.$off('personalStatus');
   window.EventBus.$off('technologiesStatus');
 } // beforeDestroy
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                    METHODS                       |
-// |                                                  |
-// |--------------------------------------------------|
-
-/**
- * Sets the form data based on the given tab.
- *
- * @param tab - the tab the data came from
- * @param data - the data to be saved
- */
-function setFormData(tab, data) {
-  if (tab == 'employee') {
-    //sets all employee info to data returned from employee tab
-    this.$set(this.model, 'firstName', data.firstName);
-    this.$set(this.model, 'middleName', data.middleName);
-    this.$set(this.model, 'noMiddleName', data.noMiddleName);
-    this.$set(this.model, 'lastName', data.lastName);
-    this.$set(this.model, 'nickname', data.nickname);
-    this.$set(this.model, 'employeeNumber', data.employeeNumber);
-    this.$set(this.model, 'email', data.email);
-    this.$set(this.model, 'prime', data.prime);
-    this.$set(this.model, 'contract', data.contract);
-    this.$set(this.model, 'jobRole', data.jobRole);
-    this.$set(this.model, 'agencyIdentificationNumber', data.agencyIdentificationNumber);
-    this.$set(this.model, 'employeeRole', data.employeeRole);
-    this.$set(this.model, 'hireDate', data.hireDate);
-    this.$set(this.model, 'workStatus', data.workStatus);
-    this.$set(this.model, 'deptDate', data.deptDate);
-    this.$set(this.model, 'mifiStatus', data.mifiStatus);
-    this.$set(this.model, 'eeoDeclineSelfIdentify', data.eeoDeclineSelfIdentify);
-    this.$set(this.model, 'eeoGender', data.eeoGender);
-    this.$set(this.model, 'eeoHispanicOrLatino', data.eeoHispanicOrLatino);
-    this.$set(this.model, 'eeoRaceOrEthnicity', data.eeoRaceOrEthnicity);
-    this.$set(this.model, 'eeoJobCategory', data.eeoJobCategory);
-    if (this.hasAdminPermissions()) {
-      this.$set(this.model, 'eeoAdminHasFilledOutEeoForm', true);
-    } else {
-      this.$set(this.model, 'eeoAdminHasFilledOutEeoForm', false);
-    }
-  } else if (tab == 'personal') {
-    // filter github and twitter links
-    if (data.github && data.github.indexOf('/') != -1) {
-      // remove trailing slash
-      if (data.github.slice(-1) === '/') data.github = data.github.slice(0, -1);
-      // extract username
-      data.github = data.github.substring(data.github.lastIndexOf('/') + 1, data.github.length);
-    }
-    if (data.twitter && data.twitter.indexOf('/') != -1) {
-      // remove trailing slash
-      if (data.twitter.slice(-1) === '/') data.twitter = data.twitter.slice(0, -1);
-      // extract username
-      data.twitter = data.twitter.substring(data.twitter.lastIndexOf('/') + 1, data.twitter.length);
-    }
-
-    //sets all personal info to data returned from personal tab
-    this.$set(this.model, 'github', data.github);
-    this.$set(this.model, 'twitter', data.twitter);
-    this.$set(this.model, 'linkedIn', data.linkedIn);
-    this.$set(this.model, 'privatePhoneNumbers', data.privatePhoneNumbers);
-    this.$set(this.model, 'publicPhoneNumbers', data.publicPhoneNumbers);
-    this.$set(this.model, 'birthday', data.birthday);
-    this.$set(this.model, 'birthdayFeed', data.birthdayFeed);
-    this.$set(this.model, 'city', data.city);
-    this.$set(this.model, 'country', data.country);
-    this.$set(this.model, 'st', data.st);
-    this.$set(this.model, 'currentCity', data.currentCity);
-    this.$set(this.model, 'currentState', data.currentState);
-    this.$set(this.model, 'currentStreet', data.currentStreet);
-    this.$set(this.model, 'currentZIP', data.currentZIP);
-  } else if (tab == 'education') {
-    this.$set(this.model, 'education', data); //sets education to data returned from education tab
-  } else if (tab == 'jobExperience') {
-    //sets all jobExperience info to data returned from job experience tab
-    this.$set(this.model, 'icTimeFrames', data.icTimeFrames);
-    this.$set(this.model, 'companies', data.companies);
-  } else if (tab == 'certifications') {
-    // update cert expirationWasSeen if needed
-    // this presumes that they cannot be rearranged
-    for (let i = 0; i < data.length; i++) {
-      for (let j = 0; j < this.model.certifications.length; j++) {
-        if (
-          data[i].name === this.model.certifications[j].name &&
-          data[i].dateSubmitted === this.model.certifications[j].dateSubmitted &&
-          data[i].expirationDate !== this.model.certifications[j].expirationDate
-        ) {
-          data[i].expirationWasSeen = false;
-        }
-      }
-    }
-    this.$set(this.model, 'certifications', data); //sets certifications to data returned from certifications tab
-  } else if (tab == 'awards') {
-    this.$set(this.model, 'awards', data); //sets awards to data returned from awards tab
-  } else if (tab == 'technologies') {
-    this.$set(this.model, 'technologies', data); //sets technologies to data returned from technologies tab
-  } else if (tab == 'customerOrgExp') {
-    this.$set(this.model, 'customerOrgExp', data); //sets degrees to data returned from education tab
-  } else if (tab == 'contracts') {
-    this.$set(this.model, 'contracts', data); //sets contracts to data returned from contracts tab
-  } else if (tab == 'clearance') {
-    this.$set(this.model, 'clearances', data); //sets clearances to data returned from clearance tab
-  } else if (tab == 'languages') {
-    this.$set(this.model, 'languages', data); //sets clearances to data returned from clearance tab
-  }
-} //setFormData
-
-/**
- * Checks if the profile accessed is the signed-in user's profile,
- * specifically used to prevent a manager from editing their own role
- *
- * @return boolean - true if the profile is the user's profile
- */
-function thisIsMyProfile() {
-  if (this.$route.params.id === this.$store.getters.employeeNumber.toString()) {
-    return true;
-  }
-  return false;
-} //thisIsMyProfile
-
-/**
- * Changes the format of the string to title case
- *
- * @param str - the string to be converted
- * @return the title case formatted string
- */
-function titleCase(str) {
-  str = str.split(' ');
-  for (var i = 0; i < str.length; i++) {
-    str[i] = str[i].charAt(0).toUpperCase() + str[i].slice(1);
-  }
-  return str.join(' ');
-} //titleCase
-
-/**
- * Converts all the autocomplete fields to title case capitalization
- */
-async function convertAutocompleteToTitlecase() {
-  //Convert autocomplete certification field to title case
-  if (this.model.certifications !== null) {
-    this.model.certifications.forEach((currCert) => {
-      currCert.name = this.titleCase(currCert.name);
-    });
-  }
-  //Convert autocomplete award field to title case
-  if (this.model.awards !== null) {
-    this.model.awards.forEach((currAward) => {
-      currAward.name = this.titleCase(currAward.name);
-    });
-  }
-  //Convert autocomplete language field to title case
-  if (this.model.languages !== null) {
-    this.model.languages.forEach((currLang) => {
-      currLang.name = this.titleCase(currLang.name);
-    });
-  }
-} //convertAutocompleteToTitlecase
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -1290,7 +1249,6 @@ export default {
     openUpload,
     setFormData,
     submit,
-    thisIsMyProfile,
     titleCase,
     resumeReceived,
     selectDropDown,
