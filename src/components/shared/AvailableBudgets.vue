@@ -35,9 +35,6 @@
             <router-link v-if="this.fiscalDateView" to="/myExpenses" class="no-decoration">
               <button class="home_buttons" @click="selectReceipt = true">Create an Expense</button>
             </router-link>
-            <!-- Pop-up modal to upload receipt from home page
-            <button class="home_buttons" @click="selectReceipt = true">Create an Expense</button>
-            <receipt-modal :activate="selectReceipt"></receipt-modal> -->
           </div>
         </div>
       </v-card-text>
@@ -212,12 +209,21 @@ function selectBudget(budget) {
  * @return boolean - current signed in user has the same id as the employee prop
  */
 function isUser() {
-  if (this.employee && this.currentUser && this.employee.id == this.currentUser.id) {
-    return true;
-  } else {
-    return false;
-  }
+  return this.employee && this.currentUser && this.employee.id == this.currentUser.id;
 } // isUser
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     WATCHERS                     |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * When the accessible budgets change refresh to employee to show changes.
+ */
+async function watchAccessibleBudgets() {
+  await this.refreshEmployee();
+} // watchAccessibleBudgets
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -228,7 +234,6 @@ function isUser() {
 export default {
   components: {
     AvailableBudgetSummary
-    // ReceiptModal
   },
   created,
   beforeDestroy,
@@ -262,9 +267,7 @@ export default {
   },
   props: ['employee', 'expenses', 'expenseTypes', 'accessibleBudgets', 'fiscalDateView', 'employeeDataLoading'],
   watch: {
-    accessibleBudgets: async function () {
-      await this.refreshEmployee();
-    }
+    accessibleBudgets: watchAccessibleBudgets
   }
 };
 </script>

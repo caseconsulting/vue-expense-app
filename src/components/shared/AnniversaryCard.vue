@@ -136,17 +136,6 @@ function getFiscalYearView() {
 // |--------------------------------------------------|
 
 /**
- * Increment the actual time by a second.
- */
-function addOneSecondToActualTimeEverySecond() {
-  var component = this;
-  component.actualTime = moment().format('X');
-  setTimeout(function () {
-    component.addOneSecondToActualTimeEverySecond();
-  }, 1000);
-} // addOneSecondToActualTimeEverySecond
-
-/**
  * load the data and api call to get budgets
  */
 async function loadData() {
@@ -187,7 +176,6 @@ function refreshBudgetYears() {
  * created lifecycle hook
  */
 async function created() {
-  this.addOneSecondToActualTimeEverySecond();
   await this.loadData();
 
   window.EventBus.$on('selected-budget-year', (data) => {
@@ -234,7 +222,6 @@ export default {
   created,
   beforeDestroy,
   methods: {
-    addOneSecondToActualTimeEverySecond,
     getCurrentBudgetYear,
     loadData,
     refreshBudgetYears
