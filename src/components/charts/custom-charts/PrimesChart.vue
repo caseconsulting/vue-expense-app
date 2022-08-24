@@ -16,7 +16,7 @@ import { storeIsPopulated } from '@/utils/utils';
 // |--------------------------------------------------|
 
 /**
- * mounted lifecycle hook
+ * Mounted lifecycle hook.
  */
 async function mounted() {
   if (this.storeIsPopulated) {
@@ -39,7 +39,7 @@ function beforeDestroy() {
 } // beforeDestroy
 
 /**
- * Gets all of the current projects the user has
+ * Gets all of the current projects the user has.
  *
  * @param employee - the employee that we are getting the current projects for
  * @return array - the current contracts
@@ -96,7 +96,7 @@ function fetchData() {
     }
   });
 
-  //We now sort the entries
+  // We now sort the entries
   let primePairs = Object.entries(this.primes);
   primePairs = primePairs.sort((a, b) => {
     return b[1] - a[1];
@@ -106,13 +106,13 @@ function fetchData() {
     this.labels.push(primePairs[i][0]);
     this.values.push(primePairs[i][1]);
   }
-} //fetchData
+} // fetchData
 
 /**
  * Sets the chart formatting and options data.
  */
 function fillData() {
-  //We cycle through these colors to get the bar colors
+  // We cycle through these colors to get the bar colors
   let colors = [
     'rgba(254, 147, 140, 1)',
     'rgba(230, 184, 156, 1)',
@@ -124,13 +124,13 @@ function fillData() {
   let backgroundColors = [];
   let borderColors = [];
 
-  //Set the background and border colors
+  // Set the background and border colors
   for (let i = 0; i < this.labels.length; i++) {
     backgroundColors[i] = colors[i % 4];
     borderColors[i] = colors[i % 4];
   }
 
-  //Set the chart data
+  // Set the chart data
   this.chartData = {
     labels: this.labels,
     datasets: [

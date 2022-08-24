@@ -64,7 +64,7 @@ function fillData() {
     labels.push(pairs[i][0]);
     values.push(pairs[i][1]);
   }
-  //We cycle through these colors to get the bar colors
+  // We cycle through these colors to get the bar colors
   let colors = [
     'rgba(255, 99, 132, 1)',
     'rgba(54, 162, 235, 1)',
@@ -81,13 +81,13 @@ function fillData() {
   let backgroundColors = [];
   let borderColors = [];
 
-  //Set the background and border colors
+  // Set the background and border colors
   for (let i = 0; i < labels.length; i++) {
     backgroundColors[i] = colors[i];
     borderColors[i] = colors[i];
   }
 
-  //Set the chart data
+  // Set the chart data
   this.chartData = {
     labels: labels,
     datasets: [
@@ -143,7 +143,7 @@ function fillData() {
   };
   this.chartKey++; // rerenders the chart
   this.dataReceived = true;
-} //fillData
+} // fillData
 
 /**
  * Increases the number of columns on the chart
@@ -158,7 +158,7 @@ function oneMoreColumn() {
   if (this.numOfColumns === this.numOfColumnsMax || this.numOfColumns === this.technologyPairs.length) {
     this.reachedMax = true;
   }
-} //oneMoreColumn
+} // oneMoreColumn
 
 /**
  * Decreases the number of columns on the chart
@@ -173,7 +173,7 @@ function oneLessColumn() {
   if (this.numOfColumns === this.numOfColumnsMin) {
     this.reachedMin = true;
   }
-} //oneLessColumn
+} // oneLessColumn
 
 /**
  * Sets num of columns to show when radio buttons are changed
@@ -189,7 +189,7 @@ function setNumOfColumns(techArray) {
     this.reachedMax = false;
     this.reachedMin = false;
   }
-} //setNumOfColumns
+} // setNumOfColumns
 
 /**
  * Sorts array of tech skills
@@ -197,7 +197,7 @@ function setNumOfColumns(techArray) {
  * @param techArray - The array of different technologies
  */
 function sortTech(techArray) {
-  //We now sort the entries
+  // We now sort the entries
   this.technologyPairs = Object.entries(techArray);
   if (this.technologyPairs.length <= this.numOfColumnsMin) {
     this.numOfColumns = this.technologyPairs.length;
@@ -211,7 +211,7 @@ function sortTech(techArray) {
   }
   // Set number of columns to display
   this.setNumOfColumns(techArray);
-} //sortTech
+} // sortTech
 
 /**
  * Parse through employee data to get technologies
@@ -219,7 +219,7 @@ function sortTech(techArray) {
  */
 function parseEmployeeData() {
   this.employees = this.$store.getters.employees;
-  //Put into dictionary where key is tech type and value is quantity
+  // Put into dictionary where key is tech type and value is quantity
   this.employees.forEach((employee) => {
     if (employee.technologies && employee.workStatus != 0) {
       employee.technologies.forEach((currTech) => {
@@ -271,7 +271,7 @@ function beforeDestroy() {
 } // beforeDestroy
 
 /**
- * mounted lifecycle hook - get items, organize them and fill data
+ * Mounted lifecycle hook - get items, organize them and fill data.
  */
 async function mounted() {
   if (this.storeIsPopulated) {
@@ -290,7 +290,7 @@ async function mounted() {
 // |--------------------------------------------------|
 
 /**
- * watcher for showCurrent - sorts tech info and then fills data
+ * Watcher for showCurrent - sorts tech info and then fills data.
  */
 function watchShowCurrent() {
   if (this.showCurrent === 'All') {

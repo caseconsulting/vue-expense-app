@@ -18,7 +18,7 @@ moment.tz.setDefault('America/New_York');
 // |--------------------------------------------------|
 
 /**
- * mounted lifecycle hook
+ * Mounted lifecycle hook.
  */
 async function mounted() {
   if (this.storeIsPopulated) {
@@ -41,7 +41,8 @@ function beforeDestroy() {
 // |--------------------------------------------------|
 
 /**
- * Puts an employee in an array based on a time interval of 2 years for each index from their hire date.
+ * Puts an employee in an array based on a time interval of
+ * 2 years for each index from their hire date.
  */
 function caseYearsData() {
   //init the caseYears array
@@ -61,7 +62,7 @@ function caseYearsData() {
       this.caseYears[Math.floor(Math.round(amOfYears) / 2)] += 1;
     }
   });
-} //caseYearsData
+} // caseYearsData
 
 /**
  * Helper function to determine how long an employee has worked from their hire date.
@@ -74,7 +75,7 @@ function calculateTimeDifference(startDate) {
 
   var end = moment();
   return end.diff(start, 'years', true); //Provides decimal value
-} //calculateTimeDifference
+} // calculateTimeDifference
 
 /**
  * Format and set data options for case years chart.
@@ -140,7 +141,8 @@ function drawCaseYearsHistGraph() {
 } // drawCaseYearsHistGraph
 
 /**
- * Finds the last index where the element is greater than 0 to ensure the chart does not show all of the labels are there is no data.
+ * Finds the last index where the element is greater than 0 to ensure the
+ * chart does not show all of the labels are there is no data.
  *
  * @return - last index that is greater than 0
  */

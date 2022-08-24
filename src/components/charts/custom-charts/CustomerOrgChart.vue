@@ -25,7 +25,7 @@ import { storeIsPopulated } from '@/utils/utils.js';
 // |--------------------------------------------------|
 
 /**
- * created lifecycle hook
+ * Created lifecycle hook
  */
 async function created() {
   if (this.storeIsPopulated) {
@@ -60,10 +60,10 @@ function fetchData() {
       _.forEach(emp.customerOrgExp, (org) => {
         let orgName = org.name;
         let orgYears = org.years;
-        //We get whether or not we want to show current or past info
+        // We get whether or not we want to show current or past info
         let orgCurrent = this.showCurrent === 'Current' ? org.current : !org.current;
 
-        //error checks if orgYears is undefined
+        // error checks if orgYears is undefined
         if (orgYears && (orgCurrent || this.showCurrent === 'All')) {
           if (allCompOrgExp[orgName]) {
             allCompOrgExp[orgName] += Math.round(Number(orgYears) * 100) / 100;
@@ -81,7 +81,7 @@ function fetchData() {
     this.quantities.push(allCompOrgExp[label]);
   });
   this.labels = labels;
-}
+} // fetchData
 
 /**
  * Sets up the chart formatting and data options.
@@ -145,7 +145,7 @@ function fillData() {
 // |--------------------------------------------------|
 
 /**
- * watcher for showCurrent - fills data
+ * Watcher for showCurrent - fills data.
  */
 function watchShowCurrent() {
   this.fetchData();

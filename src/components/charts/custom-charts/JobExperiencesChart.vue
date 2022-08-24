@@ -17,7 +17,7 @@ moment.tz.setDefault('America/New_York');
 // |--------------------------------------------------|
 
 /**
- * mounted lifecycle hook
+ * Mounted lifecycle hook.
  */
 async function mounted() {
   if (this.storeIsPopulated) {
@@ -41,7 +41,8 @@ function beforeDestroy() {
 // |--------------------------------------------------|
 
 /**
- * Finds the last index that has an element greater than 0 to prevent too many labels showing up on the chart.
+ * Finds the last index that has an element greater than 0 to prevent
+ * too many labels showing up on the chart.
  *
  * @return Number - The index greater than 0
  */
@@ -56,8 +57,10 @@ function findMaxIndex() {
 } // findMaxIndex
 
 /**
- * Extracts each employees job experience and determines how many years they have worked, including time at Case.
- * Each employees experience will be put in an array slot that is based on an increment of experience of 5 years.
+ * Extracts each employees job experience and determines how many years
+ * they have worked, including time at Case. Each employees experience
+ * will be put in an array slot that is based on an increment of experience
+ * of 5 years.
  */
 function jobExperienceData() {
   this.employees = this.$store.getters.employees;
@@ -89,7 +92,7 @@ function jobExperienceData() {
       }
     }
   });
-} //jobExperienceData
+} // jobExperienceData
 
 /**
  * Gets the time difference in years between the job start and end date.
@@ -108,7 +111,7 @@ function calculateTimeDifference(startDate, endDate) {
     end = this.stringToDate(endDate);
   }
   return end.diff(start, 'years', true); //Provides decimal value
-} //calculateTimeDifference
+} // calculateTimeDifference
 
 /**
  * Format and set data options for job experience chart.
@@ -180,7 +183,7 @@ function drawJobExpHistGraph() {
 function stringToDate(dateAsString) {
   var date = moment(dateAsString);
   return date;
-} //stringToDate
+} // stringToDate
 
 // |--------------------------------------------------|
 // |                                                  |

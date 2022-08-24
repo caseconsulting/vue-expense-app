@@ -14,7 +14,7 @@ import PieChart from '../base-charts/PieChart.vue';
 // |--------------------------------------------------|
 
 /**
- * mounted lifecycle hook
+ * Mounted lifecycle hook.
  */
 async function mounted() {
   // emit comes from HighestDegreeChart when a pie slice is clicked
@@ -31,7 +31,7 @@ async function mounted() {
 } // mounted
 
 /**
- * created lifecycle hook
+ * Created lifecycle hook
  */
 async function created() {
   await this.fetchData(null);
@@ -39,7 +39,7 @@ async function created() {
 } // created
 
 /**
- * beforeDestroy lifecycle hook
+ * Before destroy lifecycle hook.
  */
 function beforeDestroy() {
   window.EventBus.$off('majors-update');
@@ -54,6 +54,7 @@ function beforeDestroy() {
 
 /**
  * Gets all the major/school data.
+ *
  * @param majorsOrSchools The array of majors/schools for an education kind
  */
 function fetchData(majorsOrSchools) {
@@ -83,13 +84,13 @@ function fetchData(majorsOrSchools) {
       'rgba(66, 129, 164, 1)'
     ];
   } else {
-    //these presets are when an education has not been selected
+    // these presets are when an education has not been selected
     this.quantities.push(1);
     this.enabled = false;
     this.text = `Click on an Education To See the Top Majors/Schools`;
     this.colors = ['grey'];
   }
-} //fetchData
+} // fetchData
 
 /**
  * Sets the chart formatting and options data.

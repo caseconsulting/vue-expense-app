@@ -53,7 +53,7 @@ function beforeDestroy() {
 } // beforeDestroy
 
 /**
- * mounted lifecycle hook
+ * Mounted lifecycle hook.
  */
 async function mounted() {
   await this.refreshBudgets();
@@ -67,8 +67,9 @@ async function mounted() {
 // |--------------------------------------------------|
 
 /**
- * Gets and calculates employee budget data. Returns multiple lists, consisting of the budgets names, remaining budget,
- * reimbursed amount, pending amount, reimbursed overdraft amount, and pending overdraft amount.
+ * Gets and calculates employee budget data. Returns multiple lists,
+ * consisting of the budgets names, remaining budget, reimbursed amount,
+ * pending amount, reimbursed overdraft amount, and pending overdraft amount.
  *
  * @return Object - budget data
  */
@@ -285,7 +286,8 @@ function drawGraph() {
 // |--------------------------------------------------|
 
 /**
- * Checks if there are any negative values in each budget data to make sure the graph does not show negative values.
+ * Checks if there are any negative values in each budget data
+ * to make sure the graph does not show negative values.
  *
  * @param budgets - The user's budgets
  * @return array - the budget data
@@ -354,7 +356,7 @@ async function refreshBudgets() {
 // |--------------------------------------------------|
 
 /**
- * watcher for fiscalDateView - refresh budgets and draw graph
+ * Watcher for fiscalDateView - refresh budgets and draw graph.
  */
 async function watchFiscalDateView() {
   await this.refreshBudgets();

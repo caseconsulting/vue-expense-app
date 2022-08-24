@@ -21,7 +21,7 @@ import _ from 'lodash';
 // |--------------------------------------------------|
 
 /**
- * mounted lifecycle hook
+ * Mounted lifecycle hook.
  */
 async function mounted() {
   // emit comes from HighestDegreeChart.vue when a pie slice is clicked
@@ -37,7 +37,7 @@ async function mounted() {
 } // mounted
 
 /**
- * created lifecycle hook
+ * Created lifecycle hook.
  */
 async function created() {
   await this.fetchData(null);
@@ -45,12 +45,12 @@ async function created() {
 } // created
 
 /**
- * beforeDestroy lifecycle hook
+ * Before destroy lifecycle hook.
  */
 function beforeDestroy() {
   window.EventBus.$off('concentrations-update');
   this.$refs.pieChart.destroyChart();
-} //beforeDestroy
+} // beforeDestroy
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -60,6 +60,7 @@ function beforeDestroy() {
 
 /**
  * Gets all the major data.
+ *
  * @param concentations - An array of the highest degree concentrations
  */
 function fetchData(concentrations) {
@@ -97,7 +98,7 @@ function fetchData(concentrations) {
       ];
     }
   } else {
-    //these presets are when a degree has not been selected OR if there are no concentrations
+    // these presets are when a degree has not been selected OR if there are no concentrations
     if (!_.isEmpty(concentrations)) {
       this.text = 'There are no concentrations for this type of degree';
     } else {
@@ -107,7 +108,7 @@ function fetchData(concentrations) {
     this.enabled = false;
     this.colors = ['grey'];
   }
-} //fetchData
+} // fetchData
 
 /**
  * Sets up the formatting and data options for the chart.

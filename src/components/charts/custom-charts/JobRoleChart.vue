@@ -16,7 +16,7 @@ import { storeIsPopulated } from '@/utils/utils';
 // |--------------------------------------------------|
 
 /**
- * mounted lifecycle hook
+ * Mounted lifecycle hook.
  */
 async function mounted() {
   if (this.storeIsPopulated) {
@@ -39,7 +39,8 @@ function beforeDestroy() {
 // |--------------------------------------------------|
 
 /**
- * Extracts the job role from each employee and tallies up each role for active employees.
+ * Extracts the job role from each employee and tallies up
+ * each role for active employees.
  */
 function fetchData() {
   this.employees = this.$store.getters.employees;
@@ -64,7 +65,7 @@ function fetchData() {
       this.jobQuantities.push(sortedRoles[i][1]);
     }
   }
-} //fetchData
+} // fetchData
 
 /**
  * Sets the chart formatting and options data.

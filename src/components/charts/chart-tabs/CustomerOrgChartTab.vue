@@ -10,7 +10,6 @@
     </v-row>
   </v-container>
 </template>
-
 <script>
 import CustomerOrgChart from '../custom-charts/CustomerOrgChart.vue';
 import ICTable from '../custom-charts/IcTable.vue';

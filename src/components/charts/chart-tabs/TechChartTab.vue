@@ -38,8 +38,7 @@ import VueWordCloud from 'vuewordcloud';
 import { storeIsPopulated } from '@/utils/utils';
 
 /**
- * Parse through employee data to get technologies
- *
+ * Parse through employee data to get technologies.
  */
 function parseEmployeeData() {
   this.employees = this.$store.getters.employees;
@@ -71,7 +70,7 @@ function parseEmployeeData() {
 // |--------------------------------------------------|
 
 /**
- * mounted lifecycle hook - get items, organize them and fill data
+ * Mounted lifecycle hook. Gets items then organizes them and fills data.
  */
 function mounted() {
   if (this.storeIsPopulated) {

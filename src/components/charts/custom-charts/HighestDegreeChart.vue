@@ -359,7 +359,7 @@ function getDegreeName(value) {
 } // getDegreeName
 
 /**
- * Populates the data to display
+ * Populates the data to display.
  */
 function fillData() {
   let quantities = [];

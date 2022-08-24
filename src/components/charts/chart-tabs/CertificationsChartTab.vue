@@ -7,7 +7,6 @@
     </v-row>
   </v-container>
 </template>
-
 <script>
 import CertificationChart from '../custom-charts/CertificationChart.vue';
 

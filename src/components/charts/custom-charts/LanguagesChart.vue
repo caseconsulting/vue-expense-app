@@ -22,7 +22,7 @@ function beforeDestroy() {
 } // beforeDestroy
 
 /**
- * mounted lifecycle hook
+ * Mounted lifecycle hook.
  */
 async function mounted() {
   if (this.storeIsPopulated) {
@@ -38,7 +38,8 @@ async function mounted() {
 // |--------------------------------------------------|
 
 /**
- * Extracts the language array from each employee and tallies up each language for active employees.
+ * Extracts the language array from each employee and tallies
+ * up each language for active employees.
  */
 function fetchData() {
   this.employees = this.$store.getters.employees;
@@ -69,7 +70,7 @@ function fetchData() {
       this.jobQuantities.push(sortedLangs[i][1]);
     }
   }
-} //fetchData
+} // fetchData
 
 /**
  * Sets the chart formatting and options data.

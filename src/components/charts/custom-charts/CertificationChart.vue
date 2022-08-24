@@ -16,7 +16,7 @@ import { storeIsPopulated } from '@/utils/utils';
 // |--------------------------------------------------|
 
 /**
- * mounted lifecycle hook
+ * Mounted lifecycle hook.
  */
 async function mounted() {
   if (this.storeIsPopulated) {
@@ -42,7 +42,7 @@ function beforeDestroy() {
  * Extract each employees certifications and tally up each one.
  */
 async function fetchCertData() {
-  //Put into dictionary where key is kinda tech and value is quantity
+  // Put into dictionary where key is kinda tech and value is quantity
   let certifications = {};
   this.employees = this.$store.getters.employees;
   // tally up each certification
@@ -60,7 +60,7 @@ async function fetchCertData() {
     }
   });
 
-  //We now sort the entries
+  // We now sort the entries
   let certificationPairs = Object.entries(certifications);
   certificationPairs = certificationPairs.sort((a, b) => {
     return b[1] - a[1];
@@ -81,10 +81,11 @@ async function fetchCertData() {
 } // fetchCertData
 
 /**
- * Extract each employees certifications and tally up each one. Also formats and sets data options for the chart.
+ * Extract each employees certifications and tally up each one.
+ * Also formats and sets data options for the chart.
  */
 function fillCertData() {
-  //We cycle through these colors to get the bar colors
+  // We cycle through these colors to get the bar colors
   let colors = [
     'rgba(254, 147, 140, 1)',
     'rgba(230, 184, 156, 1)',
@@ -96,12 +97,12 @@ function fillCertData() {
   let backgroundColors = [];
   let borderColors = [];
 
-  //Set the background and border colors
+  // Set the background and border colors
   for (let i = 0; i < this.labels.length; i++) {
     backgroundColors[i] = colors[i];
     borderColors[i] = colors[i];
   }
-  //Set the chart data
+  // Set the chart data
   this.chartData = {
     labels: this.labels,
     datasets: [
@@ -168,10 +169,11 @@ function fillCertData() {
     maintainAspectRatio: false
   };
   this.dataReceived = true;
-} //fillCertData
+} // fillCertData
 
 /**
  * Helper function to split the text into two sections.
+ *
  * @param s - The text of the certification
  * @return Array - An array of 2 with the split text
  */
@@ -187,7 +189,7 @@ function breakSentence(s) {
   }
   var returnArr = [s.substr(0, middle), s.substr(middle + 1)];
   return returnArr;
-} //breakSentence
+} // breakSentence
 
 // |--------------------------------------------------|
 // |                                                  |

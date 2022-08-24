@@ -48,7 +48,7 @@ import { storeIsPopulated } from '@/utils/utils.js';
 // |--------------------------------------------------|
 
 /**
- * mounted lifecycle hook
+ * Mounted lifecycle hook.
  */
 async function mounted() {
   if (this.storeIsPopulated) await this.fillData();
@@ -75,7 +75,7 @@ function clickedRow(value) {
 } // clickedRow
 
 /**
- * Gets the IC data, and sets the chart formatting and data options
+ * Gets the IC data, and sets the chart formatting and data options.
  */
 function fillData() {
   let ICData = {};

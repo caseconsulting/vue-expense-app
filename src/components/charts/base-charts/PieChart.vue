@@ -13,7 +13,7 @@ import Chart from 'chart.js/auto';
 // |--------------------------------------------------|
 
 /**
- * mounted lifecycle hook
+ * Mounted lifecycle hook.
  */
 function mounted() {
   const canvas = document.getElementById(this.chartId);
@@ -36,7 +36,7 @@ function mounted() {
  */
 function destroyChart() {
   this.chart.destroy();
-} //destroyChart
+} // destroyChart
 
 // |--------------------------------------------------|
 // |                                                  |

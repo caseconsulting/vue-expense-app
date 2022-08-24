@@ -21,15 +21,15 @@ import _ from 'lodash';
 // |--------------------------------------------------|
 
 /**
- * beforeDestroy lifecycle hook
+ * Before destroy lifecycle hook.
  */
 function beforeDestroy() {
   window.EventBus.$off('minors-update');
   this.$refs.pieChart.destroyChart();
-} //beforeDestroy
+} // beforeDestroy
 
 /**
- * mounted lifecycle hook
+ * Mounted lifecycle hook.
  */
 async function mounted() {
   // emit comes from HighestDegreeChart.vue when a pie slice is clicked
@@ -45,7 +45,7 @@ async function mounted() {
 } // mounted
 
 /**
- * created lifecycle hook
+ * Created lifecycle hook.
  */
 async function created() {
   await this.fetchData(null);
@@ -96,7 +96,7 @@ function fetchData(minors) {
       ];
     }
   } else {
-    //these presets are when a degree has not been selected OR if there are no minors
+    // these presets are when a degree has not been selected OR if there are no minors
     if (!_.isEmpty(minors)) {
       this.text = 'There are no minors for this type of education';
     } else {
@@ -106,7 +106,7 @@ function fetchData(minors) {
     this.enabled = false;
     this.colors = ['grey'];
   }
-} //fetchData
+} // fetchData
 
 /**
  * Sets the chart formatting and options data.
