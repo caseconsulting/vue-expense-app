@@ -63,7 +63,7 @@
           chips
         ></v-select>
 
-        <!-- Receipt Uploading -->
+        <!-- Update Receipt Checkbox -->
         <v-checkbox
           v-if="receiptRequired && isEdit && !isEmpty(expense.receipt)"
           class="py-0"
@@ -74,9 +74,10 @@
 
         <!-- Old Receipt Name -->
         <v-card-text class="pa-0 font-16 form-text" v-if="!isEmpty(expense.receipt) && isEdit"
-          >Current Receipt: {{ this.submittedReceipt }}</v-card-text
+          >Current Receipt: {{ submittedReceipt }}</v-card-text
         >
 
+        <!-- Upload Receipt -->
         <v-row class="mt-2">
           <file-upload
             v-if="receiptRequired && ((allowReceipt && isEdit) || !isEdit || isEmpty(expense.receipt))"
@@ -124,7 +125,7 @@
           persistent-hint
           :hint="costHint()"
           @blur="editedExpense.cost = parseCost(costFormatted)"
-          @input="formatCost(costFormatted)"
+          @input="formatCost"
           validate-on-blur
         >
           <template v-slot:message="{ message }">
@@ -132,10 +133,10 @@
           </template>
         </v-text-field>
 
-        <!-- Employee Selection List -->
+        <!-- Recipient Employee Selection List -->
         <v-autocomplete
-          v-if="this.reqRecipient"
-          :items="this.recipientOptions"
+          v-if="reqRecipient"
+          :items="recipientOptions"
           :rules="getRequiredRules()"
           :disabled="isInactive || isReimbursed"
           v-model="editedExpense.recipient"
@@ -147,7 +148,7 @@
 
         <!-- Description -->
         <v-text-field
-          v-if="!this.reqRecipient"
+          v-if="!reqRecipient"
           v-model="editedExpense.description"
           :rules="descriptionRules"
           :disabled="isInactive"
@@ -273,41 +274,42 @@
         </v-btn>
         <!-- End Buttons -->
       </v-form>
+      <!-- Confirmation if the expense exceeds the available budget remaining -->
       <confirmation-box
         :isCovered="isCovered"
         :isOverCovered="isOverCovered"
         :toggleConfirmationBox="confirming"
         :expense="editedExpense"
       ></confirmation-box>
-      <!-- Confirmation Model -->
+      <!-- Confirmation Modal -->
       <form-submission-confirmation
-        :toggleSubmissionConfirmation="this.confirmingValid"
+        :toggleSubmissionConfirmation="confirmingValid"
         type="expense"
       ></form-submission-confirmation>
-      <!-- Cancel Confirmation Model -->
-      <cancel-confirmation :toggleSubmissionConfirmation="this.confirmBackingOut" type="expense"> </cancel-confirmation>
+      <!-- Cancel Confirmation Modal -->
+      <cancel-confirmation :toggleSubmissionConfirmation="confirmBackingOut" type="expense"> </cancel-confirmation>
     </v-container>
   </v-card>
 </template>
 
 <script>
-import api from '@/shared/api.js';
 import CancelConfirmation from '@/components/modals/CancelConfirmation.vue';
 import ConfirmationBox from '@/components/modals/ConfirmationBox.vue';
-import dateUtils from '@/shared/dateUtils';
-import employeeUtils from '@/shared/employeeUtils';
 import FileUpload from '@/components/utils/FileUpload.vue';
 import FormSubmissionConfirmation from '@/components/modals/FormSubmissionConfirmation.vue';
-import { getRole } from '@/utils/auth';
-import { v4 as uuid } from 'uuid';
+
+import api from '@/shared/api.js';
+import employeeUtils from '@/shared/employeeUtils';
 import { getDateRules, getDateOptionalRules, getRequiredRules, getURLRules } from '@/shared/validationUtils.js';
-import { isEmpty, isFullTime, convertToMoneyString, userRoleIsAdmin } from '@/utils/utils';
+import { isEmpty, isFullTime, convertToMoneyString, userRoleIsAdmin, formatDate, parseDate } from '@/utils/utils';
+import { updateStoreBudgets } from '@/utils/storeUtils';
+import { getRole } from '@/utils/auth';
+
+import { v4 as uuid } from 'uuid';
 import { mask } from 'vue-the-mask';
 import _ from 'lodash';
-import { updateStoreBudgets } from '@/utils/storeUtils';
 const moment = require('moment-timezone');
 moment.tz.setDefault('America/New_York');
-
 const IsoFormat = 'YYYY-MM-DD';
 
 // |--------------------------------------------------|
@@ -317,44 +319,25 @@ const IsoFormat = 'YYYY-MM-DD';
 // |--------------------------------------------------|
 
 /**
- * Get the category options for the selected expense type. Returns a sorted list of categories for the expense type.
+ * Check if expense type is changed. Returns true if the expense type is different, otherwise returns false.
  *
- * @return array - categories
+ * @return boolean - expense type is changed
  */
-function getCategories() {
-  let categories = [];
-  if (this.selectedExpenseType) {
-    categories = _.map(this.selectedExpenseType.categories, (category) => {
-      return category.name;
-    });
+function isDifferentExpenseType() {
+  if (this.editedExpense && this.originalExpense) {
+    return this.editedExpense.expenseTypeId != this.originalExpense.expenseTypeId;
   }
-  return categories;
-} // getCategories
+  return false;
+} // isDifferentExpenseType
 
 /**
- * Determine if a URL is required.
+ * Checks if the expense is reimbursed. Returns true if the expense is reimbursed, otherwise returns false.
  *
- * @return requiredRules if URL is required
+ * @return boolean - expense is reimbursed
  */
-function getRequireURL() {
-  if (!this.selectedExpenseType) {
-    return true;
-  }
-  if (this.selectedExpenseType.requireURL) {
-    return getRequiredRules();
-  }
-  if (this.selectedExpenseType.categories.length != 0 && this.editedExpense.category) {
-    let selectedCategory = _.find(this.selectedExpenseType.categories, (category) => {
-      if (category.name === this.editedExpense.category) {
-        return category;
-      }
-    });
-    if (selectedCategory.requireURL) {
-      return getRequiredRules();
-    }
-  }
-  return true;
-} // getRequireURL
+function isReimbursed() {
+  return this.isEdit && this.originalExpense && !this.isEmpty(this.originalExpense.reimbursedDate);
+} // isReimbursed
 
 /**
  * Checks if a receipt is required. Returns true if the receipt is required, otherwise returns false.
@@ -384,55 +367,28 @@ function receiptRequired() {
 } // receiptRequired
 
 /**
- * Checks if the expense is reimbursed. Returns true if the expense is reimbursed, otherwise returns false.
- *
- * @return boolean - expense is reimbursed
- */
-function isReimbursed() {
-  return this.isEdit && this.originalExpense && !this.isEmpty(this.originalExpense.reimbursedDate);
-} // isReimbursed
-
-/**
- * Checks if the employee is a user. Returns true if the employee is a user, otherwise returns false.
- *
- * @return boolean - employee is a user
- */
-function isUser() {
-  return this.employeeRole === 'user';
-} // isUser
-
-/**
- * Creates the rules for the notes section based on whether or not
- *  the current expense type requires a recipient
+ * Creates the rules for the notes section based on whether or not the current expense type requires a recipient.
  *
  *  @return rule
  */
 function notesRules() {
-  const notesRules = [];
-
   if (this.reqRecipient) {
-    const notesRule = (v) => !this.isEmpty(v) || 'Notes is a required field';
-    notesRules.push(notesRule);
+    return [(v) => !this.isEmpty(v) || 'Notes is a required field'];
   }
-
-  return notesRules;
+  return [];
 } // notesRules
 
 /**
- * Creates the label for the notes section base on if it is optional
+ * Creates the label for the notes section based on if it is optional.
  *
  * @return string - label
  */
 function notesLabel() {
-  if (this.reqRecipient) {
-    return 'Notes';
-  } else {
-    return 'Notes (optional)';
-  }
+  return this.reqRecipient ? 'Notes' : 'Notes (optional)';
 } // notesLabel
 
 /**
- * Creates the label for the url section base on if it is optional
+ * Creates the label for the url section based on if it is optional.
  *
  * @return string - label
  */
@@ -445,44 +401,6 @@ function urlLabel() {
 // |                     METHODS                      |
 // |                                                  |
 // |--------------------------------------------------|
-
-/**
- * Gets the remaining budget for the current expense type
- */
-async function getRemainingBudget() {
-  if (this.editedExpense.expenseTypeId && this.editedExpense.employeeId) {
-    let budgets;
-
-    // get budgets for employee, use budgets store if it is for yourself.
-    if (this.editedExpense.employeeId == this.$store.getters.user.id) {
-      budgets = this.$store.getters.budgets;
-    } else {
-      budgets = await api.getAllActiveEmployeeBudgets(this.editedExpense.employeeId);
-    }
-
-    if (budgets) {
-      let budget = budgets.find((currBudget) => currBudget.expenseTypeId === this.editedExpense.expenseTypeId);
-
-      if (budget) {
-        this.remainingBudget =
-          budget.budgetObject.amount -
-          budget.budgetObject.pendingAmount -
-          budget.budgetObject.reimbursedAmount -
-          this.editedExpense.cost;
-        this.expenseTypeName = budget.expenseTypeName;
-        this.overdraftBudget = budget.budgetObject.amount;
-      } else {
-        this.remainingBudget = '';
-      }
-
-      // If user is editing the form, give them back the old value for accurate calculations
-      // rules for the if statement are the same as the title (around line 5 at time or writing)
-      if (this.expense.id && (this.userRoleIsAdmin() || !this.isReimbursed)) {
-        this.remainingBudget += budget.budgetObject.pendingAmount;
-      }
-    }
-  }
-} //getRemainingBudget
 
 /**
  * Adds an expenses url and category to the training urls page.
@@ -782,7 +700,7 @@ function clearForm() {
     this.$refs.form.reset();
   }
 
-  this.emit('finished-editing-expense'); //notify parent no longer editing an expense
+  this.$emit('finished-editing-expense'); //notify parent no longer editing an expense
 
   this.reqRecipient = false;
   this.recipientPlaceholder = null;
@@ -927,18 +845,8 @@ function customFilter(item, queryText) {
  * @return String - encoded url
  */
 function encodeUrl(url) {
-  // return btoa(url).replace(/\//g, '%2F');
   return btoa(url);
 } // encodeUrl
-
-/**
- * Emits a message and data if it exists.
- *
- * @param msg - Message to emit
- */
-function emit(msg) {
-  window.EventBus.$emit(msg);
-} // emit
 
 /**
  * Filters expense type. Returns the expense types that the employee has access to and the budget amount.
@@ -998,14 +906,19 @@ function formatCost() {
 } // formatCost
 
 /**
- * Formats a date.
+ * Get the category options for the selected expense type. Returns a sorted list of categories for the expense type.
  *
- * @param date - date to format
- * @return Date - formatted date
+ * @return array - categories
  */
-function formatDate(date) {
-  return dateUtils.formatDate(date);
-} // formatDate
+function getCategories() {
+  let categories = [];
+  if (this.selectedExpenseType) {
+    categories = _.map(this.selectedExpenseType.categories, (category) => {
+      return category.name;
+    });
+  }
+  return categories;
+} // getCategories
 
 /**
  * Gets an expense type given an expense type id. Returns the expense type selected and clears the expense
@@ -1023,6 +936,69 @@ function getExpenseTypeSelected(expenseTypeId) {
     }
   }));
 } // getExpenseTypeSelected
+
+/**
+ * Gets the remaining budget for the current expense type
+ */
+async function getRemainingBudget() {
+  if (this.editedExpense.expenseTypeId && this.editedExpense.employeeId) {
+    let budgets;
+
+    // get budgets for employee, use budgets store if it is for yourself.
+    if (this.editedExpense.employeeId == this.$store.getters.user.id) {
+      budgets = this.$store.getters.budgets;
+    } else {
+      budgets = await api.getAllActiveEmployeeBudgets(this.editedExpense.employeeId);
+    }
+
+    if (budgets) {
+      let budget = budgets.find((currBudget) => currBudget.expenseTypeId === this.editedExpense.expenseTypeId);
+
+      if (budget) {
+        this.remainingBudget =
+          budget.budgetObject.amount -
+          budget.budgetObject.pendingAmount -
+          budget.budgetObject.reimbursedAmount -
+          this.editedExpense.cost;
+        this.expenseTypeName = budget.expenseTypeName;
+        this.overdraftBudget = budget.budgetObject.amount;
+      } else {
+        this.remainingBudget = '';
+      }
+
+      // If user is editing the form, give them back the old value for accurate calculations
+      // rules for the if statement are the same as the title (around line 5 at time or writing)
+      if (this.expense.id && (this.userRoleIsAdmin() || !this.isReimbursed)) {
+        this.remainingBudget += budget.budgetObject.pendingAmount;
+      }
+    }
+  }
+} //getRemainingBudget
+
+/**
+ * Determine if a URL is required.
+ *
+ * @return requiredRules if URL is required
+ */
+function getRequireURL() {
+  if (!this.selectedExpenseType) {
+    return true;
+  }
+  if (this.selectedExpenseType.requireURL) {
+    return getRequiredRules();
+  }
+  if (this.selectedExpenseType.categories.length != 0 && this.editedExpense.category) {
+    let selectedCategory = _.find(this.selectedExpenseType.categories, (category) => {
+      if (category.name === this.editedExpense.category) {
+        return category;
+      }
+    });
+    if (selectedCategory.requireURL) {
+      return getRequiredRules();
+    }
+  }
+  return true;
+} // getRequireURL
 
 /**
  * Check if an employee has access to an expense type. Returns true if employee has access, otherwise returns false.
@@ -1066,18 +1042,6 @@ async function incrementURLHits() {
 } // incrementURLHits
 
 /**
- * Check if expense type is changed. Returns true if the expense type is different, otherwise returns false.
- *
- * @return boolean - expense type is changed
- */
-function isDifferentExpenseType() {
-  if (this.editedExpense && this.originalExpense) {
-    return this.editedExpense.expenseTypeId != this.originalExpense.expenseTypeId;
-  }
-  return false;
-} // isDifferentExpenseType
-
-/**
  * Checks if a receipt is required. Returns true if the receipt is required, otherwise returns false.
  *
  * @return boolean - receipt is required
@@ -1105,21 +1069,6 @@ function isReceiptRequired() {
 } // receiptRequired
 
 /**
- * Returns a number with two decimal point precision as a string.
- *
- * @param value the original number
- * @return string - formatted number
- */
-function moneyFilter(value) {
-  return `${new Intl.NumberFormat('en-US', {
-    style: 'decimal',
-    useGrouping: false,
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2
-  }).format(value)}`;
-} // moneyFilter
-
-/**
  * Parses the cost to get rid of commas.
  *
  * @param cost - preformatted cost
@@ -1132,16 +1081,6 @@ function parseCost(cost) {
     return cost;
   }
 } // parseCost
-
-/**
- * Parse a date to isoformat (YYYY-MM-DD).
- *
- * @param Date = date to parse
- * @return Date - date in isoformat
- */
-function parseDate(date) {
-  return dateUtils.parseDate(date);
-} // parseDate
 
 /**
  * preformats different US/Europe money formats for parsing
@@ -1499,7 +1438,7 @@ async function updateExistingEntry() {
 /**
  * Set employee role, user info, expense types, and current user view. Creates event listeners.
  */
-async function created() {
+function created() {
   this.employeeRole = this.getRole();
   this.userInfo = this.$store.getters.user;
 
@@ -1634,14 +1573,14 @@ Number.prototype.pad = function (size) {
 // |--------------------------------------------------|
 
 /**
- * watcher for expense.id - sets the edited expense and original expense and determines if it is being edited
+ * watcher for expense.id - sets the edited expense and original expense and determines if it is being edited.
  */
 function watchExpenseID() {
   this.editedExpense = _.cloneDeep(this.expense);
   this.originalExpense = _.cloneDeep(this.editedExpense);
   //when model id is not empty then must be editing an expense
   if (!this.isEmpty(this.expense.id)) {
-    this.emit('editing-expense'); //notify parent that expense is being edited
+    this.$emit('editing-expense'); //notify parent that expense is being edited
     this.costFormatted = Number(this.editedExpense.cost).toLocaleString();
     this.submittedReceipt = this.editedExpense.receipt;
   } else {
@@ -1662,7 +1601,7 @@ function watchExpenseID() {
 } // watchExpenseID
 
 /**
- * watcher for editedExpense.cost - updates remaining budget
+ * watcher for editedExpense.cost - updates remaining budget.
  */
 async function watchEditedExpenseCost() {
   //update remaining budget
@@ -1670,7 +1609,7 @@ async function watchEditedExpenseCost() {
 } // watchEditedExpenseCost
 
 /**
- * watcher for editedExpense.expenseTypeId - set fields for the that expenseType
+ * watcher for editedExpense.expenseTypeId - set fields for the that expenseType.
  */
 async function watchEditedExpenseExpenseTypeID() {
   this.selectedExpenseType = _.find(this.expenseTypes, (expenseType) => {
@@ -1689,8 +1628,8 @@ async function watchEditedExpenseExpenseTypeID() {
     // set high five cost
     // HARD CODE
     if (this.selectedExpenseType.budgetName === 'High Five') {
-      this.costFormatted = this.moneyFilter(50);
-      this.editedExpense.cost = this.moneyFilter(50);
+      this.costFormatted = '50.00';
+      this.editedExpense.cost = '50.00';
       this.isHighFive = true;
       // dont clear when selecting a previous expense to edit
     } else if (!this.editedExpense.edit) {
@@ -1752,7 +1691,7 @@ async function watchEditedExpenseExpenseTypeID() {
 } // watchEditedExpenseExpenseTypeID
 
 /**
- * watcher for editedExpense.category - set fields based on category
+ * watcher for editedExpense.category - set fields based on category.
  */
 function watchEditedExpenseCategory() {
   if (
@@ -1805,7 +1744,7 @@ function watchEditedExpenseCategory() {
 } // watchEditedExpenseCategory
 
 /**
- * watcher for editedExpense.employeeId - set options and get budgets
+ * watcher for editedExpense.employeeId - set options and get budgets.
  */
 async function watchEditedExpenseEmployeeID() {
   this.setRecipientOptions();
@@ -1813,7 +1752,7 @@ async function watchEditedExpenseEmployeeID() {
 } // watchEditedExpenseEmployeeID
 
 /**
- * watcher for editedExpense.purchaseDate - format date
+ * watcher for editedExpense.purchaseDate - format date.
  */
 function watchEditedExpensePurchaseDate() {
   this.purchaseDateFormatted = this.formatDate(this.editedExpense.purchaseDate) || this.purchaseDateFormatted;
@@ -1824,7 +1763,7 @@ function watchEditedExpensePurchaseDate() {
 } // watchEditedExpensePurchaseDate
 
 /**
- * watcher for editedExpense.reimbursedDate - format date
+ * watcher for editedExpense.reimbursedDate - format date.
  */
 function watchEditedExpenseReimbursedDate() {
   this.reimbursedDateFormatted = this.formatDate(this.editedExpense.reimbursedDate) || this.reimbursedDateFormatted;
@@ -1835,7 +1774,7 @@ function watchEditedExpenseReimbursedDate() {
 } // watchEditedExpenseReimbursedDate
 
 /**
- * watcher for file -  decides whether to disable scan button
+ * watcher for file -  decides whether to disable scan button.
  */
 function watchFile() {
   //for disabling the scan button
@@ -1857,6 +1796,7 @@ function watchFile() {
 // |--------------------------------------------------|
 
 export default {
+  created,
   beforeDestroy,
   components: {
     CancelConfirmation,
@@ -1867,13 +1807,11 @@ export default {
   computed: {
     isDifferentExpenseType,
     isReimbursed,
-    isUser,
     receiptRequired,
     notesRules,
     notesLabel,
     urlLabel
   },
-  created,
   data() {
     return {
       activeEmployees: [], // active employees
@@ -1890,7 +1828,6 @@ export default {
           'Expense amount must be a number with two decimal digits',
         (v) => this.parseCost(v) < 1000000000 || 'Nice try' //when a user tries to fill out expense that is over a million
       ], // rules for cost
-      date: null, // NOTE: Unused?
       descriptionRules: [
         (v) => !this.isEmpty(v) || 'Description is a required field',
         (v) => (!this.isEmpty(v) && v.replace(/\s/g, '').length > 0) || 'Description is a required field'
@@ -1925,7 +1862,6 @@ export default {
       scanLoading: false, // determines if the scanning functionality is loading
       selectedEmployee: {}, // selected employees
       selectedExpenseType: {}, // selected expense types
-      selectedRecipient: {}, // the recipient selected for a high five
       submittedReceipt: null, // the receipt to show when editing an expense
       urlInfo: {
         id: null,
@@ -1948,7 +1884,6 @@ export default {
     costHint,
     customFilter,
     encodeUrl,
-    emit,
     filteredExpenseTypes,
     formatCost,
     formatDate,
@@ -1966,7 +1901,6 @@ export default {
     isEmpty,
     isFullTime,
     isReceiptRequired,
-    moneyFilter,
     parseCost,
     parseDate,
     preformatFloat,
@@ -1995,13 +1929,3 @@ export default {
   }
 };
 </script>
-
-<style scoped>
-.optional {
-  font-size: 0.5em;
-}
-
-.negativeBudget {
-  color: red;
-}
-</style>
