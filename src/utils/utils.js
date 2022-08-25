@@ -38,7 +38,7 @@ export function formatDate(date) {
  */
 export function formatDateMonthYear(date) {
   return dateUtils.formatDateMonthYear(date);
-} // formatDate
+} // formatDateMonthYear
 
 /**
  * Returns a date formated from YYYY-MM-DD to MM/DD/YYYY.
@@ -71,6 +71,7 @@ export function formatDateSlashToDash(date) {
 /**
  * Gets the current active anniversary budget year starting date in isoformat.
  *
+ * @param hireDate - The hire date of an employee (YYYY-MM-DD)
  * @return String - current active anniversary budget date (YYYY-MM-DD)
  */
 export function getCurrentBudgetYear(hireDate) {
@@ -88,6 +89,7 @@ export function getCurrentBudgetYear(hireDate) {
  * Check if today is between a set of given dates in isoformat. Returns true if today is between the two dates,
  * otherwise returns false.
  *
+ * @param date - the date to compare
  * @param start - start date
  * @param end - end date
  * @return boolean - today is in set of dates
@@ -96,7 +98,7 @@ export function isBetweenDates(date, start, end) {
   let startDate = moment(start, IsoFormat);
   let endDate = moment(end, IsoFormat);
   return moment(date).isBetween(startDate, endDate, 'day', '[]');
-} // betweenDates
+} // isBetweenDates
 
 /**
  * Checks if a value is empty. Returns true if the value is null or an empty/blank string.

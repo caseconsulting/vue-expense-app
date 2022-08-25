@@ -104,7 +104,7 @@ function visibleTiles() {
 // |--------------------------------------------------|
 
 /**
- * Updates active field of item with subItems
+ * Updates active field of item with subItems.
  */
 function checkActive() {
   var isAnyActive;
@@ -130,7 +130,7 @@ function checkActive() {
 } // checkActive
 
 /**
- * Scrolls up the page
+ * Scrolls up the page.
  */
 function scrollUp() {
   this.$vuetify.goTo(0);
@@ -157,7 +157,7 @@ function created() {
 // |--------------------------------------------------|
 
 /**
- * handler for watcher of the route
+ * Handler for watcher of the route.
  */
 function watchRouteHandler() {
   this.route = this.$route.name;

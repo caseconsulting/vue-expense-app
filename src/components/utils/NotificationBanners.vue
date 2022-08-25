@@ -51,6 +51,9 @@ moment.tz.setDefault('America/New_York');
 // |                                                  |
 // |--------------------------------------------------|
 
+/**
+ * Checks if a badge for a clearance is expiring within a time period.
+ */
 function checkBadges() {
   if (this.user.clearances != null) {
     this.user.clearances.forEach((clearance) => {
@@ -79,6 +82,9 @@ function checkBadges() {
   }
 } // checkBadges
 
+/**
+ * Checks if a certification is expiring within a time period.
+ */
 function checkCertifications() {
   if (this.user.certifications != null) {
     this.user.certifications.forEach((cert) => {
@@ -111,6 +117,9 @@ function checkCertifications() {
   }
 } // checkExpirations
 
+/**
+ * Checks for any recently reimbursed expenses for a user.
+ */
 async function checkReimbursements() {
   // api to get all expenses for user, filtering out inactive expense types
   let expenses;
@@ -176,7 +185,7 @@ function getButtonStyling() {
 
 /**
  * Redirect to the given page. There might be a more elegant way to
- * accomplish this but I've been on this story for too long so
+ * accomplish this but I've been on this story for too long so.
  */
 function handleClick(pageName, extras = {}) {
   this.$router.push({ name: pageName, params: extras });
@@ -209,7 +218,7 @@ async function handleMarkSeen(type, item, id) {
 
 /**
  * Helper function to return a random id, odds are astronomically
- * low that one will be duplicated
+ * low that one will be duplicated.
  * @return - random 8 character hex string
  */
 function randId() {

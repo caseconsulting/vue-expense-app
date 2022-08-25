@@ -134,7 +134,7 @@ export function getTokenExpirationDate(encodedToken) {
  * @param from - page where user was redirected from
  * @param next - function to continue the router
  */
-export function isAdmin(to, from, next) {
+export function isAdmin(to, _, next) {
   if (getRole() === 'admin') {
     next();
   } else {
@@ -152,7 +152,7 @@ export function isAdmin(to, from, next) {
  * @param from - page where user was redirected from
  * @param next - function to continue the router
  */
-export function isAdminOrManager(to, from, next) {
+export function isAdminOrManager(to, _, next) {
   if (getRole() === 'admin' || getRole() === 'manager') {
     next();
   } else {

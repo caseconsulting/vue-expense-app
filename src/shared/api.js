@@ -129,7 +129,6 @@ async function getEmployeeBudget(id, expenseTypeId, date) {
 /**
  * Gets expense types for an employee
  *
- * @param id - the id of the employee
  * @return - expense types for employee
  */
 async function getEmployeeExpenseTypes() {
@@ -165,14 +164,6 @@ async function getEmployeeBudgets(id) {
 async function getAllEvents() {
   return execute('get', `/${UTILITY}/getAllEvents`);
 } // getAllEvents
-
-// function getBudgetsByDate(id, date) {
-//   return execute('get', `/${UTILITY}/getEmployeeBudgets/${id}/${date}`);
-// }
-
-// function getBudgetsByDateAndType(id, date, expenseTypeId) {
-//   return execute('get', `/${UTILITY}/getEmployeeBudgets/${id}/${date}/${expenseTypeId}`);
-// }
 
 /**
  * gets all the audits for a specific type in a specific range
