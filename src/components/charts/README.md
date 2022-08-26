@@ -100,9 +100,9 @@ Here is what goes into the chart's options object:
 
   This checks to see if the clicked point is actually a bar/slice. If you just click the general area of the chart, it goes into the else statement. In this case, we don't want to filter the employee's expenses by something specific so we just route the employee and reimbursement filter.
 
-You also need to include some things in the destination file. See the Reports.vue file and EmployeeContractTable.vue for an example. In the created hook, see if `this.$route.params` has any values you want. I created a wasRedirected variable to true and scrolled to the top but that's not required. This boolean was used to show a back button for better usability.
+You also need to include some things in the destination file. See the Reports.vue file and EmployeeReportsTable.vue for an example. In the created hook, see if `this.$route.params` has any values you want. I created a wasRedirected variable to true and scrolled to the top but that's not required. This boolean was used to show a back button for better usability.
 
-The real routing happens in the child, EmployeeContractTable, though it isn't required to have a child. In the created hook I again checked if the `this.$route.params` had anything in it. If so, I assigned the appropriate variables the value of the `this.$route.params`. There may be more things you have to handle but this is the basics.
+The real routing happens in the child, EmployeeReportsTable, though it isn't required to have a child. In the created hook I again checked if the `this.$route.params` had anything in it. If so, I assigned the appropriate variables the value of the `this.$route.params`. There may be more things you have to handle but this is the basics.
 
 ```javascript
 if (this.$route.params.requestedDataType) {

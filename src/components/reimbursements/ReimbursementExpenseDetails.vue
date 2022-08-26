@@ -1,7 +1,7 @@
 <template>
-  <v-card v-if="expense" id="expense-info" class="mr-3 slide-in-blurred-right">
+  <v-card v-if="expense" id="reimbursement-expense-details" class="mr-3 slide-in-blurred-right">
     <v-card-title primary-title class="subtitle-2">
-      <div class="headline expense_info">Expense Info</div>
+      <div class="headline expense_details">Expense Details</div>
     </v-card-title>
     <v-card-text>
       <v-container class="pb-2" fluid>
@@ -46,7 +46,7 @@
           <v-col>N/A</v-col>
         </v-row>
         <v-row>
-          <attachment :expense="expense" :mode="'adminExpenseInfo'" class="expense_info"></attachment>
+          <attachment :expense="expense" :mode="'adminExpenseInfo'" class="expense_details"></attachment>
         </v-row>
       </v-container>
     </v-card-text>
@@ -103,11 +103,11 @@ function beforeDestroy() {
 // |--------------------------------------------------|
 
 export default {
+  created,
+  beforeDestroy,
   components: {
     Attachment
   },
-  created,
-  beforeDestroy,
   data() {
     return {
       expense: undefined // expense info
@@ -123,12 +123,12 @@ export default {
 </script>
 
 <style scoped>
-p {
-  color: #38424d;
+.expense_details_title {
+  color: white;
 }
 
-span {
-  font-weight: bold;
+.expense_details {
+  color: black;
 }
 
 .slide-in-blurred-right {

@@ -59,12 +59,12 @@ describe('testing links', () => {
       .assert.containsText('#money-team', '$11.00') // check cost
       .assert.containsText('#purchaseDate-team', data.realDate) // check purchase date
       .click('#subInfo tbody > tr') //clicks expense info row
-      .waitForElementVisible('#expense-info', vars.WAIT_TIME) // waits for side info panel
-      .assert.containsText('#expense-info', data.expenseDesc) // check description
-      .assert.containsText('#expense-info', 'Nightwatch Tester') // check employee
-      .assert.containsText('#expense-info', 'Activity Feed Show') // check expense type
-      .assert.containsText('#expense-info', '$11.00') // check cost
-      .assert.containsText('#expense-info', data.realDate); // check date
+      .waitForElementVisible('#reimbursement-expense-details', vars.WAIT_TIME) // waits for side info panel
+      .assert.containsText('#reimbursement-expense-details', data.expenseDesc) // check description
+      .assert.containsText('#reimbursement-expense-details', 'Nightwatch Tester') // check employee
+      .assert.containsText('#reimbursement-expense-details', 'Activity Feed Show') // check expense type
+      .assert.containsText('#reimbursement-expense-details', '$11.00') // check cost
+      .assert.containsText('#reimbursement-expense-details', data.realDate); // check date
   });
 
   it('Deleting the expense', (browser) => {

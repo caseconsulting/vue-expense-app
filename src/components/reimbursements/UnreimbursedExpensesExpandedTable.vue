@@ -48,7 +48,7 @@
         <!-- Description -->
         <template v-slot:[`item.description`]="{ item }">
           <p id="description-team" :class="{ failed: item.failed }" class="mb-0">
-            {{ item.description | descripFormat }}
+            {{ item.description | descriptionFormat }}
           </p>
         </template>
 
@@ -108,15 +108,15 @@ function expenseToggle(toggledExpense) {
 // |--------------------------------------------------|
 
 /**
- * watcher for descripFormat - cuts down on length
+ * filter for descriptionFormat - cuts down on length
  *
  * @param val - value to filter
  * @return string - shortened value
  */
-function descripFormat(val) {
+function descriptionFormat(val) {
   // split strings that exceed 250 characters with eclipses
   return val && val.length > 250 ? val.substring(0, 250) + '...' : val;
-} // descripFormat
+} // descriptionFormat
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -156,7 +156,7 @@ export default {
     };
   },
   filters: {
-    descripFormat
+    descriptionFormat
   },
   methods: {
     convertToMoneyString,
@@ -170,8 +170,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import 'src/assets/styles/styles';
-
 .failed {
   background-color: #ffbaba;
 }

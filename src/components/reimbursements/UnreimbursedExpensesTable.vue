@@ -29,7 +29,7 @@
           ></v-autocomplete>
         </v-card-title>
 
-        <!-- NEW DATA TABLE -->
+        <!-- START DATA TABLE -->
         <v-data-table
           :headers="headers"
           :items="filteredItems"
@@ -57,7 +57,7 @@
             >
             </v-checkbox>
           </template>
-          <!-- Employee Name slot in data table-->
+          <!-- Employee Name slot -->
           <template v-slot:[`item.employeeName`]="{ item }"
             ><v-badge
               v-if="item.expenses.length > 1"
@@ -69,7 +69,7 @@
             ></v-badge>
             {{ item.employeeName }}</template
           >
-          <!-- Show on feed item slot in data table -->
+          <!-- Show on feed item slot -->
           <template v-slot:[`item.showOnFeed`]="{ item }">
             <v-switch
               :input-value="item.showSwitch && item.selected"
@@ -78,11 +78,11 @@
               :disabled="!item.checkBox.all"
             ></v-switch>
           </template>
-          <!-- Item cost in data table slot -->
+          <!-- Item cost slot -->
           <template v-slot:[`item.cost`]="{ item }">
             <p id="totalMoney-team" class="mb-0">{{ convertToMoneyString(getBudgetTotal(item.expenses)) }}</p>
           </template>
-          <!-- Header select slot in data table -->
+          <!-- Header select slot -->
           <template v-slot:[`header.data-table-select`]>
             <v-checkbox
               class="ma-0"
@@ -94,18 +94,19 @@
             >
             </v-checkbox>
           </template>
-          <!-- Expanded slot in datatable -->
+          <!-- Expanded slot -->
           <template v-slot:expanded-item="{ headers, item }">
             <td :colspan="headers.length" class="pa-0">
-              <unrolled-table-info
+              <unreimbursed-expenses-expanded-table
                 :expenses="item.expenses"
                 @toggleExpense="toggleShowOnFeed"
                 @selectExpense="selectExpense"
-              ></unrolled-table-info>
+              ></unreimbursed-expenses-expanded-table>
             </td>
           </template>
         </v-data-table>
-        <!-- NEW DATA TABLE -->
+        <!-- END DATA TABLE -->
+
         <!-- Reimburse Button -->
         <v-fab-transition class="reimburse_button">
           <v-btn
@@ -126,7 +127,7 @@
         </v-fab-transition>
       </v-container>
 
-      <!-- Activate Reimburse Modal -->
+      <!-- Reimburse Modal -->
       <reimburse-modal
         :toggleReimburseModal="buttonClicked"
         :selectedReimbursements="getSelectedExpensesToReimburse"
@@ -136,16 +137,17 @@
 </template>
 
 <script>
-import api from '@/shared/api.js';
-const moment = require('moment-timezone');
-moment.tz.setDefault('America/New_York');
 import ReimburseModal from '@/components/modals/ReimburseModal.vue';
-import UnrolledTableInfo from '@/components/reimbursements/UnrolledTableInfo.vue';
+import UnreimbursedExpensesExpandedTable from '@/components/reimbursements/UnreimbursedExpensesExpandedTable.vue';
+
+import api from '@/shared/api.js';
 import _ from 'lodash';
 import { asyncForEach, isEmpty, convertToMoneyString, updateEmployeeLogin } from '@/utils/utils';
 import { storeIsPopulated } from '@/utils/utils';
 import { updateStoreEmployees } from '@/utils/storeUtils';
 import employeeUtils from '@/shared/employeeUtils';
+const moment = require('moment-timezone');
+moment.tz.setDefault('America/New_York');
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -175,6 +177,19 @@ function filteredItems() {
 } // filteredItems
 
 /**
+ * Gets all selected expenses
+ *
+ * @return array - the filtered pending expenses that are just selected
+ */
+function getSelectedExpensesToReimburse() {
+  return _.filter(this.pendingExpenses, (expense) => {
+    if (expense.selected) {
+      return true;
+    }
+  });
+} // getSelectedExpensesToReimburse
+
+/**
  * State of datatable header check box based on selected expeneses.
  *
  * @return Object - main checkbox state
@@ -199,19 +214,6 @@ function mainCheckBox() {
   }
   return checkBox;
 } // mainCheckBox
-
-/**
- * Gets all selected expenses
- *
- * @return array - the filtered pending expenses that are just selected
- */
-function getSelectedExpensesToReimburse() {
-  return _.filter(this.pendingExpenses, (expense) => {
-    if (expense.selected) {
-      return true;
-    }
-  });
-} // getSelectedExpensesToReimburse
 
 /**
  * Returns the display status of the reimburse button. Returns true if an expense is selected, otherwise returns false.
@@ -545,7 +547,7 @@ async function reimburseExpenses() {
         window.EventBus.$emit('expenseClicked', undefined);
         expense.reimbursedDate = moment().format('YYYY-MM-DD');
         expense.reimbursementWasSeen = false;
-        expensesToReimburse.push(removeAggregateExpenseData(expense));
+        expensesToReimburse.push(this.removeAggregateExpenseData(expense));
       }
     });
   });
@@ -656,7 +658,7 @@ function determineShowOnFeed(expense) {
 /**
  * Loads and organizes all data relevant to the data table.
  */
-async function loadExpensesData(aggData) {
+function loadExpensesData(aggData) {
   let allExpenses = this.createExpenses(aggData);
   this.pendingExpenses = this.filterOutReimbursed(allExpenses);
   this.constructAutoComplete(this.pendingExpenses);
@@ -681,6 +683,15 @@ function removeAggregateExpenseData(expense) {
   delete localExpense.showSwitch;
   return localExpense;
 } // removeAggregateExpenseData
+
+/**
+ * Resets show on feed toggles when page is created
+ */
+function resetShowOnFeedToggles() {
+  this.empBudgets = _.forEach(this.empBudgets, (budget) => {
+    budget.showSwitch = false;
+  });
+} // resetShowOnFeedToggles
 
 /**
  * Toggle all expenses selected.
@@ -773,15 +784,6 @@ function unCheckAllBoxes() {
   });
 } // unCheckAllBoxes
 
-/**
- * Resets show on feed toggles when page is created
- */
-function resetShowOnFeedToggles() {
-  this.empBudgets = _.forEach(this.empBudgets, (budget) => {
-    budget.showSwitch = false;
-  });
-} // resetShowOnFeedToggles
-
 // |--------------------------------------------------|
 // |                                                  |
 // |                 LIFECYCLE HOOKS                  |
@@ -847,20 +849,19 @@ function watchExpenseType() {
 // |--------------------------------------------------|
 
 export default {
+  created,
   beforeDestroy,
-  prop: ['confirmReimburse'],
   components: {
     ReimburseModal,
-    UnrolledTableInfo
+    UnreimbursedExpensesExpandedTable
   },
   computed: {
     filteredItems,
+    getSelectedExpensesToReimburse,
     mainCheckBox,
     showReimburseButton,
-    getSelectedExpensesToReimburse,
     storeIsPopulated
   },
-  created,
   data: () => ({
     aggregatedData: [],
     alerts: [], // status alerts

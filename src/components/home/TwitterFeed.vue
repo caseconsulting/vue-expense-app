@@ -6,7 +6,7 @@
     </v-card-title>
     <v-spacer></v-spacer>
     <!-- Loading Bar -->
-    <div v-if="this.loading" class="py-4">
+    <div v-if="loading" class="py-4">
       <v-progress-linear :indeterminate="true"></v-progress-linear>
     </div>
     <!-- Timeline -->
@@ -45,45 +45,7 @@ moment.tz.setDefault('America/New_York');
 // |--------------------------------------------------|
 
 /**
- * filter for formatting date for twitter feed
- *
- * @param date - the date to change
- * @return - the formatted date
- */
-function formatDate(date) {
-  let now = moment();
-  let tweetDate = moment(date, 'ddd MMM DD HH:mm:ss ZZ YYYY');
-  let diff = now.startOf('day').diff(tweetDate.startOf('day'), 'day');
-  if (diff == 0) {
-    return 'Today'; //set date message as today if no difference in date
-  } else if (diff == 1) {
-    return 'Yesterday'; //if it was one day removed message is yesterday
-  } else if (diff <= 6 && diff > 1) {
-    return diff + ' days ago'; //if it is otherwise less than 7 days ago create message
-  } else if (diff == -1) {
-    return 'Tomorrow';
-  } else {
-    return tweetDate.format('ll');
-  }
-} // formatDate
-
-/**
- * filter to remove links from tweet
- *
- * @param tweet - the tweet
- * @return string - the string without any https links
- */
-function removeLink(tweet) {
-  let splits = [];
-  splits = tweet.split('https');
-  if (splits.length > 1) {
-    splits.pop();
-  }
-  return splits.join('https');
-} // removeLink
-
-/**
- * filter that replaces html encoding
+ * filter that replaces html encoding.
  *
  * @param tweet - the tweet
  * @return string - fixed tweet encoding
@@ -126,6 +88,44 @@ function fixHTMLencoding(tweet) {
   return newTweet;
 } // fixHTMLencoding
 
+/**
+ * filter for formatting date for twitter feed.
+ *
+ * @param date - the date to change
+ * @return - the formatted date
+ */
+function formatDate(date) {
+  let now = moment();
+  let tweetDate = moment(date, 'ddd MMM DD HH:mm:ss ZZ YYYY');
+  let diff = now.startOf('day').diff(tweetDate.startOf('day'), 'day');
+  if (diff == 0) {
+    return 'Today'; //set date message as today if no difference in date
+  } else if (diff == 1) {
+    return 'Yesterday'; //if it was one day removed message is yesterday
+  } else if (diff <= 6 && diff > 1) {
+    return diff + ' days ago'; //if it is otherwise less than 7 days ago create message
+  } else if (diff == -1) {
+    return 'Tomorrow';
+  } else {
+    return tweetDate.format('ll');
+  }
+} // formatDate
+
+/**
+ * filter to remove links from tweet.
+ *
+ * @param tweet - the tweet
+ * @return string - the string without any https links
+ */
+function removeLink(tweet) {
+  let splits = [];
+  splits = tweet.split('https');
+  if (splits.length > 1) {
+    splits.pop();
+  }
+  return splits.join('https');
+} // removeLink
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                     EXPORT                       |
@@ -134,9 +134,9 @@ function fixHTMLencoding(tweet) {
 
 export default {
   filters: {
+    fixHTMLencoding,
     formatDate,
-    removeLink,
-    fixHTMLencoding
+    removeLink
   },
   props: ['tweets', 'loading']
 };

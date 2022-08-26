@@ -82,7 +82,7 @@
         </v-col>
       </v-row>
 
-      <!-- NEW DATA TABLE -->
+      <!-- START EMPLOYEE TABLE -->
       <v-data-table
         :headers="headers"
         :items="filteredEmployees"
@@ -135,6 +135,7 @@
           Your search for "{{ search }}" found no results.
         </v-alert>
       </v-data-table>
+      <!-- END EMPLOYEE TABLE -->
     </v-container>
   </div>
 </template>
@@ -270,16 +271,6 @@ function customEmployeeFilter(item, queryText) {
 } // customEmployeeFilter
 
 /**
- * sets midAction boolean to false
- *
- * @param item - the employee
- * @return the path to the employees profile
- */
-function employeePath(item) {
-  return `/employee/${item.employeeNumber}`;
-} // employeePath
-
-/**
  * Returns the expiration dates for all clearances in natural readable format. The sorting key of item.badgeExpiration
  * is stored just as the int form of the moment to get accurate sorting.
  *
@@ -310,7 +301,7 @@ function getBadgeExpiration(clearances, item) {
   item.badgeExpiration = fDate;
 
   return _.join(dates, ' | ');
-}
+} // getBadgeExpiration
 
 /**
  * Returns the expiration dates for all clearances.
@@ -329,7 +320,7 @@ function getClearanceType(clearances, item) {
   });
   item.clearanceType = _.join(types, ' | ');
   return item.clearanceType;
-}
+} // getClearanceType
 
 /**
  * Gets the full name of an employee.
@@ -348,7 +339,7 @@ function getFullName(item) {
  * @param item - the employee
  */
 function handleClick(item) {
-  this.$router.push(employeePath(item));
+  this.$router.push(`/employee/${item.employeeNumber}`);
 } //handleClick
 
 /**
@@ -655,7 +646,7 @@ function getActive(employees) {
   return _.filter(employees, (e) => {
     return e.workStatus > 0;
   });
-} // isActive
+} // getActive
 
 /**
  * Swap active/inactive employees and reload the page data (including dropdowns)
@@ -663,7 +654,7 @@ function getActive(employees) {
 function setActiveInactive() {
   this.search = null;
   this.employeesInfo = this.$store.getters.employees;
-  if (!this.showInactiveEmployees) this.employeesInfo = getActive(this.employeesInfo);
+  if (!this.showInactiveEmployees) this.employeesInfo = this.getActive(this.employeesInfo);
   this.populateDropDowns(this.employeesInfo);
   this.constructAutoComplete(this.employeesInfo);
   this.buildContractsColumn();
@@ -680,10 +671,10 @@ function setActiveInactive() {
 /**
  *  Gets the employees info for the table.
  */
-async function created() {
+function created() {
   this.loading = true; // set loading status to true
   this.allEmployees = this.$store.getters.employees; // get all employees
-  this.employeesInfo = getActive(this.allEmployees); // default to filtered list
+  this.employeesInfo = this.getActive(this.allEmployees); // default to filtered list
   this.filteredEmployees = this.employeesInfo; // this one is shown
 
   // if the user is coming from stats page...
@@ -763,7 +754,7 @@ function watchDataType() {
  */
 function watchShowInactiveUsers() {
   this.setActiveInactive();
-}
+} // watchShowInactiveUsers
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -822,7 +813,6 @@ export default {
     constructAutoComplete,
     customEmployeeFilter,
     customFilter,
-    employeePath,
     getBadgeExpiration,
     getClearanceType,
     getFullName,
@@ -845,6 +835,7 @@ export default {
   }
 };
 </script>
+
 <style lang="scss" scoped>
 @import 'src/assets/styles/styles';
 .inactive {

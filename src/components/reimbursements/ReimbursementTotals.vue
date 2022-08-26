@@ -123,11 +123,11 @@ function beforeDestroy() {
 // |--------------------------------------------------|
 
 export default {
+  created,
+  beforeDestroy,
   computed: {
     totals
   },
-  created,
-  beforeDestroy,
   data() {
     return {
       selected: []

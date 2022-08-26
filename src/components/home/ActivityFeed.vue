@@ -6,6 +6,7 @@
         <h3>Activity Feed</h3>
       </v-card-title>
       <v-spacer></v-spacer>
+      <!-- Autocomplete filters -->
       <v-card-text class="pb-0">
         <v-autocomplete
           :items="filters"
@@ -21,12 +22,12 @@
         </v-autocomplete>
       </v-card-text>
       <!-- Loading Bar -->
-      <div v-if="this.loading" class="py-4">
+      <div v-if="loading" class="py-4">
         <v-progress-linear :indeterminate="true"></v-progress-linear>
       </div>
       <v-timeline v-else dense class="pt-0">
         <!-- Timeline -->
-        <v-virtual-scroll :items="filterEvents()" :item-height="this.itemHeight" height="700" bench="2">
+        <v-virtual-scroll :items="filterEvents()" :item-height="itemHeight" height="700" bench="2">
           <template v-slot="{ item }">
             <v-tooltip
               open-on-hover
@@ -57,17 +58,18 @@
                           </v-btn>
                         </template>
                         <!-- Icon Hover Text -->
-                        <span v-if="item.newCampfire">welcome to team</span>
-                        <span v-else-if="item.congratulateCampfire">congratulate</span>
-                        <span v-else-if="item.birthdayCampfire">say happy birthday</span>
-                        <span v-else-if="item.campfire">comment in campfire</span>
-                        <span v-else-if="item.eventScheduled">see event</span>
+                        <span v-if="item.newCampfire">Welcome to team</span>
+                        <span v-else-if="item.congratulateCampfire">Congratulate</span>
+                        <span v-else-if="item.birthdayCampfire">Say happy birthday</span>
+                        <span v-else-if="item.campfire">Comment in campfire</span>
+                        <span v-else-if="item.eventScheduled">See event</span>
                       </v-tooltip>
 
                       <v-icon class="white--text" v-else>{{ item.icon }}</v-icon>
                     </template>
                     <!-- End Icon -->
 
+                    <!-- Item Title: Date -->
                     <h3>{{ item.date }}</h3>
                     <!-- Event has a link -->
                     <v-list-item
@@ -143,10 +145,16 @@ function itemHeight() {
   }
 } // itemHeight
 
+// |--------------------------------------------------|
+// |                                                  |
+// |                     METHODS                      |
+// |                                                  |
+// |--------------------------------------------------|
+
 /**
  * Used to remove events that the user has filtered out,
  * then the remaining events will be displayed in the
- * activity feed
+ * activity feed.
  *
  * @return array - filtered events array
  */
@@ -164,12 +172,6 @@ function filterEvents() {
   });
   return filteredEvents;
 } // filterEvents
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                     METHODS                      |
-// |                                                  |
-// |--------------------------------------------------|
 
 /**
  * Gets the URL to basecamp for an activity feed event.
@@ -210,8 +212,8 @@ export default {
     itemHeight
   },
   methods: {
-    getURL,
-    filterEvents
+    filterEvents,
+    getURL
   },
   created,
   props: ['events', 'loading']
