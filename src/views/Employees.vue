@@ -537,6 +537,14 @@ function watchFilterActive() {
   this.filterEmployees();
 } // watchFilterActive
 
+/**
+ * In the case that the page has been force reloaded (and the store cleared)
+ * this watcher will be activated when the store is populated again.
+ */
+async function watchStoreIsPopulated() {
+  if (this.storeIsPopulated) await this.refreshEmployees();
+} // watchStoreIsPopulated
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                      EXPORT                      |
@@ -684,11 +692,7 @@ export default {
   },
   watch: {
     'filter.active': watchFilterActive,
-    storeIsPopulated: async function () {
-      // in the case that the page has been force reloaded (and the store cleared)
-      // this watcher will be activated when the store is populated again.
-      if (this.storeIsPopulated) await this.refreshEmployees();
-    }
+    storeIsPopulated: watchStoreIsPopulated
   }
 };
 </script>

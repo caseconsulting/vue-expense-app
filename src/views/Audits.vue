@@ -162,7 +162,7 @@ function formatRange(range) {
 } // formatRange
 
 /**
- * selects which audit view to change to (Login, Mifi, Resume Parser)
+ * Selects which audit view to change to (Login, Mifi, Resume Parser)
  *
  * @param tab - the dropdown to select
  */
@@ -194,7 +194,7 @@ async function created() {
       await this.updateStoreEmployees();
     }
   }
-}
+} // created
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -209,7 +209,7 @@ async function watchStoreIsPopulated() {
   if (!this.$store.getters.employees) {
     await this.updateStoreEmployees();
   }
-}
+} // watchStoreIsPopulated
 
 // |--------------------------------------------------|
 // |                                                  |

@@ -194,7 +194,7 @@ async function resumeReceived(newEmployeeForm, changes) {
 } // resumeReceived
 
 /**
- * clears the status message of the uploadStatus
+ * Clears the status message of the uploadStatus
  */
 function clearStatus() {
   this.$set(this.uploadStatus, 'statusType', undefined);
@@ -203,7 +203,7 @@ function clearStatus() {
 } // clearStatus
 
 /**
- * downloads the resume of the employee
+ * Downloads the resume of the employee
  */
 async function downloadResume() {
   let signedURL = await api.getResume(this.$route.params.id);
@@ -222,8 +222,10 @@ async function getProfileData() {
     !this.$store.getters.user ? this.updateStoreUser() : ''
   ]);
   if (this.$store.getters.user.employeeNumber == this.$route.params.id) {
+    // user looking at their own profile
     this.model = this.$store.getters.user;
   } else {
+    // user looking at another employees profile
     let employees = this.$store.getters.employees;
     this.model = _.find(employees, (employee) => {
       return employee.employeeNumber == this.$route.params.id;
@@ -243,7 +245,6 @@ async function getProfileData() {
     this.expenseTypes = this.$store.getters.expenseTypes;
     this.fiscalDateView = this.getCurrentBudgetYear(this.model.hireDate);
     this.hasAccessToBudgets = this.accessibleBudgets.length !== 0; // enable budget chart
-    this.loading = false;
   }
   this.loading = false;
 } // getProfileData
@@ -283,7 +284,7 @@ function userIsEmployee() {
 } // userIsEmployee
 
 /**
- * displays the message
+ * Displays the message
  *
  * @param type - the type of message
  * @param msg - the message to display
@@ -296,7 +297,7 @@ function displayMessage(type, msg, color) {
 } // displayMessage
 
 /**
- * deletes the resume
+ * Deletes the resume
  */
 async function deleteResume() {
   this.deleteLoading = true;
@@ -308,7 +309,7 @@ async function deleteResume() {
     this.displayMessage('ERROR', 'Failure to delete resume', 'red');
   }
   this.deleteLoading = false;
-} //deleteResume
+} // deleteResume
 
 /**
  * Checks if the user has access to any budgets
@@ -402,6 +403,19 @@ function beforeDestroy() {
   window.EventBus.$off('tabChange');
   window.EventBus.$off('selected-budget-year');
 } // beforeDestroy
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                    WATCHERS                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * Load the profile data if the page is refreshed.
+ */
+async function watchStoreIsPopulated() {
+  if (this.storeIsPopulated) await this.getProfileData();
+} // watchStoreisPopulated
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -516,9 +530,7 @@ export default {
   },
   mounted,
   watch: {
-    storeIsPopulated: async function () {
-      if (this.storeIsPopulated) await this.getProfileData();
-    }
+    storeIsPopulated: watchStoreIsPopulated
   }
 };
 </script>

@@ -10,6 +10,7 @@ import api from '@/shared/api';
 const login_format = 'MMM Do, YYYY HH:mm:ss';
 const moment = require('moment-timezone');
 moment.tz.setDefault('America/New_York');
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                 LIFECYCLE HOOKS                  |
@@ -29,6 +30,8 @@ function mounted() {
       let user = await api.getUser();
       let employeeRole = user.employeeRole;
       this.setRole(employeeRole);
+      // passes this local storage information to App.vue to avoid
+      // loading the data again when the page switches to the admin/user view
       localStorage.setItem('user', JSON.stringify(user));
       localStorage.setItem('lastLogin', moment(new Date()).format(login_format));
 

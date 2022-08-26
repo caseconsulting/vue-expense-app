@@ -354,9 +354,7 @@
                                           <v-list-item-title>{{ getEmployeeName(employee.id) }}</v-list-item-title>
                                         </v-list-item-content>
                                       </v-list-item>
-                                      <!-- <v-divider v-if="index != showAccessLength - 1" :key="index" inset></v-divider> -->
                                     </template>
-                                    <!-- <div v-if="showAccessLength == 0" class="noEmployees">No Employees</div> -->
                                   </v-list>
                                 </v-row>
                               </v-card-text>
@@ -852,6 +850,9 @@ function isInactive(expenseType) {
   return !expenseType.isInactive ? '' : 'Not Active';
 } // isInactive
 
+/**
+ * Load all data required to load the page initially.
+ */
 async function loadExpenseTypesData() {
   this.initialPageLoading = true;
   this.userInfo = this.$store.getters.user;
@@ -874,7 +875,7 @@ async function loadExpenseTypesData() {
     });
   }
   this.initialPageLoading = false;
-}
+} // loadExpenseTypesData
 
 /**
  * Returns a number with two decimal point precision as a string.
@@ -1230,13 +1231,6 @@ export default {
 </script>
 
 <style scoped>
-.noEmployees {
-  text-align: center;
-  font-size: 20px;
-  margin-top: 20px;
-  margin-bottom: 20px;
-}
-
 a {
   color: black !important;
   text-decoration: none;

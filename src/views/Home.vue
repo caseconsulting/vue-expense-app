@@ -110,17 +110,6 @@ function storeIsPopulated() {
 // |--------------------------------------------------|
 
 /**
- * Increment the actual time by a second.
- */
-function addOneSecondToActualTimeEverySecond() {
-  var component = this;
-  component.actualTime = moment().format('X');
-  setTimeout(function () {
-    component.addOneSecondToActualTimeEverySecond();
-  }, 1000);
-} // addOneSecondToActualTimeEverySecond
-
-/**
  * Create the events to populate the activity feed
  */
 async function createEvents() {
@@ -506,8 +495,23 @@ async function created() {
     this.loading = false;
     await this.loadHomePageData();
   }
-  this.addOneSecondToActualTimeEverySecond();
 } // created
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     WATCHERS                     |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * A watcher for when the vuex store is populated with necessary data.
+ */
+async function watchStoreIsPopulated() {
+  if (this.$store.getters.storeIsPopulated) {
+    this.loading = false; // get rid of skeleton loaders (will still be loading for individual components)
+    this.loadHomePageData();
+  }
+} // watchStoreIsPopulated
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -530,7 +534,6 @@ export default {
   data() {
     return {
       accessibleBudgets: null,
-      actualTime: moment().format('X'),
       aggregatedAwards: [],
       aggregatedExpenses: [],
       allUserBudgets: null, // all user budgets
@@ -559,7 +562,6 @@ export default {
     };
   },
   methods: {
-    addOneSecondToActualTimeEverySecond,
     createEvents,
     getCurrentBudgetYear,
     getEmployeeAwards,
@@ -577,19 +579,7 @@ export default {
     updateStoreBudgets
   },
   watch: {
-    async storeIsPopulated() {
-      if (this.$store.getters.storeIsPopulated) {
-        this.loading = false; // get rid of skeleton loaders (will still be loading for individual components)
-        this.loadHomePageData();
-      }
-    }
+    storeIsPopulated: watchStoreIsPopulated
   }
 };
 </script>
-
-<style scoped>
-.links {
-  padding-bottom: 16px;
-  text-align: center;
-}
-</style>
