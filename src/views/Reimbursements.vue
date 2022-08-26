@@ -57,7 +57,7 @@ import { isMobile } from '@/utils/utils';
 // |--------------------------------------------------|
 
 /**
- * created
+ * Created lifecycle hook.
  */
 async function created() {
   window.EventBus.$on('reimburseAlert', (alerts) => {
@@ -66,11 +66,11 @@ async function created() {
 } // created
 
 /**
- * beforeDestroy lifecycle hook
+ * beforeDestroy lifecycle hook.
  */
 function beforeDestroy() {
   window.EventBus.$off('reimburseAlert');
-} //beforeDestroy
+} // beforeDestroy
 
 // |--------------------------------------------------|
 // |                                                  |

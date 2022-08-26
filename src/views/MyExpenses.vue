@@ -377,7 +377,8 @@ import { updateStoreBudgets, updateStoreExpenseTypes, updateStoreEmployees } fro
 // |--------------------------------------------------|
 
 /**
- * Gets the datatable headers based on user's role. Returns all the headers if the user's role is an admin, otherwise
+ * Gets the datatable headers based on user's role. Returns all
+ * the headers if the user's role is an admin, otherwise
  * returns all the headers except the 'Employee' header.
  *
  * @return Array - datatable headers
@@ -392,12 +393,16 @@ function roleHeaders() {
       })(this.headers);
 } // roleHeaders
 
+/**
+ * Computed property for storeIsPopulated.
+ */
 function storeIsPopulated() {
   return this.$store.getters.storeIsPopulated;
-}
+} // storeIsPopulated
 
 /**
- * Checks if the user is inactive. Returns true if the user is inactive, otherwise returns false.
+ * Checks if the user is inactive. Returns true if the user is
+ * inactive, otherwise returns false.
  *
  * @return boolean - whether or not the user is inactive
  */
@@ -436,7 +441,8 @@ function moneyFilter(value) {
 // |--------------------------------------------------|
 
 /**
- * Refresh and updates expense list and displays a successful create status in the snackbar.
+ * Refresh and updates expense list and displays a successful
+ * create status in the snackbar.
  */
 async function addModelToTable() {
   await this.refreshExpenses();
@@ -447,7 +453,8 @@ async function addModelToTable() {
 } // addModelToTable
 
 /**
- * Clear the selected expense by setting all values to null and if user sets employeeId and employeeName.
+ * Clear the selected expense by setting all values to null and
+ * if user sets employeeId and employeeName.
  */
 function clearExpense() {
   this.$set(this.expense, 'description', null);
@@ -490,7 +497,8 @@ function clickedRow(value) {
 } // clickedRow
 
 /**
- * Sets a mapping of employee name to employee id of an expense for the autocomplete options.
+ * Sets a mapping of employee name to employee id of an expense for
+ * the autocomplete options.
  *
  * @param aggregatedData - aggregated expenses
  */
@@ -565,7 +573,8 @@ async function deleteExpense() {
 } // deleteExpense
 
 /**
- * Refresh and updates expense list and displays a successful delete status in the snackbar.
+ * Refresh and updates expense list and displays a successful
+ * delete status in the snackbar.
  */
 async function deleteModelFromTable() {
   await this.refreshExpenses();
@@ -650,7 +659,8 @@ function hasRecipient(expense) {
 } // hasRecipient
 
 /**
- * Checks if the expense is reimbursed. Returns true if the expense is reimbursed, otherwise returns false.
+ * Checks if the expense is reimbursed. Returns true if the
+ * expense is reimbursed, otherwise returns false.
  *
  * @param expense - expense to check
  * @return boolean - expense is reimbursed
@@ -779,7 +789,8 @@ async function unreimburseExpense() {
 } // unreimburseExpense
 
 /**
- * Refresh and updates expense list and displays a successful update status in the snackbar.
+ * Refresh and updates expense list and displays a successful
+ * update status in the snackbar.
  */
 async function updateModelInTable() {
   await this.refreshExpenses();
@@ -790,8 +801,8 @@ async function updateModelInTable() {
 } // updateModelInTable
 
 /**
- * Checks if an inactive style shoud be applied for an expense. Returns true if the user is an admin and the expense
- * is inactive, otherwise returns false.
+ * Checks if an inactive style shoud be applied for an expense. Returns
+ * true if the user is an admin and the expense is inactive, otherwise returns false.
  *
  * @param expense - expense to check
  * @return boolean - user inactive styling

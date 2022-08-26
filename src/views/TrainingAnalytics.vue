@@ -149,8 +149,9 @@ function urls() {
 // |--------------------------------------------------|
 
 /**
- * Changes the webiste image to if it fails to display original. If the url fails to display a logo, the image will be
- * display. If the image fails as well, the website will default to the case logo.
+ * Changes the webiste image to if it fails to display original. If the url fails
+ * to display a logo, the image will be display. If the image fails as well,
+ * the website will default to the case logo.
  *
  * @param item - training url
  */
@@ -184,8 +185,8 @@ function filterByCategory(category) {
 } // filterByCategory
 
 /**
- * Checks if a category is already the focus. Returns true if the category was already selected, otherwise returns
- * false.
+ * Checks if a category is already the focus. Returns true if the category
+ * was already selected, otherwise returns false.
  *
  * @param value - category selected
  * @return boolean - category was already selected

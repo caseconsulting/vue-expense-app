@@ -76,8 +76,7 @@ import { updateStoreEmployees } from '@/utils/storeUtils';
 // |--------------------------------------------------|
 
 /**
- * mounted hook
- *
+ * Mounted lifecycle hook.
  */
 async function mounted() {
   if (this.storeIsPopulated) {
@@ -95,7 +94,7 @@ async function mounted() {
 // |--------------------------------------------------|
 
 /**
- * changes the tab
+ * Changes the tab display.
  *
  * @param event - the new tab
  */
@@ -104,7 +103,7 @@ function changeTab(event) {
 } // changeTab
 
 /**
- * This is used to select the correct tab on mobile devices
+ * This is used to select the correct tab on mobile devices.
  * @param tabName - The name of the tab
  */
 function selectDropDown(tabName) {

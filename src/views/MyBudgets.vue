@@ -116,7 +116,8 @@ function storeIsPopulated() {
 } // storeIsPopulated
 
 /**
- * Viewing the current active budget year. Returns true if the budget year being viwed is todays budget.
+ * Viewing the current active budget year. Returns true if the
+ * budget year being viwed is todays budget.
  *
  * @return boolean - viewing the current active year budget
  */
@@ -221,12 +222,12 @@ async function created() {
 } // created
 
 /**
- * beforeDestroy lifecycle hook
+ * beforeDestroy lifecycle hook.
  */
 function beforeDestroy() {
   window.EventBus.$off('updateData');
   window.EventBus.$off('selected-budget-year');
-} //beforeDestroy
+} // beforeDestroy
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -235,7 +236,7 @@ function beforeDestroy() {
 // |--------------------------------------------------|
 
 /**
- * watcher of employ - refresh employee
+ * Watcher of employ - refresh employee.
  */
 async function watchEmploy() {
   await this.refreshEmployee();

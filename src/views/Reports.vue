@@ -17,6 +17,28 @@ import { updateStoreEmployees } from '@/utils/storeUtils';
 
 // |--------------------------------------------------|
 // |                                                  |
+// |                 LIFECYCLE HOOKS                  |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * Created lifecycle hook.
+ */
+async function created() {
+  if (this.$store.getters.storeIsPopulated) {
+    if (!this.$store.getters.employees) {
+      await this.updateStoreEmployees();
+    }
+    this.loading = false;
+  }
+  if (this.$route.params.requestedFilter) {
+    this.wasRedirected = true;
+    window.scrollTo(0, 0);
+  }
+} // created
+
+// |--------------------------------------------------|
+// |                                                  |
 // |                     COMPUTED                     |
 // |                                                  |
 // |--------------------------------------------------|
@@ -37,23 +59,12 @@ function storeIsPopulated() {
 // |--------------------------------------------------|
 
 export default {
+  created,
   components: {
     EmployeeContractTable
   },
   computed: {
     storeIsPopulated
-  },
-  async created() {
-    if (this.$store.getters.storeIsPopulated) {
-      if (!this.$store.getters.employees) {
-        await this.updateStoreEmployees();
-      }
-      this.loading = false;
-    }
-    if (this.$route.params.requestedFilter) {
-      this.wasRedirected = true;
-      window.scrollTo(0, 0);
-    }
   },
   data() {
     return {
