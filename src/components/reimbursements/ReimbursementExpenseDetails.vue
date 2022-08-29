@@ -1,10 +1,8 @@
 <template>
-  <v-card v-if="expense" id="reimbursement-expense-details" class="mr-3 slide-in-blurred-right">
-    <v-card-title primary-title class="subtitle-2">
-      <div class="headline expense_details">Expense Details</div>
-    </v-card-title>
+  <v-card v-if="expense" id="reimbursement-expense-details" class="mr-3 my-3 slide-in-blurred-right">
+    <v-card-title primary-title class="pb-0 headline"> Expense Details </v-card-title>
     <v-card-text>
-      <v-container class="pb-2" fluid>
+      <v-container fluid class="pb-0">
         <v-row dense>
           <v-col> <b>Description:</b></v-col>
           <v-col> {{ expense.description }}</v-col>
@@ -45,8 +43,8 @@
           <v-col><b>Category:</b></v-col>
           <v-col>N/A</v-col>
         </v-row>
-        <v-row>
-          <attachment :expense="expense" :mode="'adminExpenseInfo'" class="expense_details"></attachment>
+        <v-row dense>
+          <attachment :expense="expense" :mode="'adminExpenseInfo'"></attachment>
         </v-row>
       </v-container>
     </v-card-text>
@@ -123,14 +121,6 @@ export default {
 </script>
 
 <style scoped>
-.expense_details_title {
-  color: white;
-}
-
-.expense_details {
-  color: black;
-}
-
 .slide-in-blurred-right {
   animation: slide-in-blurred-right 0.5s ease-in forwards;
 }

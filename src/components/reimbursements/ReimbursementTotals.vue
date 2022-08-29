@@ -2,19 +2,14 @@
   <!--Totals Card-->
   <v-card v-if="totals.length" class="slide-in-blurred-right my-3 mr-3">
     <!--Total Card Title-->
-    <v-card-title class="subtitle-2">
-      <v-container>
-        <v-row class="headline">Totals</v-row>
-      </v-container>
-    </v-card-title>
+    <v-card-title class="pb-0 headline"> Totals </v-card-title>
     <!--End of Total Card Title-->
     <v-card-text>
       <v-container class="pb-0">
         <!--List of Expense Types and Totals-->
-        <v-row v-for="total in totals" :key="total.id" class="pb-7">
-          <span class="font-weight-bold">{{ total.name }}: </span>
-          <v-spacer></v-spacer>
-          {{ convertToMoneyString(total.costTotal) }}
+        <v-row v-for="total in totals" :key="total.id" dense>
+          <v-col class="font-weight-bold">{{ total.name }}: </v-col>
+          <v-col> {{ convertToMoneyString(total.costTotal) }}</v-col>
         </v-row>
       </v-container>
     </v-card-text>
