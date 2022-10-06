@@ -251,7 +251,7 @@ export function getContractPrimeProject(contracts) {
       });
       // add current contract, attaching earliestDate for sorting
       result.push({
-        contract: { name: contract.name, prime: contract.prime },
+        contract: { name: contract.name, primes: contract.primes },
         projects: projects,
         d: earliestDate.format('YYYYMMDD')
       });
@@ -264,8 +264,10 @@ export function getContractPrimeProject(contracts) {
         return r.contract.name;
       }).join(', '),
       primes: _.map(result, (r) => {
-        return r.contract.prime;
-      }).join(', '),
+        return _.map(r.contract.primes, (p) => {
+          return p;
+        }).join(', ');
+      }).join('; '),
       projects: _.map(result, (r) => {
         return r.projects;
       }).join(', ')

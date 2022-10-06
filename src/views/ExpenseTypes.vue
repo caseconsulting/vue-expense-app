@@ -2,12 +2,12 @@
 <template>
   <div>
     <v-row v-if="initialPageLoading">
-      <v-col cols="12" :lg="userIsAdmin() ? 8 : 12">
+      <v-col cols="12" :lg="userRoleIsAdmin() ? 8 : 12">
         <div class="mt-3">
           <v-skeleton-loader type="table-heading, list-item@6"></v-skeleton-loader>
         </div>
       </v-col>
-      <v-col v-if="userIsAdmin()" cols="12" lg="4">
+      <v-col v-if="userRoleIsAdmin()" cols="12" lg="4">
         <v-skeleton-loader class="mt-3" type="card-heading, list-item@12"></v-skeleton-loader>
       </v-col>
     </v-row>
@@ -28,7 +28,7 @@
         <v-btn color="white" text @click="clearStatus">Close</v-btn>
       </v-snackbar>
 
-      <v-col cols="12" :lg="userIsAdmin() ? 8 : 12">
+      <v-col cols="12" :lg="userRoleIsAdmin() ? 8 : 12">
         <v-card class="mt-3">
           <v-container fluid>
             <!-- Title -->
@@ -154,41 +154,6 @@
                 </v-btn-toggle>
               </div>
               <!-- End Recurring Filter -->
-
-              <!-- Receipt Fitler -->
-              <div class="flagFilter">
-                <h4>Receipt Required:</h4>
-                <v-btn-toggle class="filter_color" v-model="filter.receipt" text mandatory>
-                  <!-- Show Receipt Required -->
-                  <v-tooltip top>
-                    <template v-slot:activator="{ on }">
-                      <v-btn value="receipt" v-on="on" text>
-                        <v-icon class="mr-1">mdi-check-circle-outline</v-icon>
-                      </v-btn>
-                    </template>
-                    <span>Show Required Receipt</span>
-                  </v-tooltip>
-
-                  <!-- Show Receipt Not Required -->
-                  <v-tooltip top>
-                    <template v-slot:activator="{ on }">
-                      <v-btn value="noReceipt" v-on="on" text>
-                        <v-icon>mdi-close-circle-outline</v-icon>
-                      </v-btn>
-                    </template>
-                    <span>Hide Required Receipt</span>
-                  </v-tooltip>
-
-                  <!-- Show Receipt Required and Not Required-->
-                  <v-tooltip top>
-                    <template v-slot:activator="{ on }">
-                      <v-btn value="both" v-on="on" text>BOTH</v-btn>
-                    </template>
-                    <span>Show All</span>
-                  </v-tooltip>
-                </v-btn-toggle>
-              </div>
-              <!-- End Receipt Fitler -->
             </fieldset>
             <br />
             <!-- End Filters -->
@@ -216,11 +181,11 @@
                 <p class="mb-0">{{ convertToMoneyString(item.budget) }}</p>
               </template>
               <!-- Actions -->
-              <template v-if="userIsAdmin()" v-slot:[`item.actions`]="{ item }">
+              <template v-if="userRoleIsAdmin()" v-slot:[`item.actions`]="{ item }">
                 <v-tooltip top>
                   <template v-slot:activator="{ on }">
                     <v-btn
-                      v-if="userIsAdmin()"
+                      v-if="userRoleIsAdmin()"
                       :disabled="midAction"
                       text
                       icon
@@ -238,7 +203,7 @@
                 <v-tooltip top>
                   <template v-slot:activator="{ on }">
                     <v-btn
-                      v-if="userIsAdmin()"
+                      v-if="userRoleIsAdmin()"
                       id="delete"
                       :disabled="midAction"
                       text
@@ -260,60 +225,87 @@
                     <v-card-text>
                       <div class="expandedInfo">
                         <!-- Description -->
-                        <p v-if="item.description">
-                          <b>Description:</b>
-                          {{ item.description }}
-                        </p>
+                        <v-row no-gutters>
+                          <v-col cols="12">
+                            <p v-if="item.description">
+                              <b>Description:</b>
+                              {{ item.description }}
+                            </p>
+                          </v-col>
+                        </v-row>
 
                         <!-- Category -->
-                        <p v-if="item.categories && item.categories.length > 0">
-                          <b>Categories:</b>
-                          {{ categoriesToString(item.categories) }}
-                        </p>
+                        <v-row no-gutters>
+                          <v-col cols="12">
+                            <p>
+                              <b>Categories:</b>
+                              {{ categoriesToString(item.categories) }}
+                            </p>
+                          </v-col>
+                        </v-row>
 
-                        <!-- Show on Feed -->
-                        <div v-if="item.alwaysOnFeed">
-                          <p><b>Show On Feed:</b> All Expenses</p>
-                        </div>
-                        <div v-else>
-                          <p><b>Show On Feed:</b> {{ categoriesOnFeed(item.categories) }}</p>
-                        </div>
+                        <v-row no-gutters>
+                          <!-- Show on Feed -->
+                          <v-col>
+                            <div v-if="item.alwaysOnFeed">
+                              <p><b>Show On Feed:</b> All Expenses</p>
+                            </div>
+                            <div v-else>
+                              <p><b>Show On Feed:</b> {{ categoriesOnFeed(item.categories) }}</p>
+                            </div>
+                          </v-col>
+                        </v-row>
 
                         <!-- Show Require URL -->
-                        <div v-if="item.requireURL">
-                          <p><b>Require URL:</b> All Expenses</p>
-                        </div>
-                        <div v-else>
-                          <p><b>Require URL:</b> {{ categoriesReqUrl(item.categories) }}</p>
-                        </div>
+                        <v-row no-gutters>
+                          <v-col>
+                            <div v-if="item.requireURL">
+                              <p><b>Require URL:</b> All Expenses</p>
+                            </div>
+                            <div v-else>
+                              <p><b>Require URL:</b> {{ categoriesReqUrl(item.categories) }}</p>
+                            </div>
+                          </v-col>
+                        </v-row>
+
+                        <!-- Show Require Receipt -->
+                        <v-row no-gutters>
+                          <v-col>
+                            <div v-if="item.requiredFlag">
+                              <p><b>Require Receipt:</b> All Expenses</p>
+                            </div>
+                            <div v-else>
+                              <p><b>Require Receipt:</b> {{ categoriesReqReceipt(item.categories) }}</p>
+                            </div>
+                          </v-col>
+                        </v-row>
 
                         <!-- Requires Recipient -->
-                        <p v-if="item.hasRecipient"><b>Requires Recipient:</b> Yes</p>
-                        <p v-else><b>Requires Recipient:</b> No</p>
+                        <v-row no-gutters>
+                          <v-col>
+                            <p v-if="item.hasRecipient"><b>Requires Recipient:</b> Yes</p>
+                            <p v-else><b>Requires Recipient:</b> No</p>
+                          </v-col>
+                        </v-row>
 
                         <!-- Flags -->
-                        <v-row>
-                          <v-col cols="12" sm="6" class="flag py-0">
+                        <v-row no-gutters>
+                          <v-col cols="12" sm="6" md="3" class="flag">
                             <p>Pro-rated:</p>
                             <v-icon v-if="item.proRated" id="marks" class="mr-1">mdi-check-circle-outline</v-icon>
                             <v-icon v-else class="mr-1" id="marks">mdi-close-circle-outline</v-icon>
                           </v-col>
-                          <v-col cols="12" sm="6" class="flag py-0">
+                          <v-col cols="12" sm="6" md="3" class="flag">
                             <p>Overdraft Allowed:</p>
                             <v-icon v-if="item.odFlag" id="marks" class="mr-1">mdi-check-circle-outline</v-icon>
                             <v-icon v-else class="mr-1" id="marks">mdi-close-circle-outline</v-icon>
                           </v-col>
-                          <v-col cols="12" sm="6" class="flag py-0">
+                          <v-col cols="12" sm="6" md="3" class="flag">
                             <p>Recurring:</p>
                             <v-icon v-if="item.recurringFlag" id="marks" class="mr-1">mdi-check-circle-outline</v-icon>
                             <v-icon v-else class="mr-1" id="marks">mdi-close-circle-outline</v-icon>
                           </v-col>
-                          <v-col cols="12" sm="6" class="flag py-0">
-                            <p>Receipt Required:</p>
-                            <v-icon v-if="item.requiredFlag" id="marks" class="mr-1">mdi-check-circle-outline</v-icon>
-                            <v-icon v-else class="mr-1" id="marks">mdi-close-circle-outline</v-icon>
-                          </v-col>
-                          <v-col cols="12" sm="6" class="flag py-0">
+                          <v-col cols="12" sm="6" md="3" class="flag">
                             <p>Inactive:</p>
                             <v-icon v-if="item.isInactive" id="marks" class="mr-1">mdi-check-circle-outline</v-icon>
                             <v-icon v-else class="mr-1" id="marks">mdi-close-circle-outline</v-icon>
@@ -322,9 +314,9 @@
                         <!-- End Flags -->
 
                         <!-- Accessible By -->
-                        <v-row v-if="userIsAdmin()">
+                        <v-row no-gutters v-if="userRoleIsAdmin()">
                           <!-- Display number of employees accessed by -->
-                          <div class="pt-2 px-3">
+                          <div>
                             <p>
                               <b>Access:</b>
                               {{ getAccess(item) }}
@@ -333,7 +325,7 @@
                           <!-- Button to view names of employees with access -->
                           <v-dialog v-model="showAccess" max-width="400px" scrollable>
                             <template v-slot:activator="{ on }">
-                              <v-btn class="px-1 mt-2" x-small outlined v-on="on">view</v-btn>
+                              <v-btn class="px-1 ml-3" x-small outlined v-on="on">view</v-btn>
                             </template>
                             <v-card color="#bc3825">
                               <!-- Dialog Title -->
@@ -362,9 +354,7 @@
                                           <v-list-item-title>{{ getEmployeeName(employee.id) }}</v-list-item-title>
                                         </v-list-item-content>
                                       </v-list-item>
-                                      <!-- <v-divider v-if="index != showAccessLength - 1" :key="index" inset></v-divider> -->
                                     </template>
-                                    <!-- <div v-if="showAccessLength == 0" class="noEmployees">No Employees</div> -->
                                   </v-list>
                                 </v-row>
                               </v-card-text>
@@ -417,7 +407,7 @@
       </v-col>
 
       <!-- Expense Type Form -->
-      <v-col v-if="userIsAdmin()" cols="12" lg="4">
+      <v-col v-if="userRoleIsAdmin()" cols="12" lg="4">
         <expense-type-form
           ref="form"
           :model="model"
@@ -436,10 +426,9 @@
 import api from '@/shared/api.js';
 import DeleteErrorModal from '@/components/modals/DeleteErrorModal.vue';
 import DeleteModal from '@/components/modals/DeleteModal.vue';
-import ExpenseTypeForm from '@/components/ExpenseTypeForm.vue';
-import { getRole } from '@/utils/auth';
+import ExpenseTypeForm from '@/components/expense-types/ExpenseTypeForm.vue';
 import _ from 'lodash';
-import { convertToMoneyString } from '@/utils/utils';
+import { convertToMoneyString, userRoleIsAdmin } from '@/utils/utils';
 import {
   updateStoreExpenseTypes,
   updateStoreEmployees,
@@ -477,7 +466,7 @@ function storeIsPopulated() {
  * @return - headers to show
  */
 function _headers() {
-  if (this.userIsAdmin()) {
+  if (this.userRoleIsAdmin()) {
     return this.headers;
   } else {
     return this.headers.filter((x) => x.show);
@@ -515,6 +504,9 @@ function categoriesToString(categories) {
     if (i < categories.length - 1) {
       string += ', ';
     }
+  }
+  if (string.length === 0) {
+    return 'None';
   }
   return string;
 } // categoriesToString
@@ -562,6 +554,31 @@ function categoriesReqUrl(categories) {
   }
   return string;
 } // categoriesReqUrl
+
+/**
+ * Returns a string of category names that require a receipt.
+ *
+ * @param categories - the categories to stringify
+ * @return string - the string of categories that require a receipt
+ */
+function categoriesReqReceipt(categories) {
+  let string = '';
+  //first filter out those that have a receipt required. then map each match to just it's name (now it's a list).
+  //finally join the array items with a comma.
+  string = _.map(
+    _.filter(categories, (cat) => {
+      return cat.requireReceipt;
+    }),
+    (match) => {
+      return match.name;
+    }
+  ).join(', ');
+
+  if (string.length == 0) {
+    string = 'None';
+  }
+  return string;
+} // categoriesReqReceipt
 
 /**
  * Changes the employee avatar to default if it fails to display original.
@@ -704,15 +721,6 @@ function filterExpenseTypes() {
       ? !expenseType.recurringFlag
       : this.filteredExpenseTypes;
   });
-
-  // filter expense types by receipt required
-  this.filteredExpenseTypes = _.filter(this.filteredExpenseTypes, (expenseType) => {
-    return this.filter.receipt == 'receipt'
-      ? expenseType.requiredFlag
-      : this.filter.receipt == 'noReceipt'
-      ? !expenseType.requiredFlag
-      : this.filteredExpenseTypes;
-  });
 } // filterExpenseTypes
 
 /**
@@ -842,17 +850,20 @@ function isInactive(expenseType) {
   return !expenseType.isInactive ? '' : 'Not Active';
 } // isInactive
 
+/**
+ * Load all data required to load the page initially.
+ */
 async function loadExpenseTypesData() {
   this.initialPageLoading = true;
   this.userInfo = this.$store.getters.user;
   [this.campfires] = await Promise.all([
-    this.userInfo.employeeRole === 'admin' ? api.getBasecampCampfires() : '',
-    this.userInfo.employeeRole === 'admin' && !this.$store.getters.employees ? this.updateStoreEmployees() : '',
-    this.userInfo.employeeRole === 'admin' && !this.$store.getters.avatars ? this.updateStoreAvatars() : '',
+    this.userRoleIsAdmin() ? api.getBasecampCampfires() : '',
+    this.userRoleIsAdmin() && !this.$store.getters.employees ? this.updateStoreEmployees() : '',
+    this.userRoleIsAdmin() && !this.$store.getters.avatars ? this.updateStoreAvatars() : '',
     this.refreshExpenseTypes()
   ]);
 
-  if (this.userInfo.employeeRole === 'admin') {
+  if (this.userRoleIsAdmin()) {
     this.employees = this.$store.getters.employees;
     // set employee avatar
     let avatars = this.$store.getters.basecampAvatars;
@@ -864,7 +875,7 @@ async function loadExpenseTypesData() {
     });
   }
   this.initialPageLoading = false;
-}
+} // loadExpenseTypesData
 
 /**
  * Returns a number with two decimal point precision as a string.
@@ -912,14 +923,14 @@ async function refreshExpenseTypes() {
   this.loading = true; // set loading status to true
   let budgetsWithExpenses;
   [budgetsWithExpenses] = await Promise.all([
-    !this.userIsAdmin() ? api.getEmployeeBudgets(this.userInfo.id) : '',
-    !this.userIsAdmin() && !this.$store.getters.budgets ? this.updateStoreBudgets() : '',
+    !this.userRoleIsAdmin() ? api.getEmployeeBudgets(this.userInfo.id) : '',
+    !this.userRoleIsAdmin() && !this.$store.getters.budgets ? this.updateStoreBudgets() : '',
     !this.$store.getters.expenseTypes ? this.updateStoreExpenseTypes() : ''
   ]);
   this.expenseTypes = this.$store.getters.expenseTypes;
 
   // filter expense types for the user
-  if (!this.userIsAdmin()) {
+  if (!this.userRoleIsAdmin()) {
     // create an array for the user expense types
     let expenseTypesFiltered = [];
     // get the active budgets for the employee
@@ -972,15 +983,6 @@ async function updateModelInTable() {
   this.$set(this.status, 'statusMessage', 'Item was successfully updated!');
   this.$set(this.status, 'color', 'green');
 } // updateModelInTable
-
-/**
- * Checks if the user is an admin. Returns true if the role is 'admin', otherwise returns false.
- *
- * @return boolean - whether the user is an admin
- */
-function userIsAdmin() {
-  return this.getRole() === 'admin';
-} // userIsAdmin
 
 /**
  * Validates if an expense type can be deleted. Returns true if the expense type has no expenses, otherwise returns
@@ -1058,7 +1060,7 @@ async function created() {
 // |--------------------------------------------------|
 
 /**
- * watcher for filter.active, filter.receipt, filter.recurring, filter.overdraft
+ * watcher for filter.active, filter.recurring, filter.overdraft
  */
 function watchFilterExpenseTypes() {
   this.filterExpenseTypes();
@@ -1115,8 +1117,7 @@ export default {
       filter: {
         active: 'active',
         overdraft: 'both',
-        recurring: 'both',
-        receipt: 'both'
+        recurring: 'both'
       }, // databale filters
       filteredExpenseTypes: [], // filtered expense types
       headers: [
@@ -1189,6 +1190,7 @@ export default {
     categoriesToString,
     categoriesOnFeed,
     categoriesReqUrl,
+    categoriesReqReceipt,
     changeAvatar,
     clearModel, // NOTE: Unused?
     clearStatus,
@@ -1203,7 +1205,6 @@ export default {
     getCampfire,
     getEmployeeList,
     getEmployeeName,
-    getRole,
     hasAccess,
     isInactive,
     loadExpenseTypesData,
@@ -1213,7 +1214,7 @@ export default {
     toTopOfForm,
     twoDecimals,
     updateModelInTable,
-    userIsAdmin,
+    userRoleIsAdmin,
     validateDelete,
     updateStoreAvatars,
     updateStoreBudgets,
@@ -1222,7 +1223,6 @@ export default {
   },
   watch: {
     'filter.active': watchFilterExpenseTypes,
-    'filter.receipt': watchFilterExpenseTypes,
     'filter.recurring': watchFilterExpenseTypes,
     'filter.overdraft': watchFilterExpenseTypes,
     storeIsPopulated: loadExpenseTypesData
@@ -1231,13 +1231,6 @@ export default {
 </script>
 
 <style scoped>
-.noEmployees {
-  text-align: center;
-  font-size: 20px;
-  margin-top: 20px;
-  margin-bottom: 20px;
-}
-
 a {
   color: black !important;
   text-decoration: none;

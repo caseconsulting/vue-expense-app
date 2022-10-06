@@ -13,8 +13,9 @@
               emit(`canceled-delete-${type}`);
               activate = false;
             "
-            >No, keep {{ type }}</v-btn
           >
+            No, keep {{ type }}
+          </v-btn>
           <v-spacer></v-spacer>
           <v-btn
             color="green darken-1"
@@ -24,8 +25,9 @@
               emit(`confirm-delete-${type}`);
               activate = false;
             "
-            >Delete</v-btn
           >
+            Delete
+          </v-btn>
           <v-spacer></v-spacer>
         </v-card-actions>
       </v-card>

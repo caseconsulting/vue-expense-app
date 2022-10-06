@@ -15,7 +15,7 @@
               <v-list-item :key="budgetYear" ripple @click.native="select(budgetYear)" class="list-hover">
                 <v-list-item-content>
                   <v-list-item-title>
-                    <h2 v-bind:class="{ 'center-text': true, 'underline-text': isCurrent(budgetYear) }">
+                    <h2 v-bind:class="{ 'text-center': true, 'text-decoration-underline': isCurrent(budgetYear) }">
                       {{ budgetYear }} - {{ budgetYear + 1 }}
                     </h2>
                   </v-list-item-title>
@@ -24,7 +24,6 @@
               <v-divider :key="index"></v-divider>
             </template>
           </div>
-          <!-- Budget List -->
           <div v-else>
             <template>
               <v-list-item>
@@ -43,7 +42,7 @@
           <template>
             <v-list-item ripple @click.native="activate = false" class="list-hover">
               <v-list-item-content>
-                <v-list-item-title><h2 class="center-text">Cancel</h2></v-list-item-title>
+                <v-list-item-title><h2 class="text-center">Cancel</h2></v-list-item-title>
               </v-list-item-content>
             </v-list-item>
           </template>
@@ -82,22 +81,6 @@ function getAnniversaryDate() {
 // |--------------------------------------------------|
 
 /**
- * Emits a message and data if it exists.
- *
- * @param msg - Message to emit
- * @param data - Data to emit
- */
-function emit(msg, data) {
-  if (data) {
-    // data exists
-    window.EventBus.$emit(msg, data);
-  } else {
-    // data does not exist
-    window.EventBus.$emit(msg);
-  }
-} // emit
-
-/**
  * Checks if a given budget year is the same as the current budget year displayed.
  *
  * @param budgetYear - int budget year to compare to current
@@ -116,7 +99,7 @@ function isCurrent(budgetYear) {
 function select(budgetYear) {
   let fiscalYear = moment(this.hireDate, IsoFormat);
   fiscalYear.year(budgetYear);
-  this.emit(`selected-budget-year`, fiscalYear);
+  window.EventBus.$emit(`selected-budget-year`, fiscalYear);
   this.activate = false;
 } // select
 
@@ -149,7 +132,6 @@ export default {
     };
   },
   methods: {
-    emit,
     isCurrent,
     select
   },
@@ -167,16 +149,8 @@ export default {
 </script>
 
 <style scoped>
-.center-text {
-  text-align: center;
-}
-
 .list-hover:hover {
   background-color: #f0f0f0;
   cursor: pointer;
-}
-
-.underline-text {
-  text-decoration: underline;
 }
 </style>

@@ -17,9 +17,9 @@
               </v-col>
             </v-row>
             <v-row justify="center" align="center">
-              <v-col xl="10" lg="10" md="10" sm="10" xs="2" class="pr-0"
-                ><v-file-input :rules="fileRules" v-model="file" label="Resume"></v-file-input
-              ></v-col>
+              <v-col xl="10" lg="10" md="10" sm="10" xs="2" class="pr-0">
+                <v-file-input :rules="fileRules" v-model="file" label="Resume"></v-file-input>
+              </v-col>
               <v-col xl="2" lg="2" md="2" sm="2" xs="2" class="text-center">
                 <v-btn @click="submit" color="green" outlined :disabled="!validFile || loading">Upload</v-btn>
               </v-col>
@@ -98,8 +98,9 @@
                           submitInfo('address', newAddress);
                           addressCanceled = true;
                         "
-                        >done</v-icon
                       >
+                        done
+                      </v-icon>
                     </template>
                     <span>Add Pending Change</span>
                   </v-tooltip>
@@ -151,8 +152,9 @@
                           submitInfo('phoneNumber', newPhoneNumber);
                           phoneCanceled = true;
                         "
-                        >done</v-icon
                       >
+                        done
+                      </v-icon>
                     </template>
                     <span>Add Pending Change</span>
                   </v-tooltip>
@@ -184,8 +186,9 @@
                           submitInfo('github', newPersonal.github);
                           gitHubCanceled = true;
                         "
-                        >done</v-icon
                       >
+                        done
+                      </v-icon>
                     </template>
                     <span>Add Pending Change</span>
                   </v-tooltip>
@@ -217,8 +220,9 @@
                           submitInfo('linkedIn', newPersonal.linkedIn);
                           linkedInCanceled = true;
                         "
-                        >done</v-icon
                       >
+                        done
+                      </v-icon>
                     </template>
                     <span>Add Pending Change</span>
                   </v-tooltip>
@@ -284,9 +288,9 @@
                     </v-tooltip>
                     <v-tooltip top>
                       <template v-slot:activator="{ on }">
-                        <v-icon v-on="on" large left color="green" @click="submitInfo('technology', index)"
-                          >done</v-icon
-                        >
+                        <v-icon v-on="on" large left color="green" @click="submitInfo('technology', index)">
+                          done
+                        </v-icon>
                       </template>
                       <span>Add Pending Change</span>
                     </v-tooltip>
@@ -314,6 +318,7 @@
                 :parser="true"
                 :school="edu"
                 :schoolIndex="index"
+                :attach="true"
                 @deny="edu.canceled = true"
                 @confirm="submitInfo('education', index, $event)"
               ></university-form>
@@ -322,6 +327,7 @@
                 :parser="true"
                 :school="edu"
                 :schoolIndex="index"
+                :attach="true"
                 @deny="edu.canceled = true"
                 @confirm="submitInfo('education', index, $event)"
               ></high-school-form>
@@ -330,6 +336,7 @@
                 :parser="true"
                 :service="edu"
                 :militaryIndex="index"
+                :attach="true"
                 @deny="edu.canceled = true"
                 @confirm="submitInfo('education', index, $event)"
               ></military-form>
@@ -371,14 +378,14 @@
           "
         >
           <v-col class="text-right">
-            <v-btn color="red" class="mx-0 my-3" outlined @click="confirmBackingOut = true" :x-small="isSmallScreen"
-              >Cancel Form Edits</v-btn
-            >
+            <v-btn color="red" class="mx-0 my-3" outlined @click="confirmBackingOut = true" :x-small="isSmallScreen">
+              Cancel Form Edits
+            </v-btn>
           </v-col>
           <v-col class="text-left">
-            <v-btn color="green" class="mx-0 my-3" outlined @click="submitForm" :x-small="isSmallScreen"
-              >Submit Form</v-btn
-            >
+            <v-btn color="green" class="mx-0 my-3" outlined @click="submitForm" :x-small="isSmallScreen">
+              Submit Form
+            </v-btn>
           </v-col>
         </v-row>
       </v-card-text>
@@ -405,9 +412,9 @@ import api from '@/shared/api.js';
 import { isEmpty, isSmallScreen } from '@/utils/utils';
 import _ from 'lodash';
 import CancelConfirmation from '@/components/modals/CancelConfirmation.vue';
-import UniversityForm from '@/components/employees/formTabs/education components/UniversityForm.vue';
-import MilitaryForm from '@/components/employees/formTabs/education components/MilitaryForm.vue';
-import HighSchoolForm from '@/components/employees/formTabs/education components/HighSchoolForm.vue';
+import UniversityForm from '@/components/employees/form-tabs/education-types/UniversityForm.vue';
+import MilitaryForm from '@/components/employees/form-tabs/education-types/MilitaryForm.vue';
+import HighSchoolForm from '@/components/employees/form-tabs/education-types/HighSchoolForm.vue';
 import FormSubmissionConfirmation from '@/components/modals/FormSubmissionConfirmation.vue';
 import { v4 as uuid } from 'uuid';
 
@@ -1207,9 +1214,6 @@ export default {
             'File unsupported, please submit a .png, .pdf, or a .jpeg file'
           );
         }
-      ],
-      requiredRules: [
-        (v) => !this.isEmpty(v) || 'This field is required. You must enter information or delete the field if possible'
       ],
       experienceRequired: [
         (v) => !this.isEmpty(v) || 'This field is required',

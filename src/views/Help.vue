@@ -95,7 +95,7 @@ function created() {
  */
 function canView(qRole) {
   return qRole == this.role || this.role == 'admin' || qRole == 'user';
-} // created
+} // canView
 
 // |--------------------------------------------------|
 // |                                                  |

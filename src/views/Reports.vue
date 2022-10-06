@@ -8,12 +8,34 @@
         >
       </router-link>
     </div>
-    <employee-contract-table v-if="!loading"></employee-contract-table>
+    <employee-reports-table v-if="!loading"></employee-reports-table>
   </div>
 </template>
 <script>
-import EmployeeContractTable from '@/components/EmployeeContractTable.vue';
+import EmployeeReportsTable from '@/components/reports/EmployeeReportsTable.vue';
 import { updateStoreEmployees } from '@/utils/storeUtils';
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                 LIFECYCLE HOOKS                  |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * Created lifecycle hook.
+ */
+async function created() {
+  if (this.$store.getters.storeIsPopulated) {
+    if (!this.$store.getters.employees) {
+      await this.updateStoreEmployees();
+    }
+    this.loading = false;
+  }
+  if (this.$route.params.requestedFilter) {
+    this.wasRedirected = true;
+    window.scrollTo(0, 0);
+  }
+} // created
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -37,23 +59,12 @@ function storeIsPopulated() {
 // |--------------------------------------------------|
 
 export default {
+  created,
   components: {
-    EmployeeContractTable
+    EmployeeReportsTable
   },
   computed: {
     storeIsPopulated
-  },
-  async created() {
-    if (this.$store.getters.storeIsPopulated) {
-      if (!this.$store.getters.employees) {
-        await this.updateStoreEmployees();
-      }
-      this.loading = false;
-    }
-    if (this.$route.params.requestedFilter) {
-      this.wasRedirected = true;
-      window.scrollTo(0, 0);
-    }
   },
   data() {
     return {

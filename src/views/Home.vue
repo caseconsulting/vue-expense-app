@@ -77,16 +77,16 @@
 
 <script>
 import api from '@/shared/api.js';
-import ActivityFeed from '@/components/ActivityFeed';
-import AvailableBudgets from '@/components/AvailableBudgets.vue';
+import ActivityFeed from '@/components/home/ActivityFeed.vue';
+import AvailableBudgets from '@/components/shared/AvailableBudgets.vue';
 import moment from 'moment-timezone';
 moment.tz.setDefault('America/New_York');
-import TwitterFeed from '@/components/TwitterFeed';
+import TwitterFeed from '@/components/home/TwitterFeed.vue';
 import _ from 'lodash';
 import { isEmpty, isMobile, getCurrentBudgetYear, updateEmployeeLogin } from '@/utils/utils';
 import { updateStoreExpenseTypes, updateStoreBudgets } from '@/utils/storeUtils';
-import QuickBooksTimeData from '@/components/QuickBooksTimeData';
-import AnniversaryCard from '@/components/AnniversaryCard';
+import QuickBooksTimeData from '@/components/shared/quickbooks/QuickBooksTimeData';
+import AnniversaryCard from '@/components/shared/AnniversaryCard';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -108,17 +108,6 @@ function storeIsPopulated() {
 // |                     METHODS                      |
 // |                                                  |
 // |--------------------------------------------------|
-
-/**
- * Increment the actual time by a second.
- */
-function addOneSecondToActualTimeEverySecond() {
-  var component = this;
-  component.actualTime = moment().format('X');
-  setTimeout(function () {
-    component.addOneSecondToActualTimeEverySecond();
-  }, 1000);
-} // addOneSecondToActualTimeEverySecond
 
 /**
  * Create the events to populate the activity feed
@@ -506,8 +495,23 @@ async function created() {
     this.loading = false;
     await this.loadHomePageData();
   }
-  this.addOneSecondToActualTimeEverySecond();
 } // created
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     WATCHERS                     |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * A watcher for when the vuex store is populated with necessary data.
+ */
+async function watchStoreIsPopulated() {
+  if (this.$store.getters.storeIsPopulated) {
+    this.loading = false; // get rid of skeleton loaders (will still be loading for individual components)
+    this.loadHomePageData();
+  }
+} // watchStoreIsPopulated
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -530,7 +534,6 @@ export default {
   data() {
     return {
       accessibleBudgets: null,
-      actualTime: moment().format('X'),
       aggregatedAwards: [],
       aggregatedExpenses: [],
       allUserBudgets: null, // all user budgets
@@ -559,7 +562,6 @@ export default {
     };
   },
   methods: {
-    addOneSecondToActualTimeEverySecond,
     createEvents,
     getCurrentBudgetYear,
     getEmployeeAwards,
@@ -577,19 +579,7 @@ export default {
     updateStoreBudgets
   },
   watch: {
-    async storeIsPopulated() {
-      if (this.$store.getters.storeIsPopulated) {
-        this.loading = false; // get rid of skeleton loaders (will still be loading for individual components)
-        this.loadHomePageData();
-      }
-    }
+    storeIsPopulated: watchStoreIsPopulated
   }
 };
 </script>
-
-<style scoped>
-.links {
-  padding-bottom: 16px;
-  text-align: center;
-}
-</style>

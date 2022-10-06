@@ -106,7 +106,7 @@
               <v-tooltip top>
                 <template v-slot:activator="{ on }">
                   <convert-employee-to-csv
-                    v-if="userIsAdmin()"
+                    v-if="userRoleIsAdmin()"
                     :midAction="midAction"
                     :employee="item"
                     v-on="on"
@@ -180,7 +180,7 @@
           <!-- Last Login Item Slot -->
           <template v-slot:[`item.lastLoginSeconds`]="{ item }">
             <p
-              v-if="userIsAdmin()"
+              v-if="userRoleIsAdmin()"
               :class="{ inactiveStyle: isInactive(item), selectFocus: isFocus(item) }"
               class="mb-0"
             >
@@ -214,12 +214,12 @@
         <!-- Download employee csv button -->
         <v-card-actions class="justify-end">
           <convert-employees-to-csv
-            v-if="userIsAdmin()"
+            v-if="userRoleIsAdmin()"
             :midAction="midAction"
             :employees="filteredEmployees"
           ></convert-employees-to-csv>
           <generate-csv-eeo-report
-            v-if="userIsAdmin()"
+            v-if="userRoleIsAdmin()"
             :midAction="midAction"
             :employees="filteredEmployees"
           ></generate-csv-eeo-report>
@@ -240,16 +240,24 @@
 <script>
 import api from '@/shared/api.js';
 import { updateStoreEmployees, updateStoreAvatars } from '@/utils/storeUtils';
-import ConvertEmployeesToCsv from '@/components/ConvertEmployeesToCsv.vue';
+import ConvertEmployeesToCsv from '@/components/employees/csv/ConvertEmployeesToCsv.vue';
 import DeleteErrorModal from '@/components/modals/DeleteErrorModal.vue';
 import DeleteModal from '@/components/modals/DeleteModal.vue';
 import EmployeeForm from '@/components/employees/EmployeeForm.vue';
 import moment from 'moment-timezone';
 import _ from 'lodash';
-import { getRole } from '@/utils/auth';
-import { isEmpty, isFullTime, isInactive, isPartTime, monthDayYearFormat, storeIsPopulated } from '@/utils/utils';
-import ConvertEmployeeToCsv from '../components/ConvertEmployeeToCsv.vue';
-import GenerateCsvEeoReport from '@/components/GenerateCsvEeoReport.vue';
+import ConvertEmployeeToCsv from '@/components/employees/csv/ConvertEmployeeToCsv.vue';
+import GenerateCsvEeoReport from '@/components/employees/csv/GenerateCsvEeoReport.vue';
+import {
+  isEmpty,
+  isFullTime,
+  isInactive,
+  isPartTime,
+  monthDayYearFormat,
+  storeIsPopulated,
+  userRoleIsAdmin,
+  userRoleIsManager
+} from '@/utils/utils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -369,12 +377,12 @@ function handleClick(item) {
 } //handleClick
 
 /**
- * Checks to see if the user has admin permissions. Returns true if the user's role is an admin or manager, otherwise returns false.
+ * checks to see if the user has admin permissions
  *
- * @return boolean - true if user's employeeRole is either a admin or a manager
+ * @return boolean - whether the user is an admin or manager
  */
 function hasAdminPermissions() {
-  return this.getRole() === 'admin' || this.getRole() === 'manager';
+  return this.userRoleIsAdmin() || this.userRoleIsManager();
 } // hasAdminPermissions
 
 /**
@@ -421,15 +429,6 @@ function renderCreateEmployee() {
   this.createEmployee = true;
   this.childKey++;
 } // renderCreateEmployee
-
-/**
- * Checks to see if the user is an admin. Returns true if the user's role is an admin, otherwise returns false.
- *
- * @return - whether of not the user is an admin
- */
-function userIsAdmin() {
-  return this.getRole() === 'admin';
-} // userIsAdmin
 
 /**
  * Validates if an employee can be deleted. Returns true if the employee has no expenses, otherwise returns false.
@@ -506,7 +505,7 @@ async function created() {
       return !adminPermissions.includes(header.value);
     });
   }
-  if (!this.userIsAdmin()) {
+  if (!this.userRoleIsAdmin()) {
     this.headers = _.filter(this.headers, (header) => {
       return !adminSpecific.includes(header.value);
     });
@@ -537,6 +536,14 @@ function watchFilterActive() {
   // filter employees based on datatable active filter
   this.filterEmployees();
 } // watchFilterActive
+
+/**
+ * In the case that the page has been force reloaded (and the store cleared)
+ * this watcher will be activated when the store is populated again.
+ */
+async function watchStoreIsPopulated() {
+  if (this.storeIsPopulated) await this.refreshEmployees();
+} // watchStoreIsPopulated
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -667,7 +674,6 @@ export default {
     employeePath,
     filterEmployees,
     getLoginDate,
-    getRole,
     handleClick,
     hasAdminPermissions,
     isEmpty,
@@ -678,18 +684,15 @@ export default {
     monthDayYearFormat,
     refreshEmployees,
     renderCreateEmployee,
-    userIsAdmin,
+    userRoleIsAdmin,
+    userRoleIsManager,
     validateDelete,
     updateStoreAvatars,
     updateStoreEmployees
   },
   watch: {
     'filter.active': watchFilterActive,
-    storeIsPopulated: async function () {
-      // in the case that the page has been force reloaded (and the store cleared)
-      // this watcher will be activated when the store is populated again.
-      if (this.storeIsPopulated) await this.refreshEmployees();
-    }
+    storeIsPopulated: watchStoreIsPopulated
   }
 };
 </script>

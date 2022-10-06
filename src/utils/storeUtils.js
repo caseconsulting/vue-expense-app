@@ -8,7 +8,6 @@ import api from '@/shared/api.js';
 
 /**
  * Update store with latest user data
- *
  */
 export async function updateStoreUser() {
   // getUser
@@ -18,7 +17,6 @@ export async function updateStoreUser() {
 
 /**
  * Update store with latest employee data
- *
  */
 export async function updateStoreEmployees() {
   // getEmployees
@@ -28,7 +26,6 @@ export async function updateStoreEmployees() {
 
 /**
  * Update store with latest Basecamp avatars
- *
  */
 export async function updateStoreAvatars() {
   let avatars = await api.getBasecampAvatars();
@@ -37,7 +34,6 @@ export async function updateStoreAvatars() {
 
 /**
  * Update store with latest Basecamp campfires
- *
  */
 export async function updateStoreCampfires() {
   let campfires = await api.getBasecampCampfires();
@@ -46,7 +42,6 @@ export async function updateStoreCampfires() {
 
 /**
  * Update store with users budgets
- *
  */
 export async function updateStoreBudgets() {
   let user = this.$store.getters.user;
@@ -56,7 +51,6 @@ export async function updateStoreBudgets() {
 
 /**
  * Update store with latest expense type data
- *
  */
 export async function updateStoreExpenseTypes() {
   // getExpenseTypes

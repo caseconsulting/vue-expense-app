@@ -4,8 +4,8 @@
       <v-card>
         <v-card-title class="headline">Switch Role</v-card-title>
         <v-card-subtitle v-if="roleOriginial" class="mb-0 pb-0"
-          >Current Role: {{ roleOriginial.charAt(0).toUpperCase() + roleOriginial.slice(1) }}</v-card-subtitle
-        >
+          >Current Role: {{ roleOriginial.charAt(0).toUpperCase() + roleOriginial.slice(1) }}
+        </v-card-subtitle>
         <v-card-actions class="my-0 py-0">
           <v-radio-group v-model="roleSelected" mandatory>
             <v-radio
@@ -34,6 +34,7 @@
 <script>
 import api from '@/shared/api.js';
 import { getRole, setRole } from '@/utils/auth';
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                 LIFECYCLE HOOKS                  |

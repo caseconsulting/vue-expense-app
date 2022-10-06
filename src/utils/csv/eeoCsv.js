@@ -69,7 +69,7 @@ export function convertEmployees(employees) {
       y = jobCategoriesPos[givenJobCat];
     }
     return [y, x];
-  }
+  } // convertEmployees
 
   /**
    * fills in empty values in `eeoData` within the range with `filler`. will skip
@@ -93,7 +93,7 @@ export function convertEmployees(employees) {
         }
       }
     }
-  }
+  } // fill
 
   // data types
   const declinedInformation = [

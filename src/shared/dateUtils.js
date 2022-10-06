@@ -59,6 +59,7 @@ function parseDate(date) {
 
 /**
  * Takes an date object in in slash format MM/YYYY and translates it to valid ISO format YYYY-MM
+ *
  * @param {Date} date date in ISO format 2020-01
  */
 function parseDateMonthYear(date) {

@@ -6,7 +6,7 @@
 function fullName(employee) {
   const middleName = employee.middleName ? employee.middleName.trim() : '';
   return `${employee.firstName} ${middleName ? middleName + ' ' : ''}${employee.lastName}`;
-}
+} // fullName
 
 /**
  * Given an employee returns the employee first and last name. Ex. John Jacob Doe -> John Doe
@@ -15,7 +15,7 @@ function fullName(employee) {
  */
 function firstAndLastName(employee) {
   return `${employee.firstName}` + ' ' + `${employee.lastName}`;
-}
+} // firstAndLastName
 
 /**
  * Given an employee returns the employee nickname (when available) and last name
@@ -25,7 +25,7 @@ function firstAndLastName(employee) {
 function nicknameAndLastName(employee) {
   let firstName = employee.nickname ? employee.nickname : employee.firstName;
   return `${firstName}` + ' ' + `${employee.lastName}`;
-}
+} // nicknameAndLastName
 
 export default {
   fullName,

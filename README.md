@@ -169,7 +169,7 @@ https://github.com/caseconsulting/vue-expense-app/blob/master/src/components/cha
 
 **Nightwatch utils**
 
-https://github.com/caseconsulting/vue-expense-app/blob/master/unitTests/utils/README.md
+https://github.com/caseconsulting/vue-expense-app/blob/master/unit-tests/utils/README.md
 
 ### External documentation
 

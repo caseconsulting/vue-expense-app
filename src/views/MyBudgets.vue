@@ -20,9 +20,7 @@
       <!-- Title -->
       <v-col cols="12" lg="8" class="d-flex justify-center align-center">
         <div v-if="!loading" :class="isMobile ? 'center' : ''">
-          <h1 v-if="hasAccessToBudgets">
-            Budget Statistics for {{ employee.nickname || employee.firstName }} {{ employee.lastName }}
-          </h1>
+          <h1 v-if="hasAccessToBudgets">My Budgets</h1>
           <h1 v-else>No Budgets Available for {{ employee.nickname || employee.firstName }} {{ employee.lastName }}</h1>
         </div>
         <v-skeleton-loader v-else-if="loading && !isMobile" type="text" width="90%"></v-skeleton-loader>
@@ -91,10 +89,10 @@
 
 <script>
 import api from '@/shared/api.js';
-import BudgetChart from '@/components/BudgetChart.vue';
-import BudgetTable from '@/components/BudgetTable.vue';
-import ExpenseForm from '@/components/ExpenseForm.vue';
-import AnniversaryCard from '@/components/AnniversaryCard.vue';
+import BudgetChart from '@/components/charts/custom-charts/BudgetChart.vue';
+import BudgetTable from '@/components/budgets/BudgetTable.vue';
+import ExpenseForm from '@/components/expenses/ExpenseForm.vue';
+import AnniversaryCard from '@/components/shared/AnniversaryCard.vue';
 const moment = require('moment-timezone');
 moment.tz.setDefault('America/New_York');
 import { isMobile, getCurrentBudgetYear } from '@/utils/utils';
@@ -118,7 +116,8 @@ function storeIsPopulated() {
 } // storeIsPopulated
 
 /**
- * Viewing the current active budget year. Returns true if the budget year being viwed is todays budget.
+ * Viewing the current active budget year. Returns true if the
+ * budget year being viwed is todays budget.
  *
  * @return boolean - viewing the current active year budget
  */
@@ -223,12 +222,12 @@ async function created() {
 } // created
 
 /**
- * beforeDestroy lifecycle hook
+ * beforeDestroy lifecycle hook.
  */
 function beforeDestroy() {
   window.EventBus.$off('updateData');
   window.EventBus.$off('selected-budget-year');
-} //beforeDestroy
+} // beforeDestroy
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -237,7 +236,7 @@ function beforeDestroy() {
 // |--------------------------------------------------|
 
 /**
- * watcher of employ - refresh employee
+ * Watcher of employ - refresh employee.
  */
 async function watchEmploy() {
   await this.refreshEmployee();

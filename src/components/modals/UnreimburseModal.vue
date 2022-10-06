@@ -27,8 +27,9 @@
               emit(`confirm-unreimburse-expense`);
               activate = false;
             "
-            >Unreimburse</v-btn
           >
+            Unreimburse
+          </v-btn>
           <v-spacer></v-spacer>
         </v-card-actions>
       </v-card>
@@ -88,8 +89,7 @@ export default {
     emit
   },
   props: [
-    'toggleUnreimburseModal', // dialog activator
-    'expense' // expense to unreimburse
+    'toggleUnreimburseModal' // dialog activator
   ],
   watch: {
     toggleUnreimburseModal: watchToggleUnreimburseModal

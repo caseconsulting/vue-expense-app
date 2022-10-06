@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { API_CONFIG } from './api-variables';
+import { API_CONFIG } from './apiVariables';
 import { getAccessToken } from '@/utils/auth';
 const EXPENSE_TYPES = 'expense-types';
 const EXPENSES = 'expenses';
@@ -129,7 +129,6 @@ async function getEmployeeBudget(id, expenseTypeId, date) {
 /**
  * Gets expense types for an employee
  *
- * @param id - the id of the employee
  * @return - expense types for employee
  */
 async function getEmployeeExpenseTypes() {
@@ -165,14 +164,6 @@ async function getEmployeeBudgets(id) {
 async function getAllEvents() {
   return execute('get', `/${UTILITY}/getAllEvents`);
 } // getAllEvents
-
-// function getBudgetsByDate(id, date) {
-//   return execute('get', `/${UTILITY}/getEmployeeBudgets/${id}/${date}`);
-// }
-
-// function getBudgetsByDateAndType(id, date, expenseTypeId) {
-//   return execute('get', `/${UTILITY}/getEmployeeBudgets/${id}/${date}/${expenseTypeId}`);
-// }
 
 /**
  * gets all the audits for a specific type in a specific range
@@ -278,15 +269,6 @@ async function deleteItem(type, id) {
 async function getAllAggregateExpenses() {
   return await execute('get', `/${UTILITY}/getAllAggregateExpenses`);
 } // getAllAggregateExpenses
-
-/**
- * gets employee role
- *
- * @return - user role
- */
-async function getRole() {
-  return await execute('get', 'info/role');
-} // getRole
 
 /**
  * gets current user
@@ -535,7 +517,6 @@ export default {
   getLocation,
   getPTOBalances,
   getResume,
-  getRole,
   getMonthlyHours,
   getTechSkills,
   getTwitterToken,

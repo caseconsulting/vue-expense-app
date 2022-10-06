@@ -15,8 +15,9 @@
               emit(`confirm-reimburse`);
               activate = false;
             "
-            >Reimburse</v-btn
           >
+            Reimburse
+          </v-btn>
           <v-spacer></v-spacer>
         </v-card-actions>
       </v-card>

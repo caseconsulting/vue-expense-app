@@ -3,6 +3,7 @@ import dateUtils from '@/shared/dateUtils';
 import MobileDetect from 'mobile-detect';
 import _ from 'lodash';
 import { v4 as uuid } from 'uuid';
+import { getRole } from '@/utils/auth';
 const IsoFormat = 'YYYY-MM-DD';
 const moment = require('moment-timezone');
 moment.tz.setDefault('America/New_York');
@@ -37,7 +38,7 @@ export function formatDate(date) {
  */
 export function formatDateMonthYear(date) {
   return dateUtils.formatDateMonthYear(date);
-} // formatDate
+} // formatDateMonthYear
 
 /**
  * Returns a date formated from YYYY-MM-DD to MM/DD/YYYY.
@@ -70,6 +71,7 @@ export function formatDateSlashToDash(date) {
 /**
  * Gets the current active anniversary budget year starting date in isoformat.
  *
+ * @param hireDate - The hire date of an employee (YYYY-MM-DD)
  * @return String - current active anniversary budget date (YYYY-MM-DD)
  */
 export function getCurrentBudgetYear(hireDate) {
@@ -87,6 +89,7 @@ export function getCurrentBudgetYear(hireDate) {
  * Check if today is between a set of given dates in isoformat. Returns true if today is between the two dates,
  * otherwise returns false.
  *
+ * @param date - the date to compare
  * @param start - start date
  * @param end - end date
  * @return boolean - today is in set of dates
@@ -95,7 +98,7 @@ export function isBetweenDates(date, start, end) {
   let startDate = moment(start, IsoFormat);
   let endDate = moment(end, IsoFormat);
   return moment(date).isBetween(startDate, endDate, 'day', '[]');
-} // betweenDates
+} // isBetweenDates
 
 /**
  * Checks if a value is empty. Returns true if the value is null or an empty/blank string.
@@ -261,6 +264,42 @@ export async function updateEmployeeLogin(employee) {
 export function storeIsPopulated() {
   return this.$store.getters.storeIsPopulated;
 } // storeIsPopulated
+
+/**
+ * Checks whether the current user role is admin
+ *
+ * @return - boolean: true if the user role is admin
+ */
+export function userRoleIsAdmin() {
+  return getRole() === 'admin';
+} //userRoleIsAdmin
+
+/**
+ * Checks whether the current user role is manager
+ *
+ * @return - boolean: true if the user role is manager
+ */
+export function userRoleIsManager() {
+  return getRole() === 'manager';
+} //userRoleIsManager
+
+/**
+ * Checks whether the current user role is user
+ *
+ * @return - boolean: true if the user role is a user
+ */
+export function userRoleIsUser() {
+  return getRole() === 'user';
+} //userRoleIsUser
+
+/**
+ * Checks whether the current user role is intern
+ *
+ * @return - boolean: true if the user role is intern
+ */
+export function userRoleIsIntern() {
+  return getRole() === 'intern';
+} //userRoleIsIntern
 
 export const countryList = [
   'United States',

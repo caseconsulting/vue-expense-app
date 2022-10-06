@@ -19,8 +19,9 @@
               emit('canceled-form');
               activate = false;
             "
-            >Ok</v-btn
           >
+            Ok
+          </v-btn>
           <v-spacer></v-spacer>
         </v-card-actions>
       </v-card>
