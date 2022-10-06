@@ -128,10 +128,10 @@ async function checkReimbursements() {
     !this.$store.getters.expenseTypes ? this.updateStoreExpenseTypes() : ''
   ]);
 
-  let expenseTypes = _.filter(this.$store.getters.expenseTypes, (t) => {
+  let activeExpenseTypes = _.filter(this.$store.getters.expenseTypes, (t) => {
     return !t.isInactive;
   });
-  expenseTypes = _.map(expenseTypes, 'id');
+  let expenseTypes = _.map(activeExpenseTypes, 'id');
   expenses = _.filter(expenses, (e) => {
     return expenseTypes.includes(e.expenseTypeId);
   });
@@ -146,6 +146,15 @@ async function checkReimbursements() {
       if ((expense.reimbursementWasSeen == undefined || !expense.reimbursementWasSeen) && expense.reimbursedDate) {
         reimbusementsCount++;
         expense.reimbursementWasSeen = true;
+        // if expense doesnt have reciept and expense type requires a reciept then set reciept to a dummy reciept
+        let expenseType = _.filter(activeExpenseTypes, (t) => {
+          return t.id == expense.expenseTypeId;
+        })[0];
+        if (!expense.receipt && expenseType.requiredFlag) {
+          expense.receipt = 'doNotOpenNonExistant.png';
+        }
+
+        // update the expense
         promises.push(api.updateItem(api.EXPENSES, expense));
       }
     });
