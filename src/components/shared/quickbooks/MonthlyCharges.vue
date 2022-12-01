@@ -237,12 +237,13 @@ function changeMonthData() {
       this.remainingHours = this.workHours - this.totalHours;
     }
   } else {
-    // if the user switches back to this month's hours after seeing the previos month's hours
+    // if the user switches back to this month's hours after seeing the previous month's hours
     if (_.isNil(this.quickBooksTimeData.previousHours)) {
       this.monthlyHourError = true;
     } else {
-      this.workedHours = this.quickBooksTimeData.previousHours;
-      this.totalHours = this.workedHours + this.todaysHours + this.futureHours;
+      this.previousHours = this.quickBooksTimeData.previousHours;
+      this.workedHours = this.previousHours + this.todaysHours;
+      this.totalHours = this.previousHours + this.todaysHours + this.futureHours;
       this.calcWorkHours();
       this.remainingHours = this.workHours - this.totalHours;
     }
@@ -305,10 +306,11 @@ async function setMonthlyCharges() {
     ) {
       this.monthlyHourError = true;
     } else {
-      this.workedHours = this.quickBooksTimeData.previousHours;
+      this.previousHours = this.quickBooksTimeData.previousHours;
       this.todaysHours = this.quickBooksTimeData.todaysHours;
       this.futureHours = this.quickBooksTimeData.futureHours;
-      this.totalHours = this.workedHours + this.todaysHours + this.futureHours;
+      this.workedHours = this.previousHours + this.todaysHours;
+      this.totalHours = this.previousHours + this.todaysHours + this.futureHours;
       this.calcWorkHours();
       this.remainingHours = this.workHours - this.totalHours;
       this.userWorkDays = this.remainingWorkDays;
@@ -384,6 +386,7 @@ export default {
       userWorkDays: 0, // work days remaining this month
       workDayHours: 8, // average work day hours
       workedHours: 0, // total hours worked this month
+      previousHours: 0, // total hours recorded prior to today
       year: '' // current year
     };
   },
