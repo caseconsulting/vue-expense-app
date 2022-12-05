@@ -283,7 +283,7 @@ async function createEvents() {
     if (startDate.startOf('day').isSame(endDate.startOf('day'), 'days')) {
       event.text = `${a.title}`;
     } else {
-      event.text = `${a.title} starts today until ${endDate.format('LL')}!`;
+      event.text = `${a.title} goes until ${endDate.format('LL')}!`;
     }
     event.icon = 'mdi-calendar';
     event.type = 'Event';
