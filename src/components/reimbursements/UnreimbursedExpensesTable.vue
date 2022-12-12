@@ -310,7 +310,7 @@ function createExpenses(aggregatedData) {
       failed: false
     };
     // high fives should have a dynamic description
-    if (expense.expenseTypeId == 'a7dfcbe0-3c85-4891-86af-961cb4df27f8') {
+    if (expense.budgetName == 'High Five') {
       const employees = this.$store.getters.employees;
       // get high fiver
       const giver = _.find(employees, (e) => {
@@ -322,7 +322,7 @@ function createExpenses(aggregatedData) {
       });
       expense.description = `
       ${employeeUtils.nicknameAndLastName(giver)} gave
-      ${employeeUtils.nicknameAndLastName(recipient)} a High Five: ${expense.note}`;
+      ${employeeUtils.nicknameAndLastName(recipient)} a High Five`;
     }
     return _.merge(expense, additionalAttributes);
   });
