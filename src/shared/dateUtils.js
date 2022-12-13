@@ -1,5 +1,100 @@
-const moment = require('moment-timezone');
-moment.tz.setDefault('America/New_York');
+const dayjs = require('dayjs');
+var utc = require('dayjs/plugin/utc');
+var timezone = require('dayjs/plugin/timezone');
+var customParseFormat = require('dayjs/plugin/customParseFormat');
+var localizedFormat = require('dayjs/plugin/localizedFormat');
+dayjs.extend(localizedFormat);
+dayjs.extend(customParseFormat);
+dayjs.extend(utc);
+dayjs.extend(timezone);
+dayjs.tz.setDefault('America/New_York');
+
+// constants
+export const DEFAULT_ISOFORMAT = 'YYYY-MM-DD';
+export const FORMATTED_ISOFORMAT = 'MM/DD/YYYY';
+export const PARSED_ISOFORMAT = 'YYYY-MM-DD';
+
+/**
+ * Adds an amount to the given date.
+ *
+ * EXAMPLE: add('2022-10-16', 1, 'M') => OUTPUT: '2022-11-16'
+ *
+ * @param {String} date - The date to add to
+ * @param {Number} amount - The amount to add
+ * @param {String} granularity - The unit to add (https://day.js.org/docs/en/manipulate/start-of#list-of-all-available-units)
+ * @returns String - The added date
+ */
+export function add(date, amount, granularity) {
+  return dayjs(date).add(amount, granularity).format(DEFAULT_ISOFORMAT);
+} // add
+
+/**
+ * Subtracts an amount from the given date.
+ *
+ * EXAMPLE: subtract('2022-12-24', 2, 'd') => OUTPUT: '2022-12-22'
+ *
+ * @param {String} date - The date to subtract from
+ * @param {Number} amount - The amount to subtract
+ * @param {String} granularity - The unit to subtract (https://day.js.org/docs/en/manipulate/start-of#list-of-all-available-units)
+ * @returns String - The subtracted date
+ */
+export function subtract(date, amount, granularity) {
+  return dayjs(date).subtract(amount, granularity).format(DEFAULT_ISOFORMAT);
+} // subtract
+
+/**
+ * Verifies if the first date is after the second date in time.
+ *
+ * EXAMPLES: isAfter('2022-12-24', '2022-12-23')         => OUTPUT: true
+ *           isAfter('2022-12-23', '2022-12-23')         => OUTPUT: false
+ *           isAfter('2022-12-23', '2022-12-18', 'M')    => OUTPUT: true
+ *
+ * @param {String} date1 - The first date
+ * @param {String} date2 - The second date
+ * @param {String} granularity - (OPTIONAL) The unit to compare (https://day.js.org/docs/en/manipulate/start-of#list-of-all-available-units)
+ * @returns Boolean - True if the first date comes after the second date, false otherwise
+ */
+export function isAfter(date1, date2, granularity) {
+  if (granularity) {
+    return dayjs(date1, DEFAULT_ISOFORMAT, true).isAfter(dayjs(date2, DEFAULT_ISOFORMAT, true), granularity);
+  } else {
+    return dayjs(date1, DEFAULT_ISOFORMAT, true).isAfter(dayjs(date2, DEFAULT_ISOFORMAT, true));
+  }
+} // isAfter
+
+/**
+ * Verifies if the first date is before the second date in time.
+ *
+ * EXAMPLES: isBefore('2022-12-23', '2022-12-24')         => OUTPUT: true
+ *           isBefore('2022-12-16', '2022-12-16')         => OUTPUT: false
+ *           isBefore('2022-12-14', '2022-12-16', 'M')    => OUTPUT: false
+ *
+ * @param {String} date1 - The first date
+ * @param {String} date2 - The second date
+ * @param {String} granularity - (OPTIONAL) The unit to compare (https://day.js.org/docs/en/manipulate/start-of#list-of-all-available-units)
+ * @returns Boolean - True if the first date comes before the second date, false otherwise
+ */
+export function isBefore(date1, date2, granularity) {
+  if (granularity) {
+    return dayjs(date1, DEFAULT_ISOFORMAT, true).isBefore(dayjs(date2, DEFAULT_ISOFORMAT, true), granularity);
+  } else {
+    return dayjs(date1, DEFAULT_ISOFORMAT, true).isBefore(dayjs(date2, DEFAULT_ISOFORMAT, true));
+  }
+} // isBefore
+
+/**
+ * Formats a given date and returns the output of the newly formatted date.
+ *
+ * EXAMPLES: format('2022-12-23', 'MM/DD/YYYY')         => OUTPUT: '12/23/2022'
+ *           format('12/16/2022', 'YYYY-MM-DD')         => OUTPUT: '2022-12-16'
+ *           format('12/23/2022', 'LLL')                => OUTPUT: 'December 23, 2022 12:00 AM'
+ *
+ * @param {String} date - The date to format
+ * @param {String} format - The format output (https://day.js.org/docs/en/display/format)
+ */
+export function format(date, format) {
+  return dayjs(date).format(format);
+} // format
 
 /**
  * formats the given date in MM/DD/YYYY
@@ -11,7 +106,7 @@ function formatDate(date) {
   if (!date) return null;
   else {
     const [year, month, day] = date.split('-');
-    if (moment(`${month}/${day}/${year}`, 'MM/DD/YYYY', true).isValid()) {
+    if (dayjs(`${month}/${day}/${year}`, 'MM/DD/YYYY', true).isValid()) {
       return `${month}/${day}/${year}`;
     } else {
       return null;
@@ -27,7 +122,7 @@ function formatDateMonthYear(date) {
   if (!date) return null;
   else {
     const [year, month] = date.split('-');
-    if (moment(`${month}/${year}`, 'MM/YYYY', true).isValid()) {
+    if (dayjs(`${month}/${year}`, 'MM/YYYY', true).isValid()) {
       return `${month}/${year}`;
     } else {
       return null;
@@ -79,8 +174,14 @@ function parseDateMonthYear(date) {
 } //parseDateMonthYear
 
 export default {
+  DEFAULT_ISOFORMAT,
+  FORMATTED_ISOFORMAT,
+  PARSED_ISOFORMAT,
+  format,
   formatDate,
   formatDateMonthYear,
+  isAfter,
+  isBefore,
   parseDate,
   parseDateMonthYear
 };
