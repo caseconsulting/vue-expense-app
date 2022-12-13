@@ -170,8 +170,6 @@ import BudgetChart from '@/components/charts/custom-charts/BudgetChart.vue';
 import ResumeParser from '@/components/modals/ResumeParser';
 import DeleteModal from '@/components/modals/DeleteModal';
 
-const IsoFormat = 'YYYY-MM-DD';
-
 // |--------------------------------------------------|
 // |                                                  |
 // |                     METHODS                      |
@@ -382,9 +380,9 @@ function mounted() {
     this.currentTab = tab;
   });
 
-  window.EventBus.$on('selected-budget-year', (data) => {
-    if (data.format(IsoFormat) != this.fiscalDateView) {
-      this.fiscalDateView = data.format(IsoFormat);
+  window.EventBus.$on('selected-budget-year', (date) => {
+    if (date != this.fiscalDateView) {
+      this.fiscalDateView = date;
     }
   });
 } // mounted

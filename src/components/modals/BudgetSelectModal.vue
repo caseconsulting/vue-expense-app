@@ -55,9 +55,7 @@
 </template>
 
 <script>
-const IsoFormat = 'YYYY-MM-DD';
-const moment = require('moment-timezone');
-moment.tz.setDefault('America/New_York');
+import { format, setYear } from '@/shared/dateUtils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -71,7 +69,7 @@ moment.tz.setDefault('America/New_York');
  * @return String - anniversary date
  */
 function getAnniversaryDate() {
-  return moment(this.hireDate).format('MMMM Do');
+  return format(this.hireDate, null, 'MMMM Do');
 } // getAnniversaryDate
 
 // |--------------------------------------------------|
@@ -97,8 +95,7 @@ function isCurrent(budgetYear) {
  * @param budgetYear - int budget year selected
  */
 function select(budgetYear) {
-  let fiscalYear = moment(this.hireDate, IsoFormat);
-  fiscalYear.year(budgetYear);
+  let fiscalYear = setYear(this.hireDate, budgetYear);
   window.EventBus.$emit(`selected-budget-year`, fiscalYear);
   this.activate = false;
 } // select
@@ -132,8 +129,10 @@ export default {
     };
   },
   methods: {
+    format,
     isCurrent,
-    select
+    select,
+    setYear
   },
   props: [
     'toggleBudgetSelectModal', // dialog activator

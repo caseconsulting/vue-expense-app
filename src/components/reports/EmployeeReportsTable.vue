@@ -142,7 +142,7 @@
 
 <script>
 import _ from 'lodash';
-import moment from 'moment-timezone';
+import { add, format, getTodaysDate } from '@/shared/dateUtils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -285,7 +285,7 @@ function getBadgeExpiration(clearances, item) {
   // used for sorting... only store the lowest date (closest to expire)
   _.forEach(clearances, (clearance) => {
     if (clearance.badgeExpirationDate) {
-      let newDate = parseInt(moment(clearance.badgeExpirationDate).format('X')); // seconds timestamp -> int
+      let newDate = parseInt(format(clearance.badgeExpirationDate, null, 'X')); // seconds timestamp -> int
       dates.push(newDate);
       if (newDate < fDate) fDate = newDate;
     }
@@ -295,7 +295,7 @@ function getBadgeExpiration(clearances, item) {
 
   // used for displaying
   dates = _.map(dates, (date) => {
-    return moment(date, 'X').format('MMM Do, YYYY');
+    return format(date, 'X', 'MMM Do, YYYY');
   });
 
   item.badgeExpiration = fDate;
@@ -366,7 +366,7 @@ function populateDataTypeDropDowns() {
       let search = date.split(' ');
       let num = parseInt(search[0]);
       let dateType = search[1].toLowerCase();
-      let futureDate = moment().add(num, dateType).format('MMM Do, YYYY');
+      let futureDate = format(add(getTodaysDate(), num, dateType), null, 'MMM Do, YYYY');
       this.dataTypeDropDown.push(date + ' (' + futureDate + ')');
     });
 
@@ -572,8 +572,8 @@ function searchBadgeExpirationDates(requestedDate, forDropdown) {
   let search = requestedDate.split(' ');
   let num = parseInt(search[0]);
   let dateType = search[1].toLowerCase();
-  let now = parseInt(moment().format('X'));
-  let upperBound = parseInt(moment().add(num, dateType).format('X'));
+  let now = parseInt(format(getTodaysDate(), null, 'X'));
+  let upperBound = parseInt(format(add(getTodaysDate(), num, dateType), null, 'X'));
   let foundEmployees = [];
 
   if (this.filteredEmployees.length > 0) {
@@ -584,7 +584,7 @@ function searchBadgeExpirationDates(requestedDate, forDropdown) {
       if (employee.badgeExpiration < 100000000000000000) {
         // loop through every employee's clearances and see if any of them are in the selected range
         _.forEach(employee.clearances, (clearance) => {
-          let clearanceDate = parseInt(moment(clearance.badgeExpirationDate).format('X')); // seconds timestamp -> int
+          let clearanceDate = parseInt(format(clearance.badgeExpirationDate, null, 'X')); // seconds timestamp -> int
           if (clearanceDate > now && clearanceDate <= upperBound && !foundEmployees.includes(employee)) {
             found.push(employee);
           }
@@ -599,7 +599,7 @@ function searchBadgeExpirationDates(requestedDate, forDropdown) {
       if (employee.badgeExpiration < 100000000000000000) {
         // loop through every employee's clearances and see if any of them are in the selected range
         _.forEach(employee.clearances, (clearance) => {
-          let clearanceDate = parseInt(moment(clearance.badgeExpirationDate).format('X')); // seconds timestamp -> int
+          let clearanceDate = parseInt(format(clearance.badgeExpirationDate, null, 'X')); // seconds timestamp -> int
           if (clearanceDate > now && clearanceDate <= upperBound && !foundEmployees.includes(employee))
             foundEmployees.push(employee);
         });
@@ -823,6 +823,7 @@ export default {
     populateDropDowns,
     refreshDataTypeList,
     refreshList,
+    format,
     searchBadgeExpirationDates,
     searchContract,
     searchDataType,

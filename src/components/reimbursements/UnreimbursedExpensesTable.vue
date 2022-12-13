@@ -145,9 +145,8 @@ import _ from 'lodash';
 import { asyncForEach, isEmpty, convertToMoneyString, updateEmployeeLogin } from '@/utils/utils';
 import { storeIsPopulated } from '@/utils/utils';
 import { updateStoreEmployees } from '@/utils/storeUtils';
+import { getTodaysDate } from '@/shared/dateUtils';
 import employeeUtils from '@/shared/employeeUtils';
-const moment = require('moment-timezone');
-moment.tz.setDefault('America/New_York');
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -545,7 +544,7 @@ async function reimburseExpenses() {
         //to remove the expense type data in the ExpenseTypeTotal modal
         window.EventBus.$emit('expenseChange', expense);
         window.EventBus.$emit('expenseClicked', undefined);
-        expense.reimbursedDate = moment().format('YYYY-MM-DD');
+        expense.reimbursedDate = getTodaysDate();
         expense.reimbursementWasSeen = false;
         expensesToReimburse.push(this.removeAggregateExpenseData(expense));
       }
@@ -931,6 +930,7 @@ export default {
     resetShowOnFeedToggles,
     selectExpense,
     removeAggregateExpenseData,
+    getTodaysDate,
     toggleAll,
     toggleGroup,
     toggleShowOnFeedGroup,

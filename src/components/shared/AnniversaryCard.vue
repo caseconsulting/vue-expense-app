@@ -43,7 +43,6 @@ import _ from 'lodash';
 import api from '@/shared/api.js';
 const moment = require('moment-timezone');
 moment.tz.setDefault('America/New_York');
-const IsoFormat = 'YYYY-MM-DD';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -178,9 +177,9 @@ function refreshBudgetYears() {
 async function created() {
   await this.loadData();
 
-  window.EventBus.$on('selected-budget-year', (data) => {
-    if (data.format(IsoFormat) != this.fiscalDateView) {
-      this.fiscalDateView = data.format(IsoFormat);
+  window.EventBus.$on('selected-budget-year', (date) => {
+    if (date != this.fiscalDateView) {
+      this.fiscalDateView = date;
     }
   });
 } // created

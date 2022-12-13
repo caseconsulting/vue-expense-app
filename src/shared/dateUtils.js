@@ -3,6 +3,8 @@ var utc = require('dayjs/plugin/utc');
 var timezone = require('dayjs/plugin/timezone');
 var customParseFormat = require('dayjs/plugin/customParseFormat');
 var localizedFormat = require('dayjs/plugin/localizedFormat');
+var advancedFormat = require('dayjs/plugin/advancedFormat');
+dayjs.extend(advancedFormat);
 dayjs.extend(localizedFormat);
 dayjs.extend(customParseFormat);
 dayjs.extend(utc);
@@ -92,9 +94,38 @@ export function isBefore(date1, date2, granularity) {
  * @param {String} date - The date to format
  * @param {String} format - The format output (https://day.js.org/docs/en/display/format)
  */
-export function format(date, format) {
-  return dayjs(date).format(format);
+export function format(date, oldFormat, newFormat) {
+  if (oldFormat) {
+    return dayjs(date, oldFormat).format(newFormat);
+  } else {
+    return dayjs(date).format(newFormat);
+  }
 } // format
+
+/**
+ * Sets the dates year and returns a string of the date.
+ *
+ * @param {String} date The given date
+ * @param {Number} year The year to set the date to
+ * @returns String - The date at the given year
+ */
+export function setYear(date, year) {
+  return dayjs(date).year(year).format(DEFAULT_ISOFORMAT);
+} // setYear
+
+/**
+ * Returns today's date.
+ *
+ * @param {String} format - The format output (https://day.js.org/docs/en/display/format)
+ * @returns String - Today's date
+ */
+export function getTodaysDate(format) {
+  if (format) {
+    return dayjs().format(format);
+  } else {
+    return dayjs().format(DEFAULT_ISOFORMAT);
+  }
+} // getTodaysDate
 
 /**
  * formats the given date in MM/DD/YYYY
@@ -183,5 +214,6 @@ export default {
   isAfter,
   isBefore,
   parseDate,
-  parseDateMonthYear
+  parseDateMonthYear,
+  setYear
 };
