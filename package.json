@@ -61,7 +61,7 @@
     "@babel/core": "7.17.10",
     "@babel/eslint-parser": "7.17.0",
     "@vue/cli-plugin-babel": "4.5.17",
-    "@vue/cli-plugin-e2e-cypress": "4.5.17",
+    "@vue/cli-plugin-e2e-cypress": "5.0.8",
     "@vue/cli-plugin-unit-jest": "4.5.17",
     "@vue/cli-service": "4.5.17",
     "@vue/eslint-config-prettier": "7.0.0",
