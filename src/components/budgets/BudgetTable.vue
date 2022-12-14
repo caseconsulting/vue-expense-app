@@ -85,9 +85,9 @@ import {
   getCurrentBudgetYear,
   isFullTime
 } from '@/utils/utils';
+import { getTodaysDate } from '../../shared/dateUtils';
 import api from '@/shared/api';
 import _ from 'lodash';
-const moment = require('moment-timezone');
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -213,6 +213,7 @@ async function refreshBudgets() {
 
     budgetsVar = existingBudgets;
   }
+
   // remove inactive budgets (exception: there contains a pending expense under that budget)
   budgetsVar = _.filter(budgetsVar, (b) => {
     let budget = b.budgetObject;
@@ -221,7 +222,12 @@ async function refreshBudgets() {
         this.expenseTypes,
         (e) =>
           e.id == budget.expenseTypeId &&
-          (e.isInactive || !isBetweenDates(moment().toISOString(), budget.fiscalStartDate, budget.fiscalEndDate))
+          (e.isInactive ||
+            !isBetweenDates(
+              getTodaysDate('YYYY-MM-DD[T]HH:mm:ss.SSS[Z]'),
+              budget.fiscalStartDate,
+              budget.fiscalEndDate
+            ))
       ) || _.some(this.expenses, (e) => e.expenseTypeId == budget.expenseTypeId && _.isEmpty(e.reimbursedDate))
     );
   });

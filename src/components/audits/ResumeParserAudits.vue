@@ -19,8 +19,7 @@ import _ from 'lodash';
 import PieChart from '@/components/charts/base-charts/PieChart.vue';
 import AuditsTable from '@/components/audits/AuditsTable.vue';
 import { storeIsPopulated } from '@/utils/utils.js';
-const moment = require('moment-timezone');
-moment.tz.setDefault('America/New_York');
+import { format } from '../../shared/dateUtils';
 const IsoFormat = 'MMMM Do YYYY, h:mm:ss a';
 
 // |--------------------------------------------------|
@@ -36,7 +35,7 @@ async function fillData() {
   let resumeData = await api.getAudits('resume', this.queryStartDate, this.queryEndDate);
 
   _.forEach(resumeData, (audit) => {
-    audit.dateCreated = moment(audit.dateCreated).format(IsoFormat);
+    audit.dateCreated = format(audit.dateCreated, null, IsoFormat);
     let employee = _.find(this.employees, (emp) => {
       return emp.id === audit.employeeId;
     });

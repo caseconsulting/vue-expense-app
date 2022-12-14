@@ -30,8 +30,8 @@
 </template>
 
 <script>
-const moment = require('moment-timezone');
-moment.tz.setDefault('America/New_York');
+import { diff } from '../../shared/dateUtils';
+
 const IsoFormat = 'MMMM Do YYYY, h:mm:ss a';
 
 // |--------------------------------------------------|
@@ -55,9 +55,9 @@ function customDateSort(items, sortBy, sortDesc) {
 
   if (sortBy[0] === 'dateCreated') {
     return items.sort((a, b) => {
-      a = moment(a.dateCreated, IsoFormat);
-      b = moment(b.dateCreated, IsoFormat);
-      return sortDesc[0] ? a.diff(b) : b.diff(a);
+      return sortDesc[0]
+        ? diff(a.dateCreated, b.dateCreated, IsoFormat, 'second')
+        : diff(b.dateCreated, a.dateCreated, IsoFormat, 'second');
     });
   } else if (sortBy[0] === 'description' || sortBy[0] === 'employeeName') {
     return items.sort((a, b) => {

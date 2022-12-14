@@ -26,8 +26,10 @@ export const PARSED_ISOFORMAT = 'YYYY-MM-DD';
  * @param {String} granularity - The unit to add (https://day.js.org/docs/en/manipulate/start-of#list-of-all-available-units)
  * @returns String - The added date
  */
-export function add(date, amount, granularity) {
-  return dayjs(date).add(amount, granularity).format(DEFAULT_ISOFORMAT);
+export function add(date, amount, granularity, format) {
+  return format
+    ? dayjs(date).add(amount, granularity).toISOString()
+    : dayjs(date).add(amount, granularity).format(format);
 } // add
 
 /**
@@ -45,6 +47,40 @@ export function subtract(date, amount, granularity) {
 } // subtract
 
 /**
+ * Gets the difference between two date-time in specified unit.
+ *
+ * @param {String} date1 - The first date
+ * @param {String} date2 - The second date
+ * @param {String} format - (OPTIONAL) The format of the dates (if not specified, uses default)
+ * @param {String} granularity - (OPTIONAL) The unit of the difference
+ * @returns Number - The difference
+ */
+export function diff(date1, date2, format, granularity) {
+  if (!date1 || !date2) return null;
+  if (!format) return null;
+  let d1 = format ? dayjs(date1, format) : dayjs(date1);
+  let d2 = format ? dayjs(date2, format) : dayjs(date2);
+  if (granularity) {
+    return d1.diff(d2, granularity, true);
+  } else {
+    return d1.diff(date2);
+  }
+} // diff
+
+/**
+ * Gets hour of the date (0 to 23).
+ *
+ * @param {String} date - The date
+ * @param {String} format - (OPTIONAL) The format of the date (if not specified, uses default)
+ * @returns
+ */
+export function getHour(date, format) {
+  // console.log(dayjs(date));
+  if (date) return format ? dayjs(date, format).hour() : dayjs(date).hour();
+  return null;
+} // getHour
+
+/**
  * Verifies if the first date is after the second date in time.
  *
  * EXAMPLES: isAfter('2022-12-24', '2022-12-23')         => OUTPUT: true
@@ -54,13 +90,14 @@ export function subtract(date, amount, granularity) {
  * @param {String} date1 - The first date
  * @param {String} date2 - The second date
  * @param {String} granularity - (OPTIONAL) The unit to compare (https://day.js.org/docs/en/manipulate/start-of#list-of-all-available-units)
+ * @param {String} format - (OPTIONAL) Format of the dates, assumes default format if not specified
  * @returns Boolean - True if the first date comes after the second date, false otherwise
  */
-export function isAfter(date1, date2, granularity) {
+export function isAfter(date1, date2, granularity, format = DEFAULT_ISOFORMAT) {
   if (granularity) {
-    return dayjs(date1, DEFAULT_ISOFORMAT, true).isAfter(dayjs(date2, DEFAULT_ISOFORMAT, true), granularity);
+    return dayjs(date1, format, true).isAfter(dayjs(date2, format, true), granularity);
   } else {
-    return dayjs(date1, DEFAULT_ISOFORMAT, true).isAfter(dayjs(date2, DEFAULT_ISOFORMAT, true));
+    return dayjs(date1, format, true).isAfter(dayjs(date2, format, true));
   }
 } // isAfter
 
@@ -74,13 +111,14 @@ export function isAfter(date1, date2, granularity) {
  * @param {String} date1 - The first date
  * @param {String} date2 - The second date
  * @param {String} granularity - (OPTIONAL) The unit to compare (https://day.js.org/docs/en/manipulate/start-of#list-of-all-available-units)
+ * @param {String} format - (OPTIONAL) Format of the dates, assumes default format if not specified
  * @returns Boolean - True if the first date comes before the second date, false otherwise
  */
-export function isBefore(date1, date2, granularity) {
+export function isBefore(date1, date2, granularity, format = DEFAULT_ISOFORMAT) {
   if (granularity) {
-    return dayjs(date1, DEFAULT_ISOFORMAT, true).isBefore(dayjs(date2, DEFAULT_ISOFORMAT, true), granularity);
+    return dayjs(date1, format, true).isBefore(dayjs(date2, format, true), granularity);
   } else {
-    return dayjs(date1, DEFAULT_ISOFORMAT, true).isBefore(dayjs(date2, DEFAULT_ISOFORMAT, true));
+    return dayjs(date1, format, true).isBefore(dayjs(date2, format, true));
   }
 } // isBefore
 
@@ -133,7 +171,7 @@ export function getTodaysDate(format) {
  * @param date - the date to be formatted
  * @return - the formatted date
  */
-function formatDate(date) {
+export function formatDate(date) {
   if (!date) return null;
   else {
     const [year, month, day] = date.split('-');
@@ -149,7 +187,7 @@ function formatDate(date) {
  * Takes an date object in ISO format 2020-01 and puts it in slash format 01/2020
  * @param {Date} date date in ISO format 2020-01
  */
-function formatDateMonthYear(date) {
+export function formatDateMonthYear(date) {
   if (!date) return null;
   else {
     const [year, month] = date.split('-');
@@ -167,7 +205,7 @@ function formatDateMonthYear(date) {
  * @param {*} date - date to parse
  * @return - the formatted date
  */
-function parseDate(date) {
+export function parseDate(date) {
   if (!date) return null;
   else {
     const [month, day, year] = date.split('/');
@@ -188,7 +226,7 @@ function parseDate(date) {
  *
  * @param {Date} date date in ISO format 2020-01
  */
-function parseDateMonthYear(date) {
+export function parseDateMonthYear(date) {
   if (!date) return null;
   else {
     const [month, year] = date.split('/');

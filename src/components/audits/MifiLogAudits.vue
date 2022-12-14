@@ -20,8 +20,7 @@ import api from '@/shared/api';
 import PieChart from '../charts/base-charts/PieChart.vue';
 import AuditsTable from '@/components/audits/AuditsTable.vue';
 import { storeIsPopulated } from '@/utils/utils.js';
-const moment = require('moment-timezone');
-moment.tz.setDefault('America/New_York');
+import { format } from '../../shared/dateUtils';
 const IsoFormat = 'MMMM Do YYYY, h:mm:ss a';
 
 // |--------------------------------------------------|
@@ -55,7 +54,7 @@ async function fillData() {
   let mifiData = await api.getAudits('mifi', this.queryStartDate, this.queryEndDate);
 
   _.forEach(mifiData, (audit) => {
-    audit.dateCreated = moment(audit.dateCreated).format(IsoFormat);
+    audit.dateCreated = format(audit.dateCreated, null, IsoFormat);
     let employee = _.find(this.employees, (emp) => {
       return emp.id === audit.employeeId;
     });
@@ -96,7 +95,9 @@ async function fillData() {
     showToolTips = true;
     title = this.show24HourTitle
       ? 'Mifi Changes For Last 24 Hours'
-      : `Mifi Changes From ${moment(this.queryStartDate).format('MM/DD/YY')} to ${moment(this.queryEndDate).format(
+      : `Mifi Changes From ${format(this.queryStartDate, null, 'MM/DD/YY')} to ${format(
+          this.queryEndDate,
+          null,
           'MM/DD/YY'
         )}`;
   }
