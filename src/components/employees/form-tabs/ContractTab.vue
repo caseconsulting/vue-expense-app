@@ -174,7 +174,7 @@ import _ from 'lodash';
 import { mask } from 'vue-the-mask';
 import { getDateMonthYearRules, getDateMonthYearOptionalRules, getRequiredRules } from '@/shared/validationUtils.js';
 import { isEmpty, formatDateMonthYear, parseDateMonthYear, isMobile } from '@/utils/utils';
-const moment = require('moment');
+import { add, isAfter } from '@/shared/dateUtils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -367,9 +367,8 @@ export default {
       dateOrderRule: (compIndex, projIndex) => {
         if (this.editedContracts) {
           let project = this.editedContracts[compIndex].projects[projIndex];
-          return !this.isEmpty(project.endDate) && moment(project.endDate) && project.startDate
-            ? moment(project.endDate).add(1, 'd').isAfter(moment(project.startDate)) ||
-                'End date must be at or after start date'
+          return !this.isEmpty(project.endDate) && project.startDate
+            ? isAfter(add(project.endDate, 1, 'd'), project.startDate) || 'End date must be at or after start date'
             : true;
         } else {
           return true;
@@ -414,6 +413,7 @@ export default {
     formatDateMonthYear
   },
   methods: {
+    add, // dateUtils
     addContract,
     addProject,
     deleteContract,
@@ -422,6 +422,7 @@ export default {
     getDateMonthYearOptionalRules,
     getRequiredRules,
     hasEndDatesFilled,
+    isAfter, // dateUtils
     isEmpty,
     parseDateMonthYear,
     parseEventDate,

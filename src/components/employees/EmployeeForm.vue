@@ -387,7 +387,6 @@
 
 <script>
 import api from '@/shared/api.js';
-import { updateStoreEmployees, updateStoreUser } from '@/utils/storeUtils';
 import AwardTab from '@/components/employees/form-tabs/AwardTab';
 import CertificationTab from '@/components/employees/form-tabs/CertificationTab';
 import ClearanceTab from '@/components/employees/form-tabs/ClearanceTab';
@@ -402,11 +401,11 @@ import ManyFormErrors from '@/components/modals/ManyFormErrors.vue';
 import PersonalTab from '@/components/employees/form-tabs/PersonalTab';
 import ResumeParser from '@/components/modals/ResumeParser';
 import TechnologyTab from '@/components/employees/form-tabs/TechnologyTab';
+import { updateStoreEmployees, updateStoreUser } from '@/utils/storeUtils';
+import { format } from '@/shared/dateUtils';
 import { getRole } from '@/utils/auth';
 import { v4 as uuid } from 'uuid';
 import _ from 'lodash';
-const moment = require('moment-timezone');
-moment.tz.setDefault('America/New_York');
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -527,14 +526,14 @@ function cleanUpData() {
           delete timeFrame.showRangeMenu;
           // sort range dates
           let chronologicalRange = _.sortBy(timeFrame.range, (monthYear) => {
-            return moment(monthYear, 'YYYY-MM');
+            return format(monthYear, null, 'YYYY-MM');
           });
           timeFrame.range = chronologicalRange;
           // return updated time frame
           return timeFrame;
         }),
         (timeFrame) => {
-          return moment(timeFrame.range[0], 'YYYY-MM');
+          return format(timeFrame.range[0], null, 'YYYY-MM');
         }
       )
     );
@@ -563,26 +562,26 @@ function cleanUpData() {
           // sort bi dates
           clearance.biDates = _.reverse(
             _.sortBy(clearance.biDates, (date) => {
-              return moment(date, 'YYYY-MM-DD');
+              return format(date, null, 'YYYY-MM-DD');
             })
           );
           // sort adjudication dates
           clearance.adjudicationDates = _.reverse(
             _.sortBy(clearance.adjudicationDates, (date) => {
-              return moment(date, 'YYYY-MM-DD');
+              return format(date, null, 'YYYY-MM-DD');
             })
           );
           // sort poly dates
           clearance.polyDates = _.reverse(
             _.sortBy(clearance.polyDates, (date) => {
-              return moment(date, 'YYYY-MM-DD');
+              return format(date, null, 'YYYY-MM-DD');
             })
           );
           // return updated clearance
           return clearance;
         }),
         (clearance) => {
-          return moment(clearance.grantedDate);
+          return format(clearance.grantedDate);
         }
       )
     );
@@ -1243,6 +1242,7 @@ export default {
     confirm,
     convertAutocompleteToTitlecase,
     displayError,
+    format, // dateUtils
     getRole,
     hasAdminPermissions,
     hasTabError,

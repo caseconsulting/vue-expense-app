@@ -81,9 +81,8 @@
 import _ from 'lodash';
 import { getDateMonthYearRules, getRequiredRules } from '@/shared/validationUtils.js';
 import { formatDateMonthYear, parseDate, parseDateMonthYear } from '@/utils/utils';
+import { getTodaysDate } from '@/shared/dateUtils';
 import { mask } from 'vue-the-mask';
-const moment = require('moment-timezone');
-moment.tz.setDefault('America/New_York');
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -114,7 +113,7 @@ function addAward() {
     name: null,
     dateReceived: null,
     expirationDate: null,
-    dateSubmitted: moment().startOf('day'),
+    dateSubmitted: getTodaysDate(),
     showReceivedMenu: false,
     showExpirationMenu: false
   });
@@ -191,6 +190,7 @@ export default {
     addAward,
     deleteAward,
     getDateMonthYearRules,
+    getTodaysDate,
     getRequiredRules,
     parseDate,
     parseDateMonthYear,

@@ -61,8 +61,7 @@
 
 <script>
 import { isEmpty, monthDayYearFormat, userRoleIsIntern } from '@/utils/utils';
-const moment = require('moment-timezone');
-moment.tz.setDefault('America/New_York');
+import { format, getTodaysDate } from '@/shared/dateUtils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -204,7 +203,7 @@ function confetti() {
  * @return boolean - true if it is a user's birthday
  */
 function isBday() {
-  return moment().format('MM-DD') != moment(this.model.birthday).format('MM-DD');
+  return format(getTodaysDate(), null, 'MM-DD') != format(this.model.birthday, null, 'MM-DD');
 } // isBday
 
 // |--------------------------------------------------|
@@ -247,6 +246,8 @@ export default {
   methods: {
     checkEmptyPersonalInfo,
     confetti,
+    format, // dateUtils
+    getTodaysDate, // dateUtils
     isBday,
     isEmpty,
     monthDayYearFormat,

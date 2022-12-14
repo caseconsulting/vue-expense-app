@@ -340,8 +340,6 @@ import {
 } from '@/utils/utils';
 import { mask } from 'vue-the-mask';
 import EEODeclineSelfIdentify from '../../modals/EEODeclineSelfIdentify.vue';
-const moment = require('moment-timezone');
-moment.tz.setDefault('America/New_York');
 
 const caseEmailDomain = '@consultwithcase.com';
 

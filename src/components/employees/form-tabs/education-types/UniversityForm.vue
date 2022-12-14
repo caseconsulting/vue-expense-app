@@ -207,8 +207,6 @@ import { getDateMonthYearRules, getRequiredRules } from '@/shared/validationUtil
 import { formatDateMonthYear, parseDateMonthYear } from '@/utils/utils';
 import { mask } from 'vue-the-mask';
 import { majorsAndMinors } from '../dropdown-info/majorsAndMinors';
-const moment = require('moment-timezone');
-moment.tz.setDefault('America/New_York');
 
 // |--------------------------------------------------|
 // |                                                  |

@@ -230,8 +230,6 @@ import {
 import { formatDate, isEmpty, parseDate, countryList } from '@/utils/utils';
 import { mask } from 'vue-the-mask';
 import { getRole } from '@/utils/auth';
-const moment = require('moment-timezone');
-moment.tz.setDefault('America/New_York');
 
 // |--------------------------------------------------|
 // |                                                  |

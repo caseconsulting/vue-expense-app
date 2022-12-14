@@ -274,9 +274,8 @@
 import _ from 'lodash';
 import { getDateOptionalRules, getRequiredRules } from '@/shared/validationUtils.js';
 import { formatDate, parseDate, isEmpty } from '@/utils/utils';
+import { format, isAfter, isBefore, DEFAULT_ISOFORMAT, FORMATTED_ISOFORMAT } from '@/shared/dateUtils';
 import { mask } from 'vue-the-mask';
-const moment = require('moment-timezone');
-moment.tz.setDefault('America/New_York');
 
 const ISOFORMAT = 'YYYY-MM-DD';
 
@@ -352,22 +351,21 @@ function maxSubmission(cIndex) {
   let max;
   if (this.editedClearances[cIndex].grantedDate) {
     // submission date is before granted date
-    max = moment(this.editedClearances[cIndex].grantedDate, ISOFORMAT);
+    max = format(this.editedClearances[cIndex].grantedDate, null, DEFAULT_ISOFORMAT);
   }
 
   // check submission date is before any poly dates
   if (!_.isEmpty(this.editedClearances[cIndex].polyDates)) {
     // poly dates exist
-    let earliest = moment(
-      _.first(
-        // get earliest poly date
-        _.sortBy(this.editedClearances[cIndex].polyDates, (date) => {
-          // sort poly dates
-          return moment(date, ISOFORMAT);
-        })
-      )
+    let earliest = _.first(
+      // get earliest poly date
+      _.sortBy(this.editedClearances[cIndex].polyDates, (date) => {
+        // sort poly dates
+        return format(date, null, ISOFORMAT);
+      })
     );
-    if (earliest.isBefore(max)) {
+
+    if (isBefore(earliest, max)) {
       // poly date is earliest date
       max = earliest; // update max date
     }
@@ -376,22 +374,20 @@ function maxSubmission(cIndex) {
   // check submission date is before any adjudication dates
   if (!_.isEmpty(this.editedClearances[cIndex].adjudicationDates)) {
     // adjudication dates exist
-    let earliest = moment(
-      _.first(
-        // get earliest adjudication date
-        _.sortBy(this.editedClearances[cIndex].adjudicationDates, (date) => {
-          // sort adjudication dates
-          return moment(date, ISOFORMAT);
-        })
-      )
+    let earliest = _.first(
+      // get earliest adjudication date
+      _.sortBy(this.editedClearances[cIndex].adjudicationDates, (date) => {
+        // sort adjudication dates
+        return format(date, null, ISOFORMAT);
+      })
     );
-    if (earliest.isBefore(max)) {
+    if (isBefore(earliest, max)) {
       // adjudication date is earliest date
       max = earliest; // update max date
     }
   }
 
-  return max ? max.format(ISOFORMAT) : null;
+  return max ? format(max, null, ISOFORMAT) : null;
 } // maxSubmission
 
 /**
@@ -441,10 +437,10 @@ function populateDropDowns() {
  * @param index - the clearance index
  */
 function removeAdjDate(item, index) {
-  const itemDate = moment(item);
+  const itemDate = format(item, null, FORMATTED_ISOFORMAT);
   this.editedClearances[index].adjudicationDates = this.editedClearances[index].adjudicationDates.filter((date) => {
-    let dateConvert = moment(date);
-    return !dateConvert.isSame(itemDate);
+    let dateConvert = format(date, null, FORMATTED_ISOFORMAT);
+    return dateConvert !== itemDate;
   });
 } // removeAdjDate
 
@@ -455,10 +451,10 @@ function removeAdjDate(item, index) {
  * @param index - the clearance index
  */
 function removeBiDate(item, index) {
-  const itemDate = moment(item);
+  const itemDate = format(item, null, FORMATTED_ISOFORMAT);
   this.editedClearances[index].biDates = this.editedClearances[index].biDates.filter((date) => {
-    let dateConvert = moment(date);
-    return !dateConvert.isSame(itemDate);
+    let dateConvert = format(date, null, FORMATTED_ISOFORMAT);
+    return dateConvert !== itemDate;
   });
 } // removeBiDate
 
@@ -469,10 +465,10 @@ function removeBiDate(item, index) {
  * @param index - the clearance index
  */
 function removePolyDate(item, index) {
-  const itemDate = moment(item);
+  const itemDate = format(item, null, FORMATTED_ISOFORMAT);
   this.editedClearances[index].polyDates = this.editedClearances[index].polyDates.filter((date) => {
-    let dateConvert = moment(date);
-    return !dateConvert.isSame(itemDate);
+    let dateConvert = format(date, null, FORMATTED_ISOFORMAT);
+    return dateConvert !== itemDate;
   });
 } // removePolyDate
 
@@ -541,15 +537,15 @@ export default {
       dateBadgeRules: (index) => {
         let currClearance = this.editedClearances[index];
         return currClearance.grantedDate && currClearance.badgeExpirationDate && currClearance.submissionDate
-          ? (moment(currClearance.badgeExpirationDate).isAfter(moment(currClearance.grantedDate)) &&
-              moment(currClearance.badgeExpirationDate).isAfter(moment(currClearance.submissionDate))) ||
+          ? (isAfter(currClearance.badgeExpirationDate, currClearance.grantedDate) &&
+              isAfter(currClearance.badgeExpirationDate, currClearance.submissionDate)) ||
               'Badge expiration date must come after grant and submission date'
           : true;
       },
       dateSubmissionRules: (index) => {
         let currClearance = this.editedClearances[index];
         return currClearance.grantedDate && currClearance.submissionDate
-          ? moment(currClearance.submissionDate).isBefore(moment(currClearance.grantedDate)) ||
+          ? isBefore(currClearance.submissionDate, currClearance.grantedDate) ||
               'Submission date must be before grant date'
           : true;
       },
@@ -557,7 +553,7 @@ export default {
       dateGrantedRules: (index) => {
         let currClearance = this.editedClearances[index];
         return currClearance.grantedDate && currClearance.submissionDate
-          ? moment(currClearance.grantedDate).isAfter(moment(currClearance.submissionDate)) ||
+          ? isAfter(currClearance.grantedDate, currClearance.submissionDate) ||
               'Grant date must be after the submission date'
           : true;
       },
@@ -578,10 +574,13 @@ export default {
   methods: {
     addClearance,
     capitalizeBadges,
+    format,
     formatDate,
     deleteClearance,
     getDateOptionalRules,
     getRequiredRules,
+    isAfter,
+    isBefore,
     isEmpty,
     maxSubmission,
     minExpiration,

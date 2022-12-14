@@ -1,9 +1,16 @@
+// DOCUMENTATION FOR DAY.JS: https://day.js.org/en/
+
 const dayjs = require('dayjs');
 var utc = require('dayjs/plugin/utc');
 var timezone = require('dayjs/plugin/timezone');
 var customParseFormat = require('dayjs/plugin/customParseFormat');
 var localizedFormat = require('dayjs/plugin/localizedFormat');
 var advancedFormat = require('dayjs/plugin/advancedFormat');
+<<<<<<< HEAD
+=======
+var minMax = require('dayjs/plugin/minMax');
+dayjs.extend(minMax);
+>>>>>>> 954ce234 (POR-1949: migrate from momentjs to dayjs in employees folder)
 dayjs.extend(advancedFormat);
 dayjs.extend(localizedFormat);
 dayjs.extend(customParseFormat);
@@ -95,9 +102,15 @@ export function getHour(date, format) {
  */
 export function isAfter(date1, date2, granularity, format = DEFAULT_ISOFORMAT) {
   if (granularity) {
+<<<<<<< HEAD
     return dayjs(date1, format, true).isAfter(dayjs(date2, format, true), granularity);
   } else {
     return dayjs(date1, format, true).isAfter(dayjs(date2, format, true));
+=======
+    return dayjs(date1).isAfter(dayjs(date2), granularity);
+  } else {
+    return dayjs(date1).isAfter(dayjs(date2));
+>>>>>>> 954ce234 (POR-1949: migrate from momentjs to dayjs in employees folder)
   }
 } // isAfter
 
@@ -116,9 +129,15 @@ export function isAfter(date1, date2, granularity, format = DEFAULT_ISOFORMAT) {
  */
 export function isBefore(date1, date2, granularity, format = DEFAULT_ISOFORMAT) {
   if (granularity) {
+<<<<<<< HEAD
     return dayjs(date1, format, true).isBefore(dayjs(date2, format, true), granularity);
   } else {
     return dayjs(date1, format, true).isBefore(dayjs(date2, format, true));
+=======
+    return dayjs(date1).isBefore(dayjs(date2), granularity);
+  } else {
+    return dayjs(date1).isBefore(dayjs(date2));
+>>>>>>> 954ce234 (POR-1949: migrate from momentjs to dayjs in employees folder)
   }
 } // isBefore
 
@@ -166,6 +185,48 @@ export function getTodaysDate(format) {
 } // getTodaysDate
 
 /**
+<<<<<<< HEAD
+=======
+ * Gets the difference in time between the two dates. https://day.js.org/docs/en/display/difference
+ * NOTE: If you want a positive number, make date1 be the later date and date2 be the earlier date
+ *
+ * @param {String} date1 - The first date
+ * @param {String} date2 - The second date
+ * @param {String} granularity - (OPTIONAL) The unit to compare (https://day.js.org/docs/en/manipulate/start-of#list-of-all-available-units)
+ * @returns Number - The difference in time
+ */
+export function difference(date1, date2, granularity) {
+  if (granularity) {
+    return dayjs(date1).diff(dayjs(date2), granularity);
+  } else {
+    return dayjs(date1).diff(dayjs(date2));
+  }
+} // difference
+
+/**
+ * Returns the earliest date from an array of dates.
+ *
+ * @param {Array} dates An array of string dates
+ * @returns The earliest date in string format
+ */
+export function minimum(dates) {
+  dates = dates.map((date) => dayjs(date));
+  return dayjs.min(dates).format();
+} // minimum
+
+/**
+ * Returns the latest date from an array of dates.
+ *
+ * @param {Array} dates An array of string dates
+ * @returns The latest date in string format
+ */
+export function maximum(dates) {
+  dates = dates.map((date) => dayjs(date));
+  return dayjs.max(dates).format();
+} // maximum
+
+/**
+>>>>>>> 954ce234 (POR-1949: migrate from momentjs to dayjs in employees folder)
  * formats the given date in MM/DD/YYYY
  *
  * @param date - the date to be formatted
@@ -246,11 +307,14 @@ export default {
   DEFAULT_ISOFORMAT,
   FORMATTED_ISOFORMAT,
   PARSED_ISOFORMAT,
+  difference,
   format,
   formatDate,
   formatDateMonthYear,
   isAfter,
   isBefore,
+  maximum,
+  minimum,
   parseDate,
   parseDateMonthYear,
   setYear

@@ -118,8 +118,6 @@ import JobExperienceTab from '@/components/employees/info-tabs/JobExperienceTab'
 import LanguagesTab from '@/components/employees/info-tabs/LanguagesTab';
 import PersonalTab from '@/components/employees/info-tabs/PersonalTab';
 import TechnologiesTab from '@/components/employees/info-tabs/TechnologiesTab';
-const moment = require('moment-timezone');
-moment.tz.setDefault('America/New_York');
 
 /**
  * Check if the user has admin permissions. Returns true if the user is an admin or a manager,

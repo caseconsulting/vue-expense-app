@@ -112,8 +112,7 @@ import _ from 'lodash';
 import { mask } from 'vue-the-mask';
 import { getDateMonthYearRules, getRequiredRules } from '@/shared/validationUtils.js';
 import { formatDateMonthYear, parseDateMonthYear } from '@/utils/utils';
-const moment = require('moment-timezone');
-moment.tz.setDefault('America/New_York');
+import { isBefore } from '@/shared/dateUtils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -129,8 +128,7 @@ moment.tz.setDefault('America/New_York');
  */
 function dateSubmissionRules() {
   return this.military.startDate && this.military.completeDate
-    ? moment(this.military.startDate).isBefore(moment(this.military.completeDate)) ||
-        'Completion date must be after start date'
+    ? isBefore(this.military.startDate, this.military.completeDate) || 'Completion date must be after start date'
     : true;
 }
 
@@ -209,11 +207,12 @@ export default {
   methods: {
     dateSubmissionRules,
     emitToParser,
+    getDateMonthYearRules,
+    getRequiredRules,
+    isBefore,
     parseDateMonthYear,
     parseEventDate,
-    validateFields,
-    getDateMonthYearRules,
-    getRequiredRules
+    validateFields
   },
   data() {
     return {
