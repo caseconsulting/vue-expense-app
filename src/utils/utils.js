@@ -4,9 +4,7 @@ import MobileDetect from 'mobile-detect';
 import _ from 'lodash';
 import { v4 as uuid } from 'uuid';
 import { getRole } from '@/utils/auth';
-const IsoFormat = 'YYYY-MM-DD';
-const moment = require('moment-timezone');
-moment.tz.setDefault('America/New_York');
+import { format, getTodaysDate, isAfter, isBefore, setYear, subtract, DEFAULT_ISOFORMAT } from '@/shared/dateUtils';
 
 /**
  * Async function to loop an array.
@@ -75,30 +73,14 @@ export function formatDateSlashToDash(date) {
  * @return String - current active anniversary budget date (YYYY-MM-DD)
  */
 export function getCurrentBudgetYear(hireDate) {
-  let currentBudgetYear = moment(hireDate, IsoFormat);
-  if (moment().isAfter(currentBudgetYear)) {
-    currentBudgetYear.year(moment().year());
-    if (moment().isBefore(currentBudgetYear)) {
-      currentBudgetYear = currentBudgetYear.subtract(1, 'years');
+  if (isAfter(getTodaysDate(), hireDate)) {
+    hireDate = setYear(hireDate, parseInt(getTodaysDate('YYYY')));
+    if (isBefore(getTodaysDate(), hireDate)) {
+      hireDate = subtract(hireDate, 1, 'years');
     }
   }
-  return currentBudgetYear.format(IsoFormat);
+  return format(hireDate, null, DEFAULT_ISOFORMAT);
 } // getCurrentBudgetYear
-
-/**
- * Check if today is between a set of given dates in isoformat. Returns true if today is between the two dates,
- * otherwise returns false.
- *
- * @param date - the date to compare
- * @param start - start date
- * @param end - end date
- * @return boolean - today is in set of dates
- */
-export function isBetweenDates(date, start, end) {
-  let startDate = moment(start, IsoFormat);
-  let endDate = moment(end, IsoFormat);
-  return moment(date).isBetween(startDate, endDate, 'day', '[]');
-} // isBetweenDates
 
 /**
  * Checks if a value is empty. Returns true if the value is null or an empty/blank string.
@@ -183,7 +165,7 @@ export function convertToMoneyString(value) {
  * @return String - date formated
  */
 export function monthDayYearFormat(date) {
-  return !isEmpty(date) ? moment(date).format('MMM Do, YYYY') : '';
+  return !isEmpty(date) ? format(date, null, 'MMM Do, YYYY') : '';
 } // monthDayYearFormat
 
 /**
@@ -193,18 +175,8 @@ export function monthDayYearFormat(date) {
  * @return String - date formated
  */
 export function monthYearFormat(date) {
-  return !isEmpty(date) ? moment(date).format('MMM YYYY') : '';
+  return !isEmpty(date) ? format(date, null, 'MMM YYYY') : '';
 } // monthYearFormat
-
-/**
- * Returns a date formated as 'MMM Do' (Aug 18th).
- *
- * @param date - date to format
- * @return String - date formated
- */
-export function monthDayFormat(date) {
-  return !isEmpty(date) ? moment(date).format('MMM Do') : '';
-} // monthDayFormat
 
 /**
  * Parse a date to isoformat (YYYY-MM-DD).

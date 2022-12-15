@@ -8,8 +8,8 @@
  * Utilities to download EEO reports of employees
  */
 const csvUtils = require('./baseCsv.js');
-import moment from 'moment-timezone';
 import _ from 'lodash';
+import { getTodaysDate } from '@/shared/dateUtils';
 
 // some useful constants as the exact strings might change
 const HISPANIC_LATINO = 'Hispanic or Latino';
@@ -29,7 +29,7 @@ export function download(employees) {
   let csvFileStringA = csvUtils.generateFrom2dArray(convertedEmployees[0]); // convert to csv file string
   let csvFileStringB = csvUtils.generateFrom2dArray(convertedEmployees[1]); // convert to csv file string
   let csvFileStringFinal = csvUtils.combine(csvFileStringA, csvFileStringB, 1);
-  let year = moment().format('YYYY');
+  let year = getTodaysDate('YYYY');
   csvUtils.download(csvFileStringFinal, `EEO Compliance Report - ${year}.csv`); // download csv file string as .csv
 } // download
 
@@ -126,8 +126,8 @@ export function convertEmployees(employees) {
   ];
   const jobCategories = [
     'Professional',
-    'Executive/Senior Level Official and Manager',
-    'First/Mid-Level Official and Manager',
+    'Executive/Senior Level Offcial and Manager',
+    'First/Mid-Level Offcial and Manager',
     'Technician',
     'Sales Worker',
     'Administrative Support Worker',

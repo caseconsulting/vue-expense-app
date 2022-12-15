@@ -8,6 +8,8 @@ var localizedFormat = require('dayjs/plugin/localizedFormat');
 var advancedFormat = require('dayjs/plugin/advancedFormat');
 var minMax = require('dayjs/plugin/minMax');
 var isoWeek = require('dayjs/plugin/isoWeek');
+var isBetween = require('dayjs/plugin/isBetween');
+dayjs.extend(isBetween);
 dayjs.extend(isoWeek);
 dayjs.extend(minMax);
 dayjs.extend(advancedFormat);
@@ -85,6 +87,33 @@ export function getHour(date, format) {
   if (date) return format ? dayjs(date, format).hour() : dayjs(date).hour();
   return null;
 } // getHour
+
+/**
+ * Checks if a date is between a start and end date (defaulted to inclusive). https://day.js.org/docs/en/query/is-between#docsNav
+ *
+ * @param {*} date The date to check
+ * @param {*} start The start date
+ * @param {*} end The end date
+ * @param {*} granularity (OPTIONAL) The unit to check
+ * @param {*} isExclusive (OPTIONAL) If the start and end dates are exclusive or not
+ * @returns True if the given date is between the start and end date
+ */
+export function isBetweenDates(date, start, end, granularity, isExclusive) {
+  if (!date || !start || !end) return null;
+  if (granularity) {
+    if (isExclusive) {
+      return dayjs(date).isBetween(start, end, granularity, '()');
+    } else {
+      return dayjs(date).isBetween(start, end, granularity, '[]');
+    }
+  } else {
+    if (isExclusive) {
+      return dayjs(date).isBetween(start, end, null, '()');
+    } else {
+      return dayjs(date).isBetween(start, end, null, '[]');
+    }
+  }
+} // isBetweenDates
 
 /**
  * Verifies if the first date is after the second date in time.
@@ -396,6 +425,7 @@ export default {
   getTodaysDate,
   isAfter,
   isBefore,
+  isBetweenDates,
   isValid,
   maximum,
   minimum,

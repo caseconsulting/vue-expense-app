@@ -3,7 +3,7 @@
  * csv.js
  */
 import _ from 'lodash';
-import moment from 'moment-timezone';
+import { difference, format, getTodaysDate, minimum } from '@/shared/dateUtils';
 const csvUtils = require('./baseCsv.js');
 
 /**
@@ -162,13 +162,13 @@ export function getClearances(clearance) {
  * @return number - number of years on the contract
  */
 export function getContractLengthInYears(contract) {
-  let total = moment.duration();
+  let total = 0;
   if (contract.projects) {
     contract.projects.forEach((project) => {
-      total.add(moment.duration(getProjectLengthInYears(project)));
+      total += getProjectLengthInYears(project);
     });
   }
-  return total.asYears().toFixed(1);
+  return total.toFixed(1);
 } // getContractLengthInYears
 
 /**
@@ -178,57 +178,14 @@ export function getContractLengthInYears(contract) {
  * @return number - time in years
  */
 export function getProjectLengthInYears(project) {
-  let startMoment = moment(project.startDate);
-  let endMoment = moment(project.endDate);
   let length;
   if (project.endDate) {
-    length = moment.duration(endMoment.diff(startMoment));
+    length = difference(project.endDate, project.startDate, 'months');
   } else {
-    length = moment.duration(moment().diff(startMoment));
+    length = difference(getTodaysDate(), project.startDate, 'months');
   }
-  return length.add(1, 'month'); // add one month to include end month in calculation.
+  return length; // add one month to include end month in calculation.
 } // getProjectLengthInYears
-
-/**
-  * This is the old `getContracts` which puts everything in one string. I get the feeling
-  * that we will want the functionality for something in the future because the new method
-  * that was requested seems significantly less convenient. This comment is being made on
-  * Aug 1, 2022; if it's wayyy into the future as you're reading this and nothing has been
-  * brought up, you can probably delete this chunk of commented code.
-  *
-  * @param contract - An array of objects.
-  * @return String - contract
-  * / <-- remove space to fix comment
-  export function getContracts(contracts) {
-   let result = [];
-   if (contracts) {
-     _.forEach(contracts, (contract) => {
-       let earliestDate = moment(); // keep track of earliest start date
-       // create array of project strings
-       let projects = [];
-       _.forEach(contract.projects, (project) => {
-         projects.push(`${project.name} - ${getProjectLengthInYears(project).asYears().toFixed(1)} years`);
-         let endDate = moment(project.endDate || moment(), 'YYYY-MM-DD');
-         earliestDate = moment.min([earliestDate, endDate]);
-       });
-       // create string for contract and add years if necessary
-       let str = `${contract.name} - ${contract.prime} (Projects: ${projects.join(', ')})`;
-       if (contract.projects.length > 1) {
-         str += ` Total Time: ${getContractLengthInYears(contract)} years`;
-       }
-       // add current contract, attaching earliestDate for sorting
-       result.push({ s: str, d: earliestDate.format('YYYYMMDD') });
-     });
-     // sort contracts by their earliest project start date
-     result = _.orderBy(result, 'd', 'desc');
-     // only return the string value after sorting
-     result = _.map(result, (r) => {
-       return r.s;
-     });
-   }
-   return result;
- } // getContracts
- */
 
 /**
  * Returns contract data for employee
@@ -241,19 +198,19 @@ export function getContractPrimeProject(contracts) {
   let toReturn = {};
   if (contracts) {
     _.forEach(contracts, (contract) => {
-      let earliestDate = moment(); // keep track of earliest start date
+      let earliestDate = getTodaysDate(); // keep track of earliest start date
       // create array of project strings
       let projects = [];
       _.forEach(contract.projects, (project) => {
-        projects.push(`${project.name} - ${getProjectLengthInYears(project).asYears().toFixed(1)} years`);
-        let endDate = moment(project.endDate || moment(), 'YYYY-MM-DD');
-        earliestDate = moment.min([earliestDate, endDate]);
+        projects.push(`${project.name} - ${(getProjectLengthInYears(project) / 12).toFixed(1)} years`);
+        let endDate = format(project.endDate || getTodaysDate(), 'YYYY-MM-DD');
+        earliestDate = minimum([earliestDate, endDate]);
       });
       // add current contract, attaching earliestDate for sorting
       result.push({
         contract: { name: contract.name, primes: contract.primes },
         projects: projects,
-        d: earliestDate.format('YYYYMMDD')
+        d: format(earliestDate, 'YYYYMMDD')
       });
     });
     // sort contracts by their earliest project start date
@@ -287,7 +244,7 @@ export function getCustomerOrgExp(exp) {
   for (let i = 0; i < exp.length; i++) {
     a += exp[i].name;
     if (typeof exp[i].years !== 'undefined') {
-      a += ' - ' + exp[i].years + ' years';
+      a += ' - ' + parseInt(exp[i].years).toFixed(1) + ' years';
     }
     if (i + 1 < exp.length) {
       a += ', ';

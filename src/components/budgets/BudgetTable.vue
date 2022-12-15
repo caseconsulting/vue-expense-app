@@ -78,14 +78,8 @@
 </template>
 
 <script>
-import {
-  convertToMoneyString,
-  isBetweenDates,
-  formatDateDashToSlash,
-  getCurrentBudgetYear,
-  isFullTime
-} from '@/utils/utils';
-import { getTodaysDate } from '../../shared/dateUtils';
+import { convertToMoneyString, formatDateDashToSlash, getCurrentBudgetYear, isFullTime } from '@/utils/utils';
+import { getTodaysDate, isBetweenDates } from '../../shared/dateUtils';
 import api from '@/shared/api';
 import _ from 'lodash';
 
@@ -226,7 +220,8 @@ async function refreshBudgets() {
             !isBetweenDates(
               getTodaysDate('YYYY-MM-DD[T]HH:mm:ss.SSS[Z]'),
               budget.fiscalStartDate,
-              budget.fiscalEndDate
+              budget.fiscalEndDate,
+              'days'
             ))
       ) || _.some(this.expenses, (e) => e.expenseTypeId == budget.expenseTypeId && _.isEmpty(e.reimbursedDate))
     );
