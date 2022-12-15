@@ -153,13 +153,11 @@ import {
   updateStoreExpenseTypes
 } from '@/utils/storeUtils';
 import floorPlan from '@/assets/img/MakeOfficesfloorplan.jpg';
-import moment from 'moment-timezone';
 import MainNav from '@/components/utils/MainNav.vue';
 import NotificationBanners from '@/components/utils/NotificationBanners.vue';
 import SwitchRoleModal from '@/components/modals/SwitchRoleModal.vue';
 import TimeOutModal from '@/components/modals/TimeOutModal.vue';
 import TimeOutWarningModal from '@/components/modals/TimeOutWarningModal.vue';
-moment.tz.setDefault('America/New_York');
 
 // |--------------------------------------------------|
 // |                                                  |
