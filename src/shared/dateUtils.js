@@ -6,11 +6,10 @@ var timezone = require('dayjs/plugin/timezone');
 var customParseFormat = require('dayjs/plugin/customParseFormat');
 var localizedFormat = require('dayjs/plugin/localizedFormat');
 var advancedFormat = require('dayjs/plugin/advancedFormat');
-<<<<<<< HEAD
-=======
 var minMax = require('dayjs/plugin/minMax');
+var isoWeek = require('dayjs/plugin/isoWeek');
+dayjs.extend(isoWeek);
 dayjs.extend(minMax);
->>>>>>> 954ce234 (POR-1949: migrate from momentjs to dayjs in employees folder)
 dayjs.extend(advancedFormat);
 dayjs.extend(localizedFormat);
 dayjs.extend(customParseFormat);
@@ -100,17 +99,19 @@ export function getHour(date, format) {
  * @param {String} format - (OPTIONAL) Format of the dates, assumes default format if not specified
  * @returns Boolean - True if the first date comes after the second date, false otherwise
  */
-export function isAfter(date1, date2, granularity, format = DEFAULT_ISOFORMAT) {
+export function isAfter(date1, date2, granularity, format) {
   if (granularity) {
-<<<<<<< HEAD
-    return dayjs(date1, format, true).isAfter(dayjs(date2, format, true), granularity);
+    if (format) {
+      return dayjs(date1, format, true).isAfter(dayjs(date2, format, true), granularity);
+    } else {
+      return dayjs(date1).isAfter(dayjs(date2), granularity);
+    }
   } else {
-    return dayjs(date1, format, true).isAfter(dayjs(date2, format, true));
-=======
-    return dayjs(date1).isAfter(dayjs(date2), granularity);
-  } else {
-    return dayjs(date1).isAfter(dayjs(date2));
->>>>>>> 954ce234 (POR-1949: migrate from momentjs to dayjs in employees folder)
+    if (format) {
+      return dayjs(date1, format, true).isAfter(dayjs(date2, format, true));
+    } else {
+      return dayjs(date1).isAfter(dayjs(date2));
+    }
   }
 } // isAfter
 
@@ -127,19 +128,32 @@ export function isAfter(date1, date2, granularity, format = DEFAULT_ISOFORMAT) {
  * @param {String} format - (OPTIONAL) Format of the dates, assumes default format if not specified
  * @returns Boolean - True if the first date comes before the second date, false otherwise
  */
-export function isBefore(date1, date2, granularity, format = DEFAULT_ISOFORMAT) {
+export function isBefore(date1, date2, granularity, format) {
   if (granularity) {
-<<<<<<< HEAD
-    return dayjs(date1, format, true).isBefore(dayjs(date2, format, true), granularity);
+    if (format) {
+      return dayjs(date1, format, true).isBefore(dayjs(date2, format, true), granularity);
+    } else {
+      return dayjs(date1).isBefore(dayjs(date2), granularity);
+    }
   } else {
-    return dayjs(date1, format, true).isBefore(dayjs(date2, format, true));
-=======
-    return dayjs(date1).isBefore(dayjs(date2), granularity);
-  } else {
-    return dayjs(date1).isBefore(dayjs(date2));
->>>>>>> 954ce234 (POR-1949: migrate from momentjs to dayjs in employees folder)
+    if (format) {
+      return dayjs(date1, format, true).isBefore(dayjs(date2, format, true));
+    } else {
+      return dayjs(date1).isBefore(dayjs(date2));
+    }
   }
 } // isBefore
+
+/**
+ * Checks the validity of a given date at a given format.
+ *
+ * @param {String} date The date to validate
+ * @param {*} format The format of the date
+ * @returns True if the date is valid at the given format
+ */
+export function isValid(date, format) {
+  return dayjs(date, format, true).isValid();
+} // isValid
 
 /**
  * Formats a given date and returns the output of the newly formatted date.
@@ -158,6 +172,17 @@ export function format(date, oldFormat, newFormat) {
     return dayjs(date).format(newFormat);
   }
 } // format
+
+/**
+ * Sets the dates day and returns a string of the date.
+ *
+ * @param {String} date The given date
+ * @param {Number} day The day to set the date to
+ * @returns String - The date at the given day
+ */
+export function setDay(date, day) {
+  return dayjs(date).date(day).format(DEFAULT_ISOFORMAT);
+} // setDay
 
 /**
  * Sets the dates year and returns a string of the date.
@@ -185,8 +210,16 @@ export function getTodaysDate(format) {
 } // getTodaysDate
 
 /**
-<<<<<<< HEAD
-=======
+ * Returns a number based on what day of the week it is. https://day.js.org/docs/en/get-set/iso-weekday
+ *
+ * @param {*} date - The given date
+ * @returns Number - An integer from 1(monday)-7(sunday)
+ */
+export function getIsoWeekday(date) {
+  return dayjs(date).isoWeekday();
+} // getIsoWeekday
+
+/**
  * Gets the difference in time between the two dates. https://day.js.org/docs/en/display/difference
  * NOTE: If you want a positive number, make date1 be the later date and date2 be the earlier date
  *
@@ -226,7 +259,6 @@ export function maximum(dates) {
 } // maximum
 
 /**
->>>>>>> 954ce234 (POR-1949: migrate from momentjs to dayjs in employees folder)
  * formats the given date in MM/DD/YYYY
  *
  * @param date - the date to be formatted
@@ -311,11 +343,15 @@ export default {
   format,
   formatDate,
   formatDateMonthYear,
+  getIsoWeekday,
+  getTodaysDate,
   isAfter,
   isBefore,
+  isValid,
   maximum,
   minimum,
   parseDate,
   parseDateMonthYear,
+  setDay,
   setYear
 };
