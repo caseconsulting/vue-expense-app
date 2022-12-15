@@ -27,7 +27,7 @@
             <template v-slot:activator="{ on, attrs }">
               <v-text-field
                 ref="formFields"
-                :value="certification.dateReceived | formatDate"
+                :value="format(certification.dateReceived, null, 'MM/DD/YYYY')"
                 label="Date Received"
                 prepend-icon="event_available"
                 :rules="[...getDateRules()]"
@@ -63,7 +63,7 @@
             <template v-slot:activator="{ on, attrs }">
               <v-text-field
                 ref="formFields"
-                :value="certification.expirationDate | formatDate"
+                :value="format(certification.expirationDate, null, 'MM/DD/YYYY')"
                 label="Expiration Date (optional)"
                 prepend-icon="event_busy"
                 :rules="[...getDateOptionalRules(), dateOrderRules(index)]"
@@ -119,8 +119,8 @@
 <script>
 import _ from 'lodash';
 import { getDateRules, getDateOptionalRules, getRequiredRules } from '@/shared/validationUtils.js';
-import { formatDate, parseDate, isEmpty, isMobile } from '@/utils/utils';
-import { add, getTodaysDate, isAfter } from '@/shared/dateUtils';
+import { isEmpty, isMobile } from '@/utils/utils';
+import { add, format, getTodaysDate, isAfter } from '@/shared/dateUtils';
 import { mask } from 'vue-the-mask';
 
 // |--------------------------------------------------|
@@ -174,7 +174,8 @@ function deleteCertification(index) {
  * @return String - The date in YYYY-MM-DD format
  */
 function parseEventDate() {
-  return this.parseDate(event.target.value);
+  console.log(this.format(event.target.value, 'MM/DD/YYYY', 'YYYY-MM-DD'));
+  return this.format(event.target.value, 'MM/DD/YYYY', 'YYYY-MM-DD');
 } //parseEventDate
 
 /**
@@ -259,20 +260,17 @@ export default {
     };
   },
   directives: { mask },
-  filters: {
-    formatDate
-  },
   methods: {
     add,
     addCertification,
     deleteCertification,
+    format,
     getDateOptionalRules,
     getDateRules,
     getTodaysDate,
     getRequiredRules,
     isAfter,
     isEmpty,
-    parseDate,
     parseEventDate,
     populateDropDowns,
     validateFields

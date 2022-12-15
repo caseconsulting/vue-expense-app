@@ -61,7 +61,7 @@
                 <v-text-field
                   :id="'start-field-' + index + '-' + projIndex"
                   ref="formFields"
-                  :value="project.startDate | formatDateMonthYear"
+                  :value="format(project.startDate, null, 'MM/YYYY')"
                   label="Start Date"
                   hint="MM/YYYY format"
                   v-mask="'##/####'"
@@ -98,7 +98,7 @@
                   :id="'end-field-' + index + '-' + projIndex"
                   ref="formFields"
                   :disabled="project.presentDate"
-                  :value="project.endDate | formatDateMonthYear"
+                  :value="format(project.endDate, null, 'MM/YYYY')"
                   label="End Date"
                   prepend-icon="event_busy"
                   :rules="[
@@ -173,8 +173,8 @@
 import _ from 'lodash';
 import { mask } from 'vue-the-mask';
 import { getDateMonthYearRules, getDateMonthYearOptionalRules, getRequiredRules } from '@/shared/validationUtils.js';
-import { isEmpty, formatDateMonthYear, parseDateMonthYear, isMobile } from '@/utils/utils';
-import { add, isAfter } from '@/shared/dateUtils';
+import { isEmpty, isMobile } from '@/utils/utils';
+import { add, format, isAfter } from '@/shared/dateUtils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -286,10 +286,10 @@ function hasEndDatesFilled(index) {
 /**
  * Parse the date after losing focus.
  *
- * @return String - The date in YYYY-MM-DD format
+ * @return String - The date in YYYY-MM format
  */
 function parseEventDate() {
-  return this.parseDateMonthYear(event.target.value);
+  return this.format(event.target.value, 'MM/YYYY', 'YYYY-MM');
 } //parseEventDate
 
 /**
@@ -409,22 +409,19 @@ export default {
     };
   },
   directives: { mask },
-  filters: {
-    formatDateMonthYear
-  },
   methods: {
     add, // dateUtils
     addContract,
     addProject,
     deleteContract,
     deleteProject,
+    format, // dateUtils
     getDateMonthYearRules,
     getDateMonthYearOptionalRules,
     getRequiredRules,
     hasEndDatesFilled,
     isAfter, // dateUtils
     isEmpty,
-    parseDateMonthYear,
     parseEventDate,
     populateDropDowns,
     validateFields

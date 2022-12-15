@@ -110,7 +110,7 @@
           hint="MM/DD/YYYY format"
           persistent-hint
           prepend-icon="event"
-          @blur="editedPersonalInfo.birthday = parseDate(birthdayFormat)"
+          @blur="editedPersonalInfo.birthday = format(birthdayFormat, 'MM/DD/YYYY', 'YYYY-MM-DD')"
           @input="BirthdayMenu = false"
           v-on="on"
         ></v-text-field>
@@ -227,7 +227,8 @@ import {
   getPhoneNumberRules,
   getPhoneNumberTypeRules
 } from '@/shared/validationUtils.js';
-import { formatDate, isEmpty, parseDate, countryList } from '@/utils/utils';
+import { isEmpty, countryList } from '@/utils/utils';
+import { format } from '@/shared/dateUtils';
 import { mask } from 'vue-the-mask';
 import { getRole } from '@/utils/auth';
 
@@ -245,9 +246,9 @@ async function created() {
   // get countries
   this.countries = countryList;
   // set formatted birthday date
-  this.birthdayFormat = this.formatDate(this.editedPersonalInfo.birthday) || this.birthdayFormat;
+  this.birthdayFormat = this.format(this.editedPersonalInfo.birthday, null, 'MM/DD/YYYY') || this.birthdayFormat;
   // fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
-  if (this.editedPersonalInfo.birthday !== null && !this.formatDate(this.editedPersonalInfo.birthday)) {
+  if (this.editedPersonalInfo.birthday !== null && !this.format(this.editedPersonalInfo.birthday, null, 'MM/DD/YYYY')) {
     // clear birthday date if fails to format
     this.editedPersonalInfo.birthday = null;
   }
@@ -451,9 +452,9 @@ function watchModelID() {
  * watcher for editedPersonalInfo.birthday
  */
 function watchEditedPersonalInfoBirthday() {
-  this.birthdayFormat = this.formatDate(this.editedPersonalInfo.birthday) || this.birthdayFormat;
+  this.birthdayFormat = this.format(this.editedPersonalInfo.birthday, null, 'MM/DD/YYYY') || this.birthdayFormat;
   //fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
-  if (this.editedPersonalInfo.birthday !== null && !this.formatDate(this.editedPersonalInfo.birthday)) {
+  if (this.editedPersonalInfo.birthday !== null && !this.format(this.editedPersonalInfo.birthday, null, 'MM/DD/YYYY')) {
     this.editedPersonalInfo.birthday = null;
   }
 } // watchEditedPersonalInfoBirthday
@@ -560,7 +561,7 @@ export default {
   },
   directives: { mask },
   methods: {
-    formatDate,
+    format,
     getDateOptionalRules,
     getNonFutureDateRules,
     getPhoneNumberRules,
@@ -568,7 +569,6 @@ export default {
     getURLRules,
     getRole,
     isEmpty,
-    parseDate,
     updateAddressDropDown,
     updateBoxes,
     userhasAdminPermissions,

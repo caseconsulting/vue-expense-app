@@ -181,7 +181,7 @@
               hint="MM/DD/YYYY format"
               persistent-hint
               prepend-icon="event"
-              @blur="editedExpense.purchaseDate = parseDate(purchaseDateFormatted)"
+              @blur="editedExpense.purchaseDate = format(purchaseDateFormatted, 'MM/DD/YYYY', 'YYYY-MM-DD')"
               @input="purchaseMenu = false"
               v-on="on"
             ></v-text-field>
@@ -213,7 +213,7 @@
               hint="MM/DD/YYYY format "
               persistent-hint
               prepend-icon="event"
-              @blur="editedExpense.reimbursedDate = parseDate(reimbursedDateFormatted)"
+              @blur="editedExpense.reimbursedDate = format(reimbursedDateFormatted, 'MM/DD/YYYY', 'YYYY-MM-DD')"
               @input="reimburseMenu = false"
               v-on="on"
             ></v-text-field>
@@ -301,7 +301,7 @@ import FormSubmissionConfirmation from '@/components/modals/FormSubmissionConfir
 import api from '@/shared/api.js';
 import employeeUtils from '@/shared/employeeUtils';
 import { getDateRules, getDateOptionalRules, getRequiredRules, getURLRules } from '@/shared/validationUtils.js';
-import { isEmpty, isFullTime, convertToMoneyString, userRoleIsAdmin, formatDate, parseDate } from '@/utils/utils';
+import { isEmpty, isFullTime, convertToMoneyString, userRoleIsAdmin } from '@/utils/utils';
 import { updateStoreBudgets } from '@/utils/storeUtils';
 import { getRole } from '@/utils/auth';
 
@@ -1279,8 +1279,7 @@ async function scanFile() {
     }
     this.isInactive = false;
     if (firstDate != null && this.editedExpense.purchaseDate == null) {
-      let date = this.parseDate(format(firstDate, null, 'YYYY-MM-DD'));
-      this.editedExpense.purchaseDate = date;
+      this.editedExpense.purchaseDate = this.format(firstDate);
     }
     if (!failed && (this.editedExpense.cost == 0 || this.editedExpense.cost == null)) {
       this.editedExpense.cost = totalPrice;
@@ -1606,8 +1605,10 @@ async function watchEditedExpenseExpenseTypeID() {
     // set hint
     this.hint = this.selectedExpenseType.recurringFlag
       ? 'Recurring Expense Type'
-      : `Available from ${this.formatDate(this.selectedExpenseType.startDate)} - ${this.formatDate(
-          this.selectedExpenseType.endDate
+      : `Available from ${this.format(this.selectedExpenseType.startDate, null, 'MM/DD/YYYY')} - ${this.format(
+          this.selectedExpenseType.endDate,
+          null,
+          'MM/DD/YYYY'
         )}`;
 
     // set high five cost
@@ -1740,9 +1741,10 @@ async function watchEditedExpenseEmployeeID() {
  * watcher for editedExpense.purchaseDate - format date.
  */
 function watchEditedExpensePurchaseDate() {
-  this.purchaseDateFormatted = this.formatDate(this.editedExpense.purchaseDate) || this.purchaseDateFormatted;
+  this.purchaseDateFormatted =
+    this.format(this.editedExpense.purchaseDate, null, 'MM/DD/YYYY') || this.purchaseDateFormatted;
   //fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
-  if (this.editedExpense.purchaseDate !== null && !this.formatDate(this.editedExpense.purchaseDate)) {
+  if (this.editedExpense.purchaseDate !== null && !this.format(this.editedExpense.purchaseDate, null, 'MM/DD/YYYY')) {
     this.editedExpense.purchaseDate = null;
   }
 } // watchEditedExpensePurchaseDate
@@ -1751,9 +1753,13 @@ function watchEditedExpensePurchaseDate() {
  * watcher for editedExpense.reimbursedDate - format date.
  */
 function watchEditedExpenseReimbursedDate() {
-  this.reimbursedDateFormatted = this.formatDate(this.editedExpense.reimbursedDate) || this.reimbursedDateFormatted;
+  this.reimbursedDateFormatted =
+    this.format(this.editedExpense.reimbursedDate, null, 'MM/DD/YYYY') || this.reimbursedDateFormatted;
   //fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
-  if (this.editedExpense.reimbursedDate !== null && !this.formatDate(this.editedExpense.reimbursedDate)) {
+  if (
+    this.editedExpense.reimbursedDate !== null &&
+    !this.format(this.editedExpense.reimbursedDate, null, 'MM/DD/YYYY')
+  ) {
     this.editedExpense.reimbursedDate = null;
   }
 } // watchEditedExpenseReimbursedDate
@@ -1870,7 +1876,7 @@ export default {
     encodeUrl,
     filteredExpenseTypes,
     formatCost,
-    formatDate,
+    format,
     getCategories,
     getDateRules,
     getDateOptionalRules,
@@ -1886,7 +1892,6 @@ export default {
     isFullTime,
     isReceiptRequired,
     parseCost,
-    parseDate,
     preformatFloat,
     scanFile,
     setFile,

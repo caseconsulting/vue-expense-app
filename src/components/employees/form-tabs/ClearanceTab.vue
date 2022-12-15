@@ -27,7 +27,7 @@
             <template v-slot:activator="{ on, attrs }">
               <v-text-field
                 ref="formFields"
-                :value="clearance.grantedDate | formatDate"
+                :value="format(clearance.grantedDate, null, 'MM/DD/YYYY')"
                 label="Granted Date"
                 prepend-icon="event_available"
                 clearable
@@ -64,7 +64,7 @@
             <template v-slot:activator="{ on, attrs }">
               <v-text-field
                 ref="formFields"
-                :value="clearance.submissionDate | formatDate"
+                :value="format(clearance.submissionDate, null, 'MM/DD/YYYY')"
                 label="Submission Date"
                 prepend-icon="event_note"
                 clearable
@@ -113,7 +113,7 @@
         <template v-slot:activator="{ on, attrs }">
           <v-text-field
             ref="formFields"
-            :value="clearance.badgeExpirationDate | formatDate"
+            :value="format(clearance.badgeExpirationDate, null, 'MM/DD/YYYY')"
             label="Badge Expiration Date"
             prepend-icon="event_busy"
             clearable
@@ -149,7 +149,7 @@
       >
         <template v-slot:activator="{ on, attrs }">
           <v-combobox
-            :value="clearance.biDates | formatDates"
+            :value="formatDates(clearance.biDates)"
             multiple
             label="BI Dates"
             prepend-icon="event"
@@ -184,7 +184,7 @@
       >
         <template v-slot:activator="{ on, attrs }">
           <v-combobox
-            :value="clearance.adjudicationDates | formatDates"
+            :value="formatDates(clearance.adjudicationDates)"
             multiple
             label="Adjudication Dates"
             prepend-icon="event"
@@ -227,7 +227,7 @@
       >
         <template v-slot:activator="{ on, attrs }">
           <v-combobox
-            :value="clearance.polyDates | formatDates"
+            :value="formatDates(clearance.polyDates)"
             multiple
             label="Poly Dates"
             prepend-icon="event"
@@ -273,7 +273,7 @@
 <script>
 import _ from 'lodash';
 import { getDateOptionalRules, getRequiredRules } from '@/shared/validationUtils.js';
-import { formatDate, parseDate, isEmpty } from '@/utils/utils';
+import { isEmpty } from '@/utils/utils';
 import { format, isAfter, isBefore, DEFAULT_ISOFORMAT, FORMATTED_ISOFORMAT } from '@/shared/dateUtils';
 import { mask } from 'vue-the-mask';
 
@@ -414,7 +414,7 @@ function minExpiration(cIndex) {
  * @return String - The date in YYYY-MM-DD format
  */
 function parseEventDate() {
-  return this.parseDate(event.target.value);
+  return this.format(event.target.value, 'MM/DD/YYYY', 'YYYY-MM-DD');
 } // parseEventDate
 
 /**
@@ -519,7 +519,7 @@ function watchValidating(val) {
 function formatDates(array) {
   let formattedDates = [];
   array.forEach((date) => {
-    formattedDates.push(formatDate(date));
+    formattedDates.push(this.format(date, null, 'MM/DD/YYYY'));
   });
   return formattedDates;
 } // formatDates
@@ -569,15 +569,11 @@ export default {
     };
   },
   directives: { mask },
-  filters: {
-    formatDate,
-    formatDates
-  },
   methods: {
     addClearance,
     capitalizeBadges,
     format,
-    formatDate,
+    formatDates,
     deleteClearance,
     getDateOptionalRules,
     getRequiredRules,
@@ -586,7 +582,6 @@ export default {
     isEmpty,
     maxSubmission,
     minExpiration,
-    parseDate,
     parseEventDate,
     populateDropDowns,
     removeAdjDate,

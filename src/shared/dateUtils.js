@@ -1,4 +1,5 @@
-// DOCUMENTATION FOR DAY.JS: https://day.js.org/en/
+// Documentation for Day.js: https://day.js.org/en/
+// WARNING: Be careful making edits to these functions as they are used all throughout the code base
 
 const dayjs = require('dayjs');
 var utc = require('dayjs/plugin/utc');
@@ -196,6 +197,7 @@ export function isBetweenDates(date, start, end, granularity, isExclusive) {
 } // isBetweenDates
 
 /**
+<<<<<<< HEAD
  * Gets year of the date.
  *
  * @param {String} date - The date to get the year of.
@@ -226,6 +228,8 @@ export function getDay(date) {
 } // getDay
 
 /**
+=======
+>>>>>>> eafc00d3 (POR-1961: get rid of date helpers in utils/utils file and older format function in shared/dateUtils)
  * Verifies if the first date is after the second date in time.
  *
  * EXAMPLES: isAfter('2022-12-24', '2022-12-23')         => OUTPUT: true
@@ -305,6 +309,7 @@ export function isValid(date, format) {
  * @param {String} format - The format output (https://day.js.org/docs/en/display/format)
  */
 export function format(date, oldFormat, newFormat) {
+  if (!date) return null;
   if (oldFormat) {
     return dayjs(date, oldFormat).format(newFormat);
   } else {
@@ -408,91 +413,12 @@ export function maximum(dates) {
   return dayjs.max(dates).format();
 } // maximum
 
-/**
- * formats the given date in MM/DD/YYYY
- *
- * @param date - the date to be formatted
- * @return - the formatted date
- */
-export function formatDate(date) {
-  if (!date) return null;
-  else {
-    const [year, month, day] = date.split('-');
-    if (dayjs(`${month}/${day}/${year}`, 'MM/DD/YYYY', true).isValid()) {
-      return `${month}/${day}/${year}`;
-    } else {
-      return null;
-    }
-  }
-} // formatDate
-
-/**
- * Takes an date object in ISO format 2020-01 and puts it in slash format 01/2020
- * @param {Date} date date in ISO format 2020-01
- */
-export function formatDateMonthYear(date) {
-  if (!date) return null;
-  else {
-    const [year, month] = date.split('-');
-    if (dayjs(`${month}/${year}`, 'MM/YYYY', true).isValid()) {
-      return `${month}/${year}`;
-    } else {
-      return null;
-    }
-  }
-} // formatDateMonthYear
-
-/**
- * parses the date to pad out date to return correct format
- *
- * @param {*} date - date to parse
- * @return - the formatted date
- */
-export function parseDate(date) {
-  if (!date) return null;
-  else {
-    const [month, day, year] = date.split('/');
-    if (month != undefined && day != undefined && year != undefined) {
-      if (year <= 40) {
-        return `${year.padStart(4, '20')}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
-      } else {
-        return `${year.padStart(4, '19')}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
-      }
-    } else {
-      return date;
-    }
-  }
-} // parseDate
-
-/**
- * Takes an date object in in slash format MM/YYYY and translates it to valid ISO format YYYY-MM
- *
- * @param {Date} date date in ISO format 2020-01
- */
-export function parseDateMonthYear(date) {
-  if (!date) return null;
-  else {
-    const [month, year] = date.split('/');
-    if (month != undefined && year != undefined) {
-      if (year <= 40) {
-        return `${year.padStart(4, '20')}-${month.padStart(2, '0')}`;
-      } else {
-        return `${year.padStart(4, '19')}-${month.padStart(2, '0')}`;
-      }
-    } else {
-      return date;
-    }
-  }
-} //parseDateMonthYear
-
 export default {
   DEFAULT_ISOFORMAT,
   FORMATTED_ISOFORMAT,
   PARSED_ISOFORMAT,
   difference,
   format,
-  formatDate,
-  formatDateMonthYear,
   getIsoWeekday,
   getTodaysDate,
   isAfter,
@@ -501,8 +427,6 @@ export default {
   isValid,
   maximum,
   minimum,
-  parseDate,
-  parseDateMonthYear,
   setDay,
   setYear
 };

@@ -128,7 +128,7 @@
             hint="MM/DD/YYYY format"
             persistent-hint
             prepend-icon="event"
-            @blur="editedEmployee.hireDate = parseDate(hireDateFormatted)"
+            @blur="editedEmployee.hireDate = format(hireDateFormatted, 'MM/DD/YYYY', 'YYYY-MM-DD')"
             @input="hireMenu = false"
             v-on="on"
           ></v-text-field>
@@ -165,7 +165,7 @@
             v-mask="'##/##/####'"
             persistent-hint
             prepend-icon="event"
-            @blur="editedEmployee.deptDate = parseDate(deptDateFormatted)"
+            @blur="editedEmployee.deptDate = format(deptDateFormatted, 'MM/DD/YYYY', 'YYYY-MM-DD')"
             @input="departureMenu = false"
             v-on="on"
             :disabled="!admin"
@@ -328,16 +328,8 @@
 import api from '@/shared/api.js';
 import _ from 'lodash';
 import { getDateRules, getNumberRules, getRequiredRules, getValidateFalse } from '@/shared/validationUtils.js';
-import {
-  formatDate,
-  isEmpty,
-  parseDate,
-  isMobile,
-  userRoleIsAdmin,
-  userRoleIsManager,
-  userRoleIsUser,
-  userRoleIsIntern
-} from '@/utils/utils';
+import { isEmpty, isMobile, userRoleIsAdmin, userRoleIsManager, userRoleIsUser, userRoleIsIntern } from '@/utils/utils';
+import { format } from '@/shared/dateUtils';
 import { mask } from 'vue-the-mask';
 import EEODeclineSelfIdentify from '../../modals/EEODeclineSelfIdentify.vue';
 
@@ -380,11 +372,11 @@ async function created() {
   // get all employees
   this.employees = this.$store.getters.employees;
   // set formatted hire date
-  this.hireDateFormatted = this.formatDate(this.editedEmployee.hireDate) || this.hireDateFormatted;
+  this.hireDateFormatted = this.format(this.editedEmployee.hireDate, null, 'MM/DD/YYYY') || this.hireDateFormatted;
   // set formatted depature date
-  this.deptDateFormatted = this.formatDate(this.editedEmployee.deptDate) || this.deptDateFormatted;
+  this.deptDateFormatted = this.format(this.editedEmployee.deptDate, null, 'MM/DD/YYYY') || this.deptDateFormatted;
   // fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
-  if (this.editedEmployee.deptDate !== null && !this.formatDate(this.editedEmployee.deptDate)) {
+  if (this.editedEmployee.deptDate !== null && !this.format(this.editedEmployee.deptDate, null, 'MM/DD/YYYY')) {
     // clear depature date if fails to format
     this.editedEmployee.deptDate = null;
   }
@@ -568,9 +560,9 @@ function watchEditedEmployeeEmployeeRole() {
  * watcher for editedEmployee.deptDate - format date on change.
  */
 function watchEditedEmployeeDeptDate() {
-  this.deptDateFormatted = formatDate(this.editedEmployee.deptDate) || this.deptDateFormatted;
+  this.deptDateFormatted = format(this.editedEmployee.deptDate, null, 'MM/DD/YYYY') || this.deptDateFormatted;
   //fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
-  if (this.editedEmployee.deptDate !== null && !this.formatDate(this.editedEmployee.deptDate)) {
+  if (this.editedEmployee.deptDate !== null && !this.format(this.editedEmployee.deptDate, null, 'MM/DD/YYYY')) {
     this.editedEmployee.deptDate = null;
   }
 } // watchEditedEmployeeDeptDate
@@ -582,9 +574,9 @@ async function watchEditedEmployeeHireDate() {
   this.hasExpenses = this.editedEmployee.id
     ? _.size(await api.getAllEmployeeExpenses(this.editedEmployee.id)) > 0
     : false;
-  this.hireDateFormatted = this.formatDate(this.editedEmployee.hireDate) || this.hireDateFormatted;
+  this.hireDateFormatted = this.format(this.editedEmployee.hireDate, null, 'MM/DD/YYYY') || this.hireDateFormatted;
   //fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
-  if (this.editedEmployee.hireDate !== null && !this.formatDate(this.editedEmployee.hireDate)) {
+  if (this.editedEmployee.hireDate !== null && !this.format(this.editedEmployee.hireDate, null, 'MM/DD/YYYY')) {
     this.editedEmployee.hireDate = null;
   }
 } // watchEditedEmployeeHireDate
@@ -613,8 +605,8 @@ function watchStatusRadio() {
   } else if (this.statusRadio == 'inactive') {
     this.status = '0';
     this.editedEmployee.workStatus = 0;
-    if (this.deptDateFormatted && this.parseDate(this.deptDateFormatted)) {
-      this.editedEmployee.deptDate = this.parseDate(this.deptDateFormatted);
+    if (this.deptDateFormatted) {
+      this.editedEmployee.deptDate = this.format(this.deptDateFormatted, 'MM/DD/YYYY', 'YYYY-MM-DD');
     }
   } else {
     this.editedEmployee.deptDate = null;
@@ -820,7 +812,7 @@ export default {
     adminCanEditEeo,
     combineEmailUsernameAndDomain,
     duplicateEmployeeNum,
-    formatDate,
+    format,
     formatKebabCase,
     getDateRules,
     getNumberRules,
@@ -830,7 +822,6 @@ export default {
     isInactive,
     isMobile,
     isPartTime,
-    parseDate,
     thisIsMyProfile,
     userRoleIsAdmin,
     userRoleIsManager,

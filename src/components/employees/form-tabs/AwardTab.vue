@@ -27,7 +27,7 @@
             <template v-slot:activator="{ on }">
               <v-text-field
                 ref="formFields"
-                :value="award.dateReceived | formatDateMonthYear"
+                :value="format(award.dateReceived, null, 'MM/YYYY')"
                 label="Date Received"
                 prepend-icon="event_available"
                 :rules="getDateMonthYearRules()"
@@ -80,8 +80,7 @@
 <script>
 import _ from 'lodash';
 import { getDateMonthYearRules, getRequiredRules } from '@/shared/validationUtils.js';
-import { formatDateMonthYear, parseDate, parseDateMonthYear } from '@/utils/utils';
-import { getTodaysDate } from '@/shared/dateUtils';
+import { format, getTodaysDate } from '@/shared/dateUtils';
 import { mask } from 'vue-the-mask';
 
 // |--------------------------------------------------|
@@ -134,7 +133,8 @@ function deleteAward(index) {
  * @return String - The date in YYYY-MM format
  */
 function parseEventDate() {
-  return this.parseDateMonthYear(event.target.value);
+  console.log(this.format(event.target.value, 'MM/YYYY', 'YYYY-MM'));
+  return this.format(event.target.value, 'MM/YYYY', 'YYYY-MM');
 } // parseEventDate
 
 /**
@@ -183,17 +183,13 @@ export default {
     };
   },
   directives: { mask },
-  filters: {
-    formatDateMonthYear
-  },
   methods: {
     addAward,
     deleteAward,
+    format,
     getDateMonthYearRules,
     getTodaysDate,
     getRequiredRules,
-    parseDate,
-    parseDateMonthYear,
     parseEventDate,
     validateFields
   },

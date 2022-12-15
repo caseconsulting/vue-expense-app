@@ -27,7 +27,7 @@
             <template v-slot:activator="{ on }">
               <v-text-field
                 ref="formFields"
-                :value="military.startDate | formatDateMonthYear"
+                :value="format(military.startDate, null, 'MM/YYYY')"
                 :rules="getDateMonthYearRules()"
                 label="Starting Date"
                 prepend-icon="event_available"
@@ -64,7 +64,7 @@
             <template v-slot:activator="{ on }">
               <v-text-field
                 ref="formFields"
-                :value="military.completeDate | formatDateMonthYear"
+                :value="format(military.completeDate, null, 'MM/YYYY')"
                 :rules="[...dateSubmissionRules()]"
                 label="Completion Date"
                 prepend-icon="event_available"
@@ -111,8 +111,7 @@
 import _ from 'lodash';
 import { mask } from 'vue-the-mask';
 import { getDateMonthYearRules, getRequiredRules } from '@/shared/validationUtils.js';
-import { formatDateMonthYear, parseDateMonthYear } from '@/utils/utils';
-import { isBefore } from '@/shared/dateUtils';
+import { format, isBefore } from '@/shared/dateUtils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -147,7 +146,7 @@ function emitToParser(include) {
  * @return String - The date in YYYY-MM format
  */
 function parseEventDate() {
-  return this.parseDateMonthYear(event.target.value);
+  return this.format(event.target.value, 'MM/YYYY', 'YYYY-MM');
 } // parseEventDate
 
 /**
@@ -198,19 +197,16 @@ function watchValidating() {
 export default {
   props: ['parser', 'service', 'militaryIndex', 'validating', 'attach'],
   directives: { mask },
-  filters: {
-    formatDateMonthYear
-  },
   computed: {
     isAttached
   },
   methods: {
     dateSubmissionRules,
     emitToParser,
+    format,
     getDateMonthYearRules,
     getRequiredRules,
     isBefore,
-    parseDateMonthYear,
     parseEventDate,
     validateFields
   },

@@ -1,5 +1,4 @@
 import api from '@/shared/api.js';
-import dateUtils from '@/shared/dateUtils';
 import MobileDetect from 'mobile-detect';
 import _ from 'lodash';
 import { v4 as uuid } from 'uuid';
@@ -17,54 +16,6 @@ export async function asyncForEach(array, callback) {
     await callback(array[index], index, array);
   }
 } // asyncForEach
-
-/**
- * Formats a date.
- *
- * @param date - date to format
- * @return Date - formatted date
- */
-export function formatDate(date) {
-  return dateUtils.formatDate(date);
-} // formatDate
-
-/**
- * Formats a date (dates that only have months and years).
- *
- * @param date - date to format
- * @return Date - formatted date
- */
-export function formatDateMonthYear(date) {
-  return dateUtils.formatDateMonthYear(date);
-} // formatDateMonthYear
-
-/**
- * Returns a date formated from YYYY-MM-DD to MM/DD/YYYY.
- *
- * @param date - YYYY-MM-DD String date
- * @return String - MM/DD/YYYY date
- */
-export function formatDateDashToSlash(date) {
-  if (!date) {
-    return null;
-  }
-  const [year, month, day] = date.split('-');
-  return `${month}/${day}/${year}`;
-} // formatDateDashToSlash
-
-/**
- * Returns a date formated from MM/DD/YYYY to YYYY-MM-DD.
- *
- * @param date - MM/DD/YYYY String date
- * @return String - YYYY-MM-DD date
- */
-export function formatDateSlashToDash(date) {
-  if (!date) {
-    return null;
-  }
-  const [month, day, year] = date.split('/');
-  return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
-} // formatDateSlashToDash
 
 /**
  * Gets the current active anniversary budget year starting date in isoformat.
@@ -179,24 +130,14 @@ export function monthYearFormat(date) {
 } // monthYearFormat
 
 /**
- * Parse a date to isoformat (YYYY-MM-DD).
+ * Returns a date formated as 'MMM Do' (Aug 18th).
  *
- * @param Date = date to parse
- * @return Date - date in isoformat
+ * @param date - date to format
+ * @return String - date formated
  */
-export function parseDate(date) {
-  return dateUtils.parseDate(date);
-} // parseDate
-
-/**
- * Parse a date to isoformat (YYYY-MM).
- *
- * @param Date = date to parse
- * @return Date - date in isoformat
- */
-export function parseDateMonthYear(date) {
-  return dateUtils.parseDateMonthYear(date);
-} // parseDateMonthYear
+export function monthDayFormat(date) {
+  return !isEmpty(date) ? format(date, null, 'MMM Do') : '';
+} // monthDayFormat
 
 /**
  * Updates the login date and creates audit for the employee.

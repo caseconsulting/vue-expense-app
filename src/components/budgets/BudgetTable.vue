@@ -78,8 +78,8 @@
 </template>
 
 <script>
-import { convertToMoneyString, formatDateDashToSlash, getCurrentBudgetYear, isFullTime } from '@/utils/utils';
-import { getTodaysDate, isBetweenDates } from '../../shared/dateUtils';
+import { convertToMoneyString, isBetweenDates, getCurrentBudgetYear, isFullTime } from '@/utils/utils';
+import { format, getTodaysDate, DEFAULT_ISOFORMAT, FORMATTED_ISOFORMAT } from '../../shared/dateUtils';
 import api from '@/shared/api';
 import _ from 'lodash';
 
@@ -145,9 +145,9 @@ function getAmount(budget) {
  */
 function getDate(item) {
   return (
-    this.formatDateDashToSlash(item.budgetObject.fiscalStartDate) +
+    this.format(item.budgetObject.fiscalStartDate, DEFAULT_ISOFORMAT, FORMATTED_ISOFORMAT) +
     ' to ' +
-    this.formatDateDashToSlash(item.budgetObject.fiscalEndDate)
+    this.format(item.budgetObject.fiscalEndDate, DEFAULT_ISOFORMAT, FORMATTED_ISOFORMAT)
   );
 } // getDate
 
@@ -271,9 +271,9 @@ export default {
     refreshBudgets,
     calcRemaining,
     convertToMoneyString,
-    formatDateDashToSlash,
     getCurrentBudgetYear,
     isFullTime,
+    format,
     getAmount,
     getDate,
     getReimbursed,

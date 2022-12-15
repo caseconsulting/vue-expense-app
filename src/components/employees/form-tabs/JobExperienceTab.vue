@@ -76,7 +76,7 @@
         <!-- Start Date -->
         <v-text-field
           ref="formFields"
-          :value="formatDate(editedJobExperienceInfo.hireDate)"
+          :value="format(editedJobExperienceInfo.hireDate, null, 'MM/DD/YYYY')"
           label="Start Date"
           prepend-icon="event_available"
           disabled
@@ -154,7 +154,7 @@
                 <v-text-field
                   :id="'start-field-' + compIndex + '-' + index"
                   ref="formFields"
-                  :value="position.startDate | formatDateMonthYear"
+                  :value="format(position.startDate, null, 'MM/YYYY')"
                   label="Start Date"
                   hint="MM/YYYY format"
                   v-mask="'##/####'"
@@ -193,7 +193,7 @@
                   :id="'end-field-' + compIndex + '-' + index"
                   ref="formFields"
                   :disabled="position.presentDate"
-                  :value="position.endDate | formatDateMonthYear"
+                  :value="format(position.endDate, null, 'MM/YYYY')"
                   label="End Date"
                   prepend-icon="event_busy"
                   :rules="[
@@ -263,7 +263,7 @@
 <script>
 import _ from 'lodash';
 import { getDateMonthYearRules, getDateMonthYearOptionalRules, getRequiredRules } from '@/shared/validationUtils.js';
-import { isEmpty, formatDate, formatDateMonthYear, parseDateMonthYear, isMobile } from '@/utils/utils';
+import { isEmpty, isMobile } from '@/utils/utils';
 import { add, format, getTodaysDate, isAfter } from '@/shared/dateUtils';
 import { mask } from 'vue-the-mask';
 import { getRole } from '@/utils/auth';
@@ -417,7 +417,7 @@ function hasEndDatesFilled(index) {
  * @return String - the date in YYYY-MM format
  */
 function parseEventDate() {
-  return this.parseDateMonthYear(event.target.value);
+  return this.format(event.target.value, 'MM/YYYY', 'YYYY-MM');
 } //parseEventDate
 
 /**
@@ -542,10 +542,6 @@ export default {
     };
   },
   directives: { mask },
-  filters: {
-    formatDate,
-    formatDateMonthYear
-  },
   methods: {
     add, // dateUtils
     addICTimeFrame,
@@ -555,12 +551,10 @@ export default {
     deleteCompany,
     deletePosition,
     format, // dateUtils
-    formatDate,
     getDateMonthYearRules,
     getDateMonthYearOptionalRules,
     getRequiredRules,
     hasEndDatesFilled,
-    parseDateMonthYear,
     parseEventDate,
     formatRange,
     getRole,

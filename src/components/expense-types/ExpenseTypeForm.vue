@@ -97,7 +97,7 @@
               v-mask="'##/##/####'"
               persistent-hint
               prepend-icon="event"
-              @blur="editedExpenseType.startDate = parseDate(startDateFormatted)"
+              @blur="editedExpenseType.startDate = format(startDateFormatted, 'MM/DD/YYYY', 'YYYY-MM-DD')"
               @input="showStartMenu = false"
               v-on="on"
             ></v-text-field>
@@ -133,7 +133,7 @@
               v-mask="'##/##/####'"
               persistent-hint
               prepend-icon="event"
-              @blur="editedExpenseType.endDate = parseDate(endDateFormatted)"
+              @blur="editedExpenseType.endDate = format(endDateFormatted, 'MM/DD/YYYY', 'YYYY-MM-DD')"
               @input="showEndMenu = false"
               v-on="on"
             ></v-text-field>
@@ -322,7 +322,8 @@ import FormSubmissionConfirmation from '@/components/modals/FormSubmissionConfir
 import _ from 'lodash';
 import { v4 as uuid } from 'uuid';
 import { getDateRules, getRequiredRules } from '@/shared/validationUtils.js';
-import { formatDate, isEmpty, parseDate } from '@/utils/utils';
+import { isEmpty } from '@/utils/utils';
+import { format } from '@/shared/dateUtils';
 import { updateStoreExpenseTypes, updateStoreCampfires } from '@/utils/storeUtils';
 import { mask } from 'vue-the-mask';
 import { isValid, isSameOrAfter, isSameOrBefore } from '../../shared/dateUtils';
@@ -784,9 +785,9 @@ function watchCategories(val) {
  * watcher for editedExpenseType.endDate - formats date
  */
 function watchEditedExpenseTypeEndDate() {
-  this.endDateFormatted = this.formatDate(this.editedExpenseType.endDate) || this.endDateFormatted;
+  this.endDateFormatted = this.format(this.editedExpenseType.endDate, null, 'MM/DD/YYYY') || this.endDateFormatted;
   //fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
-  if (this.editedExpenseType.endDate !== null && !this.formatDate(this.editedExpenseType.endDate)) {
+  if (this.editedExpenseType.endDate !== null && !this.format(this.editedExpenseType.endDate, null, 'MM/DD/YYYY')) {
     this.editedExpenseType.endDate = null;
   }
 } // watchEditedExpenseTypeEndDate
@@ -795,9 +796,10 @@ function watchEditedExpenseTypeEndDate() {
  * watcher for editedExpenseType.startDate - format date
  */
 function watchEditedExpenseTypeStartDate() {
-  this.startDateFormatted = this.formatDate(this.editedExpenseType.startDate) || this.startDateFormatted;
+  this.startDateFormatted =
+    this.format(this.editedExpenseType.startDate, null, 'MM/DD/YYYY') || this.startDateFormatted;
   //fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
-  if (this.editedExpenseType.startDate !== null && !this.formatDate(this.editedExpenseType.startDate)) {
+  if (this.editedExpenseType.startDate !== null && !this.format(this.editedExpenseType.startDate, null, 'MM/DD/YYYY')) {
     this.editedExpenseType.startDate = null;
   }
 } // watchEditedExpenseTypeStartDate
@@ -872,7 +874,7 @@ export default {
     clearForm,
     customFilter,
     formatBudget,
-    formatDate,
+    format,
     getDateRules,
     getRequiredRules,
     isCustomSelected,
@@ -882,7 +884,6 @@ export default {
     isValid,
     odFlagHint,
     parseBudget,
-    parseDate,
     removeCategory,
     submit,
     toFAQ,

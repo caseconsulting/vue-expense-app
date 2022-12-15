@@ -21,7 +21,7 @@
       >
         <template v-slot:activator="{ on }">
           <v-text-field
-            :value="highSchool.gradDate | formatDateMonthYear"
+            :value="format(highSchool.gradDate, null, 'MM/YYYY')"
             ref="formFields"
             :rules="getDateMonthYearRules()"
             label="Graduation Date"
@@ -67,7 +67,7 @@
 import _ from 'lodash';
 import { mask } from 'vue-the-mask';
 import { getDateMonthYearRules, getRequiredRules } from '@/shared/validationUtils.js';
-import { formatDateMonthYear, parseDateMonthYear } from '@/utils/utils';
+import { format } from '@/shared/dateUtils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -90,7 +90,7 @@ function emitToParser(include) {
  * @return String - The date in YYYY-MM format
  */
 function parseEventDate() {
-  return this.parseDateMonthYear(event.target.value);
+  return this.format(event.target.value, 'MM/DD/YYYY', 'YYYY-MM-DD');
 } // parseEventDate
 
 /**
@@ -141,15 +141,12 @@ function watchValidating() {
 export default {
   props: ['parser', 'school', 'schoolIndex', 'validating', 'attach'],
   directives: { mask },
-  filters: {
-    formatDateMonthYear
-  },
   computed: {
     isAttached
   },
   methods: {
     emitToParser,
-    parseDateMonthYear,
+    format,
     parseEventDate,
     validateFields,
     getDateMonthYearRules,
