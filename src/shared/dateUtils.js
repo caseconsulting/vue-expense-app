@@ -209,9 +209,15 @@ export function getTodaysDate(format) {
   }
 } // getTodaysDate
 
+/**
+ * Returns a number based on what day of the week it is. https://day.js.org/docs/en/get-set/iso-weekday
+ *
+ * @param {*} date - The given date
+ * @returns Number - An integer from 1(monday)-7(sunday)
+ */
 export function getIsoWeekday(date) {
   return dayjs(date).isoWeekday();
-}
+} // getIsoWeekday
 
 /**
  * Gets the difference in time between the two dates. https://day.js.org/docs/en/display/difference
