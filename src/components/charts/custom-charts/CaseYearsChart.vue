@@ -8,8 +8,7 @@
 <script>
 import BarChart from '../base-charts/BarChart.vue';
 import { storeIsPopulated } from '@/utils/utils';
-import moment from 'moment-timezone';
-moment.tz.setDefault('America/New_York');
+import { difference, getTodaysDate } from '@/shared/dateUtils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -71,10 +70,8 @@ function caseYearsData() {
  * @return - the decimal value of the difference
  */
 function calculateTimeDifference(startDate) {
-  var start = this.stringToDate(startDate);
-
-  var end = moment();
-  return end.diff(start, 'years', true); //Provides decimal value
+  let end = this.getTodaysDate();
+  return this.difference(end, startDate, 'years'); //Provides decimal value
 } // calculateTimeDifference
 
 /**
@@ -156,17 +153,6 @@ function findMaxIndex() {
   return max;
 } // findMaxIndex
 
-/**
- * Converts a date as a string into a moment objects.
- *
- * @param dateAsString - date that is currently a string
- * @return - the moment date object
- */
-function stringToDate(dateAsString) {
-  var date = moment(dateAsString);
-  return date;
-} //stringToDate
-
 // |--------------------------------------------------|
 // |                                                  |
 // |                      EXPORT                      |
@@ -190,9 +176,10 @@ export default {
   methods: {
     caseYearsData,
     calculateTimeDifference,
+    difference, // dateUtils
     drawCaseYearsHistGraph,
     findMaxIndex,
-    stringToDate
+    getTodaysDate // dateUtils
   },
   mounted,
   beforeDestroy,

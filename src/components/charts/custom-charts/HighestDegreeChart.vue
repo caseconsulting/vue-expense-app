@@ -9,8 +9,7 @@
 import PieChart from '../base-charts/PieChart.vue';
 import _ from 'lodash';
 import { storeIsPopulated } from '@/utils/utils';
-const moment = require('moment-timezone');
-moment.tz.setDefault('America/New_York');
+import { getTodaysDate, isBefore } from '@/shared/dateUtils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -58,7 +57,7 @@ function initDegrees() {
         // handle universities
         if (edu.type === 'university') {
           _.forEach(edu.degrees, (degree) => {
-            if (moment(degree.completionDate).isBefore(moment(new Date()))) {
+            if (this.isBefore(degree.completionDate, this.getTodaysDate())) {
               if (highestDegrees.length != 0) {
                 if (highestDegrees[0].type === 'Military') {
                   highestDegrees.unshift({
@@ -103,7 +102,7 @@ function initDegrees() {
             }
           });
         } else if (edu.type === 'highSchool') {
-          if (moment(edu.gradDate).isBefore(moment(new Date()))) {
+          if (this.isBefore(edu.gradDate, this.getTodaysDate())) {
             if (highestDegrees.length != 0) {
               if (highestDegrees[0].type === 'Military') {
                 highestDegrees.unshift({
@@ -143,7 +142,7 @@ function initDegrees() {
             }
           }
         } else if (edu.type === 'military') {
-          if (moment(edu.startDate).isBefore(moment(new Date()))) {
+          if (this.isBefore(edu.startDate, this.getTodaysDate())) {
             highestDegrees.push({
               type: 'Military',
               name: edu.branch,
@@ -483,10 +482,12 @@ export default {
     fillData,
     compareDegree,
     initDegrees,
+    isBefore, // dateUtils
     getDegreeValue,
     getDegreeMinors,
     getDegreeConcentrations,
     getDegreeName,
+    getTodaysDate, // dateUtils
     majorsEmit,
     minorsEmit,
     concentrationsEmit

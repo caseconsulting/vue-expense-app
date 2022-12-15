@@ -7,8 +7,7 @@
 <script>
 import BarChart from '../base-charts/BarChart.vue';
 import { storeIsPopulated } from '@/utils/utils';
-import moment from 'moment-timezone';
-moment.tz.setDefault('America/New_York');
+import { difference, getTodaysDate } from '@/shared/dateUtils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -102,15 +101,14 @@ function jobExperienceData() {
  * @return Number - The amount of years difference
  */
 function calculateTimeDifference(startDate, endDate) {
-  var start = this.stringToDate(startDate);
   var end = endDate;
   //Checks if endDate is valid or not
   if (end === undefined || end === null) {
-    end = moment(); //Provides today's date
+    end = this.getTodaysDate(); //Provides today's date
   } else {
-    end = this.stringToDate(endDate);
+    end = endDate;
   }
-  return end.diff(start, 'years', true); //Provides decimal value
+  return this.difference(end, startDate, 'years'); //Provides decimal value
 } // calculateTimeDifference
 
 /**
@@ -174,17 +172,6 @@ function drawJobExpHistGraph() {
   this.dataReceived = true;
 } // drawJobExpHistGraph
 
-/**
- * Creates a moment object out of a String that is a date.
- *
- * @param dateAsString - The date
- * @return Object - The Moment date object
- */
-function stringToDate(dateAsString) {
-  var date = moment(dateAsString);
-  return date;
-} // stringToDate
-
 // |--------------------------------------------------|
 // |                                                  |
 // |                      EXPORT                      |
@@ -206,11 +193,12 @@ export default {
     };
   },
   methods: {
+    difference, // dateUtils
     drawJobExpHistGraph,
     findMaxIndex,
+    getTodaysDate, // dateUtils
     jobExperienceData,
-    calculateTimeDifference,
-    stringToDate
+    calculateTimeDifference
   },
   beforeDestroy,
   mounted,

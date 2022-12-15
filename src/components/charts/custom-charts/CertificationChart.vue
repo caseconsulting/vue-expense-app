@@ -6,8 +6,8 @@
 
 <script>
 import BarChart from '../base-charts/BarChart.vue';
-import moment from 'moment-timezone';
 import { storeIsPopulated } from '@/utils/utils';
+import { getTodaysDate, isBefore } from '@/shared/dateUtils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -49,7 +49,7 @@ async function fetchCertData() {
   this.employees.forEach((employee) => {
     if (employee.certifications && employee.workStatus != 0) {
       employee.certifications.forEach((currCert) => {
-        if (!currCert.expirationDate || moment().isBefore(moment(currCert.expirationDate))) {
+        if (!currCert.expirationDate || this.isBefore(this.getTodaysDate(), currCert.expirationDate)) {
           if (!certifications[currCert.name]) {
             certifications[currCert.name] = 1;
           } else {
@@ -214,9 +214,11 @@ export default {
     };
   },
   methods: {
+    breakSentence,
     fetchCertData,
     fillCertData,
-    breakSentence
+    getTodaysDate, // dateUtils
+    isBefore // dateUtils
   },
   watch: {
     storeIsPopulated: function () {
