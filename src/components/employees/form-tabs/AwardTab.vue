@@ -133,7 +133,6 @@ function deleteAward(index) {
  * @return String - The date in YYYY-MM format
  */
 function parseEventDate() {
-  console.log(this.format(event.target.value, 'MM/YYYY', 'YYYY-MM'));
   return this.format(event.target.value, 'MM/YYYY', 'YYYY-MM');
 } // parseEventDate
 
