@@ -76,7 +76,7 @@ utils.getName('nick')
 
 ### Date utilities
 
-The `utils.date` object has functions that can provide different date formats. All functions can optionally take in a format string, which will be passed to `moment` for formatting (thus you may use any `moment` formatting). The default format is `MM/DD/YYYY` as defined in vars. The functions are aptly named:
+The `utils.date` object has functions that can provide different date formats. All functions can optionally take in a format string, which will be passed to `dayjs` for formatting (thus you may use any `dayjs` formatting). The default format is `MM/DD/YYYY` as defined in vars. The functions are aptly named:
 `today`, `yesterday`, `tomorrow`, `lastMonth`, `nextMonth`, `lastYear`, `nextYear`.
 
 For example:

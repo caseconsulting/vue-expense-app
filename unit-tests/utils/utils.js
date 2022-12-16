@@ -1,5 +1,5 @@
 const vars = require('./constants.js');
-const moment = require('moment-timezone');
+const dateUtils = require('@/shared/dateUtils');
 
 /**
  * Utilities for automation
@@ -21,43 +21,43 @@ function commonBefore(browser, after = null) {
  * Date utilities
  */
 function diff(num, type) {
-  if (num < 0) return moment().subtract(-1 * num, type);
-  else return moment().add(num, type);
+  if (num < 0) return dateUtils.subtract(dateUtils.getTodaysDate(), -1 * num, type);
+  else return dateUtils.add(dateUtils.getTodaysDate(), num, type);
 }
 const date = {
   // now
   today: (format = vars.DATE_FORMAT) => {
-    return moment().format(format);
+    return dateUtils.format(dateUtils.getTodaysDate(), null, format);
   },
   // days
   yesterday: (format = vars.DATE_FORMAT) => {
-    return diff(-1, 'days').format(format);
+    return dateUtils.format(diff(-1, 'days'), null, format);
   },
   tomorrow: (format = vars.DATE_FORMAT) => {
-    return diff(1, 'days').format(format);
+    return dateUtils.format(diff(1, 'days'), null, format);
   },
   daysDiff: (num, format = vars.DATE_FORMAT) => {
-    return diff(num, 'days').format(format);
+    return dateUtils.format(diff(num, 'days'), null, format);
   },
   // months
   lastMonth: (format = vars.DATE_FORMAT) => {
-    return diff(-1, 'months').format(format);
+    return dateUtils.format(diff(-1, 'months'), null, format);
   },
   nextMonth: (format = vars.DATE_FORMAT) => {
-    return diff(1, 'months').format(format);
+    return dateUtils.format(diff(1, 'months'), null, format);
   },
   monthsDiff: (num, format = vars.DATE_FORMAT) => {
-    return diff(num, 'months').format(format);
+    return dateUtils.format(diff(num, 'months'), null, format);
   },
   // years
   lastYear: (format = vars.DATE_FORMAT) => {
-    return diff(-1, 'years').format(format);
+    return dateUtils.format(diff(-1, 'years'), null, format);
   },
   nextYear: (format = vars.DATE_FORMAT) => {
-    return diff(1, 'years').format(format);
+    return dateUtils.format(diff(1, 'years'), null, format);
   },
   yearsDiff: (num, format = vars.DATE_FORMAT) => {
-    return diff(num, 'years').format(format);
+    return dateUtils.format(diff(num, 'years'), null, format);
   }
 };
 
