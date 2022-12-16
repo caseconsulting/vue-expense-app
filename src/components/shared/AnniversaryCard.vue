@@ -40,10 +40,6 @@
 import BudgetSelectModal from '@/components/modals/BudgetSelectModal.vue';
 import _ from 'lodash';
 import api from '@/shared/api.js';
-<<<<<<< HEAD
-const moment = require('moment-timezone');
-moment.tz.setDefault('America/New_York');
-=======
 import { isMobile, getCurrentBudgetYear } from '@/utils/utils';
 import {
   add,
@@ -56,8 +52,6 @@ import {
   setYear,
   DEFAULT_ISOFORMAT
 } from '@/shared/dateUtils';
-const IsoFormat = 'YYYY-MM-DD';
->>>>>>> c32adf54 (POR-1952: migrate from momentjs to dayjs in shared and utils components folders)
 
 // |--------------------------------------------------|
 // |                                                  |
