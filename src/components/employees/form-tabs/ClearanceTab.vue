@@ -328,7 +328,9 @@ function addClearance() {
  * @param clearance - The clearance object of the badge to capitalize
  */
 function capitalizeBadges(clearance) {
-  clearance.badgeNum = clearance.badgeNum.toUpperCase();
+  if (clearance.badgeNum) {
+    clearance.badgeNum = clearance.badgeNum.toUpperCase();
+  }
 } // capitalizeBadges
 
 /**
