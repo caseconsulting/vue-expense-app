@@ -10,6 +10,12 @@ var minMax = require('dayjs/plugin/minMax');
 var isoWeek = require('dayjs/plugin/isoWeek');
 var isBetween = require('dayjs/plugin/isBetween');
 dayjs.extend(isBetween);
+var isSameOrAfter_ = require('dayjs/plugin/isSameOrAfter');
+var isSameOrBefore_ = require('dayjs/plugin/isSameOrBefore');
+var isBetween_ = require('dayjs/plugin/isBetween');
+dayjs.extend(isBetween_);
+dayjs.extend(isSameOrBefore_);
+dayjs.extend(isSameOrAfter_);
 dayjs.extend(isoWeek);
 dayjs.extend(minMax);
 dayjs.extend(advancedFormat);
@@ -23,6 +29,70 @@ dayjs.tz.setDefault('America/New_York');
 export const DEFAULT_ISOFORMAT = 'YYYY-MM-DD';
 export const FORMATTED_ISOFORMAT = 'MM/DD/YYYY';
 export const PARSED_ISOFORMAT = 'YYYY-MM-DD';
+
+/**
+ * Gets the date at the start of given unit time.
+ *
+ * @param {String} date - The date to find the start of
+ * @param {String} granularity - The unit to find the start of
+ * @returns String - Start of date at given unit time
+ */
+export function startOf(date, granularity) {
+  return dayjs(date).startOf(granularity).format();
+} // startOf
+
+/**
+ * Checks if date is between a date range.
+ *
+ * @param {String} date - The date to check if it is between range
+ * @param {String} startDate - The start date of range
+ * @param {String} endDate - The end date of range
+ * @param {String} granularity - The unit of time for precision
+ * @param {String} interval - Identifies inclusive or exclusive for
+ *                             endpoints (Ex. '()', '[)', '[]')
+ * @returns Boolean - True if date is between date range, false otherwise
+ */
+export function isBetween(date, startDate, endDate, granularity, interval) {
+  if (granularity) {
+    return interval
+      ? dayjs(date).isBetween(startDate, endDate, granularity, interval)
+      : dayjs(date).isBetween(startDate, endDate, granularity);
+  } else {
+    return dayjs(date).isBetween(startDate, endDate);
+  }
+} // isBetween
+
+/**
+ * Checks if date1 is the same or after date2.
+ *
+ * @param {String} date1 - The first date
+ * @param {String} date2 - The second date
+ * @param {String} granularity - The unit of time for precision
+ * @returns Boolean - True if date1 is the same or after date2, false otherwise
+ */
+export function isSameOrAfter(date1, date2, granularity) {
+  if (granularity) {
+    return dayjs(date1).isSameOrAfter(date2, granularity);
+  } else {
+    return dayjs(date1).isSameOrAfter(date2);
+  }
+} // isSameOrAfter
+
+/**
+ * Checks if date1 is the same or before date2.
+ *
+ * @param {String} date1 - The first date
+ * @param {String} date2 - The second date
+ * @param {String} granularity - The unit of time for precision
+ * @returns Boolean - True if date1 is the same or before date2, false otherwise
+ */
+export function isSameOrBefore(date1, date2, granularity) {
+  if (granularity) {
+    return dayjs(date1).isSameOrBefore(date2, granularity);
+  } else {
+    return dayjs(date1).isSameOrBefore(date2);
+  }
+} // isSameOrBefore
 
 /**
  * Adds an amount to the given date.

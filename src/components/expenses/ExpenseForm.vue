@@ -307,10 +307,9 @@ import { getRole } from '@/utils/auth';
 
 import { v4 as uuid } from 'uuid';
 import { mask } from 'vue-the-mask';
+
+import { isBetween, getTodaysDate, format } from '../../shared/dateUtils';
 import _ from 'lodash';
-const moment = require('moment-timezone');
-moment.tz.setDefault('America/New_York');
-const IsoFormat = 'YYYY-MM-DD';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -442,20 +441,6 @@ async function addURLInfo(newExpense) {
 } // addURLInfo
 
 /**
- * Check if today is between a set of given dates in isoformat. Returns true if today is between the two dates,
- * otherwise returns false.
- *
- * @param start - start date
- * @param end - end date
- * @return boolean - today is in set of dates
- */
-function betweenDates(start, end) {
-  let startDate = moment(start, IsoFormat);
-  let endDate = moment(end, IsoFormat);
-  return moment().isBetween(startDate, endDate, 'day', '[]');
-} // betweenDates
-
-/**
  * Calculates the adjusted budget amount for an expense type based on an employee's work status. Returns the adjust
  * amount.
  *
@@ -503,7 +488,7 @@ async function checkCoverage() {
       let employeeBudgets = await api.getEmployeeBudgets(this.employee.id);
       let budget = employeeBudgets.find((b) => {
         // make sure if the budget is recurring to get the budget for this year
-        let isActiveBudget = this.betweenDates(b.fiscalStartDate, b.fiscalEndDate);
+        let isActiveBudget = isBetween(getTodaysDate(), b.fiscalStartDate, b.fiscalEndDate, 'day', '[]');
         return b.expenseTypeId == expenseType.value && isActiveBudget;
       });
       let budgetExists = budget ? true : false;
@@ -761,7 +746,7 @@ async function createNewEntry() {
 
   let newUUID = this.uuid();
   this.$set(this.editedExpense, 'id', newUUID);
-  this.$set(this.editedExpense, 'createdAt', moment().format('YYYY-MM-DD'));
+  this.$set(this.editedExpense, 'createdAt', getTodaysDate());
   if (this.isReceiptRequired() && this.file) {
     // if receipt required and updating receipt
     // stores file name for lookup later
@@ -881,7 +866,10 @@ function filteredExpenseTypes() {
         // expense type is active
         if (this.hasAccess(employee, expenseType)) {
           // user has access to the expense type
-          if (expenseType.recurringFlag || this.betweenDates(expenseType.startDate, expenseType.endDate)) {
+          if (
+            expenseType.recurringFlag ||
+            isBetween(getTodaysDate(), expenseType.startDate, expenseType.endDate, 'day', '[]')
+          ) {
             // expense type is active
             let amount = this.calcAdjustedBudget(employee, expenseType);
             expenseType.text = `${expenseType.budgetName} - $${Number(amount).toLocaleString().toString()}`;
@@ -1290,10 +1278,8 @@ async function scanFile() {
         .join(' ');
     }
     this.isInactive = false;
-
     if (firstDate != null && this.editedExpense.purchaseDate == null) {
-      let date = moment(new Date(firstDate));
-      date = this.parseDate(date.format('YYYY-MM-DD'));
+      let date = this.parseDate(format(firstDate, null, 'YYYY-MM-DD'));
       this.editedExpense.purchaseDate = date;
     }
     if (!failed && (this.editedExpense.cost == 0 || this.editedExpense.cost == null)) {
@@ -1874,7 +1860,6 @@ export default {
   directives: { mask },
   methods: {
     addURLInfo,
-    betweenDates,
     calcAdjustedBudget,
     checkCoverage,
     clearForm,

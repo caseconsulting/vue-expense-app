@@ -325,8 +325,7 @@ import { getDateRules, getRequiredRules } from '@/shared/validationUtils.js';
 import { formatDate, isEmpty, parseDate } from '@/utils/utils';
 import { updateStoreExpenseTypes, updateStoreCampfires } from '@/utils/storeUtils';
 import { mask } from 'vue-the-mask';
-const moment = require('moment-timezone');
-moment.tz.setDefault('America/New_York');
+import { isValid, isSameOrAfter, isSameOrBefore } from '../../shared/dateUtils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -842,17 +841,15 @@ export default {
       ],
       startDateRules: [
         (v) => {
-          return !this.isEmpty(v) && moment(v, 'MM/DD/YYYY', true).isValid() && this.editedExpenseType.endDate
-            ? moment(v, 'MM/DD/YYYY', true).isSameOrBefore(moment(this.editedExpenseType.endDate)) ||
-                'Start date must be at or before end date'
+          return !this.isEmpty(v) && isValid(v, 'MM/DD/YYYY') && this.editedExpenseType.endDate
+            ? isSameOrBefore(v, this.editedExpenseType.endDate) || 'Start date must be at or before end date'
             : true;
         }
       ],
       endDateRules: [
         (v) => {
-          return !this.isEmpty(v) && moment(v, 'MM/DD/YYYY', true).isValid() && this.editedExpenseType.startDate
-            ? moment(v, 'MM/DD/YYYY', true).isSameOrAfter(moment(this.editedExpenseType.startDate)) ||
-                'End date must be at or after start date'
+          return !this.isEmpty(v) && isValid(v, 'MM/DD/YYYY') && this.editedExpenseType.startDate
+            ? isSameOrAfter(v, this.editedExpenseType.startDate) || 'End date must be at or after start date'
             : true;
         }
       ],
@@ -880,6 +877,9 @@ export default {
     getRequiredRules,
     isCustomSelected,
     isEmpty,
+    isSameOrAfter,
+    isSameOrBefore,
+    isValid,
     odFlagHint,
     parseBudget,
     parseDate,

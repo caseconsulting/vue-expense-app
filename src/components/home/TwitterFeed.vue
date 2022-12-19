@@ -35,8 +35,7 @@
 </template>
 
 <script>
-const moment = require('moment-timezone');
-moment.tz.setDefault('America/New_York');
+import { difference, format, getTodaysDate, startOf } from '../../shared/dateUtils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -95,9 +94,7 @@ function fixHTMLencoding(tweet) {
  * @return - the formatted date
  */
 function formatDate(date) {
-  let now = moment();
-  let tweetDate = moment(date, 'ddd MMM DD HH:mm:ss ZZ YYYY');
-  let diff = now.startOf('day').diff(tweetDate.startOf('day'), 'day');
+  let diff = difference(startOf(getTodaysDate(), 'day'), startOf(date, 'day'), 'day');
   if (diff == 0) {
     return 'Today'; //set date message as today if no difference in date
   } else if (diff == 1) {
@@ -107,7 +104,7 @@ function formatDate(date) {
   } else if (diff == -1) {
     return 'Tomorrow';
   } else {
-    return tweetDate.format('ll');
+    return format(date, null, 'll');
   }
 } // formatDate
 
