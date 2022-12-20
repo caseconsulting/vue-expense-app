@@ -35,15 +35,8 @@ import api from '@/shared/api.js';
 import pattern from 'patternomaly';
 import _ from 'lodash';
 import BarChart from '@/components/charts/base-charts/BarChart.vue';
-<<<<<<< HEAD
 import { isBetweenDates, isFullTime, getCurrentBudgetYear } from '@/utils/utils';
 import { getTodaysDate } from '@/shared/dateUtils';
-=======
-const moment = require('moment-timezone');
-moment.tz.setDefault('America/New_York');
-import { isFullTime, getCurrentBudgetYear } from '@/utils/utils';
-import { isBetweenDates } from '@/shared/dateUtils';
->>>>>>> 7366ca3a (POR-1953: migrate from momentjs to dayjs in shared and utils folders)
 
 // |--------------------------------------------------|
 // |                                                  |

@@ -288,55 +288,6 @@ export function maximum(dates) {
 } // maximum
 
 /**
- * Returns a number based on what day of the week it is. https://day.js.org/docs/en/get-set/iso-weekday
- *
- * @param {*} date - The given date
- * @returns Number - An integer from 1(monday)-7(sunday)
- */
-export function getIsoWeekday(date) {
-  return dayjs(date).isoWeekday();
-} // getIsoWeekday
-
-/**
- * Gets the difference in time between the two dates. https://day.js.org/docs/en/display/difference
- * NOTE: If you want a positive number, make date1 be the later date and date2 be the earlier date
- *
- * @param {String} date1 - The first date
- * @param {String} date2 - The second date
- * @param {String} granularity - (OPTIONAL) The unit to compare (https://day.js.org/docs/en/manipulate/start-of#list-of-all-available-units)
- * @returns Number - The difference in time
- */
-export function difference(date1, date2, granularity) {
-  if (granularity) {
-    return dayjs(date1).diff(dayjs(date2), granularity);
-  } else {
-    return dayjs(date1).diff(dayjs(date2));
-  }
-} // difference
-
-/**
- * Returns the earliest date from an array of dates.
- *
- * @param {Array} dates An array of string dates
- * @returns The earliest date in string format
- */
-export function minimum(dates) {
-  dates = dates.map((date) => dayjs(date));
-  return dayjs.min(dates).format();
-} // minimum
-
-/**
- * Returns the latest date from an array of dates.
- *
- * @param {Array} dates An array of string dates
- * @returns The latest date in string format
- */
-export function maximum(dates) {
-  dates = dates.map((date) => dayjs(date));
-  return dayjs.max(dates).format();
-} // maximum
-
-/**
  * formats the given date in MM/DD/YYYY
  *
  * @param date - the date to be formatted
