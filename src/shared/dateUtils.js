@@ -8,8 +8,6 @@ var localizedFormat = require('dayjs/plugin/localizedFormat');
 var advancedFormat = require('dayjs/plugin/advancedFormat');
 var minMax = require('dayjs/plugin/minMax');
 var isoWeek = require('dayjs/plugin/isoWeek');
-var isBetween = require('dayjs/plugin/isBetween');
-dayjs.extend(isBetween);
 var isSameOrAfter_ = require('dayjs/plugin/isSameOrAfter');
 var isSameOrBefore_ = require('dayjs/plugin/isSameOrBefore');
 var isBetween_ = require('dayjs/plugin/isBetween');
