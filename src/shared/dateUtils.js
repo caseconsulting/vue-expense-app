@@ -31,6 +31,18 @@ export const FORMATTED_ISOFORMAT = 'MM/DD/YYYY';
 export const PARSED_ISOFORMAT = 'YYYY-MM-DD';
 
 /**
+ * Checks if both dates are the same.
+ *
+ * @param {String} date1 - The first date to check equivalency
+ * @param {String} date2 - The second date to check equivalency
+ * @param {String} granularity - The unit of time for precision
+ * @returns Boolean - True if date1 and date2 are the same, false otherwise
+ */
+export function isSame(date1, date2, granularity = null) {
+  return granularity ? dayjs(date1).isSame(date2, granularity) : dayjs(date1).isSame(date2);
+} // isSame
+
+/**
  * Gets the date at the start of given unit time.
  *
  * @param {String} date - The date to find the start of
@@ -120,8 +132,8 @@ export function add(date, amount, granularity, format) {
  * @param {String} granularity - The unit to subtract (https://day.js.org/docs/en/manipulate/start-of#list-of-all-available-units)
  * @returns String - The subtracted date
  */
-export function subtract(date, amount, granularity) {
-  return dayjs(date).subtract(amount, granularity).format(DEFAULT_ISOFORMAT);
+export function subtract(date, amount, granularity, format = DEFAULT_ISOFORMAT) {
+  return dayjs(date).subtract(amount, granularity).format(format);
 } // subtract
 
 /**
@@ -148,9 +160,9 @@ export function diff(date1, date2, format, granularity) {
 /**
  * Gets hour of the date (0 to 23).
  *
- * @param {String} date - The date
+ * @param {String} date - The date to get the hour of.
  * @param {String} format - (OPTIONAL) The format of the date (if not specified, uses default)
- * @returns
+ * @returns Number - Hour of the given date
  */
 export function getHour(date, format) {
   // console.log(dayjs(date));
@@ -184,6 +196,36 @@ export function isBetweenDates(date, start, end, granularity, isExclusive) {
     }
   }
 } // isBetweenDates
+
+/**
+ * Gets year of the date.
+ *
+ * @param {String} date - The date to get the year of.
+ * @returns Number - Year of the given date
+ */
+export function getYear(date) {
+  return dayjs(date).year();
+} // getYear
+
+/**
+ * Gets the month of the date (0-11).
+ *
+ * @param {String} date - The date to get the month of.
+ * @returns Number - Month of the given date (0-11)
+ */
+export function getMonth(date) {
+  return dayjs(date).month();
+} // getYear
+
+/**
+ * Gets the day number of the date
+ *
+ * @param {String} date - The date to get the day of.
+ * @returns Number - Day of the given date
+ */
+export function getDay(date) {
+  return dayjs(date).date();
+} // getDay
 
 /**
  * Verifies if the first date is after the second date in time.
@@ -271,6 +313,17 @@ export function format(date, oldFormat, newFormat) {
     return dayjs(date).format(newFormat);
   }
 } // format
+
+/**
+ * Sets the dates month and returns a string of the date.
+ *
+ * @param {String} date The given date
+ * @param {Number} month The month to set the date to (0-11)
+ * @returns String - The date with the given month
+ */
+export function setMonth(date, month) {
+  return dayjs(date).month(month).format(DEFAULT_ISOFORMAT);
+} // setMonth
 
 /**
  * Sets the dates day and returns a string of the date.

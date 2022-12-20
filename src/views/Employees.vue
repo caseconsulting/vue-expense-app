@@ -244,7 +244,6 @@ import ConvertEmployeesToCsv from '@/components/employees/csv/ConvertEmployeesTo
 import DeleteErrorModal from '@/components/modals/DeleteErrorModal.vue';
 import DeleteModal from '@/components/modals/DeleteModal.vue';
 import EmployeeForm from '@/components/employees/EmployeeForm.vue';
-import moment from 'moment-timezone';
 import _ from 'lodash';
 import ConvertEmployeeToCsv from '@/components/employees/csv/ConvertEmployeeToCsv.vue';
 import GenerateCsvEeoReport from '@/components/employees/csv/GenerateCsvEeoReport.vue';
@@ -258,6 +257,7 @@ import {
   userRoleIsAdmin,
   userRoleIsManager
 } from '@/utils/utils';
+import { format } from '../shared/dateUtils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -359,9 +359,8 @@ function getLoginDate(item) {
   let date = item.lastLogin;
 
   if (date) {
-    let momentDate = moment(date, 'MMM Do, YYYY HH:mm:ss'); //formatting taken from Callback.vue
-    item.lastLoginSeconds = parseInt(momentDate.format('X')); //seconds
-    date = momentDate.format('MMM Do, YYYY HH:mm'); //what's displayed
+    item.lastLoginSeconds = parseInt(format(date, 'MMM Do, YYYY HH:mm:ss', 'X')); //seconds
+    date = format(date, 'MMM Do, YYYY HH:mm:ss', 'MMM Do, YYYY HH:mm'); //what's displayed
   }
 
   return date;

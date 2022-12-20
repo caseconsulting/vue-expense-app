@@ -93,8 +93,6 @@ import BudgetChart from '@/components/charts/custom-charts/BudgetChart.vue';
 import BudgetTable from '@/components/budgets/BudgetTable.vue';
 import ExpenseForm from '@/components/expenses/ExpenseForm.vue';
 import AnniversaryCard from '@/components/shared/AnniversaryCard.vue';
-const moment = require('moment-timezone');
-moment.tz.setDefault('America/New_York');
 import { isMobile, getCurrentBudgetYear } from '@/utils/utils';
 import { updateStoreBudgets, updateStoreEmployees, updateStoreExpenseTypes, updateStoreUser } from '@/utils/storeUtils';
 

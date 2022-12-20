@@ -101,11 +101,10 @@
 import ResumeParserAudits from '@/components/audits/ResumeParserAudits.vue';
 import LoginAudits from '@/components/audits/LoginAudits.vue';
 import MifiLogAudits from '@/components/audits/MifiLogAudits.vue';
-const moment = require('moment-timezone');
-moment.tz.setDefault('America/New_York');
 import _ from 'lodash';
 import { storeIsPopulated } from '@/utils/utils';
 import { updateStoreEmployees } from '@/utils/storeUtils';
+import { isAfter, format, subtract, getTodaysDate } from '../shared/dateUtils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -122,12 +121,12 @@ function setDateRange() {
     this.auditsQuery.showRangeMenu = false;
 
     // Temp variables
-    let start = moment(this.auditsQuery.range[0]);
-    let end = moment(this.auditsQuery.range[1]);
+    let start = this.auditsQuery.range[0];
+    let end = this.auditsQuery.range[1];
     // Flips date values if user selected end date and THEN selected start date
     // Then sets values to a date array which is passed to the parser audit page
-    this.queryB = start.isAfter(end) ? start.format() : end.format();
-    this.queryA = start.isAfter(end) ? end.format() : start.format();
+    this.queryB = isAfter(start, end) ? format(start, 'YYYY-MM-DD') : format(end, 'YYYY-MM-DD');
+    this.queryA = isAfter(start, end) ? format(end, 'YYYY-MM-DD') : format(start, 'YYYY-MM-DD');
     // Display chart titles with date ranges rather than 'last 24 hours'
     this.firstLoad = false;
     this.reloader++; // refreshes the charts
@@ -144,20 +143,21 @@ function formatRange(range) {
   if (_.isEmpty(range)) {
     return null;
   }
-  let start = moment(range[0], 'YYYY-MM-DD');
+  let start = range[0];
+
   if (range[1]) {
     // end date selected
-    let end = moment(range[1], 'YYYY-MM-DD');
-    if (start.isAfter(end)) {
+    let end = range[1];
+    if (isAfter(range[0], range[1], 'day')) {
       // start date is listed after end date
-      return `${end.format('MM/DD/YY')} - ${start.format('MM/DD/YY')}`;
+      return `${format(end, null, 'MM/DD/YY')} - ${format(start, null, 'MM/DD/YY')}`;
     } else {
       // start date is listed before end date
-      return `${start.format('MM/DD/YY')} - ${end.format('MM/DD/YY')}`;
+      return `${format(start, null, 'MM/DD/YY')} - ${format(end, null, 'MM/DD/YY')}`;
     }
   } else {
     // no end date selected
-    return `${start.format('MM/DD/YY')} - Present`;
+    return `${format(start, null, 'MM/DD/YY')} - Present`;
   }
 } // formatRange
 
@@ -171,7 +171,10 @@ function selectDropDown(tab) {
   this.$refs.dateRange.reset();
   // Set query to last 24 hours
   this.auditsQueryFormatted = {
-    range: [moment().subtract(1, 'd').format(), moment().format()]
+    range: [
+      subtract(getTodaysDate('YYYY-MM-DDTHH:mm:ssZ'), 1, 'd', 'YYYY-MM-DDTHH:mm:ssZ'),
+      getTodaysDate('YYYY-MM-DDTHH:mm:ssZ')
+    ]
   };
   // Reset variable to show 'last 24 hours' chart title
   this.firstLoad = true;
@@ -234,12 +237,12 @@ export default {
         showRangeMenu: false
       },
       firstLoad: true, // this is used to set chart titles to "last 24 hours" if a custom date range has not been set
-      queryA: moment().subtract(1, 'd').format(),
-      queryB: moment().format(),
+      queryA: subtract(getTodaysDate('YYYY-MM-DDTHH:mm:ssZ'), 1, 'd', 'YYYY-MM-DDTHH:mm:ssZ'),
+      queryB: getTodaysDate('YYYY-MM-DDTHH:mm:ssZ'),
       reloader: 0,
       requiredRules: [(v) => !_.isEmpty(v) || 'This field is required'], // rules for a required field
       selectedDropdown: 'User Logins',
-      today: moment().format('YYYY-MM-DD')
+      today: getTodaysDate()
     };
   },
   methods: {
