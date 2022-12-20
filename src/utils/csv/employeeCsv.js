@@ -168,7 +168,7 @@ export function getContractLengthInYears(contract) {
       total += getProjectLengthInYears(project);
     });
   }
-  return total.toFixed(1);
+  return total;
 } // getContractLengthInYears
 
 /**
@@ -244,7 +244,7 @@ export function getCustomerOrgExp(exp) {
   for (let i = 0; i < exp.length; i++) {
     a += exp[i].name;
     if (typeof exp[i].years !== 'undefined') {
-      a += ' - ' + parseInt(exp[i].years).toFixed(1) + ' years';
+      a += ' - ' + parseFloat(exp[i].years).toFixed(1) + ' years';
     }
     if (i + 1 < exp.length) {
       a += ', ';
