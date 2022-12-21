@@ -164,7 +164,6 @@ export function diff(date1, date2, format, granularity) {
  * @returns Number - Hour of the given date
  */
 export function getHour(date, format) {
-  // console.log(dayjs(date));
   if (date) return format ? dayjs(date, format).hour() : dayjs(date).hour();
   return null;
 } // getHour
@@ -197,7 +196,6 @@ export function isBetweenDates(date, start, end, granularity, isExclusive) {
 } // isBetweenDates
 
 /**
-<<<<<<< HEAD
  * Gets year of the date.
  *
  * @param {String} date - The date to get the year of.
@@ -228,8 +226,6 @@ export function getDay(date) {
 } // getDay
 
 /**
-=======
->>>>>>> eafc00d3 (POR-1961: get rid of date helpers in utils/utils file and older format function in shared/dateUtils)
  * Verifies if the first date is after the second date in time.
  *
  * EXAMPLES: isAfter('2022-12-24', '2022-12-23')         => OUTPUT: true
@@ -310,11 +306,14 @@ export function isValid(date, format) {
  */
 export function format(date, oldFormat, newFormat) {
   if (!date) return null;
+  let formattedDate = null;
   if (oldFormat) {
-    return dayjs(date, oldFormat).format(newFormat);
+    formattedDate = dayjs(date, oldFormat).format(newFormat);
   } else {
-    return dayjs(date).format(newFormat);
+    formattedDate = dayjs(date).format(newFormat);
   }
+  if (!isValid(formattedDate, newFormat)) return null;
+  else return formattedDate;
 } // format
 
 /**

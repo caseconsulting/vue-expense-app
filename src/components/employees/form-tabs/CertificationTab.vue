@@ -174,7 +174,6 @@ function deleteCertification(index) {
  * @return String - The date in YYYY-MM-DD format
  */
 function parseEventDate() {
-  console.log(this.format(event.target.value, 'MM/DD/YYYY', 'YYYY-MM-DD'));
   return this.format(event.target.value, 'MM/DD/YYYY', 'YYYY-MM-DD');
 } //parseEventDate
 

@@ -90,7 +90,7 @@ function emitToParser(include) {
  * @return String - The date in YYYY-MM format
  */
 function parseEventDate() {
-  return this.format(event.target.value, 'MM/DD/YYYY', 'YYYY-MM-DD');
+  return this.format(event.target.value, 'MM/YYYY', 'YYYY-MM');
 } // parseEventDate
 
 /**
