@@ -319,9 +319,11 @@ function createExpenses(aggregatedData) {
       const recipient = _.find(employees, (e) => {
         return e.id === expense.recipient;
       });
-      expense.description = `
+      if (giver && recipient) {
+        expense.description = `
       ${employeeUtils.nicknameAndLastName(giver)} gave
       ${employeeUtils.nicknameAndLastName(recipient)} a High Five`;
+      }
     }
     return _.merge(expense, additionalAttributes);
   });
