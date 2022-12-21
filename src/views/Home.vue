@@ -261,9 +261,13 @@ async function createEvents() {
         const recipient = _.find(this.employees, (e) => {
           return e.id === a.recipient;
         });
-        event.text = `${getEmployeePreferredName(a)} ${a.lastName} gave ${getEmployeePreferredName(recipient)} ${
-          recipient.lastName
-        } a High Five: ${a.note}`;
+        if (recipient) {
+          event.text = `${getEmployeePreferredName(a)} ${a.lastName} gave ${getEmployeePreferredName(recipient)} ${
+            recipient.lastName
+          } a High Five: ${a.note}`;
+        } else {
+          event.text = `${a.description}: ${a.note}`;
+        }
       } else if (a.recipient) {
         event.congratulateCampfire = a.campfire;
         event.icon = 'mdi-thumbs-up';
