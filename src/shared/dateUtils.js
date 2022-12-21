@@ -30,82 +30,6 @@ export const FORMATTED_ISOFORMAT = 'MM/DD/YYYY';
 export const PARSED_ISOFORMAT = 'YYYY-MM-DD';
 
 /**
- * Checks if both dates are the same.
- *
- * @param {String} date1 - The first date to check equivalency
- * @param {String} date2 - The second date to check equivalency
- * @param {String} granularity - The unit of time for precision
- * @returns Boolean - True if date1 and date2 are the same, false otherwise
- */
-export function isSame(date1, date2, granularity = null) {
-  return granularity ? dayjs(date1).isSame(date2, granularity) : dayjs(date1).isSame(date2);
-} // isSame
-
-/**
- * Gets the date at the start of given unit time.
- *
- * @param {String} date - The date to find the start of
- * @param {String} granularity - The unit to find the start of
- * @returns String - Start of date at given unit time
- */
-export function startOf(date, granularity) {
-  return dayjs(date).startOf(granularity).format();
-} // startOf
-
-/**
- * Checks if date is between a date range.
- *
- * @param {String} date - The date to check if it is between range
- * @param {String} startDate - The start date of range
- * @param {String} endDate - The end date of range
- * @param {String} granularity - The unit of time for precision
- * @param {String} interval - Identifies inclusive or exclusive for
- *                             endpoints (Ex. '()', '[)', '[]')
- * @returns Boolean - True if date is between date range, false otherwise
- */
-export function isBetween(date, startDate, endDate, granularity, interval) {
-  if (granularity) {
-    return interval
-      ? dayjs(date).isBetween(startDate, endDate, granularity, interval)
-      : dayjs(date).isBetween(startDate, endDate, granularity);
-  } else {
-    return dayjs(date).isBetween(startDate, endDate);
-  }
-} // isBetween
-
-/**
- * Checks if date1 is the same or after date2.
- *
- * @param {String} date1 - The first date
- * @param {String} date2 - The second date
- * @param {String} granularity - The unit of time for precision
- * @returns Boolean - True if date1 is the same or after date2, false otherwise
- */
-export function isSameOrAfter(date1, date2, granularity) {
-  if (granularity) {
-    return dayjs(date1).isSameOrAfter(date2, granularity);
-  } else {
-    return dayjs(date1).isSameOrAfter(date2);
-  }
-} // isSameOrAfter
-
-/**
- * Checks if date1 is the same or before date2.
- *
- * @param {String} date1 - The first date
- * @param {String} date2 - The second date
- * @param {String} granularity - The unit of time for precision
- * @returns Boolean - True if date1 is the same or before date2, false otherwise
- */
-export function isSameOrBefore(date1, date2, granularity) {
-  if (granularity) {
-    return dayjs(date1).isSameOrBefore(date2, granularity);
-  } else {
-    return dayjs(date1).isSameOrBefore(date2);
-  }
-} // isSameOrBefore
-
-/**
  * Adds an amount to the given date.
  *
  * EXAMPLE: add('2022-10-16', 1, 'M') => OUTPUT: '2022-11-16'
@@ -136,17 +60,17 @@ export function subtract(date, amount, granularity, format = DEFAULT_ISOFORMAT) 
 } // subtract
 
 /**
- * Gets the difference between two date-time in specified unit.
+ * Gets the difference in time between the two dates. https://day.js.org/docs/en/display/difference
+ * NOTE: If you want a positive number, make date1 be the later date and date2 be the earlier date
  *
  * @param {String} date1 - The first date
  * @param {String} date2 - The second date
+ * @param {String} granularity - (OPTIONAL) The unit to compare (https://day.js.org/docs/en/manipulate/start-of#list-of-all-available-units)
  * @param {String} format - (OPTIONAL) The format of the dates (if not specified, uses default)
- * @param {String} granularity - (OPTIONAL) The unit of the difference
- * @returns Number - The difference
+ * @returns Number - The difference in time
  */
-export function diff(date1, date2, format, granularity) {
+export function difference(date1, date2, granularity, format) {
   if (!date1 || !date2) return null;
-  if (!format) return null;
   let d1 = format ? dayjs(date1, format) : dayjs(date1);
   let d2 = format ? dayjs(date2, format) : dayjs(date2);
   if (granularity) {
@@ -154,7 +78,29 @@ export function diff(date1, date2, format, granularity) {
   } else {
     return d1.diff(date2);
   }
-} // diff
+} // difference
+
+/**
+ * Formats a given date and returns the output of the newly formatted date.
+ *
+ * EXAMPLES: format('2022-12-23', 'MM/DD/YYYY')         => OUTPUT: '12/23/2022'
+ *           format('12/16/2022', 'YYYY-MM-DD')         => OUTPUT: '2022-12-16'
+ *           format('12/23/2022', 'LLL')                => OUTPUT: 'December 23, 2022 12:00 AM'
+ *
+ * @param {String} date - The date to format
+ * @param {String} format - The format output (https://day.js.org/docs/en/display/format)
+ */
+export function format(date, oldFormat, newFormat) {
+  if (!date) return null;
+  let formattedDate = null;
+  if (oldFormat) {
+    formattedDate = dayjs(date, oldFormat).format(newFormat);
+  } else {
+    formattedDate = dayjs(date).format(newFormat);
+  }
+  if (!isValid(formattedDate, newFormat)) return null;
+  else return formattedDate;
+} // format
 
 /**
  * Gets hour of the date (0 to 23).
@@ -169,41 +115,14 @@ export function getHour(date, format) {
 } // getHour
 
 /**
- * Checks if a date is between a start and end date (defaulted to inclusive). https://day.js.org/docs/en/query/is-between#docsNav
+ * Gets the day number of the date
  *
- * @param {*} date The date to check
- * @param {*} start The start date
- * @param {*} end The end date
- * @param {*} granularity (OPTIONAL) The unit to check
- * @param {*} isExclusive (OPTIONAL) If the start and end dates are exclusive or not
- * @returns True if the given date is between the start and end date
+ * @param {String} date - The date to get the day of.
+ * @returns Number - Day of the given date
  */
-export function isBetweenDates(date, start, end, granularity, isExclusive) {
-  if (!date || !start || !end) return null;
-  if (granularity) {
-    if (isExclusive) {
-      return dayjs(date).isBetween(start, end, granularity, '()');
-    } else {
-      return dayjs(date).isBetween(start, end, granularity, '[]');
-    }
-  } else {
-    if (isExclusive) {
-      return dayjs(date).isBetween(start, end, null, '()');
-    } else {
-      return dayjs(date).isBetween(start, end, null, '[]');
-    }
-  }
-} // isBetweenDates
-
-/**
- * Gets year of the date.
- *
- * @param {String} date - The date to get the year of.
- * @returns Number - Year of the given date
- */
-export function getYear(date) {
-  return dayjs(date).year();
-} // getYear
+export function getDay(date) {
+  return dayjs(date).date();
+} // getDay
 
 /**
  * Gets the month of the date (0-11).
@@ -216,14 +135,38 @@ export function getMonth(date) {
 } // getYear
 
 /**
- * Gets the day number of the date
+ * Gets year of the date.
  *
- * @param {String} date - The date to get the day of.
- * @returns Number - Day of the given date
+ * @param {String} date - The date to get the year of.
+ * @returns Number - Year of the given date
  */
-export function getDay(date) {
-  return dayjs(date).date();
-} // getDay
+export function getYear(date) {
+  return dayjs(date).year();
+} // getYear
+
+/**
+ * Returns a number based on what day of the week it is. https://day.js.org/docs/en/get-set/iso-weekday
+ *
+ * @param {*} date - The given date
+ * @returns Number - An integer from 1(monday)-7(sunday)
+ */
+export function getIsoWeekday(date) {
+  return dayjs(date).isoWeekday();
+} // getIsoWeekday
+
+/**
+ * Returns today's date.
+ *
+ * @param {String} format - The format output (https://day.js.org/docs/en/display/format)
+ * @returns String - Today's date
+ */
+export function getTodaysDate(format) {
+  if (format) {
+    return dayjs().format(format);
+  } else {
+    return dayjs().format(DEFAULT_ISOFORMAT);
+  }
+} // getTodaysDate
 
 /**
  * Verifies if the first date is after the second date in time.
@@ -284,6 +227,71 @@ export function isBefore(date1, date2, granularity, format) {
 } // isBefore
 
 /**
+ * Checks if date is between a date range.
+ *
+ * @param {String} date - The date to check if it is between range
+ * @param {String} startDate - The start date of range
+ * @param {String} endDate - The end date of range
+ * @param {String} granularity - The unit of time for precision
+ * @param {String} interval - Identifies inclusive or exclusive for
+ *                             endpoints (Ex. '()', '[)', '[]')
+ * @returns Boolean - True if date is between date range, false otherwise
+ */
+export function isBetween(date, startDate, endDate, granularity, interval) {
+  if (granularity) {
+    return interval
+      ? dayjs(date).isBetween(startDate, endDate, granularity, interval)
+      : dayjs(date).isBetween(startDate, endDate, granularity);
+  } else {
+    return dayjs(date).isBetween(startDate, endDate);
+  }
+} // isBetween
+
+/**
+ * Checks if both dates are the same.
+ *
+ * @param {String} date1 - The first date to check equivalency
+ * @param {String} date2 - The second date to check equivalency
+ * @param {String} granularity - The unit of time for precision
+ * @returns Boolean - True if date1 and date2 are the same, false otherwise
+ */
+export function isSame(date1, date2, granularity = null) {
+  return granularity ? dayjs(date1).isSame(date2, granularity) : dayjs(date1).isSame(date2);
+} // isSame
+
+/**
+ * Checks if date1 is the same or after date2.
+ *
+ * @param {String} date1 - The first date
+ * @param {String} date2 - The second date
+ * @param {String} granularity - The unit of time for precision
+ * @returns Boolean - True if date1 is the same or after date2, false otherwise
+ */
+export function isSameOrAfter(date1, date2, granularity) {
+  if (granularity) {
+    return dayjs(date1).isSameOrAfter(date2, granularity);
+  } else {
+    return dayjs(date1).isSameOrAfter(date2);
+  }
+} // isSameOrAfter
+
+/**
+ * Checks if date1 is the same or before date2.
+ *
+ * @param {String} date1 - The first date
+ * @param {String} date2 - The second date
+ * @param {String} granularity - The unit of time for precision
+ * @returns Boolean - True if date1 is the same or before date2, false otherwise
+ */
+export function isSameOrBefore(date1, date2, granularity) {
+  if (granularity) {
+    return dayjs(date1).isSameOrBefore(date2, granularity);
+  } else {
+    return dayjs(date1).isSameOrBefore(date2);
+  }
+} // isSameOrBefore
+
+/**
  * Checks the validity of a given date at a given format.
  *
  * @param {String} date The date to validate
@@ -293,102 +301,6 @@ export function isBefore(date1, date2, granularity, format) {
 export function isValid(date, format) {
   return dayjs(date, format, true).isValid();
 } // isValid
-
-/**
- * Formats a given date and returns the output of the newly formatted date.
- *
- * EXAMPLES: format('2022-12-23', 'MM/DD/YYYY')         => OUTPUT: '12/23/2022'
- *           format('12/16/2022', 'YYYY-MM-DD')         => OUTPUT: '2022-12-16'
- *           format('12/23/2022', 'LLL')                => OUTPUT: 'December 23, 2022 12:00 AM'
- *
- * @param {String} date - The date to format
- * @param {String} format - The format output (https://day.js.org/docs/en/display/format)
- */
-export function format(date, oldFormat, newFormat) {
-  if (!date) return null;
-  let formattedDate = null;
-  if (oldFormat) {
-    formattedDate = dayjs(date, oldFormat).format(newFormat);
-  } else {
-    formattedDate = dayjs(date).format(newFormat);
-  }
-  if (!isValid(formattedDate, newFormat)) return null;
-  else return formattedDate;
-} // format
-
-/**
- * Sets the dates month and returns a string of the date.
- *
- * @param {String} date The given date
- * @param {Number} month The month to set the date to (0-11)
- * @returns String - The date with the given month
- */
-export function setMonth(date, month) {
-  return dayjs(date).month(month).format(DEFAULT_ISOFORMAT);
-} // setMonth
-
-/**
- * Sets the dates day and returns a string of the date.
- *
- * @param {String} date The given date
- * @param {Number} day The day to set the date to
- * @returns String - The date at the given day
- */
-export function setDay(date, day) {
-  return dayjs(date).date(day).format(DEFAULT_ISOFORMAT);
-} // setDay
-
-/**
- * Sets the dates year and returns a string of the date.
- *
- * @param {String} date The given date
- * @param {Number} year The year to set the date to
- * @returns String - The date at the given year
- */
-export function setYear(date, year) {
-  return dayjs(date).year(year).format(DEFAULT_ISOFORMAT);
-} // setYear
-
-/**
- * Returns today's date.
- *
- * @param {String} format - The format output (https://day.js.org/docs/en/display/format)
- * @returns String - Today's date
- */
-export function getTodaysDate(format) {
-  if (format) {
-    return dayjs().format(format);
-  } else {
-    return dayjs().format(DEFAULT_ISOFORMAT);
-  }
-} // getTodaysDate
-
-/**
- * Returns a number based on what day of the week it is. https://day.js.org/docs/en/get-set/iso-weekday
- *
- * @param {*} date - The given date
- * @returns Number - An integer from 1(monday)-7(sunday)
- */
-export function getIsoWeekday(date) {
-  return dayjs(date).isoWeekday();
-} // getIsoWeekday
-
-/**
- * Gets the difference in time between the two dates. https://day.js.org/docs/en/display/difference
- * NOTE: If you want a positive number, make date1 be the later date and date2 be the earlier date
- *
- * @param {String} date1 - The first date
- * @param {String} date2 - The second date
- * @param {String} granularity - (OPTIONAL) The unit to compare (https://day.js.org/docs/en/manipulate/start-of#list-of-all-available-units)
- * @returns Number - The difference in time
- */
-export function difference(date1, date2, granularity) {
-  if (granularity) {
-    return dayjs(date1).diff(dayjs(date2), granularity);
-  } else {
-    return dayjs(date1).diff(dayjs(date2));
-  }
-} // difference
 
 /**
  * Returns the earliest date from an array of dates.
@@ -412,20 +324,75 @@ export function maximum(dates) {
   return dayjs.max(dates).format();
 } // maximum
 
+/**
+ * Sets the dates day and returns a string of the date.
+ *
+ * @param {String} date The given date
+ * @param {Number} day The day to set the date to
+ * @returns String - The date at the given day
+ */
+export function setDay(date, day) {
+  return dayjs(date).date(day).format(DEFAULT_ISOFORMAT);
+} // setDay
+
+/**
+ * Sets the dates month and returns a string of the date.
+ *
+ * @param {String} date The given date
+ * @param {Number} month The month to set the date to (0-11)
+ * @returns String - The date with the given month
+ */
+export function setMonth(date, month) {
+  return dayjs(date).month(month).format(DEFAULT_ISOFORMAT);
+} // setMonth
+
+/**
+ * Sets the dates year and returns a string of the date.
+ *
+ * @param {String} date The given date
+ * @param {Number} year The year to set the date to
+ * @returns String - The date at the given year
+ */
+export function setYear(date, year) {
+  return dayjs(date).year(year).format(DEFAULT_ISOFORMAT);
+} // setYear
+
+/**
+ * Gets the date at the start of given unit time.
+ *
+ * @param {String} date - The date to find the start of
+ * @param {String} granularity - The unit to find the start of
+ * @returns String - Start of date at given unit time
+ */
+export function startOf(date, granularity) {
+  return dayjs(date).startOf(granularity).format();
+} // startOf
+
 export default {
   DEFAULT_ISOFORMAT,
   FORMATTED_ISOFORMAT,
   PARSED_ISOFORMAT,
+  add,
+  subtract,
   difference,
   format,
+  getHour,
+  getDay,
+  getMonth,
+  getYear,
   getIsoWeekday,
   getTodaysDate,
   isAfter,
   isBefore,
-  isBetweenDates,
+  isBetween,
+  isSame,
+  isSameOrAfter,
+  isSameOrBefore,
   isValid,
   maximum,
   minimum,
   setDay,
-  setYear
+  setMonth,
+  setYear,
+  startOf
 };

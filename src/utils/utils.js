@@ -130,16 +130,6 @@ export function monthYearFormat(date) {
 } // monthYearFormat
 
 /**
- * Returns a date formated as 'MMM Do' (Aug 18th).
- *
- * @param date - date to format
- * @return String - date formated
- */
-export function monthDayFormat(date) {
-  return !isEmpty(date) ? format(date, null, 'MMM Do') : '';
-} // monthDayFormat
-
-/**
  * Updates the login date and creates audit for the employee.
  * @param {employee} employee the employee to update
  */

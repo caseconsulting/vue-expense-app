@@ -304,11 +304,11 @@ import { getDateRules, getDateOptionalRules, getRequiredRules, getURLRules } fro
 import { isEmpty, isFullTime, convertToMoneyString, userRoleIsAdmin } from '@/utils/utils';
 import { updateStoreBudgets } from '@/utils/storeUtils';
 import { getRole } from '@/utils/auth';
+import { isBetween, getTodaysDate, format } from '../../shared/dateUtils';
 
 import { v4 as uuid } from 'uuid';
 import { mask } from 'vue-the-mask';
 
-import { isBetween, getTodaysDate, format } from '../../shared/dateUtils';
 import _ from 'lodash';
 
 // |--------------------------------------------------|
@@ -1211,7 +1211,7 @@ async function scanFile() {
     //else if there is no total word at all
 
     //check comprehend data for date objects
-    //see if what it found is able to be converted to moment
+    //see if what it found is able to be converted to dayjs
     //format it so it is in the correct format
     //set purchase date
     let firstDate = null;

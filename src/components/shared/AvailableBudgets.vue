@@ -48,7 +48,7 @@ import _ from 'lodash';
 import api from '@/shared/api.js';
 import AvailableBudgetSummary from '@/components/shared/AvailableBudgetSummary.vue';
 import { convertToMoneyString, getCurrentBudgetYear } from '@/utils/utils';
-import { getTodaysDate, isBetweenDates } from '@/shared/dateUtils';
+import { getTodaysDate, isBetween } from '@/shared/dateUtils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -131,7 +131,7 @@ async function refreshBudget() {
         this.expenseTypes,
         (e) =>
           e.id == budget.expenseTypeId &&
-          (e.isInactive || !isBetweenDates(getTodaysDate(), budget.fiscalStartDate, budget.fiscalEndDate, 'days'))
+          (e.isInactive || !isBetween(getTodaysDate(), budget.fiscalStartDate, budget.fiscalEndDate, 'days', '[]'))
       ) || _.some(this.expenses, (e) => e.expenseTypeId == budget.expenseTypeId && _.isEmpty(e.reimbursedDate))
     );
   });

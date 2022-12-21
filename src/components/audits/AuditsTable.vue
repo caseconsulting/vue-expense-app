@@ -30,7 +30,7 @@
 </template>
 
 <script>
-import { diff } from '../../shared/dateUtils';
+import { difference } from '../../shared/dateUtils';
 
 const IsoFormat = 'MMMM Do YYYY, h:mm:ss a';
 
@@ -56,8 +56,8 @@ function customDateSort(items, sortBy, sortDesc) {
   if (sortBy[0] === 'dateCreated') {
     return items.sort((a, b) => {
       return sortDesc[0]
-        ? diff(a.dateCreated, b.dateCreated, IsoFormat, 'second')
-        : diff(b.dateCreated, a.dateCreated, IsoFormat, 'second');
+        ? difference(a.dateCreated, b.dateCreated, 'second', IsoFormat)
+        : difference(b.dateCreated, a.dateCreated, 'second', IsoFormat);
     });
   } else if (sortBy[0] === 'description' || sortBy[0] === 'employeeName') {
     return items.sort((a, b) => {
