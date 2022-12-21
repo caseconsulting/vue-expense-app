@@ -78,8 +78,8 @@
 </template>
 
 <script>
-import { convertToMoneyString, isBetweenDates, getCurrentBudgetYear, isFullTime } from '@/utils/utils';
-import { format, getTodaysDate, DEFAULT_ISOFORMAT, FORMATTED_ISOFORMAT } from '../../shared/dateUtils';
+import { convertToMoneyString, getCurrentBudgetYear, isFullTime } from '@/utils/utils';
+import { format, getTodaysDate, isBetweenDates, DEFAULT_ISOFORMAT, FORMATTED_ISOFORMAT } from '../../shared/dateUtils';
 import api from '@/shared/api';
 import _ from 'lodash';
 
@@ -221,7 +221,8 @@ async function refreshBudgets() {
               getTodaysDate('YYYY-MM-DD[T]HH:mm:ss.SSS[Z]'),
               budget.fiscalStartDate,
               budget.fiscalEndDate,
-              'days'
+              'day',
+              false
             ))
       ) || _.some(this.expenses, (e) => e.expenseTypeId == budget.expenseTypeId && _.isEmpty(e.reimbursedDate))
     );
