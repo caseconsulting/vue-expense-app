@@ -24,9 +24,6 @@ import { storeIsPopulated } from '@/utils/utils.js';
 import { format, isBefore, getHour, add } from '../../shared/dateUtils';
 const IsoFormat = 'MMMM Do YYYY, h:mm:ss a';
 
-const moment = require('moment-timezone');
-moment.tz.setDefault('America/New_York');
-
 // |--------------------------------------------------|
 // |                                                  |
 // |                 LIFECYCLE HOOKS                  |

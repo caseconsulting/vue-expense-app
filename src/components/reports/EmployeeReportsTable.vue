@@ -272,7 +272,7 @@ function customEmployeeFilter(item, queryText) {
 
 /**
  * Returns the expiration dates for all clearances in natural readable format. The sorting key of item.badgeExpiration
- * is stored just as the int form of the moment to get accurate sorting.
+ * is stored just as the int form of the time to get accurate sorting.
  *
  * @param clearances - the list of employee clearances
  * @param item - the employee
@@ -555,7 +555,7 @@ function searchDataType() {
         this.filteredEmployees = _.filter(this.employeesInfo, (employee) => {
           return employee.employeeNumber == this.search;
         });
-        return; // don't do the rest of the moment calculations below
+        return; // don't do the rest of the dayjs calculations below
       }
     }
   }
