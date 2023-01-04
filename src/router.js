@@ -16,6 +16,7 @@ import EmployeeHome from '@/views/MyBudgets.vue';
 import Home from '@/views/Home.vue';
 import TrainingAnalytics from '@/views/TrainingAnalytics';
 import PageNotFound from '@/views/PageNotFound';
+import Contracts from '@/views/Contracts.vue';
 import { requireAuth, isAdmin, isAdminOrManager } from '@/utils/auth';
 import multiguard from 'vue-router-multiguard';
 
@@ -51,6 +52,12 @@ const router = new Router({
       name: 'employees',
       component: Employees,
       beforeEnter: requireAuth
+    },
+    {
+      path: '/contracts',
+      name: 'contracts',
+      component: Contracts,
+      beforeEnter: multiguard([requireAuth, isAdmin])
     },
     {
       path: '/audits',

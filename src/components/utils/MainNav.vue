@@ -225,6 +225,13 @@ export default {
           active: false
         },
         {
+          title: 'Contracts',
+          icon: 'mdi-file-document-edit',
+          route: 'contracts',
+          permission: ['admin'],
+          active: false
+        },
+        {
           title: 'Statistics Dashboard',
           alias: ['stats'],
           icon: 'mdi-chart-bar',
