@@ -3,7 +3,13 @@
     <v-card class="mt-3">
       <v-container fluid>
         <!-- START CONTRACTS DATA TABLE -->
-        <v-data-table @click:row="clickedRow" :expanded.sync="expanded" :headers="contractHeaders" :items="data">
+        <v-data-table
+          @click:row="clickedRow"
+          :loading="loading"
+          :expanded.sync="expanded"
+          :headers="contractHeaders"
+          :items="contracts"
+        >
           <!-- Expanded Row Slot -->
           <template v-slot:expanded-item="{ item }"
             ><td :colspan="contractHeaders.length" class="pa-0">
@@ -74,6 +80,18 @@
 </template>
 <script>
 import _ from 'lodash';
+import api from '../../shared/api';
+// |--------------------------------------------------|
+// |                                                  |
+// |                 LIFECYCLE HOOKS                  |
+// |                                                  |
+// |--------------------------------------------------|
+
+async function created() {
+  this.loading = true;
+  this.contracts = await api.getItems(api.CONTRACTS);
+  this.loading = false;
+}
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -91,70 +109,19 @@ function clickedRow(contractObj) {
 }
 
 export default {
+  created,
   methods: {
     clickedRow
   },
   data() {
     return {
+      loading: false,
+      contracts: [],
       expanded: [],
-      data: [
-        {
-          id: 1,
-          contractName: 'AI',
-          costType: 'costTypeTest',
-          popEndDate: '07/07/2022',
-          popStartDate: '07/08/2019',
-          primeName: 'Case Consulting',
-          projects: [
-            {
-              name: 'Bippy'
-            }
-          ]
-        },
-        {
-          id: 2,
-          contractName: 'Gemini',
-          costType: 'costTypeTest',
-          popEndDate: '04/07/2022',
-          popStartDate: '04/08/2019',
-          primeName: 'Lockheed Martin',
-          projects: [
-            {
-              name: 'GMN-2122'
-            },
-            { name: 'GMN-2123' }
-          ]
-        },
-        {
-          id: 3,
-          contractName: 'Delphi',
-          costType: 'costTypeTest',
-          popEndDate: '07/07/2022',
-          popStartDate: '07/08/2019',
-          primeName: 'Case Consulting',
-          projects: [{ name: 'Pythia' }, { name: 'Delphi' }]
-        },
-        {
-          id: 4,
-          contractName: 'Hawkeye',
-          costType: 'costTypeTest',
-          popEndDate: '02/07/2022',
-          popStartDate: '02/05/2019',
-          primeName: 'Lockheed Martin',
-          projects: [
-            {
-              name: 'HWK-2344'
-            },
-            {
-              name: 'HWK-2345'
-            }
-          ]
-        }
-      ],
       projectHeaders: [
         {
           text: 'Project',
-          value: 'name',
+          value: 'projectName',
           align: 'center'
         },
         {
