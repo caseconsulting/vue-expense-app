@@ -113,8 +113,13 @@ function cancel() {
   this.$refs.form.resetValidation();
 } // cancel
 
+/**
+ * Organizes the data and creates a contract.
+ *
+ * @returns Object - The contract that was created
+ */
 async function createContract() {
-  this.projects = this.projects.map((project) => {
+  let contractProjects = this.projects.map((project) => {
     return { id: uuid(), projectName: project };
   });
   return await api.createItem(api.CONTRACTS, {
@@ -124,9 +129,9 @@ async function createContract() {
     popStartDate: this.popStartDate,
     popEndDate: this.popEndDate,
     costType: this.costType,
-    projects: this.projects
+    projects: contractProjects
   });
-}
+} // createContract
 
 /**
  * Emits a message and data if it exists.

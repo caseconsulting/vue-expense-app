@@ -99,7 +99,7 @@ function beforeDestroy() {
  * created life cycle hook
  */
 async function created() {
-  window.EventBus.$on('submitted-contract-form', (contract) => this.contracts.push(contract));
+  window.EventBus.$on('submitted-contract-form', (contract) => this.contracts.unshift(contract));
 
   this.loading = true;
   this.contracts = await api.getItems(api.CONTRACTS);
