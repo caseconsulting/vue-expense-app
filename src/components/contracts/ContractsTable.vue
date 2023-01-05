@@ -81,17 +81,30 @@
 <script>
 import _ from 'lodash';
 import api from '../../shared/api';
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                 LIFECYCLE HOOKS                  |
 // |                                                  |
 // |--------------------------------------------------|
 
+/**
+ * beforeDestroy life cycle hook
+ */
+function beforeDestroy() {
+  window.EventBus.$off('submitted-contract-form');
+} // beforeDestroy
+
+/**
+ * created life cycle hook
+ */
 async function created() {
+  window.EventBus.$on('submitted-contract-form', (contract) => this.contracts.push(contract));
+
   this.loading = true;
   this.contracts = await api.getItems(api.CONTRACTS);
   this.loading = false;
-}
+} // created
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -108,7 +121,14 @@ function clickedRow(contractObj) {
   }
 }
 
+// |--------------------------------------------------|
+// |                                                  |
+// |                      EXPORT                      |
+// |                                                  |
+// |--------------------------------------------------|
+
 export default {
+  beforeDestroy,
   created,
   methods: {
     clickedRow
