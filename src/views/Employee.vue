@@ -119,10 +119,20 @@
               <span>Edit Profile</span>
             </v-tooltip>
           </v-card-title>
-          <employee-info :model="this.model" :currentTab="this.currentTab" v-if="!editing"></employee-info>
+          <employee-info
+            :model="this.model"
+            :contracts="this.contracts"
+            :currentTab="this.currentTab"
+            v-if="!editing"
+          ></employee-info>
         </v-card>
         <!-- Edit Info (Form) -->
-        <employee-form :employee="this.model" :currentTab="this.currentTab" v-if="editing"></employee-form>
+        <employee-form
+          :employee="this.model"
+          :contracts="this.contracts"
+          :currentTab="this.currentTab"
+          v-if="editing"
+        ></employee-form>
         <div class="mt-4">
           <budget-chart
             v-if="(userRoleIsAdmin() || userIsEmployee()) && hasAccessToBudgets"
@@ -352,6 +362,7 @@ async function created() {
     }
   });
   this.basicEmployeeDataLoading = true;
+  this.contracts = await api.getItems(api.CONTRACTS);
   this.storeIsPopulated ? await this.getProfileData() : (this.loading = true);
 } // created
 
@@ -438,6 +449,7 @@ export default {
   data() {
     return {
       currentTab: null,
+      contracts: null,
       deleteLoading: false,
       displayQuickBooksTimeAndBalances: false,
       editing: false,

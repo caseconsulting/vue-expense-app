@@ -3,16 +3,16 @@
     <!-- Employee has Contracts -->
     <div v-if="!isEmpty(this.filteredList)">
       <!-- Loop Contracts -->
-      <div v-for="(contract, index) in this.filteredList" :key="contract.name + index">
-        <p><b>Contract: </b>{{ contract.name }}</p>
-        <p><b>Primes: </b>{{ contract.primes.join(', ') }}</p>
+      <div v-for="(contract, index) in this.filteredList" :key="contract.contractId + index">
+        <p><b>Contract: </b>{{ getContractName(contract) }}</p>
+        <p><b>Prime: </b>{{ getPrimeName(contract) }}</p>
         <p><b>Time on Contract: </b>{{ getContractLengthInYears(contract) }}</p>
         <div v-if="!isEmpty(contract.projects)">
           <div v-for="(project, projIndex) in contract.projects" :key="index + ' ' + projIndex" class="pb-1 px-4">
             <p v-if="contract.projects.length > 1">
               <v-row>
                 <v-col>
-                  <b>Project {{ projIndex + 1 }}: </b>{{ project.name }}
+                  <b>Project {{ projIndex + 1 }}: </b>{{ getProjectName(project) }}
                 </v-col>
                 <v-col>
                   <v-tooltip v-if="!project.endDate" right>
@@ -26,7 +26,7 @@
             </p>
             <p v-else>
               <v-row>
-                <v-col> <b>Project: </b>{{ project.name }} </v-col>
+                <v-col> <b>Project: </b>{{ getProjectName(project) }} </v-col>
                 <v-col>
                   <v-tooltip v-if="!project.endDate" right>
                     <template v-slot:activator="{ on }">
@@ -127,6 +127,18 @@ function getContractEarliestDate(contract) {
   return _.orderBy(contract.projects, ['startDate'])[0].startDate;
 } // getContractEarliestDate
 
+function getContractName(contract) {
+  return this.contracts.find((c) => c.id === contract.contractId).contractName;
+}
+
+function getPrimeName(contract) {
+  return this.contracts.find((c) => c.id === contract.contractId).primeName;
+}
+
+function getProjectName(project) {
+  return this.contractProjects.find((p) => p.id === project.projectId).projectName;
+}
+
 /**
  * returns a readable format of the date/time.
  *
@@ -134,6 +146,7 @@ function getContractEarliestDate(contract) {
  * @return string - A readable format of the time
  */
 function dateReadable(time) {
+  time = Math.round(time);
   let read = '';
   let comma = false;
   let years = Math.floor(time / 12);
@@ -192,7 +205,7 @@ function getProjectLengthInYears(project) {
   } else {
     length = difference(getTodaysDate(), project.startDate, 'month');
   }
-  return length; // add one month to include end month in calculation.
+  return length;
 }
 
 // |--------------------------------------------------|
@@ -221,6 +234,7 @@ export default {
   created,
   data() {
     return {
+      contractProjects: this.contracts.map((c) => c.projects).flat(),
       filteredList: [],
       page: 1
     };
@@ -233,6 +247,9 @@ export default {
     difference, // dateUtils
     getContractEarliestDate,
     getContractLengthInYears,
+    getContractName,
+    getPrimeName,
+    getProjectName,
     getProjectLengthInYears,
     getProjectLengthInYearsReadable,
     getTodaysDate, // dateUtils
@@ -240,7 +257,7 @@ export default {
     isEmpty,
     onPageChange
   },
-  props: ['model']
+  props: ['contracts', 'model']
 };
 </script>
 

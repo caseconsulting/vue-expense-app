@@ -67,7 +67,12 @@
         <v-tab href="#clearance" v-if="hasAdminPermissions() || userIsEmployee()">Clearance</v-tab>
         <v-tab href="#languages">Foreign Languages</v-tab>
         <v-tab-item id="employee" class="ma-6">
-          <employee-tab :admin="hasAdminPermissions()" :employee="userIsEmployee()" :model="model"></employee-tab>
+          <employee-tab
+            :admin="hasAdminPermissions()"
+            :contracts="contracts"
+            :employee="userIsEmployee()"
+            :model="model"
+          ></employee-tab>
         </v-tab-item>
         <v-tab-item id="personal" class="ma-6">
           <personal-tab :admin="hasAdminPermissions()" :employee="userIsEmployee()" :model="model"></personal-tab>
@@ -91,7 +96,7 @@
           <customer-org-tab :model="model"></customer-org-tab>
         </v-tab-item>
         <v-tab-item id="contracts" class="ma-6">
-          <contracts-tab :model="model"></contracts-tab>
+          <contracts-tab :contracts="contracts" :model="model"></contracts-tab>
         </v-tab-item>
         <v-tab-item id="clearance" v-if="hasAdminPermissions() || userIsEmployee()" class="ma-6">
           <clearance-tab :model="model"></clearance-tab>
@@ -249,7 +254,7 @@ export default {
     userIsEmployee,
     selectDropDown
   },
-  props: ['model', 'currentTab'],
+  props: ['model', 'contracts', 'currentTab'],
   computed: {
     useDropDown,
     parsedInfoTab

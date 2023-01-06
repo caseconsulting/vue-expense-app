@@ -12,13 +12,13 @@
     <p><b>Current Projects: </b> {{ getCurrentProjects.length === 0 ? 'None' : '' }}</p>
     <!-- Loop for Current Projects -->
     <div v-for="(contract, contractIndex) in getCurrentProjects" :key="contractIndex" class="pb-1 px-4">
-      <p><b>Contract: </b>{{ contract.name }}</p>
-      <p><b>Primes: </b>{{ contract.primes.join(', ') }}</p>
+      <p><b>Contract: </b>{{ contract.contractName }}</p>
+      <p><b>Prime: </b>{{ contract.primeName }}</p>
       <div v-for="(project, projIndex) in contract.projects" :key="projIndex" class="px-4">
         <p v-if="contract.projects.length > 1">
-          <b>Project {{ projIndex + 1 }}: </b>{{ project.name }}
+          <b>Project {{ projIndex + 1 }}: </b>{{ project.projectName }}
         </p>
-        <p v-else><b>Project: </b>{{ project.name }}</p>
+        <p v-else><b>Project: </b>{{ project.projectName }}</p>
       </div>
     </div>
     <!-- Job Role -->
@@ -110,7 +110,10 @@ function fullName() {
  * @return array - the contracts
  */
 function getCurrentProjects() {
-  let contracts = [];
+  let currentContracts = [];
+  let contractProjects = [];
+  // add all contract projects to an array
+  this.contracts.forEach((c) => contractProjects.push(...c.projects));
   if (this.model.contracts) {
     this.model.contracts.forEach((contract) => {
       let currContract = {};
@@ -118,21 +121,23 @@ function getCurrentProjects() {
       if (contract.projects) {
         contract.projects.forEach((project) => {
           if (currContract.projects.length === 0) {
-            currContract.name = contract.name;
-            currContract.primes = contract.primes;
+            let c = this.contracts.find((c) => c.id === contract.contractId);
+            currContract.contractName = c.contractName;
+            currContract.primeName = c.primeName;
           }
           if (!project.endDate) {
-            currContract.projects.push(project);
+            let proj = contractProjects.find((p) => p.id === project.projectId);
+            currContract.projects.push(proj);
           }
         });
       }
       if (currContract.projects.length > 0) {
-        contracts.push(currContract);
+        currentContracts.push(currContract);
       }
     });
   }
 
-  return contracts;
+  return currentContracts;
 } // getCurrentProjects
 
 // |--------------------------------------------------|
@@ -194,6 +199,6 @@ export default {
     isEmpty,
     monthDayYearFormat
   },
-  props: ['admin', 'employee', 'model']
+  props: ['admin', 'contracts', 'employee', 'model']
 };
 </script>
