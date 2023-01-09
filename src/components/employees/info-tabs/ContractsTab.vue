@@ -127,17 +127,32 @@ function getContractEarliestDate(contract) {
   return _.orderBy(contract.projects, ['startDate'])[0].startDate;
 } // getContractEarliestDate
 
+/**
+ * Finds the contract name from the employees contract id.
+ *
+ * @param contract - The employees contract object
+ */
 function getContractName(contract) {
   return this.contracts.find((c) => c.id === contract.contractId).contractName;
-}
+} // getContractName
 
+/**
+ * Finds the prime name from the employees contract id.
+ *
+ * @param contract - The employees contract object
+ */
 function getPrimeName(contract) {
   return this.contracts.find((c) => c.id === contract.contractId).primeName;
-}
+} // getPrimeName
 
+/**
+ * Finds the project name from the employees project id.
+ *
+ * @param contract - The employees contract object
+ */
 function getProjectName(project) {
   return this.contractProjects.find((p) => p.id === project.projectId).projectName;
-}
+} // getProjectName
 
 /**
  * returns a readable format of the date/time.

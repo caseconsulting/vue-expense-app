@@ -155,6 +155,7 @@
                 <!-- Contract Tab -->
                 <contract-tab
                   v-if="formTab === 'contracts'"
+                  :contracts="contracts"
                   :validating="validating.contracts"
                   :model="model.contracts"
                 >
@@ -343,7 +344,11 @@
             </v-tab-item>
             <!-- Contracts -->
             <v-tab-item id="contracts" class="mt-6 mb-4 px-3">
-              <contract-tab :model="model.contracts" :validating="validating.contracts"></contract-tab>
+              <contract-tab
+                :contracts="contracts"
+                :model="model.contracts"
+                :validating="validating.contracts"
+              ></contract-tab>
             </v-tab-item>
             <!-- Clearance -->
             <v-tab-item id="clearance" class="mt-6 mb-4 px-3">
@@ -503,7 +508,21 @@ function cleanUpData() {
     this.model.customerOrgExp = null;
   }
   // contracts
-  if (_.isEmpty(this.model.contracts)) {
+  if (!_.isEmpty(this.model.contracts)) {
+    // delete name attributes since the names are stored in the contracts DynamoDB table
+    // this will connect the IDs between employee contracts and the contracts table
+    _.forEach(this.model.contracts, (contract) => {
+      contract.contractId = this.contracts.find(
+        (c) => c.contractName === contract.contractName && c.primeName === contract.primeName
+      ).id;
+      delete contract.contractName;
+      delete contract.primeName;
+      _.forEach(contract.projects, (project) => {
+        project.projectId = this.contractProjects.find((p) => p.projectName === project.projectName).id;
+        delete project.projectName;
+      });
+    });
+  } else {
     this.model.contracts = null;
   }
   // jobs
@@ -1130,6 +1149,7 @@ export default {
       cancelling: false, // cancelling form
       confirmingValid: false, // confirming form submission
       confirmingError: false,
+      contractProjects: this.contracts.map((c) => c.projects).flat(),
       deleteLoading: false,
       disableEmpNum: false,
       errorStatus: {
@@ -1255,7 +1275,7 @@ export default {
     updateStoreEmployees,
     updateStoreUser
   },
-  props: ['currentTab', 'employee'], // employee to be created/updated
+  props: ['contracts', 'currentTab', 'employee'], // employee to be created/updated
   watch: {
     formTab: watchFormTab
   },
