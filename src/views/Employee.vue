@@ -172,7 +172,13 @@ import {
   userRoleIsAdmin,
   userRoleIsManager
 } from '@/utils/utils.js';
-import { updateStoreBudgets, updateStoreEmployees, updateStoreExpenseTypes, updateStoreUser } from '@/utils/storeUtils';
+import {
+  updateStoreBudgets,
+  updateStoreContracts,
+  updateStoreEmployees,
+  updateStoreExpenseTypes,
+  updateStoreUser
+} from '@/utils/storeUtils';
 import _ from 'lodash';
 import ConvertEmployeeToCsv from '@/components/employees/csv/ConvertEmployeeToCsv.vue';
 import AnniversaryCard from '@/components/shared/AnniversaryCard.vue';
@@ -227,7 +233,8 @@ async function getProfileData() {
   this.loading = true;
   await Promise.all([
     !this.$store.getters.employees ? this.updateStoreEmployees() : '',
-    !this.$store.getters.user ? this.updateStoreUser() : ''
+    !this.$store.getters.user ? this.updateStoreUser() : '',
+    !this.$store.getters.contracts ? this.updateStoreContracts() : ''
   ]);
   if (this.$store.getters.user.employeeNumber == this.$route.params.id) {
     // user looking at their own profile
@@ -240,6 +247,7 @@ async function getProfileData() {
     });
   }
   this.user = this.$store.getters.user;
+  this.contracts = this.$store.getters.contracts;
   this.displayQuickBooksTimeAndBalances = this.userRoleIsAdmin() || this.userIsEmployee();
   this.basicEmployeeDataLoading = false;
   if (this.model) {
@@ -362,7 +370,6 @@ async function created() {
     }
   });
   this.basicEmployeeDataLoading = true;
-  this.contracts = await api.getItems(api.CONTRACTS);
   this.storeIsPopulated ? await this.getProfileData() : (this.loading = true);
 } // created
 
@@ -526,6 +533,7 @@ export default {
     isMobile,
     resumeReceived,
     updateStoreBudgets,
+    updateStoreContracts,
     updateStoreEmployees,
     updateStoreExpenseTypes,
     updateStoreUser,

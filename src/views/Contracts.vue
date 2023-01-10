@@ -8,7 +8,7 @@
         <v-btn @click="toggleContractForm = true" class="my-2"
           >Create a contract <v-icon right> mdi-file-document-plus </v-icon></v-btn
         >
-        <contracts-table></contracts-table>
+        <contracts-table v-if="$store.getters.contracts"></contracts-table>
       </v-container>
     </v-card>
     <ContractForm :toggleContractForm="toggleContractForm" />
@@ -17,6 +17,8 @@
 <script>
 import ContractsTable from '@/components/contracts/ContractsTable.vue';
 import ContractForm from '@/components/contracts/ContractForm.vue';
+
+import { updateStoreContracts } from '@/utils/storeUtils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -34,9 +36,11 @@ function beforeDestroy() {
 /**
  * created life cycle hook
  */
-function created() {
+async function created() {
   window.EventBus.$on('canceled-contract-form', () => (this.toggleContractForm = false));
   window.EventBus.$on('submitted-contract-form', () => (this.toggleContractForm = false));
+
+  !this.$store.getters.contracts ? await this.updateStoreContracts() : null;
 } // created
 
 // |--------------------------------------------------|
@@ -56,6 +60,9 @@ export default {
     return {
       toggleContractForm: false
     };
+  },
+  methods: {
+    updateStoreContracts
   }
 };
 </script>

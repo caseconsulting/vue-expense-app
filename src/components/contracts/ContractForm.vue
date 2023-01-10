@@ -95,6 +95,7 @@
 
 <script>
 import api from '@/shared/api.js';
+import { updateStoreContracts } from '@/utils/storeUtils';
 import { v4 as uuid } from 'uuid';
 
 // |--------------------------------------------------|
@@ -122,7 +123,7 @@ async function createContract() {
   let contractProjects = this.projects.map((project) => {
     return { id: uuid(), projectName: project };
   });
-  return await api.createItem(api.CONTRACTS, {
+  let contract = await api.createItem(api.CONTRACTS, {
     id: uuid(),
     contractName: this.contractName,
     primeName: this.primeName,
@@ -131,6 +132,7 @@ async function createContract() {
     costType: this.costType,
     projects: contractProjects
   });
+  this.$store.dispatch('setContracts', { contracts: [contract, ...this.$store.getters.contracts] });
 } // createContract
 
 /**
@@ -196,7 +198,8 @@ export default {
     cancel,
     createContract,
     emit,
-    submit
+    submit,
+    updateStoreContracts
   },
   props: ['toggleContractForm'],
   watch: {

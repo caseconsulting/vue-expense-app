@@ -8,7 +8,7 @@
           :loading="loading"
           :expanded.sync="expanded"
           :headers="contractHeaders"
-          :items="contracts"
+          :items="$store.getters.contracts"
         >
           <!-- Expanded Row Slot -->
           <template v-slot:expanded-item="{ item }"
@@ -80,7 +80,7 @@
 </template>
 <script>
 import _ from 'lodash';
-import api from '../../shared/api';
+import { updateStoreContracts } from '@/utils/storeUtils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -89,20 +89,10 @@ import api from '../../shared/api';
 // |--------------------------------------------------|
 
 /**
- * beforeDestroy life cycle hook
- */
-function beforeDestroy() {
-  window.EventBus.$off('submitted-contract-form');
-} // beforeDestroy
-
-/**
  * created life cycle hook
  */
 async function created() {
-  window.EventBus.$on('submitted-contract-form', (contract) => this.contracts.unshift(contract));
-
   this.loading = true;
-  this.contracts = await api.getItems(api.CONTRACTS);
   this.loading = false;
 } // created
 
@@ -128,15 +118,14 @@ function clickedRow(contractObj) {
 // |--------------------------------------------------|
 
 export default {
-  beforeDestroy,
   created,
   methods: {
-    clickedRow
+    clickedRow,
+    updateStoreContracts
   },
   data() {
     return {
       loading: false,
-      contracts: [],
       expanded: [],
       projectHeaders: [
         {
