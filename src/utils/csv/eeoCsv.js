@@ -126,8 +126,8 @@ export function convertEmployees(employees) {
   ];
   const jobCategories = [
     'Professional',
-    'Executive/Senior Level Official and Manager',
-    'First/Mid-Level Official and Manager',
+    'Executive/Senior Level Offcial and Manager',
+    'First/Mid-Level Offcial and Manager',
     'Technician',
     'Sales Worker',
     'Administrative Support Worker',
