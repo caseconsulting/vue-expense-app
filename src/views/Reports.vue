@@ -8,10 +8,11 @@
         >
       </router-link>
     </div>
-    <employee-reports-table v-if="!loading"></employee-reports-table>
+    <employee-reports-table v-if="!loading" :contracts="contracts"></employee-reports-table>
   </div>
 </template>
 <script>
+import api from '@/shared/api';
 import EmployeeReportsTable from '@/components/reports/EmployeeReportsTable.vue';
 import { updateStoreEmployees } from '@/utils/storeUtils';
 
@@ -29,12 +30,13 @@ async function created() {
     if (!this.$store.getters.employees) {
       await this.updateStoreEmployees();
     }
-    this.loading = false;
   }
   if (this.$route.params.requestedFilter) {
     this.wasRedirected = true;
     window.scrollTo(0, 0);
   }
+  this.contracts = await api.getItems(api.CONTRACTS);
+  this.loading = false;
 } // created
 
 // |--------------------------------------------------|
@@ -68,6 +70,7 @@ export default {
   },
   data() {
     return {
+      contracts: null,
       loading: true,
       wasRedirected: false
     };
