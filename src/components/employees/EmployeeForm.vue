@@ -512,14 +512,18 @@ function cleanUpData() {
     // delete name attributes since the names are stored in the contracts DynamoDB table
     // this will connect the IDs between employee contracts and the contracts table
     _.forEach(this.model.contracts, (contract) => {
-      contract.contractId = this.contracts.find(
-        (c) => c.contractName === contract.contractName && c.primeName === contract.primeName
-      ).id;
-      delete contract.contractName;
-      delete contract.primeName;
+      if (contract.contractName && contract.primeName) {
+        contract.contractId = this.contracts.find(
+          (c) => c.contractName === contract.contractName && c.primeName === contract.primeName
+        ).id;
+        delete contract.contractName;
+        delete contract.primeName;
+      }
       _.forEach(contract.projects, (project) => {
-        project.projectId = this.contractProjects.find((p) => p.projectName === project.projectName).id;
-        delete project.projectName;
+        if (project.projectName) {
+          project.projectId = this.contractProjects.find((p) => p.projectName === project.projectName).id;
+          delete project.projectName;
+        }
       });
     });
   } else {

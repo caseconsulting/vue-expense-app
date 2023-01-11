@@ -14,7 +14,7 @@
                 <v-col cols="12" sm="6" md="6">
                   <v-text-field
                     v-model="contractName"
-                    :rules="[(v) => !!v || 'Field is required']"
+                    :rules="[(v) => !!v || 'Field is required', duplicateContractPrimeCombo()]"
                     label="Contract Name*"
                     required
                   ></v-text-field>
@@ -23,7 +23,7 @@
                 <v-col cols="12" sm="6" md="6">
                   <v-text-field
                     v-model="primeName"
-                    :rules="[(v) => !!v || 'Field is required']"
+                    :rules="[(v) => !!v || 'Field is required', duplicateContractPrimeCombo()]"
                     label="Prime Name*"
                     required
                   ></v-text-field>
@@ -94,6 +94,7 @@
 </template>
 
 <script>
+import _ from 'lodash';
 import api from '@/shared/api.js';
 import { updateStoreContracts } from '@/utils/storeUtils';
 import { v4 as uuid } from 'uuid';
@@ -191,7 +192,14 @@ export default {
       projects: [],
       dialog: false,
       loading: false,
-      valid: true
+      valid: true,
+      duplicateContractPrimeCombo: () => {
+        let found = _.some(
+          this.$store.getters.contracts,
+          (c) => c.contractName === this.contractName && c.primeName === this.primeName
+        );
+        return !found || 'Duplicate contract and prime combination';
+      }
     };
   },
   methods: {

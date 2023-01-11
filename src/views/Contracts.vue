@@ -5,7 +5,7 @@
         <v-card-title headline><h2 class="white--text">Contracts</h2> </v-card-title>
       </v-card>
       <v-container fluid>
-        <v-btn @click="toggleContractForm = true" class="my-2"
+        <v-btn @click="toggleContractForm = true" :disabled="!$store.getters.contracts" class="my-2"
           >Create a contract <v-icon right> mdi-file-document-plus </v-icon></v-btn
         >
         <contracts-table v-if="$store.getters.contracts"></contracts-table>
