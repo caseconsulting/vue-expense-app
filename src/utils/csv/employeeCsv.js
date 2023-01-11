@@ -9,10 +9,11 @@ const csvUtils = require('./baseCsv.js');
 /**
  * Downloads array of employees as csv file.
  * @param employees - array of employee objects
+ * @param contracts - the contracts from DyanmoDB to connect employee contract IDs to
  */
-export function download(employees) {
+export function download(employees, contracts) {
   let filename = Array.isArray(employees) ? 'employees.csv' : 'employee.csv';
-  let convertedEmployees = convertEmployees(employees); // convert employees into csv object
+  let convertedEmployees = convertEmployees(employees, contracts); // convert employees into csv object
   let csvEmployees = csvUtils.sort(convertedEmployees, 'Employee #'); // sort by employee #
   let csvFileString = csvUtils.generate(csvEmployees); // convert to csv file string
   csvUtils.download(csvFileString, filename); // download csv file string as .csv
@@ -22,14 +23,15 @@ export function download(employees) {
  * Converts employees to an array of objects to pass in to csvUtils.generate(). Expects
  * an array of employees but supports having a single employee object.
  * @param employees - employee object to convert
+ * @param contracts - the contracts from DyanmoDB to connect employee contract IDs to
  * @return a new object passable to csv.js
  */
-export function convertEmployees(employees) {
+export function convertEmployees(employees, contracts) {
   if (!Array.isArray(employees)) employees = [employees];
   let tempEmployees = [];
   _.forEach(employees, (employee) => {
     let placeOfBirth = [employee.city, employee.st, employee.country].join(' ');
-    let contractsPrimesProjects = getContractPrimeProject(employee.contracts);
+    let contractsPrimesProjects = getContractPrimeProject(employee.contracts, contracts);
     tempEmployees.push({
       'Employee #': employee.employeeNumber || '',
       'First Name': employee.firstName || '',
@@ -190,25 +192,29 @@ export function getProjectLengthInYears(project) {
 /**
  * Returns contract data for employee
  *
- * @param contracts - An array of objects.
+ * @param employeeContracts - An array of objects.
+ * @param allContracts - the contracts from DyanmoDB to connect employee contract IDs to
  * @return String - contract
  */
-export function getContractPrimeProject(contracts) {
+export function getContractPrimeProject(employeeContracts, allContracts) {
   let result = [];
   let toReturn = {};
-  if (contracts) {
-    _.forEach(contracts, (contract) => {
+  let allProjects = allContracts.map((c) => c.projects).flat();
+  if (employeeContracts) {
+    _.forEach(employeeContracts, (contract) => {
       let earliestDate = getTodaysDate(); // keep track of earliest start date
       // create array of project strings
       let projects = [];
       _.forEach(contract.projects, (project) => {
-        projects.push(`${project.name} - ${(getProjectLengthInYears(project) / 12).toFixed(1)} years`);
+        let p = allProjects.find((p) => p.id === project.projectId);
+        projects.push(`${p.projectName} - ${(getProjectLengthInYears(project) / 12).toFixed(1)} years`);
         let endDate = format(project.endDate || getTodaysDate(), 'YYYY-MM-DD');
         earliestDate = minimum([earliestDate, endDate]);
       });
       // add current contract, attaching earliestDate for sorting
+      let c = allContracts.find((c) => c.id === contract.contractId);
       result.push({
-        contract: { name: contract.name, primes: contract.primes },
+        contract: { name: c.contractName, prime: c.primeName },
         projects: projects,
         d: format(earliestDate, 'YYYYMMDD')
       });
@@ -221,12 +227,10 @@ export function getContractPrimeProject(contracts) {
         return r.contract.name;
       }).join(', '),
       primes: _.map(result, (r) => {
-        return _.map(r.contract.primes, (p) => {
-          return p;
-        }).join(', ');
-      }).join('; '),
+        return r.contract.prime;
+      }).join(', '),
       projects: _.map(result, (r) => {
-        return r.projects;
+        return r.projects.join(', ');
       }).join(', ')
     };
   }

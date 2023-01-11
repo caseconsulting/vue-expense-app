@@ -92,7 +92,12 @@
               {{ this.model.nickname || this.model.firstName }} {{ this.model.lastName }}
             </h3>
             <v-spacer></v-spacer>
-            <convert-employee-to-csv v-if="userRoleIsAdmin()" :employee="this.model" color="white" />
+            <convert-employee-to-csv
+              v-if="userRoleIsAdmin()"
+              :contracts="contracts"
+              :employee="this.model"
+              color="white"
+            />
             <v-tooltip v-if="hasAdminPermissions() || userIsEmployee()" top>
               <template #activator="{ on }">
                 <div v-on="on">
