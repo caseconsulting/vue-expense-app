@@ -45,7 +45,8 @@ function beforeDestroy() {
  * @return array - the current contracts
  */
 function getCurrentProjects(employee) {
-  let contracts = [];
+  let contracts = this.$store.getters.contracts;
+  let currentContracts = [];
   if (employee.contracts) {
     employee.contracts.forEach((contract) => {
       let currContract = {};
@@ -53,8 +54,9 @@ function getCurrentProjects(employee) {
       if (contract.projects) {
         contract.projects.forEach((project) => {
           if (currContract.projects.length === 0) {
-            currContract.name = contract.name;
-            currContract.primes = contract.primes;
+            let con = this.$store.getters.contracts.find((c) => c.id === contract.contractId);
+            currContract.name = con.contractName;
+            currContract.prime = con.primeName;
           }
           if (!project.endDate) {
             currContract.projects.push(project);
@@ -62,12 +64,12 @@ function getCurrentProjects(employee) {
         });
       }
       if (currContract.projects.length > 0) {
-        contracts.push(currContract);
+        currentContracts.push(currContract);
       }
     });
   }
 
-  return contracts;
+  return currentContracts;
 } // getCurrentProjects
 
 /**
@@ -79,19 +81,24 @@ function fetchData() {
   this.employees.forEach((employee) => {
     if (employee.workStatus != 0) {
       let currContracts = this.getCurrentProjects(employee);
-      let currPrimes = {};
+      //let currPrimes = {};
       currContracts.forEach((contract) => {
-        _.forEach(contract.primes, (prime) => {
-          let currPrime = prime;
-          //This if statement is to consider if different current contracts have the same prime
-          if (!currPrimes[currPrime]) {
-            if (!this.primes[currPrime]) {
-              this.primes[currPrime] = 1;
-            } else {
-              this.primes[currPrime] += 1;
-            }
-          }
-        });
+        if (!this.primes[contract.prime]) {
+          this.primes[contract.prime] = 1;
+        } else {
+          this.primes[contract.prime] += 1;
+        }
+        // _.forEach(contract.prime, (prime) => {
+        //   let currPrime = prime;
+        //   //This if statement is to consider if different current contracts have the same prime
+        //   if (!currPrimes[currPrime]) {
+        //     if (!this.primes[currPrime]) {
+        //       this.primes[currPrime] = 1;
+        //     } else {
+        //       this.primes[currPrime] += 1;
+        //     }
+        //   }
+        // });
       });
     }
   });
