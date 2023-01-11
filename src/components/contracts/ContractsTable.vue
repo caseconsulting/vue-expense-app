@@ -87,7 +87,7 @@
                     text
                     :disabled="editingItemID != null"
                     v-on="on"
-                    @click="
+                    @click.stop="
                       () => {
                         editingItemID = item.id;
                       }
@@ -112,34 +112,37 @@
 
             <!-- IS EDITING ROW -->
             <div v-else>
-              <!-- Save Contract -->
-              <v-tooltip top>
-                <template v-slot:activator="{ on }">
-                  <v-btn icon text v-on="on">
-                    <v-icon class="case-gray">save</v-icon>
-                  </v-btn>
-                </template>
-                <span>Save</span>
-              </v-tooltip>
+              <div v-if="!contractLoading">
+                <!-- Save Contract -->
+                <v-tooltip top>
+                  <template v-slot:activator="{ on }">
+                    <v-btn @click.stop="updateContractPrime(item.id)" icon text v-on="on">
+                      <v-icon class="case-gray">save</v-icon>
+                    </v-btn>
+                  </template>
+                  <span>Save</span>
+                </v-tooltip>
 
-              <!-- Cancel Contract -->
-              <v-tooltip top>
-                <template v-slot:activator="{ on }">
-                  <v-btn
-                    icon
-                    text
-                    @click="
-                      () => {
-                        editingItemID = null;
-                      }
-                    "
-                    v-on="on"
-                  >
-                    <v-icon class="case-gray">cancel</v-icon>
-                  </v-btn>
-                </template>
-                <span>Cancel</span>
-              </v-tooltip>
+                <!-- Cancel Contract -->
+                <v-tooltip top>
+                  <template v-slot:activator="{ on }">
+                    <v-btn
+                      icon
+                      text
+                      @click.stop="
+                        () => {
+                          editingItemID = null;
+                        }
+                      "
+                      v-on="on"
+                    >
+                      <v-icon class="case-gray">cancel</v-icon>
+                    </v-btn>
+                  </template>
+                  <span>Cancel</span>
+                </v-tooltip>
+              </div>
+              <div v-else><v-progress-circular color="#bc3825" indeterminate /></div>
             </div>
           </template>
         </v-data-table>
@@ -180,6 +183,19 @@ function clickedRow(contractObj) {
   }
 }
 
+async function updateContractPrime(id) {
+  let contractPrimeObj = this.contracts.find((obj) => obj.id == id);
+  this.contractLoading = true;
+  console.log(await api.updateItem(api.CONTRACTS, contractPrimeObj));
+  this.contractLoading = false;
+  this.editingItemID = null;
+  console.log(contractPrimeObj);
+}
+
+// function showWarning() {
+//   // todo
+// }
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                      EXPORT                      |
@@ -196,10 +212,12 @@ export default {
   created,
   methods: {
     clickedRow,
-    updateStoreContracts
+    updateStoreContracts,
+    updateContractPrime
   },
   data() {
     return {
+      contractLoading: false,
       editingItemID: null,
       loading: false,
       expanded: [],
