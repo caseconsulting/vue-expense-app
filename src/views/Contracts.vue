@@ -1,5 +1,20 @@
 <template>
   <div>
+    <!-- Status Alert -->
+    <v-snackbar
+      v-model="status.statusType"
+      :color="status.color"
+      :multi-line="true"
+      :right="true"
+      :timeout="5000"
+      :top="true"
+      :vertical="true"
+    >
+      <v-card-title headline color="white">
+        <span class="headline">{{ status.statusMessage }}</span>
+      </v-card-title>
+      <v-btn color="white" text @click="clearStatus"> Close </v-btn>
+    </v-snackbar>
     <v-card>
       <v-card color="#bc3825">
         <v-card-title headline><h2 class="white--text">Contracts</h2> </v-card-title>
@@ -39,9 +54,23 @@ function beforeDestroy() {
 async function created() {
   window.EventBus.$on('canceled-contract-form', () => (this.toggleContractForm = false));
   window.EventBus.$on('submitted-contract-form', () => (this.toggleContractForm = false));
+  window.EventBus.$on('status-alert', (status) => {
+    this.$set(this.status, 'statusType', status.statusType);
+    this.$set(this.status, 'statusMessage', status.statusMessage);
+    this.$set(this.status, 'color', status.color);
+  });
 
   !this.$store.getters.contracts ? await this.updateStoreContracts() : null;
 } // created
+
+/**
+ * Clear the action status that is displayed in the snackbar.
+ */
+function clearStatus() {
+  this.$set(this.status, 'statusType', undefined);
+  this.$set(this.status, 'statusMessage', '');
+  this.$set(this.status, 'color', '');
+} // clearStatus
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -58,11 +87,17 @@ export default {
   created,
   data() {
     return {
-      toggleContractForm: false
+      toggleContractForm: false,
+      status: {
+        statusType: undefined,
+        statusMessage: '',
+        color: ''
+      }
     };
   },
   methods: {
-    updateStoreContracts
+    updateStoreContracts,
+    clearStatus
   }
 };
 </script>
