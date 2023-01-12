@@ -95,36 +95,79 @@
           </template>
 
           <!-- Expanded Row Slot -->
-          <template v-slot:expanded-item="{ item }"
-            ><td :colspan="contractHeaders.length" class="pa-0">
+          <template v-slot:expanded-item="contract">
+            <td :colspan="contractHeaders.length" class="pa-0">
               <v-container fluid class="grey-background">
                 <!-- START EXPANDED PROJECTS DATA TABLE-->
-                <v-data-table :headers="projectHeaders" :items="item.projects" hide-default-footer>
-                  <template v-slot:[`item.actions`]="{}">
-                    <!-- Edit Contract -->
-                    <v-tooltip top>
-                      <template v-slot:activator="{ on }">
-                        <v-btn icon text v-on="on">
-                          <v-icon class="case-gray">edit</v-icon>
-                        </v-btn>
-                      </template>
-                      <span>Edit</span>
-                    </v-tooltip>
+                <v-data-table :headers="projectHeaders" :items="contract.item.projects" hide-default-footer>
+                  <template v-slot:[`item.projectName`]="{ item }">
+                    <v-text-field
+                      v-if="editingItem && editingItem.id == item.id"
+                      v-model="editingItem.projectName"
+                    ></v-text-field>
+                    <span v-else>{{ item.projectName }}</span>
+                  </template>
+                  <template v-slot:[`item.actions`]="{ item }">
+                    <div v-if="editingItem && editingItem.id == item.id">
+                      <div v-if="!contractLoading">
+                        <!-- Save Project -->
+                        <v-tooltip top>
+                          <template v-slot:activator="{ on }">
+                            <v-btn @click.stop="updateProject(contract.item)" icon text v-on="on">
+                              <v-icon class="case-gray">save</v-icon>
+                            </v-btn>
+                          </template>
+                          <span>Save</span>
+                        </v-tooltip>
 
-                    <!-- Delete Contract -->
-                    <v-tooltip top>
-                      <template v-slot:activator="{ on }">
-                        <v-btn icon text v-on="on">
-                          <v-icon class="case-gray">delete</v-icon>
-                        </v-btn>
-                      </template>
-                      <span>Delete</span>
-                    </v-tooltip>
+                        <!-- Cancel Project Edit -->
+                        <v-tooltip top>
+                          <template v-slot:activator="{ on }">
+                            <v-btn
+                              icon
+                              text
+                              @click.stop="
+                                () => {
+                                  editingItem = null;
+                                }
+                              "
+                              v-on="on"
+                            >
+                              <v-icon class="case-gray">cancel</v-icon>
+                            </v-btn>
+                          </template>
+                          <span>Cancel</span>
+                        </v-tooltip>
+                      </div>
+                      <div v-else><v-progress-circular color="#bc3825" indeterminate /></div>
+                    </div>
+                    <div v-else>
+                      <!-- Edit Contract -->
+                      <v-tooltip top>
+                        <template v-slot:activator="{ on }">
+                          <v-btn :disabled="editingItem != null" icon text @click.stop="clickedEdit(item)" v-on="on">
+                            <v-icon class="case-gray">edit</v-icon>
+                          </v-btn>
+                        </template>
+                        <span>Edit</span>
+                      </v-tooltip>
+
+                      <!-- Delete Contract -->
+                      <v-tooltip top>
+                        <template v-slot:activator="{ on }">
+                          <v-btn :disabled="editingItem != null" icon text v-on="on">
+                            <v-icon class="case-gray">delete</v-icon>
+                          </v-btn>
+                        </template>
+                        <span>Delete</span>
+                      </v-tooltip>
+                    </div>
                   </template>
                 </v-data-table>
               </v-container>
             </td>
           </template>
+
           <!-- Actions Slot -->
           <template v-slot:[`item.actions`]="{ item }">
             <!-- IS EDITING ROW -->
@@ -133,7 +176,7 @@
                 <!-- Save Contract -->
                 <v-tooltip top>
                   <template v-slot:activator="{ on }">
-                    <v-btn @click.stop="updateContractPrime(item.id)" icon text v-on="on">
+                    <v-btn @click.stop="updateContractPrime()" icon text v-on="on">
                       <v-icon class="case-gray">save</v-icon>
                     </v-btn>
                   </template>
@@ -238,7 +281,6 @@ function clickedRow(contractObj) {
 }
 
 async function updateContractPrime() {
-  console.log(this.editingItem);
   try {
     this.contractLoading = true;
     await api.updateItem(api.CONTRACTS, this.editingItem);
@@ -251,6 +293,27 @@ async function updateContractPrime() {
   }
   this.editingItem = null;
 }
+
+async function updateProject(contract) {
+  try {
+    this.contractLoading = true;
+    let contractObj = _.cloneDeep(contract);
+    let projectIndex = contractObj.projects.findIndex((item) => item.id == this.editingItem.id);
+    contractObj.projects[projectIndex] = this.editingItem;
+    await api.updateItem(api.CONTRACTS, contractObj);
+    this.contractLoading = false;
+    this.displaySuccess();
+  } catch (err) {
+    this.contractLoading = false;
+    console.log(err);
+    this.displayError(err);
+  }
+  this.editingItem = null;
+}
+
+// async function deleteContractPrime() {}
+
+// async function deleteProject(contract) {}
 
 function clickedEdit(item) {
   this.editingItem = _.cloneDeep(item);
@@ -333,7 +396,8 @@ export default {
     clickedEdit,
     updateStoreContracts,
     updateContractPrime,
-    getDateRules
+    getDateRules,
+    updateProject
   },
   data() {
     return {
