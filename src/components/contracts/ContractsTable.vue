@@ -142,7 +142,7 @@
                       <div v-else><v-progress-circular color="#bc3825" indeterminate /></div>
                     </div>
                     <div v-else>
-                      <!-- Edit Contract -->
+                      <!-- Edit Project -->
                       <v-tooltip top>
                         <template v-slot:activator="{ on }">
                           <v-btn :disabled="editingItem != null" icon text @click.stop="clickedEdit(item)" v-on="on">
@@ -152,10 +152,21 @@
                         <span>Edit</span>
                       </v-tooltip>
 
-                      <!-- Delete Contract -->
+                      <!-- Delete Project -->
                       <v-tooltip top>
                         <template v-slot:activator="{ on }">
-                          <v-btn :disabled="editingItem != null" icon text v-on="on">
+                          <v-btn
+                            :disabled="editingItem != null"
+                            @click.stop="
+                              () => {
+                                toggleProjectDeleteModal = !toggleProjectDeleteModal;
+                                deleteItem = { contract: contract.item, project: item };
+                              }
+                            "
+                            icon
+                            text
+                            v-on="on"
+                          >
                             <v-icon class="case-gray">delete</v-icon>
                           </v-btn>
                         </template>
@@ -230,7 +241,18 @@
               <!-- Delete Contract -->
               <v-tooltip top>
                 <template v-slot:activator="{ on }">
-                  <v-btn :disabled="editingItem != null" icon text v-on="on">
+                  <v-btn
+                    :disabled="editingItem != null"
+                    @click.stop="
+                      () => {
+                        toggleContractDeleteModal = !toggleContractDeleteModal;
+                        deleteItem = item;
+                      }
+                    "
+                    icon
+                    text
+                    v-on="on"
+                  >
                     <v-icon class="case-gray">delete</v-icon>
                   </v-btn>
                 </template>
@@ -241,6 +263,8 @@
         </v-data-table>
       </v-container>
     </v-card>
+    <delete-modal :toggleDeleteModal="toggleContractDeleteModal" :type="'contract'"></delete-modal>
+    <delete-modal :toggleDeleteModal="toggleProjectDeleteModal" :type="'project'"></delete-modal>
   </div>
 </template>
 <script>
@@ -249,6 +273,7 @@ import { updateStoreContracts } from '@/utils/storeUtils';
 import { getDateRules } from '@/shared/validationUtils.js';
 import { format } from '../../shared/dateUtils';
 import api from '../../shared/api';
+import DeleteModal from '../modals/DeleteModal.vue';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -263,6 +288,21 @@ async function created() {
   this.loading = true;
 
   this.loading = false;
+
+  window.EventBus.$on('confirm-delete-contract', async () => {
+    await this.deleteContractPrime(this.deleteItem.id);
+    this.deleteItem = null;
+  });
+  window.EventBus.$on('canceled-delete-contract', () => {
+    this.deleteItem = null;
+  });
+  window.EventBus.$on('confirm-delete-project', async () => {
+    await this.deleteProject(this.deleteItem.contract, this.deleteItem.project.id);
+    this.deleteItem = null;
+  });
+  window.EventBus.$on('canceled-delete-project', () => {
+    this.deleteItem = null;
+  });
 } // created
 
 // |--------------------------------------------------|
@@ -284,11 +324,14 @@ async function updateContractPrime() {
   try {
     this.contractLoading = true;
     await api.updateItem(api.CONTRACTS, this.editingItem);
+    let contracts = _.cloneDeep(this.$store.getters.contracts);
+    let itemIndex = contracts.findIndex((item) => item.id == this.editingItem.id);
+    contracts[itemIndex] = this.editingItem;
+    this.$store.dispatch('setContracts', { contracts });
     this.contractLoading = false;
-    this.displaySuccess();
+    this.displaySuccess('Item was successfully saved!');
   } catch (err) {
     this.contractLoading = false;
-    console.log(err);
     this.displayError(err);
   }
   this.editingItem = null;
@@ -302,18 +345,38 @@ async function updateProject(contract) {
     contractObj.projects[projectIndex] = this.editingItem;
     await api.updateItem(api.CONTRACTS, contractObj);
     this.contractLoading = false;
-    this.displaySuccess();
+    this.displaySuccess('Item was successfully saved!');
   } catch (err) {
     this.contractLoading = false;
-    console.log(err);
     this.displayError(err);
   }
   this.editingItem = null;
 }
 
-// async function deleteContractPrime() {}
+async function deleteContractPrime(contractID) {
+  try {
+    await api.deleteItem(api.CONTRACTS, contractID);
+    let contracts = _.cloneDeep(this.$store.getters.contracts);
+    let itemIndex = contracts.findIndex((item) => item.id == contractID);
+    contracts.splice(itemIndex, 1);
+    this.$store.dispatch('setContracts', { contracts });
+    this.displaySuccess('Item was successfully deleted!');
+  } catch (err) {
+    this.displayError(err);
+  }
+}
 
-// async function deleteProject(contract) {}
+async function deleteProject(contract, projectID) {
+  try {
+    let contractObj = _.cloneDeep(contract);
+    let projectIndex = contractObj.projects.findIndex((item) => item.id == projectID);
+    contractObj.projects.splice(projectIndex, 1);
+    console.log(await api.updateItem(api.CONTRACTS, contractObj));
+    this.displaySuccess('Item was successfully deleted!');
+  } catch (err) {
+    this.displayError(err);
+  }
+}
 
 function clickedEdit(item) {
   this.editingItem = _.cloneDeep(item);
@@ -329,10 +392,10 @@ function displayError(err) {
   window.EventBus.$emit('status-alert', status);
 }
 
-function displaySuccess() {
+function displaySuccess(msg) {
   let status = {
     statusType: 'SUCCESS',
-    statusMessage: 'Item was successfully saved!',
+    statusMessage: msg,
     color: 'green'
   };
   window.EventBus.$emit('status-alert', status);
@@ -388,7 +451,12 @@ export default {
     'editingItem.popStartDate': watchEditingContractPoPStartDate
   },
   created,
+  components: {
+    DeleteModal
+  },
   methods: {
+    deleteProject,
+    deleteContractPrime,
     displaySuccess,
     displayError,
     format,
@@ -401,6 +469,9 @@ export default {
   },
   data() {
     return {
+      deleteItem: null,
+      toggleContractDeleteModal: false,
+      toggleProjectDeleteModal: false,
       popStartDateFormatted: null,
       popEndDateFormatted: null,
       contracts: [],
