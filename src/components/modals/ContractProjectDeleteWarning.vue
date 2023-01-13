@@ -7,7 +7,7 @@
         <v-card-text>
           <span>Delete the following relationships before deleting item.</span>
           <p v-for="r in relationships" :key="r.project.id">
-            <span>Project: {{ r.project.projectName }}</span>
+            <span>Project ID: {{ r.project.projectId }}</span>
           <ul> <li v-for="e in r.employees" :key="e.id">{{`${e.firstName} ${e.lastName}`}}</li></ul></p>
          
         </v-card-text>
@@ -28,6 +28,13 @@
   </div>
 </template>
 <script>
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     METHODS                      |
+// |                                                  |
+// |--------------------------------------------------|
+
 /**
  * Emits a message and data if it exists.
  *
@@ -37,9 +44,24 @@ function emit(msg) {
   window.EventBus.$emit(msg);
 } // emit
 
+// |--------------------------------------------------|
+// |                                                  |
+// |                     WATCHERS                     |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * Watcher for modal toggle
+ */
 function watchToggleContractProjectDeleteWarning() {
   this.activate = !this.activate;
-}
+} // watchToggleContractProjectDeleteWarning
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      EXPORT                      |
+// |                                                  |
+// |--------------------------------------------------|1
 
 export default {
   data() {
