@@ -281,10 +281,6 @@ import { updateStoreEmployees } from '../../utils/storeUtils';
  * created life cycle hook
  */
 async function created() {
-  this.loading = true;
-
-  this.loading = false;
-
   window.EventBus.$on('confirm-delete-contract', async () => {
     await this.deleteContractPrime(this.deleteItem.id);
     this.deleteItem = null;
@@ -301,12 +297,26 @@ async function created() {
   });
 } // created
 
+/**
+ * beforeDestroy lifecycle hook - close event listeners
+ */
+function beforeDestroy() {
+  window.EventBus.$off('confirm-delete-contract');
+  window.EventBus.$off('canceled-delete-contract');
+  window.EventBus.$off('confirm-delete-project');
+  window.EventBus.$off('canceled-delete-project');
+} // beforeDestroy
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                     METHODS                      |
 // |                                                  |
 // |--------------------------------------------------|
 
+/**
+ * Handler for clicked contract row in data table
+ * @param contractObj contract object that is clicked
+ */
 function clickedRow(contractObj) {
   if (_.isEmpty(this.expanded) || this.expanded[0].id != contractObj.id) {
     this.expanded = [];
@@ -314,8 +324,11 @@ function clickedRow(contractObj) {
   } else {
     this.expanded = [];
   }
-}
+} // clickedRow
 
+/**
+ * Updates contract object in inline row edit
+ */
 async function updateContractPrime() {
   try {
     this.contractLoading = true;
@@ -331,8 +344,13 @@ async function updateContractPrime() {
     this.displayError(err);
   }
   this.editingItem = null;
-}
+} // updateContractPrime
 
+/**
+ * Updates project in inline row edit (expandable row)
+ *
+ * @param contract contract object that project is under
+ */
 async function updateProject(contract) {
   try {
     this.contractLoading = true;
@@ -347,8 +365,13 @@ async function updateProject(contract) {
     this.displayError(err);
   }
   this.editingItem = null;
-}
+} // updateProject
 
+/**
+ * Deletes contract object given contract ID
+ *
+ * @param contractID contract ID to delete
+ */
 async function deleteContractPrime(contractID) {
   try {
     await api.deleteItem(api.CONTRACTS, contractID);
@@ -360,8 +383,14 @@ async function deleteContractPrime(contractID) {
   } catch (err) {
     this.displayError(err);
   }
-}
+} // deleteContractPrime
 
+/**
+ * Deletes project given project ID
+ *
+ * @param contract contract that project is under
+ * @param projectID id of project to delete
+ */
 async function deleteProject(contract, projectID) {
   try {
     let contractObj = _.cloneDeep(contract);
@@ -372,22 +401,39 @@ async function deleteProject(contract, projectID) {
   } catch (err) {
     this.displayError(err);
   }
-}
+} // deleteProject
 
+/**
+ * Click edit handler
+ *
+ * @param item item that is being edited
+ */
 function clickedEdit(item) {
   this.editingItem = _.cloneDeep(item);
-}
+} // clickedEdit
 
+/**
+ * Handler for click delete contract button
+ *
+ * @param contract contract that is being deleted
+ */
 async function clickedDeleteContractPrime(contract) {
   let relationships = await this.getEmployeeContractRelationships(contract);
   if (relationships.length != 0) {
     this.toggleWarningModal = !this.toggleWarningModal;
     this.relationships = relationships;
   } else {
+    this.deleteItem = contract;
     this.toggleContractDeleteModal = !this.toggleContractDeleteModal;
   }
-}
+} // clickedDeleteContractPrime
 
+/**
+ * Handler for click delete project
+ *
+ * @param contract contract that project is under
+ * @param project project to be deleted
+ */
 async function clickedDeleteProject(contract, project) {
   let relationships = await this.getEmployeeContractRelationships(contract, project);
   if (relationships.length != 0) {
@@ -396,8 +442,17 @@ async function clickedDeleteProject(contract, project) {
   } else {
     this.toggleProjectDeleteModal = !this.toggleProjectDeleteModal;
   }
-}
+} // clickedDeleteProject
 
+/**
+ * Gets relationships between projects and employees
+ *
+ * @param contract contract to find employees under
+ * @param project project to find employees under
+ *
+ * @return list of relationships in the following format
+ *        [{project: {...}, employees: [...]}, ...]
+ */
 async function getEmployeeContractRelationships(contract, project = null) {
   if (!this.$store.getters.employees) {
     await this.updateStoreEmployees();
@@ -432,8 +487,13 @@ async function getEmployeeContractRelationships(contract, project = null) {
     }
   });
   return relationships;
-}
+} // getEmployeeContractRelationships
 
+/**
+ * Displays error snackbar
+ *
+ * @param err error message to display
+ */
 function displayError(err) {
   let status = {
     statusType: 'ERROR',
@@ -442,8 +502,12 @@ function displayError(err) {
   };
 
   window.EventBus.$emit('status-alert', status);
-}
+} // displayError
 
+/**
+ * Displays success message
+ * @param msg success message to display
+ */
 function displaySuccess(msg) {
   let status = {
     statusType: 'SUCCESS',
@@ -451,7 +515,7 @@ function displaySuccess(msg) {
     color: 'green'
   };
   window.EventBus.$emit('status-alert', status);
-}
+} // displaySuccess
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -459,6 +523,9 @@ function displaySuccess(msg) {
 // |                                                  |
 // |--------------------------------------------------|
 
+/**
+ * Formats PoPEndDate to 'MM/DD/YYYY' upon edit
+ */
 function watchEditingContractPoPEndDate() {
   if (this.editingItem)
     this.popEndDateFormatted = this.format(this.editingItem.popEndDate, null, 'MM/DD/YYYY') || this.popEndDateFormatted;
@@ -470,8 +537,11 @@ function watchEditingContractPoPEndDate() {
   ) {
     this.editingItem.popEndDate = null;
   }
-}
+} // watchEditingContractPoPEndDate
 
+/**
+ * Formats PoPStartDate to 'MM/DD/YYYY' upon edit
+ */
 function watchEditingContractPoPStartDate() {
   if (this.editingItem)
     this.popStartDateFormatted =
@@ -484,11 +554,7 @@ function watchEditingContractPoPStartDate() {
   ) {
     this.editingItem.popStartDate = null;
   }
-}
-
-// function showWarning() {
-//   // todo
-// }
+} // watchEditingContractPoPStartDate
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -497,7 +563,7 @@ function watchEditingContractPoPStartDate() {
 // |--------------------------------------------------|
 
 export default {
-  // beforeDestroy,
+  beforeDestroy,
   watch: {
     'editingItem.popEndDate': watchEditingContractPoPEndDate,
     'editingItem.popStartDate': watchEditingContractPoPStartDate
