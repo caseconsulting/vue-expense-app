@@ -7,8 +7,8 @@
         <v-card-text>
           <span>Delete the following relationships before deleting item.</span>
           <p v-for="r in relationships" :key="r.project.id">
-            <span>{{ r.project }}</span>
-          <ul> <li v-for="e in r.employees" :key="e.id">{{e.id}}</li></ul></p>
+            <span>Project: {{ r.project.projectName }}</span>
+          <ul> <li v-for="e in r.employees" :key="e.id">{{`${e.firstName} ${e.lastName}`}}</li></ul></p>
          
         </v-card-text>
         <v-card-actions>

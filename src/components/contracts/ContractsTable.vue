@@ -380,7 +380,6 @@ function clickedEdit(item) {
 
 async function clickedDeleteContractPrime(contract) {
   let relationships = await this.getEmployeeContractRelationships(contract);
-  console.log(relationships);
   if (relationships.length != 0) {
     this.toggleWarningModal = !this.toggleWarningModal;
     this.relationships = relationships;
@@ -391,7 +390,6 @@ async function clickedDeleteContractPrime(contract) {
 
 async function clickedDeleteProject(contract, project) {
   let relationships = await this.getEmployeeContractRelationships(contract, project);
-  console.log(relationships);
   if (relationships.length != 0) {
     this.toggleWarningModal = !this.toggleWarningModal;
     this.relationships = relationships;
@@ -411,17 +409,20 @@ async function getEmployeeContractRelationships(contract, project = null) {
       let contractObj = e.contracts.find((c) => c.contractId == contract.id);
       if (contractObj) {
         if (project) {
-          let index = relationships.findIndex((r) => r.project.id == project.id);
-          if (index < 0) {
-            relationships.push({ project: project, employees: [e] });
-          } else {
-            relationships[index].employees.push(e);
+          let employeeAssignedToProject = e.contracts.some((c) => c.projects.some((p) => p.projectId == project.id));
+          if (employeeAssignedToProject) {
+            let index = relationships.findIndex((r) => r.project.id == project.id);
+            if (index < 0) {
+              relationships.push({ project: project, employees: [e] });
+            } else {
+              relationships[index].employees.push(e);
+            }
           }
         } else {
           contractObj.projects.forEach((p) => {
-            let index = relationships.findIndex((r) => r.project.id == p.id);
+            let index = relationships.findIndex((r) => r.project.projectId == p.projectId);
             if (index < 0) {
-              this.$store.getters.contracts.relationships.push({ project: p, employees: [e] });
+              relationships.push({ project: p, employees: [e] });
             } else {
               relationships[index].employees.push(e);
             }
