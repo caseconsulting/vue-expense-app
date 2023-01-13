@@ -216,7 +216,18 @@
               <!-- Add Project -->
               <v-tooltip top>
                 <template v-slot:activator="{ on }">
-                  <v-btn :disabled="editingItem != null" icon text v-on="on">
+                  <v-btn
+                    :disabled="editingItem != null"
+                    @click.stop="
+                      () => {
+                        addProjectUnderContract = item;
+                        toggleProjectForm = !toggleProjectForm;
+                      }
+                    "
+                    icon
+                    text
+                    v-on="on"
+                  >
                     <v-icon class="case-gray">mdi-file-document-plus</v-icon>
                   </v-btn>
                 </template>
@@ -259,6 +270,7 @@
       :toggleModal="toggleWarningModal"
       :relationships="relationships"
     ></contract-project-delete-warning>
+    <project-form :toggleProjectForm="toggleProjectForm" :contract="addProjectUnderContract" />
   </div>
 </template>
 <script>
@@ -270,6 +282,7 @@ import api from '../../shared/api';
 import DeleteModal from '../modals/DeleteModal.vue';
 import ContractProjectDeleteWarning from '../modals/ContractProjectDeleteWarning.vue';
 import { updateStoreEmployees } from '../../utils/storeUtils';
+import ProjectForm from './ProjectForm.vue';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -294,6 +307,9 @@ async function created() {
   });
   window.EventBus.$on('canceled-delete-project', () => {
     this.deleteItem = null;
+  });
+  window.EventBus.$on('canceled-project-form', () => {
+    this.toggleProjectForm = false;
   });
 } // created
 
@@ -396,7 +412,11 @@ async function deleteProject(contract, projectID) {
     let contractObj = _.cloneDeep(contract);
     let projectIndex = contractObj.projects.findIndex((item) => item.id == projectID);
     contractObj.projects.splice(projectIndex, 1);
-    console.log(await api.updateItem(api.CONTRACTS, contractObj));
+    await api.updateItem(api.CONTRACTS, contractObj);
+    let contracts = _.cloneDeep(this.$store.getters.contracts);
+    let contractIndex = contracts.findIndex((c) => c.id == contract.id);
+    contracts[contractIndex] = contractObj;
+    this.$store.dispatch('setContracts', { contracts: contracts });
     this.displaySuccess('Item was successfully deleted!');
   } catch (err) {
     this.displayError(err);
@@ -440,6 +460,7 @@ async function clickedDeleteProject(contract, project) {
     this.toggleWarningModal = !this.toggleWarningModal;
     this.relationships = relationships;
   } else {
+    this.deleteItem = { contract: contract, project: project };
     this.toggleProjectDeleteModal = !this.toggleProjectDeleteModal;
   }
 } // clickedDeleteProject
@@ -571,7 +592,8 @@ export default {
   created,
   components: {
     DeleteModal,
-    ContractProjectDeleteWarning
+    ContractProjectDeleteWarning,
+    ProjectForm
   },
   methods: {
     updateStoreEmployees,
@@ -592,6 +614,8 @@ export default {
   },
   data() {
     return {
+      addProjectUnderContract: null,
+      toggleProjectForm: false,
       relationships: [],
       deleteItem: null,
       toggleWarningModal: false,
