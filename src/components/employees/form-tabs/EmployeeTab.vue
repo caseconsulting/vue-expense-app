@@ -306,8 +306,33 @@
         <span
           >Most Case employees are considered 'Professionals'. Please select 'Professional' unless you know you fall
           into a different category.</span
-        ></v-tooltip
+        >
+      </v-tooltip>
+
+      <!-- Disability -->
+      <v-radio-group
+        v-model="editedEmployee.eeoHasDisability"
+        :disabled="(editedEmployee.eeoDeclineSelfIdentify && thisIsMyProfile()) || !adminCanEditEeo()"
+        row
+        class="mt-0"
       >
+        <span class="mr-4">Disability:</span>
+        <v-radio label="Yes" :value="true"></v-radio>
+        <v-radio label="No" :value="false"></v-radio>
+      </v-radio-group>
+
+      <!-- Protected Veteran -->
+      <v-radio-group
+        v-model="editedEmployee.eeoIsProtectedVeteran"
+        :disabled="(editedEmployee.eeoDeclineSelfIdentify && thisIsMyProfile()) || !adminCanEditEeo()"
+        row
+        class="mt-0"
+      >
+        <span class="mr-4">Protected Veteran:</span>
+        <v-radio label="Yes" :value="true"></v-radio>
+        <v-radio label="No" :value="false"></v-radio>
+      </v-radio-group>
+
       <!-- Decline Self-identify -->
       <v-checkbox
         class="mt-0"
@@ -366,6 +391,8 @@ async function created() {
     this.editedEmployee.eeoHispanicOrLatino = null;
     this.editedEmployee.eeoRaceOrEthnicity = null;
     this.editedEmployee.eeoJobCategory = null;
+    this.editedEmployee.eeoHasDisability = null;
+    this.editedEmployee.eeoIsProtectedVeteran = null;
     // close modal
     this.toggleDeclineSelfIdentifyModal = false;
   });

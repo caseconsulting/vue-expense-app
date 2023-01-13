@@ -57,7 +57,9 @@
           !isEmpty(this.model.eeoGender) &&
           !isEmpty(this.model.eeoHispanicOrLatino) &&
           !isEmpty(this.model.eeoRaceOrEthnicity) &&
-          !isEmpty(this.model.eeoJobCategory)
+          !isEmpty(this.model.eeoJobCategory) &&
+          !isEmpty(this.model.eeoHasDisability) &&
+          !isEmpty(this.model.eeoIsProtectedVeteran)
         "
         class="ml-2"
       >
@@ -65,13 +67,17 @@
         <p><b>Hispanic or Latino: </b>{{ this.model.eeoHispanicOrLatino.value ? 'Yes' : 'No' }}</p>
         <p><b>Race or Ethnicity: </b>{{ this.model.eeoRaceOrEthnicity.text }}</p>
         <p><b>Job Category: </b>{{ this.model.eeoJobCategory.text }}</p>
+        <p><b>Disability: </b>{{ this.model.eeoHasDisability ? 'Yes' : 'No' }}</p>
+        <p><b>Protected Veteran: </b>{{ this.model.eeoIsProtectedVeteran ? 'Yes' : 'No' }}</p>
       </div>
       <div
         v-else-if="
           !isEmpty(this.model.eeoGender) ||
           !isEmpty(this.model.eeoHispanicOrLatino) ||
           !isEmpty(this.model.eeoRaceOrEthnicity) ||
-          !isEmpty(this.model.eeoJobCategory)
+          !isEmpty(this.model.eeoJobCategory) ||
+          !isEmpty(this.model.eeoHasDisability) ||
+          !isEmpty(this.model.eeoIsProtectedVeteran)
         "
         class="ml-2"
       >

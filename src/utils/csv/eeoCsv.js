@@ -219,7 +219,9 @@ export function convertEmployees(employees) {
       !nullOrUndefined(employee.eeoGender) &&
       !nullOrUndefined(employee.eeoJobCategory) &&
       !nullOrUndefined(employee.eeoRaceOrEthnicity) &&
-      !nullOrUndefined(employee.eeoHispanicOrLatino);
+      !nullOrUndefined(employee.eeoHispanicOrLatino) &&
+      !nullOrUndefined(employee.eeoHasDisability) &&
+      !nullOrUndefined(employee.eeoIsProtectedVeteran);
     if (!declined && formCompleted) {
       // extract value of race/ethnicity
       let raceEthnicity = HISPANIC_LATINO;
