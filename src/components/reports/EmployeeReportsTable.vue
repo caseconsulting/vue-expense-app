@@ -174,7 +174,7 @@ function buildContractsColumn() {
           });
         }
         if (current) {
-          let contract = this.contracts.find((c) => c.id === currentCon.contractId);
+          let contract = this.$store.getters.contracts.find((c) => c.id === currentCon.contractId);
           contractNames += `${contract.contractName} & `;
           primeNames += `${contract.primeName} & `;
         }
@@ -449,7 +449,7 @@ function populateDropDowns(employees) {
         // loop project
         _.forEach(projects, (project) => {
           if (project.presentDate) {
-            let fullContract = this.contracts.find((c) => c.id === contract.contractId);
+            let fullContract = this.$store.getters.contracts.find((c) => c.id === contract.contractId);
             if (this.contract) {
               // limit the prime dropdown to only those that belong to the contract
               if (fullContract.contractName === this.contract) {
@@ -860,7 +860,6 @@ export default {
     searchPrimes,
     setActiveInactive
   },
-  props: ['contracts'],
   watch: {
     dataType: watchDataType,
     showInactiveEmployees: watchShowInactiveUsers

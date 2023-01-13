@@ -8,13 +8,12 @@
         >
       </router-link>
     </div>
-    <employee-reports-table v-if="!loading" :contracts="contracts"></employee-reports-table>
+    <employee-reports-table v-if="!loading"></employee-reports-table>
   </div>
 </template>
 <script>
-import api from '@/shared/api';
 import EmployeeReportsTable from '@/components/reports/EmployeeReportsTable.vue';
-import { updateStoreEmployees } from '@/utils/storeUtils';
+import { updateStoreEmployees, updateStoreContracts } from '@/utils/storeUtils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -27,16 +26,16 @@ import { updateStoreEmployees } from '@/utils/storeUtils';
  */
 async function created() {
   if (this.$store.getters.storeIsPopulated) {
-    if (!this.$store.getters.employees) {
-      await this.updateStoreEmployees();
-    }
+    await Promise.all([
+      !this.$store.getters.employees ? this.updateStoreEmployees() : '',
+      !this.$store.getters.contracts ? this.updateStoreContracts() : ''
+    ]);
+    this.loading = false;
   }
   if (this.$route.params.requestedFilter) {
     this.wasRedirected = true;
     window.scrollTo(0, 0);
   }
-  this.contracts = await api.getItems(api.CONTRACTS);
-  this.loading = false;
 } // created
 
 // |--------------------------------------------------|
@@ -76,14 +75,16 @@ export default {
     };
   },
   methods: {
+    updateStoreContracts,
     updateStoreEmployees
   },
   watch: {
     async storeIsPopulated() {
       if (this.$store.getters.storeIsPopulated) {
-        if (!this.$store.getters.employees) {
-          await this.updateStoreEmployees();
-        }
+        await Promise.all([
+          !this.$store.getters.employees ? this.updateStoreEmployees() : '',
+          !this.$store.getters.contracts ? this.updateStoreContracts() : ''
+        ]);
         this.loading = false;
       }
     }
