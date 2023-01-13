@@ -157,12 +157,7 @@
                         <template v-slot:activator="{ on }">
                           <v-btn
                             :disabled="editingItem != null"
-                            @click.stop="
-                              () => {
-                                toggleProjectDeleteModal = !toggleProjectDeleteModal;
-                                deleteItem = { contract: contract.item, project: item };
-                              }
-                            "
+                            @click.stop="clickedDeleteProject(contract.item, item)"
                             icon
                             text
                             v-on="on"
@@ -243,12 +238,7 @@
                 <template v-slot:activator="{ on }">
                   <v-btn
                     :disabled="editingItem != null"
-                    @click.stop="
-                      () => {
-                        toggleContractDeleteModal = !toggleContractDeleteModal;
-                        deleteItem = item;
-                      }
-                    "
+                    @click.stop="clickedDeleteContractPrime(item)"
                     icon
                     text
                     v-on="on"
@@ -265,6 +255,10 @@
     </v-card>
     <delete-modal :toggleDeleteModal="toggleContractDeleteModal" :type="'contract'"></delete-modal>
     <delete-modal :toggleDeleteModal="toggleProjectDeleteModal" :type="'project'"></delete-modal>
+    <contract-project-delete-warning
+      :toggleModal="toggleWarningModal"
+      :relationships="relationships"
+    ></contract-project-delete-warning>
   </div>
 </template>
 <script>
@@ -274,6 +268,8 @@ import { getDateRules } from '@/shared/validationUtils.js';
 import { format } from '../../shared/dateUtils';
 import api from '../../shared/api';
 import DeleteModal from '../modals/DeleteModal.vue';
+import ContractProjectDeleteWarning from '../modals/ContractProjectDeleteWarning.vue';
+import { updateStoreEmployees } from '../../utils/storeUtils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -382,6 +378,61 @@ function clickedEdit(item) {
   this.editingItem = _.cloneDeep(item);
 }
 
+async function clickedDeleteContractPrime(contract) {
+  let relationships = await this.getEmployeeContractRelationships(contract);
+  console.log(relationships);
+  if (relationships.length != 0) {
+    this.toggleWarningModal = !this.toggleWarningModal;
+    this.relationships = relationships;
+  } else {
+    this.toggleContractDeleteModal = !this.toggleContractDeleteModal;
+  }
+}
+
+async function clickedDeleteProject(contract, project) {
+  let relationships = await this.getEmployeeContractRelationships(contract, project);
+  console.log(relationships);
+  if (relationships.length != 0) {
+    this.toggleWarningModal = !this.toggleWarningModal;
+    this.relationships = relationships;
+  } else {
+    this.toggleProjectDeleteModal = !this.toggleProjectDeleteModal;
+  }
+}
+
+async function getEmployeeContractRelationships(contract, project = null) {
+  if (!this.$store.getters.employees) {
+    await this.updateStoreEmployees();
+  }
+  let employees = this.$store.getters.employees;
+  let relationships = [];
+  employees.forEach((e) => {
+    if (e.contracts) {
+      let contractObj = e.contracts.find((c) => c.contractId == contract.id);
+      if (contractObj) {
+        if (project) {
+          let index = relationships.findIndex((r) => r.project.id == project.id);
+          if (index < 0) {
+            relationships.push({ project: project, employees: [e] });
+          } else {
+            relationships[index].employees.push(e);
+          }
+        } else {
+          contractObj.projects.forEach((p) => {
+            let index = relationships.findIndex((r) => r.project.id == p.id);
+            if (index < 0) {
+              this.$store.getters.contracts.relationships.push({ project: p, employees: [e] });
+            } else {
+              relationships[index].employees.push(e);
+            }
+          });
+        }
+      }
+    }
+  });
+  return relationships;
+}
+
 function displayError(err) {
   let status = {
     statusType: 'ERROR',
@@ -452,9 +503,14 @@ export default {
   },
   created,
   components: {
-    DeleteModal
+    DeleteModal,
+    ContractProjectDeleteWarning
   },
   methods: {
+    updateStoreEmployees,
+    getEmployeeContractRelationships,
+    clickedDeleteContractPrime,
+    clickedDeleteProject,
     deleteProject,
     deleteContractPrime,
     displaySuccess,
@@ -469,7 +525,9 @@ export default {
   },
   data() {
     return {
+      relationships: [],
       deleteItem: null,
+      toggleWarningModal: false,
       toggleContractDeleteModal: false,
       toggleProjectDeleteModal: false,
       popStartDateFormatted: null,
