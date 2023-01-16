@@ -45,7 +45,6 @@ function beforeDestroy() {
  * @return array - the current contracts
  */
 function getCurrentProjects(employee) {
-  let contracts = this.$store.getters.contracts;
   let currentContracts = [];
   if (employee.contracts) {
     employee.contracts.forEach((contract) => {

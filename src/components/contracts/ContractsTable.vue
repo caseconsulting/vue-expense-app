@@ -374,6 +374,10 @@ async function updateProject(contract) {
     let projectIndex = contractObj.projects.findIndex((item) => item.id == this.editingItem.id);
     contractObj.projects[projectIndex] = this.editingItem;
     await api.updateItem(api.CONTRACTS, contractObj);
+    let contracts = _.cloneDeep(this.$store.getters.contracts);
+    let contractIndex = contracts.findIndex((c) => c.id == contractObj.id);
+    contracts[contractIndex] = contractObj;
+    this.$store.dispatch('setContracts', { contracts });
     this.contractLoading = false;
     this.displaySuccess('Item was successfully saved!');
   } catch (err) {

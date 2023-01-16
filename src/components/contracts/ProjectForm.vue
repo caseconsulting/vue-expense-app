@@ -6,7 +6,12 @@
         <v-card-text>
           <v-container>
             <v-row>
-              <v-text-field v-model="projectName" label="Project Name" required></v-text-field>
+              <v-text-field
+                v-model="projectName"
+                label="Project Name"
+                required
+                :rules="[(v) => !!v || 'Field is required']"
+              ></v-text-field>
             </v-row>
           </v-container>
           <small>*indicates required field</small>
@@ -26,6 +31,9 @@ import api from '../../shared/api';
 import _ from 'lodash';
 import { v4 as uuid } from 'uuid';
 
+/**
+ * Resets the form and closed the form dialog.
+ */
 function cancel() {
   this.dialog = false;
   emit('canceled-project-form');
@@ -33,6 +41,9 @@ function cancel() {
   this.$refs.form.resetValidation();
 } // cancel
 
+/**
+ * Creates a validated project.
+ */
 async function submit() {
   this.valid = this.$refs.form.validate();
   if (this.valid) {
@@ -44,11 +55,13 @@ async function submit() {
     this.loading = false;
     emit('submitted-project-form');
   }
-}
+} // submit
 
+/**
+ * Creates project upon submission.
+ */
 async function createProject() {
   let project = { id: uuid(), projectName: this.projectName };
-  console.log(this.contract.id);
   let contract = _.cloneDeep(this.contract);
   contract.projects = [project, ...contract.projects];
   await api.updateItem(api.CONTRACTS, contract);
@@ -56,7 +69,13 @@ async function createProject() {
   let contractIndex = contracts.findIndex((c) => c.id == contract.id);
   contracts[contractIndex] = contract;
   this.$store.dispatch('setContracts', { contracts: contracts });
-}
+} // createProject
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     METHODS                      |
+// |                                                  |
+// |--------------------------------------------------|
 
 /**
  * Emits a message and data if it exists.
@@ -68,9 +87,24 @@ function emit(msg, data) {
   window.EventBus.$emit(msg, data);
 } // emit
 
+// |--------------------------------------------------|
+// |                                                  |
+// |                    WATCHERS                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * Watches the dialog toggle from the ContractsTable.
+ */
 function watchToggleProjectForm() {
   this.dialog = this.toggleProjectForm;
-}
+} // watchToggleContractForm
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      EXPORT                      |
+// |                                                  |
+// |--------------------------------------------------|
 
 export default {
   data() {
