@@ -1,13 +1,15 @@
 <template>
   <div>
-    <v-dialog v-model="activate" persistent max-width="350">
+    <v-dialog v-model="activate" persistent max-width="450">
       <v-card>
         <!-- Errors across tabs -->
         <v-card-title class="headline">Cannot delete item.</v-card-title>
         <v-card-text>
-          <span>Delete the following relationships before deleting item.</span>
+          <span>Delete the following relationships before deleting item:</span>
+          <br/>
+          <br/>
           <p v-for="r in relationships" :key="r.project.id">
-            <span>Project ID: {{ r.project.projectId }}</span>
+            <span><b>Contract:</b> {{ r.contract }}, <b>Prime:</b> {{ r.prime }}, <b>Project:</b> {{ r.project.projectName }}</span>
           <ul> <li v-for="e in r.employees" :key="e.id">{{`${e.firstName} ${e.lastName}`}}</li></ul></p>
          
         </v-card-text>

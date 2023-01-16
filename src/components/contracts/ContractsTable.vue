@@ -476,7 +476,7 @@ async function clickedDeleteProject(contract, project) {
  * @param project project to find employees under
  *
  * @return list of relationships in the following format
- *        [{project: {...}, employees: [...]}, ...]
+ *        [{contract: "", prime: "", project: {...}, employees: [...]}, ...]
  */
 async function getEmployeeContractRelationships(contract, project = null) {
   if (!this.$store.getters.employees) {
@@ -493,16 +493,26 @@ async function getEmployeeContractRelationships(contract, project = null) {
           if (employeeAssignedToProject) {
             let index = relationships.findIndex((r) => r.project.id == project.id);
             if (index < 0) {
-              relationships.push({ project: project, employees: [e] });
+              relationships.push({
+                contract: contract.contractName,
+                prime: contract.primeName,
+                project: project,
+                employees: [e]
+              });
             } else {
               relationships[index].employees.push(e);
             }
           }
         } else {
           contractObj.projects.forEach((p) => {
-            let index = relationships.findIndex((r) => r.project.projectId == p.projectId);
+            let index = relationships.findIndex((r) => r.project.id == p.projectId);
             if (index < 0) {
-              relationships.push({ project: p, employees: [e] });
+              relationships.push({
+                contract: contract.contractName,
+                prime: contract.primeName,
+                project: this.getProject(contract.id, p.projectId),
+                employees: [e]
+              });
             } else {
               relationships[index].employees.push(e);
             }
@@ -513,6 +523,17 @@ async function getEmployeeContractRelationships(contract, project = null) {
   });
   return relationships;
 } // getEmployeeContractRelationships
+
+/**
+ * Gets project object from vuex store based on contract id and project id
+ *
+ * @param contractId contract id of contract that project is under
+ * @param projectId project id
+ */
+function getProject(contractId, projectId) {
+  let contracts = this.$store.getters.contracts;
+  return contracts.find((c) => c.id == contractId).projects.find((p) => p.id == projectId);
+} // getProject
 
 /**
  * Displays error snackbar
@@ -600,6 +621,7 @@ export default {
     ProjectForm
   },
   methods: {
+    getProject,
     updateStoreEmployees,
     getEmployeeContractRelationships,
     clickedDeleteContractPrime,
