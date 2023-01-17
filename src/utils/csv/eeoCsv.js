@@ -19,6 +19,7 @@ const FEMALE = 'Female';
 
 const H_HEADERS = 4; // horizontal/top headers count
 const V_HEADERS = 1; // vertical/left headers count
+const COLUMNS_AFTER_RACE_ETHNICITY = 2;
 
 /**
  * Downloads array of employees EEO information as csv file.
@@ -151,7 +152,9 @@ export function convertEmployees(employees) {
   // evidentally the fastest way to construct a 2D array
   // access with eeoData[{jobCategoryPosition}][{racesEthnicitiesPosition * 2} + {gendersPosition}]
   let eeoData = new Array(jobCategories.length + H_HEADERS + 1); // + 1 for the total column
-  let temp = new Array(racesEthnicities.length * genders.length + V_HEADERS + HL_OFFSET + 1); // + 1 for the total column
+  let temp = new Array(
+    racesEthnicities.length * genders.length + V_HEADERS + HL_OFFSET + COLUMNS_AFTER_RACE_ETHNICITY + 1
+  ); // + 1 for the total column
   for (let i = 0; i < temp.length; i++) temp[i] = '';
   for (let i = 0; i < eeoData.length; i++) eeoData[i] = temp.slice(0);
 
@@ -184,8 +187,17 @@ export function convertEmployees(employees) {
   // race/ethnicity topical headers
   eeoData[0][3] = 'Race/Ethnicity';
   eeoData[1][3] = `Not ${HISPANIC_LATINO}`;
+
   // total
   eeoData[H_HEADERS - 1][V_HEADERS + racesEthnicities.length * genders.length + HL_OFFSET] = 'Overall Total';
+
+  // COLUMNS AFTER RACE/ETHNICITY
+
+  // disability
+  eeoData[0][genders.length * racesEthnicities.length + V_HEADERS + HL_OFFSET + 1] = 'Disability';
+
+  // protected veteran
+  eeoData[0][genders.length * racesEthnicities.length + V_HEADERS + HL_OFFSET + 2] = 'Protected Veteran';
 
   // add left vertical labels (job category)
   for (let i = 0; i < jobCategories.length; i++) {
@@ -199,7 +211,7 @@ export function convertEmployees(employees) {
     H_HEADERS,
     V_HEADERS,
     H_HEADERS + jobCategories.length + 1,
-    V_HEADERS + HL_OFFSET + racesEthnicities.length * genders.length + 1,
+    V_HEADERS + HL_OFFSET + racesEthnicities.length * genders.length + COLUMNS_AFTER_RACE_ETHNICITY + 1, // plus 1 for the totals
     0
   );
 
@@ -229,9 +241,17 @@ export function convertEmployees(employees) {
       // tally up
       let [y, x] = position(raceEthnicity, employee.eeoGender.text, employee.eeoJobCategory.text);
       eeoData[y][x] += 1; // specific box in middle of csv
-      eeoData[y][eeoData[0].length - 1] += 1; // totals on right of csv
+      eeoData[y][eeoData[0].length - COLUMNS_AFTER_RACE_ETHNICITY - 1] += 1; // totals on right of csv
       eeoData[eeoData.length - 1][x] += 1; // totals at bottom of csv
-      eeoData[eeoData.length - 1][eeoData[0].length - 1] += 1; // total total in bottom right of csv
+      eeoData[eeoData.length - 1][eeoData[0].length - COLUMNS_AFTER_RACE_ETHNICITY - 1] += 1; // total total in bottom right of csv
+      if (employee.eeoHasDisability) {
+        eeoData[y][eeoData[0].length - 2] += 1;
+        eeoData[eeoData.length - 1][eeoData[0].length - COLUMNS_AFTER_RACE_ETHNICITY] += 1; // disability total in bottom right of csv
+      }
+      if (employee.eeoIsProtectedVeteran) {
+        eeoData[y][eeoData[0].length - 1] += 1;
+        eeoData[eeoData.length - 1][eeoData[0].length - COLUMNS_AFTER_RACE_ETHNICITY + 1] += 1; // protected vet total in bottom right of csv
+      }
     } else {
       // eeoDeclineSelfIdentify or form not filled
       let toPush = new Array(declinedInformation.length);
