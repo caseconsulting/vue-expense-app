@@ -2,6 +2,16 @@
   <div>
     <v-card class="mt-3">
       <v-container fluid>
+        <v-col cols="6" xl="3" lg="3" md="6" class="my-0 pb-0">
+          <v-text-field
+            id="contractsSearch"
+            v-model="search"
+            :items="$store.getters.contracts.map((c) => c.contractName)"
+            label="Search"
+            auto-select-first
+            clearable
+          ></v-text-field>
+        </v-col>
         <!-- START CONTRACTS DATA TABLE -->
         <v-form ref="form" lazy-validation>
           <v-data-table
@@ -728,6 +738,7 @@ export default {
       editingItem: null,
       loading: false,
       expanded: [],
+      search: null,
       projectHeaders: [
         {
           text: 'Project',
