@@ -10,7 +10,7 @@
                 v-model="projectName"
                 label="Project Name"
                 required
-                :rules="[(v) => !!v || 'Field is required']"
+                :rules="[(v) => !!v || 'Field is required', duplicateProjects()]"
               ></v-text-field>
             </v-row>
           </v-container>
@@ -112,7 +112,14 @@ export default {
       valid: true,
       projectName: null,
       dialog: false,
-      loading: false
+      loading: false,
+      duplicateProjects: () => {
+        if (this.contract) {
+          let contract = _.find(this.$store.getters.contracts, (c) => c.id == this.contract.id);
+          let found = _.some(contract.projects, (p) => p.projectName === this.projectName);
+          return !found || 'Duplicate project names';
+        }
+      }
     };
   },
   methods: {
