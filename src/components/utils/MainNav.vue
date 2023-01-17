@@ -225,13 +225,6 @@ export default {
           active: false
         },
         {
-          title: 'Contracts',
-          icon: 'mdi-file-document-edit',
-          route: 'contracts',
-          permission: ['admin'],
-          active: false
-        },
-        {
           title: 'Statistics Dashboard',
           alias: ['stats'],
           icon: 'mdi-chart-bar',
@@ -245,6 +238,13 @@ export default {
           icon: 'mdi-clipboard-check',
           route: 'audits',
           permission: ['admin', 'manager']
+        },
+        {
+          title: 'Contracts',
+          icon: 'mdi-file-document-edit',
+          route: 'contracts',
+          permission: ['admin', 'manager'],
+          active: false
         },
         {
           title: 'Reports',
