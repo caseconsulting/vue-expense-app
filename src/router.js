@@ -57,7 +57,7 @@ const router = new Router({
       path: '/contracts',
       name: 'contracts',
       component: Contracts,
-      beforeEnter: multiguard([requireAuth, isAdmin])
+      beforeEnter: multiguard([requireAuth, isAdminOrManager])
     },
     {
       path: '/audits',
