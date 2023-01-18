@@ -521,7 +521,15 @@ function cleanUpData() {
       }
       _.forEach(contract.projects, (project) => {
         if (project.projectName) {
-          project.projectId = this.contractProjects.find((p) => p.projectName === project.projectName).id;
+          let c;
+          if (contract.contractName && contract.primeName) {
+            c = this.contracts.find(
+              (c) => c.contractName === contract.contractName && c.primeName === contract.primeName
+            );
+          } else {
+            c = this.contracts.find((c) => c.id === contract.contractId);
+          }
+          project.projectId = c.projects.find((p) => p.projectName === project.projectName).id;
           delete project.projectName;
         }
       });
