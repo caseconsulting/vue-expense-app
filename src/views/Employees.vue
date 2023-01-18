@@ -233,7 +233,7 @@
       </v-container>
     </v-card>
     <v-dialog @click:outside="clearCreateEmployee" v-model="createEmployee"
-      ><employee-form :key="childKey" :model="this.model"></employee-form
+      ><employee-form :contracts="contracts" :key="childKey" :model="this.model"></employee-form
     ></v-dialog>
   </div>
 </template>
