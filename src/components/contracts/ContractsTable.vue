@@ -3,265 +3,291 @@
     <v-card class="mt-3">
       <v-container fluid>
         <!-- START CONTRACTS DATA TABLE -->
-        <v-data-table
-          @click:row="clickedRow"
-          :loading="loading"
-          :expanded.sync="expanded"
-          :headers="contractHeaders"
-          :items="$store.getters.contracts"
-        >
-          <!-- Contract Name Slot -->
-          <template v-slot:[`item.contractName`]="{ item }">
-            <v-text-field
-              v-if="editingItem && editingItem.id == item.id"
-              v-model="editingItem.contractName"
-            ></v-text-field>
-            <span v-else>{{ item.contractName }}</span>
-          </template>
-          <!-- Prime Name Slot -->
-          <template v-slot:[`item.primeName`]="{ item }">
-            <v-text-field
-              v-if="editingItem && editingItem.id == item.id"
-              v-model="editingItem.primeName"
-            ></v-text-field>
-            <span v-else>{{ item.primeName }}</span>
-          </template>
-          <!-- Cost Type Slot -->
-          <template v-slot:[`item.costType`]="{ item }">
-            <v-text-field v-if="editingItem && editingItem.id == item.id" v-model="editingItem.costType"></v-text-field>
-            <span v-else>{{ item.costType }}</span>
-          </template>
-          <!-- PoP Start Date Slot -->
-          <template v-slot:[`item.popStartDate`]="{ item }">
-            <v-menu
-              v-if="editingItem && editingItem.id == item.id"
-              ref="popStartDateMenu"
-              :close-on-content-click="false"
-              v-model="popStartDateMenu"
-              :nudge-right="40"
-              transition="scale-transition"
-              offset-y
-              max-width="290px"
-              min-width="290px"
-            >
-              <template v-slot:activator="{ on }">
-                <v-text-field
-                  v-model="popStartDateFormatted"
-                  :rules="getDateRules()"
-                  hint="MM/DD/YYYY format"
-                  persistent-hint
-                  prepend-icon="event"
-                  @blur="editingItem.popStartDate = format(popStartDateFormatted, 'MM/DD/YYYY', 'YYYY-MM-DD')"
+        <v-form ref="form" lazy-validation>
+          <v-data-table
+            @click:row="clickedRow"
+            :loading="loading"
+            :expanded.sync="expanded"
+            :headers="contractHeaders"
+            :items="$store.getters.contracts"
+          >
+            <!-- Contract Name Slot -->
+            <template v-slot:[`item.contractName`]="{ item }">
+              <v-text-field
+                name="contractName"
+                v-if="editingItem && editingItem.id == item.id"
+                v-model="editingItem.contractName"
+                :rules="[(v) => !!v || 'Field is required', duplicateContractPrimeCombo()]"
+                required
+              ></v-text-field>
+              <!-- </v-form> -->
+              <span v-else>{{ item.contractName }}</span>
+            </template>
+            <!-- Prime Name Slot -->
+            <template v-slot:[`item.primeName`]="{ item }">
+              <v-text-field
+                name="primeName"
+                v-if="editingItem && editingItem.id == item.id"
+                v-model="editingItem.primeName"
+                :rules="[(v) => !!v || 'Field is required', duplicateContractPrimeCombo()]"
+                required
+              ></v-text-field>
+              <!-- </v-form> -->
+              <span v-else>{{ item.primeName }}</span>
+            </template>
+            <!-- Cost Type Slot -->
+            <template v-slot:[`item.costType`]="{ item }">
+              <v-text-field
+                name="costType"
+                v-if="editingItem && editingItem.id == item.id"
+                v-model="editingItem.costType"
+                :rules="[(v) => !!v || 'Field is required']"
+                required
+              ></v-text-field>
+              <!-- </v-form> -->
+              <span v-else>{{ item.costType }}</span>
+            </template>
+            <!-- PoP Start Date Slot -->
+            <template v-slot:[`item.popStartDate`]="{ item }">
+              <v-menu
+                name="popStartDate"
+                v-if="editingItem && editingItem.id == item.id"
+                ref="popStartDateMenu"
+                :close-on-content-click="false"
+                v-model="popStartDateMenu"
+                :nudge-right="40"
+                transition="scale-transition"
+                offset-y
+                max-width="290px"
+                min-width="290px"
+              >
+                <template v-slot:activator="{ on }">
+                  <v-text-field
+                    :value="format(editingItem.popStartDate, null, 'MM/DD/YYYY')"
+                    :rules="[...getDateOptionalRules(), startDateRules()]"
+                    hint="MM/DD/YYYY format"
+                    persistent-hint
+                    prepend-icon="event"
+                    @blur="editingItem.popStartDate = format($event.target.value, 'MM/DD/YYYY', 'YYYY-MM-DD')"
+                    @input="popStartDateMenu = false"
+                    v-on="on"
+                  ></v-text-field>
+                </template>
+                <v-date-picker
+                  v-model="editingItem.popStartDate"
+                  no-title
                   @input="popStartDateMenu = false"
-                  v-on="on"
-                ></v-text-field>
-              </template>
-              <v-date-picker
-                v-model="editingItem.popStartDate"
-                no-title
-                @input="popStartDateMenu = false"
-              ></v-date-picker>
-            </v-menu>
-            <span v-else>{{ format(item.popStartDate, 'YYYY-MM-DD', 'MM/DD/YYYY') }}</span>
-          </template>
-          <!-- PoP End Date Slot -->
-          <template v-slot:[`item.popEndDate`]="{ item }">
-            <v-menu
-              v-if="editingItem && editingItem.id == item.id"
-              ref="popEndDateMenu"
-              :close-on-content-click="false"
-              v-model="popEndDateMenu"
-              :nudge-right="40"
-              transition="scale-transition"
-              offset-y
-              max-width="290px"
-              min-width="290px"
-            >
-              <template v-slot:activator="{ on }">
-                <v-text-field
-                  v-model="popEndDateFormatted"
-                  :rules="getDateRules()"
-                  hint="MM/DD/YYYY format"
-                  persistent-hint
-                  prepend-icon="event"
-                  @blur="editingItem.popEndDate = format(popEndDateFormatted, 'MM/DD/YYYY', 'YYYY-MM-DD')"
+                ></v-date-picker>
+              </v-menu>
+              <!-- </v-form> -->
+              <span v-else>{{ format(item.popStartDate, 'YYYY-MM-DD', 'MM/DD/YYYY') }}</span>
+            </template>
+            <!-- PoP End Date Slot -->
+            <template v-slot:[`item.popEndDate`]="{ item }">
+              <v-menu
+                name="popEndDate"
+                v-if="editingItem && editingItem.id == item.id"
+                ref="popEndDateMenu"
+                :close-on-content-click="false"
+                v-model="popEndDateMenu"
+                :nudge-right="40"
+                transition="scale-transition"
+                offset-y
+                max-width="290px"
+                min-width="290px"
+              >
+                <template v-slot:activator="{ on }">
+                  <v-text-field
+                    :value="format(editingItem.popEndDate, null, 'MM/DD/YYYY')"
+                    :rules="[(v) => !!v || 'Field is required: MM/DD/YYYY format', ...getDateRules(), endDateRules()]"
+                    hint="MM/DD/YYYY format"
+                    persistent-hint
+                    prepend-icon="event"
+                    @blur="editingItem.popEndDate = format($event.target.value, 'MM/DD/YYYY', 'YYYY-MM-DD')"
+                    @input="popEndDateMenu = false"
+                    v-on="on"
+                    required
+                  ></v-text-field>
+                </template>
+                <v-date-picker
+                  v-model="editingItem.popEndDate"
+                  no-title
                   @input="popEndDateMenu = false"
-                  v-on="on"
-                ></v-text-field>
-              </template>
-              <v-date-picker v-model="editingItem.popEndDate" no-title @input="popEndDateMenu = false"></v-date-picker>
-            </v-menu>
-            <span v-else>{{ format(item.popEndDate, 'YYYY-MM-DD', 'MM/DD/YYYY') }}</span>
-          </template>
+                ></v-date-picker>
+              </v-menu>
+              <span v-else>{{ format(item.popEndDate, 'YYYY-MM-DD', 'MM/DD/YYYY') }}</span>
+            </template>
 
-          <!-- Expanded Row Slot -->
-          <template v-slot:expanded-item="contract">
-            <td :colspan="contractHeaders.length" class="pa-0">
-              <v-container fluid class="grey-background">
-                <!-- START EXPANDED PROJECTS DATA TABLE-->
-                <v-data-table :headers="projectHeaders" :items="contract.item.projects" hide-default-footer>
-                  <template v-slot:[`item.projectName`]="{ item }">
-                    <v-text-field
-                      v-if="editingItem && editingItem.id == item.id"
-                      v-model="editingItem.projectName"
-                    ></v-text-field>
-                    <span v-else>{{ item.projectName }}</span>
-                  </template>
-                  <template v-slot:[`item.actions`]="{ item }">
-                    <div v-if="editingItem && editingItem.id == item.id">
-                      <div v-if="!contractLoading">
-                        <!-- Save Project -->
+            <!-- Expanded Row Slot -->
+            <template v-slot:expanded-item="contract">
+              <td :colspan="contractHeaders.length" class="pa-0">
+                <v-container fluid class="grey-background">
+                  <!-- START EXPANDED PROJECTS DATA TABLE-->
+                  <v-data-table :headers="projectHeaders" :items="contract.item.projects" hide-default-footer>
+                    <template v-slot:[`item.projectName`]="{ item }">
+                      <v-text-field
+                        :rules="[(v) => !!v || 'Field is required']"
+                        v-if="editingItem && editingItem.id == item.id"
+                        v-model="editingItem.projectName"
+                      ></v-text-field>
+                      <span v-else>{{ item.projectName }}</span>
+                    </template>
+                    <template v-slot:[`item.actions`]="{ item }">
+                      <div v-if="editingItem && editingItem.id == item.id">
+                        <div v-if="!contractLoading">
+                          <!-- Save Project -->
+                          <v-tooltip top>
+                            <template v-slot:activator="{ on }">
+                              <v-btn @click.stop="updateProject(contract.item)" icon text v-on="on">
+                                <v-icon class="case-gray">save</v-icon>
+                              </v-btn>
+                            </template>
+                            <span>Save</span>
+                          </v-tooltip>
+
+                          <!-- Cancel Project Edit -->
+                          <v-tooltip top>
+                            <template v-slot:activator="{ on }">
+                              <v-btn
+                                icon
+                                text
+                                @click.stop="
+                                  () => {
+                                    editingItem = null;
+                                  }
+                                "
+                                v-on="on"
+                              >
+                                <v-icon class="case-gray">cancel</v-icon>
+                              </v-btn>
+                            </template>
+                            <span>Cancel</span>
+                          </v-tooltip>
+                        </div>
+                        <div v-else><v-progress-circular color="#bc3825" indeterminate /></div>
+                      </div>
+                      <div v-else>
+                        <!-- Edit Project -->
                         <v-tooltip top>
                           <template v-slot:activator="{ on }">
-                            <v-btn @click.stop="updateProject(contract.item)" icon text v-on="on">
-                              <v-icon class="case-gray">save</v-icon>
+                            <v-btn :disabled="editingItem != null" icon text @click.stop="clickedEdit(item)" v-on="on">
+                              <v-icon class="case-gray">edit</v-icon>
                             </v-btn>
                           </template>
-                          <span>Save</span>
+                          <span>Edit</span>
                         </v-tooltip>
 
-                        <!-- Cancel Project Edit -->
+                        <!-- Delete Project -->
                         <v-tooltip top>
                           <template v-slot:activator="{ on }">
                             <v-btn
+                              :disabled="editingItem != null"
+                              @click.stop="clickedDeleteProject(contract.item, item)"
                               icon
                               text
-                              @click.stop="
-                                () => {
-                                  editingItem = null;
-                                }
-                              "
                               v-on="on"
                             >
-                              <v-icon class="case-gray">cancel</v-icon>
+                              <v-icon class="case-gray">delete</v-icon>
                             </v-btn>
                           </template>
-                          <span>Cancel</span>
+                          <span>Delete</span>
                         </v-tooltip>
                       </div>
-                      <div v-else><v-progress-circular color="#bc3825" indeterminate /></div>
-                    </div>
-                    <div v-else>
-                      <!-- Edit Project -->
-                      <v-tooltip top>
-                        <template v-slot:activator="{ on }">
-                          <v-btn :disabled="editingItem != null" icon text @click.stop="clickedEdit(item)" v-on="on">
-                            <v-icon class="case-gray">edit</v-icon>
-                          </v-btn>
-                        </template>
-                        <span>Edit</span>
-                      </v-tooltip>
+                    </template>
+                  </v-data-table>
+                </v-container>
+              </td>
+            </template>
 
-                      <!-- Delete Project -->
-                      <v-tooltip top>
-                        <template v-slot:activator="{ on }">
-                          <v-btn
-                            :disabled="editingItem != null"
-                            @click.stop="clickedDeleteProject(contract.item, item)"
-                            icon
-                            text
-                            v-on="on"
-                          >
-                            <v-icon class="case-gray">delete</v-icon>
-                          </v-btn>
-                        </template>
-                        <span>Delete</span>
-                      </v-tooltip>
-                    </div>
-                  </template>
-                </v-data-table>
-              </v-container>
-            </td>
-          </template>
+            <!-- Actions Slot -->
+            <template v-slot:[`item.actions`]="{ item }">
+              <!-- IS EDITING ROW -->
+              <div v-if="editingItem && editingItem.id == item.id">
+                <div v-if="!contractLoading">
+                  <!-- Save Contract -->
+                  <v-tooltip top>
+                    <template v-slot:activator="{ on }">
+                      <v-btn @click.stop="updateContractPrime()" icon text v-on="on">
+                        <v-icon class="case-gray">save</v-icon>
+                      </v-btn>
+                    </template>
+                    <span>Save</span>
+                  </v-tooltip>
 
-          <!-- Actions Slot -->
-          <template v-slot:[`item.actions`]="{ item }">
-            <!-- IS EDITING ROW -->
-            <div v-if="editingItem && editingItem.id == item.id">
-              <div v-if="!contractLoading">
-                <!-- Save Contract -->
-                <v-tooltip top>
-                  <template v-slot:activator="{ on }">
-                    <v-btn @click.stop="updateContractPrime()" icon text v-on="on">
-                      <v-icon class="case-gray">save</v-icon>
-                    </v-btn>
-                  </template>
-                  <span>Save</span>
-                </v-tooltip>
+                  <!-- Cancel Contract -->
+                  <v-tooltip top>
+                    <template v-slot:activator="{ on }">
+                      <v-btn
+                        icon
+                        text
+                        @click.stop="
+                          () => {
+                            editingItem = null;
+                          }
+                        "
+                        v-on="on"
+                      >
+                        <v-icon class="case-gray">cancel</v-icon>
+                      </v-btn>
+                    </template>
+                    <span>Cancel</span>
+                  </v-tooltip>
+                </div>
+                <div v-else><v-progress-circular color="#bc3825" indeterminate /></div>
+              </div>
 
-                <!-- Cancel Contract -->
+              <!-- IS NOT EDITING ROW -->
+              <div v-else>
+                <!-- Add Project -->
                 <v-tooltip top>
                   <template v-slot:activator="{ on }">
                     <v-btn
-                      icon
-                      text
+                      :disabled="editingItem != null"
                       @click.stop="
                         () => {
-                          editingItem = null;
+                          addProjectUnderContract = item;
+                          toggleProjectForm = !toggleProjectForm;
                         }
                       "
+                      icon
+                      text
                       v-on="on"
                     >
-                      <v-icon class="case-gray">cancel</v-icon>
+                      <v-icon class="case-gray">mdi-file-document-plus</v-icon>
                     </v-btn>
                   </template>
-                  <span>Cancel</span>
+                  <span>Add Project</span>
+                </v-tooltip>
+
+                <!-- Edit Contract -->
+                <v-tooltip top>
+                  <template v-slot:activator="{ on }">
+                    <v-btn icon text :disabled="editingItem != null" v-on="on" @click.stop="clickedEdit(item)">
+                      <v-icon class="case-gray">edit</v-icon>
+                    </v-btn>
+                  </template>
+                  <span>Edit</span>
+                </v-tooltip>
+
+                <!-- Delete Contract -->
+                <v-tooltip top>
+                  <template v-slot:activator="{ on }">
+                    <v-btn
+                      :disabled="editingItem != null"
+                      @click.stop="clickedDeleteContractPrime(item)"
+                      icon
+                      text
+                      v-on="on"
+                    >
+                      <v-icon class="case-gray">delete</v-icon>
+                    </v-btn>
+                  </template>
+                  <span>Delete</span>
                 </v-tooltip>
               </div>
-              <div v-else><v-progress-circular color="#bc3825" indeterminate /></div>
-            </div>
-
-            <!-- IS NOT EDITING ROW -->
-            <div v-else>
-              <!-- Add Project -->
-              <v-tooltip top>
-                <template v-slot:activator="{ on }">
-                  <v-btn
-                    :disabled="editingItem != null"
-                    @click.stop="
-                      () => {
-                        addProjectUnderContract = item;
-                        toggleProjectForm = !toggleProjectForm;
-                      }
-                    "
-                    icon
-                    text
-                    v-on="on"
-                  >
-                    <v-icon class="case-gray">mdi-file-document-plus</v-icon>
-                  </v-btn>
-                </template>
-                <span>Add Project</span>
-              </v-tooltip>
-
-              <!-- Edit Contract -->
-              <v-tooltip top>
-                <template v-slot:activator="{ on }">
-                  <v-btn icon text :disabled="editingItem != null" v-on="on" @click.stop="clickedEdit(item)">
-                    <v-icon class="case-gray">edit</v-icon>
-                  </v-btn>
-                </template>
-                <span>Edit</span>
-              </v-tooltip>
-
-              <!-- Delete Contract -->
-              <v-tooltip top>
-                <template v-slot:activator="{ on }">
-                  <v-btn
-                    :disabled="editingItem != null"
-                    @click.stop="clickedDeleteContractPrime(item)"
-                    icon
-                    text
-                    v-on="on"
-                  >
-                    <v-icon class="case-gray">delete</v-icon>
-                  </v-btn>
-                </template>
-                <span>Delete</span>
-              </v-tooltip>
-            </div>
-          </template>
-        </v-data-table>
+            </template>
+          </v-data-table>
+        </v-form>
       </v-container>
     </v-card>
     <delete-modal :toggleDeleteModal="toggleContractDeleteModal" :type="'contract'"></delete-modal>
@@ -276,13 +302,14 @@
 <script>
 import _ from 'lodash';
 import { updateStoreContracts } from '@/utils/storeUtils';
-import { getDateRules } from '@/shared/validationUtils.js';
-import { format } from '../../shared/dateUtils';
+import { format, isAfter } from '../../shared/dateUtils';
 import api from '../../shared/api';
 import DeleteModal from '../modals/DeleteModal.vue';
 import ContractProjectDeleteWarning from '../modals/ContractProjectDeleteWarning.vue';
 import { updateStoreEmployees } from '../../utils/storeUtils';
 import ProjectForm from './ProjectForm.vue';
+import { getDateOptionalRules, getDateRules } from '@/shared/validationUtils';
+import { isBefore } from '@/shared/dateUtils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -346,9 +373,14 @@ function clickedRow(contractObj) {
  * Updates contract object in inline row edit
  */
 async function updateContractPrime() {
+  let valid = this.$refs.form.validate();
+  if (!valid) return;
   try {
     this.contractLoading = true;
-    await api.updateItem(api.CONTRACTS, this.editingItem);
+    let response = await api.updateItem(api.CONTRACTS, this.editingItem);
+    if (response.name === 'AxiosError') {
+      throw new Error(response.response.data.message);
+    }
     let contracts = _.cloneDeep(this.$store.getters.contracts);
     let itemIndex = contracts.findIndex((item) => item.id == this.editingItem.id);
     contracts[itemIndex] = this.editingItem;
@@ -368,12 +400,17 @@ async function updateContractPrime() {
  * @param contract contract object that project is under
  */
 async function updateProject(contract) {
+  let valid = this.$refs.form.validate();
+  if (!valid) return;
   try {
     this.contractLoading = true;
     let contractObj = _.cloneDeep(contract);
     let projectIndex = contractObj.projects.findIndex((item) => item.id == this.editingItem.id);
     contractObj.projects[projectIndex] = this.editingItem;
-    await api.updateItem(api.CONTRACTS, contractObj);
+    let response = await api.updateItem(api.CONTRACTS, contractObj);
+    if (response.name === 'AxiosError') {
+      throw new Error(response.response.data.message);
+    }
     let contracts = _.cloneDeep(this.$store.getters.contracts);
     let contractIndex = contracts.findIndex((c) => c.id == contractObj.id);
     contracts[contractIndex] = contractObj;
@@ -434,6 +471,8 @@ async function deleteProject(contract, projectID) {
  */
 function clickedEdit(item) {
   this.editingItem = _.cloneDeep(item);
+
+  console.log(this.editingItem);
 } // clickedEdit
 
 /**
@@ -565,55 +604,12 @@ function displaySuccess(msg) {
 
 // |--------------------------------------------------|
 // |                                                  |
-// |                     WATCHERS                     |
-// |                                                  |
-// |--------------------------------------------------|
-
-/**
- * Formats PoPEndDate to 'MM/DD/YYYY' upon edit
- */
-function watchEditingContractPoPEndDate() {
-  if (this.editingItem)
-    this.popEndDateFormatted = this.format(this.editingItem.popEndDate, null, 'MM/DD/YYYY') || this.popEndDateFormatted;
-
-  if (
-    this.editingItem !== null &&
-    this.editingItem.popEndDate !== null &&
-    !this.format(this.editingItem.popEndDate, null, 'MM/DD/YYYY')
-  ) {
-    this.editingItem.popEndDate = null;
-  }
-} // watchEditingContractPoPEndDate
-
-/**
- * Formats PoPStartDate to 'MM/DD/YYYY' upon edit
- */
-function watchEditingContractPoPStartDate() {
-  if (this.editingItem)
-    this.popStartDateFormatted =
-      this.format(this.editingItem.popStartDate, null, 'MM/DD/YYYY') || this.popStartDateFormatted;
-
-  if (
-    this.editingItem !== null &&
-    this.editingItem.popStartDate !== null &&
-    !this.format(this.editingItem.popStartDate, null, 'MM/DD/YYYY')
-  ) {
-    this.editingItem.popStartDate = null;
-  }
-} // watchEditingContractPoPStartDate
-
-// |--------------------------------------------------|
-// |                                                  |
 // |                      EXPORT                      |
 // |                                                  |
 // |--------------------------------------------------|
 
 export default {
   beforeDestroy,
-  watch: {
-    'editingItem.popEndDate': watchEditingContractPoPEndDate,
-    'editingItem.popStartDate': watchEditingContractPoPStartDate
-  },
   created,
   components: {
     DeleteModal,
@@ -636,10 +632,31 @@ export default {
     updateStoreContracts,
     updateContractPrime,
     getDateRules,
+    getDateOptionalRules,
     updateProject
   },
   data() {
     return {
+      duplicateContractPrimeCombo: () => {
+        let found = _.some(this.$store.getters.contracts, (c) => {
+          if (c.id == this.editingItem.id) return false;
+          return c.contractName === this.editingItem.contractName && c.primeName === this.editingItem.primeName;
+        });
+        return !found || 'Duplicate contract and prime combination';
+      },
+      startDateRules: () => {
+        return this.editingItem.popStartDate && this.editingItem.popEndDate
+          ? isBefore(this.editingItem.popStartDate, this.editingItem.popEndDate) ||
+              'Start date must be before the end date'
+          : true;
+      },
+      endDateRules: () => {
+        return this.editingItem.popStartDate && this.editingItem.popEndDate
+          ? isAfter(this.editingItem.popEndDate, this.editingItem.popStartDate) ||
+              'Start date must be before the end date'
+          : true;
+      },
+      contractValid: true,
       addProjectUnderContract: null,
       toggleProjectForm: false,
       relationships: [],
