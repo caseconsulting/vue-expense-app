@@ -67,7 +67,12 @@
         <v-tab href="#clearance" v-if="hasAdminPermissions() || userIsEmployee()">Clearance</v-tab>
         <v-tab href="#languages">Foreign Languages</v-tab>
         <v-tab-item id="employee" class="ma-6">
-          <employee-tab :admin="hasAdminPermissions()" :employee="userIsEmployee()" :model="model"></employee-tab>
+          <employee-tab
+            :admin="hasAdminPermissions()"
+            :contracts="contracts"
+            :employee="userIsEmployee()"
+            :model="model"
+          ></employee-tab>
         </v-tab-item>
         <v-tab-item id="personal" class="ma-6">
           <personal-tab :admin="hasAdminPermissions()" :employee="userIsEmployee()" :model="model"></personal-tab>
@@ -91,7 +96,7 @@
           <customer-org-tab :model="model"></customer-org-tab>
         </v-tab-item>
         <v-tab-item id="contracts" class="ma-6">
-          <contracts-tab :model="model"></contracts-tab>
+          <contracts-tab :contracts="contracts" :model="model"></contracts-tab>
         </v-tab-item>
         <v-tab-item id="clearance" v-if="hasAdminPermissions() || userIsEmployee()" class="ma-6">
           <clearance-tab :model="model"></clearance-tab>
@@ -107,19 +112,17 @@
 <script>
 import { getRole } from '@/utils/auth';
 import _ from 'lodash';
-import AwardsTab from '@/components/employees/infoTabs/AwardsTab';
-import CertificationsTab from '@/components/employees/infoTabs/CertificationsTab';
-import ClearanceTab from '@/components/employees/infoTabs/ClearanceTab';
-import ContractsTab from '@/components/employees/infoTabs/ContractsTab';
-import CustomerOrgTab from '@/components/employees/infoTabs/CustomerOrgTab';
-import EducationTab from '@/components/employees/infoTabs/EducationTab';
-import EmployeeTab from '@/components/employees/infoTabs/EmployeeTab';
-import JobExperienceTab from '@/components/employees/infoTabs/JobExperienceTab';
-import LanguagesTab from '@/components/employees/infoTabs/LanguagesTab';
-import PersonalTab from '@/components/employees/infoTabs/PersonalTab';
-import TechnologiesTab from '@/components/employees/infoTabs/TechnologiesTab';
-const moment = require('moment-timezone');
-moment.tz.setDefault('America/New_York');
+import AwardsTab from '@/components/employees/info-tabs/AwardsTab';
+import CertificationsTab from '@/components/employees/info-tabs/CertificationsTab';
+import ClearanceTab from '@/components/employees/info-tabs/ClearanceTab';
+import ContractsTab from '@/components/employees/info-tabs/ContractsTab';
+import CustomerOrgTab from '@/components/employees/info-tabs/CustomerOrgTab';
+import EducationTab from '@/components/employees/info-tabs/EducationTab';
+import EmployeeTab from '@/components/employees/info-tabs/EmployeeTab';
+import JobExperienceTab from '@/components/employees/info-tabs/JobExperienceTab';
+import LanguagesTab from '@/components/employees/info-tabs/LanguagesTab';
+import PersonalTab from '@/components/employees/info-tabs/PersonalTab';
+import TechnologiesTab from '@/components/employees/info-tabs/TechnologiesTab';
 
 /**
  * Check if the user has admin permissions. Returns true if the user is an admin or a manager,
@@ -141,7 +144,7 @@ function userIsEmployee() {
 } // userIsEmployee
 
 /**
- * This is used to select the correct tab on mobile devices
+ * This is used to select the correct tab on mobile devices.
  */
 function selectDropDown(name) {
   this.infoTab = name;
@@ -169,7 +172,7 @@ async function created() {
 // |--------------------------------------------------|
 
 /**
- * computed boolean to decide whether or not to use dropdown
+ * computed boolean to decide whether or not to use dropdown.
  *
  * @return boolean - returns true for small screens
  */
@@ -183,7 +186,7 @@ function useDropDown() {
 } // useDropDown
 
 /**
- * computed value for selected info tab
+ * computed value for selected info tab.
  */
 function parsedInfoTab() {
   let parseTab = !this.infoTab ? 'Select Info' : this.infoTab;
@@ -204,7 +207,7 @@ function parsedInfoTab() {
 // |--------------------------------------------------|
 
 /**
- * watcher for infoTab - track and emit tab when switching
+ * watcher for infoTab - track and emit tab when switching.
  *
  * @param val - tab being tracked
  */
@@ -251,7 +254,7 @@ export default {
     userIsEmployee,
     selectDropDown
   },
-  props: ['model', 'currentTab'],
+  props: ['model', 'contracts', 'currentTab'],
   computed: {
     useDropDown,
     parsedInfoTab

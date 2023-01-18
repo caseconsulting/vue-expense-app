@@ -95,7 +95,7 @@ function created() {
  */
 function canView(qRole) {
   return qRole == this.role || this.role == 'admin' || qRole == 'user';
-} // created
+} // canView
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -123,7 +123,7 @@ export default {
           },
           {
             title: 'What hours fall under Completed, Today, and Future?',
-            body: "Completed hours are any hours logged in QuickBooks Time from the first day of the month through the end of the day yesterday. Today's hours are any hours logged in QuickBooks Time at any point today. Future hours are any hours logged in QuickBooks Time between the beginning of the day tomorrow and the last day of the month."
+            body: "Completed hours are any hours logged in QuickBooks Time from the first day of the month through the end of the day today. Today's hours are any hours logged in QuickBooks Time at any point today. Future hours are any hours logged in QuickBooks Time between the beginning of the day tomorrow and the last day of the month."
           },
           {
             title: 'Why does my Avg Hours/Day or Days Remaining seem wrong?',

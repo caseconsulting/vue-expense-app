@@ -8,12 +8,35 @@
         >
       </router-link>
     </div>
-    <employee-contract-table v-if="!loading"></employee-contract-table>
+    <employee-reports-table v-if="!loading"></employee-reports-table>
   </div>
 </template>
 <script>
-import EmployeeContractTable from '@/components/EmployeeContractTable.vue';
-import { updateStoreEmployees } from '@/utils/storeUtils';
+import EmployeeReportsTable from '@/components/reports/EmployeeReportsTable.vue';
+import { updateStoreEmployees, updateStoreContracts } from '@/utils/storeUtils';
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                 LIFECYCLE HOOKS                  |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * Created lifecycle hook.
+ */
+async function created() {
+  if (this.$store.getters.storeIsPopulated) {
+    await Promise.all([
+      !this.$store.getters.employees ? this.updateStoreEmployees() : '',
+      !this.$store.getters.contracts ? this.updateStoreContracts() : ''
+    ]);
+    this.loading = false;
+  }
+  if (this.$route.params.requestedFilter) {
+    this.wasRedirected = true;
+    window.scrollTo(0, 0);
+  }
+} // created
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -37,39 +60,31 @@ function storeIsPopulated() {
 // |--------------------------------------------------|
 
 export default {
+  created,
   components: {
-    EmployeeContractTable
+    EmployeeReportsTable
   },
   computed: {
     storeIsPopulated
   },
-  async created() {
-    if (this.$store.getters.storeIsPopulated) {
-      if (!this.$store.getters.employees) {
-        await this.updateStoreEmployees();
-      }
-      this.loading = false;
-    }
-    if (this.$route.params.requestedFilter) {
-      this.wasRedirected = true;
-      window.scrollTo(0, 0);
-    }
-  },
   data() {
     return {
+      contracts: null,
       loading: true,
       wasRedirected: false
     };
   },
   methods: {
+    updateStoreContracts,
     updateStoreEmployees
   },
   watch: {
     async storeIsPopulated() {
       if (this.$store.getters.storeIsPopulated) {
-        if (!this.$store.getters.employees) {
-          await this.updateStoreEmployees();
-        }
+        await Promise.all([
+          !this.$store.getters.employees ? this.updateStoreEmployees() : '',
+          !this.$store.getters.contracts ? this.updateStoreContracts() : ''
+        ]);
         this.loading = false;
       }
     }

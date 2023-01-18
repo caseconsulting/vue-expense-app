@@ -87,9 +87,17 @@
       >
         <v-card>
           <v-card-title class="header_style" v-if="!editing">
-            <h3 id="employeeName">{{ this.model.firstName }} {{ this.model.lastName }}</h3>
+            <h3 id="employeeName" v-if="userIsEmployee()">My Profile</h3>
+            <h3 id="employeeName" v-else>
+              {{ this.model.nickname || this.model.firstName }} {{ this.model.lastName }}
+            </h3>
             <v-spacer></v-spacer>
-            <convert-employee-to-csv v-if="userIsAdmin()" :employee="this.model" color="white" />
+            <convert-employee-to-csv
+              v-if="userRoleIsAdmin()"
+              :contracts="contracts"
+              :employee="this.model"
+              color="white"
+            />
             <v-tooltip v-if="hasAdminPermissions() || userIsEmployee()" top>
               <template #activator="{ on }">
                 <div v-on="on">
@@ -116,13 +124,23 @@
               <span>Edit Profile</span>
             </v-tooltip>
           </v-card-title>
-          <employee-info :model="this.model" :currentTab="this.currentTab" v-if="!editing"></employee-info>
+          <employee-info
+            :model="this.model"
+            :contracts="this.contracts"
+            :currentTab="this.currentTab"
+            v-if="!editing"
+          ></employee-info>
         </v-card>
         <!-- Edit Info (Form) -->
-        <employee-form :employee="this.model" :currentTab="this.currentTab" v-if="editing"></employee-form>
+        <employee-form
+          :employee="this.model"
+          :contracts="this.contracts"
+          :currentTab="this.currentTab"
+          v-if="editing"
+        ></employee-form>
         <div class="mt-4">
           <budget-chart
-            v-if="(userIsAdmin() || userIsEmployee()) && hasAccessToBudgets"
+            v-if="(userRoleIsAdmin() || userIsEmployee()) && hasAccessToBudgets"
             :employee="this.model"
             :accessibleBudgets="accessibleBudgets"
             :expenses="expenses"
@@ -147,21 +165,31 @@
 
 <script>
 import api from '@/shared/api.js';
-import AvailableBudgets from '@/components/AvailableBudgets.vue';
+import AvailableBudgets from '@/components/shared/AvailableBudgets.vue';
 import EmployeeForm from '@/components/employees/EmployeeForm.vue';
 import EmployeeInfo from '@/components/employees/EmployeeInfo.vue';
-import QuickBooksTimeData from '@/components/QuickBooksTimeData.vue';
-import { getRole } from '@/utils/auth';
-import { getCurrentBudgetYear, isEmpty, isMobile, storeIsPopulated } from '@/utils/utils.js';
-import { updateStoreBudgets, updateStoreEmployees, updateStoreExpenseTypes, updateStoreUser } from '@/utils/storeUtils';
+import QuickBooksTimeData from '@/components/shared/quickbooks/QuickBooksTimeData.vue';
+import {
+  getCurrentBudgetYear,
+  isEmpty,
+  isMobile,
+  storeIsPopulated,
+  userRoleIsAdmin,
+  userRoleIsManager
+} from '@/utils/utils.js';
+import {
+  updateStoreBudgets,
+  updateStoreContracts,
+  updateStoreEmployees,
+  updateStoreExpenseTypes,
+  updateStoreUser
+} from '@/utils/storeUtils';
 import _ from 'lodash';
-import ConvertEmployeeToCsv from '../components/ConvertEmployeeToCsv.vue';
-import AnniversaryCard from '@/components/AnniversaryCard.vue';
-import BudgetChart from '@/components/BudgetChart.vue';
+import ConvertEmployeeToCsv from '@/components/employees/csv/ConvertEmployeeToCsv.vue';
+import AnniversaryCard from '@/components/shared/AnniversaryCard.vue';
+import BudgetChart from '@/components/charts/custom-charts/BudgetChart.vue';
 import ResumeParser from '@/components/modals/ResumeParser';
 import DeleteModal from '@/components/modals/DeleteModal';
-
-const IsoFormat = 'YYYY-MM-DD';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -185,7 +213,7 @@ async function resumeReceived(newEmployeeForm, changes) {
 } // resumeReceived
 
 /**
- * clears the status message of the uploadStatus
+ * Clears the status message of the uploadStatus
  */
 function clearStatus() {
   this.$set(this.uploadStatus, 'statusType', undefined);
@@ -194,7 +222,7 @@ function clearStatus() {
 } // clearStatus
 
 /**
- * downloads the resume of the employee
+ * Downloads the resume of the employee
  */
 async function downloadResume() {
   let signedURL = await api.getResume(this.$route.params.id);
@@ -210,20 +238,22 @@ async function getProfileData() {
   this.loading = true;
   await Promise.all([
     !this.$store.getters.employees ? this.updateStoreEmployees() : '',
-    !this.$store.getters.user ? this.updateStoreUser() : ''
+    !this.$store.getters.user ? this.updateStoreUser() : '',
+    !this.$store.getters.contracts ? this.updateStoreContracts() : ''
   ]);
   if (this.$store.getters.user.employeeNumber == this.$route.params.id) {
+    // user looking at their own profile
     this.model = this.$store.getters.user;
-    this.role = this.getRole();
   } else {
+    // user looking at another employees profile
     let employees = this.$store.getters.employees;
     this.model = _.find(employees, (employee) => {
       return employee.employeeNumber == this.$route.params.id;
     });
   }
   this.user = this.$store.getters.user;
-  this.role = this.getRole();
-  this.displayQuickBooksTimeAndBalances = this.userIsAdmin() || this.userIsEmployee();
+  this.contracts = this.$store.getters.contracts;
+  this.displayQuickBooksTimeAndBalances = this.userRoleIsAdmin() || this.userIsEmployee();
   this.basicEmployeeDataLoading = false;
   if (this.model) {
     [this.hasResume, this.expenses] = await Promise.all([
@@ -236,7 +266,6 @@ async function getProfileData() {
     this.expenseTypes = this.$store.getters.expenseTypes;
     this.fiscalDateView = this.getCurrentBudgetYear(this.model.hireDate);
     this.hasAccessToBudgets = this.accessibleBudgets.length !== 0; // enable budget chart
-    this.loading = false;
   }
   this.loading = false;
 } // getProfileData
@@ -258,21 +287,12 @@ function minimizeWindow() {
 } // minimizeWindow
 
 /**
- * Checks to see if the user is an admin. Returns true if the user's role is an admin, otherwise returns false.
- *
- * @return boolean - whether the user is an admin
- */
-function userIsAdmin() {
-  return this.role === 'admin';
-} // userIsAdmin
-
-/**
  * checks to see if the user has admin permissions
  *
  * @return boolean - whether the user is an admin or manager
  */
 function hasAdminPermissions() {
-  return this.role === 'admin' || this.role === 'manager';
+  return this.userRoleIsAdmin() || this.userRoleIsManager();
 } // hasAdminPermissions
 
 /**
@@ -285,7 +305,7 @@ function userIsEmployee() {
 } // userIsEmployee
 
 /**
- * displays the message
+ * Displays the message
  *
  * @param type - the type of message
  * @param msg - the message to display
@@ -298,7 +318,7 @@ function displayMessage(type, msg, color) {
 } // displayMessage
 
 /**
- * deletes the resume
+ * Deletes the resume
  */
 async function deleteResume() {
   this.deleteLoading = true;
@@ -310,7 +330,7 @@ async function deleteResume() {
     this.displayMessage('ERROR', 'Failure to delete resume', 'red');
   }
   this.deleteLoading = false;
-} //deleteResume
+} // deleteResume
 
 /**
  * Checks if the user has access to any budgets
@@ -383,9 +403,9 @@ function mounted() {
     this.currentTab = tab;
   });
 
-  window.EventBus.$on('selected-budget-year', (data) => {
-    if (data.format(IsoFormat) != this.fiscalDateView) {
-      this.fiscalDateView = data.format(IsoFormat);
+  window.EventBus.$on('selected-budget-year', (date) => {
+    if (date != this.fiscalDateView) {
+      this.fiscalDateView = date;
     }
   });
 } // mounted
@@ -404,6 +424,19 @@ function beforeDestroy() {
   window.EventBus.$off('tabChange');
   window.EventBus.$off('selected-budget-year');
 } // beforeDestroy
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                    WATCHERS                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * Load the profile data if the page is refreshed.
+ */
+async function watchStoreIsPopulated() {
+  if (this.storeIsPopulated) await this.getProfileData();
+} // watchStoreisPopulated
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -428,6 +461,7 @@ export default {
   data() {
     return {
       currentTab: null,
+      contracts: null,
       deleteLoading: false,
       displayQuickBooksTimeAndBalances: false,
       editing: false,
@@ -475,7 +509,6 @@ export default {
         twitter: '',
         workStatus: 100
       }, // selected employee
-      role: null, // user role
       search: '', // query text for datatable search field
       status: {
         statusType: undefined,
@@ -498,7 +531,6 @@ export default {
     deleteResume,
     displayMessage,
     downloadResume,
-    getRole,
     hasAdminPermissions,
     getProfileData,
     getCurrentBudgetYear,
@@ -506,10 +538,12 @@ export default {
     isMobile,
     resumeReceived,
     updateStoreBudgets,
+    updateStoreContracts,
     updateStoreEmployees,
     updateStoreExpenseTypes,
     updateStoreUser,
-    userIsAdmin,
+    userRoleIsAdmin,
+    userRoleIsManager,
     userIsEmployee,
     checkForBudgetAccess
   },
@@ -519,9 +553,7 @@ export default {
   },
   mounted,
   watch: {
-    storeIsPopulated: async function () {
-      if (this.storeIsPopulated) await this.getProfileData();
-    }
+    storeIsPopulated: watchStoreIsPopulated
   }
 };
 </script>

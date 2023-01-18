@@ -7,7 +7,7 @@ import ExpenseTypes from '@/views/ExpenseTypes.vue';
 import Employees from '@/views/Employees.vue';
 import Employee from '@/views/Employee.vue';
 import StatsDashboard from '@/views/StatsDashboard.vue';
-import Audit from '@/views/Audit.vue';
+import Audits from '@/views/Audits.vue';
 import Expenses from '@/views/MyExpenses.vue';
 import Help from '@/views/Help.vue';
 import Reports from '@/views/Reports.vue';
@@ -16,6 +16,7 @@ import EmployeeHome from '@/views/MyBudgets.vue';
 import Home from '@/views/Home.vue';
 import TrainingAnalytics from '@/views/TrainingAnalytics';
 import PageNotFound from '@/views/PageNotFound';
+import Contracts from '@/views/Contracts.vue';
 import { requireAuth, isAdmin, isAdminOrManager } from '@/utils/auth';
 import multiguard from 'vue-router-multiguard';
 
@@ -53,9 +54,15 @@ const router = new Router({
       beforeEnter: requireAuth
     },
     {
+      path: '/contracts',
+      name: 'contracts',
+      component: Contracts,
+      beforeEnter: multiguard([requireAuth, isAdminOrManager])
+    },
+    {
       path: '/audits',
       name: 'audits',
-      component: Audit,
+      component: Audits,
       beforeEnter: multiguard([requireAuth, isAdminOrManager])
     },
     {

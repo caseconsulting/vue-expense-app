@@ -1,6 +1,5 @@
 import { isEmpty } from '@/utils/utils';
-const moment = require('moment-timezone');
-moment.tz.setDefault('America/New_York');
+import { getTodaysDate, isBefore, isValid } from '@/shared/dateUtils';
 
 /**
  * Gets the optional date rules in MM/DD/YYYY format.
@@ -10,8 +9,7 @@ export function getDateOptionalRules() {
   return [
     (v) => {
       return !isEmpty(v)
-        ? (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v) && moment(v, 'MM/DD/YYYY').isValid()) ||
-            'Date must be valid. Format: MM/DD/YYYY'
+        ? (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v) && isValid(v, 'MM/DD/YYYY')) || 'Date must be valid. Format: MM/DD/YYYY'
         : true;
     }
   ]; // rules for an optional date
@@ -25,7 +23,7 @@ export function getDateMonthYearOptionalRules() {
   return [
     (v) => {
       return !isEmpty(v)
-        ? (/[\d]{2}\/[\d]{4}/.test(v) && moment(v, 'MM/YYYY').isValid()) || 'Date must be valid. Format: MM/DD/YYYY'
+        ? (/[\d]{2}\/[\d]{4}/.test(v) && isValid(v, 'MM/YYYY')) || 'Date must be valid. Format: MM/YYYY'
         : true;
     }
   ]; // rules for an optional date
@@ -38,7 +36,7 @@ export function getDateMonthYearOptionalRules() {
 export function getDateRules() {
   return [
     (v) =>
-      (!isEmpty(v) && /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v) && moment(v, 'MM/DD/YYYY').isValid()) ||
+      (!isEmpty(v) && /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v) && isValid(v, 'MM/DD/YYYY')) ||
       'Date must be valid. Format: MM/DD/YYYY'
   ]; // rules for a required MM/DD/YYYY date
 } // getDateRules
@@ -50,9 +48,7 @@ export function getDateRules() {
 export function getDateMonthYearRules() {
   // rules for a required MM/YYYY date
   return [
-    (v) =>
-      (!isEmpty(v) && /[\d]{2}\/[\d]{4}/.test(v) && moment(v, 'MM/YYYY').isValid()) ||
-      'Date must be valid. Format: MM/YYYY'
+    (v) => (!isEmpty(v) && /[\d]{2}\/[\d]{4}/.test(v) && isValid(v, 'MM/YYYY')) || 'Date must be valid. Format: MM/YYYY'
   ];
 } // getDateMonthYearRules
 
@@ -61,7 +57,7 @@ export function getDateMonthYearRules() {
  * @return Array - The array of rule functions
  */
 export function getNonFutureDateRules() {
-  return [(v) => moment(v, 'MM/DD/YYYY').isBefore(moment()) || 'Date must be before today'];
+  return [(v) => isBefore(v, getTodaysDate('MM/DD/YYYY'), null, 'MM/DD/YYYY') || 'Date must be before today'];
 } // getNonFutureDateRules
 
 /**

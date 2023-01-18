@@ -22,6 +22,7 @@ export default new Vuex.Store({
     return {
       basecampAvatars: null,
       basecampCampfires: null,
+      contracts: null,
       employees: null,
       employeeNumber: null,
       expenseTypes: null,
@@ -42,6 +43,9 @@ export default new Vuex.Store({
     },
     setBasecampCampfires(state, payload) {
       state.basecampCampfires = payload.basecampCampfires;
+    },
+    setContracts(state, payload) {
+      state.contracts = payload.contracts;
     },
     setEmployees(state, payload) {
       state.employees = payload.employees;
@@ -80,6 +84,9 @@ export default new Vuex.Store({
     setBasecampCampfires(context, payload) {
       context.commit('setBasecampCampfires', payload);
     },
+    setContracts(context, payload) {
+      context.commit('setContracts', payload);
+    },
     setEmployees(context, payload) {
       context.commit('setEmployees', payload);
     },
@@ -114,6 +121,9 @@ export default new Vuex.Store({
     },
     basecampCampfires(state) {
       return state.basecampCampfires;
+    },
+    contracts(state) {
+      return state.contracts;
     },
     employees(state) {
       return state.employees;

@@ -15,14 +15,16 @@
       </v-navigation-drawer>
       <v-app-bar class="nav-color" dark fixed app clipped-left>
         <v-app-bar-nav-icon v-show="isLoggedIn() && isMobile" @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
-        <v-avatar size="40" color="grey lighten-4" class="mr-2">
-          <img src="@/assets/img/case-logo-circle.png" class="logo-bar" />
-        </v-avatar>
-        <v-toolbar-title v-show="!isMobile">
-          <h1 class="d-inline">Case Portal</h1>
-        </v-toolbar-title>
-        <!-- In Mobile View decrease title size-->
-        <h1 v-show="isMobile" class="font-25">Case Portal</h1>
+        <div class="d-flex align-center siteId" @click="goToHome">
+          <v-avatar size="40" color="grey lighten-4" class="mr-2">
+            <img src="@/assets/img/case-logo-circle.png" class="logo-bar" />
+          </v-avatar>
+          <v-toolbar-title v-show="!isMobile">
+            <h1>Case Portal</h1>
+          </v-toolbar-title>
+          <!-- In Mobile View decrease title size-->
+          <h1 v-show="isMobile" class="font-25">Case Portal</h1>
+        </div>
         <v-spacer></v-spacer>
         <!-- Display social media icons and links dropdown menu -->
         <v-item-group class="hidden-sm-and-down" v-show="isLoggedIn() && !isMobile">
@@ -112,7 +114,7 @@
           <router-view></router-view>
         </v-container>
       </v-main>
-      <v-footer padless>
+      <v-footer padless v-if="isLoggedIn()">
         <v-col class="text-right text-caption" cols="12">
           <v-tooltip top>
             <template v-slot:activator="{ on }">
@@ -121,7 +123,7 @@
                 id="P"
                 class="black--text"
                 target="_blank"
-                href="https://3.basecamp.com/3097063/buckets/4708396/documents/5215706428"
+                href="https://3.basecamp.com/3097063/buckets/4708396/documents/5738899345"
                 ><strong>Version</strong> {{ version }}</a
               >
             </template>
@@ -151,13 +153,11 @@ import {
   updateStoreExpenseTypes
 } from '@/utils/storeUtils';
 import floorPlan from '@/assets/img/MakeOfficesfloorplan.jpg';
-import moment from 'moment-timezone';
-import MainNav from '@/components/MainNav.vue';
-import NotificationBanners from './components/modals/NotificationBanners.vue';
+import MainNav from '@/components/utils/MainNav.vue';
+import NotificationBanners from '@/components/utils/NotificationBanners.vue';
 import SwitchRoleModal from '@/components/modals/SwitchRoleModal.vue';
 import TimeOutModal from '@/components/modals/TimeOutModal.vue';
 import TimeOutWarningModal from '@/components/modals/TimeOutWarningModal.vue';
-moment.tz.setDefault('America/New_York');
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -262,6 +262,16 @@ async function populateStore() {
   // Otherwise, on reload, pages would try to access the store before it was populated.
   this.$store.dispatch('setStoreIsPopulated', { populated: true });
 } // populateStore
+
+/**
+ * Scrolls up to the home page
+ */
+function goToHome() {
+  if (this.isLoggedIn()) {
+    this.$router.push({ path: '/' });
+    this.$vuetify.goTo(0);
+  }
+} // goToHome
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -415,6 +425,7 @@ export default {
     handleProfile,
     isLoggedIn,
     populateStore,
+    goToHome,
     updateStoreUser,
     updateStoreEmployees,
     updateStoreAvatars,
@@ -471,5 +482,11 @@ export default {
 
 #P {
   text-decoration: none;
+}
+</style>
+
+<style>
+.siteId {
+  cursor: pointer;
 }
 </style>

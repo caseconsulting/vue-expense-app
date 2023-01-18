@@ -19,7 +19,7 @@ const NEW_LINE = '\n';
  */
 export function combine(csvA, csvB, spaceBetween = 0) {
   return `${csvA}\n${'""\n'.repeat(spaceBetween)}${csvB}`;
-}
+} // combine
 
 /**
  * Downloads a given CSV string as a .csv file
@@ -44,7 +44,7 @@ export function download(csv, filename = null) {
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
-}
+} // download
 
 /**
  * Escapes invalid characters in CSV.
@@ -64,7 +64,7 @@ export function escape(item, quotify = false) {
     if (quotify) to_return = `"${to_return}"`;
   }
   return to_return;
-}
+} // escape
 
 /**
  * Non-destructively removes undesired headers (keys)
@@ -85,7 +85,7 @@ export function filterHeaders(objects, desired_headers) {
     new_objects.push(new_object);
   });
   return new_objects;
-}
+} // filterHeaders
 
 /**
  * Generates a valid CSV "file" string from an object. Object values may
@@ -133,7 +133,7 @@ export function generate(object_array, delimiter = ', ') {
   });
 
   return final_csv;
-}
+} // generate
 
 /**
  * Generates a valid CSV "file" from a 2D array object. All values
@@ -151,7 +151,7 @@ export function generateFrom2dArray(arrays) {
     linesArray.push(line.join(','));
   }
   return linesArray.join('\n');
-}
+} // generateFrom2dArray
 
 /**
  * Non-destructively sorts an array of objects by a given key. Wrapper
@@ -163,4 +163,4 @@ export function generateFrom2dArray(arrays) {
 export function sort(objects, key) {
   if (!Array.isArray(key)) key = [key];
   return _.sortBy(objects, key);
-}
+} // sort

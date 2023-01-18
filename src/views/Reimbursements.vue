@@ -3,13 +3,13 @@
     <v-row>
       <v-col cols="12" md="9">
         <!-- Expense Table -->
-        <rollup-expense-type-table></rollup-expense-type-table>
+        <unreimbursed-expenses-table></unreimbursed-expenses-table>
       </v-col>
       <v-col v-if="!isMobile" cols="3" class="followScroll">
         <!-- Expense Info -->
-        <expense-info class="mb-3"></expense-info>
+        <reimbursement-expense-details class="mb-3"></reimbursement-expense-details>
         <!-- Expenses Total -->
-        <expense-type-totals></expense-type-totals>
+        <reimbursement-totals></reimbursement-totals>
         <!-- Status Alert -->
         <v-alert
           v-for="(alert, index) in alerts"
@@ -25,7 +25,7 @@
       </v-col>
       <v-col v-else cols="12">
         <!-- Expense Info -->
-        <expense-info class="mb-3"></expense-info>
+        <reimbursement-expense-details class="mb-3"></reimbursement-expense-details>
         <!-- Expenses Total -->
         <expense-type-totals></expense-type-totals>
         <!-- Status Alert -->
@@ -45,9 +45,9 @@
 </template>
 
 <script>
-import ExpenseInfo from '@/components/ExpenseInfo.vue';
-import ExpenseTypeTotals from '@/components/ExpenseTypeTotals.vue';
-import RollupExpenseTypeTable from '@/components/RollupExpenseTypeTable.vue';
+import ReimbursementExpenseDetails from '@/components/reimbursements/ReimbursementExpenseDetails.vue';
+import ReimbursementTotals from '@/components/reimbursements/ReimbursementTotals.vue';
+import UnreimbursedExpensesTable from '@/components/reimbursements/UnreimbursedExpensesTable.vue';
 import { isMobile } from '@/utils/utils';
 
 // |--------------------------------------------------|
@@ -57,7 +57,7 @@ import { isMobile } from '@/utils/utils';
 // |--------------------------------------------------|
 
 /**
- * created
+ * Created lifecycle hook.
  */
 async function created() {
   window.EventBus.$on('reimburseAlert', (alerts) => {
@@ -66,11 +66,11 @@ async function created() {
 } // created
 
 /**
- * beforeDestroy lifecycle hook
+ * beforeDestroy lifecycle hook.
  */
 function beforeDestroy() {
   window.EventBus.$off('reimburseAlert');
-} //beforeDestroy
+} // beforeDestroy
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -80,9 +80,9 @@ function beforeDestroy() {
 
 export default {
   components: {
-    ExpenseInfo,
-    ExpenseTypeTotals,
-    RollupExpenseTypeTable
+    ReimbursementExpenseDetails,
+    ReimbursementTotals,
+    UnreimbursedExpensesTable
   },
   computed: {
     isMobile

@@ -13,8 +13,9 @@
               emit('relog');
               activate = false;
             "
-            >Log In</v-btn
           >
+            Log In
+          </v-btn>
           <v-spacer></v-spacer>
         </v-card-actions>
       </v-card>

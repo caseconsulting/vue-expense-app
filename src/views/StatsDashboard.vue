@@ -61,13 +61,13 @@
 </template>
 
 <script>
-import CertificationsChartTab from '../components/charts/chartTabs/CertificationsChartTab.vue';
-import EmployeesChartTab from '../components/charts/chartTabs/EmployeesChartTab.vue';
-import TechChartTab from '../components/charts/chartTabs/TechChartTab.vue';
-import EducationChartTab from '../components/charts/chartTabs/EducationChartTab.vue';
-import CustomerOrgChartTab from '../components/charts/chartTabs/CustomerOrgChartTab.vue';
+import CertificationsChartTab from '../components/charts/chart-tabs/CertificationsChartTab.vue';
+import EmployeesChartTab from '../components/charts/chart-tabs/EmployeesChartTab.vue';
+import TechChartTab from '../components/charts/chart-tabs/TechChartTab.vue';
+import EducationChartTab from '../components/charts/chart-tabs/EducationChartTab.vue';
+import CustomerOrgChartTab from '../components/charts/chart-tabs/CustomerOrgChartTab.vue';
 import { isMobile, storeIsPopulated } from '@/utils/utils';
-import { updateStoreEmployees } from '@/utils/storeUtils';
+import { updateStoreEmployees, updateStoreContracts } from '@/utils/storeUtils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -76,14 +76,14 @@ import { updateStoreEmployees } from '@/utils/storeUtils';
 // |--------------------------------------------------|
 
 /**
- * mounted hook
- *
+ * Mounted lifecycle hook.
  */
 async function mounted() {
   if (this.storeIsPopulated) {
-    if (!this.$store.getters.employees) {
-      await this.updateStoreEmployees();
-    }
+    await Promise.all([
+      !this.$store.getters.employees ? this.updateStoreEmployees() : '',
+      !this.$store.getters.contracts ? this.updateStoreContracts() : ''
+    ]);
     this.dataLoaded = true;
   }
 } // mounted
@@ -95,7 +95,7 @@ async function mounted() {
 // |--------------------------------------------------|
 
 /**
- * changes the tab
+ * Changes the tab display.
  *
  * @param event - the new tab
  */
@@ -104,7 +104,7 @@ function changeTab(event) {
 } // changeTab
 
 /**
- * This is used to select the correct tab on mobile devices
+ * This is used to select the correct tab on mobile devices.
  * @param tabName - The name of the tab
  */
 function selectDropDown(tabName) {
@@ -140,13 +140,15 @@ export default {
   methods: {
     changeTab,
     selectDropDown,
-    updateStoreEmployees
+    updateStoreEmployees,
+    updateStoreContracts
   },
   watch: {
     storeIsPopulated: async function () {
-      if (!this.$store.getters.employees) {
-        await this.updateStoreEmployees();
-      }
+      await Promise.all([
+        !this.$store.getters.employees ? this.updateStoreEmployees() : '',
+        !this.$store.getters.contracts ? this.updateStoreContracts() : ''
+      ]);
       if (this.storeIsPopulated) this.dataLoaded = true;
     }
   }

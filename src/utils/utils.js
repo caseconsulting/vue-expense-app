@@ -1,11 +1,9 @@
 import api from '@/shared/api.js';
-import dateUtils from '@/shared/dateUtils';
 import MobileDetect from 'mobile-detect';
 import _ from 'lodash';
 import { v4 as uuid } from 'uuid';
-const IsoFormat = 'YYYY-MM-DD';
-const moment = require('moment-timezone');
-moment.tz.setDefault('America/New_York');
+import { getRole } from '@/utils/auth';
+import { format, getTodaysDate, isAfter, isBefore, setYear, subtract, DEFAULT_ISOFORMAT } from '@/shared/dateUtils';
 
 /**
  * Async function to loop an array.
@@ -20,82 +18,20 @@ export async function asyncForEach(array, callback) {
 } // asyncForEach
 
 /**
- * Formats a date.
- *
- * @param date - date to format
- * @return Date - formatted date
- */
-export function formatDate(date) {
-  return dateUtils.formatDate(date);
-} // formatDate
-
-/**
- * Formats a date (dates that only have months and years).
- *
- * @param date - date to format
- * @return Date - formatted date
- */
-export function formatDateMonthYear(date) {
-  return dateUtils.formatDateMonthYear(date);
-} // formatDate
-
-/**
- * Returns a date formated from YYYY-MM-DD to MM/DD/YYYY.
- *
- * @param date - YYYY-MM-DD String date
- * @return String - MM/DD/YYYY date
- */
-export function formatDateDashToSlash(date) {
-  if (!date) {
-    return null;
-  }
-  const [year, month, day] = date.split('-');
-  return `${month}/${day}/${year}`;
-} // formatDateDashToSlash
-
-/**
- * Returns a date formated from MM/DD/YYYY to YYYY-MM-DD.
- *
- * @param date - MM/DD/YYYY String date
- * @return String - YYYY-MM-DD date
- */
-export function formatDateSlashToDash(date) {
-  if (!date) {
-    return null;
-  }
-  const [month, day, year] = date.split('/');
-  return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
-} // formatDateSlashToDash
-
-/**
  * Gets the current active anniversary budget year starting date in isoformat.
  *
+ * @param hireDate - The hire date of an employee (YYYY-MM-DD)
  * @return String - current active anniversary budget date (YYYY-MM-DD)
  */
 export function getCurrentBudgetYear(hireDate) {
-  let currentBudgetYear = moment(hireDate, IsoFormat);
-  if (moment().isAfter(currentBudgetYear)) {
-    currentBudgetYear.year(moment().year());
-    if (moment().isBefore(currentBudgetYear)) {
-      currentBudgetYear = currentBudgetYear.subtract(1, 'years');
+  if (isAfter(getTodaysDate(), hireDate)) {
+    hireDate = setYear(hireDate, parseInt(getTodaysDate('YYYY')));
+    if (isBefore(getTodaysDate(), hireDate)) {
+      hireDate = subtract(hireDate, 1, 'years');
     }
   }
-  return currentBudgetYear.format(IsoFormat);
+  return format(hireDate, null, DEFAULT_ISOFORMAT);
 } // getCurrentBudgetYear
-
-/**
- * Check if today is between a set of given dates in isoformat. Returns true if today is between the two dates,
- * otherwise returns false.
- *
- * @param start - start date
- * @param end - end date
- * @return boolean - today is in set of dates
- */
-export function isBetweenDates(date, start, end) {
-  let startDate = moment(start, IsoFormat);
-  let endDate = moment(end, IsoFormat);
-  return moment(date).isBetween(startDate, endDate, 'day', '[]');
-} // betweenDates
 
 /**
  * Checks if a value is empty. Returns true if the value is null or an empty/blank string.
@@ -180,7 +116,7 @@ export function convertToMoneyString(value) {
  * @return String - date formated
  */
 export function monthDayYearFormat(date) {
-  return !isEmpty(date) ? moment(date).format('MMM Do, YYYY') : '';
+  return !isEmpty(date) ? format(date, null, 'MMM Do, YYYY') : '';
 } // monthDayYearFormat
 
 /**
@@ -190,38 +126,8 @@ export function monthDayYearFormat(date) {
  * @return String - date formated
  */
 export function monthYearFormat(date) {
-  return !isEmpty(date) ? moment(date).format('MMM YYYY') : '';
+  return !isEmpty(date) ? format(date, null, 'MMM YYYY') : '';
 } // monthYearFormat
-
-/**
- * Returns a date formated as 'MMM Do' (Aug 18th).
- *
- * @param date - date to format
- * @return String - date formated
- */
-export function monthDayFormat(date) {
-  return !isEmpty(date) ? moment(date).format('MMM Do') : '';
-} // monthDayFormat
-
-/**
- * Parse a date to isoformat (YYYY-MM-DD).
- *
- * @param Date = date to parse
- * @return Date - date in isoformat
- */
-export function parseDate(date) {
-  return dateUtils.parseDate(date);
-} // parseDate
-
-/**
- * Parse a date to isoformat (YYYY-MM).
- *
- * @param Date = date to parse
- * @return Date - date in isoformat
- */
-export function parseDateMonthYear(date) {
-  return dateUtils.parseDateMonthYear(date);
-} // parseDateMonthYear
 
 /**
  * Updates the login date and creates audit for the employee.
@@ -261,6 +167,42 @@ export async function updateEmployeeLogin(employee) {
 export function storeIsPopulated() {
   return this.$store.getters.storeIsPopulated;
 } // storeIsPopulated
+
+/**
+ * Checks whether the current user role is admin
+ *
+ * @return - boolean: true if the user role is admin
+ */
+export function userRoleIsAdmin() {
+  return getRole() === 'admin';
+} //userRoleIsAdmin
+
+/**
+ * Checks whether the current user role is manager
+ *
+ * @return - boolean: true if the user role is manager
+ */
+export function userRoleIsManager() {
+  return getRole() === 'manager';
+} //userRoleIsManager
+
+/**
+ * Checks whether the current user role is user
+ *
+ * @return - boolean: true if the user role is a user
+ */
+export function userRoleIsUser() {
+  return getRole() === 'user';
+} //userRoleIsUser
+
+/**
+ * Checks whether the current user role is intern
+ *
+ * @return - boolean: true if the user role is intern
+ */
+export function userRoleIsIntern() {
+  return getRole() === 'intern';
+} //userRoleIsIntern
 
 export const countryList = [
   'United States',

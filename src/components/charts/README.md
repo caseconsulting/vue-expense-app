@@ -19,7 +19,7 @@ In the charts folder, you'll find a baseChart folder. This contains all the simp
 
 Now you're ready to create a chart.
 
-- Start by creating a component in customCharts to serve as the main chart component. Set this up as normal with template and scripts.
+- Start by creating a component in custom-charts to serve as the main chart component. Set this up as normal with template and scripts.
 - You'll probably need `import { storeIsPopulated } from '@/utils/utils';` to wait until loading the data.
 - In a `mounted` hook, use a structure like:
   ```javascript
@@ -38,7 +38,7 @@ Now you're ready to create a chart.
     - datasets _array_ with object containing the data from the fetchData variable and any colors or border styles
   - `options` _object_ which includes
     - scales _object_ defining what the x and y axis look like (see https://www.chartjs.org/docs/latest/axes/labelling.html for more)
-    - plugins _object_ with objects like legend or title (see examples from files in customCharts)
+    - plugins _object_ with objects like legend or title (see examples from files in custom-charts)
     - (if the chart is clickable) onClick _function_ (see below section on making chart clickable)
   - maintainAspectRatio: false to use a different aspect ratio when resizing
 - Once you have both these methods fleshed out, create the base chart child component in the template. Also import and include it in the export.
@@ -100,9 +100,9 @@ Here is what goes into the chart's options object:
 
   This checks to see if the clicked point is actually a bar/slice. If you just click the general area of the chart, it goes into the else statement. In this case, we don't want to filter the employee's expenses by something specific so we just route the employee and reimbursement filter.
 
-You also need to include some things in the destination file. See the Reports.vue file and EmployeeContractTable.vue for an example. In the created hook, see if `this.$route.params` has any values you want. I created a wasRedirected variable to true and scrolled to the top but that's not required. This boolean was used to show a back button for better usability.
+You also need to include some things in the destination file. See the Reports.vue file and EmployeeReportsTable.vue for an example. In the created hook, see if `this.$route.params` has any values you want. I created a wasRedirected variable to true and scrolled to the top but that's not required. This boolean was used to show a back button for better usability.
 
-The real routing happens in the child, EmployeeContractTable, though it isn't required to have a child. In the created hook I again checked if the `this.$route.params` had anything in it. If so, I assigned the appropriate variables the value of the `this.$route.params`. There may be more things you have to handle but this is the basics.
+The real routing happens in the child, EmployeeReportsTable, though it isn't required to have a child. In the created hook I again checked if the `this.$route.params` had anything in it. If so, I assigned the appropriate variables the value of the `this.$route.params`. There may be more things you have to handle but this is the basics.
 
 ```javascript
 if (this.$route.params.requestedDataType) {

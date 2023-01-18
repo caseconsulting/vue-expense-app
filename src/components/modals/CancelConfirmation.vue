@@ -5,6 +5,7 @@
         <v-card-title class="headline">Are you sure you want to cancel?</v-card-title>
         <v-card-actions>
           <v-spacer></v-spacer>
+          <!-- id needed for nigthwatch tests -->
           <v-btn
             id="submitNoBtn"
             color="red"
@@ -16,9 +17,11 @@
             "
             :loading="loading"
             :disabled="loading"
-            >No</v-btn
           >
+            No
+          </v-btn>
           <v-spacer></v-spacer>
+          <!-- id needed for nigthwatch tests -->
           <v-btn
             id="submitYesBtn"
             color="green darken-1"
@@ -30,8 +33,9 @@
             "
             :loading="loading"
             :disabled="loading"
-            >Yes</v-btn
           >
+            Yes
+          </v-btn>
           <v-spacer></v-spacer>
         </v-card-actions>
       </v-card>

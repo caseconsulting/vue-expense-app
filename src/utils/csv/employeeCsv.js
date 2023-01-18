@@ -3,16 +3,17 @@
  * csv.js
  */
 import _ from 'lodash';
-import moment from 'moment-timezone';
+import { difference, format, getTodaysDate, minimum } from '@/shared/dateUtils';
 const csvUtils = require('./baseCsv.js');
 
 /**
  * Downloads array of employees as csv file.
  * @param employees - array of employee objects
+ * @param contracts - the contracts from DyanmoDB to connect employee contract IDs to
  */
-export function download(employees) {
+export function download(employees, contracts) {
   let filename = Array.isArray(employees) ? 'employees.csv' : 'employee.csv';
-  let convertedEmployees = convertEmployees(employees); // convert employees into csv object
+  let convertedEmployees = convertEmployees(employees, contracts); // convert employees into csv object
   let csvEmployees = csvUtils.sort(convertedEmployees, 'Employee #'); // sort by employee #
   let csvFileString = csvUtils.generate(csvEmployees); // convert to csv file string
   csvUtils.download(csvFileString, filename); // download csv file string as .csv
@@ -22,14 +23,15 @@ export function download(employees) {
  * Converts employees to an array of objects to pass in to csvUtils.generate(). Expects
  * an array of employees but supports having a single employee object.
  * @param employees - employee object to convert
+ * @param contracts - the contracts from DyanmoDB to connect employee contract IDs to
  * @return a new object passable to csv.js
  */
-export function convertEmployees(employees) {
+export function convertEmployees(employees, contracts) {
   if (!Array.isArray(employees)) employees = [employees];
   let tempEmployees = [];
   _.forEach(employees, (employee) => {
     let placeOfBirth = [employee.city, employee.st, employee.country].join(' ');
-    let contractsPrimesProjects = getContractPrimeProject(employee.contracts);
+    let contractsPrimesProjects = getContractPrimeProject(employee.contracts, contracts);
     tempEmployees.push({
       'Employee #': employee.employeeNumber || '',
       'First Name': employee.firstName || '',
@@ -162,13 +164,13 @@ export function getClearances(clearance) {
  * @return number - number of years on the contract
  */
 export function getContractLengthInYears(contract) {
-  let total = moment.duration();
+  let total = 0;
   if (contract.projects) {
     contract.projects.forEach((project) => {
-      total.add(moment.duration(getProjectLengthInYears(project)));
+      total += getProjectLengthInYears(project);
     });
   }
-  return total.asYears().toFixed(1);
+  return total;
 } // getContractLengthInYears
 
 /**
@@ -178,82 +180,43 @@ export function getContractLengthInYears(contract) {
  * @return number - time in years
  */
 export function getProjectLengthInYears(project) {
-  let startMoment = moment(project.startDate);
-  let endMoment = moment(project.endDate);
   let length;
   if (project.endDate) {
-    length = moment.duration(endMoment.diff(startMoment));
+    length = difference(project.endDate, project.startDate, 'months');
   } else {
-    length = moment.duration(moment().diff(startMoment));
+    length = difference(getTodaysDate(), project.startDate, 'months');
   }
-  return length.add(1, 'month'); // add one month to include end month in calculation.
+  return length; // add one month to include end month in calculation.
 } // getProjectLengthInYears
-
-/**
-  * This is the old `getContracts` which puts everything in one string. I get the feeling
-  * that we will want the functionality for something in the future because the new method
-  * that was requested seems significantly less convenient. This comment is being made on
-  * Aug 1, 2022; if it's wayyy into the future as you're reading this and nothing has been
-  * brought up, you can probably delete this chunk of commented code.
-  *
-  * @param contract - An array of objects.
-  * @return String - contract
-  * / <-- remove space to fix comment
-  export function getContracts(contracts) {
-   let result = [];
-   if (contracts) {
-     _.forEach(contracts, (contract) => {
-       let earliestDate = moment(); // keep track of earliest start date
-       // create array of project strings
-       let projects = [];
-       _.forEach(contract.projects, (project) => {
-         projects.push(`${project.name} - ${getProjectLengthInYears(project).asYears().toFixed(1)} years`);
-         let endDate = moment(project.endDate || moment(), 'YYYY-MM-DD');
-         earliestDate = moment.min([earliestDate, endDate]);
-       });
-       // create string for contract and add years if necessary
-       let str = `${contract.name} - ${contract.prime} (Projects: ${projects.join(', ')})`;
-       if (contract.projects.length > 1) {
-         str += ` Total Time: ${getContractLengthInYears(contract)} years`;
-       }
-       // add current contract, attaching earliestDate for sorting
-       result.push({ s: str, d: earliestDate.format('YYYYMMDD') });
-     });
-     // sort contracts by their earliest project start date
-     result = _.orderBy(result, 'd', 'desc');
-     // only return the string value after sorting
-     result = _.map(result, (r) => {
-       return r.s;
-     });
-   }
-   return result;
- } // getContracts
- */
 
 /**
  * Returns contract data for employee
  *
- * @param contracts - An array of objects.
+ * @param employeeContracts - An array of objects.
+ * @param allContracts - the contracts from DyanmoDB to connect employee contract IDs to
  * @return String - contract
  */
-export function getContractPrimeProject(contracts) {
+export function getContractPrimeProject(employeeContracts, allContracts) {
   let result = [];
   let toReturn = {};
-  if (contracts) {
-    _.forEach(contracts, (contract) => {
-      let earliestDate = moment(); // keep track of earliest start date
+  let allProjects = allContracts.map((c) => c.projects).flat();
+  if (employeeContracts) {
+    _.forEach(employeeContracts, (contract) => {
+      let earliestDate = getTodaysDate(); // keep track of earliest start date
       // create array of project strings
       let projects = [];
       _.forEach(contract.projects, (project) => {
-        projects.push(`${project.name} - ${getProjectLengthInYears(project).asYears().toFixed(1)} years`);
-        let endDate = moment(project.endDate || moment(), 'YYYY-MM-DD');
-        earliestDate = moment.min([earliestDate, endDate]);
+        let p = allProjects.find((p) => p.id === project.projectId);
+        projects.push(`${p.projectName} - ${(getProjectLengthInYears(project) / 12).toFixed(1)} years`);
+        let endDate = format(project.endDate || getTodaysDate(), 'YYYY-MM-DD');
+        earliestDate = minimum([earliestDate, endDate]);
       });
       // add current contract, attaching earliestDate for sorting
+      let c = allContracts.find((c) => c.id === contract.contractId);
       result.push({
-        contract: { name: contract.name, prime: contract.prime },
+        contract: { name: c.contractName, prime: c.primeName },
         projects: projects,
-        d: earliestDate.format('YYYYMMDD')
+        d: format(earliestDate, 'YYYYMMDD')
       });
     });
     // sort contracts by their earliest project start date
@@ -267,7 +230,7 @@ export function getContractPrimeProject(contracts) {
         return r.contract.prime;
       }).join(', '),
       projects: _.map(result, (r) => {
-        return r.projects;
+        return r.projects.join(', ');
       }).join(', ')
     };
   }
@@ -285,7 +248,7 @@ export function getCustomerOrgExp(exp) {
   for (let i = 0; i < exp.length; i++) {
     a += exp[i].name;
     if (typeof exp[i].years !== 'undefined') {
-      a += ' - ' + exp[i].years + ' years';
+      a += ' - ' + parseFloat(exp[i].years).toFixed(1) + ' years';
     }
     if (i + 1 < exp.length) {
       a += ', ';
