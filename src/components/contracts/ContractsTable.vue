@@ -301,15 +301,13 @@
 </template>
 <script>
 import _ from 'lodash';
-import { updateStoreContracts } from '@/utils/storeUtils';
-import { format, isAfter } from '../../shared/dateUtils';
-import api from '../../shared/api';
+import { updateStoreContracts, updateStoreEmployees } from '@/utils/storeUtils';
+import { format, isAfter, isBefore } from '@/shared/dateUtils';
+import api from '@/shared/api';
 import DeleteModal from '../modals/DeleteModal.vue';
 import ContractProjectDeleteWarning from '../modals/ContractProjectDeleteWarning.vue';
-import { updateStoreEmployees } from '../../utils/storeUtils';
 import ProjectForm from './ProjectForm.vue';
 import { getDateOptionalRules, getDateRules } from '@/shared/validationUtils';
-import { isBefore } from '@/shared/dateUtils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -471,8 +469,6 @@ async function deleteProject(contract, projectID) {
  */
 function clickedEdit(item) {
   this.editingItem = _.cloneDeep(item);
-
-  console.log(this.editingItem);
 } // clickedEdit
 
 /**
