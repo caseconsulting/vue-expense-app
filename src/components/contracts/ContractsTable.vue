@@ -638,7 +638,10 @@ export default {
           let contract = _.find(this.$store.getters.contracts, (c) => {
             return c.id == contractOfProject.id;
           });
-          let found = _.some(contract.projects, (p) => p.projectName === this.editingItem.projectName);
+          let found = _.some(contract.projects, (p) => {
+            if (p.id == this.editingItem.id) return false;
+            return p.projectName === this.editingItem.projectName;
+          });
           return !found || 'Duplicate project names';
         }
       },
