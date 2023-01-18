@@ -126,7 +126,7 @@
                   <v-data-table :headers="projectHeaders" :items="contract.item.projects" hide-default-footer>
                     <template v-slot:[`item.projectName`]="{ item }">
                       <v-text-field
-                        :rules="[(v) => !!v || 'Field is required']"
+                        :rules="[(v) => !!v || 'Field is required', duplicateProjects(contract.item)]"
                         v-if="editingItem && editingItem.id == item.id"
                         v-model="editingItem.projectName"
                       ></v-text-field>
@@ -633,6 +633,15 @@ export default {
   },
   data() {
     return {
+      duplicateProjects: (contractOfProject) => {
+        if (contractOfProject) {
+          let contract = _.find(this.$store.getters.contracts, (c) => {
+            return c.id == contractOfProject.id;
+          });
+          let found = _.some(contract.projects, (p) => p.projectName === this.editingItem.projectName);
+          return !found || 'Duplicate project names';
+        }
+      },
       duplicateContractPrimeCombo: () => {
         let found = _.some(this.$store.getters.contracts, (c) => {
           if (c.id == this.editingItem.id) return false;
