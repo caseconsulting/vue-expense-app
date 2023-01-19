@@ -75,15 +75,10 @@
                         prepend-icon="event"
                         @blur="popEndDate = parseEventDate($event)"
                         @input="endDateMenu = false"
-                        :rules="[
-                          (v) => !!v || 'Field is required: MM/DD/YYYY format',
-                          ...getDateRules(),
-                          endDateRules()
-                        ]"
-                        label="PoP End Date*"
+                        :rules="[...getDateOptionalRules(), endDateRules()]"
+                        label="PoP End Date"
                         hint="MM/DD/YYYY format"
                         persistent-hint
-                        required
                       ></v-text-field>
                     </template>
                     <v-date-picker v-model="popEndDate" no-title @input="endDateMenu = false"></v-date-picker>
@@ -91,12 +86,7 @@
                 </v-col>
                 <!-- Cost Type -->
                 <v-col cols="12" sm="6" md="4">
-                  <v-text-field
-                    v-model="costType"
-                    :rules="[(v) => !!v || 'Field is required']"
-                    label="Cost Type*"
-                    required
-                  ></v-text-field>
+                  <v-text-field v-model="costType" label="Cost Type"></v-text-field>
                 </v-col>
                 <!-- Projects -->
                 <v-col cols="12">
@@ -136,7 +126,7 @@
 import _ from 'lodash';
 import api from '@/shared/api.js';
 import { format, isAfter, isBefore } from '@/shared/dateUtils';
-import { getDateRules, getDateOptionalRules } from '@/shared/validationUtils.js';
+import { getDateOptionalRules } from '@/shared/validationUtils.js';
 import { updateStoreContracts } from '@/utils/storeUtils';
 import { mask } from 'vue-the-mask';
 import { v4 as uuid } from 'uuid';
@@ -272,7 +262,6 @@ export default {
     emit,
     format,
     getDateOptionalRules,
-    getDateRules,
     parseEventDate,
     submit,
     updateStoreContracts
