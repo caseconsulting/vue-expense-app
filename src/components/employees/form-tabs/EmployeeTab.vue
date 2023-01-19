@@ -338,7 +338,7 @@
         class="mt-0"
         label="Decline to self-identify"
         v-model="editedEmployee.eeoDeclineSelfIdentify"
-        :disabled="!thisIsMyProfile() && !userRoleIsAdmin()"
+        :disabled="!thisIsMyProfile()"
       ></v-checkbox>
 
       <!-- Confirm Decline Self-Identify Modal -->
@@ -387,12 +387,12 @@ async function created() {
   });
   window.EventBus.$on('confirm-decline-self-identify', () => {
     // clear fields
-    this.$set(this.editedEmployee, 'eeoGender', null);
-    this.$set(this.editedEmployee, 'eeoHispanicOrLatino', null);
-    this.$set(this.editedEmployee, 'eeoRaceOrEthnicity', null);
-    this.$set(this.editedEmployee, 'eeoJobCategory', null);
-    this.$set(this.editedEmployee, 'eeoHasDisability', null);
-    this.$set(this.editedEmployee, 'eeoIsProtectedVeteran', null);
+    this.editedEmployee.eeoGender = null;
+    this.editedEmployee.eeoHispanicOrLatino = null;
+    this.editedEmployee.eeoRaceOrEthnicity = null;
+    this.editedEmployee.eeoJobCategory = null;
+    this.editedEmployee.eeoHasDisability = null;
+    this.editedEmployee.eeoIsProtectedVeteran = null;
     // close modal
     this.toggleDeclineSelfIdentifyModal = false;
   });
