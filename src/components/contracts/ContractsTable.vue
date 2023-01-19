@@ -10,6 +10,7 @@
             :expanded.sync="expanded"
             :headers="contractHeaders"
             :items="$store.getters.contracts"
+            :items-per-page="-1"
           >
             <!-- Contract Name Slot -->
             <template v-slot:[`item.contractName`]="{ item }">
