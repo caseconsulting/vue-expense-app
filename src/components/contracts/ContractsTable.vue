@@ -42,8 +42,6 @@
                 name="costType"
                 v-if="editingItem && editingItem.id == item.id"
                 v-model="editingItem.costType"
-                :rules="[(v) => !!v || 'Field is required']"
-                required
               ></v-text-field>
               <!-- </v-form> -->
               <span v-else>{{ item.costType }}</span>
@@ -100,14 +98,13 @@
                 <template v-slot:activator="{ on }">
                   <v-text-field
                     :value="format(editingItem.popEndDate, null, 'MM/DD/YYYY')"
-                    :rules="[(v) => !!v || 'Field is required: MM/DD/YYYY format', ...getDateRules(), endDateRules()]"
+                    :rules="[...getDateOptionalRules(), endDateRules()]"
                     hint="MM/DD/YYYY format"
                     persistent-hint
                     prepend-icon="event"
                     @blur="editingItem.popEndDate = format($event.target.value, 'MM/DD/YYYY', 'YYYY-MM-DD')"
                     @input="popEndDateMenu = false"
                     v-on="on"
-                    required
                   ></v-text-field>
                 </template>
                 <v-date-picker
@@ -308,7 +305,7 @@ import api from '@/shared/api';
 import DeleteModal from '../modals/DeleteModal.vue';
 import ContractProjectDeleteWarning from '../modals/ContractProjectDeleteWarning.vue';
 import ProjectForm from './ProjectForm.vue';
-import { getDateOptionalRules, getDateRules } from '@/shared/validationUtils';
+import { getDateOptionalRules } from '@/shared/validationUtils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -628,7 +625,6 @@ export default {
     clickedEdit,
     updateStoreContracts,
     updateContractPrime,
-    getDateRules,
     getDateOptionalRules,
     updateProject
   },
