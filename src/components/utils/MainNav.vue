@@ -240,6 +240,13 @@ export default {
           permission: ['admin', 'manager']
         },
         {
+          title: 'Contracts',
+          icon: 'mdi-file-document-edit',
+          route: 'contracts',
+          permission: ['admin', 'manager'],
+          active: false
+        },
+        {
           title: 'Reports',
           alias: ['reports'],
           icon: 'mdi-clipboard-list',

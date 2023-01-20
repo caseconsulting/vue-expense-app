@@ -92,7 +92,12 @@
               {{ this.model.nickname || this.model.firstName }} {{ this.model.lastName }}
             </h3>
             <v-spacer></v-spacer>
-            <convert-employee-to-csv v-if="userRoleIsAdmin()" :employee="this.model" color="white" />
+            <convert-employee-to-csv
+              v-if="userRoleIsAdmin()"
+              :contracts="contracts"
+              :employee="this.model"
+              color="white"
+            />
             <v-tooltip v-if="hasAdminPermissions() || userIsEmployee()" top>
               <template #activator="{ on }">
                 <div v-on="on">
@@ -119,10 +124,20 @@
               <span>Edit Profile</span>
             </v-tooltip>
           </v-card-title>
-          <employee-info :model="this.model" :currentTab="this.currentTab" v-if="!editing"></employee-info>
+          <employee-info
+            :model="this.model"
+            :contracts="this.contracts"
+            :currentTab="this.currentTab"
+            v-if="!editing"
+          ></employee-info>
         </v-card>
         <!-- Edit Info (Form) -->
-        <employee-form :employee="this.model" :currentTab="this.currentTab" v-if="editing"></employee-form>
+        <employee-form
+          :employee="this.model"
+          :contracts="this.contracts"
+          :currentTab="this.currentTab"
+          v-if="editing"
+        ></employee-form>
         <div class="mt-4">
           <budget-chart
             v-if="(userRoleIsAdmin() || userIsEmployee()) && hasAccessToBudgets"
@@ -162,15 +177,19 @@ import {
   userRoleIsAdmin,
   userRoleIsManager
 } from '@/utils/utils.js';
-import { updateStoreBudgets, updateStoreEmployees, updateStoreExpenseTypes, updateStoreUser } from '@/utils/storeUtils';
+import {
+  updateStoreBudgets,
+  updateStoreContracts,
+  updateStoreEmployees,
+  updateStoreExpenseTypes,
+  updateStoreUser
+} from '@/utils/storeUtils';
 import _ from 'lodash';
 import ConvertEmployeeToCsv from '@/components/employees/csv/ConvertEmployeeToCsv.vue';
 import AnniversaryCard from '@/components/shared/AnniversaryCard.vue';
 import BudgetChart from '@/components/charts/custom-charts/BudgetChart.vue';
 import ResumeParser from '@/components/modals/ResumeParser';
 import DeleteModal from '@/components/modals/DeleteModal';
-
-const IsoFormat = 'YYYY-MM-DD';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -219,7 +238,8 @@ async function getProfileData() {
   this.loading = true;
   await Promise.all([
     !this.$store.getters.employees ? this.updateStoreEmployees() : '',
-    !this.$store.getters.user ? this.updateStoreUser() : ''
+    !this.$store.getters.user ? this.updateStoreUser() : '',
+    !this.$store.getters.contracts ? this.updateStoreContracts() : ''
   ]);
   if (this.$store.getters.user.employeeNumber == this.$route.params.id) {
     // user looking at their own profile
@@ -232,6 +252,7 @@ async function getProfileData() {
     });
   }
   this.user = this.$store.getters.user;
+  this.contracts = this.$store.getters.contracts;
   this.displayQuickBooksTimeAndBalances = this.userRoleIsAdmin() || this.userIsEmployee();
   this.basicEmployeeDataLoading = false;
   if (this.model) {
@@ -382,9 +403,9 @@ function mounted() {
     this.currentTab = tab;
   });
 
-  window.EventBus.$on('selected-budget-year', (data) => {
-    if (data.format(IsoFormat) != this.fiscalDateView) {
-      this.fiscalDateView = data.format(IsoFormat);
+  window.EventBus.$on('selected-budget-year', (date) => {
+    if (date != this.fiscalDateView) {
+      this.fiscalDateView = date;
     }
   });
 } // mounted
@@ -440,6 +461,7 @@ export default {
   data() {
     return {
       currentTab: null,
+      contracts: null,
       deleteLoading: false,
       displayQuickBooksTimeAndBalances: false,
       editing: false,
@@ -516,6 +538,7 @@ export default {
     isMobile,
     resumeReceived,
     updateStoreBudgets,
+    updateStoreContracts,
     updateStoreEmployees,
     updateStoreExpenseTypes,
     updateStoreUser,

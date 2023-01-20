@@ -123,7 +123,7 @@
                 id="P"
                 class="black--text"
                 target="_blank"
-                href="https://3.basecamp.com/3097063/buckets/4708396/documents/5613448571"
+                href="https://3.basecamp.com/3097063/buckets/4708396/documents/5738899345"
                 ><strong>Version</strong> {{ version }}</a
               >
             </template>
@@ -153,13 +153,11 @@ import {
   updateStoreExpenseTypes
 } from '@/utils/storeUtils';
 import floorPlan from '@/assets/img/MakeOfficesfloorplan.jpg';
-import moment from 'moment-timezone';
 import MainNav from '@/components/utils/MainNav.vue';
 import NotificationBanners from '@/components/utils/NotificationBanners.vue';
 import SwitchRoleModal from '@/components/modals/SwitchRoleModal.vue';
 import TimeOutModal from '@/components/modals/TimeOutModal.vue';
 import TimeOutWarningModal from '@/components/modals/TimeOutWarningModal.vue';
-moment.tz.setDefault('America/New_York');
 
 // |--------------------------------------------------|
 // |                                                  |

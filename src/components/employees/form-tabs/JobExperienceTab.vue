@@ -76,7 +76,7 @@
         <!-- Start Date -->
         <v-text-field
           ref="formFields"
-          :value="formatDate(editedJobExperienceInfo.hireDate)"
+          :value="format(editedJobExperienceInfo.hireDate, null, 'MM/DD/YYYY')"
           label="Start Date"
           prepend-icon="event_available"
           disabled
@@ -154,7 +154,7 @@
                 <v-text-field
                   :id="'start-field-' + compIndex + '-' + index"
                   ref="formFields"
-                  :value="position.startDate | formatDateMonthYear"
+                  :value="format(position.startDate, null, 'MM/YYYY')"
                   label="Start Date"
                   hint="MM/YYYY format"
                   v-mask="'##/####'"
@@ -193,7 +193,7 @@
                   :id="'end-field-' + compIndex + '-' + index"
                   ref="formFields"
                   :disabled="position.presentDate"
-                  :value="position.endDate | formatDateMonthYear"
+                  :value="format(position.endDate, null, 'MM/YYYY')"
                   label="End Date"
                   prepend-icon="event_busy"
                   :rules="[
@@ -263,11 +263,10 @@
 <script>
 import _ from 'lodash';
 import { getDateMonthYearRules, getDateMonthYearOptionalRules, getRequiredRules } from '@/shared/validationUtils.js';
-import { isEmpty, formatDate, formatDateMonthYear, parseDateMonthYear, isMobile } from '@/utils/utils';
+import { isEmpty, isMobile } from '@/utils/utils';
+import { add, format, getTodaysDate, isAfter } from '@/shared/dateUtils';
 import { mask } from 'vue-the-mask';
 import { getRole } from '@/utils/auth';
-const moment = require('moment-timezone');
-moment.tz.setDefault('America/New_York');
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -380,21 +379,20 @@ function formatRange(range) {
   if (_.isEmpty(range)) {
     return null;
   }
-
-  let start = moment(range[0], 'YYYY-MM');
+  let start = format(range[0], null, 'YYYY-MM');
   if (range[1]) {
     // end date selected
-    let end = moment(range[1], 'YYYY-MM');
-    if (start.isAfter(end)) {
+    let end = format(range[1], null, 'YYYY-MM');
+    if (isAfter(start, end)) {
       // start date is listed after end date
-      return `${end.format('MMMM YYYY')} - ${start.format('MMMM YYYY')}`;
+      return `${format(end, 'YYYY-MM', 'MMMM YYYY')} - ${format(start, 'YYYY-MM', 'MMMM YYYY')}`;
     } else {
       // start date is listed before end date
-      return `${start.format('MMMM YYYY')} - ${end.format('MMMM YYYY')}`;
+      return `${format(start, 'YYYY-MM', 'MMMM YYYY')} - ${format(end, 'YYYY-MM', 'MMMM YYYY')}`;
     }
   } else {
     // no end date selected
-    return `${start.format('MMMM YYYY')} - Present`;
+    return `${format(start, 'YYYY-MM', 'MMMM YYYY')} - Present`;
   }
 } // formatRange
 
@@ -419,7 +417,7 @@ function hasEndDatesFilled(index) {
  * @return String - the date in YYYY-MM format
  */
 function parseEventDate() {
-  return this.parseDateMonthYear(event.target.value);
+  return this.format(event.target.value, 'MM/YYYY', 'YYYY-MM');
 } //parseEventDate
 
 /**
@@ -514,9 +512,8 @@ export default {
       dateOrderRule: (compIndex, posIndex) => {
         if (this.editedJobExperienceInfo !== undefined) {
           let position = this.editedJobExperienceInfo.companies[compIndex].positions[posIndex];
-          return !this.isEmpty(position.endDate) && moment(position.endDate) && position.startDate
-            ? moment(position.endDate).add(1, 'd').isAfter(moment(position.startDate)) ||
-                'End date must be at or after start date'
+          return !this.isEmpty(position.endDate) && position.startDate
+            ? isAfter(add(position.endDate, 1, 'd'), position.startDate) || 'End date must be at or after start date'
             : true;
         } else {
           return true;
@@ -541,30 +538,27 @@ export default {
         }
       },
       editedJobExperienceInfo: _.cloneDeep(this.model), //edited job experience info
-      today: moment().format('YYYY-MM')
+      today: getTodaysDate('YYYY-MM')
     };
   },
   directives: { mask },
-  filters: {
-    formatDate,
-    formatDateMonthYear
-  },
   methods: {
+    add, // dateUtils
     addICTimeFrame,
     addCompany,
     addPosition,
     deleteICTimeFrame,
     deleteCompany,
     deletePosition,
-    formatDate,
+    format, // dateUtils
     getDateMonthYearRules,
     getDateMonthYearOptionalRules,
     getRequiredRules,
     hasEndDatesFilled,
-    parseDateMonthYear,
     parseEventDate,
     formatRange,
     getRole,
+    isAfter, // dateUtils
     isEmpty,
     populateDropDowns,
     setIndices,

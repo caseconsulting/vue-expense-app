@@ -93,12 +93,8 @@ import BudgetChart from '@/components/charts/custom-charts/BudgetChart.vue';
 import BudgetTable from '@/components/budgets/BudgetTable.vue';
 import ExpenseForm from '@/components/expenses/ExpenseForm.vue';
 import AnniversaryCard from '@/components/shared/AnniversaryCard.vue';
-const moment = require('moment-timezone');
-moment.tz.setDefault('America/New_York');
 import { isMobile, getCurrentBudgetYear } from '@/utils/utils';
 import { updateStoreBudgets, updateStoreEmployees, updateStoreExpenseTypes, updateStoreUser } from '@/utils/storeUtils';
-
-const IsoFormat = 'YYYY-MM-DD';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -210,9 +206,9 @@ async function created() {
     await this.updateData();
   });
 
-  window.EventBus.$on('selected-budget-year', (data) => {
-    if (data.format(IsoFormat) != this.fiscalDateView) {
-      this.fiscalDateView = data.format(IsoFormat);
+  window.EventBus.$on('selected-budget-year', (date) => {
+    if (date != this.fiscalDateView) {
+      this.fiscalDateView = date;
     }
   });
 

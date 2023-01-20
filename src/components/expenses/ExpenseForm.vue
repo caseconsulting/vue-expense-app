@@ -181,7 +181,7 @@
               hint="MM/DD/YYYY format"
               persistent-hint
               prepend-icon="event"
-              @blur="editedExpense.purchaseDate = parseDate(purchaseDateFormatted)"
+              @blur="editedExpense.purchaseDate = format(purchaseDateFormatted, 'MM/DD/YYYY', 'YYYY-MM-DD')"
               @input="purchaseMenu = false"
               v-on="on"
             ></v-text-field>
@@ -213,7 +213,7 @@
               hint="MM/DD/YYYY format "
               persistent-hint
               prepend-icon="event"
-              @blur="editedExpense.reimbursedDate = parseDate(reimbursedDateFormatted)"
+              @blur="editedExpense.reimbursedDate = format(reimbursedDateFormatted, 'MM/DD/YYYY', 'YYYY-MM-DD')"
               @input="reimburseMenu = false"
               v-on="on"
             ></v-text-field>
@@ -301,16 +301,15 @@ import FormSubmissionConfirmation from '@/components/modals/FormSubmissionConfir
 import api from '@/shared/api.js';
 import employeeUtils from '@/shared/employeeUtils';
 import { getDateRules, getDateOptionalRules, getRequiredRules, getURLRules } from '@/shared/validationUtils.js';
-import { isEmpty, isFullTime, convertToMoneyString, userRoleIsAdmin, formatDate, parseDate } from '@/utils/utils';
+import { isEmpty, isFullTime, convertToMoneyString, userRoleIsAdmin } from '@/utils/utils';
 import { updateStoreBudgets } from '@/utils/storeUtils';
 import { getRole } from '@/utils/auth';
+import { isBetween, getTodaysDate, format } from '../../shared/dateUtils';
 
 import { v4 as uuid } from 'uuid';
 import { mask } from 'vue-the-mask';
+
 import _ from 'lodash';
-const moment = require('moment-timezone');
-moment.tz.setDefault('America/New_York');
-const IsoFormat = 'YYYY-MM-DD';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -442,20 +441,6 @@ async function addURLInfo(newExpense) {
 } // addURLInfo
 
 /**
- * Check if today is between a set of given dates in isoformat. Returns true if today is between the two dates,
- * otherwise returns false.
- *
- * @param start - start date
- * @param end - end date
- * @return boolean - today is in set of dates
- */
-function betweenDates(start, end) {
-  let startDate = moment(start, IsoFormat);
-  let endDate = moment(end, IsoFormat);
-  return moment().isBetween(startDate, endDate, 'day', '[]');
-} // betweenDates
-
-/**
  * Calculates the adjusted budget amount for an expense type based on an employee's work status. Returns the adjust
  * amount.
  *
@@ -503,7 +488,7 @@ async function checkCoverage() {
       let employeeBudgets = await api.getEmployeeBudgets(this.employee.id);
       let budget = employeeBudgets.find((b) => {
         // make sure if the budget is recurring to get the budget for this year
-        let isActiveBudget = this.betweenDates(b.fiscalStartDate, b.fiscalEndDate);
+        let isActiveBudget = isBetween(getTodaysDate(), b.fiscalStartDate, b.fiscalEndDate, 'day', '[]');
         return b.expenseTypeId == expenseType.value && isActiveBudget;
       });
       let budgetExists = budget ? true : false;
@@ -761,7 +746,7 @@ async function createNewEntry() {
 
   let newUUID = this.uuid();
   this.$set(this.editedExpense, 'id', newUUID);
-  this.$set(this.editedExpense, 'createdAt', moment().format('YYYY-MM-DD'));
+  this.$set(this.editedExpense, 'createdAt', getTodaysDate());
   if (this.isReceiptRequired() && this.file) {
     // if receipt required and updating receipt
     // stores file name for lookup later
@@ -881,7 +866,10 @@ function filteredExpenseTypes() {
         // expense type is active
         if (this.hasAccess(employee, expenseType)) {
           // user has access to the expense type
-          if (expenseType.recurringFlag || this.betweenDates(expenseType.startDate, expenseType.endDate)) {
+          if (
+            expenseType.recurringFlag ||
+            isBetween(getTodaysDate(), expenseType.startDate, expenseType.endDate, 'day', '[]')
+          ) {
             // expense type is active
             let amount = this.calcAdjustedBudget(employee, expenseType);
             expenseType.text = `${expenseType.budgetName} - $${Number(amount).toLocaleString().toString()}`;
@@ -1223,7 +1211,7 @@ async function scanFile() {
     //else if there is no total word at all
 
     //check comprehend data for date objects
-    //see if what it found is able to be converted to moment
+    //see if what it found is able to be converted to dayjs
     //format it so it is in the correct format
     //set purchase date
     let firstDate = null;
@@ -1290,11 +1278,8 @@ async function scanFile() {
         .join(' ');
     }
     this.isInactive = false;
-
     if (firstDate != null && this.editedExpense.purchaseDate == null) {
-      let date = moment(new Date(firstDate));
-      date = this.parseDate(date.format('YYYY-MM-DD'));
-      this.editedExpense.purchaseDate = date;
+      this.editedExpense.purchaseDate = this.format(firstDate);
     }
     if (!failed && (this.editedExpense.cost == 0 || this.editedExpense.cost == null)) {
       this.editedExpense.cost = totalPrice;
@@ -1620,8 +1605,10 @@ async function watchEditedExpenseExpenseTypeID() {
     // set hint
     this.hint = this.selectedExpenseType.recurringFlag
       ? 'Recurring Expense Type'
-      : `Available from ${this.formatDate(this.selectedExpenseType.startDate)} - ${this.formatDate(
-          this.selectedExpenseType.endDate
+      : `Available from ${this.format(this.selectedExpenseType.startDate, null, 'MM/DD/YYYY')} - ${this.format(
+          this.selectedExpenseType.endDate,
+          null,
+          'MM/DD/YYYY'
         )}`;
 
     // set high five cost
@@ -1754,9 +1741,10 @@ async function watchEditedExpenseEmployeeID() {
  * watcher for editedExpense.purchaseDate - format date.
  */
 function watchEditedExpensePurchaseDate() {
-  this.purchaseDateFormatted = this.formatDate(this.editedExpense.purchaseDate) || this.purchaseDateFormatted;
+  this.purchaseDateFormatted =
+    this.format(this.editedExpense.purchaseDate, null, 'MM/DD/YYYY') || this.purchaseDateFormatted;
   //fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
-  if (this.editedExpense.purchaseDate !== null && !this.formatDate(this.editedExpense.purchaseDate)) {
+  if (this.editedExpense.purchaseDate !== null && !this.format(this.editedExpense.purchaseDate, null, 'MM/DD/YYYY')) {
     this.editedExpense.purchaseDate = null;
   }
 } // watchEditedExpensePurchaseDate
@@ -1765,9 +1753,13 @@ function watchEditedExpensePurchaseDate() {
  * watcher for editedExpense.reimbursedDate - format date.
  */
 function watchEditedExpenseReimbursedDate() {
-  this.reimbursedDateFormatted = this.formatDate(this.editedExpense.reimbursedDate) || this.reimbursedDateFormatted;
+  this.reimbursedDateFormatted =
+    this.format(this.editedExpense.reimbursedDate, null, 'MM/DD/YYYY') || this.reimbursedDateFormatted;
   //fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
-  if (this.editedExpense.reimbursedDate !== null && !this.formatDate(this.editedExpense.reimbursedDate)) {
+  if (
+    this.editedExpense.reimbursedDate !== null &&
+    !this.format(this.editedExpense.reimbursedDate, null, 'MM/DD/YYYY')
+  ) {
     this.editedExpense.reimbursedDate = null;
   }
 } // watchEditedExpenseReimbursedDate
@@ -1874,7 +1866,6 @@ export default {
   directives: { mask },
   methods: {
     addURLInfo,
-    betweenDates,
     calcAdjustedBudget,
     checkCoverage,
     clearForm,
@@ -1885,7 +1876,7 @@ export default {
     encodeUrl,
     filteredExpenseTypes,
     formatCost,
-    formatDate,
+    format,
     getCategories,
     getDateRules,
     getDateOptionalRules,
@@ -1901,7 +1892,6 @@ export default {
     isFullTime,
     isReceiptRequired,
     parseCost,
-    parseDate,
     preformatFloat,
     scanFile,
     setFile,

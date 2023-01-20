@@ -3,16 +3,16 @@
     <!-- Employee has Contracts -->
     <div v-if="!isEmpty(this.filteredList)">
       <!-- Loop Contracts -->
-      <div v-for="(contract, index) in this.filteredList" :key="contract.name + index">
-        <p><b>Contract: </b>{{ contract.name }}</p>
-        <p><b>Primes: </b>{{ contract.primes.join(', ') }}</p>
+      <div v-for="(contract, index) in this.filteredList" :key="contract.contractId + index">
+        <p><b>Contract: </b>{{ getContractName(contract) }}</p>
+        <p><b>Prime: </b>{{ getPrimeName(contract) }}</p>
         <p><b>Time on Contract: </b>{{ getContractLengthInYears(contract) }}</p>
         <div v-if="!isEmpty(contract.projects)">
           <div v-for="(project, projIndex) in contract.projects" :key="index + ' ' + projIndex" class="pb-1 px-4">
             <p v-if="contract.projects.length > 1">
               <v-row>
                 <v-col>
-                  <b>Project {{ projIndex + 1 }}: </b>{{ project.name }}
+                  <b>Project {{ projIndex + 1 }}: </b>{{ getProjectName(project) }}
                 </v-col>
                 <v-col>
                   <v-tooltip v-if="!project.endDate" right>
@@ -26,7 +26,7 @@
             </p>
             <p v-else>
               <v-row>
-                <v-col> <b>Project: </b>{{ project.name }} </v-col>
+                <v-col> <b>Project: </b>{{ getProjectName(project) }} </v-col>
                 <v-col>
                   <v-tooltip v-if="!project.endDate" right>
                     <template v-slot:activator="{ on }">
@@ -65,7 +65,7 @@
 
 <script>
 import { isEmpty, monthYearFormat } from '@/utils/utils';
-import moment from 'moment-timezone';
+import { difference, getTodaysDate } from '@/shared/dateUtils';
 import _ from 'lodash';
 
 // |--------------------------------------------------|
@@ -108,10 +108,10 @@ function onPageChange() {
  * @return number - number of years on the contract
  */
 function getContractLengthInYears(contract) {
-  let total = moment.duration();
+  let total = 0;
   if (contract.projects) {
     contract.projects.forEach((project) => {
-      total.add(moment.duration(this.getProjectLengthInYears(project)));
+      total += this.getProjectLengthInYears(project);
     });
   }
   return dateReadable(total);
@@ -128,34 +128,68 @@ function getContractEarliestDate(contract) {
 } // getContractEarliestDate
 
 /**
+ * Finds the contract name from the employees contract id.
+ *
+ * @param contract - The employees contract object
+ */
+function getContractName(contract) {
+  return this.contracts.find((c) => c.id === contract.contractId).contractName;
+} // getContractName
+
+/**
+ * Finds the prime name from the employees contract id.
+ *
+ * @param contract - The employees contract object
+ */
+function getPrimeName(contract) {
+  return this.contracts.find((c) => c.id === contract.contractId).primeName;
+} // getPrimeName
+
+/**
+ * Finds the project name from the employees project id.
+ *
+ * @param contract - The employees contract object
+ */
+function getProjectName(project) {
+  return this.contractProjects.find((p) => p.id === project.projectId).projectName;
+} // getProjectName
+
+/**
  * returns a readable format of the date/time.
  *
  * @param time - the date/time
  * @return string - A readable format of the time
  */
 function dateReadable(time) {
+  time = Math.round(time);
   let read = '';
   let comma = false;
-  if (time.years() > 0) {
+  let years = Math.floor(time / 12);
+  let months = time % 12;
+  if (years > 0) {
     comma = true;
-    read += time.years();
-    if (time.years() === 1) {
+    read += years;
+    if (years === 1) {
       read += ' year';
     } else {
       read += ' years';
     }
   }
 
-  if (time.months() > 0) {
+  if (months > 0) {
     // add comma if needed
     if (comma) {
       read += ', ';
     }
-    read += time.months();
-    if (time.months() === 1) {
+    read += months;
+    if (months === 1) {
       read += ' month';
     } else {
       read += ' months';
+    }
+  } else {
+    if (years === 0) {
+      read += '0 months';
     }
   }
 
@@ -180,15 +214,13 @@ function getProjectLengthInYearsReadable(project) {
  * @return number - time in years
  */
 function getProjectLengthInYears(project) {
-  let startMoment = moment(project.startDate);
-  let endMoment = moment(project.endDate);
   let length;
   if (project.endDate) {
-    length = moment.duration(endMoment.diff(startMoment));
+    length = difference(project.endDate, project.startDate, 'month');
   } else {
-    length = moment.duration(moment().diff(startMoment));
+    length = difference(getTodaysDate(), project.startDate, 'month');
   }
-  return length.add(1, 'month'); // add one month to include end month in calculation.
+  return length;
 }
 
 // |--------------------------------------------------|
@@ -217,6 +249,7 @@ export default {
   created,
   data() {
     return {
+      contractProjects: this.contracts.map((c) => c.projects).flat(),
       filteredList: [],
       page: 1
     };
@@ -226,15 +259,20 @@ export default {
     monthYearFormat
   },
   methods: {
+    difference, // dateUtils
     getContractEarliestDate,
     getContractLengthInYears,
+    getContractName,
+    getPrimeName,
+    getProjectName,
     getProjectLengthInYears,
     getProjectLengthInYearsReadable,
+    getTodaysDate, // dateUtils
     dateReadable,
     isEmpty,
     onPageChange
   },
-  props: ['model']
+  props: ['contracts', 'model']
 };
 </script>
 

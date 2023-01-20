@@ -63,10 +63,9 @@
 </template>
 
 <script>
-const moment = require('moment-timezone');
-moment.tz.setDefault('America/New_York');
 import _ from 'lodash';
 import { isEmpty, monthDayYearFormat, monthYearFormat } from '@/utils/utils';
+import { difference, format, getTodaysDate, isBefore, maximum, minimum } from '@/shared/dateUtils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -99,9 +98,9 @@ function icExperience() {
   given_ranges = Object.values(given_ranges);
   const durations = given_ranges
     .sort((a, b) => {
-      // array has text in format YYYY-MM, so convert that to a moment and reformat to YYYYMM
+      // array has text in format YYYY-MM, so reformat to YYYYMM
       // so that it can be sorted as a regular int
-      moment(a[0], 'YYYY-MM').format('YYYYMM') - moment(b[0], 'YYYY-MM').format('YYYYMM');
+      format(a[0], 'YYYY-MM', 'YYYYMM') - format(b[0], 'YYYY-MM', 'YYYYMM');
     })
     .reverse();
   let ranges = [];
@@ -109,10 +108,10 @@ function icExperience() {
   // combine any dates that overlap, keep separate ones that don't
   durations.forEach((d) => {
     previousVal = ranges[ranges.length - 1];
-    if (ranges.length != 0 && moment(d[0]).isBefore(moment(previousVal[1]))) {
+    if (ranges.length != 0 && isBefore(d[0], previousVal[1])) {
       // overlap combination
-      firstStart = moment.min(moment(previousVal[0]), moment(d[0]));
-      lastEnd = moment.max(moment(previousVal[1]), moment(d[1]));
+      firstStart = minimum([previousVal[0], d[0]]);
+      lastEnd = maximum([previousVal[1], d[1]]);
       ranges[ranges.length - 1] = [firstStart, lastEnd];
     } else {
       // no overlap
@@ -123,9 +122,9 @@ function icExperience() {
   let totalDurationMonths = 0; // total months
   // loop each reach to get total duration in months
   _.forEach(ranges, (range) => {
-    let start = moment(range[0], 'YYYY-MM');
-    let end = range.length > 1 ? moment(range[1], 'YYYY-MM') : moment();
-    let duration = end.diff(start, 'months') + 1; // calculate range duration
+    let start = format(range[0], null, 'YYYY-MM');
+    let end = range.length > 1 ? format(range[1], null, 'YYYY-MM') : getTodaysDate('YYYY-MM');
+    let duration = difference(end, start, 'months') + 1; // calculate range duration
     totalDurationMonths += Math.max(duration, 0); // remove negative values
   });
   // set year output text
@@ -216,8 +215,14 @@ export default {
     };
   },
   methods: {
+    difference, // dateUtils
+    format, // dateUtils
+    getTodaysDate, // dateUtils
+    isBefore, // dateUtils
     isEmpty,
     updateCompanies,
+    maximum, // dateUtils
+    minimum, // dateUtils
     monthDayYearFormat,
     monthYearFormat,
     onPageChange

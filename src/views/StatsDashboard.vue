@@ -67,7 +67,7 @@ import TechChartTab from '../components/charts/chart-tabs/TechChartTab.vue';
 import EducationChartTab from '../components/charts/chart-tabs/EducationChartTab.vue';
 import CustomerOrgChartTab from '../components/charts/chart-tabs/CustomerOrgChartTab.vue';
 import { isMobile, storeIsPopulated } from '@/utils/utils';
-import { updateStoreEmployees } from '@/utils/storeUtils';
+import { updateStoreEmployees, updateStoreContracts } from '@/utils/storeUtils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -80,9 +80,10 @@ import { updateStoreEmployees } from '@/utils/storeUtils';
  */
 async function mounted() {
   if (this.storeIsPopulated) {
-    if (!this.$store.getters.employees) {
-      await this.updateStoreEmployees();
-    }
+    await Promise.all([
+      !this.$store.getters.employees ? this.updateStoreEmployees() : '',
+      !this.$store.getters.contracts ? this.updateStoreContracts() : ''
+    ]);
     this.dataLoaded = true;
   }
 } // mounted
@@ -139,13 +140,15 @@ export default {
   methods: {
     changeTab,
     selectDropDown,
-    updateStoreEmployees
+    updateStoreEmployees,
+    updateStoreContracts
   },
   watch: {
     storeIsPopulated: async function () {
-      if (!this.$store.getters.employees) {
-        await this.updateStoreEmployees();
-      }
+      await Promise.all([
+        !this.$store.getters.employees ? this.updateStoreEmployees() : '',
+        !this.$store.getters.contracts ? this.updateStoreContracts() : ''
+      ]);
       if (this.storeIsPopulated) this.dataLoaded = true;
     }
   }

@@ -191,9 +191,9 @@ https://bootstrap-vue.org/docs
 
 https://lodash.com/
 
-**Moment:**
+**Day.js:**
 
-https://momentjs.com/docs/
+https://day.js.org/en/
 
 **Axios:**
 

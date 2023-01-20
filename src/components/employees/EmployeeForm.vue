@@ -155,6 +155,7 @@
                 <!-- Contract Tab -->
                 <contract-tab
                   v-if="formTab === 'contracts'"
+                  :contracts="contracts"
                   :validating="validating.contracts"
                   :model="model.contracts"
                 >
@@ -343,7 +344,11 @@
             </v-tab-item>
             <!-- Contracts -->
             <v-tab-item id="contracts" class="mt-6 mb-4 px-3">
-              <contract-tab :model="model.contracts" :validating="validating.contracts"></contract-tab>
+              <contract-tab
+                :contracts="contracts"
+                :model="model.contracts"
+                :validating="validating.contracts"
+              ></contract-tab>
             </v-tab-item>
             <!-- Clearance -->
             <v-tab-item id="clearance" class="mt-6 mb-4 px-3">
@@ -387,7 +392,6 @@
 
 <script>
 import api from '@/shared/api.js';
-import { updateStoreEmployees, updateStoreUser } from '@/utils/storeUtils';
 import AwardTab from '@/components/employees/form-tabs/AwardTab';
 import CertificationTab from '@/components/employees/form-tabs/CertificationTab';
 import ClearanceTab from '@/components/employees/form-tabs/ClearanceTab';
@@ -402,11 +406,11 @@ import ManyFormErrors from '@/components/modals/ManyFormErrors.vue';
 import PersonalTab from '@/components/employees/form-tabs/PersonalTab';
 import ResumeParser from '@/components/modals/ResumeParser';
 import TechnologyTab from '@/components/employees/form-tabs/TechnologyTab';
+import { updateStoreEmployees, updateStoreUser } from '@/utils/storeUtils';
+import { format } from '@/shared/dateUtils';
 import { getRole } from '@/utils/auth';
 import { v4 as uuid } from 'uuid';
 import _ from 'lodash';
-const moment = require('moment-timezone');
-moment.tz.setDefault('America/New_York');
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -504,7 +508,33 @@ function cleanUpData() {
     this.model.customerOrgExp = null;
   }
   // contracts
-  if (_.isEmpty(this.model.contracts)) {
+  if (!_.isEmpty(this.model.contracts)) {
+    // delete name attributes since the names are stored in the contracts DynamoDB table
+    // this will connect the IDs between employee contracts and the contracts table
+    _.forEach(this.model.contracts, (contract) => {
+      if (contract.contractName && contract.primeName) {
+        contract.contractId = this.contracts.find(
+          (c) => c.contractName === contract.contractName && c.primeName === contract.primeName
+        ).id;
+        delete contract.contractName;
+        delete contract.primeName;
+      }
+      _.forEach(contract.projects, (project) => {
+        if (project.projectName) {
+          let c;
+          if (contract.contractName && contract.primeName) {
+            c = this.contracts.find(
+              (c) => c.contractName === contract.contractName && c.primeName === contract.primeName
+            );
+          } else {
+            c = this.contracts.find((c) => c.id === contract.contractId);
+          }
+          project.projectId = c.projects.find((p) => p.projectName === project.projectName).id;
+          delete project.projectName;
+        }
+      });
+    });
+  } else {
     this.model.contracts = null;
   }
   // jobs
@@ -527,14 +557,14 @@ function cleanUpData() {
           delete timeFrame.showRangeMenu;
           // sort range dates
           let chronologicalRange = _.sortBy(timeFrame.range, (monthYear) => {
-            return moment(monthYear, 'YYYY-MM');
+            return format(monthYear, null, 'YYYY-MM');
           });
           timeFrame.range = chronologicalRange;
           // return updated time frame
           return timeFrame;
         }),
         (timeFrame) => {
-          return moment(timeFrame.range[0], 'YYYY-MM');
+          return format(timeFrame.range[0], null, 'YYYY-MM');
         }
       )
     );
@@ -563,26 +593,26 @@ function cleanUpData() {
           // sort bi dates
           clearance.biDates = _.reverse(
             _.sortBy(clearance.biDates, (date) => {
-              return moment(date, 'YYYY-MM-DD');
+              return format(date, null, 'YYYY-MM-DD');
             })
           );
           // sort adjudication dates
           clearance.adjudicationDates = _.reverse(
             _.sortBy(clearance.adjudicationDates, (date) => {
-              return moment(date, 'YYYY-MM-DD');
+              return format(date, null, 'YYYY-MM-DD');
             })
           );
           // sort poly dates
           clearance.polyDates = _.reverse(
             _.sortBy(clearance.polyDates, (date) => {
-              return moment(date, 'YYYY-MM-DD');
+              return format(date, null, 'YYYY-MM-DD');
             })
           );
           // return updated clearance
           return clearance;
         }),
         (clearance) => {
-          return moment(clearance.grantedDate);
+          return format(clearance.grantedDate);
         }
       )
     );
@@ -815,6 +845,8 @@ function setFormData(tab, data) {
     this.$set(this.model, 'eeoHispanicOrLatino', data.eeoHispanicOrLatino);
     this.$set(this.model, 'eeoRaceOrEthnicity', data.eeoRaceOrEthnicity);
     this.$set(this.model, 'eeoJobCategory', data.eeoJobCategory);
+    this.$set(this.model, 'eeoHasDisability', data.eeoHasDisability);
+    this.$set(this.model, 'eeoIsProtectedVeteran', data.eeoIsProtectedVeteran);
     if (this.hasAdminPermissions()) {
       this.$set(this.model, 'eeoAdminHasFilledOutEeoForm', true);
     } else {
@@ -1131,6 +1163,7 @@ export default {
       cancelling: false, // cancelling form
       confirmingValid: false, // confirming form submission
       confirmingError: false,
+      contractProjects: this.contracts.map((c) => c.projects).flat(),
       deleteLoading: false,
       disableEmpNum: false,
       errorStatus: {
@@ -1243,6 +1276,7 @@ export default {
     confirm,
     convertAutocompleteToTitlecase,
     displayError,
+    format, // dateUtils
     getRole,
     hasAdminPermissions,
     hasTabError,
@@ -1255,7 +1289,7 @@ export default {
     updateStoreEmployees,
     updateStoreUser
   },
-  props: ['currentTab', 'employee'], // employee to be created/updated
+  props: ['contracts', 'currentTab', 'employee'], // employee to be created/updated
   watch: {
     formTab: watchFormTab
   },

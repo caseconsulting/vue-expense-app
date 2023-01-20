@@ -14,6 +14,7 @@ const HIPPO_LAB = 'hippoLabs';
 const GOOGLE_MAPS = 'googleMaps';
 const AUDIT = 'audits';
 const RESUME = 'resume';
+const CONTRACTS = 'contracts';
 const API_HOSTNAME = API_CONFIG.apiHostname;
 const API_PORT = API_CONFIG.apiPort;
 const PORT = API_PORT === '443' ? '' : `:${API_PORT}`;
@@ -528,6 +529,7 @@ export default {
   EXPENSE_TYPES,
   EXPENSES,
   EMPLOYEES,
+  CONTRACTS,
   UTILITY,
   QUICK_BOOKS_TIME,
   TRAINING_URLS,

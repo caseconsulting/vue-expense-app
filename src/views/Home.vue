@@ -79,14 +79,30 @@
 import api from '@/shared/api.js';
 import ActivityFeed from '@/components/home/ActivityFeed.vue';
 import AvailableBudgets from '@/components/shared/AvailableBudgets.vue';
-import moment from 'moment-timezone';
-moment.tz.setDefault('America/New_York');
 import TwitterFeed from '@/components/home/TwitterFeed.vue';
 import _ from 'lodash';
 import { isEmpty, isMobile, getCurrentBudgetYear, updateEmployeeLogin } from '@/utils/utils';
 import { updateStoreExpenseTypes, updateStoreBudgets } from '@/utils/storeUtils';
 import QuickBooksTimeData from '@/components/shared/quickbooks/QuickBooksTimeData';
 import AnniversaryCard from '@/components/shared/AnniversaryCard';
+import {
+  format,
+  getTodaysDate,
+  isSameOrAfter,
+  isValid,
+  startOf,
+  subtract,
+  setMonth,
+  setDay,
+  getDay,
+  getMonth,
+  difference,
+  isSame,
+  isBefore,
+  isAfter,
+  getYear,
+  setYear
+} from '../shared/dateUtils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -133,31 +149,32 @@ async function createEvents() {
 
   // generate anniversaries
   let anniversaries = _.map(this.employees, (a) => {
-    let hireDate = moment(a.hireDate, 'YYYY-MM-DD');
+    let hireDate = format(a.hireDate, null, 'YYYY-MM-DD');
     let event = {};
-    if (a.workStatus != 0 && hireDate.isValid()) {
-      let now = moment();
-      let cutOff = moment().subtract(6, 'months').startOf('day'); //can't use now because itll change now
+    if (a.workStatus != 0 && isValid(a.hireDate, 'YYYY-MM-DD')) {
+      let now = getTodaysDate();
+      let cutOff = startOf(subtract(getTodaysDate(), 6, 'months', 'YYYY-MM-DD'), 'day'); //can't use now because itll change now
       //set what we want to see in the Date
-      if (now.isSameOrAfter(hireDate, 'day')) {
+      if (isSameOrAfter(now, a.hireDate, 'day')) {
         //hire date is before today
-        let anniversary = moment([now.year(), hireDate.month(), hireDate.date()]); //set anniversary to hiredate but this year
-        let diff = now.startOf('day').diff(anniversary.startOf('day'), 'day'); //difference between today and anniversary
+        let anniversary = setMonth(getTodaysDate(), getMonth(hireDate));
+        anniversary = setDay(anniversary, getDay(hireDate)); //set anniversary to hiredate but this year
+        let diff = difference(startOf(getTodaysDate(), 'day'), startOf(anniversary, 'day'), 'day'); //difference between today and anniversary
         event.date = this.getEventDateMessage(anniversary);
         if (diff < -6) {
-          anniversary.subtract(1, 'years');
-          event.date = anniversary.format('ll');
+          anniversary = subtract(anniversary, 1, 'years');
+          event.date = format(anniversary, null, 'll');
         }
-        if (cutOff.isAfter(anniversary.startOf('day'))) {
+        if (isAfter(cutOff, startOf(anniversary, 'day'))) {
           return null;
         }
-        if (anniversary.isSame(hireDate, 'day')) {
+        if (isSame(anniversary, hireDate, 'day')) {
           event.text = a.firstName + ' ' + a.lastName + ' has joined the Case Consulting team!'; //new hire message
           event.icon = 'mdi-account-plus';
           event.type = 'New Hire';
           event.newCampfire = 'https://3.basecamp.com/3097063/buckets/171415/chats/29039726';
         } else {
-          if (anniversary.diff(hireDate, 'year') == 1) {
+          if (difference(anniversary, hireDate, 'year') == 1) {
             event.text = a.firstName + ' ' + a.lastName + ' is celebrating 1 year at Case Consulting!';
           } else {
             event.text =
@@ -165,14 +182,14 @@ async function createEvents() {
               ' ' +
               a.lastName +
               ' is celebrating ' +
-              anniversary.diff(hireDate, 'year') +
+              difference(anniversary, hireDate, 'year') +
               ' years at Case Consulting!';
           }
           event.icon = 'mdi-party-popper';
           event.type = 'Anniversary';
           event.congratulateCampfire = 'https://3.basecamp.com/3097063/buckets/171415/chats/29039726';
         }
-        event.daysFromToday = now.startOf('day').diff(anniversary.startOf('day'), 'days');
+        event.daysFromToday = difference(startOf(now, 'day'), startOf(anniversary, 'day'), 'day');
         event.color = '#bc3825';
         if (this.textMaxLength < event.text.length) {
           event.truncatedText = _.truncate(event.text, { length: this.textMaxLength });
@@ -190,19 +207,18 @@ async function createEvents() {
   let birthdays = _.map(this.employees, (b) => {
     if (b.birthdayFeed && !this.isEmpty(b.birthday) && b.workStatus != 0) {
       let event = {};
-      let now = moment();
-      let cutOff = moment().subtract(6, 'months').startOf('day');
-      let birthday = moment(b.birthday, 'YYYY-MM-DD');
-      birthday = moment([now.year(), birthday.month(), birthday.date()]); // Gets birthday date this year
-
-      let diff = now.startOf('day').diff(birthday.startOf('day'), 'day');
+      let now = getTodaysDate();
+      let cutOff = startOf(subtract(now, 6, 'months'), 'day');
+      let birthday = format(b.birthday, 'YYYY-MM-DD', 'YYYY-MM-DD');
+      birthday = setYear(birthday, getYear(now));
+      let diff = difference(startOf(now, 'day'), startOf(birthday, 'day'), 'day');
       // Get event date text
       event.date = this.getEventDateMessage(birthday);
       if (diff < -6) {
-        birthday.subtract(1, 'years');
-        event.date = birthday.format('ll');
+        birthday = subtract(birthday, 1, 'years');
+        event.date = format(birthday, null, 'll');
       }
-      if (cutOff.isAfter(birthday.startOf('day'))) {
+      if (isAfter(cutOff, startOf(birthday, 'day'))) {
         return null;
       }
       // Sets event text
@@ -214,7 +230,7 @@ async function createEvents() {
       event.icon = 'mdi-cake-variant';
       event.type = 'Birthday';
       event.color = 'orange';
-      event.daysFromToday = now.startOf('day').diff(birthday.startOf('day'), 'days');
+      event.daysFromToday = difference(startOf(now, 'day'), startOf(birthday, 'day'), 'day');
       event.birthdayCampfire = 'https://3.basecamp.com/3097063/buckets/171415/chats/29039726';
       if (this.textMaxLength < event.text.length) {
         event.truncatedText = _.truncate(event.text, { length: this.textMaxLength });
@@ -228,15 +244,15 @@ async function createEvents() {
   let expenses = _.map(this.aggregatedExpenses, (a) => {
     if (!this.isEmpty(a.showOnFeed) && a.showOnFeed) {
       //value of showOnFeed is true
-      let now = moment();
-      let reimbursedDate = moment(a.reimbursedDate, 'YYYY-MM-DD');
+      let now = getTodaysDate();
+      let reimbursedDate = format(a.reimbursedDate, 'YYYY-MM-DD', 'YYYY-MM-DD');
       let event = {};
       event.date = this.getEventDateMessage(reimbursedDate);
       if (!this.isEmpty(a.url)) {
         event.link = a.url;
       }
       event.text = `${getEmployeePreferredName(a)} ${a.lastName} used their ${a.budgetName} budget on ${a.description}`;
-      event.daysFromToday = now.startOf('day').diff(reimbursedDate.startOf('day'), 'days');
+      event.daysFromToday = difference(startOf(now, 'day'), startOf(reimbursedDate, 'day'), 'day');
       if (a.budgetName === 'High Five') {
         event.congratulateCampfile = a.campfire;
         event.icon = 'mdi-hands-pray';
@@ -245,9 +261,13 @@ async function createEvents() {
         const recipient = _.find(this.employees, (e) => {
           return e.id === a.recipient;
         });
-        event.text = `${getEmployeePreferredName(a)} ${a.lastName} gave ${getEmployeePreferredName(recipient)} ${
-          recipient.lastName
-        } a High Five: ${a.note}`;
+        if (recipient) {
+          event.text = `${getEmployeePreferredName(a)} ${a.lastName} gave ${getEmployeePreferredName(recipient)} ${
+            recipient.lastName
+          } a High Five: ${a.note}`;
+        } else {
+          event.text = `${a.description}: ${a.note}`;
+        }
       } else if (a.recipient) {
         event.congratulateCampfire = a.campfire;
         event.icon = 'mdi-thumbs-up';
@@ -271,23 +291,24 @@ async function createEvents() {
 
   // generate schedules
   let schedules = _.map(this.scheduleEntries, (a) => {
-    let now = moment();
-    let cutOff = moment().subtract(6, 'months').startOf('day');
-    let startDate = moment(a.starts_at);
-    let endDate = moment(a.ends_at);
+    let now = getTodaysDate();
+    let cutOff = startOf(subtract(now, 6, 'months'), 'day');
+
+    let startDate = a.starts_at;
+    let endDate = a.ends_at;
     let event = {};
     event.date = this.getEventDateMessage(startDate);
-    if (cutOff.isAfter(startDate.startOf('day'))) {
+    if (isAfter(cutOff, startOf(startDate, 'day'))) {
       return null;
     }
-    if (startDate.startOf('day').isSame(endDate.startOf('day'), 'days')) {
+    if (isSame(startOf(startDate, 'day'), startOf(endDate, 'day'), 'day')) {
       event.text = `${a.title}`;
     } else {
-      event.text = `${a.title} goes until ${endDate.format('LL')}!`;
+      event.text = `${a.title} goes until ${format(endDate, 'LL')}!`;
     }
     event.icon = 'mdi-calendar';
     event.type = 'Event';
-    event.daysFromToday = now.startOf('day').diff(startDate.startOf('day'), 'days');
+    event.daysFromToday = difference(startOf(now, 'day'), startOf(startDate, 'day'), 'day');
     if (event.daysFromToday < -6) {
       return null;
     }
@@ -303,44 +324,48 @@ async function createEvents() {
   // generate awards
   let awards = _.map(this.aggregatedAwards, (a) => {
     // get award information
-    const dateSubmitted = moment(a.dateSubmitted || a.dateReceived);
+    let now = getTodaysDate();
+    const dateSubmitted = a.dateSubmitted || a.dateReceived;
     let award = {
       icon: 'mdi-fire',
       color: '#f9c64e',
       type: 'Award',
-      daysFromToday: moment().startOf('day').diff(dateSubmitted.startOf('day'), 'days'),
-      text: `${getEmployeePreferredName(a.employee)} ${a.employee.lastName} was awarded "${a.name}" in ${moment(
-        a.dateReceived
-      ).format('MMMM')}`,
+      daysFromToday: difference(startOf(now, 'day'), startOf(dateSubmitted, 'day'), 'day'),
+      text: `${getEmployeePreferredName(a.employee)} ${a.employee.lastName} was awarded "${a.name}" in ${format(
+        a.dateReceived,
+        null,
+        'MMMM'
+      )}`,
       congratulateCampfire: 'https://3.basecamp.com/3097063/buckets/171415/chats/29039726'
     };
     // date formatting
-    award.date = dateSubmitted.format('MMM YYYY'); // default
-    const withinSixDays = dateSubmitted.isAfter(moment().subtract(6, 'days')) && dateSubmitted.isBefore(moment());
+    award.date = format(dateSubmitted, null, 'MMM YYYY'); // default
+    const withinSixDays = isAfter(dateSubmitted, subtract(now, 6, 'days')) && isBefore(dateSubmitted, now);
     if (withinSixDays) award.date = getEventDateMessage(dateSubmitted);
     // return award only if we want to display it (ie, if awarded <6 months ago)
-    const wantToDisplay = moment(a.dateReceived).isAfter(moment().subtract(6, 'months'));
+    const wantToDisplay = isAfter(a.dateReceived, subtract(now, 6, 'months'));
     return wantToDisplay ? award : null;
   });
 
   // generate certs
   let certs = _.map(this.aggregatedCerts, (c) => {
     // get cert information
-    const dateSubmitted = moment(c.dateSubmitted || c.dateReceived);
+    let now = getTodaysDate();
+    const dateSubmitted = c.dateSubmitted || c.dateReceived;
     let cert = {
       icon: 'mdi-certificate',
       color: '#3C7DD0',
       type: 'Certification',
-      daysFromToday: moment().startOf('day').diff(dateSubmitted.startOf('day'), 'days'),
+      daysFromToday: difference(startOf(now, 'day'), startOf(dateSubmitted, 'day'), 'day'),
       text: `${getEmployeePreferredName(c.employee)} ${c.employee.lastName} was certified "${c.name}"`,
       congratulateCampfire: 'https://3.basecamp.com/3097063/buckets/171415/chats/29039726'
     };
     // date formatting
-    cert.date = dateSubmitted.format('MMM YYYY'); // default
-    const withinSixDays = dateSubmitted.isAfter(moment().subtract(6, 'days')) && dateSubmitted.isBefore(moment());
+    cert.date = format(dateSubmitted, null, 'MMM YYYY'); // default
+    const withinSixDays = isAfter(dateSubmitted, subtract(now, 6, 'days')) && isBefore(dateSubmitted, now);
     if (withinSixDays) cert.date = getEventDateMessage(dateSubmitted);
     // return cert only if we want to display it (ie, if received <6 months ago)
-    const wantToDisplay = moment(c.dateReceived).isAfter(moment().subtract(6, 'months'));
+    const wantToDisplay = isAfter(c.dateReceived, subtract(now, 6, 'months'));
     return wantToDisplay ? cert : null;
   });
 
@@ -357,8 +382,8 @@ async function createEvents() {
  * @return string - string denoting the date of when the event is coming
  */
 function getEventDateMessage(date) {
-  let now = moment();
-  let diff = now.startOf('day').diff(date.startOf('day'), 'day');
+  let now = getTodaysDate();
+  let diff = difference(startOf(now, 'day'), startOf(date, 'day'), 'day');
   if (diff == 0) {
     return 'Today'; //set date message as today if no difference in date
   } else if (diff == 1) {
@@ -370,7 +395,7 @@ function getEventDateMessage(date) {
   } else if (diff < 0 && diff >= -6) {
     return 'Coming up in ' + Math.abs(diff) + ' days'; //if its in the "future" and within 6 days say its coming up
   } else {
-    return date.format('ll');
+    return format(date, null, 'll');
   }
 } // getEventDateMessage
 

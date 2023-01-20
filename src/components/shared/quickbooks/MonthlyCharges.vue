@@ -142,11 +142,10 @@
 </template>
 
 <script>
-const moment = require('moment-timezone');
-moment.tz.setDefault('America/New_York');
 import api from '@/shared/api.js';
 import _ from 'lodash';
 import { isEmpty } from '@/utils/utils';
+import { add, format, getIsoWeekday, getTodaysDate, setDay, subtract } from '@/shared/dateUtils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -161,15 +160,17 @@ import { isEmpty } from '@/utils/utils';
  */
 function remainingWorkDays() {
   let remainingWorkDays = 0;
-  let day = moment();
-  let currMonth = day.month();
-  while (day.month() === currMonth) {
-    if (day.isoWeekday() >= 1 && day.isoWeekday() <= 5) {
+  let day = getTodaysDate();
+  let currMonth = day.split('-')[1];
+  let month = day.split('-')[1];
+  while (month === currMonth) {
+    if (getIsoWeekday(day) >= 1 && getIsoWeekday(day) <= 5) {
       // monday - friday
       remainingWorkDays += 1;
     }
     // increment to the next day
-    day = day.add(1, 'd');
+    day = add(day, 1, 'd');
+    month = day.split('-')[1];
   }
   return remainingWorkDays;
 } // remainingWorkDays
@@ -187,13 +188,13 @@ async function created() {
   this.isEmployeeView = this.$route.name === 'employee';
   this.loading = true;
   // set the current month
-  this.month = moment().format('MMMM');
+  this.month = format(getTodaysDate(), null, 'MMMM');
   // set the previous month
-  this.prevMonth = moment().subtract(1, 'months').format('MMM');
+  this.prevMonth = format(subtract(getTodaysDate(), 1, 'months'), null, 'MMM');
   // set the current year
-  this.year = moment().format('YYYY');
+  this.year = format(getTodaysDate(), null, 'YYYY');
   // set the previous year
-  this.prevYear = moment().subtract(1, 'months').format('YYYY');
+  this.prevYear = format(subtract(getTodaysDate(), 1, 'months'), null, 'YYYY');
 
   await this.setMonthlyCharges();
 } // created
@@ -209,15 +210,17 @@ async function created() {
  */
 function calcWorkHours() {
   let workHours = 0;
-  let day = this.isPrevMonth ? moment().set('date', 1).subtract(1, 'months') : moment().set('date', 1);
-  let currMonth = day.month();
-  while (day.month() === currMonth) {
-    // if day.isoWeekday() >= 1 && <=6 then add user hours to workHours
-    if (day.isoWeekday() >= 1 && day.isoWeekday() <= 5) {
+  let day = this.isPrevMonth ? setDay(subtract(getTodaysDate(), 1, 'months'), 1) : setDay(getTodaysDate(), 1);
+  let currMonth = day.split('-')[1];
+  let month = day.split('-')[1];
+  while (month === currMonth) {
+    // if day.isoWeekday() >= 1 && <= 5 then add user hours to workHours
+    if (getIsoWeekday(day) >= 1 && getIsoWeekday(day) <= 5) {
       workHours += this.workDayHours;
     }
     // increment to the next day
-    day = day.add(1, 'd');
+    day = add(day, 1, 'd');
+    month = day.split('-')[1];
   }
   this.workHours = workHours;
 } // calcWorkHours
@@ -391,12 +394,18 @@ export default {
     };
   },
   methods: {
+    add, // dateUtils
     calcWorkHours,
     changeMonthData,
+    format, // dateUtils
     formatHours,
+    getIsoWeekday, // dateUtils
+    getTodaysDate, // dateUtils
     isEmpty,
     roundHours,
+    setDay, // dateUtils
     setMonthlyCharges,
+    subtract, // dateUtils
     toFAQ,
     updateEstimate
   },

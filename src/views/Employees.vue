@@ -216,6 +216,7 @@
           <convert-employees-to-csv
             v-if="userRoleIsAdmin()"
             :midAction="midAction"
+            :contracts="contracts"
             :employees="filteredEmployees"
           ></convert-employees-to-csv>
           <generate-csv-eeo-report
@@ -232,19 +233,18 @@
       </v-container>
     </v-card>
     <v-dialog @click:outside="clearCreateEmployee" v-model="createEmployee"
-      ><employee-form :key="childKey" :model="this.model"></employee-form
+      ><employee-form :contracts="contracts" :key="childKey" :model="this.model"></employee-form
     ></v-dialog>
   </div>
 </template>
 
 <script>
 import api from '@/shared/api.js';
-import { updateStoreEmployees, updateStoreAvatars } from '@/utils/storeUtils';
+import { updateStoreEmployees, updateStoreAvatars, updateStoreContracts } from '@/utils/storeUtils';
 import ConvertEmployeesToCsv from '@/components/employees/csv/ConvertEmployeesToCsv.vue';
 import DeleteErrorModal from '@/components/modals/DeleteErrorModal.vue';
 import DeleteModal from '@/components/modals/DeleteModal.vue';
 import EmployeeForm from '@/components/employees/EmployeeForm.vue';
-import moment from 'moment-timezone';
 import _ from 'lodash';
 import ConvertEmployeeToCsv from '@/components/employees/csv/ConvertEmployeeToCsv.vue';
 import GenerateCsvEeoReport from '@/components/employees/csv/GenerateCsvEeoReport.vue';
@@ -258,6 +258,7 @@ import {
   userRoleIsAdmin,
   userRoleIsManager
 } from '@/utils/utils';
+import { format } from '../shared/dateUtils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -359,9 +360,8 @@ function getLoginDate(item) {
   let date = item.lastLogin;
 
   if (date) {
-    let momentDate = moment(date, 'MMM Do, YYYY HH:mm:ss'); //formatting taken from Callback.vue
-    item.lastLoginSeconds = parseInt(momentDate.format('X')); //seconds
-    date = momentDate.format('MMM Do, YYYY HH:mm'); //what's displayed
+    item.lastLoginSeconds = parseInt(format(date, 'MMM Do, YYYY HH:mm:ss', 'X')); //seconds
+    date = format(date, 'MMM Do, YYYY HH:mm:ss', 'MMM Do, YYYY HH:mm'); //what's displayed
   }
 
   return date;
@@ -401,17 +401,15 @@ function isFocus(item) {
  */
 async function refreshEmployees() {
   this.loading = true; // set loading status to true
-  if (!this.$store.getters.employees) {
-    await this.updateStoreEmployees();
-  }
+  await Promise.all([
+    !this.$store.getters.employees ? this.updateStoreEmployees() : '',
+    !this.$store.getters.basecampAvatars ? this.updateStoreAvatars() : '',
+    !this.$store.getters.contracts ? this.updateStoreContracts() : ''
+  ]);
   this.employees = this.$store.getters.employees; // get all employees
   this.filterEmployees(); // filter employees
   this.expanded = []; // collapse any expanded rows in the database
 
-  // set employee avatar
-  if (!this.$store.getters.basecampAvatars) {
-    await this.updateStoreAvatars();
-  }
   let avatars = this.$store.getters.basecampAvatars;
   _.map(this.employees, (employee) => {
     let avatar = _.find(avatars, ['email_address', employee.email]);
@@ -419,6 +417,7 @@ async function refreshEmployees() {
     employee.avatar = avatarUrl;
     return employee;
   });
+  this.contracts = this.$store.getters.contracts;
   this.loading = false; // set loading status to false
 } // refreshEmployees
 
@@ -568,6 +567,7 @@ export default {
   data() {
     return {
       childKey: 0,
+      contracts: [],
       createEmployee: false,
       deleteModel: {
         id: null
@@ -688,6 +688,7 @@ export default {
     userRoleIsManager,
     validateDelete,
     updateStoreAvatars,
+    updateStoreContracts,
     updateStoreEmployees
   },
   watch: {

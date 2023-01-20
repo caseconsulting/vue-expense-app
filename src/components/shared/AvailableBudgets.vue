@@ -44,12 +44,11 @@
 </template>
 
 <script>
+import _ from 'lodash';
 import api from '@/shared/api.js';
 import AvailableBudgetSummary from '@/components/shared/AvailableBudgetSummary.vue';
-import _ from 'lodash';
-import moment from 'moment-timezone';
-moment.tz.setDefault('America/New_York');
-import { isBetweenDates, convertToMoneyString, getCurrentBudgetYear } from '@/utils/utils';
+import { convertToMoneyString, getCurrentBudgetYear } from '@/utils/utils';
+import { getTodaysDate, isBetween } from '@/shared/dateUtils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -132,7 +131,7 @@ async function refreshBudget() {
         this.expenseTypes,
         (e) =>
           e.id == budget.expenseTypeId &&
-          (e.isInactive || !isBetweenDates(moment().toISOString(), budget.fiscalStartDate, budget.fiscalEndDate))
+          (e.isInactive || !isBetween(getTodaysDate(), budget.fiscalStartDate, budget.fiscalEndDate, 'days', '[]'))
       ) || _.some(this.expenses, (e) => e.expenseTypeId == budget.expenseTypeId && _.isEmpty(e.reimbursedDate))
     );
   });
@@ -260,6 +259,7 @@ export default {
     calcRemaining,
     convertToMoneyString,
     getCurrentBudgetYear,
+    getTodaysDate,
     refreshBudget,
     refreshBudgetYears,
     refreshEmployee,

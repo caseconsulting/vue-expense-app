@@ -27,10 +27,10 @@
             <template v-slot:activator="{ on, attrs }">
               <v-text-field
                 ref="formFields"
-                :value="certification.dateReceived | formatDate"
+                :value="format(certification.dateReceived, null, 'MM/DD/YYYY')"
                 label="Date Received"
                 prepend-icon="event_available"
-                :rules="[...getDateRules(), dateOrderRules(index)]"
+                :rules="[...getDateRules()]"
                 hint="MM/DD/YYYY format"
                 v-mask="'##/##/####'"
                 v-bind="attrs"
@@ -63,7 +63,7 @@
             <template v-slot:activator="{ on, attrs }">
               <v-text-field
                 ref="formFields"
-                :value="certification.expirationDate | formatDate"
+                :value="format(certification.expirationDate, null, 'MM/DD/YYYY')"
                 label="Expiration Date (optional)"
                 prepend-icon="event_busy"
                 :rules="[...getDateOptionalRules(), dateOrderRules(index)]"
@@ -119,10 +119,9 @@
 <script>
 import _ from 'lodash';
 import { getDateRules, getDateOptionalRules, getRequiredRules } from '@/shared/validationUtils.js';
-import { formatDate, parseDate, isEmpty, isMobile } from '@/utils/utils';
+import { isEmpty, isMobile } from '@/utils/utils';
+import { add, format, getTodaysDate, isAfter } from '@/shared/dateUtils';
 import { mask } from 'vue-the-mask';
-const moment = require('moment-timezone');
-moment.tz.setDefault('America/New_York');
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -153,7 +152,7 @@ function addCertification() {
   this.editedCertifications.push({
     name: null,
     dateReceived: null,
-    dateSubmitted: moment().startOf('day'),
+    dateSubmitted: getTodaysDate(),
     expirationDate: null,
     showReceivedMenu: false,
     showExpirationMenu: false
@@ -175,7 +174,7 @@ function deleteCertification(index) {
  * @return String - The date in YYYY-MM-DD format
  */
 function parseEventDate() {
-  return this.parseDate(event.target.value);
+  return this.format(event.target.value, 'MM/DD/YYYY', 'YYYY-MM-DD');
 } //parseEventDate
 
 /**
@@ -243,9 +242,9 @@ export default {
       dateOrderRules: (certIndex) => {
         if (this.editedCertifications) {
           let position = this.editedCertifications[certIndex];
-          if (!this.isEmpty(position.expirationDate) && moment(position.expirationDate) && position.dateReceived) {
+          if (!this.isEmpty(position.expirationDate) && position.dateReceived) {
             return (
-              moment(position.expirationDate).add(1, 'd').isAfter(moment(position.dateReceived)) ||
+              isAfter(add(position.expirationDate, 1, 'd'), position.dateReceived) ||
               'Expiration date must be at or after date received'
             );
           } else {
@@ -255,22 +254,22 @@ export default {
           return true;
         }
       },
-      dateSubmitted: moment().startOf('day'),
+      dateSubmitted: getTodaysDate(),
       editedCertifications: _.cloneDeep(this.model) // stores edited certifications info
     };
   },
   directives: { mask },
-  filters: {
-    formatDate
-  },
   methods: {
+    add,
     addCertification,
     deleteCertification,
+    format,
     getDateOptionalRules,
     getDateRules,
+    getTodaysDate,
     getRequiredRules,
+    isAfter,
     isEmpty,
-    parseDate,
     parseEventDate,
     populateDropDowns,
     validateFields

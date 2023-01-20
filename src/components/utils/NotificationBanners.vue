@@ -38,12 +38,11 @@
 </template>
 
 <script>
-import moment from 'moment-timezone';
 import api from '@/shared/api.js';
 import _ from 'lodash';
 import { asyncForEach, isMobile, isSmallScreen } from '@/utils/utils.js';
 import { updateStoreExpenseTypes } from '@/utils/storeUtils';
-moment.tz.setDefault('America/New_York');
+import { add, format, getTodaysDate, isBefore } from '@/shared/dateUtils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -59,10 +58,10 @@ function checkBadges() {
     this.user.clearances.forEach((clearance) => {
       // determines if a user has a badge expiring within 30 days
       if (clearance.badgeExpirationDate) {
-        const needToShow = moment(clearance.badgeExpirationDate).isBefore(moment().add(31, 'days'));
+        const needToShow = isBefore(clearance.badgeExpirationDate, add(getTodaysDate(), 31, 'days'));
         if (needToShow) {
-          const expire = moment(clearance.badgeExpirationDate).isBefore(moment()) ? 'expired' : 'is expiring';
-          let momentDate = moment(clearance.badgeExpirationDate).format('MMMM Do, YYYY');
+          const expire = isBefore(clearance.badgeExpirationDate, getTodaysDate()) ? 'expired' : 'is expiring';
+          let formattedDate = format(clearance.badgeExpirationDate, null, 'MMMM Do, YYYY');
           this.alerts.push({
             handler: {
               name: 'Profile',
@@ -72,7 +71,7 @@ function checkBadges() {
             closeable: false,
             status: 'error',
             color: '#f27311',
-            message: `Badge ${expire} on ${momentDate} for clearance: ${clearance.type}`,
+            message: `Badge ${expire} on ${formattedDate} for clearance: ${clearance.type}`,
             id: this.randId(),
             item: clearance
           });
@@ -92,10 +91,10 @@ function checkCertifications() {
       const needToShow =
         (cert.expirationWasSeen == undefined || !cert.expirationWasSeen) &&
         cert.expirationDate &&
-        moment(cert.expirationDate).isBefore(moment().add(31, 'days'));
+        isBefore(cert.expirationDate, add(getTodaysDate(), 31, 'days'));
       if (needToShow) {
-        const expire = moment(cert.expirationDate).isBefore(moment()) ? 'expired' : 'is expiring';
-        let momentDate = moment(cert.expirationDate).format('MMMM Do, YYYY');
+        const expire = isBefore(cert.expirationDate, getTodaysDate()) ? 'expired' : 'is expiring';
+        let formattedDate = format(cert.expirationDate, null, 'MMMM Do, YYYY');
         this.alerts.push({
           handler: {
             name: 'Profile',
@@ -105,7 +104,7 @@ function checkCertifications() {
           closeable: false,
           status: 'error',
           color: '#2a49a8',
-          message: `Certification ${expire} on ${momentDate} for certification: ${cert.name}`,
+          message: `Certification ${expire} on ${formattedDate} for certification: ${cert.name}`,
           // below only needed for mark seen button
           seenButton: true,
           type: 'certification',
@@ -280,13 +279,17 @@ export default {
     };
   },
   methods: {
+    add, // dateUtils
     asyncForEach,
     checkBadges,
     checkCertifications,
     checkReimbursements,
+    format, // dateUtils
     getButtonStyling,
+    getTodaysDate, // dateUtils
     handleClick,
     handleMarkSeen,
+    isBefore, // dateUtils
     isMobile,
     isSmallScreen,
     randId,

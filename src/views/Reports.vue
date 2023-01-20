@@ -13,7 +13,7 @@
 </template>
 <script>
 import EmployeeReportsTable from '@/components/reports/EmployeeReportsTable.vue';
-import { updateStoreEmployees } from '@/utils/storeUtils';
+import { updateStoreEmployees, updateStoreContracts } from '@/utils/storeUtils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -26,9 +26,10 @@ import { updateStoreEmployees } from '@/utils/storeUtils';
  */
 async function created() {
   if (this.$store.getters.storeIsPopulated) {
-    if (!this.$store.getters.employees) {
-      await this.updateStoreEmployees();
-    }
+    await Promise.all([
+      !this.$store.getters.employees ? this.updateStoreEmployees() : '',
+      !this.$store.getters.contracts ? this.updateStoreContracts() : ''
+    ]);
     this.loading = false;
   }
   if (this.$route.params.requestedFilter) {
@@ -68,19 +69,22 @@ export default {
   },
   data() {
     return {
+      contracts: null,
       loading: true,
       wasRedirected: false
     };
   },
   methods: {
+    updateStoreContracts,
     updateStoreEmployees
   },
   watch: {
     async storeIsPopulated() {
       if (this.$store.getters.storeIsPopulated) {
-        if (!this.$store.getters.employees) {
-          await this.updateStoreEmployees();
-        }
+        await Promise.all([
+          !this.$store.getters.employees ? this.updateStoreEmployees() : '',
+          !this.$store.getters.contracts ? this.updateStoreContracts() : ''
+        ]);
         this.loading = false;
       }
     }

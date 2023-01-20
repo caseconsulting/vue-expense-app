@@ -3,37 +3,49 @@
     <!-- Loop Contracts -->
     <div v-for="(contract, index) in editedContracts" class="gray-border ma-0 pt-3 pb-1 px-5" :key="index">
       <!-- Name of Contract -->
-      <v-combobox
+      <v-select
         ref="formFields"
-        v-model="contract.name"
-        :rules="[...getRequiredRules(), duplicateContractName(index)]"
-        :items="contractsDropDown"
+        v-model="contract.contractName"
+        :rules="[...getRequiredRules(), duplicateContractPrimeCombo(index)]"
+        :items="getContractsDropdownItems(contract)"
+        @change="
+          editedContracts.push(0); // force re-render for the items prop
+          editedContracts.pop(0);
+        "
         label="Contract"
         data-vv-name="Contract"
         clearable
       >
-      </v-combobox>
+      </v-select>
 
       <!-- Name of Prime -->
-      <v-combobox
+      <v-select
         ref="formFields"
-        v-model="contract.primes"
+        v-model="contract.primeName"
         :rules="getRequiredRules()"
-        :items="primesDropDown"
-        label="Primes"
-        data-vv-name="Primes"
+        :items="getPrimesDropdownItems(contract)"
+        @change="
+          editedContracts.push(0); // force re-render for the items prop
+          editedContracts.pop(0);
+        "
+        label="Prime"
+        data-vv-name="Prime"
         clearable
-        multiple
       >
-      </v-combobox>
+      </v-select>
       <!-- Start of project loop -->
-      <div v-for="(project, projIndex) in contract.projects" class="pt-3 pb-1" :key="index + '-' + projIndex">
-        <v-text-field
+      <div v-for="(project, projIndex) in contract.projects" class="pt-1 pb-2" :key="index + '-' + projIndex">
+        <v-select
           ref="formFields"
           :id="'proj-' + projIndex + '-' + index"
-          v-model.trim="project.name"
-          :rules="getRequiredRules()"
+          v-model="project.projectName"
+          :items="getProjectsDropdownItems(contract)"
+          :rules="[...getRequiredRules(), duplicateContractProjects(project, index)]"
           :label="'Project ' + (projIndex + 1)"
+          @change="
+            editedContracts.push(0); // force re-render for the items prop
+            editedContracts.pop(0);
+          "
           data-vv-name="Project"
           clearable
         >
@@ -45,7 +57,7 @@
             </template>
             <span>Delete Project</span>
           </v-tooltip>
-        </v-text-field>
+        </v-select>
         <v-row>
           <v-col cols="12" sm="6" md="12" lg="6" class="pt-3">
             <!-- Start Date -->
@@ -61,7 +73,7 @@
                 <v-text-field
                   :id="'start-field-' + index + '-' + projIndex"
                   ref="formFields"
-                  :value="project.startDate | formatDateMonthYear"
+                  :value="format(project.startDate, null, 'MM/YYYY')"
                   label="Start Date"
                   hint="MM/YYYY format"
                   v-mask="'##/####'"
@@ -98,7 +110,7 @@
                   :id="'end-field-' + index + '-' + projIndex"
                   ref="formFields"
                   :disabled="project.presentDate"
-                  :value="project.endDate | formatDateMonthYear"
+                  :value="format(project.endDate, null, 'MM/YYYY')"
                   label="End Date"
                   prepend-icon="event_busy"
                   :rules="[
@@ -173,8 +185,8 @@
 import _ from 'lodash';
 import { mask } from 'vue-the-mask';
 import { getDateMonthYearRules, getDateMonthYearOptionalRules, getRequiredRules } from '@/shared/validationUtils.js';
-import { isEmpty, formatDateMonthYear, parseDateMonthYear, isMobile } from '@/utils/utils';
-const moment = require('moment');
+import { isEmpty, isMobile } from '@/utils/utils';
+import { add, format, isAfter } from '@/shared/dateUtils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -188,12 +200,14 @@ const moment = require('moment');
 async function created() {
   window.EventBus.$emit('created', 'contracts'); // emit contracts tab was created
   this.employees = this.$store.getters.employees; // get all employees
-  this.populateDropDowns(); // get autocomplete drop down data
   this.editedContracts.forEach((contract) => {
+    contract.contractName = this.contracts.find((c) => c.id === contract.contractId).contractName;
+    contract.primeName = this.contracts.find((c) => c.id === contract.contractId).primeName;
     if (!contract.projects) {
       contract.projects = [
         {
-          name: '',
+          projectId: '',
+          projectName: '',
           endDate: null,
           presentDate: false,
           startDate: null,
@@ -201,6 +215,10 @@ async function created() {
           showEndMenu: false
         }
       ];
+    } else {
+      _.forEach(contract.projects, (proj) => [
+        (proj.projectName = this.contractProjects.find((p) => p.id === proj.projectId).projectName)
+      ]);
     }
   });
 } // created
@@ -217,13 +235,19 @@ async function created() {
 function addContract() {
   if (!this.editedContracts) this.editedContracts = [];
   this.editedContracts.push({
-    name: '',
-    primes: [],
+    contractId: '',
+    contractName: '',
+    primeName: '',
     years: 0,
     current: false,
     projects: [
       {
-        name: ''
+        projectName: '',
+        endDate: null,
+        presentDate: false,
+        startDate: null,
+        showStartMenu: false,
+        showEndMenu: false
       }
     ]
   });
@@ -236,7 +260,7 @@ function addContract() {
  */
 function addProject(contractIndex) {
   this.editedContracts[contractIndex].projects.push({
-    name: '',
+    projectName: '',
     endDate: null,
     presentDate: false,
     startDate: null,
@@ -269,6 +293,97 @@ function deleteProject(contractIndex, projectIndex) {
 } // deleteProject
 
 /**
+ * Gets contract names available based on if primes or projects are entered.
+ *
+ * @param contract - A user's contract data
+ * @return Array - An array of contract names
+ */
+function getContractsDropdownItems(contract) {
+  if (!contract) {
+    return [];
+  } else if (contract.primeName && contract.projects.length == 1 && _.isEmpty(contract.projects[0].projectName)) {
+    // only prime name is filled out
+    let matchedContracts = this.contracts.filter((c) => c.primeName === contract.primeName);
+    return matchedContracts.map((c) => c.contractName);
+  } else if (contract.primeName) {
+    // prime name and project names are filled out
+    let project = contract.projects[0];
+    let matchedContracts = this.contracts.filter(
+      (c) => c.primeName === contract.primeName && c.projects.some((p) => p.projectName === project.projectName)
+    );
+    return matchedContracts.map((c) => c.contractName);
+  } else if (_.isEmpty(contract.primeName) && !_.isEmpty(contract.projects[0].projectName)) {
+    // only project names are filled out
+    let project = contract.projects[0];
+    let matchedContracts = this.contracts.filter((c) => c.projects.some((p) => p.projectName === project.projectName));
+    return matchedContracts.map((c) => c.contractName);
+  } else {
+    // prime and projects fields are empty
+    return this.contracts.map((c) => c.contractName);
+  }
+} // getContractsDropdownItems
+
+/**
+ * Gets prime names available based on if contract names or projects are entered.
+ *
+ * @param contract - A user's contract data
+ * @return Array - An array of prime names
+ */
+function getPrimesDropdownItems(contract) {
+  if (!contract) {
+    return [];
+  } else if (contract.contractName && contract.projects.length == 1 && _.isEmpty(contract.projects[0].projectName)) {
+    // only contract name is filled out
+    let matchedContracts = this.contracts.filter((c) => c.contractName === contract.contractName);
+    return matchedContracts.map((c) => c.primeName);
+  } else if (contract.contractName) {
+    // contract name and project names are filled out
+    let project = contract.projects[0];
+    let matchedContracts = this.contracts.filter(
+      (c) => c.contractName === contract.contractName && c.projects.some((p) => p.projectName === project.projectName)
+    );
+    return matchedContracts.map((c) => c.primeName);
+  } else if (_.isEmpty(contract.contractName) && !_.isEmpty(contract.projects[0].projectName)) {
+    // only project names are filled out
+    let project = contract.projects[0];
+    let matchedContracts = this.contracts.filter((c) => c.projects.some((p) => p.projectName === project.projectName));
+    return matchedContracts.map((c) => c.primeName);
+  } else {
+    // prime and projects fields are empty
+    return this.contracts.map((c) => c.primeName);
+  }
+} // getPrimesDropdownItems
+
+/**
+ * Gets project names available based on if contract names or prime names are entered.
+ *
+ * @param contract - A user's contract data
+ * @return Array - An array of project names
+ */
+function getProjectsDropdownItems(contract) {
+  if (!contract) {
+    return [];
+  } else if (contract.contractName && contract.primeName) {
+    // both field filled out
+    let matchedContracts = this.contracts.filter(
+      (c) => c.contractName === contract.contractName && c.primeName === contract.primeName
+    );
+    return matchedContracts.map((c) => c.projects.map((p) => p.projectName)).flat();
+  } else if (contract.contractName && _.isEmpty(contract.primeName)) {
+    // only contract name is filled out
+    let matchedContracts = this.contracts.filter((c) => c.contractName === contract.contractName);
+    return matchedContracts.map((c) => c.projects.map((p) => p.projectName)).flat();
+  } else if (contract.primeName && _.isEmpty(contract.contractName)) {
+    // only prime name is filled out
+    let matchedContracts = this.contracts.filter((c) => c.primeName === contract.primeName);
+    return matchedContracts.map((c) => c.projects.map((p) => p.projectName)).flat();
+  } else {
+    // prime and projects fields are empty
+    return this.contractProjects.map((p) => p.projectName);
+  }
+} // getProjectsDropdownItems
+
+/**
  * Checks if the current contract has any projects without an end date.
  *
  * @param index The index of the contract in this.editedContracts
@@ -286,27 +401,11 @@ function hasEndDatesFilled(index) {
 /**
  * Parse the date after losing focus.
  *
- * @return String - The date in YYYY-MM-DD format
+ * @return String - The date in YYYY-MM format
  */
 function parseEventDate() {
-  return this.parseDateMonthYear(event.target.value);
+  return this.format(event.target.value, 'MM/YYYY', 'YYYY-MM');
 } //parseEventDate
-
-/**
- * Populate drop downs with information that other employees have filled out.
- */
-function populateDropDowns() {
-  let employeesContracts = _.map(this.employees, (employee) => employee.contracts); // extract contracts
-  employeesContracts = _.compact(employeesContracts); // remove falsey values
-  // loop employees
-  _.forEach(employeesContracts, (contracts) => {
-    // loop contracts
-    _.forEach(contracts, (contract) => {
-      this.contractsDropDown.push(contract.name); // add contract name
-      this.primesDropDown.push(...contract.primes); // add contract primes
-    });
-  });
-} // populateDropDowns
 
 /**
  * Validate all input fields are valid. Emit to parent the error status.
@@ -363,30 +462,35 @@ export default {
   created,
   data() {
     return {
-      contractsDropDown: [], // autocomplete contract name options
+      contractProjects: this.contracts.map((c) => c.projects).flat(),
       dateOrderRule: (compIndex, projIndex) => {
         if (this.editedContracts) {
           let project = this.editedContracts[compIndex].projects[projIndex];
-          return !this.isEmpty(project.endDate) && moment(project.endDate) && project.startDate
-            ? moment(project.endDate).add(1, 'd').isAfter(moment(project.startDate)) ||
-                'End date must be at or after start date'
+          return !this.isEmpty(project.endDate) && project.startDate
+            ? isAfter(add(project.endDate, 1, 'd'), project.startDate) || 'End date must be at or after start date'
             : true;
         } else {
           return true;
         }
       },
-      duplicateContractName: (conIndex) => {
-        let contractNames = _.map(this.editedContracts, (contract) => contract.name);
-        let primeNames = _.map(this.editedContracts, (contract) => contract.primes);
-        let contractName = contractNames[conIndex];
-        let primeName = primeNames[conIndex];
-        contractNames.splice(conIndex, 1);
-        primeNames.splice(conIndex, 1);
-        return (
-          !contractNames.includes(contractName) ||
-          (contractNames.includes(contractName) && !primeNames.includes(primeName)) ||
-          'Duplicate contract name'
+      duplicateContractPrimeCombo: (conIndex) => {
+        let contract = this.editedContracts[conIndex];
+        let found = _.some(
+          this.contracts,
+          (c) => c.contractName === contract.contractName && c.primeName === contract.primeName
         );
+        let filteredContracts = _.filter(
+          this.editedContracts,
+          (c) => c.contractName === contract.contractName && c.primeName === contract.primeName
+        );
+        return !found || filteredContracts.length === 1 || 'Duplicate contract and prime combination';
+      },
+      duplicateContractProjects: (project, conIndex) => {
+        let filteredProjects = _.filter(
+          this.editedContracts[conIndex].projects,
+          (p) => p.projectName === project.projectName
+        );
+        return filteredProjects.length === 1 || 'Duplicate project within the same contract';
       },
       editedContracts: _.cloneDeep(this.model), // stores edited contracts info
       endDatePresentRule: (compIndex, projIndex) => {
@@ -410,25 +514,26 @@ export default {
     };
   },
   directives: { mask },
-  filters: {
-    formatDateMonthYear
-  },
   methods: {
+    add, // dateUtils
     addContract,
     addProject,
+    getContractsDropdownItems,
+    getPrimesDropdownItems,
+    getProjectsDropdownItems,
     deleteContract,
     deleteProject,
+    format, // dateUtils
     getDateMonthYearRules,
     getDateMonthYearOptionalRules,
     getRequiredRules,
     hasEndDatesFilled,
+    isAfter, // dateUtils
     isEmpty,
-    parseDateMonthYear,
     parseEventDate,
-    populateDropDowns,
     validateFields
   },
-  props: ['model', 'validating'],
+  props: ['contracts', 'model', 'validating'],
   watch: {
     validating: watchValidating
   }

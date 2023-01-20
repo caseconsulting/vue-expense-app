@@ -21,8 +21,7 @@ import api from '@/shared/api';
 import BarChart from '../charts/base-charts/BarChart.vue';
 import AuditsTable from '@/components/audits/AuditsTable.vue';
 import { storeIsPopulated } from '@/utils/utils.js';
-const moment = require('moment-timezone');
-moment.tz.setDefault('America/New_York');
+import { format, isBefore, getHour, add } from '../../shared/dateUtils';
 const IsoFormat = 'MMMM Do YYYY, h:mm:ss a';
 
 // |--------------------------------------------------|
@@ -57,7 +56,7 @@ async function fillData() {
   let loginData = await api.getAudits('login', this.queryStartDate, this.queryEndDate);
 
   _.forEach(loginData, (audit) => {
-    audit.dateCreated = moment(audit.dateCreated).format(IsoFormat);
+    audit.dateCreated = format(audit.dateCreated, null, IsoFormat);
     let employee = _.find(this.employees, (emp) => {
       return emp.id === audit.employeeId;
     });
@@ -88,9 +87,11 @@ async function fillData() {
     colors = '#bc3825';
     title = this.show24HourTitle
       ? 'Login Trend Data For Last 24 Hours'
-      : `Login Trend Data From ${moment(this.queryStartDate).format('MM/DD/YYYY hh:mm')} to ${moment(
-          this.queryEndDate
-        ).format('MM/DD/YYYY hh:mm')}`;
+      : `Login Trend Data From ${format(this.queryStartDate, null, 'MM/DD/YYYY hh:mm')} to ${format(
+          this.queryEndDate,
+          null,
+          'MM/DD/YYYY hh:mm'
+        )}`;
     showTooltips = true;
   }
   //used to collect login time data, with the keys representing a specific hour and
@@ -196,10 +197,9 @@ function dateRange() {
  */
 function generateTimeLabels(queryStart, queryEnd) {
   let returnObj = {};
-  let currentTime = moment(queryStart);
-
-  while (currentTime.isBefore(moment(queryEnd))) {
-    let currentHour = currentTime.hour();
+  let currentTime = queryStart;
+  while (isBefore(currentTime, queryEnd, null, 'YYYY-MM-DDTHH:mm:ssZ')) {
+    let currentHour = getHour(currentTime);
     let suffix = currentHour >= 12 ? 'pm' : 'am';
     if (currentHour > 12) {
       currentHour -= 12;
@@ -209,9 +209,8 @@ function generateTimeLabels(queryStart, queryEnd) {
     }
 
     returnObj[currentHour + suffix] = 0;
-    currentTime = currentTime.add(1, 'hour');
+    currentTime = add(currentTime, 1, 'hour');
   }
-
   return returnObj;
 } // generateTimeLabels
 

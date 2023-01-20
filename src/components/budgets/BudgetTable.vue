@@ -78,16 +78,10 @@
 </template>
 
 <script>
-import {
-  convertToMoneyString,
-  isBetweenDates,
-  formatDateDashToSlash,
-  getCurrentBudgetYear,
-  isFullTime
-} from '@/utils/utils';
+import { convertToMoneyString, getCurrentBudgetYear, isFullTime } from '@/utils/utils';
+import { format, getTodaysDate, isBetween, DEFAULT_ISOFORMAT, FORMATTED_ISOFORMAT } from '../../shared/dateUtils';
 import api from '@/shared/api';
 import _ from 'lodash';
-const moment = require('moment-timezone');
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -151,9 +145,9 @@ function getAmount(budget) {
  */
 function getDate(item) {
   return (
-    this.formatDateDashToSlash(item.budgetObject.fiscalStartDate) +
+    this.format(item.budgetObject.fiscalStartDate, DEFAULT_ISOFORMAT, FORMATTED_ISOFORMAT) +
     ' to ' +
-    this.formatDateDashToSlash(item.budgetObject.fiscalEndDate)
+    this.format(item.budgetObject.fiscalEndDate, DEFAULT_ISOFORMAT, FORMATTED_ISOFORMAT)
   );
 } // getDate
 
@@ -213,6 +207,7 @@ async function refreshBudgets() {
 
     budgetsVar = existingBudgets;
   }
+
   // remove inactive budgets (exception: there contains a pending expense under that budget)
   budgetsVar = _.filter(budgetsVar, (b) => {
     let budget = b.budgetObject;
@@ -221,7 +216,14 @@ async function refreshBudgets() {
         this.expenseTypes,
         (e) =>
           e.id == budget.expenseTypeId &&
-          (e.isInactive || !isBetweenDates(moment().toISOString(), budget.fiscalStartDate, budget.fiscalEndDate))
+          (e.isInactive ||
+            !isBetween(
+              getTodaysDate('YYYY-MM-DD[T]HH:mm:ss.SSS[Z]'),
+              budget.fiscalStartDate,
+              budget.fiscalEndDate,
+              'day',
+              '[]'
+            ))
       ) || _.some(this.expenses, (e) => e.expenseTypeId == budget.expenseTypeId && _.isEmpty(e.reimbursedDate))
     );
   });
@@ -270,9 +272,9 @@ export default {
     refreshBudgets,
     calcRemaining,
     convertToMoneyString,
-    formatDateDashToSlash,
     getCurrentBudgetYear,
     isFullTime,
+    format,
     getAmount,
     getDate,
     getReimbursed,

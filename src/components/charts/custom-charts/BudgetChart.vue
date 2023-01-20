@@ -35,9 +35,8 @@ import api from '@/shared/api.js';
 import pattern from 'patternomaly';
 import _ from 'lodash';
 import BarChart from '@/components/charts/base-charts/BarChart.vue';
-const moment = require('moment-timezone');
-moment.tz.setDefault('America/New_York');
-import { isBetweenDates, isFullTime, getCurrentBudgetYear } from '@/utils/utils';
+import { isFullTime, getCurrentBudgetYear } from '@/utils/utils';
+import { getTodaysDate, isBetween } from '@/shared/dateUtils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -328,7 +327,7 @@ async function refreshBudgets() {
         this.expenseTypes,
         (e) =>
           e.id == budget.expenseTypeId &&
-          (e.isInactive || !isBetweenDates(moment().toISOString(), budget.fiscalStartDate, budget.fiscalEndDate))
+          (e.isInactive || !isBetween(this.getTodaysDate(), budget.fiscalStartDate, budget.fiscalEndDate, 'day', '[]'))
       ) || _.some(this.expenses, (e) => e.expenseTypeId == budget.expenseTypeId && _.isEmpty(e.reimbursedDate))
     );
   });
@@ -393,6 +392,7 @@ export default {
     drawGraph,
     getCurrentBudgetYear,
     getFinalBudgetsData,
+    getTodaysDate,
     isFullTime,
     refreshBudgets
   },

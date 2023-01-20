@@ -63,7 +63,7 @@
           <template v-slot:activator="{ on }">
             <v-text-field
               ref="formFields"
-              :value="degree.completionDate | formatDateMonthYear"
+              :value="format(degree.completionDate, null, 'MM/YYYY')"
               label="Completion Date"
               prepend-icon="event"
               :rules="getDateMonthYearRules()"
@@ -204,11 +204,9 @@
 import api from '@/shared/api.js';
 import _ from 'lodash';
 import { getDateMonthYearRules, getRequiredRules } from '@/shared/validationUtils.js';
-import { formatDateMonthYear, parseDateMonthYear } from '@/utils/utils';
+import { format } from '@/shared/dateUtils';
 import { mask } from 'vue-the-mask';
 import { majorsAndMinors } from '../dropdown-info/majorsAndMinors';
-const moment = require('moment-timezone');
-moment.tz.setDefault('America/New_York');
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -267,7 +265,7 @@ function emitToParser(include) {
  * @return String - The date in YYYY-MM format
  */
 function parseEventDate() {
-  return this.parseDateMonthYear(event.target.value);
+  return this.format(event.target.value, 'MM/YYYY', 'YYYY-MM');
 } //parseEventDate
 
 /**
@@ -437,14 +435,12 @@ export default {
     };
   },
   directives: { mask },
-  filters: {
-    formatDateMonthYear
-  },
   computed: {
     isAttached
   },
   methods: {
     emitToParser,
+    format,
     getDateMonthYearRules,
     getRequiredRules,
     parseEventDate,
@@ -452,7 +448,6 @@ export default {
     addDegree,
     deleteDegree,
     deleteItem,
-    parseDateMonthYear,
     schoolNamePlaceholder,
     titleCase,
     updateDropdowns,

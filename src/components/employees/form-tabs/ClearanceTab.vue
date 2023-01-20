@@ -27,7 +27,7 @@
             <template v-slot:activator="{ on, attrs }">
               <v-text-field
                 ref="formFields"
-                :value="clearance.grantedDate | formatDate"
+                :value="format(clearance.grantedDate, null, 'MM/DD/YYYY')"
                 label="Granted Date"
                 prepend-icon="event_available"
                 clearable
@@ -64,7 +64,7 @@
             <template v-slot:activator="{ on, attrs }">
               <v-text-field
                 ref="formFields"
-                :value="clearance.submissionDate | formatDate"
+                :value="format(clearance.submissionDate, null, 'MM/DD/YYYY')"
                 label="Submission Date"
                 prepend-icon="event_note"
                 clearable
@@ -113,7 +113,7 @@
         <template v-slot:activator="{ on, attrs }">
           <v-text-field
             ref="formFields"
-            :value="clearance.badgeExpirationDate | formatDate"
+            :value="format(clearance.badgeExpirationDate, null, 'MM/DD/YYYY')"
             label="Badge Expiration Date"
             prepend-icon="event_busy"
             clearable
@@ -149,7 +149,7 @@
       >
         <template v-slot:activator="{ on, attrs }">
           <v-combobox
-            :value="clearance.biDates | formatDates"
+            :value="formatDates(clearance.biDates)"
             multiple
             label="BI Dates"
             prepend-icon="event"
@@ -184,7 +184,7 @@
       >
         <template v-slot:activator="{ on, attrs }">
           <v-combobox
-            :value="clearance.adjudicationDates | formatDates"
+            :value="formatDates(clearance.adjudicationDates)"
             multiple
             label="Adjudication Dates"
             prepend-icon="event"
@@ -227,7 +227,7 @@
       >
         <template v-slot:activator="{ on, attrs }">
           <v-combobox
-            :value="clearance.polyDates | formatDates"
+            :value="formatDates(clearance.polyDates)"
             multiple
             label="Poly Dates"
             prepend-icon="event"
@@ -273,10 +273,9 @@
 <script>
 import _ from 'lodash';
 import { getDateOptionalRules, getRequiredRules } from '@/shared/validationUtils.js';
-import { formatDate, parseDate, isEmpty } from '@/utils/utils';
+import { isEmpty } from '@/utils/utils';
+import { format, isAfter, isBefore, DEFAULT_ISOFORMAT, FORMATTED_ISOFORMAT } from '@/shared/dateUtils';
 import { mask } from 'vue-the-mask';
-const moment = require('moment-timezone');
-moment.tz.setDefault('America/New_York');
 
 const ISOFORMAT = 'YYYY-MM-DD';
 
@@ -329,7 +328,9 @@ function addClearance() {
  * @param clearance - The clearance object of the badge to capitalize
  */
 function capitalizeBadges(clearance) {
-  clearance.badgeNum = clearance.badgeNum.toUpperCase();
+  if (clearance.badgeNum) {
+    clearance.badgeNum = clearance.badgeNum.toUpperCase();
+  }
 } // capitalizeBadges
 
 /**
@@ -352,22 +353,21 @@ function maxSubmission(cIndex) {
   let max;
   if (this.editedClearances[cIndex].grantedDate) {
     // submission date is before granted date
-    max = moment(this.editedClearances[cIndex].grantedDate, ISOFORMAT);
+    max = format(this.editedClearances[cIndex].grantedDate, null, DEFAULT_ISOFORMAT);
   }
 
   // check submission date is before any poly dates
   if (!_.isEmpty(this.editedClearances[cIndex].polyDates)) {
     // poly dates exist
-    let earliest = moment(
-      _.first(
-        // get earliest poly date
-        _.sortBy(this.editedClearances[cIndex].polyDates, (date) => {
-          // sort poly dates
-          return moment(date, ISOFORMAT);
-        })
-      )
+    let earliest = _.first(
+      // get earliest poly date
+      _.sortBy(this.editedClearances[cIndex].polyDates, (date) => {
+        // sort poly dates
+        return format(date, null, ISOFORMAT);
+      })
     );
-    if (earliest.isBefore(max)) {
+
+    if (isBefore(earliest, max)) {
       // poly date is earliest date
       max = earliest; // update max date
     }
@@ -376,22 +376,20 @@ function maxSubmission(cIndex) {
   // check submission date is before any adjudication dates
   if (!_.isEmpty(this.editedClearances[cIndex].adjudicationDates)) {
     // adjudication dates exist
-    let earliest = moment(
-      _.first(
-        // get earliest adjudication date
-        _.sortBy(this.editedClearances[cIndex].adjudicationDates, (date) => {
-          // sort adjudication dates
-          return moment(date, ISOFORMAT);
-        })
-      )
+    let earliest = _.first(
+      // get earliest adjudication date
+      _.sortBy(this.editedClearances[cIndex].adjudicationDates, (date) => {
+        // sort adjudication dates
+        return format(date, null, ISOFORMAT);
+      })
     );
-    if (earliest.isBefore(max)) {
+    if (isBefore(earliest, max)) {
       // adjudication date is earliest date
       max = earliest; // update max date
     }
   }
 
-  return max ? max.format(ISOFORMAT) : null;
+  return max ? format(max, null, ISOFORMAT) : null;
 } // maxSubmission
 
 /**
@@ -416,7 +414,7 @@ function minExpiration(cIndex) {
  * @return String - The date in YYYY-MM-DD format
  */
 function parseEventDate() {
-  return this.parseDate(event.target.value);
+  return this.format(event.target.value, 'MM/DD/YYYY', 'YYYY-MM-DD');
 } // parseEventDate
 
 /**
@@ -441,10 +439,10 @@ function populateDropDowns() {
  * @param index - the clearance index
  */
 function removeAdjDate(item, index) {
-  const itemDate = moment(item);
+  const itemDate = format(item, null, FORMATTED_ISOFORMAT);
   this.editedClearances[index].adjudicationDates = this.editedClearances[index].adjudicationDates.filter((date) => {
-    let dateConvert = moment(date);
-    return !dateConvert.isSame(itemDate);
+    let dateConvert = format(date, null, FORMATTED_ISOFORMAT);
+    return dateConvert !== itemDate;
   });
 } // removeAdjDate
 
@@ -455,10 +453,10 @@ function removeAdjDate(item, index) {
  * @param index - the clearance index
  */
 function removeBiDate(item, index) {
-  const itemDate = moment(item);
+  const itemDate = format(item, null, FORMATTED_ISOFORMAT);
   this.editedClearances[index].biDates = this.editedClearances[index].biDates.filter((date) => {
-    let dateConvert = moment(date);
-    return !dateConvert.isSame(itemDate);
+    let dateConvert = format(date, null, FORMATTED_ISOFORMAT);
+    return dateConvert !== itemDate;
   });
 } // removeBiDate
 
@@ -469,10 +467,10 @@ function removeBiDate(item, index) {
  * @param index - the clearance index
  */
 function removePolyDate(item, index) {
-  const itemDate = moment(item);
+  const itemDate = format(item, null, FORMATTED_ISOFORMAT);
   this.editedClearances[index].polyDates = this.editedClearances[index].polyDates.filter((date) => {
-    let dateConvert = moment(date);
-    return !dateConvert.isSame(itemDate);
+    let dateConvert = format(date, null, FORMATTED_ISOFORMAT);
+    return dateConvert !== itemDate;
   });
 } // removePolyDate
 
@@ -521,7 +519,7 @@ function watchValidating(val) {
 function formatDates(array) {
   let formattedDates = [];
   array.forEach((date) => {
-    formattedDates.push(formatDate(date));
+    formattedDates.push(this.format(date, null, 'MM/DD/YYYY'));
   });
   return formattedDates;
 } // formatDates
@@ -541,15 +539,15 @@ export default {
       dateBadgeRules: (index) => {
         let currClearance = this.editedClearances[index];
         return currClearance.grantedDate && currClearance.badgeExpirationDate && currClearance.submissionDate
-          ? (moment(currClearance.badgeExpirationDate).isAfter(moment(currClearance.grantedDate)) &&
-              moment(currClearance.badgeExpirationDate).isAfter(moment(currClearance.submissionDate))) ||
+          ? (isAfter(currClearance.badgeExpirationDate, currClearance.grantedDate) &&
+              isAfter(currClearance.badgeExpirationDate, currClearance.submissionDate)) ||
               'Badge expiration date must come after grant and submission date'
           : true;
       },
       dateSubmissionRules: (index) => {
         let currClearance = this.editedClearances[index];
         return currClearance.grantedDate && currClearance.submissionDate
-          ? moment(currClearance.submissionDate).isBefore(moment(currClearance.grantedDate)) ||
+          ? isBefore(currClearance.submissionDate, currClearance.grantedDate) ||
               'Submission date must be before grant date'
           : true;
       },
@@ -557,7 +555,7 @@ export default {
       dateGrantedRules: (index) => {
         let currClearance = this.editedClearances[index];
         return currClearance.grantedDate && currClearance.submissionDate
-          ? moment(currClearance.grantedDate).isAfter(moment(currClearance.submissionDate)) ||
+          ? isAfter(currClearance.grantedDate, currClearance.submissionDate) ||
               'Grant date must be after the submission date'
           : true;
       },
@@ -571,21 +569,19 @@ export default {
     };
   },
   directives: { mask },
-  filters: {
-    formatDate,
-    formatDates
-  },
   methods: {
     addClearance,
     capitalizeBadges,
-    formatDate,
+    format,
+    formatDates,
     deleteClearance,
     getDateOptionalRules,
     getRequiredRules,
+    isAfter,
+    isBefore,
     isEmpty,
     maxSubmission,
     minExpiration,
-    parseDate,
     parseEventDate,
     populateDropDowns,
     removeAdjDate,

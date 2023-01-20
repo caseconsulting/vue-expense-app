@@ -106,10 +106,16 @@
             {{ getFullName(item) }}
           </p>
         </template>
-        <!-- Prime/Contracts Item Slot -->
+        <!-- Contracts Item Slot -->
         <template v-slot:[`item.contractNames`]="{ item }">
           <p :class="{ selectFocus: isFocus(item), inactive: item.workStatus <= 0 }" class="mb-0">
             {{ item.contractNames }}
+          </p>
+        </template>
+        <!-- Prime Item Slot -->
+        <template v-slot:[`item.primeNames`]="{ item }">
+          <p :class="{ selectFocus: isFocus(item), inactive: item.workStatus <= 0 }" class="mb-0">
+            {{ item.primeNames }}
           </p>
         </template>
         <!-- Email Name Item Slot -->
@@ -142,7 +148,7 @@
 
 <script>
 import _ from 'lodash';
-import moment from 'moment-timezone';
+import { add, format, getTodaysDate } from '@/shared/dateUtils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -156,9 +162,10 @@ import moment from 'moment-timezone';
 function buildContractsColumn() {
   this.employeesInfo.forEach((currentEmp) => {
     if (currentEmp.contracts) {
-      var contractNames = '';
+      let contractNames = '';
+      let primeNames = '';
       currentEmp.contracts.forEach((currentCon) => {
-        var current = false;
+        let current = false;
         if (currentCon.projects) {
           currentCon.projects.forEach((currProj) => {
             if (!currProj.endDate) {
@@ -166,21 +173,35 @@ function buildContractsColumn() {
             }
           });
         }
-        if (current == true) {
-          contractNames += `${currentCon.name} - ${currentCon.primes.join(', ')} & `;
+        if (current) {
+          let contract = this.$store.getters.contracts.find((c) => c.id === currentCon.contractId);
+          contractNames += `${contract.contractName} & `;
+          primeNames += `${contract.primeName} & `;
         }
       });
       contractNames = contractNames.slice(0, -2);
+      primeNames = primeNames.slice(0, -2);
       currentEmp.contractNames = contractNames;
+      currentEmp.primeNames = primeNames;
     }
   });
   this.headers.splice(2, 1, {
-    text: 'Current Contract - Prime',
+    text: 'Current Contract',
     value: 'contractNames'
   });
 
-  if (this.headers[3].value === 'badgeExpiration') {
-    this.headers.splice(3, 1); //remove badge exp column
+  this.headers.splice(3, 1, {
+    text: 'Current Prime',
+    value: 'primeNames'
+  });
+
+  if (!this.headers[4]) {
+    this.headers.splice(4, 1, {
+      text: 'Email',
+      value: 'email'
+    });
+  } else if (this.headers[4].value === 'badgeExpiration') {
+    this.headers.splice(4, 1); //remove badge exp column
   }
 } // buildContractsColumn
 
@@ -193,7 +214,7 @@ function buildJobRolesColumn() {
     value: 'jobRole'
   });
 
-  if (this.headers[3].value === 'badgeExpiration') {
+  if (this.headers[3].value === 'badgeExpiration' || this.headers[3].value === 'primeNames') {
     this.headers.splice(3, 1); //remove badge exp column
   }
 } // buildJobRolesColumn
@@ -210,10 +231,14 @@ function buildSecurityColumn() {
     text: 'Badge Expiration Date',
     value: 'badgeExpiration'
   });
+
+  if (this.headers[4].value === 'primeNames') {
+    this.headers.splice(4, 1); //remove badge exp column
+  }
 } // buildSecurityColumn
 
 /**
- * Sets a mapping of employee name to employee id of an expense for the autocomplete options.
+ * Sets a mapping of employee name to employee id for the autocomplete options.
  *
  * @param empData - The list of employees
  */
@@ -272,7 +297,7 @@ function customEmployeeFilter(item, queryText) {
 
 /**
  * Returns the expiration dates for all clearances in natural readable format. The sorting key of item.badgeExpiration
- * is stored just as the int form of the moment to get accurate sorting.
+ * is stored just as the int form of the time to get accurate sorting.
  *
  * @param clearances - the list of employee clearances
  * @param item - the employee
@@ -285,7 +310,7 @@ function getBadgeExpiration(clearances, item) {
   // used for sorting... only store the lowest date (closest to expire)
   _.forEach(clearances, (clearance) => {
     if (clearance.badgeExpirationDate) {
-      let newDate = parseInt(moment(clearance.badgeExpirationDate).format('X')); // seconds timestamp -> int
+      let newDate = parseInt(format(clearance.badgeExpirationDate, null, 'X')); // seconds timestamp -> int
       dates.push(newDate);
       if (newDate < fDate) fDate = newDate;
     }
@@ -295,7 +320,7 @@ function getBadgeExpiration(clearances, item) {
 
   // used for displaying
   dates = _.map(dates, (date) => {
-    return moment(date, 'X').format('MMM Do, YYYY');
+    return format(date, 'X', 'MMM Do, YYYY');
   });
 
   item.badgeExpiration = fDate;
@@ -366,7 +391,7 @@ function populateDataTypeDropDowns() {
       let search = date.split(' ');
       let num = parseInt(search[0]);
       let dateType = search[1].toLowerCase();
-      let futureDate = moment().add(num, dateType).format('MMM Do, YYYY');
+      let futureDate = format(add(getTodaysDate(), num, dateType), null, 'MMM Do, YYYY');
       this.dataTypeDropDown.push(date + ' (' + futureDate + ')');
     });
 
@@ -424,21 +449,22 @@ function populateDropDowns(employees) {
         // loop project
         _.forEach(projects, (project) => {
           if (project.presentDate) {
+            let fullContract = this.$store.getters.contracts.find((c) => c.id === contract.contractId);
             if (this.contract) {
               // limit the prime dropdown to only those that belong to the contract
-              if (contract.name === this.contract) {
-                this.contractsDropDown.push(contract.name);
-                this.primesDropDown.push(...contract.primes);
+              if (fullContract.contractName === this.contract) {
+                this.contractsDropDown.push(fullContract.contractName);
+                this.primesDropDown.push(fullContract.primeName);
               }
-            } else if (this.primes) {
+            } else if (this.prime) {
               // limit the contract dropdown to only those that belong to the prime
-              if (contract.primes.includes(this.prime)) {
-                this.contractsDropDown.push(contract.name);
+              if (fullContract.primeName === this.prime) {
+                this.contractsDropDown.push(fullContract.contractName);
                 this.primesDropDown.push(this.prime);
               }
             } else {
-              this.contractsDropDown.push(contract.name); // add contract name
-              this.primesDropDown.push(...contract.primes); // add contract prime
+              this.contractsDropDown.push(fullContract.contractName); // add contract name
+              this.primesDropDown.push(fullContract.primeName); // add contract prime
             }
           }
         });
@@ -507,7 +533,7 @@ function searchContract() {
         if (employee.contractNames) {
           return (
             employee.contractNames.split(' & ').findIndex((element) => element.includes(this.contract)) > -1 &&
-            employee.contractNames.split(' & ').findIndex((element) => element.includes(this.prime)) > -1
+            employee.primeNames.split(' & ').findIndex((element) => element.includes(this.prime)) > -1
           );
         } else return false;
       });
@@ -555,7 +581,7 @@ function searchDataType() {
         this.filteredEmployees = _.filter(this.employeesInfo, (employee) => {
           return employee.employeeNumber == this.search;
         });
-        return; // don't do the rest of the moment calculations below
+        return; // don't do the rest of the dayjs calculations below
       }
     }
   }
@@ -572,8 +598,8 @@ function searchBadgeExpirationDates(requestedDate, forDropdown) {
   let search = requestedDate.split(' ');
   let num = parseInt(search[0]);
   let dateType = search[1].toLowerCase();
-  let now = parseInt(moment().format('X'));
-  let upperBound = parseInt(moment().add(num, dateType).format('X'));
+  let now = parseInt(format(getTodaysDate(), null, 'X'));
+  let upperBound = parseInt(format(add(getTodaysDate(), num, dateType), null, 'X'));
   let foundEmployees = [];
 
   if (this.filteredEmployees.length > 0) {
@@ -584,7 +610,7 @@ function searchBadgeExpirationDates(requestedDate, forDropdown) {
       if (employee.badgeExpiration < 100000000000000000) {
         // loop through every employee's clearances and see if any of them are in the selected range
         _.forEach(employee.clearances, (clearance) => {
-          let clearanceDate = parseInt(moment(clearance.badgeExpirationDate).format('X')); // seconds timestamp -> int
+          let clearanceDate = parseInt(format(clearance.badgeExpirationDate, null, 'X')); // seconds timestamp -> int
           if (clearanceDate > now && clearanceDate <= upperBound && !foundEmployees.includes(employee)) {
             found.push(employee);
           }
@@ -599,7 +625,7 @@ function searchBadgeExpirationDates(requestedDate, forDropdown) {
       if (employee.badgeExpiration < 100000000000000000) {
         // loop through every employee's clearances and see if any of them are in the selected range
         _.forEach(employee.clearances, (clearance) => {
-          let clearanceDate = parseInt(moment(clearance.badgeExpirationDate).format('X')); // seconds timestamp -> int
+          let clearanceDate = parseInt(format(clearance.badgeExpirationDate, null, 'X')); // seconds timestamp -> int
           if (clearanceDate > now && clearanceDate <= upperBound && !foundEmployees.includes(employee))
             foundEmployees.push(employee);
         });
@@ -621,17 +647,17 @@ function searchPrimes() {
   if (this.prime) {
     if (this.contract) {
       this.filteredEmployees = _.filter(this.employeesInfo, (employee) => {
-        if (employee.contractNames) {
+        if (employee.primeNames) {
           return (
             employee.contractNames.split(' & ').findIndex((element) => element.includes(this.contract)) > -1 &&
-            employee.contractNames.split(' & ').findIndex((element) => element.includes(this.prime)) > -1
+            employee.primeNames.split(' & ').findIndex((element) => element.includes(this.prime)) > -1
           );
         } else return false;
       });
     } else {
       this.filteredEmployees = _.filter(this.employeesInfo, (employee) => {
-        if (employee.contractNames) {
-          return employee.contractNames.split(' & ').findIndex((element) => element.includes(this.prime)) > -1;
+        if (employee.primeNames) {
+          return employee.primeNames.split(' & ').findIndex((element) => element.includes(this.prime)) > -1;
         } else return false;
       });
     }
@@ -787,8 +813,12 @@ export default {
           value: 'fullName'
         },
         {
-          text: 'Current Contract - Prime',
+          text: 'Current Contract',
           value: 'contractNames'
+        },
+        {
+          text: 'Current Prime',
+          value: 'primeNames'
         },
         {
           text: 'Email',
@@ -823,6 +853,7 @@ export default {
     populateDropDowns,
     refreshDataTypeList,
     refreshList,
+    format,
     searchBadgeExpirationDates,
     searchContract,
     searchDataType,

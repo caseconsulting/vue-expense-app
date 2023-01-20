@@ -38,12 +38,20 @@
 
 <script>
 import BudgetSelectModal from '@/components/modals/BudgetSelectModal.vue';
-import { isMobile, getCurrentBudgetYear } from '@/utils/utils';
 import _ from 'lodash';
 import api from '@/shared/api.js';
-const moment = require('moment-timezone');
-moment.tz.setDefault('America/New_York');
-const IsoFormat = 'YYYY-MM-DD';
+import { isMobile, getCurrentBudgetYear } from '@/utils/utils';
+import {
+  add,
+  difference,
+  format,
+  getTodaysDate,
+  isAfter,
+  isBefore,
+  isValid,
+  setYear,
+  DEFAULT_ISOFORMAT
+} from '@/shared/dateUtils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -66,27 +74,26 @@ function viewingCurrentBudgetYear() {
  * @return String - next employee anniversary date (day of year, month, day, year)
  */
 function getAnniversary() {
-  const [year, month, day] = this.hireDate.split('-'); // split anniversary year, month, and day
-  if (moment(`${month}/${day}/${year}`, 'MM/DD/YYYY', true).isValid()) {
+  if (isValid(this.hireDate, DEFAULT_ISOFORMAT)) {
     // if valid date
-    let now = moment();
-    let hireDate = moment(this.hireDate, 'YYYY-MM-DD');
+    let now = getTodaysDate();
+    let curYear = now.split('-')[0];
 
-    if (now.isAfter(hireDate)) {
+    if (isAfter(now, this.hireDate)) {
       // employee's hire date is before today
-      let anniversary = moment([now.year(), hireDate.month(), hireDate.date()]);
+      let anniversary = setYear(this.hireDate, curYear);
       // employee's hire date is before today
-      if (now.isSameOrAfter(anniversary)) {
+      if (isAfter(add(now, 1, 'days'), anniversary)) {
         // employee's anniversary date has already occured this year
-        anniversary.add(1, 'years');
-        return anniversary.format('ddd. MMM D, YYYY');
+        anniversary = add(anniversary, 1, 'years');
+        return format(anniversary, null, 'ddd. MMM D, YYYY');
       } else {
         // employee's anniversary date still has to happen between now and the end of year
-        return anniversary.format('ddd. MMM D, YYYY');
+        return format(anniversary, null, 'ddd. MMM D, YYYY');
       }
     } else {
       // employee's hire date is in the future
-      return hireDate.add(1, 'years').format('ddd. MMM D, YYYY');
+      return format(add(this.hireDate, 1, 'years'), null, 'ddd. MMM D, YYYY');
     }
   } else {
     // TODO: Return something for invalid date
@@ -100,23 +107,23 @@ function getAnniversary() {
  * @return number - returns the number of days until next anniversary
  */
 function getDaysUntil() {
-  let now = moment();
+  let now = getTodaysDate();
+  let curYear = now.split('-')[0];
 
-  let hireDate = moment(this.hireDate, 'YYYY-MM-DD');
-  let anniversary = moment([now.year(), hireDate.month(), hireDate.date()]);
+  let anniversary = setYear(this.hireDate, curYear);
 
-  if (now.isAfter(hireDate)) {
+  if (isAfter(now, this.hireDate)) {
     // employee's hire date is before today
-    if (now.isSameOrAfter(anniversary)) {
+    if (isAfter(add(now, 1, 'days'), anniversary)) {
       // employee's anniversary date has already occured this year
-      anniversary.add(1, 'years');
+      anniversary = add(anniversary, 1, 'years');
     }
   } else {
     // employee's hire date is in the future
-    anniversary = hireDate.add(1, 'years');
+    anniversary = add(this.hireDate, 1, 'years');
   }
 
-  return anniversary.diff(now, 'days') + 1;
+  return difference(anniversary, now, 'days');
 } // getDaysUntil
 
 /**
@@ -178,9 +185,9 @@ function refreshBudgetYears() {
 async function created() {
   await this.loadData();
 
-  window.EventBus.$on('selected-budget-year', (data) => {
-    if (data.format(IsoFormat) != this.fiscalDateView) {
-      this.fiscalDateView = data.format(IsoFormat);
+  window.EventBus.$on('selected-budget-year', (date) => {
+    if (date != this.fiscalDateView) {
+      this.fiscalDateView = date;
     }
   });
 } // created
@@ -211,7 +218,6 @@ export default {
   },
   data() {
     return {
-      actualTime: moment().format('X'), // current time (unix ms timestamp)
       allUserBudgets: null, // all user budgets
       budgetYears: [], // list of options for chaning budget year view
       changingBudgetView: false, // change budget year view activator
@@ -222,9 +228,17 @@ export default {
   created,
   beforeDestroy,
   methods: {
+    add, // dateUtils
+    difference, // dateUtils
+    format, // dateUtils
     getCurrentBudgetYear,
+    getTodaysDate, // dateUtils
+    isAfter, // dateUtils
+    isBefore, // dateUtils
+    isValid, // dateUtils
     loadData,
-    refreshBudgetYears
+    refreshBudgetYears,
+    setYear // dateUtils
   },
   props: ['employee', 'hasBudgets', 'location']
 };

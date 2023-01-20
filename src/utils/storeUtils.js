@@ -41,6 +41,14 @@ export async function updateStoreCampfires() {
 } // updateStoreCampfires
 
 /**
+ * Update store with latest contracts
+ */
+export async function updateStoreContracts() {
+  let contracts = await api.getItems(api.CONTRACTS);
+  this.$store.dispatch('setContracts', { contracts });
+} // updateStoreContracts
+
+/**
  * Update store with users budgets
  */
 export async function updateStoreBudgets() {
