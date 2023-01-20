@@ -18,7 +18,7 @@
             :headers="contractHeaders"
             :items="$store.getters.contracts"
             :items-per-page="-1"
-            :item-class="rowClass"
+            :item-class="contractRowClass"
           >
             <!-- Contract Name Slot -->
             <template v-slot:[`item.contractName`]="{ item }">
@@ -131,7 +131,12 @@
               <td :colspan="contractHeaders.length" class="pa-0">
                 <v-container fluid class="grey-background">
                   <!-- START EXPANDED PROJECTS DATA TABLE-->
-                  <v-data-table :headers="projectHeaders" :items="contract.item.projects" hide-default-footer>
+                  <v-data-table
+                    :headers="projectHeaders"
+                    :items="contract.item.projects"
+                    hide-default-footer
+                    :item-class="projectRowClass"
+                  >
                     <template v-slot:[`item.projectName`]="{ item }">
                       <v-text-field
                         :rules="[(v) => !!v || 'Field is required', duplicateProjects(contract.item)]"
@@ -609,16 +614,35 @@ function displaySuccess(msg) {
 } // displaySuccess
 
 /**
- * Adds grey highlight to row when expanded
+ * Adds grey highlight to contract row when expanded, editing or deleting
  *
  * @param item Item in contracts v-data-table row
  */
-function rowClass(item) {
-  if (this.expanded.length > 0 && item.id == this.expanded[0].id) {
-    return 'expanded-row';
+function contractRowClass(item) {
+  if (
+    (this.expanded.length > 0 && item.id == this.expanded[0].id) ||
+    (this.editingItem && item.id == this.editingItem.id) ||
+    (this.deleteItem && this.deleteItem.id && this.deleteItem.id == item.id)
+  ) {
+    return 'highlight-row';
   }
   return '';
-} // rowClass
+} // contractRowClass
+
+/**
+ * Adds grey highlight to project row when editing or deleting
+ *
+ * @param item Item in projects v-data-table row
+ */
+function projectRowClass(item) {
+  if (
+    (this.editingItem && this.editingItem.id == item.id) ||
+    (this.deleteItem && this.deleteItem.project && this.deleteItem.project.id == item.id)
+  ) {
+    return 'highlight-row';
+  }
+  return '';
+} // projectRowClass
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -635,7 +659,8 @@ export default {
     ProjectForm
   },
   methods: {
-    rowClass,
+    projectRowClass,
+    contractRowClass,
     getProject,
     updateStoreEmployees,
     getEmployeeContractRelationships,
@@ -707,42 +732,50 @@ export default {
         {
           text: 'Project',
           value: 'projectName',
-          align: 'center'
+          align: 'center',
+          width: '90%'
         },
         {
           value: 'actions',
-          sortable: false
+          sortable: false,
+          width: '10%'
         }
       ],
       contractHeaders: [
         {
           text: 'Contract',
           value: 'contractName',
-          align: 'center'
+          align: 'center',
+          width: '18%'
         },
         {
           text: 'Prime',
           value: 'primeName',
-          align: 'center'
+          align: 'center',
+          width: '18%'
         },
         {
           text: 'Cost Type',
           value: 'costType',
-          align: 'center'
+          align: 'center',
+          width: '18%'
         },
         {
           text: 'PoP-Start Date',
           value: 'popStartDate',
-          align: 'center'
+          align: 'center',
+          width: '18%'
         },
         {
           text: 'PoP-End Date',
           value: 'popEndDate',
-          align: 'center'
+          align: 'center',
+          width: '18%'
         },
         {
           value: 'actions',
-          sortable: false
+          sortable: false,
+          width: '10%'
         }
       ]
     };
@@ -751,7 +784,7 @@ export default {
 };
 </script>
 <style>
-.expanded-row {
+.highlight-row {
   background-color: rgb(238, 238, 238) !important;
 }
 </style>
