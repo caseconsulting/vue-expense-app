@@ -8,11 +8,13 @@
         >
       </router-link>
     </div>
-    <employee-reports-table v-if="!loading"></employee-reports-table>
+    <reports-page-loader v-if="loading"></reports-page-loader>
+    <employee-reports-table v-else></employee-reports-table>
   </div>
 </template>
 <script>
 import EmployeeReportsTable from '@/components/reports/EmployeeReportsTable.vue';
+import ReportsPageLoader from '@/components/reports/ReportsPageLoader.vue';
 import { updateStoreEmployees, updateStoreContracts } from '@/utils/storeUtils';
 
 // |--------------------------------------------------|
@@ -62,7 +64,8 @@ function storeIsPopulated() {
 export default {
   created,
   components: {
-    EmployeeReportsTable
+    EmployeeReportsTable,
+    ReportsPageLoader
   },
   computed: {
     storeIsPopulated
