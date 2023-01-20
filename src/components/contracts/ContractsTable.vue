@@ -5,6 +5,13 @@
         <!-- START CONTRACTS DATA TABLE -->
         <v-form ref="form" lazy-validation>
           <v-data-table
+            v-if="!$store.getters.contracts"
+            :loading="!$store.getters.contracts"
+            :headers="contractHeaders"
+            :items-per-page="-1"
+          ></v-data-table>
+          <v-data-table
+            v-else
             @click:row="clickedRow"
             :loading="loading"
             :expanded.sync="expanded"
@@ -347,6 +354,7 @@ function beforeDestroy() {
   window.EventBus.$off('canceled-delete-contract');
   window.EventBus.$off('confirm-delete-project');
   window.EventBus.$off('canceled-delete-project');
+  window.EventBus.$off('canceled-project-form');
 } // beforeDestroy
 
 // |--------------------------------------------------|

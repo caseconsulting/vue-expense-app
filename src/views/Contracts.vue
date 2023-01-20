@@ -23,7 +23,7 @@
         <v-btn @click="toggleContractForm = true" :disabled="!$store.getters.contracts" class="my-2"
           >Create a contract <v-icon right> mdi-file-document-plus </v-icon></v-btn
         >
-        <contracts-table v-if="$store.getters.contracts"></contracts-table>
+        <contracts-table></contracts-table>
       </v-container>
     </v-card>
     <ContractForm :toggleContractForm="toggleContractForm" />
@@ -45,7 +45,9 @@ import { updateStoreContracts } from '@/utils/storeUtils';
  * beforeDestroy life cycle hook
  */
 function beforeDestroy() {
+  window.EventBus.$off('canceled-contract-form');
   window.EventBus.$off('submitted-contract-form');
+  window.EventBus.$off('status-alert');
 } // beforeDestroy
 
 /**
