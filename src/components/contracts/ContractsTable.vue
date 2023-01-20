@@ -22,6 +22,7 @@
             :items="$store.getters.contracts"
             :items-per-page="-1"
             :item-class="contractRowClass"
+            :search="search"
           >
             <!-- Contract Name Slot -->
             <template v-slot:[`item.contractName`]="{ item }">
