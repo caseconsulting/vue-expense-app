@@ -18,6 +18,7 @@
             :headers="contractHeaders"
             :items="$store.getters.contracts"
             :items-per-page="-1"
+            :item-class="rowClass"
           >
             <!-- Contract Name Slot -->
             <template v-slot:[`item.contractName`]="{ item }">
@@ -607,6 +608,18 @@ function displaySuccess(msg) {
   window.EventBus.$emit('status-alert', status);
 } // displaySuccess
 
+/**
+ * Adds grey highlight to row when expanded
+ *
+ * @param item Item in contracts v-data-table row
+ */
+function rowClass(item) {
+  if (this.expanded.length > 0 && item.id == this.expanded[0].id) {
+    return 'expanded-row';
+  }
+  return '';
+} // rowClass
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                      EXPORT                      |
@@ -622,6 +635,7 @@ export default {
     ProjectForm
   },
   methods: {
+    rowClass,
     getProject,
     updateStoreEmployees,
     getEmployeeContractRelationships,
@@ -736,3 +750,8 @@ export default {
   directives: { mask }
 };
 </script>
+<style>
+.expanded-row {
+  background-color: rgb(238, 238, 238) !important;
+}
+</style>
