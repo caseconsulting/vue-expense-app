@@ -65,6 +65,7 @@
                     :value="format(editingItem.popStartDate, null, 'MM/DD/YYYY')"
                     :rules="[...getDateOptionalRules(), startDateRules()]"
                     hint="MM/DD/YYYY format"
+                    v-mask="'##/##/####'"
                     persistent-hint
                     prepend-icon="event"
                     @blur="editingItem.popStartDate = format($event.target.value, 'MM/DD/YYYY', 'YYYY-MM-DD')"
@@ -100,6 +101,7 @@
                     :value="format(editingItem.popEndDate, null, 'MM/DD/YYYY')"
                     :rules="[...getDateOptionalRules(), endDateRules()]"
                     hint="MM/DD/YYYY format"
+                    v-mask="'##/##/####'"
                     persistent-hint
                     prepend-icon="event"
                     @blur="editingItem.popEndDate = format($event.target.value, 'MM/DD/YYYY', 'YYYY-MM-DD')"
@@ -299,13 +301,14 @@
 </template>
 <script>
 import _ from 'lodash';
-import { updateStoreContracts, updateStoreEmployees } from '@/utils/storeUtils';
-import { format, isAfter, isBefore } from '@/shared/dateUtils';
 import api from '@/shared/api';
 import DeleteModal from '../modals/DeleteModal.vue';
 import ContractProjectDeleteWarning from '../modals/ContractProjectDeleteWarning.vue';
 import ProjectForm from './ProjectForm.vue';
+import { updateStoreContracts, updateStoreEmployees } from '@/utils/storeUtils';
+import { format, isAfter, isBefore } from '@/shared/dateUtils';
 import { getDateOptionalRules } from '@/shared/validationUtils';
+import { mask } from 'vue-the-mask';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -721,6 +724,7 @@ export default {
         }
       ]
     };
-  }
+  },
+  directives: { mask }
 };
 </script>
