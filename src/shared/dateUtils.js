@@ -12,6 +12,8 @@ var isoWeek = require('dayjs/plugin/isoWeek');
 var isSameOrAfter_ = require('dayjs/plugin/isSameOrAfter');
 var isSameOrBefore_ = require('dayjs/plugin/isSameOrBefore');
 var isBetween_ = require('dayjs/plugin/isBetween');
+var duration = require('dayjs/plugin/duration');
+dayjs.extend(duration);
 dayjs.extend(isBetween_);
 dayjs.extend(isSameOrBefore_);
 dayjs.extend(isSameOrAfter_);
@@ -36,13 +38,14 @@ export const PARSED_ISOFORMAT = 'YYYY-MM-DD';
  *
  * @param {String} date - The date to add to
  * @param {Number} amount - The amount to add
- * @param {String} granularity - The unit to add (https://day.js.org/docs/en/manipulate/start-of#list-of-all-available-units)
+ * @param {String} granularity - The unit to add
+ *                               (https://day.js.org/docs/en/manipulate/start-of#list-of-all-available-units)
  * @returns String - The added date
  */
 export function add(date, amount, granularity, format) {
   return format
-    ? dayjs(date).add(amount, granularity).toISOString()
-    : dayjs(date).add(amount, granularity).format(format);
+    ? dayjs(date).add(amount, granularity).format(format)
+    : dayjs(date).add(amount, granularity).toISOString();
 } // add
 
 /**
@@ -52,7 +55,8 @@ export function add(date, amount, granularity, format) {
  *
  * @param {String} date - The date to subtract from
  * @param {Number} amount - The amount to subtract
- * @param {String} granularity - The unit to subtract (https://day.js.org/docs/en/manipulate/start-of#list-of-all-available-units)
+ * @param {String} granularity - The unit to subtract
+ *                               (https://day.js.org/docs/en/manipulate/start-of#list-of-all-available-units)
  * @returns String - The subtracted date
  */
 export function subtract(date, amount, granularity, format = DEFAULT_ISOFORMAT) {
@@ -65,7 +69,8 @@ export function subtract(date, amount, granularity, format = DEFAULT_ISOFORMAT) 
  *
  * @param {String} date1 - The first date
  * @param {String} date2 - The second date
- * @param {String} granularity - (OPTIONAL) The unit to compare (https://day.js.org/docs/en/manipulate/start-of#list-of-all-available-units)
+ * @param {String} granularity - (OPTIONAL) The unit to compare
+ *                               (https://day.js.org/docs/en/manipulate/start-of#list-of-all-available-units)
  * @param {String} format - (OPTIONAL) The format of the dates (if not specified, uses default)
  * @returns Number - The difference in time
  */
@@ -177,7 +182,8 @@ export function getTodaysDate(format) {
  *
  * @param {String} date1 - The first date
  * @param {String} date2 - The second date
- * @param {String} granularity - (OPTIONAL) The unit to compare (https://day.js.org/docs/en/manipulate/start-of#list-of-all-available-units)
+ * @param {String} granularity - (OPTIONAL) The unit to compare
+ *                               (https://day.js.org/docs/en/manipulate/start-of#list-of-all-available-units)
  * @param {String} format - (OPTIONAL) Format of the dates, assumes default format if not specified
  * @returns Boolean - True if the first date comes after the second date, false otherwise
  */
@@ -206,7 +212,8 @@ export function isAfter(date1, date2, granularity, format) {
  *
  * @param {String} date1 - The first date
  * @param {String} date2 - The second date
- * @param {String} granularity - (OPTIONAL) The unit to compare (https://day.js.org/docs/en/manipulate/start-of#list-of-all-available-units)
+ * @param {String} granularity - (OPTIONAL) The unit to compare
+ *                               (https://day.js.org/docs/en/manipulate/start-of#list-of-all-available-units)
  * @param {String} format - (OPTIONAL) Format of the dates, assumes default format if not specified
  * @returns Boolean - True if the first date comes before the second date, false otherwise
  */
@@ -238,6 +245,9 @@ export function isBefore(date1, date2, granularity, format) {
  * @returns Boolean - True if date is between date range, false otherwise
  */
 export function isBetween(date, startDate, endDate, granularity, interval) {
+  if (!dayjs(date).isValid() || !dayjs(startDate).isValid() || !dayjs(endDate).isValid()) {
+    return false;
+  }
   if (granularity) {
     return interval
       ? dayjs(date).isBetween(startDate, endDate, granularity, interval)
@@ -368,6 +378,17 @@ export function startOf(date, granularity) {
   return dayjs(date).startOf(granularity).format();
 } // startOf
 
+/**
+ * Gets the date at the end of the given unit time.
+ *
+ * @param {String} date - The date to find the end of
+ * @param {String} granularity - The unit to find the end of
+ * @returns String - End of date at the given unit time
+ */
+export function endOf(date, granularity) {
+  return dayjs(date).endOf(granularity).format();
+} // endOf
+
 export default {
   DEFAULT_ISOFORMAT,
   FORMATTED_ISOFORMAT,
@@ -394,5 +415,6 @@ export default {
   setDay,
   setMonth,
   setYear,
-  startOf
+  startOf,
+  endOf
 };
