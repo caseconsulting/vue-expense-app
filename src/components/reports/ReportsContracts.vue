@@ -20,27 +20,27 @@
         </v-col>
         <v-col cols="6" xl="3" lg="3" md="3" sm="6" class="my-0 py-0">
           <v-autocomplete
-            v-model="contract"
+            v-model="contractSearch"
             :items="contractsDropDown"
             :filter="customFilter"
             label="Search By Contract"
             clearable
             auto-select-first
             @change="refreshDropdownItems()"
-            @click:clear="contract = null"
+            @click:clear="contractSearch = null"
           >
           </v-autocomplete>
         </v-col>
         <v-col cols="6" xl="3" lg="3" md="3" sm="6" class="my-0 py-0">
           <v-autocomplete
-            v-model="prime"
+            v-model="primeSearch"
             :items="primesDropDown"
             :filter="customFilter"
             label="Search By Prime"
             clearable
             auto-select-first
             @change="refreshDropdownItems()"
-            @click:clear="prime = null"
+            @click:clear="primeSearch = null"
           ></v-autocomplete>
         </v-col>
       </v-row>
@@ -112,6 +112,11 @@ function created() {
   this.filteredEmployees = this.employeesInfo; // this one is shown
   this.populateDropdowns(this.employeesInfo);
   this.buildContractsColumn();
+  if (this.$route.params.requestedFilter) {
+    this.primeSearch = this.$route.params.requestedFilter;
+    this.refreshDropdownItems();
+    this.$route.params.requestedFilter = null;
+  }
 } // created
 
 // |--------------------------------------------------|
@@ -274,15 +279,15 @@ function populateContractsAndPrimesDropdown(employees) {
             let fullContract = this.$store.getters.contracts.find((c) => c.id === contract.contractId);
             if (this.contract) {
               // limit the prime dropdown to only those that belong to the contract
-              if (fullContract.contractName === this.contract) {
+              if (fullContract.contractName === this.contractSearch) {
                 this.contractsDropDown.push(fullContract.contractName);
                 this.primesDropDown.push(fullContract.primeName);
               }
-            } else if (this.prime) {
+            } else if (this.primeSearch) {
               // limit the contract dropdown to only those that belong to the prime
-              if (fullContract.primeName === this.prime) {
+              if (fullContract.primeName === this.primeSearch) {
                 this.contractsDropDown.push(fullContract.contractName);
-                this.primesDropDown.push(this.prime);
+                this.primesDropDown.push(this.primeSearch);
               }
             } else {
               this.contractsDropDown.push(fullContract.contractName); // add contract name
@@ -310,10 +315,10 @@ function populateDropdowns(employees) {
  * Refresh the list based on the current queries
  */
 function refreshDropdownItems() {
-  if (this.contract) {
+  if (this.contractSearch) {
     this.searchContract();
   }
-  if (this.prime) {
+  if (this.primeSearch) {
     this.searchPrimes();
   }
   if (this.search) {
@@ -321,7 +326,7 @@ function refreshDropdownItems() {
       return employee.employeeNumber == this.search;
     });
   }
-  if (this.search === null && this.contract === null && this.prime === null) {
+  if (this.search === null && this.contractSearch === null && this.primeSearch === null) {
     this.filteredEmployees = this.employeesInfo;
   }
 
@@ -332,24 +337,24 @@ function refreshDropdownItems() {
  * Clears the other search forms and searches the table by contract
  */
 function searchContract() {
-  if (this.contract) {
-    if (this.prime) {
+  if (this.contractSearch) {
+    if (this.primeSearch) {
       this.filteredEmployees = _.filter(this.employeesInfo, (employee) => {
         if (employee.contractNames) {
           return (
-            employee.contractNames.split(' & ').findIndex((element) => element.includes(this.contract)) > -1 &&
-            employee.primeNames.split(' & ').findIndex((element) => element.includes(this.prime)) > -1
+            employee.contractNames.split(' & ').findIndex((element) => element.includes(this.contractSearch)) > -1 &&
+            employee.primeNames.split(' & ').findIndex((element) => element.includes(this.primeSearch)) > -1
           );
         } else return false;
       });
-    } else if (this.contract === this.noContractPlaceholder) {
+    } else if (this.contractSearch === this.noContractPlaceholder) {
       this.filteredEmployees = _.filter(this.employeesInfo, (employee) => {
         return !employee.contractNames;
       });
     } else {
       this.filteredEmployees = _.filter(this.employeesInfo, (employee) => {
         if (employee.contractNames) {
-          return employee.contractNames.split(' & ').findIndex((element) => element.includes(this.contract)) > -1;
+          return employee.contractNames.split(' & ').findIndex((element) => element.includes(this.contractSearch)) > -1;
         } else return false;
       });
     }
@@ -360,20 +365,20 @@ function searchContract() {
  * Clears the other search forms and searches the table by prime
  */
 function searchPrimes() {
-  if (this.prime) {
-    if (this.contract) {
+  if (this.primeSearch) {
+    if (this.contractSearch) {
       this.filteredEmployees = _.filter(this.employeesInfo, (employee) => {
         if (employee.primeNames) {
           return (
-            employee.contractNames.split(' & ').findIndex((element) => element.includes(this.contract)) > -1 &&
-            employee.primeNames.split(' & ').findIndex((element) => element.includes(this.prime)) > -1
+            employee.contractNames.split(' & ').findIndex((element) => element.includes(this.contractSearch)) > -1 &&
+            employee.primeNames.split(' & ').findIndex((element) => element.includes(this.primeSearch)) > -1
           );
         } else return false;
       });
     } else {
       this.filteredEmployees = _.filter(this.employeesInfo, (employee) => {
         if (employee.primeNames) {
-          return employee.primeNames.split(' & ').findIndex((element) => element.includes(this.prime)) > -1;
+          return employee.primeNames.split(' & ').findIndex((element) => element.includes(this.primeSearch)) > -1;
         } else return false;
       });
     }
@@ -385,7 +390,7 @@ export default {
   data() {
     return {
       contractsDropDown: [],
-      contract: null,
+      contractSearch: null,
       employees: [],
       employeesInfo: [],
       filteredEmployees: [],
@@ -413,7 +418,7 @@ export default {
       ], // datatable headers
       itemsPerPage: -1,
       noContractPlaceholder: ' — No Contract — ',
-      prime: null,
+      primeSearch: null,
       primesDropDown: [],
       search: null, // query text for datatable search field
       showInactiveEmployees: false,

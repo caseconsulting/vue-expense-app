@@ -2,7 +2,7 @@
   <div>
     <v-container fluid>
       <v-row>
-        <v-col cols="12" xl="3" lg="3" md="3" sm="12" class="my-0 pb-0">
+        <v-col cols="12" xl="3" lg="3" md="3" sm="12" class="my-0 py-0">
           <v-autocomplete
             id="employeesSearch"
             v-model="search"
@@ -18,7 +18,7 @@
             "
           ></v-autocomplete>
         </v-col>
-        <v-col cols="12" xl="3" lg="3" md="3" sm="12" class="my-0 pb-0">
+        <v-col cols="12" xl="3" lg="3" md="3" sm="12" class="my-0 py-0">
           <v-autocomplete
             v-model="badgeExpirationDateSearch"
             :items="badgeExpirations"
@@ -305,7 +305,7 @@ function searchBadgeExpirationDates(requestedDate, forDropdown) {
 
   if (this.filteredEmployees.length > 0) {
     // this means we already filtered by something so we want to restrict the dropdown
-    this.foundEmployees = _.filter(this.filteredEmployees, (employee) => {
+    foundEmployees = _.filter(this.filteredEmployees, (employee) => {
       let found = [];
       // if they have no badge expirations, then badgeExpiration will be the big number
       if (employee.badgeExpiration < 100000000000000000) {
@@ -321,7 +321,7 @@ function searchBadgeExpirationDates(requestedDate, forDropdown) {
     });
   } else {
     // this means we havent already filtered so we only want to filter the employees
-    this.foundEmployees = _.filter(this.employeesInfo, (employee) => {
+    foundEmployees = _.filter(this.employeesInfo, (employee) => {
       // if they have no badge expirations, then badgeExpiration will be the big number
       if (employee.badgeExpiration < 100000000000000000) {
         // loop through every employee's clearances and see if any of them are in the selected range
@@ -334,10 +334,10 @@ function searchBadgeExpirationDates(requestedDate, forDropdown) {
     });
   }
   if (!forDropdown) {
-    this.filteredEmployees = this.foundEmployees;
+    this.filteredEmployees = foundEmployees;
     return;
   } else {
-    return this.foundEmployees.length > 0; // used to filter the dropdowns in populateDataTypeDropDowns
+    return foundEmployees.length > 0; // used to filter the dropdowns in populateDataTypeDropDowns
   }
 } // searchBadgeExpirationDates
 

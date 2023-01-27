@@ -2,7 +2,7 @@
   <div>
     <v-container fluid>
       <v-row>
-        <v-col cols="12" xl="3" lg="3" md="3" sm="12" class="my-0 pb-0">
+        <v-col cols="12" xl="3" lg="3" md="3" sm="12" class="my-0 py-0">
           <v-autocomplete
             id="employeesSearch"
             v-model="search"
@@ -18,7 +18,7 @@
             "
           ></v-autocomplete>
         </v-col>
-        <v-col cols="12" xl="3" lg="3" md="3" sm="12" class="my-0 pb-0">
+        <v-col cols="12" xl="3" lg="3" md="3" sm="12" class="my-0 py-0">
           <v-autocomplete
             v-model="jobRoleSearch"
             :items="jobRoles"
@@ -88,9 +88,15 @@ import _ from 'lodash';
  * The created lifecycle hook.
  */
 function created() {
+  this.jobRoleSearch = this.$route.params.requestedFilter;
   this.employeesInfo = this.getActive(this.$store.getters.employees); // default to filtered list
   this.filteredEmployees = this.employeesInfo; // this one is shown
   this.populateDropdowns(this.employeesInfo);
+  if (this.$route.params.requestedFilter) {
+    this.jobRoleSearch = this.$route.params.requestedFilter;
+    this.refreshDropdownItems();
+    this.$route.params.requestedFilter = null;
+  }
 } // created
 
 // |--------------------------------------------------|

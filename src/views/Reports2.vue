@@ -6,21 +6,21 @@
           <h2 class="text-center white--text">Reports</h2>
         </v-card-title>
       </v-card>
-      <reports-page-loader v-if="loading"></reports-page-loader>
-      <v-container v-else fluid>
+      <v-container fluid>
+        <reports-page-loader v-if="loading"></reports-page-loader>
         <!-- user is not mobile -->
-        <v-tabs color="blue" center-active grow show-arrows @change="changeTab">
+        <v-tabs v-else color="blue" center-active grow show-arrows @change="changeTab" v-model="currentTab">
           <v-tab href="#contracts" :disabled="loading">Contracts</v-tab>
           <v-tab href="#jobRoles" :disabled="loading">Job Roles</v-tab>
           <v-tab href="#securityInfo" :disabled="loading">Security Info</v-tab>
           <v-tab-item id="contracts" class="mx-2 my-6">
-            <reports-contracts v-if="currentTab === 'contracts' && !loading"></reports-contracts>
+            <reports-contracts></reports-contracts>
           </v-tab-item>
           <v-tab-item id="jobRoles" class="mx-2 my-6">
-            <reports-job-roles v-if="currentTab === 'jobRoles' && !loading"></reports-job-roles>
+            <reports-job-roles></reports-job-roles>
           </v-tab-item>
           <v-tab-item id="securityInfo" class="mx-2 my-6">
-            <reports-security-info v-if="currentTab === 'securityInfo' && !loading"></reports-security-info>
+            <reports-security-info></reports-security-info>
           </v-tab-item>
         </v-tabs>
       </v-container>
@@ -31,9 +31,9 @@
 import ReportsPageLoader from '@/components/reports/ReportsPageLoader.vue';
 import ReportsContracts from '@/components/reports/ReportsContracts.vue';
 import ReportsJobRoles from '@/components/reports/ReportsJobRoles.vue';
+import ReportsSecurityInfo from '../components/reports/ReportsSecurityInfo.vue';
 import { updateStoreEmployees, updateStoreContracts } from '@/utils/storeUtils';
 import { isMobile } from '@/utils/utils';
-import ReportsSecurityInfo from '../components/reports/ReportsSecurityInfo.vue';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -52,7 +52,8 @@ async function created() {
     ]);
     this.loading = false;
   }
-  if (this.$route.params.requestedFilter) {
+  if (this.$route.params.requestedDataType) {
+    this.currentTab = this.$route.params.requestedDataType;
     this.wasRedirected = true;
     window.scrollTo(0, 0);
   }
@@ -109,7 +110,7 @@ export default {
   data() {
     return {
       contracts: null,
-      currentTab: '',
+      currentTab: null,
       loading: true,
       wasRedirected: false
     };

@@ -180,7 +180,7 @@ function fillData() {
         this.$router.push({
           path: '/reports',
           name: 'reports',
-          params: { requestedDataType: 'Contracts', requestedFilter: this.chartData.labels[index] }
+          params: { requestedDataType: 'contracts', requestedFilter: this.chartData.labels[index] }
         });
       }
     },

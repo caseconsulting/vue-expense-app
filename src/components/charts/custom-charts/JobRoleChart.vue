@@ -126,7 +126,7 @@ function fillData() {
         this.$router.push({
           path: '/reports',
           name: 'reports',
-          params: { requestedDataType: 'Job Roles', requestedFilter: this.chartData.labels[index] }
+          params: { requestedDataType: 'jobRoles', requestedFilter: this.chartData.labels[index] }
         });
       }
     },
