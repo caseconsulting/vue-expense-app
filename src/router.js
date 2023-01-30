@@ -10,7 +10,7 @@ import StatsDashboard from '@/views/StatsDashboard.vue';
 import Audits from '@/views/Audits.vue';
 import Expenses from '@/views/MyExpenses.vue';
 import Help from '@/views/Help.vue';
-import Reports2 from '@/views/Reports2.vue';
+import Reports from '@/views/Reports.vue';
 import Callback from '@/views/Callback';
 import EmployeeHome from '@/views/MyBudgets.vue';
 import Home from '@/views/Home.vue';
@@ -74,7 +74,7 @@ const router = new Router({
     {
       path: '/reports',
       name: 'reports',
-      component: Reports2,
+      component: Reports,
       beforeEnter: requireAuth
     },
     {
