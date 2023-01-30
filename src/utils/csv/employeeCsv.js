@@ -39,6 +39,7 @@ export function convertEmployees(employees, contracts) {
       'Last Name': employee.lastName || '',
       'Birthday (yy-mm-dd)': employee.birthday || '',
       'Place of Birth': placeOfBirth || '',
+      'State of Residence': employee.currentState || '',
       'Hire Date': employee.hireDate || '',
       'Job Role': employee.jobRole || '',
       AIN: employee.agencyIdentificationNumber || '',
