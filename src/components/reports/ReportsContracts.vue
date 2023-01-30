@@ -43,6 +43,9 @@
             @click:clear="primeSearch = null"
           ></v-autocomplete>
         </v-col>
+        <v-col cols="6" xl="3" lg="3" md="3" sm="6" class="my-0 py-0">
+          <v-checkbox v-model="showInactiveEmployees" label="Show Inactive Users"></v-checkbox>
+        </v-col>
       </v-row>
 
       <!-- START EMPLOYEE TABLE -->
@@ -97,6 +100,7 @@
 
 <script>
 import _ from 'lodash';
+import { customEmployeeFilter, getActive, getFullName, populateEmployeesDropdown } from './reports-utils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -160,26 +164,6 @@ function buildContractsColumn() {
 } // buildContractsColumn
 
 /**
- * Custom filter for employee autocomplete options.
- *
- * @param item - employee object
- * @param queryText - query to use to filter
- * @return string - the filtered name
- */
-function customEmployeeFilter(item, queryText) {
-  const query = queryText ? queryText.trim() : '';
-  const nickNameFullName = item.nickname ? `${item.nickname} ${item.lastName}` : '';
-  const firstNameFullName = `${item.firstName} ${item.lastName}`;
-
-  const queryContainsNickName = nickNameFullName.toString().toLowerCase().indexOf(query.toString().toLowerCase()) >= 0;
-  const queryContainsFirstName =
-    firstNameFullName.toString().toLowerCase().indexOf(query.toString().toLowerCase()) >= 0;
-  const queryContainsEmployeeNumber = item.value.toString().indexOf(query.toString()) >= 0;
-
-  return queryContainsNickName || queryContainsFirstName || queryContainsEmployeeNumber;
-} // customEmployeeFilter
-
-/**
  * Custom filter for contract autocomplete options.
  *
  * @param item - contract object
@@ -194,27 +178,6 @@ function customFilter(item, queryText) {
 } // customFilter
 
 /**
- * Returns a filtered list of the input with all inactive
- * employees removed
- */
-function getActive(employees) {
-  return _.filter(employees, (e) => {
-    return e.workStatus > 0;
-  });
-} // getActive
-
-/**
- * Gets the full name of an employee.
- *
- * @param item - the employee
- * @return String - The employees first name
- */
-function getFullName(item) {
-  item.fullName = item.firstName + ' ' + item.lastName;
-  return item.fullName;
-} // getFullName
-
-/**
  * handles click event of the employee table entry
  *
  * @param item - the employee
@@ -222,30 +185,6 @@ function getFullName(item) {
 function handleClick(item) {
   this.$router.push(`/employee/${item.employeeNumber}`);
 } //handleClick
-
-/**
- * Sets a mapping of employee name to employee id for the autocomplete options.
- *
- * @param empData - The list of employees
- */
-function populateEmployeesDropdown(empData) {
-  this.employees = _.sortBy(
-    _.map(empData, (data) => {
-      if (data && data.firstName && data.lastName && data.employeeNumber) {
-        return {
-          text: data.firstName + ' ' + data.lastName,
-          value: data.employeeNumber.toString(),
-          nickname: data.nickname,
-          firstName: data.firstName,
-          lastName: data.lastName
-        };
-      }
-    }).filter((data) => {
-      return data != null;
-    }),
-    (employee) => employee.text.toLowerCase()
-  );
-} // populateEmployeesDropdown
 
 /**
  * Populate contracts and primes dropdown items that match the searches.
@@ -307,7 +246,7 @@ function populateContractsAndPrimesDropdown(employees) {
  */
 function populateDropdowns(employees) {
   // refresh the employees autocomplete list to be those that match the query
-  this.populateEmployeesDropdown(employees);
+  this.employees = this.populateEmployeesDropdown(employees);
   this.populateContractsAndPrimesDropdown(employees);
 } // populateDropdowns
 
@@ -385,6 +324,30 @@ function searchPrimes() {
   }
 } // searchPrimes
 
+// |--------------------------------------------------|
+// |                                                  |
+// |                     WATCHERS                     |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * Watches the showInactiveUsers to refilter the table as needed
+ */
+function watchShowInactiveUsers() {
+  this.search = null;
+  this.employeesInfo = this.$store.getters.employees;
+  if (!this.showInactiveEmployees) this.employeesInfo = this.getActive(this.employeesInfo);
+  this.populateDropdowns(this.employeesInfo);
+  this.buildContractsColumn();
+  this.refreshDropdownItems();
+} // watchShowInactiveUsers
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      EXPORT                      |
+// |                                                  |
+// |--------------------------------------------------|
+
 export default {
   created,
   data() {
@@ -439,6 +402,9 @@ export default {
     refreshDropdownItems,
     searchContract,
     searchPrimes
+  },
+  watch: {
+    showInactiveEmployees: watchShowInactiveUsers
   }
 };
 </script>
@@ -446,5 +412,12 @@ export default {
 <style lang="css" scoped>
 .row-pointer >>> tbody tr :hover {
   cursor: pointer;
+}
+</style>
+
+<style lang="scss" scoped>
+@import 'src/assets/styles/styles';
+.inactive {
+  color: $case-red;
 }
 </style>

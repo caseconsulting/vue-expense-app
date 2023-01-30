@@ -25,7 +25,7 @@
         <v-skeleton-loader type="text" width="100%"></v-skeleton-loader>
       </v-col>
     </v-row>
-
+    <!-- data table -->
     <v-skeleton-loader elevation="1" type="table-row-divider@20" class="px-4 white"></v-skeleton-loader>
   </v-container>
 </template>

@@ -2,7 +2,7 @@
   <div>
     <v-container fluid>
       <v-row>
-        <v-col cols="12" xl="3" lg="3" md="3" sm="12" class="my-0 py-0">
+        <v-col cols="6" xl="3" lg="3" md="3" sm="6" class="my-0 py-0">
           <v-autocomplete
             id="employeesSearch"
             v-model="search"
@@ -18,7 +18,7 @@
             "
           ></v-autocomplete>
         </v-col>
-        <v-col cols="12" xl="3" lg="3" md="3" sm="12" class="my-0 py-0">
+        <v-col cols="6" xl="3" lg="3" md="3" sm="6" class="my-0 py-0">
           <v-autocomplete
             v-model="jobRoleSearch"
             :items="jobRoles"
@@ -29,6 +29,9 @@
             @click:clear="jobRoleSearch = null"
           ></v-autocomplete>
         </v-col>
+        <v-col cols="6" xl="3" lg="3" md="3" sm="6" class="my-0 py-0">
+          <v-checkbox v-model="showInactiveEmployees" label="Show Inactive Users"></v-checkbox>
+        </v-col>
       </v-row>
 
       <!-- START EMPLOYEE TABLE -->
@@ -38,7 +41,7 @@
         :sort-by.sync="sortBy"
         :sort-desc.sync="sortDesc"
         :items-per-page="-1"
-        class="elevation-1"
+        class="elevation-1 row-pointer"
         @click:row="handleClick"
       >
         <!-- Employee Number Slot -->
@@ -77,6 +80,7 @@
 
 <script>
 import _ from 'lodash';
+import { customEmployeeFilter, getActive, getFullName, populateEmployeesDropdown } from './reports-utils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -88,7 +92,6 @@ import _ from 'lodash';
  * The created lifecycle hook.
  */
 function created() {
-  this.jobRoleSearch = this.$route.params.requestedFilter;
   this.employeesInfo = this.getActive(this.$store.getters.employees); // default to filtered list
   this.filteredEmployees = this.employeesInfo; // this one is shown
   this.populateDropdowns(this.employeesInfo);
@@ -104,47 +107,6 @@ function created() {
 // |                     METHODS                      |
 // |                                                  |
 // |--------------------------------------------------|
-
-/**
- * Custom filter for employee autocomplete options.
- *
- * @param item - employee object
- * @param queryText - query to use to filter
- * @return string - the filtered name
- */
-function customEmployeeFilter(item, queryText) {
-  const query = queryText ? queryText.trim() : '';
-  const nickNameFullName = item.nickname ? `${item.nickname} ${item.lastName}` : '';
-  const firstNameFullName = `${item.firstName} ${item.lastName}`;
-
-  const queryContainsNickName = nickNameFullName.toString().toLowerCase().indexOf(query.toString().toLowerCase()) >= 0;
-  const queryContainsFirstName =
-    firstNameFullName.toString().toLowerCase().indexOf(query.toString().toLowerCase()) >= 0;
-  const queryContainsEmployeeNumber = item.value.toString().indexOf(query.toString()) >= 0;
-
-  return queryContainsNickName || queryContainsFirstName || queryContainsEmployeeNumber;
-} // customEmployeeFilter
-
-/**
- * Returns a filtered list of the input with all inactive
- * employees removed
- */
-function getActive(employees) {
-  return _.filter(employees, (e) => {
-    return e.workStatus > 0;
-  });
-} // getActive
-
-/**
- * Gets the full name of an employee.
- *
- * @param item - the employee
- * @return String - The employees first name
- */
-function getFullName(item) {
-  item.fullName = item.firstName + ' ' + item.lastName;
-  return item.fullName;
-} // getFullName
 
 /**
  * handles click event of the employee table entry
@@ -165,37 +127,13 @@ function populateJobRoleDropdown() {
 } // populateJobRoleDropdown
 
 /**
- * Sets a mapping of employee name to employee id for the autocomplete options.
- *
- * @param empData - The list of employees
- */
-function populateEmployeesDropdown(empData) {
-  this.employees = _.sortBy(
-    _.map(empData, (data) => {
-      if (data && data.firstName && data.lastName && data.employeeNumber) {
-        return {
-          text: data.firstName + ' ' + data.lastName,
-          value: data.employeeNumber.toString(),
-          nickname: data.nickname,
-          firstName: data.firstName,
-          lastName: data.lastName
-        };
-      }
-    }).filter((data) => {
-      return data != null;
-    }),
-    (employee) => employee.text.toLowerCase()
-  );
-} // constructAutoComplete
-
-/**
  * Populate drop downs with information that other employees have filled out.
  *
  * @param employees - array of employees for dropdown and to get contracts
  */
 function populateDropdowns(employees) {
   // refresh the employees autocomplete list to be those that match the query
-  this.populateEmployeesDropdown(employees);
+  this.employees = this.populateEmployeesDropdown(employees);
   this.populateJobRoleDropdown(employees);
 } // populateDropdowns
 
@@ -218,6 +156,9 @@ function refreshDropdownItems() {
   this.populateDropdowns(this.filteredEmployees);
 } // refreshDropdownItems
 
+/**
+ * Filters employees on the data table by the job role entered by the user.
+ */
 function searchJobRoles() {
   this.filteredEmployees = _.filter(this.employeesInfo, (employee) => {
     if (employee.jobRole) {
@@ -232,7 +173,30 @@ function searchJobRoles() {
       return employee.employeeNumber == this.search;
     });
   }
-}
+} // searchJobRoles
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     WATCHERS                     |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * Watches the showInactiveUsers to refilter the table as needed
+ */
+function watchShowInactiveUsers() {
+  this.search = null;
+  this.employeesInfo = this.$store.getters.employees;
+  if (!this.showInactiveEmployees) this.employeesInfo = this.getActive(this.employeesInfo);
+  this.populateDropdowns(this.employeesInfo);
+  this.refreshDropdownItems();
+} // watchShowInactiveUsers
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      EXPORT                      |
+// |                                                  |
+// |--------------------------------------------------|
 
 export default {
   created,
@@ -277,6 +241,22 @@ export default {
     populateDropdowns,
     refreshDropdownItems,
     searchJobRoles
+  },
+  watch: {
+    showInactiveEmployees: watchShowInactiveUsers
   }
 };
 </script>
+
+<style lang="css" scoped>
+.row-pointer >>> tbody tr :hover {
+  cursor: pointer;
+}
+</style>
+
+<style lang="scss" scoped>
+@import 'src/assets/styles/styles';
+.inactive {
+  color: $case-red;
+}
+</style>
