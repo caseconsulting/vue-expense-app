@@ -191,6 +191,28 @@
                         <div v-else><v-progress-circular color="#bc3825" indeterminate /></div>
                       </div>
                       <div v-else>
+                        <!-- Employees Assigned -->
+                        <v-tooltip>
+                          <template v-slot:activator="{ on }">
+                            <v-btn
+                              :disabled="editingItem != null"
+                              @click.stop="
+                                () => {
+                                  toggleProjectEmployeesModal = true;
+                                  contractEmployeesAssigned = contract.item;
+                                  projectEmployeesAsseigned = item;
+                                }
+                              "
+                              icon
+                              text
+                              v-on="on"
+                            >
+                              <v-icon class="case-gray">group</v-icon>
+                            </v-btn></template
+                          >
+                          <span>View Employees Assigned to Project</span>
+                        </v-tooltip>
+
                         <!-- Edit Project -->
                         <v-tooltip top>
                           <template v-slot:activator="{ on }">
@@ -219,6 +241,7 @@
                       </div>
                     </template>
                   </v-data-table>
+                  <!-- END EXPANDED PROJECTS DATA TABLE-->
                 </v-container>
               </td>
             </template>
@@ -314,6 +337,11 @@
         </v-form>
       </v-container>
     </v-card>
+    <projects-employees-assigned-modal
+      :toggleModal="toggleProjectEmployeesModal"
+      :contract="contractEmployeesAssigned"
+      :project="projectEmployeesAsseigned"
+    />
     <delete-modal :toggleDeleteModal="toggleContractDeleteModal" :type="'contract'"></delete-modal>
     <delete-modal :toggleDeleteModal="toggleProjectDeleteModal" :type="'project'"></delete-modal>
     <contract-project-delete-warning
@@ -333,6 +361,7 @@ import { updateStoreContracts, updateStoreEmployees } from '@/utils/storeUtils';
 import { format, isAfter, isBefore } from '@/shared/dateUtils';
 import { getDateOptionalRules } from '@/shared/validationUtils';
 import { mask } from 'vue-the-mask';
+import ProjectsEmployeesAssignedModal from '../modals/ProjectsEmployeesAssignedModal.vue';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -360,6 +389,9 @@ async function created() {
   });
   window.EventBus.$on('canceled-project-form', () => {
     this.toggleProjectForm = false;
+  });
+  window.EventBus.$on('closed-project-employees-assigned-modal', () => {
+    this.toggleProjectEmployeesModal = false;
   });
 } // created
 
@@ -667,7 +699,8 @@ export default {
   components: {
     DeleteModal,
     ContractProjectDeleteWarning,
-    ProjectForm
+    ProjectForm,
+    ProjectsEmployeesAssignedModal
   },
   methods: {
     projectRowClass,
@@ -722,11 +755,14 @@ export default {
               'Start date must be before the end date'
           : true;
       },
+      contractEmployeesAssigned: null,
+      projectEmployeesAsseigned: null,
       contractValid: true,
       addProjectUnderContract: null,
       toggleProjectForm: false,
       relationships: [],
       deleteItem: null,
+      toggleProjectEmployeesModal: false,
       toggleWarningModal: false,
       toggleContractDeleteModal: false,
       toggleProjectDeleteModal: false,
