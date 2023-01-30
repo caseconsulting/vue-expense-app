@@ -6,7 +6,7 @@
           <v-text-field
             id="contractsSearch"
             v-model="search"
-            label="Search table contents"
+            label="Search Table Contents"
             auto-select-first
             append-icon="search"
             clearable

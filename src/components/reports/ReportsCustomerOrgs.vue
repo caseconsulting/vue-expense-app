@@ -20,13 +20,13 @@
         </v-col>
         <v-col cols="6" xl="3" lg="3" md="3" sm="6" class="my-0 py-0">
           <v-autocomplete
-            v-model="jobRoleSearch"
-            :items="jobRoles"
-            label="Search By Job Role"
+            v-model="custOrgSearch"
+            :items="custOrgs"
+            label="Search By Customer Org"
             clearable
             auto-select-first
             @change="refreshDropdownItems()"
-            @click:clear="jobRoleSearch = null"
+            @click:clear="custOrgSearch = null"
           ></v-autocomplete>
         </v-col>
         <v-col cols="6" xl="3" lg="3" md="3" sm="6" class="my-0 py-0">
@@ -56,10 +56,16 @@
             {{ getFullName(item) }}
           </p>
         </template>
-        <!-- Job Role Item Slot -->
-        <template v-slot:[`item.jobRole`]="{ item }">
+        <!-- Current Customer Org Item Slot -->
+        <template v-slot:[`item.currentOrgName`]="{ item }">
           <p :class="{ inactive: item.workStatus <= 0 }" class="mb-0">
-            {{ item.jobRole }}
+            {{ item.currentOrgName }}
+          </p>
+        </template>
+        <!-- Current Customer Org Experience Item Slot -->
+        <template v-slot:[`item.currentOrgYoE`]="{ item }">
+          <p :class="{ inactive: item.workStatus <= 0 }" class="mb-0">
+            {{ item.currentOrgYoE }}
           </p>
         </template>
         <!-- Email Name Item Slot -->
@@ -95,11 +101,7 @@ function created() {
   this.employeesInfo = this.getActive(this.$store.getters.employees); // default to filtered list
   this.filteredEmployees = this.employeesInfo; // this one is shown
   this.populateDropdowns(this.employeesInfo);
-  if (this.$route.params.requestedFilter) {
-    this.jobRoleSearch = this.$route.params.requestedFilter;
-    this.refreshDropdownItems();
-    this.$route.params.requestedFilter = null;
-  }
+  this.buildCustomerOrgColumns();
 } // created
 
 // |--------------------------------------------------|
@@ -107,6 +109,32 @@ function created() {
 // |                     METHODS                      |
 // |                                                  |
 // |--------------------------------------------------|
+
+/**
+ * Gets all of the current customer orgs for each employee and displays the column on the table.
+ */
+function buildCustomerOrgColumns() {
+  this.employeesInfo.forEach((currentEmp) => {
+    if (currentEmp.customerOrgExp) {
+      let hasCurrent = false;
+      let orgs = '';
+      let years = 0;
+      currentEmp.customerOrgExp.forEach((org) => {
+        if (org.current) {
+          hasCurrent = true;
+          orgs += `${org.name} & `;
+          years += parseFloat(org.years);
+        }
+      });
+      if (hasCurrent) {
+        // remove & at the end
+        orgs = orgs.slice(0, -2);
+        currentEmp.currentOrgName = orgs;
+        currentEmp.currentOrgYoE = years + (years == 1 ? ' year' : ' years');
+      }
+    }
+  });
+} // buildCustomerOrgColumns
 
 /**
  * handles click event of the employee table entry
@@ -120,11 +148,13 @@ function handleClick(item) {
 /**
  * Populates all job roles in the search dropdown.
  */
-function populateJobRoleDropdown() {
-  let employeeJobRoles = _.map(this.filteredEmployees, (employee) => employee.jobRole);
-  employeeJobRoles = _.compact(employeeJobRoles);
-  _.forEach(employeeJobRoles, (jobRole) => this.jobRoles.push(jobRole));
-} // populateJobRoleDropdown
+function populateCustomerOrgsDropdown() {
+  _.forEach(this.filteredEmployees, (employee) =>
+    _.forEach(employee.customerOrgExp, (org) => {
+      if (org.current) this.custOrgs.push(org.name);
+    })
+  );
+} // populateCustomerOrgsDropdown
 
 /**
  * Populate drop downs with information that other employees have filled out.
@@ -134,7 +164,7 @@ function populateJobRoleDropdown() {
 function populateDropdowns(employees) {
   // refresh the employees autocomplete list to be those that match the query
   this.employees = this.populateEmployeesDropdown(employees);
-  this.populateJobRoleDropdown(employees);
+  this.populateCustomerOrgsDropdown(employees);
 } // populateDropdowns
 
 /**
@@ -146,10 +176,10 @@ function refreshDropdownItems() {
       return employee.employeeNumber == this.search;
     });
   }
-  if (this.jobRoleSearch) {
-    this.searchJobRoles();
+  if (this.custOrgSearch) {
+    this.searchCustomerOrgs();
   }
-  if (this.search === null && this.jobRoleSearch === null) {
+  if (this.search === null && this.custOrgSearch === null) {
     this.filteredEmployees = this.employeesInfo;
   }
 
@@ -159,10 +189,10 @@ function refreshDropdownItems() {
 /**
  * Filters employees on the data table by the job role entered by the user.
  */
-function searchJobRoles() {
+function searchCustomerOrgs() {
   this.filteredEmployees = _.filter(this.employeesInfo, (employee) => {
-    if (employee.jobRole) {
-      return employee.jobRole.includes(this.jobRoleSearch);
+    if (employee.customerOrgExp) {
+      return employee.customerOrgExp.find((org) => org.current && org.name.includes(this.custOrgSearch));
     } else {
       return false;
     }
@@ -173,7 +203,7 @@ function searchJobRoles() {
       return employee.employeeNumber == this.search;
     });
   }
-} // searchJobRoles
+} // searchCustomerOrgs
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -215,16 +245,20 @@ export default {
           value: 'fullName'
         },
         {
-          text: 'Job Role',
-          value: 'jobRole'
+          text: 'Current Customer Org',
+          value: 'currentOrgName'
+        },
+        {
+          text: 'Current Customer Org Experience',
+          value: 'currentOrgYoE'
         },
         {
           text: 'Email',
           value: 'email'
         }
       ], // datatable headers
-      jobRoleSearch: null,
-      jobRoles: [],
+      custOrgSearch: null,
+      custOrgs: [],
       search: null, // query text for datatable search field
       showInactiveEmployees: false,
       sortBy: 'firstName', // sort datatable items
@@ -232,15 +266,16 @@ export default {
     };
   },
   methods: {
+    buildCustomerOrgColumns,
     customEmployeeFilter,
     getActive,
     getFullName,
     handleClick,
     populateEmployeesDropdown,
-    populateJobRoleDropdown,
+    populateCustomerOrgsDropdown,
     populateDropdowns,
     refreshDropdownItems,
-    searchJobRoles
+    searchCustomerOrgs
   },
   watch: {
     showInactiveEmployees: watchShowInactiveUsers
