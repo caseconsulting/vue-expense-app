@@ -12,6 +12,7 @@
         <v-tabs v-else color="blue" center-active grow show-arrows @change="changeTab" v-model="currentTab">
           <v-tab href="#contracts" :disabled="loading">Contracts</v-tab>
           <v-tab href="#customerOrgs" :disabled="loading">Customer Orgs</v-tab>
+          <v-tab href="#certifications" :disabled="loading">Certifications</v-tab>
           <v-tab href="#jobRoles" :disabled="loading">Job Roles</v-tab>
           <v-tab href="#securityInfo" :disabled="loading">Security Info</v-tab>
           <v-tab-item id="contracts" class="mx-2 my-6">
@@ -19,6 +20,9 @@
           </v-tab-item>
           <v-tab-item id="customerOrgs" class="mx-2 my-6">
             <ReportsCustomerOrgs />
+          </v-tab-item>
+          <v-tab-item id="certifications" class="mx-2 my-6">
+            <ReportsCertifications />
           </v-tab-item>
           <v-tab-item id="jobRoles" class="mx-2 my-6">
             <ReportsJobRoles />
@@ -35,6 +39,7 @@
 import ReportsPageLoader from '@/components/reports/ReportsPageLoader.vue';
 import ReportsContracts from '@/components/reports/ReportsContracts.vue';
 import ReportsCustomerOrgs from '@/components/reports/ReportsCustomerOrgs.vue';
+import ReportsCertifications from '@/components/reports/ReportsCertifications.vue';
 import ReportsJobRoles from '@/components/reports/ReportsJobRoles.vue';
 import ReportsSecurityInfo from '../components/reports/ReportsSecurityInfo.vue';
 import { updateStoreEmployees, updateStoreContracts } from '@/utils/storeUtils';
@@ -105,6 +110,7 @@ export default {
   components: {
     ReportsContracts,
     ReportsCustomerOrgs,
+    ReportsCertifications,
     ReportsJobRoles,
     ReportsSecurityInfo,
     ReportsPageLoader

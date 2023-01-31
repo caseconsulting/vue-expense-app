@@ -5,6 +5,7 @@
 </template>
 
 <script>
+import _ from 'lodash';
 import BarChart from '../base-charts/BarChart.vue';
 import { storeIsPopulated } from '@/utils/utils';
 import { getTodaysDate, isBefore } from '@/shared/dateUtils';
@@ -141,6 +142,16 @@ function fillCertData() {
         }
       }
     },
+    onClick: (x, y) => {
+      if (_.first(y)) {
+        let index = _.first(y).index;
+        this.$router.push({
+          path: '/reports',
+          name: 'reports',
+          params: { requestedDataType: 'certifications', requestedFilter: this.chartData.labels[index] }
+        });
+      }
+    },
     plugins: {
       legend: {
         display: false
@@ -150,6 +161,13 @@ function fillCertData() {
         text: 'Top ' + this.values.length + ' Certifications Used by Employees',
         font: {
           size: 15
+        }
+      },
+      subtitle: {
+        display: true,
+        text: '*Click on a bar to see employees',
+        font: {
+          style: 'italic'
         }
       },
       tooltip: {

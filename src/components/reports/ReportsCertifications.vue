@@ -20,13 +20,13 @@
         </v-col>
         <v-col cols="6" xl="3" lg="3" md="3" sm="6" class="my-0 py-0">
           <v-autocomplete
-            v-model="custOrgSearch"
-            :items="custOrgs"
-            label="Search By Customer Org"
+            v-model="certificationSearch"
+            :items="certifications"
+            label="Search By Certification"
             clearable
             auto-select-first
             @change="refreshDropdownItems()"
-            @click:clear="custOrgSearch = null"
+            @click:clear="certificationSearch = null"
           ></v-autocomplete>
         </v-col>
         <v-col cols="6" xl="3" lg="3" md="3" sm="6" class="my-0 py-0">
@@ -56,16 +56,10 @@
             {{ getFullName(item) }}
           </p>
         </template>
-        <!-- Current Customer Org Item Slot -->
+        <!-- Certifications Item Slot -->
         <template v-slot:[`item.currentOrgName`]="{ item }">
           <p :class="{ inactive: item.workStatus <= 0 }" class="mb-0">
-            {{ item.currentOrgName }}
-          </p>
-        </template>
-        <!-- Current Customer Org Experience Item Slot -->
-        <template v-slot:[`item.currentOrgYoE`]="{ item }">
-          <p :class="{ inactive: item.workStatus <= 0 }" class="mb-0">
-            {{ item.currentOrgYoE }}
+            {{ item.certificationNames }}
           </p>
         </template>
         <!-- Email Name Item Slot -->
@@ -87,6 +81,7 @@
 <script>
 import _ from 'lodash';
 import { customEmployeeFilter, getActive, getFullName, populateEmployeesDropdown } from './reports-utils';
+import { getTodaysDate, isSameOrBefore } from '@/shared/dateUtils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -101,9 +96,9 @@ function created() {
   this.employeesInfo = this.getActive(this.$store.getters.employees); // default to filtered list
   this.filteredEmployees = this.employeesInfo; // this one is shown
   this.populateDropdowns(this.employeesInfo);
-  this.buildCustomerOrgColumns();
+  this.buildCertificationsColumns();
   if (this.$route.params.requestedFilter) {
-    this.custOrgSearch = this.$route.params.requestedFilter;
+    this.certificationSearch = this.$route.params.requestedFilter;
     this.refreshDropdownItems();
     this.$route.params.requestedFilter = null;
   }
@@ -116,30 +111,33 @@ function created() {
 // |--------------------------------------------------|
 
 /**
- * Gets all of the current customer orgs for each employee and displays the column on the table.
+ * Gets all of the active certifications for each employee and displays the column on the table.
  */
-function buildCustomerOrgColumns() {
+function buildCertificationsColumns() {
   this.employeesInfo.forEach((currentEmp) => {
-    if (currentEmp.customerOrgExp) {
-      let hasCurrent = false;
-      let orgs = '';
-      let years = 0;
-      currentEmp.customerOrgExp.forEach((org) => {
-        if (org.current) {
-          hasCurrent = true;
-          orgs += `${org.name} & `;
-          years += parseFloat(org.years);
+    if (currentEmp.certifications) {
+      let hasActiveCert = false;
+      let certs = '';
+      currentEmp.certifications.forEach((cert) => {
+        if (cert.expirationDate) {
+          if (isSameOrBefore(getTodaysDate(), cert.expirationDate)) {
+            hasActiveCert = true;
+            certs += `${cert.name} & `;
+          }
+        } else {
+          // cert has no expiration date
+          hasActiveCert = true;
+          certs += `${cert.name} & `;
         }
       });
-      if (hasCurrent) {
+      if (hasActiveCert) {
         // remove & at the end
-        orgs = orgs.slice(0, -2);
-        currentEmp.currentOrgName = orgs;
-        currentEmp.currentOrgYoE = years + (years == 1 ? ' year' : ' years');
+        certs = certs.slice(0, -2);
+        currentEmp.certificationNames = certs;
       }
     }
   });
-} // buildCustomerOrgColumns
+} // buildCertificationsColumns
 
 /**
  * handles click event of the employee table entry
@@ -151,15 +149,22 @@ function handleClick(item) {
 } //handleClick
 
 /**
- * Populates all current customer orgs in the search dropdown.
+ * Populates all certifications in the search dropdown.
  */
-function populateCustomerOrgsDropdown() {
+function populateCertificationsDropdown() {
   _.forEach(this.filteredEmployees, (employee) =>
-    _.forEach(employee.customerOrgExp, (org) => {
-      if (org.current) this.custOrgs.push(org.name);
+    _.forEach(employee.certifications, (cert) => {
+      if (cert.expirationDate) {
+        if (isSameOrBefore(getTodaysDate(), cert.expirationDate)) {
+          this.certifications.push(cert.name);
+        }
+      } else {
+        // cert has no expiration date
+        this.certifications.push(cert.name);
+      }
     })
   );
-} // populateCustomerOrgsDropdown
+} // populateCertificationsDropdown
 
 /**
  * Populate drop downs with information that other employees have filled out.
@@ -169,7 +174,7 @@ function populateCustomerOrgsDropdown() {
 function populateDropdowns(employees) {
   // refresh the employees autocomplete list to be those that match the query
   this.employees = this.populateEmployeesDropdown(employees);
-  this.populateCustomerOrgsDropdown(employees);
+  this.populateCertificationsDropdown(employees);
 } // populateDropdowns
 
 /**
@@ -181,10 +186,10 @@ function refreshDropdownItems() {
       return employee.employeeNumber == this.search;
     });
   }
-  if (this.custOrgSearch) {
-    this.searchCustomerOrgs();
+  if (this.certificationSearch) {
+    this.searchCertifications();
   }
-  if (this.search === null && this.custOrgSearch === null) {
+  if (this.search === null && this.certificationSearch === null) {
     this.filteredEmployees = this.employeesInfo;
   }
 
@@ -192,12 +197,12 @@ function refreshDropdownItems() {
 } // refreshDropdownItems
 
 /**
- * Filters employees on the data table by the customer org entered by the user.
+ * Filters employees on the data table by the certification entered by the user.
  */
-function searchCustomerOrgs() {
+function searchCertifications() {
   this.filteredEmployees = _.filter(this.employeesInfo, (employee) => {
-    if (employee.customerOrgExp) {
-      return employee.customerOrgExp.find((org) => org.current && org.name === this.custOrgSearch);
+    if (employee.certificationNames) {
+      return employee.certificationNames.includes(this.certificationSearch);
     } else {
       return false;
     }
@@ -208,7 +213,7 @@ function searchCustomerOrgs() {
       return employee.employeeNumber == this.search;
     });
   }
-} // searchCustomerOrgs
+} // searchCertifications
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -250,20 +255,16 @@ export default {
           value: 'fullName'
         },
         {
-          text: 'Current Customer Org',
-          value: 'currentOrgName'
-        },
-        {
-          text: 'Current Customer Org Experience',
-          value: 'currentOrgYoE'
+          text: 'Active Certifications',
+          value: 'certificationNames'
         },
         {
           text: 'Email',
           value: 'email'
         }
       ], // datatable headers
-      custOrgSearch: null,
-      custOrgs: [],
+      certificationSearch: null,
+      certifications: [],
       search: null, // query text for datatable search field
       showInactiveEmployees: false,
       sortBy: 'firstName', // sort datatable items
@@ -271,16 +272,16 @@ export default {
     };
   },
   methods: {
-    buildCustomerOrgColumns,
+    buildCertificationsColumns,
     customEmployeeFilter,
     getActive,
     getFullName,
     handleClick,
     populateEmployeesDropdown,
-    populateCustomerOrgsDropdown,
+    populateCertificationsDropdown,
     populateDropdowns,
     refreshDropdownItems,
-    searchCustomerOrgs
+    searchCertifications
   },
   watch: {
     showInactiveEmployees: watchShowInactiveUsers

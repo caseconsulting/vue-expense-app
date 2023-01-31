@@ -2,17 +2,20 @@
   <v-container fluid>
     <v-row>
       <!-- tabs -->
-      <v-col cols="3" class="my-1 py-0">
-        <v-skeleton-loader type="text" width="25%" class="center"></v-skeleton-loader>
+      <v-col cols="2" class="my-1 py-0">
+        <v-skeleton-loader type="text" width="60%" class="center"></v-skeleton-loader>
       </v-col>
       <v-col cols="3" class="my-1 py-0">
-        <v-skeleton-loader type="text" width="40%" class="center"></v-skeleton-loader>
+        <v-skeleton-loader type="text" width="55%" class="center"></v-skeleton-loader>
+      </v-col>
+      <v-col cols="2" class="my-1 py-0">
+        <v-skeleton-loader type="text" width="85%" class="center"></v-skeleton-loader>
       </v-col>
       <v-col cols="3" class="my-1 py-0">
-        <v-skeleton-loader type="text" width="25%" class="center"></v-skeleton-loader>
+        <v-skeleton-loader type="text" width="30%" class="center"></v-skeleton-loader>
       </v-col>
-      <v-col cols="3" class="my-1 py-0">
-        <v-skeleton-loader type="text" width="35%" class="center"></v-skeleton-loader>
+      <v-col cols="2" class="my-1 py-0">
+        <v-skeleton-loader type="text" width="60%" class="center"></v-skeleton-loader>
       </v-col>
       <!-- filters -->
       <v-col cols="12" xl="3" lg="3" md="3" sm="12" class="my-12 pb-lg-2 pb-md-0 mb-sm-2">
