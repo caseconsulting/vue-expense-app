@@ -20,6 +20,9 @@
       <v-col md="6" sm="12" class="mt-4">
         <languages-chart></languages-chart>
       </v-col>
+      <v-col md="6" sm="12" class="mt-4">
+        <employees-table></employees-table>
+      </v-col>
     </v-row>
   </v-container>
 </template>
@@ -30,6 +33,7 @@ import JobExperiencesChart from '../custom-charts/JobExperiencesChart.vue';
 import JobRoleChart from '../custom-charts/JobRoleChart.vue';
 import PrimesChart from '../custom-charts/PrimesChart.vue';
 import LanguagesChart from '../custom-charts/LanguagesChart.vue';
+import EmployeesTable from '../custom-charts/EmployeesTable.vue';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -43,7 +47,8 @@ export default {
     JobExperiencesChart,
     JobRoleChart,
     PrimesChart,
-    LanguagesChart
+    LanguagesChart,
+    EmployeesTable
   }
 };
 </script>
