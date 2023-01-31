@@ -120,6 +120,15 @@ function fillData() {
   };
 
   this.options = {
+    onClick: (x, y) => {
+      let index = _.first(y).index;
+      let labelClicked = this.chartData.labels[index];
+      this.$router.push({
+        path: '/reports',
+        name: 'reports',
+        params: { requestedDataType: 'customerOrgs', requestedFilter: labelClicked }
+      });
+    },
     plugins: {
       title: {
         display: true,
