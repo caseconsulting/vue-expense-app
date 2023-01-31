@@ -1,10 +1,15 @@
 <template>
   <v-container>
-    <v-row>
+    <v-row class="flex justify-center">
       <v-col md="6" sm="12" class="mt-4">
+        <employees-table></employees-table>
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-col md="6" sm="12" class="mt-2">
         <job-experiences-chart></job-experiences-chart>
       </v-col>
-      <v-col md="6" sm="12" class="mt-4">
+      <v-col md="6" sm="12" class="mt-2">
         <case-years-chart></case-years-chart>
       </v-col>
     </v-row>
@@ -19,9 +24,6 @@
     <v-row>
       <v-col md="6" sm="12" class="mt-4">
         <languages-chart></languages-chart>
-      </v-col>
-      <v-col md="6" sm="12" class="mt-4">
-        <employees-table></employees-table>
       </v-col>
     </v-row>
   </v-container>
