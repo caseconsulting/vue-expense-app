@@ -197,7 +197,7 @@ function refreshDropdownItems() {
 function searchCustomerOrgs() {
   this.filteredEmployees = _.filter(this.employeesInfo, (employee) => {
     if (employee.customerOrgExp) {
-      return employee.customerOrgExp.find((org) => org.current && org.name.includes(this.custOrgSearch));
+      return employee.customerOrgExp.find((org) => org.current && org.name === this.custOrgSearch);
     } else {
       return false;
     }
