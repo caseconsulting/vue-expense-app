@@ -13,7 +13,9 @@
                   >There are no employees currently working on {{ project.projectName }}.</span
                 >
                 <ul v-else>
-                  <li v-for="e in currentEmployees" :key="e.id">{{ e.firstName + ' ' + e.lastName }}</li>
+                  <li v-for="e in currentEmployees" :key="e.id">
+                    <a :href="`/employee/${e.employeeNumber}`">{{ e.firstName + ' ' + e.lastName }}</a>
+                  </li>
                 </ul>
               </v-card-text></v-card
             >
@@ -25,7 +27,9 @@
                   >There are no employees who have worked on {{ project.projectName }} in the past.</span
                 >
                 <ul v-else>
-                  <li v-for="e in pastEmployees" :key="e.id">{{ e.firstName + ' ' + e.lastName }}</li>
+                  <li v-for="e in pastEmployees" :key="e.id">
+                    <a :href="`/employee/${e.employeeNumber}`">{{ e.firstName + ' ' + e.lastName }}</a>
+                  </li>
                 </ul>
               </v-card-text></v-card
             >
