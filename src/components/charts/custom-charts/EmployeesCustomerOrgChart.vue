@@ -46,11 +46,13 @@ function fetchData() {
   employees.forEach((e) => {
     if (e.customerOrgExp && e.workStatus != 0) {
       _.forEach(e.customerOrgExp, (org) => {
-        let orgName = org.name;
-        if (employeesCustOrg[orgName]) {
-          employeesCustOrg[orgName] += 1;
-        } else {
-          employeesCustOrg[orgName] = 1;
+        if (org.years && org.current) {
+          let orgName = org.name;
+          if (employeesCustOrg[orgName]) {
+            employeesCustOrg[orgName] += 1;
+          } else {
+            employeesCustOrg[orgName] = 1;
+          }
         }
       });
     }
@@ -125,6 +127,17 @@ function fillData() {
         }
       }
     },
+    onClick: (x, y) => {
+      if (_.first(y)) {
+        let index = _.first(y).index;
+        let labelClicked = this.chartData.labels[index];
+        this.$router.push({
+          path: '/reports',
+          name: 'reports',
+          params: { requestedDataType: 'customerOrgs', requestedFilter: labelClicked }
+        });
+      }
+    },
     plugins: {
       legend: {
         display: false
@@ -134,6 +147,13 @@ function fillData() {
         text: 'Number of Employees for Each Customer Org',
         font: {
           size: 15
+        }
+      },
+      subtitle: {
+        display: true,
+        text: '*Click on a bar to see employees',
+        font: {
+          style: 'italic'
         }
       }
     },
