@@ -22,7 +22,7 @@
 
 <script>
 import _ from 'lodash';
-import { storeIsPopulated } from '@/utils/utils.js';
+import { storeIsPopulated, userRoleIsIntern } from '@/utils/utils.js';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -52,26 +52,36 @@ function fillData() {
 
   // filter out inactive and interns if selected
   this.employees = this.employees.filter((emp) => emp.workStatus != 0);
-  let contractorEmployeeCount = 0;
+  let billableCount = 0;
+  let internCount = 0;
+  let overheadCount = 0;
+  let nonPeopleCount = 1; // info account
+  // tally up counts
   _.forEach(this.employees, (employee) => {
-    let isContractor = false;
     if (employee.contracts) {
+      let isBillable = false;
       _.forEach(employee.contracts, (contract) => {
         _.forEach(contract.projects, (project) => {
-          if (!project.endDate && !isContractor) {
+          if (!project.endDate && !isBillable) {
             // employee is active on a contract
-            contractorEmployeeCount += 1;
-            isContractor = true;
+            billableCount += 1;
+            isBillable = true;
           }
         });
       });
     }
+    if (employee.employeeRole === 'intern') {
+      internCount++;
+    }
   });
 
+  overheadCount = this.employees.length - billableCount - internCount - nonPeopleCount;
+
   this.tableContents = [
-    { title: 'Total Employees', value: this.employees.length - 1 }, // -1 for the info account on prod
-    { title: 'Contracting Employees', value: contractorEmployeeCount },
-    { title: 'Overhead Employees', value: this.employees.length - contractorEmployeeCount - 1 } // -1 for the info account on prod
+    { title: 'Billable Employees', value: billableCount },
+    { title: 'Overhead Employees', value: overheadCount },
+    { title: 'Interns', value: internCount },
+    { title: 'Total Employees', value: this.employees.length - nonPeopleCount } // -1 for the info account on prod
   ];
 
   this.headers = [
@@ -93,7 +103,8 @@ function fillData() {
 
 export default {
   computed: {
-    storeIsPopulated
+    storeIsPopulated,
+    userRoleIsIntern
   },
   data() {
     return {
@@ -118,5 +129,9 @@ export default {
 <style>
 #employeesTable tr:hover {
   background-color: transparent;
+}
+
+#employeesTable tr:last-child {
+  font-weight: 600;
 }
 </style>
