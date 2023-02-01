@@ -104,7 +104,7 @@ function fillData() {
       'rgba(255, 99, 132, 1)',
       'rgba(230, 184, 156, 1)',
       'rgba(234, 210, 172, 1)',
-      'rgba(156, 175,this. 183, 1)',
+      'rgba(156, 175, 183, 1)',
       'rgba(66, 129, 164, 1)'
     ];
     text = `${this.showCurrent} Customer Org Experience (Years)`;
