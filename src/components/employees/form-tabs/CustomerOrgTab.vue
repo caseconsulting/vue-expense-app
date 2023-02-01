@@ -10,11 +10,12 @@
       <v-autocomplete
         ref="formFields"
         v-model="exp.name"
-        :rules="getRequiredRules()"
+        :rules="[duplicateCustomerOrg(exp.name), ...getRequiredRules()]"
         :items="experienceDropDown"
         label="Customer Organization Experience"
         data-vv-name="Customer Organization Experience"
         clearable
+        :error="isDuplicate(exp.name)"
       >
       </v-autocomplete>
 
@@ -124,6 +125,13 @@ function deleteExperience(index) {
 } // deleteExperience
 
 /**
+ * Checks if a customer org name is duplicated.
+ */
+function isDuplicate(custOrgName) {
+  return _.filter(this.editedCustomerOrgExp, (custOrg) => custOrg.name === custOrgName).length > 1;
+} // isDuplicate
+
+/**
  * Validate all input fields are valid. Emit to parent the error status.
  */
 function validateFields() {
@@ -165,6 +173,9 @@ export default {
   created,
   data() {
     return {
+      duplicateCustomerOrg: (customerOrgName) => {
+        return !this.isDuplicate(customerOrgName) || 'Duplicate Customer Org';
+      },
       experienceDropDown: [
         'DIR',
         'DDI',
@@ -195,6 +206,7 @@ export default {
     addExperience,
     deleteExperience,
     getRequiredRules,
+    isDuplicate,
     validateFields
   },
   props: ['model', 'validating'],
