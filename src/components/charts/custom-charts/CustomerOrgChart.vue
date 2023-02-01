@@ -139,7 +139,7 @@ function fillData() {
       },
       subtitle: {
         display: true,
-        text: '*Click on a bar to see employees',
+        text: '*Click on a segment of the pie chart to see employees',
         font: {
           style: 'italic'
         }
