@@ -33,7 +33,7 @@
           <customer-org-chart-tab v-if="statsTab === 'customer Org' && dataLoaded"></customer-org-chart-tab>
         </div>
         <!-- user is not mobile -->
-        <v-tabs v-else color="basil" center-active grow show-arrows class="" @change="changeTab">
+        <v-tabs v-else color="basil" v-model="currentTab" center-active grow show-arrows class="" @change="changeTab">
           <v-tab href="#employees">Employees</v-tab>
           <v-tab href="#education" :disabled="!dataLoaded">Education</v-tab>
           <v-tab href="#technologies" :disabled="!dataLoaded">Technology</v-tab>
@@ -74,6 +74,20 @@ import { updateStoreEmployees, updateStoreContracts } from '@/utils/storeUtils';
 // |                   LIFECYCLE                      |
 // |                                                  |
 // |--------------------------------------------------|
+
+/**
+ * Created lifecycle hook.
+ */
+function created() {
+  if (this.$route.params.requestedDataType) {
+    let mappings = {};
+    mappings['jobRoles'] = 'employees';
+    mappings['contracts'] = 'employees';
+    mappings['certifications'] = 'employees';
+    mappings['customerOrgs'] = 'customerOrg';
+    this.changeTab(mappings[this.$route.params.requestedDataType]);
+  }
+} // created
 
 /**
  * Mounted lifecycle hook.
@@ -118,6 +132,7 @@ function selectDropDown(tabName) {
 // |--------------------------------------------------|
 
 export default {
+  created,
   components: {
     CertificationsChartTab,
     EmployeesChartTab,

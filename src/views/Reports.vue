@@ -1,5 +1,14 @@
 <template>
   <div>
+    <v-btn
+      v-if="$route.params.requestedDataType"
+      id="backBtn"
+      class="mb-3"
+      elevation="2"
+      @click="backClick()"
+      :x-small="isMobile()"
+      ><v-icon class="pr-1">arrow_back</v-icon>Back</v-btn
+    >
     <v-card :elevation="3" class="">
       <v-card color="#bc3825">
         <v-card-title headline v-bind:class="{ 'justify-center': isMobile }">
@@ -76,6 +85,17 @@ async function created() {
 // |--------------------------------------------------|
 
 /**
+ * Handler for back button click event.
+ */
+function backClick() {
+  this.$router.push({
+    path: '/stats',
+    name: 'stats',
+    params: { requestedDataType: this.$route.params.requestedDataType }
+  });
+} // backClick
+
+/**
  * Changes the tab display.
  *
  * @param event - the new tab
@@ -116,7 +136,6 @@ export default {
     ReportsPageLoader
   },
   computed: {
-    isMobile,
     storeIsPopulated
   },
   data() {
@@ -128,6 +147,8 @@ export default {
     };
   },
   methods: {
+    isMobile,
+    backClick,
     changeTab,
     updateStoreContracts,
     updateStoreEmployees
