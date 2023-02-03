@@ -13,26 +13,22 @@
         clearable
       >
       </v-combobox>
+      <v-checkbox
+        v-model="clearance.awaitingClearance"
+        label="Awaiting Clearance"
+        @change="
+          () => {
+            if (clearance.awaitingClearance) {
+              clearance.grantedDate = null;
+              clearance.badgeExpirationDate = null;
+              clearance.badgeNum = null;
+            }
+          }
+        "
+      ></v-checkbox>
       <v-row class="py-3">
-        <!-- Awaiting Clearance -->
-        <v-col class="pt-0" cols="12" sm="2" md="4" lg="4">
-          <v-checkbox
-            v-model="clearance.awaitingClearance"
-            label="Awaiting Clearance"
-            @change="
-              () => {
-                if (clearance.awaitingClearance) {
-                  clearance.grantedDate = null;
-                  clearance.badgeExpirationDate = null;
-                  clearance.badgeNum = null;
-                }
-              }
-            "
-          ></v-checkbox>
-        </v-col>
-        <!-- End Awaiting Clearance -->
         <!-- Granted Date -->
-        <v-col cols="12" sm="5" md="4" lg="4" class="pt-0">
+        <v-col cols="12" sm="6" md="12" lg="6" class="pt-0">
           <v-menu
             v-model="clearance.showGrantedMenu"
             :close-on-content-click="false"
@@ -75,7 +71,7 @@
         </v-col>
         <!-- End Granted Date -->
         <!-- Submission Date -->
-        <v-col cols="12" sm="5" md="4" lg="4" class="pt-0">
+        <v-col cols="12" sm="6" md="12" lg="6" class="pt-0">
           <v-menu
             v-model="clearance.showSubmissionMenu"
             :close-on-content-click="false"
