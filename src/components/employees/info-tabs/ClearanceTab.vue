@@ -7,6 +7,15 @@
         <!-- Type -->
         <p><b>Type: </b>{{ clearance.type }}</p>
 
+        <!-- Awaiting Clearance -->
+        <p>
+          <b>Clearance Status: </b>
+          <span v-if="isClearanceGranted(clearance)"
+            >Granted <v-icon color="#0F9D58">mdi-check-circle-outline</v-icon></span
+          >
+          <span v-else>Pending <v-icon color="#F4B400">mdi-progress-clock</v-icon></span>
+        </p>
+
         <!-- Submission, Granted Date -->
         <p v-if="clearance.submissionDate">
           <b>Submission Date: </b>{{ monthDayYearFormat(clearance.submissionDate) }}
@@ -90,6 +99,17 @@ function created() {
 // |--------------------------------------------------|
 
 /**
+ * Checks if clearance is granted based if badge number, badge expiration date or granted date
+ * fields are filled out.
+ *
+ * @param clearanceObj clearance object to check if clearance is granted
+ * @return true if clearance is granted, false otherwise
+ */
+function isClearanceGranted(clearanceObj) {
+  return clearanceObj.badNum || clearanceObj.badgeExpirationDate || clearanceObj.grantedDate;
+} // isClearanceGranted
+
+/**
  * When the page is changed, grab the corresponding entries based on the page
  * number.
  */
@@ -114,6 +134,7 @@ export default {
     };
   },
   methods: {
+    isClearanceGranted,
     isEmpty,
     monthDayYearFormat,
     onPageChange
