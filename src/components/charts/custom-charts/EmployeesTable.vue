@@ -55,10 +55,11 @@ function fillData() {
   let billableCount = 0;
   let internCount = 0;
   let overheadCount = 0;
+  let awaitingClearanceCount = 0;
   let nonPeopleCount = 1; // info account
   // tally up counts
   _.forEach(this.employees, (employee) => {
-    if (employee.contracts) {
+    if (employee.contracts && employee.contracts.some((c) => c.projects.some((p) => !p.endDate))) {
       let isBillable = false;
       _.forEach(employee.contracts, (contract) => {
         _.forEach(contract.projects, (project) => {
@@ -69,18 +70,20 @@ function fillData() {
           }
         });
       });
-    }
-    if (employee.employeeRole === 'intern') {
+    } else if (employee.clearances && employee.clearances.some((c) => c.awaitingClearance)) {
+      awaitingClearanceCount++;
+    } else if (employee.employeeRole === 'intern') {
       internCount++;
     }
   });
 
-  overheadCount = this.employees.length - billableCount - internCount - nonPeopleCount;
+  overheadCount = this.employees.length - billableCount - awaitingClearanceCount - internCount - nonPeopleCount;
 
   this.tableContents = [
     { title: 'Billable Employees', value: billableCount },
     { title: 'Overhead Employees', value: overheadCount },
     { title: 'Interns', value: internCount },
+    { title: 'Awaiting Clearance', value: awaitingClearanceCount },
     { title: 'Total Employees', value: this.employees.length - nonPeopleCount } // -1 for the info account on prod
   ];
 
