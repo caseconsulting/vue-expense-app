@@ -14,8 +14,23 @@
       >
       </v-combobox>
       <v-row class="py-3">
+        <!-- Awaiting Clearance -->
+        <v-col class="pt-0" cols="12" sm="2" md="4" lg="4">
+          <v-checkbox
+            v-model="clearance.awaitingClearance"
+            label="Awaiting Clearance"
+            @change="
+              () => {
+                if (clearance.awaitingClearance) {
+                  clearance.grantedDate = null;
+                }
+              }
+            "
+          ></v-checkbox>
+        </v-col>
+        <!-- End Awaiting Clearance -->
         <!-- Granted Date -->
-        <v-col cols="12" sm="6" md="12" lg="6" class="pt-0">
+        <v-col cols="12" sm="5" md="4" lg="4" class="pt-0">
           <v-menu
             v-model="clearance.showGrantedMenu"
             :close-on-content-click="false"
@@ -36,6 +51,12 @@
                 v-mask="'##/##/####'"
                 v-bind="attrs"
                 v-on="on"
+                :disabled="clearance.awaitingClearance"
+                @change="
+                  () => {
+                    if (clearance.grantedDate) clearance.awaitingClearance = false;
+                  }
+                "
                 @click:clear="clearance.grantedDate = null"
                 @blur="clearance.grantedDate = parseEventDate($event)"
                 @input="clearance.showGrantedMenu = false"
@@ -52,7 +73,7 @@
         </v-col>
         <!-- End Granted Date -->
         <!-- Submission Date -->
-        <v-col cols="12" sm="6" md="12" lg="6" class="pt-0">
+        <v-col cols="12" sm="5" md="4" lg="4" class="pt-0">
           <v-menu
             v-model="clearance.showSubmissionMenu"
             :close-on-content-click="false"
@@ -307,6 +328,7 @@ function addClearance() {
   if (!this.editedClearances) this.editedClearances = [];
   this.editedClearances.push({
     adjudicationDates: [],
+    awaitingClearance: false,
     biDates: [],
     badgeExpirationDate: null,
     grantedDate: null,
