@@ -37,6 +37,7 @@
                 name="contractName"
                 v-if="editingItem && editingItem.id == item.id"
                 v-model="editingItem.contractName"
+                prepend-icon="mdi-script-outline"
                 :rules="[(v) => !!v || 'Field is required', duplicateContractPrimeCombo()]"
                 required
               ></v-text-field>
@@ -49,6 +50,7 @@
                 name="primeName"
                 v-if="editingItem && editingItem.id == item.id"
                 v-model="editingItem.primeName"
+                prepend-icon="mdi-office-building-outline"
                 :rules="[(v) => !!v || 'Field is required', duplicateContractPrimeCombo()]"
                 required
               ></v-text-field>
@@ -61,6 +63,7 @@
                 name="costType"
                 v-if="editingItem && editingItem.id == item.id"
                 v-model="editingItem.costType"
+                prepend-icon="mdi-currency-usd"
               ></v-text-field>
               <!-- </v-form> -->
               <span v-else>{{ item.costType }}</span>
@@ -166,6 +169,7 @@
                         :rules="[(v) => !!v || 'Field is required', duplicateProjects(contract.item)]"
                         v-if="editingItem && editingItem.id == item.id"
                         v-model="editingItem.projectName"
+                        prepend-icon="mdi-briefcase-outline"
                       ></v-text-field>
                       <span v-else>{{ item.projectName }}</span>
                     </template>

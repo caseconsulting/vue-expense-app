@@ -5,6 +5,7 @@
         <v-card>
           <!-- Title -->
           <v-card-title class="header_style">
+            <v-icon color="white" class="mr-2">mdi-file-document-plus</v-icon>
             <span class="text-h5">New Contract</span>
           </v-card-title>
           <v-card-text>
@@ -16,6 +17,7 @@
                     v-model="contractName"
                     :rules="[(v) => !!v || 'Field is required', duplicateContractPrimeCombo()]"
                     label="Contract Name*"
+                    prepend-icon="mdi-script-outline"
                     required
                   ></v-text-field>
                 </v-col>
@@ -25,6 +27,7 @@
                     v-model="primeName"
                     :rules="[(v) => !!v || 'Field is required', duplicateContractPrimeCombo()]"
                     label="Prime Name*"
+                    prepend-icon="mdi-office-building-outline"
                     required
                   ></v-text-field>
                 </v-col>
@@ -86,7 +89,7 @@
                 </v-col>
                 <!-- Cost Type -->
                 <v-col cols="12" sm="6" md="4">
-                  <v-text-field v-model="costType" label="Cost Type"></v-text-field>
+                  <v-text-field v-model="costType" label="Cost Type" prepend-icon="mdi-currency-usd"></v-text-field>
                 </v-col>
                 <!-- Projects -->
                 <v-col cols="12">
@@ -100,6 +103,7 @@
                     label="Projects*"
                     multiple
                     persistent-hint
+                    prepend-icon="mdi-briefcase-outline"
                     small-chips
                     deletable-chips
                     required
