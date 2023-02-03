@@ -106,6 +106,10 @@
                   >
                   </v-combobox>
                 </v-col>
+                <!-- Description -->
+                <v-col cols="12">
+                  <v-textarea v-model="description" auto-grow label="Description" rows="1"></v-textarea>
+                </v-col>
               </v-row>
             </v-container>
             <small>*indicates required field</small>
@@ -163,7 +167,8 @@ async function createContract() {
     popStartDate: this.popStartDate,
     popEndDate: this.popEndDate,
     costType: this.costType,
-    projects: contractProjects
+    projects: contractProjects,
+    description: this.description
   });
   this.$store.dispatch('setContracts', { contracts: [contract, ...this.$store.getters.contracts] });
 } // createContract
@@ -233,6 +238,7 @@ export default {
       endDateMenu: false,
       costType: null,
       projects: [],
+      description: null,
       dialog: false,
       loading: false,
       valid: true,

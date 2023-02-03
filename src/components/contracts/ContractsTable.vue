@@ -136,6 +136,19 @@
               </v-menu>
               <span v-else>{{ format(item.popEndDate, 'YYYY-MM-DD', 'MM/DD/YYYY') }}</span>
             </template>
+            <!-- Contract Description Slot -->
+            <template v-slot:[`item.description`]="{ item }">
+              <v-textarea
+                v-if="editingItem && editingItem.id == item.id"
+                v-model="editingItem.description"
+                name="description"
+                auto-grow
+                label="Description"
+                rows="1"
+                @click.stop
+              ></v-textarea>
+              <span v-else>{{ item.description }}</span>
+            </template>
 
             <!-- Expanded Row Slot -->
             <template v-slot:expanded-item="contract">
@@ -794,31 +807,37 @@ export default {
           text: 'Contract',
           value: 'contractName',
           align: 'center',
-          width: '18%'
+          width: '12%'
         },
         {
           text: 'Prime',
           value: 'primeName',
           align: 'center',
-          width: '18%'
+          width: '12%'
         },
         {
           text: 'Cost Type',
           value: 'costType',
           align: 'center',
-          width: '18%'
+          width: '12%'
         },
         {
           text: 'PoP-Start Date',
           value: 'popStartDate',
           align: 'center',
-          width: '18%'
+          width: '12%'
         },
         {
           text: 'PoP-End Date',
           value: 'popEndDate',
           align: 'center',
-          width: '18%'
+          width: '12%'
+        },
+        {
+          text: 'Description',
+          value: 'description',
+          align: 'left',
+          width: '29%'
         },
         {
           value: 'actions',
