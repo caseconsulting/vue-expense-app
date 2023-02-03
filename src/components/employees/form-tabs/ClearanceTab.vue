@@ -23,6 +23,8 @@
               () => {
                 if (clearance.awaitingClearance) {
                   clearance.grantedDate = null;
+                  clearance.badgeExpirationDate = null;
+                  clearance.badgeNum = null;
                 }
               }
             "
@@ -118,6 +120,7 @@
         counter="5"
         label="Badge Number"
         clearable
+        :disabled="clearance.awaitingClearance"
         @blur="capitalizeBadges(clearance)"
       ></v-text-field>
       <!-- End Badge Number -->
@@ -143,6 +146,7 @@
             v-mask="'##/##/####'"
             v-bind="attrs"
             v-on="on"
+            :disabled="clearance.awaitingClearance"
             @click:clear="clearance.badgeExpirationDate = null"
             @blur="clearance.badgeExpirationDate = parseEventDate($event)"
             @input="clearance.showBadgeMenu = false"
