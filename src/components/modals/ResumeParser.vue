@@ -398,10 +398,11 @@
       </v-card>
     </v-dialog>
     <!-- Confirmation Modal -->
-    <form-submission-confirmation
-      :toggleSubmissionConfirmation="this.confirmingValid"
+    <general-confirmation-modal
+      title="Are you sure you want to submit?"
+      :toggleModal="this.confirmingValid"
       type="parser"
-    ></form-submission-confirmation>
+    ></general-confirmation-modal>
     <!-- Cancel Confirmation Modal -->
     <cancel-confirmation :toggleSubmissionConfirmation="this.confirmBackingOut" type="parser"> </cancel-confirmation>
   </v-dialog>
@@ -415,7 +416,7 @@ import CancelConfirmation from '@/components/modals/CancelConfirmation.vue';
 import UniversityForm from '@/components/employees/form-tabs/education-types/UniversityForm.vue';
 import MilitaryForm from '@/components/employees/form-tabs/education-types/MilitaryForm.vue';
 import HighSchoolForm from '@/components/employees/form-tabs/education-types/HighSchoolForm.vue';
-import FormSubmissionConfirmation from '@/components/modals/FormSubmissionConfirmation.vue';
+import GeneralConfirmationModal from '@/components/modals/GeneralConfirmationModal.vue';
 import { v4 as uuid } from 'uuid';
 
 // |--------------------------------------------------|
@@ -1170,7 +1171,7 @@ export default {
     UniversityForm,
     MilitaryForm,
     HighSchoolForm,
-    FormSubmissionConfirmation
+    GeneralConfirmationModal
   },
   computed: {
     address,

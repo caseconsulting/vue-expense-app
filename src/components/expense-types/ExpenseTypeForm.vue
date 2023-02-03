@@ -308,17 +308,18 @@
         </v-btn>
         <!-- End Buttons -->
       </v-form>
-      <form-submission-confirmation
+      <general-confirmation-modal
+        title="Are you sure you want to submit?"
         type="type"
-        :toggleSubmissionConfirmation="submitForm"
-      ></form-submission-confirmation>
+        :toggleModal="submitForm"
+      ></general-confirmation-modal>
     </v-container>
   </v-card>
 </template>
 
 <script>
 import api from '@/shared/api.js';
-import FormSubmissionConfirmation from '@/components/modals/FormSubmissionConfirmation.vue';
+import GeneralConfirmationModal from '@/components/modals/GeneralConfirmationModal.vue';
 import _ from 'lodash';
 import { v4 as uuid } from 'uuid';
 import { getDateRules, getRequiredRules } from '@/shared/validationUtils.js';
@@ -812,7 +813,7 @@ function watchEditedExpenseTypeStartDate() {
 
 export default {
   components: {
-    FormSubmissionConfirmation
+    GeneralConfirmationModal
   },
   created,
   beforeDestroy,

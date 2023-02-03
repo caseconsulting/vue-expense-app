@@ -282,10 +282,11 @@
         :expense="editedExpense"
       ></confirmation-box>
       <!-- Confirmation Modal -->
-      <form-submission-confirmation
-        :toggleSubmissionConfirmation="confirmingValid"
+      <general-confirmation-modal
+        title="Are you sure you want to submit?"
+        :toggleModal="confirmingValid"
         type="expense"
-      ></form-submission-confirmation>
+      ></general-confirmation-modal>
       <!-- Cancel Confirmation Modal -->
       <cancel-confirmation :toggleSubmissionConfirmation="confirmBackingOut" type="expense"> </cancel-confirmation>
     </v-container>
@@ -296,7 +297,7 @@
 import CancelConfirmation from '@/components/modals/CancelConfirmation.vue';
 import ConfirmationBox from '@/components/modals/ConfirmationBox.vue';
 import FileUpload from '@/components/utils/FileUpload.vue';
-import FormSubmissionConfirmation from '@/components/modals/FormSubmissionConfirmation.vue';
+import GeneralConfirmationModal from '@/components/modals/GeneralConfirmationModal.vue';
 
 import api from '@/shared/api.js';
 import employeeUtils from '@/shared/employeeUtils';
@@ -1793,7 +1794,7 @@ export default {
     CancelConfirmation,
     ConfirmationBox,
     FileUpload,
-    FormSubmissionConfirmation
+    GeneralConfirmationModal
   },
   computed: {
     isDifferentExpenseType,

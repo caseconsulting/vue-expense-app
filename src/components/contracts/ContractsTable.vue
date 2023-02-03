@@ -2,16 +2,21 @@
   <div>
     <v-card class="mt-3">
       <v-container fluid>
-        <v-col cols="6" xl="4" lg="4" md="6" class="my-0 pb-0">
-          <v-text-field
-            id="contractsSearch"
-            v-model="search"
-            label="Search Table Contents"
-            auto-select-first
-            append-icon="search"
-            clearable
-          ></v-text-field>
-        </v-col>
+        <v-row class="flex justify-spacebetween ma-1">
+          <v-col cols="6" xl="6" lg="6" md="6" class="my-0 pb-0">
+            <v-text-field
+              id="contractsSearch"
+              v-model="search"
+              label="Search Table Contents"
+              auto-select-first
+              append-icon="search"
+              clearable
+            ></v-text-field>
+          </v-col>
+          <v-col cols="6" xl="6" lg="6" md="6" class="my-0 pb-0">
+            <v-checkbox v-model="showInactive" label="Show Inactive Contracts/Projects"></v-checkbox>
+          </v-col>
+        </v-row>
         <!-- START CONTRACTS DATA TABLE -->
         <v-form ref="form" lazy-validation>
           <v-data-table
@@ -26,7 +31,7 @@
             :loading="loading"
             :expanded.sync="expanded"
             :headers="contractHeaders"
-            :items="$store.getters.contracts"
+            :items="storeContracts"
             :items-per-page="-1"
             :item-class="contractRowClass"
             :search="search"
@@ -42,7 +47,7 @@
                 required
               ></v-text-field>
               <!-- </v-form> -->
-              <span v-else>{{ item.contractName }}</span>
+              <span v-else :class="{ inactive: item.inactive }">{{ item.contractName }}</span>
             </template>
             <!-- Prime Name Slot -->
             <template v-slot:[`item.primeName`]="{ item }">
@@ -55,7 +60,7 @@
                 required
               ></v-text-field>
               <!-- </v-form> -->
-              <span v-else>{{ item.primeName }}</span>
+              <span v-else :class="{ inactive: item.inactive }">{{ item.primeName }}</span>
             </template>
             <!-- Cost Type Slot -->
             <template v-slot:[`item.costType`]="{ item }">
@@ -66,7 +71,7 @@
                 prepend-icon="mdi-currency-usd"
               ></v-text-field>
               <!-- </v-form> -->
-              <span v-else>{{ item.costType }}</span>
+              <span v-else :class="{ inactive: item.inactive }">{{ item.costType }}</span>
             </template>
             <!-- PoP Start Date Slot -->
             <template v-slot:[`item.popStartDate`]="{ item }">
@@ -102,7 +107,9 @@
                 ></v-date-picker>
               </v-menu>
               <!-- </v-form> -->
-              <span v-else>{{ format(item.popStartDate, 'YYYY-MM-DD', 'MM/DD/YYYY') }}</span>
+              <span v-else :class="{ inactive: item.inactive }">{{
+                format(item.popStartDate, 'YYYY-MM-DD', 'MM/DD/YYYY')
+              }}</span>
             </template>
             <!-- PoP End Date Slot -->
             <template v-slot:[`item.popEndDate`]="{ item }">
@@ -137,7 +144,9 @@
                   @input="popEndDateMenu = false"
                 ></v-date-picker>
               </v-menu>
-              <span v-else>{{ format(item.popEndDate, 'YYYY-MM-DD', 'MM/DD/YYYY') }}</span>
+              <span v-else :class="{ inactive: item.inactive }">{{
+                format(item.popEndDate, 'YYYY-MM-DD', 'MM/DD/YYYY')
+              }}</span>
             </template>
             <!-- Contract Description Slot -->
             <template v-slot:[`item.description`]="{ item }">
@@ -172,7 +181,7 @@
                         v-model="editingItem.projectName"
                         prepend-icon="mdi-briefcase-outline"
                       ></v-text-field>
-                      <span v-else>{{ item.projectName }}</span>
+                      <span v-else :class="{ inactive: item.inactive }">{{ item.projectName }}</span>
                     </template>
                     <template v-slot:[`item.actions`]="{ item }">
                       <div v-if="editingItem && editingItem.id == item.id">
@@ -210,10 +219,15 @@
                       </div>
                       <div v-else>
                         <!-- Employees Assigned -->
-                        <v-tooltip>
+                        <v-tooltip top>
                           <template v-slot:activator="{ on }">
                             <v-btn
-                              :disabled="editingItem != null"
+                              :disabled="
+                                editingItem != null ||
+                                (contractLoading &&
+                                  contractProjectStatusItem &&
+                                  contractProjectStatusItem.id === item.id)
+                              "
                               @click.stop="
                                 () => {
                                   toggleProjectEmployeesModal = true;
@@ -234,18 +248,58 @@
                         <!-- Edit Project -->
                         <v-tooltip top>
                           <template v-slot:activator="{ on }">
-                            <v-btn :disabled="editingItem != null" icon text @click.stop="clickedEdit(item)" v-on="on">
+                            <v-btn
+                              :disabled="
+                                editingItem != null ||
+                                (contractLoading &&
+                                  contractProjectStatusItem &&
+                                  contractProjectStatusItem.id === item.id)
+                              "
+                              icon
+                              text
+                              @click.stop="clickedEdit(item)"
+                              v-on="on"
+                            >
                               <v-icon class="case-gray">edit</v-icon>
                             </v-btn>
                           </template>
                           <span>Edit</span>
                         </v-tooltip>
 
+                        <!-- Activate/Deactivate Project -->
+                        <v-tooltip top>
+                          <template v-slot:activator="{ on }">
+                            <v-btn
+                              icon
+                              text
+                              :disabled="editingItem != null"
+                              :loading="
+                                contractLoading && contractProjectStatusItem && contractProjectStatusItem.id === item.id
+                              "
+                              v-on="on"
+                              @click.stop="
+                                toggleContractProjectStatusModal = true;
+                                contractProjectStatusItem = cloneDeep(item);
+                              "
+                            >
+                              <v-icon class="case-gray"
+                                >mdi-file-document-{{ item.inactive ? 'check' : 'remove-outline' }}</v-icon
+                              >
+                            </v-btn>
+                          </template>
+                          <span>{{ item.inactive ? 'Activate' : 'Deactivate' }} Project</span>
+                        </v-tooltip>
+
                         <!-- Delete Project -->
                         <v-tooltip top>
                           <template v-slot:activator="{ on }">
                             <v-btn
-                              :disabled="editingItem != null"
+                              :disabled="
+                                editingItem != null ||
+                                (contractLoading &&
+                                  contractProjectStatusItem &&
+                                  contractProjectStatusItem.id === item.id)
+                              "
                               @click.stop="clickedDeleteProject(contract.item, item)"
                               icon
                               text
@@ -307,7 +361,10 @@
                 <v-tooltip top>
                   <template v-slot:activator="{ on }">
                     <v-btn
-                      :disabled="editingItem != null"
+                      :disabled="
+                        editingItem != null ||
+                        (contractLoading && contractStatusItem && contractStatusItem.id === item.id)
+                      "
                       @click.stop="
                         () => {
                           addProjectUnderContract = item;
@@ -327,18 +384,52 @@
                 <!-- Edit Contract -->
                 <v-tooltip top>
                   <template v-slot:activator="{ on }">
-                    <v-btn icon text :disabled="editingItem != null" v-on="on" @click.stop="clickedEdit(item)">
+                    <v-btn
+                      icon
+                      text
+                      :disabled="
+                        editingItem != null ||
+                        (contractLoading && contractStatusItem && contractStatusItem.id === item.id)
+                      "
+                      v-on="on"
+                      @click.stop="clickedEdit(item)"
+                    >
                       <v-icon class="case-gray">edit</v-icon>
                     </v-btn>
                   </template>
                   <span>Edit</span>
                 </v-tooltip>
 
+                <!-- Deactivate Contract -->
+                <v-tooltip top>
+                  <template v-slot:activator="{ on }">
+                    <v-btn
+                      icon
+                      text
+                      :disabled="editingItem != null"
+                      :loading="contractLoading && contractStatusItem && contractStatusItem.id === item.id"
+                      v-on="on"
+                      @click.stop="
+                        toggleContractStatusModal = true;
+                        contractStatusItem = cloneDeep(item);
+                      "
+                    >
+                      <v-icon class="case-gray"
+                        >mdi-file-document-{{ item.inactive ? 'check' : 'remove-outline' }}</v-icon
+                      >
+                    </v-btn>
+                  </template>
+                  <span>{{ item.inactive ? 'Activate' : 'Deactivate' }} Contract</span>
+                </v-tooltip>
+
                 <!-- Delete Contract -->
                 <v-tooltip top>
                   <template v-slot:activator="{ on }">
                     <v-btn
-                      :disabled="editingItem != null"
+                      :disabled="
+                        editingItem != null ||
+                        (contractLoading && contractStatusItem && contractStatusItem.id === item.id)
+                      "
                       @click.stop="clickedDeleteContractPrime(item)"
                       icon
                       text
@@ -366,6 +457,20 @@
       :toggleModal="toggleWarningModal"
       :relationships="relationships"
     ></contract-project-delete-warning>
+    <general-confirmation-modal
+      :title="`Are you sure you want to make this contract ${
+        contractStatusItem && contractStatusItem.inactive ? 'active' : 'inactive'
+      }?`"
+      type="contract-status"
+      :toggleModal="toggleContractStatusModal"
+    ></general-confirmation-modal>
+    <general-confirmation-modal
+      :title="`Are you sure you want to make this project ${
+        contractProjectStatusItem && contractProjectStatusItem.inactive ? 'active' : 'inactive'
+      }?`"
+      type="contract-project-status"
+      :toggleModal="toggleContractProjectStatusModal"
+    ></general-confirmation-modal>
     <project-form :toggleProjectForm="toggleProjectForm" :contract="addProjectUnderContract" />
   </div>
 </template>
@@ -380,6 +485,7 @@ import { format, isAfter, isBefore } from '@/shared/dateUtils';
 import { getDateOptionalRules } from '@/shared/validationUtils';
 import { mask } from 'vue-the-mask';
 import ProjectsEmployeesAssignedModal from '../modals/ProjectsEmployeesAssignedModal.vue';
+import GeneralConfirmationModal from '@/components/modals/GeneralConfirmationModal.vue';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -405,6 +511,41 @@ async function created() {
   window.EventBus.$on('canceled-delete-project', () => {
     this.deleteItem = null;
   });
+  window.EventBus.$on('confirmed-contract-project-status', async () => {
+    this.contractLoading = true;
+    let contracts = this.$store.getters.contracts;
+    let contractIdx = _.findIndex(contracts, (c) =>
+      _.find(c.projects, (p) => p.id === this.contractProjectStatusItem.id)
+    );
+    let projectIdx = _.findIndex(contracts[contractIdx].projects, (p) => p.id === this.contractProjectStatusItem.id);
+    await api.updateItem(api.CONTRACTS, contracts[contractIdx]);
+    contracts[contractIdx].projects[projectIdx]['inactive'] = !contracts[contractIdx].projects[projectIdx]['inactive'];
+    this.displaySuccess(
+      `Contract is now ${contracts[contractIdx].projects[projectIdx]['inactive'] ? 'inactive' : 'active'}!`
+    );
+    this.$store.dispatch('setContracts', { contracts });
+    this.contractProjectStatusItem = null;
+    this.toggleContractProjectStatusModal = false;
+    this.contractLoading = false;
+  });
+  window.EventBus.$on('canceled-contract-project-status', () => {
+    this.toggleContractProjectStatusModal = false;
+  });
+  window.EventBus.$on('confirmed-contract-status', async () => {
+    this.contractLoading = true;
+    let contracts = this.$store.getters.contracts;
+    let contractIdx = _.findIndex(contracts, (c) => this.contractStatusItem.id === c.id);
+    await api.updateItem(api.CONTRACTS, { ...contracts[contractIdx], inactive: !contracts[contractIdx]['inactive'] });
+    contracts[contractIdx]['inactive'] = !contracts[contractIdx]['inactive'];
+    this.displaySuccess(`Contract is now ${contracts[contractIdx]['inactive'] ? 'inactive' : 'active'}!`);
+    this.$store.dispatch('setContracts', { contracts });
+    this.contractStatusItem = null;
+    this.toggleContractStatusModal = false;
+    this.contractLoading = false;
+  });
+  window.EventBus.$on('canceled-contract-status', () => {
+    this.toggleContractStatusModal = false;
+  });
   window.EventBus.$on('canceled-project-form', () => {
     this.toggleProjectForm = false;
   });
@@ -421,7 +562,12 @@ function beforeDestroy() {
   window.EventBus.$off('canceled-delete-contract');
   window.EventBus.$off('confirm-delete-project');
   window.EventBus.$off('canceled-delete-project');
+  window.EventBus.$off('confirmed-contract-project-status');
+  window.EventBus.$off('canceled-contract-project-status');
+  window.EventBus.$off('confirmed-contract-status');
+  window.EventBus.$off('canceled-contract-status');
   window.EventBus.$off('canceled-project-form');
+  window.EventBus.$off('closed-project-employees-assigned-modal');
 } // beforeDestroy
 
 // |--------------------------------------------------|
@@ -581,6 +727,16 @@ async function clickedDeleteProject(contract, project) {
 } // clickedDeleteProject
 
 /**
+ * Clones a passed item.
+ *
+ * @param item - The item to clone
+ * @return The cloned item
+ */
+function cloneDeep(item) {
+  return _.cloneDeep(item);
+} // cloneDeep
+
+/**
  * Gets relationships between projects and employees
  *
  * @param contract contract to find employees under
@@ -717,8 +873,20 @@ export default {
   components: {
     DeleteModal,
     ContractProjectDeleteWarning,
+    GeneralConfirmationModal,
     ProjectForm,
     ProjectsEmployeesAssignedModal
+  },
+  computed: {
+    storeContracts() {
+      return this.showInactive
+        ? this.$store.getters.contracts
+        : this.$store.getters.contracts
+            .filter((c) => !c.inactive)
+            .map((c) => {
+              return { ...c, projects: c.projects.filter((p) => !p.inactive) };
+            });
+    }
   },
   methods: {
     projectRowClass,
@@ -728,6 +896,7 @@ export default {
     getEmployeeContractRelationships,
     clickedDeleteContractPrime,
     clickedDeleteProject,
+    cloneDeep,
     deleteProject,
     deleteContractPrime,
     displaySuccess,
@@ -775,6 +944,8 @@ export default {
       },
       contractEmployeesAssigned: null,
       projectEmployeesAsseigned: null,
+      contractStatusItem: null,
+      contractProjectStatusItem: null,
       contractValid: true,
       addProjectUnderContract: null,
       toggleProjectForm: false,
@@ -783,10 +954,11 @@ export default {
       toggleProjectEmployeesModal: false,
       toggleWarningModal: false,
       toggleContractDeleteModal: false,
+      toggleContractStatusModal: false,
+      toggleContractProjectStatusModal: false,
       toggleProjectDeleteModal: false,
       popStartDateFormatted: null,
       popEndDateFormatted: null,
-      contracts: [],
       popStartDateMenu: false,
       popEndDateMenu: false,
       contractLoading: false,
@@ -794,17 +966,18 @@ export default {
       loading: false,
       expanded: [],
       search: null,
+      showInactive: false,
       projectHeaders: [
         {
           text: 'Project',
           value: 'projectName',
           align: 'center',
-          width: '90%'
+          width: '85%'
         },
         {
           value: 'actions',
           sortable: false,
-          width: '10%'
+          width: '15%'
         }
       ],
       contractHeaders: [
@@ -847,7 +1020,7 @@ export default {
         {
           value: 'actions',
           sortable: false,
-          width: '10%'
+          width: '15%'
         }
       ]
     };
@@ -855,7 +1028,13 @@ export default {
   directives: { mask }
 };
 </script>
-<style>
+
+<style lang="scss">
+@import 'src/assets/styles/styles';
+.inactive {
+  color: $case-red;
+}
+
 .highlight-row {
   background-color: rgb(238, 238, 238) !important;
 }
