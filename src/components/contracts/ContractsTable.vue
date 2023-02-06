@@ -1026,11 +1026,12 @@ export default {
           text: 'Description',
           value: 'description',
           align: 'left',
-          width: '29%'
+          width: '27%'
         },
         {
           value: 'actions',
           sortable: false,
+          align: 'right',
           width: '15%'
         }
       ]
