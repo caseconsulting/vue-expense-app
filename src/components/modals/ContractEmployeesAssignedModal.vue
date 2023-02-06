@@ -79,7 +79,6 @@ import dateUtils from '../../shared/dateUtils';
 function created() {
   if (!this.$store.getters.employees) this.updateStoreEmployees();
   if (!this.$store.getters.contracts) this.updateStoreContracts();
-  console.log(this.$store.getters.employees);
 } // created
 
 // |--------------------------------------------------|
