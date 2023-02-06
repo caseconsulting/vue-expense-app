@@ -357,6 +357,27 @@
 
               <!-- IS NOT EDITING ROW -->
               <div v-else>
+                <!-- Employees Assigned -->
+                <v-tooltip>
+                  <template v-slot:activator="{ on }">
+                    <v-btn
+                      :disabled="editingItem != null"
+                      @click.stop="
+                        () => {
+                          toggleContractEmployeesModal = true;
+                          contractEmployeesAssigned = item;
+                        }
+                      "
+                      icon
+                      text
+                      v-on="on"
+                    >
+                      <v-icon class="case-gray">group</v-icon>
+                    </v-btn></template
+                  >
+                  <span>View Employees Assigned to Contract</span>
+                </v-tooltip>
+
                 <!-- Add Project -->
                 <v-tooltip top>
                   <template v-slot:activator="{ on }">
@@ -451,6 +472,10 @@
       :contract="contractEmployeesAssigned"
       :project="projectEmployeesAsseigned"
     />
+    <contract-employees-assigned-modal
+      :contract="contractEmployeesAssigned"
+      :toggleModal="toggleContractEmployeesModal"
+    />
     <delete-modal :toggleDeleteModal="toggleContractDeleteModal" :type="'contract'"></delete-modal>
     <delete-modal :toggleDeleteModal="toggleProjectDeleteModal" :type="'project'"></delete-modal>
     <contract-project-delete-warning
@@ -486,6 +511,7 @@ import { getDateOptionalRules } from '@/shared/validationUtils';
 import { mask } from 'vue-the-mask';
 import ProjectsEmployeesAssignedModal from '../modals/ProjectsEmployeesAssignedModal.vue';
 import GeneralConfirmationModal from '@/components/modals/GeneralConfirmationModal.vue';
+import ContractEmployeesAssignedModal from '../modals/ContractEmployeesAssignedModal.vue';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -562,6 +588,9 @@ async function created() {
   });
   window.EventBus.$on('closed-project-employees-assigned-modal', () => {
     this.toggleProjectEmployeesModal = false;
+  });
+  window.EventBus.$on('closed-contract-employees-assigned-modal', () => {
+    this.toggleContractEmployeesModal = false;
   });
 } // created
 
@@ -886,7 +915,8 @@ export default {
     ContractProjectDeleteWarning,
     GeneralConfirmationModal,
     ProjectForm,
-    ProjectsEmployeesAssignedModal
+    ProjectsEmployeesAssignedModal,
+    ContractEmployeesAssignedModal
   },
   computed: {
     storeContracts() {
@@ -962,6 +992,7 @@ export default {
       toggleProjectForm: false,
       relationships: [],
       deleteItem: null,
+      toggleContractEmployeesModal: false,
       toggleProjectEmployeesModal: false,
       toggleWarningModal: false,
       toggleContractDeleteModal: false,
