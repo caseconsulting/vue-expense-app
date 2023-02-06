@@ -112,7 +112,13 @@
                 </v-col>
                 <!-- Description -->
                 <v-col cols="12">
-                  <v-textarea v-model="description" auto-grow label="Description" rows="1"></v-textarea>
+                  <v-textarea
+                    v-model="description"
+                    auto-grow
+                    label="Description"
+                    prepend-icon="mdi-text"
+                    rows="1"
+                  ></v-textarea>
                 </v-col>
               </v-row>
             </v-container>

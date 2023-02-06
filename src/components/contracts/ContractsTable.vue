@@ -146,6 +146,7 @@
                 v-model="editingItem.description"
                 name="description"
                 auto-grow
+                prepend-icon="mdi-text"
                 label="Description"
                 rows="1"
                 @click.stop
