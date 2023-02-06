@@ -81,9 +81,8 @@ function fillData() {
 
   this.tableContents = [
     { title: 'Billable Employees', value: billableCount },
-    { title: 'Overhead Employees', value: overheadCount },
+    { title: 'Overhead Employees', value: `${overheadCount} (${awaitingClearanceCount} awaiting clearance)` },
     { title: 'Interns', value: internCount },
-    { title: 'Awaiting Clearance', value: awaitingClearanceCount },
     { title: 'Total Employees', value: this.employees.length - nonPeopleCount } // -1 for the info account on prod
   ];
 
