@@ -77,7 +77,7 @@ function fillData() {
     }
   });
 
-  overheadCount = this.employees.length - billableCount - awaitingClearanceCount - internCount - nonPeopleCount;
+  overheadCount = this.employees.length - billableCount - internCount - nonPeopleCount;
 
   this.tableContents = [
     { title: 'Billable Employees', value: billableCount },
