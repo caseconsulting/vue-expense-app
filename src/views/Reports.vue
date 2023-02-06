@@ -6,13 +6,13 @@
       class="mb-3"
       elevation="2"
       @click="backClick()"
-      :x-small="isMobile()"
+      :x-small="isMobile"
       ><v-icon class="pr-1">arrow_back</v-icon>Back</v-btn
     >
-    <v-card :elevation="3" class="">
+    <v-card>
       <v-card color="#bc3825">
         <v-card-title headline v-bind:class="{ 'justify-center': isMobile }">
-          <h2 class="text-center white--text">Reports</h2>
+          <h2 class="white--text">Reports</h2>
         </v-card-title>
       </v-card>
       <v-container fluid>
@@ -136,6 +136,7 @@ export default {
     ReportsPageLoader
   },
   computed: {
+    isMobile,
     storeIsPopulated
   },
   data() {
@@ -147,7 +148,6 @@ export default {
     };
   },
   methods: {
-    isMobile,
     backClick,
     changeTab,
     updateStoreContracts,
