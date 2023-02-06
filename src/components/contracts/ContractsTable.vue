@@ -535,8 +535,19 @@ async function created() {
     this.contractLoading = true;
     let contracts = this.$store.getters.contracts;
     let contractIdx = _.findIndex(contracts, (c) => this.contractStatusItem.id === c.id);
-    await api.updateItem(api.CONTRACTS, { ...contracts[contractIdx], inactive: !contracts[contractIdx]['inactive'] });
+    // if contract is becoming inactive, deactivate all of its projects
+    let projects = !contracts[contractIdx]['inactive']
+      ? _.map(contracts[contractIdx].projects, (p) => {
+          return { ...p, inactive: true };
+        })
+      : contracts[contractIdx].projects;
+    await api.updateItem(api.CONTRACTS, {
+      ...contracts[contractIdx],
+      inactive: !contracts[contractIdx]['inactive'],
+      projects
+    });
     contracts[contractIdx]['inactive'] = !contracts[contractIdx]['inactive'];
+    contracts[contractIdx].projects = projects;
     this.displaySuccess(`Contract is now ${contracts[contractIdx]['inactive'] ? 'inactive' : 'active'}!`);
     this.$store.dispatch('setContracts', { contracts });
     this.contractStatusItem = null;
