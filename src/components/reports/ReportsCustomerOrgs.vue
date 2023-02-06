@@ -135,7 +135,7 @@ function buildCustomerOrgColumns() {
         // remove & at the end
         orgs = orgs.slice(0, -2);
         currentEmp.currentOrgName = orgs;
-        currentEmp.currentOrgYoE = years + (years == 1 ? ' year' : ' years');
+        currentEmp.currentOrgYoE = years.toFixed(2) + ' years';
       }
     }
   });
