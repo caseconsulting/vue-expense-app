@@ -358,7 +358,7 @@
               <!-- IS NOT EDITING ROW -->
               <div v-else>
                 <!-- Employees Assigned -->
-                <v-tooltip>
+                <v-tooltip top>
                   <template v-slot:activator="{ on }">
                     <v-btn
                       :disabled="editingItem != null"
