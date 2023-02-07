@@ -8,7 +8,17 @@
         <v-tabs-items v-model="tab">
           <v-tab-item>
             <v-card v-if="tab == 0">
-              <v-card-text>
+              <v-card-text
+                :class="
+                  currentEmployees.length != 0 && currentEmployees.some((e) => e.employee.workStatus == 0) ? 'pt-2' : ''
+                "
+              >
+                <p
+                  v-if="currentEmployees.length != 0 && currentEmployees.some((e) => e.employee.workStatus == 0)"
+                  class="text-center caption mb-1"
+                >
+                  <i>* Names in color red indicate inactive employees</i>
+                </p>
                 <span v-if="currentEmployees.length == 0"
                   >There are no employees currently assigned to {{ contract.contractName }}.</span
                 >
