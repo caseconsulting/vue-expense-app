@@ -14,9 +14,10 @@
                 >
                 <ul v-else>
                   <li v-for="e in currentEmployees" :key="e.id">
-                    <a :href="`/employee/${e.employee.employeeNumber}`">{{
-                      e.employee.firstName + ' ' + e.employee.lastName
-                    }}</a
+                    <a
+                      :class="e.employee.workStatus == 0 ? 'inactive' : ''"
+                      :href="`/employee/${e.employee.employeeNumber}`"
+                      >{{ e.employee.firstName + ' ' + e.employee.lastName }}</a
                     ><span>
                       (assigned project{{ e.currentProjects.length > 1 ? 's' : '' }}:
                       {{ e.currentProjects.map((p) => p.projectName).join(', ') }})</span
@@ -28,15 +29,28 @@
           </v-tab-item>
           <v-tab-item>
             <v-card v-if="tab == 1">
-              <v-card-text>
+              <v-card-text
+                :class="
+                  pastEmployees.length != 0 && pastEmployees.some((e) => e.employee.workStatus == 0) ? 'pt-2' : ''
+                "
+              >
+                <p
+                  v-if="pastEmployees.length != 0 && pastEmployees.some((e) => e.employee.workStatus == 0)"
+                  class="text-center caption mb-1"
+                >
+                  <i>* Names in color red indicate inactive employees</i>
+                </p>
+
                 <span v-if="pastEmployees.length == 0"
                   >There are no employees who have been assigned to {{ contract.contractName }} in the past.</span
                 >
                 <ul v-else>
                   <li v-for="e in pastEmployees" :key="e.id">
-                    <a :href="`/employee/${e.employee.employeeNumber}`">{{
-                      e.employee.firstName + ' ' + e.employee.lastName
-                    }}</a>
+                    <a
+                      :class="e.employee.workStatus == 0 ? 'inactive' : ''"
+                      :href="`/employee/${e.employee.employeeNumber}`"
+                      >{{ e.employee.firstName + ' ' + e.employee.lastName }}</a
+                    >
                     <span>
                       (last assigned project{{ e.lastProjects.length > 1 ? 's' : '' }}:
                       {{ e.lastProjects.map((p) => p.projectName).join(', ') }})</span
@@ -207,3 +221,8 @@ export default {
   props: ['toggleModal', 'contract']
 };
 </script>
+<style>
+.inactive {
+  color: red !important;
+}
+</style>
