@@ -63,7 +63,7 @@ function watchToggleContractProjectDeleteWarning() {
 // |                                                  |
 // |                      EXPORT                      |
 // |                                                  |
-// |--------------------------------------------------|1
+// |--------------------------------------------------|
 
 export default {
   data() {

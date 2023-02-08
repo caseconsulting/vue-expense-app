@@ -141,10 +141,10 @@ function fillData() {
     }
   });
 
-  let averageYoE = totalYears / this.employees.length;
+  let averageYoE = totalYears / (this.employees.length - 1); // -1 for info account on prod
 
   this.tableContents = [
-    { title: 'Total Employees', value: this.employees.length },
+    { title: 'Total Employees', value: this.employees.length - 1 }, // -1 for info account on prod
     { title: 'Company Wide IC Experience', value: totalYears.toFixed(2) + ' Years' },
     { title: 'Average IC Experience per Employee', value: averageYoE.toFixed(2) + ' Years' }
   ];

@@ -1,19 +1,58 @@
 <template>
   <div>
-    <div class="d-flex align-center">
-      <h1>Reports</h1>
-      <router-link class="no-decoration" to="/stats">
-        <v-btn v-if="wasRedirected" elevation="2" color="#bc3825" small outlined class="ml-6">
-          <v-icon left dark> mdi-arrow-left-top </v-icon>Back to Statistics</v-btn
-        >
-      </router-link>
-    </div>
-    <employee-reports-table v-if="!loading"></employee-reports-table>
+    <v-btn
+      v-if="$route.params.requestedDataType"
+      id="backBtn"
+      class="mb-3"
+      elevation="2"
+      @click="backClick()"
+      :x-small="isMobile"
+      ><v-icon class="pr-1">arrow_back</v-icon>Back</v-btn
+    >
+    <v-card>
+      <v-card color="#bc3825">
+        <v-card-title headline v-bind:class="{ 'justify-center': isMobile }">
+          <h2 class="white--text">Reports</h2>
+        </v-card-title>
+      </v-card>
+      <v-container fluid>
+        <reports-page-loader v-if="loading"></reports-page-loader>
+        <!-- user is not mobile -->
+        <v-tabs v-else color="blue" center-active grow show-arrows @change="changeTab" v-model="currentTab">
+          <v-tab href="#contracts" :disabled="loading">Contracts</v-tab>
+          <v-tab href="#customerOrgs" :disabled="loading">Customer Orgs</v-tab>
+          <v-tab href="#certifications" :disabled="loading">Certifications</v-tab>
+          <v-tab href="#jobRoles" :disabled="loading">Job Roles</v-tab>
+          <v-tab href="#securityInfo" :disabled="loading">Security Info</v-tab>
+          <v-tab-item id="contracts" class="mx-2 my-6">
+            <ReportsContracts />
+          </v-tab-item>
+          <v-tab-item id="customerOrgs" class="mx-2 my-6">
+            <ReportsCustomerOrgs />
+          </v-tab-item>
+          <v-tab-item id="certifications" class="mx-2 my-6">
+            <ReportsCertifications />
+          </v-tab-item>
+          <v-tab-item id="jobRoles" class="mx-2 my-6">
+            <ReportsJobRoles />
+          </v-tab-item>
+          <v-tab-item id="securityInfo" class="mx-2 my-6">
+            <ReportsSecurityInfo />
+          </v-tab-item>
+        </v-tabs>
+      </v-container>
+    </v-card>
   </div>
 </template>
 <script>
-import EmployeeReportsTable from '@/components/reports/EmployeeReportsTable.vue';
+import ReportsPageLoader from '@/components/reports/ReportsPageLoader.vue';
+import ReportsContracts from '@/components/reports/ReportsContracts.vue';
+import ReportsCustomerOrgs from '@/components/reports/ReportsCustomerOrgs.vue';
+import ReportsCertifications from '@/components/reports/ReportsCertifications.vue';
+import ReportsJobRoles from '@/components/reports/ReportsJobRoles.vue';
+import ReportsSecurityInfo from '../components/reports/ReportsSecurityInfo.vue';
 import { updateStoreEmployees, updateStoreContracts } from '@/utils/storeUtils';
+import { isMobile } from '@/utils/utils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -32,11 +71,38 @@ async function created() {
     ]);
     this.loading = false;
   }
-  if (this.$route.params.requestedFilter) {
+  if (this.$route.params.requestedDataType) {
+    this.currentTab = this.$route.params.requestedDataType;
     this.wasRedirected = true;
     window.scrollTo(0, 0);
   }
 } // created
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     METHODS                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * Handler for back button click event.
+ */
+function backClick() {
+  this.$router.push({
+    path: '/stats',
+    name: 'stats',
+    params: { requestedDataType: this.$route.params.requestedDataType }
+  });
+} // backClick
+
+/**
+ * Changes the tab display.
+ *
+ * @param event - the new tab
+ */
+function changeTab(event) {
+  this.currentTab = event;
+} // changeTab
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -62,19 +128,28 @@ function storeIsPopulated() {
 export default {
   created,
   components: {
-    EmployeeReportsTable
+    ReportsContracts,
+    ReportsCustomerOrgs,
+    ReportsCertifications,
+    ReportsJobRoles,
+    ReportsSecurityInfo,
+    ReportsPageLoader
   },
   computed: {
+    isMobile,
     storeIsPopulated
   },
   data() {
     return {
       contracts: null,
+      currentTab: null,
       loading: true,
       wasRedirected: false
     };
   },
   methods: {
+    backClick,
+    changeTab,
     updateStoreContracts,
     updateStoreEmployees
   },

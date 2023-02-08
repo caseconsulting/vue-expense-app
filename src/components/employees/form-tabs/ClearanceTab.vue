@@ -13,6 +13,19 @@
         clearable
       >
       </v-combobox>
+      <v-checkbox
+        v-model="clearance.awaitingClearance"
+        label="Awaiting Clearance"
+        @change="
+          () => {
+            if (clearance.awaitingClearance) {
+              clearance.grantedDate = null;
+              clearance.badgeExpirationDate = null;
+              clearance.badgeNum = null;
+            }
+          }
+        "
+      ></v-checkbox>
       <v-row class="py-3">
         <!-- Granted Date -->
         <v-col cols="12" sm="6" md="12" lg="6" class="pt-0">
@@ -36,6 +49,12 @@
                 v-mask="'##/##/####'"
                 v-bind="attrs"
                 v-on="on"
+                :disabled="clearance.awaitingClearance"
+                @change="
+                  () => {
+                    if (clearance.grantedDate) clearance.awaitingClearance = false;
+                  }
+                "
                 @click:clear="clearance.grantedDate = null"
                 @blur="clearance.grantedDate = parseEventDate($event)"
                 @input="clearance.showGrantedMenu = false"
@@ -97,6 +116,7 @@
         counter="5"
         label="Badge Number"
         clearable
+        :disabled="clearance.awaitingClearance"
         @blur="capitalizeBadges(clearance)"
       ></v-text-field>
       <!-- End Badge Number -->
@@ -122,6 +142,7 @@
             v-mask="'##/##/####'"
             v-bind="attrs"
             v-on="on"
+            :disabled="clearance.awaitingClearance"
             @click:clear="clearance.badgeExpirationDate = null"
             @blur="clearance.badgeExpirationDate = parseEventDate($event)"
             @input="clearance.showBadgeMenu = false"
@@ -307,6 +328,7 @@ function addClearance() {
   if (!this.editedClearances) this.editedClearances = [];
   this.editedClearances.push({
     adjudicationDates: [],
+    awaitingClearance: false,
     biDates: [],
     badgeExpirationDate: null,
     grantedDate: null,

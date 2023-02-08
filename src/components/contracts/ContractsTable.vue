@@ -2,15 +2,39 @@
   <div>
     <v-card class="mt-3">
       <v-container fluid>
+        <v-row class="flex justify-spacebetween ma-1">
+          <v-col cols="6" xl="6" lg="6" md="6" class="my-0 pb-0">
+            <v-text-field
+              id="contractsSearch"
+              v-model="search"
+              label="Search Table Contents"
+              auto-select-first
+              append-icon="search"
+              clearable
+            ></v-text-field>
+          </v-col>
+          <v-col cols="6" xl="6" lg="6" md="6" class="my-0 pb-0">
+            <v-checkbox v-model="showInactive" label="Show Inactive Contracts/Projects"></v-checkbox>
+          </v-col>
+        </v-row>
         <!-- START CONTRACTS DATA TABLE -->
         <v-form ref="form" lazy-validation>
           <v-data-table
+            v-if="!$store.getters.contracts"
+            :loading="!$store.getters.contracts"
+            :headers="contractHeaders"
+            :items-per-page="-1"
+          ></v-data-table>
+          <v-data-table
+            v-else
             @click:row="clickedRow"
             :loading="loading"
             :expanded.sync="expanded"
             :headers="contractHeaders"
-            :items="$store.getters.contracts"
+            :items="storeContracts"
             :items-per-page="-1"
+            :item-class="contractRowClass"
+            :search="search"
           >
             <!-- Contract Name Slot -->
             <template v-slot:[`item.contractName`]="{ item }">
@@ -18,11 +42,12 @@
                 name="contractName"
                 v-if="editingItem && editingItem.id == item.id"
                 v-model="editingItem.contractName"
+                prepend-icon="mdi-script-outline"
                 :rules="[(v) => !!v || 'Field is required', duplicateContractPrimeCombo()]"
                 required
               ></v-text-field>
               <!-- </v-form> -->
-              <span v-else>{{ item.contractName }}</span>
+              <span v-else :class="{ inactive: item.inactive }">{{ item.contractName }}</span>
             </template>
             <!-- Prime Name Slot -->
             <template v-slot:[`item.primeName`]="{ item }">
@@ -30,11 +55,12 @@
                 name="primeName"
                 v-if="editingItem && editingItem.id == item.id"
                 v-model="editingItem.primeName"
+                prepend-icon="mdi-office-building-outline"
                 :rules="[(v) => !!v || 'Field is required', duplicateContractPrimeCombo()]"
                 required
               ></v-text-field>
               <!-- </v-form> -->
-              <span v-else>{{ item.primeName }}</span>
+              <span v-else :class="{ inactive: item.inactive }">{{ item.primeName }}</span>
             </template>
             <!-- Cost Type Slot -->
             <template v-slot:[`item.costType`]="{ item }">
@@ -42,9 +68,10 @@
                 name="costType"
                 v-if="editingItem && editingItem.id == item.id"
                 v-model="editingItem.costType"
+                prepend-icon="mdi-currency-usd"
               ></v-text-field>
               <!-- </v-form> -->
-              <span v-else>{{ item.costType }}</span>
+              <span v-else :class="{ inactive: item.inactive }">{{ item.costType }}</span>
             </template>
             <!-- PoP Start Date Slot -->
             <template v-slot:[`item.popStartDate`]="{ item }">
@@ -65,6 +92,7 @@
                     :value="format(editingItem.popStartDate, null, 'MM/DD/YYYY')"
                     :rules="[...getDateOptionalRules(), startDateRules()]"
                     hint="MM/DD/YYYY format"
+                    v-mask="'##/##/####'"
                     persistent-hint
                     prepend-icon="event"
                     @blur="editingItem.popStartDate = format($event.target.value, 'MM/DD/YYYY', 'YYYY-MM-DD')"
@@ -79,7 +107,9 @@
                 ></v-date-picker>
               </v-menu>
               <!-- </v-form> -->
-              <span v-else>{{ format(item.popStartDate, 'YYYY-MM-DD', 'MM/DD/YYYY') }}</span>
+              <span v-else :class="{ inactive: item.inactive }">{{
+                format(item.popStartDate, 'YYYY-MM-DD', 'MM/DD/YYYY')
+              }}</span>
             </template>
             <!-- PoP End Date Slot -->
             <template v-slot:[`item.popEndDate`]="{ item }">
@@ -100,6 +130,7 @@
                     :value="format(editingItem.popEndDate, null, 'MM/DD/YYYY')"
                     :rules="[...getDateOptionalRules(), endDateRules()]"
                     hint="MM/DD/YYYY format"
+                    v-mask="'##/##/####'"
                     persistent-hint
                     prepend-icon="event"
                     @blur="editingItem.popEndDate = format($event.target.value, 'MM/DD/YYYY', 'YYYY-MM-DD')"
@@ -113,7 +144,23 @@
                   @input="popEndDateMenu = false"
                 ></v-date-picker>
               </v-menu>
-              <span v-else>{{ format(item.popEndDate, 'YYYY-MM-DD', 'MM/DD/YYYY') }}</span>
+              <span v-else :class="{ inactive: item.inactive }">{{
+                format(item.popEndDate, 'YYYY-MM-DD', 'MM/DD/YYYY')
+              }}</span>
+            </template>
+            <!-- Contract Description Slot -->
+            <template v-slot:[`item.description`]="{ item }">
+              <v-textarea
+                v-if="editingItem && editingItem.id == item.id"
+                v-model="editingItem.description"
+                name="description"
+                auto-grow
+                prepend-icon="mdi-text"
+                label="Description"
+                rows="1"
+                @click.stop
+              ></v-textarea>
+              <span v-else>{{ item.description }}</span>
             </template>
 
             <!-- Expanded Row Slot -->
@@ -121,14 +168,20 @@
               <td :colspan="contractHeaders.length" class="pa-0">
                 <v-container fluid class="grey-background">
                   <!-- START EXPANDED PROJECTS DATA TABLE-->
-                  <v-data-table :headers="projectHeaders" :items="contract.item.projects" hide-default-footer>
+                  <v-data-table
+                    :headers="projectHeaders"
+                    :items="contract.item.projects"
+                    hide-default-footer
+                    :item-class="projectRowClass"
+                  >
                     <template v-slot:[`item.projectName`]="{ item }">
                       <v-text-field
                         :rules="[(v) => !!v || 'Field is required', duplicateProjects(contract.item)]"
                         v-if="editingItem && editingItem.id == item.id"
                         v-model="editingItem.projectName"
+                        prepend-icon="mdi-briefcase-outline"
                       ></v-text-field>
-                      <span v-else>{{ item.projectName }}</span>
+                      <span v-else :class="{ inactive: item.inactive }">{{ item.projectName }}</span>
                     </template>
                     <template v-slot:[`item.actions`]="{ item }">
                       <div v-if="editingItem && editingItem.id == item.id">
@@ -165,21 +218,88 @@
                         <div v-else><v-progress-circular color="#bc3825" indeterminate /></div>
                       </div>
                       <div v-else>
+                        <!-- Employees Assigned -->
+                        <v-tooltip top>
+                          <template v-slot:activator="{ on }">
+                            <v-btn
+                              :disabled="
+                                editingItem != null ||
+                                (contractLoading &&
+                                  contractProjectStatusItem &&
+                                  contractProjectStatusItem.id === item.id)
+                              "
+                              @click.stop="
+                                () => {
+                                  toggleProjectEmployeesModal = true;
+                                  contractEmployeesAssigned = contract.item;
+                                  projectEmployeesAsseigned = item;
+                                }
+                              "
+                              icon
+                              text
+                              v-on="on"
+                            >
+                              <v-icon class="case-gray">group</v-icon>
+                            </v-btn></template
+                          >
+                          <span>View Employees Assigned to Project</span>
+                        </v-tooltip>
+
                         <!-- Edit Project -->
                         <v-tooltip top>
                           <template v-slot:activator="{ on }">
-                            <v-btn :disabled="editingItem != null" icon text @click.stop="clickedEdit(item)" v-on="on">
+                            <v-btn
+                              :disabled="
+                                editingItem != null ||
+                                (contractLoading &&
+                                  contractProjectStatusItem &&
+                                  contractProjectStatusItem.id === item.id)
+                              "
+                              icon
+                              text
+                              @click.stop="clickedEdit(item)"
+                              v-on="on"
+                            >
                               <v-icon class="case-gray">edit</v-icon>
                             </v-btn>
                           </template>
                           <span>Edit</span>
                         </v-tooltip>
 
+                        <!-- Activate/Deactivate Project -->
+                        <v-tooltip top>
+                          <template v-slot:activator="{ on }">
+                            <v-btn
+                              icon
+                              text
+                              :disabled="editingItem != null"
+                              :loading="
+                                contractLoading && contractProjectStatusItem && contractProjectStatusItem.id === item.id
+                              "
+                              v-on="on"
+                              @click.stop="
+                                toggleContractProjectStatusModal = true;
+                                contractProjectStatusItem = cloneDeep(item);
+                              "
+                            >
+                              <v-icon class="case-gray"
+                                >mdi-file-document-{{ item.inactive ? 'check' : 'remove-outline' }}</v-icon
+                              >
+                            </v-btn>
+                          </template>
+                          <span>{{ item.inactive ? 'Activate' : 'Deactivate' }} Project</span>
+                        </v-tooltip>
+
                         <!-- Delete Project -->
                         <v-tooltip top>
                           <template v-slot:activator="{ on }">
                             <v-btn
-                              :disabled="editingItem != null"
+                              :disabled="
+                                editingItem != null ||
+                                (contractLoading &&
+                                  contractProjectStatusItem &&
+                                  contractProjectStatusItem.id === item.id)
+                              "
                               @click.stop="clickedDeleteProject(contract.item, item)"
                               icon
                               text
@@ -193,6 +313,7 @@
                       </div>
                     </template>
                   </v-data-table>
+                  <!-- END EXPANDED PROJECTS DATA TABLE-->
                 </v-container>
               </td>
             </template>
@@ -236,11 +357,35 @@
 
               <!-- IS NOT EDITING ROW -->
               <div v-else>
-                <!-- Add Project -->
+                <!-- Employees Assigned -->
                 <v-tooltip top>
                   <template v-slot:activator="{ on }">
                     <v-btn
                       :disabled="editingItem != null"
+                      @click.stop="
+                        () => {
+                          toggleContractEmployeesModal = true;
+                          contractEmployeesAssigned = item;
+                        }
+                      "
+                      icon
+                      text
+                      v-on="on"
+                    >
+                      <v-icon class="case-gray">group</v-icon>
+                    </v-btn></template
+                  >
+                  <span>View Employees Assigned to Contract</span>
+                </v-tooltip>
+
+                <!-- Add Project -->
+                <v-tooltip top>
+                  <template v-slot:activator="{ on }">
+                    <v-btn
+                      :disabled="
+                        editingItem != null ||
+                        (contractLoading && contractStatusItem && contractStatusItem.id === item.id)
+                      "
                       @click.stop="
                         () => {
                           addProjectUnderContract = item;
@@ -260,18 +405,52 @@
                 <!-- Edit Contract -->
                 <v-tooltip top>
                   <template v-slot:activator="{ on }">
-                    <v-btn icon text :disabled="editingItem != null" v-on="on" @click.stop="clickedEdit(item)">
+                    <v-btn
+                      icon
+                      text
+                      :disabled="
+                        editingItem != null ||
+                        (contractLoading && contractStatusItem && contractStatusItem.id === item.id)
+                      "
+                      v-on="on"
+                      @click.stop="clickedEdit(item)"
+                    >
                       <v-icon class="case-gray">edit</v-icon>
                     </v-btn>
                   </template>
                   <span>Edit</span>
                 </v-tooltip>
 
+                <!-- Deactivate Contract -->
+                <v-tooltip top>
+                  <template v-slot:activator="{ on }">
+                    <v-btn
+                      icon
+                      text
+                      :disabled="editingItem != null"
+                      :loading="contractLoading && contractStatusItem && contractStatusItem.id === item.id"
+                      v-on="on"
+                      @click.stop="
+                        toggleContractStatusModal = true;
+                        contractStatusItem = cloneDeep(item);
+                      "
+                    >
+                      <v-icon class="case-gray"
+                        >mdi-file-document-{{ item.inactive ? 'check' : 'remove-outline' }}</v-icon
+                      >
+                    </v-btn>
+                  </template>
+                  <span>{{ item.inactive ? 'Activate' : 'Deactivate' }} Contract</span>
+                </v-tooltip>
+
                 <!-- Delete Contract -->
                 <v-tooltip top>
                   <template v-slot:activator="{ on }">
                     <v-btn
-                      :disabled="editingItem != null"
+                      :disabled="
+                        editingItem != null ||
+                        (contractLoading && contractStatusItem && contractStatusItem.id === item.id)
+                      "
                       @click.stop="clickedDeleteContractPrime(item)"
                       icon
                       text
@@ -288,24 +467,51 @@
         </v-form>
       </v-container>
     </v-card>
+    <projects-employees-assigned-modal
+      :toggleModal="toggleProjectEmployeesModal"
+      :contract="contractEmployeesAssigned"
+      :project="projectEmployeesAsseigned"
+    />
+    <contract-employees-assigned-modal
+      :contract="contractEmployeesAssigned"
+      :toggleModal="toggleContractEmployeesModal"
+    />
     <delete-modal :toggleDeleteModal="toggleContractDeleteModal" :type="'contract'"></delete-modal>
     <delete-modal :toggleDeleteModal="toggleProjectDeleteModal" :type="'project'"></delete-modal>
     <contract-project-delete-warning
       :toggleModal="toggleWarningModal"
       :relationships="relationships"
     ></contract-project-delete-warning>
+    <general-confirmation-modal
+      :title="`Are you sure you want to make this contract ${
+        contractStatusItem && contractStatusItem.inactive ? 'active' : 'inactive'
+      }?`"
+      type="contract-status"
+      :toggleModal="toggleContractStatusModal"
+    ></general-confirmation-modal>
+    <general-confirmation-modal
+      :title="`Are you sure you want to make this project ${
+        contractProjectStatusItem && contractProjectStatusItem.inactive ? 'active' : 'inactive'
+      }?`"
+      type="contract-project-status"
+      :toggleModal="toggleContractProjectStatusModal"
+    ></general-confirmation-modal>
     <project-form :toggleProjectForm="toggleProjectForm" :contract="addProjectUnderContract" />
   </div>
 </template>
 <script>
 import _ from 'lodash';
-import { updateStoreContracts, updateStoreEmployees } from '@/utils/storeUtils';
-import { format, isAfter, isBefore } from '@/shared/dateUtils';
 import api from '@/shared/api';
 import DeleteModal from '../modals/DeleteModal.vue';
 import ContractProjectDeleteWarning from '../modals/ContractProjectDeleteWarning.vue';
 import ProjectForm from './ProjectForm.vue';
+import { updateStoreContracts, updateStoreEmployees } from '@/utils/storeUtils';
+import { format, isAfter, isBefore } from '@/shared/dateUtils';
 import { getDateOptionalRules } from '@/shared/validationUtils';
+import { mask } from 'vue-the-mask';
+import ProjectsEmployeesAssignedModal from '../modals/ProjectsEmployeesAssignedModal.vue';
+import GeneralConfirmationModal from '@/components/modals/GeneralConfirmationModal.vue';
+import ContractEmployeesAssignedModal from '../modals/ContractEmployeesAssignedModal.vue';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -331,8 +537,60 @@ async function created() {
   window.EventBus.$on('canceled-delete-project', () => {
     this.deleteItem = null;
   });
+  window.EventBus.$on('confirmed-contract-project-status', async () => {
+    this.contractLoading = true;
+    let contracts = this.$store.getters.contracts;
+    let contractIdx = _.findIndex(contracts, (c) =>
+      _.find(c.projects, (p) => p.id === this.contractProjectStatusItem.id)
+    );
+    let projectIdx = _.findIndex(contracts[contractIdx].projects, (p) => p.id === this.contractProjectStatusItem.id);
+    await api.updateItem(api.CONTRACTS, contracts[contractIdx]);
+    contracts[contractIdx].projects[projectIdx]['inactive'] = !contracts[contractIdx].projects[projectIdx]['inactive'];
+    this.displaySuccess(
+      `Contract is now ${contracts[contractIdx].projects[projectIdx]['inactive'] ? 'inactive' : 'active'}!`
+    );
+    this.$store.dispatch('setContracts', { contracts });
+    this.contractProjectStatusItem = null;
+    this.toggleContractProjectStatusModal = false;
+    this.contractLoading = false;
+  });
+  window.EventBus.$on('canceled-contract-project-status', () => {
+    this.toggleContractProjectStatusModal = false;
+  });
+  window.EventBus.$on('confirmed-contract-status', async () => {
+    this.contractLoading = true;
+    let contracts = this.$store.getters.contracts;
+    let contractIdx = _.findIndex(contracts, (c) => this.contractStatusItem.id === c.id);
+    // if contract is becoming inactive, deactivate all of its projects
+    let projects = !contracts[contractIdx]['inactive']
+      ? _.map(contracts[contractIdx].projects, (p) => {
+          return { ...p, inactive: true };
+        })
+      : contracts[contractIdx].projects;
+    await api.updateItem(api.CONTRACTS, {
+      ...contracts[contractIdx],
+      inactive: !contracts[contractIdx]['inactive'],
+      projects
+    });
+    contracts[contractIdx]['inactive'] = !contracts[contractIdx]['inactive'];
+    contracts[contractIdx].projects = projects;
+    this.displaySuccess(`Contract is now ${contracts[contractIdx]['inactive'] ? 'inactive' : 'active'}!`);
+    this.$store.dispatch('setContracts', { contracts });
+    this.contractStatusItem = null;
+    this.toggleContractStatusModal = false;
+    this.contractLoading = false;
+  });
+  window.EventBus.$on('canceled-contract-status', () => {
+    this.toggleContractStatusModal = false;
+  });
   window.EventBus.$on('canceled-project-form', () => {
     this.toggleProjectForm = false;
+  });
+  window.EventBus.$on('closed-project-employees-assigned-modal', () => {
+    this.toggleProjectEmployeesModal = false;
+  });
+  window.EventBus.$on('closed-contract-employees-assigned-modal', () => {
+    this.toggleContractEmployeesModal = false;
   });
 } // created
 
@@ -344,6 +602,12 @@ function beforeDestroy() {
   window.EventBus.$off('canceled-delete-contract');
   window.EventBus.$off('confirm-delete-project');
   window.EventBus.$off('canceled-delete-project');
+  window.EventBus.$off('confirmed-contract-project-status');
+  window.EventBus.$off('canceled-contract-project-status');
+  window.EventBus.$off('confirmed-contract-status');
+  window.EventBus.$off('canceled-contract-status');
+  window.EventBus.$off('canceled-project-form');
+  window.EventBus.$off('closed-project-employees-assigned-modal');
 } // beforeDestroy
 
 // |--------------------------------------------------|
@@ -503,6 +767,16 @@ async function clickedDeleteProject(contract, project) {
 } // clickedDeleteProject
 
 /**
+ * Clones a passed item.
+ *
+ * @param item - The item to clone
+ * @return The cloned item
+ */
+function cloneDeep(item) {
+  return _.cloneDeep(item);
+} // cloneDeep
+
+/**
  * Gets relationships between projects and employees
  *
  * @param contract contract to find employees under
@@ -596,6 +870,37 @@ function displaySuccess(msg) {
   window.EventBus.$emit('status-alert', status);
 } // displaySuccess
 
+/**
+ * Adds grey highlight to contract row when expanded, editing or deleting
+ *
+ * @param item Item in contracts v-data-table row
+ */
+function contractRowClass(item) {
+  if (
+    (this.expanded.length > 0 && item.id == this.expanded[0].id) ||
+    (this.editingItem && item.id == this.editingItem.id) ||
+    (this.deleteItem && this.deleteItem.id && this.deleteItem.id == item.id)
+  ) {
+    return 'highlight-row';
+  }
+  return '';
+} // contractRowClass
+
+/**
+ * Adds grey highlight to project row when editing or deleting
+ *
+ * @param item Item in projects v-data-table row
+ */
+function projectRowClass(item) {
+  if (
+    (this.editingItem && this.editingItem.id == item.id) ||
+    (this.deleteItem && this.deleteItem.project && this.deleteItem.project.id == item.id)
+  ) {
+    return 'highlight-row';
+  }
+  return '';
+} // projectRowClass
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                      EXPORT                      |
@@ -608,14 +913,31 @@ export default {
   components: {
     DeleteModal,
     ContractProjectDeleteWarning,
-    ProjectForm
+    GeneralConfirmationModal,
+    ProjectForm,
+    ProjectsEmployeesAssignedModal,
+    ContractEmployeesAssignedModal
+  },
+  computed: {
+    storeContracts() {
+      return this.showInactive
+        ? this.$store.getters.contracts
+        : this.$store.getters.contracts
+            .filter((c) => !c.inactive)
+            .map((c) => {
+              return { ...c, projects: c.projects.filter((p) => !p.inactive) };
+            });
+    }
   },
   methods: {
+    projectRowClass,
+    contractRowClass,
     getProject,
     updateStoreEmployees,
     getEmployeeContractRelationships,
     clickedDeleteContractPrime,
     clickedDeleteProject,
+    cloneDeep,
     deleteProject,
     deleteContractPrime,
     displaySuccess,
@@ -661,66 +983,102 @@ export default {
               'Start date must be before the end date'
           : true;
       },
+      contractEmployeesAssigned: null,
+      projectEmployeesAsseigned: null,
+      contractStatusItem: null,
+      contractProjectStatusItem: null,
       contractValid: true,
       addProjectUnderContract: null,
       toggleProjectForm: false,
       relationships: [],
       deleteItem: null,
+      toggleContractEmployeesModal: false,
+      toggleProjectEmployeesModal: false,
       toggleWarningModal: false,
       toggleContractDeleteModal: false,
+      toggleContractStatusModal: false,
+      toggleContractProjectStatusModal: false,
       toggleProjectDeleteModal: false,
       popStartDateFormatted: null,
       popEndDateFormatted: null,
-      contracts: [],
       popStartDateMenu: false,
       popEndDateMenu: false,
       contractLoading: false,
       editingItem: null,
       loading: false,
       expanded: [],
+      search: null,
+      showInactive: false,
       projectHeaders: [
         {
           text: 'Project',
           value: 'projectName',
-          align: 'center'
+          align: 'center',
+          width: '85%'
         },
         {
           value: 'actions',
-          sortable: false
+          sortable: false,
+          width: '15%'
         }
       ],
       contractHeaders: [
         {
           text: 'Contract',
           value: 'contractName',
-          align: 'center'
+          align: 'center',
+          width: '12%'
         },
         {
           text: 'Prime',
           value: 'primeName',
-          align: 'center'
+          align: 'center',
+          width: '12%'
         },
         {
           text: 'Cost Type',
           value: 'costType',
-          align: 'center'
+          align: 'center',
+          width: '12%'
         },
         {
           text: 'PoP-Start Date',
           value: 'popStartDate',
-          align: 'center'
+          align: 'center',
+          width: '12%'
         },
         {
           text: 'PoP-End Date',
           value: 'popEndDate',
-          align: 'center'
+          align: 'center',
+          width: '12%'
+        },
+        {
+          text: 'Description',
+          value: 'description',
+          align: 'left',
+          width: '27%'
         },
         {
           value: 'actions',
-          sortable: false
+          sortable: false,
+          align: 'right',
+          width: '15%'
         }
       ]
     };
-  }
+  },
+  directives: { mask }
 };
 </script>
+
+<style lang="scss">
+@import 'src/assets/styles/styles';
+.inactive {
+  color: $case-red;
+}
+
+.highlight-row {
+  background-color: rgb(238, 238, 238) !important;
+}
+</style>

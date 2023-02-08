@@ -87,17 +87,6 @@ function fetchData() {
         } else {
           this.primes[contract.prime] += 1;
         }
-        // _.forEach(contract.prime, (prime) => {
-        //   let currPrime = prime;
-        //   //This if statement is to consider if different current contracts have the same prime
-        //   if (!currPrimes[currPrime]) {
-        //     if (!this.primes[currPrime]) {
-        //       this.primes[currPrime] = 1;
-        //     } else {
-        //       this.primes[currPrime] += 1;
-        //     }
-        //   }
-        // });
       });
     }
   });
@@ -180,7 +169,7 @@ function fillData() {
         this.$router.push({
           path: '/reports',
           name: 'reports',
-          params: { requestedDataType: 'Contracts', requestedFilter: this.chartData.labels[index] }
+          params: { requestedDataType: 'contracts', requestedFilter: this.chartData.labels[index] }
         });
       }
     },

@@ -2,7 +2,7 @@
   <div>
     <v-dialog v-model="activate" persistent max-width="350">
       <v-card>
-        <v-card-title class="headline">Are you sure you want to submit?</v-card-title>
+        <v-card-title class="headline">{{ title }}</v-card-title>
         <v-card-actions>
           <v-spacer></v-spacer>
           <v-btn
@@ -64,8 +64,8 @@ function emit(msg) {
 /**
  * watcher for toggleSubmissionConfirmation
  */
-function watchToggleSubmissionConfirmation() {
-  this.activate = this.toggleSubmissionConfirmation;
+function watchToggleModalConfirmation() {
+  this.activate = this.toggleModal;
 } // watchToggleSubmissionConfirmation
 
 // |--------------------------------------------------|
@@ -85,11 +85,12 @@ export default {
   },
   props: [
     'submitting',
-    'toggleSubmissionConfirmation', // dialog activator,
+    'title',
+    'toggleModal', // dialog activator,
     'type' //sends appropriate emits based on where its called
   ],
   watch: {
-    toggleSubmissionConfirmation: watchToggleSubmissionConfirmation
+    toggleModal: watchToggleModalConfirmation
   }
 };
 </script>

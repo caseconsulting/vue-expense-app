@@ -104,7 +104,7 @@ function fillData() {
       'rgba(255, 99, 132, 1)',
       'rgba(230, 184, 156, 1)',
       'rgba(234, 210, 172, 1)',
-      'rgba(156, 175,this. 183, 1)',
+      'rgba(156, 175, 183, 1)',
       'rgba(66, 129, 164, 1)'
     ];
     text = `${this.showCurrent} Customer Org Experience (Years)`;
@@ -120,12 +120,28 @@ function fillData() {
   };
 
   this.options = {
+    onClick: (x, y) => {
+      let index = _.first(y).index;
+      let labelClicked = this.chartData.labels[index];
+      this.$router.push({
+        path: '/reports',
+        name: 'reports',
+        params: { requestedDataType: 'customerOrgs', requestedFilter: labelClicked }
+      });
+    },
     plugins: {
       title: {
         display: true,
         text: text,
         font: {
           size: 15
+        }
+      },
+      subtitle: {
+        display: true,
+        text: '*Click on a segment of the pie chart to see employees',
+        font: {
+          style: 'italic'
         }
       },
       tooltip: {

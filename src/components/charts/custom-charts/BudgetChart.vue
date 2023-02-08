@@ -149,8 +149,9 @@ function budgets() {
  * @return Object - budget chart data
  */
 function drawGraph() {
-  this.selectedBudgets = this.expenseTypeData.map((a) => a.expenseTypeName);
-  this.allBudgetNames = _.cloneDeep(this.selectedBudgets);
+  this.selectedBudgets = this.expenseTypeData
+    .filter((a) => this.selectedBudgets.includes(a.expenseTypeName))
+    .map((a) => a.expenseTypeName);
 
   let budgets = this.getFinalBudgetsData(this.budgets);
   let bars = [
@@ -345,6 +346,9 @@ async function refreshBudgets() {
     return budget.amount != 0 || budget.reimbursedAmount != 0 || budget.pendingAmount != 0;
   });
 
+  // reset chart to initial state
+  this.allBudgetNames = this.expenseTypeData.map((e) => e.expenseTypeName); // sets dropdown options
+  this.selectedBudgets = this.expenseTypeData.map((e) => e.expenseTypeName); // selects all budgets to display at initial state
   this.loading = false; // set loading status to false
 } // refreshBudgets
 

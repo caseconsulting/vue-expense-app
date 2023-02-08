@@ -86,7 +86,7 @@ export function isPartTime(employee) {
 } // isPartTime
 
 /**
- * Checks if the window width is a small sie.
+ * Checks if the window width is a small size.
  *
  * @returns Boolean - True if the window is a smaller size.
  */

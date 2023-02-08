@@ -1,9 +1,8 @@
 <template>
-  <v-card v-if="dataReceived" class="pa-5">
-    <bar-chart ref="barChart" chartId="job-roles-chart" :options="options" :chartData="chartData" />
+  <v-card v-if="dataRecieved" class="pa-5">
+    <bar-chart ref="barChart" chartId="employees-cust-org-chart" :options="options" :chartData="chartData"></bar-chart>
   </v-card>
 </template>
-
 <script>
 import BarChart from '../base-charts/BarChart.vue';
 import _ from 'lodash';
@@ -39,68 +38,80 @@ function beforeDestroy() {
 // |--------------------------------------------------|
 
 /**
- * Extracts the job role from each employee and tallies up
- * each role for active employees.
+ * Gets customer org data count from employees list.
  */
 function fetchData() {
-  this.employees = this.$store.getters.employees;
-  this.employees.forEach((emp) => {
-    if (emp.jobRole && emp.workStatus != 0) {
-      if (this.roles[emp.jobRole]) {
-        this.roles[emp.jobRole] += 1;
-      } else {
-        this.roles[emp.jobRole] = 1;
-      }
+  let employees = this.$store.getters.employees;
+  let employeesCustOrg = {};
+  employees.forEach((e) => {
+    if (e.customerOrgExp && e.workStatus != 0) {
+      _.forEach(e.customerOrgExp, (org) => {
+        if (org.years && org.current) {
+          let orgName = org.name;
+          if (employeesCustOrg[orgName]) {
+            employeesCustOrg[orgName] += 1;
+          } else {
+            employeesCustOrg[orgName] = 1;
+          }
+        }
+      });
     }
   });
-  //sorts contents from most common roles to least
-  let sortedRoles = Object.entries(this.roles);
-  sortedRoles = sortedRoles.sort((a, b) => {
+
+  let sortedEmployeeCustOrg = Object.entries(employeesCustOrg);
+  sortedEmployeeCustOrg = sortedEmployeeCustOrg.sort((a, b) => {
     return b[1] - a[1];
   });
-  //10 is just a limit to prevent an extremely long and crammed graph
-  for (let i = 0; i < 10; i++) {
-    if (sortedRoles.length > i) {
-      this.jobTitles.push(sortedRoles[i][0]);
-      this.jobQuantities.push(sortedRoles[i][1]);
+
+  for (let i = 0; i < sortedEmployeeCustOrg.length; i++) {
+    if (sortedEmployeeCustOrg.length > 1) {
+      this.labels.push(sortedEmployeeCustOrg[i][0]);
+      this.values.push(sortedEmployeeCustOrg[i][1]);
     }
   }
 } // fetchData
 
 /**
- * Sets the chart formatting and options data.
+ * Formats and sets data options for the chart.
  */
 function fillData() {
   let colors = [
-    'rgba(255, 99, 132, 1)',
     'rgba(54, 162, 235, 1)',
     'rgba(255, 206, 86, 1)',
     'rgba(75, 192, 192, 1)',
     'rgba(153, 102, 255, 1)',
+    'rgba(255, 99, 132, 1)',
     'rgba(230, 184, 156, 1)',
     'rgba(234, 210, 172, 1)',
     'rgba(156, 175, 183, 1)',
     'rgba(66, 129, 164, 1)'
   ];
 
+  let backgroundColors = [];
+  let borderColors = [];
+
+  // Set the background and border colors
+  for (let i = 0; i < this.labels.length; i++) {
+    backgroundColors[i] = colors[i % 9];
+    borderColors[i] = colors[i % 9];
+  }
+
   this.chartData = {
-    labels: this.jobTitles,
+    labels: this.labels,
     datasets: [
       {
-        data: this.jobQuantities,
-        backgroundColor: colors
+        data: this.values,
+        backgroundColor: backgroundColors
       }
     ]
   };
-
   this.options = {
-    aspectRatio: 2,
     scales: {
       x: {
         beginAtZero: true,
         title: {
           display: true,
-          text: 'Name of Position',
+          text: 'Customer Orgs',
           font: {
             weight: 'bold'
           }
@@ -123,10 +134,11 @@ function fillData() {
     onClick: (x, y) => {
       if (_.first(y)) {
         let index = _.first(y).index;
+        let labelClicked = this.chartData.labels[index];
         this.$router.push({
           path: '/reports',
           name: 'reports',
-          params: { requestedDataType: 'jobRoles', requestedFilter: this.chartData.labels[index] }
+          params: { requestedDataType: 'customerOrgs', requestedFilter: labelClicked }
         });
       }
     },
@@ -136,7 +148,7 @@ function fillData() {
       },
       title: {
         display: true,
-        text: 'Top Job Roles at Case Consulting',
+        text: 'Number of Employees for Each Customer Org',
         font: {
           size: 15
         }
@@ -151,7 +163,7 @@ function fillData() {
     },
     maintainAspectRatio: false
   };
-  this.dataReceived = true;
+  this.dataRecieved = true;
 } // fillData
 
 // |--------------------------------------------------|
@@ -161,31 +173,24 @@ function fillData() {
 // |--------------------------------------------------|
 
 export default {
+  beforeDestroy,
+  mounted,
   components: { BarChart },
-  computed: {
-    storeIsPopulated
-  },
   data() {
     return {
       options: null,
       chartData: null,
-      dataReceived: false,
-      employees: null,
-      roles: {},
-      jobTitles: [],
-      jobQuantities: []
+      dataRecieved: false,
+      labels: [],
+      values: []
     };
   },
-  methods: { fetchData, fillData },
-  beforeDestroy,
-  mounted,
-  watch: {
-    storeIsPopulated: function () {
-      if (this.storeIsPopulated) {
-        this.fetchData();
-        this.fillData();
-      }
-    }
+  computed: {
+    storeIsPopulated
+  },
+  methods: {
+    fillData,
+    fetchData
   }
 };
 </script>
