@@ -20,15 +20,7 @@
         <!-- START CONTRACTS DATA TABLE -->
         <v-form ref="form" lazy-validation>
           <v-data-table
-            v-if="!$store.getters.contracts"
-            :loading="!$store.getters.contracts"
-            :headers="contractHeaders"
-            :items-per-page="-1"
-          ></v-data-table>
-          <v-data-table
-            v-else
             @click:row="clickedRow"
-            :loading="loading"
             :expanded.sync="expanded"
             :headers="contractHeaders"
             :items="storeContracts"
@@ -1005,7 +997,6 @@ export default {
       popEndDateMenu: false,
       contractLoading: false,
       editingItem: null,
-      loading: false,
       expanded: [],
       search: null,
       showInactive: false,
