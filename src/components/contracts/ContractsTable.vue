@@ -160,7 +160,7 @@
                 rows="1"
                 @click.stop
               ></v-textarea>
-              <span v-else>{{ item.description }}</span>
+              <span v-else :class="{ inactive: item.inactive }">{{ item.description }}</span>
             </template>
 
             <!-- Expanded Row Slot -->
