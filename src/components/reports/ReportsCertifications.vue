@@ -98,6 +98,9 @@ function created() {
   this.populateDropdowns(this.employeesInfo);
   this.buildCertificationsColumns();
   if (this.$route.params.requestedFilter) {
+    if (Array.isArray(this.$route.params.requestedFilter)) {
+      this.$route.params.requestedFilter = this.$route.params.requestedFilter.join(' ');
+    }
     this.certificationSearch = this.$route.params.requestedFilter;
     this.refreshDropdownItems();
     this.$route.params.requestedFilter = null;
