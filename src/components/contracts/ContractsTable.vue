@@ -28,6 +28,20 @@
             :item-class="contractRowClass"
             :search="search"
           >
+            <!-- Prime Name Slot -->
+            <template v-slot:[`item.primeName`]="{ item }">
+              <v-text-field
+                name="primeName"
+                v-if="editingItem && editingItem.id == item.id"
+                v-model="editingItem.primeName"
+                prepend-icon="mdi-domain"
+                :rules="[(v) => !!v || 'Field is required', duplicateContractPrimeCombo()]"
+                required
+              ></v-text-field>
+              <!-- </v-form> -->
+              <span v-else :class="{ inactive: item.inactive }">{{ item.primeName }}</span>
+            </template>
+
             <!-- Contract Name Slot -->
             <template v-slot:[`item.contractName`]="{ item }">
               <v-text-field
@@ -41,30 +55,19 @@
               <!-- </v-form> -->
               <span v-else :class="{ inactive: item.inactive }">{{ item.contractName }}</span>
             </template>
-            <!-- Prime Name Slot -->
-            <template v-slot:[`item.primeName`]="{ item }">
+
+            <!-- Directorate Slot -->
+            <template v-slot:[`item.directorate`]="{ item }">
               <v-text-field
-                name="primeName"
+                name="directorate"
                 v-if="editingItem && editingItem.id == item.id"
-                v-model="editingItem.primeName"
+                v-model="editingItem.directorate"
                 prepend-icon="mdi-office-building-outline"
-                :rules="[(v) => !!v || 'Field is required', duplicateContractPrimeCombo()]"
-                required
               ></v-text-field>
               <!-- </v-form> -->
-              <span v-else :class="{ inactive: item.inactive }">{{ item.primeName }}</span>
+              <span v-else :class="{ inactive: item.inactive }">{{ item.directorate }}</span>
             </template>
-            <!-- Cost Type Slot -->
-            <template v-slot:[`item.costType`]="{ item }">
-              <v-text-field
-                name="costType"
-                v-if="editingItem && editingItem.id == item.id"
-                v-model="editingItem.costType"
-                prepend-icon="mdi-currency-usd"
-              ></v-text-field>
-              <!-- </v-form> -->
-              <span v-else :class="{ inactive: item.inactive }">{{ item.costType }}</span>
-            </template>
+
             <!-- PoP Start Date Slot -->
             <template v-slot:[`item.popStartDate`]="{ item }">
               <v-menu
@@ -103,6 +106,7 @@
                 format(item.popStartDate, 'YYYY-MM-DD', 'MM/DD/YYYY')
               }}</span>
             </template>
+
             <!-- PoP End Date Slot -->
             <template v-slot:[`item.popEndDate`]="{ item }">
               <v-menu
@@ -140,6 +144,7 @@
                 format(item.popEndDate, 'YYYY-MM-DD', 'MM/DD/YYYY')
               }}</span>
             </template>
+
             <!-- Contract Description Slot -->
             <template v-slot:[`item.description`]="{ item }">
               <v-textarea
@@ -162,6 +167,7 @@
                 :colspan="contractHeaders.length"
                 :isEditingContractItem="editingItem != null"
                 :isContractDeletingOrUpdatingStatus="isDeletingOrUpdatingStatus()"
+                :search="search"
               />
             </template>
 
@@ -722,20 +728,20 @@ export default {
       showInactive: false,
       contractHeaders: [
         {
-          text: 'Contract',
-          value: 'contractName',
-          align: 'center',
-          width: '12%'
-        },
-        {
           text: 'Prime',
           value: 'primeName',
           align: 'center',
           width: '12%'
         },
         {
-          text: 'Cost Type',
-          value: 'costType',
+          text: 'Contract',
+          value: 'contractName',
+          align: 'center',
+          width: '12%'
+        },
+        {
+          text: 'Directorate',
+          value: 'directorate',
           align: 'center',
           width: '12%'
         },

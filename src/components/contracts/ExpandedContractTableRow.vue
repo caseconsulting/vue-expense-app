@@ -8,7 +8,9 @@
           :items="contract.item.projects"
           hide-default-footer
           :item-class="projectRowClass"
+          :search="search"
         >
+          <!-- Project Name -->
           <template v-slot:[`item.projectName`]="{ item }">
             <v-text-field
               :rules="[(v) => !!v || 'Field is required', duplicateProjects(contract.item)]"
@@ -19,6 +21,121 @@
             <span v-else :class="{ inactive: item.inactive }">{{ item.projectName }}</span>
           </template>
 
+          <!-- Directorate -->
+          <template v-slot:[`item.directorate`]="{ item }">
+            <v-text-field
+              v-if="editingProjectItem && editingProjectItem.id == item.id"
+              v-model="editingProjectItem.directorate"
+              prepend-icon="mdi-office-building-outline"
+            ></v-text-field>
+            <span v-else :class="{ inactive: item.inactive }">{{ item.directorate }}</span>
+          </template>
+
+          <!-- PoP Start Date Slot -->
+          <template v-slot:[`item.popStartDate`]="{ item }">
+            <v-menu
+              name="popStartDate"
+              v-if="editingProjectItem && editingProjectItem.id == item.id"
+              ref="popStartDateMenu"
+              :close-on-content-click="false"
+              v-model="popStartDateMenu"
+              :nudge-right="40"
+              transition="scale-transition"
+              offset-y
+              max-width="290px"
+              min-width="290px"
+            >
+              <template v-slot:activator="{ on }">
+                <v-text-field
+                  :value="format(editingProjectItem.popStartDate, null, 'MM/DD/YYYY')"
+                  :rules="[...getDateOptionalRules(), startDateRules()]"
+                  hint="MM/DD/YYYY format"
+                  v-mask="'##/##/####'"
+                  persistent-hint
+                  prepend-icon="event"
+                  @blur="editingProjectItem.popStartDate = format($event.target.value, 'MM/DD/YYYY', 'YYYY-MM-DD')"
+                  @input="popStartDateMenu = false"
+                  v-on="on"
+                ></v-text-field>
+              </template>
+              <v-date-picker
+                v-model="editingProjectItem.popStartDate"
+                no-title
+                @input="popStartDateMenu = false"
+              ></v-date-picker>
+            </v-menu>
+            <!-- </v-form> -->
+            <span v-else :class="{ inactive: item.inactive }">{{
+              format(item.popStartDate, 'YYYY-MM-DD', 'MM/DD/YYYY')
+            }}</span>
+          </template>
+
+          <!-- PoP End Date Slot -->
+          <template v-slot:[`item.popEndDate`]="{ item }">
+            <v-menu
+              name="popEndDate"
+              v-if="editingProjectItem && editingProjectItem.id == item.id"
+              ref="popEndDateMenu"
+              :close-on-content-click="false"
+              v-model="popEndDateMenu"
+              :nudge-right="40"
+              transition="scale-transition"
+              offset-y
+              max-width="290px"
+              min-width="290px"
+            >
+              <template v-slot:activator="{ on }">
+                <v-text-field
+                  :value="format(editingProjectItem.popEndDate, null, 'MM/DD/YYYY')"
+                  :rules="[...getDateOptionalRules(), endDateRules()]"
+                  hint="MM/DD/YYYY format"
+                  v-mask="'##/##/####'"
+                  persistent-hint
+                  prepend-icon="event"
+                  @blur="editingProjectItem.popEndDate = format($event.target.value, 'MM/DD/YYYY', 'YYYY-MM-DD')"
+                  @input="popEndDateMenu = false"
+                  v-on="on"
+                ></v-text-field>
+              </template>
+              <v-date-picker
+                v-model="editingProjectItem.popEndDate"
+                no-title
+                @input="popEndDateMenu = false"
+              ></v-date-picker>
+            </v-menu>
+            <span v-else :class="{ inactive: item.inactive }">{{
+              format(item.popEndDate, 'YYYY-MM-DD', 'MM/DD/YYYY')
+            }}</span>
+          </template>
+
+          <!-- Project Description Slot -->
+          <template v-slot:[`item.description`]="{ item }">
+            <v-textarea
+              v-if="editingProjectItem && editingProjectItem.id == item.id"
+              v-model="editingProjectItem.description"
+              name="description"
+              auto-grow
+              prepend-icon="mdi-text"
+              label="Description"
+              rows="1"
+              @click.stop
+            ></v-textarea>
+            <span v-else :class="{ inactive: item.inactive }">{{ item.description }}</span>
+          </template>
+
+          <!-- Project Active Employees Slot -->
+          <template v-slot:[`item.projectActiveEmployees`]="{ item }">
+            <span
+              v-for="(emp, i) in item.projectActiveEmployees"
+              :key="emp.employeeNumber"
+              :class="{ inactive: item.inactive }"
+            >
+              <a :href="`/employee/${emp.employeeNumber}`">{{ emp.firstName }} {{ emp.lastName }}</a>
+              <span v-if="i != item.projectActiveEmployees.length - 1">, </span>
+            </span>
+          </template>
+
+          <!-- Actions -->
           <template v-slot:[`item.actions`]="{ item }">
             <div v-if="editingProjectItem && editingProjectItem.id == item.id">
               <div v-if="!projectLoading">
@@ -175,6 +292,10 @@ import GeneralConfirmationModal from '../modals/GeneralConfirmationModal.vue';
 import ProjectsEmployeesAssignedModal from '../modals/ProjectsEmployeesAssignedModal.vue';
 import ContractProjectDeleteWarning from '../modals/ContractProjectDeleteWarning.vue';
 
+import { format, isAfter, isBefore } from '@/shared/dateUtils';
+import { getDateOptionalRules } from '@/shared/validationUtils';
+import { mask } from 'vue-the-mask';
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                 LIFECYCLE HOOKS                  |
@@ -215,6 +336,8 @@ function created() {
   window.EventBus.$on('closed-project-employees-assigned-modal', () => {
     this.toggleProjectEmployeesModal = false;
   });
+
+  this.setProjectActiveEmployees();
 } // created
 
 // |--------------------------------------------------|
@@ -441,6 +564,23 @@ function isDeletingOrUpdatingStatus(projectItem) {
   );
 } // isDeletingOrUpdatingStatus
 
+function setProjectActiveEmployees() {
+  _.forEach(this.contract.item.projects, (project) => {
+    let employeesList = [];
+    _.forEach(this.$store.getters.employees, (employee) => {
+      if (employee.contracts) {
+        let contractObj = employee.contracts.find((c) => c.contractId == this.contract.item.id);
+        if (contractObj) {
+          if (employee.contracts.some((c) => c.projects.some((p) => p.projectId == project.id && !p.endDate))) {
+            employeesList.push(employee);
+          }
+        }
+      }
+    });
+    project['projectActiveEmployees'] = employeesList;
+  });
+}
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                      EXPORT                      |
@@ -459,10 +599,14 @@ export default {
     deleteProject,
     displaySuccess,
     displayError,
+    format,
+    getDateOptionalRules,
     getEmployeeContractRelationships,
     getProject,
-    isDeletingOrUpdatingStatus
+    isDeletingOrUpdatingStatus,
+    setProjectActiveEmployees
   },
+  directives: { mask },
   data() {
     return {
       duplicateProjects: (contractOfProject) => {
@@ -477,10 +621,24 @@ export default {
           return !found || 'Duplicate project names';
         }
       },
+      startDateRules: () => {
+        return this.editingProjectItem.popStartDate && this.editingProjectItem.popEndDate
+          ? isBefore(this.editingProjectItem.popStartDate, this.editingProjectItem.popEndDate) ||
+              'Start date must be before the end date'
+          : true;
+      },
+      endDateRules: () => {
+        return this.editingProjectItem.popStartDate && this.editingProjectItem.popEndDate
+          ? isAfter(this.editingProjectItem.popEndDate, this.editingProjectItem.popStartDate) ||
+              'Start date must be before the end date'
+          : true;
+      },
       projectLoading: false,
       relationships: [],
       deleteProjectItem: null,
       editingProjectItem: null,
+      popStartDateMenu: false,
+      popEndDateMenu: false,
       projectStatusItem: null,
       toggleProjectDeleteModal: false,
       toggleProjectStatusModal: false,
@@ -493,18 +651,49 @@ export default {
           text: 'Project',
           value: 'projectName',
           align: 'center',
-          width: '85%'
+          width: '10%'
+        },
+        {
+          text: 'Directorate',
+          value: 'directorate',
+          align: 'center',
+          width: '10%'
+        },
+        {
+          text: 'PoP-Start Date',
+          value: 'popStartDate',
+          align: 'center',
+          width: '10%'
+        },
+        {
+          text: 'PoP-End Date',
+          value: 'popEndDate',
+          align: 'center',
+          width: '10%'
+        },
+        {
+          text: 'Description',
+          value: 'description',
+          align: 'left',
+          width: '25%'
+        },
+        {
+          text: 'Active Employees',
+          value: 'projectActiveEmployees',
+          align: 'left',
+          width: '22%'
         },
         {
           value: 'actions',
           sortable: false,
-          width: '15%'
+          align: 'right',
+          width: '13%'
         }
       ]
     };
   },
 
-  props: ['contract', 'isEditingContractItem', 'isContractDeletingOrUpdatingStatus', 'colspan']
+  props: ['contract', 'isEditingContractItem', 'isContractDeletingOrUpdatingStatus', 'colspan', 'search']
 };
 </script>
 <style lang="scss">

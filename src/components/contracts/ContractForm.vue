@@ -27,8 +27,16 @@
                     v-model="primeName"
                     :rules="[(v) => !!v || 'Field is required', duplicateContractPrimeCombo()]"
                     label="Prime Name*"
-                    prepend-icon="mdi-office-building-outline"
+                    prepend-icon="mdi-domain"
                     required
+                  ></v-text-field>
+                </v-col>
+                <!-- Directorate -->
+                <v-col cols="12" sm="6" md="4">
+                  <v-text-field
+                    v-model="directorate"
+                    label="Directorate"
+                    prepend-icon="mdi-office-building-outline"
                   ></v-text-field>
                 </v-col>
                 <!-- PoP Start Date  -->
@@ -86,10 +94,6 @@
                     </template>
                     <v-date-picker v-model="popEndDate" no-title @input="endDateMenu = false"></v-date-picker>
                   </v-menu>
-                </v-col>
-                <!-- Cost Type -->
-                <v-col cols="12" sm="6" md="4">
-                  <v-text-field v-model="costType" label="Cost Type" prepend-icon="mdi-currency-usd"></v-text-field>
                 </v-col>
                 <!-- Projects -->
                 <v-col cols="12">
@@ -174,9 +178,9 @@ async function createContract() {
     id: uuid(),
     contractName: this.contractName,
     primeName: this.primeName,
+    directorate: this.directorate,
     popStartDate: this.popStartDate,
     popEndDate: this.popEndDate,
-    costType: this.costType,
     projects: contractProjects,
     description: this.description
   });
@@ -242,11 +246,11 @@ export default {
     return {
       contractName: null,
       primeName: null,
+      directorate: null,
       popStartDate: null,
       startDateMenu: false,
       popEndDate: null,
       endDateMenu: false,
-      costType: null,
       projects: [],
       description: null,
       dialog: false,
