@@ -12,13 +12,17 @@
           hide-default-footer
           hide-default-header
           no-data-text="No active projects"
+          show-select
+          single-select
         >
           <!-- Just a spacer -->
           <template v-if="!editingProjectItem" v-slot:[`item.spacer`]="{ item }">
             <span :class="{ inactive: item.inactive }">{{ item.spacer }}</span>
           </template>
-
-          <!-- Project Name -->
+          <template v-slot:[`item.data-table-select`]="{ item }">
+            <v-checkbox :input-value="item.checkBox" primary hide-details @click.stop="toggleProjectCheckBox(item)">
+            </v-checkbox>
+          </template>
           <template v-slot:[`item.projectName`]="{ item }">
             <v-text-field
               :rules="[(v) => !!v || 'Field is required', duplicateProjects(contract.item)]"
@@ -588,6 +592,10 @@ function setProjectActiveEmployees() {
   });
 }
 
+function toggleProjectCheckBox(projectItem) {
+  window.EventBus.$emit('toggle-project-checkBox', { contract: this.contract, project: projectItem });
+}
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                      EXPORT                      |
@@ -611,7 +619,8 @@ export default {
     getEmployeeContractRelationships,
     getProject,
     isDeletingOrUpdatingStatus,
-    setProjectActiveEmployees
+    setProjectActiveEmployees,
+    toggleProjectCheckBox
   },
   directives: { mask },
   data() {

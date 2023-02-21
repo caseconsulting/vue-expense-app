@@ -13,8 +13,14 @@
               clearable
             ></v-text-field>
           </v-col>
-          <v-col cols="6" xl="6" lg="6" md="6" class="my-0 pb-0">
+          <v-col cols="6" xl="6" lg="6" md="6" class="my-0 pb-0 d-flex">
             <v-checkbox v-model="showInactive" label="Show Inactive Contracts/Projects"></v-checkbox>
+            <div class="d-flex justify-center align-center pl-5 flex-wrap">
+              <v-btn color="#bc3825" dark>Delete<v-icon right dark>delete</v-icon></v-btn>
+              <v-btn class="ml-4">Activate</v-btn>
+              <v-btn class="ml-4">Deactivate</v-btn>
+              <v-btn class="ml-4">Close</v-btn>
+            </div>
           </v-col>
         </v-row>
         <!-- START CONTRACTS DATA TABLE -->
@@ -27,8 +33,39 @@
             :items-per-page="-1"
             :item-class="contractRowClass"
             :search="search"
+            <<<<<<<
+            HEAD
             class="contracts-table"
           >
+            ======= show-select >
+            <!-- <template v-slot:[`header.data-table-select`]="{ item }">
+      
+            </template> -->
+
+            <template v-slot:[`item.data-table-select`]="{ item }">
+              <v-checkbox
+                :input-value="item.all"
+                :indeterminate="item.indeterminate"
+                primary
+                hide-details
+                @click.stop="toggleContractCheckBox(item)"
+              >
+              </v-checkbox>
+            </template>
+            <!-- Contract Name Slot -->
+            <template v-slot:[`item.contractName`]="{ item }">
+              <v-text-field
+                name="contractName"
+                v-if="editingItem && editingItem.id == item.id"
+                v-model="editingItem.contractName"
+                prepend-icon="mdi-script-outline"
+                :rules="[(v) => !!v || 'Field is required', duplicateContractPrimeCombo()]"
+                required
+              ></v-text-field>
+              <!-- </v-form> -->
+              <span v-else :class="{ inactive: item.inactive }">{{ item.contractName }}</span>
+            </template>
+            >>>>>>> df812eb9 (POR-2048: Added checkboxes to the contracts table)
             <!-- Prime Name Slot -->
             <template v-slot:[`item.primeName`]="{ item }">
               <v-text-field
@@ -161,10 +198,10 @@
             </template>
 
             <!-- Expanded Row Slot -->
-            <template v-slot:expanded-item="contract">
+            <template v-slot:expanded-item="{ headers, item }">
               <expanded-contract-table-row
-                :contract="contract"
-                :colspan="contractHeaders.length"
+                :contract="{ item }"
+                :colspan="headers.length"
                 :isEditingContractItem="editingItem != null"
                 :isContractDeletingOrUpdatingStatus="isDeletingOrUpdatingStatus()"
                 :search="search"
@@ -398,7 +435,10 @@ async function created() {
   window.EventBus.$on('is-editing-project-item', (value) => {
     this.isEditingProjectItem = value;
   });
-
+  window.EventBus.$on('toggle-project-checkBox', ({ contract, project }) => {
+    this.toggleProjectCheckBox(contract, project);
+  });
+  this.uncheckAllBoxes();
   this.expanded = _.cloneDeep(this.storeContracts);
 } // created
 
@@ -651,6 +691,104 @@ function watchShowInactive() {
   }
 }
 
+/**
+ * Unchecks on all contracts and projects (boxes) in the contracts table.
+ */
+function uncheckAllBoxes() {
+  let uncheckedBox = { checkBox: { all: false, indeterminate: false } };
+  for (let i = 0; i < this.$store.getters.contracts.length; i++) {
+    this.contractsCheckBoxes[i] = _.cloneDeep(uncheckedBox);
+    this.contractsCheckBoxes[i].contractId = this.$store.getters.contracts[i].id;
+    this.contractsCheckBoxes[i].projectsCheckBoxes = this.$store.getters.contracts[i].projects.map((p) => ({
+      projectId: p.id,
+      checkBox: false
+    }));
+  }
+} // uncheckAllBoxes
+
+/**
+ * Toggles the contract item check box and all the project item boxes
+ *
+ * @param contractItem contract item to check
+ */
+function toggleContractCheckBox(contractItem) {
+  let index = this.contractsCheckBoxes.findIndex((c) => c.contractId == contractItem.id);
+  let contractCheckBox = this.contractsCheckBoxes[index];
+  if (this.determineCheckBox(contractCheckBox).all) {
+    this.setAllProjectsCheckBox(contractItem, false);
+  } else {
+    this.setAllProjectsCheckBox(contractItem, true);
+  }
+  contractCheckBox = this.contractsCheckBoxes[index];
+  let updatedCheckBox = this.determineCheckBox(contractCheckBox);
+  contractCheckBox.all = updatedCheckBox.all;
+  contractCheckBox.indeterminate = updatedCheckBox.indeterminate;
+  this.$set(this.contractsCheckBoxes, index, contractCheckBox);
+} // toggleContractCheckBox
+
+function toggleProjectCheckBox(contract, projectItem) {
+  this.contractsCheckBoxes
+    .find((cb) => cb.contractId == contract.item.id)
+    .projectsCheckBoxes.forEach((pb) => {
+      if (pb.projectId == projectItem.id) {
+        pb.checkBox = !pb.checkBox;
+      }
+    });
+  let index = this.contractsCheckBoxes.findIndex((c) => c.contractId == contract.item.id);
+  let contractCheckBox = this.contractsCheckBoxes[index];
+  let updatedCheckBox = this.determineCheckBox(contractCheckBox);
+  contractCheckBox.all = updatedCheckBox.all;
+  contractCheckBox.indeterminate = updatedCheckBox.indeterminate;
+  this.$set(this.contractsCheckBoxes, index, contractCheckBox);
+}
+
+/**
+ * Determines the checkbox value of the contract based on the
+ * @param contractCheckBox contract check box to determine
+ */
+function determineCheckBox(contractCheckBox) {
+  let checkBox = { all: true, indeterminate: false };
+
+  _.forEach(contractCheckBox.projectsCheckBoxes, (project) => {
+    if (!project.checkBox) {
+      // at least one project is not selected
+      checkBox.all = false;
+    }
+    if (project.checkBox) {
+      // at least one project selected
+      checkBox.indeterminate = true;
+    }
+  });
+
+  if (checkBox.all) {
+    // set indeterminate to false if all projects are selected
+    checkBox.indeterminate = false;
+  }
+
+  return checkBox;
+} // determineCheckBox
+/**
+ * Sets all projects checkbox of a contract to the given value.
+ *
+ * @param contractItem contract item to set all projects checkbox for
+ */
+function setAllProjectsCheckBox(contractItem, value) {
+  let index = this.contractsCheckBoxes.findIndex((c) => c.contractId == contractItem.id);
+  let contractCheckBox = this.contractsCheckBoxes[index];
+  let updatedProjectsCheckBoxes = contractCheckBox.projectsCheckBoxes.map((p) => {
+    p.checkBox = value;
+    return p;
+  });
+  contractCheckBox.projectsCheckBoxes = updatedProjectsCheckBoxes;
+  this.$set(this.contractsCheckBoxes, index, contractCheckBox);
+} // setAllProjectsCheckBox
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     COMPUTED                     |
+// |                                                  |
+// |--------------------------------------------------|
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                      EXPORT                      |
@@ -670,9 +808,14 @@ export default {
   },
   computed: {
     storeContracts() {
+      let mergedCheckBoxContractsData = _.merge(this.$store.getters.contracts, this.contractsCheckBoxes);
+      mergedCheckBoxContractsData.forEach((c) => {
+        c.projects = _.merge(c.projects, c.projectsCheckBoxes);
+        delete c.projectsCheckBoxes;
+      });
       return this.showInactive
-        ? this.$store.getters.contracts
-        : this.$store.getters.contracts
+        ? mergedCheckBoxContractsData
+        : mergedCheckBoxContractsData
             .filter((c) => !c.inactive)
             .map((c) => {
               return { ...c, projects: c.projects.filter((p) => !p.inactive) };
@@ -695,7 +838,12 @@ export default {
     updateStoreContracts,
     updateContractPrime,
     getDateOptionalRules,
-    isDeletingOrUpdatingStatus
+    isDeletingOrUpdatingStatus,
+    uncheckAllBoxes,
+    determineCheckBox,
+    setAllProjectsCheckBox,
+    toggleContractCheckBox,
+    toggleProjectCheckBox
   },
   data() {
     return {
@@ -718,6 +866,7 @@ export default {
               'Start date must be before the end date'
           : true;
       },
+      contracts: this.$store.getters.contracts,
       contractEmployeesAssigned: null,
       contractStatusItem: null,
       contractValid: true,
@@ -738,6 +887,7 @@ export default {
       expanded: [],
       search: null,
       showInactive: false,
+      contractsCheckBoxes: [],
       contractHeaders: [
         {
           text: 'Prime',
