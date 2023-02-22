@@ -1,22 +1,30 @@
 <template>
-  <td :colspan="colspan" class="pa-0">
-    <v-container fluid class="grey-background">
+  <td :colspan="colspan" class="pa-0 ma-0">
+    <v-container fluid class="pa-0 ma-0">
       <!-- START EXPANDED PROJECTS DATA TABLE-->
       <v-form ref="projectForm" lazy-validation>
         <v-data-table
           :headers="projectHeaders"
           :items="contract.item.projects"
-          hide-default-footer
           :item-class="projectRowClass"
           :search="search"
+          class="projects-table"
+          hide-default-footer
+          hide-default-header
+          no-data-text="No active projects"
         >
+          <!-- Just a spacer -->
+          <template v-if="!editingProjectItem" v-slot:[`item.spacer`]="{ item }">
+            <span :class="{ inactive: item.inactive }">{{ item.spacer }}</span>
+          </template>
+
           <!-- Project Name -->
           <template v-slot:[`item.projectName`]="{ item }">
             <v-text-field
               :rules="[(v) => !!v || 'Field is required', duplicateProjects(contract.item)]"
               v-if="editingProjectItem && editingProjectItem.id == item.id"
               v-model="editingProjectItem.projectName"
-              prepend-icon="mdi-briefcase-outline"
+              label="Project Name"
             ></v-text-field>
             <span v-else :class="{ inactive: item.inactive }">{{ item.projectName }}</span>
           </template>
@@ -26,7 +34,7 @@
             <v-text-field
               v-if="editingProjectItem && editingProjectItem.id == item.id"
               v-model="editingProjectItem.directorate"
-              prepend-icon="mdi-office-building-outline"
+              label="Directorate"
             ></v-text-field>
             <span v-else :class="{ inactive: item.inactive }">{{ item.directorate }}</span>
           </template>
@@ -51,8 +59,8 @@
                   :rules="[...getDateOptionalRules(), startDateRules()]"
                   hint="MM/DD/YYYY format"
                   v-mask="'##/##/####'"
+                  label="PoP Start Date"
                   persistent-hint
-                  prepend-icon="event"
                   @blur="editingProjectItem.popStartDate = format($event.target.value, 'MM/DD/YYYY', 'YYYY-MM-DD')"
                   @input="popStartDateMenu = false"
                   v-on="on"
@@ -91,7 +99,7 @@
                   hint="MM/DD/YYYY format"
                   v-mask="'##/##/####'"
                   persistent-hint
-                  prepend-icon="event"
+                  label="PoP End Date"
                   @blur="editingProjectItem.popEndDate = format($event.target.value, 'MM/DD/YYYY', 'YYYY-MM-DD')"
                   @input="popEndDateMenu = false"
                   v-on="on"
@@ -115,7 +123,6 @@
               v-model="editingProjectItem.description"
               name="description"
               auto-grow
-              prepend-icon="mdi-text"
               label="Description"
               rows="1"
               @click.stop
@@ -356,9 +363,9 @@ function projectRowClass(item) {
     (this.editingProjectItem && this.editingProjectItem.id == item.id) ||
     (this.deleteProjectItem && this.deleteProjectItem.project && this.deleteProjectItem.project.id == item.id)
   ) {
-    return 'highlight-row';
+    return 'highlight-project-row';
   }
-  return '';
+  return 'highlight-project-row';
 } // projectRowClass
 
 /**
@@ -648,46 +655,52 @@ export default {
       projectEmployeesAsseigned: null,
       projectHeaders: [
         {
+          text: '',
+          value: 'spacer'
+          // align: 'center',
+          // width: '10%'
+        },
+        {
           text: 'Project',
-          value: 'projectName',
-          align: 'center',
-          width: '10%'
+          value: 'projectName'
+          // align: 'center',
+          // width: '10%'
         },
         {
           text: 'Directorate',
-          value: 'directorate',
-          align: 'center',
-          width: '10%'
+          value: 'directorate'
+          // align: 'center',
+          // width: '10%'
         },
         {
           text: 'PoP-Start Date',
-          value: 'popStartDate',
-          align: 'center',
-          width: '10%'
+          value: 'popStartDate'
+          // align: 'center',
+          // width: '10%'
         },
         {
           text: 'PoP-End Date',
-          value: 'popEndDate',
-          align: 'center',
-          width: '10%'
+          value: 'popEndDate'
+          // align: 'center',
+          // width: '10%'
         },
         {
           text: 'Description',
-          value: 'description',
-          align: 'left',
-          width: '25%'
+          value: 'description'
+          // align: 'left',
+          // width: '25%'
         },
         {
           text: 'Active Employees',
-          value: 'projectActiveEmployees',
-          align: 'left',
-          width: '22%'
+          value: 'projectActiveEmployees'
+          // align: 'left',
+          // width: '22%'
         },
         {
           value: 'actions',
           sortable: false,
-          align: 'right',
-          width: '13%'
+          align: 'right'
+          // width: '13%'
         }
       ]
     };
@@ -702,7 +715,9 @@ export default {
   color: $case-red;
 }
 
-.highlight-row {
-  background-color: rgb(238, 238, 238) !important;
+.highlight-project-row {
+  background-color: rgb(255, 255, 255) !important;
 }
 </style>
+
+<style scoped></style>

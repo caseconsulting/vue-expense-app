@@ -35,7 +35,7 @@ import ContractsTable from '@/components/contracts/ContractsTable.vue';
 import ContractForm from '@/components/contracts/ContractForm.vue';
 import ContractsPageLoader from '@/components/contracts/ContractsPageLoader.vue';
 
-import { updateStoreContracts } from '@/utils/storeUtils';
+import { updateStoreContracts, updateStoreEmployees } from '@/utils/storeUtils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -65,7 +65,10 @@ async function created() {
     this.$set(this.status, 'color', status.color);
   });
 
-  !this.$store.getters.contracts ? await this.updateStoreContracts() : null;
+  await Promise.all([
+    !this.$store.getters.contracts ? await this.updateStoreContracts() : null,
+    !this.$store.getters.employees ? await this.updateStoreEmployees() : null
+  ]);
   this.loading = false;
 } // created
 
@@ -105,6 +108,7 @@ export default {
   },
   methods: {
     updateStoreContracts,
+    updateStoreEmployees,
     clearStatus
   }
 };

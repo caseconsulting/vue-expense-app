@@ -27,6 +27,7 @@
             :items-per-page="-1"
             :item-class="contractRowClass"
             :search="search"
+            class="contracts-table"
           >
             <!-- Prime Name Slot -->
             <template v-slot:[`item.primeName`]="{ item }">
@@ -34,7 +35,7 @@
                 name="primeName"
                 v-if="editingItem && editingItem.id == item.id"
                 v-model="editingItem.primeName"
-                prepend-icon="mdi-domain"
+                label="Prime Name"
                 :rules="[(v) => !!v || 'Field is required', duplicateContractPrimeCombo()]"
                 required
               ></v-text-field>
@@ -48,7 +49,7 @@
                 name="contractName"
                 v-if="editingItem && editingItem.id == item.id"
                 v-model="editingItem.contractName"
-                prepend-icon="mdi-script-outline"
+                label="Contract Name"
                 :rules="[(v) => !!v || 'Field is required', duplicateContractPrimeCombo()]"
                 required
               ></v-text-field>
@@ -62,7 +63,7 @@
                 name="directorate"
                 v-if="editingItem && editingItem.id == item.id"
                 v-model="editingItem.directorate"
-                prepend-icon="mdi-office-building-outline"
+                label="Directorate"
               ></v-text-field>
               <!-- </v-form> -->
               <span v-else :class="{ inactive: item.inactive }">{{ item.directorate }}</span>
@@ -89,7 +90,7 @@
                     hint="MM/DD/YYYY format"
                     v-mask="'##/##/####'"
                     persistent-hint
-                    prepend-icon="event"
+                    label="PoP Start Date"
                     @blur="editingItem.popStartDate = format($event.target.value, 'MM/DD/YYYY', 'YYYY-MM-DD')"
                     @input="popStartDateMenu = false"
                     v-on="on"
@@ -128,7 +129,7 @@
                     hint="MM/DD/YYYY format"
                     v-mask="'##/##/####'"
                     persistent-hint
-                    prepend-icon="event"
+                    label="PoP End Date"
                     @blur="editingItem.popEndDate = format($event.target.value, 'MM/DD/YYYY', 'YYYY-MM-DD')"
                     @input="popEndDateMenu = false"
                     v-on="on"
@@ -152,7 +153,6 @@
                 v-model="editingItem.description"
                 name="description"
                 auto-grow
-                prepend-icon="mdi-text"
                 label="Description"
                 rows="1"
                 @click.stop
@@ -398,6 +398,8 @@ async function created() {
   window.EventBus.$on('is-editing-project-item', (value) => {
     this.isEditingProjectItem = value;
   });
+
+  this.expanded = _.cloneDeep(this.storeContracts);
 } // created
 
 /**
@@ -424,11 +426,13 @@ function beforeDestroy() {
  * @param contractObj contract object that is clicked
  */
 function clickedRow(contractObj) {
-  if (_.isEmpty(this.expanded) || this.expanded[0].id != contractObj.id) {
-    this.expanded = [];
+  let i = this.expanded.findIndex((c) => c.id == contractObj.id);
+  if (i == -1) {
+    // item is not expanded
     this.expanded.push(contractObj);
   } else {
-    this.expanded = [];
+    // item is expanded
+    this.expanded.splice(i, 1);
   }
 } // clickedRow
 
@@ -618,9 +622,9 @@ function contractRowClass(item) {
     (this.editingItem && item.id == this.editingItem.id) ||
     (this.deleteItem && this.deleteItem.id && this.deleteItem.id == item.id)
   ) {
-    return 'highlight-row';
+    return 'highlight-contract-row';
   }
-  return '';
+  return 'highlight-contract-row';
 } // contractRowClass
 
 /**
@@ -638,6 +642,14 @@ function isDeletingOrUpdatingStatus(contractItem = null) {
           (this.deleteItem && this.deleteItem.id == contractItem.id))
     : this.contractLoading && (this.contractStatusItem || this.deleteItem);
 } // isDeletingOrUpdatingStatus
+
+function watchShowInactive() {
+  if (this.showInactive) {
+    this.expanded = [...this.expanded, ...this.$store.getters.contracts.filter((c) => c.inactive)];
+  } else {
+    this.expanded = [...this.expanded.filter((c) => !c.inactive)];
+  }
+}
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -730,49 +742,59 @@ export default {
         {
           text: 'Prime',
           value: 'primeName',
-          align: 'center',
-          width: '12%'
+          align: 'left'
+          //width: '12%'
         },
         {
           text: 'Contract',
           value: 'contractName',
-          align: 'center',
-          width: '12%'
+          align: 'left'
+          //width: '12%'
         },
         {
           text: 'Directorate',
           value: 'directorate',
-          align: 'center',
-          width: '12%'
+          align: 'left'
+          //width: '12%'
         },
         {
           text: 'PoP-Start Date',
           value: 'popStartDate',
-          align: 'center',
-          width: '12%'
+          align: 'left'
+          //width: '12%'
         },
         {
           text: 'PoP-End Date',
           value: 'popEndDate',
-          align: 'center',
-          width: '12%'
+          align: 'left'
+          //width: '12%'
         },
         {
           text: 'Description',
           value: 'description',
-          align: 'left',
-          width: '27%'
+          align: 'left'
+          //width: '27%'
+        },
+        {
+          text: 'Active Employees',
+          value: 'spacer',
+          align: 'left'
+          // align: 'center',
+          // width: '10%'
         },
         {
           value: 'actions',
           sortable: false,
-          align: 'right',
-          width: '15%'
+          align: 'right'
+          //width: '15%'
         }
       ]
     };
   },
-  directives: { mask }
+  directives: { mask },
+  watch: {
+    showInactive: watchShowInactive
+  }
 };
 </script>
 
@@ -782,7 +804,37 @@ export default {
   color: $case-red;
 }
 
-.highlight-row {
-  background-color: rgb(238, 238, 238) !important;
+.highlight-contract-row {
+  background-color: rgb(224, 224, 224) !important;
+}
+</style>
+
+<style scoped>
+@media only screen and (max-width: 1800px) {
+  .contracts-table >>> td:nth-of-type(-n + 5) {
+    width: 9em;
+  }
+
+  .contracts-table >>> td:nth-of-type(6) {
+    width: 20em;
+  }
+
+  .contracts-table >>> td:last-of-type {
+    width: 16em;
+  }
+}
+
+@media only screen and (min-width: 1800px) {
+  .contracts-table >>> td:nth-of-type(-n + 5) {
+    width: 12em;
+  }
+
+  .contracts-table >>> td:nth-of-type(6) {
+    width: 25em;
+  }
+
+  .contracts-table >>> td:last-of-type {
+    width: 16em;
+  }
 }
 </style>
