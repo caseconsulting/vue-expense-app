@@ -146,11 +146,15 @@ function handleClick(item) {
  * Populates all technologies in the search dropdown.
  */
 function populateTechnologiesDropdown() {
-  this.technologies = [];
   _.forEach(this.filteredEmployees, (employee) =>
     _.forEach(employee.technologies, (tech) => {
       if (this.showAllTechnologies || tech.current) {
         this.technologies.push(tech.name);
+      } else {
+        let t = this.technologies.findIndex((t) => t === tech.name);
+        if (t != -1) {
+          this.technologies.splice(t, 1);
+        }
       }
     })
   );
@@ -219,10 +223,9 @@ function searchTechnologies() {
  * Watches the showAllTechnologies to refilter the table as needed
  */
 function watchShowAllTechnologies() {
-  this.technologySearch = null;
   this.populateDropdowns(this.employeesInfo);
-  this.refreshDropdownItems();
   this.buildTechnologiesColumns();
+  this.refreshDropdownItems();
   if (this.showAllTechnologies) {
     this.headers[2].text = 'All Technologies';
   } else {
@@ -264,7 +267,7 @@ export default {
           value: 'fullName'
         },
         {
-          text: 'Current Technologies',
+          text: 'All Technologies',
           value: 'technologyNames'
         },
         {
@@ -275,7 +278,7 @@ export default {
       technologySearch: null,
       technologies: [],
       search: null, // query text for datatable search field
-      showAllTechnologies: false,
+      showAllTechnologies: true,
       showInactiveEmployees: false,
       sortBy: 'firstName', // sort datatable items
       sortDesc: false
