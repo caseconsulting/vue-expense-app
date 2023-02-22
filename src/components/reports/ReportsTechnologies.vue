@@ -20,18 +20,21 @@
         </v-col>
         <v-col cols="6" xl="3" lg="3" md="3" sm="6" class="my-0 py-0">
           <v-autocomplete
-            v-model="certificationSearch"
-            :items="certifications"
-            label="Search By Certification"
+            v-model="technologySearch"
+            :items="technologies"
+            label="Search By Technology"
             clearable
             auto-select-first
             @change="refreshDropdownItems()"
-            @click:clear="certificationSearch = null"
+            @click:clear="technologySearch = null"
           ></v-autocomplete>
         </v-col>
-        <v-col cols="6" xl="3" lg="3" md="3" sm="6" class="my-0 py-0">
+        <div class="mx-2">
+          <v-checkbox v-model="showAllTechnologies" label="Show All Technologies"></v-checkbox>
+        </div>
+        <div class="mx-3">
           <v-checkbox v-model="showInactiveEmployees" label="Show Inactive Users"></v-checkbox>
-        </v-col>
+        </div>
       </v-row>
 
       <!-- START EMPLOYEE TABLE -->
@@ -56,10 +59,10 @@
             {{ getFullName(item) }}
           </p>
         </template>
-        <!-- Certifications Item Slot -->
-        <template v-slot:[`item.certificationNames`]="{ item }">
+        <!-- Technology Item Slot -->
+        <template v-slot:[`item.technologyNames`]="{ item }">
           <p :class="{ inactive: item.workStatus <= 0 }" class="mb-0">
-            {{ item.certificationNames }}
+            {{ item.technologyNames }}
           </p>
         </template>
         <!-- Email Name Item Slot -->
@@ -81,7 +84,6 @@
 <script>
 import _ from 'lodash';
 import { customEmployeeFilter, getActive, getFullName, populateEmployeesDropdown } from './reports-utils';
-import { getTodaysDate, isSameOrBefore } from '@/shared/dateUtils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -96,12 +98,9 @@ function created() {
   this.employeesInfo = this.getActive(this.$store.getters.employees); // default to filtered list
   this.filteredEmployees = this.employeesInfo; // this one is shown
   this.populateDropdowns(this.employeesInfo);
-  this.buildCertificationsColumns();
+  this.buildTechnologiesColumns();
   if (this.$route.params.requestedFilter) {
-    if (Array.isArray(this.$route.params.requestedFilter)) {
-      this.$route.params.requestedFilter = this.$route.params.requestedFilter.join(' ');
-    }
-    this.certificationSearch = this.$route.params.requestedFilter;
+    this.technologySearch = this.$route.params.requestedFilter;
     this.refreshDropdownItems();
     this.$route.params.requestedFilter = null;
   }
@@ -114,33 +113,25 @@ function created() {
 // |--------------------------------------------------|
 
 /**
- * Gets all of the active certifications for each employee and displays the column on the table.
+ * Gets all of the active technologies for each employee and displays the column on the table.
  */
-function buildCertificationsColumns() {
+function buildTechnologiesColumns() {
   this.employeesInfo.forEach((currentEmp) => {
-    if (currentEmp.certifications) {
-      let hasActiveCert = false;
-      let certs = '';
-      currentEmp.certifications.forEach((cert) => {
-        if (cert.expirationDate) {
-          if (isSameOrBefore(getTodaysDate(), cert.expirationDate)) {
-            hasActiveCert = true;
-            certs += `${cert.name} & `;
-          }
-        } else {
-          // cert has no expiration date
-          hasActiveCert = true;
-          certs += `${cert.name} & `;
+    if (currentEmp.technologies) {
+      let techs = '';
+      currentEmp.technologies.forEach((tech) => {
+        if (this.showAllTechnologies || tech.current) {
+          techs += `${tech.name} & `;
         }
       });
-      if (hasActiveCert) {
+      if (techs.length > 0) {
         // remove & at the end
-        certs = certs.slice(0, -2);
-        currentEmp.certificationNames = certs;
+        techs = techs.slice(0, -2);
+        currentEmp.technologyNames = techs;
       }
     }
   });
-} // buildCertificationsColumns
+} // buildTechnologiesColumns
 
 /**
  * handles click event of the employee table entry
@@ -152,22 +143,18 @@ function handleClick(item) {
 } //handleClick
 
 /**
- * Populates all certifications in the search dropdown.
+ * Populates all technologies in the search dropdown.
  */
-function populateCertificationsDropdown() {
+function populateTechnologiesDropdown() {
+  this.technologies = [];
   _.forEach(this.filteredEmployees, (employee) =>
-    _.forEach(employee.certifications, (cert) => {
-      if (cert.expirationDate) {
-        if (isSameOrBefore(getTodaysDate(), cert.expirationDate)) {
-          this.certifications.push(cert.name);
-        }
-      } else {
-        // cert has no expiration date
-        this.certifications.push(cert.name);
+    _.forEach(employee.technologies, (tech) => {
+      if (this.showAllTechnologies || tech.current) {
+        this.technologies.push(tech.name);
       }
     })
   );
-} // populateCertificationsDropdown
+} // populateTechnologiesDropdown
 
 /**
  * Populate drop downs with information that other employees have filled out.
@@ -177,7 +164,7 @@ function populateCertificationsDropdown() {
 function populateDropdowns(employees) {
   // refresh the employees autocomplete list to be those that match the query
   this.employees = this.populateEmployeesDropdown(employees);
-  this.populateCertificationsDropdown(employees);
+  this.populateTechnologiesDropdown(employees);
 } // populateDropdowns
 
 /**
@@ -189,10 +176,10 @@ function refreshDropdownItems() {
       return employee.employeeNumber == this.search;
     });
   }
-  if (this.certificationSearch) {
-    this.searchCertifications();
+  if (this.technologySearch) {
+    this.searchTechnologies();
   }
-  if (this.search === null && this.certificationSearch === null) {
+  if (this.search === null && this.technologySearch === null) {
     this.filteredEmployees = this.employeesInfo;
   }
 
@@ -200,12 +187,16 @@ function refreshDropdownItems() {
 } // refreshDropdownItems
 
 /**
- * Filters employees on the data table by the certification entered by the user.
+ * Filters employees on the data table by the technology entered by the user.
  */
-function searchCertifications() {
+function searchTechnologies() {
   this.filteredEmployees = _.filter(this.employeesInfo, (employee) => {
-    if (employee.certificationNames) {
-      return employee.certificationNames.includes(this.certificationSearch);
+    if (employee.technologyNames) {
+      if (employee.technologyNames.includes('&')) {
+        return employee.technologyNames.split(' & ').find((t) => t.trim() === this.technologySearch);
+      } else {
+        return employee.technologyNames.trim() === this.technologySearch;
+      }
     } else {
       return false;
     }
@@ -216,13 +207,28 @@ function searchCertifications() {
       return employee.employeeNumber == this.search;
     });
   }
-} // searchCertifications
+} // searchTechnologies
 
 // |--------------------------------------------------|
 // |                                                  |
 // |                     WATCHERS                     |
 // |                                                  |
 // |--------------------------------------------------|
+
+/**
+ * Watches the showAllTechnologies to refilter the table as needed
+ */
+function watchShowAllTechnologies() {
+  this.technologySearch = null;
+  this.populateDropdowns(this.employeesInfo);
+  this.refreshDropdownItems();
+  this.buildTechnologiesColumns();
+  if (this.showAllTechnologies) {
+    this.headers[2].text = 'All Technologies';
+  } else {
+    this.headers[2].text = 'Current Technologies';
+  }
+} // watchShowAllTechnologies
 
 /**
  * Watches the showInactiveUsers to refilter the table as needed
@@ -258,35 +264,37 @@ export default {
           value: 'fullName'
         },
         {
-          text: 'Active Certifications',
-          value: 'certificationNames'
+          text: 'Current Technologies',
+          value: 'technologyNames'
         },
         {
           text: 'Email',
           value: 'email'
         }
       ], // datatable headers
-      certificationSearch: null,
-      certifications: [],
+      technologySearch: null,
+      technologies: [],
       search: null, // query text for datatable search field
+      showAllTechnologies: false,
       showInactiveEmployees: false,
       sortBy: 'firstName', // sort datatable items
       sortDesc: false
     };
   },
   methods: {
-    buildCertificationsColumns,
+    buildTechnologiesColumns,
     customEmployeeFilter,
     getActive,
     getFullName,
     handleClick,
     populateEmployeesDropdown,
-    populateCertificationsDropdown,
+    populateTechnologiesDropdown,
     populateDropdowns,
     refreshDropdownItems,
-    searchCertifications
+    searchTechnologies
   },
   watch: {
+    showAllTechnologies: watchShowAllTechnologies,
     showInactiveEmployees: watchShowInactiveUsers
   }
 };
