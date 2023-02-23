@@ -33,15 +33,8 @@
             :items-per-page="-1"
             :item-class="contractRowClass"
             :search="search"
-            <<<<<<<
-            HEAD
             class="contracts-table"
           >
-            ======= show-select >
-            <!-- <template v-slot:[`header.data-table-select`]="{ item }">
-      
-            </template> -->
-
             <template v-slot:[`item.data-table-select`]="{ item }">
               <v-checkbox
                 :input-value="item.all"
@@ -52,20 +45,6 @@
               >
               </v-checkbox>
             </template>
-            <!-- Contract Name Slot -->
-            <template v-slot:[`item.contractName`]="{ item }">
-              <v-text-field
-                name="contractName"
-                v-if="editingItem && editingItem.id == item.id"
-                v-model="editingItem.contractName"
-                prepend-icon="mdi-script-outline"
-                :rules="[(v) => !!v || 'Field is required', duplicateContractPrimeCombo()]"
-                required
-              ></v-text-field>
-              <!-- </v-form> -->
-              <span v-else :class="{ inactive: item.inactive }">{{ item.contractName }}</span>
-            </template>
-            >>>>>>> df812eb9 (POR-2048: Added checkboxes to the contracts table)
             <!-- Prime Name Slot -->
             <template v-slot:[`item.primeName`]="{ item }">
               <v-text-field
