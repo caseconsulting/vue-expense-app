@@ -573,7 +573,7 @@ async function clickedDelete() {
     this.relationships = relationships;
   } else {
     // this.deleteItem = contract;
-    this.deleteItems = selectedItems;
+    this.deletingItems = selectedItems;
     this.toggleContractDeleteModal = !this.toggleContractDeleteModal;
   }
 }
@@ -1024,12 +1024,13 @@ export default {
   directives: { mask },
   watch: {
     showInactive: watchShowInactive,
-    'this.$store.getters.contracts': function () {
+    '$store.getters.contracts': function () {
       if (this.$store.getters.contracts.length > this.contractsCheckBoxes.length) {
         let newContract = this.$store.getters.contracts[0];
         let checkBoxObj = {
           all: false,
           indeterminate: false,
+          contractId: newContract.id,
           projectsCheckBoxes: [...newContract.projects.map((p) => ({ checkBox: false, projectId: p.id }))]
         };
         this.contractsCheckBoxes = [checkBoxObj, ...this.contractsCheckBoxes];
