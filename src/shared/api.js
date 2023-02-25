@@ -24,6 +24,12 @@ const client = axios.create({
   json: true
 });
 
+const CONTRACT_STATUSES = {
+  INACTIVE: 'inactive',
+  ACTIVE: 'active',
+  CLOSED: 'closed'
+};
+
 /**
  * executes the api method
  *
@@ -534,5 +540,6 @@ export default {
   QUICK_BOOKS_TIME,
   TRAINING_URLS,
   TWITTER,
-  AUDIT
+  AUDIT,
+  CONTRACT_STATUSES
 };
