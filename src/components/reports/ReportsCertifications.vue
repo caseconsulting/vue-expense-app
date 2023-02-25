@@ -122,13 +122,7 @@ function buildCertificationsColumns() {
       let hasActiveCert = false;
       let certs = '';
       currentEmp.certifications.forEach((cert) => {
-        if (cert.expirationDate) {
-          if (isSameOrBefore(getTodaysDate(), cert.expirationDate)) {
-            hasActiveCert = true;
-            certs += `${cert.name} & `;
-          }
-        } else {
-          // cert has no expiration date
+        if ((cert.expirationDate && isSameOrBefore(getTodaysDate(), cert.expirationDate)) || !cert.expirationDate) {
           hasActiveCert = true;
           certs += `${cert.name} & `;
         }

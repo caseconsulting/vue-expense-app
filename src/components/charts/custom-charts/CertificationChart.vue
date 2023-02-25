@@ -1,5 +1,13 @@
 <template>
   <v-card v-if="dataReceived" class="pa-5">
+    <div v-if="userRoleIsAdmin()" class="right">
+      <DownloadCSV
+        filename="certifications.csv"
+        :generateData="generateCsvData"
+        sortKey="Certification"
+        tooltip="Download Active Certifications to CSV"
+      ></DownloadCSV>
+    </div>
     <bar-chart ref="barChart" chartId="certifications-chart" :options="options" :chartData="chartData"></bar-chart>
   </v-card>
 </template>
@@ -7,8 +15,9 @@
 <script>
 import _ from 'lodash';
 import BarChart from '../base-charts/BarChart.vue';
-import { storeIsPopulated } from '@/utils/utils';
-import { getTodaysDate, isBefore } from '@/shared/dateUtils';
+import DownloadCSV from '@/components/utils/DownloadCSV.vue';
+import { storeIsPopulated, userRoleIsAdmin } from '@/utils/utils';
+import { getTodaysDate, isBefore, isSameOrBefore } from '@/shared/dateUtils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -190,6 +199,26 @@ function fillCertData() {
 } // fillCertData
 
 /**
+ * Generates an object of data to be turned into a csv file.
+ *
+ * @returns Array - An array of objects
+ */
+function generateCsvData() {
+  let csvData = [];
+  let employees = this.$store.getters.employees;
+  employees.forEach((e) => {
+    if (e.certifications) {
+      e.certifications.forEach((c) => {
+        if ((c.expirationDate && isSameOrBefore(getTodaysDate(), c.expirationDate)) || !c.expirationDate) {
+          csvData.push({ Certification: c.name, Employee: `${e.firstName} ${e.lastName}` });
+        }
+      });
+    }
+  });
+  return csvData;
+} // generateCsvData
+
+/**
  * Helper function to split the text into two sections.
  *
  * @param s - The text of the certification
@@ -216,7 +245,7 @@ function breakSentence(s) {
 // |--------------------------------------------------|
 
 export default {
-  components: { BarChart },
+  components: { BarChart, DownloadCSV },
   beforeDestroy,
   mounted,
   computed: {
@@ -235,8 +264,10 @@ export default {
     breakSentence,
     fetchCertData,
     fillCertData,
+    generateCsvData,
     getTodaysDate, // dateUtils
-    isBefore // dateUtils
+    isBefore, // dateUtils
+    userRoleIsAdmin
   },
   watch: {
     storeIsPopulated: function () {
@@ -248,3 +279,9 @@ export default {
   }
 };
 </script>
+
+<style scoped>
+.right {
+  float: right;
+}
+</style>
