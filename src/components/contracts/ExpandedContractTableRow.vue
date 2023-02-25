@@ -22,14 +22,17 @@
 
           <!-- Item CheckBox Slot -->
           <template v-slot:[`item.data-table-select`]="{ item }">
-            <v-checkbox
-              :input-value="item.checkBox"
-              primary
-              class="ma-0"
-              hide-details
-              @click.stop="toggleProjectCheckBox(item)"
-            >
-            </v-checkbox>
+            <div class="checkBox-container fill-height fill-width align-center">
+              <div :class="`${item.status}-status status-indicator`"></div>
+              <v-checkbox
+                :input-value="item.checkBox"
+                primary
+                class="ma-0 pl-3"
+                hide-details
+                @click.stop="toggleProjectCheckBox(item)"
+              >
+              </v-checkbox>
+            </div>
           </template>
 
           <!-- Project Name Slot -->
@@ -388,8 +391,8 @@ function setProjectActiveEmployees() {
 
 /**
  * Toggles project checkBox item
- * 
- * @param projectItem projectItem checkbox to toggle 
+ *
+ * @param projectItem projectItem checkbox to toggle
  */
 function toggleProjectCheckBox(projectItem) {
   window.EventBus.$emit('toggle-project-checkBox', { contract: this.contract, project: projectItem });

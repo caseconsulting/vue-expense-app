@@ -67,15 +67,18 @@
             </template>
             <!-- CheckBox Slot -->
             <template v-slot:[`item.data-table-select`]="{ item }">
-              <v-checkbox
-                :input-value="item.all"
-                :indeterminate="item.indeterminate"
-                primary
-                class="ma-0"
-                hide-details
-                @click.stop="toggleContractCheckBox(item)"
-              >
-              </v-checkbox>
+              <div class="checkBox-container fill-height fill-width align-center">
+                <div :class="`${item.status}-status status-indicator`"></div>
+                <v-checkbox
+                  :input-value="item.all"
+                  :indeterminate="item.indeterminate"
+                  primary
+                  class="ma-0 pl-3"
+                  hide-details
+                  @click.stop="toggleContractCheckBox(item)"
+                >
+                </v-checkbox>
+              </div>
             </template>
             <!-- Prime Name Slot -->
             <template v-slot:[`item.primeName`]="{ item }">
@@ -1054,8 +1057,33 @@ export default {
 
 <style lang="scss">
 @import 'src/assets/styles/styles';
-.closed {
-  color: $case-red;
+
+.status-indicator {
+  position: absolute;
+  left: 0;
+  height: 100%;
+  width: 10px;
+}
+
+.text-start {
+  padding-left: 0px !important;
+}
+
+.checkBox-container {
+  position: relative;
+  display: flex;
+}
+
+.closed-status {
+  background-color: #db4437;
+}
+
+.inactive-status {
+  background-color: #f4b400;
+}
+
+.active-status {
+  background-color: #0f9d58;
 }
 
 .highlight-contract-row {
