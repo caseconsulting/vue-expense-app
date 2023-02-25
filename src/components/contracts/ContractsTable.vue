@@ -18,8 +18,8 @@
             <div class="d-flex justify-center align-center pl-5 flex-wrap">
               <v-btn
                 color="#bc3825"
-                dark
                 :loading="isDeleting"
+                class="white--text"
                 :disabled="!this.contractsCheckBoxes.some((c) => c.all || c.indeterminate) || contractLoading"
                 @click="clickedDelete()"
                 >Delete<v-icon right dark>delete</v-icon></v-btn
@@ -61,7 +61,10 @@
             class="contracts-table"
             show-select
           >
-            <template v-slot:[`header.data-table-select`]> </template>
+            <!-- Header CheckBox Slot -->
+            <template v-slot:[`header.data-table-select`]>
+              <!-- Intentionally empty to hide header checkbox -->
+            </template>
             <!-- CheckBox Slot -->
             <template v-slot:[`item.data-table-select`]="{ item }">
               <v-checkbox
@@ -453,6 +456,10 @@ async function updateContractPrime() {
   this.editingItem = null;
 } // updateContractPrime
 
+/**
+ * Delete items
+ * @param items contract and project items to delete
+ */
 async function deleteItems(items) {
   this.isDeleting = true;
   try {
@@ -490,7 +497,7 @@ async function deleteItems(items) {
   }
   this.isDeleting = false;
   this.resetAllCheckBoxes();
-}
+} // deleteItems
 
 /**
  * Click edit handler
@@ -501,6 +508,9 @@ function clickedEdit(item) {
   this.editingItem = _.cloneDeep(item);
 } // clickedEdit
 
+/**
+ * Handler for click delete button event
+ */
 async function clickedDelete() {
   let relationships = [];
   let selectedItems = this.getSelectedItems();
@@ -522,7 +532,7 @@ async function clickedDelete() {
     this.deletingItems = selectedItems;
     this.toggleContractDeleteModal = !this.toggleContractDeleteModal;
   }
-}
+} // clickedDelete
 
 /**
  * Updates the status of the selected items based on the given status.
@@ -742,6 +752,12 @@ function toggleContractCheckBox(contractItem) {
   this.$set(this.contractsCheckBoxes, index, contractCheckBox);
 } // toggleContractCheckBox
 
+/**
+ * Toggles the project item checkbox
+ *
+ * @param contract contract of selected project item
+ * @param projectItem project item
+ */
 function toggleProjectCheckBox(contract, projectItem) {
   this.contractsCheckBoxes
     .find((cb) => cb.contractId == contract.item.id)
@@ -756,7 +772,7 @@ function toggleProjectCheckBox(contract, projectItem) {
   contractCheckBox.all = updatedCheckBox.all;
   contractCheckBox.indeterminate = updatedCheckBox.indeterminate;
   this.$set(this.contractsCheckBoxes, index, contractCheckBox);
-}
+} // toggleProjectCheckBox
 
 /**
  * Determines the checkbox value of the contract based on the
@@ -799,6 +815,12 @@ function setAllProjectsCheckBox(contractItem, value) {
   this.$set(this.contractsCheckBoxes, index, contractCheckBox);
 } // setAllProjectsCheckBox
 
+/**
+ * Gets lists of selected items in the following structure:
+ * { contracts: [...], projects: [{ contractOfProject: {}, project: {} }, ...]}
+ *
+ * @return lists of selected items
+ */
 function getSelectedItems() {
   let selectedContractIds = [];
   let selectedProjectIds = [];
@@ -826,13 +848,33 @@ function getSelectedItems() {
     }
   });
   return selectedItems;
-}
+} // getSelectedItems
 
 // |--------------------------------------------------|
 // |                                                  |
 // |                     COMPUTED                     |
 // |                                                  |
 // |--------------------------------------------------|
+
+/**
+ * Merges the checkBox list and the contracts list
+ *
+ * @return filtered out inactive itemsf
+ */
+function storeContracts() {
+  let mergedCheckBoxContractsData = _.merge(this.$store.getters.contracts, this.contractsCheckBoxes);
+  mergedCheckBoxContractsData.forEach((c) => {
+    c.projects = _.merge(c.projects, c.projectsCheckBoxes);
+    delete c.projectsCheckBoxes;
+  });
+  return this.showInactive
+    ? mergedCheckBoxContractsData
+    : mergedCheckBoxContractsData
+        .filter((c) => c.status != this.contractStatuses.INACTIVE)
+        .map((c) => {
+          return { ...c, projects: c.projects.filter((p) => p.status != this.contractStatuses.INACTIVE) };
+        });
+} // storeContracts
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -852,20 +894,7 @@ export default {
     ExpandedContractTableRow
   },
   computed: {
-    storeContracts() {
-      let mergedCheckBoxContractsData = _.merge(this.$store.getters.contracts, this.contractsCheckBoxes);
-      mergedCheckBoxContractsData.forEach((c) => {
-        c.projects = _.merge(c.projects, c.projectsCheckBoxes);
-        delete c.projectsCheckBoxes;
-      });
-      return this.showInactive
-        ? mergedCheckBoxContractsData
-        : mergedCheckBoxContractsData
-            .filter((c) => c.status != this.contractStatuses.INACTIVE)
-            .map((c) => {
-              return { ...c, projects: c.projects.filter((p) => p.status != this.contractStatuses.INACTIVE) };
-            });
-    }
+    storeContracts
   },
   methods: {
     contractRowClass,

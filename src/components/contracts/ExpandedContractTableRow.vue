@@ -19,6 +19,8 @@
           <template v-if="!editingProjectItem" v-slot:[`item.spacer`]="{ item }">
             <span :class="{ inactive: item.inactive }">{{ item.spacer }}</span>
           </template>
+
+          <!-- Item CheckBox Slot -->
           <template v-slot:[`item.data-table-select`]="{ item }">
             <v-checkbox
               :input-value="item.checkBox"
@@ -29,6 +31,8 @@
             >
             </v-checkbox>
           </template>
+
+          <!-- Project Name Slot -->
           <template v-slot:[`item.projectName`]="{ item }">
             <v-text-field
               :rules="[(v) => !!v || 'Field is required', duplicateProjects(contract.item)]"
@@ -382,9 +386,14 @@ function setProjectActiveEmployees() {
   });
 }
 
+/**
+ * Toggles project checkBox item
+ * 
+ * @param projectItem projectItem checkbox to toggle 
+ */
 function toggleProjectCheckBox(projectItem) {
   window.EventBus.$emit('toggle-project-checkBox', { contract: this.contract, project: projectItem });
-}
+} // toggleProjectCheckBox
 
 // |--------------------------------------------------|
 // |                                                  |
