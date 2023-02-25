@@ -61,6 +61,7 @@
             class="contracts-table"
             show-select
           >
+            <template v-slot:[`header.data-table-select`]> </template>
             <!-- CheckBox Slot -->
             <template v-slot:[`item.data-table-select`]="{ item }">
               <v-checkbox
@@ -461,14 +462,15 @@ async function deleteItems(items) {
     items.contracts.forEach((c) => {
       deleteContractPromises.push(api.deleteItem(api.CONTRACTS, c.id));
     });
-    await Promise.all(deleteContractPromises);
+    if (deleteContractPromises.length) await Promise.all(deleteContractPromises);
 
     items.projects.forEach((p) => {
       let index = p.contractOfProject.projects.findIndex((item) => item.id == p.project.id);
       p.contractOfProject.projects.splice(index, 1);
       deleteProjectPromises.push(api.updateItem(api.CONTRACTS, p.contractOfProject));
     });
-    await Promise.all(deleteProjectPromises);
+
+    if (deleteProjectPromises.length) await Promise.all(deleteProjectPromises);
 
     items.contracts.forEach((c) => {
       let contractIndex = contracts.findIndex((item) => item.id == c.id);
@@ -477,17 +479,17 @@ async function deleteItems(items) {
     });
     items.projects.forEach((p) => {
       let contractIndex = contracts.findIndex((c) => c.id == p.contractOfProject.id);
-      let projectIndex = contracts[contractIndex].projects.findIndex((item) => item.id == p.id);
+      let projectIndex = contracts[contractIndex].projects.findIndex((item) => item.id == p.project.id);
+      this.contractsCheckBoxes[contractIndex].projectsCheckBoxes.splice(projectIndex, 1);
       contracts[contractIndex].projects.splice(projectIndex, 1);
-      this.contractsCheckBoxes[contractIndex].projects.splice(projectIndex, 1);
     });
     this.$store.dispatch('setContracts', { contracts });
     this.displaySuccess('Successfully deleted item(s)!');
   } catch (err) {
-    console.log(err);
     this.displayError(err);
   }
   this.isDeleting = false;
+  this.resetAllCheckBoxes();
 }
 
 /**
@@ -1005,6 +1007,17 @@ export default {
         };
         this.contractsCheckBoxes = [checkBoxObj, ...this.contractsCheckBoxes];
       }
+
+      this.$store.getters.contracts.forEach((c, index) => {
+        if (c.projects.length > this.contractsCheckBoxes[index].projectsCheckBoxes.length) {
+          let newProject = c.projects[0];
+          let checkBox = this.contractsCheckBoxes[index].all ? true : false;
+          this.contractsCheckBoxes[index].projectsCheckBoxes = [
+            { checkBox, projectId: newProject.id },
+            ...this.contractsCheckBoxes[index].projectsCheckBoxes
+          ];
+        }
+      });
     }
   }
 };
