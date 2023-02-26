@@ -13,6 +13,7 @@
         clearable
       >
       </v-combobox>
+      <!-- Awaiting Clearance -->
       <v-checkbox
         v-model="clearance.awaitingClearance"
         label="Awaiting Clearance"

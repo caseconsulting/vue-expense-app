@@ -4,17 +4,16 @@
     <div v-if="!isEmpty(model.clearances)">
       <!-- Loop Clearances -->
       <div v-for="(clearance, index) in this.filteredList" :key="index">
-        <!-- Type, Awaiting Clearance -->
-        <div class="pb-4">
-          <span><b>Type: </b>{{ clearance.type }}</span>
-          <span class="float-right">
-            <b>CLEARANCE STATUS: </b>
-            <span v-if="isClearanceGranted(clearance)"
-              >Granted <v-icon color="#0F9D58">mdi-check-circle-outline</v-icon></span
-            >
-            <span v-else>Pending <v-icon color="#F4B400">mdi-progress-clock</v-icon></span></span
-          >
-        </div>
+        <!-- Type -->
+        <p><b>Type: </b>{{ clearance.type }}</p>
+
+        <!-- Awaiting Clearance-->
+        <p>
+          <span class="d-flex align-center">
+            <v-checkbox class="ma-0 pa-0" disabled hide-details v-model="clearance.awaitingClearance" />
+            <b>Awaiting Clearance</b>
+          </span>
+        </p>
 
         <!-- Submission, Granted Date -->
         <p v-if="clearance.submissionDate">
@@ -99,20 +98,6 @@ function created() {
 // |--------------------------------------------------|
 
 /**
- * Checks if clearance is granted based on awaiting clearance checkbox and if badge number,
- * badge expiration date or granted date fields are filled out.
- *
- * @param clearanceObj clearance object to check if clearance is granted
- * @return true if clearance is granted, false otherwise
- */
-function isClearanceGranted(clearanceObj) {
-  return (
-    !clearanceObj.awaitingClearance &&
-    (clearanceObj.badNum || clearanceObj.badgeExpirationDate || clearanceObj.grantedDate)
-  );
-} // isClearanceGranted
-
-/**
  * When the page is changed, grab the corresponding entries based on the page
  * number.
  */
@@ -137,7 +122,6 @@ export default {
     };
   },
   methods: {
-    isClearanceGranted,
     isEmpty,
     monthDayYearFormat,
     onPageChange
