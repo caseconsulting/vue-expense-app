@@ -48,6 +48,11 @@
             </div>
           </v-col>
         </v-row>
+        <v-row class="flex ma-1">
+          <v-col cols="6" xl="6" lg="6" md="6" class="my-0 pb-0">
+            <table-legend :legendKey="legendKey"></table-legend>
+          </v-col>
+        </v-row>
         <!-- START CONTRACTS DATA TABLE -->
         <v-form ref="form" lazy-validation>
           <v-data-table
@@ -366,6 +371,7 @@ import GeneralConfirmationModal from '@/components/modals/GeneralConfirmationMod
 import ContractEmployeesAssignedModal from '../modals/ContractEmployeesAssignedModal.vue';
 import ExpandedContractTableRow from './ExpandedContractTableRow.vue';
 import { asyncForEach } from '../../utils/utils';
+import TableLegend from './TableLegend.vue';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -894,7 +900,8 @@ export default {
     GeneralConfirmationModal,
     ProjectForm,
     ContractEmployeesAssignedModal,
-    ExpandedContractTableRow
+    ExpandedContractTableRow,
+    TableLegend
   },
   computed: {
     storeContracts
@@ -973,6 +980,11 @@ export default {
       isActivating: false,
       isDeactivating: false,
       isClosing: false,
+      legendKey: [
+        { status: 'Active', color: '#0f9d58' },
+        { status: 'Inactive', color: '#f4b400' },
+        { status: 'Closed', color: '#db4437' }
+      ],
       contractHeaders: [
         {
           text: 'Prime',
@@ -1065,10 +1077,6 @@ export default {
   width: 10px;
 }
 
-.text-start {
-  padding-left: 0px !important;
-}
-
 .checkBox-container {
   position: relative;
   display: flex;
@@ -1088,6 +1096,10 @@ export default {
 
 .highlight-contract-row {
   background-color: rgb(224, 224, 224) !important;
+}
+
+.contracts-table td:first-child {
+  padding-left: 0px !important;
 }
 </style>
 
