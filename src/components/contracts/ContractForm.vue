@@ -41,59 +41,11 @@
                 </v-col>
                 <!-- PoP Start Date  -->
                 <v-col cols="12" sm="6" md="4">
-                  <v-menu
-                    ref="popStartDateMenu"
-                    :close-on-content-click="false"
-                    v-model="startDateMenu"
-                    transition="scale-transition"
-                    offset-y
-                    max-width="290px"
-                    min-width="290px"
-                  >
-                    <template v-slot:activator="{ on }">
-                      <v-text-field
-                        :value="format(popStartDate, null, 'MM/DD/YYYY')"
-                        v-mask="'##/##/####'"
-                        v-on="on"
-                        prepend-icon="event"
-                        @blur="popStartDate = parseEventDate($event)"
-                        @input="startDateMenu = false"
-                        :rules="[...getDateOptionalRules(), startDateRules()]"
-                        label="PoP Start Date"
-                        hint="MM/DD/YYYY format"
-                        persistent-hint
-                      ></v-text-field>
-                    </template>
-                    <v-date-picker v-model="popStartDate" no-title @input="startDateMenu = false"></v-date-picker>
-                  </v-menu>
+                  <v-text-field v-model="popStartDate" prepend-icon="event" label="PoP Start Date"></v-text-field>
                 </v-col>
                 <!-- Pop End Date -->
                 <v-col cols="12" sm="6" md="4">
-                  <v-menu
-                    ref="popEndDateMenu"
-                    :close-on-content-click="false"
-                    v-model="endDateMenu"
-                    transition="scale-transition"
-                    offset-y
-                    max-width="290px"
-                    min-width="290px"
-                  >
-                    <template v-slot:activator="{ on }">
-                      <v-text-field
-                        :value="format(popEndDate, null, 'MM/DD/YYYY')"
-                        v-mask="'##/##/####'"
-                        v-on="on"
-                        prepend-icon="event"
-                        @blur="popEndDate = parseEventDate($event)"
-                        @input="endDateMenu = false"
-                        :rules="[...getDateOptionalRules(), endDateRules()]"
-                        label="PoP End Date"
-                        hint="MM/DD/YYYY format"
-                        persistent-hint
-                      ></v-text-field>
-                    </template>
-                    <v-date-picker v-model="popEndDate" no-title @input="endDateMenu = false"></v-date-picker>
-                  </v-menu>
+                  <v-text-field v-model="popEndDate" prepend-icon="event" label="PoP End Date"></v-text-field>
                 </v-col>
                 <!-- Projects -->
                 <v-col cols="12">
@@ -143,10 +95,7 @@
 <script>
 import _ from 'lodash';
 import api from '@/shared/api.js';
-import { format, isAfter, isBefore } from '@/shared/dateUtils';
-import { getDateOptionalRules } from '@/shared/validationUtils.js';
 import { updateStoreContracts } from '@/utils/storeUtils';
-import { mask } from 'vue-the-mask';
 import { v4 as uuid } from 'uuid';
 
 // |--------------------------------------------------|
@@ -198,15 +147,6 @@ function emit(msg, data) {
 } // emit
 
 /**
- * Parse the date after losing focus.
- *
- * @return String - The date in YYYY-MM-DD format
- */
-function parseEventDate() {
-  return this.format(event.target.value, 'MM/DD/YYYY', 'YYYY-MM-DD');
-} // parseEventDate
-
-/**
  * Creates a validated contract.
  */
 async function submit() {
@@ -248,9 +188,7 @@ export default {
       primeName: null,
       directorate: null,
       popStartDate: null,
-      startDateMenu: false,
       popEndDate: null,
-      endDateMenu: false,
       projects: [],
       description: null,
       dialog: false,
@@ -262,27 +200,13 @@ export default {
           (c) => c.contractName === this.contractName && c.primeName === this.primeName
         );
         return !found || 'Duplicate contract and prime combination';
-      },
-      endDateRules: () => {
-        return this.popStartDate && this.popEndDate
-          ? isAfter(this.popEndDate, this.popStartDate) || 'End date must be after the start date'
-          : true;
-      },
-      startDateRules: () => {
-        return this.popStartDate && this.popEndDate
-          ? isBefore(this.popStartDate, this.popEndDate) || 'Start date must be before the end date'
-          : true;
       }
     };
   },
-  directives: { mask },
   methods: {
     cancel,
     createContract,
     emit,
-    format,
-    getDateOptionalRules,
-    parseEventDate,
     submit,
     updateStoreContracts
   },

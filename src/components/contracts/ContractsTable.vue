@@ -131,78 +131,28 @@
 
             <!-- PoP Start Date Slot -->
             <template v-slot:[`item.popStartDate`]="{ item }">
-              <v-menu
-                name="popStartDate"
+              <v-text-field
                 v-if="editingItem && editingItem.id == item.id"
-                ref="popStartDateMenu"
-                :close-on-content-click="false"
-                v-model="popStartDateMenu"
-                :nudge-right="40"
-                transition="scale-transition"
-                offset-y
-                max-width="290px"
-                min-width="290px"
-              >
-                <template v-slot:activator="{ on }">
-                  <v-text-field
-                    :value="format(editingItem.popStartDate, null, 'MM/DD/YYYY')"
-                    :rules="[...getDateOptionalRules(), startDateRules()]"
-                    hint="MM/DD/YYYY format"
-                    v-mask="'##/##/####'"
-                    persistent-hint
-                    label="PoP Start Date"
-                    @blur="editingItem.popStartDate = format($event.target.value, 'MM/DD/YYYY', 'YYYY-MM-DD')"
-                    @input="popStartDateMenu = false"
-                    v-on="on"
-                  ></v-text-field>
-                </template>
-                <v-date-picker
-                  v-model="editingItem.popStartDate"
-                  no-title
-                  @input="popStartDateMenu = false"
-                ></v-date-picker>
-              </v-menu>
+                v-model="editingItem.popStartDate"
+                label="PoP Start Date"
+                prepend-icon="event"
+              ></v-text-field>
               <!-- </v-form> -->
               <span v-else :class="{ inactive: item.status == contractStatuses.INACTIVE, 'font-weight-bold': true }">{{
-                format(item.popStartDate, 'YYYY-MM-DD', 'MM/DD/YYYY')
+                item.popStartDate
               }}</span>
             </template>
 
             <!-- PoP End Date Slot -->
             <template v-slot:[`item.popEndDate`]="{ item }">
-              <v-menu
-                name="popEndDate"
+              <v-text-field
                 v-if="editingItem && editingItem.id == item.id"
-                ref="popEndDateMenu"
-                :close-on-content-click="false"
-                v-model="popEndDateMenu"
-                :nudge-right="40"
-                transition="scale-transition"
-                offset-y
-                max-width="290px"
-                min-width="290px"
-              >
-                <template v-slot:activator="{ on }">
-                  <v-text-field
-                    :value="format(editingItem.popEndDate, null, 'MM/DD/YYYY')"
-                    :rules="[...getDateOptionalRules(), endDateRules()]"
-                    hint="MM/DD/YYYY format"
-                    v-mask="'##/##/####'"
-                    persistent-hint
-                    label="PoP End Date"
-                    @blur="editingItem.popEndDate = format($event.target.value, 'MM/DD/YYYY', 'YYYY-MM-DD')"
-                    @input="popEndDateMenu = false"
-                    v-on="on"
-                  ></v-text-field>
-                </template>
-                <v-date-picker
-                  v-model="editingItem.popEndDate"
-                  no-title
-                  @input="popEndDateMenu = false"
-                ></v-date-picker>
-              </v-menu>
+                v-model="editingItem.popEndDate"
+                label="PoP End Date"
+                prepend-icon="event"
+              ></v-text-field>
               <span v-else :class="{ inactive: item.status == contractStatuses.INACTIVE, 'font-weight-bold': true }">{{
-                format(item.popEndDate, 'YYYY-MM-DD', 'MM/DD/YYYY')
+                item.popEndDate
               }}</span>
             </template>
 
@@ -364,9 +314,6 @@ import DeleteModal from '../modals/DeleteModal.vue';
 import ContractProjectDeleteWarning from '../modals/ContractProjectDeleteWarning.vue';
 import ProjectForm from './ProjectForm.vue';
 import { updateStoreContracts, updateStoreEmployees } from '@/utils/storeUtils';
-import { format, isAfter, isBefore } from '@/shared/dateUtils';
-import { getDateOptionalRules } from '@/shared/validationUtils';
-import { mask } from 'vue-the-mask';
 import GeneralConfirmationModal from '@/components/modals/GeneralConfirmationModal.vue';
 import ContractEmployeesAssignedModal from '../modals/ContractEmployeesAssignedModal.vue';
 import ExpandedContractTableRow from './ExpandedContractTableRow.vue';
@@ -914,12 +861,10 @@ export default {
     cloneDeep,
     displaySuccess,
     displayError,
-    format,
     clickedRow,
     clickedEdit,
     updateStoreContracts,
     updateContractPrime,
-    getDateOptionalRules,
     isDeletingOrUpdatingStatus,
     resetAllCheckBoxes,
     determineCheckBox,
@@ -940,18 +885,6 @@ export default {
         });
         return !found || 'Duplicate contract and prime combination';
       },
-      startDateRules: () => {
-        return this.editingItem.popStartDate && this.editingItem.popEndDate
-          ? isBefore(this.editingItem.popStartDate, this.editingItem.popEndDate) ||
-              'Start date must be before the end date'
-          : true;
-      },
-      endDateRules: () => {
-        return this.editingItem.popStartDate && this.editingItem.popEndDate
-          ? isAfter(this.editingItem.popEndDate, this.editingItem.popStartDate) ||
-              'Start date must be before the end date'
-          : true;
-      },
       contractStatuses: api.CONTRACT_STATUSES,
       contracts: this.$store.getters.contracts,
       contractEmployeesAssigned: null,
@@ -966,8 +899,6 @@ export default {
       toggleWarningModal: false,
       toggleContractDeleteModal: false,
       toggleContractStatusModal: false,
-      popStartDateMenu: false,
-      popEndDateMenu: false,
       contractLoading: false,
       editingItem: null,
       isEditingProjectItem: false,
@@ -1038,7 +969,6 @@ export default {
       ]
     };
   },
-  directives: { mask },
   watch: {
     '$store.getters.contracts': function () {
       if (this.$store.getters.contracts.length > this.contractsCheckBoxes.length) {

@@ -58,78 +58,24 @@
 
           <!-- PoP Start Date Slot -->
           <template v-slot:[`item.popStartDate`]="{ item }">
-            <v-menu
-              name="popStartDate"
+            <v-text-field
               v-if="editingProjectItem && editingProjectItem.id == item.id"
-              ref="popStartDateMenu"
-              :close-on-content-click="false"
-              v-model="popStartDateMenu"
-              :nudge-right="40"
-              transition="scale-transition"
-              offset-y
-              max-width="290px"
-              min-width="290px"
-            >
-              <template v-slot:activator="{ on }">
-                <v-text-field
-                  :value="format(editingProjectItem.popStartDate, null, 'MM/DD/YYYY')"
-                  :rules="[...getDateOptionalRules(), startDateRules()]"
-                  hint="MM/DD/YYYY format"
-                  v-mask="'##/##/####'"
-                  label="PoP Start Date"
-                  persistent-hint
-                  @blur="editingProjectItem.popStartDate = format($event.target.value, 'MM/DD/YYYY', 'YYYY-MM-DD')"
-                  @input="popStartDateMenu = false"
-                  v-on="on"
-                ></v-text-field>
-              </template>
-              <v-date-picker
-                v-model="editingProjectItem.popStartDate"
-                no-title
-                @input="popStartDateMenu = false"
-              ></v-date-picker>
-            </v-menu>
-            <span v-else :class="{ inactive: item.status == contractStatuses.INACTIVE }">{{
-              format(item.popStartDate, 'YYYY-MM-DD', 'MM/DD/YYYY')
-            }}</span>
+              v-model="editingProjectItem.popStartDate"
+              label="PoP Start Date"
+              prepend-icon="event"
+            ></v-text-field>
+            <span v-else :class="{ inactive: item.status == contractStatuses.INACTIVE }">{{ item.popStartDate }}</span>
           </template>
 
           <!-- PoP End Date Slot -->
           <template v-slot:[`item.popEndDate`]="{ item }">
-            <v-menu
-              name="popEndDate"
+            <v-text-field
               v-if="editingProjectItem && editingProjectItem.id == item.id"
-              ref="popEndDateMenu"
-              :close-on-content-click="false"
-              v-model="popEndDateMenu"
-              :nudge-right="40"
-              transition="scale-transition"
-              offset-y
-              max-width="290px"
-              min-width="290px"
-            >
-              <template v-slot:activator="{ on }">
-                <v-text-field
-                  :value="format(editingProjectItem.popEndDate, null, 'MM/DD/YYYY')"
-                  :rules="[...getDateOptionalRules(), endDateRules()]"
-                  hint="MM/DD/YYYY format"
-                  v-mask="'##/##/####'"
-                  persistent-hint
-                  label="PoP End Date"
-                  @blur="editingProjectItem.popEndDate = format($event.target.value, 'MM/DD/YYYY', 'YYYY-MM-DD')"
-                  @input="popEndDateMenu = false"
-                  v-on="on"
-                ></v-text-field>
-              </template>
-              <v-date-picker
-                v-model="editingProjectItem.popEndDate"
-                no-title
-                @input="popEndDateMenu = false"
-              ></v-date-picker>
-            </v-menu>
-            <span v-else :class="{ inactive: item.status == contractStatuses.INACTIVE }">{{
-              format(item.popEndDate, 'YYYY-MM-DD', 'MM/DD/YYYY')
-            }}</span>
+              v-model="editingProjectItem.popEndDate"
+              label="PoP End Date"
+              prepend-icon="event"
+            ></v-text-field>
+            <span v-else :class="{ inactive: item.status == contractStatuses.INACTIVE }">{{ item.popEndDate }}</span>
           </template>
 
           <!-- Project Description Slot -->
@@ -241,10 +187,6 @@
 import _ from 'lodash';
 import api from '@/shared/api';
 import ProjectsEmployeesAssignedModal from '../modals/ProjectsEmployeesAssignedModal.vue';
-
-import { format, isAfter, isBefore } from '@/shared/dateUtils';
-import { getDateOptionalRules } from '@/shared/validationUtils';
-import { mask } from 'vue-the-mask';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -372,6 +314,9 @@ function getProject(contractId, projectId) {
   return contracts.find((c) => c.id == contractId).projects.find((p) => p.id == projectId);
 } // getProject
 
+/**
+ * Sets the projects active employees in the form of a list.
+ */
 function setProjectActiveEmployees() {
   _.forEach(this.contract.item.projects, (project) => {
     let employeesList = [];
@@ -387,7 +332,7 @@ function setProjectActiveEmployees() {
     });
     project['projectActiveEmployees'] = employeesList;
   });
-}
+} // setProjectActiveEmployees
 
 /**
  * Toggles project checkBox item
@@ -414,13 +359,10 @@ export default {
     clickedCancel,
     displaySuccess,
     displayError,
-    format,
-    getDateOptionalRules,
     getProject,
     setProjectActiveEmployees,
     toggleProjectCheckBox
   },
-  directives: { mask },
   data() {
     return {
       duplicateProjects: (contractOfProject) => {
@@ -435,23 +377,9 @@ export default {
           return !found || 'Duplicate project names';
         }
       },
-      startDateRules: () => {
-        return this.editingProjectItem.popStartDate && this.editingProjectItem.popEndDate
-          ? isBefore(this.editingProjectItem.popStartDate, this.editingProjectItem.popEndDate) ||
-              'Start date must be before the end date'
-          : true;
-      },
-      endDateRules: () => {
-        return this.editingProjectItem.popStartDate && this.editingProjectItem.popEndDate
-          ? isAfter(this.editingProjectItem.popEndDate, this.editingProjectItem.popStartDate) ||
-              'Start date must be before the end date'
-          : true;
-      },
       projectLoading: false,
       relationships: [],
       editingProjectItem: null,
-      popStartDateMenu: false,
-      popEndDateMenu: false,
       toggleProjectEmployeesModal: false,
       contractEmployeesAssigned: null,
       projectEmployeesAsseigned: null,
