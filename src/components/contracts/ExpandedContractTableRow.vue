@@ -99,7 +99,7 @@
               :key="emp.employeeNumber"
               :class="{ inactive: item.status == contractStatuses.INACTIVE }"
             >
-              <a :href="`/employee/${emp.employeeNumber}`">{{ emp.firstName }} {{ emp.lastName }}</a>
+              <a @click="$router.push(`/employee/${emp.employeeNumber}`)">{{ emp.firstName }} {{ emp.lastName }}</a>
               <span v-if="i != item.projectActiveEmployees.length - 1">, </span>
             </span>
           </template>
