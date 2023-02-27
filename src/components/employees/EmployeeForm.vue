@@ -710,6 +710,7 @@ async function submit() {
     // form validated
     this.$emit('startAction');
     this.cleanUpData();
+    this.checkEmployeeDeactivation();
     if (this.model.id) {
       // updating employee
       let updatedEmployee = await api.updateItem(api.EMPLOYEES, this.model);
@@ -790,6 +791,27 @@ function titleCase(str) {
   }
   return str.join(' ');
 } //titleCase
+
+/**
+ * Checks if an employee is being deactivated and if they are then change relevant data.
+ */
+function checkEmployeeDeactivation() {
+  let employee = this.$store.getters.employees.find((e) => e.id == this.model.id);
+  if (employee && this.model && employee.workStatus > 0 && this.model.workStatus == 0) {
+    // employee is being changed to inactive
+    if (this.model.contracts) {
+      // deactivate all employee contract projects
+      this.model.contracts.forEach((c) => {
+        c.projects.forEach((p) => {
+          if (!p.endDate) {
+            p.presentDate = false;
+            p.endDate = format(this.model.deptDate, null, 'YYYY-MM');
+          }
+        });
+      });
+    }
+  }
+} // checkEmployeeDeactivation
 
 /**
  * Converts all the autocomplete fields to title case capitalization
@@ -1273,6 +1295,7 @@ export default {
     cancelB,
     cleanUpData,
     clearStatus,
+    checkEmployeeDeactivation,
     confirm,
     convertAutocompleteToTitlecase,
     displayError,
