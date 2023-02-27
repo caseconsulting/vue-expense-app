@@ -2,7 +2,7 @@
   <div>
     <v-card class="mt-3">
       <v-container fluid>
-        <v-row class="flex justify-spacebetween ma-1">
+        <v-row class="flex justify-spacebetween mt-1 ml-1 mr-1">
           <v-col cols="6" xl="6" lg="6" md="6" class="my-0 pb-0">
             <v-text-field
               id="contractsSearch"
@@ -15,7 +15,14 @@
           </v-col>
           <v-col cols="6" xl="6" lg="6" md="6" class="my-0 pb-0 d-flex">
             <v-checkbox v-model="showInactive" label="Show All Contracts/Projects"></v-checkbox>
-            <div class="d-flex justify-center align-center pl-5 flex-wrap">
+          </v-col>
+        </v-row>
+        <v-row class="flex ma-1">
+          <v-col cols="4" xl="4" lg="4" md="4" class="my-0 pb-0">
+            <table-legend :legendKey="legendKey"></table-legend>
+          </v-col>
+          <v-col>
+            <div class="d-flex justify-end align-center pl-5 flex-wrap">
               <v-btn
                 color="#bc3825"
                 :loading="isDeleting"
@@ -48,11 +55,6 @@
             </div>
           </v-col>
         </v-row>
-        <v-row class="flex ma-1">
-          <v-col cols="6" xl="6" lg="6" md="6" class="my-0 pb-0">
-            <table-legend :legendKey="legendKey"></table-legend>
-          </v-col>
-        </v-row>
         <!-- START CONTRACTS DATA TABLE -->
         <v-form ref="form" lazy-validation>
           <v-data-table
@@ -78,7 +80,7 @@
                   :input-value="item.all"
                   :indeterminate="item.indeterminate"
                   primary
-                  class="ma-0 pl-3"
+                  class="ma-0 pl-4"
                   hide-details
                   @click.stop="toggleContractCheckBox(item)"
                 >
@@ -95,9 +97,7 @@
                 :rules="[(v) => !!v || 'Field is required', duplicateContractPrimeCombo()]"
                 required
               ></v-text-field>
-              <span v-else :class="{ inactive: item.status == contractStatuses.INACTIVE, 'font-weight-bold': true }">{{
-                item.primeName
-              }}</span>
+              <span v-else :class="{ 'font-weight-bold': true }">{{ item.primeName }}</span>
             </template>
 
             <!-- Contract Name Slot -->
@@ -111,9 +111,7 @@
                 required
               ></v-text-field>
               <!-- </v-form> -->
-              <span v-else :class="{ inactive: item.status == contractStatuses.INACTIVE, 'font-weight-bold': true }">{{
-                item.contractName
-              }}</span>
+              <span v-else :class="{ 'font-weight-bold': true }">{{ item.contractName }}</span>
             </template>
 
             <!-- Directorate Slot -->
@@ -124,9 +122,7 @@
                 v-model="editingItem.directorate"
                 label="Directorate"
               ></v-text-field>
-              <span v-else :class="{ inactive: item.status == contractStatuses.INACTIVE, 'font-weight-bold': true }">{{
-                item.directorate
-              }}</span>
+              <span v-else :class="{ 'font-weight-bold': true }">{{ item.directorate }}</span>
             </template>
 
             <!-- PoP Start Date Slot -->
@@ -138,9 +134,7 @@
                 prepend-icon="event"
               ></v-text-field>
               <!-- </v-form> -->
-              <span v-else :class="{ inactive: item.status == contractStatuses.INACTIVE, 'font-weight-bold': true }">{{
-                item.popStartDate
-              }}</span>
+              <span v-else :class="{ 'font-weight-bold': true }">{{ item.popStartDate }}</span>
             </template>
 
             <!-- PoP End Date Slot -->
@@ -151,9 +145,7 @@
                 label="PoP End Date"
                 prepend-icon="event"
               ></v-text-field>
-              <span v-else :class="{ inactive: item.status == contractStatuses.INACTIVE, 'font-weight-bold': true }">{{
-                item.popEndDate
-              }}</span>
+              <span v-else :class="{ 'font-weight-bold': true }">{{ item.popEndDate }}</span>
             </template>
 
             <!-- Contract Description Slot -->
@@ -167,9 +159,7 @@
                 rows="1"
                 @click.stop
               ></v-textarea>
-              <span v-else :class="{ inactive: item.status == contractStatuses.INACTIVE, 'font-weight-bold': true }">{{
-                item.description
-              }}</span>
+              <span v-else :class="{ 'font-weight-bold': true }">{{ item.description }}</span>
             </template>
 
             <!-- Expanded Row Slot -->
@@ -995,7 +985,7 @@ export default {
   position: absolute;
   left: 0;
   height: 100%;
-  width: 10px;
+  width: 5px;
 }
 
 .checkBox-container {
@@ -1025,31 +1015,22 @@ export default {
 </style>
 
 <style scoped>
-@media only screen and (max-width: 1800px) {
-  .contracts-table >>> td:nth-of-type(-n + 5) {
-    width: 9em;
-  }
-
-  .contracts-table >>> td:nth-of-type(6) {
-    width: 20em;
-  }
-
-  .contracts-table >>> td:last-of-type {
-    width: 16em;
-  }
+.contracts-table >>> td:first-of-type {
+  width: 4%;
+}
+.contracts-table >>> td:nth-child(n + 2):nth-child(-n + 6) {
+  width: 10%;
 }
 
-@media only screen and (min-width: 1800px) {
-  .contracts-table >>> td:nth-of-type(-n + 5) {
-    width: 12em;
-  }
+.contracts-table >>> td:nth-of-type(7) {
+  width: 19%;
+}
 
-  .contracts-table >>> td:nth-of-type(6) {
-    width: 25em;
-  }
+.contracts-table >>> td:nth-of-type(8) {
+  width: 19%;
+}
 
-  .contracts-table >>> td:last-of-type {
-    width: 16em;
-  }
+.contracts-table >>> td:last-of-type {
+  width: 8%;
 }
 </style>

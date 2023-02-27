@@ -27,7 +27,7 @@
               <v-checkbox
                 :input-value="item.checkBox"
                 primary
-                class="ma-0 pl-3"
+                class="ma-0 pl-4"
                 hide-details
                 @click.stop="toggleProjectCheckBox(item)"
               >
@@ -43,7 +43,7 @@
               v-model="editingProjectItem.projectName"
               label="Project Name"
             ></v-text-field>
-            <span v-else :class="{ inactive: item.status == contractStatuses.INACTIVE }">{{ item.projectName }}</span>
+            <span v-else>{{ item.projectName }}</span>
           </template>
 
           <!-- Directorate -->
@@ -53,7 +53,7 @@
               v-model="editingProjectItem.directorate"
               label="Directorate"
             ></v-text-field>
-            <span v-else :class="{ inactive: item.status == contractStatuses.INACTIVE }">{{ item.directorate }}</span>
+            <span v-else>{{ item.directorate }}</span>
           </template>
 
           <!-- PoP Start Date Slot -->
@@ -64,7 +64,7 @@
               label="PoP Start Date"
               prepend-icon="event"
             ></v-text-field>
-            <span v-else :class="{ inactive: item.status == contractStatuses.INACTIVE }">{{ item.popStartDate }}</span>
+            <span v-else>{{ item.popStartDate }}</span>
           </template>
 
           <!-- PoP End Date Slot -->
@@ -75,7 +75,7 @@
               label="PoP End Date"
               prepend-icon="event"
             ></v-text-field>
-            <span v-else :class="{ inactive: item.status == contractStatuses.INACTIVE }">{{ item.popEndDate }}</span>
+            <span v-else>{{ item.popEndDate }}</span>
           </template>
 
           <!-- Project Description Slot -->
@@ -89,7 +89,7 @@
               rows="1"
               @click.stop
             ></v-textarea>
-            <span v-else :class="{ inactive: item.status == contractStatuses.INACTIVE }">{{ item.description }}</span>
+            <span v-else>{{ item.description }}</span>
           </template>
 
           <!-- Project Active Employees Slot -->
@@ -442,9 +442,6 @@ export default {
 </script>
 <style lang="scss">
 @import 'src/assets/styles/styles';
-.inactive {
-  color: $case-red;
-}
 
 .highlight-project-row {
   background-color: rgb(255, 255, 255) !important;
