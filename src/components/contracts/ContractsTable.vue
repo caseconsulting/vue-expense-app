@@ -14,7 +14,7 @@
             ></v-text-field>
           </v-col>
           <v-col cols="6" xl="6" lg="6" md="6" class="my-0 pb-0 d-flex">
-            <v-checkbox v-model="showInactive" label="Show Inactive Contracts/Projects"></v-checkbox>
+            <v-checkbox v-model="showInactive" label="Show All Contracts/Projects"></v-checkbox>
             <div class="d-flex justify-center align-center pl-5 flex-wrap">
               <v-btn
                 color="#bc3825"
@@ -815,7 +815,7 @@ function getSelectedItems() {
 /**
  * Merges the checkBox list and the contracts list
  *
- * @return filtered out inactive itemsf
+ * @return filtered out inactive items
  */
 function storeContracts() {
   let mergedCheckBoxContractsData = _.merge(this.$store.getters.contracts, this.contractsCheckBoxes);
@@ -823,10 +823,11 @@ function storeContracts() {
     c.projects = _.merge(c.projects, c.projectsCheckBoxes);
     delete c.projectsCheckBoxes;
   });
+  console.log(mergedCheckBoxContractsData);
   return this.showInactive
     ? mergedCheckBoxContractsData
     : mergedCheckBoxContractsData
-        .filter((c) => c.status != this.contractStatuses.INACTIVE)
+        .filter((c) => c.status == this.contractStatuses.ACTIVE)
         .map((c) => {
           return { ...c, projects: c.projects.filter((p) => p.status != this.contractStatuses.INACTIVE) };
         });
@@ -921,50 +922,41 @@ export default {
           text: 'Prime',
           value: 'primeName',
           align: 'left'
-          //width: '12%'
         },
         {
           text: 'Contract',
           value: 'contractName',
           align: 'left'
-          //width: '12%'
         },
         {
           text: 'Directorate',
           value: 'directorate',
           align: 'left'
-          //width: '12%'
         },
         {
           text: 'PoP-Start Date',
           value: 'popStartDate',
           align: 'left'
-          //width: '12%'
         },
         {
           text: 'PoP-End Date',
           value: 'popEndDate',
           align: 'left'
-          //width: '12%'
         },
         {
           text: 'Description',
           value: 'description',
           align: 'left'
-          //width: '27%'
         },
         {
           text: 'Active Employees',
           value: 'spacer',
           align: 'left'
-          // align: 'center',
-          // width: '10%'
         },
         {
           value: 'actions',
           sortable: false,
           align: 'right'
-          //width: '15%'
         }
       ]
     };
