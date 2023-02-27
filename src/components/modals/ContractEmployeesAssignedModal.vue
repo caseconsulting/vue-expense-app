@@ -25,8 +25,8 @@
                 <ul v-else>
                   <li v-for="e in currentEmployees" :key="e.id">
                     <a
+                      @click="$router.push(`/employee/${e.employee.employeeNumber}`)"
                       :class="e.employee.workStatus == 0 ? 'inactive' : ''"
-                      :href="`/employee/${e.employee.employeeNumber}`"
                       >{{ e.employee.firstName + ' ' + e.employee.lastName }}</a
                     ><span>
                       (assigned project{{ e.currentProjects.length > 1 ? 's' : '' }}:
@@ -57,8 +57,8 @@
                 <ul v-else>
                   <li v-for="e in pastEmployees" :key="e.id">
                     <a
+                      @click="$router.push(`/employee/${e.employee.employeeNumber}`)"
                       :class="e.employee.workStatus == 0 ? 'inactive' : ''"
-                      :href="`/employee/${e.employee.employeeNumber}`"
                       >{{ e.employee.firstName + ' ' + e.employee.lastName }}</a
                     >
                     <span>
