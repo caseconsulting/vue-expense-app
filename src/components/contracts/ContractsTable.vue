@@ -823,7 +823,6 @@ function storeContracts() {
     c.projects = _.merge(c.projects, c.projectsCheckBoxes);
     delete c.projectsCheckBoxes;
   });
-  console.log(mergedCheckBoxContractsData);
   return this.showInactive
     ? mergedCheckBoxContractsData
     : mergedCheckBoxContractsData

@@ -56,7 +56,6 @@ function emit(msg) {
  * Watcher for modal toggle
  */
 function watchToggleContractProjectDeleteWarning() {
-  console.log(this.relationships)
   this.activate = !this.activate;
 } // watchToggleContractProjectDeleteWarning
 
