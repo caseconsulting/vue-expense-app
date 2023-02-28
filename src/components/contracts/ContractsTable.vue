@@ -341,6 +341,7 @@ async function created() {
   });
   this.resetAllCheckBoxes();
   this.expanded = _.cloneDeep(this.storeContracts);
+  console.log(this.expanded);
 } // created
 
 /**
@@ -961,6 +962,7 @@ export default {
           projectsCheckBoxes: [...newContract.projects.map((p) => ({ checkBox: false, projectId: p.id }))]
         };
         this.contractsCheckBoxes = [checkBoxObj, ...this.contractsCheckBoxes];
+        this.expanded = _.cloneDeep(this.storeContracts);
       }
 
       this.$store.getters.contracts.forEach((c, index) => {
