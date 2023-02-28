@@ -2,49 +2,8 @@
   <div>
     <v-card class="mt-3">
       <v-container fluid>
-        <v-row class="d-flex justify-space-between mt-1 ml-1 mr-1">
-          <div>
-            <fieldset class="filter_border">
-              <legend class="legend_style">Filters</legend>
-              <!-- Active Filter -->
-              <div class="px-2 pb-3">
-                <span class="fieldset-title mr-3">Status:</span>
-                <v-btn-toggle class="filter_color" v-model="filter.active" text multiple>
-                  <!-- Active -->
-                  <v-tooltip top>
-                    <template v-slot:activator="{ on }">
-                      <v-btn value="active" id="full" v-on="on" text>
-                        <v-icon class="mr-1" color="#0f9d58">mdi-check-circle-outline</v-icon>
-                      </v-btn>
-                    </template>
-                    <span>Active</span>
-                  </v-tooltip>
-
-                  <!-- Inactive -->
-                  <v-tooltip top>
-                    <template v-slot:activator="{ on }">
-                      <v-btn value="inactive" id="part" v-on="on" text>
-                        <v-icon color="#f4b400">mdi-stop-circle-outline</v-icon>
-                      </v-btn>
-                    </template>
-                    <span>Inactive</span>
-                  </v-tooltip>
-
-                  <!-- Closed -->
-                  <v-tooltip top>
-                    <template v-slot:activator="{ on }">
-                      <v-btn value="closed" id="inactive" v-on="on" text>
-                        <v-icon color="#db4437">mdi-close-circle-outline</v-icon>
-                      </v-btn>
-                    </template>
-                    <span>Closed</span>
-                  </v-tooltip>
-                </v-btn-toggle>
-              </div>
-              <!-- End Active Filter -->
-            </fieldset>
-          </div>
-          <v-col cols="6" xl="4" lg="4" md="6" class="my-0 pb-0">
+        <v-row class="d-flex justify-space-between ma-1">
+          <v-col cols="4" class="my-0 pb-0">
             <v-text-field
               id="contractsSearch"
               v-model="search"
@@ -54,44 +13,73 @@
               clearable
             ></v-text-field>
           </v-col>
-        </v-row>
-        <v-row class="flex ma-1">
-          <v-col cols="4" xl="4" lg="4" md="4" class="my-0 pb-0">
-            <table-legend :legendKey="legendKey"></table-legend>
-          </v-col>
-          <v-col>
-            <div class="d-flex justify-end align-center pl-5 flex-wrap">
-              <v-btn
-                color="#bc3825"
-                :loading="isDeleting"
-                class="white--text"
-                :disabled="!this.contractsCheckBoxes.some((c) => c.all || c.indeterminate) || contractLoading"
-                @click="clickedDelete()"
-                >Delete<v-icon right dark>delete</v-icon></v-btn
-              >
-              <v-btn
-                class="ml-4 font-weight-medium"
-                :loading="isActivating"
-                :disabled="!this.contractsCheckBoxes.some((c) => c.all || c.indeterminate) || contractLoading"
-                @click="updateStatus(contractStatuses.ACTIVE)"
-                >Activate</v-btn
-              >
-              <v-btn
-                class="ml-4"
-                :loading="isDeactivating"
-                :disabled="!this.contractsCheckBoxes.some((c) => c.all || c.indeterminate) || contractLoading"
-                @click="updateStatus(contractStatuses.INACTIVE)"
-                >Deactivate</v-btn
-              >
-              <v-btn
-                class="ml-4"
-                :loading="isClosing"
-                :disabled="!this.contractsCheckBoxes.some((c) => c.all || c.indeterminate) || contractLoading"
-                @click="updateStatus(contractStatuses.CLOSED)"
-                >Close</v-btn
-              >
-            </div>
-          </v-col>
+          <!-- Active Filter -->
+          <div class="d-flex justify-end align-center my-0 pb-0">
+            <span class="fieldset-title mr-3">Status:</span>
+            <v-btn-toggle class="filter_color" v-model="filter.active" text multiple>
+              <!-- Active -->
+              <v-tooltip top>
+                <template v-slot:activator="{ on }">
+                  <v-btn value="active" id="full" v-on="on" text>
+                    <v-icon class="mr-1" color="#0f9d58">mdi-check-circle-outline</v-icon>
+                  </v-btn>
+                </template>
+                <span>Active</span>
+              </v-tooltip>
+
+              <!-- Inactive -->
+              <v-tooltip top>
+                <template v-slot:activator="{ on }">
+                  <v-btn value="inactive" id="part" v-on="on" text>
+                    <v-icon color="#f4b400">mdi-stop-circle-outline</v-icon>
+                  </v-btn>
+                </template>
+                <span>Inactive</span>
+              </v-tooltip>
+
+              <!-- Closed -->
+              <v-tooltip top>
+                <template v-slot:activator="{ on }">
+                  <v-btn value="closed" id="inactive" v-on="on" text>
+                    <v-icon color="#db4437">mdi-close-circle-outline</v-icon>
+                  </v-btn>
+                </template>
+                <span>Closed</span>
+              </v-tooltip>
+            </v-btn-toggle>
+          </div>
+          <!-- End Active Filter -->
+          <div class="d-flex justify-end align-center flex-wrap">
+            <v-btn
+              color="#bc3825"
+              :loading="isDeleting"
+              class="white--text"
+              :disabled="!this.contractsCheckBoxes.some((c) => c.all || c.indeterminate) || contractLoading"
+              @click="clickedDelete()"
+              >Delete<v-icon right dark>delete</v-icon></v-btn
+            >
+            <v-btn
+              class="ml-4 font-weight-medium"
+              :loading="isActivating"
+              :disabled="!this.contractsCheckBoxes.some((c) => c.all || c.indeterminate) || contractLoading"
+              @click="updateStatus(contractStatuses.ACTIVE)"
+              >Activate</v-btn
+            >
+            <v-btn
+              class="ml-4"
+              :loading="isDeactivating"
+              :disabled="!this.contractsCheckBoxes.some((c) => c.all || c.indeterminate) || contractLoading"
+              @click="updateStatus(contractStatuses.INACTIVE)"
+              >Deactivate</v-btn
+            >
+            <v-btn
+              class="ml-4"
+              :loading="isClosing"
+              :disabled="!this.contractsCheckBoxes.some((c) => c.all || c.indeterminate) || contractLoading"
+              @click="updateStatus(contractStatuses.CLOSED)"
+              >Close</v-btn
+            >
+          </div>
         </v-row>
         <!-- START CONTRACTS DATA TABLE -->
         <v-form ref="form" lazy-validation>
@@ -343,7 +331,6 @@ import GeneralConfirmationModal from '@/components/modals/GeneralConfirmationMod
 import ContractEmployeesAssignedModal from '../modals/ContractEmployeesAssignedModal.vue';
 import ExpandedContractTableRow from './ExpandedContractTableRow.vue';
 import { asyncForEach } from '../../utils/utils';
-import TableLegend from './TableLegend.vue';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -871,8 +858,7 @@ export default {
     GeneralConfirmationModal,
     ProjectForm,
     ContractEmployeesAssignedModal,
-    ExpandedContractTableRow,
-    TableLegend
+    ExpandedContractTableRow
   },
   computed: {
     storeContracts
