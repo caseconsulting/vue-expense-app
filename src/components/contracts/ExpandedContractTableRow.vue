@@ -7,7 +7,6 @@
           :headers="projectHeaders"
           :items="contract.item.projects"
           :item-class="projectRowClass"
-          :search="search"
           class="projects-table"
           hide-default-footer
           hide-default-header
@@ -386,56 +385,41 @@ export default {
         {
           text: '',
           value: 'spacer'
-          // align: 'center',
-          // width: '10%'
         },
         {
           text: 'Project',
           value: 'projectName'
-          // align: 'center',
-          // width: '10%'
         },
         {
           text: 'Directorate',
           value: 'directorate'
-          // align: 'center',
-          // width: '10%'
         },
         {
           text: 'PoP-Start Date',
           value: 'popStartDate'
-          // align: 'center',
-          // width: '10%'
         },
         {
           text: 'PoP-End Date',
           value: 'popEndDate'
-          // align: 'center',
-          // width: '10%'
         },
         {
           text: 'Description',
           value: 'description'
-          // align: 'left',
-          // width: '25%'
         },
         {
           text: 'Active Employees',
           value: 'projectActiveEmployees'
-          // align: 'left',
-          // width: '22%'
         },
         {
           value: 'actions',
           sortable: false,
           align: 'right'
-          // width: '13%'
         }
       ]
     };
   },
 
-  props: ['contract', 'isEditingContractItem', 'isContractDeletingOrUpdatingStatus', 'colspan', 'search']
+  props: ['contract', 'isEditingContractItem', 'isContractDeletingOrUpdatingStatus', 'colspan']
 };
 </script>
 <style lang="scss">

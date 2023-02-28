@@ -2,8 +2,52 @@
   <div>
     <v-card class="mt-3">
       <v-container fluid>
-        <v-row class="flex justify-spacebetween mt-1 ml-1 mr-1">
-          <v-col cols="6" xl="6" lg="6" md="6" class="my-0 pb-0">
+        <v-row class="d-flex justify-space-between mt-1 ml-1 mr-1">
+          <!-- <v-col cols="6" xl="6" lg="6" md="6" class="my-0 pb-0 d-flex">
+            <v-checkbox v-model="showInactive" label="Show All Contracts/Projects"></v-checkbox>
+          </v-col> -->
+          <div>
+            <fieldset class="filter_border">
+              <legend class="legend_style">Filters</legend>
+              <!-- Active Filter -->
+              <div class="px-2 pb-3">
+                <span class="fieldset-title mr-3">Status:</span>
+                <v-btn-toggle class="filter_color" v-model="filter.active" text multiple>
+                  <!-- Active -->
+                  <v-tooltip top>
+                    <template v-slot:activator="{ on }">
+                      <v-btn value="active" id="full" v-on="on" text>
+                        <v-icon class="mr-1" color="#0f9d58">mdi-check-circle-outline</v-icon>
+                      </v-btn>
+                    </template>
+                    <span>Active</span>
+                  </v-tooltip>
+
+                  <!-- Inactive -->
+                  <v-tooltip top>
+                    <template v-slot:activator="{ on }">
+                      <v-btn value="inactive" id="part" v-on="on" text>
+                        <v-icon color="#f4b400">mdi-stop-circle-outline</v-icon>
+                      </v-btn>
+                    </template>
+                    <span>Inactive</span>
+                  </v-tooltip>
+
+                  <!-- Closed -->
+                  <v-tooltip top>
+                    <template v-slot:activator="{ on }">
+                      <v-btn value="closed" id="inactive" v-on="on" text>
+                        <v-icon color="#db4437">mdi-close-circle-outline</v-icon>
+                      </v-btn>
+                    </template>
+                    <span>Closed</span>
+                  </v-tooltip>
+                </v-btn-toggle>
+              </div>
+              <!-- End Active Filter -->
+            </fieldset>
+          </div>
+          <v-col cols="6" xl="4" lg="4" md="6" class="my-0 pb-0">
             <v-text-field
               id="contractsSearch"
               v-model="search"
@@ -12,9 +56,6 @@
               append-icon="search"
               clearable
             ></v-text-field>
-          </v-col>
-          <v-col cols="6" xl="6" lg="6" md="6" class="my-0 pb-0 d-flex">
-            <v-checkbox v-model="showInactive" label="Show All Contracts/Projects"></v-checkbox>
           </v-col>
         </v-row>
         <v-row class="flex ma-1">
@@ -167,7 +208,6 @@
                 :colspan="headers.length"
                 :isEditingContractItem="editingItem != null"
                 :isContractDeletingOrUpdatingStatus="isDeletingOrUpdatingStatus()"
-                :search="search"
               />
             </template>
 
@@ -339,7 +379,6 @@ async function created() {
   });
   this.resetAllCheckBoxes();
   this.expanded = _.cloneDeep(this.storeContracts);
-  console.log(this.expanded);
 } // created
 
 /**
@@ -812,13 +851,11 @@ function storeContracts() {
     c.projects = _.merge(c.projects, c.projectsCheckBoxes);
     delete c.projectsCheckBoxes;
   });
-  return this.showInactive
-    ? mergedCheckBoxContractsData
-    : mergedCheckBoxContractsData
-        .filter((c) => c.status == this.contractStatuses.ACTIVE)
-        .map((c) => {
-          return { ...c, projects: c.projects.filter((p) => p.status != this.contractStatuses.INACTIVE) };
-        });
+  return mergedCheckBoxContractsData
+    .filter((c) => this.filter.active.includes(c.status))
+    .map((c) => {
+      return { ...c, projects: c.projects.filter((p) => this.filter.active.includes(p.status)) };
+    });
 } // storeContracts
 
 // |--------------------------------------------------|
@@ -893,6 +930,7 @@ export default {
       isEditingProjectItem: false,
       loading: false,
       expanded: [],
+      filter: { active: [api.CONTRACT_STATUSES.ACTIVE] },
       search: null,
       showInactive: false,
       contractsCheckBoxes: [],
