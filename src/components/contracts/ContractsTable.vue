@@ -3,9 +3,6 @@
     <v-card class="mt-3">
       <v-container fluid>
         <v-row class="d-flex justify-space-between mt-1 ml-1 mr-1">
-          <!-- <v-col cols="6" xl="6" lg="6" md="6" class="my-0 pb-0 d-flex">
-            <v-checkbox v-model="showInactive" label="Show All Contracts/Projects"></v-checkbox>
-          </v-col> -->
           <div>
             <fieldset class="filter_border">
               <legend class="legend_style">Filters</legend>
@@ -552,6 +549,7 @@ async function updateStatus(status) {
       contracts[contractIndex].projects[projectIndex].status = status;
       updatePromises.push(api.updateItem(api.CONTRACTS, contracts[contractIndex]));
     });
+    await Promise.all(updatePromises);
 
     this.$store.dispatch('setContracts', { contracts });
     this.displaySuccess(`Successfully marked item(s) as ${status}`);
@@ -998,7 +996,6 @@ export default {
           projectsCheckBoxes: [...newContract.projects.map((p) => ({ checkBox: false, projectId: p.id }))]
         };
         this.contractsCheckBoxes = [checkBoxObj, ...this.contractsCheckBoxes];
-        this.expanded = _.cloneDeep(this.storeContracts);
       }
 
       this.$store.getters.contracts.forEach((c, index) => {
@@ -1011,6 +1008,7 @@ export default {
           ];
         }
       });
+      this.expanded = _.cloneDeep(this.storeContracts);
     }
   }
 };
