@@ -122,6 +122,7 @@
                 label="Prime Name"
                 :rules="[(v) => !!v || 'Field is required', duplicateContractPrimeCombo()]"
                 required
+                @click.stop
               ></v-text-field>
               <span v-else :class="{ 'font-weight-bold': true }">{{ item.primeName }}</span>
             </template>
@@ -135,6 +136,7 @@
                 label="Contract Name"
                 :rules="[(v) => !!v || 'Field is required', duplicateContractPrimeCombo()]"
                 required
+                @click.stop
               ></v-text-field>
               <!-- </v-form> -->
               <span v-else :class="{ 'font-weight-bold': true }">{{ item.contractName }}</span>
@@ -147,6 +149,7 @@
                 v-if="editingItem && editingItem.id == item.id"
                 v-model="editingItem.directorate"
                 label="Directorate"
+                @click.stop
               ></v-text-field>
               <span v-else :class="{ 'font-weight-bold': true }">{{ item.directorate }}</span>
             </template>
@@ -157,6 +160,7 @@
                 v-if="editingItem && editingItem.id == item.id"
                 v-model="editingItem.popStartDate"
                 label="PoP Start Date"
+                @click.stop
               ></v-text-field>
               <!-- </v-form> -->
               <span v-else :class="{ 'font-weight-bold': true }">{{ item.popStartDate }}</span>
@@ -168,6 +172,7 @@
                 v-if="editingItem && editingItem.id == item.id"
                 v-model="editingItem.popEndDate"
                 label="PoP End Date"
+                @click.stop
               ></v-text-field>
               <span v-else :class="{ 'font-weight-bold': true }">{{ item.popEndDate }}</span>
             </template>
