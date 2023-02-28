@@ -131,7 +131,6 @@
                 v-if="editingItem && editingItem.id == item.id"
                 v-model="editingItem.popStartDate"
                 label="PoP Start Date"
-                prepend-icon="event"
               ></v-text-field>
               <!-- </v-form> -->
               <span v-else :class="{ 'font-weight-bold': true }">{{ item.popStartDate }}</span>
@@ -143,7 +142,6 @@
                 v-if="editingItem && editingItem.id == item.id"
                 v-model="editingItem.popEndDate"
                 label="PoP End Date"
-                prepend-icon="event"
               ></v-text-field>
               <span v-else :class="{ 'font-weight-bold': true }">{{ item.popEndDate }}</span>
             </template>
@@ -1018,10 +1016,10 @@ export default {
 
 <style scoped>
 .contracts-table >>> td:first-of-type {
-  width: 4%;
+  width: 1%;
 }
 .contracts-table >>> td:nth-child(n + 2):nth-child(-n + 6) {
-  width: 10%;
+  width: 9%;
 }
 
 .contracts-table >>> td:nth-of-type(7) {
@@ -1033,6 +1031,6 @@ export default {
 }
 
 .contracts-table >>> td:last-of-type {
-  width: 8%;
+  width: 10%;
 }
 </style>

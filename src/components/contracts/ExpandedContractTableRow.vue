@@ -62,7 +62,6 @@
               v-if="editingProjectItem && editingProjectItem.id == item.id"
               v-model="editingProjectItem.popStartDate"
               label="PoP Start Date"
-              prepend-icon="event"
             ></v-text-field>
             <span v-else>{{ item.popStartDate }}</span>
           </template>
@@ -73,7 +72,6 @@
               v-if="editingProjectItem && editingProjectItem.id == item.id"
               v-model="editingProjectItem.popEndDate"
               label="PoP End Date"
-              prepend-icon="event"
             ></v-text-field>
             <span v-else>{{ item.popEndDate }}</span>
           </template>

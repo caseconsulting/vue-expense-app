@@ -121,7 +121,7 @@ function cancel() {
  */
 async function createContract() {
   let contractProjects = this.projects.map((project) => {
-    return { id: uuid(), projectName: project };
+    return { id: uuid(), projectName: project, status: api.CONTRACT_STATUSES.ACTIVE };
   });
   let contract = await api.createItem(api.CONTRACTS, {
     id: uuid(),
@@ -131,7 +131,8 @@ async function createContract() {
     popStartDate: this.popStartDate,
     popEndDate: this.popEndDate,
     projects: contractProjects,
-    description: this.description
+    description: this.description,
+    status: api.CONTRACT_STATUSES.ACTIVE
   });
   this.$store.dispatch('setContracts', { contracts: [contract, ...this.$store.getters.contracts] });
 } // createContract

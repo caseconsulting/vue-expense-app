@@ -100,7 +100,8 @@ async function createProject() {
     directorate: this.directorate,
     popStartDate: this.popStartDate,
     popEndDate: this.popEndDate,
-    description: this.description
+    description: this.description,
+    status: api.CONTRACT_STATUSES.ACTIVE
   };
   let contract = _.cloneDeep(this.contract);
   contract.projects = [project, ...contract.projects];
