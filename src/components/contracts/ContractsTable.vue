@@ -510,7 +510,7 @@ async function updateStatus(status) {
 
     selectedItems.projects.forEach((p) => {
       let contractIndex = contracts.findIndex((item) => item.id == p.contractOfProject.id);
-      let projectIndex = contracts[contractIndex].projects.findIndex((item) => item.id == p.id);
+      let projectIndex = contracts[contractIndex].projects.findIndex((item) => item.id == p.project.id);
       contracts[contractIndex].projects[projectIndex].status = status;
       updatePromises.push(api.updateItem(api.CONTRACTS, contracts[contractIndex]));
     });
