@@ -96,7 +96,7 @@
               :key="emp.employeeNumber"
               :class="{ inactive: item.status == contractStatuses.INACTIVE }"
             >
-              <a @click="$router.push(`/employee/${emp.employeeNumber}`)">{{ emp.firstName }} {{ emp.lastName }}</a>
+              <a @click="$router.push(`/employee/${emp.employeeNumber}`)">{{ nicknameAndLastName(emp) }}</a>
               <span v-if="i != item.projectActiveEmployees.length - 1">, </span>
             </span>
           </template>
@@ -183,6 +183,7 @@
 <script>
 import _ from 'lodash';
 import api from '@/shared/api';
+import { nicknameAndLastName } from '@/shared/employeeUtils';
 import ProjectsEmployeesAssignedModal from '../modals/ProjectsEmployeesAssignedModal.vue';
 
 // |--------------------------------------------------|
@@ -357,6 +358,7 @@ export default {
     displaySuccess,
     displayError,
     getProject,
+    nicknameAndLastName,
     setProjectActiveEmployees,
     toggleProjectCheckBox
   },

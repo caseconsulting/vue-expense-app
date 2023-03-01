@@ -14,7 +14,7 @@
                 >
                 <ul v-else>
                   <li v-for="e in currentEmployees" :key="e.id">
-                    <a :href="`/employee/${e.employeeNumber}`">{{ e.firstName + ' ' + e.lastName }}</a>
+                    <a :href="`/employee/${e.employeeNumber}`">{{ nicknameAndLastName(e) }}</a>
                   </li>
                 </ul>
               </v-card-text></v-card
@@ -28,7 +28,7 @@
                 >
                 <ul v-else>
                   <li v-for="e in pastEmployees" :key="e.id">
-                    <a :href="`/employee/${e.employeeNumber}`">{{ e.firstName + ' ' + e.lastName }}</a>
+                    <a :href="`/employee/${e.employeeNumber}`">{{ nicknameAndLastName(e) }}</a>
                   </li>
                 </ul>
               </v-card-text></v-card
@@ -53,6 +53,7 @@
 </template>
 <script>
 import { updateStoreContracts, updateStoreEmployees } from '@/utils/storeUtils';
+import { nicknameAndLastName } from '@/shared/employeeUtils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -173,6 +174,7 @@ export default {
     emit,
     getCurrentEmployeesAssignedToProject,
     getPastEmployeesAssignedToProject,
+    nicknameAndLastName,
     updateStoreContracts,
     updateStoreEmployees
   },
