@@ -86,14 +86,14 @@ function getAnniversary() {
       if (isAfter(add(now, 1, 'days'), anniversary)) {
         // employee's anniversary date has already occured this year
         anniversary = add(anniversary, 1, 'years');
-        return format(anniversary, null, 'ddd. MMM D, YYYY');
+        return format(anniversary, null, 'LL');
       } else {
         // employee's anniversary date still has to happen between now and the end of year
-        return format(anniversary, null, 'ddd. MMM D, YYYY');
+        return format(anniversary, null, 'LL');
       }
     } else {
       // employee's hire date is in the future
-      return format(add(this.hireDate, 1, 'years'), null, 'ddd. MMM D, YYYY');
+      return format(add(this.hireDate, 1, 'years'), null, 'LL');
     }
   } else {
     // TODO: Return something for invalid date
