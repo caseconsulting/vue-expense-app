@@ -14,40 +14,7 @@
             ></v-text-field>
           </v-col>
           <!-- Active Filter -->
-          <div class="d-flex justify-end align-center my-0 pb-0">
-            <span class="fieldset-title mr-3">Status:</span>
-            <v-btn-toggle class="filter_color" v-model="filter.active" text multiple>
-              <!-- Active -->
-              <v-tooltip top>
-                <template v-slot:activator="{ on }">
-                  <v-btn value="active" id="full" v-on="on" text>
-                    <v-icon class="mr-1" color="#0f9d58">mdi-check-circle-outline</v-icon>
-                  </v-btn>
-                </template>
-                <span>Active</span>
-              </v-tooltip>
-
-              <!-- Inactive -->
-              <v-tooltip top>
-                <template v-slot:activator="{ on }">
-                  <v-btn value="inactive" id="part" v-on="on" text>
-                    <v-icon color="#f4b400">mdi-stop-circle-outline</v-icon>
-                  </v-btn>
-                </template>
-                <span>Inactive</span>
-              </v-tooltip>
-
-              <!-- Closed -->
-              <v-tooltip top>
-                <template v-slot:activator="{ on }">
-                  <v-btn value="closed" id="inactive" v-on="on" text>
-                    <v-icon color="#db4437">mdi-close-circle-outline</v-icon>
-                  </v-btn>
-                </template>
-                <span>Closed</span>
-              </v-tooltip>
-            </v-btn-toggle>
-          </div>
+          <ContractFilter />
           <!-- End Active Filter -->
           <div class="d-flex justify-end align-center flex-wrap">
             <v-btn
@@ -328,14 +295,16 @@
 <script>
 import _ from 'lodash';
 import api from '@/shared/api';
+import { updateStoreContracts, updateStoreEmployees } from '@/utils/storeUtils';
+import { asyncForEach } from '../../utils/utils';
+
 import DeleteModal from '../modals/DeleteModal.vue';
+import ContractFilter from './ContractFilter.vue';
 import ContractProjectDeleteWarning from '../modals/ContractProjectDeleteWarning.vue';
 import ProjectForm from './ProjectForm.vue';
-import { updateStoreContracts, updateStoreEmployees } from '@/utils/storeUtils';
 import GeneralConfirmationModal from '@/components/modals/GeneralConfirmationModal.vue';
 import ContractEmployeesAssignedModal from '../modals/ContractEmployeesAssignedModal.vue';
 import ExpandedContractTableRow from './ExpandedContractTableRow.vue';
-import { asyncForEach } from '../../utils/utils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -360,6 +329,9 @@ async function created() {
   window.EventBus.$on('closed-contract-employees-assigned-modal', () => {
     this.toggleContractEmployeesModal = false;
   });
+  window.EventBus.$on('filter', (filter) => {
+    this.filter = filter;
+  });
   window.EventBus.$on('is-editing-project-item', (value) => {
     this.isEditingProjectItem = value;
   });
@@ -381,6 +353,7 @@ function beforeDestroy() {
   window.EventBus.$off('canceled-project-form');
   window.EventBus.$off('closed-project-employees-assigned-modal');
   window.EventBus.$off('is-editing-project-item');
+  window.EventBus.$off('filter');
 } // beforeDestroy
 
 // |--------------------------------------------------|
@@ -842,9 +815,9 @@ function storeContracts() {
     delete c.projectsCheckBoxes;
   });
   return mergedCheckBoxContractsData
-    .filter((c) => this.filter.active.includes(c.status))
+    .filter((c) => this.filter.includes(c.status))
     .map((c) => {
-      return { ...c, projects: c.projects.filter((p) => this.filter.active.includes(p.status)) };
+      return { ...c, projects: c.projects.filter((p) => this.filter.includes(p.status)) };
     });
 } // storeContracts
 
@@ -859,6 +832,7 @@ export default {
   created,
   components: {
     DeleteModal,
+    ContractFilter,
     ContractProjectDeleteWarning,
     GeneralConfirmationModal,
     ProjectForm,
@@ -919,7 +893,7 @@ export default {
       isEditingProjectItem: false,
       loading: false,
       expanded: [],
-      filter: { active: [api.CONTRACT_STATUSES.ACTIVE] },
+      filter: [api.CONTRACT_STATUSES.ACTIVE],
       search: null,
       showInactive: false,
       contractsCheckBoxes: [],
